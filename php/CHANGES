@@ -1,6 +1,9 @@
 Changes since version 2.1.0
 ---------------------------
 
+- A crash occurred if the global variable $ICE was used before a
+  profile was loaded. This now causes an error message.
+
 - Attempting to print a proxy value resulted in a fatal error.
   This has been fixed so that printing a proxy displays it in
   stringified form.
