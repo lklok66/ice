@@ -68,7 +68,7 @@ $ gacutil -i icecs.dll
 
 To run the tests, you will need Python:
 
-http://www.activestate.com/Products/ActivePython/
+http://www.python.org/download
 
 Run "python allTests.py" from the icecs directory to run all of the
 tests, or "python allTests.py -l" to run the tests in an endless loop.
