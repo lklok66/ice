@@ -1,19 +1,21 @@
 Changes since version 2.1.0
 ---------------------------
 
+- A race condition with Glacier2 detaching the request handler thread
+  has been fixed.
+
 - Ice::ObjectNotExistException are now retried for invocations made on
   indirect proxies. This allows to transparently migrate objects or
   objects adapters.
 
-- Fixed bug where data transfer statistics were not being reported
-  on outgoing datagram requests.
+- Fixed bug where data transfer statistics were not being reported on
+  outgoing datagram requests.
 
 - Fixed bug where the IcePack node with a collocated registry wouldn't
   terminate after the admin "shutdown" command.
 
-- The Windows demo/IcePatch2/MFC example displays an error dialog 
-  when the patch client is run without the --IcePatch2.Endpoints 
-  option.
+- The Windows demo/IcePatch2/MFC example displays an error dialog when
+  the patch client is run without the --IcePatch2.Endpoints option.
 
 Changes since version 2.0.0
 ---------------------------
