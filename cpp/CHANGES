@@ -1,8 +1,11 @@
 Changes since version 2.1.0
 ---------------------------
 
+- Fixed bug where data transfer statistics were not being reported
+  on outgoing datagram requests.
+
 - Fixed bug where the IcePack node with a collocated registry wouldn't
-  shutdown if shutdown with the admin "shutdown" command.
+  terminate after the admin "shutdown" command.
 
 - The Windows demo/IcePatch2/MFC example displays an error dialog 
   when the patch client is run without the --IcePatch2.Endpoints 
