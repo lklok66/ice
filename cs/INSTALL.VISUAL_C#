@@ -42,7 +42,7 @@ To run the tests, you will need Python:
 
 http://www.python.org/download
 
-Run "python allTests.py" from the top level directory to run all of the
+Run "python allTests.py" from the top-level directory to run all of the
 tests, or "python allTests.py -l" to run the tests in an endless loop.
 
 You can also run individual tests in the various test directories with
