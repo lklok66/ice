@@ -311,8 +311,7 @@ ZEND_FUNCTION(Ice_Communicator_addObjectFactory)
     assert(base);
     if(!checkClass(ce, base))
     {
-        php_error_docref(NULL TSRMLS_CC, E_ERROR, "%s(): object does not implement Ice_ObjectFactory",
-			 get_active_function_name(TSRMLS_C));
+        php_error_docref(NULL TSRMLS_CC, E_ERROR, "object does not implement Ice_ObjectFactory");
         return;
     }
 
@@ -588,6 +587,12 @@ handleGetMethod(zval* zv, char* method, int len TSRMLS_DC)
         ice_object* obj = static_cast<ice_object*>(zend_object_store_get_object(zv TSRMLS_CC));
         if(!obj->ptr)
         {
+	    if(ICE_G(profile) == NULL)
+	    {
+                php_error_docref(NULL TSRMLS_CC, E_ERROR, "$ICE used before a profile was loaded");
+                return 0;
+	    }
+
             try
             {
                 initCommunicator(obj TSRMLS_CC);
