@@ -430,6 +430,12 @@ def copyExpatFiles(expatLocation, version):
     os.symlink(os.path.basename(fileList[0].strip()), 'Ice-' + version + '/' + linkList[0].strip())
 
 def makePHPbinary(sources, buildDir, installDir, version, clean):
+    """ Create the IcePHP binaries and install to Ice installation directory """
+
+    #
+    # We currently run configure each time even if clean=false.  This is because a large part of the IcePHP build
+    # process is actually the configure step.  This could probably be bypassed afterwards.
+    #
     phpMatches = glob.glob(sources + '/php*.tar.[gb]z?')
     if len(phpMatches) == 0:
 	print 'Unable to find PHP source tarball'
@@ -725,12 +731,10 @@ def makePHPbinary(sources, buildDir, installDir, version, clean):
 
 	    makefile.close()
 
+    shutil.copy(phpDir + '/modules/ice.so', installDir + '/Ice-' + version + '/lib/icephp.so')
+
     os.system('gmake')
     os.chdir(cwd)
-
-    #
-    # XXX- Doesn't add the library to the binary distribution yet.  I'm in the process of renaming the library.
-    #
 
 def usage():
     """Print usage/help information"""
