@@ -1,6 +1,13 @@
 Changes since version 2.1.0
 ---------------------------
 
+- Reverted a change included in 2.1.0 where oneway and batch oneway
+  invocations were not retried anymore. As in previous versions, if
+  the connection associated to a oneway or batch oneway proxy is
+  closed for some reasons, an invocation on this proxy will
+  transparently reestablish the connection again. Please see the Ice
+  manual for more information on oneway and batch oneway reliability.
+
 - A race condition with Glacier2 detaching the request handler thread
   has been fixed.
 
