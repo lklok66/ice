@@ -717,8 +717,7 @@ ZEND_FUNCTION(Ice_loadProfileWithArgs)
     {
         if(Z_TYPE_PP(val) != IS_STRING)
         {
-            php_error_docref(NULL TSRMLS_CC, E_ERROR, "%s(): argument array must contain strings",
-			     get_active_function_name(TSRMLS_C));
+            php_error_docref(NULL TSRMLS_CC, E_ERROR, "argument array must contain strings");
             return;
         }
         args.push_back(Z_STRVAL_PP(val));
