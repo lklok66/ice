@@ -1,3 +1,10 @@
+Changes since version 2.1.0
+---------------------------
+
+- Attempting to print a proxy value resulted in a fatal error.
+  This has been fixed so that printing a proxy displays it in
+  stringified form.
+
 Changes since version 2.0.0
 ---------------------------
 
