@@ -693,11 +693,11 @@ def makePHPbinary(sources, buildDir, installDir, version, clean):
 
 	    makefile.close()
 
+    os.system('gmake')
 
     moduleName = '%s/modules/ice%s' % (phpDir, getPlatformLibExtension())
     shutil.copy(moduleName, '%s/Ice-%s/lib/icephp%s' % (installDir, version, getPlatformLibExtension()))
 
-    os.system('gmake')
     os.chdir(cwd)
 
 def usage():
