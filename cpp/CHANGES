@@ -1,6 +1,10 @@
 Changes since version 2.1.0
 ---------------------------
 
+- Ice::ObjectNotExistException are now retried for invocations made on
+  indirect proxies. This allows to transparently migrate objects or
+  objects adapters.
+
 - Fixed bug where data transfer statistics were not being reported
   on outgoing datagram requests.
 
