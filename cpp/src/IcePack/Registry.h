@@ -20,7 +20,7 @@ public:
     Registry(const Ice::CommunicatorPtr&);
     ~Registry();
 
-    bool start(bool);
+    bool start(bool, bool);
 
 private:
 

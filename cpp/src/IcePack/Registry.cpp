@@ -58,7 +58,7 @@ IcePack::Registry::~Registry()
 }
 
 bool
-IcePack::Registry::start(bool nowarn)
+IcePack::Registry::start(bool nowarn, bool collocated)
 {
     assert(_communicator);
     PropertiesPtr properties = _communicator->getProperties();
@@ -266,7 +266,8 @@ IcePack::Registry::start(bool nowarn)
     //
     // Create the admin interface and register it with the object registry.
     //
-    ObjectPtr admin = new AdminI(_communicator, nodeReg, appReg, serverRegistry, adapterRegistry, objectRegistry);
+    ObjectPtr admin = new AdminI(_communicator, nodeReg, appReg, serverRegistry, adapterRegistry, objectRegistry,
+				 collocated);
     adminAdapter->add(admin, stringToIdentity("IcePack/Admin"));    
     ObjectPrx adminPrx = adminAdapter->createDirectProxy(stringToIdentity("IcePack/Admin"));
     try

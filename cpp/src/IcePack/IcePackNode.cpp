@@ -205,7 +205,7 @@ IcePack::NodeService::start(int argc, char* argv[])
         }
 
         _registry = auto_ptr<Registry>(new Registry(communicator()));
-        if(!_registry->start(nowarn))
+        if(!_registry->start(nowarn, true))
         {
             return false;
         }
@@ -323,6 +323,7 @@ IcePack::NodeService::start(int argc, char* argv[])
         {
             warning("property `IcePack.Node.Name' is not set, using hostname: " + string(host));
         }
+	properties->setProperty("IcePack.Node.Name", string(host));
     }
 
     //

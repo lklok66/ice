@@ -20,7 +20,7 @@ class AdminI : public Admin, public IceUtil::Mutex
 public:
 
     AdminI(const Ice::CommunicatorPtr&, const NodeRegistryPtr&, const ApplicationRegistryPtr&, 
-	   const ServerRegistryPtr&, const AdapterRegistryPtr&, const ObjectRegistryPtr&);
+	   const ServerRegistryPtr&, const AdapterRegistryPtr&, const ObjectRegistryPtr&, bool);
     virtual ~AdminI();
 
     virtual void addApplication(const ApplicationDescriptorPtr&, const Ice::Current&);
@@ -71,6 +71,7 @@ private:
     ServerRegistryPtr _serverRegistry;
     AdapterRegistryPtr _adapterRegistry;
     ObjectRegistryPtr _objectRegistry;
+    bool _collocatedWithNode;
 };
 
 }

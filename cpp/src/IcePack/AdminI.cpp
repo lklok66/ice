@@ -1034,13 +1034,15 @@ AdminI::AdminI(const CommunicatorPtr& communicator,
 	       const ApplicationRegistryPtr& applicationRegistry, 
 	       const ServerRegistryPtr& serverRegistry, 
 	       const AdapterRegistryPtr& adapterRegistry,
-	       const ObjectRegistryPtr& objectRegistry) :
+	       const ObjectRegistryPtr& objectRegistry,
+	       bool collocatedWithNode) :
     _communicator(communicator),
     _nodeRegistry(nodeRegistry),
     _applicationRegistry(applicationRegistry),
     _serverRegistry(serverRegistry),
     _adapterRegistry(adapterRegistry),
-    _objectRegistry(objectRegistry)
+    _objectRegistry(objectRegistry),
+    _collocatedWithNode(collocatedWithNode)
 {
 }
 
@@ -1517,7 +1519,27 @@ AdminI::getAllNodeNames(const Current&) const
 void
 AdminI::shutdown(const Current&)
 {
-    _communicator->shutdown();
+    if(_collocatedWithNode)
+    {
+	string name = _communicator->getProperties()->getProperty("IcePack.Node.Name");
+	NodePrx node = _nodeRegistry->findByName(name);
+	try
+	{
+	    node->shutdown();
+	}
+	catch(const Ice::ObjectNotExistException&)
+	{
+	    throw NodeNotExistException();
+	}
+	catch(const Ice::LocalException&)
+	{
+	    throw NodeUnreachableException();
+	}
+    }
+    else
+    {
+	_communicator->shutdown();
+    }
 }
 
 SliceChecksumDict
