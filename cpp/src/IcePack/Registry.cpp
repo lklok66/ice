@@ -48,17 +48,17 @@ intToString(int v)
     return os.str();
 }
 
-IcePack::Registry::Registry(const CommunicatorPtr& communicator) :
+Registry::Registry(const CommunicatorPtr& communicator) :
     _communicator(communicator)
 {
 }
 
-IcePack::Registry::~Registry()
+Registry::~Registry()
 {
 }
 
 bool
-IcePack::Registry::start(bool nowarn, bool collocated)
+Registry::start(bool nowarn)
 {
     assert(_communicator);
     PropertiesPtr properties = _communicator->getProperties();
@@ -266,8 +266,8 @@ IcePack::Registry::start(bool nowarn, bool collocated)
     //
     // Create the admin interface and register it with the object registry.
     //
-    ObjectPtr admin = new AdminI(_communicator, nodeReg, appReg, serverRegistry, adapterRegistry, objectRegistry,
-				 collocated);
+    ObjectPtr admin = new AdminI(_communicator, nodeReg, appReg, serverRegistry, adapterRegistry, objectRegistry, 
+				 this);
     adminAdapter->add(admin, stringToIdentity("IcePack/Admin"));    
     ObjectPrx adminPrx = adminAdapter->createDirectProxy(stringToIdentity("IcePack/Admin"));
     try
@@ -317,4 +317,10 @@ IcePack::Registry::start(bool nowarn, bool collocated)
     }
     
     return true;
+}
+
+void
+Registry::shutdown()
+{
+    _communicator->shutdown();
 }

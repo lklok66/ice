@@ -34,7 +34,7 @@ private:
 
     void usage(const std::string&);
 
-    std::auto_ptr<Registry> _registry;
+    RegistryPtr _registry;
 };
 
 } // End of namespace IcePack
@@ -83,8 +83,8 @@ IcePack::RegistryService::start(int argc, char* argv[])
 	return false;
     }
 
-    _registry = auto_ptr<Registry>(new Registry(communicator()));
-    if(!_registry->start(nowarn, false))
+    _registry = new Registry(communicator());
+    if(!_registry->start(nowarn))
     {
 	return false;
     }

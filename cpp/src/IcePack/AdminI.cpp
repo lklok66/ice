@@ -11,6 +11,7 @@
 #include <IcePack/AdminI.h>
 #include <IcePack/DescriptorVisitor.h>
 #include <IcePack/DescriptorUtil.h>
+#include <IcePack/Registry.h>
 #include <Ice/LoggerUtil.h>
 #include <Ice/TraceUtil.h>
 #include <Ice/SliceChecksums.h>
@@ -1035,14 +1036,14 @@ AdminI::AdminI(const CommunicatorPtr& communicator,
 	       const ServerRegistryPtr& serverRegistry, 
 	       const AdapterRegistryPtr& adapterRegistry,
 	       const ObjectRegistryPtr& objectRegistry,
-	       bool collocatedWithNode) :
+	       const RegistryPtr& registry) :
     _communicator(communicator),
     _nodeRegistry(nodeRegistry),
     _applicationRegistry(applicationRegistry),
     _serverRegistry(serverRegistry),
     _adapterRegistry(adapterRegistry),
     _objectRegistry(objectRegistry),
-    _collocatedWithNode(collocatedWithNode)
+    _registry(registry)
 {
 }
 
@@ -1519,27 +1520,7 @@ AdminI::getAllNodeNames(const Current&) const
 void
 AdminI::shutdown(const Current&)
 {
-    if(_collocatedWithNode)
-    {
-	string name = _communicator->getProperties()->getProperty("IcePack.Node.Name");
-	NodePrx node = _nodeRegistry->findByName(name);
-	try
-	{
-	    node->shutdown();
-	}
-	catch(const Ice::ObjectNotExistException&)
-	{
-	    throw NodeNotExistException();
-	}
-	catch(const Ice::LocalException&)
-	{
-	    throw NodeUnreachableException();
-	}
-    }
-    else
-    {
-	_communicator->shutdown();
-    }
+    _registry->shutdown();
 }
 
 SliceChecksumDict

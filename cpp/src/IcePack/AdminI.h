@@ -15,12 +15,16 @@
 namespace IcePack
 {
 
+class Registry;
+typedef IceUtil::Handle<Registry> RegistryPtr;
+
 class AdminI : public Admin, public IceUtil::Mutex
 {
 public:
 
     AdminI(const Ice::CommunicatorPtr&, const NodeRegistryPtr&, const ApplicationRegistryPtr&, 
-	   const ServerRegistryPtr&, const AdapterRegistryPtr&, const ObjectRegistryPtr&, bool);
+	   const ServerRegistryPtr&, const AdapterRegistryPtr&, const ObjectRegistryPtr&, 
+	   const RegistryPtr&);
     virtual ~AdminI();
 
     virtual void addApplication(const ApplicationDescriptorPtr&, const Ice::Current&);
@@ -71,7 +75,7 @@ private:
     ServerRegistryPtr _serverRegistry;
     AdapterRegistryPtr _adapterRegistry;
     ObjectRegistryPtr _objectRegistry;
-    bool _collocatedWithNode;
+    RegistryPtr _registry;
 };
 
 }
