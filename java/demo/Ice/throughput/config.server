@@ -1,0 +1,4 @@
+Throughput.Endpoints=default -p 10000
+
+Ice.ACM.Client=0
+Ice.ACM.Server=0

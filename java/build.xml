@@ -1,0 +1,238 @@
+<!--
+ **********************************************************************
+
+ Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+
+ This copy of Ice is licensed to you under the terms described in the
+ ICE_LICENSE file included in this distribution.
+
+ **********************************************************************
+-->
+
+<project name="main" default="all" basedir=".">
+
+    <!-- set global properties for this build -->
+    <property name="top.dir" value="."/>
+    <property name="src.dir" value="src"/>
+    <property name="generated.dir" value="generated"/>
+    <property name="cache.dir" value="depcache"/>
+
+    <!-- import common definitions -->
+    <import file="config/common.xml"/>
+
+    <target name="generate" depends="init">
+        <!-- Create the output directory for generated code -->
+        <mkdir dir="${generated.dir}"/>
+        <slice2java ice="on" outputdir="${generated.dir}" dependencyfile="${generated.dir}/.depend.Ice">
+	    <meta value="${java2metadata}"/>
+            <includepath>
+                <pathelement path="${slice.dir}" />
+            </includepath>
+            <fileset dir="${slice.dir}/Ice">
+                <include name="BuiltinSequences.ice" />
+                <include name="Communicator.ice" />
+                <include name="Current.ice" />
+                <include name="Endpoint.ice" />
+                <include name="FacetMap.ice" />
+		<include name="ImplicitContext.ice" />
+                <include name="Identity.ice" />
+                <include name="LocalException.ice" />
+                <include name="Locator.ice" />
+                <include name="Logger.ice" />
+                <include name="ObjectAdapter.ice" />
+                <include name="ObjectFactory.ice" />
+                <include name="Plugin.ice" />
+                <include name="Process.ice" />
+                <include name="Properties.ice" />
+                <include name="Router.ice" />
+                <include name="ServantLocator.ice" />
+                <include name="SliceChecksumDict.ice" />
+                <include name="Stats.ice" />
+                <include name="Connection.ice" />
+            </fileset>
+            <fileset dir="${slice.dir}/Freeze">
+                <include name="DB.ice" />
+                <include name="Connection.ice" />
+                <include name="Transaction.ice" />
+                <include name="Exception.ice" />
+                <include name="Evictor.ice" />
+                <include name="TransactionalEvictor.ice" />
+                <include name="BackgroundSaveEvictor.ice" />
+                <include name="EvictorStorage.ice" />
+                <include name="CatalogData.ice" />
+            </fileset>
+            <fileset dir="${src.dir}/Freeze">
+                <include name="PingObject.ice" />
+            </fileset>
+        </slice2java>
+
+        <slice2freezej outputdir="${generated.dir}" dependencyfile="${generated.dir}/.depend.Freeze">
+	    <meta value="${java2metadata}"/>
+            <includepath>
+                <pathelement path="${slice.dir}" />
+            </includepath>
+            <fileset dir="${slice.dir}/Freeze" includes="CatalogData.ice"/>
+            <dict name="Freeze.Catalog" key="string" value="Freeze::CatalogData"/>
+        </slice2freezej>
+
+        <!-- Generate Slice checksums for the Ice services. -->
+
+        <slice2java ice="on" outputdir="${generated.dir}" checksum="Glacier2.SliceChecksums"
+            dependencyfile="${generated.dir}/.depend.Glacier2">
+	    <meta value="${java2metadata}"/>
+            <includepath>
+                <pathelement path="${slice.dir}" />
+            </includepath>
+            <fileset dir="${slice.dir}/Glacier2">
+                <include name="PermissionsVerifier.ice" />
+                <include name="SSLInfo.ice" />
+                <include name="Router.ice" />
+                <include name="Session.ice" />
+            </fileset>
+        </slice2java>
+
+        <slice2java ice="on" outputdir="${generated.dir}" checksum="IceBox.SliceChecksums"
+            dependencyfile="${generated.dir}/.depend.IceBox">
+	    <meta value="${java2metadata}"/>
+            <includepath>
+                <pathelement path="${slice.dir}" />
+            </includepath>
+            <fileset dir="${slice.dir}/IceBox">
+                <include name="IceBox.ice" />
+            </fileset>
+        </slice2java>
+
+        <slice2java ice="on" outputdir="${generated.dir}" checksum="IceGrid.SliceChecksums"
+            dependencyfile="${generated.dir}/.depend.IceGrid">
+	    <meta value="${java2metadata}"/>
+            <includepath>
+                <pathelement path="${slice.dir}" />
+            </includepath>
+            <fileset dir="${slice.dir}/IceGrid">
+                <include name="Admin.ice" />
+                <include name="Descriptor.ice" />
+                <include name="Exception.ice" />
+                <include name="FileParser.ice"/>
+                <include name="Observer.ice" />
+                <include name="Locator.ice" />
+                <include name="Query.ice" />
+                <include name="Registry.ice" />
+                <include name="Session.ice" />
+                <include name="UserAccountMapper.ice" />
+            </fileset>
+        </slice2java>
+
+        <slice2java ice="on" outputdir="${generated.dir}" checksum="IceStorm.SliceChecksums"
+            dependencyfile="${generated.dir}/.depend.IceStorm">
+	    <meta value="${java2metadata}"/>
+            <includepath>
+                <pathelement path="${slice.dir}" />
+            </includepath>
+            <fileset dir="${slice.dir}/IceStorm">
+                <include name="IceStorm.ice" />
+            </fileset>
+        </slice2java>
+    </target>
+
+    <target name="ice-compile" depends="generate">
+        <mkdir dir="${lib.dir}"/>
+        <mkdir dir="${cache.dir}"/>
+	<depend srcdir="${generated.dir}:${src.dir}:${ssl.src}" destdir="${lib.dir}" cache="${cache.dir}"/>
+	<javac srcdir="${generated.dir}:${src.dir}:${ssl.src}" destdir="${lib.dir}"
+	    source="${jdk.version}" debug="${debug}"
+	    excludes="IceGridGUI/**"
+	    includes="**"
+	    deprecation="on">
+	    <exclude name="Ice/Holder*" if="java2"/>
+	    <compilerarg value="${javac.lint}" compiler="${javac.lint.compiler}"/>
+	</javac>
+    </target>
+
+    <target name="ice-jar" depends="ice-compile">
+	<jar jarfile="${lib.dir}/Ice.jar" basedir="${lib.dir}">
+	    <include name="**/*.class"/>
+            <exclude name="IceGridGUI/**"/>
+	    <exclude name="*.jar"/>
+	</jar>
+    </target>
+
+    <target name="icegridadmin-compile" depends="ice-compile" if="java2">
+        <javac srcdir="${src.dir}" destdir="${lib.dir}"
+	    source="${jdk.version}" debug="${debug}"
+	    includes="IceGridGUI/**"
+	    deprecation="on"/>
+    </target>
+
+    <condition property="build-icegridadmin-pro-jar">
+	<and>
+	    <isset property="java2" />
+	    <isset property="hasProguard" />
+	    <available file="${jgoodies.looks}" />
+	    <available file="${jgoodies.forms}" />
+	</and>	
+    </condition>
+
+    <condition property="build-icegridadmin-plain-jar">
+	<and>
+	    <isset property="java2" />
+	    <not>
+               <isset property="build-icegridadmin-pro-jar" />
+            </not>
+	</and>	
+    </condition>
+
+    <target name="icegridadmin-plain-jar" depends="icegridadmin-compile" if="build-icegridadmin-plain-jar">
+	<manifest file="${lib.dir}/icegridgui.mf">
+	    <attribute name="Class-Path" value="Ice.jar ../resources/"/>
+	</manifest>
+        <jar jarfile="${lib.dir}/IceGridGUI.jar" manifest="${lib.dir}/icegridgui.mf" basedir="${lib.dir}">
+	    <include name="IceGridGUI/**"/>
+	</jar>
+        <delete file="${lib.dir}/icegridgui.mf" />
+    </target>
+
+    <target name="icegridadmin-pro-jar" depends="icegridadmin-compile" if="build-icegridadmin-pro-jar">
+	<manifest file="${lib.dir}/icegridgui.mf">
+	    <attribute name="Main-Class" value="IceGridGUI.Main"/>
+	    <attribute name="Class-Path" value="../help/ ../resources/ ../../share/doc/Ice-${ice.version}/ ../../share/doc/packages/Ice-${ice.version}/"/>
+	</manifest>
+	<jar jarfile="${lib.dir}/IceGridGUItemp.jar" manifest="${lib.dir}/icegridgui.mf" basedir="${lib.dir}">
+	    <include name="IceGridGUI/**"/>
+	</jar>
+	<jar jarfile="${lib.dir}/IceGridGUItemp.jar" manifest="${lib.dir}/icegridgui.mf" basedir="resources"
+	    update="true">
+	    <include name="icons/**"/>
+	</jar>
+	<delete file="${lib.dir}/icegridgui.mf" />
+        <taskdef resource="proguard/ant/task.properties"/>
+
+        <proguard>
+             -injars ${lib.dir}/IceGridGUItemp.jar
+             -injars ${lib.dir}/Ice.jar(!META-INF/**,!Freeze/**)
+             -injars ${jgoodies.looks}(!META-INF/**)
+             -injars ${jgoodies.forms}(!META-INF/**)
+             -outjars ${lib.dir}/IceGridGUI.jar
+             -include config/icegridgui.pro
+        </proguard>
+	<delete file="${lib.dir}/IceGridGUItemp.jar" />
+    </target>
+
+    <target name="compile" depends="ice-compile, icegridadmin-compile">
+    </target>
+
+    <target name="jar" depends="ice-jar, icegridadmin-plain-jar, icegridadmin-pro-jar"/>
+
+    <target name="all" depends="jar">
+        <ant inheritAll="false" dir="demo"/>
+        <ant inheritAll="false" dir="test"/>
+    </target>
+
+    <target name="clean" depends="config-init">
+        <delete dir="${generated.dir}"/>
+        <delete deleteonexit="true" dir="${lib.dir}"/>
+        <delete dir="${cache.dir}"/>
+        <ant inheritAll="false" dir="demo" target="clean"/>
+        <ant inheritAll="false" dir="test" target="clean"/>
+    </target>
+
+</project>

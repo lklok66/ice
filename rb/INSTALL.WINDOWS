@@ -1,0 +1,192 @@
+======================================================================
+Ice for Ruby
+======================================================================
+
+This file describes how to compile Ice for Ruby on a Windows platform.
+
+
+Requirements
+------------
+
+- Ice @ver@
+- Visual C++ 6.0 SP5 with STLport 4.5 (or later)*
+- Ruby 1.8.4 or 1.8.5
+
+* Ruby requires Visual C++ 6.0, therefore it is the only compiler
+  supported by Ice for Ruby.
+
+
+Build Environment
+-----------------
+
+The instructions in this file make the following assumptions about
+your build environment:
+
+1. You have installed the Ice @ver@ for Visual C++ 6.0 distribution
+   using the installer available at the link below:
+
+   http://www.zeroc.com/download.html
+
+   The default installation directory is C:\Ice-@ver@-VC60.
+
+2. You have installed Ruby using the Windows installer available at
+   RubyForge:
+
+   http://rubyforge.org/projects/rubyinstaller/
+
+   The default installation directory is C:\ruby.
+
+If you selected different installation directories, you will need to
+modify the relevant pathnames in the steps below to match your
+configuration.
+
+
+Compiling Ice for Ruby
+----------------------
+
+Follow these steps to build the Ice extension for Ruby:
+
+1) Open a command prompt that supports command-line compilation with
+   Visual C++. For example, you can execute the Visual C++ batch file
+   vcvars32.bat to configure your environment. Alternatively, you can
+   start a "Visual Studio Command Prompt" by selecting the appropriate
+   entry from the Visual Studio program group in your Start menu.
+
+2) Change to the Ice for Ruby source directory.
+
+3) Set the ICE_HOME environment variable with the Ice installation
+   directory. For example:
+
+   > set ICE_HOME=C:\Ice-@ver@
+
+4) Edit config\Make.rules.mak and review the settings. In particular
+   you must set CPP_COMPILER to the appropriate compiler.
+
+5) Run nmake:
+
+   > nmake /f Makefile.mak
+
+If no errors occurred, you can now begin using Ice for Ruby.
+
+NOTES:
+
+ * Normally you should build with OPTIMIZE=yes. If you are using a Ruby
+   interpreter that was compiled in debug mode, set OPTIMIZE=no and edit
+   ruby/Ice.rb and change the line below
+
+   require "IceRuby"
+
+   to the following:
+
+   require "IceRubyd"
+
+
+Using Ice for Ruby
+------------------
+
+The Ruby interpreter must be able to locate the Ice extension. One way
+to configure the interpreter is to define the RUBYLIB environment
+variable as follows:
+
+  > set RUBYLIB=C:\IceRuby-@ver@\ruby
+
+This example assumes your Ice for Ruby source distribution is located
+in the C:\IceRuby-@ver@ directory.
+
+In addition, you must modify your PATH environment variable to include
+the following directories:
+
+  C:\Ice-@ver@-VC60\bin
+  C:\IceRuby-@ver@\bin
+
+At a command prompt, you can set your PATH as shown below:
+
+  > set PATH=C:\Ice-@ver@-VC60\bin;C:\IceRuby-@ver@\bin;%PATH%
+
+To verify that Ruby can load the Ice extension successfully, open a
+command window and start the interpreter using irb.bat:
+
+  > irb.bat
+  irb(main):001:0>
+
+At the prompt, enter
+
+  require "Ice"
+
+If the interpreter responds with the value "true", the Ice extension
+was loaded successfully. Enter "exit" to quit the interpreter.
+
+
+Limitations
+-----------
+
+Ruby's lack of support for native threads makes it impractical for
+ZeroC to implement server-side functionality, therefore Ice for Ruby
+can only be used in client applications. If you have a need for this
+feature and wish to sponsor its development, please contact us at
+info@zeroc.com.
+
+Ice for Ruby currently does not support the thread-per-connection
+concurrency model on Windows.
+
+
+OpenSSL Compatibility Issue
+---------------------------
+
+The Ruby installer includes versions of the OpenSSL DLLs that are not
+compatible with the ones supplied with Ice. If you intend to use SSL
+in your Ice for Ruby applications, you will need to remove or rename
+the following files in the Ruby installation directory:
+
+  libeay32.dll
+  ssleay32.dll
+
+If you used the default installation directory, these files are
+located in C:\ruby\bin.
+
+Also be aware that the Ruby installer inserts C:\ruby\bin at the
+beginning of the system PATH, therefore the DLLs listed above can also
+have an adverse impact on other Ice language mappings that use
+OpenSSL, such as C++ and Python.
+
+
+Running the demos
+-----------------
+
+The demos directory contains Ruby versions of the Ice sample programs.
+Note that only clients are provided, since Ice for Ruby does not
+support server-side activities. In order to run a sample client, you
+must first start its corresponding server from another Ice language
+mapping, such as C++.
+
+As an example, let's run the hello application in demo\Ice\hello using
+the C++ server. Assuming that your Ice installation is located in
+C:\Ice-@ver@, and that you have already compiled the sample C++
+programs, we begin by starting the server:
+
+  > cd \Ice-@ver@-VC60\demo\Ice\hello
+  > server
+
+In a separate window, start the client:
+
+  > cd \IceRuby-@ver@\demo\Ice\hello
+  > ruby Client.rb
+
+Some demo directories contain README files if additional requirements
+are necessary.
+
+
+Running the tests
+-----------------
+
+You can run the test suite, provided that you have installed Python.
+Furthermore, the Ice for C++ tests must be built in the directory
+specified by the ICE_HOME environment variable.
+
+Open a command window and change to the top-level directory. At the
+command prompt, execute:
+
+  > python allTests.py
+
+If everything worked out, you should see lots of "ok" messages. In
+case of a failure, the tests abort with "failed".

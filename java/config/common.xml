@@ -1,0 +1,241 @@
+<!--
+ **********************************************************************
+
+ Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+
+ This copy of Ice is licensed to you under the terms described in the
+ ICE_LICENSE file included in this distribution.
+
+ **********************************************************************
+-->
+
+<project name="common" basedir=".">
+
+    <property environment="env"/>
+
+    <target name="init" depends="config-init">
+        <!-- Create the time stamp -->
+        <tstamp/>
+    </target>
+
+    <!-- Load build configuration properties -->
+    <property file="${top.dir}/config/build.properties"/>
+
+    <!-- Determine whether we are using JDK 1.4 -->
+    <condition property="java2">
+	<equals arg1="${jdk.version}" arg2="1.4"/>
+    </condition>
+
+    <!-- Use the global metadata "java:java2" when using JDK 1.4 -->
+    <condition property="java2metadata" value="java:java2" else="">
+	<isset property="java2"/>
+    </condition>
+
+    <!-- SSL source directory  -->
+    <condition property="ssl.src" value="ssl/jdk1.4" else="ssl/jdk1.5">
+	<isset property="java2"/>
+    </condition>
+
+    <!-- Use -Xlint:unchecked when using JDK 1.5 -->
+    <condition property="javac.lint" value="-Xlint:unchecked" else="">
+	<and>
+	    <not>
+	        <isset property="java2"/>
+	    </not>
+	    <istrue value="${lint.unchecked}"/>
+	</and>
+    </condition>
+
+    <!-- javac doesn't like an empty argument, so we have to disable the use
+         of javac.lint when the property is empty -->
+    <condition property="javac.lint.compiler" value="bogus">
+	<equals arg1="${javac.lint}" arg2=""/>
+    </condition>
+    <condition property="javac.lint.compiler" value="javac1.5">
+	<not>
+	    <equals arg1="${javac.lint}" arg2=""/>
+	</not>
+    </condition>
+
+    <!-- Commonly needed properties -->
+    <property name="class.dir" value="classes"/>
+    <property name="generated.dir" value="generated"/>
+
+    <!-- Figure out file locations -->
+    <path id="ice.dir.path">
+	<pathelement location="${top.dir}/../ice"/>
+    </path>
+
+    <pathconvert property="ice.top.dir" refid="ice.dir.path">
+    </pathconvert>
+
+    <condition property="ice.dir" value="${env.ICE_HOME}">
+	<and>
+	     <available file="${env.ICE_HOME}/slice" />
+            <not>
+                <isset property="ice.dir"/>
+	    </not>
+	</and>
+    </condition>
+
+    <condition property="ice.dir" value="${top.dir}">
+	<and>
+            <available file="${top.dir}/slice"/>
+            <not>
+                <isset property="ice.dir"/>
+            </not>
+	</and>
+    </condition>
+
+    <condition property="ice.dir" value="${ice.top.dir}">
+	<and>
+	    <available file="${top.dir}/../ice/slice"/>
+            <not>
+                <isset property="ice.dir"/>
+            </not>
+	</and>
+    </condition>
+
+    <condition property="ice.dir" value="/usr">
+	<and>
+	    <available file="/usr/share/Ice-${ice.version}/slice"/>
+            <not>
+                <isset property="ice.dir"/>
+            </not>
+	</and>
+    </condition>
+
+    <condition property="ice.dir" value="/opt/Ice-${ice.version}">
+	<and>
+	    <available file="/opt/Ice-${ice.version}/slice" />
+	    <not>
+		<isset property="ice.dir"/>
+	    </not>
+	</and>
+    </condition>
+
+    <condition property="ice.bin.dir" value="${ice.dir}">
+	<or>
+	    <available file="${ice.dir}/bin/slice2java"/>
+	    <available file="${ice.dir}/bin/slice2java.exe"/>
+	</or>
+    </condition>
+
+    <!-- Detect Ice for Java location -->
+
+    <!-- A slice directory in ${top.dir} indicates a source distribution build. 
+         A makedist.py script indicates a CVS checkout. -->
+    <condition property="icej.dir" value="${top.dir}">
+	<or>
+	    <available file="${top.dir}/makedist.py"/>
+	    <available file="${top.dir}/slice"/>
+	    <equals arg1="${ice.dir}" arg2="${ice.top.dir}"/>
+	</or>
+    </condition>
+
+    <!-- The following conditions should only occur when building the demo 
+         distributions. -->
+
+    <!-- Then we check to see if we are building against ICE_HOME or an /opt -->
+    <condition property="icej.dir" value="${ice.dir}">
+	<and>
+	    <available file="${ice.dir}/lib/Ice.jar"/>
+	    <not>
+		<isset property="icej.dir"/>
+	    </not>
+	</and>
+    </condition>
+
+    <!-- RPM -->
+    <condition property="icej.dir" value="/usr">
+	<and>
+	    <available file="/usr/lib/Ice-${ice.version}/Ice.jar"/>
+	    <not>
+		<isset property="icej.dir"/>
+	    </not>
+	</and>
+    </condition>
+
+    <!-- In RPM installs, files are located in different relative locations
+         than other install types. Use 'with-rpm' later on to make decisions
+         about the locations of slice, docs, jars, etc. --> 
+    <condition property="with-rpm" value="true">
+	<and>
+	    <equals arg1="${icej.dir}" arg2="/usr"/>
+	</and>
+    </condition>
+
+    <!-- Catch all for development tree purposes. If none of the above
+	 checks work, assume the developer knows what they are doing and the
+	 current top.dir is the ice dir. -->
+    <condition property="icej.dir" value="${top.dir}">
+	<not>
+	    <isset property="icej.dir"/>
+	</not>
+    </condition>
+    
+    <fail message="Unable to detect a valid Ice installation." unless="ice.dir" />
+    <fail message="Unable to detect a valid Ice for Java installation." unless="icej.dir"/>
+
+    <condition property="hasProguard">
+	<available classname="proguard.ant.ProGuardTask" classpath="${env.CLASSPATH}" />
+    </condition>
+
+    <condition property="hasJGoodies">
+	<and>
+	    <available classname="com.jgoodies.looks.Options" classpath="${env.CLASSPATH}" />
+	    <available classname="com.jgoodies.forms.factories.Borders" classpath="${env.CLASSPATH}" />
+	</and>
+    </condition>
+
+    <condition property="hasProguardAndJGoodies">
+	<and>
+	    <isset property="hasProguard" />
+	    <isset property="hasJGoodies" />
+	</and>
+    </condition>
+
+    <target name="config-init">
+
+	<!-- In C++, RPM installs have precedence over installs in the default Ice location 
+	     (i.e. /opt/Ice-${ice.version}) so the same will be done here. -->
+	<condition property="lib.dir" 
+	    value="/usr/lib/Ice-${ice.version}"
+	    else="${icej.dir}/lib">
+	    <isset property="with-rpm"/>
+	</condition>
+
+	<condition property="slice.dir" value="/usr/share/Ice-${ice.version}/slice" else="${ice.dir}/slice">
+	    <isset property="with-rpm"/>
+	</condition>
+
+	<condition property="ant.task.dir" value="${lib.dir}/ant" else="${icej.dir}/ant">
+	    <isset property="with-rpm"/>
+	</condition>
+
+	<taskdef name="slice2java" classpath="${ant.task.dir}" classname="Slice2JavaTask"/>
+	<taskdef name="slice2freezej" classpath="${ant.task.dir}" classname="Slice2FreezeJTask" />
+
+	<!-- 
+	    This condition satisfies the differences in Ice.jar location for
+	    /opt, rpm, cvs builds and src distribution builds. If the Ice.jar
+	    is present in the lib/java2 subdirectory, it implies an binary /opt
+	    install or RPM. Anything else and the Ice.jar should be in the lib
+	    directory. If the Ice.jar does not exist, it implies a CVS build or
+	    a cleaned source distribution. In either case, Ice.jar is expected
+	    to be in lib.
+	  -->
+	<condition property="ice.jar.file" value="${lib.dir}/java2/Ice.jar" else="${lib.dir}/Ice.jar">
+	    <and>
+		<available file="${lib.dir}/java2/Ice.jar"/>
+		<isset property="java2"/>
+	    </and>
+	</condition>
+
+	<!-- Ice classpath -->
+	<path id="ice.classpath">
+	    <fileset file="${ice.jar.file}"/>
+	</path>
+    </target>
+    
+</project>

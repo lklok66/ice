@@ -1,0 +1,267 @@
+Build instructions
+------------------
+
+Ice for C# has been built and tested with:
+
+- Visual C# Express Version 8.0.50727.42 and .NET Framework Version
+  2.0.50727.
+
+- Microsoft Visual Studio 2005 Version 8.0.50727.42 and .NET Framework
+  Version 2.0.50727.
+
+Unpack the archive. The sources will be contained in the IceCS-@ver@
+subdirectory.
+
+You will need the Slice to C# translator and supporting executables
+and libraries from the Ice for C++ distribution. You can download a
+binary distribution from the ZeroC web site, or you can build Ice for
+C++ yourself.
+
+Binary distributions for the supported platforms are available at
+
+  http://www.zeroc.com/download.html
+
+Make sure that the directory containing slice2cs is in your PATH. Note
+that icecpp.exe must be in your path as well, as must be the Ice for
+C++ run-time libraries iceutil and slice.
+
+Follow these steps to build the source:
+
+1) Set ICE_HOME to the directory of your Ice for C++ installation.
+   For example:
+
+   > set ICE_HOME=C:\Ice-@ver@
+
+2) Change to the top-level directory of the Ice for C# source
+   distribution.
+
+3) Open config\Make.rules.mak.cs and review the comments that describe
+   the settings you can modify. For example, you may wish to enable
+   optimization.
+
+4) Run nmake:
+
+   > nmake /f Makefile.mak (Visual Studio and Visual C# Express)
+
+The tests and sample programs are built automatically. If you modify
+the source code of a sample program, you can rebuild it using nmake,
+or you can open the Visual Studio solution located in demo\demo.sln.
+
+
+SSL Notes
+---------
+
+The IceSSL plug-in is supported for Visual Studio and Visual C#
+Express.
+
+In order to use SSL with the tests and sample programs, an SSL
+certificate must be installed on your system. The configuration files
+handle this for you, but you will be presented with a confirmation
+dialog the first time you run a test or sample program.
+
+Once you are finished with the tests and sample programs, follow these
+steps to remove the certificate:
+
+1) Start Internet Explorer.
+
+2) Select Internet Options from the Tools menu.
+
+3) Select the Content tab and click the "Certificates" button.
+
+4) Select the Trusted Root Certification Authorities tab.
+
+5) Select the entry for "ZeroC Test CA", click the Remove button, and
+   confirm that you want to remove this certificate.
+
+Note that under Windows Vista, the IceSSL configuration test is
+disabled due to an apparent bug with the .NET framework version
+2.0.50727.42. This bug manifests itself in those applications that
+initialize and destroy multiple IceSSL plug-ins in the same process.
+As this is an unusual use case, we don't believe it will affect most
+Ice applications.
+
+
+Running the tests
+-----------------
+
+To run the tests, you will need Python:
+
+  http://www.python.org/download
+
+Run "python allTests.py" from the top-level directory to run all of
+the tests, or "python allTests.py -l" to run the tests in an endless
+loop.
+
+You can also run individual tests in the various test directories with
+"python run.py".
+
+
+Running the demos
+-----------------
+
+To run the demos, you need to have the Ice bin directory in your PATH.
+See the README file in each demo directory for a description of the
+demo.
+
+
+Installation
+------------
+
+Simply run "nmake /f Makefile.mak install". This will install Ice for
+C# in the directory specified by the "prefix" variable in
+config/Make.rules.mak.cs. After installation, make sure that the
+<prefix>/bin directory is in your PATH.
+
+
+GAC Installation
+-----------------
+
+You can add the assemblies to the Global Assembly Cache (GAC). To do
+this, open Windows Explorer and navigate to the directory
+C:\WINDOWS\assembly. Next, drag and drop (or copy and paste) the
+assemblies from IceCS-@ver@\bin into the right-hand pane to install
+them in the cache.
+
+Or you can use gacutil from the command line to achieve the same
+result:
+
+> gacutil /i "path_to_lib.dll"
+
+You can find gacutil.exe in the SDK\Tools\Bin folder of your Visual C#
+installation. For example, if you have installed Visual C# 8.0 in
+C:\Program Files, the path to gacutil is
+
+  C:\Program Files\Microsoft Visual Studio 8\SDK\v2.0\Bin\gacutil.exe
+
+Once installed in the cache, the assemblies will always be located
+correctly without having to set environment variables or copy them
+into the same directory as an executable.
+
+If you want line numbers for stack traces, you must also install the
+PDB (.pdb) files in the GAC. Unfortunately, you cannot do this using
+Explorer, so you have to do it from the command line. Open a command
+shell window and navigate to C:\WINDOWS\assembly\GAC\icecs. (Assuming
+C:\WINDOWS is your system root.) Doing a directory listing there, you
+will find a directory named @dotnetver@__<UUID>, for example:
+
+  @dotnetver@__1f998c50fec78381
+
+Change to that directory (making sure that you use the correct version
+number for this release of Ice). In this directory, you will see a
+file called __AssemblyInfo__.ini and the icecs.dll you installed into
+the GAC in the preceding step. Now copy the icecs.pdb file into this
+directory:
+
+> copy <path_to_icecs.pdb> .
+
+
+Binary compatibility
+--------------------
+
+Patch releases of Ice are binary compatible. For example, version
+<x>.<y>.1 is compatible with <x>.<y>.0, so you can run applications
+compiled with <x>.<y>.0 with the <x>.<y>.1 Ice assemblies without
+having to recompile.
+
+If you want to run already deployed <x>.<y>.0 applications with the
+<x>.<y>.1 run time (or later patch release) on a machine, follow the
+steps under (1) or (2) below:
+
+1) On a machine with the Ice source tree and Visual Studio installed:
+
+   - Start a command shell.
+
+   - Run the following commands:
+
+	gacutil /u policy.<x>.<y>.icecs
+	gacutil /u policy.<x>.<y>.iceboxcs
+	gacutil /u policy.<x>.<y>.icegridcs
+	gacutil /u policy.<x>.<y>.icepatch2cs
+	gacutil /u policy.<x>.<y>.icesslcs
+	gacutil /u policy.<x>.<y>.icestormcs
+	gacutil /u policy.<x>.<y>.glacier2cs
+
+     Substitute the major and minor version for <x> and <y> in these
+     commands, for example: gacutil /u policy.3.1.icecs
+
+     These commands uninstall the <x>.<y> Ice run time.
+
+   - Build the solution.
+
+   - In a command shell, change directory to the bin directory of the
+     icecs source tree.
+
+   - Run the following commands:
+
+	gacutil.exe /i policy.<x>.<y>.icecs.dll
+	gacutil.exe /i policy.<x>.<y>.iceboxcs.dll
+	gacutil.exe /i policy.<x>.<y>.icegridcs.dll
+	gacutil.exe /i policy.<x>.<y>.icepatch2.dll
+	gacutil.exe /i policy.<x>.<y>.icesslcs.dll
+	gacutil.exe /i policy.<x>.<y>.icestormcs.dll
+	gacutil.exe /i policy.<x>.<y>.glacier2cs.dll
+
+     These commands cause applications requesting the <x>.<y>.<z> run
+     time to load the <x>.<y>.<z or z+n> run time instead.
+
+   - From the bin directory, run the commands:
+
+	gacutil /i icecs.dll
+	gacutil /i iceboxcs.dll
+	gacutil /i icegridcs.dll
+	gacutil /i icepatch2cs.dll
+	gacutil /i icesslcs.dll
+	gacutil /i icestormcs.dll
+	gacutil /i glacier2cs.dll
+
+     These commands install the newer patch version DLLs into the GAC.
+
+2) On a machine without the Ice source tree and without Visual Studio:
+
+   - Copy all the files beginning with "policy", and all files ending
+     in ".dll" from the bin directory of the machine on which you
+     compiled Ice for C# into a single directory on the target
+     machine.
+
+   - Start a command shell.
+
+   - Run the following commands:
+
+	gacutil /u policy.<x>.<y>.icecs
+	gacutil /u policy.<x>.<y>.iceboxcs
+	gacutil /u policy.<x>.<y>.icegridcs
+	gacutil /u policy.<x>.<y>.icepatch2cs
+	gacutil /u policy.<x>.<y>.icesslcs
+	gacutil /u policy.<x>.<y>.icestormcs
+	gacutil /u policy.<x>.<y>.glacier2cs
+
+     Substitute the major and minor version for <x> and <y> in these
+     commands, for example: gacutil /u policy.3.1.icecs
+
+     These commands uninstall the <x>.<y>.0 Ice run time.
+
+   - Change to the directory containing the policy and .dll files you
+     copied previously and run the following commands:
+
+	gacutil.exe /i policy.<x>.<y>.icecs.dll
+	gacutil.exe /i policy.<x>.<y>.iceboxcs.dll
+	gacutil.exe /i policy.<x>.<y>.icegridcs.dll
+	gacutil.exe /i policy.<x>.<y>.icepatch2.dll
+	gacutil.exe /i policy.<x>.<y>.icesslcs.dll
+	gacutil.exe /i policy.<x>.<y>.icestormcs.dll
+	gacutil.exe /i policy.<x>.<y>.glacier2cs.dll
+
+     These commands cause applications requesting the <x>.<y>.<z> run
+     time to load the <x>.<y>.<z or z+n> run time instead.
+
+   - Then run the commands:
+
+	gacutil /i icecs.dll
+	gacutil /i iceboxcs.dll
+	gacutil /i icegridcs.dll
+	gacutil /i icepatch2cs.dll
+	gacutil /i icesslcs.dll
+	gacutil /i icestormcs.dll
+	gacutil /i glacier2cs.dll
+
+     These commands install the newer patch version DLLs into the GAC.

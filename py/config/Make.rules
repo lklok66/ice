@@ -1,0 +1,253 @@
+# **********************************************************************
+#
+# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+#
+# This copy of Ice is licensed to you under the terms described in the
+# ICE_LICENSE file included in this distribution.
+#
+# **********************************************************************
+
+ifndef ICE_HOME
+   ifneq ($(shell test -f /usr/include/Ice/Ice.h && echo 0),0)
+      $(error Ice installation not found, please set ICE_HOME!)
+   endif
+endif
+
+#
+# Select an installation base directory. The directory will be created
+# if it does not exist.
+#
+
+prefix			= /opt/IcePy-$(VERSION)
+
+#
+# The "root directory" for runpath embedded in executables. Can be unset
+# to avoid adding a runpath to Ice executables.
+#
+embedded_runpath_prefix  ?= /opt/Ice-$(VERSION_MAJOR).$(VERSION_MINOR)
+
+#
+# Define OPTIMIZE as yes if you want to build with optimization.
+# Otherwise the Ice extension is built with debug information.
+#
+
+#OPTIMIZE		= yes
+
+#
+# Define LP64 as yes if you want to build in 64 bit mode on a platform
+# that supports both 32 and 64 bit.
+#
+#LP64			:= yes
+
+#
+# The values below can be overridden by defining them as environment
+# variables.
+#
+
+#
+# If you've built Python yourself then set PYTHON_HOME to contain
+# the installation directory; the rest of the Python-related settings
+# should be correct.
+#
+# If you've installed a distribution, or Python was included with
+# your system, then you likely need to review the values of
+# PYTHON_INCLUDE_DIR and PYTHON_LIB_DIR.
+#
+
+ifneq ($(PYTHON_HOME),)
+    PYTHON_VERSION	= $(notdir $(wildcard $(PYTHON_HOME)/include/python2*))
+
+    PYTHON_INCLUDE_DIR	= $(PYTHON_HOME)/include/$(PYTHON_VERSION)
+    #
+    # The Python shared library is installed in $(PYTHON_HOME)/lib on HP-UX
+    # rather than $(PYTHON_HOME)/lib/$(PYTHON_VERSION)/config.
+    #
+    PYTHON_LIB_DIR	= $(PYTHON_HOME)/lib
+else
+    #
+    # If multiple versions of Python are installed and you want a specific
+    # version used for building the Ice extension, then set PYTHON_VERSION
+    # to "python2.3" or "python2.4".
+    #
+    PYTHON_VERSION	?= $(word 1,$(notdir $(wildcard /usr/include/python2.[345]*)))
+    ifeq ($(PYTHON_VERSION),)
+      python_darwin_home = /System/Library/Frameworks/Python.framework/Versions/Current
+      PYTHON_VERSION 	= $(word 1,$(notdir $(wildcard $(python_darwin_home)/include/python2.[345]*)))
+    endif
+    PYTHON_INCLUDE_DIR	= /usr/include/$(PYTHON_VERSION)
+    PYTHON_LIB_DIR	= /usr/lib/$(PYTHON_VERSION)/config
+endif
+
+ifeq ($(PYTHON_VERSION),)
+    ifneq ($(PYTHON_HOME),)
+        $(error Unable to find a Python interpreter at PYTHON_HOME=$(PYTHON_HOME). See config/Make.rules)
+    else
+        $(error Unable to find Python 2.3, 2.4, or 2.5. See config/Make.rules)
+    endif
+endif
+
+PYTHON_FLAGS		?= -I$(PYTHON_INCLUDE_DIR)
+PYTHON_LIBS		?= -L$(PYTHON_LIB_DIR) -l$(PYTHON_VERSION)
+
+
+# ----------------------------------------------------------------------
+# Don't change anything below this line!
+# ----------------------------------------------------------------------
+
+SHELL			= /bin/sh
+VERSION_MAJOR           = 3
+VERSION_MINOR           = 2
+VERSION			= 3.2.0
+SOVERSION		= 32
+libdir			= $(top_srcdir)/python
+
+install_slicedir	= $(prefix)/slice
+install_pythondir	= $(prefix)/python
+
+INSTALL			= cp -fp
+INSTALL_PROGRAM		= ${INSTALL}
+INSTALL_LIBRARY		= ${INSTALL}
+INSTALL_DATA		= ${INSTALL}
+
+UNAME			:= $(shell uname)
+
+#
+# Platform specific definitions
+#
+ifeq ($(shell test -f $(top_srcdir)/config/Make.rules.$(UNAME) && echo 0),0)
+    configdir		= $(top_srcdir)/config
+else
+    configdir		= $(ICE_HOME)/config
+endif
+include	 $(configdir)/Make.rules.$(UNAME)
+
+ifneq ($(ICE_HOME),)
+    ifeq ($(LP64),yes)
+       ICE_LIB_DIRS	= -L$(ICE_HOME)/lib64 -L$(ICE_HOME)/lib
+    else 
+       ICE_LIB_DIRS	= -L$(ICE_HOME)/lib
+    endif
+endif
+
+ICE_LIBS		= $(ICE_LIB_DIRS) -lIce -lSlice -lIceUtil
+
+ifneq ($(ICE_HOME),)
+    ICE_FLAGS		= -I$(ICE_HOME)/include
+endif
+
+ifneq ($(ICE_HOME),)
+    slicedir		= $(ICE_HOME)/slice
+else
+    slicedir		= /usr/share/Ice-$(VERSION)/slice
+endif
+
+install_libdir	        = $(prefix)/python
+
+ifneq ($(embedded_runpath_prefix),)
+   ifeq ($(LP64),yes)
+       runpath_libdir	  := $(embedded_runpath_prefix)/lib$(lp64suffix)
+   else
+       runpath_libdir	  := $(embedded_runpath_prefix)/lib
+   endif
+endif
+
+CPPFLAGS		=
+ICECPPFLAGS		= -I$(slicedir)
+SLICE2PYFLAGS		= $(ICECPPFLAGS)
+
+LDFLAGS			= $(LDPLATFORMFLAGS) $(CXXFLAGS) -L$(libdir)
+
+#
+# Default functions for shared library names. A Python extension library
+# cannot have a "lib" prefix, so Python-specific functions are defined.
+#
+
+ifeq ($(mklibfilename),)
+    mklibfilename	= $(if $(2),lib$(1).so.$(2),lib$(1).so)
+endif
+
+ifeq ($(mksoname),)
+    mksoname		= $(if $(2),lib$(1).so.$(2),lib$(1).so)
+endif
+
+ifeq ($(mklibname),)
+    mklibname		= lib$(1).so
+endif
+
+ifndef mklibtargets
+    mklibtargets	= $(1) $(2) $(3)
+endif
+
+ifeq ($(mkshlib),)
+    $(error You need to define mkshlib in Make.rules.$(UNAME)) 
+endif
+
+ifeq ($(installlib),)
+    installlib		= $(INSTALL) $(2)/$(3) $(1); \
+			  rm -f $(1)/$(4); ln -s $(3) $(1)/$(4); \
+			  rm -f $(1)/$(5); ln -s $(4) $(1)/$(5); \
+			  chmod a+rx $(1)/$(3) 
+endif
+
+ifeq ($(installdata),)
+    installdata		= $(INSTALL_DATA) $(1) $(2); \
+			  chmod a+r $(2)/$(notdir $(1))
+endif
+
+ifeq ($(installprogram),)
+    installprogram	= $(INSTALL_PROGRAM) $(1) $(2); \
+			  chmod a+rx $(2)/$(notdir $(1))
+endif
+
+ifeq ($(mkdir),)
+    mkdir		= mkdir $(1) ; \
+			  chmod a+rx $(1)
+endif
+
+#
+# A Python extension library cannot have a "lib" prefix, so Python-specific
+# functions are defined that strip "lib" from the regular library name.
+#
+mkpylibfilename		= $(subst lib,,$(call mklibfilename,$(1),$(2)))
+mkpysoname		= $(subst lib,,$(call mksoname,$(1),$(2)))
+mkpylibname		= $(subst lib,,$(call mklibname,$(1)))
+
+ifneq ($(ICE_HOME),)
+   SLICE2PY		= $(ICE_HOME)/bin/slice2py
+else
+   SLICE2PY		= /usr/bin/slice2py
+endif
+
+EVERYTHING		= all depend clean install
+
+.SUFFIXES:
+.SUFFIXES:		.cpp .o .py
+
+all:: $(SRCS)
+
+%_ice.py: $(SDIR)/%.ice
+	rm -f $(*F).py
+	$(SLICE2PY) $(SLICE2PYFLAGS) $<
+
+.cpp.o:
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<
+
+clean::
+	-rm -f $(TARGETS)
+	-rm -f core *.o *.pyc *.bak
+
+all:: $(SRCS) $(TARGETS)
+
+depend:: $(SRCS) $(SLICE_SRCS)
+	-rm -f .depend
+	if test -n "$(SRCS)" ; then \
+	    $(CXX) -DMAKEDEPEND -M $(CXXFLAGS) $(CPPFLAGS) $(SRCS) | \
+	    $(configdir)/makedepend.py >> .depend; \
+	fi
+
+ifneq ($(TEMPLATE_REPOSITORY),)
+clean::
+	rm -fr $(TEMPLATE_REPOSITORY)
+endif
+
+install::
