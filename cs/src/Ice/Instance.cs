@@ -259,17 +259,17 @@ namespace IceInternal
 	}
 	
 	public int
-	clientConnectionIdleTime()
+	clientACM()
 	{
 	    // No mutex lock, immutable.
-	    return _clientConnectionIdleTime;
+	    return _clientACM;
 	}
 	
 	public int
-	serverConnectionIdleTime()
+	serverACM()
 	{
 	    // No mutex lock, immutable.
-	    return _serverConnectionIdleTime;
+	    return _serverACM;
 	}
 
         public void
@@ -393,36 +393,24 @@ namespace IceInternal
 		    }
 		}
 		
-		int clientConnectionIdleTime = 0;
-		int serverConnectionIdleTime = 0;
-		
 		{
-		    int num = _properties.getPropertyAsInt("Ice.ConnectionIdleTime");
-		    if(num > 0)
+		    int clientACMDefault = 60; // Client ACM enabled by default.
+		    int serverACMDefault = 0; // Server ACM disabled by default.
+		    
+		    //
+		    // Legacy: If Ice.ConnectionIdleTime is set, we use it as
+		    // default value for both the client- and server-side ACM.
+		    //
+		    if(_properties.getProperty("Ice.ConnectionIdleTime").length() > 0)
 		    {
-			clientConnectionIdleTime = num;
-			serverConnectionIdleTime = num;
+			int num = _properties.getPropertyAsInt("Ice.ConnectionIdleTime");
+			clientACMDefault = num;
+			serverACMDefault = num;
 		    }
+		    
+		    _clientACM = _properties.getPropertyAsIntWithDefault("Ice.ACM.Client", clientACMDefault);
+		    _serverACM = _properties.getPropertyAsIntWithDefault("Ice.ACM.Server",serverACMDefault);
 		}
-		
-		{
-		    int num = _properties.getPropertyAsIntWithDefault("Ice.ConnectionIdleTime.Client", 60);
-		    if(num > 0)
-		    {
-			clientConnectionIdleTime = num;
-		    }
-		}
-		
-		{
-		    int num = _properties.getPropertyAsInt("Ice.ConnectionIdleTime.Server");
-		    if(num > 0)
-		    {
-			serverConnectionIdleTime = num;
-		    }
-		}
-		
-		_clientConnectionIdleTime = clientConnectionIdleTime;
-		_serverConnectionIdleTime = serverConnectionIdleTime;
 		
 		_routerManager = new RouterManager();
 		
@@ -519,24 +507,24 @@ namespace IceInternal
 	    // Start connection monitor if necessary.
 	    //
 	    int interval = 0;
-	    if(_clientConnectionIdleTime > 0 && _serverConnectionIdleTime > 0)
+	    if(_clientACM > 0 && _serverACM > 0)
 	    {
-		if(_clientConnectionIdleTime < _serverConnectionIdleTime)
+		if(_clientACM < _serverACM)
 		{
-		    interval = _clientConnectionIdleTime;
+		    interval = _clientACM;
 		}
 		else
 		{
-		    interval = _serverConnectionIdleTime;
+		    interval = _serverACM;
 		}
 	    }
-	    else if(_clientConnectionIdleTime > 0)
+	    else if(_clientACM > 0)
 	    {
-		interval = _clientConnectionIdleTime;
+		interval = _clientACM;
 	    }
-	    else if(_serverConnectionIdleTime > 0)
+	    else if(_serverACM > 0)
 	    {
-		interval = _serverConnectionIdleTime;
+		interval = _serverACM;
 	    }
 	    interval = _properties.getPropertyAsIntWithDefault("Ice.MonitorConnections", interval);
 	    if(interval > 0)
@@ -670,8 +658,8 @@ namespace IceInternal
 	private volatile TraceLevels _traceLevels; // Immutable, not reset by destroy().
 	private volatile DefaultsAndOverrides _defaultsAndOverrides; // Immutable, not reset by destroy().
 	private volatile int _messageSizeMax; // Immutable, not reset by destroy().
-	private volatile int _clientConnectionIdleTime; // Immutable, not reset by destroy().
-	private volatile int _serverConnectionIdleTime; // Immutable, not reset by destroy().
+	private volatile int _clientACM; // Immutable, not reset by destroy().
+	private volatile int _serverACM; // Immutable, not reset by destroy().
 	private RouterManager _routerManager;
 	private LocatorManager _locatorManager;
 	private ReferenceFactory _referenceFactory;
