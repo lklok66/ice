@@ -1,8 +1,27 @@
 Changes since version 2.1.0
 ---------------------------
 
-- Fixed bug where ObjectAdapter::remove() or
-  ObjectAdapter::removeFacet() would always return null.
+- Added two new properties for controlling Active Connection
+  Management (ACM). In prior releases ACM was governed by the property
+  Ice.ConnectionIdleTime, which affected client- and server-side
+  behavior. The new properties, Ice.ACM.Client and Ice.ACM.Server,
+  now allow independent timeouts to be specified for client- and
+  server-side ACM. Ice.ConnectionIdleTime is now deprecated.
+
+- Reverted a change introduced in 2.1.0 in which retries were not
+  attempted for oneway and batch oneway requests. Ice now behaves
+  as it did in prior releases: if the connection associated with a
+  oneway or batch oneway proxy is closed, an invocation on the proxy
+  will transparently reestablish the connection. Please see the Ice
+  manual for more information on the reliability of oneway and batch
+  oneway reliability.
+
+- Ice::ObjectNotExistException is now retried for invocations made on
+  indirect proxies. This allows the transparent migration of objects
+  or objects adapters.
+
+- Fixed bug where the ObjectAdapter operations remove() and
+  removeFacet() would always return null.
 
 Changes since version 2.0.0
 ---------------------------
