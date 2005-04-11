@@ -284,8 +284,8 @@
 		<include name="*.pdb"/>
 		<exclude name="generatecs.pdb"/>
 	    </fileset>
-	    <fileset dir="${ice.dir}/bin">
-		<include name="slice2cs/Release/slice2cs.exe"/>
+	    <fileset dir="${ice.dir}/src/slice2cs/Release">
+		<include name="slice2cs.exe"/>
 	    </fileset>
 	</copy>
 
@@ -338,9 +338,11 @@
 	<!-- Binaries -->
 	<mkdir dir="${stage.dir}/ice-java/dev/bin"/>
 	<copy todir="${stage.dir}/ice-java/dev/bin" flatten="true">
-	    <fileset dir="${ice.dir}/bin">
-		<include name="slice2java/Release/slice2java.exe"/>
-		<include name="slice2freezej/Release/slice2freezej.exe"/>
+	    <fileset dir="${ice.dir}/src/slice2java/Release">
+		<include name="slice2java.exe"/>
+	    </fileset>
+	    <fileset dir="${ice.dir}/src/slice2freezej/Release">
+		<include name="slice2freezej.exe"/>
 	    </fileset>
 	</copy>
 
@@ -400,8 +402,8 @@
 	<!-- Binaries -->
 	<mkdir dir="${stage.dir}/ice-python/dev/bin"/>
 	<copy todir="${stage.dir}/ice-python/dev/bin" flatten="true">
-	    <fileset dir="${ice.dir}/bin">
-		<include name="slice2py/Release/slice2py.exe"/>
+	    <fileset dir="${ice.dir}/src/slice2py/Release">
+		<include name="slice2py.exe"/>
 	    </fileset>
 	</copy>
 
@@ -448,8 +450,8 @@
 	    <fileset dir="${icevb.dir}/bin">
 		<include name="generatevb.exe"/>
 	    </fileset>
-	    <fileset dir="${ice.dir}/bin">
-		<include name="slice2vb/Release/slice2vb.exe"/>
+	    <fileset dir="${ice.dir}/src/slice2vb/Release">
+		<include name="slice2vb.exe"/>
 	    </fileset>
 	</copy>
 
