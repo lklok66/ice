@@ -767,7 +767,15 @@ namespace IceInternal
 		lock(this)
 		{
 		    connection.waitUntilFinished(); // We must call waitUntilFinished() for cleanup.
-		    _connections.Remove(connection);
+		    LinkedList.Enumerator p = (LinkedList.Enumerator)_connections.GetEnumerator();
+		    while(p.MoveNext())
+		    {
+			if((Ice.ConnectionI)p.Current == connection)
+			{
+			    p.Remove();
+			    break;
+			}
+		    }
 		    return;
 		}
 	    }
