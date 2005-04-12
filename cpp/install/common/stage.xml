@@ -237,7 +237,29 @@
     </target>
 
     <!-- Ice for C++ Demo -->
-    <target name="ice-cpp-demo" depends="setup">
+        <!-- Ice for C++ Demo -->
+    <target name="ice-cpp-demo-vc60" depends="setup">
+
+	<mkdir dir="${stage.dir}/ice-cpp/demo/demo"/>
+	<copy todir="${stage.dir}/ice-cpp/demo/demo">
+	    <fileset dir="${ice.dir}/demo">
+		<exclude name="**/*.ncb"/>
+		<exclude name="**/*.suo"/>
+		<exclude name="**/*.exe"/>
+		<exclude name="**/*.ilk"/>
+		<exclude name="**/*.pdb"/>
+		<exclude name="**/.depend"/>
+		<exclude name="**/.dummy"/>
+		<exclude name="**/Makefile"/>
+		<exclude name="**/Debug/**"/>
+		<exclude name="**/Release/**"/>
+		<exclude name="Freeze/backup/**"/>
+	    </fileset>
+	</copy>
+
+    </target>
+
+    <target name="ice-cpp-demo-vc71" depends="setup">
 
 	<mkdir dir="${stage.dir}/ice-cpp/demo/demo"/>
 	<copy todir="${stage.dir}/ice-cpp/demo/demo">
@@ -720,13 +742,13 @@
             depends="ice-common,
 		     ice-cpp-runtime,
 		     ice-cpp-dev,
-		     ice-cpp-demo"/>
+		     ice-cpp-demo-vc60"/>
 
     <target name="ice-stage-vc71" 
             depends="ice-common,
 		     ice-cpp-runtime,
 		     ice-cpp-dev,
-		     ice-cpp-demo,
+		     ice-cpp-demo-vc71,
 		     ice-csharp-runtime,
 		     ice-csharp-dev,
 		     ice-csharp-demo,
