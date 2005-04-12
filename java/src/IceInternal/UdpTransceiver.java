@@ -366,7 +366,7 @@ final class UdpTransceiver implements Transceiver
 	    {
 		int newSize = java.lang.Math.min(messageSizeMax, _maxPacketSize) + _udpOverhead;
 	        _logger.warning("UDP " + direction + " buffer size: request size of " + sizeRequested
-		                + " adjusted to " + newSize + " (Ice.MessageSizeMax takes precendence)");
+		                + " adjusted to " + newSize + " (Ice.MessageSizeMax takes precedence)");
 		sizeRequested = newSize;
 	    }
 
