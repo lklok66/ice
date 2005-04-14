@@ -167,6 +167,10 @@ To build the Ice extension in a static configuration:
 
 - Edit the file <phpdir>/Makefile and make the following changes:
 
+  - Append "-lxnet" to EXTRA_LIBS, as shown below:
+
+    EXTRA_LIBS = -lm -lnsl -lIce -lSlice -lIceUtil -lxnet
+
   - Add a definition for EXTRA_CXXFLAGS. For 32-bit platforms, use the
     following setting:
 
