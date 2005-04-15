@@ -90,7 +90,7 @@ ICE_LIBS		?= -L$(ICE_HOME)/lib -lIce -lIceUtil -lSlice
 # ----------------------------------------------------------------------
 
 SHELL			= /bin/sh
-VERSION			= 2.1.0
+VERSION			= 2.1.1
 SOVERSION		= 21
 libdir			= $(top_srcdir)/lib
 
