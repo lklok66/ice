@@ -572,6 +572,7 @@ run(const CommunicatorPtr& communicator, const string& envName, const string& db
 	even.name = "bar";
 	even.category = "even";
 	    
+	TransactionHolder txHolder(connection);
 	for(int i = 0; i < 1000; i++)
 	{
 	    if(i % 2 == 0)
@@ -582,16 +583,15 @@ run(const CommunicatorPtr& communicator, const string& envName, const string& db
 	    {
 		iim.put(IntIdentityMap::value_type(i, odd));
 	    }
-		
 	}
+	txHolder.commit();
     }
     
-    {
+    { 
 	IntIdentityMapWithIndex iim(connection, "intIdentity");
-	
 	test(iim.categoryCount("even") == 500);
 	test(iim.categoryCount("odd") == 500);
-	
+
 	{
 	    int count = 0;
 	    IntIdentityMapWithIndex::iterator p = iim.findByCategory("even");
@@ -615,7 +615,6 @@ run(const CommunicatorPtr& communicator, const string& envName, const string& db
 	    }
 	    test(count == 500);
 	}
-
 	iim.clear();
     }
 
