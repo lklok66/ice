@@ -556,6 +556,72 @@ public class Client
 
 	    System.out.println("ok");
 	}
+
+	System.out.print("testing index creation... ");
+	System.out.flush();
+
+	{
+	    IntIdentityMap iim = new IntIdentityMap(connection, "intIdentity", true);
+
+	    Ice.Identity odd = new Ice.Identity();
+	    odd.name = "foo";
+	    odd.category = "odd";
+	    
+	    Ice.Identity even = new Ice.Identity();
+	    even.name = "bar";
+	    even.category = "even";
+	    
+	    for(int i = 0; i < 1000; i++)
+	    {
+		if(i % 2 == 0)
+		{
+		    iim.fastPut(new Integer(i), even);
+		}
+		else
+		{
+		    iim.fastPut(new Integer(i), odd);
+		}
+	    }
+	    iim.close();
+	}
+	
+	{
+	    //
+	    // Need true to create the index
+	    //
+	    IntIdentityMapWithIndex iim = new IntIdentityMapWithIndex(connection, "intIdentity", true);
+	    
+	    test(iim.categoryCount("even") == 500);
+	    test(iim.categoryCount("odd") == 500);
+	    
+	    int count = 0;
+	    java.util.Iterator p = iim.findByCategory("even");
+	    while(p.hasNext())
+	    {
+		java.util.Map.Entry e = (java.util.Map.Entry)p.next();
+		int k = ((Integer)e.getKey()).intValue();
+		test(k % 2 == 0);
+		++count;
+	    }
+	    test(count == 500);
+
+	    count = 0;
+	    p = iim.findByCategory("odd");
+	    while(p.hasNext())
+	    {
+		java.util.Map.Entry e = (java.util.Map.Entry)p.next();
+		int k = ((Integer)e.getKey()).intValue();
+		test(k % 2 == 1);
+		++count;
+	    }
+	    test(count == 500);
+	    
+	    iim.closeAllIterators();
+	    iim.clear();
+	}
+
+	System.out.println("ok");
+
 	connection.close();
 	
 	return 0;
@@ -594,11 +660,13 @@ public class Client
 	    System.err.println(args[0] + ": " + ex);
 	    status = 1;
 	}
+	/*
 	catch(Exception ex)
 	{
 	    System.err.println(args[0] + ": unknown exception: " + ex);
 	    status = 1;
 	}
+	*/
 
 	if(communicator != null)
 	{
