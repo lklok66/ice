@@ -45,6 +45,6 @@ clean::
 	rm -f ByteIntMap.h ByteIntMap.cpp IntIdentityMap.h IntIdentityMap.cpp IntIdentityMapWithIndex.h IntIdentityMapWithIndex.cpp
 
 clean::
-	rm -f db/binary db/intIdentity db/log.*
+	rm -f db/binary db/binary.* db/intIdentity db/intIdentity.* db/__catalog db/log.*
 
 include .depend
