@@ -571,6 +571,7 @@ public class Client
 	    even.name = "bar";
 	    even.category = "even";
 	    
+	    Transaction tx = connection.beginTransaction();
 	    for(int i = 0; i < 1000; i++)
 	    {
 		if(i % 2 == 0)
@@ -582,6 +583,7 @@ public class Client
 		    iim.fastPut(new Integer(i), odd);
 		}
 	    }
+	    tx.commit();
 	    iim.close();
 	}
 	
@@ -660,13 +662,12 @@ public class Client
 	    System.err.println(args[0] + ": " + ex);
 	    status = 1;
 	}
-	/*
 	catch(Exception ex)
 	{
 	    System.err.println(args[0] + ": unknown exception: " + ex);
 	    status = 1;
 	}
-	*/
+
 
 	if(communicator != null)
 	{
