@@ -1,6 +1,9 @@
 Changes since version 2.1.0
 ---------------------------
 
+- Fixed a bug in Freeze Maps: you can now add an index to an 
+  existing Freeze Map.
+
 - Added RTLD_GLOBAL when calling dlopen on Unix platforms.
 
 - Fixed a bug that could cause an assert if connections could not be
