@@ -272,7 +272,7 @@ public final class CommunicatorI extends LocalObjectImpl implements Communicator
         _instance = new IceInternal.Instance(this, properties);
     }
 
-    protected void
+    protected synchronized void
     finalize()
         throws Throwable
     {
@@ -299,7 +299,10 @@ public final class CommunicatorI extends LocalObjectImpl implements Communicator
 	{
 	    _instance.destroy();
 	    _instance = null;
-	    _destroyed = true;
+	    synchronized(this)
+	    {
+		_destroyed = true;
+	    }
 	    throw ex;
 	}
     }

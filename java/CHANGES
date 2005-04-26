@@ -1,6 +1,9 @@
 Changes since version 2.1.0
 ---------------------------
 
+- Fixed a race condition that could cause a process to abort
+  during shutdown.
+
 - Fixed a bug that could cause an assert if connections could not be
   established in thread-per-connection mode.
 

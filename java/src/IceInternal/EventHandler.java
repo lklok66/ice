@@ -59,7 +59,10 @@ public abstract class EventHandler
     destroy()
     {
 	_stream.destroy();
-	_stream = null;
+	synchronized(this)
+	{
+	    _stream = null;
+	}
     }
 
     protected

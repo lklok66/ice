@@ -457,7 +457,7 @@ public class Instance
         }
     }
 
-    protected void
+    protected synchronized void
     finalize()
         throws Throwable
     {
