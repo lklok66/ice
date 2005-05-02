@@ -60,8 +60,11 @@ namespace IceInternal
 		// We want to wait until all connections are finished
 		// outside the thread synchronization.
 		//
+		// We set _connections to null because our destructor must not
+		// invoke methods on member objects.
+		//
 		connections = _connections;
-		_connections = new Hashtable();
+		_connections = null;
 	    }
 	    
 	    //
@@ -386,6 +389,10 @@ namespace IceInternal
 		    for(int i = 0; i < endpoints.Length; i++)
 		    {
 			Endpoint endpoint = endpoints[i];
+
+			//
+			// Modify endpoints with overrides.
+			//
 			if(defaultsAndOverrides.overrideTimeout)
 			{
 			    endpoint = endpoint.timeout(defaultsAndOverrides.overrideTimeoutValue);
@@ -472,16 +479,13 @@ namespace IceInternal
 	    
 	    foreach(Ice.ConnectionI conn in c)
 	    {
-		if(conn.isValidated())
+		try
 		{
-		    try
-		    {
-			conn.flushBatchRequests();
-		    }
-		    catch(Ice.LocalException)
-		    {
-			// Ignore.
-		    }
+		    conn.flushBatchRequests();
+		}
+		catch(Ice.LocalException)
+		{
+		    // Ignore.
 		}
 	    }
 	}
@@ -497,11 +501,16 @@ namespace IceInternal
 	    _pending = new Set();
 	}
 	
+#if DEBUG
 	~OutgoingConnectionFactory()
 	{
-	    Debug.Assert(_destroyed);
-	    Debug.Assert(_connections.Count == 0);
+	    lock(this)
+	    {
+		IceUtil.Assert.FinalizerAssert(_destroyed);
+		IceUtil.Assert.FinalizerAssert(_connections == null);
+	    }
 	}
+#endif
 	
 	private readonly Instance _instance;
 	private bool _destroyed;
@@ -584,8 +593,11 @@ namespace IceInternal
 		// We want to wait until all connections are finished
 		// outside the thread synchronization.
 		//
+		// We set _connections to null because our destructor must not
+		// invoke methods on member objects.
+		//
 		connections = _connections;
-		_connections = new LinkedList();
+		_connections = null;
 	    }
 	    
 	    //
@@ -688,7 +700,6 @@ namespace IceInternal
 		    if(_state != StateActive)
 		    {
 			Thread.Sleep(0);
-			threadPool.promoteFollower();
 			return;
 		    }
 		    
@@ -824,7 +835,7 @@ namespace IceInternal
 	    _endpoint = endpoint;
 	    _adapter = adapter;
 	    _registeredWithPool = false;
-	    _warn = _instance.properties().getPropertyAsInt("Ice.Warn.Connections") > 0?true:false;
+	    _warn = _instance.properties().getPropertyAsInt("Ice.Warn.Connections") > 0 ? true : false;
 	    _connections = new LinkedList();
 	    _state = StateHolding;
 	    
@@ -879,12 +890,17 @@ namespace IceInternal
 	    }
 	}
 	
+#if DEBUG
 	~IncomingConnectionFactory()
 	{
-	    Debug.Assert(_state == StateClosed);
-	    Debug.Assert(_acceptor == null);
-	    Debug.Assert(_connections.Count == 0);
+	    lock(this)
+	    {
+		IceUtil.Assert.FinalizerAssert(_state == StateClosed);
+		IceUtil.Assert.FinalizerAssert(_acceptor == null);
+		IceUtil.Assert.FinalizerAssert(_connections == null);
+	    }
 	}
+#endif
 	
 	private const int StateActive = 0;
 	private const int StateHolding = 1;
@@ -892,8 +908,7 @@ namespace IceInternal
 	
 	private void setState(int state)
 	{
-	    if(_state == state)
-	    // Don't switch twice.
+	    if(_state == state) // Don't switch twice.
 	    {
 		return;
 	    }
@@ -902,8 +917,7 @@ namespace IceInternal
 	    {
 		case StateActive: 
 		{
-		    if(_state != StateHolding)
-		    // Can only switch from holding to active.
+		    if(_state != StateHolding) // Can only switch from holding to active.
 		    {
 			return;
 		    }
@@ -918,8 +932,7 @@ namespace IceInternal
 		
 		case StateHolding: 
 		{
-		    if(_state != StateActive)
-		    // Can only switch from active to holding.
+		    if(_state != StateActive) // Can only switch from active to holding.
 		    {
 			return;
 		    }

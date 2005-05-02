@@ -29,19 +29,12 @@ namespace IceInternal
 	}
 	
 	//
-	// Do NOT use a finalizer, this would cause a severe
-	// performance penalty! We must make sure that destroy() is
-	// called instead, to reclaim resources.
+	// Retained for backward compatibility.
+	//
+	// TODO: Remove.
 	//
 	public void destroy()
 	{
-	    Debug.Assert(_is != null);
-	    _is.destroy();
-	    _is = null;
-	    
-	    Debug.Assert(_os != null);
-	    _os.destroy();
-	    _os = null;
 	}
 	
 	//

@@ -200,6 +200,7 @@ public sealed class ServantManager
 	_adapterName = adapterName;
     }
     
+#if DEBUG
     ~ServantManager()
     {
 	//
@@ -207,8 +208,12 @@ public sealed class ServantManager
 	// not been called if the associated object adapter was not
 	// properly deactivated.
 	//
-	//Debug.Assert(_instance == null);
+	//lock(this)
+	//{
+	//     IceUtil.Assert.FinalizerAssert(_instance == null);
+	//}
     }
+#endif
     
     //
     // Only for use by Ice.ObjectAdapterI.

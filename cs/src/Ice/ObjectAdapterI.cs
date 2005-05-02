@@ -236,12 +236,15 @@ namespace Ice
 	    // Now we wait for until all incoming connection factories are
 	    // finished.
 	    //
-	    int sz = _incomingConnectionFactories.Count;
-	    for(int i = 0; i < sz; ++i)
+	    if(_incomingConnectionFactories != null)
 	    {
-		IceInternal.IncomingConnectionFactory factory =
-		    (IceInternal.IncomingConnectionFactory)_incomingConnectionFactories[i];
-		factory.waitUntilFinished();
+		int sz = _incomingConnectionFactories.Count;
+		for(int i = 0; i < sz; ++i)
+		{
+		    IceInternal.IncomingConnectionFactory factory =
+			(IceInternal.IncomingConnectionFactory)_incomingConnectionFactories[i];
+		    factory.waitUntilFinished();
+		}
 	    }
 	    
 	    //
@@ -274,7 +277,10 @@ namespace Ice
 		// We're done, now we can throw away all incoming connection
 		// factories.
 		//
-		_incomingConnectionFactories.Clear();
+		// We set _incomingConnectionFactories to null because the finalizer
+		// must not invoke methods on objects.
+		//
+		_incomingConnectionFactories = null;
 		
 		//
 		// Remove object references (some of them cyclic).
@@ -460,7 +466,6 @@ namespace Ice
 		// Create a reference and return a reverse proxy for this
 		// reference.
 		//
-		IceInternal.Endpoint[] endpoints = new IceInternal.Endpoint[0];
 		ConnectionI[] arr = new ConnectionI[connections.Count];
 		if(arr.Length != 0)
 		{
@@ -620,7 +625,7 @@ namespace Ice
 		f = new ArrayList(_incomingConnectionFactories);
 	    }
 
-	    foreach(IceInternal.IncomingConnectionFactory factory in _incomingConnectionFactories)
+	    foreach(IceInternal.IncomingConnectionFactory factory in f)
 	    {
 		factory.flushBatchRequests();
 	    }
@@ -699,7 +704,6 @@ namespace Ice
 	    _printAdapterReadyDone = false;
 	    _name = name;
 	    _id = instance.properties().getProperty(name + ".AdapterId");
-	    _logger = instance.logger();
 	    _incomingConnectionFactories = new ArrayList();
 	    _routerEndpoints = new ArrayList();
 	    _directCount = 0;
@@ -758,27 +762,38 @@ namespace Ice
 	    }
 	}
 	
-	~ObjectAdapterI()
-	{
-	    if(!_deactivated)
-	    {
-		_instance.logger().warning("object adapter `" + _name + "' has not been deactivated");
-	    }
-	    else if(_instance != null)
-	    {
-		_instance.logger().warning("object adapter `" + _name + "' deactivation had not been waited for");
-	    }
-	    else
-	    {
-		Debug.Assert(_threadPool == null);
-		Debug.Assert(_servantManager == null);
-		Debug.Assert(_communicator == null);
-		Debug.Assert(_incomingConnectionFactories.Count == 0);
-		Debug.Assert(_directCount == 0);
-		Debug.Assert(!_waitForDeactivate);
-	    }
-	}
-	
+#if DEBUG
+        ~ObjectAdapterI()
+        {   
+            lock(this)
+            {
+		if(!_deactivated)
+		{
+		    //
+		    // It's not safe to invoke methods in a destructor.
+		    //
+		    //_instance.logger().warning("object adapter `" + _name + "' has not been deactivated");
+		}
+		else if(_instance != null)
+		{
+		    //
+		    // It's not safe to invoke methods in a destructor.
+		    //
+		    //_instance.logger().warning("object adapter `" + _name + "' deactivation had not been waited for");
+		}
+		else
+		{
+		    IceUtil.Assert.FinalizerAssert(_threadPool == null);
+		    IceUtil.Assert.FinalizerAssert(_servantManager == null);
+		    IceUtil.Assert.FinalizerAssert(_communicator == null);
+		    IceUtil.Assert.FinalizerAssert(_incomingConnectionFactories == null);
+		    IceUtil.Assert.FinalizerAssert(_directCount == 0);
+		    IceUtil.Assert.FinalizerAssert(!_waitForDeactivate);
+		}
+            }   
+        }
+#endif          
+
 	private ObjectPrx newProxy(Identity ident, string facet)
 	{
 	    if(_id.Length == 0)
@@ -791,10 +806,9 @@ namespace Ice
 		// Create a reference with the adapter id and return a
 		// proxy for the reference.
 		//
-		IceInternal.Endpoint[] endpoints = new IceInternal.Endpoint[0];
-		ConnectionI[] connections = new ConnectionI[0];
 		IceInternal.Reference reference =
-		    _instance.referenceFactory().create(ident, new Context(), facet, IceInternal.Reference.Mode.ModeTwoway,
+		    _instance.referenceFactory().create(ident, new Context(), facet,
+							IceInternal.Reference.Mode.ModeTwoway,
 							false, _id, null, _locatorInfo, true);
 		return _instance.proxyFactory().referenceToProxy(reference);
 	    }
@@ -842,7 +856,6 @@ namespace Ice
 	    //
 	    // Create a reference and return a proxy for this reference.
 	    //
-	    ConnectionI[] connections = new ConnectionI[0];
 	    IceInternal.Reference reference =
 		_instance.referenceFactory().create(ident, new Context(), facet, IceInternal.Reference.Mode.ModeTwoway,
                                                     false, endpoints, null, true);
@@ -955,7 +968,6 @@ namespace Ice
 	private bool _printAdapterReadyDone;
 	private readonly string _name;
 	private readonly string _id;
-	private Logger _logger;
 	private ArrayList _incomingConnectionFactories;
 	private ArrayList _routerEndpoints;
 	private ArrayList _publishedEndpoints;

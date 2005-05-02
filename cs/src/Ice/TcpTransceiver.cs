@@ -281,10 +281,15 @@ namespace IceInternal
 	    _bytes = new byte[Protocol.headerSize];
 	}
 	
+#if DEBUG
 	~TcpTransceiver()
 	{
-	    Debug.Assert(_fd == null);
+	    lock(this)
+	    {
+		IceUtil.Assert.FinalizerAssert(_fd == null);
+	    }
 	}
+#endif
 	
 	private Socket _fd;
 	private TraceLevels _traceLevels;

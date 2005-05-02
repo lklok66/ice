@@ -108,19 +108,28 @@ namespace IceInternal
 	    }
 	}
 	
+#if DEBUG
 	~ThreadPool()
 	{
-	    Debug.Assert(_destroyed);
+	    lock(this)
+	    {
+		IceUtil.Assert.FinalizerAssert(_destroyed);
 
-	    try
-	    {
-		Network.closeSocket(_fdIntrWrite);
-		Network.closeSocket(_fdIntrRead);
-	    }
-	    catch(System.Exception)
-	    {
+		/**
+		  * We cannot invoke methods on other objects in a destructor.
+		  *
+		try
+		{
+		    Network.closeSocket(_fdIntrWrite);
+		    Network.closeSocket(_fdIntrRead);
+		}
+		catch(System.Exception)
+		{
+		}
+		  */
 	    }
 	}
+#endif
 	
 	public void destroy()
 	{
@@ -719,8 +728,8 @@ namespace IceInternal
 		throw e;
 	    }
 	    
-	    byte messageType = stream.readByte();
-	    byte compress = stream.readByte();
+	    stream.readByte(); // Message type.
+	    stream.readByte(); // Compression status.
 	    int size = stream.readInt();
 	    if(size < Protocol.headerSize)
 	    {

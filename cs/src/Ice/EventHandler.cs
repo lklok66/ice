@@ -60,12 +60,7 @@ namespace IceInternal
 	    _instance = instance;
 	    _stream = new BasicStream(instance);
 	}
-	
-	~EventHandler()
-	{
-	    _stream.destroy();
-	}
-	
+
 	protected internal Instance _instance;
 	
 	//

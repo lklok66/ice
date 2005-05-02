@@ -23,7 +23,7 @@ namespace IceInternal
 		Debug.Assert(_instance != null);
 		
 		_instance = null;
-		_connections.Clear();
+		_connections = null;
 		
 		System.Threading.Monitor.Pulse(this);
 	    }
@@ -75,11 +75,16 @@ namespace IceInternal
 	    _thread.Start();
 	}
 	
+#if DEBUG
 	~ConnectionMonitor()
 	{
-	    Debug.Assert(_instance == null);
-	    Debug.Assert(_connections.Count == 0);
+	    lock(this)
+	    {
+		IceUtil.Assert.FinalizerAssert(_instance == null);
+		IceUtil.Assert.FinalizerAssert(_connections == null);
+	    }
 	}
+#endif
 	
 	public void Run()
 	{

@@ -311,12 +311,6 @@ namespace IceInternal
 	    adapterFactory.flushBatchRequests();
 	}
 	
-	public virtual BufferManager bufferManager()
-	{
-	    // No mutex lock, immutable.
-	    return _bufferManager;
-	}
-	
 	//
 	// Only for use by Ice.CommunicatorI
 	//
@@ -435,8 +429,6 @@ namespace IceInternal
 		_servantFactoryManager = new ObjectFactoryManager();
 		
 		_objectAdapterFactory = new ObjectAdapterFactory(this, communicator);
-		
-		_bufferManager = new BufferManager(); // Must be created before the ThreadPool
 	    }
 	    catch(Ice.LocalException ex)
 	    {
@@ -445,23 +437,28 @@ namespace IceInternal
 	    }
 	}
 	
+#if DEBUG
 	~Instance()
 	{
-	    Debug.Assert(_destroyed);
-	    Debug.Assert(_referenceFactory == null);
-	    Debug.Assert(_proxyFactory == null);
-	    Debug.Assert(_outgoingConnectionFactory == null);
-	    Debug.Assert(_connectionMonitor == null);
-	    Debug.Assert(_servantFactoryManager == null);
-	    // Debug.Assert(_userExceptionFactoryManager == null);
-	    Debug.Assert(_objectAdapterFactory == null);
-	    Debug.Assert(_clientThreadPool == null);
-	    Debug.Assert(_serverThreadPool == null);
-	    Debug.Assert(_routerManager == null);
-	    Debug.Assert(_locatorManager == null);
-	    Debug.Assert(_endpointFactoryManager == null);
-	    Debug.Assert(_pluginManager == null);
+	    lock(this)
+	    {
+		IceUtil.Assert.FinalizerAssert(_destroyed);
+		IceUtil.Assert.FinalizerAssert(_referenceFactory == null);
+		IceUtil.Assert.FinalizerAssert(_proxyFactory == null);
+		IceUtil.Assert.FinalizerAssert(_outgoingConnectionFactory == null);
+		IceUtil.Assert.FinalizerAssert(_connectionMonitor == null);
+		IceUtil.Assert.FinalizerAssert(_servantFactoryManager == null);
+		// IceUtil.Assert.FinalizerAssert(_userExceptionFactoryManager == null);
+		IceUtil.Assert.FinalizerAssert(_objectAdapterFactory == null);
+		IceUtil.Assert.FinalizerAssert(_clientThreadPool == null);
+		IceUtil.Assert.FinalizerAssert(_serverThreadPool == null);
+		IceUtil.Assert.FinalizerAssert(_routerManager == null);
+		IceUtil.Assert.FinalizerAssert(_locatorManager == null);
+		IceUtil.Assert.FinalizerAssert(_endpointFactoryManager == null);
+		IceUtil.Assert.FinalizerAssert(_pluginManager == null);
+	    }
 	}
+#endif
 	
 	public virtual void finishSetup(ref string[] args)
 	{
@@ -674,7 +671,6 @@ namespace IceInternal
 	private Ice.PluginManager _pluginManager;
 	private Ice.Context _defaultContext;
 	private static Ice.Context _emptyContext = new Ice.Context();
-	private volatile BufferManager _bufferManager; // Immutable, not reset by destroy().
 	private volatile static bool _printProcessIdDone = false;
 
         private static bool _oneOffDone = false;

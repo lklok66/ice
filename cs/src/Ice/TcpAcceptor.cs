@@ -118,10 +118,15 @@ namespace IceInternal
 	    }
 	}
 	
+#if DEBUG
 	~TcpAcceptor()
 	{
-	    Debug.Assert(_fd == null);
+	    lock(this)
+	    {
+		IceUtil.Assert.FinalizerAssert(_fd == null);
+	    }
 	}
+#endif
 	
 	private Instance _instance;
 	private TraceLevels _traceLevels;
