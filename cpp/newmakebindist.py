@@ -998,16 +998,17 @@ def main():
 	#
 	# I need to get third party libraries.
 	#
-	dbLocation = buildEnvironment['DB_HOME']
+	dbLocation = os.environ['DB_HOME']
 	dbFiles = getDBfiles(dbLocation)
 	for f in dbFiles:
-	    shutil.copy(dbLocation + '/' + f.strip(), 'Ice-' + version + '/' + f.strip())
+            if not os.path.exists('Ice-' + version + '/' + f.strip()):
+                shutil.copy(dbLocation + '/' + f.strip(), 'Ice-' + version + '/' + f.strip())
 
     if getPlatform() == 'macosx':
-	copyExpatFiles(buildEnvironment['EXPAT_HOME'], version)	
+	copyExpatFiles(os.environ['EXPAT_HOME'], version)	
 
     if getPlatform() == 'hpux':
-	ssl = buildEnvironment['OPENSSL_HOME']
+	ssl = os.environ['OPENSSL_HOME']
 	os.system('cp ' + ssl + '/bin/* Ice-' + version + '/bin')
 	os.system('cp -R ' + ssl + '/include/* Ice-' + version + '/include')
 	os.system('cp -R ' + ssl + '/lib/* Ice-' + version + '/lib')
