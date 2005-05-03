@@ -41,7 +41,7 @@ namespace IcePHP
 class CodeVisitor : public Slice::ParserVisitor
 {
 public:
-    CodeVisitor(ostream&, Profile::ClassMap&);
+    CodeVisitor(ostream&, Profile::ClassMap& TSRMLS_DC);
 
     virtual void visitClassDecl(const Slice::ClassDeclPtr&);
     virtual bool visitClassDefStart(const Slice::ClassDefPtr&);
@@ -61,6 +61,9 @@ private:
 
     ostream& _out;
     Profile::ClassMap& _classes;
+#ifdef ZTS
+    TSRMLS_D;
+#endif
 };
 
 } // End of namespace IcePHP
@@ -254,7 +257,7 @@ static const char* _coreTypes =
 // Parse the Slice files that define the types and operations available to a PHP script.
 //
 static bool
-parseSlice(const string& argStr, Slice::UnitPtr& unit)
+parseSlice(const string& argStr, Slice::UnitPtr& unit TSRMLS_DC)
 {
     vector<string> args;
     if(!splitString(argStr, args))
@@ -342,7 +345,7 @@ parseSlice(const string& argStr, Slice::UnitPtr& unit)
 }
 
 static bool
-createProfile(const string& name, const string& config, const string& options, const string& slice)
+createProfile(const string& name, const string& config, const string& options, const string& slice TSRMLS_DC)
 {
     map<string, Profile*>::iterator p = _profiles.find(name);
     if(p != _profiles.end())
@@ -382,7 +385,7 @@ createProfile(const string& name, const string& config, const string& options, c
     Slice::UnitPtr unit;
     if(!slice.empty())
     {
-        if(!parseSlice(slice, unit))
+        if(!parseSlice(slice, unit TSRMLS_CC))
         {
             return false;
         }
@@ -429,7 +432,7 @@ createProfile(const string& name, const string& config, const string& options, c
     //
     ostringstream out;
     Profile::ClassMap classes;
-    CodeVisitor visitor(out, classes);
+    CodeVisitor visitor(out, classes TSRMLS_CC);
     unit->visit(&visitor, false);
 
     Profile* profile = new Profile;
@@ -456,7 +459,7 @@ IcePHP::profileInit(TSRMLS_D)
     const char* profiles = INI_STR("ice.profiles");
     const char* slice = INI_STR("ice.slice");
 
-    if(!createProfile(_defaultProfileName, config, options, slice))
+    if(!createProfile(_defaultProfileName, config, options, slice TSRMLS_CC))
     {
         return false;
     }
@@ -517,7 +520,7 @@ IcePHP::profileInit(TSRMLS_D)
 
                 if(!currentName.empty())
                 {
-                    if(!createProfile(currentName, currentConfig, currentOptions, currentSlice))
+                    if(!createProfile(currentName, currentConfig, currentOptions, currentSlice TSRMLS_CC))
                     {
                         return false;
                     }
@@ -580,7 +583,7 @@ IcePHP::profileInit(TSRMLS_D)
             }
         }
 
-        if(!currentName.empty() && !createProfile(currentName, currentConfig, currentOptions, currentSlice))
+        if(!currentName.empty() && !createProfile(currentName, currentConfig, currentOptions, currentSlice TSRMLS_CC))
         {
             return false;
         }
@@ -769,9 +772,12 @@ ZEND_FUNCTION(Ice_dumpProfile)
     PUTS(s.c_str());
 }
 
-IcePHP::CodeVisitor::CodeVisitor(ostream& out, map<string, Slice::ClassDefPtr>& classes) :
+IcePHP::CodeVisitor::CodeVisitor(ostream& out, map<string, Slice::ClassDefPtr>& classes TSRMLS_DC) :
     _out(out), _classes(classes)
 {
+#ifdef ZTS
+    this->TSRMLS_C = TSRMLS_C;
+#endif
 }
 
 void

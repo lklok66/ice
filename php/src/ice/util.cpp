@@ -571,6 +571,7 @@ IcePHP::splitString(const string& str, vector<string>& args)
             end = str.find(ch, beg);
             if(end == string::npos)
             {
+		TSRMLS_FETCH();
                 php_error_docref(NULL TSRMLS_CC, E_ERROR, "unterminated quote in `%s'", str.c_str());
                 return false;
             }
