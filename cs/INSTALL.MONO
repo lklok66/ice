@@ -1,7 +1,7 @@
 Build instructions
 ------------------
 
-This version of Ice for C# requires Mono version 1.0.6.
+This version of Ice for C# requires Mono version 1.1.6.
 
 Unpack the archive. The sources will be contained in the 
 IceCS-@ver@ subdirectory.
@@ -111,9 +111,12 @@ the .exe for your application.
 Known issues
 ------------
 
-On non-Windows platforms, a number of the tests fail, hang, or fail
-intermittently. (These tests pass with Mono on Windows.) We are
-actively working with the Mono developers to get this fixed.
+On multi-CPU machines, you may get warnings such as the following
+when running the operations tests:
+
+** (./test/Ice/operations/server.exe:14863): WARNING **: : unref on 1965 called when ref was already 0
+
+This is caused by a bug in Mono and is harmless.
 
 Please let us know about any bugs, comments, or feedback in the Ice
 forum at http://www.zeroc.com/vbulletin/.

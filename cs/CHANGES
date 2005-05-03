@@ -1,6 +1,9 @@
 Changes since version 2.1.0
 ---------------------------
 
+- Fixed a number of race conditions that could cause a crash
+  during process shutdown on multi-CPU machines.
+
 - Fixed a bug that could cause an assert if connections could not be
   established in thread-per-connection mode.
 

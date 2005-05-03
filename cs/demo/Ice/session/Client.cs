@@ -7,23 +7,12 @@
 //
 // **********************************************************************
 
-using Test;
-
 public class Client
 {
-    internal class TestClient : Ice.Application
-    {
-        public override int run(string[] args)
-        {
-            AllTests.allTests(communicator());
-            return 0;
-        }
-    }
-    
     public static void Main(string[] args)
     {
-        TestClient app = new TestClient();
-        int result = app.main(args);
-        System.Environment.Exit(result);
+        SessionClient app = new SessionClient();
+        int status = app.main(args, "config");
+        System.Environment.Exit(status);
     }
 }
