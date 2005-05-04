@@ -765,6 +765,7 @@ namespace IceInternal
 	    }
 	}
 	
+	/*
 	private void selectNonBlocking()
 	{
 	    while(true)
@@ -793,11 +794,14 @@ namespace IceInternal
 		break;
 	    }
 	}
+	*/
 	
+	/*
 	private void trace(string msg)
 	{
 	    System.Console.Error.WriteLine(_prefix + "(" + System.Threading.Thread.CurrentThread.Name + "): " + msg);
 	}
+	*/
 	
 	private sealed class FdHandlerPair
 	{
