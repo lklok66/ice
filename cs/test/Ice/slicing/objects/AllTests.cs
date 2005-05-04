@@ -1267,6 +1267,7 @@ public class AllTests
                 try
                 {
                     D3 p3 = (D3) b2;
+		    D3 tmp = p3; p3 = tmp; // Suppress compiler warning.
                 }
                 catch(InvalidCastException)
                 {
@@ -1322,6 +1323,7 @@ public class AllTests
             try
             {
                 D3 p3 = (D3) b2;
+		D3 tmp = p3; p3 = tmp; // Suppress compiler warning.
             }
             catch(InvalidCastException)
             {
@@ -1362,6 +1364,7 @@ public class AllTests
                 try
                 {
                     D3 p1 = (D3) b1;
+		    D3 tmp = p1; p1 = tmp; // Suppress compiler warning.
                 }
                 catch(InvalidCastException)
                 {
@@ -1418,6 +1421,7 @@ public class AllTests
             try
             {
                 D3 p1 = (D3) b1;
+		D3 tmp = p1; p1 = tmp; // Suppress compiler warning.
             }
             catch(InvalidCastException)
             {
