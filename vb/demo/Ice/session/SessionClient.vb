@@ -19,8 +19,8 @@ Class SessionClient
 
         Public Sub New(ByVal logger As Ice.Logger, ByVal timeout As Integer, ByVal session As SessionPrx)
             _logger = logger
-            _session = Session
-            _timeout = Timeout
+            _session = session
+            _timeout = timeout
             _terminated = False
         End Sub
 
