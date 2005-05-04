@@ -2775,6 +2775,30 @@ Package=<4>
 
 ###############################################################################
 
+Project: "sessionC"=.\demo\Ice\session\sessionC.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "sessionS"=.\demo\Ice\session\sessionS.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "simpleC"=.\test\icepack\simple\simpleC.dsp - Package Owner=<4>
 
 Package=<5>
