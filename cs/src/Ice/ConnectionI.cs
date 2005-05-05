@@ -1793,6 +1793,10 @@ namespace Ice
 	    {
 		inc.next = _incomingCache;
 		_incomingCache = inc;
+		//
+		// Clear references to Ice objects as soon as possible.
+		//
+		_incomingCache.reclaim();
 	    }
 	}
 

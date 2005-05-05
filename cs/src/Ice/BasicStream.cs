@@ -94,6 +94,7 @@ namespace IceInternal
 		_readEncapsStack.next = _readEncapsCache;
 		_readEncapsCache = _readEncapsStack;
 		_readEncapsStack = null;
+		_readEncapsCache.reset();
 	    }
 
 	    if(_objectList != null)
@@ -356,14 +357,7 @@ namespace IceInternal
 		WriteEncaps curr = _writeEncapsCache;
 		if(curr != null)
 		{
-		    if(curr.toBeMarshaledMap != null)
-		    {
-			curr.writeIndex = 0;
-			curr.toBeMarshaledMap.Clear();
-			curr.marshaledMap.Clear();
-			curr.typeIdIndex = 0;
-			curr.typeIdMap.Clear();
-		    }
+		    curr.reset();
 		    _writeEncapsCache = _writeEncapsCache.next;
 		}
 		else
@@ -387,12 +381,11 @@ namespace IceInternal
 	    int sz = _buf.position() - start; // Size includes size and version.
 	    _buf.putInt(start, sz);
 	    
-	    {
-		WriteEncaps curr = _writeEncapsStack;
-		_writeEncapsStack = curr.next;
-		curr.next = _writeEncapsCache;
-		_writeEncapsCache = curr;
-	    }
+	    WriteEncaps curr = _writeEncapsStack;
+	    _writeEncapsStack = curr.next;
+	    curr.next = _writeEncapsCache;
+	    _writeEncapsCache = curr;
+	    _writeEncapsCache.reset();
 	}
 	
 	public virtual void startReadEncaps()
@@ -401,13 +394,7 @@ namespace IceInternal
 		ReadEncaps curr = _readEncapsCache;
 		if(curr != null)
 		{
-		    if(curr.patchMap != null)
-		    {
-			curr.patchMap.Clear();
-			curr.unmarshaledMap.Clear();
-			curr.typeIdIndex = 0;
-			curr.typeIdMap.Clear();
-		    }
+		    curr.reset();
 		    _readEncapsCache = _readEncapsCache.next;
 		}
 		else
@@ -473,6 +460,7 @@ namespace IceInternal
 	    _readEncapsStack = curr.next;
 	    curr.next = _readEncapsCache;
 	    _readEncapsCache = curr;
+	    _readEncapsCache.reset();
 	}
 	
 	public virtual void checkReadEncaps()
@@ -1980,6 +1968,17 @@ namespace IceInternal
 	    internal int typeIdIndex;
 	    internal Hashtable typeIdMap;
 	    internal ReadEncaps next;
+
+	    internal void reset()
+	    {
+		if(patchMap != null)
+		{
+		    patchMap.Clear();
+		    unmarshaledMap.Clear();
+		    typeIdIndex = 0;
+		    typeIdMap.Clear();
+		}
+	    }
 	}
 	
 	private sealed class WriteEncaps
@@ -1992,6 +1991,18 @@ namespace IceInternal
 	    internal int typeIdIndex;
 	    internal Hashtable typeIdMap;
 	    internal WriteEncaps next;
+
+	    internal void reset()
+	    {
+		if(toBeMarshaledMap != null)
+		{
+		    writeIndex = 0;
+		    toBeMarshaledMap.Clear();
+		    marshaledMap.Clear();
+		    typeIdIndex = 0;
+		    typeIdMap.Clear();
+		}
+	    }
 	}
 	
 	private ReadEncaps _readEncapsStack;
