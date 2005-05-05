@@ -100,7 +100,7 @@ Class SessionClient
                 If line Is Nothing Then
                     Exit While
                 End If
-                If line.Length > 0 And Char.IsDigit(line.Chars(0)) Then
+                If line.Length > 0 AndAlso Char.IsDigit(line.Chars(0)) Then
                     Dim index As Integer = Int32.Parse(line)
                     If index < hellos.Count Then
                         Dim hello As HelloPrx = hellos.Item(index)
