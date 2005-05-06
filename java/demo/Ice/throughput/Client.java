@@ -78,6 +78,9 @@ public class Client
 	char currentType = '1';
 	int seqSize = ByteSeqSize.value;
 
+	// Initial ping to setup the connection.
+	throughput.ice_ping();
+	
         String line = null;
         do
         {
@@ -91,9 +94,6 @@ public class Client
                     break;
                 }
 
-		// Initial ping to setup the connection.
-		throughput.ice_ping();
-		
 		long tmsec = System.currentTimeMillis();
 		final int repetitions = 100;
 
