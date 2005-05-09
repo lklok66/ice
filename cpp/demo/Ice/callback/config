@@ -1,6 +1,6 @@
-Callback.Client.CallbackServer=callback:tcp -p 10000:udp -p 10000:ssl -p 10001
+Callback.Client.CallbackServer=callback:tcp -h 192.168.58.131 -p 10000:udp -h 192.168.58.131 -p 10000:ssl -h 192.168.58.131 -p 10001
 Callback.Client.Endpoints=tcp:udp:ssl
-Callback.Server.Endpoints=tcp -p 10000:udp -p 10000:ssl -p 10001
+Callback.Server.Endpoints=tcp -h 192.168.58.131 -p 10000:udp -h 192.168.58.131 -p 10000:ssl -h 192.168.58.131 -p 10001
 
 #Ice.Trace.Network=1
 #Ice.Trace.Protocol=1
