@@ -533,6 +533,12 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name mfcpatchC
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name sessionC
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name sessionS
+    End Project Dependency
 }}}
 
 ###############################################################################
