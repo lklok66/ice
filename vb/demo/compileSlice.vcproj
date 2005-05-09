@@ -28,6 +28,9 @@
 			ConfigurationType="0">
 			<Tool
 				Name="VCNMakeTool"
+				BuildCommandLine="$(SolutionDir)\..\bin\generatevb.exe $(SolutionDir) build"
+				ReBuildCommandLine="$(SolutionDir)\..\bin\generatevb.exe $(SolutionDir) rebuild"
+				CleanCommandLine="$(SolutionDir)\..\bin\generatevb.exe $(SolutionDir) clean"
 				Output="generatevb.exe"/>
 		</Configuration>
 	</Configurations>
