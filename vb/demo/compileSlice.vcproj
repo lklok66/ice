@@ -30,8 +30,7 @@
 				Name="VCNMakeTool"
 				BuildCommandLine="$(SolutionDir)\..\bin\generatevb.exe $(SolutionDir) build"
 				ReBuildCommandLine="$(SolutionDir)\..\bin\generatevb.exe $(SolutionDir) rebuild"
-				CleanCommandLine="$(SolutionDir)\..\bin\generatevb.exe $(SolutionDir) clean"
-				Output="generatevb.exe"/>
+				CleanCommandLine="$(SolutionDir)\..\bin\generatevb.exe $(SolutionDir) clean"/>
 		</Configuration>
 	</Configurations>
 	<References>
