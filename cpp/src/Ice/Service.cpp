@@ -119,7 +119,23 @@ Ice::Service::shutdown()
 {
     if(_communicator)
     {
-        _communicator->shutdown();
+	try
+	{
+	    _communicator->shutdown();
+	}
+	catch(const CommunicatorDestroyedException&)
+	{
+	    //
+	    // Expected if the service communicator is being
+	    // destroyed.
+	    //
+	}
+	catch(const Ice::Exception& ex)
+	{
+	    ostringstream ostr;
+	    ostr << "exception during interrupt:" << endl << ex;
+	    warning(ostr.str());
+	}
     }
     return true;
 }
