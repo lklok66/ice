@@ -116,7 +116,7 @@ def buildIceDists(stageDir, sourcesDir, sourcesVersion, installVersion):
 	os.path.join(stageDir, "openssl/dev/include")
     ]
     if installVersion == "vc60":
-	include.append(os.path.join(stageDir, "stlport/dev/include/stlport"))
+	include.append(os.path.join(stageDir, "stlport", "dev", "include", "stlport"))
     prependEnvPathList('INCLUDE', include)
 
     iceHome = os.environ['ICE_HOME']
@@ -145,7 +145,7 @@ def buildIceDists(stageDir, sourcesDir, sourcesVersion, installVersion):
 	#
 	os.chdir(os.path.join(sourcesDir, "IceCS-" + sourcesVersion))
 	print "Building in " + os.getcwd() + "..."
-	os.system("devenv all.sln /useenv /build Debug")
+	os.system("devenv all.sln /useenv /rebuild Debug")
 
 	#
 	# Ice for PHP
@@ -186,7 +186,7 @@ def buildIceDists(stageDir, sourcesDir, sourcesVersion, installVersion):
 	#
 	os.chdir(os.path.join(sourcesDir, "IceVB-" + sourcesVersion))
 	print "Building in " + os.getcwd() + "..."
-	os.system("devenv all.sln /useenv /build Debug")
+	os.system("devenv all.sln /useenv /rebuild Debug")
     elif installVersion == "vc60":
 	#
 	# Ice for C++ 
@@ -251,6 +251,9 @@ def main():
     startDir = os.getcwd()
     print "Start Directory: " + startDir
 
+    #
+    # XXX better switched to os.path() API?
+    #
     installDir = startDir[:startDir.rfind("\\")]
     print "Install Directory: " + installDir
 
@@ -369,6 +372,7 @@ def main():
     # Stage the third party packages.
     #
     if installer:
+	print 'packages-stage-%s' % installVersion
 	os.system("ant" + antOptions + " packages-stage-" + installVersion)
 
     #

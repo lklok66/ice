@@ -188,11 +188,7 @@
 	    </fileset>
 	</copy>
 
-	<mkdir dir="${stage.dir}/ice-cpp/dev/bin/debug"/>
-	<copy todir="${stage.dir}/ice-cpp/dev/bin/debug" flatten="true">
-	    <fileset dir="${ice.dir}/src/IceBox/Debug">
-		<include name="icebox.exe"/>
-	    </fileset>
+	<copy file="${ice.dir}/src/IceBox/Debug/icebox.exe" tofile="${stage.dir}/ice-cpp/dev/bin/iceboxd.exe">
 	</copy>
 
 	<!-- Libraries -->
@@ -303,8 +299,6 @@
 	<copy todir="${stage.dir}/ice-csharp/dev/bin" flatten="true">
 	    <fileset dir="${icecs.dir}/bin">
 		<include name="generatecs.exe"/>
-		<include name="*.pdb"/>
-		<exclude name="generatecs.pdb"/>
 	    </fileset>
 	    <fileset dir="${ice.dir}/src/slice2cs/Release">
 		<include name="slice2cs.exe"/>
@@ -510,10 +504,13 @@
 	<copy todir="${stage.dir}/berkeley/dev/bin">
 	    <fileset dir="${env.BERKELEY_HOME}/build_win32/Debug">
 		<include name="*.dll"/>
-		<include name="*.pdb"/>
+		<exclude name="*.pdb"/>
 		<exclude name="*java*"/>
 	    </fileset>
-	</copy>
+	    <fileset dir="${env.BERKELEY_HOME}/build_win32/Debug">
+		<include name="db_dll.pdb"/>
+	    </fileset>
+    	</copy>
 
 	<mkdir dir="${stage.dir}/berkeley/dev/lib"/>
 	<copy todir="${stage.dir}/berkeley/dev/lib">
