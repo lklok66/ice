@@ -133,7 +133,7 @@ Ice::Service::shutdown()
 	catch(const Ice::Exception& ex)
 	{
 	    ostringstream ostr;
-	    ostr << "exception during interrupt:" << endl << ex;
+	    ostr << "exception during shutdown:" << endl << ex;
 	    warning(ostr.str());
 	}
     }
