@@ -71,6 +71,7 @@ class CollocatedRegistry : public Registry
 public:
 
     CollocatedRegistry(const Ice::CommunicatorPtr&, const ActivatorPtr&);
+
     virtual void shutdown();
 
 private:
@@ -384,14 +385,19 @@ IcePack::NodeService::start(int argc, char* argv[])
     Identity id = stringToIdentity(IceUtil::generateUUID());
     adapter->add(node, id);
     NodePrx nodeProxy = NodePrx::uncheckedCast(adapter->createDirectProxy(id));
-
+ 
     //
     // Register this node with the node registry.
     //
     try
     {
-	ObjectPrx nodeRegistry = communicator()->stringToProxy("IcePack/NodeRegistry@IcePack.Registry.Internal");
-	NodeRegistryPrx::uncheckedCast(nodeRegistry)->add(name, nodeProxy);
+	ObjectPrx obj = communicator()->stringToProxy("IcePack/NodeRegistry@IcePack.Registry.Internal");
+	NodeRegistryPrx nodeRegistry = NodeRegistryPrx::uncheckedCast(obj);
+	if(properties->getPropertyAsInt("IcePack.Node.CollocateRegistry") > 0)
+	{
+	    nodeRegistry->remove(name);
+	}
+	nodeRegistry->add(name, nodeProxy);
     }
     catch(const NodeActiveException&)
     {

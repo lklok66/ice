@@ -19,7 +19,7 @@ public:
 
     Registry(const Ice::CommunicatorPtr&);
     ~Registry();
-
+    
     bool start(bool);
 
     virtual void shutdown();
