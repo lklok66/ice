@@ -29,7 +29,7 @@ oldServerOptions = TestUtil.serverOptions
 oldClientServerOptions = TestUtil.clientServerOptions
 
 TestUtil.clientOptions += " --TestSSL.Client.CertPath=" + os.path.join(toplevel, "test", "IceSSL", "certs")
-TestUtil.serverOptions += " --TestSSL.Server.CertPath=" + os.path.join(toplevel, "test", "IceSSL", "certs")
+TestUtil.serverOptions += " --Ice.ThreadPool.Server.Size=2 --TestSSL.Server.CertPath=" + os.path.join(toplevel, "test", "IceSSL", "certs")
 TestUtil.clientServerOptions += " --TestSSL.Client.CertPath=" + os.path.join(toplevel, "test", "IceSSL", "certs") + \
                                 " --TestSSL.Server.CertPath=" + os.path.join(toplevel, "test", "IceSSL", "certs")
 
