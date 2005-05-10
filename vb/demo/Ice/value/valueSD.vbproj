@@ -28,7 +28,7 @@
                     BaseAddress = "285212672"
                     ConfigurationOverrideFile = ""
                     DefineConstants = ""
-                    DefineDebug = "true"
+                    DefineDebug = "false"
                     DefineTrace = "true"
                     DebugSymbols = "true"
                     IncrementalBuild = "true"
