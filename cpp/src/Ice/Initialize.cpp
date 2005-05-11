@@ -151,7 +151,7 @@ CommunicatorPtr
 Ice::initializeWithProperties(int& argc, char* argv[], const PropertiesPtr& properties, Int version)
 {
 #ifndef ICE_IGNORE_VERSION
-    if(version != ICE_INT_VERSION)
+    if(ICE_INT_VERSION / 100 != version / 100)
     {
 	throw VersionMismatchException(__FILE__, __LINE__);
     }
