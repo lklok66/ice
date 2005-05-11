@@ -395,7 +395,14 @@ IcePack::NodeService::start(int argc, char* argv[])
 	NodeRegistryPrx nodeRegistry = NodeRegistryPrx::uncheckedCast(obj);
 	if(properties->getPropertyAsInt("IcePack.Node.CollocateRegistry") > 0)
 	{
-	    nodeRegistry->remove(name);
+	    try
+	    {
+		nodeRegistry->remove(name);
+	    }
+	    catch(const IcePack::NodeNotExistException&)
+	    {
+		// Ignore.
+	    }
 	}
 	nodeRegistry->add(name, nodeProxy);
     }
