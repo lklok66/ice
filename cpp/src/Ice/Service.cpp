@@ -133,7 +133,7 @@ Ice::Service::shutdown()
 	catch(const Ice::Exception& ex)
 	{
 	    ostringstream ostr;
-	    ostr << "exception during shutdown:" << endl << ex;
+	    ostr << "exception during shutdown:\n" << ex;
 	    warning(ostr.str());
 	}
     }
@@ -476,25 +476,25 @@ Ice::Service::run(int& argc, char* argv[])
     catch(const IceUtil::Exception& ex)
     {
         ostringstream ostr;
-        ostr << "service caught unhandled Ice exception:" << endl << ex;
+        ostr << "service caught unhandled Ice exception:\n" << ex;
         error(ostr.str());
     }
     catch(const std::exception& ex)
     {
         ostringstream ostr;
-        ostr << "service caught unhandled std::exception:" << endl << ex.what();
+        ostr << "service caught unhandled std::exception:\n" << ex.what();
         error(ostr.str());
     }
     catch(const std::string& msg)
     {
         ostringstream ostr;
-        ostr << "service caught unhandled exception:" << endl << msg;
+        ostr << "service caught unhandled exception:\n" << msg;
         error(ostr.str());
     }
     catch(const char* msg)
     {
         ostringstream ostr;
-        ostr << "service caught unhandled exception:" << endl << msg;
+        ostr << "service caught unhandled exception:\n" << msg;
         error(ostr.str());
     }
     catch(...)
@@ -1202,7 +1202,7 @@ Ice::Service::serviceMain(int argc, char* argv[])
     catch(const IceUtil::Exception& ex)
     {
         ostringstream ostr;
-        ostr << "service caught unhandled Ice exception:" << endl << ex;
+        ostr << "service caught unhandled Ice exception:\n" << ex;
         error(ostr.str());
     }
     catch(...)
@@ -1347,7 +1347,7 @@ Ice::Service::runDaemon(int argc, char* argv[])
                     continue;
                 }
 
-                cerr << argv[0] << ": " << strerror(errno) << endl << flush;
+                cerr << argv[0] << ": " << strerror(errno) << endl;
                 _exit(EXIT_FAILURE);
             }
             break;
@@ -1370,8 +1370,8 @@ Ice::Service::runDaemon(int argc, char* argv[])
                         continue;
                     }
 
-                    cerr << argv[0] << ": I/O error while reading error message from child:" << endl
-                         << strerror(errno) << endl << flush;
+                    cerr << argv[0] << ": I/O error while reading error message from child:\n"
+                         << strerror(errno) << endl;
                     _exit(EXIT_FAILURE);
                 }
                 pos += n;
@@ -1382,7 +1382,7 @@ Ice::Service::runDaemon(int argc, char* argv[])
 	    {
 		cerr << ':' << endl << msg;
 	    }
-	    cerr << endl << flush;
+	    cerr << endl;
             _exit(EXIT_FAILURE);
         }
 
@@ -1579,7 +1579,7 @@ Ice::Service::runDaemon(int argc, char* argv[])
     catch(const IceUtil::Exception& ex)
     {
         ostringstream ostr;
-        ostr << "service caught unhandled Ice exception:" << endl << ex;
+        ostr << "service caught unhandled Ice exception:\n" << ex;
         errMsg = ostr.str();
         error(errMsg);
     }
