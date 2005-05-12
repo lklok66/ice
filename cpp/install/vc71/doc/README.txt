@@ -266,11 +266,15 @@ for Apache1 and Apache2. The Ice extension can be used with both
 Apache versions.
 
 The PHP documentation describes how to configure the Apache servers
-for PHP5, but a summary of the steps are provided below. These
+for PHP5, but a summary of the steps is provided below. These
 instructions assume that you have extracted the PHP5 binary
 distribution into the directory C:\PHP5 and that Ice is installed in
 C:\Ice. If you have chosen different directories, you will need to
-make the appropriate changes in the instructions.
+make the appropriate changes as you follow the instructions.
+
+Before proceeding, verify that the Apache server is not currently
+running. If you installed the server as a Windows service, you can
+use the Services control panel to stop the server.
 
 Apache1 only:
 
@@ -299,19 +303,6 @@ Apache1 only:
    > cd \Program Files\Apache Group\Apache
    > copy C:\PHP5\php.ini-recommended php.ini
 
-3) You will want to ensure that you are using the expected php.ini
-   file. Create a file in the web service document tree called
-   phpinfo.php. The file should have the following contents:
-
-   <?phpInfo();?>
- 
-   Next load this file in a web browser with, for example, the
-   following URL: http://127.0.0.1/phpinfo.php.
-
-   Scan the output. You should see a line as follows:
-
-   Configuration File (php.ini) Path  C:\Program Files\Apache Group\Apache\php.ini
-
 Apache2 only:
 
 1) Open the Apache configuration file. In the default installation,
@@ -332,35 +323,39 @@ Apache2 only:
    > cd \Program Files\Apache Group\Apache2
    > copy C:\PHP5\php.ini-recommended php.ini
 
-   Or you can use the following directive in httpd.conf to specify the
-   location of the file.
+   To place the file in a different directory, add the PHPIniDir
+   directive to httpd.conf. For example, the directive below
+   indicates that php.ini is located in C:\PHP5:
 
-   PHPIniDir "C:/php5"
-
-   After you change the Apache configuration file you must restart
-   Apache for the configuration changes to take effect.
-
-3) You will want to ensure that you are using the expected php.ini
-   file. Create a file in the web service document tree called
-   phpinfo.php. The file should have the following contents:
-
-   <?phpInfo();?>
- 
-   Next load this file in a web browser with, for example, the
-   following URL: http://127.0.0.1/phpinfo.php.
-
-   Scan the output. You should see a line as follows:
-
-   Configuration File (php.ini) Path  C:\Program Files\Apache Group\Apache2\php.ini
+   PHPIniDir "C:/PHP5"
 
 Apache1 and Apache2:
 
-3) Place the Ice extension and its dependencies in a directory that
-   is in your System PATH. For example, you could copy these files to
-   the Apache directory, or you could add the \Ice\bin directory to
-   your System PATH using the System control panel.
+3) To ensure that you are using the correct php.ini file, create a
+   file in Apache's document directory (htdocs) called phpinfo.php
+   that contains the following line:
 
-   The required files from \Ice\bin are listed below:
+   <?phpInfo();?>
+ 
+   Temporarily start the Apache server, then open the file in your
+   browser using a URL such as
+
+   http://127.0.0.1/phpinfo.php
+
+   If you have configured PHP correctly, you should see a very long
+   page of PHP configuration information. Review the entry for
+   "Configuration File (php.ini) Path" and verify that its value is
+   correct.
+
+   Don't forget to stop the Apache server.
+
+4) Place the Ice extension and its dependencies in a directory that
+   is in your System PATH. For example, you could copy these files to
+   the Apache directory, or you could add the C:\Ice\bin directory to
+   your System PATH using the Environment Variables dialog in the
+   System control panel.
+
+   The required files from C:\Ice\bin are listed below:
 
    php_ice.dll
    ice21.dll
@@ -373,21 +368,26 @@ Apache1 and Apache2:
    NOTE: If you modify the System PATH, you will need to restart your
    computer for the changes to take effect.
 
-4) Open php.ini and add the following lines to the end of the file:
+5) Open php.ini and add the following lines to the end of the file:
 
    extension = php_ice.dll
 
    If the extension file php_ice.dll is not in C:\PHP5 you will need
-   to specify the location using extension_dir. For example, if the
-   extension is left in C:\Ice\bin then the following is required:
+   to specify the location using the extension_dir directive. For
+   example, if you want to leave the extension in C:\Ice\bin then add
+   the following line to php.ini:
 
    extension_dir = C:\Ice\bin
 
-5) Start Apache and verify that the PHP module has been loaded
-   successfully. If Apache does not start, check the Windows Event Viewer
-   as well as Apache's log files for more information.
+   Note that the extension_dir directive affects the loading of all
+   PHP extensions.
 
-6) In order to load Slice definitions for a PHP script, you must
+6) Start Apache and verify that the PHP module has been loaded
+   successfully. If Apache does not start, check the Windows Event Viewer
+   as well as Apache's log files for more information. The most likely
+   reason for Apache to fail at startup is missing DLLs (see step 4).
+
+7) In order to load Slice definitions for a PHP script, you must
    modify php.ini and then restart Apache. For example, the "hello" demo
    in C:\Ice\demophp\Ice\hello requires the following addition to
    php.ini:
