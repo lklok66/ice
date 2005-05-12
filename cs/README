@@ -17,4 +17,5 @@ Supported environments:
 
 - Mono
 
-See INSTALL.VISUAL_C# or INSTALL.MONO for installation information.
+See INSTALL.VISUAL_C# or INSTALL.MONO for installation and binary
+compatibility information.
