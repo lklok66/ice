@@ -18,22 +18,26 @@
 using namespace std;
 using namespace IcePHP;
 
+//
+// Keyword list. *Must* be kept in alphabetical order.
+//
+// COMPILERFIX: Mac OS X: defining this method in the lookupKwd()
+// method is causing a SEGFAULT on exit.
+// 
+static const string keywordList[] = 
+{       
+    "and", "array", "as", "break", "case", "cfunction", "class", "const", "continue", "declare", "default",
+    "die", "do", "echo", "else", "elseif", "empty", "enddeclare", "endfor", "endforeach", "endif", "endswitch",
+    "endwhile", "eval", "exit", "extends", "for", "foreach", "function", "global", "if", "include",
+    "include_once", "isset", "list", "new", "old_function", "or", "print", "require", "require_once", "return",
+    "static", "switch", "unset", "use", "var", "while", "xor"
+};
+
 static string
 lookupKwd(const string& name)
 {
     string lower = lowerCase(name); // PHP is case insensitive.
 
-    //
-    // Keyword list. *Must* be kept in alphabetical order.
-    //
-    static const string keywordList[] = 
-    {       
-        "and", "array", "as", "break", "case", "cfunction", "class", "const", "continue", "declare", "default",
-        "die", "do", "echo", "else", "elseif", "empty", "enddeclare", "endfor", "endforeach", "endif", "endswitch",
-        "endwhile", "eval", "exit", "extends", "for", "foreach", "function", "global", "if", "include",
-        "include_once", "isset", "list", "new", "old_function", "or", "print", "require", "require_once", "return",
-        "static", "switch", "unset", "use", "var", "while", "xor"
-    };
     bool found =  binary_search(&keywordList[0],
                                 &keywordList[sizeof(keywordList) / sizeof(*keywordList)],
                                 lower);
