@@ -188,7 +188,7 @@ Running the PHP demos
 
 Two PHP demos are provided in the demophp directory.
 
-To run the PHP demos, you need PHP 5.0.3. It can be downloaded from:
+To run the PHP demos, you need PHP 5.0.4. It can be downloaded from:
 
 http://www.php.net/downloads.php
 
@@ -201,7 +201,7 @@ file (php.ini) to load the extension using the following directive:
 extension = php_ice.dll
 
 If you want to use a different extension directory, you must add
-another directive as shown below:
+another directive to php.ini as shown below:
 
 extension_dir = C:\MyApp\PHPExtensions
 extension = php_ice.dll
@@ -216,3 +216,118 @@ provided in each of the example directories.
 Note that you must modify the php.ini files in each demo directory to
 match your PHP installation and ensure that the Ice extension is
 loaded properly.
+
+
+Using IcePHP with Apache
+------------------------
+
+The binary distribution of PHP5 for Windows includes loadable modules
+for Apache1 and Apache2. The Ice extension can be used with both
+Apache versions.
+
+The PHP documentation describes how to configure the Apache servers
+for PHP5, but a summary of the steps are provided below. These
+instructions assume that you have extracted the PHP5 binary
+distribution into the directory C:\PHP and that Ice is installed in
+C:\Ice. If you have chosen different directories, you will need to
+make the appropriate changes in the instructions.
+
+
+Apache1 only:
+
+1) Open the Apache configuration file. In the default installation,
+   the configuration file can be found here:
+
+   C:\Program Files\Apache Group\Apache\conf\httpd.conf
+
+ a) Add the following line at the end of the LoadModule section:
+
+    LoadModule php5_module "C:/PHP/php5apache.dll"
+
+ b) Add the following line at the end of the AddModule section:
+
+    AddModule mod_php5.c
+
+ c) Add this line inside the <IfModule mod_mime.c> conditional brace:
+
+    AddType application/x-httpd-php .php
+
+2) Create a php.ini file. You can create an empty one, or copy a
+   sample file that is included in the PHP5 distribution. In the
+   default configuration the php.ini file is expected to reside in
+   the Apache directory. For example:
+
+   > cd \Program Files\Apache Group\Apache
+   > copy C:\PHP\php.ini-recommended php.ini
+
+
+Apache2 only:
+
+1) Open the Apache configuration file. In the default installation,
+   the configuration file can be found here:
+
+   C:\Program Files\Apache Group\Apache2\conf\httpd.conf
+
+ a) Add the following lines:
+
+    LoadModule php5_module "C:/PHP/php5apache2.dll"
+    AddType application/x-httpd-php .php
+
+2) Create a php.ini file. You can create an empty one, or copy a
+   sample file that is provided in the PHP5 distribution. In the
+   default configuration the php.ini file is expected to reside in
+   the Apache directory. For example:
+
+   > cd \Program Files\Apache Group\Apache2
+   > copy C:\PHP\php.ini-recommended php.ini
+
+
+Apache1 and Apache2:
+
+3) Place the Ice extension and its dependencies in a directory that
+   is in your System PATH. For example, you could copy these files to
+   the Apache directory, or you could add the \Ice\bin directory to
+   your System PATH using the System control panel.
+
+   The required files from \Ice\bin are listed below:
+
+   php_ice.dll
+   ice21.dll
+   iceutil21.dll
+   slice21.dll
+   icecpp.exe
+   msvcp71.dll
+   msvcr71.dll
+
+   NOTE: If you modify the System PATH, you will need to restart your
+   computer for the changes to take effect.
+
+4) Open php.ini and add the following lines to the end of the file:
+
+   extension_dir = C:\Ice\bin
+   extension = php_ice.dll
+
+   If you placed the Ice extension in a different directory in step
+   3, modify the value of extension_dir accordingly.
+
+   Note that the extension_dir directive can be specified multiple
+   times, but subsequent definitions override previous ones and only
+   the last definition is actually used to load extensions. Also be
+   aware that the php.ini-recommended file contains a definition for
+   extension_dir, so if you used that file as a starting point for
+   your php.ini file, you most likely need to disable or remove the
+   existing definition of extension_dir.
+
+5) Start Apache and verify that the PHP module has been loaded
+   successfully. If Apache does not start, check the Windows Event
+   Viewer as well as Apache's log files for more information.
+
+6) In order to load Slice definitions for a PHP script, you must
+   modify php.ini and then restart Apache. For example, the "hello"
+   demo in \Ice\demophp\Ice\hello requires the following addition
+   to php.ini:
+
+   ice.slice = C:\Ice\demophp\Ice\hello\Hello.ice
+
+   Be aware that specifying a relative path for a Slice file means
+   the path is relative to the Apache directory.
