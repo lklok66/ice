@@ -112,21 +112,21 @@
 		<include name="icepatch221.dll"/>
 		<include name="icessl21.dll"/>
 		<include name="icestorm21.dll"/>
-		<include name="icestormService21.dll"/>
+		<include name="icestormservice21.dll"/>
 		<include name="iceutil21.dll"/>
 		<include name="icexml21.dll"/>
 		<include name="slice21.dll"/>
 	    </fileset>
 	    <fileset dir="${ice.dir}/src">
 		<include name="FreezeScript/Release/dumpdb.exe"/>
-		<include name="FreezeScript/Release/TransformDB.exe"/>
+		<include name="FreezeScript/Release/transformdb.exe"/>
 		<include name="Glacier2/Release/glacier2router.exe"/>
 		<include name="IceBox/Release/icebox.exe"/>
 		<include name="IceBox/Release/iceboxadmin.exe"/>
 		<include name="icecpp/Release/icecpp.exe"/>
 		<include name="IcePack/Release/icepackadmin.exe"/>
 		<include name="IcePack/Release/icepacknode.exe"/>
-		<include name="IcePack/Release/icepackRegistry.exe"/>
+		<include name="IcePack/Release/icepackregistry.exe"/>
 		<include name="IcePatch2/Release/icepatch2calc.exe"/>
 		<include name="IcePatch2/Release/icepatch2client.exe"/>
 		<include name="IcePatch2/Release/icepatch2server.exe"/>
@@ -169,7 +169,7 @@
 		<include name="icepatch221d.*"/>
 		<include name="icessl21d.*"/>
 		<include name="icestorm21d.*"/>
-		<include name="icestormService21d.*"/>
+		<include name="icestormservice21d.*"/>
 		<include name="iceutil21d.*"/>
 		<include name="icexml21d.*"/>
 		<include name="slice21d.*"/>
@@ -244,6 +244,7 @@
 		<exclude name="**/*.exe"/>
 		<exclude name="**/*.ilk"/>
 		<exclude name="**/*.pdb"/>
+		<exclude name="**/*.plg"/>
 		<exclude name="**/.depend"/>
 		<exclude name="**/.dummy"/>
 		<exclude name="**/Makefile"/>
@@ -267,6 +268,7 @@
 		<exclude name="**/*.exe"/>
 		<exclude name="**/*.ilk"/>
 		<exclude name="**/*.pdb"/>
+		<exclude name="**/*.plg"/>
 		<exclude name="**/.depend"/>
 		<exclude name="**/.dummy"/>
 		<exclude name="**/Makefile"/>
@@ -338,6 +340,14 @@
 	<mkdir dir="${stage.dir}/ice-java/runtime/lib"/>
 	<copy file="${icej.dir}/lib/Ice.jar" todir="${stage.dir}/ice-java/runtime/lib"/>
 
+	<mkdir dir="${stage.dir}/ice-java/runtime/certs"/>
+	<copy todir="${stage.dir}/ice-java/runtime/certs">
+	    <fileset dir="${icej.dir}/certs">
+	        <!-- Only need these because the core ice runtime will install the rest -->
+		<include name="*.jks"/>
+	    </fileset>
+	</copy>
+
     </target>
 
     <!-- Ice for Java -->
@@ -366,14 +376,6 @@
 	<mkdir dir="${stage.dir}/ice-java/dev/config"/>
 	<copy file="${icej.dir}/config/build.properties" todir="${stage.dir}/ice-java/dev/config"/>
 	<copy file="${icej.dir}/config/common.xml" todir="${stage.dir}/ice-java/dev/config"/>
-
-	<mkdir dir="${stage.dir}/ice-java/dev/certs"/>
-	<copy todir="${stage.dir}/ice-java/dev/certs">
-	    <fileset dir="${icej.dir}/certs">
-	        <!-- Only need these because the core ice runtime will install the rest -->
-		<include name="*.jks"/>
-	    </fileset>
-	</copy>
 
     </target>
 
