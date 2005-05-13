@@ -17,7 +17,7 @@
                 DelaySign = "false"
                 OutputType = "Exe"
                 PreBuildEvent = "$(SolutionDir)\bin\generatecs.exe $(SolutionDir) $(ProjectDir) $(ProjectName)"
-                PostBuildEvent = ""
+                PostBuildEvent = '"%VS71COMNTOOLS%"vsvars32.bat && al.exe /link:$(ProjectDir)\policy.2.1.icecs /out:&#xd;&#xa;policy.2.1.icecs.dll /keyfile:$(ProjectDir)\IcecsKey.snk'
                 RootNamespace = ""
                 RunPostBuildEvent = "OnBuildSuccess"
                 StartupObject = ""

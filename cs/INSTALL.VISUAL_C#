@@ -106,6 +106,102 @@ directory:
     copy <path_to_icecs.pdb> .
 
 
+Binary compatibility
+--------------------
+
+Patch releases of Ice are binary compatible. For example, version 2.1.1
+is compatible with 2.1.0, so you can run applications compiled with
+2.1.0 with the 2.1.1 runtime without having to recompile.
+
+If you want to run already deployed 2.1.0 applications with the 2.1.1
+runtime on a machine, follow the steps under (1) or (2) below:
+
+1) On a machine with the Ice source tree and Visual Studio installed:
+
+    - Start a command shell.
+
+    - Run the following commands:
+
+      gacutil /u policy.2.1.icecs
+      gacutil /u policy.2.1.glacier2cs
+      gacutil /u policy.2.1.icepackcs
+      gacutil /u policy.2.1.icepatch2cs
+      gacutil /u policy.2.1.icestormcs
+
+      These command uninstall the 2.1.0 Ice runtime.
+
+      gacutil .exe is installed in C:\WINDOWS\Microsoft.NET\Framework\v1.1.4322
+      (assuming that you are running build 4322 of the .NET framework).
+
+    - Build the solution.
+
+    - In a command shell, change directory to the bin directory of the icecs source tree.
+
+    - Run the following commands:
+
+      gacutil.exe /i policy.2.1.icecs.dll
+      gacutil.exe /i policy.2.1.icepackcs.dll
+      gacutil.exe /i policy.2.1.icepatch2.dll
+      gacutil.exe /i policy.2.1.icestormcs.dll
+      gacutil.exe /i policy.2.1.glacier2cs.dll
+
+      These commands cause applications requesting the 2.1.0 runtime to
+      load the 2.1.1 runtime instead.
+
+    - From the bin directory, run the commands:
+
+      gacutil /i icecs.dll
+      gacutil /i glacier2cs.dll
+      gacutil /i icepackcs.dll
+      gacutil /i icepatch2cs.dll
+      gacutil /i icestormcs.dll
+
+      These commands install the 2.1.1 dlls into the GAC.
+
+2) On a machine without the Ice source tree and without Visual Studio:
+
+    - Copy all the files beginning with "policy", and all files ending in ".dll"
+      from the bin directory of the machine on which you compiled Ice for C#
+      into a single directory on the target machine.
+
+    - Start a command shell.
+
+    - Run the following commands:
+
+      gacutil /u policy.2.1.icecs
+      gacutil /u policy.2.1.glacier2cs
+      gacutil /u policy.2.1.icepackcs
+      gacutil /u policy.2.1.icepatch2cs
+      gacutil /u policy.2.1.icestormcs
+
+      These command uninstall the 2.1.0 Ice runtime.
+
+      gacutil .exe is installed in C:\WINDOWS\Microsoft.NET\Framework\v1.1.4322
+      (assuming that you are running build 4322 of the .NET framework).
+
+    - Change directory to the directory containing the
+      policy and .dll files you copied previously and run the following commands:
+
+      gacutil.exe /i policy.2.1.icecs.dll
+      gacutil.exe /i policy.2.1.icepackcs.dll
+      gacutil.exe /i policy.2.1.icepatch2.dll
+      gacutil.exe /i policy.2.1.icestormcs.dll
+      gacutil.exe /i policy.2.1.glacier2cs.dll
+
+      These commands cause applications requesting the 2.1.0 runtime to
+      load the 2.1.1 runtime instead.
+
+    - Then run the commands:
+
+      gacutil /i icecs.dll
+      gacutil /i glacier2cs.dll
+      gacutil /i icepackcs.dll
+      gacutil /i icepatch2cs.dll
+      gacutil /i icestormcs.dll
+
+      These commands install the 2.1.1 dlls into the GAC.
+
+
 Known issues
 ------------
 

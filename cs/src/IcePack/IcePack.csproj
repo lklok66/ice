@@ -17,7 +17,7 @@
                 DelaySign = "false"
                 OutputType = "Library"
                 PreBuildEvent = "$(SolutionDir)\bin\generatecs.exe $(SolutionDir) $(ProjectDir) $(ProjectName)"
-                PostBuildEvent = ""
+                PostBuildEvent = '"%VS71COMNTOOLS%"vsvars32.bat && al.exe /link:$(ProjectDir)\policy.2.1.icepackcs /out:$(ProjectDir)\policy.2.1.icepackcs.dll /keyfile:$(ProjectDir)\IcePackcsKey.snk && move $(ProjectDir)\policy.2.1.icepackcs.dll $(ProjectDir)\..\..\bin && copy $(ProjectDir)\policy.2.1.icepackcs $(ProjectDir)\..\..\bin'
                 RootNamespace = ""
                 RunPostBuildEvent = "OnBuildSuccess"
                 StartupObject = ""
