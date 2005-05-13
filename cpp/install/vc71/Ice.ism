@@ -251,6 +251,7 @@
 		<col key="yes" def="s72">Name</col>
 		<col def="V0">Data</col>
 		<col def="S255">ISBuildSourcePath</col>
+		<row><td>ISSELFREG.DLL</td><td/><td>&lt;ISProductFolder&gt;\redist\language independent\i386\isregsvr.dll</td></row>
 		<row><td>NewBinary1</td><td/><td>&lt;ISProductFolder&gt;\Redist\Language Independent\OS Independent\IsDialogBanner.ibd</td></row>
 		<row><td>NewBinary10</td><td/><td>&lt;ISProductFolder&gt;\Redist\Language Independent\OS Independent\CompleteSetupIco.ibd</td></row>
 		<row><td>NewBinary11</td><td/><td>&lt;ISProductFolder&gt;\Redist\Language Independent\OS Independent\CustomSetupIco.ibd</td></row>
@@ -340,10 +341,15 @@
 		<col def="S0">ISDotNetInstallerArgsRollback</col>
 		<row><td>DummyComponent</td><td>{0A8A414C-E74D-471F-AC64-DEEA8E5E4747}</td><td>INSTALLDIR</td><td>8</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>GAC_glacier2cs</td><td>{FEC3532C-7323-4158-9E7E-5DF09630AFAE}</td><td>GlobalAssemblyCache</td><td>8</td><td>AdminUser And MsiNetAssemblySupport &gt;  "1.1.4322"</td><td>glacier2cs.dll</td><td>9</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>GAC_glacier2cspolicy</td><td>{01342216-F122-41E1-94A2-A2ADC4630389}</td><td>GlobalAssemblyCache</td><td>8</td><td>AdminUser And MsiNetAssemblySupport &gt;  "1.1.4322"</td><td>policy.2.1.glacier2cs.dll</td><td>9</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>GAC_icecs</td><td>{C3F958D8-5F24-4437-B912-4CCAF3309A55}</td><td>GlobalAssemblyCache</td><td>8</td><td>AdminUser And MsiNetAssemblySupport &gt;  "1.1.4322"</td><td>icecs.dll</td><td>9</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>GAC_icecspolicy</td><td>{CDDA9E25-EC5A-4D8A-92AB-3DC668DD2B7F}</td><td>GlobalAssemblyCache</td><td>8</td><td>AdminUser And MsiNetAssemblySupport &gt;  "1.1.4322"</td><td>policy.2.1.icecs.dll</td><td>9</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>GAC_icepackcs</td><td>{104E4B7B-4703-4688-8343-8F199BF881C4}</td><td>GlobalAssemblyCache</td><td>8</td><td>AdminUser And MsiNetAssemblySupport &gt;  "1.1.4322"</td><td>icepackcs.dll</td><td>9</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>GAC_icepackcspolicy</td><td>{D43A9176-DE20-4C6F-898D-9D62E2717A19}</td><td>GlobalAssemblyCache</td><td>8</td><td>AdminUser And MsiNetAssemblySupport &gt;  "1.1.4322"</td><td>policy.2.1.icepackcs.dll</td><td>9</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>GAC_icepatch2cs</td><td>{8F2DE27A-B0F5-4FE0-A27C-A6DD3C9FCA2B}</td><td>GlobalAssemblyCache</td><td>8</td><td>AdminUser And MsiNetAssemblySupport &gt;  "1.1.4322"</td><td>icepatch2cs.dll</td><td>9</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>GAC_icepatch2cspolicy</td><td>{5D567584-9F13-47FE-AB08-582E2B91DA4F}</td><td>GlobalAssemblyCache</td><td>8</td><td>AdminUser And MsiNetAssemblySupport &gt;  "1.1.4322"</td><td>policy.2.1.icepatch2cs.dll</td><td>9</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>GAC_icestormcs</td><td>{1E8D7135-C067-4CE8-943C-D21F1760E6C5}</td><td>GlobalAssemblyCache</td><td>8</td><td>AdminUser And MsiNetAssemblySupport &gt;  "1.1.4322"</td><td>icestormcs.dll</td><td>9</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>GAC_icestormcspolicy</td><td>{110CB837-3165-4BAB-A1EB-D04C45B91E30}</td><td>GlobalAssemblyCache</td><td>8</td><td>AdminUser And MsiNetAssemblySupport &gt;  "1.1.4322"</td><td>policy.2.1.icestormcs.dll</td><td>9</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>GAC_registry</td><td>{A1BE4221-A631-4347-A8CA-3ED0AE81448A}</td><td>GlobalAssemblyCache</td><td>8</td><td>AdminUser And MsiNetAssemblySupport &gt;  "1.1.4322"</td><td/><td>1</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>IceCSharpDemo</td><td>{A4BB2878-87EF-462B-B1D0-EF5A859702FA}</td><td>INSTALLDIR</td><td>8</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>IceCSharpDev</td><td>{A7182719-2C34-4246-8C00-C0673BE6EBF4}</td><td>INSTALLDIR</td><td>8</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
@@ -370,7 +376,7 @@
 		<col key="yes" def="s38">Feature_</col>
 		<col key="yes" def="i2">Level</col>
 		<col def="S255">Condition</col>
-		<row><td>ice_runtime_dotnet</td><td>0</td><td>Not (AdminUser And MsiNetAssemblySupport &gt;  "1.1.4322")</td></row>
+		<row><td>ice_runtime_dotnet</td><td>1</td><td>AdminUser And (MsiNetAssemblySupport &gt;  "1.1.4322")</td></row>
 	</table>
 
 	<table name="Control">
@@ -431,6 +437,18 @@
 		<row><td>CancelSetup</td><td>No</td><td>PushButton</td><td>135</td><td>57</td><td>66</td><td>17</td><td>3</td><td/><td>##IDS__IsCancelDlg_No##</td><td>Yes</td><td/><td>0</td><td/><td/><td/></row>
 		<row><td>CancelSetup</td><td>Text</td><td>Text</td><td>48</td><td>15</td><td>194</td><td>30</td><td>3</td><td/><td>##IDS__IsCancelDlg_ConfirmCancel##</td><td/><td/><td>0</td><td/><td/><td/></row>
 		<row><td>CancelSetup</td><td>Yes</td><td>PushButton</td><td>62</td><td>57</td><td>66</td><td>17</td><td>3</td><td/><td>##IDS__IsCancelDlg_Yes##</td><td>No</td><td/><td>0</td><td/><td/><td/></row>
+		<row><td>CustomNoFramework</td><td>Back</td><td>PushButton</td><td>164</td><td>243</td><td>66</td><td>17</td><td>3</td><td/><td>##ID_STRING44##</td><td>Text2</td><td/><td>0</td><td/><td/><td/></row>
+		<row><td>CustomNoFramework</td><td>BannerLine</td><td>Line</td><td>0</td><td>44</td><td>374</td><td>0</td><td>1</td><td/><td/><td/><td/><td>0</td><td/><td/><td/></row>
+		<row><td>CustomNoFramework</td><td>Bitmap1</td><td>Bitmap</td><td>0</td><td>0</td><td>374</td><td>44</td><td>262145</td><td/><td/><td/><td/><td>0</td><td>0</td><td/><td>NewBinary20</td></row>
+		<row><td>CustomNoFramework</td><td>Branding1</td><td>Text</td><td>4</td><td>229</td><td>50</td><td>13</td><td>3</td><td/><td>##ID_STRING49##</td><td/><td/><td/><td/><td/><td/></row>
+		<row><td>CustomNoFramework</td><td>Branding2</td><td>Text</td><td>3</td><td>228</td><td>50</td><td>13</td><td>65537</td><td/><td>##ID_STRING50##</td><td/><td/><td/><td/><td/><td/></row>
+		<row><td>CustomNoFramework</td><td>Cancel</td><td>PushButton</td><td>301</td><td>243</td><td>66</td><td>17</td><td>3</td><td/><td>##ID_STRING45##</td><td>Next</td><td/><td>0</td><td/><td/><td/></row>
+		<row><td>CustomNoFramework</td><td>DlgLine</td><td>Line</td><td>48</td><td>234</td><td>326</td><td>0</td><td>1</td><td/><td/><td/><td/><td>0</td><td/><td/><td/></row>
+		<row><td>CustomNoFramework</td><td>Icon1</td><td>Icon</td><td>7</td><td>8</td><td>24</td><td>24</td><td>5767169</td><td/><td/><td/><td/><td>0</td><td>0</td><td/><td>NewBinary4</td></row>
+		<row><td>CustomNoFramework</td><td>Line1</td><td>Line</td><td>0</td><td>44</td><td>374</td><td>0</td><td>1</td><td/><td/><td/><td/><td>0</td><td>0</td><td/><td/></row>
+		<row><td>CustomNoFramework</td><td>Next</td><td>PushButton</td><td>230</td><td>243</td><td>66</td><td>17</td><td>3</td><td/><td>##ID_STRING43##</td><td>Back</td><td/><td>0</td><td/><td/><td/></row>
+		<row><td>CustomNoFramework</td><td>Text1</td><td>Text</td><td>38</td><td>12</td><td>292</td><td>25</td><td>65539</td><td>NewProperty3</td><td>##NEW_STRING2##</td><td/><td/><td>0</td><td>0</td><td/><td/></row>
+		<row><td>CustomNoFramework</td><td>Text2</td><td>Text</td><td>18</td><td>73</td><td>241</td><td>54</td><td>65539</td><td/><td>##ID_STRING223##</td><td>Cancel</td><td/><td>0</td><td>11</td><td/><td/></row>
 		<row><td>CustomSetup</td><td>Back</td><td>PushButton</td><td>164</td><td>243</td><td>66</td><td>17</td><td>3</td><td/><td>##IDS_BACK##</td><td>Next</td><td/><td>0</td><td/><td/><td/></row>
 		<row><td>CustomSetup</td><td>Banner</td><td>Bitmap</td><td>0</td><td>0</td><td>374</td><td>44</td><td>1</td><td/><td/><td/><td/><td>0</td><td/><td/><td>NewBinary20</td></row>
 		<row><td>CustomSetup</td><td>BannerLine</td><td>Line</td><td>0</td><td>44</td><td>374</td><td>0</td><td>1</td><td/><td/><td/><td/><td>0</td><td/><td/><td/></row>
@@ -759,6 +777,17 @@
 		<row><td>SplashBitmap</td><td>DlgLine</td><td>Line</td><td>48</td><td>234</td><td>374</td><td>0</td><td>1</td><td/><td/><td/><td/><td>0</td><td/><td/><td/></row>
 		<row><td>SplashBitmap</td><td>Image</td><td>Bitmap</td><td>13</td><td>12</td><td>349</td><td>211</td><td>1</td><td/><td/><td/><td/><td>0</td><td/><td/><td>NewBinary19</td></row>
 		<row><td>SplashBitmap</td><td>Next</td><td>PushButton</td><td>230</td><td>243</td><td>66</td><td>17</td><td>3</td><td/><td>##IDS_NEXT##</td><td>Cancel</td><td/><td>0</td><td/><td/><td/></row>
+		<row><td>TypicalNoFramework</td><td>Back</td><td>PushButton</td><td>164</td><td>243</td><td>66</td><td>17</td><td>3</td><td/><td>##ID_STRING36##</td><td>Text1</td><td/><td>0</td><td/><td/><td/></row>
+		<row><td>TypicalNoFramework</td><td>BannerLine</td><td>Line</td><td>0</td><td>44</td><td>374</td><td>0</td><td>1</td><td/><td/><td/><td/><td>0</td><td/><td/><td/></row>
+		<row><td>TypicalNoFramework</td><td>Bitmap1</td><td>Bitmap</td><td>0</td><td>0</td><td>374</td><td>44</td><td>262145</td><td/><td/><td/><td/><td>0</td><td>0</td><td/><td>NewBinary20</td></row>
+		<row><td>TypicalNoFramework</td><td>Branding1</td><td>Text</td><td>4</td><td>229</td><td>50</td><td>13</td><td>3</td><td/><td>##ID_STRING41##</td><td/><td/><td>0</td><td>0</td><td/><td/></row>
+		<row><td>TypicalNoFramework</td><td>Branding2</td><td>Text</td><td>3</td><td>228</td><td>50</td><td>13</td><td>65537</td><td/><td>##ID_STRING42##</td><td/><td/><td>0</td><td>0</td><td/><td/></row>
+		<row><td>TypicalNoFramework</td><td>Cancel</td><td>PushButton</td><td>301</td><td>243</td><td>66</td><td>17</td><td>3</td><td/><td>##ID_STRING37##</td><td>Next</td><td/><td>0</td><td/><td/><td/></row>
+		<row><td>TypicalNoFramework</td><td>DlgLine</td><td>Line</td><td>48</td><td>234</td><td>325</td><td>0</td><td>1</td><td/><td/><td/><td/><td>0</td><td>0</td><td/><td/></row>
+		<row><td>TypicalNoFramework</td><td>DlgTitle</td><td>Text</td><td>38</td><td>12</td><td>292</td><td>25</td><td>65539</td><td/><td>##ID_STRING38##</td><td/><td/><td>0</td><td>0</td><td/><td/></row>
+		<row><td>TypicalNoFramework</td><td>Icon1</td><td>Icon</td><td>7</td><td>8</td><td>24</td><td>24</td><td>5767169</td><td/><td/><td/><td/><td>0</td><td>0</td><td/><td>NewBinary4</td></row>
+		<row><td>TypicalNoFramework</td><td>Next</td><td>PushButton</td><td>230</td><td>243</td><td>66</td><td>17</td><td>3</td><td/><td>##ID_STRING35##</td><td>Back</td><td/><td>0</td><td/><td/><td/></row>
+		<row><td>TypicalNoFramework</td><td>Text1</td><td>Text</td><td>18</td><td>74</td><td>215</td><td>49</td><td>65539</td><td/><td>##ID_STRING224##</td><td>Cancel</td><td/><td>0</td><td>11</td><td/><td/></row>
 	</table>
 
 	<table name="ControlCondition">
@@ -858,15 +887,19 @@
 		<row><td>AdminWelcome</td><td>Next</td><td>NewDialog</td><td>AdminNetworkLocation</td><td>1</td><td>0</td></row>
 		<row><td>CancelSetup</td><td>No</td><td>EndDialog</td><td>Return</td><td>1</td><td>1</td></row>
 		<row><td>CancelSetup</td><td>Yes</td><td>EndDialog</td><td>Exit</td><td>1</td><td>2</td></row>
+		<row><td>CustomNoFramework</td><td>Back</td><td>NewDialog</td><td>CustomSetup</td><td>1</td><td>1</td></row>
+		<row><td>CustomNoFramework</td><td>Cancel</td><td>SpawnDialog</td><td>CancelSetup</td><td>1</td><td>1</td></row>
+		<row><td>CustomNoFramework</td><td>Next</td><td>NewDialog</td><td>ReadyToInstall</td><td>1</td><td/></row>
 		<row><td>CustomSetup</td><td>Back</td><td>NewDialog</td><td>MaintenanceType</td><td>Installed</td><td>1</td></row>
 		<row><td>CustomSetup</td><td>Back</td><td>NewDialog</td><td>SetupType</td><td>NOT Installed</td><td>2</td></row>
 		<row><td>CustomSetup</td><td>Cancel</td><td>SpawnDialog</td><td>CancelSetup</td><td>1</td><td>0</td></row>
 		<row><td>CustomSetup</td><td>ChangeFolder</td><td>SelectionBrowse</td><td>InstallChangeFolder</td><td>1</td><td>0</td></row>
 		<row><td>CustomSetup</td><td>Details</td><td>SelectionBrowse</td><td>DiskSpaceRequirements</td><td>1</td><td>1</td></row>
 		<row><td>CustomSetup</td><td>Help</td><td>SpawnDialog</td><td>CustomSetupTips</td><td>1</td><td>1</td></row>
-		<row><td>CustomSetup</td><td>Next</td><td>NewDialog</td><td>OutOfSpace</td><td>OutOfNoRbDiskSpace = 1</td><td>0</td></row>
-		<row><td>CustomSetup</td><td>Next</td><td>NewDialog</td><td>ReadyToInstall</td><td>OutOfNoRbDiskSpace &lt;&gt; 1</td><td>0</td></row>
-		<row><td>CustomSetup</td><td>Next</td><td>[_IsSetupTypeMin]</td><td>Custom</td><td>1</td><td>0</td></row>
+		<row><td>CustomSetup</td><td>Next</td><td>NewDialog</td><td>CustomNoFramework</td><td>Not (MsiNetAssemblySupport &gt;  "1.1.4322") And (&amp;ice_runtime_dotnet=3)</td><td>2</td></row>
+		<row><td>CustomSetup</td><td>Next</td><td>NewDialog</td><td>OutOfSpace</td><td>OutOfNoRbDiskSpace = 1</td><td>1</td></row>
+		<row><td>CustomSetup</td><td>Next</td><td>NewDialog</td><td>ReadyToInstall</td><td>(OutOfNoRbDiskSpace &lt;&gt; 1) And ((MsiNetAssemblySupport &gt;  "1.1.4322") Or Not (&amp;ice_runtime_dotnet=3) )</td><td>3</td></row>
+		<row><td>CustomSetup</td><td>Next</td><td>[_IsSetupTypeMin]</td><td>Custom</td><td>1</td><td>4</td></row>
 		<row><td>CustomSetupTips</td><td>OK</td><td>EndDialog</td><td>Return</td><td>1</td><td>1</td></row>
 		<row><td>CustomerInformation</td><td>Back</td><td>NewDialog</td><td>LicenseAgreement</td><td>1</td><td>1</td></row>
 		<row><td>CustomerInformation</td><td>Cancel</td><td>SpawnDialog</td><td>CancelSetup</td><td>1</td><td>0</td></row>
@@ -971,11 +1004,16 @@
 		<row><td>SetupResume</td><td>Next</td><td>NewDialog</td><td>OutOfSpace</td><td>OutOfNoRbDiskSpace = 1</td><td>0</td></row>
 		<row><td>SetupType</td><td>Back</td><td>NewDialog</td><td>DestinationFolder</td><td>1</td><td>1</td></row>
 		<row><td>SetupType</td><td>Cancel</td><td>SpawnDialog</td><td>CancelSetup</td><td>1</td><td>1</td></row>
-		<row><td>SetupType</td><td>Next</td><td>AddLocal</td><td>ALL</td><td>_IsSetupTypeMin = "Typical"</td><td>3</td></row>
 		<row><td>SetupType</td><td>Next</td><td>NewDialog</td><td>CustomSetup</td><td>_IsSetupTypeMin = "Custom"</td><td>1</td></row>
-		<row><td>SetupType</td><td>Next</td><td>NewDialog</td><td>ReadyToInstall</td><td>_IsSetupTypeMin &lt;&gt; "Custom"</td><td>2</td></row>
+		<row><td>SetupType</td><td>Next</td><td>NewDialog</td><td>ReadyToInstall</td><td>(_IsSetupTypeMin &lt;&gt; "Custom") and (MsiNetAssemblySupport &gt;  "1.1.4322")</td><td>2</td></row>
+		<row><td>SetupType</td><td>Next</td><td>NewDialog</td><td>TypicalNoFramework</td><td>(_IsSetupTypeMin &lt;&gt; "Custom") and Not (MsiNetAssemblySupport &gt;  "1.1.4322")</td><td>4</td></row>
+		<row><td>SetupType</td><td>Next</td><td>SetInstallLevel</td><td>100</td><td>_IsSetupTypeMin = "Typical"</td><td>3</td></row>
 		<row><td>SplashBitmap</td><td>Cancel</td><td>SpawnDialog</td><td>CancelSetup</td><td>1</td><td>0</td></row>
 		<row><td>SplashBitmap</td><td>Next</td><td>NewDialog</td><td>InstallWelcome</td><td>1</td><td>0</td></row>
+		<row><td>TypicalNoFramework</td><td>Back</td><td>NewDialog</td><td>SetupType</td><td>1</td><td>1</td></row>
+		<row><td>TypicalNoFramework</td><td>Cancel</td><td>SpawnDialog</td><td>CancelSetup</td><td>1</td><td>1</td></row>
+		<row><td>TypicalNoFramework</td><td>Next</td><td>AddLocal</td><td>InstallWelcome</td><td> </td><td>2</td></row>
+		<row><td>TypicalNoFramework</td><td>Next</td><td>NewDialog</td><td>ReadyToInstall</td><td>1</td><td>1</td></row>
 	</table>
 
 	<table name="CreateFolder">
@@ -994,6 +1032,10 @@
 		<row><td>CheckForProductUpdates</td><td>226</td><td>ISUpdateServiceFolder</td><td>[ISUpdateServiceFolder]agent.exe "/au[ProductCode] /EndOfInstall"</td><td>Checks for product updates</td></row>
 		<row><td>CheckForProductUpdatesOnReboot</td><td>226</td><td>ISUpdateServiceFolder</td><td>[ISUpdateServiceFolder]agent.exe "/au[ProductCode] /EndOfInstall /Reboot"</td><td>Checks for product updates on reboot</td></row>
 		<row><td>CopyAssemblyPDBs</td><td>1650</td><td>CMD_EXE</td><td>/c FOR %f in (glacier2cs,icecs,icepackcs,icepatch2cs,icestormcs) DO copy [INSTALLDIR]bin\%f.pdb [WindowsFolder]assembly\GAC\%f\2.1.0.0__1f998c50fec78381</td><td/></row>
+		<row><td>ISSelfRegisterCosting</td><td>1</td><td>ISSELFREG.DLL</td><td>ISSelfRegisterCosting</td><td/></row>
+		<row><td>ISSelfRegisterFiles</td><td>1025</td><td>ISSELFREG.DLL</td><td>ISSelfRegisterFiles</td><td/></row>
+		<row><td>ISSelfRegisterFinalize</td><td>1</td><td>ISSELFREG.DLL</td><td>ISSelfRegisterFinalize</td><td/></row>
+		<row><td>ISUnSelfRegisterFiles</td><td>1025</td><td>ISSELFREG.DLL</td><td>ISUnSelfRegisterFiles</td><td/></row>
 		<row><td>SetARPINSTALLLOCATION</td><td>51</td><td>ARPINSTALLLOCATION</td><td>[INSTALLDIR]</td><td/></row>
 		<row><td>SetAllUsersProfileNT</td><td>51</td><td>ALLUSERSPROFILE</td><td>[%SystemRoot]\Profiles\All Users</td><td/></row>
 		<row><td>setAllUsersProfile2K</td><td>51</td><td>ALLUSERSPROFILE</td><td>[%ALLUSERSPROFILE]</td><td/></row>
@@ -1019,6 +1061,7 @@
 		<row><td>AdminNetworkLocation</td><td>50</td><td>50</td><td>374</td><td>266</td><td>3</td><td>##IDS_PRODUCTNAME_INSTALLSHIELD##</td><td>InstallNow</td><td>InstallNow</td><td>Cancel</td><td>Network Location</td><td/><td>0</td><td/></row>
 		<row><td>AdminWelcome</td><td>50</td><td>50</td><td>374</td><td>266</td><td>3</td><td>##IDS_PRODUCTNAME_INSTALLSHIELD##</td><td>Next</td><td>Next</td><td>Cancel</td><td>Administration Welcome</td><td/><td>0</td><td/></row>
 		<row><td>CancelSetup</td><td>50</td><td>50</td><td>260</td><td>85</td><td>3</td><td>##IDS_PRODUCTNAME_INSTALLSHIELD##</td><td>No</td><td>No</td><td>No</td><td>Cancel</td><td/><td>0</td><td/></row>
+		<row><td>CustomNoFramework</td><td>50</td><td>50</td><td>374</td><td>266</td><td>3</td><td>##ID_STRING48##</td><td>Cancel</td><td>Next</td><td>Cancel</td><td>Interior</td><td/><td>0</td><td/></row>
 		<row><td>CustomSetup</td><td>50</td><td>50</td><td>374</td><td>266</td><td>35</td><td>##IDS_PRODUCTNAME_INSTALLSHIELD##</td><td>Tree</td><td>Next</td><td>Cancel</td><td>Custom Selection</td><td/><td>0</td><td/></row>
 		<row><td>CustomSetupTips</td><td>50</td><td>50</td><td>374</td><td>266</td><td>3</td><td>##IDS_PRODUCTNAME_INSTALLSHIELD##</td><td>OK</td><td>OK</td><td>OK</td><td>Custom Setup Tips</td><td/><td>0</td><td/></row>
 		<row><td>CustomerInformation</td><td>50</td><td>50</td><td>374</td><td>266</td><td>3</td><td>##IDS_PRODUCTNAME_INSTALLSHIELD##</td><td>NameEdit</td><td>Next</td><td>Cancel</td><td>Identification</td><td/><td>0</td><td/></row>
@@ -1045,6 +1088,7 @@
 		<row><td>SetupResume</td><td>50</td><td>50</td><td>374</td><td>266</td><td>3</td><td>##IDS_PRODUCTNAME_INSTALLSHIELD##</td><td>Next</td><td>Next</td><td>Cancel</td><td>Resume</td><td/><td>0</td><td/></row>
 		<row><td>SetupType</td><td>50</td><td>50</td><td>374</td><td>266</td><td>3</td><td>##IDS_PRODUCTNAME_INSTALLSHIELD##</td><td>RadioGroup</td><td>Next</td><td>Cancel</td><td>Setup Type</td><td/><td>0</td><td/></row>
 		<row><td>SplashBitmap</td><td>50</td><td>50</td><td>374</td><td>266</td><td>3</td><td>##IDS_PRODUCTNAME_INSTALLSHIELD##</td><td>Next</td><td>Next</td><td>Cancel</td><td>Welcome Bitmap</td><td/><td>0</td><td/></row>
+		<row><td>TypicalNoFramework</td><td>50</td><td>50</td><td>373</td><td>266</td><td>3</td><td>##ID_STRING40##</td><td>Cancel</td><td>Next</td><td>Cancel</td><td>Interior</td><td/><td>0</td><td/></row>
 	</table>
 
 	<table name="Directory">
@@ -1308,7 +1352,7 @@
 		<row><td>ice_doc</td><td/><td>##ID_STRING21##</td><td/><td>28</td><td>1</td><td>INSTALLDIR</td><td>8</td><td/><td/><td/><td/></row>
 		<row><td>ice_runtime</td><td/><td>##ID_STRING2##</td><td/><td>2</td><td>1</td><td>INSTALLDIR</td><td>24</td><td/><td/><td/><td/></row>
 		<row><td>ice_runtime_cpp</td><td/><td>##ID_STRING34##</td><td/><td>4</td><td>1</td><td>INSTALLDIR</td><td>8</td><td/><td/><td/><td/></row>
-		<row><td>ice_runtime_dotnet</td><td/><td>##ID_STRING27##</td><td>##ID_STRING22##</td><td>22</td><td>1</td><td>INSTALLDIR</td><td>8</td><td/><td/><td/><td/></row>
+		<row><td>ice_runtime_dotnet</td><td/><td>##ID_STRING27##</td><td>##ID_STRING22##</td><td>22</td><td>200</td><td>INSTALLDIR</td><td>8</td><td/><td/><td/><td/></row>
 		<row><td>ice_runtime_java</td><td/><td>##ID_STRING6##</td><td/><td>16</td><td>1</td><td>INSTALLDIR</td><td>8</td><td/><td/><td/><td/></row>
 		<row><td>ice_runtime_php</td><td/><td>##ID_STRING28##</td><td/><td>26</td><td>1</td><td>INSTALLDIR</td><td>8</td><td/><td/><td/><td/></row>
 		<row><td>ice_runtime_python</td><td/><td>##ID_STRING29##</td><td/><td>24</td><td>1</td><td>INSTALLDIR</td><td>8</td><td/><td/><td/><td/></row>
@@ -1354,9 +1398,15 @@
 		<row><td>ice_runtime</td><td>IceDoc</td></row>
 		<row><td>ice_runtime_cpp</td><td>DummyComponent</td></row>
 		<row><td>ice_runtime_dotnet</td><td>GAC_glacier2cs</td></row>
+		<row><td>ice_runtime_dotnet</td><td>GAC_glacier2cspolicy</td></row>
 		<row><td>ice_runtime_dotnet</td><td>GAC_icecs</td></row>
+		<row><td>ice_runtime_dotnet</td><td>GAC_icecspolicy</td></row>
 		<row><td>ice_runtime_dotnet</td><td>GAC_icepackcs</td></row>
+		<row><td>ice_runtime_dotnet</td><td>GAC_icepackcspolicy</td></row>
+		<row><td>ice_runtime_dotnet</td><td>GAC_icepatch2cs</td></row>
+		<row><td>ice_runtime_dotnet</td><td>GAC_icepatch2cspolicy</td></row>
 		<row><td>ice_runtime_dotnet</td><td>GAC_icestormcs</td></row>
+		<row><td>ice_runtime_dotnet</td><td>GAC_icestormcspolicy</td></row>
 		<row><td>ice_runtime_dotnet</td><td>GAC_registry</td></row>
 		<row><td>ice_runtime_dotnet</td><td>IceCSharpRuntime</td></row>
 		<row><td>ice_runtime_java</td><td>IceJavaRuntime</td></row>
@@ -1382,6 +1432,16 @@
 		<row><td>icepackcs.dll</td><td>GAC_icepackcs</td><td>ICEPAC~1.DLL|icepackcs.dll</td><td>0</td><td/><td/><td/><td>1</td><td>&lt;ISProjectFolder&gt;\install\ice-csharp\runtime\bin\icepackcs.dll</td><td>1</td><td/></row>
 		<row><td>icepatch2cs.dll</td><td>GAC_icepatch2cs</td><td>ICEPAT~1.DLL|icepatch2cs.dll</td><td>0</td><td/><td/><td/><td>1</td><td>&lt;ISProjectFolder&gt;\install\ice-csharp\runtime\bin\icepatch2cs.dll</td><td>1</td><td/></row>
 		<row><td>icestormcs.dll</td><td>GAC_icestormcs</td><td>ICESTO~1.DLL|icestormcs.dll</td><td>0</td><td/><td/><td/><td>1</td><td>&lt;ISProjectFolder&gt;\install\ice-csharp\runtime\bin\icestormcs.dll</td><td>1</td><td/></row>
+		<row><td>policy.2.1.glacier2cs</td><td>GAC_glacier2cspolicy</td><td>POLICY~1.GLA|policy.2.1.glacier2cs</td><td>0</td><td/><td/><td/><td>1</td><td>&lt;ISProjectFolder&gt;\install\ice-csharp\runtime\bin\policy.2.1.glacier2cs</td><td>1</td><td/></row>
+		<row><td>policy.2.1.glacier2cs.dll</td><td>GAC_glacier2cspolicy</td><td>POLICY~1.DLL|policy.2.1.glacier2cs.dll</td><td>0</td><td/><td/><td/><td>1</td><td>&lt;ISProjectFolder&gt;\install\ice-csharp\runtime\bin\policy.2.1.glacier2cs.dll</td><td>1</td><td/></row>
+		<row><td>policy.2.1.icecs</td><td>GAC_icecspolicy</td><td>POLICY~1.ICE|policy.2.1.icecs</td><td>0</td><td/><td/><td/><td>1</td><td>&lt;ISProjectFolder&gt;\install\ice-csharp\runtime\bin\policy.2.1.icecs</td><td>1</td><td/></row>
+		<row><td>policy.2.1.icecs.dll</td><td>GAC_icecspolicy</td><td>POLICY~1.DLL|policy.2.1.icecs.dll</td><td>0</td><td/><td/><td/><td>1</td><td>&lt;ISProjectFolder&gt;\install\ice-csharp\runtime\bin\policy.2.1.icecs.dll</td><td>1</td><td/></row>
+		<row><td>policy.2.1.icepackcs</td><td>GAC_icepackcspolicy</td><td>POLICY~1.ICE|policy.2.1.icepackcs</td><td>0</td><td/><td/><td/><td>1</td><td>&lt;ISProjectFolder&gt;\install\ice-csharp\runtime\bin\policy.2.1.icepackcs</td><td>1</td><td/></row>
+		<row><td>policy.2.1.icepackcs.dll</td><td>GAC_icepackcspolicy</td><td>POLICY~1.DLL|policy.2.1.icepackcs.dll</td><td>0</td><td/><td/><td/><td>1</td><td>&lt;ISProjectFolder&gt;\install\ice-csharp\runtime\bin\policy.2.1.icepackcs.dll</td><td>1</td><td/></row>
+		<row><td>policy.2.1.icepatch2cs</td><td>GAC_icepatch2cspolicy</td><td>POLICY~1.ICE|policy.2.1.icepatch2cs</td><td>0</td><td/><td/><td/><td>1</td><td>&lt;ISProjectFolder&gt;\install\ice-csharp\runtime\bin\policy.2.1.icepatch2cs</td><td>1</td><td/></row>
+		<row><td>policy.2.1.icepatch2cs.dll</td><td>GAC_icepatch2cspolicy</td><td>POLICY~1.DLL|policy.2.1.icepatch2cs.dll</td><td>0</td><td/><td/><td/><td>1</td><td>&lt;ISProjectFolder&gt;\install\ice-csharp\runtime\bin\policy.2.1.icepatch2cs.dll</td><td>1</td><td/></row>
+		<row><td>policy.2.1.icestormcs</td><td>GAC_icestormcspolicy</td><td>POLICY~1.ICE|policy.2.1.icestormcs</td><td>0</td><td/><td/><td/><td>1</td><td>&lt;ISProjectFolder&gt;\install\ice-csharp\runtime\bin\policy.2.1.icestormcs</td><td>1</td><td/></row>
+		<row><td>policy.2.1.icestormcs.dll</td><td>GAC_icestormcspolicy</td><td>POLICY~1.DLL|policy.2.1.icestormcs.dll</td><td>0</td><td/><td/><td/><td>1</td><td>&lt;ISProjectFolder&gt;\install\ice-csharp\runtime\bin\policy.2.1.icestormcs.dll</td><td>1</td><td/></row>
 	</table>
 
 	<table name="FileSFPCatalog">
@@ -1536,10 +1596,15 @@
 		<col def="S0">Miscellaneous</col>
 		<row><td>DummyComponent</td><td/><td/><td>_908B4938_DF02_4FFC_8680_DAC7E8FF46AC_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>GAC_glacier2cs</td><td/><td/><td>_6791A0B1_69E0_496B_BBBB_6DD59B697B46_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>GAC_glacier2cspolicy</td><td/><td/><td>_99A8DE04_FAD5_4B86_BABE_83C0DC26B144_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>GAC_icecs</td><td/><td/><td>_600A5FAE_4674_435B_8700_897F353856EE_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>GAC_icecspolicy</td><td/><td/><td>_C38B9440_7BCF_48A9_8D71_50489FF86C5C_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>GAC_icepackcs</td><td/><td/><td>_72EC117B_5915_4A1F_A08E_E956F2DC75FD_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>GAC_icepackcspolicy</td><td/><td/><td>_CF4A8EF0_82E6_4006_B13F_16405EADA8E7_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>GAC_icepatch2cs</td><td/><td/><td>_4148F83B_B26E_4415_A51D_5580DE431AFC_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>GAC_icepatch2cspolicy</td><td/><td/><td>_3F09A68C_D832_4EAB_8829_11493A4C6699_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>GAC_icestormcs</td><td/><td/><td>_74B66A95_80BE_43A1_9A2E_508B6CBB795E_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>GAC_icestormcspolicy</td><td/><td/><td>_F33DA052_2958_4896_BD37_7230FB8D137E_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>GAC_registry</td><td/><td/><td>_BD3CFD91_5B86_4986_8C18_2B0C4639FCA8_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>IceCSharpDemo</td><td/><td/><td>_7DD0A005_2547_4846_B573_62AFE1194756_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>IceCSharpDev</td><td/><td/><td>_3471DDA3_D6D8_440C_837A_1DF61C7914ED_FILTER</td><td/><td/><td/><td/></row>
@@ -1644,7 +1709,10 @@
 		<col def="s255">Library</col>
 		<col def="i4">Order</col>
 		<row><td>NewLinkerLibrary1</td><td>&lt;ISProductFolder&gt;\Script\ISWi\Lib\iswi.obl</td><td>1</td></row>
-		<row><td>NewLinkerLibrary2</td><td>&lt;ISProductFolder&gt;\Script\ISRT\Lib\isrt.obl</td><td>2</td></row>
+		<row><td>NewLinkerLibrary2</td><td>&lt;ISProductFolder&gt;\Script\ISWi\Lib\iswi.obl</td><td>2</td></row>
+		<row><td>NewLinkerLibrary3</td><td>&lt;ISProductFolder&gt;\Script\ISRT\Lib\isrt.obl</td><td>3</td></row>
+		<row><td>NewLinkerLibrary4</td><td>&lt;ISProductFolder&gt;\Script\ISRT\Lib\isrt.obl</td><td>4</td></row>
+		<row><td>NewLinkerLibrary5</td><td>&lt;ISProductFolder&gt;\Script\ifx\Lib\ifx.obl</td><td>5</td></row>
 	</table>
 
 	<table name="ISLocalControl">
@@ -1918,7 +1986,6 @@
 		<col def="I2">Encoded</col>
 		<col def="S0">Comment</col>
 		<col def="I4">TimeStamp</col>
-		<row><td>##ID_STRING23##</td><td>1033</td><td>|</td><td>0</td><td/><td>1234782829</td></row>
 		<row><td>COMPANY_NAME</td><td>1033</td><td>ZeroC, Inc.</td><td>0</td><td/><td>1234820916</td></row>
 		<row><td>DN_AlwaysInstall</td><td>1033</td><td>Always Install</td><td>0</td><td>	</td><td>479664453</td></row>
 		<row><td>IDPROP_EXPRESS_LAUNCH_CONDITION_COLOR</td><td>1033</td><td>The color settings of your system are not adequate for running [ProductName].</td><td>0</td><td/><td>479664453</td></row>
@@ -2469,6 +2536,8 @@
 		<row><td>ID_STRING20</td><td>1033</td><td>Visual Basic Demos</td><td>0</td><td/><td>-1055272690</td></row>
 		<row><td>ID_STRING21</td><td>1033</td><td>HTML Documentation</td><td>0</td><td/><td>161051760</td></row>
 		<row><td>ID_STRING22</td><td>1033</td><td>NOTE: You must be an Admin user and have the .NET 1.1 Framework installed in order to correctly install this feature.</td><td>0</td><td/><td>1100556557</td></row>
+		<row><td>ID_STRING223</td><td>1033</td><td>You have selected Ice features that require a specific version  of the .NET framework that is not currently installed.  If you continue with the installation, the files for Ice .NET features will be copied to your filesystem but not completely installed.</td><td>0</td><td/><td>1788426571</td></row>
+		<row><td>ID_STRING224</td><td>1033</td><td>The required version of the .NET framework is not installed on your computer.  If you proceed with the installation, features of Ice that depend on the .Net framework will not be installed.</td><td>0</td><td/><td>1788414219</td></row>
 		<row><td>ID_STRING23</td><td>1033</td><td/><td>0</td><td/><td>1100594222</td></row>
 		<row><td>ID_STRING24</td><td>1033</td><td>Ice Language Mappings</td><td>0</td><td/><td>1100553802</td></row>
 		<row><td>ID_STRING25</td><td>1033</td><td>Third Party Packages for C++ Development</td><td>0</td><td/><td>1100601483</td></row>
@@ -2482,14 +2551,31 @@
 		<row><td>ID_STRING32</td><td>1033</td><td>The Internet Communications Engine (Ice) runtimes, tools, files and libraries for developing Ice applications.</td><td>0</td><td/><td>1234812724</td></row>
 		<row><td>ID_STRING33</td><td>1033</td><td>Ice 2.1.1 for Visual Studio .NET 2003</td><td>0</td><td/><td>312018219</td></row>
 		<row><td>ID_STRING34</td><td>1033</td><td>Ice for C++</td><td>0</td><td/><td>1234802195</td></row>
+		<row><td>ID_STRING35</td><td>1033</td><td>&amp;Next &gt;</td><td>0</td><td/><td>1788434784</td></row>
+		<row><td>ID_STRING36</td><td>1033</td><td>&lt; &amp;Back</td><td>0</td><td/><td>1788434784</td></row>
+		<row><td>ID_STRING37</td><td>1033</td><td>Cancel</td><td>0</td><td/><td>1788434784</td></row>
+		<row><td>ID_STRING38</td><td>1033</td><td>{&amp;MSSansBold8} Required .NET framework version not installed!</td><td>0</td><td/><td>1788442859</td></row>
+		<row><td>ID_STRING39</td><td>1033</td><td>Dialog Normal Description</td><td>0</td><td/><td>1788434784</td></row>
 		<row><td>ID_STRING4</td><td>1033</td><td>C++ Demos</td><td>0</td><td/><td>-1457943126</td></row>
+		<row><td>ID_STRING40</td><td>1033</td><td>[ProductName] - InstallShield Wizard</td><td>0</td><td/><td>1788434784</td></row>
+		<row><td>ID_STRING41</td><td>1033</td><td>{&amp;MSSWhiteSerif8}InstallShield</td><td>0</td><td/><td>1788434784</td></row>
+		<row><td>ID_STRING42</td><td>1033</td><td>{&amp;Tahoma8}InstallShield</td><td>0</td><td/><td>1788434784</td></row>
+		<row><td>ID_STRING43</td><td>1033</td><td>&amp;Next &gt;</td><td>0</td><td/><td>1788430752</td></row>
+		<row><td>ID_STRING44</td><td>1033</td><td>&lt; &amp;Back</td><td>0</td><td/><td>1788430752</td></row>
+		<row><td>ID_STRING45</td><td>1033</td><td>Cancel</td><td>0</td><td/><td>1788430752</td></row>
+		<row><td>ID_STRING46</td><td>1033</td><td>{&amp;MSSansBold8}Dialog Bold Title</td><td>0</td><td/><td>1788430752</td></row>
+		<row><td>ID_STRING47</td><td>1033</td><td>Dialog Normal Description</td><td>0</td><td/><td>1788430752</td></row>
+		<row><td>ID_STRING48</td><td>1033</td><td>[ProductName] - InstallShield Wizard</td><td>0</td><td/><td>1788430752</td></row>
+		<row><td>ID_STRING49</td><td>1033</td><td>{&amp;MSSWhiteSerif8}InstallShield</td><td>0</td><td/><td>1788430752</td></row>
 		<row><td>ID_STRING5</td><td>1033</td><td>Third Party Development Packages</td><td>0</td><td/><td>-1457924662</td></row>
+		<row><td>ID_STRING50</td><td>1033</td><td>{&amp;Tahoma8}InstallShield</td><td>0</td><td/><td>1788430752</td></row>
 		<row><td>ID_STRING6</td><td>1033</td><td>Ice for Java</td><td>0</td><td/><td>1234824659</td></row>
 		<row><td>ID_STRING7</td><td>1033</td><td>Java Demos</td><td>0</td><td/><td>-1457945110</td></row>
 		<row><td>ID_STRING8</td><td>1033</td><td>Python Development</td><td>0</td><td/><td>1100547884</td></row>
 		<row><td>ID_STRING9</td><td>1033</td><td>Python Demos</td><td>0</td><td/><td>-1457918486</td></row>
 		<row><td>IIDS_UITEXT_FeatureUninstalled</td><td>1033</td><td>This feature will remain uninstalled.</td><td>0</td><td/><td>479664453</td></row>
 		<row><td>NEW_STRING1</td><td>1033</td><td>Continue with the installation?</td><td>0</td><td/><td>1234820939</td></row>
+		<row><td>NEW_STRING2</td><td>1033</td><td>{&amp;MSSansBold8}Required .NET framework version not installed!</td><td>0</td><td/><td>1788444939</td></row>
 	</table>
 
 	<table name="ISTargetImage">
@@ -2584,6 +2670,10 @@
 		<row><td>DuplicateFiles</td><td/><td>4210</td><td>DuplicateFiles</td><td/></row>
 		<row><td>FileCost</td><td/><td>900</td><td>FileCost</td><td/></row>
 		<row><td>FindRelatedProducts</td><td>NOT ISSETUPDRIVEN</td><td>420</td><td>FindRelatedProducts</td><td/></row>
+		<row><td>ISSelfRegisterCosting</td><td/><td>2201</td><td/><td/></row>
+		<row><td>ISSelfRegisterFiles</td><td/><td>5601</td><td/><td/></row>
+		<row><td>ISSelfRegisterFinalize</td><td/><td>6601</td><td/><td/></row>
+		<row><td>ISUnSelfRegisterFiles</td><td/><td>2202</td><td/><td/></row>
 		<row><td>InstallFiles</td><td/><td>4000</td><td>InstallFiles</td><td/></row>
 		<row><td>InstallFinalize</td><td/><td>6600</td><td>InstallFinalize</td><td/></row>
 		<row><td>InstallInitialize</td><td/><td>1501</td><td>InstallInitialize</td><td/></row>
@@ -2877,6 +2967,7 @@ SQBDAEUAXwBNAFMASQABAFoARQBSAE8AQwA=
 		<row><td>DisplayNameMinimal</td><td>##IDS__DisplayName_Minimal##</td><td/></row>
 		<row><td>DisplayNameTypical</td><td>##IDS__DisplayName_Typical##</td><td/></row>
 		<row><td>Display_IsBitmapDlg</td><td>1</td><td/></row>
+		<row><td>DummyProperty</td><td>0</td><td/></row>
 		<row><td>ErrorDialog</td><td>SetupError</td><td/></row>
 		<row><td>INSTALLLEVEL</td><td>100</td><td/></row>
 		<row><td>ISCHECKFORPRODUCTUPDATES</td><td>1</td><td/></row>
@@ -2889,6 +2980,10 @@ SQBDAEUAXwBNAFMASQABAFoARQBSAE8AQwA=
 		<row><td>Manufacturer</td><td>##COMPANY_NAME##</td><td/></row>
 		<row><td>NewProperty1</td><td>0</td><td/></row>
 		<row><td>NewProperty2</td><td>0</td><td/></row>
+		<row><td>NewProperty3</td><td>0</td><td/></row>
+		<row><td>NewProperty4</td><td>0</td><td/></row>
+		<row><td>NewProperty5</td><td>0</td><td/></row>
+		<row><td>NewProperty6</td><td>0</td><td/></row>
 		<row><td>PIDTemplate</td><td>12345&lt;###-%%%%%%%&gt;@@@@@</td><td/></row>
 		<row><td>ProductCode</td><td>{E0B538FA-2700-4DDC-BEFD-4B5C39DA6E9E}</td><td/></row>
 		<row><td>ProductID</td><td>none</td><td/></row>

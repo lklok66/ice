@@ -179,7 +179,7 @@ def buildIceDists(stageDir, sourcesDir, sourcesVersion, installVersion):
 
 	os.chdir(os.path.join(sourcesDir, "IcePy-" + sourcesVersion))
 	print "Building in " + os.getcwd() + "..."
-	os.system("devenv all.sln /useenv /build Release")
+	os.system("devenv all.sln /useenv /rebuild Release")
 
 	#
 	# Ice for Visual Basic

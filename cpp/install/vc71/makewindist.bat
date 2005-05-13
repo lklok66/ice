@@ -3,7 +3,7 @@ setlocal
 
 set ICE_HOME=c:\Src\vc71\stage\Ice-2.1.1
 
-set BERKELEY_HOME=c:\Src\vc71\db-4.2.52
+set BERKELEY_HOME=c:\src\vc71\db-4.2.52.NC
 set BZIP2_HOME=c:\Src\vc71\bzip2-1.0.2
 set EXPAT_HOME=c:\Src\vc71\Expat-1.95.8
 set OPENSSL_HOME=c:\Src\vc71\openssl-0.9.7e

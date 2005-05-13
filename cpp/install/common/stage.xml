@@ -288,6 +288,7 @@
 	<copy todir="${stage.dir}/ice-csharp/runtime/bin">
 	    <fileset dir="${icecs.dir}/bin">
 		<include name="*.dll"/>
+		<include name="policy.2.1.*"/>
 	    </fileset>
 	</copy>
 
