@@ -21,6 +21,7 @@ instructions for building and running the sample programs.
 See doc/README.html for information on the documentation included with
 this distribution.
 
+
 Binary compatibility
 --------------------
 
@@ -28,31 +29,11 @@ Patch releases of Ice are binary compatible. For example, version 2.1.1
 is compatible with 2.1.0, so you can run applications compiled with
 2.1.0 with the 2.1.1 runtime without having to recompile.
 
-For C++ and Java, simply uninstall the previous version of Ice and
-install the new one. This replaces the dynamic libraries with the
-newer version.
+With the binary installers, simply uninstall the previous version of
+Ice and install the new one. Already deployed applications that were
+compiled against the 2.1.0 runtime will automatically use the 2.1.1
+runtime.
 
-For .NET, if you want to run already deployed applications with the
-newer Ice runtime, do the following:
-
-- Install the newer version of Ice.
-
-- Open a command window and change directory to the root of the icecs
-  source installation.
-
-- Run the bincompat.bat file installed there. (You need a machine that
-  has Visual Studio installed and has an installed source tree of Ice for C#.)
-
-  The batch file installs five DLLs into the GAC:
-
-  policy.2.1.icecs.dll
-  policy.2.1.glacier2cs.dll
-  policy.2.1.icepackcs.dll
-  policy.2.1.icepatch2cs.dll
-  policy.2.1.icestormcs.dll
-
-  These DLLs cause requests for a 2.1.0 runtime by an application to
-  load the 2.1.1 runtime instead.
 
 Setting up Visual Studio .NET
 -----------------------------
