@@ -108,15 +108,17 @@ Another option is to copy icecs.dll into the directory that contains
 the .exe for your application.
 
 
+Binary compatibility
+--------------------
+
+Mono currently has issues with forwarding requests to load a particular
+version of the runtime to a different version. Until this is resolved
+in Mono, you cannot run applications compiled with 2.1.0 against the
+2.1.1 runtime.
+
+
 Known issues
 ------------
-
-On multi-CPU machines, you may get warnings such as the following
-when running the operations tests:
-
-** (./test/Ice/operations/server.exe:14863): WARNING **: : unref on 1965 called when ref was already 0
-
-This is caused by a bug in Mono and is harmless.
 
 Please let us know about any bugs, comments, or feedback in the Ice
 forum at http://www.zeroc.com/vbulletin/.
