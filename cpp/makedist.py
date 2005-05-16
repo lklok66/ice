@@ -383,6 +383,7 @@ os.system("zip -9r" + quiet + " " + icever + ".zip " + icever)
 # Copy files (README, etc.).
 #
 shutil.copyfile(os.path.join(icever, "CHANGES"), "Ice-" + version + "-CHANGES")
+shutil.copyfile(os.path.join("ice", "install", "vc71", "doc", "KNOWN_ISSUES.txt"), "KNOWN_ISSUES")
 
 #
 # Done.
