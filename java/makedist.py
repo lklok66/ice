@@ -243,7 +243,7 @@ fixVersion(find("icej", "INSTALL*"), version)
 #
 # Copy KNOWN_ISSUES.txt
 #
-shutil.copyfile(os.path.join("ice", "install", "vc71", "doc", "KNOWN_ISSUES.txt"), os.path.join("icej", KNOWN_ISSUES.txt)
+shutil.copyfile(os.path.join("ice", "install", "vc71", "doc", "KNOWN_ISSUES.txt"), os.path.join("icej", KNOWN_ISSUES.txt))
 
 #
 # Create source archives.
