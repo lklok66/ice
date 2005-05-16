@@ -232,6 +232,11 @@ else:
 os.system("cvs " + quiet + " -d cvs.zeroc.com:/home/cvsroot export " + tag + " ice")
 
 #
+# Copy KNOWN_ISSUES.txt.
+#
+shutil.copyfile(os.path.join("ice", "install", "vc71", "doc", "KNOWN_ISSUES.txt"), os.path.join("ice", "KNOWN_ISSUES.txt"))
+
+#
 # Remove files.
 #
 print "Removing unnecessary files..."
@@ -360,11 +365,6 @@ version = re.search("ICE_STRING_VERSION \"([0-9\.]*)\"", config.read()).group(1)
 print "Fixing version in README and INSTALL files..."
 fixVersion(find("ice", "README*"), version)
 fixVersion(find("ice", "INSTALL*"), version)
-
-#
-# Copy KNOWN_ISSUES.txt.
-#
-shutil.copyfile(os.path.join("ice", "install", "vc71", "doc", "KNOWN_ISSUES.txt"), "KNOWN_ISSUES")
 
 #
 # Create archives.
