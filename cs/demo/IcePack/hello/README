@@ -41,18 +41,3 @@ If you have already deployed your application, you can update it with
 the following command:
 
 $ icepackadmin --Ice.Config=config -e "application update 'application.xml' debug"
-
-
-To run the demo, first start the IcePack service:
-
-$ icepacknode --Ice.Config=config --warn
-
-In a separate window:
-
-$ icepackadmin --Ice.Config=config -e "application add 'application.xml'"
-$ client.exe
-
-This will deploy the servers described in the file "application.xml"
-and start the client.
-
-Messages will be displayed in the IcePack service window.
