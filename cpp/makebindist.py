@@ -226,15 +226,17 @@ if strip:
         os.system("strip " + stripOpts + " " + libdir + "/" + soLib)
 
 #
+# Copy files (README, etc.).
+#
+shutil.copyfile(os.path.combine("ice", "install", "vc71", "doc", "KNOWN_ISSUES.txt"), "KNOWN_ISSUES.txt")
+
+#
 # Create binary archives.
 #
 os.system("tar cvf " + icever + "-bin-" + platform + ".tar " + icever)
 os.system("gzip -9 " + icever + "-bin-" + platform + ".tar")
 os.system("zip -9ry " + icever + "-bin-" + platform + ".zip " + icever)
 
-#
-# Copy files (README, etc.).
-#
 
 #
 # Done.
