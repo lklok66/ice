@@ -193,6 +193,7 @@ IcePack:
     Node.Trace.Server
     Node.WaitTime
     Registry.Admin.AdapterId
+    Registry.AdminIdentity
     Registry.Admin.Endpoints
     Registry.Admin.PublishedEndpoints
     Registry.Admin.ThreadPool.Size
@@ -216,6 +217,7 @@ IcePack:
     Registry.Internal.ThreadPool.SizeWarn
     Registry.Internal.ThreadPool.StackSize
     Registry.Server.AdapterId
+    Registry.LocatorIdentity
     Registry.Server.Endpoints
     Registry.Server.PublishedEndpoints
     Registry.Server.ThreadPool.Size
@@ -227,6 +229,7 @@ IcePack:
     Registry.Trace.ObjectRegistry
     Registry.Trace.ServerRegistry
 
+    Registry.QueryIdentity
 IcePatch:
     BusyTimeout
     Directory
