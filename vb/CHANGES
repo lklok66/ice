@@ -1,3 +1,10 @@
+Changes since version 2.1.1
+---------------------------
+
+- Fixed a bug in the code generator: incorrect code was generated
+  if an operation used an exception from an unrelated module in
+  its exception specification.
+
 Changes since version 2.0.0
 ---------------------------
 
