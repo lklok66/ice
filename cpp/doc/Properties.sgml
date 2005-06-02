@@ -885,6 +885,25 @@ bytes are never compressed.
 <section><title>&Ice; Miscellaneous Properties</title>
 <!-- ********************************************************************** -->
 
+<section><title>Ice.Compression.Level</title>
+<section><title>Synopsis</title>
+<synopsis>
+Ice.Compression.Level=<replaceable>num</replaceable>
+</synopsis>
+</section>
+<section>
+<title>Description</title>
+<para>
+This property determines the amount of memory used by the bzip2 algorithm
+when compressing Ice protocol messages. Legal values for
+<replaceable>num</replaceable> are 1 to 9, with 1 representing the least
+memory usage. Increasing this value can result in better compression at the
+expense of more memory allocation and higher latency. If not specified,
+the default value is 1.
+</para>
+</section>
+</section>
+
 <section><title>Ice.GC.Interval</title>
 <section><title>Synopsis</title>
 <synopsis>

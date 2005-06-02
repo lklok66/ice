@@ -18,6 +18,7 @@ const char* IceInternal::PropertyNames::IceProps[] =
     "Ice.ACM.Client",
     "Ice.ACM.Server",
     "Ice.ChangeUser",
+    "Ice.Compression.Level",
     "Ice.Config",
     "Ice.ConnectionIdleTime",
     "Ice.Default.Host",
