@@ -172,7 +172,23 @@ Ice::Service::main(int& argc, char* argv[])
 	    //
 	    try
 	    {
-		_logger = new EventLoggerI(_name);
+		//
+		// Use the executable name as the source for the temporary logger.
+		//
+		string loggerName = _name;
+		transform(loggerName.begin(), loggerName.end(), loggerName.begin(), ::tolower);
+		string::size_type pos = loggerName.find_last_of("\\/");
+		if(pos != string::npos)
+		{
+		    loggerName.erase(0, pos + 1); // Remove leading path.
+		}
+		pos = loggerName.rfind(".exe");
+		if(pos != string::npos)
+		{
+		    loggerName.erase(pos, loggerName.size() - pos); // Remove .exe extension.
+		}
+
+		_logger = new EventLoggerI(loggerName);
 	    }
 	    catch(const IceUtil::Exception& ex)
 	    {
