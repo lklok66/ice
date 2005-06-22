@@ -113,7 +113,7 @@ Patch releases of Ice are binary compatible. For example, version 2.1.1
 is compatible with 2.1.0, so you can run applications compiled with
 2.1.0 with the 2.1.1 runtime without having to recompile.
 
-If you want to run already deployed 2.1.0 applications with the 2.1.1
+If you want to run already deployed 2.1.0 applications with the 2.1.2
 runtime on a machine, follow the steps under (1) or (2) below:
 
 1) On a machine with the Ice source tree and Visual Studio installed:
@@ -146,7 +146,7 @@ runtime on a machine, follow the steps under (1) or (2) below:
       gacutil.exe /i policy.2.1.glacier2cs.dll
 
       These commands cause applications requesting the 2.1.0 runtime to
-      load the 2.1.1 runtime instead.
+      load the 2.1.2 runtime instead.
 
     - From the bin directory, run the commands:
 
@@ -156,7 +156,7 @@ runtime on a machine, follow the steps under (1) or (2) below:
       gacutil /i icepatch2cs.dll
       gacutil /i icestormcs.dll
 
-      These commands install the 2.1.1 dlls into the GAC.
+      These commands install the 2.1.2 dlls into the GAC.
 
 2) On a machine without the Ice source tree and without Visual Studio:
 
@@ -189,7 +189,7 @@ runtime on a machine, follow the steps under (1) or (2) below:
       gacutil.exe /i policy.2.1.glacier2cs.dll
 
       These commands cause applications requesting the 2.1.0 runtime to
-      load the 2.1.1 runtime instead.
+      load the 2.1.2 runtime instead.
 
     - Then run the commands:
 
@@ -199,4 +199,4 @@ runtime on a machine, follow the steps under (1) or (2) below:
       gacutil /i icepatch2cs.dll
       gacutil /i icestormcs.dll
 
-      These commands install the 2.1.1 dlls into the GAC.
+      These commands install the 2.1.2 dlls into the GAC.

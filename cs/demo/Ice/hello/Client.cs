@@ -147,7 +147,7 @@ public class Client
     {
         int status = 0;
         Ice.Communicator communicator = null;
-        
+
         try
         {
             Ice.Properties properties = Ice.Util.createProperties();

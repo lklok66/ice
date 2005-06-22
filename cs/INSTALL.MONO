@@ -114,7 +114,7 @@ Known issues
 - Binary compatibility: Mono currently has issues with forwarding
   requests to load a particular version of the runtime to a different
   version. Until this is resolved in Mono, you cannot run applications
-  compiled with 2.1.0 against the 2.1.1 runtime.
+  compiled with 2.1.0 against the 2.1.2 runtime.
 
 - The Ice for C# slicing/objects test currently fails with Mono on Mac
   OS X.  We believe that this is caused by a bug in the Mono runtime and
