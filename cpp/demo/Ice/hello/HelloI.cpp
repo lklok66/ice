@@ -16,6 +16,7 @@ void
 HelloI::sayHello(const Ice::Current&) const
 {
     cout << "Hello World!" << endl;
+    Sleep(1000);
 }
 
 void
