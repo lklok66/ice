@@ -49,6 +49,11 @@ namespace Ice
 // a servant class from both Ice::Object and IceUtil::Thread. However,
 // we never derive from IceUtil::GCShared more than once.
 //
+// NOTE: As can be seen below, we use virtual inheritance, despite of
+// what the comment above says. This was a mistake when Ice 2.1.0 was
+// released, and now we have to keep the virtual inheritance in all
+// 2.1.x releases, in order to not break binary compatibility.
+//
 class ICE_API Object : virtual public IceUtil::GCShared
 {
 public:
