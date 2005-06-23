@@ -118,10 +118,10 @@ def collectSourceDistributions(tag, sourceDir, cvsdir, distro):
     os.chdir(cwd + "/../" + cvsdir)
     if len(tag) > 0:
 	print 'Making disribution ' + cvsdir + ' with tag ' + tag
-    if cvsdir in ['icepy', 'ice', 'icephp']:
+    if cvsdir == 'ice':
         os.system("./makedist.py " + tag)
     else:
-        os.system("./makedist.py " + tag)
+        os.system("./makedist.py -d " + tag)
     shutil.copy("dist/" + distro + ".tar.gz", sourceDir)
     os.chdir(cwd)
 
@@ -131,7 +131,7 @@ def extractDemos(sources, buildDir, version, distro, demoDir):
        Ice"""
     cwd = os.getcwd()
     os.chdir(buildDir + "/demotree")
-    if demoDir != "php":
+    if not demoDir in ["php", "cs"]:
 	os.system("gzip -dc " + sources + "/" + distro + ".tar.gz | tar xf - " + distro + "/demo " + \
 		  distro + "/config " + distro + "/certs")
     else:
@@ -448,21 +448,28 @@ def copyExpatFiles(expatLocation, version):
 	shutil.copy(expatLocation + '/' + fileList[0].strip(), 'Ice-' + version + '/' + fileList[0].strip())
 	os.symlink(os.path.basename(fileList[0].strip()), 'Ice-' + version + '/' + linkList[0].strip())
 
-def makePHPbinary(sources, buildDir, installDir, version, clean):
+def makePHPbinary(sources, phpSource, buildDir, installDir, version, clean):
     """ Create the IcePHP binaries and install to Ice installation directory """
 
     platform = getPlatform()
     if not platform in ['linux', 'macosx']:
         return         
-        
+
     #
     # We currently run configure each time even if clean=false.  This is because a large part of the IcePHP build
     # process is actually the configure step.  This could probably be bypassed afterwards.
     #
-    phpMatches = glob.glob(sources + '/php*.tar.[bg]z*')
-    if len(phpMatches) == 0:
-	print 'Unable to find PHP source tarball in %s' % sources
-    	sys.exit(1)
+
+    #
+    # If a tarball file is not specified, search the sources directory.
+    #
+    if phpSource != None:
+        phpMatches = (phpSource,)
+    else:
+	phpMatches = glob.glob(sources + '/php*.tar.[bg]z*')
+	if len(phpMatches) == 0:
+	    print 'Unable to find PHP source tarball in %s' % sources
+	    sys.exit(1)
 
     phpFile = ''
     phpVersion = ''
@@ -506,7 +513,20 @@ def makePHPbinary(sources, buildDir, installDir, version, clean):
 	    else:
 		phpVersion = phpVersion + '.'  + gr
 
-    logging.info('Using PHP archive :' + phpFile)
+    phpDir = buildDir + '/php-' + phpVersion
+    if platform == 'macosx':
+        phpModuleExtension = ".so"
+    else:
+        phpModuleExtension = getPlatformLibExtension()
+        
+    moduleName = '%s/modules/ice%s' % (phpDir, phpModuleExtension)
+
+    if not clean and os.path.exists(moduleName):
+	logging.info('Using existing PHP build in ' + phpDir)
+	shutil.copy(moduleName, '%s/Ice-%s/lib/icephp%s' % (installDir, version, phpModuleExtension))
+	return
+
+    logging.info('Using PHP archive: ' + phpFile)
     root, ext = os.path.splitext(phpFile)
     untarCmd = ''
     if ext.endswith('bz2'):
@@ -523,7 +543,6 @@ def makePHPbinary(sources, buildDir, installDir, version, clean):
     # 
     # return the likely root directory name for the php distro.
     #
-    phpDir = buildDir + '/php-' + phpVersion
     os.system('ln -sf ' + buildDir + '/IcePHP-' + version + '/src/ice ' + phpDir + '/ext')
     cwd = os.getcwd()
     os.chdir(phpDir)
@@ -533,10 +552,7 @@ def makePHPbinary(sources, buildDir, installDir, version, clean):
 	os.environ['CC'] = 'cc'
 	os.environ['CXX'] = 'CC'
 
-    if platform =='hpux':
-	os.system('gzip -dc ' + buildDir + '/IcePHP-' + version + '/configure-hpux.gz > configure')
-    else:
-	os.system('gzip -dc ' + buildDir + '/IcePHP-' + version + '/configure.gz > configure')
+    os.system('gzip -dc ' + buildDir + '/IcePHP-' + version + '/configure.gz > configure')
 
     if platform == 'hpux':
 	#
@@ -644,7 +660,7 @@ def makePHPbinary(sources, buildDir, installDir, version, clean):
 
 def usage():
     """Print usage/help information"""
-    print 'Usage: ' + sys.argv[0] + ' [options] [tag]'
+    print 'Usage: ' + sys.argv[0] + ' [options]'
     print
     print 'Options:'
     print '-h                     Show this message.'
@@ -658,29 +674,33 @@ def usage():
     print '                       If this is omitted makebindist will traverse'
     print '                       ../icej ../icepy ../icecs, etc and make the'
     print '                       distributions for you.'
+    print '--php-source=[file]    Specify the filename of the PHP source tarball.'
+    print '                       If not specified, the default source location'
+    print '                       is used.'
     print '-v, --verbose          Print verbose processing messages.'
     print '-t, --tag              Specify the CVS version tag for the packages.'
+    print '                       If no tag is defined, HEAD is used by default.'
     print '--noclean              Do not clean up current sources where'
     print '                       applicable (some bits will still be cleaned.'
     print '--nobuild              Run through the process but don\'t build'
     print '                       anything new.'
     print '--specfile             Just print the RPM spec file and exit.'
-    print '--usecvs		  Use contents of existing CVS directories'
+    print '--usecvs               Use contents of existing CVS directories'
     print '                       to create binary package (This option cannot'
     print '                       be used to create RPMS)'
     print 
-    print 'The following options set the locations for third party libraries'
-    print 'that may be required on your platform.  Alternatively, you can'
-    print 'set these locations using environment variables of the form.  If'
-    print 'you do not set locations through the enviroment or through the '
-    print 'command line, default locations will be used (system defaults +'
-    print 'the default locations indicated).'
+    print 'This script uses default locations for third-party libraries unless'
+    print 'overridden by environment variables or command-line options. The'
+    print 'environment variables are defined as shown below:'
     print 
-    print 'LIBRARY_HOME=[path to library]'
+    print 'export LIBRARY_HOME=[path to library]'
     print
-    print 'e.g. for bzip2'
+    print 'e.g., for bzip2'
     print 
     print 'export BZIP2_HOME=/opt/bzip2-1.0.3'
+    print 
+    print 'The following command-line options define the locations of third-'
+    print 'party libraries:'
     print 
     print '--stlporthome=[path]   Specify location of the STLPort libraries, '
     print '                       if required.'
@@ -690,12 +710,10 @@ def usage():
     print '                       (default=/opt/db).'
     print '--sslhome=[path]       Specify location of OpenSSL'
     print '                       (default=/opt/openssl).'
-    print '--expathome=[path]	  Specify location of expat libraries '
+    print '--expathome=[path]     Specify location of expat libraries '
     print '                       (default=/opt/expat).'
     print '--readlinehome=[path]  Specify readline library and location '
     print '                       (defaults to /opt/readline if set).'
-    print
-    print 'If no tag is specified, HEAD is used.'
 
 def main():
 
@@ -703,6 +721,7 @@ def main():
     buildDir = None
     installDir = None
     sources = None
+    phpSource = None
     installRoot = None
     verbose = False
     cvsTag = "HEAD"
@@ -720,7 +739,7 @@ def main():
     try:
         optionList, args = getopt.getopt(sys.argv[1:], "hvt:",
                                          [ "build-dir=", "install-dir=", "install-root=", "sources=",
-                                           "verbose", "tag=", "noclean", "nobuild", "specfile",
+                                           "php-source=", "verbose", "tag=", "noclean", "nobuild", "specfile",
 					   "stlporthome=", "bzip2home=", "dbhome=", "sslhome=",
 					   "expathome=", "readlinehome=", "usecvs"])
                
@@ -737,6 +756,8 @@ def main():
             installRoot = a
         elif o == "--sources":
             sources = a
+        elif o == "--php-source":
+            phpSource = a
         elif o in ("-h", "--help"):
             usage()
             sys.exit()
@@ -804,7 +825,7 @@ def main():
             shutil.rmtree(installDir, True)
 
     #
-    # In CVS mode we are relying on the checked out CVS sources *are* the build sources.
+    # In CVS mode we assume that the checked-out CVS sources *are* the build sources.
     #
     if cvsMode:
 	directories = []
@@ -832,7 +853,7 @@ def main():
         print "Building binary distributions for Ice-" + version + " on " + getPlatform()
         print "Using build directory: " + buildDir
         print "Using install directory: " + installDir
-        if getPlatform() == "linux":
+        if getPlatform() == "linux" and not cvsMode:
             print "(RPMs will be built)"
         print
 
@@ -963,7 +984,7 @@ def main():
 	if os.path.exists(cf):
 	    shutil.copy(cf, 'Ice-' + version + '/' + psf) 
 
-    makePHPbinary(sources, buildDir, installDir, version, clean)
+    makePHPbinary(sources, phpSource, buildDir, installDir, version, clean)
 
     os.system('tar cf Ice-' + version + '-bin-' + getPlatform() + '.tar Ice-' + version)
     os.system('gzip -9 Ice-' + version + '-bin-' + getPlatform() + '.tar')
