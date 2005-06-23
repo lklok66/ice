@@ -131,8 +131,12 @@ def extractDemos(sources, buildDir, version, distro, demoDir):
        Ice"""
     cwd = os.getcwd()
     os.chdir(buildDir + "/demotree")
-    os.system("gzip -dc " + sources + "/" + distro + ".tar.gz | tar xf - " + distro + "/demo " + distro + "/config " \
-	    + distro + "/certs")
+    if demoDir != "php":
+	os.system("gzip -dc " + sources + "/" + distro + ".tar.gz | tar xf - " + distro + "/demo " + \
+		  distro + "/config " + distro + "/certs")
+    else:
+	os.system("gzip -dc " + sources + "/" + distro + ".tar.gz | tar xf - " + distro + "/demo " + \
+		  distro + "/config")
 	
     shutil.move(distro + "/demo", buildDir + "/Ice-" + version + "-demos/demo" + demoDir)
 
@@ -140,13 +144,14 @@ def extractDemos(sources, buildDir, version, distro, demoDir):
     # 'System' copying of files here because its just easier!  We don't
     # need any configuration out of the Python tree.
     # 
-    if not demoDir == "py":
+    if demoDir != "py":
 	os.system("cp " + distro + "/config/* " + buildDir + "/Ice-" + version + "-demos/config")
 
     if not os.path.exists(buildDir + "/Ice-" + version + "-demos/certs"):
 	os.mkdir(buildDir + "/Ice-" + version + "-demos/certs")
 
-    os.system("cp -pR " + distro + "/certs/* " + buildDir + "/Ice-" + version + "-demos/certs")
+    if demoDir != "php":
+	os.system("cp -pR " + distro + "/certs/* " + buildDir + "/Ice-" + version + "-demos/certs")
 
     # 
     # Clean up some unwanted files.
