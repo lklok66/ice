@@ -186,7 +186,7 @@ IceInternal::BasicStream::startSeq(int numElements, int minSize)
     _seqDataStack = sd;
 
     int bytesLeft = static_cast<int>(b.end() - i);
-    if(_seqDataStack == 0) // Outermost sequence
+    if(_seqDataStack->previous == 0) // Outermost sequence
     {
 	//
 	// The sequence must fit within the message.

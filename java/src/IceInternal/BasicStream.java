@@ -235,7 +235,7 @@ public class BasicStream
 	_seqDataStack = sd;
 
 	int bytesLeft = _buf.remaining();
-	if(_seqDataStack == null) // Outermost sequence
+	if(_seqDataStack.previous == null) // Outermost sequence
 	{
 	    //
 	    // The sequence must fit within the message.
