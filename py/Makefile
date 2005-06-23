@@ -60,7 +60,7 @@ install::
 		for f in *.ice ; \
 		do \
 		    echo "Installing $$i/$$f" ; \
-		    $(call installdata,$$i/$$f,$(install_slicedir)/$$i/$$f) ; \
+		    $(call installdata,$$f,$(install_slicedir)/$$i) ; \
 		done ; \
 		cd .. ; \
 	    done \
