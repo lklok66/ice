@@ -693,16 +693,12 @@ IceInternal::ThreadPool::run()
 		{
 		    int load = static_cast<int>(_load + 0.5);
 
-//		    cout << _inUse << " " << _running << " " << load << " " << _load << endl;
-
 		    //
 		    // We add one to the load factor because on
 		    // additional thread is needed for select().
 		    //
 		    if(load + 1 < _running)
 		    {
-//			cout << "delete thread!!! " << endl;
-
 			assert(_inUse > 0);
 			--_inUse;
 			

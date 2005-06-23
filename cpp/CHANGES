@@ -1,6 +1,10 @@
 Changes since version 2.1.1
 ---------------------------
 
+- Fixed a bug with dynamic thread pools, where new threads were
+  destroyed immediately after dispatch if <threadpool>.Size=1 and
+  <threadpool>.SizeMax > 1.
+
 - Fixed a few Windows bugs in the Ice::Service class.
 
 - Fixed a bug in the Ice core involving command-line arguments that
