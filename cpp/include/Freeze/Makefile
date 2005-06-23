@@ -15,12 +15,11 @@ install::
 	@if test ! -d $(install_includedir)/Freeze ; \
 	then \
 	    echo "Creating $(install_includedir)/Freeze..." ; \
-	    mkdir $(install_includedir)/Freeze ; \
-	    chmod a+rx $(install_includedir)/Freeze ; \
+	    $(call mkdir,$(install_includedir)/Freeze) ; \
 	fi
 
 	@for i in *.h ; \
 	do \
 	    echo "Installing $$i" ; \
-	    $(INSTALL_DATA) $$i $(install_includedir)/Freeze/$$i ; \
+	    $(call installdata,$$i,$(install_includedir)/Freeze) ; \
 	done

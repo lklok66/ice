@@ -15,12 +15,11 @@ install::
 	@if test ! -d $(install_slicedir)/Freeze ; \
 	then \
 	    echo "Creating $(install_slicedir)/Freeze..." ; \
-	    mkdir $(install_slicedir)/Freeze ; \
-	    chmod a+rx $(install_slicedir)/Freeze ; \
+	    $(call mkdir,$(install_slicedir)/Freeze) ; \
 	fi
 
 	@for i in *.ice ; \
 	do \
 	    echo "Installing $$i" ; \
-	    $(INSTALL_DATA) $$i $(install_slicedir)/Freeze/$$i ; \
+	    $(call installdata,$$i,$(install_slicedir)/Freeze) ; \
 	done

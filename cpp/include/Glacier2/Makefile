@@ -15,12 +15,11 @@ install::
 	@if test ! -d $(install_includedir)/Glacier2 ; \
 	then \
 	    echo "Creating $(install_includedir)/Glacier2..." ; \
-	    mkdir $(install_includedir)/Glacier2 ; \
-	    chmod a+rx $(install_includedir)/Glacier2 ; \
+	    $(call mkdir,$(install_includedir)/Glacier2) ; \
 	fi
 
 	@for i in *.h ; \
 	do \
 	    echo "Installing $$i" ; \
-	    $(INSTALL_DATA) $$i $(install_includedir)/Glacier2/$$i ; \
+	    $(call installdata,$$i,$(install_includedir)/Glacier2) ; \
 	done

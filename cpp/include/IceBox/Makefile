@@ -15,12 +15,11 @@ install::
 	@if test ! -d $(install_includedir)/IceBox ; \
 	then \
 	    echo "Creating $(install_includedir)/IceBox..." ; \
-	    mkdir $(install_includedir)/IceBox ; \
-	    chmod a+rx $(install_includedir)/IceBox ; \
+	    $(call mkdir,$(install_includedir)/IceBox) ; \
 	fi
 
 	@for i in *.h ; \
 	do \
 	    echo "Installing $$i" ; \
-	    $(INSTALL_DATA) $$i $(install_includedir)/IceBox/$$i ; \
+	    $(call installdata,$$i,$(install_includedir)/IceBox) ; \
 	done
