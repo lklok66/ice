@@ -64,8 +64,8 @@ are required to use this distribution:
 
 - bzip2-1.0.2-2.aix4.3.ppc.rpm
 - expat-1.95.7-1.aix5.1.ppc.rpm 
-- openssl-0.9.7d-1.aix5.1.ppc.rpm
-- openssl-devel-0.9.7d-1.aix5.1.ppc.rpm (only required when
+- openssl-0.9.7d-2.aix5.1.ppc.rpm
+- openssl-devel-0.9.7d-2.aix5.1.ppc.rpm (only required when
   building C++ applications)
 
 
