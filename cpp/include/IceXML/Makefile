@@ -15,11 +15,13 @@ install::
 	@if test ! -d $(install_includedir)/IceXML ; \
 	then \
 	    echo "Creating $(install_includedir)/IceXML..." ; \
-	    $(call mkdir,$(install_includedir)/IceXML) ; \
+	    mkdir $(install_includedir)/IceXML ; \
+	    chmod a+rx $(install_includedir)/IceXML ; \
 	fi
 
 	@for i in *.h ; \
 	do \
 	    echo "Installing $$i" ; \
-	    $(call installdata,$$i,$(install_includedir)/IceXML) ; \
+	    $(INSTALL_DATA) $$i $(install_includedir)/IceXML/$$i ; \
+	    chmod a+r $(install_includedir)/IceXML/$$i ; \
 	done

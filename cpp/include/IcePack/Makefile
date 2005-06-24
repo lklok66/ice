@@ -15,11 +15,13 @@ install::
 	@if test ! -d $(install_includedir)/IcePack ; \
 	then \
 	    echo "Creating $(install_includedir)/IcePack..." ; \
-	    $(call mkdir,$(install_includedir)/IcePack) ; \
+	    mkdir $(install_includedir)/IcePack ; \
+	    chmod a+rx $(install_includedir)/IcePack ; \
 	fi
 
 	@for i in *.h ; \
 	do \
 	    echo "Installing $$i" ; \
-	    $(call installdata,$$i,$(install_includedir)/IcePack) ; \
+	    $(INSTALL_DATA) $$i $(install_includedir)/IcePack/$$i ; \
+	    chmod a+r $(install_includedir)/IcePack/$$i ; \
 	done

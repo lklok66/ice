@@ -15,11 +15,13 @@ install::
 	@if test ! -d $(install_includedir)/IceSSL ; \
 	then \
 	    echo "Creating $(install_includedir)/IceSSL..." ; \
-	    $(call mkdir,$(install_includedir)/IceSSL) ; \
+	    mkdir $(install_includedir)/IceSSL ; \
+	    chmod a+rx $(install_includedir)/IceSSL ; \
 	fi
 
 	@for i in *.h ; \
 	do \
 	    echo "Installing $$i" ; \
-	    $(call installdata,$$i,$(install_includedir)/IceSSL) ; \
+	    $(INSTALL_DATA) $$i $(install_includedir)/IceSSL/$$i ; \
+	    chmod a+r $(install_includedir)/IceSSL/$$i ; \
 	done
