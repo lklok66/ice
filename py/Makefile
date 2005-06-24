@@ -54,13 +54,15 @@ install::
 		if test ! -d $(install_slicedir)/$$i ; \
 		then \
 		    echo "Creating $(install_slicedir)/$$i..." ; \
-		    $(call mkdir,$(install_slicedir)/$$i) ; \
+		    mkdir $(install_slicedir)/$$i ; \
+		    chmod a+rx $(install_slicedir)/$$i ; \
 		fi ; \
 		cd $$i ; \
 		for f in *.ice ; \
 		do \
 		    echo "Installing $$i/$$f" ; \
-		    $(call installdata,$$f,$(install_slicedir)/$$i) ; \
+		    $(INSTALL_DATA) $$f $(install_slicedir)/$$i ; \
+		    chmod a+r $(install_slicedir)/$$i/$$f ; \
 		done ; \
 		cd .. ; \
 	    done \
