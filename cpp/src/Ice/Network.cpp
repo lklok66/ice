@@ -7,12 +7,16 @@
 //
 // **********************************************************************
 
+#ifdef _WIN32
+//
+// With VC71, winsock2.h must be included before windows.h,
+// since windows.h includes winsock.h
+//
+#  include <winsock2.h>
+#endif
+
 #include <Ice/Network.h>
 #include <Ice/LocalException.h>
-
-#ifdef _WIN32
-#  include <Ws2tcpip.h>
-#endif
 
 using namespace std;
 using namespace Ice;
