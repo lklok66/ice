@@ -517,30 +517,15 @@ ServerI::start_async(const AMD_Server_startPtr& amdCB, const Ice::Current&)
     {
 	Lock sync(*this);
 	checkDestroyed();
-	if(_state == Destroying)
-	{
-	    throw ServerStartException(_id, "The server is being destroyed.");
-	}
-	
-	//
-	// The server is disabled because it failed and if the time of
-	// the failure is now past the configured duration or if the
-	// server is manualy started, we re-enable the server.
-	//
-	if(_activation == Disabled &&
-	   _failureTime != IceUtil::Time() &&
-	   (amdCB || 
-	    (_disableOnFailure > 0 &&
-	     (_failureTime + IceUtil::Time::seconds(_disableOnFailure) < IceUtil::Time::now()))))
-	{
-	    _failureTime = IceUtil::Time();
-	    _activation = _previousActivation;
-	}
 
 	//
-	// If the amd callback is set, it's a remote start call to
-	// manually activate the server. Otherwise it's a call to
-	// activate the server on demand (called from ServerAdapterI).
+	// Re-enable the server if disabled because of a failure and if
+	// activated manually.
+	//
+	enableAfterFailure(amdCB);
+
+	//
+	// Check the current activation mode and the requested activation.
 	//
 	if(_activation == Disabled)
 	{
@@ -550,13 +535,21 @@ ServerI::start_async(const AMD_Server_startPtr& amdCB, const Ice::Current&)
 	{
 	    throw ServerStartException(_id, "The server activation doesn't allow this activation mode.");
 	}
-	else if(_state == ActivationTimeout)
+
+	//
+	// Check the current state.
+	//
+	if(_state == ActivationTimeout)
 	{
 	    throw ServerStartException(_id, "The server activation timed out.");
 	}
 	else if(_state == Active)
 	{
 	    throw ServerStartException(_id, "The server is already active.");
+	}
+	else if(_state == Destroying)
+	{
+	    throw ServerStartException(_id, "The server is being destroyed.");
 	}
 
 	if(!_start)
@@ -870,6 +863,33 @@ ServerI::checkDestroyed()
 }
 
 void
+ServerI::disableOnFailure()
+{
+    if(_disableOnFailure != 0 && _activation != Disabled)
+    {
+	_previousActivation = _activation;
+	_activation = Disabled;
+	_failureTime = IceUtil::Time::now();
+    }
+}
+
+void
+ServerI::enableAfterFailure(bool force)
+{
+    if(_disableOnFailure == 0 || _failureTime == IceUtil::Time())
+    {
+	return;
+    }
+
+    if(force || 
+       _disableOnFailure > 0 && (_failureTime + IceUtil::Time::seconds(_disableOnFailure) < IceUtil::Time::now()))
+    {
+	_activation = _previousActivation;
+	_failureTime = IceUtil::Time();
+    }
+}
+
+void
 ServerI::adapterDeactivated(const string& id)
 {
     Lock sync(*this);
@@ -1048,7 +1068,18 @@ ServerI::activate()
 	{
 	}
     }    
-    setState(ServerI::Inactive, failure);
+
+    ServerCommandPtr command;
+    {
+	Lock sync(*this);
+	disableOnFailure();
+	setStateNoSync(ServerI::Inactive, failure);
+	command = nextCommand();
+    }
+    if(command)
+    {
+	command->execute();
+    }
 }
 
 void
@@ -1198,25 +1229,20 @@ ServerI::terminated(const string& msg, int status)
 	_process = 0;
 	_pid = 0;
 
-	if(_disableOnFailure != 0 && _activation != Disabled)
-	{
-	    bool failed = false;
+	bool failed = false;
 #ifndef _WIN32
-	    failed = WIFEXITED(status) && WEXITSTATUS(status) != 0;
-	    if(WIFSIGNALED(status))
-	    {
-		int s = WTERMSIG(status);
-		failed = s == SIGABRT || s == SIGILL || s == SIGBUS || s == SIGFPE || s == SIGSEGV;
-	    }
+	failed = WIFEXITED(status) && WEXITSTATUS(status) != 0;
+	if(WIFSIGNALED(status))
+	{
+	    int s = WTERMSIG(status);
+	    failed = s == SIGABRT || s == SIGILL || s == SIGBUS || s == SIGFPE || s == SIGSEGV;
+	}
 #else
-	    failed = status != 0;
+	failed = status != 0;
 #endif
-	    if(failed)
-	    {
-		_previousActivation = _activation;
-		_activation = Disabled;
-		_failureTime = IceUtil::Time::now();
-	    }
+	if(failed)
+	{
+	    disableOnFailure();
 	}
 	
 	if(_state != ServerI::Destroying)
@@ -1840,7 +1866,7 @@ ServerI::updateConfigFile(const string& serverDir, const CommunicatorDescriptorP
 		ServiceDescriptorPtr s = ServiceDescriptorPtr::dynamicCast(p->descriptor);
 		const string path = serverDir + "/config/config_" + s->name;
 		props.push_back(createProperty("IceBox.Service." + s->name, 
-					       s->entry + " --Ice.Config=\"" + path + "\""));
+					       s->entry + " --Ice.Config=" + path));
 		servicesStr += s->name + " ";
 	    }
 	    props.push_back(createProperty("IceBox.LoadOrder", servicesStr));

@@ -107,6 +107,8 @@ private:
     void updateImpl();
     void checkActivation();
     void checkDestroyed();
+    void disableOnFailure();
+    void enableAfterFailure(bool);
 
     void setState(InternalServerState, const std::string& = std::string());
     ServerCommandPtr nextCommand();
