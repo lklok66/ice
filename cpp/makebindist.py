@@ -37,7 +37,6 @@ def runprog(commandstring, haltOnError = True):
 	if haltOnError: 
 	    raise ExtProgramError(msg)
 
-
 def copyfiles(srcDir, destDir):
     '''Copy the contents of one directory to another (non-recursive)'''
     for f in os.listdir(srcDir):
