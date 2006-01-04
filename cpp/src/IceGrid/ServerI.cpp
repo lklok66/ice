@@ -639,7 +639,8 @@ ServerI::setEnabled(bool enabled, const ::Ice::Current&)
 {
     {
 	Lock sync(*this);
-	if(enabled && _activation < Disabled || !enabled && _activation == Disabled)
+	if(enabled && _activation < Disabled || 
+	   !enabled && _activation == Disabled && _failureTime == IceUtil::Time())
 	{
 	    return;
 	}
