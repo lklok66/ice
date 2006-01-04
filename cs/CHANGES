@@ -1,0 +1,458 @@
+Changes since version 3.0.0
+---------------------------
+
+- Fixed a bug in the marshaling code that caused an exception
+  if a null reference for a Slice class was passed as a parameter.
+
+- Fixed a bug in the Slice parser that caused problems if an
+  included file contained white space in the file name.
+
+- Fixed a bug in slice2cs that prevented the generated code
+  from being marked as CLS-compliant if the --checksum option
+  was used.
+
+Changes since version 2.1.2
+---------------------------
+
+- Fixed a deadlock during shutdown that could happen with
+  bi-directional connections.
+
+- Changed the mapping for Slice structures: if a Slice structure
+  (recursively) contains a member that is of reference type, the Slice
+  structure automatically maps to a C# class.
+
+  A Slice structure now maps to a C# structure only if the Slice
+  structure (recursively) consists only of value type (and if the
+  "clr:class" metadata directive does not apply to the structure).
+
+- Removed ice_default() method from proxies.
+
+- Added an implementation of IceBox for C#.
+
+- Fixed bug in Ice.Application that could cause appName() to return
+  the empty string in some cases.
+
+- The run time was obscuring the true origin (source file and
+  line number) of some exceptions when rethrowing them. It
+  now correctly shows the source of such exceptions
+  in the stack trace.
+
+- Connection::close(false) (i.e., graceful connection shutdown) now
+  waits until all outstanding requests have completed.
+
+- Added a new object adapter property, <adapter>.ReplicaGroupId, which
+  allows adapters to be replicated. See the IceGrid chapter in the
+  manual for more information.
+
+- Added the proxy method ice_connectionId, which allows an application
+  to control connection reuse.
+
+- Added the new methods Ice.Util.initializeWithLogger() and
+  Ice.Util.initializeWithPropertiesAndLogger(), which ensure that a
+  custom logger is used to record any errors during communicator
+  initialization.
+
+- Ice will now listen on all local interfaces if no -h parameter is
+  present in the endpoint configuration and no default host has been
+  set. It will also listen to all interfaces if the -h parameter is
+  set to 0.0.0.0. In such configurations the endpoints published in
+  proxies will not contain the loopback interface (127.0.0.1) unless
+  it is the only local interface present.
+
+- The Equals method for Slice structures that are mapped to classes
+  now returns false if the two structures being compared are not of
+  the same type.
+
+  Previously, a comparison such as
+
+      derived.Equals(base)
+
+  returned true if the base of part of derived was the same as base;
+  with the new slice2cs compiler, this comparison returns false.
+
+- The Slice mapping for sequences has been improved. The generated
+  sequence class now contains the following additional properties and
+  methods:
+
+  - Capacity
+  - TrimToSize
+  - Sort
+  - Reverse
+  - BinarySearch
+  - InsertRange
+  - RemoveRange
+  - GetRange
+  - SetRange
+  - LastIndexOf
+  - Repeat
+
+  These have the same semantics as the corresponding methods on
+  System.Collections.ArrayList, with one exception: GetRange returns a
+  true copy of the requested range instead of returning a view of a
+  sub-section of the collection.
+
+- The Ice run-time libraries are now marked as CLS-compliant
+  assemblies. In addition, the generated code is now also
+  CLS-compliant.
+
+  This involves one change to the C# language mapping:
+
+  The skeleton class used be called _<interface-name>Disp but is now
+  called <interface-name>Disp_.
+
+  For example, if you previously had:
+
+      class MyIntfI : _MyIntfDisp { /* ... */ }
+
+  you now have to write:
+
+      class MyIntfI : MyIntfDisp_ { /* ... */ }
+
+  Similarly, for the Tie mapping, the location of the underscore has
+  changed:
+
+      _MyIntfTie -> MyIntfTie_
+
+- Added support for the thread-per-connection concurrency model.
+
+- Changed the way servant locators work if a server has a servant
+  locator registered for a specific category, in addition to a default
+  servant locator. Previously, if the locator for the specific
+  category failed to locate the servant, the run time would then call
+  the default locator. With the new behavior, if the locator for the
+  specific category does not return a servant, the default locator is
+  not called.
+
+- slice2cs now supports a new metadata directive: ["cs:attribute"].
+  This directive allows you to inject C# attribute definitions into
+  the generated code. See the C# mapping chapter in the Ice manual for
+  more information.
+
+- Added proxy methods to retrieve the proxy adapter id and endpoints
+  (ice_getAdapterId() and ice_getEndpoints()) and to create a new
+  proxy with a new adapter id or new endpoints (ice_newAdapterId() and
+  ice_newEndpoints()).
+
+- Fixed a bug that would cause UDP server connections to be closed on
+  transient errors, thus preventing the reception of any more UDP
+  messages until a server restart.
+
+- Communicator::setDefaultContext() no longer changes the context
+  information set on existing proxies.
+
+- Ice.Communicator.createObjectAdapter() throws
+  Ice.AlreadyRegisteredException if it is called with the name of an
+  object adapter that already exists.
+
+- The "cs:" metadata prefix has been replaced by the "clr:" prefix, so
+  you now need to use "clr:collection" and "clr:class".  The "cs:"
+  prefix is still recognized and acted upon; slice2cs emits a warning
+  for the old prefix. Two releases from now, the warning will become a
+  hard error and "cs:" will no longer work.
+
+- Fixed a bug in the slice2cs code generator: for sequences of Slice
+  structs that used the class mapping, the generated code caused a
+  run-time error.
+
+- Fixed a bug in the slice2cs code generator: if an operation had a
+  parameter named i or szx, incorrect code was generated in some
+  cases.
+
+- Renamed CompressionNotSupportException to a more general
+  FeatureNotSupportedException.
+
+- Added ice_communicator() to proxies. This function returns the
+  communicator that was used to create the proxy.
+
+- Added ice_toString() to proxies. This function returns the
+  stringified proxy. This function can be more convenient to use than
+  communicator.stringToProxy() because you do not need the
+  communicator to stringify a proxy that way.
+
+- Parsing a stringified proxy no longer completely fails if the proxy
+  contains an endpoint type that is unknown to the Ice runtime as long
+  as the proxy contains other endpoints that are known. A warning is
+  printed for the unknown types that are encountered.
+
+- Ice.ObjectImpl is now an abstract class that cannot be instantiated.
+  This change should be transparent to application code.
+
+- Added new features to the C# mapping:
+
+  - Structures, classes, and exceptions now have one-shot
+    constructors. For example, for a class
+
+      class Example {
+          int i;
+	  string s;
+      };
+
+    the following constructors are generated:
+
+      public class Example : Ice.ObjectImpl {
+	  public Example() { /* ... */ }
+	  public Example(int i, string s) { /* ... */ }
+	  // ...
+      }
+
+    This allows you to construct a structure, class, or exception and
+    supply values for the data members in a single statement, instead
+    of having to assign to the members of a default-constructed
+    instance.
+
+    For derived exceptions and classes, the constructor expects values
+    for all data members, including those of base exceptions or
+    classes, in base-to-derived order of declaration.
+
+Changes since version 2.1.1
+---------------------------
+
+- Fixed a bug in proxyToString() for bidirectional proxies.
+
+- Fixed a bug with dynamic thread pools, where new threads were
+  destroyed immediately after dispatch if <threadpool>.Size=1 and
+  <threadpool>.SizeMax > 1.
+
+- Added the configuration property Ice.Compression.Level to provide
+  more control over the bzip2 algorithm used to compress Ice protocol
+  messages.
+
+- Fixed a bug in the code generator: incorrect code was generated
+  if an operation used an exception from an unrelated module in
+  its exception specification.
+
+- Fixed a bug in the randomization code for multiple endpoints: if
+  a proxy had two endpoints, they were not shuffled.
+
+Changes since version 2.1.0
+---------------------------
+
+- Modified the Ice marshaling engine so that references to Ice objects
+  are released as soon as possible.
+
+- Fixed a number of race conditions that could cause a crash during
+  process shutdown on multi-CPU machines.
+
+- Added sequences of fixed-length elements to throughput demo.
+
+- Fixed a bug that could cause an assert if connections could not be
+  established in thread-per-connection mode.
+
+- Added two new properties for controlling Active Connection
+  Management (ACM). In prior releases ACM was governed by the property
+  Ice.ConnectionIdleTime, which affected client- and server-side
+  behavior. The new properties, Ice.ACM.Client and Ice.ACM.Server,
+  now allow independent timeouts to be specified for client- and
+  server-side ACM. Ice.ConnectionIdleTime is now deprecated.
+
+- Reverted a change introduced in 2.1.0 in which retries were not
+  attempted for oneway and batch oneway requests. Ice now behaves
+  as it did in prior releases: if the connection associated with a
+  oneway or batch oneway proxy is closed, an invocation on the proxy
+  will transparently reestablish the connection. Please see the Ice
+  manual for more information on the reliability of oneway and batch
+  oneway reliability.
+
+- Added -E option to the various Slice compilers to print preprocessor
+  output on stdout.
+
+- Fixed a bug in the option parsing for Ice tools such as slice2cpp,
+  slice2java, slice2cs, etc. The option parser used to incorrectly
+  complain about repeated options when in fact no option was
+  repeated. Also changed the parser to permit options to follow an
+  argument, so
+
+      slice2cpp -I. x.ice
+
+  and
+
+      slice2cpp x.ice -I.
+
+  are now equivalent.
+
+Changes since version 2.0.0
+---------------------------
+
+- Fixed bug in the code generators for C# and VB: for sequences
+  of structs and sequences of Object*, incorrect code was generated
+  if a ["cs:collection"] or ["vb:collection"] metadata directive
+  was used.
+
+- We do not retry oneway or batch oneway requests anymore, except if
+  there are problems during connection establishment. If we retry a
+  oneway or batch oneway, previous oneways from the same batch, or
+  previous oneways that are buffered by the IP stack implementation,
+  are silently thrown away. This can lead to a situation where the
+  latest oneway succeeds due to retry, but former oneways are
+  discarded.
+
+- Fixed a deadlock that could occur if a server cannot send data
+  during connection validation.
+
+- Fixed bug where marshalling would fail for sequences of integral
+  types on big endian platforms.
+
+- Fixed bug where connection establishment could raise a 
+  System.Net.Sockets.SocketException instead of an Ice.SocketException.
+
+- Added setDefaultContext() and getDefaultContext() to the
+  Ice.Communicator interface. This allows a default context to be
+  established on a communicator-wide basis. See section 29.9.3 in the
+  doc.
+
+  Added ice_defaultContext to Ice.ObjectPrx. This creates a new
+  proxy that uses the default context established on the communicator.
+
+- Overloaded the checkedCast member function of the generated PrxHelper
+  classes to allow a trailing argument of type Ice::Context. This makes
+  it possible to do stateful things that require a context in a
+  servant locator's activate() method.
+
+- Fixed a bug in slice2cs: incorrect code was generated if an interface
+  was derived from a base interface in a different module and the base
+  interface contained an AMD operation.
+
+Changes since version 1.5.1
+---------------------------
+
+- The proxy returned by the object adapter operations addFacet and
+  addFacetWithUUID did not contain the facet. This required the
+  application to make an extra call to ice_newFacet in order to
+  obtain the correct proxy. This has been fixed.
+
+- Added the object adapter property <name>.PublishedEndpoints, which
+  specifies endpoints to advertise in proxies created by the adapter.
+
+- Fixed a bug with AMD exception handling, where it was possible that
+  certain exceptions propagate out of ice_response() or
+  ice_exception(), and therefore such exceptions were not handled
+  properly.
+
+- Exceptions raised while marshaling data for batch requests resulted
+  in a connection deadlock. This has been fixed.
+
+- Fixed a bug in slice2cs: the generated code was incorrect for
+  dictionaries and structures containing a sequence, if that sequence
+  was mapped to an array.
+
+- Fixed tracing of operation mode.
+
+- The escape prefix for Slice identifiers that are used by .NET
+  framework classes has been changed from "_cs_" to "_Ice_".  For
+  example, Slice "Add" now maps to C# "_Ice_Add" instead of "_cs_Add".
+
+  In addition, the prefix is now case-insensitive, so Slice "add" now
+  maps to C# "_Ice_add" whereas, previously, it mapped to C# "add".
+  (These changes were necessary to preserve binary compatibility of
+  slice2cs and slice2vb generated code.)
+
+- The documentation has always stated that same-named constructs
+  cannot be directly nested inside each other. (For example, a module
+  `M' cannot contain a constant named `M'. The slice2cs compiler did
+  not enforce this correctly up to now for modules containing
+  constructs with the same name as the enclosing module.  This has
+  been fixed and now results in a diagnostic.
+
+- The slice2cs compiler now disallows Slice definitions at global
+  scope: only modules can be defined at global scope. Everything else
+  (constants, classes, interfaces, etc.) must be defined inside a
+  module.
+
+- Fixed a bug in the slice2cs code generator:
+  
+  ["cs:collection"] sequence<Object> S1;
+  ["cs:collection"] sequence<Object*> S2;
+
+  Sequences of Object or Object* caused incorrect code to be generated
+  if they were marked as "cs:collection".
+
+- Fixed a bug in the slice2cs code generator: for nested sequences,
+  incorrect code was generated if both the inner and the outer
+  sequence were mapped as arrays.
+
+- Fixed a number of bugs in slice2cs that cause incorrect code to be
+  generated if C# keywords were used as Slice identifiers.
+
+- Fixed the and slice2cs compiler for operations with multiple
+  exceptions in an exception specification: if an exception was a base
+  of one or more other exceptions in the same exception specification,
+  the code generator sometimes emitted the catch blocks in the
+  marshaling and dispatch code in the wrong order. (This applied only
+  to interfaces with an ["amd"] metadata directive.)
+
+- Several demos used Slice classes where interfaces were more
+  appropriate. This has been fixed.
+
+- Ice.Util.initializeWithProperties() now correctly parses the command
+  line arguments.
+
+- New properties Ice.StdErr and Ice.StdOut to redirect the standard
+  error and output streams of a process.
+
+- Added test and demo for using Ice for C# with Glacier.
+
+- Changed the slice2cs code generator to avoid generating empty
+  namespaces.
+
+Changes since version 1.5.0
+---------------------------
+
+- Compression is now supported for non-Windows platforms as well
+  as on Windows.
+
+- Fixed a bug in the slice2cs code generator: classes with multiple
+  sequence members caused incorrect code to be generated.
+
+- Fixed a bug that sometimes prevented correct connection
+  establishment under Windows.
+
+Changes since Alpha 2
+---------------------
+
+- Added support for generating checksums of Slice definitions,
+  enabling peers to verify that they share the same client-server
+  contract. See the manual for more information.
+
+- Added support for Mono.
+
+- The DLL that contains the Ice for C# run time has been renamed from
+  Icicle.dll to icecs.dll.
+
+- Added support for protocol compression.
+
+- Added extensive documentation for the language mapping to
+  "Distributed Programming with Ice" (http://www.zeroc.com/Ice-Manual.pdf).
+
+- Added support for AMI and AMD.
+
+- Removed "cs:array" directive for sequences. Sequences are now mapped
+  to arrays by default. If you want a sequence to map to a container
+  derived from System.Collections.CollectionBase, you need to use
+  the "cs:collection" metadata directive.
+
+- Added "cs:class" metadata directive for Slice structures. Without
+  this directive, Slice structures map to C# structures. With this
+  directive, Slice structures map to C# classes.
+
+- Added a key pair to the distribution so the assembly has a strong
+  name and can be added to the global assembly cache. If you want to
+  use your own key pair, you can replace the contents of
+  src/Ice/IcecsKey.snk with your own key pair. See
+  http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpguide/html/cpconcreatingkeypairforuseincreatingstrongly-namedassembly.asp
+  for more detail.
+
+- The generated code is more efficient and smaller than it was
+  previously.
+
+
+Changes since Alpha 1
+---------------------
+
+- Changed the generate.cs code to look for slice2cs in
+  ${SolutionDir}/bin.
+
+- Added "cs:array" metadata directive for sequences.  Sequences with
+  this directive are mapped to arrays instead of being derived from
+  Collections.CollectionBase.
+
+- Improved marshaling speed.
