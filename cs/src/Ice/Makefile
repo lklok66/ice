@@ -51,7 +51,6 @@ SRCS		= Acceptor.cs \
 		  ObjectFactoryManager.cs \
 		  ObjectReader.cs \
 		  ObjectWriter.cs \
-		  Options.cs \
 		  OutgoingAsync.cs \
 		  Outgoing.cs \
 		  OutputBase.cs \
