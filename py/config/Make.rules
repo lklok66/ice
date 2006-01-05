@@ -90,7 +90,7 @@ ICE_LIBS		?= -L$(ICE_HOME)/lib -lIce -lIceUtil -lSlice
 # ----------------------------------------------------------------------
 
 SHELL			= /bin/sh
-VERSION			= 3.0.0
+VERSION			= 3.0.1
 SOVERSION		= 30
 libdir			= $(top_srcdir)/python
 

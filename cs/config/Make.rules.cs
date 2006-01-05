@@ -81,7 +81,7 @@ KERBEROS_HOME		?= /usr/kerberos
 # ----------------------------------------------------------------------
 
 SHELL			= /bin/sh
-VERSION			= 3.0.0
+VERSION			= 3.0.1
 bindir			= $(top_srcdir)/bin
 libdir			= $(top_srcdir)/lib
 slicedir := $(shell test -d $(top_srcdir)/slice && echo $(top_srcdir))
