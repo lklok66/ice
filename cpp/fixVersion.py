@@ -236,6 +236,9 @@ if not patchIceE:
 	fileMatchAndReplace(os.path.join(icephp_home, "src", "ice", "php_ice.h"),
 			    [("ICEPHP_STRING_VERSION \"([0-9]*\.[0-9]*\.[0-9]*)\"", version), \
 			     ("ICEPHP_INT_VERSION ([0-9]*)", intVersion(version))])
+	fileMatchAndReplace(os.path.join(ice_home, "src", "ice", "profile.cpp"),
+			    [("ICE_STRING_VERSION \"([0-9]*\.[0-9]*\.[0-9]*)\"", version), \
+			     ("ICE_INT_VERSION ([0-9]*)", intVersion(version))])
 	
     #
     # Fix version in IcePy
@@ -269,7 +272,7 @@ if icee_home:
                            [("testCommon([0-9][0-9])d?\.((dll)|(pdb))", soVersion(version))])
 
 #
-# Fix version in IceJ sources
+# Fix version in IceJ-E sources
 #
 iceje_home = findSourceTree("iceje", os.path.join("src", "IceUtil", "Version.java"))
 if iceje_home:
