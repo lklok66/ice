@@ -276,6 +276,14 @@ def buildIceDists(stageDir, sourcesDir, sourcesVersion, installVersion):
 	print "Building in " + os.getcwd() + "..."
 	runprog('msdev all.dsw /useenv /make "all - Win32 Debug"')
 	runprog('msdev all.dsw /useenv /make "all - Win32 Release"')
+    elif installVersion == "vc80":
+	#
+	# Ice for C++ 
+	#
+	os.chdir(iceHome)
+	print "Building in " + os.getcwd() + "..."
+	runprog("devenv all.sln /useenv /build Debug")
+	runprog("devenv all.sln /useenv /build Release")
 
 def buildMergeModules(startDir, stageDir, sourcesVersion, installVersion):
     """Build third party merge modules."""
@@ -370,7 +378,7 @@ def main():
 	try:
 	    optionList, args = getopt.getopt(
 		sys.argv[1:], "dhil:", [ "help", "clean", "skip-build", "skip-installer", "info", "debug", 
-		"logfile", "vc60", "vc71", "sslhome=", "expathome=", "dbhome=", "stlporthome=", "bzip2home=", 
+		"logfile", "vc60", "vc71", "vc80", "sslhome=", "expathome=", "dbhome=", "stlporthome=", "bzip2home=", 
 		"thirdparty="])
 	except getopt.GetoptError:
 	    usage()
@@ -406,6 +414,8 @@ def main():
 		target = 'vc60'
 	    elif o == '--vc71':
 		target = 'vc71'
+	    elif o == '--vc80':
+		target = 'vc80'
 	    elif o == '--sources':
 		os.environ['SOURCES'] = a
 	    elif o == '--buildDir':
