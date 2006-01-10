@@ -202,11 +202,10 @@ projects into Visual Studio 2005 projects:
    Create new project platforms)
  - Then in the Solution Explorer window, select all projects.
  - Select the Project/Properties menu
+ - Select All Configurations in the Configuration drop-down list
  - In Configuration Properties/General, change "Ouput Directory"
    to be just $(ConfigurationName) and "Intermediate Directory"
    to be just $(ConfigurationName)
- - You need to perform the previous step for both "Debug" and
-   "Release" configurations (or All configurations).
  - Finally, save all your project files.
 
 ======================================================================
