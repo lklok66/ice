@@ -56,7 +56,7 @@
 		<author>##ID_STRING2##</author>
 		<keywords>MergeModule,MSI,Database</keywords>
 		<comments>Contact:  Your local administrator</comments>
-		<template>Intel;1033</template>
+		<template>Intel64;1033</template>
 		<lastauthor>Administrator</lastauthor>
 		<revnumber>{3A773430-ACFB-45CB-A06E-162402847333}</revnumber>
 		<lastprinted/>
@@ -187,7 +187,7 @@
 		<col def="S0">ISDotNetInstallerArgsCommit</col>
 		<col def="S0">ISDotNetInstallerArgsUninstall</col>
 		<col def="S0">ISDotNetInstallerArgsRollback</col>
-		<row><td>ExpatRuntime.43F11D65_2523_4074_A74E_81ABA8E7973C</td><td>{C08E5938-278F-42ED-B956-384F0444C348}</td><td>INSTALLDIR.43F11D65_2523_4074_A74E_81ABA8E7973C</td><td>8</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>ExpatRuntime.43F11D65_2523_4074_A74E_81ABA8E7973C</td><td>{C08E5938-278F-42ED-B956-384F0444C348}</td><td>INSTALLDIR.43F11D65_2523_4074_A74E_81ABA8E7973C</td><td>264</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 	</table>
 
 	<table name="Condition">

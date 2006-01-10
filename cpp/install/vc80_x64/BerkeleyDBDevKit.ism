@@ -56,7 +56,7 @@
 		<author>##ID_STRING2##</author>
 		<keywords>MergeModule,MSI,Database</keywords>
 		<comments>Contact:  Your local administrator</comments>
-		<template>Intel;1033</template>
+		<template>Intel64;1033</template>
 		<lastauthor>Administrator</lastauthor>
 		<revnumber>{D6A3263D-9AB7-436D-9060-49C518AF8D82}</revnumber>
 		<lastprinted/>
@@ -187,7 +187,7 @@
 		<col def="S0">ISDotNetInstallerArgsCommit</col>
 		<col def="S0">ISDotNetInstallerArgsUninstall</col>
 		<col def="S0">ISDotNetInstallerArgsRollback</col>
-		<row><td>BerkeleyDBDev.27F0A49F_AA13_42F6_825C_7C3F439BAC84</td><td>{CF2E056B-7D61-4DB1-BACC-39BA6DBE732A}</td><td>INSTALLDIR.27F0A49F_AA13_42F6_825C_7C3F439BAC84</td><td>8</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>BerkeleyDBDev.27F0A49F_AA13_42F6_825C_7C3F439BAC84</td><td>{5BE25E49-5BB0-4AF4-B254-BC1D275D2A42}</td><td>INSTALLDIR.27F0A49F_AA13_42F6_825C_7C3F439BAC84</td><td>264</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 	</table>
 
 	<table name="Condition">

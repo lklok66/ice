@@ -56,7 +56,7 @@
 		<author>##COMPANY_NAME##</author>
 		<keywords>Installer,MSI,Database</keywords>
 		<comments>##ID_STRING5##</comments>
-		<template>Intel;1033</template>
+		<template>Intel64;1033</template>
 		<lastauthor>Administrator</lastauthor>
 		<revnumber>{5CB7587E-E507-478C-8089-B9EFC2F6B786}</revnumber>
 		<lastprinted/>
@@ -338,8 +338,7 @@
 		<col def="S0">ISDotNetInstallerArgsCommit</col>
 		<col def="S0">ISDotNetInstallerArgsUninstall</col>
 		<col def="S0">ISDotNetInstallerArgsRollback</col>
-		<row><td>CommonDoc</td><td>{4DE2986F-6C94-45A2-B7C0-FB91A2F27F09}</td><td>INSTALLDIR</td><td>8</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>VisualStudioRuntime</td><td>{D7F73B3F-43B0-459D-9740-3D8CCF271161}</td><td>INSTALLDIR</td><td>8</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>CommonDoc</td><td>{DC8814B8-BC14-429D-AD7A-6115967E9E2B}</td><td>INSTALLDIR</td><td>264</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 	</table>
 
 	<table name="Condition">
@@ -1377,7 +1376,6 @@
 		<col key="yes" def="s38">Feature_</col>
 		<col key="yes" def="s72">Component_</col>
 		<row><td>packages</td><td>CommonDoc</td></row>
-		<row><td>packages</td><td>VisualStudioRuntime</td></row>
 	</table>
 
 	<table name="File">
@@ -1545,7 +1543,6 @@
 		<col def="S0">HTTPLocation</col>
 		<col def="S0">Miscellaneous</col>
 		<row><td>CommonDoc</td><td/><td/><td>_B053A960_5DAC_427F_98DD_CB66761F11C7_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>VisualStudioRuntime</td><td/><td/><td>_30BA3320_69CB_4682_87F9_962EE1BF4FF1_FILTER</td><td/><td/><td/><td/></row>
 	</table>
 
 	<table name="ISDLLWrapper">
@@ -1574,7 +1571,6 @@
 		<col def="S255">ExcludeFiles</col>
 		<col def="I4">ISAttributes</col>
 		<row><td>CommonDoc</td><td>&lt;ISProjectFolder&gt;\install\packages\common\doc</td><td>4</td><td/><td>*.rtf</td><td>0</td></row>
-		<row><td>VisualStudioRuntime</td><td>&lt;ISProjectFolder&gt;\install\microsoft\runtime</td><td>4</td><td/><td/><td>2</td></row>
 	</table>
 
 	<table name="ISFeatureMergeModuleExcludes">

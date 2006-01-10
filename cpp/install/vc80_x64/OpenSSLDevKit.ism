@@ -56,7 +56,7 @@
 		<author>##ID_STRING2##</author>
 		<keywords>MergeModule,MSI,Database</keywords>
 		<comments>Contact:  Your local administrator</comments>
-		<template>Intel;1033</template>
+		<template>Intel64;1033</template>
 		<lastauthor>Administrator</lastauthor>
 		<revnumber>{B8C9DA2C-BAB1-41AE-B8F4-EFB546E2833D}</revnumber>
 		<lastprinted/>
@@ -187,7 +187,7 @@
 		<col def="S0">ISDotNetInstallerArgsCommit</col>
 		<col def="S0">ISDotNetInstallerArgsUninstall</col>
 		<col def="S0">ISDotNetInstallerArgsRollback</col>
-		<row><td>OpenSSLDevKit.9BD4C15D_8957_4268_9B9A_08D77BB8EEFE</td><td>{5A24A5F9-4CF1-480B-A916-792EEDA51C84}</td><td>INSTALLDIR.9BD4C15D_8957_4268_9B9A_08D77BB8EEFE</td><td>8</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>OpenSSLDevKit.9BD4C15D_8957_4268_9B9A_08D77BB8EEFE</td><td>{E99CB3FE-8751-4ED1-9479-29AF19A24FBD}</td><td>INSTALLDIR.9BD4C15D_8957_4268_9B9A_08D77BB8EEFE</td><td>264</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 	</table>
 
 	<table name="Condition">
