@@ -2455,7 +2455,7 @@
 		<row><td>ID_STRING37</td><td>1033</td><td>{&amp;Tahoma8}InstallShield</td><td>0</td><td/><td>1033487467</td></row>
 		<row><td>ID_STRING38</td><td>1033</td><td>&amp;Next &gt;</td><td>0</td><td/><td>1033477259</td></row>
 		<row><td>ID_STRING39</td><td>1033</td><td>&lt; &amp;Back</td><td>0</td><td/><td>1033477259</td></row>
-		<row><td>ID_STRING4</td><td>1033</td><td>Ice 3.0.1 Third Party Packages for Visual Studio .NET 2005 x64</td><td>0</td><td/><td>1218071957</td></row>
+		<row><td>ID_STRING4</td><td>1033</td><td>Ice 3.0.1 Third Party Packages for Visual Studio 2005 x64</td><td>0</td><td/><td>1352308364</td></row>
 		<row><td>ID_STRING40</td><td>1033</td><td>Cancel</td><td>0</td><td/><td>1033477259</td></row>
 		<row><td>ID_STRING43</td><td>1033</td><td>[ProductName] - InstallShield Wizard</td><td>0</td><td/><td>1033477259</td></row>
 		<row><td>ID_STRING44</td><td>1033</td><td>{&amp;MSSWhiteSerif8}InstallShield</td><td>0</td><td/><td>1033477259</td></row>
@@ -2899,7 +2899,7 @@ VABIAEkAUgBEAF8AUABBAFIAVABZAF8ATQBTAEkAAQBaAEUAUgBPAEMA
 		<row><td>ProductCode</td><td>{9F587C22-F72E-49CC-B53F-3BE6EB05800A}</td><td/></row>
 		<row><td>ProductID</td><td>none</td><td/></row>
 		<row><td>ProductLanguage</td><td>1033</td><td/></row>
-		<row><td>ProductName</td><td>Ice 3.0.1 Third Party Packages for Visual Studio .NET 2005 x64</td><td/></row>
+		<row><td>ProductName</td><td>Ice 3.0.1 Third Party Packages for Visual Studio 2005 x64</td><td/></row>
 		<row><td>ProductVersion</td><td>3.0.1</td><td/></row>
 		<row><td>ProgressType0</td><td>install</td><td/></row>
 		<row><td>ProgressType1</td><td>Installing</td><td/></row>
