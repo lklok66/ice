@@ -52,7 +52,7 @@
 	<summary>
 		<codepage>1252</codepage>
 		<title>Installation Database</title>
-		<subject>##ID_STRING1##</subject>
+		<subject>OpenSSL Dev Kit for Visual Studio 2005</subject>
 		<author>##ID_STRING2##</author>
 		<keywords>MergeModule,MSI,Database</keywords>
 		<comments>Contact:  Your local administrator</comments>
@@ -682,7 +682,7 @@
 		<col def="I2">Encoded</col>
 		<col def="S0">Comment</col>
 		<col def="I4">TimeStamp</col>
-		<row><td>ID_STRING1</td><td>1033</td><td>OpenSSL Dev Kit for Visual Studio .NET 2005</td><td>0</td><td/><td>1218057227</td></row>
+		<row><td>ID_STRING1</td><td>1033</td><td>OpenSSL Dev Kit for Visual Studio 2005</td><td>0</td><td/><td>1218057227</td></row>
 		<row><td>ID_STRING2</td><td>1033</td><td>ZeroC</td><td>0</td><td/><td>-2129046420</td></row>
 	</table>
 

@@ -52,7 +52,7 @@
 	<summary>
 		<codepage>1252</codepage>
 		<title>Installation Database</title>
-		<subject>##ID_STRING2##</subject>
+		<subject>JGoodies Runtime for Visual Studio 2005</subject>
 		<author>##ID_STRING1##</author>
 		<keywords>MergeModule,MSI,Database</keywords>
 		<comments>Contact:  Your local administrator</comments>
@@ -690,7 +690,7 @@
 		<col def="S0">Comment</col>
 		<col def="I4">TimeStamp</col>
 		<row><td>ID_STRING1</td><td>1033</td><td>ZeroC</td><td>0</td><td/><td>890853199</td></row>
-		<row><td>ID_STRING2</td><td>1033</td><td>JGoodies Runtime for Visual Studio .NET 2005</td><td>0</td><td/><td>1218073579</td></row>
+		<row><td>ID_STRING2</td><td>1033</td><td>JGoodies Runtime for Visual Studio 2005</td><td>0</td><td/><td>1218073579</td></row>
 	</table>
 
 	<table name="Icon">
