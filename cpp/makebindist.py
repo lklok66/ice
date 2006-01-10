@@ -434,14 +434,10 @@ def makeInstall(sources, buildDir, installDir, distro, clean, version):
     # with the Jar already built.
     # 
     if distro.startswith('IceJ'):
-	if getPlatform() == 'linux64':
-	    shutil.copy(buildDir + '/' + distro + '/lib/Ice.jar',
-		    installDir + '/lib64')
-	    shutil.copy(buildDir + '/' + distro + '/lib/IceGridGUI.jar',
-		    installDir + '/lib64')
-	else:
-	    shutil.copy(buildDir + '/' + distro + '/lib/Ice.jar', installDir + '/lib')
-	    shutil.copy(buildDir + '/' + distro + '/lib/IceGridGUI.jar', installDir + '/lib')
+	if not os.path.exists(os.path.join(installDir, 'lib')):
+	    os.mkdir(os.path.join(installDir, 'lib'))
+	shutil.copy(buildDir + '/' + distro + '/lib/Ice.jar', installDir + '/lib')
+	shutil.copy(buildDir + '/' + distro + '/lib/IceGridGUI.jar', installDir + '/lib')
 	#
 	# We really just want to copy the files, not move them.
 	# Shelling out to a copy is easier (and more likely to always
@@ -1041,7 +1037,7 @@ def main():
 			   ('icephp','IcePHP-' + version, 'php'),
                            ('icej','IceJ-' + version, 'j') ]
 
-	if not getPlatform() in ['aix', 'linux64']:
+	if not getPlatform() in ['aix']:
 	    sourceTarBalls.append(('icepy','IcePy-' + version, 'py'))
 
 	if getPlatform() == 'linux':

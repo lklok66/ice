@@ -269,7 +269,9 @@ x64_transforms = [
 	       ('dir', 'bin', 'usr/bin'),
 	       ('dir', 'include', 'usr/include'),
 	       ('dir', 'lib64', 'usr/lib64'),
-	       ('file', 'usr/lib64/IceGridGUI.jar', 'usr/lib64/Ice-%version%/IceGridGUI.jar' ),
+	       ('file', 'lib/IceGridGUI.jar', 'usr/lib/Ice-%version%/IceGridGUI.jar' ),
+	       ('dir', 'ant', 'usr/lib/Ice-%version%/ant'),
+	       ('dir', 'python', 'usr/lib64/Ice-%version%/python'),
                ('file', 'README', 'usr/share/doc/Ice-%version%/README'),
                ('file', 'ICE_LICENSE', 'usr/share/doc/Ice-%version%/ICE_LICENSE'),
                ('file', 'LICENSE', 'usr/share/doc/Ice-%version%/LICENSE')
@@ -316,7 +318,7 @@ fileLists64 = [
              ('lib', 'lib64/libIceXML.so.VERSION'),
              ('lib', 'lib64/libSlice.so.VERSION'),
              ('lib', 'lib64/libIceGrid.so.VERSION'),
-	     ('dir', 'lib64/Ice-%version%/IceGridGUI.jar'),
+	     ('dir', 'lib/Ice-%version%/IceGridGUI.jar'),
              ('dir', 'share/slice'),
              ('dir', 'share/doc/Ice-%version%/doc'),
              ('xdir', 'share/doc/Ice-%version%/certs'),
@@ -362,7 +364,43 @@ fileLists64 = [
 		('xdir', 'share/doc/Ice-%version%/config'),
 		('file', 'share/doc/Ice-%version%/config/Make.rules'),
 		('file', 'share/doc/Ice-%version%/config/Make.rules.Linux'),
-		], 'x86_64')
+		], 'x86_64'),
+    Subpackage('java-devel',
+               'ice-java = %version%',
+               'Tools and demos for developing Ice applications in Java',
+               'Development/Tools',
+	       iceDescription,
+	       'Requires: ice-x86_64',
+               [('exe', 'bin/slice2java'),
+                ('exe', 'bin/slice2freezej'),
+		('xdir', 'lib/Ice-%version%'),
+		('dir', 'lib/Ice-%version%/ant'),
+		('xdir', 'share/doc/Ice-%version%'),
+		('xdir', 'share/doc/Ice-%version%/certs'),
+	        ('file', 'share/doc/Ice-%version%/certs/certs.jks'),
+	        ('file', 'share/doc/Ice-%version%/certs/client.jks'),
+	        ('file', 'share/doc/Ice-%version%/certs/server.jks'),
+		('xdir', 'share/doc/Ice-%version%/config'),
+	        ('file', 'share/doc/Ice-%version%/config/build.properties'),
+	        ('file', 'share/doc/Ice-%version%/config/common.xml'),
+	        ('file', 'share/doc/Ice-%version%/config/iceproject.xml'),
+		('dir', 'share/doc/Ice-%version%/demoj')], 'x86_64'),
+    Subpackage('python',
+               'ice = %version%, python >= 2.4.1',
+               'The Ice runtime for Python applications',
+               'System Environment/Libraries',
+	       iceDescription,
+	       'Requires: ice-x86_64',
+               [('dir', 'lib64/Ice-%version%/python')], 'x86_64'),
+    Subpackage('python-devel',
+               'ice-python = %version%',
+               'Tools and demos for developing Ice applications in Python',
+               'Development/Tools',
+	       iceDescription,
+	       'Requires: ice-x86_64',
+               [('exe', 'bin/slice2py'),
+		('xdir', 'share/doc/Ice-%version%'),
+	        ('dir', 'share/doc/Ice-%version%/demopy')], 'x86_64')
     ]
 
 fileLists = [
@@ -677,11 +715,11 @@ def createRPMSFromBinaries64(buildDir, installDir, version, soVersion):
     os.system("tar xfz " + installDir + "/../Ice-" + version + "-demos.tar.gz -C " + installDir)
 
     ofile = open(buildDir + "/Ice-" + version + ".spec", "w")
-    fileLists64[0].writeHdr(ofile, version, '1', installDir, [])
-    fileLists64[1].writeHdr(ofile, version, '1', installDir, [])
+    for f in fileLists64:
+	f.writeHdr(ofile, version, '1', installDir, [])
     ofile.write('\n\n\n')
-    fileLists64[0].writeFiles(ofile, version, soVersion, installDir)
-    fileLists64[1].writeFiles(ofile, version, soVersion, installDir)
+    for f in fileLists64:
+	f.writeFiles(ofile, version, soVersion, '')
     ofile.write('\n')
 
     ofile.flush()
