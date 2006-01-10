@@ -58,7 +58,7 @@
 		<comments>##ID_STRING5##</comments>
 		<template>Intel;1033</template>
 		<lastauthor>Administrator</lastauthor>
-		<revnumber>{9847DAA6-ADE6-41FA-A03B-9D230CAA141D}</revnumber>
+		<revnumber>{93E6793D-885E-4826-9662-DCC4D89CEE74}</revnumber>
 		<lastprinted/>
 		<createdtm>06/21/1999 04:30</createdtm>
 		<lastsavedtm>07/14/2000 08:20</lastsavedtm>
@@ -935,7 +935,7 @@
 		<row><td>DatabaseFolder</td><td>ChangeFolder</td><td>SpawnDialog</td><td>InstallChangeFolder</td><td>1</td><td>1</td></row>
 		<row><td>DatabaseFolder</td><td>ChangeFolder</td><td>[_BrowseProperty]</td><td>DATABASEDIR</td><td>1</td><td>2</td></row>
 		<row><td>DatabaseFolder</td><td>Next</td><td>NewDialog</td><td>SetupType</td><td>1</td><td>1</td></row>
-		<row><td>DestinationFolder</td><td>Back</td><td>NewDialog</td><td>LicenseAgreement</td><td>1</td><td>0</td></row>
+		<row><td>DestinationFolder</td><td>Back</td><td>NewDialog</td><td>OpenSSLLicense</td><td>1</td><td>1</td></row>
 		<row><td>DestinationFolder</td><td>Cancel</td><td>SpawnDialog</td><td>CancelSetup</td><td>1</td><td>1</td></row>
 		<row><td>DestinationFolder</td><td>ChangeFolder</td><td>SpawnDialog</td><td>InstallChangeFolder</td><td>1</td><td>1</td></row>
 		<row><td>DestinationFolder</td><td>ChangeFolder</td><td>[_BrowseProperty]</td><td>INSTALLDIR</td><td>1</td><td>2</td></row>
@@ -984,7 +984,7 @@
 		<row><td>MaintenanceWelcome</td><td>Next</td><td>NewDialog</td><td>MaintenanceType</td><td>1</td><td>0</td></row>
 		<row><td>OpenSSLLicense</td><td>Back</td><td>NewDialog</td><td>ExpatLicense</td><td>1</td><td>1</td></row>
 		<row><td>OpenSSLLicense</td><td>Cancel</td><td>SpawnDialog</td><td>CancelSetup</td><td>1</td><td>1</td></row>
-		<row><td>OpenSSLLicense</td><td>Next</td><td>NewDialog</td><td>JGoodiesFormsLicense</td><td>AgreeToLicense1 = "Yes"</td><td>1</td></row>
+		<row><td>OpenSSLLicense</td><td>Next</td><td>NewDialog</td><td>DestinationFolder</td><td>AgreeToLicense1 = "Yes"</td><td>1</td></row>
 		<row><td>OutOfSpace</td><td>Resume</td><td>NewDialog</td><td>AdminNetworkLocation</td><td>ACTION = "ADMIN"</td><td>0</td></row>
 		<row><td>OutOfSpace</td><td>Resume</td><td>NewDialog</td><td>CustomSetup</td><td>ACTION &lt;&gt; "ADMIN"</td><td>0</td></row>
 		<row><td>PatchWelcome</td><td>Back</td><td>NewDialog</td><td>SplashBitmap</td><td>Display_IsBitmapDlg</td><td>0</td></row>
@@ -1591,6 +1591,7 @@
 		<row><td>packages</td><td>BerkeleyDBJava.VC80.E108EC08_BBAD_487E_894D_AC83937057AD</td><td>0</td></row>
 		<row><td>packages</td><td>BerkeleyDBRuntime.VC80.8B4C6A8F_5ED7_425D_98B7_CB354DC66CFB</td><td>0</td></row>
 		<row><td>packages</td><td>Bzip2Runtime.VC80.8A1A3328_212D_49E1_B41F_75B30E27102E</td><td>0</td></row>
+		<row><td>packages</td><td>CRT.98CB24AD_52FB_DB5F_FF1F_C8B3B9A1E18E</td><td>0</td></row>
 		<row><td>packages</td><td>ExpatDevKit.VC80.F9B22CE0_4775_41AD_9FB8_5F0E2FC9D2D4</td><td>0</td></row>
 		<row><td>packages</td><td>ExpatRuntime.VC80.6D0446E4_2246_4BE2_841E_248BD4AE3795</td><td>0</td></row>
 		<row><td>packages</td><td>JGoodies.VC80.83C3E3FA_8138_46C8_A4DB_E6872C51B032</td><td>0</td></row>
@@ -1683,6 +1684,7 @@
 		<row><td>BerkeleyDBJava.VC80.E108EC08_BBAD_487E_894D_AC83937057AD</td><td>0</td><td>BerkeleyDB Java Runtime for Visual Studio .NET 2005</td><td>[INSTALLDIR]</td><td/></row>
 		<row><td>BerkeleyDBRuntime.VC80.8B4C6A8F_5ED7_425D_98B7_CB354DC66CFB</td><td>0</td><td>BerkeleyDB Runtime for Visual Studio .NET 2005</td><td>[INSTALLDIR]</td><td/></row>
 		<row><td>Bzip2Runtime.VC80.8A1A3328_212D_49E1_B41F_75B30E27102E</td><td>0</td><td>Bzip2 Runtime for Visual Studio .Net 2005</td><td>[INSTALLDIR]</td><td/></row>
+		<row><td>CRT.98CB24AD_52FB_DB5F_FF1F_C8B3B9A1E18E</td><td>0</td><td>Visual C++ 8.0 CRT (x86) WinSXS MSM Beta2</td><td/><td/></row>
 		<row><td>ExpatDevKit.VC80.F9B22CE0_4775_41AD_9FB8_5F0E2FC9D2D4</td><td>0</td><td>Expat Dev Kit for Visual Studio .NET 2005</td><td>[INSTALLDIR]</td><td/></row>
 		<row><td>ExpatRuntime.VC80.6D0446E4_2246_4BE2_841E_248BD4AE3795</td><td>0</td><td>Expat Runtime for Visual Studio .NET 2005</td><td>[INSTALLDIR]</td><td/></row>
 		<row><td>JGoodies.VC80.83C3E3FA_8138_46C8_A4DB_E6872C51B032</td><td>0</td><td>JGoodies Runtime for Visual Studio .NET 2005</td><td>[INSTALLDIR]</td><td/></row>
@@ -2895,7 +2897,7 @@ VABIAEkAUgBEAF8AUABBAFIAVABZAF8ATQBTAEkAAQBaAEUAUgBPAEMA
 		<row><td>NewProperty2111</td><td>0</td><td/></row>
 		<row><td>NewProperty2112</td><td>0</td><td/></row>
 		<row><td>PIDTemplate</td><td>12345&lt;###-%%%%%%%&gt;@@@@@</td><td/></row>
-		<row><td>ProductCode</td><td>{D9959A5C-8ABF-46F7-BD76-48CFC07B3818}</td><td/></row>
+		<row><td>ProductCode</td><td>{0E163DF6-2418-4F2D-866E-53669E0EEC08}</td><td/></row>
 		<row><td>ProductID</td><td>none</td><td/></row>
 		<row><td>ProductLanguage</td><td>1033</td><td/></row>
 		<row><td>ProductName</td><td>Ice 3.0.1 Third Party Packages for Visual Studio .NET 2005</td><td/></row>
@@ -2908,7 +2910,7 @@ VABIAEkAUgBEAF8AUABBAFIAVABZAF8ATQBTAEkAAQBaAEUAUgBPAEMA
 		<row><td>ReinstallModeText</td><td>omus</td><td/></row>
 		<row><td>SHOWLAUNCHPROGRAM</td><td>0</td><td/></row>
 		<row><td>SetupType</td><td>Typical</td><td/></row>
-		<row><td>UpgradeCode</td><td>{BE4E1A42-EC60-43A5-B8B9-C10DA329D619}</td><td/></row>
+		<row><td>UpgradeCode</td><td>{3884A1C3-65A1-42E8-A342-3B2B7DC52384}</td><td/></row>
 		<row><td>_IsMaintenance</td><td>Change</td><td/></row>
 		<row><td>_IsSetupTypeMin</td><td>Typical</td><td/></row>
 	</table>
