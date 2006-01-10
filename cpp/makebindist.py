@@ -1146,10 +1146,13 @@ def main():
 
     if getPlatform() == 'hpux':
 	ssl = os.environ['OPENSSL_HOME']
-	copyfiles('%s/bin' % ssl, 'Ice-%s/bin' % version)
+	shutil.copy('%s/bin/openssl' % ssl, 'Ice-%s/bin' % version)
 	runprog('cp -R ' + ssl + '/include Ice-' + version)
 	runprog('cp -R ' + ssl + '/lib Ice-' + version)
 	runprog('rm -rf Ice-' + version + '/lib/libfips*')
+	runprog('rm -rf Ice-' + version + '/lib/engines')
+	runprog('rm -rf Ice-' + version + '/lib/pkgconfig')
+	runprog('rm -f Ice-' + version + '/lib/*.a')
 
     uname = readcommand('uname')
     platformSpecificFiles = [ 'README', 'SOURCES', 'THIRD_PARTY_LICENSE' ]
