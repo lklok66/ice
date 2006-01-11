@@ -81,8 +81,14 @@ endif
 PYTHON_FLAGS		?= -I$(PYTHON_INCLUDE_DIR)
 PYTHON_LIBS		?= -L$(PYTHON_LIB_DIR) -l$(PYTHON_VERSION)
 
-ICE_FLAGS		?= -I$(ICE_HOME)/include
-ICE_LIBS		?= -L$(ICE_HOME)/lib -lIce -lIceUtil -lSlice
+ifeq ($(LP64),yes)
+   ICE_LIBS             = -L$(ICE_HOME)/lib64 -L$(ICE_HOME)/lib -lIce -lIceUtil -lSlice 
+else 
+   ICE_LIBS		= -L$(ICE_HOME)/lib -lIce -lIceUtil -lSlice
+endif
+
+ICE_FLAGS		= -I$(ICE_HOME)/include
+
 
 
 # ----------------------------------------------------------------------
