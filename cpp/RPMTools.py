@@ -656,7 +656,7 @@ def createFullSpecFile(ofile, installDir, version, soVersion, buildReq = True):
 def createRPMSFromBinaries(buildDir, installDir, version, soVersion):
     if os.path.exists(installDir + "/rpmbase"):
 	shutil.rmtree(installDir + "/rpmbase")
-    shutil.copytree(installDir + "/Ice-" + version, installDir + "/rpmbase")
+    shutil.copytree(installDir + "/Ice-" + version, installDir + "/rpmbase", true)
     installDir = installDir + '/rpmbase'
     compileall.compile_dir(installDir + '/python')
 

@@ -10,6 +10,7 @@
 import getopt, os, re, shutil, string, sys, zipfile
 import logging, cStringIO, glob
 import components
+import textwrap
 
 # 
 # Current default third party library versions.
@@ -285,6 +286,109 @@ def buildIceDists(stageDir, sourcesDir, sourcesVersion, installVersion):
 	runprog("devenv all.sln /useenv /build Debug")
 	runprog("devenv all.sln /useenv /build Release")
 
+def list2english(l):
+    if len(l) == 1:
+	return l[0]
+    elif len(l) == 2:
+	return l[0] + " and " + list2english(l[1:])
+    else:
+	return l[0] + ", " + list2english(l[1:]) 
+
+def convertLicensesToRTF(toolDir, installTarget):
+    openssl = (os.path.join(os.environ["OPENSSL_HOME"], "LICENSE"), "OpenSSL", "OPENSSL_LICENSE.rtf")
+    berkeleydb = (os.path.join(os.environ["DB_HOME"], "LICENSE"), "Berkeley DB", "BERKELEY_DB_LICENSE.rtf")
+    expat = (os.path.join(os.environ["EXPAT_HOME"], "COPYING"), "Expat", "EXPAT_LICENSE.rtf")
+    bzip2 = (os.path.join(os.environ["BZIP2_HOME"], "LICENSE"), "bzip2/libbzip2", "BZIP2_LICENSE.rtf")
+
+    section_header = "License agreement for %s:\n"
+    line_string = "-------------------------------------------------------------------------------------------"
+    rtfhdr = file(os.path.join(toolDir, "docs", "rtf.hdr")).readlines()
+    rtfftr = file(os.path.join(toolDir, "docs", "rtf.footer")).readlines()
+    
+    core = [ berkeleydb, bzip2, openssl, expat ]
+
+    collection = core
+    if installTarget == "vc60":
+	collection.append((os.path.join(os.environ["STLPORT_HOME"], "doc", "license.html"),  
+	                   "STLport", "STLPORT_LICENSE.rtf"))
+    elif installTarget == "vc71":
+	collection.extend([(os.path.join(os.environ["JGOODIES_FORMS"], "license.txt"), "JGoodies Forms", 
+			    "JGOODIES_FORMS_LICENSE.rtf"),
+    			   (os.path.join(os.environ["JGOODIES_LOOKS"], "license.txt"), "JGoodies Looks", 
+			    "JGOODIES_LOOKS_LICENSE.rtf")])
+
+    third_party_sources_file_hdr = """Source Code
+-----------
+
+"""
+
+    if not os.path.exists(os.path.join(toolDir, "docs")):
+	os.mkdir(os.path.join(toolDir, "docs"))
+    names = []
+    for e in collection:
+	names.append(e[1])
+
+    text = "The source distributions of " + list2english(names)
+    text = text + " used to build this distribution can be downloaded at no cost from http://www.zeroc.com/download.html."
+    licensefile = file(os.path.join(toolDir, "docs", "THIRD_PARTY_SOURCES"), "w")
+
+    #
+    # textwrap module has got to be one of the coolest things since
+    # sliced bread. 
+    #
+    licensefile.write(third_party_sources_file_hdr)
+    licensefile.write(textwrap.fill(text, 75))
+    licensefile.close()
+
+    #
+    # XXX- I don't really know why we need a copy of the file with a
+    # different name yet. I'll fix l8r. - Brent
+    #
+    shutil.copyfile(os.path.join(toolDir, "docs", "THIRD_PARTY_SOURCES"), os.path.join(toolDir, "docs", "SOURCES"))
+
+    licensefile = file(os.path.join(toolDir, "docs", "LICENSE"), "w")
+    for f in collection:
+	contents = None
+	if f[0].endswith(".html"):
+	    # 
+	    # Here's me wishing the Python standard library had a class
+	    # for converting HTML to plain text. In the meantime, we'll
+	    # have to leverage 'links' in cygwin.
+	    #
+	    pipe_stdin, pipe_stdout = os.popen2("cygpath %s" % f[0])
+	    lines = pipe_stdout.readlines()
+	    pipe_stdin.close()
+	    pipe_stdout.close()
+	    cygname = lines[0].strip()
+	    pipe_stdin, pipe_stdout = os.popen2("links -dump %s" % cygname)
+	    lines = pipe_stdout.readlines()
+	    contents = lines[2:]
+	else:
+	    contents = file(f[0]).readlines()
+	hdr = section_header % f[1]
+	
+	licensefile.write(hdr)
+	licensefile.write(line_string[:len(hdr)] + "\n\n")
+	licensefile.writelines(contents)
+	licensefile.write("\n\n")
+	rtffile = file(os.path.join(toolDir, "docs", os.path.basename(f[2])), "w")
+	rtffile.writelines(rtfhdr)
+	rtffile.write(hdr + "\\par")
+	rtffile.write(line_string[:len(hdr)] + "\\par\n")
+	for l in contents:
+	    rtffile.write(l.rstrip("\n") + "\\par\n")
+	rtffile.writelines(rtfftr)
+	rtffile.close()
+
+    licensefile.close()
+    lines = file(os.path.join(toolDir, "docs", "LICENSE")).readlines()
+    rtflicense = file(os.path.join(toolDir, "docs", "LICENSE.rtf"), "w")
+    rtflicense.writelines(rtfhdr)
+    for l in lines:
+	rtflicense.write(l.rstrip("\n") + "\\par\n")
+    rtflicense.writelines(rtfftr)
+    rtflicense.close()
+
 def buildMergeModules(startDir, stageDir, sourcesVersion, installVersion):
     """Build third party merge modules."""
     modules = [
@@ -528,6 +632,11 @@ libraries."""
 	#
 	components.stage(os.path.join(os.path.dirname(components.__file__), "components", "components.ini"),
 		os.path.join(os.path.dirname(components.__file__), "components"), stageDir, "packages", defaults)
+
+	#
+	# Gather and generate license files.
+	#
+	convertLicensesToRTF(os.path.dirname(__file__), target)
 
 	#
 	# Build the merge module projects.
