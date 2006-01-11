@@ -1233,8 +1233,23 @@ Activator::terminationListener()
 	
 	for(vector<Process>::const_iterator p = terminated.begin(); p != terminated.end(); ++p)
 	{
-	    int status;
+	    int status = 0;
 	    pid_t pid = waitpid(p->pid, &status, 0);
+#ifdef __linux
+	    //
+	    // Calling waitpid() in a LinuxThreads environment fails with ECHILD
+	    // if the calling thread is not the one that forked the child. We
+	    // ignore this error; a signal handler installed by the main
+	    // program ensures we don't create zombies. This limitation means
+	    // that DisableOnFailure does not work under LinuxThreads.
+	    //
+	    if(pid < 0 && getSystemErrno() != ECHILD)
+	    {
+		SyscallException ex(__FILE__, __LINE__);
+		ex.error = getSystemErrno();
+		throw ex;
+	    }
+#else
 	    if(pid < 0)
 	    {
 		SyscallException ex(__FILE__, __LINE__);
@@ -1242,6 +1257,7 @@ Activator::terminationListener()
 		throw ex;
 	    }
 	    assert(pid == p->pid);
+#endif
 
 	    if(_traceLevels->activator > 0)
 	    {

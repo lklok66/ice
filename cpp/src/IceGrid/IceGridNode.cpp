@@ -20,13 +20,16 @@
 #include <IceGrid/DescriptorParser.h>
 #include <IcePatch2/Util.h>
 
-#ifdef _WIN32
+#if defined(_WIN32)
 #   include <direct.h>
 #   include <sys/types.h>
 #   include <sys/stat.h>
 #   define S_ISDIR(mode) ((mode) & _S_IFDIR)
 #   define S_ISREG(mode) ((mode) & _S_IFREG)
-#else
+#elif defined(__linux)
+#   include <signal.h>
+#   include <sys/types.h>
+#   include <sys/wait.h>
 #   include <sys/stat.h>
 #endif
 
@@ -137,6 +140,39 @@ private:
 
 } // End of namespace IceGrid
 
+#ifdef __linux
+extern "C"
+{
+
+//
+// This signal handler is only used for LinuxThreads. It's a workaround
+// for a limitation in waitpid() that requires it to be called from
+// the thread that forked the child process.
+//
+static void
+childHandler(int)
+{
+    //
+    // Call waitpid to de-allocate any resources allocated for the child
+    // process and avoid zombie processes. See man waitpid for more information.
+    //
+    int olderrno = errno;
+
+    pid_t pid;
+    do
+    {
+	pid = waitpid(-1, 0, WNOHANG);
+    }
+    while(pid > 0);
+
+    assert(pid != -1 || errno == ECHILD);
+
+    errno = olderrno;
+}
+
+}
+#endif
+
 CollocatedRegistry::CollocatedRegistry(const CommunicatorPtr& communicator, const ActivatorPtr& activator) :
     RegistryI(communicator), 
     _activator(activator)
@@ -192,6 +228,41 @@ NodeService::shutdown()
 bool
 NodeService::start(int argc, char* argv[])
 {
+#ifdef __linux
+    //
+    // Determine if we are using NPTL. If not, we need to install
+    // a signal handler for ECHILD.
+    //
+    {
+	bool nptl = false;
+
+	size_t n = confstr(_CS_GNU_LIBPTHREAD_VERSION, NULL, 0);
+	if(n > 0)
+	{
+	    char* buf = reinterpret_cast<char*>(alloca(n));
+	    assert(buf != NULL);
+	    confstr(_CS_GNU_LIBPTHREAD_VERSION, buf, n);
+	    if(strstr(buf, "NPTL") != NULL)
+	    {
+		nptl = true;
+	    }
+	}
+
+	if(!nptl)
+	{
+	    //
+	    // This application forks, so we need a signal handler for child termination.
+	    //
+	    struct sigaction action;
+	    action.sa_handler = childHandler;
+	    sigemptyset(&action.sa_mask);
+	    sigaddset(&action.sa_mask, SIGCHLD);
+	    action.sa_flags = 0;
+	    sigaction(SIGCHLD, &action, 0);
+	}
+    }
+#endif
+
     bool nowarn = false;
     bool checkdb = false;
     string desc;
