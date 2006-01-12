@@ -213,8 +213,6 @@ Ice/value/Server.cpp
 Ice/value/Value.ice
 Ice/value/ValueI.cpp
 Ice/value/ValueI.h
-ice.demo.vc60
-ice.demo.vc71
 IceBox/hello/Client.cpp
 IceBox/hello/config
 IceBox/hello/Hello.ice

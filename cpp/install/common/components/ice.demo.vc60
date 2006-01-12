@@ -251,7 +251,6 @@ Ice/value/valueC.dsp
 Ice/value/ValueI.cpp
 Ice/value/ValueI.h
 Ice/value/valueS.dsp
-ice.demo.vc60
 IceBox/hello/Client.cpp
 IceBox/hello/config
 IceBox/hello/Hello.ice
