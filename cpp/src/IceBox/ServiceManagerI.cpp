@@ -312,9 +312,6 @@ IceBox::ServiceManagerI::start(const string& service, const string& entryPoint, 
 	}
 	else
 	{
-	    int argc = 0;
-	    char **argv = 0;
-	    
 	    PropertiesPtr serviceProperties = properties->clone();
 
 	    //
@@ -326,14 +323,43 @@ IceBox::ServiceManagerI::start(const string& service, const string& entryPoint, 
 		name = name.empty() ? service : name + "-" + service;
 	    }
 
+	    //
+	    // Load property file eventually specified with
+	    // --Ice.Config and add the properties from the file to
+	    // the service properties.
+	    //
 	    PropertiesPtr fileProperties = createProperties(serviceArgs);
 	    serviceProperties->parseCommandLineOptions("", fileProperties->getCommandLineOptions());
+
 	    serviceProperties->setProperty("Ice.ProgramName", name);
 
+	    //
+	    // Parse Ice and <service>.* command line options.
+	    //
 	    serviceArgs = serviceProperties->parseIceCommandLineOptions(serviceArgs);
 	    serviceArgs = serviceProperties->parseCommandLineOptions(service, serviceArgs);
 
+	    //
+	    // Remaining command line options are passed to the
+	    // communicator with argc/argv. This is necessary for Ice
+	    // plugin properties (e.g.: IceSSL).
+	    //
+	    int argc = serviceArgs.size();
+	    char** argv = new char*[argc + 1];
+	    int i = 0;
+	    for(Ice::StringSeq::const_iterator p = serviceArgs.begin(); p != serviceArgs.end(); ++p, ++i)
+	    {
+		argv[i] = strdup(p->c_str());
+	    }
+	    argv[argc] = 0;
+
 	    info.communicator = initializeWithProperties(argc, argv, serviceProperties);
+
+	    for(i = 0; i < argc + 1; ++i)
+	    {
+		free(argv[i]);
+	    }
+	    delete[] argv;
 	}
 	
 	CommunicatorPtr communicator = info.communicator ? info.communicator : _server->communicator();
