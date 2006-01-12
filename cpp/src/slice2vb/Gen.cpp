@@ -3735,7 +3735,6 @@ Slice::Gen::HelperVisitor::visitClassDefStart(const ClassDefPtr& p)
 	         << "ByVal ctx__ As Ice.Context" << epar
 	         << " Implements " << name << "Prx." << opName << "_async"; // TODO: should be containing class?
 	    _out.inc();
-	    _out << nl << "checkTwowayOnly__(\"" << p->name() << "\")";
 	    _out << nl << "cb__.invoke__" << spar << "Me" << argsAMI << "ctx__" << epar;
 	    _out.dec();
 	    _out << nl << "End Sub";
@@ -4815,6 +4814,16 @@ Slice::Gen::AsyncVisitor::visitOperation(const OperationPtr& p)
 	_out << nl << "Try";
 	_out.inc();
 	_out << nl << "prepare__(prx__, \"" << p->name() << "\", " << sliceModeToIceMode(p) << ", ctx__)";
+	if(p->returnsData())
+	{
+	    _out << nl << "If Not prx__.ice_isTwoway() Then";
+	    _out.inc();
+	    _out << nl << "Dim ex As Ice.TwowayOnlyException = New Ice.TwowayOnlyException()";
+	    _out << nl << "ex.operation = \"" << p->name() << "\"";
+	    _out << nl << "Throw ex";
+	    _out.dec();
+	    _out << nl << "End If";
+	}
 	for(q = inParams.begin(); q != inParams.end(); ++q)
 	{
 	    string typeS = typeToString(q->first);
@@ -4836,7 +4845,7 @@ Slice::Gen::AsyncVisitor::visitOperation(const OperationPtr& p)
 	_out.dec();
 	_out << nl << "End Sub";
 
-	_out << sp << nl << "Protected Overrides Sub response__(ok__ As Boolean) As Boolean";
+	_out << sp << nl << "Protected Overrides Sub response__(ByVal ok__ As Boolean)";
 	_out.inc();
         for(q = outParams.begin(); q != outParams.end(); ++q)
         {
@@ -4902,19 +4911,20 @@ Slice::Gen::AsyncVisitor::visitOperation(const OperationPtr& p)
    	_out.dec();
 	_out << nl << "Catch ex__ As Ice.LocalException";
 	_out.inc();
-	_out << nl << "Return finished__(ex__)";
+	_out << nl << "finished__(ex__)";
+	_out << nl << "Return";
 	_out.dec();
 	if(!throws.empty())
 	{
 	    _out << nl << "Catch ex__ As Ice.UserException";
 	    _out.inc();
 	    _out << nl << "ice_exception(ex__)";
-	    _out << nl << "Return False";
+	    _out << nl << "Return";
 	    _out.dec();
 	}
 	_out << nl << "End Try";
 	_out << nl << "ice_response" << spar << args << epar;
-	_out << nl << "Return False";
+	_out << nl << "Return";
 	_out.dec();
 	_out << nl << "End Sub";
 	_out.dec();
