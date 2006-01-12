@@ -127,6 +127,11 @@ ifeq ($(installprogram),)
 			  chmod a+rx $(2)/$(notdir $(1))
 endif
 
+ifeq ($(installlibrary),)
+    installlibrary	= $(INSTALL_LIBRARY) $(1) $(2); \
+			  chmod a+rx $(2)/$(notdir $(1))
+endif
+
 ifeq ($(mkdir),)
     mkdir		= mkdir $(1) ; \
 			  chmod a+rx $(1)
