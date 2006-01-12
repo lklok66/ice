@@ -414,7 +414,12 @@ def buildMergeModules(startDir, stageDir, sourcesVersion, installVersion):
     #
     os.chdir(startDir)
     for project, release in modules:
-	runprog(os.environ['INSTALLSHIELD_HOME'] + "\IsCmdBld -c COMP -a ZEROC -p " + project + ".ism -r " + release)
+	#
+	# The -w -x flags indicate that the build should stop on any
+	# warning or error. This is preferable since it catches staging
+	# errors and forces us to keep our projects clean.
+	#
+	runprog(os.environ['INSTALLSHIELD_HOME'] + "\IsCmdBld -x -w -c COMP -a ZEROC -p " + project + ".ism -r " + release)
 
     #
     # Archive modules in the stage directory root.
@@ -442,7 +447,7 @@ def buildInstallers(startDir, stageDir, sourcesVersion, installVersion):
     #
     os.chdir(startDir)
     for project, release in installers:
-	runprog(os.environ['INSTALLSHIELD_HOME'] + "\ISCmdBld -c COMP -a ZEROC -p " + project + ".ism -r " + release)
+	runprog(os.environ['INSTALLSHIELD_HOME'] + "\ISCmdBld -x -w -c COMP -a ZEROC -p " + project + ".ism -r " + release)
 	msi = project + "-" + sourcesVersion + "-" + installVersion.upper() + ".msi"
 	msiPath = os.path.join(os.getcwd(), project, "ZEROC", release, "DiskImages/DISK1", msi)
 	shutil.copy(msiPath, stageDir)

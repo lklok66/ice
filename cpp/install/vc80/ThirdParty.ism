@@ -580,7 +580,7 @@
 		<row><td>JGoodiesFormsLicense</td><td>Line3</td><td>Line</td><td>0</td><td>44</td><td>374</td><td>0</td><td>1</td><td/><td/><td/><td/><td>0</td><td>0</td><td/><td/></row>
 		<row><td>JGoodiesFormsLicense</td><td>Line4</td><td>Line</td><td>0</td><td>44</td><td>374</td><td>0</td><td>1</td><td/><td/><td/><td/><td>0</td><td>0</td><td/><td/></row>
 		<row><td>JGoodiesFormsLicense</td><td>Next</td><td>PushButton</td><td>230</td><td>243</td><td>66</td><td>17</td><td>3</td><td/><td>##ID_STRING30##</td><td>RadioButtonGroup1</td><td/><td>0</td><td/><td/><td/></row>
-		<row><td>JGoodiesFormsLicense</td><td>RadioButtonGroup1</td><td>RadioButtonGroup</td><td>9</td><td>187</td><td>330</td><td>40</td><td>3</td><td>AgreeToLicense1111</td><td>##NEW_STRING15##</td><td>Cancel</td><td/><td>0</td><td>0</td><td/><td/></row>
+		<row><td>JGoodiesFormsLicense</td><td>RadioButtonGroup1</td><td>RadioButtonGroup</td><td>9</td><td>187</td><td>330</td><td>40</td><td>3</td><td>AgreeToLicense1111</td><td/><td>Cancel</td><td/><td>0</td><td>0</td><td/><td/></row>
 		<row><td>JGoodiesFormsLicense</td><td>ScrollableText1</td><td>ScrollableText</td><td>8</td><td>55</td><td>358</td><td>130</td><td>7</td><td/><td/><td/><td/><td>0</td><td>0</td><td>&lt;ISProjectFolder&gt;\install\packages\common\JGOODIES_FORMS_LICENSE.rtf</td><td/></row>
 		<row><td>JGoodiesFormsLicense</td><td>Text1</td><td>Text</td><td>21</td><td>23</td><td>292</td><td>25</td><td>65539</td><td>NewProperty1111</td><td>##NEW_STRING13##</td><td/><td/><td>0</td><td>0</td><td/><td/></row>
 		<row><td>JGoodiesFormsLicense</td><td>Text2</td><td>Text</td><td>13</td><td>6</td><td>292</td><td>25</td><td>65539</td><td>NewProperty2111</td><td>##NEW_STRING14##</td><td/><td/><td>0</td><td>0</td><td/><td/></row>
@@ -596,7 +596,7 @@
 		<row><td>JGoodiesLooksLicense</td><td>Line3</td><td>Line</td><td>0</td><td>44</td><td>374</td><td>0</td><td>1</td><td/><td/><td/><td/><td>0</td><td>0</td><td/><td/></row>
 		<row><td>JGoodiesLooksLicense</td><td>Line4</td><td>Line</td><td>0</td><td>44</td><td>374</td><td>0</td><td>1</td><td/><td/><td/><td/><td>0</td><td>0</td><td/><td/></row>
 		<row><td>JGoodiesLooksLicense</td><td>Next</td><td>PushButton</td><td>230</td><td>243</td><td>66</td><td>17</td><td>3</td><td/><td>##ID_STRING38##</td><td>RadioButtonGroup1</td><td/><td>0</td><td/><td/><td/></row>
-		<row><td>JGoodiesLooksLicense</td><td>RadioButtonGroup1</td><td>RadioButtonGroup</td><td>9</td><td>189</td><td>330</td><td>40</td><td>3</td><td>AgreeToLicense1112</td><td>##NEW_STRING20##</td><td>Cancel</td><td/><td>0</td><td>0</td><td/><td/></row>
+		<row><td>JGoodiesLooksLicense</td><td>RadioButtonGroup1</td><td>RadioButtonGroup</td><td>9</td><td>189</td><td>330</td><td>40</td><td>3</td><td>AgreeToLicense1112</td><td/><td>Cancel</td><td/><td>0</td><td>0</td><td/><td/></row>
 		<row><td>JGoodiesLooksLicense</td><td>ScrollableText1</td><td>ScrollableText</td><td>8</td><td>55</td><td>358</td><td>130</td><td>7</td><td/><td/><td/><td/><td>0</td><td>0</td><td>&lt;ISProjectFolder&gt;\install\packages\common\JGOODIES_LOOKS_LICENSE.rtf</td><td/></row>
 		<row><td>JGoodiesLooksLicense</td><td>Text1</td><td>Text</td><td>21</td><td>23</td><td>292</td><td>25</td><td>65539</td><td>NewProperty1112</td><td>##NEW_STRING18##</td><td/><td/><td>0</td><td>0</td><td/><td/></row>
 		<row><td>JGoodiesLooksLicense</td><td>Text2</td><td>Text</td><td>13</td><td>6</td><td>292</td><td>25</td><td>65539</td><td>NewProperty2112</td><td>##NEW_STRING19##</td><td/><td/><td>0</td><td>0</td><td/><td/></row>
@@ -1828,7 +1828,7 @@
 		<col def="S255">CDBrowser</col>
 		<col def="S255">DotNetBuildConfiguration</col>
 		<col def="S255">MsiCommandLine</col>
-		<row><td>THIRD_PARTY_MSI</td><td>ZEROC</td><td>&lt;ISProjectDataFolder&gt;</td><td>PackageName</td><td>1</td><td>1033</td><td>2</td><td>1</td><td>Intel</td><td/><td>1033</td><td>0</td><td>0</td><td>1</td><td>0</td><td/><td>0</td><td/><td>MediaLocation</td><td/><td>http://</td><td/><td/><td/><td/><td>8396812</td><td/><td/><td/></row>
+		<row><td>THIRD_PARTY_MSI</td><td>ZEROC</td><td>&lt;ISProjectDataFolder&gt;</td><td>PackageName</td><td>1</td><td>1033</td><td>2</td><td>1</td><td>Intel</td><td/><td>1033</td><td>0</td><td>0</td><td>1</td><td>0</td><td/><td>0</td><td/><td>MediaLocation</td><td/><td>http://</td><td/><td/><td/><td/><td>8527884</td><td/><td/><td/></row>
 	</table>
 
 	<table name="ISReleaseExtended">
