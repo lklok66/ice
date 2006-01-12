@@ -394,7 +394,6 @@ def buildMergeModules(startDir, stageDir, sourcesVersion, installVersion):
     modules = [
 	("BerkeleyDBDevKit", "BERKELEYDB_DEV_KIT"),
 	("BerkeleyDBRuntime", "BERKELEYDB_RUNTIME"),
-	("BerkeleyDBJava", "BERKELEYDB_JAVA"),
 	("BZip2DevKit", "BZIP2_DEV_KIT"),
 	("BZip2Runtime", "BZIP2_RUNTIME"),
 	("ExpatDevKit", "EXPAT_DEV_KIT"),
@@ -409,6 +408,8 @@ def buildMergeModules(startDir, stageDir, sourcesVersion, installVersion):
 	extras = [ ("JGoodies", "JGOODIES_RUNTIME") ]
 	modules.extend(extras)
 
+    if installVersion != "vc60":
+	modules.append(("BerkeleyDBJava", "BERKELEYDB_JAVA"))
     #
     # Build modules.
     #
