@@ -13,7 +13,7 @@
 # distribution (e.g., an RPM).
 #
 
-src_build=yes
+src_build		= yes
 
 #
 # Set this to the root of the Ice for C++ source tree if you want to
@@ -23,7 +23,7 @@ src_build=yes
 # source tree around, the setting of slice_home does not matter.
 #
 
-slice_home=$(top_srcdir)/../ice
+slice_home		= $(top_srcdir)/../ice
 
 #
 # Select an installation base directory. The directory will be created
@@ -33,11 +33,21 @@ slice_home=$(top_srcdir)/../ice
 prefix			= /opt/icecs-$(VERSION)
 
 #
+# The default behavior of 'make install' attempts to add the Ice for C#
+# libraries to the Global Assembly Cache (GAC). If you would prefer not
+# to install these libraries to the GAC, or if you do not have sufficient
+# priveleges to do so, then enable no_gac and the libraries will be
+# copied to $(prefix)/bin instead.
+#
+
+#no_gac			= 1
+
+#
 # Define DEBUG as yes if you want to build with debug information and
 # assertions enabled.
 #
 
-DEBUG		= yes
+DEBUG			= yes
 
 #
 # If libbzip2 is not installed in a standard location where the compiler 
@@ -100,6 +110,10 @@ ifdef src_build
 ref = -r:$(bindir)/$(1).dll
 else
 ref = -pkg:$(1)
+endif
+
+ifdef no_gac
+NOGAC			= ${no_gac}
 endif
 
 INSTALL			= cp -fp
