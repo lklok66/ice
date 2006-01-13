@@ -8,6 +8,8 @@ cat >$1 <<\_CMTFILE
 # find . -name "*" -type f | sed -e '/Debug\|Release\|.dsp$\|.dsw$\|.exe$\
 #        \|.ilk$\|.plg$\|.depend\|Makefile\|.pdb$\|.ncb$\|.suo$\|\.dummy/d' | \
 #        sed -e '/^Freeze\/backup/d' | sed -e 's/^\.\///' >> file
+# find . -name "db" -type d >> file
+# find . -name "db" -type d | sed -e 's/^\.\///' >> file
 #
 # If you want to use wild card searches instead of explicitly listing
 # files, you can delete the filenames and uncomment the following lines:
@@ -35,3 +37,4 @@ cat >$1 <<\_CMTFILE
 _CMTFILE
 
 find . -name "*" -type f | sed -e '/Debug\|Release\|.dsp$\|.dsw$\|.exe$\|.ilk$\|.plg$\|.depend\|Makefile\|.pdb$\|.ncb$\|.suo$\|\.dummy/d' | sed -e '/^[\.\/]*Freeze\/backup/d' | sed -e 's/^\.\///' >> $1
+find . -name "db" -type d | sed -e 's/^\.\///' >> $1

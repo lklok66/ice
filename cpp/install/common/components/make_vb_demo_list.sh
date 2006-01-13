@@ -9,6 +9,7 @@ cat >$1 <<\_CMTFILE
 #      Makefile\|.pdb$\|\*.bat$\|\.dummy\|[^D].vbproj.*$/d' # | \
 #      sed -e 's/^\.\///' \
 # >> file
+# find . -name "db" -type d | sed -e 's/^\.\///' >> file
 #
 # If you want to use wild card searches instead of explicitly listing
 # files, you can delete the filenames and uncomment the following lines:
@@ -33,3 +34,4 @@ _CMTFILE
 
 
 find . -name "*" -type f | sed -e '/generated\|obj\|.exe$\|.dll$\|.depend\|Makefile\|.pdb$\|*.bat$\|\.dummy\|[^D].vbproj.*$/d' | sed -e 's/^\.\///' >> $1
+find . -name "db" -type d | sed -e 's/^\.\///' >> $1
