@@ -308,14 +308,15 @@ def convertLicensesToRTF(toolDir, installTarget):
     core = [ berkeleydb, bzip2, openssl, expat ]
 
     collection = core
+    jgoodies =[(os.path.join(os.environ["JGOODIES_FORMS"], "license.txt"), "JGoodies Forms", 
+			    "JGOODIES_FORMS_LICENSE.rtf"),
+	       (os.path.join(os.environ["JGOODIES_LOOKS"], "license.txt"), "JGoodies Looks", 
+			    "JGOODIES_LOOKS_LICENSE.rtf")]
     if installTarget == "vc60":
 	collection.append((os.path.join(os.environ["STLPORT_HOME"], "doc", "license.html"),  
 	                   "STLport", "STLPORT_LICENSE.rtf"))
     elif installTarget in ["vc71", "vc80", "vc80_x64"]:
-	collection.extend([(os.path.join(os.environ["JGOODIES_FORMS"], "license.txt"), "JGoodies Forms", 
-			    "JGOODIES_FORMS_LICENSE.rtf"),
-    			   (os.path.join(os.environ["JGOODIES_LOOKS"], "license.txt"), "JGoodies Looks", 
-			    "JGOODIES_LOOKS_LICENSE.rtf")])
+	collection.extend(jgoodies)
 
     third_party_sources_file_hdr = """Source Code
 -----------
@@ -380,6 +381,25 @@ def convertLicensesToRTF(toolDir, installTarget):
 	rtffile.writelines(rtfftr)
 	rtffile.close()
 
+    #
+    # Technically, the JGoodies stuff isn't part of the Ice 6.0.0 target
+    # but we include it in our third party installer as a convenience to
+    # IceJ builders.
+    #
+    if installTarget == "vc60":
+	for f in jgoodies:
+	    contents = file(f[0]).readlines()
+	    hdr = section_header % f[1]
+	    rtffile = file(os.path.join(toolDir, "docs", os.path.basename(f[2])), "w")
+	    rtffile.writelines(rtfhdr)
+	    rtffile.write(hdr + "\\par")
+	    rtffile.write(line_string[:len(hdr)] + "\\par\n")
+	    for l in contents:
+		rtffile.write(l.rstrip("\n") + "\\par\n")
+	    rtffile.writelines(rtfftr)
+	    rtffile.close()
+
+    shutil.copyfile(os.path.join(toolDir, "docs", "LICENSE"), os.path.join(toolDir, "docs", "THIRD_PARTY_LICENSE"))
     licensefile.close()
     lines = file(os.path.join(toolDir, "docs", "LICENSE")).readlines()
     rtflicense = file(os.path.join(toolDir, "docs", "LICENSE.rtf"), "w")
@@ -399,13 +419,11 @@ def buildMergeModules(startDir, stageDir, sourcesVersion, installVersion):
 	("ExpatDevKit", "EXPAT_DEV_KIT"),
 	("ExpatRuntime", "EXPAT_RUNTIME"),
 	("OpenSSLDevKit", "OPENSSL_DEV_KIT"),
-	("OpenSSLRuntime", "OPENSSL_RUNTIME")
+	("OpenSSLRuntime", "OPENSSL_RUNTIME"),
+	("JGoodies", "JGOODIES_RUNTIME") 
     ]
     if installVersion == "vc60":
 	extras = [ ("STLPortDevKit", "STLPORT_DEV_KIT"), ("STLPortRuntime", "STLPORT_RUNTIME") ]
-	modules.extend(extras)
-    elif installVersion == "vc71":
-	extras = [ ("JGoodies", "JGOODIES_RUNTIME") ]
 	modules.extend(extras)
 
     if installVersion != "vc60":

@@ -1,9 +1,9 @@
 # To create an explicit listing for the demos run the following commands
 # in the demo directory of the ice distribution.:
 # find . -name "*" -type f| sed -e '/Debug\|Release\|.exe$\|.ilk$\|.plg$\
-#      \|.depend\|Makefile\|.pdb$\|.vcproj$\|.ncb$\|.suo$\|\.dummy/d' |
+#      \|.depend\|Makefile\|.pdb$\|.vcproj$\|.sln$\|.ncb$\|.suo$\|\.dummy/d' |
 #      sed -e '/^Freeze\/backup/d' | sed -e 's/^\.\///' >> file
-# find . -name "db" -type d | sed -e 's/^\.\///' >> file
+# find . -name "db" -type d | sed -e 's/^\.\///' | sed -e '/^Freeze\/backup/d'  >> file
 #
 # If you want to use wild card searches instead of explicitly listing
 # files, you can delete the filenames and uncomment the following lines:
@@ -46,7 +46,6 @@ book/simple_filesystem/simplefsC.dsp
 book/simple_filesystem/simplefsS.dsp
 demo.dsp
 demo.dsw
-demo.sln
 Freeze/bench/bench.dsp
 Freeze/bench/Client.cpp
 Freeze/bench/config
@@ -304,7 +303,6 @@ IceUtil/workqueue/README
 IceUtil/workqueue/WorkQueue.cpp
 IceUtil/workqueue/workqueue.dsp
 README
-Freeze/backup/db
 Freeze/bench/db
 Freeze/library/db
 Freeze/phonebook/db

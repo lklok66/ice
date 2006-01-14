@@ -3,8 +3,7 @@
 # find . -name "*" -type f | sed -e '/Debug\|Release\|.dsp$\|.dsw$\|.exe$\
 #        \|.ilk$\|.plg$\|.depend\|Makefile\|.pdb$\|.ncb$\|.suo$\|\.dummy/d' | \
 #        sed -e '/^Freeze\/backup/d' | sed -e 's/^\.\///' >> file
-# find . -name "db" -type d >> file
-# find . -name "db" -type d | sed -e 's/^\.\///' >> file
+# find . -name "db" -type d | sed -e 's/^\.\///' | sed -e '/^Freeze\/backup/d'  >> file
 #
 # If you want to use wild card searches instead of explicitly listing
 # files, you can delete the filenames and uncomment the following lines:
@@ -306,7 +305,6 @@ IceUtil/workqueue/README
 IceUtil/workqueue/WorkQueue.cpp
 IceUtil/workqueue/workqueue.vcproj
 README
-Freeze/backup/db
 Freeze/bench/db
 Freeze/library/db
 Freeze/phonebook/db
