@@ -342,10 +342,10 @@ def convertLicensesToRTF(toolDir, installTarget):
     licensefile.close()
 
     #
-    # XXX- I don't really know why we need a copy of the file with a
-    # different name yet. I'll fix l8r. - Brent
+    # THIRD_PARTY_SOURCES is the file used by the Ice installer while
+    # SOURCES is used by the third party installer.
     #
-    shutil.copyfile(os.path.join(toolDir, "docs", "THIRD_PARTY_SOURCES"), os.path.join(toolDir, "docs", "SOURCES"))
+    shutil.copy(os.path.join(toolDir, "docs", "THIRD_PARTY_SOURCES"), os.path.join(toolDir, "docs", "SOURCES")) 
 
     licensefile = file(os.path.join(toolDir, "docs", "LICENSE"), "w")
     for f in collection:
@@ -399,8 +399,8 @@ def convertLicensesToRTF(toolDir, installTarget):
 	    rtffile.writelines(rtfftr)
 	    rtffile.close()
 
-    shutil.copyfile(os.path.join(toolDir, "docs", "LICENSE"), os.path.join(toolDir, "docs", "THIRD_PARTY_LICENSE"))
     licensefile.close()
+    shutil.copyfile(os.path.join(toolDir, "docs", "LICENSE"), os.path.join(toolDir, "docs", "THIRD_PARTY_LICENSE"))
     lines = file(os.path.join(toolDir, "docs", "LICENSE")).readlines()
     rtflicense = file(os.path.join(toolDir, "docs", "LICENSE.rtf"), "w")
     rtflicense.writelines(rtfhdr)
