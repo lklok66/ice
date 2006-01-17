@@ -1844,8 +1844,8 @@ Slice::Gen::TypesVisitor::visitSequence(const SequencePtr& p)
 
     _out << sp << nl << "Public Shared Function Repeat(ByVal value As " << s << ", ByVal count As Integer) As " << name;
     _out.inc();
-    _out << nl << "Dim r As " << name << " = New " << name << "()";
-    _out << nl << "For i As Integer = 0 To Count - 1";
+    _out << nl << "Dim r As " << name << " = New " << name << "(count)";
+    _out << nl << "For i As Integer = 0 To count - 1";
     _out.inc();
     _out << nl << "r.Add(value)";
     _out.dec();
@@ -1992,7 +1992,9 @@ Slice::Gen::TypesVisitor::visitSequence(const SequencePtr& p)
 
     _out << sp << nl << "Function Clone() As Object Implements _System.ICloneable.Clone";
     _out.inc();
-    _out << nl << "Return MemberwiseClone()";
+    _out << nl << "Dim s As " << name << " = New " << name;
+    _out << nl << "s.InnerList.AddRange(InnerList)";
+    _out << nl << "Return s";
     _out.dec();
     _out << nl << "End Function";
 
@@ -2045,11 +2047,16 @@ Slice::Gen::TypesVisitor::visitSequence(const SequencePtr& p)
     _out.inc();
     if(!isValue)
     {
-	_out << nl << "If InnerList(i__) Is Nothing And Not CType(other, " << name << ")(i__) Is Nothing Then";
+	_out << nl << "If InnerList(i__) Is Nothing Then";
+	_out.inc();
+	_out << nl << "If Not CType(other, " << name << ")(i__) Is Nothing Then";
 	_out.inc();
 	_out << nl << "Return False";
 	_out.dec();
 	_out << nl << "End If";
+	_out.dec();
+	_out << nl << "Else";
+	_out.inc();
     }
     _out << nl << "If Not CType(InnerList(i__), Integer).Equals(CType(other, " << name << ")(i__)) Then";
     _out.inc();
@@ -2057,6 +2064,11 @@ Slice::Gen::TypesVisitor::visitSequence(const SequencePtr& p)
     _out.dec();
     _out << nl << "End If";
     _out.dec();
+    if(!isValue)
+    {
+        _out.dec();
+	_out << nl << "End If";
+    }
     _out << nl << "Next";
     _out << nl << "Return True";
     _out.dec();
@@ -2208,7 +2220,21 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
     for(q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
         string memberName = fixId((*q)->name(), DotNet::ApplicationException);
+	bool isValue = isValueType((*q)->type());
 
+	if(!isValue)
+	{
+	    _out << nl << "If " << memberName << " Is Nothing";
+	    _out.inc();
+	    _out << nl << "If Not CType(other__, " << name << ")." << memberName << " Is Nothing";
+	    _out.inc();
+	    _out << nl << "Return False";
+	    _out.dec();
+	    _out << nl << "End If";
+	    _out.dec();
+	    _out << nl << "Else";
+	    _out.inc();
+	}
 	ClassDeclPtr cl = ClassDeclPtr::dynamicCast((*q)->type());
 	if(cl && cl->isInterface()) // Bug in VB 7.1: cast should not be necessary.
 	{
@@ -2231,6 +2257,11 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
 	_out << nl << "Return False";
 	_out.dec();
 	_out << nl << "End If";
+	if(!isValue)
+	{
+	    _out.dec();
+	    _out << nl << "End If";
+	}
     }
     _out << nl << "Return True";
     _out.dec();
@@ -3011,7 +3042,13 @@ Slice::Gen::TypesVisitor::visitDictionary(const DictionaryPtr& p)
 
     _out << sp << nl << "Function Clone() As Object Implements _System.ICloneable.Clone";
     _out.inc();
-    _out << nl << "Return MemberwiseClone()";
+    _out << nl << "Dim d As " << name << " = New " << name;
+    _out << nl << "For Each e As _System.Collections.DictionaryEntry in d";
+    _out.inc();
+    _out << nl << "d.InnerHashtable.Add(e.Key, e.Value)";
+    _out.dec();
+    _out << nl << "Next";
+    _out << nl << "Return d";
     _out.dec();
     _out << nl << "End Function";
 
