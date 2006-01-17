@@ -1,6 +1,9 @@
 Changes since version 3.0.0
 ---------------------------
 
+- Fixed an assert that could occur during connection establishment if
+  the communicator was shutdown or destroyed concurrently.
+
 - IceUtil::Time::toString() has been deprecated and should no longer
   be used. Instead, use IceUtil::Time::toDateTime() to get a date
   and time string. (toString() will continue to work as a synonym for
