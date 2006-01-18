@@ -155,6 +155,18 @@ namespace Generate
 		}
 		Environment.Exit(0);
 	    }
+            catch(System.ComponentModel.Win32Exception ex)
+            {
+                if(ex.NativeErrorCode == 2)
+                {
+                    Console.Error.WriteLine("Cannot find slice2cs.exe: set ICE_HOME or add slice2cs.exe to your PATH");
+                    Environment.Exit(1);
+                }
+                else
+                {
+                    Console.Error.WriteLine(ex);
+                }
+            }
 	    catch(System.Exception ex)
 	    {
 	        Console.Error.WriteLine(ex);
