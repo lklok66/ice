@@ -9,10 +9,19 @@ IceVB-@ver@ subdirectory.
 
 You can either build the slice2vb compiler from the Ice for C++ source
 distribution, or you can download the Ice binary package for Windows,
-which contains a compiled version of slice2vb. Make sure that the
-directory containing slice2vb is in your PATH. Note that icecpp.exe
-must be in your path as well, as must be the Ice for C++ run-time
-libraries iceutil and slice.
+which contains a compiled version of slice2vb. 
+
+Add the directory containing slice2vb to the list of "Executable
+files" directories in Visual Studio:
+
+- In the IDE, choose Tools->Options->Projects->VC++ Directories
+
+- Select "Executable files"
+
+- Add <Ice installation root directory>\bin
+
+Alternatively, you can set the environment variable ICE_HOME to the
+location of your Ice installation root directory.
 
 Open All.sln in Visual Basic# and build the "All" solution (both
 debug and release builds are supported). Note that Ice for Visual
