@@ -263,12 +263,14 @@ transforms = [ ('file', 'ice.ini', 'etc/php.d/ice.ini'),
                ]
 
 x64_transforms = [ 
+	       ('file', 'ice.ini', 'etc/php.d/ice.ini'),
 	       ('dir', 'config', 'usr/share/doc/Ice-%version%/config'),
 	       ('dir', 'slice', 'usr/share/slice'),
                ('dir', 'doc', 'usr/share/doc/Ice-%version%/doc'),
 	       ('dir', 'bin', 'usr/bin'),
 	       ('dir', 'include', 'usr/include'),
 	       ('dir', 'lib64', 'usr/lib64'),
+	       ('file', 'usr/lib64/icephp.so', 'usr/lib64/php/modules/icephp.so'),
 	       ('file', 'lib/IceGridGUI.jar', 'usr/lib/Ice-%version%/IceGridGUI.jar' ),
 	       ('dir', 'ant', 'usr/lib/Ice-%version%/ant'),
 	       ('dir', 'python', 'usr/lib64/Ice-%version%/python'),
@@ -400,7 +402,32 @@ fileLists64 = [
 	       'Requires: ice-x86_64',
                [('exe', 'bin/slice2py'),
 		('xdir', 'share/doc/Ice-%version%'),
-	        ('dir', 'share/doc/Ice-%version%/demopy')], 'x86_64')
+	        ('dir', 'share/doc/Ice-%version%/demopy')], 'x86_64'),
+    Subpackage('csharp-devel',
+               'ice-dotnet = %version%',
+               'Tools and demos for developing Ice applications in C#',
+               'Development/Tools',
+	       iceDescription,
+	       'Requires: ice-x86_64',
+               [('exe', 'bin/slice2cs'),
+		('xdir', 'share/doc/Ice-%version%'),
+		('xdir', 'share/doc/Ice-%version%/config'),
+		('file', 'share/doc/Ice-%version%/config/Make.rules.cs'),
+	        ('dir', 'share/doc/Ice-%version%/democs')], 'x86_64'),
+    Subpackage('php',
+	       'ice = %version%, php = 5.0.4',
+	       'The Ice runtime for PHP applications',
+	       'System Environment/Libraries',
+	       iceDescription,
+	       'Requires: ice-x86_64',
+	       [('lib', 'lib64/php/modules'), ('cfg', '/etc/php.d/ice.ini')], 'x86_64'),
+    Subpackage('php-devel',
+	       'ice = %version%, php = 5.0.4, ice-php = %version%',
+	       'Demos for developing Ice applications in PHP',
+	       'Development/Tools',
+	       iceDescription,
+	       'Requires: ice-x86_64',
+	       [('dir', 'share/doc/Ice-%version%/demophp')], 'x86_64'),
     ]
 
 fileLists = [
@@ -656,7 +683,7 @@ def createFullSpecFile(ofile, installDir, version, soVersion, buildReq = True):
 def createRPMSFromBinaries(buildDir, installDir, version, soVersion):
     if os.path.exists(installDir + "/rpmbase"):
 	shutil.rmtree(installDir + "/rpmbase")
-    shutil.copytree(installDir + "/Ice-" + version, installDir + "/rpmbase", true)
+    shutil.copytree(installDir + "/Ice-" + version, installDir + "/rpmbase", True)
     installDir = installDir + '/rpmbase'
     compileall.compile_dir(installDir + '/python')
 

@@ -606,7 +606,7 @@ def makePHPbinary(sources, buildDir, installDir, version, clean):
     """ Create the IcePHP binaries and install to Ice installation directory """
 
     platform = getPlatform()
-    if not platform in ['linux', 'macosx']:
+    if not platform in ['linux', 'macosx', 'linux64']:
         return         
         
     #
@@ -695,7 +695,7 @@ def makePHPbinary(sources, buildDir, installDir, version, clean):
 
     if platform == 'hpux':
 	runprog('gzip -dc ' + buildDir + '/IcePHP-' + version + '/configure-hpux.gz > configure', False)
-    elif platform == 'linux':
+    elif platform.startswith('linux'):
 	runprog('gzip -dc ' + buildDir + '/ice/install/thirdparty/php/configure*.gz > configure', False)
 		
     else:
@@ -745,6 +745,8 @@ def makePHPbinary(sources, buildDir, installDir, version, clean):
             if line.startswith('EXTRA_CXXFLAGS ='):
                 xtraCXXFlags = False
                 print line.rstrip('\n') + ' -DCOMPILE_DL_ICE'
+	    elif line.startswith('ICE_SHARED_LIBADD'):
+		print line.rstrip('\n').replace("Ice-%s/lib" % version, "Ice-%s/lib64" % version)
             else:
                 print line.strip('\n')
 
@@ -799,7 +801,10 @@ def makePHPbinary(sources, buildDir, installDir, version, clean):
         phpModuleExtension = getPlatformLibExtension()
         
     moduleName = '%s/modules/ice%s' % (phpDir, phpModuleExtension)
-    shutil.copy(moduleName, '%s/Ice-%s/lib/icephp%s' % (installDir, version, phpModuleExtension))
+    if platform == 'linux64':
+	shutil.copy(moduleName, '%s/Ice-%s/lib64/icephp%s' % (installDir, version, phpModuleExtension))
+    else:
+	shutil.copy(moduleName, '%s/Ice-%s/lib/icephp%s' % (installDir, version, phpModuleExtension))
         
     os.chdir(cwd)
 
