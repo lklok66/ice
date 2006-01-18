@@ -6,6 +6,7 @@
 ' ICE_LICENSE file included in this distribution.
 '
 ' **********************************************************************
+Imports System.Collections
 
 Module ClockS
 

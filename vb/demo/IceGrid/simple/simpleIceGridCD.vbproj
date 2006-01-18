@@ -62,11 +62,6 @@
                     AssemblyName = "System"
                 />
                 <Reference
-                    Name = "icecs"
-                    AssemblyName = "icecs"
-                    HintPath = "..\..\..\bin\icecs.dll"
-                />
-                <Reference
                     Name = "icegridcs"
                     AssemblyName = "icegridcs"
                     HintPath = "..\..\..\bin\icegridcs.dll"
@@ -76,12 +71,14 @@
                     Project = "{4F91E9BD-6EF1-47AD-AB67-E5357AE83696}"
                     Package = "{F184B08F-C81C-45F6-A57F-5ABD9991F28F}"
                 />
+                <Reference
+                    Name = "icecs"
+                    AssemblyName = "icecs"
+                    HintPath = "..\..\..\bin\icecs.dll"
+                />
             </References>
             <Imports>
-                <Import Namespace = "Microsoft.VisualBasic" />
                 <Import Namespace = "System" />
-                <Import Namespace = "System.Collections" />
-                <Import Namespace = "System.Diagnostics" />
             </Imports>
         </Build>
         <Files>
