@@ -376,9 +376,6 @@ def extractDemos(sources, buildDir, version, distro, demoDir):
 
     if distro.startswith('Ice-'):
 	editMakeRules(os.path.join(basepath, 'Make.rules'), version)
- 
-    elif distro.startswith('IceCS-'):
-        editMakeRules(os.path.join(basepath, 'Make.rules.cs'), version)
 
     #
     # Remove collected files.
@@ -458,7 +455,6 @@ def makeInstall(sources, buildDir, installDir, distro, clean, version):
 
     if distro.startswith('IceCS'):
 	runprog('perl -pi -e \'s/^prefix.*$/prefix = \$\(INSTALL_ROOT\)/\' config/Make.rules.cs')
-	runprog('perl -pi -e \'s/^src_build.*$/src_build = no/\' config/Make.rules.cs')
     else:
 	runprog('perl -pi -e \'s/^prefix.*$/prefix = \$\(INSTALL_ROOT\)/\' config/Make.rules')
 

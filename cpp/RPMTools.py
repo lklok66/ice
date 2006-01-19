@@ -690,6 +690,7 @@ def createRPMSFromBinaries(buildDir, installDir, version, soVersion):
     _transformDirectories(transforms, version, installDir)
     os.system("tar xfz " + installDir + "/../Ice-" + version + "-demos.tar.gz -C " + installDir)
 
+
     ofile = open(buildDir + "/Ice-" + version + ".spec", "w")
     createArchSpecFile(ofile, installDir, version, soVersion, False)
     ofile.flush()
@@ -698,6 +699,16 @@ def createRPMSFromBinaries(buildDir, installDir, version, soVersion):
     # Copy demo files so the RPM spec file can pick them up.
     #
     os.system("cp -pR " + installDir + "/Ice-" + version + "-demos/* " + installDir + "/usr/share/doc/Ice-" + version)
+
+    #
+    # We need to unset a build define in the Make.rules.cs file.
+    #
+    result = os.system("perl -pi.bak -e 's/^(src_build.*)$/\\# \\1/' " + installDir + "/usr/share/doc/Ice-" + version +
+	    "/config/Make.rules.cs")
+    if result != 0:
+	print 'unable to spot edit Make.rules.cs in demo tree' 
+	sys.exit(1)
+
     if os.path.exists(installDir + "/Ice-" + version + "-demos"):
 	shutil.rmtree(installDir + "/Ice-" + version + "-demos")
     cwd = os.getcwd()
@@ -735,7 +746,7 @@ def createRPMSFromBinaries(buildDir, installDir, version, soVersion):
 def createRPMSFromBinaries64(buildDir, installDir, version, soVersion):
     if os.path.exists(installDir + "/rpmbase"):
 	shutil.rmtree(installDir + "/rpmbase")
-    shutil.copytree(installDir + "/Ice-" + version, installDir + "/rpmbase")
+    shutil.copytree(installDir + "/Ice-" + version, installDir + "/rpmbase", True)
     installDir = installDir + "/rpmbase"
 
     _transformDirectories(x64_transforms, version, installDir)
@@ -873,6 +884,7 @@ def writeDemoPkgCommands(ofile, version):
     ofile.write('mkdir -p $RPM_BUILD_ROOT/usr/share/doc/Ice-%{version}\n')
     ofile.write('tar xfz $RPM_SOURCE_DIR/Ice-%{version}-demos.tar.gz -C $RPM_BUILD_ROOT/usr/share/doc\n')
     ofile.write('cp -pR $RPM_BUILD_ROOT/usr/share/doc/Ice-%{version}-demos/* $RPM_BUILD_ROOT/usr/share/doc/Ice-%{version}\n')
+    ofile.write("sed -i.bak -e 's/^(src_build.*)$/\# \1/' $RPM_BUILD_ROOT/usr/share/doc/Ice-%{version}/config/Make.rules.cs\n")
     ofile.write('rm -rf $RPM_BUILD_ROOT/usr/share/doc/Ice-%{version}-demos\n')
 	
 if __name__ == "main":
