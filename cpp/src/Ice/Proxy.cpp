@@ -765,30 +765,8 @@ IceProxy::Ice::Object::__rethrowException(const LocalException& ex)
     ex.ice_throw();
 }
 
-//
-// Overloaded for const char* and const string& because, most of time,
-// we call this with a const char* and we want to avoid the overhead
-// of constructing a string.
-//
-
 void
 IceProxy::Ice::Object::__checkTwowayOnly(const char* name) const
-{
-    //
-    // No mutex lock necessary, there is nothing mutable in this
-    // operation.
-    //
-
-    if(!ice_isTwoway())
-    {
-        TwowayOnlyException ex(__FILE__, __LINE__);
-	ex.operation = name;
-	throw ex;
-    }
-}
-
-void
-IceProxy::Ice::Object::__checkTwowayOnly(const string& name) const
 {
     //
     // No mutex lock necessary, there is nothing mutable in this

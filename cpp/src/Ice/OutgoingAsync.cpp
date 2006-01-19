@@ -287,7 +287,7 @@ IceInternal::OutgoingAsync::__prepare(const ObjectPrx& prx, const string& operat
 	//
 	// Can't call async via a oneway proxy.
 	//
-	prx->__checkTwowayOnly(operation);
+	prx->__checkTwowayOnly(operation.c_str());
 
 	_reference = prx->__reference();
 	assert(!_connection);
