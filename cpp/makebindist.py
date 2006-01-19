@@ -280,12 +280,12 @@ endif
 ifeq ($(ICE_HOME),)
     ICE_DIR = /usr
     ifneq ($(shell test -f $(ICE_DIR)/bin/icestormadmin && echo 0),0)
-	$(error Ice distribution not found, please set ICE_HOME!)
+$(error Ice distribution not found, please set ICE_HOME!)
     endif
 else
     ICE_DIR = $(ICE_HOME)
     ifneq ($(shell test -d $(ICE_DIR)/slice && echo 0),0)
-	$(error Ice distribution not found, please set ICE_HOME!)
+$(error Ice distribution not found, please set ICE_HOME!)
     endif
 endif
 
@@ -344,7 +344,7 @@ def extractDemos(sources, buildDir, version, distro, demoDir):
     srcConfigDir = '%s/%s/config' % (os.getcwd(), distro)
     destConfigDir = '%s/Ice-%s-demos/config' % (buildDir, version)
 
-    if not demoDir == 'py' and os.path.exists(srcConfigDir):
+    if not demoDir in ['py', 'vb'] and os.path.exists(srcConfigDir):
 	for f in os.listdir(srcConfigDir):
 	    src = os.path.join(srcConfigDir, f)
 	    dest = os.path.join(destConfigDir, f)
@@ -458,7 +458,7 @@ def makeInstall(sources, buildDir, installDir, distro, clean, version):
 
     if distro.startswith('IceCS'):
 	runprog('perl -pi -e \'s/^prefix.*$/prefix = \$\(INSTALL_ROOT\)/\' config/Make.rules.cs')
-	runprog('perl -pi -e \'s/^cvs_build.*$/cvs_build = no/\' config/Make.rules.cs')
+	runprog('perl -pi -e \'s/^src_build.*$/src_build = no/\' config/Make.rules.cs')
     else:
 	runprog('perl -pi -e \'s/^prefix.*$/prefix = \$\(INSTALL_ROOT\)/\' config/Make.rules')
 
@@ -745,7 +745,7 @@ def makePHPbinary(sources, buildDir, installDir, version, clean):
             if line.startswith('EXTRA_CXXFLAGS ='):
                 xtraCXXFlags = False
                 print line.rstrip('\n') + ' -DCOMPILE_DL_ICE'
-	    elif line.startswith('ICE_SHARED_LIBADD'):
+	    elif platform == 'linux64' and line.startswith('ICE_SHARED_LIBADD'):
 		print line.rstrip('\n').replace("Ice-%s/lib" % version, "Ice-%s/lib64" % version)
             else:
                 print line.strip('\n')
@@ -1080,7 +1080,9 @@ def main():
 	# Package up demo distribution.
 	#
 	if getPlatform() == 'linux':
-	    for cvs, tarball, demoDir in sourceTarBalls:
+	    toCollect = list(sourceTarBalls)
+	    toCollect.append(('icevb', 'IceVB-' + version, 'vb'))
+	    for cvs, tarball, demoDir in toCollect:
 		extractDemos(sources, buildDir, version, tarball, demoDir)
 		shutil.copy(installFiles + '/unix/README.DEMOS', buildDir + '/Ice-' + version + '-demos/README.DEMOS') 
 	    archiveDemoTree(buildDir, version, installFiles)
