@@ -56,7 +56,7 @@
 		<author>##ID_STRING2##</author>
 		<keywords>MergeModule,MSI,Database</keywords>
 		<comments>Contact:  Your local administrator</comments>
-		<template>Intel64;1033</template>
+		<template>AMD64;1033</template>
 		<lastauthor>Administrator</lastauthor>
 		<revnumber>{D6A3263D-9AB7-436D-9060-49C518AF8D82}</revnumber>
 		<lastprinted/>

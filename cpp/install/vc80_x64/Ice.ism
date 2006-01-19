@@ -56,7 +56,7 @@
 		<author>##COMPANY_NAME##</author>
 		<keywords>Installer,MSI,Database</keywords>
 		<comments>##ID_STRING32##</comments>
-		<template>Intel64;1033</template>
+		<template>AMD64;1033</template>
 		<lastauthor>Administrator</lastauthor>
 		<revnumber>{D8566639-D906-4BD8-BF16-EBD0E26093DD}</revnumber>
 		<lastprinted/>

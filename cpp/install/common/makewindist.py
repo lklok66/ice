@@ -277,7 +277,7 @@ def buildIceDists(stageDir, sourcesDir, sourcesVersion, installVersion):
 	print "Building in " + os.getcwd() + "..."
 	runprog('msdev all.dsw /useenv /make "all - Win32 Debug"')
 	runprog('msdev all.dsw /useenv /make "all - Win32 Release"')
-    elif installVersion == "vc80":
+    elif installVersion in ["vc80", "vc80_x64"]:
 	#
 	# Ice for C++ 
 	#
@@ -457,9 +457,7 @@ def buildMergeModules(startDir, stageDir, sourcesVersion, installVersion):
 	zip.write(msmPath, os.path.basename(msmPath))
     zip.close()
 
-def buildInstallers(startDir, stageDir, sourcesVersion, installVersion):
-    """Build MSI installers."""
-    installers = [("ThirdParty", "THIRD_PARTY_MSI"), ("Ice", "ICE_MSI")]
+def buildInstallers(startDir, stageDir, sourcesVersion, installVersion, installers):
 
     #
     # Build and copy to the stage directory root.
@@ -506,7 +504,7 @@ def main():
 	try:
 	    optionList, args = getopt.getopt(
 		sys.argv[1:], "dhil:", [ "help", "clean", "skip-build", "skip-installer", "info", "debug", 
-		"logfile", "vc60", "vc71", "vc80", "sslhome=", "expathome=", "dbhome=", "stlporthome=", "bzip2home=", 
+		"logfile", "vc60", "vc71", "vc80", "vc80_x64", "sslhome=", "expathome=", "dbhome=", "stlporthome=", "bzip2home=", 
 		"thirdparty="])
 	except getopt.GetoptError:
 	    usage()
@@ -544,6 +542,8 @@ def main():
 		target = 'vc71'
 	    elif o == '--vc80':
 		target = 'vc80'
+	    elif o == '--vc80_x64':
+		target = 'vc80_x64'
 	    elif o == '--sources':
 		os.environ['SOURCES'] = a
 	    elif o == '--buildDir':
@@ -667,6 +667,7 @@ libraries."""
 	# 
 	if installer:
 	    buildMergeModules(targetDir, stageDir, sourcesVersion, target)
+	    buildInstallers(targetDir, stageDir, sourcesVersion, target, [("ThirdParty", "THIRD_PARTY_MSI")])
 
 	#
 	# Build the Ice distributions.
@@ -684,7 +685,7 @@ libraries."""
 	# Build the installer projects.
 	#
 	if installer:
-	    buildInstallers(targetDir, stageDir, sourcesVersion, target)
+	    buildInstallers(targetDir, stageDir, sourcesVersion, target, [("Ice", "ICE_MSI")])
 
     finally:
 	#
