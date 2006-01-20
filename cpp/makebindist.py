@@ -200,6 +200,22 @@ def collectSourceDistributions(tag, sourceDir, cvsdir, distro):
     shutil.copy("dist/" + distro + ".tar.gz", sourceDir)
     os.chdir(cwd)
 
+def editMakeRulesCS(filename, version):
+    '''
+    The make rules in the C# distribution need some simple tweaking to
+    make them suitable for inclusion in the demo distribution.
+    '''
+    reIceLocation = re.compile('^[a-z]*dir.*=\s*\$\(top_srcdir\)')
+    makefile = fileinput.input(filename, True)
+    for line in makefile:
+	if reIceLocation.search(line) <> None:
+	    print line.rstrip('\n').replace('top_srcdir', 'ICE_DIR', 10)
+	elif line.startswith('prefix'):
+	    print 'prefix = $(ICE_DIR)'
+	else:
+	    print line.rstrip('\n')
+    makefile.close()
+
 def editMakeRules(filename, version):
     '''
     Ice distributions contain files with useful build rules. However,
@@ -376,6 +392,8 @@ def extractDemos(sources, buildDir, version, distro, demoDir):
 
     if distro.startswith('Ice-'):
 	editMakeRules(os.path.join(basepath, 'Make.rules'), version)
+    elif distro.startswith('IceCS-'):
+	editMakeRulesCS(os.path.join(basepath, 'Make.rules.cs'), version)
 
     #
     # Remove collected files.
