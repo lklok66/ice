@@ -596,7 +596,7 @@ fileLists = [
 	       [ ('xdir', 'lib/Ice-%version%'),
 	       ('dir', 'lib/Ice-%version%/Ice.jar')
 	       ], 'noarch'),
-    SubPackage('dotnet',
+    Subpackage('dotnet',
                   'ice = %version%, mono-core >= 1.1.9',
 		  'The Ice runtime for C# applications',
 		  'System Environment/Libraries',
