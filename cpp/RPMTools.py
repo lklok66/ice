@@ -413,6 +413,12 @@ fileLists64 = [
 		('xdir', 'share/doc/Ice-%version%'),
 		('xdir', 'share/doc/Ice-%version%/config'),
 		('file', 'share/doc/Ice-%version%/config/Make.rules.cs'),
+		('file', 'lib64/pkgconfig/icecs.pc'),
+		('file', 'lib64/pkgconfig/glacier2cs.pc'),
+		('file', 'lib64/pkgconfig/iceboxcs.pc'),
+		('file', 'lib64/pkgconfig/icegridcs.pc'),
+		('file', 'lib64/pkgconfig/icepatch2cs.pc'),
+		('file', 'lib64/pkgconfig/icestormcs.pc'),
 	        ('dir', 'share/doc/Ice-%version%/democs')], 'x86_64'),
     Subpackage('php',
 	       'ice = %version%, php = 5.0.4',
@@ -524,6 +530,12 @@ fileLists = [
 		('xdir', 'share/doc/Ice-%version%'),
 		('xdir', 'share/doc/Ice-%version%/config'),
 		('file', 'share/doc/Ice-%version%/config/Make.rules.cs'),
+		('file', 'lib/pkgconfig/icecs.pc'),
+		('file', 'lib/pkgconfig/glacier2cs.pc'),
+		('file', 'lib/pkgconfig/iceboxcs.pc'),
+		('file', 'lib/pkgconfig/icegridcs.pc'),
+		('file', 'lib/pkgconfig/icepatch2cs.pc'),
+		('file', 'lib/pkgconfig/icestormcs.pc'),
 	        ('dir', 'share/doc/Ice-%version%/democs')], 'i386'),
     Subpackage('java-devel',
                'ice-java = %version%',
@@ -596,12 +608,6 @@ fileLists = [
 		  ('dll', 'lib/mono/gac/icegridcs/%version%.0__1f998c50fec78381/icegridcs.dll'),
 		  ('dll', 'lib/mono/gac/icepatch2cs/%version%.0__1f998c50fec78381/icepatch2cs.dll'),
 		  ('dll', 'lib/mono/gac/icestormcs/%version%.0__1f998c50fec78381/icestormcs.dll'),
-		  ('file', 'lib/pkgconfig/icecs.pc'),
-		  ('file', 'lib/pkgconfig/glacier2cs.pc'),
-		  ('file', 'lib/pkgconfig/iceboxcs.pc'),
-		  ('file', 'lib/pkgconfig/icegridcs.pc'),
-		  ('file', 'lib/pkgconfig/icepatch2cs.pc'),
-		  ('file', 'lib/pkgconfig/icestormcs.pc'),
 		  ('exe', 'bin/iceboxnet.exe')], 'noarch')
     ]
 
@@ -766,6 +772,12 @@ def createRPMSFromBinaries64(buildDir, installDir, version, soVersion):
     # Copy demo files so the RPM spec file can pick them up.
     #
     os.system("cp -pR " + installDir + "/Ice-" + version + "-demos/* " + installDir + "/usr/share/doc/Ice-" + version)
+
+    #
+    # We need to unset a build define in the Make.rules.cs file.
+    #
+    result = os.system("perl -pi.bak -e 's/^(src_build.*)$/\\# \\1/' " + installDir + "/usr/share/doc/Ice-" + version +
+	    "/config/Make.rules.cs")
     if os.path.exists(installDir + "/Ice-" + version + "-demos"):
 	shutil.rmtree(installDir + "/Ice-" + version + "-demos")
     cwd = os.getcwd()
@@ -786,6 +798,7 @@ sed -i -e 's/^prefix.*$/prefix = $\(RPM_BUILD_ROOT\)/' $RPM_BUILD_DIR/IcePy-%{ve
 %setup -q -n IceCS-%{version} -T -D -b 3 
 sed -i -e 's/^prefix.*$/prefix = $\(RPM_BUILD_ROOT\)/' $RPM_BUILD_DIR/IceCS-%{version}/config/Make.rules.cs
 sed -i -e 's/^cvs_build.*$/cvs_build = no/' $RPM_BUILD_DIR/IceCS-%{version}/config/Make.rules.cs
+sed -i.bak -e 's/^\(src_build.*\)$/\# \1/' $RPM_BUILD_ROOT/usr/share/doc/Ice-%{version}/config/Make.rules.cs\n
 %setup -q -n Ice-%{version}-demos -T -D -b 4 
 cd $RPM_BUILD_DIR
 tar xfz $RPM_SOURCE_DIR/IcePHP-%{version}.tar.gz
@@ -884,7 +897,7 @@ def writeDemoPkgCommands(ofile, version):
     ofile.write('mkdir -p $RPM_BUILD_ROOT/usr/share/doc/Ice-%{version}\n')
     ofile.write('tar xfz $RPM_SOURCE_DIR/Ice-%{version}-demos.tar.gz -C $RPM_BUILD_ROOT/usr/share/doc\n')
     ofile.write('cp -pR $RPM_BUILD_ROOT/usr/share/doc/Ice-%{version}-demos/* $RPM_BUILD_ROOT/usr/share/doc/Ice-%{version}\n')
-    ofile.write("sed -i.bak -e 's/^(src_build.*)$/\\# \\1/' $RPM_BUILD_ROOT/usr/share/doc/Ice-%{version}/config/Make.rules.cs\n")
+    ofile.write("sed -i.bak -e 's/^\(src_build.*\)$/\\# \\1/' $RPM_BUILD_ROOT/usr/share/doc/Ice-%{version}/config/Make.rules.cs\n")
     ofile.write('rm -rf $RPM_BUILD_ROOT/usr/share/doc/Ice-%{version}-demos\n')
 	
 if __name__ == "main":
