@@ -1059,7 +1059,7 @@ def main():
 	if not getPlatform() in ['aix']:
 	    sourceTarBalls.append(('icepy','IcePy-' + version, 'py'))
 
-	if getPlatform() == 'linux':
+	if getPlatform() == "linux":
 	    sourceTarBalls.append(('icecs','IceCS-' + version, 'cs'))
 
         os.environ['ICE_HOME'] = installDir + '/Ice-' + version
@@ -1199,7 +1199,28 @@ def main():
 	shutil.copy(installFiles + '/unix/README.Linux-RPM', '/usr/src/redhat/SOURCES/README.Linux-RPM')
 	shutil.copy(installFiles + '/unix/README.Linux-RPM', installDir + '/Ice-' + version + '/README')
 	shutil.copy(installFiles + '/thirdparty/php/ice.ini', installDir + '/Ice-' + version + '/ice.ini')
+
 	if getPlatform() == 'linux64':
+
+	    # 
+	    # I need to pull the pkgconfig files out of the IceCS
+	    # archive and place them in the installed lib64 directory.
+	    # 
+
+	    cwd = os.getcwd()
+	    os.chdir(buildDir)
+	    distro = "IceCS-%s" % version
+	    shutil.rmtree("IceCS-%s" % version, True)
+	    if not os.path.exists(distro):
+		filename = os.path.join(sources, '%s.tar.gz' % distro)
+		runprog('tar xfz %s' % filename)
+	    os.chdir(distro)
+	    if not os.path.exists(os.path.join(installDir, 'Ice-%s' % version, 'lib64')):
+		os.mkdir(os.path.join(installDir, 'Ice-%s' % version, 'lib64'))
+	    shutil.copytree(os.path.join('lib', 'pkgconfig'), os.path.join(installDir, 'Ice-%s' % version, 'lib64', 'pkgconfig'))
+	    os.chdir(cwd)
+
+
 	    #
 	    # The demo archive isn't constructed on 64 bit linux so we
 	    # need to rely on the archive being in the sources
