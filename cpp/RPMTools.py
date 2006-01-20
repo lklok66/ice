@@ -222,11 +222,17 @@ class Subpackage(Package):
 
 class DotNetPackage(Subpackage):
     def writePostInstall(self, ofile, version, intVersion, installDir):
-	ofile.write('\n%ifarch noarch\n')
+	ofile.write('\n%ifnarch noarch\n')
 	ofile.write('''
+pklibdir="lib"
+
+%ifarch x86_64
+pklibdir="lib64"
+%endif
+
 for f in icecs glacier2cs iceboxcs icegridcs icepatch2cs icestormcs;
 do
-    sed -i.bak -e "s/^mono_root.*$/mono_root = \/usr/" /usr/lib/pkgconfig/$f.pc ; 
+    sed -i.bak -e "s/^mono_root.*$/mono_root = \/usr/" /usr/$pklibdir/pkgconfig/$f.pc ; 
 done
 	''')
 	ofile.write('\n%endif\n')
