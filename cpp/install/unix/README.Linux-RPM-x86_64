@@ -1,0 +1,108 @@
+This archive contains binary (64 bit) and architecture-independent
+RPMs for Fedora Core 4.
+
+ice-3.0.1-1.x86_64.rpm
+
+    The Ice run time, including executables for Ice services and
+    tools, shared libraries, C++ runtime libraries, HTML
+    documentation, and Slice files. This RPM must be installed
+    before any of the language-specific RPMs, and depends on the
+    following third-party packages:
+
+    * db4-4.3.27
+    * expat-1.95.8
+    * openssl-0.9.7f
+    * bzip2-libs-1.0.2
+    * readline-5.0
+    * ncurses-5.4
+    * libgcc-4.0.2
+    * libstdc++-4.0.2
+
+ice-c++-devel-3.0.1-1.x86_64.rpm
+
+    Ice for C++ development kit, including Slice translators, header
+    files, libraries and sample programs. This RPM has the following
+    dependencies:
+
+    * ice-3.0.1-1
+    * openssl-devel-0.9.7f
+    * db4-utils-4.3.27
+
+ice-dotnet-3.0.1-1.x86_64.rpm
+
+    Ice for C# (Mono) runtime, including the assemblies required to
+    execute Ice for C# applications. This RPM has the following
+    dependencies:
+
+    * ice-3.0.1-1
+    * mono-core-1.1.9
+
+ice-csharp-devel-3.0.1-1.x86_64.rpm
+
+    Ice for C# (Mono) development kit, including the Slice translator
+    and sample programs. This RPM has the following dependencies:
+
+    * ice-3.0.1-1
+    * ice-dotnet-3.0.1-1
+
+ice-java-3.0.1-1.noarch.rpm
+
+    Ice for Java runtime, including the Java classes required to
+    execute Ice for Java applications. This RPM has the following
+    dependencies:
+
+    * ice-3.0.1-1
+    * db4-java-4.3.27
+
+ice-java-devel-3.0.1-1.x86_64.rpm
+
+    Ice for Java development kit, including Slice translators and
+    sample programs. This RPM has the following dependencies:
+
+    * ice-3.0.1-1
+    * ice-java-3.0.1-1
+
+ice-python-3.0.1-1.x86_64.rpm
+
+    Ice for Python runtime, including the Ice extension and supporting
+    Python classes required to run Ice for Python applications. This
+    RPM has the following dependencies:
+
+    * ice-3.0.1-1
+    * python-2.4.1
+
+ice-python-devel-3.0.1-1.x86_64.rpm
+
+    Ice for Python development kit, including the Slice translator and
+    sample programs. This RPM has the following dependencies:
+
+    * ice-3.0.1-1
+    * ice-python-3.0.1-1
+
+ice-php-3.0.1-1.x86_64.rpm
+
+    Ice for PHP runtime. This RPM has the following dependencies:
+
+    * ice-3.0.1-1
+    * php-5.0.4
+
+ice-php-devel-3.0.1-1.x86_64.rpm
+
+    Ice for PHP development kit, including the sample programs. This
+    RPM has the following dependencies:
+
+    * ice-3.0.1-1
+    * ice-php-3.0.1-1
+
+ice-third-party-3.0.1-1.noarch.rpm
+
+    Class libraries for a third-party Java GUI toolkit.
+
+db4-4.3.29-1.x86_64.rpm
+
+    Replacement for the unstable version of Berkeley DB included by
+    default with FC4 x86_64.
+
+db4-java-4.3.29-1.x86_64.rpm
+
+    Java support for Berkeley DB.
