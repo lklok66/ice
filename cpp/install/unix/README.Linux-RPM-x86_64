@@ -98,12 +98,13 @@ ice-third-party-3.0.1-1.noarch.rpm
 
     Class libraries for a third-party Java GUI toolkit.
 
-db4-4.3.29-1.x86_64.rpm
-db4-utils-4.3.29-1.x86_64.rpm
+db4-4.3.29-1.1.x86_64.rpm
+db4-utils-4.3.29-1.1.x86_64.rpm
+db4-devel-4.3.29-1.1.x86_64.rpm
 
     Newer version of Berkeley DB 4.3; more stable than the version
     included in the FC4 x86_64 distribution.
 
-db4-java-4.3.29-1.x86_64.rpm
+db4-java-4.3.29-1.1.x86_64.rpm
 
     Java support for Berkeley DB.
