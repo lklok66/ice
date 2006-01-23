@@ -13,14 +13,12 @@ import os, sys, shutil, string, logging, compileall
 # through the package descriptions to set the dependencies.
 #
 
-buildRequires = ('byacc >= 1.9',
-                 'mono-core >= 1.1.9',
+buildRequires = ('mono-core >= 1.1.9',
                  'mono-devel >= 1.1.9',
                  'python >= 2.4.1',
                  'python-devel >= 2.4.1',
                  'bzip2-devel >= 1.0.2',
                  'bzip2-libs >= 1.0.2',
-                 'ant >= 1.6.2',
                  'expat-devel >= 1.9',
                  'expat >= 1.9',
                  'libstdc++ >= 3.2',
@@ -803,8 +801,6 @@ sed -i -e 's/^prefix.*$/prefix = $\(RPM_BUILD_ROOT\)/' $RPM_BUILD_DIR/Ice-%{vers
 sed -i -e 's/^prefix.*$/prefix = $\(RPM_BUILD_ROOT\)/' $RPM_BUILD_DIR/IcePy-%{version}/config/Make.rules
 %setup -q -n IceCS-%{version} -T -D -b 3 
 sed -i -e 's/^prefix.*$/prefix = $\(RPM_BUILD_ROOT\)/' $RPM_BUILD_DIR/IceCS-%{version}/config/Make.rules.cs
-sed -i -e 's/^cvs_build.*$/cvs_build = no/' $RPM_BUILD_DIR/IceCS-%{version}/config/Make.rules.cs
-sed -i.bak -e 's/^\(src_build.*\)$/\# \1/' $RPM_BUILD_ROOT/usr/share/doc/Ice-%{version}/config/Make.rules.cs\n
 %setup -q -n Ice-%{version}-demos -T -D -b 4 
 cd $RPM_BUILD_DIR
 tar xfz $RPM_SOURCE_DIR/IcePHP-%{version}.tar.gz

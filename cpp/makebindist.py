@@ -1095,7 +1095,6 @@ def main():
 	#
 	if getPlatform() == 'linux':
 	    toCollect = list(sourceTarBalls)
-	    toCollect.append(('icevb', 'IceVB-' + version, 'vb'))
 	    for cvs, tarball, demoDir in toCollect:
 		extractDemos(sources, buildDir, version, tarball, demoDir)
 		shutil.copy(installFiles + '/unix/README.DEMOS', buildDir + '/Ice-' + version + '-demos/README.DEMOS') 
