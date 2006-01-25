@@ -1492,13 +1492,11 @@ public abstract class Map extends java.util.AbstractMap
 		    {
 			if(_index != null)
 			{
-			    inRange = _index.compare(dbIKey, 
-						     new com.sleepycat.db.DatabaseEntry(_toKey)) < 0;
+			    inRange = _index.compare(dbIKey.getData(), _toKey) < 0;
 			}
 			else
 			{
-			    inRange = _comparator.compare(dbKey,
-							  new com.sleepycat.db.DatabaseEntry(_toKey)) < 0;
+			    inRange = _comparator.compare(dbKey.getData(), _toKey) < 0;
 			}
 		    }
 		    
