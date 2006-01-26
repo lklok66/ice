@@ -14,18 +14,11 @@
   <application name="Simple">
 
     <node name="localhost">
-      <variable name="objectid" value="test/hello"/>
-      <variable name="objectname" value="test43"/>
-      <variable name="objectcat" value="test"/>
-      <variable name="slash" value="/"/>
-
-      <server id="SimpleServer" exe="./server" activation="always">
+      <server id="SimpleServer" exe="./server" activation="on-demand">
 	<adapter name="Hello" endpoints="tcp" register-process="true">
-	  <object identity="${objectid}" type="::Demo::Hello"/>
-	  <object identity="${objectcat}/${objectname}" type="::Demo::Hello"/>
-	  <object identity="${objectcat}${slash}${objectname}3" type="::Demo::Hello"/>
+	  <object identity="hello" type="::Demo::Hello"/>
 	</adapter>
-	<property name="Identity" value="${objectid}"/>
+	<property name="Identity" value="hello"/>
       </server>
     </node>
 
