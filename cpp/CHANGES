@@ -1,3 +1,9 @@
+Changes since version 3.0.1
+---------------------------
+
+- Fixed a bug in IceGrid deployment mechanism which would prevent
+  defining with a variable object identities with a category.
+
 Changes since version 3.0.0
 ---------------------------
 
