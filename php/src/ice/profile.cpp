@@ -110,7 +110,7 @@ static const char* _coreTypes =
     "        return $this->unknown;\n"
     "    }\n"
     "\n"
-    "    var $unknown;\n"
+    "    public $unknown;\n"
     "}\n"
     "\n"
     "class Ice_UnknownLocalException extends Ice_UnknownException\n"
@@ -144,9 +144,9 @@ static const char* _coreTypes =
     "               \"  operation: \" . $this->operation;\n"
     "    }\n"
     "\n"
-    "    var $id;\n"
-    "    var $facet;\n"
-    "    var $operation;\n"
+    "    public $id;\n"
+    "    public $facet;\n"
+    "    public $operation;\n"
     "}\n"
     "\n"
     "class Ice_ObjectNotExistException extends Ice_RequestFailedException\n"
@@ -186,7 +186,7 @@ static const char* _coreTypes =
     "               \"  reason: \" . $this->reason;\n"
     "    }\n"
     "\n"
-    "    var $reason;\n"
+    "    public $reason;\n"
     "}\n"
     "\n"
     "class Ice_MarshalException extends Ice_ProtocolException\n"
@@ -211,7 +211,7 @@ static const char* _coreTypes =
     "               \"    type: \" . $this->type;\n"
     "    }\n"
     "\n"
-    "    var $type;\n"
+    "    public $type;\n"
     "}\n"
     "\n"
     "class Ice_ProfileAlreadyLoadedException extends Ice_LocalException\n"
@@ -235,7 +235,7 @@ static const char* _coreTypes =
     "               \"  name: \" . $this->name;\n"
     "    }\n"
     "\n"
-    "    var $name;\n"
+    "    public $name;\n"
     "}\n"
     "\n"
     "abstract class Ice_UserException extends Ice_Exception\n"
@@ -1051,7 +1051,7 @@ IcePHP::CodeVisitor::visitOperation(const Slice::OperationPtr& p)
 void
 IcePHP::CodeVisitor::visitDataMember(const Slice::DataMemberPtr& p)
 {
-    _out << "var $" << fixIdent(p->name()) << ';' << endl;
+    _out << "public $" << fixIdent(p->name()) << ';' << endl;
 }
 
 void
