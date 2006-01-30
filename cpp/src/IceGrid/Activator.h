@@ -28,7 +28,12 @@ class Activator : public IceUtil::Monitor< IceUtil::Mutex>, public IceUtil::Shar
 {
 public:
 
+#ifdef __linux
+    Activator(const TraceLevelsPtr&, const Ice::PropertiesPtr&, bool);
+#else
     Activator(const TraceLevelsPtr&, const Ice::PropertiesPtr&);
+#endif
+
     virtual ~Activator();
 
     virtual int activate(const std::string&, const std::string&, const std::string&, const Ice::StringSeq&, 
@@ -87,6 +92,10 @@ private:
     bool _redirectErrToOut;
 
     IceUtil::ThreadPtr _thread;
+
+#ifdef __linux
+    bool _nptl;
+#endif
 };
 typedef IceUtil::Handle<Activator> ActivatorPtr;
 

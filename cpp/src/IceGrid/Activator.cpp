@@ -247,10 +247,18 @@ stringToSignal(const string& str)
 
 }
 
+#ifdef __linux
+Activator::Activator(const TraceLevelsPtr& traceLevels, const PropertiesPtr& properties, bool nptl) :
+    _traceLevels(traceLevels),
+    _properties(properties),
+    _deactivating(false),
+    _nptl(nptl)
+#else
 Activator::Activator(const TraceLevelsPtr& traceLevels, const PropertiesPtr& properties) :
     _traceLevels(traceLevels),
     _properties(properties),
     _deactivating(false)
+#endif
 {
 #ifdef _WIN32
     _hIntr = CreateEvent(
@@ -1234,22 +1242,56 @@ Activator::terminationListener()
 	for(vector<Process>::const_iterator p = terminated.begin(); p != terminated.end(); ++p)
 	{
 	    int status = 0;
-	    pid_t pid = waitpid(p->pid, &status, 0);
-#ifdef __linux
-	    //
-	    // Calling waitpid() in a LinuxThreads environment fails with ECHILD
-	    // if the calling thread is not the one that forked the child. We
-	    // ignore this error; a signal handler installed by the main
-	    // program ensures we don't create zombies. This limitation means
-	    // that DisableOnFailure does not work under LinuxThreads.
-	    //
-	    if(pid < 0 && getSystemErrno() != ECHILD)
+#if defined(__linux)
+	    if(_nptl)
 	    {
-		SyscallException ex(__FILE__, __LINE__);
-		ex.error = getSystemErrno();
-		throw ex;
+		int nRetry = 0;
+		while(true) // The while loop is necessary for the linux workaround.
+		{
+		    pid_t pid = waitpid(p->pid, &status, 0);
+		    if(pid < 0)
+		    {
+			//
+			// Some Linux distribution have a bogus waitpid() (e.g.: CentOS 4.x). It doesn't 
+			// block and reports an incorrect ECHILD error on the first call. We sleep a 
+			// little and retry to work around this issue (it appears from testing that a
+			// single retry is enough but to make sure we retry up to 10 times before to throw.)
+			//
+			if(errno == ECHILD && nRetry < 10)
+			{
+			    // Wait 1ms, 11ms, 21ms, etc.
+			    IceUtil::ThreadControl::sleep(IceUtil::Time::milliSeconds(nRetry * 10 + 1)); 
+			    ++nRetry;
+			    continue;
+			}
+			SyscallException ex(__FILE__, __LINE__);
+			ex.error = getSystemErrno();
+			throw ex;
+		    }
+		    assert(pid == p->pid);
+		    break;
+		}
+	    }
+	    else
+	    {
+		pid_t pid = waitpid(p->pid, &status, 0);
+		
+		//
+		// Calling waitpid() in a LinuxThreads environment fails with ECHILD
+		// if the calling thread is not the one that forked the child. We
+		// ignore this error; a signal handler installed by the main
+		// program ensures we don't create zombies. This limitation means
+		// that DisableOnFailure does not work under LinuxThreads.
+		//
+		if(pid < 0 && getSystemErrno() != ECHILD)
+		{
+		    SyscallException ex(__FILE__, __LINE__);
+		    ex.error = getSystemErrno();
+		    throw ex;
+		}
 	    }
 #else
+	    pid_t pid = waitpid(p->pid, &status, 0);
 	    if(pid < 0)
 	    {
 		SyscallException ex(__FILE__, __LINE__);

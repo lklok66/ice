@@ -235,8 +235,8 @@ NodeService::start(int argc, char* argv[])
     // Determine if we are using NPTL. If not, we need to install
     // a signal handler for ECHILD.
     //
+    bool nptl = false;
     {
-	bool nptl = false;
 
 	size_t n = confstr(_CS_GNU_LIBPTHREAD_VERSION, NULL, 0);
 	if(n > 0)
@@ -337,7 +337,11 @@ NodeService::start(int argc, char* argv[])
     // Create the activator.
     //
     TraceLevelsPtr traceLevels = new TraceLevels(properties, communicator()->getLogger(), true);
+#ifdef __linux
+    _activator = new Activator(traceLevels, properties, nptl);
+#else
     _activator = new Activator(traceLevels, properties);
+#endif
 
     //
     // Collocate the IceGrid registry if we need to.
