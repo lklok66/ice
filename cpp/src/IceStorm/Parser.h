@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -13,14 +13,13 @@
 #include <IceUtil/Handle.h>
 #include <IceStorm/IceStorm.h>
 #include <list>
-#include <stdio.h>
 
 #ifdef _WIN32
 #   include <io.h>
-#   ifdef _MSC_VER
-#       define isatty _isatty
-#       define fileno _fileno
+#   define isatty _isatty
+#   define fileno _fileno
 // '_isatty' : inconsistent dll linkage.  dllexport assumed.
+#   ifdef _MSC_VER
 #       pragma warning( disable : 4273 )
 #   endif
 #endif
@@ -63,20 +62,20 @@ class Parser : public ::IceUtil::SimpleShared
 {
 public:
 
-    static ParserPtr createParser(const Ice::CommunicatorPtr&, const TopicManagerPrx&, 
-                                  const std::map<Ice::Identity, TopicManagerPrx>&);
+    static ParserPtr createParser(const Ice::CommunicatorPtr&, const IceStorm::TopicManagerPrx&);
 
     void usage();
 
     void create(const std::list<std::string>&);
     void destroy(const std::list<std::string>&);
+    void dolist(const std::list<std::string>&); // Don't name list - conflicts with std::list
     void link(const std::list<std::string>&);
     void unlink(const std::list<std::string>&);
-    void links(const std::list<std::string>&);
-    void topics(const std::list<std::string>&);
-    void current(const std::list<std::string>&);
+    void graph(const std::list<std::string>&);
 
     void showBanner();
+    void showCopying();
+    void showWarranty();
 
     void getInput(char*, int&, int);
     void nextLine();
@@ -90,25 +89,16 @@ public:
     void warning(const char*);
     void warning(const std::string&);
 
-    void invalidCommand(const std::string&);
-
     int parse(FILE*, bool);
     int parse(const std::string&, bool);
 
 private:
 
-    TopicManagerPrx findManagerById(const std::string&, std::string&) const;
-    TopicManagerPrx findManagerByCategory(const std::string&) const;
-    TopicPrx findTopic(const std::string&) const;
+    Parser(const Ice::CommunicatorPtr&, const IceStorm::TopicManagerPrx&);
 
-    Parser(const Ice::CommunicatorPtr&, const TopicManagerPrx&, const std::map<Ice::Identity, TopicManagerPrx>&);
-    
-    void exception(const Ice::Exception&, bool = false);
-
-    const Ice::CommunicatorPtr _communicator;
-    TopicManagerPrx _defaultManager;
-    const std::map<Ice::Identity, TopicManagerPrx> _managers;
     std::string _commands;
+    Ice::CommunicatorPtr _communicator;
+    IceStorm::TopicManagerPrx _admin;
     bool _continue;
     int _errors;
     int _currentLine;

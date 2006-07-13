@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -29,16 +29,7 @@ SLICE_SRCS	= Throughput.ice
 
 include $(top_srcdir)/config/Make.rules
 
-ifeq ($(CXX),aCC)
-#                                                                                                          
-# Work-around 'quadrant warning' in aCC A.03.56
-# Puts string literals in read-write memory
-#
-EXTRA_CPPFLAGS   := +ESnolit
-endif
-
-CPPFLAGS         := -I. $(CPPFLAGS) $(EXTRA_CPPFLAGS)
-
+CPPFLAGS	:= -I. $(CPPFLAGS)
 
 $(CLIENT): $(OBJS) $(COBJS)
 	rm -f $@

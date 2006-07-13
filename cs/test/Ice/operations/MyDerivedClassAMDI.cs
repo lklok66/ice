@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -14,10 +14,10 @@ public sealed class MyDerivedClassI : Test.MyDerivedClass
 {
     private static void test(bool b)
     {
-        if (!b)
-        {
-            throw new Exception();
-        }
+	if (!b)
+	{
+	    throw new Exception();
+	}
     }
 
     internal class Thread_opVoid
@@ -27,30 +27,36 @@ public sealed class MyDerivedClassI : Test.MyDerivedClass
             _cb = cb;
         }
         
-        public void Start()
-        {
-            lock(this)
-            {
-                _thread = new Thread(new ThreadStart(Run));
-                _thread.Start();
-            }
-        }
+	public void Start()
+	{
+	    lock(this)
+	    {
+		_thread = new Thread(new ThreadStart(Run));
+		_thread.Start();
+	    }
+	}
 
         public void Run()
         {
             _cb.ice_response();
         }
 
-        public void Join()
-        {
-            lock(this)
-            {
-                _thread.Join();
-            }
-        }
+	public void Join()
+	{
+	    lock(this)
+	    {
+		_thread.Join();
+	    }
+	}
         
         private Test.AMD_MyClass_opVoid _cb;
-        private Thread _thread;
+	private Thread _thread;
+    }
+    
+    public MyDerivedClassI(Ice.ObjectAdapter adapter, Ice.Identity identity)
+    {
+        _adapter = adapter;
+        _identity = identity;
     }
     
     public override void shutdown_async(Test.AMD_MyClass_shutdown cb, Ice.Current current)
@@ -61,7 +67,7 @@ public sealed class MyDerivedClassI : Test.MyDerivedClass
             _opVoidThread = null;
         }
         
-        current.adapter.getCommunicator().shutdown();
+        _adapter.getCommunicator().shutdown();
         cb.ice_response();
     }
     
@@ -79,8 +85,8 @@ public sealed class MyDerivedClassI : Test.MyDerivedClass
     
     public override void opSleep_async(Test.AMD_MyClass_opSleep cb, int duration, Ice.Current current)
     {
-        System.Threading.Thread.Sleep(duration);
-        cb.ice_response();
+	System.Threading.Thread.Sleep(duration);
+	cb.ice_response();
     }
 
     public override void opBool_async(Test.AMD_MyClass_opBool cb, bool p1, bool p2, Ice.Current current)
@@ -208,9 +214,9 @@ public sealed class MyDerivedClassI : Test.MyDerivedClass
     public override void opMyClass_async(Test.AMD_MyClass_opMyClass cb, Test.MyClassPrx p1, Ice.Current current)
     {
         Test.MyClassPrx p2 = p1;
-        Test.MyClassPrx p3 = Test.MyClassPrxHelper.uncheckedCast(current.adapter.createProxy(
-                                                current.adapter.getCommunicator().stringToIdentity("noSuchIdentity")));
-        cb.ice_response(Test.MyClassPrxHelper.uncheckedCast(current.adapter.createProxy(current.id)), p2, p3);
+        Test.MyClassPrx p3 = Test.MyClassPrxHelper.uncheckedCast(_adapter.createProxy(
+						_adapter.getCommunicator().stringToIdentity("noSuchIdentity")));
+        cb.ice_response(Test.MyClassPrxHelper.uncheckedCast(_adapter.createProxy(_identity)), p2, p3);
     }
     
     public override void opMyEnum_async(Test.AMD_MyClass_opMyEnum cb, Test.MyEnum p1, Ice.Current current)
@@ -293,19 +299,19 @@ public sealed class MyDerivedClassI : Test.MyDerivedClass
     
     public override void opByteSOneway_async(Test.AMD_MyClass_opByteSOneway cb, Test.ByteS s, Ice.Current current)
     {
-        cb.ice_response();
+	cb.ice_response();
     }
 
     public override void opDoubleMarshaling_async(Test.AMD_MyClass_opDoubleMarshaling cb, double p1, Test.DoubleS p2, 
-                                                  Ice.Current current)
+					          Ice.Current current)
     {
-        double d = 1278312346.0 / 13.0;
-        test(p1 == d);
-        for(int i = 0; i < p2.Count; ++i)
-        {
-            test(p2[i] == d);
-        }
-        cb.ice_response();
+	double d = 1278312346.0 / 13.0;
+	test(p1 == d);
+	for(int i = 0; i < p2.Count; ++i)
+	{
+	    test(p2[i] == d);
+	}
+	cb.ice_response();
     }
 
     public override void opStringS_async(Test.AMD_MyClass_opStringS cb, Test.StringS p1, Test.StringS p2, Ice.Current current)
@@ -371,5 +377,7 @@ public sealed class MyDerivedClassI : Test.MyDerivedClass
         cb.ice_response();
     }
     
+    private Ice.ObjectAdapter _adapter;
+    private Ice.Identity _identity;
     private Thread_opVoid _opVoidThread;
 }

@@ -1,20 +1,20 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
 #
 # **********************************************************************
 
-import Ice, math, Test, array
+import Ice, math, Test
 
 def test(b):
     if not b:
         raise RuntimeError('test assertion failed')
 
-def twoways(communicator, p):
+def twoways(communicator, initData, p):
     #
     # opVoid
     #
@@ -132,43 +132,19 @@ def twoways(communicator, p):
 
     rso, bso = p.opByteS(bsi1, bsi2)
     test(len(bso) == 4)
-    test(bso[0] == '\x22')
-    test(bso[1] == '\x12')
-    test(bso[2] == '\x11')
-    test(bso[3] == '\x01')
+    test(bso[0] == 0x22)
+    test(bso[1] == 0x12)
+    test(bso[2] == 0x11)
+    test(bso[3] == 0x01)
     test(len(rso) == 8)
-    test(rso[0] == '\x01')
-    test(rso[1] == '\x11')
-    test(rso[2] == '\x12')
-    test(rso[3] == '\x22')
-    test(rso[4] == '\xf1')
-    test(rso[5] == '\xf2')
-    test(rso[6] == '\xf3')
-    test(rso[7] == '\xf4')
-
-    #
-    # opByteS (array)
-    #
-    bsi1 = array.array('B')
-    bsi1.fromlist([0x01, 0x11, 0x12, 0x22])
-    bsi2 = array.array('B')
-    bsi2.fromlist([0xf1, 0xf2, 0xf3, 0xf4])
-
-    rso, bso = p.opByteS(bsi1, bsi2)
-    test(len(bso) == 4)
-    test(bso[0] == '\x22')
-    test(bso[1] == '\x12')
-    test(bso[2] == '\x11')
-    test(bso[3] == '\x01')
-    test(len(rso) == 8)
-    test(rso[0] == '\x01')
-    test(rso[1] == '\x11')
-    test(rso[2] == '\x12')
-    test(rso[3] == '\x22')
-    test(rso[4] == '\xf1')
-    test(rso[5] == '\xf2')
-    test(rso[6] == '\xf3')
-    test(rso[7] == '\xf4')
+    test(rso[0] == 0x01)
+    test(rso[1] == 0x11)
+    test(rso[2] == 0x12)
+    test(rso[3] == 0x22)
+    test(rso[4] == 0xf1)
+    test(rso[5] == 0xf2)
+    test(rso[6] == 0xf3)
+    test(rso[7] == 0xf4)
 
     #
     # opBoolS
@@ -188,61 +164,11 @@ def twoways(communicator, p):
     test(rso[2])
 
     #
-    # opBoolS (array)
-    #
-    bsi1 = array.array('B')
-    bsi1.fromlist([1, 1, 0])
-    bsi2 = array.array('B')
-    bsi2.fromlist([0])
-
-    rso, bso = p.opBoolS(bsi1, bsi2)
-    test(len(bso) == 4)
-    test(bso[0])
-    test(bso[1])
-    test(not bso[2])
-    test(not bso[3])
-    test(len(rso) == 3)
-    test(not rso[0])
-    test(rso[1])
-    test(rso[2])
-
-    #
     # opShortIntLongS
     #
     ssi = (1, 2, 3)
     isi = (5, 6, 7, 8)
     lsi = (10, 30, 20)
-
-    rso, sso, iso, lso = p.opShortIntLongS(ssi, isi, lsi)
-    test(len(sso) == 3)
-    test(sso[0] == 1)
-    test(sso[1] == 2)
-    test(sso[2] == 3)
-    test(len(iso) == 4)
-    test(iso[0] == 8)
-    test(iso[1] == 7)
-    test(iso[2] == 6)
-    test(iso[3] == 5)
-    test(len(lso) == 6)
-    test(lso[0] == 10)
-    test(lso[1] == 30)
-    test(lso[2] == 20)
-    test(lso[3] == 10)
-    test(lso[4] == 30)
-    test(lso[5] == 20)
-    test(len(rso) == 3)
-    test(rso[0] == 10)
-    test(rso[1] == 30)
-    test(rso[2] == 20)
-
-    #
-    # opShortIntLongS (array)
-    #
-    ssi = array.array('h')
-    ssi.fromlist([1, 2, 3])
-    isi = array.array('i')
-    isi.fromlist([5, 6, 7, 8])
-    lsi = (10, 30, 20)  # Can't store Ice::Long in an array.
 
     rso, sso, iso, lso = p.opShortIntLongS(ssi, isi, lsi)
     test(len(sso) == 3)
@@ -288,29 +214,6 @@ def twoways(communicator, p):
     test(rso[4] - 1.11 < 0.001)
 
     #
-    # opFloatDoubleS (array)
-    #
-    fsi = array.array('f')
-    fsi.fromlist([3.14, 1.11])
-    dsi = array.array('d')
-    dsi.fromlist([1.1E10, 1.2E10, 1.3E10])
-
-    rso, fso, dso = p.opFloatDoubleS(fsi, dsi)
-    test(len(fso) == 2)
-    test(fso[0] - 3.14 < 0.001)
-    test(fso[1] - 1.11 < 0.001)
-    test(len(dso) == 3)
-    test(dso[0] == 1.3E10)
-    test(dso[1] == 1.2E10)
-    test(dso[2] == 1.1E10)
-    test(len(rso) == 5)
-    test(rso[0] == 1.1E10)
-    test(rso[1] == 1.2E10)
-    test(rso[2] == 1.3E10)
-    test(rso[3] - 3.14 < 0.001)
-    test(rso[4] - 1.11 < 0.001)
-
-    #
     # opStringS
     #
     ssi1 = ('abc', 'de', 'fghi')
@@ -336,23 +239,23 @@ def twoways(communicator, p):
     rso, bso = p.opByteSS(bsi1, bsi2)
     test(len(bso) == 2)
     test(len(bso[0]) == 1)
-    test(bso[0][0] == '\xff')
+    test(bso[0][0] == 0xff)
     test(len(bso[1]) == 3)
-    test(bso[1][0] == '\x01')
-    test(bso[1][1] == '\x11')
-    test(bso[1][2] == '\x12')
+    test(bso[1][0] == 0x01)
+    test(bso[1][1] == 0x11)
+    test(bso[1][2] == 0x12)
     test(len(rso) == 4)
     test(len(rso[0]) == 3)
-    test(rso[0][0] == '\x01')
-    test(rso[0][1] == '\x11')
-    test(rso[0][2] == '\x12')
+    test(rso[0][0] == 0x01)
+    test(rso[0][1] == 0x11)
+    test(rso[0][2] == 0x12)
     test(len(rso[1]) == 1)
-    test(rso[1][0] == '\xff')
+    test(rso[1][0] == 0xff)
     test(len(rso[2]) == 1)
-    test(rso[2][0] == '\x0e')
+    test(rso[2][0] == 0x0e)
     test(len(rso[3]) == 2)
-    test(rso[3][0] == '\xf2')
-    test(rso[3][1] == '\xf1')
+    test(rso[3][0] == 0xf2)
+    test(rso[3][1] == 0xf1)
 
     #
     # opFloatDoubleSS
@@ -534,7 +437,6 @@ def twoways(communicator, p):
         for j in range(len(r)):
             test(r[j] == -j)
 
-   
     #
     # opContext
     #
@@ -558,85 +460,22 @@ def twoways(communicator, p):
     #
     # Test that default context is obtained correctly from communicator.
     #
-    # DEPRECATED
-    #    dflt = {'a': 'b'}
-    #    communicator.setDefaultContext(dflt)
-    #    test(p.opContext() != dflt)
-    #
-    #    p2 = Test.MyClassPrx.uncheckedCast(p.ice_context({}))
-    #    test(len(p2.opContext()) == 0)
-    #
-    #    p2 = Test.MyClassPrx.uncheckedCast(p.ice_defaultContext())
-    #    test(p2.opContext() == dflt)
-    #
-    #    communicator.setDefaultContext({})
-    #    test(len(p2.opContext()) > 0)
-    #
-    #    communicator.setDefaultContext(dflt)
-    #    c = Test.MyClassPrx.checkedCast(communicator.stringToProxy("test:default -p 12010 -t 10000"))
-    #    test(c.opContext() == dflt)
-    #
-    #    dflt['a'] = 'c'
-    #    c2 = Test.MyClassPrx.uncheckedCast(c.ice_context(dflt))
-    #    test(c2.opContext()['a'] == 'c')
-    #
-    #    dflt = {}
-    #    c3 = Test.MyClassPrx.uncheckedCast(c2.ice_context(dflt))
-    #    tmp = c3.opContext()
-    #    test(not tmp.has_key('a'))
-    #
-    #    c4 = Test.MyClassPrx.uncheckedCast(c2.ice_defaultContext())
-    #    test(c4.opContext()['a'] == 'b')
-    #
-    #    dflt['a'] = 'd'
-    #    communicator.setDefaultContext(dflt)
-    #
-    #    c5 = Test.MyClassPrx.uncheckedCast(c.ice_defaultContext())
-    #    test(c5.opContext()['a'] == 'd')
-    #
-    #    communicator.setDefaultContext({})
+    initData.defaultContext = {'a': 'b'}
+    communicator2 = Ice.initialize(data=initData)
 
-    #
-    # Test implicit context propagation
-    #
-    impls = ( 'Shared', 'PerThread' )
-    for i in impls:
-        initData = Ice.InitializationData()
-        initData.properties = communicator.getProperties().clone()
-        initData.properties.setProperty('Ice.ImplicitContext', i)
-        ic = Ice.initialize(data=initData)
-        
-        ctx = {'one': 'ONE', 'two': 'TWO', 'three': 'THREE'}
-        
-        p = Test.MyClassPrx.uncheckedCast(ic.stringToProxy('test:default -p 12010 -t 10000'))
-        
-        ic.getImplicitContext().setContext(ctx)
-        test(ic.getImplicitContext().getContext() == ctx)
-        test(p.opContext() == ctx)
+    c = Test.MyClassPrx.checkedCast(communicator2.stringToProxy("test:default -p 12010 -t 10000"))
+    test(c.opContext() == initData.defaultContext)
 
-        test(ic.getImplicitContext().containsKey('zero') == False);
-        r = ic.getImplicitContext().put('zero', 'ZERO');
-        test(r == '');
-        test(ic.getImplicitContext().containsKey('zero') == True);
-        test(ic.getImplicitContext().get('zero') == 'ZERO');
-        
-        ctx = ic.getImplicitContext().getContext()
-        test(p.opContext() == ctx)
-        
-        prxContext = {'one': 'UN', 'four': 'QUATRE'}
-        
-        combined = ctx.copy()
-        combined.update(prxContext)
-        test(combined['one'] == 'UN')
-        
-        p = Test.MyClassPrx.uncheckedCast(p.ice_context(prxContext))
-       
-        ic.getImplicitContext().setContext({})
-        test(p.opContext() == prxContext)
-        
-        ic.getImplicitContext().setContext(ctx)
-        test(p.opContext() == combined)
-        
-        test(ic.getImplicitContext().remove('one') == 'ONE');
+    ctx = {'a': 'c'}
+    c2 = Test.MyClassPrx.uncheckedCast(c.ice_context(ctx))
+    test(c2.opContext()['a'] == 'c')
 
-        ic.destroy()
+    ctx = {}
+    c3 = Test.MyClassPrx.uncheckedCast(c2.ice_context(ctx))
+    test(not c3.opContext().has_key('a'))
+
+    c4 = Test.MyClassPrx.uncheckedCast(c2.ice_defaultContext())
+    test(c4.opContext()['a'] == 'b')
+
+    communicator2.destroy()
+    

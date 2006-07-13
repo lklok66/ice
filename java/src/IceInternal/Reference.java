@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -45,15 +45,15 @@ public abstract class Reference implements Cloneable
     public final java.util.Map
     getContext()
     {
-        return _context;
+	return _context;
     }
 
     public final Reference
     defaultContext()
     {
-        Reference r = _instance.referenceFactory().copy(this);
-        r._context = _instance.getDefaultContext();
-        return r;
+	Reference r = _instance.referenceFactory().copy(this);
+	r._context = _instance.initializationData().defaultContext;
+	return r;
 
     }
 
@@ -75,14 +75,12 @@ public abstract class Reference implements Cloneable
     }
 
     public abstract boolean getSecure();
-    public abstract boolean getPreferSecure();
     public abstract String getAdapterId();
     public abstract EndpointI[] getEndpoints();
     public abstract boolean getCollocationOptimization();
     public abstract int getLocatorCacheTimeout();
     public abstract boolean getCacheConnection();
     public abstract Ice.EndpointSelectionType getEndpointSelection();
-    public abstract boolean getThreadPerConnection();
 
     //
     // The change* methods (here and in derived classes) create
@@ -92,60 +90,59 @@ public abstract class Reference implements Cloneable
     public final Reference
     changeContext(java.util.Map newContext)
     {
-        if(newContext == null)
-        {
-            newContext = _emptyContext;
-        }
-        Reference r = _instance.referenceFactory().copy(this);
-        if(newContext.isEmpty())
-        {
-            r._context = _emptyContext;
-        }
-        else
-        {
-            r._context = new java.util.HashMap(newContext);
-        }
-        return r;
+	if(newContext == null)
+	{
+	    newContext = _emptyContext;
+	}
+	Reference r = _instance.referenceFactory().copy(this);
+	if(newContext.isEmpty())
+	{
+	    r._context = _emptyContext;
+	}
+	else
+	{
+	    r._context = new java.util.HashMap(newContext);
+	}
+	return r;
     }
 
     public final Reference
     changeMode(int newMode)
     {
         if(newMode == _mode)
-        {
-            return this;
-        }
-        Reference r = _instance.referenceFactory().copy(this);
-        r._mode = newMode;
-        return r;
+	{
+	    return this;
+	}
+	Reference r = _instance.referenceFactory().copy(this);
+	r._mode = newMode;
+	return r;
     }
 
     public final Reference
     changeIdentity(Ice.Identity newIdentity)
     {
         if(newIdentity.equals(_identity))
-        {
-            return this;
-        }
-        Reference r = _instance.referenceFactory().copy(this);
-        r._identity = (Ice.Identity)newIdentity.clone();
-        return r;
+	{
+	    return this;
+	}
+	Reference r = _instance.referenceFactory().copy(this);
+	r._identity = (Ice.Identity)newIdentity.clone();
+	return r;
     }
 
     public final Reference
     changeFacet(String newFacet)
     {
         if(newFacet.equals(_facet))
-        {
-            return this;
-        }
-        Reference r = _instance.referenceFactory().copy(this);
-        r._facet = newFacet;
-        return r;
+	{
+	    return this;
+	}
+	Reference r = _instance.referenceFactory().copy(this);
+	r._facet = newFacet;
+	return r;
     }
 
     public abstract Reference changeSecure(boolean newSecure);
-    public abstract Reference changePreferSecure(boolean newPreferSecure);
     public abstract Reference changeRouter(Ice.RouterPrx newRouter);
     public abstract Reference changeLocator(Ice.LocatorPrx newLocator);
     public abstract Reference changeCompress(boolean newCompress);
@@ -157,15 +154,14 @@ public abstract class Reference implements Cloneable
     public abstract Reference changeLocatorCacheTimeout(int newTimeout);
     public abstract Reference changeCacheConnection(boolean newCache);
     public abstract Reference changeEndpointSelection(Ice.EndpointSelectionType newType);
-    public abstract Reference changeThreadPerConnection(boolean newTpc);
 
     public synchronized int
     hashCode()
     {
-        if(_hashInitialized)
-        {
-            return _hashValue;
-        }
+	if(_hashInitialized)
+	{
+	    return _hashValue;
+	}
         
         int h = _mode;
 
@@ -181,7 +177,7 @@ public abstract class Reference implements Cloneable
             h = 5 * h + (int)_identity.category.charAt(i);
         }
 
-        h = 5 * h + _context.entrySet().hashCode();
+	h = 5 * h + _context.entrySet().hashCode();
 
         sz = _facet.length();
         for(int i = 0; i < sz; i++)
@@ -191,8 +187,8 @@ public abstract class Reference implements Cloneable
 
         h = 5 * h + (getSecure() ? 1 : 0);
 
-        _hashValue = h;
-        _hashInitialized = true;
+	_hashValue = h;
+	_hashInitialized = true;
 
         return h;
     }
@@ -225,7 +221,7 @@ public abstract class Reference implements Cloneable
 
         s.writeBool(getSecure());
 
-        // Derived class writes the remainder of the reference.
+	// Derived class writes the remainder of the reference.
     }
 
     //
@@ -234,13 +230,13 @@ public abstract class Reference implements Cloneable
     public String
     toString()
     {
-        //
-        // WARNING: Certain features, such as proxy validation in Glacier2,
-        // depend on the format of proxy strings. Changes to toString() and
-        // methods called to generate parts of the reference string could break
-        // these features. Please review for all features that depend on the
-        // format of proxyToString() before changing this and related code.
-        //
+	//
+	// WARNING: Certain features, such as proxy validation in Glacier2,
+	// depend on the format of proxy strings. Changes to toString() and
+	// methods called to generate parts of the reference string could break
+	// these features. Please review for all features that depend on the
+	// format of proxyToString() before changing this and related code.
+	//
         StringBuffer s = new StringBuffer();
 
         //
@@ -321,7 +317,7 @@ public abstract class Reference implements Cloneable
 
         return s.toString();
 
-        // Derived class writes the remainder of the string.
+	// Derived class writes the remainder of the string.
     }
 
     public abstract Ice.ConnectionI getConnection(Ice.BooleanHolder comp);
@@ -329,9 +325,9 @@ public abstract class Reference implements Cloneable
     public boolean
     equals(java.lang.Object obj)
     {
-        //
-        // Note: if(this == obj) and type test are performed by each non-abstract derived class.
-        //
+	//
+	// Note: if(this == obj) and type test are performed by each non-abstract derived class.
+	//
 
         Reference r = (Reference)obj; // Guaranteed to succeed.
 
@@ -345,10 +341,10 @@ public abstract class Reference implements Cloneable
             return false;
         }
 
-        if(!_context.equals(r._context))
-        {
-            return false;
-        }
+	if(!_context.equals(r._context))
+	{
+	    return false;
+	}
 
         if(!_facet.equals(r._facet))
         {
@@ -360,18 +356,18 @@ public abstract class Reference implements Cloneable
 
     public Object clone()
     {
-        //
-        // A member-wise copy is safe because the members are immutable.
-        //
-        Object o = null;
-        try
-        {
-            o = super.clone();
-        }
-        catch(CloneNotSupportedException ex)
-        {
-        }
-        return o;
+	//
+	// A member-wise copy is safe because the members are immutable.
+	//
+	Object o = null;
+	try
+	{
+	    o = super.clone();
+	}
+	catch(CloneNotSupportedException ex)
+	{
+	}
+	return o;
     }
 
     private Instance _instance;
@@ -388,9 +384,9 @@ public abstract class Reference implements Cloneable
 
     protected
     Reference(Instance inst,
-              Ice.Communicator communicator,
+	      Ice.Communicator communicator,
               Ice.Identity ident,
-              java.util.Map ctx,
+	      java.util.Map ctx,
               String fac,
               int md)
     {
@@ -405,8 +401,8 @@ public abstract class Reference implements Cloneable
         _communicator = communicator;
         _mode = md;
         _identity = ident;
-        _context = ctx == null ? _emptyContext : ctx;
+	_context = ctx == null ? _emptyContext : ctx;
         _facet = fac;
-        _hashInitialized = false;
+	_hashInitialized = false;
     }
 }

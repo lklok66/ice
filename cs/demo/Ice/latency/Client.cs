@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -15,28 +15,24 @@ public class Client : Ice.Application
     public override int
     run(string[] args)
     {
-        PingPrx ping = PingPrxHelper.checkedCast(communicator().propertyToProxy("Latency.Ping"));
+        Ice.Properties properties = communicator().getProperties();
+        string refProperty = "Latency.Ping";
+        string @ref = properties.getProperty(refProperty);
+        if(@ref.Length == 0)
+        {
+            Console.Error.WriteLine("property `" + refProperty + "' not set");
+            return 1;
+        }
+        
+        PingPrx ping = PingPrxHelper.checkedCast(communicator().stringToProxy(@ref));
         if(ping == null)
         {
             Console.Error.WriteLine("invalid proxy");
             return 1;
         }
         
-        //
-        // A method needs to be invoked thousands of times before the JIT compiler
-        // will convert it to native code. To ensure an accurate latency measurement,
-        // we need to "warm up" the JIT compiler.
-        //
-        {
-            int reps = 20000;
-            Console.Error.Write("warming up the JIT compiler...");
-            Console.Error.Flush();
-            for(int i = 0; i < reps; i++)
-            {
-                ping.ice_ping();
-            }
-            Console.Error.WriteLine("ok");
-        }
+        // Initial ping to setup the connection.
+        ping.ice_ping();
         
         long tv1 = (System.DateTime.Now.Ticks - 621355968000000000) / 10000;
         int repetitions = 100000;

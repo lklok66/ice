@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -60,18 +60,6 @@ private:
     bool _postUnmarshalInvoked;
 };
 
-class II : public Test::I
-{
-};
-
-class JI : public Test::J
-{
-};
-
-class HI : public Test::H
-{
-};
-
 class InitialI : public Test::Initial
 {
 public:
@@ -84,11 +72,6 @@ public:
     virtual Test::CPtr getC(const Ice::Current&);
     virtual Test::DPtr getD(const Ice::Current&);
     virtual void getAll(Test::BPtr&, Test::BPtr&, Test::CPtr&, Test::DPtr&, const Ice::Current&);
-    virtual Test::IPtr getI(const Ice::Current&);
-    virtual Test::IPtr getJ(const Ice::Current&);
-    virtual Test::IPtr getH(const Ice::Current&);
-
-    virtual void setI(const Test::IPtr&, const Ice::Current&);
 
 private:
 
@@ -98,13 +81,5 @@ private:
     Test::CPtr _c;
     Test::DPtr _d;
 };
-
-class UnexpectedObjectExceptionTestI : public Ice::Blobject
-{
-public:
-
-    virtual bool ice_invoke(const std::vector<Ice::Byte>&, std::vector<Ice::Byte>&, const Ice::Current&);
-};
-typedef IceUtil::Handle<UnexpectedObjectExceptionTestI> UnexpectedObjectExceptionTestIPtr;
 
 #endif

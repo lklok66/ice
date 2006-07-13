@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -13,23 +13,31 @@ public class Client : Ice.Application
 {
     public override int run(string[] args)
     {
-        CallbackSenderPrx server = 
-            CallbackSenderPrxHelper.checkedCast(communicator().propertyToProxy("Callback.Client.CallbackServer"));
+        Ice.Properties properties = communicator().getProperties();
+	string proxyProperty = "Callback.Client.CallbackServer";
+        string proxy = properties.getProperty(proxyProperty);
+        if(proxy.Length == 0)
+        {
+	    System.Console.Error.WriteLine("property `" + proxyProperty + "' not set");
+            return 1;
+        }
+
+        CallbackSenderPrx server = CallbackSenderPrxHelper.checkedCast(communicator().stringToProxy(proxy));
         if(server == null)
         {
             System.Console.Error.WriteLine("invalid proxy");
             return 1;
         }
 
-        Ice.ObjectAdapter adapter = communicator().createObjectAdapter("");
-        Ice.Identity ident = new Ice.Identity();
-        ident.name = Ice.Util.generateUUID();
-        ident.category = "";
+        Ice.ObjectAdapter adapter = communicator().createObjectAdapter("Callback.Client");
+	Ice.Identity ident = new Ice.Identity();
+	ident.name = Ice.Util.generateUUID();
+	ident.category = "";
         adapter.add(new CallbackReceiverI(), ident);
         adapter.activate();
-        server.ice_getConnection().setAdapter(adapter);
-        server.addClient(ident);
-        communicator().waitForShutdown();
+	server.ice_getConnection().setAdapter(adapter);
+	server.addClient(ident);
+	communicator().waitForShutdown();
 
         return 0;
     }

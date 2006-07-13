@@ -3,7 +3,7 @@ Demos in this directory:
 - evictor
 
   This is the source code for the evictor implementation described in
-  the Ice Run Time chapter. You can copy and modify this code to
+  the advanced server chapter. You can copy and modify this code to
   suit your needs.
 
 - printer
@@ -15,8 +15,3 @@ Demos in this directory:
 
   An implementation of the simple (non-persistent, non-life-cycle)
   version of the filesystem example.
-
-- freeze_filesystem
-
-  An implementation of the persistent version of the filesystem
-  example described in the Freeze chapter.

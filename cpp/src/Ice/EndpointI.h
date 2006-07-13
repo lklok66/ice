@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -84,19 +84,25 @@ public:
     virtual bool unknown() const = 0;
 
     //
+    // Return a client side transceiver for this endpoint, or null if a
+    // transceiver can only be created by a connector.
+    //
+    virtual TransceiverPtr clientTransceiver() const = 0;
+
+    //
     // Return a server side transceiver for this endpoint, or null if a
     // transceiver can only be created by an acceptor. In case a
     // transceiver is created, this operation also returns a new
     // "effective" endpoint, which might differ from this endpoint,
     // for example, if a dynamic port number is assigned.
     //
-    virtual TransceiverPtr transceiver(EndpointIPtr&) const = 0;
+    virtual TransceiverPtr serverTransceiver(EndpointIPtr&) const = 0;
 
     //
-    // Return connectors for this endpoint, or empty vector if no 
-    // connector is available.
+    // Return a connector for this endpoint, or null if no connector
+    // is available.
     //
-    virtual std::vector<ConnectorPtr> connectors() const = 0;
+    virtual ConnectorPtr connector() const = 0;
 
     //
     // Return an acceptor for this endpoint, or null if no acceptors
@@ -109,9 +115,15 @@ public:
 
     //
     // Expand endpoint out in to separate endpoints for each local
-    // host if listening on INADDR_ANY.
+    // host if endpoint was configured with no host set.
     //
-    virtual std::vector<EndpointIPtr> expand() const = 0;
+    virtual std::vector<EndpointIPtr> expand(bool) const = 0;
+
+    //
+    // Return whether the endpoint should be published in proxies
+    // created by the Object Adapter.
+    //
+    virtual bool publish() const = 0;
 
     //
     // Check whether the endpoint is equivalent to a specific

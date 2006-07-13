@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -16,8 +16,8 @@
 //
 // The Ice-E version.
 //
-#define ICEE_STRING_VERSION "1.2.0" // "A.B.C", with A=major, B=minor, C=patch
-#define ICEE_INT_VERSION 10200      // AABBCC, with AA=major, BB=minor, CC=patch
+#define ICEE_STRING_VERSION "1.1.0" // "A.B.C", with A=major, B=minor, C=patch
+#define ICEE_INT_VERSION 10100      // AABBCC, with AA=major, BB=minor, CC=patch
 
 namespace Slice
 {
@@ -99,7 +99,7 @@ private:
         virtual bool visitClassDefStart(const ClassDefPtr&);
 
     private:
-        void writeOperations(const ClassDefPtr&, bool);
+	void writeOperations(const ClassDefPtr&, bool);
     };
 
     class TieVisitor : public JavaVisitor

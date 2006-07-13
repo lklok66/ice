@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -15,21 +15,21 @@ public class Server extends Ice.Application
     run(String[] args)
     {
         Ice.ObjectAdapter adapter = communicator().createObjectAdapter("SessionFactory");
-        ReapThread reaper = new ReapThread();
-        reaper.start();
+	ReapThread reaper = new ReapThread();
+	reaper.start();
 
         adapter.add(new SessionFactoryI(reaper), communicator().stringToIdentity("SessionFactory"));
         adapter.activate();
         communicator().waitForShutdown();
 
-        reaper.terminate();
-        try
-        {
-            reaper.join();
-        }
-        catch(InterruptedException e)
-        {
-        }
+    	reaper.terminate();
+	try
+	{
+	    reaper.join();
+	}
+	catch(InterruptedException e)
+	{
+	}
 
         return 0;
     }

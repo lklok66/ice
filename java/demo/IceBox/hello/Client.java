@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -11,22 +11,6 @@ import Demo.*;
 
 public class Client extends Ice.Application
 {
-    class ShutdownHook extends Thread
-    {
-        public void
-        run()
-        {
-            try
-            {
-                communicator().destroy();
-            }
-            catch(Ice.LocalException ex)
-            {
-                ex.printStackTrace();
-            }
-        }
-    }
-
     private void
     menu()
     {
@@ -38,6 +22,7 @@ public class Client extends Ice.Application
             "d: send greeting as datagram\n" +
             "D: send greeting as batch datagram\n" +
             "f: flush all batch requests\n" +
+            "T: set a timeout\n" +
             "x: exit\n" +
             "?: help\n");
     }
@@ -45,15 +30,17 @@ public class Client extends Ice.Application
     public int
     run(String[] args)
     {
-        //
-        // Since this is an interactive demo we want to clear the
-        // Application installed interrupt callback and install our
-        // own shutdown hook.
-        //
-        setInterruptHook(new ShutdownHook());
+        Ice.Properties properties = communicator().getProperties();
+        final String refProperty = "Hello.Proxy";
+        String ref = properties.getProperty(refProperty);
+        if(ref.length() == 0)
+        {
+            System.err.println("property `" + refProperty + "' not set");
+            return 1;
+        }
 
         HelloPrx twoway = HelloPrxHelper.checkedCast(
-            communicator().propertyToProxy("Hello.Proxy").ice_twoway().ice_timeout(-1).ice_secure(false));
+	    communicator().stringToProxy(ref).ice_twoway().ice_timeout(-1).ice_secure(false));
         if(twoway == null)
         {
             System.err.println("invalid object reference");
@@ -63,6 +50,8 @@ public class Client extends Ice.Application
         HelloPrx batchOneway = HelloPrxHelper.uncheckedCast(twoway.ice_batchOneway());
         HelloPrx datagram = HelloPrxHelper.uncheckedCast(twoway.ice_datagram());
         HelloPrx batchDatagram = HelloPrxHelper.uncheckedCast(twoway.ice_batchDatagram());
+
+        int timeout = -1;
 
         menu();
 
@@ -102,7 +91,31 @@ public class Client extends Ice.Application
                 }
                 else if(line.equals("f"))
                 {
-                    communicator().flushBatchRequests();
+		    communicator().flushBatchRequests();
+                }
+                else if(line.equals("T"))
+                {
+                    if(timeout == -1)
+                    {
+                        timeout = 2000;
+                    }
+                    else
+                    {
+                        timeout = -1;
+                    }
+
+                    twoway = HelloPrxHelper.uncheckedCast(twoway.ice_timeout(timeout));
+                    oneway = HelloPrxHelper.uncheckedCast(oneway.ice_timeout(timeout));
+                    batchOneway = HelloPrxHelper.uncheckedCast(batchOneway.ice_timeout(timeout));
+
+                    if(timeout == -1)
+                    {
+                        System.out.println("timeout is now switched off");
+                    }
+                    else
+                    {
+                        System.out.println("timeout is now set to 2000ms");
+                    }
                 }
                 else if(line.equals("x"))
                 {
@@ -135,8 +148,8 @@ public class Client extends Ice.Application
     public static void
     main(String[] args)
     {
-        Client app = new Client();
-        int status = app.main("Client", args, "config.client");
-        System.exit(status);
+	Client app = new Client();
+	int status = app.main("Client", args, "config.client");
+	System.exit(status);
     }
 }

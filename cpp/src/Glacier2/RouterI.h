@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -29,9 +29,10 @@ class RouterI : public Router, public IceUtil::Mutex
 {
 public:
 
-    RouterI(const Ice::ObjectAdapterPtr&, const Ice::ObjectAdapterPtr&, const Ice::ConnectionPtr&, const std::string&,
-            const SessionPrx&, const Ice::Identity&, const FilterManagerPtr&, const Ice::Context& sslContext);
-            
+    RouterI(const Ice::ObjectAdapterPtr&, const Ice::ObjectAdapterPtr&, const Ice::ObjectAdapterPtr&,
+    	    const Ice::ConnectionPtr&, const std::string&, const SessionPrx&, 
+	    const Ice::Identity&, const FilterManagerPtr&);
+	    
     virtual ~RouterI();
     void destroy();
 
@@ -61,12 +62,11 @@ private:
     const Ice::ObjectPrx _serverProxy;
     const ClientBlobjectPtr _clientBlobject;
     const ServerBlobjectPtr _serverBlobject;
-    const Ice::ObjectAdapterPtr _serverAdapter;
+    const Ice::ObjectAdapterPtr _adminAdapter;
     const Ice::ConnectionPtr _connection;
     const std::string _userId;
     const SessionPrx _session;
     const Ice::Identity _controlId;
-    const Ice::Context _sslContext;
     mutable IceUtil::Time _timestamp;
 };
 

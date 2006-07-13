@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -24,7 +24,7 @@ class EndpointI : public IceInternal::EndpointI
 public:
 
     EndpointI(const InstancePtr&, const std::string&, Ice::Int, Ice::Int, const std::string&, bool, bool);
-    EndpointI(const InstancePtr&, const std::string&, bool);
+    EndpointI(const InstancePtr&, const std::string&);
     EndpointI(const InstancePtr&, IceInternal::BasicStream*);
 
     virtual void streamWrite(IceInternal::BasicStream*) const;
@@ -38,10 +38,12 @@ public:
     virtual bool datagram() const;
     virtual bool secure() const;
     virtual bool unknown() const;
-    virtual IceInternal::TransceiverPtr transceiver(IceInternal::EndpointIPtr&) const;
-    virtual std::vector<IceInternal::ConnectorPtr> connectors() const;
+    virtual IceInternal::TransceiverPtr clientTransceiver() const;
+    virtual IceInternal::TransceiverPtr serverTransceiver(IceInternal::EndpointIPtr&) const;
+    virtual IceInternal::ConnectorPtr connector() const;
     virtual IceInternal::AcceptorPtr acceptor(IceInternal::EndpointIPtr&, const std::string&) const;
-    virtual std::vector<IceInternal::EndpointIPtr> expand() const;
+    virtual std::vector<IceInternal::EndpointIPtr> expand(bool) const;
+    virtual bool publish() const;
     virtual bool equivalent(const IceInternal::TransceiverPtr&) const;
     virtual bool equivalent(const IceInternal::AcceptorPtr&) const;
 
@@ -70,7 +72,7 @@ private:
     const Ice::Int _timeout;
     const std::string _connectionId;
     const bool _compress;
-    const bool _oaEndpoint;
+    const bool _publish;
 };
 
 class EndpointFactoryI : public IceInternal::EndpointFactory
@@ -81,7 +83,7 @@ public:
 
     virtual Ice::Short type() const;
     virtual std::string protocol() const;
-    virtual IceInternal::EndpointIPtr create(const std::string&, bool) const;
+    virtual IceInternal::EndpointIPtr create(const std::string&) const;
     virtual IceInternal::EndpointIPtr read(IceInternal::BasicStream*) const;
     virtual void destroy();
 

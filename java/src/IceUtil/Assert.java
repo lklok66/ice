@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -18,28 +18,28 @@ public final class Assert
     public static void
     FinalizerAssert(boolean b)
     {
-        if(!b)
-        {
-            //
-            // Create a Throwable to obtain the stack trace.
-            //
-            Throwable t = new Throwable();
-            StackTraceElement[] trace = t.getStackTrace();
-            if(trace.length > 1)
-            {
-                //
-                // Skip the first frame, which represents this method.
-                //
-                System.err.println("Assertion failure:");
-                for(int i = 1; i < trace.length; ++i)
-                {
-                    System.err.println("\tat " + trace[i]);
-                }
-            }
-            else
-            {
-                System.err.println("Assertion failure (no stack trace information)");
-            }
-        }
+	if(!b)
+	{
+	    //
+	    // Create a Throwable to obtain the stack trace.
+	    //
+	    Throwable t = new Throwable();
+	    StackTraceElement[] trace = t.getStackTrace();
+	    if(trace.length > 1)
+	    {
+		//
+		// Skip the first frame, which represents this method.
+		//
+		System.err.println("Assertion failure:");
+		for(int i = 1; i < trace.length; ++i)
+		{
+		    System.err.println("\tat " + trace[i]);
+		}
+	    }
+	    else
+	    {
+		System.err.println("Assertion failure (no stack trace information)");
+	    }
+	}
     }
 }

@@ -52,7 +52,7 @@
 	<summary>
 		<codepage>1252</codepage>
 		<title>Installation Database</title>
-		<subject>Ice 3.2.0 for Visual Studio 6.0</subject>
+		<subject>Ice 3.1.0 for Visual Studio 6.0</subject>
 		<author>##COMPANY_NAME##</author>
 		<keywords>Installer,MSI,Database</keywords>
 		<comments>##ID_STRING18##</comments>
@@ -250,7 +250,6 @@
 		<col key="yes" def="s72">Name</col>
 		<col def="V0">Data</col>
 		<col def="S255">ISBuildSourcePath</col>
-		<row><td>ISSELFREG.DLL</td><td/><td>&lt;ISProductFolder&gt;\redist\language independent\i386\isregsvr.dll</td></row>
 		<row><td>NewBinary1</td><td/><td>&lt;ISProductFolder&gt;\Redist\Language Independent\OS Independent\IsDialogBanner.ibd</td></row>
 		<row><td>NewBinary10</td><td/><td>&lt;ISProductFolder&gt;\Redist\Language Independent\OS Independent\CompleteSetupIco.ibd</td></row>
 		<row><td>NewBinary11</td><td/><td>&lt;ISProductFolder&gt;\Redist\Language Independent\OS Independent\CustomSetupIco.ibd</td></row>
@@ -345,11 +344,9 @@
 		<row><td>IceCppDev</td><td>{7BF2EA6B-007C-4C93-8FFF-5621DC754087}</td><td>INSTALLDIR</td><td>8</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>IceCppRuntime</td><td>{1ADAF629-4ABE-4F59-A64D-DDAC46DFFBE7}</td><td>INSTALLDIR</td><td>8</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>IceDoc</td><td>{B9A07B17-F6B8-495A-BF29-29495435D957}</td><td>INSTALLDIR</td><td>8</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>IceManual</td><td>{AB3D867C-BA23-4B8E-BB71-62EA3EBEE97D}</td><td>INSTALLDIR</td><td>8</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>IcePHPDemo</td><td>{1F92A480-D22B-4E56-A5E2-CC91B87AA7BA}</td><td>INSTALLDIR</td><td>8</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>IcePHPExtension</td><td>{B09443FD-645C-4968-9D8C-3E632E175226}</td><td>INSTALLDIR</td><td>8</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>IceRubyDemo</td><td>{49A67285-7045-4AD4-BD78-ECA35F3D23FE}</td><td>INSTALLDIR</td><td>8</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>IceRubyDev</td><td>{C2C25314-0A6A-475B-BF3D-5D5292DBDD8E}</td><td>INSTALLDIR</td><td>8</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>IceRubyRuntime</td><td>{EBA6A30D-6452-4145-B71A-1EDCEA4AE1CD}</td><td>INSTALLDIR</td><td>8</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>VisualStudioRuntime</td><td>{AB917D87-9371-49AA-8F41-38AB8E4C2125}</td><td>INSTALLDIR</td><td>8</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 	</table>
 
@@ -970,10 +967,6 @@
 		<col def="S255">ISComments</col>
 		<row><td>CheckForProductUpdates</td><td>226</td><td>ISUpdateServiceFolder</td><td>[ISUpdateServiceFolder]agent.exe "/au[ProductCode] /EndOfInstall"</td><td>Checks for product updates</td></row>
 		<row><td>CheckForProductUpdatesOnReboot</td><td>226</td><td>ISUpdateServiceFolder</td><td>[ISUpdateServiceFolder]agent.exe "/au[ProductCode] /EndOfInstall /Reboot"</td><td>Checks for product updates on reboot</td></row>
-		<row><td>ISSelfRegisterCosting</td><td>1</td><td>ISSELFREG.DLL</td><td>ISSelfRegisterCosting</td><td/></row>
-		<row><td>ISSelfRegisterFiles</td><td>1025</td><td>ISSELFREG.DLL</td><td>ISSelfRegisterFiles</td><td/></row>
-		<row><td>ISSelfRegisterFinalize</td><td>1</td><td>ISSELFREG.DLL</td><td>ISSelfRegisterFinalize</td><td/></row>
-		<row><td>ISUnSelfRegisterFiles</td><td>1025</td><td>ISSELFREG.DLL</td><td>ISUnSelfRegisterFiles</td><td/></row>
 		<row><td>SetARPINSTALLLOCATION</td><td>51</td><td>ARPINSTALLLOCATION</td><td>[INSTALLDIR]</td><td/></row>
 		<row><td>SetAllUsersProfileNT</td><td>51</td><td>ALLUSERSPROFILE</td><td>[%SystemRoot]\Profiles\All Users</td><td/></row>
 		<row><td>setAllUsersProfile2K</td><td>51</td><td>ALLUSERSPROFILE</td><td>[%ALLUSERSPROFILE]</td><td/></row>
@@ -1043,8 +1036,10 @@
 		<row><td>FavoritesFolder</td><td>TARGETDIR</td><td>.:FAVORI~1|Favorites</td><td/><td>0</td><td/></row>
 		<row><td>FontsFolder</td><td>TARGETDIR</td><td>.:Fonts</td><td/><td>0</td><td/></row>
 		<row><td>GlobalAssemblyCache</td><td>TARGETDIR</td><td>.:Global~1|GlobalAssemblyCache</td><td/><td>0</td><td/></row>
-		<row><td>ICE_3.2.0_VC60</td><td>WindowsVolume</td><td>ICE-3_~1|Ice-3.2.0-VC60</td><td/><td>0</td><td/></row>
-		<row><td>INSTALLDIR</td><td>ICE_3.2.0_VC60</td><td>.</td><td/><td>0</td><td/></row>
+		<row><td>ICE</td><td>WindowsVolume</td><td>ICE-2_~1|Ice-2.1.0-VC60</td><td/><td>0</td><td/></row>
+		<row><td>ICE_2.1.0_THIRD_PARTY_PACKAGES</td><td>WindowsVolume</td><td>ICE-2_~1|Ice-2.1.0-ThirdParty</td><td/><td>0</td><td/></row>
+		<row><td>ICE_3.0.1_VC60</td><td>WindowsVolume</td><td>ICE-3_~1|Ice-3.1.0-VC60</td><td/><td>0</td><td/></row>
+		<row><td>INSTALLDIR</td><td>ICE_3.0.1_VC60</td><td>.</td><td/><td>0</td><td/></row>
 		<row><td>ISCommonFilesFolder</td><td>CommonFilesFolder</td><td>Instal~1|InstallShield</td><td/><td>0</td><td/></row>
 		<row><td>ISMyCompanyDir</td><td>ProgramFilesFolder</td><td>MYCOMP~1|My Company Name</td><td/><td>0</td><td/></row>
 		<row><td>ISMyProductDir</td><td>WindowsVolume</td><td>ICE-3_~1|Ice-3.1.0</td><td/><td>0</td><td/></row>
@@ -1275,12 +1270,10 @@
 		<col def="S255">ISProFeatureName</col>
 		<row><td>ice_dev_cpp</td><td>ice_runtime_cpp</td><td>##ID_STRING3##</td><td/><td>2</td><td>1</td><td>INSTALLDIR</td><td>8</td><td/><td/><td/><td/></row>
 		<row><td>ice_dev_php</td><td>ice_runtime_php</td><td>##ID_STRING22##</td><td/><td>2</td><td>1</td><td>INSTALLDIR</td><td>8</td><td/><td/><td/><td/></row>
-		<row><td>ice_dev_ruby</td><td>ice_runtime_ruby</td><td>##ID_STRING25##</td><td/><td>2</td><td>1</td><td>INSTALLDIR</td><td>0</td><td/><td/><td/><td/></row>
 		<row><td>ice_doc</td><td/><td>##ID_STRING16##</td><td/><td>12</td><td>1</td><td>INSTALLDIR</td><td>8</td><td/><td/><td/><td/></row>
 		<row><td>ice_runtime</td><td/><td>##ID_STRING2##</td><td/><td>2</td><td>1</td><td>INSTALLDIR</td><td>24</td><td/><td/><td/><td/></row>
 		<row><td>ice_runtime_cpp</td><td/><td>##ID_STRING20##</td><td/><td>4</td><td>1</td><td>INSTALLDIR</td><td>8</td><td/><td/><td/><td/></row>
 		<row><td>ice_runtime_php</td><td/><td>##ID_STRING21##</td><td/><td>14</td><td>1</td><td>INSTALLDIR</td><td>8</td><td/><td/><td/><td/></row>
-		<row><td>ice_runtime_ruby</td><td/><td>##ID_STRING24##</td><td/><td>16</td><td>1</td><td>INSTALLDIR</td><td>0</td><td/><td/><td/><td/></row>
 		<row><td>packages</td><td>ice_runtime</td><td>##ID_STRING1##</td><td/><td>0</td><td>1</td><td>INSTALLDIR</td><td>24</td><td/><td/><td/><td/></row>
 		<row><td>packages_dev_cpp</td><td>ice_dev_cpp</td><td>##ID_STRING17##</td><td/><td>0</td><td>1</td><td>INSTALLDIR</td><td>24</td><td/><td/><td/><td/></row>
 	</table>
@@ -1290,15 +1283,13 @@
 		<col key="yes" def="s72">Component_</col>
 		<row><td>ice_dev_cpp</td><td>IceCppDemo</td></row>
 		<row><td>ice_dev_cpp</td><td>IceCppDev</td></row>
+		<row><td>ice_dev_cpp</td><td>IceCppRuntime</td></row>
 		<row><td>ice_dev_php</td><td>IcePHPDemo</td></row>
-		<row><td>ice_dev_ruby</td><td>IceRubyDemo</td></row>
-		<row><td>ice_dev_ruby</td><td>IceRubyDev</td></row>
+		<row><td>ice_doc</td><td>IceManual</td></row>
 		<row><td>ice_runtime</td><td>IceCppRuntime</td></row>
 		<row><td>ice_runtime</td><td>IceDoc</td></row>
 		<row><td>ice_runtime_cpp</td><td>DummyComponent</td></row>
-		<row><td>ice_runtime_cpp</td><td>IceCppRuntime</td></row>
 		<row><td>ice_runtime_php</td><td>IcePHPExtension</td></row>
-		<row><td>ice_runtime_ruby</td><td>IceRubyRuntime</td></row>
 		<row><td>packages</td><td>VisualStudioRuntime</td></row>
 		<row><td>packages_dev_cpp</td><td>BerkeleyDBDebugDLL</td></row>
 		<row><td>packages_dev_cpp</td><td>Bzip2DebugDLL</td></row>
@@ -1475,11 +1466,9 @@
 		<row><td>IceCppDev</td><td/><td/><td>_770F5B6A_0687_4BB0_B0D6_E1E5F6EAF0A7_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>IceCppRuntime</td><td/><td/><td>_DC33EA7A_C8B8_4C51_AA1A_6FA971C84A5F_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>IceDoc</td><td/><td/><td>_2749BAF0_9A4A_4485_9737_C1B8C2EC849E_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>IceManual</td><td/><td/><td>_2EAC330E_02E1_44BA_81E8_FEC200B20590_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>IcePHPDemo</td><td/><td/><td>_58FC50B7_9755_4240_8600_BA7A2BC30051_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>IcePHPExtension</td><td/><td/><td>_AD02E8CC_4251_4169_B2D8_D00A24825C92_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>IceRubyDemo</td><td/><td/><td>_5A09ADF7_C0AE_4368_B2CA_28D63EC8517D_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>IceRubyDev</td><td/><td/><td>_634B8AD5_8DB8_426B_BD81_F37455C57449_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>IceRubyRuntime</td><td/><td/><td>_41000099_075E_4F54_A29E_6C1C84677F98_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>VisualStudioRuntime</td><td/><td/><td>_30BA3320_69CB_4682_87F9_962EE1BF4FF1_FILTER</td><td/><td/><td/><td/></row>
 	</table>
 
@@ -1514,11 +1503,9 @@
 		<row><td>IceCppDev</td><td>&lt;ISProjectFolder&gt;\install\ice\cpp\dev</td><td>4</td><td/><td/><td>2</td></row>
 		<row><td>IceCppRuntime</td><td>&lt;ISProjectFolder&gt;\install\ice\cpp\runtime</td><td>4</td><td/><td/><td>2</td></row>
 		<row><td>IceDoc</td><td>&lt;ISProjectFolder&gt;\install\ice\common\doc</td><td>4</td><td/><td/><td>0</td></row>
+		<row><td>IceManual</td><td>&lt;ISProjectFolder&gt;\install\ice\common\html</td><td>4</td><td/><td/><td>2</td></row>
 		<row><td>IcePHPDemo</td><td>&lt;ISProjectFolder&gt;\install\ice\php\demo</td><td>4</td><td/><td/><td>2</td></row>
 		<row><td>IcePHPExtension</td><td>&lt;ISProjectFolder&gt;\install\ice\php\extension</td><td>4</td><td/><td/><td>2</td></row>
-		<row><td>IceRubyDemo</td><td>&lt;ISProjectFolder&gt;\install\ice\ruby\demo</td><td>4</td><td/><td/><td>2</td></row>
-		<row><td>IceRubyDev</td><td>&lt;ISProjectFolder&gt;\install\ice\ruby\dev</td><td>4</td><td/><td/><td>2</td></row>
-		<row><td>IceRubyRuntime</td><td>&lt;ISProjectFolder&gt;\install\ice\ruby\runtime</td><td>4</td><td/><td/><td>2</td></row>
 		<row><td>VisualStudioRuntime</td><td>&lt;ISProjectFolder&gt;\install\microsoft\runtime</td><td>4</td><td/><td/><td>2</td></row>
 	</table>
 
@@ -1730,11 +1717,8 @@
 		<col key="yes" def="s72">ISProductConfiguration_</col>
 		<col key="yes" def="s72">Property</col>
 		<col def="L255">Value</col>
-		<row><td>ZEROC</td><td>MSIPackageFileName</td><td>Ice-3.2.0-VC60</td></row>
-		<row><td>ZEROC</td><td>PackageCode</td><td>{547FDDF6-3DF8-44E5-975C-09BD01ED2D4F}</td></row>
-		<row><td>ZEROC</td><td>ProductCode</td><td>{66BBBB41-CBB0-438B-8A0E-EB305240F3A1}</td></row>
+		<row><td>ZEROC</td><td>MSIPackageFileName</td><td>Ice-3.1.0-VC60</td></row>
 		<row><td>ZEROC</td><td>SetupFileName</td><td/></row>
-		<row><td>ZEROC</td><td>UpgradeCode</td><td>{CB987B19-6285-4B5F-AF76-2F3DEB8C7AAE}</td></row>
 	</table>
 
 	<table name="ISRelease">
@@ -2383,9 +2367,6 @@
 		<row><td>ID_STRING20</td><td>1033</td><td>Ice for C++</td><td>0</td><td/><td>1234775635</td></row>
 		<row><td>ID_STRING21</td><td>1033</td><td>Ice for PHP</td><td>0</td><td/><td>1402617014</td></row>
 		<row><td>ID_STRING22</td><td>1033</td><td>PHP Development</td><td>0</td><td/><td>1402633398</td></row>
-		<row><td>ID_STRING23</td><td>1033</td><td>Ice 3.2.0 for Visual Studio 6.0</td><td>0</td><td/><td>1713008397</td></row>
-		<row><td>ID_STRING24</td><td>1033</td><td>Ice for Ruby</td><td>0</td><td/><td>958085676</td></row>
-		<row><td>ID_STRING25</td><td>1033</td><td>Ruby development</td><td>0</td><td/><td>958095916</td></row>
 		<row><td>ID_STRING3</td><td>1033</td><td>C++ Development</td><td>0</td><td/><td>-1457951318</td></row>
 		<row><td>ID_STRING4</td><td>1033</td><td>C++ Demos</td><td>0</td><td/><td>-1457943126</td></row>
 		<row><td>ID_STRING5</td><td>1033</td><td>Third Party Development Packages</td><td>0</td><td/><td>-1457924662</td></row>
@@ -2487,10 +2468,6 @@
 		<row><td>DuplicateFiles</td><td/><td>4210</td><td>DuplicateFiles</td><td/></row>
 		<row><td>FileCost</td><td/><td>900</td><td>FileCost</td><td/></row>
 		<row><td>FindRelatedProducts</td><td>NOT ISSETUPDRIVEN</td><td>420</td><td>FindRelatedProducts</td><td/></row>
-		<row><td>ISSelfRegisterCosting</td><td/><td>2201</td><td/><td/></row>
-		<row><td>ISSelfRegisterFiles</td><td/><td>5601</td><td/><td/></row>
-		<row><td>ISSelfRegisterFinalize</td><td/><td>6601</td><td/><td/></row>
-		<row><td>ISUnSelfRegisterFiles</td><td/><td>2202</td><td/><td/></row>
 		<row><td>InstallFiles</td><td/><td>4000</td><td>InstallFiles</td><td/></row>
 		<row><td>InstallFinalize</td><td/><td>6600</td><td>InstallFinalize</td><td/></row>
 		<row><td>InstallInitialize</td><td/><td>1501</td><td>InstallInitialize</td><td/></row>
@@ -2794,8 +2771,8 @@ SQBDAEUAXwBNAFMASQABAFoARQBSAE8AQwA=
 		<row><td>ProductCode</td><td>{c1e6ab0c-8577-4df5-b83e-2a3361d9e4ad}</td><td/></row>
 		<row><td>ProductID</td><td>none</td><td/></row>
 		<row><td>ProductLanguage</td><td>1033</td><td/></row>
-		<row><td>ProductName</td><td>Ice 3.2.0 for Visual Studio 6.0</td><td/></row>
-		<row><td>ProductVersion</td><td>3.2.0</td><td/></row>
+		<row><td>ProductName</td><td>Ice 3.1.0 for Visual Studio 6.0</td><td/></row>
+		<row><td>ProductVersion</td><td>3.1.0</td><td/></row>
 		<row><td>ProgressType0</td><td>install</td><td/></row>
 		<row><td>ProgressType1</td><td>Installing</td><td/></row>
 		<row><td>ProgressType2</td><td>installed</td><td/></row>

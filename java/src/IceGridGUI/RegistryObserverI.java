@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -14,77 +14,175 @@ import IceGrid.*;
 class RegistryObserverI extends _RegistryObserverDisp
 {
 
-    RegistryObserverI(Coordinator coordinator)
+    RegistryObserverI(String instanceName, Coordinator coordinator)
     {
-        _coordinator = coordinator;
-        _trace = _coordinator.traceObservers();
+	_instanceName = instanceName;
+	_coordinator = coordinator;
     }
 
-    public void registryInit(final RegistryInfo[] registryInfos, Ice.Current current)
+    //
+    // Runs in the UI thread
+    //
+    synchronized void waitForInit()
     {
-        if(_trace)
-        {
-            if(registryInfos.length == 0)
-            {
-                _coordinator.traceObserver("registryInit (no registry)");
-            }
-            else
-            {
-                String names = "";
-                for(int i = 0; i < registryInfos.length; ++i)
-                {
-                    names += " " + registryInfos[i].name;
-                }
-                _coordinator.traceObserver("registryInit for registr" + 
-                                           (registryInfos.length == 1 ? "y" : "ies")
-                                           + names);
-            }
-        }
+	//
+	// TODO: configurable timeout
+	//
+	long timeout = 10000;
 
-        SwingUtilities.invokeLater(new Runnable() 
-            {
-                public void run() 
-                {
-                    for(int i = 0; i < registryInfos.length; ++i)
-                    {
-                        _coordinator.registryUp(registryInfos[i]);
-                    }
-                }
-            });
+	long start = System.currentTimeMillis();
+
+	while(!_initialized)
+	{
+	    try
+	    {
+		wait(timeout);
+	    }
+	    catch(InterruptedException e)
+	    {
+	    }
+
+	    if((start + timeout) < System.currentTimeMillis())
+	    {
+		break;
+	    }
+	}
+	
+	if(_initialized)
+	{
+	    _coordinator.registryInit(_instanceName,
+				      _serial, _applications, _adapters, _objects);
+	}
+	else
+	{
+	    throw new Ice.TimeoutException();
+	}
     }
 
-    public void registryUp(final RegistryInfo registryInfo, Ice.Current current)
-    {
-        if(_trace)
-        {
-            _coordinator.traceObserver("registryUp for registry " + registryInfo.name);
-        }
 
-        SwingUtilities.invokeLater(new Runnable() 
-            {
-                public void run() 
-                {
-                    _coordinator.registryUp(registryInfo);
-                }
-            });                    
+    public synchronized void init(int serial, java.util.List applications, AdapterInfo[] adapters, 
+				  ObjectInfo[] objects, Ice.Current current)
+    {
+	_initialized = true;
+	_serial = serial;
+	_applications = applications;
+	_adapters = adapters;
+	_objects = objects;
+	notify();
     }
 
-    public void registryDown(final String registryName, Ice.Current current)
+    public void applicationAdded(final int serial, final ApplicationDescriptor desc, 
+				 Ice.Current current)
     {
-        if(_trace)
-        {
-            _coordinator.traceObserver("registryDown for registry " + registryName);
-        }
-
-        SwingUtilities.invokeLater(new Runnable() 
-            {
-                public void run() 
-                {
-                    _coordinator.registryDown(registryName);
-                }
-            });                    
+	SwingUtilities.invokeLater(new Runnable() 
+	    {
+		public void run() 
+		{
+		    _coordinator.applicationAdded(serial, desc);
+		}
+	    });
     }
+
+    public void applicationRemoved(final int serial, final String name, 
+				   final Ice.Current current)
+    {
+	SwingUtilities.invokeLater(new Runnable() 
+	    {
+		public void run() 
+		{
+		    _coordinator.applicationRemoved(serial, name);
+		}
+	    });
+    }
+
+    public void applicationUpdated(final int serial, final ApplicationUpdateDescriptor desc, 
+				   Ice.Current current)
+    {
+	SwingUtilities.invokeLater(new Runnable() 
+	    {
+		public void run() 
+		{
+		    _coordinator.applicationUpdated(serial, desc);
+		}
+	    });
+    }
+
+    public void adapterAdded(final int serial, final AdapterInfo info, Ice.Current current)
+    {
+	SwingUtilities.invokeLater(new Runnable() 
+	    {
+		public void run() 
+		{
+		    _coordinator.adapterAdded(serial, info);
+		}
+	    });
+    }    
+
+    public void adapterUpdated(final int serial, final AdapterInfo info, Ice.Current current)
+    {
+	SwingUtilities.invokeLater(new Runnable() 
+	    {
+		public void run() 
+		{
+		    _coordinator.adapterUpdated(serial, info);
+		}
+	    });
+    }    
+
+    public void adapterRemoved(final int serial, final String id, Ice.Current current)
+    {
+	SwingUtilities.invokeLater(new Runnable() 
+	    {
+		public void run() 
+		{
+		    _coordinator.adapterRemoved(serial, id);
+		}
+	    });
+    }    
+
+    public void objectAdded(final int serial, final ObjectInfo info, Ice.Current current)
+    {
+	SwingUtilities.invokeLater(new Runnable() 
+	    {
+		public void run() 
+		{
+		    _coordinator.objectAdded(serial, info);
+		}
+	    });
+    }    
+
+    public void objectUpdated(final int serial, final ObjectInfo info, Ice.Current current)
+    {
+	SwingUtilities.invokeLater(new Runnable() 
+	    {
+		public void run() 
+		{
+		    _coordinator.objectUpdated(serial, info);
+		}
+	    });
+    }    
+
+    public void objectRemoved(final int serial, final Ice.Identity id, Ice.Current current)
+    {
+	SwingUtilities.invokeLater(new Runnable() 
+	    {
+		public void run() 
+		{
+		    _coordinator.objectRemoved(serial, id);
+		}
+	    });
+    }    
 
     private final Coordinator _coordinator;
-    private final boolean _trace;
+ 
+    private boolean _initialized = false;
+    
+    //
+    // Values given to init
+    //
+    private final String _instanceName;
+    private int _serial;
+    private java.util.List _applications;
+    private AdapterInfo[] _adapters;
+    private ObjectInfo[] _objects;
 };

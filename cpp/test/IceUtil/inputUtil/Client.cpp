@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -19,10 +19,7 @@ using namespace std;
 
 #define WS " \f\n\r\t\v"
 
-#if defined(__BCPLUSPLUS__)
-Int64 Int64Min = -9223372036854775808i64;
-Int64 Int64Max =  9223372036854775807i64;
-#elif defined(_MSC_VER)
+#if defined(_MSC_VER)
 const Int64 Int64Min = -9223372036854775808i64;
 const Int64 Int64Max =  9223372036854775807i64;
 #elif defined(ICE_64)
@@ -178,14 +175,14 @@ main(int, char**)
     badQuoteCommands.push_back("-Dir=$'test");
     for(vector<string>::const_iterator p = badQuoteCommands.begin(); p != badQuoteCommands.end(); ++p)
     {
-        try
-        {
-            IceUtil::Options::split(*p);
-            test(false);
-        }
-        catch(const IceUtil::BadOptException&)
-        {
-        }
+	try
+	{
+	    IceUtil::Options::split(*p);
+	    test(false);
+	}
+	catch(const IceUtil::Options::BadQuote&)
+	{
+	}
     }
     cout << "ok" << endl;
 

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -11,4 +11,5 @@
 
 using namespace Ice;
 
-Ice::LocalObject* IceInternal::upCast(EndpointI* p) { return p; }
+void IceInternal::incRef(EndpointI* p) { p->__incRef(); }
+void IceInternal::decRef(EndpointI* p) { p->__decRef(); }

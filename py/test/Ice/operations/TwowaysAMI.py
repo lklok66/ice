@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -148,21 +148,21 @@ class AMI_MyClass_opMyEnumI(CallbackBase):
 class AMI_MyClass_opMyClassI(CallbackBase):
     def __init__(self, communicator):
         CallbackBase.__init__(self)
-        self._communicator = communicator
+	self._communicator = communicator
 
     def ice_response(self, r, c1, c2):
         test(c1.ice_getIdentity() == self._communicator.stringToIdentity("test"))
         test(c2.ice_getIdentity() == self._communicator.stringToIdentity("noSuchIdentity"))
         test(r.ice_getIdentity() == self._communicator.stringToIdentity("test"))
-        # We can't do the callbacks below in thread per connection mode.
-        if self._communicator.getProperties().getPropertyAsInt("Ice.ThreadPerConnection") == 0:
-            r.opVoid()
-            c1.opVoid()
-            try:
-                c2.opVoid()
-                test(False)
-            except Ice.ObjectNotExistException:
-                pass
+	# We can't do the callbacks below in thread per connection mode.
+	if self._communicator.getProperties().getPropertyAsInt("Ice.ThreadPerConnection") == 0:
+	    r.opVoid()
+	    c1.opVoid()
+	    try:
+		c2.opVoid()
+		test(False)
+	    except Ice.ObjectNotExistException:
+		pass
         self.called()
 
     def ice_exception(self, ex):
@@ -180,9 +180,9 @@ class AMI_MyClass_opStructI(CallbackBase):
         test(rso.s.s == "def")
         test(so.e == Test.MyEnum.enum3)
         test(so.s.s == "a new string")
-        # We can't do the callbacks below in thread per connection mode.
-        if self._communicator.getProperties().getPropertyAsInt("Ice.ThreadPerConnection") == 0:
-            so.p.opVoid()
+	# We can't do the callbacks below in thread per connection mode.
+	if self._communicator.getProperties().getPropertyAsInt("Ice.ThreadPerConnection") == 0:
+	    so.p.opVoid()
         self.called()
 
     def ice_exception(self, ex):
@@ -194,19 +194,19 @@ class AMI_MyClass_opByteSI(CallbackBase):
 
     def ice_response(self, rso, bso):
         test(len(bso) == 4)
-        test(bso[0] == '\x22')
-        test(bso[1] == '\x12')
-        test(bso[2] == '\x11')
-        test(bso[3] == '\x01')
+        test(bso[0] == 0x22)
+        test(bso[1] == 0x12)
+        test(bso[2] == 0x11)
+        test(bso[3] == 0x01)
         test(len(rso) == 8)
-        test(rso[0] == '\x01')
-        test(rso[1] == '\x11')
-        test(rso[2] == '\x12')
-        test(rso[3] == '\x22')
-        test(rso[4] == '\xf1')
-        test(rso[5] == '\xf2')
-        test(rso[6] == '\xf3')
-        test(rso[7] == '\xf4')
+        test(rso[0] == 0x01)
+        test(rso[1] == 0x11)
+        test(rso[2] == 0x12)
+        test(rso[3] == 0x22)
+        test(rso[4] == 0xf1)
+        test(rso[5] == 0xf2)
+        test(rso[6] == 0xf3)
+        test(rso[7] == 0xf4)
         self.called()
 
     def ice_exception(self, ex):
@@ -310,23 +310,23 @@ class AMI_MyClass_opByteSSI(CallbackBase):
     def ice_response(self, rso, bso):
         test(len(bso) == 2)
         test(len(bso[0]) == 1)
-        test(bso[0][0] == '\xff')
+        test(bso[0][0] == 0xff)
         test(len(bso[1]) == 3)
-        test(bso[1][0] == '\x01')
-        test(bso[1][1] == '\x11')
-        test(bso[1][2] == '\x12')
+        test(bso[1][0] == 0x01)
+        test(bso[1][1] == 0x11)
+        test(bso[1][2] == 0x12)
         test(len(rso) == 4)
         test(len(rso[0]) == 3)
-        test(rso[0][0] == '\x01')
-        test(rso[0][1] == '\x11')
-        test(rso[0][2] == '\x12')
+        test(rso[0][0] == 0x01)
+        test(rso[0][1] == 0x11)
+        test(rso[0][2] == 0x12)
         test(len(rso[1]) == 1)
-        test(rso[1][0] == '\xff')
+        test(rso[1][0] == 0xff)
         test(len(rso[2]) == 1)
-        test(rso[2][0] == '\x0e')
+        test(rso[2][0] == 0x0e)
         test(len(rso[3]) == 2)
-        test(rso[3][0] == '\xf2')
-        test(rso[3][1] == '\xf1')
+        test(rso[3][0] == 0xf2)
+        test(rso[3][1] == 0xf1)
         self.called()
 
     def ice_exception(self, ex):
@@ -521,15 +521,15 @@ class AMI_MyDerivedClass_opDerivedI(CallbackBase):
     def ice_exception(self, ex):
         test(False)
 
-def twowaysAMI(communicator, p):
+def twowaysAMI(communicator, initData, p):
     # Check that a call to a void operation raises TwowayOnlyException
     # in the ice_exception() callback instead of at the point of call.
     oneway = Test.MyClassPrx.uncheckedCast(p.ice_oneway())
     cb = AMI_MyClass_opVoidExI()
     try:
-        oneway.opVoid_async(cb)
+	oneway.opVoid_async(cb)
     except Ice.Exception:
-        test(False)
+	test(False)
     test(cb.check())
 
     # Check that a call to a twoway operation raises TwowayOnlyException
@@ -537,9 +537,9 @@ def twowaysAMI(communicator, p):
     oneway = Test.MyClassPrx.uncheckedCast(p.ice_oneway())
     cb = AMI_MyClass_opByteExI()
     try:
-        oneway.opByte_async(cb, 0, 0)
+	oneway.opByte_async(cb, 0, 0)
     except Ice.Exception:
-        test(False)
+	test(False)
     test(cb.check())
 
     #
@@ -792,120 +792,38 @@ def twowaysAMI(communicator, p):
     p2.opContext_async(cb, ctx)
     test(cb.check())
 
+    #
+    # Test that default context is obtained correctly from communicator.
+    #
+    initData.defaultContext = {'a': 'b'}
+    communicator2 = Ice.initialize(data=initData)
+
+    c = Test.MyClassPrx.checkedCast(communicator2.stringToProxy("test:default -p 12010 -t 10000"))
+    cb = AMI_MyClass_opContextEqualI({'a': 'b'})
+    c.opContext_async(cb)
+    test(cb.check())
+
+    ctx = {'a': 'c'}
+    c2 = Test.MyClassPrx.uncheckedCast(c.ice_context(ctx))
+    cb = AMI_MyClass_opContextEqualI({'a': 'c'})
+    c2.opContext_async(cb)
+    test(cb.check())
+
+    ctx = {}
+    c3 = Test.MyClassPrx.uncheckedCast(c2.ice_context(ctx))
+    cb = AMI_MyClass_opContextEqualI({})
+    c3.opContext_async(cb)
+    test(cb.check())
+
+    c4 = Test.MyClassPrx.uncheckedCast(c2.ice_defaultContext())
+    cb = AMI_MyClass_opContextEqualI({'a': 'b'})
+    c4.opContext_async(cb)
+    test(cb.check())
+
+    communicator2.destroy()
+
     derived = Test.MyDerivedClassPrx.checkedCast(p)
     test(derived)
     cb = AMI_MyDerivedClass_opDerivedI()
     derived.opDerived_async(cb)
     test(cb.check())
-
-    #
-    # Test that default context is obtained correctly from communicator.
-    #
-# DEPRECATED
-#    dflt = {'a': 'b'}
-#    communicator.setDefaultContext(dflt)
-#    cb = AMI_MyClass_opContextNotEqualI(dflt)
-#    p.opContext_async(cb)
-#    test(cb.check())
-#
-#    p2 = Test.MyClassPrx.uncheckedCast(p.ice_context({}))
-#    cb = AMI_MyClass_opContextEqualI({})
-#    p2.opContext_async(cb)
-#    test(cb.check())
-#
-#    p2 = Test.MyClassPrx.uncheckedCast(p.ice_defaultContext())
-#    cb = AMI_MyClass_opContextEqualI(dflt)
-#    p2.opContext_async(cb)
-#    test(cb.check())
-#
-#    communicator.setDefaultContext({})
-#    cb = AMI_MyClass_opContextNotEqualI({})
-#    p2.opContext_async(cb)
-#    test(cb.check())
-#
-#    communicator.setDefaultContext(dflt)
-#    c = Test.MyClassPrx.checkedCast(communicator.stringToProxy("test:default -p 12010 -t 10000"))
-#    cb = AMI_MyClass_opContextEqualI({'a': 'b'})
-#    c.opContext_async(cb)
-#    test(cb.check())
-#
-#    dflt['a'] = 'c'
-#    c2 = Test.MyClassPrx.uncheckedCast(c.ice_context(dflt))
-#    cb = AMI_MyClass_opContextEqualI({'a': 'c'})
-#    c2.opContext_async(cb)
-#    test(cb.check())
-#
-#    dflt = {}
-#    c3 = Test.MyClassPrx.uncheckedCast(c2.ice_context(dflt))
-#    cb = AMI_MyClass_opContextEqualI({})
-#    c3.opContext_async(cb)
-#    test(cb.check())
-#
-#    c4 = Test.MyClassPrx.uncheckedCast(c2.ice_defaultContext())
-#    cb = AMI_MyClass_opContextEqualI({'a': 'b'})
-#    c4.opContext_async(cb)
-#    test(cb.check())
-#
-#    dflt['a'] = 'd'
-#    communicator.setDefaultContext(dflt)
-#
-#    c5 = Test.MyClassPrx.uncheckedCast(c.ice_defaultContext())
-#    cb = AMI_MyClass_opContextEqualI({'a': 'd'})
-#    c5.opContext_async(cb)
-#    test(cb.check())
-#
-#    communicator.setDefaultContext({})
-
-    #
-    # Test implicit context propagation
-    #
-    impls = ( 'Shared', 'PerThread' )
-    for i in impls:
-        initData = Ice.InitializationData()
-        initData.properties = communicator.getProperties().clone()
-        initData.properties.setProperty('Ice.ImplicitContext', i)
-        ic = Ice.initialize(data=initData)
-        
-        ctx = {'one': 'ONE', 'two': 'TWO', 'three': 'THREE'}
-        
-        p = Test.MyClassPrx.uncheckedCast(ic.stringToProxy("test:default -p 12010 -t 10000"))
-        
-        ic.getImplicitContext().setContext(ctx)
-        test(ic.getImplicitContext().getContext() == ctx)
-
-        cb = AMI_MyClass_opContextEqualI(ctx)
-        p.opContext_async(cb)
-        test(cb.check())
-        
-        ic.getImplicitContext().put('zero', 'ZERO')
-        ctx = ic.getImplicitContext().getContext()
-
-        cb = AMI_MyClass_opContextEqualI(ctx)
-        p.opContext_async(cb)
-        test(cb.check())
-        
-        prxContext = {'one': 'UN', 'four': 'QUATRE'}
-        
-        combined = ctx
-        combined.update(prxContext)
-        test(combined['one'] == 'UN')
-        
-        p = Test.MyClassPrx.uncheckedCast(p.ice_context(prxContext))
-        ic.getImplicitContext().setContext({})
-
-        cb = AMI_MyClass_opContextEqualI(prxContext)
-        p.opContext_async(cb)
-        test(cb.check())
-       
-        ic.getImplicitContext().setContext(ctx)
-
-        cb = AMI_MyClass_opContextEqualI(combined)
-        p.opContext_async(cb)
-        test(cb.check())
-
-        ic.destroy()
-        
-
-
-
-  

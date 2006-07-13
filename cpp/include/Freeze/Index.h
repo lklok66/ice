@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -18,7 +18,7 @@ namespace Freeze
 {
 
 class IndexI;
-class ObjectStoreBase;
+class ObjectStore;
 
 class FREEZE_API Index : public IceUtil::Shared
 {
@@ -46,7 +46,7 @@ protected:
 private:
 
     friend class IndexI;
-    friend class ObjectStoreBase;
+    friend class ObjectStore;
     
     std::string _name;
     std::string _facet;

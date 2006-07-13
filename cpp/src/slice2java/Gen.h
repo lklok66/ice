@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -30,7 +30,7 @@ protected:
     //
     // Compose the parameter lists for an operation.
     //
-    std::vector<std::string> getParams(const OperationPtr&, const std::string&, bool = false);
+    std::vector<std::string> getParams(const OperationPtr&, const std::string&);
     std::vector<std::string> getParamsAsync(const OperationPtr&, const std::string&, bool);
     std::vector<std::string> getParamsAsyncCB(const OperationPtr&, const std::string&);
 
@@ -59,9 +59,9 @@ protected:
                        const std::list<std::string>& = std::list<std::string>());
 
     //
-    // Generate dispatch and marshalling methods for a class or interface.
+    // Generate dispatch methods for a class or interface.
     //
-    void writeDispatchAndMarshalling(::IceUtil::Output&, const ClassDefPtr&, bool);
+    void writeDispatch(::IceUtil::Output&, const ClassDefPtr&);
 };
 
 class Gen : private ::IceUtil::noncopyable
@@ -98,7 +98,7 @@ private:
         virtual bool visitClassDefStart(const ClassDefPtr&);
 
     private:
-        void writeOperations(const ClassDefPtr&, bool);
+	void writeOperations(const ClassDefPtr&, bool);
     };
 
     class TieVisitor : public JavaVisitor
@@ -137,11 +137,11 @@ private:
 
     private:
 
-        //
-        // Verifies that a getter/setter method does not conflict with an operation.
-        //
-        bool validateGetterSetter(const OperationList&, const std::string&, int, const std::string&,
-                                  const std::string&);
+	//
+	// Verifies that a getter/setter method does not conflict with an operation.
+	//
+	bool validateGetterSetter(const OperationList&, const std::string&, int, const std::string&,
+				  const std::string&);
 
         bool _stream;
     };
@@ -224,13 +224,9 @@ private:
     {
     public:
 
-        DispatcherVisitor(const std::string&, bool);
+        DispatcherVisitor(const std::string&);
 
         virtual bool visitClassDefStart(const ClassDefPtr&);
-
-    private:
-
-        bool _stream;
     };
 
     class BaseImplVisitor : public JavaVisitor

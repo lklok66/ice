@@ -1,131 +1,82 @@
 ' **********************************************************************
 '
-' Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+' Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 '
 ' This copy of Ice is licensed to you under the terms described in the
 ' ICE_LICENSE file included in this distribution.
 '
 ' **********************************************************************
 
-Imports System
 Imports System.Collections
-Imports Demo
-
-Public Class ClockI
-    Inherits ClockDisp_
-
-    Public Overloads Overrides Sub tick(ByVal time as String, ByVal current As Ice.Current)
-        System.Console.Out.WriteLine(time)
-    End Sub
-End Class
 
 Module ClockS
-
 
     Class Subscriber
         Inherits Ice.Application
 
         Public Overloads Overrides Function run(ByVal args() As String) As Integer
-            Dim basePrx As Ice.ObjectPrx = communicator().propertyToProxy("IceStorm.TopicManager.Proxy")
-            Dim manager As IceStorm.TopicManagerPrx = IceStorm.TopicManagerPrxHelper.checkedCast(basePrx)
-            If manager Is Nothing Then
-                Console.Error.WriteLine("invalid proxy")
-                Return 1
-            End If
+	    Dim properties As Ice.Properties = communicator().getProperties()
 
-	    Dim topicName as String = "time"
-	    Dim datagram as Boolean = false
-	    Dim twoway as Boolean = false
-	    Dim ordered as Boolean = false
-	    Dim batch as Boolean = false
-	    Dim optsSet as Integer = 0
-	    For i As Integer = 0 To args.Length -1
-		If args(i).Equals("--datagram") Then
-		    datagram = true
-		    optsSet = optsSet + 1
-		Elseif args(i).Equals("--twoway") Then
-		    twoway = true
-		    optsSet = optsSet + 1
-		Elseif args(i).Equals("--ordered") Then
-		    ordered = true
-		    optsSet = optsSet + 1
-		Elseif args(i).Equals("--oneway") Then
-		    optsSet = optsSet + 1
-		Elseif args(i).Equals("--batch") Then
-		    batch = true
-		Elseif args(i).StartsWith("--") Then
-		    usage()
-		    Return 1
-		Else
-		    topicName = args(i)
-		    Exit For
-		End if
-    	    Next
-
-	    If batch and (twoway or ordered) Then
-		Console.WriteLine(appName() + ": batch can only be set with oneway or datagram")
-		Return 1
-	    End if
-
-	    If optsSet > 1 Then
-		usage()
+	    Dim proxyProperty As String = "IceStorm.TopicManager.Proxy"
+	    Dim proxy As String = properties.getProperty(proxyProperty)
+	    If proxy.Length = 0 Then
+	        Console.Error.WriteLine("property `" & proxyProperty & "' not set")
 		Return 1
 	    End If
 
-            Dim topic As IceStorm.TopicPrx 
-            Try
-                topic = manager.retrieve(topicName)
-            Catch ex As IceStorm.NoSuchTopic
-                Try
-                    topic = manager.create(topicName)
-                Catch e As IceStorm.TopicExists
-                    Console.Error.WriteLine("temporary error. try again.")
-                    Return 1
-                End Try
-            End Try
-            
-            Dim adapter As Ice.ObjectAdapter = communicator().createObjectAdapter("Clock.Subscriber")
+	    Dim basePrx As Ice.ObjectPrx = communicator().stringToProxy(proxy)
+	    Dim manager As IceStorm.TopicManagerPrx = IceStorm.TopicManagerPrxHelper.checkedCast(basePrx)
+	    If manager Is Nothing Then
+	        Console.Error.WriteLine("invalid proxy")
+		Return 1
+	    End If
 
-            Dim subscriber As Ice.ObjectPrx = adapter.addWithUUID(New ClockI)
+	    Dim topics As ArrayList = New ArrayList
+	    If args.Length > 0 Then
+	        For i As Integer = 0 To args.Length - 1
+		    topics.Add(args(i))
+		Next
+	    Else
+	        topics.Add("time")
+	    End If
 
-            Dim qos As IceStorm.Qos = New IceStorm.Qos
+	    Dim qos As IceStorm.Qos = New IceStorm.Qos
+	    qos.Add("reliability", "batch")
 
-	    '
-	    ' Set up the proxy.
-	    '
-	    If datagram Then
-		subscriber = subscriber.ice_datagram()
-	    Elseif twoway Then
-		' Do nothing to the subscriber proxy. Its already twoway.
-	    Elseif ordered Then
-		' Do nothing to the subscriber proxy. Its already twoway.
-		qos.Add("reliability", "ordered")
-	    Else ' if oneway
-		subscriber = subscriber.ice_oneway()
-    	    End If
-	    If batch Then
-		if datagram Then
-		    subscriber = subscriber.ice_batchDatagram()
-		Else
-		    subscriber = subscriber.ice_batchOneway()
-    	    	End If
-    	    End If
+	    Dim adapter As Ice.ObjectAdapter = communicator().createObjectAdapter("Clock.Subscriber")
+	    Dim clock As Ice.Object = New ClockI
 
-	    topic.subscribeAndGetPublisher(qos, subscriber)
-            adapter.activate()
+	    Dim subscribers As System.Collections.Hashtable = New System.Collections.Hashtable
 
-            shutdownOnInterrupt()
-            communicator().waitForShutdown()
+	    For i As Integer = 0 To topics.Count - 1
+	        Dim obj As Ice.ObjectPrx = adapter.addWithUUID(clock)
+		Try
+		    Dim topic As IceStorm.TopicPrx = manager.retrieve(topics(i))
+		    topic.subscribe(qos, obj)
+		Catch ex As IceStorm.NoSuchTopic
+		    Console.Error.WriteLine(ex)
+		End Try
 
-            topic.unsubscribe(subscriber)
+		subscribers.Add(topics(i), obj)
+	    Next
+
+	    If subscribers.Count = topics.Count Then
+	        adapter.activate()
+		shutdownOnInterrupt()
+		communicator().waitForShutdown()
+	    End If
+
+	    For Each entry As DictionaryEntry in subscribers
+	        Try
+		    Dim topic As IceStorm.TopicPrx = manager.retrieve(entry.Key)
+		    topic.unsubscribe(entry.Value)
+		Catch ex As IceStorm.NoSuchTopic
+		    Console.Error.WriteLine(ex)
+		End Try
+	    Next entry
 
             Return 0
         End Function
-
-	Public Sub usage
-	    Console.WriteLine("Usage: " + appName() + " [--batch] [--datagram|--twoway|--ordered|--oneway] [topic]")
-	End Sub
-
     End Class
 
     Public Sub Main(ByVal args() As String)

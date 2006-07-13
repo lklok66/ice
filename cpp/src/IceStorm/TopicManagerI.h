@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -19,15 +19,21 @@ namespace IceStorm
 //
 // Forward declarations.
 //
-class Instance;
-typedef IceUtil::Handle<Instance> InstancePtr;
-
-//
-// Map of TopicI objects.
-//
 class TopicI;
 typedef IceUtil::Handle<TopicI> TopicIPtr;
 
+class TraceLevels;
+typedef IceUtil::Handle<TraceLevels> TraceLevelsPtr;
+
+class Flusher;
+typedef IceUtil::Handle<Flusher> FlusherPtr;
+ 
+class SubscriberFactory;
+typedef IceUtil::Handle<SubscriberFactory> SubscriberFactoryPtr;
+
+//
+// Map of TopicImplementation objects.
+//
 typedef std::map<std::string, TopicIPtr> TopicIMap;
 
 //
@@ -37,10 +43,8 @@ class TopicManagerI : public TopicManager, public IceUtil::Mutex
 {
 public:
 
-    TopicManagerI(const InstancePtr&,
-                  const Ice::ObjectAdapterPtr&,
-                  const std::string&,
-                  const std::string&);
+    TopicManagerI(const Ice::CommunicatorPtr&, const Ice::ObjectAdapterPtr&, const Ice::ObjectAdapterPtr&,
+                  const TraceLevelsPtr&, const std::string&, const std::string&);
     ~TopicManagerI();
 
     virtual TopicPrx create(const std::string&, const Ice::Current&);
@@ -55,16 +59,19 @@ public:
 
 private:
 
-    TopicPrx installTopic(const std::string&, const Ice::Identity&, const LinkRecordSeq&, bool);
+    void installTopic(const std::string&, const LinkRecordDict&, bool);
   
-    const InstancePtr _instance;
-    const Ice::ObjectAdapterPtr _topicAdapter;
-    const std::string _envName;
-    const std::string _dbName;
-    const Freeze::ConnectionPtr _connection;
-    PersistentTopicMap _topics;
-
+    Ice::CommunicatorPtr _communicator;
+    Ice::ObjectAdapterPtr _topicAdapter;
+    Ice::ObjectAdapterPtr _publishAdapter;
+    TraceLevelsPtr _traceLevels;
     TopicIMap _topicIMap;
+    FlusherPtr _flusher;
+    SubscriberFactoryPtr _factory;
+    std::string _envName;
+    std::string _dbName;
+    Freeze::ConnectionPtr _connection;
+    PersistentTopicMap _topics;
 };
 
 typedef IceUtil::Handle<TopicManagerI> TopicManagerIPtr;

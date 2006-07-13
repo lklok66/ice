@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -60,25 +60,6 @@ public sealed class InitialI : Initial
     public override D getD(Ice.Current current)
     {
         return _d;
-    }
-    
-    public override I getI(Ice.Current current)
-    {
-        return new II();
-    }
-    
-    public override I getJ(Ice.Current current)
-    {
-        return new JI();
-    }
-    
-    public override I getH(Ice.Current current)
-    {
-        return new HI();
-    }
-
-    public override void setI(I theI, Ice.Current current)
-    {
     }
     
     public override void shutdown(Ice.Current current)

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -42,95 +42,7 @@ IceBox::ServiceManagerI::getSliceChecksums(const Current&) const
 }
 
 void
-IceBox::ServiceManagerI::startService(const string& name, const Current&)
-{
-    IceUtil::Mutex::Lock lock(*this);
-
-    //
-    // Search would be more efficient if services were contained in
-    // a map, but order is required for shutdown.
-    //
-    vector<ServiceInfo>::iterator p;
-    for(p = _services.begin(); p != _services.end(); ++p)
-    {
-        ServiceInfo& info = *p;
-        if(info.name == name)
-        {
-            if(info.active)
-            {
-                throw AlreadyStartedException();
-            }
-
-            try
-            {
-                info.service->start(name, info.communicator == 0 ? _communicator : info.communicator, info.args);
-                info.active = true;
-            }
-            catch(const Ice::Exception& ex)
-            {
-                Warning out(_logger);
-                out << "ServiceManager: exception in start for service " << info.name << ":\n";
-                out << ex;
-            }
-            catch(...)
-            {
-                Warning out(_logger);
-                out << "ServiceManager: unknown exception in start for service " << info.name;
-            }
-
-            return;
-        }
-    }
-
-    throw NoSuchServiceException();
-}
-
-void
-IceBox::ServiceManagerI::stopService(const string& name, const Current&)
-{
-    IceUtil::Mutex::Lock lock(*this);
-
-    //
-    // Search would be more efficient if services were contained in
-    // a map, but order is required for shutdown.
-    //
-    vector<ServiceInfo>::iterator p;
-    for(p = _services.begin(); p != _services.end(); ++p)
-    {
-        ServiceInfo& info = *p;
-        if(info.name == name)
-        {
-            if(!info.active)
-            {
-                throw AlreadyStoppedException();
-            }
-
-            try
-            {
-                info.service->stop();
-                info.active = false;
-            }
-            catch(const Ice::Exception& ex)
-            {
-                Warning out(_logger);
-                out << "ServiceManager: exception in stop for service " << info.name << ":\n";
-                out << ex;
-            }
-            catch(...)
-            {
-                Warning out(_logger);
-                out << "ServiceManager: unknown exception in stop for service " << info.name;
-            }
-
-            return;
-        }
-    }
-
-    throw NoSuchServiceException();
-}
-
-void
-IceBox::ServiceManagerI::shutdown(const Current&)
+IceBox::ServiceManagerI::shutdown(const Current& current)
 {
     _communicator->shutdown();
 }
@@ -149,11 +61,13 @@ IceBox::ServiceManagerI::start()
         //
         ObjectAdapterPtr adapter = _communicator->createObjectAdapter("IceBox.ServiceManager");
 
-        PropertiesPtr properties = _communicator->getProperties();
-        Identity identity;
-        identity.category = properties->getPropertyWithDefault("IceBox.InstanceName", "IceBox");
-        identity.name = "ServiceManager";
-        adapter->add(obj, identity);
+	PropertiesPtr properties = _communicator->getProperties();
+        string identity = properties->getProperty("IceBox.ServiceManager.Identity");
+        if(identity.empty())
+        {
+            identity = properties->getPropertyWithDefault("IceBox.InstanceName", "IceBox") + "/ServiceManager";
+        }
+        adapter->add(obj, _communicator->stringToIdentity(identity));
 
         //
         // Parse the IceBox.LoadOrder property.
@@ -191,7 +105,7 @@ IceBox::ServiceManagerI::start()
         //
         const string prefix = "IceBox.Service.";
         PropertyDict services = properties->getPropertiesForPrefix(prefix);
-        PropertyDict::iterator p;
+	PropertyDict::iterator p;
         for(StringSeq::const_iterator q = loadOrder.begin(); q != loadOrder.end(); ++q)
         {
             p = services.find(prefix + *q);
@@ -204,8 +118,8 @@ IceBox::ServiceManagerI::start()
             load(*q, p->second);
             services.erase(p);
         }
-        for(p = services.begin(); p != services.end(); ++p)
-        {
+	for(p = services.begin(); p != services.end(); ++p)
+	{
             string name = p->first.substr(prefix.size());
             load(name, p->second);
         }
@@ -228,16 +142,16 @@ IceBox::ServiceManagerI::start()
             cout << bundleName << " ready" << endl;
         }
 
-        try
-        {
-            adapter->activate();
-        }
-        catch(const ObjectAdapterDeactivatedException&)
-        {
-            //
-            // Expected if the communicator has been shutdown.
-            //
-        }
+	try
+	{
+	    adapter->activate();
+	}
+	catch(const ObjectAdapterDeactivatedException&)
+	{
+	    //
+	    // Expected if the communicator has been shutdown.
+	    //
+	}
     }
     catch(const FailureException& ex)
     {
@@ -279,16 +193,16 @@ IceBox::ServiceManagerI::load(const string& name, const string& value)
     else
     {
         entryPoint = value.substr(0, pos);
-        try
-        {
-            args = IceUtil::Options::split(value.substr(pos + 1));
-        }
-        catch(const IceUtil::BadOptException& ex)
-        {
-            FailureException e(__FILE__, __LINE__);
-            e.reason = "ServiceManager: invalid arguments for service `" + name + "':\n" + ex.reason;
-            throw e;        
-        }
+	try
+	{
+	    args = IceUtil::Options::split(value.substr(pos + 1));
+	}
+	catch(const IceUtil::Options::BadQuote& ex)
+	{
+	    FailureException e(__FILE__, __LINE__);
+	    e.reason = "ServiceManager: invalid arguments for service `" + name + "':\n" + ex.reason;
+	    throw e;	    
+	}
     }
     start(name, entryPoint, args);
 }
@@ -296,8 +210,6 @@ IceBox::ServiceManagerI::load(const string& name, const string& value)
 void
 IceBox::ServiceManagerI::start(const string& service, const string& entryPoint, const StringSeq& args)
 {
-    IceUtil::Mutex::Lock lock(*this);
-
     //
     // Create the service property set from the service arguments and
     // the server arguments. The service property set will be used to
@@ -305,18 +217,17 @@ IceBox::ServiceManagerI::start(const string& service, const string& entryPoint, 
     // communicator, depending on the value of the
     // IceBox.UseSharedCommunicator property.
     //
-    ServiceInfo info;
-    info.name = service;
+    StringSeq serviceArgs;
     StringSeq::size_type j;
     for(j = 0; j < args.size(); j++)
     {
-        info.args.push_back(args[j]);
+        serviceArgs.push_back(args[j]);
     }
     for(j = 0; j < _argv.size(); j++)
     {
         if(_argv[j].find("--" + service + ".") == 0)
         {
-            info.args.push_back(_argv[j]);
+            serviceArgs.push_back(_argv[j]);
         }
     }
 
@@ -341,6 +252,7 @@ IceBox::ServiceManagerI::start(const string& service, const string& entryPoint, 
     // Invoke the factory function.
     //
     SERVICE_FACTORY factory = (SERVICE_FACTORY)sym;
+    ServiceInfo info;
     try
     {
         info.service = factory(_communicator);
@@ -363,151 +275,125 @@ IceBox::ServiceManagerI::start(const string& service, const string& entryPoint, 
     //
     try
     {
-        //
-        // If Ice.UseSharedCommunicator.<name> is not defined, create
-        // a communicator for the service. The communicator inherits
-        // from the shared communicator properties. If it's defined
-        // add the service properties to the shared commnunicator
-        // property set.
-        //
-        PropertiesPtr properties = _communicator->getProperties();
+	//
+	// If Ice.UseSharedCommunicator.<name> is not defined, create
+	// a communicator for the service. The communicator inherits
+	// from the shared communicator properties. If it's defined
+	// add the service properties to the shared commnunicator
+	// property set.
+	//
+	PropertiesPtr properties = _communicator->getProperties();
+	if(properties->getPropertyAsInt("IceBox.UseSharedCommunicator." + service) > 0)
+	{
+	    PropertiesPtr fileProperties = createProperties(serviceArgs);
+	    properties->parseCommandLineOptions("", fileProperties->getCommandLineOptions());
 
+	    serviceArgs = properties->parseIceCommandLineOptions(serviceArgs);
+	    serviceArgs = properties->parseCommandLineOptions(service, serviceArgs);
+	}
+	else
+	{	
+	    PropertiesPtr serviceProperties = properties->clone();
 
-        if(properties->getPropertyAsInt("IceBox.UseSharedCommunicator." + service) > 0)
-        {
-            PropertiesPtr serviceProperties = createProperties(info.args, properties);
+	    //
+	    //  Append the service name to the program name if not empty.
+	    //
+	    string name = serviceProperties->getProperty("Ice.ProgramName");
+	    if(name != service)
+	    {
+		name = name.empty() ? service : name + "-" + service;
+	    }
 
-            //
-            // Erase properties in 'properties'
-            //
-            PropertyDict allProps = properties->getPropertiesForPrefix("");
-            for(PropertyDict::iterator p = allProps.begin(); p != allProps.end(); ++p)
-            {
-                if(serviceProperties->getProperty(p->first) == "")
-                {
-                    properties->setProperty(p->first, "");
-                }
-            }
-            
-            //
-            // Put all serviceProperties into 'properties'
-            //
-            properties->parseCommandLineOptions("", serviceProperties->getCommandLineOptions());
-            
-            //
-            // Parse <service>.* command line options
-            // (the Ice command line options were parse by the createProperties above)
-            //
-            info.args = properties->parseCommandLineOptions(service, info.args);
-        }
-        else
-        {       
-            string name = properties->getProperty("Ice.ProgramName");
-            PropertiesPtr serviceProperties;
-            if(properties->getPropertyAsInt("IceBox.InheritProperties") > 0)
-            {
-                serviceProperties = createProperties(info.args, properties);
-            }
-            else
-            {
-                serviceProperties = createProperties(info.args);
-            }
-         
-            if(name == serviceProperties->getProperty("Ice.ProgramName"))
-            {
-                //
-                // If the service did not set its own program-name, and 
-                // the icebox program-name != service, append the service name to the 
-                // program name.
-                //
-                if(name != service)
-                {
-                    name = name.empty() ? service : name + "-" + service;
-                }
-                serviceProperties->setProperty("Ice.ProgramName", name);
-            }
-            
-            //
-            // Parse <service>.* command line options
-            // (the Ice command line options were parsed by the createProperties above)
-            //
-            info.args = serviceProperties->parseCommandLineOptions(service, info.args);
+	    //
+	    // Load property file eventually specified with
+	    // --Ice.Config and add the properties from the file to
+	    // the service properties.
+	    //
+	    PropertiesPtr fileProperties = createProperties(serviceArgs);
+	    serviceProperties->parseCommandLineOptions("", fileProperties->getCommandLineOptions());
 
-            //
-            // Remaining command line options are passed to the
-            // communicator with argc/argv. This is necessary for Ice
-            // plugin properties (e.g.: IceSSL).
-            //
-            int argc = static_cast<int>(info.args.size());
-            char** argv = new char*[argc + 1];
-            int i = 0;
-            for(Ice::StringSeq::const_iterator p = info.args.begin(); p != info.args.end(); ++p, ++i)
-            {
-                argv[i] = strdup(p->c_str());
-            }
-            argv[argc] = 0;
+	    serviceProperties->setProperty("Ice.ProgramName", name);
 
-            InitializationData initData;
-            initData.properties = serviceProperties;
-            info.communicator = initialize(argc, argv, initData);
+	    //
+	    // Parse Ice and <service>.* command line options.
+	    //
+	    serviceArgs = serviceProperties->parseIceCommandLineOptions(serviceArgs);
+	    serviceArgs = serviceProperties->parseCommandLineOptions(service, serviceArgs);
 
-            for(i = 0; i < argc + 1; ++i)
-            {
-                free(argv[i]);
-            }
-            delete[] argv;
-        }
-        
-        CommunicatorPtr communicator = info.communicator ? info.communicator : _communicator;
+	    //
+	    // Remaining command line options are passed to the
+	    // communicator with argc/argv. This is necessary for Ice
+	    // plugin properties (e.g.: IceSSL).
+	    //
+	    int argc = static_cast<int>(serviceArgs.size());
+	    char** argv = new char*[argc + 1];
+	    int i = 0;
+	    for(Ice::StringSeq::const_iterator p = serviceArgs.begin(); p != serviceArgs.end(); ++p, ++i)
+	    {
+		argv[i] = strdup(p->c_str());
+	    }
+	    argv[argc] = 0;
 
-        //
-        // Start the service.
-        //
-        try
-        {
-            info.service->start(service, communicator, info.args);
-            info.active = true;
-        }
-        catch(...)
-        {
-            if(info.communicator)
-            {
-                try
-                {
-                    info.communicator->shutdown();
-                    info.communicator->waitForShutdown();
-                }
-                catch(const Ice::CommunicatorDestroyedException&)
-                {
-                    //
-                    // Ignore, the service might have already destroyed
-                    // the communicator for its own reasons.
-                    //
-                }
-                catch(const Ice::Exception& ex)
-                {
-                    Warning out(_logger);
-                    out << "ServiceManager: exception in shutting down communicator for service " << service << ":\n";
-                    out << ex;
-                }
+	    InitializationData initData;
+	    initData.properties = serviceProperties;
+	    info.communicator = initialize(argc, argv, initData);
 
-                try
-                {
-                    info.communicator->destroy();
-                    info.communicator = 0;
-                }
-                catch(const Exception& ex)
-                {
-                    Warning out(_logger);
-                    out << "ServiceManager: exception in shutting down communicator for service " << service << ":\n";
-                    out << ex;
-                }
-            }
-            throw;
-        }
+	    for(i = 0; i < argc + 1; ++i)
+	    {
+		free(argv[i]);
+	    }
+	    delete[] argv;
+	}
+	
+	CommunicatorPtr communicator = info.communicator ? info.communicator : _communicator;
+
+	//
+	// Start the service.
+	//
+	try
+	{
+	    info.service->start(service, communicator, serviceArgs);
+	}
+	catch(...)
+	{
+	    if(info.communicator)
+	    {
+		try
+		{
+		    info.communicator->shutdown();
+		    info.communicator->waitForShutdown();
+		}
+		catch(const Ice::CommunicatorDestroyedException&)
+		{
+		    //
+		    // Ignore, the service might have already destroyed
+		    // the communicator for its own reasons.
+		    //
+		}
+		catch(const Ice::Exception& ex)
+		{
+		    Warning out(_logger);
+		    out << "ServiceManager: exception in shutting down communicator for service " << service << ":\n";
+		    out << ex;
+		}
+
+		try
+		{
+		    info.communicator->destroy();
+		    info.communicator = 0;
+		}
+		catch(const Exception& ex)
+		{
+		    Warning out(_logger);
+		    out << "ServiceManager: exception in shutting down communicator for service " << service << ":\n";
+		    out << ex;
+		}
+	    }
+	    throw;
+	}
 
         info.library = library;
-        _services.push_back(info);
+        _services[service] = info;
     }
     catch(const FailureException&)
     {
@@ -515,12 +401,12 @@ IceBox::ServiceManagerI::start(const string& service, const string& entryPoint, 
     }
     catch(const Exception& ex)
     {
-        ostringstream s;
-        s << "ServiceManager: exception while starting service " << service << ":\n";
-        s << ex;
+	ostringstream s;
+	s << "ServiceManager: exception while starting service " << service << ":\n";
+	s << ex;
 
-        FailureException e(__FILE__, __LINE__);
-        e.reason = s.str();
+	FailureException e(__FILE__, __LINE__);
+	e.reason = s.str();
         throw e;
     }
 }
@@ -528,119 +414,110 @@ IceBox::ServiceManagerI::start(const string& service, const string& entryPoint, 
 void
 IceBox::ServiceManagerI::stopAll()
 {
-    IceUtil::Mutex::Lock lock(*this);
-
-    //
-    // Services are stopped in the reverse order from which they are started.
-    //
-    vector<ServiceInfo>::reverse_iterator p;
+    map<string,ServiceInfo>::iterator p;
 
     //
     // First, for each service, we call stop on the service and flush its database environment to 
     // the disk.
     //
-    for(p = _services.rbegin(); p != _services.rend(); ++p)
+    for(p = _services.begin(); p != _services.end(); ++p)
     {
-        ServiceInfo& info = *p;
-        if(info.active)
-        {
-            try
-            {
-                info.service->stop();
-                info.active = false;
-            }
-            catch(const Ice::Exception& ex)
-            {
-                Warning out(_logger);
-                out << "ServiceManager: exception in stop for service " << info.name << ":\n";
-                out << ex;
-            }
-            catch(...)
-            {
-                Warning out(_logger);
-                out << "ServiceManager: unknown exception in stop for service " << info.name;
-            }
-        }
+	ServiceInfo& info = p->second;
+	try
+	{
+	    info.service->stop();
+	}
+	catch(const Ice::Exception& ex)
+	{
+            Warning out(_logger);
+	    out << "ServiceManager: exception in stop for service " << p->first << ":\n";
+	    out << ex;
+	}
+	catch(...)
+	{
+            Warning out(_logger);
+	    out << "ServiceManager: unknown exception in stop for service " << p->first;
+	}
     }
 
-    for(p = _services.rbegin(); p != _services.rend(); ++p)
+    for(p = _services.begin(); p != _services.end(); ++p)
     {
-        ServiceInfo& info = *p;
+	ServiceInfo& info = p->second;
 
-        if(info.communicator)
-        {
-            try
-            {
-                info.communicator->shutdown();
-                info.communicator->waitForShutdown();
-            }
-            catch(const Ice::CommunicatorDestroyedException&)
-            {
-                //
-                // Ignore, the service might have already destroyed
-                // the communicator for its own reasons.
-                //
-            }
-            catch(const Ice::Exception& ex)
-            {
-                Warning out(_logger);
-                out << "ServiceManager: exception in stop for service " << info.name << ":\n";
-                out << ex;
-            }
-        }
+	if(info.communicator)
+	{
+	    try
+	    {
+		info.communicator->shutdown();
+		info.communicator->waitForShutdown();
+	    }
+	    catch(const Ice::CommunicatorDestroyedException&)
+	    {
+		//
+		// Ignore, the service might have already destroyed
+		// the communicator for its own reasons.
+		//
+	    }
+	    catch(const Ice::Exception& ex)
+	    {
+		Warning out(_logger);
+		out << "ServiceManager: exception in stop for service " << p->first << ":\n";
+		out << ex;
+	    }
+	}
 
-        //
-        // Release the service, the service communicator and then the library. The order is important, 
-        // the service must be released before destroying the communicator so that the communicator
-        // leak detector doesn't report potential leaks, and the communicator must be destroyed before 
-        // the library is released since the library will destroy its global state.
-        //
-        try
-        {
-            info.service = 0;
-        }
-        catch(const Exception& ex)
-        {
+	//
+	// Release the service, the service communicator and then the library. The order is important, 
+	// the service must be released before destroying the communicator so that the communicator
+	// leak detector doesn't report potential leaks, and the communicator must be destroyed before 
+	// the library is released since the library will destroy its global state.
+	//
+	try
+	{
+	    info.service = 0;
+	}
+	catch(const Exception& ex)
+	{
+	    Warning out(_logger);
+	    out << "ServiceManager: exception in stop for service " << p->first << ":\n";
+	    out << ex;
+	}
+	catch(...)
+	{
             Warning out(_logger);
-            out << "ServiceManager: exception in stop for service " << info.name << ":\n";
-            out << ex;
-        }
-        catch(...)
-        {
-            Warning out(_logger);
-            out << "ServiceManager: unknown exception in stop for service " << info.name;
-        }
+	    out << "ServiceManager: unknown exception in stop for service " << p->first;
+	}
 
-        if(info.communicator)
-        {
-            try
-            {
-                info.communicator->destroy();
-                info.communicator = 0;
-            }
-            catch(const Exception& ex)
-            {
-                Warning out(_logger);
-                out << "ServiceManager: exception in stop for service " << info.name << ":\n";
-                out << ex;
-            }
-        }
-        
-        try
-        {
-            info.library = 0;
-        }
-        catch(const Exception& ex)
-        {
+	if(info.communicator)
+	{
+	    try
+	    {
+		info.communicator->destroy();
+		info.communicator = 0;
+	    }
+	    catch(const Exception& ex)
+	    {
+		Warning out(_logger);
+		out << "ServiceManager: exception in stop for service " << p->first << ":\n";
+		out << ex;
+	    }
+	}
+	
+	try
+	{
+	    info.library = 0;
+	}
+	catch(const Exception& ex)
+	{
+	    Warning out(_logger);
+	    out << "ServiceManager: exception in stop for service " << p->first << ":\n";
+	    out << ex;
+	}
+	catch(...)
+	{
             Warning out(_logger);
-            out << "ServiceManager: exception in stop for service " << info.name << ":\n";
-            out << ex;
-        }
-        catch(...)
-        {
-            Warning out(_logger);
-            out << "ServiceManager: unknown exception in stop for service " << info.name;
-        }
+	    out << "ServiceManager: unknown exception in stop for service " << p->first;
+	}
     }
 
     _services.clear();

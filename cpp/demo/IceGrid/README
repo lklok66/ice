@@ -1,18 +1,14 @@
 Demos in this directory:
 
-- allocate
+- simple
 
-  This demo shows how to use the allocation feature of IceGrid.
-
-- replication
-
-  This example demonstrates IceGrid's registry replication feature.
+  This demo illustrates the basics of using IceGrid, including the 
+  use of templates and replication.
 
 - sessionActivation
 
   This demo shows the use of the session activation mode.
 
-- simple
+- allocate
 
-  This demo illustrates the basics of using IceGrid, including the 
-  use of templates and object adapter replication.
+  This demo shows how to use the allocation feature of IceGrid.

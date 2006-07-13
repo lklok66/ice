@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -9,7 +9,7 @@
 
 package Freeze;
 
-class EvictorElement
+class EvictorElement extends Ice.LocalObjectImpl
 {
     //
     // Clean object; can become modified or destroyed
@@ -40,8 +40,8 @@ class EvictorElement
 
     EvictorElement(Ice.Identity identity, ObjectStore store)
     {
-        this.identity = identity;
-        this.store = store;
+	this.identity = identity;
+	this.store = store;
     }
     
     final ObjectStore store;

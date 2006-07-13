@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -9,120 +9,63 @@
 
 using System;
 using System.Diagnostics;
-using System.Globalization;
 using Demo;
 
 public class Publisher : Ice.Application
 {
     public override int run(string[] args)
     {
-        IceStorm.TopicManagerPrx manager = IceStorm.TopicManagerPrxHelper.checkedCast(
-            communicator().propertyToProxy("IceStorm.TopicManager.Proxy"));
+        Ice.Properties properties = communicator().getProperties();
+        const String proxyProperty = "IceStorm.TopicManager.Proxy";
+        String proxy = properties.getProperty(proxyProperty);
+        if(proxy.Length == 0)
+        {
+            Console.WriteLine("property `" + proxyProperty + "' not set");
+            return 1;
+        }
+
+        Ice.ObjectPrx basePrx = communicator().stringToProxy(proxy);
+        IceStorm.TopicManagerPrx manager = IceStorm.TopicManagerPrxHelper.checkedCast(basePrx);
         if(manager == null)
         {
             Console.WriteLine("invalid proxy");
             return 1;
         }
 
-        string topicName = "time";
-        bool datagram = false;
-        bool twoway = false;
-        int optsSet = 0;
-        for(int i = 0; i < args.Length; ++i)
-        {
-            if(args[i].Equals("--datagram"))
-            {
-                datagram = true;
-                ++optsSet;
-            }
-            else if(args[i].Equals("--twoway"))
-            {
-                twoway = true;
-                ++optsSet;
-            }
-            else if(args[i].Equals("--oneway"))
-            {
-                ++optsSet;
-            }
-            else if(args[i].StartsWith("--"))
-            {
-                usage();
-                return 1;
-            }
-            else
-            {
-                topicName = args[i];
-                break;
-            }
-        }
-
-        if(optsSet > 1)
-        {
-            usage();
-            return 1;
-        }
-
         //
-        // Retrieve the topic.
+        // Retrieve the topic named "time".
         //
         IceStorm.TopicPrx topic;
         try
         {
-            topic = manager.retrieve(topicName);
+            topic = manager.retrieve("time");
         }
-        catch(IceStorm.NoSuchTopic)
+        catch(IceStorm.NoSuchTopic e)
         {
-            try
-            {
-                topic = manager.create(topicName);
-            }
-            catch(IceStorm.TopicExists)
-            {
-                Console.WriteLine("temporary error. try again.");
-                return 1;
-            }
+            Console.WriteLine(e + "name: " + e.name);
+            return 1;
         }
+        Debug.Assert(topic != null);
 
         //
-        // Get the topic's publisher object, and create a Clock proxy with
-        // the mode specified as an argument of this application.
+        // Get the topic's publisher object, verify that it supports
+        // the Clock type, and create a oneway Clock proxy (for efficiency
+        // reasons).
         //
-        Ice.ObjectPrx publisher = topic.getPublisher();
-        if(datagram)
+        Ice.ObjectPrx obj = topic.getPublisher();
+        if(!obj.ice_isDatagram())
         {
-            publisher = publisher.ice_datagram();
+            obj = obj.ice_oneway();
         }
-        else if(twoway)
-        {
-            // Do nothing.
-        }
-        else //if(oneway)
-        {
-            publisher = publisher.ice_oneway();
-        }
-        ClockPrx clock = ClockPrxHelper.uncheckedCast(publisher);
+        ClockPrx clock = ClockPrxHelper.uncheckedCast(obj);
 
-        Console.WriteLine("publishing tick events. Press ^C to terminate the application.");
-        try
+        Console.WriteLine("publishing 10 tick events");
+        for(int i = 0; i < 10; ++i)
         {
-            while(true)
-            {
-                clock.tick(System.DateTime.Now.ToString("G", DateTimeFormatInfo.InvariantInfo));
-
-                System.Threading.Thread.Sleep(1000);
-            }
-        }
-        catch(Ice.CommunicatorDestroyedException)
-        {
-            // Ignore
+            clock.tick();
         }
 
         return 0;
-    }
-
-    public void usage()
-    {
-        Console.WriteLine("Usage: " + appName() + " [--datagram|--twoway|--oneway] [topic]");
     }
 
     public static void Main(string[] args)

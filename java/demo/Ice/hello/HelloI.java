@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -12,18 +12,8 @@ import Demo.*;
 public class HelloI extends _HelloDisp
 {
     public void
-    sayHello(int delay, Ice.Current current)
+    sayHello(Ice.Current current)
     {
-        if(delay > 0)
-        {
-            try
-            {
-                Thread.currentThread().sleep(delay);
-            }
-            catch(InterruptedException ex1)
-            {
-            }
-        }
         System.out.println("Hello World!");
     }
 
@@ -31,6 +21,6 @@ public class HelloI extends _HelloDisp
     shutdown(Ice.Current current)
     {
         System.out.println("Shutting down...");
-        current.adapter.getCommunicator().shutdown();
+	current.adapter.getCommunicator().shutdown();
     }
 }

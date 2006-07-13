@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -15,7 +15,7 @@ public abstract class Blobject extends Ice.ObjectImpl
     public abstract boolean
     ice_invoke(byte[] inParams, ByteSeqHolder outParams, Current current);
 
-    public DispatchStatus
+    public IceInternal.DispatchStatus
     __dispatch(IceInternal.Incoming in, Current current)
     {
         byte[] inParams;
@@ -29,11 +29,11 @@ public abstract class Blobject extends Ice.ObjectImpl
         }
         if(ok)
         {
-            return DispatchStatus.DispatchOK;
+            return IceInternal.DispatchStatus.DispatchOK;
         }
         else
         {
-            return DispatchStatus.DispatchUserException;
+            return IceInternal.DispatchStatus.DispatchUserException;
         }
     }
 }

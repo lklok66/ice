@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -36,24 +36,22 @@ class AbstractMutexI : public AbstractMutex, public T
 {
 public:
 
-#ifndef __BCPLUSPLUS__
     typedef LockT<AbstractMutexI> Lock;
     typedef TryLockT<AbstractMutexI> TryLock;
-#endif
 
     virtual void lock() const
     {
-        T::lock();
+	T::lock();
     }
 
     virtual void unlock() const
     {
-        T::unlock();
+	T::unlock();
     }
 
     virtual bool tryLock() const
     {
-        return T::tryLock();
+	return T::tryLock();
     }
 
     virtual ~AbstractMutexI()
@@ -65,24 +63,22 @@ class AbstractMutexReadI : public AbstractMutex, public T
 {
 public:
 
-#ifndef __BCPLUSPLUS__
     typedef LockT<AbstractMutexReadI> Lock;
     typedef TryLockT<AbstractMutexReadI> TryLock;
-#endif
 
     virtual void lock() const
     {
-        T::readLock();
+	T::readLock();
     }
 
     virtual void unlock() const
     {
-        T::unlock();
+	T::unlock();
     }
 
     virtual bool tryLock() const
     {
-        return T::tryReadLock();
+	return T::tryReadLock();
     }
 
     virtual ~AbstractMutexReadI()
@@ -94,24 +90,22 @@ class AbstractMutexWriteI : public AbstractMutex, public T
 {
 public:
 
-#ifndef __BCPLUSPLUS__
     typedef LockT<AbstractMutexWriteI> Lock;
     typedef TryLockT<AbstractMutexWriteI> TryLock;
-#endif
 
     virtual void lock() const
     {
-        T::writeLock();
+	T::writeLock();
     }
 
     virtual void unlock() const
     {
-        T::unlock();
+	T::unlock();
     }
 
     virtual bool tryLock() const
     {
-        return T::tryWriteLock();
+	return T::tryWriteLock();
     }
 
     virtual ~AbstractMutexWriteI()

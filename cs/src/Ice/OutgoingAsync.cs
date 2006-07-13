@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -18,31 +18,31 @@ namespace IceInternal
     public abstract class OutgoingAsync
     {
         public abstract void ice_exception(Ice.Exception ex);
-        
+	
         public void finished__(BasicStream istr)
         {
             lock(_monitor)
             {
-                byte replyStatus;
-                
+                DispatchStatus status;
+		
                 try
                 {
                     is__.swap(istr);
-                    
-                    replyStatus = is__.readByte();
-                    
-                    switch(replyStatus)
+		    
+                    status = (DispatchStatus)is__.readByte();
+		    
+                    switch(status)
                     {
-                        case ReplyStatus.replyOK:
-                        case ReplyStatus.replyUserException:
+                        case DispatchStatus.DispatchOK:
+                        case DispatchStatus.DispatchUserException:
                         {
                             is__.startReadEncaps();
                             break;
                         }
-                        
-                        case ReplyStatus.replyObjectNotExist:
-                        case ReplyStatus.replyFacetNotExist:
-                        case ReplyStatus.replyOperationNotExist:
+			
+                        case DispatchStatus.DispatchObjectNotExist:
+                        case DispatchStatus.DispatchFacetNotExist:
+                        case DispatchStatus.DispatchOperationNotExist:
                         {
                             Ice.Identity id = new Ice.Identity();
                             id.read__(is__);
@@ -68,21 +68,21 @@ namespace IceInternal
                             string operation = is__.readString();
 
                             Ice.RequestFailedException ex = null;
-                            switch(replyStatus)
+                            switch(status)
                             {
-                                case ReplyStatus.replyObjectNotExist:
+                                case DispatchStatus.DispatchObjectNotExist:
                                 {
                                     ex = new Ice.ObjectNotExistException();
                                     break;
                                 }
-                                
-                                case ReplyStatus.replyFacetNotExist:
+				
+                                case DispatchStatus.DispatchFacetNotExist:
                                 {
                                     ex = new Ice.FacetNotExistException();
                                     break;
                                 }
-                                
-                                case ReplyStatus.replyOperationNotExist:
+				
+                                case DispatchStatus.DispatchOperationNotExist:
                                 {
                                     ex = new Ice.OperationNotExistException();
                                     break;
@@ -100,27 +100,27 @@ namespace IceInternal
                             ex.operation = operation;
                             throw ex;
                         }
-                        
-                        case ReplyStatus.replyUnknownException:
-                        case ReplyStatus.replyUnknownLocalException:
-                        case ReplyStatus.replyUnknownUserException:
+			
+                        case DispatchStatus.DispatchUnknownException:
+                        case DispatchStatus.DispatchUnknownLocalException:
+                        case DispatchStatus.DispatchUnknownUserException:
                         {
                             string unknown = is__.readString();
 
                             Ice.UnknownException ex = null;
-                            switch(replyStatus)
+                            switch(status)
                             {
-                                case ReplyStatus.replyUnknownException:
+                                case DispatchStatus.DispatchUnknownException:
                                 {
                                     ex = new Ice.UnknownException();
                                     break;
                                 }
-                                case ReplyStatus.replyUnknownLocalException:
+                                case DispatchStatus.DispatchUnknownLocalException:
                                 {
                                     ex = new Ice.UnknownLocalException();
                                     break;
                                 }
-                                case ReplyStatus.replyUnknownUserException:
+                                case DispatchStatus.DispatchUnknownUserException:
                                 {
                                     ex = new Ice.UnknownUserException();
                                     break;
@@ -146,12 +146,12 @@ namespace IceInternal
                     finished__(ex);
                     return;
                 }
-                    
-                Debug.Assert(replyStatus == ReplyStatus.replyOK || replyStatus == ReplyStatus.replyUserException);
-                
+		    
+                Debug.Assert(status == DispatchStatus.DispatchOK || status == DispatchStatus.DispatchUserException);
+		
                 try
                 {
-                    response__(replyStatus == ReplyStatus.replyOK);
+                    response__(status == DispatchStatus.DispatchOK);
                 }
                 catch(System.Exception ex)
                 {
@@ -163,7 +163,7 @@ namespace IceInternal
                 }
             }
         }
-        
+	
         public void finished__(Ice.LocalException exc)
         {
             lock(_monitor)
@@ -180,24 +180,24 @@ namespace IceInternal
                     // be repeated. Otherwise, we can also retry if the
                     // operation mode is Nonmutating or Idempotent.
                     //
-                    // An ObjectNotExistException can always be retried as
-                    // well without violating "at-most-once".
-                    //  
+		    // An ObjectNotExistException can always be retried as
+		    // well without violating "at-most-once".
+		    //	
                     if(_mode == Ice.OperationMode.Nonmutating || _mode == Ice.OperationMode.Idempotent ||
                         exc is Ice.CloseConnectionException || exc is Ice.ObjectNotExistException)
                     {
                         try
                         {
-                            _cnt = ((Ice.ObjectPrxHelperBase)_proxy).handleException__(_delegate, exc, _cnt);
-                            send__();
-                            return;
+			    _cnt = ((Ice.ObjectPrxHelperBase)_proxy).handleException__(exc, _cnt);
+			    send__();
+			    return;
                         }
                         catch(Ice.LocalException)
                         {
                         }
                     }
                 }
-                
+		
                 try
                 {
                     ice_exception(exc);
@@ -212,15 +212,15 @@ namespace IceInternal
                 }
             }
         }
-        
+	
         public bool timedOut__()
         {
-            long absoluteTimeoutMillis;
+	    long absoluteTimeoutMillis;
 
             lock(_timeoutMutex) // MONO bug: Should be WaitOne(), but that's broken under Mono 1.0 for Linux.
-            {
-                absoluteTimeoutMillis = _absoluteTimeoutMillis;
-            }
+	    {
+		absoluteTimeoutMillis = _absoluteTimeoutMillis;
+	    }
 
             if(absoluteTimeoutMillis > 0)
             {
@@ -247,24 +247,23 @@ namespace IceInternal
                         Monitor.Wait(_monitor);
                     }
 
-                    //
-                    // Can't call sync via a oneway proxy.
-                    //
-                    ((Ice.ObjectPrxHelperBase)prx).checkTwowayOnly__(operation);
+		    //
+		    // Can't call sync via a oneway proxy.
+		    //
+		    ((Ice.ObjectPrxHelperBase)prx).checkTwowayOnly__(operation);
 
-                    _proxy = prx;
-                    _delegate = null;
+		    _proxy = prx;
                     _cnt = 0;
                     _mode = mode;
 
-                    Reference rf = ((Ice.ObjectPrxHelperBase)prx).reference__();
+		    Reference rf = ((Ice.ObjectPrxHelperBase)prx).reference__();
                     Debug.Assert(is__ == null);
                     is__ = new BasicStream(rf.getInstance());
                     Debug.Assert(os__ == null);
                     os__ = new BasicStream(rf.getInstance());
 
-                    os__.writeBlob(IceInternal.Protocol.requestHdr);
-                    
+		    os__.writeBlob(IceInternal.Protocol.requestHdr);
+		    
                     rf.getIdentity().write__(os__);
 
                     //
@@ -285,33 +284,24 @@ namespace IceInternal
 
                     os__.writeByte((byte)mode);
 
-                    if(context != null)
+                    if(context == null)
                     {
-                        //
-                        // Explicit context
-                        //
-                        Ice.ContextHelper.write(os__, context);
+                        os__.writeSize(0);
                     }
                     else
                     {
-                        //
-                        // Implicit context
-                        //
-                        Ice.ImplicitContextI implicitContext = 
-                            rf.getInstance().getImplicitContext();
-                        
-                        Ice.Context prxContext = rf.getContext();
-                        
-                        if(implicitContext == null)
+                        int sz = context.Count;
+                        os__.writeSize(sz);
+                        if(sz > 0)
                         {
-                            Ice.ContextHelper.write(os__, prxContext);
-                        }
-                        else
-                        {
-                            implicitContext.write(prxContext, os__);
+                            foreach(DictionaryEntry e in context)
+                            {
+                                os__.writeString((string)e.Key);
+                                os__.writeString((string)e.Value);
+                            }
                         }
                     }
-                    
+		    
                     os__.startWriteEncaps();
                 }
                 catch(Ice.LocalException)
@@ -321,7 +311,7 @@ namespace IceInternal
                 }
             }
         }
-        
+	
         protected void send__()
         {
             lock(_monitor)
@@ -330,27 +320,27 @@ namespace IceInternal
                 {
                     while(true)
                     {
-                        bool comp;
-                        _delegate = ((Ice.ObjectPrxHelperBase)_proxy).getDelegate__();
-                        Ice.ConnectionI con = _delegate.getConnection__(out comp);
+			bool comp;
+			Ice.ConnectionI con;
+			con = ((Ice.ObjectPrxHelperBase)_proxy).getDelegate__().getConnection__(out comp);
 
                         // MONO bug: Should be WaitOne(), but that's broken under Mono 1.0 for Linux.
-                        lock(_timeoutMutex)
-                        {
-                            if(con.timeout() >= 0)
-                            {
-                                _absoluteTimeoutMillis = System.DateTime.Now.Ticks / 10000 + con.timeout();
-                            }
-                            else
-                            {
-                                _absoluteTimeoutMillis = 0;
-                            }
-                        }
-                        
+			lock(_timeoutMutex)
+			{
+			    if(con.timeout() >= 0)
+			    {
+				_absoluteTimeoutMillis = System.DateTime.Now.Ticks / 10000 + con.timeout();
+			    }
+			    else
+			    {
+				_absoluteTimeoutMillis = 0;
+			    }
+			}
+			
                         try
                         {
                             con.sendAsyncRequest(os__, this, comp);
-                            
+			    
                             //
                             // Don't do anything after sendAsyncRequest() returned
                             // without an exception.  I such case, there will be
@@ -360,13 +350,13 @@ namespace IceInternal
                             //
                             return;
                         }
-                        catch(LocalExceptionWrapper ex)
-                        {
-                            ((Ice.ObjectPrxHelperBase)_proxy).handleExceptionWrapper__(_delegate, ex);
-                        }
+			catch(LocalExceptionWrapper ex)
+			{
+			    ((Ice.ObjectPrxHelperBase)_proxy).handleExceptionWrapper__(ex);
+			}
                         catch(Ice.LocalException ex)
                         {
-                            _cnt = ((Ice.ObjectPrxHelperBase)_proxy).handleException__(_delegate, ex, _cnt);
+			    _cnt = ((Ice.ObjectPrxHelperBase)_proxy).handleException__(ex, _cnt);
                         }
                     }
                 }
@@ -381,30 +371,29 @@ namespace IceInternal
 
         private void warning(System.Exception ex)
         {
-            if(os__ != null) // Don't print anything if cleanup() was already called.
-            {
-                Reference rf = ((Ice.ObjectPrxHelperBase)_proxy).reference__();
-                if(rf.getInstance().initializationData().properties.getPropertyAsIntWithDefault(
-                                                                                "Ice.Warn.AMICallback", 1) > 0)
-                {
-                    rf.getInstance().initializationData().logger.warning("exception raised by AMI callback:\n" + ex);
-                }
-            }
+	    if(os__ != null) // Don't print anything if cleanup() was already called.
+	    {
+		Reference rf = ((Ice.ObjectPrxHelperBase)_proxy).reference__();
+		if(rf.getInstance().initializationData().properties.getPropertyAsIntWithDefault(
+										"Ice.Warn.AMICallback", 1) > 0)
+		{
+		    rf.getInstance().initializationData().logger.warning("exception raised by AMI callback:\n" + ex);
+		}
+	    }
         }
 
         private void cleanup()
         {
-            is__ = null;
-            os__ = null;
+	    is__ = null;
+	    os__ = null;
 
             Monitor.Pulse(_monitor);
         }
-        
+	
         protected BasicStream is__;
         protected BasicStream os__;
 
         private Ice.ObjectPrx _proxy;
-        private Ice.ObjectDel_ _delegate;
         private int _cnt;
         private Ice.OperationMode _mode;
 
@@ -451,8 +440,8 @@ namespace Ice
             }
             catch(LocalException ex)
             {
-                finished__(ex);
-                return;
+	        finished__(ex);
+		return;
             }
             ice_response(ok, outParams);
         }

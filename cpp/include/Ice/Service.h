@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -60,7 +60,6 @@ public:
     // EXIT_SUCCESS.
     //
     int main(int&, char*[], const InitializationData& = InitializationData());
-    int main(StringSeq&, const InitializationData& = InitializationData());
 
     //
     // Returns the communicator created by the service.
@@ -115,13 +114,12 @@ public:
     //
     // Installs a Win32 service.
     //
-    int installService(bool, const std::string&, const std::string&, const std::string&,
-                       const std::vector<std::string>&);
+    int installService(const std::string&, const std::string&, const std::string&, const std::vector<std::string>&);
 
     //
     // Uninstalls a Win32 service.
     //
-    int uninstallService(bool, const std::string&);
+    int uninstallService(const std::string&);
 
     //
     // Starts a Win32 service. The argument vector is passed to the
@@ -134,8 +132,6 @@ public:
     //
     int stopService(const std::string&);
 
-    static void setModuleHandle(HMODULE);
-
 #else
 
     //
@@ -143,11 +139,9 @@ public:
     // argument indicates whether the daemon should change its
     // working directory to the root directory. The second
     // argument indicates whether extraneous file descriptors are
-    // closed. If the value of the last argument is not an empty
-    // string, the daemon writes its process ID to the given
-    // filename.
+    // closed.
     //
-    void configureDaemon(bool, bool, const std::string&);
+    void configureDaemon(bool, bool);
 
 #endif
 
@@ -248,7 +242,6 @@ public:
 
     bool _changeDirectory;
     bool _closeFiles;
-    std::string _pidFile;
 
 #endif
 };

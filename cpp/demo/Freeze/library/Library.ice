@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -81,7 +81,7 @@ class Book
      * @return The book description.
      *
      **/
-    ["cpp:const"] idempotent BookDescription getBookDescription();
+    nonmutating BookDescription getBookDescription();
 
     /**
      *
@@ -91,8 +91,8 @@ class Book
      * database system.
      *
      **/
-    ["freeze:write"] void destroy()
-        throws DatabaseException;
+    void destroy()
+	throws DatabaseException;
 
     /**
      *
@@ -104,8 +104,8 @@ class Book
      * rented.
      *
      **/
-    ["freeze:write"] void rentBook(string name)
-        throws BookRentedException;
+    void rentBook(string name)
+	throws BookRentedException;
 
     /**
      *
@@ -117,8 +117,8 @@ class Book
      * currently rented.
      *
      **/
-    ["cpp:const"] idempotent string getRenterName()
-        throws BookNotRentedException;
+    nonmutating string getRenterName()
+	throws BookNotRentedException;
 
     /**
      *
@@ -128,8 +128,8 @@ class Book
      * currently rented.
      *
      **/
-    ["freeze:write"] void returnBook()
-        throws BookNotRentedException;
+    void returnBook()
+	throws BookNotRentedException;
 
     /**
      *
@@ -177,7 +177,7 @@ interface Library
      *
      **/
     Book* createBook(BookDescription description)
-        throws DatabaseException, BookExistsException;
+	throws DatabaseException, BookExistsException;
 
     /**
      *
@@ -191,8 +191,8 @@ interface Library
      * @throws DatabaseException Raised if there is a problem with the database.
      *
      **/
-    ["cpp:const"] idempotent Book* findByIsbn(string isbn)
-        throws DatabaseException;
+    nonmutating Book* findByIsbn(string isbn)
+	throws DatabaseException;
 
     /**
      *
@@ -206,8 +206,8 @@ interface Library
      * @throws DatabaseException Raised if there is a problem with the database.
      *
      **/
-    ["cpp:const"] idempotent BookPrxSeq findByAuthors(string authors)
-        throws DatabaseException;
+    nonmutating BookPrxSeq findByAuthors(string authors)
+	throws DatabaseException;
 
     /**
      *
@@ -220,14 +220,14 @@ interface Library
      *
      **/
     idempotent void setEvictorSize(int size)
-        throws DatabaseException;
+	throws DatabaseException;
 
     /**
      *
      * Shutdown the server.
      *
      **/
-    void shutdown();
+    idempotent void shutdown();
 };
 
 };

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -14,6 +14,12 @@ public class PluginFactory implements Ice.PluginFactory
     public Ice.Plugin
     create(Ice.Communicator communicator, String name, String[] args)
     {
-        return new PluginI(communicator);
+	if(communicator.getProperties().getPropertyAsInt("Ice.ThreadPerConnection") == 0)
+	{
+	    communicator.getLogger().error("IceSSL requires Ice.ThreadPerConnection");
+	    return null;
+	}
+
+	return new PluginI(communicator);
     }
 }

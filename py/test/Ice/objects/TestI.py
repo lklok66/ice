@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -51,15 +51,6 @@ class DI(Test.D):
 
     def ice_postUnmarshal(self):
         self._postUnmarshalInvoked = True
-
-class II(Test.I):
-    pass
-
-class JI(Test.J):
-    pass
-
-class HI(Test.H):
-    pass
 
 class InitialI(Test.Initial):
     def __init__(self, adapter):
@@ -117,19 +108,3 @@ class InitialI(Test.Initial):
         self._c.preMarshalInvoked = False
         self._d.preMarshalInvoked = False
         return (self._b1, self._b2, self._c, self._d)
-
-    def getI(self, current=None):
-        return II()
-
-    def getJ(self, current=None):
-        return JI()
-
-    def getH(self, current=None):
-        return HI()
-
-    def setI(self, i, current=None):
-        pass
-
-class UnexpectedObjectExceptionTestI(Test.UnexpectedObjectExceptionTest):
-    def op(self, current=None):
-        return Test.AlsoEmpty()

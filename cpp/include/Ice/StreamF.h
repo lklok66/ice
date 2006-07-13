@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -9,8 +9,6 @@
 
 #ifndef ICE_STREAM_F_H
 #define ICE_STREAM_F_H
-
-#include <IceUtil/Shared.h>
 
 #include <Ice/Handle.h>
 
@@ -25,8 +23,10 @@ class OutputStream;
 namespace IceInternal
 {
 
-ICE_API IceUtil::Shared* upCast(::Ice::InputStream*);
-ICE_API IceUtil::Shared* upCast(::Ice::OutputStream*);
+ICE_API void incRef(::Ice::InputStream*);
+ICE_API void decRef(::Ice::InputStream*);
+ICE_API void incRef(::Ice::OutputStream*);
+ICE_API void decRef(::Ice::OutputStream*);
 
 }
 

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -25,7 +25,7 @@ namespace IceUtil
 // the CtrlCHandler constructor raises CtrlCHandlerException if
 // you attempt to create a second CtrlCHandler.
 // On Unix/POSIX, it is essential to create the CtrlCHandler before
-// creating any thread, as the CtrlCHandler constructor masks (blocks)
+// creating any thread, as the CtrlCHandler constructor masks
 // SIGHUP, SIGINT and SIGTERM; by default, threads created later will 
 // inherit this signal mask.
 //
@@ -37,7 +37,7 @@ namespace IceUtil
 //
 // The CtrCHandler destructor "unregisters" the callback. However
 // on Unix/POSIX it does not restore the old signal mask in any
-// thread, so SIGHUP, SIGINT and SIGTERM remain blocked.
+// thread, so SIGHUP, SIGINT and SIGTERM are then ignored.
 //
 // TODO: Maybe the behavior on Windows should be the same? Now we
 // just restore the default behavior (TerminateProcess).
@@ -61,7 +61,7 @@ class ICE_UTIL_API CtrlCHandlerException : public Exception
 public:
  
     CtrlCHandlerException(const char*, int);
-    virtual std::string ice_name() const;
+    virtual const std::string ice_name() const;
     virtual Exception* ice_clone() const;
     virtual void ice_throw() const;
 };

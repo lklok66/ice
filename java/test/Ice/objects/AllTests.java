@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -138,50 +138,6 @@ public class AllTests
             test(d.theB.theC.postUnmarshalInvoked(null));
         }
         System.out.println("ok");
-
-        System.out.print("getting I, J and H... ");
-        System.out.flush();
-        I i = initial.getI();
-        test(i != null);
-        I j = initial.getJ();
-        test(j != null && ((J)j) != null);
-        I h = initial.getH();
-        test(h != null && ((H)h) != null);
-        System.out.println("ok");
-
-        System.out.print("setting I... ");
-        System.out.flush();
-        initial.setI(i);
-        initial.setI(j);
-        initial.setI(h);
-        System.out.println("ok");
-
-        if(!collocated)
-        {
-            System.out.print("testing UnexpectedObjectException...");
-            System.out.flush();
-            ref = "uoet:default -p 12010 -t 10000";
-            base = communicator.stringToProxy(ref);
-            test(base != null);
-            UnexpectedObjectExceptionTestPrx uoet = UnexpectedObjectExceptionTestPrxHelper.uncheckedCast(base);
-            test(uoet != null);
-            try
-            {
-                uoet.op();
-                test(false);
-            }
-            catch(Ice.UnexpectedObjectException ex)
-            {
-                test(ex.type.equals("::Test::AlsoEmpty"));
-                test(ex.expectedType.equals("::Test::Empty"));
-            }
-            catch(java.lang.Exception ex)
-            {
-                System.out.println(ex);
-                test(false);
-            }
-            System.out.println("ok");
-        }
 
         return initial;
     }

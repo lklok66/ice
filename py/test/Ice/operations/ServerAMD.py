@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -35,6 +35,10 @@ if len(slice_dir) == 0 or not os.path.exists(os.path.join(slice_dir, "slice")):
 Ice.loadSlice('-I' + slice_dir + '/slice TestAMD.ice')
 import Test
 
+def test(b):
+    if not b:
+        raise RuntimeError('test assertion failed')
+
 class Thread_opVoid(threading.Thread):
     def __init__(self, cb):
         threading.Thread.__init__(self)
@@ -44,7 +48,9 @@ class Thread_opVoid(threading.Thread):
         self.cb.ice_response()
 
 class MyDerivedClassI(Test.MyDerivedClass):
-    def __init__(self):
+    def __init__(self, adapter, identity):
+        self.adapter = adapter
+        self.identity = identity
         self.opVoidThread = None
 
     def shutdown_async(self, cb, current=None):
@@ -52,7 +58,7 @@ class MyDerivedClassI(Test.MyDerivedClass):
             self.opVoidThread.join()
             self.opVoidThread = None
 
-        current.adapter.getCommunicator().shutdown()
+        self.adapter.getCommunicator().shutdown()
         cb.ice_response()
 
     def opVoid_async(self, cb, current=None):
@@ -83,19 +89,18 @@ class MyDerivedClassI(Test.MyDerivedClass):
 
     def opMyClass_async(self, cb, p1, current=None):
         p2 = p1
-        p3 = Test.MyClassPrx.uncheckedCast(current.adapter.createProxy(communicator.stringToIdentity("noSuchIdentity")))
-        cb.ice_response(Test.MyClassPrx.uncheckedCast(current.adapter.createProxy(current.id)), p2, p3)
+        p3 = Test.MyClassPrx.uncheckedCast(self.adapter.createProxy(communicator.stringToIdentity("noSuchIdentity")))
+        cb.ice_response(Test.MyClassPrx.uncheckedCast(self.adapter.createProxy(self.identity)), p2, p3)
 
     def opStruct_async(self, cb, p1, p2, current=None):
         p1.s.s = "a new string"
         cb.ice_response(p2, p1)
 
     def opByteS_async(self, cb, p1, p2, current=None):
-        # By default sequence<byte> maps to a string.
-        p3 = map(ord, p1)
+        p3 = p1[0:]
         p3.reverse()
-        r = map(ord, p1)
-        r.extend(map(ord, p2))
+        r = p1[0:]
+        r.extend(p2)
         cb.ice_response(r, p3)
 
     def opBoolS_async(self, cb, p1, p2, current=None):
@@ -205,28 +210,35 @@ class MyDerivedClassI(Test.MyDerivedClass):
     def opIntS_async(self, cb, s, current=None):
         cb.ice_response([-x for x in s])
 
-    def opByteSOneway_async(self, cb, s, current=None):
-        cb.ice_response()
-
     def opContext_async(self, cb, current=None):
         cb.ice_response(current.ctx)
 
     def opDerived_async(self, cb, current=None):
         cb.ice_response()
 
+class TestCheckedCastI(Test.TestCheckedCast):
+    def __init__(self):
+	self.ctx = None
+
+    def getContext(self, current):
+	return self.ctx;
+
+    def ice_isA(self, s, current):
+	self.ctx = current.ctx
+	return Test.TestCheckedCast.ice_isA(self, s, current)
+
 def run(args, communicator):
     communicator.getProperties().setProperty("TestAdapter.Endpoints", "default -p 12010 -t 10000:udp")
     adapter = communicator.createObjectAdapter("TestAdapter")
-    adapter.add(MyDerivedClassI(), communicator.stringToIdentity("test"))
+    id = communicator.stringToIdentity("test")
+    adapter.add(MyDerivedClassI(adapter, id), id)
+    adapter.add(TestCheckedCastI(), communicator.stringToIdentity("context"))
     adapter.activate()
     communicator.waitForShutdown()
     return True
 
 try:
-    initData = Ice.InitializationData()
-    initData.properties = Ice.createProperties(sys.argv)
-    initData.properties.setProperty("Ice.Warn.Dispatch", "0");
-    communicator = Ice.initialize(sys.argv, initData)
+    communicator = Ice.initialize(sys.argv)
     status = run(sys.argv, communicator)
 except:
     traceback.print_exc()

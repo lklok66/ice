@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
 #
 # **********************************************************************
 
-import os, sys, shutil, fnmatch, re, glob 
+import os, sys, shutil, fnmatch, re, glob, RPMTools
 
 #
 # Program usage.
@@ -100,6 +100,51 @@ def editFile(file, target):
     os.remove(origfile)
 
 #
+# Comment out rules in VC project.
+#
+def fixProject(file, target):
+    origfile = file + ".orig"
+    os.rename(file, origfile)
+    oldProject = open(origfile, "r")
+    newProject = open(file, "w")
+    origLines = oldProject.readlines()
+
+    #
+    # Find a Source File declaration containing SOURCE=<target>
+    # and comment out the entire declaration.
+    #
+    expr = re.compile("SOURCE=.*" + target.replace(".", "\\.") + ".*")
+    inSource = 0
+    doComment = 0
+    newLines = []
+    source = []
+    for x in origLines:
+        if x.startswith("# Begin Source File"):
+            inSource = 1
+
+        if inSource:
+            if not doComment and expr.match(x) != None:
+                doComment = 1
+            source.append(x)
+        else:
+            newLines.append(x)
+
+        if x.startswith("# End Source File"):
+            inSource = 0
+            for s in source:
+                if doComment:
+                    newLines.append('#xxx#' + s)
+                else:
+                    newLines.append(s)
+            doComment = 0
+            source = []
+
+    newProject.writelines(newLines)
+    newProject.close()
+    oldProject.close()
+    os.remove(origfile)
+
+#
 # Comment out implicit parser/scanner rules in config/Make.rules.
 #
 def fixMakeRules(file):
@@ -133,6 +178,7 @@ def fixMakeRules(file):
 # Fix version in README, INSTALL files
 #
 def fixVersion(files, version):
+
     for file in files:
         origfile = file + ".orig"
         os.rename(file, origfile)
@@ -180,27 +226,24 @@ if verbose:
 else:
     quiet = "-Q"
 os.system("cvs " + quiet + " -d cvs.zeroc.com:/home/cvsroot export -l " + tag + " " +
-          "ice " +
-          "ice/bin " +
-          "ice/config/Make.rules.icee " +
-          "ice/config/Make.rules.mak.icee " +
-          "ice/config/Make.rules.Linux " +
-          "ice/config/Make.rules.msvc " +
-          "ice/include " +
-          "ice/include/IceUtil " +
-          "ice/include/Slice " +
-          "ice/install " +
-          "ice/install/icee " +
-          "ice/lib " +
-          "ice/src " +
-          "ice/src/icecpp " +
-          "ice/src/IceUtil " +
-          "ice/src/Slice " +
-          "ice/src/Slice/dummyinclude " +
-          "ice/src/slice2cppe " +
-          "ice/src/slice2javae " +
-          "icee/include/IceE/Config.h "
-         )
+	  "ice " +
+	  "ice/bin " +
+	  "ice/config " +
+	  "ice/include " +
+	  "ice/include/IceUtil " +
+	  "ice/include/Slice " +
+	  "ice/install " +
+	  "ice/install/icee " +
+	  "ice/lib " +
+	  "ice/src " +
+	  "ice/src/icecpp " +
+	  "ice/src/IceUtil " +
+	  "ice/src/Slice " +
+	  "ice/src/Slice/dummyinclude " +
+	  "ice/src/slice2cppe " +
+	  "ice/src/slice2javae " +
+	  "icee/include/IceE/Config.h "
+	 )
 
 #
 # Copy Ice-E specific install files.
@@ -212,27 +255,29 @@ shutil.copyfile(os.path.join("ice", "install", "icee", "INSTALL.LINUX"), os.path
 shutil.copyfile(os.path.join("ice", "install", "icee", "INSTALL.WINDOWS"), os.path.join("ice", "INSTALL.WINDOWS"))
 
 #
-# Move Make.rules*icee
-#
-shutil.move(os.path.join("ice", "config", "Make.rules.icee"), os.path.join("ice", "config", "Make.rules"))
-shutil.move(os.path.join("ice", "config", "Make.rules.mak.icee"), os.path.join("ice", "config", "Make.rules.mak"))
-
-#
 # Remove files.
 #
 print "Removing unnecessary files..."
 filesToRemove = [ \
     os.path.join("ice", "CHANGES"), \
+    os.path.join("ice", "INSTALL.AIX"), \
+    os.path.join("ice", "INSTALL.FREEBSD"), \
     os.path.join("ice", "INSTALL.HP-UX"), \
     os.path.join("ice", "INSTALL.MACOSX"), \
     os.path.join("ice", "INSTALL.SOLARIS"), \
     os.path.join("ice", "iceemakedist.py"), \
-    os.path.join("ice", "WINDOWS_SERVICE.txt"), \
     os.path.join("ice", "makedist.py"), \
     os.path.join("ice", "makebindist.py"), \
+    os.path.join("ice", "RPMTools.py"), \
     os.path.join("ice", "fixCopyright.py"), \
     os.path.join("ice", "fixVersion.py"), \
+    os.path.join("ice", "minimal.dsp"), \
+    os.path.join("ice", "all.dsw"), \
+    os.path.join("ice", "all.dsp"), \
     os.path.join("ice", "allTests.py"), \
+    os.path.join("ice", "src", "icecpp", "icecpp.dsp"), \
+    os.path.join("ice", "src", "IceUtil", "iceutil.dsp"), \
+    os.path.join("ice", "src", "Slice", "slice.dsp"), \
     ]
 filesToRemove.extend(find("ice", ".dummy"))
 for x in filesToRemove:
@@ -267,8 +312,11 @@ for x in grammars:
     # Edit the Makefile to comment out the grammar rules.
     #
     fixMakefile("Makefile", base)
-    fixMakefile("Makefile.mak", base)
-
+    #
+    # Edit the project file(s) to comment out the grammar rules.
+    #
+    for p in glob.glob("*.dsp"):
+        fixProject(p, file)
     os.chdir(cwd)
 
 #
@@ -295,9 +343,20 @@ for x in scanners:
     # Edit the Makefile to comment out the flex rules.
     #
     fixMakefile("Makefile", base)
-    fixMakefile("Makefile.mak", base)
-
+    #
+    # Edit the project file(s) to comment out the flex rules.
+    #
+    for p in glob.glob("*.dsp"):
+        fixProject(p, file)
     os.chdir(cwd)
+
+#
+# Comment out the implicit parser and scanner rules in
+# config/Make.rules.
+#
+print "Fixing makefiles..."
+makeRulesName = os.path.join("ice", "config", "Make.rules")
+fixMakeRules(makeRulesName)
 
 #
 # Get Ice-E version.
@@ -305,67 +364,57 @@ for x in scanners:
 config = open(os.path.join("icee", "include", "IceE", "Config.h"), "r")
 version = re.search("ICEE_STRING_VERSION \"([0-9\.]*)\"", config.read()).group(1)
 
-
-print "Fixing makefiles..."
-
-
-for makeRulesName in [os.path.join("ice", "config", "Make.rules"), \
-                      os.path.join("ice", "config", "Make.rules.mak")]:
-    fixMakeRules(makeRulesName)
-    makeRules = open(makeRulesName, "r")
-    lines = makeRules.readlines()
-    makeRules.close()
-    for i in range(len(lines)):
-        if lines[i].find("prefix") == 0:
-            lines[i] = lines[i].replace("IceE-$(VERSION)", "IceE-" + version)
-    makeRules = open(makeRulesName, "w")
-    makeRules.writelines(lines)
-    makeRules.close()
-
+#
+# Enable STATICLIBS and OPTIMIZE in config/Make.rules.
+#
+makeRules = open(makeRulesName, "r")
+lines = makeRules.readlines()
+makeRules.close()
+for i in range(len(lines)):
+    if lines[i].find("#STATICLIBS") == 0:
+	lines[i] = lines[i].replace("#STATICLIBS", "STATICLIBS")
+    if lines[i].find("#OPTIMIZE") == 0:
+	lines[i] = lines[i].replace("#OPTIMIZE", "OPTIMIZE")
+    if lines[i].find("prefix") == 0:
+	lines[i] = lines[i].replace("Ice-$(VERSION)", "IceE-" + version)
+makeRules = open(makeRulesName, "w")
+makeRules.writelines(lines)
+makeRules.close()
 
 #
 # Change SUBDIRS and INSTALL_SUBDIRS in top-level Makefile.
 #
-for makeFileName in [os.path.join("ice", "Makefile"), \
-                     os.path.join("ice", "Makefile.mak")]:
-    makeFile = open(makeFileName, "r")
-    lines = makeFile.readlines()
-    makeFile.close()
-    for i in range(len(lines)):
-        if lines[i].find("SUBDIRS") == 0:
-            lines[i] = "SUBDIRS = src\n"
-        if lines[i].find("INSTALL_SUBDIRS") == 0:
-            lines[i] = "INSTALL_SUBDIRS = $(install_bindir) $(install_libdir)\n"
-    makeFile = open(makeFileName, "w")
-    makeFile.writelines(lines)
-    makeFile.close()
+makeFileName = os.path.join("ice", "Makefile")
+makeFile = open(makeFileName, "r")
+lines = makeFile.readlines()
+makeFile.close()
+for i in range(len(lines)):
+    if lines[i].find("SUBDIRS") == 0:
+	lines[i] = "SUBDIRS = src\n"
+    if lines[i].find("INSTALL_SUBDIRS") == 0:
+	lines[i] = "INSTALL_SUBDIRS = $(install_bindir) $(install_libdir)\n"
+makeFile = open(makeFileName, "w")
+makeFile.writelines(lines)
+makeFile.close()
 
 #
 # Disable install targets for libIceUtil, libSlice.
 #
 for makeFileName in [os.path.join("ice", "src", "IceUtil", "Makefile"), \
-                     os.path.join("ice", "src", "IceUtil", "Makefile.mak"), \
-                     os.path.join("ice", "src", "Slice", "Makefile"), \
-                     os.path.join("ice", "src", "Slice", "Makefile.mak")]:
+		     os.path.join("ice", "src", "Slice", "Makefile")]:
     makeFile = open(makeFileName, "r")
     lines = makeFile.readlines()
     makeFile.close()
-
-    doComment = 0
     for i in range(len(lines)):
-        if lines[i].find("install::") == 0:
-            doComment = 1
-        elif len(lines[i].strip()) == 0:
-            doComment = 0
-        elif doComment:
-            lines[i] = "#" + lines[i]
-
+	if lines[i].find("install::") == 0:
+	    lines[i + 1] = "#" + lines[i + 1]
+	    break
     makeFile = open(makeFileName, "w")
     makeFile.writelines(lines)
     makeFile.close()
 
 #
-# Fix versions in README and INSTALL files.
+# Fix versions in READE and INSTALL files.
 #
 print "Fixing version in README and INSTALL files..."
 fixVersion(find("ice", "README*"), version)

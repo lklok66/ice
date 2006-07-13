@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -26,8 +26,8 @@ IcePy::ThreadNotificationWrapper::start()
 {
     AdoptThread adoptThread; // Ensure the current thread is able to call into Python.
 
-    PyObjectHandle tmp = PyObject_CallMethod(_threadNotification.get(), STRCAST("start"), 0);
-    if(!tmp.get())
+    PyObjectHandle tmp = PyObject_CallMethod(_threadNotification.get(), STRCAST("start"), NULL);
+    if(tmp.get() == NULL)
     {
         throwPythonException();
     }
@@ -38,8 +38,8 @@ IcePy::ThreadNotificationWrapper::stop()
 {
     AdoptThread adoptThread; // Ensure the current thread is able to call into Python.
 
-    PyObjectHandle tmp = PyObject_CallMethod(_threadNotification.get(), STRCAST("stop"), 0);
-    if(!tmp.get())
+    PyObjectHandle tmp = PyObject_CallMethod(_threadNotification.get(), STRCAST("stop"), NULL);
+    if(tmp.get() == NULL)
     {
         throwPythonException();
     }

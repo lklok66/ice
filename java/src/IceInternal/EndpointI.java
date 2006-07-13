@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -27,7 +27,7 @@ abstract public class EndpointI implements Ice.Endpoint, java.lang.Comparable
     public String
     toString()
     {
-        return _toString();
+	return _toString();
     }
 
     //
@@ -87,19 +87,25 @@ abstract public class EndpointI implements Ice.Endpoint, java.lang.Comparable
     public abstract boolean unknown();
 
     //
+    // Return a client side transceiver for this endpoint, or null if a
+    // transceiver can only be created by a connector.
+    //
+    public abstract Transceiver clientTransceiver();
+
+    //
     // Return a server side transceiver for this endpoint, or null if a
     // transceiver can only be created by an acceptor. In case a
     // transceiver is created, this operation also returns a new
     // "effective" endpoint, which might differ from this endpoint,
     // for example, if a dynamic port number is assigned.
     //
-    public abstract Transceiver transceiver(EndpointIHolder endpoint);
+    public abstract Transceiver serverTransceiver(EndpointIHolder endpoint);
 
     //
-    // Return connectors for this endpoint, or empty list if no connector
+    // Return a connector for this endpoint, or null if no connector
     // is available.
     //
-    public abstract java.util.ArrayList connectors();
+    public abstract Connector connector();
 
     //
     // Return an acceptor for this endpoint, or null if no acceptors
@@ -114,7 +120,13 @@ abstract public class EndpointI implements Ice.Endpoint, java.lang.Comparable
     // Expand endpoint out in to separate endpoints for each local
     // host if endpoint was configured with no host set.
     //
-    public abstract java.util.ArrayList expand();
+    public abstract java.util.ArrayList expand(boolean includeLoopback);
+
+    //
+    // Return whether endpoint should be published in proxies
+    // created by Object Adapter.
+    //
+    public abstract boolean publish();
 
     //
     // Check whether the endpoint is equivalent to a specific
@@ -128,11 +140,4 @@ abstract public class EndpointI implements Ice.Endpoint, java.lang.Comparable
     //
     public abstract boolean equals(java.lang.Object obj);
     public abstract int compareTo(java.lang.Object obj); // From java.lang.Comparable.
-
-    //
-    // Returns true if the endpoint's transport requires thread-per-connection.
-    //
-    // TODO: Remove this when we no longer support SSL for JDK 1.4.
-    //
-    public abstract boolean requiresThreadPerConnection();
 }

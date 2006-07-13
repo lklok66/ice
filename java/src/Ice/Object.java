@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -29,16 +29,10 @@ public interface Object
     String ice_id();
     String ice_id(Current current);
 
-    int ice_operationAttributes(String operation);
-
     void ice_preMarshal();
     void ice_postUnmarshal();
 
-    DispatchStatus ice_dispatch(Request request, DispatchInterceptorAsyncCallback cb);
-
-    DispatchStatus __dispatch(IceInternal.Incoming in, Current current);
-
-    DispatchStatus __collocDispatch(IceInternal.Direct request);
+    IceInternal.DispatchStatus __dispatch(IceInternal.Incoming in, Current current);
 
     void __write(IceInternal.BasicStream __os);
     void __read(IceInternal.BasicStream __is, boolean __rid);

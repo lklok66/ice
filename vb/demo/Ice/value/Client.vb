@@ -1,6 +1,6 @@
 ' **********************************************************************
 '
-' Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+' Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 '
 ' This copy of Ice is licensed to you under the terms described in the
 ' ICE_LICENSE file included in this distribution.
@@ -16,7 +16,15 @@ Module ValueC
         Inherits Ice.Application
 
         Public Overloads Overrides Function run(ByVal args() As String) As Integer
-            Dim initial As InitialPrx = InitialPrxHelper.checkedCast(communicator().propertyToProxy("Value.Initial"))
+            Dim properties As Ice.Properties = communicator().getProperties()
+            Dim refProperty As String = "Value.Initial"
+            Dim ref As String = properties.getProperty(refProperty)
+            If ref.Length = 0 Then
+                Console.Error.WriteLine("property `" & refProperty & "' not set")
+                Return 1
+            End If
+
+            Dim initial As InitialPrx = InitialPrxHelper.checkedCast(communicator().stringToProxy(ref))
             If initial Is Nothing Then
                 Console.Error.WriteLine("invalid object reference")
                 Return 1
@@ -138,7 +146,7 @@ Module ValueC
             Console.Out.WriteLine()
             Console.Out.WriteLine("That's it for this demo. Have fun with Ice!")
 
-            initial.shutdown()
+	    initial.shutdown()
 
             Return 0
         End Function

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -25,84 +25,61 @@ QueryI::~QueryI()
 {
 }
 
-Ice::ObjectPrx
-QueryI::findObjectById(const Ice::Identity& id, const Ice::Current&) const
+void
+QueryI::findObjectById_async(const AMD_Query_findObjectByIdPtr& cb, const Ice::Identity& id, const Ice::Current&) const
 {
     try
     {
-        return _database->getObjectProxy(id);
+	cb->ice_response(_database->getObjectProxy(id));
     }
     catch(const ObjectNotRegisteredException&)
     {
-        return 0;
+	cb->ice_response(0);
     }
 }
 
-Ice::ObjectPrx
-QueryI::findObjectByType(const string& type, const Ice::Current&) const
+void
+QueryI::findObjectByType_async(const AMD_Query_findObjectByTypePtr& cb, const string& type, const Ice::Current&) const
 {
-    return _database->getObjectByType(type);
-}
-
-Ice::ObjectPrx
-QueryI::findObjectByTypeOnLeastLoadedNode(const string& type, LoadSample sample, const Ice::Current&) const
-{
-    return _database->getObjectByTypeOnLeastLoadedNode(type, sample);
-}
-
-Ice::ObjectProxySeq
-QueryI::findAllObjectsByType(const string& type, const Ice::Current&) const
-{
-    return _database->getObjectsByType(type);
-}
-
-
-Ice::ObjectProxySeq
-QueryI::findAllReplicas(const Ice::ObjectPrx& proxy, const Ice::Current&) const
-{
-    if(!proxy)
-    {
-        return Ice::ObjectProxySeq();
-    }
-
-    //
-    // If the given proxy has an empty adapter id, we check if it's a
-    // well-known object. If it's a well-known object we use the
-    // registered proxy instead.
-    //
-    Ice::ObjectPrx prx = proxy;
-    if(prx->ice_getAdapterId().empty())
-    {
-        try
-        {
-            ObjectInfo info = _database->getObjectInfo(prx->ice_getIdentity());
-            prx = info.proxy;
-        }
-        catch(const ObjectNotRegisteredException&)
-        {
-            return Ice::ObjectProxySeq();
-        }
-    }
-
     try
     {
-        AdapterInfoSeq infos = _database->getAdapterInfo(prx->ice_getAdapterId());
-        assert(!infos.empty());
-        if(infos[0].replicaGroupId != prx->ice_getAdapterId()) // The adapter id doesn't refer to a replica group.
-        {
-            return Ice::ObjectProxySeq();
-        }
-
-        Ice::ObjectProxySeq proxies;
-        for(AdapterInfoSeq::const_iterator p = infos.begin(); p != infos.end(); ++p)
-        {
-            assert(!p->id.empty());
-            proxies.push_back(prx->ice_adapterId(p->id));
-        }
-        return proxies;
+	cb->ice_response(_database->getObjectByType(type));
     }
-    catch(const AdapterNotExistException&)
+    catch(const ObjectNotRegisteredException&)
     {
-        return Ice::ObjectProxySeq();
-    }    
+	cb->ice_response(0);
+    }
 }
+
+void
+QueryI::findObjectByTypeOnLeastLoadedNode_async(const AMD_Query_findObjectByTypeOnLeastLoadedNodePtr& cb, 
+						const string& type,
+						LoadSample sample, 
+						const Ice::Current&) const
+{
+    try
+    {
+	cb->ice_response(_database->getObjectByTypeOnLeastLoadedNode(type, sample));
+    }
+    catch(const ObjectNotRegisteredException&)
+    {
+	cb->ice_response(0);
+    }
+}
+
+void
+QueryI::findAllObjectsByType_async(const AMD_Query_findAllObjectsByTypePtr& cb,
+				   const string& type, 
+				   const Ice::Current&) const
+{
+    try
+    {
+	cb->ice_response(_database->getObjectsByType(type));
+    }
+    catch(const ObjectNotRegisteredException&)
+    {
+	cb->ice_response(Ice::ObjectProxySeq());
+    }
+}
+
+

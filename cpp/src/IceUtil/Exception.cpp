@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -8,9 +8,6 @@
 // **********************************************************************
 
 #include <IceUtil/Exception.h>
-#include <IceUtil/StaticMutex.h>
-#include <ostream>
-#include <cstdlib>
 
 using namespace std;
 
@@ -33,13 +30,13 @@ IceUtil::Exception::Exception(const char* file, int line) :
 {
 }
     
-IceUtil::Exception::~Exception() throw()
+IceUtil::Exception::~Exception()
 {
 }
 
 const char* IceUtil::Exception::_name = "IceUtil::Exception";
 
-string
+const string
 IceUtil::Exception::ice_name() const
 {
     return _name;
@@ -50,31 +47,9 @@ IceUtil::Exception::ice_print(ostream& out) const
 {
     if(_file && _line > 0)
     {
-        out << _file << ':' << _line << ": ";
+	out << _file << ':' << _line << ": ";
     }
     out << ice_name();
-}
-
-const char*
-IceUtil::Exception::what() const throw()
-{
-    try
-    {
-        StaticMutex::Lock lock(globalMutex);
-        {
-            if(_str.empty())
-            {
-                stringstream s;
-                ice_print(s);
-                _str = s.str(); // Lazy initialization.
-            }
-        }
-        return _str.c_str();
-    }
-    catch(...)
-    {
-    }
-    return "";
 }
 
 IceUtil::Exception*
@@ -113,17 +88,13 @@ IceUtil::NullHandleException::NullHandleException(const char* file, int line) :
 {
     if(nullHandleAbort)
     {
-        abort();
+	abort();
     }
-}
-
-IceUtil::NullHandleException::~NullHandleException() throw()
-{
 }
 
 const char* IceUtil::NullHandleException::_name = "IceUtil::NullHandleException";
 
-string
+const string
 IceUtil::NullHandleException::ice_name() const
 {
     return _name;
@@ -152,13 +123,9 @@ IceUtil::IllegalArgumentException::IllegalArgumentException(const char* file, in
 {
 }
 
-IceUtil::IllegalArgumentException::~IllegalArgumentException() throw()
-{
-}
-
 const char* IceUtil::IllegalArgumentException::_name = "IceUtil::IllegalArgumentException";
 
-string
+const string
 IceUtil::IllegalArgumentException::ice_name() const
 {
     return _name;

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -10,15 +10,14 @@
 #ifndef ICE_PROXY_FACTORY_F_H
 #define ICE_PROXY_FACTORY_F_H
 
-#include <IceUtil/Shared.h>
-
 #include <Ice/Handle.h>
 
 namespace IceInternal
 {
 
 class ProxyFactory;
-IceUtil::Shared* upCast(ProxyFactory*);
+void incRef(ProxyFactory*);
+void decRef(ProxyFactory*);
 typedef IceInternal::Handle<ProxyFactory> ProxyFactoryPtr;
 
 }

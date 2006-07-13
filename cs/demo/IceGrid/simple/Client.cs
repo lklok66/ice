@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -25,16 +25,16 @@ public class Client : Ice.Application
     public override int run(string[] args)
     {
         HelloPrx hello = null;
-        try
-        {
-            hello = HelloPrxHelper.checkedCast(communicator().stringToProxy("hello"));
-        }
-        catch(Ice.NotRegisteredException)
-        {
-            IceGrid.QueryPrx query = 
-                IceGrid.QueryPrxHelper.checkedCast(communicator().stringToProxy("DemoIceGrid/Query"));
-            hello = HelloPrxHelper.checkedCast(query.findObjectByType("::Demo::Hello"));            
-        }
+	try
+	{
+	    hello = HelloPrxHelper.checkedCast(communicator().stringToProxy("hello"));
+	}
+	catch(Ice.NotRegisteredException)
+	{
+	    string proxy = "DemoIceGrid/Query";
+	    IceGrid.QueryPrx query = IceGrid.QueryPrxHelper.checkedCast(communicator().stringToProxy(proxy));
+	    hello = HelloPrxHelper.checkedCast(query.findObjectByType("::Demo::Hello"));	    
+	}
         if(hello == null)
         {
             Console.WriteLine("couldn't find a `::Demo::Hello' object");

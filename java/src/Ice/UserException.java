@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -9,20 +9,20 @@
 
 package Ice;
 
-public abstract class UserException extends Exception implements Cloneable
+public abstract class UserException extends Exception
 {
     public java.lang.Object clone()
     {
         java.lang.Object o = null;
-        try
-        {
-            o = super.clone();
-        }
-        catch(CloneNotSupportedException ex)
-        {
-            assert false; // Impossible
-        }
-        return o;
+	try
+	{
+	    o = super.clone();
+	}
+	catch(CloneNotSupportedException ex)
+	{
+	    assert false; // Impossible
+	}
+	return o;
     }
 
     public abstract String

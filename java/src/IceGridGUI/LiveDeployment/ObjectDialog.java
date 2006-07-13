@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -24,156 +24,97 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.factories.Borders;
 import com.jgoodies.forms.factories.ButtonBarFactory;
-import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.util.LayoutStyle;
 
 class ObjectDialog extends JDialog
 {
-    ObjectDialog(final Root root, boolean readOnly)
+    ObjectDialog(final Root root)
     {
-        super(root.getCoordinator().getMainFrame(),
-              (readOnly ? "" : "New ") + "Dynamic Well-Known Object - IceGrid Admin", true);
- 
-        setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
-        _mainFrame = root.getCoordinator().getMainFrame();
-        
-        _proxy.setLineWrap(true);
+	super(root.getCoordinator().getMainFrame(), 
+	      "New Well-Known Object - IceGrid Admin", true);
+	setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+	_mainFrame = root.getCoordinator().getMainFrame();
+	
+	_type.setEditable(true);
 
-        if(readOnly)
-        {
-            _proxy.setEditable(false);
-            _proxy.setOpaque(false);
-            _type.setEditable(false);
-        }
-        else
-        {
-            _typeCombo.setEditable(true);
-        }
-   
-        FormLayout layout = new FormLayout("right:pref, 3dlu, pref", "");
-        DefaultFormBuilder builder = new DefaultFormBuilder(layout);
-        builder.setDefaultDialogBorder();
-        builder.setRowGroupingEnabled(true);
-        builder.setLineGapSize(LayoutStyle.getCurrent().getLinePad());
-        
-        builder.append("Proxy");
-        builder.nextLine();
-        builder.append("");
-        builder.nextRow(-2);
-        CellConstraints cc = new CellConstraints();
-        JScrollPane scrollPane = new JScrollPane(_proxy);
-        builder.add(scrollPane, 
-                    cc.xywh(builder.getColumn(), builder.getRow(), 1, 3));
-        builder.nextRow(2);
-        builder.nextLine();
-        
-        if(readOnly)
-        {
-            builder.append("Type", _type);
-        }
-        else
-        {
-            builder.append("Type", _typeCombo);
-        }
-        builder.nextLine();
+	JButton okButton = new JButton("OK");
+	ActionListener okListener = new ActionListener()
+	    {
+		public void actionPerformed(ActionEvent e)
+		{
+		    String type = null;
+		    if(_type.getSelectedItem() != QUERY_OBJECT)
+		    {
+			type = _type.getSelectedItem().toString();
+		    }
 
+		    if(root.addObject(_proxy.getText(),type))
+		    {
+			setVisible(false);
+		    }
+		}
+	    };
+	    okButton.addActionListener(okListener);
+	    getRootPane().setDefaultButton(okButton);
+	
+	    JButton cancelButton = new JButton("Cancel");
+	    ActionListener cancelListener = new ActionListener()
+		{
+		    public void actionPerformed(ActionEvent e)
+		    {
+			setVisible(false);
+		    }
+		};
+	    cancelButton.addActionListener(cancelListener);
 
-        Container contentPane = getContentPane();
-        if(readOnly)
-        {
-            contentPane.add(builder.getPanel());
-        }
-        else
-        {
-            JButton okButton = new JButton("OK");
-            ActionListener okListener = new ActionListener()
-            {
-                public void actionPerformed(ActionEvent e)
-                {
-                    if(_proxy.isEditable())
-                    {
-                        String type = null;
-                        if(_typeCombo.getSelectedItem() != QUERY_OBJECT)
-                        {
-                            type = _typeCombo.getSelectedItem().toString();
-                        }
-                        
-                        if(root.addObject(_proxy.getText(), type))
-                        {
-                            setVisible(false);
-                        }
-                    }
-                    else
-                    {
-                        setVisible(false);
-                    }
-                }
-            };
-            okButton.addActionListener(okListener);
-            getRootPane().setDefaultButton(okButton);
-        
-            JButton cancelButton = new JButton("Cancel");
-            ActionListener cancelListener = new ActionListener()
-                {
-                    public void actionPerformed(ActionEvent e)
-                    {
-                        setVisible(false);
-                    }
-                };
-            cancelButton.addActionListener(cancelListener);
-        
-            
-            JComponent buttonBar = 
-                ButtonBarFactory.buildOKCancelBar(okButton, cancelButton);
-            buttonBar.setBorder(Borders.DIALOG_BORDER);
-            
-            contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
-            contentPane.add(builder.getPanel());
-            contentPane.add(buttonBar);
-        }
+	    FormLayout layout = new FormLayout("right:pref, 3dlu, pref", "");
+	    DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+	    builder.setDefaultDialogBorder();
+	    builder.setRowGroupingEnabled(true);
+	    builder.setLineGapSize(LayoutStyle.getCurrent().getLinePad());
+	    
+	    builder.append("Proxy", _proxy);
+	    builder.nextLine();
+	    builder.append("Type", _type);
+	    builder.nextLine();
 
-        pack();
-        setResizable(false);
+	    JComponent buttonBar = 
+		ButtonBarFactory.buildOKCancelBar(okButton, cancelButton);
+	    buttonBar.setBorder(Borders.DIALOG_BORDER);
+
+	    Container contentPane = getContentPane();
+	    contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
+	    contentPane.add(builder.getPanel());
+	    contentPane.add(buttonBar);
+
+	    pack();
+	    setResizable(false);
     }
 
     void showDialog()
     {
-        assert _proxy.isEditable();
-
-        _proxy.setText("");
-        _typeCombo.setSelectedItem(QUERY_OBJECT);
-        setLocationRelativeTo(_mainFrame);
-        setVisible(true);
+	_proxy.setText("");
+	_type.setSelectedItem(QUERY_OBJECT);
+	setLocationRelativeTo(_mainFrame);
+	setVisible(true);
     }
 
-    void showDialog(String proxy, String type)
-    {
-        assert !_proxy.isEditable();
-
-        _proxy.setText(proxy);
-        _type.setText(type);
-
-        setLocationRelativeTo(_mainFrame);
-        setVisible(true);
-    }
-
-    private JTextArea _proxy = new JTextArea(3, 40);
-    private JTextField _type = new JTextField(40);
-    private JComboBox _typeCombo = new JComboBox(new Object[]{QUERY_OBJECT});
+    private JTextField _proxy = new JTextField(60);
+    private JComboBox _type = new JComboBox(new Object[]{QUERY_OBJECT});
     private JFrame _mainFrame;
 
     static private final Object QUERY_OBJECT = new Object()
-        {
-            public String toString()
-            {
-                return "Query object to retrieve type";
-            }
-        };
+	{
+	    public String toString()
+	    {
+		return "Query object to retrieve type";
+	    }
+	};
+    
 }

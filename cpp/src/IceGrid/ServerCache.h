@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -37,20 +37,16 @@ public:
     ServerEntry(ServerCache&, const std::string&);
 
     void sync();
-    void syncAndWait();
-    void waitNoThrow();
-    void unsync();
-
     void update(const ServerInfo&);
     void destroy();
 
-    ServerInfo getInfo(bool = false) const;
+    ServerInfo getServerInfo(bool = false) const;
     std::string getId() const;
 
-    ServerPrx getProxy(int&, int&, std::string&, bool = true);
-    ServerPrx getProxy(bool = true);
+    ServerPrx getProxy(int&, int&, std::string&, bool);
     AdapterPrx getAdapter(const std::string&, bool);
-    AdapterPrx getAdapter(int&, int&, const std::string&, bool);
+    NodeEntryPtr getNode() const;
+    std::string getApplication() const;
     float getLoad(LoadSample) const;
 
     bool canRemove();
@@ -61,15 +57,13 @@ public:
     void exception(const Ice::Exception&);
 
     virtual void allocated(const SessionIPtr&);
-    virtual void allocatedNoSync(const SessionIPtr&);
     virtual void released(const SessionIPtr&);
-    virtual void releasedNoSync(const SessionIPtr&);
+    virtual bool release(const SessionIPtr&, bool);
 
 private:
     
-    void syncImpl();
-    void waitImpl();
-    
+    void syncImpl(bool);
+
     ServerCache& _cache;
     const std::string _id;
     std::auto_ptr<ServerInfo> _loaded;
@@ -105,10 +99,10 @@ public:
     
     NodeCache& getNodeCache() const { return _nodeCache; }
     Ice::CommunicatorPtr getCommunicator() const { return _communicator; }
-
+    
 private:
     
-    void addCommunicator(const CommunicatorDescriptorPtr&, const ServerEntryPtr&, const std::string&);
+    void addCommunicator(const CommunicatorDescriptorPtr&, const ServerEntryPtr&);
     void removeCommunicator(const CommunicatorDescriptorPtr&, const ServerEntryPtr&);
 
     friend struct AddCommunicator;

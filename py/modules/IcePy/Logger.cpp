@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -11,7 +11,6 @@
 #   include <IceUtil/Config.h>
 #endif
 #include <Logger.h>
-#include <Ice/Initialize.h>
 
 using namespace std;
 using namespace IcePy;
@@ -41,7 +40,7 @@ IcePy::LoggerWrapper::print(const string& message)
     AdoptThread adoptThread; // Ensure the current thread is able to call into Python.
 
     PyObjectHandle tmp = PyObject_CallMethod(_logger.get(), STRCAST("print"), STRCAST("s"), message.c_str());
-    if(!tmp.get())
+    if(tmp.get() == NULL)
     {
         throwPythonException();
     }
@@ -53,8 +52,8 @@ IcePy::LoggerWrapper::trace(const string& category, const string& message)
     AdoptThread adoptThread; // Ensure the current thread is able to call into Python.
 
     PyObjectHandle tmp = PyObject_CallMethod(_logger.get(), STRCAST("trace"), STRCAST("ss"), category.c_str(),
-                                             message.c_str());
-    if(!tmp.get())
+					     message.c_str());
+    if(tmp.get() == NULL)
     {
         throwPythonException();
     }
@@ -66,7 +65,7 @@ IcePy::LoggerWrapper::warning(const string& message)
     AdoptThread adoptThread; // Ensure the current thread is able to call into Python.
 
     PyObjectHandle tmp = PyObject_CallMethod(_logger.get(), STRCAST("warning"), STRCAST("s"), message.c_str());
-    if(!tmp.get())
+    if(tmp.get() == NULL)
     {
         throwPythonException();
     }
@@ -78,7 +77,7 @@ IcePy::LoggerWrapper::error(const string& message)
     AdoptThread adoptThread; // Ensure the current thread is able to call into Python.
 
     PyObjectHandle tmp = PyObject_CallMethod(_logger.get(), STRCAST("error"), STRCAST("s"), message.c_str());
-    if(!tmp.get())
+    if(tmp.get() == NULL)
     {
         throwPythonException();
     }
@@ -97,9 +96,9 @@ static LoggerObject*
 loggerNew(PyObject* /*arg*/)
 {
     LoggerObject* self = PyObject_New(LoggerObject, &LoggerType);
-    if(!self)
+    if (self == NULL)
     {
-        return 0;
+        return NULL;
     }
     self->logger = 0;
     return self;
@@ -124,7 +123,7 @@ loggerPrint(LoggerObject* self, PyObject* args)
     char* message;
     if(!PyArg_ParseTuple(args, STRCAST("s"), &message))
     {
-        return 0;
+        return NULL;
     }
 
     assert(self->logger);
@@ -135,7 +134,7 @@ loggerPrint(LoggerObject* self, PyObject* args)
     catch(const Ice::Exception& ex)
     {
         setPythonException(ex);
-        return 0;
+        return NULL;
     }
 
     Py_INCREF(Py_None);
@@ -152,7 +151,7 @@ loggerTrace(LoggerObject* self, PyObject* args)
     char* message;
     if(!PyArg_ParseTuple(args, STRCAST("ss"), &category, &message))
     {
-        return 0;
+        return NULL;
     }
 
     assert(self->logger);
@@ -163,7 +162,7 @@ loggerTrace(LoggerObject* self, PyObject* args)
     catch(const Ice::Exception& ex)
     {
         setPythonException(ex);
-        return 0;
+        return NULL;
     }
 
     Py_INCREF(Py_None);
@@ -179,7 +178,7 @@ loggerWarning(LoggerObject* self, PyObject* args)
     char* message;
     if(!PyArg_ParseTuple(args, STRCAST("s"), &message))
     {
-        return 0;
+        return NULL;
     }
 
     assert(self->logger);
@@ -190,7 +189,7 @@ loggerWarning(LoggerObject* self, PyObject* args)
     catch(const Ice::Exception& ex)
     {
         setPythonException(ex);
-        return 0;
+        return NULL;
     }
 
     Py_INCREF(Py_None);
@@ -206,7 +205,7 @@ loggerError(LoggerObject* self, PyObject* args)
     char* message;
     if(!PyArg_ParseTuple(args, STRCAST("s"), &message))
     {
-        return 0;
+        return NULL;
     }
 
     assert(self->logger);
@@ -217,7 +216,7 @@ loggerError(LoggerObject* self, PyObject* args)
     catch(const Ice::Exception& ex)
     {
         setPythonException(ex);
-        return 0;
+        return NULL;
     }
 
     Py_INCREF(Py_None);
@@ -226,15 +225,15 @@ loggerError(LoggerObject* self, PyObject* args)
 
 static PyMethodDef LoggerMethods[] =
 {
-    { STRCAST("_print"), reinterpret_cast<PyCFunction>(loggerPrint), METH_VARARGS,
+    { STRCAST("_print"), (PyCFunction)loggerPrint, METH_VARARGS,
         PyDoc_STR(STRCAST("_print(message) -> None")) },
-    { STRCAST("trace"), reinterpret_cast<PyCFunction>(loggerTrace), METH_VARARGS,
+    { STRCAST("trace"), (PyCFunction)loggerTrace, METH_VARARGS,
         PyDoc_STR(STRCAST("trace(category, message) -> None")) },
-    { STRCAST("warning"), reinterpret_cast<PyCFunction>(loggerWarning), METH_VARARGS,
+    { STRCAST("warning"), (PyCFunction)loggerWarning, METH_VARARGS,
         PyDoc_STR(STRCAST("warning(message) -> None")) },
-    { STRCAST("error"), reinterpret_cast<PyCFunction>(loggerError), METH_VARARGS,
+    { STRCAST("error"), (PyCFunction)loggerError, METH_VARARGS,
         PyDoc_STR(STRCAST("error(message) -> None")) },
-    { 0, 0 } /* sentinel */
+    { NULL, NULL} /* sentinel */
 };
 
 namespace IcePy
@@ -244,13 +243,13 @@ PyTypeObject LoggerType =
 {
     /* The ob_type field must be initialized in the module init function
      * to be portable to Windows without using C++. */
-    PyObject_HEAD_INIT(0)
+    PyObject_HEAD_INIT(NULL)
     0,                              /* ob_size */
     STRCAST("IcePy.Logger"),        /* tp_name */
     sizeof(LoggerObject),           /* tp_basicsize */
     0,                              /* tp_itemsize */
     /* methods */
-    reinterpret_cast<destructor>(loggerDealloc), /* tp_dealloc */
+    (destructor)loggerDealloc,      /* tp_dealloc */
     0,                              /* tp_print */
     0,                              /* tp_getattr */
     0,                              /* tp_setattr */
@@ -283,7 +282,7 @@ PyTypeObject LoggerType =
     0,                              /* tp_dictoffset */
     0,                              /* tp_init */
     0,                              /* tp_alloc */
-    reinterpret_cast<newfunc>(loggerNew), /* tp_new */
+    (newfunc)loggerNew,             /* tp_new */
     0,                              /* tp_free */
     0,                              /* tp_is_gc */
 };
@@ -297,8 +296,7 @@ IcePy::initLogger(PyObject* module)
     {
         return false;
     }
-    PyTypeObject* type = &LoggerType; // Necessary to prevent GCC's strict-alias warnings.
-    if(PyModule_AddObject(module, STRCAST("Logger"), reinterpret_cast<PyObject*>(type)) < 0)
+    if(PyModule_AddObject(module, STRCAST("Logger"), (PyObject*)&LoggerType) < 0)
     {
         return false;
     }
@@ -309,71 +307,10 @@ IcePy::initLogger(PyObject* module)
 PyObject*
 IcePy::createLogger(const Ice::LoggerPtr& logger)
 {
-    LoggerObject* obj = loggerNew(0);
-    if(obj)
+    LoggerObject* obj = loggerNew(NULL);
+    if(obj != NULL)
     {
         obj->logger = new Ice::LoggerPtr(logger);
     }
-    return reinterpret_cast<PyObject*>(obj);
-}
-
-extern "C"
-PyObject*
-IcePy_getProcessLogger(PyObject* /*self*/)
-{
-    Ice::LoggerPtr logger;
-    try
-    {
-        logger = Ice::getProcessLogger();
-    }
-    catch(const Ice::Exception& ex)
-    {
-        IcePy::setPythonException(ex);
-        return 0;
-    }
-
-    //
-    // The process logger can either be a C++ object (such as
-    // the default logger supplied by the Ice run time), or a C++
-    // wrapper around a Python implementation. If the latter, we
-    // return it directly. Otherwise, we create a Python object
-    // that delegates to the C++ object.
-    //
-    LoggerWrapperPtr wrapper = LoggerWrapperPtr::dynamicCast(logger);
-    if(wrapper)
-    {
-        PyObject* obj = wrapper->getObject();
-        Py_INCREF(obj);
-        return obj;
-    }
-
-    return createLogger(logger);
-}
-
-extern "C"
-PyObject*
-IcePy_setProcessLogger(PyObject* /*self*/, PyObject* args)
-{
-    PyObject* loggerType = lookupType("Ice.Logger");
-    assert(loggerType);
-
-    PyObject* logger;
-    if(!PyArg_ParseTuple(args, STRCAST("O!"), loggerType, &logger))
-    {
-        return 0;
-    }
-
-    Ice::LoggerPtr wrapper = new LoggerWrapper(logger);
-    try
-    {
-        Ice::setProcessLogger(wrapper);
-    }
-    catch(const Ice::Exception& ex)
-    {
-        IcePy::setPythonException(ex);
-        return 0;
-    }
-
-    Py_INCREF(Py_None);
-    return Py_None;
+    return (PyObject*)obj;
 }

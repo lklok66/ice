@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -67,7 +67,7 @@ PyObject*
 IcePy::PyObjectHandle::release()
 {
     PyObject* result = _p;
-    _p = 0;
+    _p = NULL;
     return result;
 }
 
@@ -101,137 +101,154 @@ IcePy::PyException::raise()
 
     if(PyObject_IsInstance(ex.get(), userExceptionType))
     {
-        Ice::UnknownUserException e(__FILE__, __LINE__);
-        string tb = getTraceback();
-        if(!tb.empty())
-        {
-            e.unknown = tb;
-        }
-        else
-        {
-            PyObjectHandle name = PyObject_CallMethod(ex.get(), STRCAST("ice_name"), 0);
-            PyErr_Clear();
-            if(!name.get())
-            {
-                e.unknown = getTypeName();
-            }
-            else
-            {
-                e.unknown = PyString_AS_STRING(name.get());
-            }
-        }
-        throw e;
+	Ice::UnknownUserException e(__FILE__, __LINE__);
+	string tb = getTraceback();
+	if(!tb.empty())
+	{
+	    e.unknown = tb;
+	}
+	else
+	{
+	    PyObjectHandle name = PyObject_CallMethod(ex.get(), STRCAST("ice_name"), NULL);
+	    PyErr_Clear();
+	    if(name.get() == NULL)
+	    {
+		PyObject* cls = (PyObject*)((PyInstanceObject*)ex.get())->in_class;
+		IcePy::PyObjectHandle str = PyObject_Str(cls);
+		e.unknown = PyString_AsString(str.get());
+	    }
+	    else
+	    {
+		e.unknown = PyString_AS_STRING(name.get());
+	    }
+	}
+	throw e;
     }
     else if(PyObject_IsInstance(ex.get(), localExceptionType))
     {
-        raiseLocalException();
+	raiseLocalException();
     }
     else
     {
-        Ice::UnknownException e(__FILE__, __LINE__);
-        string tb = getTraceback();
-        if(!tb.empty())
-        {
-            e.unknown = tb;
-        }
-        else
-        {
-            ostringstream ostr;
+	Ice::UnknownException e(__FILE__, __LINE__);
+	string tb = getTraceback();
+	if(!tb.empty())
+	{
+	    e.unknown = tb;
+	}
+	else
+	{
+	    ostringstream ostr;
 
-            ostr << getTypeName();
+	    PyObject* cls = (PyObject*)((PyInstanceObject*)ex.get())->in_class;
+	    IcePy::PyObjectHandle className = PyObject_Str(cls);
+	    assert(className.get() != NULL);
 
-            IcePy::PyObjectHandle msg = PyObject_Str(ex.get());
-            if(msg.get() && strlen(PyString_AsString(msg.get())) > 0)
-            {
-                ostr << ": " << PyString_AsString(msg.get());
-            }
+	    ostr << PyString_AsString(className.get());
 
-            e.unknown = ostr.str();
-        }
-        throw e;
+	    IcePy::PyObjectHandle msg = PyObject_Str(ex.get());
+	    if(msg.get() != NULL && strlen(PyString_AsString(msg.get())) > 0)
+	    {
+		ostr << ": " << PyString_AsString(msg.get());
+	    }
+
+	    e.unknown = ostr.str();
+	}
+	throw e;
     }
 }
 
 void
 IcePy::PyException::raiseLocalException()
 {
-    string typeName = getTypeName();
+    assert(PyInstance_Check(ex.get()));
+    PyObject* cls = (PyObject*)((PyInstanceObject*)ex.get())->in_class;
+    IcePy::PyObjectHandle h = PyObject_Str(cls);
+    string typeName = PyString_AsString(h.get());
 
     try
     {
-        if(typeName == "Ice.ObjectNotExistException")
-        {
-            throw Ice::ObjectNotExistException(__FILE__, __LINE__);
-        }
-        else if(typeName == "Ice.OperationNotExistException")
-        {
-            throw Ice::OperationNotExistException(__FILE__, __LINE__);
-        }
-        else if(typeName == "Ice.FacetNotExistException")
-        {
-            throw Ice::FacetNotExistException(__FILE__, __LINE__);
-        }
-        else if(typeName == "Ice.RequestFailedException")
-        {
-            throw Ice::RequestFailedException(__FILE__, __LINE__);
-        }
+	if(typeName == "Ice.ObjectNotExistException")
+	{
+	    throw Ice::ObjectNotExistException(__FILE__, __LINE__);
+	}
+	else if(typeName == "Ice.OperationNotExistException")
+	{
+	    throw Ice::OperationNotExistException(__FILE__, __LINE__);
+	}
+	else if(typeName == "Ice.FacetNotExistException")
+	{
+	    throw Ice::FacetNotExistException(__FILE__, __LINE__);
+	}
+	else if(typeName == "Ice.RequestFailedException")
+	{
+	    throw Ice::RequestFailedException(__FILE__, __LINE__);
+	}
     }
     catch(Ice::RequestFailedException& e)
     {
-        IcePy::PyObjectHandle member;
-        member = PyObject_GetAttrString(ex.get(), STRCAST("id"));
-        if(member.get() && IcePy::checkIdentity(member.get()))
-        {
-            IcePy::getIdentity(member.get(), e.id);
-        }
-        member = PyObject_GetAttrString(ex.get(), STRCAST("facet"));
-        if(member.get() && PyString_Check(member.get()))
-        {
-            e.facet = PyString_AS_STRING(member.get());
-        }
-        member = PyObject_GetAttrString(ex.get(), STRCAST("operation"));
-        if(member.get() && PyString_Check(member.get()))
-        {
-            e.operation = PyString_AS_STRING(member.get());
-        }
-        throw;
+	IcePy::PyObjectHandle member;
+	member = PyObject_GetAttrString(ex.get(), STRCAST("id"));
+	if(member.get() != NULL && IcePy::checkIdentity(member.get()))
+	{
+	    IcePy::getIdentity(member.get(), e.id);
+	}
+	member = PyObject_GetAttrString(ex.get(), STRCAST("facet"));
+	if(member.get() != NULL && PyString_Check(member.get()))
+	{
+	    e.facet = PyString_AS_STRING(member.get());
+	}
+	member = PyObject_GetAttrString(ex.get(), STRCAST("operation"));
+	if(member.get() != NULL && PyString_Check(member.get()))
+	{
+	    e.operation = PyString_AS_STRING(member.get());
+	}
+	throw e;
     }
 
     try
     {
-        if(typeName == "Ice.UnknownLocalException")
-        {
-            throw Ice::UnknownLocalException(__FILE__, __LINE__);
-        }
-        else if(typeName == "Ice.UnknownUserException")
-        {
-            throw Ice::UnknownUserException(__FILE__, __LINE__);
-        }
-        else if(typeName == "Ice.UnknownException")
-        {
-            throw Ice::UnknownException(__FILE__, __LINE__);
-        }
+	if(typeName == "Ice.UnknownLocalException")
+	{
+	    throw Ice::UnknownLocalException(__FILE__, __LINE__);
+	}
+	else if(typeName == "Ice.UnknownUserException")
+	{
+	    throw Ice::UnknownUserException(__FILE__, __LINE__);
+	}
+	else if(typeName == "Ice.UnknownException")
+	{
+	    throw Ice::UnknownException(__FILE__, __LINE__);
+	}
     }
     catch(Ice::UnknownException& e)
     {
-        IcePy::PyObjectHandle member;
-        member = PyObject_GetAttrString(ex.get(), STRCAST("unknown"));
-        if(member.get() && PyString_Check(member.get()) && strlen(PyString_AS_STRING(member.get())) > 0)
-        {
-            e.unknown = PyString_AS_STRING(member.get());
-        }
-        throw;
+	string tb = getTraceback();
+	if(!tb.empty())
+	{
+	    e.unknown = tb;
+	}
+	else
+	{
+	    IcePy::PyObjectHandle member;
+	    member = PyObject_GetAttrString(ex.get(), STRCAST("unknown"));
+	    if(member.get() != NULL && PyString_Check(member.get()) && strlen(PyString_AS_STRING(member.get())) > 0)
+	    {
+		e.unknown = PyString_AS_STRING(member.get());
+	    }
+	}
+	throw e;
     }
 
     Ice::UnknownLocalException e(__FILE__, __LINE__);
     string tb = getTraceback();
     if(!tb.empty())
     {
-        e.unknown = tb;
+	e.unknown = tb;
     }
     else
     {
-        e.unknown = typeName;
+	e.unknown = typeName;
     }
     throw e;
 }
@@ -239,9 +256,9 @@ IcePy::PyException::raiseLocalException()
 string
 IcePy::PyException::getTraceback()
 {
-    if(!_tb.get())
+    if(_tb.get() == NULL)
     {
-        return string();
+	return string();
     }
 
     //
@@ -252,37 +269,19 @@ IcePy::PyException::getTraceback()
     //
     PyObjectHandle str = PyString_FromString("traceback");
     PyObjectHandle mod = PyImport_Import(str.get());
-    assert(mod.get()); // Unable to import traceback module - Python installation error?
+    assert(mod.get() != NULL); // Unable to import traceback module - Python installation error?
     PyObject* d = PyModule_GetDict(mod.get());
     PyObject* func = PyDict_GetItemString(d, "format_exception");
-    assert(func); // traceback.format_exception must be present.
+    assert(func != NULL); // traceback.format_exception must be present.
     PyObjectHandle args = Py_BuildValue("(OOO)", _type.get(), ex.get(), _tb.get());
     PyObjectHandle list = PyObject_CallObject(func, args.get());
 
     string result;
-    for(Py_ssize_t i = 0; i < PyList_GET_SIZE(list.get()); ++i)
+    for(int i = 0; i < PyList_GET_SIZE(list.get()); ++i)
     {
-        result += PyString_AsString(PyList_GetItem(list.get(), i));
+	result += PyString_AsString(PyList_GetItem(list.get(), i));
     }
 
-    return result;
-}
-
-string
-IcePy::PyException::getTypeName()
-{
-#ifdef ICEPY_OLD_EXCEPTIONS
-    PyObject* cls = reinterpret_cast<PyObject*>(reinterpret_cast<PyInstanceObject*>(ex.get())->in_class);
-#else
-    PyObject* cls = reinterpret_cast<PyObject*>(ex.get()->ob_type);
-#endif
-    PyObjectHandle name = PyObject_GetAttrString(cls, "__name__");
-    assert(name.get());
-    PyObjectHandle mod = PyObject_GetAttrString(cls, "__module__");
-    assert(mod.get());
-    string result = PyString_AsString(mod.get());
-    result += ".";
-    result += PyString_AsString(name.get());
     return result;
 }
 
@@ -311,20 +310,20 @@ IcePy::listToStringSeq(PyObject* l, Ice::StringSeq& seq)
 {
     assert(PyList_Check(l));
 
-    Py_ssize_t sz = PyList_GET_SIZE(l);
-    for(Py_ssize_t i = 0; i < sz; ++i)
+    int sz = PyList_Size(l);
+    for(int i = 0; i < sz; ++i)
     {
-        PyObject* item = PyList_GET_ITEM(l, i);
-        if(!item)
+        PyObject* item = PyList_GetItem(l, i);
+        if(item == NULL)
         {
             return false;
         }
-        if(!PyString_Check(item))
+        char* str = PyString_AsString(item);
+        if(str == NULL)
         {
-            PyErr_Format(PyExc_ValueError, STRCAST("list element must be a string"));
             return false;
         }
-        seq.push_back(string(PyString_AS_STRING(item), PyString_GET_SIZE(item)));
+        seq.push_back(str);
     }
 
     return true;
@@ -338,7 +337,7 @@ IcePy::stringSeqToList(const Ice::StringSeq& seq, PyObject* l)
     for(Ice::StringSeq::const_iterator p = seq.begin(); p != seq.end(); ++p)
     {
         PyObject* str = Py_BuildValue(STRCAST("s"), p->c_str());
-        if(!str)
+        if(str == NULL)
         {
             Py_DECREF(l);
             return false;
@@ -356,47 +355,23 @@ IcePy::stringSeqToList(const Ice::StringSeq& seq, PyObject* l)
 }
 
 bool
-IcePy::tupleToStringSeq(PyObject* t, Ice::StringSeq& seq)
-{
-    assert(PyTuple_Check(t));
-
-    int sz = static_cast<int>(PyTuple_GET_SIZE(t));
-    for(int i = 0; i < sz; ++i)
-    {
-        PyObject* item = PyTuple_GET_ITEM(t, i);
-        if(!item)
-        {
-            return false;
-        }
-        if(!PyString_Check(item))
-        {
-            PyErr_Format(PyExc_ValueError, STRCAST("tuple element must be a string"));
-            return false;
-        }
-        seq.push_back(string(PyString_AS_STRING(item), PyString_GET_SIZE(item)));
-    }
-
-    return true;
-}
-
-bool
 IcePy::dictionaryToContext(PyObject* dict, Ice::Context& context)
 {
     assert(PyDict_Check(dict));
 
-    Py_ssize_t pos = 0;
+    int pos = 0;
     PyObject* key;
     PyObject* value;
     while(PyDict_Next(dict, &pos, &key, &value))
     {
         char* keystr = PyString_AsString(key);
-        if(!keystr)
+        if(keystr == NULL)
         {
             PyErr_Format(PyExc_ValueError, STRCAST("context key must be a string"));
             return false;
         }
         char* valuestr = PyString_AsString(value);
-        if(!valuestr)
+        if(valuestr == NULL)
         {
             PyErr_Format(PyExc_ValueError, STRCAST("context value must be a string"));
             return false;
@@ -416,7 +391,7 @@ IcePy::contextToDictionary(const Ice::Context& ctx, PyObject* dict)
     {
         PyObjectHandle key = PyString_FromString(const_cast<char*>(p->first.c_str()));
         PyObjectHandle value = PyString_FromString(const_cast<char*>(p->second.c_str()));
-        if(!key.get() || !value.get())
+        if(key.get() == NULL || value.get() == NULL)
         {
             return false;
         }
@@ -441,19 +416,19 @@ IcePy::lookupType(const string& typeName)
     // First search for the module in sys.modules.
     //
     PyObject* sysModules = PyImport_GetModuleDict();
-    assert(sysModules);
+    assert(sysModules != NULL);
 
     PyObject* module = PyDict_GetItemString(sysModules, const_cast<char*>(moduleName.c_str()));
     PyObject* dict;
-    if(!module)
+    if(module == NULL)
     {
         //
         // Not found, so we need to import the module.
         //
         PyObjectHandle h = PyImport_ImportModule(const_cast<char*>(moduleName.c_str()));
-        if(!h.get())
+        if(h.get() == NULL)
         {
-            return 0;
+            return NULL;
         }
 
         dict = PyModule_GetDict(h.get());
@@ -463,22 +438,18 @@ IcePy::lookupType(const string& typeName)
         dict = PyModule_GetDict(module);
     }
 
-    assert(dict);
+    assert(dict != NULL);
     return PyDict_GetItemString(dict, const_cast<char*>(name.c_str()));
 }
 
 PyObject*
 IcePy::createExceptionInstance(PyObject* type)
 {
-#ifdef ICEPY_OLD_EXCEPTIONS
     assert(PyClass_Check(type));
-#else
-    assert(PyExceptionClass_Check(type));
-#endif
     IcePy::PyObjectHandle args = PyTuple_New(0);
-    if(!args.get())
+    if(args.get() == NULL)
     {
-        return 0;
+        return NULL;
     }
     return PyEval_CallObject(type, args.get());
 }
@@ -492,37 +463,6 @@ convertLocalException(const Ice::LocalException& ex, PyObject* p)
     try
     {
         ex.ice_throw();
-    }
-    catch(const Ice::InitializationException& e)
-    {
-        IcePy::PyObjectHandle m = PyString_FromString(const_cast<char*>(e.reason.c_str()));
-        PyObject_SetAttrString(p, STRCAST("reason"), m.get());
-    }
-    catch(const Ice::PluginInitializationException& e)
-    {
-        IcePy::PyObjectHandle m = PyString_FromString(const_cast<char*>(e.reason.c_str()));
-        PyObject_SetAttrString(p, STRCAST("reason"), m.get());
-    }
-    catch(const Ice::AlreadyRegisteredException& e)
-    {
-        IcePy::PyObjectHandle m;
-        m = PyString_FromString(const_cast<char*>(e.kindOfObject.c_str()));
-        PyObject_SetAttrString(p, STRCAST("kindOfObject"), m.get());
-        m = PyString_FromString(const_cast<char*>(e.id.c_str()));
-        PyObject_SetAttrString(p, STRCAST("id"), m.get());
-    }
-    catch(const Ice::NotRegisteredException& e)
-    {
-        IcePy::PyObjectHandle m;
-        m = PyString_FromString(const_cast<char*>(e.kindOfObject.c_str()));
-        PyObject_SetAttrString(p, STRCAST("kindOfObject"), m.get());
-        m = PyString_FromString(const_cast<char*>(e.id.c_str()));
-        PyObject_SetAttrString(p, STRCAST("id"), m.get());
-    }
-    catch(const Ice::TwowayOnlyException& e)
-    {
-        IcePy::PyObjectHandle m = PyString_FromString(const_cast<char*>(e.operation.c_str()));
-        PyObject_SetAttrString(p, STRCAST("operation"), m.get());
     }
     catch(const Ice::UnknownException& e)
     {
@@ -574,14 +514,7 @@ convertLocalException(const Ice::LocalException& ex, PyObject* p)
         m = PyString_FromString(const_cast<char*>(e.operation.c_str()));
         PyObject_SetAttrString(p, STRCAST("operation"), m.get());
     }
-    catch(const Ice::FileException& e)
-    {
-        IcePy::PyObjectHandle m = PyInt_FromLong(e.error);
-        PyObject_SetAttrString(p, STRCAST("error"), m.get());
-        m = PyString_FromString(const_cast<char*>(e.path.c_str()));
-        PyObject_SetAttrString(p, STRCAST("path"), m.get());
-    }
-    catch(const Ice::SyscallException& e) // This must appear after all subclasses of SyscallException.
+    catch(const Ice::SyscallException& e)
     {
         IcePy::PyObjectHandle m = PyInt_FromLong(e.error);
         PyObject_SetAttrString(p, STRCAST("error"), m.get());
@@ -626,30 +559,36 @@ convertLocalException(const Ice::LocalException& ex, PyObject* p)
         m = PyString_FromString(const_cast<char*>(e.type.c_str()));
         PyObject_SetAttrString(p, STRCAST("type"), m.get());
     }
-    catch(const Ice::UnexpectedObjectException& e)
+    catch(const Ice::MarshalException& e)
+    {
+        IcePy::PyObjectHandle m = PyString_FromString(const_cast<char*>(e.reason.c_str()));
+        PyObject_SetAttrString(p, STRCAST("reason"), m.get());
+    }
+    catch(const Ice::PluginInitializationException& e)
+    {
+        IcePy::PyObjectHandle m = PyString_FromString(const_cast<char*>(e.reason.c_str()));
+        PyObject_SetAttrString(p, STRCAST("reason"), m.get());
+    }
+    catch(const Ice::AlreadyRegisteredException& e)
     {
         IcePy::PyObjectHandle m;
-        m = PyString_FromString(const_cast<char*>(e.reason.c_str()));
-        PyObject_SetAttrString(p, STRCAST("reason"), m.get());
-        m = PyString_FromString(const_cast<char*>(e.type.c_str()));
-        PyObject_SetAttrString(p, STRCAST("type"), m.get());
-        m = PyString_FromString(const_cast<char*>(e.expectedType.c_str()));
-        PyObject_SetAttrString(p, STRCAST("expectedType"), m.get());
+        m = PyString_FromString(const_cast<char*>(e.kindOfObject.c_str()));
+        PyObject_SetAttrString(p, STRCAST("kindOfObject"), m.get());
+        m = PyString_FromString(const_cast<char*>(e.id.c_str()));
+        PyObject_SetAttrString(p, STRCAST("id"), m.get());
     }
-    catch(const Ice::ProtocolException& e) // This must appear after all subclasses of ProtocolException.
+    catch(const Ice::NotRegisteredException& e)
     {
-        IcePy::PyObjectHandle m = PyString_FromString(const_cast<char*>(e.reason.c_str()));
-        PyObject_SetAttrString(p, STRCAST("reason"), m.get());
+        IcePy::PyObjectHandle m;
+        m = PyString_FromString(const_cast<char*>(e.kindOfObject.c_str()));
+        PyObject_SetAttrString(p, STRCAST("kindOfObject"), m.get());
+        m = PyString_FromString(const_cast<char*>(e.id.c_str()));
+        PyObject_SetAttrString(p, STRCAST("id"), m.get());
     }
-    catch(const Ice::FeatureNotSupportedException& e)
+    catch(const Ice::TwowayOnlyException& e)
     {
-        IcePy::PyObjectHandle m = PyString_FromString(const_cast<char*>(e.unsupportedFeature.c_str()));
-        PyObject_SetAttrString(p, STRCAST("unsupportedFeature"), m.get());
-    }
-    catch(const Ice::SecurityException& e)
-    {
-        IcePy::PyObjectHandle m = PyString_FromString(const_cast<char*>(e.reason.c_str()));
-        PyObject_SetAttrString(p, STRCAST("reason"), m.get());
+        IcePy::PyObjectHandle m = PyString_FromString(const_cast<char*>(e.operation.c_str()));
+        PyObject_SetAttrString(p, STRCAST("operation"), m.get());
     }
     catch(const Ice::LocalException&)
     {
@@ -676,10 +615,10 @@ IcePy::convertException(const Ice::Exception& ex)
     catch(const Ice::LocalException& e)
     {
         type = lookupType(scopedToName(e.ice_name()));
-        if(type)
+        if(type != NULL)
         {
             p = createExceptionInstance(type);
-            if(p.get())
+            if(p.get() != NULL)
             {
                 convertLocalException(e, p.get());
             }
@@ -687,9 +626,9 @@ IcePy::convertException(const Ice::Exception& ex)
         else
         {
             type = lookupType("Ice.UnknownLocalException");
-            assert(type);
+            assert(type != NULL);
             p = createExceptionInstance(type);
-            if(p.get())
+            if(p.get() != NULL)
             {
                 PyObjectHandle s = PyString_FromString(const_cast<char*>(str.c_str()));
                 PyObject_SetAttrString(p.get(), STRCAST("unknown"), s.get());
@@ -699,9 +638,9 @@ IcePy::convertException(const Ice::Exception& ex)
     catch(const Ice::UserException&)
     {
         type = lookupType("Ice.UnknownUserException");
-        assert(type);
+        assert(type != NULL);
         p = createExceptionInstance(type);
-        if(p.get())
+        if(p.get() != NULL)
         {
             PyObjectHandle s = PyString_FromString(const_cast<char*>(str.c_str()));
             PyObject_SetAttrString(p.get(), STRCAST("unknown"), s.get());
@@ -710,9 +649,9 @@ IcePy::convertException(const Ice::Exception& ex)
     catch(const Ice::Exception&)
     {
         type = lookupType("Ice.UnknownException");
-        assert(type);
+        assert(type != NULL);
         p = createExceptionInstance(type);
-        if(p.get())
+        if(p.get() != NULL)
         {
             PyObjectHandle s = PyString_FromString(const_cast<char*>(str.c_str()));
             PyObject_SetAttrString(p.get(), STRCAST("unknown"), s.get());
@@ -726,27 +665,13 @@ void
 IcePy::setPythonException(const Ice::Exception& ex)
 {
     PyObjectHandle p = convertException(ex);
-    if(p.get())
-    {
-        setPythonException(p.get());
-    }
-}
 
-void
-IcePy::setPythonException(PyObject* ex)
-{
-    //
-    // PyErr_Restore steals references to the type and exception.
-    //
-#ifdef ICEPY_OLD_EXCEPTIONS
-    PyObject* type = reinterpret_cast<PyObject*>(reinterpret_cast<PyInstanceObject*>(ex)->in_class);
-    Py_INCREF(type);
-#else
-    PyObject* type = PyObject_Type(ex);
-    assert(type);
-#endif
-    Py_INCREF(ex);
-    PyErr_Restore(type, ex, 0);
+    if(p.get() != NULL)
+    {
+        PyObject* type = (PyObject*)((PyInstanceObject*)p.get())->in_class;
+        Py_INCREF(type);
+        PyErr_Restore(type, p.release(), NULL);
+    }
 }
 
 void
@@ -763,11 +688,7 @@ IcePy::handleSystemExit(PyObject* ex)
     // This code is similar to handle_system_exit in pythonrun.c.
     //
     PyObjectHandle code;
-#ifdef ICEPY_OLD_EXCEPTIONS
     if(PyInstance_Check(ex))
-#else
-    if(PyExceptionInstance_Check(ex))
-#endif
     {
         code = PyObject_GetAttrString(ex, STRCAST("code"));
     }
@@ -798,15 +719,15 @@ IcePy::createIdentity(const Ice::Identity& ident)
 {
     PyObject* identityType = lookupType("Ice.Identity");
 
-    PyObjectHandle obj = PyObject_CallObject(identityType, 0);
-    if(!obj.get())
+    PyObjectHandle obj = PyObject_CallObject(identityType, NULL);
+    if(obj.get() == NULL)
     {
-        return 0;
+        return NULL;
     }
 
     if(!setIdentity(obj.get(), ident))
     {
-        return 0;
+        return NULL;
     }
 
     return obj.release();
@@ -825,7 +746,7 @@ IcePy::setIdentity(PyObject* p, const Ice::Identity& ident)
     assert(checkIdentity(p));
     PyObjectHandle name = PyString_FromString(const_cast<char*>(ident.name.c_str()));
     PyObjectHandle category = PyString_FromString(const_cast<char*>(ident.category.c_str()));
-    if(!name.get() || !category.get())
+    if(name.get() == NULL || category.get() == NULL)
     {
         return false;
     }
@@ -843,20 +764,20 @@ IcePy::getIdentity(PyObject* p, Ice::Identity& ident)
     assert(checkIdentity(p));
     PyObjectHandle name = PyObject_GetAttrString(p, STRCAST("name"));
     PyObjectHandle category = PyObject_GetAttrString(p, STRCAST("category"));
-    if(name.get())
+    if(name.get() != NULL)
     {
         char* s = PyString_AsString(name.get());
-        if(!s)
+        if(s == NULL)
         {
             PyErr_Format(PyExc_ValueError, STRCAST("identity name must be a string"));
             return false;
         }
         ident.name = s;
     }
-    if(category.get())
+    if(category.get() != NULL)
     {
         char* s = PyString_AsString(category.get());
-        if(!s)
+        if(s == NULL)
         {
             PyErr_Format(PyExc_ValueError, STRCAST("identity category must be a string"));
             return false;
@@ -874,13 +795,13 @@ IcePy_identityToString(PyObject* /*self*/, PyObject* args)
     PyObject* p;
     if(!PyArg_ParseTuple(args, STRCAST("O!"), identityType, &p))
     {
-        return 0;
+        return NULL;
     }
 
     Ice::Identity id;
     if(!IcePy::getIdentity(p, id))
     {
-        return 0;
+        return NULL;
     }
 
     string s;
@@ -891,7 +812,7 @@ IcePy_identityToString(PyObject* /*self*/, PyObject* args)
     catch(const Ice::Exception& ex)
     {
         IcePy::setPythonException(ex);
-        return 0;
+        return NULL;
     }
     return PyString_FromString(const_cast<char*>(s.c_str()));
 }
@@ -903,7 +824,7 @@ IcePy_stringToIdentity(PyObject* /*self*/, PyObject* args)
     char* str;
     if(!PyArg_ParseTuple(args, STRCAST("s"), &str))
     {
-        return 0;
+        return NULL;
     }
 
     Ice::Identity id;
@@ -914,7 +835,7 @@ IcePy_stringToIdentity(PyObject* /*self*/, PyObject* args)
     catch(const Ice::Exception& ex)
     {
         IcePy::setPythonException(ex);
-        return 0;
+        return NULL;
     }
 
     return IcePy::createIdentity(id);

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -17,8 +17,11 @@ using namespace Ice;
 using namespace IceInternal;
 using namespace std;
 
-IceUtil::Shared* IceInternal::upCast(DynamicLibrary* p) { return p; }
-IceUtil::Shared* IceInternal::upCast(DynamicLibraryList* p) { return p; }
+void IceInternal::incRef(DynamicLibrary* p) { p->__incRef(); }
+void IceInternal::decRef(DynamicLibrary* p) { p->__decRef(); }
+
+void IceInternal::incRef(DynamicLibraryList* p) { p->__incRef(); }
+void IceInternal::decRef(DynamicLibraryList* p) { p->__decRef(); }
 
 IceInternal::DynamicLibrary::DynamicLibrary()
     : _hnd(0)
@@ -63,20 +66,10 @@ IceInternal::DynamicLibrary::loadEntryPoint(const string& entryPoint, bool useIc
         libName = libSpec;
         if(useIceVersion)
         {
-            int majorVersion = (ICE_INT_VERSION / 10000);
-            int minorVersion = (ICE_INT_VERSION / 100) - majorVersion * 100;
-            ostringstream os;
-            os << majorVersion * 10 + minorVersion;
-            
-            int patchVersion = ICE_INT_VERSION % 100;
-            if(patchVersion > 50)
-            {
-                os << 'b';
-                if(patchVersion >= 52)
-                {
-                    os << (patchVersion - 50);
-                }
-            }
+	    int majorVersion = (ICE_INT_VERSION / 10000);
+	    int minorVersion = (ICE_INT_VERSION / 100) - majorVersion * 100;
+	    ostringstream os;
+	    os << majorVersion * 10 + minorVersion;
             version = os.str();
         }
     }
@@ -98,7 +91,7 @@ IceInternal::DynamicLibrary::loadEntryPoint(const string& entryPoint, bool useIc
     lib = "lib" + libName;
     if(!version.empty()) 
     {
-        lib += "." + version;
+	lib += "." + version;
     }
     lib += ".dylib";
 #elif defined(__hpux)
@@ -109,7 +102,7 @@ IceInternal::DynamicLibrary::loadEntryPoint(const string& entryPoint, bool useIc
     }
     else
     {
-        lib += ".sl";
+	lib += ".sl";
     }
 #elif defined(_AIX)
     lib = "lib" + libName + ".a(lib" + libName + ".so";
@@ -168,12 +161,7 @@ IceInternal::DynamicLibrary::getSymbol(const string& name)
 {
     assert(_hnd != 0);
 #ifdef _WIN32
-#  ifdef __BCPLUSPLUS__
-    string newName = "_" + name;
-    return GetProcAddress(_hnd, newName.c_str());
-#  else
     return GetProcAddress(_hnd, name.c_str());
-#  endif
 #else
     symbol_type result = dlsym(_hnd, name.c_str());
     if(result == 0)

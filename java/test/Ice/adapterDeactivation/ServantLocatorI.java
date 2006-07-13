@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -37,9 +37,9 @@ public final class ServantLocatorI extends Ice.LocalObjectImpl implements Ice.Se
     locate(Ice.Current current, Ice.LocalObjectHolder cookie)
     {
         synchronized(this)
-        {
-            test(!_deactivated);
-        }
+	{
+	    test(!_deactivated);
+	}
 
         test(current.id.category.length() == 0);
         test(current.id.name.equals("test"));
@@ -50,12 +50,12 @@ public final class ServantLocatorI extends Ice.LocalObjectImpl implements Ice.Se
     }
 
     public void
-    finished(Ice.Current current, Ice.Object servant, java.lang.Object cookie)
+    finished(Ice.Current current, Ice.Object servant, Ice.LocalObject cookie)
     {
-        synchronized(this)
-        {
-            test(!_deactivated);
-        }
+	synchronized(this)
+	{
+	    test(!_deactivated);
+	}
 
         Cookie co = (Cookie)cookie;
         test(co.message().equals("blahblah"));
@@ -64,12 +64,12 @@ public final class ServantLocatorI extends Ice.LocalObjectImpl implements Ice.Se
     public synchronized void
     deactivate(String category)
     {
-        synchronized(this)
-        {
-            test(!_deactivated);
+	synchronized(this)
+	{
+	    test(!_deactivated);
 
-            _deactivated = true;
-        }
+	    _deactivated = true;
+	}
     }
 
     private boolean _deactivated;

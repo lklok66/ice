@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -13,159 +13,119 @@ using Demo;
 
 public class Subscriber : Ice.Application
 {
-    public class ClockI : ClockDisp_
-    {
-        public override void tick(string date, Ice.Current current)
-        {
-            System.Console.Out.WriteLine(date);
-        }
-    }
-
     public override int run(string[] args)
     {
-        IceStorm.TopicManagerPrx manager = IceStorm.TopicManagerPrxHelper.checkedCast(
-            communicator().propertyToProxy("IceStorm.TopicManager.Proxy"));
+        Ice.Properties properties = communicator().getProperties();
+
+        const string proxyProperty = "IceStorm.TopicManager.Proxy";
+        string proxy = properties.getProperty(proxyProperty);
+        if(proxy == null)
+        {
+            Console.WriteLine("property `" + proxyProperty + "' not set");
+            return 1;
+        }
+
+        Ice.ObjectPrx basePrx = communicator().stringToProxy(proxy);
+        IceStorm.TopicManagerPrx manager = IceStorm.TopicManagerPrxHelper.checkedCast(basePrx);
         if(manager == null)
         {
             Console.WriteLine("invalid proxy");
             return 1;
         }
 
-        string topicName = "time";
-        bool datagram = false;
-        bool twoway = false;
-        bool ordered = false;
-        bool batch = false;
-        int optsSet = 0;
-        for(int i = 0; i < args.Length; ++i)
+        //
+        // Gather the set of topics to which to subscribe. It is either
+        // the set provided on the command line, or the topic "time".
+        //
+        ArrayList topics = new ArrayList();;
+        if(args.Length > 1)
         {
-            if(args[i].Equals("--datagram"))
+            for(int i = 0; i < args.Length; ++i)
             {
-                datagram = true;
-                ++optsSet;
-            }
-            else if(args[i].Equals("--twoway"))
-            {
-                twoway = true;
-                ++optsSet;
-            }
-            else if(args[i].Equals("--ordered"))
-            {
-                ordered = true;
-                ++optsSet;
-            }
-            else if(args[i].Equals("--oneway"))
-            {
-                ++optsSet;
-            }
-            else if(args[i].Equals("--batch"))
-            {
-                batch = true;
-            }
-            else if(args[i].StartsWith("--"))
-            {
-                usage();
-                return 1;
-            }
-            else
-            {
-                topicName = args[i];
-                break;
+                topics.Add(args[i]);
             }
         }
-
-        if(batch && (twoway || ordered))
-	{
-	    Console.WriteLine(appName() + ": batch can only be set with oneway or datagram");
-	    return 1;
-	}
-
-        if(optsSet > 1)
+        else
         {
-            usage();
-            return 1;
+            topics.Add("time");
         }
 
         //
-        // Retrieve the topic.
+        // Set the requested quality of service "reliability" =
+        // "batch". This tells IceStorm to send events to the subscriber
+        // in batches at regular intervals.
         //
-        IceStorm.TopicPrx topic;
-        try
+	IceStorm.QoS qos = new IceStorm.QoS();
+        qos["reliability"] = "batch";
+
+        //
+        // Create the servant to receive the events.
+        //
+        Ice.ObjectAdapter adapter = communicator().createObjectAdapter("Clock.Subscriber");
+        Ice.Object clock = new ClockI();
+
+        //
+        // List of all subscribers.
+        //
+	Hashtable subscribers = new Hashtable();
+
+        //
+        // Add the servant to the adapter for each topic. A ServantLocator
+        // could have been used for the same purpose.
+        //
+	for(int i = 0; i < topics.Count; ++i)
         {
-            topic = manager.retrieve(topicName);
-        }
-        catch(IceStorm.NoSuchTopic)
-        {
+            //
+            // Add a Servant for the Ice Object.
+            //
+            Ice.ObjectPrx obj = adapter.addWithUUID(clock);
             try
             {
-                topic = manager.create(topicName);
+                IceStorm.TopicPrx topic = manager.retrieve((string)topics[i]);
+                topic.subscribe(qos, obj);
             }
-            catch(IceStorm.TopicExists)
-            {
-                Console.WriteLine("temporary error. try again.");
-                return 1;
+            catch(IceStorm.NoSuchTopic e)
+            {                               
+                Console.WriteLine(e + " name: " + e.name);
             }
-        }
 
-        Ice.ObjectAdapter adapter = communicator().createObjectAdapter("Clock.Subscriber");
+            //
+            // Add to the set of subscribers _after_ subscribing. This
+            // ensures that only subscribed subscribers are unsubscribed
+            // in the case of an error.
+            //
+            subscribers[(string)topics[i]] = obj;
+        }
 
         //
-        // Add a Servant for the Ice Object.
+        // Unless there is a subscriber per topic then there was some
+        // problem. If there was an error the application should terminate
+        // without accepting any events.
         //
-        Ice.ObjectPrx subscriber = adapter.addWithUUID(new ClockI());
-
-        IceStorm.QoS qos = new IceStorm.QoS();
-
-        //
-        // Set up the proxy.
-        //
-        if(datagram)
+        if(subscribers.Count == topics.Count)
         {
-            subscriber = subscriber.ice_datagram();
+            adapter.activate();
+            shutdownOnInterrupt();
+            communicator().waitForShutdown();
         }
-        else if(twoway)
-        {
-            // Do nothing to the subscriber proxy. Its already twoway.
-        }
-        else if(ordered)
-        {
-            // Do nothing to the subscriber proxy. Its already twoway.
-            qos["reliability"] = "ordered";
-        }
-        else // if(oneway)
-        {
-            subscriber = subscriber.ice_oneway();
-        }
-        if(batch)
-        {
-            if(datagram)
-            {
-                subscriber = subscriber.ice_batchDatagram();
-            }
-            else
-            {
-                subscriber = subscriber.ice_batchOneway();
-            }
-        }
-        
-        topic.subscribeAndGetPublisher(qos, subscriber);
-        adapter.activate();
-
-        shutdownOnInterrupt();
-        communicator().waitForShutdown();
 
         //
         // Unsubscribe all subscribed objects.
         //
-        topic.unsubscribe(subscriber);
+	foreach(DictionaryEntry entry in (Hashtable)subscribers)
+        {
+            try
+            {
+                IceStorm.TopicPrx topic = manager.retrieve((string)entry.Key);
+                topic.unsubscribe((Ice.ObjectPrx)entry.Value);
+            }
+            catch(IceStorm.NoSuchTopic e)
+            {
+                Console.WriteLine(e + " name: " + e.name);
+            }
+        }
 
         return 0;
-    }
-
-    public void
-    usage()
-    {
-        Console.WriteLine("Usage: " + appName() + " [--batch] [--datagram|--twoway|--ordered|--oneway] [topic]");
     }
 
     public static void Main(string[] args)

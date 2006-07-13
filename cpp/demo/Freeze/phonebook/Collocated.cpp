@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -19,12 +19,11 @@ class PhoneBookCollocated : public Ice::Application
 public:
     
     PhoneBookCollocated(const string& envName) :
-        _envName(envName)
+	_envName(envName)
     {
     }
 
     virtual int run(int argc, char* argv[]);
-    virtual void interruptCallback(int);
 
 private:
 
@@ -41,12 +40,6 @@ main(int argc, char* argv[])
 int
 PhoneBookCollocated::run(int argc, char* argv[])
 {
-    //
-    // Since this is an interactive demo we want the custom interrupt
-    // callback to be called when the process is interrupted.
-    //
-    callbackOnInterrupt();
-
     Ice::PropertiesPtr properties = communicator()->getProperties();
 
     //
@@ -72,23 +65,23 @@ PhoneBookCollocated::run(int argc, char* argv[])
     //
     // When Freeze.Evictor.db.contacts.PopulateEmptyIndices is not 0
     // and the Name index is empty, Freeze will traverse the database
-    // to recreate the index during createXXXEvictor(). Therefore the
+    // to recreate the index during createEvictor(). Therefore the
     // factories for the objects stored in evictor (contacts here)
-    // must be registered before the call to createXXXEvictor().
+    // must be registered before the call to createEvictor().
     //
-    Freeze::EvictorPtr evictor = Freeze::createBackgroundSaveEvictor(adapter, _envName, "contacts", 0, indices);
+    Freeze::EvictorPtr evictor = Freeze::createEvictor(adapter, _envName, "contacts", 0, indices);
     adapter->addServantLocator(evictor, "contact");
 
-    Ice::Int evictorSize = properties->getPropertyAsInt("EvictorSize");
+    Ice::Int evictorSize = properties->getPropertyAsInt("PhoneBook.EvictorSize");
     if(evictorSize > 0)
     {
-        evictor->setSize(evictorSize);
+	evictor->setSize(evictorSize);
     }
 
     //
     // Completes the initialization of the contact factory. Note that ContactI/
     // ContactFactoryI uses this evictor only when a Contact is destroyed,
-    // which cannot happen during createXXXEvictor().
+    // which cannot happen during createEvictor().
     //
     contactFactory->setEvictor(evictor);
     
@@ -103,25 +96,8 @@ PhoneBookCollocated::run(int argc, char* argv[])
     //
     int runParser(int, char*[], const Ice::CommunicatorPtr&);
     int status = runParser(argc, argv, communicator());
-    adapter->destroy();
+    adapter->deactivate();
+    adapter->waitForDeactivate();
 
     return status;
-}
-
-void
-PhoneBookCollocated::interruptCallback(int)
-{
-    try
-    {
-        communicator()->destroy();
-    }
-    catch(const IceUtil::Exception& ex)
-    {
-        cerr << appName() << ": " << ex << endl;
-    }
-    catch(...)
-    {
-        cerr << appName() << ": unknown exception" << endl;
-    }
-    exit(EXIT_SUCCESS);
 }

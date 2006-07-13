@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -13,16 +13,16 @@ public class Server
 {
     public static void Main(string[] args)
     {
-        int status = 0;
+	int status = 0;
         Ice.Communicator communicator = null;
 
         try
         {
             communicator = Ice.Util.initialize(ref args);
-            Ice.ObjectAdapter adapter = communicator.createObjectAdapterWithEndpoints("Hello", "tcp -p 10000");
-            adapter.add(new HelloI(), communicator.stringToIdentity("hello"));
-            adapter.activate();
-            communicator.waitForShutdown();
+	    Ice.ObjectAdapter adapter = communicator.createObjectAdapterWithEndpoints("Hello", "tcp -p 10000");
+	    adapter.add(new HelloI(), communicator.stringToIdentity("hello"));
+	    adapter.activate();
+	    communicator.waitForShutdown();
         }
         catch(System.Exception ex)
         {

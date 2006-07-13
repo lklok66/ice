@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -59,9 +59,6 @@ local exception CollocationOptimizationException
 
 /**
  *
- * An attempt was made to register something more than once with
- * the Ice run time.
- *
  * This exception is raised if an attempt is made to register a
  * servant, servant locator, facet, object factory, plug-in, object
  * adapter, object, or user exception factory more than once for the
@@ -81,16 +78,13 @@ local exception AlreadyRegisteredException
 
     /**
      *
-     * The ID (or name) of the object that is registered already.
+     * The id (or name) of the object that is registered already.
      *
      **/
     string id;
 };
 
 /**
- *
- * An attempt was made to deregister something that is not
- * registered with the Ice run time.
  *
  * This exception is raised if an attempt is made to remove a servant,
  * facet, object factory, plug-in, object adapter, object, or user
@@ -110,7 +104,7 @@ local exception NotRegisteredException
 
     /**
      *
-     * The ID (or name) of the object that could not be removed.
+     * The id (or name) of the object that could not be removed.
      *
      **/
     string id;
@@ -118,12 +112,10 @@ local exception NotRegisteredException
 
 /**
  *
- * The operation can only be invoked with a twoway request.
- *
  * This exception is raised if an attempt is made to invoke an
  * operation with [ice_oneway], [ice_batchOneway], [ice_datagram],
  * or [ice_batchDatagram] and the operation has a return value,
- * out-parameters, or an exception specification.
+ * out parameters, or an exception specification.
  *
  **/
 local exception TwowayOnlyException
@@ -137,9 +129,6 @@ local exception TwowayOnlyException
 };
 
 /**
- *
- * An attempt was made to clone a class that does not support
- * cloning.
  *
  * This exception is raised if [ice_clone] is called on
  * a class that is derived from an abstract Slice class (that is,
@@ -156,8 +145,8 @@ local exception CloneNotImplementedException
  * This exception is raised if an operation call on a server raises an
  * unknown exception. For example, for C++, this exception is raised
  * if the server throws a C++ exception that is not directly or
- * indirectly derived from <tt>Ice::LocalException</tt> or
- * <tt>Ice::UserException</tt>.
+ * indirectly derived from <literal>Ice::LocalException</literal> or
+ * <literal>Ice::UserException</literal>.
  *
  **/
 local exception UnknownException
@@ -178,10 +167,10 @@ local exception UnknownException
  *
  * This exception is raised if an operation call on a server raises a
  * local exception. Because local exceptions are not transmitted by
- * the Ice protocol, the client receives all local exceptions raised
+ * the &Ice; protocol, the client receives all local exceptions raised
  * by the server as [UnknownLocalException]. The only exception to this
  * rule are all exceptions derived from [RequestFailedException],
- * which are transmitted by the Ice protocol even though they are
+ * which are transmitted by the &Ice; protocol even though they are
  * declared [local].
  *
  **/
@@ -191,17 +180,15 @@ local exception UnknownLocalException extends UnknownException
 
 /**
  *
- * An operation raised an incorrect user exception.
- *
- * This exception is raised if an operation raises a
+ * This exception is raised if an operation call on a server raises a
  * user exception that is not declared in the exception's
- * <tt>throws</tt> clause. Such undeclared exceptions are
- * not transmitted from the server to the client by the Ice
+ * <literal>throws</literal> clause. Such undeclared exceptions are
+ * not transmitted from the server to the client by the &Ice;
  * protocol, but instead the client just gets an
  * [UnknownUserException]. This is necessary in order to not violate
  * the contract established by an operation's signature: Only local
  * exceptions and user exceptions declared in the
- * <tt>throws</tt> clause can be raised.
+ * <literal>throws</literal> clause can be raised.
  *
  **/
 local exception UnknownUserException extends UnknownException
@@ -210,8 +197,8 @@ local exception UnknownUserException extends UnknownException
 
 /**
  *
- * This exception is raised if the Ice library version does not match
- * the version in the Ice header files.
+ * This exception is raised if the &Ice; library version does not match
+ * the &Ice; header files version.
  *
  **/
 local exception VersionMismatchException
@@ -250,9 +237,8 @@ local exception ObjectAdapterDeactivatedException
 
 /**
  *
- * This exception is raised if an [ObjectAdapter] cannot be activated.
- *
- * This happens if the [Locator] detects another active [ObjectAdapter] with
+ * This exception is raised if an [ObjectAdapter] cannot be activated
+ * because the [Locator] detected another active [ObjectAdapter] with
  * the same adapter id.
  *
  **/
@@ -260,7 +246,7 @@ local exception ObjectAdapterIdInUseException
 {
     /**
      *
-     * Adapter ID.
+     * Adapter id.
      *
      **/
     string id;
@@ -289,22 +275,6 @@ local exception NoEndpointException
  *
  **/
 local exception EndpointParseException
-{
-    /**
-     *
-     * The string that could not be parsed.
-     *
-     **/
-    string str;
-};
-
-/**
- *
- * This exception is raised if there was an error while parsing an
- * endpoint selection type.
- *
- **/
-local exception EndpointSelectionTypeParseException
 {
     /**
      *
@@ -365,7 +335,7 @@ local exception IllegalIdentityException
  *
  * This exception is raised if a request failed. This exception, and
  * all exceptions derived from [RequestFailedException], are
- * transmitted by the Ice protocol, even though they are declared
+ * transmitted by the &Ice; protocol, even though they are declared
  * [local].
  *
  **/
@@ -425,10 +395,10 @@ local exception SyscallException
     /**
      *
      * The error number describing the system exception. For C++ and
-     * Unix, this is equivalent to <tt>errno</tt>. For C++
+     * Unix, this is equivalent to <literal>errno</literal>. For C++
      * and Windows, this is the value returned by
-     * <tt>GetLastError()</tt> or
-     * <tt>WSAGetLastError()</tt>.
+     * <literal>GetLastError()</literal> or
+     * <literal>WSAGetLastError()</literal>.
      *
      **/
     int error; // Don't use errno, as errno is usually a macro.
@@ -436,7 +406,8 @@ local exception SyscallException
 
 /**
  *
- * This exception indicates socket errors.
+ * This exception is a specialization of [SyscallException] for socket
+ * errors.
  *
  **/
 local exception SocketException extends SyscallException
@@ -445,7 +416,8 @@ local exception SocketException extends SyscallException
 
 /**
  *
- * This exception indicates file errors.
+ * This exception is a specialization of [SyscallException] for file
+ * errors.
  *
  **/
 local exception FileException extends SyscallException
@@ -456,7 +428,8 @@ local exception FileException extends SyscallException
 
 /**
  *
- * This exception indicates connection failures.
+ * This exception is a specialization of [SocketException] for
+ * connection failures.
  *
  **/
 local exception ConnectFailedException extends SocketException
@@ -465,8 +438,9 @@ local exception ConnectFailedException extends SocketException
 
 /**
  *
- * This exception indicates a connection failure for which
- * the server host actively refuses a connection.
+ * This exception is a specialization of [ConnectFailedException] for
+ * connection failures, where the server host actively refuses a
+ * connection.
  *
  **/
 local exception ConnectionRefusedException extends ConnectFailedException
@@ -475,7 +449,8 @@ local exception ConnectionRefusedException extends ConnectFailedException
 
 /**
  *
- * This exception indicates a lost connection.
+ * This exception is a specialization of [SocketException], indicating
+ * a lost connection.
  *
  **/
 local exception ConnectionLostException extends SocketException
@@ -493,9 +468,9 @@ local exception DNSException
     /**
      *
      * The error number describing the DNS problem. For C++ and Unix,
-     * this is equivalent to <tt>h_errno</tt>. For C++ and
+     * this is equivalent to <literal>h_errno</literal>. For C++ and
      * Windows, this is the value returned by
-     * <tt>WSAGetLastError()</tt>.
+     * <literal>WSAGetLastError()</literal>.
      *
      **/
     int error; // Don't use h_errno, as h_errno is usually a macro.
@@ -519,7 +494,8 @@ local exception TimeoutException
 
 /**
  *
- * This exception indicates a connection establishment timeout condition.
+ * This exception is a specialization of [TimeoutException] for
+ * connection establishment timeout conditions.
  *
  **/
 local exception ConnectTimeoutException extends TimeoutException
@@ -528,7 +504,8 @@ local exception ConnectTimeoutException extends TimeoutException
 
 /**
  *
- * This exception indicates a connection closure timeout condition.
+ * This exception is a specialization of [TimeoutException] for
+ * connection closure timeout conditions.
  *
  **/
 local exception CloseTimeoutException extends TimeoutException
@@ -537,7 +514,8 @@ local exception CloseTimeoutException extends TimeoutException
 
 /**
  *
- * This exception indicates that a connection has been shut down because it has been
+ * This exception is a specialization of [TimeoutException], and
+ * indicates that a connection has been shut down because it has been
  * idle for some time.
  *
  **/
@@ -563,7 +541,8 @@ local exception ProtocolException
 
 /**
  *
- * This exception indicates that a message did not start with the expected
+ * This exception is a specialization of [ProtocolException],
+ * indicating that a message did not start with the expected
  * magic number ('I', 'c', 'e', 'P').
  *
  **/
@@ -579,7 +558,9 @@ local exception BadMagicException extends ProtocolException
 
 /**
  *
- * This exception indicates an unsupported protocol version.
+ * This exception is a specialization of [ProtocolException],
+ * indicating that an unsupported protocol version has been
+ * encountered.
  *
  **/
 local exception UnsupportedProtocolException extends ProtocolException
@@ -615,7 +596,9 @@ local exception UnsupportedProtocolException extends ProtocolException
 
 /**
  *
- * This exception indicates an unsupported data encoding version.
+ * This exception is a specialization of [ProtocolException],
+ * indicating that an unsupported data encoding version has been
+ * encountered.
  *
  **/
 local exception UnsupportedEncodingException extends ProtocolException
@@ -651,7 +634,8 @@ local exception UnsupportedEncodingException extends ProtocolException
 
 /**
  *
- * This exception indicates that an unknown protocol message has been received.
+ * This exception is a specialization of [ProtocolException],
+ * indicating that an unknown protocol message has been received.
  *
  **/
 local exception UnknownMessageException extends ProtocolException
@@ -660,8 +644,9 @@ local exception UnknownMessageException extends ProtocolException
 
 /**
  *
- * This exception is raised if a message is received over a connection
- * that is not yet validated.
+ * This exception is a specialization of [ProtocolException], that is
+ * raised if a message is received over a connection that is not yet
+ * validated.
  *
  **/
 local exception ConnectionNotValidatedException extends ProtocolException
@@ -670,7 +655,8 @@ local exception ConnectionNotValidatedException extends ProtocolException
 
 /**
  *
- * This exception indicates that a response for an unknown request ID has been
+ * This exception is a specialization of [ProtocolException],
+ * indicating that a response for an unknown request id has been
  * received.
  *
  **/
@@ -680,7 +666,8 @@ local exception UnknownRequestIdException extends ProtocolException
 
 /**
  *
- * This exception indicates that an unknown reply status has been received.
+ * This exception is a specialization of [ProtocolException],
+ * indicating that an unknown reply status has been received.
  *
  **/
 local exception UnknownReplyStatusException extends ProtocolException
@@ -689,7 +676,8 @@ local exception UnknownReplyStatusException extends ProtocolException
 
 /**
  *
- * This exception indicates that the connection has been gracefully shut down by the
+ * This exception is a specialization of [ProtocolException],
+ * indicating that the connection has been gracefully shut down by the
  * server. The operation call that caused this exception has not been
  * executed by the server. In most cases you will not get this
  * exception, because the client will automatically retry the
@@ -706,7 +694,8 @@ local exception CloseConnectionException extends ProtocolException
 /**
  *
  * This exception is raised by an operation call if the application
- * forcefully closes the connection [Connection::close].
+ * forcefully closes the connection used by this call with
+ * [Connection::close].
  *
  * @see Connection::close
  *
@@ -717,8 +706,9 @@ local exception ForcedCloseConnectionException extends ProtocolException
 
 /**
  *
- * This exception indicates that a message size is less
- * than the minimum required size.
+ * This exception is a specialization of [ProtocolException],
+ * indicating that the message size is illegal, i.e., it is
+ * less than the minimum required size.
  *
  **/
 local exception IllegalMessageSizeException extends ProtocolException
@@ -727,7 +717,9 @@ local exception IllegalMessageSizeException extends ProtocolException
 
 /**
  *
- * This exception indicates a problem with compressing or uncompressing data.
+ * This exception is a specialization of [ProtocolException] that is
+ * raised if there is a problem with compressing or uncompressing
+ * data.
  *
  **/
 local exception CompressionException extends ProtocolException
@@ -736,9 +728,8 @@ local exception CompressionException extends ProtocolException
 
 /**
  *
- * A datagram exceeds the configured size.
- *
- * This exception is raised if a datagram exceeds the configured send or receive buffer
+ * This exception is a specialization of [ProtocolException] that is
+ * raised if a datagram exceeds the configured send or receive buffer
  * size, or exceeds the maximum payload size of a UDP packet (65507 bytes).
  *
  **/
@@ -748,7 +739,8 @@ local exception DatagramLimitException extends ProtocolException
 
 /**
  *
- * This exception is raised for errors during marshaling or unmarshaling data.
+ * This exception is a specialization of [ProtocolException] that is
+ * raised upon an error during marshaling or unmarshaling data.
  *
  **/
 local exception MarshalException extends ProtocolException
@@ -757,7 +749,8 @@ local exception MarshalException extends ProtocolException
 
 /**
  *
- * This exception is raised if inconsistent data is received while unmarshaling a proxy.
+ * This exception is a specialization of [MarshalException] that is
+ * raised if inconsistent data is received while unmarshaling a proxy.
  *
  **/
 local exception ProxyUnmarshalException extends MarshalException
@@ -766,7 +759,8 @@ local exception ProxyUnmarshalException extends MarshalException
 
 /**
  *
- * This exception is raised if an out-of-bounds condition occurs during unmarshaling.
+ * This exception is a specialization of [MarshalException] that is
+ * raised if an out-of-bounds condition occurs during unmarshaling.
  *
  **/
 local exception UnmarshalOutOfBoundsException extends MarshalException
@@ -775,7 +769,8 @@ local exception UnmarshalOutOfBoundsException extends MarshalException
 
 /**
  *
- * This exception indicates an illegal indirection during unmarshaling.
+ * This exception is a specialization of [MarshalException],
+ * indicating an illegal indirection during unmarshaling.
  *
  **/
 local exception IllegalIndirectionException extends MarshalException
@@ -784,8 +779,9 @@ local exception IllegalIndirectionException extends MarshalException
 
 /**
  *
- * This exception is raised if no suitable object factory was found during
- * unmarshaling of a Slice class instance.
+ * This exception is a specialization of [MarshalException] that is
+ * raised if no suitable object factory was found during object
+ * unmarshaling.
  *
  * @see ObjectFactory
  * @see Communicator::addObjectFactory
@@ -796,8 +792,8 @@ local exception NoObjectFactoryException extends MarshalException
 {
     /**
      *
-     * The Slice type ID of the class instance for which no
-     * no factory could be found.
+     * The absolute Slice type id of the object for which we
+     * could not find a factory.
      *
      **/
     string type;
@@ -805,35 +801,8 @@ local exception NoObjectFactoryException extends MarshalException
 
 /**
  *
- * This exception is raised if the type of an unmarshaled Slice class instance does
- * not match its expected type.
- * This can happen if client and server are compiled with mismatched Slice
- * definitions or if a class of the wrong type is passed as a parameter
- * or return value using dynamic invocation. This exception can also be
- * raised if [IceStorm] is used to send Slice class instances and
- * an operation is subscribed to the wrong topic.
- *
- **/
-local exception UnexpectedObjectException extends MarshalException
-{
-    /**
-     *
-     * The Slice type ID of the class instance that was unmarshaled.
-     *
-     **/
-    string type;
-
-    /**
-     *
-     * The Slice type ID that was excepted by the receiving operation.
-     *
-     **/
-    string expectedType;
-};
-
-/**
- *
- * This exception is raised if the system-specific memory limit is exceeded during
+ * This exception is a specialization of [MarshalException] that is
+ * raised if the system-specific memory limit is exceeded during
  * marshaling or unmarshaling.
  *
  **/
@@ -843,7 +812,7 @@ local exception MemoryLimitException extends MarshalException
 
 /**
  *
- * This exception is
+ * This exception is a specialization of [MarshalException] that is
  * raised when a string conversion to or from UTF-8 fails during 
  * marshaling or unmarshaling.
  *
@@ -855,7 +824,8 @@ local exception StringConversionException extends MarshalException
 
 /**
  *
- * This exception indicates a malformed data encapsulation.
+ * This exception is a specialization of [MarshalException],
+ * indicating a malformed data encapsulation.
  *
  **/
 local exception EncapsulationException extends MarshalException
@@ -864,8 +834,9 @@ local exception EncapsulationException extends MarshalException
 
 /**
  *
- * This exception is raised if a negative size
- * (for example, a negative sequence size) is received.
+ * This exception is a specialization of [MarshalException] that is
+ * raised if a negative size (e.g., a negative sequence size) is
+ * received.
  *
  **/
 local exception NegativeSizeException extends MarshalException
@@ -889,7 +860,6 @@ local exception FeatureNotSupportedException
     string unsupportedFeature;
 };
 
-
 /**
  *
  * This exception indicates a failure in a security subsystem,
@@ -905,27 +875,6 @@ local exception SecurityException
      **/
     string reason;
 };
-
-/**
- * 
- * This exception indicates that an attempt has been made to
- * change the connection properties of a fixed proxy.
- *
- **/
-local exception FixedProxyException
-{
-};
-
-/**
- * 
- * Indicates that the response to a request has already been sent;
- * re-dispatching such a request is not possible.
- *
- **/
-local exception ResponseSentException
-{
-};
-
 
 };
 

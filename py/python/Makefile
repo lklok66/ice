@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -27,8 +27,6 @@ ICE_SRCS	= Ice_LocalException_ice.py \
 		  Ice_ObjectFactoryF_ice.py \
 		  Ice_Identity_ice.py \
 		  Ice_Current_ice.py \
-		  Ice_ImplicitContextF_ice.py \
-		  Ice_ImplicitContext_ice.py \
 		  Ice_Router_ice.py \
 		  Ice_RouterF_ice.py \
 		  Ice_Plugin_ice.py \
@@ -60,7 +58,6 @@ ICEGRID_SRCS	= IceGrid_Admin_ice.py \
 		  IceGrid_Exception_ice.py \
 		  IceGrid_FileParser_ice.py \
 		  IceGrid_Observer_ice.py \
-		  IceGrid_Locator_ice.py \
 		  IceGrid_Query_ice.py \
 		  IceGrid_Registry_ice.py \
 		  IceGrid_Session_ice.py \

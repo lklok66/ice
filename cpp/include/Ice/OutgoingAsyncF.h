@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -10,15 +10,14 @@
 #ifndef ICE_OUTGOING_ASYNC_F_H
 #define ICE_OUTGOING_ASYNC_F_H
 
-#include <IceUtil/Shared.h>
-
 #include <Ice/Handle.h>
 
 namespace IceInternal
 {
 
 class OutgoingAsync;
-ICE_API IceUtil::Shared* upCast(OutgoingAsync*);
+ICE_API void incRef(OutgoingAsync*);
+ICE_API void decRef(OutgoingAsync*);
 typedef IceInternal::Handle<OutgoingAsync> OutgoingAsyncPtr;
 
 }
@@ -34,8 +33,10 @@ class AMI_Array_Object_ice_invoke;
 namespace IceInternal
 {
 
-ICE_API IceUtil::Shared* upCast(::Ice::AMI_Object_ice_invoke*);
-ICE_API IceUtil::Shared* upCast(::Ice::AMI_Array_Object_ice_invoke*);
+ICE_API void incRef(::Ice::AMI_Object_ice_invoke*);
+ICE_API void decRef(::Ice::AMI_Object_ice_invoke*);
+ICE_API void incRef(::Ice::AMI_Array_Object_ice_invoke*);
+ICE_API void decRef(::Ice::AMI_Array_Object_ice_invoke*);
 
 }
 

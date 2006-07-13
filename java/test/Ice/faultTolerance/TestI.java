@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -15,7 +15,7 @@ public final class TestI extends _TestIntfDisp
     TestI(Ice.ObjectAdapter adapter, int port)
     {
         _adapter = adapter;
-        _pseudoPid = port; // We use the port number instead of the process ID in Java.
+	_pseudoPid = port; // We use the port number instead of the process ID in Java.
     }
 
     public void
@@ -27,13 +27,19 @@ public final class TestI extends _TestIntfDisp
     public void
     abort(Ice.Current current)
     {
-        Runtime.getRuntime().halt(0);
+	Runtime.getRuntime().halt(0);
     }
 
     public void
     idempotentAbort(Ice.Current current)
     {
-        Runtime.getRuntime().halt(0);
+	Runtime.getRuntime().halt(0);
+    }
+
+    public void
+    nonmutatingAbort(Ice.Current current)
+    {
+	Runtime.getRuntime().halt(0);
     }
 
     public int

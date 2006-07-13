@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -14,27 +14,27 @@ final class TcpEndpointI extends EndpointI
     final static short TYPE = 1;
 
     public
-    TcpEndpointI(Instance instance, String ho, int po, int ti, String conId, boolean co, boolean oae)
+    TcpEndpointI(Instance instance, String ho, int po, int ti, String conId, boolean co, boolean pub)
     {
         _instance = instance;
         _host = ho;
         _port = po;
         _timeout = ti;
         _connectionId = conId;
-        _compress = co;
-        _oaEndpoint = oae;
+	_compress = co;
+	_publish = pub;
         calcHashValue();
     }
 
     public
-    TcpEndpointI(Instance instance, String str, boolean oaEndpoint)
+    TcpEndpointI(Instance instance, String str)
     {
         _instance = instance;
         _host = null;
         _port = 0;
         _timeout = -1;
-        _compress = false;
-        _oaEndpoint = oaEndpoint;
+	_compress = false;
+	_publish = true;
 
         String[] arr = str.split("[ \t\n\r]+");
 
@@ -50,7 +50,7 @@ final class TcpEndpointI extends EndpointI
             String option = arr[i++];
             if(option.length() != 2 || option.charAt(0) != '-')
             {
-                throw new Ice.EndpointParseException("tcp " + str);
+		throw new Ice.EndpointParseException("tcp " + str);
             }
 
             String argument = null;
@@ -65,7 +65,7 @@ final class TcpEndpointI extends EndpointI
                 {
                     if(argument == null)
                     {
-                        throw new Ice.EndpointParseException("tcp " + str);
+			throw new Ice.EndpointParseException("tcp " + str);
                     }
 
                     _host = argument;
@@ -76,7 +76,7 @@ final class TcpEndpointI extends EndpointI
                 {
                     if(argument == null)
                     {
-                        throw new Ice.EndpointParseException("tcp " + str);
+			throw new Ice.EndpointParseException("tcp " + str);
                     }
 
                     try
@@ -85,13 +85,13 @@ final class TcpEndpointI extends EndpointI
                     }
                     catch(NumberFormatException ex)
                     {
-                        throw new Ice.EndpointParseException("tcp " + str);
+			throw new Ice.EndpointParseException("tcp " + str);
                     }
 
-                    if(_port < 0 || _port > 65535)
-                    {
-                        throw new Ice.EndpointParseException("tcp " + str);
-                    }
+		    if(_port < 0 || _port > 65535)
+		    {
+			throw new Ice.EndpointParseException("tcp " + str);
+		    }
 
                     break;
                 }
@@ -100,7 +100,7 @@ final class TcpEndpointI extends EndpointI
                 {
                     if(argument == null)
                     {
-                        throw new Ice.EndpointParseException("tcp " + str);
+			throw new Ice.EndpointParseException("tcp " + str);
                     }
 
                     try
@@ -109,7 +109,7 @@ final class TcpEndpointI extends EndpointI
                     }
                     catch(NumberFormatException ex)
                     {
-                        throw new Ice.EndpointParseException("tcp " + str);
+			throw new Ice.EndpointParseException("tcp " + str);
                     }
 
                     break;
@@ -119,7 +119,7 @@ final class TcpEndpointI extends EndpointI
                 {
                     if(argument != null)
                     {
-                        throw new Ice.EndpointParseException("tcp " + str);
+			throw new Ice.EndpointParseException("tcp " + str);
                     }
 
                     _compress = true;
@@ -128,7 +128,7 @@ final class TcpEndpointI extends EndpointI
 
                 default:
                 {
-                    throw new Ice.EndpointParseException("tcp " + str);
+		    throw new Ice.EndpointParseException("tcp " + str);
                 }
             }
         }
@@ -136,22 +136,16 @@ final class TcpEndpointI extends EndpointI
         if(_host == null)
         {
             _host = _instance.defaultsAndOverrides().defaultHost;
-            if(_host == null)
-            {
-                if(_oaEndpoint)
-                {
-                    _host = "0.0.0.0";
-                }
-                else
-                {
-                    _host = "127.0.0.1";
-                }
-            }
+	    if(_host == null)
+	    {
+		_host = "0.0.0.0";
+	    }
         }
-        else if(_host.equals("*"))
-        {
-            _host = "0.0.0.0";
-        }
+	else if(_host.equals("*"))
+	{
+	    _host = "0.0.0.0";
+	}
+
         calcHashValue();
     }
 
@@ -163,9 +157,9 @@ final class TcpEndpointI extends EndpointI
         _host = s.readString();
         _port = s.readInt();
         _timeout = s.readInt();
-        _compress = s.readBool();
+	_compress = s.readBool();
         s.endReadEncaps();
-        _oaEndpoint = false;
+	_publish = true;
         calcHashValue();
     }
 
@@ -180,7 +174,7 @@ final class TcpEndpointI extends EndpointI
         s.writeString(_host);
         s.writeInt(_port);
         s.writeInt(_timeout);
-        s.writeBool(_compress);
+	s.writeBool(_compress);
         s.endWriteEncaps();
     }
 
@@ -190,22 +184,22 @@ final class TcpEndpointI extends EndpointI
     public String
     _toString()
     {
-        //
-        // WARNING: Certain features, such as proxy validation in Glacier2,
-        // depend on the format of proxy strings. Changes to toString() and
-        // methods called to generate parts of the reference string could break
-        // these features. Please review for all features that depend on the
-        // format of proxyToString() before changing this and related code.
-        //
+	//
+	// WARNING: Certain features, such as proxy validation in Glacier2,
+	// depend on the format of proxy strings. Changes to toString() and
+	// methods called to generate parts of the reference string could break
+	// these features. Please review for all features that depend on the
+	// format of proxyToString() before changing this and related code.
+	//
         String s = "tcp -h " + _host + " -p " + _port;
         if(_timeout != -1)
         {
             s += " -t " + _timeout;
         }
-        if(_compress)
-        {
-            s += " -z";
-        }
+	if(_compress)
+	{
+	    s += " -z";
+	}
         return s;
     }
 
@@ -242,7 +236,7 @@ final class TcpEndpointI extends EndpointI
         }
         else
         {
-            return new TcpEndpointI(_instance, _host, _port, timeout, _connectionId, _compress, _oaEndpoint);
+            return new TcpEndpointI(_instance, _host, _port, timeout, _connectionId, _compress, _publish);
         }
     }
 
@@ -252,13 +246,13 @@ final class TcpEndpointI extends EndpointI
     public EndpointI
     connectionId(String connectionId)
     {
-        if(connectionId.equals(_connectionId))
+        if(connectionId == _connectionId)
         {
             return this;
         }
         else
         {
-            return new TcpEndpointI(_instance, _host, _port, _timeout, connectionId, _compress, _oaEndpoint);
+            return new TcpEndpointI(_instance, _host, _port, _timeout, connectionId, _compress, _publish);
         }
     }
 
@@ -286,7 +280,7 @@ final class TcpEndpointI extends EndpointI
         }
         else
         {
-            return new TcpEndpointI(_instance, _host, _port, _timeout, _connectionId, compress, _oaEndpoint);
+            return new TcpEndpointI(_instance, _host, _port, _timeout, _connectionId, compress, _publish);
         }
     }
 
@@ -318,6 +312,16 @@ final class TcpEndpointI extends EndpointI
     }
 
     //
+    // Return a client side transceiver for this endpoint, or null if a
+    // transceiver can only be created by a connector.
+    //
+    public Transceiver
+    clientTransceiver()
+    {
+        return null;
+    }
+
+    //
     // Return a server side transceiver for this endpoint, or null if a
     // transceiver can only be created by an acceptor. In case a
     // transceiver is created, this operation also returns a new
@@ -325,27 +329,20 @@ final class TcpEndpointI extends EndpointI
     // for example, if a dynamic port number is assigned.
     //
     public Transceiver
-    transceiver(EndpointIHolder endpoint)
+    serverTransceiver(EndpointIHolder endpoint)
     {
         endpoint.value = this;
         return null;
     }
 
     //
-    // Return connectors for this endpoint, or empty list if no connector
+    // Return a connector for this endpoint, or null if no connector
     // is available.
     //
-    public java.util.ArrayList
-    connectors()
+    public Connector
+    connector()
     {
-        java.util.ArrayList connectors = new java.util.ArrayList();
-        java.util.ArrayList addresses = Network.getAddresses(_host, _port);
-        java.util.Iterator p = addresses.iterator();
-        while(p.hasNext())
-        {
-            connectors.add(new TcpConnector(_instance, (java.net.InetSocketAddress)p.next(), _timeout, _connectionId));
-        }
-        return connectors;
+        return new TcpConnector(_instance, _host, _port);
     }
 
     //
@@ -360,37 +357,48 @@ final class TcpEndpointI extends EndpointI
     {
         TcpAcceptor p = new TcpAcceptor(_instance, _host, _port);
         endpoint.value = new TcpEndpointI(_instance, _host, p.effectivePort(), _timeout, _connectionId,
-                                          _compress, _oaEndpoint);
+					  _compress, _publish);
         return p;
     }
 
     //
     // Expand endpoint out in to separate endpoints for each local
-    // host if endpoint was configured with no host set. 
+    // host if endpoint was configured with no host set. This
+    // only applies for ObjectAdapter endpoints.
     //
     public java.util.ArrayList
-    expand()
+    expand(boolean includeLoopback)
     {
         java.util.ArrayList endps = new java.util.ArrayList();
-        if(_host.equals("0.0.0.0"))
-        {
-            java.util.ArrayList hosts = Network.getLocalHosts();
-            java.util.Iterator iter = hosts.iterator();
-            while(iter.hasNext())
-            {
-                String host = (String)iter.next();
-                if(!_oaEndpoint || hosts.size() == 1 || !host.equals("127.0.0.1"))
-                {
-                    endps.add(new TcpEndpointI(_instance, host, _port, _timeout, _connectionId, _compress,
-                                               _oaEndpoint));
-                }
-            }
-        }
-        else
-        {
-            endps.add(this);
-        }
-        return endps;
+	if(_host.equals("0.0.0.0"))
+	{
+	    java.util.ArrayList hosts = Network.getLocalHosts();
+	    java.util.Iterator iter = hosts.iterator();
+	    while(iter.hasNext())
+	    {
+	        String host = (String)iter.next();
+		if(includeLoopback || hosts.size() == 1 || !host.equals("127.0.0.1"))
+		{
+		    endps.add(new TcpEndpointI(_instance, host, _port, _timeout, _connectionId, _compress,
+					       hosts.size() == 1 || !host.equals("127.0.0.1")));
+		}
+	    }
+	}
+	else
+	{
+	    endps.add(this);
+	}
+	return endps;
+    }
+
+    //
+    // Return whether endpoint should be published in proxies
+    // created by Object Adapter.
+    //
+    public boolean
+    publish()
+    {
+        return _publish;
     }
 
     //
@@ -444,15 +452,7 @@ final class TcpEndpointI extends EndpointI
         }
         catch(ClassCastException ex)
         {
-            try
-            {
-                EndpointI e = (EndpointI)obj;
-                return type() < e.type() ? -1 : 1;
-            }
-            catch(ClassCastException ee)
-            {
-                assert(false);
-            }
+            return 1;
         }
 
         if(this == p)
@@ -478,10 +478,10 @@ final class TcpEndpointI extends EndpointI
             return 1;
         }
 
-        if(!_connectionId.equals(p._connectionId))
-        {
-            return _connectionId.compareTo(p._connectionId);
-        }
+    	if(!_connectionId.equals(p._connectionId))
+	{
+	    return _connectionId.compareTo(p._connectionId);
+	}
 
         if(!_compress && p._compress)
         {
@@ -492,13 +492,57 @@ final class TcpEndpointI extends EndpointI
             return 1;
         }
 
-        return _host.compareTo(p._host);
-    }
+        if(!_host.equals(p._host))
+        {
+            //
+            // We do the most time-consuming part of the comparison last.
+            //
+            java.net.InetSocketAddress laddr = null;
+	    try
+	    {
+		laddr = Network.getAddress(_host, _port);
+	    }
+	    catch(Ice.DNSException ex)
+	    {
+	    }
 
-    public boolean
-    requiresThreadPerConnection()
-    {
-        return false;
+            java.net.InetSocketAddress raddr = null;
+	    try
+	    {
+		raddr = Network.getAddress(p._host, p._port);
+	    }
+	    catch(Ice.DNSException ex)
+	    {
+	    }
+
+	    if(laddr == null && raddr != null)
+	    {
+		return -1;
+	    }
+	    else if(raddr == null && laddr != null)
+	    {
+		return 1;
+	    }
+	    else if(laddr != null && raddr != null)
+	    {
+		byte[] larr = laddr.getAddress().getAddress();
+		byte[] rarr = raddr.getAddress().getAddress();
+		assert(larr.length == rarr.length);
+		for(int i = 0; i < larr.length; i++)
+		{
+		    if(larr[i] < rarr[i])
+		    {
+			return -1;
+		    }
+		    else if(rarr[i] < larr[i])
+		    {
+			return 1;
+		    }
+		}
+	    }
+        }
+
+        return 0;
     }
 
     private void
@@ -506,10 +550,10 @@ final class TcpEndpointI extends EndpointI
     {
         try
         {
-            java.net.InetSocketAddress addr = Network.getAddress(_host, _port);
-            _hashCode = addr.getAddress().getHostAddress().hashCode();
+            java.net.InetAddress addr = java.net.InetAddress.getByName(_host);
+            _hashCode = addr.getHostAddress().hashCode();
         }
-        catch(Ice.DNSException ex)
+        catch(java.net.UnknownHostException ex)
         {
             _hashCode = _host.hashCode();
         }
@@ -525,6 +569,6 @@ final class TcpEndpointI extends EndpointI
     private int _timeout;
     private String _connectionId = "";
     private boolean _compress;
-    private boolean _oaEndpoint;
+    private boolean _publish;
     private int _hashCode;
 }

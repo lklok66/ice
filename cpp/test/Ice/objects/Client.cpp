@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -20,38 +20,25 @@ public:
 
     virtual Ice::ObjectPtr create(const string& type)
     {
-        if(type == "::Test::B")
-        {
-            return new BI;
-        }
-        else if(type == "::Test::C")
-        {
-            return new CI;
-        }
-        else if(type == "::Test::D")
-        {
-            return new DI;
-        }
-        else if(type == "::Test::I")
-        {
-            return new II;
-        }
-        else if(type == "::Test::J")
-        {
-            return new JI;
-        }
-        else if(type == "::Test::H")
-        {
-            return new HI;
-        }
-
-        assert(false); // Should never be reached
-        return 0;
+	if(type == "::Test::B")
+	{
+	    return new BI;
+	}
+	else if(type == "::Test::C")
+	{
+	    return new CI;
+	}
+	else if(type == "::Test::D")
+	{
+	    return new DI;
+	}
+	assert(false); // Should never be reached
+	return 0;
     }
 
     virtual void destroy()
     {
-        // Nothing to do
+	// Nothing to do
     }
 };
 
@@ -62,9 +49,6 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
     communicator->addObjectFactory(factory, "::Test::B");
     communicator->addObjectFactory(factory, "::Test::C");
     communicator->addObjectFactory(factory, "::Test::D");
-    communicator->addObjectFactory(factory, "::Test::I");
-    communicator->addObjectFactory(factory, "::Test::J");
-    communicator->addObjectFactory(factory, "::Test::H");
 
     InitialPrx allTests(const Ice::CommunicatorPtr&, bool);
     InitialPrx initial = allTests(communicator, false);
@@ -80,26 +64,26 @@ main(int argc, char* argv[])
 
     try
     {
-        communicator = Ice::initialize(argc, argv);
-        status = run(argc, argv, communicator);
+	communicator = Ice::initialize(argc, argv);
+	status = run(argc, argv, communicator);
     }
     catch(const Ice::Exception& ex)
     {
-        cerr << ex << endl;
-        status = EXIT_FAILURE;
+	cerr << ex << endl;
+	status = EXIT_FAILURE;
     }
 
     if(communicator)
     {
-        try
-        {
-            communicator->destroy();
-        }
-        catch(const Ice::Exception& ex)
-        {
-            cerr << ex << endl;
-            status = EXIT_FAILURE;
-        }
+	try
+	{
+	    communicator->destroy();
+	}
+	catch(const Ice::Exception& ex)
+	{
+	    cerr << ex << endl;
+	    status = EXIT_FAILURE;
+	}
     }
 
     return status;

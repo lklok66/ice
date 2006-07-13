@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -34,13 +34,15 @@ import Ice
 Ice.loadSlice('-I' + slice_dir + '/slice Test.ice')
 import Test, TestI, AllTests
 
-def run(args, communicator):
+def run(args, communicator, initData):
     communicator.getProperties().setProperty("TestAdapter.Endpoints", "default -p 12010 -t 10000")
     adapter = communicator.createObjectAdapter("TestAdapter")
-    adapter.add(TestI.MyDerivedClassI(), communicator.stringToIdentity("test"))
+    id = communicator.stringToIdentity("test")
+    adapter.add(TestI.MyDerivedClassI(adapter, id), id)
+    adapter.add(TestI.TestCheckedCastI(), communicator.stringToIdentity("context"))
     adapter.activate()
 
-    AllTests.allTests(communicator, True)
+    AllTests.allTests(communicator, initData)
 
     return True
 
@@ -48,7 +50,7 @@ try:
     initData = Ice.InitializationData()
     initData.properties = Ice.createProperties(sys.argv)
     communicator = Ice.initialize(sys.argv, initData)
-    status = run(sys.argv, communicator)
+    status = run(sys.argv, communicator, initData)
 except:
     traceback.print_exc()
     status = False

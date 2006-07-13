@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -34,7 +34,14 @@ class CallbackReceiverI(Demo.CallbackReceiver):
 
 class Client(Ice.Application):
     def run(self, args):
-        base = self.communicator().propertyToProxy('Callback.CallbackServer')
+        properties = self.communicator().getProperties()
+        proxyProperty = 'Callback.Client.CallbackServer'
+        proxy = properties.getProperty(proxyProperty)
+        if len(proxy) == 0:
+            print self.appName() + ": property `" + proxyProperty + "' not set"
+            return 1
+
+        base = self.communicator().stringToProxy(proxy)
         twoway = Demo.CallbackSenderPrx.checkedCast(base.ice_twoway().ice_timeout(-1).ice_secure(False))
         if not twoway:
             print self.appName() + ": invalid proxy"
@@ -108,8 +115,6 @@ class Client(Ice.Application):
                     print "unknown command `" + c + "'"
                     menu()
             except EOFError:
-                break
-            except KeyboardInterrupt:
                 break
 
         return 0

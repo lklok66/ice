@@ -1,95 +1,58 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
 #
 # **********************************************************************
 
-import sys, traceback, time, Ice, IceStorm, getopt
+import sys, traceback, Ice, IceStorm
 
 Ice.loadSlice('Clock.ice')
 import Demo
 
 class Publisher(Ice.Application):
-    def usage(self):
-        print "Usage: " + self.appName() + " [--datagram|--twoway|--oneway] [topic]"
-
     def run(self, args):
-        try:
-            opts, args = getopt.getopt(args[1:], '', ['datagram', 'twoway', 'oneway'])
-        except getopt.GetoptError:
-            self.usage()
-            return 1
+	properties = self.communicator().getProperties()
 
-        datagram = False
-        twoway = False
-        optsSet = 0
-        topicName = "time"
-        for o, a in opts:
-            if o == "--datagram":
-                datagram = True
-                optsSet = optsSet + 1
-            elif o == "--twoway":
-                twoway = True
-                optsSet = optsSet + 1
-            elif o == "--oneway":
-                optsSet = optsSet + 1
+	proxyProperty = 'IceStorm.TopicManager.Proxy'
+	proxy = properties.getProperty(proxyProperty)
+	if len(proxy) == 0:
+	    print self.appName() + ": property `" + proxyProperty + "' not set"
+	    return False
 
-        if optsSet > 1:
-            self.usage()
-            return 1
+	base = self.communicator().stringToProxy(proxy)
+	manager = IceStorm.TopicManagerPrx.checkedCast(base)
+	if not manager:
+	    print args[0] + ": invalid proxy"
+	    return False
 
-        if len(args) > 0:
-            topicName = args[0]
+	#
+	# Retrieve the topic named "time".
+	#
+	try:
+	    topic = manager.retrieve("time")
+	except IceStorm.NoSuchTopic, e:
+	    print self.appName() + ": no such topic name: " + e.name
+	    return False
 
-        manager = IceStorm.TopicManagerPrx.checkedCast(\
-            self.communicator().propertyToProxy('IceStorm.TopicManager.Proxy'))
-        if not manager:
-            print args[0] + ": invalid proxy"
-            return 1
+	#
+	# Get the topic's publisher object, verify that it supports
+	# the Clock type, and create a oneway Clock proxy (for efficiency
+	# reasons).
+	#
+	obj = topic.getPublisher()
+	if not obj.ice_isDatagram():
+	    obj = obj.ice_oneway()
+	clock = Demo.ClockPrx.uncheckedCast(obj)
 
-        #
-        # Retrieve the topic.
-        #
-        try:
-            topic = manager.retrieve(topicName)
-        except IceStorm.NoSuchTopic, e:
-            try:
-                topic = manager.create(topicName)
-            except IceStorm.TopicExists, ex:
-                print self.appName() + ": temporary error. try again"
-                return 1
+	print "publishing 10 tick events"
+	for i in range(0, 10):
+	    clock.tick()
 
-        #
-        # Get the topic's publisher object, and create a Clock proxy with
-        # the mode specified as an argument of this application.
-        #
-        publisher = topic.getPublisher();
-        if datagram:
-            publisher = publisher.ice_datagram();
-        elif twoway:
-            # Do nothing.
-            pass
-        else: # if(oneway)
-            publisher = publisher.ice_oneway();
-        clock = Demo.ClockPrx.uncheckedCast(publisher)
-
-        print "publishing tick events. Press ^C to terminate the application."
-        try:
-            while 1:
-                clock.tick(time.strftime("%m/%d/%Y %H:%M:%S"))
-                time.sleep(1)
-        except IOError, e:
-            # Ignore
-            pass
-        except Ice.CommunicatorDestroyedException, e:
-            # Ignore
-            pass
-                
-        return 0
+	return True
 
 app = Publisher()
 sys.exit(app.main(sys.argv, "config.pub"))

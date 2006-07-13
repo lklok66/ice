@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -11,113 +11,13 @@
 #include <Ice/BasicStream.h>
 #include <Ice/Exception.h>
 #include <Ice/Instance.h>
-#include <IceUtil/Base64.h>
 
 using namespace std;
 using namespace Ice;
 using namespace IceInternal;
 
-IceInternal::UnknownEndpointI::UnknownEndpointI(const string& str)
-{
-    const string delim = " \t\n\r";
-
-    string::size_type beg;
-    string::size_type end = 0;
-
-    int topt = 0;
-    int vopt = 0;
-
-    while(true)
-    {
-        beg = str.find_first_not_of(delim, end);
-        if(beg == string::npos)
-        {
-            break;
-        }
-        
-        end = str.find_first_of(delim, beg);
-        if(end == string::npos)
-        {
-            end = str.length();
-        }
-
-        string option = str.substr(beg, end - beg);
-        if(option.length() != 2 || option[0] != '-')
-        {
-            EndpointParseException ex(__FILE__, __LINE__);
-            ex.str = "opaque " + str;
-            throw ex;
-        }
-
-        string argument;
-        string::size_type argumentBeg = str.find_first_not_of(delim, end);
-        if(argumentBeg != string::npos && str[argumentBeg] != '-')
-        {
-            beg = argumentBeg;
-            end = str.find_first_of(delim, beg);
-            if(end == string::npos)
-            {
-                end = str.length();
-            }
-            argument = str.substr(beg, end - beg);
-        }
-
-        switch(option[1])
-        {
-            case 't':
-            {
-                istringstream p(argument);
-                Ice::Int t;
-                if(!(p >> t) || !p.eof() || t < 0 || t > 65535)
-                {
-                    EndpointParseException ex(__FILE__, __LINE__);
-                    ex.str = "opaque " + str;
-                    throw ex;
-                }
-                _type = static_cast<Ice::Short>(t);
-                ++topt;
-                break;
-            }
-
-            case 'v':
-            {
-                if(argument.empty())
-                {
-                    EndpointParseException ex(__FILE__, __LINE__);
-                    ex.str = "opaque " + str;
-                    throw ex;
-                }
-                for(string::size_type i = 0; i < argument.size(); ++i)
-                {
-                    if(!IceUtil::Base64::isBase64(argument[i]))
-                    {
-                        EndpointParseException ex(__FILE__, __LINE__);
-                        ex.str = "opaque " + str;
-                        throw ex;
-                    }
-                }
-                const_cast<vector<Byte>&>(_rawBytes) = IceUtil::Base64::decode(argument);
-                ++vopt;
-                break;
-            }
-
-            default:
-            {
-                EndpointParseException ex(__FILE__, __LINE__);
-                ex.str = "opaque " + str;
-                throw ex;
-            }
-        }
-    }
-    if(topt != 1 || vopt != 1)
-    {
-        EndpointParseException ex(__FILE__, __LINE__);
-        ex.str = "opaque " + str;
-        throw ex;
-    }
-}
-
 IceInternal::UnknownEndpointI::UnknownEndpointI(Short type, BasicStream* s) :
+    _instance(s->instance()),
     _type(type)
 {
     s->startReadEncaps();
@@ -138,11 +38,7 @@ IceInternal::UnknownEndpointI::streamWrite(BasicStream* s) const
 string
 IceInternal::UnknownEndpointI::toString() const
 {
-
-    ostringstream s;
-    string val = IceUtil::Base64::encode(_rawBytes);
-    s << "opaque -t " << _type << " -v " << val;
-    return s.str();
+    return string();
 }
 
 Short
@@ -200,17 +96,22 @@ IceInternal::UnknownEndpointI::unknown() const
 }
 
 TransceiverPtr
-IceInternal::UnknownEndpointI::transceiver(EndpointIPtr& endp) const
+IceInternal::UnknownEndpointI::clientTransceiver() const
+{
+    return 0;
+}
+
+TransceiverPtr
+IceInternal::UnknownEndpointI::serverTransceiver(EndpointIPtr& endp) const
 {
     endp = const_cast<UnknownEndpointI*>(this);
     return 0;
 }
 
-vector<ConnectorPtr>
-IceInternal::UnknownEndpointI::connectors() const
+ConnectorPtr
+IceInternal::UnknownEndpointI::connector() const
 {
-    vector<ConnectorPtr> ret;
-    return ret;
+    return 0;
 }
 
 AcceptorPtr
@@ -221,11 +122,17 @@ IceInternal::UnknownEndpointI::acceptor(EndpointIPtr& endp, const string&) const
 }
 
 vector<EndpointIPtr>
-IceInternal::UnknownEndpointI::expand() const
+IceInternal::UnknownEndpointI::expand(bool loopback) const
 {
-    vector<EndpointIPtr> endps;
-    endps.push_back(const_cast<UnknownEndpointI*>(this));
-    return endps;
+    assert(false);
+    vector<EndpointIPtr> ret;
+    return ret;
+}
+
+bool
+IceInternal::UnknownEndpointI::publish() const
+{
+    return false;
 }
 
 bool
@@ -246,12 +153,12 @@ IceInternal::UnknownEndpointI::operator==(const EndpointI& r) const
     const UnknownEndpointI* p = dynamic_cast<const UnknownEndpointI*>(&r);
     if(!p)
     {
-        return false;
+	return false;
     }
 
     if(this == p)
     {
-        return true;
+	return true;
     }
 
     if(_type != p->_type)
@@ -261,7 +168,7 @@ IceInternal::UnknownEndpointI::operator==(const EndpointI& r) const
 
     if(_rawBytes != p->_rawBytes)
     {
-        return false;
+	return false;
     }
 
     return true;
@@ -284,25 +191,25 @@ IceInternal::UnknownEndpointI::operator<(const EndpointI& r) const
 
     if(this == p)
     {
-        return false;
+	return false;
     }
 
     if(_type < p->_type)
     {
-        return true;
+	return true;
     }
     else if(p->_type < _type)
     {
-        return false;
+	return false;
     }
 
     if(_rawBytes < p->_rawBytes)
     {
-        return true;
+	return true;
     }
     else if(p->_rawBytes < _rawBytes)
     {
-        return false;
+	return false;
     }
 
     return false;

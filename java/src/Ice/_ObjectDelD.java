@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -12,36 +12,22 @@ package Ice;
 public class _ObjectDelD implements _ObjectDel
 {
     public boolean
-    ice_isA(final String __id, java.util.Map __context)
+    ice_isA(String __id, java.util.Map __context)
         throws IceInternal.LocalExceptionWrapper
     {
-        final Current __current = new Current();
+        Current __current = new Current();
         __initCurrent(__current, "ice_isA", OperationMode.Nonmutating, __context);
-        
-        final BooleanHolder __result = new BooleanHolder();
-
-        IceInternal.Direct __direct = new IceInternal.Direct(__current)
+        while(true)
+        {
+            IceInternal.Direct __direct = new IceInternal.Direct(__current);
+            try
             {
-                public DispatchStatus run(Ice.Object __servant)
-                {
-                    __result.value = __servant.ice_isA(__id, __current);
-                    return DispatchStatus.DispatchOK;
-                }
-            };
-        
-        try
-        {
-            DispatchStatus __status = __direct.servant().__collocDispatch(__direct); 
-            assert __status == DispatchStatus.DispatchOK;
-            return __result.value;
-        }
-        catch(Ice.LocalException __ex)
-        {
-            throw new IceInternal.LocalExceptionWrapper(__ex, false);
-        }
-        finally
-        {
-            __direct.destroy();
+		return __direct.servant().ice_isA(__id, __current);
+            }
+            finally
+            {
+                __direct.destroy();
+            }
         }
     }
 
@@ -49,30 +35,20 @@ public class _ObjectDelD implements _ObjectDel
     ice_ping(java.util.Map __context)
         throws IceInternal.LocalExceptionWrapper
     {
-        final Current __current = new Current();
+        Current __current = new Current();
         __initCurrent(__current, "ice_ping", OperationMode.Nonmutating, __context);
-       
-        IceInternal.Direct __direct = new IceInternal.Direct(__current)
+        while(true)
+        {
+            IceInternal.Direct __direct = new IceInternal.Direct(__current);
+            try
             {
-                public DispatchStatus run(Ice.Object __servant)
-                {
-                    __servant.ice_ping(__current);
-                    return DispatchStatus.DispatchOK;
-                }
-            };
-                
-        try
-        {
-            DispatchStatus __status = __direct.servant().__collocDispatch(__direct); 
-            assert __status == DispatchStatus.DispatchOK;
-        }
-        catch(Ice.LocalException __ex)
-        {
-            throw new IceInternal.LocalExceptionWrapper(__ex, false);
-        }
-        finally
-        {
-            __direct.destroy();
+		__direct.servant().ice_ping(__current);
+		return;
+            }
+            finally
+            {
+                __direct.destroy();
+            }
         }
     }
 
@@ -80,32 +56,19 @@ public class _ObjectDelD implements _ObjectDel
     ice_ids(java.util.Map __context)
         throws IceInternal.LocalExceptionWrapper
     {
-        final Current __current = new Current();
+        Current __current = new Current();
         __initCurrent(__current, "ice_ids", OperationMode.Nonmutating, __context);
-
-        final Ice.StringSeqHolder __result = new Ice.StringSeqHolder();
-
-        IceInternal.Direct __direct = new IceInternal.Direct(__current)
+        while(true)
+        {
+            IceInternal.Direct __direct = new IceInternal.Direct(__current);
+            try
             {
-                public DispatchStatus run(Ice.Object __servant)
-                {
-                    __result.value = __servant.ice_ids(__current);
-                    return DispatchStatus.DispatchOK;
-                }
-            };
-        try
-        {
-            DispatchStatus __status = __direct.servant().__collocDispatch(__direct); 
-            assert __status == DispatchStatus.DispatchOK;
-            return __result.value;
-        }
-        catch(Ice.LocalException __ex)
-        {
-            throw new IceInternal.LocalExceptionWrapper(__ex, false);
-        }
-        finally
-        {
-            __direct.destroy();
+		return __direct.servant().ice_ids(__current);
+            }
+            finally
+            {
+                __direct.destroy();
+            }
         }
     }
 
@@ -113,46 +76,34 @@ public class _ObjectDelD implements _ObjectDel
     ice_id(java.util.Map __context)
         throws IceInternal.LocalExceptionWrapper
     {
-        final Current __current = new Current();
+        Current __current = new Current();
         __initCurrent(__current, "ice_id", OperationMode.Nonmutating, __context);
-        
-        final Ice.StringHolder __result = new Ice.StringHolder();
-
-        IceInternal.Direct __direct = new IceInternal.Direct(__current)
+        while(true)
+        {
+            IceInternal.Direct __direct = new IceInternal.Direct(__current);
+            try
             {
-                public DispatchStatus run(Ice.Object __servant)
-                {
-                    __result.value = __servant.ice_id(__current);
-                    return DispatchStatus.DispatchOK;
-                }
-            };
-        try
-        {
-            DispatchStatus __status = __direct.servant().__collocDispatch(__direct); 
-            assert __status == DispatchStatus.DispatchOK;
-            return __result.value;
-        }
-        catch(Ice.LocalException __ex)
-        {
-            throw new IceInternal.LocalExceptionWrapper(__ex, false);
-        }
-        finally
-        {
-            __direct.destroy();
+		return __direct.servant().ice_id(__current);
+            }
+            finally
+            {
+                __direct.destroy();
+            }
         }
     }
 
     public boolean
     ice_invoke(String operation, Ice.OperationMode mode, byte[] inParams, ByteSeqHolder outParams,
-               java.util.Map context)
+	       java.util.Map context)
+        throws IceInternal.LocalExceptionWrapper
     {
-        throw new CollocationOptimizationException();
+	throw new CollocationOptimizationException();
     }
 
     public ConnectionI
     __getConnection(BooleanHolder compress)
     {
-        throw new CollocationOptimizationException();
+	throw new CollocationOptimizationException();
     }
 
     //
@@ -171,8 +122,8 @@ public class _ObjectDelD implements _ObjectDel
         // upon initialization.
         //
 
-        assert(__reference == null);
-        assert(__adapter == null);
+	assert(__reference == null);
+	assert(__adapter == null);
 
         __reference = from.__reference;
         __adapter = from.__adapter;
@@ -189,31 +140,8 @@ public class _ObjectDelD implements _ObjectDel
         current.facet = __reference.getFacet();
         current.operation = op;
         current.mode = mode;
-
-        if(context != null)
-        {
-            current.ctx = context;
-        }
-        else
-        {
-            //
-            // Implicit context
-            //
-            ImplicitContextI implicitContext =
-                __reference.getInstance().getImplicitContext();
-            
-            java.util.Map prxContext = __reference.getContext();
-            
-            if(implicitContext == null)
-            {
-                current.ctx = new java.util.HashMap(prxContext);
-            }
-            else
-            {
-                current.ctx = implicitContext.combine(prxContext);
-            }
-        }
-        current.requestId = -1;
+        current.ctx = context;
+	current.requestId = -1;
     }
 
     public void
@@ -224,8 +152,8 @@ public class _ObjectDelD implements _ObjectDel
         // upon initialization.
         //
 
-        assert(__reference == null);
-        assert(__adapter == null);
+	assert(__reference == null);
+	assert(__adapter == null);
 
         __reference = ref;
         __adapter = adapter;

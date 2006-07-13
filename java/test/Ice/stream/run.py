@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -24,7 +24,7 @@ name = os.path.join("Ice", "stream")
 testdir = os.path.join(toplevel, "test", name)
 os.environ["CLASSPATH"] = os.path.join(testdir, "classes") + TestUtil.sep + os.getenv("CLASSPATH", "")
 
-client = TestUtil.javaCmd + " -ea Client --Ice.ProgramName=Client "
+client = "java -ea Client --Ice.ProgramName=Client "
 
 print "starting test...",
 clientPipe = os.popen(client + TestUtil.clientOptions + " 2>&1")

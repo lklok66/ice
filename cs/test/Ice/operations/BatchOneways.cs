@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -21,58 +21,86 @@ class BatchOneways
 
     internal static void batchOneways(Test.MyClassPrx p)
     {
-        byte[] tbs1 = new byte[10  * 1024];
-        byte[] tbs2 = new byte[99  * 1024];
-        byte[] tbs3 = new byte[100 * 1024];
-        Test.ByteS bs1 = new Test.ByteS(tbs1);
-        Test.ByteS bs2 = new Test.ByteS(tbs2);
-        Test.ByteS bs3 = new Test.ByteS(tbs3);
+	byte[] tbs1 = new byte[10  * 1024];
+	byte[] tbs2 = new byte[99  * 1024];
+	byte[] tbs3 = new byte[100 * 1024];
+	Test.ByteS bs1 = new Test.ByteS(tbs1);
+	Test.ByteS bs2 = new Test.ByteS(tbs2);
+	Test.ByteS bs3 = new Test.ByteS(tbs3);
 
-        try
+	try
         {
             p.opByteSOneway(bs1);
-            test(true);
+	    test(true);
         }
-        catch(Ice.MemoryLimitException)
-        {
-            test(false);
-        }
+	catch(Ice.MemoryLimitException)
+	{
+	    test(false);
+	}
 
-        try
+	try
         {
             p.opByteSOneway(bs2);
-            test(true);
+	    test(true);
         }
-        catch(Ice.MemoryLimitException)
-        {
-            test(false);
-        }
+	catch(Ice.MemoryLimitException)
+	{
+	    test(false);
+	}
 
-        try
+	try
         {
             p.opByteSOneway(bs3);
-            test(false);
+	    test(false);
         }
-        catch(Ice.MemoryLimitException)
-        {
-            test(true);
-        }
+	catch(Ice.MemoryLimitException)
+	{
+	    test(true);
+	}
 
-        Test.MyClassPrx batch = Test.MyClassPrxHelper.uncheckedCast(p.ice_batchOneway());
+	Test.MyClassPrx batch = Test.MyClassPrxHelper.uncheckedCast(p.ice_batchOneway());
 
-        for(int i = 0 ; i < 30 ; ++i)
-        {
-            try
-            {
-                batch.opByteSOneway(bs1);
-                test(true);
-            }
-            catch(Ice.MemoryLimitException)
-            {
-                test(false);
-            }
-        }
+	for(int i = 0 ; i < 9 ; ++i)
+	{
+	    try
+	    {
+		batch.opByteSOneway(bs1);
+		test(true);
+	    }
+	    catch(Ice.MemoryLimitException)
+	    {
+		test(false);
+	    }
 
-        batch.ice_getConnection().flushBatchRequests();
+	    batch.ice_getConnection().flushBatchRequests();
+	}
+
+	for(int i = 0 ; i < 10 ; ++i)
+	{
+	    try
+	    {
+		batch.opByteSOneway(bs1);
+		test(i < 9);
+	    }
+	    catch(Ice.MemoryLimitException)
+	    {
+		test(i == 9);
+	    }
+	}
+
+	for(int i = 0 ; i < 9 ; ++i)
+	{
+	    try
+	    {
+		batch.opByteSOneway(bs1);
+		test(true);
+	    }
+	    catch(Ice.MemoryLimitException)
+	    {
+		test(false);
+	    }
+
+	    batch.ice_getConnection().flushBatchRequests();
+	}
     }
 }

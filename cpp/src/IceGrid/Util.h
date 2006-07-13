@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -16,9 +16,6 @@
 #include <IceUtil/Random.h>
 
 #include <functional>
-#ifdef __BCPLUSPLUS__
-#  include <iterator>
-#endif
 
 namespace IceGrid
 {
@@ -42,9 +39,6 @@ std::string toString(const std::vector<std::string>&, const std::string& = std::
 std::string toString(const Ice::Exception&);
 
 std::string getProperty(const PropertyDescriptorSeq&, const std::string&, const std::string& = std::string());
-PropertyDescriptor createProperty(const std::string&, const std::string& = std::string());
-
-int getMMVersion(const std::string&);
 
 template<class Function>
 struct ForEachCommunicator : std::unary_function<CommunicatorDescriptorPtr&, void>
@@ -56,19 +50,19 @@ struct ForEachCommunicator : std::unary_function<CommunicatorDescriptorPtr&, voi
     void
     operator()(const ServiceInstanceDescriptor& descriptor)
     {
-        assert(descriptor.descriptor);
-        operator()(descriptor.descriptor);
+	assert(descriptor.descriptor);
+	operator()(descriptor.descriptor);
     }
 
     void
     operator()(const CommunicatorDescriptorPtr& descriptor)
     {
-        _function(descriptor);
-        IceBoxDescriptorPtr iceBox = IceBoxDescriptorPtr::dynamicCast(descriptor);
-        if(iceBox)
-        {
-            for_each(iceBox->services.begin(), iceBox->services.end(), forEachCommunicator(_function));
-        }
+	_function(descriptor);
+	IceBoxDescriptorPtr iceBox = IceBoxDescriptorPtr::dynamicCast(descriptor);
+	if(iceBox)
+	{
+	    for_each(iceBox->services.begin(), iceBox->services.end(), forEachCommunicator(_function));
+	}
     }
 
     Function _function;
@@ -89,10 +83,10 @@ struct ObjFunc : std::unary_function<A, void>
 
 public:
 
-     explicit ObjFunc(T& obj, void (T::*f)(A)) : _obj(obj), _mfn(f) { }
+    explicit ObjFunc(T& obj, void (T::*f)(A)) : _obj(obj), _mfn(f) { }
     void operator()(A arg) const
     {
-        (_obj.*_mfn)(arg);
+	(_obj.*_mfn)(arg);
     }
 };
 
@@ -108,10 +102,10 @@ inline getMatchingKeys(const T& m, const std::string& expression)
     std::vector<std::string> keys;
     for(typename T::const_iterator p = m.begin(); p != m.end(); ++p)
     {
-        if(expression.empty() || IceUtil::match(p->first, expression, true))
-        {
-            keys.push_back(p->first);
-        }
+	if(expression.empty() || IceUtil::match(p->first, expression, true))
+	{
+	    keys.push_back(p->first);
+	}
     }
     return keys;
 }

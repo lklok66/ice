@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -17,7 +17,7 @@
 
 /**
  *
- * IceGrid is a server activation and deployment tool. IceGrid,
+ * &IceGrid; is a server activation and deployment tool. &IceGrid;,
  * simplifies the complex task of deploying applications in a
  * heterogeneous computer network.
  *
@@ -32,29 +32,18 @@ module IceGrid
  **/
 enum LoadSample
 {
-    /**
-     * Sample every minute.
-     **/
     LoadSample1,
-
-    /**
-     * Sample every five minutes.
-     **/
     LoadSample5,
-
-    /**
-     * Sample every fifteen minutes.
-     **/
     LoadSample15
 };
 
 /**
  *
- * The IceGrid query interface. This interface is accessible to
- * Ice clients who wish to lookup well-known objects.
+ * The &IceGrid; query interface. This interface is accessible to
+ * &Ice; clients who wish to lookup well-known objects.
  *
  **/
-["ami"] interface Query
+["ami", "amd"] interface Query
 {
     /**
      *
@@ -65,7 +54,7 @@ enum LoadSample
      * @return The proxy or null if no such object has been found.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent Object* findObjectById(Ice::Identity id);
+    nonmutating Object* findObjectById(Ice::Identity id);
 
     /**
      *
@@ -78,7 +67,7 @@ enum LoadSample
      * @return The proxy or null if no such object has been found.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent Object* findObjectByType(string type);
+    nonmutating Object* findObjectByType(string type);
 
     /**
      *
@@ -93,7 +82,7 @@ enum LoadSample
      * @return The proxy or null if no such object has been found.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent Object* findObjectByTypeOnLeastLoadedNode(string type, LoadSample sample);
+    nonmutating Object* findObjectByTypeOnLeastLoadedNode(string type, LoadSample sample);
 
     /**
      *
@@ -105,21 +94,7 @@ enum LoadSample
      * have been found.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent Ice::ObjectProxySeq findAllObjectsByType(string type);
-
-    /**
-     *
-     * Find all the object replicas associated with the given
-     * proxy. If the given proxy is not an indirect proxy from a
-     * replica group, an empty sequence is returned.
-     *
-     * @param proxy The object proxy.
-     *
-     * @return The proxies of each object replica or an empty sequence
-     * if the given proxy is not from a replica group.
-     *
-     **/
-    ["cpp:const"] idempotent Ice::ObjectProxySeq findAllReplicas(Object* proxy);
+    nonmutating Ice::ObjectProxySeq findAllObjectsByType(string type);
 };
 
 };

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -26,8 +26,6 @@ public:
 
     IncomingAsync(Incoming&); // Adopts the argument. It must not be used afterwards.
 
-    void __deactivate(Incoming&);
-
 protected:
 
     void __response(bool);
@@ -35,17 +33,10 @@ protected:
     void __exception(const std::exception&);
     void __exception();
 
-    bool __validateResponse(bool);
-    bool __validateException(const std::exception&);
-    bool __validateException();
-
-
     // Inlined for speed optimization.
     BasicStream* __os() { return &_os; }
 
 private:
-
-    bool __servantLocatorFinished();
 
     //
     // We need a separate InstancePtr, because _is and _os only hold a
@@ -58,9 +49,6 @@ private:
     // holds a ConnectionI* for optimization.
     //
     const Ice::ConnectionIPtr _connectionCopy;
-
-    const bool _retriable;
-    bool _active;
 };
 
 }
@@ -109,7 +97,7 @@ public:
 };
 
 class ICE_API AMD_Array_Object_ice_invoke : public ::Ice::AMD_Array_Object_ice_invoke, 
-                                            public IceInternal::IncomingAsync
+					    public IceInternal::IncomingAsync
 {
 public:
     

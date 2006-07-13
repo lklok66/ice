@@ -1,21 +1,21 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
 
-public sealed class ServantLocatorI : Ice.ServantLocator
+public sealed class ServantLocatorI : Ice.LocalObjectImpl, Ice.ServantLocator
 {
-    public Ice.Object locate(Ice.Current curr, out System.Object cookie)
+    public Ice.Object locate(Ice.Current curr, out Ice.LocalObject cookie)
     {
-        cookie = null;
-        return null;
+	cookie = null;
+	return null;
     }
     
-    public void finished(Ice.Current curr, Ice.Object servant, System.Object cookie)
+    public void finished(Ice.Current curr, Ice.Object servant, Ice.LocalObject cookie)
     {
     }
     

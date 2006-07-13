@@ -1,7 +1,7 @@
 <!--
  **********************************************************************
 
- Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+ Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 
  This copy of Ice is licensed to you under the terms described in the
  ICE_LICENSE file included in this distribution.
@@ -28,7 +28,7 @@
         <!-- Create the output directory for generated code -->
         <mkdir dir="${cgen.dir}"/>
         <slice2java outputdir="${cgen.dir}">
-	    <meta value="${java2metadata}"/>
+	    <meta value="${java5metadata}"/>
 	    <includepath>
 		<pathelement path="."/>
 	    </includepath>
@@ -36,7 +36,7 @@
         </slice2java>
         <mkdir dir="${sgen.dir}"/>
         <slice2java outputdir="${sgen.dir}">
-	    <meta value="${java2metadata}"/>
+	    <meta value="${java5metadata}"/>
 	    <includepath>
 		<pathelement path="."/>
 	    </includepath>
@@ -44,7 +44,7 @@
         </slice2java>
         <mkdir dir="${sgen.dir}"/>
         <slice2java outputdir="${sgen.dir}">
-	    <meta value="${java2metadata}"/>
+	    <meta value="${java5metadata}"/>
 	    <includepath>
 		<pathelement path="."/>
 	    </includepath>

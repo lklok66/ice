@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -17,19 +17,20 @@ using namespace std;
 using namespace Ice;
 using namespace IceInternal;
 
-IceUtil::Shared* IceInternal::upCast(ConnectionMonitor* p) { return p; }
+void IceInternal::incRef(ConnectionMonitor* p) { p->__incRef(); }
+void IceInternal::decRef(ConnectionMonitor* p) { p->__decRef(); }
 
 void
 IceInternal::ConnectionMonitor::destroy()
 {
     {
-        IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
-        
-        assert(_instance);
-        _instance = 0;
-        _connections.clear();
-        
-        notify();
+	IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
+	
+	assert(_instance);
+	_instance = 0;
+	_connections.clear();
+	
+	notify();
     }
 
     getThreadControl().join();
@@ -70,53 +71,53 @@ IceInternal::ConnectionMonitor::run()
 {
     while(true)
     {
-        set<ConnectionIPtr> connections;
-        
-        {
-            IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
-            if(_instance && !timedWait(_interval))
-            {
-                connections = _connections;
-            }
+	set<ConnectionIPtr> connections;
+	
+	{
+	    IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
+	    if(_instance && !timedWait(_interval))
+	    {
+		connections = _connections;
+	    }
 
-            if(!_instance)
-            {
-                return;
-            }
-        }
-        
-        //
-        // Monitor connections outside the thread synchronization, so
-        // that connections can be added or removed during monitoring.
-        //
-        for(set<ConnectionIPtr>::const_iterator p = connections.begin(); p != connections.end(); ++p)
-        {
-            try
-            {          
-                (*p)->monitor();
-            }
-            catch(const Exception& ex)
-            {   
-                IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
-                if(!_instance)
-                {
-                    return;
-                }
+	    if(!_instance)
+	    {
+		return;
+	    }
+	}
+	
+	//
+	// Monitor connections outside the thread synchronization, so
+	// that connections can be added or removed during monitoring.
+	//
+	for(set<ConnectionIPtr>::const_iterator p = connections.begin(); p != connections.end(); ++p)
+	{
+	    try
+	    {	       
+		(*p)->monitor();
+	    }
+	    catch(const Exception& ex)
+	    {	
+		IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
+		if(!_instance)
+		{
+		    return;
+		}
 
-                Error out(_instance->initializationData().logger);
-                out << "exception in connection monitor:\n" << ex;
-            }
-            catch(...)
-            {
-                IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
-                if(!_instance)
-                {
-                    return;
-                }
+		Error out(_instance->initializationData().logger);
+		out << "exception in connection monitor:\n" << ex;
+	    }
+	    catch(...)
+	    {
+		IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
+		if(!_instance)
+		{
+		    return;
+		}
 
-                Error out(_instance->initializationData().logger);
-                out << "unknown exception in connection monitor";
-            }
-        }
+		Error out(_instance->initializationData().logger);
+		out << "unknown exception in connection monitor";
+	    }
+	}
     }
 }

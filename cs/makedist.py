@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
 #
 # **********************************************************************
 
-import os, sys, shutil, fnmatch, re, fileinput
+import os, sys, shutil, fnmatch, re
 
 #
 # Show usage information.
@@ -18,6 +18,7 @@ def usage():
     print
     print "Options:"
     print "-h    Show this message."
+    print "-d    Skip SGML documentation conversion."
     print "-v    Be verbose."
     print
     print "If no tag is specified, HEAD is used."
@@ -39,30 +40,17 @@ def find(path, patt):
 #
 # Fix version in README, INSTALL files
 #
-def fixVersion(files, version, dotnetversion):
+def fixVersion(files, version):
 
     for file in files:
         origfile = file + ".orig"
         os.rename(file, origfile)
         oldFile = open(origfile, "r")
         newFile = open(file, "w")
-        line = oldFile.read();
-        line = re.sub("@ver@", version, line)
-        line = re.sub("@dotnetver@", dotnetversion, line)
-        newFile.write(line)
+        newFile.write(re.sub("@ver@", version, oldFile.read()))
         newFile.close()
         oldFile.close()
         os.remove(origfile)
-
-
-def editMakefileMak(file):
-    makefile =  fileinput.input(file, True)
-    for line in makefile:
-        if line.startswith('!include'):
-            print '!include $(top_srcdir)/config/Make.rules.mak.cs'
-        else:
-            print line.rstrip('\n')
-    makefile.close()
 
 #
 # Are we on Windows?
@@ -73,11 +61,14 @@ win32 = sys.platform.startswith("win") or sys.platform.startswith("cygwin")
 # Check arguments
 #
 tag = "-rHEAD"
+skipDocs = 0
 verbose = 0
 for x in sys.argv[1:]:
     if x == "-h":
         usage()
         sys.exit(0)
+    elif x == "-d":
+        skipDocs = 1
     elif x == "-v":
         verbose = 1
     elif x.startswith("-"):
@@ -87,6 +78,10 @@ for x in sys.argv[1:]:
         sys.exit(1)
     else:
         tag = "-r" + x
+
+if win32 and not skipDocs:
+    print sys.argv[0] + ": the documentation cannot be built on Windows."
+    sys.exit(1)
 
 #
 # Remove any existing "dist" directory and create a new one.
@@ -108,21 +103,51 @@ if verbose:
 else:
     quiet = "-Q"
 os.system("cvs " + quiet + " -d cvs.zeroc.com:/home/cvsroot export " + tag +
-          " icecs ice/bin ice/config ice/include ice/lib ice/slice ice/src")
+          " icecs ice/bin ice/config ice/doc ice/include ice/lib ice/slice ice/src")
 
 #
 # Copy Slice directories.
 #
 print "Copying Slice directories..."
-shutil.copytree(os.path.join("ice", "slice"), os.path.join("icecs", "slice"), 1)
-for file in find(os.path.join("icecs", "slice"), "Makefile.mak"):
-    editMakefileMak(file)
-shutil.rmtree(os.path.join("icecs", "slice", "IceSSL"))
+slicedirs = [\
+    "Freeze",\
+    "Glacier2",\
+    "Ice",\
+    "IceBox",\
+    "IceGrid",\
+    "IcePatch2",\
+    "IceStorm",\
+]
+os.mkdir(os.path.join("icecs", "slice"))
+for x in slicedirs:
+    shutil.copytree(os.path.join("ice", "slice", x), os.path.join("icecs", "slice", x), 1)
 
 #
-# Makefiles found in the slice directories are removed later
-# on. 
+# Generate HTML documentation. We need to build icecpp
+# and slice2docbook first.
 #
+if not skipDocs:
+    print "Generating documentation..."
+    cwd = os.getcwd()
+    os.chdir(os.path.join("ice", "src", "icecpp"))
+    os.system("gmake")
+    os.chdir(cwd)
+    os.chdir(os.path.join("ice", "src", "IceUtil"))
+    os.system("gmake")
+    os.chdir(cwd)
+    os.chdir(os.path.join("ice", "src", "Slice"))
+    os.system("gmake")
+    os.chdir(cwd)
+    os.chdir(os.path.join("ice", "src", "slice2docbook"))
+    os.system("gmake")
+    os.chdir(cwd)
+    os.chdir(os.path.join("ice", "doc"))
+    os.system("gmake")
+    os.chdir(cwd)
+    os.mkdir(os.path.join("icecs", "doc"))
+    os.rename(os.path.join("ice", "doc", "reference"), os.path.join("icecs", "doc", "reference"))
+    os.rename(os.path.join("ice", "doc", "README.html"), os.path.join("icecs", "doc", "README.html"))
+    os.rename(os.path.join("ice", "doc", "images"), os.path.join("icecs", "doc", "images"))
 shutil.rmtree("ice")
 
 #
@@ -133,22 +158,18 @@ filesToRemove = [ \
     os.path.join("icecs", "makedist.py"), \
     ]
 filesToRemove.extend(find("icecs", ".dummy"))
-filesToRemove.extend(find(os.path.join("icecs", "slice"), "Makefile"))
 for x in filesToRemove:
     os.remove(x)
 
 #
 # Get Ice version.
 #
-config = open(os.path.join("icecs", "config", "Make.rules.cs"), "r")
-version = re.search("VERSION[= \t]*([0-9\.b]+)", config.read()).group(1)
-
-pcfg = open(os.path.join("icecs", "lib", "pkgconfig", "icecs.pc"), "r")
-dotnetversion = re.search("version[= \t]*([0-9\.]+)", pcfg.read()).group(1)
+config = open(os.path.join("icecs", "src", "Ice", "AssemblyInfo.cs"), "r")
+version = re.search("AssemblyVersion.*\"([0-9\.]*)\"", config.read()).group(1)
 
 print "Fixing version in README and INSTALL files..."
-fixVersion(find("icecs", "README*"), version, dotnetversion)
-fixVersion(find("icecs", "INSTALL*"), version, dotnetversion)
+fixVersion(find("icecs", "README*"), version)
+fixVersion(find("icecs", "INSTALL*"), version)
 
 #
 # Create source archives.

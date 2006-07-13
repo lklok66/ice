@@ -1,23 +1,24 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
 
-#include <IceUtil/IceUtil.h>
 #include <FilesystemI.h>
+#include <IceUtil/UUID.h>
+#include <time.h>
 
 using namespace std;
 
-Ice::ObjectAdapterPtr Filesystem::NodeI::_adapter;      // static member
+Ice::ObjectAdapterPtr Filesystem::NodeI::_adapter;	// static member
 
 // Slice Node::name() operation
 
 std::string
-Filesystem::NodeI::name(const Ice::Current &)
+Filesystem::NodeI::name(const Ice::Current &) const
 {
     return _name;
 }
@@ -39,15 +40,15 @@ Filesystem::NodeI::NodeI(const Ice::CommunicatorPtr & ic, const string & name, c
     //
     Ice::Identity myID;
     if (parent)
-        myID = ic->stringToIdentity(IceUtil::generateUUID());
+	myID = ic->stringToIdentity(IceUtil::generateUUID());
     else
-        myID = ic->stringToIdentity("RootDir");
+	myID = ic->stringToIdentity("RootDir");
 
     // Create a proxy for the new node and add it as a child to the parent
     //
     NodePrx thisNode = NodePrx::uncheckedCast(_adapter->createProxy(myID));
     if (parent)
-        parent->addChild(thisNode);
+	parent->addChild(thisNode);
 
     // Activate the servant
     //
@@ -57,7 +58,7 @@ Filesystem::NodeI::NodeI(const Ice::CommunicatorPtr & ic, const string & name, c
 // Slice File::read() operation
 
 Filesystem::Lines
-Filesystem::FileI::read(const Ice::Current &)
+Filesystem::FileI::read(const Ice::Current &) const
 {
     return _lines;
 }
@@ -66,7 +67,7 @@ Filesystem::FileI::read(const Ice::Current &)
 
 void
 Filesystem::FileI::write(const Filesystem::Lines & text,
-                         const Ice::Current &)
+			 const Ice::Current &)
 {
     _lines = text;
 }
@@ -81,7 +82,7 @@ Filesystem::FileI::FileI(const Ice::CommunicatorPtr & ic, const string & name, c
 // Slice Directory::list() operation
 
 Filesystem::NodeSeq
-Filesystem::DirectoryI::list(const Ice::Current &)
+Filesystem::DirectoryI::list(const Ice::Current &) const
 {
     return _contents;
 }

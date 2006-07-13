@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -10,14 +10,16 @@
 public class Collocated
 {
     private static int
-    run(String[] args, Ice.Communicator communicator)
+    run(String[] args, Ice.Communicator communicator, Ice.InitializationData initData)
     {
         communicator.getProperties().setProperty("TestAdapter.Endpoints", "default -p 12010 -t 10000");
         Ice.ObjectAdapter adapter = communicator.createObjectAdapter("TestAdapter");
-        adapter.add(new MyDerivedClassI(), communicator.stringToIdentity("test"));
-        adapter.activate();
+        Ice.Identity id = communicator.stringToIdentity("test");
+        adapter.add(new MyDerivedClassI(adapter, id), id);
+        adapter.add(new TestCheckedCastI(), communicator.stringToIdentity("context"));
+	adapter.activate();
 
-        AllTests.allTests(communicator, true);
+        AllTests.allTests(communicator, initData, true);
 
         return 0;
     }
@@ -30,11 +32,11 @@ public class Collocated
 
         try
         {
-            Ice.StringSeqHolder argsH = new Ice.StringSeqHolder(args);
-            Ice.InitializationData initData = new Ice.InitializationData();
-            initData.properties = Ice.Util.createProperties(argsH);
+	    Ice.StringSeqHolder argsH = new Ice.StringSeqHolder(args);
+	    Ice.InitializationData initData = new Ice.InitializationData();
+	    initData.properties = Ice.Util.createProperties(argsH);
             communicator = Ice.Util.initialize(argsH, initData);
-            status = run(args, communicator);
+            status = run(args, communicator, initData);
         }
         catch(Ice.LocalException ex)
         {

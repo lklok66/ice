@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -8,9 +8,7 @@
 // **********************************************************************
 
 #include <IceUtil/Base64.h>
-#ifdef __BCPLUSPLUS__
-#  include <iterator>
-#endif
+#include <iostream>
 
 using namespace std;
 
@@ -182,42 +180,6 @@ IceUtil::Base64::decode(const string& str)
     return retval;
 }
 
-bool
-IceUtil::Base64::isBase64(char c)
-{
-    if(c >= 'A' && c <= 'Z')
-    {
-        return true;
-    }
-
-    if(c >= 'a' && c <= 'z')
-    {
-        return true;
-    }
-
-    if(c >= '0' && c <= '9')
-    {
-        return true;
-    }
-
-    if(c == '+')
-    {
-        return true;
-    }
-
-    if(c == '/')
-    {
-        return true;
-    }
-
-    if(c == '=')
-    {
-        return true;
-    }
-
-    return false;
-}
-
 char
 IceUtil::Base64::encode(unsigned char uc)
 {
@@ -268,4 +230,41 @@ IceUtil::Base64::decode(char c)
     }
  
     return 63;
+}
+
+
+bool
+IceUtil::Base64::isBase64(char c)
+{
+    if(c >= 'A' && c <= 'Z')
+    {
+        return true;
+    }
+
+    if(c >= 'a' && c <= 'z')
+    {
+        return true;
+    }
+
+    if(c >= '0' && c <= '9')
+    {
+        return true;
+    }
+
+    if(c == '+')
+    {
+        return true;
+    }
+
+    if(c == '/')
+    {
+        return true;
+    }
+
+    if(c == '=')
+    {
+        return true;
+    }
+
+    return false;
 }

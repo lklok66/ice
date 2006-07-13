@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -71,12 +71,6 @@ Ice::InputStreamI::readBoolSeq()
     return v;
 }
 
-bool*
-Ice::InputStreamI::readBoolSeq(pair<const bool*, const bool*>& p)
-{
-    return _is.read(p);
-}
-
 Byte
 Ice::InputStreamI::readByte()
 {
@@ -92,12 +86,6 @@ Ice::InputStreamI::readByteSeq()
     _is.read(p);
     vector<Byte> v(p.first, p.second);
     return v;
-}
-
-void
-Ice::InputStreamI::readByteSeq(pair<const Byte*, const Byte*>& p)
-{
-    _is.read(p);
 }
 
 Short
@@ -116,12 +104,6 @@ Ice::InputStreamI::readShortSeq()
     return v;
 }
 
-Short*
-Ice::InputStreamI::readShortSeq(pair<const Short*, const Short*>& p)
-{
-    return _is.read(p);
-}
-
 Int
 Ice::InputStreamI::readInt()
 {
@@ -136,12 +118,6 @@ Ice::InputStreamI::readIntSeq()
     vector<Int> v;
     _is.read(v);
     return v;
-}
-
-Int*
-Ice::InputStreamI::readIntSeq(pair<const Int*, const Int*>& p)
-{
-    return _is.read(p);
 }
 
 Long
@@ -160,12 +136,6 @@ Ice::InputStreamI::readLongSeq()
     return v;
 }
 
-Long*
-Ice::InputStreamI::readLongSeq(pair<const Long*, const Long*>& p)
-{
-    return _is.read(p);
-}
-
 Float
 Ice::InputStreamI::readFloat()
 {
@@ -182,12 +152,6 @@ Ice::InputStreamI::readFloatSeq()
     return v;
 }
 
-Float*
-Ice::InputStreamI::readFloatSeq(pair<const Float*, const Float*>& p)
-{
-    return _is.read(p);
-}
-
 Double
 Ice::InputStreamI::readDouble()
 {
@@ -202,12 +166,6 @@ Ice::InputStreamI::readDoubleSeq()
     vector<Double> v;
     _is.read(v);
     return v;
-}
-
-Double*
-Ice::InputStreamI::readDoubleSeq(pair<const Double*, const Double*>& p)
-{
-    return _is.read(p);
 }
 
 string
@@ -354,12 +312,6 @@ Ice::OutputStreamI::writeBoolSeq(const vector<bool>& v)
 }
 
 void
-Ice::OutputStreamI::writeBoolSeq(const bool* begin, const bool* end)
-{
-    _os.write(begin, end);
-}
-
-void
 Ice::OutputStreamI::writeByte(Byte v)
 {
     _os.write(v);
@@ -376,12 +328,6 @@ Ice::OutputStreamI::writeByteSeq(const vector<Byte>& v)
     {
         _os.write(&v[0], &v[0] + v.size());
     }
-}
-
-void
-Ice::OutputStreamI::writeByteSeq(const Byte* begin, const Byte* end)
-{
-    _os.write(begin, end);
 }
 
 void
@@ -404,12 +350,6 @@ Ice::OutputStreamI::writeShortSeq(const vector<Short>& v)
 }
 
 void
-Ice::OutputStreamI::writeShortSeq(const Short* begin, const Short* end)
-{
-    _os.write(begin, end);
-}
-
-void
 Ice::OutputStreamI::writeInt(Int v)
 {
     _os.write(v);
@@ -426,12 +366,6 @@ Ice::OutputStreamI::writeIntSeq(const vector<Int>& v)
     {
         _os.write(&v[0], &v[0] + v.size());
     }
-}
-
-void
-Ice::OutputStreamI::writeIntSeq(const Int* begin, const Int* end)
-{
-    _os.write(begin, end);
 }
 
 void
@@ -454,12 +388,6 @@ Ice::OutputStreamI::writeLongSeq(const vector<Long>& v)
 }
 
 void
-Ice::OutputStreamI::writeLongSeq(const Long* begin, const Long* end)
-{
-    _os.write(begin, end);
-}
-
-void
 Ice::OutputStreamI::writeFloat(Float v)
 {
     _os.write(v);
@@ -479,12 +407,6 @@ Ice::OutputStreamI::writeFloatSeq(const vector<Float>& v)
 }
 
 void
-Ice::OutputStreamI::writeFloatSeq(const Float* begin, const Float* end)
-{
-    _os.write(begin, end);
-}
-
-void
 Ice::OutputStreamI::writeDouble(Double v)
 {
     _os.write(v);
@@ -501,12 +423,6 @@ Ice::OutputStreamI::writeDoubleSeq(const vector<Double>& v)
     {
         _os.write(&v[0], &v[0] + v.size());
     }
-}
-
-void
-Ice::OutputStreamI::writeDoubleSeq(const Double* begin, const Double* end)
-{
-    _os.write(begin, end);
 }
 
 void

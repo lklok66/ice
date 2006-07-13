@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -25,8 +25,7 @@ OBJS		= Scanner.o \
 		  Preprocessor.o \
 		  Checksum.o \
 		  PythonUtil.o \
-		  DotNetNames.o \
-		  RubyUtil.o
+		  DotNetNames.o
 
 SRCS		= $(OBJS:.o=.cpp)
 
@@ -54,10 +53,8 @@ $(libdir)/$(LIBNAME): $(libdir)/$(SONAME)
 	ln -s $(SONAME) $@
 endif
 
-#
-# The .y rule does not work well with parallel builds; need to investigate
-#
-.NOTPARALLEL:
+# Needed for make -jn to work.
+../Slice/Grammar.y: Grammar.h
 
 clean::
 	rm -f Grammar.cpp Grammar.h

@@ -1,7 +1,7 @@
 <!--
  **********************************************************************
 
- Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+ Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 
  This copy of Ice is licensed to you under the terms described in the
  ICE_LICENSE file included in this distribution.
@@ -22,8 +22,6 @@
         <ant dir="inheritance"/>
         <ant dir="location"/>
         <ant dir="objects"/>
-        <ant dir="proxy"/>
-        <ant dir="proxyAMD"/>
         <ant dir="operations"/>
         <ant dir="operationsAMD"/>
         <ant dir="slicing"/>
@@ -34,10 +32,6 @@
         <ant dir="stream"/>
         <ant dir="retry"/>
         <ant dir="timeout"/>
-        <ant dir="servantLocator"/>
-        <ant dir="servantLocatorAMD"/>
-        <ant dir="threads"/>
-        <ant dir="interceptor"/>
     </target>
 
     <target name="clean">
@@ -51,8 +45,6 @@
         <ant dir="inheritance" target="clean"/>
         <ant dir="location" target="clean"/>
         <ant dir="objects" target="clean"/>
-        <ant dir="proxy" target="clean"/>
-        <ant dir="proxyAMD" target="clean"/>
         <ant dir="operations" target="clean"/>
         <ant dir="operationsAMD" target="clean"/>
         <ant dir="slicing" target="clean"/>
@@ -63,10 +55,6 @@
         <ant dir="stream" target="clean"/>
         <ant dir="retry" target="clean"/>
         <ant dir="timeout" target="clean"/>
-        <ant dir="servantLocator" target="clean"/>
-        <ant dir="servantLocatorAMD" target="clean"/>
-        <ant dir="threads" target="clean"/>
-        <ant dir="interceptor" target="clean"/>
     </target>
 
 </project>

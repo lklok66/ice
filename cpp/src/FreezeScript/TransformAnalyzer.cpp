@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -27,9 +27,8 @@ class AnalyzeTransformVisitor : public ParserVisitor
 {
 public:
 
-    AnalyzeTransformVisitor(XMLOutput&, const UnitPtr&, bool, vector<string>&, vector<string>&);
-
-    void addDatabase(const string&, const TypePtr&, const TypePtr&, const TypePtr&, const TypePtr&);
+    AnalyzeTransformVisitor(XMLOutput&, const UnitPtr&, const TypePtr&, const TypePtr&, const TypePtr&, const TypePtr&,
+                            bool, vector<string>&, vector<string>&);
 
     virtual bool visitClassDefStart(const ClassDefPtr&);
     virtual bool visitStructStart(const StructPtr&);
@@ -82,58 +81,42 @@ private:
 ////////////////////////////////////
 
 FreezeScript::AnalyzeTransformVisitor::AnalyzeTransformVisitor(XMLOutput& out, const UnitPtr& newUnit,
+                                                               const TypePtr& oldKey, const TypePtr& newKey,
+                                                               const TypePtr& oldValue, const TypePtr& newValue,
                                                                bool ignoreTypeChanges, vector<string>& missingTypes,
                                                                vector<string>& errors) :
     _out(out), _newUnit(newUnit), _ignoreTypeChanges(ignoreTypeChanges), _missingTypes(missingTypes), _errors(errors)
 {
-}
+    out << se("database");
 
-void
-FreezeScript::AnalyzeTransformVisitor::addDatabase(const string& name, const TypePtr& oldKey, const TypePtr& newKey,
-                                                   const TypePtr& oldValue, const TypePtr& newValue)
-{
-    _out << "\n";
-    _out << se("database");
-
-    if(!name.empty())
-    {
-        _out << attr("name", name);
-    }
-
-    string oldKeyName = oldKey ? typeToString(oldKey) : string("UNKNOWN");
-    string newKeyName = newKey ? typeToString(newKey) : string("UNKNOWN");
+    string oldKeyName = typeToString(oldKey);
+    string newKeyName = typeToString(newKey);
     if(oldKeyName == newKeyName)
     {
-        _out << attr("key", oldKeyName);
+        out << attr("key", oldKeyName);
     }
     else
     {
-        _out << attr("key", oldKeyName + "," + newKeyName);
+        out << attr("key", oldKeyName + "," + newKeyName);
     }
 
-    string oldValueName = oldValue ? typeToString(oldValue) : string("UNKNOWN");
-    string newValueName = newValue ? typeToString(newValue) : string("UNKNOWN");
+    string oldValueName = typeToString(oldValue);
+    string newValueName = typeToString(newValue);
     if(oldValueName == newValueName)
     {
-        _out << attr("value", oldValueName);
+        out << attr("value", oldValueName);
     }
     else
     {
-        _out << attr("value", oldValueName + "," + newValueName);
+        out << attr("value", oldValueName + "," + newValueName);
     }
 
-    _out << se("record");
-    if(oldKey && newKey)
-    {
-        compareTypes("database key", oldKey, newKey);
-    }
-    if(oldValue && newValue)
-    {
-        compareTypes("database value", oldValue, newValue);
-    }
-    _out << ee;
+    out << se("record");
+    compareTypes("database key", oldKey, newKey);
+    compareTypes("database value", oldValue, newValue);
+    out << ee;
 
-    _out << ee;
+    out << ee;
 }
 
 bool
@@ -174,8 +157,8 @@ FreezeScript::AnalyzeTransformVisitor::visitClassDefStart(const ClassDefPtr& v)
         return false;
     }
 
-    _out.newline();
-    _out.newline();
+    _out.nl();
+    _out.nl();
     _out << "<!-- class " << scoped << " -->";
     _out << se("transform") << attr("type", scoped);
 
@@ -219,8 +202,8 @@ FreezeScript::AnalyzeTransformVisitor::visitStructStart(const StructPtr& v)
         return false;
     }
 
-    _out.newline();
-    _out.newline();
+    _out.nl();
+    _out.nl();
     _out << "<!-- struct " << scoped << " -->";
     _out << se("transform") << attr("type", scoped);
 
@@ -264,8 +247,8 @@ FreezeScript::AnalyzeTransformVisitor::visitSequence(const SequencePtr& v)
         return;
     }
 
-    _out.newline();
-    _out.newline();
+    _out.nl();
+    _out.nl();
     _out << "<!-- sequence " << scoped << " -->";
     _out << se("transform") << attr("type", scoped);
 
@@ -305,8 +288,8 @@ FreezeScript::AnalyzeTransformVisitor::visitDictionary(const DictionaryPtr& v)
         return;
     }
 
-    _out.newline();
-    _out.newline();
+    _out.nl();
+    _out.nl();
     _out << "<!-- dictionary " << scoped << " -->";
     _out << se("transform") << attr("type", scoped);
 
@@ -357,8 +340,8 @@ FreezeScript::AnalyzeTransformVisitor::visitEnum(const EnumPtr& v)
         }
     }
 
-    _out.newline();
-    _out.newline();
+    _out.nl();
+    _out.nl();
     _out << "<!-- enum " << scoped << " -->";
     _out << se("transform") << attr("type", scoped);
 
@@ -369,12 +352,12 @@ FreezeScript::AnalyzeTransformVisitor::visitEnum(const EnumPtr& v)
         map<string, int>::const_iterator q = m.find((*p)->name());
         if(q == m.end())
         {
-            _out.newline();
+            _out.nl();
             _out << "<!-- NOTICE: enumerator `" << (*p)->name() << "' has been removed -->";
         }
         else if(q->second != i)
         {
-            _out.newline();
+            _out.nl();
             _out << "<!-- NOTICE: enumerator `" << (*p)->name() << "' has changed position -->";
         }
     }
@@ -406,7 +389,7 @@ FreezeScript::AnalyzeTransformVisitor::compareMembers(const DataMemberList& oldM
         q = newMap.find(name);
         if(q == newMap.end())
         {
-            _out.newline();
+            _out.nl();
             _out << "<!-- NOTICE: " << name << " has been removed -->";
         }
         else
@@ -429,7 +412,7 @@ FreezeScript::AnalyzeTransformVisitor::compareMembers(const DataMemberList& oldM
     //
     for(q = newMap.begin(); q != newMap.end(); ++q)
     {
-        _out.newline();
+        _out.nl();
         _out << "<!-- NOTICE: " << q->first << " has been added -->";
     }
 }
@@ -833,7 +816,7 @@ FreezeScript::AnalyzeTransformVisitor::typeChange(const string& desc, const Type
 
     if(_ignoreTypeChanges)
     {
-        _out.newline();
+        _out.nl();
         _out << "<!-- NOTICE: " << desc << " has changed from ";
         if(b1)
         {
@@ -971,8 +954,8 @@ FreezeScript::AnalyzeInitVisitor::visitClassDefStart(const ClassDefPtr& v)
         }
     }
 
-    _out.newline();
-    _out.newline();
+    _out.nl();
+    _out.nl();
     _out << "<!-- class " << scoped << " -->";
     _out << se("init") << attr("type", scoped);
     _out << ee;
@@ -1003,8 +986,8 @@ FreezeScript::AnalyzeInitVisitor::visitStructStart(const StructPtr& v)
         }
     }
 
-    _out.newline();
-    _out.newline();
+    _out.nl();
+    _out.nl();
     _out << "<!-- struct " << scoped << " -->";
     _out << se("init") << attr("type", scoped);
     _out << ee;
@@ -1035,8 +1018,8 @@ FreezeScript::AnalyzeInitVisitor::visitSequence(const SequencePtr& v)
         }
     }
 
-    _out.newline();
-    _out.newline();
+    _out.nl();
+    _out.nl();
     _out << "<!-- sequence " << scoped << " -->";
     _out << se("init") << attr("type", scoped);
     _out << ee;
@@ -1065,8 +1048,8 @@ FreezeScript::AnalyzeInitVisitor::visitDictionary(const DictionaryPtr& v)
         }
     }
 
-    _out.newline();
-    _out.newline();
+    _out.nl();
+    _out.nl();
     _out << "<!-- dictionary " << scoped << " -->";
     _out << se("init") << attr("type", scoped);
     _out << ee;
@@ -1095,8 +1078,8 @@ FreezeScript::AnalyzeInitVisitor::visitEnum(const EnumPtr& v)
         }
     }
 
-    _out.newline();
-    _out.newline();
+    _out.nl();
+    _out.nl();
     _out << "<!-- enum " << scoped << " -->";
     _out << se("init") << attr("type", scoped);
     _out << ee;
@@ -1110,7 +1093,7 @@ FreezeScript::AnalyzeInitVisitor::typeChange(const TypePtr& t, const string& sco
     ContainedPtr c = ContainedPtr::dynamicCast(t);
     ProxyPtr p = ProxyPtr::dynamicCast(t);
 
-    _out.newline();
+    _out.nl();
     _out << "<!-- NOTICE: " << scoped << " has changed from ";
     if(b)
     {
@@ -1129,34 +1112,27 @@ FreezeScript::AnalyzeInitVisitor::typeChange(const TypePtr& t, const string& sco
 }
 
 FreezeScript::TransformAnalyzer::TransformAnalyzer(const UnitPtr& oldUnit, const UnitPtr& newUnit,
-                                                   bool ignoreTypeChanges, ostream& os, vector<string>& missingTypes,
-                                                   vector<string>& errors) :
-    _old(oldUnit), _new(newUnit), _out(os),
-    _visitor(new AnalyzeTransformVisitor(_out, newUnit, ignoreTypeChanges, missingTypes, errors))
+                                                   bool ignoreTypeChanges) :
+    _old(oldUnit), _new(newUnit), _ignoreTypeChanges(ignoreTypeChanges)
 {
-    _out << se("transformdb");
-}
-
-FreezeScript::TransformAnalyzer::~TransformAnalyzer()
-{
-    delete _visitor;
 }
 
 void
-FreezeScript::TransformAnalyzer::addDatabase(const string& name, const TypePtr& oldKey, const TypePtr& newKey,
-                                             const TypePtr& oldValue, const TypePtr& newValue)
+FreezeScript::TransformAnalyzer::analyze(const TypePtr& oldKey, const TypePtr& newKey, const TypePtr& oldValue,
+                                         const TypePtr& newValue, ostream& os, vector<string>& missingTypes,
+                                         vector<string>& errors)
 {
-    _visitor->addDatabase(name, oldKey, newKey, oldValue, newValue);
-}
+    XMLOutput out(os);
 
-void
-FreezeScript::TransformAnalyzer::finish()
-{
-    _old->visit(_visitor, false);
+    out << se("transformdb");
 
-    AnalyzeInitVisitor initVisitor(_out, _old);
+    AnalyzeTransformVisitor transformVisitor(out, _new, oldKey, newKey, oldValue, newValue, _ignoreTypeChanges,
+                                             missingTypes, errors);
+    _old->visit(&transformVisitor, false);
+
+    AnalyzeInitVisitor initVisitor(out, _old);
     _new->visit(&initVisitor, false);
 
-    _out << ee;
-    _out << '\n';
+    out << ee;
+    out << '\n';
 }

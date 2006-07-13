@@ -1,6 +1,6 @@
 ' **********************************************************************
 '
-' Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+' Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 '
 ' This copy of Ice is licensed to you under the terms described in the
 ' ICE_LICENSE file included in this distribution.
@@ -23,6 +23,7 @@ Module HelloIceBoxC
             Console.WriteLine("d: send greeting as datagram")
             Console.WriteLine("D: send greeting as batch datagram")
             Console.WriteLine("f: flush all batch requests")
+            Console.WriteLine("T: set a timeout")
             If _haveSSL Then
                 Console.WriteLine("S: switch secure mode on/off")
             End If
@@ -37,7 +38,15 @@ Module HelloIceBoxC
             Catch ex As Ice.NotRegisteredException
             End Try
 
-            Dim twoway As HelloPrx = HelloPrxHelper.checkedCast(communicator().propertyToProxy("Hello.Proxy").ice_twoway().ice_timeout(-1).ice_secure(False))
+            Dim properties As Ice.Properties = communicator().getProperties()
+            Dim proxyProperty As String = "Hello.Proxy"
+            Dim proxy As String = properties.getProperty(proxyProperty)
+            If proxy.Length = 0 Then
+                Console.Error.WriteLine("property `" & proxyProperty & "' not set")
+                Return 1
+            End If
+
+            Dim twoway As HelloPrx = HelloPrxHelper.checkedCast(communicator().stringToProxy(proxy).ice_twoway().ice_timeout(-1).ice_secure(False))
             If twoway Is Nothing Then
                 Console.Error.WriteLine("invalid proxy")
                 Return 1
@@ -48,6 +57,7 @@ Module HelloIceBoxC
             Dim batchDatagram As HelloPrx = HelloPrxHelper.uncheckedCast(twoway.ice_batchDatagram())
 
             Dim secure As Boolean = False
+            Dim timeout As Integer = -1
 
             menu()
 
@@ -58,7 +68,7 @@ Module HelloIceBoxC
                     Console.Out.Flush()
                     line = Console.In.ReadLine()
                     If line Is Nothing Then
-                        Exit Do
+                        Exit Try
                     End If
                     If line.Equals("t") Then
                         twoway.sayHello()
@@ -80,6 +90,22 @@ Module HelloIceBoxC
                         End If
                     ElseIf line.Equals("f") Then
                         communicator.flushBatchRequests()
+                    ElseIf line.Equals("T") Then
+                        If timeout = -1 Then
+                            timeout = 2000
+                        Else
+                            timeout = -1
+                        End If
+
+                        twoway = HelloPrxHelper.uncheckedCast(twoway.ice_timeout(timeout))
+                        oneway = HelloPrxHelper.uncheckedCast(oneway.ice_timeout(timeout))
+                        batchOneway = HelloPrxHelper.uncheckedCast(batchOneway.ice_timeout(timeout))
+
+                        If timeout = -1 Then
+                            Console.WriteLine("timeout is now switched off")
+                        Else
+                            Console.WriteLine("timeout is now set to 2000ms")
+                        End If
                     ElseIf _haveSSL And line.Equals("S") Then
                         secure = Not secure
 

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -116,8 +116,8 @@ Slice::JavaOutput::openClass(const string& cls, const string& prefix)
 
         if(!package.empty())
         {
-            separator();
-            separator();
+            sp();
+            nl();
             print("package ");
             print(package.c_str());
             print(";");
@@ -135,7 +135,7 @@ Slice::JavaOutput::printHeader()
     static const char* header =
 "// **********************************************************************\n"
 "//\n"
-"// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.\n"
+"// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.\n"
 "//\n"
 "// This copy of Ice is licensed to you under the terms described in the\n"
 "// ICE_LICENSE file included in this distribution.\n"
@@ -149,7 +149,6 @@ Slice::JavaOutput::printHeader()
 }
 
 const string Slice::JavaGenerator::_getSetMetaData = "java:getset";
-const string Slice::JavaGenerator::_java2MetaData = "java:java2";
 const string Slice::JavaGenerator::_java5MetaData = "java:java5";
 
 Slice::JavaGenerator::JavaGenerator(const string& dir) :
@@ -219,17 +218,17 @@ lookupKwd(const string& name)
     {       
         "abstract", "assert", "boolean", "break", "byte", "case", "catch",
         "char", "checkedCast", "class", "clone", "const", "continue", "default", "do",
-        "double", "else", "enum", "equals", "extends", "false", "final", "finalize",
-        "finally", "float", "for", "getClass", "goto", "hashCode", "if",
-        "implements", "import", "instanceof", "int", "interface", "long",
-        "native", "new", "notify", "notifyAll", "null", "package", "private",
-        "protected", "public", "return", "short", "static", "strictfp", "super", "switch",
+        "double", "else", "equals", "extends", "false", "final", "finalize",
+	"finally", "float", "for", "getClass", "goto", "hashCode", "if",
+	"implements", "import", "instanceof", "int", "interface", "long",
+	"native", "new", "notify", "notifyAll", "null", "package", "private",
+	"protected", "public", "return", "short", "static", "strictfp", "super", "switch",
         "synchronized", "this", "throw", "throws", "toString", "transient",
         "true", "try", "uncheckedCast", "void", "volatile", "wait", "while"
     };
     bool found =  binary_search(&keywordList[0],
-                                &keywordList[sizeof(keywordList) / sizeof(*keywordList)],
-                                name);
+	                        &keywordList[sizeof(keywordList) / sizeof(*keywordList)],
+				name);
     return found ? "_" + name : name;
 }
 
@@ -245,24 +244,24 @@ splitScopedName(const string& scoped)
     string::size_type pos;
     while((pos = scoped.find("::", next)) != string::npos)
     {
-        pos += 2;
-        if(pos != scoped.size())
-        {
-            string::size_type endpos = scoped.find("::", pos);
-            if(endpos != string::npos)
-            {
-                ids.push_back(scoped.substr(pos, endpos - pos));
-            }
-        }
-        next = pos;
+	pos += 2;
+	if(pos != scoped.size())
+	{
+	    string::size_type endpos = scoped.find("::", pos);
+	    if(endpos != string::npos)
+	    {
+		ids.push_back(scoped.substr(pos, endpos - pos));
+	    }
+	}
+	next = pos;
     }
     if(next != scoped.size())
     {
-        ids.push_back(scoped.substr(next));
+	ids.push_back(scoped.substr(next));
     }
     else
     {
-        ids.push_back("");
+	ids.push_back("");
     }
 
     return ids;
@@ -280,18 +279,18 @@ Slice::JavaGenerator::fixKwd(const string& name) const
 {
     if(name.empty())
     {
-        return name;
+	return name;
     }
     if(name[0] != ':')
     {
-        return lookupKwd(name);
+	return lookupKwd(name);
     }
     StringList ids = splitScopedName(name);
     transform(ids.begin(), ids.end(), ids.begin(), ptr_fun(lookupKwd));
     stringstream result;
     for(StringList::const_iterator i = ids.begin(); i != ids.end(); ++i)
     {
-        result << "::" + *i;
+	result << "::" + *i;
     }
     return result.str();
 }
@@ -403,7 +402,7 @@ Slice::JavaGenerator::typeToString(const TypePtr& type,
                                    TypeMode mode,
                                    const string& package,
                                    const StringList& metaData,
-                                   bool abstract) const
+				   bool abstract) const
 {
     static const char* builtinTable[] =
     {
@@ -417,7 +416,7 @@ Slice::JavaGenerator::typeToString(const TypePtr& type,
         "String",
         "Ice.Object",
         "Ice.ObjectPrx",
-        "java.lang.Object"
+        "Ice.LocalObject"
     };
     static const char* builtinHolderTable[] =
     {
@@ -470,48 +469,48 @@ Slice::JavaGenerator::typeToString(const TypePtr& type,
     {
         if(mode == TypeModeOut)
         {
-            if(_featureProfile == Slice::IceE)
-            {
-                return getAbsolute(dict, package, "", "Holder");
-            }
-            else
-            {
-                //
-                // Only use the type's generated holder if the concrete and
-                // abstract types match.
-                //
-                string concreteType, abstractType;
-                getDictionaryTypes(dict, "", metaData, concreteType, abstractType);
-                string origConcreteType, origAbstractType;
-                getDictionaryTypes(dict, "", StringList(), origConcreteType, origAbstractType);
-                if(abstractType == origAbstractType && concreteType == origConcreteType)
-                {
-                    return getAbsolute(dict, package, "", "Holder");
-                }
+	    if(_featureProfile == Slice::IceE)
+	    {
+		return getAbsolute(dict, package, "", "Holder");
+	    }
+	    else
+	    {
+		//
+		// Only use the type's generated holder if the concrete and
+		// abstract types match.
+		//
+		string concreteType, abstractType;
+		getDictionaryTypes(dict, "", metaData, concreteType, abstractType);
+		string origConcreteType, origAbstractType;
+		getDictionaryTypes(dict, "", StringList(), origConcreteType, origAbstractType);
+		if(abstractType == origAbstractType && concreteType == origConcreteType)
+		{
+		    return getAbsolute(dict, package, "", "Holder");
+		}
 
-                bool java2 = dict->definitionContext()->findMetaData(_java2MetaData) == _java2MetaData;
+		bool java5 = dict->definitionContext()->findMetaData(_java5MetaData) == _java5MetaData;
 
-                //
-                // The custom type may or may not be compatible with the type used
-                // in the generated holder. For Java5, we can use a generic holder
-                // that holds a value of the abstract custom type. Otherwise, we
-                // use MapHolder.
-                //
-                if(java2)
-                {
-                    return "Ice.MapHolder";
-                }
-                else
-                {
-                    return string("Ice.Holder<") + abstractType + " >";
-                }
-            }
+		//
+		// The custom type may or may not be compatible with the type used
+		// in the generated holder. For Java5, we can use a generic holder
+		// that holds a value of the abstract custom type. Otherwise, we
+		// use MapHolder.
+		//
+		if(java5)
+		{
+		    return string("Ice.Holder<") + abstractType + " >";
+		}
+		else
+		{
+		    return "Ice.MapHolder";
+		}
+	    }
         }
         else
         {
-            string concreteType, abstractType;
-            getDictionaryTypes(dict, package, metaData, concreteType, abstractType);
-            return abstract ? abstractType : concreteType;
+	    string concreteType, abstractType;
+	    getDictionaryTypes(dict, package, metaData, concreteType, abstractType);
+	    return abstract ? abstractType : concreteType;
         }
     }
 
@@ -520,59 +519,59 @@ Slice::JavaGenerator::typeToString(const TypePtr& type,
     {
         if(mode == TypeModeOut)
         {
-            if(_featureProfile == Slice::IceE)
-            {
-                return getAbsolute(seq, package, "", "Holder");
-            }
-            else
-            {
-                //
-                // Only use the type's generated holder if the concrete and
-                // abstract types match.
-                //
-                string concreteType, abstractType;
-                getSequenceTypes(seq, "", metaData, concreteType, abstractType);
-                string origConcreteType, origAbstractType;
-                getSequenceTypes(seq, "", StringList(), origConcreteType, origAbstractType);
-                if(abstractType == origAbstractType && concreteType == origConcreteType)
-                {
-                    return getAbsolute(seq, package, "", "Holder");
-                }
+	    if(_featureProfile == Slice::IceE)
+	    {
+		return getAbsolute(seq, package, "", "Holder");
+	    }
+	    else
+	    {
+		//
+		// Only use the type's generated holder if the concrete and
+		// abstract types match.
+		//
+		string concreteType, abstractType;
+		getSequenceTypes(seq, "", metaData, concreteType, abstractType);
+		string origConcreteType, origAbstractType;
+		getSequenceTypes(seq, "", StringList(), origConcreteType, origAbstractType);
+		if(abstractType == origAbstractType && concreteType == origConcreteType)
+		{
+		    return getAbsolute(seq, package, "", "Holder");
+		}
 
-                bool java2 = seq->definitionContext()->findMetaData(_java2MetaData) == _java2MetaData;
+		bool java5 = seq->definitionContext()->findMetaData(_java5MetaData) == _java5MetaData;
 
-                //
-                // The custom type may or may not be compatible with the type used
-                // in the generated holder. For Java5, we can use a generic holder
-                // that holds a value of the abstract custom type. Otherwise, we
-                // choose a predefined holder class.
-                //
-                if(java2)
-                {
-                    if(abstractType == "java.util.ArrayList")
-                    {
-                        return "Ice.ArrayListHolder";
-                    }
-                    else if(abstractType == "java.util.LinkedList")
-                    {
-                        return "Ice.LinkedListHolder";
-                    }
-                    else
-                    {
-                        return "Ice.ListHolder";
-                    }
-                }
-                else
-                {
-                    return string("Ice.Holder<") + abstractType + " >";
-                }
-            }
+		//
+		// The custom type may or may not be compatible with the type used
+		// in the generated holder. For Java5, we can use a generic holder
+		// that holds a value of the abstract custom type. Otherwise, we
+		// choose a predefined holder class.
+		//
+		if(java5)
+		{
+		    return string("Ice.Holder<") + abstractType + " >";
+		}
+		else
+		{
+		    if(abstractType == "java.util.ArrayList")
+		    {
+			return "Ice.ArrayListHolder";
+		    }
+		    else if(abstractType == "java.util.LinkedList")
+		    {
+			return "Ice.LinkedListHolder";
+		    }
+		    else
+		    {
+			return "Ice.ListHolder";
+		    }
+		}
+	    }
         }
         else
         {
-            string concreteType, abstractType;
-            getSequenceTypes(seq, package, metaData, concreteType, abstractType);
-            return abstract ? abstractType : concreteType;
+	    string concreteType, abstractType;
+	    getSequenceTypes(seq, package, metaData, concreteType, abstractType);
+	    return abstract ? abstractType : concreteType;
         }
     }
 
@@ -594,10 +593,10 @@ Slice::JavaGenerator::typeToString(const TypePtr& type,
 
 string
 Slice::JavaGenerator::typeToObjectString(const TypePtr& type,
-                                         TypeMode mode,
-                                         const string& package,
-                                         const StringList& metaData,
-                                         bool abstract) const
+				         TypeMode mode,
+				         const string& package,
+				         const StringList& metaData,
+				         bool abstract) const
 {
     static const char* builtinTable[] =
     {
@@ -611,13 +610,13 @@ Slice::JavaGenerator::typeToObjectString(const TypePtr& type,
         "java.lang.String",
         "Ice.Object",
         "Ice.ObjectPrx",
-        "java.lang.Object"
+        "Ice.LocalObject"
     };
 
     BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
     if(builtin && mode != TypeModeOut)
     {
-        return builtinTable[builtin->kind()];
+	return builtinTable[builtin->kind()];
     }
 
     return typeToString(type, mode, package, metaData, abstract);
@@ -632,7 +631,7 @@ Slice::JavaGenerator::writeMarshalUnmarshalCode(Output& out,
                                                 int& iter,
                                                 bool holder,
                                                 const StringList& metaData,
-                                                const string& patchParams)
+						const string& patchParams)
 {
     string stream = marshal ? "__os" : "__is";
     string v;
@@ -748,31 +747,31 @@ Slice::JavaGenerator::writeMarshalUnmarshalCode(Output& out,
             }
             case Builtin::KindObject:
             {
-                if(_featureProfile != Slice::IceE)
-                {
-                    if(marshal)
-                    {
-                        out << nl << stream << ".writeObject(" << v << ");";
-                    }
-                    else
-                    {
-                        if(holder)
-                        {
-                            out << nl << stream << ".readObject(" << param << ".getPatcher());";
-                        }
-                        else
-                        {
-                            if(patchParams.empty())
-                            {
-                                out << nl << stream << ".readObject(new Patcher());";
-                            }
-                            else
-                            {
-                                out << nl << stream << ".readObject(" << patchParams << ");";
-                            }
-                        }
-                    }
-                }
+		if(_featureProfile != Slice::IceE)
+		{
+		    if(marshal)
+		    {
+			out << nl << stream << ".writeObject(" << v << ");";
+		    }
+		    else
+		    {
+			if(holder)
+			{
+			    out << nl << stream << ".readObject(" << param << ".getPatcher());";
+			}
+			else
+			{
+			    if(patchParams.empty())
+			    {
+				out << nl << stream << ".readObject(new Patcher());";
+			    }
+			    else
+			    {
+				out << nl << stream << ".readObject(" << patchParams << ");";
+			    }
+			}
+		    }
+		}
                 break;
             }
             case Builtin::KindObjectProxy:
@@ -814,32 +813,32 @@ Slice::JavaGenerator::writeMarshalUnmarshalCode(Output& out,
     ClassDeclPtr cl = ClassDeclPtr::dynamicCast(type);
     if(cl)
     {
-        if(_featureProfile != Slice::IceE)
-        {
-            if(marshal)
-            {
-                out << nl << stream << ".writeObject(" << v << ");";
-            }
-            else
-            {
-                string typeS = typeToString(type, TypeModeIn, package);
-                if(holder)
-                {
-                    out << nl << stream << ".readObject(" << param << ".getPatcher());";
-                }
-                else
-                {
-                    if(patchParams.empty())
-                    {
-                        out << nl << stream << ".readObject(new Patcher());";
-                    }
-                    else
-                    {
-                        out << nl << stream << ".readObject(" << patchParams << ");";
-                    }
-                }
-            }
-        }
+	if(_featureProfile != Slice::IceE)
+	{
+	    if(marshal)
+	    {
+		out << nl << stream << ".writeObject(" << v << ");";
+	    }
+	    else
+	    {
+		string typeS = typeToString(type, TypeModeIn, package);
+		if(holder)
+		{
+		    out << nl << stream << ".readObject(" << param << ".getPatcher());";
+		}
+		else
+		{
+		    if(patchParams.empty())
+		    {
+			out << nl << stream << ".readObject(new Patcher());";
+		    }
+		    else
+		    {
+			out << nl << stream << ".readObject(" << patchParams << ");";
+		    }
+		}
+	    }
+	}
         return;
     }
 
@@ -914,35 +913,35 @@ Slice::JavaGenerator::writeDictionaryMarshalUnmarshalCode(Output& out,
     string stream = marshal ? "__os" : "__is";
     string v = param;
 
-    bool java2 = false;
+    bool java5 = false;
     string concreteType;
 
     if(_featureProfile != Slice::IceE)
     {
-        java2 = dict->definitionContext()->findMetaData(_java2MetaData) == _java2MetaData;
+	java5 = dict->definitionContext()->findMetaData(_java5MetaData) == _java5MetaData;
 
-        //
-        // We have to determine whether it's possible to use the
-        // type's generated helper class for this marshal/unmarshal
-        // task. Since the user may have specified a custom type in
-        // metadata, it's possible that the helper class is not
-        // compatible and therefore we'll need to generate the code
-        // in-line instead.
-        //
-        // Specifically, there may be "local" metadata (i.e., from
-        // a data member or parameter definition) that overrides the
-        // original type. We'll compare the mapped types with and
-        // without local metadata to determine whether we can use
-        // the helper.
-        //
-        string abstractType;
-        getDictionaryTypes(dict, "", metaData, concreteType, abstractType);
-        string origConcreteType, origAbstractType;
-        getDictionaryTypes(dict, "", StringList(), origConcreteType, origAbstractType);
-        if((abstractType != origAbstractType) || (!marshal && concreteType != origConcreteType))
-        {
-            useHelper = false;
-        }
+	//
+	// We have to determine whether it's possible to use the
+	// type's generated helper class for this marshal/unmarshal
+	// task. Since the user may have specified a custom type in
+	// metadata, it's possible that the helper class is not
+	// compatible and therefore we'll need to generate the code
+	// in-line instead.
+	//
+	// Specifically, there may be "local" metadata (i.e., from
+	// a data member or parameter definition) that overrides the
+	// original type. We'll compare the mapped types with and
+	// without local metadata to determine whether we can use
+	// the helper.
+	//
+	string abstractType;
+	getDictionaryTypes(dict, "", metaData, concreteType, abstractType);
+	string origConcreteType, origAbstractType;
+	getDictionaryTypes(dict, "", StringList(), origConcreteType, origAbstractType);
+	if((abstractType != origAbstractType) || (!marshal && concreteType != origConcreteType))
+	{
+	    useHelper = false;
+	}
     }
 
     //
@@ -950,16 +949,16 @@ Slice::JavaGenerator::writeDictionaryMarshalUnmarshalCode(Output& out,
     //
     if(useHelper)
     {
-        string typeS = getAbsolute(dict, package);
-        if(marshal)
-        {
-            out << nl << typeS << "Helper.write(" << stream << ", " << v << ");";
-        }
-        else
-        {
-            out << nl << v << " = " << typeS << "Helper.read(" << stream << ");";
-        }
-        return;
+	string typeS = getAbsolute(dict, package);
+	if(marshal)
+	{
+	    out << nl << typeS << "Helper.write(" << stream << ", " << v << ");";
+	}
+	else
+	{
+	    out << nl << v << " = " << typeS << "Helper.read(" << stream << ");";
+	}
+	return;
     }
 
     TypePtr key = dict->keyType();
@@ -983,21 +982,21 @@ Slice::JavaGenerator::writeDictionaryMarshalUnmarshalCode(Output& out,
         out << nl << "else";
         out << sb;
         out << nl << "__os.writeSize(" << v << ".size());";
-        if(java2)
-        {
-            out << nl << "java.util.Iterator __i" << iterS << " = " << v << ".entrySet().iterator();";
-            out << nl << "while(__i" << iterS << ".hasNext())";
-            out << sb;
-            out << nl << "java.util.Map.Entry __e = (java.util.Map.Entry)" << "__i" << iterS << ".next();";
-        }
-        else
-        {
-            string keyObjectS = typeToObjectString(key, TypeModeIn, package);
-            string valueObjectS = typeToObjectString(value, TypeModeIn, package);
-            out << nl << "for(java.util.Map.Entry<" << keyObjectS << ", " << valueObjectS << "> __e : " << v
-                << ".entrySet())";
-            out << sb;
-        }
+	if(java5)
+	{
+	    string keyObjectS = typeToObjectString(key, TypeModeIn, package);
+	    string valueObjectS = typeToObjectString(value, TypeModeIn, package);
+	    out << nl << "for(java.util.Map.Entry<" << keyObjectS << ", " << valueObjectS << "> __e : " << v
+		<< ".entrySet())";
+	    out << sb;
+	}
+	else
+	{
+	    out << nl << "java.util.Iterator __i" << iterS << " = " << v << ".entrySet().iterator();";
+	    out << nl << "while(__i" << iterS << ".hasNext())";
+	    out << sb;
+	    out << nl << "java.util.Map.Entry __e = (java.util.Map.Entry)" << "__i" << iterS << ".next();";
+	}
         for(i = 0; i < 2; i++)
         {
             string val;
@@ -1014,74 +1013,74 @@ Slice::JavaGenerator::writeDictionaryMarshalUnmarshalCode(Output& out,
                 type = value;
             }
 
-            //
-            // We have to downcast unless we're using Java5.
-            //
-            if(java2)
-            {
-                BuiltinPtr b = BuiltinPtr::dynamicCast(type);
-                if(b)
-                {
-                    switch(b->kind())
-                    {
-                        case Builtin::KindByte:
-                        {
-                            val = "((java.lang.Byte)" + arg + ").byteValue()";
-                            break;
-                        }
-                        case Builtin::KindBool:
-                        {
-                            val = "((java.lang.Boolean)" + arg + ").booleanValue()";
-                            break;
-                        }
-                        case Builtin::KindShort:
-                        {
-                            val = "((java.lang.Short)" + arg + ").shortValue()";
-                            break;
-                        }
-                        case Builtin::KindInt:
-                        {
-                            val = "((java.lang.Integer)" + arg + ").intValue()";
-                            break;
-                        }
-                        case Builtin::KindLong:
-                        {
-                            val = "((java.lang.Long)" + arg + ").longValue()";
-                            break;
-                        }
-                        case Builtin::KindFloat:
-                        {
-                            val = "((java.lang.Float)" + arg + ").floatValue()";
-                            break;
-                        }
-                        case Builtin::KindDouble:
-                        {
-                            val = "((java.lang.Double)" + arg + ").doubleValue()";
-                            break;
-                        }
-                        case Builtin::KindString:
-                        case Builtin::KindObject:
-                        case Builtin::KindObjectProxy:
-                        {
-                            break;
-                        }
-                        case Builtin::KindLocalObject:
-                        {
-                            assert(false);
-                            break;
-                        }
-                    }
-                }
+	    //
+	    // We have to downcast unless we're using Java5.
+	    //
+	    if(java5)
+	    {
+		val = arg;
+	    }
+	    else
+	    {
+		BuiltinPtr b = BuiltinPtr::dynamicCast(type);
+		if(b)
+		{
+		    switch(b->kind())
+		    {
+			case Builtin::KindByte:
+			{
+			    val = "((java.lang.Byte)" + arg + ").byteValue()";
+			    break;
+			}
+			case Builtin::KindBool:
+			{
+			    val = "((java.lang.Boolean)" + arg + ").booleanValue()";
+			    break;
+			}
+			case Builtin::KindShort:
+			{
+			    val = "((java.lang.Short)" + arg + ").shortValue()";
+			    break;
+			}
+			case Builtin::KindInt:
+			{
+			    val = "((java.lang.Integer)" + arg + ").intValue()";
+			    break;
+			}
+			case Builtin::KindLong:
+			{
+			    val = "((java.lang.Long)" + arg + ").longValue()";
+			    break;
+			}
+			case Builtin::KindFloat:
+			{
+			    val = "((java.lang.Float)" + arg + ").floatValue()";
+			    break;
+			}
+			case Builtin::KindDouble:
+			{
+			    val = "((java.lang.Double)" + arg + ").doubleValue()";
+			    break;
+			}
+			case Builtin::KindString:
+			case Builtin::KindObject:
+			case Builtin::KindObjectProxy:
+			{
+			    break;
+			}
+			case Builtin::KindLocalObject:
+			{
+			    assert(false);
+			    break;
+			}
+		    }
+		}
 
-                if(val.empty())
-                {
-                    val = "((" + typeToString(type, TypeModeIn, package) + ')' + arg + ')';
-                }
-            }
-            else
-            {
-                val = arg;
-            }
+		if(val.empty())
+		{
+		    val = "((" + typeToString(type, TypeModeIn, package) + ')' + arg + ')';
+		}
+	    }
             writeMarshalUnmarshalCode(out, package, type, val, true, iter, false);
         }
         out << eb;
@@ -1089,7 +1088,7 @@ Slice::JavaGenerator::writeDictionaryMarshalUnmarshalCode(Output& out,
     }
     else
     {
-        out << nl << v << " = new " << concreteType << "();";
+	out << nl << v << " = new " << concreteType << "();";
         out << nl << "int __sz" << iterS << " = __is.readSize();";
         out << nl << "for(int __i" << iterS << " = 0; __i" << iterS << " < __sz" << iterS << "; __i" << iterS << "++)";
         out << sb;
@@ -1097,58 +1096,58 @@ Slice::JavaGenerator::writeDictionaryMarshalUnmarshalCode(Output& out,
         {
             string arg;
             TypePtr type;
-            string typeS;
+	    string typeS;
             if(i == 0)
             {
                 arg = "__key";
                 type = key;
-                typeS = keyS;
+		typeS = keyS;
             }
             else
             {
                 arg = "__value";
                 type = value;
-                typeS = valueS;
+		typeS = valueS;
             }
 
             BuiltinPtr b = BuiltinPtr::dynamicCast(type);
-            if(b && java2)
+            if(b && !java5)
             {
                 switch(b->kind())
                 {
                     case Builtin::KindByte:
                     {
-                        out << nl << "java.lang.Byte " << arg << " = new java.lang.Byte(__is.readByte());";
+			out << nl << "java.lang.Byte " << arg << " = new java.lang.Byte(__is.readByte());";
                         break;
                     }
                     case Builtin::KindBool:
                     {
-                        out << nl << "java.lang.Boolean " << arg << " = new java.lang.Boolean(__is.readBool());";
+			out << nl << "java.lang.Boolean " << arg << " = new java.lang.Boolean(__is.readBool());";
                         break;
                     }
                     case Builtin::KindShort:
                     {
-                        out << nl << "java.lang.Short " << arg << " = new java.lang.Short(__is.readShort());";
+			out << nl << "java.lang.Short " << arg << " = new java.lang.Short(__is.readShort());";
                         break;
                     }
                     case Builtin::KindInt:
                     {
-                        out << nl << "java.lang.Integer " << arg << " = new java.lang.Integer(__is.readInt());";
+			out << nl << "java.lang.Integer " << arg << " = new java.lang.Integer(__is.readInt());";
                         break;
                     }
                     case Builtin::KindLong:
                     {
-                        out << nl << "java.lang.Long " << arg << " = new java.lang.Long(__is.readLong());";
+			out << nl << "java.lang.Long " << arg << " = new java.lang.Long(__is.readLong());";
                         break;
                     }
                     case Builtin::KindFloat:
                     {
-                        out << nl << "java.lang.Float " << arg << " = new java.lang.Float(__is.readFloat());";
+			out << nl << "java.lang.Float " << arg << " = new java.lang.Float(__is.readFloat());";
                         break;
                     }
                     case Builtin::KindDouble:
                     {
-                        out << nl << "java.lang.Double " << arg << " = new java.lang.Double(__is.readDouble());";
+			out << nl << "java.lang.Double " << arg << " = new java.lang.Double(__is.readDouble());";
                         break;
                     }
                     case Builtin::KindString:
@@ -1158,9 +1157,9 @@ Slice::JavaGenerator::writeDictionaryMarshalUnmarshalCode(Output& out,
                     }
                     case Builtin::KindObject:
                     {
-                        assert(i == 1); // Must be the element value, since an object cannot be a key.
+			assert(i == 1); // Must be the element value, since an object cannot be a key.
                         out << nl << "__is.readObject(new IceInternal.DictionaryPatcher(" << v << ", " 
-                            << valueS << ".class, \"" << value->typeId() << "\", __key));";
+			    << valueS << ".class, \"" << value->typeId() << "\", __key));";
                         break;
                     }
                     case Builtin::KindObjectProxy:
@@ -1177,24 +1176,24 @@ Slice::JavaGenerator::writeDictionaryMarshalUnmarshalCode(Output& out,
             }
             else
             {
-                if(ClassDeclPtr::dynamicCast(type) || (b && b->kind() == Builtin::KindObject))
-                {
-                    writeMarshalUnmarshalCode(out, package, type, arg, false, iter, false, StringList(),
-                                              "new IceInternal.DictionaryPatcher(" + v + ", " + typeS + ".class, \"" +
-                                              type->typeId() + "\", __key)");
-                }
-                else
-                {
-                    out << nl << typeS << ' ' << arg << ';';
-                    writeMarshalUnmarshalCode(out, package, type, arg, false, iter, false);
-                }
+		if(ClassDeclPtr::dynamicCast(type) || (b && b->kind() == Builtin::KindObject))
+		{
+		    writeMarshalUnmarshalCode(out, package, type, arg, false, iter, false, StringList(),
+					      "new IceInternal.DictionaryPatcher(" + v + ", " + typeS + ".class, \"" +
+					      type->typeId() + "\", __key)");
+		}
+		else
+		{
+		    out << nl << typeS << ' ' << arg << ';';
+		    writeMarshalUnmarshalCode(out, package, type, arg, false, iter, false);
+		}
             }
         }
-        BuiltinPtr builtin = BuiltinPtr::dynamicCast(value);
-        if(!(builtin && builtin->kind() == Builtin::KindObject) && !ClassDeclPtr::dynamicCast(value))
-        {
-            out << nl << "" << v << ".put(__key, __value);";
-        }
+	BuiltinPtr builtin = BuiltinPtr::dynamicCast(value);
+	if(!(builtin && builtin->kind() == Builtin::KindObject) && !ClassDeclPtr::dynamicCast(value))
+	{
+	    out << nl << "" << v << ".put(__key, __value);";
+	}
         out << eb;
     }
 }
@@ -1212,36 +1211,36 @@ Slice::JavaGenerator::writeSequenceMarshalUnmarshalCode(Output& out,
     string stream = marshal ? "__os" : "__is";
     string v = param;
 
-    bool java2 = false;
+    bool java5 = false;
     bool customType = false;
     string concreteType;
 
     if(_featureProfile != Slice::IceE)
     {
-        java2 = seq->definitionContext()->findMetaData(_java2MetaData) == _java2MetaData;
+	java5 = seq->definitionContext()->findMetaData(_java5MetaData) == _java5MetaData;
 
-        //
-        // We have to determine whether it's possible to use the
-        // type's generated helper class for this marshal/unmarshal
-        // task. Since the user may have specified a custom type in
-        // metadata, it's possible that the helper class is not
-        // compatible and therefore we'll need to generate the code
-        // in-line instead.
-        //
-        // Specifically, there may be "local" metadata (i.e., from
-        // a data member or parameter definition) that overrides the
-        // original type. We'll compare the mapped types with and
-        // without local metadata to determine whether we can use
-        // the helper.
-        //
-        string abstractType;
-        customType = getSequenceTypes(seq, "", metaData, concreteType, abstractType);
-        string origConcreteType, origAbstractType;
-        getSequenceTypes(seq, "", StringList(), origConcreteType, origAbstractType);
-        if((abstractType != origAbstractType) || (!marshal && concreteType != origConcreteType))
-        {
-            useHelper = false;
-        }
+	//
+	// We have to determine whether it's possible to use the
+	// type's generated helper class for this marshal/unmarshal
+	// task. Since the user may have specified a custom type in
+	// metadata, it's possible that the helper class is not
+	// compatible and therefore we'll need to generate the code
+	// in-line instead.
+	//
+	// Specifically, there may be "local" metadata (i.e., from
+	// a data member or parameter definition) that overrides the
+	// original type. We'll compare the mapped types with and
+	// without local metadata to determine whether we can use
+	// the helper.
+	//
+	string abstractType;
+	customType = getSequenceTypes(seq, "", metaData, concreteType, abstractType);
+	string origConcreteType, origAbstractType;
+	getSequenceTypes(seq, "", StringList(), origConcreteType, origAbstractType);
+	if((abstractType != origAbstractType) || (!marshal && concreteType != origConcreteType))
+	{
+	    useHelper = false;
+	}
     }
 
     //
@@ -1272,10 +1271,10 @@ Slice::JavaGenerator::writeSequenceMarshalUnmarshalCode(Output& out,
         //
         // Stop if the inner sequence type has a custom type.
         //
-        if(hasTypeMetaData(s) && _featureProfile != Slice::IceE)
-        {
-            break;
-        }
+	if(hasTypeMetaData(s) && _featureProfile != Slice::IceE)
+	{
+	    break;
+	}
         depth++;
         origContent = s->type();
         s = SequencePtr::dynamicCast(origContent);
@@ -1290,7 +1289,7 @@ Slice::JavaGenerator::writeSequenceMarshalUnmarshalCode(Output& out,
         // Marshal/unmarshal a custom sequence type.
         //
         BuiltinPtr b = BuiltinPtr::dynamicCast(type);
-        if(b && b->kind() != Builtin::KindObject && b->kind() != Builtin::KindObjectProxy && java2)
+        if(b && b->kind() != Builtin::KindObject && b->kind() != Builtin::KindObjectProxy && !java5)
         {
             if(marshal)
             {
@@ -1301,12 +1300,12 @@ Slice::JavaGenerator::writeSequenceMarshalUnmarshalCode(Output& out,
                 out << nl << "else";
                 out << sb;
                 out << nl << stream << ".writeSize(" << v << ".size());";
-                ostringstream o;
-                o << "__i" << iter;
-                string it = o.str();
-                iter++;
-                out << nl << "java.util.Iterator " << it << " = " << v << ".iterator();";
-                out << nl << "while(" << it << ".hasNext())";
+		ostringstream o;
+		o << "__i" << iter;
+		string it = o.str();
+		iter++;
+		out << nl << "java.util.Iterator " << it << " = " << v << ".iterator();";
+		out << nl << "while(" << it << ".hasNext())";
                 out << sb;
 
                 switch(b->kind())
@@ -1484,14 +1483,14 @@ Slice::JavaGenerator::writeSequenceMarshalUnmarshalCode(Output& out,
         else
         {
             string typeS = getAbsolute(seq, package);
-            ostringstream o;
-            o << origContentS;
-            int d = depth;
-            while(d--)
-            {
-                o << "[]";
-            }
-            string cont = o.str();
+	    ostringstream o;
+	    o << origContentS;
+	    int d = depth;
+	    while(d--)
+	    {
+		o << "[]";
+	    }
+	    string cont = o.str();
             if(marshal)
             {
                 out << nl << "if(" << v << " == null)";
@@ -1501,47 +1500,47 @@ Slice::JavaGenerator::writeSequenceMarshalUnmarshalCode(Output& out,
                 out << nl << "else";
                 out << sb;
                 out << nl << stream << ".writeSize(" << v << ".size());";
-                if(java2)
-                {
-                    ostringstream oit;
-                    oit << "__i" << iter;
-                    iter++;
-                    string it = oit.str();
-                    out << nl << "java.util.Iterator " << it << " = " << v << ".iterator();";
-                    out << nl << "while(" << it << ".hasNext())";
-                    out << sb;
-                    out << nl << cont << " __elem = (" << cont << ")" << it << ".next();";
-                    writeMarshalUnmarshalCode(out, package, type, "__elem", true, iter, false);
-                    out << eb;
-                }
-                else
-                {
-                    string typeS = typeToString(type, TypeModeIn, package);
-                    out << nl << "for(" << typeS << " __elem : " << v << ')';
-                    out << sb;
-                    writeMarshalUnmarshalCode(out, package, type, "__elem", true, iter, false);
-                    out << eb;
-                }
+		if(java5)
+		{
+		    string typeS = typeToString(type, TypeModeIn, package);
+		    out << nl << "for(" << typeS << " __elem : " << v << ')';
+		    out << sb;
+		    writeMarshalUnmarshalCode(out, package, type, "__elem", true, iter, false);
+		    out << eb;
+		}
+		else
+		{
+		    ostringstream oit;
+		    oit << "__i" << iter;
+		    iter++;
+		    string it = oit.str();
+		    out << nl << "java.util.Iterator " << it << " = " << v << ".iterator();";
+		    out << nl << "while(" << it << ".hasNext())";
+		    out << sb;
+		    out << nl << cont << " __elem = (" << cont << ")" << it << ".next();";
+		    writeMarshalUnmarshalCode(out, package, type, "__elem", true, iter, false);
+		    out << eb;
+		}
                 out << eb; // else
             }
             else
             {
                 bool isObject = false;
                 ClassDeclPtr cl = ClassDeclPtr::dynamicCast(type);
-                if((b && b->kind() == Builtin::KindObject) || cl)
+		if((b && b->kind() == Builtin::KindObject) || cl)
                 {
                     isObject = true;
                 }
-                out << nl << v << " = new " << concreteType << "();";
+		out << nl << v << " = new " << concreteType << "();";
                 out << nl << "final int __len" << iter << " = " << stream << ".readSize();";
-                if(type->isVariableLength())
-                {
-                    out << nl << stream << ".startSeq(__len" << iter << ", " << type->minWireSize() << ");";
-                }
-                else
-                {
-                    out << nl << stream << ".checkFixedSeq(__len" << iter << ", " << type->minWireSize() << ");";
-                }
+		if(type->isVariableLength())
+		{
+		    out << nl << stream << ".startSeq(__len" << iter << ", " << type->minWireSize() << ");";
+		}
+		else
+		{
+		    out << nl << stream << ".checkFixedSeq(__len" << iter << ", " << type->minWireSize() << ");";
+		}
                 if(isObject)
                 {
                     if(b)
@@ -1565,54 +1564,54 @@ Slice::JavaGenerator::writeSequenceMarshalUnmarshalCode(Output& out,
                 out << nl << "for(int __i" << iter << " = 0; __i" << iter << " < __len" << iter << "; __i" << iter
                     << "++)";
                 out << sb;
-                if(isObject)
-                {
+		if(isObject)
+		{
                     //
                     // Add a null value to the list as a placeholder for the element.
                     //
-                    out << nl << v << ".add(null);";
-                    ostringstream patchParams;
-                    patchParams << "new IceInternal.ListPatcher(" << v << ", " << origContentS << ".class, __type"
+		    out << nl << v << ".add(null);";
+		    ostringstream patchParams;
+		    patchParams << "new IceInternal.ListPatcher(" << v << ", " << origContentS << ".class, __type"
                                 << iter << ", __i" << iter << ')';
-                    writeMarshalUnmarshalCode(out, package, type, "__elem", false, iter, false, StringList(),
-                                              patchParams.str());
-                }
-                else
-                {
-                    out << nl << cont << " __elem;";
-                    writeMarshalUnmarshalCode(out, package, type, "__elem", false, iter, false);
-                }
-                if(!isObject)
-                {
-                    out << nl << v << ".add(__elem);";
-                }
+		    writeMarshalUnmarshalCode(out, package, type, "__elem", false, iter, false, StringList(),
+					      patchParams.str());
+		}
+		else
+		{
+		    out << nl << cont << " __elem;";
+		    writeMarshalUnmarshalCode(out, package, type, "__elem", false, iter, false);
+		}
+		if(!isObject)
+		{
+		    out << nl << v << ".add(__elem);";
+		}
 
-                //
-                // After unmarshaling each element, check that there are still enough bytes left in the stream
-                // to unmarshal the remainder of the sequence, and decrement the count of elements
-                // yet to be unmarshaled for sequences with variable-length element type (that is, for sequences
-                // of classes, structs, dictionaries, sequences, strings, or proxies). This allows us to
-                // abort unmarshaling for bogus sequence sizes at the earliest possible moment.
-                // (For fixed-length sequences, we don't need to do this because the prediction of how many
-                // bytes will be taken up by the sequence is accurate.)
-                //
-                if(type->isVariableLength())
-                {
-                    if(!SequencePtr::dynamicCast(type))
-                    {
-                        //
-                        // No need to check for directly nested sequences because, at the at start of each
-                        // sequence, we check anyway.
-                        //
-                        out << nl << stream << ".checkSeq();";
-                    }
-                    out << nl << stream << ".endElement();";
-                }
-                out << eb;
-                if(type->isVariableLength())
-                {
-                    out << nl << stream << ".endSeq(__len" << iter << ");";
-                }
+		//
+		// After unmarshaling each element, check that there are still enough bytes left in the stream
+		// to unmarshal the remainder of the sequence, and decrement the count of elements
+		// yet to be unmarshaled for sequences with variable-length element type (that is, for sequences
+		// of classes, structs, dictionaries, sequences, strings, or proxies). This allows us to
+		// abort unmarshaling for bogus sequence sizes at the earliest possible moment.
+		// (For fixed-length sequences, we don't need to do this because the prediction of how many
+		// bytes will be taken up by the sequence is accurate.)
+		//
+		if(type->isVariableLength())
+		{
+		    if(!SequencePtr::dynamicCast(type))
+		    {
+			//
+			// No need to check for directly nested sequences because, at the at start of each
+			// sequence, we check anyway.
+			//
+			out << nl << stream << ".checkSeq();";
+		    }
+		    out << nl << stream << ".endElement();";
+		}
+		out << eb;
+		if(type->isVariableLength())
+		{
+		    out << nl << stream << ".endSeq(__len" << iter << ");";
+		}
                 iter++;
             }
         }
@@ -1754,19 +1753,19 @@ Slice::JavaGenerator::writeSequenceMarshalUnmarshalCode(Output& out,
             {
                 bool isObject = false;
                 ClassDeclPtr cl = ClassDeclPtr::dynamicCast(origContent);
-                if((b && b->kind() == Builtin::KindObject) || cl)
+		if((b && b->kind() == Builtin::KindObject) || cl)
                 {
                     isObject = true;
                 }
                 out << nl << "final int __len" << iter << " = " << stream << ".readSize();";
-                if(type->isVariableLength())
-                {
-                    out << nl << stream << ".startSeq(__len" << iter << ", " << type->minWireSize() << ");";
-                }
-                else
-                {
-                    out << nl << stream << ".checkFixedSeq(__len" << iter << ", " << type->minWireSize() << ");";
-                }
+		if(type->isVariableLength())
+		{
+		    out << nl << stream << ".startSeq(__len" << iter << ", " << type->minWireSize() << ");";
+		}
+		else
+		{
+		    out << nl << stream << ".checkFixedSeq(__len" << iter << ", " << type->minWireSize() << ");";
+		}
                 if(isObject)
                 {
                     if(b)
@@ -1787,41 +1786,7 @@ Slice::JavaGenerator::writeSequenceMarshalUnmarshalCode(Output& out,
                         }
                     }
                 }
-                //
-                // In Java5, we cannot allocate an array of a generic type, such as
-                //
-                // arr = new Map<String, String>[sz];
-                //
-                // Attempting to compile this code results in a "generic array creation" error
-                // message. This problem can occur when the sequence's element type is a
-                // dictionary, or when the element type is a nested sequence that uses a custom
-                // mapping.
-                //
-                // The solution is to rewrite the code as follows:
-                //
-                // arr = (Map<String, String>[])new Map[sz];
-                //
-                // Unfortunately, this produces an unchecked warning during compilation.
-                //
-                // A simple test is to look for a "<" character in the content type, which
-                // indicates the use of a generic type.
-                //
-                string::size_type pos = origContentS.find('<');
-                if(pos != string::npos)
-                {
-                    string nonGenericType = origContentS.substr(0, pos);
-                    out << nl << v << " = (" << origContentS << "[]";
-                    int d = depth;
-                    while(d--)
-                    {
-                        out << "[]";
-                    }
-                    out << ")new " << nonGenericType << "[__len" << iter << "]";
-                }
-                else
-                {
-                    out << nl << v << " = new " << origContentS << "[__len" << iter << "]";
-                }
+                out << nl << v << " = new " << origContentS << "[__len" << iter << "]";
                 int d = depth;
                 while(d--)
                 {
@@ -1833,45 +1798,45 @@ Slice::JavaGenerator::writeSequenceMarshalUnmarshalCode(Output& out,
                 out << sb;
                 ostringstream o;
                 o << v << "[__i" << iter << "]";
-                ostringstream patchParams;
+		ostringstream patchParams;
                 if(isObject)
                 {
                     patchParams << "new IceInternal.SequencePatcher(" << v << ", " << origContentS
                                 << ".class, __type" << iter << ", __i" << iter << ')';
                     writeMarshalUnmarshalCode(out, package, type, o.str(), false, iter, false, StringList(),
-                                              patchParams.str());
+					      patchParams.str());
                 }
                 else
                 {
                     writeMarshalUnmarshalCode(out, package, type, o.str(), false, iter, false);
                 }
 
-                //
-                // After unmarshaling each element, check that there are still enough bytes left in the stream
-                // to unmarshal the remainder of the sequence, and decrement the count of elements
-                // yet to be unmarshaled for sequences with variable-length element type (that is, for sequences
-                // of classes, structs, dictionaries, sequences, strings, or proxies). This allows us to
-                // abort unmarshaling for bogus sequence sizes at the earliest possible moment.
-                // (For fixed-length sequences, we don't need to do this because the prediction of how many
-                // bytes will be taken up by the sequence is accurate.)
-                //
-                if(type->isVariableLength())
-                {
-                    if(!SequencePtr::dynamicCast(type))
-                    {
-                        //
-                        // No need to check for directly nested sequences because, at the at start of each
-                        // sequence, we check anyway.
-                        //
-                        out << nl << stream << ".checkSeq();";
-                    }
-                    out << nl << stream << ".endElement();";
-                }
+		//
+		// After unmarshaling each element, check that there are still enough bytes left in the stream
+		// to unmarshal the remainder of the sequence, and decrement the count of elements
+		// yet to be unmarshaled for sequences with variable-length element type (that is, for sequences
+		// of classes, structs, dictionaries, sequences, strings, or proxies). This allows us to
+		// abort unmarshaling for bogus sequence sizes at the earliest possible moment.
+		// (For fixed-length sequences, we don't need to do this because the prediction of how many
+		// bytes will be taken up by the sequence is accurate.)
+		//
+		if(type->isVariableLength())
+		{
+		    if(!SequencePtr::dynamicCast(type))
+		    {
+			//
+			// No need to check for directly nested sequences because, at the at start of each
+			// sequence, we check anyway.
+			//
+			out << nl << stream << ".checkSeq();";
+		    }
+		    out << nl << stream << ".endElement();";
+		}
                 out << eb;
-                if(type->isVariableLength())
-                {
-                    out << nl << stream << ".endSeq(__len" << iter << ");";
-                }
+		if(type->isVariableLength())
+		{
+		    out << nl << stream << ".endSeq(__len" << iter << ");";
+		}
                 iter++;
             }
         }
@@ -2003,31 +1968,31 @@ Slice::JavaGenerator::writeStreamMarshalUnmarshalCode(Output& out,
             }
             case Builtin::KindObject:
             {
-                if(_featureProfile != Slice::IceE)
-                {
-                    if(marshal)
-                    {
-                        out << nl << stream << ".writeObject(" << v << ");";
-                    }
-                    else
-                    {
-                        if(holder)
-                        {
-                            out << nl << stream << ".readObject((Ice.ReadObjectCallback)" << param << ".getPatcher());";
-                        }
-                        else
-                        {
-                            if(patchParams.empty())
-                            {
-                                out << nl << stream << ".readObject(new Patcher());";
-                            }
-                            else
-                            {
-                                out << nl << stream << ".readObject(" << patchParams << ");";
-                            }
-                        }
-                    }
-                }
+		if(_featureProfile != Slice::IceE)
+		{
+		    if(marshal)
+		    {
+			out << nl << stream << ".writeObject(" << v << ");";
+		    }
+		    else
+		    {
+			if(holder)
+			{
+			    out << nl << stream << ".readObject((Ice.ReadObjectCallback)" << param << ".getPatcher());";
+			}
+			else
+			{
+			    if(patchParams.empty())
+			    {
+				out << nl << stream << ".readObject(new Patcher());";
+			    }
+			    else
+			    {
+				out << nl << stream << ".readObject(" << patchParams << ");";
+			    }
+			}
+		    }
+		}
                 break;
             }
             case Builtin::KindObjectProxy:
@@ -2069,32 +2034,32 @@ Slice::JavaGenerator::writeStreamMarshalUnmarshalCode(Output& out,
     ClassDeclPtr cl = ClassDeclPtr::dynamicCast(type);
     if(cl)
     {
-        if(_featureProfile != Slice::IceE)
-        {
-            if(marshal)
-            {
-                out << nl << stream << ".writeObject(" << v << ");";
-            }
-            else
-            {
-                string typeS = typeToString(type, TypeModeIn, package);
-                if(holder)
-                {
-                    out << nl << stream << ".readObject(" << param << ".getPatcher());";
-                }
-                else
-                {
-                    if(patchParams.empty())
-                    {
-                        out << nl << stream << ".readObject(new Patcher());";
-                    }
-                    else
-                    {
-                        out << nl << stream << ".readObject(" << patchParams << ");";
-                    }
-                }
-            }
-        }
+	if(_featureProfile != Slice::IceE)
+	{
+	    if(marshal)
+	    {
+		out << nl << stream << ".writeObject(" << v << ");";
+	    }
+	    else
+	    {
+		string typeS = typeToString(type, TypeModeIn, package);
+		if(holder)
+		{
+		    out << nl << stream << ".readObject(" << param << ".getPatcher());";
+		}
+		else
+		{
+		    if(patchParams.empty())
+		    {
+			out << nl << stream << ".readObject(new Patcher());";
+		    }
+		    else
+		    {
+			out << nl << stream << ".readObject(" << patchParams << ");";
+		    }
+		}
+	    }
+	}
         return;
     }
 
@@ -2169,7 +2134,7 @@ Slice::JavaGenerator::writeStreamDictionaryMarshalUnmarshalCode(Output& out,
     string stream = marshal ? "__outS" : "__inS";
     string v = param;
 
-    bool java2 = dict->definitionContext()->findMetaData(_java2MetaData) == _java2MetaData;
+    bool java5 = dict->definitionContext()->findMetaData(_java5MetaData) == _java5MetaData;
 
     //
     // We have to determine whether it's possible to use the
@@ -2191,7 +2156,7 @@ Slice::JavaGenerator::writeStreamDictionaryMarshalUnmarshalCode(Output& out,
     getDictionaryTypes(dict, "", StringList(), origConcreteType, origAbstractType);
     if((abstractType != origAbstractType) || (!marshal && concreteType != origConcreteType))
     {
-        useHelper = false;
+	useHelper = false;
     }
 
     //
@@ -2199,16 +2164,16 @@ Slice::JavaGenerator::writeStreamDictionaryMarshalUnmarshalCode(Output& out,
     //
     if(useHelper)
     {
-        string typeS = getAbsolute(dict, package);
-        if(marshal)
-        {
-            out << nl << typeS << "Helper.write(" << stream << ", " << v << ");";
-        }
-        else
-        {
-            out << nl << v << " = " << typeS << "Helper.read(" << stream << ");";
-        }
-        return;
+	string typeS = getAbsolute(dict, package);
+	if(marshal)
+	{
+	    out << nl << typeS << "Helper.write(" << stream << ", " << v << ");";
+	}
+	else
+	{
+	    out << nl << v << " = " << typeS << "Helper.read(" << stream << ");";
+	}
+	return;
     }
 
     TypePtr key = dict->keyType();
@@ -2232,21 +2197,21 @@ Slice::JavaGenerator::writeStreamDictionaryMarshalUnmarshalCode(Output& out,
         out << nl << "else";
         out << sb;
         out << nl << "__outS.writeSize(" << v << ".size());";
-        if(java2)
-        {
-            out << nl << "java.util.Iterator __i" << iterS << " = " << v << ".entrySet().iterator();";
-            out << nl << "while(__i" << iterS << ".hasNext())";
-            out << sb;
-            out << nl << "java.util.Map.Entry __e = (java.util.Map.Entry)" << "__i" << iterS << ".next();";
-        }
-        else
-        {
-            string keyObjectS = typeToObjectString(key, TypeModeIn, package);
-            string valueObjectS = typeToObjectString(value, TypeModeIn, package);
-            out << nl << "for(java.util.Map.Entry<" << keyObjectS << ", " << valueObjectS << "> __e : " << v
-                << ".entrySet())";
-            out << sb;
-        }
+	if(java5)
+	{
+	    string keyObjectS = typeToObjectString(key, TypeModeIn, package);
+	    string valueObjectS = typeToObjectString(value, TypeModeIn, package);
+	    out << nl << "for(java.util.Map.Entry<" << keyObjectS << ", " << valueObjectS << "> __e : " << v
+		<< ".entrySet())";
+	    out << sb;
+	}
+	else
+	{
+	    out << nl << "java.util.Iterator __i" << iterS << " = " << v << ".entrySet().iterator();";
+	    out << nl << "while(__i" << iterS << ".hasNext())";
+	    out << sb;
+	    out << nl << "java.util.Map.Entry __e = (java.util.Map.Entry)" << "__i" << iterS << ".next();";
+	}
         for(i = 0; i < 2; i++)
         {
             string val;
@@ -2263,74 +2228,74 @@ Slice::JavaGenerator::writeStreamDictionaryMarshalUnmarshalCode(Output& out,
                 type = value;
             }
 
-            //
-            // We have to downcast unless we're using Java5.
-            //
-            if(java2)
-            {
-                BuiltinPtr b = BuiltinPtr::dynamicCast(type);
-                if(b)
-                {
-                    switch(b->kind())
-                    {
-                        case Builtin::KindByte:
-                        {
-                            val = "((java.lang.Byte)" + arg + ").byteValue()";
-                            break;
-                        }
-                        case Builtin::KindBool:
-                        {
-                            val = "((java.lang.Boolean)" + arg + ").booleanValue()";
-                            break;
-                        }
-                        case Builtin::KindShort:
-                        {
-                            val = "((java.lang.Short)" + arg + ").shortValue()";
-                            break;
-                        }
-                        case Builtin::KindInt:
-                        {
-                            val = "((java.lang.Integer)" + arg + ").intValue()";
-                            break;
-                        }
-                        case Builtin::KindLong:
-                        {
-                            val = "((java.lang.Long)" + arg + ").longValue()";
-                            break;
-                        }
-                        case Builtin::KindFloat:
-                        {
-                            val = "((java.lang.Float)" + arg + ").floatValue()";
-                            break;
-                        }
-                        case Builtin::KindDouble:
-                        {
-                            val = "((java.lang.Double)" + arg + ").doubleValue()";
-                            break;
-                        }
-                        case Builtin::KindString:
-                        case Builtin::KindObject:
-                        case Builtin::KindObjectProxy:
-                        {
-                            break;
-                        }
-                        case Builtin::KindLocalObject:
-                        {
-                            assert(false);
-                            break;
-                        }
-                    }
-                }
+	    //
+	    // We have to downcast unless we're using Java5.
+	    //
+	    if(java5)
+	    {
+		val = arg;
+	    }
+	    else
+	    {
+		BuiltinPtr b = BuiltinPtr::dynamicCast(type);
+		if(b)
+		{
+		    switch(b->kind())
+		    {
+			case Builtin::KindByte:
+			{
+			    val = "((java.lang.Byte)" + arg + ").byteValue()";
+			    break;
+			}
+			case Builtin::KindBool:
+			{
+			    val = "((java.lang.Boolean)" + arg + ").booleanValue()";
+			    break;
+			}
+			case Builtin::KindShort:
+			{
+			    val = "((java.lang.Short)" + arg + ").shortValue()";
+			    break;
+			}
+			case Builtin::KindInt:
+			{
+			    val = "((java.lang.Integer)" + arg + ").intValue()";
+			    break;
+			}
+			case Builtin::KindLong:
+			{
+			    val = "((java.lang.Long)" + arg + ").longValue()";
+			    break;
+			}
+			case Builtin::KindFloat:
+			{
+			    val = "((java.lang.Float)" + arg + ").floatValue()";
+			    break;
+			}
+			case Builtin::KindDouble:
+			{
+			    val = "((java.lang.Double)" + arg + ").doubleValue()";
+			    break;
+			}
+			case Builtin::KindString:
+			case Builtin::KindObject:
+			case Builtin::KindObjectProxy:
+			{
+			    break;
+			}
+			case Builtin::KindLocalObject:
+			{
+			    assert(false);
+			    break;
+			}
+		    }
+		}
 
-                if(val.empty())
-                {
-                    val = "((" + typeToString(type, TypeModeIn, package) + ')' + arg + ')';
-                }
-            }
-            else
-            {
-                val = arg;
-            }
+		if(val.empty())
+		{
+		    val = "((" + typeToString(type, TypeModeIn, package) + ')' + arg + ')';
+		}
+	    }
             writeStreamMarshalUnmarshalCode(out, package, type, val, true, iter, false);
         }
         out << eb;
@@ -2338,7 +2303,7 @@ Slice::JavaGenerator::writeStreamDictionaryMarshalUnmarshalCode(Output& out,
     }
     else
     {
-        out << nl << v << " = new " << concreteType << "();";
+	out << nl << v << " = new " << concreteType << "();";
         out << nl << "int __sz" << iterS << " = __inS.readSize();";
         out << nl << "for(int __i" << iterS << " = 0; __i" << iterS << " < __sz" << iterS << "; __i" << iterS << "++)";
         out << sb;
@@ -2346,22 +2311,22 @@ Slice::JavaGenerator::writeStreamDictionaryMarshalUnmarshalCode(Output& out,
         {
             string arg;
             TypePtr type;
-            string typeS;
+	    string typeS;
             if(i == 0)
             {
                 arg = "__key";
                 type = key;
-                typeS = keyS;
+		typeS = keyS;
             }
             else
             {
                 arg = "__value";
                 type = value;
-                typeS = valueS;
+		typeS = valueS;
             }
 
             BuiltinPtr b = BuiltinPtr::dynamicCast(type);
-            if(b && java2)
+            if(b && !java5)
             {
                 switch(b->kind())
                 {
@@ -2408,7 +2373,7 @@ Slice::JavaGenerator::writeStreamDictionaryMarshalUnmarshalCode(Output& out,
                     case Builtin::KindObject:
                     {
                         out << nl << "__inS.readObject(new IceInternal.DictionaryPatcher(" << v << ", "
-                            << valueS << ".class, \"" << value->typeId() << "\", __key));";
+			    << valueS << ".class, \"" << value->typeId() << "\", __key));";
                         break;
                     }
                     case Builtin::KindObjectProxy:
@@ -2426,11 +2391,11 @@ Slice::JavaGenerator::writeStreamDictionaryMarshalUnmarshalCode(Output& out,
             else
             {
                 string s = typeToString(type, TypeModeIn, package);
-                if(ClassDeclPtr::dynamicCast(type) || (b && b->kind() == Builtin::KindObject))
+		if(ClassDeclPtr::dynamicCast(type) || (b && b->kind() == Builtin::KindObject))
                 {
                     writeStreamMarshalUnmarshalCode(out, package, type, arg, false, iter, false, StringList(),
                                                     "new IceInternal.DictionaryPatcher(" + v + ", " + s +
-                                                    ".class, \"" + type->typeId() + "\", __key)");
+						    ".class, \"" + type->typeId() + "\", __key)");
                 }
                 else
                 {
@@ -2439,7 +2404,7 @@ Slice::JavaGenerator::writeStreamDictionaryMarshalUnmarshalCode(Output& out,
                 }
             }
         }
-        BuiltinPtr builtin = BuiltinPtr::dynamicCast(value);
+	BuiltinPtr builtin = BuiltinPtr::dynamicCast(value);
         if(!(builtin && builtin->kind() == Builtin::KindObject) && !ClassDeclPtr::dynamicCast(value))
         {
             out << nl << "" << v << ".put(__key, __value);";
@@ -2461,7 +2426,7 @@ Slice::JavaGenerator::writeStreamSequenceMarshalUnmarshalCode(Output& out,
     string stream = marshal ? "__outS" : "__inS";
     string v = param;
 
-    bool java2 = seq->definitionContext()->findMetaData(_java2MetaData) == _java2MetaData;
+    bool java5 = seq->definitionContext()->findMetaData(_java5MetaData) == _java5MetaData;
 
     //
     // We have to determine whether it's possible to use the
@@ -2483,7 +2448,7 @@ Slice::JavaGenerator::writeStreamSequenceMarshalUnmarshalCode(Output& out,
     getSequenceTypes(seq, "", StringList(), origConcreteType, origAbstractType);
     if((abstractType != origAbstractType) || (!marshal && concreteType != origConcreteType))
     {
-        useHelper = false;
+	useHelper = false;
     }
 
     //
@@ -2514,10 +2479,10 @@ Slice::JavaGenerator::writeStreamSequenceMarshalUnmarshalCode(Output& out,
         //
         // Stop if the inner sequence type has a custom type.
         //
-        if(hasTypeMetaData(s))
-        {
-            break;
-        }
+	if(hasTypeMetaData(s))
+	{
+	    break;
+	}
         depth++;
         origContent = s->type();
         s = SequencePtr::dynamicCast(origContent);
@@ -2532,7 +2497,7 @@ Slice::JavaGenerator::writeStreamSequenceMarshalUnmarshalCode(Output& out,
         // Marshal/unmarshal a custom sequence type.
         //
         BuiltinPtr b = BuiltinPtr::dynamicCast(type);
-        if(b && b->kind() != Builtin::KindObject && b->kind() != Builtin::KindObjectProxy && java2)
+        if(b && b->kind() != Builtin::KindObject && b->kind() != Builtin::KindObjectProxy && !java5)
         {
             if(marshal)
             {
@@ -2726,14 +2691,14 @@ Slice::JavaGenerator::writeStreamSequenceMarshalUnmarshalCode(Output& out,
         else
         {
             string typeS = getAbsolute(seq, package);
-            ostringstream o;
-            o << origContentS;
-            int d = depth;
-            while(d--)
-            {
-                o << "[]";
-            }
-            string cont = o.str();
+	    ostringstream o;
+	    o << origContentS;
+	    int d = depth;
+	    while(d--)
+	    {
+		o << "[]";
+	    }
+	    string cont = o.str();
             if(marshal)
             {
                 out << nl << "if(" << v << " == null)";
@@ -2743,27 +2708,27 @@ Slice::JavaGenerator::writeStreamSequenceMarshalUnmarshalCode(Output& out,
                 out << nl << "else";
                 out << sb;
                 out << nl << stream << ".writeSize(" << v << ".size());";
-                if(java2)
-                {
-                    ostringstream oit;
-                    oit << "__i" << iter;
-                    iter++;
-                    string it = oit.str();
-                    out << nl << "java.util.Iterator " << it << " = " << v << ".iterator();";
-                    out << nl << "while(" << it << ".hasNext())";
-                    out << sb;
-                    out << nl << cont << " __elem = (" << cont << ")" << it << ".next();";
-                    writeStreamMarshalUnmarshalCode(out, package, type, "__elem", true, iter, false);
-                    out << eb;
-                }
-                else
-                {
-                    string typeS = typeToString(type, TypeModeIn, package);
-                    out << nl << "for(" << typeS << " __elem : " << v << ')';
-                    out << sb;
-                    writeStreamMarshalUnmarshalCode(out, package, type, "__elem", true, iter, false);
-                    out << eb;
-                }
+		if(java5)
+		{
+		    string typeS = typeToString(type, TypeModeIn, package);
+		    out << nl << "for(" << typeS << " __elem : " << v << ')';
+		    out << sb;
+		    writeStreamMarshalUnmarshalCode(out, package, type, "__elem", true, iter, false);
+		    out << eb;
+		}
+		else
+		{
+		    ostringstream oit;
+		    oit << "__i" << iter;
+		    iter++;
+		    string it = oit.str();
+		    out << nl << "java.util.Iterator " << it << " = " << v << ".iterator();";
+		    out << nl << "while(" << it << ".hasNext())";
+		    out << sb;
+		    out << nl << cont << " __elem = (" << cont << ")" << it << ".next();";
+		    writeStreamMarshalUnmarshalCode(out, package, type, "__elem", true, iter, false);
+		    out << eb;
+		}
                 out << eb; // else
             }
             else
@@ -2987,41 +2952,7 @@ Slice::JavaGenerator::writeStreamSequenceMarshalUnmarshalCode(Output& out,
                         }
                     }
                 }
-                //
-                // In Java5, we cannot allocate an array of a generic type, such as
-                //
-                // arr = new Map<String, String>[sz];
-                //
-                // Attempting to compile this code results in a "generic array creation" error
-                // message. This problem can occur when the sequence's element type is a
-                // dictionary, or when the element type is a nested sequence that uses a custom
-                // mapping.
-                //
-                // The solution is to rewrite the code as follows:
-                //
-                // arr = (Map<String, String>[])new Map[sz];
-                //
-                // Unfortunately, this produces an unchecked warning during compilation.
-                //
-                // A simple test is to look for a "<" character in the content type, which
-                // indicates the use of a generic type.
-                //
-                string::size_type pos = origContentS.find('<');
-                if(pos != string::npos)
-                {
-                    string nonGenericType = origContentS.substr(0, pos);
-                    out << nl << v << " = (" << origContentS << "[]";
-                    int d = depth;
-                    while(d--)
-                    {
-                        out << "[]";
-                    }
-                    out << ")new " << nonGenericType << "[__len" << iter << "]";
-                }
-                else
-                {
-                    out << nl << v << " = new " << origContentS << "[__len" << iter << "]";
-                }
+                out << nl << v << " = new " << origContentS << "[__len" << iter << "]";
                 int d = depth;
                 while(d--)
                 {
@@ -3062,22 +2993,22 @@ Slice::JavaGenerator::getTypeMetaData(const StringList& metaData, string& concre
     static const string prefix = "java:type:";
     for(StringList::const_iterator q = metaData.begin(); q != metaData.end(); ++q)
     {
-        string str = *q;
-        if(str.find(prefix) == 0)
-        {
-            string::size_type pos = str.find(':', prefix.size());
-            if(pos != string::npos)
-            {
-                concreteType = str.substr(prefix.size(), pos - prefix.size());
-                abstractType = str.substr(pos + 1);
-            }
-            else
-            {
-                concreteType = str.substr(prefix.size());
-                abstractType.clear();
-            }
-            return true;
-        }
+	string str = *q;
+	if(str.find(prefix) == 0)
+	{
+	    string::size_type pos = str.find(':', prefix.size());
+	    if(pos != string::npos)
+	    {
+		concreteType = str.substr(prefix.size(), pos - prefix.size());
+		abstractType = str.substr(pos + 1);
+	    }
+	    else
+	    {
+		concreteType = str.substr(prefix.size());
+		abstractType.clear();
+	    }
+	    return true;
+	}
     }
 
     return false;
@@ -3089,27 +3020,27 @@ Slice::JavaGenerator::hasTypeMetaData(const TypePtr& type, const StringList& loc
     ContainedPtr cont = ContainedPtr::dynamicCast(type);
     if(cont)
     {
-        static const string prefix = "java:type:";
+	static const string prefix = "java:type:";
 
-        StringList::const_iterator q;
-        for(q = localMetaData.begin(); q != localMetaData.end(); ++q)
-        {
-            string str = *q;
-            if(str.find(prefix) == 0)
-            {
-                return true;
-            }
-        }
+	StringList::const_iterator q;
+	for(q = localMetaData.begin(); q != localMetaData.end(); ++q)
+	{
+	    string str = *q;
+	    if(str.find(prefix) == 0)
+	    {
+		return true;
+	    }
+	}
 
-        StringList metaData = cont->getMetaData();
-        for(q = metaData.begin(); q != metaData.end(); ++q)
-        {
-            string str = *q;
-            if(str.find(prefix) == 0)
-            {
-                return true;
-            }
-        }
+	StringList metaData = cont->getMetaData();
+	for(q = metaData.begin(); q != metaData.end(); ++q)
+	{
+	    string str = *q;
+	    if(str.find(prefix) == 0)
+	    {
+		return true;
+	    }
+	}
     }
 
     return false;
@@ -3117,20 +3048,20 @@ Slice::JavaGenerator::hasTypeMetaData(const TypePtr& type, const StringList& loc
 
 bool
 Slice::JavaGenerator::getDictionaryTypes(const DictionaryPtr& dict,
-                                         const string& package,
-                                         const StringList& metaData,
-                                         string& concreteType,
-                                         string& abstractType) const
+				         const string& package,
+				         const StringList& metaData,
+				         string& concreteType,
+					 string& abstractType) const
 {
     bool customType = false;
 
     if(_featureProfile == Slice::IceE)
     {
-        concreteType = abstractType = "java.util.Hashtable";
-        return customType;
+	concreteType = abstractType = "java.util.Hashtable";
+	return customType;
     }
 
-    bool java2 = dict->definitionContext()->findMetaData(_java2MetaData) == _java2MetaData;
+    bool java5 = dict->definitionContext()->findMetaData(_java5MetaData) == _java5MetaData;
 
     //
     // Collect metadata for a custom type.
@@ -3139,7 +3070,7 @@ Slice::JavaGenerator::getDictionaryTypes(const DictionaryPtr& dict,
     customType = getTypeMetaData(metaData, ct, at);
     if(!customType)
     {
-        customType = getTypeMetaData(dict->getMetaData(), ct, at);
+	customType = getTypeMetaData(dict->getMetaData(), ct, at);
     }
 
     //
@@ -3147,10 +3078,10 @@ Slice::JavaGenerator::getDictionaryTypes(const DictionaryPtr& dict,
     //
     string keyTypeStr;
     string valueTypeStr;
-    if(!java2)
+    if(java5)
     {
-        keyTypeStr = typeToObjectString(dict->keyType(), TypeModeIn, package);
-        valueTypeStr = typeToObjectString(dict->valueType(), TypeModeIn, package);
+	keyTypeStr = typeToObjectString(dict->keyType(), TypeModeIn, package);
+	valueTypeStr = typeToObjectString(dict->valueType(), TypeModeIn, package);
     }
 
     //
@@ -3158,47 +3089,47 @@ Slice::JavaGenerator::getDictionaryTypes(const DictionaryPtr& dict,
     //
     if(customType)
     {
-        assert(!ct.empty());
+	assert(!ct.empty());
 
-        //
-        // Check for portable syntax. Convert {type} to type<key, value> for Java5.
-        //
-        if(ct[0] == '{')
-        {
-            string::size_type pos = ct.find('}');
-            if(pos != string::npos)
-            {
-                concreteType = ct.substr(1, pos - 1);
-                if(!java2)
-                {
-                    concreteType += "<" + keyTypeStr + ", " + valueTypeStr + ">";
-                }
-            }
-        }
-        else
-        {
-            concreteType = ct;
-        }
+	//
+	// Check for portable syntax. Convert {type} to type<key, value> for Java5.
+	//
+	if(ct[0] == '{')
+	{
+	    string::size_type pos = ct.find('}');
+	    if(pos != string::npos)
+	    {
+		concreteType = ct.substr(1, pos - 1);
+		if(java5)
+		{
+		    concreteType += "<" + keyTypeStr + ", " + valueTypeStr + ">";
+		}
+	    }
+	}
+	else
+	{
+	    concreteType = ct;
+	}
 
-        if(!at.empty())
-        {
-            if(at[0] == '{')
-            {
-                string::size_type pos = at.find('}');
-                if(pos != string::npos)
-                {
-                    abstractType = at.substr(1, pos - 1);
-                    if(!java2)
-                    {
-                        abstractType += "<" + keyTypeStr + ", " + valueTypeStr + ">";
-                    }
-                }
-            }
-            else
-            {
-                abstractType = at;
-            }
-        }
+	if(!at.empty())
+	{
+	    if(at[0] == '{')
+	    {
+		string::size_type pos = at.find('}');
+		if(pos != string::npos)
+		{
+		    abstractType = at.substr(1, pos - 1);
+		    if(java5)
+		    {
+			abstractType += "<" + keyTypeStr + ", " + valueTypeStr + ">";
+		    }
+		}
+	    }
+	    else
+	    {
+		abstractType = at;
+	    }
+	}
     }
 
     //
@@ -3206,11 +3137,11 @@ Slice::JavaGenerator::getDictionaryTypes(const DictionaryPtr& dict,
     //
     if(concreteType.empty())
     {
-        concreteType = "java.util.HashMap";
-        if(!java2)
-        {
-            concreteType += "<" + keyTypeStr + ", " + valueTypeStr + ">";
-        }
+	concreteType = "java.util.HashMap";
+	if(java5)
+	{
+	    concreteType += "<" + keyTypeStr + ", " + valueTypeStr + ">";
+	}
     }
 
     //
@@ -3222,11 +3153,11 @@ Slice::JavaGenerator::getDictionaryTypes(const DictionaryPtr& dict,
     //
     if(abstractType.empty())
     {
-        abstractType = "java.util.Map";
-        if(!java2)
-        {
-            abstractType += "<" + keyTypeStr + ", " + valueTypeStr + ">";
-        }
+	abstractType = "java.util.Map";
+	if(java5)
+	{
+	    abstractType += "<" + keyTypeStr + ", " + valueTypeStr + ">";
+	}
     }
 
     return customType;
@@ -3234,20 +3165,20 @@ Slice::JavaGenerator::getDictionaryTypes(const DictionaryPtr& dict,
 
 bool
 Slice::JavaGenerator::getSequenceTypes(const SequencePtr& seq,
-                                       const string& package,
-                                       const StringList& metaData,
-                                       string& concreteType,
-                                       string& abstractType) const
+				       const string& package,
+				       const StringList& metaData,
+				       string& concreteType,
+				       string& abstractType) const
 {
     bool customType = false;
 
     if(_featureProfile == Slice::IceE)
     {
-        concreteType = abstractType = typeToString(seq->type(), TypeModeIn, package) + "[]";
-        return customType;
+	concreteType = abstractType = typeToString(seq->type(), TypeModeIn, package) + "[]";
+	return customType;
     }
 
-    bool java2 = seq->definitionContext()->findMetaData(_java2MetaData) == _java2MetaData;
+    bool java5 = seq->definitionContext()->findMetaData(_java5MetaData) == _java5MetaData;
 
     //
     // Collect metadata for a custom type.
@@ -3256,16 +3187,16 @@ Slice::JavaGenerator::getSequenceTypes(const SequencePtr& seq,
     customType = getTypeMetaData(metaData, ct, at);
     if(!customType)
     {
-        customType = getTypeMetaData(seq->getMetaData(), ct, at);
+	customType = getTypeMetaData(seq->getMetaData(), ct, at);
     }
 
     //
     // Get the inner type.
     //
     string typeStr;
-    if(!java2)
+    if(java5)
     {
-        typeStr = typeToObjectString(seq->type(), TypeModeIn, package);
+	typeStr = typeToObjectString(seq->type(), TypeModeIn, package);
     }
 
     //
@@ -3273,62 +3204,62 @@ Slice::JavaGenerator::getSequenceTypes(const SequencePtr& seq,
     //
     if(customType)
     {
-        assert(!ct.empty());
+	assert(!ct.empty());
 
-        //
-        // Check for portable syntax. Convert {type} to type<key, value> for Java5.
-        //
-        if(ct[0] == '{')
-        {
-            string::size_type pos = ct.find('}');
-            if(pos != string::npos)
-            {
-                concreteType = ct.substr(1, pos - 1);
-                if(!java2)
-                {
-                    concreteType += "<" + typeStr + ">";
-                }
-            }
-        }
-        else
-        {
-            concreteType = ct;
-        }
+	//
+	// Check for portable syntax. Convert {type} to type<key, value> for Java5.
+	//
+	if(ct[0] == '{')
+	{
+	    string::size_type pos = ct.find('}');
+	    if(pos != string::npos)
+	    {
+		concreteType = ct.substr(1, pos - 1);
+		if(java5)
+		{
+		    concreteType += "<" + typeStr + ">";
+		}
+	    }
+	}
+	else
+	{
+	    concreteType = ct;
+	}
 
-        if(!at.empty())
-        {
-            if(at[0] == '{')
-            {
-                string::size_type pos = at.find('}');
-                if(pos != string::npos)
-                {
-                    abstractType = at.substr(1, pos - 1);
-                    if(!java2)
-                    {
-                        abstractType += "<" + typeStr + ">";
-                    }
-                }
-            }
-            else
-            {
-                abstractType = at;
-            }
-        }
-        else
-        {
-            //
-            // If an abstract type is not defined, we use the concrete type as the default.
-            // If instead we chose a default abstract type, such as List<T>, then we
-            // might inadvertently generate uncompilable code. The Java5 compiler does not
-            // allow polymorphic assignment between generic types if it can weaken the
-            // compile-time type safety rules.
-            //
-            abstractType = "java.util.List";
-            if(!java2)
-            {
-                abstractType += "<" + typeStr + ">";
-            }
-        }
+	if(!at.empty())
+	{
+	    if(at[0] == '{')
+	    {
+		string::size_type pos = at.find('}');
+		if(pos != string::npos)
+		{
+		    abstractType = at.substr(1, pos - 1);
+		    if(java5)
+		    {
+			abstractType += "<" + typeStr + ">";
+		    }
+		}
+	    }
+	    else
+	    {
+		abstractType = at;
+	    }
+	}
+	else
+	{
+	    //
+	    // If an abstract type is not defined, we use the concrete type as the default.
+	    // If instead we chose a default abstract type, such as List<T>, then we
+	    // might inadvertently generate uncompilable code. The Java5 compiler does not
+	    // allow polymorphic assignment between generic types if it can weaken the
+	    // compile-time type safety rules.
+	    //
+	    abstractType = "java.util.List";
+	    if(java5)
+	    {
+		abstractType += "<" + typeStr + ">";
+	    }
+	}
     }
 
     //
@@ -3336,7 +3267,7 @@ Slice::JavaGenerator::getSequenceTypes(const SequencePtr& seq,
     //
     if(concreteType.empty())
     {
-        concreteType = abstractType = typeToString(seq->type(), TypeModeIn, package) + "[]";
+	concreteType = abstractType = typeToString(seq->type(), TypeModeIn, package) + "[]";
     }
 
     return customType;
@@ -3373,26 +3304,22 @@ Slice::JavaGenerator::MetaDataVisitor::visitModuleStart(const ModulePtr& p)
         {
             if(s.find(prefix) == 0)
             {
-                bool ok = false;
+		bool ok = false;
 
-                static const string packagePrefix = "java:package:";
-                if(s.find(packagePrefix) == 0 && s.size() > packagePrefix.size())
-                {
-                    ok = true;
-                }
-                else if(s == _java2MetaData)
-                {
-                    ok = true;
-                }
-                else if(s == _java5MetaData)
-                {
-                    ok = true;
-                }
+		static const string packagePrefix = "java:package:";
+		if(s.find(packagePrefix) == 0 && s.size() > packagePrefix.size())
+		{
+		    ok = true;
+		}
+		else if(s == _java5MetaData)
+		{
+		    ok = true;
+		}
 
-                if(!ok)
-                {
-                    cout << file << ": warning: ignoring invalid global metadata `" << s << "'" << endl;
-                }
+		if(!ok)
+		{
+		    cout << file << ": warning: ignoring invalid global metadata `" << s << "'" << endl;
+		}
             }
             _history.insert(s);
         }
@@ -3446,29 +3373,29 @@ Slice::JavaGenerator::MetaDataVisitor::visitOperation(const OperationPtr& p)
     TypePtr returnType = p->returnType();
     if(!metaData.empty())
     {
-        if(!returnType)
-        {
-            for(StringList::const_iterator q = metaData.begin(); q != metaData.end(); ++q)
-            {
-                if(q->find("java:type:", 0) == 0)
-                {
-                    cout << p->definitionContext()->filename() << ":" << p->line()
-                         << ": warning: invalid metadata for operation" << endl;
-                    break;
-                }
-            }
-        }
-        else
-        {
-            validateType(returnType, metaData, p->definitionContext()->filename(), p->line());
-        }
+	if(!returnType)
+	{
+	    for(StringList::const_iterator q = metaData.begin(); q != metaData.end(); ++q)
+	    {
+		if(q->find("java:type:", 0) == 0)
+		{
+		    cout << p->definitionContext()->filename() << ":" << p->line()
+			 << ": warning: invalid metadata for operation" << endl;
+		    break;
+		}
+	    }
+	}
+	else
+	{
+	    validateType(returnType, metaData, p->definitionContext()->filename(), p->line());
+	}
     }
 
     ParamDeclList params = p->parameters();
     for(ParamDeclList::iterator q = params.begin(); q != params.end(); ++q)
     {
-        metaData = getMetaData(*q);
-        validateType((*q)->type(), metaData, p->definitionContext()->filename(), (*q)->line());
+	metaData = getMetaData(*q);
+	validateType((*q)->type(), metaData, p->definitionContext()->filename(), (*q)->line());
     }
 
     validateGetSet(p, metaData, p->definitionContext()->filename(), p->line());
@@ -3488,6 +3415,29 @@ Slice::JavaGenerator::MetaDataVisitor::visitSequence(const SequencePtr& p)
     StringList metaData = getMetaData(p);
     validateType(p, metaData, p->definitionContext()->filename(), p->line());
     validateGetSet(p, metaData, p->definitionContext()->filename(), p->line());
+
+    //
+    // Java5 does not allow the creation of an array of a generic type.
+    // We check for the situation where an unmodified sequence contains
+    // a modified sequence or dictionary type. Since we can't be sure whether
+    // the inner sequence actually maps to a generic type, we only issue a
+    // warning.
+    //
+    if(p->definitionContext()->findMetaData(_java5MetaData) == _java5MetaData && !hasTypeMetaData(p))
+    {
+	SequencePtr innerSeq = SequencePtr::dynamicCast(p->type());
+	DictionaryPtr innerDict = DictionaryPtr::dynamicCast(p->type());
+	if((innerSeq && hasTypeMetaData(innerSeq)) || (innerDict && hasTypeMetaData(innerDict)))
+	{
+	    string file = p->file();
+	    string line = p->line();
+	    if(!file.empty())
+	    {
+		cout << file << ':' << line << ": ";
+	    }
+	    cout << "warning: Java5 forbids arrays of generic types";
+	}
+    }
 }
 
 void
@@ -3535,23 +3485,23 @@ Slice::JavaGenerator::MetaDataVisitor::getMetaData(const ContainedPtr& cont)
                 string::size_type pos = s.find(':', prefix.size());
                 if(pos == string::npos)
                 {
-                    if(s.size() > prefix.size())
-                    {
-                        string rest = s.substr(prefix.size());
-                        if(rest == "getset")
-                        {
-                            result.push_back(s);
-                        }
-                        continue;
-                    }
+		    if(s.size() > prefix.size())
+		    {
+			string rest = s.substr(prefix.size());
+			if(rest == "getset")
+			{
+			    result.push_back(s);
+			}
+			continue;
+		    }
                 }
                 else if(s.substr(prefix.size(), pos - prefix.size()) == "type")
                 {
-                    result.push_back(s);
-                    continue;
+		    result.push_back(s);
+		    continue;
                 }
 
-                cout << file << ":" << cont->line() << ": warning: ignoring invalid metadata `" << s << "'" << endl;
+		cout << file << ":" << cont->line() << ": warning: ignoring invalid metadata `" << s << "'" << endl;
             }
 
             _history.insert(s);
@@ -3563,58 +3513,58 @@ Slice::JavaGenerator::MetaDataVisitor::getMetaData(const ContainedPtr& cont)
 
 void
 Slice::JavaGenerator::MetaDataVisitor::validateType(const SyntaxTreeBasePtr& p, const StringList& metaData,
-                                                    const string& file, const string& line)
+						    const string& file, const string& line)
 {
     for(StringList::const_iterator i = metaData.begin(); i != metaData.end(); ++i)
     {
-        //
-        // Type metadata ("java:type:Foo") is only supported by sequences and dictionaries.
-        //
-        if(i->find("java:type:", 0) == 0 && (!SequencePtr::dynamicCast(p) && !DictionaryPtr::dynamicCast(p)))
-        {
-            string str;
-            ContainedPtr cont = ContainedPtr::dynamicCast(p);
-            if(cont)
-            {
-                str = cont->kindOf();
-            }
-            else
-            {
-                BuiltinPtr b = BuiltinPtr::dynamicCast(p);
-                assert(b);
-                str = b->typeId();
-            }
-            cout << file << ":" << line << ": warning: invalid metadata for " << str << endl;
-        }
+	//
+	// Type metadata ("java:type:Foo") is only supported by sequences and dictionaries.
+	//
+	if(i->find("java:type:", 0) == 0 && (!SequencePtr::dynamicCast(p) && !DictionaryPtr::dynamicCast(p)))
+	{
+	    string str;
+	    ContainedPtr cont = ContainedPtr::dynamicCast(p);
+	    if(cont)
+	    {
+		str = cont->kindOf();
+	    }
+	    else
+	    {
+		BuiltinPtr b = BuiltinPtr::dynamicCast(p);
+		assert(b);
+		str = b->typeId();
+	    }
+	    cout << file << ":" << line << ": warning: invalid metadata for " << str << endl;
+	}
     }
 }
 
 void
 Slice::JavaGenerator::MetaDataVisitor::validateGetSet(const SyntaxTreeBasePtr& p, const StringList& metaData,
-                                                      const string& file, const string& line)
+						      const string& file, const string& line)
 {
     for(StringList::const_iterator i = metaData.begin(); i != metaData.end(); ++i)
     {
-        //
-        // The "getset" metadata can only be specified on a class, struct, exception or data member.
-        //
-        if((*i) == "java:getset" &&
-           (!ClassDefPtr::dynamicCast(p) && !StructPtr::dynamicCast(p) && !ExceptionPtr::dynamicCast(p) &&
-            !DataMemberPtr::dynamicCast(p)))
-        {
-            string str;
-            ContainedPtr cont = ContainedPtr::dynamicCast(p);
-            if(cont)
-            {
-                str = cont->kindOf();
-            }
-            else
-            {
-                BuiltinPtr b = BuiltinPtr::dynamicCast(p);
-                assert(b);
-                str = b->typeId();
-            }
-            cout << file << ":" << line << ": warning: invalid metadata for " << str << endl;
-        }
+	//
+	// The "getset" metadata can only be specified on a class, struct, exception or data member.
+	//
+	if((*i) == "java:getset" &&
+	   (!ClassDefPtr::dynamicCast(p) && !StructPtr::dynamicCast(p) && !ExceptionPtr::dynamicCast(p) &&
+	    !DataMemberPtr::dynamicCast(p)))
+	{
+	    string str;
+	    ContainedPtr cont = ContainedPtr::dynamicCast(p);
+	    if(cont)
+	    {
+		str = cont->kindOf();
+	    }
+	    else
+	    {
+		BuiltinPtr b = BuiltinPtr::dynamicCast(p);
+		assert(b);
+		str = b->typeId();
+	    }
+	    cout << file << ":" << line << ": warning: invalid metadata for " << str << endl;
+	}
     }
 }

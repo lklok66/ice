@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -18,7 +18,7 @@ SRCS		= Acceptor.cs \
 		  Arrays.cs \
 		  AssemblyInfo.cs \
 		  AssemblyUtil.cs \
-                  Base64.cs \
+		  Assert.cs \
 		  BasicInputStream.cs \
 		  BasicOutputStream.cs \
 		  BasicStream.cs \
@@ -35,7 +35,6 @@ SRCS		= Acceptor.cs \
 		  EndpointFactoryManager.cs \
 		  EventHandler.cs \
 		  Exception.cs \
-		  ImplicitContextI.cs \
 		  IncomingAsync.cs \
 		  Incoming.cs \
 		  InputStream.cs \
@@ -61,7 +60,6 @@ SRCS		= Acceptor.cs \
 		  Patcher.cs \
 		  PluginManagerI.cs \
 		  PropertiesI.cs \
-		  Property.cs \
 		  PropertyNames.cs \
 		  Protocol.cs \
 		  ProtocolPluginFacade.cs \
@@ -71,7 +69,6 @@ SRCS		= Acceptor.cs \
 		  ReadObjectCallback.cs \
 		  Reference.cs \
 		  ReferenceFactory.cs \
-                  ReplyStatus.cs \
 		  RouterInfo.cs \
 		  ServantManager.cs \
 		  Set.cs \
@@ -88,7 +85,6 @@ SRCS		= Acceptor.cs \
 		  TraceUtil.cs \
 		  Transceiver.cs \
 		  UdpEndpointI.cs \
-		  UdpConnector.cs \
 		  UdpTransceiver.cs \
 		  UnknownEndpointI.cs \
 		  UserExceptionFactory.cs \
@@ -97,24 +93,35 @@ SRCS		= Acceptor.cs \
 		  XMLOutput.cs
 
 SLICE_SRCS	= $(SDIR)/BuiltinSequences.ice \
+		  $(SDIR)/CommunicatorF.ice \
 		  $(SDIR)/Communicator.ice \
 		  $(SDIR)/Connection.ice \
+		  $(SDIR)/ConnectionF.ice \
 		  $(SDIR)/Current.ice \
 		  $(SDIR)/Endpoint.ice \
 		  $(SDIR)/FacetMap.ice \
 		  $(SDIR)/Identity.ice \
-		  $(SDIR)/ImplicitContext.ice \
 		  $(SDIR)/LocalException.ice \
+		  $(SDIR)/LocatorF.ice \
 		  $(SDIR)/Locator.ice \
+		  $(SDIR)/LoggerF.ice \
 		  $(SDIR)/Logger.ice \
+		  $(SDIR)/ObjectAdapterF.ice \
 		  $(SDIR)/ObjectAdapter.ice \
+		  $(SDIR)/ObjectFactoryF.ice \
 		  $(SDIR)/ObjectFactory.ice \
+		  $(SDIR)/PluginF.ice \
 		  $(SDIR)/Plugin.ice \
+		  $(SDIR)/ProcessF.ice \
 		  $(SDIR)/Process.ice \
+		  $(SDIR)/PropertiesF.ice \
 		  $(SDIR)/Properties.ice \
+		  $(SDIR)/RouterF.ice \
 		  $(SDIR)/Router.ice \
+		  $(SDIR)/ServantLocatorF.ice \
 		  $(SDIR)/ServantLocator.ice \
 		  $(SDIR)/SliceChecksumDict.ice \
+		  $(SDIR)/StatsF.ice \
 		  $(SDIR)/Stats.ice
 
 SDIR		= $(slicedir)/Ice
@@ -122,13 +129,12 @@ GDIR		= generated
 
 include $(top_srcdir)/config/Make.rules.cs
 
-MCSFLAGS	:= $(MCSFLAGS) -target:library -out:$(TARGETS) -unsafe -warnaserror-
-MCSFLAGS	:= $(MCSFLAGS) -keyfile:$(top_srcdir)/config/IcecsKey.snk
+MCSFLAGS	:= $(MCSFLAGS) -target:library -out:$(TARGETS) -unsafe -d:ICE_DOTNET_1X -warnaserror-
 
 SLICE2CSFLAGS	:= $(SLICE2CSFLAGS) --ice -I$(slicedir)
 
 $(TARGETS):: $(SRCS) $(GEN_SRCS)
-	$(MCS) $(MCSFLAGS) $(subst /,$(DSEP),$^)
+	$(MCS) $(MCSFLAGS) $^
 
 ifeq ($(NOGAC),)
 

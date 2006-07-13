@@ -1,15 +1,15 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
 
-#include <Ice/Ice.h>
-#include <Freeze/Freeze.h>
 #include <BookFactory.h>
+#include <Ice/Application.h>
+#include <Freeze/Freeze.h>
 
 using namespace std;
 
@@ -18,7 +18,7 @@ class LibraryServer : public Ice::Application
 public:
     
     LibraryServer(const string& envName) :
-        _envName(envName)
+	_envName(envName)
     {
     }
 
@@ -49,11 +49,11 @@ LibraryServer::run(int argc, char* argv[])
     //
     // Create an evictor for books.
     //
-    Freeze::EvictorPtr evictor = Freeze::createBackgroundSaveEvictor(adapter, _envName, "books");
-    Ice::Int evictorSize = properties->getPropertyAsInt("EvictorSize");
+    Freeze::EvictorPtr evictor = Freeze::createEvictor(adapter, _envName, "books");
+    Ice::Int evictorSize = properties->getPropertyAsInt("Library.EvictorSize");
     if(evictorSize > 0)
     {
-        evictor->setSize(evictorSize);
+	evictor->setSize(evictorSize);
     }
     
     //

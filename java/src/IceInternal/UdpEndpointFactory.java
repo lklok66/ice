@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -29,9 +29,9 @@ final class UdpEndpointFactory implements EndpointFactory
     }
 
     public EndpointI
-    create(String str, boolean oaEndpoint)
+    create(String str)
     {
-        return new UdpEndpointI(_instance, str, oaEndpoint);
+        return new UdpEndpointI(_instance, str);
     }
 
     public EndpointI

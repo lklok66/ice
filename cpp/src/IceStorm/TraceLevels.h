@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -11,18 +11,17 @@
 #define ICE_STORM_TRACE_LEVELS_H
 
 #include <IceUtil/Shared.h>
-#include <IceUtil/Handle.h>
 #include <Ice/PropertiesF.h>
 #include <Ice/LoggerF.h>
 
 namespace IceStorm
 {
 
-class TraceLevels : public IceUtil::Shared
+class TraceLevels : public ::IceUtil::Shared
 {
 public:
 
-    TraceLevels(const ::std::string name, const Ice::PropertiesPtr&, const Ice::LoggerPtr&);
+    TraceLevels(const ::std::string name, const ::Ice::PropertiesPtr&, const Ice::LoggerPtr&);
     virtual ~TraceLevels();
 
     const int topicMgr;
@@ -33,9 +32,6 @@ public:
 
     const int flush;
     const char* flushCat;
-
-    const int subscriberPool;
-    const char* subscriberPoolCat;
 
     const int subscriber;
     const char* subscriberCat;

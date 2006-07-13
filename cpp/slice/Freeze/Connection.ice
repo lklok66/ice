@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -16,13 +16,6 @@
 module Freeze
 {
 
-/**
- *
- * An attempt was made to start a transaction
- * while a previous transaction has not yet been
- * committed or rolled back.
- *
- **/
 local exception TransactionAlreadyInProgressException
 {
 };
@@ -43,9 +36,9 @@ local interface Connection
      * Create a new transaction. Only one transaction at a time can
      * be associated with a connection. 
      *
-     * @return The new transaction.
+     * @return The new transaction
      *
-     * @throws TransactionAlreadyInProgressException Raised if a 
+     * @throws raises TransactionAlreadyInProgressException if a 
      * transaction is already associated with this connection.
      *
      **/
@@ -59,7 +52,7 @@ local interface Connection
      * @return The current transaction if there is one, null otherwise.
      *
      **/
-    ["cpp:const"] Transaction currentTransaction();
+    nonmutating Transaction currentTransaction();
 
      
     /**
@@ -73,18 +66,18 @@ local interface Connection
     
     /**
      *
-     * Returns the communicator associated with this connection.
+     * Returns the communicator associated with this connection
      *
      **/
-    ["cpp:const"] Ice::Communicator getCommunicator();
+    nonmutating Ice::Communicator getCommunicator();
 
     /**
      *
-     * The name of the connected system (for example, the Berkeley DB
-     * environment).
+     * The name of the connected system (e.g. Berkeley DB
+     * environment)
      *
      **/
-    ["cpp:const"] string getName();
+    nonmutating string getName();
 
 }; 
 

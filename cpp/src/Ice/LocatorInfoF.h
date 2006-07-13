@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -10,23 +10,24 @@
 #ifndef ICE_LOCATOR_INFO_F_H
 #define ICE_LOCATOR_INFO_F_H
 
-#include <IceUtil/Shared.h>
-
 #include <Ice/Handle.h>
 
 namespace IceInternal
 {
 
 class LocatorManager;
-IceUtil::Shared* upCast(LocatorManager*);
+void incRef(LocatorManager*);
+void decRef(LocatorManager*);
 typedef Handle<LocatorManager> LocatorManagerPtr;
 
 class LocatorInfo;
-IceUtil::Shared* upCast(LocatorInfo*);
+void incRef(LocatorInfo*);
+void decRef(LocatorInfo*);
 typedef Handle<LocatorInfo> LocatorInfoPtr;
 
 class LocatorTable;
-IceUtil::Shared* upCast(LocatorTable*);
+void incRef(LocatorTable*);
+void decRef(LocatorTable*);
 typedef Handle<LocatorTable> LocatorTablePtr;
 
 }

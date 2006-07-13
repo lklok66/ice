@@ -1,13 +1,11 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
-
-using System.Diagnostics;
 
 public class Server
 {
@@ -68,25 +66,23 @@ public class Server
         int status = 0;
         Ice.Communicator communicator = null;
         
-        Debug.Listeners.Add(new ConsoleTraceListener());
-
         try
         {
-            //
-            // In this test, we need longer server idle time,
-            // otherwise our test servers may time out before they are
-            // used in the test.
-            //
-            Ice.InitializationData initData = new Ice.InitializationData();
-            initData.properties = Ice.Util.createProperties(ref args);
-            initData.properties.setProperty("Ice.ServerIdleTime", "120"); // Two minutes
+	    //
+	    // In this test, we need longer server idle time,
+	    // otherwise our test servers may time out before they are
+	    // used in the test.
+	    //
+	    Ice.InitializationData initData = new Ice.InitializationData();
+	    initData.properties = Ice.Util.createProperties(ref args);
+	    initData.properties.setProperty("Ice.ServerIdleTime", "120"); // Two minutes
 
             communicator = Ice.Util.initialize(ref args, initData);
             status = run(args, communicator);
         }
         catch(System.Exception ex)
         {
-            System.Console.Error.WriteLine(ex);
+	    System.Console.Error.WriteLine(ex);
             status = 1;
         }
         
@@ -98,14 +94,14 @@ public class Server
             }
             catch(Ice.LocalException ex)
             {
-                System.Console.Error.WriteLine(ex);
+		System.Console.Error.WriteLine(ex);
                 status = 1;
             }
         }
         
-        if(status != 0)
-        {
-            System.Environment.Exit(status);
-        }
+	if(status != 0)
+	{
+	    System.Environment.Exit(status);
+	}
     }
 }

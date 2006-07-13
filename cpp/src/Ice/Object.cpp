@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -10,8 +10,6 @@
 #include <Ice/Object.h>
 #include <Ice/Incoming.h>
 #include <Ice/IncomingAsync.h>
-#include <Ice/IncomingRequest.h>
-#include <Ice/Direct.h>
 #include <Ice/LocalException.h>
 #include <Ice/Stream.h>
 
@@ -19,7 +17,8 @@ using namespace std;
 using namespace Ice;
 using namespace IceInternal;
 
-IceInternal::GCShared* IceInternal::upCast(Object* p) { return p; }
+void IceInternal::incRef(Object* p) { p->__incRef(); }
+void IceInternal::decRef(Object* p) { p->__decRef(); }
 
 bool
 Ice::Object::operator==(const Object& r) const
@@ -134,13 +133,6 @@ Ice::Object::___ice_id(Incoming& __inS, const Current& __current)
     return DispatchOK;
 }
 
-Ice::Int
-Ice::Object::ice_operationAttributes(const string&) const
-{
-    return 0;
-}
-
-
 string Ice::Object::__all[] =
 {
     "ice_id",
@@ -149,89 +141,39 @@ string Ice::Object::__all[] =
     "ice_ping"
 };
 
-
-DispatchStatus
-Ice::Object::ice_dispatch(Request& request, const DispatchInterceptorAsyncCallbackPtr& cb)
-{
-    class PushCb
-    {
-    public:
-        PushCb(IceInternal::Incoming& in, const DispatchInterceptorAsyncCallbackPtr& cb) :
-            _in(in),
-            _cb(cb)
-        {
-            if(_cb != 0)
-            {
-                _in.push(_cb);
-            }
-        }
-
-        ~PushCb()
-        {
-            if(_cb != 0)
-            {
-                _in.pop();
-            }
-        }
-    private:
-        IceInternal::Incoming& _in;
-        const DispatchInterceptorAsyncCallbackPtr& _cb;
-    };
-
-
-    if(request.isCollocated())
-    {
-        return __collocDispatch(dynamic_cast<IceInternal::Direct&>(request));
-    }
-    else
-    {
-        IceInternal::Incoming& in = dynamic_cast<IceInternal::IncomingRequest&>(request)._in;
-        
-        PushCb pusbCb(in, cb);
-        in.startOver(); // may raise ResponseSentException
-        return __dispatch(in, in.getCurrent());
-    }
-}
-
 DispatchStatus
 Ice::Object::__dispatch(Incoming& in, const Current& current)
 {
     pair<string*, string*> r =
-        equal_range(__all, __all + sizeof(__all) / sizeof(string), current.operation);
+	equal_range(__all, __all + sizeof(__all) / sizeof(string), current.operation);
 
     if(r.first == r.second)
     {
-        throw OperationNotExistException(__FILE__, __LINE__, current.id, current.facet, current.operation);
-    }                                        
+	return DispatchOperationNotExist;
+    }					     
 
     switch(r.first - __all)
     {
         case 0:
         {
-            return ___ice_id(in, current);
+	    return ___ice_id(in, current);
         }
         case 1:
         {
-            return ___ice_ids(in, current);
+	    return ___ice_ids(in, current);
         }
         case 2:
-        {
-            return ___ice_isA(in, current);
-        }
-        case 3:
-        {
-            return ___ice_ping(in, current);
-        }
+	{
+	    return ___ice_isA(in, current);
+	}
+	case 3:
+	{
+	    return ___ice_ping(in, current);
+	}
     }
 
     assert(false);
-    throw OperationNotExistException(__FILE__, __LINE__, current.id, current.facet, current.operation);
-}
-
-DispatchStatus
-Ice::Object::__collocDispatch(IceInternal::Direct& request)
-{
-    return request.run(this);
+    return DispatchOperationNotExist;
 }
 
 void
@@ -248,8 +190,8 @@ Ice::Object::__read(BasicStream* __is, bool __rid)
 {
     if(__rid)
     {
-        string myId;
-        __is->readTypeId(myId);
+	string myId;
+	__is->readTypeId(myId);
     }
 
     __is->startReadSlice();
@@ -259,7 +201,7 @@ Ice::Object::__read(BasicStream* __is, bool __rid)
     __is->readSize(sz);
     if(sz != 0)
     {
-        throw Ice::MarshalException(__FILE__, __LINE__);
+	throw Ice::MarshalException(__FILE__, __LINE__);
     }
 
     __is->endReadSlice();
@@ -279,7 +221,7 @@ Ice::Object::__read(const InputStreamPtr& __inS, bool __rid)
 {
     if(__rid)
     {
-        __inS->readTypeId();
+	__inS->readTypeId();
     }
 
     __inS->startSlice();
@@ -288,7 +230,7 @@ Ice::Object::__read(const InputStreamPtr& __inS, bool __rid)
     Int sz = __inS->readSize();
     if(sz != 0)
     {
-        throw Ice::MarshalException(__FILE__, __LINE__);
+	throw Ice::MarshalException(__FILE__, __LINE__);
     }
 
     __inS->endSlice();
@@ -307,13 +249,13 @@ operationModeToString(OperationMode mode)
     switch(mode)
     {
     case Normal:
-        return "::Ice::Normal";
+	return "::Ice::Normal";
 
     case Nonmutating:
-        return "::Ice::Nonmutating";
+	return "::Ice::Nonmutating";
 
     case Idempotent:
-        return "::Ice::Idempotent";
+	return "::Ice::Idempotent";
     }
 
     ostringstream os;
@@ -326,29 +268,14 @@ Ice::Object::__checkMode(OperationMode expected, OperationMode received)
 {
     if(expected != received)
     {
-        if(expected == Idempotent && received == Nonmutating)
-        {
-            // 
-            // Fine: typically an old client still using the deprecated nonmutating keyword
-            //
-            
-            //
-            // Note that expected == Nonmutating and received == Idempotent is not ok:
-            // the server may still use the deprecated nonmutating keyword to detect updates
-            // and the client should not break this (deprecated) feature.
-            //
-        }
-        else
-        {
-            Ice::MarshalException ex(__FILE__, __LINE__);
-            std::ostringstream __reason;
-            __reason << "unexpected operation mode. expected = "
-                     << operationModeToString(expected)
-                     << " received = "
-                     << operationModeToString(received);
-            ex.reason = __reason.str();
-            throw ex;
-        }
+	Ice::MarshalException ex(__FILE__, __LINE__);
+	std::ostringstream __reason;
+	__reason << "unexpected operation mode. expected = "
+		 << operationModeToString(expected)
+		 << " received = "
+		 << operationModeToString(received);
+	ex.reason = __reason.str();
+	throw ex;
     }
 }
 
@@ -363,11 +290,11 @@ Ice::Blobject::__dispatch(Incoming& in, const Current& current)
     in.os()->writeBlob(outParams);
     if(ok)
     {
-        return DispatchOK;
+	return DispatchOK;
     }
     else
     {
-        return DispatchUserException;
+	return DispatchUserException;
     }
 }
 
@@ -383,11 +310,11 @@ Ice::BlobjectArray::__dispatch(Incoming& in, const Current& current)
     in.os()->writeBlob(outParams);
     if(ok)
     {
-        return DispatchOK;
+	return DispatchOK;
     }
     else
     {
-        return DispatchUserException;
+	return DispatchUserException;
     }
 }
 
@@ -400,19 +327,19 @@ Ice::BlobjectAsync::__dispatch(Incoming& in, const Current& current)
     AMD_Object_ice_invokePtr cb = new ::IceAsync::Ice::AMD_Object_ice_invoke(in);
     try
     {
-        ice_invoke_async(cb, inParams, current);
+	ice_invoke_async(cb, inParams, current);
     }
     catch(const Exception& ex)
     {
-        cb->ice_exception(ex);
+	cb->ice_exception(ex);
     }
     catch(const ::std::exception& ex)
     {
-        cb->ice_exception(ex);
+	cb->ice_exception(ex);
     }
     catch(...)
     {
-        cb->ice_exception();
+	cb->ice_exception();
     }
     return DispatchAsync;
 }
@@ -427,19 +354,19 @@ Ice::BlobjectArrayAsync::__dispatch(Incoming& in, const Current& current)
     AMD_Array_Object_ice_invokePtr cb = new ::IceAsync::Ice::AMD_Array_Object_ice_invoke(in);
     try
     {
-        ice_invoke_async(cb, inParams, current);
+	ice_invoke_async(cb, inParams, current);
     }
     catch(const Exception& ex)
     {
-        cb->ice_exception(ex);
+	cb->ice_exception(ex);
     }
     catch(const ::std::exception& ex)
     {
-        cb->ice_exception(ex);
+	cb->ice_exception(ex);
     }
     catch(...)
     {
-        cb->ice_exception();
+	cb->ice_exception();
     }
     return DispatchAsync;
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -11,8 +11,12 @@
 import Ice, Test
 
 class MyDerivedClassI(Test.MyDerivedClass):
+    def __init__(self, adapter, identity):
+        self.adapter = adapter
+        self.identity = identity
+
     def shutdown(self, current=None):
-        current.adapter.getCommunicator().shutdown()
+        self.adapter.getCommunicator().shutdown()
 
     def opVoid(self, current=None):
         pass
@@ -36,19 +40,18 @@ class MyDerivedClassI(Test.MyDerivedClass):
         return (Test.MyEnum.enum3, p1)
 
     def opMyClass(self, p1, current=None):
-        return (Test.MyClassPrx.uncheckedCast(current.adapter.createProxy(current.id)), p1,
-                Test.MyClassPrx.uncheckedCast(current.adapter.createProxy(current.adapter.getCommunicator().stringToIdentity("noSuchIdentity"))))
+        return (Test.MyClassPrx.uncheckedCast(self.adapter.createProxy(self.identity)), p1,
+                Test.MyClassPrx.uncheckedCast(self.adapter.createProxy(self.adapter.getCommunicator().stringToIdentity("noSuchIdentity"))))
 
     def opStruct(self, p1, p2, current=None):
         p1.s.s = "a new string"
         return (p2, p1)
 
     def opByteS(self, p1, p2, current=None):
-        # By default sequence<byte> maps to a string.
-        p3 = map(ord, p1)
+        p3 = p1[0:]
         p3.reverse()
-        r = map(ord, p1)
-        r.extend(map(ord, p2))
+        r = p1[0:]
+        r.extend(p2)
         return (r, p3)
 
     def opBoolS(self, p1, p2, current=None):
@@ -158,11 +161,19 @@ class MyDerivedClassI(Test.MyDerivedClass):
     def opIntS(self, s, current=None):
         return [-x for x in s]
 
-    def opByteSOneway(self, s, current=None):
-        pass
-
     def opContext(self, current=None):
         return current.ctx
 
     def opDerived(self, current=None):
         pass
+
+class TestCheckedCastI(Test.TestCheckedCast):
+    def __init__(self):
+	self.ctx = None
+
+    def getContext(self, current):
+	return self.ctx;
+
+    def ice_isA(self, s, current):
+	self.ctx = current.ctx
+	return Test.TestCheckedCast.ice_isA(self, s, current)

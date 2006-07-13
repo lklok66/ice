@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -9,7 +9,7 @@
 
 #include <FreezeScript/Parser.h>
 #include <FreezeScript/GrammarUtil.h>
-#include <IceUtil/StaticMutex.h>
+#include <IceUtil/Mutex.h>
 
 using namespace std;
 
@@ -66,7 +66,7 @@ int FreezeScript::parseLine;
 
 static string _input;
 static string::size_type _pos;
-static IceUtil::StaticMutex _parserMutex = ICE_STATIC_MUTEX_INITIALIZER;
+static IceUtil::Mutex _parserMutex;
 
 //
 // parseExpression
@@ -77,7 +77,7 @@ FreezeScript::parseExpression(const string& expr, const DataFactoryPtr& factory,
     //
     // The bison grammar is not thread-safe.
     //
-    IceUtil::StaticMutex::Lock sync(_parserMutex);
+    IceUtil::Mutex::Lock sync(_parserMutex);
 
     parseDataFactory = factory;
     parseErrorReporter = errorReporter;
@@ -126,13 +126,9 @@ FreezeScript::EvaluateException::EvaluateException(const char* file, int line, c
 {
 }
 
-FreezeScript::EvaluateException::~EvaluateException() throw()
-{
-}
-
 const char* FreezeScript::EvaluateException::_name = "FreezeScript::EvaluateException";
 
-string
+const string
 FreezeScript::EvaluateException::ice_name() const
 {
     return _name;
@@ -141,11 +137,7 @@ FreezeScript::EvaluateException::ice_name() const
 void
 FreezeScript::EvaluateException::ice_print(ostream& out) const
 {
-#ifdef __BCPLUSPLUS__
-    Ice::Exception::ice_print(out);
-#else
     Exception::ice_print(out);
-#endif
     out << ":\nerror occurred while evaluating expression";
     if(!_reason.empty())
     {

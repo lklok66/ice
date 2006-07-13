@@ -1,6 +1,6 @@
 ' **********************************************************************
 '
-' Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+' Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 '
 ' This copy of Ice is licensed to you under the terms described in the
 ' ICE_LICENSE file included in this distribution.
@@ -32,7 +32,15 @@ Module InvokeC
         End Sub
 
         Public Overloads Overrides Function run(ByVal args() As String) As Integer
-            Dim obj As Ice.ObjectPrx = communicator().propertyToProxy("Printer.Proxy")
+            Dim properties As Ice.Properties = communicator().getProperties()
+            Dim proxyProperty As String = "Printer.Proxy"
+            Dim proxy As String = properties.getProperty(proxyProperty)
+            If proxy.Length = 0 Then
+                Console.Error.WriteLine("property `" & proxyProperty & "' not set")
+                Return 1
+            End If
+
+            Dim obj As Ice.ObjectPrx = communicator().stringToProxy(proxy)
 
             menu()
 
@@ -43,7 +51,7 @@ Module InvokeC
                     Console.Out.Flush()
                     line = Console.In.ReadLine()
                     If line Is Nothing Then
-                        Exit Do
+                        Exit Try
                     End If
 
                     Dim outParams As Byte() = Nothing

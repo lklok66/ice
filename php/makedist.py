@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -66,6 +66,10 @@ for x in sys.argv[1:]:
     else:
         tag = "-r" + x
 
+if not os.environ.has_key("ICE_HOME"):
+    print "The ICE_HOME environment variable is not set."
+    sys.exit(1)
+
 #
 # Remove any existing "dist" directory and create a new one.
 #
@@ -78,17 +82,7 @@ os.chdir(distdir)
 #
 # Export sources from CVS.
 #
-os.system("cvs -d cvs.zeroc.com:/home/cvsroot export " + tag + " icephp ice/config ice/include/IceUtil/Config.h")
-
-
-#
-# Copy Make.rules.Linux and Make.rules.msvc
-#
-shutil.copyfile(os.path.join("ice", "config", "Make.rules.Linux"),
-                os.path.join("icephp", "config", "Make.rules.Linux"))
-
-shutil.copyfile(os.path.join("ice", "config", "Make.rules.msvc"),
-                os.path.join("icephp", "config", "Make.rules.msvc"))
+os.system("cvs -d cvs.zeroc.com:/home/cvsroot export " + tag + " icephp")
 
 #
 # Remove files.
@@ -101,10 +95,10 @@ for x in filesToRemove:
     os.remove(x)
 
 #
-# Get Ice version.
+# Get IcePHP version.
 #
-config = open(os.path.join("ice", "include", "IceUtil", "Config.h"), "r")
-version = re.search("ICE_STRING_VERSION \"([0-9\.b]*)\"", config.read()).group(1)
+config = open(os.path.join("icephp", "src", "ice", "php_ice.h"), "r")
+version = re.search("ICEPHP_STRING_VERSION \"([0-9\.]*)\"", config.read()).group(1)
 
 print "Fixing version in README and INSTALL files..."
 fixVersion(find("icephp", "README*"), version)
@@ -133,4 +127,3 @@ shutil.copyfile(os.path.join(icephpver, "CHANGES"), "IcePHP-" + version + "-CHAN
 # Done.
 #
 shutil.rmtree(icephpver)
-shutil.rmtree("ice")

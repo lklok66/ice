@@ -1,13 +1,11 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
-
-using System.Diagnostics;
 
 public class Client
 {
@@ -22,8 +20,6 @@ public class Client
         int status = 0;
         Ice.Communicator communicator = null;
         
-        Debug.Listeners.Add(new ConsoleTraceListener());
-
         try
         {
             communicator = Ice.Util.initialize(ref args);
@@ -43,14 +39,14 @@ public class Client
             }
             catch(Ice.LocalException ex)
             {
-                System.Console.Error.WriteLine(ex);
+		System.Console.Error.WriteLine(ex);
                 status = 1;
             }
         }
         
-        if(status != 0)
-        {
-            System.Environment.Exit(status);
-        }
+	if(status != 0)
+	{
+	    System.Environment.Exit(status);
+	}
     }
 }

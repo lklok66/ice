@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -82,6 +82,13 @@ class AMI_Test_idempotentAbortI(AMI_Test_abortI):
     def ice_exception(self, ex):
         AMI_Test_abortI.ice_exception(self, ex)
 
+class AMI_Test_nonmutatingAbortI(AMI_Test_abortI):
+    def ice_response(self):
+        test(False)
+
+    def ice_exception(self, ex):
+        AMI_Test_abortI.ice_exception(self, ex)
+
 def allTests(communicator, ports):
     print "testing stringToProxy... ",
     ref = "test"
@@ -149,7 +156,7 @@ def allTests(communicator, ports):
                 obj.abort_async(cb)
                 test(cb.check())
                 print "ok"
-        elif j == 2 or j == 3:
+        elif j == 2:
             if not ami:
                 print "aborting server #%d and #%d with idempotent call... " % (i, i + 1),
                 try:
@@ -163,6 +170,24 @@ def allTests(communicator, ports):
                 print "aborting server #%d and #%d with idempotent AMI call... " % (i, i + 1),
                 cb = AMI_Test_idempotentAbortI()
                 obj.idempotentAbort_async(cb)
+                test(cb.check())
+                print "ok"
+
+            i = i + 1
+        elif j == 3:
+            if not ami:
+                print "aborting server #%d and #%d with nonmutating call... " % (i, i + 1),
+                try:
+                    obj.nonmutatingAbort()
+                    test(False)
+                except Ice.ConnectionLostException:
+                    print "ok"
+                except Ice.ConnectFailedException:
+                    print "ok"
+            else:
+                print "aborting server #%d and #%d with nonmutating AMI call... " % (i, i + 1),
+                cb = AMI_Test_nonmutatingAbortI()
+                obj.nonmutatingAbort_async(cb)
                 test(cb.check())
                 print "ok"
 

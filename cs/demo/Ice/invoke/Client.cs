@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -33,7 +33,16 @@ public class Client : Ice.Application
     public override int
     run(string[] args)
     {
-        Ice.ObjectPrx obj = communicator().propertyToProxy("Printer.Proxy");
+        Ice.Properties properties = communicator().getProperties();
+        string proxyProperty = "Printer.Proxy";
+        string proxy = properties.getProperty(proxyProperty);
+        if(proxy.Length == 0)
+        {
+            Console.Error.WriteLine("property `" + proxyProperty + "' not set");
+            return 1;
+        }
+
+        Ice.ObjectPrx obj = communicator().stringToProxy(proxy);
 
         menu();
 

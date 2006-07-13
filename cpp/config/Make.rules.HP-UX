@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -35,14 +35,7 @@ ifeq ($(STATICLIBS),)
 endif
 
 ifeq ($(OPTIMIZE),yes)
-   ifeq ($(LP64),yes)
-#
-# 64 bits -O (+O2) optimized build fail in the IceGrid tests so we use +O1
-#       
-      CXXFLAGS		+= +O1 -DNDEBUG 
-   else
-      CXXFLAGS		+= -O -DNDEBUG
-   endif
+     CXXFLAGS		+= -O -DNDEBUG
 else
      CXXFLAGS		+= -g0
 endif
@@ -52,8 +45,8 @@ endif
 #
 CXXLIBS			= -lCsup_v2 -lstd_v2
 
-ifneq ($(embedded_runpath_prefix),)
-   LDPLATFORMFLAGS      = -Wl,+s -Wl,+b$(runpath_libdir)
+ifeq ($(ADD_LIBDIR_TO_RPATH),yes)
+   LDPLATFORMFLAGS      = -Wl,+s -Wl,+b$(install_libdir)
 else
    LDPLATFORMFLAGS      = -Wl,+s
 endif

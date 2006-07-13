@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -8,9 +8,7 @@
 # **********************************************************************
 
 ifndef ICE_HOME
-   ifneq ($(shell test -f /usr/include/Ice/Ice.h && echo 0),0)
-      $(error Ice installation not found, please set ICE_HOME!)
-   endif
+    $(error ICE_HOME is not defined)
 endif
 
 #
@@ -21,10 +19,11 @@ endif
 prefix			= /opt/IcePy-$(VERSION)
 
 #
-# The "root directory" for runpath embedded in executables. Can be unset
-# to avoid adding a runpath to Ice executables.
+# When creating an executable, shall we add install_libdir to the
+# runpath embedded in this executable?
 #
-embedded_runpath_prefix  ?= /opt/Ice-$(VERSION_MAJOR).$(VERSION_MINOR)
+ADD_LIBDIR_TO_RPATH     ?= yes
+
 
 #
 # Define OPTIMIZE as yes if you want to build with optimization.
@@ -69,25 +68,30 @@ else
     # version used for building the Ice extension, then set PYTHON_VERSION
     # to "python2.3" or "python2.4".
     #
-    PYTHON_VERSION	?= $(word 1,$(notdir $(wildcard /usr/include/python2.[345]*)))
+    PYTHON_VERSION	?= $(word 1,$(notdir $(wildcard /usr/include/python2.[34]*)))
     ifeq ($(PYTHON_VERSION),)
       python_darwin_home = /System/Library/Frameworks/Python.framework/Versions/Current
-      PYTHON_VERSION 	= $(word 1,$(notdir $(wildcard $(python_darwin_home)/include/python2.[345]*)))
+      PYTHON_VERSION 	= $(word 1,$(notdir $(wildcard $(python_darwin_home)/include/python2.[34]*)))
     endif
     PYTHON_INCLUDE_DIR	= /usr/include/$(PYTHON_VERSION)
     PYTHON_LIB_DIR	= /usr/lib/$(PYTHON_VERSION)/config
 endif
 
 ifeq ($(PYTHON_VERSION),)
-    ifneq ($(PYTHON_HOME),)
-        $(error Unable to find a Python interpreter at PYTHON_HOME=$(PYTHON_HOME). See config/Make.rules)
-    else
-        $(error Unable to find Python 2.3, 2.4, or 2.5. See config/Make.rules)
-    endif
+    $(error Unable to find Python 2.3 or 2.4. See config/Make.rules)
 endif
 
 PYTHON_FLAGS		?= -I$(PYTHON_INCLUDE_DIR)
 PYTHON_LIBS		?= -L$(PYTHON_LIB_DIR) -l$(PYTHON_VERSION)
+
+ifeq ($(LP64),yes)
+   ICE_LIBS             = -L$(ICE_HOME)/lib64 -L$(ICE_HOME)/lib -lIce -lIceUtil -lSlice 
+else 
+   ICE_LIBS		= -L$(ICE_HOME)/lib -lIce -lIceUtil -lSlice
+endif
+
+ICE_FLAGS		= -I$(ICE_HOME)/include
+
 
 
 # ----------------------------------------------------------------------
@@ -95,11 +99,25 @@ PYTHON_LIBS		?= -L$(PYTHON_LIB_DIR) -l$(PYTHON_VERSION)
 # ----------------------------------------------------------------------
 
 SHELL			= /bin/sh
-VERSION_MAJOR           = 3
-VERSION_MINOR           = 2
-VERSION			= 3.2.0
-SOVERSION		= 32
+VERSION			= 3.1.0
+SOVERSION		= 31
 libdir			= $(top_srcdir)/python
+
+ifeq ($(shell test -d $(top_srcdir)/slice && echo 0),0)
+    slicedir		= $(top_srcdir)/slice
+else
+    slicedir		= $(ICE_HOME)/slice
+endif
+
+ifeq ($(LP64),yes)
+#
+# TODO: Where should the shared library be installed if it is a 64 bit
+# build.
+#
+    install_libdir	= $(prefix)/python
+else
+    install_libdir	= $(prefix)/python
+endif
 
 install_slicedir	= $(prefix)/slice
 install_pythondir	= $(prefix)/python
@@ -121,35 +139,12 @@ else
 endif
 include	 $(configdir)/Make.rules.$(UNAME)
 
-ifneq ($(ICE_HOME),)
-    ifeq ($(LP64),yes)
-       ICE_LIB_DIRS	= -L$(ICE_HOME)/lib64 -L$(ICE_HOME)/lib
-    else 
-       ICE_LIB_DIRS	= -L$(ICE_HOME)/lib
-    endif
-endif
-
-ICE_LIBS		= $(ICE_LIB_DIRS) -lIce -lSlice -lIceUtil
-
-ifneq ($(ICE_HOME),)
-    ICE_FLAGS		= -I$(ICE_HOME)/include
-endif
-
-ifneq ($(ICE_HOME),)
-    slicedir		= $(ICE_HOME)/slice
+ifeq ($(LP64),yes)
+    libsubdir		  := lib$(lp64suffix)
 else
-    slicedir		= /usr/share/Ice-$(VERSION)/slice
+    libsubdir		  := lib
 endif
 
-install_libdir	        = $(prefix)/python
-
-ifneq ($(embedded_runpath_prefix),)
-   ifeq ($(LP64),yes)
-       runpath_libdir	  := $(embedded_runpath_prefix)/lib$(lp64suffix)
-   else
-       runpath_libdir	  := $(embedded_runpath_prefix)/lib
-   endif
-endif
 
 CPPFLAGS		=
 ICECPPFLAGS		= -I$(slicedir)
@@ -212,11 +207,7 @@ mkpylibfilename		= $(subst lib,,$(call mklibfilename,$(1),$(2)))
 mkpysoname		= $(subst lib,,$(call mksoname,$(1),$(2)))
 mkpylibname		= $(subst lib,,$(call mklibname,$(1)))
 
-ifneq ($(ICE_HOME),)
-   SLICE2PY		= $(ICE_HOME)/bin/slice2py
-else
-   SLICE2PY		= /usr/bin/slice2py
-endif
+SLICE2PY		= $(ICE_HOME)/bin/slice2py
 
 EVERYTHING		= all depend clean install
 

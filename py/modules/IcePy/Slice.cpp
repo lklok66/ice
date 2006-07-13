@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -32,34 +32,26 @@ PyObject*
 IcePy_loadSlice(PyObject* /*self*/, PyObject* args)
 {
     char* cmd;
-    PyObject* list = 0;
+    PyObject* list = NULL;
     if(!PyArg_ParseTuple(args, STRCAST("s|O!"), &cmd, &PyList_Type, &list))
     {
-        return 0;
+        return NULL;
     }
 
     vector<string> argSeq;
     try
     {
-        argSeq = IceUtil::Options::split(cmd);
+	argSeq = IceUtil::Options::split(cmd);
     }
-    catch(const IceUtil::BadOptException& ex)
+    catch(const IceUtil::Options::Error& ex)
     {
-        PyErr_Format(PyExc_RuntimeError, "error in Slice options: %s", ex.reason.c_str());
-        return 0;
-    }
-    catch(const IceUtil::APIException& ex)
-    {
-        PyErr_Format(PyExc_RuntimeError, "error in Slice options: %s", ex.reason.c_str());
-        return 0;
+	PyErr_Format(PyExc_RuntimeError, "error in Slice options: %s", ex.reason.c_str());
+	return NULL;
     }
 
-    if(list)
+    if(list != NULL)
     {
-        if(!listToStringSeq(list, argSeq))
-        {
-            return 0;
-        }
+        listToStringSeq(list, argSeq);
     }
 
     IceUtil::Options opts;
@@ -75,23 +67,18 @@ IcePy_loadSlice(PyObject* /*self*/, PyObject* args)
     vector<string> files;
     try
     {
-        argSeq.insert(argSeq.begin(), ""); // dummy argv[0]
-        files = opts.parse(argSeq);
-        if(files.empty())
-        {
-            PyErr_Format(PyExc_RuntimeError, "no Slice files specified in `%s'", cmd);
-            return 0;
-        }
+	argSeq.insert(argSeq.begin(), ""); // dummy argv[0]
+	files = opts.parse(argSeq);
+	if(files.empty())
+	{
+	    PyErr_Format(PyExc_RuntimeError, "no Slice files specified in `%s'", cmd);
+	    return NULL;
+	}
     }
-    catch(const IceUtil::BadOptException& ex)
+    catch(const IceUtil::Options::BadOpt& ex)
     {
-        PyErr_Format(PyExc_RuntimeError, "error in Slice options: %s", ex.reason.c_str());
-        return 0;
-    }
-    catch(const IceUtil::APIException& ex)
-    {
-        PyErr_Format(PyExc_RuntimeError, "error in Slice options: %s", ex.reason.c_str());
-        return 0;
+	PyErr_Format(PyExc_RuntimeError, "error in Slice options: %s", ex.reason.c_str());
+	return NULL;
     }
 
     string cppArgs;
@@ -103,27 +90,27 @@ IcePy_loadSlice(PyObject* /*self*/, PyObject* args)
     bool checksum = false;
     if(opts.isSet("D"))
     {
-        vector<string> optargs = opts.argVec("D");
-        for(vector<string>::const_iterator i = optargs.begin(); i != optargs.end(); ++i)
-        {
-            cppArgs += " -D" + *i;
-        }
+	vector<string> optargs = opts.argVec("D");
+	for(vector<string>::const_iterator i = optargs.begin(); i != optargs.end(); ++i)
+	{
+	    cppArgs += " -D" + *i;
+	}
     }
     if(opts.isSet("U"))
     {
-        vector<string> optargs = opts.argVec("U");
-        for(vector<string>::const_iterator i = optargs.begin(); i != optargs.end(); ++i)
-        {
-            cppArgs += " -U" + *i;
-        }
+	vector<string> optargs = opts.argVec("U");
+	for(vector<string>::const_iterator i = optargs.begin(); i != optargs.end(); ++i)
+	{
+	    cppArgs += " -U" + *i;
+	}
     }
     if(opts.isSet("I"))
     {
-        includePaths = opts.argVec("I");
-        for(vector<string>::const_iterator i = includePaths.begin(); i != includePaths.end(); ++i)
-        {
-            cppArgs += " -I" + *i;
-        }
+	includePaths = opts.argVec("I");
+	for(vector<string>::const_iterator i = includePaths.begin(); i != includePaths.end(); ++i)
+	{
+	    cppArgs += " -I" + *i;
+	}
     }
     debug = opts.isSet("d") || opts.isSet("debug");
     caseSensitive = opts.isSet("case-sensitive");
@@ -141,7 +128,7 @@ IcePy_loadSlice(PyObject* /*self*/, PyObject* args)
         if(cppHandle == 0)
         {
             PyErr_Format(PyExc_RuntimeError, "Slice preprocessing failed for `%s'", cmd);
-            return 0;
+            return NULL;
         }
 
         UnitPtr u = Slice::Unit::createUnit(ignoreRedefs, all, ice, caseSensitive);
@@ -151,7 +138,7 @@ IcePy_loadSlice(PyObject* /*self*/, PyObject* args)
         {
             PyErr_Format(PyExc_RuntimeError, "Slice parsing failed for `%s'", cmd);
             u->destroy();
-            return 0;
+            return NULL;
         }
 
         //
@@ -166,22 +153,22 @@ IcePy_loadSlice(PyObject* /*self*/, PyObject* args)
         string code = codeStream.str();
         PyObjectHandle src = Py_CompileString(const_cast<char*>(code.c_str()), const_cast<char*>(file.c_str()),
                                               Py_file_input);
-        if(!src.get())
+        if(src.get() == NULL)
         {
-            return 0;
+            return NULL;
         }
 
         PyObjectHandle globals = PyDict_New();
-        if(!globals.get())
+        if(globals.get() == NULL)
         {
-            return 0;
+            return NULL;
         }
         PyDict_SetItemString(globals.get(), "__builtins__", PyEval_GetBuiltins());
 
-        PyObjectHandle val = PyEval_EvalCode(reinterpret_cast<PyCodeObject*>(src.get()), globals.get(), 0);
-        if(!val.get())
+        PyObjectHandle val = PyEval_EvalCode((PyCodeObject*)src.get(), globals.get(), 0);
+        if(val.get() == NULL)
         {
-            return 0;
+            return NULL;
         }
     }
 

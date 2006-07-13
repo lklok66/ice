@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -32,14 +32,15 @@ def allTests(communicator):
     sys.stdout.flush()
     adapter = communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default -p 9999")
     try:
-        communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default -p 9998")
-        test(False)
+	communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default -p 9998")
+	test(False)
     except Ice.LocalException:
         pass
-    adapter.destroy()
-
-    adapter = communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default -p 9998")
-    adapter.destroy()
+    adapter.deactivate()
+    adapter.waitForDeactivate()
+    adapter = communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default -p 9999")
+    adapter.deactivate()
+    adapter.waitForDeactivate()
     print "ok"
 
     print "creating/activating/deactivating object adapter in one operation... ",
@@ -55,9 +56,9 @@ def allTests(communicator):
     print "testing whether server is gone... ",
     sys.stdout.flush()
     try:
-        obj.ice_ping()
-        test(False)
+	obj.ice_ping()
+	test(False)
     except Ice.LocalException:
-        print "ok"
+	print "ok"
 
     return obj

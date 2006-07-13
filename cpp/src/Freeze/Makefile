@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -16,17 +16,17 @@ LIBNAME		= $(call mklibname,Freeze)
 TARGETS		= $(call mklibtargets,$(libdir)/$(LIBFILENAME),$(libdir)/$(SONAME),$(libdir)/$(LIBNAME))
 
 
-OBJS		= BackgroundSaveEvictor.o \
-                  BackgroundSaveEvictorI.o \
-                  CatalogData.o \
+OBJS		= CatalogData.o \
                   Catalog.o \
-		  ConnectionI.o \
+		  ConnectionF.o \
+                  ConnectionI.o \
                   Connection.o \
 		  DB.o \
+		  EvictorF.o \
 		  EvictorI.o \
                   EvictorIteratorI.o \
-                  EvictorStorage.o \
 		  Evictor.o \
+		  EvictorStorage.o \
                   Exception.o \
                   IndexI.o \
                   Index.o \
@@ -35,9 +35,6 @@ OBJS		= BackgroundSaveEvictor.o \
 		  PingObject.o \
                   SharedDbEnv.o \
                   SharedDb.o \
-                  TransactionalEvictor.o \
-                  TransactionalEvictorI.o \
-                  TransactionalEvictorContext.o \
                   TransactionHolder.o \
                   TransactionI.o \
                   Transaction.o \
@@ -45,8 +42,7 @@ OBJS		= BackgroundSaveEvictor.o \
 
 SRCS		= $(OBJS:.o=.cpp)
 
-SLICE_SRCS	= $(SDIR)/BackgroundSaveEvictor.ice \
-                  $(SDIR)/DB.ice \
+SLICE_SRCS	= $(SDIR)/DB.ice \
                   $(SDIR)/CatalogData.ice \
                   $(SDIR)/Connection.ice \
                   $(SDIR)/ConnectionF.ice \
@@ -54,13 +50,11 @@ SLICE_SRCS	= $(SDIR)/BackgroundSaveEvictor.ice \
 		  $(SDIR)/EvictorF.ice \
 		  $(SDIR)/EvictorStorage.ice \
 		  $(SDIR)/Evictor.ice \
-                  $(SDIR)/TransactionalEvictor.ice \
                   $(SDIR)/Transaction.ice \
-		  ../Freeze/PingObject.ice
+		  PingObject.ice
 
 HDIR		= $(includedir)/Freeze
 SDIR		= $(slicedir)/Freeze
-
 
 include $(top_srcdir)/config/Make.rules
 

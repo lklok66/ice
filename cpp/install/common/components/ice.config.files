@@ -1,5 +1,10 @@
 templates.xml
 convertssl.py
 upgradeicegrid.py
-upgradeicestorm.py
-icegrid-slice.3.1.ice.gz
+ca/initca.py
+ca/req.py
+ca/cautil.py
+ca/import.py
+ca/sign.py
+ca/ImportKey.class
+ca/README

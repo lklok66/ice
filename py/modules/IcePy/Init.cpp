@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -13,7 +13,6 @@
 #include <Communicator.h>
 #include <Connection.h>
 #include <Current.h>
-#include <ImplicitContext.h>
 #include <Logger.h>
 #include <ObjectAdapter.h>
 #include <Operation.h>
@@ -29,43 +28,39 @@ extern "C" PyObject* Ice_registerTypes(PyObject*, PyObject*);
 
 static PyMethodDef methods[] =
 {
-    { STRCAST("identityToString"), reinterpret_cast<PyCFunction>(IcePy_identityToString), METH_VARARGS,
+    { STRCAST("identityToString"), (PyCFunction)IcePy_identityToString, METH_VARARGS,
         PyDoc_STR(STRCAST("identityToString(id) -> string")) },
-    { STRCAST("stringToIdentity"), reinterpret_cast<PyCFunction>(IcePy_stringToIdentity), METH_VARARGS,
+    { STRCAST("stringToIdentity"), (PyCFunction)IcePy_stringToIdentity, METH_VARARGS,
         PyDoc_STR(STRCAST("stringToIdentity(str) -> Ice.Identity")) },
-    { STRCAST("generateUUID"), reinterpret_cast<PyCFunction>(IcePy_generateUUID), METH_NOARGS,
+    { STRCAST("generateUUID"), (PyCFunction)IcePy_generateUUID, METH_NOARGS,
         PyDoc_STR(STRCAST("generateUUID() -> string")) },
-    { STRCAST("createProperties"), reinterpret_cast<PyCFunction>(IcePy_createProperties), METH_VARARGS,
+    { STRCAST("createProperties"), (PyCFunction)IcePy_createProperties, METH_VARARGS,
         PyDoc_STR(STRCAST("createProperties([args]) -> Ice.Properties")) },
-    { STRCAST("getProcessLogger"), reinterpret_cast<PyCFunction>(IcePy_getProcessLogger), METH_NOARGS,
-        PyDoc_STR(STRCAST("getProcessLogger() -> Ice.Logger")) },
-    { STRCAST("setProcessLogger"), reinterpret_cast<PyCFunction>(IcePy_setProcessLogger), METH_VARARGS,
-        PyDoc_STR(STRCAST("setProcessLogger(logger) -> None")) },
-    { STRCAST("defineEnum"), reinterpret_cast<PyCFunction>(IcePy_defineEnum), METH_VARARGS,
+    { STRCAST("defineEnum"), (PyCFunction)IcePy_defineEnum, METH_VARARGS,
         PyDoc_STR(STRCAST("internal function")) },
-    { STRCAST("defineStruct"), reinterpret_cast<PyCFunction>(IcePy_defineStruct), METH_VARARGS,
+    { STRCAST("defineStruct"), (PyCFunction)IcePy_defineStruct, METH_VARARGS,
         PyDoc_STR(STRCAST("internal function")) },
-    { STRCAST("defineSequence"), reinterpret_cast<PyCFunction>(IcePy_defineSequence), METH_VARARGS,
+    { STRCAST("defineSequence"), (PyCFunction)IcePy_defineSequence, METH_VARARGS,
         PyDoc_STR(STRCAST("internal function")) },
-    { STRCAST("defineDictionary"), reinterpret_cast<PyCFunction>(IcePy_defineDictionary), METH_VARARGS,
+    { STRCAST("defineDictionary"), (PyCFunction)IcePy_defineDictionary, METH_VARARGS,
         PyDoc_STR(STRCAST("internal function")) },
-    { STRCAST("declareProxy"), reinterpret_cast<PyCFunction>(IcePy_declareProxy), METH_VARARGS,
+    { STRCAST("declareProxy"), (PyCFunction)IcePy_declareProxy, METH_VARARGS,
         PyDoc_STR(STRCAST("internal function")) },
-    { STRCAST("defineProxy"), reinterpret_cast<PyCFunction>(IcePy_defineProxy), METH_VARARGS,
+    { STRCAST("defineProxy"), (PyCFunction)IcePy_defineProxy, METH_VARARGS,
         PyDoc_STR(STRCAST("internal function")) },
-    { STRCAST("declareClass"), reinterpret_cast<PyCFunction>(IcePy_declareClass), METH_VARARGS,
+    { STRCAST("declareClass"), (PyCFunction)IcePy_declareClass, METH_VARARGS,
         PyDoc_STR(STRCAST("internal function")) },
-    { STRCAST("defineClass"), reinterpret_cast<PyCFunction>(IcePy_defineClass), METH_VARARGS,
+    { STRCAST("defineClass"), (PyCFunction)IcePy_defineClass, METH_VARARGS,
         PyDoc_STR(STRCAST("internal function")) },
-    { STRCAST("defineException"), reinterpret_cast<PyCFunction>(IcePy_defineException), METH_VARARGS,
+    { STRCAST("defineException"), (PyCFunction)IcePy_defineException, METH_VARARGS,
         PyDoc_STR(STRCAST("internal function")) },
-    { STRCAST("stringify"), reinterpret_cast<PyCFunction>(IcePy_stringify), METH_VARARGS,
+    { STRCAST("stringify"), (PyCFunction)IcePy_stringify, METH_VARARGS,
         PyDoc_STR(STRCAST("internal function")) },
-    { STRCAST("stringifyException"), reinterpret_cast<PyCFunction>(IcePy_stringifyException), METH_VARARGS,
+    { STRCAST("stringifyException"), (PyCFunction)IcePy_stringifyException, METH_VARARGS,
         PyDoc_STR(STRCAST("internal function")) },
-    { STRCAST("loadSlice"), reinterpret_cast<PyCFunction>(IcePy_loadSlice), METH_VARARGS,
+    { STRCAST("loadSlice"), (PyCFunction)IcePy_loadSlice, METH_VARARGS,
         PyDoc_STR(STRCAST("loadSlice(cmd) -> None")) },
-    { 0, 0 } /* sentinel */
+    { NULL, NULL} /* sentinel */
 };
 
 PyDoc_STRVAR(moduleDoc, "The Internet Communications Engine.");
@@ -125,10 +120,6 @@ initIcePy(void)
         return;
     }
     if(!initConnection(module))
-    {
-        return;
-    }
-    if(!initImplicitContext(module))
     {
         return;
     }

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -13,7 +13,6 @@
 #include <Ice/Config.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <stdio.h>
 
 #ifndef ICE_PATCH2_API
 #   ifdef ICE_PATCH2_API_EXPORTS
@@ -29,13 +28,11 @@ namespace OS
 #ifdef _WIN32
 
 typedef struct _stat structstat;
-#ifdef _MSC_VER
 #   define O_RDONLY _O_RDONLY
 #   define O_BINARY _O_BINARY
 
 #   define S_ISDIR(mode) ((mode) & _S_IFDIR)
 #   define S_ISREG(mode) ((mode) & _S_IFREG)
-#endif
 
 #else
 

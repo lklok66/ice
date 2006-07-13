@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -13,8 +13,6 @@
 #include <IceUtil/OutputUtil.h>
 #include <IceXML/Parser.h>
 #include <IceGrid/Admin.h>
-#include <IceGrid/Internal.h>
-#include <set>
 
 namespace IceGrid
 {
@@ -24,11 +22,11 @@ class Resolver
 {
 public:
 
-    Resolver(const ApplicationDescriptor&, const Ice::CommunicatorPtr&, bool);
+    Resolver(const ApplicationDescriptor&, const Ice::CommunicatorPtr&);
     Resolver(const Resolver&, const std::map<std::string, std::string>&, bool);
-    Resolver(const InternalNodeInfoPtr&, const Ice::CommunicatorPtr&);
+    Resolver(const std::string&, const std::map<std::string, std::string>&, const Ice::CommunicatorPtr&);
 
-    std::string operator()(const std::string&, const std::string& = std::string(), bool = true) const;
+    std::string operator()(const std::string&, const std::string& = std::string(), bool = true, bool = true) const;
     Ice::StringSeq operator()(const Ice::StringSeq&, const std::string&) const;
     DistributionDescriptor operator()(const DistributionDescriptor&) const;
     PropertyDescriptorSeq operator()(const PropertyDescriptorSeq&, const std::string& = std::string("property")) const;
@@ -39,7 +37,6 @@ public:
 
     std::string asInt(const std::string&, const std::string& = std::string()) const;
     std::string asFloat(const std::string&, const std::string& = std::string()) const;
-    std::string asId(const std::string&, const std::string& = std::string(), bool = false) const;
 
     void setReserved(const std::string&, const std::string&);
     void setContext(const std::string&);
@@ -55,11 +52,10 @@ public:
     bool hasReplicaGroup(const std::string&) const;
     
     Ice::CommunicatorPtr getCommunicator() const { return _communicator; }
-    bool warningEnabled() const { return _enableWarning; }
 
 private:
 
-    std::string substitute(const std::string&, bool, bool) const;
+    std::string substitute(const std::string&, bool = false) const;
     std::string getVariable(const std::string&, bool, bool&) const;
     PropertyDescriptorSeq getProperties(const Ice::StringSeq&, std::set<std::string>&) const;
 
@@ -69,7 +65,6 @@ private:
     const ApplicationDescriptor* _application;
     const Ice::CommunicatorPtr _communicator;
     const bool _escape;
-    const bool _enableWarning;
     std::string _context;
     std::map<std::string, std::string> _variables;
     std::map<std::string, std::string> _parameters;
@@ -82,7 +77,7 @@ class CommunicatorHelper
 {
 public:
 
-    CommunicatorHelper(const CommunicatorDescriptorPtr&);
+    CommunicatorHelper(const Ice::CommunicatorPtr&, const CommunicatorDescriptorPtr&);
     CommunicatorHelper() { }
     virtual ~CommunicatorHelper() { }
 
@@ -91,17 +86,19 @@ public:
 
     virtual void getIds(std::multiset<std::string>&, std::multiset<Ice::Identity>&) const;
     
-    void print(const Ice::CommunicatorPtr&, IceUtil::Output&) const;
+    void print(IceUtil::Output&) const;
 
 protected:
 
     void printDbEnv(IceUtil::Output&, const DbEnvDescriptor&) const;
-    void printObjectAdapter(const Ice::CommunicatorPtr&, IceUtil::Output&, const AdapterDescriptor&) const;
+    void printObjectAdapter(IceUtil::Output&, const AdapterDescriptor&) const;
     void printPropertySet(IceUtil::Output&, const PropertySetDescriptor&) const;
     virtual std::string getProperty(const std::string&) const;
 
     void instantiateImpl(const CommunicatorDescriptorPtr&, const Resolver&) const;
     
+    Ice::CommunicatorPtr _communicator;
+
 private:
 
     CommunicatorDescriptorPtr _desc;
@@ -111,22 +108,20 @@ class ServiceHelper : public CommunicatorHelper
 {
 public:
 
-    ServiceHelper(const ServiceDescriptorPtr&);
+    ServiceHelper(const Ice::CommunicatorPtr&, const ServiceDescriptorPtr&);
     ServiceHelper() { }
 
     bool operator==(const ServiceHelper&) const;
     bool operator!=(const ServiceHelper&) const;    
 
     ServiceDescriptorPtr getDescriptor() const;
-    ServiceDescriptorPtr instantiate(const Resolver&, const PropertyDescriptorSeq&, 
-                                     const PropertySetDescriptorDict&) const;
+    ServiceDescriptorPtr instantiate(const Resolver&, const PropertyDescriptorSeq&) const;
 
-    void print(const Ice::CommunicatorPtr&, IceUtil::Output&) const;
+    void print(IceUtil::Output&) const;
 
 protected:
 
-    void instantiateImpl(const ServiceDescriptorPtr&, const Resolver&, const PropertyDescriptorSeq&,
-                         const PropertySetDescriptorDict&) const;
+    void instantiateImpl(const ServiceDescriptorPtr&, const Resolver&, const PropertyDescriptorSeq&) const;
 
 private:
     
@@ -137,22 +132,21 @@ class ServerHelper : public CommunicatorHelper, public IceUtil::SimpleShared
 {
 public:
 
-    ServerHelper(const ServerDescriptorPtr&);
+    ServerHelper(const Ice::CommunicatorPtr&, const ServerDescriptorPtr&);
     ServerHelper() { }
 
     bool operator==(const ServerHelper&) const;
     bool operator!=(const ServerHelper&) const;    
 
     ServerDescriptorPtr getDescriptor() const;
-    virtual ServerDescriptorPtr instantiate(const Resolver&, const PropertyDescriptorSeq&,
-                                            const PropertySetDescriptorDict&) const;
+    virtual ServerDescriptorPtr instantiate(const Resolver&, const PropertyDescriptorSeq&) const;
 
-    void print(const Ice::CommunicatorPtr&, IceUtil::Output&) const;
-    void print(const Ice::CommunicatorPtr&, IceUtil::Output&, const ServerInfo&) const;
+    void print(IceUtil::Output&) const;
+    void print(IceUtil::Output&, const std::string&, const std::string&) const;
 
 protected:
 
-    void printImpl(const Ice::CommunicatorPtr&, IceUtil::Output&, const ServerInfo&) const;
+    void printImpl(IceUtil::Output&, const std::string&, const std::string&) const;
     void instantiateImpl(const ServerDescriptorPtr&, const Resolver&, const PropertyDescriptorSeq&) const;
 
 private:
@@ -166,10 +160,10 @@ class InstanceHelper
 protected:
 
     std::map<std::string, std::string> instantiateParams(const Resolver&, 
-                                                         const std::string&, 
-                                                         const std::map<std::string, std::string>&,
-                                                         const std::vector<std::string>&,
-                                                         const std::map<std::string, std::string>&) const;
+							 const std::string&, 
+							 const std::map<std::string, std::string>&,
+							 const std::vector<std::string>&,
+							 const std::map<std::string, std::string>&) const;
 };
 
 
@@ -177,15 +171,15 @@ class ServiceInstanceHelper : public InstanceHelper
 {
 public:
 
-    ServiceInstanceHelper(const ServiceInstanceDescriptor&);
+    ServiceInstanceHelper(const Ice::CommunicatorPtr&, const ServiceInstanceDescriptor&);
 
     bool operator==(const ServiceInstanceHelper&) const;
     bool operator!=(const ServiceInstanceHelper&) const;
 
-    ServiceInstanceDescriptor instantiate(const Resolver&, const PropertySetDescriptorDict&) const;
+    ServiceInstanceDescriptor instantiate(const Resolver&) const;
     void getIds(std::multiset<std::string>&, std::multiset<Ice::Identity>&) const;
 
-    void print(const Ice::CommunicatorPtr&, IceUtil::Output&) const;
+    void print(IceUtil::Output&) const;
 
 private:
     
@@ -198,24 +192,22 @@ class IceBoxHelper : public ServerHelper
 {
 public:
 
-    IceBoxHelper(const IceBoxDescriptorPtr&);
+    IceBoxHelper(const Ice::CommunicatorPtr&, const IceBoxDescriptorPtr&);
     IceBoxHelper() { }
 
     bool operator==(const IceBoxHelper&) const;
     bool operator!=(const IceBoxHelper&) const;    
 
-    virtual ServerDescriptorPtr instantiate(const Resolver&, const PropertyDescriptorSeq&, 
-                                            const PropertySetDescriptorDict&) const;
+    virtual ServerDescriptorPtr instantiate(const Resolver&, const PropertyDescriptorSeq&) const;
 
     virtual void getIds(std::multiset<std::string>&, std::multiset<Ice::Identity>&) const;
 
-    void print(const Ice::CommunicatorPtr&, IceUtil::Output&) const;
-    void print(const Ice::CommunicatorPtr&, IceUtil::Output&, const ServerInfo&) const;
+    void print(IceUtil::Output&) const;
+    void print(IceUtil::Output&, const std::string&, const std::string&) const;
 
 protected:
 
-    void instantiateImpl(const IceBoxDescriptorPtr&, const Resolver&, const PropertyDescriptorSeq&,
-                         const PropertySetDescriptorDict&) const;
+    void instantiateImpl(const IceBoxDescriptorPtr&, const Resolver&, const PropertyDescriptorSeq&) const;
 
 private:
     
@@ -260,7 +252,7 @@ class NodeHelper
 {
 public:
 
-    NodeHelper(const std::string&, const NodeDescriptor&, const Resolver&, bool);
+    NodeHelper(const std::string&, const NodeDescriptor&, const Resolver&);
     virtual ~NodeHelper() { }
 
     bool operator==(const NodeHelper&) const;
@@ -272,7 +264,7 @@ public:
     void getIds(std::multiset<std::string>&, std::multiset<std::string>&, std::multiset<Ice::Identity>&) const;
     const NodeDescriptor& getDefinition() const;
     const NodeDescriptor& getInstance() const;
-    void getServerInfos(const std::string&, const std::string&, int, std::map<std::string, ServerInfo>&) const;
+    void getServerInfos(const std::string&, std::map<std::string, ServerInfo>&) const;
     bool hasDistributions(const std::string&) const;
     bool hasServers() const;
     bool hasServer(const std::string&) const;
@@ -286,7 +278,6 @@ private:
     std::string _name;
     NodeDescriptor _def;    
     NodeDescriptor _instance;
-    bool _instantiated;
 
     typedef std::map<std::string, ServerInstanceHelper> ServerInstanceHelperDict;
     ServerInstanceHelperDict _serverInstances;
@@ -297,7 +288,7 @@ class ApplicationHelper
 {
 public:
 
-    ApplicationHelper(const Ice::CommunicatorPtr&, const ApplicationDescriptor&, bool = false, bool = true);
+    ApplicationHelper(const Ice::CommunicatorPtr&, const ApplicationDescriptor&);
 
     ApplicationUpdateDescriptor diff(const ApplicationHelper&) const;
     ApplicationDescriptor update(const ApplicationUpdateDescriptor&) const;
@@ -308,9 +299,9 @@ public:
     const ApplicationDescriptor& getInstance() const;
     void getDistributions(DistributionDescriptor&, std::vector<std::string>&,const std::string& = std::string()) const;
 
-    void print(IceUtil::Output&, const ApplicationInfo&) const;
+    void print(IceUtil::Output&) const;
     void printDiff(IceUtil::Output&, const ApplicationHelper&) const;
-    std::map<std::string, ServerInfo> getServerInfos(const std::string&, int) const;
+    std::map<std::string, ServerInfo> getServerInfos() const;
 
 private:
 
@@ -322,8 +313,8 @@ private:
     NodeHelperDict _nodes;
 };
 
-bool descriptorEqual(const ServerDescriptorPtr&, const ServerDescriptorPtr&);
-ServerHelperPtr createHelper(const ServerDescriptorPtr&);
+bool descriptorEqual(const Ice::CommunicatorPtr&, const ServerDescriptorPtr&, const ServerDescriptorPtr&);
+ServerHelperPtr createHelper(const Ice::CommunicatorPtr&, const ServerDescriptorPtr&);
 
 }
 

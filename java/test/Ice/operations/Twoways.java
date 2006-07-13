@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -19,7 +19,7 @@ class Twoways
     }
 
     static void
-    twoways(Ice.Communicator communicator, Test.MyClassPrx p)
+    twoways(Ice.Communicator communicator, Ice.InitializationData initData, Test.MyClassPrx p)
     {
         {
             p.opVoid();
@@ -403,80 +403,80 @@ class Twoways
             test(rso[2].length == 0);
         }
 
-        {
-            final String[][][] sssi1 =
-            {
-                {
-                    {
-                        "abc", "de"
-                    },
-                    {
-                        "xyz"
-                    }
-                },
-                {
-                    {
-                        "hello"
-                    }
-                }
-            };
+	{
+	    final String[][][] sssi1 =
+	    {
+		{
+		    {
+			"abc", "de"
+		    },
+		    {
+			"xyz"
+		    }
+		},
+		{
+		    {
+			"hello"
+		    }
+		}
+	    };
 
-            final String[][][] sssi2 =
-            {
-                {
-                    {
-                        "", ""
-                    },
-                    {
-                        "abcd"
-                    }
-                },
-                {
-                    {
-                        ""
-                    }
-                },
-                {
-                }
-            };
+	    final String[][][] sssi2 =
+	    {
+		{
+		    {
+			"", ""
+		    },
+		    {
+			"abcd"
+		    }
+		},
+		{
+		    {
+			""
+		    }
+		},
+		{
+		}
+	    };
 
-            Test.StringSSSHolder ssso = new Test.StringSSSHolder();
-            String rsso[][][];
+	    Test.StringSSSHolder ssso = new Test.StringSSSHolder();
+	    String rsso[][][];
 
-            rsso = p.opStringSSS(sssi1, sssi2, ssso);
-            test(ssso.value.length == 5);
-            test(ssso.value[0].length == 2);
-            test(ssso.value[0][0].length == 2);
-            test(ssso.value[0][1].length == 1);
-            test(ssso.value[1].length == 1);
-            test(ssso.value[1][0].length == 1);
-            test(ssso.value[2].length == 2);
-            test(ssso.value[2][0].length == 2);
-            test(ssso.value[2][1].length == 1);
-            test(ssso.value[3].length == 1);
-            test(ssso.value[3][0].length == 1);
-            test(ssso.value[4].length == 0);
-            test(ssso.value[0][0][0].equals("abc"));
-            test(ssso.value[0][0][1].equals("de"));
-            test(ssso.value[0][1][0].equals("xyz"));
-            test(ssso.value[1][0][0].equals("hello"));
-            test(ssso.value[2][0][0].equals(""));
-            test(ssso.value[2][0][1].equals(""));
-            test(ssso.value[2][1][0].equals("abcd"));
-            test(ssso.value[3][0][0].equals(""));
+	    rsso = p.opStringSSS(sssi1, sssi2, ssso);
+	    test(ssso.value.length == 5);
+	    test(ssso.value[0].length == 2);
+	    test(ssso.value[0][0].length == 2);
+	    test(ssso.value[0][1].length == 1);
+	    test(ssso.value[1].length == 1);
+	    test(ssso.value[1][0].length == 1);
+	    test(ssso.value[2].length == 2);
+	    test(ssso.value[2][0].length == 2);
+	    test(ssso.value[2][1].length == 1);
+	    test(ssso.value[3].length == 1);
+	    test(ssso.value[3][0].length == 1);
+	    test(ssso.value[4].length == 0);
+	    test(ssso.value[0][0][0].equals("abc"));
+	    test(ssso.value[0][0][1].equals("de"));
+	    test(ssso.value[0][1][0].equals("xyz"));
+	    test(ssso.value[1][0][0].equals("hello"));
+	    test(ssso.value[2][0][0].equals(""));
+	    test(ssso.value[2][0][1].equals(""));
+	    test(ssso.value[2][1][0].equals("abcd"));
+	    test(ssso.value[3][0][0].equals(""));
 
-            test(rsso.length == 3);
-            test(rsso[0].length == 0);
-            test(rsso[1].length == 1);
-            test(rsso[1][0].length == 1);
-            test(rsso[2].length == 2);
-            test(rsso[2][0].length == 2);
-            test(rsso[2][1].length == 1);
-            test(rsso[1][0][0].equals(""));
-            test(rsso[2][0][0].equals(""));
-            test(rsso[2][0][1].equals(""));
-            test(rsso[2][1][0].equals("abcd"));
-        }
+	    test(rsso.length == 3);
+	    test(rsso[0].length == 0);
+	    test(rsso[1].length == 1);
+	    test(rsso[1][0].length == 1);
+	    test(rsso[2].length == 2);
+	    test(rsso[2][0].length == 2);
+	    test(rsso[2][1].length == 1);
+	    test(rsso[1][0][0].equals(""));
+	    test(rsso[2][0][0].equals(""));
+	    test(rsso[2][0][1].equals(""));
+	    test(rsso[2][1][0].equals("abcd"));
+	}
 
         {
             java.util.Map di1 = new java.util.HashMap();
@@ -579,157 +579,86 @@ class Twoways
         }
 
         {
-            int[] lengths = { 0, 1, 2, 126, 127, 128, 129, 253, 254, 255, 256, 257, 1000 };
+	    int[] lengths = { 0, 1, 2, 126, 127, 128, 129, 253, 254, 255, 256, 257, 1000 };
 
-            for(int l = 0; l < lengths.length; ++l)
-            {
-                int[] s = new int[lengths[l]];
-                for(int i = 0; i < lengths[l]; ++i)
-                {
-                    s[i] = i;
-                }
-                int[] r = p.opIntS(s);
-                test(r.length == lengths[l]);
-                for(int j = 0; j < r.length; ++j)
-                {
-                    test(r[j] == -j);
-                }
-            }
+	    for(int l = 0; l < lengths.length; ++l)
+	    {
+	        int[] s = new int[lengths[l]];
+		for(int i = 0; i < lengths[l]; ++i)
+		{
+		    s[i] = i;
+		}
+		int[] r = p.opIntS(s);
+		test(r.length == lengths[l]);
+		for(int j = 0; j < r.length; ++j)
+		{
+		    test(r[j] == -j);
+		}
+	    }
         }
 
-        {
-            java.util.HashMap ctx = new java.util.HashMap();
-            ctx.put("one", "ONE");
-            ctx.put("two", "TWO");
-            ctx.put("three", "THREE");
-            {
-                test(p.ice_getContext().isEmpty());
-                java.util.Map r = p.opContext();
-                test(!r.equals(ctx));
-            }
-            {
-                java.util.Map r = p.opContext(ctx);
-                test(p.ice_getContext().isEmpty());
-                test(r.equals(ctx));
-            }
-            {
-                Test.MyClassPrx p2 = Test.MyClassPrxHelper.checkedCast(p.ice_context(ctx));
-                test(p2.ice_getContext().equals(ctx));
-                java.util.Map r = p2.opContext();
-                test(r.equals(ctx));
-                r = p2.opContext(ctx);
-                test(r.equals(ctx));
-            }
-            {
-                //
-                // Test that default context is obtained correctly from communicator.
-                //
-/* DEPRECATED
-                java.util.HashMap dflt = new java.util.HashMap();
-                dflt.put("a", "b");
-                communicator.setDefaultContext(dflt);
-                test(!p.opContext().equals(dflt));
+	{
+	    {
+	        java.util.HashMap ctx = new java.util.HashMap();
+	        ctx.put("one", "ONE");
+	        ctx.put("two", "TWO");
+	        ctx.put("three", "THREE");
+	        {
+		    test(p.ice_getContext().isEmpty());
+		    java.util.Map r = p.opContext();
+		    test(!r.equals(ctx));
+	        }
+	        {
+		    java.util.Map r = p.opContext(ctx);
+		    test(p.ice_getContext().isEmpty());
+		    test(r.equals(ctx));
+	        }
+	        {
+		    Test.MyClassPrx p2 = Test.MyClassPrxHelper.checkedCast(p.ice_context(ctx));
+		    test(p2.ice_getContext().equals(ctx));
+		    java.util.Map r = p2.opContext();
+		    test(r.equals(ctx));
+		    r = p2.opContext(ctx);
+		    test(r.equals(ctx));
+	        }
+	    }
+	    {
+		//
+		// Test that default context is obtained correctly from communicator.
+		//
+		initData =(Ice.InitializationData)initData.clone();;
+		initData.defaultContext = new java.util.HashMap();
+		initData.defaultContext.put("a", "b");
+		Ice.Communicator communicator2 = Ice.Util.initialize(initData);
 
-                Test.MyClassPrx p2 = Test.MyClassPrxHelper.uncheckedCast(p.ice_context(new java.util.HashMap()));
-                test(p2.opContext().isEmpty());
+		Test.MyClassPrx c = Test.MyClassPrxHelper.checkedCast(
+					communicator2.stringToProxy("test:default -p 12010 -t 10000"));
+		test(c.opContext().equals(initData.defaultContext));
 
-                p2 = Test.MyClassPrxHelper.uncheckedCast(p.ice_defaultContext());
-                test(p2.opContext().equals(dflt));
+		java.util.Map ctx = new java.util.HashMap();
+		ctx.put("a", "c");
+		Test.MyClassPrx c2 = Test.MyClassPrxHelper.uncheckedCast(c.ice_context(ctx));
+		test(c2.opContext().get("a").equals("c"));
 
-                communicator.setDefaultContext(new java.util.HashMap());
-                test(!p2.opContext().isEmpty());
+		ctx.clear();
+		Test.MyClassPrx c3 = Test.MyClassPrxHelper.uncheckedCast(c2.ice_context(ctx));
+		test(c3.opContext().get("a") == null);
 
-                communicator.setDefaultContext(dflt);
-                Test.MyClassPrx c = Test.MyClassPrxHelper.checkedCast(
-                                        communicator.stringToProxy("test:default -p 12010 -t 10000"));
-                test(c.opContext().equals(dflt));
+		Test.MyClassPrx c4 = Test.MyClassPrxHelper.uncheckedCast(c2.ice_defaultContext());
+		test(c4.opContext().get("a").equals("b"));
 
-                dflt.put("a", "c");
-                Test.MyClassPrx c2 = Test.MyClassPrxHelper.uncheckedCast(c.ice_context(dflt));
-                test(c2.opContext().get("a").equals("c"));
+		communicator2.destroy();
+	    }
+	}
 
-                dflt.clear();
-                Test.MyClassPrx c3 = Test.MyClassPrxHelper.uncheckedCast(c2.ice_context(dflt));
-                test(c3.opContext().get("a") == null);
-
-                Test.MyClassPrx c4 = Test.MyClassPrxHelper.uncheckedCast(c2.ice_defaultContext());
-                test(c4.opContext().get("a").equals("b"));
-
-                dflt.put("a", "d");
-                communicator.setDefaultContext(dflt);
-
-                Test.MyClassPrx c5 = Test.MyClassPrxHelper.uncheckedCast(c2.ice_defaultContext());
-                test(c5.opContext().get("a").equals("d"));
-
-                communicator.setDefaultContext(new java.util.HashMap());
-*/
-            }
-        }
-        {
-            //
-            // Test implicit context propagation
-            //
-            
-            String[] impls = {"Shared", "PerThread"};
-            for(int i = 0; i < 2; i++)
-            {
-                Ice.InitializationData initData = new Ice.InitializationData();
-                initData.properties = communicator.getProperties()._clone();
-                initData.properties.setProperty("Ice.ImplicitContext", impls[i]);
-                
-                Ice.Communicator ic = Ice.Util.initialize(initData);
-                
-                java.util.Map ctx = new java.util.HashMap();
-                ctx.put("one", "ONE");
-                ctx.put("two", "TWO");
-                ctx.put("three", "THREE");
-                
-                Test.MyClassPrx p3 = Test.MyClassPrxHelper.uncheckedCast(
-                    ic.stringToProxy("test:default -p 12010 -t 10000"));
-                
-                ic.getImplicitContext().setContext(ctx);
-                test(ic.getImplicitContext().getContext().equals(ctx));
-                test(p3.opContext().equals(ctx));
-                
-                test(ic.getImplicitContext().containsKey("zero") == false);
-                String r = ic.getImplicitContext().put("zero", "ZERO");
-                test(r.equals(""));
-                test(ic.getImplicitContext().containsKey("zero") == true);
-                test(ic.getImplicitContext().get("zero").equals("ZERO"));
-                
-                ctx = ic.getImplicitContext().getContext();
-                test(p3.opContext().equals(ctx));
-                
-                java.util.Map prxContext = new java.util.HashMap();
-                prxContext.put("one", "UN");
-                prxContext.put("four", "QUATRE");
-                
-                java.util.Map combined = new java.util.HashMap(ctx);
-                combined.putAll(prxContext);
-                test(combined.get("one").equals("UN"));
-                
-                p3 = Test.MyClassPrxHelper.uncheckedCast(p3.ice_context(prxContext));
-                
-                ic.getImplicitContext().setContext(null);
-                test(p3.opContext().equals(prxContext));
-                
-                ic.getImplicitContext().setContext(ctx);
-                test(p3.opContext().equals(combined));
-                
-                test(ic.getImplicitContext().remove("one").equals("ONE"));
-
-                ic.destroy();
-            }
-        }
-
-        {
-            double d = 1278312346.0 / 13.0;
-            double[] ds = new double[5];
-            for(int i = 0; i < 5; i++)
-            {
-                ds[i] = d;
-            }
-            p.opDoubleMarshaling(d, ds);
-        }
+	{
+	    double d = 1278312346.0 / 13.0;
+	    double[] ds = new double[5];
+	    for(int i = 0; i < 5; i++)
+	    {
+		ds[i] = d;
+	    }
+	    p.opDoubleMarshaling(d, ds);
+	}
     }
 }

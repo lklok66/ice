@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -40,9 +40,9 @@ static ConnectionObject*
 connectionNew(PyObject* /*arg*/)
 {
     ConnectionObject* self = PyObject_New(ConnectionObject, &ConnectionType);
-    if(!self)
+    if (self == NULL)
     {
-        return 0;
+        return NULL;
     }
     self->connection = 0;
     self->communicator = 0;
@@ -89,7 +89,7 @@ connectionClose(ConnectionObject* self, PyObject* args)
     int force;
     if(!PyArg_ParseTuple(args, STRCAST("i"), &force))
     {
-        return 0;
+        return NULL;
     }
 
     assert(self->connection);
@@ -100,7 +100,7 @@ connectionClose(ConnectionObject* self, PyObject* args)
     catch(const Ice::Exception& ex)
     {
         setPythonException(ex);
-        return 0;
+        return NULL;
     }
 
     Py_INCREF(Py_None);
@@ -117,13 +117,13 @@ connectionCreateProxy(ConnectionObject* self, PyObject* args)
     PyObject* id;
     if(!PyArg_ParseTuple(args, STRCAST("O!"), identityType, &id))
     {
-        return 0;
+        return NULL;
     }
 
     Ice::Identity ident;
     if(!getIdentity(id, ident))
     {
-        return 0;
+        return NULL;
     }
 
     assert(self->connection);
@@ -136,7 +136,7 @@ connectionCreateProxy(ConnectionObject* self, PyObject* args)
     catch(const Ice::Exception& ex)
     {
         setPythonException(ex);
-        return 0;
+        return NULL;
     }
 
     return createProxy(proxy, (*self->communicator));
@@ -152,7 +152,7 @@ connectionSetAdapter(ConnectionObject* self, PyObject* args)
     PyObject* adapter;
     if(!PyArg_ParseTuple(args, STRCAST("O!"), adapterType, &adapter))
     {
-        return 0;
+	return NULL;
     }
 
     Ice::ObjectAdapterPtr oa = unwrapObjectAdapter(adapter);
@@ -162,12 +162,12 @@ connectionSetAdapter(ConnectionObject* self, PyObject* args)
     assert(self->communicator);
     try
     {
-        (*self->connection)->setAdapter(oa);
+	(*self->connection)->setAdapter(oa);
     }
     catch(const Ice::Exception& ex)
     {
-        setPythonException(ex);
-        return 0;
+	setPythonException(ex);
+	return NULL;
     }
 
     Py_INCREF(Py_None);
@@ -186,12 +186,12 @@ connectionGetAdapter(ConnectionObject* self)
     assert(self->communicator);
     try
     {
-        adapter = (*self->connection)->getAdapter();
+	adapter = (*self->connection)->getAdapter();
     }
     catch(const Ice::Exception& ex)
     {
-        setPythonException(ex);
-        return 0;
+	setPythonException(ex);
+	return NULL;
     }
 
     return wrapObjectAdapter(adapter);
@@ -211,7 +211,7 @@ connectionFlushBatchRequests(ConnectionObject* self)
     catch(const Ice::Exception& ex)
     {
         setPythonException(ex);
-        return 0;
+        return NULL;
     }
 
     Py_INCREF(Py_None);
@@ -233,7 +233,7 @@ connectionType(ConnectionObject* self)
     catch(const Ice::Exception& ex)
     {
         setPythonException(ex);
-        return 0;
+        return NULL;
     }
 
     return PyString_FromString(const_cast<char*>(type.c_str()));
@@ -254,7 +254,7 @@ connectionTimeout(ConnectionObject* self)
     catch(const Ice::Exception& ex)
     {
         setPythonException(ex);
-        return 0;
+        return NULL;
     }
 
     return PyInt_FromLong(timeout);
@@ -275,7 +275,7 @@ connectionToString(ConnectionObject* self)
     catch(const Ice::Exception& ex)
     {
         setPythonException(ex);
-        return 0;
+        return NULL;
     }
 
     return PyString_FromString(const_cast<char*>(str.c_str()));
@@ -283,23 +283,23 @@ connectionToString(ConnectionObject* self)
 
 static PyMethodDef ConnectionMethods[] =
 {
-    { STRCAST("close"), reinterpret_cast<PyCFunction>(connectionClose), METH_VARARGS,
+    { STRCAST("close"), (PyCFunction)connectionClose, METH_VARARGS,
         PyDoc_STR(STRCAST("close(bool) -> None")) },
-    { STRCAST("createProxy"), reinterpret_cast<PyCFunction>(connectionCreateProxy), METH_VARARGS,
+    { STRCAST("createProxy"), (PyCFunction)connectionCreateProxy, METH_VARARGS,
         PyDoc_STR(STRCAST("createProxy(Ice.Identity) -> Ice.ObjectPrx")) },
-    { STRCAST("setAdapter"), reinterpret_cast<PyCFunction>(connectionSetAdapter), METH_VARARGS,
+    { STRCAST("setAdapter"), (PyCFunction)connectionSetAdapter, METH_VARARGS,
         PyDoc_STR(STRCAST("setAdapter(Ice.ObjectAdapter) -> None")) },
-    { STRCAST("getAdapter"), reinterpret_cast<PyCFunction>(connectionGetAdapter), METH_NOARGS,
+    { STRCAST("getAdapter"), (PyCFunction)connectionGetAdapter, METH_NOARGS,
         PyDoc_STR(STRCAST("getAdapter() -> Ice.ObjectAdapter")) },
-    { STRCAST("flushBatchRequests"), reinterpret_cast<PyCFunction>(connectionFlushBatchRequests), METH_NOARGS,
+    { STRCAST("flushBatchRequests"), (PyCFunction)connectionFlushBatchRequests, METH_NOARGS,
         PyDoc_STR(STRCAST("flushBatchRequests() -> None")) },
-    { STRCAST("type"), reinterpret_cast<PyCFunction>(connectionType), METH_NOARGS,
+    { STRCAST("type"), (PyCFunction)connectionType, METH_NOARGS,
         PyDoc_STR(STRCAST("type() -> string")) },
-    { STRCAST("timeout"), reinterpret_cast<PyCFunction>(connectionTimeout), METH_NOARGS,
+    { STRCAST("timeout"), (PyCFunction)connectionTimeout, METH_NOARGS,
         PyDoc_STR(STRCAST("timeout() -> int")) },
-    { STRCAST("toString"), reinterpret_cast<PyCFunction>(connectionToString), METH_NOARGS,
+    { STRCAST("toString"), (PyCFunction)connectionToString, METH_NOARGS,
         PyDoc_STR(STRCAST("toString() -> string")) },
-    { 0, 0 } /* sentinel */
+    { NULL, NULL} /* sentinel */
 };
 
 namespace IcePy
@@ -309,17 +309,17 @@ PyTypeObject ConnectionType =
 {
     /* The ob_type field must be initialized in the module init function
      * to be portable to Windows without using C++. */
-    PyObject_HEAD_INIT(0)
+    PyObject_HEAD_INIT(NULL)
     0,                              /* ob_size */
     STRCAST("IcePy.Connection"),    /* tp_name */
     sizeof(ConnectionObject),       /* tp_basicsize */
     0,                              /* tp_itemsize */
     /* methods */
-    reinterpret_cast<destructor>(connectionDealloc), /* tp_dealloc */
+    (destructor)connectionDealloc,  /* tp_dealloc */
     0,                              /* tp_print */
     0,                              /* tp_getattr */
     0,                              /* tp_setattr */
-    reinterpret_cast<cmpfunc>(connectionCompare), /* tp_compare */
+    (cmpfunc)connectionCompare,     /* tp_compare */
     0,                              /* tp_repr */
     0,                              /* tp_as_number */
     0,                              /* tp_as_sequence */
@@ -348,7 +348,7 @@ PyTypeObject ConnectionType =
     0,                              /* tp_dictoffset */
     0,                              /* tp_init */
     0,                              /* tp_alloc */
-    reinterpret_cast<newfunc>(connectionNew), /* tp_new */
+    (newfunc)connectionNew,         /* tp_new */
     0,                              /* tp_free */
     0,                              /* tp_is_gc */
 };
@@ -362,8 +362,7 @@ IcePy::initConnection(PyObject* module)
     {
         return false;
     }
-    PyTypeObject* type = &ConnectionType; // Necessary to prevent GCC's strict-alias warnings.
-    if(PyModule_AddObject(module, STRCAST("Connection"), reinterpret_cast<PyObject*>(type)) < 0)
+    if(PyModule_AddObject(module, STRCAST("Connection"), (PyObject*)&ConnectionType) < 0)
     {
         return false;
     }
@@ -374,11 +373,11 @@ IcePy::initConnection(PyObject* module)
 PyObject*
 IcePy::createConnection(const Ice::ConnectionPtr& connection, const Ice::CommunicatorPtr& communicator)
 {
-    ConnectionObject* obj = connectionNew(0);
-    if(obj)
+    ConnectionObject* obj = connectionNew(NULL);
+    if(obj != NULL)
     {
         obj->connection = new Ice::ConnectionPtr(connection);
         obj->communicator = new Ice::CommunicatorPtr(communicator);
     }
-    return reinterpret_cast<PyObject*>(obj);
+    return (PyObject*)obj;
 }

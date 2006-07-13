@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -34,37 +34,44 @@ class CallbackReceiverI(Demo.CallbackReceiver):
 class Client(Ice.Application):
     def run(self, args):
         defaultRouter = self.communicator().getDefaultRouter()
-        if not defaultRouter:
-            print self.appName() + ": no default router set"
-            return 1
+	if not defaultRouter:
+	    print self.appName() + ": no default router set"
+	    return 1
 
-        router = Glacier2.RouterPrx.checkedCast(defaultRouter)
-        if not router:
-            print self.appName() + ": configured router is not a Glacier2 router"
-            return 1
+	router = Glacier2.RouterPrx.checkedCast(defaultRouter)
+	if not router:
+	    print self.appName() + ": configured router is not a Glacier2 router"
+	    return 1
 
-        while True:
-            print "This demo accepts any user-id / password combination."
+	while True:
+	    print "This demo accepts any user-id / password combination."
             id = raw_input("user id: ")
             pw = raw_input("password: ")
-            try:
-                router.createSession(id, pw)
-                break
-            except Glacier2.PermissionDeniedException, ex:
-                print "permission denied:\n" + ex.reason
+	    try:
+	        router.createSession(id, pw)
+		break
+	    except Glacier2.PermissionDeniedException, ex:
+	        print "permission denied:\n" + ex.reason
 
-        category = router.getCategoryForClient()
-        callbackReceiverIdent = Ice.Identity()
-        callbackReceiverIdent.name = "callbackReceiver"
-        callbackReceiverIdent.category = category
-        callbackReceiverFakeIdent = Ice.Identity()
-        callbackReceiverFakeIdent.name = "callbackReceiver"
-        callbackReceiverFakeIdent.category = "fake"
+	category = router.getCategoryForClient()
+	callbackReceiverIdent = Ice.Identity()
+	callbackReceiverIdent.name = "callbackReceiver"
+	callbackReceiverIdent.category = category
+	callbackReceiverFakeIdent = Ice.Identity()
+	callbackReceiverFakeIdent.name = "callbackReceiver"
+	callbackReceiverFakeIdent.category = "fake"
 
-        base = self.communicator().propertyToProxy('Callback.Proxy')
+        properties = self.communicator().getProperties()
+        proxyProperty = 'Callback.Proxy'
+        proxy = properties.getProperty(proxyProperty)
+        if len(proxy) == 0:
+            print self.appName() + ": property `" + proxyProperty + "' not set"
+            return 1
+
+        base = self.communicator().stringToProxy(proxy)
         twoway = Demo.CallbackPrx.checkedCast(base)
-        oneway = Demo.CallbackPrx.uncheckedCast(twoway.ice_oneway())
-        batchOneway = Demo.CallbackPrx.uncheckedCast(twoway.ice_batchOneway())
+	oneway = Demo.CallbackPrx.uncheckedCast(twoway.ice_oneway())
+	batchOneway = Demo.CallbackPrx.uncheckedCast(twoway.ice_batchOneway())
 
         adapter = self.communicator().createObjectAdapter("Callback.Client")
         adapter.add(CallbackReceiverI(), callbackReceiverIdent)
@@ -75,7 +82,7 @@ class Client(Ice.Application):
         onewayR = Demo.CallbackReceiverPrx.uncheckedCast(twowayR.ice_oneway())
 
         override = ''
-        fake = False
+	fake = False
 
         menu()
 
@@ -84,41 +91,41 @@ class Client(Ice.Application):
             try:
                 c = raw_input("==> ")
                 if c == 't':
-                    context = {}
-                    context["_fwd"] = "t"
-                    if not len(override) == 0:
-                        context["_ovrd"] = override
+		    context = {}
+		    context["_fwd"] = "t"
+		    if not len(override) == 0:
+		        context["_ovrd"] = override
                     twoway.initiateCallback(twowayR, context)
                 elif c == 'o':
-                    context = {}
-                    context["_fwd"] = "o"
-                    if not len(override) == 0:
-                        context["_ovrd"] = override
+		    context = {}
+		    context["_fwd"] = "o"
+		    if not len(override) == 0:
+		        context["_ovrd"] = override
                     oneway.initiateCallback(onewayR, context)
                 elif c == 'O':
-                    context = {}
-                    context["_fwd"] = "O"
-                    if not len(override) == 0:
-                        context["_ovrd"] = override
+		    context = {}
+		    context["_fwd"] = "O"
+		    if not len(override) == 0:
+		        context["_ovrd"] = override
                     batchOneway.initiateCallback(onewayR, context)
-                elif c == 'f':
-                    self.communicator().flushBatchRequests()
-                elif c == 'v':
-                    if len(override) == 0:
-                        override = "some_value"
-                        print "override context field is now `" + override + "'"
-                    else:
-                        override = ''
-                        print "override context field is empty"
-                elif c == 'F':
-                    fake = not fake
+		elif c == 'f':
+		    self.communicator().flushBatchRequests()
+		elif c == 'v':
+		    if len(override) == 0:
+		        override = "some_value"
+			print "override context field is now `" + override + "'"
+		    else:
+		        override = ''
+			print "override context field is empty"
+		elif c == 'F':
+		    fake = not fake
 
-                    if fake:
-                        twowayR = Demo.CallbackReceiverPrx.uncheckedCast(twowayR.ice_identity(callbackReceiverFakeIdent))
-                        onewayR = Demo.CallbackReceiverPrx.uncheckedCast(onewayR.ice_identity(callbackReceiverFakeIdent))
-                    else:
-                        twowayR = Demo.CallbackReceiverPrx.uncheckedCast(twowayR.ice_identity(callbackReceiverIdent))
-                        onewayR = Demo.CallbackReceiverPrx.uncheckedCast(twowayR.ice_identity(callbackReceiverIdent))
+		    if fake:
+		        twowayR = Demo.CallbackReceiverPrx.uncheckedCast(twowayR.ice_identity(callbackReceiverFakeIdent))
+		        onewayR = Demo.CallbackReceiverPrx.uncheckedCast(onewayR.ice_identity(callbackReceiverFakeIdent))
+		    else:
+		        twowayR = Demo.CallbackReceiverPrx.uncheckedCast(twowayR.ice_identity(callbackReceiverIdent))
+		        onewayR = Demo.CallbackReceiverPrx.uncheckedCast(twowayR.ice_identity(callbackReceiverIdent))
                 elif c == 's':
                     twoway.shutdown()
                 elif c == 'x':
@@ -128,8 +135,6 @@ class Client(Ice.Application):
                 else:
                     print "unknown command `" + c + "'"
                     menu()
-            except KeyboardInterrupt:
-                break
             except EOFError:
                 break
 

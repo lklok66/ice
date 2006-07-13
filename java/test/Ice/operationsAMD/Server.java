@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -14,7 +14,9 @@ public class Server
     {
         communicator.getProperties().setProperty("TestAdapter.Endpoints", "default -p 12010 -t 10000:udp");
         Ice.ObjectAdapter adapter = communicator.createObjectAdapter("TestAdapter");
-        adapter.add(new MyDerivedClassI(), communicator.stringToIdentity("test"));
+        Ice.Identity id = communicator.stringToIdentity("test");
+        adapter.add(new MyDerivedClassI(adapter, id), id);
+        adapter.add(new TestCheckedCastI(), communicator.stringToIdentity("context"));
         adapter.activate();
 
         communicator.waitForShutdown();
@@ -29,11 +31,11 @@ public class Server
 
         try
         {
-            Ice.StringSeqHolder argsH = new Ice.StringSeqHolder(args);
-            Ice.InitializationData initData = new Ice.InitializationData();
-            initData.properties = Ice.Util.createProperties(argsH);
+	    Ice.StringSeqHolder argsH = new Ice.StringSeqHolder(args);
+	    Ice.InitializationData initData = new Ice.InitializationData();
+	    initData.properties = Ice.Util.createProperties(argsH);
 
-            initData.properties.setProperty("Ice.Warn.Dispatch", "0");
+	    initData.properties.setProperty("Ice.Warn.Connections", "0");
 
             communicator = Ice.Util.initialize(argsH, initData);
             status = run(args, communicator);
@@ -57,7 +59,7 @@ public class Server
             }
         }
 
-        System.gc();
+	System.gc();
         System.exit(status);
     }
 }

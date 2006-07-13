@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -20,7 +20,7 @@ public class HelloServiceI extends Ice.LocalObjectImpl implements IceBox.Service
     public void
     stop()
     {
-        _adapter.destroy();
+        _adapter.deactivate();
     }
 
     private Ice.ObjectAdapter _adapter;

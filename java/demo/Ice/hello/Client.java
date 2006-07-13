@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -11,22 +11,6 @@ import Demo.*;
 
 public class Client extends Ice.Application
 {
-    class ShutdownHook extends Thread
-    {
-        public void
-        run()
-        {
-            try
-            {
-                communicator().destroy();
-            }
-            catch(Ice.LocalException ex)
-            {
-                ex.printStackTrace();
-            }
-        }
-    }
-
     private static void
     menu()
     {
@@ -39,7 +23,6 @@ public class Client extends Ice.Application
             "D: send greeting as batch datagram\n" +
             "f: flush all batch requests\n" +
             "T: set a timeout\n" +
-            "P: set a server delay\n" +
             "S: switch secure mode on/off\n" +
             "s: shutdown server\n" +
             "x: exit\n" +
@@ -49,15 +32,17 @@ public class Client extends Ice.Application
     public int
     run(String[] args)
     {
-        //
-        // Since this is an interactive demo we want to clear the
-        // Application installed interrupt callback and install our
-        // own shutdown hook.
-        //
-        setInterruptHook(new ShutdownHook());
+        Ice.Properties properties = communicator().getProperties();
+        final String proxyProperty = "Hello.Proxy";
+        String proxy = properties.getProperty(proxyProperty);
+        if(proxy.length() == 0)
+        {
+            System.err.println("property `" + proxyProperty + "' not set");
+            return 1;
+        }
 
         HelloPrx twoway = HelloPrxHelper.checkedCast(
-            communicator().propertyToProxy("Hello.Proxy").ice_twoway().ice_timeout(-1).ice_secure(false));
+	    communicator().stringToProxy(proxy).ice_twoway().ice_timeout(-1).ice_secure(false));
         if(twoway == null)
         {
             System.err.println("invalid proxy");
@@ -68,9 +53,8 @@ public class Client extends Ice.Application
         HelloPrx datagram = HelloPrxHelper.uncheckedCast(twoway.ice_datagram());
         HelloPrx batchDatagram = HelloPrxHelper.uncheckedCast(twoway.ice_batchDatagram());
 
-        boolean secure = false;
+	boolean secure = false;
         int timeout = -1;
-        int delay = 0;
 
         menu();
 
@@ -90,41 +74,41 @@ public class Client extends Ice.Application
                 }
                 if(line.equals("t"))
                 {
-                    twoway.sayHello(delay);
+                    twoway.sayHello();
                 }
                 else if(line.equals("o"))
                 {
-                    oneway.sayHello(delay);
+                    oneway.sayHello();
                 }
                 else if(line.equals("O"))
                 {
-                    batchOneway.sayHello(delay);
+                    batchOneway.sayHello();
                 }
                 else if(line.equals("d"))
                 {
-                    if(secure)
-                    {
-                        System.out.println("secure datagrams are not supported");
-                    }
-                    else
-                    {
-                        datagram.sayHello(delay);
-                    }
+		    if(secure)
+		    {
+			System.out.println("secure datagrams are not supported");
+		    }
+		    else
+		    {
+			datagram.sayHello();
+		    }
                 }
                 else if(line.equals("D"))
                 {
-                    if(secure)
-                    {
-                        System.out.println("secure datagrams are not supported");
-                    }
-                    else
-                    {
-                        batchDatagram.sayHello(delay);
-                    }
+		    if(secure)
+		    {
+			System.out.println("secure datagrams are not supported");
+		    }
+		    else
+		    {
+			batchDatagram.sayHello();
+		    }
                 }
                 else if(line.equals("f"))
                 {
-                    communicator().flushBatchRequests();
+		    communicator().flushBatchRequests();
                 }
                 else if(line.equals("T"))
                 {
@@ -150,35 +134,15 @@ public class Client extends Ice.Application
                         System.out.println("timeout is now set to 2000ms");
                     }
                 }
-                else if(line.equals("P"))
-                {
-                    if(delay == 0)
-                    {
-                        delay = 2500;
-                    }
-                    else
-                    {
-                        delay = 0;
-                    }
-
-                    if(delay == 0)
-                    {
-                        System.out.println("delay is now deactivated");
-                    }
-                    else
-                    {
-                        System.out.println("delay is now set to 2500ms");
-                    }
-                }
                 else if(line.equals("S"))
                 {
-                    secure = !secure;
+		    secure = !secure;
 
-                    twoway = HelloPrxHelper.uncheckedCast(twoway.ice_secure(secure));
-                    oneway = HelloPrxHelper.uncheckedCast(oneway.ice_secure(secure));
-                    batchOneway = HelloPrxHelper.uncheckedCast(batchOneway.ice_secure(secure));
-                    datagram = HelloPrxHelper.uncheckedCast(datagram.ice_secure(secure));
-                    batchDatagram = HelloPrxHelper.uncheckedCast(batchDatagram.ice_secure(secure));
+		    twoway = HelloPrxHelper.uncheckedCast(twoway.ice_secure(secure));
+		    oneway = HelloPrxHelper.uncheckedCast(oneway.ice_secure(secure));
+		    batchOneway = HelloPrxHelper.uncheckedCast(batchOneway.ice_secure(secure));
+		    datagram = HelloPrxHelper.uncheckedCast(datagram.ice_secure(secure));
+		    batchDatagram = HelloPrxHelper.uncheckedCast(batchDatagram.ice_secure(secure));
 
                     if(secure)
                     {
@@ -229,4 +193,3 @@ public class Client extends Ice.Application
         System.exit(status);
     }
 }
-

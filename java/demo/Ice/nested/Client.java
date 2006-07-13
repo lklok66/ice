@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -11,40 +11,19 @@ import Demo.*;
 
 public class Client extends Ice.Application
 {
-    class ShutdownHook extends Thread
-    {
-        public void
-        run()
-        {
-            /*
-             * For this demo we won't destroy the communicator since it has to
-             * wait for any outstanding invocations to complete which may take
-             * some time if the nesting level is exceeded.
-             *
-             try
-             {
-                 communicator().destroy();
-             }
-             catch(Ice.LocalException ex)
-             {
-                 ex.printStackTrace();
-             }
-            */
-        }
-    }
-
     public int
     run(String[] args)
     {
-        //
-        // Since this is an interactive demo we want to clear the
-        // Application installed interrupt callback and install our
-        // own shutdown hook.
-        //
-        setInterruptHook(new ShutdownHook());
+        Ice.Properties properties = communicator().getProperties();
+        final String proxyProperty = "Nested.Client.NestedServer";
+        String proxy = properties.getProperty(proxyProperty);
+        if(proxy.length() == 0)
+        {
+            System.err.println("property `" + proxyProperty + "' not set");
+            return 1;
+        }
 
-        NestedPrx nested = NestedPrxHelper.checkedCast(
-            communicator().propertyToProxy("Nested.NestedServer"));
+        NestedPrx nested = NestedPrxHelper.checkedCast(communicator().stringToProxy(proxy));
         if(nested == null)
         {
             System.err.println("invalid proxy");
@@ -52,8 +31,7 @@ public class Client extends Ice.Application
         }
 
         Ice.ObjectAdapter adapter = communicator().createObjectAdapter("Nested.Client");
-        NestedPrx self =
-            NestedPrxHelper.uncheckedCast(adapter.createProxy(communicator().stringToIdentity("nestedClient")));
+        NestedPrx self = NestedPrxHelper.uncheckedCast(adapter.createProxy(communicator().stringToIdentity("nestedClient")));
         adapter.add(new NestedI(self), communicator().stringToIdentity("nestedClient"));
         adapter.activate();
 

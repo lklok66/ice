@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -13,7 +13,6 @@
 #include <IceGrid/QueryI.h>
 #include <IceGrid/LocatorI.h>
 #include <IceGrid/Database.h>
-#include <IceGrid/Admin.h>
 
 #include <IceSSL/Plugin.h>
 
@@ -31,24 +30,24 @@ class AllocateObject : public ObjectAllocationRequest
 public:
 
     AllocateObject(const SessionIPtr& session, const TPtr& cb) :
-        ObjectAllocationRequest(session), _cb(cb)
+	ObjectAllocationRequest(session), _cb(cb)
     {
     }
 
     virtual void
     response(const Ice::ObjectPrx& proxy)
     {
-        assert(_cb);
-        _cb->ice_response(proxy);
-        _cb = 0;
+	assert(_cb);
+	_cb->ice_response(proxy);
+	_cb = 0;
     }
 
     virtual void
     exception(const AllocationException& ex)
     {
-        assert(_cb);
-        _cb->ice_exception(ex);
-        _cb = 0;
+	assert(_cb);
+	_cb->ice_exception(ex);
+	_cb = 0;
     }
 
 private:
@@ -65,8 +64,8 @@ newAllocateObject(const SessionIPtr& session, const IceUtil::Handle<T>& cb)
 }
 
 BaseSessionI::BaseSessionI(const string& id, 
-                           const string& prefix, 
-                           const DatabasePtr& database) :
+			   const string& prefix, 
+			   const DatabasePtr& database) :
     _id(id), 
     _prefix(prefix),
     _traceLevels(database->getTraceLevels()),
@@ -76,8 +75,8 @@ BaseSessionI::BaseSessionI(const string& id,
 {
     if(_traceLevels && _traceLevels->session > 0)
     {
-        Ice::Trace out(_traceLevels->logger, _traceLevels->sessionCat);
-        out << _prefix << " session `" << _id << "' created";
+	Ice::Trace out(_traceLevels->logger, _traceLevels->sessionCat);
+	out << _prefix << " session `" << _id << "' created";
     }
 }
 
@@ -91,54 +90,51 @@ BaseSessionI::keepAlive(const Ice::Current& current)
     Lock sync(*this);
     if(_destroyed)
     {
-        Ice::ObjectNotExistException ex(__FILE__, __LINE__);
-        ex.id = current.id;
-        throw ex;
+	Ice::ObjectNotExistException ex(__FILE__, __LINE__);
+	ex.id = current.id;
+	throw ex;
     }
 
     _timestamp = IceUtil::Time::now();
 
     if(_traceLevels->session > 1)
     {
-        Ice::Trace out(_traceLevels->logger, _traceLevels->sessionCat);
-        out << _prefix << " session `" << _id << "' keep alive";
+	Ice::Trace out(_traceLevels->logger, _traceLevels->sessionCat);
+	out << _prefix << " session `" << _id << "' keep alive";
     }
 }
 
 void
-BaseSessionI::destroyImpl(bool shutdown)
+BaseSessionI::destroy(const Ice::Current& current)
 {
     Lock sync(*this);
     if(_destroyed)
     {
-        Ice::ObjectNotExistException ex(__FILE__, __LINE__);
-        ex.id = _identity;
-        throw ex;
+	Ice::ObjectNotExistException ex(__FILE__, __LINE__);
+	ex.id = current.id;
+	throw ex;
     }
     _destroyed = true;
 
-    if(!shutdown)
+    if(_servantLocator)
     {
-        if(_servantLocator)
-        {
-            _servantLocator->remove(_identity);
-        }
-        else if(_adapter)
-        {
-            try
-            {
-                _adapter->remove(_identity);
-            }
-            catch(const Ice::ObjectAdapterDeactivatedException&)
-            {
-            }
-        }
+	_servantLocator->remove(current.id);
     }
-        
+    else if(current.adapter)
+    {
+	try
+	{
+	    current.adapter->remove(current.id);
+	}
+	catch(const Ice::ObjectAdapterDeactivatedException&)
+	{
+	}
+    }
+	
     if(_traceLevels && _traceLevels->session > 0)
     {
-        Ice::Trace out(_traceLevels->logger, _traceLevels->sessionCat);
-        out << _prefix << " session `" << _id << "' destroyed";
+	Ice::Trace out(_traceLevels->logger, _traceLevels->sessionCat);
+	out << _prefix << " session `" << _id << "' destroyed";
     }
 }
 
@@ -150,39 +146,18 @@ BaseSessionI::timestamp() const
 }
 
 void
-BaseSessionI::shutdown()
-{
-    destroyImpl(true);
-}
-
-Ice::ObjectPrx
-BaseSessionI::registerWithServantLocator(const SessionServantLocatorIPtr& servantLoc, const Ice::ConnectionPtr& con)
+BaseSessionI::setServantLocator(const SessionServantLocatorIPtr& servantLocator)
 {
     //
-    // This is supposed to be called after creation only, no need to synchronize.
+    // This is supposed to be called after creation only.
     //
-    _servantLocator = servantLoc;
-    Ice::ObjectPrx proxy = servantLoc->add(this, con);
-    _identity = proxy->ice_getIdentity();
-    return proxy;
-}
-
-Ice::ObjectPrx
-BaseSessionI::registerWithObjectAdapter(const Ice::ObjectAdapterPtr& adapter)
-{
-    //
-    // This is supposed to be called after creation only, no need to synchronize.
-    //
-    _adapter = adapter;
-    _identity.category = _database->getInstanceName();
-    _identity.name = IceUtil::generateUUID();
-    return _adapter->add(this, _identity);
+    const_cast<SessionServantLocatorIPtr&>(_servantLocator) = servantLocator;
 }
 
 SessionI::SessionI(const string& id, 
-                   const DatabasePtr& database, 
-                   const WaitQueuePtr& waitQueue,
-                   const Glacier2::SessionControlPrx& sessionControl) :
+		   const DatabasePtr& database, 
+		   const WaitQueuePtr& waitQueue,
+		   const Glacier2::SessionControlPrx& sessionControl) :
     BaseSessionI(id, "client", database),
     _waitQueue(waitQueue),
     _sessionControl(sessionControl),
@@ -196,24 +171,24 @@ SessionI::~SessionI()
 
 void
 SessionI::allocateObjectById_async(const AMD_Session_allocateObjectByIdPtr& cb,
-                                   const Ice::Identity& id, 
-                                   const Ice::Current&)
+				   const Ice::Identity& id, 
+				   const Ice::Current&)
 {
-    _database->getAllocatableObject(id)->allocate(newAllocateObject(this, cb));
+    _database->allocateObject(id, newAllocateObject(this, cb));
 }
 
 void
 SessionI::allocateObjectByType_async(const AMD_Session_allocateObjectByTypePtr& cb, 
-                                     const string& type,
-                                     const Ice::Current&)
+				     const string& type,
+				     const Ice::Current&)
 {
-    _database->getAllocatableObjectCache().allocateByType(type, newAllocateObject(this, cb));
+    _database->allocateObjectByType(type, newAllocateObject(this, cb));
 }
 
 void
 SessionI::releaseObject(const Ice::Identity& id, const Ice::Current&)
 {
-    _database->getAllocatableObject(id)->release(this);
+    _database->releaseObject(id, this);
 }
 
 void
@@ -224,9 +199,33 @@ SessionI::setAllocationTimeout(int timeout, const Ice::Current&)
 }
 
 void
-SessionI::destroy(const Ice::Current&)
+SessionI::destroy(const Ice::Current& current)
 {
-    destroyImpl(false);
+    BaseSessionI::destroy(current);
+
+    //
+    // NOTE: The _requests and _allocations attributes are immutable
+    // once the session is destroyed so we don't need mutex protection
+    // here to access them.
+    //
+
+    for(set<AllocationRequestPtr>::const_iterator p = _requests.begin(); p != _requests.end(); ++p)
+    {
+	(*p)->cancel(AllocationException("session destroyed"));
+    }
+    _requests.clear();
+
+    for(set<AllocatablePtr>::const_iterator q = _allocations.begin(); q != _allocations.end(); ++q)
+    {
+	try
+	{
+	    (*q)->release(this);
+	}
+	catch(const AllocationException&)
+	{
+	}
+    }
+    _allocations.clear();
 }
 
 int
@@ -242,7 +241,7 @@ SessionI::addAllocationRequest(const AllocationRequestPtr& request)
     Lock sync(*this);
     if(_destroyed)
     {
-        return false;
+	return false;
     }
     _requests.insert(request);
     return true;
@@ -254,7 +253,7 @@ SessionI::removeAllocationRequest(const AllocationRequestPtr& request)
     Lock sync(*this);
     if(_destroyed)
     {
-        return;
+	return;
     }
     _requests.erase(request);
 }
@@ -265,7 +264,7 @@ SessionI::addAllocation(const AllocatablePtr& allocatable)
     Lock sync(*this);
     if(_destroyed)
     {
-        throw SessionDestroyedException();
+	throw SessionDestroyedException();
     }
     _allocations.insert(allocatable);
 }
@@ -276,89 +275,52 @@ SessionI::removeAllocation(const AllocatablePtr& allocatable)
     Lock sync(*this);
     if(_destroyed)
     {
-        return;
+	return;
     }
     _allocations.erase(allocatable);
 }
 
-void
-SessionI::destroyImpl(bool shutdown)
-{
-    BaseSessionI::destroyImpl(shutdown);
-
-    //
-    // NOTE: The _requests and _allocations attributes are immutable
-    // once the session is destroyed so we don't need mutex protection
-    // here to access them.
-    //
-
-    for(set<AllocationRequestPtr>::const_iterator p = _requests.begin(); p != _requests.end(); ++p)
-    {
-        (*p)->cancel(AllocationException("session destroyed"));
-    }
-    _requests.clear();
-
-    for(set<AllocatablePtr>::const_iterator q = _allocations.begin(); q != _allocations.end(); ++q)
-    {
-        try
-        {
-            (*q)->release(this);
-        }
-        catch(const AllocationException&)
-        {
-        }
-    }
-    _allocations.clear();
-}
-
 ClientSessionFactory::ClientSessionFactory(const Ice::ObjectAdapterPtr& adapter,
-                                           const DatabasePtr& database, 
-                                           const WaitQueuePtr& waitQueue,
-                                           const ReapThreadPtr& reaper) :
+					   const DatabasePtr& database, 
+					   const WaitQueuePtr& waitQueue) :
     _adapter(adapter),
     _database(database), 
-    _waitQueue(waitQueue),
-    _reaper(reaper)
+    _waitQueue(waitQueue)
 {
 }
 
 Glacier2::SessionPrx
 ClientSessionFactory::createGlacier2Session(const string& sessionId, const Glacier2::SessionControlPrx& ctl)
 {
-    assert(_adapter);
-
-    SessionIPtr session = createSessionServant(sessionId, ctl);
-    Ice::ObjectPrx proxy = session->registerWithObjectAdapter(_adapter);
-
-    Ice::Identity queryId;
-    queryId.category = _database->getInstanceName();
-    queryId.name = "Query";
-
     Ice::IdentitySeq ids; // Identities of the object the session is allowed to access.
-    ids.push_back(proxy->ice_getIdentity()); // Session object
-    ids.push_back(queryId);
 
-    int timeout = 0;
+    Ice::Identity id;
+    id.category = _database->getInstanceName();
+
+    // The session object
+    id.name = IceUtil::generateUUID();
+    ids.push_back(id);
+    SessionIPtr session = createSessionServant(sessionId, ctl);
+    Glacier2::SessionPrx s = Glacier2::SessionPrx::uncheckedCast(_adapter->add(session, id));
+
+    // The IceGrid::Query object
+    id.name = "Query";
+    ids.push_back(id);
+
     if(ctl)
     {
-        try
-        {
-            ctl->identities()->add(ids);
-        }
-        catch(const Ice::LocalException&)
-        {
-            session->destroy(Ice::Current());
-            return 0;
-        }
-        timeout = ctl->getSessionTimeout();
+	try
+	{
+	    ctl->identities()->add(ids);
+	}
+	catch(const Ice::LocalException&)
+	{
+	    s->destroy();
+	    return 0;
+	}
     }
 
-    if(timeout > 0)
-    {
-        _reaper->add(new SessionReapable<SessionI>(_database->getTraceLevels()->logger, session), timeout);
-    }
-
-    return Glacier2::SessionPrx::uncheckedCast(proxy);
+    return s;
 }
 
 SessionIPtr
@@ -388,27 +350,26 @@ ClientSSLSessionManagerI::ClientSSLSessionManagerI(const ClientSessionFactoryPtr
 }
 
 Glacier2::SessionPrx
-ClientSSLSessionManagerI::create(const Glacier2::SSLInfo& info,
-                                 const Glacier2::SessionControlPrx& ctl, 
-                                 const Ice::Current& current)
+ClientSSLSessionManagerI::create(const Glacier2::SSLInfo& info, const Glacier2::SessionControlPrx& ctl, 
+				 const Ice::Current& current)
 {
     string userDN;
     if(!info.certs.empty()) // TODO: Require userDN?
     {
-        try
-        {
-            IceSSL::CertificatePtr cert = IceSSL::Certificate::decode(info.certs[0]);
-            userDN = cert->getSubjectDN();
-        }
-        catch(const Ice::Exception& ex)
-        {
-            // This shouldn't happen, the SSLInfo is supposed to be encoded by Glacier2.
-            Ice::Error out(_factory->getTraceLevels()->logger);
-            out << "SSL session manager couldn't decode SSL certificates:\n" << ex;
-            return 0;
-        }
+	try
+	{
+	    IceSSL::CertificatePtr cert = IceSSL::Certificate::decode(info.certs[0]);
+	    userDN = cert->getSubjectDN();
+	}
+	catch(const Ice::Exception& ex)
+	{
+	    // This shouldn't happen, the SSLInfo is supposed to be encoded by Glacier2.
+	    Ice::Error out(_factory->getTraceLevels()->logger);
+	    out << "SSL session manager couldn't decode SSL certificates:\n" << ex;
+	    return 0;
+	}
     }
-        
+	
     return _factory->createGlacier2Session(userDN, ctl);
 }
 

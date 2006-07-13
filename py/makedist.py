@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -18,6 +18,8 @@ def usage():
     print
     print "Options:"
     print "-h    Show this message."
+    print "-d    Skip SGML documentation conversion."
+    print "-t    Skip building translator and use the one in PATH."
     print "-v    Be verbose."
     print
     print "If no tag is specified, HEAD is used."
@@ -60,11 +62,17 @@ win32 = sys.platform.startswith("win") or sys.platform.startswith("cygwin")
 # Check arguments
 #
 tag = "-rHEAD"
+skipDocs = 0
+skipTranslator = 0
 verbose = 0
 for x in sys.argv[1:]:
     if x == "-h":
         usage()
         sys.exit(0)
+    elif x == "-d":
+        skipDocs = 1
+    elif x == "-t":
+        skipTranslator = 1
     elif x == "-v":
         verbose = 1
     elif x.startswith("-"):
@@ -95,12 +103,26 @@ if verbose:
 else:
     quiet = "-Q"
 os.system("cvs " + quiet + " -d cvs.zeroc.com:/home/cvsroot export " + tag +
-          " icepy ice/config")
+          " icepy ice/bin ice/config ice/doc ice/include ice/lib ice/slice ice/src")
 
-print "Copying Make.rules.* files from ice..."
+#
+# Copy Slice directories.
+#
+print "Copying Slice directories..."
+slicedirs = [\
+    "Glacier2",\
+    "Ice",\
+    "IceBox",\
+    "IceGrid",\
+    "IcePatch2",\
+    "IceStorm",\
+]
+os.mkdir(os.path.join("icepy", "slice"))
+for x in slicedirs:
+    shutil.copytree(os.path.join("ice", "slice", x), os.path.join("icepy", "slice", x), 1)
 for x in glob.glob(os.path.join("ice", "config", "Make.rules.*")):
     if not os.path.exists(os.path.join("icepy", "config", os.path.basename(x))):
-        shutil.copyfile(x, os.path.join("icepy", "config", os.path.basename(x)))
+	shutil.copyfile(x, os.path.join("icepy", "config", os.path.basename(x)))
 
 #
 # Remove files.
@@ -113,6 +135,33 @@ filesToRemove = [ \
 filesToRemove.extend(find("icepy", ".dummy"))
 for x in filesToRemove:
     os.remove(x)
+
+#
+# Generate HTML documentation. We need to build icecpp
+# and slice2docbook first.
+#
+if not skipDocs:
+    print "Generating documentation..."
+    cwd = os.getcwd()
+    os.chdir(os.path.join("ice", "src", "icecpp"))
+    os.system("gmake")
+    os.chdir(cwd)
+    os.chdir(os.path.join("ice", "src", "IceUtil"))
+    os.system("gmake")
+    os.chdir(cwd)
+    os.chdir(os.path.join("ice", "src", "Slice"))
+    os.system("gmake")
+    os.chdir(cwd)
+    os.chdir(os.path.join("ice", "src", "slice2docbook"))
+    os.system("gmake")
+    os.chdir(cwd)
+    os.chdir(os.path.join("ice", "doc"))
+    os.system("gmake")
+    os.chdir(cwd)
+    os.mkdir(os.path.join("icepy", "doc"))
+    os.rename(os.path.join("ice", "doc", "reference"), os.path.join("icepy", "doc", "reference"))
+    os.rename(os.path.join("ice", "doc", "README.html"), os.path.join("icepy", "doc", "README.html"))
+    os.rename(os.path.join("ice", "doc", "images"), os.path.join("icepy", "doc", "images"))
 
 #
 # Taken from ice/config/TestUtil.py
@@ -140,26 +189,56 @@ def isAIX():
    else:
         return 0
 
+#
+# Build slice2py.
+#
+if not skipTranslator:
+    print "Building translator..."
+    cwd = os.getcwd()
+    os.chdir(os.path.join("ice", "src", "icecpp"))
+    os.system("gmake")
+    os.chdir(cwd)
+    os.chdir(os.path.join("ice", "src", "IceUtil"))
+    os.system("gmake")
+    os.chdir(cwd)
+    os.chdir(os.path.join("ice", "src", "Slice"))
+    os.system("gmake")
+    os.chdir(cwd)
+    os.chdir(os.path.join("ice", "src", "slice2py"))
+    os.system("gmake")
+    os.chdir(cwd)
+
+    os.environ["PATH"] = os.path.join(cwd, "ice", "bin") + ":" + os.getenv("PATH", "")
+
+    if isHpUx():
+	os.environ["SHLIB_PATH"] = os.path.join(cwd, "ice", "lib") + ":" + os.getenv("SHLIB_PATH", "")
+    elif isDarwin():
+	os.environ["DYLD_LIBRARY_PATH"] = os.path.join(cwd, "ice", "lib") + ":" + os.getenv("DYLD_LIBRRARY_PATH", "")
+    elif isAIX():
+	os.environ["LIBPATH"] = os.path.join(cwd, "ice", "lib") + ":" + os.getenv("LIBPATH", "")
+    else:
+	os.environ["LD_LIBRARY_PATH"] = os.path.join(cwd, "ice", "lib") + ":" + os.getenv("LD_LIBRARY_PATH", "")
+
+    os.environ["ICE_HOME"] = os.path.join(cwd, "ice")
+
+#
+# Translate Slice files.
+#
+print "Generating Python code..."
+cwd = os.getcwd()
+os.chdir(os.path.join("icepy", "python"))
+if verbose:
+    quiet = ""
+else:
+    quiet = " -s"
+os.system("gmake" + quiet)
+os.chdir(cwd)
 
 #
 # Get Ice version.
 #
 config = open(os.path.join("icepy", "config", "Make.rules"), "r")
-versionMajor = ""
-versionMinor = ""
-version = ""
-for l in config.readlines():
-    if l.startswith("VERSION_MAJOR"):
-        n, v = l.split('=')
-        versionMajor = v.strip()
-    elif l.startswith("VERSION_MINOR"):
-        n, v = l.split('=')
-        versionMinor = v.strip()
-    elif l.startswith("VERSION"):
-        n, v = l.split('=')
-        version = v.strip()
-
-config.close()
+version = re.search("^VERSION[ \t]+=[^\d]*([\d\.]+)", config.read(), re.M).group(1)
 
 print "Fixing version in README and INSTALL files..."
 fixVersion(find("icepy", "README*"), version)

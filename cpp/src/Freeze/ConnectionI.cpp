@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -19,15 +19,9 @@ using namespace std;
 Freeze::TransactionPtr
 Freeze::ConnectionI::beginTransaction()
 {
-    return beginTransactionI();
-}
-
-Freeze::TransactionIPtr
-Freeze::ConnectionI::beginTransactionI()
-{
     if(_transaction != 0)
     {
-        throw TransactionAlreadyInProgressException(__FILE__, __LINE__);
+	throw TransactionAlreadyInProgressException(__FILE__, __LINE__);
     }
     closeAllIterators();
     _transaction = new TransactionI(this);
@@ -45,22 +39,21 @@ Freeze::ConnectionI::close()
 {
     if(_transaction != 0)
     {
-        try
-        {
-            _transaction->rollback();
-        }
-        catch(const  DatabaseException&)
-        {
-            //
-            // Ignored
-            //
-        }
-        assert(_transaction == 0);
+	try
+	{
+	    _transaction->rollback();
+	}
+	catch(const  DatabaseException&)
+	{
+	    //
+	    // Ignored
+	    //
+	}
     }
 
     while(!_mapList.empty())
     {
-        (*_mapList.begin())->close();
+	(*_mapList.begin())->close();
     }
     
     _dbEnv = 0;
@@ -85,14 +78,14 @@ Freeze::ConnectionI::~ConnectionI()
     close();
 }
 
-
-Freeze::ConnectionI::ConnectionI(const SharedDbEnvPtr& dbEnv) :
-    _communicator(dbEnv->getCommunicator()),
-    _dbEnv(dbEnv),
-    _envName(dbEnv->getEnvName()),
-    _trace(_communicator->getProperties()->getPropertyAsInt("Freeze.Trace.Map")),
-    _txTrace(_communicator->getProperties()->getPropertyAsInt("Freeze.Trace.Transaction")),
-    _deadlockWarning(_communicator->getProperties()->getPropertyAsInt("Freeze.Warn.Deadlocks") != 0)
+Freeze::ConnectionI::ConnectionI(const CommunicatorPtr& communicator, 
+				 const string& envName, DbEnv* dbEnv) :
+    _communicator(communicator),
+    _dbEnv(SharedDbEnv::get(communicator, envName, dbEnv)),
+    _envName(envName),
+    _trace(communicator->getProperties()->getPropertyAsInt("Freeze.Trace.Map")),
+    _txTrace(communicator->getProperties()->getPropertyAsInt("Freeze.Trace.Transaction")),
+    _deadlockWarning(communicator->getProperties()->getPropertyAsInt("Freeze.Warn.Deadlocks") != 0)
 {
 }
 
@@ -100,9 +93,9 @@ void
 Freeze::ConnectionI::closeAllIterators()
 {
     for(list<MapHelperI*>::iterator p = _mapList.begin(); p != _mapList.end();
-        ++p)
+	++p)
     {
-        (*p)->closeAllIterators();
+	(*p)->closeAllIterators();
     }
 }
 
@@ -120,18 +113,18 @@ Freeze::ConnectionI::unregisterMap(MapHelperI* m)
 
 Freeze::ConnectionPtr 
 Freeze::createConnection(const CommunicatorPtr& communicator,
-                         const string& envName)
+			 const string& envName)
 {
     
-    return new ConnectionI(SharedDbEnv::get(communicator, envName, 0));
+    return new ConnectionI(communicator, envName, 0);
 }
 
 Freeze::ConnectionPtr 
 Freeze::createConnection(const CommunicatorPtr& communicator,
-                         const string& envName,
-                         DbEnv& dbEnv)
+			 const string& envName,
+			 DbEnv& dbEnv)
 {
-    return new ConnectionI(SharedDbEnv::get(communicator, envName, &dbEnv));
+    return new ConnectionI(communicator, envName, &dbEnv);
 }
 
 void

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -89,24 +89,7 @@ public class Client
         internal bool called = false;
     }
 
-    private class MyInterfaceI : Test.MyInterfaceDisp_
-    {
-    }
-
-    private class MyInterfaceFactory : Ice.ObjectFactory
-    {
-        public Ice.Object create(string type)
-        {
-            Debug.Assert(type.Equals(Test.MyInterfaceDisp_.ice_staticId()));
-            return new MyInterfaceI();
-        }
-
-        public void destroy()
-        {
-        }
-    }
-
-    private class TestObjectFactory : Ice.ObjectFactory
+    private class TestObjectFactory : Ice.LocalObjectImpl, Ice.ObjectFactory
     {
         public Ice.Object create(string type)
         {
@@ -129,39 +112,38 @@ public class Client
         internal Ice.Object obj;
     }
 
-    public class MyClassFactoryWrapper : Ice.ObjectFactory
+    public class MyClassFactoryWrapper : Ice.LocalObjectImpl, Ice.ObjectFactory
     {
-        public MyClassFactoryWrapper()
-        {
-            _factory = null;
-        }
+	public MyClassFactoryWrapper()
+	{
+	    _factory = null;
+	}
 
         public Ice.Object create(string type)
         {
-            if(_factory != null)
-            {
-                return _factory.create(type);
-            }
-            return new Test.MyClass();
+	    if(_factory != null)
+	    {
+		return _factory.create(type);
+	    }
+	    return new Test.MyClass();
         }
 
         public void destroy()
         {
         }
 
-        public void setFactory(Ice.ObjectFactory factory)
-        {
-            _factory = factory;
-        }
+	public void setFactory(Ice.ObjectFactory factory)
+	{
+	    _factory = factory;
+	}
 
-        private Ice.ObjectFactory _factory;
+	private Ice.ObjectFactory _factory;
     }
 
     private static int run(string[] args, Ice.Communicator communicator)
     {
-        MyClassFactoryWrapper factoryWrapper = new MyClassFactoryWrapper();
-        communicator.addObjectFactory(factoryWrapper, Test.MyClass.ice_staticId());
-        communicator.addObjectFactory(new MyInterfaceFactory(), Test.MyInterfaceDisp_.ice_staticId());
+	MyClassFactoryWrapper factoryWrapper = new MyClassFactoryWrapper();
+	communicator.addObjectFactory(factoryWrapper, Test.MyClass.ice_staticId());
 
         Ice.InputStream @in;
         Ice.OutputStream @out;
@@ -501,19 +483,6 @@ public class Client
         }
 
         {
-            Test.MyInterface i = new MyInterfaceI();
-            @out = Ice.Util.createOutputStream(communicator);
-            Test.MyInterfaceHelper.write(@out, i);
-            @out.writePendingObjects();
-            byte[] data = @out.finished();
-            @in = Ice.Util.createInputStream(communicator, data);
-            Test.MyInterfaceHelper helper = new Test.MyInterfaceHelper(@in);
-            helper.read();
-            @in.readPendingObjects();
-            test(helper.value != null);
-        }
-
-        {
             @out = Ice.Util.createOutputStream(communicator);
             Test.MyClass obj = new Test.MyClass();
             obj.s = new Test.SmallStruct();
@@ -547,8 +516,6 @@ public class Client
     {
         int status = 0;
         Ice.Communicator communicator = null;
-
-        Debug.Listeners.Add(new ConsoleTraceListener());
 
         try
         {

@@ -13,7 +13,7 @@
         <property name="Glacier2.Server.Endpoints" value="tcp -h 127.0.0.1"/>
         <property name="Glacier2.Admin.Endpoints" value="tcp -h 127.0.0.1"/>
         <property name="Glacier2.Admin.RegisterProcess" value="1"/>
-				   
+
         <property name="Glacier2.SessionManager" value="${manager}"/>
         <property name="Glacier2.SSLSessionManager" value="IceGrid/SSLSessionManager"/>
         <property name="Glacier2.PermissionsVerifier" value="${verifier}"/>
@@ -25,7 +25,7 @@
 
       <server-instance template="Glacier2" id="Glacier2" 
                        endpoints="default -p 12347 -h 127.0.0.1 -t 10000" 
-                       verifier="PermissionsVerifier"
+                       verifier="IceGrid/NullPermissionsVerifier"
                        manager="IceGrid/SessionManager"/>
 
       <server id="ObjectAllocation" exe="${test.dir}/server" activation="on-demand" pwd=".">
@@ -35,12 +35,6 @@
 
           <object identity="nonallocatable" type="::Test"/>
           <object identity="nonallocatable2" type="::NotAllocatable"/>
-        </adapter>
-      </server>
-
-      <server id="PermissionsVerifier" exe="${test.dir}/verifier" activation="on-demand">
-        <adapter name="PermissionsVerifier" endpoints="default">
-          <object identity="PermissionsVerifier" type="::Glacier2::PermissionsVerifier"/>
         </adapter>
       </server>
 
@@ -70,23 +64,21 @@
       <server id="ServerStress-1" exe="${test.dir}/server" activation="on-demand" pwd=".">
         <adapter name="Server" endpoints="default">
   	  <allocatable identity="stress-1" type="::StressTest"/>
-  	  <allocatable identity="stress-2" type="::StressTestBis"/>
+  	  <allocatable identity="stress-2" type="::StressTest"/>
         </adapter>
       </server>
 
       <server id="ServerStress-2" exe="${test.dir}/server" activation="on-demand" pwd="." allocatable="true">
         <adapter name="Server" endpoints="default">
   	  <allocatable identity="stress-3" type="::StressTest"/>
-  	  <allocatable identity="stress-4" type="::StressTestBis"/>
-          <allocatable identity="concurrent-1" type="::TestConcurrent"/>
+  	  <allocatable identity="stress-4" type="::StressTest"/>
         </adapter>
       </server>
 
       <server id="ServerStress-3" exe="${test.dir}/server" activation="on-demand" pwd="." allocatable="true">
         <adapter name="Server" endpoints="default">
   	  <allocatable identity="stress-5" type="::StressTest"/>
-  	  <allocatable identity="stress-6" type="::StressTestBis"/>
-          <allocatable identity="concurrent-2" type="::TestConcurrent"/>
+  	  <allocatable identity="stress-6" type="::StressTest"/>
         </adapter>
       </server>
 

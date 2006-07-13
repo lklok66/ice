@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -22,9 +22,9 @@ public class Server : Ice.Application
     {
         Server app = new Server();
         int status = app.main(args, "config.server");
-        if(status != 0)
-        {
-            System.Environment.Exit(status);
-        }
+	if(status != 0)
+	{
+	    System.Environment.Exit(status);
+	}
     }
 }

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -13,14 +13,13 @@
 #include <Ice/Ice.h>
 #include <PhoneBook.h>
 #include <list>
-#include <stdio.h>
 
 #ifdef _WIN32
 #   include <io.h>
-#   ifdef _MSC_VER
-#     define isatty _isatty
-#     define fileno _fileno
+#   define isatty _isatty
+#   define fileno _fileno
 // '_isatty' : inconsistent dll linkage.  dllexport assumed.
+#   ifdef _MSC_VER
 #       pragma warning( disable : 4273 )
 #   endif
 #endif

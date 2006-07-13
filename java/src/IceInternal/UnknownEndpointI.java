@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -12,97 +12,9 @@ package IceInternal;
 final class UnknownEndpointI extends EndpointI
 {
     public
-    UnknownEndpointI(String str)
-    {
-        int topt = 0;
-        int vopt = 0;
-
-        String[] arr = str.split("[ \t\n\r]+");
-        int i = 0;
-        while(i < arr.length)
-        {
-            if(arr[i].length() == 0)
-            {
-                i++;
-                continue;
-            }
-
-            String option = arr[i++];
-            if(option.length() != 2 || option.charAt(0) != '-')
-            {
-                throw new Ice.EndpointParseException("opaque " + str);
-            }
-
-            String argument = null;
-            if(i < arr.length && arr[i].charAt(0) != '-')
-            {
-                argument = arr[i++];
-            }
-
-            switch(option.charAt(1))
-            {
-                case 't':
-                {
-                    if(argument == null)
-                    {
-                        throw new Ice.EndpointParseException("opaque " + str);
-                    }
-
-                    int t;
-                    try
-                    {
-                        t = Integer.parseInt(argument);
-                    }
-                    catch(NumberFormatException ex)
-                    {
-                        throw new Ice.EndpointParseException("opaque " + str);
-                    }
-
-                    if(t < 0 || t > 65535)
-                    {
-                        throw new Ice.EndpointParseException("opaque " + str);
-                    }
-
-                    _type = (short)t;
-                    ++topt;
-                    break;
-                }
-
-                case 'v':
-                {
-                    if(argument == null)
-                    {
-                        throw new Ice.EndpointParseException("opaque " + str);
-                    }
-                    for(int j = 0; j < argument.length(); ++j)
-                    {
-                        if(!IceUtil.Base64.isBase64(argument.charAt(j)))
-                        {
-                            throw new Ice.EndpointParseException("opaque " + str);
-                        }
-                    }
-                    _rawBytes = IceUtil.Base64.decode(argument);
-                    ++vopt;
-                    break;
-                }
-
-                default:
-                {
-                    throw new Ice.EndpointParseException("opaque " + str);
-                }
-            }
-        }
-
-        if(topt != 1 || vopt != 1)
-        {
-            throw new Ice.EndpointParseException("opaque " + str);
-        }
-        calcHashValue();
-    }
-
-    public
     UnknownEndpointI(short type, BasicStream s)
     {
+        _instance = s.instance();
         _type = type;
         s.startReadEncaps();
         int sz = s.getReadEncapsSize();
@@ -129,8 +41,7 @@ final class UnknownEndpointI extends EndpointI
     public String
     _toString()
     {
-        String val = IceUtil.Base64.encode(_rawBytes);
-        return "opaque -t " + _type + " -v " + val;
+        return "";
     }
 
     //
@@ -190,7 +101,7 @@ final class UnknownEndpointI extends EndpointI
     public EndpointI
     compress(boolean compress)
     {
-        return this;
+	return this;
     }
 
     //
@@ -221,6 +132,16 @@ final class UnknownEndpointI extends EndpointI
     }
     
     //
+    // Return a client side transceiver for this endpoint, or null if a
+    // transceiver can only be created by a connector.
+    //
+    public Transceiver
+    clientTransceiver()
+    {
+        return null;
+    }
+
+    //
     // Return a server side transceiver for this endpoint, or null if a
     // transceiver can only be created by an acceptor. In case a
     // transceiver is created, this operation also returns a new
@@ -228,20 +149,20 @@ final class UnknownEndpointI extends EndpointI
     // for example, if a dynamic port number is assigned.
     //
     public Transceiver
-    transceiver(EndpointIHolder endpoint)
+    serverTransceiver(EndpointIHolder endpoint)
     {
         endpoint.value = null;
         return null;
     }
 
     //
-    // Return connectors for this endpoint, or empty list if no connector
+    // Return a connector for this endpoint, or null if no connector
     // is available.
     //
-    public java.util.ArrayList
-    connectors()
+    public Connector
+    connector()
     {
-        return new java.util.ArrayList();
+        return null;
     }
 
     //
@@ -260,14 +181,24 @@ final class UnknownEndpointI extends EndpointI
 
     //
     // Expand endpoint out in to separate endpoints for each local
-    // host if endpoint was configured with no host set.
+    // host if endpoint was configured with no host set. This
+    // only applies for ObjectAdapter endpoints.
     //
     public java.util.ArrayList
-    expand()
+    expand(boolean includeLoopback)
     {
-        java.util.ArrayList endps = new java.util.ArrayList();
-        endps.add(this);
-        return endps;
+        assert(false);
+	return null;
+    }
+
+    //
+    // Return whether endpoint should be published in proxies
+    // created by Object Adapter.
+    //
+    public boolean
+    publish()
+    {
+        return false;
     }
 
     //
@@ -352,12 +283,6 @@ final class UnknownEndpointI extends EndpointI
         return 0;
     }
 
-    public boolean
-    requiresThreadPerConnection()
-    {
-        return false;
-    }
-
     private void
     calcHashValue()
     {
@@ -368,6 +293,7 @@ final class UnknownEndpointI extends EndpointI
         }
     }
 
+    private Instance _instance;
     private short _type;
     private byte[] _rawBytes;
     private int _hashCode;

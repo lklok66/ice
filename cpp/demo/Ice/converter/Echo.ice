@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -15,8 +15,8 @@ module Demo
 
 interface Echo
 {
-    ["cpp:const"] idempotent string echoString(string s);
-    void shutdown();
+    nonmutating string echoString(string s);
+    idempotent void shutdown();
 };
 
 };

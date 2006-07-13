@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -14,33 +14,27 @@ final class _AMD_Object_ice_invoke extends IceInternal.IncomingAsync implements 
     public
     _AMD_Object_ice_invoke(IceInternal.Incoming in)
     {
-        super(in);
+	super(in);
     }
 
     public void
     ice_response(boolean ok, byte[] outParams)
     {
-        if(__validateResponse(ok))
-        {
-            try
-            {
-                __os().writeBlob(outParams);
-            }
-            catch(Ice.LocalException ex)
-            {
-                __exception(ex);
-                return;
-            }
-            __response(ok);
-        }
+	try
+	{
+	    __os().writeBlob(outParams);
+	}
+	catch(Ice.LocalException ex)
+	{
+	    __exception(ex);
+	    return;
+	}
+	__response(ok);
     }
 
     public void
     ice_exception(java.lang.Exception ex)
     {
-        if(__validateException(ex))
-        {
-            __exception(ex);
-        }
+	__exception(ex);
     }
 }

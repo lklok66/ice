@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -37,20 +37,10 @@ enum ServerState
     /**
      *
      * The server is being activated and will change to the active
-     * state when the registered server object adapters are activated
-     * or to the activation timed out state if the activation timeout
-     * expires.
+     * state when the registered server object adapters are activated.
      *
      **/
     Activating,
-
-    /**
-     *
-     * The activation timed out state indicates that the server
-     * activation timed out.
-     *
-     **/
-    ActivationTimedOut,
 
     /**
      *
@@ -119,7 +109,7 @@ sequence<ObjectInfo> ObjectInfoSeq;
 
 /**
  *
- * Information about an adapter registered with the IceGrid registry.
+ * Information about an adapter registered with the &IceGrid; registry.
  *
  **/
 struct AdapterInfo
@@ -156,7 +146,7 @@ sequence<AdapterInfo> AdapterInfoSeq;
 
 /**
  *
- * Information about a server managed by an IceGrid node.
+ * Information about a server managed by an &IceGrid; node.
  *
  **/
 struct ServerInfo
@@ -167,20 +157,6 @@ struct ServerInfo
      *
      **/
     string application;
-
-    /**
-     *
-     * The application uuid.
-     *
-     **/
-    string uuid;
-    
-    /**
-     *
-     * The application revision.
-     *
-     **/
-    int revision;
 
     /** 
      *
@@ -195,29 +171,15 @@ struct ServerInfo
      *
      **/
     ServerDescriptor descriptor;
-
-    /**
-     *
-     * The id of the session which allocated the server.
-     *
-     **/
-    string sessionId;
 };
 
 /**
  *
- * Information about an IceGrid node.
+ * Information about an &IceGrid; node.
  *
  **/
 struct NodeInfo
 {
-    /**
-     *
-     * The name of the node.
-     *
-     **/
-    string name;
-
     /**
      *
      * The operating system name.
@@ -271,36 +233,6 @@ struct NodeInfo
 
 /**
  *
- * Information about an IceGrid registry replica.
- *
- **/
-struct RegistryInfo
-{
-    /**
-     *
-     * The name of the registry.
-     *
-     **/
-    string name;
-
-    /**
-     *
-     * The network name of the host running this registry (as defined in
-     * uname()).
-     *
-     **/
-    string hostname;
-};
-
-/**
- *
- * A sequence of [RegistryInfo] structures.
- *
- **/
-sequence<RegistryInfo> RegistryInfoSeq;
-
-/**
- *
  * Information about the load of a node.
  *
  **/
@@ -318,73 +250,16 @@ struct LoadInfo
 
 /**
  *
- * Information about an IceGrid application.
- *
- **/
-struct ApplicationInfo
-{
-    /** Unique application identifier. */
-    string uuid;
-
-    /** The creation time. */
-    long createTime;
-    
-    /** The user who created the application. */
-    string createUser;
-
-    /** The update time. */
-    long updateTime;
-
-    /** The user who updated the application. */
-    string updateUser;
-    
-    /** The application revision number. */
-    int revision;
-
-    /** The application descriptor */
-    ApplicationDescriptor descriptor;
-};
-
-/**
- *
- * A sequence of [ApplicationInfo] structures.
- *
- **/
-["java:type:{java.util.LinkedList}"] sequence<ApplicationInfo> ApplicationInfoSeq;
-
-/**
- *
- * Information about updates to an IceGrid application.
- *
- **/
-struct ApplicationUpdateInfo
-{
-    /** The update time. */
-    long updateTime;
-
-    /** The user who updated the application. */
-    string updateUser;
-
-    /** The application revision number. */
-    int revision;
-
-    /** The update descriptor. */
-    ApplicationUpdateDescriptor descriptor;
-};
-
-/**
- *
- * The IceGrid administrative interface. </p>
- * <p class="Warning">Allowing access to this interface
- * is a security risk! Please see the IceGrid documentation
- * for further information.
+ * The &IceGrid; administrative interface. <warning><para>Allowing
+ * access to this interface is a security risk! Please see the
+ * &IceGrid; documentation for further information.</para></warning>
  *
  **/
 interface Admin
 {
     /**
      *
-     * Add an application to IceGrid.
+     * Add an application to &IceGrid;.
      *
      * @param descriptor The application descriptor.
      *
@@ -396,8 +271,8 @@ interface Admin
      * failed.
      *
      **/
-    ["ami"] void addApplication(ApplicationDescriptor descriptor)
-        throws AccessDeniedException, DeploymentException;
+    void addApplication(ApplicationDescriptor descriptor)
+	throws AccessDeniedException, DeploymentException;
 
     /**
      *
@@ -418,8 +293,8 @@ interface Admin
      * doesn't exist.
      *
      **/
-    ["ami"] void syncApplication(ApplicationDescriptor descriptor)
-        throws AccessDeniedException, DeploymentException, ApplicationNotExistException;
+    void syncApplication(ApplicationDescriptor descriptor)
+	throws AccessDeniedException, DeploymentException, ApplicationNotExistException;
 
     /**
      *
@@ -439,12 +314,12 @@ interface Admin
      * doesn't exist.
      *
      **/
-    ["ami"] void updateApplication(ApplicationUpdateDescriptor descriptor)
-        throws AccessDeniedException, DeploymentException, ApplicationNotExistException;
+    void updateApplication(ApplicationUpdateDescriptor descriptor)
+	throws AccessDeniedException, DeploymentException, ApplicationNotExistException;
 
     /**
      *
-     * Remove an application from IceGrid.
+     * Remove an application from &IceGrid;.
      *
      * @param name The application name.
      *
@@ -456,8 +331,8 @@ interface Admin
      * doesn't exist.
      *
      **/
-    ["ami"] void removeApplication(string name)
-        throws AccessDeniedException, DeploymentException, ApplicationNotExistException;
+    void removeApplication(string name)
+	throws AccessDeniedException, ApplicationNotExistException;
 
     /**
      *
@@ -483,7 +358,7 @@ interface Admin
      *
      **/
     void instantiateServer(string application, string node, ServerInstanceDescriptor desc)
-        throws AccessDeniedException, ApplicationNotExistException, DeploymentException;
+	throws AccessDeniedException, ApplicationNotExistException, DeploymentException;
 
     /**
      *
@@ -492,7 +367,7 @@ interface Admin
      * @param name The application name.
      *
      * @param shutdown If true, the servers depending on the data to
-     * patch will be shut down if necessary.
+     * patch will be shutdown if necessary.
      *
      * @throws ApplicationNotExistException Raised if the application
      * doesn't exist.
@@ -501,7 +376,7 @@ interface Admin
      *
      **/
     ["ami", "amd"] void patchApplication(string name, bool shutdown)
-        throws ApplicationNotExistException, PatchException;
+	throws ApplicationNotExistException, PatchException;
 
     /**
      *
@@ -515,8 +390,8 @@ interface Admin
      * doesn't exist.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent ApplicationInfo getApplicationInfo(string name)
-        throws ApplicationNotExistException;
+    nonmutating ApplicationDescriptor getApplicationDescriptor(string name)
+	throws ApplicationNotExistException;
 
     /**
      *
@@ -526,17 +401,17 @@ interface Admin
      * descriptor can't be accessed or is invalid.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent ApplicationDescriptor getDefaultApplicationDescriptor()
-        throws DeploymentException;
+    nonmutating ApplicationDescriptor getDefaultApplicationDescriptor()
+	throws DeploymentException;
 
     /**
      *
-     * Get all the IceGrid applications currently registered.
+     * Get all the &IceGrid; applications currently registered.
      *
      * @return The application names.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent Ice::StringSeq getAllApplicationNames();
+    nonmutating Ice::StringSeq getAllApplicationNames();
 
     /**
      *
@@ -549,8 +424,8 @@ interface Admin
      * @return The server information.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent ServerInfo getServerInfo(string id)
-        throws ServerNotExistException;
+    nonmutating ServerInfo getServerInfo(string id)
+	throws ServerNotExistException;
 
     /**
      *
@@ -569,8 +444,8 @@ interface Admin
      * deployed on the node.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent ServerState getServerState(string id)
-        throws ServerNotExistException, NodeUnreachableException, DeploymentException;
+    nonmutating ServerState getServerState(string id)
+	throws ServerNotExistException, NodeUnreachableException, DeploymentException;
     
     /**
      *
@@ -590,14 +465,14 @@ interface Admin
      * deployed on the node.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent int getServerPid(string id)
-        throws ServerNotExistException, NodeUnreachableException, DeploymentException;
+    nonmutating int getServerPid(string id)
+	throws ServerNotExistException, NodeUnreachableException, DeploymentException;
 
     /**
      *
      * Enable or disable a server. A disabled server can't be started
      * on demand or administratively. The enable state of the server
-     * is not persistent: if the node is shut down and restarted, the
+     * is not persistent: if the node is shutdown and restarted, the
      * server will be enabled by default.
      *
      * @param id The server id.
@@ -614,7 +489,7 @@ interface Admin
      *
      **/
     ["ami"] idempotent void enableServer(string id, bool enabled)
-        throws ServerNotExistException, NodeUnreachableException, DeploymentException;
+	throws ServerNotExistException, NodeUnreachableException, DeploymentException;
 
     /**
      *
@@ -632,8 +507,8 @@ interface Admin
      * deployed on the node.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent bool isServerEnabled(string id)
-        throws ServerNotExistException, NodeUnreachableException, DeploymentException;
+    nonmutating bool isServerEnabled(string id)
+	throws ServerNotExistException, NodeUnreachableException, DeploymentException;
 
     /**
      *
@@ -658,7 +533,7 @@ interface Admin
      *
      **/
     ["ami"] void startServer(string id)
-        throws ServerNotExistException, ServerStartException, NodeUnreachableException, DeploymentException;
+	throws ServerNotExistException, ServerStartException, NodeUnreachableException, DeploymentException;
 
     /**
      *
@@ -680,7 +555,7 @@ interface Admin
      *
      **/
     ["ami"] void stopServer(string id)
-        throws ServerNotExistException, ServerStopException, NodeUnreachableException, DeploymentException;
+	throws ServerNotExistException, ServerStopException, NodeUnreachableException, DeploymentException;
 
     /**
      *
@@ -689,7 +564,7 @@ interface Admin
      * @param id The server id.
      *
      * @param shutdown If true, servers depending on the data to patch
-     * will be shut down if necessary.
+     * will be shutdown if necessary.
      *
      * @throws ServerNotExistException Raised if the server doesn't
      * exist.
@@ -704,7 +579,7 @@ interface Admin
      *
      **/
     ["ami", "amd"] void patchServer(string id, bool shutdown)
-        throws ServerNotExistException, NodeUnreachableException, DeploymentException, PatchException;
+	throws ServerNotExistException, NodeUnreachableException, DeploymentException, PatchException;
 
     /**
      *
@@ -727,8 +602,8 @@ interface Admin
      * by the target server.
      *
      **/
-    ["ami"] void sendSignal(string id, string signal)
-        throws ServerNotExistException, NodeUnreachableException, DeploymentException, BadSignalException;
+    void sendSignal(string id, string signal)
+	throws ServerNotExistException, NodeUnreachableException, DeploymentException, BadSignalException;
 
     /**
      *
@@ -750,17 +625,17 @@ interface Admin
      * deployed on the node.
      *
      **/
-    ["ami"] void writeMessage(string id, string message, int fd)
-        throws ServerNotExistException, NodeUnreachableException, DeploymentException;
+    void writeMessage(string id, string message, int fd)
+	throws ServerNotExistException, NodeUnreachableException, DeploymentException;
 
     /**
      *
-     * Get all the server ids registered with IceGrid.
+     * Get all the server ids registered with &IceGrid;.
      *
      * @return The server ids.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent Ice::StringSeq getAllServerIds();
+    nonmutating Ice::StringSeq getAllServerIds();
 
     /**
      *
@@ -779,8 +654,8 @@ interface Admin
      * replica group doesn't exist.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent AdapterInfoSeq getAdapterInfo(string id)
-        throws AdapterNotExistException;
+    nonmutating AdapterInfoSeq getAdapterInfo(string id)
+	throws AdapterNotExistException;
 
     /**
      *
@@ -791,20 +666,20 @@ interface Admin
      *
      **/
     ["ami"] void removeAdapter(string adapterId)
-        throws AdapterNotExistException, DeploymentException;
+	throws AdapterNotExistException, DeploymentException;
 
     /**
      *
-     * Get all the adapter ids registered with IceGrid.
+     * Get all the adapter ids registered with &IceGrid;.
      *
      * @return The adapter ids.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent Ice::StringSeq getAllAdapterIds();
+    nonmutating Ice::StringSeq getAllAdapterIds();
 
     /**
      *
-     * Add an object to the object registry. IceGrid will get the
+     * Add an object to the object registry. &IceGrid; will get the
      * object type by calling [ice_id] on the given proxy. The object
      * must be reachable.
      *
@@ -818,8 +693,8 @@ interface Admin
      * get the object type failed.
      *
      **/
-    ["ami"] void addObject(Object* obj)
-        throws ObjectExistsException, DeploymentException;
+    void addObject(Object* obj)
+	throws ObjectExistsException, DeploymentException;
 
     /**
      *
@@ -839,7 +714,7 @@ interface Admin
      *
      **/
     void updateObject(Object* obj)
-        throws ObjectNotRegisteredException, DeploymentException;
+	throws ObjectNotRegisteredException, DeploymentException;
 
     /**
      *
@@ -854,8 +729,8 @@ interface Admin
      * registered.
      *
      **/
-    ["ami"] void addObjectWithType(Object* obj, string type)
-        throws ObjectExistsException, DeploymentException;
+    void addObjectWithType(Object* obj, string type)
+	throws ObjectExistsException;
 
     /**
      *
@@ -876,7 +751,7 @@ interface Admin
      *
      **/
     ["ami"] void removeObject(Ice::Identity id) 
-        throws ObjectNotRegisteredException, DeploymentException;
+	throws ObjectNotRegisteredException, DeploymentException;
 
     /**
      *
@@ -890,8 +765,8 @@ interface Admin
      * registered with the registry.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent ObjectInfo getObjectInfo(Ice::Identity id)
-        throws ObjectNotRegisteredException;
+    nonmutating ObjectInfo getObjectInfo(Ice::Identity id)
+	throws ObjectNotRegisteredException;
 
     /**
      *
@@ -903,7 +778,7 @@ interface Admin
      * @return The object infos.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent ObjectInfoSeq getObjectInfosByType(string type);
+    nonmutating ObjectInfoSeq getObjectInfosByType(string type);
 
     /**
      *
@@ -912,17 +787,17 @@ interface Admin
      *
      * @param expr The expression to match against the stringified
      * identities of registered objects. The expression may contain
-     * a trailing wildcard (<tt>*</tt>) character.
+     * a trailing wildcard (<literal>*</literal>) character.
      *
      * @return All the object infos with a stringified identity
      * matching the given expression.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent ObjectInfoSeq getAllObjectInfos(string expr);
+    nonmutating ObjectInfoSeq getAllObjectInfos(string expr);
     
     /**
      *
-     * Ping an IceGrid node to see if it is active.
+     * Ping an &IceGrid; node to see if it is active.
      *
      * @param name The node name.
      *
@@ -931,8 +806,8 @@ interface Admin
      * @throws NodeNotExistException Raised if the node doesn't exist.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent bool pingNode(string name)
-        throws NodeNotExistException;
+    nonmutating bool pingNode(string name)
+	throws NodeNotExistException;
 
     /**
      *
@@ -948,8 +823,8 @@ interface Admin
      * reached.
      *
      **/
-    ["ami", "nonmutating", "cpp:const"] idempotent LoadInfo getNodeLoad(string name)
-        throws NodeNotExistException, NodeUnreachableException;
+    ["ami"] nonmutating LoadInfo getNodeLoad(string name)
+	throws NodeNotExistException, NodeUnreachableException;
 
     /**
      *
@@ -965,12 +840,12 @@ interface Admin
      * reached.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent NodeInfo getNodeInfo(string name)
-        throws NodeNotExistException, NodeUnreachableException;
+    nonmutating NodeInfo getNodeInfo(string name)
+	throws NodeNotExistException, NodeUnreachableException;
     
     /**
      *
-     * Shutdown an IceGrid node.
+     * Shutdown an &IceGrid; node.
      * 
      * @param name The node name.
      *
@@ -980,8 +855,8 @@ interface Admin
      * reached.
      *
      **/
-    ["ami"] void shutdownNode(string name)
-        throws NodeNotExistException, NodeUnreachableException;
+    ["ami"] idempotent void shutdownNode(string name)
+	throws NodeNotExistException, NodeUnreachableException;
 
     /**
      *
@@ -997,79 +872,24 @@ interface Admin
      * reached.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent string getNodeHostname(string name)
-        throws NodeNotExistException, NodeUnreachableException;
+    nonmutating string getNodeHostname(string name)
+	throws NodeNotExistException, NodeUnreachableException;
 
     /**
      *
-     * Get all the IceGrid nodes currently registered.
+     * Get all the &IceGrid; nodes currently registered.
      *
      * @return The node names.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent Ice::StringSeq getAllNodeNames();
+    nonmutating Ice::StringSeq getAllNodeNames();
 
     /**
      *
-     * Ping an IceGrid registry to see if it is active.
-     *
-     * @param name The registry name.
-     *
-     * @return true if the registry ping succeeded, false otherwise.
-     * 
-     * @throws RegistryNotExistException Raised if the registry doesn't exist.
+     * Shut down the &IceGrid; registry.
      *
      **/
-    ["cpp:const"] idempotent bool pingRegistry(string name)
-        throws RegistryNotExistException;
-
-    /**
-     *
-     * Get the registry information for the registry with the given name.
-     *
-     * @param name The registry name.
-     *
-     * @return The registry information.
-     * 
-     * @throws RegistryNotExistException Raised if the registry doesn't exist.
-     *
-     * @throws RegistryUnreachableException Raised if the registry could not be
-     * reached.
-     *
-     **/
-    ["cpp:const"] idempotent RegistryInfo getRegistryInfo(string name)
-        throws RegistryNotExistException, RegistryUnreachableException;
-    
-    /**
-     *
-     * Shutdown an IceGrid registry.
-     * 
-     * @param name The registry name.
-     *
-     * @throws RegistryNotExistException Raised if the registry doesn't exist.
-     *
-     * @throws RegistryUnreachableException Raised if the registry could not be
-     * reached.
-     *
-     **/
-    ["ami"] idempotent void shutdownRegistry(string name)
-        throws RegistryNotExistException, RegistryUnreachableException;
-
-    /**
-     *
-     * Get all the IceGrid registrys currently registered.
-     *
-     * @return The registry names.
-     *
-     **/
-    ["cpp:const"] idempotent Ice::StringSeq getAllRegistryNames();
-
-    /**
-     *
-     * Shut down the IceGrid registry.
-     *
-     **/
-    void shutdown();
+    idempotent void shutdown();
 
     /**
      *
@@ -1078,57 +898,16 @@ interface Admin
      * @return A dictionary mapping Slice type ids to their checksums.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent Ice::SliceChecksumDict getSliceChecksums();
-};
-
-/**
- *
- * This interface provides access to IceGrid log file contents.
- *
- **/
-interface FileIterator
-{
-    /**
-     *
-     * Read lines from the log file.
-     *
-     * @param size Specifies the maximum number of bytes to be
-     * received. The server will ensure that the returned message
-     * doesn't exceed the given size.
-     * 
-     * @param The lines read from the file. If there was nothing to
-     * read from the file since the last call to read, an empty
-     * sequence is returned. The last line of the sequence is always
-     * incomplete (and therefore no '\n' should be added when writing
-     * the last line to the to the output device).
-     *
-     * @return True if EOF is encountered.
-     *
-     * @throws FileNotAvailableException Raised if there was a problem
-     * to read lines from the file.
-     *
-     **/
-    bool read(int size, out Ice::StringSeq lines)
-        throws FileNotAvailableException;
-
-    /**
-     *
-     * Destroy the iterator.
-     *
-     **/
-    void destroy();
+    nonmutating Ice::SliceChecksumDict getSliceChecksums();
 };
 
 interface RegistryObserver;
 interface NodeObserver;
-interface ApplicationObserver;
-interface AdapterObserver;
-interface ObjectObserver;
 
 /**
  *
- * Used by administrative clients to view,
- * update, and receive observer updates from the IceGrid
+ * An admin session object used by administrative clients to view,
+ * update and receive observer updates from the &IceGrid;
  * registry. Admin sessions are created either with the [Registry]
  * object or the registry admin [Glacier2::SessionManager] object.
  * 
@@ -1156,36 +935,25 @@ interface AdminSession extends Glacier2::Session
      * @return The admin interface proxy.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent Admin* getAdmin();
+    nonmutating Admin* getAdmin();
 
     /**
      *
-     * Set the observer proxies that receive
-     * notifications when the state of the registry
+     * Set the proxies of the observer objects that will receive
+     * notifications from the servers when the state of the registry
      * or nodes changes.
      *
      * @param registryObs The registry observer.
      *
      * @param nodeObs The node observer.
      *
-     * @param appObs The application observer.
-     *
-     * @param adapterObs The adapter observer.
-     *
-     * @param objObs The object observer.
-     *
-     * @throws ObserverAlreadyRegisteredException Raised if an
-     * observer is already registered with this registry.
-     *
      **/
-    idempotent void setObservers(RegistryObserver* registryObs, NodeObserver* nodeObs, ApplicationObserver* appObs,
-                                 AdapterObserver* adptObs, ObjectObserver* objObs)
-        throws ObserverAlreadyRegisteredException;
+    idempotent void setObservers(RegistryObserver* registryObs, NodeObserver* nodeObs);
 
     /**
      *
-     * Set the observer identities that receive
-     * notifications the state of the registry
+     * Set the identities of the observer objects that will receive
+     * notifications from the servers when the state of the registry
      * or nodes changes. This operation should be used by clients that
      * are using a bidirectional connection to communicate with the
      * session.
@@ -1194,19 +962,8 @@ interface AdminSession extends Glacier2::Session
      *
      * @param nodeObs The node observer identity.
      *
-     * @param appObs The application observer.
-     *
-     * @param adptObs The adapter observer.
-     *
-     * @param objObs The object observer.
-     *
-     * @throws ObserverAlreadyRegisteredException Raised if an
-     * observer is already registered with this registry.
-     *
      **/
-    idempotent void setObserversByIdentity(Ice::Identity registryObs, Ice::Identity nodeObs, Ice::Identity appObs,
-                                           Ice::Identity adptObs, Ice::Identity objObs)
-        throws ObserverAlreadyRegisteredException;
+    idempotent void setObserversByIdentity(Ice::Identity registryObs, Ice::Identity nodeObs);
 
     /**
      *
@@ -1220,7 +977,7 @@ interface AdminSession extends Glacier2::Session
      *
      **/
     int startUpdate()
-        throws AccessDeniedException;
+	throws AccessDeniedException;
     
     /**
      *
@@ -1231,209 +988,7 @@ interface AdminSession extends Glacier2::Session
      *
      **/
     void finishUpdate()
-        throws AccessDeniedException;
-
-    /**
-     *
-     * Get the name of the registry replica hosting this session.
-     *
-     * @return The replica name of the registry.
-     *
-     **/
-    ["cpp:const"] idempotent string getReplicaName();
-
-    /**
-     *
-     * Open the given server log file for reading. The file can be
-     * read with the returned file iterator.
-     *
-     * @param id The server id.
-     *
-     * @param path The path of the log file. A log file can be opened
-     * only if it's declared in the server or service deployment
-     * descriptor.
-     *
-     * @param count Specifies where to start reading the file. If
-     * negative, the file is read from the begining. If 0 or positive,
-     * the file is read from the last <tt>count</tt> lines.
-     *
-     * @return An iterator to read the file.
-     *
-     * @throws FileNotAvailableException Raised if the file can't be
-     * read.
-     *
-     * @throws ServerNotExistException Raised if the server doesn't
-     * exist.
-     *
-     * @throws NodeUnreachableException Raised if the node could not
-     * be reached.
-     *
-     * @throws DeploymentException Raised if the server couldn't be
-     * deployed on the node.
-     *
-     **/
-    FileIterator* openServerLog(string id, string path, int count)
-        throws FileNotAvailableException, ServerNotExistException, NodeUnreachableException, DeploymentException;
-
-    /**
-     *
-     * Open the given server stderr file for reading. The file can be
-     * read with the returned file iterator.
-     *
-     * @param id The server id.
-     *
-     * @param count Specifies where to start reading the file. If
-     * negative, the file is read from the begining. If 0 or positive,
-     * the file is read from the last <tt>count</tt> lines.
-     *
-     * @return An iterator to read the file.
-     *
-     * @throws FileNotAvailableException Raised if the file can't be
-     * read.
-     *
-     * @throws ServerNotExistException Raised if the server doesn't
-     * exist.
-     *
-     * @throws NodeUnreachableException Raised if the node could not
-     * be reached.
-     *
-     * @throws DeploymentException Raised if the server couldn't be
-     * deployed on the node.
-     *
-     **/
-    FileIterator* openServerStdErr(string id, int count)
-        throws FileNotAvailableException, ServerNotExistException, NodeUnreachableException, DeploymentException;
-
-    /**
-     *
-     * Open the given server stdout file for reading. The file can be
-     * read with the returned file iterator.
-     *
-     * @param id The server id.
-     *
-     * @param count Specifies where to start reading the file. If
-     * negative, the file is read from the begining. If 0 or positive,
-     * the file is read from the last <tt>count</tt> lines.
-     *
-     * @return An iterator to read the file.
-     *
-     * @throws FileNotAvailableException Raised if the file can't be
-     * read.
-     *
-     * @throws ServerNotExistException Raised if the server doesn't
-     * exist.
-     *
-     * @throws NodeUnreachableException Raised if the node could not
-     * be reached.
-     *
-     * @throws DeploymentException Raised if the server couldn't be
-     * deployed on the node.
-     *
-     **/
-    FileIterator* openServerStdOut(string id, int count)
-        throws FileNotAvailableException, ServerNotExistException, NodeUnreachableException, DeploymentException;
-
-    /**
-     *
-     * Open the given node stderr file for reading. The file can be
-     * read with the returned file iterator.
-     *
-     * @param name The node name.
-     *
-     * @param count Specifies where to start reading the file. If
-     * negative, the file is read from the begining. If 0 or positive,
-     * the file is read from the last <tt>count</tt> lines.
-     *
-     * @return An iterator to read the file.
-     *
-     * @throws FileNotAvailableException Raised if the file can't be
-     * read.
-     *
-     * @throws NodeNotExistException Raised if the node doesn't exist.
-     *
-     * @throws NodeUnreachableException Raised if the node could not
-     * be reached.
-     *
-     **/
-    FileIterator* openNodeStdErr(string name, int count)
-        throws FileNotAvailableException, NodeNotExistException, NodeUnreachableException;
-
-    /**
-     *
-     * Open the given node stdout file for reading. The file can be
-     * read with the returned file iterator.
-     *
-     * @param name The node name.
-     *
-     * @param count Specifies where to start reading the file. If
-     * negative, the file is read from the begining. If 0 or positive,
-     * the file is read from the last <tt>count</tt> lines.
-     *
-     * @return An iterator to read the file.
-     *
-     * @throws FileNotAvailableException Raised if the file can't be
-     * read.
-     *
-     * @throws NodeNotExistException Raised if the node doesn't exist.
-     *
-     * @throws NodeUnreachableException Raised if the node could not
-     * be reached.
-     *
-     **/
-    FileIterator* openNodeStdOut(string name, int count)
-        throws FileNotAvailableException, NodeNotExistException, NodeUnreachableException;
-
-    /**
-     *
-     * Open the given registry stderr file for reading. The file can be
-     * read with the returned file iterator.
-     *
-     * @param name The registry name.
-     *
-     * @param count Specifies where to start reading the file. If
-     * negative, the file is read from the begining. If 0 or positive,
-     * the file is read from the last <tt>count</tt> lines.
-     *
-     * @return An iterator to read the file.
-     *
-     * @throws FileNotAvailableException Raised if the file can't be
-     * read.
-     *
-     * @throws RegistryNotExistException Raised if the registry
-     * doesn't exist.
-     *
-     * @throws RegistryUnreachableException Raised if the registry
-     * could not be reached.
-     *
-     **/
-    FileIterator* openRegistryStdErr(string name, int count)
-        throws FileNotAvailableException, RegistryNotExistException, RegistryUnreachableException;
-
-    /**
-     *
-     * Open the given registry stdout file for reading. The file can be
-     * read with the returned file iterator.
-     *
-     * @param name The registry name.
-     *
-     * @param count Specifies where to start reading the file. If
-     * negative, the file is read from the begining. If 0 or positive,
-     * the file is read from the last <tt>count</tt> lines.
-     *
-     * @return An iterator to read the file.
-     *
-     * @throws FileNotAvailableException Raised if the file can't be
-     * read.
-     *
-     * @throws RegistryNotExistException Raised if the registry
-     * doesn't exist.
-     *
-     * @throws RegistryUnreachableException Raised if the registry
-     * could not be reached.
-     *
-     **/
-    FileIterator * openRegistryStdOut(string name, int count)
-        throws FileNotAvailableException, RegistryNotExistException, RegistryUnreachableException;
+	throws AccessDeniedException;
 };
 
 };

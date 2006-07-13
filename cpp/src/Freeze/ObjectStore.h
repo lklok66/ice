@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -15,7 +15,6 @@
 #include <Freeze/DB.h>
 #include <Freeze/EvictorStorage.h>
 #include <Freeze/Index.h>
-#include <Freeze/TransactionI.h>
 #include <IceUtil/Cache.h>
 
 #include <vector>
@@ -25,36 +24,31 @@
 namespace Freeze
 {
 
-template<class T> class EvictorI;
+class EvictorI;
 
-class EvictorIBase;
+struct EvictorElement;
+typedef IceUtil::Handle<EvictorElement> EvictorElementPtr;
 
-class ObjectStoreBase
+typedef IceUtil::Cache<Ice::Identity, EvictorElement> Cache;
+
+class ObjectStore : public Cache
 {
 public:
 
-    ObjectStoreBase(const std::string&, const std::string&, bool, EvictorIBase*, 
-                    const std::vector<IndexPtr>&, bool);
+    ObjectStore(const std::string&, bool, EvictorI*, 
+		const std::vector<IndexPtr>& = std::vector<IndexPtr>(), bool = false);
 
-    virtual ~ObjectStoreBase();
+    virtual ~ObjectStore();
 
-    const Ice::ObjectPtr& sampleServant() const;
+    void close();
 
-    bool dbHasObject(const Ice::Identity&, const TransactionIPtr&) const;
+    bool dbHasObject(const Ice::Identity&) const;
     void save(Key& key, Value& value, Ice::Byte status, DbTxn* tx);
 
     static void marshal(const Ice::Identity&, Key&, const Ice::CommunicatorPtr&);
     static void unmarshal(Ice::Identity&, const Key&, const Ice::CommunicatorPtr&);
     static void marshal(const ObjectRecord&, Value&, const Ice::CommunicatorPtr&);
     static void unmarshal(ObjectRecord&, const Value&, const Ice::CommunicatorPtr&);
-
-    bool load(const Ice::Identity&, const TransactionIPtr&, ObjectRecord&);
-    void update(const Ice::Identity&, const ObjectRecord&, const TransactionIPtr&);
-
-    bool insert(const Ice::Identity&, const ObjectRecord&, const TransactionIPtr&);
-    bool remove(const Ice::Identity&, const TransactionIPtr&);
-    
-    EvictorIBase* evictor() const;
 
     //
     // For IndexI and Iterator
@@ -63,96 +57,125 @@ public:
     const std::string& dbName() const;
 
     const Ice::CommunicatorPtr& communicator() const;
+    EvictorI* evictor() const;
     const std::string& facet() const;
 
 protected:
 
-    bool loadImpl(const Ice::Identity&, ObjectRecord&);
+    virtual EvictorElementPtr load(const Ice::Identity&);
+    virtual void pinned(const EvictorElementPtr&, Position p);
 
 private:
     
     std::auto_ptr<Db> _db;
     std::string _facet;
     std::string _dbName;
-    EvictorIBase* _evictor;
+    EvictorI* _evictor;
     std::vector<IndexPtr> _indices;
     Ice::CommunicatorPtr _communicator;
-    Ice::ObjectPtr _sampleServant;
 };
 
 
-template<class T>
-class ObjectStore : public ObjectStoreBase, public IceUtil::Cache<Ice::Identity, T>
+struct EvictorElement : public Ice::LocalObject
 {
- public:
 
-    ObjectStore(const std::string& facet, const std::string facetType,
-                bool createDb, EvictorIBase* evictor, 
-                const std::vector<IndexPtr>& indices = std::vector<IndexPtr>(),
-                bool populateEmptyIndices = false) :
-        ObjectStoreBase(facet, facetType, createDb, evictor, indices, populateEmptyIndices)
-    {
-    }
+#if defined(_MSC_VER) && (_MSC_VER <= 1200) || defined(__IBMCPP__)
 
-    using ObjectStoreBase::load;
+    enum 
+    { 
+      clean = 0,
+      created = 1,
+      modified = 2,
+      destroyed = 3,
+      dead = 4
+    };
+    
+#else 
+    //
+    // Clean object; can become modified or destroyed
+    //
+    static const Ice::Byte clean = 0;
 
-    typedef IceUtil::Cache<Ice::Identity, T> Cache;
+    //
+    // New object; can become clean, dead or destroyed
+    //
+    static const Ice::Byte created = 1;
 
-protected:
+    //
+    // Modified object; can become clean or destroyed
+    //
+    static const Ice::Byte modified = 2;
 
-    virtual IceUtil::Handle<T> 
-    load(const Ice::Identity& ident)
-    {
-        ObjectRecord rec;
-        if(loadImpl(ident, rec))
-        {
-            return new T(rec, *this);
-        }
-        else
-        {
-            return 0;
-        }
-    }
+    //
+    // Being saved. Can become dead or created
+    //
+    static const Ice::Byte destroyed = 3;
 
-    virtual void 
-    pinned(const IceUtil::Handle<T>& element, typename Cache::Position p)
-    {
-        element->init(p);
-    }
+    //
+    // Exists only in the Evictor; for example the object was created
+    // and later destroyed (without a save in between), or it was
+    // destroyed on disk but is still in use. Can become created.
+    //
+    static const Ice::Byte dead = 4;
+
+#endif
+    
+    EvictorElement(ObjectStore&);
+    ~EvictorElement();
+
+    //
+    // Immutable
+    //
+    ObjectStore& store;
+
+    //
+    // Immutable once set
+    //
+    Cache::Position cachePosition;
+
+    //
+    // Protected by EvictorI
+    //
+    std::list<EvictorElementPtr>::iterator evictPosition;
+    int usageCount;
+    int keepCount;
+    bool stale;
+    
+    //
+    // Protected by mutex
+    // 
+    IceUtil::Mutex mutex;
+    ObjectRecord rec;
+    Ice::Byte status;
 };
+
 
 //
 // Inline member function definitions
 //
 
 inline Db* 
-ObjectStoreBase::db() const
+ObjectStore::db() const
 {
     return _db.get();
 }
 
 inline const Ice::CommunicatorPtr& 
-ObjectStoreBase::communicator() const
+ObjectStore::communicator() const
 {
     return _communicator;
 }
 
-inline EvictorIBase*
-ObjectStoreBase::evictor() const
+inline EvictorI*
+ObjectStore::evictor() const
 {
     return _evictor;
 }
 
 inline const std::string&
-ObjectStoreBase::facet() const
+ObjectStore::facet() const
 {
     return _facet;
-}
-
-inline const Ice::ObjectPtr&
-ObjectStoreBase::sampleServant() const
-{
-    return _sampleServant;
 }
 
 }

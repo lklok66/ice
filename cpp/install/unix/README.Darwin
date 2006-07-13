@@ -5,11 +5,11 @@ The Internet Communications Engine
 Ice is a modern alternative to object middleware such as CORBA or
 COM/DCOM/COM+. It is easy to learn, yet provides a powerful network
 infrastructure for demanding technical applications. It features an
-object-oriented specification language, easy to use C++, C#, Java,
-Python, Ruby, PHP, and Visual Basic mappings, a highly efficient
-protocol, asynchronous method invocation and dispatch, dynamic
-transport plug-ins, TCP/IP and UDP/IP support, SSL-based security, a
-firewall solution, and much more.
+object-oriented specification language, easy to use C++, Java, Python,
+PHP, C#, and Visual Basic mappings, a highly efficient protocol,
+asynchronous method invocation and dispatch, dynamic transport
+plug-ins, TCP/IP and UDP/IP support, SSL-based security, a firewall
+solution, and much more.
 
 Ice is available under the terms of the GNU General Public License
 (GPL) (see LICENSE file). Commercial licenses are available for
@@ -37,27 +37,24 @@ includes the following components:
 Requirements
 ======================================================================
 
-This binary distribution was compiled on Mac OS X 10.4.8 using the
-default C++ compiler, GCC 4.0.1. 
-
-This distribution only includes Intel binaries. If you need PowerPC
-binaries, you can download the Ice for C++ source code from the ZeroC
-web site at http://www.zeroc.com/download.html.
+This binary distribution was compiled on Mac OS X 10.4.7 using the
+default C++ compiler, GCC 4.0.1.
 
 
 Java
 ----
 
-Ice for Java requires J2SE 1.4.2 or J2SE 1.5.0.
+Ice for Java requires J2SE 1.4.2, which is included with Mac OS X
+10.3.4 and later, or J2SE 1.5.0.
 
 
 Python
 ------
 
 The Ice extension for Python included in this distribution requires
-Python 2.3 installed with Mac OS X 10.4. If you prefer to use a later
-version of Python, you can download the Ice for Python source code
-from the ZeroC web site at http://www.zeroc.com/download.html.
+Python 2.3 installed with Mac OS X 10.4. If you prefer to use Python
+2.4, you can download the Ice for Python source code from the ZeroC
+web site at http://www.zeroc.com/download.html.
 
 
 ======================================================================
@@ -65,7 +62,7 @@ Berkeley DB and Expat
 ======================================================================
 
 This distribution includes the C++ and Java runtime for Berkeley DB
-4.5.20 and the Expat 2.0.0 library. The Berkeley DB C++ runtime was
+4.3.29 and the Expat 1.95.8 library. The Berkeley DB C++ runtime was
 built using GCC 4.0.1. The Berkeley DB and Expat licenses are provided
 in the file THIRD_PARTY_LICENSE.
 
@@ -82,28 +79,11 @@ The discussion below assumes you have defined the ICE_HOME variable
 with the directory of your Ice installation.
 
 In order to use Ice services and tools such as Slice translators, you
-need to add $ICE_HOME/bin to your PATH as shown in the bash command
-below:
+need to add $ICE_HOME/bin to your PATH and $ICE_HOME/lib to your
+DYLD_LIBRARY_PATH, as shown in the bash commands below:
 
 $ export PATH=$ICE_HOME/bin:$PATH
-
-Ice shared libraries and executables in this distribution contain 
-/opt/Ice-@mmver@/lib as the embedded runpath. In order to run Ice
-services and tools, you can do one of the following:
-
- - Create a symbolic link /opt/Ice-@mmver@ that points to your Ice
-   installation:
-
-   $ ln -s $ICE_HOME /opt/Ice-@mmver@
-
- - Add $ICE_HOME/lib to your DYLD_LIBRARY_PATH environment variable:
-
-   $ export DYLD_LIBRARY_PATH=$ICE_HOME/lib:$DYLD_LIBRARY_PATH
-
-On Intel platforms, you also need to set DYLD_BIND_AT_LAUNCH to
-prevent random crashes at runtime in the dynamic linker binding code:
-
-$ export DYLD_BIND_AT_LAUNCH=1
+$ export DYLD_LIBRARY_PATH=$ICE_HOME/lib:$DYLD_LIBRARY_PATH
 
 
 C++
@@ -128,10 +108,10 @@ CLASSPATH, as shown below:
 
 $ export CLASSPATH=$ICE_HOME/lib/Ice.jar:$CLASSPATH
 
-To use the Java2 version of Ice instead, modify your CLASSPATH as
+To use the Java5 version of Ice instead, modify your CLASSPATH as
 follows:
 
-$ export CLASSPATH=$ICE_HOME/lib/java2/Ice.jar:$CLASSPATH
+$ export CLASSPATH=$ICE_HOME/lib/java5/Ice.jar:$CLASSPATH
 
 If you plan to use Freeze for persistence, you must also add the
 Berkeley DB JAR file (db.jar) to your CLASSPATH:
@@ -176,12 +156,12 @@ Demos and documentation
 Sample programs are provided in the Ice-@ver@-demos.tar.gz package,
 which can be downloaded from the ZeroC web site at
 
-  http://www.zeroc.com/download.html
+http://www.zeroc.com/download.html
 
 Please refer to the README.DEMOS file included in that package for
 more information.
 
-See doc/index.html for information on the documentation included with
+See doc/README.html for information on the documentation included with
 this distribution.
 
 
@@ -198,3 +178,4 @@ With the binary installers, simply uninstall the previous version of
 Ice and install the new one. Already deployed applications that were
 compiled against the <x>.<y>.0 runtime will automatically use the
 <x>.<y>.1 runtime.
+

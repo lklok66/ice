@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -26,7 +26,7 @@ import Test, TestI
 
 class TestServer(Ice.Application):
     def run(self, args):
-        self.communicator().getProperties().setProperty("TestAdapter.Endpoints", "default -p 12010 -t 10000:udp")
+	self.communicator().getProperties().setProperty("TestAdapter.Endpoints", "default -p 12010 -t 10000:udp")
         adapter = self.communicator().createObjectAdapter("TestAdapter")
         locator = TestI.ServantLocatorI()
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -35,11 +35,11 @@ class SessionKeepAliveThread(threading.Thread):
             while not self._terminated:
                 self._cond.wait(self._timeout)
                 if self._terminated:
-                    break
+		    break
                 try:
                     self._session.keepAlive()
                 except Ice.LocalException, ex:
-                    break
+		    break
         finally:
             self._cond.release()
 
@@ -53,67 +53,59 @@ class SessionKeepAliveThread(threading.Thread):
 
 class Client(Ice.Application):
     def run(self, args):
-        status = 0
-        registry = IceGrid.RegistryPrx.checkedCast(self.communicator().stringToProxy("DemoIceGrid/Registry"))
-        if registry == None:
-            print self.appName() + ": could not contact registry"
-            return 1
+	registry = IceGrid.RegistryPrx.checkedCast(self.communicator().stringToProxy("DemoIceGrid/Registry"))
+	if registry == None:
+	    print self.appName() + ": could not contact registry"
+	    return False
 
-        while True:
-            print "This demo accepts any user-id / password combination."
-            id = raw_input("user id: ").strip()
-            pw = raw_input("password: ").strip()
-            try:
-                session = registry.createSession(id, pw)
-                break
-            except IceGrid.PermissionDeniedException, ex:
-                print "permission denied:\n" + ex.reason
+	while True:
+	    print "This demo accepts any user-id / password combination."
+	    id = raw_input("user id: ").strip()
+	    pw = raw_input("password: ").strip()
+	    try:
+	        session = registry.createSession(id, pw)
+		break
+	    except IceGrid.PermissionDeniedException, ex:
+	        print "permission denied:\n" + ex.reason
 
-        keepAlive = SessionKeepAliveThread(session, registry.getSessionTimeout() / 2)
-        keepAlive.start()
+	keepAlive = SessionKeepAliveThread(session, registry.getSessionTimeout() / 2)
+	keepAlive.start()
 
-        try:
-            hello = Demo.HelloPrx.checkedCast(session.allocateObjectById(self.communicator().stringToIdentity("hello")))
+        hello = None
+	try:
+	    hello = Demo.HelloPrx.checkedCast(session.allocateObjectById(self.communicator().stringToIdentity("hello")))
+	except IceGrid.AllocationException, ex:
+	    print self.appName() + ": could not allocate object: " + ex.reason
+	    return False
+	except IceGrid.ObjectNotRegisteredException:
+	    print self.appName() + ": object not registered with registry"
+	    return False
 
-            menu()
+	menu()
 
-            c = None
-            while c != 'x':
-                try:
-                    c = raw_input("==> ")
-                    if c == 't':
-                        hello.sayHello()
-                    elif c == 'x':
-                        pass # Nothing to do
-                    elif c == '?':
-                        menu()
-                    else:
-                        print "unknown command `" + c + "'"
-                        menu()
-                except EOFError:
-                    break
-                except KeyboardInterrupt:
-                    break
-        except IceGrid.AllocationException, ex:
-            print self.appName() + ": could not allocate object: " + ex.reason
-            status = 1
-        except IceGrid.ObjectNotRegisteredException:
-            print self.appName() + ": object not registered with registry"
-            status = 1
-        except:
-            print self.appName() + ": could not allocate object: " + str(sys.exc_info()[0])
-            status = 1
+	c = None
+	while c != 'x':
+	    try:
+		c = raw_input("==> ")
+		if c == 't':
+		    hello.sayHello()
+		elif c == 'x':
+		    pass # Nothing to do
+		elif c == '?':
+		    menu()
+		else:
+		    print "unknown command `" + c + "'"
+		    menu()
+	    except EOFError:
+		break
 
-        #
-        # Destroy the keepAlive thread and the sesion object otherwise
-        # the session will be kept allocated until the timeout occurs.
-        # Destroying the session will release all allocated objects.
-        #
-        keepAlive.terminate()
-        keepAlive.join()
-        session.destroy();
+	keepAlive.terminate()
+	keepAlive.join()
 
-        return status
+	session.releaseObject(hello.ice_getIdentity())
+	session.destroy();
+
+	return True
 
 app = Client()
 sys.exit(app.main(sys.argv, "config.client"))

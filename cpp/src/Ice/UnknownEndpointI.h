@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -20,7 +20,6 @@ class UnknownEndpointI : public EndpointI
 {
 public:
 
-    UnknownEndpointI(const ::std::string&);
     UnknownEndpointI(Ice::Short, BasicStream*);
 
     virtual void streamWrite(BasicStream*) const;
@@ -34,10 +33,12 @@ public:
     virtual bool datagram() const;
     virtual bool secure() const;
     virtual bool unknown() const;
-    virtual TransceiverPtr transceiver(EndpointIPtr&) const;
-    virtual std::vector<ConnectorPtr> connectors() const;
+    virtual TransceiverPtr clientTransceiver() const;
+    virtual TransceiverPtr serverTransceiver(EndpointIPtr&) const;
+    virtual ConnectorPtr connector() const;
     virtual AcceptorPtr acceptor(EndpointIPtr&, const std::string&) const;
-    virtual std::vector<EndpointIPtr> expand() const;
+    virtual std::vector<EndpointIPtr> expand(bool) const;
+    virtual bool publish() const;
     virtual bool equivalent(const TransceiverPtr&) const;
     virtual bool equivalent(const AcceptorPtr&) const;
 
@@ -60,6 +61,7 @@ private:
     //
     // All members are const, because endpoints are immutable.
     //
+    const InstancePtr _instance;
     Ice::Short _type;
     const std::vector<Ice::Byte> _rawBytes;
 };

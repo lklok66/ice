@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -91,9 +91,8 @@ public:
     // The marshal and unmarshal functions can raise Ice exceptions, and may raise
     // AbortMarshaling if an error occurs.
     //
-    virtual void marshal(PyObject*, const Ice::OutputStreamPtr&, ObjectMap*, const Ice::StringSeq* = 0) = 0;
-    virtual void unmarshal(const Ice::InputStreamPtr&, const UnmarshalCallbackPtr&, PyObject*, void*,
-                           const Ice::StringSeq* = 0) = 0;
+    virtual void marshal(PyObject*, const Ice::OutputStreamPtr&, ObjectMap*) = 0;
+    virtual void unmarshal(const Ice::InputStreamPtr&, const UnmarshalCallbackPtr&, PyObject*, void*) = 0;
 
     virtual void print(PyObject*, IceUtil::Output&, PrintObjectHistory*) = 0;
 };
@@ -110,11 +109,13 @@ public:
 
     virtual bool validate(PyObject*);
 
-    virtual void marshal(PyObject*, const Ice::OutputStreamPtr&, ObjectMap*, const Ice::StringSeq* = 0);
-    virtual void unmarshal(const Ice::InputStreamPtr&, const UnmarshalCallbackPtr&, PyObject*, void*,
-                           const Ice::StringSeq* = 0);
+    virtual void marshal(PyObject*, const Ice::OutputStreamPtr&, ObjectMap*);
+    virtual void unmarshal(const Ice::InputStreamPtr&, const UnmarshalCallbackPtr&, PyObject*, void*);
 
     virtual void print(PyObject*, IceUtil::Output&, PrintObjectHistory*);
+
+    void marshalSequence(PyObject*, const Ice::OutputStreamPtr&);
+    void unmarshalSequence(const Ice::InputStreamPtr&, const UnmarshalCallbackPtr&, PyObject*, void*);
 
     enum Kind
     {
@@ -145,9 +146,8 @@ public:
 
     virtual bool validate(PyObject*);
 
-    virtual void marshal(PyObject*, const Ice::OutputStreamPtr&, ObjectMap*, const Ice::StringSeq* = 0);
-    virtual void unmarshal(const Ice::InputStreamPtr&, const UnmarshalCallbackPtr&, PyObject*, void*,
-                           const Ice::StringSeq* = 0);
+    virtual void marshal(PyObject*, const Ice::OutputStreamPtr&, ObjectMap*);
+    virtual void unmarshal(const Ice::InputStreamPtr&, const UnmarshalCallbackPtr&, PyObject*, void*);
 
     virtual void print(PyObject*, IceUtil::Output&, PrintObjectHistory*);
 
@@ -164,7 +164,6 @@ public:
     virtual void unmarshaled(PyObject*, PyObject*, void*);
 
     std::string name;
-    std::vector<std::string> metaData;
     TypeInfoPtr type;
 };
 typedef IceUtil::Handle<DataMember> DataMemberPtr;
@@ -183,9 +182,8 @@ public:
 
     virtual bool usesClasses();
 
-    virtual void marshal(PyObject*, const Ice::OutputStreamPtr&, ObjectMap*, const Ice::StringSeq* = 0);
-    virtual void unmarshal(const Ice::InputStreamPtr&, const UnmarshalCallbackPtr&, PyObject*, void*,
-                           const Ice::StringSeq* = 0);
+    virtual void marshal(PyObject*, const Ice::OutputStreamPtr&, ObjectMap*);
+    virtual void unmarshal(const Ice::InputStreamPtr&, const UnmarshalCallbackPtr&, PyObject*, void*);
 
     virtual void print(PyObject*, IceUtil::Output&, PrintObjectHistory*);
 
@@ -210,41 +208,16 @@ public:
 
     virtual bool usesClasses();
 
-    virtual void marshal(PyObject*, const Ice::OutputStreamPtr&, ObjectMap*, const Ice::StringSeq* = 0);
-    virtual void unmarshal(const Ice::InputStreamPtr&, const UnmarshalCallbackPtr&, PyObject*, void*,
-                           const Ice::StringSeq* = 0);
+    virtual void marshal(PyObject*, const Ice::OutputStreamPtr&, ObjectMap*);
+    virtual void unmarshal(const Ice::InputStreamPtr&, const UnmarshalCallbackPtr&, PyObject*, void*);
+    virtual void unmarshaled(PyObject*, PyObject*, void*);
 
     virtual void print(PyObject*, IceUtil::Output&, PrintObjectHistory*);
 
     virtual void destroy();
 
-    struct SequenceMapping : public UnmarshalCallback
-    {
-        enum Type { SEQ_DEFAULT, SEQ_TUPLE, SEQ_LIST };
-
-        SequenceMapping(Type);
-        SequenceMapping(const Ice::StringSeq&);
-
-        static bool getType(const Ice::StringSeq&, Type&);
-
-        virtual void unmarshaled(PyObject*, PyObject*, void*);
-
-        PyObject* createContainer(int) const;
-        void setItem(PyObject*, int, PyObject*) const;
-
-        Type type;
-    };
-    typedef IceUtil::Handle<SequenceMapping> SequenceMappingPtr;
-
     std::string id;
-    SequenceMappingPtr mapping;
     TypeInfoPtr elementType;
-
-private:
-
-    void marshalPrimitiveSequence(const PrimitiveInfoPtr&, PyObject*, const Ice::OutputStreamPtr&);
-    void unmarshalPrimitiveSequence(const PrimitiveInfoPtr&, const Ice::InputStreamPtr&, const UnmarshalCallbackPtr&,
-                                    PyObject*, void*, const SequenceMappingPtr&);
 };
 typedef IceUtil::Handle<SequenceInfo> SequenceInfoPtr;
 
@@ -261,9 +234,8 @@ public:
 
     virtual bool usesClasses();
 
-    virtual void marshal(PyObject*, const Ice::OutputStreamPtr&, ObjectMap*, const Ice::StringSeq* = 0);
-    virtual void unmarshal(const Ice::InputStreamPtr&, const UnmarshalCallbackPtr&, PyObject*, void*,
-                           const Ice::StringSeq* = 0);
+    virtual void marshal(PyObject*, const Ice::OutputStreamPtr&, ObjectMap*);
+    virtual void unmarshal(const Ice::InputStreamPtr&, const UnmarshalCallbackPtr&, PyObject*, void*);
     virtual void unmarshaled(PyObject*, PyObject*, void*);
 
     virtual void print(PyObject*, IceUtil::Output&, PrintObjectHistory*);
@@ -298,9 +270,8 @@ public:
 
     virtual bool usesClasses();
 
-    virtual void marshal(PyObject*, const Ice::OutputStreamPtr&, ObjectMap*, const Ice::StringSeq* = 0);
-    virtual void unmarshal(const Ice::InputStreamPtr&, const UnmarshalCallbackPtr&, PyObject*, void*,
-                           const Ice::StringSeq* = 0);
+    virtual void marshal(PyObject*, const Ice::OutputStreamPtr&, ObjectMap*);
+    virtual void unmarshal(const Ice::InputStreamPtr&, const UnmarshalCallbackPtr&, PyObject*, void*);
 
     virtual void print(PyObject*, IceUtil::Output&, PrintObjectHistory*);
 
@@ -329,9 +300,8 @@ public:
 
     virtual bool validate(PyObject*);
 
-    virtual void marshal(PyObject*, const Ice::OutputStreamPtr&, ObjectMap*, const Ice::StringSeq* = 0);
-    virtual void unmarshal(const Ice::InputStreamPtr&, const UnmarshalCallbackPtr&, PyObject*, void*,
-                           const Ice::StringSeq* = 0);
+    virtual void marshal(PyObject*, const Ice::OutputStreamPtr&, ObjectMap*);
+    virtual void unmarshal(const Ice::InputStreamPtr&, const UnmarshalCallbackPtr&, PyObject*, void*);
 
     virtual void print(PyObject*, IceUtil::Output&, PrintObjectHistory*);
 
@@ -397,8 +367,6 @@ public:
     virtual void ice_postUnmarshal();
 
     virtual void read(const Ice::InputStreamPtr&, bool);
-
-    virtual ClassInfoPtr getInfo() const;
 
     PyObject* getObject() const; // Borrowed reference.
 

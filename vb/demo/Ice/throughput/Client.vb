@@ -1,6 +1,6 @@
 ' **********************************************************************
 '
-' Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+' Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 '
 ' This copy of Ice is licensed to you under the terms described in the
 ' ICE_LICENSE file included in this distribution.
@@ -37,7 +37,15 @@ Module ThroughputC
         End Sub
 
         Public Overloads Overrides Function run(ByVal args() As String) As Integer
-            Dim throughput As ThroughputPrx = ThroughputPrxHelper.checkedCast(communicator.propertyToProxy("Throughput.Throughput"))
+            Dim properties As Ice.Properties = communicator().getProperties()
+            Dim refProperty As String = "Throughput.Throughput"
+            Dim r As String = properties.getProperty(refProperty)
+            If r.Length = 0 Then
+                Console.Error.WriteLine("property `" & r & "' not set")
+                Return 1
+            End If
+
+            Dim throughput As ThroughputPrx = ThroughputPrxHelper.checkedCast(communicator.stringToProxy(r))
             If throughput Is Nothing Then
                 Console.Error.WriteLine("invalid proxy")
                 Return 1
@@ -53,7 +61,7 @@ Module ThroughputC
 
             Dim structSeq() As StringDouble = New StringDouble(StringDoubleSeqSize.value - 1) {}
             For i As Integer = 0 To StringDoubleSeqSize.value - 1
-                structSeq(i) = New StringDouble
+		structSeq(i) = New StringDouble
                 structSeq(i).s = "hello"
                 structSeq(i).d = 3.14
             Next
@@ -65,41 +73,9 @@ Module ThroughputC
                 fixedSeq(i).d = 0
             Next
 
-            '
-            ' A method needs to be invoked thousands of times before the JIT compiler
-            ' will convert it to native code. To ensure an accurate throughput measurement,
-            ' we need to "warm up" the JIT compiler.
-            '
-            Dim emptyBytes() As Byte = New Byte(0) {}
-            Dim emptyStrings() As String = New String(0) {}
-            Dim emptyStructs() As StringDouble = New StringDouble(0) {}
-            emptyStructs(0) = New StringDouble
-            Dim emptyFixed() As Fixed = New Fixed(0) {}
-            emptyFixed(0) = New Fixed
-
-            Dim repetitions As Integer = 10000
-            Console.Out.Write("warming up the JIT compiler...")
-            Console.Out.Flush()
-            For i As Integer = 0 To repetitions - 1
-               throughput.sendByteSeq(emptyBytes)
-               throughput.sendStringSeq(emptyStrings)
-               throughput.sendStructSeq(emptyStructs)
-               throughput.sendFixedSeq(emptyFixed)
-
-               throughput.recvByteSeq()
-               throughput.recvStringSeq()
-               throughput.recvStructSeq()
-               throughput.recvFixedSeq()
-
-               throughput.echoByteSeq(emptyBytes)
-               throughput.echoStringSeq(emptyStrings)
-               throughput.echoStructSeq(emptyStructs)
-               throughput.echoFixedSeq(emptyFixed)
-            Next
-            throughput.endWarmup()
-            Console.Out.WriteLine("ok")
-
             menu()
+
+            throughput.ice_ping() ' Initial ping to setup the connection.
 
             '
             ' By default use bytes sequence.
@@ -114,12 +90,12 @@ Module ThroughputC
                     Console.Out.Flush()
                     line = Console.In.ReadLine()
                     If line Is Nothing Then
-                        Exit Do
+                        Exit Try
                     End If
 
                     Dim tmsec As Long = System.DateTime.Now.Ticks / 10000
 
-                    repetitions = 100
+                    Dim repetitions As Integer = 100
 
                     If line.Equals("1") Or line.Equals("2") Or line.Equals("3") Or line.Equals("4") Then
                         currentType = line.Chars(0)

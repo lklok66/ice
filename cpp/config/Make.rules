@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -11,13 +11,13 @@
 # Select an installation base directory. The directory will be created
 # if it does not exist.
 #
-prefix			 ?= /opt/Ice-$(VERSION)
+prefix			?= /opt/Ice-$(VERSION)
 
 #
-# The "root directory" for runpath embedded in executables. Can be unset
-# to avoid adding a runpath to Ice executables.
+# When creating an executable, shall we add install_libdir to the
+# runpath embedded in this executable?
 #
-embedded_runpath_prefix  ?= /opt/Ice-$(VERSION_MAJOR).$(VERSION_MINOR)
+ADD_LIBDIR_TO_RPATH     ?= yes
 
 #
 # Define OPTIMIZE as yes if you want to build with
@@ -112,11 +112,8 @@ KERBEROS_HOME           ?= /usr/kerberos
 # ----------------------------------------------------------------------
 
 SHELL			= /bin/sh
-VERSION_MAJOR           = 3
-VERSION_MINOR           = 2
-VERSION			= 3.2.0
-SOVERSION		= 32
-
+VERSION			= 3.1.0
+SOVERSION		= 31
 bindir			= $(top_srcdir)/bin
 libdir			= $(top_srcdir)/lib
 includedir		= $(top_srcdir)/include
@@ -134,8 +131,6 @@ INSTALL_PROGRAM		= ${INSTALL}
 INSTALL_LIBRARY		= ${INSTALL}
 INSTALL_DATA		= ${INSTALL}
 
-OBJEXT			= .o
-
 UNAME			:= $(shell uname)
 
 #
@@ -149,14 +144,6 @@ ifeq ($(LP64),yes)
 else
     install_libdir	  := $(prefix)/lib
     libsubdir		  := lib
-endif
-
-ifneq ($(embedded_runpath_prefix),)
-   ifeq ($(LP64),yes)
-       runpath_libdir	  := $(embedded_runpath_prefix)/lib$(lp64suffix)
-   else
-       runpath_libdir	  := $(embedded_runpath_prefix)/lib
-   endif
 endif
 
 ifneq ($(STLPORT_HOME),)
@@ -179,18 +166,9 @@ BZIP2_FLAGS             = $(if $(BZIP2_HOME),-I$(BZIP2_HOME)/include)
 BZIP2_LIBS              = $(if $(BZIP2_HOME),-L$(BZIP2_HOME)/$(libsubdir)) -lbz2
 BZIP2_RPATH_LINK        = $(if $(BZIP2_HOME),$(call rpathlink,$(BZIP2_HOME)/$(libsubdir)))
 
-ifneq ($(DB_HOME),)
-   DB_FLAGS             = -I$(DB_HOME)/include
-   DB_LIBS              = -L$(DB_HOME)/$(libsubdir) -ldb_cxx
-   DB_RPATH_LINK        = $(call rpathlink,$(DB_HOME)/$(libsubdir))
-else
-   ifeq ($(shell if [ -d /usr/include/db45 -a -d /usr/$(libsubdir)/db45 ] ; then echo yes; fi), yes)
-      DB_FLAGS          = -I/usr/include/db45
-      DB_LIBS           = -L/usr/$(libsubdir)/db45 -ldb_cxx
-   else
-      DB_LIBS           = -ldb_cxx
-   endif
-endif
+DB_FLAGS                = $(if $(DB_HOME),-I$(DB_HOME)/include)
+DB_LIBS                 = $(if $(DB_HOME),-L$(DB_HOME)/$(libsubdir)) -ldb_cxx
+DB_RPATH_LINK           = $(if $(DB_HOME),$(call rpathlink,$(DB_HOME)/$(libsubdir)))
 
 EXPAT_FLAGS             = $(if $(EXPAT_HOME),-I$(EXPAT_HOME)/include)
 EXPAT_LIBS              = $(if $(EXPAT_HOME),-L$(EXPAT_HOME)/$(libsubdir)) -lexpat
@@ -209,7 +187,7 @@ CPPFLAGS		= -I$(includedir) $(STLPORT_FLAGS)
 ICECPPFLAGS		= -I$(slicedir)
 SLICE2CPPFLAGS		= $(ICECPPFLAGS)
 
-LDFLAGS			=   $(LDPLATFORMFLAGS) $(CXXFLAGS) -L$(libdir) 
+LDFLAGS			=  $(LDPLATFORMFLAGS) $(CXXFLAGS) -L$(libdir)
 
 ifeq ($(FLEX_NOLINE),yes)
     FLEXFLAGS	       := -L
@@ -288,7 +266,7 @@ SLICE2XSD		= $(bindir)/slice2xsd
 SLICE2FREEZE		= $(bindir)/slice2freeze
 SLICE2DOCBOOK		= $(bindir)/slice2docbook
 
-EVERYTHING		= all depend clean install 
+EVERYTHING		= all depend clean install
 
 .SUFFIXES:
 .SUFFIXES:		.cpp .c .o
@@ -331,7 +309,7 @@ $(HDIR)/%.h %.cpp: $(SDIR)/%.ice $(SLICE2CPP) $(SLICEPARSERLIB)
 
 all:: $(SRCS) $(TARGETS)
 
-depend:: $(SRCS)  $(patsubst $(SDIR)/%.ice,$(HDIR)/%.h,$(wildcard $(SDIR)/*F.ice)) $(SLICE_SRCS)
+depend:: $(SRCS) $(SLICE_SRCS)
 	-rm -f .depend
 	if test -n "$(SRCS)" ; then \
 	    $(CXX) -DMAKEDEPEND -M $(CXXFLAGS) $(CPPFLAGS) $(SRCS) | \
@@ -347,9 +325,6 @@ clean::
 	-rm -f core *.o *.bak
 
 ifneq ($(SLICE_SRCS),)
-depend::
-	$(foreach slice, $(SLICE_SRCS), echo '$(slice): $$(SLICE2CPP) $$(SLICEPARSERLIB)' >> .depend;)
-
 clean::
 	rm -f $(addsuffix .cpp, $(basename $(notdir $(SLICE_SRCS))))
 	rm -f $(addsuffix .h, $(basename $(notdir $(SLICE_SRCS))))

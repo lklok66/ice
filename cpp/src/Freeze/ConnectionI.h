@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -25,43 +25,58 @@ class ConnectionI : public Connection
 {
 public:
 
-    virtual TransactionPtr beginTransaction();
+    virtual TransactionPtr
+    beginTransaction();
 
-    virtual TransactionPtr currentTransaction() const;
+    virtual TransactionPtr
+    currentTransaction() const;
 
-    virtual void close();
+    virtual void
+    close();
     
-    virtual Ice::CommunicatorPtr getCommunicator() const;
+    virtual Ice::CommunicatorPtr
+    getCommunicator() const;
 
-    virtual std::string getName() const;
+    virtual std::string
+    getName() const;
 
     virtual ~ConnectionI();
 
-    ConnectionI(const SharedDbEnvPtr&);
+    ConnectionI(const Ice::CommunicatorPtr& communicator, 
+		const std::string& envName, DbEnv*);
 
-    TransactionIPtr beginTransactionI();
+    void
+    closeAllIterators();
 
-    void closeAllIterators();
+    void
+    registerMap(MapHelperI*);
 
-    void registerMap(MapHelperI*);
+    void
+    unregisterMap(MapHelperI*);
 
-    void unregisterMap(MapHelperI*);
+    void
+    clearTransaction();
 
-    void clearTransaction();
+    DbTxn*
+    dbTxn() const;
 
-    DbTxn* dbTxn() const;
-
-    const SharedDbEnvPtr& dbEnv() const;
+    const SharedDbEnvPtr&
+    dbEnv() const;
        
-    const Ice::CommunicatorPtr& communicator() const;
+    const Ice::CommunicatorPtr&
+    communicator() const;
 
-    const std::string&  envName() const;
+    const std::string& 
+    envName() const;
     
-    Ice::Int trace() const;
+    Ice::Int
+    trace() const;
 
-    Ice::Int txTrace() const;
+    Ice::Int
+    txTrace() const;
 
-    bool deadlockWarning() const;
+    bool
+    deadlockWarning() const;
 
 private:
 
@@ -86,11 +101,11 @@ ConnectionI::dbTxn() const
 {
     if(_transaction == 0)
     {
-        return 0;
+	return 0;
     }
     else
     {
-        return _transaction->dbTxn();
+	return _transaction->dbTxn();
     }
 }
 

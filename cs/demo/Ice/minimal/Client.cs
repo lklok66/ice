@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -14,22 +14,22 @@ public class Client
 {
     public static void Main(string[] args)
     {
-        int status = 0;
+	int status = 0;
         Ice.Communicator communicator = null;
 
         try
         {
             communicator = Ice.Util.initialize(ref args);
-            HelloPrx hello = HelloPrxHelper.checkedCast(communicator.stringToProxy("hello:tcp -p 10000"));
-            if(hello == null)
-            {
-                Console.Error.WriteLine("invalid proxy");
-                status = 1;
-            }
-            else
-            {
-                hello.sayHello();
-            }
+	    HelloPrx hello = HelloPrxHelper.checkedCast(communicator.stringToProxy("hello:tcp -p 10000"));
+	    if(hello == null)
+	    {
+		Console.Error.WriteLine("invalid proxy");
+		status = 1;
+	    }
+	    else
+	    {
+		hello.sayHello();
+	    }
         }
         catch(System.Exception ex)
         {

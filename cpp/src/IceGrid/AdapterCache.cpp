@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -8,7 +8,6 @@
 // **********************************************************************
 
 #include <IceUtil/Random.h>
-#include <Ice/Communicator.h>
 #include <Ice/LoggerUtil.h>
 #include <Ice/Locator.h>
 #include <IceGrid/AdapterCache.h>
@@ -27,89 +26,72 @@ namespace IceGrid
 
 struct ReplicaLoadComp : binary_function<ServerAdapterEntryPtr&, ServerAdapterEntryPtr&, bool>
 {
-    bool operator()(const pair<float, ServerAdapterEntryPtr>& lhs, const pair<float, ServerAdapterEntryPtr>& rhs)
+    typedef ReplicaGroupEntry::ReplicaSeq::value_type Replica;
+    typedef pair<float, Replica> ReplicaLoad;
+
+    bool operator()(const ReplicaLoad& lhs, const ReplicaLoad& rhs)
     {
-        return lhs.first < rhs.first;
+	return lhs.first < rhs.first;
     }
 };
 
-struct ReplicaPriorityComp : binary_function<ServerAdapterEntryPtr&, ServerAdapterEntryPtr&, bool>
+struct ToReplicaLoad : public unary_function<const ReplicaLoadComp::Replica&, ReplicaLoadComp::ReplicaLoad>
 {
-    bool operator()(const ServerAdapterEntryPtr& lhs, const ServerAdapterEntryPtr& rhs)
+    ToReplicaLoad(LoadSample loadSample) : _loadSample(loadSample) { }
+
+    ReplicaLoadComp::ReplicaLoad
+    operator()(const ReplicaLoadComp::Replica& value)
     {
-        return lhs->getPriority() < rhs->getPriority();
-    }
-};
-
-struct TransformToReplicaLoad : 
-        public unary_function<const ServerAdapterEntryPtr&, pair<float, ServerAdapterEntryPtr> >
-{
-public:
-
-    TransformToReplicaLoad(LoadSample loadSample) : _loadSample(loadSample) { }
-
-    pair<float, ServerAdapterEntryPtr>
-    operator()(const ServerAdapterEntryPtr& value)
-    {
-        return make_pair(value->getLeastLoadedNodeLoad(_loadSample), value);
+	try
+	{
+	    return make_pair(value.second->getLeastLoadedNodeLoad(_loadSample), value);
+	}
+	catch(const Ice::Exception&)
+	{
+	    return make_pair(1.0f, value);
+	}
     }
 
     LoadSample _loadSample;
 };
 
-struct TransformToReplica : public unary_function<const pair<string, ServerAdapterEntryPtr>&, ServerAdapterEntryPtr>
+struct ToReplica : public unary_function<const ReplicaLoadComp::ReplicaLoad&, ReplicaLoadComp::Replica>
 {
-    ServerAdapterEntryPtr
-    operator()(const pair<float, ServerAdapterEntryPtr>& value)
+    ReplicaLoadComp::Replica
+    operator()(const ReplicaLoadComp::ReplicaLoad& value)
     {
-        return value.second;
+	return value.second;
     }
 };
 
 }
 
-AdapterCache::AdapterCache(const Ice::CommunicatorPtr& communicator) : _communicator(communicator)
-{
-}
-
-void
-AdapterCache::addServerAdapter(const AdapterDescriptor& desc, const ServerEntryPtr& server, const string& app)
+ServerAdapterEntryPtr
+AdapterCache::addServerAdapter(const string& id, const string& rgId, const ServerEntryPtr& server)
 {
     Lock sync(*this);
-    if(getImpl(desc.id))
+    assert(!getImpl(id));
+    ServerAdapterEntryPtr entry = new ServerAdapterEntry(*this, id, rgId, server);
+    addImpl(id, entry);
+
+    if(!rgId.empty())
     {
-        Ice::Error out(_communicator->getLogger());
-        out << "can't add duplicate adapter `" << desc.id << "'";
-        return;
+	ReplicaGroupEntryPtr repEntry = ReplicaGroupEntryPtr::dynamicCast(getImpl(rgId));
+	assert(repEntry);
+	repEntry->addReplica(id, entry);
     }
 
-    istringstream is(desc.priority);
-    int priority = 0;
-    is >> priority;
-
-    ServerAdapterEntryPtr entry = new ServerAdapterEntry(*this, desc.id, app, desc.replicaGroupId, priority, server);
-    addImpl(desc.id, entry);
-
-    if(!desc.replicaGroupId.empty())
-    {
-        ReplicaGroupEntryPtr repEntry = ReplicaGroupEntryPtr::dynamicCast(getImpl(desc.replicaGroupId));
-        assert(repEntry);
-        repEntry->addReplica(desc.id, entry);
-    }
+    return entry;
 }
 
-void
-AdapterCache::addReplicaGroup(const ReplicaGroupDescriptor& desc, const string& app)
+ReplicaGroupEntryPtr
+AdapterCache::addReplicaGroup(const string& id, const string& app, const LoadBalancingPolicyPtr& loadBalancing)
 {
     Lock sync(*this);
-    if(getImpl(desc.id))
-    {
-        Ice::Error out(_communicator->getLogger());
-        out << "can't add duplicate replica group `" << desc.id << "'";
-        return;
-    }
-
-    addImpl(desc.id, new ReplicaGroupEntry(*this, desc.id, app, desc.loadBalancing));
+    assert(!getImpl(id));
+    ReplicaGroupEntryPtr entry = new ReplicaGroupEntry(*this, id, app, loadBalancing);
+    addImpl(id, entry);
+    return entry;
 }
 
 AdapterEntryPtr
@@ -119,9 +101,33 @@ AdapterCache::get(const string& id) const
     AdapterEntryPtr entry = getImpl(id);
     if(!entry)
     {
-        throw AdapterNotExistException(id);
+	throw AdapterNotExistException(id);
     }
     return entry;
+}
+
+ServerAdapterEntryPtr
+AdapterCache::getServerAdapter(const string& id) const
+{
+    Lock sync(*this);
+    ServerAdapterEntryPtr svrEntry = ServerAdapterEntryPtr::dynamicCast(getImpl(id));
+    if(!svrEntry)
+    {
+	throw AdapterNotExistException(id);
+    }
+    return svrEntry;
+}
+
+ReplicaGroupEntryPtr
+AdapterCache::getReplicaGroup(const string& id) const
+{
+    Lock sync(*this);
+    ReplicaGroupEntryPtr repEntry = ReplicaGroupEntryPtr::dynamicCast(getImpl(id));
+    if(!repEntry)
+    {
+	throw AdapterNotExistException(id);
+    }
+    return repEntry;
 }
 
 void
@@ -129,21 +135,15 @@ AdapterCache::removeServerAdapter(const string& id)
 {
     Lock sync(*this);
 
-    ServerAdapterEntryPtr entry = ServerAdapterEntryPtr::dynamicCast(getImpl(id));
-    if(!entry)
-    {
-        Ice::Error out(_communicator->getLogger());
-        out << "can't remove unknown adapter `" << id << "'";
-        return;
-    }
-    removeImpl(id);
+    ServerAdapterEntryPtr entry = ServerAdapterEntryPtr::dynamicCast(removeImpl(id));
+    assert(entry);
     
     string replicaGroupId = entry->getReplicaGroupId();
     if(!replicaGroupId.empty())
     {
-        ReplicaGroupEntryPtr repEntry = ReplicaGroupEntryPtr::dynamicCast(getImpl(replicaGroupId));
-        assert(repEntry);
-        repEntry->removeReplica(id);
+	ReplicaGroupEntryPtr repEntry = ReplicaGroupEntryPtr::dynamicCast(getImpl(replicaGroupId));
+	assert(repEntry);
+	repEntry->removeReplica(id);
     }
 }
 
@@ -151,14 +151,8 @@ void
 AdapterCache::removeReplicaGroup(const string& id)
 {
     Lock sync(*this);
-    ReplicaGroupEntryPtr entry = ReplicaGroupEntryPtr::dynamicCast(getImpl(id));
-    if(!entry)
-    {
-        Ice::Error out(_communicator->getLogger());
-        out << "can't remove unknown replica group `" << id << "'";
-        return;
-    }
-    removeImpl(id);
+    ReplicaGroupEntryPtr entry = ReplicaGroupEntryPtr::dynamicCast(removeImpl(id));
+    assert(entry);
 }
 
 AdapterEntryPtr
@@ -166,27 +160,26 @@ AdapterCache::addImpl(const string& id, const AdapterEntryPtr& entry)
 {
     if(_traceLevels && _traceLevels->adapter > 0)
     {
-        Ice::Trace out(_traceLevels->logger, _traceLevels->adapterCat);
-        out << "added adapter `" << id << "'";  
+	Ice::Trace out(_traceLevels->logger, _traceLevels->adapterCat);
+	out << "added adapter `" << id << "'";	
     }    
     return Cache<string, AdapterEntry>::addImpl(id, entry);
 }
 
-void
+AdapterEntryPtr
 AdapterCache::removeImpl(const string& id)
 {
     if(_traceLevels && _traceLevels->adapter > 0)
     {
-        Ice::Trace out(_traceLevels->logger, _traceLevels->adapterCat);
-        out << "removed adapter `" << id << "'";        
+	Ice::Trace out(_traceLevels->logger, _traceLevels->adapterCat);
+	out << "removed adapter `" << id << "'";	
     }    
-    Cache<string, AdapterEntry>::removeImpl(id);
+    return Cache<string, AdapterEntry>::removeImpl(id);
 }
 
-AdapterEntry::AdapterEntry(AdapterCache& cache, const string& id, const string& application) :
+AdapterEntry::AdapterEntry(AdapterCache& cache, const string& id) :
     _cache(cache),
-    _id(id),
-    _application(application)
+    _id(id)
 {
 }
 
@@ -196,66 +189,36 @@ AdapterEntry::canRemove()
     return true;
 }
 
-string
-AdapterEntry::getId() const
-{
-    return _id;
-}
-
-string
-AdapterEntry::getApplication() const
-{
-    return _application;
-}
-
 ServerAdapterEntry::ServerAdapterEntry(AdapterCache& cache,
-                                       const string& id,
-                                       const string& application,
-                                       const string& replicaGroupId, 
-                                       int priority,
-                                       const ServerEntryPtr& server) : 
-    AdapterEntry(cache, id, application),
+				       const string& id,
+				       const string& replicaGroupId, 
+				       const ServerEntryPtr& server) : 
+    AdapterEntry(cache, id),
     _replicaGroupId(replicaGroupId),
-    _priority(priority),
     _server(server)
 {
 }
 
-void
-ServerAdapterEntry::getLocatorAdapterInfo(LocatorAdapterInfoSeq& adapters, int& nReplicas, bool& replicaGroup)
+vector<pair<string, AdapterPrx> >
+ServerAdapterEntry::getProxies(int& nReplicas, bool& replicaGroup)
 {
+    vector<pair<string, AdapterPrx> > adapters;
     nReplicas = 1;
     replicaGroup = false;
-    LocatorAdapterInfo info;
-    info.id = _id;
-    info.proxy = _server->getAdapter(info.activationTimeout, info.deactivationTimeout, _id, true);
-    adapters.push_back(info);
+    adapters.push_back(make_pair(_id, getProxy("", true)));
+    return adapters;
 }
 
 float
 ServerAdapterEntry::getLeastLoadedNodeLoad(LoadSample loadSample) const
 {
-    try
-    {
-        return _server->getLoad(loadSample);
-    }
-    catch(const ServerNotExistException&)
-    {
-        // This might happen if the application is updated concurrently.
-    }
-    catch(const NodeNotExistException&)
-    {
-        // This might happen if the application is updated concurrently.
-    }
-    catch(const NodeUnreachableException&)
-    {
-    }
-    catch(const Ice::Exception& ex)
-    {
-        Ice::Error error(_cache.getTraceLevels()->logger);
-        error << "unexpected exception while getting node load:\n" << ex;
-    }
-    return 999.9f;
+    return getServer()->getLoad(loadSample);
+}
+
+string
+ServerAdapterEntry::getApplication() const
+{
+    return getServer()->getApplication();
 }
 
 AdapterInfoSeq
@@ -266,7 +229,7 @@ ServerAdapterEntry::getAdapterInfo() const
     info.replicaGroupId = _replicaGroupId;
     try
     {
-        info.proxy = _server->getAdapter(_id, true)->getDirectProxy();
+	info.proxy = getProxy("", true)->getDirectProxy();
     }
     catch(const Ice::Exception&)
     {
@@ -281,29 +244,33 @@ ServerAdapterEntry::getProxy(const string& replicaGroupId, bool upToDate) const
 {
     if(replicaGroupId.empty())
     {
-        return _server->getAdapter(_id, upToDate);
+	return getServer()->getAdapter(_id, upToDate);
     }
     else
     {
-        if(_replicaGroupId != replicaGroupId) // Validate the replica group.
-        {
-            throw Ice::InvalidReplicaGroupIdException();
-        }
-        return _server->getAdapter(_id, upToDate);
+	Lock sync(*this);
+	if(_replicaGroupId != replicaGroupId)
+	{
+	    throw Ice::InvalidReplicaGroupIdException();
+	}
+	return _server->getAdapter(_id, upToDate);
     }
 }
 
-int
-ServerAdapterEntry::getPriority() const
+ServerEntryPtr
+ServerAdapterEntry::getServer() const
 {
-    return _priority;
+    Lock sync(*this);
+    assert(_server);
+    return _server;
 }
 
 ReplicaGroupEntry::ReplicaGroupEntry(AdapterCache& cache,
-                                     const string& id,
-                                     const string& application,
-                                     const LoadBalancingPolicyPtr& policy) : 
-    AdapterEntry(cache, id, application),
+				     const string& id,
+				     const string& application,
+				     const LoadBalancingPolicyPtr& policy) : 
+    AdapterEntry(cache, id),
+    _application(application),
     _lastReplica(0)
 {
     update(policy);
@@ -313,22 +280,22 @@ void
 ReplicaGroupEntry::addReplica(const string& replicaId, const ServerAdapterEntryPtr& adapter)
 {
     Lock sync(*this);
-    _replicas.push_back(adapter);
+    _replicas.push_back(make_pair(replicaId, adapter));
 }
 
 void
 ReplicaGroupEntry::removeReplica(const string& replicaId)
 {
     Lock sync(*this);
-    for(vector<ServerAdapterEntryPtr>::iterator p = _replicas.begin(); p != _replicas.end(); ++p)
+    for(ReplicaGroupEntry::ReplicaSeq::iterator p = _replicas.begin(); p != _replicas.end(); ++p)
     {
-        if(replicaId == (*p)->getId())
-        {
-            _replicas.erase(p);         
-            // Make sure _lastReplica is still within the bounds.
-            _lastReplica = _replicas.empty() ? 0 : _lastReplica % static_cast<int>(_replicas.size());
-            break;
-        }
+	if(replicaId == p->first)
+	{
+	    _replicas.erase(p);		
+	    // Make sure _lastReplica is still within the bounds.
+	    _lastReplica = _replicas.empty() ? 0 : _lastReplica % static_cast<int>(_replicas.size());
+	    break;
+	}
     }
 }
 
@@ -336,96 +303,93 @@ void
 ReplicaGroupEntry::update(const LoadBalancingPolicyPtr& policy)
 {
     Lock sync(*this);
-    assert(policy);
-
     _loadBalancing = policy;
-
-    istringstream is(_loadBalancing->nReplicas);
-    int nReplicas = 0;
-    is >> nReplicas;
-    _loadBalancingNReplicas = nReplicas < 0 ? 1 : nReplicas;
-    AdaptiveLoadBalancingPolicyPtr alb = AdaptiveLoadBalancingPolicyPtr::dynamicCast(_loadBalancing);
-    if(alb)
+    if(_loadBalancing)
     {
-        if(alb->loadSample == "1")
-        {
-            _loadSample = LoadSample1;
-        }
-        else if(alb->loadSample == "5")
-        {
-            _loadSample = LoadSample5;
-        }
-        else if(alb->loadSample == "15")
-        {
-            _loadSample = LoadSample15;
-        }
-        else
-        {
-            _loadSample = LoadSample1;
-        }
+	istringstream is(_loadBalancing->nReplicas);
+	int nReplicas = 0;
+	is >> nReplicas;
+	_loadBalancingNReplicas = nReplicas < 1 ? 1 : nReplicas;
+	AdaptiveLoadBalancingPolicyPtr alb = AdaptiveLoadBalancingPolicyPtr::dynamicCast(_loadBalancing);
+	if(alb)
+	{
+	    if(alb->loadSample == "1")
+	    {
+		_loadSample = LoadSample1;
+	    }
+	    else if(alb->loadSample == "5")
+	    {
+		_loadSample = LoadSample5;
+	    }
+	    else if(alb->loadSample == "15")
+	    {
+		_loadSample = LoadSample15;
+	    }
+	    else
+	    {
+		_loadSample = LoadSample1;
+	    }
+	}
     }
 }
 
-void
-ReplicaGroupEntry::getLocatorAdapterInfo(LocatorAdapterInfoSeq& adapters, int& nReplicas, bool& replicaGroup)
+vector<pair<string, AdapterPrx> >
+ReplicaGroupEntry::getProxies(int& nReplicas, bool& replicaGroup)
 {
-    vector<ServerAdapterEntryPtr> replicas;
+    ReplicaSeq replicas;
     bool adaptive = false;
     LoadSample loadSample = LoadSample1;
     {
-        Lock sync(*this);
-        replicaGroup = true;
-        nReplicas = _loadBalancingNReplicas > 0 ? _loadBalancingNReplicas : static_cast<int>(_replicas.size());
+	Lock sync(*this);
+	replicaGroup = true;
+	
+	if(_replicas.empty())
+	{
+	    return vector<pair<string, AdapterPrx> >();
+	}
 
-        if(_replicas.empty())
-        {
-            return;
-        }
-
-        replicas.reserve(_replicas.size());
-        if(RoundRobinLoadBalancingPolicyPtr::dynamicCast(_loadBalancing))
-        {
-            for(unsigned int i = 0; i < _replicas.size(); ++i)
-            {
-                replicas.push_back(_replicas[(_lastReplica + i) % _replicas.size()]);
-            }
-            _lastReplica = (_lastReplica + 1) % static_cast<int>(_replicas.size());
-        }
-        else if(AdaptiveLoadBalancingPolicyPtr::dynamicCast(_loadBalancing))
-        {
-            replicas = _replicas;
-            RandomNumberGenerator rng;
-            random_shuffle(replicas.begin(), replicas.end(), rng);
-            loadSample = _loadSample;
-            adaptive = true;
-        }
-        else if(OrderedLoadBalancingPolicyPtr::dynamicCast(_loadBalancing))
-        {
-            replicas = _replicas;
-            sort(replicas.begin(), replicas.end(), ReplicaPriorityComp());
-        }
-        else if(RandomLoadBalancingPolicyPtr::dynamicCast(_loadBalancing))
-        {
-            replicas = _replicas;
-            RandomNumberGenerator rng;
-            random_shuffle(replicas.begin(), replicas.end(), rng);
-        }
+	nReplicas = _loadBalancingNReplicas > 0 ? _loadBalancingNReplicas : static_cast<int>(_replicas.size());
+	replicas.reserve(_replicas.size());
+	if(!_loadBalancing)
+	{
+	    replicas = _replicas;
+	}
+	if(RoundRobinLoadBalancingPolicyPtr::dynamicCast(_loadBalancing))
+	{
+	    for(unsigned int i = 0; i < _replicas.size(); ++i)
+	    {
+		replicas.push_back(_replicas[(_lastReplica + i) % _replicas.size()]);
+	    }
+	    _lastReplica = (_lastReplica + 1) % static_cast<int>(_replicas.size());
+	}
+	else if(AdaptiveLoadBalancingPolicyPtr::dynamicCast(_loadBalancing))
+	{
+	    replicas = _replicas;
+	    RandomNumberGenerator rng;
+	    random_shuffle(replicas.begin(), replicas.end(), rng);
+	    adaptive = true;
+	    loadSample = _loadSample;
+	}
+	else// if(RandomLoadBalancingPolicyPtr::dynamicCast(_loadBalancing))
+	{
+	    replicas = _replicas;
+	    RandomNumberGenerator rng;
+	    random_shuffle(replicas.begin(), replicas.end(), rng);
+	}
     }
 
     if(adaptive)
     {
-        //
-        // This must be done outside the synchronization block since
-        // the trasnform() might call and lock each server adapter
-        // entry. We also can't sort directly as the load of each
-        // server adapter is not stable so we first take a snapshot of
-        // each adapter and sort the snapshot.
-        //
-        vector<pair<float, ServerAdapterEntryPtr> > rl;
-        transform(replicas.begin(), replicas.end(), back_inserter(rl), TransformToReplicaLoad(loadSample));
-        sort(rl.begin(), rl.end(), ReplicaLoadComp());
-        replicas.clear();
-        transform(rl.begin(), rl.end(), back_inserter(replicas), TransformToReplica());
+	//
+	// This must be done outside the synchronization block since
+	// the sort() will call and lock each server entry.
+	//
+
+	vector<ReplicaLoadComp::ReplicaLoad> rl;
+	transform(replicas.begin(), replicas.end(), back_inserter(rl), ToReplicaLoad(loadSample));
+	sort(rl.begin(), rl.end(), ReplicaLoadComp());
+	replicas.clear();
+	transform(rl.begin(), rl.end(), back_inserter(replicas), ToReplica());
     }
 
     //
@@ -433,68 +397,80 @@ ReplicaGroupEntry::getLocatorAdapterInfo(LocatorAdapterInfoSeq& adapters, int& n
     // might not exist anymore at this time or the node might not be
     // reachable.
     //
-    for(vector<ServerAdapterEntryPtr>::const_iterator p = replicas.begin(); p != replicas.end(); ++p)
+    vector<pair<string, AdapterPrx> > adapters;
+    auto_ptr<Ice::Exception> exception;
+    for(ReplicaSeq::const_iterator p = replicas.begin(); p != replicas.end(); ++p)
     {
-        try
-        {
-            int dummy;
-            bool dummy2;
-            (*p)->getLocatorAdapterInfo(adapters, dummy, dummy2);
-        }
-        catch(const AdapterNotExistException&)
-        {
-        }
-        catch(const NodeUnreachableException&)
-        {
-        }
-        catch(const DeploymentException&)
-        {
-        }
+	try
+	{
+	    adapters.push_back(make_pair(p->first, p->second->getProxy(_id, true)));
+	}
+	catch(const AdapterNotExistException&)
+	{
+	}
+	catch(const Ice::InvalidReplicaGroupIdException&)
+	{
+	}
+	catch(const Ice::Exception& ex)
+	{
+	    if(!exception.get())
+	    {
+		exception.reset(ex.ice_clone());
+	    }
+	}
     }
+
+    if(exception.get())
+    {
+	exception->ice_throw();
+    }
+
+    return adapters;
 }
 
 float
 ReplicaGroupEntry::getLeastLoadedNodeLoad(LoadSample loadSample) const
 {
-    vector<ServerAdapterEntryPtr> replicas;
+    ReplicaSeq replicas;
     {
-        Lock sync(*this);
-        replicas = _replicas;
+	Lock sync(*this);
+	replicas = _replicas;
     }
 
-    if(replicas.empty())
-    {
-        return 999.9f;
-    }
-    else if(replicas.size() == 1)
-    {
-        return replicas.back()->getLeastLoadedNodeLoad(loadSample);
-    }
-    else
-    {
-        RandomNumberGenerator rng;
-        random_shuffle(replicas.begin(), replicas.end(), rng);
-        vector<pair<float, ServerAdapterEntryPtr> > rl;
-        transform(replicas.begin(), replicas.end(), back_inserter(rl), TransformToReplicaLoad(loadSample));
-        return min_element(rl.begin(), rl.end(), ReplicaLoadComp())->first;
-    }
+    //
+    // This must be done outside the synchronization block since
+    // min_element() will call and lock each server entry.
+    //
+    RandomNumberGenerator rng;
+    random_shuffle(replicas.begin(), replicas.end(), rng);
+    vector<ReplicaLoadComp::ReplicaLoad> rl;
+    transform(replicas.begin(), replicas.end(), back_inserter(rl), ToReplicaLoad(loadSample));
+    AdapterEntryPtr adpt = min_element(rl.begin(), rl.end(), ReplicaLoadComp())->second.second;
+    return adpt->getLeastLoadedNodeLoad(loadSample);
+}
+
+string
+ReplicaGroupEntry::getApplication() const
+{
+    Lock sync(*this);
+    return _application;
 }
 
 AdapterInfoSeq
 ReplicaGroupEntry::getAdapterInfo() const
 {
-    vector<ServerAdapterEntryPtr> replicas;
+    ReplicaSeq replicas;
     {
-        Lock sync(*this);
-        replicas = _replicas;
+	Lock sync(*this);
+	replicas = _replicas;
     }
 
     AdapterInfoSeq infos;
-    for(vector<ServerAdapterEntryPtr>::const_iterator p = replicas.begin(); p != replicas.end(); ++p)
+    for(ReplicaSeq::const_iterator p = replicas.begin(); p != replicas.end(); ++p)
     {
-        AdapterInfoSeq infs = (*p)->getAdapterInfo();
-        assert(infs.size() == 1);
-        infos.push_back(infs[0]);
+	AdapterInfoSeq infs = p->second->getAdapterInfo();
+	assert(infs.size() == 1);
+	infos.push_back(infs[0]);
     }
     return infos;
 }

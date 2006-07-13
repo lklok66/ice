@@ -1,6 +1,6 @@
 ' **********************************************************************
 '
-' Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+' Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 '
 ' This copy of Ice is licensed to you under the terms described in the
 ' ICE_LICENSE file included in this distribution.
@@ -15,28 +15,29 @@ Module SimpleIceGridC
     Class Client
         Inherits Ice.Application
 
-        Private Sub menu()
-            Console.WriteLine("usage:")
-            Console.WriteLine("t: send greeting")
-            Console.WriteLine("s: shutdown server")
-            Console.WriteLine("x: exit")
-            Console.WriteLine("?: help")
-        End Sub
+	Private Sub menu()
+	    Console.WriteLine("usage:")
+	    Console.WriteLine("t: send greeting")
+	    Console.WriteLine("s: shutdown server")
+	    Console.WriteLine("x: exit")
+	    Console.WriteLine("?: help")
+	End Sub
 
         Public Overloads Overrides Function run(ByVal args() As String) As Integer
-            Dim hello As HelloPrx = Nothing
-            Try
-                hello = HelloPrxHelper.checkedCast(communicator().stringToProxy("hello"))
-            Catch ex As Ice.NotRegisteredException
-                Dim query As IceGrid.QueryPrx = IceGrid.QueryPrxHelper.checkedCast(communicator().stringToProxy("DemoIceGrid/Query"))
-                hello = HelloPrxHelper.checkedCast(query.findObjectByType("::Demo::Hello"))
-            End Try
+	    Dim hello As HelloPrx = Nothing
+	    Try
+	        hello = HelloPrxHelper.checkedCast(communicator().stringToProxy("hello"))
+	    Catch ex As Ice.NotRegisteredException
+	        Dim proxy As String = "DemoIceGrid/Query"
+		Dim query As IceGrid.QueryPrx = IceGrid.QueryPrxHelper.checkedCast(communicator().stringToProxy(proxy))
+		hello = HelloPrxHelper.checkedCast(query.findObjectByType("::Demo::Hello"))
+	    End Try
             If hello Is Nothing Then
                 Console.Error.WriteLine("couldn't find a `::Demo::Hello' object")
                 Return 1
             End If
 
-            menu()
+	    menu()
 
             Dim line As String = Nothing
             Do
@@ -45,7 +46,7 @@ Module SimpleIceGridC
                     Console.Out.Flush()
                     line = Console.In.ReadLine()
                     If line Is Nothing Then
-                        Exit Do
+                        Exit Try
                     End If
                     If line.Equals("t") Then
                         hello.sayHello()

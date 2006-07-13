@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -15,31 +15,37 @@ import Demo
 
 class Client(Ice.Application):
     def run(self, args):
-        ping = Demo.PingPrx.checkedCast(self.communicator().propertyToProxy('Latency.Ping'))
-        if not ping:
-            print "invalid proxy"
-            return 1
+	properties = self.communicator().getProperties()
+	proxy = properties.getProperty('Latency.Ping')
+	if len(proxy) == 0:
+	    print " property `Latency.Ping' not set"
+	    return False
 
-        # Initial ping to setup the connection.
-        ping.ice_ping();
+	ping = Demo.PingPrx.checkedCast(self.communicator().stringToProxy(proxy))
+	if not ping:
+	    print "invalid proxy"
+	    return False
 
-        repetitions = 100000
-        print "pinging server " + str(repetitions) + " times (this may take a while)"
+	# Initial ping to setup the connection.
+	ping.ice_ping();
 
-        tsec = time.time()
+	repetitions = 100000
+	print "pinging server " + str(repetitions) + " times (this may take a while)"
 
-        i = repetitions
-        while(i >= 0):
-            ping.ice_ping()
-            i = i - 1
+	tsec = time.time()
 
-        tsec = time.time() - tsec
-        tmsec = tsec * 1000.0
+	i = repetitions
+	while(i >= 0):
+	    ping.ice_ping()
+	    i = i - 1
 
-        print "time for %d pings: %.3fms" % (repetitions, tmsec)
-        print "time per ping: %.3fms" % (tmsec / repetitions)
+	tsec = time.time() - tsec
+	tmsec = tsec * 1000.0
 
-        return 0
+	print "time for %d pings: %.3fms" % (repetitions, tmsec)
+	print "time per ping: %.3fms" % (tmsec / repetitions)
+
+	return True
 
 app = Client()
 sys.exit(app.main(sys.argv, "config.client"))

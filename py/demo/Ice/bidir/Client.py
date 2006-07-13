@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -14,7 +14,7 @@ slice_dir = os.getenv('ICEPY_HOME', '')
 if len(slice_dir) == 0 or not os.path.exists(os.path.join(slice_dir, 'slice')):
     slice_dir = os.getenv('ICE_HOME', '')
 if len(slice_dir) == 0 or not os.path.exists(os.path.join(slice_dir, 'slice')):
-    slice_dir = os.path.join('/', 'usr', 'share', 'Ice-3.2.0')
+    slice_dir = os.path.join('/', 'usr', 'share')
 if not os.path.exists(os.path.join(slice_dir, 'slice')):
     print sys.argv[0] + ': Slice directory not found. Define ICEPY_HOME or ICE_HOME.'
     sys.exit(1)
@@ -28,20 +28,27 @@ class CallbackReceiverI(Demo.CallbackReceiver):
 
 class Client(Ice.Application):
     def run(self, args):
-        server = Demo.CallbackSenderPrx.checkedCast(self.communicator().propertyToProxy('Callback.Client.CallbackServer'))
+        properties = self.communicator().getProperties()
+        proxyProperty = 'Callback.Client.CallbackServer'
+        proxy = properties.getProperty(proxyProperty)
+        if len(proxy) == 0:
+            print self.appName() + ": property `" + proxyProperty + "' not set"
+            return 1
+
+        server = Demo.CallbackSenderPrx.checkedCast(self.communicator().stringToProxy(proxy))
         if not server:
             print self.appName() + ": invalid proxy"
             return 1
 
-        adapter = self.communicator().createObjectAdapter("")
-        ident = Ice.Identity()
-        ident.name = Ice.generateUUID()
-        ident.category = ""
+        adapter = self.communicator().createObjectAdapter("Callback.Client")
+	ident = Ice.Identity()
+	ident.name = Ice.generateUUID()
+	ident.category = ""
         adapter.add(CallbackReceiverI(), ident)
         adapter.activate()
-        server.ice_getConnection().setAdapter(adapter)
-        server.addClient(ident)
-        self.communicator().waitForShutdown()
+	server.ice_getConnection().setAdapter(adapter)
+	server.addClient(ident)
+	self.communicator().waitForShutdown()
 
         return 0
 

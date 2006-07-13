@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -23,12 +23,13 @@ public:
 
     static std::string encode(const std::vector<unsigned char>&);
     static std::vector<unsigned char> decode(const std::string&);
-    static bool isBase64(char);
+
 
 private:
 
     static char encode(unsigned char);
     static unsigned char decode(char);
+    static bool isBase64(char);
 };
 
 }

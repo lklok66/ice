@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -28,13 +28,9 @@ IceXML::ParserException::ParserException(const char* file, int line, const strin
 {
 }
 
-IceXML::ParserException::~ParserException() throw()
-{
-}
-
 const char* IceXML::ParserException::_name = "IceXML::ParserException";
 
-string
+const string
 IceXML::ParserException::ice_name() const
 {
     return _name;
@@ -43,11 +39,7 @@ IceXML::ParserException::ice_name() const
 void
 IceXML::ParserException::ice_print(std::ostream& out) const
 {
-#ifdef __BCPLUSPLUS__
-    IceUtil::Exception::ice_print(out);
-#else
     Exception::ice_print(out);
-#endif
     if(!_reason.empty())
     {
         out << "\n" << _reason;
@@ -273,7 +265,7 @@ IceXML::DocumentBuilder::startElement(const string& name, const Attributes& attr
     NodePtr parent = _nodeStack.front();
 
     Element* element = new Element(parent, name, attributes, line, column);
-#ifdef NDEBUG
+#if NDEBUG
     parent->addChild(element);
 #else
     assert(parent->addChild(element));

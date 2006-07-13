@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -16,7 +16,7 @@
 /**
  *
  * A messaging service with support for federation. In contrast to
- * most other messaging or event services, IceStorm supports typed
+ * most other messaging or event services, &IceStorm; supports typed
  * events, meaning that broadcasting a message over a federation is as
  * easy as invoking a method on an interface.
  *
@@ -64,7 +64,7 @@ sequence<LinkInfo> LinkInfoSeq;
 
 /**
  *
- * This dictionary represents quality of service parameters.
+ * This dictionary represents Quality of service parameters.
  *
  * @see Topic::subscribe
  *
@@ -105,32 +105,6 @@ exception NoSuchLink
 
 /**
  *
- * This exception indicates that an attempt was made to subscribe
- * a proxy for which a subscription already exists.
- *
- **/
-exception AlreadySubscribed
-{
-};
-
-/**
- *
- * This exception indicates that a subscription failed due to an
- * invalid QoS.
- *
- **/
-exception BadQoS
-{
-    /*
-     *
-     * The reason for the failure.
-     *
-     */
-    string reason;
-};
-
-/**
- *
  * Publishers publish information on a particular topic. A topic
  * logically represents a type.
  *
@@ -148,7 +122,7 @@ interface Topic
      * @see TopicManager::create
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent string getName();
+    nonmutating string getName();
 
     /**
      *
@@ -160,58 +134,27 @@ interface Topic
      * @return A proxy to publish data on this topic.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent Object* getPublisher();
+    nonmutating Object* getPublisher();
 
     /**
      *
-     * Subscribe with the given <tt>qos</tt> to this topic. If the given
-     * <tt>subscriber</tt> proxy has already been registered, it will be
-     * replaced. Note that this can cause a loss of events to the
-     * subscribed object.
-     *
-     * <p class="Deprecated">This operation is deprecated as of version 3.2.
+     * Subscribe with the given [qos] to this topic. If the given
+     * [subscriber] proxy has already been registered, it will be
+     * replaced.
      *
      * @param qos The quality of service parameters for this
      * subscription.
      *
      * @param subscriber The subscriber's proxy.
      *
-     * @return The per-subscriber publisher object.
-     *
      * @see unsubscribe
      *
      **/
-    ["deprecate:subscribe is deprecated, use subscribeAndGetPublisher instead"]
     void subscribe(QoS theQoS, Object* subscriber);
 
     /**
      *
-     * Subscribe with the given <tt>qos</tt> to this topic. If the given
-     * <tt>subscriber</tt> proxy has already been registered, it will be
-     * replaced. A per-subscriber publisher object is returned.
-     *
-     * @param qos The quality of service parameters for this
-     * subscription.
-     *
-     * @param subscriber The subscriber's proxy.
-     *
-     * @return The per-subscriber publisher object.
-     *
-     * @throws AlreadySubscribed Raised if the subscriber object is
-     * already subscribed.
-     *
-     * @throws BadQoS Raised if the requested quality of service
-     * is unavailable or invalid.
-     *
-     * @see unsubscribe
-     *
-     **/
-    Object* subscribeAndGetPublisher(QoS theQoS, Object* subscriber)
-        throws AlreadySubscribed, BadQoS;
-
-    /**
-     *
-     * Unsubscribe the given <tt>subscriber</tt>.
+     * Unsubscribe the given [subscriber].
      *
      * @param subscriber The proxy of an existing subscriber.
      *
@@ -223,7 +166,7 @@ interface Topic
     /**
      *
      * Create a link to the given topic. All events originating
-     * on this topic will also be sent to <tt>linkTo</tt>.
+     * on this topic will also be sent to [linkTo].
      *
      * @param linkTo The topic to link to.
      *
@@ -237,7 +180,7 @@ interface Topic
 
     /**
      *
-     * Destroy the link from this topic to the given topic <tt>linkTo</tt>.
+     * Destroy the link from this topic to the given topic [linkTo].
      *
      * @param link The topic to destroy the link to.
      *
@@ -253,7 +196,7 @@ interface Topic
      * @return A sequence of LinkInfo objects.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent LinkInfoSeq getLinkInfoSeq();
+    nonmutating LinkInfoSeq getLinkInfoSeq();
 
     /**
      *
@@ -337,7 +280,7 @@ interface TopicManager
      * @throws NoSuchTopic Raised if the topic does not exist.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent Topic* retrieve(string name) throws NoSuchTopic;
+    nonmutating Topic* retrieve(string name) throws NoSuchTopic;
 
     /**
      *
@@ -346,7 +289,7 @@ interface TopicManager
      * @return A dictionary of string, topic proxy pairs.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent TopicDict retrieveAll();
+    nonmutating TopicDict retrieveAll();
 
     /**
      *
@@ -355,7 +298,7 @@ interface TopicManager
      * @return A dictionary mapping Slice type ids to their checksums.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent Ice::SliceChecksumDict getSliceChecksums();
+    nonmutating Ice::SliceChecksumDict getSliceChecksums();
 };
 
 };

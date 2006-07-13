@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -13,109 +13,12 @@
 #include <Ice/Identity.ice>
 #include <Ice/BuiltinSequences.ice>
 #include <Ice/ProcessF.ice>
-#include <Ice/Locator.ice>
-
 #include <Glacier2/Session.ice>
 #include <IceGrid/Admin.ice>
 #include <IceGrid/Observer.ice>
-#include <IceGrid/Registry.ice>
 
 module IceGrid
 {
-
-class InternalDbEnvDescriptor
-{
-    /** The name of the database environment. */
-    string name;
-    
-    /** The database properties. */
-    PropertyDescriptorSeq properties;
-};
-sequence<InternalDbEnvDescriptor> InternalDbEnvDescriptorSeq;
-
-class InternalAdapterDescriptor
-{
-    /** The identifier of the server. */
-    string id;
-
-    /** Specifies if the lifetime of the adapter is the same as the server. */
-    bool serverLifetime;
-};
-sequence<InternalAdapterDescriptor> InternalAdapterDescriptorSeq;
-
-class InternalDistributionDescriptor
-{
-    /** The proxy of the IcePatch2 server. */
-    string icepatch;
-
-    /** The source directories. */
-    ["java:type:{java.util.LinkedList}"] Ice::StringSeq directories;
-};
-
-dictionary<string, PropertyDescriptorSeq> PropertyDescriptorSeqDict;
-
-class InternalServerDescriptor
-{
-    /** The server ID. */
-    string id;
-
-    /** The server application */
-    string application;
-
-    /** The application uuid. */
-    string uuid;
-    
-    /** The application revision. */
-    int revision;
-
-    /** The id of the session which allocated the server. */
-    string sessionId;
-
-    /** The server executable. */
-    string exe;
-    
-    /** The server working directory. */
-    string pwd;
-
-    /** The user ID to use to run the server. */
-    string user;
-    
-    /** The server activation mode. */
-    string activation;
-
-    /** The server activation timeout. */
-    string activationTimeout;
-    
-    /** The server deactivation timeout. */
-    string deactivationTimeout;
-
-    /** Specifies if the server depends on the application distrib. */
-    bool applicationDistrib;
-
-    /** The distribution descriptor of this server. */
-    InternalDistributionDescriptor distrib;
-
-    /** Specifies if a process object is registered. */
-    bool processRegistered;
-    
-    /** The server command line options. */
-    Ice::StringSeq options;
-    
-    /** The server environment variables. */
-    Ice::StringSeq envs;
-
-    /** The path of the server logs. */
-    Ice::StringSeq logs;
-
-    /** The indirect object adapters. */
-    InternalAdapterDescriptorSeq adapters;
-
-    /** The database environments. */
-    InternalDbEnvDescriptorSeq dbEnvs;
-
-    /** The configuration files of the server. */
-    PropertyDescriptorSeqDict properties;
-};
 
 /**
  *
@@ -130,6 +33,9 @@ exception AdapterNotActiveException
 {
     /** True if the adapter can be activated on demand. */
     bool activatable;
+    
+    /** How long to wait for the adapter to become active. */
+    int timeout;
 };
 
 interface Adapter
@@ -155,8 +61,8 @@ interface Adapter
      * endpoints if the adapter is already active.
      *
      **/
-    ["ami", "nonmutating", "cpp:const"] idempotent Object* getDirectProxy()
-        throws AdapterNotActiveException;
+     ["ami"] nonmutating Object* getDirectProxy()
+	throws AdapterNotActiveException;
 
     /**
      *
@@ -172,7 +78,7 @@ interface Adapter
      *
      **/
     ["ami"] void setDirectProxy(Object* proxy)
-        throws AdapterActiveException;
+	throws AdapterActiveException;
 };
 
 /**
@@ -188,27 +94,7 @@ exception AdapterExistsException
 
 dictionary<string, Adapter*> AdapterPrxDict;
 
-interface FileReader
-{
-    /**
-     *
-     * Count the number of given lines from the end of the file and
-     * return the file offset.
-     *
-     **/
-    ["cpp:const"] idempotent long getOffsetFromEnd(string filename, int lines)
-        throws FileNotAvailableException;
-
-    /**
-     *
-     * Read lines (or size bytes) at the specified position from the given file.
-     * 
-     **/
-    ["cpp:const"] idempotent bool read(string filename, long pos, int size, out long newPos, out Ice::StringSeq lines)
-        throws FileNotAvailableException;
-};
-
-interface Server extends FileReader
+interface Server
 {
     /**
      *
@@ -219,7 +105,7 @@ interface Server extends FileReader
      *
      **/
     ["amd"] void start()
-        throws ServerStartException;
+	throws ServerStartException;
 
     /**
      *
@@ -229,7 +115,7 @@ interface Server extends FileReader
      *
      **/
     ["amd"] void stop()
-        throws ServerStopException;
+	throws ServerStopException;
     
     /**
      *
@@ -243,7 +129,7 @@ interface Server extends FileReader
      * Check if the server is enabled.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent bool isEnabled();
+    nonmutating bool isEnabled();
 
     /**
      *
@@ -251,7 +137,7 @@ interface Server extends FileReader
      *
      **/
     void sendSignal(string signal) 
-        throws BadSignalException;
+	throws BadSignalException;
     
     /**
      *
@@ -269,7 +155,7 @@ interface Server extends FileReader
      * @see ServerState
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent ServerState getState();
+    nonmutating ServerState getState();
 
     /**
      *
@@ -279,7 +165,7 @@ interface Server extends FileReader
      * integer.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent int getPid();
+    nonmutating int getPid();
 
     /**
      *
@@ -289,53 +175,7 @@ interface Server extends FileReader
     ["ami", "amd"] void setProcess(Ice::Process* proc);
 };
 
-interface InternalRegistry;
-sequence<InternalRegistry*> InternalRegistryPrxSeq;
-
-interface ReplicaObserver
-{
-    /**
-     *
-     * Initialization of the replica observer.
-     *
-     **/ 
-    void replicaInit(InternalRegistryPrxSeq replicas);
-
-    /**
-     *
-     * Notification that a replica has been added. The node should 
-     * establish a session with this new replica.
-     *
-     **/
-    void replicaAdded(InternalRegistry* replica);
-
-    /**
-     *
-     * Notification that a replica has been removed. The node should
-     * destroy the session to this replica.
-     *
-     **/
-    void replicaRemoved(InternalRegistry* replica);
-};
-
-interface PatcherFeedback
-{
-    /**
-     *
-     * The patch completed successfully.
-     *
-     **/
-    void finished();
-
-    /**
-     *
-     * The patch on the given node failed for the given reason.
-     *
-     **/
-    void failed(string reason);
-};
-
-interface Node extends FileReader, ReplicaObserver
+interface Node
 {
     /**
      *
@@ -344,20 +184,20 @@ interface Node extends FileReader, ReplicaObserver
      * they will be created.
      *
      **/
-    ["amd", "ami"] idempotent Server* loadServer(InternalServerDescriptor svr,
-                                                 string replicaName,
-                                                 out AdapterPrxDict adapters, 
-                                                 out int actTimeout, 
-                                                 out int deactTimeout)
-        throws DeploymentException;
+    ["amd", "ami"] idempotent Server* loadServer(string application, 
+						 ServerDescriptor desc,
+						 string sessionId,
+						 out AdapterPrxDict adapters, 
+						 out int actTimeout, 
+						 out int deactTimeout)
+	throws DeploymentException;
 
     /**
      *
      * Destroy the given server.
      *
      **/
-    ["amd", "ami"] idempotent void destroyServer(string name, string uuid, int revision, string replicaName)
-        throws DeploymentException;
+    ["amd", "ami"] idempotent void destroyServer(string name);
 
     /**
      *
@@ -367,51 +207,37 @@ interface Node extends FileReader, ReplicaObserver
      * which case the servers will be shutdown.
      * 
      **/
-    ["amd"] idempotent void patch(PatcherFeedback* feedback, 
-                                  string application, 
-                                  string server, 
-                                  InternalDistributionDescriptor appDistrib, 
-                                  bool shutdown);
-
-    /**
-     *
-     * Establish a session to the given replica, this method only
-     * returns once the registration was attempted (unlike
-     * replicaAdded below).
-     * 
-     **/
-    ["ami"] void registerWithReplica(InternalRegistry* replica);
+    ["ami"] idempotent void patch(string application, string server, DistributionDescriptor appDistrib, bool shutdown)
+	throws  PatchException;
 
     /**
      *
      * Get the node name.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent string getName();    
+    nonmutating string getName();    
 
     /**
      *
      * Get the node hostname.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent string getHostname();    
+    nonmutating string getHostname();    
 
     /**
      *
      * Get the node load.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent LoadInfo getLoad();
+    nonmutating LoadInfo getLoad();
 
     /**
      *
      * Shutdown the node.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent void shutdown();
+    nonmutating void shutdown();
 };
-
-sequence<Node*> NodePrxSeq;
 
 /**
  *
@@ -434,51 +260,17 @@ interface NodeSession
 
     /**
      *
-     * Set the replica observer. The node calls this method when it's
-     * ready to receive notifications for the replicas. It only calls
-     * this for the session with the master.
-     *
-     **/
-    void setReplicaObserver(ReplicaObserver* observer);
-
-    /**
-     *
      * Return the node session timeout.
      *
      **/ 
-    ["nonmutating", "cpp:const"] idempotent int getTimeout();
-
-    /**
-     *
-     * Return the node observer.
-     *
-     **/
-    ["nonmutating", "cpp:const"] idempotent NodeObserver* getObserver();
-
-    /**
-     *
-     * Ask the registry to load the servers on the node.
-     * 
-     **/
-    ["amd", "nonmutating", "cpp:const"] idempotent void loadServers();
+    nonmutating int getTimeoutAndObserver(out NodeObserver* observer);
 
     /**
      *
      * Get the name of the servers deployed on the node.
      *
      **/
-    ["nonmutating", "cpp:const"] idempotent Ice::StringSeq getServers();
-
-    /**
-     *
-     * Wait for the application update to complete (the application is
-     * completely updated once all the registry replicas have been
-     * updated). This is used by the node to ensure that before to
-     * start a server all the replicas have the up-to-date descriptor
-     * of the server.
-     *
-     **/
-    ["amd", "ami", "cpp:const"] void waitForApplicationUpdate(string application, int revision);
+    Ice::StringSeq getServers();
 
     /**
      *
@@ -488,185 +280,7 @@ interface NodeSession
     void destroy();
 };
 
-/**
- *
- * This exception is raised if a replica is already registered and
- * active.
- *
- **/
-exception ReplicaActiveException
-{
-};
-
-enum TopicName
-{
-    RegistryObserverTopicName,
-    NodeObserverTopicName,
-    ApplicationObserverTopicName,
-    AdapterObserverTopicName,
-    ObjectObserverTopicName
-};
-
-interface DatabaseObserver extends ApplicationObserver, ObjectObserver, AdapterObserver
-{
-};
-
-interface ReplicaSession
-{
-    /**
-     *
-     * The replica call this method to keep the session alive.
-     *
-     **/
-    void keepAlive();
-
-    /**
-     *
-     * Return the replica session timeout.
-     *
-     **/ 
-    ["cpp:const"] idempotent int getTimeout();
-
-    /**
-     *
-     * Set the database observer. Once the observer is subscribed, it
-     * will receive the database and database updates.
-     *
-     **/
-    idempotent void setDatabaseObserver(DatabaseObserver* dbObs);
-
-    /**
-     *
-     * This method sets the endpoints of the replica. This allows the
-     * master to create proxies with multiple endpoints for replicated
-     * objects (e.g.: IceGrid::Query object).
-     * 
-     **/
-    idempotent void setEndpoints(StringObjectProxyDict endpoints);
-
-    /**
-     *
-     * Registers the replica well-known objects with the master.
-     *
-     **/
-    idempotent void registerWellKnownObjects(ObjectInfoSeq objects);
-
-    /**
-     *
-     * Set the adapter direct proxy of the given adapter in the
-     * master. This is used to support dynamic registration with
-     * the locator registry interface.
-     *
-     **/
-    ["ami"] idempotent void setAdapterDirectProxy(string adapterId, string replicaGroupId, Object* proxy)
-        throws AdapterNotExistException, AdapterExistsException;
-
-    /**
-     *
-     * Notify the master that an update was received. The master might
-     * wait for replication updates to be received by all the replicas
-     * before to continue.
-     *
-     **/
-    void receivedUpdate(TopicName name, int serial, string failure); 
-
-    /**
-     *
-     * Destroy the session.
-     *
-     **/
-    void destroy();
-};
-
-/**
- *
- * Information about an IceGrid node.
- *
- **/
-class InternalNodeInfo
-{
-    /**
-     *
-     * The name of the node.
-     *
-     **/
-    string name;
-
-    /**
-     *
-     * The operating system name.
-     *
-     **/
-    string os;
-
-    /**
-     *
-     * The network name of the host running this node (as defined in
-     * uname()).
-     *
-     **/
-    string hostname;
-
-    /**
-     *
-     * The operation system release level (as defined in uname()).
-     * 
-     **/
-    string release;
-
-    /**
-     *
-     * The operation system version (as defined in uname()).
-     *
-     **/
-    string version;
-
-    /**
-     *
-     * The machine hardware type (as defined in uname()).
-     *
-     **/
-    string machine;    
-
-    /**
-     *
-     * The number of processors.
-     *
-     **/
-    int nProcessors;
-    
-    /**
-     *
-     * The path to the node data directory.
-     *
-     **/
-    string dataDir;
-};
-
-/**
- *
- * Information about an IceGrid registry replica.
- *
- **/
-class InternalReplicaInfo
-{
-    /**
-     *
-     * The name of the registry.
-     *
-     **/
-    string name;
-
-    /**
-     *
-     * The network name of the host running this registry (as defined in
-     * uname()).
-     *
-     **/
-    string hostname;
-};
-
-interface InternalRegistry extends FileReader
+interface InternalRegistry
 {
     /**
      *
@@ -674,71 +288,21 @@ interface InternalRegistry extends FileReader
      * is already registered, [registerNode] will overide the previous
      * node only if it's not active.
      *
-     * @param info Some information on the node.
+     * @param name The name of the node to register.
      *
-     * @param prx The proxy of the node.
+     * @param nd The proxy of the node.
+     *
+     * @param info Some information on the node.
      * 
-     * @param loadInf The load information of the node.
-     * 
-     * @return The node session proxy.
+     * @return The name of the servers currently deployed on the node.
      * 
      * @throws NodeActiveException Raised if the node is already
      * registered and currently active.
      *
      **/
-    NodeSession* registerNode(InternalNodeInfo info, Node* prx, LoadInfo loadInf)
-        throws NodeActiveException;
-
-    /**
-     *
-     * Register a replica with the registry. If a replica with the
-     * same name is already registered, [registerReplica] will overide
-     * the previous replica only if it's not active.
-     *
-     * @param info Some information on the replica.
-     *
-     * @param prx The proxy of the replica.
-     * 
-     * @return The replica session proxy.
-     * 
-     * @throws ReplicaActiveException Raised if the replica is already
-     * registered and currently active.
-     *
-     **/
-    ReplicaSession* registerReplica(InternalReplicaInfo info, InternalRegistry* prx)
-        throws ReplicaActiveException;
-
-    /**
-     *
-     * Create a session with the given registry replica. This method
-     * returns only once the session creation has been attempted.
-     * 
-     **/
-    void registerWithReplica(InternalRegistry* prx);
-
-    /**
-     *
-     * Return the proxies of all the nodes known by this registry.
-     *
-     **/
-    ["cpp:const"] idempotent NodePrxSeq getNodes();
-
-    /**
-     *
-     * Return the proxies of all the registry replicas known by this
-     * registry.
-     *
-     **/
-    ["cpp:const"] idempotent InternalRegistryPrxSeq getReplicas();
-
-    /**
-     *
-     * Shutdown this registry.
-     *
-     **/
-    ["cpp:const"] idempotent void shutdown();
+    NodeSession* registerNode(string name, Node* nd, NodeInfo info)
+	throws NodeActiveException;
 };
-
 
 };
 

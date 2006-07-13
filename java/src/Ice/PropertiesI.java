@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -9,33 +9,15 @@
 
 package Ice;
 
-public final class PropertiesI implements Properties
+public final class PropertiesI extends LocalObjectImpl implements Properties
 {
-    class PropertyValue
-    {
-        public PropertyValue(String v, boolean u)
-        {
-            value = v;
-            used = u;
-        }
-
-        public String value;
-        public boolean used;
-    }
-
     public synchronized String
     getProperty(String key)
     {
-        String result = null;
-        PropertyValue pv = (PropertyValue)_properties.get(key);
-        if(pv == null)
+        String result = (String)_properties.get(key);
+        if(result == null)
         {
             result = System.getProperty(key);
-        }
-        else
-        {
-            pv.used = true;
-            result = pv.value;
         }
         if(result == null)
         {
@@ -47,16 +29,10 @@ public final class PropertiesI implements Properties
     public synchronized String
     getPropertyWithDefault(String key, String value)
     {
-        String result = null;
-        PropertyValue pv = (PropertyValue)_properties.get(key);
-        if(pv == null)
+        String result = (String)_properties.get(key);
+        if(result == null)
         {
             result = System.getProperty(key);
-        }
-        else
-        {
-            pv.used = true;
-            result = pv.value;
         }
         if(result == null)
         {
@@ -68,131 +44,107 @@ public final class PropertiesI implements Properties
     public int
     getPropertyAsInt(String key)
     {
-        return getPropertyAsIntWithDefault(key, 0);
+	return getPropertyAsIntWithDefault(key, 0);
     }
 
     public synchronized int
     getPropertyAsIntWithDefault(String key, int value)
     {
-        String result = null;
-        PropertyValue pv = (PropertyValue)_properties.get(key);
-        if(pv == null)
+        String result = (String)_properties.get(key);
+        if(result == null)
         {
             result = System.getProperty(key);
-        }
-        else
-        {
-            pv.used = true;
-            result = pv.value;
         }
         if(result == null)
         {
             return value;
         }
 
-        try
-        {
-            return Integer.parseInt(result);
-        }
-        catch(NumberFormatException ex)
-        {
-            return 0;
-        }
+	try
+	{
+	    return Integer.parseInt(result);
+	}
+	catch(NumberFormatException ex)
+	{
+	    return 0;
+	}
     }
 
     public synchronized java.util.Map
     getPropertiesForPrefix(String prefix)
     {
-        java.util.HashMap result = new java.util.HashMap();
+	java.util.HashMap result = new java.util.HashMap();
         java.util.Iterator p = _properties.entrySet().iterator();
         while(p.hasNext())
         {
             java.util.Map.Entry entry = (java.util.Map.Entry)p.next();
             String key = (String)entry.getKey();
+            String value = (String)entry.getValue();
             if(prefix.length() == 0 || key.startsWith(prefix))
             {
-                PropertyValue pv = (PropertyValue)entry.getValue();
-                pv.used = true;
-                result.put(key, pv.value);
+		result.put(key, value);
             }
         }
-        return result;
+	return result;
     }
 
     public void
     setProperty(String key, String value)
     {
-        //
-        // Check if the property is legal.
-        //
-        Logger logger = Ice.Util.getProcessLogger();
-        if(key == null || key.length() == 0)
-        {
-            return;
-        }
+	//
+	// Check if the property is legal. (We write to System.err instead of using
+	// a logger because no logger may be established at the time the property
+	// is parsed.)
+	//
+	if(key == null || key.length() == 0)
+	{
+	    return;
+	}
 
         int dotPos = key.indexOf('.');
-        if(dotPos != -1)
-        {
-            String prefix = key.substring(0, dotPos);
-            for(int i = 0; IceInternal.PropertyNames.validProps[i] != null; ++i)
-            {
-                String pattern = IceInternal.PropertyNames.validProps[i][0].pattern();
-                dotPos = pattern.indexOf('.');
-                assert(dotPos != -1);
-                String propPrefix = pattern.substring(1, dotPos - 1);
-                if(!propPrefix.equals(prefix))
-                {
-                    continue;
-                }
+	if(dotPos != -1)
+	{
+	    String prefix = key.substring(0, dotPos);
+	    for(int i = 0; IceInternal.PropertyNames.validProps[i] != null; ++i)
+	    {
+	        String pattern = IceInternal.PropertyNames.validProps[i][0];
+		dotPos = pattern.indexOf('.');
+		assert(dotPos != -1);
+		String propPrefix = pattern.substring(1, dotPos - 1);
+		if(!propPrefix.equals(prefix))
+		{
+		    continue;
+		}
 
-                boolean found = false;
-                for(int j = 0; IceInternal.PropertyNames.validProps[i][j] != null && !found; ++j)
-                {
-                    pattern = IceInternal.PropertyNames.validProps[i][j].pattern();
-                    java.util.regex.Pattern pComp = java.util.regex.Pattern.compile(pattern);
-                    java.util.regex.Matcher m = pComp.matcher(key);
-                    found = m.matches();
+		boolean found = false;
+		for(int j = 0; IceInternal.PropertyNames.validProps[i][j] != null && !found; ++j)
+		{
+		    pattern = IceInternal.PropertyNames.validProps[i][j];
+		    java.util.regex.Pattern pComp = java.util.regex.Pattern.compile(pattern);
+		    java.util.regex.Matcher m = pComp.matcher(key);
+		    found = m.matches();
+		}
+		if(!found)
+		{
+		    System.err.println("warning: unknown property: " + key);
+		}
+	    }
+	}
 
-                    if(found && IceInternal.PropertyNames.validProps[i][j].deprecated())
-                    {
-                        logger.warning("deprecated property: " + key);
-                        if(IceInternal.PropertyNames.validProps[i][j].deprecatedBy() != null)
-                        {
-                            key = IceInternal.PropertyNames.validProps[i][j].deprecatedBy();
-                        }
-                    }
-                }
-                if(!found)
-                {
-                    logger.warning("unknown property: " + key);
-                }
-            }
-        }
-
-        synchronized(this)
-        {
-            //
-            // Set or clear the property.
-            //
-            if(value != null && value.length() > 0)
-            {
-                PropertyValue pv = (PropertyValue)_properties.get(key);
-                if(pv != null)
-                {
-                    pv.value = value;
-                }
-                else
-                {
-                    pv = new PropertyValue(value, false);
-                }
-                _properties.put(key, pv);
-            }
-            else
-            {
-                _properties.remove(key);
-            }
-        }
+	synchronized(this)
+	{
+	    //
+	    // Set or clear the property.
+	    //
+	    if(value != null && value.length() > 0)
+	    {
+		_properties.put(key, value);
+	    }
+	    else
+	    {
+		_properties.remove(key);
+	    }
+	}
     }
 
     public synchronized String[]
@@ -204,7 +156,7 @@ public final class PropertiesI implements Properties
         while(p.hasNext())
         {
             java.util.Map.Entry entry = (java.util.Map.Entry)p.next();
-            result[i++] = "--" + entry.getKey() + "=" + ((PropertyValue)entry.getValue()).value;
+            result[i++] = "--" + entry.getKey() + "=" + entry.getValue();
         }
         assert(i == result.length);
         return result;
@@ -213,11 +165,11 @@ public final class PropertiesI implements Properties
     public String[]
     parseCommandLineOptions(String pfx, String[] options)
     {
-        if(pfx.length() > 0 && pfx.charAt(pfx.length() - 1) != '.')
-        {
-            pfx += '.';
-        }
-        pfx = "--" + pfx;
+	if(pfx.length() > 0 && pfx.charAt(pfx.length() - 1) != '.')
+	{
+	    pfx += '.';
+	}
+	pfx = "--" + pfx;
 
         java.util.ArrayList result = new java.util.ArrayList();
         for(int i = 0; i < options.length; i++)
@@ -246,10 +198,10 @@ public final class PropertiesI implements Properties
     parseIceCommandLineOptions(String[] options)
     {
         String[] args = options;
-        for(int i = 0; IceInternal.PropertyNames.clPropNames[i] != null; ++i)
-        {
-            args = parseCommandLineOptions(IceInternal.PropertyNames.clPropNames[i], args);
-        }
+	for(int i = 0; IceInternal.PropertyNames.clPropNames[i] != null; ++i)
+	{
+	    args = parseCommandLineOptions(IceInternal.PropertyNames.clPropNames[i], args);
+	}
         return args;
     }
 
@@ -258,15 +210,14 @@ public final class PropertiesI implements Properties
     {
         try
         {
-            java.io.FileInputStream fis = new java.io.FileInputStream(file);
-            java.io.InputStreamReader isr = new java.io.InputStreamReader(fis, "UTF-8");
-            java.io.BufferedReader br = new java.io.BufferedReader(isr);
+            java.io.FileReader fr = new java.io.FileReader(file);
+            java.io.BufferedReader br = new java.io.BufferedReader(fr);
             parse(br);
         }
         catch(java.io.IOException ex)
         {
             FileException fe = new FileException();
-            fe.path = file;
+	    fe.path = file;
             fe.initCause(ex); // Exception chaining
             throw fe;
         }
@@ -278,26 +229,9 @@ public final class PropertiesI implements Properties
         return new PropertiesI(this);
     }
 
-    public synchronized java.util.List
-    getUnusedProperties()
-    {
-        java.util.List unused = new java.util.ArrayList();
-        java.util.Iterator p = _properties.entrySet().iterator();
-        while(p.hasNext())
-        {
-            java.util.Map.Entry entry = (java.util.Map.Entry)p.next();
-            PropertyValue pv = (PropertyValue)entry.getValue();
-            if(!pv.used)
-            {
-                unused.add((String)entry.getKey());
-            }
-        }
-        return unused;
-    }
-
     PropertiesI(PropertiesI p)
     {
-        _properties = new java.util.HashMap(p._properties);
+        _properties.putAll(p._properties);
     }
 
     PropertiesI()
@@ -306,12 +240,12 @@ public final class PropertiesI implements Properties
 
     PropertiesI(StringSeqHolder args, Properties defaults)
     {
-        if(defaults != null)
-        {
-            _properties = new java.util.HashMap(((PropertiesI)defaults)._properties);
-        }
-        
-        boolean loadConfigFiles = false;
+	if(defaults != null)
+	{
+	    _properties.putAll(defaults.getPropertiesForPrefix(""));
+	}
+	
+	boolean loadConfigFiles = false;
 
         for(int i = 0; i < args.value.length; i++)
         {
@@ -323,7 +257,7 @@ public final class PropertiesI implements Properties
                     line += "=1";
                 }
                 parseLine(line.substring(2));
-                loadConfigFiles = true;
+		loadConfigFiles = true;
 
                 String[] arr = new String[args.value.length - 1];
                 System.arraycopy(args.value, 0, arr, 0, i);
@@ -335,12 +269,12 @@ public final class PropertiesI implements Properties
             }
         }
 
-        if(loadConfigFiles)
-        {
-            loadConfig();
-        }
+	if(loadConfigFiles)
+	{
+	    loadConfig();
+	}
 
-        args.value = parseIceCommandLineOptions(args.value);
+	args.value = parseIceCommandLineOptions(args.value);
     }
 
     private void
@@ -431,7 +365,7 @@ public final class PropertiesI implements Properties
             }
         }
 
-        _properties.put("Ice.Config", new PropertyValue(value, true));
+        setProperty("Ice.Config", value);
     }
 
     private java.util.HashMap _properties = new java.util.HashMap();

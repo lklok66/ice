@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -38,8 +38,6 @@ const int FixedSeqSize = 50000;
 
 interface Throughput
 {
-    void endWarmup();
-
     void sendByteSeq(["cpp:array"] ByteSeq seq);
     ByteSeq recvByteSeq();
     ByteSeq echoByteSeq(ByteSeq seq);
@@ -56,7 +54,7 @@ interface Throughput
     FixedSeq recvFixedSeq();
     FixedSeq echoFixedSeq(FixedSeq seq);
 
-    void shutdown();
+    idempotent void shutdown();
 };
 
 };

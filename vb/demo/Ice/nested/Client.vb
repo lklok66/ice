@@ -1,6 +1,6 @@
 ' **********************************************************************
 '
-' Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+' Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 '
 ' This copy of Ice is licensed to you under the terms described in the
 ' ICE_LICENSE file included in this distribution.
@@ -16,7 +16,15 @@ Module NestedC
         Inherits Ice.Application
 
         Public Overloads Overrides Function run(ByVal args() As String) As Integer
-            Dim nested As NestedPrx = NestedPrxHelper.checkedCast(communicator().propertyToProxy("Nested.NestedServer"))
+            Dim properties As Ice.Properties = communicator().getProperties()
+            Dim proxyProperty As String = "Nested.Client.NestedServer"
+            Dim proxy As String = properties.getProperty(proxyProperty)
+            If proxy.Length = 0 Then
+                Console.Error.WriteLine("property `" & proxyProperty & "' not set")
+                Return 1
+            End If
+
+            Dim nested As NestedPrx = NestedPrxHelper.checkedCast(communicator().stringToProxy(proxy))
             If nested Is Nothing Then
                 Console.Error.WriteLine("invalid proxy")
                 Return 1
@@ -40,7 +48,7 @@ Module NestedC
                     Console.Out.Flush()
                     S = Console.In.ReadLine()
                     If S Is Nothing Then
-                        Exit Do
+                        Exit Try
                     End If
                     Dim level As Integer = System.Int32.Parse(S)
                     If level > 0 Then

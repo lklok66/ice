@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -14,7 +14,8 @@ using namespace std;
 using namespace Ice;
 using namespace IceInternal;
 
-IceUtil::Shared* IceInternal::upCast(EventHandler* p) { return p; }
+void IceInternal::incRef(EventHandler* p) { p->__incRef(); }
+void IceInternal::decRef(EventHandler* p) { p->__decRef(); }
 
 InstancePtr
 IceInternal::EventHandler::instance() const

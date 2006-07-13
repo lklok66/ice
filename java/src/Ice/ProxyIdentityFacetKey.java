@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -40,18 +40,18 @@ public class ProxyIdentityFacetKey
     public boolean
     equals(java.lang.Object obj)
     {
-        if(this == obj)
-        {
-            return true;
-        }
+	if(this == obj)
+	{
+	    return true;
+	}
 
-        if(obj instanceof ProxyIdentityFacetKey)
-        {
-            ProxyIdentityFacetKey other = (ProxyIdentityFacetKey)obj;
-            return (_hashCode == other._hashCode) && _identity.equals(other._identity) && _facet.equals(other._facet);
-        }
+	if(obj instanceof ProxyIdentityFacetKey)
+	{
+	    ProxyIdentityFacetKey other = (ProxyIdentityFacetKey)obj;
+	    return (_hashCode == other._hashCode) && _identity.equals(other._identity) && _facet.equals(other._facet);
+	}
 
-        return false;
+	return false;
     }
 
     public Ice.ObjectPrx

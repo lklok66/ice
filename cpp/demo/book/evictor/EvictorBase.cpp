@@ -1,4 +1,5 @@
 #include <EvictorBase.h>
+#include <Ice/LocalException.h>
 
 EvictorBase::EvictorBase(Ice::Int size)
     : _size(size)
@@ -15,44 +16,48 @@ EvictorBase::locate(const Ice::Current& c, Ice::LocalObjectPtr& cookie)
     IceUtil::Mutex::Lock lock(_mutex);
 
     //
+    // Create a cookie.
+    //
+    EvictorCookiePtr ec = new EvictorCookie;
+    cookie = ec;
+
+    //
     // Check if we have a servant in the map already.
     //
-    EvictorEntryPtr entry;
     EvictorMap::iterator i = _map.find(c.id);
-    if(i != _map.end())
+    bool newEntry = i == _map.end();
+    if(!newEntry)
     {
-        //
-        // Got an entry already, dequeue the entry from its current position.
-        //
-        entry = i->second;
-        _queue.erase(entry->queuePos);
+	//
+	// Got an entry already, dequeue the entry from its current position.
+	//
+	ec->entry = i->second;
+	_queue.erase(ec->entry->pos);
     }
     else
     {
-        //
-        // We do not have an entry. Ask the derived class to
-        // instantiate a servant and add a new entry to the map.
-        //
-        entry = new EvictorEntry;
-        entry->servant = add(c, entry->userCookie); // Down-call
-        if(!entry->servant)
-        {
-            return 0;
-        }
-        entry->useCount = 0;
-        i = _map.insert(std::make_pair(c.id, entry)).first;
+	//
+	// We do not have an entry. Ask the derived class to
+	// instantiate a servant and add a new entry to the map.
+	//
+	ec->entry = new EvictorEntry;
+	ec->entry->servant = add(c, ec->entry->userCookie); // Down-call
+	if(!ec->entry->servant)
+	{
+	    return 0;
+	}
+	ec->entry->useCount = 0;
+	i = _map.insert(std::make_pair(c.id, ec->entry)).first;
     }
 
     //
     // Increment the use count of the servant and enqueue
     // the entry at the front, so we get LRU order.
     //
-    ++(entry->useCount);
-    entry->queuePos = _queue.insert(_queue.begin(), i);
+    ++(ec->entry->useCount);
+    ec->entry->pos = _queue.insert(_queue.begin(), i);
 
-    cookie = entry;
-
-    return entry->servant;
+    return ec->entry->servant;
 }
 
 void
@@ -60,12 +65,12 @@ EvictorBase::finished(const Ice::Current&, const Ice::ObjectPtr&, const Ice::Loc
 {
     IceUtil::Mutex::Lock lock(_mutex);
 
-    EvictorEntryPtr entry = EvictorEntryPtr::dynamicCast(cookie);
+    EvictorCookiePtr ec = EvictorCookiePtr::dynamicCast(cookie);
 
     //
     // Decrement use count and check if there is something to evict.
     //
-    --(entry->useCount);
+    --(ec->entry->useCount);
     evictServants();
 }
 
@@ -86,21 +91,15 @@ EvictorBase::evictServants()
     // look at the excess elements to see whether any of them
     // can be evicted.
     //
-    EvictorQueue::reverse_iterator p = _queue.rbegin();
-    int excessEntries = static_cast<int>(_map.size() - _size);
-
-    for(int i = 0; i < excessEntries; ++i)
+    for(int i = static_cast<int>(_map.size() - _size); i > 0; --i)
     {
-        EvictorMap::iterator mapPos = *p;
-        if(mapPos->second->useCount == 0)
-        {
-            evict(mapPos->second->servant, mapPos->second->userCookie); // Down-call
-            p = EvictorQueue::reverse_iterator(_queue.erase(mapPos->second->queuePos));
-            _map.erase(mapPos);
-        }
-        else
-        {
-            ++p;
-        }
+	EvictorQueue::reverse_iterator p = _queue.rbegin();
+	if((*p)->second->useCount == 0)
+	{
+	    evict((*p)->second->servant, (*p)->second->userCookie); // Down-call
+	    EvictorMap::iterator pos = *p;
+	    _queue.erase((*p)->second->pos);
+	    _map.erase(pos);
+	}
     }
 }

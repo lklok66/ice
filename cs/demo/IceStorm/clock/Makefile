@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -12,7 +12,7 @@ top_srcdir	= ../../..
 TARGETS		= publisher.exe subscriber.exe
 
 C_SRCS		= Publisher.cs
-S_SRCS		= Subscriber.cs
+S_SRCS		= ClockI.cs Subscriber.cs
 
 SLICE_SRCS	= $(SDIR)/Clock.ice
 
@@ -27,9 +27,9 @@ MCSFLAGS	:= $(MCSFLAGS) -target:exe
 SLICE2CSFLAGS	:= $(SLICE2CSFLAGS) --ice -I. -I$(slicedir)
 
 publisher.exe: $(C_SRCS) $(GEN_SRCS)
-	$(MCS) $(MCSFLAGS) -out:$@ $(call ref,icecs) $(call ref,icestormcs) $(subst /,$(DSEP),$^)
+	$(MCS) $(MCSFLAGS) -out:$@ $(call ref,icecs) $(call ref,icestormcs) $^
 
 subscriber.exe: $(S_SRCS) $(GEN_SRCS)
-	$(MCS) $(MCSFLAGS) -out:$@ $(call ref,icecs) $(call ref,icestormcs) $(subst /,$(DSEP),$^)
+	$(MCS) $(MCSFLAGS) -out:$@ $(call ref,icecs) $(call ref,icestormcs) $^
 
 include .depend

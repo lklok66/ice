@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -56,7 +56,7 @@ class AMIException(CallbackBase):
         test(False)
 
     def ice_exception(self, ex):
-        test(isinstance(ex, Ice.ConnectionLostException))
+	test(isinstance(ex, Ice.ConnectionLostException))
         self.called()
 
 def allTests(communicator):
@@ -84,7 +84,7 @@ def allTests(communicator):
     print "calling operation to kill connection with second proxy...",
     try:
         retry2.op(True)
-        test(False)
+	test(False)
     except Ice.ConnectionLostException:
         print "ok"
 

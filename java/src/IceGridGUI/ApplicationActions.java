@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -26,275 +26,229 @@ public class ApplicationActions
 {
     public Action get(int index)
     {
-        return _array[index];
+	return _array[index];
     }
     
     public boolean[] setTarget(TreeNode target)
     {
-        _target = target;
+	_target = target;
 
-        boolean[] availableActions;
-        if(_target == null)
-        {
-            availableActions = new boolean[TreeNode.ACTION_COUNT];
-        }
-        else
-        {   
-            availableActions = _target.getAvailableActions();
-        }
+	boolean[] availableActions;
+	if(_target == null)
+	{
+	    availableActions = new boolean[TreeNode.ACTION_COUNT];
+	}
+	else
+	{   
+	    availableActions = _target.getAvailableActions();
+	}
 
-        for(int i = 0; i < _array.length; ++i)
-        {
-            _array[i].setEnabled(availableActions[i]);
-        }
+	for(int i = 0; i < _array.length; ++i)
+	{
+	    _array[i].setEnabled(availableActions[i]);
+	}
 
-        return availableActions;
+	return availableActions;
     }
 
     ApplicationActions(boolean popup)
     {
-        final int MENU_MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+	final int MENU_MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 
-        _array[TreeNode.NEW_ADAPTER] = new AbstractAction(
-            popup ? "New Adapter" : "Adapter")
-            {
-                public void actionPerformed(ActionEvent e) 
-                {
-                    if(apply(_target))
-                    {
-                        _target.newAdapter();
-                    }
-                }
-            };
+	_array[TreeNode.NEW_ADAPTER] = new AbstractAction(
+	    popup ? "New adapter" : "Adapter")
+	    {
+		public void actionPerformed(ActionEvent e) 
+		{
+		    _target.newAdapter();
+		}
+	    };
 
-        _array[TreeNode.NEW_DBENV] = new AbstractAction(
-            popup ? "New Database Environment" : "Database Environment")
-            {
-                public void actionPerformed(ActionEvent e) 
-                {
-                    if(apply(_target))
-                    {
-                        _target.newDbEnv();
-                    }
-                }
-            };
-        
-        _array[TreeNode.NEW_NODE] = new AbstractAction(
-            popup ? "New Node" : "Node")
-            {
-                public void actionPerformed(ActionEvent e) 
-                {
-                    if(apply(_target))
-                    {
-                        _target.newNode();
-                    }
-                }
-            };
+	_array[TreeNode.NEW_DBENV] = new AbstractAction(
+	    popup ? "New database environment" : "Database environment")
+	    {
+		public void actionPerformed(ActionEvent e) 
+		{
+		    _target.newDbEnv();
+		}
+	    };
+	
+	_array[TreeNode.NEW_NODE] = new AbstractAction(
+	    popup ? "New node" : "Node")
+	    {
+		public void actionPerformed(ActionEvent e) 
+		{
+		    _target.newNode();
+		}
+	    };
 
-        _array[TreeNode.NEW_PROPERTY_SET] = new AbstractAction(
-            popup ? "New Property Set" : "Property Set")
-            {
-                public void actionPerformed(ActionEvent e) 
-                {
-                    if(apply(_target))
-                    {
-                        _target.newPropertySet();
-                    }
-                }
-            };
+	_array[TreeNode.NEW_PROPERTY_SET] = new AbstractAction(
+	    popup ? "New property set" : "Property set")
+	    {
+		public void actionPerformed(ActionEvent e) 
+		{
+		    _target.newPropertySet();
+		}
+	    };
 
-        _array[TreeNode.NEW_REPLICA_GROUP] = new AbstractAction(
-            popup ? "New Replica Group" : "Replica Group" )
-            {
-                public void actionPerformed(ActionEvent e) 
-                {
-                    if(apply(_target))
-                    {
-                        _target.newReplicaGroup();
-                    }
-                }
-            };
+	_array[TreeNode.NEW_REPLICA_GROUP] = new AbstractAction(
+	    popup ? "New replica group" : "Replica group" )
+	    {
+		public void actionPerformed(ActionEvent e) 
+		{
+		    _target.newReplicaGroup();
+		}
+	    };
 
-        _array[TreeNode.NEW_SERVER] = new AbstractAction(
-            popup ? "New Server" : "Server")
-            {
-                public void actionPerformed(ActionEvent e) 
-                {
-                    if(apply(_target))
-                    {
-                        _target.newServer();
-                    }
-                }
-            };
+	_array[TreeNode.NEW_SERVER] = new AbstractAction(
+	    popup ? "New server" : "Server")
+	    {
+		public void actionPerformed(ActionEvent e) 
+		{
+		    _target.newServer();
+		}
+	    };
 
-        _array[TreeNode.NEW_SERVER_ICEBOX] = new AbstractAction(
-            popup ? "New IceBox Server" : "IceBox Server")
-            {
-                public void actionPerformed(ActionEvent e) 
-                {
-                    if(apply(_target))
-                    {
-                        _target.newServerIceBox();
-                    }
-                }
-            };
+	_array[TreeNode.NEW_SERVER_ICEBOX] = new AbstractAction(
+	    popup ? "New IceBox server" : "IceBox server")
+	    {
+		public void actionPerformed(ActionEvent e) 
+		{
+		    _target.newServerIceBox();
+		}
+	    };
 
-        _array[TreeNode.NEW_SERVER_FROM_TEMPLATE] = new AbstractAction(
-            popup ? "New Server from Template" : "Server from Template")
-            {
-                public void actionPerformed(ActionEvent e) 
-                {
-                    if(apply(_target))
-                    {
-                        _target.newServerFromTemplate();
-                    }
-                }
-            };
+	_array[TreeNode.NEW_SERVER_FROM_TEMPLATE] = new AbstractAction(
+	    popup ? "New server from template" : "Server from template")
+	    {
+		public void actionPerformed(ActionEvent e) 
+		{
+		    _target.newServerFromTemplate();
+		}
+	    };
 
 
-        _array[TreeNode.NEW_SERVICE] = new AbstractAction(
-            popup ? "New Service" : "Service")
-            {
-                public void actionPerformed(ActionEvent e) 
-                {
-                    if(apply(_target))
-                    {
-                        _target.newService();
-                    }
-                }
-            };
+	_array[TreeNode.NEW_SERVICE] = new AbstractAction(
+	    popup ? "New service" : "Service")
+	    {
+		public void actionPerformed(ActionEvent e) 
+		{
+		    _target.newService();
+		}
+	    };
 
-        _array[TreeNode.NEW_SERVICE_FROM_TEMPLATE] = new AbstractAction(
-            popup ? "New Service from Template" : "Service from Template")
-            {
-                public void actionPerformed(ActionEvent e) 
-                {
-                    if(apply(_target))
-                    {
-                        _target.newServiceFromTemplate();
-                    }
-                }
-            };
+	_array[TreeNode.NEW_SERVICE_FROM_TEMPLATE] = new AbstractAction(
+	    popup ? "New service from template" : "Service from template")
+	    {
+		public void actionPerformed(ActionEvent e) 
+		{
+		    _target.newServiceFromTemplate();
+		}
+	    };
 
-        _array[TreeNode.NEW_TEMPLATE_SERVER] = new AbstractAction(
-            popup ? "New Server Template" : "Server Template")
-            {
-                public void actionPerformed(ActionEvent e) 
-                {
-                    if(apply(_target))
-                    {
-                        _target.newTemplateServer();
-                    }
-                }
-            };
-        
-        _array[TreeNode.NEW_TEMPLATE_SERVER_ICEBOX] = new AbstractAction(
-            popup ? "New IceBox Server Template" : "IceBox Server Template")
-            {
-                public void actionPerformed(ActionEvent e) 
-                {
-                    if(apply(_target))
-                    {
-                        _target.newTemplateServerIceBox();
-                    }
-                }
-            };
+	_array[TreeNode.NEW_TEMPLATE_SERVER] = new AbstractAction(
+	    popup ? "New Server template" : "Server template")
+	    {
+		public void actionPerformed(ActionEvent e) 
+		{
+		    _target.newTemplateServer();
+		}
+	    };
+	
+	_array[TreeNode.NEW_TEMPLATE_SERVER_ICEBOX] = new AbstractAction(
+	    popup ? "New IceBox server template" : "IceBox server template")
+	    {
+		public void actionPerformed(ActionEvent e) 
+		{
+		    _target.newTemplateServerIceBox();
+		}
+	    };
 
 
-        _array[TreeNode.NEW_TEMPLATE_SERVICE] = new AbstractAction(
-            popup ? "New Service Template" : "Service Template")
-            {
-                public void actionPerformed(ActionEvent e) 
-                {
-                    if(apply(_target))
-                    {
-                        _target.newTemplateService();
-                    }
-                }
-            };
-        
-        _array[TreeNode.COPY] = new AbstractAction("Copy")
-            {
-                public void actionPerformed(ActionEvent e) 
-                {
-                    _target.copy();
-                }
-            };
-        
-        _array[TreeNode.PASTE] = new AbstractAction("Paste")
-            {
-                public void actionPerformed(ActionEvent e) 
-                {
-                    if(apply(_target))
-                    {
-                        _target.paste();
-                    }
-                }
-            };
-        
-        _array[TreeNode.DELETE] = new AbstractAction("Delete")
-            {
-                public void actionPerformed(ActionEvent e) 
-                {
-                    _target.delete();
-                }
-            };
+	_array[TreeNode.NEW_TEMPLATE_SERVICE] = new AbstractAction(
+	    popup ? "New service template" : "Service template")
+	    {
+		public void actionPerformed(ActionEvent e) 
+		{
+		    _target.newTemplateService();
+		}
+	    };
+	
+	_array[TreeNode.COPY] = new AbstractAction("Copy")
+	    {
+		public void actionPerformed(ActionEvent e) 
+		{
+		    _target.copy();
+		}
+	    };
+	_array[TreeNode.COPY].putValue(Action.ACCELERATOR_KEY, 
+				       KeyStroke.getKeyStroke(KeyEvent.VK_C, MENU_MASK));
+	_array[TreeNode.COPY].putValue(Action.SHORT_DESCRIPTION, "Copy");
+	
+	_array[TreeNode.PASTE] = new AbstractAction("Paste")
+	    {
+		public void actionPerformed(ActionEvent e) 
+		{
+		    _target.paste();
+		}
+	    };
+	_array[TreeNode.PASTE].putValue(Action.ACCELERATOR_KEY, 
+					KeyStroke.getKeyStroke(KeyEvent.VK_V, MENU_MASK));
+	_array[TreeNode.PASTE].putValue(Action.SHORT_DESCRIPTION, "Paste");
+	
+	_array[TreeNode.DELETE] = new AbstractAction("Delete")
+	    {
+		public void actionPerformed(ActionEvent e) 
+		{
+		    _target.delete();
+		}
+	    };
+	_array[TreeNode.DELETE].putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke("DELETE"));
+	_array[TreeNode.DELETE].putValue(Action.SHORT_DESCRIPTION, "Delete");
+   
+	_array[TreeNode.SHOW_VARS] = new 
+	    AbstractAction("Show variables")
+	    {
+		public void actionPerformed(ActionEvent e) 
+		{
+		    _target.getCoordinator().showVars();
+		}
+	    };
+	_array[TreeNode.SHOW_VARS].putValue(
+	    Action.SHORT_DESCRIPTION, 
+	    "Show variables and parameters in the Properties pane");
 
-        _array[TreeNode.SHOW_VARS] = new 
-            AbstractAction("Show Variables")
-            {
-                public void actionPerformed(ActionEvent e) 
-                {
-                    _target.getCoordinator().showVars();
-                }
-            };
-        _array[TreeNode.SHOW_VARS].putValue(
-            Action.SHORT_DESCRIPTION, 
-            "Show variables and parameters in the Properties pane");
 
+	_array[TreeNode.SUBSTITUTE_VARS] = new 
+	    AbstractAction("Substitute variables")
+	    {
+		public void actionPerformed(ActionEvent e) 
+		{
+		    _target.getCoordinator().substituteVars();
+		}
+	    };
+	
+	_array[TreeNode.SUBSTITUTE_VARS].putValue(
+	    Action.SHORT_DESCRIPTION, 
+	    "Substitute variables and parameters with their values in the Properties pane");
 
-        _array[TreeNode.SUBSTITUTE_VARS] = new 
-            AbstractAction("Substitute Variables")
-            {
-                public void actionPerformed(ActionEvent e) 
-                {
-                    _target.getCoordinator().substituteVars();
-                }
-            };
-        
-        _array[TreeNode.SUBSTITUTE_VARS].putValue(
-            Action.SHORT_DESCRIPTION, 
-            "Substitute variables and parameters with their values in the Properties pane");
-
-        
-        _array[TreeNode.MOVE_UP] = new AbstractAction("Move Up")
-            {
-                public void actionPerformed(ActionEvent e) 
-                {
-                    if(apply(_target))
-                    {
-                        _target.moveUp();
-                    }
-                }
-            };
-                           
-        _array[TreeNode.MOVE_DOWN] = new AbstractAction("Move Down")
-            {
-                public void actionPerformed(ActionEvent e) 
-                {
-                    if(apply(_target))
-                    {
-                        _target.moveDown();
-                    }
-                }
-            };
+	
+	_array[TreeNode.MOVE_UP] = new AbstractAction("Move up")
+	    {
+		public void actionPerformed(ActionEvent e) 
+		{
+		    _target.moveUp();
+		}
+	    };
+			   
+	_array[TreeNode.MOVE_DOWN] = new AbstractAction("Move down")
+	    {
+		public void actionPerformed(ActionEvent e) 
+		{
+		    _target.moveDown();
+		}
+	    };
     }
-
-    static private boolean apply(TreeNode target)
-    {
-        return target.getRoot().getPane().applyUpdates(false);
-    } 
-
 
     private TreeNode _target;
     private Action[] _array = new Action[TreeNode.ACTION_COUNT];

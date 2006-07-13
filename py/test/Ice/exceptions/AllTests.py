@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -289,20 +289,19 @@ class AMI_WrongOperation_noSuchOperationI(CallbackBase):
 
 def allTests(communicator):
     print "testing servant registration exceptions... ",
-    communicator.getProperties().setProperty("TestAdapter1.Endpoints", "default")
     adapter = communicator.createObjectAdapter("TestAdapter1")
     obj = EmptyI()
     adapter.add(obj, communicator.stringToIdentity("x"))
     try:
         adapter.add(obj, communicator.stringToIdentity("x"))
-        test(false)
+	test(false)
     except Ice.AlreadyRegisteredException:
         pass
 
     adapter.remove(communicator.stringToIdentity("x"))
     try:
         adapter.remove(communicator.stringToIdentity("x"))
-        test(false)
+	test(false)
     except Ice.NotRegisteredException:
         pass
 
@@ -310,13 +309,12 @@ def allTests(communicator):
     print "ok"
 
     print "testing servant locator registrations exceptions... ",
-    communicator.getProperties().setProperty("TestAdapter2.Endpoints", "default")
     adapter = communicator.createObjectAdapter("TestAdapter2")
     loc = ServantLocatorI()
     adapter.addServantLocator(loc, "x")
     try:
         adapter.addServantLocator(loc, "x")
-        test(false)
+	test(false)
     except Ice.AlreadyRegisteredException:
         pass
 
@@ -328,7 +326,7 @@ def allTests(communicator):
     communicator.addObjectFactory(of, "x")
     try:
         communicator.addObjectFactory(of, "x")
-        test(false)
+	test(false)
     except Ice.AlreadyRegisteredException:
         pass
     print "ok"

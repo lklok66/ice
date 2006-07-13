@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -29,13 +29,13 @@ class Token
     
     Token(int t)
     {
-        type = t;
-        value = null;
+	type = t;
+	value = null;
     }
     
     Token(int t, String v)
     {
-        type = t;
-        value = v;
+	type = t;
+	value = v;
     }
 }

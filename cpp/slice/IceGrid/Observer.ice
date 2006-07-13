@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -99,6 +99,13 @@ struct NodeDynamicInfo
 {
     /**
      *
+     * The name of the node.
+     *
+     **/
+    string name;
+
+    /**
+     *
      * Some static information about the node.
      *
      **/
@@ -137,17 +144,18 @@ interface NodeObserver
 {
     /**
      *
-     * The <tt>nodeInit</tt> operation indicates the current state
-     * of nodes. It is called after the registration of an observer.
+     * The init operation is called after the registration of the
+     * observer to communicate the current state of the node to the
+     * observer implementation.
      *
      * @param nodes The current state of the nodes.
      *
      **/
-    ["ami"] void nodeInit(NodeDynamicInfoSeq nodes);
+    ["ami"] void init(NodeDynamicInfoSeq nodes);
 
     /**
      *
-     * The <tt>nodeUp</tt> operation is called to notify an observer that a node
+     * The nodeUp operation is called to notify the observer that a node
      * came up.
      * 
      * @param node The node state.
@@ -157,7 +165,7 @@ interface NodeObserver
 
     /**
      *
-     * The <tt>nodeDown</tt> operation is called to notify an observer that a node
+     * The nodeDown operation is called to notify the observer that a node
      * went down.
      * 
      * @param name The node name.
@@ -167,7 +175,7 @@ interface NodeObserver
 
     /**
      *
-     * The <tt>updateServer</tt> operation is called to notify an observer that
+     * The updateServer operation is called to notify the observer that
      * the state of a server changed.
      *
      * @param node The node hosting the server.
@@ -179,7 +187,7 @@ interface NodeObserver
 
     /**
      *
-     * The <tt>updateAdapter</tt> operation is called to notify an observer that
+     * The updateAdapter operation is called to notify the observer that
      * the state of an adapter changed.
      * 
      * @param node The node hosting the adapter.
@@ -192,31 +200,38 @@ interface NodeObserver
 
 /**
  *
- * The database observer interface. Observers should implement this
+ * The registry observer interface. Observers should implement this
  * interface to receive information about the state of the IceGrid
- * registry database.
+ * registry.
  * 
  **/
-interface ApplicationObserver
+interface RegistryObserver
 {
     /**
      *
-     * <tt>applicationInit</tt> is called after the registration
-     * of an observer to indicate the state of the registry.
+     * The init operation is called after the registration of the
+     * observer to communicate the current state of the registry to the
+     * observer implementation.
      *
-     * @param serial The current serial number of the registry
-     * database. This serial number allows observers to make sure that
-     * their internal state is synchronized with the registry.
+     * @param serial The current serial number of the registry database. This
+     * serial number allows observers to make sure that their internal state
+     * is synchronized with the registry.
      *
      * @param applications The applications currently registered with
      * the registry.
      *
+     * @param adapters The adapters that were dynamically registered
+     * with the registry (not through the deployment mechanism).
+     *
+     * @param objects The objects registered with the [Admin]
+     * interface (not through the deployment mechanism).
+     *
      **/
-    ["ami"] void applicationInit(int serial, ApplicationInfoSeq applications);
+    ["ami"] void init(int serial, ApplicationDescriptorSeq applications, AdapterInfoSeq adpts, ObjectInfoSeq objects);
 
     /**
      * 
-     * The <tt>applicationAdded</tt> operation is called to notify an observer
+     * The applicationAdded operation is called to notify the observer
      * that an application was added.
      *
      * @param serial The new serial number of the registry database.
@@ -224,11 +239,11 @@ interface ApplicationObserver
      * @param desc The descriptor of the new application.
      * 
      **/
-    void applicationAdded(int serial, ApplicationInfo desc);
+    void applicationAdded(int serial, ApplicationDescriptor desc);
 
     /**
      *
-     * The <tt>applicationRemoved</tt> operation is called to notify an observer
+     * The applicationRemoved operation is called to notify the observer
      * that an application was removed.
      *
      * @param serial The new serial number of the registry database.
@@ -240,7 +255,7 @@ interface ApplicationObserver
 
     /**
      * 
-     * The <tt>applicationUpdated</tt> operation is called to notify an observer
+     * The applicationUpdated operation is called to notify the observer
      * that an application was updated.
      *
      * @param serial The new serial number of the registry database.
@@ -248,141 +263,55 @@ interface ApplicationObserver
      * @param desc The descriptor of the update.
      * 
      **/
-    void applicationUpdated(int serial, ApplicationUpdateInfo desc);
-};
-
-/**
- *
- * This interface allows applications to monitor the state of object
- * adapters that are registered with IceGrid.
- *
- **/
-interface AdapterObserver
-{
-    /**
-     *
-     * <tt>adapterInit</tt> is called after registration of
-     * an observer to indicate the state of the registry.
-     *
-     * @param serial The current serial number of the registry
-     * database. This serial number allows observers to make sure that
-     * their internal state is synchronized with the registry.
-     *
-     * @param adapters The adapters that were dynamically registered
-     * with the registry (not through the deployment mechanism).
-     *
-     **/
-    ["ami"] void adapterInit(AdapterInfoSeq adpts);
+    void applicationUpdated(int serial, ApplicationUpdateDescriptor desc);
 
     /**
      *
-     * The <tt>adapterAdded</tt> operation is called to notify an observer when
+     * The adapterAdded operation is called to notify the observer when
      * a dynamically-registered adapter was added.
      *
      **/
-    void adapterAdded(AdapterInfo info);
+    void adapterAdded(int serial, AdapterInfo info);
 
     /**
      *
-     * The adapterUpdated operation is called to notify an observer when
+     * The adapterUpdated operation is called to notify the observer when
      * a dynamically-registered adapter was updated.
      *
      **/
-    void adapterUpdated(AdapterInfo info);
+    void adapterUpdated(int serial, AdapterInfo info);
 
     /**
      *
-     * The adapterRemoved operation is called to notify an observer when
+     * The adapterRemoved operation is called to notify the observer when
      * a dynamically-registered adapter was removed.
      *
      **/
-    void adapterRemoved(string id);
-};
-
-/**
- *
- * This interface allows applications to monitor IceGrid well-known objects.
- *
- **/
-interface ObjectObserver
-{
-    /**
-     *
-     * <tt>objectInit</tt> is called after the registration of
-     * an observer to indicate the state of the registry.
-     *
-     * @param serial The current serial number of the registry database. This
-     * serial number allows observers to make sure that their internal state
-     * is synchronized with the registry.
-     *
-     * @param objects The objects registered with the [Admin]
-     * interface (not through the deployment mechanism).
-     *
-     **/
-    ["ami"] void objectInit(ObjectInfoSeq objects);
+    void adapterRemoved(int serial, string id);
 
     /**
      *
-     * The <tt>objectAdded</tt> operation is called to notify an observer when an
-     * object was added to the [Admin] interface.
+     * The objectAdded operation is called to notify the observer when an
+     * object was added through the [Admin] interface.
      *
      **/
-    void objectAdded(ObjectInfo info);
+    void objectAdded(int serial, ObjectInfo info);
 
     /**
      *
-     * <tt>objectUpdated</tt> is called to notify an observer when
-     * an object registered with the [Admin] interface was updated.
+     * The objectUpdated operation is called to notify the observer when
+     * an object registered through the [Admin] interface was updated.
      *
      **/
-    void objectUpdated(ObjectInfo info);
+    void objectUpdated(int serial, ObjectInfo info);
 
     /**
      *
-     * <tt>objectRemoved</tt> is called to notify an observer when
-     * an object registered with the [Admin] interface was removed.
+     * The objectRemoved operation is called to notify the observer when
+     * an object registered through the [Admin] interface was removed.
      *
      **/
-    void objectRemoved(Ice::Identity id);
-};
-
-/**
- *
- * This interface allows applications to monitor changes the state
- * of the registry.
- *
- **/
-interface RegistryObserver
-{
-    /**
-     *
-     * The <tt>registryInit</tt> operation is called after registration of
-     * an observer to indicate the state of the registries.
-     *
-     * @param registries The current state of the registries.
-     *
-     **/
-    ["ami"] void registryInit(RegistryInfoSeq registries);
-
-    /**
-     *
-     * The <tt>nodeUp</tt> operation is called to notify an observer that a node
-     * came up.
-     * 
-     * @param node The node state.
-     *
-     **/
-    void registryUp(RegistryInfo node);
-
-    /**
-     *
-     * The <tt>nodeDown</tt> operation is called to notify an observer that a node
-     * went down.
-     * 
-     * @param name The node name.
-     *
-     **/
-    void registryDown(string name);
+    void objectRemoved(int serial, Ice::Identity id);
 };
 
 };

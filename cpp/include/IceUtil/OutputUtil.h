@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -18,16 +18,14 @@
 namespace IceUtil
 {
 
-ICE_UTIL_API std::string int64ToString(Int64);
-
 // ----------------------------------------------------------------------
 // OutputBase
 // ----------------------------------------------------------------------
 
 //
-// Technically it's not necessary to have print() & newline() as virtual
+// Technically it's not necessary to have print() & nl() as virtual
 // since the opeator<< functions are specific to each OutputBase
-// derivative. However, since it's possible to call print() & newline()
+// derivative. However, since it's possible to call print() & nl()
 // manually I've decided to leave them as virtual.
 //
 
@@ -54,10 +52,9 @@ public:
     void useCurrentPosAsIndent(); // Save the current position as indentation.
     void zeroIndent(); // Use zero identation.
     void restoreIndent(); // Restore indentation.
-    int currIndent(); // Return current indent value.
 
-    virtual void newline(); // Print newline.
-    void separator(); // Print separator.
+    virtual void nl(); // Print newline.
+    void sp(); // Print separator.
 
     bool operator!() const; // Check whether the output state is ok.
 
@@ -129,7 +126,7 @@ operator<<(Output& out, const std::vector<T>& val)
 {
     for(typename std::vector<T>::const_iterator p = val.begin(); p != val.end(); ++p)
     {
-        out << *p;
+	out << *p;
     }
     return out;
 }
@@ -147,7 +144,7 @@ operator<<(Output& out, std::vector<T>& val)
 {
     for(typename std::vector<T>::const_iterator p = val.begin(); p != val.end(); ++p)
     {
-        out << *p;
+	out << *p;
     }
     return out;
 }
@@ -158,7 +155,7 @@ template<>
 inline Output&
 operator<<(Output& o, const NextLine&)
 {
-    o.newline();
+    o.nl();
     return o;
 }
 
@@ -166,7 +163,7 @@ template<>
 inline Output&
 operator<<(Output& o, const Separator&)
 {
-    o.separator();
+    o.sp();
     return o;
 }
 
@@ -236,12 +233,13 @@ public:
     XMLOutput(std::ostream&);
     XMLOutput(const char*);
 
+    void setSGML(bool);
     virtual void print(const char*); // Print a string.
 
-    virtual void newline(); // Print newline.
+    virtual void nl(); // Print newline.
 
-    void startElement(const std::string&); // Start an element.
-    void endElement(); // End an element.
+    void se(const std::string&); // Start an element.
+    void ee(); // End an element.
     void attr(const std::string&, const std::string&); // Add an attribute to an element.
 
     void startEscapes();
@@ -258,6 +256,7 @@ private:
     bool _se;
     bool _text;
 
+    bool _sgml;
     bool _escape;
 };
 
@@ -275,7 +274,7 @@ template<>
 inline XMLOutput&
 operator<<(XMLOutput& o, const NextLine&)
 {
-    o.newline();
+    o.nl();
     return o;
 }
 
@@ -283,7 +282,7 @@ template<>
 inline XMLOutput&
 operator<<(XMLOutput& o, const Separator&)
 {
-    o.separator();
+    o.sp();
     return o;
 }
 
@@ -296,7 +295,7 @@ template<>
 inline XMLOutput&
 operator<<(XMLOutput& o, const EndElement&)
 {
-    o.endElement();
+    o.ee();
     return o;
 }
 
@@ -319,7 +318,7 @@ template<>
 inline XMLOutput&
 operator<<(XMLOutput& o, const StartElement& e)
 {
-    o.startElement(e.getName());
+    o.se(e.getName());
     return o;
 }
 

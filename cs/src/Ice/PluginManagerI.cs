@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -17,12 +17,7 @@ namespace Ice
         Plugin create(Communicator communicator, string name, string[] args);
     }
 
-    public interface LoggerFactory
-    {
-        Logger create(Communicator communicator, string[] args);
-    }
-
-    public sealed class PluginManagerI : PluginManager
+    public sealed class PluginManagerI : LocalObjectImpl, PluginManager
     {
         private static string _kindOfObject = "plugin";
 
@@ -79,7 +74,7 @@ namespace Ice
                 {
                     throw new CommunicatorDestroyedException();
                 }
-            
+	    
                 Plugin p = (Plugin)_plugins[name];
                 if(p != null)
                 {
@@ -100,7 +95,7 @@ namespace Ice
                 {
                     throw new CommunicatorDestroyedException();
                 }
-            
+	    
                 if(_plugins.Contains(name))
                 {
                     AlreadyRegisteredException ex = new AlreadyRegisteredException();
@@ -122,13 +117,12 @@ namespace Ice
                     {
                         plugin.destroy();
                     }
-                
-                    _logger = null;
+		
                     _communicator = null;
                 }
             }
         }
-        
+	
         public PluginManagerI(Communicator communicator)
         {
             _communicator = communicator;
@@ -140,7 +134,7 @@ namespace Ice
         public void loadPlugins(ref string[] cmdArgs)
         {
             Debug.Assert(_communicator != null);
-            
+	    
             //
             // Load and initialize the plug-ins defined in the property set
             // with the prefix "Ice.Plugin.". These properties should
@@ -184,7 +178,7 @@ namespace Ice
                     if(plugins.Contains(key))
                     {
                         string value = (string)plugins[key];
-                        loadPlugin(names[i], value, ref cmdArgs, false);
+                        loadPlugin(names[i], value, ref cmdArgs);
                         plugins.Remove(key);
                     }
                     else
@@ -203,16 +197,7 @@ namespace Ice
             {
                 string name = ((string)entry.Key).Substring(prefix.Length);
                 string val = (string)entry.Value;
-                loadPlugin(name, val, ref cmdArgs, false);
-            }
-
-            //
-            // Check for a Logger Plugin
-            //
-            string loggerStr = properties.getProperty("Ice.LoggerPlugin");
-            if(loggerStr.Length != 0)
-            {
-                loadPlugin("Logger", loggerStr, ref cmdArgs, true);
+                loadPlugin(name, val, ref cmdArgs);
             }
 
             //      
@@ -225,8 +210,8 @@ namespace Ice
                 initializePlugins();
             }
         }
-        
-        private void loadPlugin(string name, string pluginSpec, ref string[] cmdArgs, bool isLogger)
+	
+        private void loadPlugin(string name, string pluginSpec, ref string[] cmdArgs)
         {
             Debug.Assert(_communicator != null);
 
@@ -243,17 +228,6 @@ namespace Ice
             int start = pluginSpec.IndexOf(':');
             if(start != -1)
             {
-                //
-                // Skip drive letter, if any.
-                //
-                if(pluginSpec.Length > 3 &&
-                   start == 1 &&
-                   System.Char.IsLetter(pluginSpec[0]) &&
-                   (pluginSpec[2] == '\\' || pluginSpec[2] == '/'))
-                {
-                    start = pluginSpec.IndexOf(':', 3);
-                }
-
                 //
                 // Find the whitespace.
                 //
@@ -273,7 +247,7 @@ namespace Ice
                     args = pluginSpec.Substring(pos).Trim().Split(delims, pos);
                 }
             }
-            
+	    
             //
             // Convert command-line options into properties. First
             // we convert the options from the plug-in
@@ -283,7 +257,7 @@ namespace Ice
             Properties properties = _communicator.getProperties();
             args = properties.parseCommandLineOptions(name, args);
             cmdArgs = properties.parseCommandLineOptions(name, cmdArgs);
-            
+	    
             //
             // Retrieve the assembly name and the type.
             //
@@ -295,7 +269,7 @@ namespace Ice
                 e.reason = err + "invalid entry point format";
                 throw e;
             }
-            
+	    
             System.Reflection.Assembly pluginAssembly = null;
             string assemblyName = entryPoint.Substring(0, sepPos);
             try
@@ -312,15 +286,15 @@ namespace Ice
             catch(System.Exception ex)
             {
                 //
-                // IceSSL is not supported with Mono 1.2. We avoid throwing an exception in that case,
-                // so the same configuration can be used with Mono or Visual C#.
+                // IceSSL is not supported with .NET 1.1. We avoid throwing an exception in that case,
+                // so the same configuration can be used with .NET 1.1 and .NET 2.0.
                 //
-                if(IceInternal.AssemblyUtil.runtime_ == IceInternal.AssemblyUtil.Runtime.Mono && name == "IceSSL")
+                if(System.Environment.Version.Major == 1 && name == "IceSSL")
                 {
                     if(!_sslWarnOnce)
                     {
                         _communicator.getLogger().warning(
-                            "IceSSL plugin not loaded: IceSSL is not supported with Mono");
+                            "IceSSL plugin not loaded: IceSSL is not supported with .NET 1.1");
                         _sslWarnOnce = true;
                     }
                     return;
@@ -330,14 +304,13 @@ namespace Ice
                 e.reason = err + "unable to load assembly: '" + assemblyName + "': " + ex.ToString();
                 throw e;
             }
-            
-            //
-            // Instantiate the class.
-            //
-            PluginFactory pluginFactory = null;
-            LoggerFactory loggerFactory = null;
-            string className = entryPoint.Substring(sepPos + 1);
-            System.Type c = pluginAssembly.GetType(className);
+	    
+	    //
+	    // Instantiate the class.
+	    //
+	    PluginFactory factory = null;
+	    string className = entryPoint.Substring(sepPos + 1);
+	    System.Type c = pluginAssembly.GetType(className);
             if(c == null)
             {
                 PluginInitializationException e = new PluginInitializationException();
@@ -345,118 +318,65 @@ namespace Ice
                 throw e;
             }
 
-            try
-            {
-                if(isLogger)
-                {
-                    loggerFactory = (LoggerFactory)IceInternal.AssemblyUtil.createInstance(c);
-                    if(loggerFactory == null)
-                    {
-                        PluginInitializationException e = new PluginInitializationException();
-                        e.reason = err + "Can't find constructor for '" + className + "'";
-                        throw e;
-                    }
-                }
-                else
-                {
-                    pluginFactory = (PluginFactory)IceInternal.AssemblyUtil.createInstance(c);
-                    if(pluginFactory == null)
-                    {
-                        PluginInitializationException e = new PluginInitializationException();
-                        e.reason = err + "Can't find constructor for '" + className + "'";
-                        throw e;
-                    }
-                }
-            }
-            catch(System.InvalidCastException ex)
-            {
-                PluginInitializationException e = new PluginInitializationException(ex);
-                e.reason = err + "InvalidCastException to " + (isLogger ? "Ice.LoggerFactory" : "Ice.PluginFactory");
-                throw e;
-            }
-            catch(System.UnauthorizedAccessException ex)
-            {
-                PluginInitializationException e = new PluginInitializationException(ex);
-                e.reason = err + "UnauthorizedAccessException: " + ex.ToString();
-                throw e;
-            }
-            catch(System.Exception ex)
-            {
-                PluginInitializationException e = new PluginInitializationException(ex);
-                e.reason = err + "System.Exception: " + ex.ToString();
-                throw e;
-            }
-            
-            //
-            // Invoke the factory.
-            //
-            if(isLogger)
-            {
-                try
-                {
-                    _logger = loggerFactory.create(_communicator, args);
-                }
-                catch(PluginInitializationException ex)
-                {
-                    ex.reason = err + ex.reason;
-                    throw ex;
-                }
-                catch(System.Exception ex)
-                {
-                    PluginInitializationException e = new PluginInitializationException(ex);
-                    e.reason = err + "System.Exception in factory.create: " + ex.ToString();
-                    throw e;
-                }
-            
-                if(_logger == null)
-                {
-                    PluginInitializationException ex = new PluginInitializationException();
-                    ex.reason = err + "factory.create returned null logger";
-                    throw ex;
-                }
-            }
-            else
-            {
-                Plugin plugin = null;
-                try
-                {
-                    plugin = pluginFactory.create(_communicator, name, args);
-                }
-                catch(PluginInitializationException ex)
-                {
-                    ex.reason = err + ex.reason;
-                    throw ex;
-                }
-                catch(System.Exception ex)
-                {
-                    PluginInitializationException e = new PluginInitializationException(ex);
-                    e.reason = err + "System.Exception in factory.create: " + ex.ToString();
-                    throw e;
-                }
-            
-                if(plugin == null)
-                {
-                    PluginInitializationException ex = new PluginInitializationException();
-                    ex.reason = err + "factory.create returned null plug-in";
-                    throw ex;
-                }
+	    try
+	    {
+		factory = (PluginFactory)IceInternal.AssemblyUtil.createInstance(c);
+	    }
+	    catch(System.InvalidCastException ex)
+	    {
+		PluginInitializationException e = new PluginInitializationException(ex);
+		e.reason = err + "InvalidCastException to Ice.PluginFactory";
+		throw e;
+	    }
+	    catch(System.UnauthorizedAccessException ex)
+	    {
+		PluginInitializationException e = new PluginInitializationException(ex);
+		e.reason = err + "UnauthorizedAccessException: " + ex.ToString();
+		throw e;
+	    }
+	    catch(System.Exception ex)
+	    {
+		PluginInitializationException e = new PluginInitializationException(ex);
+		e.reason = err + "System.Exception: " + ex.ToString();
+		throw e;
+	    }
+	    
+	    //
+	    // Invoke the factory.
+	    //
+	    Plugin plugin = null;
+	    try
+	    {
+		plugin = factory.create(_communicator, name, args);
+	    }
+	    catch(PluginInitializationException ex)
+	    {
+		ex.reason = err + ex.reason;
+		throw ex;
+	    }
+	    catch(System.Exception ex)
+	    {
+		PluginInitializationException e = new PluginInitializationException(ex);
+		e.reason = err + "System.Exception in factory.create: " + ex.ToString();
+		throw e;
+	    }
+	    
+	    if(plugin == null)
+	    {
+		PluginInitializationException ex = new PluginInitializationException();
+		ex.reason = err + "factory.create returned null plug-in";
+		throw ex;
+	    }
 
-                _plugins[name] = plugin;
-                _initOrder.Add(plugin);
-            }
-        }
-
-        public Logger
-        getLogger()
-        {
-            return _logger;
-        }
-        
-        private Communicator _communicator;
-        private Hashtable _plugins;
-        private ArrayList _initOrder;
-        private Logger _logger = null;
-        private bool _initialized;
+	    _plugins[name] = plugin;
+	    _initOrder.Add(plugin);
+	}
+	
+	private Communicator _communicator;
+	private Hashtable _plugins;
+	private ArrayList _initOrder;
+	private bool _initialized;
         private static bool _sslWarnOnce = false;
     }
+
 }

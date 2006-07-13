@@ -4,55 +4,33 @@ The Internet Communications Engine
 Ice is a modern alternative to object middleware such as CORBA or
 COM/DCOM/COM+. It is easy to learn, yet provides a powerful network
 infrastructure for demanding technical applications. It features an
-object-oriented specification language, easy to use C++, C#, Java,
-Python, Ruby, PHP, and Visual Basic mappings, a highly efficient
-protocol, asynchronous method invocation and dispatch, dynamic
-transport plug-ins, TCP/IP and UDP/IP support, SSL-based security, a
-firewall solution, and much more.
+object-oriented specification language, easy to use C++, Java, Python,
+PHP, C#, and Visual Basic mappings, a highly efficient protocol,
+asynchronous method invocation and dispatch, dynamic transport
+plug-ins, TCP/IP and UDP/IP support, SSL-based security, a firewall
+solution, and much more.
 
 Ice is available under the terms of the GNU General Public License
 (GPL) (see LICENSE file). Commercial licenses are available for
 customers who wish to use Ice in proprietary products. Please contact
 sales@zeroc.com for more information on licensing Ice.
 
+This file describes how to setup Visual Studio 6.0 for Ice, and
+provides instructions for building and running the sample programs.
 
-About this distribution
------------------------
-
-This binary distribution provides all Ice run time services and 
-development tools to build Ice applications:
-
- - in C++, using Visual Studio 6.0
- - in Ruby, using Ruby 1.8.5
- - in PHP, using PHP 5.2.1
-
-If you want to develop Ice applications in another programming 
-language, or with another C++ compiler, please download the 
-appropriate Ice binary distribution from the ZeroC web site at
-
-  http://www.zeroc.com/download.html
-
-You only need the development environment for your target programming
-language to use this distribution. For example, if you want to build
-Ice applications in Ruby, you need to install Ruby, but do not need 
-to install Visual Studio or PHP.
-
-This file describes how to setup Visual Studio for Ice (when building
-C++ applications), and provides instructions for building and running
-the sample programs.
+See doc/README.html for information on the documentation included with
+this distribution.
 
 
-Supported Windows versions
+Visual Studio Requirements
 --------------------------
-
-This distribution is supported on Windows XP with Service Pack 2.
-
-
-Setting up Visual Studio 6.0 to build Ice applications in C++
--------------------------------------------------------------
 
 This release requires Visual Studio 6.0 Service Pack 5 or later. We
 recommend using the most recent update, Service Pack 6.
+
+
+Setting up Visual Studio 6.0
+----------------------------
 
 Before you can use Ice in your C++ applications, you first need to
 configure Visual Studio with the locations of the Ice header files,
@@ -79,14 +57,6 @@ libraries, and executables.
 - Add <Ice installation root directory>\bin
 
 
-Running IceGrid and Glacier2 components as services
----------------------------------------------------
-
-The WINDOWS_SERVICES.txt file included in this distribution contains
-information on how to install and run the IceGrid registry, IceGrid
-node, and Glacier2 router as Windows services.
-
-
 Building and running the C++ demos
 ----------------------------------
 
@@ -110,70 +80,14 @@ Some demo directories contain README files if additional requirements
 are necessary.
 
 
-Running the Ruby demos
-----------------------
-
-The Ruby demos are in the demorb directory.
-
-You need Ruby 1.8.5 to run the demos. A binary installer for Ruby
-can be downloaded from:
-
-  http://rubyforge.org/projects/rubyinstaller/
-
-You also need to add the Ice bin directory to your PATH, for example:
-
-set ICE_HOME=<Ice installation root directory>
-set PATH=%ICE_HOME%\bin;%PATH%
-
-Finally, set RUBYLIB so that the Ruby interpreter is able to load
-the Ice extension:
-
-set RUBYLIB=%ICE_HOME%\ruby;%RUBYLIB%
-
-Since Ice for Ruby does not support server-side activities, only 
-clients are provided in the demos. In order to run the demos you must
-use the corresponding C++ server.
-
-For example, to run the hello application in demo\Ice\hello, we begin
-by starting the C++ server:
-
-> cd %ICE_HOME%\demo\Ice\hello
-> server
-
-Then in a separate window, start the Ruby client:
-
-> cd %ICE_HOME%\demorb\Ice\hello
-> ruby Client.rb
-
-
-Ruby/OpenSSL Compatibility Issue
---------------------------------
-
-The Ruby installer includes versions of the OpenSSL DLLs that are not
-compatible with the ones supplied with Ice. If you intend to use SSL
-in your Ice for Ruby applications, you will need to remove or rename
-the following files in the Ruby installation directory:
-
-  libeay32.dll
-  ssleay32.dll
-
-If you used the default installation directory, these files are
-located in C:\ruby\bin.
-
-Also be aware that the Ruby installer inserts C:\ruby\bin at the
-beginning of the system PATH, therefore the DLLs listed above can also
-have an adverse impact on other Ice language mappings that use
-OpenSSL, such as C++ and Python.
-
-
 Running the PHP demos
 ---------------------
 
 Two PHP demos are provided in the demophp directory.
 
-To run the PHP demos, you need PHP 5.2.1. It can be downloaded from:
+To run the PHP demos, you need PHP 5.1.4. It can be downloaded from:
 
-  http://www.php.net/downloads.php
+http://www.php.net/downloads.php
 
 The Ice extension for PHP is provided as bin\php_ice.dll. In order to
 use the extension, you must first configure PHP to load it. PHP looks
@@ -282,9 +196,6 @@ Apache2 only:
 
    PHPIniDir "C:/PHP5"
 
-   NOTE: It is important to use forward slashes in the PHPIniDir
-   directive.
-
 Apache1 and Apache2:
 
 3) To ensure that you are using the correct php.ini file, create a
@@ -313,15 +224,14 @@ Apache1 and Apache2:
 
    The required files from C:\Ice\bin are listed below:
 
-   bzip2.dll
+   php_ice.dll
+   ice31.dll
+   iceutil31.dll
+   slice31.dll
    icecpp.exe
-   ice@libver@.dll
-   iceutil@libver@.dll
+   bzip2.dll
    msvcp60.dll
    msvcrt.dll
-   php_ice.dll
-   slice@libver@.dll
-   stlport_vc646.dll
 
    NOTE: If you modify the System PATH, you will need to restart your
    computer for the changes to take effect.
@@ -343,8 +253,8 @@ Apache1 and Apache2:
 6) Start Apache and verify that the PHP module has been loaded
    successfully. If Apache does not start, check the Windows Event
    Viewer as well as Apache's log files for more information. The most
-   likely reasons for Apache to fail at startup are missing DLLs (see
-   step 4) or insufficient privilege settings.
+   likely reason for Apache to fail at startup is missing DLLs (see
+   step 4).
 
 7) In order to load Slice definitions for a PHP script, you must
    modify php.ini and then restart Apache. For example, the "hello"
@@ -369,9 +279,16 @@ Ice and install the new one. Already deployed applications that were
 compiled against the <x>.<y>.<z> run time will automatically use the
 <x>.<y>.<z or z+n> assemblies.
 
+Note: Under Mono, binary compatibility currently does not work due to
+      issues with Mono. Until this problem in Mono is fixed, you cannot
+      run applications compiled with previous minor versions of Ice
+      against a newer version of the Ice assemblies. For example, an
+      application compiled with version x.y.0 of Ice cannot run with
+      the x.y.1 Ice assemblies.
 
-Acknowledgments
----------------
+
+Acknowledgements
+----------------
 
 This product includes software developed by the OpenSSL Project for
 use in the OpenSSL Toolkit (http://www.openssl.org/).

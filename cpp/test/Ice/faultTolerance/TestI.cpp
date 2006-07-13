@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -33,10 +33,16 @@ TestI::idempotentAbort(const Ice::Current&)
     exit(0);
 }
 
+void
+TestI::nonmutatingAbort(const Ice::Current&) const
+{
+    exit(0);
+}
+
 Ice::Int
 TestI::pid(const Ice::Current&)
 {
-#ifdef _MSC_VER
+#ifdef _WIN32
     return _getpid();
 #else
     return getpid();

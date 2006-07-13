@@ -1,6 +1,6 @@
 ' **********************************************************************
 '
-' Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+' Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 '
 ' This copy of Ice is licensed to you under the terms described in the
 ' ICE_LICENSE file included in this distribution.
@@ -75,7 +75,7 @@ Module SessionC
                 Return 1
             End If
 
-            Dim basePrx As Ice.ObjectPrx = communicator().propertyToProxy("SessionFactory.Proxy")
+            Dim basePrx As Ice.ObjectPrx = communicator().stringToProxy(proxy)
             Dim factory As SessionFactoryPrx = SessionFactoryPrxHelper.checkedCast(basePrx)
             If factory Is Nothing Then
                 Console.Error.WriteLine("invalid proxy")

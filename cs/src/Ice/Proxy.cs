@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -16,15 +16,15 @@ namespace Ice
 {
     public interface ObjectPrx
     {
-        [Obsolete("This method is deprecated, use ice_getHash instead.")]
+	[Obsolete("This method has been deprecated, use ice_getHash instead.")]
         int ice_hash();
         int ice_getHash();
 
-        [Obsolete("This method is deprecated, use ice_getCommunicator instead.")]
-        Communicator ice_communicator();
-        Communicator ice_getCommunicator();
+	[Obsolete("This method has been deprecated, use ice_getCommunicator instead.")]
+	Communicator ice_communicator();
+	Communicator ice_getCommunicator();
 
-        string ice_toString();
+	string ice_toString();
 
         bool ice_isA(string id__);
         bool ice_isA(string id__, Context context__);
@@ -48,55 +48,51 @@ namespace Ice
             Context context);
 
         Identity ice_getIdentity();
-        [Obsolete("This method is deprecated, use ice_identity instead.")]
+	[Obsolete("This method has been deprecated, use ice_identity instead.")]
         ObjectPrx ice_newIdentity(Identity newIdentity);
         ObjectPrx ice_identity(Identity newIdentity);
-        
+	
         Context ice_getContext();
-        [Obsolete("This method is deprecated, use ice_context instead.")]
+	[Obsolete("This method has been deprecated, use ice_context instead.")]
         ObjectPrx ice_newContext(Context newContext);
         ObjectPrx ice_context(Context newContext);
-        [Obsolete("This method is deprecated.")]
         ObjectPrx ice_defaultContext();
-        
+	
         string ice_getFacet();
-        [Obsolete("This method is deprecated, use ice_facet instead.")]
+	[Obsolete("This method has been deprecated, use ice_facet instead.")]
         ObjectPrx ice_newFacet(string newFacet);
         ObjectPrx ice_facet(string newFacet);
 
         string ice_getAdapterId();
-        [Obsolete("This method is deprecated, use ice_adapterId instead.")]
+	[Obsolete("This method has been deprecated, use ice_adapterId instead.")]
         ObjectPrx ice_newAdapterId(string newAdapterId);
         ObjectPrx ice_adapterId(string newAdapterId);
 
-        Endpoint[] ice_getEndpoints();
-        [Obsolete("This method is deprecated, use ice_endpoints instead.")]
+	Endpoint[] ice_getEndpoints();
+	[Obsolete("This method has been deprecated, use ice_endpoints instead.")]
         ObjectPrx ice_newEndpoints(Endpoint[] newEndpoints);
         ObjectPrx ice_endpoints(Endpoint[] newEndpoints);
 
-        int ice_getLocatorCacheTimeout();
-        ObjectPrx ice_locatorCacheTimeout(int timeout);
-        
-        bool ice_isConnectionCached();
-        ObjectPrx ice_connectionCached(bool newCache);
+	int ice_getLocatorCacheTimeout();
+	ObjectPrx ice_locatorCacheTimeout(int timeout);
+	
+	bool ice_isConnectionCached();
+	ObjectPrx ice_connectionCached(bool newCache);
 
-        EndpointSelectionType ice_getEndpointSelection();
-        ObjectPrx ice_endpointSelection(EndpointSelectionType newType);
+	EndpointSelectionType ice_getEndpointSelection();
+	ObjectPrx ice_endpointSelection(EndpointSelectionType newType);
 
-        bool ice_isSecure();
+	bool ice_isSecure();
         ObjectPrx ice_secure(bool b);
 
-        bool ice_isPreferSecure();
-        ObjectPrx ice_preferSecure(bool b);
-
-        Ice.RouterPrx ice_getRouter();
+	Ice.RouterPrx ice_getRouter();
         ObjectPrx ice_router(Ice.RouterPrx router);
 
-        Ice.LocatorPrx ice_getLocator();
+	Ice.LocatorPrx ice_getLocator();
         ObjectPrx ice_locator(Ice.LocatorPrx locator);
 
-        bool ice_isCollocationOptimized();
-        [Obsolete("This method is deprecated, use ice_collocationOptimized instead.")]
+	bool ice_isCollocationOptimized();
+	[Obsolete("This method has been deprecated, use ice_collocationOptimized instead.")]
         ObjectPrx ice_collocationOptimization(bool b);
         ObjectPrx ice_collocationOptimized(bool b);
 
@@ -115,13 +111,9 @@ namespace Ice
         ObjectPrx ice_timeout(int t);
         ObjectPrx ice_connectionId(string connectionId);
 
-        bool ice_isThreadPerConnection();
-        ObjectPrx ice_threadPerConnection(bool tpc);
-
-        [Obsolete("This method is deprecated, use ice_getConnection instead.")]
+	[Obsolete("This method has been deprecated, use ice_getConnection instead.")]
         Connection ice_connection();
         Connection ice_getConnection();
-        Connection ice_getCachedConnection();
     }
 
     public class ObjectPrxHelperBase : ObjectPrx
@@ -142,234 +134,176 @@ namespace Ice
         }
 
         public Communicator ice_communicator()
-        {
-            return ice_getCommunicator();
-        }
+	{
+	    return ice_getCommunicator();
+	}
 
         public Communicator ice_getCommunicator()
-        {
-            return _reference.getCommunicator();
-        }
+	{
+	    return _reference.getCommunicator();
+	}
 
-        public override string ToString()
-        {
-            return _reference.ToString();
-        }
+	public override string ToString()
+	{
+	    return _reference.ToString();
+	}
 
-        public string ice_toString()
-        {
-            return ToString();
-        }
+	public string ice_toString()
+	{
+	    return ToString();
+	}
 
         public bool ice_isA(string id__)
         {
-            return ice_isA(id__, null, false);
+            return ice_isA(id__, _reference.getContext());
         }
 
         public bool ice_isA(string id__, Context context__)
         {
-            return ice_isA(id__, context__, true);
-        }
-
-        private bool ice_isA(string id__, Context context__, bool explicitContext__)
-        {
-            if(explicitContext__ && context__ == null)
-            {
-                context__ = emptyContext_;
-            }
-
             int cnt__ = 0;
             while(true)
             {
-                ObjectDel_ del__ = null;
                 try
                 {
                     checkTwowayOnly__("ice_isA");
-                    del__ = getDelegate__();
+                    ObjectDel_ del__ = getDelegate__();
                     return del__.ice_isA(id__, context__);
                 }
                 catch(IceInternal.LocalExceptionWrapper ex__)
                 {
-                    cnt__ = handleExceptionWrapperRelaxed__(del__, ex__, cnt__);
+                    cnt__ = handleExceptionWrapperRelaxed__(ex__, cnt__);
                 }
                 catch(LocalException ex__)
                 {
-                    cnt__ = handleException__(del__, ex__, cnt__);
+                    cnt__ = handleException__(ex__, cnt__);
                 }
             }
         }
 
         public void ice_ping()
         {
-            ice_ping(null, false);
+            ice_ping(_reference.getContext());
         }
 
         public void ice_ping(Context context__)
         {
-            ice_ping(context__, true);
-        }
-
-        private void ice_ping(Context context__, bool explicitContext__)
-        {
-            if(explicitContext__ && context__ == null)
-            {
-                context__ = emptyContext_;
-            }
-
             int cnt__ = 0;
             while(true)
             {
-                ObjectDel_ del__ = null;
                 try
                 {
-                    del__ = getDelegate__();
+                    checkTwowayOnly__("ice_ping");
+                    ObjectDel_ del__ = getDelegate__();
                     del__.ice_ping(context__);
                     return;
                 }
                 catch(IceInternal.LocalExceptionWrapper ex__)
                 {
-                    cnt__ = handleExceptionWrapperRelaxed__(del__, ex__, cnt__);
+		    cnt__ = handleExceptionWrapperRelaxed__(ex__, cnt__);
                 }
                 catch(LocalException ex__)
                 {
-                    cnt__ = handleException__(del__, ex__, cnt__);
+                    cnt__ = handleException__(ex__, cnt__);
                 }
             }
         }
 
         public string[] ice_ids()
         {
-            return ice_ids(null, false);
+            return ice_ids(_reference.getContext());
         }
 
         public string[] ice_ids(Context context__)
         {
-            return ice_ids(context__, true);
-        }
-
-        private string[] ice_ids(Context context__, bool explicitContext__)
-        {
-            if(explicitContext__ && context__ == null)
-            {
-                context__ = emptyContext_;
-            }
             int cnt__ = 0;
             while(true)
             {
-                ObjectDel_ del__ = null;
                 try
                 {
                     checkTwowayOnly__("ice_ids");
-                    del__ = getDelegate__();
+                    ObjectDel_ del__ = getDelegate__();
                     return del__.ice_ids(context__);
                 }
                 catch(IceInternal.LocalExceptionWrapper ex__)
                 {
-                    cnt__ = handleExceptionWrapperRelaxed__(del__, ex__, cnt__);
+		    cnt__ = handleExceptionWrapperRelaxed__(ex__, cnt__);
                 }
                 catch(LocalException ex__)
                 {
-                    cnt__ = handleException__(del__, ex__, cnt__);
+                    cnt__ = handleException__(ex__, cnt__);
                 }
             }
         }
 
         public string ice_id()
         {
-            return ice_id(null, false);
+            return ice_id(_reference.getContext());
         }
 
         public string ice_id(Context context__)
         {
-             return ice_id(context__, true);
-        }
-
-        private string ice_id(Context context__, bool explicitContext__)
-        {
-            if(explicitContext__ && context__ == null)
-            {
-                context__ = emptyContext_;
-            }
             int cnt__ = 0;
             while(true)
             {
-                ObjectDel_ del__ = null;
                 try
                 {
                     checkTwowayOnly__("ice_id");
-                    del__ = getDelegate__();
+                    ObjectDel_ del__ = getDelegate__();
                     return del__.ice_id(context__);
                 }
                 catch(IceInternal.LocalExceptionWrapper ex__)
                 {
-                    cnt__ = handleExceptionWrapperRelaxed__(del__, ex__, cnt__);
+		    cnt__ = handleExceptionWrapperRelaxed__(ex__, cnt__);
                 }
                 catch(LocalException ex__)
                 {
-                    cnt__ = handleException__(del__, ex__, cnt__);
+                    cnt__ = handleException__(ex__, cnt__);
                 }
             }
         }
 
         public bool ice_invoke(string operation, OperationMode mode, byte[] inParams, out byte[] outParams)
         {
-            return ice_invoke(operation, mode, inParams, out outParams, null, false);
+            return ice_invoke(operation, mode, inParams, out outParams, _reference.getContext());
         }
 
         public bool ice_invoke(string operation, OperationMode mode, byte[] inParams, out byte[] outParams,
             Context context)
         {
-            return ice_invoke(operation, mode, inParams, out outParams, context, true);
-        }
-            
-        private bool ice_invoke(string operation, OperationMode mode, byte[] inParams, out byte[] outParams,
-                                Context context,  bool explicitContext)
-        {
-            if(explicitContext && context == null)
-            {
-                context = emptyContext_;
-            }
-
             int cnt__ = 0;
             while(true)
             {
-                ObjectDel_ del__ = null;
                 try
                 {
-                    del__ = getDelegate__();
+                    ObjectDel_ del__ = getDelegate__();
                     return del__.ice_invoke(operation, mode, inParams, out outParams, context);
                 }
                 catch(IceInternal.LocalExceptionWrapper ex__)
                 {
                     if(mode == OperationMode.Nonmutating || mode == OperationMode.Idempotent)
                     {
-                        cnt__ = handleExceptionWrapperRelaxed__(del__, ex__, cnt__);
+                        cnt__ = handleExceptionWrapperRelaxed__(ex__, cnt__);
                     }
                     else
                     {
-                        handleExceptionWrapper__(del__, ex__);
+                        handleExceptionWrapper__(ex__);
                     }
                 }
                 catch(LocalException ex__)
                 {
-                    cnt__ = handleException__(del__, ex__, cnt__);
+                    cnt__ = handleException__(ex__, cnt__);
                 }
             }
         }
 
         public void ice_invoke_async(AMI_Object_ice_invoke cb, string operation, OperationMode mode, byte[] inParams)
         {
-            checkTwowayOnly__("ice_invoke_async");
-            cb.invoke__(this, operation, mode, inParams, null);
+            ice_invoke_async(cb, operation, mode, inParams, _reference.getContext());
         }
 
         public void ice_invoke_async(AMI_Object_ice_invoke cb, string operation, OperationMode mode, byte[] inParams,
-                                     Context context)
+				     Context context)
         {
-            if(context == null)
-            {
-                context = emptyContext_;
-            }
             checkTwowayOnly__("ice_invoke_async");
             cb.invoke__(this, operation, mode, inParams, context);
         }
@@ -381,10 +315,10 @@ namespace Ice
 
         public ObjectPrx ice_identity(Identity newIdentity)
         {
-            if(newIdentity.name.Equals(""))
-            {
-                throw new IllegalIdentityException();
-            }
+	    if(newIdentity.name.Equals(""))
+	    {
+	        throw new IllegalIdentityException();
+	    }
             if(newIdentity.Equals(_reference.getIdentity()))
             {
                 return this;
@@ -399,8 +333,8 @@ namespace Ice
 
         public ObjectPrx ice_newIdentity(Identity newIdentity)
         {
-            return ice_identity(newIdentity);
-        }
+	    return ice_identity(newIdentity);
+	}
 
         public Context ice_getContext()
         {
@@ -416,15 +350,15 @@ namespace Ice
 
         public ObjectPrx ice_newContext(Context newContext)
         {
-            return ice_context(newContext);
-        }
+	    return ice_context(newContext);
+	}
 
-        public ObjectPrx ice_defaultContext()
-        {
+	public ObjectPrx ice_defaultContext()
+	{
             ObjectPrxHelperBase proxy = new ObjectPrxHelperBase();
             proxy.setup(_reference.defaultContext());
             return proxy;
-        }
+	}
 
         public string ice_getFacet()
         {
@@ -452,8 +386,8 @@ namespace Ice
 
         public ObjectPrx ice_newFacet(string newFacet)
         {
-            return ice_facet(newFacet);
-        }
+	    return ice_facet(newFacet);
+	}
 
         public string ice_getAdapterId()
         {
@@ -481,8 +415,8 @@ namespace Ice
 
         public ObjectPrx ice_newAdapterId(string newAdapterId)
         {
-            return ice_adapterId(newAdapterId);
-        }
+	    return ice_adapterId(newAdapterId);
+	}
 
         public Endpoint[] ice_getEndpoints()
         {
@@ -498,8 +432,8 @@ namespace Ice
             else
             {
                 ObjectPrxHelperBase proxy = new ObjectPrxHelperBase();
-                ArrayList arr = ArrayList.Adapter(newEndpoints);
-                IceInternal.EndpointI[] endpts = (IceInternal.EndpointI[])arr.ToArray(typeof(IceInternal.EndpointI));
+		ArrayList arr = ArrayList.Adapter(newEndpoints);
+		IceInternal.EndpointI[] endpts = (IceInternal.EndpointI[])arr.ToArray(typeof(IceInternal.EndpointI));
                 proxy.setup(_reference.changeEndpoints(endpts));
                 return proxy;
             }
@@ -507,8 +441,8 @@ namespace Ice
 
         public ObjectPrx ice_newEndpoints(Endpoint[] newEndpoints)
         {
-            return ice_endpoints(newEndpoints);
-        }
+	    return ice_endpoints(newEndpoints);
+	}
 
         public int ice_getLocatorCacheTimeout()
         {
@@ -586,29 +520,10 @@ namespace Ice
             }
         }
 
-        public bool ice_isPreferSecure()
-        {
-            return _reference.getPreferSecure();
-        }
-
-        public ObjectPrx ice_preferSecure(bool b)
-        {
-            if(b == _reference.getPreferSecure())
-            {
-                return this;
-            }
-            else
-            {
-                ObjectPrxHelperBase proxy = new ObjectPrxHelperBase();
-                proxy.setup(_reference.changePreferSecure(b));
-                return proxy;
-            }
-        }
-
         public Ice.RouterPrx ice_getRouter()
         {
-            IceInternal.RouterInfo ri = _reference.getRouterInfo();
-            return ri != null ? ri.getRouter() : null;
+	    IceInternal.RouterInfo ri = _reference.getRouterInfo();
+	    return ri != null ? ri.getRouter() : null;
         }
 
         public ObjectPrx ice_router(RouterPrx router)
@@ -628,8 +543,8 @@ namespace Ice
 
         public Ice.LocatorPrx ice_getLocator()
         {
-            IceInternal.LocatorInfo li = _reference.getLocatorInfo();
-            return li != null ? li.getLocator() : null;
+	    IceInternal.LocatorInfo li = _reference.getLocatorInfo();
+	    return li != null ? li.getLocator() : null;
         }
 
         public ObjectPrx ice_locator(LocatorPrx locator)
@@ -654,8 +569,8 @@ namespace Ice
 
         public ObjectPrx ice_collocationOptimization(bool b)
         {
-            return ice_collocationOptimized(b);
-        }
+	    return ice_collocationOptimized(b);
+	}
 
         public ObjectPrx ice_collocationOptimized(bool b)
         {
@@ -796,7 +711,7 @@ namespace Ice
             }
         }
 
-        public ObjectPrx ice_connectionId(string connectionId)
+	public ObjectPrx ice_connectionId(string connectionId)
         {
             IceInternal.Reference @ref = _reference.changeConnectionId(connectionId);
             if(@ref.Equals(_reference))
@@ -811,70 +726,27 @@ namespace Ice
             }
         }
 
-        public bool ice_isThreadPerConnection()
-        {
-            return _reference.getThreadPerConnection();
-        }
-
-        public ObjectPrx ice_threadPerConnection(bool tpc)
-        {
-            IceInternal.Reference @ref = _reference.changeThreadPerConnection(tpc);
-            if(@ref.Equals(_reference))
-            {
-                return this;
-            }
-            else
-            {
-                ObjectPrxHelperBase proxy = new ObjectPrxHelperBase();
-                proxy.setup(@ref);
-                return proxy;
-            }
-        }
-
         public Connection ice_connection()
         {
-            return ice_getConnection();
-        }
+	    return ice_getConnection();
+	}
 
         public Connection ice_getConnection()
         {
             int cnt__ = 0;
             while(true)
             {
-                ObjectDel_ del__ = null;
                 try
                 {
-                    del__ = getDelegate__();
-                    bool comp;
+                    ObjectDel_ del__ = getDelegate__();
+		    bool comp;
                     return del__.getConnection__(out comp);
                 }
                 catch(LocalException ex__)
                 {
-                    cnt__ = handleException__(del__, ex__, cnt__);
+                    cnt__ = handleException__(ex__, cnt__);
                 }
             }
-        }
-
-        public Connection ice_getCachedConnection()
-        {
-            ObjectDel_ del__ = null;
-            lock(this)
-            {
-                del__ = _delegate;
-            }
-
-            if(del__ != null)
-            {
-                try
-                {
-                    bool comp;
-                    return del__.getConnection__(out comp);
-                }
-                catch(CollocationOptimizationException)
-                {
-                }
-            }
-            return null;
         }
 
         public override bool Equals(object r)
@@ -927,67 +799,59 @@ namespace Ice
 
             _reference = @ref;
 
-            if(_reference.getCacheConnection())
-            {
-                //
-                // The _delegate attribute is only used if "cache connection"
-                // is enabled. If it's not enabled, we don't keep track of the
-                // delegate -- a new delegate is created for each invocations.
-                //      
+	    if(_reference.getCacheConnection())
+	    {
+		//
+		// The _delegate attribute is only used if "cache connection"
+		// is enabled. If it's not enabled, we don't keep track of the
+		// delegate -- a new delegate is created for each invocations.
+		//	
 
-                if(delegateD != null)
-                {
-                    ObjectDelD_ @delegate = createDelegateD__();
-                    @delegate.copyFrom__(delegateD);
-                    _delegate = @delegate;
-                }
-                else if(delegateM != null)
-                {
-                    ObjectDelM_ @delegate = createDelegateM__();
-                    @delegate.copyFrom__(delegateM);
-                    _delegate = @delegate;
-                }
-            }
+		if(delegateD != null)
+		{
+		    ObjectDelD_ @delegate = createDelegateD__();
+		    @delegate.copyFrom__(delegateD);
+		    _delegate = @delegate;
+		}
+		else if(delegateM != null)
+		{
+		    ObjectDelM_ @delegate = createDelegateM__();
+		    @delegate.copyFrom__(delegateM);
+		    _delegate = @delegate;
+		}
+	    }
         }
 
-        public int handleException__(ObjectDel_ @delegate, LocalException ex, int cnt)
+        public int handleException__(LocalException ex, int cnt)
         {
             //
             // Only _delegate needs to be mutex protected here.
             //
             lock(this)
             {
-                if(@delegate == _delegate)
-                {
-                    _delegate = null;
-                }
+                _delegate = null;
             }
 
-            IceInternal.ProxyFactory proxyFactory;
-            try
+            IceInternal.ProxyFactory proxyFactory = _reference.getInstance().proxyFactory();
+            if(proxyFactory != null)
             {
-                proxyFactory = _reference.getInstance().proxyFactory();
+                return proxyFactory.checkRetryAfterException(ex, _reference, cnt);
             }
-            catch(CommunicatorDestroyedException)
+            else
             {
-                //
-                // The communicator is already destroyed, so we cannot
-                // retry.
-                //
+		//
+		// The communicator is already destroyed, so we cannot
+		// retry.
+		//
                 throw ex;
             }
-
-            return proxyFactory.checkRetryAfterException(ex, _reference, cnt);
         }
 
-        public void handleExceptionWrapper__(ObjectDel_ @delegate, IceInternal.LocalExceptionWrapper ex)
+        public void handleExceptionWrapper__(IceInternal.LocalExceptionWrapper ex)
         {
             lock(this)
             {
-                if(@delegate == _delegate)
-                {
-                    _delegate = null;
-                }
+                _delegate = null;
             }
 
             if(!ex.retry())
@@ -996,20 +860,17 @@ namespace Ice
             }
         }
 
-        public int handleExceptionWrapperRelaxed__(ObjectDel_ @delegate, IceInternal.LocalExceptionWrapper ex, int cnt)
+        public int handleExceptionWrapperRelaxed__(IceInternal.LocalExceptionWrapper ex, int cnt)
         {
             if(!ex.retry())
             {
-                return handleException__(@delegate, ex.get(), cnt);
+                return handleException__(ex.get(), cnt);
             }
             else
             {
                 lock(this)
                 {
-                    if(@delegate == _delegate)
-                    {
-                        _delegate = null;
-                    }
+                    _delegate = null;
                 }
                 return cnt;
             }
@@ -1036,51 +897,51 @@ namespace Ice
             {
                 if(_delegate != null)
                 {
-                    return _delegate;
-                }
+		    return _delegate;
+		}
 
-                ObjectDel_ @delegate = null;
-                if(_reference.getCollocationOptimization())
-                {
-                    ObjectAdapter adapter = _reference.getInstance().objectAdapterFactory().findObjectAdapter(this);
-                    if(adapter != null)
-                    {
-                        ObjectDelD_ d = createDelegateD__();
-                        d.setup(_reference, adapter);
-                        @delegate = d;
-                    }
-                }
-                
-                if(@delegate == null)
-                {
-                    ObjectDelM_ d = createDelegateM__();
-                    d.setup(_reference);
-                    @delegate = d;
-                    
-                    //
-                    // If this proxy is for a non-local object, and we are
-                    // using a router, then add this proxy to the router info
-                    // object.
-                    //
-                    IceInternal.RouterInfo ri = _reference.getRouterInfo();
-                    if(ri != null)
-                    {
-                        ri.addProxy(this);
-                    }
-                }
-            
-                if(_reference.getCacheConnection())
-                {
-                    //
-                    // The _delegate attribute is only used if "cache connection"
-                    // is enabled. If it's not enabled, we don't keep track of the
-                    // delegate -- a new delegate is created for each invocations.
-                    //  
-                    _delegate = @delegate;
-                }
-                
-                return @delegate;
-            }
+		ObjectDel_ @delegate = null;
+		if(_reference.getCollocationOptimization())
+		{
+		    ObjectAdapter adapter = _reference.getInstance().objectAdapterFactory().findObjectAdapter(this);
+		    if(adapter != null)
+		    {
+			ObjectDelD_ d = createDelegateD__();
+			d.setup(_reference, adapter);
+			@delegate = d;
+		    }
+		}
+		
+		if(@delegate == null)
+		{
+		    ObjectDelM_ d = createDelegateM__();
+		    d.setup(_reference);
+		    @delegate = d;
+		    
+		    //
+		    // If this proxy is for a non-local object, and we are
+		    // using a router, then add this proxy to the router info
+		    // object.
+		    //
+		    IceInternal.RouterInfo ri = _reference.getRouterInfo();
+		    if(ri != null)
+		    {
+			ri.addProxy(this);
+		    }
+		}
+	    
+		if(_reference.getCacheConnection())
+		{
+		    //
+		    // The _delegate attribute is only used if "cache connection"
+		    // is enabled. If it's not enabled, we don't keep track of the
+		    // delegate -- a new delegate is created for each invocations.
+		    //	
+		    _delegate = @delegate;
+		}
+		
+		return @delegate;
+	    }
         }
 
         protected virtual ObjectDelM_ createDelegateM__()
@@ -1091,6 +952,11 @@ namespace Ice
         protected virtual ObjectDelD_ createDelegateD__()
         {
             return new ObjectDelD_();
+        }
+
+        protected Context defaultContext__()
+        {
+            return _reference.getContext();
         }
 
         //
@@ -1109,7 +975,6 @@ namespace Ice
             _reference = @ref;
         }
 
-        protected static Ice.Context emptyContext_ = new Ice.Context();
         private IceInternal.Reference _reference;
         private ObjectDel_ _delegate;
     }
@@ -1134,7 +999,7 @@ namespace Ice
                 try
                 {
                     Ice.ObjectPrx bb = b.ice_facet(f);
-                    bool ok = bb.ice_isA("::Ice::Object");
+                    bool ok = bb.ice_isA("::Object");
                     Debug.Assert(ok);
                     ObjectPrxHelper h = new ObjectPrxHelper();
                     h.copyFrom__(bb);
@@ -1155,7 +1020,7 @@ namespace Ice
                 try
                 {
                     Ice.ObjectPrx bb = b.ice_facet(f);
-                    bool ok = bb.ice_isA("::Ice::Object", ctx);
+                    bool ok = bb.ice_isA("::Object", ctx);
                     Debug.Assert(ok);
                     ObjectPrxHelper h = new ObjectPrxHelper();
                     h.copyFrom__(bb);
@@ -1189,12 +1054,12 @@ namespace Ice
 
     public interface ObjectDel_
     {
-        bool ice_isA(string id, Ice.Context context);
-        void ice_ping(Ice.Context context);
-        string[] ice_ids(Ice.Context context);
-        string ice_id(Ice.Context context);
-        bool ice_invoke(string operation, Ice.OperationMode mode, byte[] inParams, out byte[] outParams,
-                        Ice.Context context);
+	bool ice_isA(string id, Ice.Context context);
+	void ice_ping(Ice.Context context);
+	string[] ice_ids(Ice.Context context);
+	string ice_id(Ice.Context context);
+	bool ice_invoke(string operation, Ice.OperationMode mode, byte[] inParams, out byte[] outParams,
+			Ice.Context context);
 
         ConnectionI getConnection__(out bool compress);
     }
@@ -1218,7 +1083,7 @@ namespace Ice
                 }
             }
         }
-        
+	
         public virtual void ice_ping(Ice.Context context__)
         {
             Current current__ = new Current();
@@ -1237,7 +1102,7 @@ namespace Ice
                 }
             }
         }
-        
+	
         public virtual string[] ice_ids(Ice.Context context__)
         {
             Current current__ = new Current();
@@ -1255,7 +1120,7 @@ namespace Ice
                 }
             }
         }
-        
+	
         public virtual string ice_id(Ice.Context context__)
         {
             Current current__ = new Current();
@@ -1273,13 +1138,13 @@ namespace Ice
                 }
             }
         }
-        
+	
         public virtual bool ice_invoke(string operation, Ice.OperationMode mode, byte[] inParams,
             out byte[] outParams, Ice.Context context)
         {
             throw new CollocationOptimizationException();
         }
-        
+	
         public virtual ConnectionI getConnection__(out bool compress)
         {
             throw new CollocationOptimizationException();
@@ -1294,73 +1159,49 @@ namespace Ice
             // No need to synchronize "from", as the delegate is immutable
             // after creation.
             //
-            
+	    
             //
             // No need to synchronize, as this operation is only called
             // upon initialization.
             //
-            
+	    
             Debug.Assert(reference__ == null);
             Debug.Assert(adapter__ == null);
-            
+	    
             reference__ = from.reference__;
             adapter__ = from.adapter__;
         }
-        
+	
         protected internal IceInternal.Reference reference__;
         protected internal Ice.ObjectAdapter adapter__;
-        
+	
         protected internal void initCurrent__(ref Current current, string op, Ice.OperationMode mode,
-                                              Ice.Context context)
+					      Ice.Context context)
         {
             current.adapter = adapter__;
             current.id = reference__.getIdentity();
             current.facet = reference__.getFacet();
             current.operation = op;
             current.mode = mode;
-
-            if(context != null)
-            {
-                current.ctx = context;
-            }
-            else
-            {
-                //
-                // Implicit context
-                //
-                ImplicitContextI implicitContext =
-                    reference__.getInstance().getImplicitContext();
-            
-                Context prxContext = reference__.getContext();
-                
-                if(implicitContext == null)
-                {
-                    current.ctx = (Context)prxContext.Clone();
-                }
-                else
-                {
-                    current.ctx = implicitContext.combine(prxContext);
-                }
-            }
-            
-            current.requestId = -1;
+            current.ctx = context;
+	    current.requestId = -1;
         }
-        
+	
         public virtual void setup(IceInternal.Reference rf, Ice.ObjectAdapter adapter)
         {
             //
             // No need to synchronize, as this operation is only called
             // upon initialization.
             //
-            
+	    
             Debug.Assert(reference__ == null);
             Debug.Assert(adapter__ == null);
-            
+	    
             reference__ = rf;
             adapter__ = adapter;
         }
     }
-            
+	    
     public class ObjectDelM_ : ObjectDel_
     {
         public virtual bool ice_isA(string id__, Ice.Context context__)
@@ -1368,156 +1209,156 @@ namespace Ice
             IceInternal.Outgoing og__ = getOutgoing("ice_isA", OperationMode.Nonmutating, context__);
             try
             {
-                try
-                {
-                    IceInternal.BasicStream os__ = og__.ostr();
-                    os__.writeString(id__);
-                }
-                catch(LocalException ex__)
-                {
-                    og__.abort(ex__);
-                }
-                bool ok__ = og__.invoke();
-                try
-                {
-                    IceInternal.BasicStream is__ = og__.istr();
-                    if(!ok__)
-                    {
-                        try
-                        {
-                            is__.throwException();
-                        }
-                        catch(UserException)
-                        {
-                            throw new UnknownUserException();
-                        }
-                    }
-                    return is__.readBool();
-                }
-                catch(LocalException ex__)
-                {
-                    throw new IceInternal.LocalExceptionWrapper(ex__, false);
-                }
+		try
+		{
+		    IceInternal.BasicStream os__ = og__.ostr();
+		    os__.writeString(id__);
+		}
+		catch(LocalException ex__)
+		{
+		    og__.abort(ex__);
+		}
+		bool ok__ = og__.invoke();
+		try
+		{
+		    IceInternal.BasicStream is__ = og__.istr();
+		    if(!ok__)
+		    {
+			try
+			{
+			    is__.throwException();
+			}
+			catch(UserException)
+			{
+			    throw new UnknownUserException();
+			}
+		    }
+		    return is__.readBool();
+		}
+		catch(LocalException ex__)
+		{
+		    throw new IceInternal.LocalExceptionWrapper(ex__, false);
+		}
             }
             finally
             {
                 reclaimOutgoing(og__);
             }
         }
-        
+	
         public virtual void ice_ping(Ice.Context context__)
         {
             IceInternal.Outgoing og__ = getOutgoing("ice_ping", OperationMode.Nonmutating, context__);
             try
             {
-                bool ok__ = og__.invoke();
-                try
-                {
-                    IceInternal.BasicStream is__ = og__.istr();
-                    if(!ok__)
-                    {
-                        try
-                        {
-                            is__.throwException();
-                        }
-                        catch(UserException)
-                        {
-                            throw new UnknownUserException();
-                        }
-                    }
-                }
-                catch(LocalException ex__)
-                {
-                    throw new IceInternal.LocalExceptionWrapper(ex__, false);
-                }
+		bool ok__ = og__.invoke();
+		try
+		{
+		    IceInternal.BasicStream is__ = og__.istr();
+		    if(!ok__)
+		    {
+			try
+			{
+			    is__.throwException();
+			}
+			catch(UserException)
+			{
+			    throw new UnknownUserException();
+			}
+		    }
+		}
+		catch(LocalException ex__)
+		{
+		    throw new IceInternal.LocalExceptionWrapper(ex__, false);
+		}
             }
             finally
             {
                 reclaimOutgoing(og__);
             }
         }
-        
+	
         public virtual string[] ice_ids(Ice.Context context__)
         {
             IceInternal.Outgoing og__ = getOutgoing("ice_ids", OperationMode.Nonmutating, context__);
             try
             {
-                bool ok__ = og__.invoke();
-                try
-                {
-                    IceInternal.BasicStream is__ = og__.istr();
-                    if(!ok__)
-                    {
-                        try
-                        {
-                            is__.throwException();
-                        }
-                        catch(UserException)
-                        {
-                            throw new UnknownUserException();
-                        }
-                    }
-                    return is__.readStringSeq();
-                }
-                catch(LocalException ex__)
-                {
-                    throw new IceInternal.LocalExceptionWrapper(ex__, false);
-                }
+		bool ok__ = og__.invoke();
+		try
+		{
+		    IceInternal.BasicStream is__ = og__.istr();
+		    if(!ok__)
+		    {
+			try
+			{
+			    is__.throwException();
+			}
+			catch(UserException)
+			{
+			    throw new UnknownUserException();
+			}
+		    }
+		    return is__.readStringSeq();
+		}
+		catch(LocalException ex__)
+		{
+		    throw new IceInternal.LocalExceptionWrapper(ex__, false);
+		}
             }
             finally
             {
                 reclaimOutgoing(og__);
             }
         }
-        
+	
         public virtual string ice_id(Ice.Context context__)
         {
             IceInternal.Outgoing og__ = getOutgoing("ice_id", OperationMode.Nonmutating, context__);
             try
             {
-                bool ok__ = og__.invoke();
-                try
-                {
-                    IceInternal.BasicStream is__ = og__.istr();
-                    if(!ok__)
-                    {
-                        try
-                        {
-                            is__.throwException();
-                        }
-                        catch(UserException)
-                        {
-                            throw new UnknownUserException();
-                        }
-                    }
-                    return is__.readString();
-                }
-                catch(LocalException ex__)
-                {
-                    throw new IceInternal.LocalExceptionWrapper(ex__, false);
-                }
+		bool ok__ = og__.invoke();
+		try
+		{
+		    IceInternal.BasicStream is__ = og__.istr();
+		    if(!ok__)
+		    {
+			try
+			{
+			    is__.throwException();
+			}
+			catch(UserException)
+			{
+			    throw new UnknownUserException();
+			}
+		    }
+		    return is__.readString();
+		}
+		catch(LocalException ex__)
+		{
+		    throw new IceInternal.LocalExceptionWrapper(ex__, false);
+		}
             }
             finally
             {
                 reclaimOutgoing(og__);
             }
         }
-        
+	
         public virtual bool ice_invoke(string operation, OperationMode mode, byte[] inParams, out byte[] outParams,
                                        Ice.Context context__)
         {
             IceInternal.Outgoing og__ = getOutgoing(operation, mode, context__);
             try
             {
-                try
-                {
-                    IceInternal.BasicStream os__ = og__.ostr();
-                    os__.writeBlob(inParams);
-                }
-                catch(LocalException ex__)
-                {
-                    og__.abort(ex__);
-                }
+		try
+		{
+		    IceInternal.BasicStream os__ = og__.ostr();
+		    os__.writeBlob(inParams);
+		}
+		catch(LocalException ex__)
+		{
+		    og__.abort(ex__);
+		}
                 bool ok = og__.invoke();
                 outParams = null;
                 if(reference__.getMode() == IceInternal.Reference.Mode.ModeTwoway)
@@ -1540,13 +1381,13 @@ namespace Ice
                 reclaimOutgoing(og__);
             }
         }
-        
+	
         public virtual ConnectionI getConnection__(out bool compress)
         {
-            compress = compress__;
+	    compress = compress__;
             return connection__;
         }
-        
+	
         //
         // Only for use by ObjectPrx
         //
@@ -1556,20 +1397,20 @@ namespace Ice
             // No need to synchronize "from", as the delegate is immutable
             // after creation.
             //
-            
+	    
             //
             // No need to synchronize, as this operation is only called
             // upon initialization.
             //
-            
+	    
             Debug.Assert(reference__ == null);
             Debug.Assert(connection__ == null);
-            
+	    
             reference__ = from.reference__;
             connection__ = from.connection__;
-            compress__ = from.compress__;
+	    compress__ = from.compress__;
         }
-        
+	
         protected IceInternal.Reference reference__;
         protected ConnectionI connection__;
         protected bool compress__;
@@ -1580,22 +1421,22 @@ namespace Ice
             // No need to synchronize, as this operation is only called
             // upon initialization.
             //
-            
+	    
             Debug.Assert(reference__ == null);
             Debug.Assert(connection__ == null);
-            
+	    
             reference__ = rf;
             connection__ = reference__.getConnection(out compress__);
         }
-        
+	
         protected IceInternal.Outgoing getOutgoing(string operation, OperationMode mode, Ice.Context context)
         {
-            return connection__.getOutgoing(reference__, operation, mode, context, compress__);
+	    return connection__.getOutgoing(reference__, operation, mode, context, compress__);
         }
 
         protected void reclaimOutgoing(IceInternal.Outgoing outg)
         {
-            connection__.reclaimOutgoing(outg);
+	    connection__.reclaimOutgoing(outg);
         }
     }
 }

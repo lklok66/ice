@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -59,9 +59,6 @@ public interface ObjectPrx
      **/
     ObjectPrx ice_newContext(java.util.Map newContext);
     ObjectPrx ice_context(java.util.Map newContext);
-    /**
-     * @deprecated This method has been replaced with ice_context.
-     **/
     ObjectPrx ice_defaultContext();
 
     String ice_getFacet(); 
@@ -97,9 +94,6 @@ public interface ObjectPrx
     boolean ice_isSecure();
     ObjectPrx ice_secure(boolean b);
 
-    boolean ice_isPreferSecure();
-    ObjectPrx ice_preferSecure(boolean b);
-
     Ice.RouterPrx ice_getRouter();
     ObjectPrx ice_router(Ice.RouterPrx router);
 
@@ -128,15 +122,11 @@ public interface ObjectPrx
     ObjectPrx ice_timeout(int t);
     ObjectPrx ice_connectionId(String connectionId);
 
-    boolean ice_isThreadPerConnection();
-    ObjectPrx ice_threadPerConnection(boolean tpc);
-
     /**
      * @deprecated This method has been replaced with ice_getConnection.
      **/
     Connection ice_connection();
     Connection ice_getConnection();
-    Connection ice_getCachedConnection();
 
     boolean equals(java.lang.Object r);
 }

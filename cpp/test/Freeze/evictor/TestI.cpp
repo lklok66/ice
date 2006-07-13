@@ -1,70 +1,19 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
 
+#include <IceUtil/IceUtil.h>
 #include <Freeze/Freeze.h>
 #include <TestI.h>
-#include <TestCommon.h>
 
 using namespace std;
 using namespace Ice;
 using namespace IceUtil;
-
-
-int
-Test::AccountI::getBalance(const Current&)
-{
-    return balance;
-}
-    
-void 
-Test::AccountI::deposit(int amount, const Current&)
-{
-    test(_evictor->getCurrentTransaction() != 0);
-    
-    //
-    // No need to synchronize since everything occurs within its own transaction
-    //
-    int newBalance = balance + amount;
-    if(newBalance < 0)
-    {
-        throw Test::InsufficientFundsException();
-    }
-    balance = newBalance;
-}
-
-void 
-Test::AccountI::transfer(int amount, const Test::AccountPrx& toAccount, const Current& current)
-{
-    test(_evictor->getCurrentTransaction() != 0);
-
-    toAccount->deposit(amount); // collocated call
-    deposit(-amount, current); // direct call
-}
-
-Test::AccountI::AccountI(int initialBalance, const Freeze::TransactionalEvictorPtr& evictor) :
-    Account(initialBalance),
-    _evictor(evictor)
-{
-}
-
-
-Test::AccountI::AccountI() :
-    Account(0)
-{
-}
-
-void 
-Test::AccountI::init(const Freeze::TransactionalEvictorPtr& evictor)
-{
-    test(_evictor == 0);
-    _evictor = evictor;
-}
 
 
 class DelayedResponse : public Thread
@@ -72,16 +21,16 @@ class DelayedResponse : public Thread
 public:
 
     DelayedResponse(const Test::AMD_Servant_slowGetValuePtr& cb, int val) :
-        _cb(cb),
-        _val(val)
+	_cb(cb),
+	_val(val)
     {
     }
     
     virtual void
     run()
     {
-        ThreadControl::sleep(Time::milliSeconds(500));
-        _cb->ice_response(_val);
+	ThreadControl::sleep(Time::milliSeconds(500));
+	_cb->ice_response(_val);
     }
 
 private:
@@ -113,7 +62,7 @@ Test::ServantI::init(const RemoteEvictorIPtr& remoteEvictor, const Freeze::Evict
 Int
 Test::ServantI::getValue(const Current&) const
 {
-    Monitor<Mutex>::Lock sync(*this);
+    Lock sync(*this);
     return value;
 }
 
@@ -121,16 +70,16 @@ Int
 Test::ServantI::slowGetValue(const Current&) const
 {
     IceUtil::ThreadControl::sleep(IceUtil::Time::seconds(1));
-    Monitor<Mutex>::Lock sync(*this);
+    Lock sync(*this);
     return value;
 }
 
 void
 Test::ServantI::slowGetValue_async(const AMD_Servant_slowGetValuePtr& cb,
-                                   const Current&) const
+				   const Current&) const
 {
     IceUtil::ThreadControl::sleep(IceUtil::Time::seconds(1));
-    Monitor<Mutex>::Lock sync(*this);
+    Lock sync(*this);
     (new DelayedResponse(cb, value))->start().detach();
 }
 
@@ -138,7 +87,7 @@ Test::ServantI::slowGetValue_async(const AMD_Servant_slowGetValuePtr& cb,
 void
 Test::ServantI::setValue(Int val, const Current&)
 {
-    Monitor<Mutex>::Lock sync(*this);
+    Lock sync(*this);
     value = val;
 }
 
@@ -146,26 +95,21 @@ Test::ServantI::setValue(Int val, const Current&)
 void
 Test::ServantI::setValueAsync_async(const AMD_Servant_setValueAsyncPtr& __cb, Int value, const Current&)
 {
-    Monitor<Mutex>::Lock sync(*this);
+    Lock sync(*this);
     _setValueAsyncCB = __cb;
     _setValueAsyncValue = value;
-    notify();
 }
 
 void
 Test::ServantI::releaseAsync(const Current& current) const
 {
-    Monitor<Mutex>::Lock sync(*this);
-    //
-    // Wait until the previous _async has been dispatched
-    //
-    while(_setValueAsyncCB == 0)
+    if(_setValueAsyncCB)
     {
-        wait();
+	Lock sync(*this);
+        const_cast<Int&>(value) = _setValueAsyncValue;
+        _setValueAsyncCB->ice_response();
+        const_cast<AMD_Servant_setValueAsyncPtr&>(_setValueAsyncCB) = 0;
     }
-    const_cast<Int&>(value) = _setValueAsyncValue;
-    _setValueAsyncCB->ice_response();
-    const_cast<AMD_Servant_setValueAsyncPtr&>(_setValueAsyncCB) = 0;
 }
 
 void
@@ -175,11 +119,11 @@ Test::ServantI::addFacet(const string& name, const string& data, const Current& 
 
     try
     {
-        _evictor->addFacet(facet, current.id, name);
+	_evictor->addFacet(facet, current.id, name);
     }
     catch(const Ice::AlreadyRegisteredException&)
     {
-        throw Test::AlreadyRegisteredException();
+	throw Test::AlreadyRegisteredException();
     }
 }
 
@@ -188,11 +132,11 @@ Test::ServantI::removeFacet(const string& name, const Current& current) const
 {
     try
     {
-        _evictor->removeFacet(current.id, name);
+	_evictor->removeFacet(current.id, name);
     }
     catch(const Ice::NotRegisteredException&)
     {
-        throw Test::NotRegisteredException();
+	throw Test::NotRegisteredException();
     }
 }
 
@@ -200,21 +144,21 @@ Test::ServantI::removeFacet(const string& name, const Current& current) const
 Ice::Int
 Test::ServantI::getTransientValue(const Current& current) const
 {
-    Monitor<Mutex>::Lock sync(*this);
+    Lock sync(*this);
     return _transientValue;
 }
 
 void
 Test::ServantI::setTransientValue(Ice::Int val, const Current& current)
 {
-    Monitor<Mutex>::Lock sync(*this);
+    Lock sync(*this);
     _transientValue = val;
 }
 
 void
 Test::ServantI::keepInCache(const Current& current)
 {
-    Freeze::BackgroundSaveEvictorPtr::dynamicCast(_evictor)->keep(current.id);
+    _evictor->keep(current.id);
 }
 
 void
@@ -222,100 +166,24 @@ Test::ServantI::release(const Current& current)
 {
     try
     {
-        Freeze::BackgroundSaveEvictorPtr::dynamicCast(_evictor)->release(current.id);
+	_evictor->release(current.id);
     }
     catch(const Ice::NotRegisteredException&)
     {
-        throw NotRegisteredException();
+	throw NotRegisteredException();
     }
 }
-
-
-Test::AccountPrxSeq
-Test::ServantI::getAccounts(const Current& current)
-{
-    Freeze::TransactionalEvictorPtr te = Freeze::TransactionalEvictorPtr::dynamicCast(_evictor);
-
-    if(te->getCurrentTransaction() != 0)
-    {
-        if(accounts.empty())
-        {
-            for(int i = 0; i < 10; ++i)
-            {
-                Ice::Identity ident;
-                ident.name = current.id.name + "-account#" + char('0' + i);
-                ident.category = current.id.category;
-                accounts.push_back(ident);
-                _evictor->add(new AccountI(1000, te), ident);
-            }
-        }
-        else
-        {
-            te->getCurrentTransaction()->rollback(); // not need to re-write this servant
-        }
-    }
-
-    Test::AccountPrxSeq result;
-    for(size_t i = 0; i < accounts.size(); ++i)
-    {
-        result.push_back(Test::AccountPrx::uncheckedCast(current.adapter->createProxy(accounts[i])));
-    }
-    return result;
-}
-
-int
-Test::ServantI::getTotalBalance(const Current& current)
-{
-    Test::AccountPrxSeq proxies = getAccounts(current);
-
-    //
-    // Need to start a transaction to ensure a consistent result
-    //
-    Freeze::TransactionalEvictorPtr te = Freeze::TransactionalEvictorPtr::dynamicCast(_evictor);
-
-    for(;;)
-    {
-        test(te->getCurrentTransaction() == 0);
-        Freeze::ConnectionPtr con = Freeze::createConnection(current.adapter->getCommunicator(), _remoteEvictor->envName());
-        te->setCurrentTransaction(con->beginTransaction());
-        int total = 0;
-        try
-        {
-            for(size_t i = 0; i < proxies.size(); ++i)
-            {
-                total += proxies[i]->getBalance();
-            }
-            te->getCurrentTransaction()->rollback();
-            te->setCurrentTransaction(0);
-            return total;
-        }
-        catch(const Freeze::DeadlockException&)
-        {
-            te->getCurrentTransaction()->rollback();
-            te->setCurrentTransaction(0);
-            // retry
-        }
-        catch(...)
-        {
-            te->getCurrentTransaction()->rollback();
-            te->setCurrentTransaction(0);
-            throw;
-        }
-    }
-    return -1;
-}
-
 
 void
 Test::ServantI::destroy(const Current& current)
 {
     try
     {
-        _evictor->remove(current.id);
+	_evictor->remove(current.id);
     }
     catch(const Ice::NotRegisteredException&)
     {
-        throw Ice::ObjectNotExistException(__FILE__, __LINE__);
+	throw Ice::ObjectNotExistException(__FILE__, __LINE__);
     }
 }
 
@@ -334,14 +202,14 @@ Test::FacetI::FacetI(const RemoteEvictorIPtr& remoteEvictor, const Freeze::Evict
 string
 Test::FacetI::getData(const Current&) const
 {
-    Monitor<Mutex>::Lock sync(*this);
+    Lock sync(*this);
     return data;
 }
 
 void
 Test::FacetI::setData(const string& d, const Current&)
 {
-    Monitor<Mutex>::Lock sync(*this);
+    Lock sync(*this);
     data = d;
 }
 
@@ -353,23 +221,14 @@ public:
     void init(const Test::RemoteEvictorIPtr& remoteEvictor, const Freeze::EvictorPtr& evictor)
     {
         _remoteEvictor = remoteEvictor;
-        _evictor = evictor;
+	_evictor = evictor;
     }
     
     virtual void
     initialize(const ObjectAdapterPtr& adapter, const Identity& ident, const string& facet, const ObjectPtr& servant)
     {
         Test::ServantI* servantI = dynamic_cast<Test::ServantI*>(servant.get());
-        if(servantI != 0)
-        {
-            servantI->init(_remoteEvictor, _evictor);
-        }
-        else
-        {
-            Test::AccountI* account = dynamic_cast<Test::AccountI*>(servant.get());
-            test(account != 0);
-            account->init(Freeze::TransactionalEvictorPtr::dynamicCast(_evictor));
-        }
+        servantI->init(_remoteEvictor, _evictor);
     }
 
 private:
@@ -380,9 +239,8 @@ private:
 
 
 Test::RemoteEvictorI::RemoteEvictorI(const ObjectAdapterPtr& adapter, const string& envName,
-                                     const string& category, bool transactional) :
+				     const string& category) :
     _adapter(adapter),
-    _envName(envName),
     _category(category)
 {
     CommunicatorPtr communicator = adapter->getCommunicator();
@@ -390,14 +248,7 @@ Test::RemoteEvictorI::RemoteEvictorI(const ObjectAdapterPtr& adapter, const stri
  
     Initializer* initializer = new Initializer;
     
-    if(transactional)
-    {
-        _evictor = Freeze::createTransactionalEvictor(_evictorAdapter, envName, category, Freeze::FacetTypeMap(), initializer);
-    }
-    else
-    {
-        _evictor = Freeze::createBackgroundSaveEvictor(_evictorAdapter, envName, category, initializer);
-    }
+    _evictor = Freeze::createEvictor(_evictorAdapter, envName, category, initializer);
     initializer->init(this, _evictor);
 
     _evictorAdapter->addServantLocator(_evictor, category);
@@ -420,19 +271,19 @@ Test::RemoteEvictorI::createServant(const string& id, Int value, const Current&)
     ServantPtr servant = new ServantI(this, _evictor, value);
     try
     {
-        return ServantPrx::uncheckedCast(_evictor->add(servant, ident));
+	return ServantPrx::uncheckedCast(_evictor->add(servant, ident));
     }
     catch(const Ice::AlreadyRegisteredException&)
     {
-        throw Test::AlreadyRegisteredException();
+	throw Test::AlreadyRegisteredException();
     }
     catch(const Ice::ObjectAdapterDeactivatedException&)
     {
-        throw EvictorDeactivatedException();
+	throw EvictorDeactivatedException();
     }
     catch(const Freeze::EvictorDeactivatedException&)
     {
-        throw EvictorDeactivatedException();
+	throw EvictorDeactivatedException();
     }
 
 }
@@ -456,7 +307,8 @@ Test::RemoteEvictorI::saveNow(const Current& current)
 void
 Test::RemoteEvictorI::deactivate(const Current& current)
 {
-    _evictorAdapter->destroy();
+    _evictorAdapter->deactivate();
+    _evictorAdapter->waitForDeactivate();
     _adapter->remove(_adapter->getCommunicator()->stringToIdentity(_category));
 }
 
@@ -472,7 +324,7 @@ Test::RemoteEvictorI::destroyAllServants(const string& facetName, const Current&
     Freeze::EvictorIteratorPtr p = _evictor->getIterator(facetName, batchSize);
     while(p->hasNext())
     {
-        _evictor->remove(p->next());
+	_evictor->remove(p->next());
     }
 }
 
@@ -485,11 +337,11 @@ Test::RemoteEvictorFactoryI::RemoteEvictorFactoryI(const ObjectAdapterPtr& adapt
 }
 
 ::Test::RemoteEvictorPrx
-Test::RemoteEvictorFactoryI::createEvictor(const string& name, bool transactional, const Current& current)
+Test::RemoteEvictorFactoryI::createEvictor(const string& name, const Current& current)
 {
-    RemoteEvictorIPtr remoteEvictor = new RemoteEvictorI(_adapter, _envName, name, transactional);  
+    RemoteEvictorIPtr remoteEvictor = new RemoteEvictorI(_adapter, _envName, name);  
     return RemoteEvictorPrx::uncheckedCast(_adapter->add(remoteEvictor, 
-                                                         _adapter->getCommunicator()->stringToIdentity(name)));
+    						         _adapter->getCommunicator()->stringToIdentity(name)));
 }
 
 void

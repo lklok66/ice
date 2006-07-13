@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -13,7 +13,6 @@
 #include <Ice/Plugin.h>
 #include <Ice/InstanceF.h>
 #include <Ice/CommunicatorF.h>
-#include <Ice/LoggerF.h>
 #include <Ice/DynamicLibraryF.h>
 #include <Ice/BuiltinSequences.h>
 #include <IceUtil/Mutex.h>
@@ -37,8 +36,7 @@ private:
     friend class IceInternal::Instance;
 
     void loadPlugins(int&, char*[]);
-    void loadPlugin(const std::string&, const std::string&, StringSeq&, bool);
-    LoggerPtr getLogger() const;
+    void loadPlugin(const std::string&, const std::string&, StringSeq&);
 
     CommunicatorPtr _communicator;
     IceInternal::DynamicLibraryListPtr _libraries;
@@ -47,8 +45,6 @@ private:
     std::vector<PluginPtr> _initOrder;
     bool _initialized;
     static const char * const _kindOfObject;
-
-    LoggerPtr _logger;
 };
 
 }

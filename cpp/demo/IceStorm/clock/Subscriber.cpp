@@ -1,33 +1,22 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
 
-#include <IceUtil/IceUtil.h>
-#include <Ice/Ice.h>
+#include <Ice/Application.h>
 #include <IceStorm/IceStorm.h>
+#include <IceUtil/UUID.h>
 
-#include <Clock.h>
+#include <ClockI.h>
 
 #include <map>
 
 using namespace std;
 using namespace Demo;
-
-class ClockI : public Clock
-{
-public:
-
-    virtual void
-    tick(const string& time, const Ice::Current&)
-    {
-        cout << time << endl;
-    }
-};
 
 class Subscriber : public Ice::Application
 {
@@ -43,129 +32,119 @@ main(int argc, char* argv[])
     return app.main(argc, argv, "config.sub");
 }
 
-void
-usage(const string& n)
-{
-    cerr << "Usage: " << n << " [--batch] [--datagram|--twoway|--ordered|--oneway] [topic]" << endl;
-}
-
 int
 Subscriber::run(int argc, char* argv[])
 {
-    IceUtil::Options opts;
-    opts.addOpt("", "datagram");
-    opts.addOpt("", "twoway");
-    opts.addOpt("", "ordered");
-    opts.addOpt("", "oneway");
-    opts.addOpt("", "batch");
+    Ice::PropertiesPtr properties = communicator()->getProperties();
 
-    IceUtil::Options::StringVector remaining;
-    try
+    const string proxyProperty = "IceStorm.TopicManager.Proxy";
+    string proxy = properties->getProperty(proxyProperty);
+    if(proxy.empty())
     {
-        remaining = opts.parse(argc, (const char**)argv);
-    }
-    catch(const IceUtil::BadOptException& e)
-    {
-        cerr << argv[0] << ": " << e.reason << endl;
-        usage(appName());
-        return EXIT_FAILURE;
+	cerr << appName() << ": property `" << proxyProperty << "' not set" << endl;
+	return EXIT_FAILURE;
     }
 
-    IceStorm::TopicManagerPrx manager = IceStorm::TopicManagerPrx::checkedCast(
-        communicator()->propertyToProxy("IceStorm.TopicManager.Proxy"));
+    Ice::ObjectPrx base = communicator()->stringToProxy(proxy);
+    IceStorm::TopicManagerPrx manager = IceStorm::TopicManagerPrx::checkedCast(base);
     if(!manager)
     {
-        cerr << appName() << ": invalid proxy" << endl;
-        return EXIT_FAILURE;
+	cerr << appName() << ": invalid proxy" << endl;
+	return EXIT_FAILURE;
     }
-
-    string topicName = "time";
-    if(!remaining.empty())
-    {
-        topicName = remaining.front();
-    }
-
-    IceStorm::TopicPrx topic;
-    try
-    {
-        topic = manager->retrieve(topicName);
-    }
-    catch(const IceStorm::NoSuchTopic&)
-    {
-        try
-        {
-            topic = manager->create(topicName);
-        }
-        catch(const IceStorm::TopicExists&)
-        {
-            cerr << appName() << ": temporary failure. try again." << endl;
-            return EXIT_FAILURE;
-        }
-    }
-
-    Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapter("Clock.Subscriber");
 
     //
-    // Add a Servant for the Ice Object.
+    // Gather the set of topics to which to subscribe. It is either
+    // the set provided on the command line, or the topic "time".
+    //
+    Ice::StringSeq topics;
+    if(argc > 1)
+    {
+	for(int i = 1; i < argc; ++i)
+	{
+	    topics.push_back(argv[i]);
+	}
+    }
+    else
+    {
+	topics.push_back("time");
+    }
+
+    //
+    // Set the requested quality of service "reliability" =
+    // "batch". This tells IceStorm to send events to the subscriber
+    // in batches at regular intervals.
     //
     IceStorm::QoS qos;
-    Ice::ObjectPrx subscriber = adapter->addWithUUID(new ClockI);
+    qos["reliability"] = "batch";
+
     //
-    // Set up the proxy.
+    // Create the servant to receive the events.
     //
-    int optsSet = 0;
-    if(opts.isSet("datagram"))
+    Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapter("Clock.Subscriber");
+    Ice::ObjectPtr clock = new ClockI();
+
+    //
+    // List of all subscribers.
+    //
+    map<string, Ice::ObjectPrx> subscribers;
+
+    //
+    // Add the servant to the adapter for each topic. A ServantLocator
+    // could have been used for the same purpose.
+    //
+    for(Ice::StringSeq::iterator p = topics.begin(); p != topics.end(); ++p)
     {
-        subscriber = subscriber->ice_datagram();
-        ++optsSet;
-    }
-    if(opts.isSet("twoway"))
-    {
-        // Do nothing to the subscriber proxy. Its already twoway.
-        ++optsSet;
-    }
-    if(opts.isSet("ordered"))
-    {
-        qos["reliability"] = "ordered";
-        // Do nothing to the subscriber proxy. Its already twoway.
-        ++optsSet;
-    }
-    if(opts.isSet("oneway") || optsSet == 0)
-    {
-        subscriber = subscriber->ice_oneway();
-        ++optsSet;
+	//
+	// Add a Servant for the Ice Object.
+	//
+	Ice::ObjectPrx object = adapter->addWithUUID(clock);
+	try
+	{
+            IceStorm::TopicPrx topic = manager->retrieve(*p);
+	    topic->subscribe(qos, object);
+	}
+	catch(const IceStorm::NoSuchTopic& e)
+	{
+	    cerr << appName() << ": " << e << " name: " << e.name << endl;
+	    break;
+	}
+
+	//
+	// Add to the set of subscribers _after_ subscribing. This
+	// ensures that only subscribed subscribers are unsubscribed
+	// in the case of an error.
+	//
+	subscribers[*p] = object;
     }
 
-    if(optsSet != 1)
+    //
+    // Unless there is a subscriber per topic then there was some
+    // problem. If there was an error the application should terminate
+    // without accepting any events.
+    //
+    if(subscribers.size() == topics.size())
     {
-        usage(appName());
-        return EXIT_FAILURE;
+	adapter->activate();
+	shutdownOnInterrupt();
+	communicator()->waitForShutdown();
     }
 
-    if(opts.isSet("batch"))
+    //
+    // Unsubscribe all subscribed objects.
+    //
+    for(map<string,Ice::ObjectPrx>::const_iterator q = subscribers.begin(); q != subscribers.end(); ++q)
     {
-        if(opts.isSet("twoway") || opts.isSet("ordered"))
-        {
-            cerr << appName() << ": batch can only be set with oneway or datagram" << endl;
-            return EXIT_FAILURE;
-        }
-        if(opts.isSet("datagram"))
-        {
-            subscriber = subscriber->ice_batchDatagram();
-        }
-        else
-        {
-            subscriber = subscriber->ice_batchOneway();
-        }
+	try
+	{
+            IceStorm::TopicPrx topic = manager->retrieve(q->first);
+	    topic->unsubscribe(q->second);
+	}
+	catch(const IceStorm::NoSuchTopic& e)
+	{
+	    cerr << appName() << ": " << e << " name: " << e.name << endl;
+	}
     }
-
-    topic->subscribeAndGetPublisher(qos, subscriber);
-    adapter->activate();
-
-    shutdownOnInterrupt();
-    communicator()->waitForShutdown();
-
-    topic->unsubscribe(subscriber);
 
     return EXIT_SUCCESS;
 }

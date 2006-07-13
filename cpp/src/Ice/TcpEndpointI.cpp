@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -22,23 +22,23 @@ using namespace Ice;
 using namespace IceInternal;
 
 IceInternal::TcpEndpointI::TcpEndpointI(const InstancePtr& instance, const string& ho, Int po, Int ti,
-                                        const string& conId, bool co, bool oae) :
+					const string& conId, bool co, bool pub) :
     _instance(instance),
     _host(ho),
     _port(po),
     _timeout(ti),
     _connectionId(conId),
     _compress(co),
-    _oaEndpoint(oae)
+    _publish(pub)
 {
 }
 
-IceInternal::TcpEndpointI::TcpEndpointI(const InstancePtr& instance, const string& str, bool oaEndpoint) :
+IceInternal::TcpEndpointI::TcpEndpointI(const InstancePtr& instance, const string& str) :
     _instance(instance),
     _port(0),
     _timeout(-1),
     _compress(false),
-    _oaEndpoint(oaEndpoint)
+    _publish(true)
 {
     const string delim = " \t\n\r";
 
@@ -47,112 +47,105 @@ IceInternal::TcpEndpointI::TcpEndpointI(const InstancePtr& instance, const strin
 
     while(true)
     {
-        beg = str.find_first_not_of(delim, end);
-        if(beg == string::npos)
-        {
-            break;
-        }
-        
-        end = str.find_first_of(delim, beg);
-        if(end == string::npos)
-        {
-            end = str.length();
-        }
+	beg = str.find_first_not_of(delim, end);
+	if(beg == string::npos)
+	{
+	    break;
+	}
+	
+	end = str.find_first_of(delim, beg);
+	if(end == string::npos)
+	{
+	    end = str.length();
+	}
 
-        string option = str.substr(beg, end - beg);
-        if(option.length() != 2 || option[0] != '-')
-        {
-            EndpointParseException ex(__FILE__, __LINE__);
-            ex.str = "tcp " + str;
-            throw ex;
-        }
+	string option = str.substr(beg, end - beg);
+	if(option.length() != 2 || option[0] != '-')
+	{
+	    EndpointParseException ex(__FILE__, __LINE__);
+	    ex.str = "tcp " + str;
+	    throw ex;
+	}
 
-        string argument;
-        string::size_type argumentBeg = str.find_first_not_of(delim, end);
-        if(argumentBeg != string::npos && str[argumentBeg] != '-')
-        {
-            beg = argumentBeg;
-            end = str.find_first_of(delim, beg);
-            if(end == string::npos)
-            {
-                end = str.length();
-            }
-            argument = str.substr(beg, end - beg);
-        }
+	string argument;
+	string::size_type argumentBeg = str.find_first_not_of(delim, end);
+	if(argumentBeg != string::npos && str[argumentBeg] != '-')
+	{
+	    beg = argumentBeg;
+	    end = str.find_first_of(delim, beg);
+	    if(end == string::npos)
+	    {
+		end = str.length();
+	    }
+	    argument = str.substr(beg, end - beg);
+	}
 
-        switch(option[1])
-        {
-            case 'h':
-            {
-                if(argument.empty())
-                {
-                    EndpointParseException ex(__FILE__, __LINE__);
-                    ex.str = "tcp " + str;
-                    throw ex;
-                }
-                const_cast<string&>(_host) = argument;
-                break;
-            }
+	switch(option[1])
+	{
+	    case 'h':
+	    {
+		if(argument.empty())
+		{
+		    EndpointParseException ex(__FILE__, __LINE__);
+		    ex.str = "tcp " + str;
+		    throw ex;
+		}
+		const_cast<string&>(_host) = argument;
+		break;
+	    }
 
-            case 'p':
-            {
-                istringstream p(argument);
-                if(!(p >> const_cast<Int&>(_port)) || !p.eof() || _port < 0 || _port > 65535)
-                {
-                    EndpointParseException ex(__FILE__, __LINE__);
-                    ex.str = "tcp " + str;
-                    throw ex;
-                }
-                break;
-            }
+	    case 'p':
+	    {
+		istringstream p(argument);
+		if(!(p >> const_cast<Int&>(_port)) || !p.eof() || _port < 0 || _port > 65535)
+		{
+		    EndpointParseException ex(__FILE__, __LINE__);
+		    ex.str = "tcp " + str;
+		    throw ex;
+		}
+		break;
+	    }
 
-            case 't':
-            {
-                istringstream t(argument);
-                if(!(t >> const_cast<Int&>(_timeout)) || !t.eof())
-                {
-                    EndpointParseException ex(__FILE__, __LINE__);
-                    ex.str = "tcp " + str;
-                    throw ex;
-                }
-                break;
-            }
+	    case 't':
+	    {
+		istringstream t(argument);
+		if(!(t >> const_cast<Int&>(_timeout)) || !t.eof())
+		{
+		    EndpointParseException ex(__FILE__, __LINE__);
+		    ex.str = "tcp " + str;
+		    throw ex;
+		}
+		break;
+	    }
 
-            case 'z':
-            {
-                if(!argument.empty())
-                {
-                    EndpointParseException ex(__FILE__, __LINE__);
-                    ex.str = "tcp " + str;
-                    throw ex;
-                }
-                const_cast<bool&>(_compress) = true;
-                break;
-            }
+	    case 'z':
+	    {
+		if(!argument.empty())
+		{
+		    EndpointParseException ex(__FILE__, __LINE__);
+		    ex.str = "tcp " + str;
+		    throw ex;
+		}
+		const_cast<bool&>(_compress) = true;
+		break;
+	    }
 
-            default:
-            {
-                EndpointParseException ex(__FILE__, __LINE__);
-                ex.str = "tcp " + str;
-                throw ex;
-            }
-        }
+	    default:
+	    {
+		EndpointParseException ex(__FILE__, __LINE__);
+		ex.str = "tcp " + str;
+		throw ex;
+	    }
+	}
     }
 
     if(_host.empty())
     {
-        const_cast<string&>(_host) = _instance->defaultsAndOverrides()->defaultHost;
-        if(_host.empty())
-        {
-            if(oaEndpoint)
-            {
-                const_cast<string&>(_host) = "0.0.0.0";
-            }
-            else
-            {
-                const_cast<string&>(_host) = "127.0.0.1";
-            }
-        }
+	const_cast<string&>(_host) = _instance->defaultsAndOverrides()->defaultHost;
+	if(_host.empty())
+	{
+	    const_cast<string&>(_host) = "0.0.0.0";
+	}
     }
     else if(_host == "*")
     {
@@ -165,7 +158,7 @@ IceInternal::TcpEndpointI::TcpEndpointI(BasicStream* s) :
     _port(0),
     _timeout(-1),
     _compress(false),
-    _oaEndpoint(false)
+    _publish(true)
 {
     s->startReadEncaps();
     s->read(const_cast<string&>(_host), false);
@@ -201,11 +194,11 @@ IceInternal::TcpEndpointI::toString() const
     s << "tcp -h " << _host << " -p " << _port;
     if(_timeout != -1)
     {
-        s << " -t " << _timeout;
+	s << " -t " << _timeout;
     }
     if(_compress)
     {
-        s << " -z";
+	s << " -z";
     }
     return s.str();
 }
@@ -227,11 +220,11 @@ IceInternal::TcpEndpointI::timeout(Int timeout) const
 {
     if(timeout == _timeout)
     {
-        return const_cast<TcpEndpointI*>(this);
+	return const_cast<TcpEndpointI*>(this);
     }
     else
     {
-        return new TcpEndpointI(_instance, _host, _port, timeout, _connectionId, _compress, _oaEndpoint);
+	return new TcpEndpointI(_instance, _host, _port, timeout, _connectionId, _compress, _publish);
     }
 }
 
@@ -240,11 +233,11 @@ IceInternal::TcpEndpointI::connectionId(const string& connectionId) const
 {
     if(connectionId == _connectionId)
     {
-        return const_cast<TcpEndpointI*>(this);
+	return const_cast<TcpEndpointI*>(this);
     }
     else
     {
-        return new TcpEndpointI(_instance, _host, _port, _timeout, connectionId, _compress, _oaEndpoint);
+	return new TcpEndpointI(_instance, _host, _port, _timeout, connectionId, _compress, _publish);
     }
 }
 
@@ -259,11 +252,11 @@ IceInternal::TcpEndpointI::compress(bool compress) const
 {
     if(compress == _compress)
     {
-        return const_cast<TcpEndpointI*>(this);
+	return const_cast<TcpEndpointI*>(this);
     }
     else
     {
-        return new TcpEndpointI(_instance, _host, _port, _timeout, _connectionId, compress, _oaEndpoint);
+	return new TcpEndpointI(_instance, _host, _port, _timeout, _connectionId, compress, _publish);
     }
 }
 
@@ -286,54 +279,59 @@ IceInternal::TcpEndpointI::unknown() const
 }
 
 TransceiverPtr
-IceInternal::TcpEndpointI::transceiver(EndpointIPtr& endp) const
+IceInternal::TcpEndpointI::clientTransceiver() const
+{
+    return 0;
+}
+
+TransceiverPtr
+IceInternal::TcpEndpointI::serverTransceiver(EndpointIPtr& endp) const
 {
     endp = const_cast<TcpEndpointI*>(this);
     return 0;
 }
 
-vector<ConnectorPtr>
-IceInternal::TcpEndpointI::connectors() const
+ConnectorPtr
+IceInternal::TcpEndpointI::connector() const
 {
-    vector<ConnectorPtr> connectors;
-    vector<struct sockaddr_in> addresses = getAddresses(_host, _port);
-    for(unsigned int i = 0; i < addresses.size(); ++i)
-    {
-        connectors.push_back(new TcpConnector(_instance, addresses[i], _timeout, _connectionId));
-    }
-    return connectors;
+    return new TcpConnector(_instance, _host, _port);
 }
 
 AcceptorPtr
 IceInternal::TcpEndpointI::acceptor(EndpointIPtr& endp, const string&) const
 {
     TcpAcceptor* p = new TcpAcceptor(_instance, _host, _port);
-    endp = new TcpEndpointI(_instance, _host, p->effectivePort(), _timeout, _connectionId, _compress, _oaEndpoint);
+    endp = new TcpEndpointI(_instance, _host, p->effectivePort(), _timeout, _connectionId, _compress, _publish);
     return p;
 }
 
-
 vector<EndpointIPtr>
-IceInternal::TcpEndpointI::expand() const
+IceInternal::TcpEndpointI::expand(bool includeLoopback) const
 {
     vector<EndpointIPtr> endps;
     if(_host == "0.0.0.0")
     {
         vector<string> hosts = getLocalHosts();
-        for(unsigned int i = 0; i < hosts.size(); ++i)
-        {
-            if(!_oaEndpoint || hosts.size() == 1 || hosts[i] != "127.0.0.1")
-            {
-                endps.push_back(new TcpEndpointI(_instance, hosts[i], _port, _timeout, _connectionId, _compress, 
-                                                 _oaEndpoint));
-            }
-        }
+	for(unsigned int i = 0; i < hosts.size(); ++i)
+	{
+	    if(includeLoopback || hosts.size() == 1 || hosts[i] != "127.0.0.1")
+	    {
+	        endps.push_back(new TcpEndpointI(_instance, hosts[i], _port, _timeout, _connectionId, _compress,
+	    				         hosts.size() == 1 || hosts[i] != "127.0.0.1"));
+	    }
+	}
     }
     else
     {
         endps.push_back(const_cast<TcpEndpointI*>(this));
-    }   
+    }
     return endps;
+}
+
+bool
+IceInternal::TcpEndpointI::publish() const
+{
+    return _publish;
 }
 
 bool
@@ -348,7 +346,7 @@ IceInternal::TcpEndpointI::equivalent(const AcceptorPtr& acceptor) const
     const TcpAcceptor* tcpAcceptor = dynamic_cast<const TcpAcceptor*>(acceptor.get());
     if(!tcpAcceptor)
     {
-        return false;
+	return false;
     }
     return tcpAcceptor->equivalent(_host, _port);
 }
@@ -359,37 +357,52 @@ IceInternal::TcpEndpointI::operator==(const EndpointI& r) const
     const TcpEndpointI* p = dynamic_cast<const TcpEndpointI*>(&r);
     if(!p)
     {
-        return false;
+	return false;
     }
 
     if(this == p)
     {
-        return true;
-    }
-
-    if(_host != p->_host)
-    {
-        return false;
+	return true;
     }
 
     if(_port != p->_port)
     {
-        return false;
+	return false;
     }
 
     if(_timeout != p->_timeout)
     {
-        return false;
+	return false;
     }
 
     if(_connectionId != p->_connectionId)
     {
-        return false;
+	return false;
     }
 
     if(_compress != p->_compress)
     {
-        return false;
+	return false;
+    }
+
+    if(_host != p->_host)
+    {
+	//
+	// We do the most time-consuming part of the comparison last.
+	//
+	struct sockaddr_in laddr;
+	struct sockaddr_in raddr;
+	try
+	{
+	    getAddress(_host, _port, laddr);
+	    getAddress(p->_host, p->_port, raddr);
+	}
+	catch(const DNSException&)
+	{
+	    return false;
+	}
+
+	return compareAddress(laddr, raddr);
     }
 
     return true;
@@ -412,52 +425,76 @@ IceInternal::TcpEndpointI::operator<(const EndpointI& r) const
 
     if(this == p)
     {
-        return false;
-    }
-
-    if(_host < p->_host)
-    {
-        return true;
-    }
-    else if (p->_host < _host)
-    {
-        return false;
+	return false;
     }
 
     if(_port < p->_port)
     {
-        return true;
+	return true;
     }
     else if(p->_port < _port)
     {
-        return false;
+	return false;
     }
 
     if(_timeout < p->_timeout)
     {
-        return true;
+	return true;
     }
     else if(p->_timeout < _timeout)
     {
-        return false;
+	return false;
     }
 
     if(_connectionId < p->_connectionId)
     {
-        return true;
+	return true;
     }
     else if(p->_connectionId < _connectionId)
     {
-        return false;
+	return false;
     }
 
     if(!_compress && p->_compress)
     {
-        return true;
+	return true;
     }
     else if(p->_compress < _compress)
     {
-        return false;
+	return false;
+    }
+
+    if(_host != p->_host)
+    {
+	//
+	// We do the most time-consuming part of the comparison last.
+	//
+	struct sockaddr_in laddr;
+	try
+	{
+	    getAddress(_host, _port, laddr);
+	}
+	catch(const DNSException&)
+	{
+	}
+
+	struct sockaddr_in raddr;
+	try
+	{
+	    getAddress(p->_host, p->_port, raddr);
+	}
+	catch(const DNSException&)
+	{
+	}
+
+	if(laddr.sin_addr.s_addr < raddr.sin_addr.s_addr)
+	{
+	    return true;
+	}
+	else if(raddr.sin_addr.s_addr < laddr.sin_addr.s_addr)
+	{
+	    return false;
+	}
     }
 
     return false;
@@ -485,9 +522,9 @@ IceInternal::TcpEndpointFactory::protocol() const
 }
 
 EndpointIPtr
-IceInternal::TcpEndpointFactory::create(const std::string& str, bool oaEndpoint) const
+IceInternal::TcpEndpointFactory::create(const std::string& str) const
 {
-    return new TcpEndpointI(_instance, str, oaEndpoint);
+    return new TcpEndpointI(_instance, str);
 }
 
 EndpointIPtr

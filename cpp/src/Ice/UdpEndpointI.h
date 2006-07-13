@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -22,9 +22,8 @@ class UdpEndpointI : public EndpointI
 {
 public:
 
-    UdpEndpointI(const InstancePtr&, const std::string&, Ice::Int, const std::string&, Ice::Int, bool,
-                 const std::string&, bool, bool);
-    UdpEndpointI(const InstancePtr&, const std::string&, bool);
+    UdpEndpointI(const InstancePtr&, const std::string&, Ice::Int, bool, const std::string&, bool, bool);
+    UdpEndpointI(const InstancePtr&, const std::string&);
     UdpEndpointI(BasicStream*);
 
     virtual void streamWrite(BasicStream*) const;
@@ -38,10 +37,12 @@ public:
     virtual bool datagram() const;
     virtual bool secure() const;
     virtual bool unknown() const;
-    virtual TransceiverPtr transceiver(EndpointIPtr&) const;
-    virtual std::vector<ConnectorPtr> connectors() const;
+    virtual TransceiverPtr clientTransceiver() const;
+    virtual TransceiverPtr serverTransceiver(EndpointIPtr&) const;
+    virtual ConnectorPtr connector() const;
     virtual AcceptorPtr acceptor(EndpointIPtr&, const std::string&) const;
-    virtual std::vector<EndpointIPtr> expand() const;
+    virtual std::vector<EndpointIPtr> expand(bool) const;
+    virtual bool publish() const;
     virtual bool equivalent(const TransceiverPtr&) const;
     virtual bool equivalent(const AcceptorPtr&) const;
 
@@ -67,8 +68,6 @@ private:
     const InstancePtr _instance;
     const std::string _host;
     const Ice::Int _port;
-    const std::string _mcastInterface;
-    const Ice::Int _mcastTtl;
     const Ice::Byte _protocolMajor;
     const Ice::Byte _protocolMinor;
     const Ice::Byte _encodingMajor;
@@ -76,7 +75,7 @@ private:
     const bool _connect;
     const std::string _connectionId;
     const bool _compress;
-    const bool _oaEndpoint;
+    const bool _publish;
 };
 
 class UdpEndpointFactory : public EndpointFactory
@@ -87,7 +86,7 @@ public:
 
     virtual Ice::Short type() const;
     virtual std::string protocol() const;
-    virtual EndpointIPtr create(const std::string&, bool) const;
+    virtual EndpointIPtr create(const std::string&) const;
     virtual EndpointIPtr read(BasicStream*) const;
     virtual void destroy();
 

@@ -5,11 +5,11 @@ The Internet Communications Engine
 Ice is a modern alternative to object middleware such as CORBA or
 COM/DCOM/COM+. It is easy to learn, yet provides a powerful network
 infrastructure for demanding technical applications. It features an
-object-oriented specification language, easy to use C++, C#, Java,
-Python, Ruby, PHP, and Visual Basic mappings, a highly efficient
-protocol, asynchronous method invocation and dispatch, dynamic
-transport plug-ins, TCP/IP and UDP/IP support, SSL-based security, a
-firewall solution, and much more.
+object-oriented specification language, easy to use C++, Java, Python,
+PHP, C#, and Visual Basic mappings, a highly efficient protocol,
+asynchronous method invocation and dispatch, dynamic transport
+plug-ins, TCP/IP and UDP/IP support, SSL-based security, a firewall
+solution, and much more.
 
 Ice is available under the terms of the GNU General Public License
 (GPL) (see LICENSE file). Commercial licenses are available for
@@ -21,7 +21,7 @@ contact sales@zeroc.com for more information about licensing Ice.
 About this distribution
 ======================================================================
 
-This distribution is a binary release of Ice @ver@ for Solaris 10 on
+This distribution is a binary release of Ice @ver@ for Solaris 9 on
 SPARC and includes the following components:
 
 - The Ice runtime, including executables for the Ice services, HTML
@@ -37,29 +37,28 @@ SPARC and includes the following components:
 Requirements
 ======================================================================
 
-This binary distribution was compiled on Solaris 10 using Sun CC
-version 5.8.
+This binary distribution was compiled on Solaris 9 using Sun CC
+version 5.5.
 
-The following Solaris 10 binary packages are required to use 
-this distribution:
+The following Solaris 9 binary packages, available from
+http://www.sunfreeware.com, are required to use this distribution:
 
-- bzip2 (Sun package SUNWbzip)
-- libexpat (Sun package SUNWlexpt)
-- openssl (Sun packages SUNWopenssl-libraries SUNWopenssl-commands)
+- expat 1.95.5
+- openssl 0.9.8b
+- libgcc 3.3
 
-We also recommend that you install the Solaris 10 Encryption Kit (Sun
-packages SUNWcry and SUNWcryr) available at
+You also need the bzip2 library version 1.0.2:
 
-  http://www.sun.com/download/index.jsp?cat=Security&tab=3&subcat=Cryptography%20%26%20Encryption
+ - install the SUNWbzip package from the Solaris 9 distribution
+   (it may already be installed)
+ - apply Sun patch #114586-01 to obtain bzip2 1.0.2. 
 
 
 Java
 ----
 
-Ice for Java requires J2SE 1.4.2, 1.5.0 or 1.6.0. Java binary packages 
-can be obtained from Sun Microsystems at
-
-  http://java.sun.com
+Ice for Java requires J2SE 1.4.2 or 1.5.0. RPMs can be obtained from
+JavaSoft at http://www.javasoft.com/j2se
 
 
 ======================================================================
@@ -67,9 +66,8 @@ Berkeley DB
 ======================================================================
 
 This distribution includes the C++ and Java runtime for Berkeley DB
-4.5.20. The C++ runtime was built using Sun CC version 5.8. The
+4.3.29. The C++ runtime was built using Sun CC version 5.5. The
 Berkeley DB license is provided in the file THIRD_PARTY_LICENSE.
-
 
 ======================================================================
 Ice extension for Python
@@ -80,14 +78,12 @@ included in this distribution because there is no suitable binary
 distribution for Python itself available from Sun or 
 www.sunfreeware.com. 
 
-If you want to use Ice for Python on Solaris, you can build a source
-distribution available at 
-
-  http://www.zeroc.com/download.html
-
+If you want to use Ice for Python on Solaris, you can build Ice for 
+Python using its source distribution, available at 
+http://www.zeroc.com/download.html.
 
 ======================================================================
-64-bit builds
+64 bit builds
 ======================================================================
 
 This distribution only contains 32-bit binaries. If you need a 64-bit
@@ -108,23 +104,11 @@ The discussion below assumes you have defined the ICE_HOME variable
 with the directory of your Ice installation.
 
 In order to use Ice services and tools such as Slice translators, you
-need to add $ICE_HOME/bin to your PATH as shown in the bash command
-below:
+need to add $ICE_HOME/bin to your PATH and $ICE_HOME/lib to your
+LD_LIBRARY_PATH, as shown in the bash commands below:
 
 $ export PATH=$ICE_HOME/bin:$PATH
-
-Ice shared libraries and executables in this distribution contain 
-/opt/Ice-@mmver@/lib as the embedded runpath. In order to run Ice
-services and tools, you can do one of the following:
-
- - Create a symbolic link /opt/Ice-@mmver@ that points to your Ice
-   installation:
-
-   $ ln -s $ICE_HOME /opt/Ice-@mmver@
-
- - Add $ICE_HOME/lib to your LD_LIBRARY_PATH environment variable:
-
-   $ export LD_LIBRARY_PATH=$ICE_HOME/lib:$LD_LIBRARY_PATH
+$ export LD_LIBRARY_PATH=$ICE_HOME/lib:$LD_LIBRARY_PATH
 
 
 C++
@@ -149,10 +133,10 @@ CLASSPATH, as shown below:
 
 $ export CLASSPATH=$ICE_HOME/lib/Ice.jar:$CLASSPATH
 
-To use the Java2 version of Ice instead, modify your CLASSPATH as
+To use the Java5 version of Ice instead, modify your CLASSPATH as
 follows:
 
-$ export CLASSPATH=$ICE_HOME/lib/java2/Ice.jar:$CLASSPATH
+$ export CLASSPATH=$ICE_HOME/lib/java5/Ice.jar:$CLASSPATH
 
 If you plan to use Freeze for persistence, you must also add the
 Berkeley DB JAR file (db.jar) to your CLASSPATH:
@@ -162,7 +146,6 @@ $ export CLASSPATH=$ICE_HOME/lib/db.jar:$CLASSPATH
 In addition, the JVM requires that the directory containing the
 Berkeley DB libraries be listed in java.library.path, therefore you
 must add this directory to LD_LIBRARY_PATH.
-
 
 ======================================================================
 Using the IceGrid Administrative Console
@@ -187,12 +170,12 @@ Demos and documentation
 Sample programs are provided in the Ice-@ver@-demos.tar.gz package,
 which can be downloaded from the ZeroC web site at
 
-  http://www.zeroc.com/download.html
+http://www.zeroc.com/download.html
 
 Please refer to the README.DEMOS file included in that package for
 more information.
 
-See doc/index.html for information on the documentation included with
+See doc/README.html for information on the documentation included with
 this distribution.
 
 
@@ -209,3 +192,4 @@ With the binary installers, simply uninstall the previous version of
 Ice and install the new one. Already deployed applications that were
 compiled against the <x>.<y>.0 runtime will automatically use the
 <x>.<y>.1 runtime.
+

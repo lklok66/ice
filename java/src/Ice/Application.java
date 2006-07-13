@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -36,10 +36,10 @@ public abstract class Application
         InitializationData initData = new InitializationData();
         if(configFile != null)
         {
-            try
+	    try
             {
-                initData.properties = Util.createProperties();
-                initData.properties.load(configFile);
+		initData.properties = Util.createProperties();
+		initData.properties.load(configFile);
             }
             catch(LocalException ex)
             {
@@ -54,7 +54,7 @@ public abstract class Application
                 return 1;
             }
         }
-        return main(appName, args, initData);
+    	return main(appName, args, initData);
     }
 
     /**
@@ -68,8 +68,8 @@ public abstract class Application
         {
             try
             {
-                initData.properties = Util.createProperties();
-                initData.properties.load(configFile);
+		initData.properties = Util.createProperties();
+		initData.properties.load(configFile);
             }
             catch(LocalException ex)
             {
@@ -84,8 +84,8 @@ public abstract class Application
                 return 1;
             }
         }
-        initData.logger = logger;
-        return main(appName, args, initData);
+	initData.logger = logger;
+    	return main(appName, args, initData);
     }
 
     public final int
@@ -103,7 +103,7 @@ public abstract class Application
 
         try
         {
-            StringSeqHolder argHolder = new StringSeqHolder(args);
+	    StringSeqHolder argHolder = new StringSeqHolder(args);
             _communicator = Util.initialize(argHolder, initData);
 
             //
@@ -125,46 +125,43 @@ public abstract class Application
             ex.printStackTrace();
             status = 1;
         }
-        catch(java.lang.Error err)
-        {
-            //
-            // We catch Error to avoid hangs in some non-fatal situations
-            //
-            System.err.println(_appName + ": Java error");
+	catch(java.lang.Error err)
+	{
+	    //
+	    // We catch Error to avoid hangs in some non-fatal situations
+	    //
+	    System.err.println(_appName + ": Java error");
             err.printStackTrace();
             status = 1;
-        }
+	}
 
-        // This clears any set interrupt.
-        defaultInterrupt();
+	defaultInterrupt();
 
-        synchronized(_mutex)
-        {
-            while(_callbackInProgress)
-            {
-                try
-                {
-                    _mutex.wait();
-                }
-                catch(java.lang.InterruptedException ex)
-                {
-                }
-            }
-
-            if(_destroyed)
-            {
-                _communicator = null;
-            }
-            else
-            {
-                _destroyed = true;
-                //
-                // And _communicator != null, meaning will be
-                // destroyed next, _destroyed = true also ensures that
-                // any remaining callback won't do anything
-                //
-            }
-        }
+	synchronized(_mutex)
+	{
+	    while(_callbackInProgress)
+	    {
+	        try
+		{
+	            _mutex.wait();
+		}
+		catch(java.lang.InterruptedException ex)
+		{
+		}
+	    }
+	    if(_destroyed)
+	    {
+	        _communicator = null;
+	    }
+	    else
+	    {
+	        _destroyed = true;
+		//
+		// And _communicator != null, meaning will be destroyed next,
+		// _destroyed = true also ensures that any remaining callback won't do anything
+		//
+	    }
+	}
 
         if(_communicator != null)
         {
@@ -189,9 +186,14 @@ public abstract class Application
 
         synchronized(_mutex)
         {
-            if(_appHook != null)
+            if(_destroyHook != null)
             {
-                _appHook.done();
+                _destroyHook.done();
+            }
+
+            if(_shutdownHook != null)
+            {
+                _shutdownHook.done();
             }
         }
 
@@ -228,157 +230,211 @@ public abstract class Application
     destroyOnInterrupt()
     {
         synchronized(_mutex)
-        {
-            //
-            // As soon as the destroy hook ends all the threads are
-            // terminated. So the destroy hook will join the current
-            // thread before to end.
-            //
-            try
-            {
-                changeHook(new DestroyHook());
-            }
-            catch(java.lang.IllegalStateException ex)
-            {
-                if(_communicator != null)
-                {
-                    _communicator.destroy();
-                }
-            }
-        }
+	{
+	    //
+	    // Remove the shutdown hook it's set.
+	    //
+	    if(_shutdownHook != null)
+	    {
+	        try
+	        {
+		    Runtime.getRuntime().removeShutdownHook(_shutdownHook);
+                    _shutdownHook.done();
+		    _shutdownHook = null;
+	        }
+	        catch(java.lang.IllegalStateException ex)
+	        {
+		    //
+		    // Expected if we are in the process of shutting down.
+		    //
+	        }
+	    }
+
+	    if(_destroyHook == null)
+	    {
+	        //
+	        // As soon as the destroy hook ends all the threads are
+	        // terminated. So the destroy hook will join the current
+	        // thread before to end.
+	        //
+	        _destroyHook = new DestroyHook();
+	        try
+	        {
+		    Runtime.getRuntime().addShutdownHook(_destroyHook);
+	        }
+	        catch(java.lang.IllegalStateException ex)
+	        {
+		    if(_communicator != null)
+		    {
+		        _communicator.destroy();
+		    }
+	        }
+	    }
+	}
     }
     
     public static void
     shutdownOnInterrupt()
     {
         synchronized(_mutex)
-        {
-            //
-            // As soon as the shutdown hook ends all the threads are
-            // terminated. So the shutdown hook will join the current
-            // thread before to end.
-            //
-            try
-            {
-                changeHook(new ShutdownHook());
-            }
-            catch(java.lang.IllegalStateException ex)
-            {
-                if(_communicator != null)
-                {
-                    _communicator.shutdown();
-                }
-            }
-        }
-    }
+	{
+	    //
+	    // Remove the destroy hook if it's set.
+	    //
+	    if(_destroyHook != null)
+	    {
+	        try
+	        {
+		    Runtime.getRuntime().removeShutdownHook(_destroyHook);
+		    _destroyHook.done();
+                    _destroyHook = null;
+	        }
+	        catch(java.lang.IllegalStateException ex)
+	        {
+		    //
+		    // Expected if we are in the process of shutting down.
+		    //
+	        }
+	    }
 
-    //
-    // Install a custom shutdown hook. This hook is registered as a
-    // shutdown hook and should do whatever is necessary to terminate
-    // the application. Note that this runs as a shutdown hook so the
-    // code must obey the same rules as a shutdown hook (specifically
-    // don't call exit!). The shutdown and destroy shutdown interrupts
-    // are cleared. This hook is automatically unregistered after
-    // Application.run() returns.
-    //
-    public static void
-    setInterruptHook(java.lang.Thread newHook) // Pun intended.
-    {
-        try
-        {
-            changeHook(new CustomHook(newHook));
-        }
-        catch(java.lang.IllegalStateException ex)
-        {
-            // Ignore.
-        }
+	    if(_shutdownHook == null)
+	    {
+	        //
+	        // As soon as the shutdown hook ends all the threads are
+	        // terminated. So the shutdown hook will join the current
+	        // thread before to end.
+	        //
+	        _shutdownHook = new ShutdownHook();
+	        try
+	        {
+		    Runtime.getRuntime().addShutdownHook(_shutdownHook);
+	        }
+	        catch(java.lang.IllegalStateException ex)
+	        {
+		    if(_communicator != null)
+		    {
+		        _communicator.shutdown();
+		    }
+	        }
+	    }
+	}
     }
     
-    //
-    // This clears any shutdown hooks including any custom hook.
-    //
     public static void
     defaultInterrupt()
     {
-        changeHook(null);
+        synchronized(_mutex)
+	{
+	    if(_shutdownHook != null)
+	    {
+	        try
+	        {
+		    Runtime.getRuntime().removeShutdownHook(_shutdownHook);
+		    _shutdownHook.done();
+                    _shutdownHook = null;
+	        }
+	        catch(java.lang.IllegalStateException ex)
+	        {
+		    //
+		    // Expected if we are in the process of shutting down.
+		    //
+	        }
+	    }
+
+	    if(_destroyHook != null)
+	    {
+	        try
+	        {
+		    Runtime.getRuntime().removeShutdownHook(_destroyHook);
+                    _destroyHook.done();
+		    _destroyHook = null;
+	        }
+	        catch(java.lang.IllegalStateException ex)
+	        {
+		    //
+		    // Expected if we are in the process of shutting down.
+		    //
+	        }
+	    }
+	}
     }
 
     public static boolean
     interrupted()
     {
         synchronized(_mutex)
-        {
-            return _interrupted;
-        }
-    }
-
-    private static void
-    changeHook(AppHook newHook)
-    {
-        synchronized(_mutex)
-        {
-            //
-            // Remove any existing shutdown hooks.
-            //
-            try
-            {
-                if(_appHook != null)
-                {
-                    Runtime.getRuntime().removeShutdownHook(_appHook);
-                    _appHook.done();
-                    _appHook = null;
-                }
-            }
-            catch(java.lang.IllegalStateException ex)
-            {
-                //
-                // Expected if we are in the process of shutting down.
-                //
-            }
-
-            //
-            // Note that we let the IllegalStateException propogate
-            // out if necessary.
-            //
-            if(newHook != null)
-            {
-                Runtime.getRuntime().addShutdownHook(newHook);
-                _appHook = newHook;
-            }
-        }
+	{
+    	    return _interrupted;
+	}
     }
 
     private static boolean
     setCallbackInProgress(boolean destroy)
     {
         synchronized(_mutex)
-        {
+	{
             if(_destroyed)
-            {
-                //
-                // Being destroyed by main thread
-                //
-                return false;
-            }
-            _callbackInProgress = true;
-            _destroyed = destroy;
-            _interrupted = true;
-            return true;
-        }
+	    {
+	        //
+	        // Being destroyed by main thread
+	        //
+	        return false;
+	    }
+	    _callbackInProgress = true;
+	    _destroyed = destroy;
+	    _interrupted = true;
+	    return true;
+	}
     }
 
     private static void
     clearCallbackInProgress()
     {
         synchronized(_mutex)
-        {
+	{
             _callbackInProgress = false;
-            _mutex.notify();
-        }
+	    _mutex.notify();
+	}
     }
 
-    static class AppHook extends Thread
+    static class DestroyHook extends Thread
     {
+        DestroyHook()
+        {
+            _done = false;
+        }
+
+        public void
+        run()
+        {
+            synchronized(_doneMutex)
+            {
+		if(!setCallbackInProgress(true))
+		{
+		    return;
+		}
+
+                Communicator communicator = communicator();
+                if(communicator != null)
+                {
+                    communicator.destroy();
+                }
+
+		clearCallbackInProgress();
+
+                while(!_done)
+                {
+                    try
+                    {
+                        _doneMutex.wait();
+                    }
+                    catch(InterruptedException ex)
+                    {
+                    }
+                }
+            }
+        }
+
         void
         done()
         {
@@ -389,55 +445,26 @@ public abstract class Application
             }
         }
 
-        protected boolean _done = false;
-        protected java.lang.Object _doneMutex = new java.lang.Object();
+        private boolean _done;
+        private java.lang.Object _doneMutex = new java.lang.Object();
     }
 
-    static class DestroyHook extends AppHook
+    static class ShutdownHook extends Thread
     {
-        public void
-        run()
+        ShutdownHook()
         {
-            synchronized(_doneMutex)
-            {
-                if(!setCallbackInProgress(true))
-                {
-                    return;
-                }
-
-                Communicator communicator = communicator();
-                if(communicator != null)
-                {
-                    communicator.destroy();
-                }
-
-                clearCallbackInProgress();
-
-                while(!_done)
-                {
-                    try
-                    {
-                        _doneMutex.wait();
-                    }
-                    catch(InterruptedException ex)
-                    {
-                    }
-                }
-            }
+            _done = false;
         }
-    }
 
-    static class ShutdownHook extends AppHook
-    {
         public void
         run()
         {
             synchronized(_doneMutex)
             {
-                if(!setCallbackInProgress(false))
-                {
-                    return;
-                }
+		if(!setCallbackInProgress(false))
+		{
+		    return;
+		}
 
                 Communicator communicator = communicator();
                 if(communicator != null)
@@ -445,7 +472,7 @@ public abstract class Application
                     communicator.shutdown();
                 }
 
-                clearCallbackInProgress();
+		clearCallbackInProgress();
 
                 while(!_done)
                 {
@@ -459,45 +486,25 @@ public abstract class Application
                 }
             }
         }
-    }
 
-    // Although this class doesn't actually use any of the AppHook
-    // done stuff, its more trouble than its worth to add all of the
-    // code necessary to support another hook member variable and
-    // support code.
-    static class CustomHook extends AppHook
-    {
-        CustomHook(Thread hook)
-        {
-            _hook = hook;
-        }
-
-        public void
-        run()
+        void
+        done()
         {
             synchronized(_doneMutex)
             {
-                if(!setCallbackInProgress(false))
-                {
-                    return;
-                }
-                
-                _hook.run();
-
-                clearCallbackInProgress();
-
-                //
-                // Don't bother to join with main, we're done.
-                //
+                _done = true;
+                _doneMutex.notify();
             }
         }
 
-        private Thread _hook;
+        private boolean _done;
+        private java.lang.Object _doneMutex = new java.lang.Object();
     }
 
     private static String _appName;
     private static Communicator _communicator;
-    private static AppHook _appHook;
+    private static DestroyHook _destroyHook;
+    private static ShutdownHook _shutdownHook;
     private static java.lang.Object _mutex = new java.lang.Object();
     private static boolean _callbackInProgress = false;
     private static boolean _destroyed = false;

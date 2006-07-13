@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -10,9 +10,9 @@
 #ifndef TEST_I_H
 #define TEST_I_H
 
-#include <Freeze/Freeze.h>
-#include <IceUtil/IceUtil.h>
+#include <Freeze/EvictorF.h>
 #include <Test.h>
+#include <IceUtil/AbstractMutex.h>
 
 namespace Test
 {
@@ -23,28 +23,7 @@ typedef IceUtil::Handle<ServantI> ServantIPtr;
 class RemoteEvictorI;
 typedef IceUtil::Handle<RemoteEvictorI> RemoteEvictorIPtr;
 
-class AccountI : public Account
-{
-public:
-
-    virtual int getBalance(const Ice::Current&);
-    
-    virtual void deposit(int, const Ice::Current&);
-
-    virtual void transfer(int, const Test::AccountPrx&, const Ice::Current&);
-
-    AccountI(int, const Freeze::TransactionalEvictorPtr&);
-    AccountI();
-
-    void init(const Freeze::TransactionalEvictorPtr&);
-
-private:
-
-    Freeze::TransactionalEvictorPtr _evictor;
-};
-
-
-class ServantI : public virtual Servant, public IceUtil::AbstractMutexI<IceUtil::Monitor<IceUtil::Mutex> >
+class ServantI : virtual public Servant, public IceUtil::AbstractMutexI<IceUtil::Mutex>
 {
 public:
 
@@ -62,7 +41,7 @@ public:
 
     
     virtual void slowGetValue_async(const AMD_Servant_slowGetValuePtr&,
-                                    const Ice::Current& = Ice::Current()) const;
+				    const Ice::Current& = Ice::Current()) const;
 
     virtual void setValue(::Ice::Int, const Ice::Current& = Ice::Current());
 
@@ -80,9 +59,6 @@ public:
     virtual void setTransientValue(Ice::Int, const Ice::Current& = Ice::Current());
     virtual void keepInCache(const Ice::Current& = Ice::Current());
     virtual void release(const Ice::Current& = Ice::Current());
-
-    virtual Test::AccountPrxSeq getAccounts(const Ice::Current&);
-    virtual int getTotalBalance(const Ice::Current&);
 
     virtual void destroy(const Ice::Current& = Ice::Current());
 
@@ -114,7 +90,7 @@ class RemoteEvictorI : virtual public RemoteEvictor
 {
 public:
 
-    RemoteEvictorI(const Ice::ObjectAdapterPtr&, const std::string&, const std::string&, bool);
+    RemoteEvictorI(const Ice::ObjectAdapterPtr&, const std::string&, const std::string&);
 
     virtual void setSize(::Ice::Int, const Ice::Current&);
 
@@ -128,16 +104,9 @@ public:
 
     virtual void destroyAllServants(const std::string&, const Ice::Current&);
 
-    const std::string& 
-    envName() const
-    {
-        return _envName;
-    }
-
 private:
 
     Ice::ObjectAdapterPtr _adapter;
-    std::string _envName;
     std::string _category;
     Freeze::EvictorPtr _evictor;
     Ice::ObjectAdapterPtr _evictorAdapter;
@@ -149,7 +118,7 @@ public:
 
     RemoteEvictorFactoryI(const Ice::ObjectAdapterPtr&, const std::string&);
 
-    virtual ::Test::RemoteEvictorPrx createEvictor(const ::std::string&, bool, const Ice::Current&);
+    virtual ::Test::RemoteEvictorPrx createEvictor(const ::std::string&, const Ice::Current&);
 
     virtual void shutdown(const Ice::Current&);
 

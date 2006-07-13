@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -17,10 +17,9 @@ using namespace Ice;
 using namespace Glacier2;
 
 Glacier2::ClientBlobject::ClientBlobject(const CommunicatorPtr& communicator,
-                                         const FilterManagerPtr& filters,
-                                         const Ice::Context& sslContext):
-                                         
-    Glacier2::Blobject(communicator, false, sslContext),
+					 const FilterManagerPtr& filters):
+					 
+    Glacier2::Blobject(communicator, false),
     _routingTable(new RoutingTable(communicator)),
     _filters(filters),
     _rejectTraceLevel(_properties->getPropertyAsInt("Glacier2.Client.Trace.Reject"))
@@ -33,98 +32,90 @@ Glacier2::ClientBlobject::~ClientBlobject()
 
 void
 Glacier2::ClientBlobject::ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& amdCB, 
-                                           const std::pair<const Byte*, const Byte*>& inParams,
-                                           const Current& current)
+					   const std::pair<const Byte*, const Byte*>& inParams,
+					   const Current& current)
 {
     bool matched = false;
     bool hasFilters = false;
-    string rejectedFilters;
  
     if(!_filters->categories()->empty())
     {
-        hasFilters = true;
-        if(_filters->categories()->match(current.id.category))
-        {
-            matched = true;
-        }
-        else if(_rejectTraceLevel >= 1)
-        {
-            if(rejectedFilters.size() != 0)
-            {
-                rejectedFilters += ", ";
-
-            }
-            rejectedFilters += "category filter";
-        }
+	hasFilters = true;
+	if(_filters->categories()->match(current.id.category))
+	{
+	    matched = true;
+	}
+	else
+	{
+	    if(_rejectTraceLevel >= 1)
+	    {
+		Trace out(_logger, "Glacier2");
+		out << "rejecting request: category filter\n";
+		out << "identity: " << _communicator->identityToString(current.id);
+	    }
+	}
     }
 
     if(!_filters->identities()->empty())
     {
-        hasFilters = true;
-        if(_filters->identities()->match(current.id))
-        {
-            matched = true;
-        }
-        else if(_rejectTraceLevel >= 1)
-        {
-            if(rejectedFilters.size() != 0)
-            {
-                rejectedFilters += ", ";
-
-            }
-            rejectedFilters += "identity filter";
-        }
+	hasFilters = true;
+	if(_filters->identities()->match(current.id))
+	{
+	    matched = true;
+	}
+	else
+	{
+	    if(_rejectTraceLevel >= 1)
+	    {
+		Trace out(_logger, "Glacier2");
+		out << "rejecting request: identity filter\n";
+		out << "identity: " << _communicator->identityToString(current.id);
+	    }
+	}
     }
 
     ObjectPrx proxy = _routingTable->get(current.id);
     if(!proxy)
     {
-        ObjectNotExistException ex(__FILE__, __LINE__);
+	ObjectNotExistException ex(__FILE__, __LINE__);
 
-        //
-        // We use a special operation name indicate to the client that
-        // the proxy for the Ice object has not been found in our
-        // routing table. This can happen if the proxy was evicted
-        // from the routing table.
-        //
-        ex.id = current.id;
-        ex.facet = current.facet;
-        ex.operation = "ice_add_proxy";
-        throw ex;
+	//
+	// We use a special operation name indicate to the client that
+	// the proxy for the Ice object has not been found in our
+	// routing table. This can happen if the proxy was evicted
+	// from the routing table.
+	//
+	ex.id = current.id;
+	ex.facet = current.facet;
+	ex.operation = "ice_add_proxy";
+	throw ex;
     }
 
     string adapterId = proxy->ice_getAdapterId();
 
     if(!adapterId.empty() && !_filters->adapterIds()->empty())
     {
-        hasFilters = true;
-        if(_filters->adapterIds()->match(adapterId))
-        {
-            matched = true;
-        }
-        else if(_rejectTraceLevel >= 1)
-        {
-            if(rejectedFilters.size() != 0)
-            {
-                rejectedFilters += ", ";
-
-            }
-            rejectedFilters += "adapter id filter";
-        }
+	hasFilters = true;
+	if(_filters->adapterIds()->match(adapterId))
+	{
+	    matched = true;
+	}
+	else
+	{
+	    if(_rejectTraceLevel >= 1)
+	    {
+		Trace out(_logger, "Glacier2");
+		out << "rejecting request: adapter id filter\n";
+		out << "identity: " << _communicator->identityToString(current.id);
+	    }
+	}
     }
 
     if(hasFilters && !matched)
     {
-        if(_rejectTraceLevel >= 1)
-        {
-            Trace out(_logger, "Glacier2");
-            out << "rejecting request: " << rejectedFilters << "\n";
-            out << "identity: " << _communicator->identityToString(current.id);
-        }
-
-        ObjectNotExistException ex(__FILE__, __LINE__);
-        ex.id = current.id;
-        throw ex;
+	ObjectNotExistException ex(__FILE__, __LINE__);
+	ex.id = current.id;
+	throw ex;
     }
     invoke(proxy, amdCB, inParams, current);
 }

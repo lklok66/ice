@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -51,8 +51,6 @@ regex2 = re.compile(r"^.*transf(ormdb|~1)(\.exe)?", re.IGNORECASE)
 
 print "testing error detection...",
 sys.stdout.flush()
-if TestUtil.debug:
-    print
 
 files.sort()
 for oldfile in files:
@@ -64,11 +62,7 @@ for oldfile in files:
     else:
         value = "int"
 
-    command = transformdb + " --old " + os.path.join(directory, "fail", oldfile) + " --new " + \
-        os.path.join(directory, "fail", newfile) + " -o tmp.xml --key string --value " + value
-
-    if TestUtil.debug:
-        print command
+    command = transformdb + " --old " + os.path.join(directory, "fail", oldfile) + " --new " + os.path.join(directory, "fail", newfile) + " -o tmp.xml --key string --value " + value
 
     stdin, stdout, stderr = os.popen3(command)
     lines1 = stderr.readlines()
@@ -94,8 +88,6 @@ print "creating test database...",
 sys.stdout.flush()
 
 makedb = os.path.join(directory, "makedb") + " " + directory
-if TestUtil.debug:
-    print "(" + makedb + ")",
 if os.system(makedb) != 0:
     sys.exit(1)
 
@@ -109,10 +101,7 @@ checkxml = os.path.join(directory, "check.xml")
 print "initializing test database...",
 sys.stdout.flush()
 
-command = transformdb + " --old " + testold + " --new " + testold + " -f " + initxml + " " + dbdir + \
-    " default.db " + init_dbdir
-if TestUtil.debug:
-    print "(" + command + ")",
+command = transformdb + " --old " + testold + " --new " + testold + " -f " + initxml + " " + dbdir + " default.db " + init_dbdir
 if os.system(command) != 0:
     sys.exit(1)
 
@@ -121,10 +110,7 @@ print "ok"
 print "executing default transformations...",
 sys.stdout.flush()
 
-command = transformdb + " --old " + testold + " --new " + testnew + " --key int --value ::Test::S " + init_dbdir + \
-    " default.db " + check_dbdir
-if TestUtil.debug:
-    print "(" + command + ")",
+command = transformdb + " --old " + testold + " --new " + testnew + " --key int --value ::Test::S " + init_dbdir + " default.db " + check_dbdir
 stdin, stdout, stderr = os.popen3(command)
 stderr.readlines()
 
@@ -133,10 +119,7 @@ print "ok"
 print "validating database...",
 sys.stdout.flush()
 
-command = transformdb + " --old " + testnew + " --new " + testnew + " -f " + checkxml + " " + check_dbdir + \
-    " default.db " + tmp_dbdir
-if TestUtil.debug:
-    print "(" + command + ")",
+command = transformdb + " --old " + testnew + " --new " + testnew + " -f " + checkxml + " " + check_dbdir + " default.db " + tmp_dbdir
 if os.system(command) != 0:
     sys.exit(1)
 

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -18,7 +18,7 @@ public final class RouterManager
     synchronized void
     destroy()
     {
-        java.util.Iterator i = _table.values().iterator();
+	java.util.Iterator i = _table.values().iterator();
         while(i.hasNext())
         {
             RouterInfo info = (RouterInfo)i.next();
@@ -57,18 +57,18 @@ public final class RouterManager
     public RouterInfo
     erase(Ice.RouterPrx rtr)
     {
-        RouterInfo info = null;
-        if(rtr != null)
-        {
-            // The router cannot be routed.
-            Ice.RouterPrx router = Ice.RouterPrxHelper.uncheckedCast(rtr.ice_router(null));
+	RouterInfo info = null;
+	if(rtr != null)
+	{
+	    // The router cannot be routed.
+	    Ice.RouterPrx router = Ice.RouterPrxHelper.uncheckedCast(rtr.ice_router(null));
 
-            synchronized(this)
-            {
-                info = (RouterInfo)_table.remove(router);
-            }
-        }
-        return info;
+	    synchronized(this)
+	    {
+		info = (RouterInfo)_table.remove(router);
+	    }
+	}
+	return info;
     }
 
     private java.util.HashMap _table = new java.util.HashMap();

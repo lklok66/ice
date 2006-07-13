@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -20,9 +20,11 @@ OBJS		= Acceptor.o \
 		  Buffer.o \
 		  BasicStream.o \
 		  BuiltinSequences.o \
+		  CommunicatorF.o \
 		  CommunicatorI.o \
 		  Communicator.o \
 		  ConnectionFactory.o \
+		  ConnectionF.o \
 		  ConnectionI.o \
 		  ConnectionMonitor.o \
 		  Connection.o \
@@ -30,7 +32,6 @@ OBJS		= Acceptor.o \
 		  Current.o \
 		  DefaultsAndOverrides.o \
 		  Direct.o \
-                  DispatchInterceptor.o \
 		  DynamicLibrary.o \
 		  EndpointFactoryManager.o \
 		  EndpointFactory.o \
@@ -42,33 +43,40 @@ OBJS		= Acceptor.o \
 		  FactoryTableDef.o \
 		  FactoryTable.o \
 		  GC.o \
+		  GCRecMutex.o \
+		  GCShared.o \
 		  Identity.o \
 		  IdentityUtil.o \
-		  ImplicitContextI.o \
-		  ImplicitContext.o \
 		  IncomingAsync.o \
 		  Incoming.o \
 		  Initialize.o \
 		  Instance.o \
 		  LocalException.o \
 		  LocalObject.o \
+		  LocatorF.o \
 		  LocatorInfo.o \
 		  Locator.o \
+		  LoggerF.o \
 		  LoggerI.o \
 		  Logger.o \
 		  LoggerUtil.o \
 		  Network.o \
 		  ObjectAdapterFactory.o \
+		  ObjectAdapterF.o \
 		  ObjectAdapterI.o \
 		  ObjectAdapter.o \
+		  ObjectFactoryF.o \
 		  ObjectFactoryManager.o \
 		  ObjectFactory.o \
 		  Object.o \
 		  OutgoingAsync.o \
 		  Outgoing.o \
+		  PluginF.o \
 		  PluginManagerI.o \
 		  Plugin.o \
+		  ProcessF.o \
 		  Process.o \
+		  PropertiesF.o \
 		  PropertiesI.o \
 		  Properties.o \
 		  PropertyNames.o \
@@ -78,13 +86,16 @@ OBJS		= Acceptor.o \
 		  Proxy.o \
 		  ReferenceFactory.o \
 		  Reference.o \
+		  RouterF.o \
 		  RouterInfo.o \
 		  Router.o \
+		  ServantLocatorF.o \
 		  ServantLocator.o \
 		  ServantManager.o \
 		  Service.o \
 		  SliceChecksumDict.o \
 		  SliceChecksums.o \
+		  StatsF.o \
 		  Stats.o \
 		  StreamI.o \
 		  Stream.o \
@@ -98,7 +109,6 @@ OBJS		= Acceptor.o \
 		  TraceLevels.o \
 		  TraceUtil.o \
 		  Transceiver.o \
-		  UdpConnector.o \
 		  UdpEndpointI.o \
 		  UdpTransceiver.o \
 		  UnknownEndpointI.o
@@ -114,8 +124,6 @@ SLICE_SRCS	= $(SDIR)/BuiltinSequences.ice \
 		  $(SDIR)/Endpoint.ice \
 		  $(SDIR)/FacetMap.ice \
 		  $(SDIR)/Identity.ice \
-		  $(SDIR)/ImplicitContextF.ice \
-		  $(SDIR)/ImplicitContext.ice \
 		  $(SDIR)/LocalException.ice \
 		  $(SDIR)/LocatorF.ice \
 		  $(SDIR)/Locator.ice \

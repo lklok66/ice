@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -22,10 +22,6 @@ try:
     #
     sys.setdlopenflags(dl.RTLD_NOW|dl.RTLD_GLOBAL)
 except ImportError:
-    # If the dl module is not available and we're running on a linux
-    # platform, use the hard coded value of RTLD_NOW|RTLD_GLOBAL.
-    if sys.platform.startswith("linux"):
-        sys.setdlopenflags(258)
     pass
 
 #
@@ -128,14 +124,6 @@ IcePy._t_ObjectPrx = IcePy.declareProxy('::Ice::Object')
 IcePy._t_LocalObject = IcePy.declareClass('::Ice::LocalObject')
 
 #
-# Sequence mappings.
-#
-IcePy.SEQ_DEFAULT = 0
-IcePy.SEQ_TUPLE = 1
-IcePy.SEQ_LIST = 2
-#IcePy.SEQ_ARRAY = 3
-
-#
 # Slice checksum dictionary.
 #
 sliceChecksums = {}
@@ -146,7 +134,6 @@ sliceChecksums = {}
 import Ice_BuiltinSequences_ice
 import Ice_Communicator_ice
 import Ice_Current_ice
-import Ice_ImplicitContext_ice
 import Ice_Endpoint_ice
 import Ice_Identity_ice
 import Ice_LocalException_ice
@@ -180,10 +167,11 @@ class ThreadNotification(object):
 #
 class InitializationData(object):
     def __init__(self):
-        self.properties = None
-        self.logger = None
-        #self.stats = None # Stats not currently supported in Python.
-        self.threadHook = None
+	self.properties = None
+	self.logger = None
+	#self.stats = None # Stats not currently supported in Python.
+	self.defaultContext = {}
+	self.threadHook = None
 
 #
 # Communicator wrapper.
@@ -191,7 +179,7 @@ class InitializationData(object):
 class CommunicatorI(Communicator):
     def __init__(self, impl):
         self._impl = impl
-        impl._setWrapper(self)
+	impl._setWrapper(self)
 
     def destroy(self):
         self._impl.destroy()
@@ -208,17 +196,11 @@ class CommunicatorI(Communicator):
         while not self._impl.waitForShutdown(1000):
             pass
 
-    def isShutdown(self):
-        self._impl.isShutdown()
-
     def stringToProxy(self, str):
         return self._impl.stringToProxy(str)
 
     def proxyToString(self, obj):
         return self._impl.proxyToString(obj)
-
-    def propertyToProxy(self, str):
-        return self._impl.propertyToProxy(str)
 
     def stringToIdentity(self, str):
         return self._impl.stringToIdentity(str)
@@ -244,14 +226,8 @@ class CommunicatorI(Communicator):
     def findObjectFactory(self, id):
         return self._impl.findObjectFactory(id)
 
-    def setDefaultContext(self, ctx):
-        return self._impl.setDefaultContext(ctx)
-
     def getDefaultContext(self):
         return self._impl.getDefaultContext()
-
-    def getImplicitContext(self):
-        return ImplicitContextI(self._impl.getImplicitContext())
 
     def getProperties(self):
         properties = self._impl.getProperties()
@@ -259,10 +235,10 @@ class CommunicatorI(Communicator):
 
     def getLogger(self):
         logger = self._impl.getLogger()
-        if isinstance(logger, Logger):
-            return logger
-        else:
-            return LoggerI(logger)
+	if isinstance(logger, Logger):
+	    return logger
+	else:
+	    return LoggerI(logger)
 
     def getStats(self):
         raise RuntimeError("operation `getStats' not implemented")
@@ -288,7 +264,7 @@ class CommunicatorI(Communicator):
 #
 # Ice.initialize()
 #
-def initialize(args=None, data=None):
+def initialize(args=[], data=InitializationData()):
     communicator = IcePy.Communicator(args, data)
     return CommunicatorI(communicator)
 
@@ -315,7 +291,7 @@ def initializeWithLogger(args, logger):
 #
 def initializeWithPropertiesAndLogger(args, properties, logger):
     warnings.warn("initializeWithPropertiesAndLogger has been deprecated, use initialize instead",
-                  DeprecationWarning, 2)
+		  DeprecationWarning, 2)
     data = InitializationData()
     data.properties = properties
     data.logger = logger
@@ -362,12 +338,6 @@ class ObjectAdapterI(ObjectAdapter):
         while not self._impl.waitForDeactivate(1000):
             pass
 
-    def isDeactivated(self):
-        self._impl.isDeactivated()
-
-    def destroy(self):
-        self._impl.destroy()
-
     def add(self, servant, id):
         return self._impl.add(servant, id)
 
@@ -413,17 +383,11 @@ class ObjectAdapterI(ObjectAdapter):
     def createDirectProxy(self, id):
         return self._impl.createDirectProxy(id)
 
-    def createIndirectProxy(self, id):
-        return self._impl.createIndirectProxy(id)
-
     def createReverseProxy(self, id):
         return self._impl.createReverseProxy(id)
 
     def setLocator(self, loc):
         self._impl.setLocator(loc)
-
-    def refreshPublishedEndpoints(self):
-        self._impl.refreshPublishedEndpoints()
 
 #
 # Logger wrapper.
@@ -473,10 +437,10 @@ class PropertiesI(Properties):
         return self._impl.getCommandLineOptions()
 
     def parseCommandLineOptions(self, prefix, options):
-        return self._impl.parseCommandLineOptions(prefix, options)
+        self._impl.parseCommandLineOptions(prefix, options)
 
     def parseIceCommandLineOptions(self, options):
-        return self._impl.parseIceCommandLineOptions(options)
+        self._impl.parseIceCommandLineOptions(options)
 
     def load(self, file):
         self._impl.load(file)
@@ -499,138 +463,13 @@ def createProperties(args=[], defaults=None):
     properties = IcePy.createProperties(args, defaults)
     return PropertiesI(properties)
 
-#
-# Ice.getProcessLogger()
-# Ice.setProcessLogger()
-#
-def getProcessLogger():
-    logger = IcePy.getProcessLogger()
-    if isinstance(logger, Logger):
-        return logger
-    else:
-        return LoggerI(logger)
-
-def setProcessLogger(logger):
-    IcePy.setProcessLogger(logger)
 
 #
-# ImplicitContext wrapper
+# The variables below need to be global in order to properly reference a
+# static method of Application.
 #
-class ImplicitContextI(ImplicitContext):
-    def __init__(self, impl):
-        self._impl = impl
-
-    def setContext(self, ctx):
-        self._impl.setContext(ctx)
-
-    def getContext(self):
-        return self._impl.getContext()
-
-    def containsKey(self, key):
-        return self._impl.containsKey(key)
-
-    def get(self, key):
-        return self._impl.get(key)
-
-    def put(self, key, value):
-        return self._impl.put(key, value)
-
-    def remove(self, key):
-        return self._impl.remove(key)
-
-    
-#
-# Its not possible to block in a python signal handler since this
-# blocks the main thread from doing further work. As such we queue the
-# signal with a worker thread which then "dispatches" the signal to
-# the registered callback object.
-#
-# Note the interface is the same as the C++ CtrlCHandler
-# implementation, however, the implementation is different.
-#
-class CtrlCHandler(threading.Thread):
-    # Class variable referring to the one and only handler for use
-    # from the signal handling callback.
-    _self = None
-
-    def __init__(self):
-        threading.Thread.__init__(self)
-
-        if CtrlCHandler._self != None:
-            raise RuntimeError("Only a single instance of a CtrlCHandler can be instantiated.")
-        CtrlCHandler._self = self
-
-        # State variables. These are not class static variables.
-        self._condVar = threading.Condition()
-        self._queue = []
-        self._done = False
-        self._callback = None
-
-        #
-        # Setup and install signal handlers
-        #
-        if signal.__dict__.has_key('SIGHUP'):
-            signal.signal(signal.SIGHUP, CtrlCHandler.signalHandler)
-        signal.signal(signal.SIGINT, CtrlCHandler.signalHandler)
-        signal.signal(signal.SIGTERM, CtrlCHandler.signalHandler)
-
-        # Start the thread once everything else is done.
-        self.start()
-
-    # Dequeue and dispatch signals.
-    def run(self):
-        while True:
-            self._condVar.acquire()
-            while len(self._queue) == 0 and not self._done:
-                self._condVar.wait()
-            if self._done:
-                self._condVar.release()
-                break
-            sig, callback = self._queue.pop()
-            self._condVar.release()
-            if callback:
-                callback(sig)
-
-    # Destroy the object. Wait for the thread to terminate and cleanup
-    # the internal state.
-    def destroy(self):
-        self._condVar.acquire()
-        self._done = True
-        self._condVar.notify()
-        self._condVar.release()
-
-        # Wait for the thread to terminate
-        self.join()
-        #
-        # Cleanup any state set by the CtrlCHandler.
-        #
-        if signal.__dict__.has_key('SIGHUP'):
-            signal.signal(signal.SIGHUP, signal.SIG_DFL)
-        signal.signal(signal.SIGINT, signal.SIG_DFL)
-        signal.signal(signal.SIGTERM, signal.SIG_DFL)
-        self._self = None
-
-    def setCallback(self, callback):
-        self._condVar.acquire()
-        self._callback = callback
-        self._condVar.release()
-
-    def getCallback(self):
-        self._condVar.acquire()
-        callback = self._callback
-        self._condVar.release()
-        return callback
-
-    # Private. Only called by the signal handling mechanism.
-    def signalHandler(self, sig, frame):
-        self._self._condVar.acquire()
-        #
-        # The signal AND the current callback are queued together.
-        #
-        self._self._queue.append([sig, self._self._callback])
-        self._self._condVar.notify()
-        self._self._condVar.release()
-    signalHandler = classmethod(signalHandler)
+_ctrlCHandler = None
+_previousCallback = None
 
 #
 # Application class.
@@ -645,28 +484,29 @@ class Application(object):
     def main(self, args, configFile=None, initData=None):
         if Application._communicator:
             print args[0] + ": only one instance of the Application class can be used"
-            return 1
+            return False
+
+        Application._interrupted = False
+        Application._appName = args[0]
 
         #
         # Install our handler for the signals we are interested in. We assume main()
         # is called from the main thread.
         #
-        Application._ctrlCHandler = CtrlCHandler()
+        if signal.__dict__.has_key('SIGHUP'):
+            signal.signal(signal.SIGHUP, Application.signalHandler)
+        signal.signal(signal.SIGINT, Application.signalHandler)
+        signal.signal(signal.SIGTERM, Application.signalHandler)
+
+        status = 0
 
         try:
-            status = 0
-
-            Application._interrupted = False
-            Application._appName = args[0]
-
-            if not initData:
-                initData = InitializationData()
+	    if not initData:
+	        initData = InitializationData()
             if configFile:
                 initData.properties = createProperties()
                 initData.properties.load(configFile)
-            Application._application = self
-            Application._communicator = initialize(args, initData)
-            Application._destroyed = False
+	    Application._communicator = initialize(args, initData)
 
             #
             # Used by destroyOnInterruptCallback and shutdownOnInterruptCallback.
@@ -683,29 +523,12 @@ class Application(object):
             traceback.print_exc()
             status = 1
 
-        #
-        # Don't want any new interrupt and at this point (post-run),
-        # it would not make sense to release a held signal to run
-        # shutdown or destroy.
-        #
-        Application.ignoreInterrupt()
-
-        Application._condVar.acquire()
-        while Application._callbackInProgress:
-            Application._condVar.wait()
-        if Application._destroyed:
-            Application._communicator = None
-        else:
-            Application._destroyed = True
-            #
-            # And _communicator != 0, meaning will be destroyed
-            # next, _destroyed = true also ensures that any
-            # remaining callback won't do anything
-            #
-        Application._application = None
-        Application._condVar.release()
-
         if Application._communicator:
+            #
+            # We don't want to handle signals anymore.
+            #
+            Application.ignoreInterrupt()
+
             try:
                 Application._communicator.destroy()
             except:
@@ -714,217 +537,159 @@ class Application(object):
 
             Application._communicator = None
 
-        #
-        # Set _ctrlCHandler to 0 only once communicator.destroy() has
-        # completed.
-        # 
-        Application._ctrlCHandler.destroy()
-        Application._ctrlCHandler = None
-
         return status
 
     def run(self, args):
         raise RuntimeError('run() not implemented')
 
-    def interruptCallback(self, sig):
-        pass
+    def appName():
+        return Application._appName
+    appName = staticmethod(appName)
 
-    def appName(self):
-        return self._appName
-    appName = classmethod(appName)
+    def communicator():
+        return Application._communicator
+    communicator = staticmethod(communicator)
 
-    def communicator(self):
-        return self._communicator
-    communicator = classmethod(communicator)
+    def destroyOnInterrupt():
+        global _ctrlCHandler
+        Application._condVar.acquire()
+        if _ctrlCHandler == Application.holdInterruptCallback:
+            Application._released = True
+            _ctrlCHandler = Application.destroyOnInterruptCallback
+            Application._condVar.notify()
+        else:
+            _ctrlCHandler = Application.destroyOnInterruptCallback
+        Application._condVar.release()
+    destroyOnInterrupt = staticmethod(destroyOnInterrupt)
 
-    def destroyOnInterrupt(self):
-        self._condVar.acquire()
-        if self._ctrlCHandler.getCallback() == self.holdInterruptCallback:
-            self._released = True
-            self._condVar.notify()
-        self._ctrlCHandler.setCallback(self.destroyOnInterruptCallback)
-        self._condVar.release()
-    destroyOnInterrupt = classmethod(destroyOnInterrupt)
+    def shutdownOnInterrupt():
+        global _ctrlCHandler
+        Application._condVar.acquire()
+        if _ctrlCHandler == Application.holdInterruptCallback:
+            Application._released = True
+            _ctrlCHandler = Application.shutdownOnInterruptCallback
+            Application._condVar.notify()
+        else:
+            _ctrlCHandler = Application.shutdownOnInterruptCallback
+        Application._condVar.release()
+    shutdownOnInterrupt = staticmethod(shutdownOnInterrupt)
 
-    def shutdownOnInterrupt(self):
-        self._condVar.acquire()
-        if self._ctrlCHandler.getCallback() == self.holdInterruptCallback:
-            self._released = True
-            self._condVar.notify()
-        self._ctrlCHandler.setCallback(self.shutdownOnInterruptCallback)
-        self._condVar.release()
-    shutdownOnInterrupt = classmethod(shutdownOnInterrupt)
+    def ignoreInterrupt():
+        global _ctrlCHandler
+        Application._condVar.acquire()
+        if _ctrlCHandler == Application.holdInterruptCallback:
+            Application._released = True
+            _ctrlCHandler = None
+            Application._condVar.notify()
+        else:
+            _ctrlCHandler = None
+        Application._condVar.release()
+    ignoreInterrupt = staticmethod(ignoreInterrupt)
 
-    def ignoreInterrupt(self):
-        self._condVar.acquire()
-        if self._ctrlCHandler.getCallback() == self.holdInterruptCallback:
-            self._released = True
-            self._condVar.notify()
-        self._ctrlCHandler.setCallback(None)
-        self._condVar.release()
-    ignoreInterrupt = classmethod(ignoreInterrupt)
-
-    def callbackOnInterrupt(self):
-        self._condVar.acquire()
-        if self._ctrlCHandler.getCallback() == self.holdInterruptCallback:
-            self._released = True
-            self._condVar.notify()
-        self._ctrlCHandler.setCallback(self.callbackOnInterruptCallback)
-        self._condVar.release()
-    callbackOnInterrupt = classmethod(callbackOnInterrupt)
-
-    def holdInterrupt(self):
-        self._condVar.acquire()
-        if self._ctrlCHandler.getCallback() != self.holdInterruptCallback:
-            self._previousCallback = self._ctrlCHandler.getCallback()
-            self._released = False
-            self._ctrlCHandler.setCallback(self.holdInterruptCallback)
+    def holdInterrupt():
+        global _ctrlCHandler, _previousCallback
+        Application._condVar.acquire()
+        if _ctrlCHandler != Application.holdInterruptCallback:
+            _previousCallback = _ctrlCHandler
+            Application._released = False
+            _ctrlCHandler = Application.holdInterruptCallback
         # else, we were already holding signals
-        self._condVar.release()
-    holdInterrupt = classmethod(holdInterrupt)
+        Application._condVar.release()
+    holdInterrupt = staticmethod(holdInterrupt)
 
-    def releaseInterrupt(self):
-        self._condVar.acquire()
-        if self._ctrlCHandler.getCallback() == self.holdInterruptCallback:
+    def releaseInterrupt():
+        global _ctrlCHandler, _previousCallback
+        Application._condVar.acquire()
+        if _ctrlCHandler == Application.holdInterruptCallback:
             #
             # Note that it's very possible no signal is held;
             # in this case the callback is just replaced and
             # setting _released to true and signalling _condVar
             # do no harm.
             #
-            self._released = True
-            self._ctrlCHandler.setCallback(self._previousCallback)
-            self._condVar.notify()
+            Application._released = True
+            _ctrlCHandler = _previousCallback
+            Application._condVar.notify()
         # Else nothing to release.
-        self._condVar.release()
-    releaseInterrupt = classmethod(releaseInterrupt)
+        Application._condVar.release()
+    releaseInterrupt = staticmethod(releaseInterrupt)
 
-    def interrupted(self):
-        self._condVar.acquire()
-        result = self._interrupted
-        self._condVar.release()
+    def interrupted():
+        Application._condVar.acquire()
+        result = Application._interrupted
+        Application._condVar.release()
         return result
-    interrupted = classmethod(interrupted)
+    interrupted = staticmethod(interrupted)
 
-    def holdInterruptCallback(self, sig):
-        self._condVar.acquire()
-        while not self._released:
-            self._condVar.wait()
-        if self._destroyed:
-            #
-            # Being destroyed by main thread
-            #
-            self._condVar.release()
+    def signalHandler(sig, frame):
+        global _ctrlCHandler
+        if _ctrlCHandler:
+            _ctrlCHandler(sig)
+    signalHandler = staticmethod(signalHandler)
+
+    def holdInterruptCallback(sig):
+        global _ctrlCHandler
+        Application._condVar.acquire()
+        while not Application._released:
+            Application._condVar.wait(1)
+        Application._condVar.release()
+
+        #
+        # Use the current callback to process this (old) signal.
+        #
+        if _ctrlCHandler:
+            _ctrlCHandler(sig)
+    holdInterruptCallback = staticmethod(holdInterruptCallback)
+
+    def destroyOnInterruptCallback(sig):
+        if Application._nohup and sig == signal.SIGHUP:
             return
-        callback = self._ctrlCHandler.getCallback()
-        self._condVar.release()
-        if callback:
-            callback(sig)
-    holdInterruptCallback = classmethod(holdInterruptCallback)
 
-    def destroyOnInterruptCallback(self, sig):
-        self._condVar.acquire()
-        if self._destroyed or self._nohup and sig == signal.SIGHUP:
-            #
-            # Being destroyed by main thread, or nohup.
-            #
-            self._condVar.release()
-            return
-
-        self._callbackInProcess = True
-        self._interrupted = True
-        self._destroyed = True
-        self._condVar.release()
+        Application._condVar.acquire()
+        Application._interrupted = True
+        Application._condVar.release()
 
         try:
-            self._communicator.destroy()
+            Application._communicator.destroy()
         except:
-            print self._appName + " (while destroying in response to signal " + str(sig) + "):"
+            print Application._appName + " (while destroying in response to signal " + str(sig) + "):"
             traceback.print_exc()
+    destroyOnInterruptCallback = staticmethod(destroyOnInterruptCallback)
 
-        self._condVar.acquire()
-        self._callbackInProcess = False
-        self._condVar.notify()
-        self._condVar.release()
-    destroyOnInterruptCallback = classmethod(destroyOnInterruptCallback)
-
-    def shutdownOnInterruptCallback(self, sig):
-        self._condVar.acquire()
-        if self._destroyed or self._nohup and sig == signal.SIGHUP:
-            #
-            # Being destroyed by main thread, or nohup.
-            #
-            self._condVar.release()
+    def shutdownOnInterruptCallback(sig):
+        if Application._nohup and sig == signal.SIGHUP:
             return
 
-        self._callbackInProcess = True
-        self._interrupted = True
-        self._condVar.release()
+        Application._condVar.acquire()
+        Application._interrupted = True
+        Application._condVar.release()
 
         try:
-            self._communicator.shutdown()
+            Application._communicator.shutdown()
         except:
-            print self._appName + " (while shutting down in response to signal " + str(sig) + "):"
+            print Application._appName + " (while shutting down in response to signal " + str(sig) + "):"
             traceback.print_exc()
-
-        self._condVar.acquire()
-        self._callbackInProcess = False
-        self._condVar.notify()
-        self._condVar.release()
-    shutdownOnInterruptCallback = classmethod(shutdownOnInterruptCallback)
-
-    def callbackOnInterruptCallback(self, sig):
-        self._condVar.acquire()
-        if self._destroyed:
-            #
-            # Being destroyed by main thread.
-            #
-            self._condVar.release()
-            return
-        # For SIGHUP the user callback is always called. It can decide
-        # what to do.
-
-        self._callbackInProcess = True
-        self._interrupted = True
-        self._condVar.release()
-
-        try:
-            self._application.interruptCallback(sig)
-        except:
-            print self._appName + " (while interrupting in response to signal " + str(sig) + "):"
-            traceback.print_exc()
-
-        self._condVar.acquire()
-        self._callbackInProcess = False
-        self._condVar.notify()
-        self._condVar.release()
-
-    callbackOnInterruptCallback = classmethod(callbackOnInterruptCallback)
+    shutdownOnInterruptCallback = staticmethod(shutdownOnInterruptCallback)
 
     _appName = None
     _communicator = None
-    _application = None
-    _ctrlCHandler = None
-    _previousCallback = None
     _interrupted = False
     _released = False
-    _destroyed = False
-    _callbackInProgress = False
     _condVar = threading.Condition()
 
 #
 # Define Ice::Object and Ice::ObjectPrx.
 #
-IcePy._t_Object = IcePy.defineClass('::Ice::Object', Object, (), False, None, (), ())
+IcePy._t_Object = IcePy.defineClass('::Ice::Object', Object, False, None, (), ())
 IcePy._t_ObjectPrx = IcePy.defineProxy('::Ice::Object', ObjectPrx)
 Object.ice_type = IcePy._t_Object
 
-Object._op_ice_isA = IcePy.Operation('ice_isA', OperationMode.Idempotent, OperationMode.Nonmutating, False, (), (((), IcePy._t_string),), (), IcePy._t_bool, ())
-Object._op_ice_ping = IcePy.Operation('ice_ping', OperationMode.Idempotent, OperationMode.Nonmutating, False, (), (), (), None, ())
-Object._op_ice_ids = IcePy.Operation('ice_ids', OperationMode.Idempotent, OperationMode.Nonmutating, False, (), (), (), _t_StringSeq, ())
-Object._op_ice_id = IcePy.Operation('ice_id', OperationMode.Idempotent, OperationMode.Nonmutating, False, (), (), (), IcePy._t_string, ())
+Object._op_ice_isA = IcePy.Operation('ice_isA', OperationMode.Nonmutating, False, (IcePy._t_string,), (), IcePy._t_bool, ())
+Object._op_ice_ping = IcePy.Operation('ice_ping', OperationMode.Nonmutating, False, (), (), None, ())
+Object._op_ice_ids = IcePy.Operation('ice_ids', OperationMode.Nonmutating, False, (), (), _t_StringSeq, ())
+Object._op_ice_id = IcePy.Operation('ice_id', OperationMode.Nonmutating, False, (), (), IcePy._t_string, ())
 
-IcePy._t_LocalObject = IcePy.defineClass('::Ice::LocalObject', LocalObject, (), False, None, (), ())
+IcePy._t_LocalObject = IcePy.defineClass('::Ice::LocalObject', LocalObject, False, None, (), ())
 LocalObject.ice_type = IcePy._t_LocalObject
 
 #

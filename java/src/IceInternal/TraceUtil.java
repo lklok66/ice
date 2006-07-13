@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -67,9 +67,9 @@ public final class TraceUtil
             printHeader(s, str);
 
             int batchRequestNum = str.readInt();
-            s.write("\nnumber of requests = " + batchRequestNum);
-                
-            for(int i = 0; i < batchRequestNum; ++i)
+	    s.write("\nnumber of requests = " + batchRequestNum);
+		
+	    for(int i = 0; i < batchRequestNum; ++i)
             {
                 s.write("\nrequest #" + i + ':');
                 printRequestHeader(s, str);
@@ -96,93 +96,93 @@ public final class TraceUtil
             int requestId = str.readInt();
             s.write("\nrequest id = " + requestId);
 
-            byte replyStatus = str.readByte();
-            s.write("\nreply status = " + (int)replyStatus + ' ');
+            byte status = str.readByte();
+            s.write("\nreply status = " + (int)status + ' ');
 
-            switch(replyStatus)
+            switch(status)
             {
-                case ReplyStatus.replyOK:
+                case DispatchStatus._DispatchOK:
                 {
                     s.write("(ok)");
                     break;
                 }
 
-                case ReplyStatus.replyUserException:
+                case DispatchStatus._DispatchUserException:
                 {
                     s.write("(user exception)");
                     break;
                 }
 
-                case ReplyStatus.replyObjectNotExist:
-                case ReplyStatus.replyFacetNotExist:
-                case ReplyStatus.replyOperationNotExist:
+                case DispatchStatus._DispatchObjectNotExist:
+                case DispatchStatus._DispatchFacetNotExist:
+                case DispatchStatus._DispatchOperationNotExist:
                 {
-                    switch(replyStatus)
-                    {
-                        case ReplyStatus.replyObjectNotExist:
-                        {
-                            s.write("(object not exist)");
-                            break;
-                        }
-                        
-                        case ReplyStatus.replyFacetNotExist:
-                        {
-                            s.write("(facet not exist)");
-                            break;
-                        }
-                        
-                        case ReplyStatus.replyOperationNotExist:
-                        {
-                            s.write("(operation not exist)");
-                            break;
-                        }
-                        
-                        default:
-                        {
-                            assert(false);
-                            break;
-                        }
-                    }
-                    
-                    printIdentityFacetOperation(s, str);
-                    break;
+		    switch(status)
+		    {
+			case DispatchStatus._DispatchObjectNotExist:
+			{
+			    s.write("(object not exist)");
+			    break;
+			}
+			
+			case DispatchStatus._DispatchFacetNotExist:
+			{
+			    s.write("(facet not exist)");
+			    break;
+			}
+			
+			case DispatchStatus._DispatchOperationNotExist:
+			{
+			    s.write("(operation not exist)");
+			    break;
+			}
+			
+			default:
+			{
+			    assert(false);
+			    break;
+			}
+		    }
+		    
+		    printIdentityFacetOperation(s, str);
+		    break;
                 }
 
-                case ReplyStatus.replyUnknownException:
-                case ReplyStatus.replyUnknownLocalException:
-                case ReplyStatus.replyUnknownUserException:
-                {
-                    switch(replyStatus)
-                    {
-                        case ReplyStatus.replyUnknownException:
-                        {
-                            s.write("(unknown exception)");
-                            break;
-                        }
+		case DispatchStatus._DispatchUnknownException:
+		case DispatchStatus._DispatchUnknownLocalException:
+		case DispatchStatus._DispatchUnknownUserException:
+		{
+		    switch(status)
+		    {
+			case DispatchStatus._DispatchUnknownException:
+			{
+			    s.write("(unknown exception)");
+			    break;
+			}
 
-                        case ReplyStatus.replyUnknownLocalException:
-                        {
-                            s.write("(unknown local exception)");
-                            break;
-                        }
-                        
-                        case ReplyStatus.replyUnknownUserException:
-                        {
-                            s.write("(unknown user exception)");
-                            break;
-                        }
-                        
-                        default:
-                        {
-                            assert(false);
-                            break;
-                        }
-                    }
+			case DispatchStatus._DispatchUnknownLocalException:
+			{
+			    s.write("(unknown local exception)");
+			    break;
+			}
+			
+			case DispatchStatus._DispatchUnknownUserException:
+			{
+			    s.write("(unknown user exception)");
+			    break;
+			}
+			
+			default:
+			{
+			    assert(false);
+			    break;
+			}
+		    }
 
-                    String unknown = str.readString();
-                    s.write("\nunknown = " + unknown);
-                    break;
-                }
+		    String unknown = str.readString();
+		    s.write("\nunknown = " + unknown);
+		    break;
+		}
 
                 default:
                 {
@@ -201,12 +201,12 @@ public final class TraceUtil
     synchronized static void
     traceSlicing(String kind, String typeId, String slicingCat, Ice.Logger logger)
     {
-        if(slicingIds.add(typeId))
-        {
-            java.io.StringWriter s = new java.io.StringWriter();
-            s.write("unknown " + kind + " type `" + typeId + "'");
-            logger.trace(slicingCat, s.toString());
-        }
+	if(slicingIds.add(typeId))
+	{
+	    java.io.StringWriter s = new java.io.StringWriter();
+	    s.write("unknown " + kind + " type `" + typeId + "'");
+	    logger.trace(slicingCat, s.toString());
+	}
     }
 
     public static void
@@ -291,7 +291,7 @@ public final class TraceUtil
             out.write("\nfacet = ");
             if(facet.length > 0)
             {
-                out.write(IceUtil.StringUtil.escapeString(facet[0], ""));
+		out.write(IceUtil.StringUtil.escapeString(facet[0], ""));
             }
 
             String operation = stream.readString();
@@ -306,38 +306,38 @@ public final class TraceUtil
     private static void
     printRequestHeader(java.io.Writer out, BasicStream stream)
     {
-        printIdentityFacetOperation(out, stream);
+	printIdentityFacetOperation(out, stream);
 
         try
         {
             byte mode = stream.readByte();
             out.write("\nmode = " + (int)mode + ' ');
-            switch(mode)
-            {
-                case Ice.OperationMode._Normal:
-                {
-                    out.write("(normal)");
-                    break;
-                }
-                
-                case Ice.OperationMode._Nonmutating:
-                {
-                    out.write("(nonmutating)");
-                    break;
-                }
-                
-                case Ice.OperationMode._Idempotent:
-                {
-                    out.write("(idempotent)");
-                    break;
-                }
-                
-                default:
-                {
-                    out.write("(unknown)");
-                    break;
-                }
-            }
+	    switch(mode)
+	    {
+		case Ice.OperationMode._Normal:
+		{
+		    out.write("(normal)");
+		    break;
+		}
+		
+		case Ice.OperationMode._Nonmutating:
+		{
+		    out.write("(nonmutating)");
+		    break;
+		}
+		
+		case Ice.OperationMode._Idempotent:
+		{
+		    out.write("(idempotent)");
+		    break;
+		}
+		
+		default:
+		{
+		    out.write("(unknown)");
+		    break;
+		}
+	    }
 
             int sz = stream.readSize();
             out.write("\ncontext = ");
@@ -363,18 +363,18 @@ public final class TraceUtil
     {
         try
         {
-            byte magic;
-            magic = stream.readByte();  // Don't bother printing the magic number
-            magic = stream.readByte();
-            magic = stream.readByte();
-            magic = stream.readByte();
+	    byte magic;
+	    magic = stream.readByte();	// Don't bother printing the magic number
+	    magic = stream.readByte();
+	    magic = stream.readByte();
+	    magic = stream.readByte();
 
-            byte pMajor = stream.readByte();
-            byte pMinor = stream.readByte();
+	    byte pMajor = stream.readByte();
+	    byte pMinor = stream.readByte();
 //            out.write("\nprotocol version = " + (int)pMajor + "." + (int)pMinor);
 
-            byte eMajor = stream.readByte();
-            byte eMinor = stream.readByte();
+	    byte eMajor = stream.readByte();
+	    byte eMinor = stream.readByte();
 //            out.write("\nencoding version = " + (int)eMajor + "." + (int)eMinor);
 
             byte type = stream.readByte();
@@ -402,7 +402,7 @@ public final class TraceUtil
                 case Protocol.closeConnectionMsg:
                 {
                     out.write("(close connection)");
-                    break;
+		    break;
                 }
 
                 case Protocol.validateConnectionMsg:

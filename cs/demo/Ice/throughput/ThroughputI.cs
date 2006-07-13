@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -13,8 +13,6 @@ public sealed class ThroughputI : ThroughputDisp_
 {
     public ThroughputI()
     {
-        _warmup = true;
-
         _byteSeq = new byte[ByteSeqSize.value];
         _stringSeq = new string[StringSeqSize.value];
         for(int i = 0; i < StringSeqSize.value; ++i)
@@ -24,7 +22,7 @@ public sealed class ThroughputI : ThroughputDisp_
         _structSeq = new StringDouble[StringDoubleSeqSize.value];
         for(int i = 0; i < StringDoubleSeqSize.value; ++i)
         {
-            _structSeq[i] = new StringDouble();
+	    _structSeq[i] = new StringDouble();
             _structSeq[i].s = "hello";
             _structSeq[i].d = 3.14;
         }
@@ -37,25 +35,13 @@ public sealed class ThroughputI : ThroughputDisp_
         }
     }
 
-    public override void endWarmup(Ice.Current current)
-    {
-        _warmup = false;
-    }
-
     public override void sendByteSeq(byte[] seq, Ice.Current current)
     {
     }
 
     public override byte[] recvByteSeq(Ice.Current current)
     {
-        if(_warmup)
-        {
-            return _emptyByteSeq;
-        }
-        else
-        {
-            return _byteSeq;
-        }
+        return _byteSeq;
     }
 
     public override byte[] echoByteSeq(byte[] seq, Ice.Current current)
@@ -69,14 +55,7 @@ public sealed class ThroughputI : ThroughputDisp_
 
     public override string[] recvStringSeq(Ice.Current current)
     {
-        if(_warmup)
-        {
-            return _emptyStringSeq;
-        }
-        else
-        {
-            return _stringSeq;
-        }
+        return _stringSeq;
     }
 
     public override string[] echoStringSeq(string[] seq, Ice.Current current)
@@ -90,14 +69,7 @@ public sealed class ThroughputI : ThroughputDisp_
 
     public override StringDouble[] recvStructSeq(Ice.Current current)
     {
-        if(_warmup)
-        {
-            return _emptyStructSeq;
-        }
-        else
-        {
-            return _structSeq;
-        }
+        return _structSeq;
     }
 
     public override StringDouble[] echoStructSeq(StringDouble[] seq, Ice.Current current)
@@ -111,14 +83,7 @@ public sealed class ThroughputI : ThroughputDisp_
 
     public override Fixed[] recvFixedSeq(Ice.Current current)
     {
-        if(_warmup)
-        {
-            return _emptyFixedSeq;
-        }
-        else
-        {
-            return _fixedSeq;
-        }
+        return _fixedSeq;
     }
 
     public override Fixed[] echoFixedSeq(Fixed[] seq, Ice.Current current)
@@ -135,11 +100,4 @@ public sealed class ThroughputI : ThroughputDisp_
     private string[] _stringSeq;
     private StringDouble[] _structSeq;
     private Fixed[] _fixedSeq;
-
-    private byte[] _emptyByteSeq = new byte[0];
-    private string[] _emptyStringSeq = new string[0];
-    private StringDouble[] _emptyStructSeq = new StringDouble[0];
-    private Fixed[] _emptyFixedSeq = new Fixed[0];
-
-    private bool _warmup;
 }

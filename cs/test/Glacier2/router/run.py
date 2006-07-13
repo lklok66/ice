@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -29,14 +29,15 @@ ice_home = os.environ['ICE_HOME']
 router = os.path.join(ice_home, "bin", "glacier2router")
 
 command = router + TestUtil.cppClientServerOptions + \
-          r' --Ice.Warn.Dispatch=0' + \
-          r' --Ice.Warn.Connections=0' + \
-          r' --Glacier2.Filter.Category.Accept="c1 c2"' + \
-          r' --Glacier2.Filter.Category.AcceptUser="2"' + \
-          r' --Glacier2.SessionTimeout="30"' + \
-          r' --Glacier2.Client.Endpoints="default -p 12347 -t 10000"' + \
-          r' --Glacier2.Server.Endpoints="tcp -h 127.0.0.1 -t 10000"' \
-          r' --Glacier2.Admin.Endpoints="tcp -h 127.0.0.1 -p 12348 -t 10000"' + \
+          r' --Ice.Override.Compress=0' \
+          r' --Ice.PrintProcessId' \
+          r' --Glacier2.AllowCategories="c1 c2"' + \
+          r' --Glacier2.AddUserToAllowCategories="2"' + \
+          r' --Glacier2.RouterIdentity="abc/def"' + \
+          r' --Glacier2.AdminIdentity="ABC/DEF"' + \
+          r' --Glacier2.Client.Endpoints="default -z -p 12347 -t 10000"' + \
+          r' --Glacier2.Server.Endpoints="tcp -z -h 127.0.0.1 -t 10000"' \
+          r' --Glacier2.Admin.Endpoints="tcp -z -h 127.0.0.1 -p 12348 -t 10000"' + \
           r' --Glacier2.CryptPasswords="' + toplevel + r'/test/Glacier2/router/passwords"'
 
 print "starting router...",

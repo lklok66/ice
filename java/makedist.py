@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -17,36 +17,12 @@ def usage():
     print "Usage: " + sys.argv[0] + " [options] [tag]"
     print
     print "Options:"
-    print "-h       Show this message."
-    print "-t       Skip building translators and use the ones in PATH."
-    print "-f       Keep going if precondition checks fail."
-    print "-v       Be verbose."
+    print "-h    Show this message."
+    print "-d    Skip SGML documentation conversion."
+    print "-t    Skip building translators and use the ones in PATH."
+    print "-v    Be verbose."
     print
     print "If no tag is specified, HEAD is used."
-
-#
-# Taken from ice/config/TestUtil.py
-#
-# If having this duplicated is really a problem we should split these
-# methods out into their own module.
-#
-def isHpUx():
-   if sys.platform == "hp-ux11":
-        return 1
-   else:
-        return 0
-
-def isDarwin():
-   if sys.platform == "darwin":
-        return 1
-   else:
-        return 0
-
-def isAIX():
-   if sys.platform in ['aix4', 'aix5']:
-        return 1
-   else:
-        return 0
 
 #
 # Find files matching a pattern.
@@ -88,20 +64,19 @@ if sys.platform.startswith("win") or sys.platform.startswith("cygwin"):
 # Check arguments
 #
 tag = "-rHEAD"
-skipTranslators = False 
-verbose = False 
-keepGoing = False
+skipDocs = 0
+skipTranslators = 0
+verbose = 0
 for x in sys.argv[1:]:
     if x == "-h":
         usage()
         sys.exit(0)
+    elif x == "-d":
+        skipDocs = 1
     elif x == "-t":
-        print "skipping translators"
-        skipTranslators = True
+        skipTranslators = 1
     elif x == "-v":
-        verbose = True 
-    elif x == "-f":
-        keepGoing = True
+        verbose = 1
     elif x.startswith("-"):
         print sys.argv[0] + ": unknown option `" + x + "'"
         print
@@ -114,7 +89,6 @@ for x in sys.argv[1:]:
 # Remove any existing "dist" directory and create a new one.
 #
 distdir = "dist"
-
 if os.path.exists(distdir):
     shutil.rmtree(distdir)
 os.mkdir(distdir)
@@ -131,47 +105,7 @@ if verbose:
 else:
     quiet = "-Q"
 os.system("cvs " + quiet + " -d cvs.zeroc.com:/home/cvsroot export " + tag +
-          " icej ice/bin ice/config ice/include ice/lib ice/slice ice/src")
-
-#
-# Check known preconditions for proper distribution building. Failed
-# checks do not result in immediate failure. Error messages are
-# displayed and the precondition checks continue to aide in identifying
-# other problems. If any of the precondition checks fail, the script
-# terminates.
-#
-f = file(os.path.join("icej", "config", "build.properties"))
-buildProperties = f.readlines();
-f.close()
-
-errorOut = False
-for p in buildProperties:
-    checkFilename = None
-    d = p.split("=")
-    if d[0].strip() in ["jgoodies.looks", "jgoodies.forms", "berkeleydb.jar"]:
-        if not os.path.exists(d[1].strip()):
-            print "ERROR: %s is not in configured location. IceGridGUI.jar will not build correctly!" % d[1].strip()
-            errorOut = True
-
-if not os.environ.has_key("CLASSPATH"):
-    print "ERROR: No CLASSPATH, unable to find ProGuard jar file."
-    errorOut = True
-else:
-    classpath = os.environ["CLASSPATH"]
-    found = False
-    for e in classpath.split(os.pathsep):
-        if e.find("proguard.jar") != -1:
-            if os.path.exists(e):
-                found = True
-                break
-    if not found:
-        print "ERROR: Unable to find ProGuard in CLASSPATH"
-        errorOut = True
-
-if errorOut:
-    print "Failed precondition checks! See above messages."
-    if not keepGoing:
-        sys.exit(1)
+          " icej ice/bin ice/config ice/doc ice/include ice/lib ice/slice ice/src")
 
 #
 # Copy Slice directories.
@@ -189,6 +123,59 @@ slicedirs = [
 os.mkdir(os.path.join("icej", "slice"))
 for x in slicedirs:
     shutil.copytree(os.path.join("ice", "slice", x), os.path.join("icej", "slice", x), 1)
+
+#
+# Generate HTML documentation. We need to build icecpp
+# and slice2docbook first.
+#
+if not skipDocs:
+    print "Generating documentation..."
+    cwd = os.getcwd()
+    os.chdir(os.path.join("ice", "src", "icecpp"))
+    os.system("gmake")
+    os.chdir(cwd)
+    os.chdir(os.path.join("ice", "src", "IceUtil"))
+    os.system("gmake")
+    os.chdir(cwd)
+    os.chdir(os.path.join("ice", "src", "Slice"))
+    os.system("gmake")
+    os.chdir(cwd)
+    os.chdir(os.path.join("ice", "src", "slice2docbook"))
+    os.system("gmake")
+    os.chdir(cwd)
+    os.chdir(os.path.join("ice", "doc"))
+    os.system("gmake")
+    os.chdir(cwd)
+    os.mkdir(os.path.join("icej", "doc"))
+    os.rename(os.path.join("ice", "doc", "reference"), os.path.join("icej", "doc", "reference"))
+    os.rename(os.path.join("ice", "doc", "README.html"), os.path.join("icej", "doc", "README.html"))
+    os.rename(os.path.join("ice", "doc", "images"), os.path.join("icej", "doc", "images"))
+
+#
+# Taken from ice/config/TestUtil.py
+#
+# If having this duplicated is really a problem we should split these
+# methods out into their own module.
+#
+def isHpUx():
+
+   if sys.platform == "hp-ux11":
+        return 1
+   else:
+        return 0
+
+def isDarwin():
+
+   if sys.platform == "darwin":
+        return 1
+   else:
+        return 0
+
+def isAIX():
+   if sys.platform in ['aix4', 'aix5']:
+        return 1
+   else:
+        return 0
 
 #
 # Build slice2java and slice2freezej.
@@ -215,16 +202,16 @@ if not skipTranslators:
     os.environ["PATH"] = os.path.join(cwd, "ice", "bin") + ":" + os.getenv("PATH", "")
 
     if isHpUx():
-        os.environ["SHLIB_PATH"] = os.path.join(cwd, "ice", "lib") + ":" + os.getenv("SHLIB_PATH", "")
+	os.environ["SHLIB_PATH"] = os.path.join(cwd, "ice", "lib") + ":" + os.getenv("SHLIB_PATH", "")
     elif isDarwin():
-        os.environ["DYLD_LIBRARY_PATH"] = os.path.join(cwd, "ice", "lib") + ":" + os.getenv("DYLD_LIBRARY_PATH", "")
+	os.environ["DYLD_LIBRARY_PATH"] = os.path.join(cwd, "ice", "lib") + ":" + os.getenv("DYLD_LIBRARY_PATH", "")
     elif isAIX():
-        os.environ["LIBPATH"] = os.path.join(cwd, "ice", "lib") + ":" + os.getenv("LIBPATH", "")
+	os.environ["LIBPATH"] = os.path.join(cwd, "ice", "lib") + ":" + os.getenv("LIBPATH", "")
     else:
-        os.environ["LD_LIBRARY_PATH"] = os.path.join(cwd, "ice", "lib") + ":" + os.getenv("LD_LIBRARY_PATH", "")
+	os.environ["LD_LIBRARY_PATH"] = os.path.join(cwd, "ice", "lib") + ":" + os.getenv("LD_LIBRARY_PATH", "")
 
     if os.environ.has_key("ICE_HOME"):
-        del os.environ["ICE_HOME"]
+	del os.environ["ICE_HOME"]
 
 #
 # Remove files.
@@ -237,13 +224,35 @@ filesToRemove.extend(find("icej", ".dummy"))
 for x in filesToRemove:
     os.remove(x)
 
-cwd = os.getcwd()
-os.chdir("icej")
-
 #
 # Build sources.
 #
 print "Compiling Java sources..."
+
+cwd = os.getcwd()
+os.chdir("icej")
+if os.environ.has_key("JAVA15_HOME"):
+    # 
+    # First create Ice.jar for JDK 1.5.
+    #
+    oldpath = os.environ["PATH"]
+    if os.environ.has_key("JAVA_HOME"):
+	oldjhome = os.environ["JAVA_HOME"]
+    try:
+	os.environ["PATH"] = os.path.join(os.environ["JAVA15_HOME"], "bin") + os.pathsep + os.environ["PATH"]
+	os.environ["JAVA_HOME"] = os.environ["JAVA15_HOME"]
+
+	if verbose:
+	    quiet = ""
+	else:
+	    quiet = " -q"
+	os.system("ant" + quiet + " ice-jar")
+	os.rename(os.path.join("lib", "Ice.jar"), "Ice.jdk15.jar")
+	os.system("ant" + quiet + " clean")
+    
+    finally:
+	os.environ["PATH"] = oldpath
+	os.environ["JAVA_HOME"] = oldjhome
 
 if verbose:
     quiet = ""
@@ -251,26 +260,28 @@ else:
     quiet = " -q"
 os.system("ant" + quiet)
 
-distroSuffix = "java2"
 #
 # Clean out the lib directory but save the jar files.
 #
 os.rename(os.path.join("lib", "Ice.jar"), "Ice.jar")
 if os.path.exists(os.path.join("lib", "IceGridGUI.jar")):
-    print "Found IceGridGUI, is this the Java 2 targeted source distro?"
+    print "Found IceGridGUI, is this the JDK 1.4 targeted source distro?"
     os.rename(os.path.join("lib", "IceGridGUI.jar"), "IceGridGUI.jar")
 else:
-    print "No IceGridGUI, is this the Java 5 targeted source distro?"
-    distroSuffix = "java5"
+    print "No IceGridGUI, is this the JDK 1.5 targeted source distro?"
 
 shutil.rmtree("lib")
 os.mkdir("lib")
 os.rename("Ice.jar", os.path.join("lib", "Ice.jar"))
 if os.path.exists(os.path.join("IceGridGUI.jar")):
     os.rename("IceGridGUI.jar", os.path.join("lib", "IceGridGUI.jar"))
+
+if os.environ.has_key("JAVA15_HOME"):
+    os.mkdir(os.path.join("lib", "java5"))
+    os.rename("Ice.jdk15.jar", os.path.join("lib", "java5", "Ice.jar"))
 else:
-    os.remove("THIRD_PARTY_LICENSE")
-    os.remove("THIRD_PARTY_SOURCES")
+    if os.path.exists("Ice.jdk15.jar"):
+	os.remove("Ice.jdk15.jar")
 
 #
 # Remove "generated" subdirectories.
@@ -291,7 +302,7 @@ os.chdir(cwd)
 # Get Ice version.
 #
 config = open(os.path.join("icej", "src", "IceUtil", "Version.java"), "r")
-version = re.search("ICE_STRING_VERSION = \"([0-9\.b]*)\"", config.read()).group(1)
+version = re.search("ICE_STRING_VERSION = \"([0-9\.]*)\"", config.read()).group(1)
 
 print "Fixing version in README and INSTALL files..."
 fixVersion(find("icej", "README*"), version)
@@ -301,7 +312,7 @@ fixVersion(find("icej", "INSTALL*"), version)
 # Create source archives.
 #
 print "Creating distribution archives..."
-icever = "IceJ-" + version + "-" + distroSuffix
+icever = "IceJ-" + version
 os.rename("icej", icever)
 if verbose:
     quiet = "v"

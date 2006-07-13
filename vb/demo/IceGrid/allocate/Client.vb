@@ -1,6 +1,6 @@
 ' **********************************************************************
 '
-' Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+' Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 '
 ' This copy of Ice is licensed to you under the terms described in the
 ' ICE_LICENSE file included in this distribution.
@@ -29,12 +29,12 @@ Module AllocateC
                     While Not _terminated
                         System.Threading.Monitor.Wait(Me, _timeout)
                         If _terminated Then
-                            Exit While
+			    Exit While
                         End If
                         Try
                             _session.keepAlive()
                         Catch ex As Ice.Exception
-                            Exit While
+			    Exit While
                         End Try
                     End While
                 End SyncLock
@@ -52,25 +52,24 @@ Module AllocateC
             Private _terminated As Boolean
         End Class
 
-        Private Sub menu()
-            Console.WriteLine("usage:")
-            Console.WriteLine("t: send greeting")
-            Console.WriteLine("s: shutdown server")
-            Console.WriteLine("x: exit")
-            Console.WriteLine("?: help")
-        End Sub
+	Private Sub menu()
+	    Console.WriteLine("usage:")
+	    Console.WriteLine("t: send greeting")
+	    Console.WriteLine("s: shutdown server")
+	    Console.WriteLine("x: exit")
+	    Console.WriteLine("?: help")
+	End Sub
 
         Public Overloads Overrides Function run(ByVal args() As String) As Integer
-            Dim status As Integer = 0
-            Dim registry As IceGrid.RegistryPrx
-            registry = IceGrid.RegistryPrxHelper.checkedCast(communicator().stringToProxy("DemoIceGrid/Registry"))
-            If registry Is Nothing Then
-                Console.Error.WriteLine("could not contact registry")
-            End If
+	    Dim registry As IceGrid.RegistryPrx
+	    registry = IceGrid.RegistryPrxHelper.checkedCast(communicator().stringToProxy("DemoIceGrid/Registry"))
+ 	    If registry Is Nothing Then
+	        Console.Error.WriteLine("could not contact registry")
+	    End If
 
-            Dim session As IceGrid.SessionPrx = Nothing
+	    Dim session As IceGrid.SessionPrx = Nothing	    
             While True
-                Console.Out.WriteLine("This demo accepts any user-id / password combination.")
+	        Console.Out.WriteLine("This demo accepts any user-id / password combination.")
 
                 Console.Out.Write("user id: ")
                 Console.Out.Flush()
@@ -80,71 +79,72 @@ Module AllocateC
                 Console.Out.Flush()
                 Dim pw As String = Console.In.ReadLine()
 
-                Try
-                    session = registry.createSession(id, pw)
-                    Exit While
-                Catch ex As IceGrid.PermissionDeniedException
-                    Console.Error.WriteLine("permission denied:\n" + ex.reason)
-                End Try
+		Try
+		    session = registry.createSession(id, pw)
+		    Exit While
+		Catch ex As IceGrid.PermissionDeniedException
+		    Console.Error.WriteLine("permission denied:\n" + ex.reason)
+		End Try
             End While
 
             Dim keepAlive As SessionKeepAliveThread = New SessionKeepAliveThread(session, registry.getSessionTimeout() / 2)
             Dim keepAliveThread As Thread = New Thread(New ThreadStart(AddressOf keepAlive.run))
             keepAliveThread.Start()
 
-            Try
-                Dim hello As HelloPrx = Nothing
+	    Dim hello As HelloPrx = Nothing
+	    Try
+	        hello = HelloPrxHelper.checkedCast(session.allocateObjectById(communicator().stringToIdentity("hello")))
+	    Catch ex As Icegrid.AllocationException
+	        Console.Error.WriteLine("could not allocate object: " + ex.reason)
+	        Return 1
+	    Catch ex As Icegrid.ObjectNotRegisteredException
+	    End Try
+
+	    If hello Is Nothing
+	        Try
+	            hello = HelloPrxHelper.checkedCast(session.allocateObjectByType("::Demo::Hello"))
+	        Catch ex As Icegrid.AllocationException
+	            Console.Error.WriteLine("could not allocate object: " + ex.reason)
+	            Return 1
+		End Try
+	    End If
+
+	    menu()
+
+            Dim line As String = Nothing
+            Do
                 Try
-                    hello = HelloPrxHelper.checkedCast(session.allocateObjectById(communicator().stringToIdentity("hello")))
-                Catch ex As IceGrid.ObjectNotRegisteredException
-                    hello = HelloPrxHelper.checkedCast(session.allocateObjectByType("::Demo::Hello"))
+                    Console.Out.Write("==> ")
+                    Console.Out.Flush()
+                    line = Console.In.ReadLine()
+                    If line Is Nothing Then
+                        Exit Try
+                    End If
+                    If line.Equals("t") Then
+                        hello.sayHello()
+                    ElseIf line.Equals("s") Then
+                        hello.shutdown()
+                    ElseIf line.Equals("x") Then
+                        ' Nothing to do
+                    ElseIf line.Equals("?") Then
+                        menu()
+                    Else
+                        Console.WriteLine("unknown command `" & line & "'")
+                        menu()
+                    End If
+                Catch ex As System.Exception
+                    Console.Error.WriteLine(ex)
                 End Try
+            Loop While Not line.Equals("x")
 
-                menu()
-
-                Dim line As String = Nothing
-                Do
-                    Try
-                        Console.Out.Write("==> ")
-                        Console.Out.Flush()
-                        line = Console.In.ReadLine()
-                        If line Is Nothing Then
-                            Exit Do
-                        End If
-                        If line.Equals("t") Then
-                            hello.sayHello()
-                        ElseIf line.Equals("s") Then
-                            hello.shutdown()
-                        ElseIf line.Equals("x") Then
-                            ' Nothing to do
-                        ElseIf line.Equals("?") Then
-                            menu()
-                        Else
-                            Console.WriteLine("unknown command `" & line & "'")
-                            menu()
-                        End If
-                    Catch ex As System.Exception
-                        Console.Error.WriteLine(ex)
-                    End Try
-                Loop While Not line.Equals("x")
-            Catch ex As IceGrid.AllocationException
-                Console.Error.WriteLine("could not allocate object: " + ex.reason)
-                status = 1
-            Catch ex As Exception
-                Console.Error.WriteLine("unexpected exception: " + ex.ToString())
-                status = 1
-            End Try
-
-            '
-            ' Destroy the keepAlive thread and the sesion object otherwise
-            ' the session will be kept allocated until the timeout occurs.
-            ' Destroying the session will release all allocated objects.
-            '
             keepAlive.terminate()
             keepAliveThread.Join()
-            session.destroy()
+            keepAlive = Nothing
 
-            Return status
+	    session.releaseObject(hello.ice_getIdentity())
+	    session.destroy()
+
+            Return 0
         End Function
     End Class
 

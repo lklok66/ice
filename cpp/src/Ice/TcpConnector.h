@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -25,30 +25,25 @@
 namespace IceInternal
 {
 
+class TcpEndpoint;
+
 class TcpConnector : public Connector
 {
 public:
     
     virtual TransceiverPtr connect(int);
-    virtual Ice::Short type() const;
     virtual std::string toString() const;
-
-    virtual bool operator==(const Connector&) const;
-    virtual bool operator!=(const Connector&) const;
-    virtual bool operator<(const Connector&) const;
     
 private:
     
-    TcpConnector(const InstancePtr&, const struct sockaddr_in&, Ice::Int, const std::string&);
+    TcpConnector(const InstancePtr&, const std::string&, int);
     virtual ~TcpConnector();
     friend class TcpEndpointI;
 
-    const InstancePtr _instance;
-    const TraceLevelsPtr _traceLevels;
-    const ::Ice::LoggerPtr _logger;
+    InstancePtr _instance;
+    TraceLevelsPtr _traceLevels;
+    ::Ice::LoggerPtr _logger;
     struct sockaddr_in _addr;
-    const Ice::Int _timeout;
-    const std::string _connectionId;
 };
 
 }

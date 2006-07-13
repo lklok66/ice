@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -37,27 +37,29 @@ public class AllTests
         test(obj.equals(base));
         System.out.println("ok");
 
-        {
+	{
             System.out.print("creating/destroying/recreating object adapter... ");
             System.out.flush();
-            Ice.ObjectAdapter adapter = 
-                communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default -p 9999");
-            try
-            {
-                communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default -p 9998");
-                test(false);
-            }
-            catch(Ice.AlreadyRegisteredException ex)
-            {
-            }
-            adapter.destroy();
-            //
-            // Use a different port than the first adapter to avoid an "address already in use" error.
-            //
-            adapter = communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default -p 9998");
-            adapter.destroy();
+	    Ice.ObjectAdapter adapter = 
+	        communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default -p 9999");
+	    try
+	    {
+	        communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default -p 9998");
+		test(false);
+	    }
+	    catch(Ice.AlreadyRegisteredException ex)
+	    {
+	    }
+	    adapter.deactivate();
+	    adapter.waitForDeactivate();
+	    //
+	    // Use a different port than the first adapter to avoid an "address already in use" error.
+	    //
+	    adapter = communicator.createObjectAdapterWithEndpoints("TransientTestAdapter", "default -p 9998");
+	    adapter.deactivate();
+	    adapter.waitForDeactivate();
             System.out.println("ok");
-        }
+	}
 
         System.out.print("creating/activating/deactivating object adapter in one operation... ");
         System.out.flush();

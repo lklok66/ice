@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -67,17 +67,43 @@ except getopt.GetoptError:
 
 for o, a in opts:
     if o == "--debug":
-        debug = 1
+    	debug = 1
     if o == "--protocol":
-        if a not in ( "tcp", "ssl"):
-            usage()
-        protocol = a
+	protocol = a
     if o == "--compress":
-        compress = 1
+	compress = 1
     if o == "--threadPerConnection":
-        threadPerConnection = 1
+	threadPerConnection = 1
     if o == "--host":
-        host = a
+	host = a
+
+#
+# If we are using SSL as the default protocol, we need to examine
+# the Java version to determine whether thread-per-connection is
+# required.
+#
+javaCmd = "java"
+if protocol == "ssl":
+    javaPipeIn, javaPipeOut = os.popen4("java -version")
+    if not javaPipeIn or not javaPipeOut:
+	print "unable to get Java version!"
+        sys.exit(1)
+    version = javaPipeOut.readline()
+    if not version:
+	print "unable to get Java version!"
+        sys.exit(1)
+    if version.startswith("java version \"1.4"):
+	#
+	# IceSSL requires JDK thread-per-connection when used with JDK 1.4.
+	#
+	threadPerConnection = 1
+	#
+	# To avoid the potential for long delays at startup under JDK 1.4,
+	# we direct the JVM to use /dev/urandom instead of its default.
+	#
+	javaCmd = "java -Djava.security.egd=file:/dev/urandom"
+    javaPipeIn.close()
+    javaPipeOut.close()
 
 def isCygwin():
 
@@ -107,13 +133,13 @@ def isWin9x():
 def closePipe(pipe):
 
     try:
-        status = pipe.close()
+	status = pipe.close()
     except IOError, ex:
-        # TODO: There's a waitpid problem on CentOS, so we have to ignore ECHILD.
-        if ex.errno == errno.ECHILD:
-            status = 0
-        else:
-            raise
+	# TODO: There's a waitpid problem on CentOS, so we have to ignore ECHILD.
+	if ex.errno == errno.ECHILD:
+	    status = 0
+	else:
+	    raise
 
     return status
         
@@ -128,16 +154,16 @@ class ReaderThread(Thread):
             while 1:
                 line = self.pipe.readline()
                 if not line: break
-                # Suppress "adapter ready" messages. Under windows the eol isn't \n.
-                if not line.endswith(" ready\n") and not line.endswith(" ready\r\n"):
-                    print line,
+		# Suppress "adapter ready" messages. Under windows the eol isn't \n.
+		if not line.endswith(" ready\n") and not line.endswith(" ready\r\n"):
+		    print line,
         except IOError:
             pass
 
-        self.status = closePipe(self.pipe)
+	self.status = closePipe(self.pipe)
 
     def getStatus(self):
-        return self.status
+	return self.status
 
 serverPids = []
 serverThreads = []
@@ -147,18 +173,18 @@ def joinServers():
     global serverThreads
     global allServerThreads
     for t in serverThreads:
-        t.join()
-        allServerThreads.append(t)
+	t.join()
+	allServerThreads.append(t)
     serverThreads = []
 
 def serverStatus():
     global allServerThreads
     joinServers()
     for t in allServerThreads:
-        status = t.getStatus()
-        if status:
-            print "server " + str(t) + " status: " + str(status)
-            return status
+    	status = t.getStatus()
+    	if status:
+	    print "server " + str(t) + " status: " + str(status)
+    	    return status
     return 0
 
 def killServers():
@@ -196,32 +222,32 @@ def getServerPid(pipe):
     global serverThreads
 
     while 1:
-        output = pipe.readline().strip()
-        if not output:
-            print "failed!"
-            killServers()
-            sys.exit(1)
-        if output.startswith("warning: "):
-            continue
-        break
+	output = pipe.readline().strip()
+	if not output:
+	    print "failed!"
+	    killServers()
+	    sys.exit(1)
+    	if output.startswith("warning: "):
+    	    continue
+	break
 
     try:
-        serverPids.append(int(output))
+	serverPids.append(int(output))
     except ValueError:
-        print "Output is not a PID: " + output
-        raise
+	print "Output is not a PID: " + output
+	raise
 
 def ignorePid(pipe):
 
     while 1:
-        output = pipe.readline().strip()
-        if not output:
-            print "failed!"
-            killServers()
-            sys.exit(1)
-        if output.startswith("warning: "):
-            continue
-        break
+	output = pipe.readline().strip()
+	if not output:
+	    print "failed!"
+	    killServers()
+	    sys.exit(1)
+    	if output.startswith("warning: "):
+    	    continue
+	break
 
 def getAdapterReady(pipe, createThread = True, count = 1):
     global serverThreads
@@ -237,9 +263,9 @@ def getAdapterReady(pipe, createThread = True, count = 1):
 
     # Start a thread for this server.
     if createThread:
-        serverThread = ReaderThread(pipe)
-        serverThread.start()
-        serverThreads.append(serverThread)
+	serverThread = ReaderThread(pipe)
+	serverThread.start()
+	serverThreads.append(serverThread)
 
 def waitServiceReady(pipe, token, createThread = True):
     global serverThreads
@@ -254,9 +280,9 @@ def waitServiceReady(pipe, token, createThread = True):
 
     # Start a thread for this server.
     if createThread:
-        serverThread = ReaderThread(pipe)
-        serverThread.start()
-        serverThreads.append(serverThread)
+	serverThread = ReaderThread(pipe)
+	serverThread.start()
+	serverThreads.append(serverThread)
 
 def printOutputFromPipe(pipe):
 
@@ -265,32 +291,6 @@ def printOutputFromPipe(pipe):
         if c == "":
             break
         os.write(1, c)
-
-def getIceSslVersion():
-    javaPipeIn, javaPipeOut = os.popen4("java IceSSL.Util")
-    if not javaPipeIn or not javaPipeOut:
-        print "unable to get IceSSL version!"
-        sys.exit(1)
-    version = javaPipeOut.readline()
-    if not version:
-        print "unable to get IceSSL version!"
-        sys.exit(1)
-    javaPipeIn.close()
-    javaPipeOut.close()
-    return version.strip()
-
-def getJdkVersion():
-    javaPipeIn, javaPipeOut = os.popen4("java -version")
-    if not javaPipeIn or not javaPipeOut:
-        print "unable to get Java version!"
-        sys.exit(1)
-    version = javaPipeOut.readline()
-    if not version:
-        print "unable to get Java version!"
-        sys.exit(1)
-    javaPipeIn.close()
-    javaPipeOut.close()
-    return version
 
 for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
     toplevel = os.path.normpath(toplevel)
@@ -308,53 +308,30 @@ else:
 os.environ["CLASSPATH"] = os.path.join(toplevel, "lib", "Ice.jar") + sep + os.getenv("CLASSPATH", "")
 os.environ["CLASSPATH"] = os.path.join(toplevel, "lib") + sep + os.getenv("CLASSPATH", "")
 
-#
-# If we are using SSL as the default protocol, we need to take extra
-# precautions when using JDK 1.4.
-#
-javaCmd = "java"
-jdkVersion = None
-iceSslVersion = None
 if protocol == "ssl":
-    jdkVersion = getJdkVersion()
-    if jdkVersion.startswith("java version \"1.4"):
-        #
-        # To avoid the potential for long delays at startup under JDK 1.4,
-        # we direct the JVM to use /dev/urandom instead of its default.
-        #
-        javaCmd = "java -Djava.security.egd=file:/dev/urandom"
-
-    iceSslVersion = getIceSslVersion()
-    if iceSslVersion == "1.4":
-        #
-        # IceSSL for JDK 1.4 requires thread-per-connection.
-        #
-        threadPerConnection = 1
-
-if protocol == "ssl":
-    plugin               = " --Ice.Plugin.IceSSL=IceSSL.PluginFactory"
+    plugin		 = " --Ice.Plugin.IceSSL=IceSSL.PluginFactory"
     clientProtocol       = plugin + " --Ice.Default.Protocol=ssl" + \
-                           " --IceSSL.DefaultDir=" + os.path.join(toplevel, "certs") + \
+			   " --IceSSL.DefaultDir=" + os.path.join(toplevel, "certs") + \
                            " --IceSSL.Keystore=client.jks" + \
                            " --IceSSL.Truststore=certs.jks" + \
                            " --IceSSL.Password=password"
     serverProtocol       = plugin + " --Ice.Default.Protocol=ssl" + \
-                           " --IceSSL.DefaultDir=" + os.path.join(toplevel, "certs") + \
+			   " --IceSSL.DefaultDir=" + os.path.join(toplevel, "certs") + \
                            " --IceSSL.Keystore=server.jks" + \
                            " --IceSSL.Truststore=certs.jks" + \
                            " --IceSSL.Password=password"
     clientServerProtocol = clientProtocol
-    cppPlugin               = " --Ice.Plugin.IceSSL=IceSSL:createIceSSL"
+    cppPlugin		    = " --Ice.Plugin.IceSSL=IceSSL:createIceSSL"
     cppClientProtocol       = cppPlugin + " --Ice.Default.Protocol=ssl" + \
-                              " --IceSSL.DefaultDir=" + os.path.join(toplevel, "certs") + \
-                              " --IceSSL.CertFile=c_rsa1024_pub.pem" + \
-                              " --IceSSL.KeyFile=c_rsa1024_priv.pem" + \
-                              " --IceSSL.CertAuthFile=cacert.pem"
+			      " --IceSSL.DefaultDir=" + os.path.join(toplevel, "certs") + \
+			      " --IceSSL.CertFile=c_rsa1024_pub.pem" + \
+			      " --IceSSL.KeyFile=c_rsa1024_priv.pem" + \
+			      " --IceSSL.CertAuthFile=cacert.pem"
     cppServerProtocol       = cppPlugin + " --Ice.Default.Protocol=ssl" + \
-                              " --IceSSL.DefaultDir=" + os.path.join(toplevel, "certs") + \
-                              " --IceSSL.CertFile=s_rsa1024_pub.pem" + \
-                              " --IceSSL.KeyFile=s_rsa1024_priv.pem" + \
-                              " --IceSSL.CertAuthFile=cacert.pem"
+			      " --IceSSL.DefaultDir=" + os.path.join(toplevel, "certs") + \
+			      " --IceSSL.CertFile=s_rsa1024_pub.pem" + \
+			      " --IceSSL.KeyFile=s_rsa1024_priv.pem" + \
+			      " --IceSSL.CertAuthFile=cacert.pem"
     cppClientServerProtocol = cppClientProtocol
 else:
     clientProtocol = ""
@@ -391,17 +368,19 @@ commonServerOptions = " --Ice.PrintAdapterReady --Ice.Warn.Connections"
 
 if not threadPerConnection:
     commonServerOptions += " --Ice.ThreadPool.Server.Size=1 --Ice.ThreadPool.Server.SizeMax=3" + \
-                           " --Ice.ThreadPool.Server.SizeWarn=0 --Ice.ServerIdleTime=30"
+			   " --Ice.ThreadPool.Server.SizeWarn=0 --Ice.ServerIdleTime=30"
 
 clientOptions = clientProtocol + defaultHost + commonClientOptions
 serverOptions = serverProtocol + defaultHost + commonServerOptions
 clientServerOptions = clientServerProtocol + defaultHost + commonServerOptions
 collocatedOptions = clientServerProtocol + defaultHost
 
-cppCommonClientOptions = " --Ice.NullHandleAbort --Ice.Warn.Connections"
+cppCommonClientOptions = " --Ice.Warn.Connections"
 
-cppCommonServerOptions = " --Ice.PrintProcessId --Ice.PrintAdapterReady --Ice.NullHandleAbort" + \
-                         " --Ice.Warn.Connections --Ice.ServerIdleTime=30"
+cppCommonServerOptions = " --Ice.PrintAdapterReady" + \
+                         " --Ice.Warn.Connections --Ice.ServerIdleTime=30" + \
+                         " --Ice.ThreadPool.Server.Size=1 --Ice.ThreadPool.Server.SizeMax=3" + \
+                         " --Ice.ThreadPool.Server.SizeWarn=0"
 
 cppClientOptions = cppClientProtocol + defaultHost + cppCommonClientOptions
 cppServerOptions = cppServerProtocol + defaultHost + cppCommonServerOptions
@@ -415,7 +394,7 @@ def clientServerTestWithOptions(additionalServerOptions, additionalClientOptions
     print "starting server...",
     serverCmd = server + serverOptions + additionalServerOptions
     if debug:
-        print "(" + serverCmd + ")",
+	print "(" + serverCmd + ")",
     serverPipe = os.popen(serverCmd + " 2>&1")
     getAdapterReady(serverPipe)
     print "ok"
@@ -423,7 +402,7 @@ def clientServerTestWithOptions(additionalServerOptions, additionalClientOptions
     print "starting client...",
     clientCmd = client + clientOptions + additionalClientOptions
     if debug:
-        print "(" + clientCmd + ")",
+	print "(" + clientCmd + ")",
     clientPipe = os.popen(clientCmd + " 2>&1")
     print "ok"
 
@@ -432,8 +411,8 @@ def clientServerTestWithOptions(additionalServerOptions, additionalClientOptions
     clientStatus = closePipe(clientPipe)
 
     if clientStatus or serverStatus():
-        killServers()
-        sys.exit(1)
+	killServers()
+	sys.exit(1)
 
 def clientServerTestWithClasspath(serverClasspath, clientClasspath):
 
@@ -448,7 +427,7 @@ def clientServerTestWithClasspath(serverClasspath, clientClasspath):
     os.environ["CLASSPATH"] = scp
     serverCmd = server + serverOptions
     if debug:
-        print "(" + serverCmd + ")",
+	print "(" + serverCmd + ")",
     serverPipe = os.popen(serverCmd + " 2>&1")
     os.environ["CLASSPATH"] = classpath
     getAdapterReady(serverPipe)
@@ -458,7 +437,7 @@ def clientServerTestWithClasspath(serverClasspath, clientClasspath):
     os.environ["CLASSPATH"] = ccp
     clientCmd = client + clientOptions
     if debug:
-        print "(" + clientCmd + ")",
+	print "(" + clientCmd + ")",
     clientPipe = os.popen(clientCmd + " 2>&1")
     os.environ["CLASSPATH"] = classpath
     print "ok"
@@ -468,8 +447,8 @@ def clientServerTestWithClasspath(serverClasspath, clientClasspath):
     clientStatus = closePipe(clientPipe)
 
     if clientStatus or serverStatus():
-        killServers()
-        sys.exit(1)
+	killServers()
+	sys.exit(1)
     
 def clientServerTest():
 
@@ -483,7 +462,7 @@ def mixedClientServerTestWithOptions(additionalServerOptions, additionalClientOp
     print "starting server...",
     serverCmd = server + clientServerOptions + additionalServerOptions
     if debug:
-        print "(" + serverCmd + ")",
+	print "(" + serverCmd + ")",
     serverPipe = os.popen(serverCmd + " 2>&1")
     getAdapterReady(serverPipe)
     print "ok"
@@ -491,7 +470,7 @@ def mixedClientServerTestWithOptions(additionalServerOptions, additionalClientOp
     print "starting client...",
     clientCmd = client + clientServerOptions + additionalClientOptions
     if debug:
-        print "(" + clientCmd + ")",
+	print "(" + clientCmd + ")",
     clientPipe = os.popen(clientCmd + " 2>&1")
     print "ok"
 
@@ -500,8 +479,8 @@ def mixedClientServerTestWithOptions(additionalServerOptions, additionalClientOp
     clientStatus = closePipe(clientPipe)
 
     if clientStatus or serverStatus():
-        killServers()
-        sys.exit(1)
+	killServers()
+	sys.exit(1)
 
 def mixedClientServerTest():
 
@@ -514,7 +493,7 @@ def collocatedTestWithOptions(additionalOptions):
     print "starting collocated...",
     command = collocated + collocatedOptions + additionalOptions
     if debug:
-        print "(" + command + ")",
+	print "(" + command + ")",
     collocatedPipe = os.popen(command + " 2>&1")
     print "ok"
 
@@ -523,8 +502,8 @@ def collocatedTestWithOptions(additionalOptions):
     collocatedStatus = closePipe(collocatedPipe)
 
     if collocatedStatus:
-        killServers()
-        sys.exit(1)
+	killServers()
+	sys.exit(1)
 
 def collocatedTest():
 

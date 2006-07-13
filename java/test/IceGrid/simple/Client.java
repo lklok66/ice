@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -14,28 +14,28 @@ public class Client
     private static int
     run(String[] args, Ice.Communicator communicator)
     {
-        boolean withDeploy = false;
-        for(int i = 1; i < args.length; i++)
-        {
-            if(args[i].equals("--with-deploy"))
-            {
-                withDeploy = true;
-                break;
-            }
-        }
+	boolean withDeploy = false;
+	for(int i = 1; i < args.length; i++)
+	{
+	    if(args[i].equals("--with-deploy"))
+	    {
+		withDeploy = true;
+		break;
+	    }
+	}
 
-        ;
+	;
 
-        if(!withDeploy)
-        {
-            AllTests.allTests(communicator);
-        }
-        else
-        {
-            AllTests.allTestsWithDeploy(communicator);
-        }       
+	if(!withDeploy)
+	{
+	    AllTests.allTests(communicator);
+	}
+	else
+	{
+	    AllTests.allTestsWithDeploy(communicator);
+	}	
 
-        return 0;
+	return 0;
     }
 
     public static void
@@ -68,7 +68,7 @@ public class Client
             }
         }
 
-        System.gc();
+	System.gc();
         System.exit(status);
     }
 }

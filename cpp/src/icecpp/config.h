@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -37,9 +37,7 @@
 #         pragma warning( 4 : 4267 )   
 #      endif
 #   endif
-#   ifdef _MSC_VER
-#      define alloca _alloca
-#   endif
+#   define alloca _alloca
 #endif
 
 #if defined(__linux) || defined(__FreeBSD__) || defined(__sun) || \

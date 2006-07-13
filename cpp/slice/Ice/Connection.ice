@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -54,7 +54,7 @@ local interface Connection
      * @see setAdapter
      *
      **/
-    ["cpp:const"] Object* createProxy(Identity id);
+    nonmutating Object* createProxy(Identity id);
 
     /**
      *
@@ -88,7 +88,7 @@ local interface Connection
      * @see setAdapter
      *
      **/
-    ["cpp:const"] ObjectAdapter getAdapter();
+    nonmutating ObjectAdapter getAdapter();
 
     /**
      *
@@ -107,7 +107,7 @@ local interface Connection
      * @return The type of the connection.
      *
      **/
-    ["cpp:const"] string type();
+    nonmutating string type();
 
     /**
      *
@@ -116,7 +116,7 @@ local interface Connection
      * @return The connection's timeout.
      *
      **/
-    ["cpp:const"] int timeout();
+    nonmutating int timeout();
 
     /**
      *
@@ -127,7 +127,7 @@ local interface Connection
      * text.
      *
      **/
-    ["cpp:const"] string toString();
+    nonmutating string toString();
 };
 
 };

@@ -1,6 +1,6 @@
 ' **********************************************************************
 '
-' Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+' Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 '
 ' This copy of Ice is licensed to you under the terms described in the
 ' ICE_LICENSE file included in this distribution.
@@ -44,24 +44,24 @@ Module Glacier2callbackC
             While True
                 Console.WriteLine("This demo accepts any user-id / password combination.")
 
-                Dim id As String
-                Console.Write("user id: ")
-                Console.Out.Flush()
-                id = Console.In.ReadLine()
+		Dim id As String
+		Console.Write("user id: ")
+		Console.Out.Flush()
+		id = Console.In.ReadLine()
 
-                Dim pw As String
-                Console.Write("password: ")
-                Console.Out.Flush()
-                pw = Console.In.ReadLine()
+		Dim pw As String
+		Console.Write("password: ")
+		Console.Out.Flush()
+		pw = Console.In.ReadLine()
 
-                Try
-                    router.createSession(id, pw)
-                    Exit While
-                Catch ex As Glacier2.PermissionDeniedException
-                    Console.Write("permission denied:\n" & ex.reason)
-                Catch ex As Glacier2.CannotCreateSessionException
-                    Console.Write("cannot create session:\n" & ex.reason)
-                End Try
+		Try
+		    router.createSession(id, pw)
+		    Exit While
+		Catch ex As Glacier2.PermissionDeniedException
+		    Console.Write("permission denied:\n" & ex.reason)
+		Catch ex As Glacier2.CannotCreateSessionException
+		    Console.Write("cannot create session:\n" & ex.reason)
+		End Try
 
             End While
 
@@ -73,7 +73,15 @@ Module Glacier2callbackC
             callbackReceiverFakeIdent.name = "callbackReceiver"
             callbackReceiverFakeIdent.category = "fake"
 
-            Dim base As Ice.ObjectPrx = communicator().propertyToProxy("Callback.Proxy")
+            Dim properties As Ice.Properties = communicator().getProperties()
+            Const proxyProperty As String = "Callback.Proxy"
+            Dim proxy As String = properties.getProperty(proxyProperty)
+            If proxy.Length = 0 Then
+                Console.Error.WriteLine("property `" & proxyProperty & "' not set")
+                Return 1
+            End If
+
+            Dim base As Ice.ObjectPrx = communicator().stringToProxy(proxy)
             Dim twoway As CallbackPrx = CallbackPrxHelper.checkedCast(base)
             Dim oneway As CallbackPrx = CallbackPrxHelper.uncheckedCast(twoway.ice_oneway())
             Dim batchOneway As CallbackPrx = CallbackPrxHelper.uncheckedCast(twoway.ice_batchOneway())
@@ -97,7 +105,7 @@ Module Glacier2callbackC
                     Console.Out.Flush()
                     line = Console.In.ReadLine()
                     If line Is Nothing Then
-                        Exit Do
+                        Exit Try
                     End If
                     If line.Equals("t") Then
                         Dim context As Ice.Context = New Ice.Context

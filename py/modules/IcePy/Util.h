@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -18,34 +18,8 @@
 #include <IceUtil/Monitor.h>
 #include <IceUtil/Mutex.h>
 
-//
-// These macros replace Py_RETURN_FALSE and Py_RETURN TRUE. We use these
-// instead of the standard ones in order to avoid GCC warnings about
-// strict aliasing and type punning.
-//
-#define PyRETURN_FALSE return Py_INCREF(getFalse()), getFalse()
-#define PyRETURN_TRUE return Py_INCREF(getTrue()), getTrue()
-
 namespace IcePy
 {
-
-//
-// This should be used instead of Py_False to avoid GCC compiler warnings.
-//
-inline PyObject* getFalse()
-{
-    PyIntObject* i = &_Py_ZeroStruct;
-    return reinterpret_cast<PyObject*>(i);
-}
-
-//
-// This should be used instead of Py_True to avoid GCC compiler warnings.
-//
-inline PyObject* getTrue()
-{
-    PyIntObject* i = &_Py_TrueStruct;
-    return reinterpret_cast<PyObject*>(i);
-}
 
 //
 // Invokes Py_DECREF on a Python object.
@@ -54,7 +28,7 @@ class PyObjectHandle
 {
 public:
 
-    PyObjectHandle(PyObject* = 0);
+    PyObjectHandle(PyObject* = NULL);
     PyObjectHandle(const PyObjectHandle&);
     ~PyObjectHandle();
 
@@ -97,7 +71,6 @@ private:
 
     void raiseLocalException();
     std::string getTraceback();
-    std::string getTypeName();
 
     PyObjectHandle _type;
     PyObjectHandle _tb;
@@ -141,11 +114,6 @@ bool listToStringSeq(PyObject*, Ice::StringSeq&);
 bool stringSeqToList(const Ice::StringSeq&, PyObject*);
 
 //
-// Convert a tuple to Ice::StringSeq.
-//
-bool tupleToStringSeq(PyObject*, Ice::StringSeq&);
-
-//
 // Convert Ice::Context to and from a Python dictionary.
 //
 bool dictionaryToContext(PyObject*, Ice::Context&);
@@ -156,6 +124,11 @@ bool contextToDictionary(const Ice::Context&, PyObject*);
 // to the given Python type name.
 //
 PyObject* lookupType(const std::string&);
+
+//
+// Returns the current Python exception.
+//
+//void getPythonException(PyObjectHandle&, PyObjectHandle&, bool);
 
 //
 // Creates an exception instance of the given type.
@@ -173,15 +146,11 @@ PyObject* convertException(const Ice::Exception&);
 void setPythonException(const Ice::Exception&);
 
 //
-// Sets an exception in the Python environment.
-//
-void setPythonException(PyObject*);
-
-//
 // Converts a Python exception into an Ice exception and throws it.
 // If no exception is provided, the interpreter's current exception
 // is obtained. The second argument is an optional traceback object.
 //
+//void throwPythonException(PyObject* = NULL, PyObject* = NULL);
 void throwPythonException();
 
 //

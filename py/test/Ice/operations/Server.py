@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -38,21 +38,15 @@ import Test, TestI
 def run(args, communicator):
     communicator.getProperties().setProperty("TestAdapter.Endpoints", "default -p 12010 -t 10000:udp")
     adapter = communicator.createObjectAdapter("TestAdapter")
-    adapter.add(TestI.MyDerivedClassI(), communicator.stringToIdentity("test"))
+    id = communicator.stringToIdentity("test")
+    adapter.add(TestI.MyDerivedClassI(adapter, id), id)
+    adapter.add(TestI.TestCheckedCastI(), communicator.stringToIdentity("context"))
     adapter.activate()
     communicator.waitForShutdown()
     return True
 
 try:
-    initData = Ice.InitializationData()
-    initData.properties = Ice.createProperties(sys.argv)
-    #
-    # Its possible to have batch oneway requests dispatched after the
-    # adapter is deactivated due to thread scheduling so we supress
-    # this warning.
-    #
-    initData.properties.setProperty("Ice.Warn.Dispatch", "0");
-    communicator = Ice.initialize(sys.argv, initData)
+    communicator = Ice.initialize(sys.argv)
     status = run(sys.argv, communicator)
 except:
     traceback.print_exc()

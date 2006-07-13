@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -48,7 +48,7 @@ public:
 
     void add(const ObjectInfo&, const std::string&);
     ObjectEntryPtr get(const Ice::Identity&) const;
-    void remove(const Ice::Identity&);
+    ObjectEntryPtr remove(const Ice::Identity&);
 
     Ice::ObjectProxySeq getObjectsByType(const std::string&); 
     ObjectInfoSeq getAll(const std::string&);
@@ -62,16 +62,16 @@ private:
     {
     public:
 
-        TypeEntry();
+	TypeEntry();
 
-        void add(const ObjectEntryPtr&);
-        bool remove(const ObjectEntryPtr&);
-        
-        const std::vector<ObjectEntryPtr>& getObjects() const { return _objects; }
+	void add(const ObjectEntryPtr&);
+	bool remove(const ObjectEntryPtr&);
+	
+	const std::vector<ObjectEntryPtr>& getObjects() const { return _objects; }
 
     private:
-        
-        std::vector<ObjectEntryPtr> _objects;
+	
+	std::vector<ObjectEntryPtr> _objects;
     };
 
     const Ice::CommunicatorPtr _communicator;

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -17,7 +17,7 @@
 namespace Freeze
 {
 
-class ObjectStoreBase;
+class ObjectStore;
 
 class IndexI
 {
@@ -32,7 +32,7 @@ public:
     Ice::Int untypedCount(const Key&) const;
     
     void
-    associate(ObjectStoreBase*, DbTxn*, bool, bool);
+    associate(ObjectStore* store, DbTxn* txn, bool createDb, bool populateIndex);
 
     int
     secondaryKeyCreate(Db*, const Dbt*, const Dbt*, Dbt*);
@@ -42,10 +42,12 @@ public:
     
 private:
 
+   
+
     Index& _index;
     std::string _dbName;
     std::auto_ptr<Db> _db;
-    ObjectStoreBase* _store;
+    ObjectStore* _store;
 };
 
 }

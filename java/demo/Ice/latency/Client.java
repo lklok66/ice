@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -14,28 +14,37 @@ class Client extends Ice.Application
     public int
     run(String[] args)
     {
-        PingPrx ping = PingPrxHelper.checkedCast(communicator().propertyToProxy("Latency.Ping"));
+        Ice.Properties properties = communicator().getProperties();
+        final String refProperty = "Latency.Ping";
+        String ref = properties.getProperty(refProperty);
+        if(ref.length() == 0)
+        {
+            System.err.println("property `" + refProperty + "' not set");
+            return 1;
+        }
+
+        PingPrx ping = PingPrxHelper.checkedCast(communicator().stringToProxy(ref));
         if(ping == null)
         {
             System.err.println("invalid proxy");
             return 1;
         }
 
-        //
-        // A method needs to be invoked thousands of times before the JIT compiler
-        // will convert it to native code. To ensure an accurate latency measurement,
-        // we need to "warm up" the JIT compiler.
-        //
-        {
-            final int repetitions = 20000;
-            System.out.print("warming up the JIT compiler...");
-            System.out.flush();
-            for(int i = 0; i < repetitions; i++)
-            {
-                ping.ice_ping();
-            }
-            System.out.println(" ok");
-        }
+	//
+	// A method needs to be invoked thousands of times before the JIT compiler
+	// will convert it to native code. To ensure an accurate latency measurement,
+	// we need to "warm up" the JIT compiler.
+	//
+	{
+	    final int repetitions = 20000;
+	    System.out.print("warming up the JIT compiler...");
+	    System.out.flush();
+	    for(int i = 0; i < repetitions; i++)
+	    {
+		ping.ice_ping();
+	    }
+	    System.out.println(" ok");
+	}
 
         long tv1 = System.currentTimeMillis();
         final int repetitions = 100000;

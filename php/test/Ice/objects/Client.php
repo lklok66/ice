@@ -1,7 +1,7 @@
 <?
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -10,11 +10,6 @@
 
 error_reporting(E_ALL | E_STRICT);
 
-if(!extension_loaded("ice"))
-{
-    echo "\nerror: Ice extension is not loaded.\n\n";
-    exit(1);
-}
 Ice_loadProfileWithArgs($argv);
 
 class BI extends Test_B
@@ -62,18 +57,6 @@ class DI extends Test_D
     var $_postUnmarshalInvoked = false;
 }
 
-class II extends Ice_ObjectImpl implements Test_I
-{
-}
-
-class JI extends Ice_ObjectImpl implements Test_J
-{
-}
-
-class HI extends Test_H
-{
-}
-
 class MyObjectFactory implements Ice_ObjectFactory
 {
     function create($id)
@@ -89,18 +72,6 @@ class MyObjectFactory implements Ice_ObjectFactory
         else if($id == "::Test::D")
         {
             return new DI();
-        }
-	else if($id == "::Test::I")
-        {
-            return new II();
-        }
-        else if($id == "::Test::J")
-        {
-            return new JI();
-        }
-        else if($id == "::Test::H")
-        {
-            return new HI();
         }
         return null;
     }
@@ -264,46 +235,6 @@ function allTests()
     $d->theA = null;
     $d->theB = null;
 
-    echo "getting I, J and H... ";
-    flush();
-    $i = $initial->getI();
-    test($i != null);
-    $j = $initial->getJ();
-    test($j != null and $j instanceof Test_J);
-    $h = $initial->getH();
-    test($h != null and $h instanceof Test_H);
-    echo "ok\n";
-
-    echo "setting I... ";
-    flush();
-    $initial->setI($i);
-    $initial->setI($j);
-    $initial->setI($h);
-    echo "ok\n";
- 
-    echo "testing UnexpectedObjectException... ";
-    flush();
-    $ref = "uoet:default -p 12010 -t 2000";
-    $base = $ICE->stringToProxy($ref);
-    test($base != null);
-    $uoet = $base->ice_checkedCast("::Test::UnexpectedObjectExceptionTest");
-    test($uoet != null);
-    try
-    {
-        $uoet->op();
-        test(false);
-    }
-    catch(Ice_UnexpectedObjectException $ex)
-    {
-        test($ex->type == "::Test::AlsoEmpty");
-        test($ex->expectedType == "::Test::Empty");
-    }
-    catch(Exception $ex)
-    {
-        echo $ex.getTraceAsString();
-    }
-    echo "ok\n";
-
     return $initial;
 }
 
@@ -311,9 +242,6 @@ $factory = new MyObjectFactory();
 $ICE->addObjectFactory($factory, "::Test::B");
 $ICE->addObjectFactory($factory, "::Test::C");
 $ICE->addObjectFactory($factory, "::Test::D");
-$ICE->addObjectFactory($factory, "::Test::I");
-$ICE->addObjectFactory($factory, "::Test::J");
-$ICE->addObjectFactory($factory, "::Test::H");
 $initial = allTests();
 $initial->shutdown();
 exit();

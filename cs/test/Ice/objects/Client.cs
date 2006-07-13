@@ -1,18 +1,18 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
 
-using Test;
 using System.Diagnostics;
+using Test;
 
 public class Client
 {
-    private class MyObjectFactory : Ice.ObjectFactory
+    private class MyObjectFactory : Ice.LocalObjectImpl, Ice.ObjectFactory
     {
         public Ice.Object create(string type)
         {
@@ -28,18 +28,6 @@ public class Client
             {
                 return new DI();
             }
-            else if(type.Equals("::Test::I"))
-            {
-                return new II();
-            }
-            else if(type.Equals("::Test::J"))
-            {
-                return new JI();
-            }
-            else if(type.Equals("::Test::H"))
-            {
-                return new HI();
-            }
             Debug.Assert(false); // Should never be reached
             return null;
         }
@@ -53,13 +41,10 @@ public class Client
 
     private static int run(string[] args, Ice.Communicator communicator)
     {
-        Ice.ObjectFactory factory = new MyObjectFactory();
-        communicator.addObjectFactory(factory, "::Test::B");
-        communicator.addObjectFactory(factory, "::Test::C");
-        communicator.addObjectFactory(factory, "::Test::D");
-        communicator.addObjectFactory(factory, "::Test::I");
-        communicator.addObjectFactory(factory, "::Test::J");
-        communicator.addObjectFactory(factory, "::Test::H");
+	Ice.ObjectFactory factory = new MyObjectFactory();
+	communicator.addObjectFactory(factory, "::Test::B");
+	communicator.addObjectFactory(factory, "::Test::C");
+	communicator.addObjectFactory(factory, "::Test::D");
 
         InitialPrx initial = AllTests.allTests(communicator, false);
         initial.shutdown();
@@ -70,9 +55,7 @@ public class Client
     {
         int status = 0;
         Ice.Communicator communicator = null;
-
-        Debug.Listeners.Add(new ConsoleTraceListener());
-
+        
         try
         {
             communicator = Ice.Util.initialize(ref args);

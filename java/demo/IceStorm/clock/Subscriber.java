@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -11,163 +11,125 @@ import Demo.*;
 
 public class Subscriber extends Ice.Application
 {
-    public class ClockI extends _ClockDisp
-    {
-        public void
-        tick(String date, Ice.Current current)
-        {
-            System.out.println(date);
-        }
-    }
-    
-    public void
-    usage()
-    {
-        System.out.println("Usage: " + appName() + " [--batch] [--datagram|--twoway|--ordered|--oneway] [topic]");
-    }
-
     public int
     run(String[] args)
     {
-        IceStorm.TopicManagerPrx manager = IceStorm.TopicManagerPrxHelper.checkedCast(
-            communicator().propertyToProxy("IceStorm.TopicManager.Proxy"));
+        Ice.Properties properties = communicator().getProperties();
+
+        final String proxyProperty = "IceStorm.TopicManager.Proxy";
+        String proxy = properties.getProperty(proxyProperty);
+        if(proxy == null)
+        {
+	    System.err.println("property `" + proxyProperty + "' not set");
+            return 1;
+        }
+
+        Ice.ObjectPrx base = communicator().stringToProxy(proxy);
+        IceStorm.TopicManagerPrx manager = IceStorm.TopicManagerPrxHelper.checkedCast(base);
         if(manager == null)
         {
-            System.err.println("invalid proxy");
+	    System.err.println("invalid proxy");
             return 1;
         }
 
-        String topicName = "time";
-        boolean datagram = false;
-        boolean twoway = false;
-        boolean ordered = false;
-        boolean batch = false;
-        int optsSet = 0;
-        for(int i = 0; i < args.length; ++i)
+        //
+        // Gather the set of topics to which to subscribe. It is either
+        // the set provided on the command line, or the topic "time".
+        //
+	java.util.List topics = new java.util.ArrayList();;
+        if(args.length > 1)
         {
-            if(args[i].equals("--datagram"))
+            for(int i = 0; i < args.length; ++i)
             {
-                datagram = true;
-                ++optsSet;
-            }
-            else if(args[i].equals("--twoway"))
-            {
-                twoway = true;
-                ++optsSet;
-            }
-            else if(args[i].equals("--ordered"))
-            {
-                ordered = true;
-                ++optsSet;
-            }
-            else if(args[i].equals("--oneway"))
-            {
-                ++optsSet;
-            }
-            else if(args[i].equals("--batch"))
-            {
-                batch = true;
-            }
-            else if(args[i].startsWith("--"))
-            {
-                usage();
-                return 1;
-            }
-            else
-            {
-                topicName = args[i];
-                break;
+                topics.add(args[i]);
             }
         }
-        if(batch && (twoway || ordered))
+        else
         {
-            System.err.println(appName() + ": batch can only be set with oneway or datagram");
-            return 1;
+            topics.add("time");
         }
 
-        if(optsSet > 1)
-        {
-            usage();
-            return 1;
-        }
+        //
+        // Set the requested quality of service "reliability" =
+        // "batch". This tells IceStorm to send events to the subscriber
+        // in batches at regular intervals.
+        //
+	java.util.Map qos = new java.util.HashMap();
+	qos.put("reliability", "batch");
 
-        IceStorm.TopicPrx topic;
-        try
+        //
+        // Create the servant to receive the events.
+        //
+        Ice.ObjectAdapter adapter = communicator().createObjectAdapter("Clock.Subscriber");
+        Ice.Object clock = new ClockI();
+
+        //
+        // List of all subscribers.
+        //
+        java.util.Map subscribers = new java.util.HashMap();;
+
+        //
+        // Add the servant to the adapter for each topic. A ServantLocator
+        // could have been used for the same purpose.
+        //
+	java.util.Iterator p = topics.iterator();
+	while(p.hasNext())
         {
-            topic = manager.retrieve(topicName);
-        }
-        catch(IceStorm.NoSuchTopic e)
-        {
+	    String name = (String)p.next();
+
+            //
+            // Add a Servant for the Ice Object.
+            //
+            Ice.ObjectPrx object = adapter.addWithUUID(clock);
             try
             {
-                topic = manager.create(topicName);
+                IceStorm.TopicPrx topic = manager.retrieve(name);
+                topic.subscribe(qos, object);
             }
-            catch(IceStorm.TopicExists ex)
+            catch(IceStorm.NoSuchTopic e)
             {
-                System.err.println(appName() + ": temporary failure, try again.");
-                return 1;
+	        System.err.println(e + " name: " + e.name);
+                break;
             }
+
+            //
+            // Add to the set of subscribers _after_ subscribing. This
+            // ensures that only subscribed subscribers are unsubscribed
+            // in the case of an error.
+            //
+            subscribers.put(name, object);
         }
 
-        Ice.ObjectAdapter adapter = communicator().createObjectAdapter("Clock.Subscriber");
+        //
+        // Unless there is a subscriber per topic then there was some
+        // problem. If there was an error the application should terminate
+        // without accepting any events.
+        //
+        if(subscribers.size() == topics.size())
+        {
+            adapter.activate();
+            shutdownOnInterrupt();
+            communicator().waitForShutdown();
+        }
 
         //
-        // Add a Servant for the Ice Object.
+        // Unsubscribe all subscribed objects.
         //
-        java.util.Map qos = new java.util.HashMap();
-        Ice.ObjectPrx subscriber = adapter.addWithUUID(new ClockI());
-        //
-        // Set up the proxy.
-        //
-        if(datagram)
+	p = subscribers.entrySet().iterator();
+	while(p.hasNext())
         {
-            subscriber = subscriber.ice_datagram();
-        }
-        else if(twoway)
-        {
-            // Do nothing to the subscriber proxy. Its already twoway.
-        }
-        else if(ordered)
-        {
-            // Do nothing to the subscriber proxy. Its already twoway.
-            qos.put("reliability", "ordered");
-        }
-        else // if(oneway)
-        {
-            subscriber = subscriber.ice_oneway();
-        }
-        if(batch)
-        {
-            if(datagram)
+	    java.util.Map.Entry entry = (java.util.Map.Entry)p.next();
+
+            try
             {
-                subscriber = subscriber.ice_batchDatagram();
+                IceStorm.TopicPrx topic = manager.retrieve((String)entry.getKey());
+                topic.unsubscribe((Ice.ObjectPrx)entry.getValue());
             }
-            else
+            catch(IceStorm.NoSuchTopic e)
             {
-                subscriber = subscriber.ice_batchOneway();
+	        System.err.println(e + " name: " + e.name);
             }
         }
-        
-        try
-        {
-            topic.subscribeAndGetPublisher(qos, subscriber);
-        }
-        catch(IceStorm.AlreadySubscribed e)
-        {
-            e.printStackTrace();
-            return 1;
-        }
-        catch(IceStorm.BadQoS e)
-        {
-            e.printStackTrace();
-            return 1;
-        }
-        adapter.activate();
-
-        shutdownOnInterrupt();
-        communicator().waitForShutdown();
-
-        topic.unsubscribe(subscriber);
 
         return 0;
     }

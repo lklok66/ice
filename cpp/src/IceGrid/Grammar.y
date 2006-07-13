@@ -2,7 +2,7 @@
 
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -34,16 +34,10 @@ yyerror(const char* s)
 
 %pure_parser
 
-//
-// All keyword tokens. Make sure to modify the "keyword" rule in this
-// file if the list of keywords is changed. Also make sure to add the
-// keyword to the keyword table in Scanner.l.
-//
 %token ICE_GRID_HELP
 %token ICE_GRID_EXIT
 %token ICE_GRID_APPLICATION
 %token ICE_GRID_NODE
-%token ICE_GRID_REGISTRY
 %token ICE_GRID_SERVER
 %token ICE_GRID_ADAPTER
 %token ICE_GRID_PING
@@ -93,18 +87,11 @@ start
 // ----------------------------------------------------------------------
 commands
 // ----------------------------------------------------------------------
-: commands checkInterrupted command
+: commands command
 {
 }
-| checkInterrupted command
+| command
 {
-}
-;
-
-checkInterrupted
-:
-{
-    parser->checkInterrupted();
 }
 ;
 
@@ -119,357 +106,153 @@ command
 {
     return 0;
 }
-| ICE_GRID_APPLICATION ICE_GRID_ADD strings ';'
+| ICE_GRID_APPLICATION ICE_GRID_ADD optional_strings ';'
 {
     parser->addApplication($3);
 }
-| ICE_GRID_APPLICATION ICE_GRID_ADD ICE_GRID_HELP ';'
-{
-    parser->usage("application", "add");
-}
-| ICE_GRID_APPLICATION ICE_GRID_REMOVE strings ';'
+| ICE_GRID_APPLICATION ICE_GRID_REMOVE optional_strings ';'
 {
     parser->removeApplication($3);
 }
-| ICE_GRID_APPLICATION ICE_GRID_REMOVE ICE_GRID_HELP ';'
-{
-    parser->usage("application", "remove");
-}
-| ICE_GRID_APPLICATION ICE_GRID_DIFF strings ';'
+| ICE_GRID_APPLICATION ICE_GRID_DIFF optional_strings ';'
 {
     parser->diffApplication($3);
 }
-| ICE_GRID_APPLICATION ICE_GRID_DIFF ICE_GRID_HELP ';'
-{
-    parser->usage("application", "diff");
-}
-| ICE_GRID_APPLICATION ICE_GRID_UPDATE strings ';'
+| ICE_GRID_APPLICATION ICE_GRID_UPDATE optional_strings ';'
 {
     parser->updateApplication($3);
 }
-| ICE_GRID_APPLICATION ICE_GRID_UPDATE ICE_GRID_HELP ';'
-{
-    parser->usage("application", "update");
-}
-| ICE_GRID_APPLICATION ICE_GRID_DESCRIBE strings ';'
+| ICE_GRID_APPLICATION ICE_GRID_DESCRIBE optional_strings ';'
 {
     parser->describeApplication($3);
 }
-| ICE_GRID_APPLICATION ICE_GRID_DESCRIBE ICE_GRID_HELP ';'
-{
-    parser->usage("application", "describe");
-}
-| ICE_GRID_APPLICATION ICE_GRID_PATCH strings ';'
+| ICE_GRID_APPLICATION ICE_GRID_PATCH optional_strings ';'
 {
     parser->patchApplication($3);
 }
-| ICE_GRID_APPLICATION ICE_GRID_PATCH ICE_GRID_HELP ';'
-{
-    parser->usage("application", "patch");
-}
-| ICE_GRID_APPLICATION ICE_GRID_LIST strings ';'
-{
-    parser->listAllApplications($3);
-}
-| ICE_GRID_APPLICATION ICE_GRID_LIST ICE_GRID_HELP ';'
-{
-    parser->usage("application", "list");
-}
-| ICE_GRID_SERVER ICE_GRID_TEMPLATE ICE_GRID_DESCRIBE strings ';'
+| ICE_GRID_SERVER ICE_GRID_TEMPLATE ICE_GRID_DESCRIBE optional_strings ';'
 {
     parser->describeServerTemplate($4);
 }
-| ICE_GRID_SERVER ICE_GRID_TEMPLATE ICE_GRID_DESCRIBE ICE_GRID_HELP ';'
-{
-    parser->usage("server template", "describe");
-}
-| ICE_GRID_SERVER ICE_GRID_TEMPLATE ICE_GRID_INSTANTIATE strings ';'
+| ICE_GRID_SERVER ICE_GRID_TEMPLATE ICE_GRID_INSTANTIATE optional_strings ';'
 {
     parser->instantiateServerTemplate($4);
 }
-| ICE_GRID_SERVER ICE_GRID_TEMPLATE ICE_GRID_INSTANTIATE ICE_GRID_HELP ';'
-{
-    parser->usage("server template", "instantiate");
-}
-| ICE_GRID_SERVER ICE_GRID_TEMPLATE ICE_GRID_HELP ';'
-{
-    parser->usage("server template");
-}
-| ICE_GRID_SERVICE ICE_GRID_TEMPLATE ICE_GRID_DESCRIBE strings ';'
+| ICE_GRID_SERVICE ICE_GRID_TEMPLATE ICE_GRID_DESCRIBE optional_strings ';'
 {
     parser->describeServiceTemplate($4);
 }
-| ICE_GRID_SERVICE ICE_GRID_TEMPLATE ICE_GRID_DESCRIBE ICE_GRID_HELP ';'
+| ICE_GRID_APPLICATION ICE_GRID_LIST ';'
 {
-    parser->usage("service template", "describe");
+    parser->listAllApplications();
 }
-| ICE_GRID_SERVICE ICE_GRID_TEMPLATE ICE_GRID_HELP ';'
-{
-    parser->usage("service template");
-}
-| ICE_GRID_NODE ICE_GRID_DESCRIBE strings ';'
+| ICE_GRID_NODE ICE_GRID_DESCRIBE optional_strings ';'
 {
     parser->describeNode($3);
 }
-| ICE_GRID_NODE ICE_GRID_DESCRIBE ICE_GRID_HELP ';'
-{
-    parser->usage("node", "describe");
-}
-| ICE_GRID_NODE ICE_GRID_PING strings ';'
+| ICE_GRID_NODE ICE_GRID_PING optional_strings ';'
 {
     parser->pingNode($3);
 }
-| ICE_GRID_NODE ICE_GRID_PING ICE_GRID_HELP ';'
-{
-    parser->usage("node", "ping");
-}
-| ICE_GRID_NODE ICE_GRID_LOAD strings ';'
+| ICE_GRID_NODE ICE_GRID_LOAD optional_strings ';'
 {
     parser->printLoadNode($3);
 }
-| ICE_GRID_NODE ICE_GRID_LOAD ICE_GRID_HELP ';'
-{
-    parser->usage("node", "lost");
-}
-| ICE_GRID_NODE ICE_GRID_SHUTDOWN strings ';'
+| ICE_GRID_NODE ICE_GRID_SHUTDOWN optional_strings ';'
 {
     parser->shutdownNode($3);
 }
-| ICE_GRID_NODE ICE_GRID_SHUTDOWN ICE_GRID_HELP ';'
+| ICE_GRID_NODE ICE_GRID_LIST ';'
 {
-    parser->usage("node", "shutdown");
+    parser->listAllNodes();
 }
-| ICE_GRID_NODE ICE_GRID_LIST strings ';'
-{
-    parser->listAllNodes($3);
-}
-| ICE_GRID_NODE ICE_GRID_LIST ICE_GRID_HELP ';'
-{
-    parser->usage("node", "list");
-}
-| ICE_GRID_NODE ICE_GRID_SHOW strings ';'
-{
-    parser->showFile("node", $3);
-}
-| ICE_GRID_NODE ICE_GRID_SHOW ICE_GRID_HELP ';'
-{
-    parser->usage("node", "show");
-}
-| ICE_GRID_REGISTRY ICE_GRID_DESCRIBE strings ';'
-{
-    parser->describeRegistry($3);
-}
-| ICE_GRID_REGISTRY ICE_GRID_DESCRIBE ICE_GRID_HELP ';'
-{
-    parser->usage("registry", "describe");
-}
-| ICE_GRID_REGISTRY ICE_GRID_PING strings ';'
-{
-    parser->pingRegistry($3);
-}
-| ICE_GRID_REGISTRY ICE_GRID_PING ICE_GRID_HELP ';'
-{
-    parser->usage("registry", "ping");
-}
-| ICE_GRID_REGISTRY ICE_GRID_SHUTDOWN strings ';'
-{
-    parser->shutdownRegistry($3);
-}
-| ICE_GRID_REGISTRY ICE_GRID_SHUTDOWN ICE_GRID_HELP ';'
-{
-    parser->usage("registry", "shutdown");
-}
-| ICE_GRID_REGISTRY ICE_GRID_LIST strings ';'
-{
-    parser->listAllRegistries($3);
-}
-| ICE_GRID_REGISTRY ICE_GRID_LIST ICE_GRID_HELP ';'
-{
-    parser->usage("registry", "list");
-}
-| ICE_GRID_REGISTRY ICE_GRID_SHOW strings ';'
-{
-    parser->showFile("registry", $3);
-}
-| ICE_GRID_REGISTRY ICE_GRID_SHOW ICE_GRID_HELP ';'
-{
-    parser->usage("registry", "show");
-}
-| ICE_GRID_SERVER ICE_GRID_REMOVE strings ';'
+| ICE_GRID_SERVER ICE_GRID_REMOVE optional_strings ';'
 {
     parser->removeServer($3);
 }
-| ICE_GRID_SERVER ICE_GRID_REMOVE ICE_GRID_HELP ';'
-{
-    parser->usage("server", "remove");
-}
-| ICE_GRID_SERVER ICE_GRID_DESCRIBE strings ';'
+| ICE_GRID_SERVER ICE_GRID_DESCRIBE optional_strings ';'
 {
     parser->describeServer($3);
 }
-| ICE_GRID_SERVER ICE_GRID_DESCRIBE ICE_GRID_HELP ';'
-{
-    parser->usage("server", "describe");
-}
-| ICE_GRID_SERVER ICE_GRID_START strings ';'
+| ICE_GRID_SERVER ICE_GRID_START optional_strings ';'
 {
     parser->startServer($3);
 }
-| ICE_GRID_SERVER ICE_GRID_START ICE_GRID_HELP ';'
-{
-    parser->usage("server", "start");
-}
-| ICE_GRID_SERVER ICE_GRID_STOP strings ';'
+| ICE_GRID_SERVER ICE_GRID_STOP optional_strings ';'
 {
     parser->stopServer($3);
 }
-| ICE_GRID_SERVER ICE_GRID_STOP ICE_GRID_HELP ';'
-{
-    parser->usage("server", "stop");
-}
-| ICE_GRID_SERVER ICE_GRID_PATCH strings ';'
+| ICE_GRID_SERVER ICE_GRID_PATCH optional_strings ';'
 {
     parser->patchServer($3);
 }
-| ICE_GRID_SERVER ICE_GRID_PATCH ICE_GRID_HELP ';'
-{
-    parser->usage("server", "patch");
-}
-| ICE_GRID_SERVER ICE_GRID_SIGNAL strings ';'
+| ICE_GRID_SERVER ICE_GRID_SIGNAL optional_strings ';'
 {
     parser->signalServer($3);
 }
-| ICE_GRID_SERVER ICE_GRID_SIGNAL ICE_GRID_HELP ';'
-{
-    parser->usage("server", "signal");
-}
-| ICE_GRID_SERVER ICE_GRID_STDOUT strings ';'
+| ICE_GRID_SERVER ICE_GRID_STDOUT optional_strings ';'
 {
     parser->writeMessage($3, 1);
 }
-| ICE_GRID_SERVER ICE_GRID_STDOUT ICE_GRID_HELP ';'
-{
-    parser->usage("server", "stdout");
-}
-| ICE_GRID_SERVER ICE_GRID_STDERR strings ';'
+| ICE_GRID_SERVER ICE_GRID_STDERR optional_strings ';'
 {
     parser->writeMessage($3, 2);
 }
-| ICE_GRID_SERVER ICE_GRID_STDERR ICE_GRID_HELP ';'
-{
-    parser->usage("server", "stderr");
-}
-| ICE_GRID_SERVER ICE_GRID_STATE strings ';'
+| ICE_GRID_SERVER ICE_GRID_STATE optional_strings ';'
 {
     parser->stateServer($3);
 }
-| ICE_GRID_SERVER ICE_GRID_STATE ICE_GRID_HELP ';'
-{
-    parser->usage("server", "start");
-}
-| ICE_GRID_SERVER ICE_GRID_PID strings ';'
+| ICE_GRID_SERVER ICE_GRID_PID optional_strings ';'
 {
     parser->pidServer($3);
 }
-| ICE_GRID_SERVER ICE_GRID_PID ICE_GRID_HELP ';'
-{
-    parser->usage("server", "pid");
-}
-| ICE_GRID_SERVER ICE_GRID_ENABLE strings ';'
+| ICE_GRID_SERVER ICE_GRID_ENABLE optional_strings ';'
 {
     parser->enableServer($3, true);
 }
-| ICE_GRID_SERVER ICE_GRID_ENABLE ICE_GRID_HELP ';'
-{
-    parser->usage("server", "enable");
-}
-| ICE_GRID_SERVER ICE_GRID_DISABLE strings ';'
+| ICE_GRID_SERVER ICE_GRID_DISABLE optional_strings ';'
 {
     parser->enableServer($3, false);
 }
-| ICE_GRID_SERVER ICE_GRID_DISABLE ICE_GRID_HELP ';'
+| ICE_GRID_SERVER ICE_GRID_LIST ';'
 {
-    parser->usage("server", "disable");
+    parser->listAllServers();
 }
-| ICE_GRID_SERVER ICE_GRID_LIST strings ';'
-{
-    parser->listAllServers($3);
-}
-| ICE_GRID_SERVER ICE_GRID_LIST ICE_GRID_HELP ';'
-{
-    parser->usage("server", "list");
-}
-| ICE_GRID_SERVER ICE_GRID_SHOW strings ';'
-{
-    parser->showFile("server", $3);
-}
-| ICE_GRID_SERVER ICE_GRID_SHOW ICE_GRID_HELP ';'
-{
-    parser->usage("server", "show");
-}
-| ICE_GRID_ADAPTER ICE_GRID_ENDPOINTS strings ';'
+| ICE_GRID_ADAPTER ICE_GRID_ENDPOINTS optional_strings ';'
 {
     parser->endpointsAdapter($3);
 }
-| ICE_GRID_ADAPTER ICE_GRID_ENDPOINTS ICE_GRID_HELP ';'
-{
-    parser->usage("adapter", "endpoints");
-}
-| ICE_GRID_ADAPTER ICE_GRID_REMOVE strings ';'
+| ICE_GRID_ADAPTER ICE_GRID_REMOVE optional_strings ';'
 {
     parser->removeAdapter($3);
 }
-| ICE_GRID_ADAPTER ICE_GRID_REMOVE ICE_GRID_HELP ';'
+| ICE_GRID_ADAPTER ICE_GRID_LIST ';'
 {
-    parser->usage("adapter", "remove");
+    parser->listAllAdapters();
 }
-| ICE_GRID_ADAPTER ICE_GRID_LIST strings ';'
-{
-    parser->listAllAdapters($3);
-}
-| ICE_GRID_ADAPTER ICE_GRID_LIST ICE_GRID_HELP ';'
-{
-    parser->usage("adapter", "list");
-}
-| ICE_GRID_OBJECT ICE_GRID_ADD strings ';'
+| ICE_GRID_OBJECT ICE_GRID_ADD optional_strings ';'
 {
     parser->addObject($3);
 }
-| ICE_GRID_OBJECT ICE_GRID_ADD ICE_GRID_HELP ';'
-{
-    parser->usage("object", "add");
-}
-| ICE_GRID_OBJECT ICE_GRID_REMOVE strings ';'
+| ICE_GRID_OBJECT ICE_GRID_REMOVE optional_strings ';'
 {
     parser->removeObject($3);
 }
-| ICE_GRID_OBJECT ICE_GRID_REMOVE ICE_GRID_HELP ';'
-{
-    parser->usage("object", "remove");
-}
-| ICE_GRID_OBJECT ICE_GRID_FIND strings ';'
+| ICE_GRID_OBJECT ICE_GRID_FIND optional_strings ';'
 {
     parser->findObject($3);
 }
-| ICE_GRID_OBJECT ICE_GRID_FIND ICE_GRID_HELP ';'
-{
-    parser->usage("object", "find");
-}
-| ICE_GRID_OBJECT ICE_GRID_LIST strings ';'
+| ICE_GRID_OBJECT ICE_GRID_LIST optional_strings ';'
 {
     parser->listObject($3);
 }
-| ICE_GRID_OBJECT ICE_GRID_LIST ICE_GRID_HELP ';'
-{
-    parser->usage("object", "list");
-}
-| ICE_GRID_OBJECT ICE_GRID_DESCRIBE strings ';'
+| ICE_GRID_OBJECT ICE_GRID_DESCRIBE optional_strings ';'
 {
     parser->describeObject($3);
 }
-| ICE_GRID_OBJECT ICE_GRID_DESCRIBE ICE_GRID_HELP ';'
+| ICE_GRID_SHUTDOWN ';'
 {
-    parser->usage("object", "describe");
+    parser->shutdown();
 }
 | ICE_GRID_SHOW ICE_GRID_COPYING ';'
 {
@@ -479,74 +262,75 @@ command
 {
     parser->showWarranty();
 }
-| ICE_GRID_HELP keyword ';'
+| ICE_GRID_APPLICATION optional_strings ';'
 {
-    parser->usage($2.front());
-}
-| ICE_GRID_HELP keyword keyword ';'
-{
-    if(($2.front() == "server" || $2.front() == "service") && $3.front() == "template")
+    if($2.empty())
     {
-        parser->usage($2.front() + " " + $3.front());
+	parser->invalidCommand("invalid command `application'");
     }
     else
     {
-        parser->usage($2.front(), $3.front());
+	parser->invalidCommand("invalid command: `application " + $2.front() + "'");
     }
 }
-| ICE_GRID_HELP keyword ICE_GRID_STRING strings ';'
+| ICE_GRID_SERVER optional_strings ';'
 {
-    parser->usage($2.front(), $3.front());
-}
-| ICE_GRID_HELP keyword keyword keyword ';'
-{
-    if(($2.front() == "server" || $2.front() == "service") && $3.front() == "template")
+    if($2.empty())
     {
-        parser->usage($2.front() + " " + $3.front(), $4.front());
+	parser->invalidCommand("invalid command `server'");
     }
     else
     {
-        parser->usage($2.front(), $3.front());
+	parser->invalidCommand("invalid command: `server " + $2.front() + "'");
     }
 }
-| ICE_GRID_HELP keyword keyword ICE_GRID_STRING strings ';'
+| ICE_GRID_NODE optional_strings ';'
 {
-    if(($2.front() == "server" || $2.front() == "service") && $3.front() == "template")
+    if($2.empty())
     {
-        parser->usage($2.front() + " " + $3.front(), $4.front());
+	parser->invalidCommand("invalid command `node'");
     }
     else
     {
-        parser->usage($2.front(), $3.front());
+	parser->invalidCommand("invalid command: `node " + $2.front() + "'");
     }
 }
-| ICE_GRID_HELP ICE_GRID_STRING strings ';'
+| ICE_GRID_SERVICE optional_strings ';'
 {
-    parser->usage($2.front());
+    if($2.empty())
+    {
+	parser->invalidCommand("invalid command `service'");
+    }
+    else
+    {
+	parser->invalidCommand("invalid command: `service " + $2.front() + "'");
+    }
 }
-| ICE_GRID_HELP error ';'
+| ICE_GRID_OBJECT optional_strings ';'
 {
-    parser->usage();
+    if($2.empty())
+    {
+	parser->invalidCommand("invalid command `object'");
+    }
+    else
+    {
+	parser->invalidCommand("invalid command: `object " + $2.front() + "'");
+    }
 }
-| keyword ICE_GRID_HELP ';'
+| ICE_GRID_ADAPTER optional_strings ';'
 {
-    parser->usage($1.front());
+    if($2.empty())
+    {
+	parser->invalidCommand("invalid command `adapter'");
+    }
+    else
+    {
+	parser->invalidCommand("invalid command: `adapter " + $2.front() + "'");
+    }
 }
-| keyword ICE_GRID_STRING error ';'
+| strings ';'
 {
-    $1.push_back($2.front());
-    parser->invalidCommand($1);
-    yyerrok;
-}
-| keyword error ';'
-{
-    parser->invalidCommand($1);
-    yyerrok;
-}
-| ICE_GRID_STRING error ';'
-{
-    parser->invalidCommand($1);
-    yyerrok;
+    parser->invalidCommand("invalid command `" + $1.front() + "'");
 }
 | error ';'
 {
@@ -557,7 +341,6 @@ command
 }
 ;
 
-
 // ----------------------------------------------------------------------
 strings
 // ----------------------------------------------------------------------
@@ -566,135 +349,24 @@ strings
     $$ = $2;
     $$.push_front($1.front());
 }
-| keyword strings
+| ICE_GRID_STRING
 {
-    $$ = $2;
-    $$.push_front($1.front());
-}
-| ICE_GRID_STRING ICE_GRID_HELP strings
-{
-    $$ = $2;
-    $$.push_front("help");
-    $$.push_front($1.front());
-}
-| keyword ICE_GRID_HELP strings
-{
-    $$ = $2;
-    $$.push_front("help");
-    $$.push_front($1.front());
-}
-|
-{
-    $$ = YYSTYPE();
+    $$ = $1;
 }
 ;
 
 // ----------------------------------------------------------------------
-keyword
+optional_strings
 // ----------------------------------------------------------------------
-: ICE_GRID_EXIT
+: ICE_GRID_STRING optional_strings
 {
+    $$ = $2;
+    $$.push_front($1.front());
 }
-| ICE_GRID_APPLICATION
+|
 {
-}
-| ICE_GRID_NODE
-{
-}
-| ICE_GRID_REGISTRY
-{
-}
-| ICE_GRID_SERVER
-{
-}
-| ICE_GRID_ADAPTER
-{
-}
-| ICE_GRID_PING
-{
-}
-| ICE_GRID_LOAD
-{
-}
-| ICE_GRID_ADD
-{
-}
-| ICE_GRID_REMOVE
-{
-}
-| ICE_GRID_LIST
-{
-}
-| ICE_GRID_SHUTDOWN
-{
-}
-| ICE_GRID_START
-{
-}
-| ICE_GRID_STOP
-{
-}
-| ICE_GRID_PATCH
-{
-}
-| ICE_GRID_SIGNAL
-{
-}
-| ICE_GRID_DESCRIBE
-{
-}
-| ICE_GRID_STATE
-{
-}
-| ICE_GRID_PID
-{
-}
-| ICE_GRID_ENDPOINTS
-{
-}
-| ICE_GRID_ACTIVATION
-{
-}
-| ICE_GRID_OBJECT
-{
-}
-| ICE_GRID_FIND
-{
-}
-| ICE_GRID_SHOW
-{
-}
-| ICE_GRID_COPYING
-{
-}
-| ICE_GRID_WARRANTY
-{
-}
-| ICE_GRID_DIFF
-{
-}
-| ICE_GRID_UPDATE
-{
-}
-| ICE_GRID_INSTANTIATE
-{
-}
-| ICE_GRID_TEMPLATE
-{
-}
-| ICE_GRID_SERVICE
-{
-}
-| ICE_GRID_ENABLE
-{
-}
-| ICE_GRID_DISABLE
-{
-}
-| ICE_GRID_STDERR
-{
-}
-| ICE_GRID_STDOUT
-{
+    $$ = YYSTYPE()
 }
 ;
+
+%%

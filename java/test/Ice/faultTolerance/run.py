@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -24,8 +24,8 @@ name = os.path.join("Ice", "faultTolerance")
 testdir = os.path.join(toplevel, "test", name)
 os.environ["CLASSPATH"] = os.path.join(testdir, "classes") + TestUtil.sep + os.getenv("CLASSPATH", "")
 
-server = TestUtil.javaCmd + " -ea Server"
-client = TestUtil.javaCmd + " -ea Client"
+server = "java -ea Server"
+client = "java -ea Client"
 
 num = 12
 base = 12340

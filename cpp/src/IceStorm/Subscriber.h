@@ -1,97 +1,124 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
 
-#ifndef SUBSCRIBERS_H
-#define SUBSCRIBERS_H
+#ifndef SUBSCRIBER_H
+#define SUBSCRIBER_H
 
-#include <IceStorm/IceStormInternal.h> // F
+#include <IceUtil/Mutex.h>
+#include <Ice/Identity.h>
+#include <IceStorm/Event.h>
+
+#include <vector>
 
 namespace IceStorm
 {
 
-class Instance;
-typedef IceUtil::Handle<Instance> InstancePtr;
+//
+// Forward declarations.
+//
+class TraceLevels;
+typedef IceUtil::Handle<TraceLevels> TraceLevelsPtr;
 
-class Subscriber;
-typedef IceUtil::Handle<Subscriber> SubscriberPtr;
-
-class Subscriber : public IceUtil::Shared
+//
+// Subscriber interface.
+//
+class Subscriber : public virtual IceUtil::Shared
 {
 public:
 
-    static SubscriberPtr create(const InstancePtr&, const Ice::ObjectPrx&, const IceStorm::QoS&);
-    static SubscriberPtr create(const InstancePtr&, const TopicLinkPrx&, int);
-
+    Subscriber(const TraceLevelsPtr& traceLevels, const Ice::Identity&);
     ~Subscriber();
 
-    Ice::ObjectPrx proxy() const;
+    virtual bool persistent() const = 0;
+
+    //
+    // Return true if the Subscriber is not active, false otherwise.
+    //
+    bool inactive() const;
+
+    //
+    // Retrieve true if the Subscriber is in the error state, false
+    // otherwise.
+    //
+    bool error() const;
+
+    //
+    // Retrieve the identity of the Subscriber.
+    //
     Ice::Identity id() const;
-    bool persistent() const;
-
-    enum QueueState
-    {
-        QueueStateError,
-        QueueStateFlush,
-        QueueStateNoFlush
-    };
-    virtual QueueState queue(bool, const std::vector<EventDataPtr>&);
-    //
-    // Return true if flush() must be called again, false otherwise.
-    //
-    virtual bool flush() = 0;
-    virtual void destroy();
 
     //
-    // These methods must only be called by the SubscriberPool they
-    // are not internally mutex protected.
+    // Activate. Called after any other subscribers with the same
+    // identity have been deactivated.
     //
-    void flushTime(const IceUtil::Time&);
-    IceUtil::Time pollMaxFlushTime(const IceUtil::Time&);
+    virtual void activate() = 0;
 
-    void error(const Ice::Exception&);
+    //
+    // Unsubscribe. Mark the state as Unsubscribed.
+    //
+    virtual void unsubscribe() = 0;
+
+    //
+    // Unsubscribe. Mark the state as Replaced.
+    //
+    virtual void replace() = 0;
+
+    //
+    // Publish the given event. Mark the state as Error in the event of
+    // a problem.
+    //
+    virtual void publish(const EventPtr&) = 0;
 
 protected:
 
-    Subscriber(const InstancePtr&, const Ice::ObjectPrx&, bool, const Ice::Identity&);
-
     // Immutable
-    const InstancePtr _instance;
-    const Ice::Identity _id;
-    const bool _persistent;
-    const Ice::ObjectPrx _proxy;
+    TraceLevelsPtr _traceLevels; 
 
-    IceUtil::Mutex _mutex;
-
-    enum SubscriberState
+    //
+    // Subscriber state.
+    //
+    enum State
     {
-        SubscriberStateOnline,
-        SubscriberStateFlushPending,
-        SubscriberStateSending,
-        SubscriberStateOffline,
-        SubscriberStateError
+	//
+	// The Subscriber is active.
+	//
+	StateActive,
+	//
+	// The Subscriber encountered an error during event
+	// transmission.
+	//
+	StateError,
+	//
+	// The Subscriber has been unsubscribed.
+	//
+	StateUnsubscribed,
+	//
+	// The Subscriber has been replaced.
+	//
+	StateReplaced
     };
-    SubscriberState _state; // The subscriber state.
-    EventDataSeq _events; // The queue of events to send.
+
+    IceUtil::Mutex _stateMutex;
+    State _state;
+
+private:
 
     //
-    // Not protected by _mutex. These members are protected by the
-    // SubscriberPool mutex.
+    // This id is the full id of the subscriber for a particular topic.
     //
-    bool _resetMax;
-    IceUtil::Time _maxSend;
+    // Immutable.
+    //
+    Ice::Identity _id;
 };
 
-bool operator==(const IceStorm::SubscriberPtr&, const Ice::Identity&);
-bool operator==(const IceStorm::Subscriber&, const IceStorm::Subscriber&);
-bool operator!=(const IceStorm::Subscriber&, const IceStorm::Subscriber&);
-bool operator<(const IceStorm::Subscriber&, const IceStorm::Subscriber&);
+typedef IceUtil::Handle<Subscriber> SubscriberPtr;
 
-}
+} // End namespace IceStorm
 
-#endif // SUBSCRIBERS_H
+#endif

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -12,24 +12,6 @@
 #include <Ice/Ice.h>
 
 using namespace std;
-
-class AccountFactory : public Ice::ObjectFactory
-{
-public:
-
-    virtual Ice::ObjectPtr
-    create(const string& type)
-    {
-        assert(type == "::Test::Account");
-        return new Test::AccountI;
-    }
-
-    virtual void
-    destroy()
-    {
-    }
-};
-
 
 class ServantFactory : public Ice::ObjectFactory
 {
@@ -69,14 +51,17 @@ int
 run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator, const string& envName)
 {
     communicator->getProperties()->setProperty("Factory.Endpoints", "default -p 12010 -t 30000");
-    Ice::ObjectAdapterPtr adapter = communicator->createObjectAdapter("Factory");
 
-    communicator->addObjectFactory(new ServantFactory, "::Test::Servant");
-    communicator->addObjectFactory(new FacetFactory, "::Test::Facet");
-    communicator->addObjectFactory(new AccountFactory, "::Test::Account");
+    Ice::ObjectAdapterPtr adapter = communicator->createObjectAdapter("Factory");
 
     Test::RemoteEvictorFactoryPtr factory = new Test::RemoteEvictorFactoryI(adapter, envName);
     adapter->add(factory, communicator->stringToIdentity("factory"));
+
+    Ice::ObjectFactoryPtr servantFactory = new ServantFactory;
+    communicator->addObjectFactory(servantFactory, "::Test::Servant");
+
+    Ice::ObjectFactoryPtr facetFactory = new FacetFactory;
+    communicator->addObjectFactory(facetFactory, "::Test::Facet");
 
     adapter->activate();
 

@@ -16,11 +16,9 @@ IceStorm.InstanceName=DemoIceStorm
 
 #
 # This property defines the endpoints on which the topic
-# publisher objects listen. If you want to federate
-# IceStorm instances this must run on a fixed port (or use
-# IceGrid).
+# publisher objects listen.
 #
-IceStorm.Publish.Endpoints=tcp -p 10001:udp -p 10001
+IceStorm.Publish.Endpoints=default
 
 #
 # TopicManager Tracing

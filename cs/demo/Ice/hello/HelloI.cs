@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -11,12 +11,8 @@ using Demo;
 
 public class HelloI : HelloDisp_
 {
-    public override void sayHello(int delay, Ice.Current current)
+    public override void sayHello(Ice.Current current)
     {
-        if(delay > 0)
-        {
-            System.Threading.Thread.Sleep(delay);
-        }
         System.Console.Out.WriteLine("Hello World!");
     }
     

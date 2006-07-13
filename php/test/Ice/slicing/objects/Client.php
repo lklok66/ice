@@ -1,11 +1,6 @@
 <?
 error_reporting(E_ALL | E_STRICT);
 
-if(!extension_loaded("ice"))
-{
-    echo "\nerror: Ice extension is not loaded.\n\n";
-    exit(1);
-}
 Ice_loadProfileWithArgs($argv);
 
 function test($b)
@@ -71,15 +66,15 @@ function allTests()
     echo "testing unknown with Object as Object... ";
     flush();
     {
-        try
-        {
-            $o = $test->SUnknownAsObject();
-            test(false);
-        }
+	try
+	{
+	    $o = $test->SUnknownAsObject();
+	    test(false);
+	}
         catch(Ice_NoObjectFactoryException $e)
         {
             test(get_class($e) == "Ice_NoObjectFactoryException");
-        }
+	}
     }
     echo "ok\n";
 

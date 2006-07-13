@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -19,24 +19,24 @@ public class Server extends Ice.Application
         adapter.add(sender, communicator().stringToIdentity("sender"));
         adapter.activate();
 
-        Thread t = new Thread(sender);
-        t.start();
+	Thread t = new Thread(sender);
+	t.start();
 
-        try
-        {
-            communicator().waitForShutdown();
-        }
-        finally
-        {
-            sender.destroy();
-            try
-            {
-                t.join();
-            }
-            catch(java.lang.InterruptedException ex)
-            {
-            }
-        }
+	try
+	{
+	    communicator().waitForShutdown();
+	}
+	finally
+	{
+	    sender.destroy();
+	    try
+	    {
+		t.join();
+	    }
+	    catch(java.lang.InterruptedException ex)
+	    {
+	    }
+	}
 
         return 0;
     }

@@ -1,6 +1,6 @@
 ' **********************************************************************
 '
-' Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+' Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 '
 ' This copy of Ice is licensed to you under the terms described in the
 ' ICE_LICENSE file included in this distribution.
@@ -16,28 +16,25 @@ Module LatencyC
         Inherits Ice.Application
 
         Public Overloads Overrides Function run(ByVal args() As String) As Integer
-            Dim ping As PingPrx = PingPrxHelper.checkedCast(communicator().propertyToProxy("Latency.Ping"))
+            Dim properties As Ice.Properties = communicator().getProperties()
+            Dim refProperty As String = "Latency.Ping"
+            Dim ref As String = properties.getProperty(refProperty)
+            If ref.Length = 0 Then
+                Console.Error.WriteLine("property `" & refProperty & "' not set")
+                Return 1
+            End If
+
+            Dim ping As PingPrx = PingPrxHelper.checkedCast(communicator().stringToProxy(ref))
             If ping Is Nothing Then
                 Console.Error.WriteLine("invalid proxy")
                 Return 1
             End If
 
-            '
-            ' A method needs to be invoked thousands of times before the JIT compiler
-            ' will convert it to native code. To ensure an accurate throughput measurement,
-            ' we need to "warm up" the JIT compiler.
-            '
-            Dim repetitions As Integer = 20000
-            Console.Out.Write("warming up the JIT compiler...")
-            Console.Out.Flush()
-            For i As Integer = 0 To repetitions - 1
-                ping.ice_ping()
-            Next
-            Console.Out.WriteLine("ok")
+            '  Initial ping to setup the connection.
             ping.ice_ping()
 
             Dim tv1 As Long = (System.DateTime.Now.Ticks - 621355968000000000) / 10000
-            repetitions = 100000
+            Dim repetitions As Integer = 100000
             Console.Out.WriteLine("pinging server " & repetitions & " times (this may take a while)")
             For i As Integer = 0 To repetitions - 1
                 ping.ice_ping()

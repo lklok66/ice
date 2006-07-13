@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -16,8 +16,11 @@ TARGETS		= $(bindir)/$(LIBNAME)
 SRCS		= AssemblyInfo.cs
 
 SLICE_SRCS	= $(SDIR)/PermissionsVerifier.ice \
+		  $(SDIR)/PermissionsVerifierF.ice \
 		  $(SDIR)/Router.ice \
+		  $(SDIR)/RouterF.ice \
 		  $(SDIR)/Session.ice \
+		  $(SDIR)/SessionF.ice \
 		  $(SDIR)/SSLInfo.ice
 
 SDIR		= $(slicedir)/Glacier2
@@ -26,12 +29,11 @@ GDIR		= generated
 include $(top_srcdir)/config/Make.rules.cs
 
 MCSFLAGS	:= $(MCSFLAGS) -target:library -out:$(TARGETS) -unsafe -warnaserror-
-MCSFLAGS	:= $(MCSFLAGS) -keyfile:$(top_srcdir)/config/IcecsKey.snk
 
 SLICE2CSFLAGS	:= $(SLICE2CSFLAGS) -I$(slicedir)
 
 $(TARGETS):: $(SRCS) $(GEN_SRCS)
-	$(MCS) $(MCSFLAGS) $(call ref,icecs) $(subst /,$(DSEP),$^)
+	$(MCS) $(MCSFLAGS) $(call ref,icecs) $^
 
 ifeq ($(NOGAC),)
 

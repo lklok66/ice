@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -18,8 +18,6 @@
 #include <Ice/InstanceF.h>
 #include <Ice/ObjectAdapterF.h>
 #include <Ice/EndpointIF.h>
-#include <Ice/Endpoint.h>
-#include <Ice/ConnectorF.h>
 #include <Ice/AcceptorF.h>
 #include <Ice/TransceiverF.h>
 #include <Ice/RouterInfoF.h>
@@ -46,7 +44,7 @@ public:
 
     void waitUntilFinished();
 
-    Ice::ConnectionIPtr create(const std::vector<EndpointIPtr>&, bool, bool, Ice::EndpointSelectionType, bool&);
+    Ice::ConnectionIPtr create(const std::vector<EndpointIPtr>&, bool, bool&);
     void setRouterInfo(const RouterInfoPtr&);
     void removeAdapter(const Ice::ObjectAdapterPtr&);
     void flushBatchRequests();
@@ -59,8 +57,8 @@ private:
 
     const InstancePtr _instance;
     bool _destroyed;
-    std::multimap<ConnectorPtr, Ice::ConnectionIPtr> _connections;
-    std::set<ConnectorPtr> _pending; // Connectors for which connection establishment is pending.
+    std::multimap<EndpointIPtr, Ice::ConnectionIPtr> _connections;
+    std::set<EndpointIPtr> _pending; // Endpoints for which connection establishment is pending.
 };
 
 class IncomingConnectionFactory : public EventHandler, public IceUtil::Monitor<IceUtil::Mutex>
@@ -93,15 +91,15 @@ public:
 private:
 
     IncomingConnectionFactory(const InstancePtr&, const EndpointIPtr&, const Ice::ObjectAdapterPtr&,
-                              const std::string&);
+			      const std::string&);
     virtual ~IncomingConnectionFactory();
     friend class Ice::ObjectAdapterI;
 
     enum State
     {
-        StateActive,
-        StateHolding,
-        StateClosed
+	StateActive,
+	StateHolding,
+	StateClosed
     };
 
     void setState(State);
@@ -113,13 +111,13 @@ private:
     class ThreadPerIncomingConnectionFactory : public IceUtil::Thread
     {
     public:
-        
-        ThreadPerIncomingConnectionFactory(const IncomingConnectionFactoryPtr&);
-        virtual void run();
+	
+	ThreadPerIncomingConnectionFactory(const IncomingConnectionFactoryPtr&);
+	virtual void run();
 
     private:
-        
-        IncomingConnectionFactoryPtr _factory;
+	
+	IncomingConnectionFactoryPtr _factory;
     };
     friend class ThreadPerIncomingConnectionFactory;
     IceUtil::ThreadPtr _threadPerIncomingConnectionFactory;
@@ -128,7 +126,7 @@ private:
     const TransceiverPtr _transceiver;
     const EndpointIPtr _endpoint;
 
-    Ice::ObjectAdapterPtr _adapter;
+    const Ice::ObjectAdapterPtr _adapter;
 
     bool _registeredWithPool;
     int _finishedCount;
@@ -138,9 +136,6 @@ private:
     std::list<Ice::ConnectionIPtr> _connections;
 
     State _state;
-
-    bool _threadPerConnection;
-    size_t _threadPerConnectionStackSize;
 };
 
 }

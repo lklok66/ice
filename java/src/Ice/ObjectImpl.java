@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -20,15 +20,15 @@ public abstract class ObjectImpl implements Object, java.lang.Cloneable
     clone()
     {
         java.lang.Object o = null;
-        try
-        {
-            o = super.clone();
-        }
-        catch(java.lang.CloneNotSupportedException ex)
-        {
-            assert false; // Impossible
-        }
-        return o;
+	try
+	{
+	    o = super.clone();
+	}
+	catch(java.lang.CloneNotSupportedException ex)
+	{
+	    assert false; // Impossible
+	}
+	return o;
     }
 
     public int
@@ -54,7 +54,7 @@ public abstract class ObjectImpl implements Object, java.lang.Cloneable
         return s.equals(__ids[0]);
     }
 
-    public static DispatchStatus
+    public static IceInternal.DispatchStatus
     ___ice_isA(Ice.Object __obj, IceInternal.Incoming __inS, Current __current)
     {
         IceInternal.BasicStream __is = __inS.is();
@@ -62,7 +62,7 @@ public abstract class ObjectImpl implements Object, java.lang.Cloneable
         String __id = __is.readString();
         boolean __ret = __obj.ice_isA(__id, __current);
         __os.writeBool(__ret);
-        return DispatchStatus.DispatchOK;
+        return IceInternal.DispatchStatus.DispatchOK;
     }
 
     public void
@@ -77,11 +77,11 @@ public abstract class ObjectImpl implements Object, java.lang.Cloneable
         // Nothing to do.
     }
 
-    public static DispatchStatus
+    public static IceInternal.DispatchStatus
     ___ice_ping(Ice.Object __obj, IceInternal.Incoming __inS, Current __current)
     {
         __obj.ice_ping(__current);
-        return DispatchStatus.DispatchOK;
+        return IceInternal.DispatchStatus.DispatchOK;
     }
 
     public String[]
@@ -96,13 +96,13 @@ public abstract class ObjectImpl implements Object, java.lang.Cloneable
         return __ids;
     }
 
-    public static DispatchStatus
+    public static IceInternal.DispatchStatus
     ___ice_ids(Ice.Object __obj, IceInternal.Incoming __inS, Current __current)
     {
         IceInternal.BasicStream __os = __inS.os();
         String[] __ret = __obj.ice_ids(__current);
         __os.writeStringSeq(__ret);
-        return DispatchStatus.DispatchOK;
+        return IceInternal.DispatchStatus.DispatchOK;
     }
 
     public String
@@ -117,24 +117,19 @@ public abstract class ObjectImpl implements Object, java.lang.Cloneable
         return __ids[0];
     }
 
-    public static DispatchStatus
+    public static IceInternal.DispatchStatus
     ___ice_id(Ice.Object __obj, IceInternal.Incoming __inS, Current __current)
     {
         IceInternal.BasicStream __os = __inS.os();
         String __ret = __obj.ice_id(__current);
         __os.writeString(__ret);
-        return DispatchStatus.DispatchOK;
+        return IceInternal.DispatchStatus.DispatchOK;
     }
 
     public static String
     ice_staticId()
     {
         return __ids[0];
-    }
-
-    public int ice_operationAttributes(String operation)
-    {
-        return 0;
     }
 
     public void
@@ -155,42 +150,13 @@ public abstract class ObjectImpl implements Object, java.lang.Cloneable
         "ice_ping"
     };
 
-    public DispatchStatus
-    ice_dispatch(Request request, DispatchInterceptorAsyncCallback cb)
-    {
-        if(request.isCollocated())
-        {
-            return __collocDispatch((IceInternal.Direct)request);
-        }
-        else
-        {
-            IceInternal.Incoming in = (IceInternal.Incoming)request;
-            if(cb != null)
-            {
-                in.push(cb);
-            }
-            try
-            {
-                in.startOver(); // may raise ResponseSentException
-                return __dispatch(in, in.getCurrent());
-            }
-            finally
-            {
-                if(cb != null)
-                {
-                    in.pop();
-                }
-            }
-        }
-    }
-
-    public DispatchStatus
+    public IceInternal.DispatchStatus
     __dispatch(IceInternal.Incoming in, Current current)
     {
         int pos = java.util.Arrays.binarySearch(__all, current.operation);
         if(pos < 0)
         {
-            throw new Ice.OperationNotExistException(current.id, current.facet, current.operation);
+            return IceInternal.DispatchStatus.DispatchOperationNotExist;
         }
 
         switch(pos)
@@ -214,15 +180,8 @@ public abstract class ObjectImpl implements Object, java.lang.Cloneable
         }
 
         assert(false);
-        throw new Ice.OperationNotExistException(current.id, current.facet, current.operation);
+        return IceInternal.DispatchStatus.DispatchOperationNotExist;
     }
-    
-    public DispatchStatus
-    __collocDispatch(IceInternal.Direct request)
-    {
-        return request.run(this);
-    }
-    
 
     public void
     __write(IceInternal.BasicStream __os)
@@ -285,44 +244,33 @@ public abstract class ObjectImpl implements Object, java.lang.Cloneable
     private static String
     operationModeToString(OperationMode mode)
     {
-        if(mode == Ice.OperationMode.Normal)
-        {
-            return "::Ice::Normal";
-        }
-        if(mode == Ice.OperationMode.Nonmutating)
-        {
-            return "::Ice::Nonmutating";
-        }
+	if(mode == Ice.OperationMode.Normal)
+	{
+	    return "::Ice::Normal";
+	}
+	if(mode == Ice.OperationMode.Nonmutating)
+	{
+	    return "::Ice::Nonmutating";
+	}
 
-        if(mode == Ice.OperationMode.Idempotent)
-        {
-            return "::Ice::Idempotent";
-        }
+	if(mode == Ice.OperationMode.Idempotent)
+	{
+	    return "::Ice::Idempotent";
+	}
 
-        return "???";
+	return "???";
     }
 
     protected static void
     __checkMode(OperationMode expected, OperationMode received)
     {
-        if(expected != received)
-        {
-            if(expected == Ice.OperationMode.Idempotent 
-               && received == Ice.OperationMode.Nonmutating)
-            {
-                //
-                // Fine: typically an old client still using the 
-                // deprecated nonmutating keyword
-                //
-            }
-            else
-            {
-                Ice.MarshalException ex = new Ice.MarshalException();
-                ex.reason = "unexpected operation mode. expected = "
-                    + operationModeToString(expected) + " received = "
-                    + operationModeToString(received);
-                throw ex;
-            }
-        }
+	if(expected != received)
+	{
+	    Ice.MarshalException ex = new Ice.MarshalException();
+	    ex.reason = "unexpected operation mode. expected = "
+			+ operationModeToString(expected) + " received = "
+			+ operationModeToString(received);
+	    throw ex;
+	}
     }
 }

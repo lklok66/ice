@@ -1,0 +1,132 @@
+RPM Notes
+=========
+
+When installing from RPMs, the demos for a particular language mapping
+are included with the appropriate 'devel' RPM. For example, the Java
+demos are included in the ice-java-devel RPM.
+
+We recommend that you copy the demo subdirectories from the RPM
+installation directory to your home directory.
+
+
+Building the Demos
+==================
+
+These instructions assume that you have correctly configured your
+environment according to the directions in the README or platform-
+specific INSTALL file included with your Ice installation.
+
+You can build the demos by visiting each demo directory (e.g., demo,
+demoj, democs) and running 'gmake' or 'ant' as appropriate. The Ice
+for Python and Ice for PHP demos do not need to be compiled.
+
+gmake 3.80 is required to build the C++ and C# demos. The 'ant'
+utility is required to build the Java demos, and can be downloaded
+from
+
+http://ant.apache.org/bindownload.cgi
+
+Ice requires ant 1.6.3 or later, but we recommend using the most
+recent release.
+
+
+Running the Ice Demos
+=====================
+
+Most demos consist of a single server and client. The instructions to
+run a demo depend on the programming language. Instructions for each
+language are included below.  Some demo directories contain README
+files if additional steps are necessary.
+
+
+Running the C++ demos
+=====================
+
+To run a demo, open a terminal terminal window, change to the desired
+demo directory, and enter the following command to run the server:
+
+$ ./server
+
+To run the client, open another terminal window, also change to the
+desired demo directory, and run:
+
+$ ./client
+
+
+Running the Java demos
+======================
+
+To run the demos you need to add classes to your CLASSPATH.
+
+export CLASSPATH=classes:$CLASSPATH
+
+To run a demo, open a terminal window, change to the desired demo
+directory, and enter the following command to run the server:
+
+$ java Server
+
+To run the client, open another terminal window, also change to the
+desired demo directory, and run:
+
+$ java Client
+
+
+Running the C# demos
+====================
+
+The C# demos are only officially supported under Linux or Windows,
+therefore the Ice for C# runtime is only included in the Linux and
+Windows distributions.
+
+To run a demo, open a terminal window, change to the desired demo
+directory, and enter the following command to run the server:
+
+$ ./server.exe
+
+To run the client, open another terminal window, also change to the
+desired demo directory, and run:
+
+$ ./client.exe
+
+
+Running the Python demos
+========================
+
+To run a demo, open a terminal window, change to the desired demo
+directory, and enter the following command to run the server:
+
+$ python Server.py
+
+To run the client, open another terminal window, also change to the
+desired demo directory, and run:
+
+$ python Client.py
+
+
+Running the PHP demos
+=====================
+
+Two PHP demos are provided in the demophp directory.
+
+You'll need PHP 5.1.4 to use the demos. Source and binary
+distributions of PHP can be obtained from
+
+http://www.php.net/downloads.php
+
+The Ice extension for PHP is provided as a dynamically-loadable shared
+library (lib/icephp.so) in the Linux and MacOS X binary
+distributions. On all other Unix platforms, the Ice extension can only
+be used in a static configuration, which requires that you build PHP
+and the Ice extension from source code. Please refer to the INSTALL
+file included in the IcePHP source distribution for more information.
+
+The example in demophp/Ice/hello demonstrates the use of the Ice
+extension for PHP in a dynamic Web page, whereas the example in
+demophp/Ice/value requires PHP's command line interpreter. Both
+examples require that an Ice server be available; a matching server
+from any of the other language mappings can be used. A README file is
+provided in each of the example directories.
+
+Note that you must modify the php.ini files in each demo directory to
+match your PHP installation and ensure that the Ice extension is
+loaded properly.

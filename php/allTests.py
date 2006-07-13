@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -18,35 +18,37 @@ for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
 else:
     raise "can't find toplevel directory!"
 
-def runTests(args, tests, num = 0):
+sys.path.append(os.path.join(toplevel, "config"))
+import TestUtil
+
+def runTests(tests, num = 0):
 
     #
     # Run each of the tests.
     #
     for i in tests:
 
-        i = os.path.normpath(i)
-        dir = os.path.join(toplevel, "test", i)
+	i = os.path.normpath(i)
+	dir = os.path.join(toplevel, "test", i)
 
-        print
-        if(num > 0):
-            print "[" + str(num) + "]",
-        print "*** running tests in " + dir,
-        print
+	print
+	if(num > 0):
+	    print "[" + str(num) + "]",
+	print "*** running tests in " + dir,
+	print
 
-        status = os.system("python " + os.path.join(dir, "run.py " + args))
+        status = os.system(os.path.join(dir, "run.py"))
 
-        if status and not (sys.platform.startswith("aix") and status == 256):
-            if(num > 0):
-                print "[" + str(num) + "]",
-            print "test in " + dir + " failed with exit status", status,
-            sys.exit(status)
+	if status and not (sys.platform.startswith("aix") and status == 256):
+	    if(num > 0):
+		print "[" + str(num) + "]",
+	    print "test in " + dir + " failed with exit status", status,
+	    sys.exit(status)
 
 #
 # List of all basic tests.
 #
 tests = [ \
-    "Ice/proxy", \
     "Ice/operations", \
     "Ice/exceptions", \
     "Ice/inheritance", \
@@ -58,12 +60,11 @@ tests = [ \
     ]
 
 def usage():
-    print "usage: " + sys.argv[0] + " -l -r <regex> -R <regex> --debug --protocol protocol --compress --host host --threadPerConnection"
+    print "usage: " + sys.argv[0] + " [-l]"
     sys.exit(2)
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "lr:R:", \
-        ["debug", "protocol=", "compress", "host=", "threadPerConnection"])
+    opts, args = getopt.getopt(sys.argv[1:], "l")
 except getopt.GetoptError:
     usage()
 
@@ -71,28 +72,14 @@ if(args):
     usage()
 
 loop = 0
-args = ""
 for o, a in opts:
     if o == "-l":
         loop = 1
-    if o == "-r" or o == '-R':
-        import re
-        regexp = re.compile(a)
-        if o == '-r':
-            def rematch(x): return regexp.search(x)
-        else:
-            def rematch(x): return not regexp.search(x)
-        tests = filter(rematch, tests)
-    if o in ( "--protocol", "--host" ):
-        args += " " + o + " " + a
-    if o in ( "--debug", "--compress", "--threadPerConnection" ):
-        args += " " + o 
     
-
 if loop:
     num = 1
     while 1:
-        runTests(args, tests, num)
-        num += 1
+	runTests(tests, num)
+	num += 1
 else:
-    runTests(args, tests)
+    runTests(tests)

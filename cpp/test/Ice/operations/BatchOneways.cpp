@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -22,46 +22,78 @@ batchOneways(const Test::MyClassPrx& p)
     
     try
     {
-        p->opByteSOneway(bs1);
+	p->opByteSOneway(bs1);
+	test(true);
     }
     catch(const Ice::MemoryLimitException&)
     {
-        test(false);
+	test(false);
     }
 
     try
     {
-        p->opByteSOneway(bs2);
+	p->opByteSOneway(bs2);
+	test(true);
     }
     catch(const Ice::MemoryLimitException&)
     {
-        test(false);
+	test(false);
     }
     
     try
     {
-        p->opByteSOneway(bs3);
-        test(false);
+	p->opByteSOneway(bs3);
+	test(false);
     }
     catch(const Ice::MemoryLimitException&)
     {
+	test(true);
     }
     
     Test::MyClassPrx batch = Test::MyClassPrx::uncheckedCast(p->ice_batchOneway());
     
     int i;
 
-    for(i = 0 ; i < 30 ; ++i)
+    for(i = 0 ; i < 9 ; ++i)
     {
-        try
-        {
-            batch->opByteSOneway(bs1);
-        }
-        catch(const Ice::MemoryLimitException&)
-        {
-            test(false);
-        }
+	try
+	{
+	    batch->opByteSOneway(bs1);
+	    test(true);
+	}
+	catch(const Ice::MemoryLimitException&)
+	{
+	    test(false);
+	}
+	
+	batch->ice_getConnection()->flushBatchRequests();
     }
     
-    batch->ice_getConnection()->flushBatchRequests();
+    for(i = 0 ; i < 10 ; ++i)
+    {
+	try
+	{
+	    batch->opByteSOneway(bs1);
+	    test(i < 9);
+	}
+	catch(const Ice::MemoryLimitException&)
+	{
+	    test(i == 9);
+	}
+    }
+    
+    for(i = 0 ; i < 9 ; ++i)
+    {
+	try
+	{
+	    batch->opByteSOneway(bs1);
+	    test(true);
+	}
+	catch(const Ice::MemoryLimitException&)
+	{
+	    test(false);
+	}
+	
+	batch->ice_getConnection()->flushBatchRequests();
+    }
 }

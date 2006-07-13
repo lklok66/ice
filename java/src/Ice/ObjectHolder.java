@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -24,23 +24,23 @@ public final class ObjectHolder
 
     public class Patcher implements IceInternal.Patcher
     {
-        public void
-        patch(Ice.Object v)
-        {
-            value = v;
-        }
+	public void
+	patch(Ice.Object v)
+	{
+	    value = v;
+	}
 
-        public String
-        type()
-        {
-            return Ice.ObjectImpl.ice_staticId();
-        }
+	public String
+	type()
+	{
+	    return Ice.ObjectImpl.ice_staticId();
+	}
     }
 
     public Patcher
     getPatcher()
     {
-        return new Patcher();
+	return new Patcher();
     }
 
     public Ice.Object value;

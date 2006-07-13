@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -15,14 +15,14 @@ public class LocalExceptionWrapper extends Exception
     LocalExceptionWrapper(Ice.LocalException ex, boolean retry)
     {
         _ex = ex;
-        _retry = retry;
+	_retry = retry;
     }
 
     public
     LocalExceptionWrapper(IceInternal.LocalExceptionWrapper ex)
     {
         _ex = ex.get();
-        _retry = ex._retry;
+	_retry = ex._retry;
     }
 
     public Ice.LocalException

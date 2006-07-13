@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
 #
 # **********************************************************************
 
-import os, sys, shutil, fnmatch, re, glob
+import os, sys, shutil, fnmatch, re, glob, RPMTools
 
 #
 # Program usage.
@@ -18,6 +18,7 @@ def usage():
     print
     print "Options:"
     print "-h    Show this message."
+    print "-d    Skip SGML documentation conversion."
     print "-v    Be verbose."
     print
     print "If no tag is specified, HEAD is used."
@@ -177,17 +178,14 @@ def fixMakeRules(file):
 #
 # Fix version in README, INSTALL files
 #
-def fixVersion(files, version, mmversion):
+def fixVersion(files, version):
 
     for file in files:
         origfile = file + ".orig"
         os.rename(file, origfile)
         oldFile = open(origfile, "r")
         newFile = open(file, "w")
-        line = oldFile.read();
-        line = re.sub("@ver@", version, line)
-        line = re.sub("@mmver@", mmversion, line)
-        newFile.write(line)
+        newFile.write(re.sub("@ver@", version, oldFile.read()))
         newFile.close()
         oldFile.close()
         os.remove(origfile)
@@ -196,11 +194,14 @@ def fixVersion(files, version, mmversion):
 # Check arguments
 #
 tag = "-rHEAD"
+skipDocs = 0
 verbose = 0
 for x in sys.argv[1:]:
     if x == "-h":
         usage()
         sys.exit(0)
+    elif x == "-d":
+        skipDocs = 1
     elif x == "-v":
         verbose = 1
     elif x.startswith("-"):
@@ -229,32 +230,6 @@ if verbose:
 else:
     quiet = "-Q"
 os.system("cvs " + quiet + " -d cvs.zeroc.com:/home/cvsroot export " + tag + " ice")
-
-#
-# Get Ice version.
-#
-config = open(os.path.join("ice", "include", "IceUtil", "Config.h"), "r")
-version = re.search("ICE_STRING_VERSION \"([0-9\.b]*)\"", config.read()).group(1)
-mmversion = re.search("([0-9]+\.[0-9b]+)[\.0-9]*", version).group(1)
-
-print "Fixing version in various files..."
-fixVersion(find("ice", "README*"), version, mmversion)
-fixVersion(find("ice", "INSTALL*"), version, mmversion)
-fixVersion(find("ice/config", "glacier2router.cfg"), version, mmversion)
-fixVersion(find("ice/config", "icegridregistry.cfg"), version, mmversion)
-fixVersion(find("ice/install/rpm", "*.conf"), version, mmversion)
-
-print "Creating Ice-rpmbuild..."
-rpmbuildver = "Ice-rpmbuild-" + version
-if verbose:
-    quiet = "v"
-else:
-    quiet = ""
-os.system("tar c" + quiet + "f " + rpmbuildver + ".tar " +
-          "-C ice/install -C rpm {icegridregistry,icegridnode,glacier2router}.{conf,suse,redhat} README.RPM " +
-          "-C ../unix THIRD_PARTY_LICENSE.Linux README.Linux-RPM SOURCES.Linux " +
-          "-C ../thirdparty/php ice.ini")
-os.system("gzip -9 " + rpmbuildver + ".tar")
 
 #
 # Remove files.
@@ -309,8 +284,6 @@ for x in grammars:
     # Edit the Makefile to comment out the grammar rules.
     #
     fixMakefile("Makefile", base)
-    fixMakefile("Makefile.mak", base)
-
     #
     # Edit the project file(s) to comment out the grammar rules.
     #
@@ -342,8 +315,6 @@ for x in scanners:
     # Edit the Makefile to comment out the flex rules.
     #
     fixMakefile("Makefile", base)
-    fixMakefile("Makefile.mak", base)
-
     #
     # Edit the project file(s) to comment out the flex rules.
     #
@@ -357,6 +328,44 @@ for x in scanners:
 #
 print "Fixing makefiles..."
 fixMakeRules(os.path.join("ice", "config", "Make.rules"))
+
+#
+# Generate HTML documentation. We need to build icecpp
+# and slice2docbook first.
+#
+if not skipDocs:
+    os.chdir(os.path.join("ice", "src", "icecpp"))
+    os.system("gmake")
+    os.chdir(cwd)
+    os.chdir(os.path.join("ice", "src", "IceUtil"))
+    os.system("gmake")
+    os.chdir(cwd)
+    os.chdir(os.path.join("ice", "src", "Slice"))
+    os.system("gmake")
+    os.chdir(cwd)
+    os.chdir(os.path.join("ice", "src", "slice2docbook"))
+    os.system("gmake")
+    os.chdir(cwd)
+    os.chdir(os.path.join("ice", "doc"))
+    os.system("gmake")
+    os.chdir(cwd)
+
+    #
+    # Clean the source directory.
+    #
+    os.chdir(os.path.join("ice", "src"))
+    os.system("gmake clean")
+    os.chdir(cwd)
+
+#
+# Get Ice version.
+#
+config = open(os.path.join("ice", "include", "IceUtil", "Config.h"), "r")
+version = re.search("ICE_STRING_VERSION \"([0-9\.]*)\"", config.read()).group(1)
+
+print "Fixing version in README and INSTALL files..."
+fixVersion(find("ice", "README*"), version)
+fixVersion(find("ice", "INSTALL*"), version)
 
 #
 # Create archives.
@@ -384,7 +393,7 @@ else:
 os.system("zip -9r" + quiet + " " + icever + ".zip " + icever)
 
 #
-# Copy CHANGES
+# Copy files (README, etc.).
 #
 shutil.copyfile(os.path.join(icever, "CHANGES"), "Ice-" + version + "-CHANGES")
 

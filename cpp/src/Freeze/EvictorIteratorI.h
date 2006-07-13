@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -17,17 +17,13 @@
 namespace Freeze
 {
 
-class TransactionI;
-typedef IceUtil::Handle<TransactionI> TransactionIPtr;
-
-
-class ObjectStoreBase;
+class ObjectStore;
 
 class EvictorIteratorI : public EvictorIterator
 {
 public:
 
-    EvictorIteratorI(ObjectStoreBase*, const TransactionIPtr&, Ice::Int);
+    EvictorIteratorI(ObjectStore*, Ice::Int);
 
     virtual bool hasNext();
     virtual Ice::Identity next();
@@ -37,7 +33,7 @@ private:
     std::vector<Ice::Identity>::const_iterator
     nextBatch();
 
-    ObjectStoreBase* _store;
+    ObjectStore* _store;
     size_t _batchSize;
     std::vector<Ice::Identity>::const_iterator _batchIterator;
 
@@ -45,7 +41,6 @@ private:
     std::vector<Ice::Identity> _batch;
     bool _more;
     bool _initialized;
-    DbTxn* _tx;
 };
 
 }

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -14,7 +14,16 @@ public class Client : Ice.Application
 {
     public override int run(string[] args)
     {
-        NestedPrx nested = NestedPrxHelper.checkedCast(communicator().propertyToProxy("Nested.NestedServer"));
+        Ice.Properties properties = communicator().getProperties();
+        string proxyProperty = "Nested.Client.NestedServer";
+        string proxy = properties.getProperty(proxyProperty);
+        if(proxy.Length == 0)
+        {
+            Console.Error.WriteLine("property `" + proxyProperty + "' not set");
+            return 1;
+        }
+        
+        NestedPrx nested = NestedPrxHelper.checkedCast(communicator().stringToProxy(proxy));
         if(nested == null)
         {
             Console.Error.WriteLine("invalid proxy");
@@ -22,8 +31,7 @@ public class Client : Ice.Application
         }
         
         Ice.ObjectAdapter adapter = communicator().createObjectAdapter("Nested.Client");
-        NestedPrx self = 
-            NestedPrxHelper.uncheckedCast(adapter.createProxy(communicator().stringToIdentity("nestedClient")));
+        NestedPrx self = NestedPrxHelper.uncheckedCast(adapter.createProxy(communicator().stringToIdentity("nestedClient")));
         adapter.add(new NestedI(self), communicator().stringToIdentity("nestedClient"));
         adapter.activate();
         

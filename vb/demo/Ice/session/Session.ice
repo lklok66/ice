@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -15,7 +15,7 @@ module Demo
 
 interface Hello
 {
-    idempotent void sayHello();
+    nonmutating void sayHello();
 };
 
 //
@@ -37,7 +37,7 @@ interface Session
     //
     idempotent void refresh();
 
-    idempotent string getName();
+    nonmutating string getName();
 
     //
     // Destroy the session explicitly.
@@ -54,7 +54,7 @@ interface SessionFactory
     //
     Session* create(string name);
 
-    void shutdown();
+    idempotent void shutdown();
 };
 
 };

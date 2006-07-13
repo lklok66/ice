@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -22,7 +22,6 @@ sys.path.insert(0, os.path.join(toplevel, "lib"))
 
 import Ice
 Ice.loadSlice('Test.ice')
-Ice.loadSlice('ClientPrivate.ice')
 import Test, TestI, AllTests
 
 def run(args, communicator):
@@ -30,11 +29,9 @@ def run(args, communicator):
     adapter = communicator.createObjectAdapter("TestAdapter")
     initial = TestI.InitialI(adapter)
     adapter.add(initial, communicator.stringToIdentity("initial"))
-    uoet = TestI.UnexpectedObjectExceptionTestI()
-    adapter.add(uoet, communicator.stringToIdentity("uoet"))
     adapter.activate()
 
-    AllTests.allTests(communicator, True)
+    AllTests.allTests(communicator)
 
     # We must call shutdown even in the collocated case for cyclic dependency cleanup
     initial.shutdown()

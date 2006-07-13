@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -51,7 +51,7 @@ IcePy::ObjectFactory::create(const string& id)
         // Invoke the create method on the Python factory object.
         //
         PyObjectHandle obj = PyObject_CallMethod(p->second, STRCAST("create"), STRCAST("s"), id.c_str());
-        if(!obj.get())
+        if(obj.get() == NULL)
         {
             throw AbortMarshaling();
         }
@@ -73,10 +73,10 @@ IcePy::ObjectFactory::create(const string& id)
     //
     // Instantiate the object.
     //
-    PyTypeObject* type = reinterpret_cast<PyTypeObject*>(info->pythonType.get());
+    PyTypeObject* type = (PyTypeObject*)info->pythonType.get();
     PyObjectHandle args = PyTuple_New(0);
-    PyObjectHandle obj = type->tp_new(type, args.get(), 0);
-    if(!obj.get())
+    PyObjectHandle obj = type->tp_new(type, args.get(), NULL);
+    if(obj.get() == NULL)
     {
         throw AbortMarshaling();
     }
@@ -100,7 +100,7 @@ IcePy::ObjectFactory::destroy()
         //
         // Invoke the destroy method on each registered Python factory.
         //
-        PyObjectHandle obj = PyObject_CallMethod(p->second, STRCAST("destroy"), 0);
+        PyObjectHandle obj = PyObject_CallMethod(p->second, STRCAST("destroy"), NULL);
         PyErr_Clear();
         Py_DECREF(p->second);
     }

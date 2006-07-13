@@ -1,6 +1,6 @@
 ' **********************************************************************
 '
-' Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+' Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 '
 ' This copy of Ice is licensed to you under the terms described in the
 ' ICE_LICENSE file included in this distribution.
@@ -14,8 +14,8 @@ Module SessionActivationS
 
         Public Overloads Overrides Function run(ByVal args() As String) As Integer
             Dim adapter As Ice.ObjectAdapter = communicator().createObjectAdapter("Hello")
-            Dim properties As Ice.Properties = communicator().getProperties()
-            Dim id As Ice.Identity = communicator().stringToIdentity(properties.getProperty("Identity"))
+	    Dim properties As Ice.Properties = communicator().getProperties()
+	    Dim id As Ice.Identity = communicator().stringToIdentity(properties.getProperty("Identity"))
             adapter.add(New HelloI(properties.getProperty("Ice.ServerId")), id)
             adapter.activate()
             communicator.waitForShutdown()

@@ -1,7 +1,3 @@
-#
-# The IceBox instance name is used to set the category field of the
-# IceBox ServiceManager identity.
-#
 IceBox.InstanceName=DemoIceBox
 
 #
@@ -12,7 +8,14 @@ IceBox.ServiceManager.Endpoints=tcp -p 9998
 #
 # The hello service
 #
-IceBox.Service.Hello=HelloServiceI --Ice.Config=config.service
+IceBox.Service.Hello=HelloServiceI
+
+#
+# The server creates one single object adapter with the name of
+# the service. The following line sets the endpoints for this
+# adapter.
+#
+Hello.Endpoints=tcp -p 10000:udp -p 10000
 
 #
 # Warn about connection exceptions

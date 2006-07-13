@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -14,15 +14,14 @@ public class HelloI extends _HelloDisp
     public
     HelloI(String name, int id)
     {
-        _name = name;
-        _id = id;
+	_name = name;
+	_id = id;
     }
 
     public void
     sayHello(Ice.Current current)
     {
-        System.out.println("Hello object #" + _id + " for session `" + _name + "' says:\n" +
-                           "Hello " + _name + "!");
+        System.out.println("Hello object #" + _id + " for session `" + _name + "' says: Hello " + _name + "!");
     }
 
     final private String _name;

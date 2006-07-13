@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -14,11 +14,11 @@
 
 #ifdef _WIN32
 #   include <io.h>
-#   ifdef _MSC_VER
-#     define isatty _isatty
-#     define fileno _fileno
+#   define isatty _isatty
+#   define fileno _fileno
 // '_isatty' : inconsistent dll linkage.  dllexport assumed.
-#     pragma warning( disable : 4273 )
+#   ifdef _MSC_VER
+#       pragma warning( disable : 4273 )
 #   endif
 #endif
 

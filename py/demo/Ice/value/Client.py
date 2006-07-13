@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -29,126 +29,133 @@ class ObjectFactory(Ice.ObjectFactory):
 
 class Client(Ice.Application):
     def run(self, args):
-        base = self.communicator().propertyToProxy('Value.Initial')
-        initial = Demo.InitialPrx.checkedCast(base)
-        if not initial:
-            print args[0] + ": invalid proxy"
-            return 1
+	properties = self.communicator().getProperties()
+	refProperty = 'Value.Initial'
+	proxy = properties.getProperty(refProperty)
+	if len(proxy) == 0:
+	    print args[0] + ": property `" + refProperty + "' not set"
+	    return False
 
-        print '\n'\
-              "Let's first transfer a simple object, for a class without\n"\
-              "operations, and print its contents. No factory is required\n"\
-              "for this.\n"\
-              "[press enter]"
-        raw_input()
+	base = self.communicator().stringToProxy(proxy)
+	initial = Demo.InitialPrx.checkedCast(base)
+	if not initial:
+	    print args[0] + ": invalid proxy"
+	    return False
 
-        simple = initial.getSimple()
-        print "==> " + simple.message
+	print '\n'\
+	      "Let's first transfer a simple object, for a class without\n"\
+	      "operations, and print its contents. No factory is required\n"\
+	      "for this.\n"\
+	      "[press enter]"
+	raw_input()
 
-        print '\n'\
-              "Yes, this worked. Now let's try to transfer an object for a class\n"\
-              "with operations as type ::Demo::Printer, without installing a factory\n"\
-              "first. This should give us a `no factory' exception.\n"\
-              "[press enter]"
-        raw_input()
+	simple = initial.getSimple()
+	print "==> " + simple.message
 
-        try:
-            printer, printerProxy = initial.getPrinter()
-            print args[0] + ": Did not get the expected NoObjectFactoryException!"
-            sys.exit(false)
-        except Ice.NoObjectFactoryException, ex:
-            print "==>", ex
+	print '\n'\
+	      "Yes, this worked. Now let's try to transfer an object for a class\n"\
+	      "with operations as type ::Demo::Printer, without installing a factory\n"\
+	      "first. This should give us a `no factory' exception.\n"\
+	      "[press enter]"
+	raw_input()
 
-        print '\n'\
-              "Yep, that's what we expected. Now let's try again, but with\n"\
-              "installing an appropriate factory first. If successful, we print\n"\
-              "the object's content.\n"\
-              "[press enter]"
-        raw_input()
+	try:
+	    printer, printerProxy = initial.getPrinter()
+	    print args[0] + ": Did not get the expected NoObjectFactoryException!"
+	    sys.exit(false)
+	except Ice.NoObjectFactoryException, ex:
+	    print "==>", ex
 
-        factory = ObjectFactory()
-        self.communicator().addObjectFactory(factory, "::Demo::Printer")
+	print '\n'\
+	      "Yep, that's what we expected. Now let's try again, but with\n"\
+	      "installing an appropriate factory first. If successful, we print\n"\
+	      "the object's content.\n"\
+	      "[press enter]"
+	raw_input()
 
-        printer, printerProxy = initial.getPrinter()
-        print "==> " + printer.message
+	factory = ObjectFactory()
+	self.communicator().addObjectFactory(factory, "::Demo::Printer")
 
-        print '\n'\
-              "Cool, it worked! Let's try calling the printBackwards() method\n"\
-              "on the object we just received locally.\n"\
-              "[press enter]"
-        raw_input()
+	printer, printerProxy = initial.getPrinter()
+	print "==> " + printer.message
 
-        print "==>",
-        printer.printBackwards()
+	print '\n'\
+	      "Cool, it worked! Let's try calling the printBackwards() method\n"\
+	      "on the object we just received locally.\n"\
+	      "[press enter]"
+	raw_input()
 
-        print '\n'\
-              "Now we call the same method, but on the remote object. Watch the\n"\
-              "server's output.\n"\
-              "[press enter]"
-        raw_input()
+	print "==>",
+	printer.printBackwards()
 
-        printerProxy.printBackwards()
+	print '\n'\
+	      "Now we call the same method, but on the remote object. Watch the\n"\
+	      "server's output.\n"\
+	      "[press enter]"
+	raw_input()
 
-        print '\n'\
-              "Next, we transfer a derived object from the server as a base\n"\
-              "object. Since we haven't yet installed a factory for the derived\n"\
-              "class, the derived class (::Demo::DerivedPrinter) is sliced\n"\
-              "to its base class (::Demo::Printer).\n"\
-              "[press enter]"
-        raw_input()
+	printerProxy.printBackwards()
 
-        derivedAsBase = initial.getDerivedPrinter()
-        print "==> The type ID of the received object is \"" + derivedAsBase.ice_id() + "\""
-        assert(derivedAsBase.ice_id() == "::Demo::Printer")
+	print '\n'\
+	      "Next, we transfer a derived object from the server as a base\n"\
+	      "object. Since we haven't yet installed a factory for the derived\n"\
+	      "class, the derived class (::Demo::DerivedPrinter) is sliced\n"\
+	      "to its base class (::Demo::Printer).\n"\
+	      "[press enter]"
+	raw_input()
 
-        print '\n'\
-              "Now we install a factory for the derived class, and try again.\n"\
-              "Because we receive the derived object as a base object, we\n"\
-              "we need to do a dynamic_cast<> to get from the base to the derived object.\n"\
-              "[press enter]"
-        raw_input()
+	derivedAsBase = initial.getDerivedPrinter()
+	print "==> The type ID of the received object is \"" + derivedAsBase.ice_id() + "\""
+	assert(derivedAsBase.ice_id() == "::Demo::Printer")
 
-        self.communicator().addObjectFactory(factory, "::Demo::DerivedPrinter")
+	print '\n'\
+	      "Now we install a factory for the derived class, and try again.\n"\
+	      "Because we receive the derived object as a base object, we\n"\
+	      "we need to do a dynamic_cast<> to get from the base to the derived object.\n"\
+	      "[press enter]"
+	raw_input()
 
-        derived = initial.getDerivedPrinter()
-        print "==> The type ID of the received object is \"" + derived.ice_id() + "\""
+	self.communicator().addObjectFactory(factory, "::Demo::DerivedPrinter")
 
-        print '\n'\
-              "Let's print the message contained in the derived object, and\n"\
-              "call the operation printUppercase() on the derived object\n"\
-              "locally.\n"\
-              "[press enter]"
-        raw_input()
+	derived = initial.getDerivedPrinter()
+	print "==> The type ID of the received object is \"" + derived.ice_id() + "\""
 
-        print "==> " + derived.derivedMessage
-        print "==>",
-        derived.printUppercase()
+	print '\n'\
+	      "Let's print the message contained in the derived object, and\n"\
+	      "call the operation printUppercase() on the derived object\n"\
+	      "locally.\n"\
+	      "[press enter]"
+	raw_input()
 
-        print '\n'\
-              "Finally, we try the same again, but instead of returning the\n"\
-              "derived object, we throw an exception containing the derived\n"\
-              "object.\n"\
-              "[press enter]"
-        raw_input()
+	print "==> " + derived.derivedMessage
+	print "==>",
+	derived.printUppercase()
 
-        try:
-            initial.throwDerivedPrinter()
-            print args[0] + "Did not get the expected DerivedPrinterException!"
-            sys.exit(false)
-        except Demo.DerivedPrinterException, ex:
-            derived = ex.derived
-            assert(derived)
+	print '\n'\
+	      "Finally, we try the same again, but instead of returning the\n"\
+	      "derived object, we throw an exception containing the derived\n"\
+	      "object.\n"\
+	      "[press enter]"
+	raw_input()
 
-        print "==> " + derived.derivedMessage
-        print "==>",
-        derived.printUppercase()
+	try:
+	    initial.throwDerivedPrinter()
+	    print args[0] + "Did not get the expected DerivedPrinterException!"
+	    sys.exit(false)
+	except Demo.DerivedPrinterException, ex:
+	    derived = ex.derived
+	    assert(derived)
 
-        print '\n'\
-              "That's it for this demo. Have fun with Ice!"
+	print "==> " + derived.derivedMessage
+	print "==>",
+	derived.printUppercase()
 
-        initial.shutdown()
+	print '\n'\
+	      "That's it for this demo. Have fun with Ice!"
 
-        return 0
+	initial.shutdown()
+
+	return True
 
 app = Client()
 sys.exit(app.main(sys.argv, "config.client"))

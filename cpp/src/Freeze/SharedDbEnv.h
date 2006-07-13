@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -27,12 +27,6 @@ typedef IceUtil::Handle<SharedDbEnv> SharedDbEnvPtr;
 class SharedDb;
 typedef IceUtil::Handle<SharedDb> SharedDbPtr;
 
-class Transaction;
-typedef IceInternal::Handle<Transaction> TransactionPtr;
-
-class TransactionalEvictorContext;
-typedef IceUtil::Handle<TransactionalEvictorContext> TransactionalEvictorContextPtr;
-
 class SharedDbEnv
 {
 public:
@@ -44,13 +38,6 @@ public:
     void __incRef();
     void __decRef();
    
-    //
-    // EvictorContext factory/manager
-    //
-    TransactionalEvictorContextPtr createCurrent();
-    TransactionalEvictorContextPtr getCurrent();
-    void setCurrentTransaction(const TransactionPtr& tx);
-
     DbEnv* getEnv() const;
     const std::string& getEnvName() const;
     const Ice::CommunicatorPtr& getCommunicator() const;
@@ -68,13 +55,6 @@ private:
     int _refCount;
     int _trace;
     CheckpointThreadPtr _thread;
-
-#ifdef _WIN32
-    DWORD _tsdKey;
-#else
-    pthread_key_t _tsdKey;
-#endif    
-
 };
 
 inline DbEnv*

@@ -1,7 +1,7 @@
 <!--
  **********************************************************************
 
- Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+ Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 
  This copy of Ice is licensed to you under the terms described in the
  ICE_LICENSE file included in this distribution.
@@ -16,8 +16,9 @@
     <node name="localhost">
       <server id="SessionServer" exe="./server.exe" activation="session">
 	<adapter name="Hello" endpoints="tcp" register-process="true">
-	  <allocatable identity="hello" property="Identity"/>
+	  <allocatable identity="hello"/>
 	</adapter>
+	<property name="Identity" value="hello"/>
       </server>
     </node>
 

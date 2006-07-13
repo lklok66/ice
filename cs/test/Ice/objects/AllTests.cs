@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -73,17 +73,17 @@ public class AllTests
         test(b1.theA is B);
         test(((B) b1.theA).theA == b1.theA);
         test(((B) b1.theA).theB == b1);
-        //test(((B)b1.theA).theC is C); // Redundant -- theC is always of type C
+	//test(((B)b1.theA).theC is C); // Redundant -- theC is always of type C
         test(((C) (((B) b1.theA).theC)).theB == b1.theA);
-        if(!collocated)
-        {
-            test(b1.preMarshalInvoked);
-            test(b1.postUnmarshalInvoked());
-            test(b1.theA.preMarshalInvoked);
-            test(b1.theA.postUnmarshalInvoked());
-            test(((B)b1.theA).theC.preMarshalInvoked);
-            test(((B)b1.theA).theC.postUnmarshalInvoked());
-        }
+	if(!collocated)
+	{
+	    test(b1.preMarshalInvoked);
+	    test(b1.postUnmarshalInvoked());
+	    test(b1.theA.preMarshalInvoked);
+	    test(b1.theA.postUnmarshalInvoked());
+	    test(((B)b1.theA).theC.preMarshalInvoked);
+	    test(((B)b1.theA).theC.postUnmarshalInvoked());
+	}
         // More tests possible for b2 and d, but I think this is already
         // sufficient.
         test(b2.theA == b2);
@@ -116,8 +116,8 @@ public class AllTests
         test(dout.theA == b1out);
         test(dout.theB == b2out);
         test(dout.theC == null);
-        if(!collocated)
-        {
+	if(!collocated)
+	{
             test(dout.preMarshalInvoked);
             test(dout.postUnmarshalInvoked());
             test(dout.theA.preMarshalInvoked);
@@ -126,52 +126,8 @@ public class AllTests
             test(dout.theB.postUnmarshalInvoked());
             test(dout.theB.theC.preMarshalInvoked);
             test(dout.theB.theC.postUnmarshalInvoked());
-        }
+	}
         Console.Out.WriteLine("ok");
-
-        Console.Out.Write("getting I, J and H... ");
-        Console.Out.Flush();
-        I i = initial.getI();
-        test(i != null);
-        I j = initial.getJ();
-        test(j != null && ((J)j) != null);
-        I h = initial.getH();
-        test(h != null && ((H)h) != null);
-        Console.Out.WriteLine("ok");
-
-        Console.Out.Write("setting I... ");
-        Console.Out.Flush();
-        initial.setI(i);
-        initial.setI(j);
-        initial.setI(h);
-        Console.Out.WriteLine("ok");
-
-        if(!collocated)
-        {
-            Console.Out.Write("testing UnexpectedObjectException...");
-            Console.Out.Flush();
-            @ref = "uoet:default -p 12010 -t 10000";
-            @base = communicator.stringToProxy(@ref);
-            test(@base != null);
-            UnexpectedObjectExceptionTestPrx uoet = UnexpectedObjectExceptionTestPrxHelper.uncheckedCast(@base);
-            test(uoet != null);
-            try
-            {
-                uoet.op();
-                test(false);
-            }
-            catch(Ice.UnexpectedObjectException ex)
-            {
-                test(ex.type.Equals("::Test::AlsoEmpty"));
-                test(ex.expectedType.Equals("::Test::Empty"));
-            }
-            catch(System.Exception ex)
-            {
-                Console.Out.WriteLine(ex);
-                test(false);
-            }
-            Console.Out.WriteLine("ok");
-        }
 
         return initial;
     }

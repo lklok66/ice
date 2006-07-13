@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -27,7 +27,6 @@ public:
     virtual PyObject* invoke(const Ice::ObjectPrx&, PyObject*, PyObject*) = 0;
     virtual PyObject* invokeAsync(const Ice::ObjectPrx&, PyObject*, PyObject*, PyObject*) = 0;
     virtual void deprecate(const std::string&) = 0;
-    virtual Ice::OperationMode mode() const = 0;
 
     virtual void dispatch(PyObject*, const Ice::AMD_Object_ice_invokePtr&, const std::vector<Ice::Byte>&,
                           const Ice::Current&) = 0;
