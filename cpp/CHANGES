@@ -1,6 +1,10 @@
 Changes since version 3.1.0
 ---------------------------
 
+- Fixed a bug in Ice::initialize() that raised a NullHandleException
+  when the function was called without arguments or when the
+  properties member of InitializationData was null.
+
 Changes since version 3.0.1
 ---------------------------
 
