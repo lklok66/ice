@@ -218,8 +218,24 @@ Ice::CommunicatorI::setDefaultLocator(const LocatorPrx& locator)
 Ice::Context
 Ice::CommunicatorI::getDefaultContext() const
 {
-    return _instance->initializationData().defaultContext;
+    return _instance->getDefaultContext();
 }
+
+void
+Ice::Communicator::setDefaultContext(const Context& ctx)
+{
+    //
+    // We know there is only one Communicator implementation!
+    //
+    dynamic_cast<Ice::CommunicatorI*>(this)->setDefaultContextI(ctx);
+}
+
+void
+Ice::CommunicatorI::setDefaultContextI(const Context& ctx)
+{
+    return _instance->setDefaultContext(ctx);
+}
+
 
 PluginManagerPtr
 Ice::CommunicatorI::getPluginManager() const
