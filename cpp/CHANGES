@@ -1,5 +1,10 @@
 Changes since version 3.1.0
 ---------------------------
+
+- Fixed a bug in the IceGrid replication code which would cause clients
+  to get an Ice::NoEndpointException if the node of a replica was
+  inactive.
+
 - Restored Communicator::setDefaultContext
 
 - Fixed a bug in Ice::initialize() that raised a NullHandleException
