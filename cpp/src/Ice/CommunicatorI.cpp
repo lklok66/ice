@@ -233,7 +233,7 @@ Ice::Communicator::setDefaultContext(const Context& ctx)
 void
 Ice::CommunicatorI::setDefaultContextI(const Context& ctx)
 {
-    return _instance->setDefaultContext(ctx);
+    _instance->setDefaultContext(ctx);
 }
 
 
