@@ -5,6 +5,10 @@ Changes since version 3.1.0
   to get an Ice::NoEndpointException if the node of a replica was
   inactive.
 
+- Fixed a bug in the IceGrid XML parser which could cause a crash if
+  the adapter element for the IceBox.ServiceManager adapter was
+  specified in the icebox element.
+
 - Restored Communicator::setDefaultContext
 
 - Fixed a bug in Ice::initialize() that raised a NullHandleException
