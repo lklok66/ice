@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -14,33 +14,40 @@ Ice::loadSlice('Latency.ice')
 
 class Client < Ice::Application
     def run(args)
-        ping = Demo::PingPrx::checkedCast(Ice::Application::communicator().propertyToProxy('Latency.Ping'))
-        if not ping
-            puts "invalid proxy"
-            return 1
-        end
+	properties = Ice::Application::communicator().getProperties()
+	proxy = properties.getProperty('Latency.Ping')
+	if proxy.length == 0:
+	    puts " property `Latency.Ping' not set"
+	    return false
+	end
 
-        # Initial ping to setup the connection.
-        ping.ice_ping()
+	ping = Demo::PingPrx::checkedCast(Ice::Application::communicator().stringToProxy(proxy))
+	if not ping
+	    puts "invalid proxy"
+	    return false
+	end
 
-        repetitions = 100000
-        puts "pinging server " + repetitions.to_s + " times (this may take a while)"
+	# Initial ping to setup the connection.
+	ping.ice_ping()
 
-        tsec = Time.now
+	repetitions = 100000
+	puts "pinging server " + repetitions.to_s + " times (this may take a while)"
 
-        i = repetitions
-        while i >= 0
-            ping.ice_ping()
-            i = i - 1
-        end
+	tsec = Time.now
 
-        tsec = Time.now - tsec
-        tmsec = tsec * 1000.0
+	i = repetitions
+	while i >= 0
+	    ping.ice_ping()
+	    i = i - 1
+	end
 
-        printf "time for %d pings: %.3fms\n", repetitions, tmsec
-        printf "time per ping: %.3fms\n", tmsec / repetitions
+	tsec = Time.now - tsec
+	tmsec = tsec * 1000.0
 
-        return 0
+	printf "time for %d pings: %.3fms\n", repetitions, tmsec
+	printf "time per ping: %.3fms\n", tmsec / repetitions
+
+	return true
     end
 end
 

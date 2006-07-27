@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -131,6 +131,9 @@ public:
 
     virtual void print(VALUE, IceUtil::Output&, PrintObjectHistory*);
 
+    void marshalSequence(VALUE, const Ice::OutputStreamPtr&);
+    void unmarshalSequence(const Ice::InputStreamPtr&, const UnmarshalCallbackPtr&, VALUE, void*);
+
     static double toDouble(VALUE);
 
     Kind kind;
@@ -223,12 +226,6 @@ public:
 
     std::string id;
     TypeInfoPtr elementType;
-
-private:
-
-    void marshalPrimitiveSequence(const PrimitiveInfoPtr&, VALUE, const Ice::OutputStreamPtr&);
-    void unmarshalPrimitiveSequence(const PrimitiveInfoPtr&, const Ice::InputStreamPtr&, const UnmarshalCallbackPtr&,
-                                    VALUE, void*);
 };
 typedef IceUtil::Handle<SequenceInfo> SequenceInfoPtr;
 
@@ -382,8 +379,6 @@ public:
     virtual void ice_postUnmarshal();
 
     virtual void read(const Ice::InputStreamPtr&, bool);
-
-    virtual ClassInfoPtr getInfo() const;
 
     VALUE getObject() const; // Borrowed reference.
 

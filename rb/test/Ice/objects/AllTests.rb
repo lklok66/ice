@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -18,37 +18,32 @@ require 'TestI.rb'
 #
 class MyObjectFactory
     def create(type)
-        if type == '::Test::B'
-            return BI.new
-        elsif type == '::Test::C'
-            return CI.new
-        #
-        # We do not specialize D, instead we just re-open it to define
-        # its methods.
-        #
-        #elsif type == '::Test::D'
-        #      return DI.new
-        end
-        fail "unknown type"
+	if type == '::Test::B'
+	    return BI.new
+	elsif type == '::Test::C'
+	    return CI.new
+	elsif type == '::Test::D'
+	    return DI.new
+	end
+	fail "unknown type"
     end
 
     def destroy
-        # Nothing to do
+	# Nothing to do
     end
 end
 
 def test(b)
     if !b
-        raise RuntimeError, 'test assertion failed'
+	raise RuntimeError, 'test assertion failed'
     end
 end
 
 def allTests(communicator)
-
     factory = MyObjectFactory.new
     communicator.addObjectFactory(factory, '::Test::B')
     communicator.addObjectFactory(factory, '::Test::C')
-    #communicator.addObjectFactory(factory, '::Test::D')
+    communicator.addObjectFactory(factory, '::Test::D')
 
     print "testing stringToProxy... "
     STDOUT.flush
@@ -149,47 +144,6 @@ def allTests(communicator)
     test(d.theB.postUnmarshalInvoked())
     test(d.theB.theC.preMarshalInvoked)
     test(d.theB.theC.postUnmarshalInvoked())
-    puts "ok"
-
-    print "getting I, J, H... "
-    STDOUT.flush
-    i = initial.getI()
-    test(i)
-    j = initial.getJ()
-    test(i)
-    h = initial.getH()
-    test(i)
-    puts "ok"
-
-    print "setting I... "
-    STDOUT.flush
-    initial.setI(i)
-    initial.setI(j)
-    initial.setI(h)
-    puts "ok"
-
-    print "testing UnexpectedObjectException... "
-    STDOUT.flush
-    ref = "uoet:default -p 12010 -t 10000"
-    base = communicator.stringToProxy(ref)
-    test(base)
-    uoet = Test::UnexpectedObjectExceptionTestPrx::uncheckedCast(base)
-    test(uoet)
-    begin
-        uoet.op()
-        test(false)
-    rescue Ice::UnexpectedObjectException => ex
-        test(ex.type == "::Test::AlsoEmpty")
-        test(ex.expectedType == "::Test::Empty")
-    rescue Ice::Exception => ex
-        puts $!
-        print ex.backtrace.join("\n")
-        test(false)
-    rescue => ex
-        puts $!
-        print ex.backtrace.join("\n")
-        test(false)
-    end
     puts "ok"
 
     return initial

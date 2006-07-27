@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -10,7 +10,7 @@
 
 def test(b)
     if !b
-        raise RuntimeError, 'test assertion failed'
+	raise RuntimeError, 'test assertion failed'
     end
 end
 
@@ -42,10 +42,10 @@ def allTests(communicator)
     print "calling operation to kill connection with second proxy... "
     STDOUT.flush
     begin
-        retry2.op(true)
-        test(false)
+	retry2.op(true)
+	test(false)
     rescue Ice::ConnectionLostException
-        puts "ok"
+	puts "ok"
     end
 
     print "calling regular operation with first proxy again... "

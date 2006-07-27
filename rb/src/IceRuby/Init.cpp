@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -8,7 +8,6 @@
 // **********************************************************************
 
 #include <Communicator.h>
-#include <ImplicitContext.h>
 #include <Logger.h>
 #include <Operation.h>
 #include <Properties.h>
@@ -35,7 +34,6 @@ Init_IceRuby()
     initProxy(iceModule);
     initSlice(iceModule);
     initTypes(iceModule);
-    initImplicitContext(iceModule);
 }
 
 }

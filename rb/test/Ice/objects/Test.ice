@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -48,38 +48,14 @@ class D
     bool postUnmarshalInvoked();
 };
 
-interface I
-{
-};
-
-interface J extends I
-{
-};
-
-class H implements I
-{
-};
-
-class K implements J
-{
-};
-
 class Initial
 {
     void shutdown();
-
     B getB1();
     B getB2();
     C getC();
     D getD();
-
     void getAll(out B b1, out B b2, out C theC, out D theD);
-
-    I getI();
-    I getJ();
-    I getH();
-
-    void setI(I theI);
 };
 
 };
