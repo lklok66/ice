@@ -1,6 +1,9 @@
 Changes since version 3.1.0
 ---------------------------
 
+- Fixed a bug where variables from distribution descriptors were not
+  substituted.
+
 - Fixed an assert in the IceGrid locator implementation which could
   occur when using dynamic adapter registration. The assert was
   triggered when an adapter was removed and a client was requesting

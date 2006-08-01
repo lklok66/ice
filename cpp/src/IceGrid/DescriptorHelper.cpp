@@ -421,7 +421,7 @@ Resolver::operator()(const DistributionDescriptor& desc) const
     DistributionDescriptor result;
     result.icepatch = operator()(desc.icepatch, "IcePatch2 server proxy");
     result.directories = operator()(desc.directories, "distribution source directory");
-    return desc;
+    return result;
 }
 
 PropertyDescriptorSeq
