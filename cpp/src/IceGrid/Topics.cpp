@@ -83,8 +83,8 @@ NodeObserverTopic::NodeObserverTopic(const IceStorm::TopicManagerPrx& topicManag
 
 void
 NodeObserverTopic::initialize(const IceStorm::TopicManagerPrx& topicManager)
-{
 #endif
+{
     IceStorm::TopicPrx t;
     try
     {
