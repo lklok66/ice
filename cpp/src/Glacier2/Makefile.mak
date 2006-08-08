@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -24,26 +24,26 @@ TARGETS         = $(LIBNAME) $(DLLNAME)
 
 !endif
 
-OBJS		= PermissionsVerifier.obj \
-		  Router.obj \
-		  SSLInfo.obj \
-		  Session.obj
+OBJS		= PermissionsVerifier.o \
+		  Router.o \
+		  SSLInfo.o \
+		  Session.o
 
-ROBJS		= Blobject.obj \
-		  ClientBlobject.obj \
-		  CryptPermissionsVerifierI.obj \
-		  Glacier2Router.obj \
-		  ProxyVerifier.obj \
-		  RequestQueue.obj \
-		  RouterI.obj \
-		  RoutingTable.obj \
-		  FilterI.obj \
-		  FilterManager.obj \
-		  ServerBlobject.obj \
-		  SessionRouterI.obj
+ROBJS		= Blobject.o \
+		  ClientBlobject.o \
+		  CryptPermissionsVerifierI.o \
+		  Glacier2Router.o \
+		  ProxyVerifier.o \
+		  RequestQueue.o \
+		  RouterI.o \
+		  RoutingTable.o \
+		  FilterI.o \
+		  FilterManager.o \
+		  ServerBlobject.o \
+		  SessionRouterI.o
 
-SRCS		= $(OBJS:.obj=.cpp) \
-		  $(ROBJS:.obj=.cpp)
+SRCS		= $(OBJS:.o=.cpp) \
+		  $(ROBJS:.o=.cpp)
 
 HDIR		= $(includedir)\Glacier2
 SDIR		= $(slicedir)\Glacier2
@@ -52,11 +52,8 @@ SDIR		= $(slicedir)\Glacier2
 
 !ifdef BUILD_UTILS
 
-CPPFLAGS	= -I.. $(CPPFLAGS) -DWIN32_LEAN_AND_MEAN
+CPPFLAGS	= -I.. $(CPPFLAGS)
 LINKWITH 	= $(LIBS) $(OPENSSL_LIBS) glacier2$(LIBSUFFIX).lib icessl$(LIBSUFFIX).lib
-!if "$(CPP_COMPILER)" != "BCC2006"
-LINKWITH	= $(LINKWITH) ws2_32.lib
-!endif
 
 !else
 
@@ -64,69 +61,72 @@ CPPFLAGS	= -I.. $(CPPFLAGS) -DGLACIER2_API_EXPORTS
 
 !endif
 
-!if "$(CPP_COMPILER)" != "BCC2006" && "$(OPTIMIZE)" != "yes"
-PDBFLAGS        = /pdb:$(DLLNAME:.dll=.pdb)
-RPDBFLAGS       = /pdb:$(ROUTER:.exe=.pdb)
-!endif
-
 SLICE2CPPFLAGS	= --include-dir Glacier2 --dll-export GLACIER2_API $(SLICE2CPPFLAGS)
 
 $(LIBNAME): $(DLLNAME)
 
 $(DLLNAME): $(OBJS)
-	$(LINK) $(LD_DLLFLAGS) $(PDBFLAGS) $(OBJS) $(PREOUT)$@ $(PRELIBS)$(LIBS)
+	del /q $@
+	$(LINK) $(LD_DLLFLAGS) $(OBJS), $(DLLNAME),, $(LIBS)
 	move $(DLLNAME:.dll=.lib) $(LIBNAME)
-	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
-	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#2 && del /q $@.manifest
-	@if exist $(DLLNAME:.dll=.exp) del /q $(DLLNAME:.dll=.exp)
 
 $(ROUTER): $(ROBJS)
-	$(LINK) $(LD_EXEFLAGS) $(RPDBFLAGS) $(ROBJS) $(SETARGV) $(PREOUT)$@ $(PRELIBS)$(LINKWITH)
-	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
-	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#1 && del /q $@.manifest
+	del /q $@
+	$(LINK) $(LD_EXEFLAGS) $(ROBJS), $@,, $(LINKWITH)
+
+$(HDIR)\PermissionsVerifierF.h: $(SDIR)\PermissionsVerifierF.ice $(SLICE2CPP) $(SLICEPARSERLIB)
+	$(SLICE2CPP) $(SLICE2CPPFLAGS) $(SDIR)\PermissionsVerifierF.ice
+	del /q PermissionsVerifierF.cpp
+	move PermissionsVerifierF.h $(HDIR)
+
+PermissionsVerifier.cpp $(HDIR)\PermissionsVerifier.h: $(SDIR)\PermissionsVerifier.ice $(SLICE2CPP) $(SLICEPARSERLIB)
+	$(SLICE2CPP) $(SLICE2CPPFLAGS) $(SDIR)\PermissionsVerifier.ice
+	move PermissionsVerifier.h $(HDIR)
+
+$(HDIR)\RouterF.h: $(SDIR)\RouterF.ice $(SLICE2CPP) $(SLICEPARSERLIB)
+	$(SLICE2CPP) $(SLICE2CPPFLAGS) $(SDIR)\RouterF.ice
+	del /q RouterF.cpp
+	move RouterF.h $(HDIR)
+
+Router.cpp $(HDIR)\Router.h: $(SDIR)\Router.ice $(SLICE2CPP) $(SLICEPARSERLIB)
+	$(SLICE2CPP) $(SLICE2CPPFLAGS) $(SDIR)\Router.ice
+	move Router.h $(HDIR)
+
+$(HDIR)\SessionF.h: $(SDIR)\SessionF.ice $(SLICE2CPP) $(SLICEPARSERLIB)
+	$(SLICE2CPP) $(SLICE2CPPFLAGS) $(SDIR)\SessionF.ice
+	del /q SessionF.cpp
+	move SessionF.h $(HDIR)
+
+Session.cpp $(HDIR)\Session.h: $(SDIR)\Session.ice $(SLICE2CPP) $(SLICEPARSERLIB)
+	$(SLICE2CPP) $(SLICE2CPPFLAGS) $(SDIR)\Session.ice
+	move Session.h $(HDIR)
+
+SSLInfo.cpp $(HDIR)\SSLInfo.h: $(SDIR)\SSLInfo.ice $(SLICE2CPP) $(SLICEPARSERLIB)
+	$(SLICE2CPP) $(SLICE2CPPFLAGS) $(SDIR)\SSLInfo.ice
+	move SSLInfo.h $(HDIR)
 
 !ifdef BUILD_UTILS
 
 clean::
-	del /q PermissionsVerifierF.cpp $(HDIR)\PermissionsVerifierF.h
+	del /q $(HDIR)\PermissionsVerifierF.h
 	del /q PermissionsVerifier.cpp $(HDIR)\PermissionsVerifier.h
-	del /q RouterF.cpp $(HDIR)\RouterF.h
+	del /q $(HDIR)\RouterF.h
 	del /q Router.cpp $(HDIR)\Router.h
-	del /q SessionF.cpp $(HDIR)\SessionF.h
+	del /q $(HDIR)\SessionF.h
 	del /q Session.cpp $(HDIR)\Session.h
 	del /q SSLInfo.cpp $(HDIR)\SSLInfo.h
-	del /q $(DLLNAME:.dll=.*)
-	del /q $(ROUTER:.exe=.*)
 
 install:: all
 	copy $(LIBNAME) $(install_libdir)
 	copy $(DLLNAME) $(install_bindir)
 	copy $(ROUTER) $(install_bindir)
 
-!if "$(OPTIMIZE)" != "yes"
-
-!if "$(CPP_COMPILER)" == "BCC2006"
-
-install:: all
-	copy $(DLLNAME:.dll=.tds) $(install_bindir)
-	copy $(ROUTER:.exe=.tds) $(install_bindir)
-
-!else
-
-install:: all
-	copy $(DLLNAME:.dll=.pdb) $(install_bindir)
-	copy $(ROUTER:.exe=.pdb) $(install_bindir)
-
-!endif
-
-!endif
-
 !else
 
 install:: all
 
 $(EVERYTHING)::
-	@$(MAKE) -nologo /f Makefile.mak BUILD_UTILS=1 $@
+	$(MAKE) /f Makefile.mak BUILD_UTILS=1 $@
 
 !endif
 

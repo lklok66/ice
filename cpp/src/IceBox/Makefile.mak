@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -25,17 +25,17 @@ TARGETS         = $(LIBNAME) $(DLLNAME)
 
 !endif
 
-OBJS		= IceBox.obj \
-		  Exception.obj
+OBJS		= IceBox.o \
+		  Exception.o
 
-SOBJS		= ServiceManagerI.obj \
-		  Service.obj
+SOBJS		= ServiceManagerI.o \
+		  Service.o
 
-AOBJS		= Admin.obj
+AOBJS		= Admin.o
 
-SRCS		= $(OBJS:.obj=.cpp) \
-		  $(SOBJS:.obj=.cpp) \
-		  $(AOBJS:.obj=.cpp)
+SRCS		= $(OBJS:.o=.cpp) \
+		  $(SOBJS:.o=.cpp) \
+		  $(AOBJS:.o=.cpp)
 
 HDIR		= $(includedir)\IceBox
 SDIR		= $(slicedir)\IceBox
@@ -44,7 +44,7 @@ SDIR		= $(slicedir)\IceBox
 
 !ifdef BUILD_UTILS
 
-CPPFLAGS	= -I.. $(CPPFLAGS) -DWIN32_LEAN_AND_MEAN
+CPPFLAGS	= -I.. $(CPPFLAGS)
 
 !else
 
@@ -54,38 +54,29 @@ CPPFLAGS	= -I.. $(CPPFLAGS) -DICE_BOX_API_EXPORTS
 
 SLICE2CPPFLAGS	= --checksum --ice --dll-export ICE_BOX_API --include-dir IceBox $(SLICE2CPPFLAGS)
 
-!if "$(CPP_COMPILER)" != "BCC2006" && "$(OPTIMIZE)" != "yes"
-PDBFLAGS        = /pdb:$(DLLNAME:.dll=.pdb)
-SPDBFLAGS       = /pdb:$(SERVER:.exe=.pdb)
-APDBFLAGS       = /pdb:$(ADMIN:.exe=.pdb)
-!endif
-
 $(LIBNAME): $(DLLNAME)
 
 $(DLLNAME): $(OBJS)
-	$(LINK) $(LD_DLLFLAGS) $(PDBFLAGS) $(OBJS) $(PREOUT)$@ $(PRELIBS)$(LIBS)
+	del /q $@
+	$(LINK) $(LD_DLLFLAGS) $(OBJS), $(DLLNAME),, $(LIBS)
 	move $(DLLNAME:.dll=.lib) $(LIBNAME)
-	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
-	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#2 && del /q $@.manifest
-	@if exist $(DLLNAME:.dll=.exp) del /q $(DLLNAME:.dll=.exp)
 
 $(SERVER): $(SOBJS)
-	$(LINK) $(LD_EXEFLAGS) $(SPDBFLAGS) $(SOBJS) $(SETARGV) $(PREOUT)$@ $(PRELIBS)$(LIBS) icebox$(LIBSUFFIX).lib
-	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
-	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#1 && del /q $@.manifest
+	del /q $@
+	$(LINK) $(LD_EXEFLAGS) $(SOBJS), $@,, $(LIBS) icebox$(LIBSUFFIX).lib
 
 $(ADMIN): $(AOBJS)
-	$(LINK) $(LD_EXEFLAGS) $(APDBFLAGS) $(AOBJS) $(SETARGV) $(PREOUT)$@ $(PRELIBS)$(LIBS) icebox$(LIBSUFFIX).lib
-	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
-	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#1 && del /q $@.manifest
+	del /q $@
+	$(LINK) $(LD_EXEFLAGS) $(AOBJS), $@,, $(LIBS) icebox$(LIBSUFFIX).lib
+
+IceBox.cpp $(HDIR)\IceBox.h: $(SDIR)\IceBox.ice $(SLICE2CPP) $(SLICEPARSERLIB)
+	$(SLICE2CPP) $(SLICE2CPPFLAGS) $(SDIR)\IceBox.ice
+	move IceBox.h $(HDIR)
 
 !ifdef BUILD_UTILS
 
 clean::
 	del /q IceBox.cpp $(HDIR)\IceBox.h
-	del /q $(DLLNAME:.dll=.*)
-	del /q $(SERVER:.exe=.*)
-	del /q $(ADMIN:.exe=.*)
 
 install:: all
 	copy $(LIBNAME) $(install_libdir)
@@ -93,32 +84,12 @@ install:: all
 	copy $(SERVER) $(install_bindir)
 	copy $(ADMIN) $(install_bindir)
 
-!if "$(OPTIMIZE)" != "yes"
-
-!if "$(CPP_COMPILER)" == "BCC2006"
-
-install:: all
-	copy $(DLLNAME:.dll=.tds) $(install_bindir)
-	copy $(SERVER:.exe=.tds) $(install_bindir)
-	copy $(ADMIN:.exe=.tds) $(install_bindir)
-
-!else
-
-install:: all
-	copy $(DLLNAME:.dll=.pdb) $(install_bindir)
-	copy $(SERVER:.exe=.pdb) $(install_bindir)
-	copy $(ADMIN:.exe=.pdb) $(install_bindir)
-
-!endif
-
-!endif
-
 !else
 
 install:: all
 
 $(EVERYTHING)::
-	@$(MAKE) -nologo /f Makefile.mak BUILD_UTILS=1 $@
+	$(MAKE) /f Makefile.mak BUILD_UTILS=1 $@
 
 !endif
 

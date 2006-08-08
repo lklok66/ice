@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -16,77 +16,74 @@ COLLOCATED	= collocated.exe
 
 TARGETS		= $(CLIENT) $(SERVER) $(SERVERAMD) $(COLLOCATED)
 
-COBJS           = Test.obj \
-		  Wstring.obj \
-		  Client.obj \
-		  AllTests.obj \
-		  MyByteSeq.obj \
-		  StringConverterI.obj 
+COBJS           = Test.o \
+		  Wstring.o \
+		  Client.o \
+		  AllTests.o \
+		  MyByteSeq.o \
+		  StringConverterI.o 
 
-SOBJS           = Test.obj \
-		  Wstring.obj \
-		  TestI.obj \
-		  WstringI.obj \
-		  Server.obj \
-		  MyByteSeq.obj \
-		  StringConverterI.obj
+SOBJS           = Test.o \
+		  Wstring.o \
+		  TestI.o \
+		  WstringI.o \
+		  Server.o \
+		  MyByteSeq.o \
+		  StringConverterI.o
 
-SAMDOBJS        = TestAMD.obj \
-		  TestAMDI.obj \
-		  WstringAMD.obj \
-		  WstringAMDI.obj \
-		  ServerAMD.obj \
-		  MyByteSeq.obj \
-		  StringConverterI.obj
+SAMDOBJS        = TestAMD.o \
+		  TestAMDI.o \
+		  WstringAMD.o \
+		  WstringAMDI.o \
+		  ServerAMD.o \
+		  MyByteSeq.o \
+		  StringConverterI.o
 
-COLOBJS         = Test.obj \
-		  Wstring.obj \
-		  TestI.obj \
-		  WstringI.obj \
-		  Collocated.obj \
-		  AllTests.obj \
-		  MyByteSeq.obj \
-		  StringConverterI.obj
+COLOBJS         = Test.o \
+		  Wstring.o \
+		  TestI.o \
+		  WstringI.o \
+		  Collocated.o \
+		  AllTests.o \
+		  MyByteSeq.o \
+		  StringConverterI.o
 
-SRCS		= $(COBJS:.obj=.cpp) \
-		  $(SOBJS:.obj=.cpp) \
-		  $(SAMDOBJS:.obj=.cpp) \
-		  $(COLOBJS:.obj=.cpp)
+SRCS		= $(COBJS:.o=.cpp) \
+		  $(SOBJS:.o=.cpp) \
+		  $(SAMDOBJS:.o=.cpp) \
+		  $(COLOBJS:.o=.cpp)
 
 !include $(top_srcdir)/config/Make.rules.mak
 
-SLICE2CPPFLAGS	= --stream $(SLICE2CPPFLAGS)
-CPPFLAGS	= -I. -I../../include $(CPPFLAGS) -DWIN32_LEAN_AND_MEAN
-!if "$(CPP_COMPILER)" != "BCC2006"
-CPPFLAGS	= $(CPPFLAGS) -Zm200
-!endif
-
-!if "$(CPP_COMPILER)" != "BCC2006" && "$(OPTIMIZE)" != "yes"
-CPDBFLAGS        = /pdb:$(CLIENT:.exe=.pdb)
-SPDBFLAGS        = /pdb:$(SERVER:.exe=.pdb)
-SAPDBFLAGS       = /pdb:$(SERVERAMD:.exe=.pdb)
-COPDBFLAGS       = /pdb:$(COLLOCATED:.exe=.pdb)
-!endif
+CPPFLAGS	= -I. -I../../include $(CPPFLAGS)
 
 $(CLIENT): $(COBJS)
-	$(LINK) $(LD_EXEFLAGS) $(CPDBFLAGS) $(SETARGV) $(COBJS) $(PREOUT)$@ $(PRELIBS)$(LIBS)
-	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
-	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#1 && del /q $@.manifest
+	del /q $@
+	$(LINK) $(LD_EXEFLAGS) $(COBJS), $@,, $(LIBS)
 
 $(SERVER): $(SOBJS)
-	$(LINK) $(LD_EXEFLAGS) $(SPDBFLAGS) $(SETARGV) $(SOBJS) $(PREOUT)$@ $(PRELIBS)$(LIBS)
-	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
-	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#1 && del /q $@.manifest
+	del /q $@
+	$(LINK) $(LD_EXEFLAGS) $(SOBJS), $@,, $(LIBS)
 
 $(SERVERAMD): $(SAMDOBJS)
-	$(LINK) $(LD_EXEFLAGS) $(SAPDBFLAGS) $(SETARGV) $(SAMDOBJS) $(PREOUT)$@ $(PRELIBS)$(LIBS)
-	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
-	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#1 && del /q $@.manifest
+	del /q $@
+	$(LINK) $(LD_EXEFLAGS) $(SAMDOBJS), $@,, $(LIBS)
 
 $(COLLOCATED): $(COLOBJS)
-	$(LINK) $(LD_EXEFLAGS) $(COPDBFLAGS) $(SETARGV) $(COLOBJS) $(PREOUT)$@ $(PRELIBS)$(LIBS)
-	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
-	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#1 && del /q $@.manifest
+	del /q $@
+	$(LINK) $(LD_EXEFLAGS) $(COLOBJS), $@,, $(LIBS)
+
+Test.cpp Test.h: Test.ice $(SLICE2CPP) $(SLICEPARSERLIB)
+	$(SLICE2CPP) --stream $(SLICE2CPPFLAGS) Test.ice
+
+TestAMD.cpp TestAMD.h: TestAMD.ice $(SLICE2CPP) $(SLICEPARSERLIB)
+	$(SLICE2CPP) --stream $(SLICE2CPPFLAGS) TestAMD.ice
+
+Wstring.cpp Wstring.h: Wstring.ice $(SLICE2CPP) $(SLICEPARSERLIB)
+	$(SLICE2CPP) $(SLICE2CPPFLAGS) Wstring.ice
+
+WstringAMD.cpp WstringAMD.h: WstringAMD.ice $(SLICE2CPP) $(SLICEPARSERLIB)
+	$(SLICE2CPP) $(SLICE2CPPFLAGS) WstringAMD.ice
 
 clean::
 	del /q Test.cpp Test.h

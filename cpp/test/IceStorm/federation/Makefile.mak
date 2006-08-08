@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -14,36 +14,32 @@ SUBSCRIBER	= subscriber.exe
 
 TARGETS		= $(PUBLISHER) $(SUBSCRIBER)
 
-OBJS		= Event.obj
+OBJS		= Event.o
 
-POBJS		= Publisher.obj
+POBJS		= Publisher.o
 
-SOBJS		= Subscriber.obj
+SOBJS		= Subscriber.o
 
-SRCS		= $(OBJS:.obj=.cpp) \
-		  $(POBJS:.obj=.cpp) \
-		  $(SOBJS:.obj=.cpp)
+SRCS		= $(OBJS:.o=.cpp) \
+		  $(POBJS:.o=.cpp) \
+		  $(SOBJS:.o=.cpp)
 
 
 !include $(top_srcdir)/config/Make.rules.mak
 
-CPPFLAGS	= -I. -I../../include $(CPPFLAGS) -DWIN32_LEAN_AND_MEAN
+CPPFLAGS	= -I. -I../../include $(CPPFLAGS)
 LIBS		= icestorm$(LIBSUFFIX).lib $(LIBS)
 
-!if "$(CPP_COMPILER)" != "BCC2006" && "$(OPTIMIZE)" != "yes"
-PPDBFLAGS        = /pdb:$(PUBLISHER:.exe=.pdb)
-SPDBFLAGS        = /pdb:$(SUBSCRIBER:.exe=.pdb)
-!endif
-
 $(PUBLISHER): $(OBJS) $(POBJS)
-	$(LINK) $(LD_EXEFLAGS) $(PPDBFLAGS) $(SETARGV) $(OBJS) $(POBJS) $(PREOUT)$@ $(PRELIBS)$(LIBS)
-	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
-	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#1 && del /q $@.manifest
+	del /q $@
+	$(LINK) $(LD_EXEFLAGS) $(OBJS) $(POBJS), $@,, $(LIBS)
 
 $(SUBSCRIBER): $(OBJS) $(SOBJS)
-	$(LINK) $(LD_EXEFLAGS) $(SPDBFLAGS) $(SETARGV) $(OBJS) $(SOBJS) $(PREOUT)$@ $(PRELIBS)$(LIBS)
-	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
-	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#1 && del /q $@.manifest
+	del /q $@
+	$(LINK) $(LD_EXEFLAGS) $(OBJS) $(SOBJS), $@,, $(LIBS)
+
+Event.cpp Event.h: Event.ice $(SLICE2CPP) $(SLICEPARSERLIB)
+	$(SLICE2CPP) $(SLICE2CPPFLAGS) Event.ice
 
 clean::
 	del /q Event.cpp Event.h

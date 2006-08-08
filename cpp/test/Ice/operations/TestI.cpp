@@ -11,6 +11,9 @@
 #include <TestI.h>
 #include <TestCommon.h>
 #include <functional>
+#ifdef __BCPLUSPLUS__
+#  include <iterator>
+#endif
 
 MyDerivedClassI::MyDerivedClassI(const Ice::ObjectAdapterPtr& adapter, const Ice::Identity& identity) :
     _adapter(adapter),
@@ -389,5 +392,5 @@ bool
 TestCheckedCastI::ice_isA(const std::string& s, const Ice::Current& current) const
 {
     _ctx = current.ctx;
-    return TestCheckedCast::ice_isA(s, current);
+    return Test::TestCheckedCast::ice_isA(s, current);
 }

@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -15,46 +15,39 @@ SESSION_SERVER	= sessionserver.exe
 
 TARGETS		= $(CLIENT) $(SERVER) $(SESSION_SERVER)
 
-OBJS		= Callback.obj \
-		  CallbackI.obj
+OBJS		= Callback.o \
+		  CallbackI.o
 
-COBJS		= Client.obj
+COBJS		= Client.o
 
-SOBJS		= Server.obj
+SOBJS		= Server.o
 
-SSOBJS		= SessionServer.obj \
-		  SessionI.obj
+SSOBJS		= SessionServer.o \
+		  SessionI.o
 
-SRCS		= $(OBJS:.obj=.cpp) \
-		  $(COBJS:.obj=.cpp) \
-		  $(SOBJS:.obj=.cpp) \
-		  $(SSOBJS:.obj=.cpp)
+SRCS		= $(OBJS:.o=.cpp) \
+		  $(COBJS:.o=.cpp) \
+		  $(SOBJS:.o=.cpp) \
+		  $(SSOBJS:.o=.cpp)
 
 !include $(top_srcdir)/config/Make.rules.mak
 
-CPPFLAGS	= -I. $(CPPFLAGS) -DWIN32_LEAN_AND_MEAN
-
-!if "$(CPP_COMPILER)" != "BCC2006" && "$(OPTIMIZE)" != "yes"
-CPDBFLAGS        = /pdb:$(CLIENT:.exe=.pdb)
-SPDBFLAGS        = /pdb:$(SERVER:.exe=.pdb)
-SSPDBFLAGS       = /pdb:$(SESSION_SERVER:.exe=.pdb)
-!endif
+CPPFLAGS	= -I. $(CPPFLAGS)
 
 $(CLIENT): $(OBJS) $(COBJS)
-	$(LINK) $(LD_EXEFLAGS) $(CPDBFLAGS) $(SETARGV) $(OBJS) $(COBJS) $(PREOUT)$@ $(PRELIBS)$(LIBS) glacier2$(LIBSUFFIX).lib
-	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
-	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#1 && del /q $@.manifest
+	del /q $@
+	$(LINK) $(LD_EXEFLAGS) $(OBJS) $(COBJS), $@,, $(LIBS) glacier2$(LIBSUFFIX).lib
 
 $(SERVER): $(OBJS) $(SOBJS)
-	$(LINK) $(LD_EXEFLAGS) $(SPDBFLAGS) $(SETARGV) $(OBJS) $(SOBJS) $(PREOUT)$@ $(PRELIBS)$(LIBS)
-	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
-	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#1 && del /q $@.manifest
+	del /q $@
+	$(LINK) $(LD_EXEFLAGS) $(OBJS) $(SOBJS), $@,, $(LIBS)
 
 $(SESSION_SERVER): $(SSOBJS)
-	$(LINK) $(LD_EXEFLAGS) $(SSPDBFLAGS) $(SETARGV) $(SSOBJS) $(PREOUT)$@ $(PRELIBS)$(LIBS) \
-		glacier2$(LIBSUFFIX).lib
-	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
-	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#1 && del /q $@.manifest
+	del /q $@
+	$(LINK) $(LD_EXEFLAGS) $(SSOBJS), $@,, $(LIBS) glacier2$(LIBSUFFIX).lib
+
+Callback.cpp Callback.h: Callback.ice $(SLICE2CPP) $(SLICEPARSERLIB)
+	$(SLICE2CPP) $(SLICE2CPPFLAGS) Callback.ice
 
 clean::
 	del /q Callback.cpp Callback.h

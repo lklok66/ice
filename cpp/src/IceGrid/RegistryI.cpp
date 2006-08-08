@@ -41,8 +41,10 @@
 
 #ifdef _WIN32
 #   include <direct.h>
-#   define S_ISDIR(mode) ((mode) & _S_IFDIR)
-#   define S_ISREG(mode) ((mode) & _S_IFREG)
+#   ifdef _MSC_VER
+#      define S_ISDIR(mode) ((mode) & _S_IFDIR)
+#      define S_ISREG(mode) ((mode) & _S_IFREG)
+#   endif
 #else
 #   include <unistd.h>
 #endif
@@ -334,9 +336,15 @@ RegistryI::start(bool nowarn)
 					  "Registry");
 
     NodeObserverTopicPtr nodeTopic = new NodeObserverTopic(_iceStorm->getTopicManager());
+#ifdef __BCPLUSPLUS__
+    nodeTopic->initialize(_iceStorm->getTopicManager());
+#endif
     NodeObserverPrx nodeObserver = NodeObserverPrx::uncheckedCast(registryAdapter->addWithUUID(nodeTopic));
 
     RegistryObserverTopicPtr regTopic = new RegistryObserverTopic(_iceStorm->getTopicManager());
+#ifdef __BCPLUSPLUS__
+    regTopic->initialize(_iceStorm->getTopicManager());
+#endif
     RegistryObserverPrx registryObserver = RegistryObserverPrx::uncheckedCast(registryAdapter->addWithUUID(regTopic));
 
     _database->setObservers(registryObserver, nodeObserver);

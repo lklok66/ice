@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -14,8 +14,8 @@ rubyDir = nil
 for toplevel in [".", "..", "../..", "../../..", "../../../.."]
     path = Pathname.new(toplevel).join("ruby", "Ice.rb")
     if path.file?
-        rubyDir = Pathname.new(toplevel).join("ruby")
-        break
+	rubyDir = Pathname.new(toplevel).join("ruby")
+	break
     end
 end
 if not rubyDir
@@ -42,44 +42,38 @@ require 'AllTests'
 
 def test(b)
     if !b
-        raise RuntimeError, 'test assertion failed'
+	raise RuntimeError, 'test assertion failed'
     end
 end
 
-def run(args, communicator)
-    myClass = allTests(communicator)
+def run(args, communicator, initData)
+    myClass = allTests(communicator, initData)
 
     print "testing server shutdown... "
     STDOUT.flush
     myClass.shutdown()
     begin
-        myClass.opVoid()
-        test(false)
+	myClass.opVoid()
+	test(false)
     rescue Ice::LocalException
-        puts "ok"
+	puts "ok"
     end
 
     return true
 end
 
 begin
+    #
+    # In this test, we need at least two threads in the
+    # client side thread pool for nested AMI.
+    #
     initData = Ice::InitializationData.new
     initData.properties = Ice.createProperties(ARGV)
-    #
-    # This is not necessary since we don't have AMI support (yet).
-    #
-    #initData.properties.setProperty('Ice.ThreadPool.Client.Size', '2')
-    #initData.properties.setProperty('Ice.ThreadPool.Client.SizeWarn', '0')
-
-    #
-    # We must set MessageSizeMax to an explicit values, because
-    # we run tests to check whether Ice.MemoryLimitException is
-    # raised as expected.
-    #
-    initData.properties.setProperty("Ice.MessageSizeMax", "100")
+    initData.properties.setProperty('Ice.ThreadPool.Client.Size', '2')
+    initData.properties.setProperty('Ice.ThreadPool.Client.SizeWarn', '0')
 
     communicator = Ice.initialize(ARGV, initData)
-    status = run(ARGV, communicator)
+    status = run(ARGV, communicator, initData)
 rescue => ex
     puts $!
     print ex.backtrace.join("\n")
@@ -88,11 +82,11 @@ end
 
 if communicator
     begin
-        communicator.destroy()
+	communicator.destroy()
     rescue => ex
-        puts $!
-        print ex.backtrace.join("\n")
-        status = false
+	puts $!
+	print ex.backtrace.join("\n")
+	status = false
     end
 end
 

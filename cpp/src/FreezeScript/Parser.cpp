@@ -137,7 +137,7 @@ FreezeScript::EvaluateException::ice_name() const
 void
 FreezeScript::EvaluateException::ice_print(ostream& out) const
 {
-    Exception::ice_print(out);
+    Ice::Exception::ice_print(out);
     out << ":\nerror occurred while evaluating expression";
     if(!_reason.empty())
     {

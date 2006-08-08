@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -15,8 +15,8 @@ for toplevel in [".", "..", "../..", "../../..", "../../../.."]
     toplevel = Pathname.new(toplevel)
     path = toplevel.join("ruby", "Ice.rb")
     if path.file?
-        rubyDir = toplevel.join("ruby")
-        break
+	rubyDir = toplevel.join("ruby")
+	break
     end
 end
 if not rubyDir
@@ -58,11 +58,11 @@ end
 
 if communicator
     begin
-        communicator.destroy()
+	communicator.destroy()
     rescue => ex
-        puts $!
-        print ex.backtrace.join("\n")
-        status = false
+	puts $!
+	print ex.backtrace.join("\n")
+	status = false
     end
 end
 

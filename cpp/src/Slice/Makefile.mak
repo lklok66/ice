@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -14,51 +14,33 @@ DLLNAME		= $(top_srcdir)\bin\slice$(SOVERSION)$(LIBSUFFIX).dll
 
 TARGETS		= $(LIBNAME) $(DLLNAME)
 
-OBJS		= Scanner.obj \
-		  Grammar.obj \
-		  Parser.obj \
-		  CPlusPlusUtil.obj \
-		  CsUtil.obj \
-		  VbUtil.obj \
-		  JavaUtil.obj \
-		  Preprocessor.obj \
-		  Checksum.obj \
-		  PythonUtil.obj \
-		  DotNetNames.obj \
-		  RubyUtil.obj
+OBJS		= Scanner.o \
+		  Grammar.o \
+		  Parser.o \
+		  CPlusPlusUtil.o \
+		  CsUtil.o \
+		  VbUtil.o \
+		  JavaUtil.o \
+		  Preprocessor.o \
+		  Checksum.o \
+		  PythonUtil.o \
+		  DotNetNames.o
 
-SRCS		= $(OBJS:.obj=.cpp)
+SRCS		= $(OBJS:.o=.cpp)
 
 !include $(top_srcdir)/config/Make.rules.mak
 
-CPPFLAGS	= -I.. -Idummyinclude $(CPPFLAGS) -DSLICE_API_EXPORTS  -DWIN32_LEAN_AND_MEAN
-
-!if "$(CPP_COMPILER)" != "BCC2006" && "$(OPTIMIZE)" != "yes"
-PDBFLAGS        = /pdb:$(DLLNAME:.dll=.pdb)
-!endif
-
-!if "$(STATICLIBS)" == "yes"
-
-$(DLLNAME):
-
-$(LIBNAME): $(OBJS)
-	$(AR) $(ARFLAGS) $(PDBFLAGS) $(OBJS) $(PREOUT)$@
-
-!else
+CPPFLAGS	= -I.. $(CPPFLAGS) -DSLICE_API_EXPORTS 
 
 $(LIBNAME): $(DLLNAME)
 
 $(DLLNAME): $(OBJS)
-	$(LINK) $(LD_DLLFLAGS) $(PDBFLAGS) $(OBJS) $(PREOUT)$@ $(PRELIBS)$(BASELIBS)
+	del /q $@
+	$(LINK) $(LD_DLLFLAGS) $(OBJS), $(DLLNAME),, $(BASELIBS)
 	move $(DLLNAME:.dll=.lib) $(LIBNAME)
-	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
-	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#2 && del /q $@.manifest
-	@if exist $(DLLNAME:.dll=.exp) del /q $(DLLNAME:.dll=.exp)
-
-!endif
 
 Scanner.cpp : Scanner.l
-	flex Scanner.l
+	flex $(FLEXFLAGS) Scanner.l
 	del /q $@
 	echo #include "IceUtil/Config.h" > Scanner.cpp
 	type lex.yy.c >> Scanner.cpp
@@ -74,26 +56,9 @@ Grammar.cpp Grammar.h: Grammar.y
 clean::
 	del /q Grammar.cpp Grammar.h
 	del /q Scanner.cpp
-	del /q $(DLLNAME:.dll=.*)
 
 install:: all
 	copy $(LIBNAME) $(install_libdir)
 	copy $(DLLNAME) $(install_bindir)
-
-!if "$(OPTIMIZE)" != "yes"
-
-!if "$(CPP_COMPILER)" == "BCC2006"
-
-install:: all
-	copy $(DLLNAME:.dll=.tds) $(install_bindir)
-
-!else
-
-install:: all
-	copy $(DLLNAME:.dll=.pdb) $(install_bindir)
-
-!endif
-
-!endif
 
 !include .depend

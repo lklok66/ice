@@ -39,7 +39,7 @@ IceXML::ParserException::ice_name() const
 void
 IceXML::ParserException::ice_print(std::ostream& out) const
 {
-    Exception::ice_print(out);
+    IceUtil::Exception::ice_print(out);
     if(!_reason.empty())
     {
         out << "\n" << _reason;
@@ -265,7 +265,7 @@ IceXML::DocumentBuilder::startElement(const string& name, const Attributes& attr
     NodePtr parent = _nodeStack.front();
 
     Element* element = new Element(parent, name, attributes, line, column);
-#if NDEBUG
+#ifdef NDEBUG
     parent->addChild(element);
 #else
     assert(parent->addChild(element));

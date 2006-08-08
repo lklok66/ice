@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -17,52 +17,43 @@ DLLNAME		= testservice$(LIBSUFFIX).dll
 
 TARGETS		= $(CLIENT) $(SERVER) $(LIBNAME) $(DLLNAME)
 
-OBJS		= Test.obj
+OBJS		= Test.o
 
-COBJS		= Client.obj \
-		  AllTests.obj
+COBJS		= Client.o \
+		  AllTests.o
 
-SOBJS		= TestI.obj \
-		  Server.obj
+SOBJS		= TestI.o \
+		  Server.o
 
-SERVICE_OBJS	= TestI.obj \
-		  Service.obj
+SERVICE_OBJS	= TestI.o \
+		  Service.o
 
-SRCS		= $(OBJS:.obj=.cpp) \
-		  $(COBJS:.obj=.cpp) \
-		  $(SOBJS:.obj=.cpp) \
-		  $(SERVICE_OBJS:.obj=.cpp)
+SRCS		= $(OBJS:.o=.cpp) \
+		  $(COBJS:.o=.cpp) \
+		  $(SOBJS:.o=.cpp) \
+		  $(SERVICE_OBJS:.o=.cpp)
 
 !include $(top_srcdir)/config/Make.rules.mak
 
-CPPFLAGS	= -I. -I../../include $(CPPFLAGS) -DWIN32_LEAN_AND_MEAN
+CPPFLAGS	= -I. -I../../include $(CPPFLAGS)
 LINKWITH	= $(LIBS) icebox$(LIBSUFFIX).lib
-
-!if "$(CPP_COMPILER)" != "BCC2006" && "$(OPTIMIZE)" != "yes"
-PDBFLAGS        = /pdb:$(DLLNAME:.dll=.pdb)
-CPDBFLAGS       = /pdb:$(CLIENT:.exe=.pdb)
-SPDBFLAGS       = /pdb:$(SERVER:.exe=.pdb)
-!endif
 
 $(LIBNAME) : $(DLLNAME)
 
 $(DLLNAME): $(OBJS) $(SERVICE_OBJS)
-	$(LINK) $(LD_DLLFLAGS) $(PDBFLAGS) $(SETARGV) $(OBJS) $(SERVICE_OBJS) $(PREOUT)$(DLLNAME) $(PRELIBS)$(LINKWITH) \
-	  freeze$(LIBSUFFIX).lib
-	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
-	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#2 && del /q $@.manifest
-	@if exist $(DLLNAME:.dll=.exp) del /q $(DLLNAME:.dll=.exp)
+	del /q $@
+	$(LINK) $(LD_DLLFLAGS) $(OBJS) $(SERVICE_OBJS), $(DLLNAME),, $(LINKWITH) freeze$(LIBSUFFIX).lib
 
 $(CLIENT): $(OBJS) $(COBJS)
-	$(LINK) $(LD_EXEFLAGS) $(CPDBFLAGS) $(SETARGV) $(OBJS) $(COBJS) $(PREOUT)$@ $(PRELIBS)$(LINKWITH) \
-	  icegrid$(LIBSUFFIX).lib glacier2$(LIBSUFFIX).lib
-	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
-	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#1 && del /q $@.manifest
+	del /q $@
+	$(LINK) $(LD_EXEFLAGS) $(OBJS) $(COBJS), $@,, $(LINKWITH) icegrid$(LIBSUFFIX).lib glacier2$(LIBSUFFIX).lib
 
 $(SERVER): $(OBJS) $(SOBJS)
-	$(LINK) $(LD_EXEFLAGS) $(SPDBFLAGS) $(SETARGV) $(OBJS) $(SOBJS) $(PREOUT)$@ $(PRELIBS)$(LIBS)
-	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
-	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#1 && del /q $@.manifest
+	del /q $@
+	$(LINK) $(LD_EXEFLAGS) $(OBJS) $(SOBJS), $@,, $(LIBS)
+
+Test.cpp Test.h: Test.ice $(SLICE2CPP) $(SLICEPARSERLIB)
+	$(SLICE2CPP) $(SLICE2CPPFLAGS) Test.ice
 
 clean::
 	del /q Test.cpp Test.h

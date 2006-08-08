@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2006 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -20,15 +20,16 @@ ICE_SRCS	= Ice/LocalException.rb \
 		  Ice/Logger.rb \
 		  Ice/LoggerF.rb \
 		  Ice/BuiltinSequences.rb \
+		  Ice/ObjectAdapter.rb \
 		  Ice/ObjectAdapterF.rb \
+		  Ice/ServantLocator.rb \
+		  Ice/ServantLocatorF.rb \
 		  Ice/Properties.rb \
 		  Ice/PropertiesF.rb \
 		  Ice/ObjectFactory.rb \
 		  Ice/ObjectFactoryF.rb \
 		  Ice/Identity.rb \
 		  Ice/Current.rb \
-		  Ice/ImplicitContextF.rb \
-		  Ice/ImplicitContext.rb \
 		  Ice/Router.rb \
 		  Ice/RouterF.rb \
 		  Ice/Plugin.rb \
@@ -68,7 +69,6 @@ ICEGRID_SRCS	= IceGrid/Admin.rb \
 		  IceGrid/Descriptor.rb \
 		  IceGrid/Exception.rb \
 		  IceGrid/FileParser.rb \
-		  IceGrid/Locator.rb \
 		  IceGrid/Observer.rb \
 		  IceGrid/Query.rb \
 		  IceGrid/Registry.rb \

@@ -19,14 +19,22 @@
 #include <IceGrid/NodeI.h>
 #include <IceGrid/TraceLevels.h>
 #include <IceGrid/DescriptorParser.h>
+#ifdef __BCPLUSPLUS__
+#  include <IceGrid/ServerI.h>
+#  include <IceGrid/AdminSessionI.h>
+#  include <IceGrid/ReapThread.h>
+#  include <IceGrid/Database.h>
+#endif
 #include <IcePatch2/Util.h>
 
 #ifdef _WIN32
 #   include <direct.h>
 #   include <sys/types.h>
 #   include <sys/stat.h>
-#   define S_ISDIR(mode) ((mode) & _S_IFDIR)
-#   define S_ISREG(mode) ((mode) & _S_IFREG)
+#   ifdef _MSC_VER
+#      define S_ISDIR(mode) ((mode) & _S_IFDIR)
+#      define S_ISREG(mode) ((mode) & _S_IFREG)
+#   endif
 #else
 #   include <sys/stat.h>
 #endif

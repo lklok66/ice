@@ -9,24 +9,20 @@
 
 top_srcdir	= ..\..
 
-NAME		= $(top_srcdir)\bin\slice2cppe.exe
-
-TARGETS		= $(NAME)
-
-OBJS		= Gen.o \
-		  Main.o
-
-SRCS		= $(OBJS:.o=.cpp)
-
 !include $(top_srcdir)/config/Make.rules.mak
 
-CPPFLAGS	= -I. $(CPPFLAGS)
+CA_FILES =  initca.py \
+	    req.py \
+	    cautil.py  \
+	    import.py \
+	    sign.py \
+	    ImportKey.class
 
-$(NAME): $(OBJS)
-	del /q $@
-	$(LINK) $(LD_EXEFLAGS) $(OBJS), $@,, slice$(LIBSUFFIX).lib $(BASELIBS)
-
-install:: all
-	copy $(NAME) $(install_bindir)
-
-!include .depend
+install::
+	@if not exist $(prefix)\config\ca \
+	    @echo "Creating $(prefix)\config\ca..." & \
+	    mkdir $(prefix)\config\ca
+	@for %i in ( $(CA_FILES) ) do \
+	    @echo "Installing %i" & \
+	    copy %i $(prefix)\config\ca
+	copy README $(prefix)\config\ca
