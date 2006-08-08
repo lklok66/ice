@@ -17,7 +17,7 @@ prefix			= C:\Ice-$(VERSION)
 # Define OPTIMIZE as yes if you want to build with
 # optimization. Otherwise Ice is build with debug information.
 #
-OPTIMIZE		= yes
+#OPTIMIZE		= yes
 
 
 #
@@ -29,8 +29,7 @@ BCB			= C:\Program Files\Borland\BDS\4.0
 # If third party libraries are not installed in the default location
 # change the following setting to reflect the installation location.
 #
-#THIRDPARTY_HOME	= C:\Ice-$(VERSION)-ThirdParty
-THIRDPARTY_HOME		= C:\src\packages_win32
+THIRDPARTY_HOME	= C:\Ice-$(VERSION)-ThirdParty-BCC
 
 # ----------------------------------------------------------------------
 # Don't change anything below this line!
