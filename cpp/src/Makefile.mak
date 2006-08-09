@@ -36,5 +36,6 @@ SUBDIRS		= IceUtil \
 
 $(EVERYTHING)::
 	@for %i in ( $(SUBDIRS) ) do \
-	    @echo "making $@ in %i" & \
-	    cmd /c "cd %i & $(MAKE) -f Makefile.mak $@"
+	    @if exist %i \
+	        @echo "making $@ in %i" & \
+	        cmd /c "cd %i & $(MAKE) -f Makefile.mak $@"
