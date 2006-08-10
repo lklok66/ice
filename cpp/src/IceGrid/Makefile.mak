@@ -56,12 +56,11 @@ NODE_OBJS	= NodeI.o \
 		  ServerI.o \
 		  ServerAdapterI.o \
 		  Activator.o \
-		  PlatformInfo.o \
-		  NodeSessionManager.o
+		  PlatformInfo.o
 
 REGISTRY_OBJS	= RegistryI.o \
 		  InternalRegistryI.o \
-		  StringApplicationInfoDict.o \
+		  StringApplicationDescriptorDict.o \
 		  IdentityObjectInfoDict.o \
 		  StringAdapterInfoDict.o \
 		  Database.o \
@@ -71,14 +70,12 @@ REGISTRY_OBJS	= RegistryI.o \
 		  AllocatableObjectCache.o \
 		  ServerCache.o \
 		  NodeCache.o \
-		  ReplicaCache.o \
 		  LocatorI.o \
 		  LocatorRegistryI.o \
 		  AdminI.o \
 		  Util.o \
 		  DescriptorHelper.o \
 		  NodeSessionI.o \
-		  ReplicaSessionI.o \
 		  ReapThread.o \
 		  SessionI.o \
 		  AdminSessionI.o \
@@ -86,8 +83,7 @@ REGISTRY_OBJS	= RegistryI.o \
 		  Topics.o \
 		  QueryI.o \
 		  WaitQueue.o \
-		  FileUserAccountMapperI.o \
-		  ReplicaSessionManager.o
+		  FileUserAccountMapperI.o
 
 NODE_SVR_OBJS	= $(COMMON_OBJS) \
 		  $(NODE_OBJS) \
@@ -149,10 +145,10 @@ $(NODE_SERVER): $(NODE_SVR_OBJS)
 	del /q $@
 	$(LINK) $(LD_EXEFLAGS) $(NODE_SVR_OBJS), $@,, $(NLINKWITH)
 
-StringApplicationInfoDict.h StringApplicationInfoDict.cpp: $(SLICE2FREEZE)
-	del /q StringApplicationInfoDict.h StringApplicationInfoDict.cpp
-	$(SLICE2FREEZECMD) --dict IceGrid::StringApplicationInfoDict,string,IceGrid::ApplicationInfo \
-	StringApplicationInfoDict Internal.ice
+StringApplicationDescriptorDict.h StringApplicationDescriptorDict.cpp: $(SLICE2FREEZE)
+	del /q StringApplicationDescriptorDict.h StringApplicationDescriptorDict.cpp
+	$(SLICE2FREEZECMD) --dict IceGrid::StringApplicationDescriptorDict,string,IceGrid::ApplicationDescriptor \
+	StringApplicationDescriptorDict $(SDIR)/Admin.ice
 
 IdentityObjectInfoDict.h IdentityObjectInfoDict.cpp: $(SLICE2FREEZE)
 	del /q IdentityObjectInfoDict.h IdentityObjectInfoDict.cpp
@@ -221,7 +217,7 @@ Grammar.cpp Grammar.h: Grammar.y
 !ifdef BUILD_UTILS
 
 clean::
-	del /q StringApplicationInfoDict.h StringApplicationInfoDict.cpp
+	del /q StringApplicationDescriptorDict.h StringApplicationDescriptorDict.cpp
 	del /q StringAdapterInfoDict.h StringAdapterInfoDict.cpp
 	del /q IdentityObjectInfoDict.h IdentityObjectInfoDict.cpp
 
