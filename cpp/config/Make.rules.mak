@@ -29,7 +29,7 @@ BCB			= C:\Program Files\Borland\BDS\4.0
 # If third party libraries are not installed in the default location
 # change the following setting to reflect the installation location.
 #
-THIRDPARTY_HOME	= C:\Ice-$(VERSION)-ThirdParty
+THIRDPARTY_HOME		= C:\Ice-$(VERSION)-ThirdParty-BCC
 
 # ----------------------------------------------------------------------
 # Don't change anything below this line!
