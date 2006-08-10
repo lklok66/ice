@@ -56,11 +56,12 @@ NODE_OBJS	= NodeI.o \
 		  ServerI.o \
 		  ServerAdapterI.o \
 		  Activator.o \
-		  PlatformInfo.o
+		  PlatformInfo.o \
+		  NodeSessionManager.o
 
 REGISTRY_OBJS	= RegistryI.o \
 		  InternalRegistryI.o \
-		  StringApplicationDescriptorDict.o \
+		  StringApplicationInfoDict.o \
 		  IdentityObjectInfoDict.o \
 		  StringAdapterInfoDict.o \
 		  Database.o \
@@ -70,12 +71,14 @@ REGISTRY_OBJS	= RegistryI.o \
 		  AllocatableObjectCache.o \
 		  ServerCache.o \
 		  NodeCache.o \
+		  ReplicaCache.o \
 		  LocatorI.o \
 		  LocatorRegistryI.o \
 		  AdminI.o \
 		  Util.o \
 		  DescriptorHelper.o \
 		  NodeSessionI.o \
+		  ReplicaSessionI.o \
 		  ReapThread.o \
 		  SessionI.o \
 		  AdminSessionI.o \
@@ -83,7 +86,8 @@ REGISTRY_OBJS	= RegistryI.o \
 		  Topics.o \
 		  QueryI.o \
 		  WaitQueue.o \
-		  FileUserAccountMapperI.o
+		  FileUserAccountMapperI.o \
+		  ReplicaSessionManager.o
 
 NODE_SVR_OBJS	= $(COMMON_OBJS) \
 		  $(NODE_OBJS) \
@@ -145,10 +149,10 @@ $(NODE_SERVER): $(NODE_SVR_OBJS)
 	del /q $@
 	$(LINK) $(LD_EXEFLAGS) $(NODE_SVR_OBJS), $@,, $(NLINKWITH)
 
-StringApplicationDescriptorDict.h StringApplicationDescriptorDict.cpp: $(SLICE2FREEZE)
-	del /q StringApplicationDescriptorDict.h StringApplicationDescriptorDict.cpp
-	$(SLICE2FREEZECMD) --dict IceGrid::StringApplicationDescriptorDict,string,IceGrid::ApplicationDescriptor \
-	StringApplicationDescriptorDict $(SDIR)/Admin.ice
+StringApplicationInfoDict.h StringApplicationInfoDict.cpp: $(SLICE2FREEZE)
+	del /q StringApplicationInfoDict.h StringApplicationInfoDict.cpp
+	$(SLICE2FREEZECMD) --dict IceGrid::StringApplicationInfoDict,string,IceGrid::ApplicationInfo \
+	StringApplicationInfoDict Internal.ice
 
 IdentityObjectInfoDict.h IdentityObjectInfoDict.cpp: $(SLICE2FREEZE)
 	del /q IdentityObjectInfoDict.h IdentityObjectInfoDict.cpp
@@ -201,7 +205,7 @@ Internal.cpp Internal.h: Internal.ice $(SLICE2CPP) $(SLICEPARSERLIB)
 	$(SLICE2CPP) $(SLICE2CPPFLAGS) Internal.ice
 
 Scanner.cpp : Scanner.l
-	flex $(FLEXFLAGS) Scanner.l
+	flex Scanner.l
 	del /q $@
 	echo #include "IceUtil/Config.h" > Scanner.cpp
 	type lex.yy.c >> Scanner.cpp
@@ -217,7 +221,7 @@ Grammar.cpp Grammar.h: Grammar.y
 !ifdef BUILD_UTILS
 
 clean::
-	del /q StringApplicationDescriptorDict.h StringApplicationDescriptorDict.cpp
+	del /q StringApplicationInfoDict.h StringApplicationInfoDict.cpp
 	del /q StringAdapterInfoDict.h StringAdapterInfoDict.cpp
 	del /q IdentityObjectInfoDict.h IdentityObjectInfoDict.cpp
 
