@@ -71,7 +71,7 @@ LIBSUFFIX	= $(LIBSUFFIX)d
 
 OPENSSL_LIBS            = ssleay32.lib libeay32.lib
 BZIP2_LIBS              = libbz2$(LIBSUFFIX).lib
-DB_LIBS                 = libdb44.lib
+DB_LIBS                 = libdb43.lib
 EXPAT_LIBS              = libexpat.lib
 
 CPPFLAGS		= $(CPPFLAGS) -I$(includedir)
