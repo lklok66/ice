@@ -495,6 +495,13 @@ RegistryI::createSession(const string& user, const string& password, const Curre
 	throw ex;
     }
 
+    if(user.empty())
+    {
+        PermissionDeniedException ex;
+	ex.reason = "empty user id";
+	throw ex;
+    }
+
     try
     {
 	string reason;
@@ -534,6 +541,13 @@ RegistryI::createAdminSession(const string& user, const string& password, const 
 	ex.reason = "no admin permissions verifier configured, use the property\n";
 	ex.reason += "`IceGrid.Registry.AdminPermissionsVerifier' to configure\n";
 	ex.reason += "a permissions verifier.";
+	throw ex;
+    }
+
+    if(user.empty())
+    {
+        PermissionDeniedException ex;
+	ex.reason = "empty user id";
 	throw ex;
     }
 
@@ -583,6 +597,13 @@ RegistryI::createSessionFromSecureConnection(const Current& current)
 
     string userDN;
     Glacier2::SSLInfo info = getSSLInfo(current.con, userDN);
+    if(userDN.empty())
+    {
+        PermissionDeniedException ex;
+	ex.reason = "empty user DN";
+	throw ex;
+    }
+
     try
     {
 	string reason;
