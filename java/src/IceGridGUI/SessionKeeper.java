@@ -231,7 +231,7 @@ class SessionKeeper
 		    _adapter.add(
 			new NodeObserverI(_coordinator), _nodeObserverIdentity));
 	    
-	    if(router == null)
+	    if(router != null)
 	    {
 		_session.setObservers(registryObserver, nodeObserver);
 	    }
@@ -239,7 +239,7 @@ class SessionKeeper
 	    {
 		_session.setObserversByIdentity(
 		    _registryObserverIdentity, 
-		    _registryObserverIdentity);
+		    _nodeObserverIdentity);
 	    }
 	    
 	    registryObserverServant.waitForInit();
@@ -315,7 +315,6 @@ class SessionKeeper
 		registryEndpoints = 
 		    _connectionPrefs.get("registry.endpoints", registryEndpoints);
 	    }
-
 	    
 	    //
 	    // Glacier2 properties
@@ -357,12 +356,15 @@ class SessionKeeper
 		routerEndpoints = 
 		    _connectionPrefs.get("router.endpoints", routerEndpoints);
 	    }
+	    registrySSLEnabled = _connectionPrefs.getBoolean("routerSSLEnabled", registrySSLEnabled);
 
 	    registryUsername = _connectionPrefs.get("registry.username", registryUsername);
 	    registryUseSSL = _connectionPrefs.getBoolean("registry.useSSL", registryUseSSL);
+	    registrySSLEnabled = _connectionPrefs.getBoolean("registry.sslEnabled", registryUseSSL); // not a typo!
 
 	    routerUsername = _connectionPrefs.get("router.username", routerUsername);
 	    routerUseSSL = _connectionPrefs.getBoolean("router.useSSL", routerUseSSL);
+	    routerSSLEnabled = _connectionPrefs.getBoolean("router.sslEnabled", routerUseSSL); // not a typo!
 
 	    routed = _connectionPrefs.getBoolean("routed", routed);
 
@@ -408,6 +410,7 @@ class SessionKeeper
 	    {
 		_connectionPrefs.put("router.username", routerUsername);
 		_connectionPrefs.putBoolean("router.useSSL", routerUseSSL);
+		_connectionPrefs.putBoolean("router.sslEnabled", routerSSLEnabled);
 		_connectionPrefs.put("router.instanceName", routerInstanceName);
 		_connectionPrefs.put("router.endpoints", routerEndpoints);
 	    }
@@ -415,6 +418,7 @@ class SessionKeeper
 	    {
 		_connectionPrefs.put("registry.username", registryUsername);
 		_connectionPrefs.putBoolean("registry.useSSL", registryUseSSL);
+		_connectionPrefs.putBoolean("registry.sslEnabled", registrySSLEnabled);
 		_connectionPrefs.put("registry.instanceName", registryInstanceName);
 		_connectionPrefs.put("registry.endpoints", registryEndpoints);
 	    }
@@ -424,7 +428,7 @@ class SessionKeeper
 	    //
 	    _connectionPrefs.put("keystore", keystore);
 	    _connectionPrefs.put("alias", alias);
-	    _connectionPrefs.put("truststore", keystore);
+	    _connectionPrefs.put("truststore", truststore);
 	}
 
 	boolean routed = false;
@@ -432,15 +436,17 @@ class SessionKeeper
 	String registryUsername = System.getProperty("user.name");
 	char[] registryPassword;
 	boolean registryUseSSL = false;
+	boolean registrySSLEnabled = false;
 	String registryInstanceName = "IceGrid";
 	String registryEndpoints = "";
 
 	String routerUsername = System.getProperty("user.name");
 	char[] routerPassword;
 	boolean routerUseSSL = false;
+	boolean routerSSLEnabled = false;
 	String routerInstanceName = "Glacier2";
 	String routerEndpoints = "";
-	
+
 	//
 	// SSL Configuration
 	//
@@ -498,11 +504,7 @@ class SessionKeeper
 		{
 		    public void actionPerformed(ActionEvent e) 
 		    {
-			boolean selected = _registryUseSSL.isSelected();
-			_registryUsername.setEnabled(!selected);
-			_registryUsernameLabel.setEnabled(!selected);
-			_registryPassword.setEnabled(!selected);
-			_registryPasswordLabel.setEnabled(!selected);
+			selectRegistryUseSSL(_registryUseSSL.isSelected());
 		    }
 		};
 	    _registryUseSSL = new JCheckBox(registryUseSSL);
@@ -512,14 +514,29 @@ class SessionKeeper
 		{
 		    public void actionPerformed(ActionEvent e) 
 		    {
-			boolean selected = _routerUseSSL.isSelected();
-			_routerUsername.setEnabled(!selected);
-			_routerUsernameLabel.setEnabled(!selected);
-			_routerPassword.setEnabled(!selected);
-			_routerPasswordLabel.setEnabled(!selected);
+			selectRouterUseSSL(_routerUseSSL.isSelected());
 		    }
 		};
 	    _routerUseSSL = new JCheckBox(routerUseSSL);
+
+	    Action registrySSLEnabled = new AbstractAction("Enable IceSSL")
+		{
+		    public void actionPerformed(ActionEvent e) 
+		    {
+			selectRegistrySSLEnabled(_registrySSLEnabled.isSelected());
+		    }
+		};
+	    _registrySSLEnabled = new JCheckBox(registrySSLEnabled);
+	    
+	    Action routerSSLEnabled = new AbstractAction("Enable IceSSL")
+		{
+		    public void actionPerformed(ActionEvent e) 
+		    {
+			selectRouterSSLEnabled(_routerSSLEnabled.isSelected());
+		    }
+		};
+	    _routerSSLEnabled = new JCheckBox(routerSSLEnabled);
+
 
 	    _keystore.setEditable(false);
 	    _advancedKeystore.setEditable(false);
@@ -632,6 +649,8 @@ class SessionKeeper
 		builder.nextLine();
 		builder.append("", _registryUseSSL);
 		builder.nextLine();
+		builder.append("", _registrySSLEnabled);
+		builder.nextLine();
 		builder.append("IceGrid Instance Name", _registryInstanceName);
 		builder.nextLine();
 		builder.append("IceGrid Registry Endpoint(s)", _registryEndpoints);
@@ -656,17 +675,34 @@ class SessionKeeper
 		builder.nextLine();
 		builder.append("", _routerUseSSL);
 		builder.nextLine();
+		builder.append("", _routerSSLEnabled);
+		builder.nextLine();
 		builder.append("Glacier2 Instance Name", _routerInstanceName);
 		builder.nextLine();
 		builder.append("Glacier2 Router Endpoint(s)", _routerEndpoints);
 		builder.nextLine();
-		
+	
 		routedPanel = builder.getPanel();
 	    }
 	    
 	    _mainPane.addTab("Direct", null, directPanel, "Log directly into the IceGrid registry");
 	    _mainPane.addTab("Routed", null, routedPanel, "Log into the IceGrid registry through a Glacier2 router");
 	    _mainPane.setBorder(Borders.DIALOG_BORDER);
+
+	    _mainPane.addChangeListener(new javax.swing.event.ChangeListener()
+		{
+		    public void stateChanged(javax.swing.event.ChangeEvent e)
+		    {
+			if(_mainPane.getSelectedIndex() == 0)
+			{
+			    directTabSelected();
+			}
+			else
+			{
+			    routedTabSelected(); 
+			}
+		    }
+		});
 
 	    JPanel basicSSLPanel = null;
 	    {
@@ -677,7 +713,7 @@ class SessionKeeper
 		builder.setDefaultDialogBorder();
 		builder.setRowGroupingEnabled(true);
 		builder.setLineGapSize(LayoutStyle.getCurrent().getLinePad());
-		
+
 		builder.appendSeparator("Keystore");
 		builder.append("File", _keystore);
 		builder.append(new JButton(chooseKeystore));
@@ -724,31 +760,26 @@ class SessionKeeper
 		advancedSSLPanel = builder.getPanel();
 	    }
 
-	    JTabbedPane sslPane = new JTabbedPane();
-
-	    sslPane.addTab("Basic", basicSSLPanel);
-	    sslPane.addTab("Advanced", advancedSSLPanel);
+	    
+	    _sslPane.addTab("Basic", basicSSLPanel);
+	    _sslPane.addTab("Advanced", advancedSSLPanel);
 	    TitledBorder titledBorder = BorderFactory.createTitledBorder(Borders.DIALOG_BORDER,
 									 "SSL Configuration");
-	    sslPane.setBorder(titledBorder);
-
+	    _sslPane.setBorder(titledBorder);
 
 	    JComponent buttonBar = 
 		    ButtonBarFactory.buildOKCancelBar(okButton, cancelButton);
 	    buttonBar.setBorder(Borders.DIALOG_BORDER);
 	    
-
-
 	    Container contentPane = getContentPane();
 	    contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
 	    contentPane.add(_mainPane);
-	    contentPane.add(sslPane);
+	    contentPane.add(_sslPane);
 	    contentPane.add(buttonBar);
 
 	    pack();
 	    setResizable(false);
 	}
-
 	
 	void showDialog()
 	{
@@ -757,15 +788,19 @@ class SessionKeeper
 		_mainPane.setSelectedIndex(_loginInfo.routed ? 1 : 0);
 
 		_registryUsername.setText(_loginInfo.registryUsername);
-		_registryUseSSL.setSelected(_loginInfo.registryUseSSL);
+		selectRegistryUseSSL(_loginInfo.registryUseSSL);
+
 		_registryInstanceName.setText(_loginInfo.registryInstanceName);
 		_registryEndpoints.setText(_loginInfo.registryEndpoints);
-	
+		_registrySSLEnabled.setSelected(_loginInfo.routerSSLEnabled);
+
 		_routerUsername.setText(_loginInfo.routerUsername);
-		_routerUseSSL.setSelected(_loginInfo.routerUseSSL);
+		selectRouterUseSSL(_loginInfo.routerUseSSL);
+	
 		_routerInstanceName.setText(_loginInfo.routerInstanceName);
 		_routerEndpoints.setText(_loginInfo.routerEndpoints);
-
+		_routerSSLEnabled.setSelected(_loginInfo.routerSSLEnabled);
+		
 		_keystore.setText(_loginInfo.keystore);
 		if(_loginInfo.keystore == null)
 		{
@@ -776,6 +811,15 @@ class SessionKeeper
 		    updateAlias(new File(_loginInfo.keystore), _loginInfo.alias);
 		}
 		_truststore.setText(_loginInfo.truststore);
+
+		if(_loginInfo.routed)
+		{
+		    routedTabSelected();
+		}
+		else
+		{
+		    directTabSelected();
+		}
 
 		setLocationRelativeTo(_coordinator.getMainFrame());
 		setVisible(true);
@@ -793,12 +837,14 @@ class SessionKeeper
 	    _loginInfo.registryUsername = _registryUsername.getText();
 	    _loginInfo.registryPassword = _registryPassword.getPassword();
 	    _loginInfo.registryUseSSL = _registryUseSSL.isSelected();
+	    _loginInfo.registrySSLEnabled = _registrySSLEnabled.isSelected();
 	    _loginInfo.registryInstanceName = _registryInstanceName.getText();
 	    _loginInfo.registryEndpoints = _registryEndpoints.getText();
 	 
 	    _loginInfo.routerUsername = _routerUsername.getText();
 	    _loginInfo.routerPassword = _routerPassword.getPassword();
 	    _loginInfo.routerUseSSL = _routerUseSSL.isSelected();
+	    _loginInfo.routerSSLEnabled = _routerSSLEnabled.isSelected();
 	    _loginInfo.routerInstanceName = _routerInstanceName.getText();
 	    _loginInfo.routerEndpoints = _routerEndpoints.getText();
 
@@ -875,6 +921,77 @@ class SessionKeeper
 	    _alias.setModel(new DefaultComboBoxModel());
 	}
 
+	private void selectRegistryUseSSL(boolean selected)
+	{
+	    _registryUseSSL.setSelected(selected);
+	    _registryUsername.setEnabled(!selected);
+	    _registryUsernameLabel.setEnabled(!selected);
+	    _registryPassword.setEnabled(!selected);
+	    _registryPasswordLabel.setEnabled(!selected);
+	    
+	    if(selected && _registrySSLEnabled.isSelected() == false)
+	    {
+		selectRegistrySSLEnabled(selected);
+	    }
+	}
+	
+	private void selectRouterUseSSL(boolean selected)
+	{
+	    _routerUseSSL.setSelected(selected);
+	    _routerUsername.setEnabled(!selected);
+	    _routerUsernameLabel.setEnabled(!selected);
+	    _routerPassword.setEnabled(!selected);
+	    _routerPasswordLabel.setEnabled(!selected);
+	    
+	    if(selected && _routerSSLEnabled.isSelected() == false)
+	    {
+		selectRouterSSLEnabled(selected);
+	    }
+	}
+	
+	private void selectRegistrySSLEnabled(boolean selected)
+	{
+	    _registrySSLEnabled.setSelected(selected);
+	    recursiveSetEnabled(_sslPane, selected);
+	    if(!selected && _registryUseSSL.isSelected())
+	    {
+		selectRegistryUseSSL(selected);
+	    }
+	}
+
+	private void selectRouterSSLEnabled(boolean selected)
+	{
+	    _routerSSLEnabled.setSelected(selected);
+	    recursiveSetEnabled(_sslPane, selected);
+	    if(!selected && _routerUseSSL.isSelected())
+	    {
+		selectRouterUseSSL(selected);
+	    }
+	}
+
+	private void recursiveSetEnabled(java.awt.Container c, boolean enabled)
+	{
+	    for(int i = 0; i < c.getComponentCount(); ++i)
+	    {
+		java.awt.Component comp = c.getComponent(i);
+		if(comp instanceof java.awt.Container)
+		{
+		    recursiveSetEnabled((java.awt.Container)comp, enabled);
+		}
+		comp.setEnabled(enabled);
+	    }
+	    c.setEnabled(enabled);
+	}
+
+	private void directTabSelected()
+	{
+	    recursiveSetEnabled(_sslPane, _registrySSLEnabled.isSelected());
+	}
+
+	private void routedTabSelected()
+	{
+	    recursiveSetEnabled(_sslPane, _routerSSLEnabled.isSelected());
+	}
 
 	private JTabbedPane _mainPane = new JTabbedPane();
 	private JTextField _registryUsername = new JTextField(30);
@@ -882,17 +999,20 @@ class SessionKeeper
 	private JPasswordField _registryPassword = new JPasswordField(30);
 	private JLabel _registryPasswordLabel;
 	private JCheckBox _registryUseSSL;
+	private JCheckBox _registrySSLEnabled;
 	private JTextField _registryInstanceName = new JTextField(30);
 	private JTextField _registryEndpoints = new JTextField(30);
-	
+
 	private JTextField _routerUsername = new JTextField(30);
 	private JLabel _routerUsernameLabel;
 	private JPasswordField _routerPassword = new JPasswordField(30);
 	private JLabel _routerPasswordLabel;
 	private JCheckBox _routerUseSSL;
+	private JCheckBox _routerSSLEnabled;
 	private JTextField _routerInstanceName = new JTextField(30);
 	private JTextField _routerEndpoints = new JTextField(30);
 
+	private JTabbedPane _sslPane = new JTabbedPane();
 	private JTextField _keystore = new JTextField(30);
 	private JPasswordField _keyPassword = new JPasswordField(30);
 
@@ -1055,9 +1175,12 @@ class SessionKeeper
 
     void logout(boolean destroySession)
     {
-	_session.close(destroySession);
-	_coordinator.sessionLost();
-	_session = null;
+	if(_session != null)
+	{
+	    _session.close(destroySession);
+	    _coordinator.sessionLost();
+	    _session = null;
+	}
     }
    
     AdminSessionPrx getSession()
