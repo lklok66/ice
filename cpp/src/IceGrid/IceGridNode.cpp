@@ -310,8 +310,11 @@ NodeService::start(int argc, char* argv[])
         // activator to each activated server).
         //
 	const string instanceNameProperty = "IceGrid.InstanceName";
-	const string locatorId = properties->getPropertyWithDefault(instanceNameProperty, "IceGrid") + "/Locator";
-	string locatorPrx = locatorId + ":" + properties->getProperty("IceGrid.Registry.Client.Endpoints");
+	Identity locatorId;
+	locatorId.category = properties->getPropertyWithDefault(instanceNameProperty, "IceGrid");
+	locatorId.name = "Locator";
+	string locatorPrx = "\"" + communicator()->identityToString(locatorId) + "\" :" + 
+			    properties->getProperty("IceGrid.Registry.Client.Endpoints");
         properties->setProperty("Ice.Default.Locator", locatorPrx);
     }
     else if(properties->getProperty("Ice.Default.Locator").empty())
@@ -505,8 +508,11 @@ NodeService::start(int argc, char* argv[])
         try
         {
 	    const string instanceNameProperty = "IceGrid.InstanceName";
-	    const string adminId = properties->getPropertyWithDefault(instanceNameProperty, "IceGrid") + "/Admin";
-            admin = AdminPrx::checkedCast(communicator()->stringToProxy(adminId));
+	    Identity adminId;
+	    adminId.category = properties->getPropertyWithDefault(instanceNameProperty, "IceGrid");
+	    adminId.name = "Admin";
+            admin = AdminPrx::checkedCast(
+	    		communicator()->stringToProxy("\"" + communicator()->identityToString(adminId) + "\""));
         }
         catch(const LocalException& ex)
         {

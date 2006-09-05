@@ -48,13 +48,18 @@ public class ServiceManagerI extends _ServiceManagerDisp
 	    Ice.ObjectAdapter adapter = _server.communicator().createObjectAdapter("IceBox.ServiceManager");
 
 	    Ice.Properties properties = _server.communicator().getProperties();
-
-	    String identity = properties.getProperty("IceBox.ServiceManager.Identity");
-	    if(identity.length() == 0)
-	    {
-		identity = properties.getPropertyWithDefault("IceBox.InstanceName", "IceBox") + "/ServiceManager";
-	    }
-	    adapter.add(this, _server.communicator().stringToIdentity(identity));
+            Ice.Identity managerIdentity = new Ice.Identity();
+            String identity = properties.getProperty("IceBox.ServiceManager.Identity");
+            if(identity.length() != 0)
+            {
+                managerIdentity = _server.communicator().stringToIdentity(identity);
+            }
+            else
+            {
+                managerIdentity.category = properties.getPropertyWithDefault("IceBox.InstanceName", "IceBox"); 
+                managerIdentity.name = "ServiceManager";
+            }
+	    adapter.add(this, managerIdentity);
 
 	    //
 	    // Parse the IceBox.LoadOrder property.

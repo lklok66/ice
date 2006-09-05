@@ -59,11 +59,16 @@ public final class Admin
 
             Ice.Properties properties = communicator().getProperties();
 
-	    String managerIdentity = properties.getProperty("IceBox.ServiceManager.Identity");
-	    if(managerIdentity.length() == 0)
+            Ice.Identity managerIdentity = new Ice.Identity();
+	    String identity = properties.getProperty("IceBox.ServiceManager.Identity");
+	    if(identity.length() != 0)
 	    {
-		managerIdentity =
-		    properties.getPropertyWithDefault("IceBox.InstanceName", "IceBox") + "/ServiceManager";
+	        managerIdentity = communicator().stringToIdentity(identity);
+	    }
+	    else
+	    {
+		managerIdentity.category = properties.getPropertyWithDefault("IceBox.InstanceName", "IceBox");
+		managerIdentity.name = "ServiceManager";
 	    }
 
 	    String managerProxy;
@@ -77,7 +82,7 @@ public final class Admin
 		    return 1;
 		}
 
-		managerProxy = managerIdentity + ":" + managerEndpoints;
+		managerProxy = "\"" + communicator().identityToString(managerIdentity) + "\" :" + managerEndpoints;
 	    }
 	    else
 	    {
@@ -88,7 +93,7 @@ public final class Admin
 		    return 1;
 		}
 
-		managerProxy = managerIdentity + ":" + managerAdapterId;
+		managerProxy = "\"" + communicator().identityToString(managerIdentity) + "\" @" + managerAdapterId;
 	    }
 
             Ice.ObjectPrx base = communicator().stringToProxy(managerProxy);
