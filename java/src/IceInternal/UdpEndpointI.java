@@ -502,7 +502,7 @@ final class UdpEndpointI extends EndpointI
     // only applies for ObjectAdapter endpoints.
     //
     public java.util.ArrayList
-    expand()
+    expand(boolean includeLoopback)
     {
         java.util.ArrayList endps = new java.util.ArrayList();
         if(_host.equals("0.0.0.0"))
@@ -512,8 +512,11 @@ final class UdpEndpointI extends EndpointI
             while(iter.hasNext())
             {
                 String host = (String)iter.next();
-                endps.add(new UdpEndpointI(_instance, host, _port, _connect, _connectionId, _compress,
-					   hosts.size() == 1 || !host.equals("127.0.0.1")));
+		if(includeLoopback || hosts.size() == 1 || !host.equals("127.0.0.1"))
+		{
+                    endps.add(new UdpEndpointI(_instance, host, _port, _connect, _connectionId, _compress,
+					       hosts.size() == 1 || !host.equals("127.0.0.1")));
+		}
             }
         }
         else

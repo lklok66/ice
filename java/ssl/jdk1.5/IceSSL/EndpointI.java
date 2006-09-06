@@ -367,7 +367,7 @@ final class EndpointI extends IceInternal.EndpointI
     // only applies for ObjectAdapter endpoints.
     //
     public java.util.ArrayList
-    expand()
+    expand(boolean includeLoopback)
     {
         java.util.ArrayList<EndpointI> endps = new java.util.ArrayList<EndpointI>();
         if(_host.equals("0.0.0.0"))
@@ -377,8 +377,11 @@ final class EndpointI extends IceInternal.EndpointI
             while(iter.hasNext())
             {
                 String host = (String)iter.next();
-                endps.add(new EndpointI(_instance, host, _port, _timeout, _connectionId, _compress,
-				        hosts.size() == 1 || !host.equals("127.0.0.1")));
+		if(includeLoopback || hosts.size() == 1 || !host.equals("127.0.0.1"))
+		{
+                    endps.add(new EndpointI(_instance, host, _port, _timeout, _connectionId, _compress,
+					       hosts.size() == 1 || !host.equals("127.0.0.1")));
+		}
             }
         }
         else

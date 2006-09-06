@@ -1029,7 +1029,7 @@ namespace Ice
 		    e2.str = s;
 		    throw e2;
 		}
-		ArrayList endps = endp.expand();
+		ArrayList endps = endp.expand(true);
 		endpoints.AddRange(endps);
 
 		++end;

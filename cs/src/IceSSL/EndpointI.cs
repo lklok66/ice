@@ -369,7 +369,7 @@ namespace IceSSL
 	// host if endpoint was configured with no host set. This
 	// only applies for ObjectAdapter endpoints.
 	//
-	public override ArrayList expand()
+	public override ArrayList expand(bool includeLoopback)
 	{
 	    ArrayList endps = new ArrayList();
 	    if(host_.Equals("0.0.0.0"))
@@ -377,8 +377,11 @@ namespace IceSSL
 		string[] hosts = IceInternal.Network.getLocalHosts();
 		for(int i = 0; i < hosts.Length; ++i)
 		{
-		    endps.Add(new EndpointI(instance_, hosts[i], port_, timeout_, connectionId_, compress_,
-					    hosts.Length == 1 || !hosts[i].Equals("127.0.0.1")));
+		    if(includeLoopback || hosts.Length == 1 || !hosts[i].Equals("127.0.0.1"))
+		    {
+		        endps.Add(new EndpointI(instance_, hosts[i], port_, timeout_, connectionId_, compress_,
+					           hosts.Length == 1 || !hosts[i].Equals("127.0.0.1")));
+		    }
 		}
 	    }
 	    else
