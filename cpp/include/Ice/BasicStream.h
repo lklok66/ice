@@ -492,6 +492,7 @@ public:
 	}
     }
     void write(const std::string*, const std::string*, bool = true);
+
     void read(std::string& v, bool convert = true)
     {
         Ice::Int sz;
@@ -509,7 +510,6 @@ public:
 	    else
 	    {
                 std::string(reinterpret_cast<const char*>(&*i), reinterpret_cast<const char*>(&*i) + sz).swap(v);
-//              v.assign(reinterpret_cast<const char*>(&(*i)), sz);
 	    }
             i += sz;
         }

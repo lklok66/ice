@@ -9,10 +9,47 @@
 
 #include <Ice/Buffer.h>
 #include <Ice/LocalException.h>
+#include <Ice/MemoryPool.h>
 
 using namespace std;
 using namespace Ice;
 using namespace IceInternal;
+
+static IceInternal::Buffer::Container::pointer
+MallocWrapper(MemoryPool*, IceInternal::Buffer::Container::size_type n)
+{
+    return reinterpret_cast<IceInternal::Buffer::Container::pointer>(malloc(n));
+}
+
+static IceInternal::Buffer::Container::pointer
+ReallocWrapper(MemoryPool*, IceInternal::Buffer::Container::pointer buf, IceInternal::Buffer::Container::size_type n)
+{
+    return reinterpret_cast<IceInternal::Buffer::Container::pointer>(realloc(buf, n));
+}
+
+static void
+FreeWrapper(MemoryPool*, IceInternal::Buffer::Container::pointer buf)
+{
+    ::free(buf);
+}
+
+static IceInternal::Buffer::Container::pointer
+PoolMallocWrapper(MemoryPool* p, IceInternal::Buffer::Container::size_type n)
+{
+    return p->alloc(n); 
+}
+
+static IceInternal::Buffer::Container::pointer
+PoolReallocWrapper(MemoryPool* p, IceInternal::Buffer::Container::pointer buf, IceInternal::Buffer::Container::size_type n)
+{
+    return p->realloc(buf, n);
+}
+
+static void
+PoolFreeWrapper(MemoryPool* p, IceInternal::Buffer::Container::pointer buf)
+{
+    return p->free(buf);
+}
 
 void
 IceInternal::Buffer::swap(Buffer& other)
@@ -26,6 +63,45 @@ IceInternal::Buffer::swap(Buffer& other)
 #else
     b.swap(other.b);
     std::swap(i, other.i); 
+#endif
+}
+
+IceInternal::Buffer::Container::Container(IceInternal::MemoryPool* pool) :
+#ifdef ICE_SMALL_MESSAGE_BUFFER_OPTIMIZATION
+    _buf(_fixed),
+    _size(0),
+    _capacity(ICE_BUFFER_FIXED_SIZE),
+    _pool(pool)
+#else
+    _buf(0),
+    _size(0),
+    _capacity(0),
+    _pool(pool)
+#endif
+{
+    if(pool)
+    {
+	_alloc= PoolMallocWrapper; 
+	_realloc = PoolReallocWrapper; 
+	_free = PoolFreeWrapper; 
+    }
+    else
+    {
+	_alloc= MallocWrapper;
+	_realloc = ReallocWrapper;
+	_free = FreeWrapper;
+    }
+}
+
+IceInternal::Buffer::Container::~Container()
+{
+#ifdef ICE_SMALL_MESSAGE_BUFFER_OPTIMIZATION
+    if(_buf != _fixed)
+    {
+	_free(_pool, _buf);
+    }
+#else
+    _free(_pool, _buf);
 #endif
 }
 
@@ -77,13 +153,13 @@ IceInternal::Buffer::Container::clear()
 #ifdef ICE_SMALL_MESSAGE_BUFFER_OPTIMIZATION
     if(_buf != _fixed)
     {
-	free(_buf);
+	_free(_pool, _buf);
 	_buf = _fixed;
     }
     _size = 0;
     _capacity = ICE_BUFFER_FIXED_SIZE;
 #else
-    free(_buf);
+    _free(_pool, _buf);
     _buf = 0;
     _size = 0;
     _capacity = 0;
@@ -110,21 +186,21 @@ IceInternal::Buffer::Container::reserve(size_type n)
 #ifdef ICE_SMALL_MESSAGE_BUFFER_OPTIMIZATION
     if(_buf != _fixed)
     {
-	_buf = reinterpret_cast<pointer>(realloc(_buf, _capacity));
+	_buf = _realloc(_pool, _buf, _capacity);
     }
     else if(_capacity > ICE_BUFFER_FIXED_SIZE)
     {
-	_buf = reinterpret_cast<pointer>(malloc(_capacity));
+	_buf = _alloc(_pool, _capacity);
 	memcpy(_buf, _fixed, _size);
     }
 #else
     if(_buf)
     {
-	_buf = reinterpret_cast<pointer>(realloc(_buf, _capacity));
+	_buf = _realloc(_pool, _buf, _capacity);
     }
     else
     {
-	_buf = reinterpret_cast<pointer>(malloc(_capacity));
+	_buf = _alloc(_pool, _capacity);
     }
 #endif
 	

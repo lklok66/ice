@@ -45,6 +45,8 @@ class CommunicatorI;
 namespace IceInternal
 {
 
+class MemoryPool;
+
 class Instance : public IceUtil::Shared, public IceUtil::RecMutex
 {
 public:
@@ -77,6 +79,7 @@ public:
     ::Ice::Context getDefaultContext() const;
     Ice::Identity stringToIdentity(const std::string&) const;
     std::string identityToString(const Ice::Identity&) const;
+    MemoryPool* memoryPool() const;
     
 private:
 
@@ -115,6 +118,7 @@ private:
     DynamicLibraryListPtr _dynamicLibraryList;
     Ice::PluginManagerPtr _pluginManager;
     Ice::Context _defaultContext;
+    MemoryPool* _memoryPool;
 };
 
 class UTF8BufferI : public Ice::UTF8Buffer

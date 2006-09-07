@@ -34,6 +34,7 @@
 #include <Ice/PluginManagerI.h>
 #include <Ice/Initialize.h>
 #include <IceUtil/StringUtil.h>
+#include <Ice/MemoryPool.h>
 
 #include <stdio.h>
 
@@ -451,6 +452,12 @@ IceInternal::Instance::identityToString(const Identity& ident) const
     }
 }
 
+IceInternal::MemoryPool*
+IceInternal::Instance::memoryPool() const
+{
+    return _memoryPool;
+}
+
 IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const InitializationData& initData) :
     _state(StateActive),
     _initData(initData),
@@ -459,7 +466,8 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
     _serverACM(0),
     _threadPerConnection(false),
     _threadPerConnectionStackSize(0),
-    _defaultContext(initData.defaultContext)
+    _defaultContext(initData.defaultContext),
+    _memoryPool(0)
 {
     try
     {
@@ -669,6 +677,31 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
 	    _initData.wstringConverter = new UnicodeWstringConverter();
 	}
 
+	if(_initData.properties->getPropertyAsIntWithDefault("Ice.MemoryPool", 0) == 1)
+	{
+	    //
+	    // Default max page size is 32 MB.
+	    //
+	    size_t maxPageSize = _initData.properties->getPropertyAsIntWithDefault("Ice.MemoryPool.MaxPageSize", 32);
+
+	    //
+	    // High watermark defaults to 4 * max page size.
+	    //
+	    size_t highWaterMark = _initData.properties->getPropertyAsIntWithDefault("Ice.MemoryPool.HighWaterMark", 4 * maxPageSize);
+
+	    //
+	    // Default page size is 4 MB.
+	    //
+	    size_t defaultPageSize = _initData.properties->getPropertyAsIntWithDefault("Ice.MemoryPool.DefaultPageSize", 4);
+
+	    const size_t megaByte = 1024 * 1024;
+
+	    maxPageSize *= megaByte;
+	    highWaterMark *= megaByte;
+	    defaultPageSize *= megaByte;
+	    _memoryPool = new MemoryPool(defaultPageSize, maxPageSize, highWaterMark);
+	}
+
 	__setNoDelete(false);
     }
     catch(...)
@@ -699,6 +732,8 @@ IceInternal::Instance::~Instance()
     assert(!_endpointFactoryManager);
     assert(!_dynamicLibraryList);
     assert(!_pluginManager);
+
+    delete _memoryPool;
 
     IceUtil::StaticMutex::Lock sync(staticMutex);
     if(--instanceCount == 0)
