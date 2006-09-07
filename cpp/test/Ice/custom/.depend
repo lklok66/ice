@@ -29,3 +29,4 @@ StringConverterI$(OBJEXT): StringConverterI.cpp StringConverterI.h ../../../incl
 Test.cpp: Test.ice
 TestAMD.cpp: TestAMD.ice
 Wstring.cpp: Wstring.ice
+WstringAMD.cpp: WstringAMD.ice
