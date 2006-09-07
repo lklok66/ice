@@ -14,16 +14,16 @@ SERVER		= server.exe
 
 TARGETS		= $(CLIENT) $(SERVER)
 
-OBJS		= Hello.o
+OBJS		= Hello.obj
 
-COBJS		= Client.o
+COBJS		= Client.obj
 
-SOBJS		= HelloI.o \
-		  Server.o
+SOBJS		= HelloI.obj \
+		  Server.obj
 
-SRCS		= $(OBJS:.o=.cpp) \
-		  $(COBJS:.o=.cpp) \
-		  $(SOBJS:.o=.cpp)
+SRCS		= $(OBJS:.obj=.cpp) \
+		  $(COBJS:.obj=.cpp) \
+		  $(SOBJS:.obj=.cpp)
 
 !include $(top_srcdir)/config/Make.rules.mak
 
@@ -36,9 +36,6 @@ $(CLIENT): $(OBJS) $(COBJS)
 $(SERVER): $(OBJS) $(SOBJS)
 	del /q $@
 	$(LINK) $(LD_EXEFLAGS) $(OBJS) $(SOBJS), $@,, $(LIBS)
-
-Hello.cpp Hello.h: Hello.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) Hello.ice
 
 clean::
 	del /q Hello.cpp Hello.h

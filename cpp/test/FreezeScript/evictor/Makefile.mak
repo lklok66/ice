@@ -13,10 +13,10 @@ CLIENT		= makedb.exe
 
 TARGETS		= $(CLIENT)
 
-OBJS		= TestOld.o \
-                  makedb.o
+OBJS		= TestOld.obj \
+                  makedb.obj
 
-SRCS		= $(OBJS:.o=.cpp)
+SRCS		= $(OBJS:.obj=.cpp)
 
 SLICE_SRCS	= TestOld.ice
 
@@ -27,9 +27,6 @@ CPPFLAGS	= -I. $(CPPFLAGS)
 $(CLIENT): $(OBJS)
 	del /q $@
 	$(LINK) $(LD_EXEFLAGS) $(OBJS), $@,, $(LIBS) freeze$(LIBSUFFIX).lib
-
-TestOld.cpp TestOld.h: TestOld.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-        $(SLICE2CPP) $(SLICE2CPPFLAGS) TestOld.ice
 
 clean::
 	del /q TestOld.cpp TestOld.h

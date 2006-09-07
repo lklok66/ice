@@ -15,27 +15,27 @@ SERVERAMD	= serveramd.exe
 
 TARGETS		= $(CLIENT) $(SERVER) $(SERVERAMD)
 
-COBJS		= Test.o \
-		  ClientPrivate.o \
-		  Client.o \
-		  AllTests.o \
-		  Forward.o
+COBJS		= Test.obj \
+		  ClientPrivate.obj \
+		  Client.obj \
+		  AllTests.obj \
+		  Forward.obj
 
-SOBJS		= Test.o \
-    		  ServerPrivate.o \
-		  TestI.o \
-		  Server.o \
-		  Forward.o
+SOBJS		= Test.obj \
+    		  ServerPrivate.obj \
+		  TestI.obj \
+		  Server.obj \
+		  Forward.obj
 
-SAMDOBJS	= TestAMD.o \
-    		  ServerPrivateAMD.o \
-		  TestAMDI.o \
-		  ServerAMD.o \
-		  Forward.o
+SAMDOBJS	= TestAMD.obj \
+    		  ServerPrivateAMD.obj \
+		  TestAMDI.obj \
+		  ServerAMD.obj \
+		  Forward.obj
 
-SRCS		= $(COBJS:.o=.cpp) \
-		  $(SOBJS:.o=.cpp) \
-		  $(SAMDOBJS:.o=.cpp)
+SRCS		= $(COBJS:.obj=.cpp) \
+		  $(SOBJS:.obj=.cpp) \
+		  $(SAMDOBJS:.obj=.cpp)
 
 !include $(top_srcdir)/config/Make.rules.mak
 
@@ -54,24 +54,6 @@ $(SERVER): $(SOBJS)
 $(SERVERAMD): $(SAMDOBJS)
 	del /q $@
 	$(LINK) $(LD_EXEFLAGS) $(SAMDOBJS), $@,, $(LIBS)
-
-Test.cpp Test.h: Test.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) Test.ice
-
-TestAMD.cpp TestAMD.h: TestAMD.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-        $(SLICE2CPP) $(SLICE2CPPFLAGS) TestAMD.ice
-
-ClientPrivate.cpp ClientPrivate.h: ClientPrivate.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) ClientPrivate.ice
-
-ServerPrivate.cpp ServerPrivate.h: ServerPrivate.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) ServerPrivate.ice
-
-ServerPrivateAMD.cpp ServerPrivateAMD.h: ServerPrivateAMD.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-        $(SLICE2CPP) $(SLICE2CPPFLAGS) ServerPrivateAMD.ice
-
-Forward.cpp Forward.h: Forward.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) Forward.ice
 
 clean::
 	del /q Test.cpp Test.h

@@ -14,16 +14,16 @@ SERVER		= server.exe
 
 TARGETS		= $(CLIENT) $(SERVER)
 
-OBJS		= Nested.o \
-		  NestedI.o
+OBJS		= Nested.obj \
+		  NestedI.obj
 
-COBJS		= Client.o
+COBJS		= Client.obj
 
-SOBJS		= Server.o
+SOBJS		= Server.obj
 
-SRCS		= $(OBJS:.o=.cpp) \
-		  $(COBJS:.o=.cpp) \
-		  $(SOBJS:.o=.cpp)
+SRCS		= $(OBJS:.obj=.cpp) \
+		  $(COBJS:.obj=.cpp) \
+		  $(SOBJS:.obj=.cpp)
 
 !include $(top_srcdir)/config/Make.rules.mak
 
@@ -36,9 +36,6 @@ $(CLIENT): $(OBJS) $(COBJS)
 $(SERVER): $(OBJS) $(SOBJS)
 	del /q $@
 	$(LINK) $(LD_EXEFLAGS) $(OBJS) $(SOBJS), $@,, $(LIBS)
-
-Nested.cpp Nested.h: Nested.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) Nested.ice
 
 clean::
 	del /q Nested.cpp Nested.h

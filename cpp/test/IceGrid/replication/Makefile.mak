@@ -17,21 +17,21 @@ DLLNAME		= testservice$(LIBSUFFIX).dll
 
 TARGETS		= $(CLIENT) $(SERVER) $(LIBNAME) $(DLLNAME)
 
-OBJS		= Test.o
+OBJS		= Test.obj
 
-COBJS		= Client.o \
-		  AllTests.o
+COBJS		= Client.obj \
+		  AllTests.obj
 
-SOBJS		= TestI.o \
-		  Server.o
+SOBJS		= TestI.obj \
+		  Server.obj
 
-SERVICE_OBJS	= TestI.o \
-		  Service.o
+SERVICE_OBJS	= TestI.obj \
+		  Service.obj
 
-SRCS		= $(OBJS:.o=.cpp) \
-		  $(COBJS:.o=.cpp) \
-		  $(SOBJS:.o=.cpp) \
-		  $(SERVICE_OBJS:.o=.cpp)
+SRCS		= $(OBJS:.obj=.cpp) \
+		  $(COBJS:.obj=.cpp) \
+		  $(SOBJS:.obj=.cpp) \
+		  $(SERVICE_OBJS:.obj=.cpp)
 
 !include $(top_srcdir)/config/Make.rules.mak
 
@@ -51,9 +51,6 @@ $(CLIENT): $(OBJS) $(COBJS)
 $(SERVER): $(OBJS) $(SOBJS)
 	del /q $@
 	$(LINK) $(LD_EXEFLAGS) $(OBJS) $(SOBJS), $@,, $(LIBS)
-
-Test.cpp Test.h: Test.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) Test.ice
 
 clean::
 	del /q Test.cpp Test.h

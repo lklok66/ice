@@ -15,20 +15,20 @@ SESSION_SERVER	= sessionserver.exe
 
 TARGETS		= $(CLIENT) $(SERVER) $(SESSION_SERVER)
 
-OBJS		= Callback.o \
-		  CallbackI.o
+OBJS		= Callback.obj \
+		  CallbackI.obj
 
-COBJS		= Client.o
+COBJS		= Client.obj
 
-SOBJS		= Server.o
+SOBJS		= Server.obj
 
-SSOBJS		= SessionServer.o \
-		  SessionI.o
+SSOBJS		= SessionServer.obj \
+		  SessionI.obj
 
-SRCS		= $(OBJS:.o=.cpp) \
-		  $(COBJS:.o=.cpp) \
-		  $(SOBJS:.o=.cpp) \
-		  $(SSOBJS:.o=.cpp)
+SRCS		= $(OBJS:.obj=.cpp) \
+		  $(COBJS:.obj=.cpp) \
+		  $(SOBJS:.obj=.cpp) \
+		  $(SSOBJS:.obj=.cpp)
 
 !include $(top_srcdir)/config/Make.rules.mak
 
@@ -45,9 +45,6 @@ $(SERVER): $(OBJS) $(SOBJS)
 $(SESSION_SERVER): $(SSOBJS)
 	del /q $@
 	$(LINK) $(LD_EXEFLAGS) $(SSOBJS), $@,, $(LIBS) glacier2$(LIBSUFFIX).lib
-
-Callback.cpp Callback.h: Callback.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) Callback.ice
 
 clean::
 	del /q Callback.cpp Callback.h

@@ -14,16 +14,16 @@ SUBSCRIBER	= subscriber.exe
 
 TARGETS		= $(PUBLISHER) $(SUBSCRIBER)
 
-OBJS		= Clock.o
+OBJS		= Clock.obj
 
-POBJS		= Publisher.o
+POBJS		= Publisher.obj
 
-SOBJS		= Subscriber.o \
-		  ClockI.o
+SOBJS		= Subscriber.obj \
+		  ClockI.obj
 
-SRCS		= $(OBJS:.o=.cpp) \
-		  $(POBJS:.o=.cpp) \
-		  $(SOBJS:.o=.cpp)
+SRCS		= $(OBJS:.obj=.cpp) \
+		  $(POBJS:.obj=.cpp) \
+		  $(SOBJS:.obj=.cpp)
 
 
 !include $(top_srcdir)/config/Make.rules.mak
@@ -38,9 +38,6 @@ $(PUBLISHER): $(OBJS) $(POBJS)
 $(SUBSCRIBER): $(OBJS) $(SOBJS)
 	del /q $@
 	$(LINK) $(LD_EXEFLAGS) $(OBJS) $(SOBJS), $@,, $(LIBS)
-
-Clock.cpp Clock.h: Clock.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) Clock.ice
 
 clean::
 	del /q Clock.cpp Clock.h

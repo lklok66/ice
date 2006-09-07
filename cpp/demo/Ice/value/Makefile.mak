@@ -14,17 +14,17 @@ SERVER		= server.exe
 
 TARGETS		= $(CLIENT) $(SERVER)
 
-OBJS		= Value.o \
-		  ValueI.o
+OBJS		= Value.obj \
+		  ValueI.obj
 
-COBJS		= Client.o \
-		  ObjectFactory.o
+COBJS		= Client.obj \
+		  ObjectFactory.obj
 
-SOBJS		= Server.o
+SOBJS		= Server.obj
 
-SRCS		= $(OBJS:.o=.cpp) \
-		  $(COBJS:.o=.cpp) \
-		  $(SOBJS:.o=.cpp)
+SRCS		= $(OBJS:.obj=.cpp) \
+		  $(COBJS:.obj=.cpp) \
+		  $(SOBJS:.obj=.cpp)
 
 !include $(top_srcdir)/config/Make.rules.mak
 
@@ -37,9 +37,6 @@ $(CLIENT): $(OBJS) $(COBJS)
 $(SERVER): $(OBJS) $(SOBJS)
 	del /q $@
 	$(LINK) $(LD_EXEFLAGS) $(OBJS) $(SOBJS), $@,, $(LIBS)
-
-Value.cpp Value.h: Value.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) Value.ice
 
 clean::
 	del /q Value.cpp Value.h

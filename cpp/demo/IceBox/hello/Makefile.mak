@@ -16,16 +16,16 @@ DLLNAME         = helloservice$(LIBSUFFIX).dll
 
 TARGETS		= $(CLIENT) $(LIBNAME) $(DLLNAME)
 
-OBJS		= Hello.o
+OBJS		= Hello.obj
 
-COBJS		= Client.o
+COBJS		= Client.obj
 
-SOBJS		= HelloI.o \
-		  HelloServiceI.o
+SOBJS		= HelloI.obj \
+		  HelloServiceI.obj
 
-SRCS		= $(OBJS:.o=.cpp) \
-		  $(COBJS:.o=.cpp) \
-		  $(SOBJS:.o=.cpp)
+SRCS		= $(OBJS:.obj=.cpp) \
+		  $(COBJS:.obj=.cpp) \
+		  $(SOBJS:.obj=.cpp)
 
 SLICE_SRCS	= Hello.ice
 
@@ -43,9 +43,6 @@ $(DLLNAME): $(OBJS) $(SOBJS)
 $(CLIENT): $(OBJS) $(COBJS)
 	del /q $@
 	$(LINK) $(LD_EXEFLAGS) $(OBJS) $(COBJS), $@,, $(LIBS)
-
-Hello.cpp Hello.h: Hello.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) Hello.ice
 
 clean::
 	del /q Hello.cpp Hello.h

@@ -14,17 +14,17 @@ SERVER		= server.exe
 
 TARGETS		= $(CLIENT) $(SERVER)
 
-COBJS		= Test.o \
-		  Client.o \
-		  AllTests.o
+COBJS		= Test.obj \
+		  Client.obj \
+		  AllTests.obj
 
-SOBJS		= Test.o \
-		  TestI.o \
-		  ServerLocator.o \
-		  Server.o
+SOBJS		= Test.obj \
+		  TestI.obj \
+		  ServerLocator.obj \
+		  Server.obj
 
-SRCS		= $(COBJS:.o=.cpp) \
-		  $(SOBJS:.o=.cpp)
+SRCS		= $(COBJS:.obj=.cpp) \
+		  $(SOBJS:.obj=.cpp)
 
 !include $(top_srcdir)/config/Make.rules.mak
 
@@ -37,9 +37,6 @@ $(CLIENT): $(COBJS)
 $(SERVER): $(SOBJS)
 	del /q $@
 	$(LINK) $(LD_EXEFLAGS) $(SOBJS), $@,, $(LIBS)
-
-Test.cpp Test.h: Test.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) Test.ice
 
 clean::
 	del /q Test.cpp Test.h

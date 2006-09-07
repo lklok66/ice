@@ -14,15 +14,15 @@ SUBSCRIBER	= subscriber.exe
 
 TARGETS		= $(PUBLISHER) $(SUBSCRIBER)
 
-OBJS		= Event.o
+OBJS		= Event.obj
 
-POBJS		= Publisher.o
+POBJS		= Publisher.obj
 
-SOBJS		= Subscriber.o
+SOBJS		= Subscriber.obj
 
-SRCS		= $(OBJS:.o=.cpp) \
-		  $(POBJS:.o=.cpp) \
-		  $(SOBJS:.o=.cpp)
+SRCS		= $(OBJS:.obj=.cpp) \
+		  $(POBJS:.obj=.cpp) \
+		  $(SOBJS:.obj=.cpp)
 
 
 !include $(top_srcdir)/config/Make.rules.mak
@@ -37,9 +37,6 @@ $(PUBLISHER): $(OBJS) $(POBJS)
 $(SUBSCRIBER): $(OBJS) $(SOBJS)
 	del /q $@
 	$(LINK) $(LD_EXEFLAGS) $(OBJS) $(SOBJS), $@,, $(LIBS)
-
-Event.cpp Event.h: Event.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) Event.ice
 
 clean::
 	del /q Event.cpp Event.h

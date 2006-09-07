@@ -26,23 +26,23 @@ TARGETS         = $(LIBNAME) $(DLLNAME)
 
 !endif
 
-OBJS		= Util.o \
-		  ClientUtil.o \
-		  FileInfo.o \
-		  FileServer.o \
-		  OS.o
+OBJS		= Util.obj \
+		  ClientUtil.obj \
+		  FileInfo.obj \
+		  FileServer.obj \
+		  OS.obj
 
-SOBJS		= Server.o \
-		  FileServerI.o
+SOBJS		= Server.obj \
+		  FileServerI.obj
 
-COBJS		= Client.o
+COBJS		= Client.obj
 
-CALCOBJS	= Calc.o
+CALCOBJS	= Calc.obj
 
-SRCS		= $(OBJS:.o=.cpp) \
-		  $(SOBJS:.o=.cpp) \
-		  $(COBJS:.o=.cpp) \
-		  $(CALCOBJS:.o=.cpp)
+SRCS		= $(OBJS:.obj=.cpp) \
+		  $(SOBJS:.obj=.cpp) \
+		  $(COBJS:.obj=.cpp) \
+		  $(CALCOBJS:.obj=.cpp)
 
 HDIR		= $(includedir)\IcePatch2
 SDIR		= $(slicedir)\IcePatch2
@@ -79,14 +79,6 @@ $(CLIENT): $(COBJS)
 $(CALC): $(CALCOBJS)
 	del /q $@
 	$(LINK) $(LD_EXEFLAGS) $(CALCOBJS), $@,, $(LIBS) icepatch2$(LIBSUFFIX).lib
-
-FileInfo.cpp $(HDIR)\FileInfo.h: $(SDIR)\FileInfo.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) $(SDIR)\FileInfo.ice
-	move FileInfo.h $(HDIR)
-
-FileServer.cpp $(HDIR)\FileServer.h: $(SDIR)\FileServer.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) $(SDIR)\FileServer.ice
-	move FileServer.h $(HDIR)
 
 !ifdef BUILD_UTILS
 

@@ -29,7 +29,7 @@ BCB			= C:\Program Files\Borland\BDS\4.0
 # If third party libraries are not installed in the default location
 # change the following setting to reflect the installation location.
 #
-#THIRDPARTY_HOME		= C:\Ice-$(VERSION)-ThirdParty
+THIRDPARTY_HOME		= C:\Ice-$(VERSION)-ThirdParty
 
 # ----------------------------------------------------------------------
 # Don't change anything below this line!
@@ -54,6 +54,8 @@ INSTALL			= copy
 INSTALL_PROGRAM		= $(INSTALL)
 INSTALL_LIBRARY		= $(INSTALL)
 INSTALL_DATA		= $(INSTALL)
+
+OBJEXT			= .obj
 
 #
 # Compiler specific definitions
@@ -89,13 +91,22 @@ SLICE2DOCBOOK		= $(bindir)\slice2docbook.exe
 EVERYTHING		= all clean install
 
 .SUFFIXES:
-.SUFFIXES:		.cpp .c .o
+.SUFFIXES:		.cpp .c .obj .ice
 
-.cpp.o::
-	$(CXX) /c $(CPPFLAGS) $(CXXFLAGS) -o $@ $<
+.cpp.obj::
+	$(CXX) /c $(CPPFLAGS) $(CXXFLAGS) $<
 
-.c.o::
-	$(CC) /c $(CPPFLAGS) $(CFLAGS) -o $@ $<
+.c.obj::
+	$(CC) /c $(CPPFLAGS) $(CFLAGS) $<
+
+{$(SDIR)\}.ice{$(HDIR)}.h:
+	del /q $(HDIR)\$(*F).h $(*F).cpp
+	$(SLICE2CPP) $(SLICE2CPPFLAGS) $<
+	move $(*F).h $(HDIR)
+
+.ice.h:
+	del /q $(*F).h $(*F).cpp
+	$(SLICE2CPP) $(SLICE2CPPFLAGS) $(*F).ice
 
 all:: $(SRCS) $(TARGETS)
 
@@ -107,6 +118,6 @@ clean::
 !endif
 
 clean::
-	-del /q core *.o *.bak
+	-del /q core *.obj *.bak *.tds
 
 install::

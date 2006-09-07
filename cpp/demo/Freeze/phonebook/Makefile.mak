@@ -15,32 +15,32 @@ COLLOCATED	= collocated.exe
 
 TARGETS		= $(CLIENT) $(SERVER) $(COLLOCATED)
 
-OBJS		= PhoneBook.o
+OBJS		= PhoneBook.obj
 
-COBJS		= Grammar.o \
-		  Scanner.o \
-		  Parser.o \
-		  RunParser.o \
-		  Client.o \
+COBJS		= Grammar.obj \
+		  Scanner.obj \
+		  Parser.obj \
+		  RunParser.obj \
+		  Client.obj \
 
-SOBJS		= PhoneBookI.o \
-		  ContactFactory.o \
-		  NameIndex.o \
-		  Server.o
+SOBJS		= PhoneBookI.obj \
+		  ContactFactory.obj \
+		  NameIndex.obj \
+		  Server.obj
 
-COLOBJS		= Grammar.o \
-		  Scanner.o \
-		  Parser.o \
-		  RunParser.o \
-		  PhoneBookI.o \
-		  ContactFactory.o \
-		  NameIndex.o \
-		  Collocated.o
+COLOBJS		= Grammar.obj \
+		  Scanner.obj \
+		  Parser.obj \
+		  RunParser.obj \
+		  PhoneBookI.obj \
+		  ContactFactory.obj \
+		  NameIndex.obj \
+		  Collocated.obj
 
-SRCS		= $(OBJS:.o=.cpp) \
-		  $(COBJS:.o=.cpp) \
-		  $(SOBJS:.o=.cpp) \
-		  $(COLOBJS:.o=.cpp)
+SRCS		= $(OBJS:.obj=.cpp) \
+		  $(COBJS:.obj=.cpp) \
+		  $(SOBJS:.obj=.cpp) \
+		  $(COLOBJS:.obj=.cpp)
 
 !include $(top_srcdir)/config/Make.rules.mak
 
@@ -61,9 +61,6 @@ $(COLLOCATED): $(OBJS) $(COLOBJS)
 NameIndex.h NameIndex.cpp: PhoneBook.ice $(SLICE2FREEZE)
 	del /q NameIndex.h NameIndex.cpp
 	$(SLICE2FREEZE) $(ICECPPFLAGS) --index NameIndex,Demo::Contact,name,case-insensitive NameIndex PhoneBook.ice
-
-PhoneBook.cpp PhoneBook.h: PhoneBook.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) PhoneBook.ice
 
 Scanner.cpp : Scanner.l
 	flex Scanner.l

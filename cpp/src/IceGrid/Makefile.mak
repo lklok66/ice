@@ -26,80 +26,80 @@ TARGETS         = $(LIBNAME) $(DLLNAME)
 
 !endif
 
-LIB_OBJS	= Admin.o \
-		  Query.o \
-		  Exception.o \
-		  Descriptor.o \
-		  Observer.o \
-		  Session.o \
-		  Registry.o \
-		  UserAccountMapper.o
+LIB_OBJS	= Admin.obj \
+		  Query.obj \
+		  Exception.obj \
+		  Descriptor.obj \
+		  Observer.obj \
+		  Session.obj \
+		  Registry.obj \
+		  UserAccountMapper.obj
 
-ADMIN_OBJS	= Grammar.o \
-		  Scanner.o \
-		  Parser.o \
-		  DescriptorParser.o \
-		  DescriptorBuilder.o \
-		  DescriptorHelper.o \
-		  FileParser.o \
-		  FileParserI.o \
-		  Util.o \
-		  Internal.o \
-		  Client.o
+ADMIN_OBJS	= Grammar.obj \
+		  Scanner.obj \
+		  Parser.obj \
+		  DescriptorParser.obj \
+		  DescriptorBuilder.obj \
+		  DescriptorHelper.obj \
+		  FileParser.obj \
+		  FileParserI.obj \
+		  Util.obj \
+		  Internal.obj \
+		  Client.obj
 
-COMMON_OBJS	= Internal.o \
-		  DescriptorParser.o \
-		  DescriptorBuilder.o \
-		  TraceLevels.o
+COMMON_OBJS	= Internal.obj \
+		  DescriptorParser.obj \
+		  DescriptorBuilder.obj \
+		  TraceLevels.obj
 
-NODE_OBJS	= NodeI.o \
-		  ServerI.o \
-		  ServerAdapterI.o \
-		  Activator.o \
-		  PlatformInfo.o
+NODE_OBJS	= NodeI.obj \
+		  ServerI.obj \
+		  ServerAdapterI.obj \
+		  Activator.obj \
+		  PlatformInfo.obj
 
-REGISTRY_OBJS	= RegistryI.o \
-		  InternalRegistryI.o \
-		  StringApplicationDescriptorDict.o \
-		  IdentityObjectInfoDict.o \
-		  StringAdapterInfoDict.o \
-		  Database.o \
-		  Allocatable.o \
-		  AdapterCache.o \
-		  ObjectCache.o \
-		  AllocatableObjectCache.o \
-		  ServerCache.o \
-		  NodeCache.o \
-		  LocatorI.o \
-		  LocatorRegistryI.o \
-		  AdminI.o \
-		  Util.o \
-		  DescriptorHelper.o \
-		  NodeSessionI.o \
-		  ReapThread.o \
-		  SessionI.o \
-		  AdminSessionI.o \
-		  SessionServantLocatorI.o \
-		  Topics.o \
-		  QueryI.o \
-		  WaitQueue.o \
-		  FileUserAccountMapperI.o
+REGISTRY_OBJS	= RegistryI.obj \
+		  InternalRegistryI.obj \
+		  StringApplicationDescriptorDict.obj \
+		  IdentityObjectInfoDict.obj \
+		  StringAdapterInfoDict.obj \
+		  Database.obj \
+		  Allocatable.obj \
+		  AdapterCache.obj \
+		  ObjectCache.obj \
+		  AllocatableObjectCache.obj \
+		  ServerCache.obj \
+		  NodeCache.obj \
+		  LocatorI.obj \
+		  LocatorRegistryI.obj \
+		  AdminI.obj \
+		  Util.obj \
+		  DescriptorHelper.obj \
+		  NodeSessionI.obj \
+		  ReapThread.obj \
+		  SessionI.obj \
+		  AdminSessionI.obj \
+		  SessionServantLocatorI.obj \
+		  Topics.obj \
+		  QueryI.obj \
+		  WaitQueue.obj \
+		  FileUserAccountMapperI.obj
 
 NODE_SVR_OBJS	= $(COMMON_OBJS) \
 		  $(NODE_OBJS) \
 		  $(REGISTRY_OBJS) \
-		  IceGridNode.o
+		  IceGridNode.obj
 
 REGISTRY_SVR_OBJS = \
 		  $(COMMON_OBJS) \
 		  $(REGISTRY_OBJS) \
-		  IceGridRegistry.o
+		  IceGridRegistry.obj
 		    
-SRCS		= $(LIB_OBJS:.o=.cpp) \
-		  $(ADMIN_OBJS:.o=.cpp) \
-		  $(COMMON_OBJS:.o=.cpp) \
-		  $(NODE_OBJS:.o=.cpp) \
-		  $(REGISTRY_OBJS:.o=.cpp) \
+SRCS		= $(LIB_OBJS:.obj=.cpp) \
+		  $(ADMIN_OBJS:.obj=.cpp) \
+		  $(COMMON_OBJS:.obj=.cpp) \
+		  $(NODE_OBJS:.obj=.cpp) \
+		  $(REGISTRY_OBJS:.obj=.cpp) \
 		  IceGridNode.cpp \
 		  IceGridRegistry.cpp
 
@@ -160,45 +160,6 @@ StringAdapterInfoDict.h StringAdapterInfoDict.cpp: $(SLICE2FREEZE)
 	del /q StringAdapterInfoDict.h StringAdapterInfoDict.cpp
 	$(SLICE2FREEZECMD) --dict IceGrid::StringAdapterInfoDict,string,IceGrid::AdapterInfo \
 	--dict-index IceGrid::StringAdapterInfoDict,replicaGroupId StringAdapterInfoDict $(SDIR)\Admin.ice
-
-Admin.cpp $(HDIR)\Admin.h: $(SDIR)\Admin.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) $(SDIR)\Admin.ice
-	move Admin.h $(HDIR)
-
-Exception.cpp $(HDIR)\Exception.h: $(SDIR)\Exception.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) $(SDIR)\Exception.ice
-	move Exception.h $(HDIR)
-
-FileParser.cpp $(HDIR)\FileParser.h: $(SDIR)\FileParser.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) $(SDIR)\FileParser.ice
-	move FileParser.h $(HDIR)
-
-Query.cpp $(HDIR)\Query.h: $(SDIR)\Query.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) $(SDIR)\Query.ice
-	move Query.h $(HDIR)
-
-Session.cpp $(HDIR)\Session.h: $(SDIR)\Session.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) $(SDIR)\Session.ice
-	move Session.h $(HDIR)
-
-Observer.cpp $(HDIR)\Observer.h: $(SDIR)\Observer.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) $(SDIR)\Observer.ice
-	move Observer.h $(HDIR)
-
-Descriptor.cpp $(HDIR)\Descriptor.h: $(SDIR)\Descriptor.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) $(SDIR)\Descriptor.ice
-	move Descriptor.h $(HDIR)
-
-UserAccountMapper.cpp $(HDIR)\UserAccountMapper.h: $(SDIR)\UserAccountMapper.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) $(SDIR)\UserAccountMapper.ice
-	move UserAccountMapper.h $(HDIR)
-
-Registry.cpp $(HDIR)\Registry.h: $(SDIR)\Registry.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) $(SDIR)\Registry.ice
-	move Registry.h $(HDIR)
-
-Internal.cpp Internal.h: Internal.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) Internal.ice
 
 Scanner.cpp : Scanner.l
 	flex Scanner.l

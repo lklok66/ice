@@ -14,16 +14,16 @@ SERVER		= server.exe
 
 TARGETS		= $(CLIENT) $(SERVER)
 
-OBJS		= Chat.o
+OBJS		= Chat.obj
 
-COBJS		= Client.o
+COBJS		= Client.obj
 
-SOBJS		= Server.o \
-		  ChatSessionI.o
+SOBJS		= Server.obj \
+		  ChatSessionI.obj
 
-SRCS		= $(OBJS:.o=.cpp) \
-		  $(COBJS:.o=.cpp) \
-		  $(SOBJS:.o=.cpp) \
+SRCS		= $(OBJS:.obj=.cpp) \
+		  $(COBJS:.obj=.cpp) \
+		  $(SOBJS:.obj=.cpp) \
 
 !include $(top_srcdir)/config/Make.rules.mak
 
@@ -36,9 +36,6 @@ $(CLIENT): $(OBJS) $(COBJS)
 $(SERVER): $(OBJS) $(SOBJS)
 	del /q $@
 	$(LINK) $(LD_EXEFLAGS) $(OBJS) $(SOBJS), $@,, $(LIBS) glacier2$(LIBSUFFIX).lib
-
-Chat.cpp Chat.h: Chat.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) Chat.ice
 
 clean::
 	del /q Chat.cpp Chat.h

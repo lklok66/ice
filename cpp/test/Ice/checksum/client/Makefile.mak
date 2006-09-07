@@ -13,12 +13,12 @@ CLIENT		= client.exe
 
 TARGETS		= $(CLIENT)
 
-COBJS		= Test.o \
-		  Types.o \
-		  Client.o \
-		  AllTests.o
+COBJS		= Test.obj \
+		  Types.obj \
+		  Client.obj \
+		  AllTests.obj
 
-SRCS		= $(COBJS:.o=.cpp)
+SRCS		= $(COBJS:.obj=.cpp)
 
 !include $(top_srcdir)/config/Make.rules.mak
 
@@ -27,12 +27,6 @@ CPPFLAGS	= -I. -I../../../include $(CPPFLAGS)
 $(CLIENT): $(COBJS)
 	del /q $@
 	$(LINK) $(LD_EXEFLAGS) $(COBJS), $@,, $(LIBS)
-
-Test.cpp Test.h: Test.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) --checksum $(SLICE2CPPFLAGS) Test.ice
-
-Types.cpp Types.h: Types.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) --checksum $(SLICE2CPPFLAGS) Types.ice
 
 clean::
 	del /q Test.cpp Test.h

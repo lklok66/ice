@@ -13,12 +13,12 @@ SERVER		= server.exe
 
 TARGETS		= $(SERVER)
 
-SOBJS		= Test.o \
-		  Types.o \
-		  TestI.o \
-		  Server.o
+SOBJS		= Test.obj \
+		  Types.obj \
+		  TestI.obj \
+		  Server.obj
 
-SRCS		= $(SOBJS:.o=.cpp)
+SRCS		= $(SOBJS:.obj=.cpp)
 
 !include $(top_srcdir)/config/Make.rules.mak
 
@@ -27,12 +27,6 @@ CPPFLAGS	= -I. -I../../../include $(CPPFLAGS)
 $(SERVER): $(SOBJS)
 	del /q $@
 	$(LINK) $(LD_EXEFLAGS) $(SOBJS), $@,, $(LIBS)
-
-Test.cpp Test.h: Test.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) --checksum $(SLICE2CPPFLAGS) Test.ice
-
-Types.cpp Types.h: Types.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) --checksum $(SLICE2CPPFLAGS) Types.ice
 
 clean::
 	del /q Test.cpp Test.h

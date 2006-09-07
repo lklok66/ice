@@ -16,27 +16,27 @@ COLLOCATED	= collocated.exe
 
 TARGETS		= $(CLIENT) $(SERVER) $(SERVERAMD) $(COLLOCATED)
 
-COBJS		= Test.o \
-		  Client.o \
-		  AllTests.o
+COBJS		= Test.obj \
+		  Client.obj \
+		  AllTests.obj
 
-SOBJS		= Test.o \
-		  TestI.o \
-		  Server.o
+SOBJS		= Test.obj \
+		  TestI.obj \
+		  Server.obj
 
-SAMDOBJS	= TestAMD.o \
-		  TestAMDI.o \
-		  ServerAMD.o
+SAMDOBJS	= TestAMD.obj \
+		  TestAMDI.obj \
+		  ServerAMD.obj
 
-COLOBJS		= Test.o \
-		  TestI.o \
-		  Collocated.o \
-		  AllTests.o
+COLOBJS		= Test.obj \
+		  TestI.obj \
+		  Collocated.obj \
+		  AllTests.obj
 
-SRCS		= $(COBJS:.o=.cpp) \
-		  $(SOBJS:.o=.cpp) \
-		  $(SAMDOBJS:.o=.cpp) \
-		  $(COLOBJS:.o=.cpp)
+SRCS		= $(COBJS:.obj=.cpp) \
+		  $(SOBJS:.obj=.cpp) \
+		  $(SAMDOBJS:.obj=.cpp) \
+		  $(COLOBJS:.obj=.cpp)
 
 !include $(top_srcdir)/config/Make.rules.mak
 
@@ -57,12 +57,6 @@ $(SERVERAMD): $(SAMDOBJS)
 $(COLLOCATED): $(COLOBJS)
 	del /q $@
 	$(LINK) $(LD_EXEFLAGS) $(COLOBJS), $@,, $(LIBS)
-
-Test.cpp Test.h: Test.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) Test.ice
-
-TestAMD.cpp TestAMD.h: TestAMD.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) TestAMD.ice
 
 clean::
 	del /q Test.cpp Test.h

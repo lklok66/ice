@@ -14,15 +14,15 @@ SERVER		= server.exe
 
 TARGETS		= $(CLIENT) $(SERVER)
 
-COBJS		= Client.o \
-		  Session.o
+COBJS		= Client.obj \
+		  Session.obj
 
-SOBJS		= Server.o \
-		  Session.o \
-		  SessionI.o
+SOBJS		= Server.obj \
+		  Session.obj \
+		  SessionI.obj
 
-SRCS		= $(COBJS:.o=.cpp) \
-		  $(SOBJS:.o=.cpp)
+SRCS		= $(COBJS:.obj=.cpp) \
+		  $(SOBJS:.obj=.cpp)
 
 !include $(top_srcdir)/config/Make.rules.mak
 
@@ -35,9 +35,6 @@ $(CLIENT): $(COBJS)
 $(SERVER): $(SOBJS)
 	del /q $@
 	$(LINK) $(LD_EXEFLAGS) $(SOBJS), $@,, $(LIBS) $(top_srcdir)\lib\glacier2$(LIBSUFFIX).lib
-
-Session.cpp Session.h: Session.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) Session.ice
 
 clean::
 	del /q Session.cpp Session.h

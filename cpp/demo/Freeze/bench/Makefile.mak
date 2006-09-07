@@ -13,9 +13,9 @@ CLIENT		= client.exe
 
 TARGETS		= $(CLIENT)
 
-OBJS		= Client.o BenchTypes.o Test.o
+OBJS		= Client.obj BenchTypes.obj Test.obj
 
-SRCS		= $(OBJS:.o=.cpp)
+SRCS		= $(OBJS:.obj=.cpp)
 
 !include $(top_srcdir)/config/Make.rules.mak
 
@@ -37,9 +37,6 @@ BenchTypes.h BenchTypes.cpp: Test.ice $(SLICE2FREEZE)
         --dict Demo::IndexedStruct1Class1Map,Demo::Struct1,Demo::Class1 \
         --dict-index Demo::IndexedStruct1Class1Map,s,case-sensitive \
         BenchTypes Test.ice
-
-Test.cpp Test.h: Test.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) Test.ice
 
 clean::
 	del /q BenchTypes.h BenchTypes.cpp

@@ -16,42 +16,42 @@ COLLOCATED	= collocated.exe
 
 TARGETS		= $(CLIENT) $(SERVER) $(SERVERAMD) $(COLLOCATED)
 
-COBJS           = Test.o \
-		  Wstring.o \
-		  Client.o \
-		  AllTests.o \
-		  MyByteSeq.o \
-		  StringConverterI.o 
+COBJS           = Test.obj \
+		  Wstring.obj \
+		  Client.obj \
+		  AllTests.obj \
+		  MyByteSeq.obj \
+		  StringConverterI.obj 
 
-SOBJS           = Test.o \
-		  Wstring.o \
-		  TestI.o \
-		  WstringI.o \
-		  Server.o \
-		  MyByteSeq.o \
-		  StringConverterI.o
+SOBJS           = Test.obj \
+		  Wstring.obj \
+		  TestI.obj \
+		  WstringI.obj \
+		  Server.obj \
+		  MyByteSeq.obj \
+		  StringConverterI.obj
 
-SAMDOBJS        = TestAMD.o \
-		  TestAMDI.o \
-		  WstringAMD.o \
-		  WstringAMDI.o \
-		  ServerAMD.o \
-		  MyByteSeq.o \
-		  StringConverterI.o
+SAMDOBJS        = TestAMD.obj \
+		  TestAMDI.obj \
+		  WstringAMD.obj \
+		  WstringAMDI.obj \
+		  ServerAMD.obj \
+		  MyByteSeq.obj \
+		  StringConverterI.obj
 
-COLOBJS         = Test.o \
-		  Wstring.o \
-		  TestI.o \
-		  WstringI.o \
-		  Collocated.o \
-		  AllTests.o \
-		  MyByteSeq.o \
-		  StringConverterI.o
+COLOBJS         = Test.obj \
+		  Wstring.obj \
+		  TestI.obj \
+		  WstringI.obj \
+		  Collocated.obj \
+		  AllTests.obj \
+		  MyByteSeq.obj \
+		  StringConverterI.obj
 
-SRCS		= $(COBJS:.o=.cpp) \
-		  $(SOBJS:.o=.cpp) \
-		  $(SAMDOBJS:.o=.cpp) \
-		  $(COLOBJS:.o=.cpp)
+SRCS		= $(COBJS:.obj=.cpp) \
+		  $(SOBJS:.obj=.cpp) \
+		  $(SAMDOBJS:.obj=.cpp) \
+		  $(COLOBJS:.obj=.cpp)
 
 !include $(top_srcdir)/config/Make.rules.mak
 
@@ -72,18 +72,6 @@ $(SERVERAMD): $(SAMDOBJS)
 $(COLLOCATED): $(COLOBJS)
 	del /q $@
 	$(LINK) $(LD_EXEFLAGS) $(COLOBJS), $@,, $(LIBS)
-
-Test.cpp Test.h: Test.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) --stream $(SLICE2CPPFLAGS) Test.ice
-
-TestAMD.cpp TestAMD.h: TestAMD.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) --stream $(SLICE2CPPFLAGS) TestAMD.ice
-
-Wstring.cpp Wstring.h: Wstring.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) Wstring.ice
-
-WstringAMD.cpp WstringAMD.h: WstringAMD.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) WstringAMD.ice
 
 clean::
 	del /q Test.cpp Test.h

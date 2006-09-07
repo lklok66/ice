@@ -14,20 +14,21 @@ SERVER		= server.exe
 
 TARGETS		= $(CLIENT) $(SERVER)
 
-OBJS		= Printer.o
+OBJS		= Printer.obj
 
-COBJS		= Client.o
+COBJS		= Client.obj
 
-SOBJS		= PrinterI.o \
-		  Server.o
+SOBJS		= PrinterI.obj \
+		  Server.obj
 
-SRCS		= $(OBJS:.o=.cpp) \
-		  $(COBJS:.o=.cpp) \
-		  $(SOBJS:.o=.cpp)
+SRCS		= $(OBJS:.obj=.cpp) \
+		  $(COBJS:.obj=.cpp) \
+		  $(SOBJS:.obj=.cpp)
 
 !include $(top_srcdir)/config/Make.rules.mak
 
 CPPFLAGS	= -I. $(CPPFLAGS)
+SLICE2CPPFLAGS	= --stream $(SLICE2CPPFLAGS)
 
 $(CLIENT): $(OBJS) $(COBJS)
 	del /q $@
@@ -36,9 +37,6 @@ $(CLIENT): $(OBJS) $(COBJS)
 $(SERVER): $(OBJS) $(SOBJS)
 	del /q $@
 	$(LINK) $(LD_EXEFLAGS) $(OBJS) $(SOBJS), $@,, $(LIBS)
-
-Printer.cpp Printer.h: Printer.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) --stream $(SLICE2CPPFLAGS) Printer.ice
 
 clean::
 	del /q Printer.cpp Printer.h

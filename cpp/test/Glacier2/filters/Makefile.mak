@@ -14,17 +14,17 @@ SERVER		= server.exe
 
 TARGETS		= $(CLIENT) $(SERVER)
 
-COBJS		= Client.o \
-		  Test.o
+COBJS		= Client.obj \
+		  Test.obj
 
-SOBJS		= Server.o \
-		  Test.o \
-		  SessionI.o \
-		  BackendI.o \
-		  TestControllerI.o
+SOBJS		= Server.obj \
+		  Test.obj \
+		  SessionI.obj \
+		  BackendI.obj \
+		  TestControllerI.obj
 
-SRCS		= $(COBJS:.o=.cpp) \
-		  $(SOBJS:.o=.cpp)
+SRCS		= $(COBJS:.obj=.cpp) \
+		  $(SOBJS:.obj=.cpp)
 
 !include $(top_srcdir)/config/Make.rules.mak
 
@@ -37,9 +37,6 @@ $(CLIENT): $(COBJS)
 $(SERVER): $(SOBJS)
 	del /q $@
 	$(LINK) $(LD_EXEFLAGS) $(SOBJS), $@,, $(LIBS) $(top_srcdir)\lib\glacier2$(LIBSUFFIX).lib
-
-Test.cpp Test.h: Test.ice $(SLICE2CPP) $(SLICEPARSERLIB)
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) Test.ice
 
 clean::
 	del /q Test.cpp Test.h
