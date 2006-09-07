@@ -48,7 +48,7 @@ PoolReallocWrapper(MemoryPool* p, IceInternal::Buffer::Container::pointer buf, I
 static void
 PoolFreeWrapper(MemoryPool* p, IceInternal::Buffer::Container::pointer buf)
 {
-    return p->free(buf);
+    p->free(buf);
 }
 
 void
