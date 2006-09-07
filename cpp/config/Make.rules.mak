@@ -29,14 +29,14 @@ BCB			= C:\Program Files\Borland\BDS\4.0
 # If third party libraries are not installed in the default location
 # change the following setting to reflect the installation location.
 #
-THIRDPARTY_HOME		= C:\Ice-$(VERSION)-ThirdParty-BCC
+#THIRDPARTY_HOME		= C:\Ice-$(VERSION)-ThirdParty
 
 # ----------------------------------------------------------------------
 # Don't change anything below this line!
 # ----------------------------------------------------------------------
 
 SHELL			= /bin/sh
-VERSION			= 3.1.0
+VERSION			= 3.1.1
 SOVERSION		= 31
 bindir			= $(top_srcdir)\bin
 libdir			= $(top_srcdir)\lib
@@ -91,10 +91,10 @@ EVERYTHING		= all clean install
 .SUFFIXES:
 .SUFFIXES:		.cpp .c .o
 
-.cpp.o:
+.cpp.o::
 	$(CXX) /c $(CPPFLAGS) $(CXXFLAGS) -o $@ $<
 
-.c.o:
+.c.o::
 	$(CC) /c $(CPPFLAGS) $(CFLAGS) -o $@ $<
 
 all:: $(SRCS) $(TARGETS)
