@@ -118,6 +118,10 @@ SOURCE=.\BasicStream.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\MemoryPool.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\Buffer.cpp
 # End Source File
 # Begin Source File
@@ -655,6 +659,10 @@ SOURCE=..\..\include\ice\Initialize.h
 # Begin Source File
 
 SOURCE=.\Instance.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\MemoryPool.h
 # End Source File
 # Begin Source File
 
