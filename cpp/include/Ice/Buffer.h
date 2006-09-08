@@ -18,13 +18,11 @@
 namespace IceInternal
 {
 
-class MemoryPool;
-
 class ICE_API Buffer : private IceUtil::noncopyable
 {
 public:
 
-    Buffer(MemoryPool* pool) : b(pool), i(b.begin()) { }
+    Buffer() : i(b.begin()) { }
     virtual ~Buffer() { }
 
     void swap(Buffer&);
@@ -46,9 +44,33 @@ public:
 	typedef ptrdiff_t difference_type;
 	typedef size_t size_type;
 
-	Container(MemoryPool* pool);
+#ifdef ICE_SMALL_MESSAGE_BUFFER_OPTIMIZATION
+	Container() :
+	    _buf(_fixed),
+	    _size(0),
+	    _capacity(ICE_BUFFER_FIXED_SIZE)
+	{
+	}
+#else
+	Container() :
+	    _buf(0),
+	    _size(0),
+	    _capacity(0)
+	{
+	}
+#endif
 
-	~Container();
+	~Container()
+	{
+#ifdef ICE_SMALL_MESSAGE_BUFFER_OPTIMIZATION
+	    if(_buf != _fixed)
+	    {
+		free(_buf);
+	    }
+#else
+	    free(_buf);
+#endif
+	}
 
 	iterator begin()
 	{
@@ -138,10 +160,6 @@ public:
 	    return _buf[n];
 	}
 
-	typedef Ice::Byte* (*AllocFunc)(IceInternal::MemoryPool*, size_type n);
-	typedef Ice::Byte* (*ReallocFunc)(IceInternal::MemoryPool*, Ice::Byte* buf, size_type n);
-	typedef void (*FreeFunc)(IceInternal::MemoryPool*, Ice::Byte* buf);
-
     private:
 
 	Container(const Container&);
@@ -152,11 +170,6 @@ public:
 	size_type _size;
 	size_type _capacity;
 	int _shrinkCounter;
-
-	MemoryPool* _pool;
-	AllocFunc _alloc;
-	ReallocFunc _realloc;
-	FreeFunc _free;
 
 #ifdef ICE_SMALL_MESSAGE_BUFFER_OPTIMIZATION
 	//
