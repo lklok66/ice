@@ -30,6 +30,7 @@ OBJS		= Acceptor.obj \
 		  Current.obj \
 		  DefaultsAndOverrides.obj \
 		  Direct.obj \
+		  DLLMain.obj \
 		  DynamicLibrary.obj \
 		  EndpointFactoryManager.obj \
 		  EndpointFactory.obj \
