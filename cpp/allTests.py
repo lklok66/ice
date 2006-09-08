@@ -131,12 +131,12 @@ if isCygwin() == 0:
       ]
 
 def usage():
-    print "usage: " + sys.argv[0] + " -l -r <regex> -R <regex> --debug --protocol protocol --compress --host host --threadPerConnection --memoryPool"
+    print "usage: " + sys.argv[0] + " -l -r <regex> -R <regex> --debug --protocol protocol --compress --host host --threadPerConnection"
     sys.exit(2)
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], "lr:R:", \
-    	["debug", "protocol=", "compress", "host=", "threadPerConnection", "memoryPool"])
+    	["debug", "protocol=", "compress", "host=", "threadPerConnection"])
 except getopt.GetoptError:
     usage()
 
@@ -158,7 +158,7 @@ for o, a in opts:
 	tests = filter(rematch, tests)
     if o in ( "--protocol", "--host" ):
 	args += " " + o + " " + a
-    if o in ( "--debug", "--compress", "--threadPerConnection", "--memoryPool" ):
+    if o in ( "--debug", "--compress", "--threadPerConnection" ):
 	args += " " + o 
     
 if loop:

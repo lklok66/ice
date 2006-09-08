@@ -128,10 +128,6 @@ Ice:
     GC.Interval
     InitPlugins
     Logger.Timestamp
-    MemoryPool
-    MemoryPool.HighWaterMark
-    MemoryPool.DefaultPageSize
-    MemoryPool.MaxPageSize
     MessageSizeMax
     MonitorConnections
     Nohup

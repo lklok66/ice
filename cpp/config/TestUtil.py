@@ -399,11 +399,6 @@ if threadPerConnection:
     serverProtocol += " --Ice.ThreadPerConnection"
     clientServerProtocol += " --Ice.ThreadPerConnection"
 
-if memoryPool:
-    clientProtocol += " --Ice.MemoryPool=1"
-    serverProtocol += " --Ice.MemoryPool=1"
-    clientServerProtocol += " --Ice.MemoryPool=1"
-
 if host != "":
     defaultHost = " --Ice.Default.Host=" + host
 else:
