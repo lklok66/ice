@@ -351,7 +351,7 @@ def extractDemos(sources, buildDir, version, distro, demoDir):
     # be nicer to make the toExtract list more tailored for each
     # distribution.
     #
-    toExtract = "%s/demo %s/config %s/certs" % (distro, distro, distro)
+    toExtract = "%s/demo %s/config %s/certs ICE_LICENSE" % (distro, distro, distro)
 	
     runprog("gzip -dc " + sources + "/" + distro + ".tar.gz | tar xf - " + toExtract, False)
 	
@@ -464,11 +464,8 @@ def makeInstall(sources, buildDir, installDir, distro, clean, version):
     if distro.startswith('IceJ'):
 	if not os.path.exists(os.path.join(installDir, 'lib')):
 	    os.mkdir(os.path.join(installDir, 'lib'))
-	if not os.path.exists(os.path.join(installDir, 'lib', 'java5')):
-	    os.mkdir(os.path.join(installDir, 'lib', 'java5'))
 	shutil.copy(buildDir + '/' + distro + '/lib/Ice.jar', installDir + '/lib')
 	shutil.copy(buildDir + '/' + distro + '/lib/IceGridGUI.jar', installDir + '/lib')
-	shutil.copy(buildDir + '/' + distro + '/lib/java5/Ice.jar', installDir + '/lib/java5')
 	#
 	# We really just want to copy the files, not move them.
 	# Shelling out to a copy is easier (and more likely to always
@@ -777,9 +774,9 @@ def makePHPbinary(sources, buildDir, installDir, version, clean):
                 print line.rstrip('\n') + ' -DCOMPILE_DL_ICE'
 	    elif line.startswith('ICE_SHARED_LIBADD'):
 		if platform == 'linux64':
-		    print "ICE_SHARED_LIBADD = -Wl,-rpath,/opt/Ice-%s/lib64 -L/opt/Ice-%s/lib64 -lIce -lSlice -lIceUtil" % (version, version)
+		    print "ICE_SHARED_LIBADD = -Wl,-rpath,/opt/Ice-%s/lib64 -L%s/Ice-%s/lib64 -lIce -lSlice -lIceUtil" % (version, buildDir, version)
 		else:
-		    print "ICE_SHARED_LIBADD = -Wl,-rpath,/opt/Ice-%s/lib -L/opt/Ice-%s/lib -lIce -lSlice -lIceUtil" % (version, version)
+		    print "ICE_SHARED_LIBADD = -Wl,-rpath,/opt/Ice-%s/lib -L%s/Ice-%s/lib -lIce -lSlice -lIceUtil" % (version, buildDir, version)
             else:
                 print line.strip('\n')
 
@@ -1074,9 +1071,9 @@ def main():
         #
         # Ice must be first or building the other source distributions will fail.
         #
-        sourceTarBalls = [ ('ice', 'Ice-' + version, ''),
-			   ('icephp','IcePHP-' + version, 'php'),
-                           ('icej','IceJ-' + version, 'j') ]
+        sourceTarBalls = [ ('ice', 'Ice-%s' % version, ''),
+			   ('icephp','IcePHP-%s' % version, 'php'),
+                           ('icej','IceJ-%s-java2' % version, 'j') ]
 
 	if not getPlatform() in ['aix', 'solaris', 'hpux']:
 	    sourceTarBalls.append(('icepy','IcePy-' + version, 'py'))
@@ -1120,7 +1117,7 @@ def main():
 	    for cvs, tarball, demoDir in toCollect:
 		extractDemos(sources, buildDir, version, tarball, demoDir)
 		shutil.copy("%s/unix/README.DEMOS" % installFiles, "%s/Ice-%s-demos/README.DEMOS" % (buildDir, version)) 
-		shutil.copy("%s/Ice-%s/ICE_LICENSE" % (buildDir, version), "%s/Ice-%s-demos/ICE_LICENSE" % (buildDir, version))
+	#	shutil.copy("%s/Ice-%s/ICE_LICENSE" % (buildDir, version), "%s/Ice-%s-demos/ICE_LICENSE" % (buildDir, version))
 	    archiveDemoTree(buildDir, version, installFiles)
 	    shutil.move("%s/Ice-%s-demos.tar.gz" % (buildDir, version), "%s/Ice-%s-demos.tar.gz" % (installDir, version))
 
@@ -1129,6 +1126,18 @@ def main():
 	#
         for cvs, tarball, demoDir in sourceTarBalls:
             makeInstall(sources, buildDir, "%s/Ice-%s" % (installDir, version), tarball, clean, version)	    
+
+	#
+	# XXX- put java5 Ice.jar in place!
+	#
+	prevDir = os.getcwd()
+	os.chdir("%s/Ice-%s/lib" % (installDir, version))
+        os.mkdir("java5")	
+	os.chdir("java5")
+	os.system("tar xfz %s/IceJ-%s-java5.tar.gz IceJ-%s-java5/lib/Ice.jar" % (sources, version, version))
+	shutil.move("IceJ-%s-java5/lib/Ice.jar" % version, "Ice.jar")
+	shutil.rmtree("IceJ-%s-java5" % version)
+	os.chdir(prevDir)
 
     elif cvsMode:
 	collectSources = False
