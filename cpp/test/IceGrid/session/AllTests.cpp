@@ -1016,6 +1016,10 @@ allTests(const Ice::CommunicatorPtr& communicator)
 	admin1->ice_ping();
 	admin2->ice_ping();
 
+	obj = communicator->stringToProxy("IceGrid/Query");
+	obj->ice_connectionId("admRouter1")->ice_router(adminRouter1)->ice_ping();
+	obj->ice_connectionId("admRouter2")->ice_router(adminRouter2)->ice_ping();
+
 	try
 	{
 	    admSession1->ice_connectionId("admRouter2")->ice_router(adminRouter2)->ice_ping();
