@@ -122,6 +122,13 @@ os.mkdir(os.path.join("icecs", "slice"))
 for x in slicedirs:
     shutil.copytree(os.path.join("ice", "slice", x), os.path.join("icecs", "slice", x), 1)
 
+shutil.copyfile(os.path.join("ice", "slice", "Makefile"), os.path.join("icecs", "slice", "Makefile"))
+
+#
+# Makefile.mak files found in the slice directories are removed later
+# on. 
+#
+
 #
 # Generate HTML documentation. We need to build icecpp
 # and slice2docbook first.
@@ -158,6 +165,8 @@ filesToRemove = [ \
     os.path.join("icecs", "makedist.py"), \
     ]
 filesToRemove.extend(find("icecs", ".dummy"))
+filesToRemove.extend(find(os.path.join("icecs", "slice"), "Makefile.mak"))
+filesToRemove.extend(find(os.path.join("icecs", "slice"), "Makefile"))
 for x in filesToRemove:
     os.remove(x)
 
