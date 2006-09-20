@@ -1135,7 +1135,7 @@ def main():
         os.mkdir("java5")	
 	os.chdir("java5")
 	os.system("gunzip %s/IceJ-%s-java5.tar.gz" % (sources, version))
-	os.system("tar xf %s/IceJ-%s-java5.tar.gz IceJ-%s-java5/lib/Ice.jar" % (sources, version, version))
+	os.system("tar xf %s/IceJ-%s-java5.tar IceJ-%s-java5/lib/Ice.jar" % (sources, version, version))
 	shutil.move("IceJ-%s-java5/lib/Ice.jar" % version, "Ice.jar")
 	shutil.rmtree("IceJ-%s-java5" % version)
 	os.chdir(prevDir)
