@@ -122,10 +122,8 @@ os.mkdir(os.path.join("icecs", "slice"))
 for x in slicedirs:
     shutil.copytree(os.path.join("ice", "slice", x), os.path.join("icecs", "slice", x), 1)
 
-shutil.copyfile(os.path.join("ice", "slice", "Makefile"), os.path.join("icecs", "slice", "Makefile"))
-
 #
-# Makefile.mak files found in the slice directories are removed later
+# Makefiles found in the slice directories are removed later
 # on. 
 #
 
