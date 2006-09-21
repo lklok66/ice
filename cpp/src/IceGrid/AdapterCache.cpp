@@ -304,7 +304,11 @@ ReplicaGroupEntry::update(const LoadBalancingPolicyPtr& policy)
 {
     Lock sync(*this);
     _loadBalancing = policy;
-    if(_loadBalancing)
+    if(!_loadBalancing)
+    {
+	_loadBalancingNReplicas = 0; // 0 = All of them
+    }
+    else
     {
 	istringstream is(_loadBalancing->nReplicas);
 	int nReplicas = 0;
