@@ -1017,7 +1017,8 @@ IcePy::OperationI::prepareRequest(const Ice::CommunicatorPtr& communicator, PyOb
     if(argc != paramCount)
     {
         string fixedName = fixIdent(_name);
-        PyErr_Format(PyExc_RuntimeError, STRCAST("%s expects %d in parameters"), fixedName.c_str(), paramCount);
+        PyErr_Format(PyExc_RuntimeError, STRCAST("%s expects %d in parameters"), fixedName.c_str(),
+		     static_cast<int>(paramCount));
         return false;
     }
 
