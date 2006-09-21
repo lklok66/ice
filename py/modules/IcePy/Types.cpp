@@ -618,9 +618,9 @@ IcePy::PrimitiveInfo::marshalSequence(PyObject* p, const Ice::OutputStreamPtr& o
     {
     case PrimitiveInfo::KindBool:
     {
-        int sz = PySequence_Fast_GET_SIZE(fs.get());
+        Py_ssize_t sz = PySequence_Fast_GET_SIZE(fs.get());
         Ice::BoolSeq seq(sz);
-        for(int i = 0; i < sz; ++i)
+        for(Py_ssize_t i = 0; i < sz; ++i)
         {
             PyObject* item = PySequence_Fast_GET_ITEM(fs.get(), i);
             if(item == NULL)
@@ -640,9 +640,9 @@ IcePy::PrimitiveInfo::marshalSequence(PyObject* p, const Ice::OutputStreamPtr& o
     }
     case PrimitiveInfo::KindByte:
     {
-        int sz = PySequence_Fast_GET_SIZE(fs.get());
+        Py_ssize_t sz = PySequence_Fast_GET_SIZE(fs.get());
         Ice::ByteSeq seq(sz);
-        for(int i = 0; i < sz; ++i)
+        for(Py_ssize_t i = 0; i < sz; ++i)
         {
             PyObject* item = PySequence_Fast_GET_ITEM(fs.get(), i);
             if(item == NULL)
@@ -672,9 +672,9 @@ IcePy::PrimitiveInfo::marshalSequence(PyObject* p, const Ice::OutputStreamPtr& o
     }
     case PrimitiveInfo::KindShort:
     {
-        int sz = PySequence_Fast_GET_SIZE(fs.get());
+        Py_ssize_t sz = PySequence_Fast_GET_SIZE(fs.get());
         Ice::ShortSeq seq(sz);
-        for(int i = 0; i < sz; ++i)
+        for(Py_ssize_t i = 0; i < sz; ++i)
         {
             PyObject* item = PySequence_Fast_GET_ITEM(fs.get(), i);
             if(item == NULL)
@@ -704,9 +704,9 @@ IcePy::PrimitiveInfo::marshalSequence(PyObject* p, const Ice::OutputStreamPtr& o
     }
     case PrimitiveInfo::KindInt:
     {
-        int sz = PySequence_Fast_GET_SIZE(fs.get());
+        Py_ssize_t sz = PySequence_Fast_GET_SIZE(fs.get());
         Ice::IntSeq seq(sz);
-        for(int i = 0; i < sz; ++i)
+        for(Py_ssize_t i = 0; i < sz; ++i)
         {
             PyObject* item = PySequence_Fast_GET_ITEM(fs.get(), i);
             if(item == NULL)
@@ -741,9 +741,9 @@ IcePy::PrimitiveInfo::marshalSequence(PyObject* p, const Ice::OutputStreamPtr& o
     }
     case PrimitiveInfo::KindLong:
     {
-        int sz = PySequence_Fast_GET_SIZE(fs.get());
+        Py_ssize_t sz = PySequence_Fast_GET_SIZE(fs.get());
         Ice::LongSeq seq(sz);
-        for(int i = 0; i < sz; ++i)
+        for(Py_ssize_t i = 0; i < sz; ++i)
         {
             PyObject* item = PySequence_Fast_GET_ITEM(fs.get(), i);
             if(item == NULL)
@@ -778,9 +778,9 @@ IcePy::PrimitiveInfo::marshalSequence(PyObject* p, const Ice::OutputStreamPtr& o
     }
     case PrimitiveInfo::KindFloat:
     {
-        int sz = PySequence_Fast_GET_SIZE(fs.get());
+        Py_ssize_t sz = PySequence_Fast_GET_SIZE(fs.get());
         Ice::FloatSeq seq(sz);
-        for(int i = 0; i < sz; ++i)
+        for(Py_ssize_t i = 0; i < sz; ++i)
         {
             PyObject* item = PySequence_Fast_GET_ITEM(fs.get(), i);
             if(item == NULL)
@@ -806,9 +806,9 @@ IcePy::PrimitiveInfo::marshalSequence(PyObject* p, const Ice::OutputStreamPtr& o
     }
     case PrimitiveInfo::KindDouble:
     {
-        int sz = PySequence_Fast_GET_SIZE(fs.get());
+        Py_ssize_t sz = PySequence_Fast_GET_SIZE(fs.get());
         Ice::DoubleSeq seq(sz);
-        for(int i = 0; i < sz; ++i)
+        for(Py_ssize_t i = 0; i < sz; ++i)
         {
             PyObject* item = PySequence_Fast_GET_ITEM(fs.get(), i);
             if(item == NULL)
@@ -834,9 +834,9 @@ IcePy::PrimitiveInfo::marshalSequence(PyObject* p, const Ice::OutputStreamPtr& o
     }
     case PrimitiveInfo::KindString:
     {
-        int sz = PySequence_Fast_GET_SIZE(fs.get());
+        Py_ssize_t sz = PySequence_Fast_GET_SIZE(fs.get());
         Ice::StringSeq seq(sz);
-        for(int i = 0; i < sz; ++i)
+        for(Py_ssize_t i = 0; i < sz; ++i)
         {
             PyObject* item = PySequence_Fast_GET_ITEM(fs.get(), i);
             if(item == NULL)
@@ -1188,8 +1188,7 @@ IcePy::StructInfo::marshal(PyObject* p, const Ice::OutputStreamPtr& os, ObjectMa
 {
     assert(PyObject_IsInstance(p, pythonType.get()) == 1); // validate() should have caught this.
 
-    int i = 0;
-    for(DataMemberList::iterator q = members.begin(); q != members.end(); ++q, ++i)
+    for(DataMemberList::iterator q = members.begin(); q != members.end(); ++q)
     {
         DataMemberPtr member = *q;
         char* memberName = const_cast<char*>(member->name.c_str());
@@ -1223,8 +1222,7 @@ IcePy::StructInfo::unmarshal(const Ice::InputStreamPtr& is, const UnmarshalCallb
         throw AbortMarshaling();
     }
 
-    int i = 0;
-    for(DataMemberList::iterator q = members.begin(); q != members.end(); ++q, ++i)
+    for(DataMemberList::iterator q = members.begin(); q != members.end(); ++q)
     {
         DataMemberPtr member = *q;
         member->type->unmarshal(is, member, p.get(), 0);
@@ -1313,9 +1311,9 @@ IcePy::SequenceInfo::marshal(PyObject* p, const Ice::OutputStreamPtr& os, Object
         return;
     }
 
-    int sz = PySequence_Fast_GET_SIZE(fastSeq.get());
+    Py_ssize_t sz = PySequence_Fast_GET_SIZE(fastSeq.get());
     os->writeSize(sz);
-    for(int i = 0; i < sz; ++i)
+    for(Py_ssize_t i = 0; i < sz; ++i)
     {
         PyObject* item = PySequence_Fast_GET_ITEM(fastSeq.get(), i);
         if(item == NULL)
@@ -1324,7 +1322,7 @@ IcePy::SequenceInfo::marshal(PyObject* p, const Ice::OutputStreamPtr& os, Object
         }
         if(!elementType->validate(item))
         {
-            PyErr_Format(PyExc_ValueError, STRCAST("invalid value for element %d of `%s'"), i,
+            PyErr_Format(PyExc_ValueError, STRCAST("invalid value for element %d of `%s'"), static_cast<int>(i),
 			 const_cast<char*>(id.c_str()));
             throw AbortMarshaling();
         }
@@ -1388,17 +1386,17 @@ IcePy::SequenceInfo::print(PyObject* value, IceUtil::Output& out, PrintObjectHis
 	    return;
 	}
 
-	int sz = PySequence_Fast_GET_SIZE(fastSeq.get());
+	Py_ssize_t sz = PySequence_Fast_GET_SIZE(fastSeq.get());
 
 	out.sb();
-	for(int i = 0; i < sz; ++i)
+	for(Py_ssize_t i = 0; i < sz; ++i)
 	{
 	    PyObject* item = PySequence_Fast_GET_ITEM(fastSeq.get(), i);
 	    if(item == NULL)
 	    {
 		break;
 	    }
-	    out << nl << '[' << i << "] = ";
+	    out << nl << '[' << static_cast<int>(i) << "] = ";
 	    elementType->print(item, out, history);
 	}
 	out.eb();
@@ -1450,10 +1448,10 @@ IcePy::DictionaryInfo::marshal(PyObject* p, const Ice::OutputStreamPtr& os, Obje
         throw AbortMarshaling();
     }
 
-    int sz = PyDict_Size(p);
+    Py_ssize_t sz = PyDict_Size(p);
     os->writeSize(sz);
 
-    int pos = 0;
+    Py_ssize_t pos = 0;
     PyObject* key;
     PyObject* value;
     while(PyDict_Next(p, &pos, &key, &value))
@@ -1543,7 +1541,7 @@ IcePy::DictionaryInfo::print(PyObject* value, IceUtil::Output& out, PrintObjectH
     }
     else
     {
-	int pos = 0;
+	Py_ssize_t pos = 0;
 	PyObject* elemKey;
 	PyObject* elemValue;
 	out.sb();
@@ -2062,7 +2060,7 @@ IcePy::ReadObjectCallback::invoke(const Ice::ObjectPtr& p)
 void
 IcePy::ExceptionInfo::marshal(PyObject* p, const Ice::OutputStreamPtr& os, ObjectMap* objectMap)
 {
-    if(!PyInstance_Check(p) || !PyObject_IsInstance(p, pythonType.get()))
+    if(!PyObject_IsInstance(p, pythonType.get()))
     {
         PyErr_Format(PyExc_ValueError, STRCAST("expected exception %s"), id.c_str());
         throw AbortMarshaling();
@@ -2137,7 +2135,7 @@ IcePy::ExceptionInfo::unmarshal(const Ice::InputStreamPtr& is)
 void
 IcePy::ExceptionInfo::print(PyObject* value, IceUtil::Output& out)
 {
-    if(!PyInstance_Check(value) || !PyObject_IsInstance(value, pythonType.get()))
+    if(!PyObject_IsInstance(value, pythonType.get()))
     {
 	out << "<invalid value - expected " << id << ">";
 	return;
@@ -2460,8 +2458,8 @@ IcePy_defineEnum(PyObject*, PyObject* args)
     info->pythonType = type;
     Py_INCREF(type);
 
-    int sz = PyTuple_GET_SIZE(enumerators);
-    for(int i = 0; i < sz; ++i)
+    Py_ssize_t sz = PyTuple_GET_SIZE(enumerators);
+    for(Py_ssize_t i = 0; i < sz; ++i)
     {
         PyObjectHandle e = PyTuple_GET_ITEM(enumerators, i);
         Py_INCREF(e.get());
@@ -2492,8 +2490,8 @@ IcePy_defineStruct(PyObject*, PyObject* args)
     info->pythonType = type;
     Py_INCREF(type);
 
-    int sz = PyTuple_GET_SIZE(members);
-    for(int i = 0; i < sz; ++i)
+    Py_ssize_t sz = PyTuple_GET_SIZE(members);
+    for(Py_ssize_t i = 0; i < sz; ++i)
     {
         PyObject* m = PyTuple_GET_ITEM(members, i);
         assert(PyTuple_Check(m));
@@ -2671,7 +2669,7 @@ IcePy_defineClass(PyObject*, PyObject* args)
         assert(info->base);
     }
 
-    int i, sz;
+    Py_ssize_t i, sz;
     sz = PyTuple_GET_SIZE(interfaces);
     for(i = 0; i < sz; ++i)
     {
@@ -2718,7 +2716,11 @@ IcePy_defineException(PyObject*, PyObject* args)
         return NULL;
     }
 
+#ifdef ICEPY_OLD_EXCEPTIONS
     assert(PyClass_Check(type));
+#else
+    assert(PyExceptionClass_Check(type));
+#endif
     assert(PyTuple_Check(members));
 
     ExceptionInfoPtr info = new ExceptionInfo;
@@ -2732,8 +2734,8 @@ IcePy_defineException(PyObject*, PyObject* args)
 
     info->usesClasses = false;
 
-    int sz = PyTuple_GET_SIZE(members);
-    for(int i = 0; i < sz; ++i)
+    Py_ssize_t sz = PyTuple_GET_SIZE(members);
+    for(Py_ssize_t i = 0; i < sz; ++i)
     {
         PyObject* m = PyTuple_GET_ITEM(members, i);
         assert(PyTuple_Check(m));
