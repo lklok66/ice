@@ -60,5 +60,6 @@ clean::
 install:: all
 	copy $(LIBNAME) $(install_libdir)
 	copy $(DLLNAME) $(install_bindir)
+	copy $(DLLNAME:.dll=.tds) $(install_bindir)
 
 !include .depend

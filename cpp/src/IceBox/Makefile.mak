@@ -77,7 +77,9 @@ clean::
 install:: all
 	copy $(LIBNAME) $(install_libdir)
 	copy $(DLLNAME) $(install_bindir)
+	copy $(DLLNAME:.dll=.tds) $(install_bindir)
 	copy $(SERVER) $(install_bindir)
+	copy $(SERVER:.exe=.tds) $(install_bindir)
 	copy $(ADMIN) $(install_bindir)
 
 !else
@@ -85,7 +87,7 @@ install:: all
 install:: all
 
 $(EVERYTHING)::
-	$(MAKE) -nologo /f Makefile.mak BUILD_UTILS=1 $@
+	$(MAKE) -nologo /f Makefile.mak BUILD_UTILS=1 $@ || exit 1
 
 !endif
 

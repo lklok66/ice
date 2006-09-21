@@ -201,6 +201,7 @@ clean::
 install:: all
 	copy $(LIBNAME) $(install_libdir)
 	copy $(DLLNAME) $(install_bindir)
+	copy $(DLLNAME:.dll=.tds) $(install_bindir)
 	copy $(ADMIN) $(install_bindir)
 	copy $(NODE_SERVER) $(install_bindir)
 	copy $(REGISTRY_SERVER) $(install_bindir)
@@ -210,7 +211,7 @@ install:: all
 install:: all
 
 $(EVERYTHING)::
-	$(MAKE) -nologo /f Makefile.mak BUILD_UTILS=1 $@
+	$(MAKE) -nologo /f Makefile.mak BUILD_UTILS=1 $@ || exit 1
 
 !endif
 
