@@ -325,6 +325,56 @@ prefix = $(ICE_DIR)
     runprog("sh -c 'for f in `find . -name .depend` ; do echo \"\" > $f ; done'")
     makefile.close()
 
+def editMakeRulesMak(filename, version):
+    '''
+    Ice distributions contain files with useful build rules. However,
+    these rules are source distribution specific. This script edits
+    these files to make them appropriate to accompany binary
+    distributions.
+    '''
+    state = 'header'
+    reIceLocation = re.compile('^[a-z]*dir.*=\s*\$\(top_srcdir\)')
+
+    makefile =  fileinput.input(filename, True)
+    for line in makefile:
+	if state == 'done':
+	    if reIceLocation.search(line) <> None:
+		output = line.rstrip('\n').replace('top_srcdir', 'ICE_HOME', 10)
+		print output
+	    elif line.startswith('install_'):
+		#
+		# Do nothing.
+		#
+		pass
+	    else:
+		print line.rstrip('\n')
+	elif state == 'header':
+	    #
+	    # Reading header.
+	    #
+	    print line.rstrip('\n')
+	    if line.strip() == "":
+		state = 'untilprefix'
+		print """
+#
+# Checks for ICE_HOME environment variable.
+#
+
+!if "$(ICE_HOME)" == ""
+all::
+	@echo Ice distribution not found, please set ICE_HOME!
+	@exit 1
+!endif
+
+prefix = $(ICE_HOME)
+
+"""
+	elif state == 'untilprefix':
+	    if line.startswith('prefix'):
+		state = 'done'
+
+    makefile.close()
+
 def updateIceVersion(filename, version):
     print 'Updating ice version in ' + filename + ' to ' + version
     f = fileinput.input(filename, True)
@@ -405,6 +455,7 @@ def extractDemos(sources, buildDir, version, distro, demoDir):
 
     if distro.startswith('Ice-'):
 	editMakeRules(os.path.join(basepath, 'Make.rules'), version)
+	editMakeRulesMak(os.path.join(basepath, 'Make.rules.mak'), version)
     elif distro.startswith('IceCS-'):
 	editMakeRulesCS(os.path.join(basepath, 'Make.rules.cs'), version)
 
