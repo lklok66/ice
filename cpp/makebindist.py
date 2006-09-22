@@ -318,11 +318,13 @@ prefix = $(ICE_DIR)
 	    if line.startswith('prefix'):
 		state = 'done'
     #
-    # Dependency files are all going to be bogus.  The makedepend
-    # script doesn't seem to work properly for the slice files.
+    # Dependency files are all going to be bogus since they contain relative
+    # paths to Ice headers. We need to adjust this.
+    #
+    # XXX: The following will not work for demos not in demo/A/B type dir
     #
     os.chdir("..")
-    runprog("sh -c 'for f in `find . -name .depend` ; do echo \"\" > $f ; done'")
+    runprog("for f in `find . -name .depend` ; do sed -i -e 's/\.\.\/\.\.\/\.\./$(ICE_DIR)/g' $f ; done")
     makefile.close()
 
 def editMakeRulesMak(filename, version):
@@ -339,7 +341,7 @@ def editMakeRulesMak(filename, version):
     for line in makefile:
 	if state == 'done':
 	    if reIceLocation.search(line) <> None:
-		output = line.rstrip('\n').replace('top_srcdir', 'ICE_HOME', 10)
+		output = line.rstrip('\n').replace('top_srcdir', 'ICE_DIR', 10)
 		print output
 	    elif line.startswith('install_'):
 		#
@@ -366,7 +368,8 @@ all::
 	@exit 1
 !endif
 
-prefix = $(ICE_HOME)
+ICE_DIR = $(ICE_HOME)
+prefix = $(ICE_DIR)
 
 """
 	elif state == 'untilprefix':
