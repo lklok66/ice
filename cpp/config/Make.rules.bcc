@@ -23,7 +23,7 @@ CPPFLAGS	= $(CPPFLAGS) -O2 -k- -DNDEBUG
 CPPFLAGS	= $(CPPFLAGS) -Od -v -k -D_DEBUG
 !endif
 
-LDFLAGS		= -L$(top_srcdir)\lib -L"$(THIRDPARTY_HOME)\lib" -L"$(BCB)\lib" -q -Gn -v -x
+LDFLAGS		= -L$(libdir) -L"$(THIRDPARTY_HOME)\lib" -L"$(BCB)\lib" -q -Gn -v -x
 LD_DLLFLAGS	= $(LDFLAGS) -Gi -Tpd c0d32.obj
 LD_EXEFLAGS	= $(LDFLAGS) -Tpe c0x32.obj
 
