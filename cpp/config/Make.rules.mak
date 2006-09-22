@@ -29,7 +29,7 @@ BCB			= C:\Program Files\Borland\BDS\4.0
 # If third party libraries are not installed in the default location
 # change the following setting to reflect the installation location.
 #
-THIRDPARTY_HOME		= C:\Ice-$(VERSION)-ThirdParty
+THIRDPARTY_HOME		= C:\Ice-$(VERSION)-ThirdParty-BCC
 
 # ----------------------------------------------------------------------
 # Don't change anything below this line!
@@ -82,7 +82,7 @@ SLICE2CPPFLAGS		= $(ICECPPFLAGS)
 
 LDFLAGS			= $(LDFLAGS) $(LDPLATFORMFLAGS) $(CXXFLAGS)
 
-SLICEPARSERLIB		= $(top_srcdir)\lib\slice$(LIBSUFFIX).lib
+SLICEPARSERLIB		= $(libdir)\slice$(LIBSUFFIX).lib
 SLICE2CPP		= $(bindir)\slice2cpp.exe
 SLICE2XSD		= $(bindir)\slice2xsd.exe
 SLICE2FREEZE		= $(bindir)\slice2freeze.exe
