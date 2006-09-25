@@ -23,6 +23,7 @@ SRCS		= $(SOBJS:.obj=.cpp)
 !include $(top_srcdir)/config/Make.rules.mak
 
 CPPFLAGS	= -I. -I../../../include $(CPPFLAGS)
+SLICE2CPPFLAGS	= --checksum $(SLICE2CPPFLAGS)
 
 $(SERVER): $(SOBJS)
 	del /q $@
