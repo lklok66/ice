@@ -441,7 +441,7 @@ IceInternal::FixedReference::getFixedConnections() const
 Reference::Type
 IceInternal::FixedReference::getType() const
 {
-    return Fixed;
+    return TypeFixed;
 }
 
 bool
@@ -1215,7 +1215,7 @@ IceInternal::DirectReference::getEndpoints() const
 Reference::Type
 IceInternal::DirectReference::getType() const
 {
-    return Direct;
+    return TypeDirect;
 }
 
 int
@@ -1470,7 +1470,7 @@ IceInternal::IndirectReference::getEndpoints() const
 Reference::Type
 IceInternal::IndirectReference::getType() const
 {
-    return Indirect;
+    return TypeIndirect;
 }
 
 int

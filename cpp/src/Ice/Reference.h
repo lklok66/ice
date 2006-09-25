@@ -32,6 +32,13 @@ class Reference : public IceUtil::Shared
 {
 public:
 
+    enum Type
+    {
+	TypeDirect,
+	TypeIndirect,
+	TypeFixed
+    };
+
     enum Mode
     {
 	ModeTwoway,
@@ -40,13 +47,6 @@ public:
 	ModeDatagram,
 	ModeBatchDatagram,
 	ModeLast = ModeBatchDatagram
-    };
-
-    enum Type
-    {
-	Direct,
-	Indirect,
-	Fixed
     };
 
     Mode getMode() const { return _mode; }
