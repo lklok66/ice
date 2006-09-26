@@ -718,7 +718,7 @@ def makePHPbinary(sources, buildDir, installDir, version, clean):
 	#
 	newest = 0
 	for f in phpMatches:
-	    m = re.search('([0-9]+)\.([0-9]+)\.([0-9]?).*', f)
+	    m = re.search('php-([0-9]+)\.([0-9]+)\.([0-9]?).tar.*', f)
             verString = ''
 	    for gr in m.groups():
 		verString = verString + gr
@@ -741,7 +741,7 @@ def makePHPbinary(sources, buildDir, installDir, version, clean):
 		newest = intVersion
     else:
 	phpFile = phpMatches[0]
-	m = re.search('([0-9]+)\.([0-9]+)\.([0-9]?).*', phpFile)
+	m = re.search('php-([0-9]+)\.([0-9]+)\.([0-9]+).tar.*', phpFile)
 
 	for gr in m.groups():
 	    if len(phpVersion) == 0:
@@ -750,6 +750,7 @@ def makePHPbinary(sources, buildDir, installDir, version, clean):
 		phpVersion = phpVersion + '.'  + gr
 
     logging.info('Using PHP archive :' + phpFile)
+    
     root, ext = os.path.splitext(phpFile)
     untarCmd = ''
     if ext.endswith('bz2'):
@@ -964,7 +965,6 @@ def main():
     installDir = None
     sources = None
     installRoot = None
-    verbose = False
     cvsTag = 'HEAD'
     clean = True
     build = True
