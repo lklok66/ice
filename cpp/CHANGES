@@ -1,5 +1,10 @@
 Changes since version 3.1.0
 ---------------------------
+- Unix/Linux: New Make.rules variable: embedded_runpath_prefix. 
+  Defaults to /opt/Ice-3.1 in Ice 3.1.1.
+  This variable allows you to define the root directory for embedded
+  runpath in shared libraries and executables. In prior releases,
+  prefix (the install directory variable) was used instead. 
 
 - Fixed a bug where proxy operator< could return an incorrect result
   for proxies of different types (e.g., direct vs. indirect proxies).
