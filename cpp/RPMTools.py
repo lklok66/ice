@@ -94,7 +94,7 @@ class Package:
 %ifarch noarch
 ''')
 	for f in ['mono-core >= 1.1.13', 'mono-devel >= 1.1.13']:
-            ofile.write('BuildRequires: ' + f  + '\n')
+        ofile.write('BuildRequires: mono-core >= 1.1.13\n')
 
 	ofile.write('\n%endif\n')
 
