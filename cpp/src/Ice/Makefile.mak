@@ -108,6 +108,12 @@ SDIR		= $(slicedir)\Ice
 
 !include $(top_srcdir)\config\Make.rules.mak
 
+#
+# Disable pattern rule for Communicator.ice
+#
+$(HDIR)/Communicator.h Communicator.cpp: $(SDIR)/Communicator.ice
+	touch -c $(HDIR)/Communicator.h Communicator.cpp
+
 CPPFLAGS	= -I.. $(CPPFLAGS) -DICE_API_EXPORTS
 SLICE2CPPFLAGS	= --ice --include-dir Ice --dll-export ICE_API $(SLICE2CPPFLAGS)
 LINKWITH        = $(BASELIBS) $(BZIP2_LIBS) $(ICE_OS_LIBS) ws2_32.lib
