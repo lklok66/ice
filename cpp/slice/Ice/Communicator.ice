@@ -179,12 +179,12 @@ local interface Communicator
      * the property
      * <literal><replaceable>name</replaceable>.Endpoints</literal>,
      * and then calls [createObjectAdapter]. It is provided as a
-     * convenience function.
+     * convenience function.</para>
      *
      * <para>It is legal to create an object adapter without any endpoints.
      * Such an object adapter cannot be accessed remotely and, therefore,
      * is accessible only for collocated invocations within a single address
-     * space.</para>
+     * space.
      * 
      * @param name The object adapter name.
      *
