@@ -512,7 +512,7 @@ def archiveDemoTree(buildDir, version, installFiles):
     runprog("gzip -9 Ice-" + version + "-demos.tar")
     os.chdir(cwd)
 
-def makeInstall(sources, buildDir, installDir, distro, clean, version):
+def makeInstall(sources, buildDir, installDir, distro, clean, version, mmversion):
     """Make the distro in buildDir sources and install it to installDir."""
     cwd = os.getcwd()
     os.chdir(buildDir)
@@ -585,7 +585,7 @@ def makeInstall(sources, buildDir, installDir, distro, clean, version):
     try:
 	runprog('gmake NOGAC=yes OPTIMIZE=yes INSTALL_ROOT=%s embedded_runpath_prefix=%s' % (installDir, mmversion))
     except ExtProgramError:
-	print "gmake failed for makeInstall(%s, %s, %s, %s, %s, %s)" % (sources, buildDir, installDir, distro, str(clean), version) 
+	print "gmake failed for makeInstall(%s, %s, %s, %s, %s, %s, %s)" % (sources, buildDir, installDir, distro, str(clean), version, mmversion) 
 	raise
 
     if distro.startswith('IceCS'):
@@ -972,6 +972,7 @@ def main():
     clean = True
     build = True
     version = None
+    mmversion = None
     soVersion = 0
     printSpecFile = False
     verbose = False
@@ -1102,6 +1103,7 @@ def main():
     if cvsMode:
 	version = getIceVersion('include/IceUtil/Config.h')
 	soVersion = getIceSoVersion('include/IceUtil/Config.h')
+        mmVersion = getIceMMVersion('include/IceUtil/Config.h')
 	installFiles = 'install'
     elif offline:
 	version = getIceVersion('include/IceUtil/Config.h')
@@ -1196,7 +1198,7 @@ def main():
 	# Everything should be set for building stuff up now.
 	#
         for cvs, tarball, demoDir in sourceTarBalls:
-            makeInstall(sources, buildDir, "%s/Ice-%s" % (installDir, version), tarball, clean, version)	    
+            makeInstall(sources, buildDir, "%s/Ice-%s" % (installDir, version), tarball, clean, version, mmversion)	    
 
 	#
 	# XXX- put java5 Ice.jar in place!
