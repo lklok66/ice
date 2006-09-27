@@ -24,11 +24,11 @@ install::
 ifneq ($(embedded_runpath_prefix),)
 	@if test -h $(embedded_runpath_prefix) ; \
 	then \
-	     echo "Removing $(embedded_runpath_prefix)..."; \
-	     \rm -f  $(embedded_runpath_prefix); \
+	     if `\rm -f $(embedded_runpath_prefix) 2>/dev/null`; \
+              then echo "Removed symbolic link $(embedded_runpath_prefix)"; fi \
         fi
-	echo "Creating $(embedded_runpath_prefix) symbolic link..." 
-	ln -s $(prefix) $(embedded_runpath_prefix)
+	@if `ln -s $(prefix) $(embedded_runpath_prefix) 2>/dev/null`;\
+         then echo "Created symbolic link $(embedded_runpath_prefix) --> $(prefix)"; fi
 endif
 	@for subdir in $(INSTALL_SUBDIRS); \
 	do \
