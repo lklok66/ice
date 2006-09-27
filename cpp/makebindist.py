@@ -50,6 +50,11 @@ def getIceVersion(file):
     config = open(file, 'r')
     return  re.search('ICE_STRING_VERSION \"([0-9\.]*)\"', config.read()).group(1)
 
+def getIceMMVersion(file):
+    """Extract the ICE major.minor version string from a file."""
+    config = open(file, 'r')
+    return  re.search('ICE_STRING_VERSION \"([0-9]*\.[0-9]*)\.[0-9]*\"', config.read()).group(1)
+
 def getIceSoVersion(file):
     """Extract the ICE version ordinal from a file."""
     config = open(file, 'r')
@@ -124,19 +129,25 @@ def getVersion(cvsTag, buildDir):
         os.environ['LIBPATH'] = ''
     runprog('cvs -d cvs.zeroc.com:/home/cvsroot export -r ' + cvsTag + ' ice/include/IceUtil/Config.h')
 
-    result = [ getIceVersion('ice/include/IceUtil/Config.h'), getIceSoVersion('ice/include/IceUtil/Config.h')]
+    result = [ getIceVersion('ice/include/IceUtil/Config.h'), \
+	       getIceSoVersion('ice/include/IceUtil/Config.h'), \
+	       getIceMMVersion('ice/include/IceUtil/Config.h') ]
+
     os.remove('ice/include/IceUtil/Config.h')
     os.removedirs('ice/include/IceUtil')
     os.chdir(cwd)
     return result
 
-def fixVersion(filename, version):
+def fixVersion(filename, version, mmVersion):
     f = fileinput.input(filename, True)
     for line in f:
-	print line.rstrip('\n').replace('@ver@', version)
+	l = line.rstrip('\n')
+	l = l.replace('@ver@', version)
+	l = l.replace('@mmver@', mmVersion)
+	print l
     f.close()
 
-def getInstallFiles(cvsTag, buildDir, version):
+def getInstallFiles(cvsTag, buildDir, version, mmVersion):
     """Gets the install sources for this revision"""
     cwd = os.getcwd()
     try:
@@ -149,12 +160,12 @@ def getInstallFiles(cvsTag, buildDir, version):
 	snapshot = os.walk('./ice/install/unix')
 	for dirInfo in snapshot:
 	    for f in dirInfo[2]:
-		fixVersion(os.path.join(dirInfo[0], f), version)
+		fixVersion(os.path.join(dirInfo[0], f), version, mmVersion)
     finally:
 	os.chdir(cwd)
     return buildDir + '/ice/install'
 
-def getInstallFilesFromLocalDirectory(cvsTag, buildDir, version):
+def getInstallFilesFromLocalDirectory(cvsTag, buildDir, version, mmVersion):
     '''Gets the install files from an existing CVS directory, has the
     advantage of working even if CVS is down allowing the install-O to
     continue working!'''
@@ -171,7 +182,7 @@ def getInstallFilesFromLocalDirectory(cvsTag, buildDir, version):
 	snapshot = os.walk('./ice/install/unix')
 	for dirInfo in snapshot:
 	    for f in dirInfo[2]:
-		fixVersion(os.path.join(dirInfo[0], f), version)
+		fixVersion(os.path.join(dirInfo[0], f), version, mmVersion)
     finally:
 	os.chdir(cwd)
     return buildDir + '/ice/install'
@@ -1065,7 +1076,7 @@ def main():
     # Primarily for debugging spec file creation.
     #
     if printSpecFile:
-	version, soVersion = getVersion(cvsTag, buildDir)
+	version, soVersion, mmVersion = getVersion(cvsTag, buildDir)
 	RPMTools.createFullSpecFile(sys.stdout, installDir, version, soVersion)
         sys.exit(0)
 
@@ -1103,10 +1114,11 @@ def main():
     elif offline:
 	version = getIceVersion('include/IceUtil/Config.h')
 	soVersion = getIceSoVersion('include/IceUtil/Config.h')
-	installFiles = getInstallFilesFromLocalDirectory(cvsTag, buildDir, version)
+	mmVersion = getIceMMVersion('include/IceUtil/Config.h')
+	installFiles = getInstallFilesFromLocalDirectory(cvsTag, buildDir, version, mmVersion)
     else:
-	version, soVersion = getVersion(cvsTag, buildDir)
-	installFiles = getInstallFiles(cvsTag, buildDir, version)
+	version, soVersion, mmVersion = getVersion(cvsTag, buildDir)
+	installFiles = getInstallFiles(cvsTag, buildDir, version, mmVersion)
 
     if verbose:
         print 'Building binary distributions for Ice-' + version + ' on ' + getPlatform()
