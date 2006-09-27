@@ -1,6 +1,9 @@
 Changes since version 3.1.0
 ---------------------------
 
+- For object adapters without endpoints, Ice.Trace.Network >= 2 now
+  prints a trace message.
+
 - Fixed a bug with the IceGrid allocate and sessionAllocation demos 
   where the session would not be destroyed in the event of an 
   allocation failure.
