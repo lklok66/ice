@@ -346,31 +346,20 @@ fileLists = [
 	     ('dir', 'lib/Ice-%version%/IceGridGUI.jar'),
              ('dir', 'share/slice'),
              ('dir', 'share/doc/Ice-%version%/doc'),
-             ('xdir', 'share/doc/Ice-%version%/certs'),
-	     ('file', 'share/doc/Ice-%version%/certs/cacert.pem'),
-	     ('file', 'share/doc/Ice-%version%/certs/c_dsa1024_priv.pem'),
-	     ('file', 'share/doc/Ice-%version%/certs/c_dsa1024_pub.pem'),
-	     ('file', 'share/doc/Ice-%version%/certs/c_rsa1024_priv.pem'),
-	     ('file', 'share/doc/Ice-%version%/certs/c_rsa1024_pub.pem'),
-	     ('file', 'share/doc/Ice-%version%/certs/s_rsa1024_priv.pem'),
-	     ('file', 'share/doc/Ice-%version%/certs/s_rsa1024_pub.pem'),
-	     ('file', 'share/doc/Ice-%version%/certs/s_dsa1024_priv.pem'),
-	     ('file', 'share/doc/Ice-%version%/certs/s_dsa1024_pub.pem'),
-	     ('file', 'share/doc/Ice-%version%/certs/dsaparam1024.pem'),
-	     ('file', 'share/doc/Ice-%version%/certs/cakey.pem'),
 	     ('xdir', 'share/doc/Ice-%version%/config'),
 	     ('file', 'share/doc/Ice-%version%/config/templates.xml'),
 	     ('exe', 'share/doc/Ice-%version%/config/convertssl.py'),
+             ('exe', 'share/doc/Ice-%version%/config/upgradeicegrid.py'),
+             ('file', 'share/doc/Ice-%version%/config/icegrid-slice.3.0.ice.gz'),
 	     ('exe', 'share/doc/Ice-%version%/config/ca/cautil.py'),
 	     ('exe', 'share/doc/Ice-%version%/config/ca/ImportKey.class'),
 	     ('exe', 'share/doc/Ice-%version%/config/ca/import.py'),
 	     ('exe', 'share/doc/Ice-%version%/config/ca/initca.py'),
 	     ('exe', 'share/doc/Ice-%version%/config/ca/req.py'),
-	     ('exe', 'share/doc/Ice-%version%/config/ca/sign.py'),
-	     ('file', 'share/doc/Ice-%version%/README.DEMOS')]),
+	     ('exe', 'share/doc/Ice-%version%/config/ca/sign.py')]),
     Subpackage('c++-devel',
                'ice = %version%',
-               'Tools and demos for developing Ice applications in C++',
+               'Tools for developing Ice applications in C++',
                'Development/Tools',
 	       iceDescription,
 	       'Requires: ice-%{_arch}',
@@ -390,16 +379,13 @@ fileLists = [
 		('lib', '%{icelibdir}/libIceXML.so'),
 		('lib', '%{icelibdir}/libSlice.so'),
 		('xdir', 'share/doc/Ice-%version%'),
-		('dir', 'share/doc/Ice-%version%/demo'),
-		('exe', 'share/doc/Ice-%version%/demo/Freeze/backup/backup'),
-		('exe', 'share/doc/Ice-%version%/demo/Freeze/backup/recover'),
 		('xdir', 'share/doc/Ice-%version%/config'),
 		('file', 'share/doc/Ice-%version%/config/Make.rules'),
 		('file', 'share/doc/Ice-%version%/config/Make.rules.Linux'),
 		]),
     DotNetPackage('csharp-devel',
 	          'ice-dotnet = %version%',
-		  'Tools and demos for developing Ice applications in C#',
+		  'Tools for developing Ice applications in C#',
 		  'Development/Tools',
 		  iceDescription,
 		  'Requires: ice-%{_arch}',
@@ -412,11 +398,10 @@ fileLists = [
 		  ('file', '%{icelibdir}/pkgconfig/iceboxcs.pc'),
 		  ('file', '%{icelibdir}/pkgconfig/icegridcs.pc'),
 		  ('file', '%{icelibdir}/pkgconfig/icepatch2cs.pc'),
-		  ('file', '%{icelibdir}/pkgconfig/icestormcs.pc'),
-		  ('dir', 'share/doc/Ice-%version%/democs')]),
+		  ('file', '%{icelibdir}/pkgconfig/icestormcs.pc')]),
     Subpackage('java-devel',
                'ice-java = %version%',
-               'Tools and demos for developing Ice applications in Java',
+               'Tools for developing Ice applications in Java',
                'Development/Tools',
 	       iceDescription,
 	       'Requires: ice-%{_arch}',
@@ -425,15 +410,9 @@ fileLists = [
 		('xdir', 'lib/Ice-%version%'),
 		('dir', 'lib/Ice-%version%/ant'),
 		('xdir', 'share/doc/Ice-%version%'),
-		('xdir', 'share/doc/Ice-%version%/certs'),
-	        ('file', 'share/doc/Ice-%version%/certs/certs.jks'),
-	        ('file', 'share/doc/Ice-%version%/certs/client.jks'),
-	        ('file', 'share/doc/Ice-%version%/certs/server.jks'),
 		('xdir', 'share/doc/Ice-%version%/config'),
 	        ('file', 'share/doc/Ice-%version%/config/build.properties'),
-	        ('file', 'share/doc/Ice-%version%/config/common.xml'),
-	        ('file', 'share/doc/Ice-%version%/config/iceproject.xml'),
-		('dir', 'share/doc/Ice-%version%/demoj')]),
+	        ('file', 'share/doc/Ice-%version%/config/iceproject.xml')]),
     Subpackage('python',
                'ice = %version%, python >= 2.4.1',
                'The Ice runtime for Python applications',
@@ -443,13 +422,11 @@ fileLists = [
                [('dir', '%{icelibdir}/Ice-%version%/python')]),
     Subpackage('python-devel',
                'ice-python = %version%',
-               'Tools and demos for developing Ice applications in Python',
+               'Tools for developing Ice applications in Python',
                'Development/Tools',
 	       iceDescription,
 	       'Requires: ice-%{_arch}',
-               [('exe', 'bin/slice2py'),
-		('xdir', 'share/doc/Ice-%version%'),
-	        ('dir', 'share/doc/Ice-%version%/demopy')]),
+               [('exe', 'bin/slice2py')]),
     Subpackage('php',
 	       'ice = %version%, php = 5.1.4',
 	       'The Ice runtime for PHP applications',
@@ -458,13 +435,6 @@ fileLists = [
 	       'Requires: ice-%{_arch}',
 	       [('lib', '%{icelibdir}/php/modules'), ('cfg', '/etc/php.d/ice.ini')]
 	       ),
-    NoarchSubpackage('php-devel',
-	             'ice = %version%, php = 5.1.4, ice-php = %version%',
-		     'Demos for developing Ice applications in PHP',
-		     'Development/Tools',
-		     iceDescription,
-		     '',
-		     [('dir', 'share/doc/Ice-%version%/demophp')]),
     NoarchSubpackage('java',
 		     'ice = %version%, db4-java >= 4.3.29',
 		     'The Ice runtime for Java',
@@ -550,7 +520,6 @@ def createFullSpecFile(ofile, installDir, version, soVersion):
     fullFileList[0].addBuildGenerator(writeBuildCommands)
     fullFileList[0].addInstallGenerator(writeInstallCommands)
     fullFileList[0].addInstallGenerator(writeTransformCommands)
-    fullFileList[0].addInstallGenerator(writeDemoPkgCommands)
 
     for v in fullFileList:
 	v.writeHdr(ofile, version, "1", '')
@@ -567,29 +536,21 @@ def createRPMSFromBinaries(buildDir, installDir, version, soVersion):
     compileall.compile_dir(installDir + '/python')
 
     _transformDirectories(transforms, version, installDir)
-    os.system("tar xfz " + installDir + "/../Ice-" + version + "-demos.tar.gz -C " + installDir)
-
 
     ofile = open(buildDir + "/Ice-" + version + ".spec", "w")
     createArchSpecFile(ofile, installDir, version, soVersion)
     ofile.flush()
     ofile.close()
-    #
-    # Copy demo files so the RPM spec file can pick them up.
-    #
-    os.system("cp -pR " + installDir + "/Ice-" + version + "-demos/* " + installDir + "/usr/share/doc/Ice-" + version)
-
+   
     #
     # We need to unset a build define in the Make.rules.cs file.
     #
-    result = os.system("perl -pi.bak -e 's/^(src_build.*)$/\\# \\1/' " + installDir + "/usr/share/doc/Ice-" + version +
-	    "/config/Make.rules.cs")
-    if result != 0:
-	print 'unable to spot edit Make.rules.cs in demo tree' 
-	sys.exit(1)
-
-    if os.path.exists(installDir + "/Ice-" + version + "-demos"):
-	shutil.rmtree(installDir + "/Ice-" + version + "-demos")
+    # result = os.system("perl -pi.bak -e 's/^(src_build.*)$/\\# \\1/' " + installDir + "/usr/share/doc/Ice-" + version +
+    #	    "/config/Make.rules.cs")
+    # if result != 0:
+    #	print 'unable to spot edit Make.rules.cs in demo tree' 
+    #	sys.exit(1)
+        
     cwd = os.getcwd()
     os.chdir(buildDir)
 
@@ -629,8 +590,7 @@ def createRPMSFromBinaries64(buildDir, installDir, version, soVersion):
     installDir = installDir + "/rpmbase"
 
     _transformDirectories(x64_transforms, version, installDir)
-    os.system("tar xfz " + installDir + "/../Ice-" + version + "-demos.tar.gz -C " + installDir)
-
+  
     ofile = open(buildDir + "/Ice-" + version + ".spec", "w")
     for f in fileLists64:
 	f.writeHdr(ofile, version, '1', installDir)
@@ -641,18 +601,15 @@ def createRPMSFromBinaries64(buildDir, installDir, version, soVersion):
 
     ofile.flush()
     ofile.close()
-    #
-    # Copy demo files so the RPM spec file can pick them up.
-    #
-    os.system("cp -pR " + installDir + "/Ice-" + version + "-demos/* " + installDir + "/usr/share/doc/Ice-" + version)
-
+  
     #
     # We need to unset a build define in the Make.rules.cs file.
     #
-    result = os.system("perl -pi.bak -e 's/^(src_build.*)$/\\# \\1/' " + installDir + "/usr/share/doc/Ice-" + version +
-	    "/config/Make.rules.cs")
-    if os.path.exists(installDir + "/Ice-" + version + "-demos"):
-	shutil.rmtree(installDir + "/Ice-" + version + "-demos")
+    # result = os.system("perl -pi.bak -e 's/^(src_build.*)$/\\# \\1/' " + installDir + "/usr/share/doc/Ice-" + version +
+    #	    "/config/Make.rules.cs")
+    #if os.path.exists(installDir + "/Ice-" + version + "-demos"):
+    #	shutil.rmtree(installDir + "/Ice-" + version + "-demos")
+
     cwd = os.getcwd()
     os.chdir(buildDir)
     os.system("rpmbuild -bb Ice-" + version + ".spec")
@@ -671,7 +628,6 @@ sed -i -e 's/^prefix.*$/prefix = $\(RPM_BUILD_ROOT\)/' $RPM_BUILD_DIR/IcePy-%{ve
 %setup -q -n IceCS-%{version} -T -D -b 3 
 sed -i -e 's/^prefix.*$/prefix = $\(RPM_BUILD_ROOT\)/' $RPM_BUILD_DIR/IceCS-%{version}/config/Make.rules.cs
 sed -i -e 's/^cvs_build.*$/cvs_build = no/' $RPM_BUILD_DIR/IceCS-%{version}/config/Make.rules.cs
-%setup -q -n Ice-%{version}-demos -T -D -b 4 
 %setup -q -n IceJ-%{version}-java5 -T -D -b 11
 cd $RPM_BUILD_DIR
 tar xfz $RPM_SOURCE_DIR/IcePHP-%{version}.tar.gz
@@ -736,7 +692,6 @@ then
     mkdir -p $RPM_BUILD_ROOT/%{icelibdir}
 fi
 cp $RPM_BUILD_DIR/php-5.1.4/modules/ice.so $RPM_BUILD_ROOT/%{icelibdir}/icephp.so
-cp -pR $RPM_BUILD_DIR/Ice-%{version}-demos/config $RPM_BUILD_ROOT
 cp $RPM_SOURCE_DIR/iceproject.xml $RPM_BUILD_ROOT/config
 if test ! -d $RPM_BUILD_ROOT/%{icelibdir}/pkgconfig ; 
 then 
@@ -787,16 +742,6 @@ def writeTransformCommands(ofile, version):
 	    else:
 		ofile.write('# Rule 4\n')
 		ofile.write('mv $RPM_BUILD_ROOT/usr/' + source + ' $RPM_BUILD_ROOT/usr/' + dest + '\n')
-
-def writeDemoPkgCommands(ofile, version):
-    ofile.write('#\n')
-    ofile.write('# Extract the contents of the demo packaged into the installed location.\n')
-    ofile.write('#\n')
-    ofile.write('mkdir -p $RPM_BUILD_ROOT/usr/share/doc/Ice-%{version}\n')
-    ofile.write('tar xfz $RPM_SOURCE_DIR/Ice-%{version}-demos.tar.gz -C $RPM_BUILD_ROOT/usr/share/doc\n')
-    ofile.write('cp -pR $RPM_BUILD_ROOT/usr/share/doc/Ice-%{version}-demos/* $RPM_BUILD_ROOT/usr/share/doc/Ice-%{version}\n')
-    ofile.write("sed -i.bak -e 's/^\(src_build.*\)$/\\# \\1/' $RPM_BUILD_ROOT/usr/share/doc/Ice-%{version}/config/Make.rules.cs\n")
-    ofile.write('rm -rf $RPM_BUILD_ROOT/usr/share/doc/Ice-%{version}-demos\n')
 	
 if __name__ == "main":
     print 'Ice RPM Tools module'

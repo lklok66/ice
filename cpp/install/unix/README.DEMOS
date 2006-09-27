@@ -1,14 +1,3 @@
-RPM Notes
-=========
-
-When installing from RPMs, the demos for a particular language mapping
-are included with the appropriate 'devel' RPM. For example, the Java
-demos are included in the ice-java-devel RPM.
-
-We recommend that you copy the demo subdirectories from the RPM
-installation directory to your home directory.
-
-
 Building the Demos
 ==================
 

@@ -485,7 +485,7 @@ def archiveDemoTree(buildDir, version, installFiles):
     cwd = os.getcwd()
     os.chdir(os.path.join(buildDir, 'Ice-%s-demos' % version))
     filesToRemove = ['certs/makecerts.py', 'certs/ImportKey.java', 'certs/ImportKey.class', 'certs/seed.dat',
-	    'config/convertssl.py', 'config/upgradeicegrid.py', 'config/PropertyNames.def', 'config/makeprops.py', 
+	    'config/convertssl.py', 'config/upgradeicegrid.py', 'config/icegrid-slice.3.0.ice.gz', 'config/PropertyNames.def', 'config/makeprops.py', 
 	    'config/TestUtil.py', 'config/IceGridAdmin.py', 'config/ice_ca.cnf', 'config/icegridgui.pro']
     obliterate(filesToRemove)
     os.chdir(buildDir)
@@ -579,19 +579,11 @@ def makeInstall(sources, buildDir, installDir, distro, clean, version):
 	    runprog("perl -pi -e 's/^PYTHON.LIB.DIR.*$/PYTHON_LIB_DIR = " + 
 	              "\$\(PYTHON_HOME\)\/lib\/\$\(PYTHON_VERSION\)\/config/' config/Make.rules")
 
-    #
-    # We call make twice. The first time is a straight make and ensures
-    # that we embed the correct default library search location in the
-    # binaries. The second is a 'make install' that places the files in
-    # the working install directory so the archive can be packaged up.
-    #
-
     # 
     # XXX- Optimizations need to be turned on for the release.
     #
     try:
-	runprog('gmake NOGAC=yes OPTIMIZE=yes INSTALL_ROOT=/opt/Ice-%s' % version)
-	runprog('gmake NOGAC=yes OPTIMIZE=yes INSTALL_ROOT=%s embedded_runpath_prefix="" install' % installDir)
+	runprog('gmake NOGAC=yes OPTIMIZE=yes INSTALL_ROOT=%s embedded_runpath_prefix=%s' % (installDir, mmversion))
     except ExtProgramError:
 	print "gmake failed for makeInstall(%s, %s, %s, %s, %s, %s)" % (sources, buildDir, installDir, distro, str(clean), version) 
 	raise
