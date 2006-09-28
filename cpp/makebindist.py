@@ -519,7 +519,7 @@ def archiveDemoTree(buildDir, version, installFiles):
     runprog("gzip -9 Ice-" + version + "-demos.tar")
     os.chdir(cwd)
 
-def makeInstall(sources, buildDir, installDir, distro, clean, version, mmversion):
+def makeInstall(sources, buildDir, installDir, distro, clean, version, mmVersion):
     """Make the distro in buildDir sources and install it to installDir."""
     cwd = os.getcwd()
     os.chdir(buildDir)
@@ -590,9 +590,9 @@ def makeInstall(sources, buildDir, installDir, distro, clean, version, mmversion
     # XXX- Optimizations need to be turned on for the release.
     #
     try:
-	runprog('gmake NOGAC=yes OPTIMIZE=yes INSTALL_ROOT=%s embedded_runpath_prefix=/opt/Ice-%s install' % (installDir, mmversion))
+	runprog('gmake NOGAC=yes OPTIMIZE=yes INSTALL_ROOT=%s embedded_runpath_prefix=/opt/Ice-%s install' % (installDir, mmVersion))
     except ExtProgramError:
-	print "gmake failed for makeInstall(%s, %s, %s, %s, %s, %s, %s)" % (sources, buildDir, installDir, distro, str(clean), version, mmversion) 
+	print "gmake failed for makeInstall(%s, %s, %s, %s, %s, %s, %s)" % (sources, buildDir, installDir, distro, str(clean), version, mmVersion) 
 	raise
 
     if distro.startswith('IceCS'):
@@ -978,7 +978,7 @@ def main():
     clean = True
     build = True
     version = None
-    mmversion = None
+    mmVersion = None
     soVersion = 0
     printSpecFile = False
     verbose = False
@@ -1202,7 +1202,7 @@ def main():
 	# Everything should be set for building stuff up now.
 	#
         for cvs, tarball, demoDir in sourceTarBalls:
-            makeInstall(sources, buildDir, "%s/Ice-%s" % (installDir, version), tarball, clean, version, mmversion)	    
+            makeInstall(sources, buildDir, "%s/Ice-%s" % (installDir, version), tarball, clean, version, mmVersion)	    
 
 	#
 	# XXX- put java5 Ice.jar in place!
