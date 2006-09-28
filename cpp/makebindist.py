@@ -13,6 +13,8 @@ import RPMTools
 # TODO:
 # 
 #   * Tidying and tracing.
+#    * use os.path.join() where appropriate instead of string
+#    concatenation.
 #   * Python is used in some places for 'sed' like functionality. This
 #     could be replaced by Python code.
 #  
@@ -408,18 +410,23 @@ def extractDemos(sources, buildDir, version, distro, demoDir):
        build system so it can be built against an installed version of
        Ice"""
     cwd = os.getcwd()
-    os.chdir(buildDir + "/demotree")
+    os.chdir(os.path.join(buildDir, "demotree"))
 
     #
     # TODO: Some archives don't contain all of these elements. It might
     # be nicer to make the toExtract list more tailored for each
     # distribution.
     #
-    toExtract = "%s/demo %s/config %s/certs ICE_LICENSE" % (distro, distro, distro)
+    toExtract = "%s/demo %s/config %s/certs" % (distro, distro, distro)
+    if demoDir == '':
+	toExtract = toExtract + " %s/ICE_LICENSE" % distro
 	
-    runprog("gzip -dc " + sources + "/" + distro + ".tar.gz | tar xf - " + toExtract, False)
+    runprog("gzip -dc " + os.path.join(sources, distro) + ".tar.gz | tar xf - " + toExtract, False)
 	
-    shutil.move(distro + "/demo", buildDir + "/Ice-" + version + "-demos/demo" + demoDir)
+    shutil.move(os.path.join(distro, "demo"), os.path.join(buildDir, "Ice-" + version + "-demos", "demo" + demoDir))
+    if os.path.exists(os.path.join(buildDir, "demotree", distro, "ICE_LICENSE")):
+	shutil.move(os.path.join(buildDir, "demotree", distro, "ICE_LICENSE"), \
+		os.path.join(buildDir, "Ice-%s-demos" % version, "ICE_LICENSE"))
 
     #
     # 'System' copying of files here because its just easier!  We don't
@@ -583,7 +590,7 @@ def makeInstall(sources, buildDir, installDir, distro, clean, version, mmversion
     # XXX- Optimizations need to be turned on for the release.
     #
     try:
-	runprog('gmake NOGAC=yes OPTIMIZE=yes INSTALL_ROOT=%s embedded_runpath_prefix=%s' % (installDir, mmversion))
+	runprog('gmake NOGAC=yes OPTIMIZE=yes INSTALL_ROOT=%s embedded_runpath_prefix=%s install' % (installDir, mmversion))
     except ExtProgramError:
 	print "gmake failed for makeInstall(%s, %s, %s, %s, %s, %s, %s)" % (sources, buildDir, installDir, distro, str(clean), version, mmversion) 
 	raise
@@ -785,9 +792,8 @@ def makePHPbinary(sources, buildDir, installDir, version, clean):
 
     if platform == 'hpux':
 	runprog('gzip -dc ' + buildDir + '/IcePHP-' + version + '/configure-hpux.gz > configure', False)
-#   elif platform.startswith('linux'):
-#	runprog('gzip -dc ' + buildDir + '/ice/install/thirdparty/php/configure*.gz > configure', False)
-		
+    elif platform.startswith('linux'):
+	runprog('gzip -dc ' + buildDir + '/ice/install/thirdparty/php/configure-5.1.4.gz > configure', False)
     else:
 	runprog('gzip -dc ' + buildDir + '/IcePHP-' + version + '/configure.gz > configure', False)
 
@@ -1185,14 +1191,12 @@ def main():
 	#
 	# Package up demo distribution.
 	#
-	if getPlatform() == 'linux':
-	    toCollect = list(sourceTarBalls)
-	    for cvs, tarball, demoDir in toCollect:
-		extractDemos(sources, buildDir, version, tarball, demoDir)
-		shutil.copy("%s/unix/README.DEMOS" % installFiles, "%s/Ice-%s-demos/README.DEMOS" % (buildDir, version)) 
-	#	shutil.copy("%s/Ice-%s/ICE_LICENSE" % (buildDir, version), "%s/Ice-%s-demos/ICE_LICENSE" % (buildDir, version))
-	    archiveDemoTree(buildDir, version, installFiles)
-	    shutil.move("%s/Ice-%s-demos.tar.gz" % (buildDir, version), "%s/Ice-%s-demos.tar.gz" % (installDir, version))
+	toCollect = list(sourceTarBalls)
+	for cvs, tarball, demoDir in toCollect:
+	    extractDemos(sources, buildDir, version, tarball, demoDir)
+	    shutil.copy("%s/unix/README.DEMOS" % installFiles, "%s/Ice-%s-demos/README.DEMOS" % (buildDir, version)) 
+	archiveDemoTree(buildDir, version, installFiles)
+	shutil.move("%s/Ice-%s-demos.tar.gz" % (buildDir, version), "%s/Ice-%s-demos.tar.gz" % (installDir, version))
 
 	#
 	# Everything should be set for building stuff up now.
@@ -1345,8 +1349,8 @@ def main():
 	    shutil.copy(installDir + '/Ice-' + version + '-demos.tar.gz', '/usr/src/redhat/SOURCES')
 	    shutil.copy(sources + '/php-5.1.4.tar.bz2', '/usr/src/redhat/SOURCES')
 	    shutil.copy(installFiles + '/thirdparty/php/ice.ini', '/usr/src/redhat/SOURCES')
-	    shutil.copy(buildDir + '/IcePHP-' + version + '/configure.gz', 
-		    '/usr/src/redhat/SOURCES')
+	    shutil.copy(buildDir + '/ice/install/thirdparty/php/configure-5.1.4.gz',
+		    '/usr/src/redhat/SOURCES/configure.gz')
 	    shutil.copy(installFiles + '/common/iceproject.xml', '/usr/src/redhat/SOURCES')
             iceArchives = glob.glob(sources + '/Ice*' + version + '*.gz')
 	    for f in iceArchives:
