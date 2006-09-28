@@ -539,8 +539,8 @@ def makeInstall(sources, buildDir, installDir, distro, clean, version, mmversion
     # with the Jar already built.
     # 
     if distro.startswith('IceJ'):
-	if not os.path.exists(os.path.join(installDir, 'lib')):
-	    os.mkdir(os.path.join(installDir, 'lib'))
+        initDirectory(installDir)
+        initDirectory(os.path.join(installDir, 'lib'))
 	shutil.copy(buildDir + '/' + distro + '/lib/Ice.jar', installDir + '/lib')
 	shutil.copy(buildDir + '/' + distro + '/lib/IceGridGUI.jar', installDir + '/lib')
 	#
@@ -590,7 +590,7 @@ def makeInstall(sources, buildDir, installDir, distro, clean, version, mmversion
     # XXX- Optimizations need to be turned on for the release.
     #
     try:
-	runprog('gmake NOGAC=yes OPTIMIZE=yes INSTALL_ROOT=%s embedded_runpath_prefix=%s install' % (installDir, mmversion))
+	runprog('gmake NOGAC=yes OPTIMIZE=yes INSTALL_ROOT=%s embedded_runpath_prefix=/opt/Ice-%s install' % (installDir, mmversion))
     except ExtProgramError:
 	print "gmake failed for makeInstall(%s, %s, %s, %s, %s, %s, %s)" % (sources, buildDir, installDir, distro, str(clean), version, mmversion) 
 	raise
