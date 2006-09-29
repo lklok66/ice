@@ -692,6 +692,7 @@ then
     mkdir -p $RPM_BUILD_ROOT/%{icelibdir}
 fi
 cp $RPM_BUILD_DIR/php-5.1.4/modules/ice.so $RPM_BUILD_ROOT/%{icelibdir}/icephp.so
+cp $RPM_BUILD_DIR/IceJ-%{version}-java2/config/build.properties $RPM_BUILD_ROOT/config
 cp $RPM_SOURCE_DIR/iceproject.xml $RPM_BUILD_ROOT/config
 if test ! -d $RPM_BUILD_ROOT/%{icelibdir}/pkgconfig ; 
 then 
