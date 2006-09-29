@@ -417,9 +417,11 @@ def extractDemos(sources, buildDir, version, distro, demoDir):
     # be nicer to make the toExtract list more tailored for each
     # distribution.
     #
-    toExtract = "%s/demo %s/config %s/certs" % (distro, distro, distro)
+    toExtract = "%s/demo %s/config " % (distro, distro)
     if demoDir == '':
 	toExtract = toExtract + " %s/ICE_LICENSE" % distro
+    if demoDir <> 'php':
+	toExtract = toExtract + " %s/certs" % distro
 	
     runprog("gzip -dc " + os.path.join(sources, distro) + ".tar.gz | tar xf - " + toExtract, False)
 	
