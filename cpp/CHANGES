@@ -1,20 +1,21 @@
 Changes since version 3.1.0
 ---------------------------
 
-- Fixed a bug in slice2docbook that could cause the "Used By" section of a
-  symbol to list the same operation more than once.
+- Fixed a bug in slice2docbook that could cause the "Used By" section
+  of a symbol to list the same operation more than once.
 
-- slice2doc book now adds a "Used By" section for exceptions. (Previously,
-  exceptions did not have this section, only other types.)
+- slice2docbook now adds a "Used By" section for exceptions.
+  (Previously, exceptions did not have this section, only other
+  types.)
 
-- Fixed IceGrid allocation bug which could cause allocation failures
+- Fixed IceGrid allocation bug that could cause allocation failures
   when allocating multiple objects by type from allocatable servers
   and with the same session.
 
 - Fixed the Slice translators to support spaces in paths of the
   -I option.
 
-- The demos are not longer included in the RPM distribution.
+- The demos are no longer included in the RPM distribution.
 
 - For object adapters without endpoints, Ice.Trace.Network >= 2 now
   prints a trace message.
