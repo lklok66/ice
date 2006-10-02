@@ -700,7 +700,7 @@ def copyExpatFiles(expatLocation, version):
 	shutil.copy(expatLocation + '/' + fileList[0].strip(), 'Ice-' + version + '/' + fileList[0].strip())
 	os.symlink(os.path.basename(fileList[0].strip()), 'Ice-' + version + '/' + linkList[0].strip())
 
-def makePHPbinary(sources, buildDir, installDir, version, clean):
+def makePHPbinary(sources, buildDir, installDir, version, mmVersion, clean):
     """ Create the IcePHP binaries and install to Ice installation directory """
 
     platform = getPlatform()
@@ -844,10 +844,7 @@ def makePHPbinary(sources, buildDir, installDir, version, clean):
                 xtraCXXFlags = False
                 print line.rstrip('\n') + ' -DCOMPILE_DL_ICE'
 	    elif line.startswith('ICE_SHARED_LIBADD'):
-		if platform == 'linux64':
-		    print "ICE_SHARED_LIBADD = -Wl,-rpath,/opt/Ice-%s/lib64 -L%s/Ice-%s/lib64 -lIce -lSlice -lIceUtil" % (version, buildDir, version)
-		else:
-		    print "ICE_SHARED_LIBADD = -Wl,-rpath,/opt/Ice-%s/lib -L%s/Ice-%s/lib -lIce -lSlice -lIceUtil" % (version, buildDir, version)
+                print "ICE_SHARED_LIBADD = -Wl,-rpath,/opt/Ice-%s/lib -L%s/Ice-%s/lib -lIce -lSlice -lIceUtil" % (mmVersion, buildDir, version)
             else:
                 print line.strip('\n')
 
@@ -1169,7 +1166,10 @@ def main():
         except KeyError:
             currentLibraryPath = ''
 
-        os.environ[dylibEnvironmentVar] = installDir + '/Ice-' + version + '/lib:' + currentLibraryPath
+        #
+        # TODO: Would be better to add lib64 only for 64-bit builds
+        #
+        os.environ[dylibEnvironmentVar] = installDir + '/Ice-' + version + '/lib64:' + installDir + '/Ice-' + version + '/lib:' + currentLibraryPath
         os.environ['PATH'] = installDir + '/Ice-' + version + '/bin:' + os.environ['PATH']
 
 	#
@@ -1294,7 +1294,7 @@ def main():
 
     shutil.copy(os.path.join(installFiles, 'common', 'iceproject.xml'), os.path.join('Ice-' + version, 'config'))
 
-    makePHPbinary(sources, buildDir, installDir, version, clean)
+    makePHPbinary(sources, buildDir, installDir, version, mmVersion, clean)
 
     runprog('tar cf Ice-' + version + '-bin-' + getPlatform() + '.tar Ice-' + version)
     runprog('gzip -9 Ice-' + version + '-bin-' + getPlatform() + '.tar')
