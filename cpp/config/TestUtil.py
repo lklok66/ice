@@ -32,12 +32,6 @@ threadPerConnection = 0
 #threadPerConnection = 1
 
 #
-# Set memoryPool to 1 to enable stream buffer memory pooling.
-#
-memoryPool = 0 
-#memoryPool = 1
-
-#
 # If you don't set "host" below, then the Ice library will try to find
 # out the IP address of this host. For the Ice test suite, it's best
 # to set the IP address explicitly to 127.0.0.1. This avoid problems
@@ -58,10 +52,10 @@ import sys, os, re, errno, getopt
 from threading import Thread
 
 def usage():
-    print "usage: " + sys.argv[0] + " --debug --protocol protocol --compress --host host --threadPerConnection --memoryPool"
+    print "usage: " + sys.argv[0] + " --debug --protocol protocol --compress --host host --threadPerConnection"
     sys.exit(2)
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "", ["debug", "protocol=", "compress", "host=", "threadPerConnection", "memoryPool"])
+    opts, args = getopt.getopt(sys.argv[1:], "", ["debug", "protocol=", "compress", "host=", "threadPerConnection"])
 except getopt.GetoptError:
     usage()
 
@@ -72,8 +66,6 @@ for o, a in opts:
 	protocol = a
     if o == "--compress":
 	compress = 1
-    if o == "--memoryPool":
-	memoryPool = 1
     if o == "--threadPerConnection":
 	threadPerConnection = 1
     if o == "--host":
