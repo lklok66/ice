@@ -1123,7 +1123,7 @@ def main():
         print 'Building binary distributions for Ice-' + version + ' on ' + getPlatform()
         print 'Using build directory: ' + buildDir
         print 'Using install directory: ' + installDir
-        if getPlatform().startswith('linux'):
+        if getPlatform() == 'linux':
             print '(RPMs will be built)'
         print
 
@@ -1305,45 +1305,20 @@ def main():
     # probably blow up unless the user that is running the script has
     # massaged the permissions on /usr/src/redhat/.
     #
-    if getPlatform().startswith('linux') and not cvsMode:
+    if getPlatform() == 'linux' and not cvsMode:
 	shutil.copy(installFiles + '/unix/README.Linux-RPM', '/usr/src/redhat/SOURCES/README.Linux-RPM')
 	shutil.copy(installFiles + '/unix/README.Linux-RPM', installDir + '/Ice-' + version + '/README')
 	shutil.copy(installFiles + '/thirdparty/php/ice.ini', installDir + '/Ice-' + version + '/ice.ini')
 
-	if getPlatform() == 'linux64':
-
-	    # 
-	    # I need to pull the pkgconfig files out of the IceCS
-	    # archive and place them in the installed lib64 directory.
-	    # 
-
-	    cwd = os.getcwd()
-	    os.chdir(buildDir)
-	    distro = "IceCS-%s" % version
-	    shutil.rmtree("IceCS-%s" % version, True)
-	    if not os.path.exists(distro):
-		filename = os.path.join(sources, '%s.tar.gz' % distro)
-		runprog('tar xfz %s' % filename)
-	    os.chdir(distro)
-	    if not os.path.exists(os.path.join(installDir, 'Ice-%s' % version, 'lib64')):
-		os.mkdir(os.path.join(installDir, 'Ice-%s' % version, 'lib64'))
-	    shutil.copytree(os.path.join('lib', 'pkgconfig'), os.path.join(installDir, 'Ice-%s' % version, 'lib64', 'pkgconfig'))
-	    os.chdir(cwd)
-
-            iceArchives = glob.glob(sources + '/Ice*' + version + '.gz')
-	    for f in iceArchives:
-		shutil.copy(f, 'usr/src/redhat/SOURCES')
-	    RPMTools.createRPMSFromBinaries64(buildDir, installDir, version, soVersion)
-	else:
-	    shutil.copy(sources + '/php-5.1.4.tar.bz2', '/usr/src/redhat/SOURCES')
-	    shutil.copy(installFiles + '/thirdparty/php/ice.ini', '/usr/src/redhat/SOURCES')
-	    shutil.copy(buildDir + '/ice/install/thirdparty/php/configure-5.1.4.gz',
-		    '/usr/src/redhat/SOURCES/configure.gz')
-	    shutil.copy(installFiles + '/common/iceproject.xml', '/usr/src/redhat/SOURCES')
-            iceArchives = glob.glob(sources + '/Ice*' + version + '*.gz')
-	    for f in iceArchives:
-		shutil.copy(f, '/usr/src/redhat/SOURCES')
-	    RPMTools.createRPMSFromBinaries(buildDir, installDir, version, soVersion)
+        shutil.copy(sources + '/php-5.1.4.tar.bz2', '/usr/src/redhat/SOURCES')
+        shutil.copy(installFiles + '/thirdparty/php/ice.ini', '/usr/src/redhat/SOURCES')
+        shutil.copy(buildDir + '/ice/install/thirdparty/php/configure-5.1.4.gz',
+                    '/usr/src/redhat/SOURCES/configure.gz')
+        shutil.copy(installFiles + '/common/iceproject.xml', '/usr/src/redhat/SOURCES')
+        iceArchives = glob.glob(sources + '/Ice*' + version + '*.gz')
+        for f in iceArchives:
+            shutil.copy(f, '/usr/src/redhat/SOURCES')
+        RPMTools.createRPMSFromBinaries(buildDir, installDir, version, soVersion)
 
     #
     # TODO: Cleanups?  I've left everything in place so that the process

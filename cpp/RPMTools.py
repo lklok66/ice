@@ -580,40 +580,6 @@ def createRPMSFromBinaries(buildDir, installDir, version, soVersion):
 	print 'unable to build srpm'
 	sys.exit(1)
 
-#
-# TODO - refactor so this doesn't have to be special cased.
-# 
-def createRPMSFromBinaries64(buildDir, installDir, version, soVersion):
-    if os.path.exists(installDir + "/rpmbase"):
-	shutil.rmtree(installDir + "/rpmbase")
-    shutil.copytree(installDir + "/Ice-" + version, installDir + "/rpmbase", True)
-    installDir = installDir + "/rpmbase"
-
-    _transformDirectories(x64_transforms, version, installDir)
-  
-    ofile = open(buildDir + "/Ice-" + version + ".spec", "w")
-    for f in fileLists64:
-	f.writeHdr(ofile, version, '1', installDir)
-    ofile.write('\n\n\n')
-    for f in fileLists64:
-	f.writeFiles(ofile, version, soVersion, '')
-    ofile.write('\n')
-
-    ofile.flush()
-    ofile.close()
-  
-    #
-    # We need to unset a build define in the Make.rules.cs file.
-    #
-    # result = os.system("perl -pi.bak -e 's/^(src_build.*)$/\\# \\1/' " + installDir + "/usr/share/doc/Ice-" + version +
-    #	    "/config/Make.rules.cs")
-    #if os.path.exists(installDir + "/Ice-" + version + "-demos"):
-    #	shutil.rmtree(installDir + "/Ice-" + version + "-demos")
-
-    cwd = os.getcwd()
-    os.chdir(buildDir)
-    os.system("rpmbuild -bb Ice-" + version + ".spec")
-
 def writeUnpackingCommands(ofile, version):
     ofile.write('%setup -n Ice-%{version} -q -T -D -b 0\n')
     ofile.write("""#
