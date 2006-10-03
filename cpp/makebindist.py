@@ -1330,25 +1330,11 @@ def main():
 	    shutil.copytree(os.path.join('lib', 'pkgconfig'), os.path.join(installDir, 'Ice-%s' % version, 'lib64', 'pkgconfig'))
 	    os.chdir(cwd)
 
-
-	    #
-	    # The demo archive isn't constructed on 64 bit linux so we
-	    # need to rely on the archive being in the sources
-	    # directory.
-	    # 
-	    # XXX shutil.copy() has a bug that causes the second copy to
-	    # fail... maybe it forgot to close the file in the first
-	    # copy? I've changed these to using the external copy for
-	    # the time being.
-	    #
-	    runprog('cp ' + sources + '/Ice-' + version + '-demos.tar.gz /usr/src/redhat/SOURCES')
-	    runprog('cp ' + sources + '/Ice-' + version + '-demos.tar.gz '  + installDir)
             iceArchives = glob.glob(sources + '/Ice*' + version + '.gz')
 	    for f in iceArchives:
 		shutil.copy(f, 'usr/src/redhat/SOURCES')
 	    RPMTools.createRPMSFromBinaries64(buildDir, installDir, version, soVersion)
 	else:
-	    shutil.copy(installDir + '/Ice-' + version + '-demos.tar.gz', '/usr/src/redhat/SOURCES')
 	    shutil.copy(sources + '/php-5.1.4.tar.bz2', '/usr/src/redhat/SOURCES')
 	    shutil.copy(installFiles + '/thirdparty/php/ice.ini', '/usr/src/redhat/SOURCES')
 	    shutil.copy(buildDir + '/ice/install/thirdparty/php/configure-5.1.4.gz',
