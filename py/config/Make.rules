@@ -67,17 +67,17 @@ else
     # version used for building the Ice extension, then set PYTHON_VERSION
     # to "python2.3" or "python2.4".
     #
-    PYTHON_VERSION	?= $(word 1,$(notdir $(wildcard /usr/include/python2.[34]*)))
+    PYTHON_VERSION	?= $(word 1,$(notdir $(wildcard /usr/include/python2.[345]*)))
     ifeq ($(PYTHON_VERSION),)
       python_darwin_home = /System/Library/Frameworks/Python.framework/Versions/Current
-      PYTHON_VERSION 	= $(word 1,$(notdir $(wildcard $(python_darwin_home)/include/python2.[34]*)))
+      PYTHON_VERSION 	= $(word 1,$(notdir $(wildcard $(python_darwin_home)/include/python2.[345]*)))
     endif
     PYTHON_INCLUDE_DIR	= /usr/include/$(PYTHON_VERSION)
     PYTHON_LIB_DIR	= /usr/lib/$(PYTHON_VERSION)/config
 endif
 
 ifeq ($(PYTHON_VERSION),)
-    $(error Unable to find Python 2.3 or 2.4. See config/Make.rules)
+    $(error Unable to find Python 2.3, 2.4, or 2.5. See config/Make.rules)
 endif
 
 PYTHON_FLAGS		?= -I$(PYTHON_INCLUDE_DIR)
