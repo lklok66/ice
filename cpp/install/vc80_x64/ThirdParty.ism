@@ -1788,6 +1788,7 @@
 		<col key="yes" def="s72">Property</col>
 		<col def="L255">Value</col>
 		<row><td>ZEROC</td><td>MSIPackageFileName</td><td>ThirdParty-3.1.1-VC80-x64</td></row>
+		<row><td>ZEROC</td><td>ProductCode</td><td>{3CA53CA4-A353-4358-86A9-8CA6A570EC5D}</td></row>
 		<row><td>ZEROC</td><td>SetupFileName</td><td/></row>
 	</table>
 
