@@ -428,7 +428,7 @@ def extractDemos(sources, buildDir, version, distro, demoDir):
     toExtract = "%s/demo %s/config " % (distro, distro)
     if demoDir == '':
 	toExtract = toExtract + " %s/ICE_LICENSE" % distro
-    if demoDir <> 'php':
+    if not demoDir == 'php':
 	toExtract = toExtract + " %s/certs" % distro
 	
     runprog("gzip -dc " + os.path.join(sources, distro) + ".tar.gz | tar xf - " + toExtract, False)
@@ -571,11 +571,6 @@ def makeInstall(sources, buildDir, installDir, distro, clean, version, mmVersion
         os.chdir(cwd)
 	return
 
-    if distro.startswith('IceCS'):
-	runprog('perl -pi -e \'s/^prefix.*$/prefix = \$\(INSTALL_ROOT\)/\' config/Make.rules.cs')
-    else:
-	runprog('perl -pi -e \'s/^prefix.*$/prefix = \$\(INSTALL_ROOT\)/\' config/Make.rules')
-
     if distro.startswith('IcePy'):
         try:
             pyHome = os.environ['PYTHON_HOME']
@@ -585,22 +580,13 @@ def makeInstall(sources, buildDir, installDir, distro, clean, version, mmVersion
         if pyHome == None or pyHome == '':
             logging.info('PYTHON_HOME is not set, figuring it out and trying that')
             pyHome = sys.exec_prefix
+	    os.environ['PYTHON_HOME'] = pyHome
             
-        runprog("perl -pi -e 's/^PYTHON.HOME.*$/PYTHON\_HOME \?= "+ pyHome.replace("/", "\/") + \
-		"/' config/Make.rules")
-        
-    if not getPlatform().startswith('linux'):
-	if distro.startswith('IcePy'):
-	    runprog("perl -pi -e 's/^PYTHON.INCLUDE.DIR.*$/PYTHON_INCLUDE_DIR = " +
-	              "\$\(PYTHON_HOME\)\/include\/\$\(PYTHON_VERSION\)/' config/Make.rules")
-	    runprog("perl -pi -e 's/^PYTHON.LIB.DIR.*$/PYTHON_LIB_DIR = " + 
-	              "\$\(PYTHON_HOME\)\/lib\/\$\(PYTHON_VERSION\)\/config/' config/Make.rules")
-
     # 
     # XXX- Optimizations need to be turned on for the release.
     #
     try:
-	runprog('gmake NOGAC=yes OPTIMIZE=yes INSTALL_ROOT=%s embedded_runpath_prefix=/opt/Ice-%s install' % (installDir, mmVersion))
+	runprog('gmake NOGAC=yes OPTIMIZE=yes prefix=%s embedded_runpath_prefix=/opt/Ice-%s install' % (installDir, mmVersion))
     except ExtProgramError:
 	print "gmake failed for makeInstall(%s, %s, %s, %s, %s, %s, %s)" % (sources, buildDir, installDir, distro, str(clean), version, mmVersion) 
 	raise
@@ -1257,8 +1243,7 @@ def main():
 		runprog('cp -pR ant ' + installDir + '/Ice-' + version)
 		runprog('find ' + installDir + '/Ice-' + version + ' -name "*.java" | xargs rm')
 	    else:
-		runprog('perl -pi -e "s/^prefix.*$/prefix = \$\(INSTALL_ROOT\)/" config/Make.rules')
-		runprog('gmake INSTALL_ROOT=' + installDir + '/Ice-' + version + ' install')
+		runprog('gmake prefix=' + installDir + '/Ice-' + version + ' install')
 	    os.chdir(currentDir)
 
     #
@@ -1300,8 +1285,6 @@ def main():
 	if os.path.exists(cf):
 	    shutil.copy(cf, os.path.join('Ice-' + version, psf))
 
-    shutil.copy(os.path.join(installFiles, 'common', 'iceproject.xml'), os.path.join('Ice-' + version, 'config'))
-
     makePHPbinary(sources, buildDir, installDir, version, mmVersion, clean)
 
     runprog('tar cf Ice-' + version + '-bin-' + getPlatform() + '.tar Ice-' + version)
@@ -1317,7 +1300,6 @@ def main():
 	shutil.copy(installFiles + '/unix/README.Linux-RPM', '/usr/src/redhat/SOURCES/README.Linux-RPM')
 	shutil.copy(installFiles + '/unix/README.Linux-RPM', installDir + '/Ice-' + version + '/README')
 	shutil.copy(installFiles + '/thirdparty/php/ice.ini', installDir + '/Ice-' + version + '/ice.ini')
-
         shutil.copy(sources + '/php-5.1.4.tar.bz2', '/usr/src/redhat/SOURCES')
         shutil.copy(installFiles + '/thirdparty/php/ice.ini', '/usr/src/redhat/SOURCES')
         shutil.copy(buildDir + '/ice/install/thirdparty/php/configure-5.1.4.gz',

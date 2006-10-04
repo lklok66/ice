@@ -70,14 +70,12 @@ class Package:
 	ofile.write('Source1: http://www.zeroc.com/download/Ice/' + minorVer + '/IceJ-%{version}-java2.tar.gz\n')
 	ofile.write('Source2: http://www.zeroc.com/download/Ice/' + minorVer + '/IcePy-%{version}.tar.gz\n')
 	ofile.write('Source3: http://www.zeroc.com/download/Ice/' + minorVer + '/IceCS-%{version}.tar.gz\n')
-	ofile.write('Source4: http://www.zeroc.com/download/Ice/' + minorVer + '/Ice-%{version}-demos.tar.gz\n')
-	ofile.write('Source5: http://www.zeroc.com/download/Ice/' + minorVer + '/README.Linux-RPM\n')
-	ofile.write('Source6: http://www.zeroc.com/download/Ice/' + minorVer + '/ice.ini\n')
-	ofile.write('Source7: http://www.zeroc.com/download/Ice/' + minorVer + '/configure.gz\n')
-	ofile.write('Source8: http://www.zeroc.com/download/Ice/' + minorVer + '/php-5.1.4.tar.bz2\n')
-	ofile.write('Source9: http://www.zeroc.com/download/Ice/' + minorVer + '/IcePHP-%{version}.tar.gz\n')
-	ofile.write('Source10: http://www.zeroc.com/download/Ice/' + minorVer + '/iceproject.xml\n')
-	ofile.write('Source11: http://www.zeroc.com/download/Ice/' + minorVer + '/IceJ-%{version}-java5.tar.gz\n')
+	ofile.write('Source4: http://www.zeroc.com/download/Ice/' + minorVer + '/README.Linux-RPM\n')
+	ofile.write('Source5: http://www.zeroc.com/download/Ice/' + minorVer + '/ice.ini\n')
+	ofile.write('Source6: http://www.zeroc.com/download/Ice/' + minorVer + '/configure.gz\n')
+	ofile.write('Source7: http://www.zeroc.com/download/Ice/' + minorVer + '/php-5.1.4.tar.bz2\n')
+	ofile.write('Source8: http://www.zeroc.com/download/Ice/' + minorVer + '/IcePHP-%{version}.tar.gz\n')
+	ofile.write('Source9: http://www.zeroc.com/download/Ice/' + minorVer + '/IceJ-%{version}-java5.tar.gz\n')
 	ofile.write('\n')
 	if len(installDir) != 0:
 	    ofile.write('BuildRoot: ' + installDir + '\n')
@@ -123,7 +121,7 @@ class Package:
 	ofile.write('%clean\n')
 	ofile.write('\n')
 	ofile.write('%changelog\n')
-	ofile.write('* Tue Nov 15 2005 ZeroC Staff\n')
+	ofile.write('* Fri Sep 29 2006 ZeroC Staff\n')
 	ofile.write('- See source distributions or the ZeroC website for more information\n')
 	ofile.write('  about the changes in this release\n') 
 	ofile.write('\n')
@@ -411,8 +409,7 @@ fileLists = [
 		('dir', 'lib/Ice-%version%/ant'),
 		('xdir', 'share/doc/Ice-%version%'),
 		('xdir', 'share/doc/Ice-%version%/config'),
-	        ('file', 'share/doc/Ice-%version%/config/build.properties'),
-	        ('file', 'share/doc/Ice-%version%/config/iceproject.xml')]),
+	        ('file', 'share/doc/Ice-%version%/config/build.properties')]),
     Subpackage('python',
                'ice = %version%, python >= 2.4.1',
                'The Ice runtime for Python applications',
@@ -594,7 +591,7 @@ sed -i -e 's/^prefix.*$/prefix = $\(RPM_BUILD_ROOT\)/' $RPM_BUILD_DIR/IcePy-%{ve
 %setup -q -n IceCS-%{version} -T -D -b 3 
 sed -i -e 's/^prefix.*$/prefix = $\(RPM_BUILD_ROOT\)/' $RPM_BUILD_DIR/IceCS-%{version}/config/Make.rules.cs
 sed -i -e 's/^cvs_build.*$/cvs_build = no/' $RPM_BUILD_DIR/IceCS-%{version}/config/Make.rules.cs
-%setup -q -n IceJ-%{version}-java5 -T -D -b 11
+%setup -q -n IceJ-%{version}-java5 -T -D -b 9
 cd $RPM_BUILD_DIR
 tar xfz $RPM_SOURCE_DIR/IcePHP-%{version}.tar.gz
 tar xfj $RPM_SOURCE_DIR/php-5.1.4.tar.bz2
@@ -659,7 +656,6 @@ then
 fi
 cp $RPM_BUILD_DIR/php-5.1.4/modules/ice.so $RPM_BUILD_ROOT/%{icelibdir}/icephp.so
 cp $RPM_BUILD_DIR/IceJ-%{version}-java2/config/build.properties $RPM_BUILD_ROOT/config
-cp $RPM_SOURCE_DIR/iceproject.xml $RPM_BUILD_ROOT/config
 if test ! -d $RPM_BUILD_ROOT/%{icelibdir}/pkgconfig ; 
 then 
     mkdir $RPM_BUILD_ROOT/%{icelibdir}/pkgconfig
