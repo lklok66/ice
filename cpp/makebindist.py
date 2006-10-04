@@ -253,9 +253,16 @@ def editMakeRules(filename, version):
 		state = 'untilblank'
 		print """
 ifeq ($(ICE_DIR),/usr)
-slicedir = $(ICE_DIR)/share/slice
+   slicedir = $(ICE_DIR)/share/slice
 else
-slicedir = $(ICE_DIR)/slice
+   slicedir = $(ICE_DIR)/slice
+endif
+"""
+            elif line.startswith('embedded_runpath_prefix'):
+		state = 'untilblank'
+		print """
+ifneq ($(ICE_DIR),/usr)
+   embedded_runpath_prefix  ?= /opt/Ice-$(VERSION_MAJOR).$(VERSION_MINOR)
 endif
 """
 	    elif reIceLocation.search(line) <> None:
@@ -313,15 +320,15 @@ endif
 #
 
 ifeq ($(ICE_HOME),)
-    ICE_DIR = /usr
-    ifneq ($(shell test -f $(ICE_DIR)/bin/icestormadmin && echo 0),0)
+   ICE_DIR = /usr
+   ifneq ($(shell test -f $(ICE_DIR)/bin/icestormadmin && echo 0),0)
 $(error Ice distribution not found, please set ICE_HOME!)
-    endif
+   endif
 else
-    ICE_DIR = $(ICE_HOME)
-    ifneq ($(shell test -d $(ICE_DIR)/slice && echo 0),0)
+   ICE_DIR = $(ICE_HOME)
+   ifneq ($(shell test -d $(ICE_DIR)/slice && echo 0),0)
 $(error Ice distribution not found, please set ICE_HOME!)
-    endif
+   endif
 endif
 
 prefix = $(ICE_DIR)
