@@ -22,19 +22,19 @@ recent release.
 Building the Demos - Borland C++Builder
 =======================================
 
-These instuctions are for building the C++ demos using Borland
-C++Builder 2006. First you must set up your couple of environment
-variables to indicate the location of your Ice installation.
+These instructions are for building the C++ demos using Borland
+C++Builder 2006. First, you must set up your environment variables to
+indicate the location of your Ice installation:
 
 $ set ICE_HOME=<Ice installation root directory>
 $ set PATH=%ICE_HOME%\bin;%PATH%
 
-Then go to the demo directory and run
+Next, go to the demo directory and run the following command:
 
 $ nmake /f Makefile.mak
 
-nmake is required to build the demos. If not already installed it can be 
-downloaded at the following link:
+nmake is required to build the demos. If not already installed, you
+can download it using the following link:
 
 http://download.microsoft.com/download/vc15/patch/1.52/w95/en-us/nmake15.exe
 
