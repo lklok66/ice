@@ -15,7 +15,10 @@ CXX		= bcc32.exe
 CC		= bcc32.exe
 LINK 		= ilink32.exe
 
-CPPFLAGS	= -I"$(THIRDPARTY_HOME)\include" -q -w-par -w-lvc -w-rch -b- -y -vi- -tWC -tWM -tW- -c -DNO_STRICT;_NO_VCL;_RTLDLL
+!if "$(THIRDPARTY_HOME)" != ""
+CPPFLAGS        = -I"$(THIRDPARTY_HOME)\include"
+!endif
+CPPFLAGS	= $(CPPFLAGS) -q -w-par -w-lvc -w-rch -b- -y -vi- -tWC -tWM -tW- -c -DNO_STRICT;_NO_VCL;_RTLDLL
 
 !if "$(OPTIMIZE)" == "yes"
 CPPFLAGS	= $(CPPFLAGS) -O2 -k- -DNDEBUG
@@ -23,7 +26,11 @@ CPPFLAGS	= $(CPPFLAGS) -O2 -k- -DNDEBUG
 CPPFLAGS	= $(CPPFLAGS) -Od -v -k -D_DEBUG
 !endif
 
-LDFLAGS		= -L"$(libdir)" -L"$(THIRDPARTY_HOME)\lib" -L"$(BCB)\lib" -q -Gn -v -x
+!if "$(THIRDPARTY_HOME)" != ""
+LDFLAGS		= -L"$(THIRDPARTY_HOME)\lib"
+!endif
+LDFLAGS		= $(LDFLAGS) -L"$(libdir)" -L"$(BCB)\lib" -q -Gn -v -x
+
 LD_DLLFLAGS	= $(LDFLAGS) -Gi -Tpd c0d32.obj
 LD_EXEFLAGS	= $(LDFLAGS) -Tpe c0x32.obj
 
