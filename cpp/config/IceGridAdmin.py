@@ -32,7 +32,8 @@ nodeOptions = r' --Ice.Warn.Connections=0' + \
               r' --IceGrid.Node.Trace.Server=0' + \
               r' --IceGrid.Node.PrintServersReady=node' + \
 	      r' --Ice.NullHandleAbort' + \
-              r' --Ice.ThreadPool.Server.Size=0';
+              r' --Ice.ThreadPool.Server.Size=0' + \
+              r' --Ice.ServerIdleTime=0';
 
 registryOptions = r' --Ice.Warn.Connections=0' + \
                   r' --IceGrid.Registry.PermissionsVerifier=IceGrid/NullPermissionsVerifier' + \
@@ -51,7 +52,8 @@ registryOptions = r' --Ice.Warn.Connections=0' + \
                   r' --IceGrid.Registry.Trace.Server=0' + \
                   r' --IceGrid.Registry.Trace.Locator=0' + \
                   r' --Ice.ThreadPool.Client.SizeWarn=10' + \
-                  r' --Ice.ThreadPool.Server.Size=0';
+                  r' --Ice.ThreadPool.Server.Size=0' + \
+                  r' --Ice.ServerIdleTime=0';
 
 def startIceGridRegistry(testdir, dynamicRegistration = False):
 
