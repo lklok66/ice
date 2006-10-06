@@ -1309,7 +1309,6 @@ def main():
         shutil.copy(installFiles + '/thirdparty/php/ice.ini', '/usr/src/redhat/SOURCES')
         shutil.copy(buildDir + '/ice/install/thirdparty/php/configure-5.1.4.gz',
                     '/usr/src/redhat/SOURCES/configure.gz')
-        shutil.copy(installFiles + '/common/iceproject.xml', '/usr/src/redhat/SOURCES')
         iceArchives = glob.glob(sources + '/Ice*' + version + '*.gz')
         for f in iceArchives:
             shutil.copy(f, '/usr/src/redhat/SOURCES')
