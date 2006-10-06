@@ -71,6 +71,8 @@ class Package:
 	ofile.write('Source2: http://www.zeroc.com/download/Ice/' + minorVer + '/IcePy-%{version}.tar.gz\n')
 	ofile.write('Source3: http://www.zeroc.com/download/Ice/' + minorVer + '/IceCS-%{version}.tar.gz\n')
 	ofile.write('Source4: http://www.zeroc.com/download/Ice/' + minorVer + '/README.Linux-RPM\n')
+        ofile.write('Source4: http://www.zeroc.com/download/Ice/' + minorVer + '/SOURCES\n')
+        ofile.write('Source4: http://www.zeroc.com/download/Ice/' + minorVer + '/THIRD_PARTY_LICENSE\n')
 	ofile.write('Source5: http://www.zeroc.com/download/Ice/' + minorVer + '/ice.ini\n')
 	ofile.write('Source6: http://www.zeroc.com/download/Ice/' + minorVer + '/configure.gz\n')
 	ofile.write('Source7: http://www.zeroc.com/download/Ice/' + minorVer + '/php-5.1.4.tar.bz2\n')
@@ -301,7 +303,9 @@ transforms = [ ('file', 'ice.ini', 'etc/php.d/ice.ini'),
                ('dir', 'doc', 'usr/share/doc/Ice-%version%/doc'),
                ('file', 'README', 'usr/share/doc/Ice-%version%/README'),
                ('file', 'ICE_LICENSE', 'usr/share/doc/Ice-%version%/ICE_LICENSE'),
-               ('file', 'LICENSE', 'usr/share/doc/Ice-%version%/LICENSE')
+               ('file', 'LICENSE', 'usr/share/doc/Ice-%version%/LICENSE'),
+               ('file', 'THIRD_PARTY_LICENSE', 'usr/share/doc/Ice-%version%/THIRD_PARTY_LICENSE'),
+               ('file', 'SOURCES', 'usr/share/doc/Ice-%version%/SOURCES')
                ]
 
 fileLists = [
@@ -315,6 +319,8 @@ fileLists = [
              ('doc', 'share/doc/Ice-%version%/ICE_LICENSE'),
              ('doc', 'share/doc/Ice-%version%/LICENSE'),
              ('doc', 'share/doc/Ice-%version%/README'),
+             ('doc', 'share/doc/Ice-%version%/SOURCES'),
+             ('doc', 'share/doc/Ice-%version%/THIRD_PARTY_LICENSE'),
              ('exe', 'bin/dumpdb'),
              ('exe', 'bin/transformdb'),
              ('exe', 'bin/glacier2router'),
@@ -603,7 +609,7 @@ gzip -dc $RPM_SOURCE_DIR/configure.gz > $RPM_BUILD_DIR/php-5.1.4/configure
 
 def writeBuildCommands(ofile, version):
     ofile.write("""
-cd $RPM_BUILD_DIR/Ice-%{version}
+cd $RPM_BUILD_DIR/Ice-%{version}/src
 gmake OPTIMIZE=yes RPM_BUILD_ROOT=$RPM_BUILD_ROOT embedded_runpath_prefix=""
 cd $RPM_BUILD_DIR/IcePy-%{version}
 gmake  OPTIMIZE=yes ICE_HOME=$RPM_BUILD_DIR/Ice-%{version} RPM_BUILD_ROOT=$RPM_BUILD_ROOT embedded_runpath_prefix=""
@@ -616,7 +622,8 @@ cd $RPM_BUILD_DIR/php-5.1.4
 cp Makefile Makefile.tmp
 echo "EXTRA_CXXFLAGS= -DCOMPILE_DL_ICE" > Makefile
 cat Makefile.tmp >> Makefile
-sed -i -e '/^ICE_SHARED_LIBADD/d' Makefile
+escbr=`echo $RPM_BUILD_DIR | sed -e 's/\//\\\\\\\\\//g'`
+sed -i -e "s/^ICE_SHARED_LIBADD.*$/ICE_SHARED_LIBADD = -L$escbr\/Ice-%{version}\/lib -lIce -lSlice -lIceUtil/" Makefile
 if test "$RPM_ARCH" == "x86_64"; 
 then 
     sed -i -e 's/Ice-%{version}\/lib/Ice-%{version}\/lib64/g' Makefile ;  
@@ -649,6 +656,8 @@ export PATH=$RPM_BUILD_DIR/Ice-%{version}/bin:$PATH
 export LD_LIBRARY_PATH=$RPM_BUILD_DIR/Ice-%{version}/lib:$LD_LIBRARY_PATH
 gmake NOGAC=yes ICE_HOME=$RPM_BUILD_DIR/Ice-%{version} RPM_BUILD_ROOT=$RPM_BUILD_ROOT install
 cp $RPM_SOURCE_DIR/README.Linux-RPM $RPM_BUILD_ROOT/README
+cp $RPM_SOURCE_DIR/THIRD_PARTY_LICENSE $RPM_BUILD_ROOT/THIRD_PARTY_LICENSE
+cp $RPM_SOURCE_DIR/SOURCES $RPM_BUILD_ROOT/SOURCES
 cp $RPM_SOURCE_DIR/ice.ini $RPM_BUILD_ROOT/ice.ini
 if test ! -d $RPM_BUILD_ROOT/%{icelibdir};
 then

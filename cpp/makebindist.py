@@ -1303,6 +1303,8 @@ def main():
     #
     if getPlatform() == 'linux' and not cvsMode:
 	shutil.copy(installFiles + '/unix/README.Linux-RPM', '/usr/src/redhat/SOURCES/README.Linux-RPM')
+        shutil.copy(installFiles + '/unix/SOURCES.Linux', '/usr/src/redhat/SOURCES/SOURCES')
+        shutil.copy(installFiles + '/unix/THIRD_PARTY_LICENSE.Linux', '/usr/src/redhat/SOURCES/THIRD_PARTY_LICENSE')
 	shutil.copy(installFiles + '/unix/README.Linux-RPM', installDir + '/Ice-' + version + '/README')
 	shutil.copy(installFiles + '/thirdparty/php/ice.ini', installDir + '/Ice-' + version + '/ice.ini')
         shutil.copy(sources + '/php-5.1.4.tar.bz2', '/usr/src/redhat/SOURCES')
