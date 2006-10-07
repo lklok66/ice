@@ -127,7 +127,6 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>"$(SolutionDir)."\bin\generatecs.exe "$(SolutionDir)." "$(ProjectDir)." $(ProjectName)</PreBuildEvent>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>"$(SolutionDir)."\config\mkpolicy.bat "%VS80COMNTOOLS%" "$(ProjectDir)."\policy.3.1.icegridcs "$(SolutionDir)"</PostBuildEvent>
   </PropertyGroup>
 </Project>

@@ -17,7 +17,7 @@
                 DelaySign = "false"
                 OutputType = "Library"
                 PreBuildEvent = "$(SolutionDir)\bin\generatecs.exe $(SolutionDir) $(ProjectDir) IcePatch2"
-                PostBuildEvent = ""
+                PostBuildEvent = '"$(SolutionDir)\config\mkpolicy.bat" "%VS71COMNTOOLS%" "$(ProjectDir)\policy.3.1.icepatch2cs" "$(SolutionDir)"'
                 RootNamespace = ""
                 RunPostBuildEvent = "OnBuildSuccess"
                 StartupObject = ""

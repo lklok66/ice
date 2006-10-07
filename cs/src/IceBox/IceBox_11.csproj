@@ -17,7 +17,7 @@
                 DelaySign = "false"
                 OutputType = "Library"
                 PreBuildEvent = "$(SolutionDir)\bin\generatecs.exe $(SolutionDir) $(ProjectDir) IceBox"
-                PostBuildEvent = ""
+                PostBuildEvent = '"$(SolutionDir)\config\mkpolicy.bat" "%VS71COMNTOOLS%" "$(ProjectDir)\policy.3.1.iceboxcs" "$(SolutionDir)"'
                 RootNamespace = ""
                 RunPostBuildEvent = "OnBuildSuccess"
                 StartupObject = ""

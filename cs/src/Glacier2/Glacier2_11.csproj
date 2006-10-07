@@ -17,7 +17,7 @@
                 DelaySign = "false"
                 OutputType = "Library"
                 PreBuildEvent = "$(SolutionDir)\bin\generatecs.exe $(SolutionDir) $(ProjectDir) Glacier2"
-                PostBuildEvent = ""
+                PostBuildEvent = '"$(SolutionDir)\config\mkpolicy.bat" "%VS71COMNTOOLS%" "$(ProjectDir)\policy.3.1.glacier2cs" "$(SolutionDir)"'
                 RootNamespace = ""
                 RunPostBuildEvent = "OnBuildSuccess"
                 StartupObject = ""
