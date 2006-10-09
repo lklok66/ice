@@ -532,6 +532,7 @@ def archiveDemoTree(buildDir, version, installFiles):
    
     runprog("tar cf Ice-" + version + "-demos.tar Ice-" + version + "-demos")
     runprog("gzip -9 Ice-" + version + "-demos.tar")
+    runprog("zip -9r Ice-" + version + "-demos.zip Ice-" + version + "-demos")
     os.chdir(cwd)
 
 def makeInstall(sources, buildDir, installDir, distro, clean, version, mmVersion):
@@ -1198,6 +1199,7 @@ def main():
 	    shutil.copy("%s/unix/README.DEMOS" % installFiles, "%s/Ice-%s-demos/README.DEMOS" % (buildDir, version)) 
 	archiveDemoTree(buildDir, version, installFiles)
 	shutil.move("%s/Ice-%s-demos.tar.gz" % (buildDir, version), "%s/Ice-%s-demos.tar.gz" % (installDir, version))
+        shutil.move("%s/Ice-%s-demos.zip" % (buildDir, version), "%s/Ice-%s-demos.zip" % (installDir, version))
 
 	#
 	# Everything should be set for building stuff up now.
