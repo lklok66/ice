@@ -253,11 +253,11 @@ public:
     waitForUpdate(const char* file, int line)
     {
 	Lock sync(*this);
-
+	
 	ostringstream os;
 	os << "wait for update from line " << line << " (serial = " << serial << ")";
 	trace(os.str());
-
+	
 	while(!_updated)
 	{
 	    if(!timedWait(IceUtil::Time::seconds(10)))
@@ -1670,6 +1670,7 @@ allTests(const Ice::CommunicatorPtr& communicator)
 	
 	regObs1->waitForUpdate(__FILE__, __LINE__);
 	nodeObs1->waitForUpdate(__FILE__, __LINE__); // init
+	IceUtil::ThreadControl::sleep(IceUtil::Time::milliSeconds(500));
 
 	test(nodeObs1->nodes.find("localnode") != nodeObs1->nodes.end());
 	test(regObs1->applications.empty());
