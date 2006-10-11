@@ -1792,6 +1792,7 @@
 		<col key="yes" def="s72">Property</col>
 		<col def="L255">Value</col>
 		<row><td>ZEROC</td><td>MSIPackageFileName</td><td>ThirdParty-3.1.1-VC80</td></row>
+		<row><td>ZEROC</td><td>ProductCode</td><td>{C33300F1-0C97-47EB-9739-E9EC886CB480}</td></row>
 		<row><td>ZEROC</td><td>SetupFileName</td><td/></row>
 	</table>
 
@@ -2897,7 +2898,7 @@ VABIAEkAUgBEAF8AUABBAFIAVABZAF8ATQBTAEkAAQBaAEUAUgBPAEMA
 		<row><td>ProductCode</td><td>{9BC2C519-1088-4426-ABB2-FF3A0CBAD02C}</td><td/></row>
 		<row><td>ProductID</td><td>none</td><td/></row>
 		<row><td>ProductLanguage</td><td>1033</td><td/></row>
-		<row><td>ProductName</td><td>Ice Third Party Packages for Visual Studio 2005</td><td/></row>
+		<row><td>ProductName</td><td>Ice 3.1.1 Third Party Packages for Visual Studio 2005</td><td/></row>
 		<row><td>ProductVersion</td><td>3.1.1</td><td/></row>
 		<row><td>ProgressType0</td><td>install</td><td/></row>
 		<row><td>ProgressType1</td><td>Installing</td><td/></row>
