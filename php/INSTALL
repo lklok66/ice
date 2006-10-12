@@ -97,21 +97,8 @@ Please refer to the PHP documentation for more information.
 Source patches
 --------------
 
-The following changes are necessary on AIX:
-
-- Edit the file <phpdir>/Zend/zend_language_parser.c and remove line
-  2582, indicated below:
-
-  int
-  yyparse ()
-      ;      /* REMOVE THIS LINE */
-
-- Edit the file <phpdir>/Zend/zend_ini_parser.c and remove line 1078,
-  indicated below:
-
-  int
-  yyparse ()
-      ;      /* REMOVE THIS LINE */
+No source patches are necessary to compile PHP 5.1.6 on the supported
+platforms.
 
 
 Platform-specific Issues
