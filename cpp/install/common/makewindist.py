@@ -142,7 +142,7 @@ def checkSources(sourceDir):
 	raise DistEnvironmentError(msg)
 
     keyVersion = '0.0.0'
-    exp = re.compile("Ice-([0-9.]*).zip")
+    exp = re.compile("Ice-([0-9.]*).*.zip")
     current = None
     for d in icezip:
 	m = exp.match(os.path.split(d)[1])
