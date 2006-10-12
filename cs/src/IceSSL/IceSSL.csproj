@@ -69,7 +69,6 @@
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>"$(SolutionDir)."\config\mkpolicy.bat "%VS80COMNTOOLS%" "$(ProjectDir)."\policy.3.1.icesslcs "$(SolutionDir)"</PostBuildEvent>
   </PropertyGroup>
 </Project>
