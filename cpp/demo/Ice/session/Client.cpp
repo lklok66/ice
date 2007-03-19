@@ -8,7 +8,7 @@
 // **********************************************************************
 
 #include <Ice/Ice.h>
-#include <IceUtil/Thread.h>
+#include <IceUtil/IceUtil.h>
 #include <Session.h>
 
 using namespace std;
