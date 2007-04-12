@@ -20,6 +20,10 @@
 #include <Glacier2/Router.h>
 #include <fstream>
 
+#ifndef _WIN32
+#   include <termios.h>
+#endif
+
 using namespace std;
 //using namespace Ice; // COMPILERFIX: VC6 reports compilation error because of ambiguous Locator symbol.
 using namespace IceGrid;
@@ -91,6 +95,8 @@ public:
     const char* appName() const { return _appName; }
 
     string trim(const string&);
+    string getPassword(const string&);
+
 private:
 
     IceUtil::CtrlCHandler _ctrlCHandler;
@@ -414,12 +420,11 @@ Client::run(int argc, char* argv[])
                 
                 if(password.empty())
                 {
-                    cout << "password: " << flush;
-                    getline(cin, password);
-                    password = trim(password);
+                    password = getPassword("password: ");
                 }
-                    
+                     
                 session = AdminSessionPrx::uncheckedCast(router->createSession(id, password));
+                password = "";
                 if(!session)
                 {
                     cerr << argv[0]
@@ -528,12 +533,11 @@ Client::run(int argc, char* argv[])
                 
                 if(password.empty())
                 {
-                    cout << "password: " << flush;
-                    getline(cin, password);
-                    password = trim(password);
+                    password = getPassword("password: ");
                 }
                     
                 session = registry->createAdminSession(id, password);
+                password = "";
             }
             assert(session);
             timeout = registry->getSessionTimeout();
@@ -701,4 +705,26 @@ Client::trim(const string& s)
         return s.substr(s.find_first_not_of(delims), last+1);
     }
     return s;
+}
+
+string
+Client::getPassword(const string& prompt)
+{
+#ifndef _WIN32
+    struct termios oldConf;
+    struct termios newConf;
+    tcgetattr(0, &oldConf);
+    newConf = oldConf;
+    newConf.c_lflag &= (~ECHO);
+    tcsetattr(0, TCSANOW, &newConf);
+#endif
+    string password;
+    cout << "password: " << flush;
+    getline(cin, password);
+    cout << "\n";
+    password = trim(password);
+#ifndef _WIN32
+    tcsetattr(0, TCSANOW, &oldConf);
+#endif
+    return password;
 }
