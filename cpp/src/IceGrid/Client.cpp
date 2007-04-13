@@ -20,8 +20,13 @@
 #include <Glacier2/Router.h>
 #include <fstream>
 
+//
+// For getPassword()
+//
 #ifndef _WIN32
 #   include <termios.h>
+#else
+#   include <conio.h>
 #endif
 
 using namespace std;
@@ -710,6 +715,8 @@ Client::trim(const string& s)
 string
 Client::getPassword(const string& prompt)
 {
+    cout << prompt << flush;
+    string password;
 #ifndef _WIN32
     struct termios oldConf;
     struct termios newConf;
@@ -717,14 +724,15 @@ Client::getPassword(const string& prompt)
     newConf = oldConf;
     newConf.c_lflag &= (~ECHO);
     tcsetattr(0, TCSANOW, &newConf);
-#endif
-    string password;
-    cout << "password: " << flush;
     getline(cin, password);
-    cout << "\n";
-    password = trim(password);
-#ifndef _WIN32
     tcsetattr(0, TCSANOW, &oldConf);
+#else
+    char c;
+    while((c = _getch()) != '\r')
+    {
+	password += c;
+    }
 #endif
-    return password;
+    cout << endl;
+    return trim(password);
 }
