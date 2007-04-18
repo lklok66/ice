@@ -498,8 +498,7 @@ adapterWaitForHold(ObjectAdapterObject* self, PyObject* args)
 
             if(!done)
             {
-                Py_INCREF(Py_False);
-                return Py_False;
+                PyRETURN_FALSE;
             }
         }
 
@@ -526,8 +525,7 @@ adapterWaitForHold(ObjectAdapterObject* self, PyObject* args)
         }
     }
 
-    Py_INCREF(Py_True);
-    return Py_True;
+    PyRETURN_TRUE;
 }
 
 #ifdef WIN32
@@ -605,8 +603,7 @@ adapterWaitForDeactivate(ObjectAdapterObject* self, PyObject* args)
                 
                 if(!done)
                 {
-                    Py_INCREF(Py_False);
-                    return Py_False;
+                    PyRETURN_FALSE;
                 }
             }
         }
@@ -634,8 +631,7 @@ adapterWaitForDeactivate(ObjectAdapterObject* self, PyObject* args)
         }
     }
 
-    Py_INCREF(Py_True);
-    return Py_True;
+    PyRETURN_TRUE;
 }
 
 #ifdef WIN32
@@ -1499,7 +1495,8 @@ IcePy::initObjectAdapter(PyObject* module)
     {
         return false;
     }
-    if(PyModule_AddObject(module, STRCAST("ObjectAdapter"), reinterpret_cast<PyObject*>(&ObjectAdapterType)) < 0)
+    PyTypeObject* type = &ObjectAdapterType; // Necessary to prevent GCC's strict-alias warnings.
+    if(PyModule_AddObject(module, STRCAST("ObjectAdapter"), reinterpret_cast<PyObject*>(type)) < 0)
     {
         return false;
     }

@@ -244,9 +244,14 @@ proxyIceIsA(ProxyObject* self, PyObject* args)
         return 0;
     }
 
-    PyObject* result = b ? Py_True : Py_False;
-    Py_INCREF(result);
-    return result;
+    if(b)
+    {
+        PyRETURN_TRUE;
+    }
+    else
+    {
+        PyRETURN_FALSE;
+    }
 }
 
 #ifdef WIN32
@@ -537,7 +542,8 @@ proxyIceDefaultContext(ProxyObject* self)
         return 0;
     }
 
-    return createProxy(newProxy, *self->communicator, reinterpret_cast<PyObject*>(self->ob_type));
+    PyTypeObject* type = self->ob_type; // Necessary to prevent GCC's strict-alias warnings.
+    return createProxy(newProxy, *self->communicator, reinterpret_cast<PyObject*>(type));
 }
 
 #ifdef WIN32
@@ -720,7 +726,8 @@ proxyIceEndpoints(ProxyObject* self, PyObject* args)
     for(Py_ssize_t i = 0; i < sz; ++i)
     {
         PyObject* p = PySequence_Fast_GET_ITEM(endpoints, i);
-        if(!PyObject_IsInstance(p, reinterpret_cast<PyObject*>(&EndpointType)))
+        PyTypeObject* type = &EndpointType; // Necessary to prevent GCC's strict-alias warnings.
+        if(!PyObject_IsInstance(p, reinterpret_cast<PyObject*>(type)))
         {
             PyErr_Format(PyExc_ValueError, STRCAST("expected element of type Ice.Endpoint"));
             return 0;
@@ -813,7 +820,7 @@ proxyIceIsConnectionCached(ProxyObject* self)
     PyObject* b;
     try
     {
-        b = (*self->proxy)->ice_isConnectionCached() ? Py_True : Py_False;
+        b = (*self->proxy)->ice_isConnectionCached() ? getTrue() : getFalse();
     }
     catch(const Ice::Exception& ex)
     {
@@ -958,7 +965,7 @@ proxyIceIsSecure(ProxyObject* self)
     PyObject* b;
     try
     {
-        b = (*self->proxy)->ice_isSecure() ? Py_True : Py_False;
+        b = (*self->proxy)->ice_isSecure() ? getTrue() : getFalse();
     }
     catch(const Ice::Exception& ex)
     {
@@ -1001,7 +1008,8 @@ proxyIceSecure(ProxyObject* self, PyObject* args)
         return 0;
     }
 
-    return createProxy(newProxy, *self->communicator, reinterpret_cast<PyObject*>(self->ob_type));
+    PyTypeObject* type = self->ob_type; // Necessary to prevent GCC's strict-alias warnings.
+    return createProxy(newProxy, *self->communicator, reinterpret_cast<PyObject*>(type));
 }
 
 #ifdef WIN32
@@ -1015,7 +1023,7 @@ proxyIceIsPreferSecure(ProxyObject* self)
     PyObject* b;
     try
     {
-        b = (*self->proxy)->ice_isPreferSecure() ? Py_True : Py_False;
+        b = (*self->proxy)->ice_isPreferSecure() ? getTrue() : getFalse();
     }
     catch(const Ice::Exception& ex)
     {
@@ -1236,7 +1244,7 @@ proxyIceIsTwoway(ProxyObject* self)
     PyObject* b;
     try
     {
-        b = (*self->proxy)->ice_isTwoway() ? Py_True : Py_False;
+        b = (*self->proxy)->ice_isTwoway() ? getTrue() : getFalse();
     }
     catch(const Ice::Exception& ex)
     {
@@ -1281,7 +1289,7 @@ proxyIceIsOneway(ProxyObject* self)
     PyObject* b;
     try
     {
-        b = (*self->proxy)->ice_isOneway() ? Py_True : Py_False;
+        b = (*self->proxy)->ice_isOneway() ? getTrue() : getFalse();
     }
     catch(const Ice::Exception& ex)
     {
@@ -1326,7 +1334,7 @@ proxyIceIsBatchOneway(ProxyObject* self)
     PyObject* b;
     try
     {
-        b = (*self->proxy)->ice_isBatchOneway() ? Py_True : Py_False;
+        b = (*self->proxy)->ice_isBatchOneway() ? getTrue() : getFalse();
     }
     catch(const Ice::Exception& ex)
     {
@@ -1371,7 +1379,7 @@ proxyIceIsDatagram(ProxyObject* self)
     PyObject* b;
     try
     {
-        b = (*self->proxy)->ice_isDatagram() ? Py_True : Py_False;
+        b = (*self->proxy)->ice_isDatagram() ? getTrue() : getFalse();
     }
     catch(const Ice::Exception& ex)
     {
@@ -1416,7 +1424,7 @@ proxyIceIsBatchDatagram(ProxyObject* self)
     PyObject* b;
     try
     {
-        b = (*self->proxy)->ice_isBatchDatagram() ? Py_True : Py_False;
+        b = (*self->proxy)->ice_isBatchDatagram() ? getTrue() : getFalse();
     }
     catch(const Ice::Exception& ex)
     {
@@ -1531,7 +1539,7 @@ proxyIceIsThreadPerConnection(ProxyObject* self)
     PyObject* b;
     try
     {
-        b = (*self->proxy)->ice_isThreadPerConnection() ? Py_True : Py_False;
+        b = (*self->proxy)->ice_isThreadPerConnection() ? getTrue() : getFalse();
     }
     catch(const Ice::Exception& ex)
     {
@@ -2193,15 +2201,18 @@ IcePy::initProxy(PyObject* module)
     {
         return false;
     }
-    if(PyModule_AddObject(module, STRCAST("ObjectPrx"), reinterpret_cast<PyObject*>(&ProxyType)) < 0)
+    PyTypeObject* proxyType = &ProxyType; // Necessary to prevent GCC's strict-alias warnings.
+    if(PyModule_AddObject(module, STRCAST("ObjectPrx"), reinterpret_cast<PyObject*>(proxyType)) < 0)
     {
         return false;
     }
+
     if(PyType_Ready(&EndpointType) < 0)
     {
         return false;
     }
-    if(PyModule_AddObject(module, STRCAST("Endpoint"), reinterpret_cast<PyObject*>(&EndpointType)) < 0)
+    PyTypeObject* endpointType = &EndpointType; // Necessary to prevent GCC's strict-alias warnings.
+    if(PyModule_AddObject(module, STRCAST("Endpoint"), reinterpret_cast<PyObject*>(endpointType)) < 0)
     {
         return false;
     }
@@ -2213,7 +2224,8 @@ IcePy::createProxy(const Ice::ObjectPrx& proxy, const Ice::CommunicatorPtr& comm
 {
     if(!type)
     {
-        type = reinterpret_cast<PyObject*>(&ProxyType);
+        PyTypeObject* proxyType = &ProxyType; // Necessary to prevent GCC's strict-alias warnings.
+        type = reinterpret_cast<PyObject*>(proxyType);
     }
     return reinterpret_cast<PyObject*>(allocateProxy(proxy, communicator, type));
 }
@@ -2221,7 +2233,8 @@ IcePy::createProxy(const Ice::ObjectPrx& proxy, const Ice::CommunicatorPtr& comm
 bool
 IcePy::checkProxy(PyObject* p)
 {
-    return PyObject_IsInstance(p, reinterpret_cast<PyObject*>(&ProxyType)) == 1;
+    PyTypeObject* type = &ProxyType; // Necessary to prevent GCC's strict-alias warnings.
+    return PyObject_IsInstance(p, reinterpret_cast<PyObject*>(type)) == 1;
 }
 
 Ice::ObjectPrx

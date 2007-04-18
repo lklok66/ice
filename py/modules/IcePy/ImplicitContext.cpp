@@ -148,13 +148,11 @@ implicitContextContainsKey(ImplicitContextObject* self, PyObject* args)
 
     if(containsKey)
     {
-        Py_INCREF(Py_True);
-        return Py_True;
+        PyRETURN_TRUE;
     }
     else
     {
-        Py_INCREF(Py_False);
-        return Py_False;
+        PyRETURN_FALSE;
     }
 }
 
@@ -311,7 +309,8 @@ IcePy::initImplicitContext(PyObject* module)
     {
         return false;
     }
-    if(PyModule_AddObject(module, STRCAST("ImplicitContext"), reinterpret_cast<PyObject*>(&ImplicitContextType)) < 0)
+    PyTypeObject* type = &ImplicitContextType; // Necessary to prevent GCC's strict-alias warnings.
+    if(PyModule_AddObject(module, STRCAST("ImplicitContext"), reinterpret_cast<PyObject*>(type)) < 0)
     {
         return false;
     }

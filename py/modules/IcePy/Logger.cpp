@@ -297,7 +297,8 @@ IcePy::initLogger(PyObject* module)
     {
         return false;
     }
-    if(PyModule_AddObject(module, STRCAST("Logger"), reinterpret_cast<PyObject*>(&LoggerType)) < 0)
+    PyTypeObject* type = &LoggerType; // Necessary to prevent GCC's strict-alias warnings.
+    if(PyModule_AddObject(module, STRCAST("Logger"), reinterpret_cast<PyObject*>(type)) < 0)
     {
         return false;
     }

@@ -61,7 +61,8 @@ propertiesInit(PropertiesObject* self, PyObject* args, PyObject* /*kwds*/)
     Ice::StringSeq seq;
     if(arglist)
     {
-        if(PyObject_IsInstance(arglist, reinterpret_cast<PyObject*>(&PyList_Type)))
+        PyTypeObject* listType = &PyList_Type; // Necessary to prevent GCC's strict-alias warnings.
+        if(PyObject_IsInstance(arglist, reinterpret_cast<PyObject*>(listType)))
         {
             if(!listToStringSeq(arglist, seq))
             {
@@ -597,7 +598,8 @@ IcePy::initProperties(PyObject* module)
     {
         return false;
     }
-    if(PyModule_AddObject(module, STRCAST("Properties"), reinterpret_cast<PyObject*>(&PropertiesType)) < 0)
+    PyTypeObject* type = &PropertiesType; // Necessary to prevent GCC's strict-alias warnings.
+    if(PyModule_AddObject(module, STRCAST("Properties"), reinterpret_cast<PyObject*>(type)) < 0)
     {
         return false;
     }
@@ -634,5 +636,6 @@ IcePy_createProperties(PyObject* /*self*/, PyObject* args)
     //
     // Currently the same as "p = Ice.Properties()".
     //
-    return PyObject_Call(reinterpret_cast<PyObject*>(&PropertiesType), args, 0);
+    PyTypeObject* type = &PropertiesType; // Necessary to prevent GCC's strict-alias warnings.
+    return PyObject_Call(reinterpret_cast<PyObject*>(type), args, 0);
 }

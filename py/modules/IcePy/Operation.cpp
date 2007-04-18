@@ -1355,7 +1355,8 @@ IcePy::initOperation(PyObject* module)
     {
         return false;
     }
-    if(PyModule_AddObject(module, STRCAST("Operation"), reinterpret_cast<PyObject*>(&OperationType)) < 0)
+    PyTypeObject* opType = &OperationType; // Necessary to prevent GCC's strict-alias warnings.
+    if(PyModule_AddObject(module, STRCAST("Operation"), reinterpret_cast<PyObject*>(opType)) < 0)
     {
         return false;
     }
@@ -1364,7 +1365,8 @@ IcePy::initOperation(PyObject* module)
     {
         return false;
     }
-    if(PyModule_AddObject(module, STRCAST("AMDCallback"), reinterpret_cast<PyObject*>(&AMDCallbackType)) < 0)
+    PyTypeObject* cbType = &AMDCallbackType; // Necessary to prevent GCC's strict-alias warnings.
+    if(PyModule_AddObject(module, STRCAST("AMDCallback"), reinterpret_cast<PyObject*>(cbType)) < 0)
     {
         return false;
     }

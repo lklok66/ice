@@ -292,7 +292,8 @@ IcePy::initCurrent(PyObject* module)
     {
         return false;
     }
-    if(PyModule_AddObject(module, STRCAST("Current"), reinterpret_cast<PyObject*>(&CurrentType)) < 0)
+    PyTypeObject* type = &CurrentType; // Necessary to prevent GCC's strict-alias warnings.
+    if(PyModule_AddObject(module, STRCAST("Current"), reinterpret_cast<PyObject*>(type)) < 0)
     {
         return false;
     }

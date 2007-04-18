@@ -370,8 +370,7 @@ communicatorWaitForShutdown(CommunicatorObject* self, PyObject* args)
                 
                 if(!done)
                 {
-                    Py_INCREF(Py_False);
-                    return Py_False;
+                    PyRETURN_FALSE;
                 }
             }
         }
@@ -399,8 +398,7 @@ communicatorWaitForShutdown(CommunicatorObject* self, PyObject* args)
         }
     }
 
-    Py_INCREF(Py_True);
-    return Py_True;
+    PyRETURN_TRUE;
 }
 
 #ifdef WIN32
@@ -1221,7 +1219,8 @@ IcePy::initCommunicator(PyObject* module)
     {
         return false;
     }
-    if(PyModule_AddObject(module, STRCAST("Communicator"), reinterpret_cast<PyObject*>(&CommunicatorType)) < 0)
+    PyTypeObject* type = &CommunicatorType; // Necessary to prevent GCC's strict-alias warnings.
+    if(PyModule_AddObject(module, STRCAST("Communicator"), reinterpret_cast<PyObject*>(type)) < 0)
     {
         return false;
     }

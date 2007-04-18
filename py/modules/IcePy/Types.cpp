@@ -528,11 +528,11 @@ IcePy::PrimitiveInfo::unmarshal(const Ice::InputStreamPtr& is, const UnmarshalCa
     {
         if(is->readBool())
         {
-            cb->unmarshaled(Py_True, target, closure);
+            cb->unmarshaled(getTrue(), target, closure);
         }
         else
         {
-            cb->unmarshaled(Py_False, target, closure);
+            cb->unmarshaled(getFalse(), target, closure);
         }
         break;
     }
@@ -1374,7 +1374,7 @@ IcePy::SequenceInfo::unmarshalPrimitiveSequence(const PrimitiveInfoPtr& pi, cons
 
         for(int i = 0; i < sz; ++i)
         {
-            sm->setItem(result.get(), i, p.first[i] ? Py_True : Py_False);
+            sm->setItem(result.get(), i, p.first[i] ? getTrue() : getFalse());
         }
         break;
     }
@@ -2541,7 +2541,8 @@ IcePy::initTypes(PyObject* module)
     {
         return false;
     }
-    if(PyModule_AddObject(module, STRCAST("TypeInfo"), reinterpret_cast<PyObject*>(&TypeInfoType)) < 0)
+    PyTypeObject* typeInfoType = &TypeInfoType; // Necessary to prevent GCC's strict-alias warnings.
+    if(PyModule_AddObject(module, STRCAST("TypeInfo"), reinterpret_cast<PyObject*>(typeInfoType)) < 0)
     {
         return false;
     }
@@ -2550,7 +2551,8 @@ IcePy::initTypes(PyObject* module)
     {
         return false;
     }
-    if(PyModule_AddObject(module, STRCAST("ExceptionInfo"), reinterpret_cast<PyObject*>(&ExceptionInfoType)) < 0)
+    PyTypeObject* exceptionInfoType = &ExceptionInfoType; // Necessary to prevent GCC's strict-alias warnings.
+    if(PyModule_AddObject(module, STRCAST("ExceptionInfo"), reinterpret_cast<PyObject*>(exceptionInfoType)) < 0)
     {
         return false;
     }

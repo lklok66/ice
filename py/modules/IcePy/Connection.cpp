@@ -362,7 +362,8 @@ IcePy::initConnection(PyObject* module)
     {
         return false;
     }
-    if(PyModule_AddObject(module, STRCAST("Connection"), reinterpret_cast<PyObject*>(&ConnectionType)) < 0)
+    PyTypeObject* type = &ConnectionType; // Necessary to prevent GCC's strict-alias warnings.
+    if(PyModule_AddObject(module, STRCAST("Connection"), reinterpret_cast<PyObject*>(type)) < 0)
     {
         return false;
     }
