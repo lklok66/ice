@@ -28,7 +28,7 @@ class PyObjectHandle
 {
 public:
 
-    PyObjectHandle(PyObject* = NULL);
+    PyObjectHandle(PyObject* = 0);
     PyObjectHandle(const PyObjectHandle&);
     ~PyObjectHandle();
 
