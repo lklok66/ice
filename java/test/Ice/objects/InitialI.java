@@ -85,6 +85,29 @@ public final class InitialI extends Initial
         return _d;
     }
 
+    public I
+    getI(Ice.Current current)
+    {
+        return new II();
+    }
+
+    public I
+    getJ(Ice.Current current)
+    {
+        return new JI();
+    }
+
+    public I
+    getH(Ice.Current current)
+    {
+        return new HI();
+    }
+
+    public void
+    setI(I theI, Ice.Current current)
+    {
+    }
+
     public void
     shutdown(Ice.Current current)
     {

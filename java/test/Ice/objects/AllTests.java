@@ -139,6 +139,23 @@ public class AllTests
         }
         System.out.println("ok");
 
+        System.out.print("getting I, J and H... ");
+        System.out.flush();
+        I i = initial.getI();
+        test(i != null);
+        I j = initial.getJ();
+        test(j != null && ((J)j) != null);
+        I h = initial.getH();
+        test(h != null && ((H)h) != null);
+        System.out.println("ok");
+
+        System.out.print("setting I... ");
+        System.out.flush();
+        initial.setI(i);
+        initial.setI(j);
+        initial.setI(h);
+        System.out.println("ok");
+
         if(!collocated)
         {
             System.out.print("testing UnexpectedObjectException...");

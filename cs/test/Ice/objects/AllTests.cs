@@ -129,6 +129,23 @@ public class AllTests
         }
         Console.Out.WriteLine("ok");
 
+        Console.Out.Write("getting I, J and H... ");
+        Console.Out.Flush();
+        I i = initial.getI();
+        test(i != null);
+        I j = initial.getJ();
+        test(j != null && ((J)j) != null);
+        I h = initial.getH();
+        test(h != null && ((H)h) != null);
+        Console.Out.WriteLine("ok");
+
+        Console.Out.Write("setting I... ");
+        Console.Out.Flush();
+        initial.setI(i);
+        initial.setI(j);
+        initial.setI(h);
+        Console.Out.WriteLine("ok");
+
         if(!collocated)
         {
             Console.Out.Write("testing UnexpectedObjectException...");
