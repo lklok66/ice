@@ -1,6 +1,9 @@
 Changes since version 3.2.0
 ---------------------------     
 
+- A ruby class is now generated for a Slice interface in addition to
+  the mixin module. The class has the same name as the interface.
+
 - All local methods on a proxy that return the "same" proxy with
   a different attribute (such as ice_oneway and ice_secure) now return
   a proxy of the same class as the original. As a result, once you
