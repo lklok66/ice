@@ -19,7 +19,6 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
     Ice::ObjectAdapterPtr adapter = communicator->createObjectAdapter("TestAdapter");
     Ice::Identity id = communicator->stringToIdentity("test");
     adapter->add(new MyDerivedClassI(adapter, id), id);
-    adapter->add(new TestCheckedCastI, communicator->stringToIdentity("context"));
     adapter->activate();
 
     communicator->waitForShutdown();

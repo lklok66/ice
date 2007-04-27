@@ -7,12 +7,28 @@
 //
 // **********************************************************************
 
-public sealed class TestCheckedCastI : Test.TestCheckedCastDisp_
+using System;
+
+public sealed class MyDerivedClassI : Test.MyDerivedClass
 {
-    public override void
-    getContext_async(Test.AMD_TestCheckedCast_getContext cb, Ice.Current current)
+    public MyDerivedClassI()
     {
-        cb.ice_response(_ctx);
+    }
+    
+    public override void shutdown(Ice.Current current)
+    {
+        current.adapter.getCommunicator().shutdown();
+    }
+    
+    public override void opSleep(int duration, Ice.Current current)
+    {
+        System.Threading.Thread.Sleep(duration);
+    }
+
+    public override Ice.Context
+    getContext(Ice.Current current)
+    {
+        return _ctx;
     }
 
     public override bool

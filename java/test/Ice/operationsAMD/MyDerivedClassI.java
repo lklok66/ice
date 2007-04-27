@@ -83,23 +83,6 @@ public final class MyDerivedClassI extends Test.MyDerivedClass
     }
 
     public void
-    opSleep_async(Test.AMD_MyClass_opSleep cb, int duration, Ice.Current current)
-    {
-        while(true)
-        {
-            try
-            {
-                Thread.currentThread().sleep(duration);
-                cb.ice_response();
-                break;
-            }
-            catch(java.lang.InterruptedException ex)
-            {
-            }
-        }       
-    }
-
-    public void
     opBool_async(Test.AMD_MyClass_opBool cb,
                  boolean p1, boolean p2,
                  Ice.Current current)

@@ -7,8 +7,35 @@
 //
 // **********************************************************************
 
-public final class TestCheckedCastI extends Test._TestCheckedCastDisp
+public final class MyDerivedClassI extends Test.MyDerivedClass
 {
+    public
+    MyDerivedClassI()
+    {
+    }
+
+    public void
+    shutdown(Ice.Current c)
+    {
+        c.adapter.getCommunicator().shutdown();
+    }
+
+    public void
+    opSleep(int duration, Ice.Current current)
+    {
+        while(true)
+        {
+            try
+            {
+                Thread.currentThread().sleep(duration);
+                break;
+            }
+            catch(java.lang.InterruptedException ex)
+            {
+            }
+        }       
+    }
+
     public java.util.Map
     getContext(Ice.Current current)
     {

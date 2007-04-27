@@ -33,12 +33,6 @@ MyDerivedClassI::opVoid(const Ice::Current&)
 {
 }
 
-void
-MyDerivedClassI::opSleep(int duration, const Ice::Current&)
-{
-    IceUtil::ThreadControl::sleep(IceUtil::Time::milliSeconds(duration));
-}
-
 Ice::Byte
 MyDerivedClassI::opByte(Ice::Byte p1,
                         Ice::Byte p2,
@@ -381,21 +375,4 @@ MyDerivedClassI::opDoubleMarshaling(Ice::Double p1, const Test::DoubleS& p2, con
 void
 MyDerivedClassI::opDerived(const Ice::Current&)
 {
-}
-
-Ice::Context
-TestCheckedCastI::getContext(const Ice::Current& c)
-{
-    return _ctx;
-}
-
-bool
-TestCheckedCastI::ice_isA(const std::string& s, const Ice::Current& current) const
-{
-    _ctx = current.ctx;
-#ifdef __BCPLUSPLUS__
-    return Test::TestCheckedCast::ice_isA(s, current);
-#else
-    return TestCheckedCast::ice_isA(s, current);
-#endif
 }

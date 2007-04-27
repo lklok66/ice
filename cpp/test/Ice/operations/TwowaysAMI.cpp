@@ -879,7 +879,8 @@ twowaysAMI(const Ice::CommunicatorPtr& communicator, const Test::MyClassPrx& p)
         // in the ice_exception() callback instead of at the point of call.
         Test::MyClassPrx oneway = Test::MyClassPrx::uncheckedCast(p->ice_oneway());
         AMI_MyClass_opVoidExIPtr cb = new AMI_MyClass_opVoidExI;
-        try {
+        try
+        {
             oneway->opVoid_async(cb);
         }
         catch(const Ice::Exception&)

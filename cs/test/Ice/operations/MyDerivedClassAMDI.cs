@@ -83,12 +83,6 @@ public sealed class MyDerivedClassI : Test.MyDerivedClass
         _opVoidThread.Start();
     }
     
-    public override void opSleep_async(Test.AMD_MyClass_opSleep cb, int duration, Ice.Current current)
-    {
-        System.Threading.Thread.Sleep(duration);
-        cb.ice_response();
-    }
-
     public override void opBool_async(Test.AMD_MyClass_opBool cb, bool p1, bool p2, Ice.Current current)
     {
         cb.ice_response(p2, p1);
