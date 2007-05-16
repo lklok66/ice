@@ -22,6 +22,8 @@ public:
 
     virtual void opVoid(const Ice::Current&);
 
+    virtual void opSleep(int, const Ice::Current&);
+
     virtual Ice::Byte opByte(Ice::Byte,
                              Ice::Byte,
                              Ice::Byte&,
@@ -160,6 +162,18 @@ private:
 
     Ice::ObjectAdapterPtr _adapter;
     Ice::Identity _identity;
+};
+
+class TestCheckedCastI : public Test::TestCheckedCast
+{
+public:
+
+    virtual Ice::Context getContext(const Ice::Current&);
+    virtual bool ice_isA(const std::string&, const Ice::Current&) const;
+
+private:
+
+    mutable Ice::Context _ctx;
 };
 
 #endif

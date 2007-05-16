@@ -80,7 +80,6 @@ tests = [ \
     "IceUtil/inputUtil", \
     "IceUtil/uuid", \
     "Slice/errorDetection", \
-    "Ice/proxy", \
     "Ice/operations", \
     "Ice/exceptions", \
     "Ice/inheritance", \

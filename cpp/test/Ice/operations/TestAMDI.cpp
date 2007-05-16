@@ -67,6 +67,15 @@ MyDerivedClassI::opVoid_async(const Test::AMD_MyClass_opVoidPtr& cb, const Ice::
 }
 
 void
+MyDerivedClassI::opSleep_async(const Test::AMD_MyClass_opSleepPtr& cb, 
+                               int duration, 
+                               const Ice::Current&)
+{
+    IceUtil::ThreadControl::sleep(IceUtil::Time::milliSeconds(duration));
+    cb->ice_response();
+}
+
+void
 MyDerivedClassI::opByte_async(const Test::AMD_MyClass_opBytePtr& cb,
                               Ice::Byte p1,
                               Ice::Byte p2,
@@ -401,4 +410,21 @@ void
 MyDerivedClassI::opDerived_async(const Test::AMD_MyDerivedClass_opDerivedPtr& cb, const Ice::Current&)
 {
     cb->ice_response();
+}
+
+void
+TestCheckedCastI::getContext_async(const Test::AMD_TestCheckedCast_getContextPtr& cb, const Ice::Current&)
+{
+    cb->ice_response(_ctx);
+}
+
+bool
+TestCheckedCastI::ice_isA(const std::string& s, const Ice::Current& current) const
+{
+    _ctx = current.ctx;
+#ifdef __BCPLUSPLUS__
+    return Test::TestCheckedCast::ice_isA(s, current);
+#else
+    return TestCheckedCast::ice_isA(s, current);
+#endif
 }
