@@ -22,8 +22,6 @@
         <ant dir="inheritance"/>
         <ant dir="location"/>
         <ant dir="objects"/>
-        <ant dir="proxy"/>
-        <ant dir="proxyAMD"/>
         <ant dir="operations"/>
         <ant dir="operationsAMD"/>
         <ant dir="slicing"/>

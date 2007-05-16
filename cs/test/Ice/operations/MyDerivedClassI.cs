@@ -34,6 +34,11 @@ public sealed class MyDerivedClassI : Test.MyDerivedClass
     {
     }
     
+    public override void opSleep(int duration, Ice.Current current)
+    {
+        System.Threading.Thread.Sleep(duration);
+    }
+
     public override bool opBool(bool p1, bool p2, out bool p3, Ice.Current current)
     {
         p3 = p1;

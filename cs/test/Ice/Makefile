@@ -21,7 +21,6 @@ SUBDIRS		= application \
 		  location \
 		  objects \
 		  binding \
-		  proxy \
 		  operations \
 		  slicing \
 		  checksum \
