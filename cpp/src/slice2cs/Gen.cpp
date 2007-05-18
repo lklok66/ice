@@ -221,12 +221,62 @@ Slice::CsVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool stream)
 
     _out << sp << nl << "public override bool ice_isA(string s)";
     _out << sb;
+    //
+    // TODO: Remove linear search for Mono once this bug is fixed.
+    //
+    _out << nl << "if(IceInternal.AssemblyUtil.runtime_ == IceInternal.AssemblyUtil.Runtime.Mono)";
+    _out << sb;
+    _out << nl << "// Mono bug: System.Array.BinarySearch() uses the wrong collation sequence,";
+    _out << nl << "// so we do a linear search for the time being";
+    _out << nl << "int pos = 0;";
+    _out << nl << "while(pos < ids__.Length)";
+    _out << sb;
+    _out << nl << "if(ids__[pos] == s)";
+    _out << sb;
+    _out << nl << "break;";
+    _out << eb;
+    _out << nl << "++pos;";
+    _out << eb;
+    _out << nl << "if(pos == ids__.Length)";
+    _out << sb;
+    _out << nl << "pos = -1;";
+    _out << eb;
+    _out << nl << "return pos >= 0;";
+    _out << eb;
+    _out << nl << "else";
+    _out << sb;
     _out << nl << "return _System.Array.BinarySearch(ids__, s, _System.Collections.Comparer.DefaultInvariant) >= 0;";
+    _out << eb;
     _out << eb;
 
     _out << sp << nl << "public override bool ice_isA(string s, Ice.Current current__)";
     _out << sb;
+    //
+    // TODO: Remove linear search for Mono once this bug is fixed.
+    //
+    _out << nl << "if(IceInternal.AssemblyUtil.runtime_ == IceInternal.AssemblyUtil.Runtime.Mono)";
+    _out << sb;
+    _out << nl << "// Mono bug: System.Array.BinarySearch() uses the wrong collation sequence,";
+    _out << nl << "// so we do a linear search for the time being";
+    _out << nl << "int pos = 0;";
+    _out << nl << "while(pos < ids__.Length)";
+    _out << sb;
+    _out << nl << "if(ids__[pos] == s)";
+    _out << sb;
+    _out << nl << "break;";
+    _out << eb;
+    _out << nl << "++pos;";
+    _out << eb;
+    _out << nl << "if(pos == ids__.Length)";
+    _out << sb;
+    _out << nl << "pos = -1;";
+    _out << eb;
+    _out << nl << "return pos >= 0;";
+    _out << eb;
+    _out << nl << "else";
+    _out << sb;
     _out << nl << "return _System.Array.BinarySearch(ids__, s, _System.Collections.Comparer.DefaultInvariant) >= 0;";
+    _out << eb;
     _out << eb;
 
     _out << sp << nl << "public override string[] ice_ids()";
@@ -563,8 +613,33 @@ Slice::CsVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool stream)
         _out << sp << nl << "public override IceInternal.DispatchStatus "
              << "dispatch__(IceInternal.Incoming inS__, Ice.Current current__)";
         _out << sb;
-        _out << nl << "int pos = _System.Array.BinarySearch(all__, current__.operation, "
+        _out << nl << "int pos;";
+        //
+        // TODO: Remove linear search for Mono once this bug is fixed.
+        //
+        _out << nl << "if(IceInternal.AssemblyUtil.runtime_ == IceInternal.AssemblyUtil.Runtime.Mono)";
+        _out << sb;
+        _out << nl << "// Mono bug: System.Array.BinarySearch() uses the wrong collation sequence,";
+        _out << nl << "// so we do a linear search for the time being";
+        _out << nl << "pos = 0;";
+        _out << nl << "while(pos < all__.Length)";
+        _out << sb;
+        _out << nl << "if(all__[pos] == current__.operation)";
+        _out << sb;
+        _out << nl << "break;";
+        _out << eb;
+        _out << nl << "++pos;";
+        _out << eb;
+        _out << nl << "if(pos == all__.Length)";
+        _out << sb;
+        _out << nl << "pos = -1;";
+        _out << eb;
+        _out << eb;
+        _out << nl << "else";
+        _out << sb;
+        _out << nl << "pos = _System.Array.BinarySearch(all__, current__.operation, "
              << "_System.Collections.Comparer.DefaultInvariant);";
+        _out << eb;
         _out << nl << "if(pos < 0)";
         _out << sb;
         _out << nl << "return IceInternal.DispatchStatus.DispatchOperationNotExist;";
