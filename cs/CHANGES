@@ -1,6 +1,9 @@
 Changes since version 3.2.0
 ---------------------------
 
+- Fixed throughput performance problem on Windows that would occur
+  when sending large requests.
+
 - Added Ice.TCP.RcvSize and Ice.TCP.SndSize properties. These
   properties control the size of the TCP receive and send buffers for
   the TCP and SSL transports.
