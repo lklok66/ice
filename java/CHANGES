@@ -1,6 +1,10 @@
 Changes since version 3.2.0
 ---------------------------     
 
+- Added Ice.TCP.RcvSize and Ice.TCP.SndSize properties. These
+  properties control the size of the TCP receive and send buffers for
+  the TCP and SSL transports.
+
 - Fixed a bug in IceSSL for JDK 1.5 that could cause a hang during
   the SSL handshake.
 
