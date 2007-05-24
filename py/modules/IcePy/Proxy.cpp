@@ -1733,7 +1733,7 @@ proxyIceCheckedCast(PyObject* type, PyObject* args)
         return 0;
     }
 
-    PyObject* facet = Py_None;
+    PyObject* facet = 0;
 
     if(PyString_Check(facetOrCtx))
     {
@@ -1771,7 +1771,7 @@ proxyIceUncheckedCast(PyObject* type, PyObject* args)
 {
     //
     // ice_uncheckedCast is called from generated code, therefore we always expect
-    // to receive four arguments.
+    // to receive two arguments.
     //
     PyObject* obj;
     char* facet = 0;
