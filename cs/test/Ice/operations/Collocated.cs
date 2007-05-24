@@ -8,6 +8,7 @@
 // **********************************************************************
 
 using System;
+using System.Diagnostics;
 
 public class Collocated
 {
@@ -30,6 +31,8 @@ public class Collocated
         int status = 0;
         Ice.Communicator communicator = null;
         
+        Debug.Listeners.Add(new ConsoleTraceListener());
+
         try
         {
             Ice.InitializationData initData = new Ice.InitializationData();
