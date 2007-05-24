@@ -1710,7 +1710,7 @@ proxyIceCheckedCast(PyObject* type, PyObject* args)
 {
     //
     // ice_checkedCast is called from generated code, therefore we always expect
-    // to receive all four arguments.
+    // to receive four arguments.
     //
     PyObject* obj;
     char* id;
@@ -1769,9 +1769,13 @@ extern "C"
 static PyObject*
 proxyIceUncheckedCast(PyObject* type, PyObject* args)
 {
+    //
+    // ice_uncheckedCast is called from generated code, therefore we always expect
+    // to receive four arguments.
+    //
     PyObject* obj;
-    PyObject* facet;
-    if(!PyArg_ParseTuple(args, STRCAST("OO"), &obj, &facet))
+    char* facet = 0;
+    if(!PyArg_ParseTuple(args, STRCAST("Oz"), &obj, &facet))
     {
         return 0;
     }
@@ -1788,18 +1792,11 @@ proxyIceUncheckedCast(PyObject* type, PyObject* args)
         return 0;
     }
 
-    if(facet != Py_None && !PyString_Check(facet))
-    {
-        PyErr_Format(PyExc_ValueError, STRCAST("facet argument to ice_uncheckedCast must be None or a string"));
-        return 0;
-    }
-
     ProxyObject* p = reinterpret_cast<ProxyObject*>(obj);
 
-    if(facet != Py_None)
+    if(facet)
     {
-        char* facetStr = PyString_AS_STRING(facet);
-        return createProxy((*p->proxy)->ice_facet(facetStr), *p->communicator, type);
+        return createProxy((*p->proxy)->ice_facet(facet), *p->communicator, type);
     }
     else
     {
@@ -1892,8 +1889,8 @@ static PyObject*
 proxyUncheckedCast(PyObject* /*self*/, PyObject* args)
 {
     PyObject* obj;
-    PyObject* facet = 0;
-    if(!PyArg_ParseTuple(args, STRCAST("O|O"), &obj, &facet))
+    char* facet = 0;
+    if(!PyArg_ParseTuple(args, STRCAST("O|z"), &obj, &facet))
     {
         return 0;
     }
@@ -1910,18 +1907,11 @@ proxyUncheckedCast(PyObject* /*self*/, PyObject* args)
         return 0;
     }
 
-    if(facet && facet != Py_None && !PyString_Check(facet))
-    {
-        PyErr_Format(PyExc_ValueError, STRCAST("facet argument to ice_uncheckedCast must be None or a string"));
-        return 0;
-    }
-
     ProxyObject* p = reinterpret_cast<ProxyObject*>(obj);
 
-    if(facet && facet != Py_None)
+    if(facet)
     {
-        char* facetStr = PyString_AS_STRING(facet);
-        return createProxy((*p->proxy)->ice_facet(facetStr), *p->communicator);
+        return createProxy((*p->proxy)->ice_facet(facet), *p->communicator);
     }
     else
     {
