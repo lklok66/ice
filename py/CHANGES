@@ -1,6 +1,9 @@
 Changes since version 3.2.0
 ---------------------------
 
+- Changed to the throughput demo to better support cross-language
+  testing.
+
 - Fixed a bug that caused a crash when terminating a server with a
   signal.
 

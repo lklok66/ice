@@ -1,6 +1,9 @@
 Changes since version 3.2.0
 ---------------------------     
 
+- Changed to the throughput demo to better support cross-language
+  testing.
+
 - A ruby class is now generated for a Slice interface in addition to
   the mixin module. The class has the same name as the interface.
 
