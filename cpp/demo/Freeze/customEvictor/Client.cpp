@@ -59,8 +59,6 @@ public:
                 os << "P/N " << id;
                 string name = os.str();
                 
-                // COMPILERFIX: VC6 doesn't like this.
-                //Ice::Identity identity = { name, "" };
                 Ice::Identity identity;
                 identity.name = name;
                 ItemPrx item = ItemPrx::uncheckedCast(_anItem->ice_identity(identity));
@@ -113,15 +111,13 @@ public:
                 os << "P/N " << id;
                 string name = os.str();
 
-                // COMPILERFIX: VC6 doesn't like this.
-                //Ice::Identity identity = { name, "" };
                 Ice::Identity identity;
                 identity.name = name;
                 ItemPrx item = ItemPrx::uncheckedCast(_anItem->ice_identity(identity));
                 
                 item->adjustStock(1);
             }
-            _requestsPerSecond = static_cast<int>(writeCount / (start - IceUtil::Time::now()).toSecondsDouble());  
+            _requestsPerSecond = static_cast<int>(writeCount / (IceUtil::Time::now() - start).toSecondsDouble());  
         }
         catch(const IceUtil::Exception& e)
         {
@@ -166,7 +162,6 @@ WarehouseClient::run(int argc, char* argv[])
     }
 
     wt->getThreadControl().join();
-
     for(i = 0; i < readerCount; ++i)
     {
         rt[i]->getThreadControl().join(); 
@@ -187,8 +182,8 @@ WarehouseClient::run(int argc, char* argv[])
         rpt = rt[i]->getRequestsPerSecond();
         if(rpt > 0)
         {
-            cout << "Reader " << i << ": " << rt[i]->getRequestsPerSecond() 
-                 << " requests per second (" << 1000.0 / rpt << " ms per request)" << endl;
+            cout << "Reader " << i << ": " << rpt << " requests per second (" << 1000.0 / rpt
+		 << " ms per request)" << endl;
         }
     }
     
