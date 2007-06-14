@@ -5,3 +5,5 @@ client
 server
 Hello.cpp
 Hello.h
+db/node/*
+db/registry/*
