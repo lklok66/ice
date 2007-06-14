@@ -229,6 +229,7 @@ IceGridAdmin:
 IceGrid:
     InstanceName
     Node.AdapterId
+    Node.AllowRunningServersAsRoot
     Node.CollocateRegistry
     Node.Data
     Node.DisableOnFailure
