@@ -167,7 +167,7 @@ $(LOCAL_HDIR)/StringApplicationInfoDict.h StringApplicationInfoDict.cpp: $(SLICE
 	StringApplicationInfoDict $(LOCAL_SDIR)/Internal.ice
 
 clean::
-	rm -f StringApplicationInfoDict.h StringApplicationInfoDict.cpp
+	-rm -f StringApplicationInfoDict.h StringApplicationInfoDict.cpp
 
 $(LOCAL_HDIR)/IdentityObjectInfoDict.h IdentityObjectInfoDict.cpp: $(SLICE2FREEZE)
 	rm -f IdentityObjectInfoDict.h IdentityObjectInfoDict.cpp
@@ -190,8 +190,8 @@ clean::
 #../IceGrid/Grammar.y: Grammar.h
 
 clean::
-#	rm -f Grammar.cpp Grammar.h
-#	rm -f Scanner.cpp
+	rm -f Grammar.cpp Grammar.h
+	rm -f Scanner.cpp
 
 install:: all
 	$(call installlib,$(install_libdir),$(libdir),$(LIBFILENAME),$(SONAME),$(LIBNAME))

@@ -154,6 +154,6 @@ clean::
 !endif
 
 clean::
-	-del /q *.obj *.bak *.ilk *.exp *.pdb *.tds
+	-del /q *.obj *.bak *.ilk *.exp *.pdb *.tds *.idb
 
 install::

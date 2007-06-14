@@ -35,10 +35,6 @@ SLICE_SRCS	= Item.ice ItemInfo.ice
 
 include $(top_srcdir)/config/Make.rules
 
-ifeq ($(UNAME),Darwin)
-    $(error Demo not supported on Mac OS X) 
-endif
-
 CPPFLAGS	:= -I. $(CPPFLAGS)
 
 $(CLIENT): $(OBJS) $(COBJS)
@@ -49,15 +45,12 @@ $(SERVER): $(OBJS) $(SOBJS)
 	rm -f $@
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(SOBJS) $(DB_RPATH_LINK) -lFreeze $(LIBS)
 
-
 Database.h Database.cpp: ItemInfo.ice $(SLICE2FREEZE)
 	rm -f Database.h Database.cpp
 	$(SLICE2FREEZE) -I$(slicedir) --dict Database,string,Warehouse::ItemInfo Database ItemInfo.ice
 
-cleandb:
-	rm -f db/log.* db/__catalog db/items
-
-clean:: cleandb
-	rm -f Database.h Database.cpp
+clean::
+	-rm -rf db/__* db/items db/log*
+	-rm -f Database.h Database.cpp
 
 include .depend
