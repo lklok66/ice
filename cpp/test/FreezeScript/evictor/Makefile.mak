@@ -35,8 +35,8 @@ $(CLIENT): $(OBJS)
 
 clean::
 	del /q TestOld.cpp TestOld.h
-
-clean::
-	del /q db\*.db db\log.* db\__catalog
+        if exist db_check rmdir /s /q db_check
+        if exist db_tmp rmdir /s /q db_tmp
+	for %f in (db\*) do if not %f == db\.gitignore del /q %f
 
 !include .depend
