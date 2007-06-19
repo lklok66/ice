@@ -1,7 +1,11 @@
 Changes since version 3.2.0
 ---------------------------
 
-- Changed to the throughput demo to better support cross-language
+- Added support for protected class data members using the new
+  metadata tag ["protected"]. The tag can be applied to a Slice class
+  or to individual data members.
+
+- Changed the throughput demo to better support cross-language
   testing.
 
 - Fixed throughput performance problem on Windows that would occur

@@ -1,17 +1,20 @@
 Changes since version 3.2.0
 ---------------------------
 
-- IceGrid now allows defining an object adapter with a replica group
-  from an other IceGrid application than the one where the object
-  adapter is defined.
+- Added support for protected class data members using the new
+  metadata tag ["protected"]. The tag can be applied to a Slice class
+  or to individual data members.
 
-- Changed to the throughput demo to better support cross-language
+- IceGrid now allows you to define an object adapter with a replica
+  group from a different IceGrid application.
+
+- Changed the throughput demo to better support cross-language
   testing.
 
-- Fixed bug with IceUtil::Cond under Windows which could cause a
-  deadlock if signal was used in conjunction multiple waiting threads
-  where at least one thread is using timedWait. Note that this bug
-  also affects IceUtil::Monitor since this uses IceUtil::Cond.
+- Fixed a bug in IceUtil::Cond under Windows that could cause a
+  deadlock if a signal was used in conjunction with multiple waiting
+  threads where at least one thread is using timedWait. Note that this
+  bug also affects IceUtil::Monitor since this uses IceUtil::Cond.
 
 - Fixed throughput performance problem on Windows that would occur
   when sending large requests.
