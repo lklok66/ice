@@ -1,6 +1,10 @@
 Changes since version 3.2.0
 ---------------------------
 
+- IceGrid now emulates SIGTERM and SIGKILL signals on Windows. Sending
+  SIGTERM on a Windows process generates a Ctrl+Break event and
+  sending SIGKILL terminates the process.
+
 - IceGrid now allows defining an object adapter with a replica group
   from an other IceGrid application than the one where the object
   adapter is defined.
