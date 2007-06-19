@@ -5,6 +5,10 @@ Changes since version 3.2.0
   metadata tag ["protected"]. The tag can be applied to a Slice class
   or to individual data members.
 
+- IceGrid now emulates SIGTERM and SIGKILL signals on Windows. Sending
+  SIGTERM on a Windows process generates a Ctrl+Break event and
+  sending SIGKILL terminates the process.
+
 - IceGrid now allows you to define an object adapter with a replica
   group from a different IceGrid application.
 
