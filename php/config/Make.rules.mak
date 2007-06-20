@@ -29,13 +29,13 @@ OPTIMIZE		= yes
 # Set PHP_HOME to your PHP source directory.
 #
 
-PHP_HOME		= C:\php-5.2.1
+PHP_HOME		= C:\php-5.2.3
 
 #
 # Set PHP_BIN_HOME to your PHP binary installation directory.
 #
 
-PHP_BIN_HOME		= C:\php-5.2.1-Win32
+PHP_BIN_HOME		= C:\php-5.2.3-Win32
 
 #
 # Set STLPORT_HOME to your STLPort installation directory.

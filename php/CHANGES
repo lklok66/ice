@@ -1,6 +1,8 @@
 Changes since version 3.2.0
 ---------------------------     
 
+- This release is compatible with PHP 5.1.2, 5.1.6, and 5.2.3.
+
 - Added support for protected class data members using the new
   metadata tag ["protected"]. The tag can be applied to a Slice class
   or to individual data members.
