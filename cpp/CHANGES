@@ -1,6 +1,9 @@
 Changes since version 3.2.0
 ---------------------------
 
+- It's now possible to redirect stderr and stdout with
+  Ice.StdErr and Ice.StdOut to files bigger than 2GB.
+
 - Added two new IceGrid properties:
 
     IceGrid.Registry.SessionFilters
