@@ -50,7 +50,7 @@ else
 endif
 
 SHELL			= /bin/sh
-VERSION			= 3.2.0
+VERSION			= 3.2.1
 
 #
 # Checks for ICE_HOME environment variable.  If it isn't present,
