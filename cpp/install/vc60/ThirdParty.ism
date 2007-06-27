@@ -52,7 +52,7 @@
 	<summary>
 		<codepage>1252</codepage>
 		<title>Installation Database</title>
-		<subject>Ice 3.2.0 Third Party Packages for Visual Studio 6.0</subject>
+		<subject>Ice 3.2.1 Third Party Packages for Visual Studio 6.0</subject>
 		<author>##COMPANY_NAME##</author>
 		<keywords>Installer,MSI,Database</keywords>
 		<comments>##ID_STRING5##</comments>
@@ -1156,8 +1156,8 @@
 		<row><td>FavoritesFolder</td><td>TARGETDIR</td><td>.:FAVORI~1|Favorites</td><td/><td>0</td><td/></row>
 		<row><td>FontsFolder</td><td>TARGETDIR</td><td>.:Fonts</td><td/><td>0</td><td/></row>
 		<row><td>GlobalAssemblyCache</td><td>TARGETDIR</td><td>.:Global~1|GlobalAssemblyCache</td><td/><td>0</td><td/></row>
-		<row><td>ICE_3.2.0_THIRDPARTY_VC60</td><td>WindowsVolume</td><td>ICE-3_~1|Ice-3.2.0-ThirdParty-VC60</td><td/><td>0</td><td/></row>
-		<row><td>INSTALLDIR</td><td>ICE_3.2.0_THIRDPARTY_VC60</td><td>.</td><td/><td>0</td><td/></row>
+		<row><td>ICE_3.2.1_THIRDPARTY_VC60</td><td>WindowsVolume</td><td>ICE-3_~1|Ice-3.2.1-ThirdParty-VC60</td><td/><td>0</td><td/></row>
+		<row><td>INSTALLDIR</td><td>ICE_3.2.1_THIRDPARTY_VC60</td><td>.</td><td/><td>0</td><td/></row>
 		<row><td>ISCommonFilesFolder</td><td>CommonFilesFolder</td><td>Instal~1|InstallShield</td><td/><td>0</td><td/></row>
 		<row><td>ISMyCompanyDir</td><td>ProgramFilesFolder</td><td>MYCOMP~1|My Company Name</td><td/><td>0</td><td/></row>
 		<row><td>ISMyProductDir</td><td>ISMyCompanyDir</td><td>MYPROD~1|My Product Name</td><td/><td>0</td><td/></row>
@@ -1815,11 +1815,11 @@
 		<col key="yes" def="s72">ISProductConfiguration_</col>
 		<col key="yes" def="s72">Property</col>
 		<col def="L255">Value</col>
-		<row><td>ZEROC</td><td>MSIPackageFileName</td><td>Ice-3.2.0-ThirdParty-VC60</td></row>
-		<row><td>ZEROC</td><td>PackageCode</td><td>{BF91AD1B-7B44-482B-ACFD-18C80DD32CD7}</td></row>
-		<row><td>ZEROC</td><td>ProductCode</td><td>{92A8F9E6-A111-4B7F-94E0-13157469415D}</td></row>
+		<row><td>ZEROC</td><td>MSIPackageFileName</td><td>Ice-3.2.1-ThirdParty-VC60</td></row>
+		<row><td>ZEROC</td><td>PackageCode</td><td>{CABCC35D-762A-469B-A142-F3A9F49FC51E}</td></row>
+		<row><td>ZEROC</td><td>ProductCode</td><td>{31553698-582A-406F-937F-CC5D2FCE1DF3}</td></row>
 		<row><td>ZEROC</td><td>SetupFileName</td><td/></row>
-		<row><td>ZEROC</td><td>UpgradeCode</td><td>{15CE07AF-059B-4C8D-B507-529203C401D2}</td></row>
+		<row><td>ZEROC</td><td>UpgradeCode</td><td>{828C64C5-6914-483C-9F3C-ED86D1E68B71}</td></row>
 	</table>
 
 	<table name="ISRelease">
@@ -1920,7 +1920,7 @@
 		<col def="I4">TimeStamp</col>
 		<row><td>COMPANY_NAME</td><td>1033</td><td>ZeroC, Inc.</td><td>0</td><td/><td>1234816852</td></row>
 		<row><td>DN_AlwaysInstall</td><td>1033</td><td>Always Install</td><td>0</td><td>	</td><td>479664453</td></row>
-		<row><td>ICE_VERSION</td><td>1033</td><td>3.2.0</td><td>0</td><td/><td>1973063787</td></row>
+		<row><td>ICE_VERSION</td><td>1033</td><td>3.2.1</td><td>0</td><td/><td>1973063787</td></row>
 		<row><td>IDPROP_EXPRESS_LAUNCH_CONDITION_COLOR</td><td>1033</td><td>The color settings of your system are not adequate for running [ProductName].</td><td>0</td><td/><td>479664453</td></row>
 		<row><td>IDPROP_EXPRESS_LAUNCH_CONDITION_OS</td><td>1033</td><td>The operating system is not adequate for running [ProductName].</td><td>0</td><td/><td>479664453</td></row>
 		<row><td>IDPROP_EXPRESS_LAUNCH_CONDITION_PROCESSOR</td><td>1033</td><td>The processor is not adequate for running [ProductName].</td><td>0</td><td/><td>479664453</td></row>
@@ -2455,7 +2455,7 @@
 		<row><td>IDS__TargetReq_DESC_PROCESSOR</td><td>1033</td><td>The processor is not adequate for running [ProductName].</td><td>0</td><td/><td>479664453</td></row>
 		<row><td>IDS__TargetReq_DESC_RAM</td><td>1033</td><td>The amount of RAM is not adequate for running [ProductName].</td><td>0</td><td/><td>479664453</td></row>
 		<row><td>IDS__TargetReq_DESC_RESOLUTION</td><td>1033</td><td>The screen resolution is not adequate for running [ProductName].</td><td>0</td><td/><td>479664453</td></row>
-		<row><td>ID_STRING1</td><td>1033</td><td>Ice 3.2.0 Third Party Packages</td><td>0</td><td/><td>1973069931</td></row>
+		<row><td>ID_STRING1</td><td>1033</td><td>Ice 3.2.1 Third Party Packages</td><td>0</td><td/><td>1973069931</td></row>
 		<row><td>ID_STRING10</td><td>1033</td><td>Dialog Normal Description</td><td>0</td><td/><td>1033470955</td></row>
 		<row><td>ID_STRING11</td><td>1033</td><td>[ProductName] - InstallShield Wizard</td><td>0</td><td/><td>1033470955</td></row>
 		<row><td>ID_STRING12</td><td>1033</td><td>{&amp;MSSWhiteSerif8}InstallShield</td><td>0</td><td/><td>1033470955</td></row>
@@ -2488,7 +2488,7 @@
 		<row><td>ID_STRING37</td><td>1033</td><td>{&amp;Tahoma8}InstallShield</td><td>0</td><td/><td>1033487467</td></row>
 		<row><td>ID_STRING38</td><td>1033</td><td>&amp;Next &gt;</td><td>0</td><td/><td>1033477259</td></row>
 		<row><td>ID_STRING39</td><td>1033</td><td>&lt; &amp;Back</td><td>0</td><td/><td>1033477259</td></row>
-		<row><td>ID_STRING4</td><td>1033</td><td>Ice 3.2.0 Third Party Packages for Visual Studio 6.0</td><td>0</td><td/><td>1973078123</td></row>
+		<row><td>ID_STRING4</td><td>1033</td><td>Ice 3.2.1 Third Party Packages for Visual Studio 6.0</td><td>0</td><td/><td>1973078123</td></row>
 		<row><td>ID_STRING40</td><td>1033</td><td>Cancel</td><td>0</td><td/><td>1033477259</td></row>
 		<row><td>ID_STRING41</td><td>1033</td><td>{&amp;MSSansBold8}Dialog Bold Title</td><td>0</td><td/><td>1033477259</td></row>
 		<row><td>ID_STRING42</td><td>1033</td><td>Dialog Normal Description</td><td>0</td><td/><td>1033477259</td></row>
@@ -2504,7 +2504,7 @@
 		<row><td>ID_STRING51</td><td>1033</td><td>[ProductName] - InstallShield Wizard</td><td>0</td><td/><td>1671051817</td></row>
 		<row><td>ID_STRING52</td><td>1033</td><td>{&amp;MSSWhiteSerif8}InstallShield</td><td>0</td><td/><td>1671051817</td></row>
 		<row><td>ID_STRING53</td><td>1033</td><td>{&amp;Tahoma8}InstallShield</td><td>0</td><td/><td>1671051817</td></row>
-		<row><td>ID_STRING54</td><td>1033</td><td>Ice 3.2.0 Third Party Packages for Visual Studio 6.0</td><td>0</td><td/><td>1973033067</td></row>
+		<row><td>ID_STRING54</td><td>1033</td><td>Ice 3.2.1 Third Party Packages for Visual Studio 6.0</td><td>0</td><td/><td>1973033067</td></row>
 		<row><td>ID_STRING6</td><td>1033</td><td>&amp;Next &gt;</td><td>0</td><td/><td>1033470955</td></row>
 		<row><td>ID_STRING7</td><td>1033</td><td>&lt; &amp;Back</td><td>0</td><td/><td>1033470955</td></row>
 		<row><td>ID_STRING8</td><td>1033</td><td>Cancel</td><td>0</td><td/><td>1033470955</td></row>
@@ -2954,8 +2954,8 @@ VABIAEkAUgBEAF8AUABBAFIAVABZAF8ATQBTAEkAAQBaAEUAUgBPAEMA
 		<row><td>ProductCode</td><td>{86DDB1C1-40F9-4CF1-ADB7-D9B159036700}</td><td/></row>
 		<row><td>ProductID</td><td>none</td><td/></row>
 		<row><td>ProductLanguage</td><td>1033</td><td/></row>
-		<row><td>ProductName</td><td>Ice 3.2.0 Third Party Packages for Visual Studio 6.0</td><td/></row>
-		<row><td>ProductVersion</td><td>3.2.0</td><td/></row>
+		<row><td>ProductName</td><td>Ice 3.2.1 Third Party Packages for Visual Studio 6.0</td><td/></row>
+		<row><td>ProductVersion</td><td>3.2.1</td><td/></row>
 		<row><td>ProgressType0</td><td>install</td><td/></row>
 		<row><td>ProgressType1</td><td>Installing</td><td/></row>
 		<row><td>ProgressType2</td><td>installed</td><td/></row>

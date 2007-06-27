@@ -29,7 +29,7 @@
 # ----------------------------------------------------------------------
 
 SHELL			= /bin/sh
-VERSION			= 3.2.0
+VERSION			= 3.2.1
 
 bindir			= $(top_srcdir)\bin
 libdir			= $(top_srcdir)\lib
