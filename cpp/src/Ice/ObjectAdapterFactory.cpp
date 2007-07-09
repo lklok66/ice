@@ -78,6 +78,7 @@ IceInternal::ObjectAdapterFactory::waitForShutdown()
             wait();
         }
         _waitForShutdown = true;
+        adapters = _adapters;
     }
     
     //
