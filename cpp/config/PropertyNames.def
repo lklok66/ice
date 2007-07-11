@@ -276,6 +276,7 @@ IceGrid:
     Registry.AdminPermissionsVerifier.Router
     Registry.AdminPermissionsVerifier.CollocationOptimization
     Registry.AdminPermissionsVerifier.ThreadPerConnection
+    Registry.AdminSessionFilters
     Registry.AdminSSLPermissionsVerifier
     Registry.AdminSSLPermissionsVerifier.EndpointSelection
     Registry.AdminSSLPermissionsVerifier.ConnectionCached
@@ -340,6 +341,7 @@ IceGrid:
     Registry.Server.ThreadPool.SizeMax
     Registry.Server.ThreadPool.SizeWarn
     Registry.Server.ThreadPool.StackSize
+    Registry.SessionFilters
     Registry.SessionManager.AdapterId
     Registry.SessionManager.Endpoints
     Registry.SessionManager.Locator
