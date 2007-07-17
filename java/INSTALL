@@ -236,6 +236,39 @@ If you want to rebuild the source code, you will need to obtain the
 Ice requires ant 1.6.3 or later, but we recommend using the most
 recent release.
 
+Ice for Java includes ant tasks for translating Slice to Java. The ant
+tasks allow the slice2java and slice2freezej to be efficiently invoked
+from the build system. These tasks require one of the following:
+
+ - You correctly install the translators in the standard location,
+   /opt/Ice-@ver@. If you have not created the /opt/Ice-@mmver@ symbolic
+   link, you will also need add /opt/Ice-@ver@/lib to your shared
+   library search path. See the READMEs in your Ice for C++ or Ice
+   binary installation for more information.
+
+ - If you have installed Ice in a non-standard location, you specify the
+   location of the Ice installation containing the translators with the
+   ice.home property:
+
+   ant -Dice.home=/home/bill/Ice-@ver@
+
+ - For non-standard installations, you can also use the ICE_HOME
+   environment variable to specify the location of the Ice installation
+   containing the translators:
+
+   $ export ICE_HOME=/home/bill/Ice-@ver@
+
+ - If neither ice.home or ICE_HOME are available, the ant tasks will
+   simply invoke the translator without an absolute path, relying on the
+   translators being in a directory in your PATH for successful
+   execution. If they are not anywhere in the PATH, the build will fail.
+
+Unless you modified the Ice build system to change the embedded library
+information, you will also need to add the path containing the Ice
+shared libraries to your shared library search path.
+
+   $ export LD_LIBRARY_PATH=/home/bill/Ice-@ver@/lib:$LD_LIBRARY_PATH
+   
 The third-party dependencies that Ice requires must be in your
 CLASSPATH.
 
