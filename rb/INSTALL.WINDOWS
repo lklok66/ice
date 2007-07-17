@@ -57,7 +57,7 @@ Follow these steps to build the Ice extension for Ruby:
 3) Set the ICE_HOME environment variable with the Ice installation
    directory. For example:
 
-   > set ICE_HOME=C:\Ice-@ver@
+   > set ICE_HOME=C:\Ice-@ver@-VC60
 
 4) Edit config\Make.rules.mak and review the settings. In particular
    you must set CPP_COMPILER to the appropriate compiler.

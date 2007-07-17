@@ -65,6 +65,17 @@ the kernel or Mono.
 Running the tests
 -----------------
 
+Some of the Ice for C# tests employ applications that are part of the
+Ice for C++ distribution. You need to set the ICE_HOME environment
+variable to the path where these applications are installed for these
+tests to run properly:
+
+# On Unix.
+$ export ICE_HOME=/opt/Ice-@ver@
+
+# On Windows
+$ set ICE_HOME=c:\Ice-@ver@
+
 You must add IceCS-@ver@/bin to your MONO_PATH. (Don't forget to export
 MONO_PATH). Alternatively, you can install the Ice DLLs (from the bin
 directory) in the Global Assembly Cache (GAC), using gacutil -i

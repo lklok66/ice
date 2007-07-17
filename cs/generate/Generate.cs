@@ -38,10 +38,10 @@ namespace Generate
                 string iceHome = Environment.GetEnvironmentVariable("ICE_HOME");
                 if(iceHome == null)
                 {
-                    iceHome = Path.Combine(Path.Combine(solDir, ".."), "ice");
+                    iceHome = Path.Combine(Path.Combine(solDir, ".."), "cpp");
                     if(!Directory.Exists(iceHome))
                     {
-                        iceHome = Path.Combine(Path.Combine(Path.Combine(solDir, ".."), ".."), "ice");
+                        iceHome = Path.Combine(Path.Combine(Path.Combine(solDir, ".."), ".."), "cpp");
                         if(!Directory.Exists(iceHome))
                         {
                             iceHome = Path.Combine(solDir, "..");

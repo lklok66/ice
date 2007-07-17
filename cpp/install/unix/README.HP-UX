@@ -100,7 +100,9 @@ General
 -------
 
 The discussion below assumes you have defined the ICE_HOME variable
-with the directory of your Ice installation.
+with the directory of your Ice installation. For example:
+
+$ export ICE_HOME=/opt/Ice-@ver@
 
 In order to use Ice services and tools such as Slice translators, you
 need to add $ICE_HOME/bin to your PATH, as show in the bash command

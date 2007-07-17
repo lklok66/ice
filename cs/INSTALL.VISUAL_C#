@@ -84,6 +84,13 @@ Ice applications.
 Running the tests
 -----------------
 
+Some of the Ice for C# tests employ applications that are part of the
+Ice for C++ distribution. You need to set the ICE_HOME environment
+variable to the path where these applications are installed for these
+tests to run properly:
+
+> set ICE_HOME=c:\Ice-@ver@
+
 To run the tests, you will need Python:
 
   http://www.python.org/download

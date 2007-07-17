@@ -119,8 +119,7 @@ Unix:
   default directory (/opt/IcePy-@ver@), you would modify your
   environment as shown below:
 
-  $ export ICEPY_HOME=/opt/IcePy-@ver@
-  $ export PYTHONPATH=$ICEPY_HOME/python:$PYTHONPATH
+  $ export PYTHONPATH=/opt/IcePy-@ver@/python:$PYTHONPATH
 
 Windows:
 
@@ -132,9 +131,17 @@ Windows:
   the Ice for Python extension is installed in C:\IcePy-@ver@, you
   could configure your environment as follows:
 
-  > set ICEPY_HOME=C:\IcePy-@ver@
-  > set PYTHONPATH=%ICEPY_HOME%\python
+  > set PYTHONPATH=c:\IcePy-@ver@\python
 
+ICEPY_HOME is used by the Ice for Python test suite and the Ice for
+Python bidir demo. If you want to run these than you should also set
+ICEPY_HOME to your Ice for Python installation.
+
+  # Unix
+  $ export ICEPY_HOME=/opt/IcePy-@ver@
+
+  # Windows
+  > set ICEPY_HOME=c:\IcePy-@ver@
 
 =========================================================================
 Running the Tests

@@ -258,9 +258,9 @@ Module Generate
             '
             Dim iceHome As String = Environment.GetEnvironmentVariable("ICE_HOME")
             If iceHome Is Nothing Then
-                iceHome = Path.Combine(Path.Combine(solDir, ".."), "ice")
+                iceHome = Path.Combine(Path.Combine(solDir, ".."), "cpp")
                 If Not Directory.Exists(iceHome) Then
-                    iceHome = Path.Combine(Path.Combine(Path.Combine(solDir, ".."), ".."), "ice")
+                    iceHome = Path.Combine(Path.Combine(Path.Combine(solDir, ".."), ".."), "cpp")
                     If Not Directory.Exists(iceHome) Then
                         iceHome = Path.Combine(solDir, "..")
                     End If
