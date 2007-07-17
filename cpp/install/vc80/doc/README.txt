@@ -83,6 +83,41 @@ information on how to install and run the IceGrid registry, IceGrid
 node, and Glacier2 router as Windows services.
 
 
+About ICE_HOME
+--------------
+
+To avoid conflicts with the Ice installers for other Windows compilers, the
+default installation path for the Visual Studio 2005 installer is
+c:\Ice-@ver@. While most parts of this installation are designed to work
+without changing your environment other than described later in this
+document, you will need to set an ICE_HOME environment variable it if you
+wish to:
+
+ - Run the iceca.bat utility script found in Ice-@ver@\bin
+
+ - Build the C++, Java or C# demos in the Ice example source code
+   archive.
+
+ - With the exception of C++, build other Ice language mappings from
+   sources.
+
+ - Run certain tests and examples in from the source code distributions.
+
+ - Run the Ice for Python bidir demo found in this distribution.
+
+ - Build the Visual Basic and C# demos found in this distribution.
+ 
+ICE_HOME is used by the abovementioned applications and build systems to
+locate Ice applications, header files and libraries found in this
+installation.
+ 
+To set the ICE_HOME environment variable from the command prompt, simply run:
+
+set ICE_HOME=<Ice installation root directory>
+
+You can set also set ICE_HOME through My Computer|Advanced System
+Settings|Environment Variables.
+
 Setting up Visual C++ 2005 Express Edition
 ------------------------------------------
 

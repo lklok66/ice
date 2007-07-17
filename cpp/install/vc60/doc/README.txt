@@ -87,6 +87,38 @@ information on how to install and run the IceGrid registry, IceGrid
 node, and Glacier2 router as Windows services.
 
 
+About ICE_HOME
+--------------
+
+To avoid conflicts with the Ice installers for other Windows compilers, the
+default installation path for the Visual C++ 6.0 installer is
+c:\Ice-@ver@-VC60. While most parts of this installation are designed to
+work without changing your environment other than described later in this
+document, you will need to set an ICE_HOME environment variable it if you
+wish to:
+
+ - Run the iceca.bat utility script found in Ice-@ver@-VC60\bin
+
+ - Build the C++, Java or C# demos in the Ice example source code
+   archive.
+
+ - With the exception of C++, build other Ice language mappings from
+   sources.
+
+ - Run certain tests and examples in from the source code distributions.
+
+ICE_HOME is used by the abovementioned applications and build systems to
+locate Ice applications, header files and libraries found in this
+installation.
+ 
+To set the ICE_HOME environment variable from the command prompt, simply run:
+
+set ICE_HOME=<Ice installation root directory>
+
+You can set also set ICE_HOME through My Computer|Advanced System
+Settings|Environment Variables.
+
+
 Building and running the C++ demos
 ----------------------------------
 
@@ -99,9 +131,8 @@ Active Project, then start the compilation using Build->Build.
 To run these demos, you need to add the Ice bin directory to your
 PATH, as shown below:
 
-set ICE_HOME=<Ice installation root directory>
-set PATH=%ICE_HOME%\bin;%PATH%
-
+set PATH=<Ice installation root directory>\bin;%PATH%
+ 
 Next, open a Command Prompt, change to the desired demo subdirectory,
 and type 'server' to start the server. In a separate Command Prompt
 window, type 'client' to start the client.
@@ -127,13 +158,12 @@ can be downloaded from:
 
 You also need to add the Ice bin directory to your PATH, for example:
 
-set ICE_HOME=<Ice installation root directory>
-set PATH=%ICE_HOME%\bin;%PATH%
+set PATH=<Ice installation root directory>\bin;%PATH%
 
 Finally, set RUBYLIB so that the Ruby interpreter is able to load
 the Ice extension:
 
-set RUBYLIB=%ICE_HOME%\ruby;%RUBYLIB%
+set RUBYLIB=<Ice installation root directory>\ruby;%RUBYLIB%
 
 Since Ice for Ruby does not support server-side activities, only 
 clients are provided in the demos. In order to run the demos you must
@@ -142,12 +172,12 @@ use the corresponding C++ server.
 For example, to run the hello application in demo\Ice\hello, we begin
 by starting the C++ server:
 
-> cd %ICE_HOME%\demo\Ice\hello
+> cd <Ice installation root directory>\demo\Ice\hello
 > server
 
 Then in a separate window, start the Ruby client:
 
-> cd %ICE_HOME%\demorb\Ice\hello
+> cd <Ice installation root directory>\demorb\Ice\hello
 > ruby Client.rb
 
 
