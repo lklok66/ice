@@ -1,24 +1,24 @@
 Changes since version 3.2.0
 ---------------------------
 
-- It's now possible to redirect stderr and stdout with
-  Ice.StdErr and Ice.StdOut to files bigger than 2GB.
+- It is now possible to redirect stderr and stdout with Ice.StdErr and
+  Ice.StdOut to files bigger than 2GB.
 
 - Added two new IceGrid properties:
 
     IceGrid.Registry.SessionFilters
     IceGrid.Registry.AdminSessionFilters 
 
-  These properties allow disabling the setup of Glacier2 filters for
-  IceGrid client and administrative sessions created through
+  These properties allow you to disable the installation of Glacier2
+  filters for IceGrid client and administrative sessions created by
   Glacier2. See the Ice manual for more information.
 
 - Fixed object adapter activation deadlock. The deadlock could occur
-  when the adapter register its endpoints with the locator registry
-  and if another thread invokes concurrently on the locator.
+  if another thread invokes concurrently on the locator while the
+  adapter is registering its endpoints with the locator registry.
   
-- If the glacier2router can not contact the permissions verifier or
-  session manager on startup it now prints a warning and continues 
+- If the glacier2router cannot contact the permissions verifier or
+  session manager on startup, it now prints a warning and continues 
   rather than exiting. These warnings are disabled if the router is
   started with the --nowarn command line option.
 
