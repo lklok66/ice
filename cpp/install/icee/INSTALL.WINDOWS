@@ -15,14 +15,14 @@ C++ compiler
 
 The following Microsoft Visual C++ compilers are supported:
 
-- Visual C++ 6.0 SP5 with STLport 4.5 (or later)
+- Visual C++ 6.0 SP5 with STLport 4.6.2 (or later)
 
 - Visual C++ .NET 2003 (aka VC 7.1)
 
 - Visual C++ 2005 (aka VC++ 8.0)
 
 The STL (Standard Template Library) that is included with Visual C++
-6.0 is not supported. You must use STLport 4.5 (or later) with Visual
+6.0 is not supported. You must use STLport 4.6.2 (or later) with Visual
 C++ 6.0.
 
 For Visual C++ .NET 2003 and Visual C++ 2005, you can use the included
@@ -32,7 +32,7 @@ STL library.
 STLport
 -------
 
-Ice-E translators require STLport 4.5 or later for Visual C++ 6.0. You
+Ice-E translators require STLport 4.6.2 or later for Visual C++ 6.0. You
 can download STLport at the following location:
 
 http://www.stlport.org/download.html
