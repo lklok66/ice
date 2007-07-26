@@ -14,13 +14,11 @@ import os, sys, shutil, fnmatch, re, glob
 # Program usage.
 #
 def usage():
-    print "Usage: " + sys.argv[0] + " [options] [tag]"
+    print "Usage: " + sys.argv[0] + " [options]"
     print
     print "Options:"
     print "-h    Show this message."
     print "-v    Be verbose."
-    print
-    print "If no tag is specified, HEAD is used."
 
 #
 # Find files matching a pattern.
@@ -195,7 +193,6 @@ def fixVersion(files, version, mmversion):
 #
 # Check arguments
 #
-tag = "HEAD"
 verbose = 0
 for x in sys.argv[1:]:
     if x == "-h":
@@ -208,9 +205,11 @@ for x in sys.argv[1:]:
         print
         usage()
         sys.exit(1)
-    else:
-        tag = x
 
+if os.path.exists("../.git"):
+    print "Unable to run in repository! Exiting..."
+    sys.exit(1)
+    
 #
 # Remove any existing "dist" directory and create a new one.
 #
@@ -218,77 +217,84 @@ distdir = "dist"
 if os.path.exists(distdir):
     shutil.rmtree(distdir)
 os.mkdir(distdir)
-os.mkdir(os.path.join(distdir, "ice"))
 
-#
-# Export sources from git.
-#
-print "Checking out " + tag + "..."
-if verbose:
-    quiet = "-v"
-else:
-    quiet = ""
-os.system("git archive " + quiet + " " + tag + " . | (cd dist/ice && tar xf -)")
-
-os.chdir(distdir)
-
-#
-# Get Ice version.
-#
-config = open(os.path.join("ice", "include", "IceUtil", "Config.h"), "r")
-version = re.search("ICE_STRING_VERSION \"([0-9\.b]*)\"", config.read()).group(1)
-mmversion = re.search("([0-9]+\.[0-9b]+)[\.0-9]*", version).group(1)
-
-print "Fixing version in various files..."
-fixVersion(find("ice", "README*"), version, mmversion)
-fixVersion(find("ice", "INSTALL*"), version, mmversion)
-fixVersion(find("ice/config", "glacier2router.cfg"), version, mmversion)
-fixVersion(find("ice/config", "icegridregistry.cfg"), version, mmversion)
-fixVersion(find("ice/install/rpm", "*.conf"), version, mmversion)
-
-print "Creating Ice-rpmbuild..."
-rpmbuildver = "Ice-rpmbuild-" + version
 if verbose:
     quiet = "v"
 else:
     quiet = ""
+
+#
+# Get Ice version.
+#
+config = open(os.path.join("include", "IceUtil", "Config.h"), "r")
+version = re.search("ICE_STRING_VERSION \"([0-9\.b]*)\"", config.read()).group(1)
+mmversion = re.search("([0-9]+\.[0-9b]+)[\.0-9]*", version).group(1)
+
+print "Creating Ice-rpmbuild..."
+rpmbuildver = os.path.join("dist", "Ice-rpmbuild-" + version)
 os.system("tar c" + quiet + "f " + rpmbuildver + ".tar " +
-          "-C ice/install -C rpm {icegridregistry,icegridnode,glacier2router}.{conf,suse,redhat} README.RPM " +
+          "-C install -C rpm {icegridregistry,icegridnode,glacier2router}.{conf,suse,redhat} README.RPM " +
           "-C ../unix THIRD_PARTY_LICENSE.Linux README.Linux-RPM SOURCES.Linux " +
           "-C ../thirdparty/php ice.ini")
 os.system("gzip -9 " + rpmbuildver + ".tar")
 
 #
-# Remove files.
+# Create archives.
 #
-print "Removing unnecessary files..."
+print "Creating distribution..."
+icever = "Ice-" + version
+  
+print "Creating exclusion file..."
 filesToRemove = [ \
-    os.path.join("ice", "makedist.py"), \
-    os.path.join("ice", "makebindist.py"), \
-    os.path.join("ice", "iceemakedist.py"), \
-    os.path.join("ice", "RPMTools.py"), \
-    os.path.join("ice", "fixCopyright.py"), \
-    os.path.join("ice", "fixVersion.py"), \
-    os.path.join("ice", "icee.dsw"), \
-    os.path.join("ice", "icee.dsp"), \
-    os.path.join("ice", "src", "icecpp", "icecppe.dsp"), \
-    os.path.join("ice", "src", "IceUtil", "iceutile.dsp"), \
-    os.path.join("ice", "src", "Slice", "slicee.dsp"), \
+    "makedist.py", \
+    "makebindist.py", \
+    "iceemakedist.py", \
+    "RPMTools.py", \
+    "fixCopyright.py", \
+    "fixVersion.py", \
+    "icee.dsw", \
+    "icee.dsp", \
+    os.path.join("src", "icecpp", "icecppe.dsp"), \
+    os.path.join("src", "IceUtil", "iceutile.dsp"), \
+    os.path.join("src", "Slice", "slicee.dsp"), \
+    "dist", \
+    "install", \
+    os.path.join("src", "slice2cppe"), \
+    os.path.join("src", "slice2javae"), \
+    os.path.join("exclusions")
     ]
-filesToRemove.extend(find("ice", ".gitignore"))
+
+filesToRemove.extend(find(".", ".gitignore"))
+
+exclusionFile = open("exclusions", "w")
 for x in filesToRemove:
-    if os.path.exists(x):
-        os.remove(x)
-shutil.rmtree(os.path.join("ice", "install"))
-shutil.rmtree(os.path.join("ice", "src", "slice2cppe"))
-shutil.rmtree(os.path.join("ice", "src", "slice2javae"))
+    exclusionFile.write("%s\n" % x)
+exclusionFile.close()
+os.mkdir(os.path.join("dist", icever))
+os.system("tar c" + quiet + " -X exclusions . | ( cd " + os.path.join("dist", icever) + " && tar xf - )")
+
+os.chdir("dist")
+
+os.system("chmod -R u+rw,go+r-w %s " % icever)
+os.system("find %s \\( -name \"*.h\" -or -name \"*.cpp\" -or -name \"*.ice\" \\) -exec chmod a-x {} \\;" % icever)
+os.system("find %s \\( -name \"README*\" -or -name \"INSTALL*\" \\) -exec chmod a-x {} \\;" % icever)
+os.system("find %s \\( -name \"*.xml\" -or -name \"*.mc\" \\) -exec chmod a-x {} \\;" % icever)
+os.system("find %s \\( -name \"Makefile\" -or -name \"*.dsp\" \\) -exec chmod a-x {} \\;" % icever)
+os.system("find %s -type d -exec chmod a+x {} \\;" % icever)
+os.system("find %s -perm +111 -exec chmod a+x {} \\;" % icever)
+
+print "Fixing version in various files..."
+fixVersion(find(icever, "README*"), version, mmversion)
+fixVersion(find(icever, "INSTALL*"), version, mmversion)
+fixVersion(find(os.path.join(icever, "config"), "glacier2router.cfg"), version, mmversion)
+fixVersion(find(os.path.join(icever, "config"), "icegridregistry.cfg"), version, mmversion)
 
 #
 # Generate bison files.
 #
 print "Generating bison files..."
 cwd = os.getcwd()
-grammars = find("ice", "*.y")
+grammars = find(icever, "*.y")
 for x in grammars:
     #
     # Change to the directory containing the file.
@@ -324,7 +330,7 @@ for x in grammars:
 # Generate flex files.
 #
 print "Generating flex files..."
-scanners = find("ice", "*.l")
+scanners = find(icever, "*.l")
 for x in scanners:
     #
     # Change to the directory containing the file.
@@ -353,36 +359,25 @@ for x in scanners:
         fixProject(p, file)
     os.chdir(cwd)
 
+if verbose:
+    quiet = ""
+else:
+    quiet = "v"
+
 #
 # Comment out the implicit parser and scanner rules in
 # config/Make.rules.
 #
 print "Fixing makefiles..."
-fixMakeRules(os.path.join("ice", "config", "Make.rules"))
+fixMakeRules(os.path.join(icever, "config", "Make.rules"))
 
-#
-# Create archives.
-#
-print "Creating distribution..."
-icever = "Ice-" + version
-os.rename("ice", icever)
-if verbose:
-    quiet = "v"
-else:
-    quiet = ""
-os.system("chmod -R u+rw,go+r-w . " + icever)
-os.system("find " + icever + " \\( -name \"*.h\" -or -name \"*.cpp\" -or -name \"*.ice\" \\) -exec chmod a-x {} \\;")
-os.system("find " + icever + " \\( -name \"README*\" -or -name \"INSTALL*\" \\) -exec chmod a-x {} \\;")
-os.system("find " + icever + " \\( -name \"*.xml\" -or -name \"*.mc\" \\) -exec chmod a-x {} \\;")
-os.system("find " + icever + " \\( -name \"Makefile\" -or -name \"*.dsp\" \\) -exec chmod a-x {} \\;")
-os.system("find " + icever + " -type d -exec chmod a+x {} \\;")
-os.system("find " + icever + " -perm +111 -exec chmod a+x {} \\;")
-os.system("tar c" + quiet + "f " + icever + ".tar " + icever)
+os.system("tar c" + quiet + "f %s.tar %s" % (icever, icever))
 os.system("gzip -9 " + icever + ".tar")
 if verbose:
     quiet = ""
 else:
     quiet = "q"
+    
 os.system("zip -9r" + quiet + " " + icever + ".zip " + icever)
 
 #

@@ -1,0 +1,120 @@
+#!/bin/bash
+# **********************************************************************
+#
+# Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
+#
+# This copy of Ice is licensed to you under the terms described in the
+# ICE_LICENSE file included in this distribution.
+#
+# **********************************************************************
+
+#
+# Location where working archive is created.
+#
+WORKINGDIR=$HOME/tmp
+
+#
+# Used to naming the archive.
+#
+LABEL="HEAD" 
+
+REFSPEC="HEAD"
+
+usage()
+{
+    echo "makedist [-d working-directory] [-n archive-name] [-t tag] [-M] [-h]"
+    echo ""
+    echo " -d Indicate the working directory. 'makedist' will create"
+    echo "    the source archive in this directory. Defaults to "
+    echo "    \$HOME/tmp"
+    echo ""
+    echo " -n Specify a name and prefix for the source archive."
+    echo "    Defaults to HEAD"
+    echo ""
+    echo " -t Specify which branch or tag to base the archive on."
+    echo "    If 'tag' is a branch, the archive will be created from"
+    echo "    'tag'/HEAD. Defaults to HEAD of the current branch"
+    echo ""
+    echo " -M Skip running the makedist.py files."
+    echo ""
+    echo " -h Display this message."
+    
+    return 0
+}
+
+validopts="d:n:t:hM"
+getopts $validopts curopt
+runmakedist=1
+while test ! "x$curopt" == "x:" ;
+do
+   case $curopt in
+   	d)
+	    WORKINGDIR=$OPTARG
+	    if test ! -d $WORKINGDIR;
+	    then
+		echo "$WORKINGDIR does not exist!"
+		exit 1
+	    fi
+	;;
+	
+	n)
+	    LABEL=$OPTARG
+	;;
+
+	t)
+	    REFSPEC=$OPTARG
+	;;
+
+	h)
+	   usage
+	   exit 0
+	;;
+
+	M)
+	   runmakedist=0
+	;;
+
+	?)
+	   exit 1
+	;;
+	
+   esac
+   getopts $validopts curopt
+   [ "$?" -gt 0 ] && break
+done
+
+echo "Creating archive $WORKINGDIR/$LABEL.tar.gz with $REFSPEC"
+
+git archive --prefix="$LABEL/" $REFSPEC > $WORKINGDIR/$LABEL.tar
+cd $WORKINGDIR
+[ -e $LABEL.tar.gz ] && rm $LABEL.tar.gz
+[ -d $LABEL ] && rm -rf $LABEL
+tar xf $LABEL.tar
+gzip -9 $LABEL.tar
+
+[ "$runmakedist" -eq "0" ] && { echo "Skipping makedist.py step on user's request" ;  exit 0 ; }
+
+echo "Walking directories and creating source distributions"
+cd $LABEL
+currentdir=`pwd`
+for f in `ls` ;
+do
+   cd $currentdir/$f
+   python makedist.py
+done
+cd $currentdir
+
+#
+# Move source distributions into a single directory.
+#
+[ ! -d ../sources ] && mkdir ../sources
+for f in `find . -name dist -type d` ;
+do
+   mv $f/* ../sources ;
+done
+
+echo "Source distributions have been created..."
+echo "Please note that this system doesn't create both the Java5 and"
+echo "Java2 distributions. You will need to configure your environment"
+echo "appropriately and run makedist.py in $WORKINGDIR/$LABEL/java"
+echo "manually to create the missing distribution."
