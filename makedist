@@ -79,7 +79,7 @@ do
    [ "$?" -gt 0 ] && break
 done
 
-echo "Creating archive $WORKINGDIR/$LABEL.tar.gz with $REFSPEC"
+echo "Creating $WORKINGDIR/$LABEL with $REFSPEC"
 
 [ -d $WORKINGDIR/$LABEL ] && rm -rf $LABEL
 git archive --prefix="$LABEL/" $REFSPEC | ( cd $WORKINGDIR && tar xf - )
