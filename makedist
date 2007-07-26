@@ -8,6 +8,8 @@
 #
 # **********************************************************************
 
+BASEDIR=`pwd`
+
 #
 # Location where working archive is created.
 #
@@ -18,11 +20,19 @@ WORKINGDIR=$HOME/tmp
 #
 LABEL="HEAD" 
 
+#
+# The 'tree-ish' arg to the git-archive command.
+#
 REFSPEC="HEAD"
+
+#
+# Set to 1 to keep working files around.
+#
+KEEP=0
 
 usage()
 {
-    echo "makedist [-d working-directory] [-n archive-name] [-t tag] [-M] [-h]"
+    echo "makedist [-d working-directory] [-n archive-name] [-t tag] [-M] [-h] [-k]"
     echo ""
     echo " -d Indicate the working directory. 'makedist' will create"
     echo "    the source archive in this directory. Defaults to "
@@ -37,12 +47,14 @@ usage()
     echo ""
     echo " -M Skip running the makedist.py files."
     echo ""
+    echo " -k Don't clean up working files when finished"
+    echo ""
     echo " -h Display this message."
     
     return 0
 }
 
-validopts="d:n:t:hM"
+validopts="d:n:t:hMk"
 getopts $validopts curopt
 runmakedist=1
 while test ! "x$curopt" == "x:" ;
@@ -73,7 +85,10 @@ do
 	M)
 	   runmakedist=0
 	;;
-	
+
+	k)
+	   keep=1
+	;;
    esac
    getopts $validopts curopt
    [ "$?" -gt 0 ] && break
@@ -87,25 +102,53 @@ git archive --prefix="$LABEL/" $REFSPEC | ( cd $WORKINGDIR && tar xf - )
 
 echo "Walking directories and creating source distributions"
 cd $WORKINGDIR/$LABEL
+
+ICEVER=`awk "/.*ICE_STRING_VERSION.*/ { print \\$3 }" cpp/include/IceUtil/Config.h | sed -e s/\"//g`
+SOURCEDIR="$BASEDIR/../dist-$ICEVER"
+[ ! -d $SOURCEDIR ] && mkdir $SOURCEDIR
+
 currentdir=`pwd`
-for f in `ls` ;
+#
+# The person creating the source distribution must have:
+#   jdk 1.5 installed
+#   jdk 1.4 installed
+#   a utility named java_env to switch between the two
+#
+# There currently isn't a cross-platfrom standard java_env
+# utility. So it's up to the developer to have something suitable in
+# their path. A simple example follows:
+#
+# case $1 in
+#   1.4) JAVA_HOME=/usr/java/j2sdk1.4.2_13;;
+#   1.5) JAVA_HOME=/usr/java/jdk1.5.0_12 ;;
+#   *) echo "Unsupported" && exit 1;;
+# esac
+# export PATH=$JAVA_HOME/bin:$PATH
+# export JAVA_HOME
+#
+# Other options exist such as update-alternatives on linux and
+# java_select on MacOS X, but they require sudo or Administrator
+# access, which isn't otherwise necessary for this process.
+
+source java_env 1.4
+for f in `find . -maxdepth 1 -name "*" -type d` ;
 do
    cd $currentdir/$f
    python makedist.py
+   cp dist/* $SOURCEDIR
 done
+
+source java_env 1.5
+cd $currentdir/java
+python makedist.py
+cp dist/* $SOURCEDIR
+ 
 cd $currentdir
 
-#
-# Move source distributions into a single directory.
-#
-[ ! -d ../sources ] && mkdir ../sources
-for f in `find . -name dist -type d` ;
-do
-   mv $f/* ../sources ;
-done
 
-echo "Source distributions have been created..."
-echo "Please note that this system doesn't create both the Java5 and"
-echo "Java2 distributions. You will need to configure your environment"
-echo "appropriately and run makedist.py in $WORKINGDIR/$LABEL/java"
-echo "manually to create the missing distribution."
+cp $currentdir/cpp/makebindist.py $SOURCEDIR
+
+# Cleanup
+[ "$keep" -eq "1" ] && echo "Cleaning up working files..." && cd $WORKINGDIR && rm -rf $LABEL
+cd $BASEDIR
+echo "Source distributions can be found in $SOURCEDIR"
