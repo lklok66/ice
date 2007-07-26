@@ -87,7 +87,7 @@ do
 	;;
 
 	k)
-	   keep=1
+	   KEEP=1
 	;;
    esac
    getopts $validopts curopt
@@ -128,7 +128,9 @@ currentdir=`pwd`
 #
 # Other options exist such as update-alternatives on linux and
 # java_select on MacOS X, but they require sudo or Administrator
-# access, which isn't otherwise necessary for this process.
+# access, which isn't otherwise necessary for this process. The
+# commands to properly configure the relevant Java environments will
+# depend on your system.
 
 source java_env 1.4
 for f in `find . -maxdepth 1 -name "*" -type d` ;
@@ -149,6 +151,6 @@ cd $currentdir
 cp $currentdir/cpp/makebindist.py $SOURCEDIR
 
 # Cleanup
-[ "$keep" -eq "1" ] && echo "Cleaning up working files..." && cd $WORKINGDIR && rm -rf $LABEL
+[ "$KEEP" -eq "1" ] && echo "Cleaning up working files..." && cd $WORKINGDIR && rm -rf $LABEL
 cd $BASEDIR
 echo "Source distributions can be found in $SOURCEDIR"
