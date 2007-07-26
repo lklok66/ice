@@ -73,10 +73,6 @@ do
 	M)
 	   runmakedist=0
 	;;
-
-	?)
-	   exit 1
-	;;
 	
    esac
    getopts $validopts curopt
@@ -85,17 +81,12 @@ done
 
 echo "Creating archive $WORKINGDIR/$LABEL.tar.gz with $REFSPEC"
 
-git archive --prefix="$LABEL/" $REFSPEC > $WORKINGDIR/$LABEL.tar
-cd $WORKINGDIR
-[ -e $LABEL.tar.gz ] && rm $LABEL.tar.gz
-[ -d $LABEL ] && rm -rf $LABEL
-tar xf $LABEL.tar
-gzip -9 $LABEL.tar
-
+[ -d $WORKINGDIR/$LABEL ] && rm -rf $LABEL
+git archive --prefix="$LABEL/" $REFSPEC | ( cd $WORKINGDIR && tar xf - )
 [ "$runmakedist" -eq "0" ] && { echo "Skipping makedist.py step on user's request" ;  exit 0 ; }
 
 echo "Walking directories and creating source distributions"
-cd $LABEL
+cd $WORKINGDIR/$LABEL
 currentdir=`pwd`
 for f in `ls` ;
 do
