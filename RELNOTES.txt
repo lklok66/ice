@@ -1,0 +1,129 @@
+Release Notes for Ice 3.2.1
+---------------------------
+
+The primary purpose of a minor release such as this one is to correct
+known issues while maintaining binary compatibility with the most
+recent major release. As a result, you can use the libraries in this
+release as drop-in replacements without needing to recompile your
+Slice files or rebuild your applications. Naturally, we recommend that
+you thoroughly test your application with this release prior to
+deploying it in a production environment.
+
+Bug Fixes
+---------
+
+This release addresses the following issues:
+
+* Eliminated a deadlock that could occur while activating an object
+  adapter.
+
+* Fixed a throughput performance problem on Windows when sending large
+  requests.
+
+* Fixed an assertion failure in the IceGrid registry that occurred
+  when registering duplicate well-known objects in the same adapter.
+
+* Collocation optimization now works for indirect proxies that refer
+  to a replica group.
+
+* Ice now raises ProxyParseException if a stringified proxy contains
+  trailing characters after an adapter id.
+
+* Fixed a bug in IceSSL for Java that could cause a
+  NullPointerException when using TrustOnly properties.
+
+* Fixed a bug in IceSSL for JDK 1.5 that could cause a hang during
+  the SSL handshake.
+
+* Fixed a translator bug that generated invalid code for certain
+  Java5 types.
+
+* Fixed Communicator.isShutdown in Python, which always returned None.
+
+* Fixed a bug in Ice for Python that caused a crash when terminating a
+  server with a signal.
+
+* Added the missing data member requestId to Ice.Current in Python.
+
+* Fixed a bug in Ice for Python that caused the Properties methods
+  parseCommandLineOptions and parseIceCommandLineOptions to always
+  return None.
+
+* Fixed a bug in Ice for Ruby where ObjectPrx.ice_getCachedConnection
+  would never return a valid connection object.
+
+* Fixed bugs in stringToProxy and propertyToProxy that reported a
+  NullHandleException in Ruby.
+
+Enhancements
+------------
+
+A minor release may contain enhancements if they do not affect
+binary compatibility. This release includes the following
+improvements:
+
+* When redirecting stderr and stdout using the properties Ice.StdErr
+  and Ice.StdOut, the output files are no longer limited to 2GB.
+
+* In prior releases, the Glacier2 router would exit immediately if it
+  was unable to contact a permissions verifier or session manager. Now
+  the router displays a warning and continues its normal operation.
+  The warning can be suppressed using the --nowarn option.
+
+* Added support for translating Slice class data members into
+  protected member variables. See the relevant language mapping
+  chapters in the Ice manual for more details.
+
+* Two new properties, Ice.TCP.RcvSize and Ice.TCP.SndSize, control the
+  size of the TCP receive and send buffers for the TCP and SSL
+  transports.
+
+* Added support for opaque endpoints in stringified proxies, which
+  allows you to preserve the endpoint of an unknown transport (such
+  as an SSL endpoint when IceSSL is not installed).
+
+* In the scripting languages (Python, Ruby, and PHP), proxy factory
+  methods such as ice_oneway now preserve the proxy's existing type.
+  As a result, once you have downcast a proxy, it will rarely be
+  necessary to downcast it again. For example, you can rewrite the
+  following Python statements
+
+  twoway = Demo.HelloPrx.checkedCast(...)
+  oneway = Demo.HelloPrx.uncheckedCast(twoway.ice_oneway())
+
+  as simply
+
+  twoway = Demo.HelloPrx.checkedCast(...)
+  oneway = twoway.ice_oneway()
+
+  The local methods ice_facet and ice_identity still return a proxy of
+  the base class Ice.ObjectPrx, since a change to the proxy's facet
+  or identity typically refers to an object with a different Slice
+  type and therefore requires a new downcast.
+
+  This change does not affect the behavior of existing code. However,
+  code that depends on these new semantics will not run correctly
+  using prior versions of Ice.
+
+* IceGrid:
+
+  - Two new IceGrid properties affect IceGrid's interaction with a
+    Glacier2 router:
+
+    IceGrid.Registry.SessionFilters
+    IceGrid.Registry.AdminSessionFilters
+
+    See the Ice manual for more information on these properties.
+
+  - IceGrid now emulates the signals SIGTERM and SIGKILL on Windows.
+    Sending SIGTERM is equivalent to a Ctrl+Break event, and sending
+    SIGKILL terminates the process.
+
+  - You can now define an object adapter with a replica group from a
+    different IceGrid application.
+
+  - Added code generated from FileParser.ice to the IceGrid library.
+
+  - The findAllReplicas operation now accepts well-known proxies from
+    a replica group. This makes it possible to retrieve the replicas
+    of an object using its well-known proxy.
