@@ -62,22 +62,24 @@ Changes since version 3.2.0
   -t <num>:    Indicates the protocol type (TCP = 1, SSL = 2, UDP = 3).
 
   -v <base64>: Provides the value of the opaque endpoint. The option
-               argument is the marshaled representation of the endpoint
-               (including the endpoint's enclosing encapsulation) in
-               base64 encoding.
+               argument is the marshaled representation of the
+               endpoint (including the endpoint's enclosing
+               encapsulation) in base64 encoding.
 
   This syntax is useful if, for example, a client that has the SSL
   plugin configured sends a proxy with an SSL endpoint to a server
   without the SSL plugin. Prior to this version, the server would
   drop the unknown SSL endpoint when it stringified the proxy.
-  As of this version, the server preserves the endpoint and, when the server
-  stringifies a proxy containing an unknown endpoint, it uses the above opaque syntax.
+  As of this version, the server preserves the endpoint and, when the
+  server stringifies a proxy containing an unknown endpoint, it uses
+  the above opaque syntax.
 
 - Trailing characters past the adapter id in a stringified proxy
   will now raise a ProxyParseException.
 
-- Fixed IceGrid registry assert which would be triggered on registration
-  of duplicate well-known objects with the same object adapter.
+- Fixed an IceGrid registry assertion failure that would be triggered
+  on registration of duplicate well-known objects with the same object
+  adapter.
 
 - Added code generated from FileParser.ice to the IceGrid library.
 

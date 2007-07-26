@@ -42,9 +42,9 @@ Changes since version 3.2.0
   -t <num>:    Indicates the protocol type (TCP = 1, SSL = 2, UDP = 3).
 
   -v <base64>: Provides the value of the opaque endpoint. The option
-               argument is the marshaled representation of the endpoint
-               (including the endpoint's enclosing encapsulation) in
-               base64 encoding.
+               argument is the marshaled representation of the
+               endpoint (including the endpoint's enclosing
+               encapsulation) in base64 encoding.
 
   This syntax is useful if, for example, a client that has the SSL
   plugin configured sends a proxy with an SSL endpoint to a server
