@@ -39,7 +39,24 @@ def isVista():
     else:
         return 0
 
-def runTests(args, tests, num = 0):
+def runTests(tests, protocol, host, debug, compress, threadPerConnection, num = 0):
+
+    args = ""
+    if protocol:
+        args += "--protocol " + protocol + " "
+    if host:
+        args += "--host " + host + " "
+    if debug:
+        args += "--debug "
+    if compress:
+        args += "--compress "
+    if threadPerConnection:
+        args += "--threadPerConnection "
+
+    if num > 0:
+        prefix = "[" + str(num) + "] *** "
+    else:
+        prefix = "*** "
 
     #
     # Run each of the tests.
@@ -50,17 +67,17 @@ def runTests(args, tests, num = 0):
         dir = os.path.join(toplevel, "test", i)
 
         print
-        if(num > 0):
-            print "[" + str(num) + "]",
-        print "*** running tests in " + dir,
-        print
+        print prefix + "running tests in " + dir
+
+        if len(args) > 0:
+            print prefix + "options: " + args
+
+        sys.stdout.flush()
 
         status = os.system("python " + os.path.join(dir, "run.py " + args))
 
         if status:
-            if(num > 0):
-                print "[" + str(num) + "]",
-            print "test in " + dir + " failed with exit status", status,
+            print prefix + "test in " + dir + " failed with exit status", status
             sys.exit(status)
 
 #
@@ -93,12 +110,12 @@ tests = [ \
     ]
 
 def usage():
-    print "usage: " + sys.argv[0] + " -m|--mono -l -r <regex> -R <regex> --debug --protocol protocol --compress --host host --threadPerConnection"
+    print "usage: " + sys.argv[0] + " -m|--mono --all -l -r <regex> -R <regex> --debug --protocol protocol --compress --host host --threadPerConnection"
     sys.exit(2)
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], "lmr:R:", \
-        ["mono", "debug", "protocol=", "compress", "host=", "threadPerConnection"])
+        ["mono", "all", "debug", "protocol=", "compress", "host=", "threadPerConnection"])
 except getopt.GetoptError:
     usage()
 
@@ -107,10 +124,21 @@ if(args):
 
 mono = 0
 loop = 0
-args = ""
+all = 0
+protocol = None
+host = None
+debug = 0
+compress = 0
+threadPerConnection = 0
 for o, a in opts:
+    if o in ( "-m", "--mono" ):
+        mono = 1
     if o == "-l":
         loop = 1
+    if o == "-l":
+        loop = 1
+    if o == "--all":
+        all = 1
     if o == "-r" or o == '-R':
         import re
         regexp = re.compile(a)
@@ -122,14 +150,17 @@ for o, a in opts:
     if o == "--protocol":
         if a not in ( "ssl", "tcp"):
             usage()
-        args += " " + o + " " + a
-    if o == "--host" :
-        args += " " + o + " " + a
-    if o in ( "-m", "--mono" ):
-        args += " " + o
-        mono = 1
-    if o in ( "--debug", "-m", "--mono", "--compress", "--threadPerConnection" ):
-        args += " " + o
+        protocol = o
+    if o == "--host":
+        host = o
+    if o == "--debug":
+        debug = 1
+    if o == "--compress":
+        compress = 1
+    if o == "--threadPerConnection":
+        threadPerConnection = 1
+
+protocols = ["tcp", "ssl"]
 
 if not isWin32():
     mono = 1
@@ -140,11 +171,24 @@ if mono or isVista():
 	tests.remove("IceSSL/configuration")
     except ValueError:
 	pass
+    protocols.remove("ssl")
 
 if loop:
     num = 1
     while 1:
-        runTests(args, tests, num)
+        if all:
+            for protocol in protocols:
+                for compress in [0, 1]:
+                    for threadPerConnection in [0, 1]:
+                        runTests(tests, protocol, host, debug, compress, threadPerConnection, num)
+        else:
+            runTests(tests, protocol, host, debug, compress, threadPerConnection, num)
         num += 1
 else:
-    runTests(args, tests)
+    if all:
+        for protocol in protocols:
+            for compress in [0, 1]:
+                for threadPerConnection in [0, 1]:
+                    runTests(tests, protocol, host, debug, compress, threadPerConnection)
+    else:
+        runTests(tests, protocol, host, debug, compress, threadPerConnection)
