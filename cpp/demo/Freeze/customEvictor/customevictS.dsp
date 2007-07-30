@@ -212,12 +212,20 @@ SOURCE=.\ItemInfo.ice
 InputPath=.\ItemInfo.ice
 
 BuildCmds= \
-	..\..\..\bin\slice2cpp.exe ItemInfo.ice
+	..\..\..\bin\slice2cpp.exe ItemInfo.ice \
+	..\..\..\bin\slice2freeze -I..\..\..\include --dict Database,string,Warehouse::ItemInfo Database ItemInfo.ice \
+	
 
 "ItemInfo.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
 
 "ItemInfo.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"Database.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"Database.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
 # End Custom Build
 
@@ -227,12 +235,20 @@ BuildCmds= \
 InputPath=.\ItemInfo.ice
 
 BuildCmds= \
-	..\..\..\bin\slice2cpp.exe ItemInfo.ice
+	..\..\..\bin\slice2cpp.exe ItemInfo.ice \
+	..\..\..\bin\slice2freeze -I..\..\..\include --dict Database,string,Warehouse::ItemInfo Database ItemInfo.ice \
+	
 
 "ItemInfo.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
 
 "ItemInfo.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"Database.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"Database.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
 # End Custom Build
 
