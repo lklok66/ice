@@ -109,6 +109,80 @@ SOURCE=.\Item.h
 # Begin Group "Resource Files"
 
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
+# Begin Source File
+
+SOURCE=.\Item.ice
+
+!IF  "$(CFG)" == "customevictC - Win32 Release"
+
+# Begin Custom Build
+InputPath=.\Item.ice
+
+BuildCmds= \
+	..\..\..\bin\slice2cpp.exe Item.ice
+
+"Item.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"Item.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "customevictC - Win32 Debug"
+
+# Begin Custom Build
+InputPath=.\Item.ice
+
+BuildCmds= \
+	..\..\..\bin\slice2cpp.exe Item.ice
+
+"Item.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"Item.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\ItemInfo.ice
+
+!IF  "$(CFG)" == "customevictC - Win32 Release"
+
+# Begin Custom Build
+InputPath=.\ItemInfo.ice
+
+BuildCmds= \
+	..\..\..\bin\slice2cpp.exe ItemInfo.ice
+
+"ItemInfo.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"ItemInfo.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "customevictC - Win32 Debug"
+
+# Begin Custom Build
+InputPath=.\ItemInfo.ice
+
+BuildCmds= \
+	..\..\..\bin\slice2cpp.exe ItemInfo.ice
+
+"ItemInfo.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"ItemInfo.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
 # End Group
 # Begin Source File
 
