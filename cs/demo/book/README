@@ -11,6 +11,10 @@ Demos in this directory:
   An implementation of the simple printer example at the beginning of
   the book.
 
+- lifecycle
+
+  An implementation of the file system that supports life cycle operations.
+
 - simple_filesystem
 
   An implementation of the simple (non-persistent, non-life-cycle)
