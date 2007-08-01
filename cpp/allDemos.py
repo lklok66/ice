@@ -71,6 +71,10 @@ demos = [ "IceUtil/workqueue",
           "Glacier2/callback",
           "Freeze/bench",
           "Freeze/customEvictor",
+          "book/freeze_filesystem",
+          "book/simple_filesystem",
+          "book/printer",
+          "book/lifecycle",
           ]
 
 #
