@@ -19,6 +19,10 @@ else:
 sys.path.append(os.path.join(toplevel, "config"))
 import DemoUtil
 
+if DemoUtil.isDarwin():
+    print "This demo is not supported under MacOS."
+    sys.exit(0)
+
 print "testing IceUtl::Cache evictor"
 server = DemoUtil.spawn('./server --Ice.PrintAdapterReady')
 server.expect(".* ready")
