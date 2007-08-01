@@ -67,8 +67,8 @@ demos = [ "IceUtil/workqueue",
           "IceGrid/allocate",
           "IceGrid/sessionActivation",
           "IceGrid/replication",
-          #"Glacier2/chat",
-          #"IceGrid/simple",
+          "Glacier2/chat",
+          "Glacier2/callback",
           ]
 
 #
