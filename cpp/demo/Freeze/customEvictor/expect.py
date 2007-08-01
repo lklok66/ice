@@ -29,7 +29,7 @@ server.expect(".* ready")
 
 client = DemoUtil.spawn('./client')
 client.expect(pexpect.EOF, timeout=200)
-print "%s " % (client.before)
+print client.before
 
 server.kill(signal.SIGINT)
 server.expect(pexpect.EOF)
@@ -40,7 +40,7 @@ server.expect(".* ready")
 
 client = DemoUtil.spawn('./client')
 client.expect(pexpect.EOF, timeout=200)
-print "%s " % (client.before)
+print client.before
 
 server.kill(signal.SIGINT)
 server.expect(pexpect.EOF)
