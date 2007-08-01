@@ -8,7 +8,7 @@
 #
 # **********************************************************************
 
-import pexpect, sys, os, signal
+import pexpect, sys, os
 
 for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
     toplevel = os.path.normpath(toplevel)
@@ -19,28 +19,22 @@ else:
 sys.path.append(os.path.join(toplevel, "config"))
 import DemoUtil
 
-if DemoUtil.isDarwin():
-    print "This demo is not supported under MacOS."
-    sys.exit(0)
-
-print "testing IceUtl::Cache evictor"
 server = DemoUtil.spawn('./server --Ice.PrintAdapterReady')
-server.expect(".* ready")
-
+server.expect('.* ready')
+print "testing...",
+sys.stdout.flush()
 client = DemoUtil.spawn('./client')
-client.expect(pexpect.EOF, timeout=200)
-print client.before
-
-server.kill(signal.SIGINT)
-server.expect(pexpect.EOF)
-
-print "testing simple evictor"
-server = DemoUtil.spawn('./server simple --Ice.PrintAdapterReady')
-server.expect(".* ready")
-
-client = DemoUtil.spawn('./client')
-client.expect(pexpect.EOF, timeout=200)
-print client.before
-
-server.kill(signal.SIGINT)
-server.expect(pexpect.EOF)
+client.expect('>')
+client.sendline('mkfile bar')
+client.expect('>')
+client.sendline('write bar "hello world"')
+client.expect('>')
+client.sendline('cat bar')
+client.expect('hello world\r\n>')
+client.sendline('rm bar')
+client.expect('>')
+client.sendline('rm bar')
+client.expect('no such file or directory\r\n>')
+client.sendline('exit')
+client.expect(pexpect.EOF)
+print "ok"
