@@ -46,7 +46,8 @@ def runDemos(args, demos, num = 0):
 #
 # List of all basic demos.
 #
-demos = [ "Ice/async",
+demos = [ "IceUtil/workqueue",
+          "Ice/async",
           "Ice/bidir",
           "Ice/callback",
           "Ice/converter",
