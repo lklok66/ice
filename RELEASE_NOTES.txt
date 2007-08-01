@@ -1,5 +1,5 @@
 Release Notes for Ice 3.2.1
----------------------------
+===========================
 
 The primary purpose of a minor release such as this one is to correct
 known issues while maintaining binary compatibility with the most
@@ -8,6 +8,7 @@ release as drop-in replacements without needing to recompile your
 Slice files or rebuild your applications. Naturally, we recommend that
 you thoroughly test your application with this release prior to
 deploying it in a production environment.
+
 
 Bug Fixes
 ---------
@@ -54,6 +55,40 @@ This release addresses the following issues:
 
 * Fixed bugs in stringToProxy and propertyToProxy that reported a
   NullHandleException in Ruby.
+
+
+Upgrading to Ice 3.2.x from earlier versions
+--------------------------------------------
+
+For developers who are upgrading from Ice 3.1.x or earlier, we
+described the most significant changes in Issue 21 of our newsletter:
+
+  http://www.zeroc.com/newsletter/issue21.pdf
+
+However, we neglected to mention a change to the semantics of object
+adapter destruction. In Ice 3.1.x, it was possible to recreate an
+object adapter with the same name if you called deactivate() followed
+by waitForDeactivate() prior to creating the new adapter. For example:
+
+  adapter = communicator->createObjectAdapter("MyAdapter");
+  adapter->activate();
+  ...
+  adapter->deactivate();
+  adapter->waitForDeactivate();
+  adapter = communicator->createObjectAdapter("MyAdapter");
+
+In Ice 3.2, these steps are no longer sufficient, as an object adapter
+is not fully destroyed until its destroy() operation has been called.
+As a result, applications that relied on the semantics of Ice 3.1
+could fail with an exception while attempting to create the new object
+adapter. To correct the problem, add a call to destroy():
+
+  adapter = communicator->createObjectAdapter("MyAdapter");
+  adapter->activate();
+  ...
+  adapter->destroy();
+  adapter = communicator->createObjectAdapter("MyAdapter");
+
 
 Enhancements
 ------------
@@ -104,6 +139,15 @@ improvements:
   This change does not affect the behavior of existing code. However,
   code that depends on these new semantics will not run correctly
   using prior versions of Ice.
+
+* New sample applications:
+
+  - In C++, Java, and C#, the directory demo/book/lifecycle contains
+    the example code from the new lifecycle chapter in the manual.
+
+  - In C++ and Java, the directory demo/book/freeze_filesystem holds
+    the Freeze version of the filesystem application as described in
+    the manual.
 
 * IceGrid:
 
