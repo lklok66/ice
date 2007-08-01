@@ -27,9 +27,14 @@ DemoUtil.cleanDbDir("db/node")
 DemoUtil.cleanDbDir("db/registry")
 print "ok"
 
+if DemoUtil.defaultHost:
+    args = ' --IceGrid.Node.PropertiesOverride="Ice.Default.Host=127.0.0.1"'
+else:
+    args = ''
+
 print "starting icegridnode...",
 sys.stdout.flush()
-node = DemoUtil.spawn('icegridnode --Ice.Config=config.grid --Ice.PrintAdapterReady --IceGrid.Node.PropertiesOverride="Ice.Default.Host=127.0.0.1"')
+node = DemoUtil.spawn('icegridnode --Ice.Config=config.grid --Ice.PrintAdapterReady %s' % (args))
 node.expect('IceGrid.Registry.Internal ready\r\nIceGrid.Registry.Server ready\r\nIceGrid.Registry.Client ready\r\nIceGrid.Node ready')
 print "ok"
 
