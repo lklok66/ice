@@ -68,6 +68,7 @@ demos = [ "IceUtil/workqueue",
           "IceGrid/sessionActivation",
           "IceGrid/replication",
           "Freeze/bench",
+          "Freeze/customEvictor",
           #"Glacier2/chat",
           #"IceGrid/simple",
           ]
