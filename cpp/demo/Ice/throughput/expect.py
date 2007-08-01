@@ -53,7 +53,7 @@ print "testing bytes"
 
 runseries()
 
-if slow:
+if False:
     print "testing strings"
     client.sendline('2')
     runseries()
