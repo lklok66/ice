@@ -52,7 +52,7 @@ def runtests(client, server):
     books = []
     for l in f:
         client.sendline(l)
-        server.expect('added object')
+        #server.expect('added object')
         client.expect('added new book')
         isbn, title, author = dequote(l)
         books.append((isbn, title, author))
@@ -70,8 +70,8 @@ def runtests(client, server):
     for b in books:
         isbn, title, author = b
         client.sendline('isbn %s' %(isbn))
-        server.expect('locate found')
-        server.expect('locate found')
+        #server.expect('locate found')
+        #server.expect('locate found')
         client.expect('current book is:')
         client.expect('isbn: %s' %(isbn))
         client.expect('title: %s' %(mkregexp(title)))
@@ -88,13 +88,13 @@ def runtests(client, server):
         n = int(client.match.group(1))
         assert len(bl) == n
         for i in range(0, n):
-            server.expect('locate found')
+            #server.expect('locate found')
             # Consume evicting messages otherwise its possible to get
             # hangs.
-            try:
-                server.expect('evicting', timeout=0)
-            except pexpect.TIMEOUT:
-                pass
+            #try:
+                #server.expect('evicting', timeout=0)
+            #except pexpect.TIMEOUT:
+                #pass
             client.expect('current book is:')
             client.expect('isbn: ([a-zA-Z0-9]+)')
             findisbn = client.match.group(1)
@@ -121,19 +121,19 @@ def runtests(client, server):
     sys.stdout.flush()
     isbn, title, author = books[0]
     client.sendline('isbn %s' % (isbn))
-    server.expect('locate')
+    #server.expect('locate')
     client.expect('current book is:.*isbn.*\r\ntitle.*\r\nauthors')
     client.sendline('rent matthew')
-    server.expect('locate')
+    #server.expect('locate')
     client.expect("the book is now rented by `matthew'")
     client.sendline('current')
-    server.expect('locate')
+    #server.expect('locate')
     client.expect('rented: matthew')
     client.sendline('rent john')
-    server.expect('locate')
+    #server.expect('locate')
     client.expect('the book has already been rented')
     client.sendline('return')
-    server.expect('locate')
+    #server.expect('locate')
     client.expect('the book has been returned')
     client.sendline('current')
     try:
@@ -146,14 +146,14 @@ def runtests(client, server):
     sys.stdout.flush()
     isbn, title, author = books[0]
     client.sendline('isbn %s' % (isbn))
-    server.expect('locate')
+    #server.expect('locate')
     client.expect('current book is:.*isbn.*\r\ntitle.*\r\nauthors')
     client.sendline('remove')
-    server.expect('locate')
-    server.expect('removed')
+    #server.expect('locate')
+    #server.expect('removed')
     client.expect('removed current book')
     client.sendline('remove')
-    server.expect(['locate could not find', 'locate found.*but it was dead or destroyed'])
+    #server.expect(['locate could not find', 'locate found.*but it was dead or destroyed'])
     client.expect('current book no longer exists')
     print "ok"
 
@@ -162,7 +162,7 @@ sys.stdout.flush()
 DemoUtil.cleanDbDir("db")
 print "ok"
 
-server = DemoUtil.spawn('./server --Ice.PrintAdapterReady')
+server = DemoUtil.spawn('./server --Ice.PrintAdapterReady --Freeze.Trace.Evictor=0 --Freeze.Trace.DbEnv=0')
 server.expect('.* ready')
 client = DemoUtil.spawn('./client')
 client.expect('>>> ')
@@ -182,7 +182,7 @@ sys.stdout.flush()
 DemoUtil.cleanDbDir("db")
 print "ok"
 
-server = DemoUtil.spawn('./collocated')
+server = DemoUtil.spawn('./collocated --Freeze.Trace.Evictor=0 --Freeze.Trace.DbEnv=0')
 server.expect('>>> ')
 
 runtests(server, server)

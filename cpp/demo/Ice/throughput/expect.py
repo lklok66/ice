@@ -53,7 +53,7 @@ print "testing bytes"
 
 runseries()
 
-if False:
+if not DemoUtil.fast:
     print "testing strings"
     client.sendline('2')
     runseries()
