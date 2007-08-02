@@ -40,6 +40,9 @@ All languages
   allows you to preserve the endpoint of an unknown transport (such
   as an SSL endpoint when IceSSL is not installed).
 
+* Collocation optimization now works for indirect proxies that refer
+  to a replica group.
+
 
 C++
 ---
@@ -82,6 +85,9 @@ Ruby
 * Fixed bugs in stringToProxy and propertyToProxy that reported a
   NullHandleException.
 
+* Fixed a bug where ObjectPrx.ice_getCachedConnection would never
+  return a valid connection object.
+
 
 Proxy factory methods in Python, Ruby, and PHP
 ----------------------------------------------
@@ -114,12 +120,6 @@ IceGrid
 
 * Fixed an assertion failure in the IceGrid registry that occurred
   when registering duplicate well-known objects in the same adapter.
-
-* Collocation optimization now works for indirect proxies that refer
-  to a replica group.
-
-* Fixed a bug in Ice for Ruby where ObjectPrx.ice_getCachedConnection
-  would never return a valid connection object.
 
 * Two new IceGrid properties affect IceGrid's interaction with a
   Glacier2 router:
@@ -168,6 +168,12 @@ Sample programs
   Freeze version of the filesystem application as described in
   the manual.
 
+* In C++, the demo/Freeze/customEvictor example shows how to write a
+  custom evictor using the IceUtil::Cache class.
+
+* In C++, the sample program in demo/Freeze/backup has been updated to
+  use the db_hotbackup utility and can now be used on Windows.
+
 
 Upgrading your applications
 ---------------------------
@@ -206,20 +212,11 @@ For a Unix binary archive or source build:
     in the examples below:
 
     $ export PATH=/opt/Ice-3.2/bin:...
-    $ export LD_LIBRARY_PATH=/opt/Ice-3.2/lib:...
     $ export PYTHONPATH=/opt/Ice-3.2/python:...
     $ export RUBYLIB=/opt/Ice-3.2/ruby:...
     $ export CLASSPATH=/opt/Ice-3.2/lib/Ice.jar:...
     $ export MONO_PATH=/opt/Ice-3.2/bin:...
 
-    Note that the variable name LD_LIBRARY_PATH is platform-specific.
-    The relevant names are shown below:
-
-    Linux, Solaris      LD_LIBRARY_PATH (i386)
-    Linux, Solaris      LD_LIBRARY_PATH_64 (x86_64)
-    MacOS X             DYLD_LIBRARY_PATH
-    HP-UX               SHLIB_PATH
-    
     No changes to these environment variables are necessary if they
     already refer to the symbolic link.
 
