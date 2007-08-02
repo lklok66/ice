@@ -1,19 +1,23 @@
-Release Notes for Ice 3.2.1
+Release notes for Ice 3.2.1
 ===========================
 
 The primary purpose of a minor release such as this one is to correct
 known issues while maintaining binary compatibility with the most
-recent major release. As a result, you can use the libraries in this
-release as drop-in replacements without needing to recompile your
-Slice files or rebuild your applications. Naturally, we recommend that
-you thoroughly test your application with this release prior to
-deploying it in a production environment.
+recent major release. A minor release may also contain enhancements if
+they do not affect binary compatibility. 
+
+The sections below describe the fixes and improvements included in
+this release. See the section titled "Upgrading your applications"
+for more information about migrating to a new Ice release.
+
+Note that because the Python, Ruby, and PHP language mappings use the
+C++ Ice run time, they automatically benefit from fixes to the C++ Ice
+core even if those language mappings are not explicitly mentioned
+below.
 
 
-Bug Fixes
----------
-
-This release addresses the following issues:
+All languages
+-------------
 
 * Eliminated a deadlock that could occur while activating an object
   adapter.
@@ -21,23 +25,44 @@ This release addresses the following issues:
 * Fixed a throughput performance problem on Windows when sending large
   requests.
 
-* Fixed an assertion failure in the IceGrid registry that occurred
-  when registering duplicate well-known objects in the same adapter.
-
-* Collocation optimization now works for indirect proxies that refer
-  to a replica group.
-
 * Ice now raises ProxyParseException if a stringified proxy contains
   trailing characters after an adapter id.
 
-* Fixed a bug in IceSSL for Java that could cause a
-  NullPointerException when using TrustOnly properties.
+* Added support for translating Slice class data members into
+  protected member variables. See the relevant language mapping
+  chapters in the Ice manual for more details.
+
+* Two new properties, Ice.TCP.RcvSize and Ice.TCP.SndSize, control the
+  size of the TCP receive and send buffers for the TCP and SSL
+  transports.
+
+* Added support for opaque endpoints in stringified proxies, which
+  allows you to preserve the endpoint of an unknown transport (such
+  as an SSL endpoint when IceSSL is not installed).
+
+
+C++
+---
+
+* When redirecting stderr and stdout using the properties Ice.StdErr
+  and Ice.StdOut, the output files are no longer limited to 2GB.
+
+
+Java
+----
+
+* Fixed a bug in IceSSL that could cause a NullPointerException when
+  using TrustOnly properties.
 
 * Fixed a bug in IceSSL for JDK 1.5 that could cause a hang during
   the SSL handshake.
 
 * Fixed a translator bug that generated invalid code for certain
   Java5 types.
+
+
+Python
+------
 
 * Fixed Communicator.isShutdown in Python, which always returned None.
 
@@ -50,15 +75,171 @@ This release addresses the following issues:
   parseCommandLineOptions and parseIceCommandLineOptions to always
   return None.
 
+
+Ruby
+----
+
+* Fixed bugs in stringToProxy and propertyToProxy that reported a
+  NullHandleException.
+
+
+Proxy factory methods in Python, Ruby, and PHP
+----------------------------------------------
+
+Proxy factory methods such as ice_oneway now preserve the proxy's
+existing type. As a result, once you have downcast a proxy, it will
+rarely be necessary to downcast it again. For example, you can rewrite
+the following Python statements
+
+  twoway = Demo.HelloPrx.checkedCast(...)
+  oneway = Demo.HelloPrx.uncheckedCast(twoway.ice_oneway())
+
+as simply
+
+  twoway = Demo.HelloPrx.checkedCast(...)
+  oneway = twoway.ice_oneway()
+
+The local methods ice_facet and ice_identity still return a proxy of
+the base class Ice.ObjectPrx, since a change to the proxy's facet
+or identity typically refers to an object with a different Slice
+type and therefore requires a new downcast.
+
+This change does not affect the behavior of existing code. However,
+code that depends on these new semantics will not run correctly
+using prior versions of Ice.
+
+
+IceGrid
+-------
+
+* Fixed an assertion failure in the IceGrid registry that occurred
+  when registering duplicate well-known objects in the same adapter.
+
+* Collocation optimization now works for indirect proxies that refer
+  to a replica group.
+
 * Fixed a bug in Ice for Ruby where ObjectPrx.ice_getCachedConnection
   would never return a valid connection object.
 
-* Fixed bugs in stringToProxy and propertyToProxy that reported a
-  NullHandleException in Ruby.
+* Two new IceGrid properties affect IceGrid's interaction with a
+  Glacier2 router:
+
+  IceGrid.Registry.SessionFilters
+  IceGrid.Registry.AdminSessionFilters
+
+  See the Ice manual for more information on these properties.
+
+* IceGrid now emulates the signals SIGTERM and SIGKILL on Windows.
+  Sending SIGTERM is equivalent to a Ctrl+Break event, and sending
+  SIGKILL terminates the process.
+
+* You can now define an object adapter with a replica group from a
+  different IceGrid application.
+
+* Added code generated from FileParser.ice to the IceGrid library.
+
+* The findAllReplicas operation now accepts well-known proxies from
+  a replica group. This makes it possible to retrieve the replicas
+  of an object using its well-known proxy.
 
 
-Upgrading to Ice 3.2.x from earlier versions
---------------------------------------------
+Glacier2
+--------
+
+* In prior releases, the Glacier2 router would exit immediately if it
+  was unable to contact a permissions verifier or session manager. Now
+  the router displays a warning and continues its normal operation.
+  The warning can be suppressed using the --nowarn option.
+
+
+Sample programs
+---------------
+
+* In C++, Java, and C#, the directory demo/book/lifecycle contains the
+  example code from the new lifecycle chapter in the manual.
+
+* In C++ and Java, the directory demo/book/freeze_filesystem holds the
+  Freeze version of the filesystem application as described in
+  the manual.
+
+
+Upgrading your applications
+---------------------------
+
+Since a minor release maintains backward compatibility, you can use
+the libraries in this release as drop-in replacements without
+recompiling your Slice files or rebuilding your applications.
+Naturally, we recommend that you thoroughly test your application with
+this release prior to deploying it in a production environment.
+
+For a Linux RPM installation:
+
+  - Upgrade your installed packages.
+
+  - Update the values of environment variables so that they use the
+    installation directories of the new release, as shown in the
+    examples below:
+
+    $ export PYTHONPATH=/usr/lib/Ice-3.2.1/python:...
+    $ export RUBYLIB=/usr/lib/Ice-3.2.1/ruby:...
+    $ export CLASSPATH=/usr/lib/Ice-3.2.1/Ice.jar:...
+
+For a Unix binary archive or source build:
+
+  - Install the distribution into your chosen location, such as
+    /opt/Ice-3.2.1.
+
+  - If you had previously created a symbolic link, update it to
+    reflect the new installation:
+
+    $ rm /opt/Ice-3.2
+    $ ln -s /opt/Ice-3.2.1 /opt/Ice-3.2
+
+  - If necessary, update the values of environment variables so that
+    they use the installation directories of the new release, as shown
+    in the examples below:
+
+    $ export PATH=/opt/Ice-3.2/bin:...
+    $ export LD_LIBRARY_PATH=/opt/Ice-3.2/lib:...
+    $ export PYTHONPATH=/opt/Ice-3.2/python:...
+    $ export RUBYLIB=/opt/Ice-3.2/ruby:...
+    $ export CLASSPATH=/opt/Ice-3.2/lib/Ice.jar:...
+    $ export MONO_PATH=/opt/Ice-3.2/bin:...
+
+    Note that the variable name LD_LIBRARY_PATH is platform-specific.
+    The relevant names are shown below:
+
+    Linux, Solaris      LD_LIBRARY_PATH (i386)
+    Linux, Solaris      LD_LIBRARY_PATH_64 (x86_64)
+    MacOS X             DYLD_LIBRARY_PATH
+    HP-UX               SHLIB_PATH
+    
+    No changes to these environment variables are necessary if they
+    already refer to the symbolic link.
+
+For a Windows installation:
+
+  - Install the distribution. We do not recommend using the same
+    directory as a previous installation.
+
+  - Update the values of environment variables so that they use the
+    installation directories of the new release, as shown in the
+    examples below:
+
+    > set PATH=C:\Ice-3.2.1\bin;...
+    > set PYTHONPATH=C:\Ice-3.2.1\python;...
+    > set CLASSPATH=C:\Ice-3.2.1\lib\Ice.jar;...
+
+    For a Visual C++ 6.0 installation, you may also need to update the
+    RUBYLIB environment variable:
+
+    > set RUBYLIB=C:\Ice-3.2.1-VC60\ruby;...
+
+  - If desired, you can safely uninstall the prior release.
+
+
+Upgrading from Ice 3.1.x to 3.2.x
+---------------------------------
 
 For developers who are upgrading from Ice 3.1.x or earlier, we
 described the most significant changes in Issue 21 of our newsletter:
@@ -89,85 +270,7 @@ adapter. To correct the problem, add a call to destroy():
   adapter->destroy();
   adapter = communicator->createObjectAdapter("MyAdapter");
 
-
-Enhancements
-------------
-
-A minor release may contain enhancements if they do not affect
-binary compatibility. This release includes the following
-improvements:
-
-* When redirecting stderr and stdout using the properties Ice.StdErr
-  and Ice.StdOut, the output files are no longer limited to 2GB.
-
-* In prior releases, the Glacier2 router would exit immediately if it
-  was unable to contact a permissions verifier or session manager. Now
-  the router displays a warning and continues its normal operation.
-  The warning can be suppressed using the --nowarn option.
-
-* Added support for translating Slice class data members into
-  protected member variables. See the relevant language mapping
-  chapters in the Ice manual for more details.
-
-* Two new properties, Ice.TCP.RcvSize and Ice.TCP.SndSize, control the
-  size of the TCP receive and send buffers for the TCP and SSL
-  transports.
-
-* Added support for opaque endpoints in stringified proxies, which
-  allows you to preserve the endpoint of an unknown transport (such
-  as an SSL endpoint when IceSSL is not installed).
-
-* In the scripting languages (Python, Ruby, and PHP), proxy factory
-  methods such as ice_oneway now preserve the proxy's existing type.
-  As a result, once you have downcast a proxy, it will rarely be
-  necessary to downcast it again. For example, you can rewrite the
-  following Python statements
-
-  twoway = Demo.HelloPrx.checkedCast(...)
-  oneway = Demo.HelloPrx.uncheckedCast(twoway.ice_oneway())
-
-  as simply
-
-  twoway = Demo.HelloPrx.checkedCast(...)
-  oneway = twoway.ice_oneway()
-
-  The local methods ice_facet and ice_identity still return a proxy of
-  the base class Ice.ObjectPrx, since a change to the proxy's facet
-  or identity typically refers to an object with a different Slice
-  type and therefore requires a new downcast.
-
-  This change does not affect the behavior of existing code. However,
-  code that depends on these new semantics will not run correctly
-  using prior versions of Ice.
-
-* New sample applications:
-
-  - In C++, Java, and C#, the directory demo/book/lifecycle contains
-    the example code from the new lifecycle chapter in the manual.
-
-  - In C++ and Java, the directory demo/book/freeze_filesystem holds
-    the Freeze version of the filesystem application as described in
-    the manual.
-
-* IceGrid:
-
-  - Two new IceGrid properties affect IceGrid's interaction with a
-    Glacier2 router:
-
-    IceGrid.Registry.SessionFilters
-    IceGrid.Registry.AdminSessionFilters
-
-    See the Ice manual for more information on these properties.
-
-  - IceGrid now emulates the signals SIGTERM and SIGKILL on Windows.
-    Sending SIGTERM is equivalent to a Ctrl+Break event, and sending
-    SIGKILL terminates the process.
-
-  - You can now define an object adapter with a replica group from a
-    different IceGrid application.
-
-  - Added code generated from FileParser.ice to the IceGrid library.
-
-  - The findAllReplicas operation now accepts well-known proxies from
-    a replica group. This makes it possible to retrieve the replicas
-    of an object using its well-known proxy.
+The destroy() operation internally calls deactivate() and
+waitForDeactivate() if they have not already been invoked. It is no
+longer necessary for an application to call them if its objective is
+to recreate the object adapter.
