@@ -152,11 +152,17 @@ Glacier2
   The warning can be suppressed using the --nowarn option.
 
 
+Documentation
+-------------
+
+* The Ice manual contains a new chapter on object life cycle.
+
+
 Sample programs
 ---------------
 
 * In C++, Java, and C#, the directory demo/book/lifecycle contains the
-  example code from the new lifecycle chapter in the manual.
+  example code from the new life cycle chapter in the manual.
 
 * In C++ and Java, the directory demo/book/freeze_filesystem holds the
   Freeze version of the filesystem application as described in
