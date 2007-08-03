@@ -142,6 +142,16 @@ IceGrid
   a replica group. This makes it possible to retrieve the replicas
   of an object using its well-known proxy.
 
+* Fixed a NullPointerException in the IceGrid Admin GUI, that 
+  occurred when creating a new node descriptor.
+
+* Fixed the display order of nodes in the "Live Deployment"
+  pane of the IceGrid Admin GUI. They are now sorted in alphabetical
+  order.
+
+* When you copy and paste an object adapter descriptor with the 
+  IceGrid Admin GUI, the entire adapter (including endpoints and
+  published endpoints) is now copied.
 
 Glacier2
 --------
