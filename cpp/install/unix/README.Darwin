@@ -83,10 +83,10 @@ with the directory of your Ice installation. For example:
 
 $ export ICE_HOME=/opt/Ice-@ver@
 
-If you have installed Ice in a non-default location (i.e. other than
+If you have installed Ice in a non-default location (i.e., other than
 /opt/Ice-@ver@), setting ICE_HOME is required if you wish to:
 
- - Run the iceca utility script found in Ice-@ver@/bin
+ - Run the iceca utility script found in Ice-@ver@/bin.
 
  - Build the C++, Java or C# demos in the Ice example source code
    archive.
@@ -155,22 +155,22 @@ Berkeley DB libraries be listed in java.library.path, therefore you
 must add this directory to DYLD_LIBRARY_PATH.
 
 Ice includes ant tasks for translating Slice to Java. The ant tasks
-allow slice2java and slice2freezej to be efficiently invoked from the
-ant build system. These tasks require one of the following:
+allow slice2java and slice2freezej to be invoked from the ant build
+system. These tasks require one of the following:
 
  - Specify the location of the Ice installation containing the
    translators with the ice.home property:
 
    ant -Dice.home=/home/bill/Ice-@ver@
 
- - Set the ICE_HOME environment variable to specify the location of the
-   Ice installation containing the translators:
+ - Set the ICE_HOME environment variable to specify the location of
+   the Ice installation containing the translators:
 
    $ export ICE_HOME=/home/bill/Ice-@ver@
 
- - If neither ice.home or ICE_HOME are available, the ant tasks will
-   simply invoke the translator without an absolute path, relying on the
-   translators being in a directory in your PATH for successful
+ - If neither ice.home nor ICE_HOME is available, the ant tasks will
+   simply invoke the translator without an absolute path, relying on
+   the translators being in a directory in your PATH for successful
    execution.
 
    
