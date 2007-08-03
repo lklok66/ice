@@ -30,9 +30,9 @@ sys.stdout.flush()
 demoscript.Util.cleanDbDir("db")
 print "ok"
 
-server = demoscript.Util.spawn('./server --Ice.PrintAdapterReady --Freeze.Trace.Evictor=0 --Freeze.Trace.DbEnv=0')
+server = demoscript.Util.spawn('java Server --Ice.PrintAdapterReady --Freeze.Trace.Evictor=0 --Freeze.Trace.DbEnv=0')
 server.expect('.* ready')
-client = demoscript.Util.spawn('./client')
+client = demoscript.Util.spawn('java Client')
 client.expect('>>> ')
 
 demoscript.Freeze.phonebook.run(client, server)
@@ -50,7 +50,7 @@ sys.stdout.flush()
 demoscript.Util.cleanDbDir("db")
 print "ok"
 
-server = demoscript.Util.spawn('./collocated --Freeze.Trace.Evictor=0 --Freeze.Trace.DbEnv=0')
+server = demoscript.Util.spawn('java Collocated --Freeze.Trace.Evictor=0 --Freeze.Trace.DbEnv=0')
 server.expect('>>> ')
 
 demoscript.Freeze.phonebook.run(server, server)
