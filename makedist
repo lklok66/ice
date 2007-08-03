@@ -149,7 +149,7 @@ if [ -f $currentdir/java/makedist.py ];
 then
     source java_env 1.5
     cd $currentdir/java
-    python makedist.py
+    python makedist.py 
     cp dist/* $SOURCEDIR
 fi
  

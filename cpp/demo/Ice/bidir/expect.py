@@ -10,41 +10,22 @@
 
 import pexpect, sys, os
 
-for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
-    toplevel = os.path.normpath(toplevel)
-    if os.path.exists(os.path.join(toplevel, "config", "DemoUtil.py")):
-        break
-else:
-    raise "can't find toplevel directory!"
-sys.path.append(os.path.join(toplevel, "config"))
-import DemoUtil
+try:
+    import demoscript
+except ImportError:
+    for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
+        toplevel = os.path.normpath(toplevel)
+        if os.path.exists(os.path.join(toplevel, "demoscript")):
+            break
+    else:
+        raise "can't find toplevel directory!"
+    sys.path.append(os.path.join(toplevel))
+    import demoscript
 
-import signal
+import demoscript.Util
+import demoscript.Ice.bidir
 
-server = DemoUtil.spawn('./server --Ice.PrintAdapterReady')
+server = demoscript.Util.spawn('./server --Ice.PrintAdapterReady')
 server.expect('.* ready')
-client1 = DemoUtil.spawn('./client')
 
-print "adding client 1... ",
-sys.stdout.flush()
-server.expect('adding client')
-client1.expect('received callback #1')
-print "ok"
-
-print "adding client 2... ",
-sys.stdout.flush()
-client2 = DemoUtil.spawn('./client')
-server.expect('adding client')
-client1.expect('received callback #')
-client2.expect('received callback #')
-print "ok"
-
-print "removing client 2...",
-client2.kill(signal.SIGINT)
-server.expect('removing client')
-client1.expect('received callback #')
-print "ok"
-print "removing client 1...",
-client1.kill(signal.SIGINT)
-server.expect('removing client')
-print "ok"
+demoscript.Ice.bidir.run('./client', server)

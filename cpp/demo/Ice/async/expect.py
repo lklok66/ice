@@ -10,41 +10,24 @@
 
 import pexpect, sys, os
 
-for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
-    toplevel = os.path.normpath(toplevel)
-    if os.path.exists(os.path.join(toplevel, "config", "DemoUtil.py")):
-        break
-else:
-    raise "can't find toplevel directory!"
-sys.path.append(os.path.join(toplevel, "config"))
-import DemoUtil
+try:
+    import demoscript
+except ImportError:
+    for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
+        toplevel = os.path.normpath(toplevel)
+        if os.path.exists(os.path.join(toplevel, "config", "DemoUtil.py")):
+            break
+    else:
+        raise "can't find toplevel directory!"
+    sys.path.append(os.path.join(toplevel))
+    import demoscript
 
-server = DemoUtil.spawn('./server --Ice.PrintAdapterReady')
+import demoscript.Util
+import demoscript.Ice.async
+
+server = demoscript.Util.spawn('./server --Ice.PrintAdapterReady')
 server.expect('.* ready')
-client = DemoUtil.spawn('./client')
+client = demoscript.Util.spawn('./client')
 client.expect('.*==>')
 
-print "testing client... ",
-sys.stdout.flush()
-client.sendline('i')
-server.expect('Hello World!')
-client.sendline('d')
-try:
-    server.expect('Hello World!', timeout=1)
-except pexpect.TIMEOUT:
-    pass
-client.sendline('i')
-server.expect('Hello World!')
-server.expect('Hello World!')
-print "ok"
-
-print "testing shutdown... ",
-sys.stdout.flush()
-client.sendline('d')
-client.sendline('s')
-server.expect(pexpect.EOF)
-
-client.expect('Demo::RequestCanceledException')
-client.sendline('x')
-client.expect(pexpect.EOF)
-print "ok"
+demoscript.Ice.async.run(client, server)
