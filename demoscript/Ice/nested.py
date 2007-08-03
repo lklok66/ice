@@ -39,4 +39,5 @@ def run(client, server):
 
     server.kill(signal.SIGINT)
     server.expect(pexpect.EOF)
-    assert server.wait() == 0
+    status = server.wait()
+    assert status == 0 or status == 130 or server.signalstatus == signal.SIGINT

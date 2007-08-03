@@ -10,15 +10,16 @@
 
 import pexpect, sys
 
-def run(client, server):
+def run(client, server, ruby = False):
     print "testing...",
     sys.stdout.flush()
     client.expect('press enter')
     client.sendline('')
     client.expect('==> a message 4 u.*press enter')
     client.sendline('')
-    client.expect('NoObjectFactoryException.*press enter')
-    client.sendline('')
+    if not ruby:
+        client.expect('NoObjectFactoryException.*press enter')
+        client.sendline('')
     client.expect('==> Ice rulez!.*press enter')
     client.sendline('')
     client.expect('==> !zelur ecI.*press enter')
@@ -26,8 +27,14 @@ def run(client, server):
     client.expect('press enter')
     server.expect('!zelur ecI')
     client.sendline('')
-    client.expect('==> The type ID of the received object is "::Demo::Printer".*press enter')
-    client.sendline('')
+    if ruby:
+        client.expect('==> The type ID of the received object is "::Demo::DerivedPrinter".*press enter')
+        client.sendline('')
+        client.expect('==> undefined method')
+        client.sendline('')
+    else:
+        client.expect('==> The type ID of the received object is "::Demo::Printer".*press enter')
+        client.sendline('')
     client.expect('==> The type ID of the received object is "::Demo::DerivedPrinter".*press enter')
     client.sendline('')
     client.expect('==> a derived message 4 u\r\n==> A DERIVED MESSAGE 4 U.*press enter')
