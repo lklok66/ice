@@ -140,7 +140,7 @@ do
    if [ -f $currentdir/$f/makedist.py ];
    then
       cd $currentdir/$f 
-      python makedist.py 
+      [ python makedist.py ] && exit 1
       cp dist/* $SOURCEDIR
   fi
 done
@@ -149,7 +149,7 @@ if [ -f $currentdir/java/makedist.py ];
 then
     source java_env 1.5
     cd $currentdir/java
-    python makedist.py
+    [ python makedist.py ] && exit 1
     cp dist/* $SOURCEDIR
 fi
  
