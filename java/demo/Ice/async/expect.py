@@ -15,7 +15,7 @@ try:
 except ImportError:
     for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
         toplevel = os.path.normpath(toplevel)
-        if os.path.exists(os.path.join(toplevel, "demoscript")):
+        if os.path.exists(os.path.join(toplevel, "config", "DemoUtil.py")):
             break
     else:
         raise "can't find toplevel directory!"
@@ -23,6 +23,11 @@ except ImportError:
     import demoscript
 
 import demoscript.Util
-import demoscript.IceGrid.allocate
+import demoscript.Ice.async
 
-demoscript.IceGrid.allocate.run('./client')
+server = demoscript.Util.spawn('java Server --Ice.PrintAdapterReady')
+server.expect('.* ready')
+client = demoscript.Util.spawn('java Client')
+client.expect('.*==>')
+
+demoscript.Ice.async.run(client, server)

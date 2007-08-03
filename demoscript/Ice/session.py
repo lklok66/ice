@@ -25,7 +25,7 @@ def run(clientStr, server):
     client.expect('Index is too high')
     client.sendline('x')
     client.expect(pexpect.EOF)
-    server.expect("The session foo is now destroyed.\r\nHello object #0 for session `foo' destroyed")
+    server.expect("The session foo is now destroyed.")
     print "ok"
 
     print "testing session cleanup...",
@@ -37,7 +37,7 @@ def run(clientStr, server):
     client.sendline('c')
     client.sendline('t')
     client.expect(pexpect.EOF)
-    server.expect("The session foo is now destroyed.\r\nHello object #0 for session `foo' destroyed\r\nThe session foo has timed out.", timeout=25)
+    server.expect("The session foo is now destroyed.\r\n.*The session foo has timed out.", timeout=25)
     print "ok"
 
     client = demoscript.Util.spawn(clientStr)

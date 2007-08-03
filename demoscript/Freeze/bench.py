@@ -10,15 +10,33 @@
 
 import pexpect, sys
 
-def run(client):
-    client.expect('IntIntMap')
-    print "IntIntMap:"
-    client.expect('IntIntMap with index', timeout=200)
-    print "%s " % (client.before)
+def run(client, isJava=False):
+    if isJava:
+        client.expect('IntIntMap \\(Collections API\\)')
+        print "IntIntMap (Collections API):"
+        client.expect('IntIntMap \\(Fast API\\)', timeout=200)
+        print "%s " % (client.before)
 
-    print "IntIntMap with index:"
-    client.expect('Struct1Struct2Map', timeout=200)
-    print "%s " % (client.before)
+        print "IntIntMap (Fast API):"
+        client.expect('IntIntMap with index \\(Collections API\\)', timeout=200)
+        print "%s " % (client.before)
+
+        print "IntIntMap with index (Collections API):"
+        client.expect('IntIntMap with index \\(Fast API\\)', timeout=200)
+        print "%s " % (client.before)
+
+        print "IntIntMap with index (Fast API):"
+        client.expect('Struct1Struct2Map', timeout=200)
+        print "%s " % (client.before)
+    else:
+        client.expect('IntIntMap')
+        print "IntIntMap:"
+        client.expect('IntIntMap with index', timeout=200)
+        print "%s " % (client.before)
+
+        print "IntIntMap with index:"
+        client.expect('Struct1Struct2Map', timeout=200)
+        print "%s " % (client.before)
 
     print "Struct1Struct2Map:"
     client.expect('Struct1Struct2Map with index', timeout=200)

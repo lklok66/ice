@@ -31,7 +31,7 @@ def run(client, server):
     client.sendline('s')
     server.expect(pexpect.EOF)
 
-    client.expect('Demo::RequestCanceledException')
+    client.expect('RequestCanceledException')
     client.sendline('x')
     client.expect(pexpect.EOF)
     print "ok"

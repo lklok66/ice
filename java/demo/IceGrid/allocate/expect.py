@@ -25,4 +25,4 @@ except ImportError:
 import demoscript.Util
 import demoscript.IceGrid.allocate
 
-demoscript.IceGrid.allocate.run('./client')
+demoscript.IceGrid.allocate.run('java Client')

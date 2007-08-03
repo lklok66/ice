@@ -565,16 +565,15 @@ class TestApp extends Ice.Application
         System.out.println("Struct1Class1Map with index");
         Struct1Class1MapTest(new IndexedStruct1Class1Map(_connection, "IndexedStruct1Class1", true));
 
-        System.out.println("IntIntMap (read test)");
-        IntIntMapReadTest(new IntIntMap(_connection, "IntIntMap", true));
-
-        System.out.println("IntIntMap (read test with index)");
-        IntIntMapReadTest(new IndexedIntIntMap(_connection, "IndexedIntIntMap", true));
-        
-
         System.out.println("Struct1ObjectMap");
         Struct1ObjectMapTest(new Struct1ObjectMap(_connection, "Struct1Object", true));
 
+        System.out.println("IntIntMap (read test)");
+        IntIntMapReadTest(new IntIntMap(_connection, "IntIntMap", true));
+
+        System.out.println("IntIntMap with index (read test)");
+        IntIntMapReadTest(new IndexedIntIntMap(_connection, "IndexedIntIntMap", true));
+        
         _connection.close();
 
         return 0;

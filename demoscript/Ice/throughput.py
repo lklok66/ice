@@ -8,10 +8,10 @@
 #
 # **********************************************************************
 
-import pexpect, sys
+import pexpect, sys, demoscript
 
 def runseries(client):
-    client.expect('==> ')
+    client.expect('==> ', timeout=240)
     client.sendline('t')
     client.expect('t')
 
@@ -39,7 +39,7 @@ def run(client, server):
     print "testing bytes"
     runseries(client)
 
-    if not DemoUtil.fast:
+    if not demoscript.Util.fast:
         print "testing strings"
         client.sendline('2')
         runseries(client)

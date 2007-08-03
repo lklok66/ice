@@ -23,6 +23,7 @@ except ImportError:
     import demoscript
 
 import demoscript.Util
-import demoscript.IceGrid.allocate
+import demoscript.Freeze.bench
 
-demoscript.IceGrid.allocate.run('./client')
+client = demoscript.Util.spawn('java Client')
+demoscript.Freeze.bench.run(client, True)

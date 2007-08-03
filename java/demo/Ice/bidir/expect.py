@@ -23,6 +23,9 @@ except ImportError:
     import demoscript
 
 import demoscript.Util
-import demoscript.IceGrid.allocate
+import demoscript.Ice.bidir
 
-demoscript.IceGrid.allocate.run('./client')
+server = demoscript.Util.spawn('java Server --Ice.PrintAdapterReady')
+server.expect('.* ready')
+
+demoscript.Ice.bidir.run('java Client', server)

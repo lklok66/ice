@@ -29,8 +29,8 @@ def run(client, server):
     client.sendline('21') # This will cause a block.
     server.expect('\r\n'.join(['13', '11', '9', '7', '5', '3']))
     client.expect('\r\n'.join(['12', '10', '8', '6', '4', '2']))
-    client.expect('Ice::TimeoutException', timeout=3000)
-    server.expect('Ice::TimeoutException', timeout=3000)
+    client.expect('TimeoutException', timeout=3000)
+    server.expect('TimeoutException', timeout=3000)
     print "ok"
 
     client.sendline('x')

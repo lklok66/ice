@@ -23,6 +23,15 @@ except ImportError:
     import demoscript
 
 import demoscript.Util
-import demoscript.IceGrid.allocate
+import demoscript.book.freeze_filesystem
 
-demoscript.IceGrid.allocate.run('./client')
+print "cleaning databases...",
+sys.stdout.flush()
+demoscript.Util.cleanDbDir("db")
+print "ok"
+
+server = demoscript.Util.spawn('java Server --Ice.PrintAdapterReady')
+server.expect('.* ready')
+client = demoscript.Util.spawn('java Client')
+
+demoscript.book.freeze_filesystem.run(client, server)

@@ -23,6 +23,17 @@ except ImportError:
     import demoscript
 
 import demoscript.Util
-import demoscript.IceGrid.allocate
+import demoscript.IceBox.hello
 
-demoscript.IceGrid.allocate.run('./client')
+if demoscript.Util.defaultHost:
+    args = ' --IceBox.UseSharedCommunicator.IceStorm=1'
+else:
+    args = ''
+
+# TODO: This doesn't setup LD_LIBRARY_PATH
+server = demoscript.Util.spawn('java IceBox.Server --Ice.Config=config.icebox --Ice.PrintAdapterReady %s' % (args))
+server.expect('.* ready')
+client = demoscript.Util.spawn('java Client')
+client.expect('.*==>')
+
+demoscript.IceBox.hello.run(client, server)

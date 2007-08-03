@@ -23,6 +23,7 @@ except ImportError:
     import demoscript
 
 import demoscript.Util
-import demoscript.IceGrid.allocate
+import demoscript.IceGrid.sessionActivation
 
-demoscript.IceGrid.allocate.run('./client')
+demoscript.IceGrid.sessionActivation.run('java Client')
+
