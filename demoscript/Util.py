@@ -70,6 +70,12 @@ def isWin32():
 def isDarwin():
    return sys.platform == "darwin"
 
+def mono():
+    if isWin32():
+        return ""
+    else:
+        return "mono "
+
 def getIceBox():
     if isWin32():
         if mode == 'release':
