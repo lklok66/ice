@@ -28,7 +28,7 @@ def run(client, server):
     client.sendline('')
     client.expect('==> The type ID of the received object is "::Demo::Printer".*press enter')
     client.sendline('')
-    client.expect('==> .* to derived object succeded\r\n==> The type ID of the received object is "::Demo::DerivedPrinter".*press enter')
+    client.expect('==> The type ID of the received object is "::Demo::DerivedPrinter".*press enter')
     client.sendline('')
     client.expect('==> a derived message 4 u\r\n==> A DERIVED MESSAGE 4 U.*press enter')
     client.sendline('')
