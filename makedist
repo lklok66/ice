@@ -5,6 +5,7 @@
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
+# 
 #
 # **********************************************************************
 
@@ -54,21 +55,21 @@ usage()
     return 0
 }
 
-validopts="d:n:t:hMk"
+validopts="d:n:t:hMke"
 getopts $validopts curopt
 runmakedist=1
-while test ! "x$curopt" == "x:" ;
+while [ ! "x$curopt" == "x:" ] ;
 do
    case $curopt in
    	d)
 	    WORKINGDIR=$OPTARG
-	    if test ! -d $WORKINGDIR;
+	    if [ ! -d $WORKINGDIR ];
 	    then
 		echo "$WORKINGDIR does not exist!"
 		exit 1
 	    fi
 	;;
-	
+
 	n)
 	    LABEL=$OPTARG
 	;;
@@ -103,7 +104,8 @@ git archive --prefix="$LABEL/" $REFSPEC | ( cd $WORKINGDIR && tar xf - )
 echo "Walking directories and creating source distributions"
 cd $WORKINGDIR/$LABEL
 
-ICEVER=`awk "/.*ICE_STRING_VERSION.*/ { print \\$3 }" cpp/include/IceUtil/Config.h | sed -e s/\"//g`
+ICEVER=`awk "/.*ICE_STRING_VERSION.*/ { print \\$3 }" cpp/include/IceUtil/Config.h | sed -e s/\"//g` # "
+
 SOURCEDIR="$BASEDIR/../dist-$ICEVER"
 [ ! -d $SOURCEDIR ] && mkdir $SOURCEDIR
 
@@ -127,30 +129,37 @@ currentdir=`pwd`
 # export JAVA_HOME
 #
 # Other options exist such as update-alternatives on linux and
-# java_select on MacOS X, but they require sudo or Administrator
-# access, which isn't otherwise necessary for this process. The
-# commands to properly configure the relevant Java environments will
-# depend on your system.
+# java_select on MacOS X, but they require sudo or Administrator access,
+# which is not otherwise necessary for this process. The commands to
+# properly configure the relevant Java environments will depend on your
+# system.
 
 source java_env 1.4
 for f in `find . -maxdepth 1 -name "*" -type d` ;
 do
-   cd $currentdir/$f
-   python makedist.py
-   cp dist/* $SOURCEDIR
+   if [ -f $currentdir/$f/makedist.py ];
+   then
+      cd $currentdir/$f 
+      python makedist.py 
+      cp dist/* $SOURCEDIR
+  fi
 done
 
-source java_env 1.5
-cd $currentdir/java
-python makedist.py
-cp dist/* $SOURCEDIR
+if [ -f $currentdir/java/makedist.py ];
+then
+    source java_env 1.5
+    cd $currentdir/java
+    python makedist.py
+    cp dist/* $SOURCEDIR
+fi
  
+cd $currentdir/cpp
+cp makebindist.py $SOURCEDIR
+tar cfz $SOURCEDIR/distfiles.tar.gz install include/IceUtil/Config.h -C .. RELEASE_NOTES.txt
+
 cd $currentdir
 
-
-cp $currentdir/cpp/makebindist.py $SOURCEDIR
-
 # Cleanup
-[ "$KEEP" -eq "1" ] && echo "Cleaning up working files..." && cd $WORKINGDIR && rm -rf $LABEL
+[ "$KEEP" -eq "0" ] && echo "Cleaning up working files..." && cd $WORKINGDIR && rm -rf $LABEL
 cd $BASEDIR
 echo "Source distributions can be found in $SOURCEDIR"

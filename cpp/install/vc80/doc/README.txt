@@ -95,19 +95,11 @@ wish to:
 
  - Run the iceca.bat utility script found in Ice-@ver@\bin
 
- - Build the C++, Java or C# demos in the Ice example source code
-   archive.
-
- - With the exception of C++, build other Ice language mappings from
-   sources.
-
- - Run certain tests and examples in from the source code distributions.
-
  - Run the Ice for Python bidir demo found in this distribution.
 
  - Build the Visual Basic and C# demos found in this distribution.
  
-ICE_HOME is used by the abovementioned applications and build systems to
+ICE_HOME is used by the applications and build systems listed above to
 locate Ice applications, header files and libraries found in this
 installation.
  
@@ -151,8 +143,7 @@ projects from the solution entirely.
 To run these demos, you need to add the Ice bin directory to your
 PATH, as shown below:
 
-set ICE_HOME=<Ice installation root directory>
-set PATH=%ICE_HOME%\bin;%PATH%
+set PATH=<Ice installation root directory>\bin;%PATH%
 
 Next, open a Command Prompt, change to the desired demo subdirectory,
 and type 'server' to start the server. In a separate Command Prompt
@@ -255,8 +246,7 @@ The ant bin directory must be added to your PATH, and the following
 environment variables need to be defined:
 
 set JAVA_HOME=<Java SDK installation root directory>
-set ICE_HOME=<Ice installation root directory>
-set PATH=%ICE_HOME%\bin;%PATH%
+set PATH=<Ice installation directory>\bin;%PATH%
 
 You can build all of the demos by running 'ant' in the demoj
 directory, or you can build individual demos by changing to the
@@ -264,12 +254,12 @@ desired subdirectory and then running 'ant'.
 
 Before running the demos you must modify your CLASSPATH as follows:
 
-set CLASSPATH=%ICE_HOME%\lib\Ice.jar;%ICE_HOME%\lib\db.jar;classes;%CLASSPATH%
+set CLASSPATH=<Ice installation directory>\lib\Ice.jar;<Ice installation directory>\lib\db.jar;classes;%CLASSPATH%
 
 If you prefer to use Ice for Java2 rather than Java5, modify your CLASSPATH
 as shown below:
 
-set CLASSPATH=%ICE_HOME%\lib\java2\Ice.jar;%ICE_HOME%\lib\db.jar;classes;%CLASSPATH%
+set CLASSPATH=<Ice installation directory>\lib\java2\Ice.jar;<Ice installation dir>\lib\db.jar;classes;%CLASSPATH%
 
 In addition, the JVM requires the directory containing the Berkeley DB
 libraries to be listed in java.library.path, therefore the Ice bin
@@ -302,13 +292,12 @@ can be downloaded from:
 
 You also need to add the Ice bin directory to your PATH, for example:
 
-set ICE_HOME=<Ice installation root directory>
-set PATH=%ICE_HOME%\bin;%PATH%
+set PATH=<Ice installation root directory>\bin;%PATH%
 
 Finally, set PYTHONPATH so that the Python interpreter is able to load
 the Ice extension:
 
-set PYTHONPATH=%ICE_HOME%\python
+set PYTHONPATH=<Ice installation root directory>\python
 
 To run a demo, open a Command Prompt, change to the desired demo
 directory, and type 'python Server.py' to start the server. In a

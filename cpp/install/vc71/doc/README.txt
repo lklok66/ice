@@ -79,21 +79,7 @@ default installation path for the Visual Studio .NET 2003 installer is
 c:\Ice-@ver@-VC71. While most parts of this installation are designed to
 work without changing your environment other than described later in this
 document, you will need to set an ICE_HOME environment variable it if you
-wish to:
-
- - Run the iceca.bat utility script found in Ice-@ver@-VC71\bin
-
- - Build the C++, Java or C# demos in the Ice example source code
-   archive.
-
- - With the exception of C++, build other Ice language mappings from
-   sources.
-
- - Run certain tests and examples in from the source code distributions.
-
-ICE_HOME is used by the abovementioned applications and build systems to
-locate Ice applications, header files and libraries found in this
-installation.
+wish to run the iceca.bat utility script found in Ice-@ver@-VC71\bin.
  
 To set the ICE_HOME environment variable from the command prompt, simply run:
 
