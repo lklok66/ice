@@ -93,7 +93,7 @@ os.mkdir(os.path.join(distdir, icephpver))
 #
 # Remove files.
 #
-filesToRemove = [ "makedist.py", "exclusions" ]
+filesToRemove = [ "makedist.py", "exclusions", "dist" ]
 filesToRemove.extend(find(".", ".gitignore"))
 
 exclusionFile = open("exclusions", "w")

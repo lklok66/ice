@@ -37,7 +37,7 @@ includes the following components:
 Requirements
 ======================================================================
 
-This binary distribution was compiled on Mac OS X 10.4.8 using the
+This binary distribution was compiled on Mac OS X 10.4.10 using the
 default C++ compiler, GCC 4.0.1. 
 
 This distribution only includes Intel binaries. If you need PowerPC

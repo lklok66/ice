@@ -73,26 +73,13 @@ node, and Glacier2 router as Windows services.
 About ICE_HOME
 --------------
 
-To avoid conflicts with the Ice installers for other Windows compilers, the
-default installation path for the Visual 2005 for x64 installer is
-c:\Ice-@ver@-VC80-x64. While most parts of this installation are designed
-to work without changing your environment other than described later in
-this document, you will need to set an ICE_HOME environment variable it if
-you wish to:
-
- - Run the iceca.bat utility script found in Ice-@ver@-VC80-x64\bin
-
- - Build the C++, Java or C# demos in the Ice example source code
-   archive.
-
- - With the exception of C++, build other Ice language mappings from
-   sources.
-
- - Run certain tests and examples in from the source code distributions.
-
-ICE_HOME is used by the abovementioned applications and build systems to
-locate Ice applications, header files and libraries found in this
-installation.
+To avoid conflicts with the Ice installers for other Windows compilers,
+the default installation path for the Visual 2005 for x64 installer is
+c:\Ice-@ver@-VC80-x64. While most parts of this installation are
+designed to work without changing your environment other than described
+later in this document, you will need to set an ICE_HOME environment
+variable it if you wish to run the iceca.bat utility script found in
+Ice-@ver@-VC80-x64\bin.
  
 To set the ICE_HOME environment variable from the command prompt, simply run:
 
