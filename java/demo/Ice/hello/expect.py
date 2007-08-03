@@ -25,9 +25,9 @@ except ImportError:
 import demoscript.Util
 import demoscript.Ice.hello
 
-server = demoscript.Util.spawn('./server --Ice.PrintAdapterReady')
+server = demoscript.Util.spawn('java Server --Ice.PrintAdapterReady')
 server.expect('.* ready')
-client = demoscript.Util.spawn('./client')
+client = demoscript.Util.spawn('java Client')
 client.expect('.*==>')
 
 demoscript.Ice.hello.run(client, server)

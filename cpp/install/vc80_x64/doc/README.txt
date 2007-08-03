@@ -73,20 +73,22 @@ node, and Glacier2 router as Windows services.
 About ICE_HOME
 --------------
 
-To avoid conflicts with the Ice installers for other Windows compilers,
-the default installation path for the Visual 2005 for x64 installer is
-c:\Ice-@ver@-VC80-x64. While most parts of this installation are
-designed to work without changing your environment other than described
-later in this document, you will need to set an ICE_HOME environment
-variable it if you wish to run the iceca.bat utility script found in
-Ice-@ver@-VC80-x64\bin.
+To avoid conflicts with the Ice installers for other Windows
+compilers, the default installation path for the Visual 2005 for x64
+installer is c:\Ice-@ver@-VC80-x64. While most parts of this
+installation are designed to work without changing your environment
+other than as described later in this document, you will need to set
+the ICE_HOME environment variable if you wish to run the iceca.bat
+utility script found in Ice-@ver@-VC80-x64\bin.
  
-To set the ICE_HOME environment variable from the command prompt, simply run:
+To set the ICE_HOME environment variable from the command prompt,
+simply run:
 
 set ICE_HOME=<Ice installation root directory>
 
-You can set also set ICE_HOME through My Computer|Advanced System
+You can also set ICE_HOME through My Computer|Advanced System
 Settings|Environment Variables.
+
 
 Building and running the C++ demos
 ----------------------------------
@@ -110,18 +112,19 @@ Some demo directories contain README files if additional requirements
 are necessary.
 
 The Ice demo source code archive and Windows installers for Visual
-Studio .NET 2003 and Visual Studio 2005 include examples for integrating
-Ice with databases other than BerkeleyDB. These demos are not supported
-for Visual Studio 2005 for 64 bit platforms and are not included in
-this distribution.
+Studio .NET 2003 and Visual Studio 2005 include examples for
+integrating Ice with databases other than BerkeleyDB. These demos are
+not supported for Visual Studio 2005 for 64 bit platforms and are not
+included in this distribution.
 
 
 Binary compatibility
 --------------------
 
-Patch releases of Ice are binary compatible. For example, version <x>.<y>.1
-is compatible with <x>.<y>.0, so you can run applications compiled with
-<x>.<y>.0 with <x>.<y>.1 (or later) assemblies without having to recompile.
+Patch releases of Ice are binary compatible. For example, version
+<x>.<y>.1 is compatible with <x>.<y>.0, so you can run applications
+compiled with <x>.<y>.0 with <x>.<y>.1 (or later) assemblies without
+having to recompile.
 
 With the binary installers, simply uninstall the previous version of
 Ice and install the new one. Already deployed applications that were
@@ -140,7 +143,7 @@ The registration key used by this installer is:
 
 HKEY_LOCAL_MACHINE\Software\ZeroC\Ice @ver@ for Visual Studio 2005 (x64)
 
-To install location is stored as a string value named 'InstallDir'.
+The install location is stored as a string value named 'InstallDir'.
 
 
 Acknowledgments
