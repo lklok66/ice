@@ -203,7 +203,7 @@ steps under (1) or (2) below:
 	gacutil.exe /i policy.<x>.<y>.icecs.dll
 	gacutil.exe /i policy.<x>.<y>.iceboxcs.dll
 	gacutil.exe /i policy.<x>.<y>.icegridcs.dll
-	gacutil.exe /i policy.<x>.<y>.icepatch2.dll
+	gacutil.exe /i policy.<x>.<y>.icepatch2cs.dll
 	gacutil.exe /i policy.<x>.<y>.icesslcs.dll
 	gacutil.exe /i policy.<x>.<y>.icestormcs.dll
 	gacutil.exe /i policy.<x>.<y>.glacier2cs.dll
@@ -253,7 +253,7 @@ steps under (1) or (2) below:
 	gacutil.exe /i policy.<x>.<y>.icecs.dll
 	gacutil.exe /i policy.<x>.<y>.iceboxcs.dll
 	gacutil.exe /i policy.<x>.<y>.icegridcs.dll
-	gacutil.exe /i policy.<x>.<y>.icepatch2.dll
+	gacutil.exe /i policy.<x>.<y>.icepatch2cs.dll
 	gacutil.exe /i policy.<x>.<y>.icesslcs.dll
 	gacutil.exe /i policy.<x>.<y>.icestormcs.dll
 	gacutil.exe /i policy.<x>.<y>.glacier2cs.dll

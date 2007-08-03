@@ -175,7 +175,7 @@ IceSSL::PluginI::setupSSL(const CommunicatorPtr& communicator)
         //
         // Initialize the PRNG.
         //
-#ifdef WINDOWS
+#ifdef _WIN32
         RAND_screen(); // Uses data from the screen if possible.
 #endif
         char randFile[1024];
