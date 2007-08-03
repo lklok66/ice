@@ -74,18 +74,20 @@ node, and Glacier2 router as Windows services.
 About ICE_HOME
 --------------
 
-To avoid conflicts with the Ice installers for other Windows compilers, the
-default installation path for the Visual Studio .NET 2003 installer is
-c:\Ice-@ver@-VC71. While most parts of this installation are designed to
-work without changing your environment other than described later in this
-document, you will need to set an ICE_HOME environment variable it if you
-wish to run the iceca.bat utility script found in Ice-@ver@-VC71\bin.
+To avoid conflicts with the Ice installers for other Windows
+compilers, the default installation path for the Visual Studio .NET
+2003 installer is c:\Ice-@ver@-VC71. While most parts of this
+installation are designed to work without changing your environment
+other than as described later in this document, you will need to set
+the ICE_HOME environment variable if you wish to run the iceca.bat
+utility script found in Ice-@ver@-VC71\bin.
  
-To set the ICE_HOME environment variable from the command prompt, simply run:
+To set the ICE_HOME environment variable from the command prompt,
+simply run:
 
 set ICE_HOME=<Ice installation root directory>
 
-You can set also set ICE_HOME through My Computer|Advanced System
+You can also set ICE_HOME through My Computer|Advanced System
 Settings|Environment Variables.
 
 
@@ -110,19 +112,19 @@ window, type 'client' to start the client.
 Some demo directories contain README files if additional requirements
 are necessary.
 
-This distribution includes examples for intergrating Ice with databases
+This distribution includes examples for integrating Ice with databases
 other than BerkeleyDB. These examples are not included in the demo.sln
 file mentioned above and must be built using the Microsoft Makefile
-processor, NMAKE. Under the "Microsoft Visual Studio .NET 2003" entry in
-your "Start" menu, click on the "Visual Studio .NET Tools" submenu and
-select "Visual Studio .NET 2003 Command Prompt". In this command prompt
-window, change to the appropriate demo directory and run "nmake /f
-Makefile.mak". For example:
+processor, NMAKE. Under the "Microsoft Visual Studio .NET 2003" entry
+in your "Start" menu, click on the "Visual Studio .NET Tools" submenu
+and select "Visual Studio .NET 2003 Command Prompt". In this command
+prompt window, change to the appropriate demo directory and run "nmake
+/f Makefile.mak". For example:
 
 cd <Ice installation root directory>\demo\Database
-nmake /f Makefile.mak.
+nmake /f Makefile.mak
 
-The current examples are for the Oracle, and require the appropriate
+The current examples are for Oracle, and require the appropriate
 Oracle development environment. 
 
 
@@ -151,7 +153,7 @@ The registration key used by this installer is:
 
 HKEY_LOCAL_MACHINE\Software\ZeroC\Ice @ver@ for Visual Studio .NET 2003
 
-To install location is stored as a string value named 'InstallDir'.
+The install location is stored as a string value named 'InstallDir'.
 
 
 Acknowledgments

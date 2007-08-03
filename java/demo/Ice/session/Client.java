@@ -170,7 +170,7 @@ public class Client extends Ice.Application
                     }
                     else
                     {
-                        System.out.println("index is too high. " + hellos.size() + " exist so far. " +
+                        System.out.println("Index is too high. " + hellos.size() + " exist so far. " +
                                            "Use 'c' to create a new hello object.");
                     }
                 }
