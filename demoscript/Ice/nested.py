@@ -8,7 +8,7 @@
 #
 # **********************************************************************
 
-import pexpect, sys
+import pexpect, sys, signal
 
 def run(client, server):
     print "testing nested...",
@@ -35,3 +35,8 @@ def run(client, server):
 
     client.sendline('x')
     client.expect(pexpect.EOF)
+    assert client.wait() == 0
+
+    server.kill(signal.SIGINT)
+    server.expect(pexpect.EOF)
+    assert server.wait() == 0

@@ -64,4 +64,5 @@ def run(client, isJava=False):
 
     print "IntIntMap with index (read test):"
     client.expect(pexpect.EOF, timeout=200)
+    assert client.wait() == 0
     print "%s " % (client.before)

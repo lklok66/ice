@@ -36,4 +36,5 @@ server.expect('work item: item3')
 server.expect('work item: item4')
 server.expect('work item: item5')
 server.expect(pexpect.EOF, timeout=10)
+assert server.wait() == 0
 print "ok"

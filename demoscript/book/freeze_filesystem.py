@@ -26,4 +26,5 @@ def run(client, server):
     client.expect('Destroying README')
     server.expect('removed object')
     client.expect(pexpect.EOF)
+    assert client.wait() == 0
     print "ok"

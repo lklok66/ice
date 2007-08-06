@@ -158,4 +158,5 @@ def run(client, server):
 
     client.sendline('exit')
     client.expect(pexpect.EOF)
+    assert client.wait() == 0
     print "ok"

@@ -30,8 +30,10 @@ def run(client, server):
     client.sendline('d')
     client.sendline('s')
     server.expect(pexpect.EOF)
+    assert server.wait() == 0
 
     client.expect('RequestCanceledException')
     client.sendline('x')
     client.expect(pexpect.EOF)
+    assert client.wait() == 0
     print "ok"

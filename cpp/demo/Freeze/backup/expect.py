@@ -48,11 +48,14 @@ sys.stdout.flush()
 backup = demoscript.Util.spawn('./backup full')
 backup.expect('hot backup started', timeout=30)
 backup.expect(pexpect.EOF, timeout=30)
+assert backup.wait() == 0
 print "ok"
 
 assert os.path.isdir('hotbackup')
 
 client.kill(signal.SIGINT)
+client.expect(pexpect.EOF)
+assert client.wait() != 0
 
 print "restarting client...",
 sys.stdout.flush()
@@ -64,3 +67,7 @@ client = demoscript.Util.spawn('./client')
 client.expect('(.*)Updating map', timeout=60)
 assert client.match.group(1).find('Creating new map') == -1
 print "ok"
+
+client.kill(signal.SIGINT)
+client.expect(pexpect.EOF)
+assert client.wait() != 0

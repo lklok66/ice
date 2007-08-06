@@ -103,6 +103,11 @@ class spawn(pexpect.spawn):
             timeout = initialTimeout
             self.expectFirst = False
         return pexpect.spawn.expect(self, pattern, timeout, searchwindowsize)
+    def wait(self):
+        try:
+            return pexpect.spawn.wait(self)
+        except pexpect.ExceptionPexpect:
+            return self.exitstatus
 
 def cleanDbDir(path):
     for filename in [ os.path.join(path, f) for f in os.listdir(path) if f != ".gitignore"]:

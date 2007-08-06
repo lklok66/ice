@@ -70,16 +70,21 @@ print "ok"
 print "testing removing client...",
 client3.sendline('x')
 client3.expect(pexpect.EOF)
+assert client3.wait() == 0
 
 client2.sendline('d')
 client1.expect('int: -1 total: 0')
 client2.expect('int: -1 total: 0')
 client1.sendline('x')
 client1.expect(pexpect.EOF)
+assert client1.wait() == 0
 client2.sendline('x')
 client2.expect(pexpect.EOF)
+assert client2.wait() == 0
 print "ok"
 
 admin = demoscript.Util.spawn('iceboxadmin --Ice.Config=config.icebox shutdown')
 admin.expect(pexpect.EOF)
+assert admin.wait() == 0
 icestorm.expect(pexpect.EOF)
+assert icestorm.wait() == 0

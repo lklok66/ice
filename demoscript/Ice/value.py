@@ -36,4 +36,6 @@ def run(client, server):
     print "ok"
 
     server.expect(pexpect.EOF)
+    assert server.wait() == 0
     client.expect(pexpect.EOF)
+    assert client.wait() == 0

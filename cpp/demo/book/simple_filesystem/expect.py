@@ -23,6 +23,7 @@ except ImportError:
     import demoscript
 
 import demoscript.Util
+import signal
 
 server = demoscript.Util.spawn('./server --Ice.PrintAdapterReady')
 server.expect('.* ready')
@@ -32,4 +33,8 @@ sys.stdout.flush()
 client = demoscript.Util.spawn('./client')
 client.expect('Contents of root directory:\r\n.*Down to a sunless sea.')
 client.expect(pexpect.EOF)
+assert client.wait() == 0
 print "ok"
+server.kill(signal.SIGINT)
+server.expect(pexpect.EOF)
+assert server.wait() == 0

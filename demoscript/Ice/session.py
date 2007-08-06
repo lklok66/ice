@@ -25,6 +25,7 @@ def run(clientStr, server):
     client.expect('Index is too high')
     client.sendline('x')
     client.expect(pexpect.EOF)
+    assert client.wait() == 0
     server.expect("The session foo is now destroyed.")
     print "ok"
 
@@ -37,6 +38,7 @@ def run(clientStr, server):
     client.sendline('c')
     client.sendline('t')
     client.expect(pexpect.EOF)
+    assert client.wait() == 0
     server.expect("The session foo is now destroyed.\r\n.*The session foo has timed out.", timeout=25)
     print "ok"
 
@@ -46,6 +48,8 @@ def run(clientStr, server):
     server.expect('The session foo is now created.')
     client.sendline('s')
     server.expect(pexpect.EOF)
+    assert server.wait() == 0
 
     client.sendline('x')
     client.expect(pexpect.EOF)
+    assert client.wait() == 0
