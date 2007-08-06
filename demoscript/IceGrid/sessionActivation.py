@@ -38,18 +38,33 @@ def run(clientCmd):
 
     print "testing client...", 
     sys.stdout.flush()
+
     client = demoscript.Util.spawn(clientCmd)
     client.expect('user id:')
     client.sendline('foo')
     client.expect('password:')
     client.sendline('foo')
+    node.expect('activating server')
     client.expect('==>')
     client.sendline('t')
-    node.expect('activating server')
     node.expect('says Hello World!')
     client.sendline('x')
     client.expect(pexpect.EOF, timeout=1)
     node.expect('detected termination of server')
+
+    client = demoscript.Util.spawn(clientCmd)
+    client.expect('user id:')
+    client.sendline('foo')
+    client.expect('password:')
+    client.sendline('foo')
+    node.expect('activating server')
+    client.expect('==>')
+    client.sendline('t')
+    node.expect('says Hello World!')
+    client.sendline('x')
+    client.expect(pexpect.EOF, timeout=1)
+    node.expect('detected termination of server')
+
     print "ok"
 
     admin.sendline('registry shutdown Master')

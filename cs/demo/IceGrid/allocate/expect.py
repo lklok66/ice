@@ -25,4 +25,7 @@ except ImportError:
 import demoscript.Util
 import demoscript.IceGrid.allocate
 
-demoscript.IceGrid.allocate.run('%sclient.exe' % (demoscript.Util.mono()))
+if demoscript.Util.isWin32():
+    demoscript.IceGrid.allocate.run('%sclient.exe' % (demoscript.Util.mono()))
+else:
+    print "Not supported yet with mono!"

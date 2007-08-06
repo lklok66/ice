@@ -80,17 +80,40 @@ def run(clientStr):
 
     print "testing client...", 
     sys.stdout.flush()
+
     client = pexpect.spawn(clientStr + ' --Ice.Default.Host=127.0.0.1')
     client.expect('==>')
     client.sendline('t')
-    node.expect("SimpleServer-[123] says Hello World!")
+    node.expect("SimpleServer-1 says Hello World!")
     client.sendline('t')
-    node.expect("SimpleServer-[123] says Hello World!")
+    node.expect("SimpleServer-1 says Hello World!")
     client.sendline('s')
-    node.expect("detected termination of.*SimpleServer-[123]")
+    node.expect("detected termination of.*SimpleServer-1")
     client.sendline('x')
-
     client.expect(pexpect.EOF, timeout=1)
+
+    client = pexpect.spawn(clientStr + ' --Ice.Default.Host=127.0.0.1')
+    client.expect('==>')
+    client.sendline('t')
+    node.expect("SimpleServer-2 says Hello World!")
+    client.sendline('t')
+    node.expect("SimpleServer-2 says Hello World!")
+    client.sendline('s')
+    node.expect("detected termination of.*SimpleServer-2")
+    client.sendline('x')
+    client.expect(pexpect.EOF, timeout=1)
+
+    client = pexpect.spawn(clientStr + ' --Ice.Default.Host=127.0.0.1')
+    client.expect('==>')
+    client.sendline('t')
+    node.expect("SimpleServer-3 says Hello World!")
+    client.sendline('t')
+    node.expect("SimpleServer-3 says Hello World!")
+    client.sendline('s')
+    node.expect("detected termination of.*SimpleServer-3")
+    client.sendline('x')
+    client.expect(pexpect.EOF, timeout=1)
+
     print "ok"
 
     admin.sendline('registry shutdown Master')

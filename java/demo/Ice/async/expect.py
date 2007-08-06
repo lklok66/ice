@@ -15,7 +15,7 @@ try:
 except ImportError:
     for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
         toplevel = os.path.normpath(toplevel)
-        if os.path.exists(os.path.join(toplevel, "config", "DemoUtil.py")):
+        if os.path.exists(os.path.join(toplevel, "demoscript")):
             break
     else:
         raise "can't find toplevel directory!"
