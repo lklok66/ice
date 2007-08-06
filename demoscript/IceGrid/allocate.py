@@ -38,20 +38,35 @@ def run(clientCmd):
 
     print "testing client...", 
     sys.stdout.flush()
-    client = demoscript.Util.spawn(clientCmd)
-    client.expect('user id:')
-    client.sendline('foo')
-    client.expect('password:')
-    client.sendline('foo')
-    client.expect('==>')
-    client.sendline('t')
+    client1 = demoscript.Util.spawn(clientCmd)
+    client1.expect('user id:')
+    client1.sendline('foo')
+    client1.expect('password:')
+    client1.sendline('foo')
+
+    client2 = demoscript.Util.spawn(clientCmd)
+    client2.expect('user id:')
+    client2.sendline('foo')
+    client2.expect('password:')
+    client2.sendline('foo')
+
     node.expect('activating server')
+    client1.expect('==>')
+    client2.expect(pexpect.TIMEOUT, timeout = 0)
+
+    client1.sendline('t')
     node.expect('says Hello World!')
-    client.sendline('s')
+    client2.expect(pexpect.TIMEOUT, timeout = 0)
+    client1.sendline('x')
+    client1.expect(pexpect.EOF, timeout=1)
+
+    client2.expect('==>')
+    client2.sendline('t')
+    node.expect('says Hello World!')
+    client2.sendline('s')
     node.expect('detected termination of server')
-    client.sendline('x')
-    client.sendline('x')
-    client.expect(pexpect.EOF, timeout=1)
+    client2.sendline('x')
+    client2.expect(pexpect.EOF, timeout=1)
     print "ok"
 
     print "deploying multiple...", 
@@ -62,20 +77,54 @@ def run(clientCmd):
 
     print "testing client...", 
     sys.stdout.flush()
-    client = demoscript.Util.spawn(clientCmd)
-    client.expect('user id:')
-    client.sendline('foo')
-    client.expect('password:')
-    client.sendline('foo')
-    client.expect('==>')
-    client.sendline('t')
+    client1 = demoscript.Util.spawn(clientCmd)
+    client1.expect('user id:')
+    client1.sendline('foo')
+    client1.expect('password:')
+    client1.sendline('foo')
+
+    client2 = demoscript.Util.spawn(clientCmd)
+    client2.expect('user id:')
+    client2.sendline('foo')
+    client2.expect('password:')
+    client2.sendline('foo')
+
+    client3 = demoscript.Util.spawn(clientCmd)
+    client3.expect('user id:')
+    client3.sendline('foo')
+    client3.expect('password:')
+    client3.sendline('foo')
+
     node.expect('activating server')
+    client1.expect('==>')
+    client2.expect('==>')
+    client3.expect(pexpect.TIMEOUT, timeout = 0)
+
+    client1.sendline('t')
     node.expect('says Hello World!')
-    client.sendline('s')
+    client2.sendline('t')
+    node.expect('says Hello World!')
+    client3.expect(pexpect.TIMEOUT, timeout = 0)
+
+    client1.sendline('x')
+    client1.expect(pexpect.EOF, timeout=1)
+
+    client3.expect('==>')
+    client3.sendline('t')
+    node.expect('says Hello World!')
+    client2.sendline('t')
+    node.expect('says Hello World!')
+
+    client2.sendline('s')
     node.expect('detected termination of server')
-    client.sendline('x')
-    client.sendline('x')
-    client.expect(pexpect.EOF, timeout=1)
+    client2.sendline('x')
+    client2.expect(pexpect.EOF, timeout=1)
+
+    client3.sendline('s')
+    node.expect('detected termination of server')
+    client3.sendline('x')
+    client3.expect(pexpect.EOF, timeout=1)
+
     print "ok"
 
     admin.sendline('registry shutdown Master')

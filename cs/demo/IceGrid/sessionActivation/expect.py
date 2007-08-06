@@ -25,5 +25,8 @@ except ImportError:
 import demoscript.Util
 import demoscript.IceGrid.sessionActivation
 
-demoscript.IceGrid.sessionActivation.run('%sclient.exe' % (demoscript.Util.mono()))
 
+if demoscript.Util.isWin32():
+    demoscript.IceGrid.sessionActivation.run('%sclient.exe' % (demoscript.Util.mono()))
+else:
+    print "Not supported yet with mono!"
