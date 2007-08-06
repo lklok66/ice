@@ -10,48 +10,53 @@
 
 import pexpect, sys, os
 
-for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
-    toplevel = os.path.normpath(toplevel)
-    if os.path.exists(os.path.join(toplevel, "config", "DemoUtil.py")):
-        break
-else:
-    raise "can't find toplevel directory!"
-sys.path.append(os.path.join(toplevel, "config"))
-import DemoUtil
+try:
+    import demoscript
+except ImportError:
+    for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
+        toplevel = os.path.normpath(toplevel)
+        if os.path.exists(os.path.join(toplevel, "demoscript")):
+            break
+    else:
+        raise "can't find toplevel directory!"
+    sys.path.append(os.path.join(toplevel))
+    import demoscript
+
+import demoscript.Util
 
 import signal
 
 print "cleaning databases...",
 sys.stdout.flush()
-DemoUtil.cleanDbDir("db/master")
-DemoUtil.cleanDbDir("db/node1")
-DemoUtil.cleanDbDir("db/node2")
-DemoUtil.cleanDbDir("db/replica1")
-DemoUtil.cleanDbDir("db/replica2")
+demoscript.Util.cleanDbDir("db/master")
+demoscript.Util.cleanDbDir("db/node1")
+demoscript.Util.cleanDbDir("db/node2")
+demoscript.Util.cleanDbDir("db/replica1")
+demoscript.Util.cleanDbDir("db/replica2")
 print "ok"
 
-if DemoUtil.defaultHost:
+if demoscript.Util.defaultHost:
     args = ' --IceGrid.Node.PropertiesOverride="Ice.Default.Host=127.0.0.1"'
 else:
     args = ''
 
 print "starting icegridnodes...",
 sys.stdout.flush()
-master = DemoUtil.spawn('icegridregistry --Ice.Config=config.master --Ice.PrintAdapterReady --Ice.StdErr= --Ice.StdOut=')
+master = demoscript.Util.spawn('icegridregistry --Ice.Config=config.master --Ice.PrintAdapterReady --Ice.StdErr= --Ice.StdOut=')
 master.expect('IceGrid.Registry.Internal ready\r\nIceGrid.Registry.Server ready\r\nIceGrid.Registry.Client ready')
-replica1 = DemoUtil.spawn('icegridregistry --Ice.Config=config.replica1 --Ice.PrintAdapterReady --Ice.StdErr= --Ice.StdOut=')
+replica1 = demoscript.Util.spawn('icegridregistry --Ice.Config=config.replica1 --Ice.PrintAdapterReady --Ice.StdErr= --Ice.StdOut=')
 replica1.expect('IceGrid.Registry.Server ready\r\nIceGrid.Registry.Client ready')
-replica2 = DemoUtil.spawn('icegridregistry --Ice.Config=config.replica2 --Ice.PrintAdapterReady --Ice.StdErr= --Ice.StdOut=')
+replica2 = demoscript.Util.spawn('icegridregistry --Ice.Config=config.replica2 --Ice.PrintAdapterReady --Ice.StdErr= --Ice.StdOut=')
 replica2.expect('IceGrid.Registry.Server ready\r\nIceGrid.Registry.Client ready')
-node1 = DemoUtil.spawn('icegridnode --Ice.Config=config.node1 --Ice.PrintAdapterReady --Ice.StdErr= --Ice.StdOut= %s' % (args))
+node1 = demoscript.Util.spawn('icegridnode --Ice.Config=config.node1 --Ice.PrintAdapterReady --Ice.StdErr= --Ice.StdOut= %s' % (args))
 node1.expect('IceGrid.Node ready')
-node2 = DemoUtil.spawn('icegridnode --Ice.Config=config.node2 --Ice.PrintAdapterReady --Ice.StdErr= --Ice.StdOut= %s' % (args))
+node2 = demoscript.Util.spawn('icegridnode --Ice.Config=config.node2 --Ice.PrintAdapterReady --Ice.StdErr= --Ice.StdOut= %s' % (args))
 node2.expect('IceGrid.Node ready')
 print "ok"
 
 print "deploying application...",
 sys.stdout.flush()
-admin = DemoUtil.spawn('icegridadmin --Ice.Config=config.client')
+admin = demoscript.Util.spawn('icegridadmin --Ice.Config=config.client')
 admin.expect('>>>')
 admin.sendline("application add \'application.xml\'")
 admin.expect('>>>')

@@ -21,6 +21,8 @@ def run(client, server, sessionserver, glacier2):
     sessionserver.expect('verified user')
     sessionserver.expect('creating session')
 
+    client.expect("==>")
+
     print "twoway",
     sys.stdout.flush()
     client.sendline('t')
@@ -39,7 +41,7 @@ def run(client, server, sessionserver, glacier2):
     sys.stdout.flush()
     client.sendline('O')
     try:
-        server.expect('initiating callback to')
+        server.expect('initiating callback to', timeout=1)
     except pexpect.TIMEOUT:
         pass
     client.sendline('O')
@@ -61,7 +63,7 @@ def run(client, server, sessionserver, glacier2):
     client.sendline('v')
     client.sendline('F')
     client.sendline('t')
-    server.expect('initiating callback to.*fake.*Ice::ObjectNotExistException')
+    server.expect('initiating callback to.*fake.*ObjectNotExistException')
     glacier2.expect('_fwd/t, _ovrd/some_value')
     try:
         client.expect('received callback', timeout=1)

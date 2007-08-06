@@ -10,18 +10,23 @@
 
 import pexpect, sys, os
 
-for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
-    toplevel = os.path.normpath(toplevel)
-    if os.path.exists(os.path.join(toplevel, "config", "DemoUtil.py")):
-        break
-else:
-    raise "can't find toplevel directory!"
-sys.path.append(os.path.join(toplevel, "config"))
-import DemoUtil
+try:
+    import demoscript
+except ImportError:
+    for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
+        toplevel = os.path.normpath(toplevel)
+        if os.path.exists(os.path.join(toplevel, "demoscript")):
+            break
+    else:
+        raise "can't find toplevel directory!"
+    sys.path.append(os.path.join(toplevel))
+    import demoscript
 
-server = DemoUtil.spawn('./server --Ice.PrintAdapterReady')
+import demoscript.Util
+
+server = demoscript.Util.spawn('./server --Ice.PrintAdapterReady')
 server.expect('.* ready')
-client = DemoUtil.spawn('./client')
+client = demoscript.Util.spawn('./client')
 client.expect('.*==>')
 
 print "testing with conversion... ",
