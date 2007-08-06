@@ -39,7 +39,7 @@ client1.expect('password:')
 client1.sendline("foo")
 print "ok"
 
-print "starting client 1...",
+print "starting client 2...",
 sys.stdout.flush()
 client2 = demoscript.Util.spawn('./client')
 client2.expect('user id:')
