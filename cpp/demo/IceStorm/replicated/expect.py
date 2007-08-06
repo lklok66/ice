@@ -10,37 +10,42 @@
 
 import pexpect, sys, os
 
-for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
-    toplevel = os.path.normpath(toplevel)
-    if os.path.exists(os.path.join(toplevel, "config", "DemoUtil.py")):
-        break
-else:
-    raise "can't find toplevel directory!"
-sys.path.append(os.path.join(toplevel, "config"))
-import DemoUtil
+try:
+    import demoscript
+except ImportError:
+    for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
+        toplevel = os.path.normpath(toplevel)
+        if os.path.exists(os.path.join(toplevel, "demoscript")):
+            break
+    else:
+        raise "can't find toplevel directory!"
+    sys.path.append(os.path.join(toplevel))
+    import demoscript
+
+import demoscript.Util
 
 import time, signal
 
 print "cleaning databases...",
 sys.stdout.flush()
-DemoUtil.cleanDbDir("db/node")
-DemoUtil.cleanDbDir("db/registry")
+demoscript.Util.cleanDbDir("db/node")
+demoscript.Util.cleanDbDir("db/registry")
 print "ok"
 
-if DemoUtil.defaultHost:
+if demoscript.Util.defaultHost:
     args = ' --IceGrid.Node.PropertiesOverride="Ice.Default.Host=127.0.0.1"'
 else:
     args = ''
 
 print "starting icegridnode...",
 sys.stdout.flush()
-node = DemoUtil.spawn('icegridnode --Ice.Config=config.grid --Ice.PrintAdapterReady %s' % (args))
+node = demoscript.Util.spawn('icegridnode --Ice.Config=config.grid --Ice.PrintAdapterReady %s' % (args))
 node.expect('IceGrid.Registry.Internal ready\r\nIceGrid.Registry.Server ready\r\nIceGrid.Registry.Client ready\r\nIceGrid.Node ready')
 print "ok"
 
 print "deploying application...",
 sys.stdout.flush()
-admin = DemoUtil.spawn('icegridadmin --Ice.Config=config.grid')
+admin = demoscript.Util.spawn('icegridadmin --Ice.Config=config.grid')
 admin.expect('>>>')
 admin.sendline("application add \'application.xml\'")
 admin.expect('>>>')
@@ -48,12 +53,12 @@ print "ok"
 
 print "testing pub/sub...",
 sys.stdout.flush()
-sub = DemoUtil.spawn('./subscriber --Ice.PrintAdapterReady')
+sub = demoscript.Util.spawn('./subscriber --Ice.PrintAdapterReady')
 sub.expect('.* ready')
 
 node.expect('Subscribe:.*Subscribe:.*Subscribe:')
 
-pub = DemoUtil.spawn('./publisher')
+pub = demoscript.Util.spawn('./publisher')
 
 time.sleep(3)
 sub.expect('[0-9][0-9]/[0-9][0-9].*\r\n[0-9][0-9]/[0-9][0-9]')

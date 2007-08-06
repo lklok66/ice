@@ -9,25 +9,30 @@
 # **********************************************************************
 
 import pexpect, sys, os
-for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
-    toplevel = os.path.normpath(toplevel)
-    if os.path.exists(os.path.join(toplevel, "config", "DemoUtil.py")):
-        break
-else:
-    raise "can't find toplevel directory!"
-sys.path.append(os.path.join(toplevel, "config"))
-import DemoUtil
+try:
+    import demoscript
+except ImportError:
+    for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
+        toplevel = os.path.normpath(toplevel)
+        if os.path.exists(os.path.join(toplevel, "demoscript")):
+            break
+    else:
+        raise "can't find toplevel directory!"
+    sys.path.append(os.path.join(toplevel))
+    import demoscript
 
-server = DemoUtil.spawn('./server --Ice.PrintAdapterReady')
+import demoscript.Util
+
+server = demoscript.Util.spawn('./server --Ice.PrintAdapterReady')
 server.expect('.* ready')
 
-glacier2 = DemoUtil.spawn('glacier2router --Ice.Config=config.glacier2 --Ice.PrintAdapterReady')
+glacier2 = demoscript.Util.spawn('glacier2router --Ice.Config=config.glacier2 --Ice.PrintAdapterReady')
 glacier2.expect('Glacier2.Client ready')
 glacier2.expect('Glacier2.Server ready')
 
 print "starting client 1...",
 sys.stdout.flush()
-client1 = DemoUtil.spawn('./client')
+client1 = demoscript.Util.spawn('./client')
 client1.expect('user id:')
 client1.sendline("foo")
 client1.expect('password:')
@@ -36,7 +41,7 @@ print "ok"
 
 print "starting client 1...",
 sys.stdout.flush()
-client2 = DemoUtil.spawn('./client')
+client2 = demoscript.Util.spawn('./client')
 client2.expect('user id:')
 client2.sendline("bar")
 client2.expect('password:')

@@ -10,24 +10,29 @@
 
 import pexpect, sys, os, signal
 
-for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
-    toplevel = os.path.normpath(toplevel)
-    if os.path.exists(os.path.join(toplevel, "config", "DemoUtil.py")):
-        break
-else:
-    raise "can't find toplevel directory!"
-sys.path.append(os.path.join(toplevel, "config"))
-import DemoUtil
+try:
+    import demoscript
+except ImportError:
+    for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
+        toplevel = os.path.normpath(toplevel)
+        if os.path.exists(os.path.join(toplevel, "demoscript")):
+            break
+    else:
+        raise "can't find toplevel directory!"
+    sys.path.append(os.path.join(toplevel))
+    import demoscript
 
-if DemoUtil.isDarwin():
+import demoscript.Util
+
+if demoscript.Util.isDarwin():
     print "This demo is not supported under MacOS."
     sys.exit(0)
 
 print "testing IceUtl::Cache evictor"
-server = DemoUtil.spawn('./server --Ice.PrintAdapterReady')
+server = demoscript.Util.spawn('./server --Ice.PrintAdapterReady')
 server.expect(".* ready")
 
-client = DemoUtil.spawn('./client')
+client = demoscript.Util.spawn('./client')
 client.expect(pexpect.EOF, timeout=200)
 print client.before
 
@@ -35,10 +40,10 @@ server.kill(signal.SIGINT)
 server.expect(pexpect.EOF)
 
 print "testing simple evictor"
-server = DemoUtil.spawn('./server simple --Ice.PrintAdapterReady')
+server = demoscript.Util.spawn('./server simple --Ice.PrintAdapterReady')
 server.expect(".* ready")
 
-client = DemoUtil.spawn('./client')
+client = demoscript.Util.spawn('./client')
 client.expect(pexpect.EOF, timeout=200)
 print client.before
 

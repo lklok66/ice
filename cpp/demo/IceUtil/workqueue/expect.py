@@ -10,16 +10,22 @@
 
 import pexpect, sys, os
 
-for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
-    toplevel = os.path.normpath(toplevel)
-    if os.path.exists(os.path.join(toplevel, "config", "DemoUtil.py")):
-        break
-else:
-    raise "can't find toplevel directory!"
-sys.path.append(os.path.join(toplevel, "config"))
-import DemoUtil
+try:
+    import demoscript
+except ImportError:
+    for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
+        toplevel = os.path.normpath(toplevel)
+        if os.path.exists(os.path.join(toplevel, "demoscript")):
+            break
+    else:
+        raise "can't find toplevel directory!"
+    sys.path.append(os.path.join(toplevel))
+    import demoscript
 
-server = DemoUtil.spawn('./workqueue')
+import demoscript.Util
+import demoscript.Ice.hello
+
+server = demoscript.Util.spawn('./workqueue')
 server.expect('Pushing work items.*ok')
 
 print "testing...",
@@ -28,5 +34,5 @@ server.expect('work item: item2')
 server.expect('work item: item3')
 server.expect('work item: item4')
 server.expect('work item: item5')
-server.expect(pexpect.EOF)
+server.expect(pexpect.EOF, timeout=10)
 print "ok"
