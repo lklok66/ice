@@ -129,9 +129,26 @@ if verbose:
 else:
     quiet = ""
 
+#
+# Create demo script archive.
+#
+print "Creating demo script archive"
+demoScripts = find(".", "expect.py")
+demoScripts.append("allDemos.py")
+demoScriptFile = open("demoscripts", "w")
+for f in demoScripts:
+    print>>demoScriptFile, f
+demoScriptFile.close()
+
+archive = os.path.join("dist", "IceJ-demo-scripts-" + version)
+os.system("tar c" + quiet + "f " + archive+ ".tar -T demoscripts")
+os.system("gzip -9 " + archive + ".tar")
+os.remove("demoscripts")
+
 print "Creating exclusion file..."
 filesToRemove = [ "makedist.py", "exclusions", "dist" ]
 filesToRemove.extend(find(".", ".gitignore"))
+filesToRemove.extend(demoScripts)
 exclusionFile = open("exclusions", "w")
 for x in filesToRemove:
     exclusionFile.write("%s\n" % x)
