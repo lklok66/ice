@@ -62,8 +62,10 @@ client1.expect("bar says: hello")
 
 client1.sendline("/quit")
 client1.expect(pexpect.EOF)
+assert client1.wait() == 0
 client2.expect("foo has left the chat room")
 
 client2.sendline("/quit")
 client2.expect(pexpect.EOF)
+assert client2.wait() == 0
 print "ok"

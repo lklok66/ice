@@ -39,9 +39,11 @@ demoscript.Freeze.library.run(client, server)
 
 client.sendline('shutdown')
 server.expect(pexpect.EOF)
+assert server.wait() == 0
 
 client.sendline('exit')
 client.expect(pexpect.EOF)
+assert server.wait() == 0
 
 print "running with collocated server"
 
@@ -57,3 +59,4 @@ demoscript.Freeze.library.run(server, server)
 
 server.sendline('exit')
 server.expect(pexpect.EOF)
+assert server.wait() == 0

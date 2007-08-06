@@ -38,6 +38,7 @@ print client.before
 
 server.kill(signal.SIGINT)
 server.expect(pexpect.EOF)
+assert server.wait() == 0
 
 print "testing simple evictor"
 server = demoscript.Util.spawn('./server simple --Ice.PrintAdapterReady')
@@ -45,7 +46,9 @@ server.expect(".* ready")
 
 client = demoscript.Util.spawn('./client')
 client.expect(pexpect.EOF, timeout=200)
+assert client.wait() == 0
 print client.before
 
 server.kill(signal.SIGINT)
 server.expect(pexpect.EOF)
+assert server.wait() == 0

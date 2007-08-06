@@ -90,12 +90,17 @@ admin.expect('>>>')
 
 pub.expect('Ice::NoEndpointException')
 pub.expect(pexpect.EOF)
+assert pub.wait() != 0
 
 sub.kill(signal.SIGINT)
+sub.expect('NoEndpointException')
 sub.expect(pexpect.EOF)
+assert sub.wait() != 0
 print "ok"
 
 admin.sendline('registry shutdown Master')
 admin.sendline('exit')
 admin.expect(pexpect.EOF)
+assert admin.wait() == 0
 node.expect(pexpect.EOF)
+assert node.wait() == 0

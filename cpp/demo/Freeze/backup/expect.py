@@ -50,6 +50,7 @@ sys.stdout.flush()
 backup = demoscript.Util.spawn('./backup full')
 backup.expect('hot backup started', timeout=30)
 backup.expect(pexpect.EOF, timeout=30)
+assert backup.wait() == 0
 print "ok"
 
 print "sleeping 5s...",
@@ -75,6 +76,7 @@ print "killing client with SIGTERM...",
 sys.stdout.flush()
 client.kill(signal.SIGTERM)
 client.expect(pexpect.EOF, timeout=30)
+assert client.wait() != 0
 print "ok"
 
 print "Client output: ",
@@ -99,6 +101,7 @@ print "ok"
 print "killing client with SIGTERM...",
 rclient.kill(signal.SIGTERM)
 rclient.expect(pexpect.EOF, timeout=30)
+assert rclient.wait() != 0
 print "ok"
 
 print "Restarted client output:",
