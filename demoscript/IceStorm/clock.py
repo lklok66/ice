@@ -26,9 +26,11 @@ def runtest(icestorm, subCmd, subargs, pubCmd, pubargs):
 
     pub.kill(signal.SIGINT)
     pub.expect(pexpect.EOF)
+    assert pub.wait() == 0
 
     sub.kill(signal.SIGINT)
     sub.expect(pexpect.EOF)
+    assert sub.wait() == 0
     try:
         icestorm.expect('Unsubscribe:')
     except pexpect.TIMEOUT:
@@ -60,4 +62,6 @@ def run(subCmd, pubCmd):
 
     admin = demoscript.Util.spawn('iceboxadmin --Ice.Config=config.icebox shutdown')
     admin.expect(pexpect.EOF)
+    assert admin.wait() == 0
     icestorm.expect(pexpect.EOF)
+    assert icestorm.wait() == 0

@@ -38,7 +38,7 @@ def run(clientStr):
 
     print "testing client...", 
     sys.stdout.flush()
-    client = pexpect.spawn(clientStr)
+    client = demoscript.Util.spawn(clientStr)
     client.expect('==>')
     client.sendline('t')
     node.expect("SimpleServer says Hello World!")
@@ -49,6 +49,7 @@ def run(clientStr):
     client.sendline('x')
 
     client.expect(pexpect.EOF, timeout=1)
+    assert client.wait() == 0
     print "ok"
 
     print "deploying template...", 
@@ -59,7 +60,7 @@ def run(clientStr):
 
     print "testing client...", 
     sys.stdout.flush()
-    client = pexpect.spawn(clientStr)
+    client = demoscript.Util.spawn(clientStr)
     client.expect('==>')
     client.sendline('t')
     node.expect("SimpleServer-[123] says Hello World!")
@@ -70,6 +71,7 @@ def run(clientStr):
     client.sendline('x')
 
     client.expect(pexpect.EOF, timeout=1)
+    assert client.wait() == 0
     print "ok"
 
     print "deploying replicated version...", 
@@ -81,7 +83,7 @@ def run(clientStr):
     print "testing client...", 
     sys.stdout.flush()
 
-    client = pexpect.spawn(clientStr + ' --Ice.Default.Host=127.0.0.1')
+    client = demoscript.Util.spawn(clientStr + ' --Ice.Default.Host=127.0.0.1')
     client.expect('==>')
     client.sendline('t')
     node.expect("SimpleServer-1 says Hello World!")
@@ -91,8 +93,9 @@ def run(clientStr):
     node.expect("detected termination of.*SimpleServer-1")
     client.sendline('x')
     client.expect(pexpect.EOF, timeout=1)
+    assert client.wait() == 0
 
-    client = pexpect.spawn(clientStr + ' --Ice.Default.Host=127.0.0.1')
+    client = demoscript.Util.spawn(clientStr + ' --Ice.Default.Host=127.0.0.1')
     client.expect('==>')
     client.sendline('t')
     node.expect("SimpleServer-2 says Hello World!")
@@ -102,8 +105,9 @@ def run(clientStr):
     node.expect("detected termination of.*SimpleServer-2")
     client.sendline('x')
     client.expect(pexpect.EOF, timeout=1)
+    assert client.wait() == 0
 
-    client = pexpect.spawn(clientStr + ' --Ice.Default.Host=127.0.0.1')
+    client = demoscript.Util.spawn(clientStr + ' --Ice.Default.Host=127.0.0.1')
     client.expect('==>')
     client.sendline('t')
     node.expect("SimpleServer-3 says Hello World!")
@@ -113,10 +117,13 @@ def run(clientStr):
     node.expect("detected termination of.*SimpleServer-3")
     client.sendline('x')
     client.expect(pexpect.EOF, timeout=1)
+    assert client.wait() == 0
 
     print "ok"
 
     admin.sendline('registry shutdown Master')
     admin.sendline('exit')
     admin.expect(pexpect.EOF)
+    assert admin.wait() == 0
     node.expect(pexpect.EOF)
+    assert node.wait() == 0

@@ -31,6 +31,7 @@ print "testing ping... ",
 sys.stdout.flush()
 client = demoscript.Util.spawn('./client')
 client.expect(pexpect.EOF, timeout=100)
+assert client.wait() == 0
 print "ok"
 
 print client.before

@@ -63,7 +63,7 @@ admin.expect('>>>')
 print "ok"
 
 def runtest():
-    client = pexpect.spawn('./client')
+    client = demoscript.Util.spawn('./client')
     client.expect('iterations:')
     client.sendline('5')
     client.expect('\(in ms\):')
@@ -74,6 +74,7 @@ def runtest():
     client.kill(signal.SIGINT)
 
     client.expect(pexpect.EOF, timeout=1)
+    assert client.wait() == 0
 
 print "testing client...", 
 sys.stdout.flush()
@@ -85,24 +86,30 @@ sys.stdout.flush()
 admin.sendline('registry shutdown Replica1')
 admin.expect('>>>')
 replica1.expect(pexpect.EOF)
+assert replica1.wait() == 0
 runtest()
 admin.sendline('registry shutdown Replica2')
 admin.expect('>>>')
 replica2.expect(pexpect.EOF)
+assert replica2.wait() == 0
 runtest()
 print "ok"
 
 admin.sendline('node shutdown node1')
 admin.expect('>>>')
 node1.expect(pexpect.EOF)
+assert node1.wait() == 0
 
 admin.sendline('node shutdown node2')
 admin.expect('>>>')
 node2.expect(pexpect.EOF)
+assert node2.wait() == 0
 
 admin.sendline('registry shutdown Master')
 admin.expect('>>>')
 master.expect(pexpect.EOF)
+assert master.wait() == 0
 
 admin.sendline('exit')
 admin.expect(pexpect.EOF)
+assert admin.wait() == 0
