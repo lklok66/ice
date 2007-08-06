@@ -32,7 +32,7 @@ def runtest(icestorm, subCmd, subargs, pubCmd, pubargs):
     try:
         icestorm.expect('Unsubscribe:')
     except pexpect.TIMEOUT:
-        print "(Wait for Unsubscribe failed, expected for Mono)"
+        print "(Wait for Unsubscribe failed, expected for Mono)",
     print "ok"
 
 def run(subCmd, pubCmd):
