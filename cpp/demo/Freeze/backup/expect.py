@@ -27,8 +27,10 @@ import signal, time
 
 print "cleaning databases...",
 sys.stdout.flush()
+os.system('rm -fr db.save')
 demoscript.Util.cleanDbDir("db/data")
 demoscript.Util.cleanDbDir("db/logs")
+os.system('rm -fr db/__*')
 for d in os.listdir('.'):
     if d.startswith('hotbackup'):
         os.system('rm -rf %s' % (d))
@@ -43,24 +45,61 @@ time.sleep(3) # Let the client do some work for a bit.
 print "ok"
 
 
-print "performing backup...",
+print "performing full backup...",
 sys.stdout.flush()
 backup = demoscript.Util.spawn('./backup full')
 backup.expect('hot backup started', timeout=30)
 backup.expect(pexpect.EOF, timeout=30)
 print "ok"
 
+print "sleeping 5s...",
+sys.stdout.flush()
+time.sleep(5)
+print "ok"
+
+print "performing incremental backup...",
+sys.stdout.flush()
+backup = demoscript.Util.spawn('./backup incremental')
+backup.expect('hot backup started', timeout=30)
+backup.expect(pexpect.EOF, timeout=30)
+print "ok"
+
+print "sleeping 30s...",
+sys.stdout.flush()
+time.sleep(30)
+print "ok"
+
 assert os.path.isdir('hotbackup')
 
-client.kill(signal.SIGINT)
+print "killing client with SIGTERM...",
+sys.stdout.flush()
+client.kill(signal.SIGTERM)
+client.expect(pexpect.EOF, timeout=30)
+print "ok"
+
+print "Client output: ",
+print "%s " % (client.before)
 
 print "restarting client...",
 sys.stdout.flush()
-os.system("rm db/data/*")
-os.system("rm db/logs/*")
-os.system("cp hotbackup/data/* db/data")
-os.system("cp hotbackup/logs/* db/logs")
-client = demoscript.Util.spawn('./client')
-client.expect('(.*)Updating map', timeout=60)
-assert client.match.group(1).find('Creating new map') == -1
+os.system('rm -fr db/data/* db/logs/* db/__*')
+os.system('cp -Rp hotbackup/ db')
+sys.stdout.flush()
+
+rclient = demoscript.Util.spawn('./client')
+rclient.expect('(.*)Updating map', timeout=60)
+assert rclient.match.group(1).find('Creating new map') == -1
 print "ok"
+
+print "sleeping 5s...",
+sys.stdout.flush()
+time.sleep(5)
+print "ok"
+
+print "killing client with SIGTERM...",
+rclient.kill(signal.SIGTERM)
+rclient.expect(pexpect.EOF, timeout=30)
+print "ok"
+
+print "Restarted client output:",
+print "%s " % (rclient.before)
