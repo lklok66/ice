@@ -29,6 +29,7 @@ server = demoscript.Util.spawn('./workqueue')
 server.expect('Pushing work items.*ok')
 
 print "testing...",
+sys.stdout.flush()
 server.expect('work item: item1')
 server.expect('work item: item2')
 server.expect('work item: item3')
