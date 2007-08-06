@@ -128,7 +128,6 @@ icevbver = "IceVB-" + version
         
 os.mkdir(os.path.join(distdir, icevbver))
 
-
 #
 # Create demo script archive.
 #
@@ -139,6 +138,11 @@ demoScriptFile = open("demoscripts", "w")
 for f in demoScripts:
     print>>demoScriptFile, f
 demoScriptFile.close()
+ 
+if verbose:
+    quiet = "-v"
+else:
+    quiet = ""
 
 archive = os.path.join("dist", "IceVB-demo-scripts-" + version)
 os.system("tar c" + quiet + "f " + archive+ ".tar -T demoscripts")
@@ -157,11 +161,6 @@ exclusionFile = open("exclusions", "w")
 for x in filesToRemove:
    exclusionFile.write("%s\n" % x)
 exclusionFile.close()
-
-if verbose:
-    quiet = "-v"
-else:
-    quiet = ""
 
 os.system("tar c" + quiet + " -X exclusions . | ( cd " + os.path.join(distdir, icevbver) + " && tar xf - )")
 

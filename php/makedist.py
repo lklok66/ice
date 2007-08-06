@@ -89,6 +89,11 @@ icephpver = "IcePHP-" + version
 
 os.mkdir(os.path.join(distdir, icephpver))
 
+if verbose:
+    quiet = "v"
+else:
+    quiet = ""
+
 #
 # Create demo script archive.
 #
@@ -116,11 +121,6 @@ exclusionFile = open("exclusions", "w")
 for x in filesToRemove:
     exclusionFile.write("%s\n" % x)
 exclusionFile.close()
-
-if verbose:
-    quiet = "v"
-else:
-    quiet = ""
 
 os.system("tar c" + quiet + " -X exclusions . | ( cd " + os.path.join(distdir, icephpver) + " && tar xf - )")
 

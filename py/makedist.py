@@ -117,6 +117,11 @@ for f in demoScripts:
     print>>demoScriptFile, f
 demoScriptFile.close()
 
+if verbose:
+    quiet = "v"
+else:
+    quiet = ""
+
 archive = os.path.join("dist", "IcePy-demo-scripts-" + version)
 os.system("tar c" + quiet + "f " + archive+ ".tar -T demoscripts")
 os.system("gzip -9 " + archive + ".tar")
@@ -134,10 +139,6 @@ exclusionFile = open("exclusions", "w")
 for x in filesToRemove:
     exclusionFile.write("%s\n" % x)
 exclusionFile.close()
-if verbose:
-    quiet = "v"
-else:
-    quiet = ""
 os.system("tar c" + quiet + " -X exclusions . | ( cd " + os.path.join(distdir, icepyver) + " && tar xf - )")
 
 os.chdir(distdir)
