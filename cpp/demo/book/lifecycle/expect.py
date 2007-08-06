@@ -10,31 +10,23 @@
 
 import pexpect, sys, os
 
-for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
-    toplevel = os.path.normpath(toplevel)
-    if os.path.exists(os.path.join(toplevel, "config", "DemoUtil.py")):
-        break
-else:
-    raise "can't find toplevel directory!"
-sys.path.append(os.path.join(toplevel, "config"))
-import DemoUtil
+try:
+    import demoscript
+except ImportError:
+    for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
+        toplevel = os.path.normpath(toplevel)
+        if os.path.exists(os.path.join(toplevel, "demoscript")):
+            break
+    else:
+        raise "can't find toplevel directory!"
+    sys.path.append(os.path.join(toplevel))
+    import demoscript
 
-server = DemoUtil.spawn('./server --Ice.PrintAdapterReady')
+import demoscript.Util
+import demoscript.book.lifecycle
+
+server = demoscript.Util.spawn('./server --Ice.PrintAdapterReady')
 server.expect('.* ready')
-print "testing...",
-sys.stdout.flush()
-client = DemoUtil.spawn('./client')
-client.expect('>')
-client.sendline('mkfile bar')
-client.expect('>')
-client.sendline('write bar "hello world"')
-client.expect('>')
-client.sendline('cat bar')
-client.expect('hello world\r\n>')
-client.sendline('rm bar')
-client.expect('>')
-client.sendline('rm bar')
-client.expect('no such file or directory\r\n>')
-client.sendline('exit')
-client.expect(pexpect.EOF)
-print "ok"
+client = demoscript.Util.spawn('./client')
+
+demoscript.book.lifecycle.run(client, server)

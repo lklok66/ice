@@ -232,18 +232,44 @@ mmversion = re.search("([0-9]+\.[0-9b]+)[\.0-9]*", version).group(1)
 
 print "Creating Ice-rpmbuild..."
 rpmbuildver = os.path.join("dist", "Ice-rpmbuild-" + version)
+fixVersion(find(os.path.join("install", "rpm"), "icegridregistry.*"), version, mmversion)
+fixVersion(find(os.path.join("install", "rpm"), "icegridnode.*"), version, mmversion)
+fixVersion(find(os.path.join("install", "rpm"), "glacier2router.*"), version, mmversion)
+fixVersion(find(os.path.join("install", "rpm"), "README.RPM"), version, mmversion)
+fixVersion(find(os.path.join("install", "unix"), "THIRD_PARTY_LICENSE.Linux"), version, mmversion)
+fixVersion(find(os.path.join("install", "unix"), "README.Linux-RPM"), version, mmversion)
+fixVersion(find(os.path.join("install", "unix"), "SOURCES.Linux"), version, mmversion)
+
 os.system("tar c" + quiet + "f " + rpmbuildver + ".tar " +
-          "-C install -C rpm {icegridregistry,icegridnode,glacier2router}.{conf,suse,redhat} README.RPM " +
+          "-C .. RELEASE_NOTES.txt " +
+          "-C cpp/install -C rpm {icegridregistry,icegridnode,glacier2router}.{conf,suse,redhat} README.RPM " +
           "-C ../unix THIRD_PARTY_LICENSE.Linux README.Linux-RPM SOURCES.Linux " +
           "-C ../thirdparty/php ice.ini")
 os.system("gzip -9 " + rpmbuildver + ".tar")
+
+
+#
+# Create demo script archive.
+#
+print "Creating demo script archive"
+demoScripts = find(".", "expect.py")
+demoScripts.append("allDemos.py")
+demoScriptFile = open("demoscripts", "w")
+for f in demoScripts:
+    print>>demoScriptFile, f
+demoScriptFile.close()
+
+archive = os.path.join("dist", "Ice-demo-scripts-" + version)
+os.system("tar c" + quiet + "f " + archive+ ".tar -T demoscripts")
+os.system("gzip -9 " + archive + ".tar")
+os.remove("demoscripts")
 
 #
 # Create archives.
 #
 print "Creating distribution..."
 icever = "Ice-" + version
-  
+
 print "Creating exclusion file..."
 filesToRemove = [ \
     "makedist.py", \
@@ -254,6 +280,7 @@ filesToRemove = [ \
     "fixVersion.py", \
     "icee.dsw", \
     "icee.dsp", \
+    os.path.join("config", "makegitignore.py"), \
     os.path.join("src", "icecpp", "icecppe.dsp"), \
     os.path.join("src", "IceUtil", "iceutile.dsp"), \
     os.path.join("src", "Slice", "slicee.dsp"), \
@@ -265,6 +292,7 @@ filesToRemove = [ \
     ]
 
 filesToRemove.extend(find(".", ".gitignore"))
+filesToRemove.extend(demoScripts)
 
 exclusionFile = open("exclusions", "w")
 for x in filesToRemove:
@@ -272,7 +300,7 @@ for x in filesToRemove:
 exclusionFile.close()
 os.mkdir(os.path.join("dist", icever))
 os.system("tar c" + quiet + " -X exclusions . | ( cd " + os.path.join("dist", icever) + " && tar xf - )")
-
+os.remove("exclusions")
 os.chdir("dist")
 
 os.system("chmod -R u+rw,go+r-w %s " % icever)

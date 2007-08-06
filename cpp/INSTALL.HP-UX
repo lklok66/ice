@@ -83,7 +83,7 @@ Ice has dependencies on a number of third-party libraries:
   "Software Porting And Archive Centre for HP-UX" located at
   http://hpux.cs.utah.edu.
 
-- bzip2 1.0, which can be downloaded from the "Software Porting And
+- bzip2 1.0.3, which can be downloaded from the "Software Porting And
   Archive Centre for HP-UX", http://hpux.cs.utah.edu. For 32-bit
   builds, you can also use the binary distribution from the "Software
   Porting And Archive Centre for HP-UX".

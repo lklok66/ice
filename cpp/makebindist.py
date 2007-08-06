@@ -566,12 +566,31 @@ def extractDemos(sources, buildDir, version, distro, demoDir):
 
 def archiveDemoTree(buildDir, version, installFiles):
     cwd = os.getcwd()
-    os.chdir(os.path.join(buildDir, 'Ice-%s-demos' % version))
-    filesToRemove = ['certs/makecerts.py', 'certs/ImportKey.java', 'certs/ImportKey.class', 'certs/seed.dat',
-            'config/convertssl.py', 'config/upgradeicegrid.py', 'config/upgradeicestorm.py',
-            'config/icegrid-slice.3.1.ice.gz', 'config/PropertyNames.def', 'config/makeprops.py', 
-            'config/Makefile', 'config/Makefile.mak', 'config/TestUtil.py', 'config/IceGridAdmin.py', 
-            'config/ice_ca.cnf', 'config/icegridgui.pro']
+    os.chdir(os.path.join(buildDir, "Ice-%s-demos" % version))
+    filesToRemove = [
+        "certs/makecerts.py",
+        "certs/ImportKey.java",
+        "certs/ImportKey.class",
+        "certs/seed.dat",
+        "config/convertssl.py",
+        "config/upgradeicegrid.py",
+        "config/upgradeicestorm.py",
+        "config/icegrid-slice.3.1.ice.gz",
+        "config/PropertyNames.def",
+        "config/makeprops.py", 
+        "config/Makefile",
+        "config/Makefile.mak",
+        "config/TestUtil.py",
+        "config/IceGridAdmin.py", 
+        "config/ice_ca.cnf",
+        "config/findSliceFiles.py",
+        "config/IcecsKey.snk",
+        "config/icegridnode.cfg",
+        "config/icegridregistry.cfg",
+        "config/makeconfig.py",
+        "config/makedepend.py",
+        "config/makegitignore.py",
+        "config/icegridgui.pro"]
     obliterate(filesToRemove)
     os.chdir(buildDir)
     
@@ -1124,6 +1143,8 @@ def main():
     #
     if getPlatform() == 'macosx':
         fixInstallNames(version, mmVersion)
+
+    shutil.copyfile(os.path.join(sources, "RELEASE_NOTES.txt"), os.path.join(installDir, "Ice-%s" % version, "RELEASE_NOTES.txt"))
 
     runprog('tar cf Ice-' + version + '-bin-' + getPlatformString() + '.tar Ice-' + version)
     runprog('gzip -9 Ice-' + version + '-bin-' + getPlatformString() + '.tar')

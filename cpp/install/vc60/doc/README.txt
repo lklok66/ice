@@ -90,32 +90,20 @@ node, and Glacier2 router as Windows services.
 About ICE_HOME
 --------------
 
-To avoid conflicts with the Ice installers for other Windows compilers, the
-default installation path for the Visual C++ 6.0 installer is
-c:\Ice-@ver@-VC60. While most parts of this installation are designed to
-work without changing your environment other than described later in this
-document, you will need to set an ICE_HOME environment variable it if you
-wish to:
-
- - Run the iceca.bat utility script found in Ice-@ver@-VC60\bin
-
- - Build the C++, Java or C# demos in the Ice example source code
-   archive.
-
- - With the exception of C++, build other Ice language mappings from
-   sources.
-
- - Run certain tests and examples in from the source code distributions.
-
-ICE_HOME is used by the abovementioned applications and build systems to
-locate Ice applications, header files and libraries found in this
-installation.
+To avoid conflicts with the Ice installers for other Windows
+compilers, the default installation path for the Visual C++ 6.0
+installer is c:\Ice-@ver@-VC60. While most parts of this installation
+are designed to work without changing your environment other than as
+described later in this document, you will need to set the ICE_HOME
+environment variable if you wish to run the iceca.bat utility script
+found in Ice-@ver@-VC60\bin.
  
-To set the ICE_HOME environment variable from the command prompt, simply run:
+To set the ICE_HOME environment variable from the command prompt,
+simply run:
 
 set ICE_HOME=<Ice installation root directory>
 
-You can set also set ICE_HOME through My Computer|Advanced System
+You can also set ICE_HOME through My Computer|Advanced System
 Settings|Environment Variables.
 
 
@@ -395,9 +383,10 @@ Apache1 and Apache2:
 Binary compatibility
 --------------------
 
-Patch releases of Ice are binary compatible. For example, version <x>.<y>.1
-is compatible with <x>.<y>.0, so you can run applications compiled with
-<x>.<y>.0 with <x>.<y>.1 (or later) assemblies without having to recompile.
+Patch releases of Ice are binary compatible. For example, version
+<x>.<y>.1 is compatible with <x>.<y>.0, so you can run applications
+compiled with <x>.<y>.0 with <x>.<y>.1 (or later) assemblies without
+having to recompile.
 
 With the binary installers, simply uninstall the previous version of
 Ice and install the new one. Already deployed applications that were
@@ -416,7 +405,7 @@ The registration key used by this installer is:
 
 HKEY_LOCAL_MACHINE\Software\ZeroC\Ice @ver@ for Visual Studio 6.0
 
-To install location is stored as a string value named 'InstallDir'.
+The install location is stored as a string value named 'InstallDir'.
 
 
 Acknowledgments

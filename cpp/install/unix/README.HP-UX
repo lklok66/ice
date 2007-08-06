@@ -99,26 +99,23 @@ Setting up your environment to use Ice
 General
 -------
 
-The discussion below assumes you have defined the ICE_HOME variable with
-the directory of your Ice installation. For example:
+The discussion below assumes you have defined the ICE_HOME variable
+with the directory of your Ice installation. For example:
 
 $ export ICE_HOME=/opt/Ice-@ver@
 
-If you have installed Ice in a non-default location (i.e. other than
+If you have installed Ice in a non-default location (i.e., other than
 /opt/Ice-@ver@), setting ICE_HOME is required if you wish to:
 
- - Run the iceca utility script found in Ice-@ver@/bin
+ - Run the iceca utility script found in Ice-@ver@/bin.
 
  - Build the C++, Java or C# demos in the Ice example source code
    archive.
 
- - With the exception of C++, build other Ice language mappings from
-   sources.
-
- - Run certain tests and examples in from the source code distributions.
+ - Run certain tests and examples in the source code distributions.
 
 In order to use Ice services and tools such as Slice translators, you
-need to add $ICE_HOME/bin to your PATH, as show in the bash command
+need to add $ICE_HOME/bin to your PATH, as shown in the bash command
 below:
 
 $ export PATH=$ICE_HOME/bin:$PATH
@@ -173,6 +170,25 @@ In addition, the JVM requires that the directory containing the
 Berkeley DB libraries be listed in java.library.path, therefore you
 must add this directory to SHLIB_PATH.
 
+Ice includes ant tasks for translating Slice to Java. The ant tasks
+allow slice2java and slice2freezej to be invoked from the ant build
+system. These tasks require one of the following:
+
+ - Specify the location of the Ice installation containing the
+   translators with the ice.home property:
+
+   ant -Dice.home=/home/bill/Ice-@ver@
+
+ - Set the ICE_HOME environment variable to specify the location of
+   the Ice installation containing the translators:
+
+   $ export ICE_HOME=/home/bill/Ice-@ver@
+
+ - If neither ice.home nor ICE_HOME is available, the ant tasks will
+   simply invoke the translator without an absolute path, relying on
+   the translators being in a directory in your PATH for successful
+   execution.
+   
 
 ======================================================================
 Using the IceGrid Administrative Console

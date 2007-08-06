@@ -11,13 +11,9 @@
 import os, sys, getopt
 
 def isCygwin():
-
     # The substring on sys.platform is required because some cygwin
     # versions return variations like "cygwin_nt-4.01".
-    if sys.platform[:6] == "cygwin":
-        return 1
-    else:
-        return 0
+    return sys.platform[:6] == "cygwin"
 
 def runDemos(args, demos, num = 0):
 
@@ -71,6 +67,9 @@ demos = [ "IceUtil/workqueue",
           "Glacier2/callback",
           "Freeze/bench",
           "Freeze/customEvictor",
+          "Freeze/phonebook",
+          "Freeze/library",
+          "Freeze/backup",
           "book/freeze_filesystem",
           "book/simple_filesystem",
           "book/printer",
@@ -81,17 +80,14 @@ demos = [ "IceUtil/workqueue",
 # These demos are currently disabled on cygwin
 #
 if isCygwin() == 0:
-    demos += [ \
-       
-      ]
+    demos += [ ]
 
 def usage():
-    print "usage: " + sys.argv[0] + " --start=<demo> -l -r <regex> -R <regex> --debug --protocol tcp|ssl --compress --host host --threadPerConnection"
+    print "usage: " + sys.argv[0] + " --fast --trace --start=<demo> -l -r <regex> -R <regex> --debug --host host"
     sys.exit(2)
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "lr:R:", \
-        ["start=", "debug", "protocol=", "compress", "host=", "threadPerConnection"])
+    opts, args = getopt.getopt(sys.argv[1:], "lr:R:", ["start=", "fast", "trace", "debug", "host="])
 except getopt.GetoptError:
     usage()
 
@@ -117,7 +113,7 @@ for o, a in opts:
         args += " " + o + " " + a
     if o == "--host" :
         args += " " + o + " " + a
-    if o in ( "--debug", "--compress", "--threadPerConnection" ):
+    if o in ( "--fast", "--trace", "--debug"):
         args += " " + o 
     if o == '--start':
         import re

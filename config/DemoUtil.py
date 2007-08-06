@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # **********************************************************************
 #
 # Copyright (c) 2003-2007 ZeroC, Inc. All rights reserved.
@@ -8,22 +7,36 @@
 #
 # **********************************************************************
 
+#
+# Timeout after the initial spawn.
+#
 initialTimeout = 10
+#
+# Default timeout on subsequent expect calls.
+#
 defaultTimeout = 5
 
+#
+# Default value of --Ice.Default.Host
+#
 host = "127.0.0.1"
+
+#
+# Echo the commands.
+#
 debug = False
 
 import sys, getopt, pexpect, os
 
 def usage():
-    print "usage: " + sys.argv[0] + " --trace --debug --host host --mode=[debug|release]"
+    print "usage: " + sys.argv[0] + " --fast --trace --debug --host host --mode=[debug|release]"
     sys.exit(2)
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "", ["trace", "debug", "host=", "mode="])
+    opts, args = getopt.getopt(sys.argv[1:], "", ["fast", "trace", "debug", "host=", "mode="])
 except getopt.GetoptError:
     usage()
 
+fast = False
 trace = False
 mode = 'release'
 for o, a in opts:
@@ -33,6 +46,8 @@ for o, a in opts:
         trace = True
     if o == "--host":
         host = a
+    if o == "--fast":
+        fast = True
     if o == "--mode":
         mode = a
         if mode != 'debug' or mode != 'release':
@@ -45,27 +60,15 @@ else:
     defaultHost = None
 
 def isCygwin():
-
     # The substring on sys.platform is required because some cygwin
     # versions return variations like "cygwin_nt-4.01".
-    if sys.platform[:6] == "cygwin":
-        return 1
-    else:
-        return 0
+    return sys.platform[:6] == "cygwin"
 
 def isWin32():
-
-    if sys.platform == "win32" or isCygwin():
-        return 1
-    else:
-        return 0
+    return sys.platform == "win32" or isCygwin()
 
 def isDarwin():
-
-   if sys.platform == "darwin":
-        return 1
-   else:
-        return 0
+   return sys.platform == "darwin"
 
 def getIceBox():
     if isWin32():
@@ -75,6 +78,8 @@ def getIceBox():
             return "iceboxd"
     return "icebox"
 
+# Automatically adds default host, and uses our default timeout for
+# expect.
 class spawn(pexpect.spawn):
     def __init__(self, command):
         if defaultHost:

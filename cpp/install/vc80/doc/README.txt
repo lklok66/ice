@@ -86,37 +86,31 @@ node, and Glacier2 router as Windows services.
 About ICE_HOME
 --------------
 
-To avoid conflicts with the Ice installers for other Windows compilers, the
-default installation path for the Visual Studio 2005 installer is
-c:\Ice-@ver@. While most parts of this installation are designed to work
-without changing your environment other than described later in this
-document, you will need to set an ICE_HOME environment variable it if you
-wish to:
+To avoid conflicts with the Ice installers for other Windows
+compilers, the default installation path for the Visual Studio 2005
+installer is c:\Ice-@ver@. While most parts of this installation are
+designed to work without changing your environment other than as
+described later in this document, you will need to set the ICE_HOME
+environment variable it if you wish to:
 
- - Run the iceca.bat utility script found in Ice-@ver@\bin
-
- - Build the C++, Java or C# demos in the Ice example source code
-   archive.
-
- - With the exception of C++, build other Ice language mappings from
-   sources.
-
- - Run certain tests and examples in from the source code distributions.
+ - Run the iceca.bat utility script found in Ice-@ver@\bin.
 
  - Run the Ice for Python bidir demo found in this distribution.
 
  - Build the Visual Basic and C# demos found in this distribution.
  
-ICE_HOME is used by the abovementioned applications and build systems to
-locate Ice applications, header files and libraries found in this
+ICE_HOME is used by the applications and build systems listed above to
+locate the applications, header files and libraries included in this
 installation.
  
-To set the ICE_HOME environment variable from the command prompt, simply run:
+To set the ICE_HOME environment variable from the command prompt,
+simply run:
 
 set ICE_HOME=<Ice installation root directory>
 
-You can set also set ICE_HOME through My Computer|Advanced System
+You can also set ICE_HOME through My Computer|Advanced System
 Settings|Environment Variables.
+
 
 Setting up Visual C++ 2005 Express Edition
 ------------------------------------------
@@ -139,20 +133,19 @@ Building and running the C++ demos
 The C++ demos are in the demo directory.
 
 To build a C++ demo, start Visual Studio 2005 and open the solution
-demo\demo.sln. Right click on the desired demo in the Solution Explorer
-window and select "Build".
+demo\demo.sln. Right click on the desired demo in the Solution
+Explorer window and select "Build".
 
-Note that if you are using Visual C++ 2005 Express Edition the Ice demos
-that require MFC (demo/Ice/MFC and demo/IcePatch2/MFC) will not compile
-since only the Professional edition contains MFC support. You can
-either ignore any compile errors these demos generate or just remove the
-projects from the solution entirely.
+Note that if you are using Visual C++ 2005 Express Edition, the Ice
+demos that require MFC (demo/Ice/MFC and demo/IcePatch2/MFC) will not
+compile since MFC support is only included in the Professional edition
+of the compiler. You can either ignore any compile errors these demos
+generate, or just remove the projects from the solution entirely.
 
 To run these demos, you need to add the Ice bin directory to your
 PATH, as shown below:
 
-set ICE_HOME=<Ice installation root directory>
-set PATH=%ICE_HOME%\bin;%PATH%
+set PATH=<Ice installation root directory>\bin;%PATH%
 
 Next, open a Command Prompt, change to the desired demo subdirectory,
 and type 'server' to start the server. In a separate Command Prompt
@@ -161,19 +154,19 @@ window, type 'client' to start the client.
 Some demo directories contain README files if additional requirements
 are necessary.
 
-This distribution includes examples for intergrating Ice with databases
-other than BerkeleyDB. These examples are not included in the demo.sln
-file mentioned above and must be built using the Microsoft Makefile
-processor, NMAKE. Under the "Microsoft Visual Studio 2005" entry in your
-"Start" menu, click on the "Visual Studio Tools" submenu and select
-"Visual Studio 2005 Command Prompt". In this command prompt window,
-change to the appropriate demo directory and run "nmake /f
-Makefile.mak". For example:
+This distribution includes examples for integrating Ice with
+databases other than BerkeleyDB. These examples are not included in
+the demo.sln file mentioned above and must be built using the
+Microsoft Makefile processor, NMAKE. Under the "Microsoft Visual
+Studio 2005" entry in your "Start" menu, click on the "Visual Studio
+Tools" submenu and select "Visual Studio 2005 Command Prompt". In this
+command prompt window, change to the appropriate demo directory and
+run "nmake /f Makefile.mak". For example:
 
 cd <Ice installation root directory>\demo\Database
-nmake /f Makefile.mak.
+nmake /f Makefile.mak
 
-The current examples are for the Oracle, and require the appropriate
+The current examples are for Oracle, and require the appropriate
 Oracle development environment. 
 
 
@@ -255,8 +248,7 @@ The ant bin directory must be added to your PATH, and the following
 environment variables need to be defined:
 
 set JAVA_HOME=<Java SDK installation root directory>
-set ICE_HOME=<Ice installation root directory>
-set PATH=%ICE_HOME%\bin;%PATH%
+set PATH=<Ice installation directory>\bin;%PATH%
 
 You can build all of the demos by running 'ant' in the demoj
 directory, or you can build individual demos by changing to the
@@ -264,12 +256,12 @@ desired subdirectory and then running 'ant'.
 
 Before running the demos you must modify your CLASSPATH as follows:
 
-set CLASSPATH=%ICE_HOME%\lib\Ice.jar;%ICE_HOME%\lib\db.jar;classes;%CLASSPATH%
+set CLASSPATH=<Ice installation directory>\lib\Ice.jar;<Ice installation directory>\lib\db.jar;classes;%CLASSPATH%
 
 If you prefer to use Ice for Java2 rather than Java5, modify your CLASSPATH
 as shown below:
 
-set CLASSPATH=%ICE_HOME%\lib\java2\Ice.jar;%ICE_HOME%\lib\db.jar;classes;%CLASSPATH%
+set CLASSPATH=<Ice installation directory>\lib\java2\Ice.jar;<Ice installation dir>\lib\db.jar;classes;%CLASSPATH%
 
 In addition, the JVM requires the directory containing the Berkeley DB
 libraries to be listed in java.library.path, therefore the Ice bin
@@ -302,13 +294,12 @@ can be downloaded from:
 
 You also need to add the Ice bin directory to your PATH, for example:
 
-set ICE_HOME=<Ice installation root directory>
-set PATH=%ICE_HOME%\bin;%PATH%
+set PATH=<Ice installation root directory>\bin;%PATH%
 
 Finally, set PYTHONPATH so that the Python interpreter is able to load
 the Ice extension:
 
-set PYTHONPATH=%ICE_HOME%\python
+set PYTHONPATH=<Ice installation root directory>\python
 
 To run a demo, open a Command Prompt, change to the desired demo
 directory, and type 'python Server.py' to start the server. In a
@@ -319,9 +310,10 @@ client.
 Binary compatibility
 --------------------
 
-Patch releases of Ice are binary compatible. For example, version <x>.<y>.1
-is compatible with <x>.<y>.0, so you can run applications compiled with
-<x>.<y>.0 with <x>.<y>.1 (or later) assemblies without having to recompile.
+Patch releases of Ice are binary compatible. For example, version
+<x>.<y>.1 is compatible with <x>.<y>.0, so you can run applications
+compiled with <x>.<y>.0 with <x>.<y>.1 (or later) assemblies without
+having to recompile.
 
 With the binary installers, simply uninstall the previous version of
 Ice and install the new one. Already deployed applications that were
@@ -340,7 +332,7 @@ The registration key used by this installer is:
 
 HKEY_LOCAL_MACHINE\Software\ZeroC\Ice @ver@ for Visual Studio 2005
 
-To install location is stored as a string value named 'InstallDir'.
+The install location is stored as a string value named 'InstallDir'.
 
 
 Acknowledgments
