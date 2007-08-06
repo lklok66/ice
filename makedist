@@ -155,7 +155,7 @@ fi
  
 cd $currentdir/cpp
 cp makebindist.py $SOURCEDIR
-tar cfz $SOURCEDIR/distfiles.tar.gz install include/IceUtil/Config.h -C .. RELEASE_NOTES.txt
+tar cfz $SOURCEDIR/distfiles.tar.gz --wildcards -C ./install . -C ../include/IceUtil Config.h -C ../../.. RELEASE_NOTES.txt
 
 cd $currentdir
 

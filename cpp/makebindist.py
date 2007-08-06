@@ -148,9 +148,8 @@ def getVersion(buildDir):
     cwd = os.getcwd()
     if getPlatform() == 'aix':
         os.environ['LIBPATH'] = ''
-    result = [ getIceVersion('include/IceUtil/Config.h'), \
-               getIceSoVersion('include/IceUtil/Config.h'), \
-               getIceMMVersion('include/IceUtil/Config.h') ]
+    configFile = os.path.join(buildDir, "install", "Config.h")
+    result = [ getIceVersion(configFile), getIceSoVersion(configFile), getIceMMVersion(configFile) ]
 
     os.chdir(cwd)
     return result
@@ -164,12 +163,11 @@ def fixVersion(filename, version, mmVersion):
         print l
     f.close()
 
-def getInstallFiles(buildDir, version, mmVersion):
+def fixInstallFiles(buildDir, version, mmVersion):
     """Gets the install sources for this revision"""
     cwd = os.getcwd()
     try:
-        runprog('rm -rf ' + os.path.join(buildDir, "install"))
-        runprog("tar c install | ( cd %s && tar xf - )" % buildDir)
+        os.chdir(buildDir)
         fixVersion('install/common/README.DEMOS', version, mmVersion)
         snapshot = os.walk('./install/unix')
         for dirInfo in snapshot:
@@ -634,9 +632,7 @@ def makeInstall(sources, buildDir, installDir, distro, clean, version, mmVersion
         
     if not os.path.exists(distro):
         filename = os.path.join(sources, distro + '.tar')
-        runprog('gzip -d %s.gz' % filename)
-        runprog('tar xf %s' % filename)
-        runprog('gzip -9 %s' % filename)
+        runprog('gzip -dc %s.gz | tar xf -' % filename)
         
     os.chdir(distro)
 
@@ -887,7 +883,7 @@ def main():
     buildEnvironment = dict()
     buildDir = None
     installDir = None
-    sources = None
+    sources = os.getcwd()
     installRoot = None
     clean = True
     build = True
@@ -945,10 +941,24 @@ def main():
         elif o == '--offline':
             offline = True
 
-    if sources == None:
-        print "You must specify a location for the source distributions"
+    if sources == None or not os.path.exists(sources):
+        print "You must specify a valid location for the source distributions"
         sys.exit(1)
-        
+
+    #
+    # Determine location of binary distribution-only files.
+    #
+    distfiles = None
+    trypaths = [ sources, os.getcwd() ]
+    for f in trypaths:
+        if os.path.exists(os.path.join(f, "distfiles.tar.gz")):
+            distfiles = os.path.join(f, "distfiles.tar.gz")
+            break
+
+    if distfiles == None:
+        print "Unable to find distfiles.tar.gz."
+        sys.exit(1)
+            
     if verbose:
         logging.getLogger().setLevel(logging.DEBUG)
 
@@ -998,15 +1008,18 @@ def main():
         initDirectory(d)
 
     #
-    # Determine location of binary distribution-only files.
+    # Unpack and update distribution files.
     #
+    # TODO: The updates performed here should be performed by the makedist script.
+    # 
     installFiles = None
-    configFile = os.path.join("include", "IceUtil", "Config.h")
+    os.system("gzip -dc " + distfiles + " | tar xf - -C " + os.path.join(buildDir, "install"))
+    configFile = os.path.join(buildDir, "install", "Config.h")
     version = getIceVersion(configFile)
     soVersion = getIceSoVersion(configFile)
     mmVersion = getIceMMVersion(configFile)
     version, soVersion, mmVersion = getVersion(buildDir)
-    installFiles = getInstallFiles(buildDir, version, mmVersion)
+    installFiles = fixInstallFiles(buildDir, version, mmVersion)
 
     if verbose:
         print 'Building binary distributions for Ice-' + version + ' on ' + getPlatformString()
@@ -1144,7 +1157,8 @@ def main():
     if getPlatform() == 'macosx':
         fixInstallNames(version, mmVersion)
 
-    shutil.copyfile(os.path.join(sources, "RELEASE_NOTES.txt"), os.path.join(installDir, "Ice-%s" % version, "RELEASE_NOTES.txt"))
+    shutil.copyfile(os.path.join(buildDir, "install", "RELEASE_NOTES.txt"), 
+                    os.path.join(installDir, "Ice-%s" % version, "RELEASE_NOTES.txt"))
 
     runprog('tar cf Ice-' + version + '-bin-' + getPlatformString() + '.tar Ice-' + version)
     runprog('gzip -9 Ice-' + version + '-bin-' + getPlatformString() + '.tar')
