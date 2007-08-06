@@ -83,7 +83,7 @@ print "%s " % (client.before)
 print "restarting client...",
 sys.stdout.flush()
 os.system('rm -fr db/data/* db/logs/* db/__*')
-os.system('cp -Rp hotbackup/ db')
+os.system('cp -Rp hotbackup/* db')
 sys.stdout.flush()
 
 rclient = demoscript.Util.spawn('./client')
