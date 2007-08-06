@@ -728,7 +728,7 @@ libraries."""
             if os.path.exists(os.path.join(buildDir, "debug")):
                shutil.rmtree(os.path.join(buildDir, "debug"))
             if  os.path.exists(os.path.join(buildDir, "release")):
-                shutil.mkdir(os.path.join(buildDir, "release"))
+               shutil.rmtree(os.path.join(buildDir, "release"))
 
         if not os.path.exists(buildDir):
             os.mkdir(buildDir)
