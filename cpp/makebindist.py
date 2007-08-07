@@ -695,7 +695,12 @@ def makeInstall(sources, buildDir, installDir, distro, clean, version, mmVersion
 
         for a in assemblies:
             shutil.copy("bin/%s.dll" % a, "%s/bin/%s.dll" % (installDir, a))
+            if os.path.exists("bin/policy.%s.%s" % (mmVersion, a)):
+                shutil.copy("bin/policy.%s.%s" % (mmVersion, a), "%s/bin/policy.%s.%s" % (installDir, mmVersion, a))
+                shutil.copy("bin/policy.%s.%s.dll" % (mmVersion, a),
+                            "%s/bin/policy.%s.%s.dll" % (installDir, mmVersion, a))
             shutil.copy("lib/pkgconfig/%s.pc" % a, "%s/lib/pkgconfig" % installDir)
+        
 
     os.chdir(cwd)
     
@@ -1096,11 +1101,13 @@ def main():
     # Sources should have already been built and installed.  We
     # can pick the binaries up from the iceinstall directory.
     #
+    # TODO: What is this used for?
+    #
     binaries = glob.glob(installDir + '/Ice-' + version + '/bin/*')
     binaries.extend(glob.glob(installDir + '/Ice-' + version + '/lib/*' + shlibExtensions(version, soVersion)[0]))
+
     cwd = os.getcwd()
     os.chdir(installDir)
-
   
     #
     # Get third party libraries.
