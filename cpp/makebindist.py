@@ -986,6 +986,9 @@ def main():
     if buildDir == None:
         print 'No build directory specified, defaulting to $HOME/tmp/icebuild'
         buildDir = os.path.join(os.environ.get('HOME'), "tmp", "icebuild")
+        
+    if not os.path.exists(buildDir):
+        os.mkdir(buildDir)
 
     if installDir == None:
         print 'No install directory specified, default to $HOME/tmp/iceinstall'

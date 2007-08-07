@@ -16,6 +16,13 @@ def isCygwin():
     return sys.platform[:6] == "cygwin"
 
 def runDemos(args, demos, num = 0):
+    rootPath = "demo"
+    if not os.path.exists(rootPath):
+        rootPath = "."
+        
+    if not os.path.exists(os.path.join(rootPath, os.path.normpath(demos[0]))):
+        print "Unable to locate first demo. Check directory structure and location of scripts"
+        sys.exit(1)
 
     #
     # Run each of the demos.
@@ -23,7 +30,7 @@ def runDemos(args, demos, num = 0):
     for i in demos:
 
         i = os.path.normpath(i)
-        dir = os.path.join("demo", i)
+        dir = os.path.join(rootPath, i)
 
         print
         if(num > 0):

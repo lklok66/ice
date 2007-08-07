@@ -205,7 +205,7 @@ do
   
   gzip -dc $f | tar xf - -C $TMPDIR
   mv $TMPDIR/demo $TMPDIR/demo$demoSuffix
-  cp $TMPDIR/allDemos.py $TMPDIR/demo$demoSuffix
+  mv $TMPDIR/allDemos.py $TMPDIR/demo$demoSuffix
 done
 
 tar cf - -C $WORKINGDIR/$LABEL demoscript | tar xf - -C $TMPDIR

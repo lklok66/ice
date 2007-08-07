@@ -20,7 +20,7 @@ def runDemos(args, demos, num = 0):
     if not os.path.exists(rootPath):
         rootPath = "."
         
-    if not os.path.exists(os.path.join(rootPath), os.path.normpath(demos[i])):
+    if not os.path.exists(os.path.join(rootPath, os.path.normpath(demos[0]))):
         print "Unable to locate first demo. Check directory structure and location of scripts"
         sys.exit(1)
 
