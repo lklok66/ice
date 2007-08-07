@@ -64,7 +64,10 @@ def run(client, server):
     client.expect(pexpect.EOF)
     assert client.wait() == 0
 
-    admin = demoscript.Util.spawn('iceboxadmin --Ice.Config=config.icebox shutdown')
+    admin = demoscript.Util.spawn('iceboxadmin --IceBox.InstanceName=DemoIceBox --IceBox.ServiceManager.Endpoints="tcp -p 9998:ssl -p 9999" shutdown')
+
     admin.expect(pexpect.EOF)
+    assert admin.wait() == 0
+
     server.expect(pexpect.EOF)
     assert server.wait() == 0

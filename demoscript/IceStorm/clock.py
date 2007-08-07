@@ -26,11 +26,13 @@ def runtest(icestorm, subCmd, subargs, pubCmd, pubargs):
 
     pub.kill(signal.SIGINT)
     pub.expect(pexpect.EOF)
-    assert pub.wait() == 0
+    status = pub.wait()
+    assert status == 0 or status == 130 or pub.signalstatus == signal.SIGINT
 
     sub.kill(signal.SIGINT)
     sub.expect(pexpect.EOF)
-    assert sub.wait() == 0
+    status = sub.wait()
+    assert status == 0 or status == 130 or sub.signalstatus == signal.SIGINT
     try:
         icestorm.expect('Unsubscribe:')
     except pexpect.TIMEOUT:

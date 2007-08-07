@@ -106,7 +106,7 @@ class spawn(pexpect.spawn):
     def wait(self):
         try:
             return pexpect.spawn.wait(self)
-        except pexpect.ExceptionPexpect:
+        except pexpect.ExceptionPexpect, e:
             return self.exitstatus
 
 def cleanDbDir(path):
