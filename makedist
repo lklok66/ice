@@ -99,17 +99,19 @@ echo "Creating $WORKINGDIR/$LABEL with $REFSPEC"
 
 [ -d $WORKINGDIR/$LABEL ] && rm -rf $LABEL
 git archive --prefix="$LABEL/" $REFSPEC | ( cd $WORKINGDIR && tar xf - )
-[ "$runmakedist" -eq "0" ] && { echo "Skipping makedist.py step on user's request" ;  exit 0 ; }
-
-echo "Walking directories and creating source distributions"
+currentdir=`pwd`
 cd $WORKINGDIR/$LABEL
 
 ICEVER=`awk "/.*ICE_STRING_VERSION.*/ { print \\$3 }" cpp/include/IceUtil/Config.h | sed -e s/\"//g` # "
 
 SOURCEDIR="$BASEDIR/../dist-$ICEVER"
-[ ! -d $SOURCEDIR ] && mkdir $SOURCEDIR
 
-currentdir=`pwd`
+if [ "$runmakedist" -eq "1" ];
+then
+    
+    echo "Walking directories and creating source distributions"
+    [ ! -d $SOURCEDIR ] && mkdir $SOURCEDIR
+    currentdir=`pwd`
 #
 # The person creating the source distribution must have:
 #   jdk 1.5 installed
@@ -134,32 +136,88 @@ currentdir=`pwd`
 # properly configure the relevant Java environments will depend on your
 # system.
 
-source java_env 1.4
-for f in `find . -maxdepth 1 -name "*" -type d` ;
-do
-   if [ -f $currentdir/$f/makedist.py ];
-   then
-      cd $currentdir/$f 
-      python makedist.py 
-      cp dist/* $SOURCEDIR
-  fi
-done
+    source java_env 1.4
+    for f in `find . -maxdepth 1 -name "*" -type d` ;
+      do
+      if [ -f $currentdir/$f/makedist.py ];
+	  then
+	  cd $currentdir/$f 
+	  python makedist.py 
+	  cp dist/* $SOURCEDIR
+      fi
+    done
 
-if [ -f $currentdir/java/makedist.py ];
-then
-    source java_env 1.5
-    cd $currentdir/java
-    python makedist.py 
-    cp dist/* $SOURCEDIR
+    if [ -f $currentdir/java/makedist.py ];
+	then
+	source java_env 1.5
+	cd $currentdir/java
+	python makedist.py 
+	cp dist/* $SOURCEDIR
+    fi
 fi
- 
+
 cd $currentdir/cpp
 cp makebindist.py $SOURCEDIR
-tar cfz $SOURCEDIR/distfiles.tar.gz --wildcards -C ./install . -C ../include/IceUtil Config.h -C ../../.. RELEASE_NOTES.txt
+tar cfz $SOURCEDIR/distfiles.tar.gz -C ./install . -C ../include/IceUtil Config.h -C ../../.. RELEASE_NOTES.txt
 
 cd $currentdir
 
+#
+# Consolidating demoscript archive.
+#
+TMPDIR=$WORKINGDIR/dscrpt/Ice-$ICEVER-demos
+rm -rf $TMPDIR
+mkdir $TMPDIR
+
+for f in $SOURCEDIR/*demo-scripts-$ICEVER.tar.gz;
+do
+  demoSuffix=""
+  archfile=`basename $f`
+  case "${archfile:0:4}" in
+      Ice-)
+	  demoSuffix="cxx"
+      ;;
+      IceJ)
+	  demoSuffix="j"
+      ;;
+      IceP)
+	  if [ "${f:0:5}" == "IcePy" ];
+	  then
+	      demoSuffix="py"
+	  else
+	      #
+	      # We don't do anything for PHP yet.
+	      #
+	      continue
+	  fi
+      ;;
+      IceR)
+	  demoSuffix="rb"
+      ;;
+      IceC)
+	  demoSuffix="cs"
+      ;;
+      *)
+      # Ignore.
+      continue
+      ;;
+  esac
+  
+  gzip -dc $f | tar xf - -C $TMPDIR
+  mv $TMPDIR/demo $TMPDIR/demo$demoSuffix
+  cp $TMPDIR/allDemos.py $TMPDIR/demo$demoSuffix
+done
+
+tar cf - -C $WORKINGDIR/$LABEL demoscript | tar xf - -C $TMPDIR
+
+[ ! -d $TMPDIR/democxx ] && { echo "Failure in creating demo script archive. C++ mapping scripts missing." ; exit 1; }
+mv $TMPDIR/democxx $TMPDIR/demo
+pushd $TMPDIR/..
+rm -f $SOURCEDIR/Ice-$ICEVER-demo-scripts.tar.gz
+tar cf $SOURCEDIR/Ice-$ICEVER-demo-scripts.tar Ice-$ICEVER-demos
+gzip -9 $SOURCEDIR/Ice-$ICEVER-demo-scripts.tar
+
 # Cleanup
-[ "$KEEP" -eq "0" ] && echo "Cleaning up working files..." && cd $WORKINGDIR && rm -rf $LABEL
+[ "$KEEP" -eq "0" ] && echo "Cleaning up working files..." && cd $WORKINGDIR && { rm -rf $LABEL ; rm -rf $TMPDIR; }
 cd $BASEDIR
 echo "Source distributions can be found in $SOURCEDIR"
