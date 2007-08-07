@@ -38,4 +38,4 @@ os.chdir(cwd)
 
 client = demoscript.Util.spawn('ruby Client.rb')
 
-demoscript.Ice.value.run(client, server)
+demoscript.Ice.value.run(client, server, ruby=True)

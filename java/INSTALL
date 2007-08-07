@@ -172,26 +172,28 @@ Ice for C++ distribution. You need to set the ICE_HOME environment
 variable to the path where these applications are installed for these
 tests to run properly:
 
-# On Unix.
-$ export ICE_HOME=/opt/Ice-@ver@
+  # On Unix.
+  $ export ICE_HOME=/opt/Ice-@ver@
 
-# On Windows
-$ set ICE_HOME=c:\Ice-@ver@
+  # On Windows
+  > set ICE_HOME=c:\Ice-@ver@
 
-To run the tests, you will need Python:
+Python is required to run the test suite:
 
   http://www.python.org/download
 
-Once Python is installed, you can run the entire Ice for Java test suite
-by running:
+To run the tests, open a command window and change to the top-level
+directory. At the command prompt, execute:
 
-python allTests.py
+  > python allTests.py
+
+You can also run tests individually by changing to the test directory
+and running this command:
+
+  > python run.py
 
 If everything worked out, you should see lots of "ok" messages. In
 case of a failure, the tests abort with "failed".
-
-You can also run individual tests in the various test directories with
-"python run.py".
 
 If you want to try out any of the demos, make sure to add lib/Ice.jar
 and "classes" to your CLASSPATH. Then change to the desired demo
@@ -199,12 +201,12 @@ directory and follow the instructions in the README file. If no README
 file is present, the demo can be run by entering the following command
 to start the server:
 
-$ java Server
+  $ java Server
 
 Then in a separate window enter the following command to start the
 client:
 
-$ java Client
+  $ java Client
 
 
 ======================================================================

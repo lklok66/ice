@@ -30,8 +30,19 @@ if demoscript.Util.defaultHost:
 else:
     args = ''
 
+iceboxnet = "iceboxnet.exe"
+if len(demoscript.Util.mono()) > 0:
+    prefix = [ "../../..", "/usr" ]
+    if os.environ.has_key("ICE_HOME"):
+        prefix.append(os.environ["ICE_HOME"])
+    for p in prefix:
+        path = os.path.join(p, "bin", iceboxnet)
+        if os.path.exists(path):
+            iceboxnet = path
+            break
 # TODO: This doesn't setup LD_LIBRARY_PATH
-server = demoscript.Util.spawn('%siceboxnet.exe --Ice.Config=config.icebox --Ice.PrintAdapterReady %s' % (demoscript.Util.mono(), args))
+server = demoscript.Util.spawn('%s%s --Ice.Config=config.icebox --Ice.PrintAdapterReady %s' % (
+        demoscript.Util.mono(), iceboxnet, args))
 server.expect('.* ready')
 client = demoscript.Util.spawn('%sclient.exe' % (demoscript.Util.mono()))
 client.expect('.*==>')
