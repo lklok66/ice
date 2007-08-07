@@ -987,9 +987,6 @@ def main():
         print 'No build directory specified, defaulting to $HOME/tmp/icebuild'
         buildDir = os.path.join(os.environ.get('HOME'), "tmp", "icebuild")
         
-    if not os.path.exists(buildDir):
-        os.mkdir(buildDir)
-
     if installDir == None:
         print 'No install directory specified, default to $HOME/tmp/iceinstall'
         installDir = os.path.join(os.environ.get('HOME'), "tmp", "iceinstall")
@@ -1003,9 +1000,8 @@ def main():
         if os.path.exists(installDir):
             shutil.rmtree(installDir, True)
 
-    directories = [buildDir, os.path.join(buildDir, "sources"), os.path.join(buildDir, "demotree")]
-
-    directories.append(installDir)
+    directories = [buildDir, os.path.join(buildDir, "sources"), os.path.join(buildDir, "demotree"),
+                   os.path.join(buildDir, "install"), installDir]
 
     for d in directories:
         initDirectory(d)
