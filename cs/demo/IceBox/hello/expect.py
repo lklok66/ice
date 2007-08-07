@@ -31,7 +31,16 @@ else:
     args = ''
 
 # TODO: This doesn't setup LD_LIBRARY_PATH
-server = demoscript.Util.spawn('%siceboxnet.exe --Ice.Config=config.icebox --Ice.PrintAdapterReady %s' % (demoscript.Util.mono(), args))
+iceboxnet = "iceboxnet.exe"
+if demoscript.Util.isWin32() == False:
+    if os.path.exists(os.path.join("../../..", "bin", "iceboxnet.exe")):
+        iceboxnet = os.path.join("../../..", "bin","iceboxnet.exe")
+    elif os.path.exists(os.path.join("/usr", "bin", "iceboxnet.exe")):
+        iceboxnet = os.path.join("/usr", "bin", "iceboxnet.exe")
+    elif os.environ.has_key("ICE_HOME"):
+        iceboxnet = os.path.join(os.environ["ICE_HOME"], "bin", "iceboxnet.exe")
+
+server = demoscript.Util.spawn('%s%s --Ice.Config=config.icebox --Ice.PrintAdapterReady %s' % (demoscript.Util.mono(), iceboxnet, args))
 server.expect('.* ready')
 client = demoscript.Util.spawn('%sclient.exe' % (demoscript.Util.mono()))
 client.expect('.*==>')
