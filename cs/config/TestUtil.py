@@ -283,6 +283,15 @@ if isWin32():
     else:
         os.environ["PATH"] = os.path.join(toplevel, "bin") + ";" + os.getenv("PATH", "")
 
+if mono:
+    sep = ""
+    if isWin32():
+        sep = ";"
+    else:
+        sep = ":"
+    os.environ["MONO_PATH"] = os.path.join(toplevel, "bin") + sep + os.getenv("MONO_PATH", "")
+
+
 if protocol == "ssl":
     plugin               = " --Ice.Plugin.IceSSL=" + os.path.join(toplevel, "bin", "icesslcs.dll") + \
                            ":IceSSL.PluginFactory"
