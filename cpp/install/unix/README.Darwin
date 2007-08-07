@@ -78,11 +78,6 @@ Setting up your environment to use Ice
 General
 -------
 
-The discussion below assumes you have defined the ICE_HOME variable
-with the directory of your Ice installation. For example:
-
-$ export ICE_HOME=/opt/Ice-@ver@
-
 If you have installed Ice in a non-default location (i.e., other than
 /opt/Ice-@ver@), setting ICE_HOME is required if you wish to:
 
@@ -91,13 +86,11 @@ If you have installed Ice in a non-default location (i.e., other than
  - Build the C++, Java or C# demos in the Ice example source code
    archive.
 
- - Run certain tests and examples in the source code distributions.
-
 In order to use Ice services and tools such as Slice translators, you
-need to add $ICE_HOME/bin to your PATH as shown in the bash command
-below:
+need to add location of the Ice binaries to your PATH as shown in the
+bash command below:
 
-$ export PATH=$ICE_HOME/bin:$PATH
+$ export PATH=<Ice installation directory>/bin:$PATH
 
 Ice shared libraries and executables in this distribution contain 
 /opt/Ice-@mmver@/lib as the embedded runpath. In order to run Ice
@@ -106,11 +99,12 @@ services and tools, you can do one of the following:
  - Create a symbolic link /opt/Ice-@mmver@ that points to your Ice
    installation:
 
-   $ ln -s $ICE_HOME /opt/Ice-@mmver@
+   $ ln -s <Ice installation directory> /opt/Ice-@mmver@ 
 
- - Add $ICE_HOME/lib to your DYLD_LIBRARY_PATH environment variable:
+ - Add the Ice lib directory to your DYLD_LIBRARY_PATH environment
+   variable:
 
-   $ export DYLD_LIBRARY_PATH=$ICE_HOME/lib:$DYLD_LIBRARY_PATH
+   $ export DYLD_LIBRARY_PATH=<Ice installation directory>/lib:$DYLD_LIBRARY_PATH
 
 On Intel platforms, you also need to set DYLD_BIND_AT_LAUNCH to
 prevent random crashes at runtime in the dynamic linker binding code:
@@ -121,12 +115,14 @@ $ export DYLD_BIND_AT_LAUNCH=1
 C++
 ---
 
-When compiling Ice for C++ programs, you must pass $ICE_HOME/include
-to the compiler with the -I option, and $ICE_HOME/lib with the -L
-option. Furthermore, a C++ program needs to link with at least libIce
-and libIceUtil, so a typical link command would look like this:
+When compiling Ice for C++ programs, you must pass the Ice include
+directory to the compiler with the -I option, and the Ice library
+directory with the -L option. Furthermore, a C++ program needs to link
+with at least libIce and libIceUtil, so a typical link command would
+look like this:
 
-$ c++ -o myprogram myprogram.o -L$ICE_HOME/lib -lIce -lIceUtil
+$ c++ -I <Ice installation directory>/include -o myprogram myprogram.o \
+  -L<Ice installation directory>/lib -lIce -lIceUtil
 
 Additional libraries are necessary if you are using an Ice service
 such as IceGrid or Glacier2.
@@ -135,20 +131,20 @@ such as IceGrid or Glacier2.
 Java
 ----
 
-To use Ice for Java, you must add $ICE_HOME/lib/Ice.jar to your
-CLASSPATH, as shown below:
+To use Ice for Java, you must add Ice.jar to your CLASSPATH, as shown
+below:
 
-$ export CLASSPATH=$ICE_HOME/lib/Ice.jar:$CLASSPATH
+$ export CLASSPATH=<Ice installation directory>/lib/Ice.jar:$CLASSPATH
 
 To use the Java2 version of Ice instead, modify your CLASSPATH as
 follows:
 
-$ export CLASSPATH=$ICE_HOME/lib/java2/Ice.jar:$CLASSPATH
+$ export CLASSPATH=<Ice installation directory>/lib/java2/Ice.jar:$CLASSPATH
 
 If you plan to use Freeze for persistence, you must also add the
 Berkeley DB JAR file (db.jar) to your CLASSPATH:
 
-$ export CLASSPATH=$ICE_HOME/lib/db.jar:$CLASSPATH
+$ export CLASSPATH=<Ice installation directory>/lib/db.jar:$CLASSPATH
 
 In addition, the JVM requires that the directory containing the
 Berkeley DB libraries be listed in java.library.path, therefore you
@@ -181,7 +177,7 @@ To use Ice for Python, the PYTHONPATH environment variable must be
 updated so that the interpreter can load the Ice extension and
 supporting Python files:
 
-$ export PYTHONPATH=$ICE_HOME/python:$PYTHONPATH
+$ export PYTHONPATH=<Ice installation directory>/python:$PYTHONPATH
 
 
 ======================================================================
@@ -192,7 +188,7 @@ A Java-based graphical tool for administering IceGrid applications
 is included in this distribution. The Java archive file is installed
 as
 
-$ICE_HOME/lib/IceGridGUI.jar
+<Ice installation directory>/lib/IceGridGUI.jar
 
 With a suitable Java installation, you can execute the application
 using the following command:
