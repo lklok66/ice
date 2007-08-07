@@ -89,22 +89,38 @@ icephpver = "IcePHP-" + version
 
 os.mkdir(os.path.join(distdir, icephpver))
 
+if verbose:
+    quiet = "v"
+else:
+    quiet = ""
+
+#
+# Create demo script archive.
+#
+print "Creating demo script archive"
+demoScripts = find(".", "expect.py")
+demoScripts.append("allDemos.py")
+demoScriptFile = open("demoscripts", "w")
+for f in demoScripts:
+    print>>demoScriptFile, f
+demoScriptFile.close()
+
+archive = os.path.join("dist", "IcePHP-demo-scripts-" + version)
+os.system("tar c" + quiet + "f " + archive+ ".tar -T demoscripts")
+os.system("gzip -9 " + archive + ".tar")
+os.remove("demoscripts")
 
 #
 # Remove files.
 #
 filesToRemove = [ "makedist.py", "exclusions", "dist" ]
 filesToRemove.extend(find(".", ".gitignore"))
+filesToRemove.extend(demoScripts)
 
 exclusionFile = open("exclusions", "w")
 for x in filesToRemove:
     exclusionFile.write("%s\n" % x)
 exclusionFile.close()
-
-if verbose:
-    quiet = "v"
-else:
-    quiet = ""
 
 os.system("tar c" + quiet + " -X exclusions . | ( cd " + os.path.join(distdir, icephpver) + " && tar xf - )")
 

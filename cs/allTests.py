@@ -150,9 +150,9 @@ for o, a in opts:
     if o == "--protocol":
         if a not in ( "ssl", "tcp"):
             usage()
-        protocol = o
+        protocol = a
     if o == "--host":
-        host = o
+        host = a
     if o == "--debug":
         debug = 1
     if o == "--compress":

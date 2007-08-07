@@ -107,20 +107,38 @@ icepyver = "IcePy-" + version
 os.mkdir(os.path.join(distdir, icepyver))
 
 #
+# Create demo script archive.
+#
+print "Creating demo script archive"
+demoScripts = find(".", "expect.py")
+demoScripts.append("allDemos.py")
+demoScriptFile = open("demoscripts", "w")
+for f in demoScripts:
+    print>>demoScriptFile, f
+demoScriptFile.close()
+
+if verbose:
+    quiet = "v"
+else:
+    quiet = ""
+
+archive = os.path.join("dist", "IcePy-demo-scripts-" + version)
+os.system("tar c" + quiet + "f " + archive+ ".tar -T demoscripts")
+os.system("gzip -9 " + archive + ".tar")
+os.remove("demoscripts")
+
+#
 # Remove files.
 #
 print "Creating exclusion file..."
 filesToRemove = [ "exclusions", "makedist.py", "makebindist.py", "dist"]
 filesToRemove.extend(find(".", ".gitignore"))
+filesToRemove.extend(demoScripts)
 
 exclusionFile = open("exclusions", "w")
 for x in filesToRemove:
     exclusionFile.write("%s\n" % x)
 exclusionFile.close()
-if verbose:
-    quiet = "v"
-else:
-    quiet = ""
 os.system("tar c" + quiet + " -X exclusions . | ( cd " + os.path.join(distdir, icepyver) + " && tar xf - )")
 
 os.chdir(distdir)
