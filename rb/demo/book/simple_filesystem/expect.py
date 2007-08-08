@@ -22,10 +22,13 @@ except ImportError:
     sys.path.append(os.path.join(toplevel))
     import demoscript
 
-if not os.environ.has_key("ICE_HOME"):
-    print "ICE_HOME must be defined."
+if os.path.exists("../../../../cpp"):
+    iceHome = "../../../../cpp"
+elif os.path.exists("../../../demo"):
+    iceHome = "../../../"
+else:
+    print "Cannot find C++ demos"
     sys.exit(1)
-iceHome = os.environ["ICE_HOME"]
 
 import demoscript.Util
 
