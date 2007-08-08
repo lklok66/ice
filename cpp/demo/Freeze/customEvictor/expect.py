@@ -30,14 +30,14 @@ if demoscript.Util.isDarwin():
 
 print "testing IceUtl::Cache evictor"
 server = demoscript.Util.spawn('./server --Ice.PrintAdapterReady')
-server.expect(".* ready")
+server.expect(".* ready", timeout=120)
 
 client = demoscript.Util.spawn('./client')
 client.expect(pexpect.EOF, timeout=200)
 print client.before
 
 server.kill(signal.SIGINT)
-server.expect(pexpect.EOF)
+server.expect(pexpect.EOF, timeout=60)
 assert server.wait() == 0
 
 print "testing simple evictor"
@@ -50,5 +50,5 @@ assert client.wait() == 0
 print client.before
 
 server.kill(signal.SIGINT)
-server.expect(pexpect.EOF)
+server.expect(pexpect.EOF, timeout=60)
 assert server.wait() == 0

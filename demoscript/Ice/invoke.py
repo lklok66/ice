@@ -18,7 +18,11 @@ def run(client, server):
     client.sendline('2')
     server.expect("Printing string sequence \\{'The', 'streaming', 'API', 'works!'\\}");
     client.sendline('3')
-    server.expect("Printing dictionary \\{API=works!, The=streaming\\}")
+    server.expect("Printing dictionary \\{")
+    i = server.expect(["API=works!", "The=streaming"])
+    j = server.expect(["API=works!", "The=streaming"])
+    assert i != j
+    server.expect("\\}")
     client.sendline('4')
     server.expect("Printing enum green")
     client.sendline('5')

@@ -21,9 +21,10 @@ def run(client, server):
     server.expect('locate')
     client.expect('Down to a sunless sea')
     server.expect('locate')
-    client.expect('Destroying Coleridge')
+    i = client.expect(['Destroying Coleridge', 'Destroying README'])
     server.expect('removed object')
-    client.expect('Destroying README')
+    j = client.expect(['Destroying Coleridge', 'Destroying README'])
+    assert i != j
     server.expect('removed object')
     client.expect(pexpect.EOF)
     assert client.wait() == 0

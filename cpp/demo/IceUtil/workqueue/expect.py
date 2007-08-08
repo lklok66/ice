@@ -26,7 +26,7 @@ import demoscript.Util
 import demoscript.Ice.hello
 
 server = demoscript.Util.spawn('./workqueue')
-server.expect('Pushing work items.*ok')
+server.expect('Pushing work items')
 
 print "testing...",
 sys.stdout.flush()

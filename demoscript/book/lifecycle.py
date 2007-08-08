@@ -83,14 +83,16 @@ def run(client, server):
 
     client.sendline('ls')
     client.expect('ls\r\n')
-    client.expect('a \(file\)\r\n')
-    client.expect('b \(directory\)')
+    i = client.expect(['a \(file\)', 'b \(directory\)'])
+    j = client.expect(['a \(file\)', 'b \(directory\)'])
+    assert i != j
     client.expect('\r\n>')
 
     client.sendline('lr')
     client.expect('lr\r\n')
-    client.expect('a \(file\)\r\n')
-    client.expect('b \(directory\):')
+    i = client.expect(['a \(file\)', 'b \(directory\)'])
+    j = client.expect(['a \(file\)', 'b \(directory\)'])
+    assert i != j
     client.expect('\r\n>')
 
     client.sendline('cd b')
@@ -111,10 +113,13 @@ def run(client, server):
 
     client.sendline('lr')
     client.expect('lr\r\n')
-    client.expect('a \(file\)\r\n')
-    client.expect('b \(directory\):')
-    client.expect('\tc \(directory\):')
-    client.expect('\r\n>')
+    i = client.expect(['a \(file\)', 'b \(directory\)'])
+    if i == 1:
+	client.expect('c \(directory\):')
+        client.expect('a \(file\)')
+    else:
+        client.expect('b \(directory\)')
+	client.expect('\tc \(directory\):')
 
     client.sendline('mkfile c')
     client.expect('mkfile c\r\n>')
