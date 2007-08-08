@@ -116,12 +116,12 @@ cd $WORKINGDIR/$LABEL
 ICEVER=`awk "/.*ICE_STRING_VERSION.*/ { print \\$3 }" cpp/include/IceUtil/Config.h | sed -e s/\"//g` # "
 
 SOURCEDIR="$BASEDIR/../dist-$ICEVER"
+[ ! -d $SOURCEDIR ] && mkdir -p $SOURCEDIR
 
 if [ "$RUNMAKEDIST" -eq "1" ];
 then
     
     echo "Walking directories and creating source distributions"
-    [ ! -d $SOURCEDIR ] && mkdir $SOURCEDIR
     currentdir=`pwd`
 #
 # The person creating the source distribution must have:
@@ -180,7 +180,7 @@ cd $WORKINGDIR/$LABEL
 if [ "$SCRIPTARCHIVE" -eq "1" ];
 then
     rm -rf $TMPDIR
-    mkdir $TMPDIR
+    mkdir -p $TMPDIR
     for f in `find . -maxdepth 1 -name "*" -type d` ;
     do
 	#
