@@ -25,11 +25,9 @@ except ImportError:
 if os.path.exists("../../../../cpp"):
     iceHome = "../../../../cpp"
 elif os.path.exists("../../../demo"):
-    iceHome = "../../../demo"
-elif os.environ.has_key("ICE_HOME"):
-    iceHome = os.environ["ICE_HOME"]
+    iceHome = "../../../"
 else:
-    print "ICE_HOME must be defined."
+    print "Cannot find C++ demos"
     sys.exit(1)
 
 import demoscript.Util
