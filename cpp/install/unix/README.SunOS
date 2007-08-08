@@ -113,8 +113,8 @@ If you have installed Ice in a non-default location (i.e., other than
    archive.
 
 In order to use Ice services and tools such as Slice translators, you
-need to add location of the Ice binaries to your PATH as shown in the
-bash command below:
+need to add the location of the Ice binaries to your PATH as shown in
+the bash command below:
 
 $ export PATH=<Ice installation directory>/bin:$PATH
 

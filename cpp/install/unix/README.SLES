@@ -114,8 +114,8 @@ If you have installed Ice in a non-default location (i.e., other than
    archive.
 
 In order to use Ice services and tools such as Slice translators, you
-need to add location of the Ice binaries to your PATH as shown in the
-bash command below:
+need to add the location of the Ice binaries to your PATH as shown in
+the bash command below:
 
 $ export PATH=<Ice installation directory>/bin:$PATH
 
@@ -133,8 +133,8 @@ services and tools, you can do one of the following:
    $ export LD_LIBRARY_PATH=<Ice installation directory>/lib:$LD_LIBRARY_PATH
 
    With the x86_64 distribution, libraries are installed in <Ice
-   installation directory>/lib64; if you use this distribution, set your
-   LD_LIBRARY_PATH as follows:
+   installation directory>/lib64; if you use this distribution, set
+   your LD_LIBRARY_PATH as follows:
 
    $ export LD_LIBRARY_PATH=<Ice installation directory>/lib64:$LD_LIBRARY_PATH
 
@@ -282,9 +282,9 @@ instead of <Ice installation directory>/lib)
 
 At run time, the PHP interpreter requires the Ice shared libraries as
 well as the Slice preprocessor (<Ice installation
-directory>/bin/icecpp), therefore these components must be in a standard
-location or accessible via the PATH and LD_LIBRARY_PATH environment
-variables.
+directory>/bin/icecpp), therefore these components must be in a
+standard location or accessible via the PATH and LD_LIBRARY_PATH
+environment variables.
 
 You can verify that the Ice extension is installed properly by
 examining the output of the "php -m" command, or by calling the
