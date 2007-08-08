@@ -40,7 +40,7 @@ else:
 print "starting icegridnode...",
 sys.stdout.flush()
 node = demoscript.Util.spawn('icegridnode --Ice.Config=config.grid --Ice.PrintAdapterReady %s' % (args))
-node.expect('IceGrid.Registry.Internal ready\r\nIceGrid.Registry.Server ready\r\nIceGrid.Registry.Client ready\r\nIceGrid.Node ready')
+node.expect('IceGrid.Registry.Internal ready\r{1,2}\nIceGrid.Registry.Server ready\r{1,2}\nIceGrid.Registry.Client ready\r{1,2}\nIceGrid.Node ready')
 print "ok"
 
 print "deploying application...",
@@ -61,7 +61,7 @@ node.expect('Subscribe:.*Subscribe:.*Subscribe:')
 pub = demoscript.Util.spawn('./publisher')
 
 time.sleep(3)
-sub.expect('[0-9][0-9]/[0-9][0-9].*\r\n[0-9][0-9]/[0-9][0-9]')
+sub.expect('[0-9][0-9]/[0-9][0-9].*\r{1,2}\n[0-9][0-9]/[0-9][0-9]')
 print "ok"
 
 print "testing replication...",
@@ -73,7 +73,7 @@ admin.sendline('server stop DemoIceStorm-1')
 admin.expect('>>>')
 
 time.sleep(3)
-sub.expect('[0-9][0-9]/[0-9][0-9].*\r\n[0-9][0-9]/[0-9][0-9]')
+sub.expect('[0-9][0-9]/[0-9][0-9].*\r{1,2}\n[0-9][0-9]/[0-9][0-9]')
 
 admin.sendline('server disable DemoIceStorm-2')
 admin.expect('>>>')
@@ -81,7 +81,7 @@ admin.sendline('server stop DemoIceStorm-2')
 admin.expect('>>>')
 
 time.sleep(3)
-sub.expect('[0-9][0-9]/[0-9][0-9].*\r\n[0-9][0-9]/[0-9][0-9]')
+sub.expect('[0-9][0-9]/[0-9][0-9].*\r{1,2}\n[0-9][0-9]/[0-9][0-9]')
 
 admin.sendline('server disable DemoIceStorm-3')
 admin.expect('>>>')

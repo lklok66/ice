@@ -113,7 +113,7 @@ def run(client, server):
     isbn, title, author = books[0]
     client.sendline('isbn %s' % (isbn))
     #server.expect('locate')
-    client.expect('current book is:.*isbn.*\r\ntitle.*\r\nauthors')
+    client.expect('current book is:.*isbn.*\r{1,2}\ntitle.*\r{1,2}\nauthors')
     client.sendline('rent matthew')
     #server.expect('locate')
     client.expect("the book is now rented by `matthew'")
@@ -138,7 +138,7 @@ def run(client, server):
     isbn, title, author = books[0]
     client.sendline('isbn %s' % (isbn))
     #server.expect('locate')
-    client.expect('current book is:.*isbn.*\r\ntitle.*\r\nauthors')
+    client.expect('current book is:.*isbn.*\r{1,2}\ntitle.*\r{1,2}\nauthors')
     client.sendline('remove')
     #server.expect('locate')
     #server.expect('removed')

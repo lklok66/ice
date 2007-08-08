@@ -22,7 +22,7 @@ def runtest(icestorm, subCmd, subargs, pubCmd, pubargs):
 
     pub.expect('publishing tick events')
     time.sleep(3)
-    sub.expect('[0-9][0-9]/[0-9][0-9].*\r\n[0-9][0-9]/[0-9][0-9]')
+    sub.expect('[0-9][0-9]/[0-9][0-9].*\r{1,2}\n[0-9][0-9]/[0-9][0-9]')
 
     pub.kill(signal.SIGINT)
     pub.expect(pexpect.EOF)

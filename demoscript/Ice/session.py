@@ -20,7 +20,7 @@ def run(clientStr, server):
     server.expect('The session foo is now created.')
     client.sendline('c')
     client.sendline('0')
-    server.expect("Hello object #0 for session `foo' says:\r\nHello foo!")
+    server.expect("Hello object #0 for session `foo' says:\r{1,2}\nHello foo!")
     client.sendline('1')
     client.expect('Index is too high')
     client.sendline('x')
@@ -39,7 +39,7 @@ def run(clientStr, server):
     client.sendline('t')
     client.expect(pexpect.EOF)
     assert client.wait() == 0
-    server.expect("The session foo is now destroyed.\r\n.*The session foo has timed out.", timeout=25)
+    server.expect("The session foo is now destroyed.\r{1,2}\n.*The session foo has timed out.", timeout=25)
     print "ok"
 
     client = demoscript.Util.spawn(clientStr)

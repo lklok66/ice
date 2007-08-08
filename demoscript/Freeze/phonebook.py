@@ -43,12 +43,12 @@ def run(client, server):
     for l in f:
         client.sendline(l)
         try:
-            client.expect('\r\n', timeout=0)
+            client.expect('\r{1,2}\n', timeout=0)
         except pexpect.TIMEOUT:
             pass
     try:
         while True:
-            client.expect('\r\n', timeout=1)
+            client.expect('\r{1,2}\n', timeout=1)
     except pexpect.TIMEOUT:
         pass
     print "ok"

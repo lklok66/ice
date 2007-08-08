@@ -31,7 +31,7 @@ server.expect('.* ready')
 print "testing...",
 sys.stdout.flush()
 client = demoscript.Util.spawn('./client')
-client.expect('Contents of root directory:\r\n.*Down to a sunless sea.')
+client.expect('Contents of root directory:\r{1,2}\n.*Down to a sunless sea.')
 client.expect(pexpect.EOF)
 assert client.wait() == 0
 print "ok"

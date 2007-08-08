@@ -38,6 +38,6 @@ server.expect('.* ready')
 print "testing...",
 sys.stdout.flush()
 client = demoscript.Util.spawn('ruby Client.rb')
-client.expect('Contents of root directory:\r\n.*Down to a sunless sea.')
+client.expect('Contents of root directory:\r{1,2}\n.*Down to a sunless sea.')
 client.expect(pexpect.EOF)
 print "ok"
