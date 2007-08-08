@@ -31,6 +31,11 @@ REFSPEC="HEAD"
 #
 KEEP=0
 
+#
+# Build the demo script distribution
+#
+SCRIPTARCHIVE=1
+
 usage()
 {
     echo "makedist [-d working-directory] [-n archive-name] [-t tag] [-M] [-h] [-k]"
@@ -48,6 +53,8 @@ usage()
     echo ""
     echo " -M Skip running the makedist.py files."
     echo ""
+    echo " -E Skip building the demo script archive"
+    echo ""
     echo " -k Don't clean up working files when finished"
     echo ""
     echo " -h Display this message."
@@ -55,9 +62,9 @@ usage()
     return 0
 }
 
-validopts="d:n:t:hMke"
+validopts="d:n:t:hMkE"
 getopts $validopts curopt
-runmakedist=1
+RUNMAKEDIST=1
 while [ ! "x$curopt" == "x:" ] ;
 do
    case $curopt in
@@ -84,9 +91,13 @@ do
 	;;
 
 	M)
-	   runmakedist=0
+	   RUNMAKEDIST=0
 	;;
 
+	E)
+	   SCRIPTARCHIVE=0
+	;;
+	   
 	k)
 	   KEEP=1
 	;;
@@ -106,7 +117,7 @@ ICEVER=`awk "/.*ICE_STRING_VERSION.*/ { print \\$3 }" cpp/include/IceUtil/Config
 
 SOURCEDIR="$BASEDIR/../dist-$ICEVER"
 
-if [ "$runmakedist" -eq "1" ];
+if [ "$RUNMAKEDIST" -eq "1" ];
 then
     
     echo "Walking directories and creating source distributions"
@@ -160,62 +171,68 @@ cd $currentdir/cpp
 cp makebindist.py $SOURCEDIR
 tar cfz $SOURCEDIR/distfiles.tar.gz -C ./install . -C ../include/IceUtil Config.h -C ../../.. RELEASE_NOTES.txt
 
-cd $currentdir
-
 #
 # Consolidating demoscript archive.
 #
 TMPDIR=$WORKINGDIR/dscrpt/Ice-$ICEVER-demos
-rm -rf $TMPDIR
-mkdir $TMPDIR
+cd $WORKINGDIR/$LABEL
 
-for f in $SOURCEDIR/*demo-scripts-$ICEVER.tar.gz;
-do
-  demoSuffix=""
-  archfile=`basename $f`
-  case "${archfile:0:4}" in
-      Ice-)
-	  demoSuffix="cxx"
-      ;;
-      IceJ)
-	  demoSuffix="j"
-      ;;
-      IceP)
-	  if [ "${f:0:5}" == "IcePy" ];
-	  then
-	      demoSuffix="py"
-	  else
-	      #
-	      # We don't do anything for PHP yet.
-	      #
-	      continue
-	  fi
-      ;;
-      IceR)
-	  demoSuffix="rb"
-      ;;
-      IceC)
-	  demoSuffix="cs"
-      ;;
-      *)
-      # Ignore.
-      continue
-      ;;
-  esac
-  
-  gzip -dc $f | tar xf - -C $TMPDIR
-  mv $TMPDIR/demo $TMPDIR/demo$demoSuffix
-  mv $TMPDIR/allDemos.py $TMPDIR/demo$demoSuffix
-done
+if [ "$SCRIPTARCHIVE" -eq "1" ];
+then
+    rm -rf $TMPDIR
+    mkdir $TMPDIR
+    for f in `find . -maxdepth 1 -name "*" -type d` ;
+    do
+	#
+	# Only continue processing this directory if there is an
+	# allDemos.py script there.
+	#
+	[ ! -e $f/allDemos.py ] && continue
+	
+	mappingdir=`basename $f`
+	case $mappingdir in
+	    cpp)
+		demoSuffix="cxx";
+		;;
+	    java)
+		demoSuffix="j";
+		;;
+	    py)
+		demoSuffix="py";
+		;;
+	    rb)
+		demoSuffix="rb";
+		;;
+	    cs)
+		demoSuffix="cs";
+		;;
+	    php)
+		demoSuffix="php";
+		;;
+	    vb)
+		demoSuffix="vb";
+		;;
+	    *)
+		continue;
+		;;
+	esac
+        pushd $mappingdir
+	tar cf - `find . -name "expect.py"` | tar xf - -C $TMPDIR
+	mv $TMPDIR/demo $TMPDIR/demo$demoSuffix
+	cp allDemos.py $TMPDIR/demo$demoSuffix
+	popd
+    done
 
-tar cf - -C $WORKINGDIR/$LABEL demoscript | tar xf - -C $TMPDIR
+    tar cf - -C $WORKINGDIR/$LABEL demoscript | tar xf - -C $TMPDIR
 
-[ ! -d $TMPDIR/democxx ] && { echo "Failure in creating demo script archive. C++ mapping scripts missing." ; exit 1; }
-mv $TMPDIR/democxx $TMPDIR/demo
-pushd $TMPDIR/..
-rm -f $SOURCEDIR/Ice-$ICEVER-demo-scripts.tar.gz
-tar cf $SOURCEDIR/Ice-$ICEVER-demo-scripts.tar Ice-$ICEVER-demos
-gzip -9 $SOURCEDIR/Ice-$ICEVER-demo-scripts.tar
+    [ ! -d $TMPDIR/democxx ] && { echo "Failure in creating demo script archive. C++ mapping scripts missing." ; exit 1; }
+    mv $TMPDIR/democxx $TMPDIR/demo
+    pushd $TMPDIR/..
+    rm -f $SOURCEDIR/Ice-$ICEVER-demo-scripts.tar.gz
+    tar cf $SOURCEDIR/Ice-$ICEVER-demo-scripts.tar Ice-$ICEVER-demos
+    gzip -9 $SOURCEDIR/Ice-$ICEVER-demo-scripts.tar
+    popd
+fi
 
 # Cleanup
 [ "$KEEP" -eq "0" ] && echo "Cleaning up working files..." && cd $WORKINGDIR && { rm -rf $LABEL ; rm -rf $TMPDIR; }
