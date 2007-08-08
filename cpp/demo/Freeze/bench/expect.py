@@ -25,5 +25,10 @@ except ImportError:
 import demoscript.Util
 import demoscript.Freeze.bench
 
+print "cleaning databases...",
+sys.stdout.flush()
+demoscript.Util.cleanDbDir("db")
+print "ok"
+
 client = demoscript.Util.spawn('./client')
 demoscript.Freeze.bench.run(client)

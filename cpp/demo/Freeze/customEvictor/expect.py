@@ -28,6 +28,11 @@ if demoscript.Util.isDarwin():
     print "This demo is not supported under MacOS."
     sys.exit(0)
 
+print "cleaning databases...",
+sys.stdout.flush()
+demoscript.Util.cleanDbDir("db")
+print "ok"
+
 print "testing IceUtl::Cache evictor"
 server = demoscript.Util.spawn('./server --Ice.PrintAdapterReady')
 server.expect(".* ready", timeout=120)
