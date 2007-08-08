@@ -50,6 +50,10 @@
     <target name="clean">
         <delete dir="${generated.dir}"/>
         <delete dir="${class.dir}"/>
+	<delete>
+	    <fileset dir="db" includes="log.*,__catalog"/>
+            <fileset dir="db" includes="evictorfs"/>
+        </delete>
     </target>
 
 </project>

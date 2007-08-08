@@ -57,7 +57,7 @@
         <delete dir="${generated.dir}"/>
         <delete dir="${class.dir}"/>
         <delete>
-	    <fileset dir="db" includes="log.*"/>
+	    <fileset dir="db" includes="log.*,__catalog"/>
             <fileset dir="db" includes="contacts,contacts.*"/>
         </delete>
     </target>
