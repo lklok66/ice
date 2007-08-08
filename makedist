@@ -216,22 +216,24 @@ then
 		continue;
 		;;
 	esac
-        pushd $mappingdir
+	currentdir=`pwd`
+        cd $mappingdir
 	tar cf - `find . -name "expect.py"` | tar xf - -C $TMPDIR
 	mv $TMPDIR/demo $TMPDIR/demo$demoSuffix
 	cp allDemos.py $TMPDIR/demo$demoSuffix
-	popd
+	cd $currentdir
     done
 
     tar cf - -C $WORKINGDIR/$LABEL demoscript | tar xf - -C $TMPDIR
 
     [ ! -d $TMPDIR/democxx ] && { echo "Failure in creating demo script archive. C++ mapping scripts missing." ; exit 1; }
     mv $TMPDIR/democxx $TMPDIR/demo
-    pushd $TMPDIR/..
+    currentdir=`pwd`
+    cd $TMPDIR/..
     rm -f $SOURCEDIR/Ice-$ICEVER-demo-scripts.tar.gz
     tar cf $SOURCEDIR/Ice-$ICEVER-demo-scripts.tar Ice-$ICEVER-demos
     gzip -9 $SOURCEDIR/Ice-$ICEVER-demo-scripts.tar
-    popd
+    cd $currentdir
 fi
 
 # Cleanup
