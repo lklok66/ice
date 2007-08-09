@@ -1,9 +1,9 @@
 Release notes for Ice 3.2.1
 ===========================
 
-The primary purpose of a minor release such as this one is to correct
+The primary purpose of a patch release such as this one is to correct
 known issues while maintaining binary compatibility with the most
-recent major release. A minor release may also contain enhancements if
+recent minor release. A patch release may also contain enhancements if
 they do not affect binary compatibility. 
 
 The sections below describe the fixes and improvements included in
@@ -188,7 +188,7 @@ Sample programs
 Upgrading your applications
 ---------------------------
 
-Since a minor release maintains backward compatibility, you can use
+Since a patch release maintains backward compatibility, you can use
 the libraries in this release as drop-in replacements without
 recompiling your Slice files or rebuilding your applications.
 Naturally, we recommend that you thoroughly test your application with
