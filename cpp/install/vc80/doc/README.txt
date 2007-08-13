@@ -249,8 +249,8 @@ Before running the demos you must modify your CLASSPATH as follows:
 
 set CLASSPATH=<Ice installation directory>\lib\Ice.jar;classes;%CLASSPATH%
 
-If you prefer to use Ice for Java2 rather than Java5, modify your CLASSPATH
-as shown below:
+If you prefer to use Ice for Java2 rather than Java5, modify your
+CLASSPATH as shown below:
 
 set CLASSPATH=<Ice installation directory>\lib\java2\Ice.jar;classes;%CLASSPATH%
 

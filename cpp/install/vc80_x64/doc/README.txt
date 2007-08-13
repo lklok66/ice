@@ -115,11 +115,6 @@ window, type 'client' to start the client.
 Some demo directories contain README files if additional requirements
 are necessary.
 
-The Ice demo source code archive include examples for integrating Ice
-with databases other than BerkeleyDB. These demos are not supported for
-Visual Studio 2005 for 64 bit platforms and are not included in this
-distribution.
-
 
 Binary compatibility
 --------------------
