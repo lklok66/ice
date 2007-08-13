@@ -124,20 +124,6 @@ having to recompile or relink this application.
 Please refer to the RELEASE_NOTES.txt file included in this
 distribution for detailed upgrade instructions.
 
-Ice and the Windows Registry
-----------------------------
-
-The Ice installer adds information to the Windows registry to indicate
-where it was installed. Developers can use this information to locate
-the Ice files in their applications.
-
-The registration key used by this installer is:
-
-HKEY_LOCAL_MACHINE\Software\ZeroC\Ice @ver@ for Visual Studio .NET 2003
-
-The install location is stored as a string value named 'InstallDir'.
-
-
 Acknowledgments
 ---------------
 
