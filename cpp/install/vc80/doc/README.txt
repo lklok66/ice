@@ -97,7 +97,7 @@ environment variable it if you wish to:
 
  - Run the Ice for Python bidir demo found in this distribution.
 
- - Build the Visual Basic and C# demos found in this distribution.
+ - Build the Java demos found in this distribution.
  
 ICE_HOME is used by the applications and build systems listed above to
 locate the applications, header files and libraries included in this
@@ -238,6 +238,8 @@ environment variables need to be defined:
 
 set JAVA_HOME=<Java SDK installation root directory>
 set PATH=<Ice installation directory>\bin;%PATH%
+set ICE_HOME=<Ice installation directory>
+set CLASSPATH=<Ice installation directory>\lib\db.jar;%CLASSPATH%
 
 You can build all of the demos by running 'ant' in the demoj
 directory, or you can build individual demos by changing to the
@@ -245,12 +247,12 @@ desired subdirectory and then running 'ant'.
 
 Before running the demos you must modify your CLASSPATH as follows:
 
-set CLASSPATH=<Ice installation directory>\lib\Ice.jar;<Ice installation directory>\lib\db.jar;classes;%CLASSPATH%
+set CLASSPATH=<Ice installation directory>\lib\Ice.jar;classes;%CLASSPATH%
 
 If you prefer to use Ice for Java2 rather than Java5, modify your CLASSPATH
 as shown below:
 
-set CLASSPATH=<Ice installation directory>\lib\java2\Ice.jar;<Ice installation dir>\lib\db.jar;classes;%CLASSPATH%
+set CLASSPATH=<Ice installation directory>\lib\java2\Ice.jar;classes;%CLASSPATH%
 
 In addition, the JVM requires the directory containing the Berkeley DB
 libraries to be listed in java.library.path, therefore the Ice bin
