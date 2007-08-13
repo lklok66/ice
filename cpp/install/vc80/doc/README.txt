@@ -136,6 +136,10 @@ To build a C++ demo, start Visual Studio 2005 and open the solution
 demo\demo.sln. Right click on the desired demo in the Solution
 Explorer window and select "Build".
 
+If you are using a multi-processor machine, parallel builds must be
+disabled. Under Tools->Options->Projects and Solutions->Build and Run
+in the IDE set "maximum number of parallel project builds" to 1.
+
 Note that if you are using Visual C++ 2005 Express Edition, the Ice
 demos that require MFC (demo/Ice/MFC and demo/IcePatch2/MFC) will not
 compile since MFC support is only included in the Professional edition
@@ -153,21 +157,6 @@ window, type 'client' to start the client.
 
 Some demo directories contain README files if additional requirements
 are necessary.
-
-This distribution includes examples for integrating Ice with
-databases other than BerkeleyDB. These examples are not included in
-the demo.sln file mentioned above and must be built using the
-Microsoft Makefile processor, NMAKE. Under the "Microsoft Visual
-Studio 2005" entry in your "Start" menu, click on the "Visual Studio
-Tools" submenu and select "Visual Studio 2005 Command Prompt". In this
-command prompt window, change to the appropriate demo directory and
-run "nmake /f Makefile.mak". For example:
-
-cd <Ice installation root directory>\demo\Database
-nmake /f Makefile.mak
-
-The current examples are for Oracle, and require the appropriate
-Oracle development environment. 
 
 
 Building and running the C# demos

@@ -99,6 +99,10 @@ To build a C++ demo, start Visual Studio 2005 and open the solution
 demo\demo.sln. Right click on the desired demo in the Solution
 Explorer window and select "Build".
 
+If you are using a multi-processor machine, parallel builds must be
+disabled. Under Tools->Options->Projects and Solutions->Build and Run 
+in the IDE set "maximum number of parallel project builds" to 1.
+
 To run these demos, you need to add the Ice bin directory to your
 PATH, as shown below:
 
@@ -111,11 +115,10 @@ window, type 'client' to start the client.
 Some demo directories contain README files if additional requirements
 are necessary.
 
-The Ice demo source code archive and Windows installers for Visual
-Studio .NET 2003 and Visual Studio 2005 include examples for
-integrating Ice with databases other than BerkeleyDB. These demos are
-not supported for Visual Studio 2005 for 64 bit platforms and are not
-included in this distribution.
+The Ice demo source code archive include examples for integrating Ice
+with databases other than BerkeleyDB. These demos are not supported for
+Visual Studio 2005 for 64 bit platforms and are not included in this
+distribution.
 
 
 Binary compatibility
