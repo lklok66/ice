@@ -626,6 +626,7 @@
 		<col def="S255">DotNetBuildConfiguration</col>
 		<col def="S255">MsiCommandLine</col>
 		<row><td>BERKELEYDB_DEV_KIT</td><td>ZEROC</td><td>&lt;ISProjectDataFolder&gt;</td><td>PackageName</td><td>1</td><td>1033</td><td>0</td><td>1</td><td>Intel</td><td/><td>1033</td><td>0</td><td>0</td><td>0</td><td>0</td><td/><td>0</td><td/><td>MediaLocation</td><td/><td>http://</td><td/><td/><td/><td/><td>44</td><td/><td/><td/></row>
+		<row><td>BERKELEY_DEV_KIT</td><td>ZEROC</td><td>&lt;ISProjectDataFolder&gt;</td><td>PackageName</td><td>1</td><td>1033</td><td>2</td><td>1</td><td>Intel</td><td/><td>1033</td><td>0</td><td>0</td><td>0</td><td>0</td><td/><td>0</td><td/><td>MediaLocation</td><td/><td>http://</td><td/><td/><td/><td/><td>44</td><td/><td/><td/></row>
 	</table>
 
 	<table name="ISReleaseExtended">
@@ -657,6 +658,7 @@
 		<col def="I4">Attributes</col>
 		<col def="I4">JSharpRedistLocation</col>
 		<row><td>BERKELEYDB_DEV_KIT</td><td>ZEROC</td><td/><td/><td/><td/><td/><td/><td/><td/><td/><td/><td/><td/><td/><td/><td/><td/><td/><td/><td/><td/><td/><td/><td/><td/><td/></row>
+		<row><td>BERKELEY_DEV_KIT</td><td>ZEROC</td><td/><td/><td/><td/><td/><td/><td>1</td><td/><td/><td>1</td><td/><td/><td/><td/><td/><td/><td/><td/><td/><td/><td/><td/><td/><td/><td/></row>
 	</table>
 
 	<table name="ISScriptFile">
