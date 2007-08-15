@@ -137,7 +137,6 @@ os.chdir(distdir)
 #
 for file in find(os.path.join(icever, "slice"), "Makefile.mak"):
     editMakefileMak(file)
-shutil.rmtree(os.path.join(icever, "slice", "IceSSL"))
 
 #
 # Get Ice version.
