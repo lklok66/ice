@@ -1,8 +1,8 @@
 %define _unpackaged_files_terminate_build 0
 
-Summary: Third party libraries request by Ice. 
+Summary: Third party JAR files used by the IceGrid Admin GUI
 Name: ice-third-party
-Version: 3.2.0
+Version: 3.2.1
 Release: 1
 License: GPL
 Group:System Environment/Libraries
