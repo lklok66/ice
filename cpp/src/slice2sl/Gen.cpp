@@ -1132,7 +1132,7 @@ Slice::Gen::TypesVisitor::visitSequence(const SequencePtr& p)
 
     emitAttributes(p);
     _out << nl << "public class " << name
-         << " : Ice.CollectionBase<" << s << ">, _System.ICloneable";
+         << " : Ice.CollectionBase<" << s << ">";
     _out << sb;
 
     _out << sp << nl << "#region Constructors";
@@ -1550,7 +1550,7 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
     }
     else
     {
-        _out << nl << "public class " << name << " : _System.ICloneable";
+        _out << nl << "public class " << name;
     }
     _out << sb;
 
@@ -1804,7 +1804,7 @@ Slice::Gen::TypesVisitor::visitDictionary(const DictionaryPtr& p)
 
     emitAttributes(p);
     _out << nl << "public class " << name
-         << " : Ice.DictionaryBase<" << ks << ", " << vs << ">, _System.ICloneable";
+         << " : Ice.DictionaryBase<" << ks << ", " << vs << ">";
     _out << sb;
 
     _out << sp << nl << "#region " << name << " members";
@@ -2960,7 +2960,7 @@ Slice::Gen::HelperVisitor::visitSequence(const SequencePtr& p)
     if(p->findMetaData(prefix, meta))
     {
         string type = meta.substr(prefix.size());
-        if(type == "List" || type == "LinkedList" || type == "Queue" || type == "Stack")
+        if(type == "List")
         {
             return;
         }

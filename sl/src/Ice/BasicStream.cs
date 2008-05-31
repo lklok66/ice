@@ -128,7 +128,7 @@ namespace IceInternal
             other._seqDataStack = _seqDataStack;
             _seqDataStack = tmpSeqDataStack;
 
-            ArrayList tmpObjectList = other._objectList;
+            List<Ice.Object> tmpObjectList = other._objectList;
             other._objectList = _objectList;
             _objectList = tmpObjectList;
 
@@ -566,11 +566,11 @@ namespace IceInternal
         
         public virtual void writeTypeId(string id)
         {
-            object o = _writeEncapsStack.typeIdMap[id];
-            if(o != null)
+            if(_writeEncapsStack.typeIdMap.ContainsKey(id))
             {
+                int index = _writeEncapsStack.typeIdMap[id];
                 writeBool(true);
-                writeSize((int)o);
+                writeSize(index);
             }
             else
             {
@@ -589,8 +589,11 @@ namespace IceInternal
             if(isIndex)
             {
                 index = readSize();
-                id = (string)_readEncapsStack.typeIdMap[index];
-                if(id == null)
+                try
+                {
+                    id = _readEncapsStack.typeIdMap[index];
+                }
+                catch(KeyNotFoundException)
                 {
                     throw new Ice.UnmarshalOutOfBoundsException("Missing type ID");
                 }
@@ -681,24 +684,6 @@ namespace IceInternal
             {
                 writeByteSeq(((List<byte>)v).ToArray());
             }
-            else if(v is LinkedList<byte>)
-            {
-                writeSize(count);
-                expand(count);
-                IEnumerator<byte> i = v.GetEnumerator();
-                while(i.MoveNext())
-                {
-                    _buf.put(i.Current);
-                }
-            }
-            else if(v is Queue<byte>)
-            {
-                writeByteSeq(((Queue<byte>)v).ToArray());
-            }
-            else if (v is Stack<byte>)
-            {
-                writeByteSeq(((Stack<byte>)v).ToArray());
-            }
             else
             {
                 writeSize(count);
@@ -758,40 +743,6 @@ namespace IceInternal
             l = new List<byte>(readByteSeq());
         }
 
-        public virtual void readByteSeq(out LinkedList<byte> l)
-        {
-            //
-            // Reading into an array and copy-constructing the
-            // list is faster than constructing the list
-            // and adding to it one element at a time.
-            //
-            l = new LinkedList<byte>(readByteSeq());
-        }
-
-        public virtual void readByteSeq(out Queue<byte> l)
-        {
-            //
-            // Reading into an array and copy-constructing the
-            // queue is faster than constructing the queue
-            // and adding to it one element at a time.
-            //
-            l = new Queue<byte>(readByteSeq());
-        }
-
-        public virtual void readByteSeq(out Stack<byte> l)
-        {
-            //
-            // Reverse the contents by copying into an array first
-            // because the stack is marshaled in top-to-bottom order.
-            //
-            byte[] array = readByteSeq();
-            l = new Stack<byte>(array.Length);
-            for(int i = array.Length - 1; i >= 0; --i)
-            {
-                l.Push(array[i]);
-            }
-        }
-
         public virtual void writeBool(bool v)
         {
             expand(1);
@@ -823,24 +774,6 @@ namespace IceInternal
             if(v is List<bool>)
             {
                 writeBoolSeq(((List<bool>)v).ToArray());
-            }
-            else if(v is LinkedList<bool>)
-            {
-                writeSize(count);
-                expand(count);
-                IEnumerator<bool> i = v.GetEnumerator();
-                while(i.MoveNext())
-                {
-                    writeBool(i.Current);
-                }
-            }
-            else if(v is Queue<bool>)
-            {
-                writeBoolSeq(((Queue<bool>)v).ToArray());
-            }
-            else if (v is Stack<bool>)
-            {
-                writeBoolSeq(((Stack<bool>)v).ToArray());
             }
             else
             {
@@ -891,40 +824,6 @@ namespace IceInternal
             l = new List<bool>(readBoolSeq());
         }
 
-        public virtual void readBoolSeq(out LinkedList<bool> l)
-        {
-            //
-            // Reading into an array and copy-constructing the
-            // list is faster than constructing the list
-            // and adding to it one element at a time.
-            //
-            l = new LinkedList<bool>(readBoolSeq());
-        }
-
-        public virtual void readBoolSeq(out Queue<bool> l)
-        {
-            //
-            // Reading into an array and copy-constructing the
-            // queue is faster than constructing the queue
-            // and adding to it one element at a time.
-            //
-            l = new Queue<bool>(readBoolSeq());
-        }
-
-        public virtual void readBoolSeq(out Stack<bool> l)
-        {
-            //
-            // Reverse the contents by copying into an array first
-            // because the stack is marshaled in top-to-bottom order.
-            //
-            bool[] array = readBoolSeq();
-            l = new Stack<bool>(array.Length);
-            for(int i = array.Length - 1; i >= 0; --i)
-            {
-                l.Push(array[i]);
-            }
-        }
-        
         public virtual void writeShort(short v)
         {
             expand(2);
@@ -956,24 +855,6 @@ namespace IceInternal
             if(v is List<short>)
             {
                 writeShortSeq(((List<short>)v).ToArray());
-            }
-            else if(v is LinkedList<short>)
-            {
-                writeSize(count);
-                expand(count * 2);
-                IEnumerator<short> i = v.GetEnumerator();
-                while(i.MoveNext())
-                {
-                    _buf.putShort(i.Current);
-                }
-            }
-            else if(v is Queue<short>)
-            {
-                writeShortSeq(((Queue<short>)v).ToArray());
-            }
-            else if (v is Stack<short>)
-            {
-                writeShortSeq(((Stack<short>)v).ToArray());
             }
             else
             {
@@ -1024,40 +905,6 @@ namespace IceInternal
             l = new List<short>(readShortSeq());
         }
 
-        public virtual void readShortSeq(out LinkedList<short> l)
-        {
-            //
-            // Reading into an array and copy-constructing the
-            // list is faster than constructing the list
-            // and adding to it one element at a time.
-            //
-            l = new LinkedList<short>(readShortSeq());
-        }
-
-        public virtual void readShortSeq(out Queue<short> l)
-        {
-            //
-            // Reading into an array and copy-constructing the
-            // queue is faster than constructing the queue
-            // and adding to it one element at a time.
-            //
-            l = new Queue<short>(readShortSeq());
-        }
-
-        public virtual void readShortSeq(out Stack<short> l)
-        {
-            //
-            // Reverse the contents by copying into an array first
-            // because the stack is marshaled in top-to-bottom order.
-            //
-            short[] array = readShortSeq();
-            l = new Stack<short>(array.Length);
-            for(int i = array.Length - 1; i >= 0; --i)
-            {
-                l.Push(array[i]);
-            }
-        }
-        
         public virtual void writeInt(int v)
         {
             expand(4);
@@ -1089,24 +936,6 @@ namespace IceInternal
             if(v is List<int>)
             {
                 writeIntSeq(((List<int>)v).ToArray());
-            }
-            else if(v is LinkedList<int>)
-            {
-                writeSize(count);
-                expand(count * 4);
-                IEnumerator<int> i = v.GetEnumerator();
-                while(i.MoveNext())
-                {
-                    _buf.putInt(i.Current);
-                }
-            }
-            else if(v is Queue<int>)
-            {
-                writeIntSeq(((Queue<int>)v).ToArray());
-            }
-            else if (v is Stack<int>)
-            {
-                writeIntSeq(((Stack<int>)v).ToArray());
             }
             else
             {
@@ -1157,62 +986,6 @@ namespace IceInternal
             l = new List<int>(readIntSeq());
         }
 
-        public virtual void readIntSeq(out LinkedList<int> l)
-        {
-            try
-            {
-                int sz = readSize();
-                checkFixedSeq(sz, 4);
-                l = new LinkedList<int>();
-                for(int i = 0; i < sz; ++i)
-                {
-                    l.AddLast(_buf.getInt());
-                }
-            }
-            catch(InvalidOperationException ex)
-            {
-                throw new Ice.UnmarshalOutOfBoundsException(ex);
-            }
-        }
-
-        public virtual void readIntSeq(out Queue<int> l)
-        {
-            //
-            // Reading into an array and copy-constructing the
-            // queue takes the same time as constructing the queue
-            // and adding to it one element at a time, so
-            // we avoid the copy.
-            //
-            try
-            {
-                int sz = readSize();
-                checkFixedSeq(sz, 4);
-                l = new Queue<int>(sz);
-                for(int i = 0; i < sz; ++i)
-                {
-                    l.Enqueue(_buf.getInt());
-                }
-            }
-            catch(InvalidOperationException ex)
-            {
-                throw new Ice.UnmarshalOutOfBoundsException(ex);
-            }
-        }
-
-        public virtual void readIntSeq(out Stack<int> l)
-        {
-            //
-            // Reverse the contents by copying into an array first
-            // because the stack is marshaled in top-to-bottom order.
-            //
-            int[] array = readIntSeq();
-            l = new Stack<int>(array.Length);
-            for(int i = array.Length - 1; i >= 0; --i)
-            {
-                l.Push(array[i]);
-            }
-        }
-        
         public virtual void writeLong(long v)
         {
             expand(8);
@@ -1244,24 +1017,6 @@ namespace IceInternal
             if(v is List<long>)
             {
                 writeLongSeq(((List<long>)v).ToArray());
-            }
-            else if(v is LinkedList<long>)
-            {
-                writeSize(count);
-                expand(count * 8);
-                IEnumerator<long> i = v.GetEnumerator();
-                while(i.MoveNext())
-                {
-                    _buf.putLong(i.Current);
-                }
-            }
-            else if(v is Queue<long>)
-            {
-                writeLongSeq(((Queue<long>)v).ToArray());
-            }
-            else if (v is Stack<long>)
-            {
-                writeLongSeq(((Stack<long>)v).ToArray());
             }
             else
             {
@@ -1312,62 +1067,6 @@ namespace IceInternal
             l = new List<long>(readLongSeq());
         }
 
-        public virtual void readLongSeq(out LinkedList<long> l)
-        {
-            try
-            {
-                int sz = readSize();
-                checkFixedSeq(sz, 4);
-                l = new LinkedList<long>();
-                for(int i = 0; i < sz; ++i)
-                {
-                    l.AddLast(_buf.getLong());
-                }
-            }
-            catch(InvalidOperationException ex)
-            {
-                throw new Ice.UnmarshalOutOfBoundsException(ex);
-            }
-        }
-
-        public virtual void readLongSeq(out Queue<long> l)
-        {
-            //
-            // Reading into an array and copy-constructing the
-            // queue takes the same time as constructing the queue
-            // and adding to it one element at a time, so
-            // we avoid the copy.
-            //
-            try
-            {
-                int sz = readSize();
-                checkFixedSeq(sz, 4);
-                l = new Queue<long>(sz);
-                for(int i = 0; i < sz; ++i)
-                {
-                    l.Enqueue(_buf.getLong());
-                }
-            }
-            catch(InvalidOperationException ex)
-            {
-                throw new Ice.UnmarshalOutOfBoundsException(ex);
-            }
-        }
-
-        public virtual void readLongSeq(out Stack<long> l)
-        {
-            //
-            // Reverse the contents by copying into an array first
-            // because the stack is marshaled in top-to-bottom order.
-            //
-            long[] array = readLongSeq();
-            l = new Stack<long>(array.Length);
-            for(int i = array.Length - 1; i >= 0; --i)
-            {
-                l.Push(array[i]);
-            }
-        }
-
         public virtual void writeFloat(float v)
         {
             expand(4);
@@ -1399,24 +1098,6 @@ namespace IceInternal
             if(v is List<float>)
             {
                 writeFloatSeq(((List<float>)v).ToArray());
-            }
-            else if(v is LinkedList<float>)
-            {
-                writeSize(count);
-                expand(count * 4);
-                IEnumerator<float> i = v.GetEnumerator();
-                while(i.MoveNext())
-                {
-                    _buf.putFloat(i.Current);
-                }
-            }
-            else if(v is Queue<float>)
-            {
-                writeFloatSeq(((Queue<float>)v).ToArray());
-            }
-            else if (v is Stack<float>)
-            {
-                writeFloatSeq(((Stack<float>)v).ToArray());
             }
             else
             {
@@ -1467,62 +1148,6 @@ namespace IceInternal
             l = new List<float>(readFloatSeq());
         }
 
-        public virtual void readFloatSeq(out LinkedList<float> l)
-        {
-            try
-            {
-                int sz = readSize();
-                checkFixedSeq(sz, 4);
-                l = new LinkedList<float>();
-                for(int i = 0; i < sz; ++i)
-                {
-                    l.AddLast(_buf.getFloat());
-                }
-            }
-            catch(InvalidOperationException ex)
-            {
-                throw new Ice.UnmarshalOutOfBoundsException(ex);
-            }
-        }
-
-        public virtual void readFloatSeq(out Queue<float> l)
-        {
-            //
-            // Reading into an array and copy-constructing the
-            // queue takes the same time as constructing the queue
-            // and adding to it one element at a time, so
-            // we avoid the copy.
-            //
-            try
-            {
-                int sz = readSize();
-                checkFixedSeq(sz, 4);
-                l = new Queue<float>(sz);
-                for(int i = 0; i < sz; ++i)
-                {
-                    l.Enqueue(_buf.getFloat());
-                }
-            }
-            catch(InvalidOperationException ex)
-            {
-                throw new Ice.UnmarshalOutOfBoundsException(ex);
-            }
-        }
-
-        public virtual void readFloatSeq(out Stack<float> l)
-        {
-            //
-            // Reverse the contents by copying into an array first
-            // because the stack is marshaled in top-to-bottom order.
-            //
-            float[] array = readFloatSeq();
-            l = new Stack<float>(array.Length);
-            for(int i = array.Length - 1; i >= 0; --i)
-            {
-                l.Push(array[i]);
-            }
-        }
-        
         public virtual void writeDouble(double v)
         {
             expand(8);
@@ -1554,24 +1179,6 @@ namespace IceInternal
             if(v is List<double>)
             {
                 writeDoubleSeq(((List<double>)v).ToArray());
-            }
-            else if(v is LinkedList<double>)
-            {
-                writeSize(count);
-                expand(count * 8);
-                IEnumerator<double> i = v.GetEnumerator();
-                while(i.MoveNext())
-                {
-                    _buf.putDouble(i.Current);
-                }
-            }
-            else if(v is Queue<double>)
-            {
-                writeDoubleSeq(((Queue<double>)v).ToArray());
-            }
-            else if (v is Stack<double>)
-            {
-                writeDoubleSeq(((Stack<double>)v).ToArray());
             }
             else
             {
@@ -1620,62 +1227,6 @@ namespace IceInternal
             // and adding to it one element at a time.
             //
             l = new List<double>(readDoubleSeq());
-        }
-
-        public virtual void readDoubleSeq(out LinkedList<double> l)
-        {
-            try
-            {
-                int sz = readSize();
-                checkFixedSeq(sz, 4);
-                l = new LinkedList<double>();
-                for(int i = 0; i < sz; ++i)
-                {
-                    l.AddLast(_buf.getDouble());
-                }
-            }
-            catch(InvalidOperationException ex)
-            {
-                throw new Ice.UnmarshalOutOfBoundsException(ex);
-            }
-        }
-
-        public virtual void readDoubleSeq(out Queue<double> l)
-        {
-            //
-            // Reading into an array and copy-constructing the
-            // queue takes the same time as constructing the queue
-            // and adding to it one element at a time, so
-            // we avoid the copy.
-            //
-            try
-            {
-                int sz = readSize();
-                checkFixedSeq(sz, 4);
-                l = new Queue<double>(sz);
-                for(int i = 0; i < sz; ++i)
-                {
-                    l.Enqueue(_buf.getDouble());
-                }
-            }
-            catch(InvalidOperationException ex)
-            {
-                throw new Ice.UnmarshalOutOfBoundsException(ex);
-            }
-        }
-
-        public virtual void readDoubleSeq(out Stack<double> l)
-        {
-            //
-            // Reverse the contents by copying into an array first
-            // because the stack is marshaled in top-to-bottom order.
-            //
-            double[] array = readDoubleSeq();
-            l = new Stack<double>(array.Length);
-            for(int i = array.Length - 1; i >= 0; --i)
-            {
-                l.Push(array[i]);
-            }
         }
 
         private static System.Text.UTF8Encoding utf8 = new System.Text.UTF8Encoding(false, true);
@@ -1792,58 +1343,6 @@ namespace IceInternal
             endSeq(sz);
         }
 
-        public virtual void readStringSeq(out LinkedList<string> l)
-        {
-            //
-            // Reading into an array and copy-constructing the
-            // list is slower than constructing the list
-            // and adding to it one element at a time.
-            //
-            int sz = readSize();
-            startSeq(sz, 1);
-            l = new LinkedList<string>();
-            for(int i = 0; i < sz; ++i)
-            {
-                l.AddLast(readString());
-                checkSeq();
-                endElement();
-            }
-            endSeq(sz);
-        }
-
-        public virtual void readStringSeq(out Queue<string> l)
-        {
-            //
-            // Reading into an array and copy-constructing the
-            // queue is slower than constructing the queue
-            // and adding to it one element at a time.
-            //
-            int sz = readSize();
-            startSeq(sz, 1);
-            l = new Queue<string>();
-            for(int i = 0; i < sz; ++i)
-            {
-                l.Enqueue(readString());
-                checkSeq();
-                endElement();
-            }
-            endSeq(sz);
-        }
-
-        public virtual void readStringSeq(out Stack<string> l)
-        {
-            //
-            // Reverse the contents by copying into an array first
-            // because the stack is marshaled in top-to-bottom order.
-            //
-            string[] array = readStringSeq();
-            l = new Stack<string>(array.Length);
-            for(int i = array.Length - 1; i >= 0; --i)
-            {
-                l.Push(array[i]);
-            }
-        }
-
         public virtual void writeProxy(Ice.ObjectPrx v)
         {
             instance_.proxyFactory().proxyToStream(v, this);
@@ -1871,33 +1370,39 @@ namespace IceInternal
             
             if(_writeEncapsStack.toBeMarshaledMap == null) // Lazy initialization
             {
-                _writeEncapsStack.toBeMarshaledMap = new Hashtable();
-                _writeEncapsStack.marshaledMap = new Hashtable();
-                _writeEncapsStack.typeIdMap = new Hashtable();
+                _writeEncapsStack.toBeMarshaledMap = new Dictionary<Ice.Object, int>();
+                _writeEncapsStack.marshaledMap = new Dictionary<Ice.Object, int>();
+                _writeEncapsStack.typeIdMap = new Dictionary<string, int>();
             }
             if(v != null)
             {
                 //
                 // Look for this instance in the to-be-marshaled map.
                 //
-                object p = _writeEncapsStack.toBeMarshaledMap[v];
-                if(p == null)
+                int p;
+                try
+                {
+                    p = _writeEncapsStack.toBeMarshaledMap[v];
+                }
+                catch(KeyNotFoundException)
                 {
                     //
                     // Didn't find it, try the marshaled map next.
                     //
-                    object q = _writeEncapsStack.marshaledMap[v];
-                    if(q == null)
+                    try
+                    {
+                        p = _writeEncapsStack.marshaledMap[v];
+                    }
+                    catch(KeyNotFoundException)
                     {
                         //
                         // We haven't seen this instance previously,
                         // create a new index, and insert it into the
                         // to-be-marshaled map.
                         //
-                        q = ++_writeEncapsStack.writeIndex;
-                        _writeEncapsStack.toBeMarshaledMap[v] = q;
+                        p = ++_writeEncapsStack.writeIndex;
+                        _writeEncapsStack.toBeMarshaledMap[v] = p;
                     }
-                    p = q;
                 }
                 writeInt(-((int)p));
             }
@@ -1926,9 +1431,9 @@ namespace IceInternal
             
             if(_readEncapsStack.patchMap == null) // Lazy initialization
             {
-                _readEncapsStack.patchMap = new Hashtable();
-                _readEncapsStack.unmarshaledMap = new Hashtable();
-                _readEncapsStack.typeIdMap = new Hashtable();
+                _readEncapsStack.patchMap = new Dictionary<int, List<IceInternal.IPatcher> >();
+                _readEncapsStack.unmarshaledMap = new Dictionary<int, Ice.Object>();
+                _readEncapsStack.typeIdMap = new Dictionary<int, string>();
             }
             
             int index = readInt();
@@ -1942,16 +1447,19 @@ namespace IceInternal
             if(index < 0 && patcher != null)
             {
                 int i = -index;
-                LinkedList<IceInternal.IPatcher> patchlist =
-                    (LinkedList<IceInternal.IPatcher>)_readEncapsStack.patchMap[i];
-                if(patchlist == null)
+                List<IceInternal.IPatcher> patchlist;
+                if(_readEncapsStack.patchMap.ContainsKey(i))
+                {
+                    patchlist = _readEncapsStack.patchMap[i];
+                }
+                else
                 {
                     //
                     // We have no outstanding instances to be patched
                     // for this index, so make a new entry in the
                     // patch map.
                     //
-                    patchlist = new LinkedList<IceInternal.IPatcher>();
+                    patchlist = new List<IceInternal.IPatcher>();
                     _readEncapsStack.patchMap[i] = patchlist;
                 }
                 //
@@ -1959,7 +1467,7 @@ namespace IceInternal
                 // can patch the instance. (The instance may have been
                 // unmarshaled previously.)
                 //
-                patchlist.AddLast(patcher);
+                patchlist.Add(patcher);
                 patchReferences(null, i);
                 return;
             }
@@ -2057,7 +1565,7 @@ namespace IceInternal
                 //
                 if(_objectList == null)
                 {
-                    _objectList = new ArrayList();
+                    _objectList = new List<Ice.Object>();
                 }
                 _objectList.Add(v);
 
@@ -2147,9 +1655,10 @@ namespace IceInternal
             {
                 while(_writeEncapsStack.toBeMarshaledMap.Count > 0)
                 {
-                    Hashtable savedMap = new Hashtable(_writeEncapsStack.toBeMarshaledMap);
+                    Dictionary<Ice.Object, int> savedMap = 
+                        new Dictionary<Ice.Object, int>(_writeEncapsStack.toBeMarshaledMap);
                     writeSize(savedMap.Count);
-                    foreach(DictionaryEntry e in savedMap)
+                    foreach(KeyValuePair<Ice.Object, int> e in savedMap)
                     {
                         //
                         // Add an instance from the old
@@ -2160,7 +1669,7 @@ namespace IceInternal
                         // added to toBeMarshaledMap.
                         //
                         _writeEncapsStack.marshaledMap[e.Key] = e.Value;
-                        writeInstance((Ice.Object)e.Key, (int)e.Value);
+                        writeInstance(e.Key, e.Value);
                     }
                     
                     //
@@ -2168,7 +1677,7 @@ namespace IceInternal
                     // pass, substract what we have marshaled from the
                     // toBeMarshaledMap.
                     //
-                    foreach(DictionaryEntry e in savedMap)
+                    foreach(KeyValuePair<Ice.Object, int> e in savedMap)
                     {
                         _writeEncapsStack.toBeMarshaledMap.Remove(e.Key);
                     }
@@ -2246,7 +1755,7 @@ namespace IceInternal
             Debug.Assert(   ((object)instanceIndex != null && (object)patchIndex == null)
                          || ((object)instanceIndex == null && (object)patchIndex != null));
             
-            LinkedList<IceInternal.IPatcher> patchlist;
+            List<IceInternal.IPatcher> patchlist;
             Ice.Object v;
             if((object)instanceIndex != null)
             {
@@ -2254,13 +1763,16 @@ namespace IceInternal
                 // We have just unmarshaled an instance -- check if
                 // something needs patching for that instance.
                 //
-                patchlist = (LinkedList<IceInternal.IPatcher>)_readEncapsStack.patchMap[instanceIndex];
-                if(patchlist == null)
+                if(_readEncapsStack.patchMap.ContainsKey((int)instanceIndex))
+                {
+                    patchlist = _readEncapsStack.patchMap[(int)instanceIndex];
+                    v = _readEncapsStack.unmarshaledMap[(int)instanceIndex];
+                    patchIndex = instanceIndex;
+                }
+                else
                 {
                     return; // We don't have anything to patch for the instance just unmarshaled.
                 }
-                v = (Ice.Object)_readEncapsStack.unmarshaledMap[instanceIndex];
-                patchIndex = instanceIndex;
             }
             else
             {
@@ -2268,12 +1780,15 @@ namespace IceInternal
                 // We have just unmarshaled an index -- check if we
                 // have unmarshaled the instance for that index yet.
                 //
-                v = (Ice.Object)_readEncapsStack.unmarshaledMap[patchIndex];
-                if(v == null)
+                if( _readEncapsStack.unmarshaledMap.ContainsKey((int)patchIndex))
+                {
+                    v = _readEncapsStack.unmarshaledMap[(int)patchIndex];
+                    patchlist = _readEncapsStack.patchMap[(int)patchIndex];
+                }
+                else
                 {
                     return; // We haven't unmarshaled the instance for this index yet.
                 }
-                patchlist = (LinkedList<IceInternal.IPatcher>)_readEncapsStack.patchMap[patchIndex];
             }
             Debug.Assert(patchlist != null && patchlist.Count > 0);
             Debug.Assert(v != null);
@@ -2307,7 +1822,7 @@ namespace IceInternal
             // nothing left to patch for that index for the time
             // being.
             //
-            _readEncapsStack.patchMap.Remove(patchIndex);
+            _readEncapsStack.patchMap.Remove((int)patchIndex);
         }
 
         internal virtual int pos()
@@ -2470,8 +1985,11 @@ namespace IceInternal
 
             lock(_exceptionFactories)
             {
-                factory = (UserExceptionFactory)_exceptionFactories[id];
-                if(factory == null)
+                if(_exceptionFactories.ContainsKey(id))
+                {
+                    factory = _exceptionFactories[id];
+                }
+                else
                 {
                     try
                     {
@@ -2556,10 +2074,10 @@ namespace IceInternal
             internal byte encodingMajor;
             internal byte encodingMinor;
             
-            internal Hashtable patchMap;
-            internal Hashtable unmarshaledMap;
+            internal Dictionary<int, List<IceInternal.IPatcher> > patchMap;
+            internal Dictionary<int, Ice.Object> unmarshaledMap;
             internal int typeIdIndex;
-            internal Hashtable typeIdMap;
+            internal Dictionary<int, string> typeIdMap;
             internal ReadEncaps next;
 
             internal void reset()
@@ -2579,10 +2097,10 @@ namespace IceInternal
             internal int start;
             
             internal int writeIndex;
-            internal Hashtable toBeMarshaledMap;
-            internal Hashtable marshaledMap;
+            internal Dictionary<Ice.Object, int> toBeMarshaledMap;
+            internal Dictionary<Ice.Object, int> marshaledMap;
             internal int typeIdIndex;
-            internal Hashtable typeIdMap;
+            internal Dictionary<string, int> typeIdMap;
             internal WriteEncaps next;
 
             internal void reset()
@@ -2628,8 +2146,9 @@ namespace IceInternal
         }
         SeqData _seqDataStack;
 
-        private ArrayList _objectList;
+        private List<Ice.Object> _objectList;
 
-        private static Hashtable _exceptionFactories = new Hashtable(); // <type name, factory> pairs.
+        private static Dictionary<string, UserExceptionFactory> _exceptionFactories = 
+            new Dictionary<string, UserExceptionFactory>(); // <type name, factory> pairs.
     }
 }

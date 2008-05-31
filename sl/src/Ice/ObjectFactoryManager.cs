@@ -10,7 +10,7 @@
 namespace IceInternal
 {
 
-    using System.Collections;
+    using System.Collections.Generic;
 
     public sealed class ObjectFactoryManager
     {
@@ -18,8 +18,7 @@ namespace IceInternal
         {
             lock(this)
             {
-                object o = _factoryMap[id];
-                if(o != null)
+                if(_factoryMap.ContainsKey(id))
                 {
                     Ice.AlreadyRegisteredException ex = new Ice.AlreadyRegisteredException();
                     ex.id = id;
@@ -32,27 +31,35 @@ namespace IceInternal
         
         public void remove(string id)
         {
-            object o = null;
+            Ice.ObjectFactory factory = null;
             lock(this)
             {
-                o = _factoryMap[id];
-                if(o == null)
+                factory = _factoryMap[id];
+                if(!_factoryMap.ContainsKey(id))
                 {
                     Ice.NotRegisteredException ex = new Ice.NotRegisteredException();
                     ex.id = id;
                     ex.kindOfObject = "object factory";
                     throw ex;
                 }
+                factory = _factoryMap[id];
                 _factoryMap.Remove(id);
             }
-            ((Ice.ObjectFactory)o).destroy();
+            factory.destroy();
         }
         
         public Ice.ObjectFactory find(string id)
         {
             lock(this)
             {
-                return (Ice.ObjectFactory)_factoryMap[id];
+                if(_factoryMap.ContainsKey(id))
+                {
+                    return _factoryMap[id];
+                }
+                else
+                {
+                    return null;
+                }
             }
         }
         
@@ -61,17 +68,17 @@ namespace IceInternal
         //
         internal ObjectFactoryManager()
         {
-            _factoryMap = new Hashtable();
+            _factoryMap = new Dictionary<string, Ice.ObjectFactory>();
         }
         
         internal void destroy()
         {
-            Hashtable oldMap = null;
+            Dictionary<string, Ice.ObjectFactory> oldMap = null;
 
             lock(this)
             {
                 oldMap = _factoryMap;
-                _factoryMap = new Hashtable();
+                _factoryMap = new Dictionary<string, Ice.ObjectFactory>();
             }
 
             foreach(Ice.ObjectFactory factory in oldMap.Values)
@@ -80,7 +87,7 @@ namespace IceInternal
             }
         }
         
-        private Hashtable _factoryMap;
+        private Dictionary<string, Ice.ObjectFactory> _factoryMap;
     }
 
 }

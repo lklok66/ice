@@ -208,7 +208,10 @@ namespace Ice
             Dictionary<string, string> threadContext = null;
             lock(this)
             {
-                threadContext = (Dictionary<string, string>)_map[Thread.CurrentThread];
+                if(_map.ContainsKey(Thread.CurrentThread))
+                {
+                    threadContext = _map[Thread.CurrentThread];
+                }
             }
 
             if(threadContext == null)
@@ -248,7 +251,10 @@ namespace Ice
             Dictionary<string, string> threadContext = null;
             lock(this)
             {
-                threadContext = (Dictionary<string, string>)_map[Thread.CurrentThread];
+                if(_map.ContainsKey(Thread.CurrentThread))
+                {
+                    threadContext = _map[Thread.CurrentThread];
+                }
             }
 
             if(threadContext == null)
@@ -269,15 +275,22 @@ namespace Ice
             Dictionary<string, string> threadContext = null;
             lock(this)
             {
-                threadContext = (Dictionary<string, string>)_map[Thread.CurrentThread];
+                if(_map.ContainsKey(Thread.CurrentThread))
+                {
+                    threadContext = _map[Thread.CurrentThread];
+                }
             }
 
             if(threadContext == null)
             {
                 return "";
             }
-            string val = threadContext[key];
-            if(val == null)
+            string val;
+            if(threadContext.ContainsKey(key))
+            {
+                val = threadContext[key];
+            }
+            else
             {
                 val = "";
             }
@@ -300,7 +313,10 @@ namespace Ice
             Dictionary<string, string> threadContext = null;
             lock(this)
             {
-                threadContext = (Dictionary<string, string>)_map[currentThread];
+                if(_map.ContainsKey(currentThread))
+                {
+                    threadContext = _map[currentThread];
+                }
             }
            
             if(threadContext == null)
@@ -333,7 +349,10 @@ namespace Ice
             Dictionary<string, string> threadContext = null;
             lock(this)
             {
-                threadContext = (Dictionary<string, string>)_map[Thread.CurrentThread];
+                if(_map.ContainsKey(Thread.CurrentThread))
+                {
+                    threadContext = _map[Thread.CurrentThread];
+                }
             }
 
             if(threadContext == null)
@@ -341,15 +360,15 @@ namespace Ice
                 return "";
             }
 
-            string val = threadContext[key];
-
-            if(val == null)
+            string val;
+            if(threadContext.ContainsKey(key))
             {
-                val = "";
+                val = threadContext[key];
+                threadContext.Remove(key);
             }
             else
             {
-                threadContext.Remove(key);
+                val = "";
             }
             return val;
         }
@@ -360,7 +379,10 @@ namespace Ice
             Dictionary<string, string> threadContext = null;
             lock(this)
             {
-                threadContext = (Dictionary<string, string>)_map[Thread.CurrentThread];
+                if(_map.ContainsKey(Thread.CurrentThread))
+                {
+                    threadContext = _map[Thread.CurrentThread];
+                }
             }
             
             if(threadContext == null || threadContext.Count == 0)
@@ -394,7 +416,10 @@ namespace Ice
             Dictionary<string, string> threadContext = null;
             lock(this)
             {
-                threadContext = (Dictionary<string, string>)_map[Thread.CurrentThread];
+                if(_map.ContainsKey(Thread.CurrentThread))
+                {
+                    threadContext = _map[Thread.CurrentThread];
+                }
             }
 
             Dictionary<string, string> combined = new Dictionary<string, string>(prxContext);
@@ -408,8 +433,7 @@ namespace Ice
         //
         //  map Thread -> Context
         //
-        private Hashtable _map = new Hashtable();
-    } 
+        private Dictionary<Thread, Dictionary<string, string> > _map = 
+            new Dictionary<Thread, Dictionary<string, string> >();
+    }
 }
-
-

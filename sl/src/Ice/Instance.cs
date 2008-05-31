@@ -31,6 +31,12 @@ namespace IceInternal
             //
             return _initData;
         }
+
+        public System.Windows.Threading.Dispatcher dispatcher()
+        {
+            // No mutex lock, immutable.
+            return _dispatcher;
+        }
         
         public TraceLevels traceLevels()
         {
@@ -158,9 +164,11 @@ namespace IceInternal
         //
         // Only for use by Ice.CommunicatorI
         //
-        public Instance(Ice.Communicator communicator, Ice.InitializationData initData)
+        public Instance(Ice.Communicator communicator, System.Windows.Threading.Dispatcher dispatcher,
+                        Ice.InitializationData initData)
         {
             _state = StateActive;
+            _dispatcher = dispatcher;
             _initData = initData;
                 
             try
@@ -343,7 +351,7 @@ namespace IceInternal
             
             if(_initData.properties.getPropertyAsInt("Ice.Warn.UnusedProperties") > 0)
             {
-                ArrayList unusedProperties = ((Ice.PropertiesI)_initData.properties).getUnusedProperties();
+                List<string> unusedProperties = ((Ice.PropertiesI)_initData.properties).getUnusedProperties();
                 if(unusedProperties.Count != 0)
                 {
                     string message = "The following properties were set but never read:";
@@ -363,6 +371,7 @@ namespace IceInternal
         private const int StateDestroyed = 2;
         private System.Uri _bridgeUri;
         private int _state;
+        private System.Windows.Threading.Dispatcher _dispatcher; // Immutable, not reset by destroy().
         private Ice.InitializationData _initData; // Immutable, not reset by destroy().
         private TraceLevels _traceLevels; // Immutable, not reset by destroy().
         private DefaultsAndOverrides _defaultsAndOverrides; // Immutable, not reset by destroy().

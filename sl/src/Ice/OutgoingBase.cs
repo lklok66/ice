@@ -249,5 +249,6 @@ namespace IceInternal
         protected TraceLevels traceLevels__ = null;
         protected BasicStream is__ = null;
         protected BasicStream os__ = null;
+        protected System.Windows.Threading.Dispatcher dispatcher__ = null;
     }
 }

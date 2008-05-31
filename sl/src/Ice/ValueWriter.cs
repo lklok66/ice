@@ -10,6 +10,7 @@
 namespace IceInternal
 {
 
+    using System.Collections.Generic;
     using System.Collections;
     using System.Diagnostics;
     using System.Reflection;
@@ -22,7 +23,8 @@ namespace IceInternal
             writeValue(null, obj, null, output);
         }
         
-        private static void writeValue(string name, object val, Hashtable objectTable, OutputBase output)
+        private static void writeValue(string name, object val, Dictionary<Ice.Object, object> objectTable,
+                                       OutputBase output)
         {
             if(val == null)
             {
@@ -46,6 +48,7 @@ namespace IceInternal
                     output.print(val.ToString());
                     output.print("\"");
                 }
+                /* XXX - TODO
                 else if(val is CollectionBase)
                 {
                     int n = 0;
@@ -57,15 +60,16 @@ namespace IceInternal
                         writeValue(elem, i.Current, objectTable, output);
                     }
                 }
-                else if(val is Hashtable)
+                else if(val is DictionaryBase)
                 {
-                    foreach(DictionaryEntry entry in (Hashtable)val)
+                    foreach(DictionaryEntry entry in (DictionaryBase)val)
                     {
                         string elem = name != null ? name + "." : "";
                         writeValue(elem + "key", entry.Key, objectTable, output);
                         writeValue(elem + "value", entry.Value, objectTable, output);
                     }
                 }
+                */
                 else if(val is Ice.ObjectPrxHelperBase)
                 {
                     writeName(name, output);
@@ -77,7 +81,7 @@ namespace IceInternal
                     //
                     // Check for recursion.
                     //
-                    if(objectTable != null && objectTable.Contains(val))
+                    if(objectTable != null && objectTable.ContainsKey((Ice.Object)val))
                     {
                         writeName(name, output);
                         output.print("(recursive)");
@@ -86,9 +90,9 @@ namespace IceInternal
                     {
                         if(objectTable == null)
                         {
-                            objectTable = new Hashtable();
+                            objectTable = new Dictionary<Ice.Object, object>();
                         }
-                        objectTable[val] = null;
+                        objectTable[(Ice.Object)val] = null;
                         writeFields(name, val, c, objectTable, output);
                     }
                 }
@@ -107,8 +111,8 @@ namespace IceInternal
             }
         }
         
-        private static void writeFields(string name, object obj, System.Type c, Hashtable objectTable,
-                                        OutputBase output)
+        private static void writeFields(string name, object obj, System.Type c, 
+                                        Dictionary<Ice.Object, object> objectTable, OutputBase output)
         {
             if(!c.Equals(typeof(object)))
             {

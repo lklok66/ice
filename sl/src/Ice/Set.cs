@@ -13,7 +13,7 @@ using System.Diagnostics;
 
 namespace IceUtil
 {
-    public class Set : ICollection, ICloneable
+    public class Set : ICollection //, ICloneable
     {
         public Set()
             : this(DEFAULT_CAPACITY, DEFAULT_LOAD_FACTOR)

@@ -19,8 +19,8 @@ SUBDIRS		= dictMapping \
 		  operations \
 		  proxy \
 		  retry \
-		  seqMapping \
-		  slicing
+		  slicing \
+		  seqMapping
 
 $(EVERYTHING)::
 	@for %i in ( $(SUBDIRS) ) do \

@@ -19,7 +19,7 @@ namespace Ice
         DispatchAsync
     };
 
-    public interface Object : System.ICloneable
+    public interface Object //: System.ICloneable
     {
         int ice_hash();
 

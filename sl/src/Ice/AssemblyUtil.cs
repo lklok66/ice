@@ -11,7 +11,7 @@ namespace IceInternal
 {
 
     using System;
-    using System.Collections;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.Reflection;
     using System.Threading;
@@ -60,13 +60,13 @@ namespace IceInternal
 
             lock(_mutex)
             {
-                Type t = (Type)_typeTable[csharpId];
-                if(t != null)
+                if(_typeTable.ContainsKey(csharpId))
                 {
-                    return t;
+                    return _typeTable[csharpId];
                 }
                 foreach(Assembly a in _loadedAssemblies.Values)
                 {
+                    Type t;
                     if((t = a.GetType(csharpId)) != null)
                     {
                         _typeTable[csharpId] = t;
@@ -134,7 +134,7 @@ namespace IceInternal
             AssemblyName[] names = a.GetReferencedAssemblies();
             foreach(AssemblyName name in names)
             {
-                if(!_loadedAssemblies.Contains(name.FullName))
+                if(!_loadedAssemblies.ContainsKey(name.FullName))
                 {
                     Assembly ra = Assembly.Load(name);
                     _loadedAssemblies[ra.FullName] = ra;
@@ -144,8 +144,8 @@ namespace IceInternal
         }
 
         private static bool _assembliesLoaded = false;
-        private static Hashtable _loadedAssemblies = new Hashtable(); // <string, Assembly> pairs.
-        private static Hashtable _typeTable = new Hashtable(); // <type name, Type> pairs.
+        private static Dictionary<string, Assembly> _loadedAssemblies = new Dictionary<string, Assembly>();
+        private static Dictionary<string, Type> _typeTable = new Dictionary<string, Type>();
         private static Mutex _mutex = new Mutex();
 #endif
 

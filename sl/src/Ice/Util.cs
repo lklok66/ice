@@ -17,6 +17,7 @@ namespace Ice
     using System.IO;
     using System.Text;
     using System.Globalization;
+    using System.Windows.Threading;
 
     public interface ThreadNotification
     {
@@ -24,7 +25,7 @@ namespace Ice
         void stop();
     }
 
-    public class InitializationData : ICloneable
+    public class InitializationData //: ICloneable
     {
         public System.Object Clone()
         {
@@ -57,12 +58,12 @@ namespace Ice
             return new PropertiesI(ref args, defaults);
         }
 
-        public static Communicator initialize(ref string[] args)
+        public static Communicator initialize(Dispatcher dispatcher, ref string[] args)
         {
-            return initialize(ref args, null);
+            return initialize(dispatcher, ref args, null);
         }
 
-        public static Communicator initialize(ref string[] args, InitializationData initData)
+        public static Communicator initialize(Dispatcher dispatcher, ref string[] args, InitializationData initData)
         {
             if(initData == null)
             {
@@ -75,12 +76,12 @@ namespace Ice
 
             initData.properties = createProperties(ref args, initData.properties);          
 
-            CommunicatorI result = new CommunicatorI(initData);
+            CommunicatorI result = new CommunicatorI(dispatcher, initData);
             result.finishSetup(ref args);
             return result;
         }
 
-        public static Communicator initialize(InitializationData initData)
+        public static Communicator initialize(Dispatcher dispatcher, InitializationData initData)
         {
             if(initData == null)
             {
@@ -91,43 +92,17 @@ namespace Ice
                 initData = (InitializationData)initData.Clone();
             }
 
-            CommunicatorI result = new CommunicatorI(initData);
+            CommunicatorI result = new CommunicatorI(dispatcher, initData);
             string[] args = new string[0];
             result.finishSetup(ref args);
             return result;
         }
 
-        public static Communicator initialize()
+        public static Communicator initialize(Dispatcher dispatcher)
         {
-            return initialize(null);
+            return initialize(dispatcher, null);
         }
 
-        [Obsolete("This method is deprecated, use initialize instead.")]
-        public static Communicator initializeWithLogger(ref string[] args, Logger logger)
-        {
-            InitializationData initData = new InitializationData();
-            initData.logger = logger;
-            return initialize(ref args, initData);
-        }
-        
-        [Obsolete("This method is deprecated, use initialize instead.")]
-        public static Communicator initializeWithProperties(ref string[] args, Properties properties)
-        {
-            InitializationData initData = new InitializationData();
-            initData.properties = properties;
-            return initialize(ref args, initData);
-        }
-
-        [Obsolete("This method is deprecated, use initialize instead.")]
-        public static Communicator initializeWithPropertiesAndLogger(ref string[] args, Properties properties,
-                                                                     Ice.Logger logger)
-        {
-            InitializationData initData = new InitializationData();
-            initData.properties = properties;
-            initData.logger = logger;
-            return initialize(ref args, initData);
-        }
-        
         public static IceInternal.Instance getInstance(Communicator communicator)
         {
             CommunicatorI p = (CommunicatorI) communicator;

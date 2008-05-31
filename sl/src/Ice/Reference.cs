@@ -15,7 +15,7 @@ using System.Text;
 
 namespace IceInternal
 {
-    public abstract class Reference : ICloneable
+    public abstract class Reference // : ICloneable
     {
         public enum Mode {
                             ModeTwoway,

@@ -12,13 +12,13 @@
 # assertions enabled.
 #
 
-#DEBUG			= yes
+DEBUG			= yes
 
 #
 # Define OPTIMIZE as yes if you want to build with optimized.
 #
 
-OPTIMIZE		= yes
+#OPTIMIZE		= yes
 
 
 #
@@ -57,7 +57,7 @@ MCS			= csc -nologo
 MCSFLAGS = -warnaserror -d:MAKEFILE_BUILD
 
 !if "$(SILVERLIGHT)" == "yes"
-MCSFLAGS = $(MCSFLAGS) -d:SILVERLIGHT /nowarn:618 /noconfig /nostdlib+ /reference:"C:\\Program Files\\Microsoft Silverlight\\agclr.dll" /reference:"C:\\Program Files\\Microsoft Silverlight\\mscorlib.dll" /reference:"C:\\Program Files\\Microsoft Silverlight\\System.Core.dll" /reference:"C:\\Program Files\\Microsoft Silverlight\\system.dll" /reference:"C:\\Program Files\\Microsoft Silverlight\\system.silverlight.dll" /reference:"C:\\Program Files\\Microsoft Silverlight\\system.Xml.core.dll"
+MCSFLAGS = $(MCSFLAGS) -d:SILVERLIGHT /nowarn:618 /noconfig /nostdlib+ /reference:"C:\Program Files\Microsoft Silverlight\2.0.30226.2\mscorlib.dll" /reference:"C:\Program Files\Microsoft Silverlight\2.0.30226.2\System.Core.dll" /reference:"C:\Program Files\Microsoft Silverlight\2.0.30226.2\system.dll" /reference:"C:\Program Files\Microsoft Silverlight\2.0.30226.2\System.Windows.dll" /reference:"C:\Program Files\Microsoft Silverlight\2.0.30226.2\System.Net.dll" /reference:"C:\Program Files\Microsoft Silverlight\2.0.30226.2\System.Windows.Browser.dll"
 !endif
 
 !if "$(DEBUG)" == "yes"

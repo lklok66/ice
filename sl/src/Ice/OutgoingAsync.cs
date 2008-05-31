@@ -16,14 +16,116 @@ namespace IceInternal
     using System.IO;
     using System.Net;
 
-#if SILVERLIGHT
-    using System.Windows.Browser.Net;
-#else
+#if !SILVERLIGHT
     using System.Collections.Specialized;
 #endif
 
     public abstract class OutgoingAsync : OutgoingBase
     {
+        public void getRequestStream__()
+        {
+            HttpWebRequest req = (HttpWebRequest)WebRequest.Create(bridgeUri__);
+            req.Method = "POST";
+            req.ContentType = "application/binary";
+
+            if(traceLevels__.network >= 2)
+            {
+                string str = "trying to bridge request with " + bridgeUri__.ToString();
+                logger__.trace(traceLevels__.networkCat, str);
+            }
+
+            IceInternal.TraceUtil.traceRequest("sending asynchronous request", os__, logger__, traceLevels__);
+
+            try
+            {
+                req.BeginGetRequestStream(new AsyncCallback(requestStreamReady__), req);
+            }
+            catch(WebException ex)
+            {
+                //
+                // Error occurred in processing the response. The
+                // request cannot be retried.
+                //
+                finished__(new Ice.SocketException(ex));
+            }
+        }
+
+        public void requestStreamReady__(IAsyncResult iar)
+        {
+            lock(this)
+            {
+                ByteBuffer buf = os__.prepareWrite();
+                HttpWebRequest req;
+
+                Stream s = null;
+                try
+                {
+                    req = (HttpWebRequest)iar.AsyncState;
+                    s = (Stream)req.EndGetRequestStream(iar);
+                    s.Write(buf.rawBytes(), 0, buf.limit());
+                }
+                catch(WebException ex)
+                {
+                    // Error occurred in processing the response.
+                    finished__(new Ice.SocketException(ex));
+                    return;
+                }
+                catch(IOException ex)
+                {
+                    try
+                    {
+                        _cnt = ((Ice.ObjectPrxHelperBase)_proxy).handleException__(
+                            new Ice.SocketException(ex), _cnt);
+                        //
+                        // If we reach here we should retry the send.
+                        //
+                        send__();
+                        return;
+                    }
+                    catch(Ice.LocalException e)
+                    {
+                        finished__(e);
+                        return;
+                    }
+                }
+                finally
+                {
+#if !SILVERLIGHT
+                    // The stream must be closed.
+                    if(s != null)
+                    {
+                        s.Close();
+                        s = null;
+                    }
+#endif
+                }
+
+                if(traceLevels__.network >= 1)
+                {
+                    string str = "bridging request with " + bridgeUri__.ToString();
+                    logger__.trace(traceLevels__.networkCat, str);
+                    if(traceLevels__.network >= 3)
+                    {
+                        str = "sent " + buf.limit() + " of " + buf.limit() + " bytes";
+                        logger__.trace(traceLevels__.networkCat, str);
+                    }
+                }
+
+                try
+                {
+                    req.BeginGetResponse(new AsyncCallback(responseReady__), req);
+                }
+                catch(WebException ex)
+                {
+                    //
+                    // Error occurred in processing the response. The
+                    // request cannot be retried.
+                    //
+                    finished__(new Ice.SocketException(ex));
+                }
+            }
+        }
+
         public void responseReady__(IAsyncResult iar)
         {
             lock(this)
@@ -158,6 +260,7 @@ namespace IceInternal
                 logger__ = rf.getInstance().initializationData().logger;
                 traceLevels__ = rf.getInstance().traceLevels();
                 bridgeUri__ = rf.getInstance().bridgeUri();
+                dispatcher__ = rf.getInstance().dispatcher();
 
                 Debug.Assert(is__ == null);
                 is__ = new BasicStream(rf.getInstance());
@@ -183,88 +286,13 @@ namespace IceInternal
                     {
                         try
                         {
-                            ByteBuffer buf = os__.prepareWrite();
-#if SILVERLIGHT
-                            BrowserHttpWebRequest req = new BrowserHttpWebRequest(bridgeUri__);
-#else
-                            HttpWebRequest req = (HttpWebRequest)WebRequest.Create(bridgeUri__);
-#endif
-                            req.Method = "PUT";
-                            req.ContentLength = os__.prepareWrite().limit();
-                            req.ContentType = "application/binary";
-
-                            if(traceLevels__.network >= 2)
+                            if(System.Threading.Thread.CurrentThread.ManagedThreadId == 1)
                             {
-                                string str = "trying to bridge request with " + bridgeUri__.ToString();
-                                logger__.trace(traceLevels__.networkCat, str);
+                                getRequestStream__();
                             }
-
-                            IceInternal.TraceUtil.traceRequest("sending asynchronous request", os__, logger__,
-                                                               traceLevels__);
-
-                            Stream s = null;
-                            try
+                            else
                             {
-                                s = req.GetRequestStream();
-                                s.Write(buf.rawBytes(), 0, buf.limit());
-                            }
-                            catch(WebException ex)
-                            {
-                                finished__(new Ice.ConnectFailedException(ex));
-                                return;
-                            }
-                            catch(IOException ex)
-                            {
-                                try
-                                {
-                                    _cnt = ((Ice.ObjectPrxHelperBase)_proxy).handleException__(
-                                        new Ice.SocketException(ex), _cnt);
-                                    //
-                                    // If we reach here we should retry the send.
-                                    //
-                                    send__();
-                                    return;
-                                }
-                                catch(Ice.LocalException e)
-                                {
-                                    finished__(e);
-                                    return;
-                                }
-                            }
-                            finally
-                            {
-#if !SILVERLIGHT
-                                // The stream must be closed.
-                                if(s != null)
-                                {
-                                    s.Close();
-                                    s = null;
-                                }
-#endif
-                            }
-
-                            if(traceLevels__.network >= 1)
-                            {
-                                string str = "bridging request with " + bridgeUri__.ToString();
-                                logger__.trace(traceLevels__.networkCat, str);
-                                if(traceLevels__.network >= 3)
-                                {
-                                    str = "sent " + buf.limit() + " of " + buf.limit() + " bytes";
-                                    logger__.trace(traceLevels__.networkCat, str);
-                                }
-                            }
-
-                            try
-                            {
-                                req.BeginGetResponse(new AsyncCallback(responseReady__), req);
-                            }
-                            catch(WebException ex)
-                            {
-                                //
-                                // Error occurred in processing the response. The
-                                // request cannot be retried.
-                                //
-                                finished__(new Ice.SocketException(ex));
+                                dispatcher__.BeginInvoke(delegate { getRequestStream__(); });
                             }
                             return;
                         }

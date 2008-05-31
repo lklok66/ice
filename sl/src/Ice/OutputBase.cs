@@ -10,7 +10,7 @@
 namespace IceUtil
 {
 
-using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Diagnostics;
 
@@ -24,7 +24,7 @@ public class OutputBase
         indent_ = 0;
         indentSize_ = 4;
         useTab_ = true;
-        indentSave_ = new Stack();
+        indentSave_ = new List<int>();
         separator_ = true;
     }
     
@@ -36,7 +36,7 @@ public class OutputBase
         indent_ = 0;
         indentSize_ = 4;
         useTab_ = true;
-        indentSave_ = new Stack();
+        indentSave_ = new List<int>();
         separator_ = true;
     }
     
@@ -48,7 +48,7 @@ public class OutputBase
         indent_ = 0;
         indentSize_ = 4;
         useTab_ = true;
-        indentSave_ = new Stack();
+        indentSave_ = new List<int>();
         separator_ = true;
     }
 
@@ -110,14 +110,14 @@ public class OutputBase
     public virtual void
     useCurrentPosAsIndent()
     {
-        indentSave_.Push(indent_);
+        indentSave_.Add(indent_);
         indent_ = pos_;
     }
     
     public virtual void
     zeroIndent()
     {
-        indentSave_.Push(indent_);
+        indentSave_.Add(indent_);
         indent_ = 0;
     }
     
@@ -125,7 +125,8 @@ public class OutputBase
     restoreIndent()
     {
         Debug.Assert(indentSave_.Count != 0);
-        indent_ = (int)indentSave_.Pop();
+        indent_ = (int)indentSave_[indentSave_.Count - 1];
+        indentSave_.RemoveAt(indentSave_.Count - 1);
     }
     
     public virtual void
@@ -185,7 +186,7 @@ public class OutputBase
     protected internal int pos_;
     protected internal int indent_;
     protected internal int indentSize_;
-    protected internal Stack indentSave_;
+    protected internal List<int> indentSave_;
     protected internal bool useTab_;
     protected internal bool separator_;
 }

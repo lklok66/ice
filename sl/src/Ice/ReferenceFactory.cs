@@ -8,7 +8,6 @@
 // **********************************************************************
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace IceInternal
@@ -368,11 +367,11 @@ namespace IceInternal
                 return create(ident, instance_.getDefaultContext(), facet, mode, secure, "");
             }
 
-            ArrayList endpoints = new ArrayList();
+            List<EndpointI> endpoints = new List<EndpointI>();
 
             if(s[beg] == ':')
             {
-                ArrayList unknownEndpoints = new ArrayList();
+                List<string> unknownEndpoints = new List<string>();
                 end = beg;
 
                 while(end < s.Length && s[end] == ':')
@@ -415,7 +414,7 @@ namespace IceInternal
                     instance_.initializationData().logger.warning(msg);
                 }
 
-                EndpointI[] ep = (EndpointI[])endpoints.ToArray(typeof(EndpointI));
+                EndpointI[] ep = endpoints.ToArray();
                 return create(ident, instance_.getDefaultContext(), facet, mode, secure, ep);
             }
             else if(s[beg] == '@')
@@ -586,9 +585,9 @@ namespace IceInternal
             // set.
             //
             WeakReference w = new WeakReference(@ref);
-            WeakReference val = (WeakReference)_references[w];
-            if(val != null)
+            if(_references.ContainsKey(w))
             {
+                WeakReference val = (WeakReference)_references[w];
                 Reference r = (Reference)val.Target;
                 if(r != null && r.Equals(@ref))
                 {
@@ -626,7 +625,7 @@ namespace IceInternal
                 }
             }
 
-            ArrayList unknownProps = new ArrayList();
+            List<string> unknownProps = new List<string>();
             Dictionary<string, string> props
                 = instance_.initializationData().properties.getPropertiesForPrefix(prefix + ".");
             foreach(String prop in props.Keys)
@@ -660,7 +659,7 @@ namespace IceInternal
 
         private Instance instance_;
         private Ice.Communicator _communicator;
-        private Hashtable _references = new Hashtable();
+        private Dictionary<WeakReference, WeakReference> _references = new Dictionary<WeakReference, WeakReference>();
     }
 
 }

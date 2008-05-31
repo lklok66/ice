@@ -117,90 +117,6 @@ public class TwowaysAMI
         private Callback callback = new Callback();
     }
 
-    private class AMI_MyClass_opKByteSI 
-    {
-        public AMI_MyClass_opKByteSI(LinkedList<byte> i)
-        {
-            _i = i;
-        }
-
-        public void response(LinkedList<byte> r, LinkedList<byte> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private LinkedList<byte> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opQByteSI
-    {
-        public AMI_MyClass_opQByteSI(Queue<byte> i)
-        {
-            _i = i;
-        }
-
-        public void response(Queue<byte> r, Queue<byte> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private Queue<byte> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opSByteSI 
-    {
-        public AMI_MyClass_opSByteSI(Stack<byte> i)
-        {
-            _i = i;
-        }
-
-        public void response(Stack<byte> r, Stack<byte> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private Stack<byte> _i;
-        private Callback callback = new Callback();
-    }
-
     private class AMI_MyClass_opCByteSI 
     {
         public AMI_MyClass_opCByteSI(CByteS i)
@@ -282,90 +198,6 @@ public class TwowaysAMI
         }
 
         private List<bool> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opKBoolSI 
-    {
-        public AMI_MyClass_opKBoolSI(LinkedList<bool> i)
-        {
-            _i = i;
-        }
-
-        public void response(LinkedList<bool> r, LinkedList<bool> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private LinkedList<bool> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opQBoolSI 
-    {
-        public AMI_MyClass_opQBoolSI(Queue<bool> i)
-        {
-            _i = i;
-        }
-
-        public void response(Queue<bool> r, Queue<bool> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private Queue<bool> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opSBoolSI 
-    {
-        public AMI_MyClass_opSBoolSI(Stack<bool> i)
-        {
-            _i = i;
-        }
-
-        public void response(Stack<bool> r, Stack<bool> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private Stack<bool> _i;
         private Callback callback = new Callback();
     }
 
@@ -453,90 +285,6 @@ public class TwowaysAMI
         private Callback callback = new Callback();
     }
 
-    private class AMI_MyClass_opKShortSI 
-    {
-        public AMI_MyClass_opKShortSI(LinkedList<short> i)
-        {
-            _i = i;
-        }
-
-        public void response(LinkedList<short> r, LinkedList<short> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private LinkedList<short> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opQShortSI 
-    {
-        public AMI_MyClass_opQShortSI(Queue<short> i)
-        {
-            _i = i;
-        }
-
-        public void response(Queue<short> r, Queue<short> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private Queue<short> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opSShortSI 
-    {
-        public AMI_MyClass_opSShortSI(Stack<short> i)
-        {
-            _i = i;
-        }
-
-        public void response(Stack<short> r, Stack<short> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private Stack<short> _i;
-        private Callback callback = new Callback();
-    }
-
     private class AMI_MyClass_opCShortSI 
     {
         public AMI_MyClass_opCShortSI(CShortS i)
@@ -618,90 +366,6 @@ public class TwowaysAMI
         }
 
         private List<int> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opKIntSI 
-    {
-        public AMI_MyClass_opKIntSI(LinkedList<int> i)
-        {
-            _i = i;
-        }
-
-        public void response(LinkedList<int> r, LinkedList<int> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private LinkedList<int> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opQIntSI 
-    {
-        public AMI_MyClass_opQIntSI(Queue<int> i)
-        {
-            _i = i;
-        }
-
-        public void response(Queue<int> r, Queue<int> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private Queue<int> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opSIntSI 
-    {
-        public AMI_MyClass_opSIntSI(Stack<int> i)
-        {
-            _i = i;
-        }
-
-        public void response(Stack<int> r, Stack<int> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private Stack<int> _i;
         private Callback callback = new Callback();
     }
 
@@ -789,90 +453,6 @@ public class TwowaysAMI
         private Callback callback = new Callback();
     }
 
-    private class AMI_MyClass_opKLongSI 
-    {
-        public AMI_MyClass_opKLongSI(LinkedList<long> i)
-        {
-            _i = i;
-        }
-
-        public void response(LinkedList<long> r, LinkedList<long> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private LinkedList<long> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opQLongSI 
-    {
-        public AMI_MyClass_opQLongSI(Queue<long> i)
-        {
-            _i = i;
-        }
-
-        public void response(Queue<long> r, Queue<long> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private Queue<long> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opSLongSI 
-    {
-        public AMI_MyClass_opSLongSI(Stack<long> i)
-        {
-            _i = i;
-        }
-
-        public void response(Stack<long> r, Stack<long> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private Stack<long> _i;
-        private Callback callback = new Callback();
-    }
-
     private class AMI_MyClass_opCLongSI 
     {
         public AMI_MyClass_opCLongSI(CLongS i)
@@ -954,90 +534,6 @@ public class TwowaysAMI
         }
 
         private List<float> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opKFloatSI 
-    {
-        public AMI_MyClass_opKFloatSI(LinkedList<float> i)
-        {
-            _i = i;
-        }
-
-        public void response(LinkedList<float> r, LinkedList<float> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private LinkedList<float> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opQFloatSI 
-    {
-        public AMI_MyClass_opQFloatSI(Queue<float> i)
-        {
-            _i = i;
-        }
-
-        public void response(Queue<float> r, Queue<float> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private Queue<float> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opSFloatSI 
-    {
-        public AMI_MyClass_opSFloatSI(Stack<float> i)
-        {
-            _i = i;
-        }
-
-        public void response(Stack<float> r, Stack<float> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private Stack<float> _i;
         private Callback callback = new Callback();
     }
 
@@ -1125,90 +621,6 @@ public class TwowaysAMI
         private Callback callback = new Callback();
     }
 
-    private class AMI_MyClass_opKDoubleSI 
-    {
-        public AMI_MyClass_opKDoubleSI(LinkedList<double> i)
-        {
-            _i = i;
-        }
-
-        public void response(LinkedList<double> r, LinkedList<double> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private LinkedList<double> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opQDoubleSI 
-    {
-        public AMI_MyClass_opQDoubleSI(Queue<double> i)
-        {
-            _i = i;
-        }
-
-        public void response(Queue<double> r, Queue<double> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private Queue<double> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opSDoubleSI 
-    {
-        public AMI_MyClass_opSDoubleSI(Stack<double> i)
-        {
-            _i = i;
-        }
-
-        public void response(Stack<double> r, Stack<double> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private Stack<double> _i;
-        private Callback callback = new Callback();
-    }
-
     private class AMI_MyClass_opCDoubleSI 
     {
         public AMI_MyClass_opCDoubleSI(CDoubleS i)
@@ -1290,90 +702,6 @@ public class TwowaysAMI
         }
 
         private List<string> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opKStringSI 
-    {
-        public AMI_MyClass_opKStringSI(LinkedList<string> i)
-        {
-            _i = i;
-        }
-
-        public void response(LinkedList<string> r, LinkedList<string> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private LinkedList<string> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opQStringSI 
-    {
-        public AMI_MyClass_opQStringSI(Queue<string> i)
-        {
-            _i = i;
-        }
-
-        public void response(Queue<string> r, Queue<string> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private Queue<string> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opSStringSI 
-    {
-        public AMI_MyClass_opSStringSI(Stack<string> i)
-        {
-            _i = i;
-        }
-
-        public void response(Stack<string> r, Stack<string> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private Stack<string> _i;
         private Callback callback = new Callback();
     }
 
@@ -1566,90 +894,6 @@ public class TwowaysAMI
         private Callback callback = new Callback();
     }
 
-    private class AMI_MyClass_opKObjectPrxSI 
-    {
-        public AMI_MyClass_opKObjectPrxSI(LinkedList<Ice.ObjectPrx> i)
-        {
-            _i = i;
-        }
-
-        public void response(LinkedList<Ice.ObjectPrx> r, LinkedList<Ice.ObjectPrx> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private LinkedList<Ice.ObjectPrx> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opQObjectPrxSI 
-    {
-        public AMI_MyClass_opQObjectPrxSI(Queue<Ice.ObjectPrx> i)
-        {
-            _i = i;
-        }
-
-        public void response(Queue<Ice.ObjectPrx> r, Queue<Ice.ObjectPrx> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private Queue<Ice.ObjectPrx> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opSObjectPrxSI 
-    {
-        public AMI_MyClass_opSObjectPrxSI(Stack<Ice.ObjectPrx> i)
-        {
-            _i = i;
-        }
-
-        public void response(Stack<Ice.ObjectPrx> r, Stack<Ice.ObjectPrx> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private Stack<Ice.ObjectPrx> _i;
-        private Callback callback = new Callback();
-    }
-
     private class AMI_MyClass_opCObjectPrxSI 
     {
         public AMI_MyClass_opCObjectPrxSI(CObjectPrxS i)
@@ -1731,90 +975,6 @@ public class TwowaysAMI
         }
 
         private List<S> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opKStructSI 
-    {
-        public AMI_MyClass_opKStructSI(LinkedList<S> i)
-        {
-            _i = i;
-        }
-
-        public void response(LinkedList<S> r, LinkedList<S> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private LinkedList<S> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opQStructSI 
-    {
-        public AMI_MyClass_opQStructSI(Queue<S> i)
-        {
-            _i = i;
-        }
-
-        public void response(Queue<S> r, Queue<S> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private Queue<S> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opSStructSI 
-    {
-        public AMI_MyClass_opSStructSI(Stack<S> i)
-        {
-            _i = i;
-        }
-
-        public void response(Stack<S> r, Stack<S> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private Stack<S> _i;
         private Callback callback = new Callback();
     }
 
@@ -2007,90 +1167,6 @@ public class TwowaysAMI
         private Callback callback = new Callback();
     }
 
-    private class AMI_MyClass_opKCVPrxSI 
-    {
-        public AMI_MyClass_opKCVPrxSI(LinkedList<CVPrx> i)
-        {
-            _i = i;
-        }
-
-        public void response(LinkedList<CVPrx> r, LinkedList<CVPrx> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private LinkedList<CVPrx> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opQCVPrxSI 
-    {
-        public AMI_MyClass_opQCVPrxSI(Queue<CVPrx> i)
-        {
-            _i = i;
-        }
-
-        public void response(Queue<CVPrx> r, Queue<CVPrx> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private Queue<CVPrx> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opSCVPrxSI 
-    {
-        public AMI_MyClass_opSCVPrxSI(Stack<CVPrx> i)
-        {
-            _i = i;
-        }
-
-        public void response(Stack<CVPrx> r, Stack<CVPrx> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private Stack<CVPrx> _i;
-        private Callback callback = new Callback();
-    }
-
     private class AMI_MyClass_opCCVPrxSI 
     {
         public AMI_MyClass_opCCVPrxSI(CCVPrxS i)
@@ -2280,90 +1356,6 @@ public class TwowaysAMI
         private Callback callback = new Callback();
     }
 
-    private class AMI_MyClass_opKEnSI 
-    {
-        public AMI_MyClass_opKEnSI(LinkedList<En> i)
-        {
-            _i = i;
-        }
-
-        public void response(LinkedList<En> r, LinkedList<En> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private LinkedList<En> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opQEnSI 
-    {
-        public AMI_MyClass_opQEnSI(Queue<En> i)
-        {
-            _i = i;
-        }
-
-        public void response(Queue<En> r, Queue<En> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private Queue<En> _i;
-        private Callback callback = new Callback();
-    }
-
-    private class AMI_MyClass_opSEnSI 
-    {
-        public AMI_MyClass_opSEnSI(Stack<En> i)
-        {
-            _i = i;
-        }
-
-        public void response(Stack<En> r, Stack<En> o)
-        {
-            test(Ice.CollectionComparer.Equals(_i, o));
-            test(Ice.CollectionComparer.Equals(_i, r));
-            callback.called();
-        }
-
-        public void exception(Ice.Exception ex)
-        {
-            test(false);
-        }
-
-        public virtual bool check()
-        {
-            return callback.check();
-        }
-
-        private Stack<En> _i;
-        private Callback callback = new Callback();
-    }
-
     private class AMI_MyClass_opCEnSI
     {
         public AMI_MyClass_opCEnSI(CEnS i)
@@ -2421,42 +1413,6 @@ public class TwowaysAMI
         }
 
         {
-            LinkedList<byte> i = new LinkedList<byte>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.AddLast((byte)c);
-            }
-
-            AMI_MyClass_opKByteSI cb = new AMI_MyClass_opKByteSI(i);
-            p.opKByteS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            Queue<byte> i = new Queue<byte>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.Enqueue((byte)c);
-            }
-
-            AMI_MyClass_opQByteSI cb = new AMI_MyClass_opQByteSI(i);
-            p.opQByteS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            Stack<byte> i = new Stack<byte>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.Push((byte)c);
-            }
-
-            AMI_MyClass_opSByteSI cb = new AMI_MyClass_opSByteSI(i);
-            p.opSByteS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
             CByteS i = new CByteS();
             for(int c = 0; c < _length; ++c)
             {
@@ -2489,42 +1445,6 @@ public class TwowaysAMI
 
             AMI_MyClass_opLBoolSI cb = new AMI_MyClass_opLBoolSI(i);
             p.opLBoolS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            LinkedList<bool> i = new LinkedList<bool>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.AddLast(c % 1 == 1);
-            }
-
-            AMI_MyClass_opKBoolSI cb = new AMI_MyClass_opKBoolSI(i);
-            p.opKBoolS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            Queue<bool> i = new Queue<bool>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.Enqueue(c % 1 == 1);
-            }
-
-            AMI_MyClass_opQBoolSI cb = new AMI_MyClass_opQBoolSI(i);
-            p.opQBoolS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            Stack<bool> i = new Stack<bool>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.Push(c % 1 == 1);
-            }
-
-            AMI_MyClass_opSBoolSI cb = new AMI_MyClass_opSBoolSI(i);
-            p.opSBoolS_async(cb.response, cb.exception, i);
             test(cb.check());
         }
 
@@ -2565,42 +1485,6 @@ public class TwowaysAMI
         }
 
         {
-            LinkedList<short> i = new LinkedList<short>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.AddLast((short)c);
-            }
-
-            AMI_MyClass_opKShortSI cb = new AMI_MyClass_opKShortSI(i);
-            p.opKShortS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            Queue<short> i = new Queue<short>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.Enqueue((short)c);
-            }
-
-            AMI_MyClass_opQShortSI cb = new AMI_MyClass_opQShortSI(i);
-            p.opQShortS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            Stack<short> i = new Stack<short>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.Push((short)c);
-            }
-
-            AMI_MyClass_opSShortSI cb = new AMI_MyClass_opSShortSI(i);
-            p.opSShortS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
             CShortS i = new CShortS();
             for(int c = 0; c < _length; ++c)
             {
@@ -2633,42 +1517,6 @@ public class TwowaysAMI
 
             AMI_MyClass_opLIntSI cb = new AMI_MyClass_opLIntSI(i);
             p.opLIntS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            LinkedList<int> i = new LinkedList<int>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.AddLast((int)c);
-            }
-
-            AMI_MyClass_opKIntSI cb = new AMI_MyClass_opKIntSI(i);
-            p.opKIntS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            Queue<int> i = new Queue<int>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.Enqueue((int)c);
-            }
-
-            AMI_MyClass_opQIntSI cb = new AMI_MyClass_opQIntSI(i);
-            p.opQIntS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            Stack<int> i = new Stack<int>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.Push((int)c);
-            }
-
-            AMI_MyClass_opSIntSI cb = new AMI_MyClass_opSIntSI(i);
-            p.opSIntS_async(cb.response, cb.exception, i);
             test(cb.check());
         }
 
@@ -2709,42 +1557,6 @@ public class TwowaysAMI
         }
 
         {
-            LinkedList<long> i = new LinkedList<long>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.AddLast((long)c);
-            }
-
-            AMI_MyClass_opKLongSI cb = new AMI_MyClass_opKLongSI(i);
-            p.opKLongS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            Queue<long> i = new Queue<long>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.Enqueue((long)c);
-            }
-
-            AMI_MyClass_opQLongSI cb = new AMI_MyClass_opQLongSI(i);
-            p.opQLongS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            Stack<long> i = new Stack<long>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.Push((long)c);
-            }
-
-            AMI_MyClass_opSLongSI cb = new AMI_MyClass_opSLongSI(i);
-            p.opSLongS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
             CLongS i = new CLongS();
             for(int c = 0; c < _length; ++c)
             {
@@ -2777,42 +1589,6 @@ public class TwowaysAMI
 
             AMI_MyClass_opLFloatSI cb = new AMI_MyClass_opLFloatSI(i);
             p.opLFloatS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            LinkedList<float> i = new LinkedList<float>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.AddLast((float)c);
-            }
-
-            AMI_MyClass_opKFloatSI cb = new AMI_MyClass_opKFloatSI(i);
-            p.opKFloatS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            Queue<float> i = new Queue<float>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.Enqueue((float)c);
-            }
-
-            AMI_MyClass_opQFloatSI cb = new AMI_MyClass_opQFloatSI(i);
-            p.opQFloatS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            Stack<float> i = new Stack<float>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.Push((float)c);
-            }
-
-            AMI_MyClass_opSFloatSI cb = new AMI_MyClass_opSFloatSI(i);
-            p.opSFloatS_async(cb.response, cb.exception, i);
             test(cb.check());
         }
 
@@ -2853,42 +1629,6 @@ public class TwowaysAMI
         }
 
         {
-            LinkedList<double> i = new LinkedList<double>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.AddLast((double)c);
-            }
-
-            AMI_MyClass_opKDoubleSI cb = new AMI_MyClass_opKDoubleSI(i);
-            p.opKDoubleS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            Queue<double> i = new Queue<double>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.Enqueue((double)c);
-            }
-
-            AMI_MyClass_opQDoubleSI cb = new AMI_MyClass_opQDoubleSI(i);
-            p.opQDoubleS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            Stack<double> i = new Stack<double>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.Push((double)c);
-            }
-
-            AMI_MyClass_opSDoubleSI cb = new AMI_MyClass_opSDoubleSI(i);
-            p.opSDoubleS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
             CDoubleS i = new CDoubleS();
             for(int c = 0; c < _length; ++c)
             {
@@ -2921,42 +1661,6 @@ public class TwowaysAMI
 
             AMI_MyClass_opLStringSI cb = new AMI_MyClass_opLStringSI(i);
             p.opLStringS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            LinkedList<string> i = new LinkedList<string>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.AddLast(c.ToString());
-            }
-
-            AMI_MyClass_opKStringSI cb = new AMI_MyClass_opKStringSI(i);
-            p.opKStringS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            Queue<string> i = new Queue<string>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.Enqueue(c.ToString());
-            }
-
-            AMI_MyClass_opQStringSI cb = new AMI_MyClass_opQStringSI(i);
-            p.opQStringS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            Stack<string> i = new Stack<string>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.Push(c.ToString());
-            }
-
-            AMI_MyClass_opSStringSI cb = new AMI_MyClass_opSStringSI(i);
-            p.opSStringS_async(cb.response, cb.exception, i);
             test(cb.check());
         }
 
@@ -3033,42 +1737,6 @@ public class TwowaysAMI
         }
 
         {
-            LinkedList<Ice.ObjectPrx> i = new LinkedList<Ice.ObjectPrx>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.AddLast(communicator.stringToProxy(c.ToString()));
-            }
-
-            AMI_MyClass_opKObjectPrxSI cb = new AMI_MyClass_opKObjectPrxSI(i);
-            p.opKObjectPrxS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            Queue<Ice.ObjectPrx> i = new Queue<Ice.ObjectPrx>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.Enqueue(communicator.stringToProxy(c.ToString()));
-            }
-
-            AMI_MyClass_opQObjectPrxSI cb = new AMI_MyClass_opQObjectPrxSI(i);
-            p.opQObjectPrxS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            Stack<Ice.ObjectPrx> i = new Stack<Ice.ObjectPrx>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.Push(communicator.stringToProxy(c.ToString()));
-            }
-
-            AMI_MyClass_opSObjectPrxSI cb = new AMI_MyClass_opSObjectPrxSI(i);
-            p.opSObjectPrxS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
             CObjectPrxS i = new CObjectPrxS();
             for(int c = 0; c < _length; ++c)
             {
@@ -3101,42 +1769,6 @@ public class TwowaysAMI
 
             AMI_MyClass_opLStructSI cb = new AMI_MyClass_opLStructSI(i);
             p.opLStructS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            LinkedList<S> i = new LinkedList<S>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.AddLast(new S(c));
-            }
-
-            AMI_MyClass_opKStructSI cb = new AMI_MyClass_opKStructSI(i);
-            p.opKStructS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            Queue<S> i = new Queue<S>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.Enqueue(new S(c));
-            }
-
-            AMI_MyClass_opQStructSI cb = new AMI_MyClass_opQStructSI(i);
-            p.opQStructS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            Stack<S> i = new Stack<S>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.Push(new S(c));
-            }
-
-            AMI_MyClass_opSStructSI cb = new AMI_MyClass_opSStructSI(i);
-            p.opSStructS_async(cb.response, cb.exception, i);
             test(cb.check());
         }
 
@@ -3213,42 +1845,6 @@ public class TwowaysAMI
         }
 
         {
-            LinkedList<CVPrx> i = new LinkedList<CVPrx>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.AddLast(CVPrxHelper.uncheckedCast(communicator.stringToProxy(c.ToString())));
-            }
-
-            AMI_MyClass_opKCVPrxSI cb = new AMI_MyClass_opKCVPrxSI(i);
-            p.opKCVPrxS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            Queue<CVPrx> i = new Queue<CVPrx>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.Enqueue(CVPrxHelper.uncheckedCast(communicator.stringToProxy(c.ToString())));
-            }
-
-            AMI_MyClass_opQCVPrxSI cb = new AMI_MyClass_opQCVPrxSI(i);
-            p.opQCVPrxS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            Stack<CVPrx> i = new Stack<CVPrx>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.Push(CVPrxHelper.uncheckedCast(communicator.stringToProxy(c.ToString())));
-            }
-
-            AMI_MyClass_opSCVPrxSI cb = new AMI_MyClass_opSCVPrxSI(i);
-            p.opSCVPrxS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
             CCVPrxS i = new CCVPrxS();
             for(int c = 0; c < _length; ++c)
             {
@@ -3317,42 +1913,6 @@ public class TwowaysAMI
 
             AMI_MyClass_opLEnSI cb = new AMI_MyClass_opLEnSI(i);
             p.opLEnS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            LinkedList<En> i = new LinkedList<En>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.AddLast((En)(c % 3));
-            }
-
-            AMI_MyClass_opKEnSI cb = new AMI_MyClass_opKEnSI(i);
-            p.opKEnS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            Queue<En> i = new Queue<En>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.Enqueue((En)(c % 3));
-            }
-
-            AMI_MyClass_opQEnSI cb = new AMI_MyClass_opQEnSI(i);
-            p.opQEnS_async(cb.response, cb.exception, i);
-            test(cb.check());
-        }
-
-        {
-            Stack<En> i = new Stack<En>();
-            for(int c = 0; c < _length; ++c)
-            {
-                i.Push((En)(c % 3));
-            }
-
-            AMI_MyClass_opSEnSI cb = new AMI_MyClass_opSEnSI(i);
-            p.opSEnS_async(cb.response, cb.exception, i);
             test(cb.check());
         }
 
