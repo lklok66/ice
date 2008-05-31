@@ -33,22 +33,26 @@ namespace IceInternal
             traceLevels__ = r.getInstance().traceLevels();
             is__ = new BasicStream(r.getInstance());
             os__ = new BasicStream(r.getInstance());
+#if SILVERLIGHT
             dispatcher__ = r.getInstance().dispatcher();
+#endif
             writeHeader__(r, operation, mode, context);
         }
 
         // Returns true if ok, false if user exception.
         public bool invoke()
         {
+            os__.endWriteEncaps();
+#if SILVERLIGHT
             if(System.Threading.Thread.CurrentThread.ManagedThreadId == 1)
             {
                 throw new Ice.FeatureNotSupportedException("can't send synchronous calls from UI thread.");
             }
 
-            os__.endWriteEncaps();
-
             dispatcher__.BeginInvoke(delegate { getRequestStream(); });
-
+#else
+            getRequestStream();
+#endif
             lock(this)
             {
                 while(_state == StateUnsent)

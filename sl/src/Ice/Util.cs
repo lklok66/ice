@@ -17,7 +17,9 @@ namespace Ice
     using System.IO;
     using System.Text;
     using System.Globalization;
+#if SILVERLIGHT
     using System.Windows.Threading;
+#endif
 
     public interface ThreadNotification
     {
@@ -58,12 +60,24 @@ namespace Ice
             return new PropertiesI(ref args, defaults);
         }
 
-        public static Communicator initialize(Dispatcher dispatcher, ref string[] args)
+        public static Communicator initialize(
+#if SILVERLIGHT
+                                              Dispatcher dispatcher,
+#endif
+                                              ref string[] args)
         {
-            return initialize(dispatcher, ref args, null);
+            return initialize(
+#if SILVERLIGHT
+                              dispatcher,
+#endif
+                              ref args, null);
         }
 
-        public static Communicator initialize(Dispatcher dispatcher, ref string[] args, InitializationData initData)
+        public static Communicator initialize(
+#if SILVERLIGHT
+                                              Dispatcher dispatcher,
+#endif
+                                              ref string[] args, InitializationData initData)
         {
             if(initData == null)
             {
@@ -76,12 +90,20 @@ namespace Ice
 
             initData.properties = createProperties(ref args, initData.properties);          
 
-            CommunicatorI result = new CommunicatorI(dispatcher, initData);
+            CommunicatorI result = new CommunicatorI(
+#if SILVERLIGHT
+                                                     dispatcher,
+#endif
+                                                     initData);
             result.finishSetup(ref args);
             return result;
         }
 
-        public static Communicator initialize(Dispatcher dispatcher, InitializationData initData)
+        public static Communicator initialize(
+#if SILVERLIGHT
+                                              Dispatcher dispatcher,
+#endif
+                                              InitializationData initData)
         {
             if(initData == null)
             {
@@ -92,15 +114,27 @@ namespace Ice
                 initData = (InitializationData)initData.Clone();
             }
 
-            CommunicatorI result = new CommunicatorI(dispatcher, initData);
+            CommunicatorI result = new CommunicatorI(
+#if SILVERLIGHT
+                                                     dispatcher,
+#endif
+                                                     initData);
             string[] args = new string[0];
             result.finishSetup(ref args);
             return result;
         }
 
-        public static Communicator initialize(Dispatcher dispatcher)
+        public static Communicator initialize(
+#if SILVERLIGHT
+                                              Dispatcher dispatcher
+#endif
+                                              )
         {
-            return initialize(dispatcher, null);
+            return initialize(
+#if SILVERLIGHT
+                              dispatcher,
+#endif
+                              null);
         }
 
         public static IceInternal.Instance getInstance(Communicator communicator)

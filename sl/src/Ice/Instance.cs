@@ -32,11 +32,13 @@ namespace IceInternal
             return _initData;
         }
 
+#if SILVERLIGHT
         public System.Windows.Threading.Dispatcher dispatcher()
         {
             // No mutex lock, immutable.
             return _dispatcher;
         }
+#endif
         
         public TraceLevels traceLevels()
         {
@@ -164,11 +166,16 @@ namespace IceInternal
         //
         // Only for use by Ice.CommunicatorI
         //
-        public Instance(Ice.Communicator communicator, System.Windows.Threading.Dispatcher dispatcher,
+        public Instance(Ice.Communicator communicator,
+#if SILVERLIGHT
+                        System.Windows.Threading.Dispatcher dispatcher,
+#endif
                         Ice.InitializationData initData)
         {
             _state = StateActive;
+#if SILVERLIGHT
             _dispatcher = dispatcher;
+#endif
             _initData = initData;
                 
             try
@@ -371,7 +378,9 @@ namespace IceInternal
         private const int StateDestroyed = 2;
         private System.Uri _bridgeUri;
         private int _state;
+#if SILVERLIGHT
         private System.Windows.Threading.Dispatcher _dispatcher; // Immutable, not reset by destroy().
+#endif
         private Ice.InitializationData _initData; // Immutable, not reset by destroy().
         private TraceLevels _traceLevels; // Immutable, not reset by destroy().
         private DefaultsAndOverrides _defaultsAndOverrides; // Immutable, not reset by destroy().
