@@ -1676,6 +1676,7 @@ public class TwowaysAMI
             test(cb.check());
         }
 
+/*
         {
             Ice.Object[] i = new Ice.Object[_length];
             for(int c = 0; c < _length; ++c)
@@ -1711,6 +1712,7 @@ public class TwowaysAMI
             p.opCObjectS_async(cb.response, cb.exception, i);
             test(cb.check());
         }
+*/
 
         {
             Ice.ObjectPrx[] i = new Ice.ObjectPrx[_length];
@@ -1784,6 +1786,7 @@ public class TwowaysAMI
             test(cb.check());
         }
 
+/*
         {
             CV[] i = new CV[_length];
             for(int c = 0; c < _length; ++c)
@@ -1819,6 +1822,7 @@ public class TwowaysAMI
             p.opCCVS_async(cb.response, cb.exception, i);
             test(cb.check());
         }
+*/
 
         {
             CVPrx[] i = new CVPrx[_length];
@@ -1856,6 +1860,7 @@ public class TwowaysAMI
             test(cb.check());
         }
 
+/*
         {
             CR[] i = new CR[_length];
             for(int c = 0; c < _length; ++c)
@@ -1891,6 +1896,7 @@ public class TwowaysAMI
             p.opCCRS_async(cb.response, cb.exception, i);
             test(cb.check());
         }
+*/
 
         {
             En[] i = new En[_length];
