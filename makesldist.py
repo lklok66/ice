@@ -592,9 +592,8 @@ print "ok"
 print "Changing the PublicKeyToken in web.config files to " + publickey + "...",
 for root, dirnames, filesnames in os.walk('.'):
     for f in filesnames:
-        if f == "web.config":
-            
-            substitute(os.path.join(root, f), [('PublicKeyToken=[a-z0-9]+', 'PublicKeyToken=%s' % publickey)])
+        if f == "Web.config" or f == "web.config":
+            substitute(os.path.join(root, f), [('PublicKeyToken=1f998c50fec78381', 'PublicKeyToken=%s' % publickey)])
 print "ok"
 
 #
