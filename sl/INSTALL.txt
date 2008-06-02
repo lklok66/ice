@@ -25,15 +25,13 @@ Ice for Silverlight requires:
 
 - Microsoft Visual Studio 2008 Silverlight Tools
 
-  http://www.microsoft.com/downloads/thankyou.aspx?familyId=25144c27-6514-4ad4-8bcb-e2e051416e03&displayLang=en
+  http://www.microsoft.com/downloads/details.aspx?FamilyID=e0bae58e-9c0b-4090-a1db-f134d9f095fd&displaylang=en
 
 
 Silverlight Runtime
 -------------------
 
-- Silverlight 1.1 Alpha
-
-  http://www.microsoft.com/silverlight/resources/LicenseWinDev.aspx
+- Silverlight 2.0 Beta 1
 
 
 Ice for .NET
@@ -72,9 +70,9 @@ following third-party library:
 - mcpp 2.7 with patch
 
 If you want to build the slice2sl translator yourself, you do not need
-to build mcpp yourself, as ZeroC supplies a Windows installer for the
-VC9 compiler that contains release and debug libraries for all of the
-third-party dependencies.
+to build mcpp yourself, as ZeroC supplies a Third-Party Windows installer
+for the VC9 compiler that contains release and debug libraries for all
+of the third-party dependencies.
 
 If you intend to build the third-party dependencies from source, we
 recommend downloading the Ice third-party source archive from
@@ -183,13 +181,10 @@ To run a test or demo do the following:
 2) Start the Visual Studio 2008 IDE and open the selected test or demo
    solution file.
 
-3) Right-click on the WebApplication project and select Properties.
-   Select the Web tab, change the Start Action to be a Specific Page
-   and choose TestPage.html.
+3) Right-click on TestPage.html and choose "Set As Start Page".
 
-4) Right-click on the WebApplication project and select
-   Debug->Start new instance. This causes a browser window to be
-   spawned.
+4) Right-click on the Web project and select Debug->Start new instance.
+   This causes a browser window to be spawned.
 
 5) Click on the button in the browser to run the test or demo.
 
@@ -199,3 +194,94 @@ Installation
 ======================================================================
 
 Ice for Silverlight does not support automatic installation.
+
+
+======================================================================
+Creating a new project.
+======================================================================
+
+The following steps explain how to create a new project in Visual
+Stdio 2008 that uses Ice for Silverlight.
+
+1) In the IDE select "File->New->Project".
+
+2) In the "New Project" dialog select "Silverlight Application" under
+   "Other Languages->Visual C#->Silverlight" and click OK.
+
+3) In the "Add Silverlight Application" choose "Generate an HTML test
+   page to host Silverlight within this project" and "Web Application"
+   as the project type and click OK. This will create two projects, the
+   Silverlight project plus a Web project.
+
+4) Right click on the <project name>TestPage.html and choose "Set As
+   Start Page"
+
+5) Add the Ice HTTP bridge to the Web project by right clicking on the
+   project, choosing "Add->Existing Item" and then browsing to the 
+   location of the IceBridge.ashx file in the Ice for Silverlight
+   distribution.
+
+6) Edit Web.config, find the compilation section, and add a reference
+   for the Ice for .NET 3.3 assembly
+
+   <compilation debug="true">
+     <assemblies>
+        <add assembly="System.Core, Version=3.5.0.0, Culture=neutral, PublicKeyToken=B77A5C561934E089"/>
+        ...
+        <add assembly="Ice, Version=3.3.0.0, Culture=neutral, PublicKeyToken=cdd571ade22f2f16, processorArchitecture=MSIL"/>
+      </assemblies>
+    </compilation>
+
+7) Add a "Global Application Class" to the Web project by right clicking on
+   the Web project and selecting "Add->New Item" and choosing "Global
+   Application Class" in the "Add New Item" dialog.
+
+8) Edit the Global.ashx.cs file and add code to initialize and destroy the
+   Ice communicator in the Application_Start and Application_End functions.
+
+   protected void Application_Start(object sender, EventArgs e)
+   {
+       Application["com"] = Ice.Util.initialize();
+   }
+
+   protected void Application_End(object sender, EventArgs e)
+   {
+       Ice.Communicator com = (Ice.Communicator) Application["com"];
+       try
+       {
+           com.destroy();
+       }
+       catch (Exception)
+       {
+       }
+   }
+
+9) Add a reference to the Ice for .NET 3.3 assembly to the Web projects by
+   right clicking on References, selecting "Add Reference" and in the "Browse"
+   tab locate Ice.dll and select it.
+
+10) Add slice compilation to the regular project by manually editing the 
+    project file and adding something similar to the following at the end of
+    the file, changing the name of the slice file appropriately.
+
+      ...
+      <Target Name="CompileSlice" Inputs="Test.ice" Outputs="generated\Test.cs">
+        <Exec Command="slice2sl.exe --output-dir generated Test.ice"/>
+      </Target>
+      <Target Name="AfterClean">
+        <Delete Files="generated\Test.cs"/>
+      </Target>
+      <PropertyGroup>
+        <CompileDependsOn>
+          CompileSlice;$(CompileDependsOn)
+        </CompileDependsOn>
+      </PropertyGroup>
+    </Project>
+
+    Create a directory in the project directory named generated and then build
+    the project to run the slice2sl task. Now add the generated C# file to the
+    project by right-clicking on the project and choosing "Add->Existing Item".
+
+Your project is now setup and you are ready to start developing your
+application using Ice for Silverlight. Please see the tests and demo for
+examples.

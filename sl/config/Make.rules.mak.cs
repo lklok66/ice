@@ -20,6 +20,13 @@ DEBUG			= yes
 
 #OPTIMIZE		= yes
 
+#
+# Set the location of the Silverlight 2.0 SDK
+#
+
+!if "$(SLSDK_HOME)" == ""
+SLSDK_HOME		= C:\Program Files\Microsoft Silverlight
+!endif
 
 #
 # Set the key file used to sign assemblies.
@@ -57,7 +64,7 @@ MCS			= csc -nologo
 MCSFLAGS = -warnaserror -d:MAKEFILE_BUILD
 
 !if "$(SILVERLIGHT)" == "yes"
-MCSFLAGS = $(MCSFLAGS) -d:SILVERLIGHT /nowarn:618 /noconfig /nostdlib+ /reference:"C:\Program Files\Microsoft Silverlight\2.0.30226.2\mscorlib.dll" /reference:"C:\Program Files\Microsoft Silverlight\2.0.30226.2\System.Core.dll" /reference:"C:\Program Files\Microsoft Silverlight\2.0.30226.2\system.dll" /reference:"C:\Program Files\Microsoft Silverlight\2.0.30226.2\System.Windows.dll" /reference:"C:\Program Files\Microsoft Silverlight\2.0.30226.2\System.Net.dll" /reference:"C:\Program Files\Microsoft Silverlight\2.0.30226.2\System.Windows.Browser.dll"
+MCSFLAGS = $(MCSFLAGS) -d:SILVERLIGHT /nowarn:618 /noconfig /nostdlib+ /reference:"$(SLSDK_HOME)\2.0.30226.2\mscorlib.dll" /reference:"$(SLSDK_HOME)\2.0.30226.2\System.Core.dll" /reference:"$(SLSDK_HOME)\2.0.30226.2\system.dll" /reference:"$(SLSDK_HOME)\2.0.30226.2\System.Windows.dll" /reference:"$(SLSDK_HOME)\2.0.30226.2\System.Net.dll" /reference:"$(SLSDK_HOME)\2.0.30226.2\System.Windows.Browser.dll"
 !endif
 
 !if "$(DEBUG)" == "yes"
