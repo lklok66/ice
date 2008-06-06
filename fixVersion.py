@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, sys, shutil, fnmatch, re, glob, getopt
+import os, sys, shutil, fnmatch, re, glob, getopt, stat
 
 #
 # version pattern
@@ -114,6 +114,7 @@ def find(path, patt):
 #
 def fileMatchAndReplace(filename, matchAndReplaceExps, warn=True):
 
+    mode = os.stat(filename).st_mode
     oldConfigFile = open(filename, "r")
     newConfigFile = open(filename + ".new", "w")
 
@@ -146,6 +147,7 @@ def fileMatchAndReplace(filename, matchAndReplaceExps, warn=True):
     if updated:
         print "updated " + filename
         os.rename(filename + ".new", filename)
+        os.chmod(filename, stat.S_IMODE(mode))
     elif warn:
         print "warning: " + filename + " didn't contain any version"
         os.unlink(filename + ".new")
@@ -381,11 +383,12 @@ if not patchIceE:
 #
 # Fix version in Ice-E sources
 #
-icee_home = os.path.join(ice_dir, "cppe")
-if icee_home:
-    fileMatchAndReplace(os.path.join(icee_home, "include", "IceE", "Config.h"),
-                        [("ICEE_STRING_VERSION \"([0-9]*\.[0-9]*\.[0-9]*)\"", version), \
-                         ("ICEE_INT_VERSION ([0-9]*)", intVersion(version))])
+if patchIceE:
+    icee_home = os.path.join(ice_dir, "cppe")
+    if icee_home:
+        fileMatchAndReplace(os.path.join(icee_home, "include", "IceE", "Config.h"),
+                            [("ICEE_STRING_VERSION \"([0-9]*\.[0-9]*\.[0-9]*)\"", version), \
+                             ("ICEE_INT_VERSION ([0-9]*)", intVersion(version))])
 
     fileMatchAndReplace(os.path.join(icee_home, "config", "Make.rules"),
                         [("VERSION[\t\s]*= ([0-9]*\.[0-9]*\.[0-9]*)", version),
@@ -398,13 +401,22 @@ if icee_home:
     fileMatchAllAndReplace(os.path.join(icee_home, "test", "Common", "testCommon.dsp"),
                            [("testCommon([0-9][0-9])d?\.((dll)|(pdb))", soVersion(version))])
 
-#
-# Fix version in IceJ sources
-#
-iceje_home = os.path.join(ice_dir, "javae")
-if iceje_home:
-    fileMatchAndReplace(os.path.join(iceje_home, "src", "IceUtil", "Version.java"),
-                        [("ICEE_STRING_VERSION = \"([0-9]*\.[0-9]*\.[0-9]*)\"", version), \
-                         ("ICEE_INT_VERSION = ([0-9]*)", intVersion(version))])
+    iceje_home = os.path.join(ice_dir, "javae")
+    if iceje_home:
+        fileMatchAndReplace(os.path.join(iceje_home, "src", "Ice", "Util.java"),
+                            [("return \"" + vpatMatch +"\".*A=major", version), \
+                             ("return ([0-9]*).*AA=major", intVersion(version))])
+
+    ice_home = os.path.join(ice_dir, "cpp")
+    if ice_home:
+        fileMatchAndReplace(os.path.join(ice_home, "src", "slice2cppe", "Gen.h"),
+                            [("ICEE_STRING_VERSION \"([0-9]*\.[0-9]*\.[0-9]*)\"", version), \
+                             ("ICEE_INT_VERSION ([0-9]*)", intVersion(version))])
+        fileMatchAndReplace(os.path.join(ice_home, "src", "slice2javae", "Gen.h"),
+                            [("ICEE_STRING_VERSION \"([0-9]*\.[0-9]*\.[0-9]*)\"", version), \
+                             ("ICEE_INT_VERSION ([0-9]*)", intVersion(version))])
+
+    sys.exit(0)
+
 
 sys.exit(0)
