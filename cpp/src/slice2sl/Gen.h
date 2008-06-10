@@ -15,7 +15,7 @@
 //
 // The IceSL version.
 //
-#define ICESL_STRING_VERSION "0.1.1" // "A.B.C", with A=major, B=minor, C=patch
+#define ICESL_STRING_VERSION "0.2.0" // "A.B.C", with A=major, B=minor, C=patch
 
 namespace Slice
 {
