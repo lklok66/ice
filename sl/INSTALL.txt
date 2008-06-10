@@ -207,8 +207,8 @@ Studio 2008 that uses Ice for Silverlight.
 2) In the "New Project" dialog select "Silverlight Application" under
    "Other Languages->Visual C#->Silverlight" and click OK.
 
-3) In the "Add Silverlight Application" choose "Generate an HTML test
-   page to host Silverlight within this project" and "Web Application"
+3) In the "Add Silverlight Application" choose "Add a new Web to the 
+   solution for hosting the control" and "Web Application Project"
    as the project type and click OK. This will create two projects, the
    Silverlight project plus a Web project.
 
