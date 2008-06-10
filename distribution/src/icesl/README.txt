@@ -55,7 +55,7 @@ Ice for Silverlight
 -------------------
 
 There are two main components included in the package. First, the 
-Ice for Silverlight assembly (icesl.dll) which all Ice for 
+Ice for Silverlight assembly (IceSL.dll) which all Ice for 
 Silverlight applications must reference.
 
 Second, the Ice for Silverlight bridge (IceBridge.ashx) which receives 

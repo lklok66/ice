@@ -300,9 +300,6 @@ sys.stdout.flush()
 os.chdir(distDir)
 
 for d in [srcDir]:
-    tarArchive(srcDir, verbose)
-
-for d in [srcDir]:
     zipArchive(srcDir, verbose)
 
 #
