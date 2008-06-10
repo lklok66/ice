@@ -90,17 +90,9 @@ namespace Ice
             return instance_.getImplicitContext();
         }
 
-        internal CommunicatorI(
-#if SILVERLIGHT
-                               System.Windows.Threading.Dispatcher dispatcher,
-#endif
-                               InitializationData initData)
+        internal CommunicatorI(InitializationData initData)
         {
-            instance_ = new IceInternal.Instance(this,
-#if SILVERLIGHT
-                                                 dispatcher,
-#endif
-                                                 initData);
+            instance_ = new IceInternal.Instance(this, initData);
         }
         
 #if DEBUG

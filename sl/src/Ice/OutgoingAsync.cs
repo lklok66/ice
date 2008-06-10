@@ -260,9 +260,6 @@ namespace IceInternal
                 logger__ = rf.getInstance().initializationData().logger;
                 traceLevels__ = rf.getInstance().traceLevels();
                 bridgeUri__ = rf.getInstance().bridgeUri();
-#if SILVERLIGHT
-                dispatcher__ = rf.getInstance().dispatcher();
-#endif
 
                 Debug.Assert(is__ == null);
                 is__ = new BasicStream(rf.getInstance());
@@ -288,18 +285,7 @@ namespace IceInternal
                     {
                         try
                         {
-#if SILVERLIGHT
-                            if(System.Threading.Thread.CurrentThread.ManagedThreadId == 1)
-#endif
-                            {
-                                getRequestStream__();
-                            }
-#if SILVERLIGHT
-                            else
-                            {
-                                dispatcher__.BeginInvoke(delegate { getRequestStream__(); });
-                            }
-#endif
+                            getRequestStream__();
                             return;
                         }
                         catch(Ice.LocalException ex)

@@ -17,11 +17,11 @@ C++ compiler
 
 The following Microsoft Visual C++ compilers are supported:
 
-- Microsoft Visual C++ 2005 (both Professional and Express editions)
+- Microsoft Visual C++ 2008 (both Professional and Express editions)
 
-  Visual C++ 2005 Express is available for download from:
+  Visual C++ 2008 Express is available for download from:
 
-  http://msdn.microsoft.com/vstudio/express/visualc/
+  http://www.microsoft.com/express/vc/
 
 
 ======================================================================

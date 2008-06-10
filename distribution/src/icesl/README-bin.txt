@@ -22,7 +22,7 @@ Windows Version
 
 Ice for Silverlight has been extensively tested on:
 
-- Windows XP x86 with Internet Explorer 6.0
+- Windows XP x86 with Internet Explorer 6.0 and FireFox 3.0
 
 
 Compiler
@@ -36,13 +36,13 @@ Ice for Silverlight requires:
 
 - Microsoft Visual Studio 2008 Silverlight Tools
 
-  http://www.microsoft.com/downloads/details.aspx?FamilyID=e0bae58e-9c0b-4090-a1db-f134d9f095fd&displaylang=en
+  http://www.microsoft.com/downloads/details.aspx?FamilyID=50A9EC01-267B-4521-B7D7-C0DBA8866434&displaylang=en
 
 
 Silverlight Runtime
 -------------------
 
-- Silverlight 2.0 Beta 1
+- Silverlight 2.0 Beta 2
 
   Downloaded as part of the Visual Studio Tools above.
 

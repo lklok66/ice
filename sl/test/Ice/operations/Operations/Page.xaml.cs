@@ -64,7 +64,7 @@ namespace Operations
                 //
                 initData.properties.setProperty("Ice.MessageSizeMax", "100");
 
-                _comm = Ice.Util.initialize(Button1.Dispatcher, initData);
+                _comm = Ice.Util.initialize(initData);
             }
             catch (Exception ex)
             {
@@ -75,7 +75,7 @@ namespace Operations
             {
                 try
                 {
-                    Test.MyClassPrx myClass = AllTests.allTests(_comm, Button1.Dispatcher);
+                    Test.MyClassPrx myClass = AllTests.allTests(_comm);
                     myClass.shutdown();
                 }
                 catch (Exception ex)

@@ -60,24 +60,12 @@ namespace Ice
             return new PropertiesI(ref args, defaults);
         }
 
-        public static Communicator initialize(
-#if SILVERLIGHT
-                                              Dispatcher dispatcher,
-#endif
-                                              ref string[] args)
+        public static Communicator initialize(ref string[] args)
         {
-            return initialize(
-#if SILVERLIGHT
-                              dispatcher,
-#endif
-                              ref args, null);
+            return initialize(ref args, null);
         }
 
-        public static Communicator initialize(
-#if SILVERLIGHT
-                                              Dispatcher dispatcher,
-#endif
-                                              ref string[] args, InitializationData initData)
+        public static Communicator initialize(ref string[] args, InitializationData initData)
         {
             if(initData == null)
             {
@@ -90,20 +78,12 @@ namespace Ice
 
             initData.properties = createProperties(ref args, initData.properties);          
 
-            CommunicatorI result = new CommunicatorI(
-#if SILVERLIGHT
-                                                     dispatcher,
-#endif
-                                                     initData);
+            CommunicatorI result = new CommunicatorI(initData);
             result.finishSetup(ref args);
             return result;
         }
 
-        public static Communicator initialize(
-#if SILVERLIGHT
-                                              Dispatcher dispatcher,
-#endif
-                                              InitializationData initData)
+        public static Communicator initialize(InitializationData initData)
         {
             if(initData == null)
             {
@@ -114,27 +94,15 @@ namespace Ice
                 initData = (InitializationData)initData.Clone();
             }
 
-            CommunicatorI result = new CommunicatorI(
-#if SILVERLIGHT
-                                                     dispatcher,
-#endif
-                                                     initData);
+            CommunicatorI result = new CommunicatorI(initData);
             string[] args = new string[0];
             result.finishSetup(ref args);
             return result;
         }
 
-        public static Communicator initialize(
-#if SILVERLIGHT
-                                              Dispatcher dispatcher
-#endif
-                                              )
+        public static Communicator initialize()
         {
-            return initialize(
-#if SILVERLIGHT
-                              dispatcher,
-#endif
-                              null);
+            return initialize(null);
         }
 
         public static IceInternal.Instance getInstance(Communicator communicator)
@@ -322,7 +290,7 @@ namespace Ice
                 f.Close();
                 if(index != uuidSize)
                 {
-                     throw new System.ApplicationException("generateUUID(): could not get 16 random bytes");
+                     throw new System.SystemException("generateUUID(): could not get 16 random bytes");
                 }
 
                 //

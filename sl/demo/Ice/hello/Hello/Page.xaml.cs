@@ -31,7 +31,7 @@ namespace Hello
                 Ice.InitializationData initData = new Ice.InitializationData();
                 initData.properties = Ice.Util.createProperties();
                 initData.properties.setProperty("Ice.BridgeUri", "http://localhost:1287/IceBridge.ashx");
-                _comm = Ice.Util.initialize(Button1.Dispatcher, initData);
+                _comm = Ice.Util.initialize(initData);
                 _hello = Demo.HelloPrxHelper.uncheckedCast(_comm.stringToProxy("hello:tcp -p 10000"));
                 _helloOneway = Demo.HelloPrxHelper.uncheckedCast(_hello.ice_oneway());
             }
@@ -108,12 +108,12 @@ namespace Hello
 
         void sayHelloResponse()
         {
-            _tb.Text = "Call succeeded";
+            Button1.Dispatcher.BeginInvoke(delegate() { _tb.Text = "Call succeeded"; });
         }
 
         void sayHelloException(Ice.Exception ex)
         {
-            _tb.Text = "Call failed with exception:\n" + ex.ToString();
+            Button1.Dispatcher.BeginInvoke(delegate() { _tb.Text = "Call failed with exception:\n" + ex.ToString(); });
         }
 
         void OnClickAMI(object sender, MouseEventArgs e)

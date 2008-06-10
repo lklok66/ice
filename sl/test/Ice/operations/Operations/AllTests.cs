@@ -12,8 +12,7 @@ using System.Collections.Generic;
 
 public class AllTests
 {
-    public static Test.MyClassPrx allTests(Ice.Communicator communicator,
-                                           System.Windows.Threading.Dispatcher dispatcher)
+    public static Test.MyClassPrx allTests(Ice.Communicator communicator)
     {
         Console.Out.Flush();
         string rf = "test:default -p 12010 -t 10000";
@@ -21,12 +20,12 @@ public class AllTests
         Test.MyClassPrx cl = Test.MyClassPrxHelper.checkedCast(baseProxy);
         Test.MyDerivedClassPrx derivedProxy = Test.MyDerivedClassPrxHelper.checkedCast(cl);
         
-        Twoways.twoways(communicator, cl, dispatcher);
-        Twoways.twoways(communicator, derivedProxy, dispatcher);
+        Twoways.twoways(communicator, cl);
+        Twoways.twoways(communicator, derivedProxy);
         derivedProxy.opDerived();
         
-        TwowaysAMI.twowaysAMI(communicator, cl, dispatcher);
-        TwowaysAMI.twowaysAMI(communicator, derivedProxy, dispatcher);
+        TwowaysAMI.twowaysAMI(communicator, cl);
+        TwowaysAMI.twowaysAMI(communicator, derivedProxy);
         
         return cl;
     }

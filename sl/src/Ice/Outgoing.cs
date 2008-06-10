@@ -33,9 +33,6 @@ namespace IceInternal
             traceLevels__ = r.getInstance().traceLevels();
             is__ = new BasicStream(r.getInstance());
             os__ = new BasicStream(r.getInstance());
-#if SILVERLIGHT
-            dispatcher__ = r.getInstance().dispatcher();
-#endif
             writeHeader__(r, operation, mode, context);
         }
 
@@ -48,11 +45,8 @@ namespace IceInternal
             {
                 throw new Ice.FeatureNotSupportedException("can't send synchronous calls from UI thread.");
             }
-
-            dispatcher__.BeginInvoke(delegate { getRequestStream(); });
-#else
-            getRequestStream();
 #endif
+            getRequestStream();
             lock(this)
             {
                 while(_state == StateUnsent)

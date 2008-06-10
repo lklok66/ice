@@ -11,6 +11,7 @@
     <RootNamespace>DictMappingWeb</RootNamespace>
     <AssemblyName>DictMappingWeb</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <SilverlightApplicationList>{B6EDE9E0-313B-4B30-9300-10DC499F8CC1}|..\DictMapping\DictMapping.csproj|ClientBin|False</SilverlightApplicationList>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -98,9 +99,6 @@
           <IISUrl>http://localhost/DictMappingWeb</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
-          <ProjectOutputReferences>
-            <Ref Project="{B6EDE9E0-313B-4B30-9300-10DC499F8CC1}" Folder="" />
-          </ProjectOutputReferences>
         </WebProjectProperties>
       </FlavorProperties>
     </VisualStudio>

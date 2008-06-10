@@ -964,8 +964,7 @@ public class TwowaysAMI
         private Callback callback = new Callback();
     }
     
-    internal static void twowaysAMI(Ice.Communicator communicator, Test.MyClassPrx p,
-                                    System.Windows.Threading.Dispatcher dispatcher)
+    internal static void twowaysAMI(Ice.Communicator communicator, Test.MyClassPrx p)
     {
         {
             // Check that a call to a void operation raises TwowayOnlyException
@@ -1314,7 +1313,7 @@ public class TwowaysAMI
                 initData.properties = communicator.getProperties().ice_clone_();
                 initData.properties.setProperty("Ice.ImplicitContext", impls[i]);
                 
-                Ice.Communicator ic = Ice.Util.initialize(dispatcher, initData);
+                Ice.Communicator ic = Ice.Util.initialize(initData);
                 
                 Dictionary<string, string> ctx = new Dictionary<string, string>();
                 ctx["one"] = "ONE";

@@ -49,7 +49,7 @@ namespace Inheritance
                 Ice.InitializationData initData = new Ice.InitializationData();
                 initData.properties = Ice.Util.createProperties();
                 initData.properties.setProperty("Ice.BridgeUri", "http://localhost:1287/IceBridge.ashx");
-                _comm = Ice.Util.initialize(Button1.Dispatcher, initData);
+                _comm = Ice.Util.initialize(initData);
             }
             catch (Exception ex)
             {

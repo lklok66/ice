@@ -20,8 +20,7 @@ class Twoways
         }
     }
     
-    internal static void twoways(Ice.Communicator communicator, Test.MyClassPrx p, 
-                                 System.Windows.Threading.Dispatcher dispatcher)
+    internal static void twoways(Ice.Communicator communicator, Test.MyClassPrx p)
     {
         {
             p.opVoid();
@@ -655,7 +654,7 @@ class Twoways
                 initData.properties = communicator.getProperties().ice_clone_();
                 initData.properties.setProperty("Ice.ImplicitContext", impls[i]);
                 
-                Ice.Communicator ic = Ice.Util.initialize(dispatcher, initData);
+                Ice.Communicator ic = Ice.Util.initialize(initData);
                 
                 Dictionary<string, string> ctx = new Dictionary<string, string>();
                 ctx["one"] = "ONE";

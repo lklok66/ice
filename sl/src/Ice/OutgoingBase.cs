@@ -249,8 +249,5 @@ namespace IceInternal
         protected TraceLevels traceLevels__ = null;
         protected BasicStream is__ = null;
         protected BasicStream os__ = null;
-#if SILVERLIGHT
-        protected System.Windows.Threading.Dispatcher dispatcher__ = null;
-#endif
     }
 }
