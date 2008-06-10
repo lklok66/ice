@@ -291,6 +291,7 @@ move(os.path.join("sl", "ICE_LICENSE"), os.path.join("ICE_LICENSE"))
 move(os.path.join("sl", "LICENSE"), os.path.join("LICENSE"))
 move(os.path.join("sl", "README.txt"), os.path.join("README.txt"))
 move(os.path.join("sl", "INSTALL.txt"), os.path.join("INSTALL.txt"))
+move(os.path.join("sl", "CHANGES.txt"), os.path.join("CHANGES.txt"))
 
 #
 # Move *.icesl to the correct names.

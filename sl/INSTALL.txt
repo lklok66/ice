@@ -33,6 +33,8 @@ Silverlight Runtime
 
 - Silverlight 2.0 Beta 1
 
+  Downloaded as part of the Visual Studio Tools above.
+
 
 Ice for .NET
 ------------
@@ -100,8 +102,8 @@ subdirectory.
 Building the slice2sl translator
 --------------------------------
 
-If you have not already downloaded the slice2sl binary distribution as
-mentioned above, follow these steps to build the translator yourself:
+If you have not already downloaded the binary distribution as mentioned
+above, follow these steps to build the translator yourself:
 
 1) In a Visual Studio 2008 command prompt, change to the cpp subdirectory
    of the Ice for Silverlight source distribution.
