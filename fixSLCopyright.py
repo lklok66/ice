@@ -37,7 +37,7 @@ copyright = "2008"
 files = FixUtil.find(icesl_dir, "*.rc")
 files += FixUtil.find(icesl_dir, "*.as*x")
 files += FixUtil.find(icesl_dir, "AssemblyInfo.cs")
-files += [os.path.join(ice_dir, "distribution", "src", "icesl", "ICE_LICENSE")]
+files += [os.path.join(icesl_dir, "ICE_LICENSE")]
 
 for f in files:
    FixUtil. fileMatchAndReplace(f, [(cpatMatch, copyright)])
