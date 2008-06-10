@@ -9,11 +9,11 @@ made from the UI thread while non-UI threads allow both synchronous
 and asynchronous invocations.
 
 For it's invocations Ice uses HttpWebRequest, which must be used from
-within the UI thread. For non-UI thread Ice uses the 
-System.Windows.Threading.Dispatcher class in order use the UI thread to
-initiate the remote call. An instance of the dispacther must be passed
-to the Communicator initializer in order for the Ice interanls to have
-access to it.
+within the UI thread. For non-UI thread Ice uses the
+System.Windows.Threading.Dispatcher class in order to use the UI
+thread to initiate the remote call. An instance of the dispacther must
+be passed to the Communicator initializer in order for the Ice
+internals to have access to it.
 
 
 Asynchronous Message Invocation (AMI)

@@ -23,7 +23,7 @@ Ice for Silverlight requires:
 
   http://msdn2.microsoft.com/en-us/vstudio/aa700831.aspx
 
-- Microsoft Visual Studio 2008 Silverlight Tools
+- Microsoft Silverlight Tools Beta 1 for Visual Studio 2008
 
   http://www.microsoft.com/downloads/details.aspx?FamilyID=e0bae58e-9c0b-4090-a1db-f134d9f095fd&displaylang=en
 
@@ -203,7 +203,7 @@ Creating a new project.
 ======================================================================
 
 The following steps explain how to create a new project in Visual
-Stdio 2008 that uses Ice for Silverlight.
+Studio 2008 that uses Ice for Silverlight.
 
 1) In the IDE select "File->New->Project".
 
