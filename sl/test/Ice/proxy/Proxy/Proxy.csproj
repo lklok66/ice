@@ -90,7 +90,8 @@
   </Target>
   -->
   <Target Name="CompileSlice" Inputs="Test.ice" Outputs="generated\Test.cs">
-    <Exec Command="slice2sl.exe --output-dir generated -I..\..\..\..\slice Test.ice" />
+    <Exec Condition="Exists('..\..\..\..\..\cpp\bin\slice2sl.exe')" Command="..\..\..\..\..\cpp\bin\slice2sl.exe --output-dir generated -I..\..\..\..\slice Test.ice" />
+    <Exec Condition="!Exists('..\..\..\..\..\cpp\bin\slice2sl.exe')" Command="slice2sl.exe --output-dir generated -I..\..\..\..\slice Test.ice" />
   </Target>
   <Target Name="AfterClean">
     <Delete Files="generated\Test.cs" />
