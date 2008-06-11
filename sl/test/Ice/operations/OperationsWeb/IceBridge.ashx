@@ -88,14 +88,12 @@ namespace IceBridge
         {
             while(remaining > 0)
             {
-                _log.WriteEntry("Attempting read");
                 int ret = s.Read(data, pos, remaining);
                 if(ret == 0)
                 {
                     throw new System.IO.IOException();
                 }
                 remaining -= ret;
-                _log.WriteEntry("Read " + ret);
             }
         }
 
@@ -105,8 +103,6 @@ namespace IceBridge
             {
                 Ice.Communicator com = (Ice.Communicator)context.Application["com"];
 
-                _log.WriteEntry("Length: " + context.Request.ContentLength);
-                
                 byte[] requestData = new byte[context.Request.ContentLength];
                 read(context.Request.InputStream, requestData, 0, context.Request.ContentLength);
                 Ice.InputStream stream = Ice.Util.createInputStream(com, requestData);
