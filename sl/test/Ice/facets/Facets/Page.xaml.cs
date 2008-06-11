@@ -60,6 +60,7 @@ namespace Facets
             {
                 try
                 {
+                    Button1.Dispatcher.BeginInvoke(delegate() { _tb.Text = "Testing..."; });
                     Test.GPrx g = AllTests.allTests(_comm);
                     g.shutdown();
                 }

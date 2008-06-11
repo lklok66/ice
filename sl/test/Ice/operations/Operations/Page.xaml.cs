@@ -75,6 +75,7 @@ namespace Operations
             {
                 try
                 {
+                    Button1.Dispatcher.BeginInvoke(delegate() { _tb.Text = "Testing..."; });
                     Test.MyClassPrx myClass = AllTests.allTests(_comm);
                     myClass.shutdown();
                 }

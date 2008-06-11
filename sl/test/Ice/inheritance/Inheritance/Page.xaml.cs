@@ -60,6 +60,7 @@ namespace Inheritance
             {
                 try
                 {
+                    Button1.Dispatcher.BeginInvoke(delegate() { _tb.Text = "Testing..."; });
                     Test.InitialPrx initial = AllTests.allTests(_comm);
                     initial.shutdown();
                 }
