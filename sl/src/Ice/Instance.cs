@@ -260,8 +260,8 @@ namespace IceInternal
                     "Ice.BridgeUri", "http://127.0.0.1:8080/IceBridge.ashx"));
 
                 
-                char[] separator = { ' ' };
-                _factoryAssemblies = _initData.properties.getProperty("Ice.FactoryAssemblies").Split(separator);
+                char[] separators = { ' ', '\t', '\n', '\r' };
+                _factoryAssemblies = _initData.properties.getProperty("Ice.FactoryAssemblies").Split(separators);
                 
                 _implicitContext = Ice.ImplicitContextI.create(_initData.properties.getProperty("Ice.ImplicitContext"));
                 _referenceFactory = new ReferenceFactory(this, communicator);
