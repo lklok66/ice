@@ -109,9 +109,10 @@ cannot find the type, it raises an Ice.UnmarshalOutOfBoundsException
 for user exceptions and Ice.NoObjectFactoryException for object by
 value.
 
-The easiest way to ensure that Ice can find the relevant types is to
-merge the IceSL.dll assembly with your application code assembly,
-which you can do using the ILMerge tool provided by Microsoft. Please
-see the link below for more information:
+To work around this issue the Ice.FactoryAssemblies property was added
+to allow the specification of the names of the assemblies where the
+types for the user exceptions nf objects are located. The format of the
+property is a list of qualified assembly names separated by whitespace.
+For example:
 
-  http://research.microsoft.com/~mbarnett/ILMerge.aspx
+  Ice.FactoryAssemblies=UserAssembly1,version=1.0.0 UserAssembly2,version=1.0.0.0
