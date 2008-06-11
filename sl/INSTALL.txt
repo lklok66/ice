@@ -162,7 +162,8 @@ Running the tests and demos
 Since Ice for Silverlight provides client-side functionality only, you
 must use Ice servers from another Ice language mapping in order to run
 the tests and demos. Any of the Ice 3.3 mappings that provide server-
-side functionality (C++, Java, C#, Python) can be used.
+side functionality (C++, Java, .NET, Python) can be used, although the
+dictMapping and seqMapping tests are only found in .NET.
 
 Note that the Windows binary installer for Ice only contains the Ice
 demos, but not the Ice tests. Therefore, to run the tests, you will
