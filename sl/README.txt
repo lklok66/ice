@@ -105,7 +105,9 @@ exceptions and objects by value. Unfortunately, Silverlight does not
 support the method AppDomain.CurrentDomain.GetAssemblies(), which
 means that user exceptions and objects received by value must reside
 in the same assembly as the Ice for Silverlight run time. If Ice
-cannot find the type, it raises an Ice.UnmarshalOutOfBoundsException.
+cannot find the type, it raises an Ice.UnmarshalOutOfBoundsException
+for user exceptions and Ice.NoObjectFactoryException for object by
+value.
 
 The easiest way to ensure that Ice can find the relevant types is to
 merge the IceSL.dll assembly with your application code assembly,
