@@ -9,7 +9,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 
-namespace SeqMapping
+namespace Objects
 {
     public partial class Page : UserControl
     {
@@ -49,8 +49,18 @@ namespace SeqMapping
                 Ice.InitializationData initData = new Ice.InitializationData();
                 initData.properties = Ice.Util.createProperties();
                 initData.properties.setProperty("Ice.BridgeUri", "http://localhost:1287/IceBridge.ashx");
-                initData.properties.setProperty("Ice.FactoryAssemblies", "SeqMapping,version=1.0.0.0");
+                initData.properties.setProperty("Ice.FactoryAssemblies", "Objects,version=1.0.0.0");
                 _comm = Ice.Util.initialize(initData);
+
+                ObjectFactoryI factory = new ObjectFactoryI();
+                _comm.addObjectFactory(factory, "::Test::B");
+                _comm.addObjectFactory(factory, "::Test::C");
+                _comm.addObjectFactory(factory, "::Test::D");
+                _comm.addObjectFactory(factory, "::Test::E");
+                _comm.addObjectFactory(factory, "::Test::F");
+                _comm.addObjectFactory(factory, "::Test::I");
+                _comm.addObjectFactory(factory, "::Test::J");
+                _comm.addObjectFactory(factory, "::Test::H");
             }
             catch (Exception ex)
             {
@@ -62,8 +72,8 @@ namespace SeqMapping
                 try
                 {
                     Button1.Dispatcher.BeginInvoke(delegate() { _tb.Text = "Testing..."; });
-                    Test.MyClassPrx myClass = AllTests.allTests(_comm);
-                    myClass.shutdown();
+                    Test.InitialPrx initial = AllTests.allTests(_comm);
+                    initial.shutdown();
                 }
                 catch (Exception ex)
                 {

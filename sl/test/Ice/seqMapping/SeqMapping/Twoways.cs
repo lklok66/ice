@@ -386,7 +386,7 @@ class Twoways
             test(Ice.CollectionComparer.Equals(i, r));
         }
 
-/*
+
         {
             Ice.Object[] i = new CV[_length];
             for(int c = 0; c < _length; ++c)
@@ -452,7 +452,6 @@ class Twoways
                 test(obj.i == ((CV)er.Current).i);
             }
         }
-*/
 
         {
             Ice.ObjectPrx[] i = new Ice.ObjectPrx[_length];
@@ -544,7 +543,6 @@ class Twoways
             test(Ice.CollectionComparer.Equals(i, r));
         }
 
-/*
         {
             CV[] i = new CV[_length];
             for(int c = 0; c < _length; ++c)
@@ -676,7 +674,6 @@ class Twoways
                 test(obj.v.i == er.Current.v.i);
             }
         }
-*/
 
         {
             En[] i = new En[_length];
@@ -783,7 +780,6 @@ class Twoways
             test(Ice.CollectionComparer.Equals(i, r));
         }
 
-/*
         {
             Custom<CV> i = new Custom<CV>();
             for(int c = 0; c < _length; ++c)
@@ -814,7 +810,6 @@ class Twoways
                 }
             }
         }
-*/
 
         {
             Custom<Custom<int>> i = new Custom<Custom<int>>();

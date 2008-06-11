@@ -1901,7 +1901,11 @@ namespace IceInternal
             
             try
             {
-                Type c = AssemblyUtil.findType(typeToClass(id));
+                Type c = AssemblyUtil.findType(
+#if SILVERLIGHT
+                                               instance_,
+#endif
+                                               typeToClass(id));
                 if(c == null)
                 {
                     return null;
@@ -1993,7 +1997,11 @@ namespace IceInternal
                 {
                     try
                     {
-                        Type c = AssemblyUtil.findType(typeToClass(id));
+                        Type c = AssemblyUtil.findType(
+#if SILVERLIGHT
+                                                       instance_,
+#endif
+                                                       typeToClass(id));
                         if(c == null)
                         {
                             return null;

@@ -49,6 +49,11 @@ namespace IceInternal
             return _bridgeUri;
         }
 
+        public string[] factoryAssemblies()
+        {
+            return _factoryAssemblies;
+        }
+
         public ReferenceFactory referenceFactory()
         {
             lock(this)
@@ -253,6 +258,10 @@ namespace IceInternal
 
                 _bridgeUri = new System.Uri(_initData.properties.getPropertyWithDefault(
                     "Ice.BridgeUri", "http://127.0.0.1:8080/IceBridge.ashx"));
+
+                
+                char[] separator = { ' ' };
+                _factoryAssemblies = _initData.properties.getProperty("Ice.FactoryAssemblies").Split(separator);
                 
                 _implicitContext = Ice.ImplicitContextI.create(_initData.properties.getProperty("Ice.ImplicitContext"));
                 _referenceFactory = new ReferenceFactory(this, communicator);
@@ -362,6 +371,7 @@ namespace IceInternal
         private const int StateDestroyInProgress = 1;
         private const int StateDestroyed = 2;
         private System.Uri _bridgeUri;
+        private string[] _factoryAssemblies;
         private int _state;
         private Ice.InitializationData _initData; // Immutable, not reset by destroy().
         private TraceLevels _traceLevels; // Immutable, not reset by destroy().

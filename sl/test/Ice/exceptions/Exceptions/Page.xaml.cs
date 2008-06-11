@@ -9,7 +9,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 
-namespace SeqMapping
+namespace Exceptions
 {
     public partial class Page : UserControl
     {
@@ -49,7 +49,7 @@ namespace SeqMapping
                 Ice.InitializationData initData = new Ice.InitializationData();
                 initData.properties = Ice.Util.createProperties();
                 initData.properties.setProperty("Ice.BridgeUri", "http://localhost:1287/IceBridge.ashx");
-                initData.properties.setProperty("Ice.FactoryAssemblies", "SeqMapping,version=1.0.0.0");
+                initData.properties.setProperty("Ice.FactoryAssemblies", "Exceptions,version=1.0.0.0");
                 _comm = Ice.Util.initialize(initData);
             }
             catch (Exception ex)
@@ -62,8 +62,8 @@ namespace SeqMapping
                 try
                 {
                     Button1.Dispatcher.BeginInvoke(delegate() { _tb.Text = "Testing..."; });
-                    Test.MyClassPrx myClass = AllTests.allTests(_comm);
-                    myClass.shutdown();
+                    Test.ThrowerPrx thrower = AllTests.allTests(_comm);
+                    thrower.shutdown();
                 }
                 catch (Exception ex)
                 {

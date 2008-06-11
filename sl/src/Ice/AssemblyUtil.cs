@@ -51,10 +51,28 @@ namespace IceInternal
             runtimeRevision_ = v.Revision;
         }
 
-        public static Type findType(string csharpId)
+        public static Type findType(
+#if SILVERLIGHT
+                                    IceInternal.Instance instance,
+#endif
+                                    string csharpId)
         {
 #if SILVERLIGHT
-            return Type.GetType(csharpId);
+            Type t = Type.GetType(csharpId);
+            if(t == null)
+            {
+                string[] assemblies = instance.factoryAssemblies();
+                for(int i = 0; i < assemblies.Length; ++i)
+                {
+                    string s = csharpId + "," + assemblies[i];
+                    t = Type.GetType(s);
+                    if(t != null)
+                    {
+                        break;
+                    }
+                }
+            }
+            return t;
 #else
             loadAssemblies(); // Lazy initialization
 
