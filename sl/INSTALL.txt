@@ -8,7 +8,7 @@ Windows Version
 
 Ice for Silverlight has been extensively tested on:
 
-- Windows XP x86 with Internet Explorer 6.0 and FireFox 3.0
+- Windows XP x86 with Internet Explorer 6.0 and Firefox 3.0
 
 
 Compiler
@@ -70,9 +70,9 @@ following third-party library:
 - mcpp 2.7 with patch
 
 If you want to build the slice2sl translator yourself, you do not need
-to build mcpp yourself, as ZeroC supplies a Third-Party Windows installer
-for the VC9 compiler that contains release and debug libraries for all
-of the third-party dependencies.
+to build mcpp yourself, as ZeroC supplies a Third-Party Windows
+installer for the VC9 compiler that contains release and debug
+libraries for all of the third-party dependencies.
 
 If you intend to build the third-party dependencies from source, we
 recommend downloading the Ice third-party source archive from
@@ -103,8 +103,8 @@ Building the slice2sl translator
 If you have not already downloaded the binary distribution as mentioned
 above, follow these steps to build the translator yourself:
 
-1) In a Visual Studio 2008 command prompt, change to the cpp subdirectory
-   of the Ice for Silverlight source distribution.
+1) In a Visual Studio 2008 command prompt, change to the cpp
+   subdirectory of the Ice for Silverlight source distribution.
 
 2) Open config\Make.rules.mak and review the comments that describe
    the settings you can modify.
@@ -122,14 +122,14 @@ Follow these steps to build the Ice for Silverlight source:
 1) Change to the sl subdirectory of the Ice for Silverlight source
    distribution.
 
-2) Open config\Make.rules.cs.mak and review the comments that describe
+2) Open config\Make.rules.mak.cs and review the comments that describe
    the settings you can modify. For example, you may wish to enable
    optimization.
 
-3) If you do not build the translator yourself, the directory containing
-   the translator executables must be added to your PATH. For example, if
-   the translator distribution is installed in C:\IceSL-@ver@, you must
-   add C:\IceSL-@ver@\bin to your PATH.
+3) If you did not build the translator yourself, the directory
+   containing the translator executables must be added to your PATH.
+   For example, if the translator distribution is installed in
+   C:\IceSL-@ver@, you must add C:\IceSL-@ver@\bin to your PATH.
 
 4) Run nmake:
 
@@ -206,13 +206,13 @@ Studio 2008 that uses Ice for Silverlight.
 
 1) In the IDE select "File->New->Project".
 
-2) In the "New Project" dialog select "Silverlight Application" under
+2) In the "New Project" dialog, select "Silverlight Application" under
    "Other Languages->Visual C#->Silverlight" and click OK.
 
 3) In the "Add Silverlight Application" choose "Add a new Web to the 
    solution for hosting the control" and "Web Application Project"
-   as the project type and click OK. This will create two projects, the
-   Silverlight project plus a Web project.
+   as the project type and click OK. This will create two projects,
+   the Silverlight project plus a Web project.
 
 4) Right click on the <project name>TestPage.html and choose "Set As
    Start Page"
@@ -233,12 +233,13 @@ Studio 2008 that uses Ice for Silverlight.
       </assemblies>
     </compilation>
 
-7) Add a "Global Application Class" to the Web project by right clicking on
-   the Web project and selecting "Add->New Item" and choosing "Global
-   Application Class" in the "Add New Item" dialog.
+7) Add a "Global Application Class" to the Web project by right-
+   clicking on the Web project and selecting "Add->New Item" and
+   choosing "Global Application Class" in the "Add New Item" dialog.
 
-8) Edit the Global.ashx.cs file and add code to initialize and destroy the
-   Ice communicator in the Application_Start and Application_End functions.
+8) Edit the Global.ashx.cs file and add code to initialize and destroy
+   the Ice communicator in the Application_Start and Application_End
+   functions:
 
    protected void Application_Start(object sender, EventArgs e)
    {
@@ -257,13 +258,14 @@ Studio 2008 that uses Ice for Silverlight.
        }
    }
 
-9) Add a reference to the Ice for .NET 3.3 assembly to the Web projects by
-   right clicking on References, selecting "Add Reference" and in the "Browse"
-   tab locate Ice.dll and select it.
+9) Add a reference to the Ice for .NET 3.3 assembly to the Web
+   projects by right-clicking on References, selecting "Add Reference"
+   and in the "Browse" tab locate Ice.dll and select it.
 
-10) Add slice compilation to the regular project by manually editing the 
-    project file and adding something similar to the following at the end of
-    the file, changing the name of the slice file appropriately.
+10) Add slice compilation to the regular project by manually editing
+    the project file and adding something similar to the following at
+    the end of the file, changing the name of the Slice file
+    appropriately:
 
       ...
       <Target Name="CompileSlice" Inputs="Test.ice" Outputs="generated\Test.cs">
@@ -279,10 +281,11 @@ Studio 2008 that uses Ice for Silverlight.
       </PropertyGroup>
     </Project>
 
-    Create a directory in the project directory named generated and then build
-    the project to run the slice2sl task. Now add the generated C# file to the
-    project by right-clicking on the project and choosing "Add->Existing Item".
+    Create a directory in the project directory named "generated" and
+    then build the project to run the slice2sl task. Now add the
+    generated C# file to the project by right-clicking on the project
+    and choosing "Add->Existing Item".
 
-Your project is now setup and you are ready to start developing your
-application using Ice for Silverlight. Please see the tests and demo for
-examples.
+Your project is now set up and you are ready to start developing your
+application using Ice for Silverlight. Please see the tests and demo
+for examples.
