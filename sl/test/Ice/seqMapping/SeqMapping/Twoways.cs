@@ -833,7 +833,7 @@ class Twoways
 
         {
             Custom<Custom<CV>> i = new Custom<Custom<CV>>();
-            for(int c = 0; c < _length; ++c)
+            for(int c = 0; c < 10; ++c)
             {
                 Custom<CV> inner = new Custom<CV>();
                 for(int j = 0; j < c; ++j)
