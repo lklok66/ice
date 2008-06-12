@@ -53,9 +53,10 @@ Slice-to-Silverlight translator
 
 You will need the Slice-to-Silverlight translator (slice2sl). You can
 download a binary distribution from the ZeroC web site, or you can
-build the Slice-to-Silverlight translator yourself.
+build the Slice-to-Silverlight translator yourself using this source
+distribution.
 
-Binary and source distributions are available at
+Binary distributions are available at
 
   http://www.zeroc.com/labs/download.html
 

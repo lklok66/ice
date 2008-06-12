@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -33,7 +33,7 @@ namespace Hello
                 initData.properties.setProperty("Ice.BridgeUri", "http://localhost:1287/IceBridge.ashx");
                 _comm = Ice.Util.initialize(initData);
                 _hello = Demo.HelloPrxHelper.uncheckedCast(_comm.stringToProxy("hello:tcp -p 10000"));
-                _helloOneway = Demo.HelloPrxHelper.uncheckedCast(_hello.ice_oneway());
+                _helloOneway = _hello.ice_oneway();
             }
             catch (Exception ex)
             {
@@ -73,11 +73,11 @@ namespace Hello
                 {
                     _hello.sayHello(0);
                     int id = System.Threading.Thread.CurrentThread.ManagedThreadId;
-                    Button1.Dispatcher.BeginInvoke(delegate() { _tb.Text = "Call succeeded"; });
+                    sayHelloResponse();
                 }
                 catch (Exception ex)
                 {
-                    Button1.Dispatcher.BeginInvoke(delegate() { _tb.Text = "Call failed with exception:\n" + ex.ToString(); });
+                    sayHelloException(ex);
                 }
             });
             myThread.Start();
@@ -96,11 +96,11 @@ namespace Hello
                 try
                 {
                     _helloOneway.sayHello(0);
-                    Button1.Dispatcher.BeginInvoke(delegate() { _tb.Text = "Call completed"; });
+                    sayHelloResponse();
                 }
                 catch (Exception ex)
                 {
-                    Button1.Dispatcher.BeginInvoke(delegate() { _tb.Text = "Call failed with exception:\n" + ex.ToString(); });
+                    sayHelloException(ex);
                 }
             });
             myThread.Start();

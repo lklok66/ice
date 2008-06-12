@@ -8,9 +8,9 @@ Changes since version 0.1.0
   thread. However, it is now possible to make both synchronous and
   asynchronous calls from non-UI threads.
 
-- All of the communicator initialize functions now require a class of 
-  type System.Windows.Threading.Dispatcher to be passed as first
-  paramater.
+- A new property, Ice.FactoryAssemblies, has been added that allow
+  you to specify assemblies which contain types required for user
+  exceptions and objects-by-value.
 
 - Due to changes in classes supported by Silverlight, it is no longer
   possible to use LinkedList<T>, Stack<T>, and Queue<T> as alternate

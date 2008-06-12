@@ -101,18 +101,17 @@ User Exceptions and Object-by-Value
 -----------------------------------
 
 Ice for .NET uses reflection during the unmarshaling of user
-exceptions and objects by value. Unfortunately, Silverlight does not
-support the method AppDomain.CurrentDomain.GetAssemblies(), which
-means that user exceptions and objects received by value must reside
-in the same assembly as the Ice for Silverlight run time. If Ice
-cannot find the type, it raises an Ice.UnmarshalOutOfBoundsException
-for user exceptions and Ice.NoObjectFactoryException for object by
-value.
+exceptions and objects by value. Since Silverlight does not support
+retrieving the list of assemblies loaded with the application, it is
+necessary to explicitly configure the list of assemblies where the
+user exception or object by value types are located.
 
-To work around this issue the Ice.FactoryAssemblies property was added
-to allow the specification of the names of the assemblies where the
-types for the user exceptions nf objects are located. The format of the
-property is a list of qualified assembly names separated by whitespace.
-For example:
+This is done using the Ice.FactoryAssemblies property, which is set
+to a list of qualified assembly names separated by whitespace. For
+example:
 
   Ice.FactoryAssemblies=UserAssembly1,version=1.0.0 UserAssembly2,version=1.0.0.0
+
+If you don't set this property, your client will throw
+Ice.UnmarshalOutOfBoundsException or Ice.NoObjectFactoryException if it
+receives an unknown user exception or object by value respectively.
