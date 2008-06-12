@@ -23,8 +23,8 @@ public class AllTests
 
     public static Test.MyClassPrx allTests(Ice.Communicator communicator)
     {
-        Console.Out.Write("testing stringToProxy... ");
-        Console.Out.Flush();
+        //Console.Out.Write("testing stringToProxy... ");
+        //Console.Out.Flush();
         string rf = "test:default -p 12010 -t 10000";
         Ice.ObjectPrx baseProxy = communicator.stringToProxy(rf);
         test(baseProxy != null);
@@ -223,10 +223,10 @@ public class AllTests
         catch(Ice.EndpointParseException)
         {
         }
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
 
-        Console.Out.Write("testing propertyToProxy... ");
-        Console.Out.Flush();
+        //Console.Out.Write("testing propertyToProxy... ");
+        //Console.Out.Flush();
         Ice.Properties prop = communicator.getProperties();
         String propertyPrefix = "Foo.Proxy";
         prop.setProperty(propertyPrefix, "test:default -p 12010 -t 10000");
@@ -234,14 +234,14 @@ public class AllTests
         test(b1.ice_getIdentity().name.Equals("test") && b1.ice_getIdentity().category.Length == 0 &&
              b1.ice_getAdapterId().Length == 0 && b1.ice_getFacet().Length == 0);
 
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
 
-        Console.Out.Write("testing ice_getCommunicator... ");
-        Console.Out.Flush();
+        //Console.Out.Write("testing ice_getCommunicator... ");
+        //Console.Out.Flush();
         test(baseProxy.ice_getCommunicator() == communicator);
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
 
-        Console.Out.Write("testing proxy methods... ");
+        //Console.Out.Write("testing proxy methods... ");
         test(communicator.identityToString(
                  baseProxy.ice_identity(communicator.stringToIdentity("other")).ice_getIdentity()).Equals("other"));
         test(baseProxy.ice_facet("facet").ice_getFacet().Equals("facet"));
@@ -253,10 +253,10 @@ public class AllTests
         test(baseProxy.ice_batchDatagram().ice_isBatchDatagram());
         test(baseProxy.ice_secure(true).ice_isSecure());
         test(!baseProxy.ice_secure(false).ice_isSecure());
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
 
-        Console.Out.Write("testing proxy comparison... ");
-        Console.Out.Flush();
+        //Console.Out.Write("testing proxy comparison... ");
+        //Console.Out.Flush();
 
         test(communicator.stringToProxy("foo").Equals(communicator.stringToProxy("foo")));
         test(!communicator.stringToProxy("foo").Equals(communicator.stringToProxy("foo2")));
@@ -293,10 +293,10 @@ public class AllTests
         //
         // TODO: Ideally we should also test comparison of fixed proxies.
         //
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
 
-        Console.Out.Write("testing checked cast... ");
-        Console.Out.Flush();
+        //Console.Out.Write("testing checked cast... ");
+        //Console.Out.Flush();
         Test.MyClassPrx cl = Test.MyClassPrxHelper.checkedCast(baseProxy);
         test(cl != null);
         Test.MyDerivedClassPrx derived = Test.MyDerivedClassPrxHelper.checkedCast(cl);
@@ -304,10 +304,10 @@ public class AllTests
         test(cl.Equals(baseProxy));
         test(derived.Equals(baseProxy));
         test(cl.Equals(derived));
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
 
-        Console.Out.Write("testing checked cast with context... ");
-        Console.Out.Flush();
+        //Console.Out.Write("testing checked cast with context... ");
+        //Console.Out.Flush();
 
         Dictionary<string, string> c = cl.getContext();
         test(c == null || c.Count == 0);
@@ -318,10 +318,10 @@ public class AllTests
         cl = Test.MyClassPrxHelper.checkedCast(baseProxy, c);
         Dictionary<string, string> c2 = cl.getContext();
         test(Ice.CollectionComparer.Equals(c, c2));
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
 
-        Console.Out.Write("testing opaque endpoints... ");
-        Console.Out.Flush();
+        //Console.Out.Write("testing opaque endpoints... ");
+        //Console.Out.Flush();
 
         try
         {
@@ -473,7 +473,7 @@ public class AllTests
         pstr = communicator.proxyToString(p2);
         test(pstr.Equals("test -t:opaque -t 2 -v CTEyNy4wLjAuMREnAAD/////AA==:opaque -t 99 -v abch"));
 
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
 
         return cl;
     }

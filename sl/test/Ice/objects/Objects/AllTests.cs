@@ -22,46 +22,46 @@ public class AllTests
     
     public static InitialPrx allTests(Ice.Communicator communicator)
     {
-        Console.Out.Write("testing stringToProxy... ");
-        Console.Out.Flush();
+        //Console.Out.Write("testing stringToProxy... ");
+        //Console.Out.Flush();
         String @ref = "initial:default -p 12010 -t 2000";
         Ice.ObjectPrx @base = communicator.stringToProxy(@ref);
         test(@base != null);
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
         
-        Console.Out.Write("testing checked cast... ");
-        Console.Out.Flush();
+        //Console.Out.Write("testing checked cast... ");
+        //Console.Out.Flush();
         InitialPrx initial = InitialPrxHelper.checkedCast(@base);
         test(initial != null);
         test(initial.Equals(@base));
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
         
-        Console.Out.Write("getting B1... ");
-        Console.Out.Flush();
+        //Console.Out.Write("getting B1... ");
+        //Console.Out.Flush();
         B b1 = initial.getB1();
         test(b1 != null);
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
         
-        Console.Out.Write("getting B2... ");
-        Console.Out.Flush();
+        //Console.Out.Write("getting B2... ");
+        //Console.Out.Flush();
         B b2 = initial.getB2();
         test(b2 != null);
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
         
-        Console.Out.Write("getting C... ");
-        Console.Out.Flush();
+        //Console.Out.Write("getting C... ");
+        //Console.Out.Flush();
         C c = initial.getC();
         test(c != null);
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
         
-        Console.Out.Write("getting D... ");
-        Console.Out.Flush();
+        //Console.Out.Write("getting D... ");
+        //Console.Out.Flush();
         D d = initial.getD();
         test(d != null);
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
         
-        Console.Out.Write("checking consistency... ");
-        Console.Out.Flush();
+        //Console.Out.Write("checking consistency... ");
+        //Console.Out.Flush();
         test(b1 != b2);
         //test(b1 != c);
         //test(b1 != d);
@@ -85,10 +85,10 @@ public class AllTests
         // sufficient.
         test(b2.theA == b2);
         test(d.theC == null);
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
         
-        Console.Out.Write("getting B1, B2, C, and D all at once... ");
-        Console.Out.Flush();
+        //Console.Out.Write("getting B1, B2, C, and D all at once... ");
+        //Console.Out.Flush();
         B b1out;
         B b2out;
         C cout;
@@ -98,10 +98,10 @@ public class AllTests
         test(b2out != null);
         test(cout != null);
         test(dout != null);
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
         
-        Console.Out.Write("checking consistency... ");
-        Console.Out.Flush();
+        //Console.Out.Write("checking consistency... ");
+        //Console.Out.Flush();
         test(b1out != b2out);
         test(b1out.theA == b2out);
         test(b1out.theB == b1out);
@@ -121,10 +121,10 @@ public class AllTests
         test(dout.theB.postUnmarshalInvoked());
         test(dout.theB.theC.preMarshalInvoked);
         test(dout.theB.theC.postUnmarshalInvoked());
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
 
-        Console.Out.Write("testing protected members... ");
-        Console.Out.Flush();
+        //Console.Out.Write("testing protected members... ");
+        //Console.Out.Flush();
         E e = initial.getE();
         test(e.checkValues());
         System.Reflection.BindingFlags flags = System.Reflection.BindingFlags.NonPublic |
@@ -137,27 +137,27 @@ public class AllTests
         test(f.e2.checkValues());
         test(!typeof(F).GetField("e1", flags).IsPublic && !typeof(F).GetField("e1", flags).IsPrivate);
         test(typeof(F).GetField("e2", flags).IsPublic && !typeof(F).GetField("e2", flags).IsPrivate);
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
 
-        Console.Out.Write("getting I, J and H... ");
-        Console.Out.Flush();
+        //Console.Out.Write("getting I, J and H... ");
+        //Console.Out.Flush();
         I i = initial.getI();
         test(i != null);
         I j = initial.getJ();
         test(j != null && ((J)j) != null);
         I h = initial.getH();
         test(h != null && ((H)h) != null);
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
 
-        Console.Out.Write("setting I... ");
-        Console.Out.Flush();
+        //Console.Out.Write("setting I... ");
+        //Console.Out.Flush();
         initial.setI(i);
         initial.setI(j);
         initial.setI(h);
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
 
-        Console.Out.Write("testing UnexpectedObjectException...");
-        Console.Out.Flush();
+        //Console.Out.Write("testing UnexpectedObjectException...");
+        //Console.Out.Flush();
         @ref = "uoet:default -p 12010 -t 10000";
         @base = communicator.stringToProxy(@ref);
         test(@base != null);
@@ -175,10 +175,10 @@ public class AllTests
         }
         catch(System.Exception ex)
         {
-            Console.Out.WriteLine(ex);
+            //Console.Out.WriteLine(ex);
             test(false);
         }
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
 
         return initial;
     }

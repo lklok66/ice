@@ -22,22 +22,22 @@ public class AllTests
     
     public static InitialPrx allTests(Ice.Communicator communicator)
     {
-        Console.Out.Write("testing stringToProxy... ");
-        Console.Out.Flush();
+        //Console.Out.Write("testing stringToProxy... ");
+        //Console.Out.Flush();
         string ref_Renamed = "initial:default -p 12010 -t 2000";
         Ice.ObjectPrx @base = communicator.stringToProxy(ref_Renamed);
         test(@base != null);
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
         
-        Console.Out.Write("testing checked cast... ");
-        Console.Out.Flush();
+        //Console.Out.Write("testing checked cast... ");
+        //Console.Out.Flush();
         InitialPrx initial = InitialPrxHelper.checkedCast(@base);
         test(initial != null);
         test(initial.Equals(@base));
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
         
-        Console.Out.Write("getting proxies for class hierarchy... ");
-        Console.Out.Flush();
+        //Console.Out.Write("getting proxies for class hierarchy... ");
+        //Console.Out.Flush();
         Test.MA.CAPrx ca = initial.caop();
         Test.MB.CBPrx cb = initial.cbop();
         Test.MA.CCPrx cc = initial.ccop();
@@ -48,10 +48,10 @@ public class AllTests
         test(cb != cc);
         test(cb != cd);
         test(cc != cd);
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
         
-        Console.Out.Write("getting proxies for interface hierarchy... ");
-        Console.Out.Flush();
+        //Console.Out.Write("getting proxies for interface hierarchy... ");
+        //Console.Out.Flush();
         Test.MA.IAPrx ia = initial.iaop();
         Test.MB.IB1Prx ib1 = initial.ib1op();
         Test.MB.IB2Prx ib2 = initial.ib2op();
@@ -61,10 +61,10 @@ public class AllTests
         test(ia != ic);
         test(ib1 != ic);
         test(ib2 != ic);
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
         
-        Console.Out.Write("invoking proxy operations on class hierarchy... ");
-        Console.Out.Flush();
+        //Console.Out.Write("invoking proxy operations on class hierarchy... ");
+        //Console.Out.Flush();
         Test.MA.CAPrx cao;
         Test.MB.CBPrx cbo;
         Test.MA.CCPrx cco;
@@ -111,10 +111,10 @@ public class AllTests
         test(cbo.Equals(cc));
         cco = cc.ccop(cc);
         test(cco.Equals(cc));
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
         
-        Console.Out.Write("ditto, but for interface hierarchy... ");
-        Console.Out.Flush();
+        //Console.Out.Write("ditto, but for interface hierarchy... ");
+        //Console.Out.Flush();
         Test.MA.IAPrx iao;
         Test.MB.IB1Prx ib1o;
         Test.MB.IB2Prx ib2o;
@@ -195,10 +195,10 @@ public class AllTests
         test(ib2o.Equals(ic));
         ico = ic.icop(ic);
         test(ico.Equals(ic));
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
         
-        Console.Out.Write("ditto, but for class implementing interfaces... ");
-        Console.Out.Flush();
+        //Console.Out.Write("ditto, but for class implementing interfaces... ");
+        //Console.Out.Flush();
         
         cao = cd.caop(cd);
         test(cao.Equals(cd));
@@ -227,7 +227,7 @@ public class AllTests
         test(ib1o.Equals(cd));
         ib2o = cd.cdop(cd);
         test(ib2o.Equals(cd));
-        Console.Out.WriteLine("ok");
+        //Console.Out.WriteLine("ok");
         
         return initial;
     }

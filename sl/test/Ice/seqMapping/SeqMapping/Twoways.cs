@@ -831,7 +831,6 @@ class Twoways
             test(Ice.CollectionComparer.Equals(i, r));
         }
 
-/*
         {
             Custom<Custom<CV>> i = new Custom<Custom<CV>>();
             for(int c = 0; c < _length; ++c)
@@ -873,6 +872,5 @@ class Twoways
                 }
             }
         }
-*/
     }
 }

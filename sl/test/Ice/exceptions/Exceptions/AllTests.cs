@@ -665,7 +665,7 @@ public class AllTests
     public static ThrowerPrx allTests(Ice.Communicator communicator)
     {
         {
-            Console.Write("testing object factory registration exception... ");
+            //Console.Write("testing object factory registration exception... ");
             Ice.ObjectFactory of = new ObjectFactoryI();
             communicator.addObjectFactory(of, "::x");
             try
@@ -676,25 +676,25 @@ public class AllTests
             catch(Ice.AlreadyRegisteredException)
             {
             }
-            Console.WriteLine("ok");
+            //Console.WriteLine("ok");
         }
         
-        Console.Write("testing stringToProxy... ");
-        Console.Out.Flush();
+        //Console.Write("testing stringToProxy... ");
+        //Console.Out.Flush();
         String @ref = "thrower:default -p 12010 -t 2000";
         Ice.ObjectPrx @base = communicator.stringToProxy(@ref);
         test(@base != null);
-        Console.WriteLine("ok");
+        //Console.WriteLine("ok");
         
-        Console.Write("testing checked cast... ");
-        Console.Out.Flush();
+        //Console.Write("testing checked cast... ");
+        //Console.Out.Flush();
         ThrowerPrx thrower = ThrowerPrxHelper.checkedCast(@base);
         test(thrower != null);
         test(thrower.Equals(@base));
-        Console.WriteLine("ok");
+        //Console.WriteLine("ok");
         
-        Console.Write("catching exact types... ");
-        Console.Out.Flush();
+        //Console.Write("catching exact types... ");
+        //Console.Out.Flush();
         
         try
         {
@@ -769,10 +769,10 @@ public class AllTests
             test(false);
         }
         
-        Console.WriteLine("ok");
+        //Console.WriteLine("ok");
         
-        Console.Write("catching base types... ");
-        Console.Out.Flush();
+        //Console.Write("catching base types... ");
+        //Console.Out.Flush();
         
         try
         {
@@ -803,10 +803,10 @@ public class AllTests
             test(false);
         }
         
-        Console.WriteLine("ok");
+        //Console.WriteLine("ok");
         
-        Console.Write("catching derived types... ");
-        Console.Out.Flush();
+        //Console.Write("catching derived types... ");
+        //Console.Out.Flush();
         
         try
         {
@@ -855,12 +855,12 @@ public class AllTests
             test(false);
         }
         
-        Console.WriteLine("ok");
+        //Console.WriteLine("ok");
         
         if(thrower.supportsUndeclaredExceptions())
         {
-            Console.Write("catching unknown user exception... ");
-            Console.Out.Flush();
+            //Console.Write("catching unknown user exception... ");
+            //Console.Out.Flush();
             
             try
             {
@@ -901,11 +901,11 @@ public class AllTests
                 test(false);
             }
             
-            Console.WriteLine("ok");
+            //Console.WriteLine("ok");
         }
         
-        Console.Write("catching object not exist exception... ");
-        Console.Out.Flush();
+        //Console.Write("catching object not exist exception... ");
+        //Console.Out.Flush();
         
         {
             Ice.Identity id = communicator.stringToIdentity("does not exist");
@@ -925,10 +925,10 @@ public class AllTests
             }
         }
         
-        Console.WriteLine("ok");
+        //Console.WriteLine("ok");
         
-        Console.Write("catching facet not exist exception... ");
-        Console.Out.Flush();
+        //Console.Write("catching facet not exist exception... ");
+        //Console.Out.Flush();
         
         try
         {
@@ -948,10 +948,10 @@ public class AllTests
             test(false);
         }
         
-        Console.WriteLine("ok");
+        //Console.WriteLine("ok");
         
-        Console.Write("catching operation not exist exception... ");
-        Console.Out.Flush();
+        //Console.Write("catching operation not exist exception... ");
+        //Console.Out.Flush();
         
         try
         {
@@ -968,10 +968,10 @@ public class AllTests
             test(false);
         }
         
-        Console.WriteLine("ok");
+        //Console.WriteLine("ok");
 
-        Console.Write("catching unknown local exception... ");
-        Console.Out.Flush();
+        //Console.Write("catching unknown local exception... ");
+        //Console.Out.Flush();
         
         try
         {
@@ -986,10 +986,10 @@ public class AllTests
             test(false);
         }
         
-        Console.WriteLine("ok");
+        //Console.WriteLine("ok");
 
-        Console.Write("catching unknown non-Ice exception... ");
-        Console.Out.Flush();
+        //Console.Write("catching unknown non-Ice exception... ");
+        //Console.Out.Flush();
         
         try
         {
@@ -1004,10 +1004,10 @@ public class AllTests
             test(false);
         }
         
-        Console.WriteLine("ok");
+        //Console.WriteLine("ok");
         
-        Console.Write("catching exact types with AMI... ");
-        Console.Out.Flush();
+        //Console.Write("catching exact types with AMI... ");
+        //Console.Out.Flush();
         
         {
             AMI_Thrower_throwAasAI cb = new AMI_Thrower_throwAasAI();
@@ -1039,10 +1039,10 @@ public class AllTests
             test(cb.check());
         }
         
-        Console.WriteLine("ok");
+        //Console.WriteLine("ok");
         
-        Console.Write("catching derived types... ");
-        Console.Out.Flush();
+        //Console.Write("catching derived types... ");
+        //Console.Out.Flush();
         
         {
             AMI_Thrower_throwBasAI cb = new AMI_Thrower_throwBasAI();
@@ -1062,12 +1062,12 @@ public class AllTests
             test(cb.check());
         }
         
-        Console.WriteLine("ok");
+        //Console.WriteLine("ok");
         
         if(thrower.supportsUndeclaredExceptions())
         {
-            Console.Write("catching unknown user exception with AMI... ");
-            Console.Out.Flush();
+            //Console.Write("catching unknown user exception with AMI... ");
+            //Console.Out.Flush();
             
             {
                 AMI_Thrower_throwUndeclaredAI cb = new AMI_Thrower_throwUndeclaredAI();
@@ -1087,11 +1087,11 @@ public class AllTests
                 test(cb.check());
             }
             
-            Console.WriteLine("ok");
+            //Console.WriteLine("ok");
         }
         
-        Console.Write("catching object not exist exception with AMI... ");
-        Console.Out.Flush();
+        //Console.Write("catching object not exist exception with AMI... ");
+        //Console.Out.Flush();
         
         {
             Ice.Identity id = communicator.stringToIdentity("does not exist");
@@ -1101,10 +1101,10 @@ public class AllTests
             test(cb.check());
         }
         
-        Console.WriteLine("ok");
+        //Console.WriteLine("ok");
         
-        Console.Write("catching facet not exist exception with AMI... ");
-        Console.Out.Flush();
+        //Console.Write("catching facet not exist exception with AMI... ");
+        //Console.Out.Flush();
         
         try
         {
@@ -1120,10 +1120,10 @@ public class AllTests
             test(false);
         }
         
-        Console.WriteLine("ok");
+        //Console.WriteLine("ok");
         
-        Console.Write("catching operation not exist exception with AMI... ");
-        Console.Out.Flush();
+        //Console.Write("catching operation not exist exception with AMI... ");
+        //Console.Out.Flush();
         
         {
             AMI_WrongOperation_noSuchOperationI cb = new AMI_WrongOperation_noSuchOperationI();
@@ -1132,10 +1132,10 @@ public class AllTests
             test(cb.check());
         }
         
-        Console.WriteLine("ok");
+        //Console.WriteLine("ok");
         
-        Console.Write("catching unknown local exception with AMI... ");
-        Console.Out.Flush();
+        //Console.Write("catching unknown local exception with AMI... ");
+        //Console.Out.Flush();
         
         {
             AMI_Thrower_throwLocalExceptionI cb = new AMI_Thrower_throwLocalExceptionI();
@@ -1143,16 +1143,16 @@ public class AllTests
             test(cb.check());
         }
         
-        Console.WriteLine("ok");
+        //Console.WriteLine("ok");
         
-        Console.Write("catching unknown non-Ice exception with AMI... ");
-        Console.Out.Flush();
+        //Console.Write("catching unknown non-Ice exception with AMI... ");
+        //Console.Out.Flush();
         
         AMI_Thrower_throwNonIceExceptionI cb2 = new AMI_Thrower_throwNonIceExceptionI();
         thrower.throwNonIceException_async(cb2.response, cb2.exception);
         test(cb2.check());
         
-        Console.WriteLine("ok");
+        //Console.WriteLine("ok");
     
         return thrower;
     }

@@ -73,7 +73,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ClientBin\Operations.xap" />
     <Content Include="IceBridge.ashx" />
   </ItemGroup>
   <ItemGroup>
