@@ -33,7 +33,7 @@ namespace Hello
                 initData.properties.setProperty("Ice.BridgeUri", "http://localhost:1287/IceBridge.ashx");
                 _comm = Ice.Util.initialize(initData);
                 _hello = Demo.HelloPrxHelper.uncheckedCast(_comm.stringToProxy("hello:tcp -p 10000"));
-                _helloOneway = _hello.ice_oneway();
+                _helloOneway = Demo.HelloPrxHelper.uncheckedCast(_hello.ice_oneway());
             }
             catch (Exception ex)
             {
@@ -75,7 +75,7 @@ namespace Hello
                     int id = System.Threading.Thread.CurrentThread.ManagedThreadId;
                     sayHelloResponse();
                 }
-                catch (Exception ex)
+                catch (Ice.Exception ex)
                 {
                     sayHelloException(ex);
                 }
@@ -98,7 +98,7 @@ namespace Hello
                     _helloOneway.sayHello(0);
                     sayHelloResponse();
                 }
-                catch (Exception ex)
+                catch (Ice.Exception ex)
                 {
                     sayHelloException(ex);
                 }
