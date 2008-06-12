@@ -2,7 +2,7 @@
 About this distribution
 ======================================================================
 
-This distribution is a binary release of Ice for Silverlight 0.1.1
+This distribution is a binary release of Ice for Silverlight 0.2.0
 including the following components:
 
 - The Ice for Silverlight runtime assembly, as well as the Ice for 
@@ -17,12 +17,13 @@ including the following components:
 Requirements
 ======================================================================
 
+
 Windows Version
 ---------------
 
 Ice for Silverlight has been extensively tested on:
 
-- Windows XP x86 with Internet Explorer 6.0 and FireFox 3.0
+- Windows XP x86 with Internet Explorer 6.0 and Firefox 3.0
 
 
 Compiler
@@ -51,52 +52,55 @@ Silverlight Runtime
 Package Contents
 ======================================================================
 
+
 Ice for Silverlight
 -------------------
 
-There are two main components included in the package. First, the 
-Ice for Silverlight assembly (IceSL.dll) which all Ice for 
-Silverlight applications must reference.
+There are two main components included in the package. The first
+component is the Ice for Silverlight assembly (IceSL.dll), which all
+Ice for Silverlight applications must reference.
 
-Second, the Ice for Silverlight bridge (IceBridge.ashx) which receives 
-requests from Ice for Silverlight applications, forward the request
-onto the Ice server and then returns the request back to the Ice for
-Silverlight application. It must be deployed on the same web server
-as the Ice for Silverlight application is running.
+The second component is the Ice for Silverlight bridge (provided as
+IceBridge.ashx), which receives requests from Ice for Silverlight
+applications, forward the requests to the appropriate Ice servers, and
+then returns the responses to the Ice for Silverlight application. It
+must be deployed on the same web server as the Ice for Silverlight
+application.
 
 
 Slice-to-Silverlight translator
 --------------------------------
 
 The Slice-to-Silverlight translator (slice2sl.exe) is included in the
-bin directory. It is required to translate Slice definitions into Ice
-for Silverlight code.
+bin directory. Its purpose is to translate Slice definitions into Ice
+for Silverlight code that you compile into your application.
 
 
 Ice for .NET
 ------------
 
-In order to use Ice for Silverlight it is necessary to also install 
-Ice for .NET. Specifically it is necessary to install the Ice for .NET
-3.3.0 Ice.dll which is provided in the bin directory. The assembly is
-required by the bridge and must be installed in the GAC.
+In order to use Ice for Silverlight, it is necessary to also install
+Ice for .NET. Specifically, you must install the Ice for .NET 3.3.0
+run time (Ice.dll), which is provided in the bin directory. The
+assembly is required by the bridge and must be installed in the GAC
+using the following command:
 
-  gacutil -i Ice.dll
+  > gacutil -i Ice.dll
 
 
 ======================================================================
 Building and running the demo
 ======================================================================
 
-Since Ice for Silverlight provides client-side functionality only, it 
-is required to use the Ice server from another Ice language mapping 
-in order to run the hello demo. Any of the Ice 3.3.0 mappings that
-provide server-side functionality (C++, Java, C#, Python) can be used. 
-You can download one of the other mappings of Ice here:
+Since Ice for Silverlight provides client-side functionality only, you
+must use an Ice server from another Ice language mapping in order to
+run the hello demo. Any of the Ice 3.3.0 mappings that provide server-
+side functionality (C++, Java, C#, Python) can be used. You can
+download an Ice distribution here:
 
   http://www.zeroc.com/download.html
 
-Now to compile and run the demo do the following:
+To compile and run the demo, do the following:
 
 1) Start the Visual Studio 2008 IDE and open the solution file
    (demo\Ice\hello\hello.sln). 
@@ -108,7 +112,7 @@ Now to compile and run the demo do the following:
    See the README in the Ice 3.3.0 demo directory for information on
    how to start the server.
 
-4) Right click on the TestPage.html and choose "Set As Start Page".
+4) Right click on TestPage.html and choose "Set As Start Page".
 
 5) Right click on the HelloWeb project and select "Debug->Start new
    instance". This should cause a browser window to be spawned.
