@@ -23,7 +23,17 @@ Windows Version
 
 Ice for Silverlight has been extensively tested on:
 
-- Windows XP x86 with Internet Explorer 6.0 and Firefox 3.0
+- Windows XP x86 and x64
+- Windows Vista x86 and x64
+
+
+Browser
+-------
+
+Ice for Silverlight has been tested with:
+
+- Internet Explorer 7.0 
+- Firefox 3.0
 
 
 Compiler

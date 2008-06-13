@@ -8,7 +8,17 @@ Windows Version
 
 Ice for Silverlight has been extensively tested on:
 
-- Windows XP x86 with Internet Explorer 6.0 and Firefox 3.0
+- Windows XP x86 and x64
+- Windows Vista x86 and x64
+
+
+Browser
+-------
+
+Ice for Silverlight has been tested with:
+
+- Internet Explorer 7.0
+- Firefox 3.0
 
 
 Compiler
@@ -67,11 +77,11 @@ Third-party libraries
 The Ice for Silverlight compiler (slice2sl) has a dependency on the
 following third-party library:
 
-- mcpp 2.7 with patch
+- mcpp 2.7.1
 
 If you want to build the slice2sl translator yourself, you do not need
 to build mcpp yourself, as ZeroC supplies a Third-Party Windows
-installer for the VC9 compiler that contains release and debug
+installer for Visual Studio 2008 that contains release and debug
 libraries for all of the third-party dependencies.
 
 If you intend to build the third-party dependencies from source, we
@@ -168,12 +178,36 @@ dictMapping and seqMapping tests are only found in .NET.
 
 Note that the Windows binary installer for Ice only contains the Ice
 demos, but not the Ice tests. Therefore, to run the tests, you will
-need to download and compile one of the source distributions. They can
-be downloaded here:
+need to download and compile the tests from the source distribution.
+It can be downloaded here:
 
   http://www.zeroc.com/download.html
 
-To run a test or demo do the following:
+To compile the Ice tests from source distribution against binary
+installation:
+
+1) Unpack the Ice 3.3.0 source distribution.
+
+2) In a Visual Studio 2008 command prompt, change to the test/Ice
+   subdirectory of mapping you want to use. For example, to use
+   Ice for .Net do the following:
+
+   > cd Ice-3.3.0\cs\test\Ice
+
+3) Set ICE_HOME to the location of the binary installation.
+
+   > set ICE_HOME=C:\Ice-3.3.0-VC90
+
+4) Indicate you are building against binary distribution by setting
+   USE_BIN_DIST.
+
+   > set USE_BIN_DIST=yes
+
+5) Run nmake to build the tests.
+
+   > nmake /f Makefile.mak
+
+Now to run a Ice for Silverlight test or demo do the following:
 
 1) Start the corresponding server from the Ice 3.3 distribution that
    you compiled. See the instructions in the Ice 3.3 distribution for
