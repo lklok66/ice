@@ -64,14 +64,12 @@ SRCS		= Arrays.cs \
 GEN_SRCS	= $(GDIR)\BuiltinSequences.cs \
 		  $(GDIR)\Communicator.cs \
 		  $(GDIR)\Endpoint.cs \
-		  $(GDIR)\FacetMap.cs \
 		  $(GDIR)\Identity.cs \
 		  $(GDIR)\ImplicitContext.cs \
 		  $(GDIR)\LocalException.cs \
 		  $(GDIR)\Logger.cs \
 		  $(GDIR)\ObjectFactory.cs \
 		  $(GDIR)\Properties.cs \
-		  $(GDIR)\Stats.cs \
 		  $(GDIR)\Context.cs
 
 SDIR		= $(slicedir)\Ice

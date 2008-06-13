@@ -64,14 +64,12 @@ SRCS		= Arrays.cs \
 SLICE_SRCS	= $(SDIR)/BuiltinSequences.ice \
 		  $(SDIR)/Communicator.ice \
 		  $(SDIR)/Endpoint.ice \
-		  $(SDIR)/FacetMap.ice \
 		  $(SDIR)/Identity.ice \
 		  $(SDIR)/ImplicitContext.ice \
 		  $(SDIR)/LocalException.ice \
 		  $(SDIR)/Logger.ice \
 		  $(SDIR)/ObjectFactory.ice \
 		  $(SDIR)/Properties.ice \
-		  $(SDIR)/Stats.ice \
 		  $(SDIR)/Context.ice
 
 SDIR		= $(slicedir)/Ice

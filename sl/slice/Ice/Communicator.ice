@@ -11,7 +11,6 @@
 #define ICE_COMMUNICATOR_ICE
 
 #include <Ice/LoggerF.ice>
-#include <Ice/StatsF.ice>
 #include <Ice/PropertiesF.ice>
 #include <Ice/ObjectFactoryF.ice>
 #include <Ice/ImplicitContextF.ice>
@@ -38,7 +37,6 @@ module Ice
  * is language-specific, and not specified in Slice code.
  *
  * @see Logger
- * @see Stats
  * @see ObjectAdapter
  * @see Properties
  * @see ObjectFactory
@@ -253,17 +251,6 @@ local interface Communicator
      *
      **/
     ["cpp:const"] Logger getLogger();
-
-    /**
-     *
-     * Get the statistics callback object for this communicator.
-     *
-     * @return This communicator's statistics callback object.
-     *
-     * @see Stats
-     *
-     **/
-    ["cpp:const"] Stats getStats();
 };
 
 };

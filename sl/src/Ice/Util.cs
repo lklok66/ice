@@ -39,7 +39,6 @@ namespace Ice
 
         public Properties properties;
         public Logger logger;
-        public Stats stats;
         public ThreadNotification threadHook;
     }
 

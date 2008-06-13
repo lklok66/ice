@@ -70,11 +70,6 @@ namespace Ice
             return instance_.initializationData().logger;
         }
 
-        public Stats getStats()
-        {
-            return instance_.initializationData().stats;
-        }
-
         public Dictionary<string, string> getDefaultContext()
         {
             return instance_.getDefaultContext();
