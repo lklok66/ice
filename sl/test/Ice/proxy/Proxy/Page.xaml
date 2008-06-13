@@ -1,4 +1,14 @@
-﻿<UserControl x:Class="Proxy.Page"
+﻿<!--
+ **********************************************************************
+
+ Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+
+ This copy of Ice is licensed to you under the terms described in the
+ ICE_LICENSE file included in this distribution.
+
+ **********************************************************************
+-->
+<UserControl x:Class="Proxy.Page"
     xmlns="http://schemas.microsoft.com/client/2007" 
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
     Width="640" Height="480">
