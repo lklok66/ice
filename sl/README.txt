@@ -1,5 +1,119 @@
 Please see the file INSTALL.txt for installation instructions.
 
+
+Ice for Silverlight Bridge
+--------------------------
+
+The bridge is an Ice for .NET application implemented as an ASP.NET 
+web handler. It retrieves Ice requests encoded in HTTP POST requests,
+forwards the request to an Ice server using the Ice protocol, ana
+d returns the server's reply as an HTTP response to the web client.
+The bridge requires an ASP.NET capable server, such as Microsoft IIS
+or Apache with mod_mono; it also requires the Ice for .NET run time
+(which must be accessible to ASP.NET applications).
+
+The Ice for Silverlight bridge is generic: the bridge is not specific
+to a particular Ice application and does not require type information
+for the requests and replies that it processes. A single bridge
+deployment can be used for multiple Ice applications without requiring
+application-specific configuration. New applications may also be added
+without additional configuration, and removing applications does not
+require "clean-up".
+
+Besides making deploying or retiring applications extremely easy, a 
+generic bridge has other additional benefits:
+
+ - Only one instance per server needs to be maintained or updated.
+
+ - Changes to running applications have no effect on the bridge or 
+   existing applications.
+
+ - It is easier to control the resources used for processing Ice
+   applications.
+
+While a single bridge can be used for any number of Ice applications,
+it is also possible to host multiple bridges on a server. For example,
+this can be used control resource consumption and access permissions
+for different groups of applications, with each group using a
+different bridge.  
+
+
+Configuring the Ice for Silverlight Bridge on Microsoft IIS
+-----------------------------------------------------------
+
+IIS is Microsoft's Internet Information Server. IIS includes ASP.NET
+support and is pre-configured to run .ashx files. The configuration
+steps are:
+
+ - Decide where you will store the Ice for Silverlight bridge files,
+   creating a new directory if necessary.
+
+ - Place the Global.asax and IceBridge.ashx files included in the 
+   distribution into that directory.
+
+ - Verify that the permissions on IceBridge.ashx will allow it to be
+   run by IIS.
+
+ - If the Ice for .NET assembly, Ice.dll, is not to be installed in
+   the global assembly cache on the web server host, create a bin
+   sub-directory in the bridge's directory and copy the assembly there.
+
+ - Create a web application with IIS Manager or another administration
+   tool, using the directory where the bridge files were placed as the
+   physical path for the application. Take note of the alias specified
+   for the web application; its URI is required when configuring
+   Silverlight clients.
+
+
+Configuring the Ice for Silverlight Bridge on Apache and mod_mono
+-----------------------------------------------------------------
+
+Apache does not include support for ASP.NET applications. However, the
+Mono project develops and maintains an ASP.NET implementation that can
+be configured as an Apache module. (For information on how to install
+mod_mono and configure Apache, please consult the mod_mono
+documentation.) Once you have a working Apache and mod_mono
+installation, setting up the Ice for Silverlight bridge is very similar
+to the procedure for IIS. There are two important points: Ice for .NET
+is a .NET 2.0 application, so the Apache configuration should contain:
+
+  MonoServerPath /usr/bin/mod-mono-server2
+
+Substitute the proper path for mod-mono-server2 if it is not installed
+in /usr/bin.
+
+Secondly, the bridge must be configured specifically as an ASP.NET
+application. For example, the Apache configuration could contain a
+line such as:
+
+  MonoApplications "/icebridge:/var/www/htdocs/icebridge"
+
+As with IIS, file permissions are important. For example, the 
+IceBridge.ashx file must have execute permission and the Silverlight
+client assemblies must not.
+
+mod_mono adds MIME types to the Apache configuration for typical
+ASP.NET file types. Some MIME types required for Silverlight
+applications are incorrect or missing. Strictly speaking, this only
+affects Silverlight clients, not the bridge itself. However, since Ice
+for Silverlight applications will not work properly unless the
+configuration is correct, the following changes are required:
+
+ - The .dll extension must be changed from application/x-asp-net to
+   application/x-msdownload. Without this change, assemblies such as
+   the Ice for Silverlight assembly will not be transferred properly,
+   resulting in loading errors.
+
+ - The following MIME types must be added:
+ 
+   application/manifest .manifest
+   application/xaml+xml .xaml
+   application/x-ms-application .application
+   application/octet-stream .deploy
+   application/x-ms-xbap .xbap
+   application/vnd.ms-xpsdocument .xps
+
+
 Threading
 ---------
 
