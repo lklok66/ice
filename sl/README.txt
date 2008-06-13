@@ -6,24 +6,24 @@ Ice for Silverlight Bridge
 
 The bridge is an Ice for .NET application implemented as an ASP.NET 
 web handler. It retrieves Ice requests encoded in HTTP POST requests,
-forwards the request to an Ice server using the Ice protocol, ana
-d returns the server's reply as an HTTP response to the web client.
-The bridge requires an ASP.NET capable server, such as Microsoft IIS
-or Apache with mod_mono; it also requires the Ice for .NET run time
-(which must be accessible to ASP.NET applications).
+forwards each request to the appropriate Ice server using the Ice
+protocol, and returns the server's reply as an HTTP response to the
+web client. The bridge requires an ASP.NET capable server, such as
+Microsoft IIS or Apache with mod_mono; it also requires the Ice for
+.NET run time (which must be accessible to ASP.NET applications).
 
-The Ice for Silverlight bridge is generic: the bridge is not specific
-to a particular Ice application and does not require type information
-for the requests and replies that it processes. A single bridge
-deployment can be used for multiple Ice applications without requiring
-application-specific configuration. New applications may also be added
-without additional configuration, and removing applications does not
-require "clean-up".
+The Ice for Silverlight bridge is generic; in other words, the bridge
+is not specific to a particular Ice application and does not require
+type information for the requests and replies that it processes. A
+single bridge deployment can be used for multiple Ice applications
+without requiring application-specific configuration. New applications
+may also be added without additional configuration, and removing
+applications does not require "clean-up".
 
-Besides making deploying or retiring applications extremely easy, a 
-generic bridge has other additional benefits:
+A generic bridge offers additional benefits as well:
 
- - Only one instance per server needs to be maintained or updated.
+ - Only one instance per web server host needs to be maintained or
+   updated.
 
  - Changes to running applications have no effect on the bridge or 
    existing applications.
@@ -32,10 +32,10 @@ generic bridge has other additional benefits:
    applications.
 
 While a single bridge can be used for any number of Ice applications,
-it is also possible to host multiple bridges on a server. For example,
-this can be used control resource consumption and access permissions
-for different groups of applications, with each group using a
-different bridge.  
+it is also possible to deploy multiple bridges on the same web server
+host. For example, this can be used control resource consumption and
+access permissions for different groups of applications, with each
+group using a different bridge.  
 
 
 Configuring the Ice for Silverlight Bridge on Microsoft IIS

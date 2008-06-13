@@ -183,31 +183,31 @@ It can be downloaded here:
 
   http://www.zeroc.com/download.html
 
-To compile the Ice tests from source distribution against binary
+To compile the Ice tests from a source distribution against a binary
 installation:
 
 1) Unpack the Ice 3.3.0 source distribution.
 
 2) In a Visual Studio 2008 command prompt, change to the test/Ice
-   subdirectory of mapping you want to use. For example, to use
-   Ice for .Net do the following:
+   subdirectory of the mapping you want to use. For example, to use
+   Ice for .NET do the following:
 
    > cd Ice-3.3.0\cs\test\Ice
 
-3) Set ICE_HOME to the location of the binary installation.
+3) Set ICE_HOME to the location of the binary installation:
 
    > set ICE_HOME=C:\Ice-3.3.0-VC90
 
-4) Indicate you are building against binary distribution by setting
-   USE_BIN_DIST.
+4) Indicate you are building against a binary distribution by setting
+   USE_BIN_DIST:
 
    > set USE_BIN_DIST=yes
 
-5) Run nmake to build the tests.
+5) Run nmake to build the tests:
 
    > nmake /f Makefile.mak
 
-Now to run a Ice for Silverlight test or demo do the following:
+To run an Ice for Silverlight test or demo, do the following:
 
 1) Start the corresponding server from the Ice 3.3 distribution that
    you compiled. See the instructions in the Ice 3.3 distribution for
