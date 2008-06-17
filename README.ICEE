@@ -1,0 +1,6 @@
+This archive contains the Ice-E source code for the C++ and Java
+language mappings as well as the C++ source code for the 
+Slice-to-Embedded-C++ and Slice-to-Embedded-Java translators.
+
+Please refer to the README and INSTALL files in the appropriate
+subdirectory for specific information on each language mapping.

@@ -1,0 +1,48 @@
+======================================================================
+CHANGES for Ice-E 1.3.0
+======================================================================
+
+The entries below contain brief descriptions of the changes in a
+release, in no particular order. Some of the entries reflect
+significant new additions, while others represent minor corrections.
+
+Note that this file only includes changes since Ice-E 1.2.0. For the
+change history of prior releases, refer to the CHANGES file in the
+subdirectory of each language mapping (e.g., cppe/CHANGES).
+
+
+======================================================================
+Changes since version 1.2.0
+======================================================================
+
+
+General Changes
+===============
+
+These entries apply to all relevant language mappings unless otherwise
+noted.
+
+- The use of sequences (and structs containing sequences) as valid
+  dictionary keys has been deprecated and will be removed in a future
+  release.
+
+- The property Ice.Trace.Location has been replaced by new property
+  Ice.Trace.Locator.
+
+- Fixed throughput performance problem on Windows that would occur
+  when sending large requests.
+
+- Added Ice.TCP.RcvSize and Ice.TCP.SndSize properties. These
+  properties control the size of the TCP receive and send buffers for
+  the TCP and SSL transports.
+
+
+C++ Changes
+===========
+
+
+Java Changes
+============
+
+- Replaced IceUtil.Version with the methods Ice.Util.stringVersion
+  and Ice.Util.intVersion.
