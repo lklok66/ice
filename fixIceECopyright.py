@@ -37,7 +37,7 @@ for dir in ["cppe", "javae"]:
 cpatMatch = "20[0-9][0-9]-(20[0-9][0-9]) ZeroC"
 copyright = "2008"
 
-files = [os.path.join(ice_dir, "distribution", "src", "icee", "ICE_LICENSE")]
+files = [os.path.join(ice_dir, "distribution", "src", "icee", "ICEE_LICENSE")]
 
 for f in files:
    FixUtil. fileMatchAndReplace(f, [(cpatMatch, copyright)])

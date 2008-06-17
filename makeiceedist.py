@@ -31,6 +31,7 @@ filesToKeep = [
     "./ICEE_LICENSE",
     "./LICENSE",
     "./CHANGES.ICEE",
+    "./README.ICEE",
     "./config/Make.common.rules.mak",
     "./config/Make.common.rules",
     "./config/TestUtil.py",
