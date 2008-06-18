@@ -23,6 +23,7 @@ ipv6 = False                    # Default to use IPv4 only
 ice_home = None                 # Binary distribution to use (None to use binaries from source distribution)
 x64 = False                     # Binary distribution is 64-bit
 javaCmd = "java"                # Default java loader
+blocking = False                # Set to True to use client-side blocking mode in Ice-E.
 
 #
 # The PHP interpreter is called "php5" on some platforms (e.g., SLES).
@@ -96,12 +97,8 @@ def configurePaths():
             else:
                 os.environ["LD_LIBRARY_PATH"] = libDir + os.pathsep + os.getenv("LD_LIBRARY_PATH", "")
 
-    if getDefaultMapping() == "javae":
-        javaDir = os.path.join(getIceDir("javae"), "jdk", "lib")
-        os.environ["CLASSPATH"] = os.path.join(javaDir, "IceE.jar") + os.pathsep + os.getenv("CLASSPATH", "")
-    else:
-        javaDir = os.path.join(getIceDir("java"), "lib")
-        os.environ["CLASSPATH"] = os.path.join(javaDir, "Ice.jar") + os.pathsep + os.getenv("CLASSPATH", "")
+    javaDir = os.path.join(getIceDir("java"), "lib")
+    os.environ["CLASSPATH"] = os.path.join(javaDir, "Ice.jar") + os.pathsep + os.getenv("CLASSPATH", "")
     os.environ["CLASSPATH"] = os.path.join(javaDir) + os.pathsep + os.getenv("CLASSPATH", "")
     
     # 
@@ -121,6 +118,22 @@ def configurePaths():
 
     rubyDir = os.path.join(getIceDir("rb"), "ruby")
     os.environ["RUBYLIB"] = rubyDir + os.pathsep + os.getenv("RUBYLIB", "")
+
+def configureEmbeddedPaths():
+    toplevel = findTopLevel()
+
+    if isWin32():
+        os.environ["PATH"] = getCppBinDir() + os.pathsep + os.getenv("PATH", "")
+    else:
+        libDir = os.path.join(getIceDir("cppe"), "lib")
+        if isDarwin():
+            os.environ["DYLD_LIBRARY_PATH"] = libDir + os.pathsep + os.getenv("DYLD_LIBRARY_PATH", "")
+        else:
+            os.environ["LD_LIBRARY_PATH"] = libDir + os.pathsep + os.getenv("LD_LIBRARY_PATH", "")
+
+    javaDir = os.path.join(getIceDir("javae"), "jdk", "lib")
+    os.environ["CLASSPATH"] = os.path.join(javaDir, "IceE.jar") + os.pathsep + os.getenv("CLASSPATH", "")
+    os.environ["CLASSPATH"] = os.path.join(javaDir) + os.pathsep + os.getenv("CLASSPATH", "")
 
 def addLdPath(libpath):
     if isWin32():
@@ -186,30 +199,49 @@ def index(l, re):
 
 def run(tests, root = False):
     def usage():
-        print "usage: " + sys.argv[0] + """
-          --all                   Run all sensible permutations of the tests.
-          --start=index           Start running the tests at the given index.
-          --loop                  Run the tests in a loop.
-          --filter=<regex>        Run all the tests that match the given regex.
-          --rfilter=<regex>       Run all the tests that do not match the given regex.
-          --debug                 Display debugging information on each test.
-          --protocol=tcp|ssl      Run with the given protocol.
-          --compress              Run the tests with protocol compression.
-          --host=host             Set --Ice.Default.Host=<host>.
-          --serialize             Run with connection serialization.
-          --continue              Keep running when a test fails
-          --ipv6                  Use IPv6 addresses.
-          --ice-home=<path>       Use the binary distribution from the given path.
-          --x64                   Binary distribution is 64-bit.
-          --script                Generate a script to run the tests.
-        """
+        if getDefaultMapping() == "cppe" or getDefaultMapping() == "javae":
+            print "usage: " + sys.argv[0] + """
+  --all                   Run all sensible permutations of the tests.
+  --start=index           Start running the tests at the given index.
+  --loop                  Run the tests in a loop.
+  --filter=<regex>        Run all the tests that match the given regex.
+  --rfilter=<regex>       Run all the tests that do not match the given regex.
+  --debug                 Display debugging information on each test.
+  --host=host             Set --Ice.Default.Host=<host>.
+  --continue              Keep running when a test fails.
+  --script                Generate a script to run the tests.
+  --blocking              Use client-side blocking concurrency model.
+            """
+        else:
+            print "usage: " + sys.argv[0] + """
+  --all                   Run all sensible permutations of the tests.
+  --start=index           Start running the tests at the given index.
+  --loop                  Run the tests in a loop.
+  --filter=<regex>        Run all the tests that match the given regex.
+  --rfilter=<regex>       Run all the tests that do not match the given regex.
+  --debug                 Display debugging information on each test.
+  --protocol=tcp|ssl      Run with the given protocol.
+  --compress              Run the tests with protocol compression.
+  --host=host             Set --Ice.Default.Host=<host>.
+  --serialize             Run with connection serialization.
+  --continue              Keep running when a test fails.
+  --ipv6                  Use IPv6 addresses.
+  --ice-home=<path>       Use the binary distribution from the given path.
+  --x64                   Binary distribution is 64-bit.
+  --script                Generate a script to run the tests.
+            """
         sys.exit(2)
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "lr:R:",
-                                   ["start=", "start-after=", "filter=", "rfilter=", "all", "loop", "debug",
-                                    "protocol=", "compress", "host=", "serialize", "continue", "ipv6",
-                                    "ice-home=", "x64", "script"])
+        if getDefaultMapping() == "cppe" or getDefaultMapping() == "javae":
+            opts, args = getopt.getopt(sys.argv[1:], "lr:R:",
+                                       ["start=", "start-after=", "filter=", "rfilter=", "all", "loop", "debug",
+                                        "host=", "continue", "script", "blocking"])
+        else:
+            opts, args = getopt.getopt(sys.argv[1:], "lr:R:",
+                                       ["start=", "start-after=", "filter=", "rfilter=", "all", "loop", "debug",
+                                        "protocol=", "compress", "host=", "serialize", "continue", "ipv6",
+                                        "ice-home=", "x64", "script"])
     except getopt.GetoptError:
         usage()
 
@@ -248,7 +280,7 @@ def run(tests, root = False):
                 sys.exit(1)
 
         if o in ( "--protocol", "--host", "--debug", "--compress", "--serialize", "--ipv6", \
-                  "--ice-home", "--x64"):
+                  "--ice-home", "--x64", "--blocking"):
             arg += " " + o
             if len(a) > 0:
                 arg += " " + a
@@ -267,29 +299,35 @@ def run(tests, root = False):
     if all:
         expanded.append([(test, arg, config) for test,config in tests if "once" in config ])
 
-        a = '--protocol=tcp %s'  % arg
-        expanded.append([ (test, a, config) for test,config in tests if "core" in config])
+        if getDefaultMapping() == "cppe" or getDefaultMapping() == "javae":
+            expanded.append([ (test, arg, config) for test,config in tests if "core" in config])
 
-        a = '--protocol=ssl %s'  % arg
-        expanded.append([ (test, a, config) for test,config in tests if "core" in config])
+            a = '--blocking %s'  % arg
+            expanded.append([ (test, a, config) for test,config in tests if "core" in config])
+        else:
+            a = '--protocol=tcp %s'  % arg
+            expanded.append([ (test, a, config) for test,config in tests if "core" in config])
 
-        a = '--protocol=tcp --compress %s'  % arg
-        expanded.append([ (test, a, config) for test,config in tests if "core" in config])
+            a = '--protocol=ssl %s'  % arg
+            expanded.append([ (test, a, config) for test,config in tests if "core" in config])
 
-        a = "--ipv6 --protocol=tcp %s" % arg
-        expanded.append([ (test, a, config) for test,config in tests if "core" in config])
+            a = '--protocol=tcp --compress %s'  % arg
+            expanded.append([ (test, a, config) for test,config in tests if "core" in config])
 
-        a = "--ipv6 --protocol=ssl %s" % arg
-        expanded.append([ (test, a, config) for test,config in tests if "core" in config])
+            a = "--ipv6 --protocol=tcp %s" % arg
+            expanded.append([ (test, a, config) for test,config in tests if "core" in config])
 
-        a = "--protocol=tcp %s" % arg
-        expanded.append([ (test, a, config) for test,config in tests if "service" in config])
+            a = "--ipv6 --protocol=ssl %s" % arg
+            expanded.append([ (test, a, config) for test,config in tests if "core" in config])
 
-        a = "--protocol=ssl --ipv6 %s" % arg
-        expanded.append([ (test, a, config) for test,config in tests if "service" in config])
+            a = "--protocol=tcp %s" % arg
+            expanded.append([ (test, a, config) for test,config in tests if "service" in config])
 
-        a = "--protocol=tcp --serialize %s" % arg
-        expanded.append([ (test, a, config) for test,config in tests if "stress" in config])
+            a = "--protocol=ssl --ipv6 %s" % arg
+            expanded.append([ (test, a, config) for test,config in tests if "service" in config])
+
+            a = "--protocol=tcp --serialize %s" % arg
+            expanded.append([ (test, a, config) for test,config in tests if "stress" in config])
     else:
         expanded.append([ (test, arg, config) for test,config in tests])
 
@@ -470,7 +508,11 @@ class ReaderThread(Thread):
         except IOError:
             pass
 
-        self.status = closePipe(self.pipe)
+        status = closePipe(self.pipe)
+        if status == None:
+            self.status = 0
+        else:
+            self.status = os.WEXITSTATUS(status)
 
     def getPipe(self):
         return self.pipe
@@ -494,12 +536,12 @@ def serverStatus():
     for t in allServerThreads:
         status = t.getStatus()
         if status:
-            print "server ", str(t), " status: ", str(status)
+            print "server " + str(t.pipe) + " status: " + str(status)
             return status
     return 0
 
 # This joins with a specific server (the one started with the given pipe)
-# returns its exit status. If the server cannot be found an exception
+# and returns its exit status. If the server cannot be found an exception
 # is raised.
 def specificServerStatus(pipe, timeout = None):
     global serverThreads
@@ -522,8 +564,7 @@ def specificServerStatus(pipe, timeout = None):
 	        t.join(timeout)
             if t.isAlive():
                 raise "server with pipe " + str(pipe) + " did not exit within the timeout period."
-            status = t.getStatus()
-            return status
+            return t.getStatus()
     raise "can't find server with pipe: " + str(pipe)
 
 def killServers():
@@ -732,6 +773,7 @@ class DriverConfig:
     overrides = None
     ipv6 = False
     x64 = False
+    blocking = False
 
     def __init__(self, type = None):
         global protocol
@@ -741,6 +783,7 @@ class DriverConfig:
         global mono
         global ipv6
         global x64
+        global blocking
         self.lang = getDefaultMapping()
         self.protocol = protocol
         self.compress = compress
@@ -750,6 +793,7 @@ class DriverConfig:
         self.type = type
         self.ipv6 = ipv6
         self.x64 = x64
+        self.blocking = blocking
         
 def argsToDict(argumentString, results):
     """Converts an argument string to dictionary"""
@@ -802,7 +846,10 @@ def getCommandLine(exe, config, env=None):
 
     if config.serialize:
         components.append("--Ice.ThreadPool.Server.Serialize=1")
-        
+
+    if config.blocking:
+        components.append("--Ice.Blocking=1")
+
     if config.type == "server" or config.type == "colloc" and config.lang == "py":
         components.append("--Ice.ThreadPool.Server.Size=1 --Ice.ThreadPool.Server.SizeMax=3 --Ice.ThreadPool.Server.SizeWarn=0")
 
@@ -940,7 +987,7 @@ def runTests(start, expanded, num = 0, script = False):
                 if status:
                     if(num > 0):
                         print "[" + str(num) + "]",
-                    message = "test in " + os.path.abspath(dir) + " failed with exit status", status,
+                    message = "test in " + os.path.abspath(dir) + " failed with exit status", os.WEXITSTATUS(status),
                     print message
                     if not keepGoing:
                         sys.exit(status)
@@ -1198,22 +1245,33 @@ def getCppBinDir():
 
 def processCmdLine():
     def usage():
-        print "usage: " + sys.argv[0] + """
-          --debug                 Display debugging information on each test.
-          --protocol=tcp|ssl      Run with the given protocol.
-          --compress              Run the tests with protocol compression.
-          --host=host             Set --Ice.Default.Host=<host>.
-          --serialize             Run with connection serialization.
-          --ipv6                  Use IPv6 addresses.
-          --ice-home=<path>       Use the binary distribution from the given path.
-          --x64                   Binary distribution is 64-bit.
-        """
+        if getDefaultMapping() == "cppe" or getDefaultMapping() == "javae":
+            print "usage: " + sys.argv[0] + """
+  --debug                 Display debugging information on each test.
+  --host=host             Set --Ice.Default.Host=<host>.
+  --blocking              Use client-side blocking concurrency model.
+            """
+        else:
+            print "usage: " + sys.argv[0] + """
+  --debug                 Display debugging information on each test.
+  --protocol=tcp|ssl      Run with the given protocol.
+  --compress              Run the tests with protocol compression.
+  --host=host             Set --Ice.Default.Host=<host>.
+  --serialize             Run with connection serialization.
+  --ipv6                  Use IPv6 addresses.
+  --ice-home=<path>       Use the binary distribution from the given path.
+  --x64                   Binary distribution is 64-bit.
+            """
         sys.exit(2)
 
     try:
-        opts, args = getopt.getopt(
-            sys.argv[1:], "", ["debug", "protocol=", "compress", "host=", "serialize", "ipv6", \
-                              "ice-home=", "x64"])
+        if getDefaultMapping() == "cppe" or getDefaultMapping() == "javae":
+            opts, args = getopt.getopt(
+                sys.argv[1:], "", ["debug", "host=", "blocking"])
+        else:
+            opts, args = getopt.getopt(
+                sys.argv[1:], "", ["debug", "protocol=", "compress", "host=", "serialize", "ipv6", \
+                                  "ice-home=", "x64"])
     except getopt.GetoptError:
         usage()
 
@@ -1251,6 +1309,9 @@ def processCmdLine():
                 sys.exit(1)
             global protocol
             protocol = a
+        elif o == "--blocking":
+            global blocking
+            blocking = True
 
     if len(args) > 0:
         usage()
@@ -1265,7 +1326,10 @@ def processCmdLine():
     if not x64:
         x64 = isWin32() and os.environ.get("XTARGET") == "x64" or os.environ.get("LP64") == "yes"
     
-    configurePaths()
+    if getDefaultMapping() == "cppe" or getDefaultMapping() == "javae":
+        configureEmbeddedPaths()
+    else:
+        configurePaths()
 
 if os.environ.has_key("ICE_CONFIG"):
     os.unsetenv("ICE_CONFIG")

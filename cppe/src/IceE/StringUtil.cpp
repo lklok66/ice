@@ -319,7 +319,14 @@ IceUtil::trim(const string& s)
     {
         string::size_type beg = s.find_first_not_of(delim);
         string::size_type end = s.find_last_not_of(delim);
-        return s.substr(beg, end - beg + 1);
+        if(beg != string::npos)
+        {
+            return s.substr(beg, end - beg + 1);
+        }
+        else
+        {
+            return string();
+        }
     }
     return s;
 }

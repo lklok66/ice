@@ -30,7 +30,7 @@ base = 12340
 
 for i in range(0, num):
     print "starting server #%d..." % (i + 1),
-    serverPipe = TestUtil.startServer("Server", " %d" % (base + i) + " 2>&1")
+    serverPipe = TestUtil.startServer("Server", " %d" % (base + i))
     TestUtil.getAdapterReady(serverPipe)
     print "ok"
 
@@ -38,7 +38,7 @@ ports = ""
 for i in range(0, num):
     ports = "%s %d" % (ports, base + i)
 print "starting client...",
-clientPipe = TestUtil.startClient("Client", ports + " 2>&1")
+clientPipe = TestUtil.startClient("Client", ports)
 print "ok"
 
 TestUtil.printOutputFromPipe(clientPipe)

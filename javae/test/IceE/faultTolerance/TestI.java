@@ -27,13 +27,13 @@ public final class TestI extends _TestIntfDisp
     public void
     abort(Ice.Current current)
     {
-        System.exit(1);
+        System.exit(0);
     }
 
     public void
     idempotentAbort(Ice.Current current)
     {
-        System.exit(1);
+        System.exit(0);
     }
 
     public int

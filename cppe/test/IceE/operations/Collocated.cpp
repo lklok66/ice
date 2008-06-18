@@ -26,11 +26,11 @@ public:
     virtual int
     run(int argc, char* argv[])
     {
-            Ice::InitializationData initData;
+        Ice::InitializationData initData;
         initData.properties = Ice::createProperties();
 
         //
-        // We must set MessageSizeMax to an explicit values, because
+        // We must set MessageSizeMax to an explicit value because
         // we run tests to check whether Ice.MemoryLimitException is
         // raised as expected.
         //
@@ -43,6 +43,11 @@ public:
         // Now parse argc/argv into initData.properties
         //
         initData.properties = Ice::createProperties(argc, argv, initData.properties);
+
+        //
+        // We don't want connection warnings because of the timeout test.
+        //
+        initData.properties->setProperty("Ice.Warn.Connections", "0");
 
         initData.logger = getLogger();
         setCommunicator(Ice::initialize(argc, argv, initData));

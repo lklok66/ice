@@ -336,7 +336,7 @@ Ice::Properties::parseLine(const string& line
 
     string key = IceUtil::trim(s.substr(0, split));
     string value;
-    if(split < s.length() - 2)
+    if(split < s.length() - 1)
     {
         value = IceUtil::trim(s.substr(split + 1, s.length() - split - 1));
     }
