@@ -84,7 +84,16 @@ IceInternal::Acceptor::connectToSelf()
 {
     SOCKET fd = createSocket();
     setBlock(fd, false);
-    doConnect(fd, _addr, -1);
+    if(inetAddrToString(_addr.sin_addr) == "0.0.0.0")
+    {
+        struct sockaddr_in addr;
+        getAddress("127.0.0.1", ntohs(_addr.sin_port), addr);
+        doConnect(fd, addr, -1);
+    }
+    else
+    {
+        doConnect(fd, _addr, -1);
+    }
     closeSocket(fd);
 }
 

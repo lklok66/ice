@@ -662,7 +662,8 @@ Ice::ObjectAdapter::ObjectAdapter(const InstancePtr& instance, const Communicato
     _directCount(0),
     _waitForActivate(false),
     _destroying(false),
-    _destroyed(false)
+    _destroyed(false),
+    _noConfig(noConfig)
 {
     if(_noConfig)
     {

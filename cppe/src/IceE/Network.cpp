@@ -36,8 +36,8 @@ using namespace IceInternal;
 
 static IceUtil::StaticMutex inetMutex = ICE_STATIC_MUTEX_INITIALIZER;
 
-static string
-inetAddrToString(const struct in_addr& in)
+string
+IceInternal::inetAddrToString(const struct in_addr& in)
 {
     //
     // inet_ntoa uses static memory on some platforms so we protect
@@ -762,6 +762,10 @@ vector<struct sockaddr_in>
 IceInternal::getAddresses(const string& host, int port)
 {
     vector<struct sockaddr_in> result;
+
+    struct sockaddr_in addr;
+    memset(&addr, 0, sizeof(struct sockaddr_in));
+
 #ifdef _WIN32
     //
     // Windows XP has getaddrinfo(), but we don't want to require XP to run Ice-E.
@@ -792,6 +796,8 @@ IceInternal::getAddresses(const string& host, int port)
         char** p = entry->h_addr_list;
         while(*p)
         {
+            addr.sin_family = AF_INET;
+            addr.sin_port = htons(port);
             memcpy(&addr.sin_addr, *p, entry->h_length);
             result.push_back(addr);
             p++;
@@ -805,9 +811,6 @@ IceInternal::getAddresses(const string& host, int port)
     }
 
 #else
-
-    struct sockaddr_in addr;
-    memset(&addr, 0, sizeof(struct sockaddr_in));
 
     struct addrinfo* info = 0;
     int retry = 5;

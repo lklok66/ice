@@ -112,6 +112,7 @@ std::string errorToString(int);
 std::string errorToStringDNS(int);
 std::string lastErrorToString();
 
+std::string inetAddrToString(const struct in_addr& in);
 std::string fdToString(SOCKET);
 std::string addrToString(const struct sockaddr_in&);
 std::vector<std::string> getHostsForEndpointExpand(const std::string&);
