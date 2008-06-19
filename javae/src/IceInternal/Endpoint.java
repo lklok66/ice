@@ -55,25 +55,10 @@ public interface Endpoint extends IceUtil.Comparable
     boolean unknown();
 
     //
-    // Return a client side transceiver for this endpoint, or null if a
-    // transceiver can only be created by a connector.
+    // Return list of connectors for this endpoint, or empty list if
+    // no connectors are available.
     //
-    Transceiver clientTransceiver();
-
-    //
-    // Return a server side transceiver for this endpoint, or null if a
-    // transceiver can only be created by an acceptor. In case a
-    // transceiver is created, this operation also returns a new
-    // "effective" endpoint, which might differ from this endpoint,
-    // for example, if a dynamic port number is assigned.
-    //
-    Transceiver serverTransceiver(EndpointHolder endpoint);
-
-    //
-    // Return a connector for this endpoint, or null if no connector
-    // is available.
-    //
-    Connector connector();
+    java.util.Vector connectors();
 
     //
     // Return an acceptor for this endpoint, or null if no acceptors

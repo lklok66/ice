@@ -94,7 +94,11 @@ Ice::Communicator::identityToString(const Identity& ident) const
 ObjectAdapterPtr
 Ice::Communicator::createObjectAdapter(const string& name)
 {
-    return createObjectAdapterWithEndpoints(name, getProperties()->getProperty(name + ".Endpoints"));
+    return _instance->objectAdapterFactory()->createObjectAdapter(name, ""
+#ifdef ICEE_HAS_ROUTER
+                                                                  , 0
+# endif
+                                                                      );
 }
 
 ObjectAdapterPtr

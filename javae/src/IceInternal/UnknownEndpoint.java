@@ -102,37 +102,13 @@ final class UnknownEndpoint implements Endpoint
     }
     
     //
-    // Return a client side transceiver for this endpoint, or null if a
-    // transceiver can only be created by a connector.
+    // Return list of connectors for this endpoint, or empty list if
+    // no connector are available.
     //
-    public Transceiver
-    clientTransceiver()
+    public java.util.Vector
+    connectors()
     {
-        return null;
-    }
-
-    //
-    // Return a server side transceiver for this endpoint, or null if a
-    // transceiver can only be created by an acceptor. In case a
-    // transceiver is created, this operation also returns a new
-    // "effective" endpoint, which might differ from this endpoint,
-    // for example, if a dynamic port number is assigned.
-    //
-    public Transceiver
-    serverTransceiver(EndpointHolder endpoint)
-    {
-        endpoint.value = null;
-        return null;
-    }
-
-    //
-    // Return a connector for this endpoint, or null if no connector
-    // is available.
-    //
-    public Connector
-    connector()
-    {
-        return null;
+        return new java.util.Vector();
     }
 
     //

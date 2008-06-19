@@ -45,7 +45,7 @@ Ice::ObjectAdapter::getName() const
     //
     // No mutex lock necessary, _name is immutable.
     //
-    return _name;
+    return _noConfig ? string("") : _name;
 }
 
 CommunicatorPtr
@@ -94,7 +94,11 @@ Ice::ObjectAdapter::activate()
 #ifdef ICEE_HAS_LOCATOR
         locatorInfo = _locatorInfo;
 #endif
-        printAdapterReady = _instance->initializationData().properties->getPropertyAsInt("Ice.PrintAdapterReady") > 0;
+        if(!_noConfig)
+        {
+            printAdapterReady =
+                _instance->initializationData().properties->getPropertyAsInt("Ice.PrintAdapterReady") > 0;
+        }
     }
 
 #ifdef ICEE_HAS_LOCATOR
@@ -550,6 +554,47 @@ Ice::ObjectAdapter::setLocator(const LocatorPrx& locator)
 #endif
 
 void
+Ice::ObjectAdapter::refreshPublishedEndpoints()
+{
+#ifdef ICEE_HAS_LOCATOR
+    LocatorInfoPtr locatorInfo;
+#endif
+    vector<EndpointPtr> oldPublishedEndpoints;
+
+    {
+        IceUtil::Monitor<IceUtil::RecMutex>::Lock sync(*this);
+
+        checkForDeactivation();
+
+        oldPublishedEndpoints = _publishedEndpoints;
+        _publishedEndpoints = parsePublishedEndpoints();
+
+#ifdef ICEE_HAS_LOCATOR
+        locatorInfo = _locatorInfo;
+#endif
+    }
+
+#ifdef ICEE_HAS_LOCATOR
+    try
+    {
+        Ice::Identity dummy;
+        dummy.name = "dummy";
+        updateLocatorRegistry(locatorInfo, createDirectProxy(dummy));
+    }
+    catch(const Ice::LocalException& ex)
+    {
+        IceUtil::Monitor<IceUtil::RecMutex>::Lock sync(*this);
+
+        //
+        // Restore the old published endpoints.
+        //
+        _publishedEndpoints = oldPublishedEndpoints;
+        ex.ice_throw();
+    }
+#endif
+}
+
+void
 Ice::ObjectAdapter::flushBatchRequests()
 {
     vector<IncomingConnectionFactoryPtr> f;
@@ -598,11 +643,11 @@ Ice::ObjectAdapter::getServantManager() const
 
 Ice::ObjectAdapter::ObjectAdapter(const InstancePtr& instance, const CommunicatorPtr& communicator,
                                   const ObjectAdapterFactoryPtr& objectAdapterFactory, 
-                                  const string& name, const string& endpointInfo
+                                  const string& name, const string& endpointInfo,
 #ifdef ICEE_HAS_ROUTER
-                                  , const RouterPrx& router
+                                  const RouterPrx& router,
 #endif
-                                  ) :
+                                  bool noConfig) :
     _deactivated(false),
     _instance(instance),
     _communicator(communicator),
@@ -619,6 +664,11 @@ Ice::ObjectAdapter::ObjectAdapter(const InstancePtr& instance, const Communicato
     _destroying(false),
     _destroyed(false)
 {
+    if(_noConfig)
+    {
+        return;
+    }
+
     __setNoDelete(true);
     try
     {
@@ -679,11 +729,22 @@ Ice::ObjectAdapter::ObjectAdapter(const InstancePtr& instance, const Communicato
             // The connection factory might change it, for example, to
             // fill in the real port number.
             //
-            vector<EndpointPtr> endpoints = parseEndpoints(endpointInfo);
+            vector<EndpointPtr> endpoints;
+            if(endpointInfo.empty())
+            {
+                endpoints = 
+                    parseEndpoints(_instance->initializationData().properties->getProperty(_name + ".Endpoints"), true);
+            }
+            else
+            {
+                endpoints = parseEndpoints(endpointInfo, true);
+            }
+
             for(vector<EndpointPtr>::iterator p = endpoints.begin(); p != endpoints.end(); ++p)
             {
                 _incomingConnectionFactories.push_back(new IncomingConnectionFactory(_instance, *p, this));
             }
+
             if(endpoints.empty())
             {
                 TraceLevelsPtr tl = _instance->traceLevels();
@@ -695,22 +756,9 @@ Ice::ObjectAdapter::ObjectAdapter(const InstancePtr& instance, const Communicato
             }
 
             //
-            // Parse published endpoints. These are used in proxies
-            // instead of the connection factory endpoints.
+            // Parse published endpoints.
             //
-            string endpts = _instance->initializationData().properties->getProperty(name + ".PublishedEndpoints");
-            _publishedEndpoints = parseEndpoints(endpts);
-            if(_publishedEndpoints.empty())
-            {
-                transform(_incomingConnectionFactories.begin(), _incomingConnectionFactories.end(),
-                          back_inserter(_publishedEndpoints), Ice::constMemFun(&IncomingConnectionFactory::endpoint));
-            }
-
-            //
-            // Filter out any endpoints that are not meant to be published.
-            //
-            _publishedEndpoints.erase(remove_if(_publishedEndpoints.begin(), _publishedEndpoints.end(),
-                                      not1(Ice::constMemFun(&Endpoint::publish))), _publishedEndpoints.end());
+            _publishedEndpoints = parsePublishedEndpoints();
         }
 
 #ifdef ICEE_HAS_LOCATOR
@@ -853,7 +901,7 @@ Ice::ObjectAdapter::checkIdentity(const Identity& ident)
 }
 
 vector<EndpointPtr>
-Ice::ObjectAdapter::parseEndpoints(const string& str) const
+Ice::ObjectAdapter::parseEndpoints(const string& str, bool oaEndpoints) const
 {
     string endpts = str;
     transform(endpts.begin(), endpts.end(), endpts.begin(), ::tolower);
@@ -885,20 +933,53 @@ Ice::ObjectAdapter::parseEndpoints(const string& str) const
         }
         
         string s = endpts.substr(beg, end - beg);
-        EndpointPtr endp = _instance->endpointFactory()->create(s);
+        EndpointPtr endp = _instance->endpointFactory()->create(s, oaEndpoints);
         if(endp == 0)
         {
             EndpointParseException ex(__FILE__, __LINE__);
             ex.str = s;
             throw ex;
         }
-        vector<EndpointPtr> endps = endp->expand(true);
-        endpoints.insert(endpoints.end(), endps.begin(), endps.end());
+        endpoints.push_back(endp);
 
         ++end;
     }
 
     return endpoints;
+}
+
+std::vector<EndpointPtr>
+ObjectAdapter::parsePublishedEndpoints()
+{
+    //
+    // Parse published endpoints. If set, these are used in proxies
+    // instead of the connection factory endpoints. 
+    //
+    string endpts = _instance->initializationData().properties->getProperty(_name + ".PublishedEndpoints");
+    vector<EndpointPtr> endpoints = parseEndpoints(endpts, false);
+    if(!endpoints.empty())
+    {
+        return endpoints;
+    }
+
+    //
+    // If the PublishedEndpoints property isn't set, we compute the published enpdoints
+    // from the OA endpoints.
+    //
+    transform(_incomingConnectionFactories.begin(), _incomingConnectionFactories.end(),
+              back_inserter(endpoints), Ice::constMemFun(&IncomingConnectionFactory::endpoint));
+
+    //
+    // Expand any endpoints that may be listening on INADDR_ANY to include actual
+    // addresses in the published endpoints.
+    //
+    vector<EndpointPtr> expandedEndpoints;
+    for(unsigned int i = 0; i < endpoints.size(); ++i)
+    {
+        vector<EndpointPtr> endps = endpoints[i]->expand();
+        expandedEndpoints.insert(expandedEndpoints.end(), endps.begin(), endps.end());
+    }
+    return expandedEndpoints;
 }
 
 #ifdef ICEE_HAS_LOCATOR
@@ -911,15 +992,8 @@ ObjectAdapter::updateLocatorRegistry(const IceInternal::LocatorInfoPtr& locatorI
     }
 
     //
-    // We must get and call on the locator registry outside the thread
-    // synchronization to avoid deadlocks. (we can't make remote calls
-    // within the OA synchronization because the remote call will
-    // indirectly call isLocal() on this OA with the OA factory
-    // locked).
-    //
-    // TODO: This might throw if we can't connect to the
-    // locator. Shall we raise a special exception for the activate
-    // operation instead of a non obvious network exception?
+    // Call on the locator registry outside the synchronization to 
+    // blocking other threads that need to lock this OA.
     //
     LocatorRegistryPrx locatorRegistry = locatorInfo ? locatorInfo->getLocatorRegistry() : LocatorRegistryPrx();
     if(!locatorRegistry)

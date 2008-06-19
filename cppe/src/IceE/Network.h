@@ -105,7 +105,8 @@ void doConnect(SOCKET, struct sockaddr_in&, int);
 SOCKET doAccept(SOCKET);
 
 void getAddress(const std::string&, int, struct sockaddr_in&);
-bool compareAddress(const struct sockaddr_in&, const struct sockaddr_in&);
+std::vector<struct sockaddr_in> getAddresses(const std::string&, int);
+int compareAddress(const struct sockaddr_in&, const struct sockaddr_in&);
 
 std::string errorToString(int);
 std::string errorToStringDNS(int);
@@ -113,8 +114,9 @@ std::string lastErrorToString();
 
 std::string fdToString(SOCKET);
 std::string addrToString(const struct sockaddr_in&);
+std::vector<std::string> getHostsForEndpointExpand(const std::string&);
 
-std::vector<std::string> getLocalHosts();
+std::vector<struct sockaddr_in> getLocalAddresses();
  void setTcpBufSize(SOCKET, const Ice::PropertiesPtr&, const Ice::LoggerPtr&);
 
 int getSocketErrno();

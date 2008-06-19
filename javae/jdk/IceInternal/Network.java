@@ -47,7 +47,15 @@ public final class Network
     {
         try
         {
-            java.net.InetAddress addr = java.net.InetAddress.getByName(host);
+            java.net.InetAddress addr;
+            if(host == null || host.length() == 0)
+            {
+                addr = java.net.InetAddress.getByName("0.0.0.0");
+            }
+            else
+            {
+                addr = java.net.InetAddress.getByName(host);
+            }
             return new InetSocketAddress(addr, port);
         }
         catch(java.net.UnknownHostException ex)
@@ -56,6 +64,45 @@ public final class Network
             e.host = host;
             throw e;
         }
+    }
+
+    public static java.util.Vector
+    getAddresses(String host, int port)
+    {
+        java.util.Vector addresses = new java.util.Vector();
+        try
+        {
+            if(host == null || host.length() == 0)
+            {
+                addresses.addElement(new InetSocketAddress(java.net.InetAddress.getByName("127.0.0.1"), port));
+            }
+            else
+            {
+                java.net.InetAddress[] addrs = java.net.InetAddress.getAllByName(host);
+                for(int i = 0; i < addrs.length; ++i)
+                {
+                    addresses.addElement(new InetSocketAddress(addrs[i], port));
+                }
+            }
+        }
+        catch(java.net.UnknownHostException ex)
+        {
+            Ice.DNSException e = new Ice.DNSException();
+            e.host = host;
+            throw e;
+        }
+
+        //
+        // No address available.
+        //
+        if(addresses.size() == 0)
+        {
+            Ice.DNSException e = new Ice.DNSException();
+            e.host = host;
+            throw e;
+        }
+
+        return addresses;
     }
 
     public static String
@@ -120,6 +167,48 @@ public final class Network
             IceUtil.Debug.Assert(addr != null);
         }
         return addr.getAddress();
+    }
+
+    public static int
+    compareAddress(InetSocketAddress addr1, InetSocketAddress addr2)
+    {
+        if(addr1.getPort() < addr2.getPort())
+        {
+            return -1;
+        }
+        else if(addr2.getPort() < addr1.getPort())
+        {
+            return 1;
+        }
+
+        byte[] larr = addr1.getAddress().getAddress();
+        byte[] rarr = addr2.getAddress().getAddress();
+        if(larr.length < rarr.length)
+        {
+            return -1;
+        }
+        else if(rarr.length < larr.length)
+        {
+            return 1;
+        }
+        if(IceUtil.Debug.ASSERT)
+        {
+            IceUtil.Debug.Assert(larr.length == rarr.length);
+        }
+
+        for(int i = 0; i < larr.length; i++)
+        {
+            if(larr[i] < rarr[i])
+            {
+                return -1;
+            }
+            else if(rarr[i] < larr[i])
+            {
+                return 1;
+            }
+        }
+
+        return 0;
     }
 
     public static void

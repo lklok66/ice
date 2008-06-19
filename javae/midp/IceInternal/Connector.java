@@ -186,16 +186,59 @@ final class Connector
     //
     // Only for use by TcpEndpoint
     //
-    Connector(Instance instance, String host, int port)
+    Connector(Instance instance, String host, int port, int timeout)
     {
         _instance = instance;
+        _timeout = timeout;
         _traceLevels = instance.traceLevels();
         _logger = instance.initializationData().logger;
 
         _url = "socket://" + host + ':' + port;
     }
 
+    //
+    // Compare connectors for sorting purposes
+    //
+    public boolean
+    equals(java.lang.Object obj)
+    {
+        return compareTo(obj) == 0;
+    }
+
+    public int
+    compareTo(java.lang.Object obj) // From java.lang.Comparable
+    {
+        Connector p = null;
+
+        try
+        {
+            p = (Connector)obj;
+        }
+        catch(ClassCastException ex)
+        {
+            return 1;
+        }
+
+        if(this == p)
+        {
+            return 0;
+        }
+
+        if(_timeout < p._timeout)
+        {
+            return -1;
+        }
+        else if(p._timeout < _timeout)
+        {
+            return 1;
+        }
+
+        return _url.compareTo(p._url);
+    }
+
+
     private Instance _instance;
+    private int _timeout;
     private TraceLevels _traceLevels;
     private Ice.Logger _logger;
     private String _url;

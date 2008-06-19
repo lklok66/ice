@@ -17,7 +17,7 @@ public final class ObjectAdapter
         //
         // No mutex lock necessary, _name is immutable.
         //
-        return _name;
+        return _noConfig ? "" : _name;
     }
 
     public synchronized Communicator
@@ -66,8 +66,11 @@ public final class ObjectAdapter
             _waitForActivate = true;
             
             locatorInfo = _locatorInfo;
-            final Properties properties = _instance.initializationData().properties;
-            printAdapterReady = properties.getPropertyAsInt("Ice.PrintAdapterReady") > 0;
+            if(!_noConfig)
+            {
+                final Properties properties = _instance.initializationData().properties;
+                printAdapterReady = properties.getPropertyAsInt("Ice.PrintAdapterReady") > 0;
+            }
         }
 
         try
@@ -548,6 +551,41 @@ public final class ObjectAdapter
     }
 
     public void
+    refreshPublishedEndpoints() 
+    {
+        IceInternal.LocatorInfo locatorInfo = null;
+        java.util.Vector oldPublishedEndpoints;
+    
+        synchronized(this)
+        {
+            checkForDeactivation();
+    
+            oldPublishedEndpoints = _publishedEndpoints;
+            _publishedEndpoints = parsePublishedEndpoints();
+    
+            locatorInfo = _locatorInfo;
+        }
+
+        try
+        {
+            Ice.Identity dummy = new Ice.Identity();
+            dummy.name = "dummy";
+            updateLocatorRegistry(locatorInfo, createDirectProxy(dummy));
+        }
+        catch(Ice.LocalException ex)
+        {
+            synchronized(this)
+            {
+                //
+                // Restore the old published endpoints.
+                //
+                _publishedEndpoints = oldPublishedEndpoints;
+                throw ex;
+            }
+        }
+    }
+
+    public void
     flushBatchRequests()
     {
         java.util.Vector f;
@@ -614,7 +652,7 @@ public final class ObjectAdapter
     public
     ObjectAdapter(IceInternal.Instance instance, Communicator communicator, 
                   IceInternal.ObjectAdapterFactory objectAdapterFactory, String name, String endpointInfo,
-                  RouterPrx router)
+                  RouterPrx router, boolean noConfig)
     {
         _deactivated = false;
         _instance = instance;
@@ -629,6 +667,14 @@ public final class ObjectAdapter
         _waitForActivate = false;
         _destroying = false;
         _destroyed = false;
+        _noConfig = noConfig;
+
+        if(_noConfig)
+        {
+            _id = "";
+            _replicaGroupId = "";
+            return;
+        }
         
         try
         {
@@ -705,10 +751,20 @@ public final class ObjectAdapter
                 // The connection factory might change it, for example, to
                 // fill in the real port number.
                 //
-                java.util.Vector endpoints = parseEndpoints(endpointInfo);
-                for(int i = 0; i < endpoints.size(); ++i)
+                java.util.Vector endpoints;
+                if(endpointInfo.length() == 0)
                 {
-                    IceInternal.Endpoint endp = (IceInternal.Endpoint)endpoints.elementAt(i);
+                    endpoints = parseEndpoints(
+                                     _instance.initializationData().properties.getProperty(_name + ".Endpoints"), true);
+                } 
+                else
+                {
+                    endpoints = parseEndpoints(endpointInfo, true);
+                }
+                java.util.Enumeration p = endpoints.elements();
+                while(p.hasMoreElements())
+                {
+                    IceInternal.Endpoint endp = (IceInternal.Endpoint)p.nextElement();
                     _incomingConnectionFactories.addElement(
                         new IceInternal.IncomingConnectionFactory(instance, endp, this));
                 }
@@ -726,8 +782,7 @@ public final class ObjectAdapter
                 // Parse published endpoints. These are used in proxies
                 // instead of the connection factory endpoints.
                 //
-                String endpts = _instance.initializationData().properties.getProperty(name + ".PublishedEndpoints");
-                _publishedEndpoints = parseEndpoints(endpts);
+                _publishedEndpoints = parsePublishedEndpoints();
             }
 
             String locator = _instance.initializationData().properties.getProperty(name + ".Locator");
@@ -888,7 +943,7 @@ public final class ObjectAdapter
     }
 
     private java.util.Vector
-    parseEndpoints(String endpts)
+    parseEndpoints(String endpts, boolean oaEndpoints)
     {
         endpts = endpts.toLowerCase();
 
@@ -919,7 +974,7 @@ public final class ObjectAdapter
             }
 
             String s = endpts.substring(beg, end);
-            IceInternal.Endpoint endp = _instance.endpointFactory().create(s);
+            IceInternal.Endpoint endp = _instance.endpointFactory().create(s, oaEndpoints);
             if(endp == null)
             {
                 Ice.EndpointParseException e = new Ice.EndpointParseException();
@@ -934,6 +989,38 @@ public final class ObjectAdapter
         return endpoints;
     }
 
+    private java.util.Vector
+    parsePublishedEndpoints()
+    {
+        //
+        // Parse published endpoints. If set, these are used in proxies
+        // instead of the connection factory Endpoints.
+        //
+        String endpts = _instance.initializationData().properties.getProperty(_name + ".PublishedEndpoints");
+        java.util.Vector endpoints = parseEndpoints(endpts, false);
+        if(!endpoints.isEmpty())
+        {
+            return endpoints;
+        }
+
+        //
+        // If the PublishedEndpoints property isn't set, we compute the published enpdoints
+        // from the OA endpoints.
+        //
+        java.util.Enumeration p = _incomingConnectionFactories.elements();
+        while(p.hasMoreElements())
+        {
+            IceInternal.IncomingConnectionFactory factory = (IceInternal.IncomingConnectionFactory)p.nextElement();
+            endpoints.addElement(factory.endpoint());
+        }
+
+        //
+        // For C++ at this point we expand the endpoints but to do this we would normally
+        // use java.net.NetworkInterface which is not available in JDK 1.1.8.
+        //
+        return endpoints;
+    }
+
     private void
     updateLocatorRegistry(IceInternal.LocatorInfo locatorInfo, Ice.ObjectPrx proxy)
     {
@@ -943,16 +1030,8 @@ public final class ObjectAdapter
         }
 
         //
-        // We must get and call on the locator registry outside the
-        // thread synchronization to avoid deadlocks. (we can't make
-        // remote calls within the OA synchronization because the
-        // remote call will indirectly call isLocal() on this OA with
-        // the OA factory locked).
-        //
-        // TODO: This might throw if we can't connect to the
-        // locator. Shall we raise a special exception for the
-        // activate operation instead of a non obvious network
-        // exception?
+        // Call on the locator registry outside the synchronization to
+        // blocking other threads that need to lock this OA.
         //
         LocatorRegistryPrx locatorRegistry = locatorInfo != null ? locatorInfo.getLocatorRegistry() : null;
         if(locatorRegistry == null)
@@ -1014,4 +1093,5 @@ public final class ObjectAdapter
     private boolean _waitForActivate;
     private boolean _destroying;
     private boolean _destroyed;
+    private boolean _noConfig;
 }

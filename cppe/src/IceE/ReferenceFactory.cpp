@@ -438,11 +438,10 @@ IceInternal::ReferenceFactory::create(const string& str)
                 }
                 
                 string es = s.substr(beg, end - beg);
-                EndpointPtr endp = _instance->endpointFactory()->create(es);
+                EndpointPtr endp = _instance->endpointFactory()->create(es, false);
                 if(endp != 0)
                 {
-                    vector<EndpointPtr> endps = endp->expand(false);
-                    endpoints.insert(endpoints.end(), endps.begin(), endps.end());
+                    endpoints.push_back(endp);
                 }
                 else
                 {

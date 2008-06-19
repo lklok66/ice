@@ -42,11 +42,11 @@ IceInternal::OutgoingConnectionFactory::destroy()
 #ifdef _STLP_BEGIN_NAMESPACE
     // voidbind2nd is an STLport extension for broken compilers in IceE/Functional.h
     for_each(_connections.begin(), _connections.end(),
-             voidbind2nd(Ice::secondVoidMemFun1<EndpointPtr, Connection, Connection::DestructionReason>
+             voidbind2nd(Ice::secondVoidMemFun1<ConnectorPtr, Connection, Connection::DestructionReason>
                          (&Connection::destroy), Connection::CommunicatorDestroyed));
 #else
     for_each(_connections.begin(), _connections.end(),
-             bind2nd(Ice::secondVoidMemFun1<const EndpointPtr, Connection, Connection::DestructionReason>
+             bind2nd(Ice::secondVoidMemFun1<const ConnectorPtr, Connection, Connection::DestructionReason>
                      (&Connection::destroy), Connection::CommunicatorDestroyed));
 #endif
 
@@ -57,7 +57,7 @@ IceInternal::OutgoingConnectionFactory::destroy()
 void
 IceInternal::OutgoingConnectionFactory::waitUntilFinished()
 {
-    multimap<EndpointPtr, ConnectionPtr> connections;
+    multimap<ConnectorPtr, ConnectionPtr> connections;
 
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
@@ -80,14 +80,14 @@ IceInternal::OutgoingConnectionFactory::waitUntilFinished()
     }
 
     for_each(connections.begin(), connections.end(),
-             Ice::secondVoidMemFun<const EndpointPtr, Connection>(&Connection::waitUntilFinished));
+             Ice::secondVoidMemFun<const ConnectorPtr, Connection>(&Connection::waitUntilFinished));
 }
 
 ConnectionPtr
 IceInternal::OutgoingConnectionFactory::create(const vector<EndpointPtr>& endpts)
 {
     assert(!endpts.empty());
-    vector<EndpointPtr> endpoints = endpts;
+    vector<pair<ConnectorPtr, EndpointPtr> > connectors;
 
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
@@ -100,7 +100,7 @@ IceInternal::OutgoingConnectionFactory::create(const vector<EndpointPtr>& endpts
         //
         // Reap connections for which destruction has completed.
         //
-        std::multimap<EndpointPtr, ConnectionPtr>::iterator p = _connections.begin();
+        std::multimap<ConnectorPtr, ConnectionPtr>::iterator p = _connections.begin();
         while(p != _connections.end())
         {
             if(p->second->isFinished())
@@ -113,27 +113,40 @@ IceInternal::OutgoingConnectionFactory::create(const vector<EndpointPtr>& endpts
             }
         }
 
-        //
-        // Modify endpoints with overrides.
-        //
+        vector<EndpointPtr> endpoints = endpts;
         vector<EndpointPtr>::iterator q;
         for(q = endpoints.begin(); q != endpoints.end(); ++q)
         {
+            //
+            // Modify endpoints with overrides.
+            //
             if(_instance->defaultsAndOverrides()->overrideTimeout)
             {
                 *q = (*q)->timeout(_instance->defaultsAndOverrides()->overrideTimeoutValue);
+            }
+
+            //
+            // Create connectors for the endpoints.
+            //
+            vector<ConnectorPtr> cons = (*q)->connectors();
+            assert(cons.size() > 0);
+
+            vector<ConnectorPtr>::const_iterator r;
+            for(r = cons.begin(); r != cons.end(); ++r)
+            {
+                connectors.push_back(make_pair(*r, *q));
             }
         }
 
         //
         // Search for existing connections.
         //
-        vector<EndpointPtr>::const_iterator r;
-        for(q = endpoints.begin(), r = endpts.begin(); q != endpoints.end(); ++q, ++r)
+        vector<pair<ConnectorPtr, EndpointPtr> >::const_iterator r;
+        for(r = connectors.begin(); r != connectors.end(); ++r)
         {
-            pair<multimap<EndpointPtr, ConnectionPtr>::iterator,
-                 multimap<EndpointPtr, ConnectionPtr>::iterator> pr = _connections.equal_range(*q);
-            
+            pair<multimap<ConnectorPtr, ConnectionPtr>::iterator,
+                 multimap<ConnectorPtr, ConnectionPtr>::iterator> pr = _connections.equal_range((*r).first);
+
             while(pr.first != pr.second)
             {
                 //
@@ -157,15 +170,15 @@ IceInternal::OutgoingConnectionFactory::create(const vector<EndpointPtr>& endpts
         bool searchAgain = false;
         while(!_destroyed)
         {
-            for(q = endpoints.begin(); q != endpoints.end(); ++q)
+            for(r = connectors.begin(); r != connectors.end(); ++r)
             {
-                if(_pending.find(*q) != _pending.end())
+                if(_pending.find((*r).first) != _pending.end())
                 {
                     break;
                 }
             }
 
-            if(q == endpoints.end())
+            if(r == connectors.end())
             {
                 break;
             }
@@ -186,11 +199,11 @@ IceInternal::OutgoingConnectionFactory::create(const vector<EndpointPtr>& endpts
         //
         if(searchAgain)
         {        
-            for(q = endpoints.begin(), r = endpts.begin(); q != endpoints.end(); ++q, ++r)
+            for(r = connectors.begin(); r != connectors.end(); ++r)
             {
-                pair<multimap<EndpointPtr, ConnectionPtr>::iterator,
-                      multimap<EndpointPtr, ConnectionPtr>::iterator> pr = _connections.equal_range(*q);
-                
+                pair<multimap<ConnectorPtr, ConnectionPtr>::iterator,
+                     multimap<ConnectorPtr, ConnectionPtr>::iterator> pr = _connections.equal_range((*r).first);
+
                 while(pr.first != pr.second)
                 {
                     //
@@ -213,23 +226,24 @@ IceInternal::OutgoingConnectionFactory::create(const vector<EndpointPtr>& endpts
         // create connections to the same endpoints, we add our
         // endpoints to _pending.
         //
-        _pending.insert(endpoints.begin(), endpoints.end());
+        for(r = connectors.begin(); r != connectors.end(); ++r)
+        {
+            _pending.insert((*r).first);
+        }
     }
 
+    ConnectorPtr connector;
     ConnectionPtr connection;
     auto_ptr<LocalException> exception;
     
-    vector<EndpointPtr>::const_iterator q;
-    vector<EndpointPtr>::const_iterator r;
-    for(q = endpoints.begin(), r = endpts.begin(); q != endpoints.end(); ++q, ++r)
+    vector<pair<ConnectorPtr, EndpointPtr> >::const_iterator q;
+    for(q = connectors.begin(); q != connectors.end(); ++q)
     {
-        EndpointPtr endpoint = *q;
+        connector = (*q).first;
+        EndpointPtr endpoint = (*q).second;
         
         try
         {
-            ConnectorPtr connector = endpoint->connector();
-            assert(connector);
-            
             Int timeout;
             if(_instance->defaultsAndOverrides()->overrideConnectTimeout)
             {
@@ -280,7 +294,7 @@ IceInternal::OutgoingConnectionFactory::create(const vector<EndpointPtr>& endpts
             Trace out(_instance->initializationData().logger, traceLevels->retryCat);
 
             out << "connection to endpoint failed";
-            if(q + 1 != endpoints.end())
+            if(q + 1 != connectors.end())
             {
                 out << ", trying next endpoint\n";
             }
@@ -299,9 +313,9 @@ IceInternal::OutgoingConnectionFactory::create(const vector<EndpointPtr>& endpts
         // Signal other threads that we are done with trying to
         // establish connections to our endpoints.
         //
-        for(q = endpoints.begin(); q != endpoints.end(); ++q)
+        for(q = connectors.begin(); q != connectors.end(); ++q)
         {
-            _pending.erase(*q);
+            _pending.erase((*q).first);
         }
         notifyAll();
 
@@ -312,8 +326,7 @@ IceInternal::OutgoingConnectionFactory::create(const vector<EndpointPtr>& endpts
         }
         else
         {
-            _connections.insert(_connections.end(),
-                                pair<const EndpointPtr, ConnectionPtr>(connection->endpoint(), connection));
+            _connections.insert(_connections.end(), pair<const ConnectorPtr, ConnectionPtr>(connector, connection));
 
             if(_destroyed)
             {
@@ -364,22 +377,22 @@ IceInternal::OutgoingConnectionFactory::setRouterInfo(const RouterInfoPtr& route
         }
 
 #ifndef ICEE_PURE_CLIENT
-        pair<multimap<EndpointPtr, ConnectionPtr>::iterator,
-             multimap<EndpointPtr, ConnectionPtr>::iterator> pr = _connections.equal_range(endpoint);
-
-        while(pr.first != pr.second)
+        multimap<ConnectorPtr, ConnectionPtr>::const_iterator q;
+        for(q = _connections.begin(); q != _connections.end(); ++q)
         {
-            try
+            if((*q).second->endpoint() == endpoint)
             {
-                pr.first->second->setAdapter(adapter);
+                try
+                {
+                    (*q).second->setAdapter(adapter);
+                }
+                catch(const Ice::LocalException&)
+                {
+                    //
+                    // Ignore, the connection is being closed or closed.
+                    //
+                }
             }
-            catch(const Ice::LocalException&)
-            {
-                //
-                // Ignore, the connection is being closed or closed.
-                //
-            }
-            ++pr.first;
         }
 #endif
     }
@@ -396,7 +409,7 @@ IceInternal::OutgoingConnectionFactory::flushBatchRequests()
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
 
-        for(std::multimap<EndpointPtr, ConnectionPtr>::const_iterator p = _connections.begin();
+        for(std::multimap<ConnectorPtr, ConnectionPtr>::const_iterator p = _connections.begin();
             p != _connections.end();
             ++p)
         {
@@ -442,7 +455,7 @@ IceInternal::OutgoingConnectionFactory::removeAdapter(const ObjectAdapterPtr& ad
         return;
     }
     
-    for(multimap<EndpointPtr, ConnectionPtr>::const_iterator p = _connections.begin(); p != _connections.end(); ++p)
+    for(multimap<ConnectorPtr, ConnectionPtr>::const_iterator p = _connections.begin(); p != _connections.end(); ++p)
     {
         if(p->second->getAdapter() == adapter)
         {

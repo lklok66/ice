@@ -291,54 +291,163 @@ Ice::Properties::parseLine(const string& line
 #endif
         )
 {
-    string s = line;
+    string key;
+    string value;
 
-    //
-    // Remove comments and unescape #'s
-    //
-    string::size_type idx = 0;
-    while((idx = s.find("#", idx)) != string::npos)
+    enum ParseState { Key , Value };
+    ParseState state = Key;
+
+    string whitespace;
+    string escapedspace;
+    bool finished = false;
+    for(string::size_type i = 0; i < line.size(); ++i)
     {
-        if(idx != 0 && s[idx - 1] == '\\')
+        char c = line[i];
+        switch(state)
         {
-            s.erase(idx - 1, 1);
-            ++idx;
+          case Key:
+          {
+            switch(c)
+            {
+              case '\\':
+                if(i < line.length() - 1)
+                {
+                    c = line[++i];
+                    switch(c)
+                    {
+                      case '\\':
+                      case '#':
+                      case '=':
+                        key += whitespace;
+                        whitespace.clear();
+                        key += c;
+                        break;
+
+                      case ' ':
+                        if(key.length() != 0)
+                        {
+                            whitespace += c;
+                        }
+                        break;
+
+                      default:
+                        key += whitespace;
+                        whitespace.clear();
+                        key += '\\';
+                        key += c;
+                        break;
+                    }
+                }
+                else
+                {
+                    key += whitespace;
+                    key += c;
+                }
+                break;
+
+              case ' ':
+              case '\t':
+              case '\r':
+              case '\n':
+                  if(key.length() != 0)
+                  {
+                      whitespace += c;
+                  }
+                  break;
+
+              case '=':
+                  whitespace.clear();
+                  state = Value;
+                  break;
+
+              case '#':
+                  finished = true;
+                  break;
+
+              default:
+                  key += whitespace;
+                  whitespace.clear();
+                  key += c;
+                  break;
+            }
+            break;
+          }
+
+          case Value:
+          {
+            switch(c)
+            {
+              case '\\':
+                if(i < line.length() - 1)
+                {
+                    c = line[++i];
+                    switch(c)
+                    {
+                      case '\\':
+                      case '#':
+                      case '=':
+                        value += value.length() == 0 ? escapedspace : whitespace;
+                        whitespace.clear();
+                        escapedspace.clear();
+                        value += c;
+                        break;
+
+                      case ' ':
+                        whitespace += c;
+                        escapedspace += c;
+                        break;
+
+                      default:
+                        value += value.length() == 0 ? escapedspace : whitespace;
+                        whitespace.clear();
+                        escapedspace.clear();
+                        value += '\\';
+                        value += c;
+                        break;
+                    }
+                }
+                else
+                {
+                    value += value.length() == 0 ? escapedspace : whitespace;
+                      value += c;
+                }
+                break;
+
+              case ' ':
+              case '\t':
+              case '\r':
+              case '\n':
+                  if(value.length() != 0)
+                  {
+                      whitespace += c;
+                  }
+                  break;
+
+              case '#':
+                  value += escapedspace;
+                  finished = true;
+                  break;
+
+              default:
+                  value += value.length() == 0 ? escapedspace : whitespace;
+                  whitespace.clear();
+                  escapedspace.clear();
+                  value += c;
+                  break;
+            }
+            break;
+          }
         }
-        else
+        if(finished)
         {
-            s.erase(idx);
             break;
         }
     }
+    value += escapedspace;
 
-    //
-    // Split key/value and unescape ='s
-    //
-    string::size_type split = string::npos;
-    idx = 0;
-    while((idx = s.find("=", idx)) != string::npos)
-    {
-        if(idx != 0 && s[idx - 1] == '\\')
-        {
-            s.erase(idx - 1, 1);
-        }
-        else if(split == string::npos)
-        {
-            split = idx;
-        }
-        ++idx;
-    }
-
-    if(split == 0 || split == string::npos)
+    if((state == Key && key.length() != 0) || (state == Value && key.length() == 0) || (key.length() == 0))
     {
         return;
-    }
-
-    string key = IceUtil::trim(s.substr(0, split));
-    string value;
-    if(split < s.length() - 1)
-    {
-        value = IceUtil::trim(s.substr(split + 1, s.length() - split - 1));
     }
 
 #ifdef ICEE_HAS_WSTRING
@@ -349,9 +458,12 @@ Ice::Properties::parseLine(const string& line
                             reinterpret_cast<const Byte*>(key.data() + key.size()), tmp);
         key.swap(tmp);
 
-        converter->fromUTF8(reinterpret_cast<const Byte*>(value.data()),
-                            reinterpret_cast<const Byte*>(value.data() + value.size()), tmp);
-        value.swap(tmp);
+        if(!value.empty())
+        {
+            converter->fromUTF8(reinterpret_cast<const Byte*>(value.data()),
+                                reinterpret_cast<const Byte*>(value.data() + value.size()), tmp);
+            value.swap(tmp);
+        }
     }
 #endif
 

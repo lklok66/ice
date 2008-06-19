@@ -53,12 +53,46 @@ Connector::toString() const
     return addrToString(_addr);
 }
 
-Connector::Connector(const InstancePtr& instance, const string& host, int port) :
+bool
+Connector::operator==(const Connector& r) const
+{
+    if(_timeout != r._timeout)
+    {
+        return false;
+    }
+    
+    return compareAddress(_addr, r._addr) == 0;
+}
+
+bool
+Connector::operator!=(const Connector& r) const
+{
+    return !operator==(r);
+}
+
+bool
+Connector::operator<(const Connector& r) const
+{
+    if(_timeout < r._timeout)
+    {
+        return true;
+    }
+    else if(r._timeout < _timeout)
+    {
+        return false;
+    }
+
+    return compareAddress(_addr, r._addr) == -1;
+}
+
+
+Connector::Connector(const InstancePtr& instance, const struct sockaddr_in& addr, int timeout) :
     _instance(instance),
+    _addr(addr),
+    _timeout(timeout),
     _traceLevels(instance->traceLevels()),
     _logger(instance->initializationData().logger)
 {
-    getAddress(host, port, _addr);
 }
 
 Connector::~Connector()

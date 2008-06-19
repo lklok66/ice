@@ -74,10 +74,10 @@ public:
     virtual bool unknown() const = 0;
 
     //
-    // Return a connector for this endpoint, or null if no connector
-    // is available.
+    // Return connectors for this endpoint, or empty vector if no
+    // connector is available.
     //
-    virtual ConnectorPtr connector() const = 0;
+    virtual std::vector<ConnectorPtr> connectors() const = 0;
 
     //
     // Return an acceptor for this endpoint, or null if no acceptors
@@ -88,20 +88,12 @@ public:
     //
 #ifndef ICEE_PURE_CLIENT
     virtual AcceptorPtr acceptor(EndpointPtr&) const = 0;
-#endif
 
     //
     // Expand endpoint out in to separate endpoints for each local
     // host if endpoint was configured with no host set.
     //
-    virtual std::vector<EndpointPtr> expand(bool) const = 0;
-
-    //
-    // Return whether the endpoint should be published in proxies
-    // created by the Object Adapter.
-    //
-#ifndef ICEE_PURE_CLIENT
-    virtual bool publish() const = 0;
+    virtual std::vector<EndpointPtr> expand() const = 0;
 #endif
 
     //

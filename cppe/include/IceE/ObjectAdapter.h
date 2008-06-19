@@ -80,6 +80,7 @@ public:
 #ifdef ICEE_HAS_LOCATOR
     void setLocator(const LocatorPrx&);
 #endif
+    void refreshPublishedEndpoints();
     
     void flushBatchRequests();
 
@@ -91,11 +92,11 @@ public:
 private:
 
     ObjectAdapter(const IceInternal::InstancePtr&, const CommunicatorPtr&, const IceInternal::ObjectAdapterFactoryPtr&, 
-                      const std::string&, const std::string&
+                      const std::string&, const std::string&,
 #ifdef ICEE_HAS_ROUTER
-                  , const RouterPrx&
+                  const RouterPrx&,
 #endif
-                  );
+                  bool);
     ~ObjectAdapter();
     friend class IceInternal::ObjectAdapterFactory;
     
@@ -106,7 +107,8 @@ private:
 #endif
     void checkForDeactivation() const;
     static void checkIdentity(const Identity&);
-    std::vector<IceInternal::EndpointPtr> parseEndpoints(const std::string&) const;
+    std::vector<IceInternal::EndpointPtr> parseEndpoints(const std::string&, bool) const;
+    std::vector<IceInternal::EndpointPtr> parsePublishedEndpoints();
 #ifdef ICEE_HAS_LOCATOR
     void updateLocatorRegistry(const IceInternal::LocatorInfoPtr&, const Ice::ObjectPrx&);
 #endif
@@ -135,6 +137,10 @@ private:
     bool _waitForActivate;
     bool _destroying;
     bool _destroyed;
+    bool _noConfig;
+#ifdef ICEE_HAS_LOCATOR
+    Identity _processId;
+#endif
 };
 
 }

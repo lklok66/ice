@@ -222,69 +222,31 @@ public final class IncomingConnectionFactory
 
         EndpointHolder h = new EndpointHolder();
         h.value = _endpoint;
-        _transceiver = _endpoint.serverTransceiver(h);
 
         try
         {
-            if(_transceiver != null)
+            _acceptor = _endpoint.acceptor(h);
+            _endpoint = h.value;
+            if(IceUtil.Debug.ASSERT)
             {
-                _endpoint = h.value;
-                
-                Ice.Connection connection = null;
-                
-                try
-                {
-                    connection = new Ice.Connection(_instance, _transceiver, _endpoint, _adapter);
-
-                    //
-                    // Wait for the connection to be validated by the
-                    // connection thread.  Once the connection has
-                    // been validated it will be activated also.
-                    //
-                    connection.waitForValidation();
-                }
-                catch(Ice.LocalException ex)
-                {
-                    //
-                    // If a connection object was constructed, then
-                    // validate() must have raised the exception.
-                    //
-                    if(connection != null)
-                    {
-                        connection.waitUntilFinished(); // We must call waitUntilFinished() for cleanup.
-                    }
-
-                    return;
-                }
-                
-                _connections.addElement(connection);
+                IceUtil.Debug.Assert(_acceptor != null);
             }
-            else
+            _acceptor.listen();
+            
+            //
+            // If we are in thread per connection mode, we also use
+            // one thread per incoming connection factory, that
+            // accepts new connections on this endpoint.
+            //
+            try
             {
-                h.value = _endpoint;
-                _acceptor = _endpoint.acceptor(h);
-                _endpoint = h.value;
-                if(IceUtil.Debug.ASSERT)
-                {
-                    IceUtil.Debug.Assert(_acceptor != null);
-                }
-                _acceptor.listen();
-                
-                //
-                // If we are in thread per connection mode, we also use
-                // one thread per incoming connection factory, that
-                // accepts new connections on this endpoint.
-                //
-                try
-                {
-                    _threadPerIncomingConnectionFactory = new ThreadPerIncomingConnectionFactory(this);
-                    _threadPerIncomingConnectionFactory.start();
-                }
-                catch(java.lang.Exception ex)
-                {
-                    error("cannot create thread for incoming connection factory", ex);
-                    throw ex;
-                }
+                _threadPerIncomingConnectionFactory = new ThreadPerIncomingConnectionFactory(this);
+                _threadPerIncomingConnectionFactory.start();
+            }
+            catch(java.lang.Exception ex)
+            {
+                error("cannot create thread for incoming connection factory", ex);
+                throw ex;
             }
         }
         catch(java.lang.Exception ex)

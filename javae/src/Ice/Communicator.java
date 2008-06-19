@@ -68,7 +68,7 @@ public final class Communicator
     public ObjectAdapter
     createObjectAdapter(String name)
     {
-        return createObjectAdapterWithEndpoints(name, getProperties().getProperty(name + ".Endpoints"));
+        return _instance.objectAdapterFactory().createObjectAdapter(name, "", null);
     }
 
     public ObjectAdapter

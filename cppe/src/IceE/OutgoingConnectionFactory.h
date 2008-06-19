@@ -15,6 +15,7 @@
 #include <IceE/InstanceF.h>
 #include <IceE/ObjectAdapterF.h>
 #include <IceE/EndpointF.h>
+#include <IceE/ConnectorF.h>
 #ifdef ICEE_HAS_ROUTER
 #   include <IceE/RouterInfoF.h>
 #endif
@@ -51,8 +52,8 @@ private:
 
     const InstancePtr _instance;
     bool _destroyed;
-    std::multimap<EndpointPtr, Ice::ConnectionPtr> _connections;
-    std::set<EndpointPtr> _pending; // Endpoints for which connection establishment is pending.
+    std::multimap<ConnectorPtr, Ice::ConnectionPtr> _connections;
+    std::set<ConnectorPtr> _pending; // Connectors for which connection establishment is pending.
 };
 
 }

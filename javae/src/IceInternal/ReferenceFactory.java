@@ -404,7 +404,7 @@ public final class ReferenceFactory
                 }
                 
                 String es = s.substring(beg, end);
-                Endpoint endp = _instance.endpointFactory().create(es);
+                Endpoint endp = _instance.endpointFactory().create(es, false);
                 if(endp != null)
                 {
                     endpoints.addElement(endp);
@@ -421,7 +421,7 @@ public final class ReferenceFactory
                 throw e;
             }
             else if(unknownEndpoints.size() != 0 &&
-                        _instance.initializationData().properties.getPropertyAsIntWithDefault("Ice.Warn.Endpoints", 1) > 0)
+                    _instance.initializationData().properties.getPropertyAsIntWithDefault("Ice.Warn.Endpoints", 1) > 0)
             {
                 String msg = "Proxy contains unknown endpoints:";
                 java.util.Enumeration e = unknownEndpoints.elements();

@@ -24,7 +24,7 @@ public final class DefaultsAndOverrides
         }
         else
         {
-            defaultHost = Network.getLocalHost(true);
+            defaultHost = null; // XXX: Was previously Network.getLocalHost(true);
         }
         
         defaultRouter = properties.getProperty("Ice.Default.Router");

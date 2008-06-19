@@ -77,10 +77,11 @@ IceInternal::UnknownEndpoint::unknown() const
     return true;
 }
 
-ConnectorPtr
-IceInternal::UnknownEndpoint::connector() const
+vector<ConnectorPtr>
+IceInternal::UnknownEndpoint::connectors() const
 {
-    return 0;
+    vector<ConnectorPtr> ret;
+    return ret;
 }
 
 #ifndef ICEE_PURE_CLIENT
@@ -91,22 +92,15 @@ IceInternal::UnknownEndpoint::acceptor(EndpointPtr& endp) const
     return 0;
 }
 
-bool
-IceInternal::UnknownEndpoint::publish() const
-{
-    return false;
-}
-
-#endif
-
 vector<EndpointPtr>
-IceInternal::UnknownEndpoint::expand(bool) const
+IceInternal::UnknownEndpoint::expand() const
 {
     assert(false);
     vector<EndpointPtr> ret;
     return ret;
 
 }
+#endif
 
 bool
 IceInternal::UnknownEndpoint::operator==(const Endpoint& r) const

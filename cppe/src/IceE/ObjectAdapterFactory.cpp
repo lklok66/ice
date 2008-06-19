@@ -11,6 +11,7 @@
 #include <IceE/ObjectAdapter.h>
 #include <IceE/LocalException.h>
 #include <IceE/Functional.h>
+#include <IceE/UUID.h>
 
 using namespace std;
 using namespace Ice;
@@ -154,12 +155,37 @@ IceInternal::ObjectAdapterFactory::createObjectAdapter(const string& name, const
         throw AlreadyRegisteredException(__FILE__, __LINE__, "object adapter", name);
     }
 
-    ObjectAdapterPtr adapter = new ObjectAdapter(_instance, _communicator, this, name, endpoints
+    if(name.empty() && (!endpoints.empty()
 #ifdef ICEE_HAS_ROUTER
-                                                 , router
+                                           || router != 0
 #endif
-                                                    );
-    _adapters.insert(make_pair(name, adapter));
+       ))
+    {
+        FeatureNotSupportedException ex(__FILE__, __LINE__);
+        ex.unsupportedFeature = "Cannot configure endpoints or router with nameless object adapter";
+        throw ex;
+    }
+
+    ObjectAdapterPtr adapter;
+    if(name.empty())
+    {
+        string uuid = IceUtil::generateUUID();
+        adapter = new ObjectAdapter(_instance, _communicator, this, uuid, "",
+#ifdef ICEE_HAS_ROUTER
+                                      0,
+#endif
+                                       true);
+        _adapters.insert(make_pair(uuid, adapter));
+    }
+    else
+    {
+        adapter = new ObjectAdapter(_instance, _communicator, this, name, endpoints,
+#ifdef ICEE_HAS_ROUTER
+                                    router,
+#endif
+                                    false);
+        _adapters.insert(make_pair(name, adapter));
+    }
     return adapter;
 }
 

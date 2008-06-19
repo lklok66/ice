@@ -29,12 +29,11 @@ public:
     virtual bool secure() const;
     virtual bool datagram() const;
     virtual bool unknown() const;
-    virtual ConnectorPtr connector() const;
+    virtual std::vector<ConnectorPtr> connectors() const;
 #ifndef ICEE_PURE_CLIENT
     virtual AcceptorPtr acceptor(EndpointPtr&) const;
-    virtual bool publish() const;
+    virtual std::vector<EndpointPtr> expand() const;
 #endif
-    virtual std::vector<EndpointPtr> expand(bool) const;
 
     virtual bool operator==(const Endpoint&) const;
     virtual bool operator!=(const Endpoint&) const;

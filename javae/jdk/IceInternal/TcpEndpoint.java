@@ -24,7 +24,7 @@ final class TcpEndpoint implements Endpoint
     }
 
     public
-    TcpEndpoint(Instance instance, String str)
+    TcpEndpoint(Instance instance, String str, boolean oaEndpoint)
     {
         _instance = instance;
         _host = null;
@@ -143,6 +143,22 @@ final class TcpEndpoint implements Endpoint
         {
             _host = _instance.defaultsAndOverrides().defaultHost;
         }
+        else if(_host.equals("*"))
+        {
+            if(oaEndpoint)
+            {
+                _host = null;
+            }
+            else
+            {
+                throw new Ice.EndpointParseException("tcp " + str);
+            }
+        }
+
+        if(_host == null)
+        {
+            _host = "";
+        }
 
         calcHashValue();
     }
@@ -254,37 +270,20 @@ final class TcpEndpoint implements Endpoint
     }
 
     //
-    // Return a client side transceiver for this endpoint, or null if a
-    // transceiver can only be created by a connector.
-    //
-    public Transceiver
-    clientTransceiver()
-    {
-        return null;
-    }
-
-    //
-    // Return a server side transceiver for this endpoint, or null if a
-    // transceiver can only be created by an acceptor. In case a
-    // transceiver is created, this operation also returns a new
-    // "effective" endpoint, which might differ from this endpoint,
-    // for example, if a dynamic port number is assigned.
-    //
-    public Transceiver
-    serverTransceiver(EndpointHolder endpoint)
-    {
-        endpoint.value = this;
-        return null;
-    }
-
-    //
-    // Return a connector for this endpoint, or null if no connector
+    // Return connectors for this endpoint, or empty list if no connector
     // is available.
     //
-    public Connector
-    connector()
+    public java.util.Vector
+    connectors()
     {
-        return new Connector(_instance, _host, _port);
+        java.util.Vector connectors = new java.util.Vector();
+        java.util.Vector addresses = Network.getAddresses(_host, _port);
+        java.util.Enumeration p = addresses.elements();
+        while(p.hasMoreElements())
+        {
+            connectors.add(new Connector(_instance, (InetSocketAddress)p.nextElement(), _timeout));
+        }
+        return connectors;
     }
 
     //
@@ -354,60 +353,7 @@ final class TcpEndpoint implements Endpoint
             return 1;
         }
 
-        if(!_host.equals(p._host))
-        {
-            //
-            // We do the most time-consuming part of the comparison last.
-            //
-            InetSocketAddress laddr = null;
-            try
-            {
-                laddr = Network.getAddress(_host, _port);
-            }
-            catch(Ice.DNSException ex)
-            {
-            }
-
-            InetSocketAddress raddr = null;
-            try
-            {
-                raddr = Network.getAddress(p._host, p._port);
-            }
-            catch(Ice.DNSException ex)
-            {
-            }
-
-            if(laddr == null && raddr != null)
-            {
-                return -1;
-            }
-            else if(raddr == null && laddr != null)
-            {
-                return 1;
-            }
-            else if(laddr != null && raddr != null)
-            {
-                byte[] larr = laddr.getAddress().getAddress();
-                byte[] rarr = raddr.getAddress().getAddress();
-                if(IceUtil.Debug.ASSERT)
-                {
-                    IceUtil.Debug.Assert(larr.length == rarr.length);
-                }
-                for(int i = 0; i < larr.length; i++)
-                {
-                    if(larr[i] < rarr[i])
-                    {
-                        return -1;
-                    }
-                    else if(rarr[i] < larr[i])
-                    {
-                        return 1;
-                    }
-                }
-            }
-        }
-
-        return 0;
+        return _host.compareTo(p._host);
     }
 
     private void

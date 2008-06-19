@@ -237,50 +237,170 @@ public final class Properties
         }
     }
 
+    private static final int ParseStateKey = 0;
+    private static final int ParseStateValue = 1;
+
     private void
     parseLine(String line)
     {
-        String s = line;
+        String key = "";
+        String value = "";
 
-        //
-        // Remove comments and unescape #'s
-        //
-        int idx = 0;
-        while((idx = s.indexOf("#", idx)) != -1)
+        int state = ParseStateKey;
+
+        String whitespace = "";
+        String escapedspace = "";
+        boolean finished = false;
+        for(int i = 0; i < line.length(); ++i)
         {
-            if(idx == 0 || s.charAt(idx - 1) != '\\')
+            char c = line.charAt(i);
+            switch(state)
             {
-                s = s.substring(0, idx);
+              case ParseStateKey:
+              {
+                  switch(c)
+                  {
+                    case '\\':
+                      if(i < line.length() - 1)
+                      {
+                          c = line.charAt(++i);
+                          switch(c)
+                          {
+                            case '\\':
+                            case '#':
+                            case '=':
+                              key += whitespace;
+                              whitespace = "";
+                              key += c;
+                              break;
+
+                            case ' ':
+                              if(key.length() != 0)
+                              {
+                                  whitespace += c;
+                              }
+                              break;
+
+                            default:
+                              key += whitespace;
+                              whitespace = "";
+                              key += '\\';
+                              key += c;
+                              break;
+                          }
+                      }
+                      else
+                      {
+                          key += whitespace;
+                          key += c;
+                      }
+                      break;
+
+                    case ' ':
+                    case '\t':
+                    case '\r':
+                    case '\n':
+                        if(key.length() != 0)
+                        {
+                            whitespace += c;
+                        }
+                        break;
+
+                    case '=':
+                        whitespace = "";
+                        state = ParseStateValue;
+                        break;
+
+                    case '#':
+                        finished = true;
+                        break;
+
+                    default:
+                        key += whitespace;
+                        whitespace = "";
+                        key += c;
+                        break;
+                  }
+                  break;
+              }
+
+              case ParseStateValue:
+              {
+                  switch(c)
+                  {
+                    case '\\':
+                      if(i < line.length() - 1)
+                      {
+                          c = line.charAt(++i);
+                          switch(c)
+                          {
+                            case '\\':
+                            case '#':
+                            case '=':
+                              value += value.length() == 0 ? escapedspace : whitespace;
+                              whitespace = "";
+                              escapedspace = "";
+                              value += c;
+                              break;
+
+                            case ' ':
+                              whitespace += c;
+                              escapedspace += c;
+                              break;
+
+                            default:
+                              value += value.length() == 0 ? escapedspace : whitespace;
+                              whitespace = "";
+                              escapedspace = "";
+                              value += '\\';
+                              value += c;
+                              break;
+                          }
+                      }
+                      else
+                      {
+                          value += value.length() == 0 ? escapedspace : whitespace;
+                          value += c;
+                      }
+                      break;
+
+                    case ' ':
+                    case '\t':
+                    case '\r':
+                    case '\n':
+                        if(value.length() != 0)
+                        {
+                            whitespace += c;
+                        }
+                        break;
+
+                    case '#':
+                        value += escapedspace;
+                        finished = true;
+                        break;
+
+                    default:
+                        value += value.length() == 0 ? escapedspace : whitespace;
+                        whitespace = "";
+                        escapedspace = "";
+                        value += c;
+                        break;
+                  }
+                  break;
+              }
+            }
+            if(finished)
+            {
                 break;
             }
-            ++idx;
         }
-        s = s.replace("\\#", "#");
+        value += escapedspace;
 
-        //
-        // Split key/value and unescape ='s
-        //
-        int split = -1;
-        idx = 0;
-        while((idx = s.indexOf("=", idx)) != -1)
-        {
-            if(idx == 0 || s.charAt(idx - 1) != '\\')
-            {
-                split = idx;
-                break;
-            }
-            ++idx;
-        }
-        if(split == 0 || split == -1)
+        if((state == ParseStateKey && key.length() != 0) || (state == ParseStateValue && key.length() == 0) ||
+           (key.length() == 0))
         {
             return;
         }
-
-        String key = s.substring(0, split).trim();
-        String value = s.substring(split + 1, s.length()).trim();
-
-        key = key.replace("\\=", "=");
-        value = value.replace("\\=", "=");
 
         setProperty(key, value);
     }

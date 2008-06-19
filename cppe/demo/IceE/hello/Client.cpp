@@ -175,7 +175,7 @@ main(int argc, char* argv[])
 
     try
     {
-            Ice::InitializationData initData;
+        Ice::InitializationData initData;
         initData.properties = Ice::createProperties();
         initData.properties->load("config.client");
         communicator = Ice::initialize(argc, argv, initData);

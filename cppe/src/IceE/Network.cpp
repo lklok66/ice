@@ -724,11 +724,19 @@ IceInternal::getAddress(const string& host, int port, struct sockaddr_in& addr)
 
         struct addrinfo hints = { 0 };
         hints.ai_family = PF_INET;
+        hints.ai_flags |= AI_PASSIVE;
         
         int rs = 0;
         do
         {
-            rs = getaddrinfo(host.c_str(), 0, &hints, &info);    
+            if(host.empty())
+            {
+                rs = getaddrinfo(0, "1", &hints, &info);
+            }
+            else
+            {
+                rs = getaddrinfo(host.c_str(), 0, &hints, &info);    
+            }
         }
         while(info == 0 && rs == EAI_AGAIN && --retry >= 0);
         
@@ -750,12 +758,152 @@ IceInternal::getAddress(const string& host, int port, struct sockaddr_in& addr)
     }
 }
 
-bool
+vector<struct sockaddr_in>
+IceInternal::getAddresses(const string& host, int port)
+{
+    vector<struct sockaddr_in> result;
+#ifdef _WIN32
+    //
+    // Windows XP has getaddrinfo(), but we don't want to require XP to run Ice-E.
+    //
+
+    if(!host.empty())
+    {
+        //
+        // gethostbyname() is thread safe on Windows, with a separate hostent per thread
+        //
+        struct hostent* entry = 0;
+        int retry = 5;
+
+        do
+        {
+            entry = gethostbyname(host.c_str());
+        }
+        while(entry == 0 && h_errno == TRY_AGAIN && --retry >= 0);
+
+        if(entry == 0)
+        {
+            DNSException ex(__FILE__, __LINE__);
+            ex.error = h_errno;
+            ex.host = host;
+            throw ex;
+        }
+
+        char** p = entry->h_addr_list;
+        while(*p)
+        {
+            memcpy(&addr.sin_addr, *p, entry->h_length);
+            result.push_back(addr);
+            p++;
+        }
+    }
+    else
+    {
+        struct sockaddr_in addr;
+        getAddress("127.0.0.1", port, addr);
+        result.push_back(addr);
+    }
+
+#else
+
+    struct sockaddr_in addr;
+    memset(&addr, 0, sizeof(struct sockaddr_in));
+
+    struct addrinfo* info = 0;
+    int retry = 5;
+
+    struct addrinfo hints = { 0 };
+    hints.ai_family = PF_INET;
+
+    int rs = 0;
+    do
+    {
+        if(host.empty())
+        {
+            rs = getaddrinfo(0, "1", &hints, &info); // Get the address of the loopback interface
+        }
+        else
+        {
+            rs = getaddrinfo(host.c_str(), 0, &hints, &info);
+        }
+    }
+    while(info == 0 && rs == EAI_AGAIN && --retry >= 0);
+
+    if(rs != 0)
+    {
+        DNSException ex(__FILE__, __LINE__);
+        ex.error = rs;
+        ex.host = host;
+        throw ex;
+    }
+
+    struct addrinfo* p;
+    for(p = info; p != NULL; p = p->ai_next)
+    {
+        assert(p->ai_family == PF_INET);
+        memcpy(&addr, p->ai_addr, p->ai_addrlen);
+        struct sockaddr_in* sin = reinterpret_cast<sockaddr_in*>(&addr);
+        sin->sin_port = htons(port);
+
+        bool found = false;
+        for(unsigned int i = 0; i < result.size(); ++i)
+        {
+            if(compareAddress(result[i], addr) == 0)
+            {
+                found = true;
+                break;
+            }
+        }
+        if(!found)
+        {
+            result.push_back(addr);
+        }
+    }
+
+    freeaddrinfo(info);
+#endif
+
+    if(result.size() == 0)
+    {
+        DNSException ex(__FILE__, __LINE__);
+        ex.host = host;
+        throw ex;
+    }
+
+    return result;
+}
+
+int
 IceInternal::compareAddress(const struct sockaddr_in& addr1, const struct sockaddr_in& addr2)
 {
-    return (addr1.sin_family == addr2.sin_family) &&
-           (addr1.sin_port == addr2.sin_port) &&
-           (addr1.sin_addr.s_addr == addr2.sin_addr.s_addr);
+    if(addr1.sin_family < addr2.sin_family)
+    {
+        return -1;
+    }
+    else if(addr2.sin_family < addr1.sin_family)
+    {
+        return 1;
+    }
+
+    if(addr1.sin_port < addr2.sin_port)
+    {
+        return -1;
+    }
+    else if(addr2.sin_port < addr1.sin_port)
+    {
+        return 1;
+    }
+
+    if(addr1.sin_addr.s_addr < addr2.sin_addr.s_addr)
+    {
+        return -1;
+    }
+    else if(addr2.sin_addr.s_addr < addr1.sin_addr.s_addr)
+    {
+        return 1;
+    }
+
+    return 0;
 }
 
 #ifdef _WIN32
@@ -882,6 +1030,28 @@ IceInternal::addrToString(const struct sockaddr_in& addr)
     return s;
 }
 
+vector<string>
+IceInternal::getHostsForEndpointExpand(const string& host)
+{
+    vector<string> hosts;
+    if(host.empty() || host == "0.0.0.0")
+    {
+        vector<struct sockaddr_in> addrs = getLocalAddresses();
+        for(vector<struct sockaddr_in>::const_iterator p = addrs.begin(); p != addrs.end(); ++p)
+        {
+            hosts.push_back(inetAddrToString((*p).sin_addr));
+        }
+
+        if(hosts.empty())
+        {
+            hosts.push_back("127.0.0.1");
+        }
+    }
+    return hosts; // An empty host list indicates to just use the given host.
+}
+
+
+
 #ifndef ICEE_PURE_CLIENT
 
 bool
@@ -947,10 +1117,10 @@ repeatListen:
 
 #endif
 
-vector<string>
-IceInternal::getLocalHosts()
+vector<struct sockaddr_in>
+IceInternal::getLocalAddresses()
 {
-    vector<string> result;
+    vector<struct sockaddr_in> result;
 
 #if defined(_WIN32)
     try
@@ -988,19 +1158,9 @@ IceInternal::getLocalHosts()
         SOCKET_ADDRESS_LIST* addrs = reinterpret_cast<SOCKET_ADDRESS_LIST*>(&buffer[0]);
         for (int i = 0; i < addrs->iAddressCount; ++i)
         {
-            result.push_back(
-                inetAddrToString(reinterpret_cast<struct sockaddr_in*>(addrs->Address[i].lpSockaddr)->sin_addr));
+            
+            result.push_back(*reinterpret_cast<struct sockaddr_in*>(addrs->Address[i].lpSockaddr));
         }
-
-        //
-        // Add the loopback interface address.
-        //
-        struct sockaddr_in addr;
-        memset(&addr, 0, sizeof(addr));
-        addr.sin_family = AF_INET;
-        addr.sin_port = htons(0);
-        addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-        result.push_back(inetAddrToString(addr.sin_addr));
 
         closeSocket(fd);
     }
@@ -1022,12 +1182,12 @@ IceInternal::getLocalHosts()
     struct ifaddrs* curr = ifap;
     while(curr != 0)
     {
-        if(curr->ifa_addr && curr->ifa_addr->sa_family == AF_INET)
+        if(curr->ifa_addr && curr->ifa_addr->sa_family == AF_INET && !(curr->ifa_flags & IFF_LOOPBACK))
         {
             struct sockaddr_in* addr = reinterpret_cast<struct sockaddr_in*>(curr->ifa_addr);
             if(addr->sin_addr.s_addr != 0)
             {
-                result.push_back(inetAddrToString((*addr).sin_addr));
+                result.push_back(*addr);
             }
         }
 
@@ -1087,12 +1247,12 @@ IceInternal::getLocalHosts()
     struct ifreq* ifr = ifc.ifc_req;
     for(int i = 0; i < numaddrs; ++i)
     {
-        if(ifr[i].ifr_addr.sa_family == AF_INET)
+        if(ifr[i].ifr_addr.sa_family == AF_INET && !(ifr[i].ifr_flags & IFF_LOOPBACK))
         {
             struct sockaddr_in* addr = reinterpret_cast<struct sockaddr_in*>(&ifr[i].ifr_addr);
             if(addr->sin_addr.s_addr != 0)
             {
-                result.push_back(inetAddrToString((*addr).sin_addr));
+                result.push_back(*addr);
             }
         }
     }

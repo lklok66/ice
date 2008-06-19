@@ -21,8 +21,8 @@ class TcpEndpoint : public IceInternal::Endpoint
 {
 public:
 
-    TcpEndpoint(const InstancePtr&, const std::string&, Ice::Int, Ice::Int, bool);
-    TcpEndpoint(const InstancePtr&, const std::string&);
+    TcpEndpoint(const InstancePtr&, const std::string&, Ice::Int, Ice::Int);
+    TcpEndpoint(const InstancePtr&, const std::string&, bool);
     TcpEndpoint(BasicStream*);
 
     virtual void streamWrite(BasicStream*) const;
@@ -33,12 +33,11 @@ public:
     virtual bool secure() const;
     virtual bool datagram() const;
     virtual bool unknown() const;
-    virtual ConnectorPtr connector() const;
+    virtual std::vector<ConnectorPtr> connectors() const;
 #ifndef ICEE_PURE_CLIENT
     virtual AcceptorPtr acceptor(EndpointPtr&) const;
-    virtual bool publish() const;
+    virtual std::vector<EndpointPtr> expand() const;
 #endif
-    virtual std::vector<EndpointPtr> expand(bool) const;
 
     virtual bool operator==(const Endpoint&) const;
     virtual bool operator!=(const Endpoint&) const;
@@ -53,7 +52,6 @@ private:
     const std::string _host;
     const Ice::Int _port;
     const Ice::Int _timeout;
-    const bool _publish;
 };
 
 }

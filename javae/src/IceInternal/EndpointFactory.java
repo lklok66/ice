@@ -17,7 +17,7 @@ public final class EndpointFactory
     }
 
     public Endpoint
-    create(String str)
+    create(String str, boolean oaEndpoint)
     {
         String s = str.trim();
         if(s.length() == 0)
@@ -52,7 +52,7 @@ public final class EndpointFactory
 
         if(protocol.equals("default") || protocol.equals("tcp"))
         {
-            return new TcpEndpoint(_instance, args);
+            return new TcpEndpoint(_instance, args, oaEndpoint);
         }
 
         return null;

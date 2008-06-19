@@ -28,7 +28,7 @@ final class TcpEndpoint implements Endpoint
     }
 
     public
-    TcpEndpoint(Instance instance, String str)
+    TcpEndpoint(Instance instance, String str, boolean oaEndpoint)
     {
         _instance = instance;
         _host = null;
@@ -147,6 +147,22 @@ final class TcpEndpoint implements Endpoint
         {
             _host = _instance.defaultsAndOverrides().defaultHost;
         }
+        else if(_host.equals("*"))
+        {
+            if(oaEndpoint)
+            {
+                _host = null;
+            }
+            else
+            {
+                throw new Ice.EndpointParseException("tcp " + str);
+            }
+        }
+
+        if(_host == null)
+        {
+            _host = "";
+        }
 
         calcHashValue();
     }
@@ -259,37 +275,15 @@ final class TcpEndpoint implements Endpoint
     }
 
     //
-    // Return a client side transceiver for this endpoint, or null if a
-    // transceiver can only be created by a connector.
-    //
-    public Transceiver
-    clientTransceiver()
-    {
-        return null;
-    }
-
-    //
-    // Return a server side transceiver for this endpoint, or null if a
-    // transceiver can only be created by an acceptor. In case a
-    // transceiver is created, this operation also returns a new
-    // "effective" endpoint, which might differ from this endpoint,
-    // for example, if a dynamic port number is assigned.
-    //
-    public Transceiver
-    serverTransceiver(EndpointHolder endpoint)
-    {
-        endpoint.value = this;
-        return null;
-    }
-
-    //
-    // Return a connector for this endpoint, or null if no connector
+    // Return connectors for this endpoint, or empty list if no connector
     // is available.
     //
-    public Connector
-    connector()
+    public java.util.Vector
+    connectors()
     {
-        return new Connector(_instance, _host, _port);
+        java.util.Vector connectors = new java.util.Vector();
+        connectors.add(new Connector(_instance, (_host.empty() ? "127.0.0.1" : _host), port, _timeout));
+        return connectors;
     }
 
     //
@@ -359,47 +353,9 @@ final class TcpEndpoint implements Endpoint
             return 1;
         }
 
-        byte[] myIP = IPAddr();
-        if(myIP != null)
-        {
-            byte[] otherIP = p.IPAddr();
-            if(otherIP != null)
-            {
-                if(IceUtil.Debug.ASSERT)
-                {
-                    IceUtil.Debug.Assert(myIP.length == otherIP.length);
-                }
-                for(int i = 0; i < otherIP.length; i++)
-                {
-                    if(myIP[i] < otherIP[i])
-                    {
-                        return -1;
-                    }
-                    else if(otherIP[i] < myIP[i])
-                    {
-                        return 1;
-                    }
-                }
-            }
-        }
-
-        //
-        // At this point the best we can do is a lexical compare.
-        //
         return _host.compareTo(p._host);
     }
 
-    private byte[]
-    IPAddr()
-    {
-        if(_ip == null && !_parsed)
-        {
-            _parsed = true;
-            _ip = Network.addrStringToIP(_host);
-        }
-        return _ip;
-    }
-        
     private void
     calcHashValue()
     {

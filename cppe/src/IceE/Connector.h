@@ -34,17 +34,22 @@ public:
     
     TransceiverPtr connect(int);
     std::string toString() const;
+
+    bool operator==(const Connector&) const;
+    bool operator!=(const Connector&) const;
+    bool operator<(const Connector&) const;
     
 private:
     
-    Connector(const InstancePtr&, const std::string&, int);
+    Connector(const InstancePtr&, const struct sockaddr_in&, int);
     virtual ~Connector();
     friend class TcpEndpoint;
 
     InstancePtr _instance;
+    struct sockaddr_in _addr;
+    int _timeout;
     TraceLevelsPtr _traceLevels;
     ::Ice::LoggerPtr _logger;
-    struct sockaddr_in _addr;
 };
 
 }
