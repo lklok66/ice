@@ -363,11 +363,11 @@ CChatClientDlg::OnLogin()
                 //
                 _chat = ChatSessionPrx::uncheckedCast(_router->createSession(user, password)->ice_router(_router));
 
-                    //
-                    // Create the OA.
-                    //
-                    _adapter = _communicator->createObjectAdapterWithRouter("Chat.Client", _router);
-                    _adapter->activate();
+                //
+                // Create the OA.
+                //
+                _adapter = _communicator->createObjectAdapterWithRouter("Chat.Client", _router);
+                _adapter->activate();
 
                 //
                 // Create the callback object. This must have the
@@ -375,7 +375,7 @@ CChatClientDlg::OnLogin()
                 //
                 Ice::Identity callbackReceiverIdent;
                 callbackReceiverIdent.name = "callbackReceiver";
-                callbackReceiverIdent.category = _router->getCallbackForClient();
+                callbackReceiverIdent.category = _router->getCategoryForClient();
                 ChatCallbackPtr cb = new ChatCallbackI(_log);
                 _callback = ChatCallbackPrx::uncheckedCast(_adapter->add(cb, callbackReceiverIdent));
 
