@@ -22,6 +22,30 @@ General Changes
 These entries apply to all relevant language mappings unless otherwise
 noted.
 
+- If a proxy contains a host that is multihomed, the client will now
+  try all the available IP addresses. Previously, only the first in
+  the address list returned by the DNS was used and others were
+  ignored.
+
+- The "-h *" endpoint option is now only valid for object adapter
+  endpoints. It can no longer be used in proxy endpoints or object
+  adapter published endpoints.
+
+- Ice now listens on INADDR_ANY for object adapter endpoints that do
+  not contain a host name (or are set to use "-h *" or "-h 0.0.0.0").
+  Previously, Ice would only listen on the local interfaces that were
+  present when the adapter was created.
+
+- Added a new operation to the ObjectAdapter interface named
+  refreshPublishedEndpoints(). This operation allows you to update an
+  adapter's published endpoints after a change in the available local
+  interfaces or after a change to the PublishedEndpoints property.
+
+- It is now possible to specify properties in a config file with
+  space, '#' or '=' in either the key or value string. It is necessary
+  to escape '#' and '=' as '\#' and '\='. Leading or trailing spaces
+  are only allowed in keys and need to be escaped as '\ '.
+
 - The use of sequences (and structs containing sequences) as valid
   dictionary keys has been deprecated and will be removed in a future
   release.
