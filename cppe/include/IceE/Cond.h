@@ -33,7 +33,7 @@ public:
     ~Semaphore();
 
     void wait() const;
-    bool timedWait(const Time&) const;
+    bool timedWait(const IceUtil::Time&) const;
     void post(int = 1) const;
 
 private:
