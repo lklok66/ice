@@ -123,17 +123,21 @@ def configureEmbeddedPaths():
     toplevel = findTopLevel()
 
     if isWin32():
-        os.environ["PATH"] = getCppBinDir() + os.pathsep + os.getenv("PATH", "")
+        os.environ["PATH"] = getCppBinDir("cppe") + os.pathsep + os.getenv("PATH", "")
+        if ice_home:
+            os.environ["PATH"] = os.path.join(findTopLevel(), "cppe", "bin") + os.pathsep + os.getenv("PATH", "")
     else:
         libDir = os.path.join(getIceDir("cppe"), "lib")
+        if ice_home:
+            libDir = libDir + os.pathsep + os.path.join(findTopLevel(), "cppe", "lib")
         if isDarwin():
             os.environ["DYLD_LIBRARY_PATH"] = libDir + os.pathsep + os.getenv("DYLD_LIBRARY_PATH", "")
         else:
             os.environ["LD_LIBRARY_PATH"] = libDir + os.pathsep + os.getenv("LD_LIBRARY_PATH", "")
 
-    javaDir = os.path.join(getIceDir("javae"), "jdk", "lib")
+    javaDir = os.path.join(getIceDir("javae"), "lib")
     os.environ["CLASSPATH"] = os.path.join(javaDir, "IceE.jar") + os.pathsep + os.getenv("CLASSPATH", "")
-    os.environ["CLASSPATH"] = os.path.join(javaDir) + os.pathsep + os.getenv("CLASSPATH", "")
+    os.environ["CLASSPATH"] = os.path.join(javaDir, "jdk") + os.pathsep + os.getenv("CLASSPATH", "")
 
 def addLdPath(libpath):
     if isWin32():
@@ -1229,8 +1233,8 @@ def startColloc(exe, args, config=None, env=None):
 def getMappingDir(currentDir):
     return os.path.abspath(os.path.join(findTopLevel(), getDefaultMapping(currentDir)))
 
-def getCppBinDir():
-    binDir = os.path.join(getIceDir("cpp"), "bin")
+def getCppBinDir(subdir = "cpp"):
+    binDir = os.path.join(getIceDir(subdir), "bin")
     if ice_home and x64:
         if isHpUx():
             binDir = os.path.join(binDir, "pa20_64")
@@ -1318,10 +1322,16 @@ def processCmdLine():
 
     # Only use binary distribution from ICE_HOME environment variable if USE_BIN_DIST=yes
     if not ice_home and os.environ.get("USE_BIN_DIST", "no") == "yes":
-        if os.environ.get("ICE_HOME", "") != "":
-            ice_home = os.environ["ICE_HOME"]
-        elif isLinux():
-            ice_home = "/usr"
+        if getDefaultMapping() == "cppe" or getDefaultMapping() == "javae":
+            if os.environ.get("ICEE_HOME", "") != "":
+                ice_home = os.environ["ICEE_HOME"]
+            elif isLinux():
+                ice_home = "/usr"
+        else:
+            if os.environ.get("ICE_HOME", "") != "":
+                ice_home = os.environ["ICE_HOME"]
+            elif isLinux():
+                ice_home = "/usr"
             
     if not x64:
         x64 = isWin32() and os.environ.get("XTARGET") == "x64" or os.environ.get("LP64") == "yes"

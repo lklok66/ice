@@ -93,7 +93,7 @@ SLICE_SRCS	= $(SDIR)/BuiltinSequences.ice \
 		  $(SDIR)/RouterF.ice \
 		  $(SDIR)/Router.ice
 
-HDIR		= $(includedir)/IceE
+HDIR		= $(headerdir)/IceE
 SDIR		= $(slicedir)/IceE
 
 include $(top_srcdir)/config/Make.rules
@@ -103,6 +103,9 @@ CPPFLAGS	:= -I.. $(CPPFLAGS) -DICE_API_EXPORTS
 SLICE2CPPEFLAGS	:= --ice --include-dir IceE --dll-export ICE_API $(SLICE2CPPEFLAGS)
 
 LINKWITH        := $(ICE_OS_LIBS)
+
+$(HDIR)/LocalException.h LocalException.cpp: 
+	# Dummy rule to prevent compilation of LocalException.ice
 
 ifeq ($(STATICLIBS),yes)
 $(libdir)/$(LIBNAME): $(OBJS)

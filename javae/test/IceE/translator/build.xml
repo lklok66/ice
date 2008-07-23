@@ -17,8 +17,6 @@
     <!-- Include common definitions -->
     <import file="${top.dir}/config/common.xml"/>
 
-    <target name="init" depends="config-init"/>
-
     <target name="generate" depends="init" unless="build.compiler">
         <!-- Create the output directory for generated code -->
         <mkdir dir="${generated.dir}"/>
@@ -68,9 +66,9 @@
 
     <target name="compile" depends="generate" unless="build.compiler">
         <mkdir dir="${class.dir}"/>
-        <javac srcdir="${generated.dir}" destdir="${class.dir}" classpath="${jdk.lib.dir}" debug="${debug}"
+        <javac srcdir="${generated.dir}" destdir="${class.dir}" classpathref="jdk.classpath" debug="${debug}"
 	    source="1.2" target="1.1"/>
-        <javac srcdir="." destdir="${class.dir}" classpath="${jdk.lib.dir}" excludes="generated/**" debug="${debug}"
+        <javac srcdir="." destdir="${class.dir}" classpathref="jdk.classpath" excludes="generated/**" debug="${debug}"
 	    source="1.2" target="1.1"/>
     </target>
 

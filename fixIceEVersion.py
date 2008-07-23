@@ -52,6 +52,10 @@ if iceje_home:
 
 ice_home = os.path.join(ice_dir, "cpp")
 if ice_home:
+    fileMatchAndReplace(os.path.join(ice_home, "config", "Make.rules.icee"),
+                        [("VERSION[\t\s]*= ([0-9]*\.[0-9]*\.[0-9]*)", version)])
+    fileMatchAndReplace(os.path.join(ice_home, "config", "Make.rules.mak.icee"),
+                        [("VERSION[\t\s]*= ([0-9]*\.[0-9]*\.[0-9]*)", version)])
     fileMatchAndReplace(os.path.join(ice_home, "src", "slice2cppe", "Gen.h"),
                         [("ICEE_STRING_VERSION \"([0-9]*\.[0-9]*\.[0-9]*)\"", version), \
                          ("ICEE_INT_VERSION ([0-9]*)", FixUtil.intVersion(version))])

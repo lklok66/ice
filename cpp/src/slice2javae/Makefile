@@ -22,11 +22,15 @@ include $(top_srcdir)/config/Make.rules
 
 CPPFLAGS	:= -I. $(CPPFLAGS)
 
+ifeq ($(STATICLIBS),yes)
+BASELIBS 	:= $(MCPP_LIBS) $(BASELIBS)
+endif
+
 $(NAME): $(OBJS)
 	rm -f $@
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS) -lSlice $(BASELIBS) $(MCPP_RPATH_LINK)
 
 install:: all
-	$(INSTALL_PROGRAM) $(NAME) $(install_bindir)
+	$(call installprogram,$(NAME),$(install_bindir))
 
 include .depend

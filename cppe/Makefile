@@ -11,16 +11,9 @@ top_srcdir	= .
 
 include $(top_srcdir)/config/Make.rules
 
-SUBDIRS		= src slice include test demo
+SUBDIRS		= src include test demo
 
-install::
-	@if test ! -d $(prefix) ; \
-	then \
-	    echo "Creating $(prefix)..." ; \
-	    mkdir $(prefix) ; \
-	    chmod a+rx $(prefix) ; \
-	fi
-
+install:: install-common
 	@if test ! -d $(install_bindir) ; \
 	then \
 	    echo "Creating $(install_bindir)..." ; \
@@ -42,23 +35,12 @@ install::
 	    chmod a+rx $(install_includedir) ; \
 	fi
 
-	@if test ! -d $(install_slicedir) ; \
-	then \
-	    echo "Creating $(install_slicedir)..." ; \
-	    mkdir $(install_slicedir) ; \
-	    chmod a+rx $(install_slicedir) ; \
-	fi
-
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \
 	do \
 	    echo "making $@ in $$subdir"; \
 	    ( cd $$subdir && $(MAKE) $@ ) || exit 1; \
 	done
-
-install::
-	$(call installdata,ICEE_LICENSE,$(prefix))
-	$(call installdata,LICENSE,$(prefix))
 
 test::
 	@python $(top_srcdir)/allTests.py

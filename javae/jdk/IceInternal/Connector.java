@@ -190,6 +190,9 @@ final class Connector
         _traceLevels = instance.traceLevels();
         _logger = instance.initializationData().logger;
 
+        _hashCode = _addr.getAddress().getHostAddress().hashCode();
+        _hashCode = 5 * _hashCode + _addr.getPort();
+        _hashCode = 5 * _hashCode + _timeout;
     }
 
     //
@@ -232,9 +235,16 @@ final class Connector
         return Network.compareAddress(_addr, p._addr);
     }
 
+    public int
+    hashCode()
+    {
+        return _hashCode;
+    }
+
     private Instance _instance;
     private InetSocketAddress _addr;
     private int _timeout;
     private TraceLevels _traceLevels;
     private Ice.Logger _logger;
+    private int _hashCode;
 }

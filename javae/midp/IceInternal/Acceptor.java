@@ -95,21 +95,13 @@ class Acceptor
         String ip = System.getProperty("microedition.hostname");
         if(ip == null || ip.length() == 0 || ip.equals("0.0.0.0"))
         {
-            try
-            {
-                ip = _connection.getLocalAddress();
-            }
-            catch(java.io.IOException ex)
-            {
-                ip = "127.0.0.1"; 
-            }
+            ip = _host;
         }
 
         try
         {
-            javax.microedition.io.Connection localConn =
-                javax.microedition.io.Connector.open("socket://" + ip + ':' + _connection.getLocalPort());
-            localConn.close();
+            javax.microedition.io.Connection c = javax.microedition.io.Connector.open("socket://" + ip + ':' + _port);
+            c.close();
         }
         catch(java.io.IOException ex)
         {
@@ -122,13 +114,13 @@ class Acceptor
     public String
     toString()
     {
-        return _addr.getAddress() + ":" + _addr.getPort();
+        return _host + ":" + _port;
     }
 
     int
     effectivePort()
     {
-        return _addr.getPort();
+        return _port;
     }
 
     //
@@ -162,7 +154,8 @@ class Acceptor
             _connection =
                 (javax.microedition.io.ServerSocketConnection)javax.microedition.io.Connector.open(connectString);
 
-            _addr = new InetSocketAddress(_connection.getLocalAddress(), _connection.getLocalPort());
+            _host = _connection.getLocalAddress();
+            _port = _connection.getLocalPort();
         }
         catch(java.io.IOException ex)
         {
@@ -210,5 +203,6 @@ class Acceptor
     private Ice.Logger _logger;
     private javax.microedition.io.ServerSocketConnection _connection;
     private int _backlog;
-    private InetSocketAddress _addr;
+    private String _host;
+    private int _port;
 }

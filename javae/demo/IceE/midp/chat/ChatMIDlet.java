@@ -55,7 +55,7 @@ public class ChatMIDlet extends MIDlet
         }
         catch(Exception ex)
         {
-            Alert alert = new Alert("Ice Error", ex.getMessage(), null, AlertType.ERROR);
+            Alert alert = new Alert("Ice Error", ex.toString(), null, AlertType.ERROR);
             alert.setTimeout(Alert.FOREVER);
             Display.getDisplay(this).setCurrent(alert);
             notifyDestroyed();

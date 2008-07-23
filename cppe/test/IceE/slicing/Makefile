@@ -34,6 +34,9 @@ include $(top_srcdir)/config/Make.rules
 ICECPPFLAGS	:= -I. $(ICECPPFLAGS)
 
 CPPFLAGS	:= -I. -I../../include $(CPPFLAGS)
+ifdef ice_bin_dist
+LDFLAGS		:= $(LDFLAGS) -L$(libdir)
+endif
 
 $(CLIENT): $(OBJS) $(COBJS)
 	rm -f $@

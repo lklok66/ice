@@ -37,6 +37,9 @@ SLICE_SRCS	= Test.ice
 include $(top_srcdir)/config/Make.rules
 
 CPPFLAGS	:= -I. -I../../include $(CPPFLAGS)
+ifdef ice_bin_dist
+LDFLAGS		:= $(LDFLAGS) -L$(libdir)
+endif
 
 $(CLIENT): $(OBJS) $(COBJS)
 	rm -f $@

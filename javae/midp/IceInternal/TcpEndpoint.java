@@ -282,7 +282,7 @@ final class TcpEndpoint implements Endpoint
     connectors()
     {
         java.util.Vector connectors = new java.util.Vector();
-        connectors.add(new Connector(_instance, (_host.empty() ? "127.0.0.1" : _host), port, _timeout));
+        connectors.addElement(new Connector(_instance, _host.length() == 0 ? "127.0.0.1" : _host, _port, _timeout));
         return connectors;
     }
 

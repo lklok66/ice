@@ -31,6 +31,9 @@ SRCS		= $(OBJS:.o=.cpp)
 include $(top_srcdir)/config/Make.rules
 
 CPPFLAGS	:= -I. -I../../include -DICEE_PURE_CLIENT $(CPPFLAGS)
+ifdef ice_bin_dist
+LDFLAGS		:= $(LDFLAGS) -L$(libdir)
+endif
 
 $(CLIENT): $(OBJS)
 	rm -f $@

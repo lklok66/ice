@@ -88,7 +88,7 @@ abstract public class TestApplication
         catch(Exception ex)
         {
             javax.microedition.lcdui.Alert a = 
-                new javax.microedition.lcdui.Alert("startApp alert", ex.getMessage(),
+                new javax.microedition.lcdui.Alert("startApp alert", ex.toString(),
                         null, javax.microedition.lcdui.AlertType.ERROR);
             a.setTimeout(javax.microedition.lcdui.Alert.FOREVER);
             javax.microedition.lcdui.Display.getDisplay(this).setCurrent(a);

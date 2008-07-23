@@ -17,8 +17,6 @@
     <!-- Include common definitions -->
     <import file="${top.dir}/config/common.xml"/>
 
-    <target name="init" depends="config-init"/>
-
     <property name="cclass.dir" value="cclasses"/>
     <property name="sclass.dir" value="sclasses"/>
     <property name="midp.cclass.dir" value="midpclient"/>
@@ -56,18 +54,19 @@
 
     <target name="compile" depends="generate">
         <mkdir dir="${cclass.dir}"/>
-        <javac srcdir="${cgen.dir}" destdir="${cclass.dir}" classpath="${jdk.lib.dir}/IceE.jar" debug="${debug}"
+        <javac srcdir="${cgen.dir}" destdir="${cclass.dir}" classpathref="jdk.classpath" debug="${debug}"
 	    source="1.2" target="1.1"/>
-        <javac srcdir="${csrc.dir}" destdir="${cclass.dir}" classpath="${jdk.lib.dir}/IceE.jar"
-            debug="${debug}" source="1.2" target="1.1">
+        <javac srcdir="${csrc.dir}" destdir="${cclass.dir}"
+        classpathref="jdk.classpath" debug="${debug}" 
+            source="1.2" target="1.1">
             <exclude name="${cgen.dir}/**" />
             <exclude name="**/*MIDlet*" />
         </javac>
         <mkdir dir="${sclass.dir}"/>
-        <javac srcdir="${sgen.dir}" destdir="${sclass.dir}" classpath="${jdk.lib.dir}/IceE.jar" debug="${debug}"
+        <javac srcdir="${sgen.dir}" destdir="${sclass.dir}" classpathref="jdk.classpath" debug="${debug}"
 	    source="1.2" target="1.1"/>
-        <javac srcdir="${ssrc.dir}" destdir="${sclass.dir}" classpath="${jdk.lib.dir}/IceE.jar"
-            debug="${debug}" source="1.2" target="1.1">
+        <javac srcdir="${ssrc.dir}" destdir="${sclass.dir}" classpathref="jdk.classpath" debug="${debug}" 
+            source="1.2" target="1.1">
             <exclude name="${sgen.dir}/**" />
             <exclude name="**/*MIDlet*" />
         </javac>
@@ -75,10 +74,10 @@
 
     <target name="midp-compile" depends="generate" if="midp">
         <mkdir dir="${midp.cclass.dir}"/>
-        <javac srcdir="${cgen.dir}" destdir="${midp.cclass.dir}" classpath="${midp.lib.dir}" debug="${debug}"
+        <javac srcdir="${cgen.dir}" destdir="${midp.cclass.dir}" classpathref="midp.classpath" debug="${debug}"
 	    source="1.2" target="1.1"/>
-        <javac srcdir="${csrc.dir}" destdir="${midp.cclass.dir}" classpath="${midp.lib.dir}" excludes="${cgen.dir}/**"
-            classpathref="midp.classpath" bootclasspathref="midp.bootclasspath" 
+        <javac srcdir="${csrc.dir}" destdir="${midp.cclass.dir}" classpathref="midp.classpath" excludes="${cgen.dir}/**"
+            bootclasspathref="midp.bootclasspath" 
             debug="${debug}" source="1.2" target="1.1">
             <src path="${csrc.dir}" />
             <src path="../common" />
@@ -86,10 +85,10 @@
             <exclude name="**/Collocated*" />
         </javac>
         <mkdir dir="${midp.sclass.dir}"/>
-        <javac srcdir="${sgen.dir}" destdir="${midp.sclass.dir}" classpath="${midp.lib.dir}" debug="${debug}"
+        <javac srcdir="${sgen.dir}" destdir="${midp.sclass.dir}" classpathref="midp.classpath" debug="${debug}"
             source="1.2" target="1.1"/>
-        <javac destdir="${midp.sclass.dir}" classpath="${midp.lib.dir}" excludes="${sgen.dir}/**"
-            classpathref="midp.classpath" bootclasspathref="midp.bootclasspath" 
+        <javac destdir="${midp.sclass.dir}" classpathref="midp.classpath" excludes="${sgen.dir}/**"
+            bootclasspathref="midp.bootclasspath" 
             debug="${debug}" source="1.2" target="1.1">
             <src path="${ssrc.dir}" />
             <src path="../common" />
@@ -112,9 +111,8 @@
         </manifest>
 
 	<copy overwrite="true" file="config" todir="${midp.cclass.dir}"/>
-	<jar destfile="tmp/${testclient}.jar" manifest="CLIENTMANIFEST.MF" basedir="${midp.cclass.dir}"/>
-        <jar destfile="tmp/${testclient}.jar" manifest="CLIENTMANIFEST.MF" basedir="${midp.lib.dir}" update="true"
-            excludes="IceE-midp.jar"/>
+        <copy overwrite="true" file="${midp.jarfile}" tofile="tmp/${testclient}.jar"/>
+        <jar destfile="tmp/${testclient}.jar" manifest="CLIENTMANIFEST.MF" basedir="${midp.cclass.dir}" update="true"/>
     </target>
 
     <target name="obfuscate-client" depends="client-midlet-jar" if="hasProguardAndMIDP">
@@ -169,9 +167,8 @@
 	    <attribute name="MIDlet-Name" value="${testserver}Test"/>
         </manifest>
 
-	<jar destfile="tmp/${testserver}.jar" manifest="MANIFEST.MF" basedir="${midp.sclass.dir}"/>
-        <jar destfile="tmp/${testserver}.jar" manifest="MANIFEST.MF" basedir="${midp.lib.dir}" update="true"
-            excludes="IceE-midp.jar"/>
+        <copy overwrite="true" file="${midp.jarfile}" tofile="tmp/${testserver}.jar"/>
+        <jar destfile="tmp/${testserver}.jar" manifest="MANIFEST.MF" basedir="${midp.sclass.dir}" update="true"/>
     </target>
 
     <target name="obfuscate-server" depends="server-midlet-jar" if="hasProguardAndMIDP">

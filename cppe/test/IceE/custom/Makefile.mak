@@ -44,6 +44,9 @@ SRCS		= $(OBJS:.obj=.cpp) \
 !include $(top_srcdir)/config/Make.rules.mak
 
 CPPFLAGS	= -I. -I../../include $(CPPFLAGS) -WX -Zm200 -DWIN32_LEAN_AND_MEAN
+!if "$(ice_bin_dist)" != ""
+LDFLAGS		= $(LDFLAGS) /LIBPATH:"$(libdir)"
+!endif
 
 !if "$(OPTIMIZE_SPEED)" != "yes" && "$(OPTIMIZE_SIZE)" != "yes"
 CPDBFLAGS        = /pdb:$(CLIENT:.exe=.pdb)

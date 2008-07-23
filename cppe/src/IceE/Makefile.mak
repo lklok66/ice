@@ -83,9 +83,8 @@ SRCS		= $(LOCAL_OBJS:.obj=.cpp) \
                   $(TRANSPORT_DIR)\EndpointFactory.cpp \
                   $(TRANSPORT_DIR)\TcpEndpoint.cpp \
                   $(TRANSPORT_DIR)\Transceiver.cpp
-		
 
-HDIR		= $(includedir)\IceE
+HDIR		= $(headerdir)\IceE
 SDIR		= $(slicedir)\IceE
 
 !include $(top_srcdir)\config\Make.rules.mak
@@ -100,13 +99,16 @@ PDBFLAGS        = /pdb:$(DLLNAME:.dll=.pdb)
 {$(TRANSPORT_DIR)\}.cpp.obj::
     $(CXX) /c $(CPPFLAGS) $(CXXFLAGS) $<
 
+$(HDIR)\LocalException.h LocalException.cpp: # Dummy rule to prevent compilation of LocalException.ice
+	
+
 !if "$(STATICLIBS)" == "yes"
 
 $(DLLNAME): 
 
 $(LIBNAME): $(LOCAL_OBJS) $(TRANSPORT_OBJS)
 	$(AR) $(ARFLAGS) $(PDBFLAGS) $(LOCAL_OBJS) $(TRANSPORT_OBJS) /out:$(LIBNAME)
-	
+
 !else
 
 $(LIBNAME): $(DLLNAME)

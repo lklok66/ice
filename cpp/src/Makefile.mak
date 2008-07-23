@@ -23,7 +23,6 @@ SUBDIRS		= IceUtil \
 		  slice2javae \
 		  slice2py \
 		  slice2rb \
-		  slice2sl \
 		  slice2html \
 		  Ice \
 		  IceXML \

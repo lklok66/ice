@@ -17,8 +17,6 @@
     <!-- Include common definitions -->
     <import file="${top.dir}/config/common.xml"/>
 
-    <target name="init" depends="config-init"/>
-
     <target name="generate" depends="init">
         <!-- Create the output directory for generated code -->
         <mkdir dir="${generated.dir}"/>

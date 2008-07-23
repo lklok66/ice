@@ -1,4 +1,12 @@
 #!/usr/bin/env python
+# **********************************************************************
+#
+# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+#
+# This copy of Ice is licensed to you under the terms described in the
+# ICE_LICENSE file included in this distribution.
+#
+# **********************************************************************
 
 import os, sys, fnmatch, re, getopt
 
@@ -32,8 +40,10 @@ filesToKeep = [
     "./LICENSE",
     "./CHANGES.ICEE",
     "./README.ICEE",
-    "./config/Make.common.rules.mak",
-    "./config/Make.common.rules",
+    "./Makefile.icee",
+    "./Makefile.mak.icee",
+    "./config/Make.common.rules.mak.icee",
+    "./config/Make.common.rules.icee",
     "./config/TestUtil.py",
     "./cpp/Makefile.mak",
     "./cpp/Makefile",
@@ -50,6 +60,7 @@ filesToKeep = [
     "./cpp/lib",
     "./cppe",
     "./javae",
+    "./slice/IceE"
 ]
 
 def pathInList(p, l):
@@ -100,7 +111,6 @@ def usage():
 #
 verbose = 0
 tag = "HEAD"
-publickey = "cdd571ade22f2f16"
 compareToDir = None
 
 try:
@@ -115,8 +125,6 @@ for o, a in opts:
         sys.exit(0)
     elif o == "-v":
         verbose = 1
-    elif o == "-k":
-        publickey = a
     elif o == "-c":
         compareToDir = a
 
@@ -160,18 +168,6 @@ print "ok"
 os.chdir(os.path.join(srcDir))
 
 print "Fixing makefiles...",
-
-for makeRulesName in [os.path.join("cpp", "config", "Make.rules.mak")]:
-    fixMakeRules(makeRulesName)
-    makeRules = open(makeRulesName, "r")
-    lines = makeRules.readlines()
-    makeRules.close()
-    for i in range(len(lines)):
-        if lines[i].find("prefix") == 0:
-            lines[i] = lines[i].replace("IceE-$(VERSION)", "IceE-" + version)
-    makeRules = open(makeRulesName, "w")
-    makeRules.writelines(lines)
-    makeRules.close()
 
 #
 # Change SUBDIRS and INSTALL_SUBDIRS in top-level Makefile.
@@ -278,8 +274,8 @@ move(os.path.join("CHANGES.ICEE"), os.path.join("CHANGES"))
 #
 move(os.path.join("cpp", "config", "Make.rules.mak.icee"), os.path.join("cpp", "config", "Make.rules.mak"))
 move(os.path.join("cpp", "config", "Make.rules.icee"), os.path.join("cpp", "config", "Make.rules"))
-
-
+move(os.path.join("Makefile.mak.icee"), os.path.join("Makefile.mak"))
+move(os.path.join("Makefile.icee"), os.path.join("Makefile"))
 
 print "ok"
 

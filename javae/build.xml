@@ -19,9 +19,23 @@
     <property name="src.dir" value="src"/>
     <property name="cache.dir" value="depcache"/>
 	      
-    <target name="init" depends="config-init"/>
+    <!-- This target cannot depend on init because the tasks may not be compiled yet -->
+    <target name="tasks" depends="config-init">
+        <mkdir dir="${jdk.lib.dir}/ant"/>
+        <javac srcdir="${src.dir}/ant" destdir="${jdk.lib.dir}/ant"
+            target="1.1" source="1.2"
+            includes="**"
+            deprecation="on">
+        </javac>
+        <jar jarfile="${lib.dir}/ant-icee.jar" basedir="${jdk.lib.dir}/ant">
+            <include name="*.class"/>
+            <manifest>
+                <attribute name="Built-By" value="ZeroC, Inc."/>
+            </manifest>
+        </jar>
+    </target>
 
-    <target name="generate" depends="init">
+    <target name="generate" depends="tasks, task-init">
         <!-- Create the output directory for generated code -->
         <mkdir dir="${generated.dir}"/>
         <slice2javae ice="on" outputdir="${generated.dir}" dependencyfile="${generated.dir}/.depend.IceE">
@@ -42,35 +56,68 @@
 	<mkdir dir="${jdk.lib.dir}"/>
 	<mkdir dir="${cache.dir}"/>
 	<depend srcdir="${generated.dir}:${src.dir}:jdk" destdir="${jdk.lib.dir}" cache="${cache.dir}"/>
-	<javac srcdir="${generated.dir}:${src.dir}:jdk" destdir="${jdk.lib.dir}"
-            debug="${debug}" optimize="${optimize}" deprecation="on" target="1.1" source="1.2"/>
-	<jar jarfile="${jdk.lib.dir}/IceE.jar" basedir="${jdk.lib.dir}" excludes="IceE.jar"/>
+	<javac srcdir="${generated.dir}:${src.dir}:jdk"	destdir="${jdk.lib.dir}" excludes="ant/**"
+               debug="${debug}" optimize="${optimize}" deprecation="on" target="1.1" source="1.2"/>
+	<jar jarfile="${lib.dir}/IceE.jar" basedir="${jdk.lib.dir}" excludes="ant/**"/>
     </target>
 
     <target name="compile-midp" depends="generate" if="midp">
 	<mkdir dir="${midp.lib.dir}"/>
 	<mkdir dir="${cache.dir}"/>
 	<depend srcdir="${generated.dir}:${src.dir}:midp" destdir="${midp.lib.dir}" cache="${cache.dir}"/>
-	<javac srcdir="${generated.dir}:${src.dir}:midp" destdir="${midp.lib.dir}"
+	<javac srcdir="${generated.dir}:${src.dir}:midp" destdir="${midp.lib.dir}" excludes="ant/**"
 	    debug="${debug}" optimize="${optimize}" deprecation="on" target="1.1" source="1.2">
 		<bootclasspath refid="midp.bootclasspath"/>  
 	</javac>
-	<jar jarfile="${midp.lib.dir}/IceE-midp.jar" basedir="${midp.lib.dir}" excludes="IceE-midp.jar"/>
+	<jar jarfile="${lib.dir}/IceE-midp.jar" basedir="${midp.lib.dir}" excludes="ant/**"/>
     </target>
 
     <target name="compile" depends="compile-jdk,compile-midp"/>
 
     <target name="jar" depends="compile-jdk"/>
 
+    <target name="install-common">
+        <mkdir dir="${prefix}"/>
+        <mkdir dir="${prefix}/lib"/>
+        <copy file="${ice.dir}/LICENSE" todir="${prefix}"/>
+        <copy file="${ice.dir}/ICEE_LICENSE" todir="${prefix}"/>
+    </target>
+
+    <condition property="slice-installed">
+        <and>
+            <available file="${prefix}/slice/IceE/LocalException.ice"/>
+        </and>
+    </condition>
+
+    <target name="install-slice" unless="slice-installed">
+        <mkdir dir="${prefix}/slice"/>
+        <copy todir="${prefix}/slice">
+            <fileset dir="../slice" includes="IceE/**"/>
+        </copy>
+    </target>
+
+    <target name="install-jar">
+        <copy file="${jdk.jarfile}" todir="${prefix}/lib"/>
+    </target>
+
+    <target name="install-midp-jar" if="midp">
+        <copy file="${midp.jarfile}" todir="${prefix}/lib"/>
+    </target>
+
+    <target name="install-tasks">
+        <copy file="${lib.dir}/ant-icee.jar" todir="${prefix}/lib"/>
+    </target>
+
     <target name="all" depends="compile">
         <ant inheritAll="false" dir="demo"/>
         <ant inheritAll="false" dir="test"/>
     </target>
 
-    <target name="clean" depends="init">
+    <target name="install" depends="all, install-common, install-jar, install-midp-jar, install-tasks, install-slice"/>
+
+    <target name="clean" depends="config-init">
         <delete dir="${generated.dir}"/>
-        <delete dir="${jdk.lib.dir}"/>
-        <delete dir="${midp.lib.dir}"/>
+        <delete dir="${lib.dir}"/>
         <delete dir="${cache.dir}"/>
         <ant inheritAll="false" dir="demo" target="clean"/>
         <ant inheritAll="false" dir="test" target="clean"/>

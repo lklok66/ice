@@ -17,8 +17,6 @@
     <!-- Include common definitions -->
     <import file="${top.dir}/config/common.xml"/>
 
-    <target name="init" depends="config-init"/>
-
     <target name="generate" depends="init">
         <!-- Create the output directory for generated code -->
         <mkdir dir="${generated.dir}"/>
@@ -62,8 +60,8 @@
 	    <attribute name="MicroEdition-Profile" value="MIDP-2.0"/>
         </manifest>
 
-	<jar destfile="tmp/ChatDemo.jar" manifest="MANIFEST.MF" basedir="${class.dir}"/>
-        <jar destfile="tmp/ChatDemo.jar" basedir="${midp.lib.dir}" excludes="IceE-midp.jar" update="true"/>
+        <copy overwrite="true" file="${midp.jarfile}" tofile="tmp/ChatDemo.jar"/>
+	<jar destfile="tmp/ChatDemo.jar" manifest="MANIFEST.MF"	basedir="${class.dir}" update="true"/>
     </target>
 
     <target name="obfuscate" depends="jar" if="hasProguardAndMIDP">

@@ -46,6 +46,9 @@ SLICE_SRCS	= Test.ice Wstring.ice
 include $(top_srcdir)/config/Make.rules
 
 CPPFLAGS	 := -I. -I../../include $(CPPFLAGS)
+ifdef ice_bin_dist
+LDFLAGS		:= $(LDFLAGS) -L$(libdir)
+endif
 SLICE2CPPEFLAGS  := $(SLICE2CPPFLAGS)
 
 $(CLIENT): $(OBJS) $(COBJS)

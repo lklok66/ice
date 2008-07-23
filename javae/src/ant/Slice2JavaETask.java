@@ -135,14 +135,7 @@ public class Slice2JavaETask extends SliceTask
             String translator;
             if(_translator == null)
             {
-                if(getIceHome() == null)
-                {
-                    translator = "slice2javae";
-                }
-                else
-                {
-                    translator = new File(getIceHome() + File.separator + "bin" + File.separator + "slice2javae").toString();
-                }
+                translator = getDefaultTranslator("slice2javae");
             }
             else
             {
@@ -209,6 +202,19 @@ public class Slice2JavaETask extends SliceTask
             }
 
             //
+            // Add --meta
+            //
+            if(!_meta.isEmpty())
+            {
+                java.util.Iterator i = _meta.iterator();
+                while(i.hasNext())
+                {
+                    SliceMeta m = (SliceMeta)i.next();
+                    cmd.append(" --meta " + m.getValue());
+                }
+            }
+
+            //
             // Add --ice
             //
             if(_ice)
@@ -247,6 +253,7 @@ public class Slice2JavaETask extends SliceTask
             //
             log(translator + " " + cmd);
             ExecTask task = (ExecTask)getProject().createTask("exec");
+            addLdLibraryPath(task);
             task.setFailonerror(true);
             Argument arg = task.createArg();
             arg.setLine(cmd.toString());
@@ -301,6 +308,7 @@ public class Slice2JavaETask extends SliceTask
             // unique property name here. Perhaps we should output the dependencies to a file instead.
             //
             final String outputProperty = "slice2javae.depend." + System.currentTimeMillis();
+            final String errorProperty = "slice2javae.error." + System.currentTimeMillis();
 
             task = (ExecTask)getProject().createTask("exec");
             task.setFailonerror(true);
@@ -308,6 +316,7 @@ public class Slice2JavaETask extends SliceTask
             arg.setLine(cmd.toString());
             task.setExecutable(translator);
             task.setOutputproperty(outputProperty);
+            task.setErrorProperty(errorProperty);
             task.execute();
 
             //

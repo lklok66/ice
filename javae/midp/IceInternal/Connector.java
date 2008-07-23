@@ -194,6 +194,9 @@ final class Connector
         _logger = instance.initializationData().logger;
 
         _url = "socket://" + host + ':' + port;
+
+        _hashCode = _url.hashCode();
+        _hashCode = 5 * _hashCode + _timeout;
     }
 
     //
@@ -236,10 +239,16 @@ final class Connector
         return _url.compareTo(p._url);
     }
 
+    public int
+    hashCode()
+    {
+        return _hashCode;
+    }
 
     private Instance _instance;
     private int _timeout;
     private TraceLevels _traceLevels;
     private Ice.Logger _logger;
     private String _url;
+    private int _hashCode;
 }

@@ -69,25 +69,31 @@ MT = "$(PDK_HOME)\bin\mt.exe"
 # Don't change anything below this line!
 # ----------------------------------------------------------------------
 
-SHELL			= /bin/sh
-VERSION			= 1.3.0
-SOVERSION		= 13
+#
+# Common definitions
+#
+ice_language     = cppe
+slice_translator = slice2cppe.exe
+
+!if exist ($(top_srcdir)\..\config\Make.common.rules.mak.icee)
+!include $(top_srcdir)\..\config\Make.common.rules.mak.icee
+!else
+!include $(top_srcdir)\config\Make.common.rules.mak.icee
+!endif
+
 bindir			= $(top_srcdir)\bin
 libdir			= $(top_srcdir)\lib
+headerdir		= $(top_srcdir)\include
+
+!if "$(ice_src_dist)" != ""
 includedir		= $(top_srcdir)\include
-slicedir		= $(top_srcdir)\slice
+!else
+includedir		= $(ice_dir)\include
+!endif
 
 install_bindir		= $(prefix)\bin
 install_libdir	  	= $(prefix)\lib
 install_includedir	= $(prefix)\include
-install_slicedir	= $(prefix)\slice
-
-INSTALL			= copy
-INSTALL_PROGRAM		= $(INSTALL)
-INSTALL_LIBRARY		= $(INSTALL)
-INSTALL_DATA		= $(INSTALL)
-
-OBJEXT			= .obj
 
 #
 # Verify valid embedded settings
@@ -103,7 +109,6 @@ OBJEXT			= .obj
 !error Invalid setting for EMBEDDED_OS: "$(EMBEDDED_OS)"
 !endif
 !endif
-
 
 #
 # Set executables
@@ -234,7 +239,12 @@ CPPFLAGS        = $(CPPFLAGS) -RTC1
 #
 # Linker flags
 #
+!if "$(ice_src_dist)" != ""
 LDFLAGS         = $(LDFLAGS) /LIBPATH:"$(libdir)" /nologo
+!else
+LDFLAGS         = $(LDFLAGS) /LIBPATH:"$(ice_dir)\lib" /nologo
+!endif
+
 !if "$(EMBEDDED_DEVICE)" != ""
 LDFLAGS		= $(LDFLAGS) /subsystem:windowsce -manifest:no
 !endif
@@ -329,7 +339,16 @@ TESTLIBS	= testcommon$(LIBSUFFIX).lib $(LIBS)
 TESTCLIBS	= testcommonc$(LIBSUFFIX).lib $(MINLIBS)
 
 SLICE2CPPEFLAGS		= -I$(slicedir)
-SLICE2CPP		= slice2cppe.exe
+
+!if "$(ice_src_dist)" != ""
+!if "$(ice_cpp_dir)" == "$(ice_dir)\cpp"
+SLICE2CPPE		= "$(ice_cpp_dir)\bin\slice2cppe.exe"
+!else
+SLICE2CPPE		= "$(ice_cpp_dir)\bin$(x64suffix)\slice2cppe.exe"
+!endif
+!else
+SLICE2CPPE		= "$(ice_dir)\bin$(x64suffix)\slice2cppe.exe"
+!endif
 
 EVERYTHING		= all clean install
 
@@ -345,12 +364,12 @@ EVERYTHING		= all clean install
 
 {$(SDIR)\}.ice{$(HDIR)}.h:
 	del /q $(HDIR)\$(*F).h $(*F).cpp
-	$(SLICE2CPP) $(SLICE2CPPEFLAGS) $<
+	$(SLICE2CPPE) $(SLICE2CPPEFLAGS) $<
 	move $(*F).h $(HDIR)
 
 .ice.cpp:
 	del /q $(*F).h $(*F).cpp
-	$(SLICE2CPP) $(SLICE2CPPEFLAGS) $(*F).ice
+	$(SLICE2CPPE) $(SLICE2CPPEFLAGS) $(*F).ice
 
 all:: $(SRCS) $(TARGETS)
 

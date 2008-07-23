@@ -17,8 +17,6 @@
     <!-- Include common definitions -->
     <import file="${top.dir}/config/common.xml"/>
 
-    <target name="init" depends="config-init"/>
-
     <target name="generate" depends="init">
         <!-- Create the output directory for generated code -->
         <mkdir dir="${generated.dir}"/>
@@ -52,10 +50,9 @@
 	    <attribute name="MicroEdition-Profile" value="MIDP-2.0"/>
         </manifest>
 	      
+        <copy overwrite="true" file="${midp.jarfile}" tofile="tmp/HelloClient.jar"/>
 	<jar destfile="tmp/HelloClient.jar" manifest="CLIENTMANIFEST.MF" excludes="ServerMIDlet*.class" 
-	    basedir="classes"/>
-        <jar destfile="tmp/HelloClient.jar" manifest="CLIENTMANIFEST.MF" basedir="${midp.lib.dir}" 
-            excludes="IceE-midp.jar" update="true"/>
+ 	     basedir="classes" update="true"/>
     </target>
 
     <target name="client-obfuscate" depends="client-jar" if="hasProguardAndMIDP">
@@ -108,10 +105,9 @@
 	    <attribute name="MicroEdition-Profile" value="MIDP-2.0"/>
         </manifest>
 
+        <copy overwrite="true" file="${midp.jarfile}" tofile="tmp/HelloServer.jar"/>
         <jar destfile="tmp/HelloServer.jar" manifest="SERVERMANIFEST.MF" excludes="ClientMIDlet.class"
-	    basedir="classes"/>
-        <jar destfile="tmp/HelloServer.jar" manifest="SERVERMANIFEST.MF" basedir="${midp.lib.dir}" excludes="IceE-midp.jar"
-	    update="true"/>
+	    basedir="classes" update="true"/>
     </target>
 
     <target name="server-obfuscate" depends="server-jar" if="hasProguardAndMIDP">

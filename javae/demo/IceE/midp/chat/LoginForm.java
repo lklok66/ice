@@ -102,6 +102,10 @@ public class LoginForm extends Form implements CommandListener, Runnable
                     adapter.add(cb, callbackReceiverIdent));
                 adapter.activate();
 
+                Alert alert = new Alert("Router Error", session.toString(), null, AlertType.ERROR);
+                alert.setTimeout(Alert.FOREVER);
+                Display.getDisplay(_parent).setCurrent(alert, this);
+
                 session.setCallback(callback);
 
                 Display.getDisplay(_parent).setCurrent(cf);
@@ -116,7 +120,7 @@ public class LoginForm extends Form implements CommandListener, Runnable
         }
         catch(Exception ex)
         {
-            Alert alert = new Alert("Ice Error", ex.getMessage(), null, AlertType.ERROR);
+            Alert alert = new Alert("Ice Error", ex.toString(), null, AlertType.ERROR);
             alert.setTimeout(Alert.FOREVER);
             Display.getDisplay(_parent).setCurrent(alert, this);
             return;

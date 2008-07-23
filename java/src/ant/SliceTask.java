@@ -62,6 +62,21 @@ public class SliceTask extends org.apache.tools.ant.Task
         _caseSensitive = false;
         _ice = false;
         _includePath = null;
+
+        //
+        // Check for the presence of the ICEE_HOME environment variable.
+        //
+        java.util.Vector env = Execute.getProcEnvironment();
+        java.util.Enumeration e = env.elements();
+        while(e.hasMoreElements())
+        {
+            String entry = (String)e.nextElement();
+            if(entry.startsWith("ICEE_HOME="))
+            {
+                _iceHome = entry.substring(entry.indexOf('=') + 1);
+                break;
+            }
+        }
     }
 
     public void

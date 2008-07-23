@@ -17,8 +17,6 @@
     <!-- Include common definitions -->
     <import file="${top.dir}/config/common.xml"/>
 
-    <target name="init" depends="config-init"/>
-
     <target name="generate" depends="init">
         <!-- Create the output directory for generated code -->
         <mkdir dir="${generated.dir}"/>
@@ -29,9 +27,9 @@
 
     <target name="compile" depends="generate">
         <mkdir dir="${class.dir}"/>
-        <javac srcdir="${generated.dir}" destdir="${class.dir}" classpath="${jdk.lib.dir}/IceE.jar" debug="${debug}"
+        <javac srcdir="${generated.dir}" destdir="${class.dir}" classpathref="jdk.classpath" debug="${debug}"
 	    source="1.2" target="1.1"/>
-        <javac srcdir="." destdir="${class.dir}" classpath="${jdk.lib.dir}/IceE.jar" excludes="generated/**"
+        <javac srcdir="." destdir="${class.dir}" classpathref="jdk.classpath" excludes="generated/**"
             debug="${debug}" source="1.2" target="1.1">
             <exclude name="generated/**" />
             <exclude name="*MIDlet*" />
@@ -40,10 +38,10 @@
 
     <target name="midp-compile" depends="generate" if="midp">
         <mkdir dir="${midp.class.dir}"/>
-        <javac srcdir="${generated.dir}" destdir="${midp.class.dir}" classpath="${midp.lib.dir}" debug="${debug}"
+        <javac srcdir="${generated.dir}" destdir="${midp.class.dir}" classpathref="midp.classpath" debug="${debug}"
 	    source="1.2" target="1.1"/>
-        <javac destdir="${midp.class.dir}" classpath="${midp.lib.dir}" 
-            classpathref="midp.classpath" bootclasspathref="midp.bootclasspath"
+        <javac destdir="${midp.class.dir}" classpathref="midp.classpath" 
+            bootclasspathref="midp.bootclasspath"
             debug="${debug}" source="1.2" target="1.1">
             <src path="." />
             <src path="../common" />
@@ -66,10 +64,8 @@
         </manifest>
 
 	<copy overwrite="true" file="config" todir="${midp.class.dir}"/>
-	<jar destfile="tmp/${testname}.jar" manifest="MANIFEST.MF" basedir="${midp.class.dir}"
-	    excludes="**/Server.class"/>
-        <jar destfile="tmp/${testname}.jar" manifest="MANIFEST.MF" basedir="${midp.lib.dir}" update="true"
-            excludes="IceE-midp.jar"/>
+        <copy overwrite="true" file="${midp.jarfile}" tofile="tmp/${testname}.jar"/>
+        <jar destfile="tmp/${testname}.jar" manifest="MANIFEST.MF" basedir="${midp.class.dir}" update="true"/>
     </target>
 
     <target name="obfuscate" depends="midlet-jar" if="hasProguardAndMIDP">
