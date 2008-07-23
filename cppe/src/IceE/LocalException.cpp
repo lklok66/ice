@@ -1743,11 +1743,11 @@ Ice::IllegalIdentityException::toString() const
     out += ":\nillegal identity: `";
     if(id.category.empty())
     {
-        out += IceUtil::escapeString(id.name, "/");
+        out += IceUtilInternal::escapeString(id.name, "/");
     }
     else
     {
-        out += IceUtil::escapeString(id.category, "/") + '/' + IceUtil::escapeString(id.name, "/");
+        out += IceUtilInternal::escapeString(id.category, "/") + '/' + IceUtilInternal::escapeString(id.name, "/");
     }
     out += "'";
     return out;
@@ -1759,11 +1759,11 @@ printFailedRequestData(string& out, const RequestFailedException& ex)
     out += "\nidentity: ";
     if(ex.id.category.empty())
     {
-        out += IceUtil::escapeString(ex.id.name, "/");
+        out += IceUtilInternal::escapeString(ex.id.name, "/");
     }
     else
     {
-        out += IceUtil::escapeString(ex.id.category, "/") + '/' + IceUtil::escapeString(ex.id.name, "/");
+        out += IceUtilInternal::escapeString(ex.id.category, "/") + '/' + IceUtilInternal::escapeString(ex.id.name, "/");
     }
     out += "\nfacet: ";
     out += ex.facet;

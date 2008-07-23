@@ -25,9 +25,9 @@ public final class DispatchStatus
     public static DispatchStatus
     convert(int val)
     {
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(val < 2);
+            IceUtilInternal.Debug.Assert(val < 2);
         }
         return __values[val];
     }

@@ -198,9 +198,9 @@ public final class IncomingConnectionFactory
             return _transceiver.toString();
         }
 
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(_acceptor != null);        
+            IceUtilInternal.Debug.Assert(_acceptor != null);        
         }
         return _acceptor.toString();
     }
@@ -227,9 +227,9 @@ public final class IncomingConnectionFactory
         {
             _acceptor = _endpoint.acceptor(h);
             _endpoint = h.value;
-            if(IceUtil.Debug.ASSERT)
+            if(IceUtilInternal.Debug.ASSERT)
             {
-                IceUtil.Debug.Assert(_acceptor != null);
+                IceUtilInternal.Debug.Assert(_acceptor != null);
             }
             _acceptor.listen();
             
@@ -285,10 +285,10 @@ public final class IncomingConnectionFactory
     finalize()
         throws Throwable
     {
-        IceUtil.Debug.FinalizerAssert(_state == StateClosed);
-        IceUtil.Debug.FinalizerAssert(_acceptor == null);
-        IceUtil.Debug.FinalizerAssert(_connections == null);
-        IceUtil.Debug.FinalizerAssert(_threadPerIncomingConnectionFactory == null);
+        IceUtilInternal.Debug.FinalizerAssert(_state == StateClosed);
+        IceUtilInternal.Debug.FinalizerAssert(_acceptor == null);
+        IceUtilInternal.Debug.FinalizerAssert(_connections == null);
+        IceUtilInternal.Debug.FinalizerAssert(_threadPerIncomingConnectionFactory == null);
     }
 
     private static final int StateActive = 0;
@@ -379,9 +379,9 @@ public final class IncomingConnectionFactory
     public void
     run()
     {
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(_acceptor != null);
+            IceUtilInternal.Debug.Assert(_acceptor != null);
         }
 
         while(true)
@@ -458,9 +458,9 @@ public final class IncomingConnectionFactory
                     return;
                 }
 
-                if(IceUtil.Debug.ASSERT)
+                if(IceUtilInternal.Debug.ASSERT)
                 {
-                    IceUtil.Debug.Assert(_state == StateActive);
+                    IceUtilInternal.Debug.Assert(_state == StateActive);
                 }
 
                 //

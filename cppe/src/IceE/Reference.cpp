@@ -252,7 +252,7 @@ IceInternal::Reference::toString() const
             fs = string(reinterpret_cast<const char*>(buffer.getBuffer()), last - buffer.getBuffer());
         }
 #endif
-        fs = IceUtil::escapeString(fs, "");
+        fs = IceUtilInternal::escapeString(fs, "");
         if(fs.find_first_of(" :@") != string::npos)
         {
             s += "\"";
@@ -1095,7 +1095,7 @@ IceInternal::IndirectReference::toString() const
         a = string(reinterpret_cast<const char*>(buffer.getBuffer()), last - buffer.getBuffer());
     }
 #endif
-    a = IceUtil::escapeString(a, "");
+    a = IceUtilInternal::escapeString(a, "");
     if(a.find_first_of(" ") != string::npos)
     {
         result.append("\"");

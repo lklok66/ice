@@ -26,9 +26,9 @@ public final class OperationMode
     public static OperationMode
     convert(int val)
     {
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(val < 3);
+            IceUtilInternal.Debug.Assert(val < 3);
         }
         return __values[val];
     }

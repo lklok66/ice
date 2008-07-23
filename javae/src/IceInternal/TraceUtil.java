@@ -142,9 +142,9 @@ public final class TraceUtil
                         
                         default:
                         {
-                            if(IceUtil.Debug.ASSERT)
+                            if(IceUtilInternal.Debug.ASSERT)
                             {
-                                IceUtil.Debug.Assert(false);
+                                IceUtilInternal.Debug.Assert(false);
                             }
                             break;
                         }
@@ -180,9 +180,9 @@ public final class TraceUtil
                         
                         default:
                         {
-                            if(IceUtil.Debug.ASSERT)
+                            if(IceUtilInternal.Debug.ASSERT)
                             {
-                                IceUtil.Debug.Assert(false);
+                                IceUtilInternal.Debug.Assert(false);
                             }
                             break;
                         }
@@ -285,7 +285,7 @@ public final class TraceUtil
         out.print("\nfacet = ");
         if(facet.length > 0)
         {
-            out.print(IceUtil.StringUtil.escapeString(facet[0], ""));
+            out.print(IceUtilInternal.StringUtil.escapeString(facet[0], ""));
         }
 
         String operation = stream.readString();

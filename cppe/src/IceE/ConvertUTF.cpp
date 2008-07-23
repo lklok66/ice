@@ -58,7 +58,9 @@
 #include <stdio.h>
 #endif
 
-namespace IceUtil
+using namespace IceUtil;
+
+namespace IceUtilInternal
 {
 
 static const int halfShift  = 10; /* used for shifting by 10 bits */

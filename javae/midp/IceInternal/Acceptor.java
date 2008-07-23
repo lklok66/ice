@@ -202,7 +202,7 @@ class Acceptor
     finalize()
         throws Throwable
     {
-        IceUtil.Debug.FinalizerAssert(_connection == null);
+        IceUtilInternal.Debug.FinalizerAssert(_connection == null);
     }
 
     private Instance _instance;

@@ -12,7 +12,7 @@
 
 #include <IceE/Config.h>
 
-namespace IceUtil
+namespace IceUtilInternal
 {
 
 //

@@ -99,9 +99,9 @@ public final class Properties
             java.lang.Object value = _properties.get(key);
             result[i++] = "--" + key + "=" + value;
         }
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(i == result.length);
+            IceUtilInternal.Debug.Assert(i == result.length);
         }
         return result;
     }
@@ -417,7 +417,7 @@ public final class Properties
 
         if(value.length() > 0)
         {
-            String[] files = IceUtil.StringUtil.split(value, ",");
+            String[] files = IceUtilInternal.StringUtil.split(value, ",");
             for(int i = 0; i < files.length; i++)
             {
                 load(files[i]);

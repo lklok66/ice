@@ -17,17 +17,11 @@
 #    include <IceE/Mutex.h>
 #endif
 
-namespace IceUtil
-{
-
-//
-// Forward declaration (for friend declarations).
-//
-template <class T> class Monitor;
-class RecMutex;
-class Mutex;
 
 #ifdef _WIN32
+
+namespace IceUtilInternal
+{
 //
 // Needed for implementation.
 //
@@ -46,7 +40,19 @@ private:
 
     mutable HANDLE _sem;
 };
+}
+
 #endif
+
+namespace IceUtil
+{
+
+//
+// Forward declaration (for friend declarations).
+//
+template <class T> class Monitor;
+class RecMutex;
+class Mutex;
 
 //
 // Condition variable implementation. Conforms to the same semantics
@@ -180,8 +186,8 @@ private:
     ICE_API void dowait() const;
 
     Mutex _internal;
-    Semaphore _gate;
-    Semaphore _queue;
+    IceUtilInternal::Semaphore _gate;
+    IceUtilInternal::Semaphore _queue;
     mutable long _blocked;
     mutable long _unblocked;
     mutable long _toUnblock;

@@ -30,7 +30,7 @@ public final class EndpointFactory
         String protocol;
         String args;
         final String delim = " \t\n\r";
-        int pos = IceUtil.StringUtil.findFirstOf(s, delim);
+        int pos = IceUtilInternal.StringUtil.findFirstOf(s, delim);
         if(pos == -1)
         {
             protocol = s;
@@ -39,7 +39,7 @@ public final class EndpointFactory
         else
         {
             protocol = s.substring(0, pos);
-            int beg = IceUtil.StringUtil.findFirstNotOf(s, delim, pos);
+            int beg = IceUtilInternal.StringUtil.findFirstNotOf(s, delim, pos);
             if(beg == -1)
             {
                 args = "";

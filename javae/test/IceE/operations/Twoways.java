@@ -489,7 +489,7 @@ class Twoways
             Test.ByteBoolDHolder _do = new Test.ByteBoolDHolder();
             java.util.Hashtable ro = p.opByteBoolD(di1, di2, _do);
 
-            test(IceUtil.Hashtable.equals(_do.value, di1));
+            test(IceUtilInternal.Hashtable.equals(_do.value, di1));
             test(ro.size() == 4);
             test(((Boolean)ro.get(new Byte((byte)10))).booleanValue() == true);
             test(((Boolean)ro.get(new Byte((byte)11))).booleanValue() == false);
@@ -509,7 +509,7 @@ class Twoways
             Test.ShortIntDHolder _do = new Test.ShortIntDHolder();
             java.util.Hashtable ro = p.opShortIntD(di1, di2, _do);
 
-            test(IceUtil.Hashtable.equals(_do.value, di1));
+            test(IceUtilInternal.Hashtable.equals(_do.value, di1));
             test(ro.size() == 4);
             test(((Integer)ro.get(new Short((short)110))).intValue() == -1);
             test(((Integer)ro.get(new Short((short)111))).intValue() == -100);
@@ -529,7 +529,7 @@ class Twoways
             Test.LongFloatDHolder _do = new Test.LongFloatDHolder();
             java.util.Hashtable ro = p.opLongFloatD(di1, di2, _do);
 
-            test(IceUtil.Hashtable.equals(_do.value, di1));
+            test(IceUtilInternal.Hashtable.equals(_do.value, di1));
             test(ro.size() == 4);
             test(((Float)ro.get(new Long(999999110L))).floatValue() == -1.1f);
             test(((Float)ro.get(new Long(999999120L))).floatValue() == -100.4f);
@@ -549,7 +549,7 @@ class Twoways
             Test.StringStringDHolder _do = new Test.StringStringDHolder();
             java.util.Hashtable ro = p.opStringStringD(di1, di2, _do);
 
-            test(IceUtil.Hashtable.equals(_do.value, di1));
+            test(IceUtilInternal.Hashtable.equals(_do.value, di1));
             test(ro.size() == 4);
             test(((String)ro.get("foo")).equals("abc -1.1"));
             test(((String)ro.get("FOO")).equals("abc -100.4"));
@@ -569,7 +569,7 @@ class Twoways
             Test.StringMyEnumDHolder _do = new Test.StringMyEnumDHolder();
             java.util.Hashtable ro = p.opStringMyEnumD(di1, di2, _do);
 
-            test(IceUtil.Hashtable.equals(_do.value, di1));
+            test(IceUtilInternal.Hashtable.equals(_do.value, di1));
             test(ro.size() == 4);
             test(((Test.MyEnum)ro.get("abc")) == Test.MyEnum.enum1);
             test(((Test.MyEnum)ro.get("qwerty")) == Test.MyEnum.enum3);
@@ -604,20 +604,20 @@ class Twoways
             {
                 test(p.ice_getContext().isEmpty());
                 java.util.Hashtable r = p.opContext();
-                test(!IceUtil.Hashtable.equals(r, ctx));
+                test(!IceUtilInternal.Hashtable.equals(r, ctx));
             }
             {
                 java.util.Hashtable r = p.opContext(ctx);
                 test(p.ice_getContext().isEmpty());
-                test(IceUtil.Hashtable.equals(r, ctx));
+                test(IceUtilInternal.Hashtable.equals(r, ctx));
             }
             {
                 Test.MyClassPrx p2 = Test.MyClassPrxHelper.checkedCast(p.ice_context(ctx));
-                test(IceUtil.Hashtable.equals(p2.ice_getContext(), ctx));
+                test(IceUtilInternal.Hashtable.equals(p2.ice_getContext(), ctx));
                 java.util.Hashtable r = p2.opContext();
-                test(IceUtil.Hashtable.equals(r, ctx));
+                test(IceUtilInternal.Hashtable.equals(r, ctx));
                 r = p2.opContext(ctx);
-                test(IceUtil.Hashtable.equals(r, ctx));
+                test(IceUtilInternal.Hashtable.equals(r, ctx));
             }
             {
                 //

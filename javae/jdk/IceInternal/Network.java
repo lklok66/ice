@@ -162,9 +162,9 @@ public final class Network
             }
         }
 
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(addr != null);
+            IceUtilInternal.Debug.Assert(addr != null);
         }
         return addr.getAddress();
     }
@@ -191,9 +191,9 @@ public final class Network
         {
             return 1;
         }
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(larr.length == rarr.length);
+            IceUtilInternal.Debug.Assert(larr.length == rarr.length);
         }
 
         for(int i = 0; i < larr.length; i++)

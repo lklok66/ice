@@ -45,7 +45,7 @@ IceInternal::ServantManager::addServant(const ObjectPtr& object, const Identity&
             ex.id = _instance->identityToString(ident);
             if(!facet.empty())
             {
-                ex.id += " -f " + IceUtil::escapeString(facet, "");
+                ex.id += " -f " + IceUtilInternal::escapeString(facet, "");
             }
             throw ex;
         }
@@ -85,7 +85,7 @@ IceInternal::ServantManager::removeServant(const Identity& ident, const string& 
         ex.id = _instance->identityToString(ident);
         if(!facet.empty())
         {
-            ex.id += " -f " + IceUtil::escapeString(facet, "");
+            ex.id += " -f " + IceUtilInternal::escapeString(facet, "");
         }
         throw ex;
     }

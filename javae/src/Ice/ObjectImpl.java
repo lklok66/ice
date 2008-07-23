@@ -148,7 +148,7 @@ public abstract class ObjectImpl implements Object
     public DispatchStatus
     __dispatch(IceInternal.Incoming in, Current current)
     {
-        int pos = IceUtil.Arrays.search(__all, current.operation);
+        int pos = IceUtilInternal.Arrays.search(__all, current.operation);
         if(pos < 0)
         {
             throw new OperationNotExistException(current.id, current.facet, current.operation);
@@ -174,9 +174,9 @@ public abstract class ObjectImpl implements Object
             }
         }
 
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(false);
+            IceUtilInternal.Debug.Assert(false);
         }
         throw new OperationNotExistException(current.id, current.facet, current.operation);
     }

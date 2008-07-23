@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-package IceUtil;
+package IceUtilInternal;
 
 public final class Debug
 {
@@ -15,9 +15,9 @@ public final class Debug
     // The ASSERT member determines whether assertions are enabled.
     // Applications should use the following idiom:
     //
-    // if(IceUtil.Debug.ASSERT)
+    // if(IceUtilInternal.Debug.ASSERT)
     // {
-    //     IceUtil.Debug.Assert(expression);
+    //     IceUtilInternal.Debug.Assert(expression);
     // }
     //
     // When ASSERT is set to false, a decent Java compiler will detect that
@@ -31,7 +31,7 @@ public final class Debug
     {
         if(!b)
         {
-            throw new AssertionError();
+            throw new IceUtil.AssertionError();
         }
     }
 

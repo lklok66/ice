@@ -494,7 +494,7 @@ IceInternal::Incoming::__warning(const string& msg) const
     Warning out(_os.instance()->initializationData().logger);
     out << "dispatch exception: " << msg;
     out << "\nidentity: " << _os.instance()->identityToString(_current.id);
-    out << "\nfacet: " << IceUtil::escapeString(_current.facet, "");
+    out << "\nfacet: " << IceUtilInternal::escapeString(_current.facet, "");
     out << "\noperation: " << _current.operation;
 }
 

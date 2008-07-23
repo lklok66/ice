@@ -54,7 +54,7 @@ public class AllTests
         public synchronized void
         called()
         {
-            IceUtil.Debug.Assert(!_called);
+            IceUtilInternal.Debug.Assert(!_called);
             _called = true;
             notify();
         }
@@ -158,7 +158,7 @@ public class AllTests
             }
             else
             {
-                IceUtil.Debug.Assert(false);
+                IceUtilInternal.Debug.Assert(false);
             }
         }
 

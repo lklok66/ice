@@ -94,9 +94,9 @@ final public class Incoming
 
         if(response)
         {
-            if(IceUtil.Debug.ASSERT)
+            if(IceUtilInternal.Debug.ASSERT)
             {
-                IceUtil.Debug.Assert(_os.size() == Protocol.headerSize + 4); // Reply status position.
+                IceUtilInternal.Debug.Assert(_os.size() == Protocol.headerSize + 4); // Reply status position.
             }
             _os.writeByte(ReplyStatus.replyOK);
             _os.startWriteEncaps();
@@ -181,9 +181,9 @@ final public class Incoming
                 }
                 else
                 {
-                    if(IceUtil.Debug.ASSERT)
+                    if(IceUtilInternal.Debug.ASSERT)
                     {
-                        IceUtil.Debug.Assert(false);
+                        IceUtilInternal.Debug.Assert(false);
                     }
                 }
                 ex.id.__write(_os);
@@ -363,9 +363,9 @@ final public class Incoming
             
             if(replyStatus != ReplyStatus.replyOK && replyStatus != ReplyStatus.replyUserException)
             {
-                if(IceUtil.Debug.ASSERT)
+                if(IceUtilInternal.Debug.ASSERT)
                 {
-                    IceUtil.Debug.Assert(replyStatus == ReplyStatus.replyObjectNotExist ||
+                    IceUtilInternal.Debug.Assert(replyStatus == ReplyStatus.replyObjectNotExist ||
                                          replyStatus == ReplyStatus.replyFacetNotExist);
                 }
                 
@@ -420,15 +420,15 @@ final public class Incoming
     final private void
     __warning(java.lang.Exception ex)
     {
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(_os != null);
+            IceUtilInternal.Debug.Assert(_os != null);
         }
 
         StringBuffer sb = new StringBuffer();
         sb.append("dispatch exception:");
         sb.append("\nidentity: " + _os.instance().identityToString(_current.id));
-        sb.append("\nfacet: " + IceUtil.StringUtil.escapeString(_current.facet, ""));
+        sb.append("\nfacet: " + IceUtilInternal.StringUtil.escapeString(_current.facet, ""));
         sb.append("\noperation: " + _current.operation);
         sb.append("\n");
         sb.append(ex.toString());

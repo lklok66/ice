@@ -107,8 +107,8 @@ public class IndirectReference extends RoutableReference
         // the reference parser uses as separators, then we enclose
         // the adapter id string in quotes.
         //
-        String a = IceUtil.StringUtil.escapeString(_adapterId, null);
-        if(IceUtil.StringUtil.findFirstOf(a, " \t\n\r") != -1)
+        String a = IceUtilInternal.StringUtil.escapeString(_adapterId, null);
+        if(IceUtilInternal.StringUtil.findFirstOf(a, " \t\n\r") != -1)
         {
             s.append('"');
             s.append(a);
@@ -149,18 +149,18 @@ public class IndirectReference extends RoutableReference
             {
                 OutgoingConnectionFactory factory = getInstance().outgoingConnectionFactory();
                 connection = factory.create(filteredEndpoints);
-                if(IceUtil.Debug.ASSERT)
+                if(IceUtilInternal.Debug.ASSERT)
                 {
-                    IceUtil.Debug.Assert(connection != null);
+                    IceUtilInternal.Debug.Assert(connection != null);
                 }
             }
             catch(Ice.LocalException ex)
             {
                 if(getRouterInfo() == null)
                 {
-                    if(IceUtil.Debug.ASSERT)
+                    if(IceUtilInternal.Debug.ASSERT)
                     {
-                        IceUtil.Debug.Assert(_locatorInfo != null);
+                        IceUtilInternal.Debug.Assert(_locatorInfo != null);
                     }
                     _locatorInfo.clearCache(this);
 
@@ -194,9 +194,9 @@ public class IndirectReference extends RoutableReference
             connection.setAdapter(getRouterInfo().getAdapter());
         }
 
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(connection != null);
+            IceUtilInternal.Debug.Assert(connection != null);
         }
         return connection;
     }

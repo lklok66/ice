@@ -14,9 +14,9 @@ public final class ServantManager
     public synchronized void
     addServant(Ice.Object servant, Ice.Identity ident, String facet)
     {
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(_instance != null); // Must not be called after destruction.
+            IceUtilInternal.Debug.Assert(_instance != null); // Must not be called after destruction.
         }
 
         if(facet == null)
@@ -39,7 +39,7 @@ public final class ServantManager
                 ex.kindOfObject = "servant";
                 if(facet.length() > 0)
                 {
-                    ex.id += " -f " + IceUtil.StringUtil.escapeString(facet, "");
+                    ex.id += " -f " + IceUtilInternal.StringUtil.escapeString(facet, "");
                 }
                 throw ex;
             }
@@ -51,9 +51,9 @@ public final class ServantManager
     public synchronized Ice.Object
     removeServant(Ice.Identity ident, String facet)
     {
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(_instance != null); // Must not be called after destruction.
+            IceUtilInternal.Debug.Assert(_instance != null); // Must not be called after destruction.
         }
 
         if(facet == null)
@@ -70,7 +70,7 @@ public final class ServantManager
             ex.kindOfObject = "servant";
             if(facet.length() > 0)
             {
-                ex.id += " -f " + IceUtil.StringUtil.escapeString(facet, "");
+                ex.id += " -f " + IceUtilInternal.StringUtil.escapeString(facet, "");
             }
             throw ex;
         }
@@ -85,9 +85,9 @@ public final class ServantManager
     public synchronized java.util.Hashtable
     removeAllFacets(Ice.Identity ident)
     {
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(_instance != null); // Must not be called after destruction.
+            IceUtilInternal.Debug.Assert(_instance != null); // Must not be called after destruction.
         }
 
         java.util.Hashtable m = (java.util.Hashtable)_servantMapMap.get(ident);
@@ -113,9 +113,9 @@ public final class ServantManager
         // requests are received over the bidir connection after the
         // adapter was deactivated.
         //        
-        //if(IceUtil.Debug.ASSERT)
+        //if(IceUtilInternal.Debug.ASSERT)
         //{
-        //    IceUtil.Debug.Assert(_instance != null); // Must not be called after destruction.
+        //    IceUtilInternal.Debug.Assert(_instance != null); // Must not be called after destruction.
         //}
 
         if(facet == null)
@@ -136,9 +136,9 @@ public final class ServantManager
     public synchronized java.util.Hashtable
     findAllFacets(Ice.Identity ident)
     {
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(_instance != null); // Must not be called after destruction.
+            IceUtilInternal.Debug.Assert(_instance != null); // Must not be called after destruction.
         }
 
         java.util.Hashtable m = (java.util.Hashtable)_servantMapMap.get(ident);
@@ -167,9 +167,9 @@ public final class ServantManager
         // requests are received over the bidir connection after the
         // adapter was deactivated.
         //        
-        //if(IceUtil.Debug.ASSERT)
+        //if(IceUtilInternal.Debug.ASSERT)
         //{
-        //    IceUtil.Debug.Assert(_instance != null); // Must not be called after destruction.
+        //    IceUtilInternal.Debug.Assert(_instance != null); // Must not be called after destruction.
         //}
 
         java.util.Hashtable m = (java.util.Hashtable)_servantMapMap.get(ident);
@@ -179,9 +179,9 @@ public final class ServantManager
         }
         else
         {
-            if(IceUtil.Debug.ASSERT)
+            if(IceUtilInternal.Debug.ASSERT)
             {
-                IceUtil.Debug.Assert(!m.isEmpty());
+                IceUtilInternal.Debug.Assert(!m.isEmpty());
             }
             return true;
         }
@@ -206,7 +206,7 @@ public final class ServantManager
         // not been called if the associated object adapter was not
         // properly deactivated.
         //
-        //IceUtil.Debug.FinalizerAssert(_instance == null);
+        //IceUtilInternal.Debug.FinalizerAssert(_instance == null);
     }
 
     //
@@ -215,9 +215,9 @@ public final class ServantManager
     public synchronized void
     destroy()
     {
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(_instance != null); // Must not be called after destruction.
+            IceUtilInternal.Debug.Assert(_instance != null); // Must not be called after destruction.
         }
 
         _servantMapMap.clear();

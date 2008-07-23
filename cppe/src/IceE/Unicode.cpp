@@ -16,6 +16,7 @@
 
 using namespace std;
 using namespace IceUtil;
+using namespace IceUtilInternal;
 
 namespace
 {
@@ -89,7 +90,7 @@ struct WstringHelper<4>
 //
 
 ConversionResult 
-IceUtil::convertUTFWstringToUTF8(
+IceUtilInternal::convertUTFWstringToUTF8(
     const wchar_t*& sourceStart, const wchar_t* sourceEnd, 
     Byte*& targetStart, Byte* targetEnd, ConversionFlags flags)
 {
@@ -98,7 +99,7 @@ IceUtil::convertUTFWstringToUTF8(
 }
 
 ConversionResult
-IceUtil::convertUTF8ToUTFWstring(
+IceUtilInternal::convertUTF8ToUTFWstring(
     const Byte*& sourceStart, const Byte* sourceEnd, 
     wchar_t*& targetStart, wchar_t* targetEnd, ConversionFlags flags)
 {
@@ -107,7 +108,7 @@ IceUtil::convertUTF8ToUTFWstring(
 }
 
 ConversionResult 
-IceUtil::convertUTF8ToUTFWstring(const Byte*& sourceStart, const Byte* sourceEnd, 
+IceUtilInternal::convertUTF8ToUTFWstring(const Byte*& sourceStart, const Byte* sourceEnd, 
                                  std::wstring& target, ConversionFlags flags)
 {
     //
@@ -184,7 +185,7 @@ IceUtil::UTFConversionException::ice_throw() const
     throw *this;
 }
 
-IceUtil::ConversionResult
+IceUtilInternal::ConversionResult
 IceUtil::UTFConversionException::conversionResult() const
 {
     return _conversionResult;

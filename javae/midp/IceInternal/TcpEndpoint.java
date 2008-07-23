@@ -35,7 +35,7 @@ final class TcpEndpoint implements Endpoint
         _port = 0;
         _timeout = -1;
 
-        String[] arr = IceUtil.StringUtil.split(str, " \t\n\r");
+        String[] arr = IceUtilInternal.StringUtil.split(str, " \t\n\r");
 
         int i = 0;
         while(i < arr.length)

@@ -185,7 +185,7 @@ class Acceptor
     finalize()
         throws Throwable
     {
-        IceUtil.Debug.FinalizerAssert(_fd == null);
+        IceUtilInternal.Debug.FinalizerAssert(_fd == null);
     }
 
     private Instance _instance;

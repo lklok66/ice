@@ -9,7 +9,7 @@
 
 package IceInternal;
 
-public interface Endpoint extends IceUtil.Comparable
+public interface Endpoint extends IceUtilInternal.Comparable
 {
     //
     // Marshal the endpoint.

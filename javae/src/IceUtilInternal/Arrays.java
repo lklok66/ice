@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-package IceUtil;
+package IceUtilInternal;
 
 public final class Arrays
 {
@@ -52,7 +52,7 @@ public final class Arrays
         {
             for(int j = 0; j < vector.size() -1 ; ++j)
             {
-                if(((IceUtil.Comparable)vector.elementAt(j)).compareTo(vector.elementAt(j + 1)) > 0)
+                if(((IceUtilInternal.Comparable)vector.elementAt(j)).compareTo(vector.elementAt(j + 1)) > 0)
                 {
                     java.lang.Object t = vector.elementAt(j + 1);
                     vector.setElementAt(vector.elementAt(j), j + 1);

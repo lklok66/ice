@@ -16,9 +16,9 @@ public final class RouterInfo
         _router = router;
         _identities = new java.util.Hashtable();
 
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(_router != null);
+            IceUtilInternal.Debug.Assert(_router != null);
         }
     }
 
@@ -108,7 +108,7 @@ public final class RouterInfo
     public void
     addProxy(Ice.ObjectPrx proxy)
     {
-        IceUtil.Debug.Assert(proxy != null);
+        IceUtilInternal.Debug.Assert(proxy != null);
 
         if(!_identities.containsKey(proxy.ice_getIdentity()))
         {

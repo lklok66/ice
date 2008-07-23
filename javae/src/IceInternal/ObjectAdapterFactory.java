@@ -232,10 +232,10 @@ public final class ObjectAdapterFactory
     finalize()
         throws Throwable
     {
-        IceUtil.Debug.FinalizerAssert(_instance == null);
-        IceUtil.Debug.FinalizerAssert(_communicator == null);
-        IceUtil.Debug.FinalizerAssert(_adapters == null);
-        IceUtil.Debug.FinalizerAssert(!_waitForShutdown);
+        IceUtilInternal.Debug.FinalizerAssert(_instance == null);
+        IceUtilInternal.Debug.FinalizerAssert(_communicator == null);
+        IceUtilInternal.Debug.FinalizerAssert(_adapters == null);
+        IceUtilInternal.Debug.FinalizerAssert(!_waitForShutdown);
 
         // Cannot call finalize on superclass. java.lang.Object.finalize() not available in CLDC.
     }

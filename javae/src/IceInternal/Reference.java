@@ -143,9 +143,9 @@ public abstract class Reference
         }
         catch(IceUtil.CloneException ex)
         {
-            if(IceUtil.Debug.ASSERT)
+            if(IceUtilInternal.Debug.ASSERT)
             {
-                IceUtil.Debug.Assert(false);
+                IceUtilInternal.Debug.Assert(false);
             }
         }
         return r;
@@ -268,7 +268,7 @@ public abstract class Reference
         // the identity string in quotes.
         //
         String id = _instance.identityToString(_identity);
-        if(IceUtil.StringUtil.findFirstOf(id, " \t\n\r:@") != -1)
+        if(IceUtilInternal.StringUtil.findFirstOf(id, " \t\n\r:@") != -1)
         {
             s.append('"');
             s.append(id);
@@ -287,8 +287,8 @@ public abstract class Reference
             // the facet string in quotes.
             //
             s.append(" -f ");
-            String fs = IceUtil.StringUtil.escapeString(_facet, "");
-            if(IceUtil.StringUtil.findFirstOf(fs, " \t\n\r:@") != -1)
+            String fs = IceUtilInternal.StringUtil.escapeString(_facet, "");
+            if(IceUtilInternal.StringUtil.findFirstOf(fs, " \t\n\r:@") != -1)
             {
                 s.append('"');
                 s.append(fs);
@@ -369,7 +369,7 @@ public abstract class Reference
             return false;
         }
 
-        if(!IceUtil.Hashtable.equals(_context, r._context))
+        if(!IceUtilInternal.Hashtable.equals(_context, r._context))
         {
             return false;
         }
@@ -411,7 +411,7 @@ public abstract class Reference
         //
         // This should not be called. The cloning operation will be handled by descendents.
         //
-        IceUtil.Debug.Assert(false);
+        IceUtilInternal.Debug.Assert(false);
         return null;
     }
 
@@ -456,11 +456,11 @@ public abstract class Reference
         //
         // Validate string arguments.
         //
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(ident.name != null);
-            IceUtil.Debug.Assert(ident.category != null);
-            IceUtil.Debug.Assert(fac != null);
+            IceUtilInternal.Debug.Assert(ident.name != null);
+            IceUtilInternal.Debug.Assert(ident.category != null);
+            IceUtilInternal.Debug.Assert(fac != null);
         }
 
         _instance = inst;

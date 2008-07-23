@@ -102,9 +102,9 @@ public final class ObjectAdapter
 
         synchronized(this)
         {
-            if(IceUtil.Debug.ASSERT)
+            if(IceUtilInternal.Debug.ASSERT)
             {
-                IceUtil.Debug.Assert(!_deactivated); // Not possible if _waitForActivate = true;
+                IceUtilInternal.Debug.Assert(!_deactivated); // Not possible if _waitForActivate = true;
             }
             
             //
@@ -614,9 +614,9 @@ public final class ObjectAdapter
     {
         checkForDeactivation();
 
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(_directCount >= 0);
+            IceUtilInternal.Debug.Assert(_directCount >= 0);
         }
         ++_directCount;
     }
@@ -626,10 +626,10 @@ public final class ObjectAdapter
     {
         // No check for deactivation here!
         
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(_instance != null); // Must not be called after waitForDeactivate().
-            IceUtil.Debug.Assert(_directCount > 0);
+            IceUtilInternal.Debug.Assert(_instance != null); // Must not be called after waitForDeactivate().
+            IceUtilInternal.Debug.Assert(_directCount > 0);
         }
         if(--_directCount == 0)
         {
@@ -710,7 +710,7 @@ public final class ObjectAdapter
                         _routerEndpoints.addElement(endpoints[i]);
                     }
             
-                    IceUtil.Arrays.sort(_routerEndpoints); // Must be sorted.
+                    IceUtilInternal.Arrays.sort(_routerEndpoints); // Must be sorted.
                     //
                     // Remove duplicate endpoints, so we have a list of unique
                     // endpoints.
@@ -818,11 +818,11 @@ public final class ObjectAdapter
         }
         else
         {
-            //IceUtil.Debug.FinalizerAssert(_servantManager == null); // Not cleared, it needs to be immutable.
-            IceUtil.Debug.FinalizerAssert(_communicator == null);
-            IceUtil.Debug.FinalizerAssert(_incomingConnectionFactories == null);
-            IceUtil.Debug.FinalizerAssert(_directCount == 0);
-            IceUtil.Debug.FinalizerAssert(!_waitForActivate);
+            //IceUtilInternal.Debug.FinalizerAssert(_servantManager == null); // Not cleared, it needs to be immutable.
+            IceUtilInternal.Debug.FinalizerAssert(_communicator == null);
+            IceUtilInternal.Debug.FinalizerAssert(_incomingConnectionFactories == null);
+            IceUtilInternal.Debug.FinalizerAssert(_directCount == 0);
+            IceUtilInternal.Debug.FinalizerAssert(!_waitForActivate);
         }
     }
 
@@ -928,9 +928,9 @@ public final class ObjectAdapter
             }
             catch(IceUtil.CloneException ex)
             {
-                if(IceUtil.Debug.ASSERT)
+                if(IceUtilInternal.Debug.ASSERT)
                 {
-                    IceUtil.Debug.Assert(false);
+                    IceUtilInternal.Debug.Assert(false);
                 }
             }
             throw e;
@@ -955,7 +955,7 @@ public final class ObjectAdapter
         java.util.Vector endpoints = new java.util.Vector();
         while(end < endpts.length())
         {
-            beg = IceUtil.StringUtil.findFirstNotOf(endpts, delim, end);
+            beg = IceUtilInternal.StringUtil.findFirstNotOf(endpts, delim, end);
             if(beg == -1)
             {
                 break;

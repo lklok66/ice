@@ -299,9 +299,9 @@ public class IntMap
         public Object
         nextElement()
         {
-            if(IceUtil.Debug.ASSERT)
+            if(IceUtilInternal.Debug.ASSERT)
             {
-                IceUtil.Debug.Assert(_modCount == _expectedModCount);
+                IceUtilInternal.Debug.Assert(_modCount == _expectedModCount);
             }
             Entry e = _next;
             if(e == null)
@@ -328,9 +328,9 @@ public class IntMap
             {
                 throw new IllegalStateException();
             }
-            if(IceUtil.Debug.ASSERT)
+            if(IceUtilInternal.Debug.ASSERT)
             {
-                IceUtil.Debug.Assert(_modCount == _expectedModCount);
+                IceUtilInternal.Debug.Assert(_modCount == _expectedModCount);
             }
             int k = _current.key;
             _current = null;

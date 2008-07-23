@@ -33,9 +33,9 @@ public final class Outgoing
         _state = StateUnsent;
         _exception = null;
 
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(_stream != null);
+            IceUtilInternal.Debug.Assert(_stream != null);
         }
         _stream.reset();
 
@@ -47,9 +47,9 @@ public final class Outgoing
     invoke()
         throws LocalExceptionWrapper
     {
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(_state == StateUnsent);
+            IceUtilInternal.Debug.Assert(_state == StateUnsent);
         }
 
         _stream.endWriteEncaps();
@@ -108,9 +108,9 @@ public final class Outgoing
                     return false;
                 }
                 
-                if(IceUtil.Debug.ASSERT)
+                if(IceUtilInternal.Debug.ASSERT)
                 {
-                    IceUtil.Debug.Assert(_state == StateOK);
+                    IceUtilInternal.Debug.Assert(_state == StateOK);
                 }
                 break;
             }
@@ -143,9 +143,9 @@ public final class Outgoing
             case Reference.ModeDatagram:
             case Reference.ModeBatchDatagram:
             {
-                if(IceUtil.Debug.ASSERT)
+                if(IceUtilInternal.Debug.ASSERT)
                 {
-                        IceUtil.Debug.Assert(false);
+                        IceUtilInternal.Debug.Assert(false);
                 }
                 return false;
             }
@@ -158,9 +158,9 @@ public final class Outgoing
     abort(Ice.LocalException ex)
         throws LocalExceptionWrapper
     {
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(_state == StateUnsent);
+            IceUtilInternal.Debug.Assert(_state == StateUnsent);
         }
 
         //
@@ -188,11 +188,11 @@ public final class Outgoing
     public void
     finished(BasicStream is)
     {
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(_reference.getMode() == Reference.ModeTwoway); // Can only be called for twoways.
+            IceUtilInternal.Debug.Assert(_reference.getMode() == Reference.ModeTwoway); // Can only be called for twoways.
         
-            IceUtil.Debug.Assert(_state <= StateInProgress);
+            IceUtilInternal.Debug.Assert(_state <= StateInProgress);
         }
         
         //
@@ -258,9 +258,9 @@ public final class Outgoing
                     
                     default:
                     {
-                        if(IceUtil.Debug.ASSERT)
+                        if(IceUtilInternal.Debug.ASSERT)
                         {
-                            IceUtil.Debug.Assert(false);
+                            IceUtilInternal.Debug.Assert(false);
                         }
                         break;
                     }
@@ -320,9 +320,9 @@ public final class Outgoing
                     
                     default:
                     {
-                        if(IceUtil.Debug.ASSERT)
+                        if(IceUtilInternal.Debug.ASSERT)
                         {
-                            IceUtil.Debug.Assert(false);
+                            IceUtilInternal.Debug.Assert(false);
                         }
                         break;
                     }
@@ -347,10 +347,10 @@ public final class Outgoing
     public void
     finished(Ice.LocalException ex)
     {
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(_reference.getMode() == Reference.ModeTwoway); // Can only be called for twoways.
-            IceUtil.Debug.Assert(_state <= StateInProgress);
+            IceUtilInternal.Debug.Assert(_reference.getMode() == Reference.ModeTwoway); // Can only be called for twoways.
+            IceUtilInternal.Debug.Assert(_state <= StateInProgress);
         }
 
         _state = StateLocalException;
@@ -384,9 +384,9 @@ public final class Outgoing
             case Reference.ModeDatagram:
             case Reference.ModeBatchDatagram:
             {
-                if(IceUtil.Debug.ASSERT)
+                if(IceUtilInternal.Debug.ASSERT)
                 {
-                        IceUtil.Debug.Assert(false);
+                        IceUtilInternal.Debug.Assert(false);
                 }
                 break;
             }

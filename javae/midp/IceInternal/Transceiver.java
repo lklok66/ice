@@ -170,9 +170,9 @@ final public class Transceiver
 
         synchronized(this)
         {
-            if(IceUtil.Debug.ASSERT)
+            if(IceUtilInternal.Debug.ASSERT)
             {
-                IceUtil.Debug.Assert(_connection != null);
+                IceUtilInternal.Debug.Assert(_connection != null);
             }
             try
             {
@@ -215,9 +215,9 @@ final public class Transceiver
             _logger.trace(_traceLevels.networkCat, s);
         }
 
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(_connection != null);
+            IceUtilInternal.Debug.Assert(_connection != null);
         }
 
         try
@@ -288,9 +288,9 @@ final public class Transceiver
             int pos = buf.position();
             try
             {
-                if(IceUtil.Debug.ASSERT)
+                if(IceUtilInternal.Debug.ASSERT)
                 {
-                    IceUtil.Debug.Assert(_connection != null);
+                    IceUtilInternal.Debug.Assert(_connection != null);
                 }
 
                 int rem = buf.remaining();
@@ -374,9 +374,9 @@ final public class Transceiver
             int pos = buf.position();
             try
             {
-                if(IceUtil.Debug.ASSERT)
+                if(IceUtilInternal.Debug.ASSERT)
                 {
-                    IceUtil.Debug.Assert(_connection != null);
+                    IceUtilInternal.Debug.Assert(_connection != null);
                 }
                 int ret = _in.read(data, pos, buf.remaining());
                 
@@ -463,7 +463,7 @@ final public class Transceiver
     finalize()
         throws Throwable
     {
-        IceUtil.Debug.FinalizerAssert(_connection == null);
+        IceUtilInternal.Debug.FinalizerAssert(_connection == null);
     }
 
     private javax.microedition.io.SocketConnection _connection;

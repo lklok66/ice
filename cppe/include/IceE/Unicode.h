@@ -83,6 +83,21 @@ ICE_API std::wstring stringToWstring(const std::string&);
 
 #endif
 
+typedef unsigned char Byte;
+
+ICE_API bool
+isLegalUTF8Sequence(const Byte* source, const Byte* end);
+
+enum ConversionFlags 
+{
+    strictConversion = 0,
+    lenientConversion
+};
+
+}
+
+namespace IceUtilInternal
+{
 
 //
 // Converts UTF-8 byte-sequences to and from UTF-16 or UTF-32 (with native
@@ -103,32 +118,22 @@ enum ConversionResult
         sourceIllegal                /* source sequence is illegal/malformed */
 };
 
-
-enum ConversionFlags 
-{
-    strictConversion = 0,
-    lenientConversion
-};
-
-typedef unsigned char Byte;
-
-ICE_API bool
-isLegalUTF8Sequence(const Byte* source, const Byte* end);
-
 ICE_API ConversionResult 
 convertUTFWstringToUTF8(const wchar_t*& sourceStart, const wchar_t* sourceEnd, 
-                        Byte*& targetStart, Byte* targetEnd, ConversionFlags flags);
+                        IceUtil::Byte*& targetStart, IceUtil::Byte* targetEnd, IceUtil::ConversionFlags flags);
 
 ICE_API ConversionResult
-convertUTF8ToUTFWstring(const Byte*& sourceStart, const Byte* sourceEnd, 
-                        wchar_t*& targetStart, wchar_t* targetEnd, ConversionFlags flags);
+convertUTF8ToUTFWstring(const IceUtil::Byte*& sourceStart, const IceUtil::Byte* sourceEnd, 
+                        wchar_t*& targetStart, wchar_t* targetEnd, IceUtil::ConversionFlags flags);
 
 ICE_API ConversionResult 
-convertUTF8ToUTFWstring(const Byte*& sourceStart, const Byte* sourceEnd, 
-                        std::wstring& target, ConversionFlags flags);
+convertUTF8ToUTFWstring(const IceUtil::Byte*& sourceStart, const IceUtil::Byte* sourceEnd, 
+                        std::wstring& target, IceUtil::ConversionFlags flags);
 
+}
 
-
+namespace IceUtil
+{
 
 //
 // UTFConversionException is raised by wstringToString() or stringToWstring()
@@ -138,16 +143,16 @@ class ICE_API UTFConversionException : public Exception
 {
 public:
     
-    UTFConversionException(const char*, int, ConversionResult);
+    UTFConversionException(const char*, int, IceUtilInternal::ConversionResult);
     virtual std::string ice_name() const;
     virtual std::string toString() const;
     virtual Exception* ice_clone() const;
     virtual void ice_throw() const;
 
-    ConversionResult conversionResult() const;
+    IceUtilInternal::ConversionResult conversionResult() const;
 private:
 
-    const ConversionResult _conversionResult;
+    const IceUtilInternal::ConversionResult _conversionResult;
     static const char* _name;    
 };
 

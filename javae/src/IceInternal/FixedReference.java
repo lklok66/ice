@@ -187,9 +187,9 @@ public class FixedReference extends Reference
         }
         
         Ice.Connection connection = (Ice.Connection)connections.elementAt(0);
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(connection != null);
+            IceUtilInternal.Debug.Assert(connection != null);
         }
         connection.throwException();
         return connection;
@@ -212,7 +212,7 @@ public class FixedReference extends Reference
             return false;
         }
         
-        return IceUtil.Arrays.equals(_fixedConnections, rhs._fixedConnections);
+        return IceUtilInternal.Arrays.equals(_fixedConnections, rhs._fixedConnections);
     }
 
     protected

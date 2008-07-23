@@ -131,7 +131,7 @@ encodeChar(string::value_type b, string& s, const string& special)
 // prefixed with a backslash in the returned string.
 //
 string
-IceUtil::escapeString(const string& s, const string& special)
+IceUtilInternal::escapeString(const string& s, const string& special)
 {
     string::size_type i;
     for(i = 0; i < special.size(); ++i)
@@ -279,7 +279,7 @@ static void decodeString(const string& s, string::size_type start, string::size_
 // Remove escape sequences added by escapeString.
 //
 bool
-IceUtil::unescapeString(const string& s, string::size_type start, string::size_type end, string& result)
+IceUtilInternal::unescapeString(const string& s, string::size_type start, string::size_type end, string& result)
 {
     if(start < 0)
     {
@@ -312,7 +312,7 @@ IceUtil::unescapeString(const string& s, string::size_type start, string::size_t
 // Trim white space (" \t\r\n")
 //
 string
-IceUtil::trim(const string& s)
+IceUtilInternal::trim(const string& s)
 {
     const string delim = " \t\r\n";
     if(s.length() != 0)
@@ -338,7 +338,7 @@ IceUtil::trim(const string& s)
 // If no matching closing quote is found, then -1 is returned.
 //
 string::size_type
-IceUtil::checkQuote(const string& s, string::size_type start)
+IceUtilInternal::checkQuote(const string& s, string::size_type start)
 {
     string::value_type quoteChar = s[start];
     if(quoteChar == '"' || quoteChar == '\'')
@@ -365,7 +365,7 @@ IceUtil::checkQuote(const string& s, string::size_type start)
 // it's portable across platforms (whereas regex() isn't).
 //
 bool
-IceUtil::match(const string& s, const string& pat, bool matchPeriod)
+IceUtilInternal::match(const string& s, const string& pat, bool matchPeriod)
 {
     assert(!s.empty());
     assert(!pat.empty());

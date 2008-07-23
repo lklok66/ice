@@ -163,7 +163,7 @@ public final class ProxyFactory
         }
 
         ++cnt;
-        IceUtil.Debug.Assert(cnt > 0);
+        IceUtilInternal.Debug.Assert(cnt > 0);
 
         if(cnt > _retryIntervals.length)
         {
@@ -214,7 +214,7 @@ public final class ProxyFactory
 
         String str = _instance.initializationData().properties.getPropertyWithDefault("Ice.RetryIntervals", "0");
 
-        String[] arr = IceUtil.StringUtil.split(str.trim(), " \t\n\r");
+        String[] arr = IceUtilInternal.StringUtil.split(str.trim(), " \t\n\r");
 
         if(arr.length > 0)
         {

@@ -181,7 +181,7 @@ public class Instance
         if(slash == -1)
         {
             Ice.StringHolder token = new Ice.StringHolder();
-            if(!IceUtil.StringUtil.unescapeString(s, 0, s.length(), token))
+            if(!IceUtilInternal.StringUtil.unescapeString(s, 0, s.length(), token))
             {
                 Ice.IdentityParseException ex = new Ice.IdentityParseException();
                 ex.str = s;
@@ -193,7 +193,7 @@ public class Instance
         else
         {
             Ice.StringHolder token = new Ice.StringHolder();
-            if(!IceUtil.StringUtil.unescapeString(s, 0, slash, token))
+            if(!IceUtilInternal.StringUtil.unescapeString(s, 0, slash, token))
             {
                 Ice.IdentityParseException ex = new Ice.IdentityParseException();
                 ex.str = s;
@@ -202,7 +202,7 @@ public class Instance
             ident.category = token.value;
             if(slash + 1 < s.length())
             {
-                if(!IceUtil.StringUtil.unescapeString(s, slash + 1, s.length(), token))
+                if(!IceUtilInternal.StringUtil.unescapeString(s, slash + 1, s.length(), token))
                 {
                     Ice.IdentityParseException ex = new Ice.IdentityParseException();
                     ex.str = s;
@@ -224,12 +224,12 @@ public class Instance
     {
         if(ident.category.length() == 0)
         {
-            return IceUtil.StringUtil.escapeString(ident.name, "/");
+            return IceUtilInternal.StringUtil.escapeString(ident.name, "/");
         }
         else
         {
-            return IceUtil.StringUtil.escapeString(ident.category, "/") + '/' +
-                IceUtil.StringUtil.escapeString(ident.name, "/");
+            return IceUtilInternal.StringUtil.escapeString(ident.category, "/") + '/' +
+                IceUtilInternal.StringUtil.escapeString(ident.name, "/");
         }
     }
 
@@ -306,14 +306,14 @@ public class Instance
     finalize()
         throws Throwable
     {
-        IceUtil.Debug.FinalizerAssert(_state == StateDestroyed);
-        IceUtil.Debug.FinalizerAssert(_referenceFactory == null);
-        IceUtil.Debug.FinalizerAssert(_proxyFactory == null);
-        IceUtil.Debug.FinalizerAssert(_outgoingConnectionFactory == null);
-        IceUtil.Debug.FinalizerAssert(_objectAdapterFactory == null);
-        IceUtil.Debug.FinalizerAssert(_routerManager == null);
-        IceUtil.Debug.FinalizerAssert(_locatorManager == null);
-        IceUtil.Debug.FinalizerAssert(_endpointFactory == null);
+        IceUtilInternal.Debug.FinalizerAssert(_state == StateDestroyed);
+        IceUtilInternal.Debug.FinalizerAssert(_referenceFactory == null);
+        IceUtilInternal.Debug.FinalizerAssert(_proxyFactory == null);
+        IceUtilInternal.Debug.FinalizerAssert(_outgoingConnectionFactory == null);
+        IceUtilInternal.Debug.FinalizerAssert(_objectAdapterFactory == null);
+        IceUtilInternal.Debug.FinalizerAssert(_routerManager == null);
+        IceUtilInternal.Debug.FinalizerAssert(_locatorManager == null);
+        IceUtilInternal.Debug.FinalizerAssert(_endpointFactory == null);
 
         //
         // Do not call parent's finalizer, CLDC Object does not have it.

@@ -101,9 +101,9 @@ public final class OutgoingConnectionFactory
              public Endpoint endpoint;
         }
 
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(endpts.length > 0);
+            IceUtilInternal.Debug.Assert(endpts.length > 0);
         }
         java.util.Vector connectors = new java.util.Vector();
 
@@ -156,9 +156,9 @@ public final class OutgoingConnectionFactory
                 // Create connectors for the endpoint.
                 //
                 java.util.Vector cons = endpoints[i].connectors();
-                if(IceUtil.Debug.ASSERT)
+                if(IceUtilInternal.Debug.ASSERT)
                 {
-                    IceUtil.Debug.Assert(cons.size() > 0);
+                    IceUtilInternal.Debug.Assert(cons.size() > 0);
                 }
 
                 p = cons.elements();
@@ -313,9 +313,9 @@ public final class OutgoingConnectionFactory
                 }
 
                 Transceiver transceiver = connector.connect(timeout);
-                if(IceUtil.Debug.ASSERT)
+                if(IceUtilInternal.Debug.ASSERT)
                 {
-                    IceUtil.Debug.Assert(transceiver != null);
+                    IceUtilInternal.Debug.Assert(transceiver != null);
                 }
 
                 connection = new Ice.Connection(_instance, transceiver, endpoint, null);
@@ -376,9 +376,9 @@ public final class OutgoingConnectionFactory
             
             if(connection == null)
             {
-                if(IceUtil.Debug.ASSERT)
+                if(IceUtilInternal.Debug.ASSERT)
                 {
-                    IceUtil.Debug.Assert(exception != null);
+                    IceUtilInternal.Debug.Assert(exception != null);
                 }
                 throw exception;
             }
@@ -400,9 +400,9 @@ public final class OutgoingConnectionFactory
             }
         }
         
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(connection != null);
+            IceUtilInternal.Debug.Assert(connection != null);
         }
         return connection;
     }
@@ -415,9 +415,9 @@ public final class OutgoingConnectionFactory
             throw new Ice.CommunicatorDestroyedException();
         }
 
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(routerInfo != null);
+            IceUtilInternal.Debug.Assert(routerInfo != null);
         }
 
         //
@@ -546,8 +546,8 @@ public final class OutgoingConnectionFactory
     finalize()
         throws Throwable
     {
-        IceUtil.Debug.FinalizerAssert(_destroyed);
-        IceUtil.Debug.FinalizerAssert(_connections == null);
+        IceUtilInternal.Debug.FinalizerAssert(_destroyed);
+        IceUtilInternal.Debug.FinalizerAssert(_connections == null);
 
         //
         // Cannot call parent's finalizer here. java.lang.Object in CLDC doesn't have a finalize call.

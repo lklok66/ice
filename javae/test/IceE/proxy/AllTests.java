@@ -433,7 +433,7 @@ public class AllTests
         c.put("two", "world");
         cl = Test.MyClassPrxHelper.checkedCast(base, c);
         java.util.Hashtable c2 = cl.getContext();
-        test(IceUtil.Hashtable.equals(c, c2));
+        test(IceUtilInternal.Hashtable.equals(c, c2));
         out.println("ok");
 
         return cl;

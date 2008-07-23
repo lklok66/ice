@@ -33,9 +33,9 @@ public class ObjectPrxHelper extends ObjectPrxHelperBase
             try
             {
                 boolean ok = bb.ice_isA("::Ice::Object");
-                if(IceUtil.Debug.ASSERT)
+                if(IceUtilInternal.Debug.ASSERT)
                 {
-                    IceUtil.Debug.Assert(ok);
+                    IceUtilInternal.Debug.Assert(ok);
                 }
                 ObjectPrxHelper h = new ObjectPrxHelper();
                 h.__copyFrom(bb);
@@ -58,9 +58,9 @@ public class ObjectPrxHelper extends ObjectPrxHelperBase
             try
             {
                 boolean ok = bb.ice_isA("::Ice::Object", ctx);
-                if(IceUtil.Debug.ASSERT)
+                if(IceUtilInternal.Debug.ASSERT)
                 {
-                    IceUtil.Debug.Assert(ok);
+                    IceUtilInternal.Debug.Assert(ok);
                 }
                 ObjectPrxHelper h = new ObjectPrxHelper();
                 h.__copyFrom(bb);

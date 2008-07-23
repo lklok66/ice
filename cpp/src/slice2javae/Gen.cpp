@@ -298,12 +298,12 @@ Slice::JavaVisitor::writeDispatch(Output& out, const ClassDefPtr& p)
 
     out << sp << nl << "public boolean" << nl << "ice_isA(String s)";
     out << sb;
-    out << nl << "return IceUtil.Arrays.search(__ids, s) >= 0;";
+    out << nl << "return IceUtilInternal.Arrays.search(__ids, s) >= 0;";
     out << eb;
 
     out << sp << nl << "public boolean" << nl << "ice_isA(String s, Ice.Current __current)";
     out << sb;
-    out << nl << "return IceUtil.Arrays.search(__ids, s) >= 0;";
+    out << nl << "return IceUtilInternal.Arrays.search(__ids, s) >= 0;";
     out << eb;
 
     out << sp << nl << "public String[]" << nl << "ice_ids()";
@@ -615,7 +615,7 @@ Slice::JavaVisitor::writeDispatch(Output& out, const ClassDefPtr& p)
         out << sp << nl << "public Ice.DispatchStatus" << nl
             << "__dispatch(IceInternal.Incoming in, Ice.Current __current)";
         out << sb;
-        out << nl << "int pos = IceUtil.Arrays.search(__all, __current.operation);";
+        out << nl << "int pos = IceUtilInternal.Arrays.search(__all, __current.operation);";
         out << nl << "if(pos < 0)";
         out << sb;
         out << nl << "throw new Ice.OperationNotExistException(__current.id, __current.facet, __current.operation);";
@@ -681,9 +681,9 @@ Slice::JavaVisitor::writeDispatch(Output& out, const ClassDefPtr& p)
             out << eb;
         }
         out << eb;
-        out << nl << "if(IceUtil.Debug.ASSERT)";
+        out << nl << "if(IceUtilInternal.Debug.ASSERT)";
         out << sb;
-        out << sp << nl << "IceUtil.Debug.Assert(false);";
+        out << sp << nl << "IceUtilInternal.Debug.Assert(false);";
         out << eb;
         out << nl << "throw new Ice.OperationNotExistException(__current.id, __current.facet, __current.operation);";
         out << eb;
@@ -1583,14 +1583,14 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
             //
             // We treat sequences differently because the native equals() method for
             // a Java array does not perform a deep comparison. We use the helper method
-            // IceUtil.Arrays.equals() to compare native arrays.
+            // IceUtilInternal.Arrays.equals() to compare native arrays.
             //
             // For all other types, we can use the native equals() method.
             //
             SequencePtr seq = SequencePtr::dynamicCast((*d)->type());
             if(seq)
             {
-                out << nl << "if(!IceUtil.Arrays.equals(" << memberName << ", _r." << memberName << "))";
+                out << nl << "if(!IceUtilInternal.Arrays.equals(" << memberName << ", _r." << memberName << "))";
                 out << sb;
                 out << nl << "return false;";
                 out << eb;
@@ -1801,9 +1801,9 @@ Slice::Gen::TypesVisitor::visitEnum(const EnumPtr& p)
 
     out << sp << nl << "public static " << name << nl << "convert(int val)";
     out << sb;
-    out << nl << "if(IceUtil.Debug.ASSERT)";
+    out << nl << "if(IceUtilInternal.Debug.ASSERT)";
     out << sb;
-    out << nl << "IceUtil.Debug.Assert(val < " << sz << ");";
+    out << nl << "IceUtilInternal.Debug.Assert(val < " << sz << ");";
     out << eb;
     out << nl << "return __values[val];";
     out << eb;

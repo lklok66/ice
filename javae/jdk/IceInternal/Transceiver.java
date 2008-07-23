@@ -22,9 +22,9 @@ final public class Transceiver
 
         synchronized(this)
         {
-            if(IceUtil.Debug.ASSERT)
+            if(IceUtilInternal.Debug.ASSERT)
             {
-                IceUtil.Debug.Assert(_fd != null);
+                IceUtilInternal.Debug.Assert(_fd != null);
             }
             try
             {
@@ -60,9 +60,9 @@ final public class Transceiver
             _logger.trace(_traceLevels.networkCat, s);
         }
 
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(_fd != null);
+            IceUtilInternal.Debug.Assert(_fd != null);
         }
 
         _shutdown = true;
@@ -106,9 +106,9 @@ final public class Transceiver
         {
             try
             {
-                if(IceUtil.Debug.ASSERT)
+                if(IceUtilInternal.Debug.ASSERT)
                 {
-                    IceUtil.Debug.Assert(_fd != null);
+                    IceUtilInternal.Debug.Assert(_fd != null);
                 }
 
                 _out.write(data, pos, packetSize);
@@ -169,9 +169,9 @@ final public class Transceiver
             try
             {
                 _fd.setSoTimeout(interval);
-                if(IceUtil.Debug.ASSERT)
+                if(IceUtilInternal.Debug.ASSERT)
                 {
-                    IceUtil.Debug.Assert(_fd != null);
+                    IceUtilInternal.Debug.Assert(_fd != null);
                 }
                 int ret = _in.read(data, pos, buf.remaining());
                 
@@ -291,7 +291,7 @@ final public class Transceiver
     finalize()
         throws Throwable
     {
-        IceUtil.Debug.FinalizerAssert(_fd == null);
+        IceUtilInternal.Debug.FinalizerAssert(_fd == null);
     }
 
     private java.net.Socket _fd;

@@ -683,10 +683,10 @@ public class ObjectPrxHelperBase implements ObjectPrx
         // called upon initialization.
         //
 
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(_reference == null);
-            IceUtil.Debug.Assert(_connection == null);
+            IceUtilInternal.Debug.Assert(_reference == null);
+            IceUtilInternal.Debug.Assert(_connection == null);
         }
 
         _reference = ref;
@@ -786,10 +786,10 @@ public class ObjectPrxHelperBase implements ObjectPrx
         // upon initial initialization.
         //
 
-        if(IceUtil.Debug.ASSERT)
+        if(IceUtilInternal.Debug.ASSERT)
         {
-            IceUtil.Debug.Assert(_reference == null);
-            IceUtil.Debug.Assert(_connection == null);
+            IceUtilInternal.Debug.Assert(_reference == null);
+            IceUtilInternal.Debug.Assert(_connection == null);
         }
 
         _reference = ref;
