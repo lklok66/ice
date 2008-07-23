@@ -22,6 +22,9 @@ General Changes
 These entries apply to all relevant language mappings unless otherwise
 noted.
 
+- Properties set programmatically can no longer have leading or
+  trailing whitespace in the key.
+
 - If a proxy contains a host that is multihomed, the client will now
   try all the available IP addresses. Previously, only the first in
   the address list returned by the DNS was used and others were

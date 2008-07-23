@@ -215,9 +215,15 @@ public final class Properties
     setProperty(String key, String value)
     {
         //
-        // Check if the property is legal. (We write to System.err instead of using
-        // a logger because no logger may be established at the time the property
-        // is parsed.)
+        // Trim whitespace
+        //
+        if(key != null)
+        {
+            key = key.trim();
+        }
+
+        //
+        // Check if the property is legal.
         //
         if(key == null || key.length() == 0)
         {

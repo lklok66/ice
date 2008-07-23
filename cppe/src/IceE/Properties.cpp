@@ -92,7 +92,11 @@ Ice::Properties::getPropertiesForPrefix(const string& prefix)
 void
 Ice::Properties::setProperty(const string& key, const string& value)
 {
-    if(key.empty())
+    //
+    // Trim whitespace
+    //
+    string currentKey = IceUtilInternal::trim(key);
+    if(currentKey.empty())
     {
         return;
     }
@@ -104,11 +108,11 @@ Ice::Properties::setProperty(const string& key, const string& value)
     //
     if(!value.empty())
     {
-        _properties[key] = value;
+        _properties[currentKey] = value;
     }
     else
     {
-        _properties.erase(key);
+        _properties.erase(currentKey);
     }
 }
 
