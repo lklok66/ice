@@ -83,15 +83,42 @@ ICE_API std::wstring stringToWstring(const std::string&);
 
 #endif
 
+enum ConversionFlags 
+{
+    strictConversion = 0,
+    lenientConversion
+};
+
 typedef unsigned char Byte;
 
 ICE_API bool
 isLegalUTF8Sequence(const Byte* source, const Byte* end);
 
-enum ConversionFlags 
+enum ConversionError
 {
-    strictConversion = 0,
-    lenientConversion
+    partialCharacter,
+    badEncoding
+};
+
+//
+// UTFConversionException is raised by wstringToString() or stringToWstring()
+// to report a conversion error 
+//
+class ICE_API UTFConversionException : public Exception
+{
+public:
+    
+    UTFConversionException(const char*, int, ConversionError);
+    virtual std::string ice_name() const;
+    virtual std::string toString() const;
+    virtual Exception* ice_clone() const;
+    virtual void ice_throw() const;
+
+    ConversionError conversionError() const;
+private:
+
+    const ConversionError _conversionError;
+    static const char* _name;    
 };
 
 }
@@ -112,10 +139,10 @@ namespace IceUtilInternal
 
 enum ConversionResult
 {
-        conversionOK,                 /* conversion successful */
+        conversionOK,           /* conversion successful */
         sourceExhausted,        /* partial character in source, but hit end */
         targetExhausted,        /* insuff. room in target for conversion */
-        sourceIllegal                /* source sequence is illegal/malformed */
+        sourceIllegal           /* source sequence is illegal/malformed */
 };
 
 ICE_API ConversionResult 
@@ -135,26 +162,6 @@ convertUTF8ToUTFWstring(const IceUtil::Byte*& sourceStart, const IceUtil::Byte* 
 namespace IceUtil
 {
 
-//
-// UTFConversionException is raised by wstringToString() or stringToWstring()
-// to report a conversion error 
-//
-class ICE_API UTFConversionException : public Exception
-{
-public:
-    
-    UTFConversionException(const char*, int, IceUtilInternal::ConversionResult);
-    virtual std::string ice_name() const;
-    virtual std::string toString() const;
-    virtual Exception* ice_clone() const;
-    virtual void ice_throw() const;
-
-    IceUtilInternal::ConversionResult conversionResult() const;
-private:
-
-    const IceUtilInternal::ConversionResult _conversionResult;
-    static const char* _name;    
-};
 
 }
 

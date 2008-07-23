@@ -139,10 +139,9 @@ IceUtilInternal::convertUTF8ToUTFWstring(const Byte*& sourceStart, const Byte* s
 
 const char* IceUtil::UTFConversionException::_name = "IceUtil::UTFConversionException";
 
-IceUtil::UTFConversionException::UTFConversionException(const char* file, int line, 
-                                                        ConversionResult cr): 
+IceUtil::UTFConversionException::UTFConversionException(const char* file, int line, ConversionError ce): 
     Exception(file, line),
-    _conversionResult(cr)
+    _conversionError(ce)
 {}
 
 string
@@ -155,16 +154,13 @@ string
 IceUtil::UTFConversionException::toString() const
 {
     string str = Exception::toString();
-    switch(_conversionResult)
+    switch(_conversionError)
     {
-        case sourceExhausted:
-            str += ": source exhausted";
+        case partialCharacter:
+            str += ": partial character";
             break;
-        case targetExhausted:
-            str += ": target exhausted";
-            break;
-        case sourceIllegal:
-            str += ": illegal source";
+        case badEncoding:
+            str += ": bad encoding";
             break;
         default:
             assert(0);
@@ -185,10 +181,10 @@ IceUtil::UTFConversionException::ice_throw() const
     throw *this;
 }
 
-IceUtilInternal::ConversionResult
-IceUtil::UTFConversionException::conversionResult() const
+ConversionError
+IceUtil::UTFConversionException::conversionError() const
 {
-    return _conversionResult;
+    return _conversionError;
 }
 
 
@@ -213,7 +209,8 @@ IceUtil::wstringToString(const wstring& wstr)
     if(cr != conversionOK)
     {
         delete[] outBuf;
-        throw UTFConversionException(__FILE__, __LINE__, cr);
+        assert(cr == sourceExhausted || cr == sourceIllegal);
+        throw UTFConversionException(__FILE__, __LINE__, cr == sourceExhausted ? partialCharacter : badEncoding);
     }
     
     string s(reinterpret_cast<char*>(outBuf),
@@ -235,7 +232,9 @@ IceUtil::stringToWstring(const string& str)
 
     if(cr != conversionOK)
     {
-        throw UTFConversionException(__FILE__, __LINE__, cr);
+        assert(cr == sourceExhausted || cr == sourceIllegal);
+
+        throw UTFConversionException(__FILE__, __LINE__, cr == sourceExhausted ? partialCharacter : badEncoding);
     }
     return result;
 }
