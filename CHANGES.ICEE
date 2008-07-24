@@ -22,6 +22,11 @@ General Changes
 These entries apply to all relevant language mappings unless otherwise
 noted.
 
+- The new property Ice.TCP.Backlog allows you to specify the size of
+  incoming connection backlog for TCP/IP sockets.  In C++ the default
+  value is SOMAXCONN or 511 if that macro is not defined. In Java the
+  default value is 511.
+
 - Properties set programmatically can no longer have leading or
   trailing whitespace in the key.
 

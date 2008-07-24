@@ -131,12 +131,6 @@ class Acceptor
         _instance = instance;
         _traceLevels = instance.traceLevels();
         _logger = instance.initializationData().logger;
-        _backlog = 0;
-
-        if(_backlog <= 0)
-        {
-            _backlog = 5;
-        }
 
         String connectString = "socket://";
         if(port > 0)
@@ -202,7 +196,6 @@ class Acceptor
     private TraceLevels _traceLevels;
     private Ice.Logger _logger;
     private javax.microedition.io.ServerSocketConnection _connection;
-    private int _backlog;
     private String _host;
     private int _port;
 }

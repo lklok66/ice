@@ -124,12 +124,8 @@ class Acceptor
         _instance = instance;
         _traceLevels = instance.traceLevels();
         _logger = instance.initializationData().logger;
-        _backlog = 0;
 
-        if(_backlog <= 0)
-        {
-            _backlog = 5;
-        }
+        int backlog = instance.initializationData().properties.getPropertyAsIntWithDefault("Ice.TCP.Backlog", 511);
 
         try
         {
@@ -139,7 +135,7 @@ class Acceptor
                 String s = "attempting to bind to tcp socket " + toString();
                 _logger.trace(_traceLevels.networkCat, s);
             }
-            _fd = new java.net.ServerSocket(port, _backlog, _addr.getAddress());
+            _fd = new java.net.ServerSocket(port, backlog, _addr.getAddress());
             _addr = new InetSocketAddress(_addr.getAddress(), _fd.getLocalPort());
             if(!System.getProperty("os.name").startsWith("Windows"))
             {
@@ -192,6 +188,5 @@ class Acceptor
     private TraceLevels _traceLevels;
     private Ice.Logger _logger;
     private java.net.ServerSocket _fd;
-    private int _backlog;
     private InetSocketAddress _addr;
 }
