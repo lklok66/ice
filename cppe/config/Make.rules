@@ -69,6 +69,13 @@ else
     include $(top_srcdir)/../config/Make.common.rules.icee
 endif
 
+ifeq ($(OPTIMIZE_SPEED),yes)
+    OPTIMIZE		= yes
+endif
+ifeq ($(OPTIMIZE_SIZE),yes)
+    OPTIMIZE		= yes
+endif
+
 #
 # Platform specific definitions
 #
@@ -91,13 +98,6 @@ endif
 install_bindir	  	= $(prefix)/$(binsubdir)
 install_libdir	  	= $(prefix)/$(libsubdir)
 install_includedir	= $(prefix)/include
-
-ifeq ($(OPTIMIZE_SPEED),yes)
-    OPTIMIZE		= yes
-endif
-ifeq ($(OPTIMIZE_SIZE),yes)
-    OPTIMIZE		= yes
-endif
 
 ifneq ($(STLPORT_HOME),)
     STLPORT_FLAGS	= -I$(STLPORT_HOME)/include/stlport
