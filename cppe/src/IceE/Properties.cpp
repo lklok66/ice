@@ -185,15 +185,26 @@ Ice::Properties::load(const std::string& file)
         throw ex;
     }
 
-    char line[1024];
-    while(fgets(line, 1024, in) != NULL)
+    static const size_t delta = 12;
+    size_t size = delta;
+    char* line = (char*)malloc(delta);
+    while(fgets(line, size, in) != NULL)
     {
+        while(strlen(line) == size - 1 && line[size - 1] != '\n')
+        {
+            size_t oldSize = size;
+            size += delta;
+            line = (char*)realloc(line, size);
+            fgets(line + oldSize - 1, delta, in);
+        }
+
         parseLine(line
 #ifdef ICEE_HAS_WSTRING
                   , _converter
 #endif
                   );
     }
+    free(line);
     fclose(in);
 }
 

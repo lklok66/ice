@@ -67,6 +67,8 @@ noted.
 C++ Changes
 ===========
 
+- There is no longer a limit on the allowable length of a property line
+  in an Ice config file. Previously the limit was 1024.
 
 Java Changes
 ============
