@@ -2070,6 +2070,8 @@ Slice::Gen::ObjectVisitor::visitClassDefEnd(const ClassDefPtr& p)
         C << eb;
     }
 
+    bool inProtected = false;
+
     //
     // We add a protected destructor to force heap instantiation of the class.
     //
@@ -2079,6 +2081,47 @@ Slice::Gen::ObjectVisitor::visitClassDefEnd(const ClassDefPtr& p)
         H << sp << nl << "protected:";
         H.inc();
         H << sp << nl << "virtual ~" << fixKwd(p->name()) << "() {}";
+
+        inProtected = true;
+    }
+
+    //
+    // Emit data members. Access visibility may be specified by metadata.
+    //
+    DataMemberList dataMembers = p->dataMembers();
+    if(dataMembers.size() != 0)
+    {
+        H << sp;
+    }
+    bool prot = p->hasMetaData("protected");
+    for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
+    {
+        if(prot || (*q)->hasMetaData("protected"))
+        {
+            if(!inProtected)
+            {
+                H.dec();
+                H << sp << nl << "protected:";
+                H << sp;
+                H.inc();
+                inProtected = true;
+            }
+        }
+        else
+        {
+            if(inProtected)
+            {
+                H.dec();
+                H << sp << nl << "public:";
+                H << sp;
+                H.inc();
+                inProtected = false;
+            }
+        }
+
+        string name = fixKwd((*q)->name());
+        string s = typeToString((*q)->type(), _useWstring, (*q)->getMetaData());
+        H << nl << s << ' ' << name << ';';
     }
 
     H << eb << ';';
@@ -2253,14 +2296,6 @@ Slice::Gen::ObjectVisitor::visitOperation(const OperationPtr& p)
     }
     C << nl << "return ::Ice::DispatchOK;";
     C << eb;
-}
-
-void
-Slice::Gen::ObjectVisitor::visitDataMember(const DataMemberPtr& p)
-{
-    string name = fixKwd(p->name());
-    string s = typeToString(p->type(), _useWstring, p->getMetaData());
-    H << nl << s << ' ' << name << ';';
 }
 
 bool

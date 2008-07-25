@@ -22,6 +22,10 @@ General Changes
 These entries apply to all relevant language mappings unless otherwise
 noted.
 
+- Added support for protected class data members using the new
+  metadata tag ["protected"]. The tag can be applied to a Slice class
+  or to individual data members.
+
 - The new property Ice.TCP.Backlog allows you to specify the size of
   incoming connection backlog for TCP/IP sockets.  In C++ the default
   value is SOMAXCONN or 511 if that macro is not defined. In Java the

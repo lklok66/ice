@@ -188,7 +188,6 @@ private:
         virtual bool visitExceptionStart(const ExceptionPtr&);
         virtual bool visitStructStart(const StructPtr&);
         virtual void visitOperation(const OperationPtr&);
-        virtual void visitDataMember(const DataMemberPtr&);
 
     private:
 
