@@ -237,7 +237,7 @@ Ice::Connection::waitUntilFinished()
             if(_state != StateClosed && _endpoint->timeout() >= 0)
             {
                 IceUtil::Time timeout = IceUtil::Time::milliSeconds(_endpoint->timeout());
-                IceUtil::Time waitTime = _stateTime + timeout - IceUtil::Time::now();
+                IceUtil::Time waitTime = _stateTime + timeout - IceUtil::Time::now(IceUtil::Time::Monotonic);
                 
                 if(waitTime > IceUtil::Time())
                 {
@@ -418,14 +418,14 @@ Ice::Connection::sendRequest(BasicStream* os, Outgoing* out)
             IceUtil::Time expireTime;
             if(tout > 0)
             {
-                expireTime = IceUtil::Time::now() + IceUtil::Time::milliSeconds(tout);
+                expireTime = IceUtil::Time::now(IceUtil::Time::Monotonic) + IceUtil::Time::milliSeconds(tout);
             }
             
             while(out->state() == Outgoing::StateInProgress)
             {
                 if(tout > 0)
                 {           
-                    IceUtil::Time now = IceUtil::Time::now();
+                    IceUtil::Time now = IceUtil::Time::now(IceUtil::Time::Monotonic);
                     if(now < expireTime)
                     {
                         _sendMonitor.timedWait(expireTime - now);
@@ -434,7 +434,8 @@ Ice::Connection::sendRequest(BasicStream* os, Outgoing* out)
                     //
                     // Make sure we woke up because of timeout and not another response.
                     //
-                    if(out->state() == Outgoing::StateInProgress && IceUtil::Time::now() > expireTime)
+                    if(out->state() == Outgoing::StateInProgress && 
+                       IceUtil::Time::now(IceUtil::Time::Monotonic) > expireTime)
                     {        
                         throw TimeoutException(__FILE__, __LINE__);
                     }
@@ -1013,7 +1014,7 @@ Ice::Connection::Connection(const InstancePtr& instance,
 #endif
         _dispatchCount(0),
         _state(StateNotValidated),
-        _stateTime(IceUtil::Time::now()),
+        _stateTime(IceUtil::Time::now(IceUtil::Time::Monotonic)),
         _nextRequestId(1)
 #ifndef ICEE_PURE_BLOCKING_CLIENT
       , _requestsHint(_requests.end())
@@ -1408,7 +1409,7 @@ Ice::Connection::setState(State state)
     }
 
     _state = state;
-    _stateTime = IceUtil::Time::now();
+    _stateTime = IceUtil::Time::now(IceUtil::Time::Monotonic);
 
     notifyAll();
 

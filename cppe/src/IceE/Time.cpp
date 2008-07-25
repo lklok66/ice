@@ -9,6 +9,7 @@
 
 #include <IceE/DisableWarnings.h>
 #include <IceE/Time.h>
+#include <IceE/LocalException.h>
 
 #ifndef _WIN32_WCE
 #   if defined(_WIN32)
@@ -21,13 +22,51 @@
 
 using namespace IceUtil;
 
+#ifdef _WIN32
+
+namespace
+{
+
+static double frequency = -1.0;
+
+//
+// Initialize the frequency
+//
+class InitializeFrequency
+{
+public:
+
+    InitializeFrequency()
+    {
+        //
+        // Get the frequency of performance counters. We also make a call to
+        // QueryPerformanceCounter to ensure it works. If it fails or if the
+        // call to QueryPerformanceFrequency fails, the frequency will remain
+        // set to -1.0 and ftime will be used instead.
+        //
+        Int64 v;
+        if(QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&v)))
+        {
+            if(QueryPerformanceFrequency(reinterpret_cast<LARGE_INTEGER*>(&v)))
+            {
+                frequency = static_cast<double>(v);
+            }
+        }
+    }
+};
+static InitializeFrequency frequencyInitializer;
+
+};
+#endif
+
+
 IceUtil::Time::Time() :
     _usec(0)
 {
 }
 
 Time
-IceUtil::Time::now()
+IceUtil::Time::now(Clock clock)
 {
 #if defined(_WIN32_WCE)
     //
@@ -37,14 +76,64 @@ IceUtil::Time::now()
     // resolution.
     //
     return Time(static_cast<Int64>(GetTickCount()) * 1000);
-#elif defined(_WIN32)
-    struct _timeb tb;
-    _ftime(&tb);
-    return Time(tb.time * static_cast<Int64>(1000000) + tb.millitm * static_cast<Int64>(1000));
 #else
-    struct timeval tv;
-    gettimeofday(&tv, 0);
-    return Time(tv.tv_sec * static_cast<Int64>(1000000) + tv.tv_usec);
+    if(clock == Realtime)
+    {
+#  if defined(_WIN32)
+        struct _timeb tb;
+        _ftime(&tb);
+        return Time(static_cast<Int64>(tb.time) * ICE_INT64(1000000) + tb.millitm * 1000);
+#  else
+        struct timeval tv;
+        if(gettimeofday(&tv, 0) < 0)
+        {
+            assert(0);
+            throw Ice::SyscallException(__FILE__, __LINE__, errno);
+        }
+        return Time(tv.tv_sec * ICE_INT64(1000000) + tv.tv_usec);
+#  endif
+    }
+    else
+    {
+#if defined(_WIN32)
+        if(frequency > 0.0)
+        {
+            Int64 count;
+            if(!QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER*>(&count)))
+            {
+                assert(0);
+                throw Ice::SyscallException(__FILE__, __LINE__, GetLastError());
+            }
+            return Time(static_cast<Int64>(count / frequency * 1000000.0));
+        }
+        else
+        {
+            struct _timeb tb;
+            _ftime(&tb);
+            return Time(static_cast<Int64>(tb.time) * ICE_INT64(1000000) + tb.millitm * 1000);
+        }
+#elif defined(__hpux) || defined(__APPLE__)
+        //
+        // Platforms do not support CLOCK_MONOTONIC
+        //
+        struct timeval tv;
+        if(gettimeofday(&tv, 0) < 0)
+        {
+            assert(0);
+            throw SyscallException(__FILE__, __LINE__, errno);
+        }
+        return Time(tv.tv_sec * ICE_INT64(1000000) + tv.tv_usec);
+#else
+        struct timespec ts;
+        if(clock_gettime(CLOCK_MONOTONIC, &ts) < 0)
+        {
+            assert(0);
+            throw Ice::SyscallException(__FILE__, __LINE__, errno);
+        }
+        return Time(ts.tv_sec * ICE_INT64(1000000) + ts.tv_nsec / ICE_INT64(1000));
+#endif
+
+    }
 #endif
 }
 

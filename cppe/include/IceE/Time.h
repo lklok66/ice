@@ -25,7 +25,8 @@ public:
     // automatically generated copy constructor and assignment
     // operator do the right thing.
     
-    static Time now();
+    enum Clock { Realtime, Monotonic };
+    static Time now(Clock = Realtime);
     static Time seconds(Int64);
     static Time milliSeconds(Int64);
     static Time microSeconds(Int64);

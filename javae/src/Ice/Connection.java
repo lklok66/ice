@@ -210,7 +210,7 @@ public final class Connection
                     if(_state != StateClosed && _endpoint.timeout() >= 0)
                     {
                         long absoluteWaitTime = _stateTime + _endpoint.timeout();
-                        long waitTime = absoluteWaitTime - System.currentTimeMillis();
+                        long waitTime = absoluteWaitTime - IceInternal.Time.currentMonotonicTimeMillis();
                         
                         if(waitTime > 0)
                         {
@@ -219,7 +219,7 @@ public final class Connection
                             // connection.
                             //
                             wait(waitTime);
-                            if(System.currentTimeMillis() >= absoluteWaitTime)
+                            if(IceInternal.Time.currentMonotonicTimeMillis() >= absoluteWaitTime)
                             {
                                 setState(StateClosed, new CloseTimeoutException());
                             }
@@ -365,7 +365,7 @@ public final class Connection
                     long expireTime = 0;
                     if(tout > 0)
                     {
-                        expireTime = System.currentTimeMillis() + tout;
+                        expireTime = IceInternal.Time.currentMonotonicTimeMillis() + tout;
                     }
                         
                     while(out.state() == IceInternal.Outgoing.StateInProgress)
@@ -374,7 +374,7 @@ public final class Connection
                         {
                             if(tout > 0)
                             {
-                                long now = System.currentTimeMillis();
+                                long now = IceInternal.Time.currentMonotonicTimeMillis();
                                 if(now < expireTime)
                                 {
                                     _sendMonitor.wait(expireTime - now);
@@ -384,7 +384,7 @@ public final class Connection
                                 // Make sure we woke up because of timeout and not another response.
                                 //
                                 if(out.state() == IceInternal.Outgoing.StateInProgress &&  
-                                   System.currentTimeMillis() > expireTime)
+                                   IceInternal.Time.currentMonotonicTimeMillis() > expireTime)
                                 {
                                     throw new TimeoutException();
                                 }
@@ -948,7 +948,7 @@ public final class Connection
         _batchRequestNum = 0;
         _dispatchCount = 0;
         _state = StateNotValidated;
-        _stateTime = System.currentTimeMillis();
+        _stateTime = IceInternal.Time.currentMonotonicTimeMillis();
         _blocking = _instance.initializationData().properties.getPropertyAsInt("Ice.Blocking") > 0 && adapter == null;
         _stream = new IceInternal.BasicStream(_instance);
         _in = new IceInternal.Incoming(_instance, this, _stream, adapter);
@@ -1293,7 +1293,7 @@ public final class Connection
         }
 
         _state = state;
-        _stateTime = System.currentTimeMillis();
+        _stateTime = IceInternal.Time.currentMonotonicTimeMillis();
 
         notifyAll();
 

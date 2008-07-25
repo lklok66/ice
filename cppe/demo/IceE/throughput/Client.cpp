@@ -167,7 +167,7 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
             }
             while(c != EOF && c == '\n');
 
-            IceUtil::Time tm = IceUtil::Time::now();
+            IceUtil::Time tm = IceUtil::Time::now(IceUtil::Time::Monotonic);
             const int repetitions = 1000;
 
             if(c == '1' || c == '2' || c == '3' || c == '4')
@@ -395,7 +395,7 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
                     }
                 }
 
-                tm = IceUtil::Time::now() - tm;
+                tm = IceUtil::Time::now(IceUtil::Time::Monotonic) - tm;
                 printf("time for %d sequences: %lfms\n", repetitions, tm.toMilliSecondsDouble());
                 printf("time per sequence: %lfms\n", tm.toMilliSecondsDouble() / repetitions);
                 int wireSize = 0;

@@ -205,7 +205,7 @@ public:
         //
         // First measure raw time to produce UUIDs.
         //
-        Time startTime = Time::now();
+        Time startTime = Time::now(Time::Monotonic);
         long i;
         for(i = 0; i < howMany; i++)
         {
@@ -218,7 +218,7 @@ public:
         }
 #endif
 
-        Time finish = Time::now();
+        Time finish = Time::now(Time::Monotonic);
 
         tprintf("ok\n");
 
@@ -244,7 +244,7 @@ public:
 
         set<string> uuidSet;
         
-        startTime = Time::now();
+        startTime = Time::now(Time::Monotonic);
         vector<InsertThreadPtr> threads;
 
         CountedBarrierPtr stop = new CountedBarrier(threadCount);
@@ -289,7 +289,7 @@ public:
         }
 #endif
         stop->waitZero();
-        finish = Time::now();
+        finish = Time::now(Time::Monotonic);
 
         for(p = threads.begin(); p != threads.end(); ++p)
         {
