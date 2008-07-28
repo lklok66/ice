@@ -75,8 +75,6 @@ public:
     ObjectPrx createDirectProxy(const Identity&) const;
     ObjectPrx createIndirectProxy(const Identity&) const;
 #endif
-    ObjectPrx createReverseProxy(const Identity&) const;
-
 #ifdef ICEE_HAS_LOCATOR
     void setLocator(const LocatorPrx&);
 #endif

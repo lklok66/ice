@@ -11,7 +11,7 @@
 import os, sys
 
 for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
-    toplevel = os.path.abspath(toplevel)
+    toplevel = os.path.normpath(toplevel)
     if os.path.exists(os.path.join(toplevel, "config", "TestUtil.py")):
         break
 else:
@@ -19,26 +19,10 @@ else:
 
 sys.path.append(os.path.join(toplevel, "config"))
 import TestUtil
+TestUtil.processCmdLine()
 
-#
-# List of all basic tests.
-#
-tests = [ 
-    ("IceE/thread", ["once"]),
-    ("IceE/uuid", ["once"]),
-    ("IceE/proxy", ["core"]),
-    ("IceE/operations", ["core"]),
-    ("IceE/exceptions", ["core"]),
-    ("IceE/inheritance", ["core"]),
-    ("IceE/facets", ["core"]),
-    ("IceE/binding", ["core"]),
-    ("IceE/faultTolerance", ["core"]),
-    ("IceE/location", ["core"]),
-    ("IceE/adapterDeactivation", ["core"]),
-    ("IceE/slicing", ["core"]),
-    ("IceE/custom", ["core"]),
-    ("IceE/retry", ["core"]),
-    ]
+name = os.path.join("IceE", "binding")
 
-if __name__ == "__main__":
-    TestUtil.run(tests)
+print "tests with regular server."
+TestUtil.clientServerTest(name)
+sys.exit(0)

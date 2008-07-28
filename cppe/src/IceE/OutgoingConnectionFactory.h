@@ -53,6 +53,7 @@ private:
     const InstancePtr _instance;
     bool _destroyed;
     std::multimap<ConnectorPtr, Ice::ConnectionPtr> _connections;
+    std::multimap<EndpointPtr, Ice::ConnectionPtr> _connectionsByEndpoint;
     std::set<ConnectorPtr> _pending; // Connectors for which connection establishment is pending.
 };
 

@@ -78,7 +78,6 @@ public:
     void destroy();
 
     bool operator==(const LocatorInfo&) const;
-    bool operator!=(const LocatorInfo&) const;
     bool operator<(const LocatorInfo&) const;
 
     Ice::LocatorPrx getLocator() const;

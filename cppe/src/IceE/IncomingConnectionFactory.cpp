@@ -120,26 +120,14 @@ IceInternal::IncomingConnectionFactory::endpoint() const
     return _endpoint;
 }
 
-list<ConnectionPtr>
-IceInternal::IncomingConnectionFactory::connections() const
-{
-    IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
-
-    list<ConnectionPtr> result;
-
-    //
-    // Only copy connections which have not been destroyed.
-    //
-    remove_copy_if(_connections.begin(), _connections.end(), back_inserter(result),
-                   Ice::constMemFun(&Connection::isDestroyed));
-
-    return result;
-}
-
 void
 IceInternal::IncomingConnectionFactory::flushBatchRequests()
 {
-    list<ConnectionPtr> c = connections(); // connections() is synchronized, so no need to synchronize here.
+    list<ConnectionPtr> c;
+    {
+        IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
+        c = _connections;
+    }
 
     for(list<ConnectionPtr>::const_iterator p = c.begin(); p != c.end(); ++p)
     {

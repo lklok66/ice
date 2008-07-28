@@ -130,12 +130,6 @@ IceInternal::UnknownEndpoint::operator==(const Endpoint& r) const
 }
 
 bool
-IceInternal::UnknownEndpoint::operator!=(const Endpoint& r) const
-{
-    return !operator==(r);
-}
-
-bool
 IceInternal::UnknownEndpoint::operator<(const Endpoint& r) const
 {
     const UnknownEndpoint* p = dynamic_cast<const UnknownEndpoint*>(&r);

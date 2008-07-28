@@ -36,7 +36,6 @@ public:
 #endif
 
     virtual bool operator==(const Endpoint&) const;
-    virtual bool operator!=(const Endpoint&) const;
     virtual bool operator<(const Endpoint&) const;
 
 private:

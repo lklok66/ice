@@ -137,12 +137,6 @@ IceInternal::RouterInfo::operator==(const RouterInfo& rhs) const
 }
 
 bool
-IceInternal::RouterInfo::operator!=(const RouterInfo& rhs) const
-{
-    return _router != rhs._router;
-}
-
-bool
 IceInternal::RouterInfo::operator<(const RouterInfo& rhs) const
 {
     return _router < rhs._router;

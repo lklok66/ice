@@ -58,7 +58,6 @@ public:
     void destroy();
 
     bool operator==(const RouterInfo&) const;
-    bool operator!=(const RouterInfo&) const;
     bool operator<(const RouterInfo&) const;
 
     Ice::RouterPrx getRouter() const;

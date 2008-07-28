@@ -512,35 +512,6 @@ Ice::ObjectAdapter::createIndirectProxy(const Identity& ident) const
 }
 #endif
 
-ObjectPrx
-Ice::ObjectAdapter::createReverseProxy(const Identity& ident) const
-{
-    IceUtil::Monitor<IceUtil::RecMutex>::Lock sync(*this);
-    
-    checkForDeactivation();
-    checkIdentity(ident);
-
-    //
-    // Get all incoming connections for this object adapter.
-    //
-    vector<ConnectionPtr> connections;
-    vector<IncomingConnectionFactoryPtr>::const_iterator p;
-    for(p = _incomingConnectionFactories.begin(); p != _incomingConnectionFactories.end(); ++p)
-    {
-        list<ConnectionPtr> cons = (*p)->connections();
-        copy(cons.begin(), cons.end(), back_inserter(connections));
-    }
-
-    //
-    // Create a reference and return a reverse proxy for this
-    // reference.
-    //
-    vector<EndpointPtr> endpoints;
-    ReferencePtr ref = _instance->referenceFactory()->create(ident, Ice::Context(), "", ReferenceModeTwoway, 
-                                                             connections);
-    return _instance->proxyFactory()->referenceToProxy(ref);
-}
-
 #ifdef ICEE_HAS_LOCATOR
 void
 Ice::ObjectAdapter::setLocator(const LocatorPrx& locator)

@@ -65,12 +65,6 @@ Connector::operator==(const Connector& r) const
 }
 
 bool
-Connector::operator!=(const Connector& r) const
-{
-    return !operator==(r);
-}
-
-bool
 Connector::operator<(const Connector& r) const
 {
     if(_timeout < r._timeout)

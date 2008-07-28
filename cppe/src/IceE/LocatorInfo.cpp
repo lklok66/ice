@@ -227,12 +227,6 @@ IceInternal::LocatorInfo::operator==(const LocatorInfo& rhs) const
 }
 
 bool
-IceInternal::LocatorInfo::operator!=(const LocatorInfo& rhs) const
-{
-    return _locator != rhs._locator;
-}
-
-bool
 IceInternal::LocatorInfo::operator<(const LocatorInfo& rhs) const
 {
     return _locator < rhs._locator;

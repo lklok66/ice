@@ -77,6 +77,7 @@ IceInternal::OutgoingConnectionFactory::waitUntilFinished()
         // thread synchronization.
         //
         connections.swap(_connections);
+        _connectionsByEndpoint.clear();
     }
 
     for_each(connections.begin(), connections.end(),
@@ -100,11 +101,20 @@ IceInternal::OutgoingConnectionFactory::create(const vector<EndpointPtr>& endpts
         //
         // Reap connections for which destruction has completed.
         //
-        std::multimap<ConnectorPtr, ConnectionPtr>::iterator p = _connections.begin();
+        multimap<ConnectorPtr, ConnectionPtr>::iterator p = _connections.begin();
         while(p != _connections.end())
         {
             if(p->second->isFinished())
             {
+                multimap<EndpointPtr, ConnectionPtr>::iterator q = _connectionsByEndpoint.find(p->second->endpoint());
+                assert(q != _connectionsByEndpoint.end());
+                while(q->second != p->second)
+                {
+                    ++q;
+                    assert(q != _connectionsByEndpoint.end());
+                }
+                assert(q->second == p->second);
+                _connectionsByEndpoint.erase(q);
                 _connections.erase(p++);
             }
             else
@@ -125,28 +135,8 @@ IceInternal::OutgoingConnectionFactory::create(const vector<EndpointPtr>& endpts
                 *q = (*q)->timeout(_instance->defaultsAndOverrides()->overrideTimeoutValue);
             }
 
-            //
-            // Create connectors for the endpoints.
-            //
-            vector<ConnectorPtr> cons = (*q)->connectors();
-            assert(cons.size() > 0);
-
-            vector<ConnectorPtr>::const_iterator r;
-            for(r = cons.begin(); r != cons.end(); ++r)
-            {
-                connectors.push_back(make_pair(*r, *q));
-            }
-        }
-
-        //
-        // Search for existing connections.
-        //
-        vector<pair<ConnectorPtr, EndpointPtr> >::const_iterator r;
-        for(r = connectors.begin(); r != connectors.end(); ++r)
-        {
-            pair<multimap<ConnectorPtr, ConnectionPtr>::iterator,
-                 multimap<ConnectorPtr, ConnectionPtr>::iterator> pr = _connections.equal_range((*r).first);
-
+            pair<multimap<EndpointPtr, ConnectionPtr>::iterator,
+                 multimap<EndpointPtr, ConnectionPtr>::iterator> pr = _connectionsByEndpoint.equal_range(*q);
             while(pr.first != pr.second)
             {
                 //
@@ -160,50 +150,42 @@ IceInternal::OutgoingConnectionFactory::create(const vector<EndpointPtr>& endpts
 
                 ++pr.first;
             }
+        }        
+            
+        for(q = endpoints.begin(); q != endpoints.end(); ++q)
+        {
+            //
+            // Create connectors for the endpoints.
+            //
+            vector<ConnectorPtr> cons = (*q)->connectors();
+            assert(cons.size() > 0);
+
+            random_shuffle(cons.begin(), cons.end());
+
+            vector<ConnectorPtr>::const_iterator r;
+            for(r = cons.begin(); r != cons.end(); ++r)
+            {
+                connectors.push_back(make_pair(*r, *q));
+            }
         }
 
         //
         // If some other thread is currently trying to establish a
-        // connection to any of our endpoints, we wait until this
+        // connection to any of the connectors, we wait until this
         // thread is finished.
         //
-        bool searchAgain = false;
+        vector<pair<ConnectorPtr, EndpointPtr> >::const_iterator r;
         while(!_destroyed)
         {
-            for(r = connectors.begin(); r != connectors.end(); ++r)
-            {
-                if(_pending.find((*r).first) != _pending.end())
-                {
-                    break;
-                }
-            }
-
-            if(r == connectors.end())
-            {
-                break;
-            }
-
-            searchAgain = true;
-
-            wait();
-        }
-
-        if(_destroyed)
-        {
-            throw CommunicatorDestroyedException(__FILE__, __LINE__);
-        }
-
-        //
-        // Search for existing connections again if we waited above,
-        // as new connections might have been added in the meantime.
-        //
-        if(searchAgain)
-        {        
+            //
+            // Search for existing connections.
+            //
+            bool pending = false;
             for(r = connectors.begin(); r != connectors.end(); ++r)
             {
                 pair<multimap<ConnectorPtr, ConnectionPtr>::iterator,
-                     multimap<ConnectorPtr, ConnectionPtr>::iterator> pr = _connections.equal_range((*r).first);
-
+                     multimap<ConnectorPtr, ConnectionPtr>::iterator> pr = _connections.equal_range(r->first);
+                
                 while(pr.first != pr.second)
                 {
                     //
@@ -214,10 +196,27 @@ IceInternal::OutgoingConnectionFactory::create(const vector<EndpointPtr>& endpts
                     {
                         return pr.first->second;
                     }
-
+                    
                     ++pr.first;
                 }
+
+                if(!pending)
+                {
+                    pending = _pending.find(r->first) != _pending.end();
+                }
             }
+
+            if(!pending)
+            {
+                break;
+            }
+
+            wait();
+        }
+
+        if(_destroyed)
+        {
+            throw CommunicatorDestroyedException(__FILE__, __LINE__);
         }
 
         //
@@ -228,11 +227,12 @@ IceInternal::OutgoingConnectionFactory::create(const vector<EndpointPtr>& endpts
         //
         for(r = connectors.begin(); r != connectors.end(); ++r)
         {
-            _pending.insert((*r).first);
+            _pending.insert(r->first);
         }
     }
 
     ConnectorPtr connector;
+    EndpointPtr endpoint;
     ConnectionPtr connection;
     auto_ptr<LocalException> exception;
     
@@ -240,7 +240,7 @@ IceInternal::OutgoingConnectionFactory::create(const vector<EndpointPtr>& endpts
     for(q = connectors.begin(); q != connectors.end(); ++q)
     {
         connector = (*q).first;
-        EndpointPtr endpoint = (*q).second;
+        endpoint = (*q).second;
         
         try
         {
@@ -326,8 +326,8 @@ IceInternal::OutgoingConnectionFactory::create(const vector<EndpointPtr>& endpts
         }
         else
         {
-            _connections.insert(_connections.end(), pair<const ConnectorPtr, ConnectionPtr>(connector, connection));
-
+            _connections.insert(pair<ConnectorPtr, ConnectionPtr>(connector, connection));
+            _connectionsByEndpoint.insert(pair<EndpointPtr, ConnectionPtr>(endpoint, connection));
             if(_destroyed)
             {
                 connection->destroy(Connection::CommunicatorDestroyed);
@@ -409,8 +409,7 @@ IceInternal::OutgoingConnectionFactory::flushBatchRequests()
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
 
-        for(std::multimap<ConnectorPtr, ConnectionPtr>::const_iterator p = _connections.begin();
-            p != _connections.end();
+        for(multimap<ConnectorPtr, ConnectionPtr>::const_iterator p = _connections.begin(); p != _connections.end();
             ++p)
         {
             c.push_back(p->second);
@@ -441,6 +440,7 @@ IceInternal::OutgoingConnectionFactory::~OutgoingConnectionFactory()
 {
     assert(_destroyed);
     assert(_connections.empty());
+    assert(_connectionsByEndpoint.empty());
 }
 
 #ifndef ICEE_PURE_CLIENT

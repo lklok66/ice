@@ -85,11 +85,9 @@ IceInternal::Acceptor::connectToSelf()
 {
     SOCKET fd = createSocket();
     setBlock(fd, false);
-    if(inetAddrToString(_addr.sin_addr) == "0.0.0.0")
+    if(_addr.sin_addr.s_addr == INADDR_ANY)
     {
-        struct sockaddr_in addr;
-        getAddress("127.0.0.1", ntohs(_addr.sin_port), addr);
-        doConnect(fd, addr, -1);
+        doConnect(fd, getAddresses("127.0.0.1", ntohs(_addr.sin_port))[0], -1);
     }
     else
     {
@@ -124,7 +122,7 @@ IceInternal::Acceptor::Acceptor(const InstancePtr& instance, const string& host,
     try
     {
         _fd = createSocket();
-        getAddress(host, port, _addr);
+        _addr = getAddresses(host, port)[0];
         setTcpBufSize(_fd, _instance->initializationData().properties, _logger);
 #ifndef _WIN32
         //

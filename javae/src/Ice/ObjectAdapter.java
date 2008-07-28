@@ -508,40 +508,6 @@ public final class ObjectAdapter
         return newIndirectProxy(ident, "", _id);
     }
 
-    public synchronized ObjectPrx
-    createReverseProxy(Identity ident)
-    {
-        checkForDeactivation();
-        checkIdentity(ident);
-
-        //
-        // Get all incoming connections for this object adapter.
-        //
-        java.util.Vector connections = new java.util.Vector();
-        java.util.Enumeration e = _incomingConnectionFactories.elements();
-        while(e.hasMoreElements())
-        {
-            IceInternal.IncomingConnectionFactory factory =
-                (IceInternal.IncomingConnectionFactory)e.nextElement();
-            Connection[] conns = factory.connections();
-            for(int j = 0; j < conns.length; ++j)
-            {
-                connections.addElement(conns[j]);
-            }
-        }
-
-        //
-        // Create a reference and return a reverse proxy for this
-        // reference.
-        //
-        IceInternal.Endpoint[] endpoints = new IceInternal.Endpoint[0];
-        Connection[] arr = new Connection[connections.size()];
-        connections.copyInto( arr);
-        IceInternal.Reference ref = 
-                _instance.referenceFactory().create(ident, null, "", IceInternal.Reference.ModeTwoway, arr);
-        return _instance.proxyFactory().referenceToProxy(ref);
-    }
-
     public synchronized void
     setLocator(LocatorPrx locator)
     {

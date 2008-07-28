@@ -100,7 +100,6 @@ public:
     // Compare endpoints for sorting purposes.
     //
     virtual bool operator==(const Endpoint&) const = 0;
-    virtual bool operator!=(const Endpoint&) const = 0;
     virtual bool operator<(const Endpoint&) const = 0;
 };
 

@@ -36,7 +36,6 @@ public:
     std::string toString() const;
 
     bool operator==(const Connector&) const;
-    bool operator!=(const Connector&) const;
     bool operator<(const Connector&) const;
     
 private:

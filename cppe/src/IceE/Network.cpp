@@ -680,84 +680,6 @@ repeatConnect:
     }
 }
 
-void
-IceInternal::getAddress(const string& host, int port, struct sockaddr_in& addr)
-{
-    memset(&addr, 0, sizeof(struct sockaddr_in));
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(port);
-    addr.sin_addr.s_addr = inet_addr(host.c_str());
-
-    if(addr.sin_addr.s_addr == INADDR_NONE)
-    {
-#ifdef _WIN32
-
-        //
-        // Windows XP has getaddrinfo(), but we don't want to require XP to run IceE.
-        //
-        
-        //
-        // gethostbyname() is thread safe on Windows, with a separate hostent per thread
-        //
-        struct hostent* entry;
-        int retry = 5;
-        do
-        {
-            entry = gethostbyname(host.c_str());
-        }
-        while(entry == 0 && WSAGetLastError() == WSATRY_AGAIN && --retry >= 0);
-        
-        if(entry == 0)
-        {
-            DNSException ex(__FILE__, __LINE__);
-
-            ex.error = WSAGetLastError();
-            ex.host = host;
-            throw ex;
-        }
-        memcpy(&addr.sin_addr, entry->h_addr, entry->h_length);
-
-#else
-
-        struct addrinfo* info = 0;
-        int retry = 5;
-
-        struct addrinfo hints = { 0 };
-        hints.ai_family = PF_INET;
-        hints.ai_flags |= AI_PASSIVE;
-        
-        int rs = 0;
-        do
-        {
-            if(host.empty())
-            {
-                rs = getaddrinfo(0, "1", &hints, &info);
-            }
-            else
-            {
-                rs = getaddrinfo(host.c_str(), 0, &hints, &info);    
-            }
-        }
-        while(info == 0 && rs == EAI_AGAIN && --retry >= 0);
-        
-        if(rs != 0)
-        {
-            DNSException ex(__FILE__, __LINE__);
-            ex.error = rs;
-            ex.host = host;
-            throw ex;
-        }
-
-        assert(info->ai_family == PF_INET);
-        struct sockaddr_in* sin = reinterpret_cast<sockaddr_in*>(info->ai_addr);
-
-        addr.sin_addr.s_addr = sin->sin_addr.s_addr;
-        freeaddrinfo(info);
-
-#endif
-    }
-}
-
 vector<struct sockaddr_in>
 IceInternal::getAddresses(const string& host, int port)
 {
@@ -806,7 +728,9 @@ IceInternal::getAddresses(const string& host, int port)
     else
     {
         struct sockaddr_in addr;
-        getAddress("127.0.0.1", port, addr);
+        addr.sin_family = AF_INET;
+        addr.sin_port = htons(port);
+        addr.sin_addr.s_addr = INADDR_LOOPBACK;
         result.push_back(addr);
     }
 
