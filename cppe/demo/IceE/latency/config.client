@@ -3,3 +3,9 @@
 # object in the server.
 #
 Ping.Proxy=ping:default -p 10000 -h 127.0.0.1
+
+#
+# Use faster blocking client side model by default.
+#
+Ice.Blocking=1
+
