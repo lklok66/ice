@@ -22,6 +22,17 @@ General Changes
 These entries apply to all relevant language mappings unless otherwise
 noted.
 
+- Most proxy factory methods now return a proxy of the same type as
+  the original and no longer require the use of a checked or unchecked
+  cast. For example, you can write 
+
+  HelloPrx hello = ...;
+  hello = hello->ice_oneway();
+
+  Previously you would have needed a cast, such as
+
+  hello = HelloPrx::uncheckedCast(hello->ice_oneway());
+
 - Added support for protected class data members using the new
   metadata tag ["protected"]. The tag can be applied to a Slice class
   or to individual data members.

@@ -69,7 +69,7 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
         return EXIT_FAILURE;
     }
 
-    ThroughputPrx throughputOneway = ThroughputPrx::uncheckedCast(throughput->ice_oneway());
+    ThroughputPrx throughputOneway = throughput->ice_oneway();
 
     ByteSeq byteSeq(ByteSeqSize / reduce, 0);
     pair<const Ice::Byte*, const Ice::Byte*> byteArr;

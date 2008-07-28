@@ -55,9 +55,9 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
         fprintf(stderr, "%s: invalid proxy\n", argv[0]);
         return EXIT_FAILURE;
     }
-    HelloPrx oneway = HelloPrx::uncheckedCast(twoway->ice_oneway());
+    HelloPrx oneway = twoway->ice_oneway();
 #ifdef ICEE_HAS_BATCH
-    HelloPrx batchOneway = HelloPrx::uncheckedCast(twoway->ice_batchOneway());
+    HelloPrx batchOneway = twoway->ice_batchOneway();
 #endif
 
     int timeout = -1;
@@ -105,10 +105,10 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
                     timeout = -1;
                 }
                 
-                twoway = HelloPrx::uncheckedCast(twoway->ice_timeout(timeout));
-                oneway = HelloPrx::uncheckedCast(oneway->ice_timeout(timeout));
+                twoway = twoway->ice_timeout(timeout);
+                oneway = oneway->ice_timeout(timeout);
 #ifdef ICEE_HAS_BATCH
-                batchOneway = HelloPrx::uncheckedCast(batchOneway->ice_timeout(timeout));
+                batchOneway = batchOneway->ice_timeout(timeout);
 #endif                
                 if(timeout == -1)
                 {

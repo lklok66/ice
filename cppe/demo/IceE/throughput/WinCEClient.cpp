@@ -140,7 +140,7 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmd
             MessageBox(NULL, L"invalid proxy", L"Throughput Client", MB_ICONEXCLAMATION | MB_OK);
             return EXIT_FAILURE;
         }
-        ThroughputPrx throughputOneway = ThroughputPrx::uncheckedCast(throughput->ice_oneway());
+        ThroughputPrx throughputOneway = throughput->ice_oneway();
 
         //
         // The amount by which we reduce buffer sizes for CE runs

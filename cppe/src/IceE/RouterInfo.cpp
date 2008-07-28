@@ -49,7 +49,7 @@ IceInternal::RouterManager::get(const RouterPrx& rtr)
         return 0;
     }
 
-    RouterPrx router = RouterPrx::uncheckedCast(rtr->ice_router(0)); // The router cannot be routed.
+    RouterPrx router = rtr->ice_router(0); // The router cannot be routed.
 
     IceUtil::Mutex::Lock sync(*this);
 
@@ -86,7 +86,7 @@ IceInternal::RouterManager::erase(const RouterPrx& rtr)
     RouterInfoPtr info;
     if(rtr)
     {
-        RouterPrx router = RouterPrx::uncheckedCast(rtr->ice_router(0)); // The router cannot be routed.
+        RouterPrx router = rtr->ice_router(0); // The router cannot be routed.
         IceUtil::Mutex::Lock sync(*this);
 
         map<RouterPrx, RouterInfoPtr>::iterator p = _table.end();

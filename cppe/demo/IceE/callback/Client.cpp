@@ -62,8 +62,8 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
         fprintf(stderr, "%s: invalid proxy\n", argv[0]);
         return EXIT_FAILURE;
     }
-    CallbackSenderPrx oneway = CallbackSenderPrx::uncheckedCast(twoway->ice_oneway());
-    CallbackSenderPrx batchOneway = CallbackSenderPrx::uncheckedCast(twoway->ice_batchOneway());
+    CallbackSenderPrx oneway = twoway->ice_oneway();
+    CallbackSenderPrx batchOneway = twoway->ice_batchOneway();
     
     Ice::ObjectAdapterPtr adapter = communicator->createObjectAdapter("Callback.Client");
     CallbackReceiverPtr cr = new CallbackReceiverI;
@@ -72,7 +72,7 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
 
     CallbackReceiverPrx twowayR = CallbackReceiverPrx::uncheckedCast(
         adapter->createProxy(communicator->stringToIdentity("callbackReceiver")));
-    CallbackReceiverPrx onewayR = CallbackReceiverPrx::uncheckedCast(twowayR->ice_oneway());
+    CallbackReceiverPrx onewayR = twowayR->ice_oneway();
 
     menu();
 
