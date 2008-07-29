@@ -20,6 +20,14 @@ namespace Ice
 
 class Object;
 
+#ifdef ICEE_HAS_ROUTER
+class Router;
+#endif
+
+#ifdef ICEE_HAS_LOCATOR
+class Locator;
+#endif
+
 }
 
 }
@@ -35,6 +43,14 @@ upCast(::IceProxy::Ice::Object* o)
 {
     return o;
 }
+
+#ifdef ICEE_HAS_ROUTER
+ICE_API ::IceProxy::Ice::Object* upCast(::IceProxy::Ice::Router*);
+#endif
+
+#ifdef ICEE_HAS_LOCATOR
+ICE_API ::IceProxy::Ice::Object* upCast(::IceProxy::Ice::Locator*);
+#endif
 
 }
 

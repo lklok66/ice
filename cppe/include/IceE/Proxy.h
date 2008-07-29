@@ -24,51 +24,16 @@
 #include <IceE/OperationMode.h>
 #include <IceE/Outgoing.h>
 
-#ifdef ICEE_HAS_ROUTER
-
-namespace IceProxy { namespace Ice
-{
-
-class Router;
-
-} }
-
-namespace IceInternal
-{
-
-class LocalExceptionWrapper;
-
-}
-
 namespace Ice
 {
 
+#ifdef ICEE_HAS_ROUTER
 typedef ::IceInternal::ProxyHandle< ::IceProxy::Ice::Router> RouterPrx;
-
-}
-
 #endif // ICEE_HAS_ROUTER
 
 #ifdef ICEE_HAS_LOCATOR
-
-namespace IceProxy { namespace Ice
-{
-
-class Locator;
-
-} }
-
-namespace Ice
-{
-
 typedef ::IceInternal::ProxyHandle< ::IceProxy::Ice::Locator> LocatorPrx;
-
-}
-
 #endif // ICEE_HAS_LOCATOR
-
-namespace Ice
-{
 
 class LocalException;
 
