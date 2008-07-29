@@ -361,6 +361,8 @@ EVERYTHING		= all clean install
 .c.obj:
 	$(CC) /c $(CPPFLAGS) $(CFLAGS) $<
 
+.cpp.objc:
+	$(CXX) -DICEE_PURE_CLIENT /Fo$(*F).objc /c $(CPPFLAGS) $(CXXFLAGS) $<
 
 {$(SDIR)\}.ice{$(HDIR)}.h:
 	del /q $(HDIR)\$(*F).h $(*F).cpp
@@ -381,6 +383,6 @@ clean::
 !endif
 
 clean::
-	-del /q *.obj *.bak *.ilk *.exp *.pdb
+	-del /q *.obj *.objc *.bak *.ilk *.exp *.pdb
 
 install::
