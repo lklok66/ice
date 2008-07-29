@@ -7,10 +7,10 @@
 #
 # **********************************************************************
 
-SUBDIRS			= cpp cppe javae
-CLEAN_SUBDIRS		= javae cppe cpp
+SUBDIRS			= cpp cppe 
+CLEAN_SUBDIRS		= cppe cpp
 DEPEND_SUBDIRS		= cpp cppe
-INSTALL_SUBDIRS		= cpp cppe javae
+INSTALL_SUBDIRS		= cpp cppe 
 
 all::
 	@for subdir in $(SUBDIRS); \
@@ -47,7 +47,3 @@ cpp::
 cppe::
 	echo "making all in cppe";
 	( cd cppe && $(MAKE) all ) || exit 1;
-
-javae::
-	echo "making all in javae";
-	( cd javae && $(MAKE) all ) || exit 1;

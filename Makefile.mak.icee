@@ -7,10 +7,10 @@
 #
 # **********************************************************************
 
-SUBDIRS			= cpp cppe javae
-CLEAN_SUBDIRS		= javae cppe cpp
+SUBDIRS			= cpp cppe 
+CLEAN_SUBDIRS		= cppe cpp
 DEPEND_SUBDIRS		= cpp cppe
-INSTALL_SUBDIRS		= cpp cppe javae
+INSTALL_SUBDIRS		= cpp cppe 
 
 all::
 	@for %i in ( $(SUBDIRS) ) do \
@@ -39,7 +39,3 @@ cpp::
 cppe::
 	@echo "making all in cppe" && \
 	cmd /c "cd cppe && $(MAKE) -nologo -f Makefile.mak $(MAKEFLAGS) all" || exit 1
-
-javae::
-	@echo "making all in javae" && \
-	cmd /c "cd javae && $(MAKE) -nologo -f Makefile.mak $(MAKEFLAGS) all" || exit 1

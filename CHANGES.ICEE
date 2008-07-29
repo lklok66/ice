@@ -7,20 +7,12 @@ release, in no particular order. Some of the entries reflect
 significant new additions, while others represent minor corrections.
 
 Note that this file only includes changes since Ice-E 1.2.0. For the
-change history of prior releases, refer to the CHANGES file in the
-subdirectory of each language mapping (e.g., cppe/CHANGES).
+change history of prior releases, refer to the cppe/CHANGES file.
 
 
 ======================================================================
 Changes since version 1.2.0
 ======================================================================
-
-
-General Changes
-===============
-
-These entries apply to all relevant language mappings unless otherwise
-noted.
 
 - Most proxy factory methods now return a proxy of the same type as
   the original and no longer require the use of a checked or unchecked
@@ -83,15 +75,5 @@ noted.
   properties control the size of the TCP receive and send buffers for
   the TCP and SSL transports.
 
-
-C++ Changes
-===========
-
 - There is no longer a limit on the allowable length of a property line
   in an Ice config file. Previously the limit was 1024.
-
-Java Changes
-============
-
-- Replaced IceUtil.Version with the methods Ice.Util.stringVersion
-  and Ice.Util.intVersion.

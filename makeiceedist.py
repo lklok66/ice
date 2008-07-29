@@ -31,7 +31,8 @@ filesToRemove = [
     "./cpp/config/icegrid-slice.3.3.ice.gz",
     "./cpp/config/makegitignore.py",
     "./cpp/config/templates.xml",
-    "./cpp/config/upgradeicegrid.py"
+    "./cpp/config/upgradeicegrid.py",
+    "./slice/IceE/LocalException.ice"
 ]
 
 # List of files & subdirectories to keep, all others are removed.
@@ -55,11 +56,9 @@ filesToKeep = [
     "./cpp/src/IceUtil",
     "./cpp/src/Slice",
     "./cpp/src/slice2cppe",
-    "./cpp/src/slice2javae",
     "./cpp/bin",
     "./cpp/lib",
     "./cppe",
-    "./javae",
     "./slice/IceE"
 ]
 
@@ -104,7 +103,6 @@ def usage():
     print "-h      Show this message."
     print "-v      Be verbose."
     print "-c DIR  Compare distribution to the one from DIR and"
-    print "-k key  Specify Ice public key token."
 
 #
 # Check arguments
@@ -268,6 +266,7 @@ print "ok"
 print "Copying icee install files...",
 move(os.path.join("README.ICEE"), os.path.join("README"))
 move(os.path.join("CHANGES.ICEE"), os.path.join("CHANGES"))
+move(os.path.join("RELEASE_NOTES.ICEE"), os.path.join("RELEASE_NOTES"))
 
 #
 # Move *.icee to the correct names.
