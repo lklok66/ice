@@ -159,6 +159,8 @@ EVERYTHING		= all depend clean install
 .c.o:
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $<
 
+%C.o: %.cpp
+	$(CXX) -c -DICEE_PURE_CLIENT -o $(*F)C.o $(CPPFLAGS) $(CXXFLAGS) $<
 
 $(HDIR)/%F.h: $(SDIR)/%F.ice
 	rm -f $(HDIR)/$(*F)F.h $(*F)F.cpp

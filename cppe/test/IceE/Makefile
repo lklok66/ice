@@ -19,7 +19,7 @@ SUBDIRS		= adapterDeactivation \
 		  faultTolerance \
 		  inheritance \
 		  location \
-                  operations \
+		  operations \
 	 	  proxy \
 		  retry \
 		  slicing \

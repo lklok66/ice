@@ -30,7 +30,7 @@ include $(top_srcdir)/config/Make.rules
 
 CPPFLAGS	:= -I. $(CPPFLAGS)
 
-$(CLIENT): $(OBJS) $(COBJS)
+$(CLIENT): $(OBJS) $(COBJS) ThroughputC.o
 	rm -f $@
 	$(CXX) $(LDFLAGS) -o $@ ThroughputC.o $(COBJS) $(MINLIBS)
 
@@ -40,9 +40,5 @@ $(SERVER): $(OBJS) $(SOBJS)
 
 Client.o: Client.cpp
 	$(CXX) -c -DICEE_PURE_CLIENT $(CPPFLAGS) $(CXXFLAGS) $<
-
-ThroughputC.o Throughput.o: Throughput.cpp
-	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<
-	$(CXX) -c -DICEE_PURE_CLIENT -o ThroughputC.o $(CPPFLAGS) $(CXXFLAGS) $<
 
 include .depend

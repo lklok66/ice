@@ -16,6 +16,7 @@ using namespace std;
 void
 batchOneways(const Test::MyClassPrx& p)
 {
+#ifdef ICEE_HAS_BATCH
     const Test::ByteS bs1(10  * 1024, 0);
     const Test::ByteS bs2(99  * 1024, 0);
     const Test::ByteS bs3(100  * 1024, 0);
@@ -68,4 +69,5 @@ batchOneways(const Test::MyClassPrx& p)
     }
     
     batch->ice_getConnection()->flushBatchRequests();
+#endif
 }
