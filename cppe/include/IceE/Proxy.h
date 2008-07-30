@@ -209,7 +209,7 @@ public:
 
 protected:
 
-    virtual Object* __newInstance() const;
+    ICE_API virtual Object* __newInstance() const;
 
     ::IceInternal::ReferencePtr _reference;
 
