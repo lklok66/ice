@@ -15,7 +15,7 @@
 {
     Ice::Communicator* _communicator;
 }
+
 -(Communicator*)initWithCommunicator:(const Ice::CommunicatorPtr&)communicator;
--(void)shutdown;
 @end
 

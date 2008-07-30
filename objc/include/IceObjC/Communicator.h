@@ -11,8 +11,13 @@
 
 @interface Communicator : NSObject
 
-+(Communicator*) initialize;
 -(void) shutdown;
+-(void) destroy;
 
 @end
 
+@interface Communicator (Initialize)
+
++(Communicator*) initializeCommunicator;
+
+@end

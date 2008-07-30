@@ -12,8 +12,9 @@
 int
 main(int argc, const char* argv[])
 {
-    Communicator* communicator = [Communicator initialize];
+    Communicator* communicator = [Communicator initializeCommunicator];
     [communicator shutdown];
+    [communicator destroy];
     [communicator release];
     return 0;
 }

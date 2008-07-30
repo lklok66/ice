@@ -12,9 +12,16 @@
 #include <Ice/Initialize.h>
 #include <Ice/Communicator.h>
 
+@implementation Communicator (Initialize)
++(Communicator*) initializeCommunicator
+{ 
+    return [CommunicatorI initializeCommunicator];
+}
+@end
+
 @implementation CommunicatorI
 
-+ (Communicator*)initialize
++ (Communicator*)initializeCommunicator
 {
     Ice::CommunicatorPtr communicator = Ice::initialize();
     return [[CommunicatorI alloc] initWithCommunicator:communicator];
@@ -37,6 +44,11 @@
 - (void)shutdown
 {
     _communicator->shutdown();
+}
+
+- (void)destroy
+{
+    _communicator->destroy();
 }
 
 @end

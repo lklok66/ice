@@ -9,18 +9,18 @@
 
 #import <IceObjC/Communicator.h>
 
-@implementation Communicator
+#include <assert.h>
 
-+(Communicator*) initialize
-{ 
-     // TODO: Abort
-     return nil;
-} 
+@implementation Communicator
 
 -(void) shutdown
 { 
-     // TODO: Abort
+    assert(false);
+} 
+
+-(void) destroy
+{ 
+    assert(false);
 } 
 
 @end
-
