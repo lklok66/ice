@@ -26,7 +26,8 @@
 #include <Ice/LocalException.h>
 #include <Ice/ReferenceFactory.h> // For createProxy().
 #include <Ice/ProxyFactory.h> // For createProxy().
-#ifndef ICE_NO_BZIP2
+
+#ifndef ICE_IPHONE
 #include <bzlib.h>
 #endif
 
@@ -1817,7 +1818,7 @@ Ice::ConnectionI::send()
             if(!message->stream->i)
             {
                 message->stream->i = message->stream->b.begin();
-#ifndef ICE_NO_BZIP2
+#ifndef ICE_IPHONE
                 if(message->compress && message->stream->b.size() >= 100) // Only compress messages > 100 bytes.
                 {
                     //
@@ -1875,7 +1876,7 @@ Ice::ConnectionI::send()
                         traceSend(*message->stream, _logger, _traceLevels);
                     }
                 }
-#ifndef ICE_NO_BZIP2
+#ifndef ICE_IPHONE
             }
 #endif
             //
@@ -1956,7 +1957,7 @@ Ice::ConnectionI::sendMessage(OutgoingMessage& message)
 
     message.stream->i = message.stream->b.begin();
 
-#ifndef ICE_NO_BZIP2
+#ifndef ICE_IPHONE
     if(message.compress && message.stream->b.size() >= 100) // Only compress messages larger than 100 bytes.
     {
         //
@@ -2044,7 +2045,7 @@ Ice::ConnectionI::sendMessage(OutgoingMessage& message)
 
         _sendStreams.push_back(message);
         _sendStreams.back().adopt(0); // Adopt the stream.
-#ifndef ICE_NO_BZIP2
+#ifndef ICE_IPHONE
     }
 #endif
 
@@ -2053,7 +2054,7 @@ Ice::ConnectionI::sendMessage(OutgoingMessage& message)
     return false;
 }
 
-#ifndef ICE_NO_BZIP2
+#ifndef ICE_IPHONE
 static string
 getBZ2Error(int bzError)
 {
@@ -2116,7 +2117,7 @@ getBZ2Error(int bzError)
 }
 #endif
 
-#ifndef ICE_NO_BZIP2
+#ifndef ICE_IPHONE
 void
 Ice::ConnectionI::doCompress(BasicStream& uncompressed, BasicStream& compressed)
 {
@@ -2228,7 +2229,7 @@ Ice::ConnectionI::parseMessage(BasicStream& stream, Int& invokeNum, Int& request
         stream.read(compress);
         if(compress == 2)
         {
-#ifndef ICE_NO_BZIP2
+#ifndef ICE_IPHONE
             BasicStream ustream(_instance.get());
             doUncompress(stream, ustream);
             stream.b.swap(ustream.b);

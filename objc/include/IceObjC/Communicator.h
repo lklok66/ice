@@ -9,15 +9,15 @@
 
 #import <Foundation/NSObject.h>
 
-@interface Communicator : NSObject
+@interface Ice_Communicator : NSObject
 
 -(void) shutdown;
 -(void) destroy;
 
 @end
 
-@interface Communicator (Initialize)
+@interface Ice_Communicator (Initialize)
 
-+(Communicator*) initializeCommunicator;
++(Ice_Communicator*) create;
 
 @end

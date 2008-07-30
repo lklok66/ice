@@ -7,10 +7,6 @@
 //
 // **********************************************************************
 
-#ifdef _WIN32
-#define ICE_NO_ICONV
-#endif
-
 #include <Ice/StringConverter.h>
 #include <IceUtil/IceUtil.h>
 #include <IceUtil/StringUtil.h>
@@ -20,7 +16,7 @@
 #include <Ice/LocalException.h>
 #include <Ice/LoggerUtil.h>
 #include <Ice/Communicator.h>
-#ifndef ICE_NO_ICONV
+#if !defined(_WIN32) && !defined(ICE_IPHONE)
 #include <Ice/IconvStringConverter.h>
 #endif
 
@@ -191,6 +187,8 @@ WindowsStringConverter::fromUTF8(const Byte* sourceStart, const Byte* sourceEnd,
 
 #endif
 
+#ifndef ICE_IPHONE
+
 StringConverterPlugin::StringConverterPlugin(const CommunicatorPtr& communicator,
                                              const StringConverterPtr& stringConverter, 
                                              const WstringConverterPtr& wstringConverter)
@@ -347,5 +345,8 @@ createStringConverter(const CommunicatorPtr& communicator, const string& name, c
         return 0;
     }
 }
+
+#endif
+
 }
 

@@ -150,7 +150,7 @@ STATICLIBS	:= yes
 
 include $(top_srcdir)/config/Make.rules
 
-CPPFLAGS	:= -DICE_NO_ICONV -DICE_NO_BZIP2 -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src $(CPPFLAGS)
+CPPFLAGS	:= -DICE_IPHONE -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src $(CPPFLAGS)
 SLICE2CPPFLAGS	:= --ice --include-dir Ice $(SLICE2CPPFLAGS)
 
 $(libdir)/$(LIBNAME): $(OBJS) $(SLICE_OBJS)

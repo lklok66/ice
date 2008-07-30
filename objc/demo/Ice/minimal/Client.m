@@ -8,13 +8,14 @@
 // **********************************************************************
 
 #import <IceObjC/IceObjC.h>
+#import <Foundation/NSAutoreleasePool.h>
 
 int
 main(int argc, const char* argv[])
 {
-    Communicator* communicator = [Communicator initializeCommunicator];
-    [communicator shutdown];
+    NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+    Ice_Communicator* communicator = [Ice_Communicator create];
     [communicator destroy];
-    [communicator release];
+    [pool release];
     return 0;
 }

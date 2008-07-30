@@ -401,6 +401,26 @@
 		vrLen = 501;
 		vrLoc = 262;
 	};
+	141803B40E40B7B700DC7AFB /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1D3623250D0F684500981E51 /* helloAppDelegate.m */;
+		name = "helloAppDelegate.m: 42";
+		rLen = 0;
+		rLoc = 752;
+		rType = 0;
+		vrLen = 516;
+		vrLoc = 229;
+	};
+	141803B70E40B7C300DC7AFB /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1D3623250D0F684500981E51 /* helloAppDelegate.m */;
+		name = "helloAppDelegate.m: 42";
+		rLen = 0;
+		rLoc = 736;
+		rType = 0;
+		vrLen = 501;
+		vrLoc = 229;
+	};
 	1D3623240D0F684500981E51 /* helloAppDelegate.h */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {900, 588}}";
@@ -411,9 +431,9 @@
 	};
 	1D3623250D0F684500981E51 /* helloAppDelegate.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {729, 602}}";
-			sepNavSelRange = "{580, 0}";
-			sepNavVisRange = "{262, 501}";
+			sepNavIntBoundsRect = "{{0, 0}, {729, 588}}";
+			sepNavSelRange = "{736, 0}";
+			sepNavVisRange = "{229, 501}";
 			sepNavWindowFrame = "{{38, 136}, {959, 716}}";
 		};
 	};
@@ -548,6 +568,8 @@
 			141803AA0E4082B800DC7AFB /* PBXTextBookmark */ = 141803AA0E4082B800DC7AFB /* PBXTextBookmark */;
 			141803AB0E4082BD00DC7AFB /* PBXTextBookmark */ = 141803AB0E4082BD00DC7AFB /* PBXTextBookmark */;
 			141803B10E408D3D00DC7AFB /* PBXTextBookmark */ = 141803B10E408D3D00DC7AFB /* PBXTextBookmark */;
+			141803B40E40B7B700DC7AFB /* PBXTextBookmark */ = 141803B40E40B7B700DC7AFB /* PBXTextBookmark */;
+			141803B70E40B7C300DC7AFB /* PBXTextBookmark */ = 141803B70E40B7C300DC7AFB /* PBXTextBookmark */;
 		};
 		sourceControlManager = 141802AF0E40610D00DC7AFB /* Source Control */;
 		userBuildSettings = {

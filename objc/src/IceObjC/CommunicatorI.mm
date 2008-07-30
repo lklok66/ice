@@ -12,22 +12,17 @@
 #include <Ice/Initialize.h>
 #include <Ice/Communicator.h>
 
-@implementation Communicator (Initialize)
-+(Communicator*) initializeCommunicator
+@implementation Ice_Communicator (Initialize)
++(Ice_Communicator*) create
 { 
-    return [CommunicatorI initializeCommunicator];
+    Ice::CommunicatorPtr communicator = Ice::initialize();
+    return [[[Ice_CommunicatorI alloc] initWithCommunicator:communicator] autorelease];
 }
 @end
 
-@implementation CommunicatorI
+@implementation Ice_CommunicatorI
 
-+ (Communicator*)initializeCommunicator
-{
-    Ice::CommunicatorPtr communicator = Ice::initialize();
-    return [[CommunicatorI alloc] initWithCommunicator:communicator];
-}
-
-- (Communicator*)initWithCommunicator:(const Ice::CommunicatorPtr&)communicator
+- (Ice_Communicator*)initWithCommunicator:(const Ice::CommunicatorPtr&)communicator
 {
     _communicator = communicator.get();
     _communicator->__incRef();

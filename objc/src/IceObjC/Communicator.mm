@@ -11,7 +11,7 @@
 
 #include <assert.h>
 
-@implementation Communicator
+@implementation Ice_Communicator
 
 -(void) shutdown
 { 

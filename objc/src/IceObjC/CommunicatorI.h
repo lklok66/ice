@@ -11,11 +11,11 @@
 
 #include <Ice/CommunicatorF.h>
 
-@interface CommunicatorI : Communicator
+@interface Ice_CommunicatorI : Ice_Communicator
 {
     Ice::Communicator* _communicator;
 }
 
--(Communicator*)initWithCommunicator:(const Ice::CommunicatorPtr&)communicator;
+-(Ice_Communicator*)initWithCommunicator:(const Ice::CommunicatorPtr&)communicator;
 @end
 

@@ -19,7 +19,7 @@
 
 - (void)applicationDidFinishLaunching:(UIApplication *)application {
 
-    communicator = [Communicator initializeCommunicator];
+    communicator = [[Ice_Communicator create] retain];
 
     // Override point for customization after app launch	
     [window addSubview:viewController.view];
@@ -29,7 +29,6 @@
 
 - (void)dealloc {
 
-    [communicator shutdown];
     [communicator destroy];
     [communicator release];
 

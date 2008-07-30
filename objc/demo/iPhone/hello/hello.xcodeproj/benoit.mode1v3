@@ -306,7 +306,7 @@
 							<real>186</real>
 						</array>
 						<key>RubberWindowFrame</key>
-						<string>125 146 998 685 0 0 1440 878 </string>
+						<string>158 159 998 685 0 0 1440 878 </string>
 					</dict>
 					<key>Module</key>
 					<string>PBXSmartGroupTreeModule</string>
@@ -336,7 +336,7 @@
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>141803B10E408D3D00DC7AFB</string>
+										<string>141803B70E40B7C300DC7AFB</string>
 										<key>history</key>
 										<array>
 											<string>1418034B0E40680B00DC7AFB</string>
@@ -372,7 +372,7 @@
 								<key>Frame</key>
 								<string>{{0, 0}, {790, 405}}</string>
 								<key>RubberWindowFrame</key>
-								<string>125 146 998 685 0 0 1440 878 </string>
+								<string>158 159 998 685 0 0 1440 878 </string>
 							</dict>
 							<key>Module</key>
 							<string>PBXNavigatorGroup</string>
@@ -392,7 +392,7 @@
 								<key>Frame</key>
 								<string>{{0, 410}, {790, 234}}</string>
 								<key>RubberWindowFrame</key>
-								<string>125 146 998 685 0 0 1440 878 </string>
+								<string>158 159 998 685 0 0 1440 878 </string>
 							</dict>
 							<key>Module</key>
 							<string>XCDetailModule</string>
@@ -558,7 +558,7 @@
 		<string>/Users/benoit/Devel/git/ice/objc/demo/iPhone/hello/hello.xcodeproj</string>
 	</array>
 	<key>WindowString</key>
-	<string>125 146 998 685 0 0 1440 878 </string>
+	<string>158 159 998 685 0 0 1440 878 </string>
 	<key>WindowToolsV3</key>
 	<array>
 		<dict>

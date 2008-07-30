@@ -35,7 +35,7 @@
 #include <Ice/DispatchInterceptor.h>
 #include <Ice/Plugin.h>
 
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(ICE_IPHONE)
 #include <Ice/IconvStringConverter.h>
 #endif
 
