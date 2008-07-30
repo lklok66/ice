@@ -25,6 +25,11 @@ embedded_runpath_prefix  ?= /opt/Ice-$(VERSION_MAJOR).$(VERSION_MINOR)
 #
 #OPTIMIZE		= yes
 
+#
+# Define COMPILE_FOR_IPHONE as yes if you want to build Ice for
+# Objective-C with the iPhone SDK.
+#
+COMPILE_FOR_IPHONE	= yes
 
 # ----------------------------------------------------------------------
 # Don't change anything below this line!
@@ -54,10 +59,6 @@ install_libdir	  	:= $(prefix)/$(libsubdir)
 # Platform specific definitions
 #
 include	 $(top_srcdir)/config/Make.rules.$(UNAME)
-
-BZIP2_FLAGS             = $(if $(BZIP2_HOME),-I$(BZIP2_HOME)/include)
-BZIP2_LIBS              = $(if $(BZIP2_HOME),-L$(BZIP2_HOME)/$(libsubdir)) -lbz2
-BZIP2_RPATH_LINK        = $(if $(BZIP2_HOME),$(call rpathlink,$(BZIP2_HOME)/$(libsubdir)))
 
 ifdef ice_src_dist
     ifeq ($(ice_cpp_dir), $(ice_dir)/cpp)
@@ -115,7 +116,7 @@ EVERYTHING		= all depend clean install
 .SUFFIXES:		.cpp .m .mm .o 
 
 .m.o:
-	$(CC) -c $(CPPFLAGS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $<
 
 .mm.o:
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<

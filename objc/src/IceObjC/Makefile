@@ -26,7 +26,7 @@ include $(top_srcdir)/config/Make.rules
 
 CPPFLAGS	:= -I.. $(CPPFLAGS) $(ICE_FLAGS)
 
-LINKWITH        := -lIce -lIceUtil $(BZIP2_LIBS) $(ICE_OS_LIBS) $(BASELIBS)
+LINKWITH        := -lIce -lIceUtil $(ICE_OS_LIBS) $(BASELIBS)
 
 $(libdir)/$(LIBFILENAME): $(OBJS)
 	rm -f $@

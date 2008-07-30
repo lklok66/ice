@@ -189,8 +189,10 @@ private:
     void flushSentCallbacks();
     bool sendMessage(OutgoingMessage&);
 
+#ifndef ICE_NO_BZIP2
     void doCompress(IceInternal::BasicStream&, IceInternal::BasicStream&);
     void doUncompress(IceInternal::BasicStream&, IceInternal::BasicStream&);
+#endif
 
     void parseMessage(IceInternal::BasicStream&, Int&, Int&, Byte&,
                       IceInternal::ServantManagerPtr&, ObjectAdapterPtr&, IceInternal::OutgoingAsyncPtr&);

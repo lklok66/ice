@@ -45,8 +45,6 @@ include $(top_srcdir)/config/Make.rules
 
 CPPFLAGS        := -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src $(CPPFLAGS)
 
-LINKWITH        := $(ICEUTIL_OS_LIBS)
-
 $(libdir)/$(LIBNAME): $(OBJS)
 	rm -f $@
 	$(call mklib,$@,$(OBJS))

@@ -150,10 +150,8 @@ STATICLIBS	:= yes
 
 include $(top_srcdir)/config/Make.rules
 
-CPPFLAGS	:= -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src $(CPPFLAGS)
+CPPFLAGS	:= -DICE_NO_ICONV -DICE_NO_BZIP2 -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src $(CPPFLAGS)
 SLICE2CPPFLAGS	:= --ice --include-dir Ice $(SLICE2CPPFLAGS)
-
-LINKWITH        := -lIceUtil $(ICE_OS_LIBS)
 
 $(libdir)/$(LIBNAME): $(OBJS) $(SLICE_OBJS)
 	rm -f $@

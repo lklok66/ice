@@ -26,7 +26,9 @@
 #include <Ice/LocalException.h>
 #include <Ice/ReferenceFactory.h> // For createProxy().
 #include <Ice/ProxyFactory.h> // For createProxy().
+#ifndef ICE_NO_BZIP2
 #include <bzlib.h>
+#endif
 
 using namespace std;
 using namespace Ice;
@@ -1815,6 +1817,7 @@ Ice::ConnectionI::send()
             if(!message->stream->i)
             {
                 message->stream->i = message->stream->b.begin();
+#ifndef ICE_NO_BZIP2
                 if(message->compress && message->stream->b.size() >= 100) // Only compress messages > 100 bytes.
                 {
                     //
@@ -1849,6 +1852,7 @@ Ice::ConnectionI::send()
                         //
                         message->stream->b[9] = 1;
                     }
+#endif
 
                     //
                     // No compression, just fill in the message size.
@@ -1871,8 +1875,9 @@ Ice::ConnectionI::send()
                         traceSend(*message->stream, _logger, _traceLevels);
                     }
                 }
+#ifndef ICE_NO_BZIP2
             }
-
+#endif
             //
             // Send the first message.
             //
@@ -1951,6 +1956,7 @@ Ice::ConnectionI::sendMessage(OutgoingMessage& message)
 
     message.stream->i = message.stream->b.begin();
 
+#ifndef ICE_NO_BZIP2
     if(message.compress && message.stream->b.size() >= 100) // Only compress messages larger than 100 bytes.
     {
         //
@@ -2000,7 +2006,7 @@ Ice::ConnectionI::sendMessage(OutgoingMessage& message)
             //
             message.stream->b[9] = 1;
         }
-
+#endif
         //
         // No compression, just fill in the message size.
         //
@@ -2038,13 +2044,16 @@ Ice::ConnectionI::sendMessage(OutgoingMessage& message)
 
         _sendStreams.push_back(message);
         _sendStreams.back().adopt(0); // Adopt the stream.
+#ifndef ICE_NO_BZIP2
     }
+#endif
 
     _sendInProgress = true;
     _selectorThread->_register(_transceiver->fd(), this, NeedWrite, _endpoint->timeout());
     return false;
 }
 
+#ifndef ICE_NO_BZIP2
 static string
 getBZ2Error(int bzError)
 {
@@ -2105,7 +2114,9 @@ getBZ2Error(int bzError)
         return "";
     }
 }
+#endif
 
+#ifndef ICE_NO_BZIP2
 void
 Ice::ConnectionI::doCompress(BasicStream& uncompressed, BasicStream& compressed)
 {
@@ -2189,6 +2200,7 @@ Ice::ConnectionI::doUncompress(BasicStream& compressed, BasicStream& uncompresse
 
     copy(compressed.b.begin(), compressed.b.begin() + headerSize, uncompressed.b.begin());
 }
+#endif
 
 void
 Ice::ConnectionI::parseMessage(BasicStream& stream, Int& invokeNum, Int& requestId, Byte& compress,
@@ -2216,9 +2228,15 @@ Ice::ConnectionI::parseMessage(BasicStream& stream, Int& invokeNum, Int& request
         stream.read(compress);
         if(compress == 2)
         {
+#ifndef ICE_NO_BZIP2
             BasicStream ustream(_instance.get());
             doUncompress(stream, ustream);
             stream.b.swap(ustream.b);
+#else
+            FeatureNotSupportedException ex(__FILE__, __LINE__);
+            ex.unsupportedFeature = "Cannot uncompress compressed message";
+            throw ex;
+#endif
         }
         stream.i = stream.b.begin() + headerSize;
 

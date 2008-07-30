@@ -7,6 +7,10 @@
 //
 // **********************************************************************
 
+#ifdef _WIN32
+#define ICE_NO_ICONV
+#endif
+
 #include <Ice/StringConverter.h>
 #include <IceUtil/IceUtil.h>
 #include <IceUtil/StringUtil.h>
@@ -16,7 +20,7 @@
 #include <Ice/LocalException.h>
 #include <Ice/LoggerUtil.h>
 #include <Ice/Communicator.h>
-#ifndef _WIN32
+#ifndef ICE_NO_ICONV
 #include <Ice/IconvStringConverter.h>
 #endif
 
@@ -277,7 +281,7 @@ createStringConverter(const CommunicatorPtr& communicator, const string& name, c
         }
 
         stringConverter = new WindowsStringConverter(static_cast<unsigned int>(cp));
-#else
+#elif !defined(ICE_NO_ICONV)
         StringSeq iconvArgs;
 
         for(size_t i = 0; i < args.size(); ++i)
@@ -322,7 +326,10 @@ createStringConverter(const CommunicatorPtr& communicator, const string& name, c
                 assert(0);
             }
         }
-
+#else
+        Error out(communicator->getLogger());
+        out << "Plugin " << name << ": string converter not supported on this platform";
+        return 0;
 #endif    
 
         return new StringConverterPlugin(communicator, stringConverter, wstringConverter);
