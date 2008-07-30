@@ -15,15 +15,16 @@ module Test
 
 dictionary<string, string> Context;
 
-["ami"] class MyClass
+class MyClass
 {
     void shutdown();
 
     Context getContext();
 };
 
-["ami"] class MyDerivedClass extends MyClass
+class MyDerivedClass extends MyClass
 {
+    Object* echo(Object* obj);
 };
 
 };

@@ -32,6 +32,10 @@
 #define ICEE_HAS_WSTRING
 
 //
+// Comment this out if you want to build without opaque endpoint support.
+//
+#define ICEE_HAS_OPAQUE_ENDPOINTS
+
 // Uncomment this if want the pure client library built with
 // only the blocking concurrency model.
 // If commented, both blocking and thread-per-connections support

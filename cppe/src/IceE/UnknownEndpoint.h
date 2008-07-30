@@ -19,6 +19,9 @@ class UnknownEndpoint : public Endpoint
 {
 public:
 
+#ifdef ICEE_HAS_OPAQUE_ENDPOINTS
+    UnknownEndpoint(const std::string&);
+#endif
     UnknownEndpoint(Ice::Short, BasicStream*);
 
     virtual void streamWrite(BasicStream*) const;

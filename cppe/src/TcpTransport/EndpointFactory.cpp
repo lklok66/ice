@@ -11,6 +11,7 @@
 #include <IceE/UnknownEndpoint.h>
 #include <IceE/LocalException.h>
 #include <IceE/BasicStream.h>
+#include <IceE/Instance.h>
 #include <TcpTransport/TcpEndpoint.h>
 
 using namespace std;
@@ -53,6 +54,34 @@ IceInternal::EndpointFactory::create(const std::string& str, bool oaEndpoint) co
     {
         return new TcpEndpoint(_instance, str.substr(end), oaEndpoint);
     }
+
+#ifdef ICEE_HAS_OPAQUE_ENDPOINTS
+    //
+    // If the stringified endpoint is opaque, create an unknown endpoint,
+    // then see whether the type is tcp.
+    //
+    if(protocol == "opaque")
+    {
+        EndpointPtr ue = new UnknownEndpoint(str.substr(end));
+        if(ue->type() == TcpEndpointType)
+        {
+            //
+            // Make a temporary stream, write the opaque endpoint data into the stream,
+            // and read the endpoint data from that stream to create the actual endpoint.
+            //
+            BasicStream bs(_instance.get(), _instance->messageSizeMax(),
+#ifdef ICEE_HAS_WSTRING
+                           _instance->initializationData().stringConverter,
+                           _instance->initializationData().wstringConverter
+#endif
+                           );
+            ue->streamWrite(&bs);
+            bs.i = bs.b.begin();
+            return read(&bs);
+        }
+        return ue; // Endpoint is opaque, and not tcp.
+    }
+#endif
 
     return 0;
 }

@@ -93,7 +93,7 @@ IceInternal::TcpEndpoint::TcpEndpoint(const InstancePtr& instance, const string&
 
             case 'p':
             {
-                    const_cast<Int&>(_port) = atoi(argument.c_str());
+                const_cast<Int&>(_port) = atoi(argument.c_str());
                 if(_port <= 0 || _port > 65535)
                 {
                     EndpointParseException ex(__FILE__, __LINE__);
