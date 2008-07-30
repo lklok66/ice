@@ -83,13 +83,13 @@ public:
     Ice::LocatorPrx getLocator() const;
     Ice::LocatorRegistryPrx getLocatorRegistry();
 
-    std::vector<EndpointPtr> getEndpoints(const IndirectReferencePtr&, bool&);
-    void clearCache(const IndirectReferencePtr&);
-    void clearObjectCache(const IndirectReferencePtr&);
+    std::vector<EndpointPtr> getEndpoints(const ReferencePtr&, bool&);
+    void clearCache(const ReferencePtr&);
+    void clearObjectCache(const ReferencePtr&);
 
 private:
 
-    void trace(const std::string&, const IndirectReferencePtr&, const std::vector<EndpointPtr>&);
+    void trace(const std::string&, const ReferencePtr&, const std::vector<EndpointPtr>&);
 
     const Ice::LocatorPrx _locator;
     Ice::LocatorRegistryPrx _locatorRegistry;

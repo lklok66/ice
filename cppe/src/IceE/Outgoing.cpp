@@ -225,21 +225,13 @@ IceInternal::Outgoing::abort(const LocalException& ex)
     assert(_state == StateUnsent);
     
     //
-    // If we didn't finish a batch oneway request, we must
-    // notify the connection about that we give up ownership of the
-    // batch stream.
+    // If we didn't finish a batch request, we must notify the connection
+    // that we give up ownership of the batch stream.
     //
 #ifdef ICEE_HAS_BATCH
-    if(_reference->getMode() == ReferenceModeBatchOneway)
+    if(_reference->getMode() == ReferenceModeBatchOneway || _reference->getMode() == ReferenceModeBatchDatagram)
     {
         _connection->abortBatchRequest();
-        
-        //
-        // If we abort a batch requests, we cannot retry, because not
-        // only the batch request that caused the problem will be
-        // aborted, but all other requests in the batch as well.
-        //
-        throw LocalExceptionWrapper(ex, false);
     }
 #endif
     

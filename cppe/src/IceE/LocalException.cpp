@@ -25,6 +25,61 @@ Ice::LocalException::~LocalException() throw()
 {
 }
 
+Ice::InitializationException::InitializationException(const char* __file, int __line) :
+#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
+    LocalException(__file, __line)
+#else
+    ::Ice::LocalException(__file, __line)
+#endif
+{
+}
+
+Ice::InitializationException::InitializationException(const char* __file, int __line, const ::std::string& __reason) :
+#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
+    LocalException(__file, __line),
+#else
+    ::Ice::LocalException(__file, __line),
+#endif
+    reason(__reason)
+{
+}
+
+Ice::InitializationException::~InitializationException() throw()
+{
+}
+
+static const char* __Ice__InitializationException_name = "Ice::InitializationException";
+
+::std::string
+Ice::InitializationException::ice_name() const
+{
+    return __Ice__InitializationException_name;
+}
+
+string
+Ice::InitializationException::toString() const
+{
+    string out = Exception::toString();
+    if(!reason.empty())
+    {
+        out +=  ":\n";
+        out += reason;
+    }
+    return out;
+}
+
+::Ice::Exception*
+Ice::InitializationException::ice_clone() const
+{
+    return new InitializationException(*this);
+}
+
+void
+Ice::InitializationException::ice_throw() const
+{
+    throw *this;
+}
+
 Ice::AlreadyRegisteredException::AlreadyRegisteredException(const char* __file, int __line) :
 #if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
     LocalException(__file, __line)
@@ -426,6 +481,7 @@ Ice::ObjectAdapterDeactivatedException::ice_throw() const
 {
     throw *this;
 }
+
 string
 Ice::ObjectAdapterDeactivatedException::toString() const
 {

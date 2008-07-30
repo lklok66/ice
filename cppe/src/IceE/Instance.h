@@ -67,6 +67,13 @@ public:
     Ice::Identity stringToIdentity(const std::string&) const;
     std::string identityToString(const Ice::Identity&) const;
 
+#ifdef ICEE_HAS_LOCATOR
+    void setDefaultLocator(const Ice::LocatorPrx&);
+#endif
+#ifdef ICEE_HAS_ROUTER
+    void setDefaultRouter(const Ice::RouterPrx&);
+#endif
+
 private:
 
     Instance(const Ice::CommunicatorPtr&, const Ice::InitializationData&);

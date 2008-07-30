@@ -29,7 +29,7 @@ allTests(const Ice::CommunicatorPtr& communicator)
 
     Ice::ObjectPrx b1 = communicator->stringToProxy("test:tcp");
     test(b1->ice_getIdentity().name == "test" && b1->ice_getIdentity().category.empty() &&
-         b1->ice_getFacet().empty());
+         b1->ice_getAdapterId().empty() && b1->ice_getFacet().empty());
     b1 = communicator->stringToProxy("test :tcp");
     test(b1->ice_getIdentity().name == "test" && b1->ice_getIdentity().category.empty() &&
          b1->ice_getFacet().empty());
@@ -50,13 +50,13 @@ allTests(const Ice::CommunicatorPtr& communicator)
     catch(const Ice::ProxyParseException&)
     {
     }
-    b1 = communicator->stringToProxy("\"test -f facet\":tcp");
+    b1 = communicator->stringToProxy("\"test -f facet\"");
     test(b1->ice_getIdentity().name == "test -f facet" && b1->ice_getIdentity().category.empty() &&
          b1->ice_getFacet().empty());
-    b1 = communicator->stringToProxy("\"test -f facet@test\":tcp");
+    b1 = communicator->stringToProxy("\"test -f facet@test\"");
     test(b1->ice_getIdentity().name == "test -f facet@test" && b1->ice_getIdentity().category.empty() &&
          b1->ice_getFacet().empty());
-    b1 = communicator->stringToProxy("\"test -f facet@test @test\":tcp");
+    b1 = communicator->stringToProxy("\"test -f facet@test @test\"");
     test(b1->ice_getIdentity().name == "test -f facet@test @test" && b1->ice_getIdentity().category.empty() &&
          b1->ice_getFacet().empty());
     try
@@ -71,32 +71,31 @@ allTests(const Ice::CommunicatorPtr& communicator)
     test(b1->ice_getIdentity().name == "test test" && b1->ice_getIdentity().category.empty());
     try
     {
-        b1 = communicator->stringToProxy("test\\777:tcp");
+        b1 = communicator->stringToProxy("test\\777");
         test(false);
     }
     catch(const Ice::IdentityParseException&)
     {
     }
-    b1 = communicator->stringToProxy("test\\40test:tcp");
+    b1 = communicator->stringToProxy("test\\40test");
     test(b1->ice_getIdentity().name == "test test");
 
     // Test some octal and hex corner cases.
-    b1 = communicator->stringToProxy("test\\4test:tcp");
+    b1 = communicator->stringToProxy("test\\4test");
     test(b1->ice_getIdentity().name == "test\4test");
-    b1 = communicator->stringToProxy("test\\04test:tcp");
+    b1 = communicator->stringToProxy("test\\04test");
     test(b1->ice_getIdentity().name == "test\4test");
-    b1 = communicator->stringToProxy("test\\004test:tcp");
+    b1 = communicator->stringToProxy("test\\004test");
     test(b1->ice_getIdentity().name == "test\4test");
-    b1 = communicator->stringToProxy("test\\1114test:tcp");
+    b1 = communicator->stringToProxy("test\\1114test");
     test(b1->ice_getIdentity().name == "test\1114test");
 
-    b1 = communicator->stringToProxy("test\\b\\f\\n\\r\\t\\'\\\"\\\\test:tcp");
+    b1 = communicator->stringToProxy("test\\b\\f\\n\\r\\t\\'\\\"\\\\test");
     test(b1->ice_getIdentity().name == "test\b\f\n\r\t\'\"\\test" && b1->ice_getIdentity().category.empty());
 
-    b1 = communicator->stringToProxy("category/test:tcp");
+    b1 = communicator->stringToProxy("category/test");
     test(b1->ice_getIdentity().name == "test" && b1->ice_getIdentity().category == "category");
 
-#ifdef ICEE_HAS_LOCATOR
     b1 = communicator->stringToProxy("test@adapter");
     test(b1->ice_getIdentity().name == "test" && b1->ice_getIdentity().category.empty() &&
          b1->ice_getAdapterId() == "adapter");
@@ -129,7 +128,6 @@ allTests(const Ice::CommunicatorPtr& communicator)
     b1 = communicator->stringToProxy("\"category \\/test@foo/test\"@\"adapter:tcp\"");
     test(b1->ice_getIdentity().name == "test" && b1->ice_getIdentity().category == "category /test@foo" &&
          b1->ice_getAdapterId() == "adapter:tcp");
-#endif
 
     b1 = communicator->stringToProxy("id -f facet:tcp");
     test(b1->ice_getIdentity().name == "id" && b1->ice_getIdentity().category.empty() &&
@@ -142,7 +140,7 @@ allTests(const Ice::CommunicatorPtr& communicator)
          b1->ice_getFacet() == "facet x");
     try
     {
-        b1 = communicator->stringToProxy("id -f \"facet x:tcp");
+        b1 = communicator->stringToProxy("id -f \"facet x");
         test(false);
     }
     catch(const Ice::ProxyParseException&)
@@ -150,7 +148,7 @@ allTests(const Ice::CommunicatorPtr& communicator)
     }
     try
     {
-        b1 = communicator->stringToProxy("id -f \'facet x:tcp");
+        b1 = communicator->stringToProxy("id -f \'facet x");
         test(false);
     }
     catch(const Ice::ProxyParseException&)
@@ -158,11 +156,10 @@ allTests(const Ice::CommunicatorPtr& communicator)
     }
     b1 = communicator->stringToProxy("test -f facet:tcp");
     test(b1->ice_getIdentity().name == "test" && b1->ice_getIdentity().category.empty() &&
-         b1->ice_getFacet() == "facet");
-    b1 = communicator->stringToProxy("test -f \"facet:tcp\":tcp");
+         b1->ice_getFacet() == "facet" && b1->ice_getAdapterId().empty());
+    b1 = communicator->stringToProxy("test -f \"facet:tcp\"");
     test(b1->ice_getIdentity().name == "test" && b1->ice_getIdentity().category.empty() &&
-         b1->ice_getFacet() == "facet:tcp");
-#ifdef ICEE_HAS_LOCATOR
+         b1->ice_getFacet() == "facet:tcp" && b1->ice_getAdapterId().empty());
     b1 = communicator->stringToProxy("test -f facet@test");
     test(b1->ice_getIdentity().name == "test" && b1->ice_getIdentity().category.empty() &&
          b1->ice_getFacet() == "facet" && b1->ice_getAdapterId() == "test");
@@ -180,22 +177,21 @@ allTests(const Ice::CommunicatorPtr& communicator)
     catch(const Ice::ProxyParseException&)
     {
     }
-#endif
-    b1 = communicator->stringToProxy("test:tcp");
+    b1 = communicator->stringToProxy("test");
     test(b1->ice_isTwoway());
-    b1 = communicator->stringToProxy("test -t:tcp");
+    b1 = communicator->stringToProxy("test -t");
     test(b1->ice_isTwoway());
-    b1 = communicator->stringToProxy("test -o:tcp:tcp");
+    b1 = communicator->stringToProxy("test -o");
     test(b1->ice_isOneway());
-    b1 = communicator->stringToProxy("test -O:tcp");
+    b1 = communicator->stringToProxy("test -O");
     test(b1->ice_isBatchOneway());
-    b1 = communicator->stringToProxy("test -d:tcp");
+    b1 = communicator->stringToProxy("test -d");
     test(b1->ice_isDatagram());
-    b1 = communicator->stringToProxy("test -D:tcp");
+    b1 = communicator->stringToProxy("test -D");
     test(b1->ice_isBatchDatagram());
-    b1 = communicator->stringToProxy("test:tcp");
+    b1 = communicator->stringToProxy("test");
     test(!b1->ice_isSecure());
-    b1 = communicator->stringToProxy("test -s:tcp");
+    b1 = communicator->stringToProxy("test -s");
     test(b1->ice_isSecure());
 
     try
@@ -232,32 +228,18 @@ allTests(const Ice::CommunicatorPtr& communicator)
     prop->setProperty(propertyPrefix, "test:default -p 12010 -t 10000");
     b1 = communicator->propertyToProxy(propertyPrefix);
     test(b1->ice_getIdentity().name == "test" && b1->ice_getIdentity().category.empty() &&
-         b1->ice_getFacet().empty());
+         b1->ice_getAdapterId().empty() && b1->ice_getFacet().empty());
 
     string property;
 
-    // These two properties don't do anything to direct proxies so
-    // first we test that.
-    /*
-     * Commented out because setting a locator or locator cache
-     * timeout on a direct proxy causes warning.
-     *
 #ifdef ICEE_HAS_LOCATOR
-    string property = propertyPrefix + ".Locator";
+    property = propertyPrefix + ".Locator";
     test(!b1->ice_getLocator());
     prop->setProperty(property, "locator:default -p 10000");
     b1 = communicator->propertyToProxy(propertyPrefix);
-    test(!b1->ice_getLocator());
+    test(b1->ice_getLocator() && b1->ice_getLocator()->ice_getIdentity().name == "locator");
     prop->setProperty(property, "");
 #endif
-
-    property = propertyPrefix + ".LocatorCacheTimeout";
-    test(b1->ice_getLocatorCacheTimeout() == 0);
-    prop->setProperty(property, "1");
-    b1 = communicator->propertyToProxy(propertyPrefix);
-    test(b1->ice_getLocatorCacheTimeout() == 0);
-    prop->setProperty(property, "");
-    */
 
     // Now retest with an indirect proxy.
 #ifdef ICEE_HAS_LOCATOR
@@ -268,23 +250,6 @@ allTests(const Ice::CommunicatorPtr& communicator)
     test(b1->ice_getLocator() && b1->ice_getLocator()->ice_getIdentity().name == "locator");
     prop->setProperty(property, "");
 #endif
-
-/*
-    property = propertyPrefix + ".LocatorCacheTimeout";
-    test(b1->ice_getLocatorCacheTimeout() == -1);
-    prop->setProperty(property, "1");
-    b1 = communicator->propertyToProxy(propertyPrefix);
-    test(b1->ice_getLocatorCacheTimeout() == 1);
-    prop->setProperty(property, "");
-    */
-
-    // This cannot be tested so easily because the property is cached
-    // on communicator initialization.
-    //
-    //prop->setProperty("Ice.Default.LocatorCacheTimeout", "60");
-    //b1 = communicator->propertyToProxy(propertyPrefix);
-    //test(b1->ice_getLocatorCacheTimeout() == 60);
-    //prop->setProperty("Ice.Default.LocatorCacheTimeout", "");
 
     prop->setProperty(propertyPrefix, "test:default -p 12010 -t 10000");
 
@@ -297,46 +262,6 @@ allTests(const Ice::CommunicatorPtr& communicator)
     prop->setProperty(property, "");
 #endif
 
-    /*
-    property = propertyPrefix + ".PreferSecure";
-    test(!b1->ice_isPreferSecure());
-    prop->setProperty(property, "1");
-    b1 = communicator->propertyToProxy(propertyPrefix);
-    test(b1->ice_isPreferSecure());
-    prop->setProperty(property, "");
-
-    property = propertyPrefix + ".ConnectionCached";
-    test(b1->ice_isConnectionCached());
-    prop->setProperty(property, "0");
-    b1 = communicator->propertyToProxy(propertyPrefix);
-    test(!b1->ice_isConnectionCached());
-    prop->setProperty(property, "");
-
-    property = propertyPrefix + ".EndpointSelection";
-    test(b1->ice_getEndpointSelection() == Ice::Random);
-    prop->setProperty(property, "Random");
-    b1 = communicator->propertyToProxy(propertyPrefix);
-    test(b1->ice_getEndpointSelection() == Ice::Random);
-    prop->setProperty(property, "Ordered");
-    b1 = communicator->propertyToProxy(propertyPrefix);
-    test(b1->ice_getEndpointSelection() == Ice::Ordered);
-    prop->setProperty(property, "");
-
-    property = propertyPrefix + ".CollocationOptimization";
-    test(b1->ice_isCollocationOptimized());
-    prop->setProperty(property, "0");
-    b1 = communicator->propertyToProxy(propertyPrefix);
-    test(!b1->ice_isCollocationOptimized());
-    prop->setProperty(property, "");
-
-    property = propertyPrefix + ".ThreadPerConnection";
-    test(!b1->ice_isThreadPerConnection());
-    prop->setProperty(property, "1");
-    b1 = communicator->propertyToProxy(propertyPrefix);
-    test(b1->ice_isThreadPerConnection());
-    prop->setProperty(property, "");
-*/
-
     tprintf("ok\n");
 
     tprintf("testing ice_getCommunicator... ");
@@ -347,9 +272,7 @@ allTests(const Ice::CommunicatorPtr& communicator)
     test(communicator->identityToString(base->ice_identity(communicator->stringToIdentity("other"))->ice_getIdentity())
          == "other");
     test(base->ice_facet("facet")->ice_getFacet() == "facet");
-#ifdef ICEE_HAS_LOCATOR
     test(base->ice_adapterId("id")->ice_getAdapterId() == "id");
-#endif
     test(base->ice_twoway()->ice_isTwoway());
     test(base->ice_oneway()->ice_isOneway());
     test(base->ice_batchOneway()->ice_isBatchOneway());
@@ -357,18 +280,16 @@ allTests(const Ice::CommunicatorPtr& communicator)
     test(base->ice_batchDatagram()->ice_isBatchDatagram());
     test(base->ice_secure(true)->ice_isSecure());
     test(!base->ice_secure(false)->ice_isSecure());
-    //test(base->ice_collocationOptimized(true)->ice_isCollocationOptimized());
-    //test(!base->ice_collocationOptimized(false)->ice_isCollocationOptimized());
     tprintf("ok\n");
 
     tprintf("testing proxy comparison... ");
 
-    test(communicator->stringToProxy("foo:tcp") == communicator->stringToProxy("foo:tcp"));
-    test(communicator->stringToProxy("foo:tcp") != communicator->stringToProxy("foo2:tcp"));
-    test(communicator->stringToProxy("foo:tcp") < communicator->stringToProxy("foo2:tcp"));
-    test(!(communicator->stringToProxy("foo2:tcp") < communicator->stringToProxy("foo:tcp")));
+    test(communicator->stringToProxy("foo") == communicator->stringToProxy("foo"));
+    test(communicator->stringToProxy("foo") != communicator->stringToProxy("foo2"));
+    test(communicator->stringToProxy("foo") < communicator->stringToProxy("foo2"));
+    test(!(communicator->stringToProxy("foo2") < communicator->stringToProxy("foo")));
 
-    Ice::ObjectPrx compObj = communicator->stringToProxy("foo:tcp");
+    Ice::ObjectPrx compObj = communicator->stringToProxy("foo");
 
     test(compObj->ice_facet("facet") == compObj->ice_facet("facet"));
     test(compObj->ice_facet("facet") != compObj->ice_facet("facet1"));
@@ -385,37 +306,50 @@ allTests(const Ice::CommunicatorPtr& communicator)
     test(compObj->ice_secure(false) < compObj->ice_secure(true));
     test(!(compObj->ice_secure(true) < compObj->ice_secure(false)));
 
-/*
-    test(compObj->ice_collocationOptimized(true) == compObj->ice_collocationOptimized(true));
-    test(compObj->ice_collocationOptimized(false) != compObj->ice_collocationOptimized(true));
-    test(compObj->ice_collocationOptimized(false) < compObj->ice_collocationOptimized(true));
-    test(!(compObj->ice_collocationOptimized(true) < compObj->ice_collocationOptimized(false)));
-
-    test(compObj->ice_connectionCached(true) == compObj->ice_connectionCached(true));
-    test(compObj->ice_connectionCached(false) != compObj->ice_connectionCached(true));
-    test(compObj->ice_connectionCached(false) < compObj->ice_connectionCached(true));
-    test(!(compObj->ice_connectionCached(true) < compObj->ice_connectionCached(false)));
-
-    test(compObj->ice_endpointSelection(Ice::Random) == compObj->ice_endpointSelection(Ice::Random));
-    test(compObj->ice_endpointSelection(Ice::Random) != compObj->ice_endpointSelection(Ice::Ordered));
-    test(compObj->ice_endpointSelection(Ice::Random) < compObj->ice_endpointSelection(Ice::Ordered));
-    test(!(compObj->ice_endpointSelection(Ice::Ordered) < compObj->ice_endpointSelection(Ice::Random)));
-
-    test(compObj->ice_connectionId("id2") == compObj->ice_connectionId("id2"));
-    test(compObj->ice_connectionId("id1") != compObj->ice_connectionId("id2"));
-    test(compObj->ice_connectionId("id1") < compObj->ice_connectionId("id2"));
-    test(!(compObj->ice_connectionId("id2") < compObj->ice_connectionId("id1")));
-
-    test(compObj->ice_compress(true) == compObj->ice_compress(true));
-    test(compObj->ice_compress(false) != compObj->ice_compress(true));
-    test(compObj->ice_compress(false) < compObj->ice_compress(true));
-    test(!(compObj->ice_compress(true) < compObj->ice_compress(false)));
-*/
-
     test(compObj->ice_timeout(20) == compObj->ice_timeout(20));
     test(compObj->ice_timeout(10) != compObj->ice_timeout(20));
     test(compObj->ice_timeout(10) < compObj->ice_timeout(20));
     test(!(compObj->ice_timeout(20) < compObj->ice_timeout(10)));
+
+#ifdef ICEE_HAS_LOCATOR
+    Ice::LocatorPrx loc1 = Ice::LocatorPrx::uncheckedCast(communicator->stringToProxy("loc1:default -p 10000"));
+    Ice::LocatorPrx loc2 = Ice::LocatorPrx::uncheckedCast(communicator->stringToProxy("loc2:default -p 10000"));
+    test(compObj->ice_locator(0) == compObj->ice_locator(0));
+    test(compObj->ice_locator(loc1) == compObj->ice_locator(loc1));
+    test(compObj->ice_locator(loc1) != compObj->ice_locator(0));
+    test(compObj->ice_locator(0) != compObj->ice_locator(loc2));
+    test(compObj->ice_locator(loc1) != compObj->ice_locator(loc2));
+    test(compObj->ice_locator(0) < compObj->ice_locator(loc1));
+    test(!(compObj->ice_locator(loc1) < compObj->ice_locator(0)));
+    test(compObj->ice_locator(loc1) < compObj->ice_locator(loc2));
+    test(!(compObj->ice_locator(loc2) < compObj->ice_locator(loc1)));
+#endif
+
+#ifdef ICEE_HAS_ROUTER
+    Ice::RouterPrx rtr1 = Ice::RouterPrx::uncheckedCast(communicator->stringToProxy("rtr1:default -p 10000"));
+    Ice::RouterPrx rtr2 = Ice::RouterPrx::uncheckedCast(communicator->stringToProxy("rtr2:default -p 10000"));
+    test(compObj->ice_router(0) == compObj->ice_router(0));
+    test(compObj->ice_router(rtr1) == compObj->ice_router(rtr1));
+    test(compObj->ice_router(rtr1) != compObj->ice_router(0));
+    test(compObj->ice_router(0) != compObj->ice_router(rtr2));
+    test(compObj->ice_router(rtr1) != compObj->ice_router(rtr2));
+    test(compObj->ice_router(0) < compObj->ice_router(rtr1));
+    test(!(compObj->ice_router(rtr1) < compObj->ice_router(0)));
+    test(compObj->ice_router(rtr1) < compObj->ice_router(rtr2));
+    test(!(compObj->ice_router(rtr2) < compObj->ice_router(rtr1)));
+#endif
+
+    Ice::Context ctx1;
+    ctx1["ctx1"] = "v1";
+    Ice::Context ctx2;
+    ctx2["ctx2"] = "v2";
+    test(compObj->ice_context(Ice::Context()) == compObj->ice_context(Ice::Context()));
+    test(compObj->ice_context(ctx1) == compObj->ice_context(ctx1));
+    test(compObj->ice_context(ctx1) != compObj->ice_context(Ice::Context()));
+    test(compObj->ice_context(Ice::Context()) != compObj->ice_context(ctx2));
+    test(compObj->ice_context(ctx1) != compObj->ice_context(ctx2));
+    test(compObj->ice_context(ctx1) < compObj->ice_context(ctx2));
+    test(!(compObj->ice_context(ctx2) < compObj->ice_context(ctx1)));
 
     Ice::ObjectPrx compObj1 = communicator->stringToProxy("foo:tcp -h 127.0.0.1 -p 10000");
     Ice::ObjectPrx compObj2 = communicator->stringToProxy("foo:tcp -h 127.0.0.1 -p 10001");
@@ -423,20 +357,11 @@ allTests(const Ice::CommunicatorPtr& communicator)
     test(compObj1 < compObj2);
     test(!(compObj2 < compObj1));
 
-#ifdef ICEE_HAS_LOCATOR
     compObj1 = communicator->stringToProxy("foo@MyAdapter1");
     compObj2 = communicator->stringToProxy("foo@MyAdapter2");
     test(compObj1 != compObj2);
     test(compObj1 < compObj2);
     test(!(compObj2 < compObj1));
-#endif
-
-/*
-    test(compObj1->ice_locatorCacheTimeout(20) == compObj1->ice_locatorCacheTimeout(20));
-    test(compObj1->ice_locatorCacheTimeout(10) != compObj1->ice_locatorCacheTimeout(20));
-    test(compObj1->ice_locatorCacheTimeout(10) < compObj1->ice_locatorCacheTimeout(20));
-    test(!(compObj1->ice_locatorCacheTimeout(20) < compObj1->ice_locatorCacheTimeout(10)));
-*/
 
 #ifdef ICEE_HAS_LOCATOR
     compObj1 = communicator->stringToProxy("foo:tcp -h 127.0.0.1 -p 1000");

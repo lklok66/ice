@@ -330,8 +330,7 @@ Ice::ObjectAdapter::destroy()
     waitForDeactivate();
 
     //
-    // Now it's also time to clean up our servants and servant
-    // locators.
+    // Now it's also time to clean up our servants.
     //
     _servantManager->destroy();
 
@@ -366,6 +365,7 @@ Ice::ObjectAdapter::destroy()
 #ifdef ICEE_HAS_LOCATOR
         _locatorInfo = 0;
 #endif
+        _reference = 0;
 
         objectAdapterFactory = _objectAdapterFactory;
         _objectAdapterFactory = 0;
@@ -638,7 +638,26 @@ Ice::ObjectAdapter::ObjectAdapter(const InstancePtr& instance, const Communicato
 {
     if(_noConfig)
     {
+        _reference = _instance->referenceFactory()->create("dummy -t", "");
         return;
+    }
+
+    PropertiesPtr properties = instance->initializationData().properties;
+
+    //
+    // Setup a reference to be used to get the default proxy options
+    // when creating new proxies. By default, create twoway proxies.
+    //
+    string proxyOptions = properties->getPropertyWithDefault(_name + ".ProxyOptions", "-t");
+    try
+    {
+        _reference = _instance->referenceFactory()->create("dummy " + proxyOptions, "");
+    }
+    catch(const ProxyParseException&)
+    {
+        InitializationException ex(__FILE__, __LINE__);
+        ex.reason = "invalid proxy options `" + proxyOptions + "' for object adapter `" + _name + "'";
+        throw ex;
     }
 
     __setNoDelete(true);
@@ -815,15 +834,8 @@ Ice::ObjectAdapter::newDirectProxy(const Identity& ident, const string& facet) c
     //
     // Create a reference and return a proxy for this reference.
     //
-#ifdef ICEE_HAS_ROUTER
-    ReferencePtr ref = _instance->referenceFactory()->create(ident, Ice::Context(), facet, ReferenceModeTwoway,
-                                                             false, endpoints, 0);
-#else
-    ReferencePtr ref = _instance->referenceFactory()->create(ident, Ice::Context(), facet, ReferenceModeTwoway,
-                                                             false, endpoints);
-#endif
+    ReferencePtr ref = _instance->referenceFactory()->create(ident, facet, _reference, endpoints);
     return _instance->proxyFactory()->referenceToProxy(ref);
-
 }
 
 #ifdef ICEE_HAS_LOCATOR
@@ -833,15 +845,7 @@ Ice::ObjectAdapter::newIndirectProxy(const Identity& ident, const string& facet,
     //
     // Create a reference with the adapter id.
     //
-#ifdef ICEE_HAS_ROUTER
-    ReferencePtr ref =
-        _instance->referenceFactory()->create(ident, Ice::Context(), facet, ReferenceModeTwoway, false, id, 0,
-                                              _locatorInfo);
-#else
-    ReferencePtr ref =
-        _instance->referenceFactory()->create(ident, Ice::Context(), facet, ReferenceModeTwoway, false, id, 
-                                              _locatorInfo);
-#endif
+    ReferencePtr ref = _instance->referenceFactory()->create(ident, facet, _reference, id);
 
     //
     // Return a proxy for the reference. 
@@ -964,7 +968,7 @@ ObjectAdapter::updateLocatorRegistry(const IceInternal::LocatorInfoPtr& locatorI
     }
 
     //
-    // Call on the locator registry outside the synchronization to 
+    // Call on the locator registry outside the synchronization to
     // blocking other threads that need to lock this OA.
     //
     LocatorRegistryPrx locatorRegistry = locatorInfo ? locatorInfo->getLocatorRegistry() : LocatorRegistryPrx();
@@ -988,6 +992,13 @@ ObjectAdapter::updateLocatorRegistry(const IceInternal::LocatorInfoPtr& locatorI
         }
         catch(const AdapterNotFoundException&)
         {
+            if(_instance->traceLevels()->location >= 1)
+            {
+                Trace out(_instance->initializationData().logger, _instance->traceLevels()->locationCat);
+                out << "couldn't update object adapter `" + _id + "' endpoints with the locator registry:\n";
+                out << "the object adapter is not known to the locator registry";
+            }
+
             NotRegisteredException ex(__FILE__, __LINE__);
             ex.kindOfObject = "object adapter";
             ex.id = _id;
@@ -995,6 +1006,13 @@ ObjectAdapter::updateLocatorRegistry(const IceInternal::LocatorInfoPtr& locatorI
         }
         catch(const InvalidReplicaGroupIdException&)
         {
+            if(_instance->traceLevels()->location >= 1)
+            {
+                Trace out(_instance->initializationData().logger, _instance->traceLevels()->locationCat);
+                out << "couldn't update object adapter `" + _id + "' endpoints with the locator registry:\n";
+                out << "the replica group `" << _replicaGroupId << "' is not known to the locator registry";
+            }
+
             NotRegisteredException ex(__FILE__, __LINE__);
             ex.kindOfObject = "replica group";
             ex.id = _replicaGroupId;
@@ -1002,9 +1020,42 @@ ObjectAdapter::updateLocatorRegistry(const IceInternal::LocatorInfoPtr& locatorI
         }
         catch(const AdapterAlreadyActiveException&)
         {
+            if(_instance->traceLevels()->location >= 1)
+            {
+                Trace out(_instance->initializationData().logger, _instance->traceLevels()->locationCat);
+                out << "couldn't update object adapter `" + _id + "' endpoints with the locator registry:\n";
+                out << "the object adapter endpoints are already set";
+            }
+
             ObjectAdapterIdInUseException ex(__FILE__, __LINE__);
             ex.id = _id;
             throw ex;
+        }
+        catch(const LocalException& ex)
+        {
+            if(_instance->traceLevels()->location >= 1)
+            {
+                Trace out(_instance->initializationData().logger, _instance->traceLevels()->locationCat);
+                out << "couldn't update object adapter `" + _id + "' endpoints with the locator registry:\n"
+                    << ex.toString();
+            }
+            throw; // TODO: Shall we raise a special exception instead of a non obvious local exception?
+        }
+
+        if(_instance->traceLevels()->location >= 1)
+        {
+            Trace out(_instance->initializationData().logger, _instance->traceLevels()->locationCat);
+            out << "updated object adapter `" + _id + "' endpoints with the locator registry\n";
+            out << "endpoints = ";
+            vector<EndpointPtr> endpts = proxy ? proxy->__reference()->getEndpoints() : vector<EndpointPtr>();
+            for(vector<EndpointPtr>::iterator p = endpts.begin(); p != endpts.end(); ++p)
+            {
+                if(p != endpts.begin())
+                {
+                    out << ":";
+                }
+                out << (*p)->toString();
+            }
         }
     }
 }

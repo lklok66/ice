@@ -135,9 +135,9 @@ public:
     ICE_API ::Ice::ObjectPrx ice_router(const ::Ice::RouterPrx&) const;
     ICE_API ::Ice::RouterPrx ice_getRouter() const;
 #endif
-#ifdef ICEE_HAS_LOCATOR
     ICE_API ::Ice::ObjectPrx ice_adapterId(const std::string&) const;
     ICE_API std::string ice_getAdapterId() const;
+#ifdef ICEE_HAS_LOCATOR
     ICE_API ::Ice::ObjectPrx ice_locator(const ::Ice::LocatorPrx&) const;
     ICE_API ::Ice::LocatorPrx ice_getLocator() const;
 #endif
@@ -208,6 +208,8 @@ public:
     ICE_API void __checkTwowayOnly(const char*) const;
 
 protected:
+
+    virtual Object* __newInstance() const;
 
     ::IceInternal::ReferencePtr _reference;
 

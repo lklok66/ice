@@ -74,8 +74,6 @@ public:
 #ifdef ICEE_HAS_LOCATOR
     ObjectPrx createDirectProxy(const Identity&) const;
     ObjectPrx createIndirectProxy(const Identity&) const;
-#endif
-#ifdef ICEE_HAS_LOCATOR
     void setLocator(const LocatorPrx&);
 #endif
     void refreshPublishedEndpoints();
@@ -122,6 +120,7 @@ private:
     const std::string _id;
     const std::string _replicaGroupId;
 #endif
+    IceInternal::ReferencePtr _reference;
     std::vector<IceInternal::IncomingConnectionFactoryPtr> _incomingConnectionFactories;
 #ifdef ICEE_HAS_ROUTER
     std::vector<IceInternal::EndpointPtr> _routerEndpoints;

@@ -327,6 +327,36 @@ IceInternal::Instance::identityToString(const Identity& ident) const
     }
 }
 
+#ifdef ICEE_HAS_LOCATOR
+void
+IceInternal::Instance::setDefaultLocator(const Ice::LocatorPrx& defaultLocator)
+{
+    IceUtil::RecMutex::Lock sync(*this);
+
+    if(_state == StateDestroyed)
+    {
+        throw CommunicatorDestroyedException(__FILE__, __LINE__);
+    }
+
+    _referenceFactory = _referenceFactory->setDefaultLocator(defaultLocator);
+}
+#endif
+
+#ifdef ICEE_HAS_ROUTER
+void
+IceInternal::Instance::setDefaultRouter(const Ice::RouterPrx& defaultRouter)
+{
+    IceUtil::RecMutex::Lock sync(*this);
+
+    if(_state == StateDestroyed)
+    {
+        throw CommunicatorDestroyedException(__FILE__, __LINE__);
+    }
+
+    _referenceFactory = _referenceFactory->setDefaultRouter(defaultRouter);
+}
+#endif
+
 IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const InitializationData& initData) :
     _state(StateActive),
     _initData(initData),
@@ -350,7 +380,7 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
 
             string stdOutFilename = _initData.properties->getProperty("Ice.StdOut");
             string stdErrFilename = _initData.properties->getProperty("Ice.StdErr");
-            
+
             if(stdOutFilename != "")
             {
                     FILE * file;
@@ -369,7 +399,7 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
                     throw ex;
                 }
             }
-            
+
             if(stdErrFilename != "")
             {
                     FILE* file;
@@ -388,18 +418,18 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
                     throw ex;
                 }
             }
-            
+
             unsigned int seed = static_cast<unsigned int>(IceUtil::Time::now().toMicroSeconds());
             srand(seed);
 #ifndef _WIN32
             srand48(seed);
 #endif
-            
+
             if(_initData.properties->getPropertyAsInt("Ice.NullHandleAbort") > 0)
             {
                 IceUtil::nullHandleAbort = true;
             }
-            
+
 #ifndef _WIN32
             string newUser = _initData.properties->getProperty("Ice.ChangeUser");
             if(!newUser.empty())
@@ -411,14 +441,14 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
                     ex.error = getSystemErrno();
                     throw ex;
                 }
-                
+
                 if(setgid(pw->pw_gid) == -1)
                 {
                     SyscallException ex(__FILE__, __LINE__);
                     ex.error = getSystemErrno();
                     throw ex;
                 }
-                
+
                 if(setuid(pw->pw_uid) == -1)
                 {
                     SyscallException ex(__FILE__, __LINE__);
@@ -428,11 +458,11 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
             }
 #endif
             oneOffDone = true;
-        }   
-        
+        }
+
         if(instanceCount == 1)
-        {                     
-            
+        {
+
 #ifdef _WIN32
             WORD version = MAKEWORD(1, 1);
             WSADATA data;
@@ -443,7 +473,7 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
                 throw ex;
             }
 #endif
-            
+
 #ifndef _WIN32
             struct sigaction action;
             action.sa_handler = SIG_IGN;
@@ -452,9 +482,9 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
             sigaction(SIGPIPE, &action, 0);
 #endif
         }
-        
+
         sync.release();
-        
+
 
         if(!_initData.logger)
         {
@@ -558,7 +588,7 @@ IceInternal::Instance::~Instance()
 #ifdef _WIN32
         WSACleanup();
 #endif
-        
+
 #ifndef _WIN32
         struct sigaction action;
         action.sa_handler = SIG_DFL;
@@ -578,18 +608,18 @@ IceInternal::Instance::finishSetup(int& argc, char* argv[])
     // might depend on endpoint factories to be installed by plug-ins.
     //
 #ifdef ICEE_HAS_ROUTER
-    if(!_defaultsAndOverrides->defaultRouter.empty())
+    RouterPrx router = RouterPrx::uncheckedCast(_proxyFactory->propertyToProxy("Ice.Default.Router"));
+    if(router)
     {
-        _referenceFactory->setDefaultRouter(
-            RouterPrx::uncheckedCast(_proxyFactory->stringToProxy(_defaultsAndOverrides->defaultRouter)));
+        _referenceFactory = _referenceFactory->setDefaultRouter(router);
     }
 #endif
 
 #ifdef ICEE_HAS_LOCATOR
-    if(!_defaultsAndOverrides->defaultLocator.empty())
+    LocatorPrx locator = LocatorPrx::uncheckedCast(_proxyFactory->propertyToProxy("Ice.Default.Locator"));
+    if(locator)
     {
-        _referenceFactory->setDefaultLocator(
-            LocatorPrx::uncheckedCast(_proxyFactory->stringToProxy(_defaultsAndOverrides->defaultLocator)));
+        _referenceFactory = _referenceFactory->setDefaultLocator(locator);
     }
 #endif
 
@@ -602,10 +632,10 @@ IceInternal::Instance::finishSetup(int& argc, char* argv[])
     {
         //
         // Safe double-check locking (no dependent variable!)
-        // 
+        //
         IceUtil::StaticMutex::Lock sync(staticMutex);
         printProcessId = !printProcessIdDone;
-        
+
         //
         // We anticipate: we want to print it once, and we don't care when.
         //
@@ -617,7 +647,7 @@ IceInternal::Instance::finishSetup(int& argc, char* argv[])
 #ifdef _WIN32
         printf("%d\n", _getpid());
 #else
-        printf("%d\n", getpid()); 
+        printf("%d\n", getpid());
 #endif
         fflush(stdout);
     }
@@ -629,7 +659,7 @@ IceInternal::Instance::destroy()
 {
     {
         IceUtil::RecMutex::Lock sync(*this);
-        
+
         //
         // If the _state is not StateActive then the instance is
         // either being destroyed, or has already been destroyed.
@@ -651,7 +681,7 @@ IceInternal::Instance::destroy()
 #ifndef ICEE_PURE_CLIENT
     if(_objectAdapterFactory)
     {
-        _objectAdapterFactory->shutdown();        
+        _objectAdapterFactory->shutdown();
     }
 
     if(_outgoingConnectionFactory)
@@ -684,16 +714,12 @@ IceInternal::Instance::destroy()
 #endif
         _outgoingConnectionFactory = 0;
 
-        if(_referenceFactory)
-        {
-            _referenceFactory->destroy();
-            _referenceFactory = 0;
-        }
-        
-        // No destroy function defined.
-        // _proxyFactory->destroy();
+        //_referenceFactory->destroy(); // No destroy function defined.
+        _referenceFactory = 0;
+
+        //_proxyFactory->destroy(); // No destroy function defined.
         _proxyFactory = 0;
-        
+
 #ifdef ICEE_HAS_ROUTER
         if(_routerManager)
         {

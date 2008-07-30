@@ -407,7 +407,7 @@ IceProxy::Ice::Object::ice_getContext() const
 ObjectPrx
 IceProxy::Ice::Object::ice_context(const Context& newContext) const
 {
-    ObjectPrx proxy(new ::IceProxy::Ice::Object());
+    ObjectPrx proxy = __newInstance();
     proxy->setup(_reference->changeContext(newContext));
     return proxy;
 }
@@ -431,7 +431,7 @@ IceProxy::Ice::Object::ice_identity(const Identity& newIdentity) const
     }
     else
     {
-        ObjectPrx proxy(new ::IceProxy::Ice::Object());
+        ObjectPrx proxy = new Object;
         proxy->setup(_reference->changeIdentity(newIdentity));
         return proxy;
     }
@@ -452,7 +452,7 @@ IceProxy::Ice::Object::ice_facet(const string& newFacet) const
     }
     else
     {
-        ObjectPrx proxy(new ::IceProxy::Ice::Object());
+        ObjectPrx proxy = new Object;
         proxy->setup(_reference->changeFacet(newFacet));
         return proxy;
     }
@@ -477,15 +477,13 @@ IceProxy::Ice::Object::ice_router(const RouterPrx& router) const
     }
     else
     {
-        ObjectPrx proxy(new ::IceProxy::Ice::Object());
+        ObjectPrx proxy = __newInstance();
         proxy->setup(ref);
         return proxy;
     }
 }
 
 #endif
-
-#ifdef ICEE_HAS_LOCATOR
 
 string
 IceProxy::Ice::Object::ice_getAdapterId() const
@@ -503,11 +501,13 @@ IceProxy::Ice::Object::ice_adapterId(const string& adapterId) const
     }
     else
     {
-        ObjectPrx proxy(new ::IceProxy::Ice::Object());
+        ObjectPrx proxy = __newInstance();
         proxy->setup(ref);
         return proxy;
     }
 }
+
+#ifdef ICEE_HAS_LOCATOR
 
 LocatorPrx
 IceProxy::Ice::Object::ice_getLocator() const
@@ -526,7 +526,7 @@ IceProxy::Ice::Object::ice_locator(const LocatorPrx& locator) const
     }
     else
     {
-        ObjectPrx proxy(new ::IceProxy::Ice::Object());
+        ObjectPrx proxy = __newInstance();
         proxy->setup(ref);
         return proxy;
     }
@@ -549,7 +549,7 @@ IceProxy::Ice::Object::ice_secure(bool b) const
     }
     else
     {
-        ObjectPrx proxy(new ::IceProxy::Ice::Object());
+        ObjectPrx proxy = __newInstance();
         proxy->setup(_reference->changeSecure(b));
         return proxy;
     }
@@ -565,7 +565,7 @@ IceProxy::Ice::Object::ice_timeout(int t) const
     }
     else
     {
-        ObjectPrx proxy(new ::IceProxy::Ice::Object());
+        ObjectPrx proxy = __newInstance();
         proxy->setup(ref);
         return proxy;
     }
@@ -708,6 +708,12 @@ IceProxy::Ice::Object::__checkTwowayOnly(const char* name) const
     }
 }
 
+IceProxy::Ice::Object*
+IceProxy::Ice::Object::__newInstance() const
+{
+    return new Object;
+}
+
 ReferenceMode
 IceProxy::Ice::Object::getMode() const
 {
@@ -723,7 +729,7 @@ IceProxy::Ice::Object::changeMode(ReferenceMode newMode) const
     }
     else
     {
-        ObjectPrx proxy(new ::IceProxy::Ice::Object());
+        ObjectPrx proxy = __newInstance();
         proxy->setup(_reference->changeMode(newMode));
         return proxy;
     }

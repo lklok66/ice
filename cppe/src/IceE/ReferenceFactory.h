@@ -31,59 +31,46 @@ public:
     //
     // Create a direct reference.
     //
-    ReferencePtr create(const ::Ice::Identity&, const Ice::Context&, const ::std::string&, ReferenceMode, bool,
-                        const ::std::vector<EndpointPtr>&
-#ifdef ICEE_HAS_ROUTER
-                        , const RouterInfoPtr&
-#endif
-                        );
+    ReferencePtr create(const ::Ice::Identity&, const ::std::string&, const ReferencePtr&,
+                        const ::std::vector<EndpointPtr>&);
+
     //
     // Create an indirect reference.
     //
-#ifdef ICEE_HAS_LOCATOR
-    ReferencePtr create(const ::Ice::Identity&, const Ice::Context&, const ::std::string&, ReferenceMode, bool,
-                        const ::std::string&
-#ifdef ICEE_HAS_ROUTER
-                        , const RouterInfoPtr&
-#endif
-                        , const LocatorInfoPtr&);
-#endif
+    ReferencePtr create(const ::Ice::Identity&, const ::std::string&, const ReferencePtr&, const ::std::string&);
+
     //
     // Create a fixed reference.
     //
-    ReferencePtr create(const ::Ice::Identity&, const Ice::Context&, const ::std::string&, ReferenceMode,
-                        const ::std::vector< ::Ice::ConnectionPtr>&);
+    ReferencePtr create(const ::Ice::Identity&, const Ice::ConnectionPtr&);
 
     //
     // Create a reference from a string.
     //
-    ReferencePtr create(const ::std::string&);
+    ReferencePtr create(const ::std::string&, const ::std::string&);
 
     //
     // Create a reference by unmarshaling it from a stream.
     //
     ReferencePtr create(const ::Ice::Identity&, BasicStream*);
 
-    //
-    // Create a reference from a property set.
-    //
-    ReferencePtr createFromProperties(const ::std::string&);
-
 #ifdef ICEE_HAS_ROUTER
-    void setDefaultRouter(const ::Ice::RouterPrx&);
+    ReferenceFactoryPtr setDefaultRouter(const ::Ice::RouterPrx&);
     ::Ice::RouterPrx getDefaultRouter() const;
 #endif
 
 #ifdef ICEE_HAS_LOCATOR
-    void setDefaultLocator(const ::Ice::LocatorPrx&);
+    ReferenceFactoryPtr setDefaultLocator(const ::Ice::LocatorPrx&);
     ::Ice::LocatorPrx getDefaultLocator() const;
 #endif
 
 private:
 
-    ReferenceFactory(const InstancePtr&, const Ice::CommunicatorPtr&);
-    void destroy();
+    ReferenceFactory(const InstancePtr&, const ::Ice::CommunicatorPtr&);
     friend class Instance;
+
+    RoutableReferencePtr create(const ::Ice::Identity&, const ::std::string&, ReferenceMode, bool,
+                                const ::std::vector<EndpointPtr>&, const ::std::string&, const ::std::string&);
 
     InstancePtr _instance;
     Ice::CommunicatorPtr _communicator;

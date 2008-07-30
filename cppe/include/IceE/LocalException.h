@@ -17,6 +17,22 @@
 namespace Ice
 {
 
+class ICE_API InitializationException : public ::Ice::LocalException
+{
+public:
+
+    InitializationException(const char*, int);
+    InitializationException(const char*, int, const ::std::string&);
+    virtual ~InitializationException() throw();
+
+    virtual ::std::string ice_name() const;
+    virtual ::std::string toString() const;
+    virtual ::Ice::Exception* ice_clone() const;
+    virtual void ice_throw() const;
+
+    ::std::string reason;
+};
+
 class ICE_API AlreadyRegisteredException : public ::Ice::LocalException
 {
 public:

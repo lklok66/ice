@@ -24,7 +24,7 @@
 #endif
 #include <IceE/ConnectionF.h>
 #include <IceE/Shared.h>
-#include <IceE/RecMutex.h>
+#include <IceE/Mutex.h>
 #include <IceE/Identity.h>
 
 namespace IceInternal
@@ -35,13 +35,6 @@ class BasicStream;
 class Reference : public IceUtil::Shared
 {
 public:
-
-    enum Type
-    {
-        TypeDirect,
-        TypeIndirect,
-        TypeFixed
-    };
 
     //
     // The reference mode in Ice-E is defined in ReferenceF.h to allow the proxy
@@ -66,15 +59,14 @@ public:
 
     Ice::CommunicatorPtr getCommunicator() const;
 
-    virtual Type getType() const = 0;
     virtual std::vector<EndpointPtr> getEndpoints() const = 0;
 
+    virtual std::string getAdapterId() const = 0;
+#ifdef ICEE_HAS_LOCATOR
+    virtual LocatorInfoPtr getLocatorInfo() const { return 0; }
+#endif
 #ifdef ICEE_HAS_ROUTER
     virtual RouterInfoPtr getRouterInfo() const { return 0; }
-#endif
-#ifdef ICEE_HAS_LOCATOR
-    virtual std::string getAdapterId() const = 0;
-    virtual LocatorInfoPtr getLocatorInfo() const { return 0; }
 #endif
 
     //
@@ -88,16 +80,23 @@ public:
     ReferencePtr changeIdentity(const Ice::Identity&) const;
     ReferencePtr changeFacet(const std::string&) const;
 
+    virtual ReferencePtr changeAdapterId(const std::string&) const = 0;
+#ifdef ICEE_HAS_LOCATOR
+    virtual ReferencePtr changeLocator(const Ice::LocatorPrx&) const = 0;
+#endif
 #ifdef ICEE_HAS_ROUTER
     virtual ReferencePtr changeRouter(const Ice::RouterPrx&) const = 0;
 #endif
-#ifdef ICEE_HAS_LOCATOR
-    virtual ReferencePtr changeAdapterId(const std::string&) const = 0;
-    virtual ReferencePtr changeLocator(const Ice::LocatorPrx&) const = 0;
-#endif
-    virtual ReferencePtr changeTimeout(int) const;
+
+    virtual ReferencePtr changeTimeout(int) const = 0;
 
     int hash() const; // Conceptually const.
+
+    //
+    // Utility methods.
+    //
+    virtual bool isIndirect() const = 0;
+    virtual bool isWellKnown() const = 0;
 
     //
     // Marshal the reference.
@@ -114,8 +113,9 @@ public:
     //
     virtual Ice::ConnectionPtr getConnection() const = 0;
 
-    virtual bool operator==(const Reference&) const = 0;
-    virtual bool operator<(const Reference&) const = 0;
+    virtual bool operator==(const Reference&) const;
+    virtual bool operator!=(const Reference&) const;
+    virtual bool operator<(const Reference&) const;
 
     virtual ReferencePtr clone() const = 0;
 
@@ -125,9 +125,9 @@ protected:
               const std::string&, ReferenceMode, bool);
     Reference(const Reference&);
 
-    void applyOverrides(std::vector<EndpointPtr>&) const;
+    void hashInit() const;
 
-    IceUtil::RecMutex _hashMutex; // For lazy initialization of hash value.
+    IceUtil::Mutex _hashMutex; // For lazy initialization of hash value.
     mutable Ice::Int _hashValue;
     mutable bool _hashInitialized;
 
@@ -141,16 +141,6 @@ private:
     Ice::Identity _identity;
     Ice::Context _context;
     std::string _facet;
-
-    //
-    // NOTE: The override timeout should theoritically be in
-    // RoutableReference. However, since RoutableReference is only
-    // defined if the ICEE_HAS_ROUTER macro is defined, it would also
-    // have to be conditionally defined here. To simplify, we just 
-    // define it here.
-    //
-    bool _overrideTimeout;
-    int _timeout; // Only used if _overrideTimeout == true
 };
 
 class FixedReference : public Reference
@@ -158,20 +148,24 @@ class FixedReference : public Reference
 public:
 
     FixedReference(const InstancePtr&, const Ice::CommunicatorPtr&, const Ice::Identity&, const Ice::Context&,
-                   const std::string&, ReferenceMode, const std::vector<Ice::ConnectionPtr>&);
+                   const std::string&, ReferenceMode, bool, const Ice::ConnectionPtr&);
 
-    virtual Type getType() const;
     virtual std::vector<EndpointPtr> getEndpoints() const;
+
+    virtual std::string getAdapterId() const;
+    virtual ReferencePtr changeAdapterId(const std::string&) const;
+#ifdef ICEE_HAS_LOCATOR
+    virtual ReferencePtr changeLocator(const Ice::LocatorPrx&) const;
+#endif
 
 #ifdef ICEE_HAS_ROUTER
     virtual ReferencePtr changeRouter(const Ice::RouterPrx&) const;
 #endif
-#ifdef ICEE_HAS_LOCATOR
-    virtual std::string getAdapterId() const;
-    virtual ReferencePtr changeAdapterId(const std::string&) const;
-    virtual ReferencePtr changeLocator(const Ice::LocatorPrx&) const;
-#endif
+
     virtual ReferencePtr changeTimeout(int) const;
+
+    virtual bool isIndirect() const;
+    virtual bool isWellKnown() const;
 
     virtual void streamWrite(BasicStream*) const;
     virtual std::string toString() const;
@@ -179,157 +173,93 @@ public:
     virtual Ice::ConnectionPtr getConnection() const;
 
     virtual bool operator==(const Reference&) const;
+    virtual bool operator!=(const Reference&) const;
     virtual bool operator<(const Reference&) const;
 
     virtual ReferencePtr clone() const;
 
-protected:
+private:
 
     FixedReference(const FixedReference&);
 
-private:
-
-    std::vector<Ice::ConnectionPtr> _fixedConnections;
+    Ice::ConnectionPtr _fixedConnection;
 };
 
-#ifdef ICEE_HAS_ROUTER
 class RoutableReference : public Reference
 {
 public:
 
-    virtual RouterInfoPtr getRouterInfo() const { return _routerInfo; }
-    std::vector<EndpointPtr> getRoutedEndpoints() const;
-
-    virtual ReferencePtr changeRouter(const Ice::RouterPrx&) const;
-
-    virtual Ice::ConnectionPtr getConnection() const = 0;
-
-    int hash() const; // Conceptually const.
-
-    virtual bool operator==(const Reference&) const = 0;
-    virtual bool operator<(const Reference&) const = 0;
-
-    virtual ReferencePtr clone() const = 0;
-
-protected:
-
     RoutableReference(const InstancePtr&, const Ice::CommunicatorPtr&, const Ice::Identity&, const Ice::Context&,
-                      const std::string&, ReferenceMode, bool, const RouterInfoPtr&);
-    RoutableReference(const RoutableReference&);
-
-
-private:
-
-    RouterInfoPtr _routerInfo; // Null if no router is used.
-};
-#endif
-
-class DirectReference :
-#ifdef ICEE_HAS_ROUTER
-    public RoutableReference
-#else
-    public Reference
-#endif
-{
-public:
-
-    DirectReference(const InstancePtr&, const Ice::CommunicatorPtr&, const Ice::Identity&, const Ice::Context&,
-                    const std::string&, ReferenceMode, bool, const std::vector<EndpointPtr>&
-#ifdef ICEE_HAS_ROUTER
-                    , const RouterInfoPtr&
-#endif
-                    );
-
-    virtual Type getType() const;
-    virtual std::vector<EndpointPtr> getEndpoints() const;
-
+                      const std::string&, ReferenceMode, bool, const std::vector<EndpointPtr>&, const std::string&
 #ifdef ICEE_HAS_LOCATOR
-    virtual std::string getAdapterId() const;
-    virtual ReferencePtr changeAdapterId(const std::string&) const;
-    virtual ReferencePtr changeLocator(const Ice::LocatorPrx&) const;
+                      , const LocatorInfoPtr&
 #endif
-    virtual ReferencePtr changeTimeout(int) const;
-
-    virtual void streamWrite(BasicStream*) const;
-    virtual std::string toString() const;
-    virtual Ice::ConnectionPtr getConnection() const;
-
-    virtual bool operator==(const Reference&) const;
-    virtual bool operator<(const Reference&) const;
-
-    virtual ReferencePtr clone() const;
-
-protected:
-
-    DirectReference(const DirectReference&);
-
-private:
-
-    std::vector<EndpointPtr> _endpoints;
-
-#ifdef ICEE_HAS_ROUTER
-    typedef RoutableReference Parent;
-#else
-    typedef Reference Parent;
-#endif
-};
-
-#ifdef ICEE_HAS_LOCATOR
-
-class IndirectReference :
-#ifdef ICEE_HAS_ROUTER
-    public RoutableReference
-#else
-    public Reference
-#endif
-{
-public:
-
-    IndirectReference(const InstancePtr&, const Ice::CommunicatorPtr&, const Ice::Identity&, const Ice::Context&,
-                      const std::string&, ReferenceMode, bool, const std::string&
 #ifdef ICEE_HAS_ROUTER
                       , const RouterInfoPtr&
 #endif
-                      , const LocatorInfoPtr&);
+    );
 
-    virtual LocatorInfoPtr getLocatorInfo() const { return _locatorInfo; }
-
-    virtual Type getType() const;
     virtual std::vector<EndpointPtr> getEndpoints() const;
     virtual std::string getAdapterId() const;
+#ifdef ICEE_HAS_LOCATOR
+    virtual LocatorInfoPtr getLocatorInfo() const;
+#endif
+#ifdef ICEE_HAS_ROUTER
+    virtual RouterInfoPtr getRouterInfo() const;
+#endif
 
     virtual ReferencePtr changeAdapterId(const std::string&) const;
+#ifdef ICEE_HAS_LOCATOR
     virtual ReferencePtr changeLocator(const Ice::LocatorPrx&) const;
+#endif
+#ifdef ICEE_HAS_ROUTER
+    virtual ReferencePtr changeRouter(const Ice::RouterPrx&) const;
+#endif
 
-    virtual void streamWrite(BasicStream*) const;
-    virtual std::string toString() const;
-    virtual Ice::ConnectionPtr getConnection() const;
+    virtual ReferencePtr changeTimeout(int) const;
 
     int hash() const; // Conceptually const.
 
+    virtual bool isIndirect() const;
+    virtual bool isWellKnown() const;
+
+    virtual void streamWrite(BasicStream*) const;
+    virtual std::string toString() const;
+
     virtual bool operator==(const Reference&) const;
+    virtual bool operator!=(const Reference&) const;
     virtual bool operator<(const Reference&) const;
 
     virtual ReferencePtr clone() const;
 
+    virtual Ice::ConnectionPtr getConnection() const;
+
+    Ice::ConnectionPtr createConnection(const std::vector<EndpointPtr>&) const;
+
+    void applyOverrides(std::vector<EndpointPtr>&) const;
+
 protected:
 
-    IndirectReference(const IndirectReference&);
+    RoutableReference(const RoutableReference&);
+
+    std::vector<EndpointPtr> filterEndpoints(const std::vector<EndpointPtr>&) const;
 
 private:
 
-    std::string _adapterId;
-    LocatorInfoPtr _locatorInfo;
-#ifdef ICEE_HAS_ROUTER
-    typedef RoutableReference Parent;
-#else
-    typedef Reference Parent;
+    std::vector<EndpointPtr> _endpoints; // Empty if indirect proxy.
+
+    std::string _adapterId; // Empty if direct proxy.
+
+#ifdef ICEE_HAS_LOCATOR
+    LocatorInfoPtr _locatorInfo; // Null if no locator is used.
 #endif
+#ifdef ICEE_HAS_ROUTER
+    RouterInfoPtr _routerInfo; // Null if no router is used.
+#endif
+
+    bool _overrideTimeout;
+    int _timeout; // Only used if _overrideTimeout == true
 };
-
-#endif // ICEE_HAS_LOCATOR
-
-std::vector<EndpointPtr> filterEndpoints(const std::vector<EndpointPtr>&, ReferenceMode, bool);
 
 }
 

@@ -35,13 +35,6 @@ IceUtil::Shared* IceInternal::upCast(::IceInternal::ReferenceFactory* p) { retur
 ReferencePtr
 IceInternal::ReferenceFactory::copy(const Reference* r) const
 {
-    Mutex::Lock sync(*this);
-
-    if(!_instance)
-    {
-        throw CommunicatorDestroyedException(__FILE__, __LINE__);
-    }
-
     const Ice::Identity& ident = r->getIdentity();
     if(ident.name.empty() && ident.category.empty())
     {
@@ -53,59 +46,35 @@ IceInternal::ReferenceFactory::copy(const Reference* r) const
 
 ReferencePtr
 IceInternal::ReferenceFactory::create(const Identity& ident,
-                                      const Context& context,
                                       const string& facet,
-                                      ReferenceMode mode,
-                                      bool secure,
-                                      const vector<EndpointPtr>& endpoints
-#ifdef ICEE_HAS_ROUTER
-                                      , const RouterInfoPtr& routerInfo
-#endif
-                                      )
+                                      const ReferencePtr& tmpl,
+                                      const vector<EndpointPtr>& endpoints)
 {
-    Mutex::Lock sync(*this);
-
-    if(!_instance)
-    {
-        throw CommunicatorDestroyedException(__FILE__, __LINE__);
-    }
-
     if(ident.name.empty() && ident.category.empty())
     {
         return 0;
     }
 
-    //
-    // Create new reference
-    //
-#ifdef ICEE_HAS_ROUTER
-    return new DirectReference(_instance, _communicator, ident, context, facet, mode, secure, endpoints, routerInfo);
-#else
-    return new DirectReference(_instance, _communicator, ident, context, facet, mode, secure, endpoints);
-#endif
+    return create(ident, facet, tmpl->getMode(), tmpl->getSecure(), endpoints, "", "");
 }
-
-#ifdef ICEE_HAS_LOCATOR
 
 ReferencePtr
 IceInternal::ReferenceFactory::create(const Identity& ident,
-                                      const Context& context,
                                       const string& facet,
-                                      ReferenceMode mode,
-                                      bool secure,
-                                      const string& adapterId
-#ifdef ICEE_HAS_ROUTER
-                                      , const RouterInfoPtr& routerInfo
-#endif
-                                      , const LocatorInfoPtr& locatorInfo)
+                                      const ReferencePtr& tmpl,
+                                      const string& adapterId)
 {
-    Mutex::Lock sync(*this);
-
-    if(!_instance)
+    if(ident.name.empty() && ident.category.empty())
     {
-        throw CommunicatorDestroyedException(__FILE__, __LINE__);
+        return 0;
     }
 
+    return create(ident, facet, tmpl->getMode(), tmpl->getSecure(), vector<EndpointPtr>(), adapterId, "");
+}
+
+ReferencePtr
+IceInternal::ReferenceFactory::create(const Identity& ident, const Ice::ConnectionPtr& connection)
+{
     if(ident.name.empty() && ident.category.empty())
     {
         return 0;
@@ -114,43 +83,18 @@ IceInternal::ReferenceFactory::create(const Identity& ident,
     //
     // Create new reference
     //
-#ifdef ICEE_HAS_ROUTER
-    return new IndirectReference(_instance, _communicator, ident, context, facet, mode, secure, adapterId, routerInfo,
-                                locatorInfo);
-#else
-    return new IndirectReference(_instance, _communicator, ident, context, facet, mode, secure, adapterId, locatorInfo);
-#endif
-}
-
-#endif
-
-ReferencePtr
-IceInternal::ReferenceFactory::create(const Identity& ident,
-                                      const Context& context,
-                                      const string& facet,
-                                      ReferenceMode mode,
-                                      const vector<Ice::ConnectionPtr>& fixedConnections)
-{
-    Mutex::Lock sync(*this);
-
-    if(!_instance)
-    {
-        throw CommunicatorDestroyedException(__FILE__, __LINE__);
-    }
-
-    if(ident.name.empty() && ident.category.empty())
-    {
-        return 0;
-    }
-
-    //
-    // Create new reference
-    //
-    return new FixedReference(_instance, _communicator, ident, context, facet, mode, fixedConnections);
+    return new FixedReference(_instance,
+                              _communicator,
+                              ident,
+                              Ice::Context(),
+                              "",  // Facet
+                              ReferenceModeTwoway,
+                              false,
+                              connection);
 }
 
 ReferencePtr
-IceInternal::ReferenceFactory::create(const string& str)
+IceInternal::ReferenceFactory::create(const string& str, const string& propertyPrefix)
 {
     if(str.empty())
     {
@@ -168,7 +112,7 @@ IceInternal::ReferenceFactory::create(const string& str)
     {
         throw ProxyParseException(__FILE__, __LINE__, str);
     }
-    
+
     //
     // Extract the identity, which may be enclosed in single
     // or double quotation marks.
@@ -204,7 +148,6 @@ IceInternal::ReferenceFactory::create(const string& str)
     // Parsing the identity may raise IdentityParseException.
     //
     Identity ident = _instance->stringToIdentity(idstr);
-
     if(ident.name.empty())
     {
         //
@@ -248,7 +191,7 @@ IceInternal::ReferenceFactory::create(const string& str)
         {
             break;
         }
-        
+
         end = s.find_first_of(delim + ":@", beg);
         if(end == string::npos)
         {
@@ -259,7 +202,7 @@ IceInternal::ReferenceFactory::create(const string& str)
         {
             break;
         }
-        
+
         string option = s.substr(beg, end - beg);
         if(option.length() != 2 || option[0] != '-')
         {
@@ -398,26 +341,11 @@ IceInternal::ReferenceFactory::create(const string& str)
         }
     }
 
-#ifdef ICEE_HAS_ROUTER
-    RouterInfoPtr routerInfo = _instance->routerManager()->get(getDefaultRouter());
-#endif
-#ifdef ICEE_HAS_LOCATOR
-    LocatorInfoPtr locatorInfo = _instance->locatorManager()->get(getDefaultLocator());
-#endif
-
     if(beg == string::npos)
     {
-#ifdef ICEE_HAS_LOCATOR
-#   ifdef ICEE_HAS_ROUTER
-        return create(ident, Ice::Context(), facet, mode, secure, "", routerInfo, locatorInfo);
-#   else
-        return create(ident, Ice::Context(), facet, mode, secure, "", locatorInfo);
-#   endif
-#else        
-        throw FeatureNotSupportedException(__FILE__, __LINE__, 
-                                           "indirect proxy `" + str + "' (no locator support built-in)");
-#endif
+        return create(ident, facet, mode, secure, vector<EndpointPtr>(), "", propertyPrefix);
     }
+
     vector<EndpointPtr> endpoints;
 
     switch(s[beg])
@@ -426,17 +354,54 @@ IceInternal::ReferenceFactory::create(const string& str)
         {
             vector<string> unknownEndpoints;
             end = beg;
-            
+
             while(end < s.length() && s[end] == ':')
             {
                 beg = end + 1;
-                
-                end = s.find(':', beg);
-                if(end == string::npos)
+
+                end = beg;
+                while(true)
                 {
-                    end = s.length();
+                    end = s.find(':', end);
+                    if(end == string::npos)
+                    {
+                        end = s.length();
+                        break;
+                    }
+                    else
+                    {
+                        bool quoted = false;
+                        string::size_type quote = beg;
+                        while(true)
+                        {
+                            quote = s.find('\"', quote);
+                            if(quote == string::npos || end < quote)
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                quote = s.find('\"', ++quote);
+                                if(quote == string::npos)
+                                {
+                                    break;
+                                }
+                                else if(end < quote)
+                                {
+                                    quoted = true;
+                                    break;
+                                }
+                                ++quote;
+                            }
+                        }
+                        if(!quoted)
+                        {
+                            break;
+                        }
+                        ++end;
+                    }
                 }
-                
+
                 string es = s.substr(beg, end - beg);
                 EndpointPtr endp = _instance->endpointFactory()->create(es, false);
                 if(endp != 0)
@@ -453,8 +418,8 @@ IceInternal::ReferenceFactory::create(const string& str)
                 throw EndpointParseException(__FILE__, __LINE__, unknownEndpoints.front());
             }
             else if(unknownEndpoints.size() != 0 &&
-                    _instance->initializationData().properties->getPropertyAsIntWithDefault(
-                                                                            "Ice.Warn.Endpoints", 1) > 0)
+                    _instance->initializationData().properties->
+                                getPropertyAsIntWithDefault("Ice.Warn.Endpoints", 1) > 0)
             {
                 Warning out(_instance->initializationData().logger);
                 out << "Proxy contains unknown endpoints:";
@@ -464,17 +429,11 @@ IceInternal::ReferenceFactory::create(const string& str)
                 }
             }
 
-#ifdef ICEE_HAS_ROUTER
-            return create(ident, Ice::Context(), facet, mode, secure, endpoints, routerInfo);
-#else
-            return create(ident, Ice::Context(), facet, mode, secure, endpoints);
-#endif
+            return create(ident, facet, mode, secure, endpoints, "", propertyPrefix);
             break;
         }
-
         case '@':
         {
-#ifdef ICEE_HAS_LOCATOR
             beg = s.find_first_not_of(delim, beg + 1);
             if(beg == string::npos)
             {
@@ -513,29 +472,21 @@ IceInternal::ReferenceFactory::create(const string& str)
             {
                 throw ProxyParseException(__FILE__, __LINE__, str);
             }
+
 #ifdef ICEE_HAS_WSTRING
-            if(_instance->initializationData().stringConverter)
+            if(_instance->initializationData().stringConverter && !adapter.empty())
             {
                 string tmpAdapter;
                 _instance->initializationData().stringConverter->fromUTF8(
-                               reinterpret_cast<const Byte*>(adapter.data()),
-                               reinterpret_cast<const Byte*>(adapter.data() + adapter.size()), tmpAdapter);
+                                reinterpret_cast<const Byte*>(adapter.data()),
+                                reinterpret_cast<const Byte*>(adapter.data() + adapter.size()), tmpAdapter);
                 adapter = tmpAdapter;
             }
 #endif
 
-#ifdef ICEE_HAS_ROUTER
-            return create(ident, Ice::Context(), facet, mode, secure, adapter, routerInfo, locatorInfo);
-#else
-            return create(ident, Ice::Context(), facet, mode, secure, adapter, locatorInfo);
-#endif
-#else
-            throw FeatureNotSupportedException(__FILE__, __LINE__, 
-                                               "indirect proxy `" + str + "' (no locator support built-in)");
-#endif
+            return create(ident, facet, mode, secure, vector<EndpointPtr>(), adapter, propertyPrefix);
             break;
         }
-
         default:
         {
             throw ProxyParseException(__FILE__, __LINE__, str);
@@ -543,53 +494,6 @@ IceInternal::ReferenceFactory::create(const string& str)
     }
 
     return 0; // Unreachable, fixes compiler warning.
-}
-
-ReferencePtr
-IceInternal::ReferenceFactory::createFromProperties(const string& propertyPrefix)
-{
-    PropertiesPtr properties = _instance->initializationData().properties;
-
-    ReferencePtr ref = create(properties->getProperty(propertyPrefix));
-    if(!ref)
-    {
-        return 0;
-    }
-
-#ifdef ICEE_HAS_LOCATOR
-    string property = propertyPrefix + ".Locator";
-    if(!properties->getProperty(property).empty())
-    {
-        ref = ref->changeLocator(
-            LocatorPrx::uncheckedCast(_communicator->propertyToProxy(property)));
-        if(ref->getType() == Reference::TypeDirect)
-        {
-            Warning out(_instance->initializationData().logger);
-            out << "`" << property << "=" << properties->getProperty(property)
-                << "': cannot set a locator on a direct reference; setting ignored";
-        }
-    }
-#endif
-
-#ifdef ICEE_HAS_ROUTER
-    property = propertyPrefix + ".Router";
-    if(!properties->getProperty(property).empty())
-    {
-        if(propertyPrefix.size() > 7 && propertyPrefix.substr(propertyPrefix.size() - 7, 7) == ".Router")
-        {
-            Warning out(_instance->initializationData().logger);
-            out << "`" << property << "=" << properties->getProperty(property)
-                << "': cannot set a router on a router; setting ignored";
-        }
-        else
-        {
-            ref = ref->changeRouter(
-                RouterPrx::uncheckedCast(_communicator->propertyToProxy(property)));
-        }
-    }
-#endif
-
-    return ref;
 }
 
 ReferencePtr
@@ -628,19 +532,15 @@ IceInternal::ReferenceFactory::create(const Identity& ident, BasicStream* s)
         throwProxyUnmarshalException(__FILE__, __LINE__);
     }
 
-    vector<EndpointPtr> endpoints;
-    string adapterId;
-
-#ifdef ICEE_HAS_ROUTER
-    RouterInfoPtr routerInfo = _instance->routerManager()->get(getDefaultRouter());
-#endif
-
     bool secure;
     s->read(secure);
 
+    vector<EndpointPtr> endpoints;
+    string adapterId;
+
     Ice::Int sz;
     s->readSize(sz);
-    
+
     if(sz > 0)
     {
         endpoints.reserve(sz);
@@ -649,36 +549,31 @@ IceInternal::ReferenceFactory::create(const Identity& ident, BasicStream* s)
             EndpointPtr endpoint = _instance->endpointFactory()->read(s);
             endpoints.push_back(endpoint);
         }
-#ifdef ICEE_HAS_ROUTER
-        return create(ident, Ice::Context(), facet, mode, secure, endpoints, routerInfo);
-#else
-        return create(ident, Ice::Context(), facet, mode, secure, endpoints);
-#endif
     }
     else
     {
-#ifdef ICEE_HAS_LOCATOR
-        LocatorInfoPtr locatorInfo = _instance->locatorManager()->get(getDefaultLocator());
         s->read(adapterId);
-#   ifdef ICEE_HAS_ROUTER
-        return create(ident, Ice::Context(), facet, mode, secure, adapterId, routerInfo, locatorInfo);
-#   else
-        return create(ident, Ice::Context(), facet, mode, secure, adapterId, locatorInfo);
-#   endif
-#else
-        throwProxyUnmarshalException(__FILE__, __LINE__);
-        return 0; // Unreachable, fixes compiler warning.
-#endif
     }
+
+    return create(ident, facet, mode, secure, endpoints, adapterId, "");
 }
 
 #ifdef ICEE_HAS_ROUTER
 
-void
+ReferenceFactoryPtr
 IceInternal::ReferenceFactory::setDefaultRouter(const RouterPrx& defaultRouter)
 {
-    IceUtil::Mutex::Lock sync(*this);
-    _defaultRouter = defaultRouter;
+    if(defaultRouter == _defaultRouter)
+    {
+        return this;
+    }
+
+    ReferenceFactoryPtr factory = new ReferenceFactory(_instance, _communicator);
+#ifdef ICEE_HAS_LOCATOR
+    factory->_defaultLocator = _defaultLocator;
+#endif
+    factory->_defaultRouter = defaultRouter;
+    return factory;
 }
 
 RouterPrx
@@ -692,11 +587,20 @@ IceInternal::ReferenceFactory::getDefaultRouter() const
 
 #ifdef ICEE_HAS_LOCATOR
 
-void
+ReferenceFactoryPtr
 IceInternal::ReferenceFactory::setDefaultLocator(const LocatorPrx& defaultLocator)
 {
-    IceUtil::Mutex::Lock sync(*this);
-    _defaultLocator = defaultLocator;
+    if(defaultLocator == _defaultLocator)
+    {
+        return this;
+    }
+
+    ReferenceFactoryPtr factory = new ReferenceFactory(_instance, _communicator);
+#ifdef ICEE_HAS_ROUTER
+    factory->_defaultRouter = _defaultRouter;
+#endif
+    factory->_defaultLocator = defaultLocator;
+    return factory;
 }
 
 LocatorPrx
@@ -708,29 +612,84 @@ IceInternal::ReferenceFactory::getDefaultLocator() const
 
 #endif
 
-IceInternal::ReferenceFactory::ReferenceFactory(const InstancePtr& instance,
-                                                const CommunicatorPtr& communicator) :
+IceInternal::ReferenceFactory::ReferenceFactory(const InstancePtr& instance, const CommunicatorPtr& communicator) :
     _instance(instance),
     _communicator(communicator)
 {
 }
 
-void
-IceInternal::ReferenceFactory::destroy()
+RoutableReferencePtr
+IceInternal::ReferenceFactory::create(const Identity& ident,
+                                      const string& facet,
+                                      ReferenceMode mode,
+                                      bool secure,
+                                      const vector<EndpointPtr>& endpoints,
+                                      const string& adapterId,
+                                      const string& propertyPrefix)
 {
-    Mutex::Lock sync(*this);
+    //
+    // Default local proxy options.
+    //
+#ifdef ICEE_HAS_LOCATOR
+    LocatorInfoPtr locatorInfo = _instance->locatorManager()->get(_defaultLocator);
+#endif
+#ifdef ICEE_HAS_ROUTER
+    RouterInfoPtr routerInfo = _instance->routerManager()->get(_defaultRouter);
+#endif
 
-    if(!_instance)
+    //
+    // Override the defaults with the proxy properties if a property prefix is defined.
+    //
+    if(!propertyPrefix.empty())
     {
-        throw CommunicatorDestroyedException(__FILE__, __LINE__);
+        PropertiesPtr properties = _instance->initializationData().properties;
+        string property;
+
+#ifdef ICEE_HAS_LOCATOR
+        property = propertyPrefix + ".Locator";
+        LocatorPrx locator = LocatorPrx::uncheckedCast(_communicator->propertyToProxy(property));
+        if(locator)
+        {
+            locatorInfo = _instance->locatorManager()->get(locator);
+        }
+#endif
+
+#ifdef ICEE_HAS_ROUTER
+        property = propertyPrefix + ".Router";
+        RouterPrx router = RouterPrx::uncheckedCast(_communicator->propertyToProxy(property));
+        if(router)
+        {
+            if(propertyPrefix.size() > 7 && propertyPrefix.substr(propertyPrefix.size() - 7, 7) == ".Router")
+            {
+                Warning out(_instance->initializationData().logger);
+                out << "`" << property << "=" << properties->getProperty(property)
+                    << "': cannot set a router on a router; setting ignored";
+            }
+            else
+            {
+                routerInfo = _instance->routerManager()->get(router);
+            }
+        }
+#endif
     }
 
-    _instance = 0;
-    _communicator = 0;
-#ifdef ICEE_HAS_ROUTER
-    _defaultRouter = 0;
-#endif
+    //
+    // Create new reference
+    //
+    return new RoutableReference(_instance,
+                                 _communicator,
+                                 ident,
+                                 Ice::Context(),
+                                 facet,
+                                 mode,
+                                 secure,
+                                 endpoints,
+                                 adapterId
 #ifdef ICEE_HAS_LOCATOR
-    _defaultLocator = 0;
+                                 , locatorInfo
 #endif
+#ifdef ICEE_HAS_ROUTER
+                                 , routerInfo
+#endif
+                                );
 }

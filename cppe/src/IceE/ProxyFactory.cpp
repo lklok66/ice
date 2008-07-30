@@ -30,7 +30,7 @@ IceUtil::Shared* IceInternal::upCast(ProxyFactory* p) { return p; }
 ObjectPrx
 IceInternal::ProxyFactory::stringToProxy(const string& str) const
 {
-    ReferencePtr ref = _instance->referenceFactory()->create(str);
+    ReferencePtr ref = _instance->referenceFactory()->create(str, "");
     return referenceToProxy(ref);
 }
 
@@ -50,7 +50,8 @@ IceInternal::ProxyFactory::proxyToString(const ObjectPrx& proxy) const
 ObjectPrx
 IceInternal::ProxyFactory::propertyToProxy(const string& prefix) const
 {
-    ReferencePtr ref = _instance->referenceFactory()->createFromProperties(prefix);
+    string proxy = _instance->initializationData().properties->getProperty(prefix);
+    ReferencePtr ref = _instance->referenceFactory()->create(proxy, prefix);
     return referenceToProxy(ref);
 }
 
@@ -100,18 +101,28 @@ IceInternal::ProxyFactory::checkRetryAfterException(const LocalException& ex, co
     TraceLevelsPtr traceLevels = _instance->traceLevels();
     LoggerPtr logger = _instance->initializationData().logger;
 
+    //
+    // We don't retry batch requests because the exception might have caused
+    // the all the requests batched with the connection to be aborted and we
+    // want the application to be notified.
+    //
+    if(ref->getMode() == ReferenceModeBatchOneway || ref->getMode() == ReferenceModeBatchDatagram)
+    {
+        ex.ice_throw();
+    }
+
 #if defined(ICEE_HAS_LOCATOR) || defined(ICEE_HAS_ROUTER)
     const ObjectNotExistException* one = dynamic_cast<const ObjectNotExistException*>(&ex);
     if(one)
     {
 #ifdef ICEE_HAS_LOCATOR
         LocatorInfoPtr li = ref->getLocatorInfo();
-        if(li)
+        if(li && ref->isIndirect())
         {
             //
             // We retry ObjectNotExistException if the reference is indirect.
             //
-            li->clearObjectCache(IndirectReferencePtr::dynamicCast(ref));
+            li->clearObjectCache(ref);
         }
         else
 #endif

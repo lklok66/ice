@@ -1612,6 +1612,13 @@ Slice::Gen::ProxyVisitor::visitClassDefEnd(const ClassDefPtr& p)
     H << eb;
 
     H << nl << nl << _dllExport << "static const ::std::string& ice_staticId();";
+
+    H << nl;
+    H.dec();
+    H << nl << "private:";
+    H.inc();
+    H << nl << nl <<  _dllExport << "virtual ::IceProxy::Ice::Object* __newInstance() const;";
+
     H << eb << ';';
 
     string flatName = p->flattenedScope() + p->name() + "_ids";
@@ -1628,6 +1635,12 @@ Slice::Gen::ProxyVisitor::visitClassDefEnd(const ClassDefPtr& p)
     C << nl << "const ::std::string&" << nl << "IceProxy" << scoped << "::ice_staticId()";
     C << sb;
     C << nl << "return " << flatName << '[' << scopedPos << "];";
+    C << eb;
+
+    C << sp << nl << "::IceProxy::Ice::Object*";
+    C << nl << "IceProxy" << scoped << "::__newInstance() const";
+    C << sb;
+    C << nl << "return new " << name << ";";
     C << eb;
 
     _useWstring = resetUseWstring(_useWstringHist);
