@@ -30,7 +30,11 @@ LINKWITH        := -lIce -lIceUtil $(ICE_OS_LIBS) $(BASELIBS)
 
 $(libdir)/$(LIBFILENAME): $(OBJS)
 	rm -f $@
+ifeq ($(COMPILE_FOR_IPHONE),yes)
+	$(call mkshlib,$@,$(LIBFILENAME),$(OBJS),$(LINKWITH))
+else
 	$(call mkshlib,$@,$(SONAME),$(OBJS),$(LINKWITH))
+endif
 
 $(libdir)/$(SONAME): $(libdir)/$(LIBFILENAME)
 	rm -f $@
