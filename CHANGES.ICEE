@@ -14,6 +14,9 @@ change history of prior releases, refer to the cppe/CHANGES file.
 Changes since version 1.2.0
 ======================================================================
 
+- A new object adapter property, <adapter>.ProxyOptions, lets you
+  customize the proxies that the adapter creates.
+
 - Most proxy factory methods now return a proxy of the same type as
   the original and no longer require the use of a checked or unchecked
   cast. For example, you can write 
