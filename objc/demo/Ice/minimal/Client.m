@@ -13,8 +13,10 @@
 int
 main(int argc, const char* argv[])
 {
+    Ice_InitializationData* initData = [[Ice_InitializationData alloc] init];
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-    Ice_Communicator* communicator = [Ice_Communicator create];
+    Ice_Communicator* communicator = [Ice_Communicator create:initData];
+    [initData release];
     [communicator destroy];
     [pool release];
     return 0;

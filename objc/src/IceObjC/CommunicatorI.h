@@ -9,13 +9,12 @@
 
 #import <IceObjC/Communicator.h>
 
-#include <Ice/CommunicatorF.h>
+#include <Ice/Communicator.h>
 
 @interface Ice_CommunicatorI : Ice_Communicator
 {
-    Ice::Communicator* _communicator;
+    Ice::Communicator* communicator;
 }
-
--(Ice_Communicator*)initWithCommunicator:(const Ice::CommunicatorPtr&)communicator;
+-(Ice_Communicator*)initWithCommunicator:(const Ice::CommunicatorPtr&)arg;
 @end
 

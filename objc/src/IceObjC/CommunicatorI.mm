@@ -9,41 +9,58 @@
 
 #import <IceObjC/CommunicatorI.h>
 
-#include <Ice/Initialize.h>
-#include <Ice/Communicator.h>
+#import <IceObjC/PropertiesI.h>
 
-@implementation Ice_Communicator (Initialize)
-+(Ice_Communicator*) create
-{ 
-    Ice::CommunicatorPtr communicator = Ice::initialize();
-    return [[[Ice_CommunicatorI alloc] initWithCommunicator:communicator] autorelease];
+#include <assert.h>
+
+@implementation Ice_Communicator
+
+-(Ice_Properties*) getProperties
+{
+    assert(false);
 }
+
+-(void) shutdown
+{ 
+    assert(false);
+} 
+
+-(void) destroy
+{ 
+    assert(false);
+} 
+
 @end
 
 @implementation Ice_CommunicatorI
 
-- (Ice_Communicator*)initWithCommunicator:(const Ice::CommunicatorPtr&)communicator
+-(Ice_Communicator*) initWithCommunicator:(const Ice::CommunicatorPtr&)arg
 {
-    _communicator = communicator.get();
-    _communicator->__incRef();
+    communicator = arg.get();
+    communicator->__incRef();
     return self;
 }
 
-- (void)dealloc
+-(void) dealloc
 {
-    _communicator->__decRef();
-    _communicator = 0;
+    communicator->__decRef();
+    communicator = 0;
     [super dealloc];
 }
 
-- (void)shutdown
+-(Ice_Properties*) getProperties
 {
-    _communicator->shutdown();
+    return [[Ice_PropertiesI alloc] initWithProperties:communicator->getProperties()];
 }
 
-- (void)destroy
+-(void) shutdown
 {
-    _communicator->destroy();
+    communicator->shutdown();
+}
+
+-(void) destroy
+{
+    communicator->destroy();
 }
 
 @end

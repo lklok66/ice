@@ -9,15 +9,13 @@
 
 #import <Foundation/NSObject.h>
 
+#import <IceObjc/Properties.h>
+
 @interface Ice_Communicator : NSObject
 
+-(Ice_Properties*) getProperties;
 -(void) shutdown;
 -(void) destroy;
 
 @end
 
-@interface Ice_Communicator (Initialize)
-
-+(Ice_Communicator*) create;
-
-@end
