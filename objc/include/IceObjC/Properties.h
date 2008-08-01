@@ -10,7 +10,9 @@
 #import <Foundation/NSObject.h>
 
 @interface Ice_Properties : NSObject
-
+{
+    void* properties__;
+}
 -(NSString*) getProperty:(NSString*)key;
 -(NSString*) getPropertyWithDefault:(NSString*)key value:(NSString*)value;
 -(int) getPropertyAsInt:(NSString*)key;

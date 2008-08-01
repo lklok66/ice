@@ -20,10 +20,13 @@ prefix			 ?= /opt/Ice-$(VERSION)
 embedded_runpath_prefix  ?= /opt/Ice-$(VERSION_MAJOR).$(VERSION_MINOR)
 
 #
-# Define OPTIMIZE as yes if you want to build with
-# optimization. Otherwise Ice is build with debug information.
+# Define OPTIMIZE_SIZE as yes if you want to build with minimal size.
+# Define OPTIMIZE_SPEED as yes if you want to build with maximum speed.
+# These options are mutually exclusive.
+# If neither is set, Ice-ObjC is built with debug information.
 #
-#OPTIMIZE		= yes
+#OPTIMIZE_SIZE		= yes
+#OPTIMIZE_SPEED		= yes
 
 #
 # Define COMPILE_FOR_IPHONE or COMPILE_FOR_IPHONE_EMULATOR as yes if
@@ -31,6 +34,8 @@ embedded_runpath_prefix  ?= /opt/Ice-$(VERSION_MAJOR).$(VERSION_MINOR)
 #
 #COMPILE_FOR_IPHONE	    	= yes
 COMPILE_FOR_IPHONE_SIMULATOR 	= yes
+
+#STATICLIBS			= yes
 
 # ----------------------------------------------------------------------
 # Don't change anything below this line!
@@ -47,6 +52,13 @@ ifeq ($(shell test -f $(top_srcdir)/config/Make.common.rules && echo 0),0)
     include $(top_srcdir)/config/Make.common.rules
 else
     include $(top_srcdir)/../config/Make.common.rules
+endif
+
+ifeq ($(OPTIMIZE_SPEED),yes)
+    OPTIMIZE		= yes
+endif
+ifeq ($(OPTIMIZE_SIZE),yes)
+    OPTIMIZE		= yes
 endif
 
 bindir			= $(top_srcdir)/bin

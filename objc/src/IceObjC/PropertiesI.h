@@ -11,10 +11,7 @@
 
 #include <Ice/Properties.h>
 
-@interface Ice_PropertiesI : Ice_Properties
-{
-    Ice::Properties* properties;
-}
--(Ice_PropertiesI*)initWithProperties:(const Ice::PropertiesPtr&)arg;
+@interface Ice_Properties (Internal)
+-(Ice_Properties*)initWithProperties:(Ice::Properties*)arg;
 @end
 

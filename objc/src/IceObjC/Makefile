@@ -15,11 +15,12 @@ LIBNAME		= $(call mklibname,IceObjC)
 
 TARGETS		= $(call mklibtargets,$(libdir)/$(LIBFILENAME),$(libdir)/$(SONAME),$(libdir)/$(LIBNAME))
 
-OBJS		= CommunicatorI.o \
+OBJS		= Communicator.o \
                   Exception.o \
 		  Initialize.o \
-		  PropertiesI.o \
-		  ProxyI.o \
+		  Properties.o \
+		  Proxy.o \
+		  Stream.o \
 		  Util.o
 
 SRCS		= $(OBJS:.o=.mm)
@@ -31,6 +32,14 @@ include $(top_srcdir)/config/Make.rules
 CPPFLAGS	:= -I.. $(CPPFLAGS) $(ICE_FLAGS)
 
 LINKWITH        := -lIce -lIceUtil $(ICE_OS_LIBS) $(BASELIBS)
+
+ifeq ($(STATICLIBS),yes)
+
+$(libdir)/$(LIBNAME): $(OBJS) $(SLICE_OBJS)
+	rm -f $@
+	$(call mklib,$@,$(OBJS) $(SLICE_OBJS))
+
+else
 
 $(libdir)/$(LIBFILENAME): $(OBJS)
 	rm -f $@
@@ -47,6 +56,8 @@ $(libdir)/$(SONAME): $(libdir)/$(LIBFILENAME)
 $(libdir)/$(LIBNAME): $(libdir)/$(SONAME)
 	rm -f $@
 	ln -s $(SONAME) $@
+
+endif
 
 install:: all
 	$(call installlib,$(install_libdir),$(libdir),$(LIBFILENAME),$(SONAME),$(LIBNAME))

@@ -11,10 +11,8 @@
 
 #include <Ice/Proxy.h>
 
-@interface Ice_ObjectPrxI : Ice_ObjectPrx
-{
-    IceProxy::Ice::Object* proxy;
-}
--(Ice_ObjectPrx*)initWithObjectPrx:(const Ice::ObjectPrx&)arg;
+@interface Ice_ObjectPrx (Internal)
+-(Ice_ObjectPrx*)initWithObjectPrx__:(IceProxy::Ice::Object*)arg;
+-(IceProxy::Ice::Object*) proxy__;
 @end
 

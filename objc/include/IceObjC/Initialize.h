@@ -9,6 +9,7 @@
 
 #import <IceObjC/Communicator.h>
 #import <IceObjC/Properties.h>
+#import <IceObjC/Stream.h>
 
 @interface Ice_InitializationData : NSObject
 {
@@ -32,4 +33,12 @@
 +(Ice_Communicator*) create:(Ice_InitializationData *)initData;
 +(Ice_Communicator*) create:(int*)argc argv:(char*[])argv;
 +(Ice_Communicator*) create:(int*)argc argv:(char*[])argv initData:(Ice_InitializationData *)initData;
+@end
+
+@interface Ice_InputStream (Initialize)
++(Ice_InputStream*) createInputStream:(Ice_Communicator*)communicator buf:(unsigned char*)buf length:(int)length;
+@end
+
+@interface Ice_OutputStream (Initialize)
++(Ice_OutputStream*) createOutputStream:(Ice_Communicator*)communicator;
 @end

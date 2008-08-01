@@ -14,7 +14,9 @@
 #import <IceObjC/Properties.h>
 
 @interface Ice_Communicator : NSObject
-
+{
+    void* communicator__;
+}
 -(Ice_ObjectPrx*) stringToProxy:(NSString*)str;
 -(Ice_Properties*) getProperties;
 -(void) shutdown;

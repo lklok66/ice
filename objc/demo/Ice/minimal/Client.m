@@ -12,16 +12,18 @@
 
 #import <IceObjC/IceObjC.h>
 
+#import <Hello.h>
+
 int
 main(int argc, char* argv[])
 {
     Ice_InitializationData* initData = [[Ice_InitializationData alloc] init];
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
     Ice_Communicator* communicator = [Ice_Communicator create:&argc argv:argv initData:initData];
-    Ice_ObjectPrx* proxy = [communicator stringToProxy:@"hello:tcp -p 10000"];
+    HelloPrx* hello = [HelloPrx uncheckedCast:[communicator stringToProxy:@"hello:tcp -p 10000"]];
     @try
     {
-        [proxy ice_ping];
+        [hello sayHello];
     }
     @catch(Ice_LocalException* ex)
     {

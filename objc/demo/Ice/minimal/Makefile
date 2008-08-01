@@ -13,7 +13,8 @@ CLIENT		= client
 
 TARGETS		= $(CLIENT)
 
-COBJS		= Client.o
+COBJS		= Hello.o \
+                  Client.o
 
 SRCS		= $(COBJS:.o=.m)
 

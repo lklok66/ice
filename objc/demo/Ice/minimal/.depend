@@ -1,0 +1,2 @@
+Hello$(OBJEXT): Hello.m Hello.h $(includedir)/IceObjC/Proxy.h
+Client$(OBJEXT): Client.m $(includedir)/IceObjC/IceObjC.h $(includedir)/IceObjC/Initialize.h $(includedir)/IceObjC/Communicator.h $(includedir)/IceObjC/Proxy.h $(includedir)/IceObjC/Properties.h $(includedir)/IceObjC/Exception.h Hello.h

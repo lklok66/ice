@@ -11,10 +11,8 @@
 
 #include <Ice/Communicator.h>
 
-@interface Ice_CommunicatorI : Ice_Communicator
-{
-    Ice::Communicator* communicator;
-}
--(Ice_Communicator*)initWithCommunicator:(const Ice::CommunicatorPtr&)arg;
+@interface Ice_Communicator (Internal)
+-(Ice_Communicator*)initWithCommunicator:(Ice::Communicator*)arg;
+-(Ice::Communicator*)communicator__;
 @end
 

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		141803960E40775500DC7AFB /* libIceObjC.3.3.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1418037B0E406A9C00DC7AFB /* libIceObjC.3.3.0.dylib */; };
 		141803A60E4082A300DC7AFB /* libIceObjC.3.3.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1418037B0E406A9C00DC7AFB /* libIceObjC.3.3.0.dylib */; };
+		14C841420E4377F300284B96 /* Hello.m in Sources */ = {isa = PBXBuildFile; fileRef = 14C841410E4377F300284B96 /* Hello.m */; };
 		1D3623260D0F684500981E51 /* helloAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* helloAppDelegate.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
@@ -33,6 +34,8 @@
 
 /* Begin PBXFileReference section */
 		1418037B0E406A9C00DC7AFB /* libIceObjC.3.3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libIceObjC.3.3.0.dylib; path = ../../../lib/libIceObjC.3.3.0.dylib; sourceTree = SOURCE_ROOT; };
+		14C841410E4377F300284B96 /* Hello.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Hello.m; sourceTree = SOURCE_ROOT; };
+		14C841430E43780300284B96 /* Hello.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Hello.h; sourceTree = SOURCE_ROOT; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623240D0F684500981E51 /* helloAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = helloAppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* helloAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = helloAppDelegate.m; sourceTree = "<group>"; };
@@ -67,6 +70,8 @@
 				1D3623240D0F684500981E51 /* helloAppDelegate.h */,
 				1D3623250D0F684500981E51 /* helloAppDelegate.m */,
 				28D7ACF60DDB3853001CB0EB /* helloViewController.h */,
+				14C841410E4377F300284B96 /* Hello.m */,
+				14C841430E43780300284B96 /* Hello.h */,
 				28D7ACF70DDB3853001CB0EB /* helloViewController.m */,
 			);
 			path = Classes;
@@ -179,6 +184,7 @@
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				1D3623260D0F684500981E51 /* helloAppDelegate.m in Sources */,
 				28D7ACF80DDB3853001CB0EB /* helloViewController.m in Sources */,
+				14C841420E4377F300284B96 /* Hello.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

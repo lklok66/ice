@@ -9,6 +9,7 @@
 #import "helloViewController.h"
 
 #import <IceObjC/IceObjC.h>
+#import "Hello.h"
 
 @implementation helloViewController
 
@@ -38,7 +39,7 @@
 }
 
 - (void)sayHello:(id)sender {
-        [[communicator stringToProxy:@"hello:tcp -h 192.168.5.100 -p 10000"] ice_ping];
+        [[HelloPrx uncheckedCast:[communicator stringToProxy:@"hello:tcp -h 192.168.5.100 -p 10000"]] sayHello];
 }
 
 - (void)dealloc {
