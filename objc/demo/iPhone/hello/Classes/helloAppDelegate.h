@@ -8,14 +8,11 @@
 
 #import <UIKit/UIKit.h>
 
-@class Communicator;
-
 @class helloViewController;
 
 @interface helloAppDelegate : NSObject <UIApplicationDelegate> {
 	IBOutlet UIWindow *window;
 	IBOutlet helloViewController *viewController;
-        Communicator* communicator;
 }
 
 @property (nonatomic, retain) UIWindow *window;

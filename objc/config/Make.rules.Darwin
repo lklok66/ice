@@ -34,8 +34,6 @@ else
     CXX	                = c++
 
     CXXFLAGS		= -ftemplate-depth-128 -Wall -D_REENTRANT
-
-    LDPLATFORMFLAGS     = -isysroot $(SDK_HOME)
 endif
 
 ifeq ($(OPTIMIZE),yes)

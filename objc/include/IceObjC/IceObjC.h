@@ -10,3 +10,4 @@
 #import <IceObjC/Initialize.h>
 #import <IceObjC/Communicator.h>
 #import <IceObjC/Properties.h>
+#import <IceObjC/Exception.h>

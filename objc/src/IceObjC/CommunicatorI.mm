@@ -7,13 +7,21 @@
 //
 // **********************************************************************
 
+#import <Foundation/NSString.h>
+
 #import <IceObjC/CommunicatorI.h>
 
 #import <IceObjC/PropertiesI.h>
+#import <IceObjC/ProxyI.h>
 
 #include <assert.h>
 
 @implementation Ice_Communicator
+
+-(Ice_ObjectPrx*) stringToProxy:(NSString*)str
+{
+    assert(false);
+}
 
 -(Ice_Properties*) getProperties
 {
@@ -36,6 +44,10 @@
 
 -(Ice_Communicator*) initWithCommunicator:(const Ice::CommunicatorPtr&)arg
 {
+    if(![super init])
+    {
+        return nil;
+    }
     communicator = arg.get();
     communicator->__incRef();
     return self;
@@ -48,9 +60,14 @@
     [super dealloc];
 }
 
+-(Ice_ObjectPrx*) stringToProxy:(NSString*)str
+{
+    return [[[Ice_ObjectPrxI alloc] initWithObjectPrx:communicator->stringToProxy([str UTF8String])] autorelease];
+}
+
 -(Ice_Properties*) getProperties
 {
-    return [[Ice_PropertiesI alloc] initWithProperties:communicator->getProperties()];
+    return [[[Ice_PropertiesI alloc] initWithProperties:communicator->getProperties()] autorelease];
 }
 
 -(void) shutdown

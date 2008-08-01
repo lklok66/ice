@@ -9,7 +9,6 @@
 #import "helloAppDelegate.h"
 #import "helloViewController.h"
 
-#import <IceObjC/IceObjC.h>
 
 @implementation helloAppDelegate
 
@@ -18,9 +17,6 @@
 
 
 - (void)applicationDidFinishLaunching:(UIApplication *)application {
-
-    communicator = [[Ice_Communicator create] retain];
-
     // Override point for customization after app launch	
     [window addSubview:viewController.view];
     [window makeKeyAndVisible];
@@ -28,10 +24,6 @@
 
 
 - (void)dealloc {
-
-    [communicator destroy];
-    [communicator release];
-
     [viewController release];
     [window release];
     [super dealloc];

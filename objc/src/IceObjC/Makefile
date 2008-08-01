@@ -15,9 +15,12 @@ LIBNAME		= $(call mklibname,IceObjC)
 
 TARGETS		= $(call mklibtargets,$(libdir)/$(LIBFILENAME),$(libdir)/$(SONAME),$(libdir)/$(LIBNAME))
 
-OBJS		= PropertiesI.o \
-		  CommunicatorI.o \
-		  Initialize.o
+OBJS		= CommunicatorI.o \
+                  Exception.o \
+		  Initialize.o \
+		  PropertiesI.o \
+		  ProxyI.o \
+		  Util.o
 
 SRCS		= $(OBJS:.o=.mm)
 

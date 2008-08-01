@@ -7,18 +7,14 @@
 //
 // **********************************************************************
 
-#import <Foundation/NSObject.h>
-
-#import <IceObjC/Proxy.h>
-
 #import <IceObjC/Properties.h>
 
-@interface Ice_Communicator : NSObject
+#include <Ice/Properties.h>
 
--(Ice_ObjectPrx*) stringToProxy:(NSString*)str;
--(Ice_Properties*) getProperties;
--(void) shutdown;
--(void) destroy;
-
+@interface Ice_PropertiesI : Ice_Properties
+{
+    Ice::Properties* properties;
+}
+-(Ice_PropertiesI*)initWithProperties:(const Ice::PropertiesPtr&)arg;
 @end
 

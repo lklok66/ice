@@ -9,16 +9,9 @@
 
 #import <Foundation/NSObject.h>
 
-#import <IceObjC/Proxy.h>
+@interface Ice_ObjectPrx : NSObject
 
-#import <IceObjC/Properties.h>
-
-@interface Ice_Communicator : NSObject
-
--(Ice_ObjectPrx*) stringToProxy:(NSString*)str;
--(Ice_Properties*) getProperties;
--(void) shutdown;
--(void) destroy;
+-(BOOL) ice_isA:(NSString*)typeId;
+-(void) ice_ping;
 
 @end
-

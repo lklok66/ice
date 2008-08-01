@@ -7,9 +7,12 @@
 //
 // **********************************************************************
 
-#import <IceObjC/PropertiesI.h>
 #import <Foundation/NSString.h>
+
+#import <IceObjC/PropertiesI.h>
+
 #include <Ice/Properties.h>
+
 #include <assert.h>
 
 @implementation Ice_Properties
@@ -55,6 +58,10 @@
 
 -(Ice_PropertiesI*) initWithProperties:(const Ice::PropertiesPtr&)arg
 {
+    if(![super init])
+    {
+        return nil;
+    }
     properties = arg.get();
     properties->__incRef();
     return self;
@@ -102,7 +109,7 @@
 
 -(Ice_Properties*) clone
 {
-    return [[Ice_PropertiesI alloc] initWithProperties:properties->clone()];
+    return [[[Ice_PropertiesI alloc] initWithProperties:properties->clone()] autorelease];
 }
 
 @end

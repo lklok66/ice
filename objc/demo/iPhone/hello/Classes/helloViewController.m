@@ -8,6 +8,8 @@
 
 #import "helloViewController.h"
 
+#import <IceObjC/IceObjC.h>
+
 @implementation helloViewController
 
 /*
@@ -16,12 +18,12 @@
 }
  */
 
-/*
- Implement viewDidLoad if you need to do additional setup after loading the view.
+
 - (void)viewDidLoad {
 	[super viewDidLoad];
+        communicator = [[Ice_Communicator create] retain];
 }
- */
+
 
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -35,8 +37,13 @@
 	// Release anything that's not essential, such as cached data
 }
 
+- (void)sayHello:(id)sender {
+        [[communicator stringToProxy:@"hello:tcp -h 192.168.5.100 -p 10000"] ice_ping];
+}
 
 - (void)dealloc {
+        [communicator destroy];
+	[communicator release];
 	[super dealloc];
 }
 

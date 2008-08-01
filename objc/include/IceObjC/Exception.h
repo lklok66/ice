@@ -7,18 +7,11 @@
 //
 // **********************************************************************
 
-#import <Foundation/NSObject.h>
+#import <Foundation/NSException.h>
 
-#import <IceObjC/Proxy.h>
+@interface Ice_LocalException : NSException
+@end
 
-#import <IceObjC/Properties.h>
-
-@interface Ice_Communicator : NSObject
-
--(Ice_ObjectPrx*) stringToProxy:(NSString*)str;
--(Ice_Properties*) getProperties;
--(void) shutdown;
--(void) destroy;
-
+@interface Ice_UserException : NSException
 @end
 
