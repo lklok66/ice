@@ -7,12 +7,12 @@
 //
 // **********************************************************************
 
-#import <IceObjC/Proxy.h>
+#import <IceObjC/ObjectAdapter.h>
 
-#include <Ice/Proxy.h>
+#include <Ice/ObjectAdapter.h>
 
-@interface Ice_ObjectPrx (Internal)
--(Ice_ObjectPrx*)initWithObjectPrx__:(const Ice::ObjectPrx&)arg;
--(IceProxy::Ice::Object*) objectPrx__;
-+(Ice_ObjectPrx*)objectPrxWithObjectPrx__:(const Ice::ObjectPrx&)arg;
+@interface Ice_ObjectAdapter (Internal)
+-(Ice_ObjectAdapter*)initWithObjectAdapter:(Ice::ObjectAdapter*)arg;
+-(Ice::ObjectAdapter*)objectAdapter__;
 @end
+

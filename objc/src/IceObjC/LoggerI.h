@@ -7,12 +7,11 @@
 //
 // **********************************************************************
 
-#import <IceObjC/Proxy.h>
+#import <IceObjC/Logger.h>
 
-#include <Ice/Proxy.h>
+#include <Ice/Logger.h>
 
-@interface Ice_ObjectPrx (Internal)
--(Ice_ObjectPrx*)initWithObjectPrx__:(const Ice::ObjectPrx&)arg;
--(IceProxy::Ice::Object*) objectPrx__;
-+(Ice_ObjectPrx*)objectPrxWithObjectPrx__:(const Ice::ObjectPrx&)arg;
+@interface Ice_Logger (Internal)
+-(Ice_Logger*)initWithLogger:(const Ice::LoggerPtr&)arg;
++(Ice_Logger*)loggerWithLogger:(const Ice::LoggerPtr&)arg;
 @end

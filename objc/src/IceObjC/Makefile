@@ -17,9 +17,15 @@ TARGETS		= $(call mklibtargets,$(libdir)/$(LIBFILENAME),$(libdir)/$(SONAME),$(li
 
 OBJS		= Communicator.o \
                   Exception.o \
+		  Identity.o \
 		  Initialize.o \
+		  Locator.o \
+	          Logger.o \
+	  	  Object.o \
+		  ObjectAdapter.o \
 		  Properties.o \
 		  Proxy.o \
+		  Router.o \
 		  Stream.o \
 		  Util.o
 

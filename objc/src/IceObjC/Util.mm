@@ -7,8 +7,6 @@
 //
 // **********************************************************************
 
-#import <Foundation/NSString.h>
-
 #import <IceObjC/Util.h>
 #import <IceObjC/Exception.h>
 

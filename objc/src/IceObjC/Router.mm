@@ -7,12 +7,7 @@
 //
 // **********************************************************************
 
-#import <IceObjC/Proxy.h>
+#import <IceObjC/Router.h>
 
-#include <Ice/Proxy.h>
-
-@interface Ice_ObjectPrx (Internal)
--(Ice_ObjectPrx*)initWithObjectPrx__:(const Ice::ObjectPrx&)arg;
--(IceProxy::Ice::Object*) objectPrx__;
-+(Ice_ObjectPrx*)objectPrxWithObjectPrx__:(const Ice::ObjectPrx&)arg;
+@implementation Ice_RouterPrx
 @end

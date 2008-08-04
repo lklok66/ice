@@ -38,7 +38,7 @@
     {
         properties = Ice::createProperties();
     }
-    return [[[Ice_Properties alloc] initWithProperties:properties.get()] autorelease];
+    return [Ice_Properties propertiesWithProperties:properties];
 }
 
 @end
@@ -72,7 +72,7 @@
     {
         communicator = Ice::initialize(data);
     }
-    return [[[Ice_Communicator alloc] initWithCommunicator:communicator.get()] autorelease];
+    return [Ice_Communicator communicatorWithCommunicator:communicator];
 }
 
 @end

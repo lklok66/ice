@@ -7,32 +7,34 @@
 //
 // **********************************************************************
 
-#import <Foundation/NSString.h>
-
 #import <IceObjC/PropertiesI.h>
+#import <IceObjC/Util.h>
 
-#include <Ice/Properties.h>
-
-#include <assert.h>
+#define PROPERTIES ((Ice::Properties*)properties__)
 
 @implementation Ice_Properties (Internal)
 
--(Ice_Properties*) initWithProperties:(Ice::Properties*)arg
+-(Ice_Properties*) initWithProperties:(const Ice::PropertiesPtr&)arg
 {
     if(![super init])
     {
         return nil;
     }
-    properties__ = arg;
-    ((Ice::Properties*)properties__)->__incRef();
+    properties__ = arg.get();
+    PROPERTIES->__incRef();
     return self;
 }
 
 -(void) dealloc
 {
-    ((Ice::Properties*)properties__)->__decRef();
+    PROPERTIES->__decRef();
     properties__ = 0;
     [super dealloc];
+}
+
++(Ice_Properties*) propertiesWithProperties:(const Ice::PropertiesPtr&)properties
+{
+    return [[[Ice_Properties alloc] initWithProperties:properties] autorelease];
 }
 
 @end
@@ -41,40 +43,61 @@
 
 -(NSString*) getProperty:(NSString*)key
 {
-    return [NSString stringWithUTF8String:((Ice::Properties*)properties__)->getProperty([key UTF8String]).c_str()];
+    return [NSString stringWithUTF8String:PROPERTIES->getProperty([key UTF8String]).c_str()];
 }
-
 -(NSString*) getPropertyWithDefault:(NSString*)key value:(NSString*)value
 {
-    return [NSString stringWithUTF8String:((Ice::Properties*)properties__)->getPropertyWithDefault([key UTF8String], [value UTF8String]).c_str()];
+    return [NSString stringWithUTF8String:PROPERTIES->getPropertyWithDefault([key UTF8String], [value UTF8String]).c_str()];
 }
-
 -(int) getPropertyAsInt:(NSString*)key
 {
-    return 0; // TODO
+    return PROPERTIES->getPropertyAsInt([key UTF8String]);
 }
 -(int) getPropertyAsIntWithDefault:(NSString*)key value:(int)value
 {
-    return 0; // TODO
+    return PROPERTIES->getPropertyAsIntWithDefault([key UTF8String], value);
 }
-//StringSeq getPropertyAsList(string key)
-//StringSeq getPropertyAsListWithDefault(string key, StringSeq value);
-//PropertyDict getPropertiesForPrefix(string prefix);
+-(NSArray*) getPropertyAsList:(NSString*)key
+{
+    return [toNSArray(PROPERTIES->getPropertyAsList([key UTF8String])) autorelease];
+}
+-(NSArray*) getPropertyAsListWithDefault:(NSString*)key value:(NSArray*)value
+{
+    std::vector<std::string> s;
+    fromNSArray(value, s);
+    return [toNSArray(PROPERTIES->getPropertyAsListWithDefault([key UTF8String], s)) autorelease];
+}
+-(NSDictionary*) getPropertiesForPrefix:(NSString*)prefix
+{
+    return [toNSDictionary(PROPERTIES->getPropertiesForPrefix([prefix UTF8String])) autorelease];
+}
 -(void) setProperty:(NSString*)key value:(NSString*)value
 {
-    // TODO
+    PROPERTIES->setProperty([key UTF8String], [value UTF8String]);
 }
-//StringSeq getCommandLineOptions();
-//StringSeq parseCommandLineOptions(string prefix, StringSeq options);
-//StringSeq parseIceCommandLineOptions(StringSeq options);
+-(NSArray*) getCommandLineOptions
+{
+    return [toNSArray(PROPERTIES->getCommandLineOptions()) autorelease];
+}
+-(NSArray*) parseCommandLineOptions:(NSString*)prefix options:(NSArray*)options
+{
+    std::vector<std::string> o;
+    fromNSArray(options, o);
+    return [toNSArray(PROPERTIES->parseCommandLineOptions([prefix UTF8String], o)) autorelease];
+}
+-(NSArray*) parseIceCommandLineOptions:(NSArray*)options
+{
+    std::vector<std::string> o;
+    fromNSArray(options, o);
+    return [toNSArray(PROPERTIES->parseIceCommandLineOptions(o)) autorelease];
+}
 -(void) load:(NSString*)file
 {
-    ((Ice::Properties*)properties__)->load([file UTF8String]);
+    PROPERTIES->load([file UTF8String]);
 }
-
 -(Ice_Properties*) clone
 {
-    return [[[Ice_Properties alloc] initWithProperties:((Ice::Properties*)properties__)->clone().get()] autorelease];
+    return [Ice_Properties propertiesWithProperties:PROPERTIES->clone()];
 }
 
 @end

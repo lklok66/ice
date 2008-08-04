@@ -12,7 +12,8 @@
 #include <Ice/Communicator.h>
 
 @interface Ice_Communicator (Internal)
--(Ice_Communicator*)initWithCommunicator:(Ice::Communicator*)arg;
+-(Ice_Communicator*)initWithCommunicator:(const Ice::CommunicatorPtr&)arg;
 -(Ice::Communicator*)communicator__;
++(Ice_Communicator*)communicatorWithCommunicator:(const Ice::CommunicatorPtr&)arg;
 @end
 

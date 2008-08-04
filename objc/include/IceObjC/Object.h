@@ -7,12 +7,18 @@
 //
 // **********************************************************************
 
-#import <IceObjC/Proxy.h>
+#import <Foundation/NSObject.h>
+#import <Foundation/NSString.h>
 
-#include <Ice/Proxy.h>
+@class Ice_Object;
 
-@interface Ice_ObjectPrx (Internal)
--(Ice_ObjectPrx*)initWithObjectPrx__:(const Ice::ObjectPrx&)arg;
--(IceProxy::Ice::Object*) objectPrx__;
-+(Ice_ObjectPrx*)objectPrxWithObjectPrx__:(const Ice::ObjectPrx&)arg;
+@protocol Ice_Object
+-(BOOL) ice_isA:(NSString*)typeId;
+-(void) ice_ping;
+@end
+
+@interface Ice_Object : NSObject<Ice_Object>
+{
+    void* object__;
+}
 @end

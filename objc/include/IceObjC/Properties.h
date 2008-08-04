@@ -8,6 +8,8 @@
 // **********************************************************************
 
 #import <Foundation/NSObject.h>
+#import <Foundation/NSArray.h>
+#import <Foundation/NSDictionary.h>
 
 @interface Ice_Properties : NSObject
 {
@@ -17,13 +19,13 @@
 -(NSString*) getPropertyWithDefault:(NSString*)key value:(NSString*)value;
 -(int) getPropertyAsInt:(NSString*)key;
 -(int) getPropertyAsIntWithDefault:(NSString*)key value:(int)value;
-//StringSeq getPropertyAsList(string key);
-//StringSeq getPropertyAsListWithDefault(string key, StringSeq value);
-//PropertyDict getPropertiesForPrefix(string prefix);
+-(NSArray*) getPropertyAsList:(NSString*)key;
+-(NSArray*) getPropertyAsListWithDefault:(NSString*)key value:(NSArray*)value;
+-(NSDictionary*) getPropertiesForPrefix:(NSString*)prefix;
 -(void) setProperty:(NSString*)key value:(NSString*)value;
-//StringSeq getCommandLineOptions();
-//StringSeq parseCommandLineOptions(string prefix, StringSeq options);
-//StringSeq parseIceCommandLineOptions(StringSeq options);
+-(NSArray*) getCommandLineOptions;
+-(NSArray*) parseCommandLineOptions:(NSString*)prefix options:(NSArray*)options;
+-(NSArray*) parseIceCommandLineOptions:(NSArray*)options;
 -(void) load:(NSString*)file;
 -(Ice_Properties*) clone;
 

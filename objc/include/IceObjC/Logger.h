@@ -7,12 +7,15 @@
 //
 // **********************************************************************
 
-#import <IceObjC/Proxy.h>
+#import <Foundation/NSObject.h>
+#import <Foundation/NSString.h>
 
-#include <Ice/Proxy.h>
-
-@interface Ice_ObjectPrx (Internal)
--(Ice_ObjectPrx*)initWithObjectPrx__:(const Ice::ObjectPrx&)arg;
--(IceProxy::Ice::Object*) objectPrx__;
-+(Ice_ObjectPrx*)objectPrxWithObjectPrx__:(const Ice::ObjectPrx&)arg;
+@interface Ice_Logger : NSObject
+{
+    void* logger__;
+}
+-(void) print:(NSString*)message;
+-(void) trace:(NSString*)category message:(NSString*)message;
+-(void) warning:(NSString*)message;
+-(void) error:(NSString*)message;
 @end

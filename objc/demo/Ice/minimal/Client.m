@@ -20,7 +20,7 @@ main(int argc, char* argv[])
     Ice_InitializationData* initData = [[Ice_InitializationData alloc] init];
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
     Ice_Communicator* communicator = [Ice_Communicator create:&argc argv:argv initData:initData];
-    HelloPrx* hello = [HelloPrx uncheckedCast:[communicator stringToProxy:@"hello:tcp -p 10000"]];
+    id<HelloPrx> hello = [HelloPrx uncheckedCast:[communicator stringToProxy:@"hello:tcp -p 10000"]];
     @try
     {
         [hello sayHello];

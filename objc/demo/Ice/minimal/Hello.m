@@ -11,14 +11,14 @@
 
 @implementation HelloPrx
 
-+(HelloPrx*) uncheckedCast:(Ice_ObjectPrx*)proxy
++(id<HelloPrx>) uncheckedCast:(id<Ice_ObjectPrx>)proxy
 {
-    return (HelloPrx*)[self uncheckedCast__:proxy];
+    return (id<HelloPrx>)[self uncheckedCast__:proxy];
 }
 
-+(HelloPrx*) checkedCast:(Ice_ObjectPrx*)proxy
++(id<HelloPrx>) checkedCast:(id<Ice_ObjectPrx>)proxy
 {
-    return (HelloPrx*)[self checkedCast__:proxy protocol:@protocol(HelloPrxProtocol) sliceId:@"::Demo::Hello"];
+    return (id<HelloPrx>)[self checkedCast__:proxy protocol:@protocol(HelloPrx) sliceId:@"::Demo::Hello"];
 }
 
 -(void) sayHello
