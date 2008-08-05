@@ -39,7 +39,7 @@
 }
 
 - (void)sayHello:(id)sender {
-        [[HelloPrx uncheckedCast:[communicator stringToProxy:@"hello:tcp -h 192.168.5.100 -p 10000"]] sayHello];
+        [[HelloPrx uncheckedCast:[communicator stringToProxy:@"hello:tcp -p 10000"]] sayHello];
 }
 
 - (void)dealloc {
