@@ -10,13 +10,19 @@
 top_srcdir	= ../../..
 
 CLIENT		= client
+SERVER		= server
 
-TARGETS		= $(CLIENT)
+TARGETS		= $(CLIENT) $(SERVER)
 
 COBJS		= Hello.o \
-                  Client.o
+                  Client.o \
 
-SRCS		= $(COBJS:.o=.m)
+SOBJS		= Hello.o \
+		  HelloI.o \
+		  Server.o
+
+SRCS		= $(COBJS:.o=.m) \
+		  $(SOBJS:.o=.m)
 
 include $(top_srcdir)/config/Make.rules
 
@@ -25,5 +31,9 @@ CPPFLAGS	:= -I. $(CPPFLAGS)
 $(CLIENT): $(OBJS) $(COBJS)
 	rm -f $@
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(COBJS) $(LIBS)
+
+$(SERVER): $(OBJS) $(SOBJS)
+	rm -f $@
+	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(SOBJS) $(LIBS)
 
 include .depend

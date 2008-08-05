@@ -7,13 +7,17 @@
 //
 // **********************************************************************
 
-#import <IceObjC/ObjectAdapter.h>
+//
+// Some import files we need almost everywhere
+//
+#import <Foundation/NSObject.h>
+#import <Foundation/NSString.h>
+#import <Foundation/NSArray.h>
+#import <Foundation/NSDictionary.h>
 
-#include <Ice/ObjectAdapter.h>
-
-@interface ICEObjectAdapter (Internal)
--(ICEObjectAdapter*)initWithObjectAdapter:(const Ice::ObjectAdapterPtr&)arg;
--(Ice::ObjectAdapter*)objectAdapter__;
-+(ICEObjectAdapter*)objectAdapterWithObjectAdapter:(const Ice::ObjectAdapterPtr&)arg;
-@end
-
+typedef unsigned char ICEByte;
+typedef short ICEShort;
+typedef int ICEInt;
+typedef long long ICELong;
+typedef float ICEFloat;
+typedef double ICEDouble;

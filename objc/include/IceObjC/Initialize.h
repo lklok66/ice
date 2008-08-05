@@ -7,14 +7,21 @@
 //
 // **********************************************************************
 
+#import <IceObjC/Config.h>
+
 #import <IceObjC/Communicator.h>
 #import <IceObjC/Properties.h>
 #import <IceObjC/Stream.h>
 
+//
+// Forward declarations.
+//
+@class ICELogger;
+
 @interface ICEInitializationData : NSObject
 {
     ICEProperties* properties;
-    //ICELogger* logger;
+    ICELogger* logger;
     //ICEStats* stats;
     //ICEStringConverter* stringConverter;
     //ICEWstringConverter* wstringConverter;

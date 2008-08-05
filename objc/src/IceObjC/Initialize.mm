@@ -14,6 +14,40 @@
 
 #include <Ice/Initialize.h>
 
+#import <Foundation/NSAutoreleasePool.h>
+#import <Foundation/NSThread.h>
+
+namespace IceObjC
+{
+
+class ThreadNotification : public Ice::ThreadNotification
+{
+public:
+
+    ThreadNotification()
+    {
+    }
+
+    virtual void start()
+    {
+        _pools.insert(std::make_pair(IceUtil::ThreadControl().id(), [[NSAutoreleasePool alloc] init]));
+    }
+
+    virtual void stop()
+    {
+        std::map<IceUtil::ThreadControl::ID, NSAutoreleasePool*>::iterator p =
+            _pools.find(IceUtil::ThreadControl().id());
+        [p->second release];
+        _pools.erase(p);
+    }
+
+private:
+
+    std::map<IceUtil::ThreadControl::ID, NSAutoreleasePool*> _pools;
+};
+
+};
+
 @implementation ICEInitializationData
 
 @synthesize properties;
@@ -62,7 +96,13 @@
 
 +(ICECommunicator*) create:(int*)argc argv:(char*[])argv initData:(ICEInitializationData*)initData
 { 
+    if(![NSThread isMultiThreaded])
+    {
+        [[[NSThread alloc] init] start]; // TODO: doesn't this leak?
+    }
+
     Ice::InitializationData data; // TODO: convert initData to data
+    data.threadHook = new IceObjC::ThreadNotification();
     Ice::CommunicatorPtr communicator;
     if(argc != nil && argv != nil)
     {
@@ -82,7 +122,7 @@
 +(ICEInputStream*) createInputStream:(ICECommunicator*)communicator buf:(unsigned char*)buf length:(int)length
 {
     Ice::InputStreamPtr is = Ice::createInputStream([communicator communicator__], std::make_pair(buf, buf + length));
-    return [[[ICEInputStream alloc] initWithInputStream:is.get()] autorelease];
+    return [[[ICEInputStream alloc] initWithInputStream:is] autorelease];
 }
 
 @end
@@ -92,7 +132,7 @@
 +(ICEOutputStream*) createOutputStream:(ICECommunicator*)communicator
 {
     Ice::OutputStreamPtr os = Ice::createOutputStream([communicator communicator__]);
-    return [[[ICEOutputStream alloc] initWithOutputStream:os.get()] autorelease];
+    return [[[ICEOutputStream alloc] initWithOutputStream:os] autorelease];
 }
 
 @end

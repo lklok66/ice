@@ -87,7 +87,7 @@
 -(ICEOutputStream*) createOutputStream__
 {
     Ice::OutputStreamPtr os = Ice::createOutputStream(OBJECTPRX->ice_getCommunicator());
-    return [[ICEOutputStream alloc] initWithOutputStream:os.get()];
+    return [[ICEOutputStream alloc] initWithOutputStream:os];
 }
 
 -(BOOL) invoke__:(NSString*)operation mode:(ICEOperationMode)mode os:(ICEOutputStream*)os is:(ICEInputStream**)is

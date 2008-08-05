@@ -7,18 +7,17 @@
 //
 // **********************************************************************
 
-#import <Foundation/NSObject.h>
-#import <Foundation/NSDictionary.h>
+#import <IceObjC/Config.h>
 
 //
 // Forward declarations.
 //
 @protocol ICEObjectPrx;
-@protocol ICEObject;
 @protocol ICELocatorPrx;
 @class ICECommunicator;
 @class ICEServantLocator;
 @class ICEIdentity;
+@class ICEObject;
 
 @interface ICEObjectAdapter : NSObject
 {
@@ -33,19 +32,17 @@
 -(void) waitForDeactivate;
 -(BOOL) isDeactivated;
 -(void) destroy;
--(id<ICEObjectPrx>) add:(id<ICEObject>)servant identity:(ICEIdentity*)ident;
--(id<ICEObjectPrx>) addFacet:(id<ICEObject>)servant identity:(ICEIdentity*)ident facet:(NSString*)facet;
--(id<ICEObjectPrx>) addWithUUID:(id<ICEObject>)servant;
--(id<ICEObjectPrx>) addFacetWithUUID:(id<ICEObject>)servant facet:(NSString*)facet;
--(id<ICEObject>) remove:(ICEIdentity*)ident;
--(id<ICEObject>) removeFacet:(ICEIdentity*)ident facet:(NSString*)facet;
+-(id<ICEObjectPrx>) add:(ICEObject*)servant identity:(ICEIdentity*)ident;
+-(id<ICEObjectPrx>) addFacet:(ICEObject*)servant identity:(ICEIdentity*)ident facet:(NSString*)facet;
+-(id<ICEObjectPrx>) addWithUUID:(ICEObject*)servant;
+-(id<ICEObjectPrx>) addFacetWithUUID:(ICEObject*)servant facet:(NSString*)facet;
+-(ICEObject*) remove:(ICEIdentity*)ident;
+-(ICEObject*) removeFacet:(ICEIdentity*)ident facet:(NSString*)facet;
 -(NSDictionary*) removeAllFacets:(ICEIdentity*)ident;
--(id<ICEObject>) find:(ICEIdentity*)ident;
--(id<ICEObject>) findFacet:(ICEIdentity*)ident facet:(NSString*)facet;
+-(ICEObject*) find:(ICEIdentity*)ident;
+-(ICEObject*) findFacet:(ICEIdentity*)ident facet:(NSString*)facet;
 -(NSDictionary*) findAllFacets:(ICEIdentity*)ident;
--(id<ICEObject>) findByProxy:(id<ICEObjectPrx>)proxy;
--(void) addServantLocator:(ICEServantLocator*)locator category:(NSString*)category;
--(ICEServantLocator*) findServantLocator:(NSString*)category;
+-(ICEObject*) findByProxy:(id<ICEObjectPrx>)proxy;
 -(id<ICEObjectPrx>) createProxy:(ICEIdentity*)ident;
 -(id<ICEObjectPrx>) createDirectProxy:(ICEIdentity*)ident;
 -(id<ICEObjectPrx>) createIndirectProxy:(ICEIdentity*)ident;

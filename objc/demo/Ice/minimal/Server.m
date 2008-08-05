@@ -11,15 +11,15 @@
 
 #import <Foundation/NSAutoreleasePool.h>
 
-#import <Hello.h>
+#import <HelloI.h>
 
 int
 main(int argc, char* argv[])
 {
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+    
     int status = 0;
-    ICECommunicator* communicator;
-
+    ICECommunicator* communicator = nil;
     @try
     {
         communicator = [ICECommunicator create:&argc argv:argv];
@@ -28,16 +28,12 @@ main(int argc, char* argv[])
             NSLog(@"%s: too many arguments", argv[0]);
             return 1;
         }
-        id<HelloPrx> hello = [HelloPrx checkedCast:[communicator stringToProxy:@"hello:tcp -p 10000"]];
-        if(hello == nil)
-        {
-            NSLog(@"%s: invalid proxy", argv[0]);
-            return 1;
-        }
-        else
-        {
-            [hello sayHello];
-        }
+        ICEObjectAdapter* adapter = [communicator createObjectAdapterWithEndpoints:@"Hello" endpoints:@"tcp -p 10000"];
+        Hello* hello = [[HelloI alloc] init];
+        [adapter add:hello identity:[communicator stringToIdentity:@"hello"]];
+        [hello release];
+        [adapter activate];
+        [communicator waitForShutdown];
     }
     @catch(ICELocalException* ex)
     {
@@ -59,5 +55,5 @@ main(int argc, char* argv[])
     }
 
     [pool release];
-    return 0;
+    return status;
 }

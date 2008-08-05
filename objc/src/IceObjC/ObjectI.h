@@ -11,6 +11,13 @@
 
 #include <Ice/Object.h>
 
+//
+// Forward declarations.
+//
+@class ICECurrent;
+@class ICEInputStream;
+@class ICEOutputStream;
+
 namespace IceObjC
 {
 
@@ -25,7 +32,7 @@ typedef IceUtil::Handle<ServantWrapper> ServantWrapperPtr;
 };
 
 @interface ICEObject (Internal)
--(ICEObject*)initWithObject__:(const Ice::ObjectPtr&)arg;
+-(ICEObject*) initWithObject__:(const Ice::ObjectPtr&)arg;
 -(Ice::Object*) object__;
-+(ICEObject*)objectWithObject__:(const Ice::ObjectPtr&)arg;
++(ICEObject*) objectWithObject__:(const Ice::ObjectPtr&)arg;
 @end

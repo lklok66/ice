@@ -14,17 +14,19 @@
 #import <IceObjC/ObjectI.h>
 #import <IceObjC/Util.h>
 
+#include <Ice/Locator.h>
+
 #define OBJECTADAPTER ((Ice::ObjectAdapter*)objectAdapter__)
 
 @implementation ICEObjectAdapter (Internal)
 
--(ICEObjectAdapter*) initWithObjectAdapter:(Ice::ObjectAdapter*)arg
+-(ICEObjectAdapter*) initWithObjectAdapter:(const Ice::ObjectAdapterPtr&)arg
 {
     if(![super init])
     {
         return nil;
     }
-    objectAdapter__ = arg;
+    objectAdapter__ = arg.get();
     OBJECTADAPTER->__incRef();
     return self;
 }
@@ -39,6 +41,11 @@
     OBJECTADAPTER->__decRef();
     objectAdapter__ = 0;
     [super dealloc];
+}
+
++(ICEObjectAdapter*) objectAdapterWithObjectAdapter:(const Ice::ObjectAdapterPtr&)arg
+{
+    return [[[ICEObjectAdapter alloc] initWithObjectAdapter:arg] autorelease];
 }
 
 @end
@@ -90,41 +97,43 @@
     OBJECTADAPTER->destroy();
 }
 
--(id<ICEObjectPrx>) add:(id<ICEObject>)servant identity:(ICEIdentity*)ident
+-(id<ICEObjectPrx>) add:(ICEObject*)servant identity:(ICEIdentity*)ident
 {
-    [(ICEObject*)servant retain];
-    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->add([(ICEObject*)servant object__], [ident identity__])];
+    [servant retain];
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->add([servant object__], [ident identity__])];
 }
 
--(id<ICEObjectPrx>) addFacet:(id<ICEObject>)servant identity:(ICEIdentity*)ident facet:(NSString*)facet
+-(id<ICEObjectPrx>) addFacet:(ICEObject*)servant identity:(ICEIdentity*)ident facet:(NSString*)facet
 {
-    [(ICEObject*)servant retain];
-    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->addFacet([(ICEObject*)servant object__], [ident identity__], [facet UTF8String])];
+    [servant retain];
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->addFacet([servant object__], [ident identity__],
+                                                                          [facet UTF8String])];
 }
 
--(id<ICEObjectPrx>) addWithUUID:(id<ICEObject>)servant
+-(id<ICEObjectPrx>) addWithUUID:(ICEObject*)servant
 {
-    [(ICEObject*)servant retain];
-    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->addWithUUID([(ICEObject*)servant object__])];
+    [servant retain];
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->addWithUUID([servant object__])];
 }
 
--(id<ICEObjectPrx>) addFacetWithUUID:(id<ICEObject>)servant facet:(NSString*)facet
+-(id<ICEObjectPrx>) addFacetWithUUID:(ICEObject*)servant facet:(NSString*)facet
 {
-    [(ICEObject*)servant retain];
-    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->addFacetWithUUID([(ICEObject*)servant object__], [facet UTF8String])];
+    [servant retain];
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->addFacetWithUUID([servant object__],
+                                                                                  [facet UTF8String])];
 }
 
--(id<ICEObject>) remove:(ICEIdentity*)ident
+-(ICEObject*) remove:(ICEIdentity*)ident
 {
     Ice::ObjectPtr wrapper = OBJECTADAPTER->remove([ident identity__]);
-    id<ICEObject> servant = IceObjC::ServantWrapperPtr::dynamicCast(wrapper)->getServant();
-    return [(ICEObject*)servant autorelease];
+    ICEObject* servant = IceObjC::ServantWrapperPtr::dynamicCast(wrapper)->getServant();
+    return [servant autorelease];
 }
--(id<ICEObject>) removeFacet:(ICEIdentity*)ident facet:(NSString*)facet
+-(ICEObject*) removeFacet:(ICEIdentity*)ident facet:(NSString*)facet
 {
     Ice::ObjectPtr wrapper = OBJECTADAPTER->removeFacet([ident identity__], [facet UTF8String]);
-    id<ICEObject> servant = IceObjC::ServantWrapperPtr::dynamicCast(wrapper)->getServant();
-    return [(ICEObject*)servant autorelease];
+    ICEObject* servant = IceObjC::ServantWrapperPtr::dynamicCast(wrapper)->getServant();
+    return [servant autorelease];
 }
 
 -(NSDictionary*) removeAllFacets:(ICEIdentity*)ident
@@ -142,56 +151,57 @@
     return [servants autorelease];
 }
 
--(id<ICEObject>) find:(ICEIdentity*)ident
+-(ICEObject*) find:(ICEIdentity*)ident
 {
-    return nil;
+    return IceObjC::ServantWrapperPtr::dynamicCast(OBJECTADAPTER->find([ident identity__]))->getServant();
 }
 
--(id<ICEObject>) findFacet:(ICEIdentity*)ident facet:(NSString*)facet
+-(ICEObject*) findFacet:(ICEIdentity*)ident facet:(NSString*)facet
 {
-    return nil;
+    Ice::ObjectPtr wrapper = OBJECTADAPTER->findFacet([ident identity__], [facet UTF8String]);
+    return IceObjC::ServantWrapperPtr::dynamicCast(wrapper)->getServant();
 }
 
 -(NSDictionary*) findAllFacets:(ICEIdentity*)ident
 {
-    return nil;
+    Ice::FacetMap wrappers = OBJECTADAPTER->findAllFacets([ident identity__]);
+    NSMutableDictionary* servants = [[NSMutableDictionary alloc] initWithCapacity:wrappers.size()];
+    for(Ice::FacetMap::const_iterator p = wrappers.begin(); p != wrappers.end(); ++p)
+    {
+        [servants setObject:IceObjC::ServantWrapperPtr::dynamicCast(p->second)->getServant() forKey:toObjC(p->first)];
+    }
+    return servants;
 }
 
--(id<ICEObject>) findByProxy:(id<ICEObjectPrx>)proxy
+-(ICEObject*) findByProxy:(id<ICEObjectPrx>)proxy
 {
-    return nil;
-}
-
--(void) addServantLocator:(ICEServantLocator*)locator category:(NSString*)category
-{
-}
-
--(ICEServantLocator*) findServantLocator:(NSString*)category
-{
-    return nil;
+    Ice::ObjectPrx prx = [(ICEObjectPrx*)proxy objectPrx__];
+    return IceObjC::ServantWrapperPtr::dynamicCast(OBJECTADAPTER->findByProxy(prx))->getServant();
 }
 
 -(id<ICEObjectPrx>) createProxy:(ICEIdentity*)ident
 {
-    return nil;
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->createProxy([ident identity__])];
 }
 
 -(id<ICEObjectPrx>) createDirectProxy:(ICEIdentity*)ident
 {
-    return nil;
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->createDirectProxy([ident identity__])];
 }
 
 -(id<ICEObjectPrx>) createIndirectProxy:(ICEIdentity*)ident
 {
-    return nil;
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->createIndirectProxy([ident identity__])];
 }
 
 -(void) setLocator:(id<ICELocatorPrx>)loc
 {
+    OBJECTADAPTER->setLocator(Ice::LocatorPrx::uncheckedCast(Ice::ObjectPrx([(ICEObjectPrx*)loc objectPrx__])));
 }
 
 -(void) refreshPublishedEndpoints
 {
+    OBJECTADAPTER->refreshPublishedEndpoints();
 }
 
 @end

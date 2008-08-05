@@ -7,7 +7,11 @@
 //
 // **********************************************************************
 
-#import <Foundation/NSObject.h>
+#import <IceObjC/Config.h>
+
+//
+// TODO: remove when generated from slice2objc
+//
 
 #import <IceObjC/Proxy.h>
 

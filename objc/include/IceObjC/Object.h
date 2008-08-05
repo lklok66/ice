@@ -7,18 +7,25 @@
 //
 // **********************************************************************
 
-#import <Foundation/NSObject.h>
-#import <Foundation/NSString.h>
+#import <IceObjC/Config.h>
 
+//
+// Forward declarations.
+//
 @class ICEObject;
+@class ICECurrent;
+@class ICEInputStream;
+@class ICEOutputStream;
 
 @protocol ICEObject
--(BOOL) ice_isA:(NSString*)typeId;
--(void) ice_ping;
+-(BOOL) ice_isA:(NSString*)typeId current:(ICECurrent*)current;
+-(void) ice_ping:(ICECurrent*)current;
 @end
 
 @interface ICEObject : NSObject<ICEObject>
 {
     void* object__;
 }
+-(ICEOutputStream*) createOutputStream__:(ICECurrent*)current;
+-(BOOL) dispatch__:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream**)os;
 @end

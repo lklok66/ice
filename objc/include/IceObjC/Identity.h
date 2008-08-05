@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-#import <Foundation/NSObject.h>
+#import <IceObjC/Config.h>
 
 @interface ICEIdentity : NSObject
 {

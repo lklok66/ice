@@ -100,9 +100,20 @@
     return [NSString stringWithUTF8String:COMMUNICATOR->identityToString([ident identity__]).c_str()];
 }
 
+-(ICEObjectAdapter*) createObjectAdapter:(NSString*)name;
+{
+    return [ICEObjectAdapter objectAdapterWithObjectAdapter:COMMUNICATOR->createObjectAdapter([name UTF8String])];
+}
+
+-(ICEObjectAdapter*) createObjectAdapterWithEndpoints:(NSString*)name endpoints:(NSString*)endpoints;
+{
+    return [ICEObjectAdapter objectAdapterWithObjectAdapter:COMMUNICATOR->createObjectAdapterWithEndpoints([name UTF8String], [endpoints UTF8String])];
+}
+
 -(ICEObjectAdapter*) createObjectAdapterWithRouter:(NSString*)name router:(id<ICERouterPrx>)rtr
 {
-    return nil;
+    Ice::RouterPrx router = Ice::RouterPrx::uncheckedCast(Ice::ObjectPrx([(ICEObjectPrx*)rtr objectPrx__]));
+    return [ICEObjectAdapter objectAdapterWithObjectAdapter:COMMUNICATOR->createObjectAdapterWithRouter([name UTF8String], router)];
 }
 
 -(ICEProperties*) getProperties

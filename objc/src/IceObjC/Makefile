@@ -16,6 +16,7 @@ LIBNAME		= $(call mklibname,IceObjC)
 TARGETS		= $(call mklibtargets,$(libdir)/$(LIBFILENAME),$(libdir)/$(SONAME),$(libdir)/$(LIBNAME))
 
 OBJS		= Communicator.o \
+		  Current.o \
                   Exception.o \
 		  Identity.o \
 		  Initialize.o \

@@ -7,18 +7,20 @@
 //
 // **********************************************************************
 
-#include <Foundation/NSObject.h>
-
-@class ICECommunicator;
+#import <IceObjC/Config.h>
 
 @interface ICEInputStream : NSObject
 {
     void* is__;
 }
+-(BOOL)readBool;
+-(NSString*)readString;
 @end
 
 @interface ICEOutputStream : NSObject
 {
     void* os__;
 }
+-(void)writeBool:(BOOL)v;
+-(void)writeString:(NSString*)v;
 @end

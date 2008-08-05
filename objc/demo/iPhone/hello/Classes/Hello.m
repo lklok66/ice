@@ -25,8 +25,48 @@
 {
     ICEOutputStream* os = [self createOutputStream__];
     ICEInputStream* is;
-    [self invoke__:@"sayHello" mode:Idempotent os:os is:&is];
+    BOOL ok = [self invoke__:@"sayHello" mode:Idempotent os:os is:&is];
     [is release];
+}
+
+@end
+
+@implementation Hello
+
+-(BOOL) ice_isA:(NSString*)typeId current:(ICECurrent*)current
+{
+    //
+    // TODO: Optimize
+    //
+    if([typeId isEqualToString:@"::Demo::Hello"])
+    {
+        return TRUE;
+    }
+    else
+    {
+        return [super ice_isA:typeId current:current];
+    }
+}
+-(BOOL) sayHello___:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream**)os
+{
+    [is release];
+    [(id)self sayHello:current];
+    *os = [self createOutputStream__:current];
+    return TRUE;
+}
+-(BOOL) dispatch__:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream**)os
+{
+    //
+    // TODO: Optimize
+    //
+    if([[current operation] isEqualToString:@"sayHello"])
+    {
+        return [self sayHello___:current is:is os:os];
+    }
+    else
+    {
+        return [super dispatch__:current is:is os:os];
+    }
 }
 
 @end

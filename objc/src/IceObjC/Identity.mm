@@ -28,7 +28,7 @@
 {
     Ice::Identity ident;
     ident.category = [category UTF8String];
-    ident.category = [name UTF8String];
+    ident.name = [name UTF8String];
     return ident;
 }
 

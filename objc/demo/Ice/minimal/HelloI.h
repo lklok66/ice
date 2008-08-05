@@ -7,13 +7,8 @@
 //
 // **********************************************************************
 
-#import <IceObjC/ObjectAdapter.h>
+#import <Hello.h>
 
-#include <Ice/ObjectAdapter.h>
-
-@interface ICEObjectAdapter (Internal)
--(ICEObjectAdapter*)initWithObjectAdapter:(const Ice::ObjectAdapterPtr&)arg;
--(Ice::ObjectAdapter*)objectAdapter__;
-+(ICEObjectAdapter*)objectAdapterWithObjectAdapter:(const Ice::ObjectAdapterPtr&)arg;
+@interface HelloI : Hello<Hello>
 @end
 

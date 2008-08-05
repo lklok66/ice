@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-#import <Foundation/NSObject.h>
+#import <IceObjC/Config.h>
 
 //
 // Forward declarations
@@ -34,8 +34,8 @@
 -(id<ICEObjectPrx>)propertyToProxy:(NSString*)property;
 -(ICEIdentity*) stringToIdentity:(NSString*)str;
 -(NSString*) identityToString:(ICEIdentity*)ident;
-//-(ICEObjectAdapter*) createObjectAdapter:(NSString*)name;
-//-(ICEObjectAdapter*) createObjectAdapterWithEndpoints:(NSString*)name endpoints:(NSString*)endpoints;
+-(ICEObjectAdapter*) createObjectAdapter:(NSString*)name;
+-(ICEObjectAdapter*) createObjectAdapterWithEndpoints:(NSString*)name endpoints:(NSString*)endpoints;
 -(ICEObjectAdapter*) createObjectAdapterWithRouter:(NSString*)name router:(id<ICERouterPrx>)rtr;
 //-(void) addObjectFactory(ObjectFactory factory, NSString* id);
 //-(ObjectFactory findObjectFactory(NSString* id);

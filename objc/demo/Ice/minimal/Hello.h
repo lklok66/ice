@@ -8,17 +8,23 @@
 // **********************************************************************
 
 #import <IceObjC/Proxy.h>
+#import <IceObjC/Object.h>
 
 // Servant protocol
-//@protocol Hello
-//-(void) sayHello:(ICECurrent*);
-//@end
+@protocol Hello
+-(void) sayHello:(ICECurrent*)current;
+@end
 
-// Proxy protocol (Slice Hello* parameters are mapped to ICEObjectPrx<HelloPrx>)
+// Servant class
+@interface Hello : ICEObject
+@end
+
+// Proxy protocol
 @protocol HelloPrx<ICEObjectPrx>
 -(void) sayHello;
 @end
 
+// Proxy class
 @interface HelloPrx : ICEObjectPrx<HelloPrx>
 +(id<HelloPrx>) checkedCast:(id<ICEObjectPrx>)proxy;
 +(id<HelloPrx>) uncheckedCast:(id<ICEObjectPrx>)proxy;

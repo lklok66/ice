@@ -7,6 +7,8 @@
 //
 // **********************************************************************
 
+#import <IceObjC/Config.h>
+
 #import <Foundation/NSException.h>
 
 @interface ICELocalException : NSException

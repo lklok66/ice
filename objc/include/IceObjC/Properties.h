@@ -7,9 +7,7 @@
 //
 // **********************************************************************
 
-#import <Foundation/NSObject.h>
-#import <Foundation/NSArray.h>
-#import <Foundation/NSDictionary.h>
+#import <IceObjC/Config.h>
 
 @interface ICEProperties : NSObject
 {
@@ -17,8 +15,8 @@
 }
 -(NSString*) getProperty:(NSString*)key;
 -(NSString*) getPropertyWithDefault:(NSString*)key value:(NSString*)value;
--(int) getPropertyAsInt:(NSString*)key;
--(int) getPropertyAsIntWithDefault:(NSString*)key value:(int)value;
+-(ICEInt) getPropertyAsInt:(NSString*)key;
+-(ICEInt) getPropertyAsIntWithDefault:(NSString*)key value:(ICEInt)value;
 -(NSArray*) getPropertyAsList:(NSString*)key;
 -(NSArray*) getPropertyAsListWithDefault:(NSString*)key value:(NSArray*)value;
 -(NSDictionary*) getPropertiesForPrefix:(NSString*)prefix;

@@ -7,8 +7,7 @@
 //
 // **********************************************************************
 
-#import <Foundation/NSObject.h>
-#import <Foundation/NSString.h>
+#import <IceObjC/Config.h>
 
 @interface ICELogger : NSObject
 {

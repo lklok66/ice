@@ -7,13 +7,16 @@
 //
 // **********************************************************************
 
-#import <Foundation/NSObject.h>
-#import <Foundation/NSString.h>
+#import <IceObjC/Config.h>
 
-#include <IceObjC/Current.h>
-#include <IceObjC/Stream.h>
+#import <IceObjC/Current.h> // For ICEOperationMode
 
+//
+// Forward declarations.
+//
 @class ICEObjectPrx;
+@class ICEOutputStream;
+@class ICEInputStream;
 
 @protocol ICEObjectPrx
 -(BOOL) ice_isA:(NSString*)typeId;
