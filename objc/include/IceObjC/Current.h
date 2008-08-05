@@ -13,4 +13,4 @@ typedef enum
     Nonmutating,
     Idempotent
 }
-Ice_OperationMode;
+ICEOperationMode;

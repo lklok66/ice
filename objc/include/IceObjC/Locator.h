@@ -11,8 +11,8 @@
 
 #import <IceObjC/Proxy.h>
 
-@protocol Ice_LocatorPrx<Ice_ObjectPrx>
+@protocol ICELocatorPrx<ICEObjectPrx>
 @end
 
-@interface Ice_LocatorPrx : Ice_ObjectPrx
+@interface ICELocatorPrx : ICEObjectPrx
 @end

@@ -9,8 +9,8 @@
 
 #import <IceObjC/Exception.h>
 
-@implementation Ice_LocalException
+@implementation ICELocalException
 @end
 
-@implementation Ice_UserException
+@implementation ICEUserException
 @end

@@ -9,9 +9,9 @@
 
 #import <IceObjC/LoggerI.h>
 
-@implementation Ice_Logger (Internal)
+@implementation ICELogger (Internal)
 
--(Ice_Logger*) initWithLogger:(const Ice::LoggerPtr&)arg
+-(ICELogger*) initWithLogger:(const Ice::LoggerPtr&)arg
 {
     if(![super init])
     {
@@ -29,14 +29,14 @@
     [super dealloc];
 }
 
-+(Ice_Logger*) loggerWithLogger:(const Ice::LoggerPtr&)arg
++(ICELogger*) loggerWithLogger:(const Ice::LoggerPtr&)arg
 {
-    return [[[Ice_Logger alloc] initWithLogger:arg] autorelease];
+    return [[[ICELogger alloc] initWithLogger:arg] autorelease];
 }
 
 @end
 
-@implementation Ice_Logger
+@implementation ICELogger
 -(void) print:(NSString*)message
 {
     ((Ice::Logger*)logger__)->print([message UTF8String]);

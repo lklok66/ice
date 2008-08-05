@@ -12,15 +12,15 @@
 //
 // Forward declarations
 //
-@protocol Ice_ObjectPrx;
-@protocol Ice_RouterPrx;
-@protocol Ice_LocatorPrx;
-@class Ice_Logger;
-@class Ice_Properties;
-@class Ice_Identity;
-@class Ice_ObjectAdapter;
+@protocol ICEObjectPrx;
+@protocol ICERouterPrx;
+@protocol ICELocatorPrx;
+@class ICELogger;
+@class ICEProperties;
+@class ICEIdentity;
+@class ICEObjectAdapter;
 
-@interface Ice_Communicator : NSObject
+@interface ICECommunicator : NSObject
 {
     void* communicator__;
 }
@@ -29,24 +29,24 @@
 -(void) shutdown;
 -(void) waitForShutdown;
 -(BOOL) isShutdown;
--(id<Ice_ObjectPrx>) stringToProxy:(NSString*)str;
--(NSString*)proxyToString:(id<Ice_ObjectPrx>)obj;
--(id<Ice_ObjectPrx>)propertyToProxy:(NSString*)property;
--(Ice_Identity*) stringToIdentity:(NSString*)str;
--(NSString*) identityToString:(Ice_Identity*)ident;
-//-(Ice_ObjectAdapter*) createObjectAdapter:(NSString*)name;
-//-(Ice_ObjectAdapter*) createObjectAdapterWithEndpoints:(NSString*)name endpoints:(NSString*)endpoints;
--(Ice_ObjectAdapter*) createObjectAdapterWithRouter:(NSString*)name router:(id<Ice_RouterPrx>)rtr;
+-(id<ICEObjectPrx>) stringToProxy:(NSString*)str;
+-(NSString*)proxyToString:(id<ICEObjectPrx>)obj;
+-(id<ICEObjectPrx>)propertyToProxy:(NSString*)property;
+-(ICEIdentity*) stringToIdentity:(NSString*)str;
+-(NSString*) identityToString:(ICEIdentity*)ident;
+//-(ICEObjectAdapter*) createObjectAdapter:(NSString*)name;
+//-(ICEObjectAdapter*) createObjectAdapterWithEndpoints:(NSString*)name endpoints:(NSString*)endpoints;
+-(ICEObjectAdapter*) createObjectAdapterWithRouter:(NSString*)name router:(id<ICERouterPrx>)rtr;
 //-(void) addObjectFactory(ObjectFactory factory, NSString* id);
 //-(ObjectFactory findObjectFactory(NSString* id);
-//-(Ice_ImplicitContext*) getImplicitContext;
--(Ice_Properties*) getProperties;
--(Ice_Logger*) getLogger;
-//-(Ice_Stats*) getStats;
--(id<Ice_RouterPrx>) getDefaultRouter;
--(void) setDefaultRouter:(id<Ice_RouterPrx>)rtr;
--(id<Ice_LocatorPrx>) getDefaultLocator;
--(void) setDefaultLocator:(id<Ice_LocatorPrx>)loc;
+//-(ICEImplicitContext*) getImplicitContext;
+-(ICEProperties*) getProperties;
+-(ICELogger*) getLogger;
+//-(ICEStats*) getStats;
+-(id<ICERouterPrx>) getDefaultRouter;
+-(void) setDefaultRouter:(id<ICERouterPrx>)rtr;
+-(id<ICELocatorPrx>) getDefaultLocator;
+-(void) setDefaultLocator:(id<ICELocatorPrx>)loc;
 //-(PluginManager*) getPluginManager;
 -(void) flushBatchRequests;
 //Object* getAdmin;

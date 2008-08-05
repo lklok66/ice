@@ -14,20 +14,20 @@
 
 #include <Ice/Initialize.h>
 
-@implementation Ice_InitializationData
+@implementation ICEInitializationData
 
 @synthesize properties;
 
 @end
 
-@implementation Ice_Properties (Initialize)
+@implementation ICEProperties (Initialize)
 
-+(Ice_Properties*) create
++(ICEProperties*) create
 { 
     return [self create:nil argv:nil];
 }
 
-+(Ice_Properties*) create:(int*)argc argv:(char*[])argv
++(ICEProperties*) create:(int*)argc argv:(char*[])argv
 { 
     Ice::PropertiesPtr properties;
     if(argc != nil && argv != nil)
@@ -38,29 +38,29 @@
     {
         properties = Ice::createProperties();
     }
-    return [Ice_Properties propertiesWithProperties:properties];
+    return [ICEProperties propertiesWithProperties:properties];
 }
 
 @end
 
-@implementation Ice_Communicator (Initialize)
+@implementation ICECommunicator (Initialize)
 
-+(Ice_Communicator*) create
++(ICECommunicator*) create
 { 
     return [self create:nil argv:nil initData:nil];
 }
 
-+(Ice_Communicator*) create:(Ice_InitializationData*)initData
++(ICECommunicator*) create:(ICEInitializationData*)initData
 { 
     return [self create:nil argv:nil initData:initData];
 }
 
-+(Ice_Communicator*) create:(int*)argc argv:(char*[])argv
++(ICECommunicator*) create:(int*)argc argv:(char*[])argv
 { 
     return [self create:argc argv:argv initData:nil];
 }
 
-+(Ice_Communicator*) create:(int*)argc argv:(char*[])argv initData:(Ice_InitializationData*)initData
++(ICECommunicator*) create:(int*)argc argv:(char*[])argv initData:(ICEInitializationData*)initData
 { 
     Ice::InitializationData data; // TODO: convert initData to data
     Ice::CommunicatorPtr communicator;
@@ -72,27 +72,27 @@
     {
         communicator = Ice::initialize(data);
     }
-    return [Ice_Communicator communicatorWithCommunicator:communicator];
+    return [ICECommunicator communicatorWithCommunicator:communicator];
 }
 
 @end
 
-@implementation Ice_InputStream (Initialize)
+@implementation ICEInputStream (Initialize)
 
-+(Ice_InputStream*) createInputStream:(Ice_Communicator*)communicator buf:(unsigned char*)buf length:(int)length
++(ICEInputStream*) createInputStream:(ICECommunicator*)communicator buf:(unsigned char*)buf length:(int)length
 {
     Ice::InputStreamPtr is = Ice::createInputStream([communicator communicator__], std::make_pair(buf, buf + length));
-    return [[[Ice_InputStream alloc] initWithInputStream:is.get()] autorelease];
+    return [[[ICEInputStream alloc] initWithInputStream:is.get()] autorelease];
 }
 
 @end
 
-@implementation Ice_OutputStream (Initialize)
+@implementation ICEOutputStream (Initialize)
 
-+(Ice_OutputStream*) createOutputStream:(Ice_Communicator*)communicator
++(ICEOutputStream*) createOutputStream:(ICECommunicator*)communicator
 {
     Ice::OutputStreamPtr os = Ice::createOutputStream([communicator communicator__]);
-    return [[[Ice_OutputStream alloc] initWithOutputStream:os.get()] autorelease];
+    return [[[ICEOutputStream alloc] initWithOutputStream:os.get()] autorelease];
 }
 
 @end

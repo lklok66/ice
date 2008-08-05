@@ -11,8 +11,8 @@
 
 #include <Ice/ObjectAdapter.h>
 
-@interface Ice_ObjectAdapter (Internal)
--(Ice_ObjectAdapter*)initWithObjectAdapter:(Ice::ObjectAdapter*)arg;
+@interface ICEObjectAdapter (Internal)
+-(ICEObjectAdapter*)initWithObjectAdapter:(Ice::ObjectAdapter*)arg;
 -(Ice::ObjectAdapter*)objectAdapter__;
 @end
 

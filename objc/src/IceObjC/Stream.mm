@@ -11,9 +11,9 @@
 
 #include <Ice/Stream.h>
 
-@implementation Ice_InputStream (Internal)
+@implementation ICEInputStream (Internal)
 
--(Ice_InputStream*) initWithInputStream:(Ice::InputStream*)arg
+-(ICEInputStream*) initWithInputStream:(Ice::InputStream*)arg
 {
     if(![super init])
     {
@@ -38,12 +38,12 @@
 
 @end
 
-@implementation Ice_InputStream
+@implementation ICEInputStream
 @end
 
-@implementation Ice_OutputStream (Internal)
+@implementation ICEOutputStream (Internal)
 
--(Ice_OutputStream*) initWithOutputStream:(Ice::OutputStream*)arg
+-(ICEOutputStream*) initWithOutputStream:(Ice::OutputStream*)arg
 {
     if(![super init])
     {
@@ -68,5 +68,5 @@
 
 @end
 
-@implementation Ice_OutputStream
+@implementation ICEOutputStream
 @end

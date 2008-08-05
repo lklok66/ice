@@ -13,19 +13,19 @@
 //
 // Forward declarations.
 //
-@protocol Ice_ObjectPrx;
-@protocol Ice_Object;
-@protocol Ice_LocatorPrx;
-@class Ice_Communicator;
-@class Ice_ServantLocator;
-@class Ice_Identity;
+@protocol ICEObjectPrx;
+@protocol ICEObject;
+@protocol ICELocatorPrx;
+@class ICECommunicator;
+@class ICEServantLocator;
+@class ICEIdentity;
 
-@interface Ice_ObjectAdapter : NSObject
+@interface ICEObjectAdapter : NSObject
 {
     void* objectAdapter__;
 }
 -(NSString*) getName;
--(Ice_Communicator*) getCommunicator;
+-(ICECommunicator*) getCommunicator;
 -(void) activate;
 -(void) hold;
 -(void) waitForHold;
@@ -33,22 +33,22 @@
 -(void) waitForDeactivate;
 -(BOOL) isDeactivated;
 -(void) destroy;
--(id<Ice_ObjectPrx>) add:(id<Ice_Object>)servant identity:(Ice_Identity*)ident;
--(id<Ice_ObjectPrx>) addFacet:(id<Ice_Object>)servant identity:(Ice_Identity*)ident facet:(NSString*)facet;
--(id<Ice_ObjectPrx>) addWithUUID:(id<Ice_Object>)servant;
--(id<Ice_ObjectPrx>) addFacetWithUUID:(id<Ice_Object>)servant facet:(NSString*)facet;
--(id<Ice_Object>) remove:(Ice_Identity*)ident;
--(id<Ice_Object>) removeFacet:(Ice_Identity*)ident facet:(NSString*)facet;
--(NSDictionary*) removeAllFacets:(Ice_Identity*)ident;
--(id<Ice_Object>) find:(Ice_Identity*)ident;
--(id<Ice_Object>) findFacet:(Ice_Identity*)ident facet:(NSString*)facet;
--(NSDictionary*) findAllFacets:(Ice_Identity*)ident;
--(id<Ice_Object>) findByProxy:(id<Ice_ObjectPrx>)proxy;
--(void) addServantLocator:(Ice_ServantLocator*)locator category:(NSString*)category;
--(Ice_ServantLocator*) findServantLocator:(NSString*)category;
--(id<Ice_ObjectPrx>) createProxy:(Ice_Identity*)ident;
--(id<Ice_ObjectPrx>) createDirectProxy:(Ice_Identity*)ident;
--(id<Ice_ObjectPrx>) createIndirectProxy:(Ice_Identity*)ident;
--(void) setLocator:(id<Ice_LocatorPrx>)loc;
+-(id<ICEObjectPrx>) add:(id<ICEObject>)servant identity:(ICEIdentity*)ident;
+-(id<ICEObjectPrx>) addFacet:(id<ICEObject>)servant identity:(ICEIdentity*)ident facet:(NSString*)facet;
+-(id<ICEObjectPrx>) addWithUUID:(id<ICEObject>)servant;
+-(id<ICEObjectPrx>) addFacetWithUUID:(id<ICEObject>)servant facet:(NSString*)facet;
+-(id<ICEObject>) remove:(ICEIdentity*)ident;
+-(id<ICEObject>) removeFacet:(ICEIdentity*)ident facet:(NSString*)facet;
+-(NSDictionary*) removeAllFacets:(ICEIdentity*)ident;
+-(id<ICEObject>) find:(ICEIdentity*)ident;
+-(id<ICEObject>) findFacet:(ICEIdentity*)ident facet:(NSString*)facet;
+-(NSDictionary*) findAllFacets:(ICEIdentity*)ident;
+-(id<ICEObject>) findByProxy:(id<ICEObjectPrx>)proxy;
+-(void) addServantLocator:(ICEServantLocator*)locator category:(NSString*)category;
+-(ICEServantLocator*) findServantLocator:(NSString*)category;
+-(id<ICEObjectPrx>) createProxy:(ICEIdentity*)ident;
+-(id<ICEObjectPrx>) createDirectProxy:(ICEIdentity*)ident;
+-(id<ICEObjectPrx>) createIndirectProxy:(ICEIdentity*)ident;
+-(void) setLocator:(id<ICELocatorPrx>)loc;
 -(void) refreshPublishedEndpoints;
 @end

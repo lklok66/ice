@@ -11,7 +11,7 @@
 #import <Foundation/NSArray.h>
 #import <Foundation/NSDictionary.h>
 
-@interface Ice_Properties : NSObject
+@interface ICEProperties : NSObject
 {
     void* properties__;
 }
@@ -27,6 +27,6 @@
 -(NSArray*) parseCommandLineOptions:(NSString*)prefix options:(NSArray*)options;
 -(NSArray*) parseIceCommandLineOptions:(NSArray*)options;
 -(void) load:(NSString*)file;
--(Ice_Properties*) clone;
+-(ICEProperties*) clone;
 
 @end

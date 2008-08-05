@@ -11,7 +11,7 @@
 
 #include <Ice/Logger.h>
 
-@interface Ice_Logger (Internal)
--(Ice_Logger*)initWithLogger:(const Ice::LoggerPtr&)arg;
-+(Ice_Logger*)loggerWithLogger:(const Ice::LoggerPtr&)arg;
+@interface ICELogger (Internal)
+-(ICELogger*)initWithLogger:(const Ice::LoggerPtr&)arg;
++(ICELogger*)loggerWithLogger:(const Ice::LoggerPtr&)arg;
 @end

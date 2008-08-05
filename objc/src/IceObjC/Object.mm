@@ -20,7 +20,7 @@ class BlobjectI : public ServantWrapper, public Ice::BlobjectArrayAsync
 {
 public:
 
-BlobjectI(id<Ice_Object> servant) : _servant((Ice_Object*)servant)
+BlobjectI(id<ICEObject> servant) : _servant((ICEObject*)servant)
 {
 }
     
@@ -30,8 +30,8 @@ ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& cb,
                  const Ice::Current& current)
 {
 //     Ice::InputStreamPtr s = Ice::createInputStream(OBJECTPRX->ice_getCommunicator(), inParams);
-//     Ice_InputStream* is = [[Ice_InputStream alloc] initWithInputStream:s.get()];
-//     Ice_OutputStream* os;
+//     ICEInputStream* is = [[ICEInputStream alloc] initWithInputStream:s.get()];
+//     ICEOutputStream* os;
 //     @try
 //     {
 //         BOOL ok = [_servant dispatch__:current.operation.c_str() is:is os:&os];
@@ -46,7 +46,7 @@ ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& cb,
 //     }
 }
 
-virtual Ice_Object*
+virtual ICEObject*
 getServant()
 {
     return _servant;
@@ -54,15 +54,15 @@ getServant()
 
 private:
 
-Ice_Object* _servant;
+ICEObject* _servant;
     
 };
 
 }
 
-@implementation Ice_Object (Internal)
+@implementation ICEObject (Internal)
 
--(Ice_Object*)init
+-(ICEObject*)init
 {
     if(![super init])
     {
@@ -73,7 +73,7 @@ Ice_Object* _servant;
     return self;
 }
 
--(Ice_Object*)initWithObject__:(const Ice::ObjectPtr&)arg
+-(ICEObject*)initWithObject__:(const Ice::ObjectPtr&)arg
 {
     if(![super init])
     {
@@ -96,15 +96,15 @@ Ice_Object* _servant;
     [super dealloc];
 }
 
-+(Ice_Object*)objectWithObject__:(const Ice::ObjectPtr&)arg
++(ICEObject*)objectWithObject__:(const Ice::ObjectPtr&)arg
 {
     return [[[self alloc] initWithObject__:arg] autorelease];
 }
 @end
 
-@implementation Ice_Object
+@implementation ICEObject
 
--(Ice_Object*)servant__
+-(ICEObject*)servant__
 {
     return self;
 }

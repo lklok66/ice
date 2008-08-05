@@ -21,7 +21,7 @@ rethrowObjCException(const std::exception& ex)
     if(localEx)
     {
         NSString* name = [[NSString alloc] initWithUTF8String:localEx->ice_name().c_str()];
-        nsex = [Ice_LocalException exceptionWithName:name reason:reason userInfo:nil];
+        nsex = [ICELocalException exceptionWithName:name reason:reason userInfo:nil];
         [name release];
     }
     else if(dynamic_cast<const Ice::UserException*>(&ex))

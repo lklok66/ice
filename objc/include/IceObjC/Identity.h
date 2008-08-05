@@ -9,7 +9,7 @@
 
 #import <Foundation/NSObject.h>
 
-@interface Ice_Identity : NSObject
+@interface ICEIdentity : NSObject
 {
     NSString* category;
     NSString* name;

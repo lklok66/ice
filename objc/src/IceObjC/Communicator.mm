@@ -21,9 +21,9 @@
 
 #define COMMUNICATOR ((Ice::Communicator*)communicator__)
 
-@implementation Ice_Communicator (Internal)
+@implementation ICECommunicator (Internal)
 
--(Ice_Communicator*) initWithCommunicator:(const Ice::CommunicatorPtr&)arg
+-(ICECommunicator*) initWithCommunicator:(const Ice::CommunicatorPtr&)arg
 {
     if(![super init])
     {
@@ -46,14 +46,14 @@
     [super dealloc];
 }
 
-+(Ice_Communicator*) communicatorWithCommunicator:(const Ice::CommunicatorPtr&)arg
++(ICECommunicator*) communicatorWithCommunicator:(const Ice::CommunicatorPtr&)arg
 {
-    return [[[Ice_Communicator alloc] initWithCommunicator:arg] autorelease];
+    return [[[ICECommunicator alloc] initWithCommunicator:arg] autorelease];
 }
 
 @end
 
-@implementation Ice_Communicator
+@implementation ICECommunicator
 
 -(void) destroy
 {
@@ -75,64 +75,64 @@
     return COMMUNICATOR->isShutdown();
 }
 
--(id<Ice_ObjectPrx>) stringToProxy:(NSString*)str
+-(id<ICEObjectPrx>) stringToProxy:(NSString*)str
 {
-    return [Ice_ObjectPrx objectPrxWithObjectPrx__:COMMUNICATOR->stringToProxy([str UTF8String])];
+    return [ICEObjectPrx objectPrxWithObjectPrx__:COMMUNICATOR->stringToProxy([str UTF8String])];
 }
 
--(NSString*)proxyToString:(id<Ice_ObjectPrx>)obj
+-(NSString*)proxyToString:(id<ICEObjectPrx>)obj
 {
-    return [NSString stringWithUTF8String:COMMUNICATOR->proxyToString([(Ice_ObjectPrx*)obj objectPrx__]).c_str()];
+    return [NSString stringWithUTF8String:COMMUNICATOR->proxyToString([(ICEObjectPrx*)obj objectPrx__]).c_str()];
 }
 
--(id<Ice_ObjectPrx>)propertyToProxy:(NSString*)property
+-(id<ICEObjectPrx>)propertyToProxy:(NSString*)property
 {
-    return [Ice_ObjectPrx objectPrxWithObjectPrx__:COMMUNICATOR->propertyToProxy([property UTF8String])];
+    return [ICEObjectPrx objectPrxWithObjectPrx__:COMMUNICATOR->propertyToProxy([property UTF8String])];
 }
 
--(Ice_Identity*) stringToIdentity:(NSString*)str
+-(ICEIdentity*) stringToIdentity:(NSString*)str
 {
-    return [Ice_Identity identityWithIdentity:COMMUNICATOR->stringToIdentity([str UTF8String])];
+    return [ICEIdentity identityWithIdentity:COMMUNICATOR->stringToIdentity([str UTF8String])];
 }
 
--(NSString*) identityToString:(Ice_Identity*)ident
+-(NSString*) identityToString:(ICEIdentity*)ident
 {
     return [NSString stringWithUTF8String:COMMUNICATOR->identityToString([ident identity__]).c_str()];
 }
 
--(Ice_ObjectAdapter*) createObjectAdapterWithRouter:(NSString*)name router:(id<Ice_RouterPrx>)rtr
+-(ICEObjectAdapter*) createObjectAdapterWithRouter:(NSString*)name router:(id<ICERouterPrx>)rtr
 {
     return nil;
 }
 
--(Ice_Properties*) getProperties
+-(ICEProperties*) getProperties
 {
-    return [Ice_Properties propertiesWithProperties:COMMUNICATOR->getProperties()];
+    return [ICEProperties propertiesWithProperties:COMMUNICATOR->getProperties()];
 }
 
--(Ice_Logger*) getLogger
+-(ICELogger*) getLogger
 {
-    return [Ice_Logger loggerWithLogger:COMMUNICATOR->getLogger()];
+    return [ICELogger loggerWithLogger:COMMUNICATOR->getLogger()];
 }
 
--(id<Ice_RouterPrx>) getDefaultRouter
+-(id<ICERouterPrx>) getDefaultRouter
 {
-    return (id<Ice_RouterPrx>)[Ice_RouterPrx objectPrxWithObjectPrx__:COMMUNICATOR->getDefaultRouter()];
+    return (id<ICERouterPrx>)[ICERouterPrx objectPrxWithObjectPrx__:COMMUNICATOR->getDefaultRouter()];
 }
 
--(void) setDefaultRouter:(id<Ice_RouterPrx>)rtr
+-(void) setDefaultRouter:(id<ICERouterPrx>)rtr
 {
-    COMMUNICATOR->setDefaultRouter(Ice::RouterPrx::uncheckedCast(Ice::ObjectPrx([(Ice_ObjectPrx*)rtr objectPrx__])));
+    COMMUNICATOR->setDefaultRouter(Ice::RouterPrx::uncheckedCast(Ice::ObjectPrx([(ICEObjectPrx*)rtr objectPrx__])));
 }
 
--(id<Ice_LocatorPrx>) getDefaultLocator
+-(id<ICELocatorPrx>) getDefaultLocator
 {
-    return (id<Ice_LocatorPrx>)[Ice_LocatorPrx objectPrxWithObjectPrx__:COMMUNICATOR->getDefaultLocator()];
+    return (id<ICELocatorPrx>)[ICELocatorPrx objectPrxWithObjectPrx__:COMMUNICATOR->getDefaultLocator()];
 }
 
--(void) setDefaultLocator:(id<Ice_LocatorPrx>)loc
+-(void) setDefaultLocator:(id<ICELocatorPrx>)loc
 {
-    COMMUNICATOR->setDefaultLocator(Ice::LocatorPrx::uncheckedCast(Ice::ObjectPrx([(Ice_ObjectPrx*)loc objectPrx__])));
+    COMMUNICATOR->setDefaultLocator(Ice::LocatorPrx::uncheckedCast(Ice::ObjectPrx([(ICEObjectPrx*)loc objectPrx__])));
 }
 
 -(void) flushBatchRequests

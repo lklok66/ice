@@ -18,14 +18,14 @@ class ServantWrapper : virtual public Ice::Object
 {
 public:
 
-    virtual Ice_Object* getServant() = 0;
+    virtual ICEObject* getServant() = 0;
 };
 typedef IceUtil::Handle<ServantWrapper> ServantWrapperPtr;
 
 };
 
-@interface Ice_Object (Internal)
--(Ice_Object*)initWithObject__:(const Ice::ObjectPtr&)arg;
+@interface ICEObject (Internal)
+-(ICEObject*)initWithObject__:(const Ice::ObjectPtr&)arg;
 -(Ice::Object*) object__;
-+(Ice_Object*)objectWithObject__:(const Ice::ObjectPtr&)arg;
++(ICEObject*)objectWithObject__:(const Ice::ObjectPtr&)arg;
 @end

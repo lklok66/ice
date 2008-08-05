@@ -9,5 +9,5 @@
 
 #import <IceObjC/Locator.h>
 
-@implementation Ice_LocatorPrx
+@implementation ICELocatorPrx
 @end

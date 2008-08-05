@@ -11,9 +11,9 @@
 
 #import <IceObjC/IdentityI.h>
 
-@implementation Ice_Identity (Internal)
+@implementation ICEIdentity (Internal)
 
--(Ice_Identity*) initWithIdentity:(const Ice::Identity&)arg
+-(ICEIdentity*) initWithIdentity:(const Ice::Identity&)arg
 {
     if(![super init])
     {
@@ -39,13 +39,13 @@
     [super dealloc];
 }
 
-+(Ice_Identity*) identityWithIdentity:(const Ice::Identity&)arg
++(ICEIdentity*) identityWithIdentity:(const Ice::Identity&)arg
 {
-    return [[[Ice_Identity alloc] initWithIdentity:arg] autorelease];
+    return [[[ICEIdentity alloc] initWithIdentity:arg] autorelease];
 }
 
 @end
 
-@implementation Ice_Identity
+@implementation ICEIdentity
 @end
 

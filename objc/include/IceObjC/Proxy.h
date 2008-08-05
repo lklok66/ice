@@ -13,22 +13,22 @@
 #include <IceObjC/Current.h>
 #include <IceObjC/Stream.h>
 
-@class Ice_ObjectPrx;
+@class ICEObjectPrx;
 
-@protocol Ice_ObjectPrx
+@protocol ICEObjectPrx
 -(BOOL) ice_isA:(NSString*)typeId;
 -(void) ice_ping;
 @end
 
-@interface Ice_ObjectPrx : NSObject<Ice_ObjectPrx>
+@interface ICEObjectPrx : NSObject<ICEObjectPrx>
 {
     void* objectPrx__;
 }
 
-+(id<Ice_ObjectPrx>) uncheckedCast__:(id<Ice_ObjectPrx>)proxy;
-+(id<Ice_ObjectPrx>) checkedCast__:(id<Ice_ObjectPrx>)proxy protocol:(Protocol*)protocol sliceId:(NSString*)sliceId;
++(id<ICEObjectPrx>) uncheckedCast__:(id<ICEObjectPrx>)proxy;
++(id<ICEObjectPrx>) checkedCast__:(id<ICEObjectPrx>)proxy protocol:(Protocol*)protocol sliceId:(NSString*)sliceId;
 
--(Ice_OutputStream*) createOutputStream__;
--(BOOL) invoke__:(NSString*)operation mode:(Ice_OperationMode)mode os:(Ice_OutputStream*)os is:(Ice_InputStream**)is;
+-(ICEOutputStream*) createOutputStream__;
+-(BOOL) invoke__:(NSString*)operation mode:(ICEOperationMode)mode os:(ICEOutputStream*)os is:(ICEInputStream**)is;
 
 @end

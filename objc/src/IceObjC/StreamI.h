@@ -11,12 +11,12 @@
 
 #include <Ice/Stream.h>
 
-@interface Ice_InputStream (Internal)
--(Ice_InputStream*) initWithInputStream:(Ice::InputStream*)is;
+@interface ICEInputStream (Internal)
+-(ICEInputStream*) initWithInputStream:(Ice::InputStream*)is;
 -(Ice::InputStream*) is__;
 @end
 
-@interface Ice_OutputStream (Internal)
--(Ice_OutputStream*) initWithOutputStream:(Ice::OutputStream*)os;
+@interface ICEOutputStream (Internal)
+-(ICEOutputStream*) initWithOutputStream:(Ice::OutputStream*)os;
 -(Ice::OutputStream*) os__;
 @end

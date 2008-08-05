@@ -11,16 +11,16 @@
 
 // Servant protocol
 //@protocol Hello
-//-(void) sayHello:(Ice_Current*);
+//-(void) sayHello:(ICECurrent*);
 //@end
 
-// Proxy protocol (Slice Hello* parameters are mapped to Ice_ObjectPrx<HelloPrx>)
-@protocol HelloPrx<Ice_ObjectPrx>
+// Proxy protocol (Slice Hello* parameters are mapped to ICEObjectPrx<HelloPrx>)
+@protocol HelloPrx<ICEObjectPrx>
 -(void) sayHello;
 @end
 
-@interface HelloPrx : Ice_ObjectPrx<HelloPrx>
-+(id<HelloPrx>) checkedCast:(id<Ice_ObjectPrx>)proxy;
-+(id<HelloPrx>) uncheckedCast:(id<Ice_ObjectPrx>)proxy;
+@interface HelloPrx : ICEObjectPrx<HelloPrx>
++(id<HelloPrx>) checkedCast:(id<ICEObjectPrx>)proxy;
++(id<HelloPrx>) uncheckedCast:(id<ICEObjectPrx>)proxy;
 @end
 

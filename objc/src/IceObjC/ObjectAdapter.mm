@@ -16,9 +16,9 @@
 
 #define OBJECTADAPTER ((Ice::ObjectAdapter*)objectAdapter__)
 
-@implementation Ice_ObjectAdapter (Internal)
+@implementation ICEObjectAdapter (Internal)
 
--(Ice_ObjectAdapter*) initWithObjectAdapter:(Ice::ObjectAdapter*)arg
+-(ICEObjectAdapter*) initWithObjectAdapter:(Ice::ObjectAdapter*)arg
 {
     if(![super init])
     {
@@ -43,11 +43,11 @@
 
 @end
 
-@implementation Ice_ObjectAdapter
+@implementation ICEObjectAdapter
 
--(Ice_Communicator*) getCommunicator
+-(ICECommunicator*) getCommunicator
 {
-    return [Ice_Communicator communicatorWithCommunicator:OBJECTADAPTER->getCommunicator()];
+    return [ICECommunicator communicatorWithCommunicator:OBJECTADAPTER->getCommunicator()];
 }
 
 -(NSString*) getName
@@ -90,44 +90,44 @@
     OBJECTADAPTER->destroy();
 }
 
--(id<Ice_ObjectPrx>) add:(id<Ice_Object>)servant identity:(Ice_Identity*)ident
+-(id<ICEObjectPrx>) add:(id<ICEObject>)servant identity:(ICEIdentity*)ident
 {
-    [(Ice_Object*)servant retain];
-    return [Ice_ObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->add([(Ice_Object*)servant object__], [ident identity__])];
+    [(ICEObject*)servant retain];
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->add([(ICEObject*)servant object__], [ident identity__])];
 }
 
--(id<Ice_ObjectPrx>) addFacet:(id<Ice_Object>)servant identity:(Ice_Identity*)ident facet:(NSString*)facet
+-(id<ICEObjectPrx>) addFacet:(id<ICEObject>)servant identity:(ICEIdentity*)ident facet:(NSString*)facet
 {
-    [(Ice_Object*)servant retain];
-    return [Ice_ObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->addFacet([(Ice_Object*)servant object__], [ident identity__], [facet UTF8String])];
+    [(ICEObject*)servant retain];
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->addFacet([(ICEObject*)servant object__], [ident identity__], [facet UTF8String])];
 }
 
--(id<Ice_ObjectPrx>) addWithUUID:(id<Ice_Object>)servant
+-(id<ICEObjectPrx>) addWithUUID:(id<ICEObject>)servant
 {
-    [(Ice_Object*)servant retain];
-    return [Ice_ObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->addWithUUID([(Ice_Object*)servant object__])];
+    [(ICEObject*)servant retain];
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->addWithUUID([(ICEObject*)servant object__])];
 }
 
--(id<Ice_ObjectPrx>) addFacetWithUUID:(id<Ice_Object>)servant facet:(NSString*)facet
+-(id<ICEObjectPrx>) addFacetWithUUID:(id<ICEObject>)servant facet:(NSString*)facet
 {
-    [(Ice_Object*)servant retain];
-    return [Ice_ObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->addFacetWithUUID([(Ice_Object*)servant object__], [facet UTF8String])];
+    [(ICEObject*)servant retain];
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->addFacetWithUUID([(ICEObject*)servant object__], [facet UTF8String])];
 }
 
--(id<Ice_Object>) remove:(Ice_Identity*)ident
+-(id<ICEObject>) remove:(ICEIdentity*)ident
 {
     Ice::ObjectPtr wrapper = OBJECTADAPTER->remove([ident identity__]);
-    id<Ice_Object> servant = IceObjC::ServantWrapperPtr::dynamicCast(wrapper)->getServant();
-    return [(Ice_Object*)servant autorelease];
+    id<ICEObject> servant = IceObjC::ServantWrapperPtr::dynamicCast(wrapper)->getServant();
+    return [(ICEObject*)servant autorelease];
 }
--(id<Ice_Object>) removeFacet:(Ice_Identity*)ident facet:(NSString*)facet
+-(id<ICEObject>) removeFacet:(ICEIdentity*)ident facet:(NSString*)facet
 {
     Ice::ObjectPtr wrapper = OBJECTADAPTER->removeFacet([ident identity__], [facet UTF8String]);
-    id<Ice_Object> servant = IceObjC::ServantWrapperPtr::dynamicCast(wrapper)->getServant();
-    return [(Ice_Object*)servant autorelease];
+    id<ICEObject> servant = IceObjC::ServantWrapperPtr::dynamicCast(wrapper)->getServant();
+    return [(ICEObject*)servant autorelease];
 }
 
--(NSDictionary*) removeAllFacets:(Ice_Identity*)ident
+-(NSDictionary*) removeAllFacets:(ICEIdentity*)ident
 {
     Ice::FacetMap wrappers = OBJECTADAPTER->removeAllFacets([ident identity__]);
     NSMutableDictionary* servants = [[NSMutableDictionary alloc] initWithCapacity:wrappers.size()];
@@ -142,51 +142,51 @@
     return [servants autorelease];
 }
 
--(id<Ice_Object>) find:(Ice_Identity*)ident
+-(id<ICEObject>) find:(ICEIdentity*)ident
 {
     return nil;
 }
 
--(id<Ice_Object>) findFacet:(Ice_Identity*)ident facet:(NSString*)facet
+-(id<ICEObject>) findFacet:(ICEIdentity*)ident facet:(NSString*)facet
 {
     return nil;
 }
 
--(NSDictionary*) findAllFacets:(Ice_Identity*)ident
+-(NSDictionary*) findAllFacets:(ICEIdentity*)ident
 {
     return nil;
 }
 
--(id<Ice_Object>) findByProxy:(id<Ice_ObjectPrx>)proxy
+-(id<ICEObject>) findByProxy:(id<ICEObjectPrx>)proxy
 {
     return nil;
 }
 
--(void) addServantLocator:(Ice_ServantLocator*)locator category:(NSString*)category
+-(void) addServantLocator:(ICEServantLocator*)locator category:(NSString*)category
 {
 }
 
--(Ice_ServantLocator*) findServantLocator:(NSString*)category
-{
-    return nil;
-}
-
--(id<Ice_ObjectPrx>) createProxy:(Ice_Identity*)ident
+-(ICEServantLocator*) findServantLocator:(NSString*)category
 {
     return nil;
 }
 
--(id<Ice_ObjectPrx>) createDirectProxy:(Ice_Identity*)ident
+-(id<ICEObjectPrx>) createProxy:(ICEIdentity*)ident
 {
     return nil;
 }
 
--(id<Ice_ObjectPrx>) createIndirectProxy:(Ice_Identity*)ident
+-(id<ICEObjectPrx>) createDirectProxy:(ICEIdentity*)ident
 {
     return nil;
 }
 
--(void) setLocator:(id<Ice_LocatorPrx>)loc
+-(id<ICEObjectPrx>) createIndirectProxy:(ICEIdentity*)ident
+{
+    return nil;
+}
+
+-(void) setLocator:(id<ICELocatorPrx>)loc
 {
 }
 

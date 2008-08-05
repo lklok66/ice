@@ -18,9 +18,9 @@
 
 #define OBJECTPRX ((IceProxy::Ice::Object*)objectPrx__)
 
-@implementation Ice_ObjectPrx(Internal)
+@implementation ICEObjectPrx(Internal)
 
--(Ice_ObjectPrx*) initWithObjectPrx__:(const Ice::ObjectPrx&)arg
+-(ICEObjectPrx*) initWithObjectPrx__:(const Ice::ObjectPrx&)arg
 {
     if(![super init])
     {
@@ -43,54 +43,54 @@
     [super dealloc];
 }
 
-+(Ice_ObjectPrx*) objectPrxWithObjectPrx__:(const Ice::ObjectPrx&)arg
++(ICEObjectPrx*) objectPrxWithObjectPrx__:(const Ice::ObjectPrx&)arg
 {
     return [[[self alloc] initWithObjectPrx__:arg] autorelease];
 }
 
 @end
 
-@implementation Ice_ObjectPrx
+@implementation ICEObjectPrx
 
-+(id<Ice_ObjectPrx>) uncheckedCast__:(id<Ice_ObjectPrx>)proxy
++(id<ICEObjectPrx>) uncheckedCast__:(id<ICEObjectPrx>)proxy
 {
     if(proxy != nil)
     {
-        if([(Ice_ObjectPrx*)proxy isKindOfClass:self])
+        if([(ICEObjectPrx*)proxy isKindOfClass:self])
         {
             return proxy;
         }
         else
         {
-            return [[[self alloc] initWithObjectPrx__:[(Ice_ObjectPrx*)proxy objectPrx__]] autorelease];
+            return [[[self alloc] initWithObjectPrx__:[(ICEObjectPrx*)proxy objectPrx__]] autorelease];
         }
     }
     return nil;
 }
 
-+(id<Ice_ObjectPrx>) checkedCast__:(id<Ice_ObjectPrx>)proxy protocol:(Protocol*)protocol sliceId:(NSString*)sliceId
++(id<ICEObjectPrx>) checkedCast__:(id<ICEObjectPrx>)proxy protocol:(Protocol*)protocol sliceId:(NSString*)sliceId
 {
     if(proxy != nil)
     {
-        if([(Ice_ObjectPrx*)proxy isKindOfClass:self])
+        if([(ICEObjectPrx*)proxy isKindOfClass:self])
         {
             return proxy;
         }
-        else if([(Ice_ObjectPrx*)proxy conformsToProtocol:protocol] || [proxy ice_isA:sliceId])
+        else if([(ICEObjectPrx*)proxy conformsToProtocol:protocol] || [proxy ice_isA:sliceId])
         {
-            return [[[self alloc] initWithObjectPrx__:[(Ice_ObjectPrx*)proxy objectPrx__]] autorelease];
+            return [[[self alloc] initWithObjectPrx__:[(ICEObjectPrx*)proxy objectPrx__]] autorelease];
         }
     }
     return nil;
 }
 
--(Ice_OutputStream*) createOutputStream__
+-(ICEOutputStream*) createOutputStream__
 {
     Ice::OutputStreamPtr os = Ice::createOutputStream(OBJECTPRX->ice_getCommunicator());
-    return [[Ice_OutputStream alloc] initWithOutputStream:os.get()];
+    return [[ICEOutputStream alloc] initWithOutputStream:os.get()];
 }
 
--(BOOL) invoke__:(NSString*)operation mode:(Ice_OperationMode)mode os:(Ice_OutputStream*)os is:(Ice_InputStream**)is
+-(BOOL) invoke__:(NSString*)operation mode:(ICEOperationMode)mode os:(ICEOutputStream*)os is:(ICEInputStream**)is
 {
     std::vector<Ice::Byte> inParams;
     [os os__]->finished(inParams);
@@ -109,7 +109,7 @@
     }
     
     Ice::InputStreamPtr s = Ice::createInputStream(OBJECTPRX->ice_getCommunicator(), outParams);
-    *is = [[Ice_InputStream alloc] initWithInputStream:s.get()];
+    *is = [[ICEInputStream alloc] initWithInputStream:s.get()];
     return ok;
 }
 

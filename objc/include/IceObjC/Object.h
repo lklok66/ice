@@ -10,14 +10,14 @@
 #import <Foundation/NSObject.h>
 #import <Foundation/NSString.h>
 
-@class Ice_Object;
+@class ICEObject;
 
-@protocol Ice_Object
+@protocol ICEObject
 -(BOOL) ice_isA:(NSString*)typeId;
 -(void) ice_ping;
 @end
 
-@interface Ice_Object : NSObject<Ice_Object>
+@interface ICEObject : NSObject<ICEObject>
 {
     void* object__;
 }

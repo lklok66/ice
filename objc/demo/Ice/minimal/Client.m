@@ -17,15 +17,15 @@
 int
 main(int argc, char* argv[])
 {
-    Ice_InitializationData* initData = [[Ice_InitializationData alloc] init];
+    ICEInitializationData* initData = [[ICEInitializationData alloc] init];
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-    Ice_Communicator* communicator = [Ice_Communicator create:&argc argv:argv initData:initData];
+    ICECommunicator* communicator = [ICECommunicator create:&argc argv:argv initData:initData];
     id<HelloPrx> hello = [HelloPrx uncheckedCast:[communicator stringToProxy:@"hello:tcp -p 10000"]];
     @try
     {
         [hello sayHello];
     }
-    @catch(Ice_LocalException* ex)
+    @catch(ICELocalException* ex)
     {
         NSLog(@"%@", ex);
     }

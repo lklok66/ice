@@ -9,5 +9,5 @@
 
 #import <IceObjC/Router.h>
 
-@implementation Ice_RouterPrx
+@implementation ICERouterPrx
 @end

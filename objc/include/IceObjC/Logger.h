@@ -10,7 +10,7 @@
 #import <Foundation/NSObject.h>
 #import <Foundation/NSString.h>
 
-@interface Ice_Logger : NSObject
+@interface ICELogger : NSObject
 {
     void* logger__;
 }

@@ -9,9 +9,9 @@
 
 #import <Foundation/NSException.h>
 
-@interface Ice_LocalException : NSException
+@interface ICELocalException : NSException
 @end
 
-@interface Ice_UserException : NSException
+@interface ICEUserException : NSException
 @end
 

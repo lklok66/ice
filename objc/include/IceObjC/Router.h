@@ -11,8 +11,8 @@
 
 #import <IceObjC/Proxy.h>
 
-@protocol Ice_RouterPrx<Ice_ObjectPrx>
+@protocol ICERouterPrx<ICEObjectPrx>
 @end
 
-@interface Ice_RouterPrx : Ice_ObjectPrx
+@interface ICERouterPrx : ICEObjectPrx
 @end

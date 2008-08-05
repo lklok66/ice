@@ -12,9 +12,9 @@
 
 #define PROPERTIES ((Ice::Properties*)properties__)
 
-@implementation Ice_Properties (Internal)
+@implementation ICEProperties (Internal)
 
--(Ice_Properties*) initWithProperties:(const Ice::PropertiesPtr&)arg
+-(ICEProperties*) initWithProperties:(const Ice::PropertiesPtr&)arg
 {
     if(![super init])
     {
@@ -32,14 +32,14 @@
     [super dealloc];
 }
 
-+(Ice_Properties*) propertiesWithProperties:(const Ice::PropertiesPtr&)properties
++(ICEProperties*) propertiesWithProperties:(const Ice::PropertiesPtr&)properties
 {
-    return [[[Ice_Properties alloc] initWithProperties:properties] autorelease];
+    return [[[ICEProperties alloc] initWithProperties:properties] autorelease];
 }
 
 @end
 
-@implementation Ice_Properties
+@implementation ICEProperties
 
 -(NSString*) getProperty:(NSString*)key
 {
@@ -95,9 +95,9 @@
 {
     PROPERTIES->load([file UTF8String]);
 }
--(Ice_Properties*) clone
+-(ICEProperties*) clone
 {
-    return [Ice_Properties propertiesWithProperties:PROPERTIES->clone()];
+    return [ICEProperties propertiesWithProperties:PROPERTIES->clone()];
 }
 
 @end

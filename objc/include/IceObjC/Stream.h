@@ -9,15 +9,15 @@
 
 #include <Foundation/NSObject.h>
 
-@class Ice_Communicator;
+@class ICECommunicator;
 
-@interface Ice_InputStream : NSObject
+@interface ICEInputStream : NSObject
 {
     void* is__;
 }
 @end
 
-@interface Ice_OutputStream : NSObject
+@interface ICEOutputStream : NSObject
 {
     void* os__;
 }

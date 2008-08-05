@@ -11,20 +11,20 @@
 
 @implementation HelloPrx
 
-+(HelloPrx*) uncheckedCast:(Ice_ObjectPrx*)proxy
++(HelloPrx*) uncheckedCast:(ICEObjectPrx*)proxy
 {
     return (HelloPrx*)[self uncheckedCast__:proxy];
 }
 
-+(HelloPrx*) checkedCast:(Ice_ObjectPrx*)proxy
++(HelloPrx*) checkedCast:(ICEObjectPrx*)proxy
 {
     return (HelloPrx*)[self checkedCast__:proxy protocol:@protocol(HelloPrxProtocol) sliceId:@"::Demo::Hello"];
 }
 
 -(void) sayHello
 {
-    Ice_OutputStream* os = [self createOutputStream__];
-    Ice_InputStream* is;
+    ICEOutputStream* os = [self createOutputStream__];
+    ICEInputStream* is;
     BOOL ok = [self invoke__:@"sayHello" mode:Idempotent os:os is:&is];
     [is release];
 }

@@ -11,34 +11,34 @@
 #import <IceObjC/Properties.h>
 #import <IceObjC/Stream.h>
 
-@interface Ice_InitializationData : NSObject
+@interface ICEInitializationData : NSObject
 {
-    Ice_Properties* properties;
-    //Ice_Logger* logger;
-    //Ice_Stats* stats;
-    //Ice_StringConverter* stringConverter;
-    //Ice_WstringConverter* wstringConverter;
-    //Ice_ThreadNotification* threadHook;
+    ICEProperties* properties;
+    //ICELogger* logger;
+    //ICEStats* stats;
+    //ICEStringConverter* stringConverter;
+    //ICEWstringConverter* wstringConverter;
+    //ICEThreadNotification* threadHook;
 }
-@property(retain) Ice_Properties* properties;
+@property(retain) ICEProperties* properties;
 @end
 
-@interface Ice_Properties (Initialize)
-+(Ice_Properties*) create;
-+(Ice_Properties*) create:(int*)argc argv:(char*[])argv;
+@interface ICEProperties (Initialize)
++(ICEProperties*) create;
++(ICEProperties*) create:(int*)argc argv:(char*[])argv;
 @end
 
-@interface Ice_Communicator (Initialize)
-+(Ice_Communicator*) create;
-+(Ice_Communicator*) create:(Ice_InitializationData *)initData;
-+(Ice_Communicator*) create:(int*)argc argv:(char*[])argv;
-+(Ice_Communicator*) create:(int*)argc argv:(char*[])argv initData:(Ice_InitializationData *)initData;
+@interface ICECommunicator (Initialize)
++(ICECommunicator*) create;
++(ICECommunicator*) create:(ICEInitializationData *)initData;
++(ICECommunicator*) create:(int*)argc argv:(char*[])argv;
++(ICECommunicator*) create:(int*)argc argv:(char*[])argv initData:(ICEInitializationData *)initData;
 @end
 
-@interface Ice_InputStream (Initialize)
-+(Ice_InputStream*) createInputStream:(Ice_Communicator*)communicator buf:(unsigned char*)buf length:(int)length;
+@interface ICEInputStream (Initialize)
++(ICEInputStream*) createInputStream:(ICECommunicator*)communicator buf:(unsigned char*)buf length:(int)length;
 @end
 
-@interface Ice_OutputStream (Initialize)
-+(Ice_OutputStream*) createOutputStream:(Ice_Communicator*)communicator;
+@interface ICEOutputStream (Initialize)
++(ICEOutputStream*) createOutputStream:(ICECommunicator*)communicator;
 @end
