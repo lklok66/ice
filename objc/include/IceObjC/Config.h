@@ -15,6 +15,10 @@
 #import <Foundation/NSArray.h>
 #import <Foundation/NSDictionary.h>
 
+//
+// Don't forget to update the conversion methods from Util.h if the types below
+// are changed.
+//
 typedef unsigned char ICEByte;
 typedef short ICEShort;
 typedef int ICEInt;

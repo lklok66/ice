@@ -13,5 +13,6 @@
 
 @interface ICELogger (Internal)
 -(ICELogger*)initWithLogger:(const Ice::LoggerPtr&)arg;
+-(Ice::Logger*)logger__;
 +(ICELogger*)loggerWithLogger:(const Ice::LoggerPtr&)arg;
 @end

@@ -7,10 +7,11 @@
 //
 // **********************************************************************
 
-#import <IceObjC/Initialize.h>
+#import <IceObjC/InitializeI.h>
 #import <IceObjC/PropertiesI.h>
 #import <IceObjC/CommunicatorI.h>
 #import <IceObjC/StreamI.h>
+#import <IceObjC/LoggerI.h>
 
 #include <Ice/Initialize.h>
 
@@ -48,9 +49,20 @@ private:
 
 };
 
+@implementation ICEInitializationData (Internal)
+-(Ice::InitializationData)initializationData__
+{
+    Ice::InitializationData data;
+    data.properties = [properties properties__];
+    data.logger = [logger logger__];
+    return data;
+}
+@end
+
 @implementation ICEInitializationData
 
 @synthesize properties;
+@synthesize logger;
 
 @end
 
@@ -96,12 +108,18 @@ private:
 
 +(ICECommunicator*) create:(int*)argc argv:(char*[])argv initData:(ICEInitializationData*)initData
 { 
-    if(![NSThread isMultiThreaded])
+    if(![NSThread isMultiThreaded]) // Ensure sure Cocoa is multithreaded.
     {
-        [[[NSThread alloc] init] start]; // TODO: doesn't this leak?
+        NSThread* thread = [[NSThread alloc] init];
+        [thread start];
+        [thread release];
     }
 
-    Ice::InitializationData data; // TODO: convert initData to data
+    Ice::InitializationData data;
+    if(initData != nil)
+    {
+        data = [initData initializationData__];
+    }
     data.threadHook = new IceObjC::ThreadNotification();
     Ice::CommunicatorPtr communicator;
     if(argc != nil && argv != nil)
@@ -119,9 +137,11 @@ private:
 
 @implementation ICEInputStream (Initialize)
 
-+(ICEInputStream*) createInputStream:(ICECommunicator*)communicator buf:(unsigned char*)buf length:(int)length
++(ICEInputStream*) createInputStream:(ICECommunicator*)communicator data:(NSData*)data
 {
-    Ice::InputStreamPtr is = Ice::createInputStream([communicator communicator__], std::make_pair(buf, buf + length));
+    Ice::Byte* start = (Ice::Byte*)[data bytes];
+    Ice::Byte* end = (Ice::Byte*)[data bytes] + [data length];
+    Ice::InputStreamPtr is = Ice::createInputStream([communicator communicator__], std::make_pair(start, end));
     return [[[ICEInputStream alloc] initWithInputStream:is] autorelease];
 }
 

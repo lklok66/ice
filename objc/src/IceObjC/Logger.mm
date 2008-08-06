@@ -22,6 +22,11 @@
     return self;
 }
 
+-(Ice::Logger*) logger__
+{
+    return (Ice::Logger*)logger__;
+}
+
 -(void) dealloc
 {
     ((Ice::Logger*)logger__)->__decRef();

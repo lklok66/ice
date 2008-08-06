@@ -7,13 +7,10 @@
 //
 // **********************************************************************
 
-#import <IceObjC/Properties.h>
+#import <IceObjC/Initialize.h>
 
-#include <Ice/Properties.h>
+#include <Ice/Initialize.h>
 
-@interface ICEProperties (Internal)
--(ICEProperties*)initWithProperties:(const Ice::PropertiesPtr&)arg;
--(Ice::Properties*)properties__;
-+(ICEProperties*)propertiesWithProperties:(const Ice::PropertiesPtr&)arg;
+@interface ICEInitializationData (Internal)
+-(Ice::InitializationData)initializationData__;
 @end
-

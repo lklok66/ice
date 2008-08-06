@@ -25,6 +25,11 @@
     return self;
 }
 
+-(Ice::Properties*) properties__
+{
+    return (Ice::Properties*)properties__;
+}
+
 -(void) dealloc
 {
     PROPERTIES->__decRef();

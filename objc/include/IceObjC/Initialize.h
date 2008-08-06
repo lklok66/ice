@@ -20,14 +20,12 @@
 
 @interface ICEInitializationData : NSObject
 {
+@private
     ICEProperties* properties;
     ICELogger* logger;
-    //ICEStats* stats;
-    //ICEStringConverter* stringConverter;
-    //ICEWstringConverter* wstringConverter;
-    //ICEThreadNotification* threadHook;
 }
-@property(retain) ICEProperties* properties;
+@property(retain, nonatomic) ICEProperties* properties;
+@property(retain, nonatomic) ICELogger* logger;
 @end
 
 @interface ICEProperties (Initialize)
@@ -43,7 +41,7 @@
 @end
 
 @interface ICEInputStream (Initialize)
-+(ICEInputStream*) createInputStream:(ICECommunicator*)communicator buf:(unsigned char*)buf length:(int)length;
++(ICEInputStream*) createInputStream:(ICECommunicator*)communicator data:(NSData*)data;
 @end
 
 @interface ICEOutputStream (Initialize)

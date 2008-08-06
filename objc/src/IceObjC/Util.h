@@ -7,10 +7,9 @@
 //
 // **********************************************************************
 
+#include <IceObjC/Config.h>
+
 #import <Foundation/NSException.h>
-#import <Foundation/NSArray.h>
-#import <Foundation/NSDictionary.h>
-#import <Foundation/NSString.h>
 
 #include <exception>
 #include <vector>
@@ -23,6 +22,22 @@ NSException* rethrowObjCException(const std::exception& ex);
 // The toXXX methods don't auto release the returned object: the caller
 // must assume ownership of the returned object.
 //
+
+inline id toObjC(bool v)      { return [[NSNumber alloc] initWithBool:v]; }
+inline id toObjC(ICEByte v)   { return [[NSNumber alloc] initWithUnsignedChar:v]; }
+inline id toObjC(ICEShort v)  { return [[NSNumber alloc] initWithShort:v]; }
+inline id toObjC(ICEInt v)    { return [[NSNumber alloc] initWithInt:v]; }
+inline id toObjC(ICELong v)   { return [[NSNumber alloc] initWithLongLong:v]; }
+inline id toObjC(ICEFloat v)  { return [[NSNumber alloc] initWithFloat:v]; }
+inline id toObjC(ICEDouble v) { return [[NSNumber alloc] initWithDouble:v]; }
+
+inline void fromObjC(id object, bool& v)      { v = [object boolValue]; }
+inline void fromObjC(id object, ICEByte& v)   { v = [object unsignedCharValue]; }
+inline void fromObjC(id object, ICEShort& v)  { v = [object shortValue]; }
+inline void fromObjC(id object, ICEInt& v)    { v = [object intValue];}
+inline void fromObjC(id object, ICELong& v)   { v = [object longLongValue]; }
+inline void fromObjC(id object, ICEFloat& v)  { v = [object floatValue]; }
+inline void fromObjC(id object, ICEDouble& v) { v = [object doubleValue]; }
 
 inline id
 toObjC(const std::string& s)
@@ -49,7 +64,21 @@ toNSArray(const std::vector<T>& seq)
     return array;
 }
 
-template<typename T> void
+// template<typename T> void
+// fromNSArray(NSArray* array, std::vector<T>& seq)
+// {
+//     seq.reserve([array count]);
+//     NSEnumerator* enumerator = [array objectEnumerator]; 
+//     id obj = nil; 
+//     while((obj = [enumerator nextObject])) 
+//     { 
+//         T v;
+//         fromObjC(obj, v);
+//         seq.push_back(v);
+//     }
+// }
+
+template<typename T> std::vector<T>&
 fromNSArray(NSArray* array, std::vector<T>& seq)
 {
     seq.reserve([array count]);
@@ -61,6 +90,7 @@ fromNSArray(NSArray* array, std::vector<T>& seq)
         fromObjC(obj, v);
         seq.push_back(v);
     }
+    return seq;
 }
 
 template<typename K, typename V> NSDictionary*
