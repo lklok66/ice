@@ -130,11 +130,3 @@ fromNSString(NSString* s)
         return [s UTF8String];
     }
 }
-
-@interface ExceptionHandlerForwarder : NSProxy
-{
-    id forwardTo;
-}
--(id)init:(id)forwardTo;
--(void)forwardInvocation:(NSInvocation *)invocation;
-@end

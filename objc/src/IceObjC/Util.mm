@@ -80,37 +80,3 @@ rethrowCxxException(NSException* ex)
     }
 }
 
-@implementation ExceptionHandlerForwarder
--(id)init:(id)fwdTo
-{
-    forwardTo = [fwdTo retain];
-    return self;
-}
--(void) forwardInvocation:(NSInvocation *)invocation
-{
-    try
-    {
-        if([forwardTo respondsToSelector:[invocation selector]])
-        {
-            [invocation invokeWithTarget:forwardTo];
-        }
-        else
-        {
-            [super forwardInvocation:invocation];
-        }
-    }
-    catch(const std::exception& ex)
-    {
-        rethrowObjCException(ex);
-    }
-}
-- (NSMethodSignature *)methodSignatureForSelector:(SEL)sel
-{
-    return [forwardTo methodSignatureForSelector:sel];
-}
--(void)dealloc
-{
-    [forwardTo release];
-    [super dealloc];
-}
-@end

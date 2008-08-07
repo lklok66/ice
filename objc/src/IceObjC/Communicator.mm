@@ -32,7 +32,7 @@
     }
     communicator__ = arg.get();
     COMMUNICATOR->__incRef();
-    return [[ExceptionHandlerForwarder alloc] init:self];
+    return self;
 }
 
 -(Ice::Communicator*) communicator__
