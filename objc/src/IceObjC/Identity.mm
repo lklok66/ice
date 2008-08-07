@@ -7,9 +7,8 @@
 //
 // **********************************************************************
 
-#include <Foundation/NSString.h>
-
 #import <IceObjC/IdentityI.h>
+#import <IceObjC/Util.h>
 
 @implementation ICEIdentity (Internal)
 
@@ -27,8 +26,8 @@
 -(Ice::Identity) identity__
 {
     Ice::Identity ident;
-    ident.category = [category UTF8String];
-    ident.name = [name UTF8String];
+    ident.category = fromNSString(category);
+    ident.name = fromNSString(name);
     return ident;
 }
 

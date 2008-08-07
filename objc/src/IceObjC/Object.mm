@@ -7,11 +7,10 @@
 //
 // **********************************************************************
 
-#import <Foundation/NSException.h>
-
 #import <IceObjC/ObjectI.h>
 #import <IceObjC/StreamI.h>
 #import <IceObjC/CurrentI.h>
+#import <IceObjC/Util.h>
 
 #include <Ice/Object.h>
 #include <Ice/IncomingAsync.h>
@@ -36,23 +35,30 @@ ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& cb,
                  const std::pair<const Ice::Byte*, const Ice::Byte*>& inParams,
                  const Ice::Current& current)
 {
-    Ice::InputStreamPtr s = Ice::createInputStream(current.adapter->getCommunicator(), inParams);
-    ICEInputStream* is = [[ICEInputStream alloc] initWithInputStream:s];
+    ICEInputStream* is;
     ICEOutputStream* os;
+    {
+        Ice::InputStreamPtr s = Ice::createInputStream(current.adapter->getCommunicator(), inParams);
+        is = [[ICEInputStream alloc] initWithInputStream:s];
+    }
+    ICECurrent* c = [[ICECurrent alloc] initWithCurrent:current];
+    BOOL ok;
     @try
     {
-        ICECurrent* c = [[ICECurrent alloc] initWithCurrent:current]; // TODO: create from cached current.
-        BOOL ok = [_servant dispatch__:c is:is os:&os];
-        [c release];
-        std::vector<Ice::Byte> outParams;
-        [os os__]->finished(outParams);
-        [os release];
-        cb->ice_response(ok, std::make_pair(&outParams[0], &outParams[0] + outParams.size()));
-    } 
+        ok = [_servant dispatch__:c is:is os:&os];
+    }
     @catch(NSException* ex)
     {
-        //rethrowCxxException(ex);
+        rethrowCxxException(ex);
     }
+    @finally
+    {
+        [c release];
+    }
+    std::vector<Ice::Byte> outParams;
+    [os os__]->finished(outParams);
+    [os release];
+    cb->ice_response(ok, std::make_pair(&outParams[0], &outParams[0] + outParams.size()));
 }
 
 virtual ICEObject*
@@ -120,8 +126,15 @@ ICEObject* _servant;
 
 -(ICEOutputStream*) createOutputStream__:(ICECurrent*)current
 {
-    Ice::OutputStreamPtr os = Ice::createOutputStream([current current__]->adapter->getCommunicator());
-    return [[ICEOutputStream alloc] initWithOutputStream:os.get()];
+    try
+    {
+        Ice::OutputStreamPtr os = Ice::createOutputStream([current current__]->adapter->getCommunicator());
+        return [[ICEOutputStream alloc] initWithOutputStream:os.get()];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(BOOL) ice_isA___:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream**)os
@@ -142,11 +155,25 @@ ICEObject* _servant;
 }
 -(BOOL) ice_isA:(NSString*)typeId current:(ICECurrent*)current
 {
-    return OBJECT->ice_isA([typeId UTF8String]);
+    try
+    {
+        return OBJECT->ice_isA(fromNSString(typeId));
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 -(void) ice_ping:(ICECurrent*)current
 {
-    OBJECT->ice_ping();
+    try
+    {
+        OBJECT->ice_ping();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 -(BOOL) dispatch__:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream**)os
 {

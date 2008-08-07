@@ -54,154 +54,346 @@
 
 -(ICECommunicator*) getCommunicator
 {
-    return [ICECommunicator communicatorWithCommunicator:OBJECTADAPTER->getCommunicator()];
+    try
+    {
+        return [ICECommunicator communicatorWithCommunicator:OBJECTADAPTER->getCommunicator()];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(NSString*) getName
 {
-    return [NSString stringWithUTF8String:OBJECTADAPTER->getName().c_str()];
+    try
+    {
+        return [toNSString(OBJECTADAPTER->getName()) autorelease];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(void) activate
 {
-    OBJECTADAPTER->activate();
+    try
+    {
+        OBJECTADAPTER->activate();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(void) hold
 {
-    OBJECTADAPTER->hold();
+    try
+    {
+        OBJECTADAPTER->hold();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(void) waitForHold
 {
-    OBJECTADAPTER->waitForHold();
+    try
+    {
+        OBJECTADAPTER->waitForHold();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(void) deactivate
 {
-    OBJECTADAPTER->deactivate();
+    try
+    {
+        OBJECTADAPTER->deactivate();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(void) waitForDeactivate
 {
-    OBJECTADAPTER->waitForDeactivate();
+    try
+    {
+        OBJECTADAPTER->waitForDeactivate();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(BOOL) isDeactivated
 {
-    return OBJECTADAPTER->isDeactivated();
+    try
+    {
+        return OBJECTADAPTER->isDeactivated();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(void) destroy
 {
-    OBJECTADAPTER->destroy();
+    try
+    {
+        OBJECTADAPTER->destroy();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(id<ICEObjectPrx>) add:(ICEObject*)servant identity:(ICEIdentity*)ident
 {
-    [servant retain];
-    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->add([servant object__], [ident identity__])];
+    try
+    {
+        [servant retain];
+        return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->add([servant object__], [ident identity__])];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(id<ICEObjectPrx>) addFacet:(ICEObject*)servant identity:(ICEIdentity*)ident facet:(NSString*)facet
 {
-    [servant retain];
-    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->addFacet([servant object__], [ident identity__],
-                                                                          [facet UTF8String])];
+    try
+    {
+        [servant retain];
+        return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->addFacet([servant object__], [ident identity__],
+                                                                              fromNSString(facet))];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(id<ICEObjectPrx>) addWithUUID:(ICEObject*)servant
 {
-    [servant retain];
-    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->addWithUUID([servant object__])];
+    try
+    {
+        [servant retain];
+        return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->addWithUUID([servant object__])];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(id<ICEObjectPrx>) addFacetWithUUID:(ICEObject*)servant facet:(NSString*)facet
 {
-    [servant retain];
-    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->addFacetWithUUID([servant object__],
-                                                                                  [facet UTF8String])];
+    try
+    {
+        [servant retain];
+        return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->addFacetWithUUID([servant object__],
+                                                                                      fromNSString(facet))];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(ICEObject*) remove:(ICEIdentity*)ident
 {
-    Ice::ObjectPtr wrapper = OBJECTADAPTER->remove([ident identity__]);
-    ICEObject* servant = IceObjC::ServantWrapperPtr::dynamicCast(wrapper)->getServant();
-    return [servant autorelease];
+    try
+    {
+        Ice::ObjectPtr wrapper = OBJECTADAPTER->remove([ident identity__]);
+        ICEObject* servant = IceObjC::ServantWrapperPtr::dynamicCast(wrapper)->getServant();
+        return [servant autorelease];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 -(ICEObject*) removeFacet:(ICEIdentity*)ident facet:(NSString*)facet
 {
-    Ice::ObjectPtr wrapper = OBJECTADAPTER->removeFacet([ident identity__], [facet UTF8String]);
-    ICEObject* servant = IceObjC::ServantWrapperPtr::dynamicCast(wrapper)->getServant();
-    return [servant autorelease];
+    try
+    {
+        Ice::ObjectPtr wrapper = OBJECTADAPTER->removeFacet([ident identity__], fromNSString(facet));
+        ICEObject* servant = IceObjC::ServantWrapperPtr::dynamicCast(wrapper)->getServant();
+        return [servant autorelease];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(NSDictionary*) removeAllFacets:(ICEIdentity*)ident
 {
-    Ice::FacetMap wrappers = OBJECTADAPTER->removeAllFacets([ident identity__]);
-    NSMutableDictionary* servants = [[NSMutableDictionary alloc] initWithCapacity:wrappers.size()];
-    for(Ice::FacetMap::const_iterator p = wrappers.begin(); p != wrappers.end(); ++p)
+    try
     {
-        NSObject* key = toObjC(p->first);
-        NSObject* value = IceObjC::ServantWrapperPtr::dynamicCast(p->second)->getServant();
-        [servants setObject:value forKey:key];
-        [key release];
-        [value release];
+        Ice::FacetMap wrappers = OBJECTADAPTER->removeAllFacets([ident identity__]);
+        NSMutableDictionary* servants = [[NSMutableDictionary alloc] initWithCapacity:wrappers.size()];
+        for(Ice::FacetMap::const_iterator p = wrappers.begin(); p != wrappers.end(); ++p)
+        {
+            NSObject* key = toObjC(p->first);
+            NSObject* value = IceObjC::ServantWrapperPtr::dynamicCast(p->second)->getServant();
+            [servants setObject:value forKey:key];
+            [key release];
+            [value release];
+        }
+        return [servants autorelease];
     }
-    return [servants autorelease];
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(ICEObject*) find:(ICEIdentity*)ident
 {
-    return IceObjC::ServantWrapperPtr::dynamicCast(OBJECTADAPTER->find([ident identity__]))->getServant();
+    try
+    {
+        return IceObjC::ServantWrapperPtr::dynamicCast(OBJECTADAPTER->find([ident identity__]))->getServant();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(ICEObject*) findFacet:(ICEIdentity*)ident facet:(NSString*)facet
 {
-    Ice::ObjectPtr wrapper = OBJECTADAPTER->findFacet([ident identity__], [facet UTF8String]);
-    return IceObjC::ServantWrapperPtr::dynamicCast(wrapper)->getServant();
+    try
+    {
+        Ice::ObjectPtr wrapper = OBJECTADAPTER->findFacet([ident identity__], fromNSString(facet));
+        return IceObjC::ServantWrapperPtr::dynamicCast(wrapper)->getServant();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(NSDictionary*) findAllFacets:(ICEIdentity*)ident
 {
-    Ice::FacetMap wrappers = OBJECTADAPTER->findAllFacets([ident identity__]);
-    NSMutableDictionary* servants = [[NSMutableDictionary alloc] initWithCapacity:wrappers.size()];
-    for(Ice::FacetMap::const_iterator p = wrappers.begin(); p != wrappers.end(); ++p)
+    try
     {
-        [servants setObject:IceObjC::ServantWrapperPtr::dynamicCast(p->second)->getServant() forKey:toObjC(p->first)];
+        Ice::FacetMap wrappers = OBJECTADAPTER->findAllFacets([ident identity__]);
+        NSMutableDictionary* servants = [[NSMutableDictionary alloc] initWithCapacity:wrappers.size()];
+        for(Ice::FacetMap::const_iterator p = wrappers.begin(); p != wrappers.end(); ++p)
+        {
+            [servants setObject:IceObjC::ServantWrapperPtr::dynamicCast(p->second)->getServant() forKey:toObjC(p->first)];
+        }
+        return servants;
     }
-    return servants;
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(ICEObject*) findByProxy:(id<ICEObjectPrx>)proxy
 {
-    Ice::ObjectPrx prx = [(ICEObjectPrx*)proxy objectPrx__];
-    return IceObjC::ServantWrapperPtr::dynamicCast(OBJECTADAPTER->findByProxy(prx))->getServant();
+    try
+    {
+        Ice::ObjectPrx prx = [(ICEObjectPrx*)proxy objectPrx__];
+        return IceObjC::ServantWrapperPtr::dynamicCast(OBJECTADAPTER->findByProxy(prx))->getServant();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(id<ICEObjectPrx>) createProxy:(ICEIdentity*)ident
 {
-    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->createProxy([ident identity__])];
+    try
+    {
+        return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->createProxy([ident identity__])];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(id<ICEObjectPrx>) createDirectProxy:(ICEIdentity*)ident
 {
-    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->createDirectProxy([ident identity__])];
+    try
+    {
+        return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->createDirectProxy([ident identity__])];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(id<ICEObjectPrx>) createIndirectProxy:(ICEIdentity*)ident
 {
-    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->createIndirectProxy([ident identity__])];
+    try
+    {
+        return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->createIndirectProxy([ident identity__])];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(void) setLocator:(id<ICELocatorPrx>)loc
 {
-    OBJECTADAPTER->setLocator(Ice::LocatorPrx::uncheckedCast(Ice::ObjectPrx([(ICEObjectPrx*)loc objectPrx__])));
+    try
+    {
+        OBJECTADAPTER->setLocator(Ice::LocatorPrx::uncheckedCast(Ice::ObjectPrx([(ICEObjectPrx*)loc objectPrx__])));
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(void) refreshPublishedEndpoints
 {
-    OBJECTADAPTER->refreshPublishedEndpoints();
+    try
+    {
+        OBJECTADAPTER->refreshPublishedEndpoints();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 @end

@@ -8,6 +8,9 @@
 // **********************************************************************
 
 #import <IceObjC/LoggerI.h>
+#import <IceObjC/Util.h>
+
+#define LOGGER ((Ice::Logger*)logger__)
 
 @implementation ICELogger (Internal)
 
@@ -18,7 +21,7 @@
         return nil;
     }
     logger__ = arg.get();
-    ((Ice::Logger*)logger__)->__incRef();
+    LOGGER->__incRef();
     return self;
 }
 
@@ -29,7 +32,7 @@
 
 -(void) dealloc
 {
-    ((Ice::Logger*)logger__)->__decRef();
+    LOGGER->__decRef();
     logger__ = 0;
     [super dealloc];
 }
@@ -44,18 +47,46 @@
 @implementation ICELogger
 -(void) print:(NSString*)message
 {
-    ((Ice::Logger*)logger__)->print([message UTF8String]);
+    try
+    {
+        LOGGER->print(fromNSString(message));
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 -(void) trace:(NSString*)category message:(NSString*)message
 {
-    ((Ice::Logger*)logger__)->trace([category UTF8String], [message UTF8String]);
+    try
+    {
+        LOGGER->trace(fromNSString(category), fromNSString(message));
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 -(void) warning:(NSString*)message
 {
-    ((Ice::Logger*)logger__)->warning([message UTF8String]);
+    try
+    {
+        LOGGER->warning(fromNSString(message));
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 -(void) error:(NSString*)message
 {
-    ((Ice::Logger*)logger__)->error([message UTF8String]);
+    try
+    {
+        LOGGER->error(fromNSString(message));
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 @end

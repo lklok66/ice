@@ -7,10 +7,458 @@
 //
 // **********************************************************************
 
-#import <IceObjC/Exception.h>
+#import <IceObjC/ExceptionI.h>
+#import <IceObjC/LocalException.h>
+#import <IceObjC/IdentityI.h>
+#import <IceObjC/Util.h>
+
+#import <Foundation/NSPathUtilities.h>
+
+#include <Ice/LocalException.h>
+
+@implementation ICELocalException (Internal)
+-(id)initWithLocalException:(const Ice::LocalException&)ex
+{
+    if(![super initWithName:[self ice_name] reason:nil userInfo:nil])
+    {
+        return nil;
+    }
+    if(ex.ice_file())
+    {
+        file = [[[NSString alloc] initWithUTF8String:ex.ice_file()] lastPathComponent];
+        line = ex.ice_line();
+    }
+    return self;
+}
+-(void)rethrowCxx__
+{
+    NSAssert(false, @"rethrowCxx__ must be overriden");
+}
++(id)localExceptionWithLocalException:(const Ice::LocalException&)ex
+{
+    return [[[self alloc] initWithLocalException:ex] autorelease];
+}
+@end
 
 @implementation ICELocalException
+-(id)init:(NSString*)f line:(int)l
+{
+    if(![super initWithName:[self ice_name] reason:nil userInfo:nil])
+    {
+        return nil;
+    }
+    file = [f copy];
+    line = l;
+    return self;
+}
++(id)localException:(NSString*)file line:(int)line
+{
+    return [[[self alloc] init:file line:line] autorelease];
+}
+-(NSString*)description
+{
+    try
+    {
+        [self rethrowCxx__];
+        return @""; // Keep the compiler happy.
+    }
+    catch(const Ice::LocalException& ex)
+    {
+        std::ostringstream os;
+        os << ex;
+        std::string str = os.str();
+        if(str.find("../../../cpp/") == 0)
+        {
+            str = str.substr(13);
+        }
+        return [NSString stringWithUTF8String:str.c_str()];
+    }
+}
+-(NSString*)ice_name
+{
+    return @"Ice::LocalException";
+}
 @end
 
 @implementation ICEUserException
+-(NSString*)ice_name
+{
+    return @"Ice::UserException";
+}
+@end
+
+@implementation ICEInitializationException (Internal)
+-(id)initWithLocalException:(const Ice::LocalException&)ex
+{
+    if(![super initWithLocalException:ex])
+    {
+        return nil;
+    }
+    NSAssert(dynamic_cast<const Ice::InitializationException*>(&ex), @"invalid local exception type");
+    const Ice::InitializationException& localEx = dynamic_cast<const Ice::InitializationException&>(ex);
+    _objc_reason = toNSString(localEx.reason);
+    return self;
+}
+@end
+
+@implementation ICEPluginInitializationException (Internal)
+-(id)initWithLocalException:(const Ice::LocalException&)ex
+{
+    if(![super initWithLocalException:ex])
+    {
+        return nil;
+    }
+    NSAssert(dynamic_cast<const Ice::PluginInitializationException*>(&ex), @"invalid local exception type");
+    const Ice::PluginInitializationException& localEx = dynamic_cast<const Ice::PluginInitializationException&>(ex);
+    _objc_reason = [[NSString alloc] initWithUTF8String:localEx.reason.c_str()];
+    return self;
+}
+@end
+
+@implementation ICEAlreadyRegisteredException (Internal)
+-(id)initWithLocalException:(const Ice::LocalException&)ex
+{
+    if(![super initWithLocalException:ex])
+    {
+        return nil;
+    }
+    NSAssert(dynamic_cast<const Ice::AlreadyRegisteredException*>(&ex), @"invalid local exception type");
+    const Ice::AlreadyRegisteredException& localEx = dynamic_cast<const Ice::AlreadyRegisteredException&>(ex);
+    kindOfObject = toNSString(localEx.kindOfObject);
+    _objc_id = [[NSString alloc] initWithUTF8String:localEx.id.c_str()];
+    return self;
+}
+@end
+
+@implementation ICENotRegisteredException (Internal)
+-(id)initWithLocalException:(const Ice::LocalException&)ex
+{
+    if(![super initWithLocalException:ex])
+    {
+        return nil;
+    }
+    NSAssert(dynamic_cast<const Ice::NotRegisteredException*>(&ex), @"invalid local exception type");
+    const Ice::NotRegisteredException& localEx = dynamic_cast<const Ice::NotRegisteredException&>(ex);
+    kindOfObject = toNSString(localEx.kindOfObject);
+    _objc_id = [[NSString alloc] initWithUTF8String:localEx.id.c_str()];
+    return self;
+}
+@end
+
+@implementation ICETwowayOnlyException (Internal)
+-(id)initWithLocalException:(const Ice::LocalException&)ex
+{
+    if(![super initWithLocalException:ex])
+    {
+        return nil;
+    }
+    NSAssert(dynamic_cast<const Ice::TwowayOnlyException*>(&ex), @"invalid local exception type");
+    const Ice::TwowayOnlyException& localEx = dynamic_cast<const Ice::TwowayOnlyException&>(ex);
+    operation = toNSString(localEx.operation);
+    return self;
+}
+@end
+
+@implementation ICEUnknownException (Internal)
+-(id)initWithLocalException:(const Ice::LocalException&)ex
+{
+    if(![super initWithLocalException:ex])
+    {
+        return nil;
+    }
+    NSAssert(dynamic_cast<const Ice::UnknownException*>(&ex), @"invalid local exception type");
+    const Ice::UnknownException& localEx = dynamic_cast<const Ice::UnknownException&>(ex);
+    unknown = [[NSString alloc] initWithUTF8String:localEx.unknown.c_str()];
+    return self;
+}
+@end
+
+@implementation ICEObjectAdapterDeactivatedException (Internal)
+-(id)initWithLocalException:(const Ice::LocalException&)ex
+{
+    if(![super initWithLocalException:ex])
+    {
+        return nil;
+    }
+    NSAssert(dynamic_cast<const Ice::ObjectAdapterDeactivatedException*>(&ex), @"invalid local exception type");
+    const Ice::ObjectAdapterDeactivatedException& localEx = dynamic_cast<const Ice::ObjectAdapterDeactivatedException&>(ex);
+    _objc_name = toNSString(localEx.name);
+    return self;
+}
+@end
+
+@implementation ICEObjectAdapterIdInUseException (Internal)
+-(id)initWithLocalException:(const Ice::LocalException&)ex
+{
+    if(![super initWithLocalException:ex])
+    {
+        return nil;
+    }
+    NSAssert(dynamic_cast<const Ice::ObjectAdapterIdInUseException*>(&ex), @"invalid local exception type");
+    const Ice::ObjectAdapterIdInUseException& localEx = dynamic_cast<const Ice::ObjectAdapterIdInUseException&>(ex);
+    _objc_id = [[NSString alloc] initWithUTF8String:localEx.id.c_str()];
+    return self;
+}
+@end
+
+@implementation ICENoEndpointException (Internal)
+-(id)initWithLocalException:(const Ice::LocalException&)ex
+{
+    if(![super initWithLocalException:ex])
+    {
+        return nil;
+    }
+    NSAssert(dynamic_cast<const Ice::NoEndpointException*>(&ex), @"invalid local exception type");
+    const Ice::NoEndpointException& localEx = dynamic_cast<const Ice::NoEndpointException&>(ex);
+    proxy = toNSString(localEx.proxy);
+    return self;
+}
+@end
+
+@implementation ICEEndpointParseException (Internal)
+-(id)initWithLocalException:(const Ice::LocalException&)ex
+{
+    if(![super initWithLocalException:ex])
+    {
+        return nil;
+    }
+    NSAssert(dynamic_cast<const Ice::EndpointParseException*>(&ex), @"invalid local exception type");
+    const Ice::EndpointParseException& localEx = dynamic_cast<const Ice::EndpointParseException&>(ex);
+    str = [[NSString alloc] initWithUTF8String:localEx.str.c_str()];
+    return self;
+}
+@end
+
+@implementation ICEEndpointSelectionTypeParseException (Internal)
+-(id)initWithLocalException:(const Ice::LocalException&)ex
+{
+    if(![super initWithLocalException:ex])
+    {
+        return nil;
+    }
+    NSAssert(dynamic_cast<const Ice::EndpointSelectionTypeParseException*>(&ex), @"invalid local exception type");
+    const Ice::EndpointSelectionTypeParseException& localEx = dynamic_cast<const Ice::EndpointSelectionTypeParseException&>(ex);
+    str = toNSString(localEx.str);
+    return self;
+}
+@end
+
+@implementation ICEIdentityParseException (Internal)
+-(id)initWithLocalException:(const Ice::LocalException&)ex
+{
+    if(![super initWithLocalException:ex])
+    {
+        return nil;
+    }
+    NSAssert(dynamic_cast<const Ice::IdentityParseException*>(&ex), @"invalid local exception type");
+    const Ice::IdentityParseException& localEx = dynamic_cast<const Ice::IdentityParseException&>(ex);
+    str = [[NSString alloc] initWithUTF8String:localEx.str.c_str()];
+    return self;
+}
+@end
+
+@implementation ICEProxyParseException (Internal)
+-(id)initWithLocalException:(const Ice::LocalException&)ex
+{
+    if(![super initWithLocalException:ex])
+    {
+        return nil;
+    }
+    NSAssert(dynamic_cast<const Ice::ProxyParseException*>(&ex), @"invalid local exception type");
+    const Ice::ProxyParseException& localEx = dynamic_cast<const Ice::ProxyParseException&>(ex);
+    str = toNSString(localEx.str);
+    return self;
+}
+@end
+
+@implementation ICEIllegalIdentityException (Internal)
+-(id)initWithLocalException:(const Ice::LocalException&)ex
+{
+    if(![super initWithLocalException:ex])
+    {
+        return nil;
+    }
+    NSAssert(dynamic_cast<const Ice::IllegalIdentityException*>(&ex), @"invalid local exception type");
+    const Ice::IllegalIdentityException& localEx = dynamic_cast<const Ice::IllegalIdentityException&>(ex);
+    _objc_id = [[ICEIdentity alloc] initWithIdentity:localEx.id];
+    return self;
+}
+@end
+
+@implementation ICERequestFailedException (Internal)
+-(id)initWithLocalException:(const Ice::LocalException&)ex
+{
+    if(![super initWithLocalException:ex])
+    {
+        return nil;
+    }
+    NSAssert(dynamic_cast<const Ice::RequestFailedException*>(&ex), @"invalid local exception type");
+    const Ice::RequestFailedException& localEx = dynamic_cast<const Ice::RequestFailedException&>(ex);
+    _objc_id = [[ICEIdentity alloc] initWithIdentity:localEx.id];
+    facet = [[NSString alloc] initWithUTF8String:localEx.facet.c_str()];
+    operation = [[NSString alloc] initWithUTF8String:localEx.operation.c_str()];
+    return self;
+}
+@end
+
+@implementation ICESyscallException (Internal)
+-(id)initWithLocalException:(const Ice::LocalException&)ex
+{
+    if(![super initWithLocalException:ex])
+    {
+        return nil;
+    }
+    NSAssert(dynamic_cast<const Ice::SyscallException*>(&ex), @"invalid local exception type");
+    const Ice::SyscallException& localEx = dynamic_cast<const Ice::SyscallException&>(ex);
+    error = localEx.error;
+    return self;
+}
+@end
+
+@implementation ICEFileException (Internal)
+-(id)initWithLocalException:(const Ice::LocalException&)ex
+{
+    if(![super initWithLocalException:ex])
+    {
+        return nil;
+    }
+    NSAssert(dynamic_cast<const Ice::FileException*>(&ex), @"invalid local exception type");
+    const Ice::FileException& localEx = dynamic_cast<const Ice::FileException&>(ex);
+    path = toNSString(localEx.path);
+    return self;
+}
+@end
+
+@implementation ICEDNSException (Internal)
+-(id)initWithLocalException:(const Ice::LocalException&)ex
+{
+    if(![super initWithLocalException:ex])
+    {
+        return nil;
+    }
+    NSAssert(dynamic_cast<const Ice::DNSException*>(&ex), @"invalid local exception type");
+    const Ice::DNSException& localEx = dynamic_cast<const Ice::DNSException&>(ex);
+    error = localEx.error;
+    host = [[NSString alloc] initWithUTF8String:localEx.host.c_str()];
+    return self;
+}
+@end
+
+@implementation ICEProtocolException (Internal)
+-(id)initWithLocalException:(const Ice::LocalException&)ex
+{
+    if(![super initWithLocalException:ex])
+    {
+        return nil;
+    }
+    NSAssert(dynamic_cast<const Ice::ProtocolException*>(&ex), @"invalid local exception type");
+    const Ice::ProtocolException& localEx = dynamic_cast<const Ice::ProtocolException&>(ex);
+    _objc_reason = toNSString(localEx.reason);
+    return self;
+}
+@end
+
+@implementation ICEBadMagicException (Internal)
+-(id)initWithLocalException:(const Ice::LocalException&)ex
+{
+    if(![super initWithLocalException:ex])
+    {
+        return nil;
+    }
+    NSAssert(dynamic_cast<const Ice::BadMagicException*>(&ex), @"invalid local exception type");
+    const Ice::BadMagicException& localEx = dynamic_cast<const Ice::BadMagicException&>(ex);
+    badMagic = toNSArray(localEx.badMagic);
+    return self;
+}
+@end
+
+@implementation ICEUnsupportedProtocolException (Internal)
+-(id)initWithLocalException:(const Ice::LocalException&)ex
+{
+    if(![super initWithLocalException:ex])
+    {
+        return nil;
+    }
+    NSAssert(dynamic_cast<const Ice::UnsupportedProtocolException*>(&ex), @"invalid local exception type");
+    const Ice::UnsupportedProtocolException& localEx = dynamic_cast<const Ice::UnsupportedProtocolException&>(ex);
+    badMajor = localEx.badMajor;
+    badMinor = localEx.badMinor;
+    major = localEx.major;
+    minor = localEx.minor;
+    return self;
+}
+@end
+
+@implementation ICEUnsupportedEncodingException (Internal)
+-(id)initWithLocalException:(const Ice::LocalException&)ex
+{
+    if(![super initWithLocalException:ex])
+    {
+        return nil;
+    }
+    NSAssert(dynamic_cast<const Ice::UnsupportedEncodingException*>(&ex), @"invalid local exception type");
+    const Ice::UnsupportedEncodingException& localEx = dynamic_cast<const Ice::UnsupportedEncodingException&>(ex);
+    badMajor = localEx.badMajor;
+    badMinor = localEx.badMinor;
+    major = localEx.major;
+    minor = localEx.minor;
+    return self;
+}
+@end
+
+@implementation ICENoObjectFactoryException (Internal)
+-(id)initWithLocalException:(const Ice::LocalException&)ex
+{
+    if(![super initWithLocalException:ex])
+    {
+        return nil;
+    }
+    NSAssert(dynamic_cast<const Ice::NoObjectFactoryException*>(&ex), @"invalid local exception type");
+    const Ice::NoObjectFactoryException& localEx = dynamic_cast<const Ice::NoObjectFactoryException&>(ex);
+    type = [[NSString alloc] initWithUTF8String:localEx.type.c_str()];
+    return self;
+}
+@end
+
+@implementation ICEUnexpectedObjectException (Internal)
+-(id)initWithLocalException:(const Ice::LocalException&)ex
+{
+    if(![super initWithLocalException:ex])
+    {
+        return nil;
+    }
+    NSAssert(dynamic_cast<const Ice::UnexpectedObjectException*>(&ex), @"invalid local exception type");
+    const Ice::UnexpectedObjectException& localEx = dynamic_cast<const Ice::UnexpectedObjectException&>(ex);
+    type = toNSString(localEx.type);
+    expectedType = [[NSString alloc] initWithUTF8String:localEx.expectedType.c_str()];
+    return self;
+}
+@end
+
+@implementation ICEFeatureNotSupportedException (Internal)
+-(id)initWithLocalException:(const Ice::LocalException&)ex
+{
+    if(![super initWithLocalException:ex])
+    {
+        return nil;
+    }
+    NSAssert(dynamic_cast<const Ice::FeatureNotSupportedException*>(&ex), @"invalid local exception type");
+    const Ice::FeatureNotSupportedException& localEx = dynamic_cast<const Ice::FeatureNotSupportedException&>(ex);
+    unsupportedFeature = toNSString(localEx.unsupportedFeature);
+    return self;
+}
+@end
+
+@implementation ICESecurityException (Internal)
+-(id)initWithLocalException:(const Ice::LocalException&)ex
+{
+    if(![super initWithLocalException:ex])
+    {
+        return nil;
+    }
+    NSAssert(dynamic_cast<const Ice::SecurityException*>(&ex), @"invalid local exception type");
+    const Ice::SecurityException& localEx = dynamic_cast<const Ice::SecurityException&>(ex);
+    _objc_reason = toNSString(localEx.reason);
+    return self;
+}
 @end

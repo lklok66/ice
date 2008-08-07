@@ -12,6 +12,7 @@
 #import <IceObjC/CommunicatorI.h>
 #import <IceObjC/StreamI.h>
 #import <IceObjC/LoggerI.h>
+#import <IceObjC/Util.h>
 
 #include <Ice/Initialize.h>
 
@@ -75,16 +76,24 @@ private:
 
 +(ICEProperties*) create:(int*)argc argv:(char*[])argv
 { 
-    Ice::PropertiesPtr properties;
-    if(argc != nil && argv != nil)
+    try
     {
-        properties = Ice::createProperties(*argc, argv);
+        Ice::PropertiesPtr properties;
+        if(argc != nil && argv != nil)
+        {
+            properties = Ice::createProperties(*argc, argv);
+        }
+        else
+        {
+            properties = Ice::createProperties();
+        }
+        return [ICEProperties propertiesWithProperties:properties];
     }
-    else
+    catch(const std::exception& ex)
     {
-        properties = Ice::createProperties();
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
     }
-    return [ICEProperties propertiesWithProperties:properties];
 }
 
 @end
@@ -107,30 +116,38 @@ private:
 }
 
 +(ICECommunicator*) create:(int*)argc argv:(char*[])argv initData:(ICEInitializationData*)initData
-{ 
+{
     if(![NSThread isMultiThreaded]) // Ensure sure Cocoa is multithreaded.
     {
         NSThread* thread = [[NSThread alloc] init];
         [thread start];
         [thread release];
     }
-
-    Ice::InitializationData data;
-    if(initData != nil)
+    
+    try
     {
-        data = [initData initializationData__];
+        Ice::InitializationData data;
+        if(initData != nil)
+        {
+            data = [initData initializationData__];
+        }
+        data.threadHook = new IceObjC::ThreadNotification();
+        Ice::CommunicatorPtr communicator;
+        if(argc != nil && argv != nil)
+        {
+            communicator = Ice::initialize(*argc, argv, data);
+        }
+        else
+        {
+            communicator = Ice::initialize(data);
+        }
+        return [ICECommunicator communicatorWithCommunicator:communicator];
     }
-    data.threadHook = new IceObjC::ThreadNotification();
-    Ice::CommunicatorPtr communicator;
-    if(argc != nil && argv != nil)
+    catch(const std::exception& ex)
     {
-        communicator = Ice::initialize(*argc, argv, data);
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
     }
-    else
-    {
-        communicator = Ice::initialize(data);
-    }
-    return [ICECommunicator communicatorWithCommunicator:communicator];
 }
 
 @end
@@ -139,10 +156,18 @@ private:
 
 +(ICEInputStream*) createInputStream:(ICECommunicator*)communicator data:(NSData*)data
 {
-    Ice::Byte* start = (Ice::Byte*)[data bytes];
-    Ice::Byte* end = (Ice::Byte*)[data bytes] + [data length];
-    Ice::InputStreamPtr is = Ice::createInputStream([communicator communicator__], std::make_pair(start, end));
-    return [[[ICEInputStream alloc] initWithInputStream:is] autorelease];
+    try
+    {
+        Ice::Byte* start = (Ice::Byte*)[data bytes];
+        Ice::Byte* end = (Ice::Byte*)[data bytes] + [data length];
+        Ice::InputStreamPtr is = Ice::createInputStream([communicator communicator__], std::make_pair(start, end));
+        return [[[ICEInputStream alloc] initWithInputStream:is] autorelease];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 @end
@@ -151,8 +176,16 @@ private:
 
 +(ICEOutputStream*) createOutputStream:(ICECommunicator*)communicator
 {
-    Ice::OutputStreamPtr os = Ice::createOutputStream([communicator communicator__]);
-    return [[[ICEOutputStream alloc] initWithOutputStream:os] autorelease];
+    try
+    {
+        Ice::OutputStreamPtr os = Ice::createOutputStream([communicator communicator__]);
+        return [[[ICEOutputStream alloc] initWithOutputStream:os] autorelease];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 @end

@@ -48,102 +48,261 @@
 
 -(ICECommunicator*) communicator
 {
-    return [ICECommunicator communicatorWithCommunicator:IS->communicator()];
+    try
+    {
+        return [ICECommunicator communicatorWithCommunicator:IS->communicator()];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(void) sliceObjects:(BOOL)b
 {
-    IS->sliceObjects(b);
+    try
+    {
+        IS->sliceObjects(b);
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(BOOL)readBool
 {
-    return IS->readBool();
+    try
+    {
+        return IS->readBool();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return FALSE; // Keep the compiler happy.
+    }
 }
 
 -(NSArray*) readBoolSeq
 {
-    return toNSArray(IS->readBoolSeq());
+    try
+    {
+        return toNSArray(IS->readBoolSeq());
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(ICEByte) readByte
 {
-    return IS->readByte();
+    try
+    {
+        return IS->readByte();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return 0; // Keep the compiler happy.
+    }
 }
 
 -(NSArray*) readByteSeq
 {
-    return toNSArray(IS->readByteSeq());
+    try
+    {
+        return toNSArray(IS->readByteSeq());
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(ICEShort) readShort
 {
-    return IS->readShort();
+    try
+    {
+        return IS->readShort();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return 0; // Keep the compiler happy.
+    }
 }
 
 -(NSArray*) readShortSeq
 {
-    return toNSArray(IS->readShortSeq());
+    try
+    {
+        return toNSArray(IS->readShortSeq());
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(ICEInt) readInt
 {
-    return IS->readInt();
+    try
+    {
+        return IS->readInt();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return 0;
+    }
 }
 
 -(NSArray*) readIntSeq
 {
-    return toNSArray(IS->readIntSeq());
+    try
+    {
+        return toNSArray(IS->readIntSeq());
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(ICELong) readLong
 {
-    return IS->readLong();
+    try
+    {
+        return IS->readLong();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(NSArray*) readLongSeq
 {
-    return toNSArray(IS->readLongSeq());
+    try
+    {
+        return toNSArray(IS->readLongSeq());
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(ICEFloat) readFloat
 {
-    return IS->readFloat();
+    try
+    {
+        return IS->readFloat();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return 0; // Keep the compiler happy.
+    }
 }
 
 -(NSArray*) readFloatSeq
 {
-    return toNSArray(IS->readFloatSeq());
+    try
+    {
+        return toNSArray(IS->readFloatSeq());
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(ICEDouble) readDouble
 {
-    return IS->readDouble();
+    try
+    {
+        return IS->readDouble();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return 0; // Keep the compiler happy.
+    }
 }
 
 -(NSArray*) readDoubleSeq
 {
-    return toNSArray(IS->readDoubleSeq());
+    try
+    {
+        return toNSArray(IS->readDoubleSeq());
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(NSString*)readString
 {
-    return [NSString stringWithUTF8String:IS->readString().c_str()];
+    try
+    {
+        return [toNSString(IS->readString()) autorelease];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(NSArray*) readStringSeq
 {
-    return toNSArray(IS->readStringSeq());
+    try
+    {
+        return toNSArray(IS->readStringSeq());
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(ICEInt) readSize
 {
-    return IS->readSize();
+    try
+    {
+        return IS->readSize();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return 0; // Keep the compiler happy.
+    }
 }
 
 -(ICEObjectPrx*) readProxy
 {
-    return [ICEObjectPrx objectPrxWithObjectPrx__:IS->readProxy()];
+    try
+    {
+        return [ICEObjectPrx objectPrxWithObjectPrx__:IS->readProxy()];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 //-(void) readObject(const ICEReadObjectCallbackPtr&)
@@ -152,15 +311,29 @@
 
 -(NSString*) readTypeId
 {
-    return [NSString stringWithUTF8String:IS->readTypeId().c_str()];
+    try
+    {
+        return [toNSString(IS->readTypeId()) autorelease];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
-
 
 -(void) throwException
 {
     try
     {
-        IS->throwException();
+        try
+        {
+            IS->throwException();
+        }
+        catch(const std::exception& ex)
+        {
+            rethrowObjCException(ex);
+        }
     }
     catch(const std::exception& ex)
     {
@@ -170,37 +343,86 @@
 
 -(void) startSlice
 {
-    IS->startSlice();
+    try
+    {
+        IS->startSlice();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(void) endSlice
 {
-    IS->endSlice();
+    try
+    {
+        IS->endSlice();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(void) skipSlice
 {
-    IS->skipSlice();
+    try
+    {
+        IS->skipSlice();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(void) startEncapsulation
 {
-    IS->startEncapsulation();
+    try
+    {
+        IS->startEncapsulation();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(void) endEncapsulation
 {
-    IS->endEncapsulation();
+    try
+    {
+        IS->endEncapsulation();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(void) skipEncapsulation
 {
-    IS->skipEncapsulation();
+    try
+    {
+        IS->skipEncapsulation();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(void) readPendingObjects
 {
-    IS->readPendingObjects();
+    try
+    {
+        IS->readPendingObjects();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 @end
@@ -236,112 +458,246 @@
 
 -(ICECommunicator*) communicator
 {
-    return [ICECommunicator communicatorWithCommunicator:OS->communicator()];
+    try
+    {
+        return [ICECommunicator communicatorWithCommunicator:OS->communicator()];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 -(void)writeBool:(BOOL)v
 {
-    OS->writeBool(v);
+    try
+    {
+        OS->writeBool(v);
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(void) writeBoolSeq:(NSArray*)v
 {
-    std::vector<bool> s;
-    OS->writeBoolSeq(fromNSArray(v, s));
+    try
+    {
+        std::vector<bool> s;
+        OS->writeBoolSeq(fromNSArray(v, s));
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(void) writeByte:(ICEByte)v
 {
-    OS->writeByte(v);
+    try
+    {
+        OS->writeByte(v);
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(void) writeByteSeq:(NSArray*)v
-{    
-    std::vector<ICEByte> s;
-    OS->writeByteSeq(fromNSArray(v, s));
+{ 
+    try
+    {
+        std::vector<ICEByte> s;
+        OS->writeByteSeq(fromNSArray(v, s));
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 
 -(void) writeShort:(ICEShort)v
 {
-    OS->writeShort(v);
+    try
+    {
+        OS->writeShort(v);
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(void) writeShortSeq:(NSArray*)v
 {
-    std::vector<ICEShort> s;
-    OS->writeShortSeq(fromNSArray(v, s));
+    try
+    {
+        std::vector<ICEShort> s;
+        OS->writeShortSeq(fromNSArray(v, s));
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 
 -(void) writeInt:(ICEInt)v
 {
-    OS->writeInt(v);
+    try
+    {
+        OS->writeInt(v);
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(void) writeIntSeq:(NSArray*)v
 {
-    std::vector<ICEInt> s;
-    OS->writeIntSeq(fromNSArray(v, s));
+    try
+    {
+        std::vector<ICEInt> s;
+        OS->writeIntSeq(fromNSArray(v, s));
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 
 -(void) writeLong:(ICELong)v
 {
-    OS->writeLong(v);
+    try
+    {
+        OS->writeLong(v);
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(void) writeLongSeq:(NSArray*)v
 {
-    std::vector<ICELong> s;
-    OS->writeLongSeq(fromNSArray(v, s));
+    try
+    {
+        std::vector<ICELong> s;
+        OS->writeLongSeq(fromNSArray(v, s));
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 
 -(void) writeFloat:(ICEFloat)v
 {
-    OS->writeFloat(v);
+    try
+    {
+        OS->writeFloat(v);
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(void) writeFloatSeq:(NSArray*)v
 {
-    std::vector<ICEFloat> s;
-    OS->writeFloatSeq(fromNSArray(v, s));
+    try
+    {
+        std::vector<ICEFloat> s;
+        OS->writeFloatSeq(fromNSArray(v, s));
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 
 -(void) writeDouble:(ICEDouble)v
 {
-    OS->writeDouble(v);
+    try
+    {
+        OS->writeDouble(v);
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(void) writeDoubleSeq:(NSArray*)v
 {
-    std::vector<ICEDouble> s;
-    OS->writeDoubleSeq(fromNSArray(v, s));
+    try
+    {
+        std::vector<ICEDouble> s;
+        OS->writeDoubleSeq(fromNSArray(v, s));
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 
 -(void) writeString:(NSString*)v
 {
-    OS->writeString([v UTF8String]);
+    try
+    {
+        OS->writeString(fromNSString(v));
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(void) writeStringSeq:(NSArray*)v
 {
-    std::vector<std::string> s;
-    OS->writeStringSeq(fromNSArray(v, s));
+    try
+    {
+        std::vector<std::string> s;
+        OS->writeStringSeq(fromNSArray(v, s));
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(void) writeSize:(ICEInt)v
 {
-    OS->writeSize(v);
+    try
+    {
+        OS->writeSize(v);
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 
 -(void) writeProxy:(ICEObjectPrx*)v
 {
-    OS->writeProxy([v objectPrx__]);
+    try
+    {
+        OS->writeProxy([v objectPrx__]);
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 //-(void) writeObject:(ICEObject*)v
@@ -352,44 +708,101 @@
 
 -(void) writeTypeId:(NSString*)v
 {
-    OS->writeTypeId([v UTF8String]);
+    try
+    {
+        OS->writeTypeId(fromNSString(v));
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(void) writeException:(ICEUserException*)v
 {
-    // TODO
+    try
+    {
+        // TODO
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(void) startSlice
 {
-    OS->startSlice();
+    try
+    {
+        OS->startSlice();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(void) endSlice
 {
-    OS->endSlice();
+    try
+    {
+        OS->endSlice();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(void) startEncapsulation
 {
-    OS->startEncapsulation();
+    try
+    {
+        OS->startEncapsulation();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(void) endEncapsulation
 {
-    OS->endEncapsulation();
+    try
+    {
+        OS->endEncapsulation();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(void) writePendingObjects
 {
-    OS->writePendingObjects();
+    try
+    {
+        OS->writePendingObjects();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(NSData*) finished
 {
-    std::vector<Ice::Byte> buf;
-    OS->finished(buf);
-    return [NSData dataWithBytes:&buf[0] length:buf.size()];
+    try
+    {
+        std::vector<Ice::Byte> buf;
+        OS->finished(buf);
+        return [NSData dataWithBytes:&buf[0] length:buf.size()];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
 }
 
 @end

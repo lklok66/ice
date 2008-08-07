@@ -19,7 +19,6 @@ main(int argc, char* argv[])
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
     int status = 0;
     ICECommunicator* communicator;
-
     @try
     {
         communicator = [ICECommunicator create:&argc argv:argv];

@@ -86,38 +86,44 @@
 
 -(ICEOutputStream*) createOutputStream__
 {
-    Ice::OutputStreamPtr os = Ice::createOutputStream(OBJECTPRX->ice_getCommunicator());
-    return [[ICEOutputStream alloc] initWithOutputStream:os];
+    try
+    {
+        Ice::OutputStreamPtr os = Ice::createOutputStream(OBJECTPRX->ice_getCommunicator());
+        return [[ICEOutputStream alloc] initWithOutputStream:os];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 -(BOOL) invoke__:(NSString*)operation mode:(ICEOperationMode)mode os:(ICEOutputStream*)os is:(ICEInputStream**)is
 {
-    std::vector<Ice::Byte> inParams;
-    [os os__]->finished(inParams);
-    [os release];
-
-    std::vector<Ice::Byte> outParams;
-    BOOL ok;
     try
     {
-        ok = OBJECTPRX->ice_invoke([operation UTF8String], (Ice::OperationMode)mode, inParams, outParams);
+        std::vector<Ice::Byte> inParams;
+        [os os__]->finished(inParams);
+        [os release];
+        
+        std::vector<Ice::Byte> outParams;
+        BOOL ok = OBJECTPRX->ice_invoke(fromNSString(operation), (Ice::OperationMode)mode, inParams, outParams);
+    
+        Ice::InputStreamPtr s = Ice::createInputStream(OBJECTPRX->ice_getCommunicator(), outParams);
+        *is = [[ICEInputStream alloc] initWithInputStream:s.get()];
+        return ok;
     }
     catch(const std::exception& ex)
     {
         rethrowObjCException(ex);
         return FALSE; // Keep the compiler happy
     }
-    
-    Ice::InputStreamPtr s = Ice::createInputStream(OBJECTPRX->ice_getCommunicator(), outParams);
-    *is = [[ICEInputStream alloc] initWithInputStream:s.get()];
-    return ok;
 }
 
 -(BOOL) ice_isA:(NSString*)typeId
 {
     try
     {
-        return OBJECTPRX->ice_isA([typeId UTF8String]);
+        return OBJECTPRX->ice_isA(fromNSString(typeId));
     }
     catch(const std::exception& ex)
     {

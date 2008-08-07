@@ -48,61 +48,152 @@
 
 -(NSString*) getProperty:(NSString*)key
 {
-    return [NSString stringWithUTF8String:PROPERTIES->getProperty([key UTF8String]).c_str()];
+    try
+    {
+        return [toNSString(PROPERTIES->getProperty(fromNSString(key))) autorelease];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 -(NSString*) getPropertyWithDefault:(NSString*)key value:(NSString*)value
 {
-    return [NSString stringWithUTF8String:PROPERTIES->getPropertyWithDefault([key UTF8String], [value UTF8String]).c_str()];
+    try
+    {
+        return [toNSString(PROPERTIES->getPropertyWithDefault(fromNSString(key), fromNSString(value))) autorelease];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 -(int) getPropertyAsInt:(NSString*)key
 {
-    return PROPERTIES->getPropertyAsInt([key UTF8String]);
+    try
+    {
+        return PROPERTIES->getPropertyAsInt(fromNSString(key));
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 -(int) getPropertyAsIntWithDefault:(NSString*)key value:(int)value
 {
-    return PROPERTIES->getPropertyAsIntWithDefault([key UTF8String], value);
+    try
+    {
+        return PROPERTIES->getPropertyAsIntWithDefault(fromNSString(key), value);
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 -(NSArray*) getPropertyAsList:(NSString*)key
 {
-    return [toNSArray(PROPERTIES->getPropertyAsList([key UTF8String])) autorelease];
+    try
+    {
+        return [toNSArray(PROPERTIES->getPropertyAsList(fromNSString(key))) autorelease];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 -(NSArray*) getPropertyAsListWithDefault:(NSString*)key value:(NSArray*)value
 {
-    std::vector<std::string> s;
-    fromNSArray(value, s);
-    return [toNSArray(PROPERTIES->getPropertyAsListWithDefault([key UTF8String], s)) autorelease];
+    try
+    {
+        std::vector<std::string> s;
+        fromNSArray(value, s);
+        return [toNSArray(PROPERTIES->getPropertyAsListWithDefault(fromNSString(key), s)) autorelease];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 -(NSDictionary*) getPropertiesForPrefix:(NSString*)prefix
 {
-    return [toNSDictionary(PROPERTIES->getPropertiesForPrefix([prefix UTF8String])) autorelease];
+    try
+    {
+        return [toNSDictionary(PROPERTIES->getPropertiesForPrefix(fromNSString(prefix))) autorelease];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 -(void) setProperty:(NSString*)key value:(NSString*)value
 {
-    PROPERTIES->setProperty([key UTF8String], [value UTF8String]);
+    try
+    {
+        PROPERTIES->setProperty(fromNSString(key), fromNSString(value));
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 -(NSArray*) getCommandLineOptions
 {
-    return [toNSArray(PROPERTIES->getCommandLineOptions()) autorelease];
+    try
+    {
+        return [toNSArray(PROPERTIES->getCommandLineOptions()) autorelease];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 -(NSArray*) parseCommandLineOptions:(NSString*)prefix options:(NSArray*)options
 {
-    std::vector<std::string> o;
-    fromNSArray(options, o);
-    return [toNSArray(PROPERTIES->parseCommandLineOptions([prefix UTF8String], o)) autorelease];
+    try
+    {
+        std::vector<std::string> o;
+        fromNSArray(options, o);
+        return [toNSArray(PROPERTIES->parseCommandLineOptions(fromNSString(prefix), o)) autorelease];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 -(NSArray*) parseIceCommandLineOptions:(NSArray*)options
 {
-    std::vector<std::string> o;
-    fromNSArray(options, o);
-    return [toNSArray(PROPERTIES->parseIceCommandLineOptions(o)) autorelease];
+    try
+    {
+        std::vector<std::string> o;
+        fromNSArray(options, o);
+        return [toNSArray(PROPERTIES->parseIceCommandLineOptions(o)) autorelease];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 -(void) load:(NSString*)file
 {
-    PROPERTIES->load([file UTF8String]);
+    try
+    {
+        PROPERTIES->load(fromNSString(file));
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 -(ICEProperties*) clone
 {
-    return [ICEProperties propertiesWithProperties:PROPERTIES->clone()];
+    try
+    {
+        return [ICEProperties propertiesWithProperties:PROPERTIES->clone()];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
 
 @end

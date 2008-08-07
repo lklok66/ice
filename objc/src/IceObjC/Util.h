@@ -10,13 +10,15 @@
 #include <IceObjC/Config.h>
 
 #import <Foundation/NSException.h>
+#import <Foundation/NSProxy.h>
 
 #include <exception>
 #include <vector>
 #include <map>
 #include <string>
 
-NSException* rethrowObjCException(const std::exception& ex);
+void rethrowObjCException(const std::exception& ex);
+void rethrowCxxException(NSException* ex);
 
 //
 // The toXXX methods don't auto release the returned object: the caller
@@ -64,20 +66,6 @@ toNSArray(const std::vector<T>& seq)
     return array;
 }
 
-// template<typename T> void
-// fromNSArray(NSArray* array, std::vector<T>& seq)
-// {
-//     seq.reserve([array count]);
-//     NSEnumerator* enumerator = [array objectEnumerator]; 
-//     id obj = nil; 
-//     while((obj = [enumerator nextObject])) 
-//     { 
-//         T v;
-//         fromObjC(obj, v);
-//         seq.push_back(v);
-//     }
-// }
-
 template<typename T> std::vector<T>&
 fromNSArray(NSArray* array, std::vector<T>& seq)
 {
@@ -123,3 +111,30 @@ fromNSDictionary(NSDictionary* dictionary, std::map<K, V>& dict)
         dict.insert(std::pair<K, V>(k, v));
     }
 }
+
+inline NSString*
+toNSString(const std::string& s)
+{
+    return [[NSString alloc] initWithUTF8String:s.c_str()];
+}
+
+inline std::string
+fromNSString(NSString* s)
+{
+    if(s == nil)
+    {
+        return std::string();
+    }
+    else
+    {
+        return [s UTF8String];
+    }
+}
+
+@interface ExceptionHandlerForwarder : NSProxy
+{
+    id forwardTo;
+}
+-(id)init:(id)forwardTo;
+-(void)forwardInvocation:(NSInvocation *)invocation;
+@end

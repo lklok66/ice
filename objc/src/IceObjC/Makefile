@@ -20,6 +20,7 @@ OBJS		= Communicator.o \
                   Exception.o \
 		  Identity.o \
 		  Initialize.o \
+		  LocalException.o \
 		  Locator.o \
 	          Logger.o \
 	  	  Object.o \

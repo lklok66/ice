@@ -7,11 +7,12 @@
 //
 // **********************************************************************
 
-#import <HelloI.h>
+#import <IceObjC/Exception.h>
 
-@implementation HelloI
--(void) sayHello:(ICECurrent*)current
-{
-    printf("Hello world!\n");
-}
+#include <Ice/Exception.h>
+
+@interface ICELocalException (Internal)
+-(id) initWithLocalException:(const Ice::LocalException&)ex;
+-(void) rethrowCxx__;
++(id) localExceptionWithLocalException:(const Ice::LocalException&)ex;
 @end
