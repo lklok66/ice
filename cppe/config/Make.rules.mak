@@ -353,7 +353,7 @@ SLICE2CPPE		= "$(ice_dir)\bin$(x64suffix)\slice2cppe.exe"
 EVERYTHING		= all clean install
 
 .SUFFIXES:
-.SUFFIXES:		.ice .cpp .c .obj
+.SUFFIXES:		.ice .cpp .c .obj .cobj
 
 .cpp.obj::
 	$(CXX) /c $(CPPFLAGS) $(CXXFLAGS) $<
@@ -361,8 +361,8 @@ EVERYTHING		= all clean install
 .c.obj:
 	$(CC) /c $(CPPFLAGS) $(CFLAGS) $<
 
-.cpp.objc:
-	$(CXX) -DICEE_PURE_CLIENT /Fo$(*F).objc /c $(CPPFLAGS) $(CXXFLAGS) $<
+.cpp.cobj:
+	$(CXX) -DICEE_PURE_CLIENT /Fo$(*F).cobj /c $(CPPFLAGS) $(CXXFLAGS) $<
 
 {$(SDIR)\}.ice{$(HDIR)}.h:
 	del /q $(HDIR)\$(*F).h $(*F).cpp

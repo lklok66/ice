@@ -16,6 +16,9 @@
 #include <IceE/Logger.h>
 #include <IceE/LoggerUtil.h>
 #include <IceE/Communicator.h>
+#ifdef ICEE_HAS_OBV
+#   include <IceE/ObjectFactory.h>
+#endif
 #ifndef ICEE_PURE_CLIENT
 #   include <IceE/ObjectAdapter.h>
 #   include <IceE/Object.h>

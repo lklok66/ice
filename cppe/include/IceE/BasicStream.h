@@ -11,12 +11,15 @@
 #define ICEE_BASIC_STREAM_H
 
 #include <IceE/ProxyF.h>
-
 #include <IceE/Buffer.h>
 #include <IceE/Protocol.h>
 
 #ifdef ICEE_HAS_WSTRING
 #  include <IceE/StringConverter.h>
+#endif
+
+#ifdef ICEE_HAS_OBV
+#  include <IceE/ObjectF.h>
 #endif
 
 namespace Ice
@@ -27,6 +30,9 @@ ICE_API void throwUnmarshalOutOfBoundsException(const char*, int);
 ICE_API void throwNegativeSizeException(const char*, int);
 ICE_API void throwMemoryLimitException(const char*, int);
 ICE_API void throwUnsupportedEncodingException(const char*, int, ::Ice::Int, ::Ice::Int, ::Ice::Int, ::Ice::Int);
+#ifdef ICEE_HAS_OBV
+ICE_API void throwEncapsulationException(const char*, int);
+#endif
 
 }
 
@@ -82,6 +88,10 @@ public:
     };
 #endif
 
+#ifdef ICEE_HAS_OBV
+    typedef void (*PatchFunc)(void*, Ice::ObjectPtr&);
+#endif
+
     BasicStream(Instance* instance, int messageSizeMax,
 #ifdef ICEE_HAS_WSTRING
                 const Ice::StringConverterPtr& stringConverter, const Ice::WstringConverterPtr& wstringConverter,
@@ -98,6 +108,9 @@ public:
         _wstringConverter(wstringConverter),
 #endif
         _seqDataStack(0)
+#ifdef ICEE_HAS_OBV
+        , _objectList(0)
+#endif
     {
         // Inlined for performance reasons.
     }
@@ -193,6 +206,7 @@ public:
         write(encodingMajor);
         write(encodingMinor);
     }
+
     void endWriteEncaps()
     {
         assert(_currentWriteEncaps);
@@ -358,6 +372,11 @@ public:
             v = static_cast<Ice::Int>(static_cast<unsigned char>(byte));
         }
     }
+
+#ifdef ICEE_HAS_OBV
+    ICE_API void writeTypeId(const std::string&);
+    ICE_API void readTypeId(std::string&);
+#endif
 
     ICE_API void writeBlob(const std::vector<Ice::Byte>&);
     ICE_API void readBlob(std::vector<Ice::Byte>&, Ice::Int);
@@ -588,6 +607,30 @@ public:
     ICE_API void write(const Ice::UserException&);
     ICE_API void throwException();
 
+#ifdef ICEE_HAS_OBV
+    ICE_API void write(const Ice::ObjectPtr&);
+    ICE_API void read(PatchFunc, void*);
+
+    ICE_API void writePendingObjects();
+    ICE_API void readPendingObjects();
+        
+    struct PatchEntry
+    {
+        PatchFunc patchFunc;
+        void* patchAddr;
+    };
+        
+    typedef std::vector<PatchEntry> PatchList;
+    typedef std::map<Ice::Int, PatchList> PatchMap;
+    typedef std::map<Ice::Int, Ice::ObjectPtr> IndexToPtrMap;
+    typedef std::map<Ice::Int, std::string> TypeIdReadMap;
+    
+    typedef std::map<Ice::ObjectPtr, Ice::Int> PtrToIndexMap;
+    typedef std::map<std::string, Ice::Int> TypeIdWriteMap;
+    
+    typedef std::vector<Ice::ObjectPtr> ObjectList;
+#endif
+
 private:
 
     //
@@ -600,10 +643,39 @@ private:
     {
     public:
 
-        ReadEncaps() : previous(0) { } // Inlined for performance reasons.
-        ~ReadEncaps() { } // Inlined for performance reasons.
+        ReadEncaps() :
+#ifdef ICEE_HAS_OBV
+                       patchMap(0), unmarshaledMap(0), typeIdMap(0), typeIdIndex(0),
+#endif
+                       previous(0)
+        {
+            // Inlined for performance reasons.
+        }
+        ~ReadEncaps()
+        {
+            // Inlined for performance reasons.
+#ifdef ICEE_HAS_OBV
+            delete patchMap;
+            delete unmarshaledMap;
+            delete typeIdMap;
+#endif
+        }
 
-        void reset() { previous = 0; } // Inlined for performance reasons.
+        void reset()
+        {
+            // Inlined for performance reasons.
+#ifdef ICEE_HAS_OBV
+            delete patchMap;
+            delete unmarshaledMap;
+            delete typeIdMap;
+
+            patchMap = 0;
+            unmarshaledMap = 0;
+            typeIdMap = 0;
+            typeIdIndex = 0;
+#endif
+            previous = 0;
+        }
         ICE_API void swap(ReadEncaps&);
 
         Container::size_type start;
@@ -612,6 +684,13 @@ private:
         Ice::Byte encodingMajor;
         Ice::Byte encodingMinor;
 
+#ifdef ICEE_HAS_OBV
+        PatchMap* patchMap;
+        IndexToPtrMap* unmarshaledMap;
+        TypeIdReadMap* typeIdMap;
+        Ice::Int typeIdIndex;
+#endif
+
         ReadEncaps* previous;
     };
 
@@ -619,15 +698,51 @@ private:
     {
     public:
 
-        WriteEncaps() : writeIndex(0), previous(0) { } // Inlined for performance reasons.
-        ~WriteEncaps() { } // Inlined for performance reasons.
+        WriteEncaps() : writeIndex(0),
+#ifdef ICEE_HAS_OBV
+                        toBeMarshaledMap(0), marshaledMap(0), typeIdMap(0), typeIdIndex(0),
+#endif
+                        previous(0) 
+        {
+            // Inlined for performance reasons.
+        }
+        ~WriteEncaps()
+        {
+            // Inlined for performance reasons.
+#ifdef ICEE_HAS_OBV
+            delete toBeMarshaledMap;
+            delete marshaledMap;
+            delete typeIdMap;
+#endif
+        }
 
-        void reset() { writeIndex = 0; previous = 0; } // Inlined for performance reasons.
+        void reset()
+        {
+            // Inlined for performance reasons.
+#ifdef ICEE_HAS_OBV
+            delete toBeMarshaledMap;
+            delete marshaledMap;
+            delete typeIdMap;
+
+            toBeMarshaledMap = 0;
+            marshaledMap = 0;
+            typeIdMap = 0;
+            typeIdIndex = 0;
+#endif
+            writeIndex = 0;
+            previous = 0;
+        }
         ICE_API void swap(WriteEncaps&);
 
         Container::size_type start;
 
         Ice::Int writeIndex;
+#ifdef ICEE_HAS_OBV
+        PtrToIndexMap* toBeMarshaledMap;
+        PtrToIndexMap* marshaledMap;
+        TypeIdWriteMap* typeIdMap;
+        Ice::Int typeIdIndex;
+#endif
 
         WriteEncaps* previous;
     };
@@ -640,6 +755,11 @@ private:
 
     Container::size_type _readSlice;
     Container::size_type _writeSlice;
+
+#ifdef ICEE_HAS_OBV
+    void writeInstance(const Ice::ObjectPtr&, Ice::Int);
+    void patchPointers(Ice::Int, IndexToPtrMap::const_iterator, PatchMap::iterator);
+#endif
 
     const Container::size_type _messageSizeMax;
     bool _unlimited;
@@ -657,6 +777,10 @@ private:
         SeqData* previous;
     };
     SeqData* _seqDataStack;
+
+#ifdef ICEE_HAS_OBV
+    ObjectList* _objectList;
+#endif
 };
 
 } // End namespace IceInternal

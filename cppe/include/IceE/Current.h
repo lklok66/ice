@@ -10,7 +10,11 @@
 #ifndef ICEE_CURRENT_H
 #define ICEE_CURRENT_H
 
-#include <IceE/ObjectAdapterF.h>
+#include <IceE/Config.h>
+
+#ifndef ICEE_PURE_CLIENT
+#   include <IceE/ObjectAdapterF.h>
+#endif
 #include <IceE/ConnectionF.h>
 #include <IceE/Identity.h>
 #include <IceE/OperationMode.h>
@@ -20,7 +24,9 @@ namespace Ice
 
 struct Current
 {
+#ifndef ICEE_PURE_CLIENT
     ::Ice::ObjectAdapter* adapter;
+#endif
     ::Ice::Connection* con;
     ::Ice::Identity id;
     ::std::string facet;

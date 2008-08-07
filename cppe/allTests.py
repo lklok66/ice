@@ -35,7 +35,7 @@ tests = [
     ("IceE/faultTolerance", ["core"]),
     ("IceE/location", ["core"]),
     ("IceE/adapterDeactivation", ["core"]),
-    ("IceE/slicing", ["core"]),
+    ("IceE/slicing/exceptions", ["core"]),
     ("IceE/custom", ["core"]),
     ("IceE/retry", ["core"]),
     ]

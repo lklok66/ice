@@ -14,6 +14,20 @@
 #include <IceE/Identity.h>
 #include <IceE/BuiltinSequences.h>
 
+#ifdef ICEE_HAS_OBV
+namespace IceInternal
+{
+
+namespace Ex
+{
+
+ICE_API void throwUOE(const ::std::string&, const ::std::string&);
+
+}
+
+}
+#endif
+
 namespace Ice
 {
 
@@ -592,6 +606,11 @@ inline void throwProxyUnmarshalException(const char* file, int line)
 {     
     throw MarshalException(file, line, "inconsistent proxy data during unmarshaling");
 }
+
+#ifdef ICEE_HAS_OBV
+ICE_API void throwNoObjectFactoryException(const char*, int, const std::string&);
+ICE_API void throwUOE(const ::std::string&, const ::std::string&);
+#endif
 
 class ICE_API FeatureNotSupportedException : public ::Ice::LocalException
 {

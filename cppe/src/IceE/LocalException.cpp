@@ -16,6 +16,14 @@ using namespace std;
 using namespace Ice;
 using namespace IceInternal;
 
+#ifdef ICEE_HAS_OBV
+bool
+Ice::UserException::__usesClasses() const
+{
+    return false;
+}
+#endif
+
 Ice::LocalException::LocalException(const char* file, int line) :
     Exception(file, line)
 {
@@ -1572,6 +1580,29 @@ Ice::throwNegativeSizeException(const char* file, int line)
 {
     throw MarshalException(file, line, "negative size for sequence, dictionary, etc.");
 }
+
+#ifdef ICEE_HAS_OBV
+
+void
+Ice::throwEncapsulationException(const char* file, int line)
+{
+    throw MarshalException(file, line, "encapsulation error during unmarshalling");
+}
+
+void
+Ice::throwNoObjectFactoryException(const char* file, int line, const std::string& type)
+{
+    throw MarshalException(file, line, "no object factory found for `" + type + "'");
+}
+
+void
+IceInternal::Ex::throwUOE(const string& expectedType, const string& actualType)
+{
+    throw MarshalException(__FILE__, __LINE__, 
+                           "expected element of type `" + expectedType + "' but received `" + actualType + "'");
+}
+
+#endif
 
 Ice::FeatureNotSupportedException::FeatureNotSupportedException(const char* __file, int __line) :
 #if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug

@@ -10,6 +10,7 @@
 #ifndef ICEE_OBJECT_F_H
 #define ICEE_OBJECT_F_H
 
+#include <IceE/Config.h>
 #include <IceE/Handle.h>
 #include <IceE/Shared.h>
 
@@ -31,6 +32,10 @@ namespace Ice
 {
 
 typedef IceInternal::Handle< Object > ObjectPtr;
+
+#ifdef ICEE_HAS_OBV
+void ICE_API __patch__ObjectPtr(void*, ObjectPtr&);
+#endif
 
 }
 

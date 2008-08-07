@@ -45,8 +45,10 @@ ICEE_OBJS      	= Base64.obj \
                   LoggerI.obj \
                   LoggerUtil.obj \
                   Network.obj \
+		  ObjectFactoryManager.obj \
                   OperationMode.obj \
                   Outgoing.obj \
+		  Object.obj \
                   OutgoingConnectionFactory.obj \
                   Properties.obj \
                   Protocol.obj \

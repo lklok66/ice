@@ -48,8 +48,8 @@ SPDBFLAGS        = /pdb:$(SERVER:.exe=.pdb)
 COPDBFLAGS       = /pdb:$(COLLOCATED:.exe=.pdb)
 !endif
 
-$(CLIENT): $(COBJS) BatchOneways.objc Test.objc
-	$(LINK) $(LDFLAGS) $(CPDBFLAGS) BatchOneways.objc Test.objc $(COBJS) /out:$@ $(TESTCLIBS)
+$(CLIENT): $(COBJS) BatchOneways.cobj Test.cobj
+	$(LINK) $(LDFLAGS) $(CPDBFLAGS) BatchOneways.cobj Test.cobj $(COBJS) /out:$@ $(TESTCLIBS)
 	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
 	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#2 && del /q $@.manifest
 

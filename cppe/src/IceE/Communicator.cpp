@@ -25,6 +25,10 @@
 #   include <IceE/ObjectAdapterFactory.h>
 #endif
 
+#ifdef ICEE_HAS_OBV
+#   include <IceE/ObjectFactoryManager.h>
+#endif
+
 using namespace std;
 using namespace Ice;
 using namespace IceInternal;
@@ -120,6 +124,22 @@ Ice::Communicator::createObjectAdapterWithRouter(const string& name, const Route
 }
 
 #endif
+
+#endif
+
+#ifdef ICEE_HAS_OBV
+
+void
+Ice::Communicator::addObjectFactory(const ObjectFactoryPtr& factory, const string& id)
+{
+    _instance->servantFactoryManager()->add(factory, id);
+}
+
+ObjectFactoryPtr
+Ice::Communicator::findObjectFactory(const string& id) const
+{
+    return _instance->servantFactoryManager()->find(id);
+}
 
 #endif
 

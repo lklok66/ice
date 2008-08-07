@@ -36,6 +36,11 @@
 //
 #define ICEE_HAS_OPAQUE_ENDPOINTS
 
+//
+// Uncomment this if you want to build with object-by-value support.
+//
+//#define ICEE_HAS_OBV
+
 // Uncomment this if want the pure client library built with
 // only the blocking concurrency model.
 // If commented, both blocking and thread-per-connections support

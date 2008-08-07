@@ -681,7 +681,7 @@ repeatConnect:
 }
 
 vector<struct sockaddr_in>
-IceInternal::getAddresses(const string& host, int port)
+IceInternal::getAddresses(const string& host, int port, bool server)
 {
     vector<struct sockaddr_in> result;
 
@@ -730,7 +730,14 @@ IceInternal::getAddresses(const string& host, int port)
         struct sockaddr_in addr;
         addr.sin_family = AF_INET;
         addr.sin_port = htons(port);
-        addr.sin_addr.s_addr = INADDR_LOOPBACK;
+        if(server)
+        {
+            addr.sin_addr.s_addr = htonl(INADDR_ANY);
+        }
+        else
+        {
+            addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+        }
         result.push_back(addr);
     }
 

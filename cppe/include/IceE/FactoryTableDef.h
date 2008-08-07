@@ -11,6 +11,9 @@
 #define ICEE_FACTORY_TABLE_DEF_H
 
 #include <IceE/UserExceptionFactoryF.h>
+#ifdef ICEE_HAS_OBV
+#include <IceE/ObjectFactoryF.h>
+#endif
 
 #include <IceE/StaticMutex.h>
 #include <IceE/Mutex.h>
@@ -26,6 +29,12 @@ public:
     IceInternal::UserExceptionFactoryPtr getExceptionFactory(const ::std::string&) const;
     void removeExceptionFactory(const ::std::string&);
 
+#ifdef ICEE_HAS_OBV
+    void addObjectFactory(const ::std::string&, const Ice::ObjectFactoryPtr&);
+    Ice::ObjectFactoryPtr getObjectFactory(const ::std::string&) const;
+    void removeObjectFactory(const ::std::string&);
+#endif
+
 private:
 
     IceUtil::Mutex _m;
@@ -33,6 +42,13 @@ private:
     typedef ::std::pair<IceInternal::UserExceptionFactoryPtr, int> EFPair;
     typedef ::std::map< ::std::string, EFPair> EFTable;
     EFTable _eft;
+
+#ifdef ICEE_HAS_OBV
+    typedef ::std::pair<Ice::ObjectFactoryPtr, int> OFPair;
+    typedef ::std::map< ::std::string, OFPair> OFTable;
+    OFTable _oft;
+
+#endif
 };
 
 class ICE_API FactoryTableWrapper : private IceUtil::noncopyable

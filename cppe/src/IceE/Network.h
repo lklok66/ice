@@ -104,7 +104,7 @@ void doListen(SOCKET, int);
 void doConnect(SOCKET, struct sockaddr_in&, int);
 SOCKET doAccept(SOCKET);
 
-std::vector<struct sockaddr_in> getAddresses(const std::string&, int);
+std::vector<struct sockaddr_in> getAddresses(const std::string&, int, bool = false);
 int compareAddress(const struct sockaddr_in&, const struct sockaddr_in&);
 
 std::string errorToString(int);

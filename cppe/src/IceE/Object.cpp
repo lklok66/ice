@@ -7,8 +7,14 @@
 //
 // **********************************************************************
 
+#include <IceE/Config.h>
+
+#if !defined(ICEE_PURE_CLIENT) || defined(ICEE_HAS_OBV)
+
 #include <IceE/Object.h>
-#include <IceE/Incoming.h>
+#ifndef ICEE_PURE_CLIENT
+#   include <IceE/Incoming.h>
+#endif
 #include <IceE/LocalException.h>
 #include <IceE/SafeStdio.h>
 
@@ -76,6 +82,22 @@ Ice::Object::ice_clone() const
 {
     throw CloneNotImplementedException(__FILE__, __LINE__);
 }
+
+#ifdef ICEE_HAS_OBV
+
+void
+Ice::Object::ice_preMarshal()
+{
+}
+
+void
+Ice::Object::ice_postUnmarshal()
+{
+}
+
+#endif
+
+#ifndef ICEE_PURE_CLIENT
 
 DispatchStatus
 Ice::Object::___ice_isA(Incoming& __inS, const Current& __current)
@@ -157,6 +179,50 @@ Ice::Object::__dispatch(Incoming& in, const Current& current)
     throw OperationNotExistException(__FILE__, __LINE__, current.id, current.facet, current.operation);
 }
 
+#endif
+
+#ifdef ICEE_HAS_OBV
+void
+Ice::Object::__write(BasicStream* __os) const
+{
+    __os->writeTypeId(ice_staticId());
+    __os->startWriteSlice();
+    __os->writeSize(0); // For compatibility with the old AFM.
+    __os->endWriteSlice();
+}
+    
+void
+Ice::Object::__read(BasicStream* __is, bool __rid)
+{
+    if(__rid)
+    {
+        string myId;
+        __is->readTypeId(myId);
+    }
+
+    __is->startReadSlice();
+
+    // For compatibility with the old AFM.
+    Int sz;
+    __is->readSize(sz);
+    if(sz != 0)
+    {
+        throw Ice::MarshalException(__FILE__, __LINE__);
+    }
+
+    __is->endReadSlice();
+}
+
+void
+Ice::__patch__ObjectPtr(void* __addr, ObjectPtr& v)
+{
+    ObjectPtr* p = static_cast<ObjectPtr*>(__addr);
+    *p = v;
+}
+#endif
+
+#ifndef ICEE_PURE_CLIENT
+
 static const char*
 operationModeToString(OperationMode mode)
 {
@@ -201,21 +267,6 @@ Ice::Object::__invalidMode(OperationMode expected, OperationMode received)
     }
 }
 
-DispatchStatus
-Ice::Blobject::__dispatch(Incoming& in, const Current& current)
-{
-    vector<Byte> inParams;
-    vector<Byte> outParams;
-    Int sz = in.is()->getReadEncapsSize();
-    in.is()->readBlob(inParams, sz);
-    bool ok = ice_invoke(inParams, outParams, current);
-    in.os()->writeBlob(outParams);
-    if(ok)
-    {
-        return DispatchOK;
-    }
-    else
-    {
-        return DispatchUserException;
-    }
-}
+#endif
+
+#endif

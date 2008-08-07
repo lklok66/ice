@@ -40,29 +40,38 @@ public:
     virtual Int ice_hash() const;
 
     virtual bool ice_isA(const std::string&, const Current& = Current()) const;
-    DispatchStatus ___ice_isA(IceInternal::Incoming&, const Current&);
-
     virtual void ice_ping(const Current&  = Current()) const;
-    DispatchStatus ___ice_ping(IceInternal::Incoming&, const Current&);
-
     virtual std::vector< std::string> ice_ids(const Current& = Current()) const;
-    DispatchStatus ___ice_ids(IceInternal::Incoming&, const Current&);
-
     virtual const std::string& ice_id(const Current& = Current()) const;
-    DispatchStatus ___ice_id(IceInternal::Incoming&, const Current&);
 
     static const std::string& ice_staticId();
 
     virtual ObjectPtr ice_clone() const;
 
+#ifndef ICEE_PURE_CLIENT
+    DispatchStatus ___ice_isA(IceInternal::Incoming&, const Current&);
+    DispatchStatus ___ice_ping(IceInternal::Incoming&, const Current&);
+    DispatchStatus ___ice_ids(IceInternal::Incoming&, const Current&);
+    DispatchStatus ___ice_id(IceInternal::Incoming&, const Current&);
+
     static std::string __all[];
     virtual DispatchStatus __dispatch(IceInternal::Incoming&, const Current&);
+#endif
+
+#ifdef ICEE_HAS_OBV
+    virtual void ice_preMarshal();
+    virtual void ice_postUnmarshal();
+
+    virtual void __write(IceInternal::BasicStream*) const;
+    virtual void __read(IceInternal::BasicStream*, bool);
+#endif
 
 protected:
 
     Object() {};
     virtual ~Object() {} // This class is abstract.
 
+#ifndef ICEE_PURE_CLIENT
     static void __checkMode(OperationMode expected, OperationMode received) // Inline for performance reasons.
     {
         if(expected != received)
@@ -71,15 +80,7 @@ protected:
         }
     }
     static void __invalidMode(OperationMode, OperationMode);
-};
-
-class ICE_API Blobject : public Object
-{
-public:
-
-    // Returns true if ok, false if user exception.
-    virtual bool ice_invoke(const std::vector<Byte>&, std::vector<Byte>&, const Current&) = 0;
-    virtual DispatchStatus __dispatch(IceInternal::Incoming&, const Current&);
+#endif
 };
 
 }

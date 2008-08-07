@@ -122,7 +122,7 @@ IceInternal::Acceptor::Acceptor(const InstancePtr& instance, const string& host,
     try
     {
         _fd = createSocket();
-        _addr = getAddresses(host, port)[0];
+        _addr = getAddresses(host, port, true)[0];
         setTcpBufSize(_fd, _instance->initializationData().properties, _logger);
 #ifndef _WIN32
         //

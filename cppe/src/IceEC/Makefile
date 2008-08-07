@@ -47,6 +47,8 @@ ICE_OBJS	= Base64.o \
 		  LoggerI.o \
 		  LoggerUtil.o \
 		  Network.o \
+		  Object.o \
+		  ObjectFactoryManager.o \
 		  OperationMode.o \
 		  Outgoing.o \
 		  OutgoingConnectionFactory.o \

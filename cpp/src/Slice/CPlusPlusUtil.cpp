@@ -599,6 +599,12 @@ Slice::writeMarshalUnmarshalCode(Output& out, const TypePtr& type, const string&
     {
         if(builtin->kind() == Builtin::KindObject)
         {
+            if(featureProfile == IceE)
+            {
+                out.zeroIndent();
+                out << nl << "#ifdef ICEE_HAS_OBV";
+                out.restoreIndent();
+            }
             if(marshal)
             {
                 out << nl << stream << deref << func << fixedParam << ");";
@@ -606,6 +612,14 @@ Slice::writeMarshalUnmarshalCode(Output& out, const TypePtr& type, const string&
             else
             {
                 out << nl << stream << deref << func << "::Ice::__patch__ObjectPtr, &" << fixedParam << ");";
+            }
+            if(featureProfile == IceE)
+            {
+                out.zeroIndent();
+                out << nl << "#else";
+                out << nl << "#error Ice-E was not built with Object-By-Value enabled.";
+                out << nl << "#endif // ICEE_HAS_OBV";
+                out.restoreIndent();
             }
             return;
         }
@@ -620,6 +634,12 @@ Slice::writeMarshalUnmarshalCode(Output& out, const TypePtr& type, const string&
     if(cl)
     {
         string scope = fixKwd(cl->scope());
+        if(featureProfile == IceE)
+        {
+            out.zeroIndent();
+            out << nl << "#ifdef ICEE_HAS_OBV";
+            out.restoreIndent();
+        }
         if(marshal)
         {
             out << nl << stream << deref << "write(::Ice::ObjectPtr(::IceInternal::upCast(" << fixedParam 
@@ -629,6 +649,14 @@ Slice::writeMarshalUnmarshalCode(Output& out, const TypePtr& type, const string&
         {
             out << nl << stream << deref << "read("
                 << scope << "__patch__" << cl->name() << "Ptr, &" << fixedParam << ");";
+        }
+        if(featureProfile == IceE)
+        {
+            out.zeroIndent();
+            out << nl << "#else";
+            out << nl << "#error Ice-E was not built with Object-By-Value enabled.";
+            out << nl << "#endif // ICEE_HAS_OBV";
+            out.restoreIndent();
         }
 
         return;

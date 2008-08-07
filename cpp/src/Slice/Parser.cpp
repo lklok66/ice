@@ -814,6 +814,7 @@ Slice::Container::createSequence(const string& name, const TypePtr& type, const 
 {
     checkPrefix(name);
 
+/*
     if(_unit->profile() == IceE && !local)
     {
         BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
@@ -824,6 +825,7 @@ Slice::Container::createSequence(const string& name, const TypePtr& type, const 
             return 0;
         }
     }
+*/
 
     ContainedList matches = _unit->findContents(thisScope() + name);
     if(!matches.empty())
@@ -878,7 +880,7 @@ Slice::Container::createDictionary(const string& name, const TypePtr& keyType, c
                                    NodeType nt)
 {
     checkPrefix(name);
-
+/*
     if(_unit->profile() == IceE && !local)
     {
         BuiltinPtr builtin = BuiltinPtr::dynamicCast(valueType);
@@ -889,6 +891,7 @@ Slice::Container::createDictionary(const string& name, const TypePtr& keyType, c
             return 0;
         }
     }
+*/
  
     ContainedList matches = _unit->findContents(thisScope() + name);
     if(!matches.empty())
@@ -2725,6 +2728,7 @@ Slice::ClassDef::createDataMember(const string& name, const TypePtr& type)
 {
     checkPrefix(name);
 
+    /*
     if(_unit->profile() == IceE)
     {
         if(!isLocal())
@@ -2746,6 +2750,7 @@ Slice::ClassDef::createDataMember(const string& name, const TypePtr& type)
             }
         }
     }
+    */
 
     assert(!isInterface()); 
     ContainedList matches = _unit->findContents(thisScope() + name);
@@ -3205,6 +3210,7 @@ Slice::Exception::createDataMember(const string& name, const TypePtr& type)
 {
     checkPrefix(name);
 
+    /*
     if(_unit->profile() == IceE)
     {
         if(!isLocal())
@@ -3226,6 +3232,7 @@ Slice::Exception::createDataMember(const string& name, const TypePtr& type)
             }
         }
     }
+    */
 
     ContainedList matches = _unit->findContents(thisScope() + name);
     if(!matches.empty())
@@ -3518,6 +3525,7 @@ Slice::Struct::createDataMember(const string& name, const TypePtr& type)
 {
     checkPrefix(name);
 
+    /*
     if(_unit->profile() == IceE)
     {
         if(!isLocal())
@@ -3538,6 +3546,7 @@ Slice::Struct::createDataMember(const string& name, const TypePtr& type)
             }
         }
     }
+    */
  
     ContainedList matches = _unit->findContents(thisScope() + name);
     if(!matches.empty())
@@ -4441,6 +4450,7 @@ Slice::Operation::createParamDecl(const string& name, const TypePtr& type, bool 
 {
     checkPrefix(name);
 
+    /*
     if(_unit->profile() == IceE)
     {
         ClassDefPtr cl = ClassDefPtr::dynamicCast(this->container());
@@ -4463,6 +4473,7 @@ Slice::Operation::createParamDecl(const string& name, const TypePtr& type, bool 
             }
         }
     }
+    */
 
     ContainedList matches = _unit->findContents(thisScope() + name);
     if(!matches.empty())
@@ -4824,6 +4835,7 @@ Slice::Operation::Operation(const ContainerPtr& container,
     _returnType(returnType),
     _mode(mode)
 {
+    /*
     if(_unit->profile() == IceE)
     {
         ClassDefPtr cl = ClassDefPtr::dynamicCast(this->container());
@@ -4844,6 +4856,7 @@ Slice::Operation::Operation(const ContainerPtr& container,
             }
         }
     }
+    */
 }
 
 // ----------------------------------------------------------------------

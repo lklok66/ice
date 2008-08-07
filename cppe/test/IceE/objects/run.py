@@ -3,8 +3,8 @@
 #
 # Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
 #
-# This copy of Ice-E is licensed to you under the terms described in the
-# ICEE_LICENSE file included in this distribution.
+# This copy of Ice is licensed to you under the terms described in the
+# ICE_LICENSE file included in this distribution.
 #
 # **********************************************************************
 
@@ -21,8 +21,8 @@ sys.path.append(os.path.join(toplevel, "config"))
 import TestUtil
 TestUtil.processCmdLine()
 
-name = os.path.join("IceE", "slicing")
+name = os.path.join("IceE", "objects")
 
-print "tests with regular server."
 TestUtil.clientServerTest(name)
+TestUtil.collocatedTest(name)
 sys.exit(0)

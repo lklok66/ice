@@ -24,6 +24,9 @@
 #ifndef ICEE_PURE_CLIENT
 #   include <IceE/ObjectAdapterFactoryF.h>
 #endif
+#ifdef ICEE_HAS_OBV
+#   include <IceE/ObjectFactoryManagerF.h>
+#endif
 #include <IceE/Shared.h>
 #include <IceE/RecMutex.h>
 #include <IceE/Initialize.h>
@@ -58,6 +61,10 @@ public:
 
 #ifndef ICEE_PURE_BLOCKING_CLIENT
     size_t threadPerConnectionStackSize() const;
+#endif
+
+#ifdef ICEE_HAS_OBV
+    ObjectFactoryManagerPtr servantFactoryManager() const;
 #endif
 
 #ifndef ICEE_PURE_CLIENT
@@ -107,6 +114,10 @@ private:
     ProxyFactoryPtr _proxyFactory;
     OutgoingConnectionFactoryPtr _outgoingConnectionFactory;
     EndpointFactoryPtr _endpointFactory;
+
+#ifdef ICEE_HAS_OBV
+    ObjectFactoryManagerPtr _servantFactoryManager;
+#endif
 
 #ifndef ICEE_PURE_CLIENT
     ObjectAdapterFactoryPtr _objectAdapterFactory;
