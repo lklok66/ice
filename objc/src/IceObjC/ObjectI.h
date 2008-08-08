@@ -21,13 +21,13 @@
 namespace IceObjC
 {
 
-class ServantWrapper : virtual public Ice::Object
+class ObjectWrapper : virtual public Ice::Object
 {
 public:
 
-    virtual ICEObject* getServant() = 0;
+    virtual ICEObject* getObject() = 0;
 };
-typedef IceUtil::Handle<ServantWrapper> ServantWrapperPtr;
+typedef IceUtil::Handle<ObjectWrapper> ObjectWrapperPtr;
 
 };
 

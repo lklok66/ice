@@ -12,8 +12,6 @@
 #import <IceObjC/IdentityI.h>
 #import <IceObjC/Util.h>
 
-#import <Foundation/NSPathUtilities.h>
-
 #include <Ice/LocalException.h>
 
 @implementation ICELocalException (Internal)
@@ -23,11 +21,8 @@
     {
         return nil;
     }
-    if(ex.ice_file())
-    {
-        file = [[[NSString alloc] initWithUTF8String:ex.ice_file()] lastPathComponent];
-        line = ex.ice_line();
-    }
+    file = ex.ice_file();
+    line = ex.ice_line();
     return self;
 }
 -(void)rethrowCxx__
@@ -41,17 +36,17 @@
 @end
 
 @implementation ICELocalException
--(id)init:(NSString*)f line:(int)l
+-(id)init:(const char*)f line:(int)l
 {
     if(![super initWithName:[self ice_name] reason:nil userInfo:nil])
     {
         return nil;
     }
-    file = [f copy];
+    file = f;
     line = l;
     return self;
 }
-+(id)localException:(NSString*)file line:(int)line
++(id)localException:(const char*)file line:(int)line
 {
     return [[[self alloc] init:file line:line] autorelease];
 }
@@ -67,9 +62,9 @@
         std::ostringstream os;
         os << ex;
         std::string str = os.str();
-        if(str.find("../../../cpp/") == 0)
+        if(str.find("../../../cpp/src/Ice") == 0)
         {
-            str = str.substr(13);
+            str = str.substr(21);
         }
         return [NSString stringWithUTF8String:str.c_str()];
     }
@@ -84,6 +79,18 @@
 -(NSString*)ice_name
 {
     return @"Ice::UserException";
+}
+-(BOOL)usesClasses__
+{
+    return FALSE;
+}
+-(void)write__:(ICEOutputStream*)stream
+{
+    // TODO
+}
+-(void)read__:(ICEInputStream*)stream
+{
+    // TODO
 }
 @end
 

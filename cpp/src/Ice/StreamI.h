@@ -85,11 +85,15 @@ public:
 
     virtual void readPendingObjects();
 
+    virtual void setClosure(void*);
+    virtual void* getClosure();
+
 private:
 
     Ice::CommunicatorPtr _communicator;
     IceInternal::BasicStream* _is;
     std::vector< ReadObjectCallbackPtr > _callbacks;
+    void* _closure;
 };
 
 //
@@ -158,11 +162,15 @@ public:
 
     virtual void finished(std::vector< Ice::Byte >&);
 
+    virtual void setClosure(void*);
+    virtual void* getClosure();
+
 private:
 
     Ice::CommunicatorPtr _communicator;
     IceInternal::BasicStream* _os;
     bool _own;
+    void* _closure;
 };
 
 }

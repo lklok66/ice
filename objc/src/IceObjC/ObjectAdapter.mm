@@ -226,7 +226,7 @@
     try
     {
         Ice::ObjectPtr wrapper = OBJECTADAPTER->remove([ident identity__]);
-        ICEObject* servant = IceObjC::ServantWrapperPtr::dynamicCast(wrapper)->getServant();
+        ICEObject* servant = IceObjC::ObjectWrapperPtr::dynamicCast(wrapper)->getObject();
         return [servant autorelease];
     }
     catch(const std::exception& ex)
@@ -240,7 +240,7 @@
     try
     {
         Ice::ObjectPtr wrapper = OBJECTADAPTER->removeFacet([ident identity__], fromNSString(facet));
-        ICEObject* servant = IceObjC::ServantWrapperPtr::dynamicCast(wrapper)->getServant();
+        ICEObject* servant = IceObjC::ObjectWrapperPtr::dynamicCast(wrapper)->getObject();
         return [servant autorelease];
     }
     catch(const std::exception& ex)
@@ -259,7 +259,7 @@
         for(Ice::FacetMap::const_iterator p = wrappers.begin(); p != wrappers.end(); ++p)
         {
             NSObject* key = toObjC(p->first);
-            NSObject* value = IceObjC::ServantWrapperPtr::dynamicCast(p->second)->getServant();
+            NSObject* value = IceObjC::ObjectWrapperPtr::dynamicCast(p->second)->getObject();
             [servants setObject:value forKey:key];
             [key release];
             [value release];
@@ -277,7 +277,7 @@
 {
     try
     {
-        return IceObjC::ServantWrapperPtr::dynamicCast(OBJECTADAPTER->find([ident identity__]))->getServant();
+        return IceObjC::ObjectWrapperPtr::dynamicCast(OBJECTADAPTER->find([ident identity__]))->getObject();
     }
     catch(const std::exception& ex)
     {
@@ -291,7 +291,7 @@
     try
     {
         Ice::ObjectPtr wrapper = OBJECTADAPTER->findFacet([ident identity__], fromNSString(facet));
-        return IceObjC::ServantWrapperPtr::dynamicCast(wrapper)->getServant();
+        return IceObjC::ObjectWrapperPtr::dynamicCast(wrapper)->getObject();
     }
     catch(const std::exception& ex)
     {
@@ -308,7 +308,7 @@
         NSMutableDictionary* servants = [[NSMutableDictionary alloc] initWithCapacity:wrappers.size()];
         for(Ice::FacetMap::const_iterator p = wrappers.begin(); p != wrappers.end(); ++p)
         {
-            [servants setObject:IceObjC::ServantWrapperPtr::dynamicCast(p->second)->getServant() forKey:toObjC(p->first)];
+            [servants setObject:IceObjC::ObjectWrapperPtr::dynamicCast(p->second)->getObject() forKey:toObjC(p->first)];
         }
         return servants;
     }
@@ -324,7 +324,7 @@
     try
     {
         Ice::ObjectPrx prx = [(ICEObjectPrx*)proxy objectPrx__];
-        return IceObjC::ServantWrapperPtr::dynamicCast(OBJECTADAPTER->findByProxy(prx))->getServant();
+        return IceObjC::ObjectWrapperPtr::dynamicCast(OBJECTADAPTER->findByProxy(prx))->getObject();
     }
     catch(const std::exception& ex)
     {

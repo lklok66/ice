@@ -12,6 +12,7 @@
 #include <Ice/Stream.h>
 
 @interface ICEInputStream (Internal)
++(void)installObjectFactory:(const Ice::CommunicatorPtr&)communicator;
 -(ICEInputStream*) initWithInputStream:(const Ice::InputStreamPtr&)is;
 -(Ice::InputStream*) is__;
 @end

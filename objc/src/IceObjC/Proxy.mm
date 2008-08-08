@@ -94,6 +94,7 @@
     catch(const std::exception& ex)
     {
         rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
     }
 }
 
@@ -102,14 +103,20 @@
     try
     {
         std::vector<Ice::Byte> inParams;
-        [os os__]->finished(inParams);
-        [os release];
-        
+        if(os)
+        {
+            [os os__]->finished(inParams);
+            [os release];
+        }
+
         std::vector<Ice::Byte> outParams;
         BOOL ok = OBJECTPRX->ice_invoke(fromNSString(operation), (Ice::OperationMode)mode, inParams, outParams);
     
-        Ice::InputStreamPtr s = Ice::createInputStream(OBJECTPRX->ice_getCommunicator(), outParams);
-        *is = [[ICEInputStream alloc] initWithInputStream:s.get()];
+        if(is)
+        {
+            Ice::InputStreamPtr s = Ice::createInputStream(OBJECTPRX->ice_getCommunicator(), outParams);
+            *is = [[ICEInputStream alloc] initWithInputStream:s];
+        }
         return ok;
     }
     catch(const std::exception& ex)

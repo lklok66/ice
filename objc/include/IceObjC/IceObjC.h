@@ -10,9 +10,8 @@
 #import <IceObjC/Initialize.h>
 #import <IceObjC/Communicator.h>
 #import <IceObjC/Properties.h>
-#import <IceObjC/Exception.h>
 #import <IceObjC/ObjectAdapter.h>
 #import <IceObjC/Logger.h>
 #import <IceObjC/Current.h>
 #import <IceObjC/Identity.h>
-
+#import <IceObjC/LocalException.h>

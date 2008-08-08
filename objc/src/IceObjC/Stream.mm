@@ -11,14 +11,201 @@
 #import <IceObjC/CommunicatorI.h>
 #import <IceObjC/ProxyI.h>
 #import <IceObjC/Util.h>
+#import <IceObjC/Object.h>
+#import <IceObjC/LocalException.h>
 
 #include <Ice/Stream.h>
+#include <Ice/ObjectFactory.h>
+
+#import <objc/runtime.h>
 
 #define IS ((Ice::InputStream*)is__)
 #define OS ((Ice::OutputStream*)os__)
 
+namespace IceObjC
+{
+
+class ObjectWriter : public Ice::ObjectWriter
+{
+public:
+    
+    ObjectWriter(ICEObject* obj) : _obj(obj)
+    {
+    }
+    
+    virtual void
+    write(const Ice::OutputStreamPtr& stream) const
+    {
+        @try
+        {
+            [_obj write__:(ICEOutputStream*)stream->getClosure()];
+        }
+        @catch(NSException* ex)
+        {
+            rethrowCxxException(ex);
+        }
+    }
+
+private:
+
+    ICEObject* _obj;
+};
+
+class ObjectReader : public Ice::ObjectReader
+{
+public:
+    
+    ObjectReader(ICEObject* obj) : _obj(obj)
+    {
+    }
+    
+    virtual void
+    read(const Ice::InputStreamPtr& stream, bool rid)
+    {
+        @try
+        {
+            [_obj read__:(ICEInputStream*)stream->getClosure() readTypeId:rid];
+        }
+        @catch(NSException* ex)
+        {
+            rethrowCxxException(ex);
+        }
+    }
+
+    ICEObject*
+    getObject()
+    {
+        return _obj;
+    }
+
+private:
+
+    ICEObject* _obj;
+};
+typedef IceUtil::Handle<ObjectReader> ObjectReaderPtr;
+
+class UserExceptionWriter : public Ice::UserExceptionWriter
+{
+public:
+    
+    UserExceptionWriter(ICEUserException* ex, const Ice::CommunicatorPtr& communicator) : 
+        Ice::UserExceptionWriter(communicator),
+        _ex(ex)
+    {
+    }
+    
+    virtual void
+    write(const Ice::OutputStreamPtr& stream) const
+    {
+        @try
+        {
+            [_ex write__:(ICEOutputStream*)stream->getClosure()];
+        }
+        @catch(NSException* ex)
+        {
+            rethrowCxxException(ex);
+        }
+    }
+
+    virtual bool 
+    usesClasses() const
+    {
+        return [_ex usesClasses__];
+    }
+
+    virtual std::string 
+    ice_name() const
+    {
+        return fromNSString([_ex ice_name]);
+    }
+
+    virtual Ice::Exception*
+    ice_clone() const
+    {
+        return new UserExceptionWriter(*this);
+    }
+
+    virtual void 
+    ice_throw() const
+    {
+        throw *this;
+    }
+
+private:
+
+    ICEUserException* _ex;
+};
+
+class ReadObjectCallbackI : public Ice::ReadObjectCallback
+{
+public:
+    
+    ReadObjectCallbackI(id<ICEReadObjectCallback> cb) : _cb(cb)
+    {
+    }
+
+    virtual void
+    invoke(const Ice::ObjectPtr& obj)
+    {
+        @try
+        {
+            [_cb invoke:ObjectReaderPtr::dynamicCast(obj)->getObject()];
+        }
+        @catch(NSException* ex)
+        {
+            rethrowCxxException(ex);
+        }
+    }
+
+private:
+
+    id<ICEReadObjectCallback> _cb;
+};
+
+class ObjectReaderFactory : public Ice::ObjectFactory
+{
+public:
+
+    virtual Ice::ObjectPtr
+    create(const std::string& type)
+    {
+        std::string objcType = type;
+        if(objcType.find("::Ice::"))
+        {
+            objcType = objcType.replace(0, 7, "ICE");
+        }
+        else
+        {
+            std::string::size_type pos;
+            while((pos = objcType.find("::")) != std::string::npos)
+            {
+                objcType = objcType.replace(pos, 2, "");
+            }
+        }
+
+        Class c = objc_lookUpClass(objcType.c_str());
+        if(c == nil)
+        {
+            return 0; // No object factory.
+        }
+
+        return new ObjectReader([[c alloc] init]);
+    }
+
+    virtual void
+    destroy()
+    {
+    }
+};
+
+}
+
 @implementation ICEInputStream (Internal)
 
++(void)installObjectFactory:(const Ice::CommunicatorPtr&)communicator
+{
+    communicator->addObjectFactory(new IceObjC::ObjectReaderFactory(), "");
+}
 -(ICEInputStream*) initWithInputStream:(const Ice::InputStreamPtr&)arg
 {
     if(![super init])
@@ -26,22 +213,20 @@
         return nil;
     }
     is__ = arg.get();
-    ((Ice::InputStream*)is__)->__incRef();
+    IS->__incRef();
+    IS->setClosure(self);
     return self;
 }
-
 -(Ice::InputStream*) is__
 {
-    return (Ice::InputStream*)is__;
+    return IS;
 }
-
 -(void) dealloc
 {
-    ((Ice::InputStream*)is__)->__decRef();
+    IS->__decRef();
     is__ = 0;
     [super dealloc];
 }
-
 @end
 
 @implementation ICEInputStream
@@ -88,7 +273,7 @@
 {
     try
     {
-        return toNSArray(IS->readBoolSeq());
+        return [toNSArray(IS->readBoolSeq()) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -110,12 +295,30 @@
     }
 }
 
--(NSArray*) readByteSeq
+-(NSData*) readByteSeq
 {
     try
     {
-        return toNSArray(IS->readByteSeq());
+        std::pair<const Ice::Byte*, const Ice::Byte*> seq;
+        IS->readByteSeq(seq);
+        return [NSData dataWithBytes:seq.first length:(seq.second - seq.first)];
+    }    
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
     }
+}
+
+-(NSData*) readByteSeqNoCopy
+{
+    try
+    {
+        std::pair<const Ice::Byte*, const Ice::Byte*> seq;
+        IS->readByteSeq(seq);
+        return [NSData dataWithBytesNoCopy:const_cast<Ice::Byte*>(seq.first) 
+                       length:(seq.second - seq.first) freeWhenDone:FALSE];
+    }    
     catch(const std::exception& ex)
     {
         rethrowObjCException(ex);
@@ -140,7 +343,7 @@
 {
     try
     {
-        return toNSArray(IS->readShortSeq());
+        return [toNSArray(IS->readShortSeq()) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -166,7 +369,7 @@
 {
     try
     {
-        return toNSArray(IS->readIntSeq());
+        return [toNSArray(IS->readIntSeq()) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -192,7 +395,7 @@
 {
     try
     {
-        return toNSArray(IS->readLongSeq());
+        return [toNSArray(IS->readLongSeq()) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -218,7 +421,7 @@
 {
     try
     {
-        return toNSArray(IS->readFloatSeq());
+        return [toNSArray(IS->readFloatSeq()) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -244,7 +447,7 @@
 {
     try
     {
-        return toNSArray(IS->readDoubleSeq());
+        return [toNSArray(IS->readDoubleSeq()) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -270,7 +473,7 @@
 {
     try
     {
-        return toNSArray(IS->readStringSeq());
+        return [toNSArray(IS->readStringSeq()) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -305,9 +508,17 @@
     }
 }
 
-//-(void) readObject(const ICEReadObjectCallbackPtr&)
-//{
-//}
+-(void) readObject:(id<ICEReadObjectCallback>)callback
+{
+    try
+    {
+        IS->readObject(new IceObjC::ReadObjectCallbackI(callback));
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
+}
 
 -(NSString*) readTypeId
 {
@@ -324,21 +535,7 @@
 
 -(void) throwException
 {
-    try
-    {
-        try
-        {
-            IS->throwException();
-        }
-        catch(const std::exception& ex)
-        {
-            rethrowObjCException(ex);
-        }
-    }
-    catch(const std::exception& ex)
-    {
-        rethrowObjCException(ex);
-    }
+    // TODO
 }
 
 -(void) startSlice
@@ -436,18 +633,19 @@
         return nil;
     }
     os__ = arg.get();
-    ((Ice::OutputStream*)os__)->__incRef();
+    OS->__incRef();
+    OS->setClosure(self);
     return self;
 }
 
 -(Ice::OutputStream*) os__
 {
-    return (Ice::OutputStream*)os__;
+    return OS;
 }
 
 -(void) dealloc
 {
-    ((Ice::OutputStream*)os__)->__decRef();
+    OS->__decRef();
     os__ = 0;
     [super dealloc];
 }
@@ -506,19 +704,17 @@
     }
 }
 
--(void) writeByteSeq:(NSArray*)v
+-(void) writeByteSeq:(NSData*)v
 { 
     try
     {
-        std::vector<ICEByte> s;
-        OS->writeByteSeq(fromNSArray(v, s));
+        OS->writeByteSeq((ICEByte*)[v bytes], (ICEByte*)[v bytes] + [v length]);
     }
     catch(const std::exception& ex)
     {
         rethrowObjCException(ex);
     }
 }
-
 
 -(void) writeShort:(ICEShort)v
 {
@@ -570,7 +766,6 @@
         rethrowObjCException(ex);
     }
 }
-
 
 -(void) writeLong:(ICELong)v
 {
@@ -700,17 +895,23 @@
     }
 }
 
-//-(void) writeObject:(ICEObject*)v
-//{
-    // TODO
-    //OS->writeObject([v object__]);
-//}
-
--(void) writeTypeId:(NSString*)v
+-(void) writeObject:(ICEObject*)v
 {
     try
     {
-        OS->writeTypeId(fromNSString(v));
+        OS->writeObject(new IceObjC::ObjectWriter(v));
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
+}
+
+-(void) writeTypeId:(const char*)v
+{
+    try
+    {
+        OS->writeTypeId(v);
     }
     catch(const std::exception& ex)
     {
@@ -722,7 +923,7 @@
 {
     try
     {
-        // TODO
+        OS->writeException(IceObjC::UserExceptionWriter(v, OS->communicator()));
     }
     catch(const std::exception& ex)
     {

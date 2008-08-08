@@ -370,3 +370,4 @@ IceInternal::ServantManager::destroy()
     servantMapMap.clear();
     locatorMap.clear();
 }
+

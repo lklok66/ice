@@ -11,16 +11,25 @@
 
 #import <Foundation/NSException.h>
 
+//
+// Forward declarations
+// 
+@class ICEOutputStream;
+@class ICEInputStream;
+
 @interface ICELocalException : NSException
 {
-    NSString* file;
+    const char* file;
     int line;
 }
 -(NSString*)ice_name;
--(id)init:(NSString*)file line:(int)line;
-+(id)localException:(NSString*)file line:(int)line;
+-(id)init:(const char*)file line:(int)line;
++(id)localException:(const char*)file line:(int)line;
 @end
 
 @interface ICEUserException : NSException
 -(NSString*)ice_name;
+-(BOOL)usesClasses__;
+-(void)write__:(ICEOutputStream*)stream;
+-(void)read__:(ICEInputStream*)stream;
 @end

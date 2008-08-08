@@ -16,7 +16,7 @@
 @implementation ICEInitializationException
 -(void)rethrowCxx__
 {
-    throw Ice::InitializationException([file UTF8String], line, fromNSString(_objc_reason));
+    throw Ice::InitializationException(file, line, fromNSString(_objc_reason));
 }
 -(NSString*)ice_name
 {
@@ -28,7 +28,7 @@
 @implementation ICEPluginInitializationException
 -(void)rethrowCxx__
 {
-    throw Ice::PluginInitializationException([file UTF8String], line, fromNSString(_objc_reason));
+    throw Ice::PluginInitializationException(file, line, fromNSString(_objc_reason));
 }
 -(NSString*)ice_name
 {
@@ -40,7 +40,7 @@
 @implementation ICECollocationOptimizationException
 -(void)rethrowCxx__
 {
-    throw Ice::CollocationOptimizationException([file UTF8String], line);
+    throw Ice::CollocationOptimizationException(file, line);
 }
 -(NSString*)ice_name
 {
@@ -51,7 +51,7 @@
 @implementation ICEAlreadyRegisteredException
 -(void)rethrowCxx__
 {
-    throw Ice::AlreadyRegisteredException([file UTF8String], line, fromNSString(kindOfObject), fromNSString(_objc_id));
+    throw Ice::AlreadyRegisteredException(file, line, fromNSString(kindOfObject), fromNSString(_objc_id));
 }
 -(NSString*)ice_name
 {
@@ -64,7 +64,7 @@
 @implementation ICENotRegisteredException
 -(void)rethrowCxx__
 {
-    throw Ice::NotRegisteredException([file UTF8String], line, fromNSString(kindOfObject), fromNSString(_objc_id));
+    throw Ice::NotRegisteredException(file, line, fromNSString(kindOfObject), fromNSString(_objc_id));
 }
 -(NSString*)ice_name
 {
@@ -77,7 +77,7 @@
 @implementation ICETwowayOnlyException
 -(void)rethrowCxx__
 {
-    throw Ice::TwowayOnlyException([file UTF8String], line, fromNSString(operation));
+    throw Ice::TwowayOnlyException(file, line, fromNSString(operation));
 }
 -(NSString*)ice_name
 {
@@ -89,7 +89,7 @@
 @implementation ICECloneNotImplementedException
 -(void)rethrowCxx__
 {
-    throw Ice::CloneNotImplementedException([file UTF8String], line);
+    throw Ice::CloneNotImplementedException(file, line);
 }
 -(NSString*)ice_name
 {
@@ -100,7 +100,7 @@
 @implementation ICEUnknownException
 -(void)rethrowCxx__
 {
-    throw Ice::UnknownException([file UTF8String], line, fromNSString(unknown));
+    throw Ice::UnknownException(file, line, fromNSString(unknown));
 }
 -(NSString*)ice_name
 {
@@ -112,7 +112,7 @@
 @implementation ICEUnknownLocalException
 -(void)rethrowCxx__
 {
-    throw Ice::UnknownLocalException([file UTF8String], line, fromNSString(unknown));
+    throw Ice::UnknownLocalException(file, line, fromNSString(unknown));
 }
 -(NSString*)ice_name
 {
@@ -123,7 +123,7 @@
 @implementation ICEUnknownUserException
 -(void)rethrowCxx__
 {
-    throw Ice::UnknownUserException([file UTF8String], line, fromNSString(unknown));
+    throw Ice::UnknownUserException(file, line, fromNSString(unknown));
 }
 -(NSString*)ice_name
 {
@@ -134,7 +134,7 @@
 @implementation ICEVersionMismatchException
 -(void)rethrowCxx__
 {
-    throw Ice::VersionMismatchException([file UTF8String], line);
+    throw Ice::VersionMismatchException(file, line);
 }
 -(NSString*)ice_name
 {
@@ -145,7 +145,7 @@
 @implementation ICECommunicatorDestroyedException
 -(void)rethrowCxx__
 {
-    throw Ice::CommunicatorDestroyedException([file UTF8String], line);
+    throw Ice::CommunicatorDestroyedException(file, line);
 }
 -(NSString*)ice_name
 {
@@ -156,7 +156,7 @@
 @implementation ICEObjectAdapterDeactivatedException
 -(void)rethrowCxx__
 {
-    throw Ice::ObjectAdapterDeactivatedException([file UTF8String], line, fromNSString(_objc_name));
+    throw Ice::ObjectAdapterDeactivatedException(file, line, fromNSString(_objc_name));
 }
 -(NSString*)ice_name
 {
@@ -168,7 +168,7 @@
 @implementation ICEObjectAdapterIdInUseException
 -(void)rethrowCxx__
 {
-    throw Ice::ObjectAdapterIdInUseException([file UTF8String], line, fromNSString(_objc_id));
+    throw Ice::ObjectAdapterIdInUseException(file, line, fromNSString(_objc_id));
 }
 -(NSString*)ice_name
 {
@@ -180,7 +180,7 @@
 @implementation ICENoEndpointException
 -(void)rethrowCxx__
 {
-    throw Ice::NoEndpointException([file UTF8String], line, fromNSString(proxy));
+    throw Ice::NoEndpointException(file, line, fromNSString(proxy));
 }
 -(NSString*)ice_name
 {
@@ -192,7 +192,7 @@
 @implementation ICEEndpointParseException
 -(void)rethrowCxx__
 {
-    throw Ice::EndpointParseException([file UTF8String], line, fromNSString(str));
+    throw Ice::EndpointParseException(file, line, fromNSString(str));
 }
 -(NSString*)ice_name
 {
@@ -204,7 +204,7 @@
 @implementation ICEEndpointSelectionTypeParseException
 -(void)rethrowCxx__
 {
-    throw Ice::EndpointSelectionTypeParseException([file UTF8String], line, fromNSString(str));
+    throw Ice::EndpointSelectionTypeParseException(file, line, fromNSString(str));
 }
 -(NSString*)ice_name
 {
@@ -216,7 +216,7 @@
 @implementation ICEIdentityParseException
 -(void)rethrowCxx__
 {
-    throw Ice::IdentityParseException([file UTF8String], line, fromNSString(str));
+    throw Ice::IdentityParseException(file, line, fromNSString(str));
 }
 -(NSString*)ice_name
 {
@@ -228,7 +228,7 @@
 @implementation ICEProxyParseException
 -(void)rethrowCxx__
 {
-    throw Ice::ProxyParseException([file UTF8String], line, fromNSString(str));
+    throw Ice::ProxyParseException(file, line, fromNSString(str));
 }
 -(NSString*)ice_name
 {
@@ -240,7 +240,7 @@
 @implementation ICEIllegalIdentityException
 -(void)rethrowCxx__
 {
-    throw Ice::IllegalIdentityException([file UTF8String], line, [_objc_id identity__]);
+    throw Ice::IllegalIdentityException(file, line, [_objc_id identity__]);
 }
 -(NSString*)ice_name
 {
@@ -252,7 +252,7 @@
 @implementation ICERequestFailedException
 -(void)rethrowCxx__
 {
-    throw Ice::RequestFailedException([file UTF8String], line, [_objc_id identity__], fromNSString(facet), fromNSString(operation));
+    throw Ice::RequestFailedException(file, line, [_objc_id identity__], fromNSString(facet), fromNSString(operation));
 }
 -(NSString*)ice_name
 {
@@ -266,7 +266,7 @@
 @implementation ICEObjectNotExistException
 -(void)rethrowCxx__
 {
-    throw Ice::ObjectNotExistException([file UTF8String], line, [_objc_id identity__], fromNSString(facet), fromNSString(operation));
+    throw Ice::ObjectNotExistException(file, line, [_objc_id identity__], fromNSString(facet), fromNSString(operation));
 }
 -(NSString*)ice_name
 {
@@ -277,7 +277,7 @@
 @implementation ICEFacetNotExistException
 -(void)rethrowCxx__
 {
-    throw Ice::FacetNotExistException([file UTF8String], line, [_objc_id identity__], fromNSString(facet), fromNSString(operation));
+    throw Ice::FacetNotExistException(file, line, [_objc_id identity__], fromNSString(facet), fromNSString(operation));
 }
 -(NSString*)ice_name
 {
@@ -288,7 +288,7 @@
 @implementation ICEOperationNotExistException
 -(void)rethrowCxx__
 {
-    throw Ice::OperationNotExistException([file UTF8String], line, [_objc_id identity__], fromNSString(facet), fromNSString(operation));
+    throw Ice::OperationNotExistException(file, line, [_objc_id identity__], fromNSString(facet), fromNSString(operation));
 }
 -(NSString*)ice_name
 {
@@ -299,7 +299,7 @@
 @implementation ICESyscallException
 -(void)rethrowCxx__
 {
-    throw Ice::SyscallException([file UTF8String], line, error);
+    throw Ice::SyscallException(file, line, error);
 }
 -(NSString*)ice_name
 {
@@ -311,7 +311,7 @@
 @implementation ICESocketException
 -(void)rethrowCxx__
 {
-    throw Ice::SocketException([file UTF8String], line, error);
+    throw Ice::SocketException(file, line, error);
 }
 -(NSString*)ice_name
 {
@@ -322,7 +322,7 @@
 @implementation ICEFileException
 -(void)rethrowCxx__
 {
-    throw Ice::FileException([file UTF8String], line, error, fromNSString(path));
+    throw Ice::FileException(file, line, error, fromNSString(path));
 }
 -(NSString*)ice_name
 {
@@ -334,7 +334,7 @@
 @implementation ICEConnectFailedException
 -(void)rethrowCxx__
 {
-    throw Ice::ConnectFailedException([file UTF8String], line, error);
+    throw Ice::ConnectFailedException(file, line, error);
 }
 -(NSString*)ice_name
 {
@@ -345,7 +345,7 @@
 @implementation ICEConnectionRefusedException
 -(void)rethrowCxx__
 {
-    throw Ice::ConnectionRefusedException([file UTF8String], line, error);
+    throw Ice::ConnectionRefusedException(file, line, error);
 }
 -(NSString*)ice_name
 {
@@ -356,7 +356,7 @@
 @implementation ICEConnectionLostException
 -(void)rethrowCxx__
 {
-    throw Ice::ConnectionLostException([file UTF8String], line, error);
+    throw Ice::ConnectionLostException(file, line, error);
 }
 -(NSString*)ice_name
 {
@@ -367,7 +367,7 @@
 @implementation ICEDNSException
 -(void)rethrowCxx__
 {
-    throw Ice::DNSException([file UTF8String], line, error, fromNSString(host));
+    throw Ice::DNSException(file, line, error, fromNSString(host));
 }
 -(NSString*)ice_name
 {
@@ -380,7 +380,7 @@
 @implementation ICETimeoutException
 -(void)rethrowCxx__
 {
-    throw Ice::TimeoutException([file UTF8String], line);
+    throw Ice::TimeoutException(file, line);
 }
 -(NSString*)ice_name
 {
@@ -391,7 +391,7 @@
 @implementation ICEConnectTimeoutException
 -(void)rethrowCxx__
 {
-    throw Ice::ConnectTimeoutException([file UTF8String], line);
+    throw Ice::ConnectTimeoutException(file, line);
 }
 -(NSString*)ice_name
 {
@@ -402,7 +402,7 @@
 @implementation ICECloseTimeoutException
 -(void)rethrowCxx__
 {
-    throw Ice::CloseTimeoutException([file UTF8String], line);
+    throw Ice::CloseTimeoutException(file, line);
 }
 -(NSString*)ice_name
 {
@@ -413,7 +413,7 @@
 @implementation ICEConnectionTimeoutException
 -(void)rethrowCxx__
 {
-    throw Ice::ConnectionTimeoutException([file UTF8String], line);
+    throw Ice::ConnectionTimeoutException(file, line);
 }
 -(NSString*)ice_name
 {
@@ -424,7 +424,7 @@
 @implementation ICEProtocolException
 -(void)rethrowCxx__
 {
-    throw Ice::ProtocolException([file UTF8String], line, fromNSString(_objc_reason));
+    throw Ice::ProtocolException(file, line, fromNSString(_objc_reason));
 }
 -(NSString*)ice_name
 {
@@ -437,7 +437,7 @@
 -(void)rethrowCxx__
 {
     Ice::ByteSeq s;
-    throw Ice::BadMagicException([file UTF8String], line, fromNSString(_objc_reason), fromNSArray(badMagic, s));
+    throw Ice::BadMagicException(file, line, fromNSString(_objc_reason), fromNSArray(badMagic, s));
 }
 -(NSString*)ice_name
 {
@@ -449,7 +449,7 @@
 @implementation ICEUnsupportedProtocolException
 -(void)rethrowCxx__
 {
-    throw Ice::UnsupportedProtocolException([file UTF8String], line, fromNSString(_objc_reason), badMajor, badMinor, major, minor);
+    throw Ice::UnsupportedProtocolException(file, line, fromNSString(_objc_reason), badMajor, badMinor, major, minor);
 }
 -(NSString*)ice_name
 {
@@ -464,7 +464,7 @@
 @implementation ICEUnsupportedEncodingException
 -(void)rethrowCxx__
 {
-    throw Ice::UnsupportedEncodingException([file UTF8String], line, fromNSString(_objc_reason), badMajor, badMinor, major, minor);
+    throw Ice::UnsupportedEncodingException(file, line, fromNSString(_objc_reason), badMajor, badMinor, major, minor);
 }
 -(NSString*)ice_name
 {
@@ -479,7 +479,7 @@
 @implementation ICEUnknownMessageException
 -(void)rethrowCxx__
 {
-    throw Ice::UnknownMessageException([file UTF8String], line, fromNSString(_objc_reason));
+    throw Ice::UnknownMessageException(file, line, fromNSString(_objc_reason));
 }
 -(NSString*)ice_name
 {
@@ -490,7 +490,7 @@
 @implementation ICEConnectionNotValidatedException
 -(void)rethrowCxx__
 {
-    throw Ice::ConnectionNotValidatedException([file UTF8String], line, fromNSString(_objc_reason));
+    throw Ice::ConnectionNotValidatedException(file, line, fromNSString(_objc_reason));
 }
 -(NSString*)ice_name
 {
@@ -501,7 +501,7 @@
 @implementation ICEUnknownRequestIdException
 -(void)rethrowCxx__
 {
-    throw Ice::UnknownRequestIdException([file UTF8String], line, fromNSString(_objc_reason));
+    throw Ice::UnknownRequestIdException(file, line, fromNSString(_objc_reason));
 }
 -(NSString*)ice_name
 {
@@ -512,7 +512,7 @@
 @implementation ICEUnknownReplyStatusException
 -(void)rethrowCxx__
 {
-    throw Ice::UnknownReplyStatusException([file UTF8String], line, fromNSString(_objc_reason));
+    throw Ice::UnknownReplyStatusException(file, line, fromNSString(_objc_reason));
 }
 -(NSString*)ice_name
 {
@@ -523,7 +523,7 @@
 @implementation ICECloseConnectionException
 -(void)rethrowCxx__
 {
-    throw Ice::CloseConnectionException([file UTF8String], line, fromNSString(_objc_reason));
+    throw Ice::CloseConnectionException(file, line, fromNSString(_objc_reason));
 }
 -(NSString*)ice_name
 {
@@ -534,7 +534,7 @@
 @implementation ICEForcedCloseConnectionException
 -(void)rethrowCxx__
 {
-    throw Ice::ForcedCloseConnectionException([file UTF8String], line, fromNSString(_objc_reason));
+    throw Ice::ForcedCloseConnectionException(file, line, fromNSString(_objc_reason));
 }
 -(NSString*)ice_name
 {
@@ -545,7 +545,7 @@
 @implementation ICEIllegalMessageSizeException
 -(void)rethrowCxx__
 {
-    throw Ice::IllegalMessageSizeException([file UTF8String], line, fromNSString(_objc_reason));
+    throw Ice::IllegalMessageSizeException(file, line, fromNSString(_objc_reason));
 }
 -(NSString*)ice_name
 {
@@ -556,7 +556,7 @@
 @implementation ICECompressionException
 -(void)rethrowCxx__
 {
-    throw Ice::CompressionException([file UTF8String], line, fromNSString(_objc_reason));
+    throw Ice::CompressionException(file, line, fromNSString(_objc_reason));
 }
 -(NSString*)ice_name
 {
@@ -567,7 +567,7 @@
 @implementation ICEDatagramLimitException
 -(void)rethrowCxx__
 {
-    throw Ice::DatagramLimitException([file UTF8String], line, fromNSString(_objc_reason));
+    throw Ice::DatagramLimitException(file, line, fromNSString(_objc_reason));
 }
 -(NSString*)ice_name
 {
@@ -578,7 +578,7 @@
 @implementation ICEMarshalException
 -(void)rethrowCxx__
 {
-    throw Ice::MarshalException([file UTF8String], line, fromNSString(_objc_reason));
+    throw Ice::MarshalException(file, line, fromNSString(_objc_reason));
 }
 -(NSString*)ice_name
 {
@@ -589,7 +589,7 @@
 @implementation ICEProxyUnmarshalException
 -(void)rethrowCxx__
 {
-    throw Ice::ProxyUnmarshalException([file UTF8String], line, fromNSString(_objc_reason));
+    throw Ice::ProxyUnmarshalException(file, line, fromNSString(_objc_reason));
 }
 -(NSString*)ice_name
 {
@@ -600,7 +600,7 @@
 @implementation ICEUnmarshalOutOfBoundsException
 -(void)rethrowCxx__
 {
-    throw Ice::UnmarshalOutOfBoundsException([file UTF8String], line, fromNSString(_objc_reason));
+    throw Ice::UnmarshalOutOfBoundsException(file, line, fromNSString(_objc_reason));
 }
 -(NSString*)ice_name
 {
@@ -611,7 +611,7 @@
 @implementation ICEIllegalIndirectionException
 -(void)rethrowCxx__
 {
-    throw Ice::IllegalIndirectionException([file UTF8String], line, fromNSString(_objc_reason));
+    throw Ice::IllegalIndirectionException(file, line, fromNSString(_objc_reason));
 }
 -(NSString*)ice_name
 {
@@ -622,7 +622,7 @@
 @implementation ICENoObjectFactoryException
 -(void)rethrowCxx__
 {
-    throw Ice::NoObjectFactoryException([file UTF8String], line, fromNSString(_objc_reason), fromNSString(type));
+    throw Ice::NoObjectFactoryException(file, line, fromNSString(_objc_reason), fromNSString(type));
 }
 -(NSString*)ice_name
 {
@@ -634,7 +634,7 @@
 @implementation ICEUnexpectedObjectException
 -(void)rethrowCxx__
 {
-    throw Ice::UnexpectedObjectException([file UTF8String], line, fromNSString(_objc_reason), fromNSString(type), fromNSString(expectedType));
+    throw Ice::UnexpectedObjectException(file, line, fromNSString(_objc_reason), fromNSString(type), fromNSString(expectedType));
 }
 -(NSString*)ice_name
 {
@@ -647,7 +647,7 @@
 @implementation ICEMemoryLimitException
 -(void)rethrowCxx__
 {
-    throw Ice::MemoryLimitException([file UTF8String], line, fromNSString(_objc_reason));
+    throw Ice::MemoryLimitException(file, line, fromNSString(_objc_reason));
 }
 -(NSString*)ice_name
 {
@@ -658,7 +658,7 @@
 @implementation ICEStringConversionException
 -(void)rethrowCxx__
 {
-    throw Ice::StringConversionException([file UTF8String], line, fromNSString(_objc_reason));
+    throw Ice::StringConversionException(file, line, fromNSString(_objc_reason));
 }
 -(NSString*)ice_name
 {
@@ -669,7 +669,7 @@
 @implementation ICEEncapsulationException
 -(void)rethrowCxx__
 {
-    throw Ice::EncapsulationException([file UTF8String], line, fromNSString(_objc_reason));
+    throw Ice::EncapsulationException(file, line, fromNSString(_objc_reason));
 }
 -(NSString*)ice_name
 {
@@ -680,7 +680,7 @@
 @implementation ICENegativeSizeException
 -(void)rethrowCxx__
 {
-    throw Ice::NegativeSizeException([file UTF8String], line, fromNSString(_objc_reason));
+    throw Ice::NegativeSizeException(file, line, fromNSString(_objc_reason));
 }
 -(NSString*)ice_name
 {
@@ -691,7 +691,7 @@
 @implementation ICEFeatureNotSupportedException
 -(void)rethrowCxx__
 {
-    throw Ice::FeatureNotSupportedException([file UTF8String], line, fromNSString(unsupportedFeature));
+    throw Ice::FeatureNotSupportedException(file, line, fromNSString(unsupportedFeature));
 }
 -(NSString*)ice_name
 {
@@ -703,7 +703,7 @@
 @implementation ICESecurityException
 -(void)rethrowCxx__
 {
-    throw Ice::SecurityException([file UTF8String], line, fromNSString(_objc_reason));
+    throw Ice::SecurityException(file, line, fromNSString(_objc_reason));
 }
 -(NSString*)ice_name
 {
@@ -715,7 +715,7 @@
 @implementation ICEFixedProxyException
 -(void)rethrowCxx__
 {
-    throw Ice::FixedProxyException([file UTF8String], line);
+    throw Ice::FixedProxyException(file, line);
 }
 -(NSString*)ice_name
 {
@@ -726,7 +726,7 @@
 @implementation ICEResponseSentException
 -(void)rethrowCxx__
 {
-    throw Ice::ResponseSentException([file UTF8String], line);
+    throw Ice::ResponseSentException(file, line);
 }
 -(NSString*)ice_name
 {

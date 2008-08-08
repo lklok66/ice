@@ -8,7 +8,7 @@
 // **********************************************************************
 
 #import <IceObjC/IceObjC.h>
-
+#import <IceObjC/LocalException.h>
 #import <Foundation/NSAutoreleasePool.h>
 
 #import <HelloI.h>

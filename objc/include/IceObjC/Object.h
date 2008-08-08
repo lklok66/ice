@@ -20,6 +20,9 @@
 @protocol ICEObject
 -(BOOL) ice_isA:(NSString*)typeId current:(ICECurrent*)current;
 -(void) ice_ping:(ICECurrent*)current;
+-(NSString*) ice_id:(ICECurrent*)current;
+-(NSArray*) ice_ids:(ICECurrent*)current;
++(const char*) ice_staticId;
 @end
 
 @interface ICEObject : NSObject<ICEObject>
@@ -28,4 +31,6 @@
 }
 -(ICEOutputStream*) createOutputStream__:(ICECurrent*)current;
 -(BOOL) dispatch__:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream**)os;
+-(void) write__:(ICEOutputStream*)os;
+-(void) read__:(ICEInputStream*)is readTypeId:(BOOL)rid;
 @end

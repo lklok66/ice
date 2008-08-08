@@ -13,8 +13,6 @@
 
 #include <Ice/LocalException.h>
 
-#import <Foundation/NSInvocation.h>
-
 #import <objc/runtime.h>
 
 void

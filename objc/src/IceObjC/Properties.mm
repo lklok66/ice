@@ -55,6 +55,7 @@
     catch(const std::exception& ex)
     {
         rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
     }
 }
 -(NSString*) getPropertyWithDefault:(NSString*)key value:(NSString*)value
@@ -66,6 +67,7 @@
     catch(const std::exception& ex)
     {
         rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
     }
 }
 -(int) getPropertyAsInt:(NSString*)key
@@ -77,6 +79,7 @@
     catch(const std::exception& ex)
     {
         rethrowObjCException(ex);
+        return 0; // Keep the compiler happy.
     }
 }
 -(int) getPropertyAsIntWithDefault:(NSString*)key value:(int)value
@@ -88,6 +91,7 @@
     catch(const std::exception& ex)
     {
         rethrowObjCException(ex);
+        return 0; // Keep the compiler happy.
     }
 }
 -(NSArray*) getPropertyAsList:(NSString*)key
@@ -99,6 +103,7 @@
     catch(const std::exception& ex)
     {
         rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
     }
 }
 -(NSArray*) getPropertyAsListWithDefault:(NSString*)key value:(NSArray*)value
@@ -112,6 +117,7 @@
     catch(const std::exception& ex)
     {
         rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
     }
 }
 -(NSDictionary*) getPropertiesForPrefix:(NSString*)prefix
@@ -123,6 +129,7 @@
     catch(const std::exception& ex)
     {
         rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
     }
 }
 -(void) setProperty:(NSString*)key value:(NSString*)value
@@ -145,6 +152,7 @@
     catch(const std::exception& ex)
     {
         rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
     }
 }
 -(NSArray*) parseCommandLineOptions:(NSString*)prefix options:(NSArray*)options
@@ -158,6 +166,7 @@
     catch(const std::exception& ex)
     {
         rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
     }
 }
 -(NSArray*) parseIceCommandLineOptions:(NSArray*)options
@@ -171,6 +180,7 @@
     catch(const std::exception& ex)
     {
         rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
     }
 }
 -(void) load:(NSString*)file
@@ -193,6 +203,7 @@
     catch(const std::exception& ex)
     {
         rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
     }
 }
 

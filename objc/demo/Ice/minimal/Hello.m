@@ -9,6 +9,8 @@
 
 #import <Hello.h>
 
+#import <IceObjC/LocalException.h>
+
 @implementation HelloPrx
 
 +(id<HelloPrx>) uncheckedCast:(id<ICEObjectPrx>)proxy
@@ -23,10 +25,7 @@
 
 -(void) sayHello
 {
-    ICEOutputStream* os = [self createOutputStream__];
-    ICEInputStream* is;
-    BOOL ok = [self invoke__:@"sayHello" mode:Idempotent os:os is:&is];
-    [is release];
+    BOOL ok = [self invoke__:@"sayHello" mode:Idempotent os:nil is:nil];
 }
 
 @end

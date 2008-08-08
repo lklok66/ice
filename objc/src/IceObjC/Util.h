@@ -10,7 +10,6 @@
 #include <IceObjC/Config.h>
 
 #import <Foundation/NSException.h>
-#import <Foundation/NSProxy.h>
 
 #include <exception>
 #include <vector>
@@ -51,6 +50,19 @@ inline void
 fromObjC(id object, std::string& s)
 {
     s = [object UTF8String];
+}
+
+inline NSArray*
+toNSArray(const char* arr[], size_t size)
+{
+    NSMutableArray* array = [[NSMutableArray alloc] initWithCapacity:size];
+    for(size_t i = 0; i < size; ++i)
+    {
+        NSObject* obj = [[NSString alloc] initWithUTF8String:arr[i]];
+        [array addObject:obj];
+        [obj release];
+    }
+    return array;
 }
 
 template<typename T> NSArray*

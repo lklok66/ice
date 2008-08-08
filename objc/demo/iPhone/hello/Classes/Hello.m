@@ -23,10 +23,7 @@
 
 -(void) sayHello
 {
-    ICEOutputStream* os = [self createOutputStream__];
-    ICEInputStream* is;
-    BOOL ok = [self invoke__:@"sayHello" mode:Idempotent os:os is:&is];
-    [is release];
+    [self invoke__:@"sayHello" mode:Idempotent os:nil is:nil];
 }
 
 @end

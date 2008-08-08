@@ -19,6 +19,10 @@
 @class ICECommunicator;
 @class ICEUserException;
 
+@protocol ICEReadObjectCallback
+-(void)invoke:(ICEObject*)obj;
+@end
+
 @interface ICEInputStream : NSObject
 {
     void* is__;
@@ -32,7 +36,8 @@
 -(NSArray*) readBoolSeq;
 
 -(ICEByte) readByte;
--(NSArray*) readByteSeq;
+-(NSData*) readByteSeq;
+-(NSData*) readByteSeqNoCopy;
 
 -(ICEShort) readShort;
 -(NSArray*) readShortSeq;
@@ -56,7 +61,7 @@
 
 -(ICEObjectPrx*) readProxy;
 
-//-(void) readObject(const ICEReadObjectCallbackPtr&);
+-(void) readObject:(id<ICEReadObjectCallback>)callback;
 
 -(NSString*) readTypeId;
 
@@ -84,7 +89,7 @@
 -(void) writeBoolSeq:(NSArray*)v;
 
 -(void) writeByte:(ICEByte)v;
--(void) writeByteSeq:(NSArray*)v;
+-(void) writeByteSeq:(NSData*)v;
 
 -(void) writeShort:(ICEShort)v;
 -(void) writeShortSeq:(NSArray*)v;
@@ -108,9 +113,9 @@
 
 -(void) writeProxy:(ICEObjectPrx*)v;
 
-//-(void) writeObject:(ICEObject*)v;
+-(void) writeObject:(ICEObject*)v;
 
--(void) writeTypeId:(NSString*)v;
+-(void) writeTypeId:(const char*)v;
 
 -(void) writeException:(ICEUserException*)v;
 

@@ -18,7 +18,8 @@ using namespace IceInternal;
 // InputStreamI
 //
 Ice::InputStreamI::InputStreamI(const Ice::CommunicatorPtr& communicator, const vector<Byte>& data) :
-    _communicator(communicator)
+    _communicator(communicator),
+    _closure(0)
 {
     _is = new BasicStream(getInstance(communicator).get());
     _is->closure(this);
@@ -326,11 +327,23 @@ Ice::InputStreamI::readPendingObjects()
     _is->readPendingObjects();
 }
 
+void
+Ice::InputStreamI::setClosure(void* closure)
+{
+    _closure = closure;
+}
+
+void* 
+Ice::InputStreamI::getClosure()
+{
+    return _closure;
+}
+
 //
 // OutputStreamI
 //
 Ice::OutputStreamI::OutputStreamI(const Ice::CommunicatorPtr& communicator, BasicStream* os) :
-    _communicator(communicator), _os(os), _own(!os)
+    _communicator(communicator), _os(os), _own(!os), _closure(0)
 {
     if(!_os)
     {
@@ -713,3 +726,16 @@ Ice::UserExceptionWriter::__usesClasses() const
 {
     return usesClasses();
 }
+
+void
+Ice::OutputStreamI::setClosure(void* closure)
+{
+    _closure = closure;
+}
+
+void* 
+Ice::OutputStreamI::getClosure()
+{
+    return _closure;
+}
+
