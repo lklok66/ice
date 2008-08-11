@@ -29,7 +29,9 @@ OBJS		= Scanner.o \
 		  Util.o \
 		  MD5.o \
 		  MD5I.o \
-		  SignalHandler.o
+		  SignalHandler.o \
+		  ObjCNames.o \
+		  ObjCUtil.o
 
 SRCS		= $(OBJS:.o=.cpp)
 
