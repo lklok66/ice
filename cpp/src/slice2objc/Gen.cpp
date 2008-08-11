@@ -2034,7 +2034,9 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     _H << nl << "+(id) " << name << "WithStruct:(" << name << " *)s;";
     _M << sp << nl << "+(id) " << name << "WithStruct:(" << name << " *)s_";
     _M << sb;
-    _M << nl << name << " *s__ = [[" << name << " alloc] initWithStruct:s_ copyItems:NO];";
+    _M << nl << name << " *s__ = [[" << name << " alloc] init";
+    writeMemberMethodCall(dataMembers, "s_");
+    _M << " copyItems:NO];";
     _M << nl << "[s__ autorelease];";
     _M << nl << "return s__;";
     _M << eb;
@@ -2042,7 +2044,9 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     _H << nl << "+(id) " << name << "WithStruct:(" << name << " *)s copyItems:(BOOL)copyItems;";
     _M << sp << nl << "+(id) " << name << "WithStruct:(" << name << " *)s_ copyItems:(BOOL)copyItems__";
     _M << sb;
-    _M << nl << name << " *s__ = [[" << name << " alloc] initWithStruct:s_ copyItems:copyItems__];";
+    _M << nl << name << " *s__ = [[" << name << " alloc] init";
+    writeMemberMethodCall(dataMembers, "s_");
+    _M << " copyItems:copyItems__];";
     _M << nl << "[s__ autorelease];";
     _M << nl << "return s__;";
     _M << eb;
@@ -2130,7 +2134,12 @@ void
 Slice::Gen::TypesVisitor::visitConst(const ConstPtr& p)
 {
     _H << sp;
-    _H << nl << "const " << typeToString(p->type()) << " ";
+    _H << nl;
+    if(EnumPtr::dynamicCast(p->type()))
+    {
+        _H << "static ";
+    }
+    _H << "const " << typeToString(p->type()) << " ";
     if(!isValueType(p->type()))
     {
         _H << "*";
