@@ -169,21 +169,8 @@ public:
     virtual Ice::ObjectPtr
     create(const std::string& type)
     {
-        std::string objcType = type;
-        if(objcType.find("::Ice::"))
-        {
-            objcType = objcType.replace(0, 7, "ICE");
-        }
-        else
-        {
-            std::string::size_type pos;
-            while((pos = objcType.find("::")) != std::string::npos)
-            {
-                objcType = objcType.replace(pos, 2, "");
-            }
-        }
-
-        Class c = objc_lookUpClass(objcType.c_str());
+        std::string tId = toObjCSliceId(type);
+        Class c = objc_lookUpClass(tId.c_str());
         if(c == nil)
         {
             return 0; // No object factory.
@@ -535,7 +522,52 @@ public:
 
 -(void) throwException
 {
-    // TODO
+    ICEUserException* ex = nil;
+    bool usesClasses = false;
+    try
+    {
+        usesClasses = IS->readBool();
+
+        std::string typeId = IS->readString(false);
+        for(;;)
+        {
+            typeId = toObjCSliceId(typeId);
+            Class c = objc_lookUpClass(typeId.c_str());
+            if(c != nil)
+            {
+                ex = [[c alloc] init];
+                break;
+            }
+            else
+            {
+                IS->skipSlice(); // Slice off what we don't understand.
+                typeId = IS->readString(false); // Read type id for next slice.
+            }
+        }
+
+        //
+        // The only way out of the loop above is to find an exception for
+        // which the receiver has a factory. If this does not happen,
+        // sender and receiver disagree about the Slice definitions they
+        // use. In that case, the receiver will eventually fail to read
+        // another type ID and throw a MarshalException.
+        //
+        NSAssert(ex, @"error while unmarshalling exception");
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
+
+    if(ex)
+    {
+        [ex read__:self readTypeId:false];
+        if(usesClasses)
+        {
+            [self readPendingObjects];
+        }
+        @throw ex;
+    }
 }
 
 -(void) startSlice

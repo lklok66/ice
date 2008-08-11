@@ -17,19 +17,21 @@
 @class ICEOutputStream;
 @class ICEInputStream;
 
-@interface ICELocalException : NSException
+@interface ICEException : NSException
+-(NSString*)ice_name;
+@end
+
+@interface ICELocalException : ICEException
 {
     const char* file;
     int line;
 }
--(NSString*)ice_name;
 -(id)init:(const char*)file line:(int)line;
 +(id)localException:(const char*)file line:(int)line;
 @end
 
-@interface ICEUserException : NSException
--(NSString*)ice_name;
+@interface ICEUserException : ICEException
 -(BOOL)usesClasses__;
 -(void)write__:(ICEOutputStream*)stream;
--(void)read__:(ICEInputStream*)stream;
+-(void)read__:(ICEInputStream*)stream readTypeId:(BOOL)rid;
 @end

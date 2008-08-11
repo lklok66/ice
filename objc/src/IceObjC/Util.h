@@ -142,3 +142,5 @@ fromNSString(NSString* s)
         return [s UTF8String];
     }
 }
+
+std::string toObjCSliceId(const std::string&);

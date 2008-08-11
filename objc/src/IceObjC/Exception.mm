@@ -14,6 +14,14 @@
 
 #include <Ice/LocalException.h>
 
+@implementation ICEException
+-(NSString*)ice_name
+{
+    NSAssert(false, @"ice_name not overriden");
+    return nil;
+}
+@end
+
 @implementation ICELocalException (Internal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
@@ -69,17 +77,9 @@
         return [NSString stringWithUTF8String:str.c_str()];
     }
 }
--(NSString*)ice_name
-{
-    return @"Ice::LocalException";
-}
 @end
 
 @implementation ICEUserException
--(NSString*)ice_name
-{
-    return @"Ice::UserException";
-}
 -(BOOL)usesClasses__
 {
     return FALSE;
@@ -88,7 +88,7 @@
 {
     // TODO
 }
--(void)read__:(ICEInputStream*)stream
+-(void)read__:(ICEInputStream*)stream readTypeId:(BOOL)rid
 {
     // TODO
 }

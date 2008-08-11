@@ -23,12 +23,8 @@ rethrowObjCException(const std::exception& ex)
         const Ice::LocalException* lex = dynamic_cast<const Ice::LocalException*>(&ex);
         if(lex)
         {
-            std::string n = lex->ice_name();
-            if(n.find("Ice::") == 0)
-            {
-                n = n.replace(0, 5, "ICE");
-            }
-            Class c = objc_lookUpClass(n.c_str());
+            std::string typeId = toObjCSliceId("::" + lex->ice_name());
+            Class c = objc_lookUpClass(typeId.c_str());
             if(c != nil)
             {
                 nsex = [c localExceptionWithLocalException:*lex];
@@ -78,3 +74,21 @@ rethrowCxxException(NSException* ex)
     }
 }
 
+std::string 
+toObjCSliceId(const std::string& sliceId)
+{
+    std::string objcType = sliceId;
+    if(objcType.find("::Ice::") == 0)
+    {
+        objcType = objcType.replace(0, 7, "ICE");
+    }
+    else
+    {
+        std::string::size_type pos;
+        while((pos = objcType.find("::")) != std::string::npos)
+        {
+            objcType = objcType.replace(pos, 2, "");
+        }
+    }
+    return objcType;
+}
