@@ -1990,7 +1990,9 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     _H << nl << "-(id) initWithStruct:(" << name << " *)s;";
     _M << sp << nl << "-(id) initWithStruct:(" << name << " *)s_";
     _M << sb;
-    _M << nl << "return [self initWithStruct:s_ copyItems:NO];";
+    _M << nl << "return [self init";
+    writeMemberMethodCall(dataMembers, "s_");
+    _M << " copyItems:NO];";
     _M << eb;
 
     _H << nl << "-(id) initWithStruct:(" << name << " *)s copyItems:(BOOL)copyItems;";
@@ -2108,7 +2110,7 @@ Slice::Gen::TypesVisitor::visitEnum(const EnumPtr& p)
 
     emitDeprecate(p, 0, _M, "type");
 
-    _H << nl << "enum " << name;
+    _H << nl << "typedef enum";
     _H << sb;
     EnumeratorList::const_iterator en = enumerators.begin();
     while(en != enumerators.end())
@@ -2119,8 +2121,7 @@ Slice::Gen::TypesVisitor::visitEnum(const EnumPtr& p)
             _H << ',';
         }
     }
-    _H << eb;
-    _H << ";";
+    _H << eb << " " << name << ";";
 
     // TODO: if(_stream)
 }
@@ -2129,12 +2130,7 @@ void
 Slice::Gen::TypesVisitor::visitConst(const ConstPtr& p)
 {
     _H << sp;
-    _H << nl << "const ";
-    if(EnumPtr::dynamicCast(p->type()))
-    {
-        _H << "enum ";
-    }
-    _H << typeToString(p->type()) << " ";
+    _H << nl << "const " << typeToString(p->type()) << " ";
     if(!isValueType(p->type()))
     {
         _H << "*";
@@ -2393,7 +2389,7 @@ Slice::Gen::TypesVisitor::writeProperties(const DataMemberList& dataMembers, int
 	string typeString = typeToString(type);
 	bool isValue = isValueType(type);
 
-	_H << nl << "@property(";
+	_H << nl << "@property(nonatomic, ";
 	if(isValue)
 	{
 	    _H << "assign";
@@ -2437,13 +2433,12 @@ Slice::Gen::TypesVisitor::writeMemberHashCode(const DataMemberList& dataMembers,
 	_M << nl << "h_ = (h_ << 1) ^ ";
 	if(isValueType(type))
 	{
-	    _M << name;
+	    _M << name << ";";
 	}
 	else
 	{
-	    _M << "[" << name << " hash]";
+	    _M << "(!" << name << " ? 0 : [" << name << " hash]);";
 	}
-	_M << ";";
     }
     _M << nl << "return h_;";
     _M << eb;
@@ -2471,15 +2466,28 @@ Slice::Gen::TypesVisitor::writeMemberEquals(const DataMemberList& dataMembers, i
 
 	if(isValueType(type))
 	{
-	    _M << nl << "if([o_ " << name << "] != " << name << ")";
+	    _M << nl << "if(" << name << " != [o_ " << name << "])";
+	    _M << sb;
+	    _M << nl << "return NO;";
+	    _M << eb;
 	}
 	else
 	{
-	    _M << nl << "if([o_ isEqual: " << name << "])";
+	    _M << nl << "if(!" << name << ")";
+	    _M << sb;
+	    _M << nl << "if([o_ " << name << "])";
+	    _M << sb;
+	    _M << nl << "return NO;";
+	    _M << eb;
+	    _M << eb;
+	    _M << nl << "else";
+	    _M << sb;
+	    _M << nl << "if(![" << name << " isEqual:[o_ " << name << "]])";
+	    _M << sb;
+	    _M << nl << "return NO;";
+	    _M << eb;
+	    _M << eb;
 	}
-	_M << sb;
-	_M << nl << "return NO;";
-	_M << eb;
     }
     _M << nl << "return YES;";
     _M << eb;
