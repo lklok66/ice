@@ -84,11 +84,11 @@
 {
     return FALSE;
 }
--(void)write__:(ICEOutputStream*)stream
+-(void)write__:(id<ICEOutputStream>)stream
 {
     // TODO
 }
--(void)read__:(ICEInputStream*)stream readTypeId:(BOOL)rid
+-(void)read__:(id<ICEInputStream>)stream readTypeId:(BOOL)rid
 {
     // TODO
 }

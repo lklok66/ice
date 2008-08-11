@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-#import <Hello.h>
+#import "Hello.h"
 
 #import <IceObjC/LocalException.h>
 
@@ -25,7 +25,7 @@
 
 -(void) sayHello
 {
-    BOOL ok = [self invoke__:@"sayHello" mode:Idempotent os:nil is:nil];
+    BOOL ok = [self invoke__:@"sayHello" mode:ICEIdempotent os:nil is:nil];
 }
 
 @end
@@ -46,12 +46,12 @@
         return [super ice_isA:typeId current:current];
     }
 }
--(BOOL) sayHello___:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream*)os
+-(BOOL) sayHello___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
     [(id)self sayHello:current];
     return TRUE;
 }
--(BOOL) dispatch__:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream*)os
+-(BOOL) dispatch__:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
     //
     // TODO: Optimize

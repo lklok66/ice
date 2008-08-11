@@ -19,9 +19,6 @@
 
 #import <objc/runtime.h>
 
-#define IS ((Ice::InputStream*)is__)
-#define OS ((Ice::OutputStream*)os__)
-
 namespace IceObjC
 {
 
@@ -38,7 +35,7 @@ public:
     {
         @try
         {
-            [_obj write__:(ICEOutputStream*)stream->getClosure()];
+            [_obj write__:(id<ICEOutputStream>)stream->getClosure()];
         }
         @catch(NSException* ex)
         {
@@ -64,7 +61,7 @@ public:
     {
         @try
         {
-            [_obj read__:(ICEInputStream*)stream->getClosure() readTypeId:rid];
+            [_obj read__:(id<ICEInputStream>)stream->getClosure() readTypeId:rid];
         }
         @catch(NSException* ex)
         {
@@ -99,7 +96,7 @@ public:
     {
         @try
         {
-            [_ex write__:(ICEOutputStream*)stream->getClosure()];
+            [_ex write__:(id<ICEOutputStream>)stream->getClosure()];
         }
         @catch(NSException* ex)
         {
@@ -187,7 +184,7 @@ public:
 
 }
 
-@implementation ICEInputStream (Internal)
+@implementation ICEInputStream
 
 +(void)installObjectFactory:(const Ice::CommunicatorPtr&)communicator
 {
@@ -200,29 +197,28 @@ public:
         return nil;
     }
     is__ = arg.get();
-    IS->__incRef();
-    IS->setClosure(self);
+    is__->__incRef();
+    is__->setClosure(self);
     return self;
 }
 -(Ice::InputStream*) is__
 {
-    return IS;
+    return is__;
 }
 -(void) dealloc
 {
-    IS->__decRef();
+    is__->__decRef();
     is__ = 0;
     [super dealloc];
 }
-@end
 
-@implementation ICEInputStream
+// @protocol ICEInputStream methods
 
--(ICECommunicator*) communicator
+-(id<ICECommunicator>) communicator
 {
     try
     {
-        return [ICECommunicator communicatorWithCommunicator:IS->communicator()];
+        return [ICECommunicator communicatorWithCommunicator:is__->communicator()];
     }
     catch(const std::exception& ex)
     {
@@ -235,7 +231,7 @@ public:
 {
     try
     {
-        IS->sliceObjects(b);
+        is__->sliceObjects(b);
     }
     catch(const std::exception& ex)
     {
@@ -247,7 +243,7 @@ public:
 {
     try
     {
-        return IS->readBool();
+        return is__->readBool();
     }
     catch(const std::exception& ex)
     {
@@ -260,7 +256,7 @@ public:
 {
     try
     {
-        return [toNSArray(IS->readBoolSeq()) autorelease];
+        return [toNSArray(is__->readBoolSeq()) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -273,7 +269,7 @@ public:
 {
     try
     {
-        return IS->readByte();
+        return is__->readByte();
     }
     catch(const std::exception& ex)
     {
@@ -287,7 +283,7 @@ public:
     try
     {
         std::pair<const Ice::Byte*, const Ice::Byte*> seq;
-        IS->readByteSeq(seq);
+        is__->readByteSeq(seq);
         return [NSData dataWithBytes:seq.first length:(seq.second - seq.first)];
     }    
     catch(const std::exception& ex)
@@ -302,7 +298,7 @@ public:
     try
     {
         std::pair<const Ice::Byte*, const Ice::Byte*> seq;
-        IS->readByteSeq(seq);
+        is__->readByteSeq(seq);
         return [NSData dataWithBytesNoCopy:const_cast<Ice::Byte*>(seq.first) 
                        length:(seq.second - seq.first) freeWhenDone:FALSE];
     }    
@@ -317,7 +313,7 @@ public:
 {
     try
     {
-        return IS->readShort();
+        return is__->readShort();
     }
     catch(const std::exception& ex)
     {
@@ -330,7 +326,7 @@ public:
 {
     try
     {
-        return [toNSArray(IS->readShortSeq()) autorelease];
+        return [toNSArray(is__->readShortSeq()) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -343,7 +339,7 @@ public:
 {
     try
     {
-        return IS->readInt();
+        return is__->readInt();
     }
     catch(const std::exception& ex)
     {
@@ -356,7 +352,7 @@ public:
 {
     try
     {
-        return [toNSArray(IS->readIntSeq()) autorelease];
+        return [toNSArray(is__->readIntSeq()) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -369,7 +365,7 @@ public:
 {
     try
     {
-        return IS->readLong();
+        return is__->readLong();
     }
     catch(const std::exception& ex)
     {
@@ -382,7 +378,7 @@ public:
 {
     try
     {
-        return [toNSArray(IS->readLongSeq()) autorelease];
+        return [toNSArray(is__->readLongSeq()) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -395,7 +391,7 @@ public:
 {
     try
     {
-        return IS->readFloat();
+        return is__->readFloat();
     }
     catch(const std::exception& ex)
     {
@@ -408,7 +404,7 @@ public:
 {
     try
     {
-        return [toNSArray(IS->readFloatSeq()) autorelease];
+        return [toNSArray(is__->readFloatSeq()) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -421,7 +417,7 @@ public:
 {
     try
     {
-        return IS->readDouble();
+        return is__->readDouble();
     }
     catch(const std::exception& ex)
     {
@@ -434,7 +430,7 @@ public:
 {
     try
     {
-        return [toNSArray(IS->readDoubleSeq()) autorelease];
+        return [toNSArray(is__->readDoubleSeq()) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -447,7 +443,7 @@ public:
 {
     try
     {
-        return [toNSString(IS->readString()) autorelease];
+        return [toNSString(is__->readString()) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -460,7 +456,7 @@ public:
 {
     try
     {
-        return [toNSArray(IS->readStringSeq()) autorelease];
+        return [toNSArray(is__->readStringSeq()) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -473,7 +469,7 @@ public:
 {
     try
     {
-        return IS->readSize();
+        return is__->readSize();
     }
     catch(const std::exception& ex)
     {
@@ -486,7 +482,7 @@ public:
 {
     try
     {
-        return [ICEObjectPrx objectPrxWithObjectPrx__:IS->readProxy()];
+        return [ICEObjectPrx objectPrxWithObjectPrx__:is__->readProxy()];
     }
     catch(const std::exception& ex)
     {
@@ -499,7 +495,7 @@ public:
 {
     try
     {
-        IS->readObject(new IceObjC::ReadObjectCallbackI(callback));
+        is__->readObject(new IceObjC::ReadObjectCallbackI(callback));
     }
     catch(const std::exception& ex)
     {
@@ -511,7 +507,7 @@ public:
 {
     try
     {
-        return [toNSString(IS->readTypeId()) autorelease];
+        return [toNSString(is__->readTypeId()) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -526,9 +522,9 @@ public:
     bool usesClasses = false;
     try
     {
-        usesClasses = IS->readBool();
+        usesClasses = is__->readBool();
 
-        std::string typeId = IS->readString(false);
+        std::string typeId = is__->readString(false);
         for(;;)
         {
             typeId = toObjCSliceId(typeId);
@@ -540,8 +536,8 @@ public:
             }
             else
             {
-                IS->skipSlice(); // Slice off what we don't understand.
-                typeId = IS->readString(false); // Read type id for next slice.
+                is__->skipSlice(); // Slice off what we don't understand.
+                typeId = is__->readString(false); // Read type id for next slice.
             }
         }
 
@@ -574,7 +570,7 @@ public:
 {
     try
     {
-        IS->startSlice();
+        is__->startSlice();
     }
     catch(const std::exception& ex)
     {
@@ -586,7 +582,7 @@ public:
 {
     try
     {
-        IS->endSlice();
+        is__->endSlice();
     }
     catch(const std::exception& ex)
     {
@@ -598,7 +594,7 @@ public:
 {
     try
     {
-        IS->skipSlice();
+        is__->skipSlice();
     }
     catch(const std::exception& ex)
     {
@@ -610,7 +606,7 @@ public:
 {
     try
     {
-        IS->startEncapsulation();
+        is__->startEncapsulation();
     }
     catch(const std::exception& ex)
     {
@@ -622,7 +618,7 @@ public:
 {
     try
     {
-        IS->endEncapsulation();
+        is__->endEncapsulation();
     }
     catch(const std::exception& ex)
     {
@@ -634,7 +630,7 @@ public:
 {
     try
     {
-        IS->skipEncapsulation();
+        is__->skipEncapsulation();
     }
     catch(const std::exception& ex)
     {
@@ -646,7 +642,7 @@ public:
 {
     try
     {
-        IS->readPendingObjects();
+        is__->readPendingObjects();
     }
     catch(const std::exception& ex)
     {
@@ -656,7 +652,7 @@ public:
 
 @end
 
-@implementation ICEOutputStream (Internal)
+@implementation ICEOutputStream
 
 -(ICEOutputStream*) initWithOutputStream:(const Ice::OutputStreamPtr&)arg
 {
@@ -665,32 +661,30 @@ public:
         return nil;
     }
     os__ = arg.get();
-    OS->__incRef();
-    OS->setClosure(self);
+    os__->__incRef();
+    os__->setClosure(self);
     return self;
 }
 
 -(Ice::OutputStream*) os__
 {
-    return OS;
+    return os__;
 }
 
 -(void) dealloc
 {
-    OS->__decRef();
+    os__->__decRef();
     os__ = 0;
     [super dealloc];
 }
 
-@end
+// @protocol ICEOutputStream methods
 
-@implementation ICEOutputStream
-
--(ICECommunicator*) communicator
+-(id<ICECommunicator>) communicator
 {
     try
     {
-        return [ICECommunicator communicatorWithCommunicator:OS->communicator()];
+        return [ICECommunicator communicatorWithCommunicator:os__->communicator()];
     }
     catch(const std::exception& ex)
     {
@@ -703,7 +697,7 @@ public:
 {
     try
     {
-        OS->writeBool(v);
+        os__->writeBool(v);
     }
     catch(const std::exception& ex)
     {
@@ -716,7 +710,7 @@ public:
     try
     {
         std::vector<bool> s;
-        OS->writeBoolSeq(fromNSArray(v, s));
+        os__->writeBoolSeq(fromNSArray(v, s));
     }
     catch(const std::exception& ex)
     {
@@ -728,7 +722,7 @@ public:
 {
     try
     {
-        OS->writeByte(v);
+        os__->writeByte(v);
     }
     catch(const std::exception& ex)
     {
@@ -740,7 +734,7 @@ public:
 { 
     try
     {
-        OS->writeByteSeq((ICEByte*)[v bytes], (ICEByte*)[v bytes] + [v length]);
+        os__->writeByteSeq((ICEByte*)[v bytes], (ICEByte*)[v bytes] + [v length]);
     }
     catch(const std::exception& ex)
     {
@@ -752,7 +746,7 @@ public:
 {
     try
     {
-        OS->writeShort(v);
+        os__->writeShort(v);
     }
     catch(const std::exception& ex)
     {
@@ -765,7 +759,7 @@ public:
     try
     {
         std::vector<ICEShort> s;
-        OS->writeShortSeq(fromNSArray(v, s));
+        os__->writeShortSeq(fromNSArray(v, s));
     }
     catch(const std::exception& ex)
     {
@@ -778,7 +772,7 @@ public:
 {
     try
     {
-        OS->writeInt(v);
+        os__->writeInt(v);
     }
     catch(const std::exception& ex)
     {
@@ -791,7 +785,7 @@ public:
     try
     {
         std::vector<ICEInt> s;
-        OS->writeIntSeq(fromNSArray(v, s));
+        os__->writeIntSeq(fromNSArray(v, s));
     }
     catch(const std::exception& ex)
     {
@@ -803,7 +797,7 @@ public:
 {
     try
     {
-        OS->writeLong(v);
+        os__->writeLong(v);
     }
     catch(const std::exception& ex)
     {
@@ -816,7 +810,7 @@ public:
     try
     {
         std::vector<ICELong> s;
-        OS->writeLongSeq(fromNSArray(v, s));
+        os__->writeLongSeq(fromNSArray(v, s));
     }
     catch(const std::exception& ex)
     {
@@ -829,7 +823,7 @@ public:
 {
     try
     {
-        OS->writeFloat(v);
+        os__->writeFloat(v);
     }
     catch(const std::exception& ex)
     {
@@ -842,7 +836,7 @@ public:
     try
     {
         std::vector<ICEFloat> s;
-        OS->writeFloatSeq(fromNSArray(v, s));
+        os__->writeFloatSeq(fromNSArray(v, s));
     }
     catch(const std::exception& ex)
     {
@@ -855,7 +849,7 @@ public:
 {
     try
     {
-        OS->writeDouble(v);
+        os__->writeDouble(v);
     }
     catch(const std::exception& ex)
     {
@@ -868,7 +862,7 @@ public:
     try
     {
         std::vector<ICEDouble> s;
-        OS->writeDoubleSeq(fromNSArray(v, s));
+        os__->writeDoubleSeq(fromNSArray(v, s));
     }
     catch(const std::exception& ex)
     {
@@ -881,7 +875,7 @@ public:
 {
     try
     {
-        OS->writeString(fromNSString(v));
+        os__->writeString(fromNSString(v));
     }
     catch(const std::exception& ex)
     {
@@ -894,7 +888,7 @@ public:
     try
     {
         std::vector<std::string> s;
-        OS->writeStringSeq(fromNSArray(v, s));
+        os__->writeStringSeq(fromNSArray(v, s));
     }
     catch(const std::exception& ex)
     {
@@ -906,7 +900,7 @@ public:
 {
     try
     {
-        OS->writeSize(v);
+        os__->writeSize(v);
     }
     catch(const std::exception& ex)
     {
@@ -919,7 +913,7 @@ public:
 {
     try
     {
-        OS->writeProxy([v objectPrx__]);
+        os__->writeProxy([v objectPrx__]);
     }
     catch(const std::exception& ex)
     {
@@ -931,7 +925,7 @@ public:
 {
     try
     {
-        OS->writeObject(new IceObjC::ObjectWriter(v));
+        os__->writeObject(new IceObjC::ObjectWriter(v));
     }
     catch(const std::exception& ex)
     {
@@ -943,7 +937,7 @@ public:
 {
     try
     {
-        OS->writeTypeId(v);
+        os__->writeTypeId(v);
     }
     catch(const std::exception& ex)
     {
@@ -955,7 +949,7 @@ public:
 {
     try
     {
-        OS->writeException(IceObjC::UserExceptionWriter(v, OS->communicator()));
+        os__->writeException(IceObjC::UserExceptionWriter(v, os__->communicator()));
     }
     catch(const std::exception& ex)
     {
@@ -967,7 +961,7 @@ public:
 {
     try
     {
-        OS->startSlice();
+        os__->startSlice();
     }
     catch(const std::exception& ex)
     {
@@ -979,7 +973,7 @@ public:
 {
     try
     {
-        OS->endSlice();
+        os__->endSlice();
     }
     catch(const std::exception& ex)
     {
@@ -991,7 +985,7 @@ public:
 {
     try
     {
-        OS->startEncapsulation();
+        os__->startEncapsulation();
     }
     catch(const std::exception& ex)
     {
@@ -1003,7 +997,7 @@ public:
 {
     try
     {
-        OS->endEncapsulation();
+        os__->endEncapsulation();
     }
     catch(const std::exception& ex)
     {
@@ -1015,7 +1009,7 @@ public:
 {
     try
     {
-        OS->writePendingObjects();
+        os__->writePendingObjects();
     }
     catch(const std::exception& ex)
     {
@@ -1028,7 +1022,7 @@ public:
     try
     {
         std::vector<Ice::Byte> buf;
-        OS->finished(buf);
+        os__->finished(buf);
         return [NSData dataWithBytes:&buf[0] length:buf.size()];
     }
     catch(const std::exception& ex)

@@ -54,8 +54,8 @@ private:
 -(Ice::InitializationData)initializationData__
 {
     Ice::InitializationData data;
-    data.properties = [properties properties__];
-    data.logger = [logger logger__];
+    data.properties = [(ICEProperties*)properties properties__];
+    data.logger = [(ICELogger*)logger logger__];
     return data;
 }
 @end
@@ -67,14 +67,14 @@ private:
 
 @end
 
-@implementation ICEProperties (Initialize)
+@implementation ICEUtil
 
-+(ICEProperties*) create
++(id<ICEProperties>) createProperties
 { 
-    return [self create:nil argv:nil];
+    return [self createProperties:nil argv:nil];
 }
 
-+(ICEProperties*) create:(int*)argc argv:(char*[])argv
++(id<ICEProperties>) createProperties:(int*)argc argv:(char*[])argv
 { 
     try
     {
@@ -96,26 +96,22 @@ private:
     }
 }
 
-@end
-
-@implementation ICECommunicator (Initialize)
-
-+(ICECommunicator*) create
++(id<ICECommunicator>) createCommunicator
 { 
-    return [self create:nil argv:nil initData:nil];
+    return [self createCommunicator:nil argv:nil initData:nil];
 }
 
-+(ICECommunicator*) create:(ICEInitializationData*)initData
++(id<ICECommunicator>) createCommunicator:(ICEInitializationData*)initData
 { 
-    return [self create:nil argv:nil initData:initData];
+    return [self createCommunicator:nil argv:nil initData:initData];
 }
 
-+(ICECommunicator*) create:(int*)argc argv:(char*[])argv
++(id<ICECommunicator>) createCommunicator:(int*)argc argv:(char*[])argv
 { 
-    return [self create:argc argv:argv initData:nil];
+    return [self createCommunicator:argc argv:argv initData:nil];
 }
 
-+(ICECommunicator*) create:(int*)argc argv:(char*[])argv initData:(ICEInitializationData*)initData
++(id<ICECommunicator>) createCommunicator:(int*)argc argv:(char*[])argv initData:(ICEInitializationData*)initData
 {
     if(![NSThread isMultiThreaded]) // Ensure sure Cocoa is multithreaded.
     {
@@ -151,17 +147,14 @@ private:
     }
 }
 
-@end
-
-@implementation ICEInputStream (Initialize)
-
-+(ICEInputStream*) createInputStream:(ICECommunicator*)communicator data:(NSData*)data
++(id<ICEInputStream>) createInputStream:(id<ICECommunicator>)communicator data:(NSData*)data
 {
     try
     {
+        Ice::CommunicatorPtr com = [(ICECommunicator*)communicator communicator__];
         Ice::Byte* start = (Ice::Byte*)[data bytes];
         Ice::Byte* end = (Ice::Byte*)[data bytes] + [data length];
-        Ice::InputStreamPtr is = Ice::createInputStream([communicator communicator__], std::make_pair(start, end));
+        Ice::InputStreamPtr is = Ice::createInputStream(com, std::make_pair(start, end));
         return [[[ICEInputStream alloc] initWithInputStream:is] autorelease];
     }
     catch(const std::exception& ex)
@@ -171,15 +164,12 @@ private:
     }
 }
 
-@end
-
-@implementation ICEOutputStream (Initialize)
-
-+(ICEOutputStream*) createOutputStream:(ICECommunicator*)communicator
++(id<ICEOutputStream>) createOutputStream:(id<ICECommunicator>)communicator
 {
     try
     {
-        Ice::OutputStreamPtr os = Ice::createOutputStream([communicator communicator__]);
+        Ice::CommunicatorPtr com = [(ICECommunicator*)communicator communicator__];
+        Ice::OutputStreamPtr os = Ice::createOutputStream(com);
         return [[[ICEOutputStream alloc] initWithOutputStream:os] autorelease];
     }
     catch(const std::exception& ex)

@@ -12,32 +12,31 @@
 //
 // Forward declarations
 //
-@class ICEObjectAdapter;
+@protocol ICEObjectAdapter;
 @class ICEIdentity;
 
-typedef enum
+enum ICEOperationMode
 {
-    Normal,
-    Nonmutating,
-    Idempotent
-}
-ICEOperationMode;
+    ICENormal,
+    ICENonmutating,
+    ICEIdempotent
+};
 
 @interface ICECurrent : NSObject
 {
-    ICEObjectAdapter* adapter;
+    id<ICEObjectAdapter> adapter;
     ICEIdentity* id_objc_;
     NSString* facet;
     NSString* operation;
-    ICEOperationMode mode;
+    enum ICEOperationMode mode;
     NSDictionary* ctx;
     ICEInt requestId;
 }
-@property(readonly, nonatomic) ICEObjectAdapter* adapter;
+@property(readonly, nonatomic) id<ICEObjectAdapter> adapter;
 @property(readonly, nonatomic) ICEIdentity* id_objc_;
 @property(readonly, nonatomic) NSString* facet;
 @property(readonly, nonatomic) NSString* operation;
-@property(readonly, nonatomic) ICEOperationMode mode;
+@property(readonly, nonatomic) enum ICEOperationMode mode;
 @property(readonly, nonatomic) NSDictionary* ctx;
 @property(readonly, nonatomic) ICEInt requestId;
 @end

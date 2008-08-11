@@ -15,10 +15,10 @@
 // Forward declarations.
 //
 @class ICEObjectPrx;
-@class ICEOutputStream;
-@class ICEInputStream;
+@protocol ICEOutputStream;
+@protocol ICEInputStream;
 
-@protocol ICEObjectPrx
+@protocol ICEObjectPrx <NSObject>
 -(BOOL) ice_isA:(NSString*)typeId;
 -(void) ice_ping;
 @end
@@ -31,7 +31,7 @@
 +(id<ICEObjectPrx>) uncheckedCast__:(id<ICEObjectPrx>)proxy;
 +(id<ICEObjectPrx>) checkedCast__:(id<ICEObjectPrx>)proxy protocol:(Protocol*)protocol sliceId:(NSString*)sliceId;
 
--(ICEOutputStream*) createOutputStream__;
--(BOOL) invoke__:(NSString*)operation mode:(ICEOperationMode)mode os:(ICEOutputStream*)os is:(ICEInputStream**)is;
+-(id<ICEOutputStream>) createOutputStream__;
+-(BOOL) invoke__:(NSString*)operation mode:(enum ICEOperationMode)mode os:(id<ICEOutputStream>)os is:(id<ICEInputStream>*)is;
 
 @end

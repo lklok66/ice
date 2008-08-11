@@ -14,17 +14,13 @@
 //
 @protocol ICEObjectPrx;
 @protocol ICELocatorPrx;
-@class ICECommunicator;
-@class ICEServantLocator;
+@protocol ICECommunicator;
 @class ICEIdentity;
 @class ICEObject;
 
-@interface ICEObjectAdapter : NSObject
-{
-    void* objectAdapter__;
-}
+@protocol ICEObjectAdapter <NSObject>
 -(NSString*) getName;
--(ICECommunicator*) getCommunicator;
+-(id<ICECommunicator>) getCommunicator;
 -(void) activate;
 -(void) hold;
 -(void) waitForHold;

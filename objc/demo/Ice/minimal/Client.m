@@ -18,10 +18,10 @@ main(int argc, char* argv[])
 {
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
     int status = 0;
-    ICECommunicator* communicator;
+    id<ICECommunicator> communicator;
     @try
     {
-        communicator = [ICECommunicator create:&argc argv:argv];
+        communicator = [ICEUtil createCommunicator:&argc argv:argv];
         if(argc > 1)
         {
             NSLog(@"%s: too many arguments", argv[0]);

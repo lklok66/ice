@@ -8,10 +8,10 @@
 
 #import <UIKit/UIKit.h>
 
-@class ICECommunicator;
+@protocol ICECommunicator;
 
 @interface helloViewController : UIViewController {
-        ICECommunicator* communicator;
+    id<ICECommunicator> communicator;
 }
 @end
 

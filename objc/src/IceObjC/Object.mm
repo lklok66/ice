@@ -144,25 +144,25 @@ static const char* ICEObject_ids__[] =
     "::Ice::Object"
 };
 
--(BOOL) ice_isA___:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream*)os
+-(BOOL) ice_isA___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
     NSString* id__ = [is readString];
     BOOL ret__ = [(id)self ice_isA:id__ current:current];
     [os writeBool:ret__];
     return TRUE;
 }
--(BOOL) ice_ping___:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream*)os
+-(BOOL) ice_ping___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
     [(id)self ice_ping:current];
     return TRUE;
 }
--(BOOL) ice_id___:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream*)os
+-(BOOL) ice_id___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
     NSString* ret__ = [(id)self ice_id:current];
     [os writeString:ret__];
     return TRUE;
 }
--(BOOL) ice_ids___:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream*)os
+-(BOOL) ice_ids___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
     NSArray* ret__ = [(id)self ice_ids:current];
     [os writeStringSeq:ret__];
@@ -211,7 +211,7 @@ static const char* ICEObject_ids__[] =
 {
     return ICEObject_ids__[0];
 }
--(BOOL) dispatch__:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream*)os
+-(BOOL) dispatch__:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
     //
     // TODO: Optimize
@@ -240,14 +240,14 @@ static const char* ICEObject_ids__[] =
     return TRUE;
 }
 
--(void) write__:(ICEOutputStream*)os
+-(void) write__:(id<ICEOutputStream>)os
 {
     [os writeTypeId:[ICEObject ice_staticId]];
     [os startSlice];
     [os writeSize:0]; // For compatibility with the old AFM.
     [os endSlice];
 }
--(void) read__:(ICEInputStream*)is readTypeId:(BOOL)rid
+-(void) read__:(id<ICEInputStream>)is readTypeId:(BOOL)rid
 {
     if(rid)
     {

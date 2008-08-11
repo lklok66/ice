@@ -16,19 +16,16 @@
 //
 @class ICEObject;
 @class ICEObjectPrx;
-@class ICECommunicator;
+@protocol ICECommunicator;
 @class ICEUserException;
 
-@protocol ICEReadObjectCallback
+@protocol ICEReadObjectCallback <NSObject>
 -(void)invoke:(ICEObject*)obj;
 @end
 
-@interface ICEInputStream : NSObject
-{
-    void* is__;
-}
+@protocol ICEInputStream <NSObject>
 
--(ICECommunicator*) communicator;
+-(id<ICECommunicator>) communicator;
 
 -(void) sliceObjects:(BOOL)b;
 
@@ -78,12 +75,9 @@
 -(void) readPendingObjects;
 @end
 
-@interface ICEOutputStream : NSObject
-{
-    void* os__;
-}
+@protocol ICEOutputStream <NSObject>
 
--(ICECommunicator*) communicator;
+-(id<ICECommunicator>) communicator;
 
 -(void) writeBool:(BOOL)v;
 -(void) writeBoolSeq:(NSArray*)v;

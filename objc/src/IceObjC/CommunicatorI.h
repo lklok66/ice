@@ -11,7 +11,10 @@
 
 #include <Ice/Communicator.h>
 
-@interface ICECommunicator (Internal)
+@interface ICECommunicator : NSObject<ICECommunicator>
+{
+    Ice::Communicator* communicator__;
+}
 -(ICECommunicator*)initWithCommunicator:(const Ice::CommunicatorPtr&)arg;
 -(Ice::Communicator*)communicator__;
 +(ICECommunicator*)communicatorWithCommunicator:(const Ice::CommunicatorPtr&)arg;

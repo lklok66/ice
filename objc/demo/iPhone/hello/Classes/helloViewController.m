@@ -22,7 +22,7 @@
 
 - (void)viewDidLoad {
 	[super viewDidLoad];
-        communicator = [[ICECommunicator create] retain];
+        communicator = [[ICEUtil createCommunicator] retain];
 }
 
 

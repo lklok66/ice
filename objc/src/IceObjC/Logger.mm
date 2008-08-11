@@ -10,9 +10,7 @@
 #import <IceObjC/LoggerI.h>
 #import <IceObjC/Util.h>
 
-#define LOGGER ((Ice::Logger*)logger__)
-
-@implementation ICELogger (Internal)
+@implementation ICELogger
 
 -(ICELogger*) initWithLogger:(const Ice::LoggerPtr&)arg
 {
@@ -21,7 +19,7 @@
         return nil;
     }
     logger__ = arg.get();
-    LOGGER->__incRef();
+    logger__->__incRef();
     return self;
 }
 
@@ -32,7 +30,7 @@
 
 -(void) dealloc
 {
-    LOGGER->__decRef();
+    logger__->__decRef();
     logger__ = 0;
     [super dealloc];
 }
@@ -42,14 +40,15 @@
     return [[[ICELogger alloc] initWithLogger:arg] autorelease];
 }
 
-@end
+//
+// @protocol Logger methods.
+//
 
-@implementation ICELogger
 -(void) print:(NSString*)message
 {
     try
     {
-        LOGGER->print(fromNSString(message));
+        logger__->print(fromNSString(message));
     }
     catch(const std::exception& ex)
     {
@@ -60,7 +59,7 @@
 {
     try
     {
-        LOGGER->trace(fromNSString(category), fromNSString(message));
+        logger__->trace(fromNSString(category), fromNSString(message));
     }
     catch(const std::exception& ex)
     {
@@ -71,7 +70,7 @@
 {
     try
     {
-        LOGGER->warning(fromNSString(message));
+        logger__->warning(fromNSString(message));
     }
     catch(const std::exception& ex)
     {
@@ -82,7 +81,7 @@
 {
     try
     {
-        LOGGER->error(fromNSString(message));
+        logger__->error(fromNSString(message));
     }
     catch(const std::exception& ex)
     {
