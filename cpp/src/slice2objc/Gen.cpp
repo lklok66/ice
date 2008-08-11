@@ -2134,12 +2134,7 @@ void
 Slice::Gen::TypesVisitor::visitConst(const ConstPtr& p)
 {
     _H << sp;
-    _H << nl;
-    if(EnumPtr::dynamicCast(p->type()))
-    {
-        _H << "static ";
-    }
-    _H << "const " << typeToString(p->type()) << " ";
+    _H << nl << "static const " << typeToString(p->type()) << " ";
     if(!isValueType(p->type()))
     {
         _H << "*";
