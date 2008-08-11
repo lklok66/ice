@@ -22,6 +22,7 @@ SUBDIRS		= IceUtil \
 		  slice2py \
 		  slice2rb \
 		  slice2html \
+		  slice2objc \
 		  Ice \
 		  IceXML \
 		  IceSSL \

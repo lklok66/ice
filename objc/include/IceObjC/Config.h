@@ -25,3 +25,4 @@ typedef int ICEInt;
 typedef long long ICELong;
 typedef float ICEFloat;
 typedef double ICEDouble;
+typedef NSDictionary ICEContext;
