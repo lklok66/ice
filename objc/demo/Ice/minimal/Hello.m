@@ -46,14 +46,12 @@
         return [super ice_isA:typeId current:current];
     }
 }
--(BOOL) sayHello___:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream**)os
+-(BOOL) sayHello___:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream*)os
 {
-    [is release];
     [(id)self sayHello:current];
-    *os = [self createOutputStream__:current];
     return TRUE;
 }
--(BOOL) dispatch__:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream**)os
+-(BOOL) dispatch__:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream*)os
 {
     //
     // TODO: Optimize

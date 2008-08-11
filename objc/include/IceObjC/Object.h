@@ -29,8 +29,7 @@
 {
     void* object__;
 }
--(ICEOutputStream*) createOutputStream__:(ICECurrent*)current;
--(BOOL) dispatch__:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream**)os;
+-(BOOL) dispatch__:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream*)os;
 -(void) write__:(ICEOutputStream*)os;
 -(void) read__:(ICEInputStream*)is readTypeId:(BOOL)rid;
 @end

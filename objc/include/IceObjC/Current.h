@@ -25,9 +25,8 @@ ICEOperationMode;
 
 @interface ICECurrent : NSObject
 {
-    const void* current__;
     ICEObjectAdapter* adapter;
-    ICEIdentity* _objc_id;
+    ICEIdentity* id_objc_;
     NSString* facet;
     NSString* operation;
     ICEOperationMode mode;
@@ -35,7 +34,7 @@ ICEOperationMode;
     ICEInt requestId;
 }
 @property(readonly, nonatomic) ICEObjectAdapter* adapter;
-@property(readonly, nonatomic) ICEIdentity* _objc_id;
+@property(readonly, nonatomic) ICEIdentity* id_objc_;
 @property(readonly, nonatomic) NSString* facet;
 @property(readonly, nonatomic) NSString* operation;
 @property(readonly, nonatomic) ICEOperationMode mode;

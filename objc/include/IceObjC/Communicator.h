@@ -17,14 +17,13 @@
 @protocol ICELocatorPrx;
 @class ICELogger;
 @class ICEProperties;
-@class ICEIdentity;
 @class ICEObjectAdapter;
+@class ICEIdentity;
 
 @interface ICECommunicator : NSObject
 {
     void* communicator__;
 }
-
 -(void) destroy;
 -(void) shutdown;
 -(void) waitForShutdown;

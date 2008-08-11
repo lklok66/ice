@@ -7,7 +7,9 @@
 //
 // **********************************************************************
 
-#import "Hello.h"
+#import <Hello.h>
+
+#import <IceObjC/LocalException.h>
 
 @implementation HelloPrx
 
@@ -23,7 +25,7 @@
 
 -(void) sayHello
 {
-    [self invoke__:@"sayHello" mode:Idempotent os:nil is:nil];
+    BOOL ok = [self invoke__:@"sayHello" mode:Idempotent os:nil is:nil];
 }
 
 @end
@@ -44,14 +46,12 @@
         return [super ice_isA:typeId current:current];
     }
 }
--(BOOL) sayHello___:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream**)os
+-(BOOL) sayHello___:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream*)os
 {
-    [is release];
     [(id)self sayHello:current];
-    *os = [self createOutputStream__:current];
     return TRUE;
 }
--(BOOL) dispatch__:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream**)os
+-(BOOL) dispatch__:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream*)os
 {
     //
     // TODO: Optimize

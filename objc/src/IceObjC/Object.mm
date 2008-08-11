@@ -62,19 +62,25 @@ IceObjC::ObjectI::ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& cb
         Ice::InputStreamPtr s = Ice::createInputStream(current.adapter->getCommunicator(), inParams);
         is = [[ICEInputStream alloc] initWithInputStream:s];
     }
+    {
+        Ice::OutputStreamPtr s = Ice::createOutputStream(current.adapter->getCommunicator());
+        os = [[ICEOutputStream alloc] initWithOutputStream:s];
+    }
     ICECurrent* c = [[ICECurrent alloc] initWithCurrent:current];
     BOOL ok;
     @try
     {
-        ok = [_object dispatch__:c is:is os:&os];
+        ok = [_object dispatch__:c is:is os:os];
     }
     @catch(NSException* ex)
     {
+        [os release];
         rethrowCxxException(ex);
     }
     @finally
     {
         [c release];
+        [is release];
     }
     
     std::vector<Ice::Byte> outParams;
@@ -133,55 +139,33 @@ IceObjC::ObjectI::getObject()
 
 @implementation ICEObject
 
--(ICEOutputStream*) createOutputStream__:(ICECurrent*)current
-{
-    try
-    {
-        Ice::OutputStreamPtr os = Ice::createOutputStream([current current__]->adapter->getCommunicator());
-        return [[ICEOutputStream alloc] initWithOutputStream:os];
-    }
-    catch(const std::exception& ex)
-    {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
-    }
-}
-
 static const char* ICEObject_ids__[] =
 {
     "::Ice::Object"
 };
 
--(BOOL) ice_isA___:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream**)os
+-(BOOL) ice_isA___:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream*)os
 {
     NSString* id__ = [is readString];
-    [is release];
     BOOL ret__ = [(id)self ice_isA:id__ current:current];
-    *os = [self createOutputStream__:current];
-    [*os writeBool:ret__];
+    [os writeBool:ret__];
     return TRUE;
 }
--(BOOL) ice_ping___:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream**)os
+-(BOOL) ice_ping___:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream*)os
 {
-    [is release];
     [(id)self ice_ping:current];
-    *os = [self createOutputStream__:current];
     return TRUE;
 }
--(BOOL) ice_id___:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream**)os
+-(BOOL) ice_id___:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream*)os
 {
-    [is release];
     NSString* ret__ = [(id)self ice_id:current];
-    *os = [self createOutputStream__:current];
-    [*os writeString:ret__];
+    [os writeString:ret__];
     return TRUE;
 }
--(BOOL) ice_ids___:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream**)os
+-(BOOL) ice_ids___:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream*)os
 {
-    [is release];
     NSArray* ret__ = [(id)self ice_ids:current];
-    *os = [self createOutputStream__:current];
-    [*os writeStringSeq:ret__];
+    [os writeStringSeq:ret__];
     return TRUE;
 }
 -(BOOL) ice_isA:(NSString*)typeId current:(ICECurrent*)current
@@ -227,7 +211,7 @@ static const char* ICEObject_ids__[] =
 {
     return ICEObject_ids__[0];
 }
--(BOOL) dispatch__:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream**)os
+-(BOOL) dispatch__:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream*)os
 {
     //
     // TODO: Optimize
