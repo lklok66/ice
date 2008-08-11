@@ -16,9 +16,7 @@
 
 #include <Ice/Locator.h>
 
-#define OBJECTADAPTER ((Ice::ObjectAdapter*)objectAdapter__)
-
-@implementation ICEObjectAdapter (Internal)
+@implementation ICEObjectAdapter
 
 -(ICEObjectAdapter*) initWithObjectAdapter:(const Ice::ObjectAdapterPtr&)arg
 {
@@ -27,7 +25,7 @@
         return nil;
     }
     objectAdapter__ = arg.get();
-    OBJECTADAPTER->__incRef();
+    objectAdapter__->__incRef();
     return self;
 }
 
@@ -38,7 +36,7 @@
 
 -(void) dealloc
 {
-    OBJECTADAPTER->__decRef();
+    objectAdapter__->__decRef();
     objectAdapter__ = 0;
     [super dealloc];
 }
@@ -48,15 +46,15 @@
     return [[[ICEObjectAdapter alloc] initWithObjectAdapter:arg] autorelease];
 }
 
-@end
+//
+// @protocol ICEObjectAdapter methods.
+//
 
-@implementation ICEObjectAdapter
-
--(ICECommunicator*) getCommunicator
+-(id<ICECommunicator>) getCommunicator
 {
     try
     {
-        return [ICECommunicator communicatorWithCommunicator:OBJECTADAPTER->getCommunicator()];
+        return [ICECommunicator communicatorWithCommunicator:objectAdapter__->getCommunicator()];
     }
     catch(const std::exception& ex)
     {
@@ -69,7 +67,7 @@
 {
     try
     {
-        return [toNSString(OBJECTADAPTER->getName()) autorelease];
+        return [toNSString(objectAdapter__->getName()) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -82,7 +80,7 @@
 {
     try
     {
-        OBJECTADAPTER->activate();
+        objectAdapter__->activate();
     }
     catch(const std::exception& ex)
     {
@@ -94,7 +92,7 @@
 {
     try
     {
-        OBJECTADAPTER->hold();
+        objectAdapter__->hold();
     }
     catch(const std::exception& ex)
     {
@@ -106,7 +104,7 @@
 {
     try
     {
-        OBJECTADAPTER->waitForHold();
+        objectAdapter__->waitForHold();
     }
     catch(const std::exception& ex)
     {
@@ -118,7 +116,7 @@
 {
     try
     {
-        OBJECTADAPTER->deactivate();
+        objectAdapter__->deactivate();
     }
     catch(const std::exception& ex)
     {
@@ -130,7 +128,7 @@
 {
     try
     {
-        OBJECTADAPTER->waitForDeactivate();
+        objectAdapter__->waitForDeactivate();
     }
     catch(const std::exception& ex)
     {
@@ -142,7 +140,7 @@
 {
     try
     {
-        return OBJECTADAPTER->isDeactivated();
+        return objectAdapter__->isDeactivated();
     }
     catch(const std::exception& ex)
     {
@@ -155,7 +153,7 @@
 {
     try
     {
-        OBJECTADAPTER->destroy();
+        objectAdapter__->destroy();
     }
     catch(const std::exception& ex)
     {
@@ -168,7 +166,7 @@
     try
     {
         [servant retain];
-        return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->add([servant object__], [ident identity__])];
+        return [ICEObjectPrx objectPrxWithObjectPrx__:objectAdapter__->add([servant object__], [ident identity__])];
     }
     catch(const std::exception& ex)
     {
@@ -182,7 +180,7 @@
     try
     {
         [servant retain];
-        return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->addFacet([servant object__], [ident identity__],
+        return [ICEObjectPrx objectPrxWithObjectPrx__:objectAdapter__->addFacet([servant object__], [ident identity__],
                                                                               fromNSString(facet))];
     }
     catch(const std::exception& ex)
@@ -197,7 +195,7 @@
     try
     {
         [servant retain];
-        return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->addWithUUID([servant object__])];
+        return [ICEObjectPrx objectPrxWithObjectPrx__:objectAdapter__->addWithUUID([servant object__])];
     }
     catch(const std::exception& ex)
     {
@@ -211,7 +209,7 @@
     try
     {
         [servant retain];
-        return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->addFacetWithUUID([servant object__],
+        return [ICEObjectPrx objectPrxWithObjectPrx__:objectAdapter__->addFacetWithUUID([servant object__],
                                                                                       fromNSString(facet))];
     }
     catch(const std::exception& ex)
@@ -225,7 +223,7 @@
 {
     try
     {
-        Ice::ObjectPtr wrapper = OBJECTADAPTER->remove([ident identity__]);
+        Ice::ObjectPtr wrapper = objectAdapter__->remove([ident identity__]);
         ICEObject* servant = IceObjC::ObjectWrapperPtr::dynamicCast(wrapper)->getObject();
         return [servant autorelease];
     }
@@ -239,7 +237,7 @@
 {
     try
     {
-        Ice::ObjectPtr wrapper = OBJECTADAPTER->removeFacet([ident identity__], fromNSString(facet));
+        Ice::ObjectPtr wrapper = objectAdapter__->removeFacet([ident identity__], fromNSString(facet));
         ICEObject* servant = IceObjC::ObjectWrapperPtr::dynamicCast(wrapper)->getObject();
         return [servant autorelease];
     }
@@ -254,7 +252,7 @@
 {
     try
     {
-        Ice::FacetMap wrappers = OBJECTADAPTER->removeAllFacets([ident identity__]);
+        Ice::FacetMap wrappers = objectAdapter__->removeAllFacets([ident identity__]);
         NSMutableDictionary* servants = [[NSMutableDictionary alloc] initWithCapacity:wrappers.size()];
         for(Ice::FacetMap::const_iterator p = wrappers.begin(); p != wrappers.end(); ++p)
         {
@@ -277,7 +275,7 @@
 {
     try
     {
-        return IceObjC::ObjectWrapperPtr::dynamicCast(OBJECTADAPTER->find([ident identity__]))->getObject();
+        return IceObjC::ObjectWrapperPtr::dynamicCast(objectAdapter__->find([ident identity__]))->getObject();
     }
     catch(const std::exception& ex)
     {
@@ -290,7 +288,7 @@
 {
     try
     {
-        Ice::ObjectPtr wrapper = OBJECTADAPTER->findFacet([ident identity__], fromNSString(facet));
+        Ice::ObjectPtr wrapper = objectAdapter__->findFacet([ident identity__], fromNSString(facet));
         return IceObjC::ObjectWrapperPtr::dynamicCast(wrapper)->getObject();
     }
     catch(const std::exception& ex)
@@ -304,7 +302,7 @@
 {
     try
     {
-        Ice::FacetMap wrappers = OBJECTADAPTER->findAllFacets([ident identity__]);
+        Ice::FacetMap wrappers = objectAdapter__->findAllFacets([ident identity__]);
         NSMutableDictionary* servants = [[NSMutableDictionary alloc] initWithCapacity:wrappers.size()];
         for(Ice::FacetMap::const_iterator p = wrappers.begin(); p != wrappers.end(); ++p)
         {
@@ -324,7 +322,7 @@
     try
     {
         Ice::ObjectPrx prx = [(ICEObjectPrx*)proxy objectPrx__];
-        return IceObjC::ObjectWrapperPtr::dynamicCast(OBJECTADAPTER->findByProxy(prx))->getObject();
+        return IceObjC::ObjectWrapperPtr::dynamicCast(objectAdapter__->findByProxy(prx))->getObject();
     }
     catch(const std::exception& ex)
     {
@@ -337,7 +335,7 @@
 {
     try
     {
-        return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->createProxy([ident identity__])];
+        return [ICEObjectPrx objectPrxWithObjectPrx__:objectAdapter__->createProxy([ident identity__])];
     }
     catch(const std::exception& ex)
     {
@@ -350,7 +348,7 @@
 {
     try
     {
-        return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->createDirectProxy([ident identity__])];
+        return [ICEObjectPrx objectPrxWithObjectPrx__:objectAdapter__->createDirectProxy([ident identity__])];
     }
     catch(const std::exception& ex)
     {
@@ -363,7 +361,7 @@
 {
     try
     {
-        return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->createIndirectProxy([ident identity__])];
+        return [ICEObjectPrx objectPrxWithObjectPrx__:objectAdapter__->createIndirectProxy([ident identity__])];
     }
     catch(const std::exception& ex)
     {
@@ -376,7 +374,7 @@
 {
     try
     {
-        OBJECTADAPTER->setLocator(Ice::LocatorPrx::uncheckedCast(Ice::ObjectPrx([(ICEObjectPrx*)loc objectPrx__])));
+        objectAdapter__->setLocator(Ice::LocatorPrx::uncheckedCast(Ice::ObjectPrx([(ICEObjectPrx*)loc objectPrx__])));
     }
     catch(const std::exception& ex)
     {
@@ -388,7 +386,7 @@
 {
     try
     {
-        OBJECTADAPTER->refreshPublishedEndpoints();
+        objectAdapter__->refreshPublishedEndpoints();
     }
     catch(const std::exception& ex)
     {

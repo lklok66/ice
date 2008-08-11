@@ -20,9 +20,7 @@
 #include <Ice/Router.h>
 #include <Ice/Locator.h>
 
-#define COMMUNICATOR ((Ice::Communicator*)communicator__)
-
-@implementation ICECommunicator (Internal)
+@implementation ICECommunicator
 
 -(ICECommunicator*) initWithCommunicator:(const Ice::CommunicatorPtr&)arg
 {
@@ -31,7 +29,7 @@
         return nil;
     }
     communicator__ = arg.get();
-    COMMUNICATOR->__incRef();
+    communicator__->__incRef();
     return self;
 }
 
@@ -42,7 +40,7 @@
 
 -(void) dealloc
 {
-    COMMUNICATOR->__decRef();
+    communicator__->__decRef();
     communicator__ = 0;
     [super dealloc];
 }
@@ -52,15 +50,15 @@
     return [[[ICECommunicator alloc] initWithCommunicator:arg] autorelease];
 }
 
-@end
-
-@implementation ICECommunicator
+//
+// Methods from @protocol ICECommunicator
+//
 
 -(void) destroy
 {
     try
     {
-        COMMUNICATOR->destroy();
+        communicator__->destroy();
     }
     catch(const std::exception& ex)
     {
@@ -72,7 +70,7 @@
 {
     try
     {
-        COMMUNICATOR->shutdown();
+        communicator__->shutdown();
     }
     catch(const std::exception& ex)
     {
@@ -84,7 +82,7 @@
 {
     try
     {
-        COMMUNICATOR->waitForShutdown();
+        communicator__->waitForShutdown();
     }
     catch(const std::exception& ex)
     {
@@ -96,7 +94,7 @@
 {
     try
     {
-        return COMMUNICATOR->isShutdown();
+        return communicator__->isShutdown();
     }
     catch(const std::exception& ex)
     {
@@ -109,7 +107,7 @@
 {
     try
     {
-        return [ICEObjectPrx objectPrxWithObjectPrx__:COMMUNICATOR->stringToProxy(fromNSString(str))];
+        return [ICEObjectPrx objectPrxWithObjectPrx__:communicator__->stringToProxy(fromNSString(str))];
     }
     catch(const std::exception& ex)
     {
@@ -122,7 +120,7 @@
 {
     try
     {
-        return [toNSString(COMMUNICATOR->proxyToString([(ICEObjectPrx*)obj objectPrx__])) autorelease];
+        return [toNSString(communicator__->proxyToString([(ICEObjectPrx*)obj objectPrx__])) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -135,7 +133,7 @@
 {
     try
     {
-        return [ICEObjectPrx objectPrxWithObjectPrx__:COMMUNICATOR->propertyToProxy(fromNSString(property))];
+        return [ICEObjectPrx objectPrxWithObjectPrx__:communicator__->propertyToProxy(fromNSString(property))];
     }
     catch(const std::exception& ex)
     {
@@ -148,7 +146,7 @@
 {
     try
     {
-        return [ICEIdentity identityWithIdentity:COMMUNICATOR->stringToIdentity(fromNSString(str))];
+        return [ICEIdentity identityWithIdentity:communicator__->stringToIdentity(fromNSString(str))];
     }
     catch(const std::exception& ex)
     {
@@ -161,7 +159,7 @@
 {
     try
     {
-        return [toNSString(COMMUNICATOR->identityToString([ident identity__])) autorelease];
+        return [toNSString(communicator__->identityToString([ident identity__])) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -170,11 +168,11 @@
     }
 }
 
--(ICEObjectAdapter*) createObjectAdapter:(NSString*)name;
+-(id<ICEObjectAdapter>) createObjectAdapter:(NSString*)name;
 {
     try
     {
-        return [ICEObjectAdapter objectAdapterWithObjectAdapter:COMMUNICATOR->createObjectAdapter(fromNSString(name))];
+        return [ICEObjectAdapter objectAdapterWithObjectAdapter:communicator__->createObjectAdapter(fromNSString(name))];
     }
     catch(const std::exception& ex)
     {
@@ -183,11 +181,11 @@
     }
 }
 
--(ICEObjectAdapter*) createObjectAdapterWithEndpoints:(NSString*)name endpoints:(NSString*)endpoints;
+-(id<ICEObjectAdapter>) createObjectAdapterWithEndpoints:(NSString*)name endpoints:(NSString*)endpoints;
 {
     try
     {
-        return [ICEObjectAdapter objectAdapterWithObjectAdapter:COMMUNICATOR->createObjectAdapterWithEndpoints(fromNSString(name), fromNSString(endpoints))];
+        return [ICEObjectAdapter objectAdapterWithObjectAdapter:communicator__->createObjectAdapterWithEndpoints(fromNSString(name), fromNSString(endpoints))];
     }
     catch(const std::exception& ex)
     {
@@ -196,12 +194,12 @@
     }
 }
 
--(ICEObjectAdapter*) createObjectAdapterWithRouter:(NSString*)name router:(id<ICERouterPrx>)rtr
+-(id<ICEObjectAdapter>) createObjectAdapterWithRouter:(NSString*)name router:(id<ICERouterPrx>)rtr
 {
     try
     {
         Ice::RouterPrx router = Ice::RouterPrx::uncheckedCast(Ice::ObjectPrx([(ICEObjectPrx*)rtr objectPrx__]));
-        return [ICEObjectAdapter objectAdapterWithObjectAdapter:COMMUNICATOR->createObjectAdapterWithRouter(fromNSString(name), router)];
+        return [ICEObjectAdapter objectAdapterWithObjectAdapter:communicator__->createObjectAdapterWithRouter(fromNSString(name), router)];
     }
     catch(const std::exception& ex)
     {
@@ -210,11 +208,11 @@
     }
 }
 
--(ICEProperties*) getProperties
+-(id<ICEProperties>) getProperties
 {
     try
     {
-        return [ICEProperties propertiesWithProperties:COMMUNICATOR->getProperties()];
+        return [ICEProperties propertiesWithProperties:communicator__->getProperties()];
     }
     catch(const std::exception& ex)
     {
@@ -223,11 +221,11 @@
     }
 }
 
--(ICELogger*) getLogger
+-(id<ICELogger>) getLogger
 {
     try
     {
-        return [ICELogger loggerWithLogger:COMMUNICATOR->getLogger()];
+        return [ICELogger loggerWithLogger:communicator__->getLogger()];
     }
     catch(const std::exception& ex)
     {
@@ -240,7 +238,7 @@
 {
     try
     {
-        return (id<ICERouterPrx>)[ICERouterPrx objectPrxWithObjectPrx__:COMMUNICATOR->getDefaultRouter()];
+        return (id<ICERouterPrx>)[ICERouterPrx objectPrxWithObjectPrx__:communicator__->getDefaultRouter()];
     }
     catch(const std::exception& ex)
     {
@@ -253,7 +251,7 @@
 {
     try
     {
-        COMMUNICATOR->setDefaultRouter(Ice::RouterPrx::uncheckedCast(Ice::ObjectPrx([(ICEObjectPrx*)rtr objectPrx__])));
+        communicator__->setDefaultRouter(Ice::RouterPrx::uncheckedCast(Ice::ObjectPrx([(ICEObjectPrx*)rtr objectPrx__])));
     }
     catch(const std::exception& ex)
     {
@@ -265,7 +263,7 @@
 {
     try
     {
-        return (id<ICELocatorPrx>)[ICELocatorPrx objectPrxWithObjectPrx__:COMMUNICATOR->getDefaultLocator()];
+        return (id<ICELocatorPrx>)[ICELocatorPrx objectPrxWithObjectPrx__:communicator__->getDefaultLocator()];
     }
     catch(const std::exception& ex)
     {
@@ -278,7 +276,7 @@
 {
     try
     {
-        COMMUNICATOR->setDefaultLocator(Ice::LocatorPrx::uncheckedCast(Ice::ObjectPrx([(ICEObjectPrx*)loc objectPrx__])));
+        communicator__->setDefaultLocator(Ice::LocatorPrx::uncheckedCast(Ice::ObjectPrx([(ICEObjectPrx*)loc objectPrx__])));
     }
     catch(const std::exception& ex)
     {
@@ -290,7 +288,7 @@
 {
     try
     {
-        COMMUNICATOR->flushBatchRequests();
+        communicator__->flushBatchRequests();
     }
     catch(const std::exception& ex)
     {

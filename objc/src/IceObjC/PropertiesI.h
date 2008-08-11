@@ -11,7 +11,10 @@
 
 #include <Ice/Properties.h>
 
-@interface ICEProperties (Internal)
+@interface ICEProperties : NSObject<ICEProperties>
+{
+    Ice::Properties* properties__;
+}
 -(ICEProperties*)initWithProperties:(const Ice::PropertiesPtr&)arg;
 -(Ice::Properties*)properties__;
 +(ICEProperties*)propertiesWithProperties:(const Ice::PropertiesPtr&)arg;

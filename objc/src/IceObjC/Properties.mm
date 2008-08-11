@@ -10,9 +10,7 @@
 #import <IceObjC/PropertiesI.h>
 #import <IceObjC/Util.h>
 
-#define PROPERTIES ((Ice::Properties*)properties__)
-
-@implementation ICEProperties (Internal)
+@implementation ICEProperties
 
 -(ICEProperties*) initWithProperties:(const Ice::PropertiesPtr&)arg
 {
@@ -21,7 +19,7 @@
         return nil;
     }
     properties__ = arg.get();
-    PROPERTIES->__incRef();
+    properties__->__incRef();
     return self;
 }
 
@@ -32,7 +30,7 @@
 
 -(void) dealloc
 {
-    PROPERTIES->__decRef();
+    properties__->__decRef();
     properties__ = 0;
     [super dealloc];
 }
@@ -42,15 +40,13 @@
     return [[[ICEProperties alloc] initWithProperties:properties] autorelease];
 }
 
-@end
-
-@implementation ICEProperties
+// @protocol ICEProperties methods.
 
 -(NSString*) getProperty:(NSString*)key
 {
     try
     {
-        return [toNSString(PROPERTIES->getProperty(fromNSString(key))) autorelease];
+        return [toNSString(properties__->getProperty(fromNSString(key))) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -62,7 +58,7 @@
 {
     try
     {
-        return [toNSString(PROPERTIES->getPropertyWithDefault(fromNSString(key), fromNSString(value))) autorelease];
+        return [toNSString(properties__->getPropertyWithDefault(fromNSString(key), fromNSString(value))) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -74,7 +70,7 @@
 {
     try
     {
-        return PROPERTIES->getPropertyAsInt(fromNSString(key));
+        return properties__->getPropertyAsInt(fromNSString(key));
     }
     catch(const std::exception& ex)
     {
@@ -86,7 +82,7 @@
 {
     try
     {
-        return PROPERTIES->getPropertyAsIntWithDefault(fromNSString(key), value);
+        return properties__->getPropertyAsIntWithDefault(fromNSString(key), value);
     }
     catch(const std::exception& ex)
     {
@@ -98,7 +94,7 @@
 {
     try
     {
-        return [toNSArray(PROPERTIES->getPropertyAsList(fromNSString(key))) autorelease];
+        return [toNSArray(properties__->getPropertyAsList(fromNSString(key))) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -112,7 +108,7 @@
     {
         std::vector<std::string> s;
         fromNSArray(value, s);
-        return [toNSArray(PROPERTIES->getPropertyAsListWithDefault(fromNSString(key), s)) autorelease];
+        return [toNSArray(properties__->getPropertyAsListWithDefault(fromNSString(key), s)) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -124,7 +120,7 @@
 {
     try
     {
-        return [toNSDictionary(PROPERTIES->getPropertiesForPrefix(fromNSString(prefix))) autorelease];
+        return [toNSDictionary(properties__->getPropertiesForPrefix(fromNSString(prefix))) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -136,7 +132,7 @@
 {
     try
     {
-        PROPERTIES->setProperty(fromNSString(key), fromNSString(value));
+        properties__->setProperty(fromNSString(key), fromNSString(value));
     }
     catch(const std::exception& ex)
     {
@@ -147,7 +143,7 @@
 {
     try
     {
-        return [toNSArray(PROPERTIES->getCommandLineOptions()) autorelease];
+        return [toNSArray(properties__->getCommandLineOptions()) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -161,7 +157,7 @@
     {
         std::vector<std::string> o;
         fromNSArray(options, o);
-        return [toNSArray(PROPERTIES->parseCommandLineOptions(fromNSString(prefix), o)) autorelease];
+        return [toNSArray(properties__->parseCommandLineOptions(fromNSString(prefix), o)) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -175,7 +171,7 @@
     {
         std::vector<std::string> o;
         fromNSArray(options, o);
-        return [toNSArray(PROPERTIES->parseIceCommandLineOptions(o)) autorelease];
+        return [toNSArray(properties__->parseIceCommandLineOptions(o)) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -187,18 +183,18 @@
 {
     try
     {
-        PROPERTIES->load(fromNSString(file));
+        properties__->load(fromNSString(file));
     }
     catch(const std::exception& ex)
     {
         rethrowObjCException(ex);
     }
 }
--(ICEProperties*) clone
+-(id<ICEProperties>) clone
 {
     try
     {
-        return [ICEProperties propertiesWithProperties:PROPERTIES->clone()];
+        return [ICEProperties propertiesWithProperties:properties__->clone()];
     }
     catch(const std::exception& ex)
     {

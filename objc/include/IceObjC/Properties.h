@@ -9,10 +9,8 @@
 
 #import <IceObjC/Config.h>
 
-@interface ICEProperties : NSObject
-{
-    void* properties__;
-}
+@protocol ICEProperties <NSObject>
+
 -(NSString*) getProperty:(NSString*)key;
 -(NSString*) getPropertyWithDefault:(NSString*)key value:(NSString*)value;
 -(ICEInt) getPropertyAsInt:(NSString*)key;
@@ -25,6 +23,6 @@
 -(NSArray*) parseCommandLineOptions:(NSString*)prefix options:(NSArray*)options;
 -(NSArray*) parseIceCommandLineOptions:(NSArray*)options;
 -(void) load:(NSString*)file;
--(ICEProperties*) clone;
+-(id<ICEProperties>) clone;
 
 @end

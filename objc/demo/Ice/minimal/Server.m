@@ -19,20 +19,20 @@ main(int argc, char* argv[])
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
     
     int status = 0;
-    ICECommunicator* communicator = nil;
+    id<ICECommunicator> communicator = nil;
     @try
     {
-        communicator = [ICECommunicator create:&argc argv:argv];
+        communicator = [ICEUtil createCommunicator:&argc argv:argv];
         if(argc > 1)
         {
             NSLog(@"%s: too many arguments", argv[0]);
             return 1;
         }
-        ICEObjectAdapter* adapter = [communicator createObjectAdapterWithEndpoints:@"Hello" endpoints:@"tcp -p 10000"];
+        id<ICEObjectAdapter> adpt = [communicator createObjectAdapterWithEndpoints:@"Hello" endpoints:@"tcp -p 10000"];
         Hello* hello = [[HelloI alloc] init];
-        [adapter add:hello identity:[communicator stringToIdentity:@"hello"]];
+        [adpt add:hello identity:[communicator stringToIdentity:@"hello"]];
         [hello release];
-        [adapter activate];
+        [adpt activate];
         [communicator waitForShutdown];
     }
     @catch(ICELocalException* ex)

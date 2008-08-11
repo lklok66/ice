@@ -9,10 +9,7 @@
 
 #import <IceObjC/Config.h>
 
-@interface ICELogger : NSObject
-{
-    void* logger__;
-}
+@protocol ICELogger <NSObject>
 -(void) print:(NSString*)message;
 -(void) trace:(NSString*)category message:(NSString*)message;
 -(void) warning:(NSString*)message;

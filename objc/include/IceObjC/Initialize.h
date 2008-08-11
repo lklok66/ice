@@ -16,34 +16,25 @@
 //
 // Forward declarations.
 //
-@class ICELogger;
+@protocol ICELogger;
 
 @interface ICEInitializationData : NSObject
 {
 @private
-    ICEProperties* properties;
-    ICELogger* logger;
+    id<ICEProperties> properties;
+    id<ICELogger> logger;
 }
-@property(retain, nonatomic) ICEProperties* properties;
-@property(retain, nonatomic) ICELogger* logger;
+@property(retain, nonatomic) id<ICEProperties> properties;
+@property(retain, nonatomic) id<ICELogger> logger;
 @end
 
-@interface ICEProperties (Initialize)
-+(ICEProperties*) create;
-+(ICEProperties*) create:(int*)argc argv:(char*[])argv;
-@end
-
-@interface ICECommunicator (Initialize)
-+(ICECommunicator*) create;
-+(ICECommunicator*) create:(ICEInitializationData *)initData;
-+(ICECommunicator*) create:(int*)argc argv:(char*[])argv;
-+(ICECommunicator*) create:(int*)argc argv:(char*[])argv initData:(ICEInitializationData *)initData;
-@end
-
-@interface ICEInputStream (Initialize)
-+(ICEInputStream*) createInputStream:(ICECommunicator*)communicator data:(NSData*)data;
-@end
-
-@interface ICEOutputStream (Initialize)
-+(ICEOutputStream*) createOutputStream:(ICECommunicator*)communicator;
+@interface ICEUtil : NSObject
++(id<ICEProperties>) createProperties;
++(id<ICEProperties>) createProperties:(int*)argc argv:(char*[])argv;
++(id<ICECommunicator>) createCommunicator;
++(id<ICECommunicator>) createCommunicator:(ICEInitializationData *)initData;
++(id<ICECommunicator>) createCommunicator:(int*)argc argv:(char*[])argv;
++(id<ICECommunicator>) createCommunicator:(int*)argc argv:(char*[])argv initData:(ICEInitializationData *)initData;
++(id<ICEInputStream>) createInputStream:(id<ICECommunicator>)communicator data:(NSData*)data;
++(id<ICEOutputStream>) createOutputStream:(id<ICECommunicator>)communicator;
 @end

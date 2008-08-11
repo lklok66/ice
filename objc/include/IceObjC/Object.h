@@ -14,10 +14,10 @@
 //
 @class ICEObject;
 @class ICECurrent;
-@class ICEInputStream;
-@class ICEOutputStream;
+@protocol ICEInputStream;
+@protocol ICEOutputStream;
 
-@protocol ICEObject
+@protocol ICEObject <NSObject>
 -(BOOL) ice_isA:(NSString*)typeId current:(ICECurrent*)current;
 -(void) ice_ping:(ICECurrent*)current;
 -(NSString*) ice_id:(ICECurrent*)current;
@@ -29,8 +29,7 @@
 {
     void* object__;
 }
--(ICEOutputStream*) createOutputStream__:(ICECurrent*)current;
--(BOOL) dispatch__:(ICECurrent*)current is:(ICEInputStream*)is os:(ICEOutputStream**)os;
--(void) write__:(ICEOutputStream*)os;
--(void) read__:(ICEInputStream*)is readTypeId:(BOOL)rid;
+-(BOOL) dispatch__:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os;
+-(void) write__:(id<ICEOutputStream>)os;
+-(void) read__:(id<ICEInputStream>)is readTypeId:(BOOL)rid;
 @end

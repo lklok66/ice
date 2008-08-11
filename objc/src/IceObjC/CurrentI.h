@@ -13,5 +13,4 @@
 
 @interface ICECurrent (Internal)
 -(ICECurrent*) initWithCurrent:(const Ice::Current&)arg;
--(const Ice::Current*) current__;
 @end

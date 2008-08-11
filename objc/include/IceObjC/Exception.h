@@ -14,8 +14,8 @@
 //
 // Forward declarations
 // 
-@class ICEOutputStream;
-@class ICEInputStream;
+@protocol ICEOutputStream;
+@protocol ICEInputStream;
 
 @interface ICEException : NSException
 -(NSString*)ice_name;
@@ -32,6 +32,6 @@
 
 @interface ICEUserException : ICEException
 -(BOOL)usesClasses__;
--(void)write__:(ICEOutputStream*)stream;
--(void)read__:(ICEInputStream*)stream readTypeId:(BOOL)rid;
+-(void)write__:(id<ICEOutputStream>)stream;
+-(void)read__:(id<ICEInputStream>)stream readTypeId:(BOOL)rid;
 @end

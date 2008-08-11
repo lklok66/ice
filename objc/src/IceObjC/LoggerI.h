@@ -11,7 +11,10 @@
 
 #include <Ice/Logger.h>
 
-@interface ICELogger (Internal)
+@interface ICELogger : NSObject<ICELogger>
+{
+    Ice::Logger* logger__;
+}
 -(ICELogger*)initWithLogger:(const Ice::LoggerPtr&)arg;
 -(Ice::Logger*)logger__;
 +(ICELogger*)loggerWithLogger:(const Ice::LoggerPtr&)arg;

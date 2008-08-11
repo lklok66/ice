@@ -15,15 +15,12 @@
 @protocol ICEObjectPrx;
 @protocol ICERouterPrx;
 @protocol ICELocatorPrx;
-@class ICELogger;
-@class ICEProperties;
+@protocol ICELogger;
+@protocol ICEProperties;
+@protocol ICEObjectAdapter;
 @class ICEIdentity;
-@class ICEObjectAdapter;
 
-@interface ICECommunicator : NSObject
-{
-    void* communicator__;
-}
+@protocol ICECommunicator <NSObject>
 
 -(void) destroy;
 -(void) shutdown;
@@ -34,14 +31,14 @@
 -(id<ICEObjectPrx>)propertyToProxy:(NSString*)property;
 -(ICEIdentity*) stringToIdentity:(NSString*)str;
 -(NSString*) identityToString:(ICEIdentity*)ident;
--(ICEObjectAdapter*) createObjectAdapter:(NSString*)name;
--(ICEObjectAdapter*) createObjectAdapterWithEndpoints:(NSString*)name endpoints:(NSString*)endpoints;
--(ICEObjectAdapter*) createObjectAdapterWithRouter:(NSString*)name router:(id<ICERouterPrx>)rtr;
+-(id<ICEObjectAdapter>) createObjectAdapter:(NSString*)name;
+-(id<ICEObjectAdapter>) createObjectAdapterWithEndpoints:(NSString*)name endpoints:(NSString*)endpoints;
+-(id<ICEObjectAdapter>) createObjectAdapterWithRouter:(NSString*)name router:(id<ICERouterPrx>)rtr;
 //-(void) addObjectFactory(ObjectFactory factory, NSString* id);
 //-(ObjectFactory findObjectFactory(NSString* id);
 //-(ICEImplicitContext*) getImplicitContext;
--(ICEProperties*) getProperties;
--(ICELogger*) getLogger;
+-(id<ICEProperties>) getProperties;
+-(id<ICELogger>) getLogger;
 //-(ICEStats*) getStats;
 -(id<ICERouterPrx>) getDefaultRouter;
 -(void) setDefaultRouter:(id<ICERouterPrx>)rtr;

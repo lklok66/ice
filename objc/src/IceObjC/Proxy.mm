@@ -84,7 +84,7 @@
     return nil;
 }
 
--(ICEOutputStream*) createOutputStream__
+-(id<ICEOutputStream>) createOutputStream__
 {
     try
     {
@@ -98,14 +98,14 @@
     }
 }
 
--(BOOL) invoke__:(NSString*)operation mode:(ICEOperationMode)mode os:(ICEOutputStream*)os is:(ICEInputStream**)is
+-(BOOL) invoke__:(NSString*)operation mode:(ICEOperationMode)mode os:(id<ICEOutputStream>)os is:(id<ICEInputStream>*)is
 {
     try
     {
         std::vector<Ice::Byte> inParams;
         if(os)
         {
-            [os os__]->finished(inParams);
+            [(ICEOutputStream*)os os__]->finished(inParams);
             [os release];
         }
 

@@ -11,7 +11,10 @@
 
 #include <Ice/ObjectAdapter.h>
 
-@interface ICEObjectAdapter (Internal)
+@interface ICEObjectAdapter : NSObject<ICEObjectAdapter>
+{
+    Ice::ObjectAdapter* objectAdapter__;
+}
 -(ICEObjectAdapter*)initWithObjectAdapter:(const Ice::ObjectAdapterPtr&)arg;
 -(Ice::ObjectAdapter*)objectAdapter__;
 +(ICEObjectAdapter*)objectAdapterWithObjectAdapter:(const Ice::ObjectAdapterPtr&)arg;
