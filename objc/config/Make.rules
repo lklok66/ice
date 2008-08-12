@@ -25,7 +25,7 @@ embedded_runpath_prefix  ?= /opt/Ice-$(VERSION_MAJOR).$(VERSION_MINOR)
 # These options are mutually exclusive.
 # If neither is set, Ice-ObjC is built with debug information.
 #
-OPTIMIZE_SIZE		= yes
+#OPTIMIZE_SIZE		= yes
 #OPTIMIZE_SPEED		= yes
 
 #
