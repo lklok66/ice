@@ -1945,6 +1945,61 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     writeMemberSignature(dataMembers, 0); // TODO fix second parameter
     _H << ";";
     _M << sb;
+    _M << nl << "if(![super init])";
+    _M << sb;
+    _M << nl << "return nil;";
+    _M << eb;
+    for(q = dataMembers.begin(); q != dataMembers.end(); ++q)
+    {
+	TypePtr type = (*q)->type();
+	string typeString = typeToString(type);
+        string name = fixId((*q)->name());
+
+	_M << nl << name << " = ";
+	if(isValueType(type))
+	{
+	    _M << name << "_;";
+	}
+	else
+	{
+	   _M << "[" << name << " retain];";
+	}
+    }
+    _M << nl << "return self;";
+    _M << eb;
+
+    string lowerCaseName = fixId(p->name());
+    *(lowerCaseName.begin()) = tolower(*lowerCaseName.begin());
+
+    _H << nl << "+(id) " << lowerCaseName;
+    _M << sp << nl << "+(id) " << lowerCaseName;
+    writeMemberSignature(dataMembers, 0); // TODO fix second parameter
+    _H << ";";
+    _M << sb;
+    _M << nl << name << " *s__ = [[" << name << " alloc] init";
+    writeMemberCall(dataMembers, WithEscape);
+    _M << "];";
+    _M << nl << "[s__ autorelease];";
+    _M << nl << "return s__;";
+    _M << eb;
+
+    _H << nl << "+(id) " << lowerCaseName << ";";
+    _M << sp << nl << "+(id) " << lowerCaseName;
+    _M << sb;
+    _M << nl << name << " *s__ = [[" << name << " alloc] init];";
+    _M << nl << "[s__ autorelease];";
+    _M << nl << "return s__;";
+    _M << eb;
+
+#if 0
+    // The other constructors constructors are disabled for now because they
+    // add about 40% to the code size for a struct with three members of int, string, and sequence<double>.
+
+    _H << sp << nl << "-(id) init";
+    _M << sp << nl << "-(id) init";
+    writeMemberSignature(dataMembers, 0); // TODO fix second parameter
+    _H << ";";
+    _M << sb;
     _M << nl << "return [self init";
     writeMemberCall(dataMembers, WithEscape);
     _M << " copyItems:NO];";
@@ -2050,6 +2105,7 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     _M << nl << "[s__ autorelease];";
     _M << nl << "return s__;";
     _M << eb;
+#endif
 
     //
     // copyWithZone
