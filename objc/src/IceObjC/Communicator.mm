@@ -99,7 +99,7 @@
     catch(const std::exception& ex)
     {
         rethrowObjCException(ex);
-        return FALSE; // Keep the compiler happy.
+        return NO; // Keep the compiler happy.
     }
 }
 

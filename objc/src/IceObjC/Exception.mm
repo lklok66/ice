@@ -82,7 +82,7 @@
 @implementation ICEUserException
 -(BOOL)usesClasses__
 {
-    return FALSE;
+    return NO;
 }
 -(void)write__:(id<ICEOutputStream>)stream
 {

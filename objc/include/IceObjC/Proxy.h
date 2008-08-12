@@ -32,6 +32,6 @@
 +(id<ICEObjectPrx>) checkedCast__:(id<ICEObjectPrx>)proxy protocol:(Protocol*)protocol sliceId:(NSString*)sliceId;
 
 -(id<ICEOutputStream>) createOutputStream__;
--(BOOL) invoke__:(NSString*)operation mode:(enum ICEOperationMode)mode os:(id<ICEOutputStream>)os is:(id<ICEInputStream>*)is;
+-(BOOL) invoke__:(NSString*)operation mode:(ICEOperationMode)mode os:(id<ICEOutputStream>)os is:(id<ICEInputStream>*)is;
 
 @end

@@ -15,12 +15,12 @@
 @protocol ICEObjectAdapter;
 @class ICEIdentity;
 
-enum ICEOperationMode
+typedef enum
 {
     ICENormal,
     ICENonmutating,
     ICEIdempotent
-};
+} ICEOperationMode;
 
 @interface ICECurrent : NSObject
 {
@@ -28,7 +28,7 @@ enum ICEOperationMode
     ICEIdentity* id_objc_;
     NSString* facet;
     NSString* operation;
-    enum ICEOperationMode mode;
+    ICEOperationMode mode;
     NSDictionary* ctx;
     ICEInt requestId;
 }
@@ -36,7 +36,7 @@ enum ICEOperationMode
 @property(readonly, nonatomic) ICEIdentity* id_objc_;
 @property(readonly, nonatomic) NSString* facet;
 @property(readonly, nonatomic) NSString* operation;
-@property(readonly, nonatomic) enum ICEOperationMode mode;
+@property(readonly, nonatomic) ICEOperationMode mode;
 @property(readonly, nonatomic) NSDictionary* ctx;
 @property(readonly, nonatomic) ICEInt requestId;
 @end

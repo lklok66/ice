@@ -149,24 +149,24 @@ static const char* ICEObject_ids__[] =
     NSString* id__ = [is readString];
     BOOL ret__ = [(id)self ice_isA:id__ current:current];
     [os writeBool:ret__];
-    return TRUE;
+    return YES;
 }
 -(BOOL) ice_ping___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
     [(id)self ice_ping:current];
-    return TRUE;
+    return YES;
 }
 -(BOOL) ice_id___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
     NSString* ret__ = [(id)self ice_id:current];
     [os writeString:ret__];
-    return TRUE;
+    return YES;
 }
 -(BOOL) ice_ids___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
     NSArray* ret__ = [(id)self ice_ids:current];
     [os writeStringSeq:ret__];
-    return TRUE;
+    return YES;
 }
 -(BOOL) ice_isA:(NSString*)typeId current:(ICECurrent*)current
 {
@@ -177,7 +177,7 @@ static const char* ICEObject_ids__[] =
     catch(const std::exception& ex)
     {
         rethrowObjCException(ex);
-        return FALSE; // Keep the compiler happy.
+        return NO; // Keep the compiler happy.
     }
 }
 -(void) ice_ping:(ICECurrent*)current
@@ -204,7 +204,7 @@ static const char* ICEObject_ids__[] =
     catch(const std::exception& ex)
     {
         rethrowObjCException(ex);
-        return FALSE; // Keep the compiler happy.
+        return NO; // Keep the compiler happy.
     }
 }
 +(const char*) ice_staticId
@@ -237,7 +237,7 @@ static const char* ICEObject_ids__[] =
     {
         // TODO: throw operation not exist exception.
     }
-    return TRUE;
+    return YES;
 }
 
 -(void) write__:(id<ICEOutputStream>)os

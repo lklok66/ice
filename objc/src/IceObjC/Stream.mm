@@ -248,7 +248,7 @@ public:
     catch(const std::exception& ex)
     {
         rethrowObjCException(ex);
-        return FALSE; // Keep the compiler happy.
+        return NO; // Keep the compiler happy.
     }
 }
 
@@ -300,7 +300,7 @@ public:
         std::pair<const Ice::Byte*, const Ice::Byte*> seq;
         is__->readByteSeq(seq);
         return [NSData dataWithBytesNoCopy:const_cast<Ice::Byte*>(seq.first) 
-                       length:(seq.second - seq.first) freeWhenDone:FALSE];
+                       length:(seq.second - seq.first) freeWhenDone:NO];
     }    
     catch(const std::exception& ex)
     {
