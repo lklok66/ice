@@ -2306,21 +2306,6 @@ Slice::Gen::TypesVisitor::writeMemberCall(const DataMemberList& dataMembers, Esc
 }
 
 void
-Slice::Gen::TypesVisitor::writeMemberMethodCall(const DataMemberList& dataMembers, const string& container) const
-{
-    for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
-    {
-        string name = fixId((*q)->name());
-
-	if(q != dataMembers.begin())
-	{
-	    _M << " " << name;
-	}
-	_M << ":[" << container << " " << name << "]";
-    }
-}
-
-void
 Slice::Gen::TypesVisitor::writeMemberInit(const DataMemberList& dataMembers) const
 {
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
@@ -2409,6 +2394,8 @@ Slice::Gen::TypesVisitor::writeMemberHashCode(const DataMemberList& dataMembers,
 void
 Slice::Gen::TypesVisitor::writeMemberEquals(const DataMemberList& dataMembers, int baseTypes) const
 {
+    assert(!dataMembers.empty());
+
     _H << nl << "-(BOOL) isEqual:(id)anObject;";
 
     _M << sp << nl << "-(BOOL) isEqual:(id)o_";
@@ -2421,6 +2408,10 @@ Slice::Gen::TypesVisitor::writeMemberEquals(const DataMemberList& dataMembers, i
     _M << sb;
     _M << nl << "return NO;";
     _M << eb;
+    ContainerPtr container = (*dataMembers.begin())->container();
+    ContainedPtr contained = ContainedPtr::dynamicCast(container);
+    string containerName = fixName(contained);
+    _M << nl << containerName << " *obj_ = (" << containerName << " *)o_;";
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
 	TypePtr type = (*q)->type();
@@ -2428,7 +2419,7 @@ Slice::Gen::TypesVisitor::writeMemberEquals(const DataMemberList& dataMembers, i
 
 	if(isValueType(type))
 	{
-	    _M << nl << "if(" << name << " != [o_ " << name << "])";
+	    _M << nl << "if(" << name << " != obj_->" << name << ")";
 	    _M << sb;
 	    _M << nl << "return NO;";
 	    _M << eb;
@@ -2437,7 +2428,7 @@ Slice::Gen::TypesVisitor::writeMemberEquals(const DataMemberList& dataMembers, i
 	{
 	    _M << nl << "if(!" << name << ")";
 	    _M << sb;
-	    _M << nl << "if([o_ " << name << "])";
+	    _M << nl << "if(obj_->" << name << ")";
 	    _M << sb;
 	    _M << nl << "return NO;";
 	    _M << eb;
@@ -2446,7 +2437,7 @@ Slice::Gen::TypesVisitor::writeMemberEquals(const DataMemberList& dataMembers, i
 	    _M << sb;
 	    _M << nl << "if(![" << name << " ";
 	    _M << (isString(type) ? "isEqualToString" : "isEqual");
-	    _M << ":[o_ " << name << "]])";
+	    _M << ":obj_->" << name << "])";
 	    _M << sb;
 	    _M << nl << "return NO;";
 	    _M << eb;

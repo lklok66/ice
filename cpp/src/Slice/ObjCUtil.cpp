@@ -197,11 +197,7 @@ Slice::ObjCGenerator::typeToString(const TypePtr& type)
     SequencePtr seq = SequencePtr::dynamicCast(type);
     if(seq)
     {
-	if(isValueType(seq->type()))
-	{
-	    return "NSData";
-	}
-        return "NSArray";
+	return fixName(seq);
     }
 
     DictionaryPtr d = DictionaryPtr::dynamicCast(type);
