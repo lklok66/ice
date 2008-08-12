@@ -1133,6 +1133,7 @@ Slice::Gen::Gen(const string& name, const string& base, const string& include, c
 
     _H << sp << nl << "#import <IceObjC/Config.h>";
     _H << nl << "#import <IceObjC/Proxy.h>";
+    _H << nl << "#import <IceObjC/Exception.h>";
 
     _M.open(fileM.c_str());
     if(!_M)
@@ -1730,18 +1731,18 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
     ExceptionPtr base = p->base();
     DataMemberList dataMembers = p->dataMembers();
 
-    _M << sp;
+    _H << sp;
 
     emitDeprecate(p, 0, _M, "type");
 
-    _H << sp << nl << "@interface " << name << " : ";
+    _H << nl << "@interface " << name << " : ";
     if(base)
     {
         _H << fixName(base);
     }
     else
     {
-        _H << "Ice.UserException";
+        _H << "ICEUserException";
     }
     if(!dataMembers.empty())
     {
@@ -1750,7 +1751,7 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
 	_H.inc();
     }
 
-    _M << sp << nl << "@implementation " << name << sp;
+    _M << sp << nl << "@implementation " << name;
 
     return true;
 }
@@ -1759,91 +1760,108 @@ void
 Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
 {
     string name = fixName(p);
+
+    string lowerCaseName = fixId(p->name());
+    *(lowerCaseName.begin()) = tolower(*lowerCaseName.begin());
+
     DataMemberList dataMembers = p->dataMembers();
+    DataMemberList allDataMembers = p->allDataMembers();
     DataMemberList::const_iterator q;
+    
+    DataMemberList baseDataMembers;
+    if(p->base())
+    {
+        baseDataMembers = p->base()->allDataMembers();
+    }
 
     // TODO: deprecate metadata
 
-    //
-    // Data member declarations.
-    //
-    writeMembers(dataMembers, 0); // TODO fix second paramater
-
     if(!dataMembers.empty())
     {
+	//
+	// Data member declarations.
+	//
+	writeMembers(dataMembers, 0); // TODO fix second paramater
+
 	_H.dec();
 	_H << eb;
 	_H << sp;
+	_M << sp;
+
+	//
+	// @property and @synthesize for each data member.
+	//
+	writeProperties(dataMembers, 0); // TODO fix second parameter
+	writeSynthesize(dataMembers, 0); // TODO fix second parameter
     }
 
     //
-    // @property and @synthesize for each data member.
+    // Constructor.
     //
-    writeProperties(dataMembers, 0); // TODO fix second parameter
-    writeSynthesize(dataMembers, 0); // TODO fix second parameter
+    if(!allDataMembers.empty())
+    {
+        if(!dataMembers.empty())
+	{
+	    _M << sp << nl << "-(void) initDM__";
+	    writeMemberSignature(dataMembers, 0, MOnly); // TODO fix second parameter
+	    _M << sb;
+	    writeMemberInit(dataMembers);
+	    _M << eb;
+	}
+    }
 
-    //
-    // Constructors.
-    //
-    _H << sp << nl << "-(id) init";
-    _M << sp << nl << "-(id) init";
-    writeMemberSignature(dataMembers, 0); // TODO fix second parameter
-    _H << ";";
-    _M << sb;
-    _M << nl << "return [self init";
-    writeMemberCall(dataMembers, WithEscape);
-    _M << " copyItems:NO];";
-    _M << eb;
-
+    if(!dataMembers.empty())
+    {
+	_H << sp;
+    }
     _H << nl << "-(id) init";
     _M << sp << nl << "-(id) init";
-    writeMemberSignature(dataMembers, 0); // TODO fix second parameter
-    _H << " copyItems:(BOOL)copyItems;";
-    _M << " copyItems:(BOOL)copyItems__";
+    writeMemberSignature(allDataMembers, 0, HAndM); // TODO fix second parameter
+    _H << ";";
     _M << sb;
-    _M << nl << "if(![super init])";
+    if(!p->base())
+    {
+	_M << nl << "if(![super initWithName:[self ice_name] reason:nil userInfo:nil])";
+    }
+    else
+    {
+	_M << nl << "if(![super init";
+	writeMemberCall(baseDataMembers, WithEscape);
+	_M << "])";
+    }
     _M << sb;
     _M << nl << "return nil;";
     _M << eb;
-    if(!membersAreValues(dataMembers))
+    if(!dataMembers.empty())
     {
-	_M << nl << "SEL sel_ = (copyItems__ ? @selector(copy) : @selector(retain));";
+	_M << nl << "[self initDM__";
+	writeMemberCall(dataMembers, WithEscape);
+	_M << "];";
     }
-    for(q = dataMembers.begin(); q != dataMembers.end(); ++q)
-    {
-	TypePtr type = (*q)->type();
-	string typeString = typeToString(type);
-        string name = fixId((*q)->name());
-
-	_M << nl << name << " = ";
-	if(isValueType(type))
-	{
-	    _M << name << "_;";
-	}
-	else
-	{
-	   _M << "[" << name << "_ performSelector:sel_];";
-	}
-    }
-
     _M << nl << "return self;";
     _M << eb;
 
-    //
-    // Copy constructors.
-    //
-    _H << nl << "-(id) initWithException:(" << name << " *)s_;";
-    _M << sp << nl << "-(id) initWithException:(" << name << " *)s_";
-    _M << sb;
-    _M << nl << "return [self initWithException:s_ copyItems:NO];";
-    _M << eb;
+    if(!allDataMembers.empty())
+    {
+	_H << nl << "+(id) " << lowerCaseName << ";";
+	_M << sp << nl << "+(id) " << lowerCaseName;
+	_M << sb;
+	_M << nl << name << " *s__ = [[" << name << " alloc] init];";
+	_M << nl << "[s__ autorelease];";
+	_M << nl << "return s__;";
+	_M << eb;
+    }
 
-    _H << nl << "-(id) initWithException:(" << name << " *)s_ copyItems:(BOOL)copyItems;";
-    _M << sp << nl << "-(id) initWithException:(" << name << " *)s_ copyItems:(BOOL)copyItems__";
+    _H << nl << "+(id) " << lowerCaseName;
+    _M << sp << nl << "+(id) " << lowerCaseName;
+    writeMemberSignature(allDataMembers, 0, HAndM); // TODO fix second parameter
+    _H << ";";
     _M << sb;
-    _M << nl << "return [self init";
-    writeMemberMethodCall(dataMembers, "s_");
-    _M << " copyItems:copyItems__];";
+    _M << nl << name << " *s__ = [[" << name << " alloc] init";
+    writeMemberCall(allDataMembers, WithEscape);
+    _M << "];";
+    _M << nl << "[s__ autorelease];";
+    _M << nl << "return s__;";
     _M << eb;
 
     //
@@ -1853,11 +1871,11 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
 
     _M << sp << nl << "-(id) copyWithZone:(NSZone *)zone";
     _M << sb;
-    _M << nl << name << " *copy_ = [" << name << " allocWithZone:zone];";
+    _M << nl << name << " *copy_ = [super copyWithZone:zone];";
 
     for(q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
-        string name = fixId((*q)->name());
+	string name = fixId((*q)->name());
 	if(isValueType((*q)->type()))
 	{
 	    _M << nl << "copy_->" << name << " = " << name << ";";
@@ -1871,22 +1889,11 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
     _M << eb;
 
     //
-    // hash
-    //
-    writeMemberHashCode(dataMembers, 0); // TODO fix second parameter
-
-    //
-    // isEqual
-    //
-    writeMemberEquals(dataMembers, 0); // TODO fix second parameter
-
-    //
     // dealloc
     //
     writeMemberDealloc(dataMembers, 0); // TODO fix second parameter
 
     _H << nl << "@end";
-
     _M << nl << "@end";
 }
 
@@ -1940,29 +1947,14 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     //
     _H << sp << nl << "-(id) init";
     _M << sp << nl << "-(id) init";
-    writeMemberSignature(dataMembers, 0); // TODO fix second parameter
+    writeMemberSignature(dataMembers, 0, HAndM); // TODO fix second parameter
     _H << ";";
     _M << sb;
     _M << nl << "if(![super init])";
     _M << sb;
     _M << nl << "return nil;";
     _M << eb;
-    for(q = dataMembers.begin(); q != dataMembers.end(); ++q)
-    {
-	TypePtr type = (*q)->type();
-	string typeString = typeToString(type);
-        string name = fixId((*q)->name());
-
-	_M << nl << name << " = ";
-	if(isValueType(type))
-	{
-	    _M << name << "_;";
-	}
-	else
-	{
-	   _M << "[" << name << " retain];";
-	}
-    }
+    writeMemberInit(dataMembers);
     _M << nl << "return self;";
     _M << eb;
 
@@ -1971,7 +1963,7 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
 
     _H << nl << "+(id) " << lowerCaseName;
     _M << sp << nl << "+(id) " << lowerCaseName;
-    writeMemberSignature(dataMembers, 0); // TODO fix second parameter
+    writeMemberSignature(dataMembers, 0, HAndM); // TODO fix second parameter
     _H << ";";
     _M << sb;
     _M << nl << name << " *s__ = [[" << name << " alloc] init";
@@ -2256,7 +2248,7 @@ Slice::Gen::TypesVisitor::writeMembers(const DataMemberList& dataMembers, int ba
 }
 
 void
-Slice::Gen::TypesVisitor::writeMemberSignature(const DataMemberList& dataMembers, int baseTypes) const
+Slice::Gen::TypesVisitor::writeMemberSignature(const DataMemberList& dataMembers, int baseTypes, Destination d) const
 {
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
@@ -2267,23 +2259,28 @@ Slice::Gen::TypesVisitor::writeMemberSignature(const DataMemberList& dataMembers
 
 	if(q != dataMembers.begin())
 	{
-	    _H << " ";
-	    _M << " ";
+	    _M << " " << name;
 	}
-	if(q != dataMembers.begin())
-	{
-	    _H << name;
-	    _M << name;
-	}
-	_H << ":(" << typeString;
 	_M << ":(" << typeString;
 	if(!isValue)
 	{
-	    _H << " *";
 	    _M << " *";
 	}
-	_H << ")" << name;
 	_M << ")" << name << "_";
+
+	if(d == HAndM)
+	{
+	    if(q != dataMembers.begin())
+	    {
+		_H << " " << name;
+	    }
+	    _H << ":(" << typeString;
+	    if(!isValue)
+	    {
+		_H << " *";
+	    }
+	    _H << ")" << name;
+	}
     }
 }
 
@@ -2318,6 +2315,27 @@ Slice::Gen::TypesVisitor::writeMemberMethodCall(const DataMemberList& dataMember
 	    _M << " " << name;
 	}
 	_M << ":[" << container << " " << name << "]";
+    }
+}
+
+void
+Slice::Gen::TypesVisitor::writeMemberInit(const DataMemberList& dataMembers) const
+{
+    for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
+    {
+	TypePtr type = (*q)->type();
+	string typeString = typeToString(type);
+	string name = fixId((*q)->name());
+
+	_M << nl << name << " = ";
+	if(isValueType(type))
+	{
+	    _M << name << "_;";
+	}
+	else
+	{
+	   _M << "[" << name << " retain];";
+	}
     }
 }
 
