@@ -197,8 +197,7 @@ Slice::ObjCGenerator::typeToString(const TypePtr& type)
     SequencePtr seq = SequencePtr::dynamicCast(type);
     if(seq)
     {
-	BuiltinPtr builtin = BuiltinPtr::dynamicCast(seq->type());
-	if(builtin && builtin->kind() == Builtin::KindByte)
+	if(isValueType(seq->type()))
 	{
 	    return "NSData";
 	}

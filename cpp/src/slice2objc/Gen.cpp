@@ -1710,12 +1710,10 @@ void
 Slice::Gen::TypesVisitor::visitSequence(const SequencePtr& p)
 {
     string name = fixName(p);
-    BuiltinPtr builtin = BuiltinPtr::dynamicCast(p->type());
-    bool isByteSeq = builtin && builtin->kind() == Builtin::KindByte;
 
     emitDeprecate(p, 0, _M, "type");
 
-    if(isByteSeq)
+    if(isValueType(p->type()))
     {
 	_H << sp << nl << "typedef NSData " << name << ";";
     }
@@ -1990,122 +1988,6 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     _M << nl << "[s__ autorelease];";
     _M << nl << "return s__;";
     _M << eb;
-
-#if 0
-    // The other constructors constructors are disabled for now because they
-    // add about 40% to the code size for a struct with three members of int, string, and sequence<double>.
-
-    _H << sp << nl << "-(id) init";
-    _M << sp << nl << "-(id) init";
-    writeMemberSignature(dataMembers, 0); // TODO fix second parameter
-    _H << ";";
-    _M << sb;
-    _M << nl << "return [self init";
-    writeMemberCall(dataMembers, WithEscape);
-    _M << " copyItems:NO];";
-    _M << eb;
-
-    _H << nl << "-(id) init";
-    _M << sp << nl << "-(id) init";
-    writeMemberSignature(dataMembers, 0); // TODO fix second parameter
-    _H << " copyItems:(BOOL)copyItems;";
-    _M << " copyItems:(BOOL)copyItems__";
-    _M << sb;
-    _M << nl << "if(![super init])";
-    _M << sb;
-    _M << nl << "return nil;";
-    _M << eb;
-    if(!membersAreValues(dataMembers))
-    {
-	_M << nl << "SEL sel_ = (copyItems__ ? @selector(copy) : @selector(retain));";
-    }
-    for(q = dataMembers.begin(); q != dataMembers.end(); ++q)
-    {
-	TypePtr type = (*q)->type();
-	string typeString = typeToString(type);
-        string name = fixId((*q)->name());
-
-	_M << nl << name << " = ";
-	if(isValueType(type))
-	{
-	    _M << name << "_;";
-	}
-	else
-	{
-	   _M << "[" << name << "_ performSelector:sel_];";
-	}
-    }
-
-    _M << nl << "return self;";
-    _M << eb;
-
-    //
-    // Copy constructors.
-    //
-    _H << nl << "-(id) initWithStruct:(" << name << " *)s;";
-    _M << sp << nl << "-(id) initWithStruct:(" << name << " *)s_";
-    _M << sb;
-    _M << nl << "return [self init";
-    writeMemberMethodCall(dataMembers, "s_");
-    _M << " copyItems:NO];";
-    _M << eb;
-
-    _H << nl << "-(id) initWithStruct:(" << name << " *)s copyItems:(BOOL)copyItems;";
-    _M << sp << nl << "-(id) initWithStruct:(" << name << " *)s_ copyItems:(BOOL)copyItems__";
-    _M << sb;
-    _M << nl << "return [self init";
-    writeMemberMethodCall(dataMembers, "s_");
-    _M << " copyItems:copyItems__];";
-    _M << eb;
-
-    //
-    // Convenience constructors.
-    //
-    _H << nl << "+(id) " << name;
-    _M << sp << nl << "+(id) " << name;
-    writeMemberSignature(dataMembers, 0); // TODO fix second parameter
-    _H << ";";
-    _M << sb;
-    _M << nl << name << " *s__ = [[" << name << " alloc] init";
-    writeMemberCall(dataMembers, WithEscape);
-    _M << " copyItems:NO];";
-    _M << nl << "[s__ autorelease];";
-    _M << nl << "return s__;";
-    _M << eb;
-
-    _H << nl << "+(id) " << name;
-    _M << sp << nl << "+(id) " << name;
-    writeMemberSignature(dataMembers, 0); // TODO fix second parameter
-    _H << " copyItems:(BOOL)copyItems;";
-    _M << " copyItems:(BOOL)copyItems__";
-    _M << sb;
-    _M << nl << name << " *s__ = [[" << name << " alloc] init";
-    writeMemberCall(dataMembers, WithEscape);
-    _M << " copyItems:copyItems__];";
-    _M << nl << "[s__ autorelease];";
-    _M << nl << "return s__;";
-    _M << eb;
-
-    _H << nl << "+(id) " << name << "WithStruct:(" << name << " *)s;";
-    _M << sp << nl << "+(id) " << name << "WithStruct:(" << name << " *)s_";
-    _M << sb;
-    _M << nl << name << " *s__ = [[" << name << " alloc] init";
-    writeMemberMethodCall(dataMembers, "s_");
-    _M << " copyItems:NO];";
-    _M << nl << "[s__ autorelease];";
-    _M << nl << "return s__;";
-    _M << eb;
-
-    _H << nl << "+(id) " << name << "WithStruct:(" << name << " *)s copyItems:(BOOL)copyItems;";
-    _M << sp << nl << "+(id) " << name << "WithStruct:(" << name << " *)s_ copyItems:(BOOL)copyItems__";
-    _M << sb;
-    _M << nl << name << " *s__ = [[" << name << " alloc] init";
-    writeMemberMethodCall(dataMembers, "s_");
-    _M << " copyItems:copyItems__];";
-    _M << nl << "[s__ autorelease];";
-    _M << nl << "return s__;";
-    _M << eb;
-#endif
 
     //
     // copyWithZone
