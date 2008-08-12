@@ -1795,52 +1795,54 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
 	writeSynthesize(dataMembers, 0); // TODO fix second parameter
     }
 
+    if(!dataMembers.empty())
+    {
+	_H << sp;
+    }
+
+    //
+    // ice_name
+    //
+    _H << nl << "-(NSString *) ice_name;";
+    _M << sp << nl << "-(NSString *) ice_name";
+    _M << sb;
+    _M << nl << "return @\"" << p->scoped() << "\";";
+    _M << eb;
+
     //
     // Constructor.
     //
     if(!allDataMembers.empty())
     {
-        if(!dataMembers.empty())
+	_H << nl << "-(id) init";
+	_M << sp << nl << "-(id) init";
+	writeMemberSignature(allDataMembers, 0, HAndM); // TODO fix second parameter
+	_H << ";";
+	_M << sb;
+	if(!p->base())
 	{
-	    _M << sp << nl << "-(void) initDM__";
-	    writeMemberSignature(dataMembers, 0, MOnly); // TODO fix second parameter
-	    _M << sb;
-	    writeMemberInit(dataMembers);
-	    _M << eb;
+	    _M << nl << "if(![super initWithName:[self ice_name] reason:nil userInfo:nil])";
 	}
+	else
+	{
+	    _M << nl << "if(![super init";
+	    writeMemberCall(baseDataMembers, WithEscape);
+	    _M << "])";
+	}
+	_M << sb;
+	_M << nl << "return nil;";
+	_M << eb;
+	if(!dataMembers.empty())
+	{
+	    writeMemberInit(dataMembers);
+	}
+	_M << nl << "return self;";
+	_M << eb;
     }
 
-    if(!dataMembers.empty())
-    {
-	_H << sp;
-    }
-    _H << nl << "-(id) init";
-    _M << sp << nl << "-(id) init";
-    writeMemberSignature(allDataMembers, 0, HAndM); // TODO fix second parameter
-    _H << ";";
-    _M << sb;
-    if(!p->base())
-    {
-	_M << nl << "if(![super initWithName:[self ice_name] reason:nil userInfo:nil])";
-    }
-    else
-    {
-	_M << nl << "if(![super init";
-	writeMemberCall(baseDataMembers, WithEscape);
-	_M << "])";
-    }
-    _M << sb;
-    _M << nl << "return nil;";
-    _M << eb;
-    if(!dataMembers.empty())
-    {
-	_M << nl << "[self initDM__";
-	writeMemberCall(dataMembers, WithEscape);
-	_M << "];";
-    }
-    _M << nl << "return self;";
-    _M << eb;
-
+    //
+    // Convenience constructors.
+    //
     if(!allDataMembers.empty())
     {
 	_H << nl << "+(id) " << lowerCaseName << ";";
