@@ -1859,7 +1859,17 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
     writeMemberSignature(allDataMembers, 0, HAndM); // TODO fix second parameter
     _H << ";";
     _M << sb;
-    _M << nl << name << " *s__ = [[" << name << " alloc] init";
+	//
+	// COMPILERFIX: without the cast, the compiler emits an erroneous warning if there is another
+	// init constructor with the same number of arguments in a different class, but with different
+	// parameter types. Apparently, the compiler looks for an init constructor with the same number
+	// of arguments and, if the first one doesn't have matching types, it emits the warning.
+	//
+#if 1
+	_M << nl << name << " *s__ = [((" << name << " *)[" << name << " alloc]) init";
+#else
+	_M << nl << name << " *s__ = [[" << name << " alloc] init";
+#endif
     writeMemberCall(allDataMembers, WithEscape);
     _M << "];";
     _M << nl << "[s__ autorelease];";
@@ -1968,7 +1978,17 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     writeMemberSignature(dataMembers, 0, HAndM); // TODO fix second parameter
     _H << ";";
     _M << sb;
+    //
+    // COMPILERFIX: without the cast, the compiler emits an erroneous warning if there is another
+    // init constructor with the same number of arguments in a different class, but with different
+    // parameter types. Apparently, the compiler looks for an init constructor with the same number
+    // of arguments and, if the first one doesn't have matching types, it emits the warning.
+    //
+#if 1
+    _M << nl << name << " *s__ = [((" << name << " *)[" << name << " alloc]) init";
+#else
     _M << nl << name << " *s__ = [[" << name << " alloc] init";
+#endif
     writeMemberCall(dataMembers, WithEscape);
     _M << "];";
     _M << nl << "[s__ autorelease];";
@@ -2321,7 +2341,7 @@ Slice::Gen::TypesVisitor::writeMemberInit(const DataMemberList& dataMembers) con
 	}
 	else
 	{
-	   _M << "[" << name << " retain];";
+	   _M << "[" << name << "_ retain];";
 	}
     }
 }
