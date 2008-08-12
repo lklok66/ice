@@ -2444,7 +2444,9 @@ Slice::Gen::TypesVisitor::writeMemberEquals(const DataMemberList& dataMembers, i
 	    _M << eb;
 	    _M << nl << "else";
 	    _M << sb;
-	    _M << nl << "if(![" << name << " isEqual:[o_ " << name << "]])";
+	    _M << nl << "if(![" << name << " ";
+	    _M << (isString(type) ? "isEqualToString" : "isEqual");
+	    _M << ":[o_ " << name << "]])";
 	    _M << sb;
 	    _M << nl << "return NO;";
 	    _M << eb;

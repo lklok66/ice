@@ -254,15 +254,14 @@ Slice::ObjCGenerator::isValueType(const TypePtr& type)
 }
 
 bool
-Slice::ObjCGenerator::hasCopySemantics(const TypePtr& type)
+Slice::ObjCGenerator::isString(const TypePtr& type)
 {
-    BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
-    // TODO: what about classes and proxies?
-    if(builtin && builtin->kind() == Builtin::KindString)
+    if(!type)
     {
-        return true;
+        return false;
     }
-    return StructPtr::dynamicCast(type);
+    BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
+    return builtin && builtin->kind() == Builtin::KindString;
 }
 
 //
