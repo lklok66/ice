@@ -15,6 +15,10 @@
 #include <Ice/LocalException.h>
 
 @implementation ICEException
+-(id)init
+{
+    return [super initWithName:[self ice_name] reason:nil userInfo:nil];
+}
 -(NSString*)ice_name
 {
     NSAssert(false, @"ice_name not overriden");
@@ -25,7 +29,7 @@
 @implementation ICELocalException (Internal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
-    if(![super initWithName:[self ice_name] reason:nil userInfo:nil])
+    if(![super init])
     {
         return nil;
     }
@@ -46,7 +50,7 @@
 @implementation ICELocalException
 -(id)init:(const char*)f line:(int)l
 {
-    if(![super initWithName:[self ice_name] reason:nil userInfo:nil])
+    if(![super init])
     {
         return nil;
     }
