@@ -18,6 +18,7 @@
 @protocol ICEInputStream;
 
 @interface ICEException : NSException
+-(id) init;
 -(NSString*)ice_name;
 @end
 

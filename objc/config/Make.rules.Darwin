@@ -45,8 +45,10 @@ ifeq ($(OPTIMIZE_SIZE),yes)
 endif
 
 ifeq ($(OPTIMIZE),yes)
+     CCFLAGS		:= $(OPT_FLAGS) -DNDEBUG $(CCFLAGS)
      CXXFLAGS		:= $(OPT_FLAGS) -DNDEBUG $(CXXFLAGS)
 else
+     CCFLAGS		:= -g $(CCFLAGS)
      CXXFLAGS		:= -g $(CXXFLAGS)
 endif
 

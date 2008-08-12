@@ -119,12 +119,13 @@ private:
     private:
 
         enum Escape { NoEscape, WithEscape };
+	enum Destination { MOnly , HAndM};
 
 	bool membersAreValues(const DataMemberList&) const;
 	void writeMembers(const DataMemberList&, int) const;
-	void writeMemberSignature(const DataMemberList&, int) const;
+	void writeMemberSignature(const DataMemberList&, int, Destination) const;
 	void writeMemberCall(const DataMemberList&, Escape) const;
-	void writeMemberMethodCall(const DataMemberList&, const ::std::string&) const;
+	void writeMemberInit(const DataMemberList&) const;
 	void writeProperties(const DataMemberList&, int) const;
 	void writeSynthesize(const DataMemberList&, int) const;
         void writeMemberHashCode(const DataMemberList&, int) const;

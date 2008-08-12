@@ -50,7 +50,7 @@ protected:
     static std::string fixScoped(const ContainedPtr&, int = 0, bool = false);
     static std::string typeToString(const TypePtr&);
     static bool isValueType(const TypePtr&);
-    static bool hasCopySemantics(const TypePtr&);
+    static bool isString(const TypePtr&);
     static StringList splitScopedName(const std::string&);
 
     //
