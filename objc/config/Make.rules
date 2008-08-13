@@ -126,7 +126,7 @@ endif
 EVERYTHING		= all depend clean install 
 
 .SUFFIXES:
-.SUFFIXES:		.cpp .m .mm .o 
+.SUFFIXES:		.m .mm .o .cpp 
 
 .m.o:
 	$(CC) -c $(CPPFLAGS) $(CCFLAGS) $<
@@ -137,14 +137,18 @@ EVERYTHING		= all depend clean install
 %.o: $(SRCS_DIR)/%.cpp
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<
 
-%F.h: $(SDIR)/%F.ice $(SLICE2CPP)
+%F.h: $(SDIR)/%F.ice $(SLICE2OBJC)
 	rm -f $(*F)F.h $(*F)F.cpp
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) $<
+	$(SLICE2OBJC) $(SLICE2OBJCFLAGS) $<
 	rm -f $(*F)F.cpp
 
-%.h %.cpp: $(SDIR)/%.ice $(SLICE2CPP)
+%.h %.m: %.ice $(SLICE2OBJC)
 	rm -f $(*F).h $(*F).cpp
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) $<
+	$(SLICE2OBJC) $(SLICE2OBJCFLAGS) $<
+
+%.h %.m: $(SDIR)/%.ice $(SLICE2OBJC)
+	rm -f $(*F).h $(*F).cpp
+	$(SLICE2OBJC) $(SLICE2OBJCFLAGS) $<
 
 all:: $(SRCS) $(TARGETS)
 

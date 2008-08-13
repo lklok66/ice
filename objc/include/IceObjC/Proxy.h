@@ -19,6 +19,8 @@
 @protocol ICEInputStream;
 
 @protocol ICEObjectPrx <NSObject>
+-(NSString*) ice_id;
+-(NSArray*) ice_ids;
 -(BOOL) ice_isA:(NSString*)typeId;
 -(void) ice_ping;
 @end
@@ -27,11 +29,14 @@
 {
     void* objectPrx__;
 }
++(id) uncheckedCast:(id<ICEObjectPrx>)proxy;
++(id) checkedCast:(id<ICEObjectPrx>)proxy;
++(NSString*) ice_staticId;
 
-+(id<ICEObjectPrx>) uncheckedCast__:(id<ICEObjectPrx>)proxy;
-+(id<ICEObjectPrx>) checkedCast__:(id<ICEObjectPrx>)proxy protocol:(Protocol*)protocol sliceId:(NSString*)sliceId;
-
++(Protocol*) protocol__;
++(Class) servant__;
 -(id<ICEOutputStream>) createOutputStream__;
--(BOOL) invoke__:(NSString*)operation mode:(ICEOperationMode)mode os:(id<ICEOutputStream>)os is:(id<ICEInputStream>*)is;
+-(BOOL) invoke__:(NSString*)operation mode:(ICEOperationMode)mode os:(id<ICEOutputStream>)os 
+               is:(id<ICEInputStream>*)is context:(ICEContext*)context;
 
 @end

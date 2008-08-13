@@ -252,11 +252,13 @@ public:
     }
 }
 
--(NSArray*) readBoolSeq
+-(NSMutableData*) readBoolSeq
 {
     try
     {
-        return [toNSArray(is__->readBoolSeq()) autorelease];
+        std::pair<const bool*, const bool*> seq;
+        is__->readBoolSeq(seq);
+        return [NSMutableData dataWithBytes:seq.first length:(seq.second - seq.first) * sizeof(BOOL)];
     }
     catch(const std::exception& ex)
     {
@@ -278,13 +280,13 @@ public:
     }
 }
 
--(NSData*) readByteSeq
+-(NSMutableData*) readByteSeq
 {
     try
     {
         std::pair<const Ice::Byte*, const Ice::Byte*> seq;
         is__->readByteSeq(seq);
-        return [NSData dataWithBytes:seq.first length:(seq.second - seq.first)];
+        return [NSMutableData dataWithBytes:seq.first length:(seq.second - seq.first)];
     }    
     catch(const std::exception& ex)
     {
@@ -322,11 +324,13 @@ public:
     }
 }
 
--(NSArray*) readShortSeq
+-(NSMutableData*) readShortSeq
 {
     try
     {
-        return [toNSArray(is__->readShortSeq()) autorelease];
+        std::pair<const Ice::Short*, const Ice::Short*> seq;
+        is__->readShortSeq(seq);
+        return [NSMutableData dataWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEShort)];
     }
     catch(const std::exception& ex)
     {
@@ -348,11 +352,13 @@ public:
     }
 }
 
--(NSArray*) readIntSeq
+-(NSMutableData*) readIntSeq
 {
     try
     {
-        return [toNSArray(is__->readIntSeq()) autorelease];
+        std::pair<const Ice::Int*, const Ice::Int*> seq;
+        is__->readIntSeq(seq);
+        return [NSMutableData dataWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEInt)];
     }
     catch(const std::exception& ex)
     {
@@ -374,11 +380,13 @@ public:
     }
 }
 
--(NSArray*) readLongSeq
+-(NSMutableData*) readLongSeq
 {
     try
     {
-        return [toNSArray(is__->readLongSeq()) autorelease];
+        std::pair<const Ice::Long*, const Ice::Long*> seq;
+        is__->readLongSeq(seq);
+        return [NSMutableData dataWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICELong)];
     }
     catch(const std::exception& ex)
     {
@@ -400,11 +408,13 @@ public:
     }
 }
 
--(NSArray*) readFloatSeq
+-(NSMutableData*) readFloatSeq
 {
     try
     {
-        return [toNSArray(is__->readFloatSeq()) autorelease];
+        std::pair<const Ice::Float*, const Ice::Float*> seq;
+        is__->readFloatSeq(seq);
+        return [NSMutableData dataWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEFloat)];
     }
     catch(const std::exception& ex)
     {
@@ -426,11 +436,13 @@ public:
     }
 }
 
--(NSArray*) readDoubleSeq
+-(NSMutableData*) readDoubleSeq
 {
     try
     {
-        return [toNSArray(is__->readDoubleSeq()) autorelease];
+        std::pair<const Ice::Double*, const Ice::Double*> seq;
+        is__->readDoubleSeq(seq);
+        return [NSMutableData dataWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEDouble)];
     }
     catch(const std::exception& ex)
     {
@@ -452,7 +464,7 @@ public:
     }
 }
 
--(NSArray*) readStringSeq
+-(NSMutableArray*) readStringSeq
 {
     try
     {
@@ -705,12 +717,11 @@ public:
     }
 }
 
--(void) writeBoolSeq:(NSArray*)v
+-(void) writeBoolSeq:(NSData*)v
 {
     try
     {
-        std::vector<bool> s;
-        os__->writeBoolSeq(fromNSArray(v, s));
+        os__->writeBoolSeq((bool*)[v bytes], (bool*)[v bytes] + [v length] / sizeof(BOOL));
     }
     catch(const std::exception& ex)
     {
@@ -754,12 +765,11 @@ public:
     }
 }
 
--(void) writeShortSeq:(NSArray*)v
+-(void) writeShortSeq:(NSData*)v
 {
     try
     {
-        std::vector<ICEShort> s;
-        os__->writeShortSeq(fromNSArray(v, s));
+        os__->writeShortSeq((ICEShort*)[v bytes], (ICEShort*)[v bytes] + [v length] / sizeof(ICEShort));
     }
     catch(const std::exception& ex)
     {
@@ -780,12 +790,11 @@ public:
     }
 }
 
--(void) writeIntSeq:(NSArray*)v
+-(void) writeIntSeq:(NSData*)v
 {
     try
     {
-        std::vector<ICEInt> s;
-        os__->writeIntSeq(fromNSArray(v, s));
+        os__->writeIntSeq((ICEInt*)[v bytes], (ICEInt*)[v bytes] + [v length] / sizeof(ICEInt));
     }
     catch(const std::exception& ex)
     {
@@ -805,12 +814,11 @@ public:
     }
 }
 
--(void) writeLongSeq:(NSArray*)v
+-(void) writeLongSeq:(NSData*)v
 {
     try
     {
-        std::vector<ICELong> s;
-        os__->writeLongSeq(fromNSArray(v, s));
+        os__->writeLongSeq((ICELong*)[v bytes], (ICELong*)[v bytes] + [v length] / sizeof(ICELong));
     }
     catch(const std::exception& ex)
     {
@@ -831,12 +839,11 @@ public:
     }
 }
 
--(void) writeFloatSeq:(NSArray*)v
+-(void) writeFloatSeq:(NSData*)v
 {
     try
     {
-        std::vector<ICEFloat> s;
-        os__->writeFloatSeq(fromNSArray(v, s));
+        os__->writeFloatSeq((ICEFloat*)[v bytes], (ICEFloat*)[v bytes] + [v length] / sizeof(ICEFloat));
     }
     catch(const std::exception& ex)
     {
@@ -857,12 +864,11 @@ public:
     }
 }
 
--(void) writeDoubleSeq:(NSArray*)v
+-(void) writeDoubleSeq:(NSData*)v
 {
     try
     {
-        std::vector<ICEDouble> s;
-        os__->writeDoubleSeq(fromNSArray(v, s));
+        os__->writeDoubleSeq((ICEDouble*)[v bytes], (ICEDouble*)[v bytes] + [v length] / sizeof(ICEDouble));
     }
     catch(const std::exception& ex)
     {

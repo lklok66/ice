@@ -30,29 +30,29 @@
 -(void) sliceObjects:(BOOL)b;
 
 -(BOOL) readBool;
--(NSArray*) readBoolSeq;
+-(NSMutableData*) readBoolSeq;
 
 -(ICEByte) readByte;
--(NSData*) readByteSeq;
+-(NSMutableData*) readByteSeq;
 -(NSData*) readByteSeqNoCopy;
 
 -(ICEShort) readShort;
--(NSArray*) readShortSeq;
+-(NSMutableData*) readShortSeq;
 
 -(ICEInt) readInt;
--(NSArray*) readIntSeq;
+-(NSMutableData*) readIntSeq;
 
 -(ICELong) readLong;
--(NSArray*) readLongSeq;
+-(NSMutableData*) readLongSeq;
 
 -(ICEFloat) readFloat;
--(NSArray*) readFloatSeq;
+-(NSMutableData*) readFloatSeq;
 
 -(ICEDouble) readDouble;
--(NSArray*) readDoubleSeq;
+-(NSMutableData*) readDoubleSeq;
 
 -(NSString*) readString;
--(NSArray*) readStringSeq;
+-(NSMutableArray*) readStringSeq;
 
 -(ICEInt) readSize;
 
@@ -80,25 +80,25 @@
 -(id<ICECommunicator>) communicator;
 
 -(void) writeBool:(BOOL)v;
--(void) writeBoolSeq:(NSArray*)v;
+-(void) writeBoolSeq:(NSData*)v;
 
 -(void) writeByte:(ICEByte)v;
 -(void) writeByteSeq:(NSData*)v;
 
 -(void) writeShort:(ICEShort)v;
--(void) writeShortSeq:(NSArray*)v;
+-(void) writeShortSeq:(NSData*)v;
 
 -(void) writeInt:(ICEInt)v;
--(void) writeIntSeq:(NSArray*)v;
+-(void) writeIntSeq:(NSData*)v;
 
 -(void) writeLong:(ICELong)v;
--(void) writeLongSeq:(NSArray*)v;
+-(void) writeLongSeq:(NSData*)v;
 
 -(void) writeFloat:(ICEFloat)v;
--(void) writeFloatSeq:(NSArray*)v;
+-(void) writeFloatSeq:(NSData*)v;
 
 -(void) writeDouble:(ICEDouble)v;
--(void) writeDoubleSeq:(NSArray*)v;
+-(void) writeDoubleSeq:(NSData*)v;
 
 -(void) writeString:(NSString*)v;
 -(void) writeStringSeq:(NSArray*)v;

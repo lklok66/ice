@@ -52,7 +52,7 @@ fromObjC(id object, std::string& s)
     s = [object UTF8String];
 }
 
-inline NSArray*
+inline NSMutableArray*
 toNSArray(const char* arr[], size_t size)
 {
     NSMutableArray* array = [[NSMutableArray alloc] initWithCapacity:size];
@@ -65,7 +65,7 @@ toNSArray(const char* arr[], size_t size)
     return array;
 }
 
-template<typename T> NSArray*
+template<typename T> NSMutableArray*
 toNSArray(const std::vector<T>& seq)
 {
     NSMutableArray* array = [[NSMutableArray alloc] initWithCapacity:seq.size()];
@@ -93,7 +93,7 @@ fromNSArray(NSArray* array, std::vector<T>& seq)
     return seq;
 }
 
-template<typename K, typename V> NSDictionary*
+template<typename K, typename V> NSMutableDictionary*
 toNSDictionary(const std::map<K, V>& dict)
 {
     NSMutableDictionary* dictionary = [[NSMutableDictionary alloc] initWithCapacity:dict.size()];
@@ -111,7 +111,6 @@ toNSDictionary(const std::map<K, V>& dict)
 template<typename K, typename V> void
 fromNSDictionary(NSDictionary* dictionary, std::map<K, V>& dict)
 {
-    dict.reserve([dictionary count]);
     NSEnumerator* enumerator = [dictionary keyEnumerator]; 
     id obj = nil; 
     while((obj = [enumerator nextObject])) 
@@ -119,7 +118,7 @@ fromNSDictionary(NSDictionary* dictionary, std::map<K, V>& dict)
         K k;
         fromObjC(obj, k);
         V v;
-        fromObjC([dictionary objectForKey:k], v);
+        fromObjC([dictionary objectForKey:obj], v);
         dict.insert(std::pair<K, V>(k, v));
     }
 }

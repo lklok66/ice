@@ -26,7 +26,5 @@
 
 // Proxy class
 @interface HelloPrx : ICEObjectPrx<HelloPrx>
-+(id<HelloPrx>) checkedCast:(id<ICEObjectPrx>)proxy;
-+(id<HelloPrx>) uncheckedCast:(id<ICEObjectPrx>)proxy;
 @end
 

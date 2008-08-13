@@ -10,11 +10,15 @@
 #import <Foundation/NSString.h>
 
 #import <IceObjC/ProxyI.h>
+#import <IceObjC/Object.h>
+#import <IceObjC/Util.h>
+#import <IceObjC/StreamI.h>
 
-#include <IceObjC/Util.h>
-#include <Ice/Proxy.h>
 #include <Ice/Initialize.h>
-#include <IceObjC/StreamI.h>
+#include <Ice/Proxy.h>
+#include <Ice/LocalException.h>
+
+#import <objc/runtime.h>
 
 #define OBJECTPRX ((IceProxy::Ice::Object*)objectPrx__)
 
@@ -52,7 +56,7 @@
 
 @implementation ICEObjectPrx
 
-+(id<ICEObjectPrx>) uncheckedCast__:(id<ICEObjectPrx>)proxy
++(id) uncheckedCast:(id<ICEObjectPrx>)proxy
 {
     if(proxy != nil)
     {
@@ -68,7 +72,7 @@
     return nil;
 }
 
-+(id<ICEObjectPrx>) checkedCast__:(id<ICEObjectPrx>)proxy protocol:(Protocol*)protocol sliceId:(NSString*)sliceId
++(id) checkedCast:(id<ICEObjectPrx>)proxy
 {
     if(proxy != nil)
     {
@@ -76,12 +80,38 @@
         {
             return proxy;
         }
-        else if([(ICEObjectPrx*)proxy conformsToProtocol:protocol] || [proxy ice_isA:sliceId])
+        else if([(ICEObjectPrx*)proxy conformsToProtocol:[self protocol__]] || [proxy ice_isA:[self ice_staticId]])
         {
             return [[[self alloc] initWithObjectPrx__:[(ICEObjectPrx*)proxy objectPrx__]] autorelease];
         }
     }
     return nil;
+}
+
++(NSString*) ice_staticId
+{
+    return [[self servant__] ice_staticId];
+}
+
++(Protocol*) protocol__
+{
+    return objc_getProtocol(class_getName([self class]));
+}
+
++(Class) servant__
+{
+    //
+    // The servant class name is the proxy class name minus the 'Prx' suffix.
+    //
+    const char* proxyClassName = class_getName([self class]);
+    int len = strlen(proxyClassName) - 3 + 1;
+    char* objClassName = (char*)malloc(len);
+    strncpy(objClassName, proxyClassName, len - 1);
+    objClassName[len - 1] = '\0';
+    Class c = objc_getClass(objClassName);
+    NSAssert(c, @"can't find servant class");
+    free(objClassName);
+    return c;
 }
 
 -(id<ICEOutputStream>) createOutputStream__
@@ -98,26 +128,90 @@
     }
 }
 
--(BOOL) invoke__:(NSString*)operation mode:(ICEOperationMode)mode os:(id<ICEOutputStream>)os is:(id<ICEInputStream>*)is
+-(void) invoke__:(NSString*)operation 
+            mode:(ICEOperationMode)mode 
+              os:(id<ICEOutputStream>)os 
+              is:(id<ICEInputStream>*)is 
+         context:(ICEContext*)context
 {
+    BOOL ok;
     try
     {
         std::vector<Ice::Byte> inParams;
         if(os)
         {
             [(ICEOutputStream*)os os__]->finished(inParams);
-            [os release];
         }
 
         std::vector<Ice::Byte> outParams;
-        BOOL ok = OBJECTPRX->ice_invoke(fromNSString(operation), (Ice::OperationMode)mode, inParams, outParams);
-    
+        if(context)
+        {
+            Ice::Context ctx;
+            fromNSDictionary(context, ctx);
+            ok = OBJECTPRX->ice_invoke(fromNSString(operation), (Ice::OperationMode)mode, inParams, outParams, ctx);
+        }
+        else
+        {
+            ok = OBJECTPRX->ice_invoke(fromNSString(operation), (Ice::OperationMode)mode, inParams, outParams);
+        }
+
         if(is)
         {
             Ice::InputStreamPtr s = Ice::createInputStream(OBJECTPRX->ice_getCommunicator(), outParams);
             *is = [[ICEInputStream alloc] initWithInputStream:s];
         }
+        else if(!outParams.empty())
+        {
+            if(ok)
+            {
+                throw Ice::EncapsulationException(__FILE__, __LINE__);
+            }
+            else
+            {
+                Ice::InputStreamPtr s = Ice::createInputStream(OBJECTPRX->ice_getCommunicator(), outParams);
+                try
+                {
+                    s->throwException();
+                }
+                catch(const Ice::UserException& ex)
+                {
+                    throw Ice::UnknownUserException(__FILE__, __LINE__, ex.ice_name());
+                }
+            }
+        }
         return ok;
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return NO; // Keep the compiler happy
+    }
+
+    if(!ok)
+    {
+        NSAssert(is && *is, "input stream not set");
+        [*is throwException];
+    }
+}
+
+-(NSString*) ice_id
+{
+    try
+    {
+        return [toNSString(OBJECTPRX->ice_id()) autorelease];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return NO; // Keep the compiler happy
+    }
+}
+
+-(NSArray*) ice_ids
+{
+    try
+    {
+        return [toNSArray(OBJECTPRX->ice_ids()) autorelease];
     }
     catch(const std::exception& ex)
     {

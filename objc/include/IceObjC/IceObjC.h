@@ -15,3 +15,5 @@
 #import <IceObjC/Current.h>
 #import <IceObjC/Identity.h>
 #import <IceObjC/LocalException.h>
+#import <IceObjC/Stream.h>
+

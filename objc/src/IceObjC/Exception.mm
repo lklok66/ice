@@ -107,7 +107,7 @@
     }
     NSAssert(dynamic_cast<const Ice::InitializationException*>(&ex), @"invalid local exception type");
     const Ice::InitializationException& localEx = dynamic_cast<const Ice::InitializationException&>(ex);
-    _objc_reason = toNSString(localEx.reason);
+    reason_ = toNSString(localEx.reason);
     return self;
 }
 @end
@@ -121,7 +121,7 @@
     }
     NSAssert(dynamic_cast<const Ice::PluginInitializationException*>(&ex), @"invalid local exception type");
     const Ice::PluginInitializationException& localEx = dynamic_cast<const Ice::PluginInitializationException&>(ex);
-    _objc_reason = [[NSString alloc] initWithUTF8String:localEx.reason.c_str()];
+    reason_ = [[NSString alloc] initWithUTF8String:localEx.reason.c_str()];
     return self;
 }
 @end
@@ -136,7 +136,7 @@
     NSAssert(dynamic_cast<const Ice::AlreadyRegisteredException*>(&ex), @"invalid local exception type");
     const Ice::AlreadyRegisteredException& localEx = dynamic_cast<const Ice::AlreadyRegisteredException&>(ex);
     kindOfObject = toNSString(localEx.kindOfObject);
-    _objc_id = [[NSString alloc] initWithUTF8String:localEx.id.c_str()];
+    id_ = [[NSString alloc] initWithUTF8String:localEx.id.c_str()];
     return self;
 }
 @end
@@ -151,7 +151,7 @@
     NSAssert(dynamic_cast<const Ice::NotRegisteredException*>(&ex), @"invalid local exception type");
     const Ice::NotRegisteredException& localEx = dynamic_cast<const Ice::NotRegisteredException&>(ex);
     kindOfObject = toNSString(localEx.kindOfObject);
-    _objc_id = [[NSString alloc] initWithUTF8String:localEx.id.c_str()];
+    id_ = [[NSString alloc] initWithUTF8String:localEx.id.c_str()];
     return self;
 }
 @end
@@ -193,7 +193,7 @@
     }
     NSAssert(dynamic_cast<const Ice::ObjectAdapterDeactivatedException*>(&ex), @"invalid local exception type");
     const Ice::ObjectAdapterDeactivatedException& localEx = dynamic_cast<const Ice::ObjectAdapterDeactivatedException&>(ex);
-    _objc_name = toNSString(localEx.name);
+    name_ = toNSString(localEx.name);
     return self;
 }
 @end
@@ -207,7 +207,7 @@
     }
     NSAssert(dynamic_cast<const Ice::ObjectAdapterIdInUseException*>(&ex), @"invalid local exception type");
     const Ice::ObjectAdapterIdInUseException& localEx = dynamic_cast<const Ice::ObjectAdapterIdInUseException&>(ex);
-    _objc_id = [[NSString alloc] initWithUTF8String:localEx.id.c_str()];
+    id_ = [[NSString alloc] initWithUTF8String:localEx.id.c_str()];
     return self;
 }
 @end
@@ -291,7 +291,7 @@
     }
     NSAssert(dynamic_cast<const Ice::IllegalIdentityException*>(&ex), @"invalid local exception type");
     const Ice::IllegalIdentityException& localEx = dynamic_cast<const Ice::IllegalIdentityException&>(ex);
-    _objc_id = [[ICEIdentity alloc] initWithIdentity:localEx.id];
+    id_ = [[ICEIdentity alloc] initWithIdentity:localEx.id];
     return self;
 }
 @end
@@ -305,7 +305,7 @@
     }
     NSAssert(dynamic_cast<const Ice::RequestFailedException*>(&ex), @"invalid local exception type");
     const Ice::RequestFailedException& localEx = dynamic_cast<const Ice::RequestFailedException&>(ex);
-    _objc_id = [[ICEIdentity alloc] initWithIdentity:localEx.id];
+    id_ = [[ICEIdentity alloc] initWithIdentity:localEx.id];
     facet = [[NSString alloc] initWithUTF8String:localEx.facet.c_str()];
     operation = [[NSString alloc] initWithUTF8String:localEx.operation.c_str()];
     return self;
@@ -364,7 +364,7 @@
     }
     NSAssert(dynamic_cast<const Ice::ProtocolException*>(&ex), @"invalid local exception type");
     const Ice::ProtocolException& localEx = dynamic_cast<const Ice::ProtocolException&>(ex);
-    _objc_reason = toNSString(localEx.reason);
+    reason_ = toNSString(localEx.reason);
     return self;
 }
 @end
@@ -469,7 +469,7 @@
     }
     NSAssert(dynamic_cast<const Ice::SecurityException*>(&ex), @"invalid local exception type");
     const Ice::SecurityException& localEx = dynamic_cast<const Ice::SecurityException&>(ex);
-    _objc_reason = toNSString(localEx.reason);
+    reason_ = toNSString(localEx.reason);
     return self;
 }
 @end

@@ -16,13 +16,6 @@
 int
 main(int argc, char* argv[])
 {
-    NSString* s1 = nil;
-    NSString* s2 = @"TEST";
-    if(![s1 isEqual:s2])
-    {
-        NSLog(@"not equal");
-    }
-
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
     int status = 0;
     id<ICECommunicator> communicator;

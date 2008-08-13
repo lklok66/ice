@@ -13,39 +13,27 @@
 
 @implementation HelloPrx
 
-+(id<HelloPrx>) uncheckedCast:(id<ICEObjectPrx>)proxy
-{
-    return (id<HelloPrx>)[self uncheckedCast__:proxy];
-}
-
-+(id<HelloPrx>) checkedCast:(id<ICEObjectPrx>)proxy
-{
-    return (id<HelloPrx>)[self checkedCast__:proxy protocol:@protocol(HelloPrx) sliceId:@"::Demo::Hello"];
-}
-
 -(void) sayHello
 {
-    BOOL ok = [self invoke__:@"sayHello" mode:ICEIdempotent os:nil is:nil];
+    [self invoke__:@"sayHello" mode:ICEIdempotent os:nil is:nil context:nil];
 }
 
 @end
 
 @implementation Hello
 
--(BOOL) ice_isA:(NSString*)typeId current:(ICECurrent*)current
+static const char* Hello_ids__[2] =
 {
-    //
-    // TODO: Optimize
-    //
-    if([typeId isEqualToString:@"::Demo::Hello"])
-    {
-        return TRUE;
-    }
-    else
-    {
-        return [super ice_isA:typeId current:current];
-    }
+    "::Demo::Hello",
+    "::Ice::Object"
+};
+
++(const char**) staticIds__:(int*)count
+{
+    *count = sizeof(Hello_ids__) / sizeof(const char*);
+    return Hello_ids__;
 }
+
 -(BOOL) sayHello___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
     [(id)self sayHello:current];

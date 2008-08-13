@@ -15,6 +15,8 @@
 #import <Foundation/NSArray.h>
 #import <Foundation/NSDictionary.h>
 
+#import <stdlib.h>
+
 //
 // Don't forget to update the conversion methods from Util.h if the types below
 // are changed.

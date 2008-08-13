@@ -24,7 +24,7 @@ rethrowObjCException(const std::exception& ex)
         if(lex)
         {
             std::string typeId = toObjCSliceId("::" + lex->ice_name());
-            Class c = objc_lookUpClass(typeId.c_str());
+            Class c = objc_getClass(typeId.c_str());
             if(c != nil)
             {
                 nsex = [c localExceptionWithLocalException:*lex];

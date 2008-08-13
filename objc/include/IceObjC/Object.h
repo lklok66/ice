@@ -22,13 +22,14 @@
 -(void) ice_ping:(ICECurrent*)current;
 -(NSString*) ice_id:(ICECurrent*)current;
 -(NSArray*) ice_ids:(ICECurrent*)current;
-+(const char*) ice_staticId;
 @end
 
 @interface ICEObject : NSObject<ICEObject>
 {
     void* object__;
 }
++(NSString*) ice_staticId;
++(const char**) staticIds__:(int*)count;
 -(BOOL) dispatch__:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os;
 -(void) write__:(id<ICEOutputStream>)os;
 -(void) read__:(id<ICEInputStream>)is readTypeId:(BOOL)rid;

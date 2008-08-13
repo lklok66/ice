@@ -20,23 +20,24 @@ typedef enum
     ICENormal,
     ICENonmutating,
     ICEIdempotent
-} ICEOperationMode;
+} 
+ICEOperationMode;
 
 @interface ICECurrent : NSObject
 {
     id<ICEObjectAdapter> adapter;
-    ICEIdentity* id_objc_;
+    ICEIdentity* id_;
     NSString* facet;
     NSString* operation;
     ICEOperationMode mode;
     NSDictionary* ctx;
     ICEInt requestId;
 }
-@property(readonly, nonatomic) id<ICEObjectAdapter> adapter;
-@property(readonly, nonatomic) ICEIdentity* id_objc_;
-@property(readonly, nonatomic) NSString* facet;
-@property(readonly, nonatomic) NSString* operation;
-@property(readonly, nonatomic) ICEOperationMode mode;
-@property(readonly, nonatomic) NSDictionary* ctx;
-@property(readonly, nonatomic) ICEInt requestId;
+@property(retain, nonatomic) id<ICEObjectAdapter> adapter;
+@property(retain, nonatomic) ICEIdentity* id_;
+@property(retain, nonatomic) NSString* facet;
+@property(retain, nonatomic) NSString* operation;
+@property(assign, nonatomic) ICEOperationMode mode;
+@property(retain, nonatomic) NSDictionary* ctx;
+@property(assign, nonatomic) ICEInt requestId;
 @end

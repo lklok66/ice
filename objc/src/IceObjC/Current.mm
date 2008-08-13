@@ -27,7 +27,7 @@
     // avoid re-creating the wrappers for each dispatched invocation.
     //
     adapter = [[ICEObjectAdapter alloc] initWithObjectAdapter:current.adapter];
-    id_objc_ = [[ICEIdentity alloc] initWithIdentity:current.id];
+    id_ = [[ICEIdentity alloc] initWithIdentity:current.id];
     facet = [[NSString alloc] initWithUTF8String:current.facet.c_str()];
     operation = [[NSString alloc] initWithUTF8String:current.operation.c_str()];
     mode = (ICEOperationMode)current.mode;
@@ -41,7 +41,7 @@
     [ctx release];
     [operation release];
     [facet release];
-    [id_objc_ release];
+    [id_ release];
     [adapter release];
     [super dealloc];
 }
@@ -50,7 +50,7 @@
 
 @implementation ICECurrent
 @synthesize adapter;
-@synthesize id_objc_;
+@synthesize id_;
 @synthesize facet;
 @synthesize operation;
 @synthesize mode;

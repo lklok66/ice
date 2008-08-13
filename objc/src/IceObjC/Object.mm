@@ -139,7 +139,7 @@ IceObjC::ObjectI::getObject()
 
 @implementation ICEObject
 
-static const char* ICEObject_ids__[] =
+static const char* ICEObject_ids__[1] =
 {
     "::Ice::Object"
 };
@@ -170,36 +170,23 @@ static const char* ICEObject_ids__[] =
 }
 -(BOOL) ice_isA:(NSString*)typeId current:(ICECurrent*)current
 {
-    try
-    {
-        return OBJECT->ice_isA(fromNSString(typeId));
-    }
-    catch(const std::exception& ex)
-    {
-        rethrowObjCException(ex);
-        return NO; // Keep the compiler happy.
-    }
+    return [typeId isEqualToString:[[self class] ice_staticId]];
 }
 -(void) ice_ping:(ICECurrent*)current
 {
-    try
-    {
-        OBJECT->ice_ping();
-    }
-    catch(const std::exception& ex)
-    {
-        rethrowObjCException(ex);
-    }
+    // Nothing to do.
 }
 -(NSString*) ice_id:(ICECurrent*)current
 {
-    return [NSString stringWithUTF8String:ICEObject_ids__[0]];
+    return [[self class] ice_staticId];
 }
 -(NSArray*) ice_ids:(ICECurrent*)current
 {
     try
     {
-        return [toNSArray(ICEObject_ids__, sizeof(ICEObject_ids__) / sizeof(const char*)) autorelease];
+        int count;
+        const char** staticIds = [[self class] staticIds__:&count];
+        return [toNSArray(staticIds, count) autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -207,9 +194,16 @@ static const char* ICEObject_ids__[] =
         return NO; // Keep the compiler happy.
     }
 }
-+(const char*) ice_staticId
++(NSString*) ice_staticId
 {
-    return ICEObject_ids__[0];
+    int count;
+    const char** staticIds = [self staticIds__:&count];
+    return [NSString stringWithUTF8String:staticIds[0]];
+}
++(const char**) staticIds__:(int*)count
+{
+    *count = sizeof(ICEObject_ids__) / sizeof(const char*);
+    return ICEObject_ids__;
 }
 -(BOOL) dispatch__:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
@@ -242,7 +236,7 @@ static const char* ICEObject_ids__[] =
 
 -(void) write__:(id<ICEOutputStream>)os
 {
-    [os writeTypeId:[ICEObject ice_staticId]];
+    [os writeTypeId:ICEObject_ids__[0]];
     [os startSlice];
     [os writeSize:0]; // For compatibility with the old AFM.
     [os endSlice];
@@ -260,7 +254,7 @@ static const char* ICEObject_ids__[] =
     ICEInt sz = [is readSize];
     if(sz != 0)
     {
-        @throw [ICEMarshalException localException:__FILE__ line:__LINE__];
+        @throw [ICEMarshalException marshalException:__FILE__ line:__LINE__];
     }
 
     [is endSlice];
