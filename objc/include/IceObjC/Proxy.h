@@ -36,7 +36,7 @@
 +(Protocol*) protocol__;
 +(Class) servant__;
 -(id<ICEOutputStream>) createOutputStream__;
--(BOOL) invoke__:(NSString*)operation mode:(ICEOperationMode)mode os:(id<ICEOutputStream>)os 
-               is:(id<ICEInputStream>*)is context:(ICEContext*)context;
+-(void) invoke__:(NSString*)operation mode:(ICEOperationMode)mode os:(id<ICEOutputStream>)os 
+              is:(id<ICEInputStream>*)is context:(ICEContext*)context;
 
 @end

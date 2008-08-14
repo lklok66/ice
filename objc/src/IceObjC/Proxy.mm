@@ -179,17 +179,15 @@
                 }
             }
         }
-        return ok;
     }
     catch(const std::exception& ex)
     {
         rethrowObjCException(ex);
-        return NO; // Keep the compiler happy
     }
 
     if(!ok)
     {
-        NSAssert(is && *is, "input stream not set");
+        NSAssert(is && *is, @"input stream not set");
         [*is throwException];
     }
 }
