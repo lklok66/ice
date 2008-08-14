@@ -170,7 +170,17 @@ static const char* ICEObject_ids__[1] =
 }
 -(BOOL) ice_isA:(NSString*)typeId current:(ICECurrent*)current
 {
-    return [typeId isEqualToString:[[self class] ice_staticId]];
+    int count;
+    const char* tid = [typeId UTF8String];
+    const char** staticIds = [[self class] staticIds__:&count];
+    for(int i = 0; i < count; ++i)
+    {
+        if(strcmp(tid, staticIds[i]) == 0)
+        {
+            return YES;
+        }
+    }
+    return FALSE;
 }
 -(void) ice_ping:(ICECurrent*)current
 {
