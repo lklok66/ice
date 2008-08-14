@@ -17,6 +17,11 @@
 @protocol ICEInputStream;
 @protocol ICEOutputStream;
 
+#if defined(__cplusplus)
+extern "C"
+#endif
+int ICELookupString(const char**, size_t, const char*);
+
 @protocol ICEObject <NSObject>
 -(BOOL) ice_isA:(NSString*)typeId current:(ICECurrent*)current;
 -(void) ice_ping:(ICECurrent*)current;
@@ -30,6 +35,10 @@
 }
 +(NSString*) ice_staticId;
 +(const char**) staticIds__:(int*)count;
+-(BOOL) ice_isA___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os;
+-(BOOL) ice_ping___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os;
+-(BOOL) ice_id___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os;
+-(BOOL) ice_ids___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os;
 -(BOOL) dispatch__:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os;
 -(void) write__:(id<ICEOutputStream>)os;
 -(void) read__:(id<ICEInputStream>)is readTypeId:(BOOL)rid;

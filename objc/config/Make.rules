@@ -137,10 +137,14 @@ EVERYTHING		= all depend clean install
 %.o: $(SRCS_DIR)/%.cpp
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<
 
-%F.h: $(SDIR)/%F.ice $(SLICE2OBJC)
+%F.h: $(SDIR)/%F.ice $(SLICE2CPP)
 	rm -f $(*F)F.h $(*F)F.cpp
-	$(SLICE2OBJC) $(SLICE2OBJCFLAGS) $<
+	$(SLICE2CPP) $(SLICE2CPPFLAGS) $<
 	rm -f $(*F)F.cpp
+
+%.h %.cpp: $(SDIR)/%.ice $(SLICE2CPP)
+	rm -f $(*F).h $(*F).cpp
+	$(SLICE2CPP) $(SLICE2CPPFLAGS) $<
 
 %.h %.m: %.ice $(SLICE2OBJC)
 	rm -f $(*F).h $(*F).cpp
@@ -152,7 +156,7 @@ EVERYTHING		= all depend clean install
 
 all:: $(SRCS) $(TARGETS)
 
-depend:: $(SRCS)  $(patsubst $(SDIR)/%.ice,$(HDIR)/%.h,$(wildcard $(SDIR)/*F.ice)) $(SLICE_SRCS)
+depend:: $(SRCS) $(patsubst $(SDIR)/%.ice,%.h,$(wildcard $(SDIR)/*F.ice)) $(SLICE_SRCS)
 	-rm -f .depend
 	if test -n "$(SRCS)" ; then \
 	    $(CXX) -DMAKEDEPEND -M $(CXXFLAGS) $(CPPFLAGS) $(SRCS) | $(ice_dir)/config/makedepend.py >> .depend; \

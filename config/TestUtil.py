@@ -696,19 +696,19 @@ def getDefaultMapping(currentDir = ""):
         scriptPath = os.path.abspath(currentDir).split(os.sep)
         scriptPath.reverse()
         for p in scriptPath: 
-            if p in ["cpp", "cs", "java", "php", "py", "rb", "tmp"]:
+            if p in ["cpp", "cs", "java", "php", "py", "rb", "objc", "tmp"]:
                 return p
 
     scriptPath = os.path.abspath(sys.argv[0]).split(os.sep)
     scriptPath.reverse()
     for p in scriptPath: 
-        if p in ["cpp", "cs", "java", "php", "py", "rb", "tmp"]:
+        if p in ["cpp", "cs", "java", "php", "py", "rb", "objc", "tmp"]:
             return p
 
     scriptPath = os.path.abspath(os.getcwd()).split(os.sep)
     scriptPath.reverse()
     for p in scriptPath: 
-        if p in ["cpp", "cs", "java", "php", "py", "rb", "tmp"]:
+        if p in ["cpp", "cs", "java", "php", "py", "rb", "objc", "tmp"]:
             return p
 
     #  Default to C++
@@ -960,7 +960,7 @@ def runTests(start, expanded, num = 0, script = False):
 
 def getDefaultServerFile():
     lang = getDefaultMapping()
-    if lang in ["rb", "php", "cpp", "cs"]:
+    if lang in ["rb", "php", "cpp", "cs", "objc"]:
         return "server"
     if lang == "py":
         return "Server.py"
@@ -973,7 +973,7 @@ def getDefaultClientFile():
         return "Client.rb"
     if lang == "php":
         return "Client.php"
-    if lang in ["cpp", "cs"]:
+    if lang in ["cpp", "cs", "objc"]:
         return "client"
     if lang == "py":
         return "Client.py"

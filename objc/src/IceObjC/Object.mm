@@ -20,6 +20,22 @@
 
 #define OBJECT ((Ice::Object*)object__)
 
+int
+ICELookupString(const char** array, size_t count, const char* str)
+{
+    //
+    // TODO: Optimize to do a binary search.
+    //
+    for(size_t i = 0; i < count; i++)
+    {
+        if(strcmp(array[i], str) == 0)
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
 namespace IceObjC
 {
 
@@ -144,6 +160,14 @@ static const char* ICEObject_ids__[1] =
     "::Ice::Object"
 };
 
+static const char* ICEObject_all__[4] =
+{
+    "ice_id",
+    "ice_ids",
+    "ice_isA",
+    "ice_ping"
+};
+
 -(BOOL) ice_isA___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
     NSString* id__ = [is readString];
@@ -171,16 +195,8 @@ static const char* ICEObject_ids__[1] =
 -(BOOL) ice_isA:(NSString*)typeId current:(ICECurrent*)current
 {
     int count;
-    const char* tid = [typeId UTF8String];
     const char** staticIds = [[self class] staticIds__:&count];
-    for(int i = 0; i < count; ++i)
-    {
-        if(strcmp(tid, staticIds[i]) == 0)
-        {
-            return YES;
-        }
-    }
-    return FALSE;
+    return ICELookupString(staticIds, count, [typeId UTF8String]) >= 0;
 }
 -(void) ice_ping:(ICECurrent*)current
 {
@@ -215,33 +231,28 @@ static const char* ICEObject_ids__[1] =
     *count = sizeof(ICEObject_ids__) / sizeof(const char*);
     return ICEObject_ids__;
 }
+
 -(BOOL) dispatch__:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
-    //
-    // TODO: Optimize
-    //
-
-    if([[current operation] isEqualToString:@"ice_isA"])
+    switch(ICELookupString(ICEObject_all__, 
+                           sizeof(ICEObject_all__) / sizeof(const char*),
+                           [[current operation] UTF8String]))
     {
-        return [self ice_isA___:current is:is os:os];
-    }
-    else if([[current operation] isEqualToString:@"ice_ping"])
-    {
-        return [self ice_ping___:current is:is os:os];
-    }
-    else if([[current operation] isEqualToString:@"ice_id"])
-    {
+    case 0:
         return [self ice_id___:current is:is os:os];
-    }
-    else if([[current operation] isEqualToString:@"ice_ids"])
-    {
+    case 1:
         return [self ice_ids___:current is:is os:os];
+    case 2:
+        return [self ice_isA___:current is:is os:os];
+    case 3:
+        return [self ice_ping___:current is:is os:os];
+    default:
+        @throw [ICEOperationNotExistException requestFailedException:__FILE__ 
+                                              line:__LINE__ 
+                                              id_:current.id_ 
+                                              facet:current.facet
+                                              operation:current.operation];
     }
-    else
-    {
-        // TODO: throw operation not exist exception.
-    }
-    return YES;
 }
 
 -(void) write__:(id<ICEOutputStream>)os

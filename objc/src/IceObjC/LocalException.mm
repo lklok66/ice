@@ -226,6 +226,10 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
++(id) unknownLocalException:(const char*)file_ line:(int)line_ unknown:(NSString*)unknown_
+{
+    return [[self alloc] init:file_ line:line_ unknown:unknown_];
+}
 -(void)rethrowCxx__
 {
     throw Ice::UnknownLocalException(file, line, fromNSString(unknown));
@@ -240,6 +244,10 @@
 +(id) unknownUserException:(const char*)file_ line:(int)line_
 {
     return [[self alloc] init:file_ line:line_];
+}
++(id) unknownUserException:(const char*)file_ line:(int)line_ unknown:(NSString*)unknown_
+{
+    return [[self alloc] init:file_ line:line_ unknown:unknown_];
 }
 -(void)rethrowCxx__
 {

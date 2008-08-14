@@ -7,11 +7,12 @@
 #
 # **********************************************************************
 
-top_srcdir	= .
+top_srcdir	= ..
 
 include $(top_srcdir)/config/Make.rules
 
-SUBDIRS		= src demo test
+SUBDIRS		= Common \
+		  Ice
 
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \
@@ -19,6 +20,3 @@ $(EVERYTHING)::
 	    echo "making $@ in $$subdir"; \
 	    ( cd $$subdir && $(MAKE) $@ ) || exit 1; \
 	done
-
-test::
-	@python $(top_srcdir)/allTests.py
