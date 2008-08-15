@@ -3476,7 +3476,7 @@ Slice::Gen::DelegateMVisitor::visitClassDefStart(const ClassDefPtr& p)
 	{
 	    _M << "return ";
 	}
-	_M << "[" << className << "Prx invoke_" << opName << args;
+	_M << "[[self class] invoke_" << opName << args;
 	if(!args.empty())
 	{
 	    _M << " prx";
@@ -3504,12 +3504,12 @@ Slice::Gen::DelegateMVisitor::visitClassDefStart(const ClassDefPtr& p)
 	{
 	    _M << "return ";
 	}
-	_M << "[" << className << "Prx invoke_" << opName << args;
+	_M << "[[self class] invoke_" << opName << args;
 	if(!args.empty())
 	{
 	    _M << " prx";
 	}
-	_M << ":self context:nil];";
+	_M << ":self context:ctx_];";
 	_M << eb;
     }
 
