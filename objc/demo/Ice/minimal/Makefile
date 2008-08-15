@@ -14,15 +14,18 @@ SERVER		= server
 
 TARGETS		= $(CLIENT) $(SERVER)
 
-COBJS		= Hello.o \
-                  Client.o \
+OBJS		= Hello.o
 
-SOBJS		= Hello.o \
+COBJS		= Client.o \
+
+SOBJS		= Hello_S.o \
 		  HelloI.o \
 		  Server.o
 
 SRCS		= $(COBJS:.o=.m) \
 		  $(SOBJS:.o=.m)
+
+SLICE_SRCS	= Hello.ice
 
 include $(top_srcdir)/config/Make.rules
 

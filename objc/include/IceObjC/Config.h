@@ -14,6 +14,7 @@
 #import <Foundation/NSString.h>
 #import <Foundation/NSArray.h>
 #import <Foundation/NSDictionary.h>
+#import <Foundation/NSData.h>
 
 #import <stdlib.h>
 

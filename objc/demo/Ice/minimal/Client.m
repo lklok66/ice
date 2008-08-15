@@ -27,7 +27,7 @@ main(int argc, char* argv[])
             NSLog(@"%s: too many arguments", argv[0]);
             return 1;
         }
-        id<HelloPrx> hello = [HelloPrx checkedCast:[communicator stringToProxy:@"hello:tcp -p 10000"]];
+        id<DemoHelloPrx> hello = [DemoHelloPrx checkedCast:[communicator stringToProxy:@"hello:tcp -p 10000"]];
         if(hello == nil)
         {
             NSLog(@"%s: invalid proxy", argv[0]);

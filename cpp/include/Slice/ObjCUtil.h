@@ -49,6 +49,7 @@ protected:
     static std::string fixName(const ContainedPtr&, int = 0, bool = false);
     static std::string fixScoped(const ContainedPtr&, int = 0, bool = false);
     static std::string typeToString(const TypePtr&);
+    static std::string outTypeToString(const TypePtr&);
     static bool isValueType(const TypePtr&);
     static bool isString(const TypePtr&);
     static StringList splitScopedName(const std::string&);

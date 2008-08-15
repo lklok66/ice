@@ -30,7 +30,7 @@ protected:
     virtual std::string getParams(const OperationPtr&);
     virtual std::vector<std::string> getParamsAsync(const OperationPtr&, bool);
     virtual std::vector<std::string> getParamsAsyncCB(const OperationPtr&);
-    virtual std::vector<std::string> getArgs(const OperationPtr&);
+    virtual std::string getArgs(const OperationPtr&);
     virtual std::vector<std::string> getArgsAsync(const OperationPtr&);
     virtual std::vector<std::string> getArgsAsyncCB(const OperationPtr&);
 
@@ -131,6 +131,7 @@ private:
         void writeMemberHashCode(const DataMemberList&, int) const;
         void writeMemberEquals(const DataMemberList&, int) const;
         void writeMemberDealloc(const DataMemberList&, int) const;
+        void writeMemberMarshal(const DataMemberList&, int) const;
 
         bool _stream;
     };
@@ -196,12 +197,13 @@ private:
     {
     public:
 
-        DelegateMVisitor(::IceUtilInternal::Output&);
+        DelegateMVisitor(::IceUtilInternal::Output&, ::IceUtilInternal::Output&);
 
         virtual bool visitModuleStart(const ModulePtr&);
         virtual void visitModuleEnd(const ModulePtr&);
         virtual bool visitClassDefStart(const ClassDefPtr&);
         virtual void visitClassDefEnd(const ClassDefPtr&);
+        virtual void visitOperation(const OperationPtr&);
     };
 
     class DelegateDVisitor : public ObjCVisitor

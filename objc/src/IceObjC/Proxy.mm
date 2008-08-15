@@ -88,10 +88,15 @@
     return nil;
 }
 
+#if 0
+//
+// Removed here because each Prx class now implements ice_staticId
+//
 +(NSString*) ice_staticId
 {
     return [[self servant__] ice_staticId];
 }
+#endif
 
 +(Protocol*) protocol__
 {

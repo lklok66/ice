@@ -37,7 +37,7 @@ HDIR		= $(headerdir)/IceObjC
 
 include $(top_srcdir)/config/Make.rules
 
-CPPFLAGS	:= -I.. $(CPPFLAGS) $(ICE_FLAGS)
+CPPFLAGS	:= -I.. -I../../include $(CPPFLAGS) $(ICE_FLAGS)
 
 LINKWITH        := -lIce -lIceUtil $(ICE_OS_LIBS) $(BASELIBS)
 

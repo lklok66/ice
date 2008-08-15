@@ -215,6 +215,37 @@ Slice::ObjCGenerator::typeToString(const TypePtr& type)
     return "???";
 }
 
+string
+Slice::ObjCGenerator::outTypeToString(const TypePtr& type)
+{
+    if(!type)
+    {
+        return "void";
+    }
+
+    BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
+    if(builtin && builtin->kind() == Builtin::KindString)
+    {
+	return "NSMutableString";
+    }
+
+    SequencePtr seq = SequencePtr::dynamicCast(type);
+    if(seq)
+    {
+	string prefix = moduleName(findModule(seq));
+	return prefix + "Mutable" + seq->name();
+    }
+
+    DictionaryPtr d = DictionaryPtr::dynamicCast(type);
+    if(d)
+    {
+	string prefix = moduleName(findModule(d));
+	return prefix + "Mutable" + d->name();
+    }
+
+    return typeToString(type);
+}
+
 bool
 Slice::ObjCGenerator::isValueType(const TypePtr& type)
 {
@@ -308,11 +339,11 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
 
     if(marshal)
     {
-        stream = streamingAPI ? "outS__" : "os__";
+        stream = streamingAPI ? "outS_" : "os_";
     }
     else
     {
-        stream = streamingAPI ? "inS__" : "is__";
+        stream = streamingAPI ? "inS_" : "is_";
     }
 
     BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
@@ -324,11 +355,11 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
             {
                 if(marshal)
                 {
-                    out << nl << stream << ".writeByte(" << param << ");";
+                    out << nl << "[" << stream << " writeByte:" << param << "];";
                 }
                 else
                 {
-                    out << nl << param << " = " << stream << ".readByte()" << ';';
+                    out << nl << param << " = [" << stream << " readByte];";
                 }
                 break;
             }
@@ -336,11 +367,11 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
             {
                 if(marshal)
                 {
-                    out << nl << stream << ".writeBool(" << param << ");";
+                    out << nl << "[" << stream << " writeBool:" << param << "];";
                 }
                 else
                 {
-                    out << nl << param << " = " << stream << ".readBool()" << ';';
+                    out << nl << param << " = [" << stream << " readBool];";
                 }
                 break;
             }
@@ -348,11 +379,11 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
             {
                 if(marshal)
                 {
-                    out << nl << stream << ".writeShort(" << param << ");";
+                    out << nl << "[" << stream << " writeShort:" << param << "];";
                 }
                 else
                 {
-                    out << nl << param << " = " << stream << ".readShort()" << ';';
+                    out << nl << param << " = [" << stream << " readShort];";
                 }
                 break;
             }
@@ -360,11 +391,11 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
             {
                 if(marshal)
                 {
-                    out << nl << stream << ".writeInt(" << param << ");";
+                    out << nl << "[" << stream << " writeInt:" << param << "];";
                 }
                 else
                 {
-                    out << nl << param << " = " << stream << ".readInt()" << ';';
+                    out << nl << param << " = [" << stream << " readInt];";
                 }
                 break;
             }
@@ -372,11 +403,11 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
             {
                 if(marshal)
                 {
-                    out << nl << stream << ".writeLong(" << param << ");";
+                    out << nl << "[" << stream << " writeLong:" << param << "];";
                 }
                 else
                 {
-                    out << nl << param << " = " << stream << ".readLong()" << ';';
+                    out << nl << param << " = [" << stream << " readLong];";
                 }
                 break;
             }
@@ -384,11 +415,11 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
             {
                 if(marshal)
                 {
-                    out << nl << stream << ".writeFloat(" << param << ");";
+                    out << nl << "[" << stream << " writeFloat:" << param << "];";
                 }
                 else
                 {
-                    out << nl << param << " = " << stream << ".readFloat()" << ';';
+                    out << nl << param << " = [" << stream << " readFloat];";
                 }
                 break;
             }
@@ -396,11 +427,11 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
             {
                 if(marshal)
                 {
-                    out << nl << stream << ".writeDouble(" << param << ");";
+                    out << nl << "[" << stream << " writeDouble:" << param << "];";
                 }
                 else
                 {
-                    out << nl << param << " = " << stream << ".readDouble()" << ';';
+                    out << nl << param << " = [" << stream << " readDouble];";
                 }
                 break;
             }
@@ -408,16 +439,17 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
             {
                 if(marshal)
                 {
-                    out << nl << stream << ".writeString(" << param << ");";
+                    out << nl << "[" << stream << " writeString:" << param << "];";
                 }
                 else
                 {
-                    out << nl << param << " = " << stream << ".readString()" << ';';
+                    out << nl << param << " = [" << stream << " readString];";
                 }
                 break;
             }
             case Builtin::KindObject:
             {
+	        // TODO: deal with classes
                 if(marshal)
                 {
                     out << nl << stream << ".writeObject(" << param << ");";
@@ -449,14 +481,13 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
             }
             case Builtin::KindObjectProxy:
             {
-                string typeS = typeToString(type);
                 if(marshal)
                 {
-                    out << nl << stream << ".writeProxy(" << param << ");";
+                    out << nl << "[" << stream << " writeProxy:" << param << "];";
                 }
                 else
                 {
-                    out << nl << param << " = " << stream << ".readProxy()" << ';';
+                    out << nl << "*" << param << " = [" << stream << " readProxy];";
                 }
                 break;
             }
@@ -472,6 +503,7 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
     ProxyPtr prx = ProxyPtr::dynamicCast(type);
     if(prx)
     {
+        // TODO
         string typeS = typeToString(type);
         if(marshal)
         {
