@@ -9,7 +9,7 @@
 
 #import <IceObjC/IceObjC.h>
 
-#import <TestI.h>
+#import <Test_S.h>
 #import <TestCommon.h>
 
 //
@@ -144,68 +144,6 @@ static const char* TestMyDerivedClass_all__[] =
 }
 @end
 
-//
-// Proxy generated classes.
-//
-@implementation TestMyClassPrx
--(void) shutdown:(ICEContext*)context
-{
-    [self invoke__:@"shutdown" mode:ICENormal os:nil is:nil context:context];
-}
--(void) shutdown
-{
-    [self shutdown:nil];
-}
-+(void) opVoid___:(ICEObjectPrx*)prx context:(ICEContext*)context
-{
-}
--(void) opVoid:(ICEContext*)context
-{
-    [self invoke__:@"opVoid" mode:ICENormal os:nil is:nil context:context];
-}
--(void) opVoid
-{
-    [self opVoid:nil];
-}
--(ICEByte) opByte:(ICEByte)p1 p2:(ICEByte)p2 p3:(ICEByte*)p3 context:(ICEContext*)context
-{
-    id<ICEOutputStream> os = [self createOutputStream__];
-    id<ICEInputStream> is = nil;
-    @try
-    {
-        [os writeByte:p1];
-        [os writeByte:p2];
-        [self invoke__:@"opByte" mode:ICENormal os:os is:&is context:context];
-        *p3 = [is readByte];
-        return [is readByte];
-    }
-    @catch(ICEUserException* ex)
-    {
-        @throw [ICEUnknownUserException unknownUserException:__FILE__ line:__LINE__ unknown:[ex ice_name]];
-    }
-    @finally
-    {
-        [os release];
-        [is release];
-    }
-}
--(ICEByte) opByte:(ICEByte)p1 p2:(ICEByte)p2 p3:(ICEByte*)p3
-{
-    return [self opByte:p1 p2:p2 p3:p3 context:nil];
-}
-@end
-
-@implementation TestMyDerivedClassPrx
--(void) opDerived:(ICEContext*)context
-{
-    [self invoke__:@"opDerived" mode:ICENormal os:nil is:nil context:context];
-}
--(void) opDerived
-{
-    [self opDerived:nil];
-}
-@end
-
 @implementation MyDerivedClassI
 -(void) opVoid:(ICECurrent*)current
 {
@@ -223,4 +161,3 @@ static const char* TestMyDerivedClass_all__[] =
     [[[current adapter] getCommunicator] shutdown];
 }
 @end
-

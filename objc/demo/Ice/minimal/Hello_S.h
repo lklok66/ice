@@ -6,12 +6,16 @@
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
-  
-#import <Test_S.h>
-#import <IceObjC/Object.h>
 
-//
-// Servant implementation
-//
-@interface MyDerivedClassI : TestMyDerivedClass<TestMyDerivedClass>
+#import <IceObjC/Proxy.h>
+#import <IceObjC/Object.h>
+#import <Hello.h>
+
+// Servant protocol
+@protocol Hello
+-(void) sayHello:(ICECurrent*)current;
+@end
+
+// Servant class
+@interface Hello : ICEObject
 @end

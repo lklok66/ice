@@ -66,14 +66,14 @@ dictionary<long, float> LongFloatD;
 dictionary<string, string> StringStringD;
 dictionary<string, MyEnum> StringMyEnumD;
 
-// ["ami"] class MyClass
-// {
-//     void shutdown();
+["ami"] class MyClass
+{
+     void shutdown();
 
-//     void opVoid();
+     void opVoid();
 
-//     byte opByte(byte p1, byte p2,
-//                 out byte p3);
+     byte opByte(byte p1, byte p2,
+                 out byte p3);
 
 //     bool opBool(bool p1, bool p2,
 //                 out bool p3);
@@ -150,12 +150,12 @@ dictionary<string, MyEnum> StringMyEnumD;
 //     Ice::Context opContext();
 
 //     void opDoubleMarshaling(double p1, DoubleS p2);
-// };
+};
 
-// ["ami"] class MyDerivedClass extends MyClass
-// {
-//     void opDerived();
-// };
+["ami"] class MyDerivedClass extends MyClass
+{
+    void opDerived();
+};
 
 };
 

@@ -6,12 +6,19 @@
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
-  
-#import <Test_S.h>
-#import <IceObjC/Object.h>
 
-//
-// Servant implementation
-//
-@interface MyDerivedClassI : TestMyDerivedClass<TestMyDerivedClass>
-@end
+#ifndef HELLO_ICE
+#define HELLO_ICE
+
+module Demo
+{
+
+interface Hello
+{
+    ["cpp:const"] idempotent void sayHello();
+    void shutdown();
+};
+
+};
+
+#endif

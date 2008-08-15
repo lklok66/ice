@@ -965,7 +965,7 @@ Slice::ObjCVisitor::getArgs(const OperationPtr& op)
 
 	if(q != paramList.begin())
 	{
-	    result += " ";
+	    result += " " + name;
 	}
 	result += ":" + name;
     }
@@ -1620,6 +1620,7 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
 void
 Slice::Gen::TypesVisitor::visitOperation(const OperationPtr& p)
 {
+#if 0
 
     ClassDefPtr classDef = ClassDefPtr::dynamicCast(p->container());
     if(classDef->isInterface())
@@ -1680,6 +1681,7 @@ Slice::Gen::TypesVisitor::visitOperation(const OperationPtr& p)
         _M << nl << "public abstract " << retS << " " << name
              << spar << params << "Ice.Current current__" << epar << ';';
     }
+#endif
 }
 
 void
@@ -3476,7 +3478,7 @@ Slice::Gen::DelegateMVisitor::visitClassDefStart(const ClassDefPtr& p)
 	{
 	    _M << "return ";
 	}
-	_M << "[[self class] invoke_" << opName << args;
+	_M << "[" << className << "Prx invoke_" << opName << args;
 	if(!args.empty())
 	{
 	    _M << " prx";
@@ -3504,7 +3506,7 @@ Slice::Gen::DelegateMVisitor::visitClassDefStart(const ClassDefPtr& p)
 	{
 	    _M << "return ";
 	}
-	_M << "[[self class] invoke_" << opName << args;
+	_M << "[" << className << "Prx invoke_" << opName << args;
 	if(!args.empty())
 	{
 	    _M << " prx";
@@ -3536,6 +3538,7 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
     string retString = outTypeToString(returnType);
     bool retIsValue = isValueType(returnType);
     string params = getParams(p);
+    string args = getParams(p);
 
     TypeStringList inParams;
     TypeStringList outParams;
@@ -3599,9 +3602,9 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
     if(p->returnsData())
     {
         // _M << nl << "[is_ startEncapsulation];";
-	for(TypeStringList::const_iterator ip = inParams.begin(); ip != inParams.end(); ++ip)
+	for(TypeStringList::const_iterator op = outParams.begin(); op != outParams.end(); ++op)
 	{
-	    writeMarshalUnmarshalCode(_M, ip->first, fixId(ip->second), false, false, true, "");
+	    writeMarshalUnmarshalCode(_M, op->first, "*" + fixId(op->second), false, false, true, "");
 	}
 	if(returnType)
 	{
@@ -3626,7 +3629,7 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
     }
     if(returnType)
     {
-        _M << nl << "return _ret_;";
+        _M << nl << "return ret_;";
     }
 
     _M << eb;

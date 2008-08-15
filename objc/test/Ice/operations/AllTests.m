@@ -11,7 +11,6 @@
 #import <IceObjC/Locator.h>
 #import <TestCommon.h>
 #import <Test.h>
-#import <TestI.h> // TODO: Remove
  
 TestMyClassPrx*
 allTests(id<ICECommunicator> communicator, BOOL collocated)

@@ -10,7 +10,6 @@
 #import <IceObjC/IceObjC.h>
 #import <TestCommon.h>
 #import <Test.h>
-#import <TestI.h> // TODO: remove
 
 #import <Foundation/NSAutoreleasePool.h>
  
