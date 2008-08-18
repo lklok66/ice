@@ -8,7 +8,7 @@
 // **********************************************************************
   
 #import <Test_S.h>
-#import <IceObjC/Object.h>
+#import <Ice/Object.h>
 
 //
 // Servant implementation

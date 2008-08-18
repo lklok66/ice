@@ -9,6 +9,5 @@
 
 #import <Hello_S.h>
 
-@interface HelloI : Hello<Hello>
+@interface HelloI : DemoHello<DemoHello>
 @end
-

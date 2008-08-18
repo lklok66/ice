@@ -7,15 +7,15 @@
 //
 // **********************************************************************
 
-#import <IceObjC/Proxy.h>
-#import <IceObjC/Object.h>
+#import <Ice/Proxy.h>
+#import <Ice/Object.h>
 #import <Hello.h>
 
 // Servant protocol
-@protocol Hello
+@protocol DemoHello
 -(void) sayHello:(ICECurrent*)current;
 @end
 
 // Servant class
-@interface Hello : ICEObject
+@interface DemoHello : ICEObject
 @end

@@ -7,8 +7,8 @@
 //
 // **********************************************************************
 
-#import <IceObjC/IceObjC.h>
-#import <IceObjC/Locator.h>
+#import <Ice/Ice.h>
+#import <Ice/Locator.h>
 #import <TestCommon.h>
 #import <Test.h>
  

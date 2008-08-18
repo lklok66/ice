@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-#import <IceObjC/IceObjC.h>
+#import <Ice/Ice.h>
 
 #import <TestI.h>
 #import <TestCommon.h>
@@ -40,12 +40,12 @@ static const char* TestMyClass_all__[] =
 
 -(BOOL) shutdown___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
-    [(id)self shutdown:current];
+    [(id<TestMyClass>)self shutdown:current];
     return TRUE;
 }
 -(BOOL) opVoid___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
-    [(id)self opVoid:current];
+    [(id<TestMyClass>)self opVoid:current];
     return TRUE;
 }
 -(BOOL) opByte___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
@@ -53,7 +53,7 @@ static const char* TestMyClass_all__[] =
     ICEByte p1 = [is readByte];
     ICEByte p2 = [is readByte];
     ICEByte p3;
-    ICEByte ret = [(id)self opByte:p1 p2:p2 p3:&p3 current:current];
+    ICEByte ret = [(id<TestMyClass>)self opByte:p1 p2:p2 p3:&p3 current:current];
     [os writeByte:p3];
     [os writeByte:ret];
     return TRUE;
@@ -111,7 +111,7 @@ static const char* TestMyDerivedClass_all__[] =
 }
 -(BOOL) opDerived___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
-    [(id)self opDerived:current];
+    [(id<TestMyDerivedClass>)self opDerived:current];
     return TRUE;
 }
 -(BOOL) dispatch__:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os

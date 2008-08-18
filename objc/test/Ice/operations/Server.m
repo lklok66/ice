@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-#import <IceObjC/IceObjC.h>
+#import <Ice/Ice.h>
 #import <TestI.h>
 
 #import <Foundation/NSAutoreleasePool.h>

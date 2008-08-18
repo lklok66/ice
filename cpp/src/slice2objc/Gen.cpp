@@ -1100,16 +1100,16 @@ Slice::Gen::Gen(const string& name, const string& base, const string& include, c
         *p = fullPath(*p);
     }
 
-    string fileBase = base;
-    string::size_type pos = base.find_last_of("/\\");
+    string::size_type pos = _base.find_last_of("/\\");
     if(pos != string::npos)
     {
-        fileBase = base.substr(pos + 1);
+        _base.erase(0, pos + 1);
     }
-    string fileH = fileBase + ".h";
-    string fileM = fileBase + ".m";
-    string fileImplH = fileBase + "I.h";
-    string fileImplM = fileBase + "I.m";
+
+    string fileH = _base + ".h";
+    string fileM = _base + ".m";
+    string fileImplH = _base + "I.h";
+    string fileImplM = _base + "I.m";
 
     if(!dir.empty())
     {
@@ -1130,11 +1130,11 @@ Slice::Gen::Gen(const string& name, const string& base, const string& include, c
         return;
     }
     printHeader(_H);
-    _H << nl << "// Generated from file `" << fileBase << ".ice'";
+    _H << nl << "// Generated from file `" << _base << ".ice'";
 
-    _H << sp << nl << "#import <IceObjC/Config.h>";
-    _H << nl << "#import <IceObjC/Proxy.h>";
-    _H << nl << "#import <IceObjC/Exception.h>";
+    _H << sp << nl << "#import <Ice/Config.h>";
+    _H << nl << "#import <Ice/Proxy.h>";
+    _H << nl << "#import <Ice/Exception.h>";
 
     _M.open(fileM.c_str());
     if(!_M)
@@ -1143,7 +1143,7 @@ Slice::Gen::Gen(const string& name, const string& base, const string& include, c
         return;
     }
     printHeader(_M);
-    _M << nl << "// Generated from file `" << fileBase << ".ice'";
+    _M << nl << "// Generated from file `" << _base << ".ice'";
 
     if(impl || implTie)
     {
@@ -1209,8 +1209,8 @@ Slice::Gen::generate(const UnitPtr& p)
 {
     ObjCGenerator::validateMetaData(p);
 
-    _M << nl << "\n#import <IceObjC/LocalException.h>";
-    _M << nl << "#import <IceObjC/Stream.h>";
+    _M << nl << "\n#import <Ice/LocalException.h>";
+    _M << nl << "#import <Ice/Stream.h>";
     _M << nl << "#import <";
     if(!_include.empty())
     {

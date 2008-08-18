@@ -9,6 +9,8 @@
 
 #import <HelloI.h>
 
+#include <stdio.h>
+
 @implementation HelloI
 -(void) sayHello:(ICECurrent*)current
 {

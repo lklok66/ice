@@ -8,7 +8,7 @@
 // **********************************************************************
   
 #import <Test.h>
-#import <IceObjC/Object.h>
+#import <Ice/Object.h>
 
 //
 // Servant generated protocols

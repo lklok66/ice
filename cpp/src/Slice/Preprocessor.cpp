@@ -438,6 +438,18 @@ Slice::Preprocessor::printMakefileDependencies(Language lang, const vector<strin
             }
             break;
         }
+        case ObjC:
+        {
+            //
+            // Change .o[bj] suffix to .m suffix.
+            //
+            string::size_type pos;
+            while((pos = result.find(suffix)) != string::npos)
+            {
+                result.replace(pos, suffix.size() - 1, ".m");
+            }
+            break;
+        }
         default:
         {
             abort();

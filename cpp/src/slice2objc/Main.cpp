@@ -155,7 +155,7 @@ main(int argc, char* argv[])
         if(depend)
         {
             Preprocessor icecpp(argv[0], *i, cppArgs);
-            icecpp.printMakefileDependencies(Preprocessor::CSharp, includePaths);
+            icecpp.printMakefileDependencies(Preprocessor::ObjC, includePaths);
         }
         else
         {

@@ -9,17 +9,17 @@
 
 #import <Hello_S.h>
 
-#import <IceObjC/LocalException.h>
+#import <Ice/LocalException.h>
 
-@implementation Hello
+@implementation DemoHello
 
-static const char* Hello_ids__[2] =
+static const char* DemoHello_ids__[2] =
 {
     "::Demo::Hello",
     "::Ice::Object"
 };
 
-static const char* Hello_all__[5] =
+static const char* DemoHello_all__[5] =
 {
     "ice_id",
     "ice_ids",
@@ -30,18 +30,18 @@ static const char* Hello_all__[5] =
 
 +(const char**) staticIds__:(int*)count
 {
-    *count = sizeof(Hello_ids__) / sizeof(const char*);
-    return Hello_ids__;
+    *count = sizeof(DemoHello_ids__) / sizeof(const char*);
+    return DemoHello_ids__;
 }
 
 -(BOOL) sayHello___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
-    [(id)self sayHello:current];
+    [(id<DemoHello>)self sayHello:current];
     return TRUE;
 }
 -(BOOL) dispatch__:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
-    switch(ICELookupString(Hello_all__, sizeof(Hello_all__) / sizeof(const char*), [[current operation] UTF8String]))
+    switch(ICELookupString(DemoHello_all__, sizeof(DemoHello_all__) / sizeof(const char*), [[current operation] UTF8String]))
     {
     case 0:
         return [self ice_id___:current is:is os:os];

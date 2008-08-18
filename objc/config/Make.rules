@@ -46,7 +46,7 @@ COMPILE_FOR_IPHONE_SIMULATOR 	= yes
 #
 ice_language     = objc
 ice_require_cpp	 = yes
-slice_translator = slice2cpp
+slice_translator = slice2objc
 
 ifeq ($(shell test -f $(top_srcdir)/config/Make.common.rules && echo 0),0)
     include $(top_srcdir)/config/Make.common.rules
@@ -126,7 +126,7 @@ endif
 EVERYTHING		= all depend clean install 
 
 .SUFFIXES:
-.SUFFIXES:		.m .mm .o .cpp 
+.SUFFIXES:		.mm .m .o .cpp 
 
 .m.o:
 	$(CC) -c $(CPPFLAGS) $(CCFLAGS) $<
@@ -137,32 +137,37 @@ EVERYTHING		= all depend clean install
 %.o: $(SRCS_DIR)/%.cpp
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<
 
-%F.h: $(SDIR)/%F.ice $(SLICE2CPP)
-	rm -f $(*F)F.h $(*F)F.cpp
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) $<
-	rm -f $(*F)F.cpp
+$(HDIR)/%F.h: $(SDIR)/%F.ice $(SLICE2OBJC) $(SLICEPARSERLIB)
+	rm -f $(HDIR)/$(*F)F.h $(*F)F.m
+	$(SLICE2OBJC) $(SLICE2OBJCFLAGS) $<
+	mv $(*F)F.h $(HDIR)
+	rm -f $(*F)F.m
 
-%.h %.cpp: $(SDIR)/%.ice $(SLICE2CPP)
-	rm -f $(*F).h $(*F).cpp
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) $<
+$(HDIR)/%.h %.m: $(SDIR)/%.ice $(SLICE2OBJC) $(SLICEPARSERLIB)
+	rm -f $(HDIR)/$(*F).h $(*F).m
+	$(SLICE2OBJC) $(SLICE2OBJCFLAGS) $<
+	mv $(*F).h $(HDIR)
 
 %.h %.m: %.ice $(SLICE2OBJC)
-	rm -f $(*F).h $(*F).cpp
+	rm -f $(*F).h $(*F).m
 	$(SLICE2OBJC) $(SLICE2OBJCFLAGS) $<
 
-%.h %.m: $(SDIR)/%.ice $(SLICE2OBJC)
-	rm -f $(*F).h $(*F).cpp
-	$(SLICE2OBJC) $(SLICE2OBJCFLAGS) $<
+IceUtilCpp/%.h: $(ice_cpp_dir)/include/IceUtil/%.h
+	@echo Creating $@ from $<
+	@if [ ! -d IceUtilCpp ]; then mkdir IceUtilCpp ; fi
+	@sed -e "s%IceUtil/%IceUtilCpp/%g" $< > $@
+
+IceCpp/%.h:  $(ice_cpp_dir)/include/Ice/%.h
+	@echo Creating $@ from $<
+	@if [ ! -d IceCpp ]; then mkdir IceCpp ; fi
+	@sed -e "s%IceUtil/%IceUtilCpp/%g;s%Ice/%IceCpp/%g" $< > $@
 
 all:: $(SRCS) $(TARGETS)
 
-depend:: $(SRCS) $(patsubst $(SDIR)/%.ice,%.h,$(wildcard $(SDIR)/*F.ice)) $(SLICE_SRCS)
+depend:: $(SRCS)
 	-rm -f .depend
 	if test -n "$(SRCS)" ; then \
-	    $(CXX) -DMAKEDEPEND -M $(CXXFLAGS) $(CPPFLAGS) $(SRCS) | $(ice_dir)/config/makedepend.py >> .depend; \
-	fi
-	if test -n "$(SLICE_SRCS)" ; then \
-	    $(SLICE2CPP) --depend $(SLICE2CPPFLAGS) $(SLICE_SRCS) | $(ice_dir)/config/makedepend.py >> .depend; \
+	    $(CXX) -DMAKEDEPEND -M $(CPPFLAGS) $(SRCS) | $(ice_dir)/config/makedepend.py >> .depend; \
 	fi
 
 clean::
@@ -170,11 +175,13 @@ clean::
 	-rm -f core *.o *.bak
 
 ifneq ($(SLICE_SRCS),)
-depend::
-	$(foreach slice, $(SLICE_SRCS), echo '$(slice): $$(SLICE2CPP)' >> .depend;)
+depend:: $(SLICE_SRCS)
+	if test -n "$(SLICE_SRCS)" ; then \
+	    $(SLICE2OBJC) --depend $(SLICE2OBJCFLAGS) $(SLICE_SRCS) | $(ice_dir)/config/makedepend.py >> .depend; \
+	fi
+	$(foreach slice, $(SLICE_SRCS), echo '$(slice): $$(SLICE2OBJC)' >> .depend;)
 
 clean::
-	rm -f $(addsuffix .cpp, $(basename $(notdir $(SLICE_SRCS))))
 	rm -f $(addsuffix .m, $(basename $(notdir $(SLICE_SRCS))))
 	rm -f $(addsuffix .h, $(basename $(notdir $(SLICE_SRCS))))
 endif

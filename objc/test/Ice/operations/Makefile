@@ -19,8 +19,6 @@ COBJS		= Test.o \
 		  Client.o \
 		  AllTests.o \
 		  Twoways.o \
-#		  Oneways.o \
-#		  BatchOneways.o
 
 SOBJS		= Test.o \
 		  TestI.o \
@@ -29,15 +27,12 @@ SOBJS		= Test.o \
 SRCS		= $(COBJS:.o=.m) \
 		  $(SOBJS:.o=.m) \
 
-#SLICE_SRCS	= Test.ice
+SLICE_SRCS	= Test.ice
 
 include $(top_srcdir)/config/Make.rules
 
 CPPFLAGS	:= -I. -I../../include $(CPPFLAGS)
 LIBS		:= -lTestCommon $(LIBS)
-
-Test.h Test.m:
-	
 
 $(CLIENT): $(COBJS)
 	rm -f $@

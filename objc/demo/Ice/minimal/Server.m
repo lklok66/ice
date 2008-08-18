@@ -7,8 +7,8 @@
 //
 // **********************************************************************
 
-#import <IceObjC/IceObjC.h>
-#import <IceObjC/LocalException.h>
+#import <Ice/Ice.h>
+
 #import <Foundation/NSAutoreleasePool.h>
 
 #import <HelloI.h>
@@ -29,7 +29,7 @@ main(int argc, char* argv[])
             return 1;
         }
         id<ICEObjectAdapter> adpt = [communicator createObjectAdapterWithEndpoints:@"Hello" endpoints:@"tcp -p 10000"];
-        Hello* hello = [[HelloI alloc] init];
+        DemoHello* hello = [[HelloI alloc] init];
         [adpt add:hello identity:[communicator stringToIdentity:@"hello"]];
         [hello release];
         [adpt activate];
