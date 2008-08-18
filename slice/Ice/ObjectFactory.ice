@@ -10,6 +10,7 @@
 #ifndef ICE_OBJECT_FACTORY_ICE
 #define ICE_OBJECT_FACTORY_ICE
 
+["objc:prefix:ICE"]
 module Ice
 {
 

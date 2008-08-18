@@ -10,6 +10,7 @@
 #ifndef ICE_STATS_ICE
 #define ICE_STATS_ICE
 
+["objc:prefix:ICE"]
 module Ice
 {
 

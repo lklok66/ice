@@ -10,6 +10,7 @@
 #ifndef ICE_PROCESS_ICE
 #define ICE_PROCESS_ICE
 
+["objc:prefix:ICE"]
 module Ice
 {
 

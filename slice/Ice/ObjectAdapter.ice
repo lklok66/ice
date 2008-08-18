@@ -16,6 +16,7 @@
 #include <Ice/Identity.ice>
 #include <Ice/FacetMap.ice>
 
+["objc:prefix:ICE"]
 module Ice
 {
 

@@ -12,6 +12,7 @@
 
 #include <Ice/LoggerF.ice>
 
+["objc:prefix:ICE"]
 module Ice
 {
 

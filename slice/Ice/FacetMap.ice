@@ -10,6 +10,7 @@
 #ifndef ICE_FACET_MAP_ICE
 #define ICE_FACET_MAP_ICE
 
+["objc:prefix:ICE"]
 module Ice
 {
 

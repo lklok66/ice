@@ -10,6 +10,7 @@
 #ifndef ICE_LOGGER_ICE
 #define ICE_LOGGER_ICE
 
+["objc:prefix:ICE"]
 module Ice
 {
 

@@ -10,6 +10,7 @@
 #ifndef ICE_SERVANT_LOCATOR_F_ICE
 #define ICE_SERVANT_LOCATOR_F_ICE
 
+["objc:prefix:ICE"]
 module Ice
 {
 

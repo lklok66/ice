@@ -30,6 +30,7 @@
  * additional functionality that supports high scalability.
  *
  **/
+["objc:prefix:ICE"]
 module Ice
 {
     

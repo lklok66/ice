@@ -13,6 +13,7 @@
 #include <Ice/ObjectAdapterF.ice>
 #include <Ice/Identity.ice>
 
+["objc:prefix:ICE"]
 module Ice
 {
 

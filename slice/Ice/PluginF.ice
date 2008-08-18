@@ -10,6 +10,7 @@
 #ifndef ICE_PLUGIN_F_ICE
 #define ICE_PLUGIN_F_ICE
 
+["objc:prefix:ICE"]
 module Ice
 {
     

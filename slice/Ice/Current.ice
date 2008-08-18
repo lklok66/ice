@@ -14,6 +14,7 @@
 #include <Ice/ConnectionF.ice>
 #include <Ice/Identity.ice>
 
+["objc:prefix:ICE"]
 module Ice
 {
 

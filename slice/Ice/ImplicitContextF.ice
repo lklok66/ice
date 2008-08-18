@@ -10,6 +10,7 @@
 #ifndef ICE_IMPLICIT_CONTEXT_F_ICE
 #define ICE_IMPLICIT_CONTEXT_F_ICE
 
+["objc:prefix:ICE"]
 module Ice
 {
 

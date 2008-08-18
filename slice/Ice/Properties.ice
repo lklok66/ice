@@ -12,6 +12,7 @@
 
 #include <Ice/BuiltinSequences.ice>
 
+["objc:prefix:ICE"]
 module Ice
 {
 

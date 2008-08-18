@@ -13,6 +13,7 @@
 #include <Ice/LocalException.ice>
 #include <Ice/Current.ice>
 
+["objc:prefix:ICE"]
 module Ice
 {
 

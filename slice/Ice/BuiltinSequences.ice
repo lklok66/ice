@@ -10,6 +10,7 @@
 #ifndef ICE_BUILTIN_SEQUENCES_ICE
 #define ICE_BUILTIN_SEQUENCES_ICE
 
+["objc:prefix:ICE"]
 module Ice
 {
 

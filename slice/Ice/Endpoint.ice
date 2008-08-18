@@ -10,6 +10,7 @@
 #ifndef ICE_ENDPOINT_ICE
 #define ICE_ENDPOINT_ICE
 
+["objc:prefix:ICE"]
 module Ice
 {
 
