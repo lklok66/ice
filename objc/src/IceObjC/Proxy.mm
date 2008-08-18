@@ -88,35 +88,14 @@
     return nil;
 }
 
-#if 0
-//
-// Removed here because each Prx class now implements ice_staticId
-//
 +(NSString*) ice_staticId
 {
-    return [[self servant__] ice_staticId];
+    return @"::Ice::Object";
 }
-#endif
 
 +(Protocol*) protocol__
 {
     return objc_getProtocol(class_getName([self class]));
-}
-
-+(Class) servant__
-{
-    //
-    // The servant class name is the proxy class name minus the 'Prx' suffix.
-    //
-    const char* proxyClassName = class_getName([self class]);
-    int len = strlen(proxyClassName) - 3 + 1;
-    char* objClassName = (char*)malloc(len);
-    strncpy(objClassName, proxyClassName, len - 1);
-    objClassName[len - 1] = '\0';
-    Class c = objc_getClass(objClassName);
-    NSAssert(c, @"can't find servant class");
-    free(objClassName);
-    return c;
 }
 
 -(id<ICEOutputStream>) createOutputStream__

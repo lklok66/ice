@@ -9,7 +9,7 @@
 
 #import <IceObjC/IceObjC.h>
 
-#import <Test_S.h>
+#import <TestI.h>
 #import <TestCommon.h>
 
 //
