@@ -56,9 +56,10 @@ endif
 
 ifeq ($(OPTIMIZE_SPEED),yes)
     OPTIMIZE		= yes
-endif
-ifeq ($(OPTIMIZE_SIZE),yes)
+else ifeq ($(OPTIMIZE_SIZE),yes)
     OPTIMIZE		= yes
+else ifeq ($(OPTIMIZE),yes)
+    OPTIMIZE_SIZE	= yes
 endif
 
 bindir			= $(top_srcdir)/bin
@@ -129,9 +130,12 @@ EVERYTHING		= all depend clean install
 .SUFFIXES:		.mm .m .o .cpp 
 
 .m.o:
-	$(CC) -c $(CPPFLAGS) $(CCFLAGS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $<
 
 .mm.o:
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<
+
+%.o: %.cpp
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<
 
 %.o: $(SRCS_DIR)/%.cpp
@@ -152,23 +156,15 @@ $(HDIR)/%.h %.m: $(SDIR)/%.ice $(SLICE2OBJC) $(SLICEPARSERLIB)
 	rm -f $(*F).h $(*F).m
 	$(SLICE2OBJC) $(SLICE2OBJCFLAGS) $<
 
-IceUtilCpp/%.h: $(ice_cpp_dir)/include/IceUtil/%.h
-	@echo Creating $@ from $<
-	@if [ ! -d IceUtilCpp ]; then mkdir IceUtilCpp ; fi
-	@sed -e "s%IceUtil/%IceUtilCpp/%g" $< > $@
-
-IceCpp/%.h:  $(ice_cpp_dir)/include/Ice/%.h
-	@echo Creating $@ from $<
-	@if [ ! -d IceCpp ]; then mkdir IceCpp ; fi
-	@sed -e "s%IceUtil/%IceUtilCpp/%g;s%Ice/%IceCpp/%g" $< > $@
-
 all:: $(SRCS) $(TARGETS)
 
+ifneq ($(SRCS),)
 depend:: $(SRCS)
 	-rm -f .depend
 	if test -n "$(SRCS)" ; then \
 	    $(CXX) -DMAKEDEPEND -M $(CPPFLAGS) $(SRCS) | $(ice_dir)/config/makedepend.py >> .depend; \
 	fi
+endif
 
 clean::
 	-rm -f $(TARGETS)
@@ -190,11 +186,6 @@ ifneq ($(HDIR),)
 clean::
 	rm -f $(addprefix $(HDIR), $(addsuffix .h, $(basename $(subst $(SDIR),, \
 	$(filter $(SDIR)/%.ice, $(SLICE_SRCS))))))
-endif
-
-ifneq ($(TEMPLATE_REPOSITORY),)
-clean::
-	rm -fr $(TEMPLATE_REPOSITORY)
 endif
 
 install::

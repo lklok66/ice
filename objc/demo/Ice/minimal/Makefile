@@ -22,7 +22,8 @@ SOBJS		= Hello_S.o \
 		  HelloI.o \
 		  Server.o
 
-SRCS		= $(COBJS:.o=.m) \
+SRCS		= $(OBJS:.o=.m) \
+		  $(COBJS:.o=.m) \
 		  $(SOBJS:.o=.m)
 
 SLICE_SRCS	= Hello.ice

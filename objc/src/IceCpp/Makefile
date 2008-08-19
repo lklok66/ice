@@ -13,7 +13,6 @@ LIBNAME		= $(call mklibname,Ice)
 
 TARGETS		= $(libdir)/$(LIBNAME)
 
-
 OBJS		= Acceptor.o \
 		  Application.o \
                   Base64.o \
@@ -151,23 +150,30 @@ STATICLIBS	:= yes
 
 include $(top_srcdir)/config/Make.rules
 
-CPPFLAGS	:= -DICE_IPHONE -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src $(CPPFLAGS)
+CPPFLAGS	:= -DICE_IPHONE -Iinclude -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src
 SLICE2CPPFLAGS	:= --ice --include-dir Ice $(SLICE2CPPFLAGS)
-
-%F.h: $(SDIR)/%F.ice $(SLICE2CPP)
-	rm -f $(*F)F.h $(*F)F.cpp
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) $<
-	rm -f $(*F)F.cpp
-
-%.h %.cpp: $(SDIR)/%.ice $(SLICE2CPP)
-	rm -f $(*F).h $(*F).cpp
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) $<
 
 $(libdir)/$(LIBNAME): $(OBJS) $(SLICE_OBJS)
 	rm -f $@
 	$(call mklib,$@,$(OBJS) $(SLICE_OBJS))
 
-depend:: $(patsubst $(SDIR)/%.ice,%.h,$(wildcard $(SDIR)/*F.ice)) $(SLICECPP_SRCS)
+include/Ice/%F.h: $(SDIR)/%F.ice $(SLICE2CPP)
+	rm -f $(*F)F.h $(*F)F.cpp
+	$(SLICE2CPP) $(SLICE2CPPFLAGS) $<
+	rm -f $(*F)F.cpp
+	mv $(*F)F.h include/Ice/$(*F)F.h
+
+include/Ice/%.h %.cpp: $(SDIR)/%.ice $(SLICE2CPP)
+	rm -f $(*F).h $(*F).cpp
+	$(SLICE2CPP) $(SLICE2CPPFLAGS) $<
+	mv $(*F).h include/Ice/$(*F).h
+
+$(addprefix $(SRCS_DIR)/, $(OBJS:.o=.cpp)): \
+	$(patsubst $(SDIR)/%.ice,include/Ice/%.h,$(wildcard $(SDIR)/*F.ice)) \
+	$(patsubst $(SDIR)/%.ice,include/Ice/%.h,$(SLICECPP_SRCS))
+
+depend:: $(patsubst $(SDIR)/%.ice,include/Ice/%.h,$(wildcard $(SDIR)/*F.ice)) \
+	 $(patsubst $(SDIR)/%.ice,include/Ice/%.h,$(SLICECPP_SRCS))
 	if test -n "$(SLICECPP_SRCS)" ; then \
 	    $(SLICE2CPP) --depend $(SLICE2CPPFLAGS) $(SLICECPP_SRCS) | $(ice_dir)/config/makedepend.py >> .depend; \
 	fi
@@ -175,7 +181,8 @@ depend:: $(patsubst $(SDIR)/%.ice,%.h,$(wildcard $(SDIR)/*F.ice)) $(SLICECPP_SRC
 
 clean::
 	rm -f $(addsuffix .cpp, $(basename $(notdir $(SLICECPP_SRCS))))
-	rm -f $(addsuffix .h, $(basename $(notdir $(SLICECPP_SRCS))))
+	rm -f $(addprefix include/Ice, $(addsuffix .h, $(basename $(subst $(SDIR),, \
+	$(filter $(SDIR)/%.ice, $(SLICECPP_SRCS))))))
 
 install:: all
 	$(call installlib,$(install_libdir),$(libdir),$(LIBFILENAME),$(SONAME),$(LIBNAME))
