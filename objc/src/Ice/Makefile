@@ -82,23 +82,23 @@ endif
 
 # Prevent generation of these files from .ice files
 $(HDIR)/Locator.h Locator.m:
-	@echo ""
+	
 $(HDIR)/Router.h Router.m:
-	@echo ""
+	
 $(HDIR)/Communicator.h Communicator.m:
-	@echo ""
+	
 $(HDIR)/Current.h Current.m:
-	@echo ""
+	
 $(HDIR)/Identity.h Identity.m:
-	@echo ""
+	
 $(HDIR)/LocalException.h LocalException.m:
-	@echo ""
+	
 $(HDIR)/Logger.h Logger.m:
-	@echo ""
+	
 $(HDIR)/ObjectAdapter.h ObjectAdapter.m:
-	@echo ""
+	
 $(HDIR)/Properties.h Properties.m:
-	@echo ""
+	
 
 ice_cpp_include = $(ice_cpp_dir)/include
 include/IceUtilCpp/%.h: $(ice_cpp_include)/IceUtil/%.h
