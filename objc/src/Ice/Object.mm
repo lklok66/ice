@@ -36,6 +36,25 @@ ICELookupString(const char** array, size_t count, const char* str)
     return -1;
 }
 
+static NSString*
+operationModeToString(ICEOperationMode mode)
+{
+    switch(mode)
+    {
+    case ICENormal:
+        return @"::Ice::Normal";
+
+    case ICENonmutating:
+        return @"::Ice::Nonmutating";
+
+    case ICEIdempotent:
+        return @"::Ice::Idempotent";
+
+    default:
+        return [NSString stringWithFormat:@"unknown value(%d)", mode];
+    }
+}
+
 namespace IceObjC
 {
 
@@ -167,7 +186,41 @@ static const char* ICEObject_all__[4] =
     "ice_isA",
     "ice_ping"
 };
+-(void) checkModeAndSelector__:(ICEOperationMode)expected selector:(SEL)sel current:(ICECurrent*)current
+{
+    ICEOperationMode received = current.mode;
+    if(expected != received)
+    {
+        if(expected == ICEIdempotent && received == ICENonmutating)
+        {
+            // 
+            // Fine: typically an old client still using the deprecated nonmutating keyword
+            //
+            
+            //
+            // Note that expected == Nonmutating and received == Idempotent is not ok:
+            // the server may still use the deprecated nonmutating keyword to detect updates
+            // and the client should not break this (deprecated) feature.
+            //
+        }
+        else
+        {
+            ICEMarshalException* ex = [ICEMarshalException marshalException:__FILE__ line:__LINE__];
+            [ex setReason_:[NSString stringWithFormat:@"unexpected operation mode. expected = %@ received=%@", 
+                                     operationModeToString(expected), operationModeToString(received)]]; 
+            @throw ex;
+        }
+    }
 
+    if(![self respondsToSelector:sel])
+    {
+        @throw [ICEOperationNotExistException requestFailedException:__FILE__ 
+                                              line:__LINE__ 
+                                              id_:current.id_ 
+                                              facet:current.facet
+                                              operation:current.operation];
+    }
+}
 -(BOOL) ice_isA___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
     NSString* id__ = [is readString];

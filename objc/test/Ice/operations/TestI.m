@@ -40,16 +40,19 @@ static const char* TestMyClass_all__[] =
 
 -(BOOL) shutdown___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
+    [self checkModeAndSelector__:ICENormal selector:@selector(shutdown:) current:current];
     [(id<TestMyClass>)self shutdown:current];
     return TRUE;
 }
 -(BOOL) opVoid___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
+    [self checkModeAndSelector__:ICENormal selector:@selector(opVoid:) current:current];
     [(id<TestMyClass>)self opVoid:current];
     return TRUE;
 }
 -(BOOL) opByte___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
+    [self checkModeAndSelector__:ICENormal selector:@selector(opByte:p2:p3:current:) current:current];
     ICEByte p1 = [is readByte];
     ICEByte p2 = [is readByte];
     ICEByte p3;

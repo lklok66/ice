@@ -555,6 +555,10 @@
 @end
 
 @implementation ICEObjectNotExistException
++(id) objectNotExistException:(const char*)file_ line:(int)line_ id_:(ICEIdentity*)id__ facet:(NSString*)facet_ operation:(NSString*)operation_
+{
+    return [[self alloc] init:file_ line:line_ id_:id__ facet:facet_ operation:operation_];
+}
 +(id) objectNotExistException:(const char*)file_ line:(int)line_
 {
     return [[self alloc] init:file_ line:line_];
@@ -570,6 +574,10 @@
 @end
 
 @implementation ICEFacetNotExistException
++(id) facetNotExistException:(const char*)file_ line:(int)line_ id_:(ICEIdentity*)id__ facet:(NSString*)facet_ operation:(NSString*)operation_
+{
+    return [[self alloc] init:file_ line:line_ id_:id__ facet:facet_ operation:operation_];
+}
 +(id) facetNotExistException:(const char*)file_ line:(int)line_
 {
     return [[self alloc] init:file_ line:line_];
@@ -585,6 +593,10 @@
 @end
 
 @implementation ICEOperationNotExistException
++(id) operationNotExistException:(const char*)file_ line:(int)line_ id_:(ICEIdentity*)id__ facet:(NSString*)facet_ operation:(NSString*)operation_
+{
+    return [[self alloc] init:file_ line:line_ id_:id__ facet:facet_ operation:operation_];
+}
 +(id) operationNotExistException:(const char*)file_ line:(int)line_
 {
     return [[self alloc] init:file_ line:line_];
@@ -629,6 +641,10 @@
 @end
 
 @implementation ICESocketException
++(id) socketException:(const char*)file_ line:(int)line_ error:(ICEInt)error_
+{
+    return [[self alloc] init:file_ line:line_ error:error_];
+}
 +(id) socketException:(const char*)file_ line:(int)line_
 {
     return [[self alloc] init:file_ line:line_];
@@ -644,18 +660,18 @@
 @end
 
 @implementation ICEFileException
--(id) init:(const char*)file_ line:(int)line_ path:(NSString*)path_
+-(id) init:(const char*)file_ line:(int)line_ error:(ICEInt)error_ path:(NSString*)path_
 {
-    if(![super init:file_ line:line_])
+    if(![super init:file_ line:line_ error:error_])
     {
         return nil;
     }
     path = [path_ retain];
     return self;
 }
-+(id) fileException:(const char*)file_ line:(int)line_ path:(NSString*)path_
++(id) fileException:(const char*)file_ line:(int)line_ error:(ICEInt)error_ path:(NSString*)path_
 {
-    return [[self alloc] init:file_ line:line_ path:path_];
+    return [[self alloc] init:file_ line:line_ error:error_ path:path_];
 }
 +(id) fileException:(const char*)file_ line:(int)line_
 {
@@ -673,6 +689,10 @@
 @end
 
 @implementation ICEConnectFailedException
++(id) connectFailedException:(const char*)file_ line:(int)line_ error:(ICEInt)error_
+{
+    return [[self alloc] init:file_ line:line_ error:error_];
+}
 +(id) connectFailedException:(const char*)file_ line:(int)line_
 {
     return [[self alloc] init:file_ line:line_];
@@ -688,6 +708,10 @@
 @end
 
 @implementation ICEConnectionRefusedException
++(id) connectionRefusedException:(const char*)file_ line:(int)line_ error:(ICEInt)error_
+{
+    return [[self alloc] init:file_ line:line_ error:error_];
+}
 +(id) connectionRefusedException:(const char*)file_ line:(int)line_
 {
     return [[self alloc] init:file_ line:line_];
@@ -703,6 +727,10 @@
 @end
 
 @implementation ICEConnectionLostException
++(id) connectionLostException:(const char*)file_ line:(int)line_ error:(ICEInt)error_
+{
+    return [[self alloc] init:file_ line:line_ error:error_];
+}
 +(id) connectionLostException:(const char*)file_ line:(int)line_
 {
     return [[self alloc] init:file_ line:line_];
@@ -838,18 +866,18 @@
 @end
 
 @implementation ICEBadMagicException
--(id) init:(const char*)file_ line:(int)line_ badMagic:(NSArray*)badMagic_
+-(id) init:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ badMagic:(NSArray*)badMagic_
 {
-    if(![super init:file_ line:line_])
+    if(![super init:file_ line:line_ reason_:reason__])
     {
         return nil;
     }
     badMagic = [badMagic_ retain];
     return self;
 }
-+(id) badMagicException:(const char*)file_ line:(int)line_ badMagic:(NSArray*)badMagic_
++(id) badMagicException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ badMagic:(NSArray*)badMagic_
 {
-    return [[self alloc] init:file_ line:line_ badMagic:badMagic_];
+    return [[self alloc] init:file_ line:line_ reason_:reason__ badMagic:badMagic_];
 }
 +(id) badMagicException:(const char*)file_ line:(int)line_
 {
@@ -868,9 +896,9 @@
 @end
 
 @implementation ICEUnsupportedProtocolException
--(id) init:(const char*)file_ line:(int)line_ badMajor:(ICEInt)badMajor_ badMinor:(ICEInt)badMinor_ major:(ICEInt)major_ minor:(ICEInt)minor_
+-(id) init:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ badMajor:(ICEInt)badMajor_ badMinor:(ICEInt)badMinor_ major:(ICEInt)major_ minor:(ICEInt)minor_
 {
-    if(![super init:file_ line:line_])
+    if(![super init:file_ line:line_ reason_:reason__])
     {
         return nil;
     }
@@ -880,9 +908,9 @@
     minor = minor_;
     return self;
 }
-+(id) unsupportedProtocolException:(const char*)file_ line:(int)line_ badMajor:(ICEInt)badMajor_ badMinor:(ICEInt)badMinor_ major:(ICEInt)major_ minor:(ICEInt)minor_
++(id) unsupportedProtocolException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ badMajor:(ICEInt)badMajor_ badMinor:(ICEInt)badMinor_ major:(ICEInt)major_ minor:(ICEInt)minor_
 {
-    return [[self alloc] init:file_ line:line_ badMajor:badMajor_ badMinor:badMinor_ major:major_ minor:minor_];
+    return [[self alloc] init:file_ line:line_ reason_:reason__ badMajor:badMajor_ badMinor:badMinor_ major:major_ minor:minor_];
 }
 +(id) unsupportedProtocolException:(const char*)file_ line:(int)line_
 {
@@ -903,9 +931,9 @@
 @end
 
 @implementation ICEUnsupportedEncodingException
--(id) init:(const char*)file_ line:(int)line_ badMajor:(ICEInt)badMajor_ badMinor:(ICEInt)badMinor_ major:(ICEInt)major_ minor:(ICEInt)minor_
+-(id) init:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ badMajor:(ICEInt)badMajor_ badMinor:(ICEInt)badMinor_ major:(ICEInt)major_ minor:(ICEInt)minor_
 {
-    if(![super init:file_ line:line_])
+    if(![super init:file_ line:line_ reason_:reason__])
     {
         return nil;
     }
@@ -915,9 +943,9 @@
     minor = minor_;
     return self;
 }
-+(id) unsupportedEncodingException:(const char*)file_ line:(int)line_ badMajor:(ICEInt)badMajor_ badMinor:(ICEInt)badMinor_ major:(ICEInt)major_ minor:(ICEInt)minor_
++(id) unsupportedEncodingException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ badMajor:(ICEInt)badMajor_ badMinor:(ICEInt)badMinor_ major:(ICEInt)major_ minor:(ICEInt)minor_
 {
-    return [[self alloc] init:file_ line:line_ badMajor:badMajor_ badMinor:badMinor_ major:major_ minor:minor_];
+    return [[self alloc] init:file_ line:line_ reason_:reason__ badMajor:badMajor_ badMinor:badMinor_ major:major_ minor:minor_];
 }
 +(id) unsupportedEncodingException:(const char*)file_ line:(int)line_
 {
@@ -938,6 +966,10 @@
 @end
 
 @implementation ICEUnknownMessageException
++(id) unknownMessageException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__
+{
+    return [[self alloc] init:file_ line:line_ reason_:reason__];
+}
 +(id) unknownMessageException:(const char*)file_ line:(int)line_
 {
     return [[self alloc] init:file_ line:line_];
@@ -953,6 +985,10 @@
 @end
 
 @implementation ICEConnectionNotValidatedException
++(id) connectionNotValidatedException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__
+{
+    return [[self alloc] init:file_ line:line_ reason_:reason__];
+}
 +(id) connectionNotValidatedException:(const char*)file_ line:(int)line_
 {
     return [[self alloc] init:file_ line:line_];
@@ -968,6 +1004,10 @@
 @end
 
 @implementation ICEUnknownRequestIdException
++(id) unknownRequestIdException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__
+{
+    return [[self alloc] init:file_ line:line_ reason_:reason__];
+}
 +(id) unknownRequestIdException:(const char*)file_ line:(int)line_
 {
     return [[self alloc] init:file_ line:line_];
@@ -983,6 +1023,10 @@
 @end
 
 @implementation ICEUnknownReplyStatusException
++(id) unknownReplyStatusException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__
+{
+    return [[self alloc] init:file_ line:line_ reason_:reason__];
+}
 +(id) unknownReplyStatusException:(const char*)file_ line:(int)line_
 {
     return [[self alloc] init:file_ line:line_];
@@ -998,6 +1042,10 @@
 @end
 
 @implementation ICECloseConnectionException
++(id) closeConnectionException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__
+{
+    return [[self alloc] init:file_ line:line_ reason_:reason__];
+}
 +(id) closeConnectionException:(const char*)file_ line:(int)line_
 {
     return [[self alloc] init:file_ line:line_];
@@ -1013,6 +1061,10 @@
 @end
 
 @implementation ICEForcedCloseConnectionException
++(id) forcedCloseConnectionException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__
+{
+    return [[self alloc] init:file_ line:line_ reason_:reason__];
+}
 +(id) forcedCloseConnectionException:(const char*)file_ line:(int)line_
 {
     return [[self alloc] init:file_ line:line_];
@@ -1028,6 +1080,10 @@
 @end
 
 @implementation ICEIllegalMessageSizeException
++(id) illegalMessageSizeException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__
+{
+    return [[self alloc] init:file_ line:line_ reason_:reason__];
+}
 +(id) illegalMessageSizeException:(const char*)file_ line:(int)line_
 {
     return [[self alloc] init:file_ line:line_];
@@ -1043,6 +1099,10 @@
 @end
 
 @implementation ICECompressionException
++(id) compressionException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__
+{
+    return [[self alloc] init:file_ line:line_ reason_:reason__];
+}
 +(id) compressionException:(const char*)file_ line:(int)line_
 {
     return [[self alloc] init:file_ line:line_];
@@ -1058,6 +1118,10 @@
 @end
 
 @implementation ICEDatagramLimitException
++(id) datagramLimitException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__
+{
+    return [[self alloc] init:file_ line:line_ reason_:reason__];
+}
 +(id) datagramLimitException:(const char*)file_ line:(int)line_
 {
     return [[self alloc] init:file_ line:line_];
@@ -1073,6 +1137,10 @@
 @end
 
 @implementation ICEMarshalException
++(id) marshalException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__
+{
+    return [[self alloc] init:file_ line:line_ reason_:reason__];
+}
 +(id) marshalException:(const char*)file_ line:(int)line_
 {
     return [[self alloc] init:file_ line:line_];
@@ -1088,6 +1156,10 @@
 @end
 
 @implementation ICEProxyUnmarshalException
++(id) proxyUnmarshalException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__
+{
+    return [[self alloc] init:file_ line:line_ reason_:reason__];
+}
 +(id) proxyUnmarshalException:(const char*)file_ line:(int)line_
 {
     return [[self alloc] init:file_ line:line_];
@@ -1103,6 +1175,10 @@
 @end
 
 @implementation ICEUnmarshalOutOfBoundsException
++(id) unmarshalOutOfBoundsException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__
+{
+    return [[self alloc] init:file_ line:line_ reason_:reason__];
+}
 +(id) unmarshalOutOfBoundsException:(const char*)file_ line:(int)line_
 {
     return [[self alloc] init:file_ line:line_];
@@ -1118,6 +1194,10 @@
 @end
 
 @implementation ICEIllegalIndirectionException
++(id) illegalIndirectionException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__
+{
+    return [[self alloc] init:file_ line:line_ reason_:reason__];
+}
 +(id) illegalIndirectionException:(const char*)file_ line:(int)line_
 {
     return [[self alloc] init:file_ line:line_];
@@ -1133,18 +1213,18 @@
 @end
 
 @implementation ICENoObjectFactoryException
--(id) init:(const char*)file_ line:(int)line_ type:(NSString*)type_
+-(id) init:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ type:(NSString*)type_
 {
-    if(![super init:file_ line:line_])
+    if(![super init:file_ line:line_ reason_:reason__])
     {
         return nil;
     }
     type = [type_ retain];
     return self;
 }
-+(id) noObjectFactoryException:(const char*)file_ line:(int)line_ type:(NSString*)type_
++(id) noObjectFactoryException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ type:(NSString*)type_
 {
-    return [[self alloc] init:file_ line:line_ type:type_];
+    return [[self alloc] init:file_ line:line_ reason_:reason__ type:type_];
 }
 +(id) noObjectFactoryException:(const char*)file_ line:(int)line_
 {
@@ -1162,9 +1242,9 @@
 @end
 
 @implementation ICEUnexpectedObjectException
--(id) init:(const char*)file_ line:(int)line_ type:(NSString*)type_ expectedType:(NSString*)expectedType_
+-(id) init:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ type:(NSString*)type_ expectedType:(NSString*)expectedType_
 {
-    if(![super init:file_ line:line_])
+    if(![super init:file_ line:line_ reason_:reason__])
     {
         return nil;
     }
@@ -1172,9 +1252,9 @@
     expectedType = [expectedType_ retain];
     return self;
 }
-+(id) unexpectedObjectException:(const char*)file_ line:(int)line_ type:(NSString*)type_ expectedType:(NSString*)expectedType_
++(id) unexpectedObjectException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ type:(NSString*)type_ expectedType:(NSString*)expectedType_
 {
-    return [[self alloc] init:file_ line:line_ type:type_ expectedType:expectedType_];
+    return [[self alloc] init:file_ line:line_ reason_:reason__ type:type_ expectedType:expectedType_];
 }
 +(id) unexpectedObjectException:(const char*)file_ line:(int)line_
 {
@@ -1193,6 +1273,10 @@
 @end
 
 @implementation ICEMemoryLimitException
++(id) memoryLimitException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__
+{
+    return [[self alloc] init:file_ line:line_ reason_:reason__];
+}
 +(id) memoryLimitException:(const char*)file_ line:(int)line_
 {
     return [[self alloc] init:file_ line:line_];
@@ -1208,6 +1292,10 @@
 @end
 
 @implementation ICEStringConversionException
++(id) stringConversionException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__
+{
+    return [[self alloc] init:file_ line:line_ reason_:reason__];
+}
 +(id) stringConversionException:(const char*)file_ line:(int)line_
 {
     return [[self alloc] init:file_ line:line_];
@@ -1223,6 +1311,10 @@
 @end
 
 @implementation ICEEncapsulationException
++(id) encapsulationException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__
+{
+    return [[self alloc] init:file_ line:line_ reason_:reason__];
+}
 +(id) encapsulationException:(const char*)file_ line:(int)line_
 {
     return [[self alloc] init:file_ line:line_];
@@ -1238,6 +1330,10 @@
 @end
 
 @implementation ICENegativeSizeException
++(id) negativeSizeException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__
+{
+    return [[self alloc] init:file_ line:line_ reason_:reason__];
+}
 +(id) negativeSizeException:(const char*)file_ line:(int)line_
 {
     return [[self alloc] init:file_ line:line_];

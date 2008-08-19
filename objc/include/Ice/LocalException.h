@@ -200,14 +200,17 @@
 
 @interface ICEObjectNotExistException : ICERequestFailedException
 +(id) objectNotExistException:(const char*)file_ line:(int)line_;
++(id) objectNotExistException:(const char*)file_ line:(int)line_ id_:(ICEIdentity*)id__ facet:(NSString*)facet_ operation:(NSString*)operation_;
 @end
 
 @interface ICEFacetNotExistException : ICERequestFailedException
 +(id) facetNotExistException:(const char*)file_ line:(int)line_;
++(id) facetNotExistException:(const char*)file_ line:(int)line_ id_:(ICEIdentity*)id__ facet:(NSString*)facet_ operation:(NSString*)operation_;
 @end
 
 @interface ICEOperationNotExistException : ICERequestFailedException
 +(id) operationNotExistException:(const char*)file_ line:(int)line_;
++(id) operationNotExistException:(const char*)file_ line:(int)line_ id_:(ICEIdentity*)id__ facet:(NSString*)facet_ operation:(NSString*)operation_;
 @end
 
 @interface ICESyscallException : ICELocalException
@@ -222,6 +225,7 @@
 
 @interface ICESocketException : ICESyscallException
 +(id) socketException:(const char*)file_ line:(int)line_;
++(id) socketException:(const char*)file_ line:(int)line_ error:(ICEInt)error_;
 @end
 
 @interface ICEFileException : ICESyscallException
@@ -229,21 +233,24 @@
     NSString* path;
 }
 @property(retain, nonatomic) NSString* path;
--(id) init:(const char*)file_ line:(int)line_ path:(NSString*)path;
-+(id) fileException:(const char*)file_ line:(int)line_ path:(NSString*)path;
+-(id) init:(const char*)file_ line:(int)line_ error:(ICEInt)error_ path:(NSString*)path;
++(id) fileException:(const char*)file_ line:(int)line_ error:(ICEInt)error_ path:(NSString*)path;
 +(id) fileException:(const char*)file_ line:(int)line_;
 @end
 
 @interface ICEConnectFailedException : ICESocketException
 +(id) connectFailedException:(const char*)file_ line:(int)line_;
++(id) connectFailedException:(const char*)file_ line:(int)line_ error:(ICEInt)error_;
 @end
 
 @interface ICEConnectionRefusedException : ICEConnectFailedException
 +(id) connectionRefusedException:(const char*)file_ line:(int)line_;
++(id) connectionRefusedException:(const char*)file_ line:(int)line_ error:(ICEInt)error_;
 @end
 
 @interface ICEConnectionLostException : ICESocketException
 +(id) connectionLostException:(const char*)file_ line:(int)line_;
++(id) connectionLostException:(const char*)file_ line:(int)line_ error:(ICEInt)error_;
 @end
 
 @interface ICEDNSException : ICELocalException
@@ -289,8 +296,8 @@
     NSArray* badMagic;
 }
 @property(retain, nonatomic) NSArray* badMagic;
--(id) init:(const char*)file_ line:(int)line_ badMagic:(NSArray*)badMagic_;
-+(id) badMagicException:(const char*)file_ line:(int)line_ badMagic:(NSArray*)badMagic_;
+-(id) init:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ badMagic:(NSArray*)badMagic_;
++(id) badMagicException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ badMagic:(NSArray*)badMagic_;
 +(id) badMagicException:(const char*)file_ line:(int)line_;
 @end
 
@@ -301,8 +308,8 @@
     ICEInt major;
     ICEInt minor;
 }
--(id) init:(const char*)file_ line:(int)line_ badMajor:(ICEInt)badMajor_ badMinor:(ICEInt)badMinor_ major:(ICEInt)major_ minor:(ICEInt)minor_;
-+(id) unsupportedProtocolException:(const char*)file_ line:(int)line_ badMajor:(ICEInt)badMajor_ badMinor:(ICEInt)badMinor_ major:(ICEInt)major_ minor:(ICEInt)minor_;
+-(id) init:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ badMajor:(ICEInt)badMajor_ badMinor:(ICEInt)badMinor_ major:(ICEInt)major_ minor:(ICEInt)minor_;
++(id) unsupportedProtocolException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ badMajor:(ICEInt)badMajor_ badMinor:(ICEInt)badMinor_ major:(ICEInt)major_ minor:(ICEInt)minor_;
 +(id) unsupportedProtocolException:(const char*)file_ line:(int)line_;
 @property(assign, nonatomic) ICEInt badMajor;
 @property(assign, nonatomic) ICEInt badMinor;
@@ -317,8 +324,8 @@
     ICEInt major;
     ICEInt minor;
 }
--(id) init:(const char*)file_ line:(int)line_ badMajor:(ICEInt)badMajor_ badMinor:(ICEInt)badMinor_ major:(ICEInt)major_ minor:(ICEInt)minor_;
-+(id) unsupportedEncodingException:(const char*)file_ line:(int)line_ badMajor:(ICEInt)badMajor_ badMinor:(ICEInt)badMinor_ major:(ICEInt)major_ minor:(ICEInt)minor_;
+-(id) init:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ badMajor:(ICEInt)badMajor_ badMinor:(ICEInt)badMinor_ major:(ICEInt)major_ minor:(ICEInt)minor_;
++(id) unsupportedEncodingException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ badMajor:(ICEInt)badMajor_ badMinor:(ICEInt)badMinor_ major:(ICEInt)major_ minor:(ICEInt)minor_;
 +(id) unsupportedEncodingException:(const char*)file_ line:(int)line_;
 @property(assign, nonatomic) ICEInt badMajor;
 @property(assign, nonatomic) ICEInt badMinor;
@@ -328,54 +335,67 @@
 
 @interface ICEUnknownMessageException : ICEProtocolException
 +(id) unknownMessageException:(const char*)file_ line:(int)line_;
++(id) unknownMessageException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__;
 @end
 
 @interface ICEConnectionNotValidatedException : ICEProtocolException
 +(id) connectionNotValidatedException:(const char*)file_ line:(int)line_;
++(id) connectionNotValidatedException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__;
 @end
 
 @interface ICEUnknownRequestIdException : ICEProtocolException
 +(id) unknownRequestIdException:(const char*)file_ line:(int)line_;
++(id) unknownRequestIdException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__;
 @end
 
 @interface ICEUnknownReplyStatusException : ICEProtocolException
 +(id) unknownReplyStatusException:(const char*)file_ line:(int)line_;
++(id) unknownReplyStatusException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__;
 @end
 
 @interface ICECloseConnectionException : ICEProtocolException
 +(id) closeConnectionException:(const char*)file_ line:(int)line_;
++(id) closeConnectionException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__;
 @end
 
 @interface ICEForcedCloseConnectionException : ICEProtocolException
 +(id) forcedCloseConnectionException:(const char*)file_ line:(int)line_;
++(id) forcedCloseConnectionException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__;
 @end
 
 @interface ICEIllegalMessageSizeException : ICEProtocolException
 +(id) illegalMessageSizeException:(const char*)file_ line:(int)line_;
++(id) illegalMessageSizeException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__;
 @end
 
 @interface ICECompressionException : ICEProtocolException
 +(id) compressionException:(const char*)file_ line:(int)line_;
++(id) compressionException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__;
 @end
 
 @interface ICEDatagramLimitException : ICEProtocolException
 +(id) datagramLimitException:(const char*)file_ line:(int)line_;
++(id) datagramLimitException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__;
 @end
 
 @interface ICEMarshalException : ICEProtocolException
 +(id) marshalException:(const char*)file_ line:(int)line_;
++(id) marshalException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__;
 @end
 
 @interface ICEProxyUnmarshalException : ICEMarshalException
 +(id) proxyUnmarshalException:(const char*)file_ line:(int)line_;
++(id) proxyUnmarshalException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__;
 @end
 
 @interface ICEUnmarshalOutOfBoundsException : ICEMarshalException
 +(id) unmarshalOutOfBoundsException:(const char*)file_ line:(int)line_;
++(id) unmarshalOutOfBoundsException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__;
 @end
 
 @interface ICEIllegalIndirectionException : ICEMarshalException
 +(id) illegalIndirectionException:(const char*)file_ line:(int)line_;
++(id) illegalIndirectionException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__;
 @end
 
 @interface ICENoObjectFactoryException : ICEMarshalException
@@ -383,8 +403,8 @@
     NSString* type;
 }
 @property(retain, nonatomic) NSString* type;
--(id) init:(const char*)file_ line:(int)line_ type:(NSString*)type_;
-+(id) noObjectFactoryException:(const char*)file_ line:(int)line_ type:(NSString*)type_;
+-(id) init:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ type:(NSString*)type_;
++(id) noObjectFactoryException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ type:(NSString*)type_;
 +(id) noObjectFactoryException:(const char*)file_ line:(int)line_;
 @end
 
@@ -393,8 +413,8 @@
     NSString* type;
     NSString* expectedType;
 }
--(id) init:(const char*)file_ line:(int)line_ type:(NSString*)type_ expectedType:(NSString*)expectedType_;
-+(id) unexpectedObjectException:(const char*)file_ line:(int)line_ type:(NSString*)type_ expectedType:(NSString*)expectedType_;
+-(id) init:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ type:(NSString*)type_ expectedType:(NSString*)expectedType_;
++(id) unexpectedObjectException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ type:(NSString*)type_ expectedType:(NSString*)expectedType_;
 +(id) unexpectedObjectException:(const char*)file_ line:(int)line_;
 @property(retain, nonatomic) NSString* type;
 @property(retain, nonatomic) NSString* expectedType;
@@ -402,18 +422,22 @@
 
 @interface ICEMemoryLimitException : ICEMarshalException
 +(id) memoryLimitException:(const char*)file_ line:(int)line_;
++(id) memoryLimitException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__;
 @end
 
 @interface ICEStringConversionException : ICEMarshalException
 +(id) stringConversionException:(const char*)file_ line:(int)line_;
++(id) stringConversionException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__;
 @end
 
 @interface ICEEncapsulationException : ICEMarshalException
 +(id) encapsulationException:(const char*)file_ line:(int)line_;
++(id) encapsulationException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__;
 @end
 
 @interface ICENegativeSizeException : ICEMarshalException
 +(id) negativeSizeException:(const char*)file_ line:(int)line_;
++(id) negativeSizeException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__;
 @end
 
 @interface ICEFeatureNotSupportedException : ICELocalException

@@ -36,6 +36,7 @@ static const char* DemoHello_all__[5] =
 
 -(BOOL) sayHello___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
+    [self checkModeAndSelector__:ICEIdempotent selector:@selector(sayHello:) current:current];
     [(id<DemoHello>)self sayHello:current];
     return TRUE;
 }
