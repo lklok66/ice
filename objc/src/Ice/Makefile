@@ -58,7 +58,7 @@ ifeq ($(STATICLIBS),yes)
 
 $(libdir)/$(LIBNAME): $(OBJS)
 	rm -f $@
-	$(call mklib,$@,$(OBJS)
+	$(call mklib,$@,$(OBJS))
 
 else
 
