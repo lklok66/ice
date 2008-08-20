@@ -191,7 +191,7 @@ Slice::ObjCGenerator::typeToString(const TypePtr& type)
     ProxyPtr proxy = ProxyPtr::dynamicCast(type);
     if(proxy)
     {
-        return fixId(proxy->_class()->scoped() + "Prx");
+        return fixName(proxy->_class()) + "Prx";
     }
 
     SequencePtr seq = SequencePtr::dynamicCast(type);

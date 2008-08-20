@@ -1101,6 +1101,9 @@ Slice::Gen::generate(const UnitPtr& p)
     UnitVisitor unitVisitor(_H, _M, _stream);
     p->visit(&unitVisitor, false);
 
+    ProxyDeclVisitor proxyDeclVisitor(_H, _M);
+    p->visit(&proxyDeclVisitor, false);
+
     TypesVisitor typesVisitor(_H, _M, _stream);
     p->visit(&typesVisitor, false);
 
@@ -1256,6 +1259,18 @@ Slice::Gen::UnitVisitor::visitModuleStart(const ModulePtr& p)
     }
 #endif
     return false;
+}
+
+Slice::Gen::ProxyDeclVisitor::ProxyDeclVisitor(IceUtilInternal::Output& H, IceUtilInternal::Output& M)
+    : ObjCVisitor(H, M)
+{
+}
+
+void
+Slice::Gen::ProxyDeclVisitor::visitClassDecl(const ClassDeclPtr& p)
+{
+    _H << sp << nl << "@class " << fixName(p) << "Prx;";
+    _H << nl << "@protocol " << fixName(p) << "Prx;";
 }
 
 Slice::Gen::TypesVisitor::TypesVisitor(IceUtilInternal::Output& H, IceUtilInternal::Output& M, bool stream)
