@@ -99,6 +99,8 @@ $(HDIR)/ObjectAdapter.h ObjectAdapter.m:
 	
 $(HDIR)/Properties.h Properties.m:
 	
+$(HDIR)/Endpoint.h Endpoint.m:
+	
 
 ice_cpp_include = $(ice_cpp_dir)/include
 include/IceUtilCpp/%.h: $(ice_cpp_include)/IceUtil/%.h
