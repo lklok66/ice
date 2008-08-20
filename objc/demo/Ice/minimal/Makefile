@@ -18,8 +18,7 @@ OBJS		= Hello.o
 
 COBJS		= Client.o \
 
-SOBJS		= Hello_S.o \
-		  HelloI.o \
+SOBJS		= HelloI.o \
 		  Server.o
 
 SRCS		= $(OBJS:.o=.m) \

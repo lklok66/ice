@@ -333,7 +333,7 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
                                               bool marshal,
                                               bool streamingAPI,
                                               bool isOutParam,
-                                              const string& patchParams)
+                                              const string& patchParams) const
 {
     string stream;
 
@@ -565,49 +565,20 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
     {
         if(marshal)
         {
-            if(!isValueType(st))
-            {
-                out << nl << "if(" << param << " == null)";
-                out << sb;
-                string typeS = typeToString(st);
-                out << nl << typeS << " " << "tmp__ = new " << typeS << "();";
-                out << nl << "tmp__.";
-                out << (streamingAPI ? "ice_write" : "write__") << "(" << stream << ");";
-                out << eb;
-                out << nl << "else";
-                out << sb;
-                out << nl << param << "." << (streamingAPI ? "ice_write" : "write__") << "(" << stream << ");";
-                out << eb;
-            }
-            else
-            {
-                if(streamingAPI)
-                {
-                    out << nl << param << ".ice_write(" << stream << ");";
-                }
-                else
-                {
-                    out << nl << param << ".write__(" << stream << ");";
-                }
-            }
+	    out << nl << "if(" << param << " == nil)";
+	    out << sb;
+	    string typeS = typeToString(st);
+	    out << nl << typeS << " *tmp_ = [[" << typeS << " alloc] init];";
+	    out << nl << "[tmp_ " << (streamingAPI ? "ice_write" : "write__") << ":" << stream << "];";
+	    out << eb;
+	    out << nl << "else";
+	    out << sb;
+	    out << nl << "[" << param << " " << (streamingAPI ? "ice_write" : "write__") << ":" << stream << "];";
+	    out << eb;
         }
         else
         {
-            if(!isValueType(st))
-            {
-                out << nl << "if(" << param << " == null)";
-                out << sb;
-                out << nl << param << " = new " << typeToString(type) << "();";
-                out << eb;
-            }
-            if(streamingAPI)
-            {
-                out << nl << param << ".ice_read(" << stream << ");";
-            }
-            else
-            {
-                out << nl << param << ".read__(" << stream << ");";
-            }
+	    out << nl << "[" << param << " " << (streamingAPI ? "ice_read" : "read__") << ":" << stream << "];";
         }
         return;
     }
@@ -621,49 +592,25 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
         if(sz <= 0x7f)
         {
             func = marshal ? "writeByte" : "readByte";
-            cast = marshal ? string("(byte)") : "(" + fixId(en->scoped()) + ")";
+            cast = marshal ? string("(ICEByte)") : "(" + fixName(en) + ")";
         }
         else if(sz <= 0x7fff)
         {
             func = marshal ? "writeShort" : "readShort";
-            cast = marshal ? string("(short)") : "(" + fixId(en->scoped()) + ")";
+            cast = marshal ? string("(ICEShort)") : "(" + fixName(en) + ")";
         }
         else
         {
             func = marshal ? "writeInt" : "readInt";
-            cast = marshal ? string("(int)") : "(" + fixId(en->scoped()) + ")";
+            cast = marshal ? string("(ICEInt)") : "(" + fixName(en) + ")";
         }
         if(marshal)
         {
-            if(streamingAPI)
-            {
-                out << nl << "if((int)" << param << " < 0 || (int)" << param << " >= " << sz << ")";
-                out << sb;
-                out << nl << "throw new Ice.MarshalException(\"enumerator out of range\");";
-                out << eb;
-            }
-            out << nl << stream << '.' << func << '(' << cast << param;
-            if(!streamingAPI)
-            {
-                out << ", " << sz;
-            }
-            out << ");";
+            out << nl << "[" << stream << " " << func << ":" << cast << param << " limit:" << sz << "];";
         }
         else
         {
-            out << nl << param << " = " << cast << stream << '.' << func << "(";
-            if(!streamingAPI)
-            {
-                out << sz;
-            }
-            out << ")" << ';';
-            if(streamingAPI)
-            {
-                out << nl << "if((int)" << param << " < 0 || (int)" << param << " >= " << sz << ")";
-                out << sb;
-                out << nl << "throw new Ice.MarshalException(\"enumerator out of range\");";
-                out << eb;
-            }
+            out << nl << param << " = " << cast << "[" << stream << " " << func << ":" << sz << "];";
         }
         return;
     }
@@ -701,7 +648,7 @@ Slice::ObjCGenerator::writeSequenceMarshalUnmarshalCode(Output& out,
                                                       const SequencePtr& seq,
                                                       const string& param,
                                                       bool marshal,
-                                                      bool streamingAPI)
+                                                      bool streamingAPI) const
 {
     string stream;
     if(marshal)

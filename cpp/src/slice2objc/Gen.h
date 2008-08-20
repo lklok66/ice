@@ -27,10 +27,12 @@ protected:
 
     virtual void writeInheritedOperations(const ClassDefPtr&);
     virtual void writeDispatchAndMarshalling(const ClassDefPtr&, bool);
-    virtual std::string getParams(const OperationPtr&);
+    virtual std::string getSelector(const OperationPtr&) const;
+    virtual std::string getParams(const OperationPtr&) const;
     virtual std::vector<std::string> getParamsAsync(const OperationPtr&, bool);
     virtual std::vector<std::string> getParamsAsyncCB(const OperationPtr&);
-    virtual std::string getArgs(const OperationPtr&);
+    virtual std::string getArgs(const OperationPtr&) const;
+    virtual std::string getServerArgs(const OperationPtr&) const;
     virtual std::vector<std::string> getArgsAsync(const OperationPtr&);
     virtual std::vector<std::string> getArgsAsyncCB(const OperationPtr&);
 

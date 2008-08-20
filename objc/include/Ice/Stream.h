@@ -33,13 +33,16 @@
 -(NSMutableData*) readBoolSeq;
 
 -(ICEByte) readByte;
+-(ICEByte) readByte:(ICEInt)limit;
 -(NSMutableData*) readByteSeq;
 -(NSData*) readByteSeqNoCopy;
 
 -(ICEShort) readShort;
+-(ICEShort) readShort:(ICEInt)limit;
 -(NSMutableData*) readShortSeq;
 
 -(ICEInt) readInt;
+-(ICEInt) readInt:(ICEInt)limit;
 -(NSMutableData*) readIntSeq;
 
 -(ICELong) readLong;
@@ -83,12 +86,15 @@
 -(void) writeBoolSeq:(NSData*)v;
 
 -(void) writeByte:(ICEByte)v;
+-(void) writeByte:(ICEByte)v limit:(ICEInt)limit;
 -(void) writeByteSeq:(NSData*)v;
 
 -(void) writeShort:(ICEShort)v;
+-(void) writeShort:(ICEShort)v limit:(ICEInt)limit;
 -(void) writeShortSeq:(NSData*)v;
 
 -(void) writeInt:(ICEInt)v;
+-(void) writeInt:(ICEInt)v limit:(ICEInt)limit;
 -(void) writeIntSeq:(NSData*)v;
 
 -(void) writeLong:(ICELong)v;

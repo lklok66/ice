@@ -40,14 +40,17 @@ public:
     virtual bool* readBoolSeq(::std::pair<const bool*, const bool*>&) = 0;
 
     virtual ::Ice::Byte readByte() = 0;
+    virtual ::Ice::Byte readByte(::Ice::Int) = 0;
     virtual ::std::vector< ::Ice::Byte > readByteSeq() = 0;
     virtual void readByteSeq(::std::pair<const ::Ice::Byte*, const ::Ice::Byte*>&) = 0;
 
     virtual ::Ice::Short readShort() = 0;
+    virtual ::Ice::Short readShort(::Ice::Int) = 0;
     virtual ::std::vector< ::Ice::Short > readShortSeq() = 0;
     virtual ::Ice::Short* readShortSeq(::std::pair<const ::Ice::Short*, const ::Ice::Short*>&) = 0;
 
     virtual ::Ice::Int readInt() = 0;
+    virtual ::Ice::Int readInt(::Ice::Int) = 0;
     virtual ::std::vector< ::Ice::Int > readIntSeq() = 0;
     virtual ::Ice::Int* readIntSeq(::std::pair<const ::Ice::Int*, const ::Ice::Int*>&) = 0;
 
@@ -104,14 +107,17 @@ public:
     virtual void writeBoolSeq(const bool*, const bool*) = 0;
 
     virtual void writeByte(::Ice::Byte) = 0;
+    virtual void writeByte(::Ice::Byte, ::Ice::Int) = 0;
     virtual void writeByteSeq(const ::std::vector< ::Ice::Byte >&) = 0;
     virtual void writeByteSeq(const Ice::Byte*, const Ice::Byte*) = 0;
 
     virtual void writeShort(::Ice::Short) = 0;
+    virtual void writeShort(::Ice::Short, ::Ice::Int) = 0;
     virtual void writeShortSeq(const ::std::vector< ::Ice::Short >&) = 0;
     virtual void writeShortSeq(const Ice::Short*, const Ice::Short*) = 0;
 
     virtual void writeInt(::Ice::Int) = 0;
+    virtual void writeInt(::Ice::Int, ::Ice::Int) = 0;
     virtual void writeIntSeq(const ::std::vector< ::Ice::Int >&) = 0;
     virtual void writeIntSeq(const Ice::Int*, const Ice::Int*) = 0;
 

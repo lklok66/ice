@@ -280,6 +280,19 @@ public:
     }
 }
 
+-(ICEByte) readByte:(ICEInt)limit
+{
+    try
+    {
+        return is__->readByte(limit);
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return 0; // Keep the compiler happy.
+    }
+}
+
 -(NSMutableData*) readByteSeq
 {
     try
@@ -324,6 +337,19 @@ public:
     }
 }
 
+-(ICEShort) readShort:(ICEInt)limit
+{
+    try
+    {
+        return is__->readShort(limit);
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return 0; // Keep the compiler happy.
+    }
+}
+
 -(NSMutableData*) readShortSeq
 {
     try
@@ -344,6 +370,19 @@ public:
     try
     {
         return is__->readInt();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return 0;
+    }
+}
+
+-(ICEInt) readInt:(ICEInt)limit
+{
+    try
+    {
+        return is__->readInt(limit);
     }
     catch(const std::exception& ex)
     {
@@ -741,6 +780,18 @@ public:
     }
 }
 
+-(void) writeByte:(ICEByte)v limit:(int)limit
+{
+    try
+    {
+        os__->writeByte(v, limit);
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
+}
+
 -(void) writeByteSeq:(NSData*)v
 { 
     try
@@ -758,6 +809,18 @@ public:
     try
     {
         os__->writeShort(v);
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
+}
+
+-(void) writeShort:(ICEShort)v limit:(int)limit
+{
+    try
+    {
+        os__->writeShort(v, limit);
     }
     catch(const std::exception& ex)
     {
@@ -783,6 +846,18 @@ public:
     try
     {
         os__->writeInt(v);
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
+}
+
+-(void) writeInt:(ICEInt)v limit:(int)limit
+{
+    try
+    {
+        os__->writeInt(v, limit);
     }
     catch(const std::exception& ex)
     {

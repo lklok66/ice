@@ -58,9 +58,9 @@ protected:
     // Generate code to marshal or unmarshal a type
     //
     void writeMarshalUnmarshalCode(::IceUtilInternal::Output&, const TypePtr&, const std::string&, bool, bool,
-                                   bool, const std::string& = "");
+                                   bool, const std::string& = "") const;
     void writeSequenceMarshalUnmarshalCode(::IceUtilInternal::Output&, const SequencePtr&, const std::string&,
-                                           bool, bool);
+                                           bool, bool) const;
 
 private:
 

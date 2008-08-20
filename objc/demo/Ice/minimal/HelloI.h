@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-#import <Hello_S.h>
+#import <Hello.h>
 
 @interface HelloI : DemoHello<DemoHello>
 @end

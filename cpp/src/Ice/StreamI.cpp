@@ -83,6 +83,14 @@ Ice::InputStreamI::readByte()
     return v;
 }
 
+Byte
+Ice::InputStreamI::readByte(Int limit)
+{
+    Byte v;
+    _is->read(v, limit);
+    return v;
+}
+
 vector<Byte>
 Ice::InputStreamI::readByteSeq()
 {
@@ -106,6 +114,14 @@ Ice::InputStreamI::readShort()
     return v;
 }
 
+Short
+Ice::InputStreamI::readShort(Int limit)
+{
+    Short v;
+    _is->read(v, limit);
+    return v;
+}
+
 vector<Short>
 Ice::InputStreamI::readShortSeq()
 {
@@ -125,6 +141,14 @@ Ice::InputStreamI::readInt()
 {
     Int v;
     _is->read(v);
+    return v;
+}
+
+Int
+Ice::InputStreamI::readInt(Int limit)
+{
+    Int v;
+    _is->read(v, limit);
     return v;
 }
 
@@ -391,6 +415,12 @@ Ice::OutputStreamI::writeByte(Byte v)
 }
 
 void
+Ice::OutputStreamI::writeByte(Byte v, Int limit)
+{
+    _os->write(v, limit);
+}
+
+void
 Ice::OutputStreamI::writeByteSeq(const vector<Byte>& v)
 {
     if(v.size() == 0)
@@ -416,6 +446,12 @@ Ice::OutputStreamI::writeShort(Short v)
 }
 
 void
+Ice::OutputStreamI::writeShort(Short v, Int limit)
+{
+    _os->write(v, limit);
+}
+
+void
 Ice::OutputStreamI::writeShortSeq(const vector<Short>& v)
 {
     if(v.size() == 0)
@@ -438,6 +474,12 @@ void
 Ice::OutputStreamI::writeInt(Int v)
 {
     _os->write(v);
+}
+
+void
+Ice::OutputStreamI::writeInt(Int v, Int limit)
+{
+    _os->write(v, limit);
 }
 
 void

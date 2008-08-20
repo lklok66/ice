@@ -117,8 +117,6 @@ Slice::ObjCVisitor::writeInheritedOperations(const ClassDefPtr& p)
     }
     if(!bases.empty())
     {
-        _M << sp << nl << "#region Inherited Slice operations";
-
         OperationList allOps;
         for(ClassList::const_iterator q = bases.begin(); q != bases.end(); ++q)
         {
@@ -169,30 +167,18 @@ Slice::ObjCVisitor::writeInheritedOperations(const ClassDefPtr& p)
                      << spar << params << "Ice.Current current__" << epar << ';';
             }
         }
-
-        _M << sp << nl << "#endregion"; // Inherited Slice operations
     }
 }
 
 void
 Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool stream)
 {
-#if 0
-    string name = fixId(p->name());
+    string name = fixName(p);
     string scoped = p->scoped();
     ClassList allBases = p->allBases();
     StringList ids;
 
-#if defined(__IBMCPP__) && defined(NDEBUG)
-    //
-    // VisualAge C++ 6.0 does not see that ClassDef is a Contained,
-    // when inlining is on. The code below issues a warning: better
-    // than an error!
-    //
-    transform(allBases.begin(), allBases.end(), back_inserter(ids), ::IceUtil::constMemFun<string,ClassDef>(&Contained::scoped));
-#else
     transform(allBases.begin(), allBases.end(), back_inserter(ids), ::IceUtil::constMemFun(&Contained::scoped));
-#endif
 
     StringList other;
     other.push_back(p->scoped());
@@ -201,16 +187,15 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
     ids.merge(other);
     ids.unique();
 
+#if 0
     StringList::const_iterator firstIter = ids.begin();
     StringList::const_iterator scopedIter = find(ids.begin(), ids.end(), scoped);
     assert(scopedIter != ids.end());
     StringList::difference_type scopedPos = IceUtilInternal::distance(firstIter, scopedIter);
+#endif
     
-    _M << sp << nl << "#region Slice type-related members";
-
-    _M << sp << nl << "public static new string[] ids__ = ";
+    _M << sp << nl << "static const char *" << name << "_ids__[] = ";
     _M << sb;
-
     {
         StringList::const_iterator q = ids.begin();
         while(q != ids.end())
@@ -224,49 +209,7 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
     }
     _M << eb << ";";
 
-    _M << sp << nl << "public override bool ice_isA(string s)";
-    _M << sb;
-    _M << nl << "return _System.Array.BinarySearch(ids__, s, IceUtilInternal.StringUtil.OrdinalStringComparer) >= 0;";
-    _M << eb;
-
-    _M << sp << nl << "public override bool ice_isA(string s, Ice.Current current__)";
-    _M << sb;
-    _M << nl << "return _System.Array.BinarySearch(ids__, s, IceUtilInternal.StringUtil.OrdinalStringComparer) >= 0;";
-    _M << eb;
-
-    _M << sp << nl << "public override string[] ice_ids()";
-    _M << sb;
-    _M << nl << "return ids__;";
-    _M << eb;
-
-    _M << sp << nl << "public override string[] ice_ids(Ice.Current current__)";
-    _M << sb;
-    _M << nl << "return ids__;";
-    _M << eb;
-
-    _M << sp << nl << "public override string ice_id()";
-    _M << sb;
-    _M << nl << "return ids__[" << scopedPos << "];";
-    _M << eb;
-
-    _M << sp << nl << "public override string ice_id(Ice.Current current__)";
-    _M << sb;
-    _M << nl << "return ids__[" << scopedPos << "];";
-    _M << eb;
-
-    _M << sp << nl << "public static new string ice_staticId()";
-    _M << sb;
-    _M << nl << "return ids__[" << scopedPos << "];";
-    _M << eb;
-
-    _M << sp << nl << "#endregion"; // Slice type-related members
-
     OperationList ops = p->operations();
-    if(!p->isInterface() || ops.size() != 0)
-    {
-        _M << sp << nl << "#region Operation dispatch";
-    }
-
     OperationList::const_iterator r;
     for(r = ops.begin(); r != ops.end(); ++r)
     {
@@ -275,182 +218,87 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
         ClassDefPtr cl = ClassDefPtr::dynamicCast(container);
         assert(cl);
 
-        string opName = op->name();
-        _M << sp << nl << "public static Ice.DispatchStatus " << opName << "___(" << name
-             << " obj__, IceInternal.Incoming inS__, Ice.Current current__)";
+        string opName = fixId(op->name());
+        _M << sp << nl << "-(BOOL)" << opName
+	   << "___:(ICECurrent *)current is:(id<ICEInputStream>)is_ os:(id<ICEOutputStream>)os_";
         _M << sb;
 
         bool amd = p->hasMetaData("amd") || op->hasMetaData("amd");
         if(!amd)
         {
-            TypePtr ret = op->returnType();
-            
+	    string selector = getSelector(op);
+	    _M << nl << "[self checkModeAndSelector__:" << sliceModeToIceMode(op->mode()) << " selector:@selector("
+	       << opName << selector << ":";
+	    if(!selector.empty())
+	    {
+	        _M << "current:";
+	    }
+	    _M << ") current:current];";
             TypeStringList inParams;
             TypeStringList outParams;
             ParamDeclList paramList = op->parameters();
             for(ParamDeclList::const_iterator pli = paramList.begin(); pli != paramList.end(); ++pli)
             {
-                if((*pli)->isOutParam())
-                {
-                    outParams.push_back(make_pair((*pli)->type(), (*pli)->name()));
-                }
-                else
+                if(!(*pli)->isOutParam())
                 {
                     inParams.push_back(make_pair((*pli)->type(), (*pli)->name()));
                 }
+		else
+		{
+		    outParams.push_back(make_pair((*pli)->type(), (*pli)->name()));
+		}
             }
-            
-            ExceptionList throws = op->throws();
-            throws.sort();
-            throws.unique();
-
-            //
-            // Arrange exceptions into most-derived to least-derived order. If we don't
-            // do this, a base exception handler can appear before a derived exception
-            // handler, causing compiler warnings and resulting in the base exception
-            // being marshaled instead of the derived exception.
-            //
-#if defined(__SUNPRO_CC)
-            throws.sort(Slice::derivedToBaseCompare);
-#else
-            throws.sort(Slice::DerivedToBaseCompare());
-#endif
-
-            TypeStringList::const_iterator q;
-            
-            _M << nl << "checkMode__(" << sliceModeToIceMode(op->mode()) << ", current__.mode);";
-            if(!inParams.empty())
-            {
-                //
-                // Unmarshal 'in' parameters.
-                //
-                _M << nl << "IceInternal.BasicStream is__ = inS__.istr();";
-                _M << nl << "is__.startReadEncaps();";
-                for(q = inParams.begin(); q != inParams.end(); ++q)
-                {
-                    string param = fixId(q->second);
-                    string typeS = typeToString(q->first);
-                    BuiltinPtr builtin = BuiltinPtr::dynamicCast(q->first);
-                    bool isClass = (builtin && builtin->kind() == Builtin::KindObject)
-                        || ClassDeclPtr::dynamicCast(q->first);
-                    if(!isClass)
-                    {
-                        _M << nl << typeS << ' ' << param << ';';
-                        StructPtr st = StructPtr::dynamicCast(q->first);
-                        if(st)
-                        {
-                            if(isValueType(q->first))
-                            {
-                                _M << nl << param << " = new " << typeS << "();";
-                            }
-                            else
-                            {
-                                _M << nl << param << " = null;";
-                            }
-                        }
-                    }
-                    writeMarshalUnmarshalCode(_M, q->first, param, false, false, true);
-                }
-                if(op->sendsClasses())
-                {
-                    _M << nl << "is__.readPendingObjects();";
-                }
-                _M << nl << "is__.endReadEncaps();";
-            }
-            else
-            {
-                _M << nl << "inS__.istr().skipEmptyEncaps();";
-            }
-
-            for(q = outParams.begin(); q != outParams.end(); ++q)
-            {
-                string typeS = typeToString(q->first);
-                _M << nl << typeS << ' ' << fixId(q->second) << ";";
-            }
-
-            if(!outParams.empty() || ret || !throws.empty())
-            {
-                _M << nl << "IceInternal.BasicStream os__ = inS__.ostr();";
-            }
-            
-            //
-            // Call on the servant.
-            //
-            if(!throws.empty())
-            {
-                _M << nl << "try";
-                _M << sb;
-            }
-            _M << nl;
-            if(ret)
-            {
-                string retS = typeToString(ret);
-                _M << retS << " ret__ = ";
-            }
-            _M << "obj__." << fixId(opName, DotNet::ICloneable, true) << spar;
-            for(q = inParams.begin(); q != inParams.end(); ++q)
-            {
-                BuiltinPtr builtin = BuiltinPtr::dynamicCast(q->first);
-                bool isClass = (builtin && builtin->kind() == Builtin::KindObject)
-                               || ClassDeclPtr::dynamicCast(q->first);
-                
-                string arg;
-                if(isClass)
-                {
-                    arg += "(" + typeToString(q->first) + ")";
-                }
-                arg += fixId(q->second);
-                if(isClass)
-                {
-                    arg += "_PP.value";
-                }
-                _M << arg;
-            }
-            for(q = outParams.begin(); q != outParams.end(); ++q)
-            {
-                _M << "out " + fixId(q->second);
-            }
-            _M << "current__" << epar << ';';
-            
-            //
-            // Marshal 'out' parameters and return value.
-            //
-            for(q = outParams.begin(); q != outParams.end(); ++q)
-            {
-                writeMarshalUnmarshalCode(_M, q->first, fixId(q->second), true, false, true, "");
-            }
-            if(ret)
-            {
-                writeMarshalUnmarshalCode(_M, ret, "ret__", true, false, true, "");
-            }
-            if(op->returnsClasses())
-            {
-                _M << nl << "os__.writePendingObjects();";
-            }
-            _M << nl << "return Ice.DispatchStatus.DispatchOK;";
-            
-            //
-            // Handle user exceptions.
-            //
-            if(!throws.empty())
-            {
-                _M << eb;
-                ExceptionList::const_iterator t;
-                for(t = throws.begin(); t != throws.end(); ++t)
-                {
-                    string exS = fixId((*t)->scoped());
-                    _M << nl << "catch(" << exS << " ex)";
-                    _M << sb;
-                    _M << nl << "os__.writeUserException(ex);";
-                    _M << nl << "return Ice.DispatchStatus.DispatchUserException;";
-                    _M << eb;
-                }
-            }
-
-            _M << eb;
+	    for(TypeStringList::const_iterator inp = inParams.begin(); inp != inParams.end(); ++inp)
+	    {
+	        string typeString = typeToString(inp->first);
+	        string param = fixId(inp->second);
+		_M << nl << typeString << " ";
+		if(!isValueType(inp->first))
+		{
+		    _M << "*";
+		}
+		_M << param << ";";
+		writeMarshalUnmarshalCode(_M, inp->first, param, false, false, false);
+	    }
+	    for(TypeStringList::const_iterator outp = outParams.begin(); outp != outParams.end(); ++outp)
+	    {
+	        _M << nl << typeToString(outp->first) << " ";
+		if(!isValueType(outp->first))
+		{
+		    _M << "*";
+		}
+		_M << fixId(outp->second) << ";";
+	    }
+	    TypePtr returnType = op->returnType();
+	    if(returnType)
+	    {
+	        _M << nl << typeToString(returnType) << " ";
+		if(!isValueType(returnType))
+		{
+		    _M << "*";
+		}
+		_M << "ret_ = ";
+	    }
+	    string args = getServerArgs(op);
+	    _M << "[(id<" << name << ">)self " << opName << args;
+	    if(!args.empty())
+	    {
+	        _M << " current";
+	    }
+	    _M << ":current];";
+	    for(TypeStringList::const_iterator op = outParams.begin(); op != outParams.end(); ++op)
+	    {
+		writeMarshalUnmarshalCode(_M, op->first, fixId(op->second), true, false, false);
+	    }
+	    if(returnType)
+	    {
+		writeMarshalUnmarshalCode(_M, returnType, "ret_", true, false, false);
+	    }
+	    _M << nl << "return YES;";
         }
         else
         {
+	    // TODO: amd
             TypeStringList inParams;
             ParamDeclList paramList = op->parameters();
             for(ParamDeclList::const_iterator pli = paramList.begin(); pli != paramList.end(); ++pli)
@@ -556,20 +404,15 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
 
             _M << eb;
         }
+	_M << eb;
     }
 
     OperationList allOps = p->allOperations();
     if(!allOps.empty())
     {
         StringList allOpNames;
-#if defined(__IBMCPP__) && defined(NDEBUG)
-        //
-        // See comment for transform above
-        //
-        transform(allOps.begin(), allOps.end(), back_inserter(allOpNames), ::IceUtil::constMemFun<string,Operation>(&Contained::name));
-#else
         transform(allOps.begin(), allOps.end(), back_inserter(allOpNames), ::IceUtil::constMemFun(&Contained::name));
-#endif
+
         allOpNames.push_back("ice_id");
         allOpNames.push_back("ice_ids");
         allOpNames.push_back("ice_isA");
@@ -579,7 +422,7 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
 
         StringList::const_iterator q;
 
-        _M << sp << nl << "private static string[] all__ =";
+        _M << sp << nl << "static const char *" << name << "_all__[] =";
         _M << sb;
         q = allOpNames.begin();
         while(q != allOpNames.end())
@@ -592,83 +435,44 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
         }
         _M << eb << ';';
 
-        _M << sp << nl << "public override Ice.DispatchStatus "
-             << "dispatch__(IceInternal.Incoming inS__, Ice.Current current__)";
+        _M << sp << nl << "-(BOOL) dispatch__:(ICECurrent *)current is:(id<ICEInputStream>)is "
+	   << "os:(id<ICEOutputStream>)os";
         _M << sb;
-        _M << nl << "int pos = _System.Array.BinarySearch(all__, current__.operation, "
-             << "IceUtilInternal.StringUtil.OrdinalStringComparer);";
-        _M << nl << "if(pos < 0)";
-        _M << sb;
-        _M << nl << "throw new Ice.OperationNotExistException(current__.id, current__.facet, current__.operation);";
-        _M << eb;
-        _M << sp << nl << "switch(pos)";
-        _M << sb;
+	_M << nl << "switch(ICELookupString(" << name << "_all__, sizeof(" << name
+	   << "_all__) / sizeof(const char*), [[current operation] UTF8String]))";
+	_M << sb;
         int i = 0;
         for(q = allOpNames.begin(); q != allOpNames.end(); ++q)
         {
             string opName = *q;
 
             _M << nl << "case " << i++ << ':';
-            _M << sb;
-            if(opName == "ice_id")
-            {
-                _M << nl << "return ice_id___(this, inS__, current__);";
-            }
-            else if(opName == "ice_ids")
-            {
-                _M << nl << "return ice_ids___(this, inS__, current__);";
-            }
-            else if(opName == "ice_isA")
-            {
-                _M << nl << "return ice_isA___(this, inS__, current__);";
-            }
-            else if(opName == "ice_ping")
-            {
-                _M << nl << "return ice_ping___(this, inS__, current__);";
-            }
-            else
-            {
-                //
-                // There's probably a better way to do this
-                //
-                for(OperationList::const_iterator t = allOps.begin(); t != allOps.end(); ++t)
-                {
-                    if((*t)->name() == (*q))
-                    {
-                        ContainerPtr container = (*t)->container();
-                        ClassDefPtr cl = ClassDefPtr::dynamicCast(container);
-                        assert(cl);
-                        if(cl->scoped() == p->scoped())
-                        {
-                            _M << nl << "return " << opName << "___(this, inS__, current__);";
-                        }
-                        else
-                        {
-                            string base = cl->scoped();
-                            if(cl->isInterface())
-                            {
-                                base += "Disp_";
-                            }
-                            _M << nl << "return " << fixId(base) << "." << opName << "___(this, inS__, current__);";
-                        }
-                        break;
-                    }
-                }
-            }
-            _M << eb;
+	    _M.inc();
+	    _M << nl << "return [self " << opName << "___:current is:is os:os];";
+            _M.dec();
         }
+	_M << nl << "default:";
+	_M.inc();
+	_M << nl << "@throw [ICEOperationNotExistException operationNotExistException:";
+	_M.useCurrentPosAsIndent();
+	_M << "__FILE__";
+	_M << nl << "line:__LINE__";
+	_M << nl << "id_:current.id_";
+	_M << nl << "facet:current.facet";
+	_M << nl << "operation:current.operation];";
+	_M.restoreIndent();
+	_M.dec();
         _M << eb;
-        _M << sp << nl << "_System.Diagnostics.Debug.Assert(false);";
-        _M << nl << "throw new Ice.OperationNotExistException(current__.id, current__.facet, current__.operation);";
-        _M << eb;
+	_M << eb;
+
+	_M << sp << nl << "+(const char **) staticIds__:(int*)count";
+	_M << sb;
+	_M << nl << "*count = sizeof(" << name << "_ids__) / sizeof(const char *);";
+	_M << nl << "return " << name << "_ids__;";
+	_M << eb;
     }
 
-    if(!p->isInterface() || ops.size() != 0)
-    {
-        _M << sp << nl << "#endregion"; // Operation dispatch
-    }
-
-
+#if 0
     // Marshalling support
     DataMemberList allClassMembers = p->allClassDataMembers();
     DataMemberList::const_iterator d;
@@ -858,7 +662,6 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
     }
 
     _M << sp << nl << "#endregion"; // Marshalling support
-
 #endif
 }
 
@@ -881,7 +684,22 @@ Slice::ObjCVisitor::getParamAttributes(const ParamDeclPtr& p)
 #endif
 
 string
-Slice::ObjCVisitor::getParams(const OperationPtr& op)
+Slice::ObjCVisitor::getSelector(const OperationPtr& op) const
+{
+    string result;
+    ParamDeclList paramList = op->parameters();
+    for(ParamDeclList::const_iterator q = paramList.begin(); q != paramList.end(); ++q)
+    {
+	if(q != paramList.begin())
+	{
+	    result += ":" + fixId((*q)->name());
+	}
+    }
+    return result;
+}
+
+string
+Slice::ObjCVisitor::getParams(const OperationPtr& op) const
 {
     string result;
     ParamDeclList paramList = op->parameters();
@@ -955,7 +773,7 @@ Slice::ObjCVisitor::getParamsAsyncCB(const OperationPtr& op)
 }
 
 string
-Slice::ObjCVisitor::getArgs(const OperationPtr& op)
+Slice::ObjCVisitor::getArgs(const OperationPtr& op) const
 {
     string result;
     ParamDeclList paramList = op->parameters();
@@ -968,6 +786,29 @@ Slice::ObjCVisitor::getArgs(const OperationPtr& op)
 	    result += " " + name;
 	}
 	result += ":" + name;
+    }
+    return result;
+}
+
+string
+Slice::ObjCVisitor::getServerArgs(const OperationPtr& op) const
+{
+    string result;
+    ParamDeclList paramList = op->parameters();
+    for(ParamDeclList::const_iterator q = paramList.begin(); q != paramList.end(); ++q)
+    {
+        string name = fixId((*q)->name());
+
+	if(q != paramList.begin())
+	{
+	    result += " " + name;
+	}
+	result += ":";
+	if((*q)->isOutParam())
+	{
+	    result += "&";
+	}
+	result += name;
     }
     return result;
 }
@@ -1134,7 +975,8 @@ Slice::Gen::Gen(const string& name, const string& base, const string& include, c
 
     _H << sp << nl << "#import <Ice/Config.h>";
     _H << nl << "#import <Ice/Proxy.h>";
-    _H << nl << "#import <Ice/Exception.h>";
+    _H << nl << "#import <Ice/Object.h>";
+    _H << nl << "#import <Ice/Current.h>";
 
     _M.open(fileM.c_str());
     if(!_M)
@@ -1424,16 +1266,32 @@ Slice::Gen::TypesVisitor::visitModuleEnd(const ModulePtr&)
 bool
 Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
 {
-#if 0
-    string name = p->name();
+    string name = fixName(p);
     ClassList bases = p->bases();
-    bool hasBaseClass = !bases.empty() && !bases.front()->isInterface();
 
+    // TODO :if(_stream)
+
+    _H << sp << nl << "@protocol " << name;
+    if(!bases.empty())
+    {
+        _H << " <";
+    }
+    for(ClassList::const_iterator i = bases.begin(); i != bases.end(); ++i)
+    {
+        string baseName = fixName(*i);
+	if(i != bases.begin())
+	{
+	    _H << ", ";
+	}
+	_H << baseName;
+    }
+    if(!bases.empty())
+    {
+        _H << ">";
+    }
+
+    _M << sp << nl << "@implementation " << name;
 #if 0
-    TODO :if(_stream)
-#endif
-
-    _M << sp;
     if(p->isInterface())
     {
         if(!bases.empty())
@@ -1507,61 +1365,34 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
             }
         }
     }
-
-    _M << sb;
-
-    if(!p->isInterface())
-    {
-        if(p->hasDataMembers() && !p->hasOperations())
-        {
-            _M << sp << nl << "#region Slice data members";
-        }
-        else if(p->hasDataMembers())
-        {
-            _M << sp << nl << "#region Slice data members and operations";
-        }
-        else if(p->hasOperations())
-        {
-            _M << sp << nl << "#region Slice operations";
-        }
-    }
-
 #endif
+
     return true;
 }
 
 void
 Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
 {
-#if 0
-    string name = fixId(p->name());
+    _H << nl << "@end";
+
+    string name = fixName(p);
+    ClassList bases = p->bases();
+    bool hasBaseClass = !bases.empty() && !bases.front()->isInterface();
+    string baseName = hasBaseClass ? fixName(bases.front()) : "ICEObject";
+
+    _H << sp << nl << "@interface " << name << " : " << baseName;
+    _H << nl << "@end";
+
     DataMemberList classMembers = p->classDataMembers();
     DataMemberList allClassMembers = p->allClassDataMembers();
     DataMemberList dataMembers = p->dataMembers();
     DataMemberList allDataMembers = p->allDataMembers();
-    ClassList bases = p->bases();
-    bool hasBaseClass = !bases.empty() && !bases.front()->isInterface();
     DataMemberList::const_iterator d;
 
     if(!p->isInterface())
     {
-        if(p->hasDataMembers() && !p->hasOperations())
-        {
-            _M << sp << nl << "#endregion"; // Slice data members"
-        }
-        else if(p->hasDataMembers())
-        {
-            _M << sp << nl << "#endregion"; // Slice data members and operations"
-        }
-        else if(p->hasOperations())
-        {
-            _M << sp << nl << "#endregion"; // Slice operations"
-        }
-
         if(!allDataMembers.empty())
         {
-            _M << sp << nl << "#region Constructors";
-
             _M << sp << nl << "public " << name << spar << epar;
             if(hasBaseClass)
             {
@@ -1608,80 +1439,35 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
         writeInheritedOperations(p);
     }
 
-    if(!p->isInterface() && !p->isLocal())
-    {
-        writeDispatchAndMarshalling(p, _stream);
-    }
+    writeDispatchAndMarshalling(p, _stream);
 
-    _M << eb;
-#endif
+    _M << nl << "@end";
 }
 
 void
 Slice::Gen::TypesVisitor::visitOperation(const OperationPtr& p)
 {
-#if 0
+    // TODO deal with deprecate metadata.
 
-    ClassDefPtr classDef = ClassDefPtr::dynamicCast(p->container());
-    if(classDef->isInterface())
-    {
-        return;
-    }
+    string name = fixId(p->name());
+    TypePtr returnType = p->returnType();
+    string retString = outTypeToString(returnType);
+    bool retIsValue = isValueType(returnType);
+    string params = getParams(p);
 
-    bool isLocal = classDef->isLocal();
-    bool amd = !isLocal && (classDef->hasMetaData("amd") || p->hasMetaData("amd"));
+    _H << nl << "-(" << retString;
+    if(!retIsValue)
+    {
+        _H << " *";
+    }
+    _H << ") " << name << params;
+    if(!params.empty())
+    {
+        _H << " current";
+    }
+    _H << ":(ICECurrent *)current;";
 
-    string name = p->name();
-    ParamDeclList paramList = p->parameters();
-    vector<string> params;
-    vector<string> args;
-    string retS;
-
-    if(!amd)
-    {
-        //params = getParams(p);
-        //args = getArgs(p);
-        name = fixId(name, DotNet::ICloneable, true);
-        retS = typeToString(p->returnType());
-    }
-    else
-    {
-        params = getParamsAsync(p, true);
-        args = getArgsAsync(p);
-        retS = "void";
-        name = name + "_async";
-    }
-
-    _M << sp;
-    emitAttributes(p);
-    _M << nl << "public ";
-    if(isLocal)
-    {
-        _M << "abstract ";
-    }
-    _M << retS << " " << name << spar << params << epar;
-    if(isLocal)
-    {
-        _M << ";";
-    }
-    else
-    {
-        _M << sb;
-        _M << nl;
-        if(!amd && p->returnType())
-        {
-            _M << "return ";
-        }
-        _M << name << spar << args << "Ice.ObjectImpl.defaultCurrent" << epar << ';';
-        _M << eb;
-    }
-
-    if(!isLocal)
-    {
-        _M << nl << "public abstract " << retS << " " << name
-             << spar << params << "Ice.Current current__" << epar << ';';
-    }
-#endif
+    // TODO: deal with AMI
 }
 
 void
@@ -2015,7 +1801,7 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     //
     // Marshaling/unmarshaling
     //
-    //writeMemberMarshaling(dataMembers);
+    writeMemberMarshal(dataMembers, 0); // TODO fix second parameter
 
     _H << nl << "@end";
 
@@ -2467,7 +2253,23 @@ Slice::Gen::TypesVisitor::writeMemberDealloc(const DataMemberList& dataMembers, 
 void
 Slice::Gen::TypesVisitor::writeMemberMarshal(const DataMemberList& dataMembers, int baseTypes) const
 {
-    // TODO
+    _H << nl << "-(void) write__:(id <ICEOutputStream>)os;";
+    _M << sp << nl << "-(void) write__:(id <ICEOutputStream>)os_";
+    _M << sb;
+    for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
+    {
+	writeMarshalUnmarshalCode(_M, (*q)->type(), fixId((*q)->name()), true, false, false);
+    }
+    _M << eb;
+
+    _H << nl << "-(void) read__:(id <ICEInputStream>)is_;";
+    _M << sp << nl << "-(void) read__:(id <ICEInputStream>)is_";
+    _M << sb;
+    for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
+    {
+	writeMarshalUnmarshalCode(_M, (*q)->type(), fixId((*q)->name() /* TODO: base classes */), false, false, false);
+    }
+    _M << eb;
 }
 
 Slice::Gen::ProxyVisitor::ProxyVisitor(IceUtilInternal::Output& H, IceUtilInternal::Output& M)
@@ -3478,7 +3280,7 @@ Slice::Gen::DelegateMVisitor::visitClassDefStart(const ClassDefPtr& p)
 	{
 	    _M << "return ";
 	}
-	_M << "[" << className << "Prx invoke_" << opName << args;
+	_M << "[" << className << "Prx " << opName << "___" << args;
 	if(!args.empty())
 	{
 	    _M << " prx";
@@ -3506,7 +3308,7 @@ Slice::Gen::DelegateMVisitor::visitClassDefStart(const ClassDefPtr& p)
 	{
 	    _M << "return ";
 	}
-	_M << "[" << className << "Prx invoke_" << opName << args;
+	_M << "[" << className << "Prx " << opName << "___" << args;
 	if(!args.empty())
 	{
 	    _M << " prx";
@@ -3564,9 +3366,9 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
     _H << nl << "+(" << retString;
     if(!retIsValue)
     {
-        _H << nl << " *";
+        _H << " *";
     }
-    _H << ") invoke_" << name << params;
+    _H << ") " << name << "___" << params;
     if(!params.empty())
     {
         _H << " prx";
@@ -3576,9 +3378,9 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
     _M << sp << nl << "+(" << retString;
     if(!retIsValue)
     {
-        _M << nl << " *";
+        _M << " *";
     }
-    _M << ") invoke_" << name << params;
+    _M << ") " << name << "___" << params;
     if(!params.empty())
     {
         _M << " prx";
@@ -3613,7 +3415,10 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
 	   {
 	       _M << "*";
 	   }
-	   _M << "ret_;";
+	   if(!isValueType(returnType))
+	   {
+	       _M << "ret_ = [[" << retString << " alloc] init];";
+	   }
 	   writeMarshalUnmarshalCode(_M, returnType, "ret_", false, false, true, "");
 	}
 	if(p->returnsClasses())
