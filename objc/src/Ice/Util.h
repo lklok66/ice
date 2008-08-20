@@ -129,6 +129,14 @@ toNSString(const std::string& s)
     return [[NSString alloc] initWithUTF8String:s.c_str()];
 }
 
+inline NSMutableString*
+toNSMutableString(const std::string& s)
+{
+    NSMutableString *ret = [[NSMutableString alloc] initWithCapacity:s.size()];
+    [ret appendString:[NSString stringWithCString:s.c_str() encoding:NSUTF8StringEncoding]];
+    return ret;
+}
+
 inline std::string
 fromNSString(NSString* s)
 {

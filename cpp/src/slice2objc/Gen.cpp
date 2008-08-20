@@ -250,7 +250,7 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
             }
 	    for(TypeStringList::const_iterator inp = inParams.begin(); inp != inParams.end(); ++inp)
 	    {
-	        string typeString = typeToString(inp->first);
+	        string typeString = outTypeToString(inp->first);
 	        string param = fixId(inp->second);
 		_M << nl << typeString << " ";
 		if(!isValueType(inp->first))
@@ -720,7 +720,36 @@ Slice::ObjCVisitor::getParams(const OperationPtr& op) const
 	}
         if((*q)->isOutParam())
 	{
-	    result += "*";
+	    result += " *";
+	}
+	result += ")" + name;
+    }
+    return result;
+}
+
+string
+Slice::ObjCVisitor::getServerParams(const OperationPtr& op) const
+{
+    string result;
+    ParamDeclList paramList = op->parameters();
+    for(ParamDeclList::const_iterator q = paramList.begin(); q != paramList.end(); ++q)
+    {
+	TypePtr type = (*q)->type();
+	string typeString = (*q)->isOutParam() ? typeToString(type) : outTypeToString(type);
+        string name = fixId((*q)->name());
+
+	if(q != paramList.begin())
+	{
+	    result += " " + name;
+	}
+	result += ":(" + typeString;
+	if(!isValueType(type))
+	{
+	    result += " *";
+	}
+        if((*q)->isOutParam())
+	{
+	    result += " *";
 	}
 	result += ")" + name;
     }
@@ -1451,9 +1480,9 @@ Slice::Gen::TypesVisitor::visitOperation(const OperationPtr& p)
 
     string name = fixId(p->name());
     TypePtr returnType = p->returnType();
-    string retString = outTypeToString(returnType);
+    string retString = typeToString(returnType);
     bool retIsValue = isValueType(returnType);
-    string params = getParams(p);
+    string params = getServerParams(p);
 
     _H << nl << "-(" << retString;
     if(!retIsValue)
@@ -1811,11 +1840,13 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
 void
 Slice::Gen::TypesVisitor::visitDictionary(const DictionaryPtr& p)
 {
+    string prefix = moduleName(findModule(p));
     string name = fixName(p);
 
     emitDeprecate(p, 0, _M, "type");
 
     _H << sp << nl << "typedef NSDictionary " << name << ";";
+    _H << nl << "typedef NSMutableDictionary " << prefix << "Mutable" << p->name() << ";";
 }
 
 void

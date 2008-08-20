@@ -75,19 +75,19 @@ dictionary<string, MyEnum> StringMyEnumD;
      byte opByte(byte p1, byte p2,
                  out byte p3);
 
-//     bool opBool(bool p1, bool p2,
-//                 out bool p3);
+     bool opBool(bool p1, bool p2,
+                 out bool p3);
 
-//     long opShortIntLong(short p1, int p2, long p3,
-//                         out short p4, out int p5, out long p6);
+     long opShortIntLong(short p1, int p2, long p3,
+                         out short p4, out int p5, out long p6);
 
-//     double opFloatDouble(float p1, double p2,
-//                          out float p3, out double p4);
+     double opFloatDouble(float p1, double p2,
+                          out float p3, out double p4);
 
-//     string opString(string p1, string p2,
-//                     out string p3);
+     string opString(string p1, string p2,
+                     out string p3);
 
-//     MyEnum opMyEnum(MyEnum p1, out MyEnum p2);
+     MyEnum opMyEnum(MyEnum p1, out MyEnum p2);
 
 //     MyClass* opMyClass(MyClass* p1, out MyClass* p2, out MyClass* p3);
 

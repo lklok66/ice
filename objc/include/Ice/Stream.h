@@ -54,7 +54,7 @@
 -(ICEDouble) readDouble;
 -(NSMutableData*) readDoubleSeq;
 
--(NSString*) readString;
+-(NSMutableString*) readString;
 -(NSMutableArray*) readStringSeq;
 
 -(ICEInt) readSize;
