@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		141803960E40775500DC7AFB /* libIceObjC.3.3.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1418037B0E406A9C00DC7AFB /* libIceObjC.3.3.0.dylib */; };
-		141803A60E4082A300DC7AFB /* libIceObjC.3.3.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1418037B0E406A9C00DC7AFB /* libIceObjC.3.3.0.dylib */; };
 		1432BEC00E484C0E00DAC793 /* Hello.m in Sources */ = {isa = PBXBuildFile; fileRef = 1432BEBE0E484C0E00DAC793 /* Hello.m */; };
 		1D3623260D0F684500981E51 /* helloAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* helloAppDelegate.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
@@ -17,6 +15,11 @@
 		2899E5220DE3E06400AC0155 /* helloViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2899E5210DE3E06400AC0155 /* helloViewController.xib */; };
 		28AD733F0D9D9553002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD733E0D9D9553002E5188 /* MainWindow.xib */; };
 		28D7ACF80DDB3853001CB0EB /* helloViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28D7ACF70DDB3853001CB0EB /* helloViewController.m */; };
+		A10643D10E5B6F9700338C12 /* libstdc++.6.0.4.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A10643CF0E5B6F9700338C12 /* libstdc++.6.0.4.dylib */; };
+		A10643D20E5B6F9700338C12 /* libstdc++.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A10643D00E5B6F9700338C12 /* libstdc++.6.dylib */; };
+		A10643E90E5B702A00338C12 /* libIce.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A10643C60E5B6E8500338C12 /* libIce.a */; };
+		A10643EA0E5B702B00338C12 /* libIceObjC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A10643C70E5B6E8500338C12 /* libIceObjC.a */; };
+		A10643EB0E5B702C00338C12 /* libIceUtil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A10643C80E5B6E8500338C12 /* libIceUtil.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -26,14 +29,12 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				141803960E40775500DC7AFB /* libIceObjC.3.3.0.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		1418037B0E406A9C00DC7AFB /* libIceObjC.3.3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libIceObjC.3.3.0.dylib; path = ../../../lib/libIceObjC.3.3.0.dylib; sourceTree = SOURCE_ROOT; };
 		1432BEBE0E484C0E00DAC793 /* Hello.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Hello.m; sourceTree = "<group>"; };
 		1432BEBF0E484C0E00DAC793 /* Hello.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Hello.h; sourceTree = "<group>"; };
 		1432BF5A0E59A5FC00DAC793 /* Hello.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Hello.ice; sourceTree = "<group>"; };
@@ -49,6 +50,11 @@
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* hello_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hello_Prefix.pch; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A10643C60E5B6E8500338C12 /* libIce.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libIce.a; path = ../../../lib/libIce.a; sourceTree = SOURCE_ROOT; };
+		A10643C70E5B6E8500338C12 /* libIceObjC.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libIceObjC.a; path = ../../../lib/libIceObjC.a; sourceTree = SOURCE_ROOT; };
+		A10643C80E5B6E8500338C12 /* libIceUtil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libIceUtil.a; path = ../../../lib/libIceUtil.a; sourceTree = SOURCE_ROOT; };
+		A10643CF0E5B6F9700338C12 /* libstdc++.6.0.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.6.0.4.dylib"; path = "usr/lib/libstdc++.6.0.4.dylib"; sourceTree = SDKROOT; };
+		A10643D00E5B6F9700338C12 /* libstdc++.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.6.dylib"; path = "usr/lib/libstdc++.6.dylib"; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,9 +62,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				141803A60E4082A300DC7AFB /* libIceObjC.3.3.0.dylib in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
+				A10643D10E5B6F9700338C12 /* libstdc++.6.0.4.dylib in Frameworks */,
+				A10643D20E5B6F9700338C12 /* libstdc++.6.dylib in Frameworks */,
+				A10643E90E5B702A00338C12 /* libIce.a in Frameworks */,
+				A10643EA0E5B702B00338C12 /* libIceObjC.a in Frameworks */,
+				A10643EB0E5B702C00338C12 /* libIceUtil.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -89,7 +99,6 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
-				1418037B0E406A9C00DC7AFB /* libIceObjC.3.3.0.dylib */,
 				1432BF5A0E59A5FC00DAC793 /* Hello.ice */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
@@ -122,6 +131,11 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A10643CF0E5B6F9700338C12 /* libstdc++.6.0.4.dylib */,
+				A10643D00E5B6F9700338C12 /* libstdc++.6.dylib */,
+				A10643C60E5B6E8500338C12 /* libIce.a */,
+				A10643C70E5B6E8500338C12 /* libIceObjC.a */,
+				A10643C80E5B6E8500338C12 /* libIceUtil.a */,
 				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
 				1D30AB110D05D00D00671497 /* Foundation.framework */,
 			);
@@ -258,12 +272,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Bernard Normier";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "B85322A9-C60E-45CB-AC56-04730BB32BDC";
 				SDKROOT = iphoneos2.0;
 			};
 			name = Debug;
