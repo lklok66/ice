@@ -18,6 +18,8 @@
 #include <IceCpp/Initialize.h>
 #include <IceCpp/ObjectAdapter.h>
 
+#import <Foundation/NSAutoreleasePool.h>
+
 #define OBJECT ((Ice::Object*)object__)
 
 int
@@ -105,7 +107,9 @@ IceObjC::ObjectI::ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& cb
     BOOL ok;
     @try
     {
+        NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
         ok = [_object dispatch__:c is:is os:os];
+        [pool release];
     }
     @catch(NSException* ex)
     {
@@ -223,7 +227,7 @@ static const char* ICEObject_all__[4] =
 }
 -(BOOL) ice_isA___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
-    NSString* id__ = [is readString];
+    NSString* id__ = [[is readString] autorelease];
     BOOL ret__ = [(id)self ice_isA:id__ current:current];
     [os writeBool:ret__];
     return YES;
@@ -247,8 +251,8 @@ static const char* ICEObject_all__[4] =
 }
 -(BOOL) ice_isA:(NSString*)typeId current:(ICECurrent*)current
 {
-    int count;
-    const char** staticIds = [[self class] staticIds__:&count];
+    int count, index;
+    const char** staticIds = [[self class] staticIds__:&count idIndex:&index];
     return ICELookupString(staticIds, count, [typeId UTF8String]) >= 0;
 }
 -(void) ice_ping:(ICECurrent*)current
@@ -263,8 +267,8 @@ static const char* ICEObject_all__[4] =
 {
     try
     {
-        int count;
-        const char** staticIds = [[self class] staticIds__:&count];
+        int count, index;
+        const char** staticIds = [[self class] staticIds__:&count idIndex:&index];
         return [toNSArray(staticIds, count) autorelease];
     }
     catch(const std::exception& ex)
@@ -275,13 +279,14 @@ static const char* ICEObject_all__[4] =
 }
 +(NSString*) ice_staticId
 {
-    int count;
-    const char** staticIds = [self staticIds__:&count];
-    return [NSString stringWithUTF8String:staticIds[0]];
+    int count, index;
+    const char** staticIds = [self staticIds__:&count idIndex:&index];
+    return [NSString stringWithUTF8String:staticIds[index]];
 }
-+(const char**) staticIds__:(int*)count
++(const char**) staticIds__:(int*)count idIndex:(int*)idx
 {
     *count = sizeof(ICEObject_ids__) / sizeof(const char*);
+    *idx = 0;
     return ICEObject_ids__;
 }
 
@@ -319,7 +324,7 @@ static const char* ICEObject_all__[4] =
 {
     if(rid)
     {
-        [is readTypeId];
+        [[is readTypeId] release];
     }
 
     [is startSlice];

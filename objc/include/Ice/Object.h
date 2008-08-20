@@ -35,7 +35,7 @@ int ICELookupString(const char**, size_t, const char*);
     void* object__;
 }
 +(NSString*) ice_staticId;
-+(const char**) staticIds__:(int*)count;
++(const char**) staticIds__:(int*)count idIndex:(int*)idx;
 -(void) checkModeAndSelector__:(ICEOperationMode)expected selector:(SEL)sel current:(ICECurrent*)current;
 -(BOOL) ice_isA___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os;
 -(BOOL) ice_ping___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os;

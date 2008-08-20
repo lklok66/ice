@@ -187,12 +187,10 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
     ids.merge(other);
     ids.unique();
 
-#if 0
     StringList::const_iterator firstIter = ids.begin();
     StringList::const_iterator scopedIter = find(ids.begin(), ids.end(), scoped);
     assert(scopedIter != ids.end());
     StringList::difference_type scopedPos = IceUtilInternal::distance(firstIter, scopedIter);
-#endif
     
     _M << sp << nl << "static const char *" << name << "_ids__[] = ";
     _M << sb;
@@ -279,6 +277,10 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
 		}
 		_M << "ret_ = ";
 	    }
+            if(paramList.empty() && !returnType)
+            {
+                _M << nl;
+            }
 	    string args = getServerArgs(op);
 	    _M << "[(id<" << name << ">)self " << opName << args;
 	    if(!args.empty())
@@ -465,9 +467,10 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
         _M << eb;
 	_M << eb;
 
-	_M << sp << nl << "+(const char **) staticIds__:(int*)count";
+	_M << sp << nl << "+(const char **) staticIds__:(int*)count idIndex:(int*)idx";
 	_M << sb;
 	_M << nl << "*count = sizeof(" << name << "_ids__) / sizeof(const char *);";
+        _M << nl << "*idx = " << scopedPos << ";";
 	_M << nl << "return " << name << "_ids__;";
 	_M << eb;
     }
@@ -2284,8 +2287,8 @@ Slice::Gen::TypesVisitor::writeMemberDealloc(const DataMemberList& dataMembers, 
 void
 Slice::Gen::TypesVisitor::writeMemberMarshal(const DataMemberList& dataMembers, int baseTypes) const
 {
-    _H << nl << "-(void) write__:(id <ICEOutputStream>)os;";
-    _M << sp << nl << "-(void) write__:(id <ICEOutputStream>)os_";
+    _H << nl << "-(void) write__:(id<ICEOutputStream>)os;";
+    _M << sp << nl << "-(void) write__:(id<ICEOutputStream>)os_";
     _M << sb;
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
@@ -2293,8 +2296,8 @@ Slice::Gen::TypesVisitor::writeMemberMarshal(const DataMemberList& dataMembers, 
     }
     _M << eb;
 
-    _H << nl << "-(void) read__:(id <ICEInputStream>)is_;";
-    _M << sp << nl << "-(void) read__:(id <ICEInputStream>)is_";
+    _H << nl << "-(void) read__:(id<ICEInputStream>)is_;";
+    _M << sp << nl << "-(void) read__:(id<ICEInputStream>)is_";
     _M << sb;
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
@@ -3418,8 +3421,8 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
     }
     _M << ":(ICEObjectPrx <" << className << "Prx> *)prx_ context:(ICEContext *)ctx_";
     _M << sb;
-    _M << nl << "id <ICEOutputStream> os_ = [prx_ createOutputStream__];";
-    _M << nl << "id <ICEInputStream> is_ = nil;";
+    _M << nl << "id<ICEOutputStream> os_ = [prx_ createOutputStream__];";
+    _M << nl << "id<ICEInputStream> is_ = nil;";
     _M << nl << "@try";
     _M << sb;
     for(TypeStringList::const_iterator ip = inParams.begin(); ip != inParams.end(); ++ip)

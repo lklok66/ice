@@ -570,6 +570,7 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
 	    string typeS = typeToString(st);
 	    out << nl << typeS << " *tmp_ = [[" << typeS << " alloc] init];";
 	    out << nl << "[tmp_ " << (streamingAPI ? "ice_write" : "write__") << ":" << stream << "];";
+            out << nl << "[tmp_ release];";
 	    out << eb;
 	    out << nl << "else";
 	    out << sb;
@@ -578,6 +579,11 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
         }
         else
         {
+	    out << nl << "if(" << param << " == nil)";
+	    out << sb;
+	    string typeS = typeToString(st);
+	    out << nl << param << " = [[" << typeS << " alloc] init];";
+            out << eb;
 	    out << nl << "[" << param << " " << (streamingAPI ? "ice_read" : "read__") << ":" << stream << "];";
         }
         return;

@@ -10,7 +10,6 @@
 #import <Ice/Ice.h>
 #import <TestCommon.h>
 #import <Test.h>
-#import <TestI.h> // TODO: remove
 #import <limits.h>
 #import <float.h>
     

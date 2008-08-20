@@ -258,7 +258,7 @@ public:
     {
         std::pair<const bool*, const bool*> seq;
         is__->readBoolSeq(seq);
-        return [NSMutableData dataWithBytes:seq.first length:(seq.second - seq.first) * sizeof(BOOL)];
+        return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(BOOL)];
     }
     catch(const std::exception& ex)
     {
@@ -299,7 +299,7 @@ public:
     {
         std::pair<const Ice::Byte*, const Ice::Byte*> seq;
         is__->readByteSeq(seq);
-        return [NSMutableData dataWithBytes:seq.first length:(seq.second - seq.first)];
+        return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first)];
     }    
     catch(const std::exception& ex)
     {
@@ -356,7 +356,7 @@ public:
     {
         std::pair<const Ice::Short*, const Ice::Short*> seq;
         is__->readShortSeq(seq);
-        return [NSMutableData dataWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEShort)];
+        return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEShort)];
     }
     catch(const std::exception& ex)
     {
@@ -397,7 +397,7 @@ public:
     {
         std::pair<const Ice::Int*, const Ice::Int*> seq;
         is__->readIntSeq(seq);
-        return [NSMutableData dataWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEInt)];
+        return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEInt)];
     }
     catch(const std::exception& ex)
     {
@@ -425,7 +425,7 @@ public:
     {
         std::pair<const Ice::Long*, const Ice::Long*> seq;
         is__->readLongSeq(seq);
-        return [NSMutableData dataWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICELong)];
+        return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICELong)];
     }
     catch(const std::exception& ex)
     {
@@ -453,7 +453,7 @@ public:
     {
         std::pair<const Ice::Float*, const Ice::Float*> seq;
         is__->readFloatSeq(seq);
-        return [NSMutableData dataWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEFloat)];
+        return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEFloat)];
     }
     catch(const std::exception& ex)
     {
@@ -481,7 +481,7 @@ public:
     {
         std::pair<const Ice::Double*, const Ice::Double*> seq;
         is__->readDoubleSeq(seq);
-        return [NSMutableData dataWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEDouble)];
+        return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEDouble)];
     }
     catch(const std::exception& ex)
     {
@@ -494,7 +494,7 @@ public:
 {
     try
     {
-        return [toNSMutableString(is__->readString()) autorelease];
+        return toNSMutableString(is__->readString());
     }
     catch(const std::exception& ex)
     {
@@ -507,7 +507,7 @@ public:
 {
     try
     {
-        return [toNSArray(is__->readStringSeq()) autorelease];
+        return toNSArray(is__->readStringSeq());
     }
     catch(const std::exception& ex)
     {
@@ -533,7 +533,7 @@ public:
 {
     try
     {
-        return [ICEObjectPrx objectPrxWithObjectPrx__:is__->readProxy()];
+        return [[ICEObjectPrx alloc] initWithObjectPrx__:is__->readProxy()];
     }
     catch(const std::exception& ex)
     {
@@ -558,7 +558,7 @@ public:
 {
     try
     {
-        return [toNSString(is__->readTypeId()) autorelease];
+        return toNSString(is__->readTypeId());
     }
     catch(const std::exception& ex)
     {
@@ -613,7 +613,7 @@ public:
         {
             [self readPendingObjects];
         }
-        @throw ex;
+        @throw ex; // TODO: Should we auto release the exception here or should it be the responsability of the caller?
     }
 }
 

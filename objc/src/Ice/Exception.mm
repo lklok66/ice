@@ -90,11 +90,11 @@
 }
 -(void)write__:(id<ICEOutputStream>)stream
 {
-    // TODO
+    NSAssert(false, @"write__ must be overriden");
 }
 -(void)read__:(id<ICEInputStream>)stream readTypeId:(BOOL)rid
 {
-    // TODO
+    NSAssert(false, @"read__ must be overriden");
 }
 @end
 
