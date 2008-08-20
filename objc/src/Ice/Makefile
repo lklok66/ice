@@ -49,7 +49,7 @@ all::
 
 include $(top_srcdir)/config/Make.rules
 
-CPPFLAGS	:= -I.. -Iinclude -I../../include -I../.. $(CPPFLAGS)
+CPPFLAGS	:= -I.. -Iinclude -I../../include $(CPPFLAGS)
 SLICE2OBJCFLAGS	:= --ice --include-dir Ice $(SLICE2OBJCFLAGS)
 
 LINKWITH        := -lIce -lIceUtil $(ICE_OS_LIBS) $(BASELIBS)

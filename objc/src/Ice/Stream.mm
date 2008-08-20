@@ -490,11 +490,11 @@ public:
     }
 }
 
--(NSString*)readString
+-(NSMutableString*)readString
 {
     try
     {
-        return [toNSString(is__->readString()) autorelease];
+        return [toNSMutableString(is__->readString()) autorelease];
     }
     catch(const std::exception& ex)
     {
