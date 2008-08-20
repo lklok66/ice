@@ -3436,6 +3436,10 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
     }
     _M << ":(ICEObjectPrx <" << className << "Prx> *)prx_ context:(ICEContext *)ctx_";
     _M << sb;
+    if(p->returnsData())
+    {
+        _M << nl << "[prx_ checkTwowayOnly__:@\"" << name <<  "\"];";
+    }
     _M << nl << "id<ICEOutputStream> os_ = [prx_ createOutputStream__];";
     _M << nl << "id<ICEInputStream> is_ = nil;";
     _M << nl << "@try";

@@ -9,14 +9,8 @@
 
 #import <Ice/Config.h>
 
-//
-// TODO: remove when generated from slice2objc
-//
-
-#import <Ice/Proxy.h>
-
-@protocol ICERouterPrx<ICEObjectPrx>
-@end
-
-@interface ICERouterPrx : ICEObjectPrx<ICERouterPrx>
-@end
+typedef enum
+{
+    ICERandom,
+    Ordered
+} ICEEndpointSelectionType;

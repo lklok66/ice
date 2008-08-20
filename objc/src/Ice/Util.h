@@ -81,14 +81,17 @@ toNSArray(const std::vector<T>& seq)
 template<typename T> std::vector<T>&
 fromNSArray(NSArray* array, std::vector<T>& seq)
 {
-    seq.reserve([array count]);
-    NSEnumerator* enumerator = [array objectEnumerator]; 
-    id obj = nil; 
-    while((obj = [enumerator nextObject])) 
-    { 
-        T v;
-        fromObjC(obj, v);
-        seq.push_back(v);
+    if(array != nil)
+    {
+        seq.reserve([array count]);
+        NSEnumerator* enumerator = [array objectEnumerator]; 
+        id obj = nil; 
+        while((obj = [enumerator nextObject])) 
+        { 
+            T v;
+            fromObjC(obj, v);
+            seq.push_back(v);
+        }
     }
     return seq;
 }
@@ -108,19 +111,23 @@ toNSDictionary(const std::map<K, V>& dict)
     return dictionary;
 }
 
-template<typename K, typename V> void
+template<typename K, typename V> std::map<K, V>&
 fromNSDictionary(NSDictionary* dictionary, std::map<K, V>& dict)
 {
-    NSEnumerator* enumerator = [dictionary keyEnumerator]; 
-    id obj = nil; 
-    while((obj = [enumerator nextObject])) 
-    { 
-        K k;
-        fromObjC(obj, k);
-        V v;
-        fromObjC([dictionary objectForKey:obj], v);
-        dict.insert(std::pair<K, V>(k, v));
+    if(dictionary != nil)
+    {
+        NSEnumerator* enumerator = [dictionary keyEnumerator]; 
+        id obj = nil; 
+        while((obj = [enumerator nextObject])) 
+        { 
+            K k;
+            fromObjC(obj, k);
+            V v;
+            fromObjC([dictionary objectForKey:obj], v);
+            dict.insert(std::pair<K, V>(k, v));
+        }
     }
+    return dict;
 }
 
 inline NSString*

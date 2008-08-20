@@ -18,5 +18,5 @@
 @protocol ICELocatorPrx<ICEObjectPrx>
 @end
 
-@interface ICELocatorPrx : ICEObjectPrx
+@interface ICELocatorPrx : ICEObjectPrx<ICELocatorPrx>
 @end

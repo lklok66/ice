@@ -7,16 +7,22 @@
 //
 // **********************************************************************
 
-#import <Foundation/NSString.h>
-
 #import <Ice/ProxyI.h>
 #import <Ice/Object.h>
 #import <Ice/Util.h>
 #import <Ice/StreamI.h>
+#import <Ice/CommunicatorI.h>
+#import <Ice/IdentityI.h>
+#import <Ice/LocalException.h>
+
+#import <Ice/Router.h>
+#import <Ice/Locator.h>
 
 #include <IceCpp/Initialize.h>
 #include <IceCpp/Proxy.h>
 #include <IceCpp/LocalException.h>
+#include <IceCpp/Router.h>
+#include <IceCpp/Locator.h>
 
 #import <objc/runtime.h>
 
@@ -111,7 +117,13 @@
         return nil; // Keep the compiler happy.
     }
 }
-
+-(void) checkTwowayOnly__:(NSString*)name
+{
+    if(!OBJECTPRX->ice_isTwoway())
+    {
+        @throw [ICETwowayOnlyException twowayOnlyException:__FILE__ line:__LINE__ operation:name];
+    }
+}
 -(void) invoke__:(NSString*)operation 
             mode:(ICEOperationMode)mode 
               os:(id<ICEOutputStream>)os 
@@ -176,30 +188,37 @@
     }
 }
 
--(NSString*) ice_id
+-(NSUInteger) hash
 {
-    try
-    {
-        return [toNSString(OBJECTPRX->ice_id()) autorelease];
-    }
-    catch(const std::exception& ex)
-    {
-        rethrowObjCException(ex);
-        return NO; // Keep the compiler happy
-    }
+    return (NSUInteger)OBJECTPRX->ice_getHash();
 }
 
--(NSArray*) ice_ids
+-(BOOL) isEqual:(id)o_
 {
-    try
+    if(self == o_)
     {
-        return [toNSArray(OBJECTPRX->ice_ids()) autorelease];
+        return YES;
     }
-    catch(const std::exception& ex)
+    if(!o_ || ![o_ isKindOfClass:[self class]])
     {
-        rethrowObjCException(ex);
-        return NO; // Keep the compiler happy
+        return NO;
     }
+    return *OBJECTPRX == *[o_ objectPrx__];
+}
+
+-(ICEInt) ice_getHash
+{
+    return OBJECTPRX->ice_getHash();
+}
+
+-(ICECommunicator*) ice_getCommunicator
+{
+    return [ICECommunicator communicatorWithCommunicator:OBJECTPRX->ice_getCommunicator()];
+}
+
+-(NSString*) ice_toString
+{
+    return [toNSString(OBJECTPRX->ice_toString()) autorelease];
 }
 
 -(BOOL) ice_isA:(NSString*)typeId
@@ -207,6 +226,19 @@
     try
     {
         return OBJECTPRX->ice_isA(fromNSString(typeId));
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return NO; // Keep the compiler happy
+    }
+}
+-(BOOL) ice_isA:(NSString*)typeId context:(ICEContext*)context
+{
+    try
+    {
+        Ice::Context ctx;
+        return OBJECTPRX->ice_isA(fromNSString(typeId), fromNSDictionary(context, ctx));
     }
     catch(const std::exception& ex)
     {
@@ -226,5 +258,288 @@
         rethrowObjCException(ex);
     }
 }
+-(void) ice_ping:(ICEContext*)context
+{
+    try
+    {
+        Ice::Context ctx;
+        OBJECTPRX->ice_ping(fromNSDictionary(context, ctx));
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
+}
+
+-(NSArray*) ice_ids
+{
+    try
+    {
+        return [toNSArray(OBJECTPRX->ice_ids()) autorelease];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return NO; // Keep the compiler happy
+    }
+}
+-(NSArray*) ice_ids:(ICEContext*)context
+{
+    try
+    {
+        Ice::Context ctx;
+        return [toNSArray(OBJECTPRX->ice_ids(fromNSDictionary(context, ctx))) autorelease];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return NO; // Keep the compiler happy
+    }
+}
+
+-(NSString*) ice_id
+{
+    try
+    {
+        return [toNSString(OBJECTPRX->ice_id()) autorelease];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return NO; // Keep the compiler happy
+    }
+}
+-(NSString*) ice_id:(ICEContext*)context
+{
+    try
+    {
+        Ice::Context ctx;
+        return [toNSString(OBJECTPRX->ice_id(fromNSDictionary(context, ctx))) autorelease];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return NO; // Keep the compiler happy
+    }
+}
+
+-(BOOL) ice_invoke:(NSString*)operation 
+              mode:(ICEOperationMode)mode
+          inParams:(NSData*)inParams 
+         outParams:(NSMutableData**)outParams
+{
+    try
+    {
+        std::pair<const Ice::Byte*, const Ice::Byte*> inP((ICEByte*)[inParams bytes], 
+                                                          (ICEByte*)[inParams bytes] + [inParams length]);
+        std::vector<Ice::Byte> outP;
+        BOOL ok = OBJECTPRX->ice_invoke(fromNSString(operation), (Ice::OperationMode)mode, inP, outP);
+        *outParams = [NSMutableData dataWithBytes:&outP[0] length:outP.size()];
+        return ok;
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return NO; // Keep the compiler happy
+    }
+}
+
+-(BOOL) ice_invoke:(NSString*)operation 
+              mode:(ICEOperationMode)mode 
+          inParams:(NSData*)inParams 
+         outParams:(NSMutableData**)outParams
+           context:(ICEContext*)context
+{
+    try
+    {
+        Ice::Context ctx;
+        std::pair<const Ice::Byte*, const Ice::Byte*> inP((ICEByte*)[inParams bytes], 
+                                                          (ICEByte*)[inParams bytes] + [inParams length]);
+        std::vector<Ice::Byte> outP;
+        BOOL ok = OBJECTPRX->ice_invoke(fromNSString(operation), 
+                                        (Ice::OperationMode)mode, 
+                                        inP, 
+                                        outP, 
+                                        fromNSDictionary(context, ctx));
+        *outParams = [NSMutableData dataWithBytes:&outP[0] length:outP.size()];
+        return ok;
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return NO; // Keep the compiler happy
+    }
+}
+
+-(ICEIdentity*) ice_getIdentity
+{
+    return [ICEIdentity identityWithIdentity:OBJECTPRX->ice_getIdentity()];
+}
+-(id<ICEObjectPrx>) ice_identity:(ICEIdentity*)identity
+{
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTPRX->ice_identity([identity identity__])];
+}
+-(ICEContext*) ice_getContext
+{
+    return [toNSDictionary(OBJECTPRX->ice_getContext()) autorelease];
+}
+-(id<ICEObjectPrx>) ice_context:(ICEContext*)context
+{
+    Ice::Context ctx;
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTPRX->ice_context(fromNSDictionary(context, ctx))];
+}
+-(NSString*) ice_getFacet
+{
+    return [toNSString(OBJECTPRX->ice_getFacet()) autorelease];
+}
+-(id<ICEObjectPrx>) ice_facet:(NSString*)facet
+{
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTPRX->ice_facet(fromNSString(facet))];
+}
+-(NSString*) ice_getAdapterId
+{
+    return [toNSString(OBJECTPRX->ice_getAdapterId()) autorelease];
+}
+-(id<ICEObjectPrx>) ice_adapterId:(NSString*)adapterId
+{
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTPRX->ice_adapterId(fromNSString(adapterId))];
+}
+//-(NSArray*) ice_getEndpoints
+//{
+//}
+//-(id<ICEObjectPrx>) ice_endpoints:(NSArray*)endpoints
+//{
+//}
+-(ICEInt) ice_getLocatorCacheTimeout
+{
+    return OBJECTPRX->ice_getLocatorCacheTimeout();
+}
+-(id<ICEObjectPrx>) ice_locatorCacheTimeout:(ICEInt)timeout
+{
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTPRX->ice_locatorCacheTimeout(timeout)];
+}
+-(BOOL) ice_isConnectionCached
+{
+    return OBJECTPRX->ice_isConnectionCached();
+}
+-(id<ICEObjectPrx>) ice_connectionCached:(BOOL)cached
+{
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTPRX->ice_connectionCached(cached)];
+}
+-(ICEEndpointSelectionType) ice_getEndpointSelection
+{
+    return (ICEEndpointSelectionType)OBJECTPRX->ice_getEndpointSelection();
+}
+-(id<ICEObjectPrx>) ice_endpointSelection:(ICEEndpointSelectionType)type
+{
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTPRX->ice_endpointSelection((Ice::EndpointSelectionType)type)];
+}
+-(BOOL) ice_isSecure
+{
+    return OBJECTPRX->ice_isSecure();
+}
+-(id<ICEObjectPrx>) ice_secure:(BOOL)secure
+{
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTPRX->ice_secure(secure)];
+}
+-(BOOL) ice_isPreferSecure
+{
+    return OBJECTPRX->ice_isPreferSecure();
+}
+-(id<ICEObjectPrx>) ice_preferSecure:(BOOL)preferSecure
+{
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTPRX->ice_preferSecure(preferSecure)];
+}
+-(id<ICERouterPrx>) ice_getRouter
+{
+    return (id<ICERouterPrx>)[ICERouterPrx objectPrxWithObjectPrx__:OBJECTPRX->ice_getRouter()];
+}
+-(id<ICEObjectPrx>) ice_router:(id<ICERouterPrx>)router
+{
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTPRX->ice_router(
+            Ice::RouterPrx::uncheckedCast(Ice::ObjectPrx([(ICEObjectPrx*)router objectPrx__])))];
+}
+-(id<ICELocatorPrx>) ice_getLocator
+{
+    return (id<ICELocatorPrx>)[ICELocatorPrx objectPrxWithObjectPrx__:OBJECTPRX->ice_getLocator()];
+}
+-(id<ICEObjectPrx>) ice_locator:(id<ICELocatorPrx>)locator
+{
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTPRX->ice_locator(
+            Ice::LocatorPrx::uncheckedCast(Ice::ObjectPrx([(ICEObjectPrx*)locator objectPrx__])))];
+}
+-(BOOL) ice_isCollocationOptimized
+{
+    return OBJECTPRX->ice_isCollocationOptimized();
+}
+-(id<ICEObjectPrx>) ice_collocationOptimized:(BOOL)collocOptimized
+{
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTPRX->ice_collocationOptimized(collocOptimized)];
+}
+-(id<ICEObjectPrx>) ice_twoway
+{
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTPRX->ice_twoway()];
+}
+-(BOOL) ice_isTwoway
+{
+    return OBJECTPRX->ice_isTwoway();
+}
+-(id<ICEObjectPrx>) ice_oneway
+{
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTPRX->ice_oneway()];
+}
+-(BOOL) ice_isOneway
+{
+    return OBJECTPRX->ice_isOneway();
+}
+-(id<ICEObjectPrx>) ice_batchOneway
+{
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTPRX->ice_batchOneway()];
+}
+-(BOOL) ice_isBatchOneway
+{
+    return OBJECTPRX->ice_isBatchOneway();
+}
+-(id<ICEObjectPrx>) ice_datagram
+{
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTPRX->ice_datagram()];
+}
+-(BOOL) ice_isDatagram
+{
+    return OBJECTPRX->ice_isDatagram();
+}
+-(id<ICEObjectPrx>) ice_batchDatagram
+{
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTPRX->ice_batchDatagram()];
+}
+-(BOOL) ice_isBatchDatagram
+{
+    return OBJECTPRX->ice_isBatchDatagram();
+}
+-(id<ICEObjectPrx>) ice_compress:(BOOL)compress
+{
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTPRX->ice_compress(compress)];
+}
+-(id<ICEObjectPrx>) ice_timeout:(int)timeout
+{
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTPRX->ice_timeout(timeout)];
+}
+-(id<ICEObjectPrx>) ice_connectionId:(NSString*)connectionId
+{
+    return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTPRX->ice_connectionId(fromNSString(connectionId))];
+}
+//ICEConnection* ice_getConnection
+//{
+//}
+//ICEConnection* ice_getCachedConnection
+//{
+//}
+-(void) ice_flushBatchRequests
+{
+    OBJECTPRX->ice_flushBatchRequests();
+}
+//-(BOOL) ice_flushBatchRequests_async(const ICEAMI_Object_ice_flushBatchRequests*&)
+//{
+//}
 
 @end
