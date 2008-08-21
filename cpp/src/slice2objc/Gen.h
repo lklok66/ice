@@ -154,8 +154,6 @@ private:
 
         ProxyVisitor(::IceUtilInternal::Output&, ::IceUtilInternal::Output&);
 
-        virtual bool visitModuleStart(const ModulePtr&);
-        virtual void visitModuleEnd(const ModulePtr&);
         virtual bool visitClassDefStart(const ClassDefPtr&);
         virtual void visitClassDefEnd(const ClassDefPtr&);
         virtual void visitOperation(const OperationPtr&);
@@ -179,10 +177,8 @@ private:
     {
     public:
 
-        HelperVisitor(::IceUtilInternal::Output&, bool);
+        HelperVisitor(::IceUtilInternal::Output&, ::IceUtilInternal::Output&, bool);
 
-        virtual bool visitModuleStart(const ModulePtr&);
-        virtual void visitModuleEnd(const ModulePtr&);
         virtual bool visitClassDefStart(const ClassDefPtr&);
         virtual void visitClassDefEnd(const ClassDefPtr&);
         virtual void visitSequence(const SequencePtr&);

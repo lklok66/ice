@@ -443,7 +443,7 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
                 }
                 else
                 {
-                    out << nl << param << " = [" << stream << " readString];";
+                    out << nl << param << " = [[" << stream << " readString] autorelease];";
                 }
                 break;
             }
@@ -503,26 +503,15 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
     ProxyPtr prx = ProxyPtr::dynamicCast(type);
     if(prx)
     {
-        // TODO
-        string typeS = typeToString(type);
         if(marshal)
         {
-            out << nl << typeS << "Helper.write";
-            if(!streamingAPI)
-            {
-                out << "__";
-            }
-            out << "(" << stream << ", " << param << ");";
-        }
-        else
-        {
-            out << nl << param << " = " << typeS << "Helper.read";
-            if(!streamingAPI)
-            {
-                out << "__";
-            }
-            out << "(" << stream << ");";
-        }
+	    out << nl << "[" << stream << " writeProxy:" << param << "];";
+	}
+	else
+	{
+	    string name = fixName(prx->_class()) + "Prx";
+	    out << nl << param << " = (" << name << " *)[[" << stream << " readProxy] autorelease];";
+	}
         return;
     }
 
@@ -579,11 +568,8 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
         }
         else
         {
-	    out << nl << "if(" << param << " == nil)";
-	    out << sb;
 	    string typeS = typeToString(st);
 	    out << nl << param << " = [[" << typeS << " alloc] init];";
-            out << eb;
 	    out << nl << "[" << param << " " << (streamingAPI ? "ice_read" : "read__") << ":" << stream << "];";
         }
         return;
@@ -659,11 +645,11 @@ Slice::ObjCGenerator::writeSequenceMarshalUnmarshalCode(Output& out,
     string stream;
     if(marshal)
     {
-        stream = streamingAPI ? "outS__" : "os__";
+        stream = streamingAPI ? "outS__" : "os_";
     }
     else
     {
-        stream = streamingAPI ? "inS__" : "is__";
+        stream = streamingAPI ? "inS__" : "is_";
     }
 
     TypePtr type = seq->type();
@@ -870,52 +856,42 @@ Slice::ObjCGenerator::writeSequenceMarshalUnmarshalCode(Output& out,
                 }
                 break;
             }
-            default:
-            {
-                typeS[0] = toupper(typeS[0]);
+	    case Builtin::KindBool:
+	    {
                 if(marshal)
                 {
-                    out << nl << stream << ".write" << typeS << "Seq(";
-                    if(isArray)
-                    {
-                        out << param << ");";
-                    }
-                    else if(!isGeneric)
-                    {
-                        out << param << " == null ? null : " << param << ".ToArray());";
-                    }
-                    else
-                    {
-                        out << param << " == null ? 0 : " << param << ".Count, " << param << ");";
-                    }
+                    out << nl << "[" << stream << " writeBoolSeq:" << param << "];";
                 }
                 else
                 {
-                    if(isArray)
-                    {
-                        out << nl << param << " = " << stream << ".read" << typeS << "Seq();";
-                    }
-                    else if(isCustom)
-                    {
-                        out << sb;
-                        out << nl << param << " = new " << genericType << "<"
-                            << typeToString(type) << ">();";
-                        out << nl << "int szx__ = " << stream << ".readSize();";
-                        out << nl << "for(int ix__ = 0; ix__ < szx__; ++ix__)";
-                        out << sb;
-                        out << nl << param << ".Add(" << stream << ".read" << typeS << "());";
-                        out << eb;
-                        out << eb;
-                    }
-                    else if(isGeneric)
-                    {
-                        out << nl << stream << ".read" << typeS << "Seq(out " << param << ");";
-                    }
-                    else
-                    {
-                        out << nl << param << " = new " << fixId(seq->scoped())
-                            << '(' << stream << ".read" << typeS << "Seq());";
-                    }
+		    out << nl << param << " = [[" << stream << " readBoolSeq] autorelease];";
+                }
+                break;
+	    }
+	    case Builtin::KindString:
+	    {
+                if(marshal)
+                {
+                    out << nl << "[" << stream << " writeStringSeq:" << param << "];";
+                }
+                else
+                {
+		    out << nl << param << " = [[" << stream << " readStringSeq] autorelease];";
+                }
+                break;
+	    }
+            default:
+            {
+	        assert(typeS.compare(0, 3, "ICE") == 0);
+		typeS = typeS.substr(3);
+                typeS[0] = toupper(typeS[0]);
+                if(marshal)
+                {
+                    out << nl << "[" << stream << " write" << typeS << "Seq:" << param << "];";
+                }
+                else
+                {
+		    out << nl << param << " = [[" << stream << " read" << typeS << "Seq] autorelease];";
                 }
                 break;
             }

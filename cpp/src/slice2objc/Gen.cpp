@@ -1113,12 +1113,13 @@ Slice::Gen::generate(const UnitPtr& p)
     DelegateMVisitor delegateMVisitor(_H, _M);
     p->visit(&delegateMVisitor, false);
 
+    HelperVisitor helperVisitor(_H, _M, _stream);
+    p->visit(&helperVisitor, false);
+
 #if 0
     OpsVisitor opsVisitor(_M);
     p->visit(&opsVisitor, false);
 
-    HelperVisitor helperVisitor(_M, _stream);
-    p->visit(&helperVisitor, false);
 
     DelegateVisitor delegateVisitor(_M);
     p->visit(&delegateVisitor, false);
@@ -1226,7 +1227,7 @@ Slice::Gen::printHeader(Output& o)
     o << "\n// Ice version " << ICE_STRING_VERSION;
 }
 
-Slice::Gen::UnitVisitor::UnitVisitor(IceUtilInternal::Output& H, IceUtilInternal::Output& M, bool stream)
+Slice::Gen::UnitVisitor::UnitVisitor(Output& H, Output& M, bool stream)
     : ObjCVisitor(H, M), _stream(stream), _globalMetaDataDone(false)
 {
 }
@@ -1261,7 +1262,7 @@ Slice::Gen::UnitVisitor::visitModuleStart(const ModulePtr& p)
     return false;
 }
 
-Slice::Gen::ProxyDeclVisitor::ProxyDeclVisitor(IceUtilInternal::Output& H, IceUtilInternal::Output& M)
+Slice::Gen::ProxyDeclVisitor::ProxyDeclVisitor(Output& H, Output& M)
     : ObjCVisitor(H, M)
 {
 }
@@ -1271,9 +1272,10 @@ Slice::Gen::ProxyDeclVisitor::visitClassDecl(const ClassDeclPtr& p)
 {
     _H << sp << nl << "@class " << fixName(p) << "Prx;";
     _H << nl << "@protocol " << fixName(p) << "Prx;";
+    _H << sp << nl << "@class " << fixName(p) << "PrxHelper;";
 }
 
-Slice::Gen::TypesVisitor::TypesVisitor(IceUtilInternal::Output& H, IceUtilInternal::Output& M, bool stream)
+Slice::Gen::TypesVisitor::TypesVisitor(Output& H, Output& M, bool stream)
     : ObjCVisitor(H, M), _stream(stream)
 {
 }
@@ -2311,7 +2313,7 @@ Slice::Gen::TypesVisitor::writeMemberMarshal(const DataMemberList& dataMembers, 
     }
     _M << eb;
 
-    _H << nl << "-(void) read__:(id<ICEInputStream>)is_;";
+    _H << nl << "-(void) read__:(id<ICEInputStream>)is;";
     _M << sp << nl << "-(void) read__:(id<ICEInputStream>)is_";
     _M << sb;
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
@@ -2321,19 +2323,8 @@ Slice::Gen::TypesVisitor::writeMemberMarshal(const DataMemberList& dataMembers, 
     _M << eb;
 }
 
-Slice::Gen::ProxyVisitor::ProxyVisitor(IceUtilInternal::Output& H, IceUtilInternal::Output& M)
+Slice::Gen::ProxyVisitor::ProxyVisitor(Output& H, Output& M)
     : ObjCVisitor(H, M)
-{
-}
-
-bool
-Slice::Gen::ProxyVisitor::visitModuleStart(const ModulePtr& p)
-{
-    return true;
-}
-
-void
-Slice::Gen::ProxyVisitor::visitModuleEnd(const ModulePtr&)
 {
 }
 
@@ -2408,7 +2399,7 @@ Slice::Gen::ProxyVisitor::visitOperation(const OperationPtr& p)
     // TODO: deal with AMI
 }
 
-Slice::Gen::OpsVisitor::OpsVisitor(IceUtilInternal::Output& out)
+Slice::Gen::OpsVisitor::OpsVisitor(Output& out)
     : ObjCVisitor(out, out)
 {
 }
@@ -2533,315 +2524,31 @@ Slice::Gen::OpsVisitor::writeOperations(const ClassDefPtr& p, bool noCurrent)
     _M << eb;
 }
 
-Slice::Gen::HelperVisitor::HelperVisitor(IceUtilInternal::Output& out, bool stream)
-    : ObjCVisitor(out, out), _stream(stream)
+Slice::Gen::HelperVisitor::HelperVisitor(Output& H, Output& M, bool stream)
+    : ObjCVisitor(H, M), _stream(stream)
 {
-}
-
-bool
-Slice::Gen::HelperVisitor::visitModuleStart(const ModulePtr& p)
-{
-    if(!p->hasNonLocalClassDecls() && !p->hasNonLocalSequences() && !p->hasDictionaries())
-    {
-        return false;
-    }
-
-    _M << sp << nl << "namespace " << fixId(p->name());
-    _M << sb;
-    return true;
-}
-
-void
-Slice::Gen::HelperVisitor::visitModuleEnd(const ModulePtr&)
-{
-    _M << eb;
 }
 
 bool
 Slice::Gen::HelperVisitor::visitClassDefStart(const ClassDefPtr& p)
 {
-    if(p->isLocal())
-        return false;
-
-    string name = p->name();
+    string name = fixName(p) + "PrxHelper";
     ClassList bases = p->bases();
 
+    _H << sp << nl << "@interface " << name;
+    _H << nl << "+(void) write__:(id<ICEOutputStream>)os proxy:(" << fixName(p) + "Prx" << " *)proxy;";
+    _H << nl << "+(void) read__:(id<ICEInputStream>)is;";
+    _H << nl << "@end";
+
+#if 0
     _M << sp << nl << "public sealed class " << name << "PrxHelper : Ice.ObjectPrxHelperBase, " << name << "Prx";
     _M << sb;
 
     OperationList ops = p->allOperations();
 
-    if(!ops.empty())
-    {
-        _M << sp << nl << "#region Synchronous operations";
-    }
-
     OperationList::const_iterator r;
     for(r = ops.begin(); r != ops.end(); ++r)
     {
-        OperationPtr op = *r;
-        string opName = fixId(op->name(), DotNet::ICloneable, true);
-        TypePtr ret = op->returnType();
-        string retS = typeToString(ret);
-
-        vector<string> params;// = getParams(op);
-        vector<string> args;// = getArgs(op);
-
-        _M << sp << nl << "public " << retS << " " << opName << spar << params << epar;
-        _M << sb;
-        _M << nl;
-        if(ret)
-        {
-            _M << "return ";
-        }
-        _M << opName << spar << args << "null" << "false" << epar << ';';
-        _M << eb;
-
-        _M << sp << nl << "public " << retS << " " << opName << spar << params 
-             << "_System.Collections.Generic.Dictionary<string, string> context__" << epar;
-        _M << sb;
-        _M << nl;
-        if(ret)
-        {
-            _M << "return ";
-        }
-        _M << opName << spar << args << "context__" << "true" << epar << ';';
-        _M << eb;
-
-        _M << sp << nl << "private " << retS << " " << opName << spar << params 
-             << "_System.Collections.Generic.Dictionary<string, string> context__"
-             << "bool explicitContext__" << epar;
-        _M << sb;
-
-        _M << nl << "if(explicitContext__ && context__ == null)";
-        _M << sb;
-        _M << nl << "context__ = emptyContext_;";
-        _M << eb;
-        _M << nl << "int cnt__ = 0;";
-        _M << nl << "while(true)";
-        _M << sb;
-        _M << nl << "Ice.ObjectDel_ delBase__ = null;";
-        _M << nl << "try";
-        _M << sb;
-        if(op->returnsData())
-        {
-            _M << nl << "checkTwowayOnly__(\"" << op->name() << "\");";
-        }
-        _M << nl << "delBase__ = getDelegate__(false);";
-        _M << nl << name << "Del_ del__ = (" << name << "Del_)delBase__;";
-        _M << nl;
-        if(ret)
-        {
-            _M << "return ";
-        }
-        _M << "del__." << opName << spar << args << "context__" << epar << ';';
-        if(!ret)
-        {
-            _M << nl << "return;";
-        }
-        _M << eb;
-        _M << nl << "catch(IceInternal.LocalExceptionWrapper ex__)";
-        _M << sb;
-        if(op->mode() == Operation::Idempotent || op->mode() == Operation::Nonmutating)
-        {
-            _M << nl << "handleExceptionWrapperRelaxed__(delBase__, ex__, null, ref cnt__);";
-        }
-        else
-        {
-            _M << nl << "handleExceptionWrapper__(delBase__, ex__, null);";
-        }
-        _M << eb;
-        _M << nl << "catch(Ice.LocalException ex__)";
-        _M << sb;
-        _M << nl << "handleException__(delBase__, ex__, null, ref cnt__);";
-        _M << eb;
-        _M << eb;
-
-        _M << eb;
-    }
-
-    if(!ops.empty())
-    {
-        _M << sp << nl << "#endregion"; // Synchronous operations
-    }
-
-    bool hasAsyncOps = false;
-
-    for(r = ops.begin(); r != ops.end(); ++r)
-    {
-        OperationPtr op = *r;
-        
-        ClassDefPtr containingClass = ClassDefPtr::dynamicCast(op->container());
-        if(containingClass->hasMetaData("ami") || op->hasMetaData("ami"))
-        {
-            if(!hasAsyncOps)
-            {
-                _M << sp << nl << "#region Asynchronous operations";
-                hasAsyncOps = true;
-            }
-            vector<string> paramsAMI = getParamsAsync(op, false);
-            vector<string> argsAMI = getArgsAsync(op);
-
-            string opName = op->name();
-
-            //
-            // Write two versions of the operation - with and without a
-            // context parameter
-            //
-            _M << sp;
-            _M << nl << "public bool " << opName << "_async" << spar << paramsAMI << epar;
-            _M << sb;
-            _M << nl << "return " << opName << "_async" << spar << argsAMI << "null" << "false" << epar << ';';
-            _M << eb;
-
-            _M << sp;
-            _M << nl << "public bool " << opName << "_async" << spar << paramsAMI
-                 << "_System.Collections.Generic.Dictionary<string, string> ctx__" << epar;
-            _M << sb;
-            _M << nl << "return " << opName << "_async" << spar << argsAMI << "ctx__" << "true" << epar << ';';
-            _M << eb;
-
-            _M << sp;
-            _M << nl << "public bool " << opName << "_async" << spar << paramsAMI
-                 << "_System.Collections.Generic.Dictionary<string, string> ctx__"
-                 << "bool explicitContext__" << epar;
-            _M << sb;
-            _M << nl << "if(explicitContext__ && ctx__ == null)";
-            _M << sb;
-            _M << nl << "ctx__ = emptyContext_;";
-            _M << eb;
-            _M << nl << "return cb__.invoke__" << spar << "this" << argsAMI << "ctx__" << epar << ';';
-            _M << eb;
-        }
-    }
-
-    if(hasAsyncOps)
-    {
-        _M << sp << nl << "#endregion"; // Asynchronous operations
-    }
-
-    _M << sp << nl << "#region Checked and unchecked cast operations";
-
-    _M << sp << nl << "public static " << name << "Prx checkedCast(Ice.ObjectPrx b)";
-    _M << sb;
-    _M << nl << "if(b == null)";
-    _M << sb;
-    _M << nl << "return null;";
-    _M << eb;
-    _M << nl << name << "Prx r = b as " << name << "Prx;";
-    _M << nl << "if((r == null) && b.ice_isA(\"" << p->scoped() << "\"))";
-    _M << sb;
-    _M << nl << name << "PrxHelper h = new " << name << "PrxHelper();";
-    _M << nl << "h.copyFrom__(b);";
-    _M << nl << "r = h;";
-    _M << eb;
-    _M << nl << "return r;";
-    _M << eb;
-
-    _M << sp << nl << "public static " << name
-         << "Prx checkedCast(Ice.ObjectPrx b, _System.Collections.Generic.Dictionary<string, string> ctx)";
-    _M << sb;
-    _M << nl << "if(b == null)";
-    _M << sb;
-    _M << nl << "return null;";
-    _M << eb;
-    _M << nl << name << "Prx r = b as " << name << "Prx;";
-    _M << nl << "if((r == null) && b.ice_isA(\"" << p->scoped() << "\", ctx))";
-    _M << sb;
-    _M << nl << name << "PrxHelper h = new " << name << "PrxHelper();";
-    _M << nl << "h.copyFrom__(b);";
-    _M << nl << "r = h;";
-    _M << eb;
-    _M << nl << "return r;";
-    _M << eb;
-
-    _M << sp << nl << "public static " << name << "Prx checkedCast(Ice.ObjectPrx b, string f)";
-    _M << sb;
-    _M << nl << "if(b == null)";
-    _M << sb;
-    _M << nl << "return null;";
-    _M << eb;
-    _M << nl << "Ice.ObjectPrx bb = b.ice_facet(f);";
-    _M << nl << "try";
-    _M << sb;
-    _M << nl << "if(bb.ice_isA(\"" << p->scoped() << "\"))";
-    _M << sb;
-    _M << nl << name << "PrxHelper h = new " << name << "PrxHelper();";
-    _M << nl << "h.copyFrom__(bb);";
-    _M << nl << "return h;";
-    _M << eb;
-    _M << eb;
-    _M << nl << "catch(Ice.FacetNotExistException)";
-    _M << sb;
-    _M << eb;
-    _M << nl << "return null;";
-    _M << eb;
-
-    _M << sp << nl << "public static " << name
-         << "Prx checkedCast(Ice.ObjectPrx b, string f, "
-         << "_System.Collections.Generic.Dictionary<string, string> ctx)";
-    _M << sb;
-    _M << nl << "if(b == null)";
-    _M << sb;
-    _M << nl << "return null;";
-    _M << eb;
-    _M << nl << "Ice.ObjectPrx bb = b.ice_facet(f);";
-    _M << nl << "try";
-    _M << sb;
-    _M << nl << "if(bb.ice_isA(\"" << p->scoped() << "\", ctx))";
-    _M << sb;
-    _M << nl << name << "PrxHelper h = new " << name << "PrxHelper();";
-    _M << nl << "h.copyFrom__(bb);";
-    _M << nl << "return h;";
-    _M << eb;
-    _M << eb;
-    _M << nl << "catch(Ice.FacetNotExistException)";
-    _M << sb;
-    _M << eb;
-    _M << nl << "return null;";
-    _M << eb;
-
-    _M << sp << nl << "public static " << name << "Prx uncheckedCast(Ice.ObjectPrx b)";
-    _M << sb;
-    _M << nl << "if(b == null)";
-    _M << sb;
-    _M << nl << "return null;";
-    _M << eb;
-    _M << nl << name << "Prx r = b as " << name << "Prx;";
-    _M << nl << "if(r == null)";
-    _M << sb;
-    _M << nl << name << "PrxHelper h = new " << name << "PrxHelper();";
-    _M << nl << "h.copyFrom__(b);";
-    _M << nl << "r = h;";
-    _M << eb;
-    _M << nl << "return r;";
-    _M << eb;
-
-    _M << sp << nl << "public static " << name << "Prx uncheckedCast(Ice.ObjectPrx b, string f)";
-    _M << sb;
-    _M << nl << "if(b == null)";
-    _M << sb;
-    _M << nl << "return null;";
-    _M << eb;
-    _M << nl << "Ice.ObjectPrx bb = b.ice_facet(f);";
-    _M << nl << name << "PrxHelper h = new " << name << "PrxHelper();";
-    _M << nl << "h.copyFrom__(bb);";
-    _M << nl << "return h;";
-    _M << eb;
-
-    _M << sp << nl << "#endregion"; // Checked and unchecked cast operations
-
-    _M << sp << nl << "#region Marshaling support";
-
-    _M << sp << nl << "protected override Ice.ObjectDelM_ createDelegateM__()";
-    _M << sb;
-    _M << nl << "return new " << name << "DelM_();";
-    _M << eb;
-
-    _M << sp << nl << "protected override Ice.ObjectDelD_ createDelegateD__()";
-    _M << sb;
-    _M << nl << "return new " << name << "DelD_();";
-    _M << eb;
 
     _M << sp << nl << "public static void write__(IceInternal.BasicStream os__, " << name << "Prx v__)";
     _M << sb;
@@ -2882,18 +2589,19 @@ Slice::Gen::HelperVisitor::visitClassDefStart(const ClassDefPtr& p)
 
     _M << sp << nl << "#endregion"; // Marshaling support
 
+#endif
     return true;
 }
 
 void
 Slice::Gen::HelperVisitor::visitClassDefEnd(const ClassDefPtr&)
 {
-    _M << eb;
 }
 
 void
 Slice::Gen::HelperVisitor::visitSequence(const SequencePtr& p)
 {
+#if 0
     //
     // Don't generate helper for sequence of a local type.
     //
@@ -2968,11 +2676,13 @@ Slice::Gen::HelperVisitor::visitSequence(const SequencePtr& p)
         _M << eb;
         _M << eb;
     }
+#endif
 }
 
 void
 Slice::Gen::HelperVisitor::visitDictionary(const DictionaryPtr& p)
 {
+#if 0
     //
     // Don't generate helper for a dictionary containing a local type
     //
@@ -3190,9 +2900,10 @@ Slice::Gen::HelperVisitor::visitDictionary(const DictionaryPtr& p)
     }
 
     _M << eb;
+#endif
 }
 
-Slice::Gen::DelegateVisitor::DelegateVisitor(IceUtilInternal::Output& out)
+Slice::Gen::DelegateVisitor::DelegateVisitor(Output& out)
     : ObjCVisitor(out, out)
 {
 }
@@ -3273,7 +2984,7 @@ Slice::Gen::DelegateVisitor::visitClassDefEnd(const ClassDefPtr&)
     _M << eb;
 }
 
-Slice::Gen::DelegateMVisitor::DelegateMVisitor(IceUtilInternal::Output& H, IceUtilInternal::Output& M)
+Slice::Gen::DelegateMVisitor::DelegateMVisitor(Output& H, Output& M)
     : ObjCVisitor(H, M)
 {
 }
@@ -3468,10 +3179,7 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
 	   {
 	       _M << "*";
 	   }
-	   if(!isValueType(returnType))
-	   {
-	       _M << "ret_ = [[" << retString << " alloc] init];";
-	   }
+	   _M << "ret_;";
 	   writeMarshalUnmarshalCode(_M, returnType, "ret_", false, false, true, "");
 	}
 	if(p->returnsClasses())
@@ -3522,7 +3230,7 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
     _M << eb;
 }
 
-Slice::Gen::DelegateDVisitor::DelegateDVisitor(IceUtilInternal::Output& out)
+Slice::Gen::DelegateDVisitor::DelegateDVisitor(Output& out)
     : ObjCVisitor(out, out)
 {
 }
@@ -3740,7 +3448,7 @@ Slice::Gen::DelegateDVisitor::visitClassDefEnd(const ClassDefPtr&)
     _M << eb;
 }
 
-Slice::Gen::DispatcherVisitor::DispatcherVisitor(::IceUtilInternal::Output &out, bool stream)
+Slice::Gen::DispatcherVisitor::DispatcherVisitor(Output &out, bool stream)
     : ObjCVisitor(out, out), _stream(stream)
 {
 }
@@ -3837,7 +3545,7 @@ Slice::Gen::DispatcherVisitor::visitClassDefStart(const ClassDefPtr& p)
     return true;
 }
 
-Slice::Gen::AsyncVisitor::AsyncVisitor(::IceUtilInternal::Output &out)
+Slice::Gen::AsyncVisitor::AsyncVisitor(Output &out)
     : ObjCVisitor(out, out)
 {
 }
@@ -4197,7 +3905,7 @@ Slice::Gen::AsyncVisitor::visitOperation(const OperationPtr& p)
     }
 }
 
-Slice::Gen::TieVisitor::TieVisitor(IceUtilInternal::Output& out)
+Slice::Gen::TieVisitor::TieVisitor(Output& out)
     : ObjCVisitor(out, out)
 {
 }
@@ -4438,7 +4146,7 @@ Slice::Gen::TieVisitor::writeInheritedOperationsWithOpNames(const ClassDefPtr& p
     }
 }
 
-Slice::Gen::BaseImplVisitor::BaseImplVisitor(IceUtilInternal::Output& out)
+Slice::Gen::BaseImplVisitor::BaseImplVisitor(Output& out)
     : ObjCVisitor(out, out)
 {
 }
@@ -4548,7 +4256,7 @@ Slice::Gen::BaseImplVisitor::writeOperation(const OperationPtr& op, bool comment
 }
 
 
-Slice::Gen::ImplVisitor::ImplVisitor(IceUtilInternal::Output& out)
+Slice::Gen::ImplVisitor::ImplVisitor(Output& out)
     : BaseImplVisitor(out)
 {
 }
@@ -4616,7 +4324,7 @@ Slice::Gen::ImplVisitor::visitClassDefEnd(const ClassDefPtr&)
     _M << eb;
 }
 
-Slice::Gen::ImplTieVisitor::ImplTieVisitor(IceUtilInternal::Output& out)
+Slice::Gen::ImplTieVisitor::ImplTieVisitor(Output& out)
     : BaseImplVisitor(out)
 {
 }

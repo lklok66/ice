@@ -31,7 +31,7 @@ struct AnotherStruct
 
 struct Structure
 {
-//    MyClass* p;
+    //MyClass* p;
     MyEnum e;
     AnotherStruct s;
 };
@@ -91,23 +91,23 @@ dictionary<string, MyEnum> StringMyEnumD;
 
 //     MyClass* opMyClass(MyClass* p1, out MyClass* p2, out MyClass* p3);
 
-//     Structure opStruct(Structure p1, Structure p2,
-//                        out Structure p3);
+     Structure opStruct(Structure p1, Structure p2,
+                        out Structure p3);
 
-//     ByteS opByteS(ByteS p1, ByteS p2,
-//                   out ByteS p3);
+     ByteS opByteS(ByteS p1, ByteS p2,
+                   out ByteS p3);
 
-//     BoolS opBoolS(BoolS p1, BoolS p2,
-//                   out BoolS p3);        
+     BoolS opBoolS(BoolS p1, BoolS p2,
+                   out BoolS p3);        
 
-//     LongS opShortIntLongS(Test::ShortS p1, IntS p2, LongS p3,
-//                           out ::Test::ShortS p4, out IntS p5, out LongS p6);
+     LongS opShortIntLongS(Test::ShortS p1, IntS p2, LongS p3,
+                           out ::Test::ShortS p4, out IntS p5, out LongS p6);
 
-//     DoubleS opFloatDoubleS(FloatS p1, DoubleS p2,
-//                            out FloatS p3, out DoubleS p4);
+     DoubleS opFloatDoubleS(FloatS p1, DoubleS p2,
+                            out FloatS p3, out DoubleS p4);
     
-//     StringS opStringS(StringS p1, StringS p2,
-//                       out StringS p3);
+     StringS opStringS(StringS p1, StringS p2,
+                       out StringS p3);
     
 //     ByteSS opByteSS(ByteSS p1, ByteSS p2,
 //                     out ByteSS p3);
