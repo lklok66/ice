@@ -25,11 +25,11 @@
     NSString* _hostname;
     enum DeliveryMode
     {
-	DeliveryModeTwoway,
-	DeliveryModeOneway,
-	DeliveryModeDatagram,
-	DeliveryModeBatchOneway,
-	DeliveryModeBatchDatagram
+        DeliveryModeTwoway,
+        DeliveryModeOneway,
+        DeliveryModeDatagram,
+        DeliveryModeBatchOneway,
+        DeliveryModeBatchDatagram
     }
     _deliveryMode;
     BOOL _batch;

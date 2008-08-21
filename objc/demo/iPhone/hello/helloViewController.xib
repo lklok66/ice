@@ -65,7 +65,7 @@
 						<int key="IBUIContentVerticalAlignment">0</int>
 						<string key="IBUIText"/>
 						<int key="IBUIBorderStyle">3</int>
-						<string key="IBUIPlaceholder">Hostname</string>
+						<string key="IBUIPlaceholder"/>
 						<object class="NSColor" key="IBUITextColor">
 							<int key="NSColorSpace">3</int>
 							<bytes key="NSWhite">MAA</bytes>
@@ -661,8 +661,8 @@
 					<object class="NSArray">
 						<bool key="EncodedWithXMLCoder">YES</bool>
 					</object>
-					<integer value="0" id="6"/>
-					<reference ref="6"/>
+					<real value="0.000000e+00" id="278971594"/>
+					<reference ref="278971594"/>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>

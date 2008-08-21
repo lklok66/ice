@@ -22,6 +22,8 @@
 @synthesize delaySlider;
 @synthesize activity;
 
+NSString* hostnameKey			= @"hostnameKey";
+
 /*
  Implement loadView if you want to create a view hierarchy programmatically
 - (void)loadView {
@@ -34,30 +36,30 @@
     ICEObjectPrx* prx = [_communicator stringToProxy: s];
     switch(_deliveryMode)
     {
-	case DeliveryModeTwoway:
-	    prx = [prx ice_twoway];
-	    break;
-	    
-	case DeliveryModeOneway:
-	    prx = [prx ice_oneway];
-	    break;
-	    
-	case DeliveryModeBatchOneway:
-	    prx = [prx ice_batchOneway];
-	    break;
-	    
-	case DeliveryModeDatagram:
-	    prx = [prx ice_datagram];
-	    break;
-	    
-	case DeliveryModeBatchDatagram:
-	    prx = [prx ice_batchDatagram];
-	    break;
+        case DeliveryModeTwoway:
+            prx = [prx ice_twoway];
+            break;
+            
+        case DeliveryModeOneway:
+            prx = [prx ice_oneway];
+            break;
+            
+        case DeliveryModeBatchOneway:
+            prx = [prx ice_batchOneway];
+            break;
+            
+        case DeliveryModeDatagram:
+            prx = [prx ice_datagram];
+            break;
+            
+        case DeliveryModeBatchDatagram:
+            prx = [prx ice_batchDatagram];
+            break;
     }
     
     if(_timeout != 0)
     {
-	prx = [prx ice_timeout: _timeout];
+        prx = [prx ice_timeout: _timeout];
     }
     
     [_hello release];
@@ -66,6 +68,19 @@
 
 - (void)viewDidLoad
 {
+	NSString* testValue = [[NSUserDefaults standardUserDefaults] stringForKey:hostnameKey];
+	if (testValue == nil)
+	{
+		NSDictionary* appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
+					 				 @"127.0.0.1", hostnameKey,
+									 nil];
+		
+		[[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
+		[[NSUserDefaults standardUserDefaults] synchronize];
+	}
+	
+	_hostname = [[NSUserDefaults standardUserDefaults] stringForKey:hostnameKey];
+
     [super viewDidLoad];
     _communicator = [[ICEUtil createCommunicator] retain];
     
@@ -73,7 +88,6 @@
     hostnameTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
 
     // Defaults for the UI elements.
-    _hostname = @"127.0.0.1";
     hostnameTextField.text = _hostname; 
 
     // Disable secure switch for now, since SSL is not supported.
@@ -99,12 +113,16 @@
 - (BOOL)textFieldShouldReturn:(UITextField *)theTextField
 {
     // When the user presses return, take focus away from the text field so that the keyboard is dismissed.
-    if (theTextField == hostnameTextField) {
-	[hostnameTextField resignFirstResponder];
+    if (theTextField == hostnameTextField)
+    {
+        [hostnameTextField resignFirstResponder];
 
         // Invoke the method that changes the greeting.
-	// Store the text of the text field in the 'string' instance variable.
-	_hostname = hostnameTextField.text;
+        // Store the text of the text field in the 'string' instance variable.
+        _hostname = hostnameTextField.text;
+        [[NSUserDefaults standardUserDefaults] setObject:_hostname forKey:hostnameKey];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+        [self updateProxy];
     }
     return YES;
 }
@@ -138,37 +156,37 @@
     int mode = [sender selectedSegmentIndex];
     switch (mode)
     {
-	case 0: // Twoway
-	    _deliveryMode = DeliveryModeTwoway;
-	    [batchSwitch setEnabled: NO];
-	    [flushButton setEnabled: NO];
-	    break;
-	case 1: // Oneway
-	    if(_batch)
-	    {
-		_deliveryMode = DeliveryModeBatchOneway;
-	    }
-	    else
-	    {
-		_deliveryMode = DeliveryModeOneway;
-	    }
-	    [batchSwitch setEnabled: YES];
-	    [flushButton setEnabled: [batchSwitch isOn]];
-	    break;
-	case 2: // Datagram
-	    if(_batch)
-	    {
-		_deliveryMode = DeliveryModeBatchDatagram;
-	    }
-	    else
-	    {
-		_deliveryMode = DeliveryModeDatagram;
-	    }
-	    [batchSwitch setEnabled: YES];
-	    [flushButton setEnabled: [batchSwitch isOn]];
-	    break;
-	default:
-	    break;
+        case 0: // Twoway
+            _deliveryMode = DeliveryModeTwoway;
+            [batchSwitch setEnabled: NO];
+            [flushButton setEnabled: NO];
+            break;
+        case 1: // Oneway
+            if(_batch)
+            {
+                _deliveryMode = DeliveryModeBatchOneway;
+            }
+            else
+            {
+                _deliveryMode = DeliveryModeOneway;
+            }
+            [batchSwitch setEnabled: YES];
+            [flushButton setEnabled: [batchSwitch isOn]];
+            break;
+        case 2: // Datagram
+            if(_batch)
+            {
+                _deliveryMode = DeliveryModeBatchDatagram;
+            }
+            else
+            {
+                _deliveryMode = DeliveryModeDatagram;
+            }
+            [batchSwitch setEnabled: YES];
+            [flushButton setEnabled: [batchSwitch isOn]];
+            break;
+        default:
+            break;
     }
     [self updateProxy];
 }
@@ -179,19 +197,19 @@
     _batch = [sender isOn];
     if(_batch && _deliveryMode == DeliveryModeOneway)
     {
-	_deliveryMode = DeliveryModeBatchOneway;
+        _deliveryMode = DeliveryModeBatchOneway;
     }
     else if(_batch && _deliveryMode == DeliveryModeDatagram)
     {
-	_deliveryMode = DeliveryModeBatchDatagram;
+        _deliveryMode = DeliveryModeBatchDatagram;
     }
     else if(!_batch && _deliveryMode == DeliveryModeBatchOneway)
     {
-	_deliveryMode = DeliveryModeOneway;
+        _deliveryMode = DeliveryModeOneway;
     }
     else if(!_batch && _deliveryMode == DeliveryModeBatchDatagram)
     {
-	_deliveryMode = DeliveryModeDatagram;
+        _deliveryMode = DeliveryModeDatagram;
     }
     [self updateProxy];
 }
@@ -212,13 +230,14 @@
 
 -(void)handleException:(ICEException*) ex
 {
-    [activity stopAnimating];	    
+    [activity stopAnimating];       
 
     NSString* s = [NSString stringWithFormat:@"%@", ex];
     // open an alert with just an OK button
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error" message:s
-						   delegate:self cancelButtonTitle:@"OK" otherButtonTitles: nil];
-    [alert show];	
+    UIAlertView *alert = [[UIAlertView alloc]
+                          initWithTitle:@"Error" message:s
+                          delegate:self cancelButtonTitle:@"OK" otherButtonTitles: nil];
+    [alert show];       
     [alert release];
     
     statusLabel.text = @"Ready";
@@ -229,24 +248,24 @@
     // TODO: Delay blocks the caller. We should use AMI here.
     @try
     {
-	if(_deliveryMode != DeliveryModeBatchOneway || _deliveryMode != DeliveryModeBatchDatagram)
-	{
-	    statusLabel.text = @"Sending request";
-	    // TODO: Note at present this doens't work since there is no AMI.
-	    [activity startAnimating];
-	    [_hello sayHello: _delay];
-	    [activity stopAnimating];	    
-	    statusLabel.text = @"Sent request";
-	}
-	else
-	{
-	    [_hello sayHello: _delay];
-	    statusLabel.text = @"Queued batch request";
-	}
+        if(_deliveryMode != DeliveryModeBatchOneway || _deliveryMode != DeliveryModeBatchDatagram)
+        {
+            statusLabel.text = @"Sending request";
+            // TODO: Note at present this doens't work since there is no AMI.
+            [activity startAnimating];
+            [_hello sayHello: _delay];
+            [activity stopAnimating];       
+            statusLabel.text = @"Sent request";
+        }
+        else
+        {
+            [_hello sayHello: _delay];
+            statusLabel.text = @"Queued batch request";
+        }
     }
     @catch(ICELocalException* ex)
     {
-	[self handleException: ex];
+        [self handleException: ex];
     }
 }
 
@@ -254,12 +273,12 @@
 {
     @try
     {
-	[_communicator flushBatchRequests];
-	statusLabel.text = @"Flushed batch requests";
+        [_communicator flushBatchRequests];
+        statusLabel.text = @"Flushed batch requests";
     }
     @catch(ICELocalException* ex)
     {
-	[self handleException: ex];
+        [self handleException: ex];
     }
 }
 
@@ -267,19 +286,19 @@
 {
     @try
     {
-	[_hello shutdown];
-	if(_deliveryMode == DeliveryModeBatchOneway || _deliveryMode == DeliveryModeBatchDatagram)
-	{
-	    statusLabel.text = @"Queued shutdown request";
-	}
-	else
-	{
-	    statusLabel.text = @"Sent shutdown";
-	}
+        [_hello shutdown];
+        if(_deliveryMode == DeliveryModeBatchOneway || _deliveryMode == DeliveryModeBatchDatagram)
+        {
+            statusLabel.text = @"Queued shutdown request";
+        }
+        else
+        {
+            statusLabel.text = @"Sent shutdown";
+        }
     }
     @catch(ICELocalException* ex)
     {
-	[self handleException: ex];
+        [self handleException: ex];
     }
    
 }

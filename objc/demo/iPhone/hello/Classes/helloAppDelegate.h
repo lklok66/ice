@@ -1,18 +1,19 @@
+// **********************************************************************
 //
-//  helloAppDelegate.h
-//  hello
+// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
 //
-//  Created by Benoit Foucher on 7/30/08.
-//  Copyright ZeroC, Inc. 2008. All rights reserved.
+// This copy of Ice is licensed to you under the terms described in the
+// ICE_LICENSE file included in this distribution.
 //
+// **********************************************************************
 
 #import <UIKit/UIKit.h>
 
 @class helloViewController;
 
 @interface helloAppDelegate : NSObject <UIApplicationDelegate> {
-	IBOutlet UIWindow *window;
-	IBOutlet helloViewController *viewController;
+    IBOutlet UIWindow *window;
+    IBOutlet helloViewController *viewController;
 }
 
 @property (nonatomic, retain) UIWindow *window;
