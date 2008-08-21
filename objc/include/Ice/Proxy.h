@@ -22,8 +22,9 @@
 @protocol ICEOutputStream;
 @protocol ICEInputStream;
 
-@protocol ICEObjectPrx <NSObject>
+@protocol ICEObjectPrx <NSObject, NSCopying>
 
+-(id) copyWithZone:(NSZone *)zone;
 -(NSUInteger) hash;
 -(BOOL) isEqual:(id)anObject;
 

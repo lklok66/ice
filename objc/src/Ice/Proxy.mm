@@ -188,6 +188,11 @@
     }
 }
 
+-(id) copyWithZone:(NSZone *)zone
+{
+    return [self retain];
+}
+
 -(NSUInteger) hash
 {
     return (NSUInteger)OBJECTPRX->ice_getHash();

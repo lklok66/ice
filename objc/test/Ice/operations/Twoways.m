@@ -117,12 +117,12 @@ twoways(id<ICECommunicator> communicator, TestMyClassPrx* p)
 
     {
         TestStructure *si1 = [TestStructure structure];
-	//[si1 setP:p];
+	[si1 setP:p];
 	[si1 setE:Testenum3];
 	[si1 setS:[TestAnotherStruct anotherStruct]];
 	[[si1 s] setS:@"abc"];
 	TestStructure *si2 = [TestStructure structure];
-	//[si2 setP:nil];
+	[si2 setP:nil];
 	[si2 setE:Testenum2];
 	[si2 setS:[TestAnotherStruct anotherStruct]];
 	[[si2 s] setS:@"def"];
@@ -130,13 +130,14 @@ twoways(id<ICECommunicator> communicator, TestMyClassPrx* p)
 	TestStructure *so;
 	TestStructure *rso = [p opStruct:si1 p2:si2 p3:&so];
 
-	//test([rso p] == nil);
+	test([rso p] == nil);
 	test([rso e] == Testenum2);
 	test([[[rso s] s] isEqualToString:@"def"]);
-	//test([so p] == p); // ???
+	test([so p] != nil);
+	//test([[so p] isEqual:p]);
 	test([so e] == Testenum3);
 	test([[[so s] s] isEqualToString:@"a new string"]);
-	//[[so p] opVoid];
+	[[so p] opVoid];
     }
 
     {
