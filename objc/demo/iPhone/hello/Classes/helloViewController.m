@@ -53,9 +53,6 @@
 	case DeliveryModeBatchDatagram:
 	    prx = [prx ice_batchDatagram];
 	    break;
-
-	default:
-	    assert(NO);
     }
     
     if(_timeout != 0)
@@ -143,7 +140,7 @@
     {
 	case 0: // Twoway
 	    _deliveryMode = DeliveryModeTwoway;
-	    [self.batchSwitch setEnabled: NO];
+	    [batchSwitch setEnabled: NO];
 	    [flushButton setEnabled: NO];
 	    break;
 	case 1: // Oneway
@@ -155,7 +152,7 @@
 	    {
 		_deliveryMode = DeliveryModeOneway;
 	    }
-	    [self.batchSwitch setEnabled: YES];
+	    [batchSwitch setEnabled: YES];
 	    [flushButton setEnabled: [batchSwitch isOn]];
 	    break;
 	case 2: // Datagram
