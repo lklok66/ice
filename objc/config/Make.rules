@@ -32,8 +32,8 @@ embedded_runpath_prefix  ?= /opt/Ice-$(VERSION_MAJOR).$(VERSION_MINOR)
 # Define COMPILE_FOR_IPHONE or COMPILE_FOR_IPHONE_EMULATOR as yes if
 # you want to build Ice for Objective-C with the iPhone SDK.
 #
-#COMPILE_FOR_IPHONE	    	= yes
-#COMPILE_FOR_IPHONE_SIMULATOR 	= yes
+COMPILE_FOR_IPHONE	    	= yes
+COMPILE_FOR_IPHONE_SIMULATOR 	= yes
 
 #STATICLIBS			= yes
 
