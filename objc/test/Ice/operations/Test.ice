@@ -31,7 +31,7 @@ struct AnotherStruct
 
 struct Structure
 {
-    //MyClass* p;
+    MyClass* p;
     MyEnum e;
     AnotherStruct s;
 };

@@ -510,7 +510,8 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
 	else
 	{
 	    string name = fixName(prx->_class()) + "Prx";
-	    out << nl << param << " = (" << name << " *)[[" << stream << " readProxy] autorelease];";
+	    out << nl << param << " = (" << name << " *)[[" << stream
+	        << " readProxy:[" << name << " class]] autorelease];";
 	}
         return;
     }

@@ -529,11 +529,16 @@ public:
     }
 }
 
--(ICEObjectPrx*) readProxy
+-(ICEObjectPrx*) readProxy:(Class)c
 {
     try
     {
-        return [[ICEObjectPrx alloc] initWithObjectPrx__:is__->readProxy()];
+	Ice::ObjectPrx p = is__->readProxy();
+	if(p.get() == nil)
+	{
+	     return nil;
+	}
+	return [[c alloc] initWithObjectPrx__:p];
     }
     catch(const std::exception& ex)
     {

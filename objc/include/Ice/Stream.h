@@ -59,7 +59,7 @@
 
 -(ICEInt) readSize;
 
--(ICEObjectPrx*) readProxy;
+-(ICEObjectPrx*) readProxy:(Class)c;
 
 -(void) readObject:(id<ICEReadObjectCallback>)callback;
 
