@@ -11,6 +11,13 @@
 #import <Ice/Ice.h>
 #import "Hello.h"
 
+//
+// Avoid warning for undocumented UISlider method
+//
+@interface UISlider(UndocumentedAPI)
+-(void)setShowValue:(BOOL)val;
+@end
+
 @implementation helloViewController
 
 @synthesize flushButton;
