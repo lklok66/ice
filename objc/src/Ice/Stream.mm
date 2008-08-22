@@ -146,7 +146,14 @@ public:
     {
         @try
         {
-            [_cb invoke:ObjectReaderPtr::dynamicCast(obj)->getObject()];
+            if(obj)
+            {
+                [_cb invoke:ObjectReaderPtr::dynamicCast(obj)->getObject()];
+            }
+            else
+            {
+                [_cb invoke:nil];
+            }
         }
         @catch(NSException* ex)
         {
@@ -549,7 +556,7 @@ public:
     try
     {
 	Ice::ObjectPrx p = is__->readProxy();
-	if(p.get() == nil)
+	if(!p)
 	{
 	     return nil;
 	}
