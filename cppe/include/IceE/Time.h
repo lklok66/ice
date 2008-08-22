@@ -190,6 +190,11 @@ private:
     Int64 _usec;
 };
 
+inline ICE_API std::ostream& operator<<(std::ostream& os, const Time& tm)
+{
+    return os << tm.toMicroSeconds() / 1000000.0;
+}
+
 } // End namespace Ice
 
 #endif

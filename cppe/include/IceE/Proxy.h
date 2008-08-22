@@ -242,6 +242,11 @@ private:
 
 } }
 
+inline ICE_API std::ostream& operator<<(std::ostream& os, const ::IceProxy::Ice::Object& p)
+{
+    return os << p.ice_toString();
+}
+
 namespace Ice
 {
 

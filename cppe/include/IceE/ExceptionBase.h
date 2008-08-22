@@ -11,6 +11,7 @@
 #define ICEE_EXCEPTION_BASE_H
 
 #include <IceE/Config.h>
+#include <iostream>
 
 namespace IceUtil
 {
@@ -37,6 +38,11 @@ private:
     static const char* _name;
     mutable std::string _str; // Initialized lazily in what().
 };
+
+inline ICE_API std::ostream& operator<<(std::ostream& os, const Exception& ex)
+{
+    return os << ex.toString();
+}
 
 class ICE_API NullHandleException : public Exception
 {

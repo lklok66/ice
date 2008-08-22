@@ -317,6 +317,12 @@ public:
     }
 };
 
+template<class Y>
+inline std::ostream& operator<<(std::ostream& os, ::IceInternal::ProxyHandle<Y> p)
+{
+    return os << (p ? p->ice_toString() : std::string(""));
+}
+
 }
 
 #endif
