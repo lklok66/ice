@@ -584,17 +584,17 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
         size_t sz = en->getEnumerators().size();
         if(sz <= 0x7f)
         {
-            func = marshal ? "writeByte" : "readByte";
+            func = marshal ? "writeByteEnumerator" : "readByteEnumerator";
             cast = marshal ? string("(ICEByte)") : "(" + fixName(en) + ")";
         }
         else if(sz <= 0x7fff)
         {
-            func = marshal ? "writeShort" : "readShort";
+            func = marshal ? "writeShortEnumerator" : "readShortEnumerator";
             cast = marshal ? string("(ICEShort)") : "(" + fixName(en) + ")";
         }
         else
         {
-            func = marshal ? "writeInt" : "readInt";
+            func = marshal ? "writeIntEnumerator" : "readIntEnumerator";
             cast = marshal ? string("(ICEInt)") : "(" + fixName(en) + ")";
         }
         if(marshal)

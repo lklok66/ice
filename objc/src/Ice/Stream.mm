@@ -280,17 +280,22 @@ public:
     }
 }
 
--(ICEByte) readByte:(ICEInt)limit
+-(ICEByte) readByteEnumerator:(ICEInt)limit
 {
+    ICEByte val;
     try
     {
-        return is__->readByte(limit);
+	val = [self readByte];
     }
     catch(const std::exception& ex)
     {
         rethrowObjCException(ex);
-        return 0; // Keep the compiler happy.
     }
+    if(val >= limit)
+    {
+	@throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"enumerator out of range"];
+    }
+    return val;
 }
 
 -(NSMutableData*) readByteSeq
@@ -337,17 +342,22 @@ public:
     }
 }
 
--(ICEShort) readShort:(ICEInt)limit
+-(ICEShort) readShortEnumerator:(ICEInt)limit
 {
+    ICEShort val;
     try
     {
-        return is__->readShort(limit);
+	val = [self readShort];
     }
     catch(const std::exception& ex)
     {
         rethrowObjCException(ex);
-        return 0; // Keep the compiler happy.
     }
+    if(val < 0 || val >= limit)
+    {
+	@throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"enumerator out of range"];
+    }
+    return val;
 }
 
 -(NSMutableData*) readShortSeq
@@ -378,17 +388,22 @@ public:
     }
 }
 
--(ICEInt) readInt:(ICEInt)limit
+-(ICEInt) readIntEnumerator:(ICEInt)limit
 {
+    ICEInt val;
     try
     {
-        return is__->readInt(limit);
+	val = [self readInt];
     }
     catch(const std::exception& ex)
     {
         rethrowObjCException(ex);
-        return 0;
     }
+    if(val < 0 || val >= limit)
+    {
+	@throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"enumerator out of range"];
+    }
+    return val;
 }
 
 -(NSMutableData*) readIntSeq
@@ -785,11 +800,15 @@ public:
     }
 }
 
--(void) writeByte:(ICEByte)v limit:(int)limit
+-(void) writeByteEnumerator:(ICEByte)v limit:(int)limit
 {
+    if(v >= limit)
+    {
+	@throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"enumerator out of range"];
+    }
     try
     {
-        os__->writeByte(v, limit);
+        os__->writeByte(v);
     }
     catch(const std::exception& ex)
     {
@@ -821,11 +840,15 @@ public:
     }
 }
 
--(void) writeShort:(ICEShort)v limit:(int)limit
+-(void) writeShortEnumerator:(ICEShort)v limit:(int)limit
 {
+    if(v < 0 || v >= limit)
+    {
+	@throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"enumerator out of range"];
+    }
     try
     {
-        os__->writeShort(v, limit);
+        os__->writeShort(v);
     }
     catch(const std::exception& ex)
     {
@@ -858,11 +881,15 @@ public:
     }
 }
 
--(void) writeInt:(ICEInt)v limit:(int)limit
+-(void) writeIntEnumerator:(ICEInt)v limit:(int)limit
 {
+    if(v < 0 || v >= limit)
+    {
+	@throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"enumerator out of range"];
+    }
     try
     {
-        os__->writeInt(v, limit);
+        os__->writeInt(v);
     }
     catch(const std::exception& ex)
     {
