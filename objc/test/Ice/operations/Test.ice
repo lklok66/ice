@@ -109,24 +109,24 @@ dictionary<string, MyEnum> StringMyEnumD;
      StringS opStringS(StringS p1, StringS p2,
                        out StringS p3);
     
-//     ByteSS opByteSS(ByteSS p1, ByteSS p2,
-//                     out ByteSS p3);
+     ByteSS opByteSS(ByteSS p1, ByteSS p2,
+                     out ByteSS p3);
     
-//     BoolSS opBoolSS(BoolSS p1, BoolSS p2,
-//                     out BoolSS p3);
+     BoolSS opBoolSS(BoolSS p1, BoolSS p2,
+                     out BoolSS p3);
     
-//     LongSS opShortIntLongSS(ShortSS p1, IntSS p2, LongSS p3,
-//                             out ShortSS p4, out IntSS p5, out LongSS p6);
+     LongSS opShortIntLongSS(ShortSS p1, IntSS p2, LongSS p3,
+                             out ShortSS p4, out IntSS p5, out LongSS p6);
     
     
-//     DoubleSS opFloatDoubleSS(FloatSS p1, DoubleSS p2,
-//                              out FloatSS p3, out DoubleSS p4);
+     DoubleSS opFloatDoubleSS(FloatSS p1, DoubleSS p2,
+                              out FloatSS p3, out DoubleSS p4);
     
-//     StringSS opStringSS(StringSS p1, StringSS p2,
-//                         out StringSS p3);
+     StringSS opStringSS(StringSS p1, StringSS p2,
+                         out StringSS p3);
 
-//     StringSSS opStringSSS(StringSSS p1, StringSSS p2,
-//                           out StringSSS p3);
+     StringSSS opStringSSS(StringSSS p1, StringSSS p2,
+                           out StringSSS p3);
 
 //     ByteBoolD opByteBoolD(ByteBoolD p1, ByteBoolD p2,
 //                           out ByteBoolD p3);

@@ -298,4 +298,255 @@ twoways(id<ICECommunicator> communicator, TestMyClassPrx* p)
 	test([[rso objectAtIndex:1] isEqualToString:@"de"]);
 	test([[rso objectAtIndex:2] isEqualToString:@"abc"]);
     }
+
+    {
+        TestMutableByteSS *bsi1 = [TestMutableByteSS array];
+        TestMutableByteSS *bsi2 = [TestMutableByteSS array];
+
+	ICEByte b;
+	TestMutableByteS *tmp = [TestMutableByteS data];
+
+	b = 0x01;
+	[tmp appendBytes:&b length:sizeof(b)];
+	b = 0x11;
+	[tmp appendBytes:&b length:sizeof(b)];
+	b = 0x12;
+	[tmp appendBytes:&b length:sizeof(b)];
+	[bsi1 addObject:tmp];
+
+        tmp = [TestMutableByteS data];
+	b = 0xff;
+	[tmp appendBytes:&b length:sizeof(b)];
+	[bsi1 addObject:tmp];
+
+        tmp = [TestMutableByteS data];
+	b = 0x0e;
+	[tmp appendBytes:&b length:sizeof(b)];
+	[bsi2 addObject:tmp];
+
+        tmp = [TestMutableByteS data];
+	b = 0xf2;
+	[tmp appendBytes:&b length:sizeof(b)];
+	b = 0xf1;
+	[tmp appendBytes:&b length:sizeof(b)];
+	[bsi2 addObject:tmp];
+
+	TestMutableByteSS *bso;
+	TestByteSS *rso;
+
+	rso = [p opByteSS:bsi1 p2:bsi2 p3:&bso];
+
+	const ICEByte *p;
+	test([bso count] == 2);
+	test([[bso objectAtIndex:0] length] / sizeof(ICEByte) == 1);
+	p = [[bso objectAtIndex:0] bytes];
+	test(p[0] == (ICEByte)0x0ff);
+	test([[bso objectAtIndex:1] length] / sizeof(ICEByte) == 3);
+	p = [[bso objectAtIndex:1] bytes];
+	test(p[0] == (ICEByte)0x01);
+	test(p[1] == (ICEByte)0x11);
+	test(p[2] == (ICEByte)0x12);
+	test([rso count] == 4);
+	test([[rso objectAtIndex:0] length] / sizeof(ICEByte) == 3);
+	p = [[rso objectAtIndex:0] bytes];
+	test(p[0] == (ICEByte)0x01);
+	test(p[1] == (ICEByte)0x11);
+	test(p[2] == (ICEByte)0x12);
+	test([[rso objectAtIndex:1] length] / sizeof(ICEByte) == 1);
+	p = [[rso objectAtIndex:1] bytes];
+	test(p[0] == (ICEByte)0xff);
+	test([[rso objectAtIndex:2] length] / sizeof(ICEByte) == 1);
+	p = [[rso objectAtIndex:2] bytes];
+	test(p[0] == (ICEByte)0x0e);
+	test([[rso objectAtIndex:3] length] / sizeof(ICEByte) == 2);
+	p = [[rso objectAtIndex:3] bytes];
+	test(p[0] == (ICEByte)0xf2);
+	test(p[1] == (ICEByte)0xf1);
+    }
+
+    {
+        TestMutableFloatSS *fsi = [TestMutableFloatSS array];
+        TestMutableDoubleSS *dsi = [TestMutableDoubleSS array];
+
+	ICEFloat f;
+	TestMutableFloatS *ftmp;
+
+	ftmp = [TestMutableFloatS data];
+	f = 3.14f;
+	[ftmp appendBytes:&f length:sizeof(f)];
+	[fsi addObject:ftmp];
+	ftmp = [TestMutableFloatS data];
+	f = 1.11f;
+	[ftmp appendBytes:&f length:sizeof(f)];
+	[fsi addObject:ftmp];
+	ftmp = [TestMutableFloatS data];
+	[fsi addObject:ftmp];
+
+	ICEDouble d;
+	TestMutableDoubleS *dtmp;
+
+        dtmp = [TestMutableDoubleS data];
+	d = 1.1E10;
+	[dtmp appendBytes:&d length:sizeof(d)];
+	d = 1.2E10;
+	[dtmp appendBytes:&d length:sizeof(d)];
+	d = 1.3E10;
+	[dtmp appendBytes:&d length:sizeof(d)];
+	[dsi addObject:dtmp];
+
+	TestMutableFloatSS *fso;
+	TestMutableDoubleSS *dso;
+	TestDoubleSS *rso;
+
+	rso = [p opFloatDoubleSS:fsi p2:dsi p3:&fso p4:&dso];
+
+	const ICEFloat *fp;
+	const ICEDouble *dp;
+
+	test([fso count] == 3);
+	test([[fso objectAtIndex:0] length] / sizeof(ICEFloat) == 1);
+	fp = [[fso objectAtIndex:0] bytes];
+	test(fp[0] == 3.14f);
+	test([[fso objectAtIndex:1] length] / sizeof(ICEFloat) == 1);
+	fp = [[fso objectAtIndex:1] bytes];
+	test(fp[0] == 1.11f);
+	test([[fso objectAtIndex:2] length] / sizeof(ICEFloat) == 0);
+	test([dso count] == 1);
+	test([[dso objectAtIndex:0] length] / sizeof(ICEDouble) == 3);
+	dp = [[dso objectAtIndex:0] bytes];
+	test(dp[0] == 1.1E10);
+	test(dp[1] == 1.2E10);
+	test(dp[2] == 1.3E10);
+	test([rso count] == 2);
+	test([[rso objectAtIndex:0] length] / sizeof(ICEDouble) == 3);
+	dp = [[rso objectAtIndex:0] bytes];
+	test(dp[0] == 1.1E10);
+	test(dp[1] == 1.2E10);
+	test(dp[2] == 1.3E10);
+	test([[rso objectAtIndex:1] length] / sizeof(ICEDouble) == 3);
+	dp = [[rso objectAtIndex:1] bytes];
+	test(dp[0] == 1.1E10);
+	test(dp[1] == 1.2E10);
+	test(dp[2] == 1.3E10);
+    }
+
+    {
+        TestMutableStringSS * ssi1 = [TestMutableStringSS array];
+        TestMutableStringSS * ssi2 = [TestMutableStringSS array];
+
+	TestMutableStringS *tmp;
+
+	tmp = [TestMutableStringS array];
+	[tmp addObject:@"abc"];
+	[ssi1 addObject:tmp];
+	tmp = [TestMutableStringS array];
+	[tmp addObject:@"de"];
+	[tmp addObject:@"fghi"];
+	[ssi1 addObject:tmp];
+
+	[ssi2 addObject:[TestStringS array]];
+	[ssi2 addObject:[TestStringS array]];
+	tmp = [TestMutableStringS array];
+	[tmp addObject:@"xyz"];
+	[ssi2 addObject:tmp];
+
+	TestMutableStringSS *sso;
+	TestStringSS *rso;
+
+	rso = [p opStringSS:ssi1 p2:ssi2 p3:&sso];
+
+	test([sso count] == 5);
+	test([[sso objectAtIndex:0] count] == 1);
+	test([[[sso objectAtIndex:0] objectAtIndex:0] isEqualToString:@"abc"]);
+	test([[sso objectAtIndex:1] count] == 2);
+	test([[[sso objectAtIndex:1] objectAtIndex:0] isEqualToString:@"de"]);
+	test([[[sso objectAtIndex:1] objectAtIndex:1] isEqualToString:@"fghi"]);
+	test([[sso objectAtIndex:2] count] == 0);
+	test([[sso objectAtIndex:3] count] == 0);
+	test([[sso objectAtIndex:4] count] == 1);
+	test([[[sso objectAtIndex:4] objectAtIndex:0] isEqualToString:@"xyz"]);
+	test([rso count] == 3);
+	test([[rso objectAtIndex:0] count] == 1);
+	test([[[rso objectAtIndex:0] objectAtIndex:0] isEqualToString:@"xyz"]);
+	test([[rso objectAtIndex:1] count] == 0);
+	test([[rso objectAtIndex:2] count] == 0);
+    }
+
+    {
+        TestMutableStringSSS *sssi1 = [TestMutableStringSSS array];
+        TestMutableStringSSS *sssi2 = [TestMutableStringSSS array];
+
+	TestMutableStringSS *tmpss;
+	TestMutableStringS *tmps;
+
+	tmps = [TestMutableStringS array];
+        [tmps addObject:@"abc"];
+        [tmps addObject:@"de"];
+	tmpss = [TestMutableStringSS array];
+	[tmpss addObject:tmps];
+	tmps = [TestMutableStringS array];
+        [tmps addObject:@"xyz"];
+	[tmpss addObject:tmps];
+	[sssi1 addObject:tmpss];
+	tmps = [TestMutableStringS array];
+        [tmps addObject:@"hello"];
+	tmpss = [TestMutableStringSS array];
+	[tmpss addObject:tmps];
+	[sssi1 addObject:tmpss];
+
+	tmps = [TestMutableStringS array];
+        [tmps addObject:@""];
+        [tmps addObject:@""];
+	tmpss = [TestMutableStringSS array];
+	[tmpss addObject:tmps];
+	tmps = [TestMutableStringS array];
+        [tmps addObject:@"abcd"];
+	[tmpss addObject:tmps];
+	[sssi2 addObject:tmpss];
+	tmps = [TestMutableStringS array];
+        [tmps addObject:@""];
+	tmpss = [TestMutableStringSS array];
+	[tmpss addObject:tmps];
+	[sssi2 addObject:tmpss];
+	tmpss = [TestMutableStringSS array];
+	[sssi2 addObject:tmpss];
+
+	TestMutableStringSSS *ssso;
+	TestStringSSS *rsso;
+
+	rsso = [p opStringSSS:sssi1 p2:sssi2 p3:&ssso];
+
+	test([ssso count] == 5);
+	test([[ssso objectAtIndex:0] count] == 2);
+	test([[[ssso objectAtIndex:0] objectAtIndex:0] count] == 2);
+	test([[[ssso objectAtIndex:0] objectAtIndex:1] count] == 1);
+	test([[ssso objectAtIndex:1] count] == 1);
+	test([[[ssso objectAtIndex:1] objectAtIndex:0] count] == 1);
+	test([[ssso objectAtIndex:2] count] == 2);
+	test([[[ssso objectAtIndex:2] objectAtIndex:0] count] == 2);
+	test([[[ssso objectAtIndex:2] objectAtIndex:1] count] == 1);
+	test([[ssso objectAtIndex:3] count] == 1);
+	test([[[ssso objectAtIndex:3] objectAtIndex:0] count] == 1);
+	test([[ssso objectAtIndex:4] count] == 0);
+	test([[[[ssso objectAtIndex:0] objectAtIndex:0] objectAtIndex:0] isEqualToString:@"abc"]);
+	test([[[[ssso objectAtIndex:0] objectAtIndex:0] objectAtIndex:1] isEqualToString:@"de"]);
+	test([[[[ssso objectAtIndex:0] objectAtIndex:1] objectAtIndex:0] isEqualToString:@"xyz"]);
+	test([[[[ssso objectAtIndex:1] objectAtIndex:0] objectAtIndex:0] isEqualToString:@"hello"]);
+	test([[[[ssso objectAtIndex:2] objectAtIndex:0] objectAtIndex:0] isEqualToString:@""]);
+	test([[[[ssso objectAtIndex:2] objectAtIndex:0] objectAtIndex:1] isEqualToString:@""]);
+	test([[[[ssso objectAtIndex:2] objectAtIndex:1] objectAtIndex:0] isEqualToString:@"abcd"]);
+	test([[[[ssso objectAtIndex:3] objectAtIndex:0] objectAtIndex:0] isEqualToString:@""]);
+
+	test([rsso count] == 3);
+	test([[rsso objectAtIndex:0] count] == 0);
+	test([[rsso objectAtIndex:1] count] == 1);
+	test([[[rsso objectAtIndex:1] objectAtIndex:0] count] == 1);
+	test([[rsso objectAtIndex:2] count] == 2);
+	test([[[rsso objectAtIndex:2] objectAtIndex:0] count] == 2);
+	test([[[rsso objectAtIndex:2] objectAtIndex:1] count] == 1);
+	test([[[[rsso objectAtIndex:1] objectAtIndex:0] objectAtIndex:0] isEqualToString:@""]);
+	test([[[[rsso objectAtIndex:2] objectAtIndex:0] objectAtIndex:0] isEqualToString:@""]);
+	test([[[[rsso objectAtIndex:2] objectAtIndex:0] objectAtIndex:1] isEqualToString:@""]);
+	test([[[[rsso objectAtIndex:2] objectAtIndex:1] objectAtIndex:0] isEqualToString:@"abcd"]);
+    }
 }

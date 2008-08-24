@@ -1113,8 +1113,11 @@ Slice::Gen::generate(const UnitPtr& p)
     DelegateMVisitor delegateMVisitor(_H, _M);
     p->visit(&delegateMVisitor, false);
 
-    HelperVisitor helperVisitor(_H, _M, _stream);
-    p->visit(&helperVisitor, false);
+    ProxyHelperVisitor proxyHelperVisitor(_H, _M, _stream);
+    p->visit(&proxyHelperVisitor, false);
+
+    SequenceHelperVisitor sequenceHelperVisitor(_H, _M, _stream);
+    p->visit(&sequenceHelperVisitor, false);
 
 #if 0
     OpsVisitor opsVisitor(_M);
@@ -2524,13 +2527,13 @@ Slice::Gen::OpsVisitor::writeOperations(const ClassDefPtr& p, bool noCurrent)
     _M << eb;
 }
 
-Slice::Gen::HelperVisitor::HelperVisitor(Output& H, Output& M, bool stream)
+Slice::Gen::ProxyHelperVisitor::ProxyHelperVisitor(Output& H, Output& M, bool stream)
     : ObjCVisitor(H, M), _stream(stream)
 {
 }
 
 bool
-Slice::Gen::HelperVisitor::visitClassDefStart(const ClassDefPtr& p)
+Slice::Gen::ProxyHelperVisitor::visitClassDefStart(const ClassDefPtr& p)
 {
     string name = fixName(p) + "PrxHelper";
     ClassList bases = p->bases();
@@ -2540,147 +2543,63 @@ Slice::Gen::HelperVisitor::visitClassDefStart(const ClassDefPtr& p)
     _H << nl << "+(void) read__:(id<ICEInputStream>)is;";
     _H << nl << "@end";
 
-#if 0
-    _M << sp << nl << "public sealed class " << name << "PrxHelper : Ice.ObjectPrxHelperBase, " << name << "Prx";
+    _M << sp << nl << "@implementation " << name;
+    _M << nl << "+(void) write__:(id<ICEOutputStream>)os proxy:(" << fixName(p) + "Prx" << " *)proxy";
     _M << sb;
-
-    OperationList ops = p->allOperations();
-
-    OperationList::const_iterator r;
-    for(r = ops.begin(); r != ops.end(); ++r)
-    {
-
-    _M << sp << nl << "public static void write__(IceInternal.BasicStream os__, " << name << "Prx v__)";
-    _M << sb;
-    _M << nl << "os__.writeProxy(v__);";
     _M << eb;
 
-    _M << sp << nl << "public static " << name << "Prx read__(IceInternal.BasicStream is__)";
+    _M << sp << nl << "+(void) read__:(id<ICEInputStream>)is";
     _M << sb;
-    _M << nl << "Ice.ObjectPrx proxy = is__.readProxy();";
-    _M << nl << "if(proxy != null)";
-    _M << sb;
-    _M << nl << name << "PrxHelper result = new " << name << "PrxHelper();";
-    _M << nl << "result.copyFrom__(proxy);";
-    _M << nl << "return result;";
-    _M << eb;
-    _M << nl << "return null;";
     _M << eb;
 
-    if(_stream)
-    {
-        _M << sp << nl << "public static void write(Ice.OutputStream outS__, " << name << "Prx v__)";
-        _M << sb;
-        _M << nl << "outS__.writeProxy(v__);";
-        _M << eb;
 
-        _M << sp << nl << "public static " << name << "Prx read(Ice.InputStream inS__)";
-        _M << sb;
-        _M << nl << "Ice.ObjectPrx proxy = inS__.readProxy();";
-        _M << nl << "if(proxy != null)";
-        _M << sb;
-        _M << nl << name << "PrxHelper result = new " << name << "PrxHelper();";
-        _M << nl << "result.copyFrom__(proxy);";
-        _M << nl << "return result;";
-        _M << eb;
-        _M << nl << "return null;";
-        _M << eb;
-    }
-
-    _M << sp << nl << "#endregion"; // Marshaling support
-
-#endif
+    // TODO: if(_stream)
     return true;
 }
 
 void
-Slice::Gen::HelperVisitor::visitClassDefEnd(const ClassDefPtr&)
+Slice::Gen::ProxyHelperVisitor::visitClassDefEnd(const ClassDefPtr&)
+{
+    _M << nl << "@end";
+}
+
+Slice::Gen::SequenceHelperVisitor::SequenceHelperVisitor(Output& H, Output& M, bool stream)
+    : ObjCVisitor(H, M), _stream(stream)
 {
 }
 
 void
-Slice::Gen::HelperVisitor::visitSequence(const SequencePtr& p)
+Slice::Gen::SequenceHelperVisitor::visitSequence(const SequencePtr& p)
 {
-#if 0
-    //
-    // Don't generate helper for sequence of a local type.
-    //
-    if(p->isLocal())
-    {
-        return;
-    }
+    string name = fixName(p);
+    string mutableName = outTypeToString(p);
+    string prefix = moduleName(findModule(p));
 
-    string typeS = typeToString(p);
+    _H << sp << nl << "@interface " << prefix << p->name() << "Helper : NSObject";
+    _H << nl << "+(void) write:(id<ICEOutputStream>)os v:(" << name << " *)v;";
+    _H << nl << "+(" << mutableName << " *) read:(id<ICEInputStream>)is;";
+    _H << nl << "@end";
 
-    _M << sp << nl << "public sealed class " << p->name() << "Helper";
+    _M << sp << nl << "@implementation " << prefix << p->name() << "Helper";
+
+    _M << nl << "+(void) write:(id<ICEOutputStream>)os_ v:(" << name << " *)v";
     _M << sb;
-
-    _M << sp << nl << "public static void write(IceInternal.BasicStream os__, " << typeS << " v__)";
-    _M << sb;
-    writeSequenceMarshalUnmarshalCode(_M, p, "v__", true, false);
+    writeSequenceMarshalUnmarshalCode(_M, p, "v", true, false);
     _M << eb;
 
-    _M << sp << nl << "public static " << typeS << " read(IceInternal.BasicStream is__)";
+    _M << sp << nl << "+(" << mutableName << " *) read:(id<ICEInputStream>)is_";
     _M << sb;
-    _M << nl << typeS << " v__;";
-    writeSequenceMarshalUnmarshalCode(_M, p, "v__", false, false);
-    _M << nl << "return v__;";
+    _M << nl << mutableName << " *v;";
+    writeSequenceMarshalUnmarshalCode(_M, p, "v", false, false);
+    _M << nl << "return v;";
     _M << eb;
+    _M << nl << "@end";
 
-    if(_stream)
-    {
-        _M << sp << nl << "public static void write(Ice.OutputStream outS__, " << typeS << " v__)";
-        _M << sb;
-        writeSequenceMarshalUnmarshalCode(_M, p, "v__", true, true);
-        _M << eb;
-
-        _M << sp << nl << "public static " << typeS << " read(Ice.InputStream inS__)";
-        _M << sb;
-        _M << nl << typeS << " v__;";
-        writeSequenceMarshalUnmarshalCode(_M, p, "v__", false, true);
-        _M << nl << "return v__;";
-        _M << eb;
-    }
-
-    _M << eb;
-
-    string prefix = "clr:generic:";
-    string meta;
-    if(p->findMetaData(prefix, meta))
-    {
-        string type = meta.substr(prefix.size());
-        if(type == "List" || type == "LinkedList" || type == "Queue" || type == "Stack")
-        {
-            return;
-        }
-        BuiltinPtr builtin = BuiltinPtr::dynamicCast(p->type());
-        bool isClass = (builtin && builtin->kind() == Builtin::KindObject)
-                        || ClassDeclPtr::dynamicCast(p->type());
-
-        if(!isClass)
-        {
-            return;
-        }
-
-        //
-        // The sequence is a custom sequence with elements of class type.
-        // Emit a dummy class that causes a compile-time error if the
-        // custom sequence type does not implement an indexer.
-        //
-        _M << sp << nl << "public class " << p->name() << "_Tester";
-        _M << sb;
-        _M << nl << p->name() << "_Tester()";
-        _M << sb;
-        _M << nl << typeS << " test = new " << typeS << "();";
-        _M << nl << "test[0] = null;";
-        _M << eb;
-        _M << eb;
-    }
-#endif
+    // TODO: if(_stream)
 }
 
 void
-Slice::Gen::HelperVisitor::visitDictionary(const DictionaryPtr& p)
+Slice::Gen::ProxyHelperVisitor::visitDictionary(const DictionaryPtr& p)
 {
 #if 0
     //

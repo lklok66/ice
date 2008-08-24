@@ -173,16 +173,28 @@ private:
         void writeOperations(const ClassDefPtr&, bool);
     };
 
-    class HelperVisitor : public ObjCVisitor
+    class ProxyHelperVisitor : public ObjCVisitor
     {
     public:
 
-        HelperVisitor(::IceUtilInternal::Output&, ::IceUtilInternal::Output&, bool);
+        ProxyHelperVisitor(::IceUtilInternal::Output&, ::IceUtilInternal::Output&, bool);
 
         virtual bool visitClassDefStart(const ClassDefPtr&);
         virtual void visitClassDefEnd(const ClassDefPtr&);
-        virtual void visitSequence(const SequencePtr&);
         virtual void visitDictionary(const DictionaryPtr&);
+
+    private:
+
+        bool _stream;
+    };
+
+    class SequenceHelperVisitor : public ObjCVisitor
+    {
+    public:
+
+        SequenceHelperVisitor(::IceUtilInternal::Output&, ::IceUtilInternal::Output&, bool);
+
+        virtual void visitSequence(const SequencePtr&);
 
     private:
 

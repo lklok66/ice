@@ -34,8 +34,8 @@
 }
 
 -(ICELong) opShortIntLong:(ICEShort)p1 p2:(ICEInt)p2 p3:(ICELong)p3
-                       p4:(ICEShort *)p4 p5:(ICEInt *)p5 p6:(ICELong *)p6
-		       current:(ICECurrent *)current
+                          p4:(ICEShort *)p4 p5:(ICEInt *)p5 p6:(ICELong *)p6
+		          current:(ICECurrent *)current
 {
     *p4 = p1;
     *p5 = p2;
@@ -44,7 +44,7 @@
 }
 
 -(ICEDouble) opFloatDouble:(ICEFloat)p1 p2:(ICEDouble)p2 p3:(ICEFloat *)p3 p4:(ICEDouble *)p4
-                   current:(ICECurrent *)current
+                           current:(ICECurrent *)current
 {
     *p3 = p1;
     *p4 = p2;
@@ -75,14 +75,15 @@
 // TODO: opMyClass
 
 -(TestStructure *) opStruct:(TestStructure *)p1 p2:(TestStructure *)p2 p3:(TestStructure **)p3
-                    current:(ICECurrent *)current;
+                            current:(ICECurrent *)current;
 {
     *p3 = [[p1 copy] autorelease];
     [[*p3 s] setS:@"a new string"];
     return p2;
 }
 
--(TestByteS *) opByteS:(TestMutableByteS *)p1 p2:(TestMutableByteS *)p2 p3:(TestByteS **)p3 current:(ICECurrent *)current
+-(TestByteS *) opByteS:(TestMutableByteS *)p1 p2:(TestMutableByteS *)p2 p3:(TestByteS **)p3
+                       current:(ICECurrent *)current
 {
     *p3 = [TestMutableByteS dataWithLength:[p1 length]];
     ICEByte *target = (ICEByte *)[*p3 bytes];
@@ -97,7 +98,8 @@
     return r;
 }
 
--(TestBoolS *) opBoolS:(TestMutableBoolS *)p1 p2:(TestMutableBoolS *)p2 p3:(TestBoolS **)p3 current:(ICECurrent *)current
+-(TestBoolS *) opBoolS:(TestMutableBoolS *)p1 p2:(TestMutableBoolS *)p2 p3:(TestBoolS **)p3
+                       current:(ICECurrent *)current
 {
     *p3 = [TestMutableBoolS dataWithData:p1];
     [(TestMutableBoolS *)*p3 appendData:p2];
@@ -114,7 +116,8 @@
 }
 
 -(TestLongS *) opShortIntLongS:(TestMutableShortS *)p1 p2:(TestMutableIntS *)p2 p3:(TestMutableLongS *)p3
-                            p4:(TestShortS **)p4 p5:(TestIntS **)p5 p6:(TestLongS **)p6 current:(ICECurrent *)current
+                               p4:(TestShortS **)p4 p5:(TestIntS **)p5 p6:(TestLongS **)p6
+			       current:(ICECurrent *)current
 {
     *p4 = [TestMutableShortS dataWithData:p1];
     *p5 = [TestMutableIntS dataWithLength:[p2 length]];
@@ -131,7 +134,7 @@
 }
 
 -(TestDoubleS *) opFloatDoubleS:(TestMutableFloatS *)p1 p2:(TestMutableDoubleS *)p2
-                             p3:(TestFloatS **)p3 p4:(TestDoubleS **)p4 current:(ICECurrent *)current
+                                p3:(TestFloatS **)p3 p4:(TestDoubleS **)p4 current:(ICECurrent *)current
 {
     *p3 = [TestMutableFloatS dataWithData:p1];
     *p4 = [TestMutableDoubleS dataWithLength:[p2 length]];
@@ -159,7 +162,7 @@
 }
 
 -(TestStringS *) opStringS:(TestMutableStringS *)p1 p2:(TestMutableStringS *)p2
-                        p3:(TestStringS **)p3 current:(ICECurrent *)current
+                           p3:(TestStringS **)p3 current:(ICECurrent *)current
 {
     *p3 = [TestMutableStringS arrayWithArray:p1];
     [(TestMutableStringS *)*p3 addObjectsFromArray:p2];
@@ -169,6 +172,95 @@
     {
         [r addObject:element];
     } 
+    return r;
+}
+
+-(TestByteSS *) opByteSS:(TestMutableByteSS *)p1 p2:(TestMutableByteSS *)p2 p3:(TestByteSS * *)p3
+                         current:(ICECurrent *)current
+{
+    *p3 = [TestMutableByteSS array];
+    NSEnumerator *enumerator = [p1 reverseObjectEnumerator]; 
+    for(TestByteS *element in enumerator)
+    { 
+        [(TestMutableByteSS *)*p3 addObject:element];
+    }
+
+    TestMutableByteSS *r = [TestMutableByteSS arrayWithArray:p1];
+    [r addObjectsFromArray:p2];
+    return r;
+}
+
+-(TestBoolSS *) opBoolSS:(TestMutableBoolSS *)p1 p2:(TestMutableBoolSS *)p2 p3:(TestBoolSS * *)p3
+                         current:(ICECurrent *)current
+{
+    *p3 = [TestMutableBoolSS arrayWithArray:p1];
+    [(TestMutableBoolSS *)*p3 addObjectsFromArray:p2];
+
+    TestMutableBoolSS *r = [TestMutableBoolSS array];
+    NSEnumerator *enumerator = [p1 reverseObjectEnumerator]; 
+    for(TestBoolS *element in enumerator)
+    { 
+        [r addObject:element];
+    }
+    return r;
+}
+
+-(TestLongSS *) opShortIntLongSS:(TestMutableShortSS *)p1 p2:(TestMutableIntSS *)p2 p3:(TestMutableLongSS *)p3
+                                 p4:(TestShortSS **)p4 p5:(TestIntSS **)p5 p6:(TestLongSS **)p6
+			         current:(ICECurrent *)current
+{
+    *p4 = [TestShortSS arrayWithArray:p1];
+    *p5 = [TestMutableIntSS array];
+    NSEnumerator *enumerator = [p2 reverseObjectEnumerator]; 
+    for(TestIntS *element in enumerator)
+    { 
+        [(TestMutableIntSS *)*p5 addObject:element];
+    }
+    *p6 = [TestMutableLongSS arrayWithArray:p3];
+    [(TestMutableLongSS *)*p6 addObjectsFromArray:p3];
+    return [[p3 copy] autorelease];
+}
+
+-(TestDoubleSS *) opFloatDoubleSS:(TestMutableFloatSS *)p1 p2:(TestMutableDoubleSS *)p2
+                                  p3:(TestFloatSS **)p3 p4:(TestDoubleSS **)p4 current:(ICECurrent *)current
+{
+    *p3 = [TestFloatSS arrayWithArray:p1];
+    *p4 = [TestMutableDoubleSS array];
+    NSEnumerator *enumerator = [p2 reverseObjectEnumerator]; 
+    for(TestDoubleS *element in enumerator)
+    { 
+        [(TestMutableDoubleSS *)*p4 addObject:element];
+    }
+    TestMutableDoubleSS *r = [TestMutableDoubleSS arrayWithArray:p2];
+    [r addObjectsFromArray:p2];
+    return r;
+}
+
+-(TestStringSS *) opStringSS:(TestMutableStringSS *)p1 p2:(TestMutableStringSS *)p2 p3:(TestStringSS **)p3
+                             current:(ICECurrent *)current
+{
+    *p3 = [TestMutableStringSS arrayWithArray:p1];
+    [(TestMutableStringSS *)*p3 addObjectsFromArray:p2];
+    TestMutableStringSS *r = [TestMutableStringSS array];
+    NSEnumerator *enumerator = [p2 reverseObjectEnumerator]; 
+    for(TestStringS *element in enumerator)
+    { 
+        [r addObject:element];
+    }
+    return r;
+}
+
+-(TestStringSSS *) opStringSSS:(TestMutableStringSSS *)p1 p2:(TestMutableStringSSS *)p2 p3:(TestStringSSS **)p3
+                               current:(ICECurrent *)current
+{
+    *p3 = [TestMutableStringSSS arrayWithArray:p1];
+    [(TestMutableStringSSS *)*p3 addObjectsFromArray:p2];
+    TestMutableStringSSS *r = [TestMutableStringSSS array];
+    NSEnumerator *enumerator = [p2 reverseObjectEnumerator];
+    for(TestStringSS *element in enumerator)
+    { 
+        [r addObject:element];
+    }
     return r;
 }
 

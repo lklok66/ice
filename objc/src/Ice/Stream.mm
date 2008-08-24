@@ -146,7 +146,14 @@ public:
     {
         @try
         {
-            [_cb invoke:ObjectReaderPtr::dynamicCast(obj)->getObject()];
+	    if(obj)
+	    {
+		[_cb invoke:ObjectReaderPtr::dynamicCast(obj)->getObject()];
+	    }
+	    else
+	    {
+	        [_cb invoke:nil];
+	    }
         }
         @catch(NSException* ex)
         {
@@ -280,24 +287,6 @@ public:
     }
 }
 
--(ICEByte) readByteEnumerator:(ICEInt)limit
-{
-    ICEByte val;
-    try
-    {
-	val = [self readByte];
-    }
-    catch(const std::exception& ex)
-    {
-        rethrowObjCException(ex);
-    }
-    if(val >= limit)
-    {
-	@throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"enumerator out of range"];
-    }
-    return val;
-}
-
 -(NSMutableData*) readByteSeq
 {
     try
@@ -342,24 +331,6 @@ public:
     }
 }
 
--(ICEShort) readShortEnumerator:(ICEInt)limit
-{
-    ICEShort val;
-    try
-    {
-	val = [self readShort];
-    }
-    catch(const std::exception& ex)
-    {
-        rethrowObjCException(ex);
-    }
-    if(val < 0 || val >= limit)
-    {
-	@throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"enumerator out of range"];
-    }
-    return val;
-}
-
 -(NSMutableData*) readShortSeq
 {
     try
@@ -386,24 +357,6 @@ public:
         rethrowObjCException(ex);
         return 0;
     }
-}
-
--(ICEInt) readIntEnumerator:(ICEInt)limit
-{
-    ICEInt val;
-    try
-    {
-	val = [self readInt];
-    }
-    catch(const std::exception& ex)
-    {
-        rethrowObjCException(ex);
-    }
-    if(val < 0 || val >= limit)
-    {
-	@throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"enumerator out of range"];
-    }
-    return val;
 }
 
 -(NSMutableData*) readIntSeq
@@ -531,6 +484,35 @@ public:
     }
 }
 
+-(ICEInt) readEnumerator:(ICEInt)limit
+{
+    ICEInt val;
+    try
+    {
+	if(limit <= 0x7f)
+	{
+	    val = [self readByte];
+	}
+	else if(limit <= 0x7fff)
+	{
+	    val = [self readShort];
+	}
+	else
+	{
+	    val = [self readInt];
+	}
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
+    if(val >= limit)
+    {
+	@throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"enumerator out of range"];
+    }
+    return val;
+}
+
 -(ICEInt) readSize
 {
     try
@@ -635,6 +617,30 @@ public:
         }
         @throw ex; // TODO: Should we auto release the exception here or should it be the responsability of the caller?
     }
+}
+
+-(void) startSeq:(ICEInt)numElements minSize:(ICEInt)minSize
+{
+}
+
+-(void) checkSeq
+{
+}
+
+-(void) checkSeq:(ICEInt)bytesLeft
+{
+}
+
+-(void) checkFixedSeq:(ICEInt)numElements elemSize:(ICEInt)elemSize
+{
+}
+
+-(void) endElement
+{
+}
+
+-(void) endSeq
+{
 }
 
 -(void) startSlice
@@ -800,22 +806,6 @@ public:
     }
 }
 
--(void) writeByteEnumerator:(ICEByte)v limit:(int)limit
-{
-    if(v >= limit)
-    {
-	@throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"enumerator out of range"];
-    }
-    try
-    {
-        os__->writeByte(v);
-    }
-    catch(const std::exception& ex)
-    {
-        rethrowObjCException(ex);
-    }
-}
-
 -(void) writeByteSeq:(NSData*)v
 { 
     try
@@ -830,22 +820,6 @@ public:
 
 -(void) writeShort:(ICEShort)v
 {
-    try
-    {
-        os__->writeShort(v);
-    }
-    catch(const std::exception& ex)
-    {
-        rethrowObjCException(ex);
-    }
-}
-
--(void) writeShortEnumerator:(ICEShort)v limit:(int)limit
-{
-    if(v < 0 || v >= limit)
-    {
-	@throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"enumerator out of range"];
-    }
     try
     {
         os__->writeShort(v);
@@ -871,22 +845,6 @@ public:
 
 -(void) writeInt:(ICEInt)v
 {
-    try
-    {
-        os__->writeInt(v);
-    }
-    catch(const std::exception& ex)
-    {
-        rethrowObjCException(ex);
-    }
-}
-
--(void) writeIntEnumerator:(ICEInt)v limit:(int)limit
-{
-    if(v < 0 || v >= limit)
-    {
-	@throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"enumerator out of range"];
-    }
     try
     {
         os__->writeInt(v);
@@ -1002,6 +960,33 @@ public:
     {
         std::vector<std::string> s;
         os__->writeStringSeq(fromNSArray(v, s));
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
+}
+
+-(void) writeEnumerator:(ICEInt)v limit:(int)limit
+{
+    if(v >= limit)
+    {
+	@throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"enumerator out of range"];
+    }
+    try
+    {
+        if(limit <= 0x7f)
+	{
+	    os__->writeByte(v);
+	}
+	else if(limit <= 0x7fff)
+	{
+	    os__->writeShort(v);
+	}
+	else
+	{
+	    os__->writeInt(v);
+	}
     }
     catch(const std::exception& ex)
     {

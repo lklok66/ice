@@ -33,16 +33,13 @@
 -(NSMutableData*) readBoolSeq;
 
 -(ICEByte) readByte;
--(ICEByte) readByteEnumerator:(ICEInt)limit;
 -(NSMutableData*) readByteSeq;
 -(NSData*) readByteSeqNoCopy;
 
 -(ICEShort) readShort;
--(ICEShort) readShortEnumerator:(ICEInt)limit;
 -(NSMutableData*) readShortSeq;
 
 -(ICEInt) readInt;
--(ICEInt) readIntEnumerator:(ICEInt)limit;
 -(NSMutableData*) readIntSeq;
 
 -(ICELong) readLong;
@@ -57,6 +54,8 @@
 -(NSMutableString*) readString;
 -(NSMutableArray*) readStringSeq;
 
+-(ICEInt) readEnumerator:(ICEInt)limit;
+
 -(ICEInt) readSize;
 
 -(ICEObjectPrx*) readProxy:(Class)c;
@@ -66,6 +65,13 @@
 -(NSString*) readTypeId;
 
 -(void) throwException;
+
+-(void) startSeq:(ICEInt)numElements minSize:(ICEInt)minSize;
+-(void) checkSeq;
+-(void) checkSeq:(ICEInt)bytesLeft;
+-(void) checkFixedSeq:(ICEInt)numElements elemSize:(ICEInt)elemSize;
+-(void) endElement;
+-(void) endSeq;
 
 -(void) startSlice;
 -(void) endSlice;
@@ -86,15 +92,12 @@
 -(void) writeBoolSeq:(NSData*)v;
 
 -(void) writeByte:(ICEByte)v;
--(void) writeByteEnumerator:(ICEByte)v limit:(ICEInt)limmit;
 -(void) writeByteSeq:(NSData*)v;
 
 -(void) writeShort:(ICEShort)v;
--(void) writeShortEnumerator:(ICEShort)v limit:(ICEInt)limit;
 -(void) writeShortSeq:(NSData*)v;
 
 -(void) writeInt:(ICEInt)v;
--(void) writeIntEnumerator:(ICEInt)v limit:(ICEInt)limit;
 -(void) writeIntSeq:(NSData*)v;
 
 -(void) writeLong:(ICELong)v;
@@ -109,6 +112,8 @@
 -(void) writeString:(NSString*)v;
 -(void) writeStringSeq:(NSArray*)v;
 
+-(void) writeEnumerator:(ICEInt)v limit:(ICEInt)limit;
+
 -(void) writeSize:(ICEInt)v;
 
 -(void) writeProxy:(ICEObjectPrx*)v;
@@ -118,6 +123,13 @@
 -(void) writeTypeId:(const char*)v;
 
 -(void) writeException:(ICEUserException*)v;
+
+// -(void) startSeq:(ICEInt)numElements minSize:(ICEInt)minSize;
+// -(void) checkSeq;
+// -(void) checkSeq:(ICEInt)bytesLeft;
+// -(void) checkFixedSeq:(ICEInt)numElements elemSize:(ICEInt)elemSize;
+// -(void) endEleemnt;
+// -(void) endSeq;
 
 -(void) startSlice;
 -(void) endSlice;
