@@ -71,7 +71,7 @@
 -(void) checkSeq:(ICEInt)bytesLeft;
 -(void) checkFixedSeq:(ICEInt)numElements elemSize:(ICEInt)elemSize;
 -(void) endElement;
--(void) endSeq;
+-(void) endSeq:(ICEInt)size;
 
 -(void) startSlice;
 -(void) endSlice;

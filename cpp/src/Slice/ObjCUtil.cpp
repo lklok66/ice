@@ -688,58 +688,59 @@ Slice::ObjCGenerator::writeSequenceMarshalUnmarshalCode(Output& out,
                 }
                 else
                 {
-#if 0
-// TODO: adjust this
-                    out << nl << "int " << param << "_lenx = " << stream << ".readSize();";
+                    out << nl << "int " << param << "_lenx = [" << stream << " readSize];";
                     if(!streamingAPI)
                     {
                         if(builtin->isVariableLength())
                         {
-                            out << nl << "[" <<  stream << ".startSeq(" << param << "_lenx, "
-                                << static_cast<unsigned>(builtin->minWireSize()) << ");";
+                            out << nl << "[" <<  stream << " startSeq:" << param << "_lenx minSize:"
+                                << static_cast<unsigned>(builtin->minWireSize()) << "];";
                         }
                         else
                         {
-                            out << nl << stream << ".checkFixedSeq(" << param << "_lenx, "
-                                << static_cast<unsigned>(builtin->minWireSize()) << ");";
+                            out << nl << "[" << stream << " checkFixedSeq:" << param << "_lenx elemSize:"
+                                << static_cast<unsigned>(builtin->minWireSize()) << "];";
                         }
                     }
-                    out << nl << param << " = new ";
+                    out << nl << param << " = ";
                     if(builtin->kind() == Builtin::KindObject)
                     {
-			out << typeToString(seq) << "(" << param << "_lenx);";
-                        out << nl << "for(int ix__ = 0; ix__ < " << param << "_lenx; ++ix__)";
+			out << "[" << outTypeToString(seq) << " arrayWithCapacity:" << param << "_lenx];";
+			out << nl << "int ix__;";
+                        out << nl << "for(ix__ = 0; ix__ < " << param << "_lenx; ++ix__)";
                         out << sb;
-                        out << nl << stream << ".readObject(";
+#if 0
+// TODO: adjust this
+                        out << nl << "[" << stream << " readObject:";
                         if(streamingAPI)
                         {
-                            out << "(ReadObjectCallback)";
+                            out << "(ReadObjectCallback *)";
                         }
                         string patcherName;
 			patcherName = "Sequence";
                         out << "new IceInternal." << patcherName << "Patcher<Ice.Object>(\"::Ice::Object\", "
                             << param << ", ix__));";
+#endif
                     }
                     else
                     {
-			out << typeToString(seq) << "(" << param << "_lenx);";
-                        out << nl << "for(int ix__ = 0; ix__ < " << param << "_lenx; ++ix__)";
+			out << "[" << outTypeToString(seq) << " arrayWithCapacity:" << param << "_lenx];";
+			out << nl << "int ix__;";
+                        out << nl << "for(ix__ = 0; ix__ < " << param << "_lenx; ++ix__)";
                         out << sb;
-			out << nl << "Ice.ObjectPrx val__ = new Ice.ObjectPrxHelperBase();";
-			out << nl << "val__ = " << stream << ".readProxy();";
-			out << nl << param << "." << addMethod << "(val__);";
+			out << nl << "[" << param << " addObject:[[" << stream
+			    << " readProxy:[ICEObjectPrx class]] autorelease]];";
                     }
                     if(!streamingAPI && builtin->isVariableLength())
                     {
-                        out << nl << stream << ".checkSeq();";
-                        out << nl << stream << ".endElement();";
+                        out << nl << "[" << stream << " checkSeq];";
+                        out << nl << "[" << stream << " endElement];";
                     }
                     out << eb;
                     if(!streamingAPI && builtin->isVariableLength())
                     {
-                        out << nl << stream << ".endSeq(" << param << "_lenx);";
+                        out << nl << "[" << stream << " endSeq:" << param << "_lenx];";
                     }
-#endif
                 }
                 break;
             }
@@ -960,7 +961,7 @@ Slice::ObjCGenerator::writeSequenceMarshalUnmarshalCode(Output& out,
             out << sb;
             out << nl << "int szx__ = [" << stream << " readSize];";
             {
-                out << nl << "// [" << stream << " checkFixedSeq:szx__ elemSize:" << static_cast<unsigned>(type->minWireSize()) << "];";
+                out << nl << "[" << stream << " checkFixedSeq:szx__ elemSize:" << static_cast<unsigned>(type->minWireSize()) << "];";
             }
 	    string mName = moduleName(findModule(seq)) + "Mutable" + seq->name();
             out << nl << param << " = [" << mName << " dataWithCapacity:szx__];";
@@ -1019,12 +1020,12 @@ Slice::ObjCGenerator::writeSequenceMarshalUnmarshalCode(Output& out,
         {
             if(type->isVariableLength())
             {
-                out << nl << "// [" << stream << " startSeq:szx__ minSize:"
+                out << nl << "[" << stream << " startSeq:szx__ minSize:"
 		    << static_cast<unsigned>(type->minWireSize()) << "];";
             }
             else
             {
-                out << nl << "// [" << stream << " checkFixedSeq:szx__ elemSize:"
+                out << nl << "[" << stream << " checkFixedSeq:szx__ elemSize:"
 		    << static_cast<unsigned>(type->minWireSize()) << "];";
             }
         }
@@ -1038,14 +1039,14 @@ Slice::ObjCGenerator::writeSequenceMarshalUnmarshalCode(Output& out,
         {
             if(!SequencePtr::dynamicCast(type))
             {
-                out << nl << "// [" << stream << " checkSeq];";
+                out << nl << "[" << stream << " checkSeq];";
             }
-            out << nl << "// [" << stream << " endElement];";
+            out << nl << "[" << stream << " endElement];";
         }
         out << eb;
         if(!streamingAPI && type->isVariableLength())
         {
-            out << nl << "// [" << stream << " endSeq:szx__];";
+            out << nl << "[" << stream << " endSeq:szx__];";
         }
         out << eb;
     }

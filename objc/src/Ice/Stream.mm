@@ -639,7 +639,7 @@ public:
 {
 }
 
--(void) endSeq
+-(void) endSeq:(ICEInt)size
 {
 }
 
