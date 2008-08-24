@@ -32,8 +32,8 @@ embedded_runpath_prefix  ?= /opt/Ice-$(VERSION_MAJOR).$(VERSION_MINOR)
 # Define COMPILE_FOR_IPHONE or COMPILE_FOR_IPHONE_EMULATOR as yes if
 # you want to build Ice for Objective-C with the iPhone SDK.
 #
-COMPILE_FOR_IPHONE	    	= yes
-COMPILE_FOR_IPHONE_SIMULATOR 	= yes
+#COMPILE_FOR_IPHONE	    	= yes
+#COMPILE_FOR_IPHONE_SIMULATOR 	= yes
 
 #STATICLIBS			= yes
 
@@ -113,14 +113,17 @@ endif
 
 ifdef ice_src_dist
     ifeq ($(ice_cpp_dir), $(ice_dir)/cpp)
+        SLICEPARSERLIB = $(ice_cpp_dir)/lib/$(call mklibfilename,Slice,$(VERSION))
         SLICE2CPP = $(ice_cpp_dir)/bin/slice2cpp
         SLICE2OBJC = $(ice_cpp_dir)/bin/slice2objc
     else
-        SLICE2CPP = $(ice_cpp_dir)/bin/slice2cpp
+        SLICEPARSERLIB = $(ice_cpp_dir)/$(libsubdir)/$(call mklibfilename,Slice,$(VERSION))
+        SLICE2CPP = $(ice_cpp_dir)/$(binsubdir)/slice2cpp
         SLICE2OBJC = $(ice_cpp_dir)/$(binsubdir)/slice2objc
     endif
 else
-    SLICE2CPP = $(ice_cpp_dir)/bin/slice2cpp
+    SLICEPARSERLIB = $(ice_dir)/$(libsubdir)/$(call mklibfilename,Slice,$(VERSION))
+    SLICE2CPP = $(ice_dir)/$(binsubdir)/slice2cpp
     SLICE2OBJC = $(ice_dir)/$(binsubdir)/slice2objc
 endif
 
@@ -152,7 +155,7 @@ $(HDIR)/%.h %.m: $(SDIR)/%.ice $(SLICE2OBJC) $(SLICEPARSERLIB)
 	$(SLICE2OBJC) $(SLICE2OBJCFLAGS) $<
 	mv $(*F).h $(HDIR)
 
-%.h %.m: %.ice $(SLICE2OBJC)
+%.h %.m: %.ice $(SLICE2OBJC) $(SLICEPARSERLIB)
 	rm -f $(*F).h $(*F).m
 	$(SLICE2OBJC) $(SLICE2OBJCFLAGS) $<
 
