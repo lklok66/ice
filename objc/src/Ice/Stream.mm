@@ -484,6 +484,20 @@ public:
     }
 }
 
+-(NSMutableArray*) readSequence:(Class)cl
+{
+    ICEInt sz = [self readSize];
+    NSMutableArray* arr = [[NSMutableArray alloc] initWithCapacity: sz];
+    while(sz-- > 0)
+    {
+        id obj = [[cl alloc] init];
+        [obj read__:self];
+        [arr addObject:obj];
+        [obj release];
+    }
+    return arr;
+}
+
 -(ICEInt) readEnumerator:(ICEInt)limit
 {
     ICEInt val;
@@ -964,6 +978,24 @@ public:
     catch(const std::exception& ex)
     {
         rethrowObjCException(ex);
+    }
+}
+
+-(void)writeSequence:(NSArray*)arr class:(Class)cl
+{
+    [self writeSize: [arr count] ];
+    for(id i in arr)
+    {
+        if(i == nil)
+        {
+            i = [[cl alloc] init];
+            [i write__: self];
+            [i release];
+        }
+        else
+        {
+            [i write__: self];
+        }
     }
 }
 

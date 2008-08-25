@@ -54,6 +54,8 @@
 -(NSMutableString*) readString;
 -(NSMutableArray*) readStringSeq;
 
+-(NSMutableArray*) readSequence: (Class)c;
+
 -(ICEInt) readEnumerator:(ICEInt)limit;
 
 -(ICEInt) readSize;
@@ -111,6 +113,8 @@
 
 -(void) writeString:(NSString*)v;
 -(void) writeStringSeq:(NSArray*)v;
+
+-(void) writeSequence:(NSArray*)arr class:(Class)cl;
 
 -(void) writeEnumerator:(ICEInt)v limit:(ICEInt)limit;
 

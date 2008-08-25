@@ -857,78 +857,11 @@ Slice::ObjCGenerator::writeSequenceMarshalUnmarshalCode(Output& out,
     {
         if(marshal)
         {
-            out << nl << "if(" << param << " == null)";
-            out << sb;
-            out << nl << stream << ".writeSize(0);";
-            out << eb;
-            out << nl << "else";
-            out << sb;
-            out << nl << stream << ".writeSize(" << param << '.' << limitID << ");";
-	    out << nl << "for(int ix__ = 0; ix__ < " << param << '.' << limitID << "; ++ix__)";
-            out << sb;
-            string call;
-	    if(isValueType(type))
-	    {
-		call = param;
-	    }
-	    else
-	    {
-		call = "(";
-		call += param;
-		call += " == null ? new " + typeS + "() : " + param;
-	    }
-	    call += "[ix__]";
-	    if(!isValueType(type))
-	    {
-		call += ")";
-	    }
-            call += ".";
-            call += streamingAPI ? "ice_write" : "write__";
-            call += "(" + stream + ");";
-            out << nl << call;
-            out << eb;
-            out << eb;
+            out << nl << "[" << stream << " writeSequence: " << param << " class: [" << typeS << " class]];";
         }
         else
         {
-            out << sb;
-            out << nl << "int szx__ = " << stream << ".readSize();";
-            if(!streamingAPI)
-            {
-                if(type->isVariableLength())
-                {
-                    out << nl << stream << ".startSeq(szx__, " << static_cast<unsigned>(type->minWireSize()) << ");";
-                }
-                else
-                {
-                    out << nl << stream << ".checkFixedSeq(szx__, " << static_cast<unsigned>(type->minWireSize()) << ");";
-                }
-            }
-            out << nl << param << " = new ";
-	    out << fixId(seq->scoped()) << "(szx__);";
-            out << nl << "for(int ix__ = 0; ix__ < szx__; ++ix__)";
-            out << sb;
-	    out << nl << typeS << " val__ = new " << typeS << "();";
-	    if(streamingAPI)
-	    {
-		out << nl << "val__.ice_read(" << stream << ");";
-	    }
-	    else
-	    {
-		out << nl << "val__.read__(" << stream << ");";
-	    }
-	    out << nl << param << "." << addMethod << "(val__);";
-            if(!streamingAPI && type->isVariableLength())
-            {
-                out << nl << stream << ".checkSeq();";
-                out << nl << stream << ".endElement();";
-            }
-            out << eb;
-            if(!streamingAPI && type->isVariableLength())
-            {
-                out << nl << stream << ".endSeq(szx__);";
-            }
-            out << eb;
+            out << nl << "v = [" << stream << " readSequence: [" << typeS << " class]];";
         }
         return;
     }
