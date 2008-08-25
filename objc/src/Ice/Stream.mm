@@ -19,6 +19,10 @@
 
 #import <objc/runtime.h>
 
+@protocol Dummy
+-(void)read__:(ICEInputStream*)is;
+@end
+
 namespace IceObjC
 {
 
