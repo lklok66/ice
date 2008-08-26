@@ -88,7 +88,7 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
     try
     {
         initial->getPrinter(printer, printerProxy);
-        fprintf(stderr, "%s: Did not get the expected NoObjectFactoryException!\n");
+        fprintf(stderr, "%s: Did not get the expected NoObjectFactoryException!\n", argv[0]);
         return EXIT_FAILURE;
     }
     catch(const Ice::MarshalException& ex)
