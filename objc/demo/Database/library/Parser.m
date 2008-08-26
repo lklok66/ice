@@ -437,6 +437,7 @@ Parser* parser;
     }
 
     [pool_ release];
+    pool_ = nil;
 
     parser = nil;
     return status;

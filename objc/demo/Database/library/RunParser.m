@@ -28,8 +28,8 @@ long timeout_;
 BOOL terminated_;
 }
 
--(id)initWithLogger:(id<ICELogger>) logger timeout:(int) timeout session:(id<DemoSessionPrx>) session;
-+(id)sessionRefreshThreadWithLogger:(id<ICELogger>) logger timeout:(int) timeout session:(id<DemoSessionPrx>) session;
+-(id)initWithLogger:(id<ICELogger>) logger timeout:(long) timeout session:(id<DemoSessionPrx>) session;
++(id)sessionRefreshThreadWithLogger:(id<ICELogger>) logger timeout:(long) timeout session:(id<DemoSessionPrx>) session;
 -(void) main;
 -(void) terminate;
 
@@ -39,7 +39,7 @@ BOOL terminated_;
 
 @implementation SessionRefreshThread
 
--(id)initWithLogger:(id<ICELogger>)logger timeout:(int)timeout session:(id<DemoSessionPrx>)session
+-(id)initWithLogger:(id<ICELogger>)logger timeout:(long)timeout session:(id<DemoSessionPrx>)session
 {
     if(![super init])
     {
@@ -51,12 +51,13 @@ BOOL terminated_;
     cond_ = [[NSCondition alloc] init];
 
     timeout_ = timeout;
+    printf("%ld\n", timeout_);
     terminated_ = NO;
 
     return self;
 } 
 
-+(id)sessionRefreshThreadWithLogger:(id<ICELogger>) logger timeout:(int) timeout session:(id<DemoSessionPrx>) session
++(id)sessionRefreshThreadWithLogger:(id<ICELogger>) logger timeout:(long) timeout session:(id<DemoSessionPrx>) session
 {
     return [[[SessionRefreshThread alloc] initWithLogger:logger timeout:timeout session:session] autorelease];
 }
@@ -128,7 +129,7 @@ runParser(int argc, char* argv[], id<ICECommunicator> communicator)
     id<DemoSessionPrx> session = [factory create];
 
     SessionRefreshThread* refresh = [SessionRefreshThread sessionRefreshThreadWithLogger:[communicator getLogger]
-                                                          timeout:5 session:session];
+                                                          timeout:[factory getSessionTimeout]/2 session:session];
     [refresh start];
     id<DemoLibraryPrx> library = [session getLibrary];
 
