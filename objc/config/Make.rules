@@ -99,6 +99,9 @@ SLICE2CPPFLAGS		= $(ICECPPFLAGS)
 SLICE2OBJCFLAGS		= $(ICECPPFLAGS)
 LDFLAGS			= $(LDPLATFORMFLAGS) $(CXXFLAGS) -L$(libdir)
 
+FLEXFLAGS	       :=
+BISONFLAGS		:= -dvt
+
 ifeq ($(ice_dir), /usr) 
     CPPFLAGS		= 
     LDFLAGS		= $(LDPLATFORMFLAGS) $(CXXFLAGS)
@@ -130,7 +133,7 @@ endif
 EVERYTHING		= all depend clean install 
 
 .SUFFIXES:
-.SUFFIXES:		.mm .m .o .cpp 
+.SUFFIXES:		.mm .m .o .cpp  .c
 
 .m.o:
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $<
@@ -158,6 +161,19 @@ $(HDIR)/%.h %.m: $(SDIR)/%.ice $(SLICE2OBJC) $(SLICEPARSERLIB)
 %.h %.m: %.ice $(SLICE2OBJC) $(SLICEPARSERLIB)
 	rm -f $(*F).h $(*F).m
 	$(SLICE2OBJC) $(SLICE2OBJCFLAGS) $<
+
+%.h %.m: %.y
+	rm -f $(*F).h $(*F).c
+	bison $(BISONFLAGS) $<
+	mv $(*F).tab.c $(*F).m
+	mv $(*F).tab.h $(*F).h
+	rm -f $(*F).output
+
+%.m: %.l
+	flex $(FLEXFLAGS) $<
+	rm -f $@
+	cat lex.yy.c >> $@
+	rm -f lex.yy.c
 
 all:: $(SRCS) $(TARGETS)
 
