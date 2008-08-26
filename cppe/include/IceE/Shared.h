@@ -196,7 +196,7 @@ public:
         return *this;
     }
 
-    void __incRef()
+    virtual void __incRef()
     {
 #if defined(_WIN32)
         assert(InterlockedExchangeAdd(&_ref, 0) >= 0);
@@ -212,7 +212,7 @@ public:
 #endif
     }
 
-    void __decRef()
+    virtual void __decRef()
     {
 #if defined(_WIN32)
         assert(InterlockedExchangeAdd(&_ref, 0) > 0);
@@ -245,8 +245,8 @@ public:
 #endif
     }
 
-    int __getRef() const;
-    void __setNoDelete(bool);
+    virtual int __getRef() const;
+    virtual void __setNoDelete(bool);
 
 protected:
 

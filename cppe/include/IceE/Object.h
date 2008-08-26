@@ -30,7 +30,7 @@ enum DispatchStatus
     DispatchUserException
 };
 
-class ICE_API Object : public IceUtil::Shared
+class ICE_API Object : virtual public IceUtil::Shared
 {
 public:
 
