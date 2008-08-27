@@ -8,7 +8,6 @@
 // **********************************************************************
 
 #import <Parser.h>
-#import <assert.h>
 #import <string.h>
 #import <stdio.h>
 
@@ -19,29 +18,25 @@ Parser* parser;
 
 @synthesize query_;
 @synthesize current_;
-@synthesize library_;
 
--(id)initWithLibrary: (id<DemoLibraryPrx>) library
+-(id)initWithLibrary:(id<DemoLibraryPrx>)library
 {
     if(![super init])
     {
         return nil;
     }
 
-    [self setLibrary_:library];
-    [self setQuery_:nil];
-    [self setCurrent_:nil];
-    pool_ = nil;
+    library_ = [library retain];
 
     return self;
 }
 
-+(id)parserWithLibrary: (id<DemoLibraryPrx>) library
++(id)parserWithLibrary:(id<DemoLibraryPrx>)library
 {
     return [[[Parser alloc] initWithLibrary:library] autorelease];
 }
 
--(void) usage
+-(void)usage
 {
     printf("help                    Print this message.\n"
            "exit, quit              Exit this program.\n"
@@ -52,12 +47,10 @@ Parser* parser;
            "current                 Display the current book.\n"
            "rent NAME               Rent the current book for customer NAME.\n"
            "return                  Return the currently rented book.\n"
-           "remove                  Permanently remove the current book from the library.\n"
-           "size SIZE               Set the evictor size for books to SIZE.\n"
-           "shutdown                Shut the library server down.\n");
+           "remove                  Permanently remove the current book from the library.\n");
 }
 
--(void) addBook:(NSArray*) args
+-(void)addBook:(NSArray*)args
 {
     if([args count] != 3)
     {
@@ -76,14 +69,14 @@ Parser* parser;
     }
     @catch(DemoBookExistsException* ex)
     {
-        [self errorWithString:@"the book already exists."];
+        [self errorWithString:@"the book already exists"];
     }
     @catch(ICELocalException* ex)
     {
         [self errorWithString:[ex description]];
     }
 }
--(void) findIsbn:(NSArray*)args
+-(void)findIsbn:(NSArray*)args
 {
     if([args count] != 1)
     {
@@ -103,15 +96,16 @@ Parser* parser;
             {
                 // Ignore
             }
+
+            [self setQuery_:nil];
+            [self setCurrent_:nil];
         }
-        [self setQuery_:nil];
-        [self setCurrent_:nil];
 
         NSString* isbn = [args objectAtIndex:0];
         
         DemoBookQueryResultPrx* query;
         DemoBookDescription* current;
-        [[self library_] queryByIsbn:[args objectAtIndex:0] first:&current result:&query];
+        [library_ queryByIsbn:[args objectAtIndex:0] first:&current result:&query];
 
         [self setCurrent_:current];
         [self setQuery_:query];
@@ -127,7 +121,8 @@ Parser* parser;
         [self errorWithString:[ex description]];
     }
 }
--(void) findAuthors:(NSArray*)args
+
+-(void)findAuthors:(NSArray*)args
 {
     if([args count] != 1)
     {
@@ -147,9 +142,9 @@ Parser* parser;
             {
                 // Ignore
             }
+            [self setQuery_:nil];
+            [self setCurrent_:nil];
         }
-        [self setQuery_:nil];
-        [self setCurrent_:nil];
 
         DemoBookQueryResultPrx* query;
         DemoBookDescription* current;
@@ -169,62 +164,38 @@ Parser* parser;
     }
 }
 
--(void) nextFoundBook
+-(void)nextFoundBook
 {
-    if(query_ != nil)
+    if(query_ == nil)
+    {
+        printf("no next book\n");
+        return;
+    }
+
+    @try
     {
         BOOL destroyed;
         NSArray* next = [query_ next:1 destroyed:&destroyed];
-        if(destroyed)
-        {
-            [self setQuery_:nil];
-            [self setCurrent_:nil];
-        }
-        else
+        if([next count] > 0)
         {
             [self setCurrent_:[next objectAtIndex:0]];
         }
-    }
-    else
-    {
-        [self setCurrent_:nil];
-    }
-    [self printCurrent];
-}
-
--(void) printCurrent
-{
-    @try
-    {
-        if(current_ != nil)
-        {
-            printf("current book is:\n");
-            printf("isbn: %s\n", [[current_ isbn] UTF8String]);
-            printf("title: %s\n", [[current_ title] UTF8String]);
-            NSMutableString* auth = [[NSMutableString alloc] init];
-            for(NSString* s in [current_ authors])
-            {
-                if(s != [[current_ authors] objectAtIndex:0])
-                {
-                    [auth appendString:@", "];
-                }
-                [auth appendString:s];
-            }
-            printf("authors: %s\n",  [auth UTF8String]);
-            [auth release];
-            if([[current_ rentedBy] length] > 0)
-            {
-                printf("rented: %s\n", [[current_ rentedBy] UTF8String]);
-            }
-        }
         else
         {
-            printf("no current book\n");
+            NSAssert(destroyed, @"");
+            [self setCurrent_:nil];
         }
+
+        if(destroyed)
+        {
+            [self setQuery_:nil];
+        }
+
+        [self printCurrent];
     }
     @catch(ICEObjectNotExistException* ex)
     {
-        printf("current book no longer exists\n");
+        printf("the query object no longer exists\n");
     }
     @catch(ICELocalException* ex)
     {
@@ -232,7 +203,36 @@ Parser* parser;
     }
 }
 
--(void) rentCurrent:(NSArray*)args
+-(void)printCurrent
+{
+    if(current_ != nil)
+    {
+        printf("current book is:\n");
+        printf("isbn: %s\n", [[current_ isbn] UTF8String]);
+        printf("title: %s\n", [[current_ title] UTF8String]);
+        NSMutableString* auth = [[NSMutableString alloc] init];
+        for(NSString* s in [current_ authors])
+        {
+            if(s != [[current_ authors] objectAtIndex:0])
+            {
+                [auth appendString:@", "];
+            }
+            [auth appendString:s];
+        }
+        printf("authors: %s\n",  [auth UTF8String]);
+        [auth release];
+        if([[current_ rentedBy] length] > 0)
+        {
+            printf("rented: %s\n", [[current_ rentedBy] UTF8String]);
+        }
+    }
+    else
+    {
+        printf("no current book\n");
+    }
+}
+
+-(void)rentCurrent:(NSArray*)args
 {
     if([args count] != 1)
     {
@@ -246,6 +246,7 @@ Parser* parser;
         {
             [[current_ proxy] rentBook:[args objectAtIndex:0]];
             printf("the book is now rented by `%s'\n", [[args objectAtIndex:0] UTF8String]);
+            [self setCurrent_:[[current_ proxy] describe]];
         }
         else
         {
@@ -265,7 +266,8 @@ Parser* parser;
         [self errorWithString:[ex description]];
     }
 }
--(void) returnCurrent
+
+-(void)returnCurrent
 {
     @try
     {
@@ -273,6 +275,7 @@ Parser* parser;
         {
             [[current_ proxy] returnBook];
             printf( "the book has been returned.\n");
+            [self setCurrent_:[[current_ proxy] describe]];
         }
         else
         {
@@ -292,14 +295,15 @@ Parser* parser;
         [self errorWithString:[ex description]];
     }
 }
--(void) removeCurrent
+
+-(void)removeCurrent
 {
     @try
     {
         if(current_ != nil)
         {
             [[current_ proxy] destroy];
-            [self setCurrent_: nil];
+            [self setCurrent_:nil];
             printf("removed current book\n");
         }
         else
@@ -317,9 +321,9 @@ Parser* parser;
     }
 }
 
--(int) getInput:(char*)buf max:(int)max
+-(int)getInput:(char*)buf max:(int)max
 {
-    assert(pool_ != nil);
+    NSAssert(pool_, @"");
     [pool_ drain];
 
     printf("%s", [self getPrompt]);
@@ -371,12 +375,12 @@ Parser* parser;
     }
 }
 
--(void) continueLine
+-(void)continueLine
 {
     continue_ = YES;
 }
 
--(const char*) getPrompt
+-(const char*)getPrompt
 {
     if(continue_)
     {
@@ -389,41 +393,38 @@ Parser* parser;
     }
 }
 
--(void) error:(const char*) s
+-(void)error:(const char*)s
 {
     fprintf(stderr, "error: %s", s);
 }
 
--(void) errorWithString:(NSString*) s
+-(void)errorWithString:(NSString*)s
 {
     fprintf(stderr, "error: %s", [s UTF8String]);
 }
 
--(void) warning:(const char*) s
+-(void)warning:(const char*)s
 {
     fprintf(stderr, "warning: %s", s);
 }
 
--(void) warningWithString:(NSString*) s
+-(void)warningWithString:(NSString*)s
 {
     fprintf(stderr, "warning: %s", [s UTF8String]);
 }
 
 -(int)parse
 {
-    //extern int yydebug;
-    //yydebug = debug ? 1 : 0;
-
-    assert(pool_ == nil);
+    NSAssert(!pool_, @"");
 
     pool_ = [[NSAutoreleasePool alloc] init];
 
-    assert(!parser);
+    NSAssert(!parser, @"");
     parser = self;
 
     errors_ = 0;
     yyin = stdin;
-    assert(yyin);
+    NSAssert(yyin, @"");
 
     continue_ = false;
 
@@ -448,7 +449,7 @@ Parser* parser;
     [query_ release];
     [current_ release];
     [library_ release];
-    assert(pool_ == nil);
+    NSAssert(!pool_, @"");
     [super dealloc];
 }
 @end

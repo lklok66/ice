@@ -80,7 +80,6 @@ int errors_;
 
 @property(retain, nonatomic) DemoBookQueryResultPrx* query_;
 @property(retain, nonatomic) DemoBookDescription* current_;
-@property(retain, nonatomic) id<DemoLibraryPrx> library_;
 
 @end
 

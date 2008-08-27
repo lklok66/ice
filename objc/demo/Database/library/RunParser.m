@@ -20,21 +20,18 @@
 @interface SessionRefreshThread : NSThread
 {
 @private
-id<ICELogger> logger_;
-id<DemoSessionPrx> session_;
-NSCondition* cond_;
+    id<ICELogger> logger_;
+    id<DemoSessionPrx> session_;
+    NSCondition* cond_;
 
-long timeout_;
-BOOL terminated_;
+    long timeout_;
 }
 
--(id)initWithLogger:(id<ICELogger>) logger timeout:(long) timeout session:(id<DemoSessionPrx>) session;
-+(id)sessionRefreshThreadWithLogger:(id<ICELogger>) logger timeout:(long) timeout session:(id<DemoSessionPrx>) session;
--(void) main;
--(void) terminate;
+-(id)initWithLogger:(id<ICELogger>) logger timeout:(long)timeout session:(id<DemoSessionPrx>)session;
++(id)sessionRefreshThreadWithLogger:(id<ICELogger>)logger timeout:(long)timeout session:(id<DemoSessionPrx>)session;
+-(void)main;
 
 -(void)dealloc;
-
 @end
 
 @implementation SessionRefreshThread
@@ -51,27 +48,25 @@ BOOL terminated_;
     cond_ = [[NSCondition alloc] init];
 
     timeout_ = timeout;
-    printf("%ld\n", timeout_);
-    terminated_ = NO;
 
     return self;
 } 
 
-+(id)sessionRefreshThreadWithLogger:(id<ICELogger>) logger timeout:(long) timeout session:(id<DemoSessionPrx>) session
++(id)sessionRefreshThreadWithLogger:(id<ICELogger>)logger timeout:(long)timeout session:(id<DemoSessionPrx>)session
 {
     return [[[SessionRefreshThread alloc] initWithLogger:logger timeout:timeout session:session] autorelease];
 }
 
--(void) main
+-(void)main
 {
     [cond_ lock];
     @try
     {
-        while(!terminated_)
+        while(![self isCancelled])
         {
             NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
             [cond_ waitUntilDate:[NSDate dateWithTimeIntervalSinceNow:timeout_]];
-            if(!terminated_)
+            if(![self isCancelled])
             {
                 @try
                 {
@@ -81,7 +76,7 @@ BOOL terminated_;
                 {
                     NSString* warning = [NSString stringWithFormat:@"SessionRefreshThread: %@", [ex description]];
                     [logger_ warning:warning];
-                    terminated_ = true;
+                    [self cancel];
                 }
             }
             [pool release];
@@ -93,12 +88,12 @@ BOOL terminated_;
     }
 }
 
--(void)terminate
+-(void)cancel
 {
+    [super cancel];
     [cond_ lock];
     @try
     {
-        terminated_ = YES;
         [cond_ signal];
     }
     @finally
@@ -135,19 +130,9 @@ runParser(int argc, char* argv[], id<ICECommunicator> communicator)
 
     Parser* parser = [Parser parserWithLibrary:library];
 
-    int rc = 0;
+    int rc = [parser parse];
 
-    //if(args.length == 1)
-    //{
-        //rc = parser.parse(args[0]);
-    //}
-
-    if(rc == 0)
-    {
-        rc = [parser parse];
-    }
-
-    [refresh terminate];
+    [refresh cancel];
 
     // No join.
     while(![refresh isFinished])

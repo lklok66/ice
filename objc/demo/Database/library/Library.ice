@@ -163,7 +163,6 @@ interface BookQueryResult
      *
      **/
     BookDescriptionSeq next(int n, out bool destroyed);
-    LongSeq foo();
 
     /**
      *
