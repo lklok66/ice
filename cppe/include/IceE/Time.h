@@ -185,6 +185,9 @@ public:
 
 private:
 
+    // COMPILERBUG: friend statement required by gcc otherwise inline operator<<
+    // cause compile error with GCC.
+    friend ICE_API std::ostream& operator<<(std::ostream&, const Time&);
     Time(Int64);
 
     Int64 _usec;
