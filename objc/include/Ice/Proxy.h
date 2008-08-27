@@ -12,15 +12,30 @@
 #import <Ice/Current.h> // For ICEOperationMode
 #import <Ice/Endpoint.h> // For ICEEndpointSelectionType
 
+#import <Foundation/NSProxy.h>
+
 //
 // Forward declarations.
 //
 @class ICEObjectPrx;
 @class ICECommunicator;
+@class ICEException;
 @protocol ICERouterPrx;
 @protocol ICELocatorPrx;
 @protocol ICEOutputStream;
 @protocol ICEInputStream;
+
+//
+// An helper class to run Ice callbacks on the main thread.
+//
+@interface ICECallbackOnMainThread : NSProxy
+{
+    id cb_;
+}
+-(id)init:(id)cb;
++(id)callbackOnMainThread:(id)cb;
+-(void)forwardInvocation:(NSInvocation *)inv;
+@end
 
 @protocol ICEObjectPrx <NSObject, NSCopying>
 
@@ -41,6 +56,10 @@
 -(NSString*) ice_id:(ICEContext*)context;
 -(BOOL) ice_invoke:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams outParams:(NSMutableData**)outParams;
 -(BOOL) ice_invoke:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams outParams:(NSMutableData**)outParams context:(ICEContext*)context;
+-(BOOL) ice_invoke_async:(id)target response:(SEL)response exception:(SEL)exception operation:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams;
+-(BOOL) ice_invoke_async:(id)target response:(SEL)response exception:(SEL)exception operation:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams context:(ICEContext*)context;
+-(BOOL) ice_invoke_async:(id)target response:(SEL)response exception:(SEL)exception sent:(SEL)sent operation:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams;
+-(BOOL) ice_invoke_async:(id)target response:(SEL)response exception:(SEL)exception sent:(SEL)sent operation:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams context:(ICEContext*)context;
 -(ICEIdentity*) ice_getIdentity;
 -(id<ICEObjectPrx>) ice_identity:(ICEIdentity*)identity;
 -(ICEContext*) ice_getContext;
@@ -100,4 +119,7 @@
 -(void) checkTwowayOnly__:(NSString*)operation;
 -(void) invoke__:(NSString*)operation mode:(ICEOperationMode)mode os:(id<ICEOutputStream>)os 
               is:(id<ICEInputStream>*)is context:(ICEContext*)context;
+-(BOOL) invoke_async__:(id)target response:(SEL)response exception:(SEL)exception sent:(SEL)sent finished:(SEL)finished 
+             operation:(NSString*)operation mode:(ICEOperationMode)mode os:(id<ICEOutputStream>)os 
+               context:(ICEContext*)context;
 @end

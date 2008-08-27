@@ -30,12 +30,13 @@ protected:
     virtual std::string getSelector(const OperationPtr&) const;
     virtual std::string getParams(const OperationPtr&) const;
     virtual std::string getServerParams(const OperationPtr&) const;
-    virtual std::vector<std::string> getParamsAsync(const OperationPtr&, bool);
-    virtual std::vector<std::string> getParamsAsyncCB(const OperationPtr&);
+    virtual std::string getParamsAsync(const OperationPtr&, bool);
+    virtual std::string getParamsAsyncCB(const OperationPtr&);
     virtual std::string getArgs(const OperationPtr&) const;
     virtual std::string getServerArgs(const OperationPtr&) const;
-    virtual std::vector<std::string> getArgsAsync(const OperationPtr&);
-    virtual std::vector<std::string> getArgsAsyncCB(const OperationPtr&);
+    virtual std::string getArgsAsync(const OperationPtr&, bool);
+    virtual std::string getArgsAsyncCB(const OperationPtr&);
+    virtual std::string getSigAsyncCB(const OperationPtr&);
 
     void emitAttributes(const ContainedPtr&);
     ::std::string getParamAttributes(const ParamDeclPtr&);

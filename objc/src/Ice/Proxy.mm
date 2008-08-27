@@ -25,8 +25,239 @@
 #include <IceCpp/Locator.h>
 
 #import <objc/runtime.h>
+#import <objc/message.h>
+
+#import <Foundation/NSThread.h>
 
 #define OBJECTPRX ((IceProxy::Ice::Object*)objectPrx__)
+
+namespace
+{
+
+class AMICallback : public Ice::AMI_Array_Object_ice_invoke
+{
+public:
+
+AMICallback(const Ice::CommunicatorPtr& communicator, id target, SEL resp, SEL ex, id responder, SEL finished) : 
+    _target(target),
+    _communicator(communicator), 
+    _response(resp),
+    _exception(ex),
+    _responder(responder), 
+    _finished(finished)
+{
+    [_target retain];
+}
+
+virtual ~AMICallback()
+{
+    [_target release];
+}
+
+virtual void
+ice_response(bool ok , const std::pair<const Byte*, const Byte*>& outParams)
+{
+    if(ok && !_response || !ok && !_exception)
+    {
+        return;
+    }
+    
+    ICEInputStream* is;
+    {
+        Ice::InputStreamPtr s = Ice::createInputStream(_communicator, outParams);
+        is = [[ICEInputStream alloc] initWithInputStream:s];
+    }
+
+    @try
+    {
+        objc_msgSend(_responder, _finished, _target, _response, _exception, ok, is);
+    }
+    @catch(NSException* ex)
+    {
+        [is release];
+        rethrowCxxException(ex);
+    }
+
+    [is release];
+}
+
+virtual void 
+ice_exception(const Ice::Exception& ex)
+{
+    if(!_exception)
+    {
+        return;
+    }
+
+    @try
+    {
+        @try
+        {
+            rethrowObjCException(ex);
+        }
+        @catch(ICEException* e)
+        {
+            objc_msgSend(_target, _exception, e);
+        }
+    }
+    @catch(NSException* e)
+    {
+        rethrowCxxException(e);
+    }
+}
+
+protected:
+
+id _target;
+
+private:
+
+const Ice::CommunicatorPtr _communicator;
+SEL _response;
+SEL _exception;
+id _responder;
+SEL _finished;
+};
+typedef IceUtil::Handle<AMICallback> AMICallbackPtr;
+
+class AMICallbackWithSent : public AMICallback, public Ice::AMISentCallback
+{
+public:
+
+AMICallbackWithSent(const Ice::CommunicatorPtr& communicator, id target, SEL resp, SEL ex, SEL sent, id responder,
+                    SEL finished) : 
+    AMICallback(communicator, target, resp, ex, responder, finished),
+    _sent(sent)
+{
+}
+
+virtual void
+ice_sent()
+{
+    @try
+    {
+        objc_msgSend(_target, _sent);
+    }
+    @catch(NSException* e)
+    {
+        rethrowCxxException(e);
+    }
+}
+
+private:
+
+SEL _sent;
+
+};
+typedef IceUtil::Handle<AMICallback> AMICallbackPtr;
+
+class AMIIceInvokeCallback : public Ice::AMI_Array_Object_ice_invoke
+{
+public:
+
+AMIIceInvokeCallback(id target, SEL response, SEL ex) : _target(target), _response(response), _exception(ex)
+{
+    [_target retain];
+}
+
+virtual ~AMIIceInvokeCallback()
+{
+    [_target release];
+}
+
+virtual void
+ice_response(bool ok , const std::pair<const Byte*, const Byte*>& oP)
+{
+    @try
+    {
+        objc_msgSend(_target, _response, ok, [NSMutableData dataWithBytes:oP.first length:(oP.second - oP.first)]);
+    }
+    @catch(NSException* e)
+    {
+        rethrowCxxException(e);
+    }
+}
+
+virtual void 
+ice_exception(const Ice::Exception& ex)
+{
+    @try
+    {
+        @try
+        {
+            rethrowObjCException(ex);
+        }
+        @catch(ICEException* e)
+        {
+            objc_msgSend(_target, _exception, e);
+        }
+    }
+    @catch(NSException* e)
+    {
+        rethrowCxxException(e);
+    }
+}
+
+protected:
+
+id _target;
+
+private:
+
+SEL _response;
+SEL _exception;
+
+};
+
+class AMIIceInvokeCallbackWithSent : public AMIIceInvokeCallback, public Ice::AMISentCallback
+{
+public:
+
+AMIIceInvokeCallbackWithSent(id target, SEL response, SEL ex, SEL sent) :
+    AMIIceInvokeCallback(target, response, ex),
+    _sent(sent)
+{
+}
+
+virtual void
+ice_sent()
+{
+    @try
+    {
+        objc_msgSend(_target, _sent);
+    }
+    @catch(NSException* e)
+    {
+        rethrowCxxException(e);
+    }
+}
+
+private:
+
+SEL _sent;
+};
+
+};
+
+@implementation ICECallbackOnMainThread
+-(id)init:(id)cb
+{
+    cb_ = cb;
+    return self;
+}
++(id)callbackOnMainThread:(id)cb
+{
+    return [[[self alloc] init:cb] autorelease];
+}
+-(void)forwardInvocation:(NSInvocation *)inv
+{
+    [inv performSelectorOnMainThread:@selector(invokeWithTarget:) withObject:cb_ waitUntilDone:NO];
+}
+-(NSMethodSignature *)methodSignatureForSelector:(SEL)selector
+{
+    return [cb_ methodSignatureForSelector:selector];
+}
+@end
 
 @implementation ICEObjectPrx(Internal)
 
@@ -124,6 +355,7 @@
         @throw [ICETwowayOnlyException twowayOnlyException:__FILE__ line:__LINE__ operation:name];
     }
 }
+
 -(void) invoke__:(NSString*)operation 
             mode:(ICEOperationMode)mode 
               os:(id<ICEOutputStream>)os 
@@ -140,7 +372,7 @@
         }
 
         std::vector<Ice::Byte> outParams;
-        if(context)
+        if(context != nil)
         {
             Ice::Context ctx;
             fromNSDictionary(context, ctx);
@@ -185,6 +417,55 @@
     {
         NSAssert(is && *is, @"input stream not set");
         [*is throwException];
+    }
+}
+
+-(BOOL) invoke_async__:(id)target
+              response:(SEL)response
+             exception:(SEL)exception
+                  sent:(SEL)sent
+              finished:(SEL)finished
+             operation:(NSString*)operation
+                  mode:(ICEOperationMode)mode 
+                    os:(id<ICEOutputStream>)os
+               context:(ICEContext*)context
+{
+    try
+    {
+        std::vector<Ice::Byte> inParams;
+        if(os)
+        {
+            [(ICEOutputStream*)os os__]->finished(inParams);
+        }
+        std::pair<const ::Ice::Byte*, const ::Ice::Byte*> inP(&inParams[0], &inParams[0] + inParams.size());
+        
+        AMICallbackPtr amiCB;
+        if(sent != nil)
+        {
+            amiCB = new AMICallbackWithSent(OBJECTPRX->ice_getCommunicator(), target, response, exception, sent,
+                                            [self class], finished);
+        }
+        else
+        {
+            amiCB = new AMICallback(OBJECTPRX->ice_getCommunicator(), target, response, exception, [self class], 
+                                    finished);
+        }
+
+        if(context != nil)
+        {
+            Ice::Context ctx;
+            fromNSDictionary(context, ctx);
+            return OBJECTPRX->ice_invoke_async(amiCB, fromNSString(operation), (Ice::OperationMode)mode, inP, ctx);
+        }
+        else
+        {
+            return OBJECTPRX->ice_invoke_async(amiCB, fromNSString(operation), (Ice::OperationMode)mode, inP);
+        }
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return NO; // Keep the compiler happy.
     }
 }
 
@@ -373,6 +654,92 @@
     {
         rethrowObjCException(ex);
         return NO; // Keep the compiler happy
+    }
+}
+
+-(BOOL) ice_invoke_async:(id)target
+                response:(SEL)response
+               exception:(SEL)exception 
+               operation:(NSString*)operation 
+                    mode:(ICEOperationMode)mode 
+                inParams:(NSData*)inParams
+{
+    return [self ice_invoke_async:target response:response exception:exception sent:nil operation:operation mode:mode 
+                 inParams:inParams];
+}
+
+-(BOOL) ice_invoke_async:(id)target
+                response:(SEL)response
+               exception:(SEL)exception 
+               operation:(NSString*)operation 
+                    mode:(ICEOperationMode)mode 
+                inParams:(NSData*)inParams
+                 context:(ICEContext*)context
+{
+    return [self ice_invoke_async:target response:response exception:exception sent:nil operation:operation mode:mode 
+                 inParams:inParams context:context];
+}
+
+-(BOOL) ice_invoke_async:(id)target
+                response:(SEL)response
+               exception:(SEL)exception 
+                    sent:(SEL)sent
+               operation:(NSString*)operation 
+                    mode:(ICEOperationMode)mode 
+                inParams:(NSData*)inParams
+{
+    try
+    {
+        std::pair<const Ice::Byte*, const Ice::Byte*> inP((ICEByte*)[inParams bytes], 
+                                                          (ICEByte*)[inParams bytes] + [inParams length]);
+        Ice::AMI_Array_Object_ice_invokePtr amiCB;
+        if(sent != nil)
+        {
+            amiCB = new AMIIceInvokeCallbackWithSent(target, response, exception, sent);
+        }
+        else
+        {
+            amiCB = new AMIIceInvokeCallback(target, response, exception);
+        }
+        return OBJECTPRX->ice_invoke_async(amiCB, fromNSString(operation), (Ice::OperationMode)mode, inP);
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return NO; // Keep the compiler happy.
+    }
+}
+
+-(BOOL) ice_invoke_async:(id)target
+                response:(SEL)response
+               exception:(SEL)exception
+                    sent:(SEL)sent
+               operation:(NSString*)operation 
+                    mode:(ICEOperationMode)mode 
+                inParams:(NSData*)inParams 
+                 context:(ICEContext*)context
+{
+    try
+    {
+        std::pair<const Ice::Byte*, const Ice::Byte*> inP((ICEByte*)[inParams bytes], 
+                                                          (ICEByte*)[inParams bytes] + [inParams length]);
+        Ice::AMI_Array_Object_ice_invokePtr amiCB;
+        if(sent != nil)
+        {
+            amiCB = new AMIIceInvokeCallbackWithSent(target, response, exception, sent);
+        }
+        else
+        {
+            amiCB = new AMIIceInvokeCallback(target, response, exception);
+        }
+        Ice::Context ctx;
+        return OBJECTPRX->ice_invoke_async(amiCB, fromNSString(operation), (Ice::OperationMode)mode, inP, 
+                                           fromNSDictionary(context, ctx));
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return NO; // Keep the compiler happy.
     }
 }
 

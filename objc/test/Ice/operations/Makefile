@@ -19,6 +19,7 @@ COBJS		= Test.o \
 		  Client.o \
 		  AllTests.o \
 		  Twoways.o \
+		  TwowaysAMI.o
 
 SOBJS		= Test.o \
 		  TestI.o \

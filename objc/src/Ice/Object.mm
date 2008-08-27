@@ -103,28 +103,30 @@ IceObjC::ObjectI::ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& cb
         Ice::OutputStreamPtr s = Ice::createOutputStream(current.adapter->getCommunicator());
         os = [[ICEOutputStream alloc] initWithOutputStream:s];
     }
+
     ICECurrent* c = [[ICECurrent alloc] initWithCurrent:current];
+    NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
     BOOL ok;
     @try
     {
-        NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
         ok = [_object dispatch__:c is:is os:os];
-        [pool release];
     }
     @catch(NSException* ex)
     {
+        [pool release];
+        [c release];
+        [is release];
         [os release];
         rethrowCxxException(ex);
     }
-    @finally
-    {
-        [c release];
-        [is release];
-    }
+    [pool release];
+    [c release];
+    [is release];
     
     std::vector<Ice::Byte> outParams;
     [os os__]->finished(outParams);
     [os release];
+
     cb->ice_response(ok, std::make_pair(&outParams[0], &outParams[0] + outParams.size()));
 }
 
