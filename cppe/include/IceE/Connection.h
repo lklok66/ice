@@ -32,6 +32,8 @@
 #include <IceE/Identity.h>
 #include <IceE/BasicStream.h>
 
+#include <memory>
+
 namespace IceInternal
 {
 

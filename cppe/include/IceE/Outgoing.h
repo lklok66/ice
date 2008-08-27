@@ -15,6 +15,8 @@
 #include <IceE/BasicStream.h>
 #include <IceE/OperationMode.h>
 
+#include <memory>
+
 namespace Ice
 {
 

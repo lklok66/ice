@@ -65,7 +65,7 @@ ifeq ($(MACHINE),x86_64)
    lp64suffix	= 64
 endif
 
-CXXFLAGS		= $(CXXARCHFLAGS) -ftemplate-depth-128 -Wall -D_REENTRANT
+CXXFLAGS		= $(CXXARCHFLAGS) -ftemplate-depth-128 -Wall -D_REENTRANT -I/usr/include/nptl
 
 ifeq ($(STATICLIBS),)
    CXXFLAGS		+= -fPIC

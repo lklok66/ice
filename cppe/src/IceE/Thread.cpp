@@ -11,6 +11,7 @@
 #include <IceE/Time.h>
 #include <IceE/ThreadException.h>
 
+#include <climits>
 #include <stdio.h>
 
 #ifdef _WIN32
