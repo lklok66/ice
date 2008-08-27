@@ -174,7 +174,14 @@ IceObjC::ObjectI::getObject()
 
 +(ICEObject*)objectWithObject__:(const Ice::ObjectPtr&)arg
 {
-    return [[[self alloc] initWithObject__:arg] autorelease];
+    if(!arg)
+    {
+        return nil;
+    }
+    else
+    {
+        return [[[self alloc] initWithObject__:arg] autorelease];
+    }
 }
 @end
 

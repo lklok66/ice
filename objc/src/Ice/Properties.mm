@@ -37,7 +37,14 @@
 
 +(ICEProperties*) propertiesWithProperties:(const Ice::PropertiesPtr&)properties
 {
-    return [[[ICEProperties alloc] initWithProperties:properties] autorelease];
+    if(!properties)
+    {
+        return nil;
+    }
+    else
+    {
+        return [[[ICEProperties alloc] initWithProperties:properties] autorelease];
+    }
 }
 
 // @protocol ICEProperties methods.

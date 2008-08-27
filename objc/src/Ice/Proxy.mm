@@ -286,7 +286,14 @@ SEL _sent;
 
 +(ICEObjectPrx*) objectPrxWithObjectPrx__:(const Ice::ObjectPrx&)arg
 {
-    return [[[self alloc] initWithObjectPrx__:arg] autorelease];
+    if(!arg)
+    {
+        return nil;
+    }
+    else
+    {
+        return [[[self alloc] initWithObjectPrx__:arg] autorelease];
+    }
 }
 
 @end

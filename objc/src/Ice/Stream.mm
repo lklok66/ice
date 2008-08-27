@@ -553,7 +553,10 @@ public:
 	{
 	     return nil;
 	}
-	return [[c alloc] initWithObjectPrx__:p];
+        else
+        {
+            return [[c alloc] initWithObjectPrx__:p];
+        }
     }
     catch(const std::exception& ex)
     {

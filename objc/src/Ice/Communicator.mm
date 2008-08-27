@@ -47,7 +47,14 @@
 
 +(ICECommunicator*) communicatorWithCommunicator:(const Ice::CommunicatorPtr&)arg
 {
-    return [[[ICECommunicator alloc] initWithCommunicator:arg] autorelease];
+    if(!arg)
+    {
+        return nil;
+    }
+    else
+    {
+        return [[[ICECommunicator alloc] initWithCommunicator:arg] autorelease];
+    }
 }
 
 //

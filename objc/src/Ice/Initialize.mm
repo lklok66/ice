@@ -155,7 +155,14 @@ private:
         Ice::Byte* start = (Ice::Byte*)[data bytes];
         Ice::Byte* end = (Ice::Byte*)[data bytes] + [data length];
         Ice::InputStreamPtr is = Ice::createInputStream(com, std::make_pair(start, end));
-        return [[[ICEInputStream alloc] initWithInputStream:is] autorelease];
+        if(is)
+        {
+            return [[[ICEInputStream alloc] initWithInputStream:is] autorelease];
+        }
+        else
+        {
+            return nil;
+        }
     }
     catch(const std::exception& ex)
     {
@@ -170,7 +177,14 @@ private:
     {
         Ice::CommunicatorPtr com = [(ICECommunicator*)communicator communicator__];
         Ice::OutputStreamPtr os = Ice::createOutputStream(com);
-        return [[[ICEOutputStream alloc] initWithOutputStream:os] autorelease];
+        if(os)
+        {
+            return [[[ICEOutputStream alloc] initWithOutputStream:os] autorelease];
+        }
+        else
+        {
+            return nil;
+        }
     }
     catch(const std::exception& ex)
     {

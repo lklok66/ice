@@ -101,6 +101,10 @@ def configurePaths():
     os.environ["CLASSPATH"] = os.path.join(javaDir, "Ice.jar") + os.pathsep + os.getenv("CLASSPATH", "")
     os.environ["CLASSPATH"] = os.path.join(javaDir) + os.pathsep + os.getenv("CLASSPATH", "")
     
+    if isDarwin():
+        objcDir = os.path.join(getIceDir("objc"), "lib")
+        os.environ["DYLD_LIBRARY_PATH"] = objcDir + os.pathsep + os.getenv("DYLD_LIBRARY_PATH", "")
+
     # 
     # On Windows, C# assemblies are found thanks to the .exe.config files.
     #
