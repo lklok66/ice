@@ -1116,8 +1116,8 @@ Slice::Gen::generate(const UnitPtr& p)
     ProxyHelperVisitor proxyHelperVisitor(_H, _M, _stream);
     p->visit(&proxyHelperVisitor, false);
 
-    SequenceHelperVisitor sequenceHelperVisitor(_H, _M, _stream);
-    p->visit(&sequenceHelperVisitor, false);
+    HelperVisitor HelperVisitor(_H, _M, _stream);
+    p->visit(&HelperVisitor, false);
 
 #if 0
     OpsVisitor opsVisitor(_M);
@@ -1275,7 +1275,9 @@ Slice::Gen::ProxyDeclVisitor::visitClassDecl(const ClassDeclPtr& p)
 {
     _H << sp << nl << "@class " << fixName(p) << "Prx;";
     _H << nl << "@protocol " << fixName(p) << "Prx;";
+#if 0
     _H << sp << nl << "@class " << fixName(p) << "PrxHelper;";
+#endif
 }
 
 Slice::Gen::TypesVisitor::TypesVisitor(Output& H, Output& M, bool stream)
@@ -1759,6 +1761,7 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
 
     _H.dec();
     _H << eb;
+
     _H << sp;
 
     //
@@ -1853,7 +1856,28 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     //
     // Marshaling/unmarshaling
     //
+    _H << nl << "+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;";
+    _M << sp << nl << "+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)os_";
+    _M << sb;
+    _M << nl << name << "*" << " p = (" << name << "*)obj;";
     writeMemberMarshal(dataMembers, 0); // TODO fix second parameter
+    _M << eb;
+
+    _H << nl << "+(id) readWithStream:(id<ICEInputStream>)stream;";
+    _M << sp << nl << "+(id) readWithStream:(id<ICEInputStream>)is_";
+    _M << sb;
+    _M << nl << name << "*" << " p = [[self alloc] init];";
+    _M << nl << "@try";
+    _M << sb;
+    writeMemberUnmarshal(dataMembers, 0); // TODO fix second parameter
+    _M << eb;
+    _M << nl << "@catch(NSException *ex)";
+    _M << sb;
+    _M << nl << "[p release];";
+    _M << nl << "return nil;";
+    _M << eb;
+    _M << nl << "return p;";
+    _M << eb;
 
     _H << nl << "@end";
 
@@ -2307,23 +2331,20 @@ Slice::Gen::TypesVisitor::writeMemberDealloc(const DataMemberList& dataMembers, 
 void
 Slice::Gen::TypesVisitor::writeMemberMarshal(const DataMemberList& dataMembers, int baseTypes) const
 {
-    _H << nl << "-(void) write__:(id<ICEOutputStream>)os;";
-    _M << sp << nl << "-(void) write__:(id<ICEOutputStream>)os_";
-    _M << sb;
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
-	writeMarshalUnmarshalCode(_M, (*q)->type(), fixId((*q)->name()), true, false, false);
+	writeMarshalUnmarshalCode(_M, (*q)->type(), "p->" + fixId((*q)->name()), true, false, false);
     }
-    _M << eb;
+}
 
-    _H << nl << "-(void) read__:(id<ICEInputStream>)is;";
-    _M << sp << nl << "-(void) read__:(id<ICEInputStream>)is_";
-    _M << sb;
+void
+Slice::Gen::TypesVisitor::writeMemberUnmarshal(const DataMemberList& dataMembers, int baseTypes) const
+{
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
-	writeMarshalUnmarshalCode(_M, (*q)->type(), fixId((*q)->name() /* TODO: base classes */), false, false, false);
+	writeMarshalUnmarshalCode(_M, (*q)->type(), "p->" + fixId((*q)->name()
+	                          /* TODO: base classes */), false, false, false);
     }
-    _M << eb;
 }
 
 Slice::Gen::ProxyVisitor::ProxyVisitor(Output& H, Output& M)
@@ -2535,6 +2556,7 @@ Slice::Gen::ProxyHelperVisitor::ProxyHelperVisitor(Output& H, Output& M, bool st
 bool
 Slice::Gen::ProxyHelperVisitor::visitClassDefStart(const ClassDefPtr& p)
 {
+#if 0
     string name = fixName(p) + "PrxHelper";
     ClassList bases = p->bases();
 
@@ -2554,272 +2576,169 @@ Slice::Gen::ProxyHelperVisitor::visitClassDefStart(const ClassDefPtr& p)
 
 
     // TODO: if(_stream)
+#endif
     return true;
 }
 
 void
 Slice::Gen::ProxyHelperVisitor::visitClassDefEnd(const ClassDefPtr&)
 {
-    _M << nl << "@end";
 }
 
-Slice::Gen::SequenceHelperVisitor::SequenceHelperVisitor(Output& H, Output& M, bool stream)
+Slice::Gen::HelperVisitor::HelperVisitor(Output& H, Output& M, bool stream)
     : ObjCVisitor(H, M), _stream(stream)
 {
 }
 
 void
-Slice::Gen::SequenceHelperVisitor::visitSequence(const SequencePtr& p)
+Slice::Gen::HelperVisitor::visitEnum(const EnumPtr& p)
 {
-    string name = fixName(p);
-    string mutableName = outTypeToString(p);
     string prefix = moduleName(findModule(p));
+    string name = prefix + p->name() + "Helper";
 
-    _H << sp << nl << "@interface " << prefix << p->name() << "Helper : NSObject";
-    _H << nl << "+(void) write:(id<ICEOutputStream>)os v:(" << name << " *)v;";
-    _H << nl << "+(" << mutableName << " *) read:(id<ICEInputStream>)is;";
+    _H << sp << nl << "@interface " << name << " : ICEEnumHelper";
+    _H << nl << "+(ICEInt) getLimit;";
     _H << nl << "@end";
 
-    _M << sp << nl << "@implementation " << prefix << p->name() << "Helper";
-
-    _M << nl << "+(void) write:(id<ICEOutputStream>)os_ v:(" << name << " *)v";
+    _M << sp << nl << "@implementation " << name;
+    _M << nl << "+(ICEInt) getLimit";
     _M << sb;
-    writeSequenceMarshalUnmarshalCode(_M, p, "v", true, false);
-    _M << eb;
-
-    _M << sp << nl << "+(" << mutableName << " *) read:(id<ICEInputStream>)is_";
-    _M << sb;
-    _M << nl << mutableName << " *v;";
-    writeSequenceMarshalUnmarshalCode(_M, p, "v", false, false);
-    _M << nl << "return v;";
+    _M << nl << "return " << p->getEnumerators().size() << ";";
     _M << eb;
     _M << nl << "@end";
+}
 
-    // TODO: if(_stream)
+void
+Slice::Gen::HelperVisitor::visitSequence(const SequencePtr& p)
+{
+    string prefix = moduleName(findModule(p));
+    string name = prefix + p->name() + "Helper";
+
+    BuiltinPtr builtin = BuiltinPtr::dynamicCast(p->type());
+    if(builtin)
+    {
+	_H << sp << nl << "@interface " << name << " : NSObject;";
+	_H << nl << "+(id) readWithStream:(id<ICEInputStream>)stream;";
+	_H << nl << "+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;";
+	_H << nl << "@end";
+
+	_M << sp << nl << "@implementation " << name;
+	_M << nl << "+(id) readWithStream:(id<ICEInputStream>)stream";
+	_M << sb;
+	_M << nl << "return [stream read" << getBuiltinName(builtin) << "Seq];";
+	_M << eb;
+
+	_M << sp << nl << "+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream";
+	_M << sb;
+	_M << nl << "[stream write" << getBuiltinName(builtin) << "Seq:obj];";
+	_M << eb;
+	_M << nl << "@end";
+	
+	return;
+    }
+
+    EnumPtr en = EnumPtr::dynamicCast(p->type());
+    if(en)
+    {
+	_H << sp << nl << "@interface " << name << " : NSObject;";
+	_H << nl << "+(id) readWithStream:(id<ICEInputStream>)stream;";
+	_H << nl << "+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;";
+	_H << nl << "@end";
+
+	string typeS = typeToString(en);
+	int limit = en->getEnumerators().size();
+	_M << sp << nl << "@implementation " << name;
+	_M << nl << "+(id) readWithStream:(id<ICEInputStream>)stream";
+	_M << sb;
+	_M << nl << "return [stream readEnumSeq:" << limit << "];";
+	_M << eb;
+
+	_M << sp << nl << "+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream";
+	_M << sb;
+	_M << nl << "[stream writeEnumSeq:obj limit:" << limit << "];";
+	_M << eb;
+	_M << nl << "@end";
+
+        return;
+    }
+
+    ContainedPtr contained = ContainedPtr::dynamicCast(p->type());
+    assert(contained);
+    _H << sp << nl << "@interface " << name << " : ICESeqHelper";
+    _H << nl << "+(Class) getContained;";
+    _H << nl << "@end";
+
+    _M << sp << nl << "@implementation " << name;
+    _M << nl << "+(Class) getContained";
+    _M << sb;
+    _M << nl << "return [" << moduleName(findModule(contained)) + contained->name() + "Helper class];";
+    _M << eb;
+    _M << nl << "@end";
+}
+
+void
+Slice::Gen::HelperVisitor::visitDictionary(const DictionaryPtr& p)
+{
+    string prefix = moduleName(findModule(p));
+    string name = prefix + p->name() + "Helper";
+
+    _H << sp << nl << "@interface " << name << " : ICEDictHelper";
+    _H << nl << "+(ICEKeyValueHelper) getContained;";
+    _H << nl << "@end";
+
+    _M << sp << nl << "@implementation " << name;
+    _M << nl << "+(ICEKeyValueHelper) getContained";
+    _M << sb;
+    _M << nl << "ICEKeyValueHelper c;";
+    TypePtr keyType = p->keyType();
+    string keyS;
+    BuiltinPtr keyBuiltin = BuiltinPtr::dynamicCast(keyType);
+    EnumPtr keyEnum = EnumPtr::dynamicCast(keyType);
+    if(keyBuiltin)
+    {
+        keyS = "ICE" + getBuiltinName(BuiltinPtr::dynamicCast(keyType));
+    }
+    else if(keyEnum)
+    {
+        keyS = moduleName(findModule(keyEnum)) + keyEnum->name();
+    }
+    else
+    {
+	StructPtr contained = StructPtr::dynamicCast(keyType);
+	string prefix = moduleName(findModule(contained));
+        keyS = moduleName(findModule(contained)) + contained->name();
+    }
+    keyS += "Helper";
+    _M << nl << "c.key = [" << keyS << " class];";
+
+    TypePtr valueType = p->valueType();
+    string valueS;
+    BuiltinPtr valueBuiltin = BuiltinPtr::dynamicCast(valueType);
+    EnumPtr valueEnum = EnumPtr::dynamicCast(valueType);
+    if(valueBuiltin)
+    {
+        valueS = "ICE" + getBuiltinName(BuiltinPtr::dynamicCast(keyType));
+    }
+    else if(valueEnum)
+    {
+        valueS = moduleName(findModule(valueEnum)) + valueEnum->name();
+    }
+    else
+    {
+	ContainedPtr contained = ContainedPtr::dynamicCast(valueType);
+	string prefix = moduleName(findModule(contained));
+        valueS = moduleName(findModule(contained)) + contained->name();
+    }
+    valueS += "Helper";
+    _M << nl << "c.value = [" << valueS << " class];";
+    _M << nl << "return c;";
+    _M << eb;
+    _M << nl << "@end";
 }
 
 void
 Slice::Gen::ProxyHelperVisitor::visitDictionary(const DictionaryPtr& p)
 {
-#if 0
-    //
-    // Don't generate helper for a dictionary containing a local type
-    //
-    if(p->isLocal())
-    {
-        return;
-    }
-
-    TypePtr key = p->keyType();
-    TypePtr value = p->valueType();
-
-    string meta;
-    bool isNewMapping = !p->hasMetaData("clr:collection");
-
-    string prefix = "clr:generic:";
-    string genericType;
-    if(!p->findMetaData(prefix, meta))
-    {
-        genericType = "Dictionary";
-    }
-    else
-    {
-        genericType = meta.substr(prefix.size());
-    }
-
-    string keyS = typeToString(key);
-    string valueS = typeToString(value);
-    string name = isNewMapping
-                        ? "_System.Collections.Generic." + genericType + "<" + keyS + ", " + valueS + ">"
-                        : fixId(p->name());
-
-    _M << sp << nl << "public sealed class " << p->name() << "Helper";
-    _M << sb;
-
-    _M << sp << nl << "public static void write(";
-    _M.useCurrentPosAsIndent();
-    _M << "IceInternal.BasicStream os__,";
-    _M << nl << name << " v__)";
-    _M.restoreIndent();
-    _M << sb;
-    _M << nl << "if(v__ == null)";
-    _M << sb;
-    _M << nl << "os__.writeSize(0);";
-    _M << eb;
-    _M << nl << "else";
-    _M << sb;
-    _M << nl << "os__.writeSize(v__.Count);";
-    _M << nl << "foreach(_System.Collections.";
-    if(isNewMapping)
-    {
-        _M << "Generic.KeyValuePair<" << keyS << ", " << valueS << ">";
-    }
-    else
-    {
-        _M << "DictionaryEntry";
-    }
-    _M << " e__ in v__)";
-    _M << sb;
-    string keyArg = isNewMapping ? string("e__.Key") : "((" + keyS + ")e__.Key)";
-    writeMarshalUnmarshalCode(_M, key, keyArg, true, false, false);
-    string valueArg = isNewMapping ? string("e__.Value") : "((" + valueS + ")e__.Value)";
-    writeMarshalUnmarshalCode(_M, value, valueArg, true, false, false);
-    _M << eb;
-    _M << eb;
-    _M << eb;
-
-    BuiltinPtr builtin = BuiltinPtr::dynamicCast(value);
-    bool hasClassValue = (builtin && builtin->kind() == Builtin::KindObject) || ClassDeclPtr::dynamicCast(value);
-    if(hasClassValue)
-    {
-        string expectedType = ContainedPtr::dynamicCast(value)->scoped();
-        _M << sp << nl << "public sealed class Patcher__ : IceInternal.Patcher<" << valueS << ">";
-        _M << sb;
-        _M << sp << nl << "internal Patcher__(string type, " << name << " m, " << keyS << " key) : base(type)";
-        _M << sb;
-        _M << nl << "_m = m;";
-        _M << nl << "_key = key;";
-        _M << eb;
-
-        _M << sp << nl << "public override void" << nl << "patch(Ice.Object v)";
-        _M << sb;
-        _M << nl << "try";
-        _M << sb;
-        _M << nl << "_m[_key] = (" << valueS << ")v;";
-        _M << eb;
-        _M << nl << "catch(System.InvalidCastException)";
-        _M << sb;
-        _M << nl << "IceInternal.Ex.throwUOE(type(), v.ice_id());";
-        _M << eb;
-        _M << eb;
-
-        _M << sp << nl << "private " << name << " _m;";
-        _M << nl << "private " << keyS << " _key;";
-        _M << eb;
-    }
-
-    _M << sp << nl << "public static " << name << " read(IceInternal.BasicStream is__)";
-    _M << sb;
-    _M << nl << "int sz__ = is__.readSize();";
-    _M << nl << name << " r__ = new " << name << "();";
-    _M << nl << "for(int i__ = 0; i__ < sz__; ++i__)";
-    _M << sb;
-    _M << nl << keyS << " k__;";
-    StructPtr st = StructPtr::dynamicCast(key);
-    if(st)
-    {
-        if(isValueType(key))
-        {
-            _M << nl << "v__ = new " << typeToString(key) << "();";
-        }
-        else
-        {
-            _M << nl << "k__ = null;";
-        }
-    }
-    writeMarshalUnmarshalCode(_M, key, "k__", false, false, false);
-    if(!hasClassValue)
-    {
-        _M << nl << valueS << " v__;";
-
-        StructPtr st = StructPtr::dynamicCast(value);
-        if(st)
-        {
-            if(isValueType(value))
-            {
-                _M << nl << "v__ = new " << typeToString(value) << "();";
-            }
-            else
-            {
-                _M << nl << "v__ = null;";
-            }
-        }
-    }
-    writeMarshalUnmarshalCode(_M, value, "v__", false, false, false, "r__, k__");
-    if(!hasClassValue)
-    {
-        _M << nl << "r__[k__] = v__;";
-    }
-    _M << eb;
-    _M << nl << "return r__;";
-    _M << eb;
-
-    if(_stream)
-    {
-        _M << sp << nl << "public static void write(Ice.OutputStream outS__, " << name << " v__)";
-        _M << sb;
-        _M << nl << "if(v__ == null)";
-        _M << sb;
-        _M << nl << "outS__.writeSize(0);";
-        _M << eb;
-        _M << nl << "else";
-        _M << sb;
-        _M << nl << "outS__.writeSize(v__.Count);";
-        _M << nl << "foreach(_System.Collections.";
-        if(isNewMapping)
-        {
-            _M << nl << "Generic.KeyValuePair<" << keyS << ", " << valueS << ">";
-        }
-        else
-        {
-            _M << nl << "DictionaryEntry";
-        }
-        _M << " e__ in v__)";
-        _M << sb;
-        writeMarshalUnmarshalCode(_M, key, keyArg, true, true, false);
-        writeMarshalUnmarshalCode(_M, value, valueArg, true, true, false);
-        _M << eb;
-        _M << eb;
-        _M << eb;
-
-        _M << sp << nl << "public static " << name << " read(Ice.InputStream inS__)";
-        _M << sb;
-        _M << nl << "int sz__ = inS__.readSize();";
-        _M << nl << name << " r__ = new " << name << "();";
-        _M << nl << "for(int i__ = 0; i__ < sz__; ++i__)";
-        _M << sb;
-        _M << nl << keyS << " k__;";
-        StructPtr st = StructPtr::dynamicCast(key);
-        if(st)
-        {
-            if(isValueType(key))
-            {
-                _M << nl << "v__ = new " << typeToString(key) << "();";
-            }
-            else
-            {
-                _M << nl << "k__ = null;";
-            }
-        }
-        writeMarshalUnmarshalCode(_M, key, "k__", false, true, false);
-        if(!hasClassValue)
-        {
-            _M << nl << valueS << " v__;";
-            StructPtr st = StructPtr::dynamicCast(value);
-            if(st)
-            {
-                if(isValueType(value))
-                {
-                    _M << nl << "v__ = new " << typeToString(value) << "();";
-                }
-                else
-                {
-                    _M << nl << "v__ = null;";
-                }
-            }
-        }
-        writeMarshalUnmarshalCode(_M, value, "v__", false, true, false, "r__, k__");
-        if(!hasClassValue)
-        {
-            _M << nl << "r__[k__] = v__;";
-        }
-        _M << eb;
-        _M << nl << "return r__;";
-        _M << eb;
-    }
-
-    _M << eb;
-#endif
 }
 
 Slice::Gen::DelegateVisitor::DelegateVisitor(Output& out)

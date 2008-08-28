@@ -291,6 +291,66 @@ Slice::ObjCGenerator::isString(const TypePtr& type)
     return builtin && builtin->kind() == Builtin::KindString;
 }
 
+string
+Slice::ObjCGenerator::getBuiltinName(const BuiltinPtr& builtin)
+{
+    switch(builtin->kind())
+    {
+	case Builtin::KindByte:
+	{
+	    return "Byte";
+	}
+	case Builtin::KindBool:
+	{
+	    return "Bool";
+	}
+	case Builtin::KindShort:
+	{
+	    return "Short";
+	}
+	case Builtin::KindInt:
+	{
+	    return "Int";
+	}
+	case Builtin::KindLong:
+	{
+	    return "Long";
+	}
+	case Builtin::KindFloat:
+	{
+	    return "Float";
+	}
+	case Builtin::KindDouble:
+	{
+	    return "Double";
+	}
+	case Builtin::KindString:
+	{
+	    return "String";
+	}
+	case Builtin::KindObject:
+	{
+	    return "Object";
+	}
+	case Builtin::KindObjectProxy:
+	{
+	    return "Proxy";
+	}
+	default:
+	{
+	    assert(false);
+	}
+    }
+    return "NO__SUCH__TYPE";
+}
+
+string
+Slice::ObjCGenerator::getBuiltinSelector(const BuiltinPtr& builtin, bool marshal)
+{
+    string rw = marshal ? "write" : "read";
+    return rw + getBuiltinName(builtin);
+}
+
 //
 // Split a scoped name into its components and return the components as a list of (unscoped) identifiers.
 //
@@ -349,99 +409,25 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
     BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
     if(builtin)
     {
-        switch(builtin->kind())
-        {
-            case Builtin::KindBool:
-            {
-                if(marshal)
-                {
-                    out << nl << "[" << stream << " writeBool:" << param << "];";
-                }
-                else
-                {
-                    out << nl << param << " = [" << stream << " readBool];";
-                }
-                break;
-            }
-            case Builtin::KindString:
-            {
-                if(marshal)
-                {
-                    out << nl << "[" << stream << " writeString:" << param << "];";
-                }
-                else
-                {
-                    out << nl << param << " = [[" << stream << " readString] autorelease];";
-                }
-                break;
-            }
-            case Builtin::KindObject:
-            {
-	        // TODO: deal with classes
-                if(marshal)
-                {
-                    out << nl << stream << ".writeObject(" << param << ");";
-                }
-                else
-                {
-                    if(isOutParam)
-                    {
-                        out << nl << "IceInternal.ParamPatcher<Ice.Object> " << param
-                            << "_PP = new IceInternal.ParamPatcher<Ice.Object>(\"::Ice::Object\");";
-                        out << nl << stream << ".readObject(";
-                        if(streamingAPI)
-                        {
-                            out << "(Ice.ReadObjectCallback)";
-                        }
-                        out << param << "_PP);";
-                    }
-                    else
-                    {
-                        out << nl << stream << ".readObject(";
-                        if(streamingAPI)
-                        {
-                            out <<  "(Ice.ReadObjectCallback)";
-                        }
-                        out << "new Patcher__(\"::Ice::Object\", " << patchParams << "));";
-                    }
-                }
-                break;
-            }
-            case Builtin::KindObjectProxy:
-            {
-                if(marshal)
-                {
-                    out << nl << "[" << stream << " writeProxy:" << param << "];";
-                }
-                else
-                {
-                    out << nl << "*" << param << " = [[" << stream << " readProxy] autorelease];";
-                }
-                break;
-            }
-            case Builtin::KindLocalObject:
-            {
-                assert(false);
-                break;
-            }
-	    default:
+	string selector = getBuiltinSelector(builtin, marshal);
+	if(marshal)
+	{
+	    out << nl << "[" << stream << " " << selector << ":" << param << "];";
+	}
+	else
+	{
+	    out << nl << param << " = [";
+	    if(!isValueType(builtin))
 	    {
-		string typeS = typeToString(builtin);
-		assert(typeS.compare(0, 3, "ICE") == 0);
-		typeS = typeS.substr(3);
-		typeS[0] = toupper(typeS[0]);
-
-                if(marshal)
-                {
-                    out << nl << "[" << stream << " write" << typeS << ":" << param << "];";
-                }
-                else
-                {
-                    out << nl << param << " = [" << stream << " read" << typeS << "];";
-                }
-                break;
+	        out << "[";
 	    }
-        }
+	    out << stream << " " << selector;
+	    if(!isValueType(builtin))
+	    {
+	        out << "] autorelease";
+	    }
+	    out << "];";
+	}
         return;
     }
 
@@ -454,9 +440,10 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
 	}
 	else
 	{
-	    string name = fixName(prx->_class()) + "Prx";
-	    out << nl << param << " = (" << name << " *)[[" << stream
-	        << " readProxy:[" << name << " class]] autorelease];";
+	    string mName = moduleName(findModule(prx->_class()));
+	    string name = mName + prx->_class()->name() + "Prx";
+	    out << nl << param << " = (" << name << " *)[[" << stream << " readProxy:["
+	        << name << " class]] autorelease];";
 	}
         return;
     }
@@ -498,26 +485,15 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
     StructPtr st = StructPtr::dynamicCast(type);
     if(st)
     {
-        if(marshal)
-        {
-	    out << nl << "if(" << param << " == nil)";
-	    out << sb;
-	    string typeS = typeToString(st);
-	    out << nl << typeS << " *tmp_ = [[" << typeS << " alloc] init];";
-	    out << nl << "[tmp_ " << (streamingAPI ? "ice_write" : "write__") << ":" << stream << "];";
-            out << nl << "[tmp_ release];";
-	    out << eb;
-	    out << nl << "else";
-	    out << sb;
-	    out << nl << "[" << param << " " << (streamingAPI ? "ice_write" : "write__") << ":" << stream << "];";
-	    out << eb;
-        }
-        else
-        {
-	    string typeS = typeToString(st);
-	    out << nl << param << " = [[" << typeS << " alloc] init];";
-	    out << nl << "[" << param << " " << (streamingAPI ? "ice_read" : "read__") << ":" << stream << "];";
-        }
+	string typeS = typeToString(st);
+	if(marshal)
+	{
+	    out << nl << "[" << typeS << " writeWithStream:" << param << " stream:" << stream << "];";
+	}
+	else
+	{
+	    out << nl << param << " = (" << typeS << "*)[" << typeS << " readWithStream:" << stream << "];";
+	}
         return;
     }
 
@@ -542,97 +518,74 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
         BuiltinPtr builtin = BuiltinPtr::dynamicCast(seq->type());
 	if(builtin)
 	{
-	    switch(builtin->kind())
-	    {
-		// TODO: adjust this for ObjC
-		case Builtin::KindObject:
-		case Builtin::KindObjectProxy:
-		{
-		    if(marshal)
-		    {
-		        // TODO
-		    }
-		    else
-		    {
-		    }
-		       // TODO
-		    break;
-		}
-		case Builtin::KindBool:
-		{
-		    if(marshal)
-		    {
-			out << nl << "[" << stream << " writeBoolSeq:" << param << "];";
-		    }
-		    else
-		    {
-			out << nl << param << " = [[" << stream << " readBoolSeq] autorelease];";
-		    }
-		    break;
-		}
-		case Builtin::KindString:
-		{
-		    if(marshal)
-		    {
-			out << nl << "[" << stream << " writeStringSeq:" << param << "];";
-		    }
-		    else
-		    {
-			out << nl << param << " = [[" << stream << " readStringSeq] autorelease];";
-		    }
-		    break;
-		}
-		default:
-		{
-		    string typeS = typeToString(seq->type());
-		    assert(typeS.compare(0, 3, "ICE") == 0);
-		    typeS = typeS.substr(3);
-		    typeS[0] = toupper(typeS[0]);
-		    if(marshal)
-		    {
-			out << nl << "[" << stream << " write" << typeS << "Seq:" << param << "];";
-		    }
-		    else
-		    {
-			out << nl << param << " = [[" << stream << " read" << typeS << "Seq] autorelease];";
-		    }
-		    break;
-		}
-	    }
-	}
-	else
-	{
-	    string typeS = typeToString(seq) + "Helper";
+	    string selector = getBuiltinSelector(builtin, marshal);
 	    if(marshal)
 	    {
-		out << nl << "[" << typeS << " write:" << stream << " v:" << param << "];";
+	        out << nl << "[" << stream << " " << selector << "Seq:" << param << "];";
 	    }
 	    else
 	    {
-		out << nl << param << " = [" << typeS << " read:" << stream << "];";
+	        out << nl << param << " = [" << stream << " " << selector << "Seq];";
 	    }
+	    return;
 	}
-        return;
+
+	EnumPtr en = EnumPtr::dynamicCast(seq->type());
+	if(en)
+	{
+	    size_t sz = en->getEnumerators().size();
+	    string func = marshal ? "writeEnumSeq" : "readEnumSeq";
+	    if(marshal)
+	    {
+		out << nl << "[" << stream << " writeEnumSeq:" << param << " limit:" << sz << "];";
+	    }
+	    else
+	    {
+		out << nl << param << " = [[" << stream << " readEnumSeq:" << sz << "] autorelease];";
+	    }
+	    return;
+	}
+
+	ProxyPtr prx = ProxyPtr::dynamicCast(seq->type());
+	if(ProxyPtr::dynamicCast(seq))
+	{
+	    if(marshal)
+	    {
+		out << nl << "[" << stream << " writeProxySeq:" << param << "];";
+	    }
+	    else
+	    {
+		string mName = moduleName(findModule(prx->_class()));
+		out << nl << param << " = [[" << stream << " readProxySeq:["
+		    << mName + prx->_class()->name() + "Prx class]] autorelease];";
+	    }
+	    return;
+	}
+
+	string prefix = moduleName(findModule(seq));
+	string name =  prefix + seq->name() + "Helper";
+	if(marshal)
+	{
+	    out << nl << "[" << name << " writeWithStream:" << param << " stream:" << stream << "];";
+	}
+	else
+	{
+	    out << nl << param << " = [" << name << " readWithStream:" << stream << "];";
+	}
+	return;
     }
 
-    assert(ConstructedPtr::dynamicCast(type));
-    string typeS;
     DictionaryPtr d = DictionaryPtr::dynamicCast(type);
-    if(d)
-    {
-        typeS = fixId(d->scope()) + d->name();
-    }
-    else
-    {
-        typeS = typeToString(type);
-    }
+    assert(d);
+    string prefix = moduleName(findModule(d));
+    string name = prefix + d->name() + "Helper";
     if(marshal)
     {
-        out << nl << typeS << "Helper.write(" << stream << ", " << param << ");";
+        out << nl << "[" + name << " writeWithStream:" << param << " stream:" << stream << "];";
     }
     else
     {
-        out << nl << param << " = " << typeS << "Helper.read(" << stream << ')' << ';';
+        out << nl << param << " = [" << name << " readWithStream:" << stream << "];";
     }
 }
 
@@ -870,41 +823,14 @@ Slice::ObjCGenerator::writeSequenceMarshalUnmarshalCode(Output& out,
     if(en)
     {
         size_t sz = en->getEnumerators().size();
-        string func = marshal ? "writeEnumerator" : "readEnumerator";
+        string func = marshal ? "writeEnumeSeq" : "readEnumSeq";
         if(marshal)
         {
-            out << nl << "if(" << param << " == nil)";
-            out << sb;
-            out << nl << "[" << stream << " writeSize:0];";
-            out << eb;
-            out << nl << "else";
-            out << sb;
-	    out << nl << "int len_ = [v length] / sizeof(" << typeS << ");";
-            out << nl << "[" << stream << " writeSize:len_];";
-	    out << nl << typeS << " *p_ = (" << typeS << " *)[v bytes];";
-	    out << nl << "int ix__;";
-	    out << nl << "for(ix__ = 0; ix__ < len_; ++ix__)";
-	    out << sb;
-	    out << nl << "[" << stream << " " << func << ":p_[ix__] limit:" << sz << "];";
-	    out << eb;
-            out << eb;
+	    out << nl << "[" << stream << " writeEnumSeq:" << param << " limit:" << sz << "];";
         }
         else
         {
-            out << sb;
-            out << nl << "int szx__ = [" << stream << " readSize];";
-            {
-                out << nl << "[" << stream << " checkFixedSeq:szx__ elemSize:" << static_cast<unsigned>(type->minWireSize()) << "];";
-            }
-	    string mName = moduleName(findModule(seq)) + "Mutable" + seq->name();
-            out << nl << param << " = [" << mName << " dataWithCapacity:szx__];";
-	    out << nl << typeS << " *p_ = (" << typeS << " *)[v bytes];";
-	    out << nl << "int ix__;";
-            out << nl << "for(ix__ = 0; ix__ < szx__; ++ix__)";
-            out << sb;
-	    out << nl << "p_[ix__] = (" << typeS << ")[" << stream << " " << func << ":" << sz << "];";
-            out << eb;
-            out << eb;
+	    out << nl << param << " = [[" << stream << " readEnumSeq:" << sz << "] autorelease];";
         }
         return;
     }

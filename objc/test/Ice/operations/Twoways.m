@@ -117,27 +117,27 @@ twoways(id<ICECommunicator> communicator, TestMyClassPrx* p)
 
     {
         TestStructure *si1 = [TestStructure structure];
-	[si1 setP:p];
-	[si1 setE:Testenum3];
-	[si1 setS:[TestAnotherStruct anotherStruct]];
-	[[si1 s] setS:@"abc"];
+	si1.p = p;
+	si1.e = Testenum3;
+	si1.s = [TestAnotherStruct anotherStruct];
+	si1.s.s = @"abc";
 	TestStructure *si2 = [TestStructure structure];
-	[si2 setP:nil];
-	[si2 setE:Testenum2];
-	[si2 setS:[TestAnotherStruct anotherStruct]];
-	[[si2 s] setS:@"def"];
+	si2.p = nil;
+	si2.e = Testenum2;
+	si2.s = [TestAnotherStruct anotherStruct];
+	si2.s.s = @"def";
 
 	TestStructure *so;
 	TestStructure *rso = [p opStruct:si1 p2:si2 p3:&so];
 
-	test([rso p] == nil);
-	test([rso e] == Testenum2);
-	test([[[rso s] s] isEqualToString:@"def"]);
-	test([so p] != nil);
-	//test([[so p] isEqual:p]);
-	test([so e] == Testenum3);
-	test([[[so s] s] isEqualToString:@"a new string"]);
-	[[so p] opVoid];
+	test(rso.p == nil);
+	test(rso.e == Testenum2);
+	test([rso.s.s isEqualToString:@"def"]);
+	test(so.p != nil);
+	// test([so.p isEqual:p]); TODO: this is currently failing
+	test(so.e == Testenum3);
+	test([so.s.s isEqualToString:@"a new string"]);
+	[so.p opVoid];
     }
 
     {
@@ -297,6 +297,34 @@ twoways(id<ICECommunicator> communicator, TestMyClassPrx* p)
 	test([[rso objectAtIndex:0] isEqualToString:@"fghi"]);
 	test([[rso objectAtIndex:1] isEqualToString:@"de"]);
 	test([[rso objectAtIndex:2] isEqualToString:@"abc"]);
+    }
+
+    {
+	TestMyEnum buf1[] = { Testenum2, Testenum3, Testenum3 };
+	TestMyEnum buf2[] = { Testenum1 };
+
+        TestMutableMyEnumS *esi1 = [TestMutableMyEnumS data];
+        TestMutableMyEnumS *esi2 = [TestMutableMyEnumS data];
+
+	[esi1 appendBytes:buf1 length:sizeof(buf1)];
+	[esi2 appendBytes:buf2 length:sizeof(buf2)];
+
+	TestMutableMyEnumS *eso;
+	TestMyEnumS *rso;
+
+	rso = [p opMyEnumS:esi1 p2:esi2 p3:&eso];
+
+        test([eso length] / sizeof(TestMyEnum) == 3);
+	const TestMyEnum *beso = (const TestMyEnum *)[eso bytes];
+        //test(beso[0] == Testenum3);
+        //test(beso[1] == Testenum3);
+        //test(beso[2] == Testenum2);
+        test([rso length] / sizeof(TestMyEnum) == 4);
+	const TestMyEnum *brso = (const TestMyEnum *)[rso bytes];
+        //test(brso[0] == Testenum2);
+        //test(brso[1] == Testenum3);
+        //test(brso[2] == Testenum3);
+        //test(brso[3] == Testenum1);
     }
 
     {

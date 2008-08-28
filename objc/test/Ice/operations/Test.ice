@@ -108,6 +108,12 @@ dictionary<string, MyEnum> StringMyEnumD;
     
      StringS opStringS(StringS p1, StringS p2,
                        out StringS p3);
+
+     MyEnumS opMyEnumS(MyEnumS p1, MyEnumS p2,
+                       out MyEnumS p3);
+
+     //MyClassS opMyClassS(MyClassS p1, MyClassS p2,
+     //                    out MyClassS p3);
     
      ByteSS opByteSS(ByteSS p1, ByteSS p2,
                      out ByteSS p3);
@@ -128,8 +134,8 @@ dictionary<string, MyEnum> StringMyEnumD;
      StringSSS opStringSSS(StringSSS p1, StringSSS p2,
                            out StringSSS p3);
 
-//     ByteBoolD opByteBoolD(ByteBoolD p1, ByteBoolD p2,
-//                           out ByteBoolD p3);
+     ByteBoolD opByteBoolD(ByteBoolD p1, ByteBoolD p2,
+                           out ByteBoolD p3);
 
 //     ShortIntD opShortIntD(ShortIntD p1, ShortIntD p2,
 //                           out ShortIntD p3);

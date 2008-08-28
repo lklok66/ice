@@ -58,6 +58,15 @@
     return [[[self alloc] initWithObjectPrx__:arg] autorelease];
 }
 
++(id) readWithStream:(id<ICEInputStream>)stream
+{
+    return [stream readProxy:nil]; // TODO: how to get this parameter into the stream?
+}
+
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
+{
+    [stream writeProxy:obj];
+}
 @end
 
 @implementation ICEObjectPrx

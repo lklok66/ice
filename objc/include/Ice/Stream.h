@@ -23,6 +23,12 @@
 -(void)invoke:(ICEObject*)obj;
 @end
 
+typedef struct
+{
+    Class key;
+    Class value;
+} ICEKeyValueHelper;
+
 @protocol ICEInputStream <NSObject>
 
 -(id<ICECommunicator>) communicator;
@@ -54,15 +60,20 @@
 -(NSMutableString*) readString;
 -(NSMutableArray*) readStringSeq;
 
--(NSMutableArray*) readSequence: (Class)c;
-
 -(ICEInt) readEnumerator:(ICEInt)limit;
-
--(ICEInt) readSize;
+-(NSMutableData*) readEnumSeq:(ICEInt)limit;
 
 -(ICEObjectPrx*) readProxy:(Class)c;
+-(NSMutableArray*) readProxySeq;
 
 -(void) readObject:(id<ICEReadObjectCallback>)callback;
+-(NSMutableArray*) readObjectSeq;
+
+-(NSMutableArray*) readSequence:(Class)c;
+
+-(NSMutableDictionary*) readDictionary:(ICEKeyValueHelper)c;
+
+-(ICEInt) readSize;
 
 -(NSString*) readTypeId;
 
@@ -114,15 +125,20 @@
 -(void) writeString:(NSString*)v;
 -(void) writeStringSeq:(NSArray*)v;
 
--(void) writeSequence:(NSArray*)arr class:(Class)cl;
-
 -(void) writeEnumerator:(ICEInt)v limit:(ICEInt)limit;
-
--(void) writeSize:(ICEInt)v;
+-(void) writeEnumSeq:(NSData*)v limit:(ICEInt)limit;
 
 -(void) writeProxy:(ICEObjectPrx*)v;
+-(void) writeProxySeq:(NSArray*)v;
 
 -(void) writeObject:(ICEObject*)v;
+-(void) writeObjectSeq:(NSArray*)v;
+
+-(void) writeSequence:(NSArray*)arr c:(Class)c;
+
+-(void) writeDictionary:(NSDictionary*)dictionary c:(ICEKeyValueHelper)c;
+
+-(void) writeSize:(ICEInt)v;
 
 -(void) writeTypeId:(const char*)v;
 
@@ -145,4 +161,80 @@
 
 -(NSData*) finished;
 
+@end
+
+//
+// Helper classes for the Slice built-in types.
+//
+
+@interface ICEBoolHelper : NSObject
++(id) readWithStream:(id<ICEInputStream>)stream;
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
+@end
+
+@interface ICEByteHelper : NSObject
++(id) readWithStream:(id<ICEInputStream>)stream;
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
+@end
+
+@interface ICEShortHelper : NSObject
++(id) readWithStream:(id<ICEInputStream>)stream;
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
+@end
+
+@interface ICEIntHelper : NSObject
++(id) readWithStream:(id<ICEInputStream>)stream;
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
+@end
+
+@interface ICELongHelper : NSObject
++(id) readWithStream:(id<ICEInputStream>)stream;
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
+@end
+
+@interface ICEFloatHelper : NSObject
++(id) readWithStream:(id<ICEInputStream>)stream;
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
+@end
+
+@interface ICEDoubleHelper : NSObject
++(id) readWithStream:(id<ICEInputStream>)stream;
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
+@end
+
+@interface ICEStringHelper : NSObject
++(id) readWithStream:(id<ICEInputStream>)stream;
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
+@end
+
+@interface ICEObjectHelper : NSObject
++(id) readWithStream:(id<ICEInputStream>)stream;
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
+@end
+
+//
+// Helper for enums.
+//
+@interface ICEEnumHelper : NSObject
++(id) readWithStream:(id<ICEInputStream>)stream;
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
++(ICEInt) getLimit;
+@end
+
+//
+// Helper for sequences of non-value types.
+//
+@interface ICESeqHelper : NSObject
++(id) readWithStream:(id<ICEInputStream>)stream;
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
++(Class) getContained;
+@end
+
+//
+// Helper for dictionaries.
+//
+@interface ICEDictHelper : NSObject
++(id) readWithStream:(id<ICEInputStream>)stream;
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
++(ICEKeyValueHelper) getContained;
 @end

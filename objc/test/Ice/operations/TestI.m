@@ -93,7 +93,7 @@
     {
         *target++ = *--src;
     }
-    TestMutableByteS * r = [TestMutableByteS dataWithData:p1];
+    TestMutableByteS *r = [TestMutableByteS dataWithData:p1];
     [r appendData:p2];
     return r;
 }
@@ -104,7 +104,7 @@
     *p3 = [TestMutableBoolS dataWithData:p1];
     [(TestMutableBoolS *)*p3 appendData:p2];
 
-    TestMutableBoolS * r = [TestMutableBoolS dataWithLength:[p1 length] * sizeof(BOOL)];
+    TestMutableBoolS *r = [TestMutableBoolS dataWithLength:[p1 length] * sizeof(BOOL)];
     BOOL *target = (BOOL *)[r bytes];
     BOOL *src = (BOOL *)([p1 bytes] + [p1 length]);
     int i;
@@ -172,6 +172,22 @@
     {
         [r addObject:element];
     } 
+    return r;
+}
+
+-(TestMyEnumS *) opMyEnumS:(TestMutableMyEnumS *)p1 p2:(TestMutableMyEnumS *)p2
+                           p3:(TestMyEnumS **)p3 current:(ICECurrent *)current
+{
+    *p3 = [TestMutableMyEnumS dataWithLength:[p1 length]];
+    TestMyEnum *target = (TestMyEnum *)[*p3 bytes];
+    TestMyEnum *src = (TestMyEnum *)([p1 bytes] + [p1 length]);
+    int i;
+    for(i = 0; i != [p1 length] / sizeof(TestMyEnum); ++i)
+    {
+        *target++ = *--src;
+    }
+    TestMutableMyEnumS *r = [TestMutableMyEnumS dataWithData:p1];
+    [r appendData:p2];
     return r;
 }
 

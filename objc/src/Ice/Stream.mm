@@ -19,10 +19,6 @@
 
 #import <objc/runtime.h>
 
-@protocol Dummy
--(void)read__:(ICEInputStream*)is;
-@end
-
 namespace IceObjC
 {
 
@@ -268,6 +264,8 @@ public:
     try
     {
         std::pair<const bool*, const bool*> seq;
+	// TODO: size check. This is awkward because, to do that, we need to read the size
+	// from the stream first, but that also happens inside readBoolSeq().
         is__->readBoolSeq(seq);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(BOOL)];
     }
@@ -296,6 +294,7 @@ public:
     try
     {
         std::pair<const Ice::Byte*, const Ice::Byte*> seq;
+	// TODO: size check
         is__->readByteSeq(seq);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first)];
     }    
@@ -311,6 +310,7 @@ public:
     try
     {
         std::pair<const Ice::Byte*, const Ice::Byte*> seq;
+	// TODO: size check
         is__->readByteSeq(seq);
         return [NSData dataWithBytesNoCopy:const_cast<Ice::Byte*>(seq.first) 
                        length:(seq.second - seq.first) freeWhenDone:NO];
@@ -340,6 +340,7 @@ public:
     try
     {
         std::pair<const Ice::Short*, const Ice::Short*> seq;
+	// TODO: size check
         is__->readShortSeq(seq);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEShort)];
     }
@@ -368,6 +369,7 @@ public:
     try
     {
         std::pair<const Ice::Int*, const Ice::Int*> seq;
+	// TODO: size check
         is__->readIntSeq(seq);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEInt)];
     }
@@ -396,6 +398,7 @@ public:
     try
     {
         std::pair<const Ice::Long*, const Ice::Long*> seq;
+	// TODO: size check
         is__->readLongSeq(seq);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICELong)];
     }
@@ -424,6 +427,7 @@ public:
     try
     {
         std::pair<const Ice::Float*, const Ice::Float*> seq;
+	// TODO: size check
         is__->readFloatSeq(seq);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEFloat)];
     }
@@ -452,6 +456,7 @@ public:
     try
     {
         std::pair<const Ice::Double*, const Ice::Double*> seq;
+	// TODO: size check
         is__->readDoubleSeq(seq);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEDouble)];
     }
@@ -479,6 +484,7 @@ public:
 {
     try
     {
+	// TODO: size check
         return toNSArray(is__->readStringSeq());
     }
     catch(const std::exception& ex)
@@ -486,20 +492,6 @@ public:
         rethrowObjCException(ex);
         return nil; // Keep the compiler happy.
     }
-}
-
--(NSMutableArray*) readSequence:(Class)cl
-{
-    ICEInt sz = [self readSize];
-    NSMutableArray* arr = [[NSMutableArray alloc] initWithCapacity: sz];
-    while(sz-- > 0)
-    {
-        id obj = [[cl alloc] init];
-        [obj read__:self];
-        [arr addObject:obj];
-        [obj release];
-    }
-    return arr;
 }
 
 -(ICEInt) readEnumerator:(ICEInt)limit
@@ -529,6 +521,88 @@ public:
 	@throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"enumerator out of range"];
     }
     return val;
+}
+
+//
+// Size of an enum (which can vary with processor and compiler). We don't know what it is absolutely.
+// The definition below assumes that all enums have the same size, regardless of the number of
+// enumerators.
+//
+typedef enum { dummy } Dummy_Enum;
+#define ENUM_SIZE (sizeof(Dummy_Enum))
+
+-(NSMutableData*) readEnumSeq:(ICEInt)limit
+{
+    int minWireSize;
+    if(limit <= 0x7f)
+    {
+	minWireSize = 1;
+    }
+    else if(limit <= 0x7fff)
+    {
+	minWireSize = 2;
+    }
+    else
+    {
+	minWireSize = 4;
+    }
+
+    NSMutableData* ret;
+    try
+    {
+	int count = is__->readSize();
+	[self checkFixedSeq:count elemSize:minWireSize];
+	if((ret = [[NSMutableData alloc] initWithLength:(count * ENUM_SIZE)]) == 0)
+	{
+	    return ret;
+	}
+
+	Dummy_Enum *v = (Dummy_Enum *)[ret bytes];
+	if(limit <= 0x7f)
+	{
+	    while(count-- > 0)
+	    {
+		*v = (Dummy_Enum)[self readByte];
+		if(*v >= limit)
+		{
+		    @throw [ICEMarshalException marshalException:__FILE__ line:__LINE__
+		                                reason_:@"enumerator out of range"];
+		}
+		++v;
+	    }
+	}
+	else if (limit <= 0x7fff)
+	{
+	    while(count-- > 0)
+	    {
+		*v = (Dummy_Enum)[self readShort];
+		if(*v < 0 || *v >= limit)
+		{
+		    @throw [ICEMarshalException marshalException:__FILE__ line:__LINE__
+		                                reason_:@"enumerator out of range"];
+		}
+		++v;
+	    }
+	}
+	else
+	{
+	    while(count-- > 0)
+	    {
+		*v = (Dummy_Enum)[self readInt];
+		if(*v < 0 || *v >= limit)
+		{
+		    @throw [ICEMarshalException marshalException:__FILE__ line:__LINE__
+		                                reason_:@"enumerator out of range"];
+		}
+		++v;
+	    }
+	}
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
+    return ret;
 }
 
 -(ICEInt) readSize
@@ -562,6 +636,31 @@ public:
     }
 }
 
+-(NSMutableArray*) readProxySeq
+{
+#if 0 // TODO
+    NSMutableArray* ret;
+    try
+    {
+        int sz = [self readSize];
+	// TODO size check
+	ret = [[NSMutableArray alloc] initWithCapacity:sz];
+	for(int i = 0; i < sz; ++i)
+	{
+	    [ret addObject:[self readProxy:c]];
+	}
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
+    }
+    return ret;
+#else
+    return [[NSMutableArray alloc] init];
+#endif
+}
+
 -(void) readObject:(id<ICEReadObjectCallback>)callback
 {
     try
@@ -572,6 +671,63 @@ public:
     {
         rethrowObjCException(ex);
     }
+}
+
+-(NSMutableArray*) readObjectSeq
+{
+    // TODO
+    return nil;
+}
+
+-(NSMutableArray*) readSequence:(Class)cl
+{
+    ICEInt sz = [self readSize];
+    // TODO sequence size check
+    NSMutableArray* arr = [[NSMutableArray alloc] initWithCapacity:sz];
+    id obj = nil;
+    @try
+    {
+	while(sz-- > 0)
+	{
+	    obj = [cl readWithStream:self];
+	    [arr addObject:obj];
+	}
+    }
+    @catch(NSException *ex)
+    {
+        [arr release];
+	[obj release];
+	return nil;
+    }
+    return arr;
+}
+
+-(NSMutableDictionary*) readDictionary:(ICEKeyValueHelper)c
+{
+    ICEInt sz = [self readSize];
+    // TODO size check
+    NSMutableDictionary* dictionary = [[NSMutableDictionary alloc] initWithCapacity:sz];
+    Class key = nil;
+    Class value = nil;
+    @try
+    {
+	while(sz-- > 0)
+	{
+	    key = [c.key readWithStream:self];
+	    value = [c.value readWithStream:self];
+	    [dictionary setObject:value forKey:key];
+	    [key release];
+	    [value release];
+	}
+    }
+    @catch(NSException *ex)
+    {
+	[dictionary release];
+	[key release];
+	[value release];
+	return nil;
+    }
+    return dictionary;
 }
 
 -(NSString*) readTypeId
@@ -804,7 +960,8 @@ public:
 {
     try
     {
-        os__->writeBoolSeq((bool*)[v bytes], (bool*)[v bytes] + [v length] / sizeof(BOOL));
+        v == nil ? os__->writeSize(0)
+	         : os__->writeBoolSeq((bool*)[v bytes], (bool*)[v bytes] + [v length] / sizeof(BOOL));
     }
     catch(const std::exception& ex)
     {
@@ -828,7 +985,8 @@ public:
 { 
     try
     {
-        os__->writeByteSeq((ICEByte*)[v bytes], (ICEByte*)[v bytes] + [v length]);
+        v == nil ? os__->writeSize(0)
+                 : os__->writeByteSeq((ICEByte*)[v bytes], (ICEByte*)[v bytes] + [v length]);
     }
     catch(const std::exception& ex)
     {
@@ -852,7 +1010,8 @@ public:
 {
     try
     {
-        os__->writeShortSeq((ICEShort*)[v bytes], (ICEShort*)[v bytes] + [v length] / sizeof(ICEShort));
+        v == nil ? os__->writeSize(0)
+                 : os__->writeShortSeq((ICEShort*)[v bytes], (ICEShort*)[v bytes] + [v length] / sizeof(ICEShort));
     }
     catch(const std::exception& ex)
     {
@@ -877,7 +1036,8 @@ public:
 {
     try
     {
-        os__->writeIntSeq((ICEInt*)[v bytes], (ICEInt*)[v bytes] + [v length] / sizeof(ICEInt));
+        v == nil ? os__->writeSize(0)
+                 : os__->writeIntSeq((ICEInt*)[v bytes], (ICEInt*)[v bytes] + [v length] / sizeof(ICEInt));
     }
     catch(const std::exception& ex)
     {
@@ -901,7 +1061,8 @@ public:
 {
     try
     {
-        os__->writeLongSeq((ICELong*)[v bytes], (ICELong*)[v bytes] + [v length] / sizeof(ICELong));
+        v == nil ? os__->writeSize(0)
+                 : os__->writeLongSeq((ICELong*)[v bytes], (ICELong*)[v bytes] + [v length] / sizeof(ICELong));
     }
     catch(const std::exception& ex)
     {
@@ -926,7 +1087,8 @@ public:
 {
     try
     {
-        os__->writeFloatSeq((ICEFloat*)[v bytes], (ICEFloat*)[v bytes] + [v length] / sizeof(ICEFloat));
+        v == nil ? os__->writeSize(0)
+                 : os__->writeFloatSeq((ICEFloat*)[v bytes], (ICEFloat*)[v bytes] + [v length] / sizeof(ICEFloat));
     }
     catch(const std::exception& ex)
     {
@@ -951,7 +1113,8 @@ public:
 {
     try
     {
-        os__->writeDoubleSeq((ICEDouble*)[v bytes], (ICEDouble*)[v bytes] + [v length] / sizeof(ICEDouble));
+        v == nil ? os__->writeSize(0)
+                 : os__->writeDoubleSeq((ICEDouble*)[v bytes], (ICEDouble*)[v bytes] + [v length] / sizeof(ICEDouble));
     }
     catch(const std::exception& ex)
     {
@@ -964,7 +1127,7 @@ public:
 {
     try
     {
-        os__->writeString(fromNSString(v));
+	 os__->writeString(fromNSString(v));
     }
     catch(const std::exception& ex)
     {
@@ -976,8 +1139,8 @@ public:
 {
     try
     {
-        std::vector<std::string> s;
-        os__->writeStringSeq(fromNSArray(v, s));
+	std::vector<std::string> s;
+	os__->writeStringSeq(fromNSArray(v, s));
     }
     catch(const std::exception& ex)
     {
@@ -985,21 +1148,24 @@ public:
     }
 }
 
--(void)writeSequence:(NSArray*)arr class:(Class)cl
+-(void)writeSequence:(NSArray*)arr c:(Class)c
 {
-    [self writeSize: [arr count] ];
+    [self writeSize:[arr count]];
     for(id i in arr)
     {
-        if(i == nil)
-        {
-            i = [[cl alloc] init];
-            [i write__: self];
-            [i release];
-        }
-        else
-        {
-            [i write__: self];
-        }
+	[c writeWithStream:i stream:self];
+    }
+}
+
+-(void) writeDictionary:(NSDictionary*)dictionary c:(ICEKeyValueHelper)c
+{
+    [self writeSize:[dictionary count]];
+    NSEnumerator* e = [dictionary keyEnumerator];
+    id key;
+    while((key = [e nextObject]))
+    {
+	[c.key writeWithStream:key stream:self];
+	[c.value writeWithStream:[dictionary objectForKey:key] stream:self];
     }
 }
 
@@ -1022,6 +1188,68 @@ public:
 	else
 	{
 	    os__->writeInt(v);
+	}
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
+}
+
+//
+// The C standard does not fix the size of an enum. The compiler is free
+// to choose an enum size that depends on the number of enumerators, and
+// the choice may vary depending on the processor. This means that we don't
+// know what the size of an enum is until run time, so the marshaling
+// has to be generic and copy with enums that could be 8, 16, or 32 bits wide.
+//
+-(void) writeEnumSeq:(NSData*)v limit:(ICEInt)limit
+{
+    try
+    {
+	int count = v == nil ? 0 : [v length] / ENUM_SIZE;
+	[self writeSize:count];
+	if(count == 0)
+	{
+	    return;
+	}
+
+	const Dummy_Enum* p = (const Dummy_Enum*)[v bytes];
+	if(limit <= 0x7f)
+	{
+	    while(count-- > 0)
+	    {
+		if(*p >= limit)
+		{
+		    @throw [ICEMarshalException marshalException:__FILE__ line:__LINE__
+		                                reason_:@"enumerator out of range"];
+		}
+		[self writeByte:*p++];
+	    }
+	}
+	else if(limit <= 0x7fff)
+	{
+	    while(count-- > 0)
+	    {
+		if(*p < 0 || *p >= limit)
+		{
+		    @throw [ICEMarshalException marshalException:__FILE__ line:__LINE__
+		                                reason_:@"enumerator out of range"];
+		}
+		[self writeShort:*p++];
+	    }
+	}
+	else
+	{
+	    while(count-- > 0)
+	    {
+		if(*p < 0 || *p >= limit)
+		{
+		    @throw [ICEMarshalException marshalException:__FILE__ line:__LINE__
+		                                reason_:@"enumerator out of range"];
+		}
+		[self writeInt:*p++];
+	    }
 	}
     }
     catch(const std::exception& ex)
@@ -1055,6 +1283,22 @@ public:
     }
 }
 
+-(void) writeProxySeq:(NSArray*)v
+{
+    try
+    {
+	[self writeSize:[v count]];
+        for(ICEObjectPrx* element in v)
+	{
+	    [self writeProxy:element];
+	}
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
+}
+
 -(void) writeObject:(ICEObject*)v
 {
     try
@@ -1065,6 +1309,11 @@ public:
     {
         rethrowObjCException(ex);
     }
+}
+
+-(void) writeObjectSeq:(NSArray*)v
+{
+    // TODO
 }
 
 -(void) writeTypeId:(const char*)v
@@ -1166,4 +1415,155 @@ public:
     }
 }
 
+@end
+
+@implementation ICEBoolHelper
++(id) readWithStream:(id<ICEInputStream>)stream
+{
+    return [[NSNumber alloc] initWithBool:[stream readBool]];
+}
+
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
+{
+    [stream writeBool:[obj boolValue]];
+}
+@end
+
+@implementation ICEByteHelper
++(id) readWithStream:(id<ICEInputStream>)stream
+{
+    return [[NSNumber alloc] initWithUnsignedChar:[stream readByte]];
+}
+
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
+{
+    [stream writeBool:[obj unsignedCharValue]];
+}
+@end
+
+@implementation ICEShortHelper
++(id) readWithStream:(id<ICEInputStream>)stream
+{
+    return [[NSNumber alloc] initWithShort:[stream readShort]];
+}
+
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
+{
+    [stream writeShort:[obj shortValue]];
+}
+@end
+
+@implementation ICEIntHelper
++(id) readWithStream:(id<ICEInputStream>)stream
+{
+    return [[NSNumber alloc] initWithInt:[stream readInt]];
+}
+
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
+{
+    [stream writeInt:[obj intValue]];
+}
+@end
+
+@implementation ICELongHelper
++(id) readWithStream:(id<ICEInputStream>)stream
+{
+    return [[NSNumber alloc] initWithLong:[stream readLong]];
+}
+
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
+{
+    [stream writeLong:[obj longValue]];
+}
+@end
+
+@implementation ICEFloatHelper
++(id) readWithStream:(id<ICEInputStream>)stream
+{
+    return [[NSNumber alloc] initWithFloat:[stream readFloat]];
+}
+
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
+{
+    [stream writeFloat:[obj floatValue]];
+}
+@end
+
+@implementation ICEDoubleHelper
++(id) readWithStream:(id<ICEInputStream>)stream
+{
+    return [stream readString];
+}
+
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
+{
+    [stream writeString:obj];
+}
+@end
+
+@implementation ICEStringHelper
++(id) readWithStream:(id<ICEInputStream>)stream
+{
+    return [[NSNumber alloc] initWithDouble:[stream readDouble]];
+}
+
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
+{
+    [stream writeDouble:[obj doubleValue]];
+}
+@end
+
+@implementation ICEEnumHelper
++(id) readWithStream:(id<ICEInputStream>)stream
+{
+    return [stream readEnumSeq:[self getLimit]];
+}
+
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
+{
+    return [stream writeEnumSeq:obj limit:[self getLimit]];
+}
+
++(ICEInt) getLimit
+{
+    NSAssert(false, @"ICEEnumHelper getLimit requires override");
+    return nil;
+}
+@end
+
+@implementation ICESeqHelper
++(id) readWithStream:(id<ICEInputStream>)stream
+{
+    return [stream readSequence:[self getContained]];
+}
+
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
+{
+    return [stream writeSequence:obj c:[self getContained]];
+}
+
++(Class) getContained
+{
+    NSAssert(false, @"ICESeqHelper getContained requires override");
+    return nil;
+}
+@end
+
+@implementation ICEDictHelper
++(id) readWithStream:(id<ICEInputStream>)stream
+{
+    return [stream readDictionary:[self getContained]];
+}
+
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
+{
+    [stream writeDictionary:obj c:[self getContained]];
+}
+
++(ICEKeyValueHelper) getContained
+{
+    NSAssert(false, @"ICEDictHelper getContained requires override");
+    ICEKeyValueHelper dummy;
+    return dummy; // Keep compiler quiet
+}
 @end

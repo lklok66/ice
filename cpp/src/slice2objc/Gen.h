@@ -144,6 +144,7 @@ private:
         void writeMemberEquals(const DataMemberList&, int) const;
         void writeMemberDealloc(const DataMemberList&, int) const;
         void writeMemberMarshal(const DataMemberList&, int) const;
+        void writeMemberUnmarshal(const DataMemberList&, int) const;
 
         bool _stream;
     };
@@ -188,13 +189,15 @@ private:
         bool _stream;
     };
 
-    class SequenceHelperVisitor : public ObjCVisitor
+    class HelperVisitor : public ObjCVisitor
     {
     public:
 
-        SequenceHelperVisitor(::IceUtilInternal::Output&, ::IceUtilInternal::Output&, bool);
+        HelperVisitor(::IceUtilInternal::Output&, ::IceUtilInternal::Output&, bool);
 
+	virtual void visitEnum(const EnumPtr&);
         virtual void visitSequence(const SequencePtr&);
+        virtual void visitDictionary(const DictionaryPtr&);
 
     private:
 
