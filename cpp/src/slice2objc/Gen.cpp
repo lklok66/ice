@@ -155,7 +155,7 @@ Slice::ObjCVisitor::writeInheritedOperations(const ClassDefPtr& p)
             }
             else
             {
-                vector<string> params = getParamsAsync(*op, true);
+                vector<string> params;// = getParamsAsync(*op, true);
                 vector<string> args;// = getArgsAsync(*op);
 
                 _M << sp << nl << "public void " << name << "_async" << spar << params << epar;
@@ -759,37 +759,46 @@ Slice::ObjCVisitor::getServerParams(const OperationPtr& op) const
     return result;
 }
 
-vector<string>
-Slice::ObjCVisitor::getParamsAsync(const OperationPtr& op, bool amd)
+string
+Slice::ObjCVisitor::getParamsAsync(const OperationPtr& op, bool sent)
 {
-    vector<string> params;
-
-    string name = fixId(op->name());
-    ContainerPtr container = op->container();
-    ClassDefPtr cl = ClassDefPtr::dynamicCast(container); // Get the class containing the op.
-    string scope = fixId(cl->scope());
-    params.push_back(scope + (amd ? "AMD_" : "AMI_") + cl->name() + '_' + op->name() + " cb__");
-
     ParamDeclList paramList = op->parameters();
+    string result = ":(id)target_ response:(SEL)response_ exception:(SEL)exception_";
+    if(sent)
+    {
+        result += " sent:(SEL)sent_";
+    }
     for(ParamDeclList::const_iterator q = paramList.begin(); q != paramList.end(); ++q)
     {
         if(!(*q)->isOutParam())
         {
-            //params.push_back(getParamAttributes(*q) + typeToString((*q)->type()) + " " + fixId((*q)->name()));
+            TypePtr type = (*q)->type();
+            string name = fixId((*q)->name());
+            result += " " + name + ":(" + typeToString(type);
+            if(!isValueType(type))
+            {
+                result += " *";
+            }
+            result += ")" + name;
         }
     }
-    return params;
+    return result;
 }
 
-vector<string>
+string
 Slice::ObjCVisitor::getParamsAsyncCB(const OperationPtr& op)
 {
-    vector<string> params;
-
+    string result = ":(id)target_ response:(SEL)response_ exception:(SEL)exception_";
+    
     TypePtr ret = op->returnType();
     if(ret)
     {
-        params.push_back(typeToString(ret) + " ret__");
+        result += " ret:(" + typeToString(ret);
+        if(!isValueType(ret))
+        {
+            result += " *";
+        }
+        result += ")ret_";
     }
 
     ParamDeclList paramList = op->parameters();
@@ -797,11 +806,18 @@ Slice::ObjCVisitor::getParamsAsyncCB(const OperationPtr& op)
     {
         if((*q)->isOutParam())
         {
-            //params.push_back(getParamAttributes(*q) + typeToString((*q)->type()) + ' ' + fixId((*q)->name()));
+            TypePtr type = (*q)->type();
+            string name = fixId((*q)->name());
+            result += " " + name + ":(" + typeToString(type);
+            if(!isValueType(type))
+            {
+                result += " *";
+            }
+            result += ")" + name;
         }
     }
 
-    return params;
+    return result;
 }
 
 string
@@ -845,33 +861,42 @@ Slice::ObjCVisitor::getServerArgs(const OperationPtr& op) const
     return result;
 }
 
-vector<string>
-Slice::ObjCVisitor::getArgsAsync(const OperationPtr& op)
+string
+Slice::ObjCVisitor::getArgsAsync(const OperationPtr& op, bool sent)
 {
-    vector<string> args;
+    string result;
 
-    args.push_back("cb__");
+    result += ":target_ response:response_ exception:exception_ ";
+    if(sent)
+    {
+        result += "sent:sent_ ";
+    }
+    else
+    {
+        result += "sent:nil ";
+    }
 
     ParamDeclList paramList = op->parameters();
     for(ParamDeclList::const_iterator q = paramList.begin(); q != paramList.end(); ++q)
     {
         if(!(*q)->isOutParam())
         {
-            args.push_back(fixId((*q)->name()));
+            string name = fixId((*q)->name());
+            result += " " + name + ":" +name;
         }
     }
-    return args;
+    return result;
 }
 
-vector<string>
+string
 Slice::ObjCVisitor::getArgsAsyncCB(const OperationPtr& op)
 {
-    vector<string> args;
+    string result;
 
     TypePtr ret = op->returnType();
     if(ret)
     {
-        args.push_back("ret__");
+        result += "ret_";
     }
 
     ParamDeclList paramList = op->parameters();
@@ -879,11 +904,49 @@ Slice::ObjCVisitor::getArgsAsyncCB(const OperationPtr& op)
     {
         if((*q)->isOutParam())
         {
-            args.push_back(fixId((*q)->name()));
+            string name = fixId((*q)->name());
+            
+            if(q != paramList.begin() || ret)
+            {
+                result += ", ";
+            }
+            result += name;
         }
     }
 
-    return args;
+    return result;
+}
+
+string
+Slice::ObjCVisitor::getSigAsyncCB(const OperationPtr& op)
+{
+    string result = "void(*)(id, SEL";
+
+    TypePtr ret = op->returnType();
+    if(ret)
+    {
+        result += ", " + typeToString(ret);
+        if(!isValueType(ret))
+        {
+            result += " *";
+        }
+    }
+
+    ParamDeclList paramList = op->parameters();
+    for(ParamDeclList::const_iterator q = paramList.begin(); q != paramList.end(); ++q)
+    {
+        if((*q)->isOutParam())
+        {
+            TypePtr type = (*q)->type();
+            result += ", " + typeToString(type);
+            if(!isValueType(type))
+            {
+                result += " *";
+            }
+        }
+    }
+    result += ")";
+    return result;
 }
 
 void
@@ -2421,6 +2484,20 @@ Slice::Gen::ProxyVisitor::visitOperation(const OperationPtr& p)
     _H << ":(ICEContext *)context;";
 
     // TODO: deal with AMI
+    ContainerPtr container = p->container();
+    ClassDefPtr cl = ClassDefPtr::dynamicCast(container);
+    if(cl->hasMetaData("ami") || p->hasMetaData("ami"))
+    {
+        string params = getParamsAsync(p, false); // Without sent callback.
+        assert(!params.empty());
+        _H << nl << "-(BOOL) " << name << "_async" << params << ";";
+        _H << nl << "-(BOOL) " << name << "_async" << params << " context:(ICEContext *)context;";
+
+        params = getParamsAsync(p, true); // With sent callback.
+        assert(!params.empty());
+        _H << nl << "-(BOOL) " << name << "_async" << params << ";";
+        _H << nl << "-(BOOL) " << name << "_async" << params << " context:(ICEContext *)context;";
+    }
 }
 
 Slice::Gen::OpsVisitor::OpsVisitor(Output& out)
@@ -2523,7 +2600,7 @@ Slice::Gen::OpsVisitor::writeOperations(const ClassDefPtr& p, bool noCurrent)
 
         if(amd)
         {
-            params = getParamsAsync(op, true);
+            //params = getParamsAsync(op, true);
         }
         else
         {
@@ -2913,6 +2990,35 @@ Slice::Gen::DelegateMVisitor::visitClassDefStart(const ClassDefPtr& p)
 	}
 	_M << ":self context:ctx_];";
 	_M << eb;
+
+
+        if(cl->hasMetaData("ami") || (*r)->hasMetaData("ami"))
+        {
+            bool sent[] = { false, true };
+            for(int i = 0; i < 2; ++i)
+            {
+                params = getParamsAsync(*r, sent[i]);
+                args = getArgsAsync(*r, sent[i]);
+                
+                //
+                // Write context-less operation that forwards to the version with a context.
+                //
+                _M << sp << nl << "-(BOOL) " << opName << "_async" << params;
+                _M << sb;
+                _M << nl;
+                _M << "return [" << className << "Prx " << opName << "_async___" << args << " prx:self context:nil];";
+                _M << eb;
+                
+                //
+                // Write version with context.
+                //
+                _M << sp << nl << "-(BOOL) " << opName << "_async" << params << " context:(ICEContext *)ctx_";
+                _M << sb;
+                _M << nl;
+                _M << "return [" << className << "Prx " << opName << "_async___" << args << " prx:self context:ctx_];";
+                _M << eb;
+            }
+        }
     }
 
     _M << sp << nl << "+(NSString *) ice_staticId";
@@ -3066,6 +3172,133 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
     _M << nl << "[is_ release];";
     _M << eb;
     _M << eb;
+
+    if(cl->hasMetaData("ami") || p->hasMetaData("ami"))
+    {
+        params = getParamsAsync(p, true);
+        _H << nl << "+(BOOL) " << name << "_async___" << params << " prx:(ICEObjectPrx <" << className << "Prx> *)prx ";
+        _H << "context:(ICEContext *)ctx;";
+
+        _M << sp << nl << "+(BOOL) " << name << "_async___" << params << " prx:(ICEObjectPrx <" << className;
+        _M << "Prx> *)prx_ context:(ICEContext *)ctx_";
+        _M << sb;
+        if(p->returnsData())
+        {
+            _M << nl << "[prx_ checkTwowayOnly__:@\"" << name <<  "\"];";
+        }
+        _M << nl << "SEL finished_ = @selector(" << name << "_async_finished___:response:exception:ok:is:);";
+
+        _M << nl << "id<ICEOutputStream> os_ = [prx_ createOutputStream__];";
+        _M << nl << "@try";
+        _M << sb;
+        for(TypeStringList::const_iterator ip = inParams.begin(); ip != inParams.end(); ++ip)
+        {
+            writeMarshalUnmarshalCode(_M, ip->first, fixId(ip->second), true, false, false);
+        }
+        if(p->sendsClasses())
+        {
+            _M << nl << "[os_ writePendingObjects();";
+        }
+        _M << nl << "return ";
+        _M << "[prx_ invoke_async__:target_ response:response_ exception:exception_ sent:sent_ finished:finished_";
+        _M << " operation:@\"" << name <<  "\" mode:" << sliceModeToIceMode(p->sendMode()) << " os:os_ context:ctx_];";
+        _M << eb;
+
+        _M << nl << "@finally";
+        _M << sb;
+        _M << nl << "[os_ release];";
+        _M << eb;
+        _M << eb;
+
+        params = getParamsAsyncCB(p);
+        _H << nl << "+(void) " << name << "_async_finished___:(id)target response:(SEL)response ";
+        _H << "exception:(SEL)exception ok:(BOOL)ok is:(id<ICEInputStream>)is;";
+
+        _M << nl << "+(void) " << name << "_async_finished___:(id)target_ response:(SEL)response_ ";
+        _M << "exception:(SEL)exception_ ok:(BOOL)ok_ is:(id<ICEInputStream>)is_";
+        _M << sb;
+        _M << nl << "if(!ok_)";
+        _M << sb;
+        _M << nl << "@try";
+        _M << sb;
+        _M << nl << "[is_ throwException];";
+        _M << eb;
+
+        //
+        // Arrange exceptions into most-derived to least-derived order. If we don't
+        // do this, a base exception handler can appear before a derived exception
+        // handler, causing compiler warnings and resulting in the base exception
+        // being marshaled instead of the derived exception.
+        //
+        ExceptionList throws = p->throws();
+        throws.sort();
+        throws.unique();
+        throws.sort(Slice::DerivedToBaseCompare());
+        
+        for(ExceptionList::const_iterator e = throws.begin(); e != throws.end(); ++e)
+        {
+            _M << nl << "@catch(" << fixName(*e) << " *ex_)";
+            _M << sb;
+            _M << nl << "objc_msgSend(target_, exception_, ex_);";
+            _M << eb;
+        }
+        _M << nl << "@catch(ICEUserException *ex_)";
+        _M << sb;
+        _M << nl << "ICEUnknownUserException* uuex_;";
+        _M << nl << "uuex_ = [ICEUnknownUserException unknownUserException:__FILE__ line:__LINE__ ";
+        _M << "unknown:[ex_ ice_name]];";
+        _M << nl << "objc_msgSend(target_, exception_, uuex_);";
+        _M << eb;
+        _M << nl << "return;";
+        _M << eb;
+
+        if(p->returnsData())
+        {
+            // _M << nl << "[is_ startEncapsulation];";
+            for(TypeStringList::const_iterator op = outParams.begin(); op != outParams.end(); ++op)
+            {
+                string param = outTypeToString(op->first) + " ";
+                if(!isValueType(op->first))
+                {
+                    param += "*";
+                }
+                param += fixId(op->second) + ";";
+                _M << nl << param;
+                writeMarshalUnmarshalCode(_M, op->first, fixId(op->second), false, false, true, "");
+            }
+            if(returnType)
+            {
+                string param = retString + " ";
+                if(!isValueType(returnType))
+                {
+                    param += "*";
+                }
+                param += "ret_;";
+                _M << nl << param;
+                writeMarshalUnmarshalCode(_M, returnType, "ret_", false, false, true, "");
+            }
+            if(p->returnsClasses())
+            {
+                _M << nl << "[is_ readPendingObjects];";
+                // TODO: assign to parameters from patcher
+            }
+            // _M << nl << "[is_ endEncapsulation];";
+
+            //
+            // NOTE: it's necessary to cast the objc_msgSend function to the type of the callback.
+            // Otherwise, wrong parameter types are used to call the Objective-C method (this occurs
+            // when calling a function with float parameters for instance).
+            //
+            _M << nl << "((" << getSigAsyncCB(p) << ")objc_msgSend)(target_, response_, " << getArgsAsyncCB(p) << ");";
+        }
+        else
+        {
+            // _M << nl << "[is_ skipEncapsulation];";
+            _M << nl << "objc_msgSend(target_, response_);";
+        }
+
+        _M << eb;
+    }
 }
 
 Slice::Gen::DelegateDVisitor::DelegateDVisitor(Output& out)
@@ -3341,8 +3574,8 @@ Slice::Gen::DispatcherVisitor::visitClassDefStart(const ClassDefPtr& p)
         if(amd)
         {
             opname = opname + "_async";
-            params = getParamsAsync(*op, true);
-            args = getArgsAsync(*op);
+            //params = getParamsAsync(*op, true);
+            //args = getArgsAsync(*op);
         }
         else
         {
@@ -3470,10 +3703,10 @@ Slice::Gen::AsyncVisitor::visitOperation(const OperationPtr& p)
 
         TypeStringList::const_iterator q;
 
-        vector<string> params = getParamsAsyncCB(p);
-        vector<string> args = getArgsAsyncCB(p);
+        vector<string> params;// = getParamsAsyncCB(p);
+        vector<string> args;// = getArgsAsyncCB(p);
 
-        vector<string> paramsInvoke = getParamsAsync(p, false);
+        vector<string> paramsInvoke;// = getParamsAsync(p, false);
 
         _M << sp << nl << "public abstract class AMI_" << cl->name() << '_'
              << name << " : IceInternal.OutgoingAsync";
@@ -3626,7 +3859,7 @@ Slice::Gen::AsyncVisitor::visitOperation(const OperationPtr& p)
         string classNameAMD = "AMD_" + cl->name();
         string classNameAMDI = "_AMD_" + cl->name();
 
-        vector<string> paramsAMD = getParamsAsyncCB(p);
+        vector<string> paramsAMD;// = getParamsAsyncCB(p);
 
         _M << sp << nl << "public interface " << classNameAMD << '_' << name;
         _M << sb;
@@ -3867,8 +4100,8 @@ Slice::Gen::TieVisitor::visitClassDefStart(const ClassDefPtr& p)
         vector<string> args;
         if(hasAMD)
         {
-            params = getParamsAsync((*r), true);
-            args = getArgsAsync(*r);
+            //params = getParamsAsync((*r), true);
+            //args = getArgsAsync(*r);
         }
         else
         {
@@ -3942,8 +4175,8 @@ Slice::Gen::TieVisitor::writeInheritedOperationsWithOpNames(const ClassDefPtr& p
         vector<string> args;
         if(hasAMD)
         {
-            params = getParamsAsync((*r), true);
-            args = getArgsAsync(*r);
+            //params = getParamsAsync((*r), true);
+            //args = getArgsAsync(*r);
         }
         else
         {
@@ -4011,7 +4244,7 @@ Slice::Gen::BaseImplVisitor::writeOperation(const OperationPtr& op, bool comment
     if(!cl->isLocal() && (cl->hasMetaData("amd") || op->hasMetaData("amd")))
     {
         ParamDeclList::const_iterator i;
-        vector<string> pDecl = getParamsAsync(op, true);
+        vector<string> pDecl;// = getParamsAsync(op, true);
 
         _M << "public ";
         if(!forTie)

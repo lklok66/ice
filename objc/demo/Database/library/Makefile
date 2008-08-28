@@ -10,37 +10,32 @@
 top_srcdir	= ../../..
 
 CLIENT		= client
-SERVER		= server
 
 TARGETS		= $(CLIENT) $(SERVER)
 
-COBJS		= Test.o \
-		  TestI.o \
-		  Client.o \
-		  AllTests.o \
-		  Twoways.o \
-		  TwowaysAMI.o
+OBJS		= Library.o Session.o
 
-SOBJS		= Test.o \
-		  TestI.o \
-		  Server.o
+COBJS		= Client.o \
+		  Grammar.o \
+		  Scanner.o \
+		  Parser.o \
+		  RunParser.o
 
-SRCS		= $(COBJS:.o=.m) \
-		  $(SOBJS:.o=.m) \
+SRCS		= $(OBJS:.o=.m) \
+		  $(COBJS:.o=.m)
 
-SLICE_SRCS	= Test.ice
+SLICE_SRCS	= Library.ice Session.ice
 
 include $(top_srcdir)/config/Make.rules
 
-CPPFLAGS	:= -I. -I../../include $(CPPFLAGS)
-LIBS		:= -lTestCommon $(LIBS)
+CPPFLAGS	:= -I. $(CPPFLAGS)
 
-$(CLIENT): $(COBJS)
+$(CLIENT): $(OBJS) $(COBJS) $(CPP_OBJS)
 	rm -f $@
-	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(COBJS) $(LIBS)
+	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(COBJS) $(CPP_OBJS) $(LIBS)
 
-$(SERVER): $(SOBJS)
-	rm -f $@
-	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(SOBJS) $(LIBS)
+clean::
+	-rm -f Grammar.m Grammar.h
+	-rm -f Scanner.m
 
 include .depend

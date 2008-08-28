@@ -37,7 +37,14 @@
 
 +(ICELogger*) loggerWithLogger:(const Ice::LoggerPtr&)arg
 {
-    return [[[ICELogger alloc] initWithLogger:arg] autorelease];
+    if(!arg)
+    {
+        return nil;
+    }
+    else
+    {
+        return [[[ICELogger alloc] initWithLogger:arg] autorelease];
+    }
 }
 
 //

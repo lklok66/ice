@@ -257,12 +257,23 @@ NSString* hostnameKey			= @"hostnameKey";
     {
         if(_deliveryMode != DeliveryModeBatchOneway || _deliveryMode != DeliveryModeBatchDatagram)
         {
-            statusLabel.text = @"Sending request";
-            // TODO: Note at present this doens't work since there is no AMI.
-            [activity startAnimating];
-            [_hello sayHello: _delay];
-            [activity stopAnimating];       
-            statusLabel.text = @"Sent request";
+            if([_hello sayHello_async:[ICECallbackOnMainThread callbackOnMainThread:self]
+                             response:@selector(sayHelloResponse)
+                            exception:@selector(handleException:) 
+                                 sent:@selector(sayHelloSent)
+                                delay:_delay])
+            {
+                if(_deliveryMode == DeliveryModeTwoway)
+                {
+                    [activity startAnimating];
+                    statusLabel.text = @"Waiting for response";
+                }
+            }
+            else
+            {
+                [activity startAnimating];
+                statusLabel.text = @"Sending request";
+            }
         }
         else
         {
@@ -275,7 +286,23 @@ NSString* hostnameKey			= @"hostnameKey";
         [self handleException: ex];
     }
 }
-
+- (void)sayHelloSent
+{
+    if(_deliveryMode == DeliveryModeTwoway)
+    {
+        statusLabel.text = @"Waiting for response";
+    }
+    else
+    {
+        statusLabel.text = @"Ready";
+        [activity stopAnimating];       
+    }
+}
+- (void)sayHelloResponse
+{
+    statusLabel.text = @"Ready";
+    [activity stopAnimating];       
+}
 - (void)flushBatch:(id) sender
 {
     @try

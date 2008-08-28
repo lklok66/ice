@@ -14,7 +14,7 @@
 #import <float.h>
     
 void
-twoways(id<ICECommunicator> communicator, TestMyClassPrx* p)
+twoways(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 {
     {
         [p opVoid];

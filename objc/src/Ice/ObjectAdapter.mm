@@ -43,7 +43,14 @@
 
 +(ICEObjectAdapter*) objectAdapterWithObjectAdapter:(const Ice::ObjectAdapterPtr&)arg
 {
-    return [[[ICEObjectAdapter alloc] initWithObjectAdapter:arg] autorelease];
+    if(!arg)
+    {
+        return nil;
+    }
+    else
+    {
+        return [[[ICEObjectAdapter alloc] initWithObjectAdapter:arg] autorelease];
+    }
 }
 
 //
