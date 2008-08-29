@@ -280,6 +280,64 @@
     return r;
 }
 
+-(TestByteBoolD *) opByteBoolD:(TestMutableByteBoolD *)p1 p2:(TestMutableByteBoolD *)p2 p3:(TestByteBoolD **)p3
+                               current:(ICECurrent *)current
+{
+    *p3 = [TestMutableByteBoolD dictionaryWithDictionary:p1];
+    TestMutableByteBoolD *r = [TestMutableByteBoolD dictionaryWithDictionary:p1];
+    [r addEntriesFromDictionary:p2];
+    return r;
+}
+
+-(TestShortIntD *) opShortIntD:(TestMutableShortIntD *)p1 p2:(TestMutableShortIntD *)p2 p3:(TestShortIntD **)p3
+                               current:(ICECurrent *)current
+{
+    *p3 = [TestMutableShortIntD dictionaryWithDictionary:p1];
+    TestMutableShortIntD *r = [TestMutableShortIntD dictionaryWithDictionary:p1];
+    [r addEntriesFromDictionary:p2];
+    return r;
+}
+
+-(TestLongFloatD *) opLongFloatD:(TestMutableLongFloatD *)p1 p2:(TestMutableLongFloatD *)p2 p3:(TestLongFloatD **)p3
+                               current:(ICECurrent *)current
+{
+    *p3 = [TestMutableLongFloatD dictionaryWithDictionary:p1];
+    TestMutableLongFloatD *r = [TestMutableLongFloatD dictionaryWithDictionary:p1];
+    [r addEntriesFromDictionary:p2];
+    return r;
+}
+
+-(TestStringStringD *) opStringStringD:(TestMutableStringStringD *)p1 p2:(TestMutableStringStringD *)p2
+                                       p3:(TestStringStringD **)p3 current:(ICECurrent *)current
+{
+    *p3 = [TestMutableStringStringD dictionaryWithDictionary:p1];
+    TestMutableStringStringD *r = [TestMutableStringStringD dictionaryWithDictionary:p1];
+    [r addEntriesFromDictionary:p2];
+    return r;
+}
+
+-(TestStringMyEnumD *) opStringMyEnumD:(TestMutableStringMyEnumD *)p1 p2:(TestMutableStringMyEnumD *)p2
+                                       p3:(TestStringMyEnumD **)p3 current:(ICECurrent *)current
+{
+    *p3 = [TestMutableStringMyEnumD dictionaryWithDictionary:p1];
+    TestMutableStringMyEnumD *r = [TestMutableStringMyEnumD dictionaryWithDictionary:p1];
+    [r addEntriesFromDictionary:p2];
+    return r;
+}
+
+-(TestIntS *) opIntS:(TestMutableIntS *)p1 current:(ICECurrent *)current
+{
+    int count = [p1 length] / sizeof(ICEInt);
+    TestMutableIntS *r = [TestMutableIntS dataWithLength:[p1 length]];
+    const int *src = [p1 bytes];
+    int *target = (int *)[r bytes] + count;
+    while(count-- > 0)
+    {
+	*--target = -*src++;
+    }
+    return r;
+}
+
 -(void) shutdown:(ICECurrent*)current
 {
     [[[current adapter] getCommunicator] shutdown];

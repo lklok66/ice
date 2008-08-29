@@ -137,17 +137,17 @@ dictionary<string, MyEnum> StringMyEnumD;
      ByteBoolD opByteBoolD(ByteBoolD p1, ByteBoolD p2,
                            out ByteBoolD p3);
 
-//     ShortIntD opShortIntD(ShortIntD p1, ShortIntD p2,
-//                           out ShortIntD p3);
+     ShortIntD opShortIntD(ShortIntD p1, ShortIntD p2,
+                           out ShortIntD p3);
 
-//     LongFloatD opLongFloatD(LongFloatD p1, LongFloatD p2,
-//                             out LongFloatD p3);
+     LongFloatD opLongFloatD(LongFloatD p1, LongFloatD p2,
+                             out LongFloatD p3);
 
-//     StringStringD opStringStringD(StringStringD p1, StringStringD p2,
-//                                   out StringStringD p3);
+     StringStringD opStringStringD(StringStringD p1, StringStringD p2,
+                                   out StringStringD p3);
 
-//     StringMyEnumD opStringMyEnumD(StringMyEnumD p1, StringMyEnumD p2,
-//                                   out StringMyEnumD p3);
+     StringMyEnumD opStringMyEnumD(StringMyEnumD p1, StringMyEnumD p2,
+                                   out StringMyEnumD p3);
 
 //     IntS opIntS(IntS s);
 

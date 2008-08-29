@@ -1410,7 +1410,7 @@ typedef enum { dummy } Dummy_Enum;
 
 +(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
-    [stream writeBool:[obj unsignedCharValue]];
+    [stream writeByte:[obj unsignedCharValue]];
 }
 @end
 
@@ -1465,18 +1465,6 @@ typedef enum { dummy } Dummy_Enum;
 @implementation ICEDoubleHelper
 +(id) readWithStream:(id<ICEInputStream>)stream
 {
-    return [stream readString];
-}
-
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
-{
-    [stream writeString:obj];
-}
-@end
-
-@implementation ICEStringHelper
-+(id) readWithStream:(id<ICEInputStream>)stream
-{
     return [[NSNumber alloc] initWithDouble:[stream readDouble]];
 }
 
@@ -1486,15 +1474,27 @@ typedef enum { dummy } Dummy_Enum;
 }
 @end
 
-@implementation ICEEnumHelper
+@implementation ICEStringHelper
 +(id) readWithStream:(id<ICEInputStream>)stream
 {
-    return [stream readEnumSeq:[self getLimit]];
+    return [stream readString];
 }
 
 +(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
-    return [stream writeEnumSeq:obj limit:[self getLimit]];
+    [stream writeString:obj];
+}
+@end
+
+@implementation ICEEnumHelper
++(id) readWithStream:(id<ICEInputStream>)stream
+{
+    return [[NSNumber alloc] initWithInt:[stream readEnumerator:[self getLimit]]];
+}
+
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
+{
+    [stream writeEnumerator:[obj intValue] limit:[self getLimit]];
 }
 
 +(ICEInt) getLimit

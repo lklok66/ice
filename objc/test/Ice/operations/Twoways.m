@@ -577,4 +577,130 @@ twoways(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 	test([[[[rsso objectAtIndex:2] objectAtIndex:0] objectAtIndex:1] isEqualToString:@""]);
 	test([[[[rsso objectAtIndex:2] objectAtIndex:1] objectAtIndex:0] isEqualToString:@"abcd"]);
     }
+
+    {
+        TestMutableByteBoolD *di1 = [TestMutableByteBoolD dictionary];
+	[di1 setObject:[NSNumber numberWithBool:YES] forKey:[NSNumber numberWithUnsignedChar:10]];
+	[di1 setObject:[NSNumber numberWithBool:NO] forKey:[NSNumber numberWithUnsignedChar:100]];
+        TestMutableByteBoolD *di2 = [TestMutableByteBoolD dictionary];
+	[di2 setObject:[NSNumber numberWithBool:YES] forKey:[NSNumber numberWithUnsignedChar:10]];
+	[di2 setObject:[NSNumber numberWithBool:NO] forKey:[NSNumber numberWithUnsignedChar:11]];
+	[di2 setObject:[NSNumber numberWithBool:TRUE] forKey:[NSNumber numberWithUnsignedChar:101]];
+
+        TestMutableByteBoolD *_do;
+        TestMutableByteBoolD *ro = [p opByteBoolD:di1 p2:di2 p3:&_do];
+
+	test([_do isEqualToDictionary:di1]);
+	test([ro count] == 4);
+	test([[ro objectForKey:[NSNumber numberWithUnsignedChar:10]] boolValue] == YES);
+	test([[ro objectForKey:[NSNumber numberWithUnsignedChar:11]] boolValue] == NO);
+	test([[ro objectForKey:[NSNumber numberWithUnsignedChar:100]] boolValue] == NO);
+	test([[ro objectForKey:[NSNumber numberWithUnsignedChar:101]] boolValue] == YES);
+    }
+
+    {
+        TestMutableShortIntD *di1 = [TestMutableShortIntD dictionary];
+	[di1 setObject:[NSNumber numberWithInt:-1] forKey:[NSNumber numberWithShort:110]];
+	[di1 setObject:[NSNumber numberWithInt:123123] forKey:[NSNumber numberWithShort:1100]];
+        TestMutableShortIntD *di2 = [TestMutableShortIntD dictionary];
+	[di2 setObject:[NSNumber numberWithInt:-1] forKey:[NSNumber numberWithShort:110]];
+	[di2 setObject:[NSNumber numberWithInt:-100] forKey:[NSNumber numberWithShort:111]];
+	[di2 setObject:[NSNumber numberWithInt:0] forKey:[NSNumber numberWithShort:1101]];
+
+        TestMutableShortIntD *_do;
+        TestMutableShortIntD *ro = [p opShortIntD:di1 p2:di2 p3:&_do];
+
+	test([_do isEqualToDictionary:di1]);
+	test([ro count] == 4);
+	test([[ro objectForKey:[NSNumber numberWithShort:110]] intValue] == -1);
+	test([[ro objectForKey:[NSNumber numberWithShort:111]] intValue] == -100);
+	test([[ro objectForKey:[NSNumber numberWithShort:1100]] intValue] == 123123);
+	test([[ro objectForKey:[NSNumber numberWithShort:1101]] intValue] == 0);
+    }
+
+    {
+        TestMutableLongFloatD *di1 = [TestMutableLongFloatD dictionary];
+	[di1 setObject:[NSNumber numberWithFloat:-1.1f] forKey:[NSNumber numberWithLong:999999110]];
+	[di1 setObject:[NSNumber numberWithFloat:123123.2f] forKey:[NSNumber numberWithLong:999999111]];
+        TestMutableLongFloatD *di2 = [TestMutableLongFloatD dictionary];
+	[di2 setObject:[NSNumber numberWithFloat:-1.1f] forKey:[NSNumber numberWithLong:999999110]];
+	[di2 setObject:[NSNumber numberWithFloat:-100.4f] forKey:[NSNumber numberWithLong:999999120]];
+	[di2 setObject:[NSNumber numberWithFloat:0.5f] forKey:[NSNumber numberWithLong:999999130]];
+
+        TestMutableLongFloatD *_do;
+        TestMutableLongFloatD *ro = [p opLongFloatD:di1 p2:di2 p3:&_do];
+
+	test([_do isEqualToDictionary:di1]);
+	test([ro count] == 4);
+	test((ICEFloat)[[ro objectForKey:[NSNumber numberWithLong:999999110]] floatValue] == -1.1f);
+	test((ICEFloat)[[ro objectForKey:[NSNumber numberWithLong:999999120]] floatValue] == -100.4f);
+	test((ICEFloat)[[ro objectForKey:[NSNumber numberWithLong:999999111]] floatValue] == 123123.2f);
+	test((ICEFloat)[[ro objectForKey:[NSNumber numberWithLong:999999130]] floatValue] == 0.5f);
+    }
+
+    {
+        TestMutableStringStringD *di1 = [TestMutableStringStringD dictionary];
+	[di1 setObject:@"abc -1.1" forKey:@"foo"];
+	[di1 setObject:@"abc 123123.2" forKey:@"bar"];
+        TestMutableStringStringD *di2 = [TestMutableStringStringD dictionary];
+	[di2 setObject:@"abc -1.1" forKey:@"foo"];
+	[di2 setObject:@"abc -100.4" forKey:@"FOO"];
+	[di2 setObject:@"abc 0.5" forKey:@"BAR"];
+
+        TestMutableStringStringD *_do;
+        TestMutableStringStringD *ro = [p opStringStringD:di1 p2:di2 p3:&_do];
+
+	test([_do isEqualToDictionary:di1]);
+	test([ro count] == 4);
+	test([[ro objectForKey:@"foo"] isEqualToString:@"abc -1.1"]);
+	test([[ro objectForKey:@"FOO"] isEqualToString:@"abc -100.4"]);
+	test([[ro objectForKey:@"bar"] isEqualToString:@"abc 123123.2"]);
+	test([[ro objectForKey:@"BAR"] isEqualToString:@"abc 0.5"]);
+    }
+
+    {
+        TestMutableStringMyEnumD *di1 = [TestMutableStringMyEnumD dictionary];
+	[di1 setObject:[NSNumber numberWithInt:Testenum1] forKey:@"abc"];
+	[di1 setObject:[NSNumber numberWithInt:Testenum2] forKey:@""];
+        TestMutableStringMyEnumD *di2 = [TestMutableStringMyEnumD dictionary];
+	[di2 setObject:[NSNumber numberWithInt:Testenum1] forKey:@"abc"];
+	[di2 setObject:[NSNumber numberWithInt:Testenum3] forKey:@"querty"];
+	[di2 setObject:[NSNumber numberWithInt:Testenum2] forKey:@"Hello!!"];
+
+        TestMutableStringMyEnumD *_do;
+        TestMutableStringMyEnumD *ro = [p opStringMyEnumD:di1 p2:di2 p3:&_do];
+
+	test([_do isEqualToDictionary:di1]);
+	test([ro count] == 4);
+	test([[ro objectForKey:@"abc"] intValue] == Testenum1);
+	test([[ro objectForKey:@"querty"] intValue] == Testenum3);
+	test([[ro objectForKey:@""] intValue] == Testenum2);
+	test([[ro objectForKey:@"Hello!!"] intValue] == Testenum2);
+    }
+
+#if 0
+    {
+        const int lengths[] = { 0, 1, 2, 126, 127, 128, 129, 253, 254, 255, 256, 257, 1000 };
+
+	int l;
+        for(l = 0; l != sizeof(lengths) / sizeof(*lengths); ++l)
+        {
+            TestMutableIntS *s = [TestMutableIntS dataWithLength:(l * sizeof(ICEInt))];
+	    ICEInt *ip = (ICEInt *)[s bytes];
+	    int i;
+            for(i = 0; i < lengths[l]; ++i)
+            {
+                *ip++ = i;
+            }
+            TestIntS *r = [p opIntS:s];
+            test([r length] == lengths[l] * sizeof(ICEInt));
+            const ICEInt *rp = [r bytes];
+	    int j;
+            for(j = 0; j < [r length] / sizeof(ICEInt); ++j)
+            {
+                test(rp[j] == -j);
+            }
+        }
+    }
+#endif
 }
