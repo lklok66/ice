@@ -28,13 +28,15 @@ int ICELookupString(const char**, size_t, const char*);
 -(void) ice_ping:(ICECurrent*)current;
 -(NSString*) ice_id:(ICECurrent*)current;
 -(NSArray*) ice_ids:(ICECurrent*)current;
++(NSString*) ice_staticId;
+-(ICEInt) ice_hash;
+-(id<ICEObject>) ice_clone;
 @end
 
 @interface ICEObject : NSObject<ICEObject>
 {
     void* object__;
 }
-+(NSString*) ice_staticId;
 +(const char**) staticIds__:(int*)count idIndex:(int*)idx;
 -(void) checkModeAndSelector__:(ICEOperationMode)expected selector:(SEL)sel current:(ICECurrent*)current;
 -(BOOL) ice_isA___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os;

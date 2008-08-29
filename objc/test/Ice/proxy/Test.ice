@@ -7,10 +7,26 @@
 //
 // **********************************************************************
 
-#import <Ice/Config.h>
+#ifndef TEST_ICE
+#define TEST_ICE
 
-typedef enum
+#include <Ice/Current.ice>
+
+module Test
 {
-    ICERandom,
-    ICEOrdered
-} ICEEndpointSelectionType;
+
+["ami"] class MyClass
+{
+    void shutdown();
+
+    Ice::Context getContext();
+};
+
+class MyDerivedClass extends MyClass
+{
+    Object* echo(Object* obj);
+};
+
+};
+
+#endif

@@ -21,7 +21,6 @@
 @class ICEIdentity;
 
 @protocol ICECommunicator <NSObject>
-
 -(void) destroy;
 -(void) shutdown;
 -(void) waitForShutdown;
@@ -49,6 +48,5 @@
 //Object* getAdmin;
 //void addAdminFacet(Object servant, NSString* facet);
 //Object removeAdminFacet(NSString* facet);
-
 @end
 

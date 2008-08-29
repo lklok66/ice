@@ -224,13 +224,16 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
         bool amd = false; //p->hasMetaData("amd") || op->hasMetaData("amd");
         if(!amd)
         {
+	    _M << nl << "[self checkModeAndSelector__:" << sliceModeToIceMode(op->mode()) << " selector:@selector(";
 	    string selector = getSelector(op);
-	    _M << nl << "[self checkModeAndSelector__:" << sliceModeToIceMode(op->mode()) << " selector:@selector("
-	       << opName << selector << ":";
 	    if(!selector.empty())
 	    {
-	        _M << "current:";
+	        _M << selector << "current:";
 	    }
+            else
+            {
+                _M << opName << ":";
+            }
 	    _M << ") current:current];";
             TypeStringList inParams;
             TypeStringList outParams;
@@ -693,9 +696,13 @@ Slice::ObjCVisitor::getSelector(const OperationPtr& op) const
     ParamDeclList paramList = op->parameters();
     for(ParamDeclList::const_iterator q = paramList.begin(); q != paramList.end(); ++q)
     {
-	if(q != paramList.begin())
-	{
-	    result += ":" + fixId((*q)->name());
+	if(q == paramList.begin())
+        {
+            result += fixId(op->name()) + ":";
+        }
+        else
+        {
+	    result += fixId((*q)->name()) + ":";
 	}
     }
     return result;

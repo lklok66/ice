@@ -44,7 +44,7 @@
 -(BOOL) isEqual:(id)anObject;
 
 -(ICEInt) ice_getHash;
--(ICECommunicator*) ice_getCommunicator;
+-(id<ICECommunicator>) ice_getCommunicator;
 -(NSString*) ice_toString;
 -(BOOL) ice_isA:(NSString*)typeId;
 -(BOOL) ice_isA:(NSString*)typeId context:(ICEContext*)context;    
@@ -62,7 +62,7 @@
 -(BOOL) ice_invoke_async:(id)target response:(SEL)response exception:(SEL)exception sent:(SEL)sent operation:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams context:(ICEContext*)context;
 -(ICEIdentity*) ice_getIdentity;
 -(id<ICEObjectPrx>) ice_identity:(ICEIdentity*)identity;
--(ICEContext*) ice_getContext;
+-(ICEMutableContext*) ice_getContext;
 -(id<ICEObjectPrx>) ice_context:(ICEContext*)context;
 -(NSString*) ice_getFacet;
 -(id<ICEObjectPrx>) ice_facet:(NSString*)facet;
@@ -113,7 +113,11 @@
 +(id) readWithStream:(id<ICEInputStream>)stream;
 +(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
 +(id) uncheckedCast:(id<ICEObjectPrx>)proxy;
++(id) uncheckedCast:(id<ICEObjectPrx>)proxy facet:(NSString*)facet;
 +(id) checkedCast:(id<ICEObjectPrx>)proxy;
++(id) checkedCast:(id<ICEObjectPrx>)proxy facet:(NSString*)facet;
++(id) checkedCast:(id<ICEObjectPrx>)proxy context:(ICEContext*)context;
++(id) checkedCast:(id<ICEObjectPrx>)proxy facet:(NSString*)facet context:(ICEContext*)context;
 +(NSString*) ice_staticId;
 
 +(Protocol*) protocol__;

@@ -8,6 +8,7 @@
 // **********************************************************************
 
 #import <Ice/Config.h>
+#import <Ice/Stream.h>
 
 //
 // Forward declarations
@@ -15,29 +16,49 @@
 @protocol ICEObjectAdapter;
 @class ICEIdentity;
 
+typedef NSDictionary ICEContext;
+typedef NSMutableDictionary ICEMutableContext;
+
 typedef enum
 {
     ICENormal,
     ICENonmutating,
     ICEIdempotent
-} 
-ICEOperationMode;
+} ICEOperationMode;
 
-@interface ICECurrent : NSObject
+@interface ICECurrent : NSObject <NSCopying>
 {
-    id<ICEObjectAdapter> adapter;
-    ICEIdentity* id_;
-    NSString* facet;
-    NSString* operation;
-    ICEOperationMode mode;
-    NSDictionary* ctx;
-    ICEInt requestId;
+    @private
+        id<ICEObjectAdapter> adapter;
+        ICEIdentity *id_;
+        NSString *facet;
+        NSString *operation;
+        ICEOperationMode mode;
+        NSDictionary *ctx;
+        ICEInt requestId;
 }
-@property(retain, nonatomic) id<ICEObjectAdapter> adapter;
-@property(retain, nonatomic) ICEIdentity* id_;
-@property(retain, nonatomic) NSString* facet;
-@property(retain, nonatomic) NSString* operation;
-@property(assign, nonatomic) ICEOperationMode mode;
-@property(retain, nonatomic) NSDictionary* ctx;
-@property(assign, nonatomic) ICEInt requestId;
+
+@property(nonatomic, retain) id<ICEObjectAdapter> adapter;
+@property(nonatomic, retain) ICEIdentity *id_;
+@property(nonatomic, retain) NSString *facet;
+@property(nonatomic, retain) NSString *operation;
+@property(nonatomic, assign) ICEOperationMode mode;
+@property(nonatomic, retain) NSDictionary *ctx;
+@property(nonatomic, assign) ICEInt requestId;
+
+-(id) init:(id<ICEObjectAdapter>)adapter id_:(ICEIdentity *)id_ facet:(NSString *)facet operation:(NSString *)operation mode:(ICEOperationMode)mode ctx:(NSDictionary *)ctx requestId:(ICEInt)requestId;
++(id) current:(id<ICEObjectAdapter>)adapter id_:(ICEIdentity *)id_ facet:(NSString *)facet operation:(NSString *)operation mode:(ICEOperationMode)mode ctx:(NSDictionary *)ctx requestId:(ICEInt)requestId;
++(id) current;
+-(id) copyWithZone:(NSZone *)zone;
+-(NSUInteger) hash;
+-(BOOL) isEqual:(id)anObject;
+-(void) dealloc;
+@end
+
+@interface ICEContextHelper : ICEDictHelper
++(ICEKeyValueHelper) getContained;
+@end
+
+@interface ICEOperationModeHelper : ICEEnumHelper
++(ICEInt) getLimit;
 @end

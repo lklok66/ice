@@ -292,6 +292,15 @@ static const char* ICEObject_all__[4] =
     const char** staticIds = [self staticIds__:&count idIndex:&index];
     return [NSString stringWithUTF8String:staticIds[index]];
 }
+-(ICEInt) ice_hash
+{
+    return (ICEInt)[self hash];
+}
+-(id<ICEObject>) ice_clone
+{
+    @throw [ICECloneNotImplementedException cloneNotImplementedException:__FILE__ line:__LINE__];
+    return nil; // avoid warning with some compilers
+}
 +(const char**) staticIds__:(int*)count idIndex:(int*)idx
 {
     *count = sizeof(ICEObject_ids__) / sizeof(const char*);

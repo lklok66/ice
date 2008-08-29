@@ -7,15 +7,15 @@
 //
 // **********************************************************************
 
-#import <Ice/Communicator.h>
+#import <Test.h>
 
-#include <IceCpp/Communicator.h>
-
-@interface ICECommunicator : NSObject<ICECommunicator>
+@interface MyDerivedClassI : TestMyDerivedClass<TestMyDerivedClass>
 {
-    Ice::Communicator* communicator__;
+@private
+    ICEContext *_ctx;
 }
--(Ice::Communicator*)communicator__;
-+(ICECommunicator*)communicatorWithCommunicator:(const Ice::CommunicatorPtr&)arg;
+-(id<ICEObjectPrx>) echo:(id<ICEObjectPrx>)proxy current:(ICECurrent*)current;
+-(void) shutdown:(ICECurrent*)current;
+-(ICEContext*) getContext:(ICECurrent*)current;
+-(BOOL) ice_isA:(NSString*)typeId current:(ICECurrent*)current;
 @end
-

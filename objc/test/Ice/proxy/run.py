@@ -8,10 +8,10 @@
 #
 # **********************************************************************
 
-import os, sys, re, getopt
+import os, sys
 
 for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
-    toplevel = os.path.abspath(toplevel)
+    toplevel = os.path.normpath(toplevel)
     if os.path.exists(os.path.join(toplevel, "config", "TestUtil.py")):
         break
 else:
@@ -19,14 +19,10 @@ else:
 
 sys.path.append(os.path.join(toplevel, "config"))
 import TestUtil
+TestUtil.processCmdLine()
 
-#
-# List of all basic tests.
-#
-tests = [ 
-    ("Ice/proxy", ["core"]),
-    ("Ice/operations", ["core"]),
-    ]
+name = os.path.join("Ice", "proxy")
 
-if __name__ == "__main__":
-    TestUtil.run(tests)
+print "tests with regular server."
+TestUtil.clientServerTest(name)
+sys.exit(0)
