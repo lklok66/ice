@@ -179,17 +179,16 @@
 
 -(void) opStructResponse:(TestStructure*)rso p3:(TestStructure*)so
 {
-    test([rso p] == nil);
-    test([rso e] == Testenum2);
-    test([[[rso s] s] isEqualToString:@"def"]);
+    test(ICEisNil(rso.p));
+    test(rso.e == Testenum2);
+    test([rso.s.s isEqualToString:@"def"]);
     test([so e] == Testenum3);
-    test([so p] != nil);
-    //test([[so p] isEqual:p]);
-    test([[[so s] s] isEqualToString:@"a new string"]);
+    test(!ICEisNil(so.p));
+    test([so.s.s isEqualToString:@"a new string"]);
     // We can't do the callbacks below in connection serialization mode.
-    if([[[[so p] ice_getCommunicator] getProperties] getPropertyAsInt:@"Ice.ThreadPool.Client.Serialize"])
+    if([[[so.p ice_getCommunicator] getProperties] getPropertyAsInt:@"Ice.ThreadPool.Client.Serialize"])
     {
-        [[so p] opVoid];
+        [so.p opVoid];
     }
     [self called];
 }
@@ -613,15 +612,15 @@ twowaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 
     {
         TestStructure *si1 = [TestStructure structure];
-	[si1 setP:p];
-	[si1 setE:Testenum3];
-	[si1 setS:[TestAnotherStruct anotherStruct]];
-	[[si1 s] setS:@"abc"];
+	si1.p = p;
+	si1.e = Testenum3;
+	si1.s = [TestAnotherStruct anotherStruct];
+	si1.s.s = @"abc";
 	TestStructure *si2 = [TestStructure structure];
-	[si2 setP:nil];
-	[si2 setE:Testenum2];
-	[si2 setS:[TestAnotherStruct anotherStruct]];
-	[[si2 s] setS:@"def"];
+	si2.p = nil;
+	si2.e = Testenum2;
+	si2.s = [TestAnotherStruct anotherStruct];
+	si2.s.s = @"def";
         
         Callback* cb = [[Callback alloc] init];
         [p opStruct_async:cb response:@selector(opStructResponse:p3:) exception:@selector(opStructException:) p1:si1 p2:si2];
