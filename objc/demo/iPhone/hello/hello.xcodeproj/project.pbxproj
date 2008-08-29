@@ -17,9 +17,7 @@
 		28D7ACF80DDB3853001CB0EB /* helloViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28D7ACF70DDB3853001CB0EB /* helloViewController.m */; };
 		A10643D10E5B6F9700338C12 /* libstdc++.6.0.4.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A10643CF0E5B6F9700338C12 /* libstdc++.6.0.4.dylib */; };
 		A10643D20E5B6F9700338C12 /* libstdc++.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A10643D00E5B6F9700338C12 /* libstdc++.6.dylib */; };
-		A10643E90E5B702A00338C12 /* libIce.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A10643C60E5B6E8500338C12 /* libIce.a */; };
 		A10643EA0E5B702B00338C12 /* libIceObjC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A10643C70E5B6E8500338C12 /* libIceObjC.a */; };
-		A10643EB0E5B702C00338C12 /* libIceUtil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A10643C80E5B6E8500338C12 /* libIceUtil.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -50,9 +48,7 @@
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* hello_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hello_Prefix.pch; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A10643C60E5B6E8500338C12 /* libIce.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libIce.a; path = ../../../lib/libIce.a; sourceTree = SOURCE_ROOT; };
 		A10643C70E5B6E8500338C12 /* libIceObjC.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libIceObjC.a; path = ../../../lib/libIceObjC.a; sourceTree = SOURCE_ROOT; };
-		A10643C80E5B6E8500338C12 /* libIceUtil.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libIceUtil.a; path = ../../../lib/libIceUtil.a; sourceTree = SOURCE_ROOT; };
 		A10643CF0E5B6F9700338C12 /* libstdc++.6.0.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.6.0.4.dylib"; path = "usr/lib/libstdc++.6.0.4.dylib"; sourceTree = SDKROOT; };
 		A10643D00E5B6F9700338C12 /* libstdc++.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.6.dylib"; path = "usr/lib/libstdc++.6.dylib"; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -66,9 +62,7 @@
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
 				A10643D10E5B6F9700338C12 /* libstdc++.6.0.4.dylib in Frameworks */,
 				A10643D20E5B6F9700338C12 /* libstdc++.6.dylib in Frameworks */,
-				A10643E90E5B702A00338C12 /* libIce.a in Frameworks */,
 				A10643EA0E5B702B00338C12 /* libIceObjC.a in Frameworks */,
-				A10643EB0E5B702C00338C12 /* libIceUtil.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -133,9 +127,7 @@
 			children = (
 				A10643CF0E5B6F9700338C12 /* libstdc++.6.0.4.dylib */,
 				A10643D00E5B6F9700338C12 /* libstdc++.6.dylib */,
-				A10643C60E5B6E8500338C12 /* libIce.a */,
 				A10643C70E5B6E8500338C12 /* libIceObjC.a */,
-				A10643C80E5B6E8500338C12 /* libIceUtil.a */,
 				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
 				1D30AB110D05D00D00671497 /* Foundation.framework */,
 			);

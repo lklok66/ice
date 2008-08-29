@@ -64,10 +64,10 @@ typedef struct
 -(NSMutableData*) readEnumSeq:(ICEInt)limit;
 
 -(ICEObjectPrx*) readProxy:(Class)c;
--(NSMutableArray*) readProxySeq;
 
 -(void) readObject:(id<ICEReadObjectCallback>)callback;
 -(NSMutableArray*) readObjectSeq;
+-(NSMutableDictionary*) readObjectDict:(Class)c;
 
 -(NSMutableArray*) readSequence:(Class)c;
 
@@ -129,10 +129,10 @@ typedef struct
 -(void) writeEnumSeq:(NSData*)v limit:(ICEInt)limit;
 
 -(void) writeProxy:(ICEObjectPrx*)v;
--(void) writeProxySeq:(NSArray*)v;
 
 -(void) writeObject:(ICEObject*)v;
 -(void) writeObjectSeq:(NSArray*)v;
+-(void) writeObjectDict:(NSDictionary*)v c:(Class)c;
 
 -(void) writeSequence:(NSArray*)arr c:(Class)c;
 

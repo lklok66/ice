@@ -102,14 +102,16 @@
 //ICEConnection* ice_getConnection;
 //ICEConnection* ice_getCachedConnection;
 -(void) ice_flushBatchRequests;
-//-(BOOL) ice_flushBatchRequests_async(const ICEAMI_Object_ice_flushBatchRequests*&);
-
+-(BOOL) ice_flushBatchRequests_async:(id)target exception:(SEL)exception;
+-(BOOL) ice_flushBatchRequests_async:(id)target exception:(SEL)exception sent:(SEL)sent;
 @end
 
 @interface ICEObjectPrx : NSObject<ICEObjectPrx>
 {
     void* objectPrx__;
 }
++(id) readWithStream:(id<ICEInputStream>)stream;
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
 +(id) uncheckedCast:(id<ICEObjectPrx>)proxy;
 +(id) checkedCast:(id<ICEObjectPrx>)proxy;
 +(NSString*) ice_staticId;

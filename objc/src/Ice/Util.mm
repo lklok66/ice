@@ -45,8 +45,14 @@ rethrowObjCException(const std::exception& ex)
             }    
             else
             {
-                Ice::UnknownException e(__FILE__, __LINE__, ex.what());
-                nsex = [ICEUnknownException localExceptionWithLocalException:e];
+                //
+                // std::exception from the Ice runtime are translated to NSException.
+                //
+                //Ice::UnknownException e(__FILE__, __LINE__, ex.what());
+                //nsex = [ICEUnknownException localExceptionWithLocalException:e];
+                nsex = [NSException exceptionWithName:@"std::exception" 
+                                               reason:[NSString stringWithUTF8String:ex.what()]
+                                             userInfo:nil];
             }
         }
     }
@@ -70,7 +76,11 @@ rethrowCxxException(NSException* ex)
     }
     @catch(NSException* ex)
     {
-        throw Ice::UnknownException(__FILE__, __LINE__, fromNSString([ex description]));
+        //
+        // NSException from the runtime are translated to C++ IceObjc::Exception
+        //
+        //throw Ice::UnknownException(__FILE__, __LINE__, fromNSString([ex description]));
+        throw IceObjC::Exception(__FILE__, __LINE__, fromNSString([ex description]));
     }
 }
 
@@ -91,4 +101,28 @@ toObjCSliceId(const std::string& sliceId)
         }
     }
     return objcType;
+}
+
+IceObjC::Exception::Exception(const char* file, int line, const std::string& str)
+{
+    if(file && line > 0)
+    {
+        std::ostringstream os;
+        os << file << ':' << line << ": " << str;
+        _str = os.str();
+    }
+    else
+    {
+        _str = str;
+    }
+}
+
+IceObjC::Exception::~Exception() throw()
+{
+}
+
+const char*
+IceObjC::Exception::what() const throw()
+{
+    return _str.c_str();
 }

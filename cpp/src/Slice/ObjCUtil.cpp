@@ -409,7 +409,16 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
     BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
     if(builtin)
     {
-	string selector = getBuiltinSelector(builtin, marshal);
+	string selector;
+        if(builtin->kind() == Builtin::KindObjectProxy)
+        {
+            selector = marshal ? "writeProxy" : "readProxy:[ICEObjectPrx class]";
+        }
+        else
+        {
+            selector = getBuiltinSelector(builtin, marshal);
+        }
+
 	if(marshal)
 	{
 	    out << nl << "[" << stream << " " << selector << ":" << param << "];";
@@ -436,14 +445,20 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
     {
         if(marshal)
         {
-	    out << nl << "[" << stream << " writeProxy:" << param << "];";
+	    out << nl << "[" << stream << " writeProxy:(ICEObjectPrx*)" << param << "];";
 	}
 	else
 	{
 	    string mName = moduleName(findModule(prx->_class()));
 	    string name = mName + prx->_class()->name() + "Prx";
-	    out << nl << param << " = (" << name << " *)[[" << stream << " readProxy:["
-	        << name << " class]] autorelease];";
+            //
+            // We use objc_getClass to get the proxy class instead of [name class]. This is to avoid
+            // a warning if the proxy is forward declared.
+            //
+	    //out << nl << param << " = (" << name << " *)[[" << stream << " readProxy:["
+	    //    << name << " class]] autorelease];";
+	    out << nl << param << " = (" << name << " *)[[" << stream << " readProxy:objc_getClass(\""
+	        << name << "\")] autorelease];";
 	}
         return;
     }
@@ -518,15 +533,29 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
         BuiltinPtr builtin = BuiltinPtr::dynamicCast(seq->type());
 	if(builtin)
 	{
-	    string selector = getBuiltinSelector(builtin, marshal);
-	    if(marshal)
-	    {
-	        out << nl << "[" << stream << " " << selector << "Seq:" << param << "];";
-	    }
-	    else
-	    {
-	        out << nl << param << " = [" << stream << " " << selector << "Seq];";
-	    }
+            if(builtin->kind() == Builtin::KindObjectProxy)
+            {
+                if(marshal)
+                {
+                    out << nl << "[" << stream << " writeSequence:" << param << " c:[ICEObjectPrx class]];";
+                }
+                else
+                {
+                    out << nl << param << " = [" << stream << " readSequence:[ICEObjectPrx class]];";
+                }
+            }
+            else
+            {
+                string selector = getBuiltinSelector(builtin, marshal) + "Seq";
+                if(marshal)
+                {
+                    out << nl << "[" << stream << " " << selector << ":" << param << "];";
+                }
+                else
+                {
+                    out << nl << param << " = [" << stream << " " << selector << "];";
+                }
+            }
 	    return;
 	}
 
@@ -551,12 +580,14 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
 	{
 	    if(marshal)
 	    {
-		out << nl << "[" << stream << " writeProxySeq:" << param << "];";
+		string mName = moduleName(findModule(prx->_class()));
+		out << nl << "[" << stream << " writeSequence:" << param << " c:["
+		    << mName + prx->_class()->name() + "Prx class]];";
 	    }
 	    else
 	    {
 		string mName = moduleName(findModule(prx->_class()));
-		out << nl << param << " = [[" << stream << " readProxySeq:["
+		out << nl << param << " = [[" << stream << " readSequence:["
 		    << mName + prx->_class()->name() + "Prx class]] autorelease];";
 	    }
 	    return;

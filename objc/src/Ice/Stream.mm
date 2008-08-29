@@ -639,31 +639,6 @@ typedef enum { dummy } Dummy_Enum;
     }
 }
 
--(NSMutableArray*) readProxySeq
-{
-#if 0 // TODO
-    NSMutableArray* ret;
-    try
-    {
-        int sz = [self readSize];
-	// TODO size check
-	ret = [[NSMutableArray alloc] initWithCapacity:sz];
-	for(int i = 0; i < sz; ++i)
-	{
-	    [ret addObject:[self readProxy:c]];
-	}
-    }
-    catch(const std::exception& ex)
-    {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
-    }
-    return ret;
-#else
-    return [[NSMutableArray alloc] init];
-#endif
-}
-
 -(void) readObject:(id<ICEReadObjectCallback>)callback
 {
     try
@@ -677,6 +652,12 @@ typedef enum { dummy } Dummy_Enum;
 }
 
 -(NSMutableArray*) readObjectSeq
+{
+    // TODO
+    return nil;
+}
+
+-(NSMutableDictionary*) readObjectDict:(Class)cl
 {
     // TODO
     return nil;
@@ -1286,22 +1267,6 @@ typedef enum { dummy } Dummy_Enum;
     }
 }
 
--(void) writeProxySeq:(NSArray*)v
-{
-    try
-    {
-	[self writeSize:[v count]];
-        for(ICEObjectPrx* element in v)
-	{
-	    [self writeProxy:element];
-	}
-    }
-    catch(const std::exception& ex)
-    {
-        rethrowObjCException(ex);
-    }
-}
-
 -(void) writeObject:(ICEObject*)v
 {
     try
@@ -1315,6 +1280,11 @@ typedef enum { dummy } Dummy_Enum;
 }
 
 -(void) writeObjectSeq:(NSArray*)v
+{
+    // TODO
+}
+
+-(void) writeObjectDict:(NSDictionary*)v c:(Class)c
 {
     // TODO
 }

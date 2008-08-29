@@ -221,7 +221,7 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
 	   << "___:(ICECurrent *)current is:(id<ICEInputStream>)is_ os:(id<ICEOutputStream>)os_";
         _M << sb;
 
-        bool amd = p->hasMetaData("amd") || op->hasMetaData("amd");
+        bool amd = false; //p->hasMetaData("amd") || op->hasMetaData("amd");
         if(!amd)
         {
 	    string selector = getSelector(op);
@@ -277,7 +277,7 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
 		}
 		_M << "ret_ = ";
 	    }
-            if(paramList.empty() && !returnType)
+            else
             {
                 _M << nl;
             }
@@ -1072,6 +1072,8 @@ Slice::Gen::Gen(const string& name, const string& base, const string& include, c
     _H << nl << "#import <Ice/Proxy.h>";
     _H << nl << "#import <Ice/Object.h>";
     _H << nl << "#import <Ice/Current.h>";
+    _H << nl << "#import <Ice/Exception.h>";
+    _H << nl << "#import <Ice/Stream.h>";
 
     _M.open(fileM.c_str());
     if(!_M)
@@ -2694,7 +2696,7 @@ Slice::Gen::HelperVisitor::visitSequence(const SequencePtr& p)
     BuiltinPtr builtin = BuiltinPtr::dynamicCast(p->type());
     if(builtin)
     {
-	_H << sp << nl << "@interface " << name << " : NSObject;";
+	_H << sp << nl << "@interface " << name << " : NSObject";
 	_H << nl << "+(id) readWithStream:(id<ICEInputStream>)stream;";
 	_H << nl << "+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;";
 	_H << nl << "@end";
@@ -2702,12 +2704,26 @@ Slice::Gen::HelperVisitor::visitSequence(const SequencePtr& p)
 	_M << sp << nl << "@implementation " << name;
 	_M << nl << "+(id) readWithStream:(id<ICEInputStream>)stream";
 	_M << sb;
-	_M << nl << "return [stream read" << getBuiltinName(builtin) << "Seq];";
+        if(builtin->kind() == Builtin::KindObjectProxy)
+        {
+            _M << nl << "return [stream readSequence:[ICEObjectPrx class]];";
+        }
+        else
+        {
+            _M << nl << "return [stream read" << getBuiltinName(builtin) << "Seq];";
+        }
 	_M << eb;
 
 	_M << sp << nl << "+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream";
 	_M << sb;
-	_M << nl << "[stream write" << getBuiltinName(builtin) << "Seq:obj];";
+        if(builtin->kind() == Builtin::KindObjectProxy)
+        {
+            _M << nl << "[stream writeSequence:obj c:[ICEObjectPrx class]];";
+        }
+        else
+        {
+            _M << nl << "[stream write" << getBuiltinName(builtin) << "Seq:obj];";
+        }
 	_M << eb;
 	_M << nl << "@end";
 	
@@ -2717,7 +2733,7 @@ Slice::Gen::HelperVisitor::visitSequence(const SequencePtr& p)
     EnumPtr en = EnumPtr::dynamicCast(p->type());
     if(en)
     {
-	_H << sp << nl << "@interface " << name << " : NSObject;";
+	_H << sp << nl << "@interface " << name << " : NSObject";
 	_H << nl << "+(id) readWithStream:(id<ICEInputStream>)stream;";
 	_H << nl << "+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;";
 	_H << nl << "@end";
@@ -2748,7 +2764,14 @@ Slice::Gen::HelperVisitor::visitSequence(const SequencePtr& p)
     _M << sp << nl << "@implementation " << name;
     _M << nl << "+(Class) getContained";
     _M << sb;
-    _M << nl << "return [" << moduleName(findModule(contained)) + contained->name() + "Helper class];";
+    if(SequencePtr::dynamicCast(contained) || DictionaryPtr::dynamicCast(contained))
+    {
+        _M << nl << "return [" << moduleName(findModule(contained)) + contained->name() + "Helper class];";
+    }
+    else
+    {
+        _M << nl << "return [" << moduleName(findModule(contained)) + contained->name() + " class];";
+    }
     _M << eb;
     _M << nl << "@end";
 }
@@ -2759,6 +2782,75 @@ Slice::Gen::HelperVisitor::visitDictionary(const DictionaryPtr& p)
     string prefix = moduleName(findModule(p));
     string name = prefix + p->name() + "Helper";
 
+    TypePtr keyType = p->keyType();
+    string keyS;
+    BuiltinPtr keyBuiltin = BuiltinPtr::dynamicCast(keyType);
+    EnumPtr keyEnum = EnumPtr::dynamicCast(keyType);
+    if(keyBuiltin)
+    {
+        keyS = "ICE" + getBuiltinName(BuiltinPtr::dynamicCast(keyType)) + "Helper";
+    }
+    else if(keyEnum)
+    {
+        keyS = moduleName(findModule(keyEnum)) + keyEnum->name() + "Helper";
+    }
+    else
+    {
+	StructPtr contained = StructPtr::dynamicCast(keyType);
+	string prefix = moduleName(findModule(contained));
+        keyS = moduleName(findModule(contained)) + contained->name();
+        if(SequencePtr::dynamicCast(contained) || DictionaryPtr::dynamicCast(contained))
+        {
+            keyS += "Helper";
+        }
+    }
+
+    TypePtr valueType = p->valueType();
+    string valueS;
+    BuiltinPtr valueBuiltin = BuiltinPtr::dynamicCast(valueType);
+    EnumPtr valueEnum = EnumPtr::dynamicCast(valueType);
+    if(valueBuiltin)
+    {
+        valueS = "ICE" + getBuiltinName(BuiltinPtr::dynamicCast(valueType)) + "Helper";
+    }
+    else if(valueEnum)
+    {
+        valueS = moduleName(findModule(valueEnum)) + valueEnum->name() + "Helper";
+    }
+    else
+    {
+	ContainedPtr contained = ContainedPtr::dynamicCast(valueType);
+	string prefix = moduleName(findModule(contained));
+        valueS = moduleName(findModule(contained)) + contained->name();
+        if(SequencePtr::dynamicCast(contained) || DictionaryPtr::dynamicCast(contained))
+        {
+            valueS += "Helper";
+        }
+    }
+
+    if(valueBuiltin && valueBuiltin->kind() == Builtin::KindObject)
+    {
+	_H << sp << nl << "@interface " << name << " : NSObject";
+	_H << nl << "+(id) readWithStream:(id<ICEInputStream>)stream;";
+	_H << nl << "+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;";
+	_H << nl << "@end";
+
+
+	_M << sp << nl << "@implementation " << name;
+	_M << nl << "+(id) readWithStream:(id<ICEInputStream>)stream";
+	_M << sb;
+        _M << nl << "return [stream readObjectDict:[" << keyS << " class]];";
+	_M << eb;
+
+	_M << sp << nl << "+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream";
+	_M << sb;
+        _M << nl << "[stream writeObjectDict:obj c:[" << keyS << " class]];";
+	_M << eb;
+	_M << nl << "@end";	
+        return;
+    }
+
+
     _H << sp << nl << "@interface " << name << " : ICEDictHelper";
     _H << nl << "+(ICEKeyValueHelper) getContained;";
     _H << nl << "@end";
@@ -2767,46 +2859,7 @@ Slice::Gen::HelperVisitor::visitDictionary(const DictionaryPtr& p)
     _M << nl << "+(ICEKeyValueHelper) getContained";
     _M << sb;
     _M << nl << "ICEKeyValueHelper c;";
-    TypePtr keyType = p->keyType();
-    string keyS;
-    BuiltinPtr keyBuiltin = BuiltinPtr::dynamicCast(keyType);
-    EnumPtr keyEnum = EnumPtr::dynamicCast(keyType);
-    if(keyBuiltin)
-    {
-        keyS = "ICE" + getBuiltinName(BuiltinPtr::dynamicCast(keyType));
-    }
-    else if(keyEnum)
-    {
-        keyS = moduleName(findModule(keyEnum)) + keyEnum->name();
-    }
-    else
-    {
-	StructPtr contained = StructPtr::dynamicCast(keyType);
-	string prefix = moduleName(findModule(contained));
-        keyS = moduleName(findModule(contained)) + contained->name();
-    }
-    keyS += "Helper";
     _M << nl << "c.key = [" << keyS << " class];";
-
-    TypePtr valueType = p->valueType();
-    string valueS;
-    BuiltinPtr valueBuiltin = BuiltinPtr::dynamicCast(valueType);
-    EnumPtr valueEnum = EnumPtr::dynamicCast(valueType);
-    if(valueBuiltin)
-    {
-        valueS = "ICE" + getBuiltinName(BuiltinPtr::dynamicCast(keyType));
-    }
-    else if(valueEnum)
-    {
-        valueS = moduleName(findModule(valueEnum)) + valueEnum->name();
-    }
-    else
-    {
-	ContainedPtr contained = ContainedPtr::dynamicCast(valueType);
-	string prefix = moduleName(findModule(contained));
-        valueS = moduleName(findModule(contained)) + contained->name();
-    }
-    valueS += "Helper";
     _M << nl << "c.value = [" << valueS << " class];";
     _M << nl << "return c;";
     _M << eb;
@@ -3128,7 +3181,7 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
 	}
 	if(p->returnsClasses())
 	{
-	    _M << nl << "[is_ readPendingObjects];";
+ 	    _M << nl << "[is_ readPendingObjects];";
 	    // TODO: assign to parameters from patcher
 	}
 	// _M << nl << "[is_ endEncapsulation];";
@@ -3252,7 +3305,7 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
         _M << nl << "return;";
         _M << eb;
 
-        if(p->returnsData())
+        if(!outParams.empty() || returnType)
         {
             // _M << nl << "[is_ startEncapsulation];";
             for(TypeStringList::const_iterator op = outParams.begin(); op != outParams.end(); ++op)

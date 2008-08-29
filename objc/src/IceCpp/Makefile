@@ -9,9 +9,7 @@
 
 top_srcdir	= ../..
 
-LIBNAME		= $(call mklibname,Ice)
-
-TARGETS		= $(libdir)/$(LIBNAME)
+TARGETS		= $(OBJS) $(SLICE_OBJS)
 
 OBJS		= Acceptor.o \
 		  Application.o \
@@ -146,16 +144,10 @@ SLICECPP_SRCS	= $(SDIR)/BuiltinSequences.ice \
 
 SDIR		= $(slicedir)/Ice
 
-STATICLIBS	:= yes
-
 include $(top_srcdir)/config/Make.rules
 
 CPPFLAGS	:= -DICE_IPHONE -Iinclude -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src
 SLICE2CPPFLAGS	:= --ice --include-dir Ice $(SLICE2CPPFLAGS)
-
-$(libdir)/$(LIBNAME): $(OBJS) $(SLICE_OBJS)
-	rm -f $@
-	$(call mklib,$@,$(OBJS) $(SLICE_OBJS))
 
 include/Ice/%F.h: $(SDIR)/%F.ice $(SLICE2CPP)
 	rm -f $(*F)F.h $(*F)F.cpp
@@ -183,8 +175,5 @@ clean::
 	rm -f $(addsuffix .cpp, $(basename $(notdir $(SLICECPP_SRCS))))
 	rm -f $(addprefix include/Ice, $(addsuffix .h, $(basename $(subst $(SDIR),, \
 	$(filter $(SDIR)/%.ice, $(SLICECPP_SRCS))))))
-
-install:: all
-	$(call installlib,$(install_libdir),$(libdir),$(LIBFILENAME),$(SONAME),$(LIBNAME))
 
 include .depend

@@ -255,7 +255,7 @@ NSString* hostnameKey			= @"hostnameKey";
     // TODO: Delay blocks the caller. We should use AMI here.
     @try
     {
-        if(_deliveryMode != DeliveryModeBatchOneway || _deliveryMode != DeliveryModeBatchDatagram)
+        if(_deliveryMode != DeliveryModeBatchOneway && _deliveryMode != DeliveryModeBatchDatagram)
         {
             if([_hello sayHello_async:[ICECallbackOnMainThread callbackOnMainThread:self]
                              response:@selector(sayHelloResponse)

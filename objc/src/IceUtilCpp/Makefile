@@ -9,9 +9,7 @@
 
 top_srcdir	= ../..
 
-LIBNAME		= $(call mklibname,IceUtil)
-
-TARGETS		= $(libdir)/$(LIBNAME)
+TARGETS		= $(OBJS)
 
 OBJS		= ArgVector.o \
 		  Cond.o \
@@ -39,17 +37,8 @@ OBJS		= ArgVector.o \
 SRCS_DIR	= $(ice_dir)/cpp/src/IceUtil
 SRCS		= $(addprefix $(SRCS_DIR)/, $(OBJS:.o=.cpp))
 
-STATICLIBS	:= yes
-
 include $(top_srcdir)/config/Make.rules
 
 CPPFLAGS        := -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src $(CPPFLAGS)
-
-$(libdir)/$(LIBNAME): $(OBJS)
-	rm -f $@
-	$(call mklib,$@,$(OBJS))
-
-install:: all
-	$(call installlib,$(install_libdir),$(libdir),$(LIBFILENAME),$(SONAME),$(LIBNAME))
 
 include .depend

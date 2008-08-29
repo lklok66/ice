@@ -17,11 +17,13 @@ TARGETS		= $(call mklibtargets,$(libdir)/$(LIBFILENAME),$(libdir)/$(SONAME),$(li
 
 OBJC_OBJS	= BuiltinSequences.o \
 		  Locator.o \
-		  Router.o
+		  Router.o \
+		  Identity.o \
+		  Process.o
 
 OBJCPP_OBJS	= Communicator.o \
 		  Current.o \
-		  Identity.o \
+		  IdentityI.o \
                   Exception.o \
 		  Initialize.o \
 		  LocalException.o \
@@ -33,14 +35,20 @@ OBJCPP_OBJS	= Communicator.o \
 		  Stream.o \
 		  Util.o
 
-OBJS		= $(OBJC_OBJS) $(OBJCPP_OBJS)
+OBJS		= $(OBJC_OBJS) \
+	          $(OBJCPP_OBJS) \
+                  $(wildcard ../IceUtilCpp/*.o) \
+	          $(wildcard ../IceCpp/*.o)
 
 SRCS		= $(OBJCPP_OBJS:.o=.mm) \
 		  $(OBJC_OBJS:.o=.m)
 
 SLICE_SRCS	= $(SDIR)/BuiltinSequences.ice \
-#		  $(SDIR)/Locator.ice \
-#		  $(SDIR)/Router.ice
+		  $(SDIR)/Identity.ice \
+		  $(SDIR)/Locator.ice \
+		  $(SDIR)/Router.ice \
+		  $(SDIR)/Process.ice \
+		  $(SDIR)/ProcessF.ice
 
 HDIR		= $(includedir)/Ice
 SDIR		= $(slicedir)/Ice
@@ -52,7 +60,7 @@ include $(top_srcdir)/config/Make.rules
 CPPFLAGS	:= -I.. -Iinclude -I../../include $(CPPFLAGS)
 SLICE2OBJCFLAGS	:= --ice --include-dir Ice $(SLICE2OBJCFLAGS)
 
-LINKWITH        := -lIce -lIceUtil $(ICE_OS_LIBS) $(BASELIBS)
+LINKWITH        := $(ICE_OS_LIBS) $(BASELIBS)
 
 ifeq ($(STATICLIBS),yes)
 
@@ -81,15 +89,9 @@ $(libdir)/$(LIBNAME): $(libdir)/$(SONAME)
 endif
 
 # Prevent generation of these files from .ice files
-$(HDIR)/Locator.h Locator.m:
-	
-$(HDIR)/Router.h Router.m:
-	
 $(HDIR)/Communicator.h Communicator.m:
 	
 $(HDIR)/Current.h Current.m:
-	
-$(HDIR)/Identity.h Identity.m:
 	
 $(HDIR)/LocalException.h LocalException.m:
 	

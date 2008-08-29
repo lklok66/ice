@@ -237,6 +237,78 @@ private:
 SEL _sent;
 };
 
+class AMIIceFlushBatchRequestsCallback : public Ice::AMI_Object_ice_flushBatchRequests
+{
+public:
+
+AMIIceFlushBatchRequestsCallback(id target, SEL ex) : _target(target), _exception(ex)
+{
+    [_target retain];
+}
+
+virtual ~AMIIceFlushBatchRequestsCallback()
+{
+    [_target release];
+}
+
+virtual void 
+ice_exception(const Ice::Exception& ex)
+{
+    @try
+    {
+        @try
+        {
+            rethrowObjCException(ex);
+        }
+        @catch(ICEException* e)
+        {
+            objc_msgSend(_target, _exception, e);
+        }
+    }
+    @catch(NSException* e)
+    {
+        rethrowCxxException(e);
+    }
+}
+
+protected:
+
+id _target;
+
+private:
+
+SEL _exception;
+
+};
+
+class AMIIceFlushBatchRequestsCallbackWithSent : public AMIIceFlushBatchRequestsCallback, public Ice::AMISentCallback
+{
+public:
+
+AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
+    AMIIceFlushBatchRequestsCallback(target, ex),
+    _sent(sent)
+{
+}
+
+virtual void
+ice_sent()
+{
+    @try
+    {
+        objc_msgSend(_target, _sent);
+    }
+    @catch(NSException* e)
+    {
+        rethrowCxxException(e);
+    }
+}
+
+private:
+
+SEL _sent;
+};
+
 };
 
 @implementation ICECallbackOnMainThread
@@ -308,7 +380,14 @@ SEL _sent;
 @end
 
 @implementation ICEObjectPrx
-
++(id) readWithStream:(id<ICEInputStream>)stream
+{
+    return [stream readProxy:self];
+}
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
+{
+    [stream writeProxy:obj];
+}
 +(id) uncheckedCast:(id<ICEObjectPrx>)proxy
 {
     if(proxy != nil)
@@ -924,10 +1003,38 @@ SEL _sent;
 //}
 -(void) ice_flushBatchRequests
 {
-    OBJECTPRX->ice_flushBatchRequests();
+    try
+    {
+        OBJECTPRX->ice_flushBatchRequests();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
 }
-//-(BOOL) ice_flushBatchRequests_async(const ICEAMI_Object_ice_flushBatchRequests*&)
-//{
-//}
-
+-(BOOL) ice_flushBatchRequests_async:(id)target exception:(SEL)exception
+{
+    return [self ice_flushBatchRequests_async:target exception:exception sent:nil];
+}
+-(BOOL) ice_flushBatchRequests_async:(id)target exception:(SEL)exception sent:(SEL)sent
+{
+    try
+    {
+        Ice::AMI_Object_ice_flushBatchRequestsPtr amiCB;
+        if(sent != nil)
+        {
+            amiCB = new AMIIceFlushBatchRequestsCallbackWithSent(target, exception, sent);
+        }
+        else
+        {
+            amiCB = new AMIIceFlushBatchRequestsCallback(target, exception);
+        }
+        return OBJECTPRX->ice_flushBatchRequests_async(amiCB);
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+        return NO; // Keep the compiler happy.
+    }
+}
 @end

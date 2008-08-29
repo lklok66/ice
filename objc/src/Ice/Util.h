@@ -156,3 +156,22 @@ fromNSString(NSString* s)
 }
 
 std::string toObjCSliceId(const std::string&);
+
+namespace IceObjC
+{
+
+class Exception : public std::exception
+{
+public:
+
+    Exception(const char*, int, const std::string&);
+    virtual ~Exception() throw();
+
+    virtual const char* what() const throw();
+    
+private:
+    
+    ::std::string _str;
+};
+
+}
