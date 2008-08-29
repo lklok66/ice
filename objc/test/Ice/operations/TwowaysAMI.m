@@ -183,7 +183,7 @@
     test([rso e] == Testenum2);
     test([[[rso s] s] isEqualToString:@"def"]);
     test([so e] == Testenum3);
-    test([so p] == != nil);
+    test([so p] != nil);
     //test([[so p] isEqual:p]);
     test([[[so s] s] isEqualToString:@"a new string"]);
     // We can't do the callbacks below in connection serialization mode.
