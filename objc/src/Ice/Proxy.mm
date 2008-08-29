@@ -580,7 +580,7 @@ SEL _sent;
     {
         return YES;
     }
-    if(!o_ || ![o_ isKindOfClass:[self class]])
+    if(!o_ || ![o_ isKindOfClass:[ICEObjectPrx class]])
     {
         return NO;
     }

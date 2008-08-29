@@ -134,7 +134,7 @@ twoways(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 	test(rso.e == Testenum2);
 	test([rso.s.s isEqualToString:@"def"]);
 	test(so.p != nil);
-	// test([so.p isEqual:p]); TODO: this is currently failing
+	test([so.p isEqual:p]);
 	test(so.e == Testenum3);
 	test([so.s.s isEqualToString:@"a new string"]);
 	[so.p opVoid];
