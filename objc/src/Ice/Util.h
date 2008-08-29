@@ -81,7 +81,7 @@ toNSArray(const std::vector<T>& seq)
 template<typename T> std::vector<T>&
 fromNSArray(NSArray* array, std::vector<T>& seq)
 {
-    if(array != nil)
+    if(!ICEisNil(array))
     {
         seq.reserve([array count]);
         NSEnumerator* enumerator = [array objectEnumerator]; 
@@ -89,7 +89,10 @@ fromNSArray(NSArray* array, std::vector<T>& seq)
         while((obj = [enumerator nextObject])) 
         { 
             T v;
-            fromObjC(obj, v);
+	    if(!ICEisNil(obj))
+	    {
+		fromObjC(obj, v);
+	    }
             seq.push_back(v);
         }
     }
@@ -145,7 +148,7 @@ toNSMutableString(const std::string& s)
 inline std::string
 fromNSString(NSString* s)
 {
-    if(s == nil)
+    if(ICEisNil(s))
     {
         return std::string();
     }

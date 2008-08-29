@@ -130,10 +130,10 @@ twoways(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 	TestStructure *so;
 	TestStructure *rso = [p opStruct:si1 p2:si2 p3:&so];
 
-	test(rso.p == nil);
+	test(ICEisNil(rso.p));
 	test(rso.e == Testenum2);
 	test([rso.s.s isEqualToString:@"def"]);
-	test(so.p != nil);
+	test(!ICEisNil(so.p));
 	test([so.p isEqual:p]);
 	test(so.e == Testenum3);
 	test([so.s.s isEqualToString:@"a new string"]);

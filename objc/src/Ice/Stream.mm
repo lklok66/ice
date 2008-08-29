@@ -18,6 +18,7 @@
 #include <IceCpp/ObjectFactory.h>
 
 #import <objc/runtime.h>
+#import <Foundation/NSNull.h>
 
 namespace IceObjC
 {
@@ -944,8 +945,8 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        v == nil ? os__->writeSize(0)
-	         : os__->writeBoolSeq((bool*)[v bytes], (bool*)[v bytes] + [v length] / sizeof(BOOL));
+        ICEisNil(v) ? os__->writeSize(0)
+	            : os__->writeBoolSeq((bool*)[v bytes], (bool*)[v bytes] + [v length] / sizeof(BOOL));
     }
     catch(const std::exception& ex)
     {
@@ -969,8 +970,8 @@ typedef enum { dummy } Dummy_Enum;
 { 
     try
     {
-        v == nil ? os__->writeSize(0)
-                 : os__->writeByteSeq((ICEByte*)[v bytes], (ICEByte*)[v bytes] + [v length]);
+        ICEisNil(v) ? os__->writeSize(0)
+                    : os__->writeByteSeq((ICEByte*)[v bytes], (ICEByte*)[v bytes] + [v length]);
     }
     catch(const std::exception& ex)
     {
@@ -994,8 +995,8 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        v == nil ? os__->writeSize(0)
-                 : os__->writeShortSeq((ICEShort*)[v bytes], (ICEShort*)[v bytes] + [v length] / sizeof(ICEShort));
+        ICEisNil(v) ? os__->writeSize(0)
+                    : os__->writeShortSeq((ICEShort*)[v bytes], (ICEShort*)[v bytes] + [v length] / sizeof(ICEShort));
     }
     catch(const std::exception& ex)
     {
@@ -1020,8 +1021,8 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        v == nil ? os__->writeSize(0)
-                 : os__->writeIntSeq((ICEInt*)[v bytes], (ICEInt*)[v bytes] + [v length] / sizeof(ICEInt));
+        ICEisNil(v) ? os__->writeSize(0)
+                    : os__->writeIntSeq((ICEInt*)[v bytes], (ICEInt*)[v bytes] + [v length] / sizeof(ICEInt));
     }
     catch(const std::exception& ex)
     {
@@ -1045,8 +1046,8 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        v == nil ? os__->writeSize(0)
-                 : os__->writeLongSeq((ICELong*)[v bytes], (ICELong*)[v bytes] + [v length] / sizeof(ICELong));
+        ICEisNil(v) ? os__->writeSize(0)
+                    : os__->writeLongSeq((ICELong*)[v bytes], (ICELong*)[v bytes] + [v length] / sizeof(ICELong));
     }
     catch(const std::exception& ex)
     {
@@ -1071,8 +1072,8 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        v == nil ? os__->writeSize(0)
-                 : os__->writeFloatSeq((ICEFloat*)[v bytes], (ICEFloat*)[v bytes] + [v length] / sizeof(ICEFloat));
+        ICEisNil(v) ? os__->writeSize(0)
+                    : os__->writeFloatSeq((ICEFloat*)[v bytes], (ICEFloat*)[v bytes] + [v length] / sizeof(ICEFloat));
     }
     catch(const std::exception& ex)
     {
@@ -1097,8 +1098,9 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        v == nil ? os__->writeSize(0)
-                 : os__->writeDoubleSeq((ICEDouble*)[v bytes], (ICEDouble*)[v bytes] + [v length] / sizeof(ICEDouble));
+        ICEisNil(v) ? os__->writeSize(0)
+                    : os__->writeDoubleSeq((ICEDouble*)[v bytes],
+		                           (ICEDouble*)[v bytes] + [v length] / sizeof(ICEDouble));
     }
     catch(const std::exception& ex)
     {
@@ -1134,15 +1136,27 @@ typedef enum { dummy } Dummy_Enum;
 
 -(void)writeSequence:(NSArray*)arr c:(Class)c
 {
+    if(ICEisNil(arr))
+    {
+        [self writeSize:0];
+        return;
+    }
+
     [self writeSize:[arr count]];
     for(id i in arr)
     {
-	[c writeWithStream:i stream:self];
+	    [c writeWithStream:i stream:self];
     }
 }
 
 -(void) writeDictionary:(NSDictionary*)dictionary c:(ICEKeyValueHelper)c
 {
+    if(ICEisNil(dictionary))
+    {
+        [self writeSize:0];
+	return;
+    }
+
     [self writeSize:[dictionary count]];
     NSEnumerator* e = [dictionary keyEnumerator];
     id key;
@@ -1191,7 +1205,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-	int count = v == nil ? 0 : [v length] / ENUM_SIZE;
+	int count = ICEisNil(v) ? 0 : [v length] / ENUM_SIZE;
 	[self writeSize:count];
 	if(count == 0)
 	{
@@ -1259,6 +1273,10 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
+	if(v == (ICEObjectPrx*)[NSNull null])
+	{
+	    v = nil;
+	}
         os__->writeProxy([v objectPrx__]);
     }
     catch(const std::exception& ex)
@@ -1271,6 +1289,10 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
+	if(v == (ICEObject*)[NSNull null])
+	{
+	    v = nil;
+	}
         os__->writeObject(new IceObjC::ObjectWriter(v));
     }
     catch(const std::exception& ex)
@@ -1398,7 +1420,7 @@ typedef enum { dummy } Dummy_Enum;
 
 +(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
-    [stream writeBool:[obj boolValue]];
+    [stream writeBool:ICEisNil(obj) ? NO : [obj boolValue]];
 }
 @end
 
@@ -1410,7 +1432,7 @@ typedef enum { dummy } Dummy_Enum;
 
 +(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
-    [stream writeByte:[obj unsignedCharValue]];
+    [stream writeByte:ICEisNil(obj) ? 0 : [obj unsignedCharValue]];
 }
 @end
 
@@ -1422,7 +1444,7 @@ typedef enum { dummy } Dummy_Enum;
 
 +(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
-    [stream writeShort:[obj shortValue]];
+    [stream writeShort:ICEisNil(obj) ? 0 : [obj shortValue]];
 }
 @end
 
@@ -1434,7 +1456,7 @@ typedef enum { dummy } Dummy_Enum;
 
 +(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
-    [stream writeInt:[obj intValue]];
+    [stream writeInt:ICEisNil(obj) ? 0 : [obj intValue]];
 }
 @end
 
@@ -1446,7 +1468,7 @@ typedef enum { dummy } Dummy_Enum;
 
 +(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
-    [stream writeLong:[obj longValue]];
+    [stream writeLong:ICEisNil(obj) ? 0 : [obj longValue]];
 }
 @end
 
@@ -1458,7 +1480,7 @@ typedef enum { dummy } Dummy_Enum;
 
 +(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
-    [stream writeFloat:[obj floatValue]];
+    [stream writeFloat:ICEisNil(obj) ? 0 : [obj floatValue]];
 }
 @end
 
@@ -1470,7 +1492,7 @@ typedef enum { dummy } Dummy_Enum;
 
 +(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
-    [stream writeDouble:[obj doubleValue]];
+    [stream writeDouble:ICEisNil(obj) ? 0 : [obj doubleValue]];
 }
 @end
 
@@ -1482,7 +1504,7 @@ typedef enum { dummy } Dummy_Enum;
 
 +(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
-    [stream writeString:obj];
+    [stream writeString:obj]; // No ICEisNil here because writeString does the check.
 }
 @end
 
@@ -1494,7 +1516,7 @@ typedef enum { dummy } Dummy_Enum;
 
 +(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
-    [stream writeEnumerator:[obj intValue] limit:[self getLimit]];
+    [stream writeEnumerator:ICEisNil(obj) ? 0 : [obj intValue] limit:[self getLimit]];
 }
 
 +(ICEInt) getLimit
@@ -1512,7 +1534,7 @@ typedef enum { dummy } Dummy_Enum;
 
 +(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
-    return [stream writeSequence:obj c:[self getContained]];
+    return [stream writeSequence:obj c:[self getContained]]; // No ICEisNil here because writeSequence does the check.
 }
 
 +(Class) getContained
@@ -1530,7 +1552,7 @@ typedef enum { dummy } Dummy_Enum;
 
 +(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
-    [stream writeDictionary:obj c:[self getContained]];
+    [stream writeDictionary:obj c:[self getContained]]; // No ICEisNil here because writeDictionary does the check.
 }
 
 +(ICEKeyValueHelper) getContained

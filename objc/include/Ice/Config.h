@@ -29,3 +29,8 @@ typedef long long ICELong;
 typedef float ICEFloat;
 typedef double ICEDouble;
 typedef NSDictionary ICEContext;
+
+#if defined(__cplusplus)
+extern "C"
+#endif
+BOOL ICEisNil(id);
