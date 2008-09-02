@@ -20,3 +20,6 @@ $(EVERYTHING)::
 	    echo "making $@ in $$subdir"; \
 	    ( cd $$subdir && $(MAKE) $@ ) || exit 1; \
 	done
+
+clean::
+	rm -f Test.cpp Test.h Types.cpp Types.h
