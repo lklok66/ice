@@ -13,6 +13,7 @@
 #import <Ice/StreamI.h>
 #import <Ice/LoggerI.h>
 #import <Ice/Util.h>
+#import <Ice/LocalException.h>
 
 #include <IceCpp/Initialize.h>
 
@@ -51,11 +52,11 @@ private:
 };
 
 @implementation ICEInitializationData (Internal)
--(Ice::InitializationData)initializationData__
+-(Ice::InitializationData)initializationData
 {
     Ice::InitializationData data;
-    data.properties = [(ICEProperties*)properties properties__];
-    data.logger = [(ICELogger*)logger logger__];
+    data.properties = [(ICEProperties*)properties properties];
+    data.logger = [[ICELogger loggerWithLogger:logger] logger];
     return data;
 }
 @end
@@ -176,7 +177,7 @@ private:
         {
             properties = Ice::createProperties();
         }
-        return [ICEProperties propertiesWithProperties:properties];
+        return [ICEProperties wrapperWithCxxObject:properties.get()];
     }
     catch(const std::exception& ex)
     {
@@ -208,13 +209,20 @@ private:
         [thread start];
         [thread release];
     }
-    
+
+    id<ICEProperties> properties = [initData properties];
+    if(properties != nil && ![properties isKindOfClass:[ICEProperties class]])
+    {
+        @throw [ICEInitializationException initializationException:__FILE__ line:__LINE__ 
+                                           reason_:@"properties were not created with createProperties"];
+    }
+
     try
     {
         Ice::InitializationData data;
         if(initData != nil)
         {
-            data = [initData initializationData__];
+            data = [initData initializationData];
         }
         data.threadHook = new IceObjC::ThreadNotification();
         Ice::CommunicatorPtr communicator;
@@ -227,7 +235,7 @@ private:
             communicator = Ice::initialize(data);
         }
         [ICEInputStream installObjectFactory:communicator];
-        return [ICECommunicator communicatorWithCommunicator:communicator];
+        return [ICECommunicator wrapperWithCxxObject:communicator.get()];
     }
     catch(const std::exception& ex)
     {
@@ -240,13 +248,13 @@ private:
 {
     try
     {
-        Ice::CommunicatorPtr com = [(ICECommunicator*)communicator communicator__];
+        Ice::CommunicatorPtr com = [(ICECommunicator*)communicator communicator];
         Ice::Byte* start = (Ice::Byte*)[data bytes];
         Ice::Byte* end = (Ice::Byte*)[data bytes] + [data length];
         Ice::InputStreamPtr is = Ice::createInputStream(com, std::make_pair(start, end));
         if(is)
         {
-            return [[[ICEInputStream alloc] initWithInputStream:is] autorelease];
+            return [ICEInputStream wrapperWithCxxObject:is.get()];
         }
         else
         {
@@ -264,11 +272,11 @@ private:
 {
     try
     {
-        Ice::CommunicatorPtr com = [(ICECommunicator*)communicator communicator__];
+        Ice::CommunicatorPtr com = [(ICECommunicator*)communicator communicator];
         Ice::OutputStreamPtr os = Ice::createOutputStream(com);
         if(os)
         {
-            return [[[ICEOutputStream alloc] initWithOutputStream:os] autorelease];
+            return [ICEOutputStream wrapperWithCxxObject:os.get()];
         }
         else
         {

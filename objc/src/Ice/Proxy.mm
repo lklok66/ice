@@ -65,7 +65,7 @@ ice_response(bool ok , const std::pair<const Byte*, const Byte*>& outParams)
     ICEInputStream* is;
     {
         Ice::InputStreamPtr s = Ice::createInputStream(_communicator, outParams);
-        is = [[ICEInputStream alloc] initWithInputStream:s];
+        is = [ICEInputStream wrapperWithCxxObjectNoAutoRelease:s.get()];
     }
 
     @try
@@ -341,6 +341,8 @@ SEL _sent;
     }
     objectPrx__ = arg.get();
     OBJECTPRX->__incRef();
+    // Retain the communicator associated with the proxy (to prevent premature destruction of the wrapper).
+    [ICECommunicator wrapperWithCxxObjectNoAutoRelease:OBJECTPRX->ice_getCommunicator().get()];
     return self;
 }
 
@@ -351,6 +353,8 @@ SEL _sent;
 
 -(void) dealloc
 {
+    // Release the communicator associated with the proxy.
+    [[ICECommunicator getWrapperWithCxxObjectNoAutoRelease:OBJECTPRX->ice_getCommunicator().get()] release];
     OBJECTPRX->__decRef();
     objectPrx__ = 0;
     [super dealloc];
@@ -476,7 +480,7 @@ SEL _sent;
     try
     {
         Ice::OutputStreamPtr os = Ice::createOutputStream(OBJECTPRX->ice_getCommunicator());
-        return [[ICEOutputStream alloc] initWithOutputStream:os];
+        return [ICEOutputStream wrapperWithCxxObjectNoAutoRelease:os.get()];
     }
     catch(const std::exception& ex)
     {
@@ -504,7 +508,7 @@ SEL _sent;
         std::vector<Ice::Byte> inParams;
         if(os)
         {
-            [(ICEOutputStream*)os os__]->finished(inParams);
+            [(ICEOutputStream*)os os]->finished(inParams);
         }
 
         std::vector<Ice::Byte> outParams;
@@ -522,7 +526,7 @@ SEL _sent;
         if(is)
         {
             Ice::InputStreamPtr s = Ice::createInputStream(OBJECTPRX->ice_getCommunicator(), outParams);
-            *is = [[ICEInputStream alloc] initWithInputStream:s];
+            *is = [ICEInputStream wrapperWithCxxObjectNoAutoRelease:s.get()];
         }
         else if(!outParams.empty())
         {
@@ -571,7 +575,7 @@ SEL _sent;
         std::vector<Ice::Byte> inParams;
         if(os)
         {
-            [(ICEOutputStream*)os os__]->finished(inParams);
+            [(ICEOutputStream*)os os]->finished(inParams);
         }
         std::pair<const ::Ice::Byte*, const ::Ice::Byte*> inP(&inParams[0], &inParams[0] + inParams.size());
         
@@ -635,7 +639,7 @@ SEL _sent;
 
 -(id<ICECommunicator>) ice_getCommunicator
 {
-    return [ICECommunicator communicatorWithCommunicator:OBJECTPRX->ice_getCommunicator()];
+    return [ICECommunicator wrapperWithCxxObject:OBJECTPRX->ice_getCommunicator().get()];
 }
 
 -(NSString*) ice_toString
@@ -885,7 +889,7 @@ SEL _sent;
 }
 -(id<ICEObjectPrx>) ice_identity:(ICEIdentity*)identity
 {
-    return [[self class] objectPrxWithObjectPrx__:OBJECTPRX->ice_identity([identity identity__])];
+    return [[self class] objectPrxWithObjectPrx__:OBJECTPRX->ice_identity([identity identity])];
 }
 -(ICEMutableContext*) ice_getContext
 {
@@ -1077,9 +1081,5 @@ SEL _sent;
         rethrowObjCException(ex);
         return NO; // Keep the compiler happy.
     }
-}
--(void*) get__
-{
-    return objectPrx__;
 }
 @end

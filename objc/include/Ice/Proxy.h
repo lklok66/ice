@@ -18,8 +18,8 @@
 // Forward declarations.
 //
 @class ICEObjectPrx;
-@class ICECommunicator;
 @class ICEException;
+@protocol ICECommunicator;
 @protocol ICERouterPrx;
 @protocol ICELocatorPrx;
 @protocol ICEOutputStream;
@@ -104,7 +104,6 @@
 -(void) ice_flushBatchRequests;
 -(BOOL) ice_flushBatchRequests_async:(id)target exception:(SEL)exception;
 -(BOOL) ice_flushBatchRequests_async:(id)target exception:(SEL)exception sent:(SEL)sent;
--(void*) get__;
 @end
 
 @interface ICEObjectPrx : NSObject<ICEObjectPrx>

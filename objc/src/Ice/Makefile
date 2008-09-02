@@ -33,7 +33,8 @@ OBJCPP_OBJS	= Communicator.o \
 		  Properties.o \
 		  Proxy.o \
 		  Stream.o \
-		  Util.o
+		  Util.o \
+		  Wrapper.o 
 
 OBJS		= $(OBJC_OBJS) \
 	          $(OBJCPP_OBJS) \

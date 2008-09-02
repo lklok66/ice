@@ -23,7 +23,7 @@
     return self;
 }
 
--(Ice::Identity) identity__
+-(Ice::Identity) identity
 {
     Ice::Identity ident;
     ident.category = fromNSString(category);

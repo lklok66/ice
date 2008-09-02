@@ -12,5 +12,5 @@
 #include <IceCpp/Initialize.h>
 
 @interface ICEInitializationData (Internal)
--(Ice::InitializationData)initializationData__;
+-(Ice::InitializationData)initializationData;
 @end

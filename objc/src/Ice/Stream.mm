@@ -35,7 +35,7 @@ public:
     {
         @try
         {
-            [_obj write__:(id<ICEOutputStream>)stream->getClosure()];
+            [_obj write__:(id<ICEOutputStream>)[ICEOutputStream getWrapperWithCxxObjectNoAutoRelease:stream.get()]];
         }
         @catch(NSException* ex)
         {
@@ -61,7 +61,7 @@ public:
     {
         @try
         {
-            [_obj read__:(id<ICEInputStream>)stream->getClosure() readTypeId:rid];
+            [_obj read__:[ICEInputStream getWrapperWithCxxObjectNoAutoRelease:stream.get()] readTypeId:rid];
         }
         @catch(NSException* ex)
         {
@@ -96,7 +96,7 @@ public:
     {
         @try
         {
-            [_ex write__:(id<ICEOutputStream>)stream->getClosure()];
+            [_ex write__:[ICEOutputStream getWrapperWithCxxObjectNoAutoRelease:stream.get()]];
         }
         @catch(NSException* ex)
         {
@@ -192,53 +192,44 @@ public:
 }
 
 @implementation ICEInputStream
-
+-(id) initWithCxxObject:(IceUtil::Shared*)cxxObject
+{
+    if(![super initWithCxxObject:cxxObject])
+    {
+        return nil;
+    }
+    is_ = dynamic_cast<Ice::InputStream*>(cxxObject);
+    // Retain the communicator associated with the stream (to prevent premature destruction of the wrapper).
+    [ICECommunicator wrapperWithCxxObjectNoAutoRelease:is_->communicator().get()];
+    return self;
+}
+-(void) dealloc
+{
+    // Release the communicator associated with the stream.
+    [[ICECommunicator getWrapperWithCxxObjectNoAutoRelease:is_->communicator().get()] release];
+    [super dealloc];
+}
 +(void)installObjectFactory:(const Ice::CommunicatorPtr&)communicator
 {
     communicator->addObjectFactory(new IceObjC::ObjectReaderFactory(), "");
 }
--(ICEInputStream*) initWithInputStream:(const Ice::InputStreamPtr&)arg
+-(Ice::InputStream*) is
 {
-    if(![super init])
-    {
-        return nil;
-    }
-    is__ = arg.get();
-    is__->__incRef();
-    is__->setClosure(self);
-    return self;
-}
--(Ice::InputStream*) is__
-{
-    return is__;
-}
--(void) dealloc
-{
-    is__->__decRef();
-    is__ = 0;
-    [super dealloc];
+    return is_;
 }
 
 // @protocol ICEInputStream methods
 
 -(id<ICECommunicator>) communicator
 {
-    try
-    {
-        return [ICECommunicator communicatorWithCommunicator:is__->communicator()];
-    }
-    catch(const std::exception& ex)
-    {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
-    }
+    return [ICECommunicator wrapperWithCxxObject:is_->communicator().get()];
 }
 
 -(void) sliceObjects:(BOOL)b
 {
     try
     {
-        is__->sliceObjects(b);
+        is_->sliceObjects(b);
     }
     catch(const std::exception& ex)
     {
@@ -250,7 +241,7 @@ public:
 {
     try
     {
-        return is__->readBool();
+        return is_->readBool();
     }
     catch(const std::exception& ex)
     {
@@ -266,7 +257,7 @@ public:
         std::pair<const bool*, const bool*> seq;
 	// TODO: size check. This is awkward because, to do that, we need to read the size
 	// from the stream first, but that also happens inside readBoolSeq().
-        is__->readBoolSeq(seq);
+        is_->readBoolSeq(seq);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(BOOL)];
     }
     catch(const std::exception& ex)
@@ -280,7 +271,7 @@ public:
 {
     try
     {
-        return is__->readByte();
+        return is_->readByte();
     }
     catch(const std::exception& ex)
     {
@@ -295,7 +286,7 @@ public:
     {
         std::pair<const Ice::Byte*, const Ice::Byte*> seq;
 	// TODO: size check
-        is__->readByteSeq(seq);
+        is_->readByteSeq(seq);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first)];
     }    
     catch(const std::exception& ex)
@@ -311,7 +302,7 @@ public:
     {
         std::pair<const Ice::Byte*, const Ice::Byte*> seq;
 	// TODO: size check
-        is__->readByteSeq(seq);
+        is_->readByteSeq(seq);
         return [NSData dataWithBytesNoCopy:const_cast<Ice::Byte*>(seq.first) 
                        length:(seq.second - seq.first) freeWhenDone:NO];
     }    
@@ -326,7 +317,7 @@ public:
 {
     try
     {
-        return is__->readShort();
+        return is_->readShort();
     }
     catch(const std::exception& ex)
     {
@@ -341,7 +332,7 @@ public:
     {
         std::pair<const Ice::Short*, const Ice::Short*> seq;
 	// TODO: size check
-        is__->readShortSeq(seq);
+        is_->readShortSeq(seq);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEShort)];
     }
     catch(const std::exception& ex)
@@ -355,7 +346,7 @@ public:
 {
     try
     {
-        return is__->readInt();
+        return is_->readInt();
     }
     catch(const std::exception& ex)
     {
@@ -370,7 +361,7 @@ public:
     {
         std::pair<const Ice::Int*, const Ice::Int*> seq;
 	// TODO: size check
-        is__->readIntSeq(seq);
+        is_->readIntSeq(seq);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEInt)];
     }
     catch(const std::exception& ex)
@@ -384,7 +375,7 @@ public:
 {
     try
     {
-        return is__->readLong();
+        return is_->readLong();
     }
     catch(const std::exception& ex)
     {
@@ -399,7 +390,7 @@ public:
     {
         std::pair<const Ice::Long*, const Ice::Long*> seq;
 	// TODO: size check
-        is__->readLongSeq(seq);
+        is_->readLongSeq(seq);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICELong)];
     }
     catch(const std::exception& ex)
@@ -413,7 +404,7 @@ public:
 {
     try
     {
-        return is__->readFloat();
+        return is_->readFloat();
     }
     catch(const std::exception& ex)
     {
@@ -428,7 +419,7 @@ public:
     {
         std::pair<const Ice::Float*, const Ice::Float*> seq;
 	// TODO: size check
-        is__->readFloatSeq(seq);
+        is_->readFloatSeq(seq);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEFloat)];
     }
     catch(const std::exception& ex)
@@ -442,7 +433,7 @@ public:
 {
     try
     {
-        return is__->readDouble();
+        return is_->readDouble();
     }
     catch(const std::exception& ex)
     {
@@ -457,7 +448,7 @@ public:
     {
         std::pair<const Ice::Double*, const Ice::Double*> seq;
 	// TODO: size check
-        is__->readDoubleSeq(seq);
+        is_->readDoubleSeq(seq);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEDouble)];
     }
     catch(const std::exception& ex)
@@ -471,7 +462,7 @@ public:
 {
     try
     {
-        return toNSMutableString(is__->readString());
+        return toNSMutableString(is_->readString());
     }
     catch(const std::exception& ex)
     {
@@ -485,7 +476,7 @@ public:
     try
     {
 	// TODO: size check
-        return toNSArray(is__->readStringSeq());
+        return toNSArray(is_->readStringSeq());
     }
     catch(const std::exception& ex)
     {
@@ -550,7 +541,7 @@ typedef enum { dummy } Dummy_Enum;
     NSMutableData* ret;
     try
     {
-	int count = is__->readSize();
+	int count = is_->readSize();
 	[self checkFixedSeq:count elemSize:minWireSize];
 	if((ret = [[NSMutableData alloc] initWithLength:(count * ENUM_SIZE)]) == 0)
 	{
@@ -609,7 +600,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        return is__->readSize();
+        return is_->readSize();
     }
     catch(const std::exception& ex)
     {
@@ -622,7 +613,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-	Ice::ObjectPrx p = is__->readProxy();
+	Ice::ObjectPrx p = is_->readProxy();
 	if(!p)
 	{
 	     return nil;
@@ -643,7 +634,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        is__->readObject(new IceObjC::ReadObjectCallbackI(callback));
+        is_->readObject(new IceObjC::ReadObjectCallbackI(callback));
     }
     catch(const std::exception& ex)
     {
@@ -722,7 +713,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        return toNSString(is__->readTypeId());
+        return toNSString(is_->readTypeId());
     }
     catch(const std::exception& ex)
     {
@@ -737,9 +728,9 @@ typedef enum { dummy } Dummy_Enum;
     bool usesClasses = false;
     try
     {
-        usesClasses = is__->readBool();
+        usesClasses = is_->readBool();
 
-        std::string typeId = is__->readString(false);
+        std::string typeId = is_->readString(false);
         for(;;)
         {
             typeId = toObjCSliceId(typeId);
@@ -751,8 +742,8 @@ typedef enum { dummy } Dummy_Enum;
             }
             else
             {
-                is__->skipSlice(); // Slice off what we don't understand.
-                typeId = is__->readString(false); // Read type id for next slice.
+                is_->skipSlice(); // Slice off what we don't understand.
+                typeId = is_->readString(false); // Read type id for next slice.
             }
         }
 
@@ -809,7 +800,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        is__->startSlice();
+        is_->startSlice();
     }
     catch(const std::exception& ex)
     {
@@ -821,7 +812,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        is__->endSlice();
+        is_->endSlice();
     }
     catch(const std::exception& ex)
     {
@@ -833,7 +824,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        is__->skipSlice();
+        is_->skipSlice();
     }
     catch(const std::exception& ex)
     {
@@ -845,7 +836,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        is__->startEncapsulation();
+        is_->startEncapsulation();
     }
     catch(const std::exception& ex)
     {
@@ -857,7 +848,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        is__->endEncapsulation();
+        is_->endEncapsulation();
     }
     catch(const std::exception& ex)
     {
@@ -869,7 +860,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        is__->skipEncapsulation();
+        is_->skipEncapsulation();
     }
     catch(const std::exception& ex)
     {
@@ -881,7 +872,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        is__->readPendingObjects();
+        is_->readPendingObjects();
     }
     catch(const std::exception& ex)
     {
@@ -893,50 +884,40 @@ typedef enum { dummy } Dummy_Enum;
 
 @implementation ICEOutputStream
 
--(ICEOutputStream*) initWithOutputStream:(const Ice::OutputStreamPtr&)arg
+-(id) initWithCxxObject:(IceUtil::Shared*)cxxObject
 {
-    if(![super init])
+    if(![super initWithCxxObject:cxxObject])
     {
         return nil;
     }
-    os__ = arg.get();
-    os__->__incRef();
-    os__->setClosure(self);
+    os_ = dynamic_cast<Ice::OutputStream*>(cxxObject);
+    // Retain the communicator associated with the stream (to prevent premature destruction of the wrapper).
+    [ICECommunicator wrapperWithCxxObjectNoAutoRelease:os_->communicator().get()];
     return self;
 }
-
--(Ice::OutputStream*) os__
-{
-    return os__;
-}
-
 -(void) dealloc
 {
-    os__->__decRef();
-    os__ = 0;
+    // Release the communicator associated with the stream.
+    [[ICECommunicator getWrapperWithCxxObjectNoAutoRelease:os_->communicator().get()] release];
     [super dealloc];
+}
+-(Ice::OutputStream*) os
+{
+    return os_;
 }
 
 // @protocol ICEOutputStream methods
 
 -(id<ICECommunicator>) communicator
 {
-    try
-    {
-        return [ICECommunicator communicatorWithCommunicator:os__->communicator()];
-    }
-    catch(const std::exception& ex)
-    {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
-    }
+    return [ICECommunicator wrapperWithCxxObject:os_->communicator().get()];
 }
 
 -(void)writeBool:(BOOL)v
 {
     try
     {
-        os__->writeBool(v);
+        os_->writeBool(v);
     }
     catch(const std::exception& ex)
     {
@@ -948,8 +929,8 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        v == nil ? os__->writeSize(0)
-	         : os__->writeBoolSeq((bool*)[v bytes], (bool*)[v bytes] + [v length] / sizeof(BOOL));
+        v == nil ? os_->writeSize(0)
+	         : os_->writeBoolSeq((bool*)[v bytes], (bool*)[v bytes] + [v length] / sizeof(BOOL));
     }
     catch(const std::exception& ex)
     {
@@ -961,7 +942,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        os__->writeByte(v);
+        os_->writeByte(v);
     }
     catch(const std::exception& ex)
     {
@@ -973,8 +954,8 @@ typedef enum { dummy } Dummy_Enum;
 { 
     try
     {
-        v == nil ? os__->writeSize(0)
-                 : os__->writeByteSeq((ICEByte*)[v bytes], (ICEByte*)[v bytes] + [v length]);
+        v == nil ? os_->writeSize(0)
+                 : os_->writeByteSeq((ICEByte*)[v bytes], (ICEByte*)[v bytes] + [v length]);
     }
     catch(const std::exception& ex)
     {
@@ -986,7 +967,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        os__->writeShort(v);
+        os_->writeShort(v);
     }
     catch(const std::exception& ex)
     {
@@ -998,8 +979,8 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        v == nil ? os__->writeSize(0)
-                 : os__->writeShortSeq((ICEShort*)[v bytes], (ICEShort*)[v bytes] + [v length] / sizeof(ICEShort));
+        v == nil ? os_->writeSize(0)
+                 : os_->writeShortSeq((ICEShort*)[v bytes], (ICEShort*)[v bytes] + [v length] / sizeof(ICEShort));
     }
     catch(const std::exception& ex)
     {
@@ -1012,7 +993,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        os__->writeInt(v);
+        os_->writeInt(v);
     }
     catch(const std::exception& ex)
     {
@@ -1024,8 +1005,8 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        v == nil ? os__->writeSize(0)
-                 : os__->writeIntSeq((ICEInt*)[v bytes], (ICEInt*)[v bytes] + [v length] / sizeof(ICEInt));
+        v == nil ? os_->writeSize(0)
+                 : os_->writeIntSeq((ICEInt*)[v bytes], (ICEInt*)[v bytes] + [v length] / sizeof(ICEInt));
     }
     catch(const std::exception& ex)
     {
@@ -1037,7 +1018,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        os__->writeLong(v);
+        os_->writeLong(v);
     }
     catch(const std::exception& ex)
     {
@@ -1049,8 +1030,8 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        v == nil ? os__->writeSize(0)
-                 : os__->writeLongSeq((ICELong*)[v bytes], (ICELong*)[v bytes] + [v length] / sizeof(ICELong));
+        v == nil ? os_->writeSize(0)
+                 : os_->writeLongSeq((ICELong*)[v bytes], (ICELong*)[v bytes] + [v length] / sizeof(ICELong));
     }
     catch(const std::exception& ex)
     {
@@ -1063,7 +1044,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        os__->writeFloat(v);
+        os_->writeFloat(v);
     }
     catch(const std::exception& ex)
     {
@@ -1075,8 +1056,8 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        v == nil ? os__->writeSize(0)
-                 : os__->writeFloatSeq((ICEFloat*)[v bytes], (ICEFloat*)[v bytes] + [v length] / sizeof(ICEFloat));
+        v == nil ? os_->writeSize(0)
+                 : os_->writeFloatSeq((ICEFloat*)[v bytes], (ICEFloat*)[v bytes] + [v length] / sizeof(ICEFloat));
     }
     catch(const std::exception& ex)
     {
@@ -1089,7 +1070,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        os__->writeDouble(v);
+        os_->writeDouble(v);
     }
     catch(const std::exception& ex)
     {
@@ -1101,8 +1082,8 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        v == nil ? os__->writeSize(0)
-                 : os__->writeDoubleSeq((ICEDouble*)[v bytes],
+        v == nil ? os_->writeSize(0)
+                 : os_->writeDoubleSeq((ICEDouble*)[v bytes],
 		                           (ICEDouble*)[v bytes] + [v length] / sizeof(ICEDouble));
     }
     catch(const std::exception& ex)
@@ -1116,7 +1097,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-	 os__->writeString(fromNSString(v));
+	 os_->writeString(fromNSString(v));
     }
     catch(const std::exception& ex)
     {
@@ -1129,7 +1110,7 @@ typedef enum { dummy } Dummy_Enum;
     try
     {
 	std::vector<std::string> s;
-	os__->writeStringSeq(fromNSArray(v, s));
+	os_->writeStringSeq(fromNSArray(v, s));
     }
     catch(const std::exception& ex)
     {
@@ -1180,15 +1161,15 @@ typedef enum { dummy } Dummy_Enum;
     {
         if(limit <= 0x7f)
 	{
-	    os__->writeByte(v);
+	    os_->writeByte(v);
 	}
 	else if(limit <= 0x7fff)
 	{
-	    os__->writeShort(v);
+	    os_->writeShort(v);
 	}
 	else
 	{
-	    os__->writeInt(v);
+	    os_->writeInt(v);
 	}
     }
     catch(const std::exception& ex)
@@ -1263,7 +1244,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        os__->writeSize(v);
+        os_->writeSize(v);
     }
     catch(const std::exception& ex)
     {
@@ -1276,7 +1257,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        os__->writeProxy((IceProxy::Ice::Object*)[v get__]);
+        os_->writeProxy([(ICEObjectPrx*)v objectPrx__]);
     }
     catch(const std::exception& ex)
     {
@@ -1288,7 +1269,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        os__->writeObject(new IceObjC::ObjectWriter(v));
+        os_->writeObject(new IceObjC::ObjectWriter(v));
     }
     catch(const std::exception& ex)
     {
@@ -1310,7 +1291,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        os__->writeTypeId(v);
+        os_->writeTypeId(v);
     }
     catch(const std::exception& ex)
     {
@@ -1322,7 +1303,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        os__->writeException(IceObjC::UserExceptionWriter(v, os__->communicator()));
+        os_->writeException(IceObjC::UserExceptionWriter(v, os_->communicator()));
     }
     catch(const std::exception& ex)
     {
@@ -1334,7 +1315,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        os__->startSlice();
+        os_->startSlice();
     }
     catch(const std::exception& ex)
     {
@@ -1346,7 +1327,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        os__->endSlice();
+        os_->endSlice();
     }
     catch(const std::exception& ex)
     {
@@ -1358,7 +1339,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        os__->startEncapsulation();
+        os_->startEncapsulation();
     }
     catch(const std::exception& ex)
     {
@@ -1370,7 +1351,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        os__->endEncapsulation();
+        os_->endEncapsulation();
     }
     catch(const std::exception& ex)
     {
@@ -1382,7 +1363,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        os__->writePendingObjects();
+        os_->writePendingObjects();
     }
     catch(const std::exception& ex)
     {
@@ -1395,7 +1376,7 @@ typedef enum { dummy } Dummy_Enum;
     try
     {
         std::vector<Ice::Byte> buf;
-        os__->finished(buf);
+        os_->finished(buf);
         return [NSData dataWithBytes:&buf[0] length:buf.size()];
     }
     catch(const std::exception& ex)

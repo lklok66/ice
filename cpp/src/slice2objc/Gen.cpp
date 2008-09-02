@@ -1778,7 +1778,12 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
 	{
 	    _M << nl << "copy_->" << name << " = " << name << ";";
 	}
-	else
+	else if(isProtocolType((*q)->type()))
+        {
+            // Cast to NSObject to prevent warning (copy isn't part of the NSObject protocol).
+	    _M << nl << "copy_->" << name << " = [(NSObject*)" << name << " copy];";
+        }
+        else
 	{
 	    _M << nl << "copy_->" << name << " = [" << name << " copy];";
 	}
@@ -1901,6 +1906,11 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
 	{
 	    _M << nl << "copy_->" << name << " = " << name << ";";
 	}
+	else if(isProtocolType((*q)->type()))
+        {
+            // Cast to NSObject to prevent warning (copy isn't part of the NSObject protocol).
+	    _M << nl << "copy_->" << name << " = [(NSObject*)" << name << " copy];";
+        }
 	else
 	{
 	    _M << nl << "copy_->" << name << " = [" << name << " copy];";

@@ -282,6 +282,39 @@ Slice::ObjCGenerator::isValueType(const TypePtr& type)
 }
 
 bool
+Slice::ObjCGenerator::isProtocolType(const TypePtr& type)
+{
+    if(!type)
+    {
+        return true;
+    }
+    BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
+    if(builtin)
+    {
+        switch(builtin->kind())
+        {
+            case Builtin::KindObjectProxy:
+            case Builtin::KindObject:
+            case Builtin::KindLocalObject:
+            {
+                return true;
+                break;
+            }
+            default:
+            {
+                return false;
+                break;
+            }
+        }
+    }
+    if(ProxyPtr::dynamicCast(type) || ClassDefPtr::dynamicCast(type))
+    {
+        return true;
+    }
+    return false;
+}
+
+bool
 Slice::ObjCGenerator::isString(const TypePtr& type)
 {
     if(!type)
@@ -461,7 +494,7 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
     {
         if(marshal)
         {
-	    out << nl << "[" << stream << " writeProxy:" << param << "];";
+	    out << nl << "[" << stream << " writeProxy:(id<ICEObjectPrx>)" << param << "];";
 	}
 	else
 	{

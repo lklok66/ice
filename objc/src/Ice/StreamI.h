@@ -8,22 +8,21 @@
 // **********************************************************************
 
 #import <Ice/Stream.h>
+#import <Ice/Wrapper.h>
 
 #include <IceCpp/Stream.h>
 
-@interface ICEInputStream : NSObject<ICEInputStream>
+@interface ICEInputStream : ICEInternalWrapper<ICEInputStream>
 {
-    Ice::InputStream* is__;
+    Ice::InputStream* is_;
 }
 +(void)installObjectFactory:(const Ice::CommunicatorPtr&)communicator;
--(ICEInputStream*) initWithInputStream:(const Ice::InputStreamPtr&)is;
--(Ice::InputStream*) is__;
+-(Ice::InputStream*) is;
 @end
 
-@interface ICEOutputStream : NSObject<ICEOutputStream>
+@interface ICEOutputStream : ICEInternalWrapper<ICEOutputStream>
 {
-    Ice::OutputStream* os__;
+    Ice::OutputStream* os_;
 }
--(ICEOutputStream*) initWithOutputStream:(const Ice::OutputStreamPtr&)os;
--(Ice::OutputStream*) os__;
+-(Ice::OutputStream*) os;
 @end

@@ -32,7 +32,6 @@ typedef IceUtil::Handle<ObjectWrapper> ObjectWrapperPtr;
 };
 
 @interface ICEObject (Internal)
--(ICEObject*) initWithObject__:(const Ice::ObjectPtr&)arg;
 -(Ice::Object*) object__;
 +(ICEObject*) objectWithObject__:(const Ice::ObjectPtr&)arg;
 @end

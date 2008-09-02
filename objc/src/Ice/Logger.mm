@@ -10,40 +10,109 @@
 #import <Ice/LoggerI.h>
 #import <Ice/Util.h>
 
-@implementation ICELogger
-
--(ICELogger*) initWithLogger:(const Ice::LoggerPtr&)arg
+namespace
 {
-    if(![super init])
+
+class LoggerI : public Ice::Logger
+{
+public:
+
+LoggerI(id<ICELogger> logger) : _logger(logger)
+{
+    [_logger retain];
+}
+
+virtual ~LoggerI()
+{
+    [_logger release];
+}
+
+virtual void 
+print(const std::string& msg)
+{
+    NSString* s = toNSString(msg);
+    [_logger print:s];
+    [s release];
+}
+
+virtual void 
+trace(const std::string& category, const std::string& msg)
+{
+    NSString* s1 = toNSString(category);
+    NSString* s2 = toNSString(msg);
+    [_logger trace:s1 message:s2];
+    [s1 release];
+    [s2 release];
+}
+
+virtual void 
+warning(const std::string& msg)
+{
+    NSString* s = toNSString(msg);
+    [_logger warning:s];
+    [s release];
+}
+
+virtual void 
+error(const std::string& msg)
+{
+    NSString* s = toNSString(msg);
+    [_logger error:s];
+    [s release];
+}
+
+id<ICELogger>
+getLogger()
+{
+    return _logger;
+}
+
+private:
+
+id<ICELogger> _logger;
+
+};
+typedef IceUtil::Handle<LoggerI> LoggerIPtr;
+
+}
+
+@implementation ICELogger
+-(id) initWithCxxObject:(IceUtil::Shared*)cxxObject
+{
+    if(![super initWithCxxObject:cxxObject])
     {
         return nil;
     }
-    logger__ = arg.get();
-    logger__->__incRef();
+    logger_ = dynamic_cast<Ice::Logger*>(cxxObject);
     return self;
 }
-
--(Ice::Logger*) logger__
+-(Ice::Logger*) logger
 {
-    return (Ice::Logger*)logger__;
+    return logger_;
 }
-
--(void) dealloc
++(ICELogger*) loggerWithLogger:(id<ICELogger>)logger
 {
-    logger__->__decRef();
-    logger__ = 0;
-    [super dealloc];
-}
-
-+(ICELogger*) loggerWithLogger:(const Ice::LoggerPtr&)arg
-{
-    if(!arg)
+    if(logger == 0)
     {
         return nil;
+    }
+    
+    @synchronized([ICEInternalWrapper class])
+    {
+        return [[self alloc] initWithCxxObject:(new LoggerI(logger))];
+    }
+    return nil; // Keep the compiler happy.
+}
++(id) wrapperWithCxxObjectNoAutoRelease:(IceUtil::Shared*)cxxObject
+{
+    LoggerI* impl = dynamic_cast<LoggerI*>(cxxObject);
+    if(impl)
+    {
+        return [impl->getLogger() retain];
     }
     else
     {
-        return [[[ICELogger alloc] initWithLogger:arg] autorelease];
+        return [super wrapperWithCxxObjectNoAutoRelease:cxxObject];
     }
 }
 
@@ -55,7 +124,7 @@
 {
     try
     {
-        logger__->print(fromNSString(message));
+        logger_->print(fromNSString(message));
     }
     catch(const std::exception& ex)
     {
@@ -66,7 +135,7 @@
 {
     try
     {
-        logger__->trace(fromNSString(category), fromNSString(message));
+        logger_->trace(fromNSString(category), fromNSString(message));
     }
     catch(const std::exception& ex)
     {
@@ -77,7 +146,7 @@
 {
     try
     {
-        logger__->warning(fromNSString(message));
+        logger_->warning(fromNSString(message));
     }
     catch(const std::exception& ex)
     {
@@ -88,7 +157,7 @@
 {
     try
     {
-        logger__->error(fromNSString(message));
+        logger_->error(fromNSString(message));
     }
     catch(const std::exception& ex)
     {

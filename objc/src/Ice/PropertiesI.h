@@ -8,15 +8,14 @@
 // **********************************************************************
 
 #import <Ice/Properties.h>
+#import <Ice/Wrapper.h>
 
 #include <IceCpp/Properties.h>
 
-@interface ICEProperties : NSObject<ICEProperties>
+@interface ICEProperties : ICEInternalWrapper<ICEProperties>
 {
-    Ice::Properties* properties__;
+    Ice::Properties* properties_;
 }
--(ICEProperties*)initWithProperties:(const Ice::PropertiesPtr&)arg;
--(Ice::Properties*)properties__;
-+(ICEProperties*)propertiesWithProperties:(const Ice::PropertiesPtr&)arg;
+-(Ice::Properties*)properties;
 @end
 

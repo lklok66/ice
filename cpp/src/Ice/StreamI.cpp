@@ -327,18 +327,6 @@ Ice::InputStreamI::readPendingObjects()
     _is->readPendingObjects();
 }
 
-void
-Ice::InputStreamI::setClosure(void* closure)
-{
-    _closure = closure;
-}
-
-void* 
-Ice::InputStreamI::getClosure()
-{
-    return _closure;
-}
-
 //
 // OutputStreamI
 //
@@ -725,17 +713,5 @@ bool
 Ice::UserExceptionWriter::__usesClasses() const
 {
     return usesClasses();
-}
-
-void
-Ice::OutputStreamI::setClosure(void* closure)
-{
-    _closure = closure;
-}
-
-void* 
-Ice::OutputStreamI::getClosure()
-{
-    return _closure;
 }
 

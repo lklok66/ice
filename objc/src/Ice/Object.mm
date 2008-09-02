@@ -97,11 +97,11 @@ IceObjC::ObjectI::ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& cb
     ICEOutputStream* os = nil;
     {
         Ice::InputStreamPtr s = Ice::createInputStream(current.adapter->getCommunicator(), inParams);
-        is = [[ICEInputStream alloc] initWithInputStream:s];
+        is = [ICEInputStream wrapperWithCxxObjectNoAutoRelease:s.get()];
     }
     {
         Ice::OutputStreamPtr s = Ice::createOutputStream(current.adapter->getCommunicator());
-        os = [[ICEOutputStream alloc] initWithOutputStream:s];
+        os = [ICEOutputStream wrapperWithCxxObjectNoAutoRelease:s.get()];
     }
 
     ICECurrent* c = [[ICECurrent alloc] initWithCurrent:current];
@@ -124,7 +124,7 @@ IceObjC::ObjectI::ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& cb
     [is release];
     
     std::vector<Ice::Byte> outParams;
-    [os os__]->finished(outParams);
+    [os os]->finished(outParams);
     [os release];
 
     cb->ice_response(ok, std::make_pair(&outParams[0], &outParams[0] + outParams.size()));

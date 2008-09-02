@@ -130,6 +130,10 @@ else
     SLICE2OBJC = $(ice_dir)/$(binsubdir)/slice2objc
 endif
 
+ifeq ($(STATICLIBS),yes)
+    ICEOBJCLIB = $(top_srcdir)/lib/libIceObjC.a
+endif
+
 EVERYTHING		= all depend clean install 
 
 .SUFFIXES:

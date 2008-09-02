@@ -51,6 +51,7 @@ protected:
     static std::string typeToString(const TypePtr&);
     static std::string outTypeToString(const TypePtr&);
     static bool isValueType(const TypePtr&);
+    static bool isProtocolType(const TypePtr&);
     static bool isString(const TypePtr&);
     static bool mapsToPointerType(const TypePtr&);
     static std::string getBuiltinName(const BuiltinPtr&);

@@ -72,7 +72,7 @@ rethrowCxxException(NSException* ex)
     }
     @catch(ICELocalException* ex)
     {
-        [ex rethrowCxx__];
+        [ex rethrowCxx];
     }
     @catch(NSException* ex)
     {

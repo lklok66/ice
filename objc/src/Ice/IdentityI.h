@@ -13,6 +13,6 @@
 
 @interface ICEIdentity (Internal)
 -(ICEIdentity*)initWithIdentity:(const Ice::Identity&)arg;
--(Ice::Identity)identity__;
+-(Ice::Identity)identity;
 +(ICEIdentity*)identityWithIdentity:(const Ice::Identity&)arg;
 @end

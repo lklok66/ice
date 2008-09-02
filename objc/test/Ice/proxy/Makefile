@@ -33,11 +33,11 @@ include $(top_srcdir)/config/Make.rules
 CPPFLAGS	:= -I. -I../../include $(CPPFLAGS)
 LIBS		:= -lTestCommon $(LIBS)
 
-$(CLIENT): $(COBJS)
+$(CLIENT): $(ICEOBJCLIB) $(COBJS)
 	rm -f $@
 	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(COBJS) $(LIBS)
 
-$(SERVER): $(SOBJS)
+$(SERVER): $(ICEOBJCLIB) $(SOBJS)
 	rm -f $@
 	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(SOBJS) $(LIBS)
 

@@ -30,7 +30,7 @@ include $(top_srcdir)/config/Make.rules
 
 CPPFLAGS	:= -I. $(CPPFLAGS)
 
-$(CLIENT): $(OBJS) $(COBJS) $(CPP_OBJS)
+$(CLIENT): $(ICEOBJCLIB) $(OBJS) $(COBJS) $(CPP_OBJS)
 	rm -f $@
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(COBJS) $(CPP_OBJS) $(LIBS)
 

@@ -8,14 +8,14 @@
 // **********************************************************************
 
 #import <Ice/Logger.h>
+#import <Ice/Wrapper.h>
 
 #include <IceCpp/Logger.h>
 
-@interface ICELogger : NSObject<ICELogger>
+@interface ICELogger : ICEInternalWrapper<ICELogger>
 {
-    Ice::Logger* logger__;
+    Ice::Logger* logger_;
 }
--(ICELogger*)initWithLogger:(const Ice::LoggerPtr&)arg;
--(Ice::Logger*)logger__;
-+(ICELogger*)loggerWithLogger:(const Ice::LoggerPtr&)arg;
+-(Ice::Logger*)logger;
++(ICELogger*)loggerWithLogger:(id<ICELogger>)arg;
 @end

@@ -7,12 +7,11 @@
 //
 // **********************************************************************
 
-#import <Ice/Exception.h>
+#import <Ice/Config.h>
+#import <Foundation/NSNull.h>
 
-#include <IceCpp/Exception.h>
+BOOL ICEisNil(id p)
+{
+    return p == nil || p == [NSNull null];
+}
 
-@interface ICELocalException (Internal)
--(id) initWithLocalException:(const Ice::LocalException&)ex;
--(void) rethrowCxx;
-+(id) localExceptionWithLocalException:(const Ice::LocalException&)ex;
-@end

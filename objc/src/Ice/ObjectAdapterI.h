@@ -8,15 +8,15 @@
 // **********************************************************************
 
 #import <Ice/ObjectAdapter.h>
+#import <Ice/Wrapper.h>
 
 #include <IceCpp/ObjectAdapter.h>
 
-@interface ICEObjectAdapter : NSObject<ICEObjectAdapter>
+@class ICECommunicator;
+
+@interface ICEObjectAdapter : ICEInternalWrapper<ICEObjectAdapter>
 {
-    Ice::ObjectAdapter* objectAdapter__;
+    ICECommunicator* communicator_;
 }
--(ICEObjectAdapter*)initWithObjectAdapter:(const Ice::ObjectAdapterPtr&)arg;
--(Ice::ObjectAdapter*)objectAdapter__;
-+(ICEObjectAdapter*)objectAdapterWithObjectAdapter:(const Ice::ObjectAdapterPtr&)arg;
 @end
 

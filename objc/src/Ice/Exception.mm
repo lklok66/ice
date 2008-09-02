@@ -14,6 +14,10 @@
 
 #include <IceCpp/LocalException.h>
 
+//
+// TODO: add dealloc.
+//
+
 @implementation ICEException
 -(id)init
 {
@@ -37,9 +41,9 @@
     line = ex.ice_line();
     return self;
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
-    NSAssert(false, @"rethrowCxx__ must be overriden");
+    NSAssert(false, @"rethrowCxx must be overriden");
 }
 +(id)localExceptionWithLocalException:(const Ice::LocalException&)ex
 {
@@ -66,7 +70,7 @@
 {
     try
     {
-        [self rethrowCxx__];
+        [self rethrowCxx];
         return @""; // Keep the compiler happy.
     }
     catch(const Ice::LocalException& ex)

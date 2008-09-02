@@ -13,6 +13,10 @@
 
 #include <IceCpp/LocalException.h>
 
+//
+// TODO: add dealloc?
+//
+
 @implementation ICEInitializationException
 -(id) init:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__
 {
@@ -31,7 +35,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::InitializationException(file, line, fromNSString(reason_));
 }
@@ -60,7 +64,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::PluginInitializationException(file, line, fromNSString(reason_));
 }
@@ -76,7 +80,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::CollocationOptimizationException(file, line);
 }
@@ -105,7 +109,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::AlreadyRegisteredException(file, line, fromNSString(kindOfObject), fromNSString(id_));
 }
@@ -136,7 +140,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::NotRegisteredException(file, line, fromNSString(kindOfObject), fromNSString(id_));
 }
@@ -166,7 +170,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::TwowayOnlyException(file, line, fromNSString(operation));
 }
@@ -182,7 +186,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::CloneNotImplementedException(file, line);
 }
@@ -210,7 +214,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::UnknownException(file, line, fromNSString(unknown));
 }
@@ -230,7 +234,7 @@
 {
     return [[self alloc] init:file_ line:line_ unknown:unknown_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::UnknownLocalException(file, line, fromNSString(unknown));
 }
@@ -249,7 +253,7 @@
 {
     return [[self alloc] init:file_ line:line_ unknown:unknown_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::UnknownUserException(file, line, fromNSString(unknown));
 }
@@ -264,7 +268,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::VersionMismatchException(file, line);
 }
@@ -279,7 +283,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::CommunicatorDestroyedException(file, line);
 }
@@ -307,7 +311,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::ObjectAdapterDeactivatedException(file, line, fromNSString(name_));
 }
@@ -336,7 +340,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::ObjectAdapterIdInUseException(file, line, fromNSString(id_));
 }
@@ -365,7 +369,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::NoEndpointException(file, line, fromNSString(proxy));
 }
@@ -394,7 +398,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::EndpointParseException(file, line, fromNSString(str));
 }
@@ -423,7 +427,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::EndpointSelectionTypeParseException(file, line, fromNSString(str));
 }
@@ -452,7 +456,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::IdentityParseException(file, line, fromNSString(str));
 }
@@ -481,7 +485,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::ProxyParseException(file, line, fromNSString(str));
 }
@@ -510,9 +514,9 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
-    throw Ice::IllegalIdentityException(file, line, [id_ identity__]);
+    throw Ice::IllegalIdentityException(file, line, [id_ identity]);
 }
 -(NSString*)ice_name
 {
@@ -541,9 +545,9 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
-    throw Ice::RequestFailedException(file, line, [id_ identity__], fromNSString(facet), fromNSString(operation));
+    throw Ice::RequestFailedException(file, line, [id_ identity], fromNSString(facet), fromNSString(operation));
 }
 -(NSString*)ice_name
 {
@@ -563,9 +567,9 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
-    throw Ice::ObjectNotExistException(file, line, [id_ identity__], fromNSString(facet), fromNSString(operation));
+    throw Ice::ObjectNotExistException(file, line, [id_ identity], fromNSString(facet), fromNSString(operation));
 }
 -(NSString*)ice_name
 {
@@ -582,9 +586,9 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
-    throw Ice::FacetNotExistException(file, line, [id_ identity__], fromNSString(facet), fromNSString(operation));
+    throw Ice::FacetNotExistException(file, line, [id_ identity], fromNSString(facet), fromNSString(operation));
 }
 -(NSString*)ice_name
 {
@@ -601,9 +605,9 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
-    throw Ice::OperationNotExistException(file, line, [id_ identity__], fromNSString(facet), fromNSString(operation));
+    throw Ice::OperationNotExistException(file, line, [id_ identity], fromNSString(facet), fromNSString(operation));
 }
 -(NSString*)ice_name
 {
@@ -629,7 +633,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::SyscallException(file, line, error);
 }
@@ -649,7 +653,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::SocketException(file, line, error);
 }
@@ -677,7 +681,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::FileException(file, line, error, fromNSString(path));
 }
@@ -697,7 +701,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::ConnectFailedException(file, line, error);
 }
@@ -716,7 +720,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::ConnectionRefusedException(file, line, error);
 }
@@ -735,7 +739,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::ConnectionLostException(file, line, error);
 }
@@ -764,7 +768,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::DNSException(file, line, error, fromNSString(host));
 }
@@ -781,7 +785,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::TimeoutException(file, line);
 }
@@ -796,7 +800,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::ConnectTimeoutException(file, line);
 }
@@ -811,7 +815,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::CloseTimeoutException(file, line);
 }
@@ -826,7 +830,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::ConnectionTimeoutException(file, line);
 }
@@ -854,7 +858,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::ProtocolException(file, line, fromNSString(reason_));
 }
@@ -883,7 +887,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     Ice::ByteSeq s;
     throw Ice::BadMagicException(file, line, fromNSString(reason_), fromNSArray(badMagic, s));
@@ -916,7 +920,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::UnsupportedProtocolException(file, line, fromNSString(reason_), badMajor, badMinor, major, minor);
 }
@@ -951,7 +955,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::UnsupportedEncodingException(file, line, fromNSString(reason_), badMajor, badMinor, major, minor);
 }
@@ -974,7 +978,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::UnknownMessageException(file, line, fromNSString(reason_));
 }
@@ -993,7 +997,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::ConnectionNotValidatedException(file, line, fromNSString(reason_));
 }
@@ -1012,7 +1016,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::UnknownRequestIdException(file, line, fromNSString(reason_));
 }
@@ -1031,7 +1035,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::UnknownReplyStatusException(file, line, fromNSString(reason_));
 }
@@ -1050,7 +1054,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::CloseConnectionException(file, line, fromNSString(reason_));
 }
@@ -1069,7 +1073,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::ForcedCloseConnectionException(file, line, fromNSString(reason_));
 }
@@ -1088,7 +1092,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::IllegalMessageSizeException(file, line, fromNSString(reason_));
 }
@@ -1107,7 +1111,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::CompressionException(file, line, fromNSString(reason_));
 }
@@ -1126,7 +1130,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::DatagramLimitException(file, line, fromNSString(reason_));
 }
@@ -1145,7 +1149,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::MarshalException(file, line, fromNSString(reason_));
 }
@@ -1164,7 +1168,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::ProxyUnmarshalException(file, line, fromNSString(reason_));
 }
@@ -1183,7 +1187,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::UnmarshalOutOfBoundsException(file, line, fromNSString(reason_));
 }
@@ -1202,7 +1206,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::IllegalIndirectionException(file, line, fromNSString(reason_));
 }
@@ -1230,7 +1234,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::NoObjectFactoryException(file, line, fromNSString(reason_), fromNSString(type));
 }
@@ -1260,7 +1264,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::UnexpectedObjectException(file, line, fromNSString(reason_), fromNSString(type), fromNSString(expectedType));
 }
@@ -1281,7 +1285,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::MemoryLimitException(file, line, fromNSString(reason_));
 }
@@ -1300,7 +1304,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::StringConversionException(file, line, fromNSString(reason_));
 }
@@ -1319,7 +1323,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::EncapsulationException(file, line, fromNSString(reason_));
 }
@@ -1338,7 +1342,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::NegativeSizeException(file, line, fromNSString(reason_));
 }
@@ -1366,7 +1370,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::FeatureNotSupportedException(file, line, fromNSString(unsupportedFeature));
 }
@@ -1395,7 +1399,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::SecurityException(file, line, fromNSString(reason_));
 }
@@ -1411,7 +1415,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::FixedProxyException(file, line);
 }
@@ -1426,7 +1430,7 @@
 {
     return [[self alloc] init:file_ line:line_];
 }
--(void)rethrowCxx__
+-(void)rethrowCxx
 {
     throw Ice::ResponseSentException(file, line);
 }

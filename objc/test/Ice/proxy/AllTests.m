@@ -327,8 +327,7 @@ allTests(id<ICECommunicator> communicator)
     tprintf("ok\n");
 
     tprintf("testing ice_getCommunicator... ");
-    // TODO
-    //test([base ice_getCommunicator] == communicator);
+    test([base ice_getCommunicator] == communicator);
     tprintf("ok\n");
 
     tprintf("testing proxy methods... ");
