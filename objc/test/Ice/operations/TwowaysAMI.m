@@ -32,6 +32,7 @@
         return nil;
     }
     cond = [[NSCondition alloc] init];
+    return self;
 }
 -(void) dealloc
 {
@@ -841,9 +842,6 @@ twowaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 	[sssi2 addObject:tmpss];
 	tmpss = [TestMutableStringSS array];
 	[sssi2 addObject:tmpss];
-
-	TestMutableStringSSS *ssso;
-	TestStringSSS *rsso;
 
         Callback* cb = [[Callback alloc] init];
         [p opStringSSS_async:cb response:@selector(opStringSSSResponse:p3:) exception:@selector(opStringSSSException:) p1:sssi1 p2:sssi2];

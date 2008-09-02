@@ -907,13 +907,18 @@ Slice::ObjCVisitor::getArgsAsyncCB(const OperationPtr& op)
     }
 
     ParamDeclList paramList = op->parameters();
+    bool first = !ret;
     for(ParamDeclList::const_iterator q = paramList.begin(); q != paramList.end(); ++q)
     {
         if((*q)->isOutParam())
         {
             string name = fixId((*q)->name());
             
-            if(q != paramList.begin() || ret)
+            if(first)
+            {
+                first = false;
+            }
+            else
             {
                 result += ", ";
             }
@@ -3165,6 +3170,15 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
     }
     _M << nl << "id<ICEOutputStream> os_ = [prx_ createOutputStream__];";
     _M << nl << "id<ICEInputStream> is_ = nil;";
+    if(returnType)
+    {
+        _M << nl << retString << " ";
+        if(retIsPointer)
+        {
+            _M << "*";
+        }
+        _M << "ret_;";
+    }
     _M << nl << "@try";
     _M << sb;
     for(TypeStringList::const_iterator ip = inParams.begin(); ip != inParams.end(); ++ip)
@@ -3184,14 +3198,8 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
 	{
 	    writeMarshalUnmarshalCode(_M, op->first, "*" + fixId(op->second), false, false, true, "");
 	}
-	if(returnType)
-	{
-	   _M << nl << retString << " ";
-	   if(retIsPointer)
-	   {
-	       _M << "*";
-	   }
-	   _M << "ret_;";
+        if(returnType)
+        {
 	   writeMarshalUnmarshalCode(_M, returnType, "ret_", false, false, true, "");
 	}
 	if(p->returnsClasses())
@@ -3204,10 +3212,6 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
     else
     {
         // _M << nl << "[is_ skipEncapsulation];";
-    }
-    if(returnType)
-    {
-        _M << nl << "return ret_;";
     }
 
     _M << eb;
@@ -3239,6 +3243,10 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
     _M << nl << "[os_ release];";
     _M << nl << "[is_ release];";
     _M << eb;
+    if(returnType)
+    {
+        _M << nl << "return ret_;";
+    }
     _M << eb;
 
     if(cl->hasMetaData("ami") || p->hasMetaData("ami"))
@@ -3276,6 +3284,7 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
         _M << sb;
         _M << nl << "[os_ release];";
         _M << eb;
+        _M << nl << "return FALSE; // Keep the compiler happy.";
         _M << eb;
 
         params = getParamsAsyncCB(p);

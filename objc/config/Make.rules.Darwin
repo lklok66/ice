@@ -30,9 +30,10 @@ ifeq ($(COMPILE_FOR_IPHONE),yes)
     CFLAGS              = -isysroot $(SDK_HOME) -Wall
     CXXFLAGS		= -isysroot $(SDK_HOME) -ftemplate-depth-128 -Wall -D_REENTRANT
 else
-    CC                  = cc -Wall
+    CC                  = cc
     CXX	                = c++
 
+    CFLAGS              = -Wall
     CXXFLAGS		= -ftemplate-depth-128 -Wall -D_REENTRANT
 endif
 

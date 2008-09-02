@@ -514,7 +514,7 @@ allTests(id<ICECommunicator> communicator)
     @try
     {
         // Invalid -x option
-        id<ICEObjectPrx> p = [communicator stringToProxy:@"id:opaque -t 99 -v abc -x abc"];
+        [communicator stringToProxy:@"id:opaque -t 99 -v abc -x abc"];
         test(NO);
     }
     @catch(ICEEndpointParseException*)
@@ -524,7 +524,7 @@ allTests(id<ICECommunicator> communicator)
     @try
     {
         // Missing -t and -v
-        id<ICEObjectPrx> p = [communicator stringToProxy:@"id:opaque"];
+        [communicator stringToProxy:@"id:opaque"];
         test(NO);
     }
     @catch(ICEEndpointParseException*)
@@ -534,7 +534,7 @@ allTests(id<ICECommunicator> communicator)
     @try
     {
         // Repeated -t
-        id<ICEObjectPrx> p = [communicator stringToProxy:@"id:opaque -t 1 -t 1 -v abc"];
+        [communicator stringToProxy:@"id:opaque -t 1 -t 1 -v abc"];
         test(NO);
     }
     @catch(ICEEndpointParseException*)
@@ -544,7 +544,7 @@ allTests(id<ICECommunicator> communicator)
     @try
     {
         // Repeated -v
-        id<ICEObjectPrx> p = [communicator stringToProxy:@"id:opaque -t 1 -v abc -v abc"];
+        [communicator stringToProxy:@"id:opaque -t 1 -v abc -v abc"];
         test(NO);
     }
     @catch(ICEEndpointParseException*)
@@ -554,7 +554,7 @@ allTests(id<ICECommunicator> communicator)
     @try
     {
         // Missing -t
-        id<ICEObjectPrx> p = [communicator stringToProxy:@"id:opaque -v abc"];
+        [communicator stringToProxy:@"id:opaque -v abc"];
         test(NO);
     }
     @catch(ICEEndpointParseException*)
@@ -564,7 +564,7 @@ allTests(id<ICECommunicator> communicator)
     @try
     {
         // Missing -v
-        id<ICEObjectPrx> p = [communicator stringToProxy:@"id:opaque -t 1"];
+        [communicator stringToProxy:@"id:opaque -t 1"];
         test(NO);
     }
     @catch(ICEEndpointParseException*)
@@ -574,7 +574,7 @@ allTests(id<ICECommunicator> communicator)
     @try
     {
         // Missing arg for -t
-        id<ICEObjectPrx> p = [communicator stringToProxy:@"id:opaque -t -v abc"];
+        [communicator stringToProxy:@"id:opaque -t -v abc"];
         test(NO);
     }
     @catch(ICEEndpointParseException*)
@@ -584,7 +584,7 @@ allTests(id<ICECommunicator> communicator)
     @try
     {
         // Missing arg for -v
-        id<ICEObjectPrx> p = [communicator stringToProxy:@"id:opaque -t 1 -v"];
+        [communicator stringToProxy:@"id:opaque -t 1 -v"];
         test(NO);
     }
     @catch(ICEEndpointParseException*)
@@ -594,7 +594,7 @@ allTests(id<ICECommunicator> communicator)
     @try
     {
         // Not a number for -t
-        id<ICEObjectPrx> p = [communicator stringToProxy:@"id:opaque -t x -v abc"];
+        [communicator stringToProxy:@"id:opaque -t x -v abc"];
         test(NO);
     }
     @catch(ICEEndpointParseException*)
@@ -604,7 +604,7 @@ allTests(id<ICECommunicator> communicator)
     @try
     {
         // < 0 for -t
-        id<ICEObjectPrx> p = [communicator stringToProxy:@"id:opaque -t -1 -v abc"];
+        [communicator stringToProxy:@"id:opaque -t -1 -v abc"];
         test(NO);
     }
     @catch(ICEEndpointParseException*)
@@ -614,7 +614,7 @@ allTests(id<ICECommunicator> communicator)
     @try
     {
         // Invalid char for -v
-        id<ICEObjectPrx> p = [communicator stringToProxy:@"id:opaque -t 99 -v x?c"];
+        [communicator stringToProxy:@"id:opaque -t 99 -v x?c"];
         test(NO);
     }
     @catch(ICEEndpointParseException*)

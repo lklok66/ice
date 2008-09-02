@@ -139,8 +139,14 @@ public:
     
     ReadObjectCallbackI(id<ICEReadObjectCallback> cb) : _cb(cb)
     {
+        [_cb retain];
     }
 
+    virtual ~ReadObjectCallbackI()
+    {
+        [_cb release];
+    }
+    
     virtual void
     invoke(const Ice::ObjectPtr& obj)
     {
