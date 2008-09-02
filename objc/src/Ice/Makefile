@@ -22,7 +22,6 @@ OBJC_OBJS	= BuiltinSequences.o \
 		  Process.o
 
 OBJCPP_OBJS	= Communicator.o \
-		  Config.o \
 		  Current.o \
 		  IdentityI.o \
                   Exception.o \

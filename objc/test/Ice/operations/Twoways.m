@@ -130,10 +130,10 @@ twoways(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 	TestStructure *so;
 	TestStructure *rso = [p opStruct:si1 p2:si2 p3:&so];
 
-	test(ICEisNil(rso.p));
+	test(rso.p == nil);
 	test(rso.e == Testenum2);
 	test([rso.s.s isEqualToString:@"def"]);
-	test(!ICEisNil(so.p));
+	test(so.p != nil);
 	test([so.p isEqual:p]);
 	test(so.e == Testenum3);
 	test([so.s.s isEqualToString:@"a new string"]);
@@ -689,7 +689,6 @@ twoways(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 	int l;
         for(l = 0; l != sizeof(lengths) / sizeof(*lengths); ++l)
         {
-	    printf("length: %d\n", l);
             TestMutableIntS *s = [TestMutableIntS dataWithLength:(l * sizeof(ICEInt))];
 	    ICEInt *ip = (ICEInt *)[s bytes];
 	    int i;
@@ -703,7 +702,6 @@ twoways(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 	    int j;
             for(j = 0; j < [r length] / sizeof(ICEInt); ++j)
             {
-	        printf("rp[j] == %d, j = %d\n", rp[j], j);
                 test(rp[j] == -j);
             }
         }
@@ -726,7 +724,7 @@ twoways(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 	    test([r isEqual:ctx]);
 	}
 	{
-	    TestMyClassPrx *p2 = [TestMyClassPrx checkedCast:[p ice_context:ctx]];
+	    id<TestMyClassPrx> p2 = [TestMyClassPrx checkedCast:[p ice_context:ctx]];
 	    test([[p2 ice_getContext] isEqual:ctx]);
 	    ICEContext *r = [p2 opContext];
 	    test([r isEqual:ctx]);
@@ -756,7 +754,7 @@ twoways(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 	    [ctx setObject:@"TWO" forKey:@"two"];
 	    [ctx setObject:@"THREE" forKey:@"three"];
 
-	    TestMyClassPrx *p = [TestMyClassPrx uncheckedCast:[ic stringToProxy:@"test:default -p 12010 -t 10000"]];
+	    id<TestMyClassPrx> p = [TestMyClassPrx uncheckedCast:[ic stringToProxy:@"test:default -p 12010 -t 10000"]];
 
 	    [[ic getImplicitContext] setContext:ctx];
 	    test([[[ic getImplicitContext] getContext] isEqual:ctx]);

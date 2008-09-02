@@ -254,7 +254,7 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
 	        string typeString = outTypeToString(inp->first);
 	        string param = fixId(inp->second);
 		_M << nl << typeString << " ";
-		if(!isValueType(inp->first))
+		if(mapsToPointerType(inp->first))
 		{
 		    _M << "*";
 		}
@@ -264,7 +264,7 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
 	    for(TypeStringList::const_iterator outp = outParams.begin(); outp != outParams.end(); ++outp)
 	    {
 	        _M << nl << typeToString(outp->first) << " ";
-		if(!isValueType(outp->first))
+		if(mapsToPointerType(outp->first))
 		{
 		    _M << "*";
 		}
@@ -274,7 +274,7 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
 	    if(returnType)
 	    {
 	        _M << nl << typeToString(returnType) << " ";
-		if(!isValueType(returnType))
+		if(mapsToPointerType(returnType))
 		{
 		    _M << "*";
 		}
@@ -724,7 +724,7 @@ Slice::ObjCVisitor::getParams(const OperationPtr& op) const
 	    result += " " + name;
 	}
 	result += ":(" + typeString;
-	if(!isValueType(type))
+	if(mapsToPointerType(type))
 	{
 	    result += " *";
 	}
@@ -753,7 +753,7 @@ Slice::ObjCVisitor::getServerParams(const OperationPtr& op) const
 	    result += " " + name;
 	}
 	result += ":(" + typeString;
-	if(!isValueType(type))
+	if(mapsToPointerType(type))
 	{
 	    result += " *";
 	}
@@ -782,7 +782,7 @@ Slice::ObjCVisitor::getParamsAsync(const OperationPtr& op, bool sent)
             TypePtr type = (*q)->type();
             string name = fixId((*q)->name());
             result += " " + name + ":(" + typeToString(type);
-            if(!isValueType(type))
+            if(mapsToPointerType(type))
             {
                 result += " *";
             }
@@ -801,7 +801,7 @@ Slice::ObjCVisitor::getParamsAsyncCB(const OperationPtr& op)
     if(ret)
     {
         result += " ret:(" + typeToString(ret);
-        if(!isValueType(ret))
+        if(mapsToPointerType(ret))
         {
             result += " *";
         }
@@ -816,7 +816,7 @@ Slice::ObjCVisitor::getParamsAsyncCB(const OperationPtr& op)
             TypePtr type = (*q)->type();
             string name = fixId((*q)->name());
             result += " " + name + ":(" + typeToString(type);
-            if(!isValueType(type))
+            if(mapsToPointerType(type))
             {
                 result += " *";
             }
@@ -933,7 +933,7 @@ Slice::ObjCVisitor::getSigAsyncCB(const OperationPtr& op)
     if(ret)
     {
         result += ", " + typeToString(ret);
-        if(!isValueType(ret))
+        if(mapsToPointerType(ret))
         {
             result += " *";
         }
@@ -946,7 +946,7 @@ Slice::ObjCVisitor::getSigAsyncCB(const OperationPtr& op)
         {
             TypePtr type = (*q)->type();
             result += ", " + typeToString(type);
-            if(!isValueType(type))
+            if(mapsToPointerType(type))
             {
                 result += " *";
             }
@@ -1578,11 +1578,10 @@ Slice::Gen::TypesVisitor::visitOperation(const OperationPtr& p)
     string name = fixId(p->name());
     TypePtr returnType = p->returnType();
     string retString = typeToString(returnType);
-    bool retIsValue = isValueType(returnType);
     string params = getServerParams(p);
 
     _H << nl << "-(" << retString;
-    if(!retIsValue)
+    if(mapsToPointerType(returnType))
     {
         _H << " *";
     }
@@ -1998,7 +1997,7 @@ Slice::Gen::TypesVisitor::visitConst(const ConstPtr& p)
 {
     _H << sp;
     _H << nl << "static const " << typeToString(p->type()) << " ";
-    if(!isValueType(p->type()))
+    if(mapsToPointerType(p->type()))
     {
         _H << "*";
     }
@@ -2172,7 +2171,7 @@ Slice::Gen::TypesVisitor::writeMembers(const DataMemberList& dataMembers, int ba
         string name = fixId((*q)->name());
 
 	_H << nl << typeString << " ";
-	if(!isValueType(type))
+	if(mapsToPointerType(type))
 	{
 	    _H << "*";
 	}
@@ -2188,14 +2187,13 @@ Slice::Gen::TypesVisitor::writeMemberSignature(const DataMemberList& dataMembers
 	TypePtr type = (*q)->type();
 	string typeString = typeToString(type);
         string name = fixId((*q)->name());
-	bool isValue = isValueType(type);
 
 	if(q != dataMembers.begin())
 	{
 	    _M << " " << name;
 	}
 	_M << ":(" << typeString;
-	if(!isValue)
+	if(mapsToPointerType(type))
 	{
 	    _M << " *";
 	}
@@ -2208,7 +2206,7 @@ Slice::Gen::TypesVisitor::writeMemberSignature(const DataMemberList& dataMembers
 		_H << " " << name;
 	    }
 	    _H << ":(" << typeString;
-	    if(!isValue)
+	    if(mapsToPointerType(type))
 	    {
 		_H << " *";
 	    }
@@ -2277,7 +2275,7 @@ Slice::Gen::TypesVisitor::writeProperties(const DataMemberList& dataMembers, int
 	    _H << "retain";
 	}
 	_H << ") " << typeString << " ";
-	if(!isValue)
+	if(mapsToPointerType(type))
 	{
 	    _H << "*";
 	}
@@ -2405,7 +2403,7 @@ Slice::Gen::TypesVisitor::writeMemberMarshal(const DataMemberList& dataMembers, 
 {
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
-	writeMarshalUnmarshalCode(_M, (*q)->type(), "p->" + fixId((*q)->name()), true, false, false);
+	writeMarshalUnmarshalCode(_M, (*q)->type(), "p." + fixId((*q)->name()), true, false, false);
     }
 }
 
@@ -2414,7 +2412,7 @@ Slice::Gen::TypesVisitor::writeMemberUnmarshal(const DataMemberList& dataMembers
 {
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
-	writeMarshalUnmarshalCode(_M, (*q)->type(), "p->" + fixId((*q)->name()
+	writeMarshalUnmarshalCode(_M, (*q)->type(), "p." + fixId((*q)->name()
 	                          /* TODO: base classes */), false, false, false);
     }
 }
@@ -2466,7 +2464,7 @@ Slice::Gen::ProxyVisitor::visitOperation(const OperationPtr& p)
     string name = fixId(p->name());
     TypePtr returnType = p->returnType();
     string retString = outTypeToString(returnType);
-    bool retIsValue = isValueType(returnType);
+    bool retIsPointer = mapsToPointerType(returnType);
     string params = getParams(p);
 
     //
@@ -2474,14 +2472,14 @@ Slice::Gen::ProxyVisitor::visitOperation(const OperationPtr& p)
     // context parameter.
     //
     _H << nl << "-(" << retString;
-    if(!retIsValue)
+    if(retIsPointer)
     {
         _H << " *";
     }
     _H << ") " << name << params << ";";
 
     _H << nl << "-(" << retString;
-    if(!retIsValue)
+    if(retIsPointer)
     {
         _H << " *";
     }
@@ -2992,7 +2990,7 @@ Slice::Gen::DelegateMVisitor::visitClassDefStart(const ClassDefPtr& p)
         string opName = fixId((*r)->name());
 	TypePtr returnType = (*r)->returnType();
 	string retString = outTypeToString(returnType);
-	bool retIsValue = isValueType(returnType);
+	bool retIsPointer = mapsToPointerType(returnType);
 	string params = getParams(*r);
 	string args = getArgs(*r);
 
@@ -3004,7 +3002,7 @@ Slice::Gen::DelegateMVisitor::visitClassDefStart(const ClassDefPtr& p)
 	// Write context-less operation that forwards to the version with a context.
 	//
 	_M << sp << nl << "-(" << retString;
-	if(!retIsValue)
+	if(retIsPointer)
 	{
 	    _M << " *";
 	}
@@ -3027,7 +3025,7 @@ Slice::Gen::DelegateMVisitor::visitClassDefStart(const ClassDefPtr& p)
 	// Write version with context.
 	//
 	_M << sp << nl << "-(" << retString;
-	if(!retIsValue)
+	if(retIsPointer)
 	{
 	    _M << " *";
 	}
@@ -3102,7 +3100,7 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
     string name = fixId(p->name());
     TypePtr returnType = p->returnType();
     string retString = outTypeToString(returnType);
-    bool retIsValue = isValueType(returnType);
+    bool retIsPointer = mapsToPointerType(returnType);
     string params = getParams(p);
     string args = getParams(p);
 
@@ -3128,7 +3126,7 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
     ClassDefPtr cl = ClassDefPtr::dynamicCast(container);
     string className = fixName(cl);
     _H << nl << "+(" << retString;
-    if(!retIsValue)
+    if(retIsPointer)
     {
         _H << " *";
     }
@@ -3140,7 +3138,7 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
     _H << ":(ICEObjectPrx <" << className << "Prx> *)prx context:(ICEContext *)ctx;";
 
     _M << sp << nl << "+(" << retString;
-    if(!retIsValue)
+    if(retIsPointer)
     {
         _M << " *";
     }
@@ -3179,7 +3177,7 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
 	if(returnType)
 	{
 	   _M << nl << retString << " ";
-	   if(!isValueType(returnType))
+	   if(retIsPointer)
 	   {
 	       _M << "*";
 	   }
@@ -3318,7 +3316,7 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
             for(TypeStringList::const_iterator op = outParams.begin(); op != outParams.end(); ++op)
             {
                 string param = outTypeToString(op->first) + " ";
-                if(!isValueType(op->first))
+                if(mapsToPointerType(op->first))
                 {
                     param += "*";
                 }
@@ -3329,7 +3327,7 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
             if(returnType)
             {
                 string param = retString + " ";
-                if(!isValueType(returnType))
+                if(mapsToPointerType(returnType))
                 {
                     param += "*";
                 }

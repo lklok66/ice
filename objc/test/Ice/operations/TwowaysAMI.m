@@ -150,7 +150,7 @@
     test(NO);
 }
 
-// -(void) opMyClassResponse:(TestMyClassPrx*)r c1:(TestMyClassPrx*)c1 c2:(TestMyClassPrx*)c2
+// -(void) opMyClassResponse:(id<TestMyClassPrx>)r c1:(id<TestMyClassPrx>)c1 c2:(id<TestMyClassPrx>)c2
 // {
 //     test([c1 ice_getIdentity]:isEqual:[[c1 ice_getCommunicator] stringToIdentity:@"test"]);
 //     test([c2 ice_getIdentity]:isEqual:[[c1 ice_getCommunicator] stringToIdentity:@"noSuchIdentity"]);
@@ -179,11 +179,11 @@
 
 -(void) opStructResponse:(TestStructure*)rso p3:(TestStructure*)so
 {
-    test(ICEisNil(rso.p));
+    test(rso.p == nil);
     test(rso.e == Testenum2);
     test([rso.s.s isEqualToString:@"def"]);
     test([so e] == Testenum3);
-    test(!ICEisNil(so.p));
+    test(so.p != nil);
     test([so.s.s isEqualToString:@"a new string"]);
     // We can't do the callbacks below in connection serialization mode.
     if([[[so.p ice_getCommunicator] getProperties] getPropertyAsInt:@"Ice.ThreadPool.Client.Serialize"])
@@ -539,7 +539,7 @@ twowaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
         ICEInitializationData* initData = [[ICEInitializationData alloc] init];
         [initData setProperties:[[communicator getProperties] clone]];
         id<ICECommunicator> ic = [ICEUtil createCommunicator:initData];
-        ICEObjectPrx* obj = [ic stringToProxy:[p ice_toString]];
+        id<ICEObjectPrx> obj = [ic stringToProxy:[p ice_toString]];
         id<TestMyClassPrx> p2 = [TestMyClassPrx checkedCast:obj];
 
         [ic destroy];

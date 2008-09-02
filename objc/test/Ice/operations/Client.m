@@ -16,8 +16,8 @@
 int
 run(int argc, char* argv[], id<ICECommunicator> communicator, ICEInitializationData* initData)
 {
-    TestMyClassPrx* allTests(id<ICECommunicator>, BOOL);
-    TestMyClassPrx* myClass = allTests(communicator, NO);
+    id<TestMyClassPrx> allTests(id<ICECommunicator>, BOOL);
+    id<TestMyClassPrx> myClass = allTests(communicator, NO);
 
     tprintf("testing server shutdown... ");
     [myClass shutdown];

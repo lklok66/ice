@@ -1078,4 +1078,8 @@ SEL _sent;
         return NO; // Keep the compiler happy.
     }
 }
+-(void*) get__
+{
+    return objectPrx__;
+}
 @end

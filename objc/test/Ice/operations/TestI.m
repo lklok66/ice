@@ -78,7 +78,7 @@
                             current:(ICECurrent *)current;
 {
     *p3 = [[p1 copy] autorelease];
-    [[*p3 s] setS:@"a new string"];
+    (*p3).s.s = @"a new string";
     return p2;
 }
 
@@ -344,7 +344,7 @@
 
 -(ICEContext *) opContext:(ICECurrent *)current
 {
-    return [current.ctx copy];
+    return [[current.ctx copy] autorelease];
 }
 
 -(void) opDoubleMarshaling:(ICEDouble)p1 p2:(TestMutableDoubleS *)p2 current:(ICECurrent *)current

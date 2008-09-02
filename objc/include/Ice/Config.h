@@ -28,8 +28,3 @@ typedef int ICEInt;
 typedef long long ICELong;
 typedef float ICEFloat;
 typedef double ICEDouble;
-
-#if defined(__cplusplus)
-extern "C"
-#endif
-BOOL ICEisNil(id);

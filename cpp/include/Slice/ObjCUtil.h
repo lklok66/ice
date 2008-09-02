@@ -52,6 +52,7 @@ protected:
     static std::string outTypeToString(const TypePtr&);
     static bool isValueType(const TypePtr&);
     static bool isString(const TypePtr&);
+    static bool mapsToPointerType(const TypePtr&);
     static std::string getBuiltinName(const BuiltinPtr&);
     static std::string getBuiltinSelector(const BuiltinPtr&, bool);
     static StringList splitScopedName(const std::string&);

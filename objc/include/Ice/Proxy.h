@@ -104,6 +104,7 @@
 -(void) ice_flushBatchRequests;
 -(BOOL) ice_flushBatchRequests_async:(id)target exception:(SEL)exception;
 -(BOOL) ice_flushBatchRequests_async:(id)target exception:(SEL)exception sent:(SEL)sent;
+-(void*) get__;
 @end
 
 @interface ICEObjectPrx : NSObject<ICEObjectPrx>

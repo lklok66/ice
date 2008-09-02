@@ -15,7 +15,7 @@
 // Forward declarations
 //
 @class ICEObject;
-@class ICEObjectPrx;
+@protocol ICEObjectPrx;
 @protocol ICECommunicator;
 @class ICEUserException;
 
@@ -63,7 +63,7 @@ typedef struct
 -(ICEInt) readEnumerator:(ICEInt)limit;
 -(NSMutableData*) readEnumSeq:(ICEInt)limit;
 
--(ICEObjectPrx*) readProxy:(Class)c;
+-(id<ICEObjectPrx>) readProxy:(Class)c;
 
 -(void) readObject:(id<ICEReadObjectCallback>)callback;
 -(NSMutableArray*) readObjectSeq;
@@ -128,7 +128,7 @@ typedef struct
 -(void) writeEnumerator:(ICEInt)v limit:(ICEInt)limit;
 -(void) writeEnumSeq:(NSData*)v limit:(ICEInt)limit;
 
--(void) writeProxy:(ICEObjectPrx*)v;
+-(void) writeProxy:(id<ICEObjectPrx>)v;
 
 -(void) writeObject:(ICEObject*)v;
 -(void) writeObjectSeq:(NSArray*)v;

@@ -178,7 +178,7 @@ Slice::ObjCGenerator::typeToString(const TypePtr& type)
         "ICEDouble",
         "NSString",
         "ICEObject",
-        "ICEObjectPrx",
+        "id<ICEObjectPrx>",
         "id"		// Dummy--we don't support Slice local Object
     };
 
@@ -191,7 +191,8 @@ Slice::ObjCGenerator::typeToString(const TypePtr& type)
     ProxyPtr proxy = ProxyPtr::dynamicCast(type);
     if(proxy)
     {
-        return fixName(proxy->_class()) + "Prx";
+	string mName = moduleName(findModule(proxy->_class()));
+        return "id<" + mName + (proxy->_class()->name()) + "Prx>";
     }
 
     SequencePtr seq = SequencePtr::dynamicCast(type);
@@ -289,6 +290,21 @@ Slice::ObjCGenerator::isString(const TypePtr& type)
     }
     BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
     return builtin && builtin->kind() == Builtin::KindString;
+}
+
+bool
+Slice::ObjCGenerator::mapsToPointerType(const TypePtr& type)
+{
+    if(isValueType(type))
+    {
+        return false;
+    }
+    BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
+    if(builtin && builtin->kind() == Builtin::KindObjectProxy)
+    {
+       return false;
+    }
+    return !ProxyPtr::dynamicCast(type);
 }
 
 string
@@ -445,7 +461,7 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
     {
         if(marshal)
         {
-	    out << nl << "[" << stream << " writeProxy:(ICEObjectPrx*)" << param << "];";
+	    out << nl << "[" << stream << " writeProxy:" << param << "];";
 	}
 	else
 	{
@@ -454,10 +470,7 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
             //
             // We use objc_getClass to get the proxy class instead of [name class]. This is to avoid
             // a warning if the proxy is forward declared.
-            //
-	    //out << nl << param << " = (" << name << " *)[[" << stream << " readProxy:["
-	    //    << name << " class]] autorelease];";
-	    out << nl << param << " = (" << name << " *)[[" << stream << " readProxy:objc_getClass(\""
+	    out << nl << param << " = (id<" << name << ">)[[" << stream << " readProxy:objc_getClass(\""
 	        << name << "\")] autorelease];";
 	}
         return;
@@ -507,7 +520,8 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
 	}
 	else
 	{
-	    out << nl << param << " = (" << typeS << "*)[" << typeS << " readWithStream:" << stream << "];";
+	    out << nl << param << " = (" << typeS << "*)[[" << typeS << " readWithStream:" << stream
+	        << "] autorelease];";
 	}
         return;
     }
@@ -541,7 +555,7 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
                 }
                 else
                 {
-                    out << nl << param << " = [" << stream << " readSequence:[ICEObjectPrx class]];";
+                    out << nl << param << " = [[" << stream << " readSequence:[ICEObjectPrx class]] autorelease];";
                 }
             }
             else
@@ -553,7 +567,7 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
                 }
                 else
                 {
-                    out << nl << param << " = [" << stream << " " << selector << "];";
+                    out << nl << param << " = [[" << stream << " " << selector << "] autorelease];";
                 }
             }
 	    return;
@@ -601,7 +615,7 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
 	}
 	else
 	{
-	    out << nl << param << " = [" << name << " readWithStream:" << stream << "];";
+	    out << nl << param << " = [[" << name << " readWithStream:" << stream << "] autorelease];";
 	}
 	return;
     }
@@ -616,7 +630,7 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
     }
     else
     {
-        out << nl << param << " = [" << name << " readWithStream:" << stream << "];";
+        out << nl << param << " = [[" << name << " readWithStream:" << stream << "] autorelease];";
     }
 }
 

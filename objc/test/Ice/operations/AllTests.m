@@ -12,11 +12,11 @@
 #import <TestCommon.h>
 #import <Test.h>
  
-TestMyClassPrx*
+id<TestMyClassPrx>
 allTests(id<ICECommunicator> communicator, BOOL collocated)
 {
     NSString* ref = @"test:default -p 12010 -t 10000";
-    ICEObjectPrx* base = [communicator stringToProxy:(ref)];
+    id<ICEObjectPrx> base = [communicator stringToProxy:(ref)];
     id<TestMyClassPrx> cl = [TestMyClassPrx checkedCast:base];
     id<TestMyDerivedClassPrx> derived = [TestMyDerivedClassPrx checkedCast:cl];
 
@@ -28,7 +28,7 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
     tprintf("ok\n");
 
 //     tprintf("testing oneway operations... ");
-//     void oneways(id<ICECommunicator>, TestMyClassPrx*);
+//     void oneways(id<ICECommunicator>, id<TestMyClassPrx>);
 //     oneways(communicator, cl);
 //     tprintf("ok\n");
     
@@ -39,12 +39,12 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
     tprintf("ok\n");
     
 //     tprintf("testing oneway operations with AMI... ");
-//     void onewaysAMI(id<ICECommunicator>, TestMyClassPrx*);
+//     void onewaysAMI(id<ICECommunicator>, id<TestMyClassPrx>);
 //     onewaysAMI(communicator, cl);
 //     tprintf("ok\n");
     
 //     tprintf("testing batch oneway operations... ");
-//     void batchOneways(TestMyClassPrx*);
+//     void batchOneways(id<TestMyClassPrx>);
 //     batchOneways(cl);
 //     batchOneways(derived);
 //     tprintf("ok\n");
