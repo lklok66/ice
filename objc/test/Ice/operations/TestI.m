@@ -234,7 +234,7 @@
     }
     *p6 = [TestMutableLongSS arrayWithArray:p3];
     [(TestMutableLongSS *)*p6 addObjectsFromArray:p3];
-    return [[p3 copy] autorelease];
+    return p3;
 }
 
 -(TestDoubleSS *) opFloatDoubleSS:(TestMutableFloatSS *)p1 p2:(TestMutableDoubleSS *)p2
@@ -344,7 +344,7 @@
 
 -(ICEContext *) opContext:(ICECurrent *)current
 {
-    return [[current.ctx copy] autorelease];
+    return current.ctx;
 }
 
 -(void) opDoubleMarshaling:(ICEDouble)p1 p2:(TestMutableDoubleS *)p2 current:(ICECurrent *)current
