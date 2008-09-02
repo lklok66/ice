@@ -26,6 +26,14 @@
 }
 @property(retain, nonatomic) id<ICEProperties> properties;
 @property(retain, nonatomic) id<ICELogger> logger;
+
+-(id) init:(id<ICEProperties>)properties logger:(id<ICELogger>)logger;
++(id) initializationData;
++(id) initializationData:(id<ICEProperties>)properties logger:(id<ICELogger>)logger;
+-(id) copyWithZone:(NSZone *) zone;
+-(NSUInteger) hash;
+-(BOOL) isEqual:(id)anObject;
+-(void) dealloc;
 @end
 
 @interface ICEUtil : NSObject

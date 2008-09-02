@@ -149,13 +149,13 @@ dictionary<string, MyEnum> StringMyEnumD;
      StringMyEnumD opStringMyEnumD(StringMyEnumD p1, StringMyEnumD p2,
                                    out StringMyEnumD p3);
 
-//     IntS opIntS(IntS s);
+     IntS opIntS(IntS s);
 
-//     void opByteSOneway(ByteS s);
+     void opByteSOneway(ByteS s);
 
-//     Ice::Context opContext();
+     Ice::Context opContext();
 
-//     void opDoubleMarshaling(double p1, DoubleS p2);
+     void opDoubleMarshaling(double p1, DoubleS p2);
 };
 
 ["ami"] class MyDerivedClass extends MyClass

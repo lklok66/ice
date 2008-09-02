@@ -65,6 +65,95 @@ private:
 @synthesize properties;
 @synthesize logger;
 
+-(id) init:(id<ICEProperties>)props logger:(id<ICELogger>)log
+{
+    if(![super init])
+    {
+        return nil;
+    }
+    properties = [props retain];
+    logger = [log retain];
+    return self;
+}
+
++(id) initializationData;
+{
+   ICEInitializationData *s = [[ICEInitializationData alloc] init];
+   [s autorelease];
+   return s;
+}
+
++(id) initializationData:(id<ICEProperties>)props logger:(id<ICELogger>)log;
+{
+   ICEInitializationData *s = [((ICEInitializationData *)[ICEInitializationData alloc]) init:props logger:log];
+   [s autorelease];
+   return s;
+}
+
+-(id) copyWithZone:(NSZone *)zone
+{
+    ICEInitializationData *copy = [ICEInitializationData allocWithZone:zone];
+    copy->properties = [properties clone];
+    copy->logger = [logger retain];
+    return copy;
+}
+
+-(NSUInteger) hash;
+{
+    NSUInteger h = 0;
+    h = (h << 1 ^ [properties hash]);
+    h = (h << 1 ^ [logger hash]);
+    return h;
+}
+
+-(BOOL) isEqual:(id)anObject;
+{
+    if(self == anObject)
+    {
+        return YES;
+    }
+    if(!anObject || ![anObject isKindOfClass:[self class]])
+    {
+        return NO;
+    }
+    ICEInitializationData * obj =(ICEInitializationData *)anObject;
+    if(!properties)
+    {
+        if(obj->properties)
+	{
+	    return NO;
+	}
+    }
+    else
+    {
+        if(![properties isEqual:obj->properties])
+	{
+	    return NO;
+	}
+    }
+    if(!logger)
+    {
+        if(obj->logger)
+	{
+	    return NO;
+	}
+    }
+    else
+    {
+        if(![logger isEqual:obj->logger])
+	{
+	    return NO;
+	}
+    }
+    return YES;
+}
+
+-(void) dealloc;
+{
+    [properties release];
+    [logger release];
+    [super dealloc];
+}
 @end
 
 @implementation ICEUtil

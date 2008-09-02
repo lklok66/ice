@@ -338,6 +338,27 @@
     return r;
 }
 
+-(void) opByteSOneway:(TestMutableByteS *)p1 current:(ICECurrent *)current
+{
+}
+
+-(ICEContext *) opContext:(ICECurrent *)current
+{
+    return [current.ctx copy];
+}
+
+-(void) opDoubleMarshaling:(ICEDouble)p1 p2:(TestMutableDoubleS *)p2 current:(ICECurrent *)current
+{
+    ICEDouble d = 1278312346.0 / 13.0;
+    test(p1 == d);
+    const ICEDouble *p = [p2 bytes];
+    int i;
+    for(i = 0; i < [p2 length] / sizeof(ICEDouble); ++i)
+    {
+	test(p[i] == d);
+    }
+}
+
 -(void) shutdown:(ICECurrent*)current
 {
     [[[current adapter] getCommunicator] shutdown];

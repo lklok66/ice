@@ -299,6 +299,8 @@ twoways(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 	test([[rso objectAtIndex:2] isEqualToString:@"abc"]);
     }
 
+// Commented out because other language mappings do not implement this.
+#if 0
     {
 	TestMyEnum buf1[] = { Testenum2, Testenum3, Testenum3 };
 	TestMyEnum buf2[] = { Testenum1 };
@@ -316,16 +318,17 @@ twoways(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 
         test([eso length] / sizeof(TestMyEnum) == 3);
 	const TestMyEnum *beso = (const TestMyEnum *)[eso bytes];
-        //test(beso[0] == Testenum3);
-        //test(beso[1] == Testenum3);
-        //test(beso[2] == Testenum2);
+        test(beso[0] == Testenum3);
+        test(beso[1] == Testenum3);
+        test(beso[2] == Testenum2);
         test([rso length] / sizeof(TestMyEnum) == 4);
 	const TestMyEnum *brso = (const TestMyEnum *)[rso bytes];
-        //test(brso[0] == Testenum2);
-        //test(brso[1] == Testenum3);
-        //test(brso[2] == Testenum3);
-        //test(brso[3] == Testenum1);
+        test(brso[0] == Testenum2);
+        test(brso[1] == Testenum3);
+        test(brso[2] == Testenum3);
+        test(brso[3] == Testenum1);
     }
+#endif
 
     {
         TestMutableByteSS *bsi1 = [TestMutableByteSS array];
@@ -678,6 +681,7 @@ twoways(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 	test([[ro objectForKey:@"Hello!!"] intValue] == Testenum2);
     }
 
+// TODO: Commented out because getCommunicator() currently does not work.
 #if 0
     {
         const int lengths[] = { 0, 1, 2, 126, 127, 128, 129, 253, 254, 255, 256, 257, 1000 };
@@ -685,6 +689,7 @@ twoways(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 	int l;
         for(l = 0; l != sizeof(lengths) / sizeof(*lengths); ++l)
         {
+	    printf("length: %d\n", l);
             TestMutableIntS *s = [TestMutableIntS dataWithLength:(l * sizeof(ICEInt))];
 	    ICEInt *ip = (ICEInt *)[s bytes];
 	    int i;
@@ -698,9 +703,109 @@ twoways(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 	    int j;
             for(j = 0; j < [r length] / sizeof(ICEInt); ++j)
             {
+	        printf("rp[j] == %d, j = %d\n", rp[j], j);
                 test(rp[j] == -j);
             }
         }
     }
 #endif
+
+    {
+        ICEMutableContext *ctx = [ICEMutableContext dictionary];
+	[ctx setObject:@"ONE" forKey:@"one"];
+	[ctx setObject:@"TWO" forKey:@"two"];
+	[ctx setObject:@"THREE" forKey:@"three"];
+	{
+	    ICEContext *r = [p opContext];
+	    test([[p ice_getContext] count] == 0);
+	    test(![r isEqual:ctx]);
+	}
+	{
+	    ICEContext *r = [p opContext:ctx];
+	    test([[p ice_getContext] count] == 0);
+	    test([r isEqual:ctx]);
+	}
+	{
+	    TestMyClassPrx *p2 = [TestMyClassPrx checkedCast:[p ice_context:ctx]];
+	    test([[p2 ice_getContext] isEqual:ctx]);
+	    ICEContext *r = [p2 opContext];
+	    test([r isEqual:ctx]);
+	    r = [p2 opContext:ctx];
+	    test([r isEqual:ctx]);
+	}
+    }
+
+#if 0 // TODO: commented out until context stuff is implemented
+    {
+        //
+	// Test implicit context propagation
+	//
+
+	NSString *impls[] = { @"Shared", @"PerThread" };
+	int i;
+	for(i = 0; i < 2; i++)
+	{
+	    ICEInitializationData *initData = [ICEInitializationData initializationData];
+	    initData.properties = [[communicator getProperties] clone];
+	    [initData.properties setProperty:@"Ice.Implicitcontext" value:impls[i]];
+
+	    id<ICECommunicator> ic = [ICEUtil createCommunicator:initData];
+
+	    ICEMutableContext *ctx = [ICEContext dictionary];
+	    [ctx setObject:@"ONE" forKey:@"one"];
+	    [ctx setObject:@"TWO" forKey:@"two"];
+	    [ctx setObject:@"THREE" forKey:@"three"];
+
+	    TestMyClassPrx *p = [TestMyClassPrx uncheckedCast:[ic stringToProxy:@"test:default -p 12010 -t 10000"]];
+
+	    [[ic getImplicitContext] setContext:ctx];
+	    test([[[ic getImplicitContext] getContext] isEqual:ctx]);
+	    test([[p opContext] isEqual:ctx]);
+
+	    test([[ic getImplicitContext] objectForKey:@"zero"] == nil);
+	    [[ic getImplicitContext] setObject:@"ZERO" forKey:@"zero"];
+	    test([[[ic getImplicitContext] objectForKey:@"zero"] isEqualToString:@"ZERO"]);
+
+	    ctx = [[ic getImplicitContext] getContext];
+	    test([[p opContext] isEqual:ctx]);
+
+	    ICEMutableContext *prxContext = [ICEContext dictionary];
+	    [prxContext setObject:@"UN" forKey:@"one"];
+	    [prxContext setObject:@"QUATRE" forKey:@"four"];
+
+	    ICEMutableContext *combined = [ICEMutableContext dictionaryWithDictionary:prxContext];
+	    [combined setObject:@"UN" forKey:@"one"];
+
+	    p = [TestMyClassPrx uncheckedCast:[p ice_context:prxContext]];
+
+	    [[ic getImplicitContext] setContext:[ICEContext dictionary]];
+	    test([[p opContext] isEqualToDictionary:prxContext]);
+
+	    [[ic getImplicitContext] setContext:ctx];
+	    test([[p opContext] isEqualToDictionary:combined]);
+
+	    test([[[ic getImplicitContext] objectForKey:@"one"] isEqualToString:@"ONE"]);
+	    [[ic getImplicitContext] removeObjectForKey:@"one"];
+
+	    if([impls[i] isEqualToString:@"PerThread"])
+	    {
+	        // TODO: create thred with context
+	    }
+
+	    [[ic getImplicitContext] setContext:[ICEContext dictionary]];
+	    [ic destroy];
+	}
+    }
+#endif
+
+    {
+        ICEDouble d = 1278312346.0 / 13.0;
+	TestMutableDoubleS *ds = [TestMutableDoubleS dataWithLength:(5 * sizeof(ICEDouble))];
+	ICEDouble *p = (ICEDouble *)[ds bytes];
+	int i = 5;
+	while(i-- > 0)
+	{
+	    *p++ = d;
+	}
+    }
 }
