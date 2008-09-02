@@ -27,10 +27,10 @@ ifeq ($(COMPILE_FOR_IPHONE),yes)
     CC       = /Developer/Platforms/$(SDK_NAME).platform/Developer/usr/bin/$(ARCH)-apple-darwin9-gcc-4.0.1
     CXX      = /Developer/Platforms/$(SDK_NAME).platform/Developer/usr/bin/$(ARCH)-apple-darwin9-g++-4.0.1
 
-    CFLAGS              = -isysroot $(SDK_HOME)
+    CFLAGS              = -isysroot $(SDK_HOME) -Wall
     CXXFLAGS		= -isysroot $(SDK_HOME) -ftemplate-depth-128 -Wall -D_REENTRANT
 else
-    CC                  = cc
+    CC                  = cc -Wall
     CXX	                = c++
 
     CXXFLAGS		= -ftemplate-depth-128 -Wall -D_REENTRANT

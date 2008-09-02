@@ -64,7 +64,7 @@ Parser* parser;
         NSString* title = [args objectAtIndex:1];
 
         NSArray* authors = [[args objectAtIndex:2] componentsSeparatedByString:@","];
-        id<DemoBookPrx> book = [library_ createBook:isbn title:title authors:authors];
+        [library_ createBook:isbn title:title authors:authors];
         printf("added new book with isbn %s\n", [isbn UTF8String]);
     }
     @catch(DemoBookExistsException* ex)
@@ -101,8 +101,6 @@ Parser* parser;
             [self setCurrent_:nil];
         }
 
-        NSString* isbn = [args objectAtIndex:0];
-        
         DemoBookQueryResultPrx* query;
         DemoBookDescription* current;
         [library_ queryByIsbn:[args objectAtIndex:0] first:&current result:&query];
@@ -351,11 +349,12 @@ Parser* parser;
         }
     }
     NSString* ss = [ [NSString alloc] initWithData:line encoding:NSUTF8StringEncoding ];
+    int len;
     @try
     {
         const char* utf8 = [ss UTF8String];
 
-        int len = strlen(utf8);
+        len = strlen(utf8);
         if(len > max)
         {
             [self errorWithString:@"input line too long"];
@@ -366,13 +365,13 @@ Parser* parser;
         {
             strcpy(buf, utf8);
         }
-        return len;
     }
     @finally
     {
         [ss release];
         [line release];
     }
+    return len;
 }
 
 -(void)continueLine
@@ -444,7 +443,7 @@ Parser* parser;
     return status;
 }
 
--(int)dealloc
+-(void)dealloc
 {
     [query_ release];
     [current_ release];

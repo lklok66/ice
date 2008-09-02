@@ -10,6 +10,7 @@
 
 #include <Parser.h>
 #include <Grammar.h>
+#include <ctype.h>
 
 #import <Foundation/NSString.h>
 #import <Foundation/NSData.h>

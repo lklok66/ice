@@ -76,7 +76,6 @@ int errors_;
 -(void) warningWithString: (NSString*) s;
 
 -(int)parse;
--(int)dealloc;
 
 @property(retain, nonatomic) DemoBookQueryResultPrx* query_;
 @property(retain, nonatomic) DemoBookDescription* current_;
