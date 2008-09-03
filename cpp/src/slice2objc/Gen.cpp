@@ -3276,8 +3276,9 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
             _M << nl << "[os_ writePendingObjects();";
         }
         _M << nl << "return ";
-        _M << "[prx_ invoke_async__:target_ response:response_ exception:exception_ sent:sent_ finished:finished_";
-        _M << " operation:@\"" << name <<  "\" mode:" << sliceModeToIceMode(p->sendMode()) << " os:os_ context:ctx_];";
+        _M << "[prx_ invoke_async__:target_ response:response_ exception:exception_ sent:sent_ ";
+        _M << "finishedClass:self finished:finished_" << " operation:@\"" << name <<  "\""; 
+        _M << " mode:" << sliceModeToIceMode(p->sendMode()) << " os:os_ context:ctx_];";
         _M << eb;
 
         _M << nl << "@finally";

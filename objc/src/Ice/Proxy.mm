@@ -38,12 +38,12 @@ class AMICallback : public Ice::AMI_Array_Object_ice_invoke
 {
 public:
 
-AMICallback(const Ice::CommunicatorPtr& communicator, id target, SEL resp, SEL ex, id responder, SEL finished) : 
+AMICallback(const Ice::CommunicatorPtr& communicator, id target, SEL resp, SEL ex, Class finishedClass, SEL finished) : 
     _target(target),
     _communicator(communicator), 
     _response(resp),
     _exception(ex),
-    _responder(responder), 
+    _finishedClass(finishedClass),
     _finished(finished)
 {
     [_target retain];
@@ -70,7 +70,7 @@ ice_response(bool ok , const std::pair<const Byte*, const Byte*>& outParams)
 
     @try
     {
-        objc_msgSend(_responder, _finished, _target, _response, _exception, ok, is);
+        objc_msgSend(_finishedClass, _finished, _target, _response, _exception, ok, is);
     }
     @catch(NSException* ex)
     {
@@ -115,7 +115,7 @@ private:
 const Ice::CommunicatorPtr _communicator;
 SEL _response;
 SEL _exception;
-id _responder;
+Class _finishedClass;
 SEL _finished;
 };
 typedef IceUtil::Handle<AMICallback> AMICallbackPtr;
@@ -124,9 +124,9 @@ class AMICallbackWithSent : public AMICallback, public Ice::AMISentCallback
 {
 public:
 
-AMICallbackWithSent(const Ice::CommunicatorPtr& communicator, id target, SEL resp, SEL ex, SEL sent, id responder,
-                    SEL finished) : 
-    AMICallback(communicator, target, resp, ex, responder, finished),
+AMICallbackWithSent(const Ice::CommunicatorPtr& communicator, id target, SEL resp, SEL ex, SEL sent, 
+                    Class finishedClass ,SEL finished) : 
+    AMICallback(communicator, target, resp, ex, finishedClass, finished),
     _sent(sent)
 {
 }
@@ -564,6 +564,7 @@ SEL _sent;
               response:(SEL)response
              exception:(SEL)exception
                   sent:(SEL)sent
+              finishedClass:(Class)finishedClass
               finished:(SEL)finished
              operation:(NSString*)operation
                   mode:(ICEOperationMode)mode 
@@ -583,11 +584,11 @@ SEL _sent;
         if(sent != nil)
         {
             amiCB = new AMICallbackWithSent(OBJECTPRX->ice_getCommunicator(), target, response, exception, sent,
-                                            [self class], finished);
+                                            finishedClass, finished);
         }
         else
         {
-            amiCB = new AMICallback(OBJECTPRX->ice_getCommunicator(), target, response, exception, [self class], 
+            amiCB = new AMICallback(OBJECTPRX->ice_getCommunicator(), target, response, exception, finishedClass, 
                                     finished);
         }
 

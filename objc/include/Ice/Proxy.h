@@ -125,7 +125,7 @@
 -(void) checkTwowayOnly__:(NSString*)operation;
 -(void) invoke__:(NSString*)operation mode:(ICEOperationMode)mode os:(id<ICEOutputStream>)os 
               is:(id<ICEInputStream>*)is context:(ICEContext*)context;
--(BOOL) invoke_async__:(id)target response:(SEL)response exception:(SEL)exception sent:(SEL)sent finished:(SEL)finished 
-             operation:(NSString*)operation mode:(ICEOperationMode)mode os:(id<ICEOutputStream>)os 
-               context:(ICEContext*)context;
+-(BOOL) invoke_async__:(id)target response:(SEL)response exception:(SEL)exception sent:(SEL)sent 
+         finishedClass:(Class)finishedClass finished:(SEL)finished operation:(NSString*)operation 
+                  mode:(ICEOperationMode)mode os:(id<ICEOutputStream>)os context:(ICEContext*)context;
 @end
