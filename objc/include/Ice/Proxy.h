@@ -61,44 +61,44 @@
 -(BOOL) ice_invoke_async:(id)target response:(SEL)response exception:(SEL)exception sent:(SEL)sent operation:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams;
 -(BOOL) ice_invoke_async:(id)target response:(SEL)response exception:(SEL)exception sent:(SEL)sent operation:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams context:(ICEContext*)context;
 -(ICEIdentity*) ice_getIdentity;
--(id<ICEObjectPrx>) ice_identity:(ICEIdentity*)identity;
+-(id) ice_identity:(ICEIdentity*)identity;
 -(ICEMutableContext*) ice_getContext;
--(id<ICEObjectPrx>) ice_context:(ICEContext*)context;
+-(id) ice_context:(ICEContext*)context;
 -(NSString*) ice_getFacet;
--(id<ICEObjectPrx>) ice_facet:(NSString*)facet;
+-(id) ice_facet:(NSString*)facet;
 -(NSString*) ice_getAdapterId;
--(id<ICEObjectPrx>) ice_adapterId:(NSString*)adapterId;
+-(id) ice_adapterId:(NSString*)adapterId;
 //-(NSArray*) ice_getEndpoints;
-//-(id<ICEObjectPrx>) ice_endpoints:(NSArray*)endpoints;
+//-(id) ice_endpoints:(NSArray*)endpoints;
 -(ICEInt) ice_getLocatorCacheTimeout;
--(id<ICEObjectPrx>) ice_locatorCacheTimeout:(ICEInt)timeout;
+-(id) ice_locatorCacheTimeout:(ICEInt)timeout;
 -(BOOL) ice_isConnectionCached;
--(id<ICEObjectPrx>) ice_connectionCached:(BOOL)cached;
+-(id) ice_connectionCached:(BOOL)cached;
 -(ICEEndpointSelectionType) ice_getEndpointSelection;
--(id<ICEObjectPrx>) ice_endpointSelection:(ICEEndpointSelectionType)type;
+-(id) ice_endpointSelection:(ICEEndpointSelectionType)type;
 -(BOOL) ice_isSecure;
--(id<ICEObjectPrx>) ice_secure:(BOOL)secure;
+-(id) ice_secure:(BOOL)secure;
 -(BOOL) ice_isPreferSecure;
--(id<ICEObjectPrx>) ice_preferSecure:(BOOL)preferSecure;
+-(id) ice_preferSecure:(BOOL)preferSecure;
 -(id<ICERouterPrx>) ice_getRouter;
--(id<ICEObjectPrx>) ice_router:(id<ICERouterPrx>)router;
+-(id) ice_router:(id<ICERouterPrx>)router;
 -(id<ICELocatorPrx>) ice_getLocator;
--(id<ICEObjectPrx>) ice_locator:(id<ICELocatorPrx>)locator;
+-(id) ice_locator:(id<ICELocatorPrx>)locator;
 -(BOOL) ice_isCollocationOptimized;
--(id<ICEObjectPrx>) ice_collocationOptimized:(BOOL)collocOptimized;
--(id<ICEObjectPrx>) ice_twoway;
+-(id) ice_collocationOptimized:(BOOL)collocOptimized;
+-(id) ice_twoway;
 -(BOOL) ice_isTwoway;
--(id<ICEObjectPrx>) ice_oneway;
+-(id) ice_oneway;
 -(BOOL) ice_isOneway;
--(id<ICEObjectPrx>) ice_batchOneway;
+-(id) ice_batchOneway;
 -(BOOL) ice_isBatchOneway;
--(id<ICEObjectPrx>) ice_datagram;
+-(id) ice_datagram;
 -(BOOL) ice_isDatagram;
--(id<ICEObjectPrx>) ice_batchDatagram;
+-(id) ice_batchDatagram;
 -(BOOL) ice_isBatchDatagram;
--(id<ICEObjectPrx>) ice_compress:(BOOL)compress;
--(id<ICEObjectPrx>) ice_timeout:(int)timeout;
--(id<ICEObjectPrx>) ice_connectionId:(NSString*)connectionId;
+-(id) ice_compress:(BOOL)compress;
+-(id) ice_timeout:(int)timeout;
+-(id) ice_connectionId:(NSString*)connectionId;
 //ICEConnection* ice_getConnection;
 //ICEConnection* ice_getCachedConnection;
 -(void) ice_flushBatchRequests;
@@ -125,7 +125,7 @@
 -(void) checkTwowayOnly__:(NSString*)operation;
 -(void) invoke__:(NSString*)operation mode:(ICEOperationMode)mode os:(id<ICEOutputStream>)os 
               is:(id<ICEInputStream>*)is context:(ICEContext*)context;
--(BOOL) invoke_async__:(id)target response:(SEL)response exception:(SEL)exception sent:(SEL)sent finished:(SEL)finished 
-             operation:(NSString*)operation mode:(ICEOperationMode)mode os:(id<ICEOutputStream>)os 
-               context:(ICEContext*)context;
+-(BOOL) invoke_async__:(id)target response:(SEL)response exception:(SEL)exception sent:(SEL)sent 
+         finishedClass:(Class)finishedClass finished:(SEL)finished operation:(NSString*)operation 
+                  mode:(ICEOperationMode)mode os:(id<ICEOutputStream>)os context:(ICEContext*)context;
 @end

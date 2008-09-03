@@ -38,12 +38,12 @@ class AMICallback : public Ice::AMI_Array_Object_ice_invoke
 {
 public:
 
-AMICallback(const Ice::CommunicatorPtr& communicator, id target, SEL resp, SEL ex, id responder, SEL finished) : 
+AMICallback(const Ice::CommunicatorPtr& communicator, id target, SEL resp, SEL ex, Class finishedClass, SEL finished) : 
     _target(target),
     _communicator(communicator), 
     _response(resp),
     _exception(ex),
-    _responder(responder), 
+    _finishedClass(finishedClass),
     _finished(finished)
 {
     [_target retain];
@@ -70,7 +70,7 @@ ice_response(bool ok , const std::pair<const Byte*, const Byte*>& outParams)
 
     @try
     {
-        objc_msgSend(_responder, _finished, _target, _response, _exception, ok, is);
+        objc_msgSend(_finishedClass, _finished, _target, _response, _exception, ok, is);
     }
     @catch(NSException* ex)
     {
@@ -115,7 +115,7 @@ private:
 const Ice::CommunicatorPtr _communicator;
 SEL _response;
 SEL _exception;
-id _responder;
+Class _finishedClass;
 SEL _finished;
 };
 typedef IceUtil::Handle<AMICallback> AMICallbackPtr;
@@ -124,9 +124,9 @@ class AMICallbackWithSent : public AMICallback, public Ice::AMISentCallback
 {
 public:
 
-AMICallbackWithSent(const Ice::CommunicatorPtr& communicator, id target, SEL resp, SEL ex, SEL sent, id responder,
-                    SEL finished) : 
-    AMICallback(communicator, target, resp, ex, responder, finished),
+AMICallbackWithSent(const Ice::CommunicatorPtr& communicator, id target, SEL resp, SEL ex, SEL sent, 
+                    Class finishedClass ,SEL finished) : 
+    AMICallback(communicator, target, resp, ex, finishedClass, finished),
     _sent(sent)
 {
 }
@@ -564,6 +564,7 @@ SEL _sent;
               response:(SEL)response
              exception:(SEL)exception
                   sent:(SEL)sent
+              finishedClass:(Class)finishedClass
               finished:(SEL)finished
              operation:(NSString*)operation
                   mode:(ICEOperationMode)mode 
@@ -583,11 +584,11 @@ SEL _sent;
         if(sent != nil)
         {
             amiCB = new AMICallbackWithSent(OBJECTPRX->ice_getCommunicator(), target, response, exception, sent,
-                                            [self class], finished);
+                                            finishedClass, finished);
         }
         else
         {
-            amiCB = new AMICallback(OBJECTPRX->ice_getCommunicator(), target, response, exception, [self class], 
+            amiCB = new AMICallback(OBJECTPRX->ice_getCommunicator(), target, response, exception, finishedClass, 
                                     finished);
         }
 
@@ -887,7 +888,7 @@ SEL _sent;
 {
     return [ICEIdentity identityWithIdentity:OBJECTPRX->ice_getIdentity()];
 }
--(id<ICEObjectPrx>) ice_identity:(ICEIdentity*)identity
+-(id) ice_identity:(ICEIdentity*)identity
 {
     return [[self class] objectPrxWithObjectPrx__:OBJECTPRX->ice_identity([identity identity])];
 }
@@ -895,7 +896,7 @@ SEL _sent;
 {
     return [toNSDictionary(OBJECTPRX->ice_getContext()) autorelease];
 }
--(id<ICEObjectPrx>) ice_context:(ICEContext*)context
+-(id) ice_context:(ICEContext*)context
 {
     Ice::Context ctx;
     return [[self class] objectPrxWithObjectPrx__:OBJECTPRX->ice_context(fromNSDictionary(context, ctx))];
@@ -904,7 +905,7 @@ SEL _sent;
 {
     return [toNSString(OBJECTPRX->ice_getFacet()) autorelease];
 }
--(id<ICEObjectPrx>) ice_facet:(NSString*)facet
+-(id) ice_facet:(NSString*)facet
 {
     return [[self class] objectPrxWithObjectPrx__:OBJECTPRX->ice_facet(fromNSString(facet))];
 }
@@ -912,21 +913,21 @@ SEL _sent;
 {
     return [toNSString(OBJECTPRX->ice_getAdapterId()) autorelease];
 }
--(id<ICEObjectPrx>) ice_adapterId:(NSString*)adapterId
+-(id) ice_adapterId:(NSString*)adapterId
 {
     return [[self class] objectPrxWithObjectPrx__:OBJECTPRX->ice_adapterId(fromNSString(adapterId))];
 }
 //-(NSArray*) ice_getEndpoints
 //{
 //}
-//-(id<ICEObjectPrx>) ice_endpoints:(NSArray*)endpoints
+//-(id) ice_endpoints:(NSArray*)endpoints
 //{
 //}
 -(ICEInt) ice_getLocatorCacheTimeout
 {
     return OBJECTPRX->ice_getLocatorCacheTimeout();
 }
--(id<ICEObjectPrx>) ice_locatorCacheTimeout:(ICEInt)timeout
+-(id) ice_locatorCacheTimeout:(ICEInt)timeout
 {
     return [[self class] objectPrxWithObjectPrx__:OBJECTPRX->ice_locatorCacheTimeout(timeout)];
 }
@@ -934,7 +935,7 @@ SEL _sent;
 {
     return OBJECTPRX->ice_isConnectionCached();
 }
--(id<ICEObjectPrx>) ice_connectionCached:(BOOL)cached
+-(id) ice_connectionCached:(BOOL)cached
 {
     return [[self class] objectPrxWithObjectPrx__:OBJECTPRX->ice_connectionCached(cached)];
 }
@@ -942,7 +943,7 @@ SEL _sent;
 {
     return (ICEEndpointSelectionType)OBJECTPRX->ice_getEndpointSelection();
 }
--(id<ICEObjectPrx>) ice_endpointSelection:(ICEEndpointSelectionType)type
+-(id) ice_endpointSelection:(ICEEndpointSelectionType)type
 {
     return [[self class] objectPrxWithObjectPrx__:OBJECTPRX->ice_endpointSelection((Ice::EndpointSelectionType)type)];
 }
@@ -950,7 +951,7 @@ SEL _sent;
 {
     return OBJECTPRX->ice_isSecure();
 }
--(id<ICEObjectPrx>) ice_secure:(BOOL)secure
+-(id) ice_secure:(BOOL)secure
 {
     return [[self class] objectPrxWithObjectPrx__:OBJECTPRX->ice_secure(secure)];
 }
@@ -958,7 +959,7 @@ SEL _sent;
 {
     return OBJECTPRX->ice_isPreferSecure();
 }
--(id<ICEObjectPrx>) ice_preferSecure:(BOOL)preferSecure
+-(id) ice_preferSecure:(BOOL)preferSecure
 {
     return [[self class] objectPrxWithObjectPrx__:OBJECTPRX->ice_preferSecure(preferSecure)];
 }
@@ -966,7 +967,7 @@ SEL _sent;
 {
     return (id<ICERouterPrx>)[ICERouterPrx objectPrxWithObjectPrx__:OBJECTPRX->ice_getRouter()];
 }
--(id<ICEObjectPrx>) ice_router:(id<ICERouterPrx>)router
+-(id) ice_router:(id<ICERouterPrx>)router
 {
     return [[self class] objectPrxWithObjectPrx__:OBJECTPRX->ice_router(
             Ice::RouterPrx::uncheckedCast(Ice::ObjectPrx([(ICEObjectPrx*)router objectPrx__])))];
@@ -975,7 +976,7 @@ SEL _sent;
 {
     return (id<ICELocatorPrx>)[ICELocatorPrx objectPrxWithObjectPrx__:OBJECTPRX->ice_getLocator()];
 }
--(id<ICEObjectPrx>) ice_locator:(id<ICELocatorPrx>)locator
+-(id) ice_locator:(id<ICELocatorPrx>)locator
 {
     return [[self class] objectPrxWithObjectPrx__:OBJECTPRX->ice_locator(
             Ice::LocatorPrx::uncheckedCast(Ice::ObjectPrx([(ICEObjectPrx*)locator objectPrx__])))];
@@ -984,11 +985,11 @@ SEL _sent;
 {
     return OBJECTPRX->ice_isCollocationOptimized();
 }
--(id<ICEObjectPrx>) ice_collocationOptimized:(BOOL)collocOptimized
+-(id) ice_collocationOptimized:(BOOL)collocOptimized
 {
     return [[self class] objectPrxWithObjectPrx__:OBJECTPRX->ice_collocationOptimized(collocOptimized)];
 }
--(id<ICEObjectPrx>) ice_twoway
+-(id) ice_twoway
 {
     return [[self class] objectPrxWithObjectPrx__:OBJECTPRX->ice_twoway()];
 }
@@ -996,7 +997,7 @@ SEL _sent;
 {
     return OBJECTPRX->ice_isTwoway();
 }
--(id<ICEObjectPrx>) ice_oneway
+-(id) ice_oneway
 {
     return [[self class] objectPrxWithObjectPrx__:OBJECTPRX->ice_oneway()];
 }
@@ -1004,7 +1005,7 @@ SEL _sent;
 {
     return OBJECTPRX->ice_isOneway();
 }
--(id<ICEObjectPrx>) ice_batchOneway
+-(id) ice_batchOneway
 {
     return [[self class] objectPrxWithObjectPrx__:OBJECTPRX->ice_batchOneway()];
 }
@@ -1012,7 +1013,7 @@ SEL _sent;
 {
     return OBJECTPRX->ice_isBatchOneway();
 }
--(id<ICEObjectPrx>) ice_datagram
+-(id) ice_datagram
 {
     return [[self class] objectPrxWithObjectPrx__:OBJECTPRX->ice_datagram()];
 }
@@ -1020,7 +1021,7 @@ SEL _sent;
 {
     return OBJECTPRX->ice_isDatagram();
 }
--(id<ICEObjectPrx>) ice_batchDatagram
+-(id) ice_batchDatagram
 {
     return [[self class] objectPrxWithObjectPrx__:OBJECTPRX->ice_batchDatagram()];
 }
@@ -1028,15 +1029,15 @@ SEL _sent;
 {
     return OBJECTPRX->ice_isBatchDatagram();
 }
--(id<ICEObjectPrx>) ice_compress:(BOOL)compress
+-(id) ice_compress:(BOOL)compress
 {
     return [[self class] objectPrxWithObjectPrx__:OBJECTPRX->ice_compress(compress)];
 }
--(id<ICEObjectPrx>) ice_timeout:(int)timeout
+-(id) ice_timeout:(int)timeout
 {
     return [[self class] objectPrxWithObjectPrx__:OBJECTPRX->ice_timeout(timeout)];
 }
--(id<ICEObjectPrx>) ice_connectionId:(NSString*)connectionId
+-(id) ice_connectionId:(NSString*)connectionId
 {
     return [[self class] objectPrxWithObjectPrx__:OBJECTPRX->ice_connectionId(fromNSString(connectionId))];
 }
