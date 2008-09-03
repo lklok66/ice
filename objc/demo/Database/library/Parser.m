@@ -52,7 +52,7 @@ Parser* parser;
 
 -(void)addBook:(NSArray*)args
 {
-    if([args count] != 3)
+    if(args.count != 3)
     {
         [self errorWithString:@"`add' requires exactly three arguments (type `help' for more info)"];
         return;
@@ -78,7 +78,7 @@ Parser* parser;
 }
 -(void)findIsbn:(NSArray*)args
 {
-    if([args count] != 1)
+    if(args.count != 1)
     {
         [self errorWithString:@"`isbn' requires exactly one argument (type `help' for more info)"];
         return;
@@ -97,16 +97,16 @@ Parser* parser;
                 // Ignore
             }
 
-            [self setQuery_:nil];
-            [self setCurrent_:nil];
+            self.query_ =  nil;
+            self.current_ = nil;
         }
 
         DemoBookQueryResultPrx* query;
         DemoBookDescription* current;
         [library_ queryByIsbn:[args objectAtIndex:0] first:&current result:&query];
 
-        [self setCurrent_:current];
-        [self setQuery_:query];
+        self.current_ = current;
+        self.query_ = query;
         
         [self printCurrent];
     }
@@ -122,7 +122,7 @@ Parser* parser;
 
 -(void)findAuthors:(NSArray*)args
 {
-    if([args count] != 1)
+    if(args.count != 1)
     {
         [self errorWithString:@"`authors' requires exactly one argument (type `help' for more info)"];
         return;
@@ -140,16 +140,16 @@ Parser* parser;
             {
                 // Ignore
             }
-            [self setQuery_:nil];
-            [self setCurrent_:nil];
+            self.query_ = nil;
+            self.current_ = nil;
         }
 
         DemoBookQueryResultPrx* query;
         DemoBookDescription* current;
         [library_ queryByAuthor:[args objectAtIndex:0] first:&current result:&query];
 
-        [self setCurrent_:current];
-        [self setQuery_:query];
+        self.current_ = current;
+        self.query_ = query;
         [self printCurrent];
     }
     @catch(DemoNoResultsException* ex)
@@ -176,17 +176,17 @@ Parser* parser;
         NSArray* next = [query_ next:1 destroyed:&destroyed];
         if([next count] > 0)
         {
-            [self setCurrent_:[next objectAtIndex:0]];
+            self.current_ = [next objectAtIndex:0];
         }
         else
         {
             NSAssert(destroyed, @"");
-            [self setCurrent_:nil];
+            self.current_ = nil;
         }
 
         if(destroyed)
         {
-            [self setQuery_:nil];
+            self.query_ = nil;
         }
 
         [self printCurrent];
@@ -206,12 +206,12 @@ Parser* parser;
     if(current_ != nil)
     {
         printf("current book is:\n");
-        printf("isbn: %s\n", [[current_ isbn] UTF8String]);
-        printf("title: %s\n", [[current_ title] UTF8String]);
+        printf("isbn: %s\n", [current_.isbn UTF8String]);
+        printf("title: %s\n", [current_.title UTF8String]);
         NSMutableString* auth = [[NSMutableString alloc] init];
-        for(NSString* s in [current_ authors])
+        for(NSString* s in current_.authors)
         {
-            if(s != [[current_ authors] objectAtIndex:0])
+            if(s != [current_.authors objectAtIndex:0])
             {
                 [auth appendString:@", "];
             }
@@ -219,9 +219,9 @@ Parser* parser;
         }
         printf("authors: %s\n",  [auth UTF8String]);
         [auth release];
-        if([[current_ rentedBy] length] > 0)
+        if([current_.rentedBy length] > 0)
         {
-            printf("rented: %s\n", [[current_ rentedBy] UTF8String]);
+            printf("rented: %s\n", [current_.rentedBy UTF8String]);
         }
     }
     else
@@ -232,7 +232,7 @@ Parser* parser;
 
 -(void)rentCurrent:(NSArray*)args
 {
-    if([args count] != 1)
+    if(args.count != 1)
     {
         [self errorWithString:@"`rent' requires exactly one argument (type `help' for more info)"];
         return;
@@ -242,9 +242,9 @@ Parser* parser;
     {
         if(current_ != nil)
         {
-            [[current_ proxy] rentBook:[args objectAtIndex:0]];
+            [current_.proxy rentBook:[args objectAtIndex:0]];
             printf("the book is now rented by `%s'\n", [[args objectAtIndex:0] UTF8String]);
-            [self setCurrent_:[[current_ proxy] describe]];
+            self.current_  = [current_.proxy describe];
         }
         else
         {
@@ -271,9 +271,9 @@ Parser* parser;
     {
         if(current_ != nil)
         {
-            [[current_ proxy] returnBook];
+            [current_.proxy returnBook];
             printf( "the book has been returned.\n");
-            [self setCurrent_:[[current_ proxy] describe]];
+            self.current_ = [current_.proxy describe];
         }
         else
         {
@@ -300,8 +300,8 @@ Parser* parser;
     {
         if(current_ != nil)
         {
-            [[current_ proxy] destroy];
-            [self setCurrent_:nil];
+            [current_.proxy destroy];
+            self.current_ = nil;
             printf("removed current book\n");
         }
         else
@@ -319,12 +319,25 @@ Parser* parser;
     }
 }
 
+-(const char*)getPrompt
+{
+    if(continue_)
+    {
+        continue_ = NO;
+        return "(cont) ";
+    }
+    else
+    {
+        return ">>> ";
+    }
+}
+
 -(int)getInput:(char*)buf max:(int)max
 {
     NSAssert(pool_, @"");
     [pool_ drain];
 
-    printf("%s", [self getPrompt]);
+    printf("%s", self.getPrompt);
     fflush(stdout);
 
     NSMutableData* line = [ [ NSMutableData alloc] init];
@@ -379,19 +392,6 @@ Parser* parser;
     continue_ = YES;
 }
 
--(const char*)getPrompt
-{
-    if(continue_)
-    {
-        continue_ = NO;
-        return "(cont) ";
-    }
-    else
-    {
-        return ">>> ";
-    }
-}
-
 -(void)error:(const char*)s
 {
     fprintf(stderr, "error: %s", s);
@@ -427,8 +427,8 @@ Parser* parser;
 
     continue_ = false;
 
-    query_ = nil;
-    current_ = nil;
+    self.query_ = nil;
+    self.current_ = nil;
 
     int status = yyparse();
     if(errors_)

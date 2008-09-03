@@ -62,11 +62,11 @@
     [cond_ lock];
     @try
     {
-        while(![self isCancelled])
+        while(!self.isCancelled)
         {
             NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
             [cond_ waitUntilDate:[NSDate dateWithTimeIntervalSinceNow:timeout_]];
-            if(![self isCancelled])
+            if(!self.isCancelled)
             {
                 @try
                 {
@@ -135,7 +135,7 @@ runParser(int argc, char* argv[], id<ICECommunicator> communicator)
     [refresh cancel];
 
     // No join.
-    while(![refresh isFinished])
+    while(!refresh.isFinished)
     {
         [NSThread sleepForTimeInterval:0.1];
     }

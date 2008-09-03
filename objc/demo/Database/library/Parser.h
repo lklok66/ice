@@ -51,13 +51,13 @@ BOOL continue_;
 int errors_;
 }
 
--(id)initWithLibrary: (id<DemoLibraryPrx>) library;
-+(id)parserWithLibrary: (id<DemoLibraryPrx>) library;
+-(id)initWithLibrary:(id<DemoLibraryPrx>) library;
++(id)parserWithLibrary:(id<DemoLibraryPrx>) library;
 
 -(void) usage;
 
--(void) addBook: (NSArray*) data;
--(void) findIsbn: (NSArray*)data;
+-(void) addBook:(NSArray*) data;
+-(void) findIsbn:(NSArray*)data;
 -(void) findAuthors:(NSArray*)data;
 -(void) nextFoundBook;
 -(void) printCurrent;
@@ -65,15 +65,14 @@ int errors_;
 -(void) returnCurrent;
 -(void) removeCurrent;
 
--(int) getInput: (char*)buf max: (int)max;
+-(int) getInput:(char*)buf max:(int)max;
 -(void) continueLine;
--(const char*) getPrompt;
 
--(void) error: (const char*) s;
--(void) errorWithString: (NSString*) s;
+-(void) error:(const char*) s;
+-(void) errorWithString:(NSString*) s;
 
--(void) warning: (const char*) s;
--(void) warningWithString: (NSString*) s;
+-(void) warning:(const char*) s;
+-(void) warningWithString:(NSString*) s;
 
 -(int)parse;
 
