@@ -7,14 +7,12 @@
 //
 // **********************************************************************
 
-#import <Ice/ObjectAdapter.h>
-#import <Ice/Wrapper.h>
+#import <Test.h>
 
-#include <IceCpp/ObjectAdapter.h>
-
-@class ICECommunicator;
-
-@interface ICEObjectAdapter : ICEInternalWrapper<ICEObjectAdapter>
--(Ice::ObjectAdapter*) adapter;
+@interface TimeoutI : TestTimeout
+-(void) op:(ICECurrent *)current;
+-(void) sendData:(TestMutableByteSeq *)seq current:(ICECurrent *)current;
+-(void) sleep:(ICEInt)to current:(ICECurrent *)current;
+-(void) holdAdapter:(ICEInt)to current:(ICECurrent *)current;
+-(void) shutdown:(ICECurrent *)current;
 @end
-

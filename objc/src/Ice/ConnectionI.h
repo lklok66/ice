@@ -7,14 +7,10 @@
 //
 // **********************************************************************
 
-#import <Ice/ObjectAdapter.h>
+#import <Ice/Connection.h>
 #import <Ice/Wrapper.h>
 
-#include <IceCpp/ObjectAdapter.h>
-
-@class ICECommunicator;
-
-@interface ICEObjectAdapter : ICEInternalWrapper<ICEObjectAdapter>
--(Ice::ObjectAdapter*) adapter;
+#include <IceCpp/Connection.h>
+ 
+@interface ICEConnection : ICEInternalWrapper<ICEConnection>
 @end
-

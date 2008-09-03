@@ -15,5 +15,5 @@
         id<ICEObjectAdapter> _adapter;
 }
 
-+(id) ThrowerI:(id<ICEObjectAdapter>)adapter;
++(id) throwerI:(id<ICEObjectAdapter>)adapter;
 @end

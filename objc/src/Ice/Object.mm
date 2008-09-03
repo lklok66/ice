@@ -113,11 +113,18 @@ IceObjC::ObjectI::ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& cb
     }
     @catch(NSException* ex)
     {
-        [pool release];
         [c release];
         [is release];
         [os release];
-        rethrowCxxException(ex);
+        try
+        {
+            rethrowCxxException(ex);
+        }
+        catch(const std::exception&)
+        {
+            [pool release];
+            throw;
+        }
     }
     [pool release];
     [c release];

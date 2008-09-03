@@ -8,21 +8,17 @@
 // **********************************************************************
 
 #import <Ice/Ice.h>
-#import <TestI.h>
+#import <TestCommon.h>
+#import <Test.h>
 
 #import <Foundation/NSAutoreleasePool.h>
- 
+
 int
 run(int argc, char* argv[], id<ICECommunicator> communicator)
 {
-    id<ICEProperties> properties = [communicator getProperties];
-    [properties setProperty:@"Ice.Warn.Dispatch" value:@"0"];
-    [[communicator getProperties] setProperty:@"TestAdapter.Endpoints" value:@"default -p 12010 -t 10000:udp"];
-    id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestAdapter"];
-    id<ICEObject> object = [ThrowerI throwerI:adapter];
-    [adapter add:object identity:[communicator stringToIdentity:@"thrower"]];
-    [adapter activate];
-    [communicator waitForShutdown];
+    TestRetryPrx* allTests(id<ICECommunicator>);
+    TestRetryPrx* retry = allTests(communicator);
+    [retry shutdown];
     return EXIT_SUCCESS;
 }
 
@@ -35,21 +31,24 @@ main(int argc, char* argv[])
 
     @try
     {
-        ICEInitializationData* initData = [ICEInitializationData initializationData];
+        ICEInitializationData* initData = [[ICEInitializationData alloc] init];
         [initData setProperties:[ICEUtil createProperties:&argc argv:argv]];
+
         //
-        // Its possible to have batch oneway requests dispatched after
-        // the adapter is deactivated due to thread scheduling so we
-        // supress this warning.
+        // For this test, we want to disable retries.
         //
-        [[initData properties] setProperty:@"Ice.Warn.Dispatch" value:@"0"];
+        [[initData properties] setProperty:@"Ice.RetryIntervals" value:@"-1"];
+
+        //
+        // This test kills connections, so we don't want warnings.
+        //
+        [[initData properties] setProperty:@"Ice.Warn.Connections" value:@"0"];
 
         communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];
         status = run(argc, argv, communicator);
     }
-    @catch(ICEException* ex)
+    @catch(ICEException*)
     {
-        NSLog(@"%@", ex);
         status = EXIT_FAILURE;
     }
 

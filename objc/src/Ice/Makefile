@@ -22,6 +22,7 @@ OBJC_OBJS	= BuiltinSequences.o \
 		  Process.o
 
 OBJCPP_OBJS	= Communicator.o \
+		  Connection.o \
 		  Current.o \
 		  IdentityI.o \
                   Exception.o \
@@ -103,6 +104,8 @@ $(HDIR)/ObjectAdapter.h ObjectAdapter.m:
 $(HDIR)/Properties.h Properties.m:
 	
 $(HDIR)/Endpoint.h Endpoint.m:
+	
+$(HDIR)/Connection.h Connection.m:
 	
 
 ice_cpp_include = $(ice_cpp_dir)/include

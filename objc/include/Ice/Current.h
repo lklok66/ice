@@ -14,6 +14,7 @@
 // Forward declarations
 //
 @protocol ICEObjectAdapter;
+@protocol ICEConnection;
 @class ICEIdentity;
 
 typedef NSDictionary ICEContext;
@@ -30,6 +31,7 @@ typedef enum
 {
     @private
         id<ICEObjectAdapter> adapter;
+        id<ICEConnection> con;
         ICEIdentity *id_;
         NSString *facet;
         NSString *operation;
@@ -39,6 +41,7 @@ typedef enum
 }
 
 @property(nonatomic, retain) id<ICEObjectAdapter> adapter;
+@property(nonatomic, retain) id<ICEConnection> con;
 @property(nonatomic, retain) ICEIdentity *id_;
 @property(nonatomic, retain) NSString *facet;
 @property(nonatomic, retain) NSString *operation;
@@ -46,8 +49,8 @@ typedef enum
 @property(nonatomic, retain) NSDictionary *ctx;
 @property(nonatomic, assign) ICEInt requestId;
 
--(id) init:(id<ICEObjectAdapter>)adapter id_:(ICEIdentity *)id_ facet:(NSString *)facet operation:(NSString *)operation mode:(ICEOperationMode)mode ctx:(NSDictionary *)ctx requestId:(ICEInt)requestId;
-+(id) current:(id<ICEObjectAdapter>)adapter id_:(ICEIdentity *)id_ facet:(NSString *)facet operation:(NSString *)operation mode:(ICEOperationMode)mode ctx:(NSDictionary *)ctx requestId:(ICEInt)requestId;
+-(id) init:(id<ICEObjectAdapter>)adapter con:(id<ICEConnection>)con_ id_:(ICEIdentity *)id_ facet:(NSString *)facet operation:(NSString *)operation mode:(ICEOperationMode)mode ctx:(NSDictionary *)ctx requestId:(ICEInt)requestId;
++(id) current:(id<ICEObjectAdapter>)adapter con:(id<ICEConnection>)con_ id_:(ICEIdentity *)id_ facet:(NSString *)facet operation:(NSString *)operation mode:(ICEOperationMode)mode ctx:(NSDictionary *)ctx requestId:(ICEInt)requestId;
 +(id) current;
 -(id) copyWithZone:(NSZone *)zone;
 -(NSUInteger) hash;

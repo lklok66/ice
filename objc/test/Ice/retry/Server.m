@@ -11,16 +11,14 @@
 #import <TestI.h>
 
 #import <Foundation/NSAutoreleasePool.h>
- 
+
 int
 run(int argc, char* argv[], id<ICECommunicator> communicator)
 {
-    id<ICEProperties> properties = [communicator getProperties];
-    [properties setProperty:@"Ice.Warn.Dispatch" value:@"0"];
     [[communicator getProperties] setProperty:@"TestAdapter.Endpoints" value:@"default -p 12010 -t 10000:udp"];
     id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestAdapter"];
-    id<ICEObject> object = [ThrowerI throwerI:adapter];
-    [adapter add:object identity:[communicator stringToIdentity:@"thrower"]];
+    ICEObject* object = [[RetryI alloc] init];
+    [adapter add:object identity:[communicator stringToIdentity:@"retry"]];
     [adapter activate];
     [communicator waitForShutdown];
     return EXIT_SUCCESS;
@@ -35,16 +33,7 @@ main(int argc, char* argv[])
 
     @try
     {
-        ICEInitializationData* initData = [ICEInitializationData initializationData];
-        [initData setProperties:[ICEUtil createProperties:&argc argv:argv]];
-        //
-        // Its possible to have batch oneway requests dispatched after
-        // the adapter is deactivated due to thread scheduling so we
-        // supress this warning.
-        //
-        [[initData properties] setProperty:@"Ice.Warn.Dispatch" value:@"0"];
-
-        communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];
+        communicator = [ICEUtil createCommunicator:&argc argv:argv];
         status = run(argc, argv, communicator);
     }
     @catch(ICEException* ex)

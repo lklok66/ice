@@ -17,10 +17,18 @@
 @end
 
 @implementation FooException
+-(id)init
+{
+    if(![super initWithName:@"FooException" reason:@"no reason" userInfo:nil])
+    {
+        return nil;
+    }
+    return self;
+}
 @end
 
 @implementation ThrowerI
-+(id) ThrowerI:(id<ICEObjectAdapter>)adapter
++(id) throwerI:(id<ICEObjectAdapter>)adapter
 {
      ThrowerI *t = [[[ThrowerI alloc] init] autorelease];
      t->_adapter = adapter;
@@ -39,7 +47,7 @@
 
 -(BOOL) supportsAssertException:(ICECurrent*)current
 {
-    return YES;
+    return NO;
 }
 
 -(void) throwAasA:(ICEInt)a current:(ICECurrent*)current
@@ -116,6 +124,6 @@
 
 -(void) throwAssertException:(ICECurrent*)current
 {
-    NSAssert(NO, @"throwAssertException");
+    // Not supported.
 }
 @end

@@ -8,6 +8,7 @@
 // **********************************************************************
 
 #import <Ice/Communicator.h>
+#import <Ice/Connection.h>
 #import <Ice/Current.h>
 #import <Ice/Exception.h>
 #import <Ice/Identity.h>

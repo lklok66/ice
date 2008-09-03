@@ -19,27 +19,9 @@
 #define OBJECTADAPTER dynamic_cast<Ice::ObjectAdapter*>(static_cast<IceUtil::Shared*>(cxxObject_))
 
 @implementation ICEObjectAdapter
--(id) initWithCxxObject:(IceUtil::Shared*)cxxObject
+-(Ice::ObjectAdapter*) adapter
 {
-    if(![super initWithCxxObject:cxxObject])
-    {
-        return nil;
-    }
-
-    try
-    {
-        communicator_ = [ICECommunicator wrapperWithCxxObjectNoAutoRelease:OBJECTADAPTER->getCommunicator().get()];
-    }
-    catch(const std::exception&)
-    {
-        // Ignore
-    }
-    return self;
-}
--(void) dealloc
-{
-    [communicator_ release];
-    [super dealloc];
+    return OBJECTADAPTER;
 }
 //
 // @protocol ICEObjectAdapter methods.
@@ -154,7 +136,6 @@
     {
         rethrowObjCException(ex);
     }
-    [communicator_ removeObjectAdapter:self];
 }
 
 -(id<ICEObjectPrx>) add:(ICEObject*)servant identity:(ICEIdentity*)ident

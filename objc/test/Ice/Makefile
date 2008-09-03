@@ -13,7 +13,9 @@ include $(top_srcdir)/config/Make.rules
 
 SUBDIRS		= proxy \
 	          operations \
-		  exceptions
+		  exceptions \
+		  retry \
+		  timeout
 
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \

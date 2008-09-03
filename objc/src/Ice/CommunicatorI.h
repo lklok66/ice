@@ -17,10 +17,5 @@
 @class ICEObjectAdapter;
 
 @interface ICECommunicator : ICEInternalWrapper<ICECommunicator>
-{
-@private
-    NSMutableSet* adapters_;
-}
 -(Ice::Communicator*)communicator;
--(void)removeObjectAdapter:(ICEObjectAdapter*)adapter;
 @end

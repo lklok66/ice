@@ -7,14 +7,20 @@
 //
 // **********************************************************************
 
-#import <Ice/ObjectAdapter.h>
-#import <Ice/Wrapper.h>
+#import <Ice/Ice.h>
+#import <TestI.h>
 
-#include <IceCpp/ObjectAdapter.h>
+@implementation RetryI
+-(void) op:(BOOL)kill current:(ICECurrent*)current
+{
+   if(kill)
+   {
+       [[current con] close:YES];
+   }
+}
 
-@class ICECommunicator;
-
-@interface ICEObjectAdapter : ICEInternalWrapper<ICEObjectAdapter>
--(Ice::ObjectAdapter*) adapter;
+-(void) shutdown:(ICECurrent*)current
+{
+    [[[current adapter] getCommunicator] shutdown];
+}
 @end
-

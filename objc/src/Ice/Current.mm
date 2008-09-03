@@ -10,6 +10,7 @@
 #import <Ice/CurrentI.h>
 
 #import <Ice/ObjectAdapterI.h>
+#import <Ice/ConnectionI.h>
 #import <Ice/IdentityI.h>
 #import <Ice/Util.h>
 
@@ -25,6 +26,7 @@
 @implementation ICECurrent
 
 @synthesize adapter;
+@synthesize con;
 @synthesize id_;
 @synthesize facet;
 @synthesize operation;
@@ -32,13 +34,14 @@
 @synthesize ctx;
 @synthesize requestId;
 
--(id) init:(id<ICEObjectAdapter>)adapter_ id_:(ICEIdentity *)id__ facet:(NSString *)facet_ operation:(NSString *)operation_ mode:(ICEOperationMode)mode_ ctx:(NSDictionary *)ctx_ requestId:(ICEInt)requestId_
+-(id) init:(id<ICEObjectAdapter>)adapter_ con:(id<ICEConnection>)con_ id_:(ICEIdentity *)id__ facet:(NSString *)facet_ operation:(NSString *)operation_ mode:(ICEOperationMode)mode_ ctx:(NSDictionary *)ctx_ requestId:(ICEInt)requestId_
 {
     if(![super init])
     {
         return nil;
     }
     adapter = [adapter_ retain];
+    con = [con_ retain];
     id_ = [id__ retain];
     facet = [facet_ retain];
     operation = [operation_ retain];
@@ -48,9 +51,9 @@
     return self;
 }
 
-+(id) current:(id<ICEObjectAdapter>)adapter_ id_:(ICEIdentity *)id__ facet:(NSString *)facet_ operation:(NSString *)operation_ mode:(ICEOperationMode)mode_ ctx:(NSDictionary *)ctx_ requestId:(ICEInt)requestId_
++(id) current:(id<ICEObjectAdapter>)adapter_ con:(id<ICEConnection>)con_ id_:(ICEIdentity *)id__ facet:(NSString *)facet_ operation:(NSString *)operation_ mode:(ICEOperationMode)mode_ ctx:(NSDictionary *)ctx_ requestId:(ICEInt)requestId_
 {
-    ICECurrent *s__ = [((ICECurrent *)[ICECurrent alloc]) init:adapter_ id_:id__ facet:facet_ operation:operation_ mode:mode_ ctx:ctx_ requestId:requestId_];
+    ICECurrent *s__ = [((ICECurrent *)[ICECurrent alloc]) init:adapter_ con:con_ id_:id__ facet:facet_ operation:operation_ mode:mode_ ctx:ctx_ requestId:requestId_];
     [s__ autorelease];
     return s__;
 }
@@ -66,6 +69,7 @@
 {
     ICECurrent *copy_ = [ICECurrent allocWithZone:zone];
     copy_->adapter = [adapter retain];
+    copy_->con = [con retain];
     copy_->id_ = [id_ copy];
     copy_->facet = [facet copy];
     copy_->operation = [operation copy];
@@ -79,6 +83,7 @@
 {
     NSUInteger h_ = 0;
     h_ = (h_ << 1) ^ (!adapter ? 0 : [adapter hash]);
+    h_ = (h_ << 1) ^ (!con ? 0 : [con hash]);
     h_ = (h_ << 1) ^ (!id_ ? 0 : [id_ hash]);
     h_ = (h_ << 1) ^ (!facet ? 0 : [facet hash]);
     h_ = (h_ << 1) ^ (!operation ? 0 : [operation hash]);
@@ -109,6 +114,20 @@
     else
     {
         if(![adapter isEqual:obj_->adapter])
+        {
+            return NO;
+        }
+    }
+    if(!con)
+    {
+        if(obj_->con)
+        {
+            return NO;
+        }
+    }
+    else
+    {
+        if(![con isEqual:obj_->con])
         {
             return NO;
         }
@@ -183,6 +202,7 @@
 -(void) dealloc
 {
     [adapter release];
+    [con release];
     [id_ release];
     [facet release];
     [operation release];
@@ -206,6 +226,7 @@
     // avoid re-creating the wrappers for each dispatched invocation.
     //
     adapter = [[ICEObjectAdapter wrapperWithCxxObjectNoAutoRelease:current.adapter.get()] retain];
+    con = [[ICEConnection wrapperWithCxxObjectNoAutoRelease:current.con.get()] retain];
     id_ = [[ICEIdentity alloc] initWithIdentity:current.id];
     facet = [[NSString alloc] initWithUTF8String:current.facet.c_str()];
     operation = [[NSString alloc] initWithUTF8String:current.operation.c_str()];

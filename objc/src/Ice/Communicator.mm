@@ -23,27 +23,9 @@
 #define COMMUNICATOR dynamic_cast<Ice::Communicator*>(static_cast<IceUtil::Shared*>(cxxObject_))
 
 @implementation ICECommunicator
--(id) initWithCxxObject:(IceUtil::Shared*)cxxObject
-{
-    if(![super initWithCxxObject:cxxObject])
-    {
-        return nil;
-    }
-    adapters_ = [[NSMutableSet alloc] init];
-    return self;
-}
 -(Ice::Communicator*) communicator
 {
-    return (Ice::Communicator*)cxxObject_;
-}
--(void)removeObjectAdapter:(ICEObjectAdapter*)adapter
-{
-    [adapters_ removeObject:adapter];
-}
--(void) dealloc
-{
-    [adapters_ release];
-    [super dealloc];
+    return COMMUNICATOR;
 }
 //
 // Methods from @protocol ICECommunicator
@@ -59,7 +41,6 @@
     {
         rethrowObjCException(ex);
     }
-    [adapters_ removeAllObjects];
 }
 
 -(void) shutdown
@@ -171,7 +152,6 @@
         ICEObjectAdapter* adapter = [ICEObjectAdapter wrapperWithCxxObject:
                                                           COMMUNICATOR->createObjectAdapter(
                                                               fromNSString(name)).get()];
-        [adapters_ addObject:adapter];
         return adapter;
     }
     catch(const std::exception& ex)
@@ -188,7 +168,6 @@
         ICEObjectAdapter* adapter = [ICEObjectAdapter wrapperWithCxxObject:
                                                           COMMUNICATOR->createObjectAdapterWithEndpoints(
                                                               fromNSString(name), fromNSString(endpoints)).get()];
-        [adapters_ addObject:adapter];
         return adapter;
     }
     catch(const std::exception& ex)
@@ -206,7 +185,6 @@
         ICEObjectAdapter* adapter = [ICEObjectAdapter wrapperWithCxxObject:
                                                           COMMUNICATOR->createObjectAdapterWithRouter(
                                                               fromNSString(name), router).get()];
-        [adapters_ addObject:adapter];
         return adapter;
     }
     catch(const std::exception& ex)

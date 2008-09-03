@@ -7,14 +7,18 @@
 //
 // **********************************************************************
 
-#import <Ice/ObjectAdapter.h>
-#import <Ice/Wrapper.h>
+#ifndef TEST_ICE
+#define TEST_ICE
 
-#include <IceCpp/ObjectAdapter.h>
+module Test
+{
 
-@class ICECommunicator;
+interface Retry
+{
+    ["ami"] void op(bool kill);
+    void shutdown();
+};
 
-@interface ICEObjectAdapter : ICEInternalWrapper<ICEObjectAdapter>
--(Ice::ObjectAdapter*) adapter;
-@end
+};
 
+#endif

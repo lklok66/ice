@@ -492,14 +492,14 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
 	_M.dec();
         _M << eb;
 	_M << eb;
-
-	_M << sp << nl << "+(const char **) staticIds__:(int*)count idIndex:(int*)idx";
-	_M << sb;
-	_M << nl << "*count = sizeof(" << name << "_ids__) / sizeof(const char *);";
-        _M << nl << "*idx = " << scopedPos << ";";
-	_M << nl << "return " << name << "_ids__;";
-	_M << eb;
     }
+
+    _M << sp << nl << "+(const char **) staticIds__:(int*)count idIndex:(int*)idx";
+    _M << sb;
+    _M << nl << "*count = sizeof(" << name << "_ids__) / sizeof(const char *);";
+    _M << nl << "*idx = " << scopedPos << ";";
+    _M << nl << "return " << name << "_ids__;";
+    _M << eb;
 
 #if 0
     // Marshalling support

@@ -26,7 +26,7 @@ class ObjectWriter : public Ice::ObjectWriter
 {
 public:
     
-    ObjectWriter(ICEObject* obj) : _obj(obj)
+    ObjectWriter(ICEObject* obj, ICEOutputStream* stream) : _obj(obj), _stream(stream)
     {
     }
     
@@ -35,7 +35,7 @@ public:
     {
         @try
         {
-            [_obj write__:(id<ICEOutputStream>)[ICEOutputStream getWrapperWithCxxObjectNoAutoRelease:stream.get()]];
+            [_obj write__:_stream];
         }
         @catch(NSException* ex)
         {
@@ -46,6 +46,7 @@ public:
 private:
 
     ICEObject* _obj;
+    ICEOutputStream* _stream;
 };
 
 class ObjectReader : public Ice::ObjectReader
@@ -85,9 +86,10 @@ class UserExceptionWriter : public Ice::UserExceptionWriter
 {
 public:
     
-    UserExceptionWriter(ICEUserException* ex, const Ice::CommunicatorPtr& communicator) : 
+    UserExceptionWriter(ICEUserException* ex, ICEOutputStream* stream, const Ice::CommunicatorPtr& communicator) : 
         Ice::UserExceptionWriter(communicator),
-        _ex(ex)
+        _ex(ex),
+        _stream(stream)
     {
     }
     
@@ -96,7 +98,7 @@ public:
     {
         @try
         {
-            [_ex write__:[ICEOutputStream getWrapperWithCxxObjectNoAutoRelease:stream.get()]];
+            [_ex write__:_stream];
         }
         @catch(NSException* ex)
         {
@@ -131,6 +133,7 @@ public:
 private:
 
     ICEUserException* _ex;
+    ICEOutputStream* _stream;
 };
 
 class ReadObjectCallbackI : public Ice::ReadObjectCallback
@@ -205,15 +208,7 @@ public:
         return nil;
     }
     is_ = dynamic_cast<Ice::InputStream*>(cxxObject);
-    // Retain the communicator associated with the stream (to prevent premature destruction of the wrapper).
-    [ICECommunicator wrapperWithCxxObjectNoAutoRelease:is_->communicator().get()];
     return self;
-}
--(void) dealloc
-{
-    // Release the communicator associated with the stream.
-    [[ICECommunicator getWrapperWithCxxObjectNoAutoRelease:is_->communicator().get()] release];
-    [super dealloc];
 }
 +(void)installObjectFactory:(const Ice::CommunicatorPtr&)communicator
 {
@@ -889,7 +884,6 @@ typedef enum { dummy } Dummy_Enum;
 @end
 
 @implementation ICEOutputStream
-
 -(id) initWithCxxObject:(IceUtil::Shared*)cxxObject
 {
     if(![super initWithCxxObject:cxxObject])
@@ -897,15 +891,7 @@ typedef enum { dummy } Dummy_Enum;
         return nil;
     }
     os_ = dynamic_cast<Ice::OutputStream*>(cxxObject);
-    // Retain the communicator associated with the stream (to prevent premature destruction of the wrapper).
-    [ICECommunicator wrapperWithCxxObjectNoAutoRelease:os_->communicator().get()];
     return self;
-}
--(void) dealloc
-{
-    // Release the communicator associated with the stream.
-    [[ICECommunicator getWrapperWithCxxObjectNoAutoRelease:os_->communicator().get()] release];
-    [super dealloc];
 }
 -(Ice::OutputStream*) os
 {
@@ -1275,7 +1261,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        os_->writeObject(new IceObjC::ObjectWriter(v));
+        os_->writeObject(new IceObjC::ObjectWriter(v, self));
     }
     catch(const std::exception& ex)
     {
@@ -1309,7 +1295,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        os_->writeException(IceObjC::UserExceptionWriter(v, os_->communicator()));
+        os_->writeException(IceObjC::UserExceptionWriter(v, self, os_->communicator()));
     }
     catch(const std::exception& ex)
     {

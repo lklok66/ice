@@ -99,8 +99,8 @@
 -(id) ice_compress:(BOOL)compress;
 -(id) ice_timeout:(int)timeout;
 -(id) ice_connectionId:(NSString*)connectionId;
-//ICEConnection* ice_getConnection;
-//ICEConnection* ice_getCachedConnection;
+-(id<ICEConnection>) ice_getConnection;
+-(id<ICEConnection>) ice_getCachedConnection;
 -(void) ice_flushBatchRequests;
 -(BOOL) ice_flushBatchRequests_async:(id)target exception:(SEL)exception;
 -(BOOL) ice_flushBatchRequests_async:(id)target exception:(SEL)exception sent:(SEL)sent;

@@ -13,6 +13,7 @@
 #import <Ice/StreamI.h>
 #import <Ice/CommunicatorI.h>
 #import <Ice/IdentityI.h>
+#import <Ice/ConnectionI.h>
 #import <Ice/LocalException.h>
 
 #import <Ice/Router.h>
@@ -34,205 +35,205 @@
 namespace
 {
 
-class AMICallback : public Ice::AMI_Array_Object_ice_invoke
-{
-public:
-
-AMICallback(const Ice::CommunicatorPtr& communicator, id target, SEL resp, SEL ex, Class finishedClass, SEL finished) : 
-    _target(target),
-    _communicator(communicator), 
-    _response(resp),
-    _exception(ex),
-    _finishedClass(finishedClass),
-    _finished(finished)
-{
-    [_target retain];
-}
-
-virtual ~AMICallback()
-{
-    [_target release];
-}
-
-virtual void
-ice_response(bool ok , const std::pair<const Byte*, const Byte*>& outParams)
-{
-    if(ok && !_response || !ok && !_exception)
+    class AMICallback : public Ice::AMI_Array_Object_ice_invoke
     {
-        return;
-    }
+    public:
+
+    AMICallback(const Ice::CommunicatorPtr& communicator, id target, SEL resp, SEL ex, Class finishedClass, SEL finished) : 
+        _target(target),
+            _communicator(communicator), 
+            _response(resp),
+            _exception(ex),
+            _finishedClass(finishedClass),
+            _finished(finished)
+            {
+                [_target retain];
+            }
+
+        virtual ~AMICallback()
+        {
+            [_target release];
+        }
+
+        virtual void
+            ice_response(bool ok , const std::pair<const Byte*, const Byte*>& outParams)
+        {
+            if(ok && !_response || !ok && !_exception)
+            {
+                return;
+            }
     
-    ICEInputStream* is;
-    {
-        Ice::InputStreamPtr s = Ice::createInputStream(_communicator, outParams);
-        is = [ICEInputStream wrapperWithCxxObjectNoAutoRelease:s.get()];
-    }
+            ICEInputStream* is;
+            {
+                Ice::InputStreamPtr s = Ice::createInputStream(_communicator, outParams);
+                is = [ICEInputStream wrapperWithCxxObjectNoAutoRelease:s.get()];
+            }
 
-    @try
-    {
-        objc_msgSend(_finishedClass, _finished, _target, _response, _exception, ok, is);
-    }
-    @catch(NSException* ex)
-    {
-        [is release];
-        rethrowCxxException(ex);
-    }
+            @try
+            {
+                objc_msgSend(_finishedClass, _finished, _target, _response, _exception, ok, is);
+            }
+            @catch(NSException* ex)
+            {
+                [is release];
+                rethrowCxxException(ex);
+            }
 
-    [is release];
-}
-
-virtual void 
-ice_exception(const Ice::Exception& ex)
-{
-    if(!_exception)
-    {
-        return;
-    }
-
-    @try
-    {
-        @try
-        {
-            rethrowObjCException(ex);
+            [is release];
         }
-        @catch(ICEException* e)
+
+        virtual void 
+            ice_exception(const Ice::Exception& ex)
         {
-            objc_msgSend(_target, _exception, e);
+            if(!_exception)
+            {
+                return;
+            }
+
+            @try
+            {
+                @try
+                {
+                    rethrowObjCException(ex);
+                }
+                @catch(ICEException* e)
+                {
+                    objc_msgSend(_target, _exception, e);
+                }
+            }
+            @catch(NSException* e)
+            {
+                rethrowCxxException(e);
+            }
         }
-    }
-    @catch(NSException* e)
+
+    protected:
+
+        id _target;
+
+    private:
+
+        const Ice::CommunicatorPtr _communicator;
+        SEL _response;
+        SEL _exception;
+        Class _finishedClass;
+        SEL _finished;
+    };
+    typedef IceUtil::Handle<AMICallback> AMICallbackPtr;
+
+    class AMICallbackWithSent : public AMICallback, public Ice::AMISentCallback
     {
-        rethrowCxxException(e);
-    }
-}
+    public:
 
-protected:
+    AMICallbackWithSent(const Ice::CommunicatorPtr& communicator, id target, SEL resp, SEL ex, SEL sent, 
+                        Class finishedClass ,SEL finished) : 
+        AMICallback(communicator, target, resp, ex, finishedClass, finished),
+            _sent(sent)
+            {
+            }
 
-id _target;
-
-private:
-
-const Ice::CommunicatorPtr _communicator;
-SEL _response;
-SEL _exception;
-Class _finishedClass;
-SEL _finished;
-};
-typedef IceUtil::Handle<AMICallback> AMICallbackPtr;
-
-class AMICallbackWithSent : public AMICallback, public Ice::AMISentCallback
-{
-public:
-
-AMICallbackWithSent(const Ice::CommunicatorPtr& communicator, id target, SEL resp, SEL ex, SEL sent, 
-                    Class finishedClass ,SEL finished) : 
-    AMICallback(communicator, target, resp, ex, finishedClass, finished),
-    _sent(sent)
-{
-}
-
-virtual void
-ice_sent()
-{
-    @try
-    {
-        objc_msgSend(_target, _sent);
-    }
-    @catch(NSException* e)
-    {
-        rethrowCxxException(e);
-    }
-}
-
-private:
-
-SEL _sent;
-
-};
-typedef IceUtil::Handle<AMICallback> AMICallbackPtr;
-
-class AMIIceInvokeCallback : public Ice::AMI_Array_Object_ice_invoke
-{
-public:
-
-AMIIceInvokeCallback(id target, SEL response, SEL ex) : _target(target), _response(response), _exception(ex)
-{
-    [_target retain];
-}
-
-virtual ~AMIIceInvokeCallback()
-{
-    [_target release];
-}
-
-virtual void
-ice_response(bool ok , const std::pair<const Byte*, const Byte*>& oP)
-{
-    @try
-    {
-        objc_msgSend(_target, _response, ok, [NSMutableData dataWithBytes:oP.first length:(oP.second - oP.first)]);
-    }
-    @catch(NSException* e)
-    {
-        rethrowCxxException(e);
-    }
-}
-
-virtual void 
-ice_exception(const Ice::Exception& ex)
-{
-    @try
-    {
-        @try
+        virtual void
+            ice_sent()
         {
-            rethrowObjCException(ex);
+            @try
+            {
+                objc_msgSend(_target, _sent);
+            }
+            @catch(NSException* e)
+            {
+                rethrowCxxException(e);
+            }
         }
-        @catch(ICEException* e)
+
+    private:
+
+        SEL _sent;
+
+    };
+    typedef IceUtil::Handle<AMICallback> AMICallbackPtr;
+
+    class AMIIceInvokeCallback : public Ice::AMI_Array_Object_ice_invoke
+    {
+    public:
+
+    AMIIceInvokeCallback(id target, SEL response, SEL ex) : _target(target), _response(response), _exception(ex)
         {
-            objc_msgSend(_target, _exception, e);
+            [_target retain];
         }
-    }
-    @catch(NSException* e)
+
+        virtual ~AMIIceInvokeCallback()
+        {
+            [_target release];
+        }
+
+        virtual void
+            ice_response(bool ok , const std::pair<const Byte*, const Byte*>& oP)
+        {
+            @try
+            {
+                objc_msgSend(_target, _response, ok, [NSMutableData dataWithBytes:oP.first length:(oP.second - oP.first)]);
+            }
+            @catch(NSException* e)
+            {
+                rethrowCxxException(e);
+            }
+        }
+
+        virtual void 
+            ice_exception(const Ice::Exception& ex)
+        {
+            @try
+            {
+                @try
+                {
+                    rethrowObjCException(ex);
+                }
+                @catch(ICEException* e)
+                {
+                    objc_msgSend(_target, _exception, e);
+                }
+            }
+            @catch(NSException* e)
+            {
+                rethrowCxxException(e);
+            }
+        }
+
+    protected:
+
+        id _target;
+
+    private:
+
+        SEL _response;
+        SEL _exception;
+
+    };
+
+    class AMIIceInvokeCallbackWithSent : public AMIIceInvokeCallback, public Ice::AMISentCallback
     {
-        rethrowCxxException(e);
-    }
-}
+    public:
 
-protected:
+    AMIIceInvokeCallbackWithSent(id target, SEL response, SEL ex, SEL sent) :
+        AMIIceInvokeCallback(target, response, ex),
+            _sent(sent)
+            {
+            }
 
-id _target;
+        virtual void
+            ice_sent()
+        {
+            @try
+            {
+                objc_msgSend(_target, _sent);
+            }
+            @catch(NSException* e)
+            {
+                rethrowCxxException(e);
+            }
+        }
 
-private:
-
-SEL _response;
-SEL _exception;
-
-};
-
-class AMIIceInvokeCallbackWithSent : public AMIIceInvokeCallback, public Ice::AMISentCallback
-{
-public:
-
-AMIIceInvokeCallbackWithSent(id target, SEL response, SEL ex, SEL sent) :
-    AMIIceInvokeCallback(target, response, ex),
-    _sent(sent)
-{
-}
-
-virtual void
-ice_sent()
-{
-    @try
-    {
-        objc_msgSend(_target, _sent);
-    }
-    @catch(NSException* e)
-    {
-        rethrowCxxException(e);
-    }
-}
-
-private:
+    private:
 
 SEL _sent;
 };
@@ -341,8 +342,6 @@ SEL _sent;
     }
     objectPrx__ = arg.get();
     OBJECTPRX->__incRef();
-    // Retain the communicator associated with the proxy (to prevent premature destruction of the wrapper).
-    [ICECommunicator wrapperWithCxxObjectNoAutoRelease:OBJECTPRX->ice_getCommunicator().get()];
     return self;
 }
 
@@ -353,8 +352,6 @@ SEL _sent;
 
 -(void) dealloc
 {
-    // Release the communicator associated with the proxy.
-    [[ICECommunicator getWrapperWithCxxObjectNoAutoRelease:OBJECTPRX->ice_getCommunicator().get()] release];
     OBJECTPRX->__decRef();
     objectPrx__ = 0;
     [super dealloc];
@@ -619,7 +616,10 @@ SEL _sent;
 {
     return (NSUInteger)OBJECTPRX->ice_getHash();
 }
-
+-(NSString*) description
+{
+    return [toNSString(OBJECTPRX->ice_toString()) autorelease];
+}
 -(BOOL) isEqual:(id)o_
 {
     if(self == o_)
@@ -1041,12 +1041,30 @@ SEL _sent;
 {
     return [[self class] objectPrxWithObjectPrx__:OBJECTPRX->ice_connectionId(fromNSString(connectionId))];
 }
-//ICEConnection* ice_getConnection
-//{
-//}
-//ICEConnection* ice_getCachedConnection
-//{
-//}
+-(id<ICEConnection>) ice_getConnection
+{
+    try
+    {
+        return [ICEConnection wrapperWithCxxObject:OBJECTPRX->ice_getConnection().get()];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
+    return nil; // Keep the compiler happy.
+}
+-(id<ICEConnection>) ice_getCachedConnection
+{
+    try
+    {
+        return [ICEConnection wrapperWithCxxObject:OBJECTPRX->ice_getCachedConnection().get()];
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
+    return nil; // Keep the compiler happy.
+}
 -(void) ice_flushBatchRequests
 {
     try
