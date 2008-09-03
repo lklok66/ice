@@ -270,6 +270,15 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
 		}
 		_M << fixId(outp->second) << ";";
 	    }
+	    ExceptionList throws = op->throws();
+	    throws.sort();
+	    throws.unique();
+	    throws.sort(Slice::DerivedToBaseCompare());
+	    if(!throws.empty())
+	    {
+		_M << nl << "@try";
+		_M << sb;
+	    }
 	    TypePtr returnType = op->returnType();
 	    if(returnType)
 	    {
@@ -298,6 +307,20 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
 	    if(returnType)
 	    {
 		writeMarshalUnmarshalCode(_M, returnType, "ret_", true, false, false);
+	    }
+	    if(!throws.empty())
+	    {
+		_M << eb;
+		ExceptionList::const_iterator t;
+		for(t = throws.begin(); t != throws.end(); ++t)
+		{
+		    string exS = fixName(*t);
+		    _M << nl << "@catch(" << exS << " *ex)";
+		    _M << sb;
+		    _M << nl << "[os_ writeException:ex];";
+		    _M << nl << "return NO;";
+		    _M << eb;
+		}
 	    }
 	    _M << nl << "return YES;";
         }
@@ -1801,6 +1824,51 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
     //
     writeMemberDealloc(dataMembers, 0); // TODO fix second parameter
 
+    //
+    // Marshaling/unmarshaling
+    //
+    ExceptionPtr base = p->base();
+    if(!p->allClassDataMembers().empty())
+    {
+	if(!base || (base && !base->usesClasses()))
+	{
+	    _H << nl << "-(BOOL) usesClasses__;";
+	    _M << sp << nl << "-(BOOL) usesClasses__";
+	    _M << sb;
+	    _M << nl << "return YES;";
+	    _M << eb;
+	}
+    }
+
+    _H << nl << "-(void) write__:(id<ICEOutputStream>)stream;";
+    _M << sp << nl << "-(void) write__:(id<ICEOutputStream>)os_";
+    _M << sb;
+    _M << nl << "[os_ writeString:@\"" << p->scoped() << "\"];";
+    _M << nl << "[os_ startSlice];";
+    writeMemberMarshal("", dataMembers, 0); // TODO fix second parameter
+    _M << nl << "[os_ endSlice];";
+    if(base)
+    {
+        _M << nl << "[super write__:os_];";
+    }
+    _M << eb;
+
+    _H << nl << "-(void) read__:(id<ICEInputStream>)stream readTypeId:(BOOL)rid_;";
+    _M << sp << nl << "-(void) read__:(id<ICEInputStream>)is_ readTypeId:(BOOL)rid_";
+    _M << sb;
+    _M << nl << "if(rid_)";
+    _M << sb;
+    _M << nl << "[[is_ readString] release];";
+    _M << eb;
+    _M << nl << "[is_ startSlice];";
+    writeMemberUnmarshal("self.", dataMembers, 0); // TODO fix second parameter
+    _M << nl << "[is_ endSlice];";
+    if(base)
+    {
+        _M << nl << "[super read__:is_ readTypeId:YES];";
+    }
+    _M << eb;
+
     _H << nl << "@end";
     _M << nl << "@end";
 }
@@ -1946,7 +2014,7 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     _M << sp << nl << "+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)os_";
     _M << sb;
     _M << nl << name << "*" << " p = (" << name << "*)obj;";
-    writeMemberMarshal(dataMembers, 0); // TODO fix second parameter
+    writeMemberMarshal("p.", dataMembers, 0); // TODO fix second parameter
     _M << eb;
 
     _H << nl << "+(id) readWithStream:(id<ICEInputStream>)stream;";
@@ -1955,7 +2023,7 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     _M << nl << name << "*" << " p = [[self alloc] init];";
     _M << nl << "@try";
     _M << sb;
-    writeMemberUnmarshal(dataMembers, 0); // TODO fix second parameter
+    writeMemberUnmarshal("p.", dataMembers, 0); // TODO fix second parameter
     _M << eb;
     _M << nl << "@catch(NSException *ex)";
     _M << sb;
@@ -2414,20 +2482,22 @@ Slice::Gen::TypesVisitor::writeMemberDealloc(const DataMemberList& dataMembers, 
 }
 
 void
-Slice::Gen::TypesVisitor::writeMemberMarshal(const DataMemberList& dataMembers, int baseTypes) const
+Slice::Gen::TypesVisitor::writeMemberMarshal(const string& instance, const DataMemberList& dataMembers,
+                                             int baseTypes) const
 {
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
-	writeMarshalUnmarshalCode(_M, (*q)->type(), "p." + fixId((*q)->name()), true, false, false);
+	writeMarshalUnmarshalCode(_M, (*q)->type(), instance + fixId((*q)->name()), true, false, false);
     }
 }
 
 void
-Slice::Gen::TypesVisitor::writeMemberUnmarshal(const DataMemberList& dataMembers, int baseTypes) const
+Slice::Gen::TypesVisitor::writeMemberUnmarshal(const string& instance, const DataMemberList& dataMembers,
+                                               int baseTypes) const
 {
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
-	writeMarshalUnmarshalCode(_M, (*q)->type(), "p." + fixId((*q)->name()
+	writeMarshalUnmarshalCode(_M, (*q)->type(), instance + fixId((*q)->name()
 	                          /* TODO: base classes */), false, false, false);
     }
 }

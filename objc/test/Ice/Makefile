@@ -12,7 +12,8 @@ top_srcdir	= ../..
 include $(top_srcdir)/config/Make.rules
 
 SUBDIRS		= proxy \
-	          operations
+	          operations \
+		  exceptions
 
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \

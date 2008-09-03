@@ -144,8 +144,8 @@ private:
         void writeMemberHashCode(const DataMemberList&, int) const;
         void writeMemberEquals(const DataMemberList&, int) const;
         void writeMemberDealloc(const DataMemberList&, int) const;
-        void writeMemberMarshal(const DataMemberList&, int) const;
-        void writeMemberUnmarshal(const DataMemberList&, int) const;
+        void writeMemberMarshal(const ::std::string&, const DataMemberList&, int) const;
+        void writeMemberUnmarshal(const ::std::string&, const DataMemberList&, int) const;
 
         bool _stream;
     };

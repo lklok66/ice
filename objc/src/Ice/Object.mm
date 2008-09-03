@@ -338,6 +338,7 @@ static const char* ICEObject_all__[4] =
     [os writeSize:0]; // For compatibility with the old AFM.
     [os endSlice];
 }
+
 -(void) read__:(id<ICEInputStream>)is readTypeId:(BOOL)rid
 {
     if(rid)
