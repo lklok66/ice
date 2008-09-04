@@ -84,8 +84,8 @@
 -(id) ice_router:(id<ICERouterPrx>)router;
 -(id<ICELocatorPrx>) ice_getLocator;
 -(id) ice_locator:(id<ICELocatorPrx>)locator;
--(BOOL) ice_isCollocationOptimized;
--(id) ice_collocationOptimized:(BOOL)collocOptimized;
+//-(BOOL) ice_isCollocationOptimized;
+//-(id) ice_collocationOptimized:(BOOL)collocOptimized;
 -(id) ice_twoway;
 -(BOOL) ice_isTwoway;
 -(id) ice_oneway;

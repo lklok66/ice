@@ -1,0 +1,88 @@
+// **********************************************************************
+//
+// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+//
+// This copy of Ice is licensed to you under the terms described in the
+// ICE_LICENSE file included in this distribution.
+//
+// **********************************************************************
+
+#import <Ice/Ice.h>
+#import <TestI.h>
+
+@implementation RemoteCommunicatorI
+-(id) init
+{
+    if(![super init])
+    {
+        return nil;
+    }
+    nextPort_ = 10001;
+    return self;
+}
+
+
+-(id<TestRemoteObjectAdapterPrx>) createObjectAdapter:(NSMutableString*)name endpoints:(NSMutableString*)endpts
+                                              current:(ICECurrent*)current
+{
+    id<ICECommunicator> com = [[current adapter] getCommunicator];
+    [[com getProperties] setProperty:[name stringByAppendingString:@".ThreadPool.Size"] value:@"1"];
+    id<ICEObjectAdapter> adapter = [com createObjectAdapterWithEndpoints:name endpoints:endpts];
+    return [TestRemoteObjectAdapterPrx uncheckedCast:[[current adapter] addWithUUID:[[RemoteObjectAdapterI alloc]
+                                                                                    init:adapter]]];
+}
+
+-(void) deactivateObjectAdapter:(id<TestRemoteObjectAdapterPrx>)adapter current:(ICECurrent*)current
+{
+    [adapter deactivate]; // Collocated call
+}
+
+-(void) shutdown:(ICECurrent*)current
+{
+    [[[current adapter] getCommunicator] shutdown];
+}
+@end
+
+@implementation RemoteObjectAdapterI
+-(id) init:(id<ICEObjectAdapter>)adapter
+{
+    if(![super init])
+    {
+        return nil;
+    }
+    adapter_ = [adapter retain];
+    testIntf_ = [TestTestIntfPrx uncheckedCast:[adapter_ add:[[TestI alloc] init] 
+                                                     identity:[[adapter_ getCommunicator] stringToIdentity:@"test"]]];
+    [testIntf_ retain];
+    [adapter_ activate];
+    return self;
+}
+-(void) dealloc
+{
+    [testIntf_ release];
+    [adapter_ release];
+    [super dealloc];
+}
+-(id<TestTestIntfPrx>) getTestIntf:(ICECurrent*)current
+{
+    return testIntf_;
+}
+
+-(void) deactivate:(ICECurrent*)current
+{
+    @try
+    {
+        [adapter_ destroy];
+    }
+    @catch(ICEObjectAdapterDeactivatedException*)
+    {
+    }
+}
+@end
+
+@implementation TestI
+-(NSString*) getAdapterName:(ICECurrent*)current
+{
+    return [[current adapter] getName];
+}
+@end

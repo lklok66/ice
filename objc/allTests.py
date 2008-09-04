@@ -25,9 +25,9 @@ import TestUtil
 #
 tests = [ 
 #     ("Slice/keyword", ["once"]),
-#     ("Ice/adapterDeactivation", ["core"]),
-#     ("Ice/binding", ["core"]),
-#     ("Ice/exceptions", ["core"]),
+     ("Ice/adapterDeactivation", ["core"]),
+     ("Ice/binding", ["core"]),
+     ("Ice/exceptions", ["core"]),
 #     ("Ice/facets", ["core"]),
 #     ("Ice/faultTolerance", ["core"]),
 #     ("Ice/inheritance", ["core"]),

@@ -317,12 +317,12 @@ allTests(id<ICECommunicator> communicator)
     test([b1 ice_getEndpointSelection] == ICEOrdered);
     [prop  setProperty:property value:@""];
 
-    property = [propertyPrefix stringByAppendingString:@".CollocationOptimized"];
-    test([b1 ice_isCollocationOptimized]);
-    [prop  setProperty:property value:@"0"];
-    b1 = [communicator propertyToProxy:propertyPrefix];
-    test(![b1 ice_isCollocationOptimized]);
-    [prop  setProperty:property value:@""];
+//     property = [propertyPrefix stringByAppendingString:@".CollocationOptimized"];
+//     test([b1 ice_isCollocationOptimized]);
+//     [prop  setProperty:property value:@"0"];
+//     b1 = [communicator propertyToProxy:propertyPrefix];
+//     test(![b1 ice_isCollocationOptimized]);
+//     [prop  setProperty:property value:@""];
 
     tprintf("ok\n");
 
@@ -342,8 +342,8 @@ allTests(id<ICECommunicator> communicator)
     test([[base ice_batchDatagram] ice_isBatchDatagram]);
     test([[base ice_secure:YES] ice_isSecure]);
     test(![[base ice_secure:NO] ice_isSecure]);
-    test([[base ice_collocationOptimized:YES] ice_isCollocationOptimized]);
-    test(![[base ice_collocationOptimized:NO] ice_isCollocationOptimized]);
+//    test([[base ice_collocationOptimized:YES] ice_isCollocationOptimized]);
+//    test(![[base ice_collocationOptimized:NO] ice_isCollocationOptimized]);
     test([[base ice_preferSecure:YES] ice_isPreferSecure]);
     test(![[base ice_preferSecure:NO] ice_isPreferSecure]);
     tprintf("ok\n");
@@ -372,8 +372,8 @@ allTests(id<ICECommunicator> communicator)
 //     test([compObj ice_secure:NO] < [compObj ice_secure:YES]);
 //    test(!([compObj ice_secure:YES] < [compObj ice_secure:NO]));
 
-    test([[compObj ice_collocationOptimized:YES] isEqual:[compObj ice_collocationOptimized:YES]]);
-    test(![[compObj ice_collocationOptimized:NO] isEqual:[compObj ice_collocationOptimized:YES]]);
+//    test([[compObj ice_collocationOptimized:YES] isEqual:[compObj ice_collocationOptimized:YES]]);
+//    test(![[compObj ice_collocationOptimized:NO] isEqual:[compObj ice_collocationOptimized:YES]]);
 //     test([compObj ice_collocationOptimized:NO] < [compObj ice_collocationOptimized:YES]);
 //     test(!([compObj ice_collocationOptimized:YES] < [compObj ice_collocationOptimized:NO]));
 

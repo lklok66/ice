@@ -11,7 +11,9 @@ top_srcdir	= ../..
 
 include $(top_srcdir)/config/Make.rules
 
-SUBDIRS		= proxy \
+SUBDIRS		= adapterDeactivation \
+		  binding \
+		  proxy \
 	          operations \
 		  exceptions \
 		  retry \

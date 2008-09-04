@@ -225,6 +225,11 @@ private:
             data = [initData initializationData];
         }
         data.threadHook = new IceObjC::ThreadNotification();
+        if(!data.properties)
+        {
+            data.properties = Ice::createProperties();
+        }
+        data.properties->setProperty("Ice.Default.CollocationOptimized", "0");
         Ice::CommunicatorPtr communicator;
         if(argc != nil && argv != nil)
         {
