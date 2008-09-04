@@ -17,6 +17,8 @@ SUBDIRS		= adapterDeactivation \
 		  proxy \
 	          operations \
 		  exceptions \
+		  inheritance \
+		  location \
 		  faultTolerance \
 		  retry \
 		  timeout

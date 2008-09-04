@@ -634,6 +634,24 @@ SEL _sent;
     return *OBJECTPRX == *[o_ objectPrx__];
 }
 
+-(NSComparisonResult) compareIdentity:(id<ICEObjectPrx>)aProxy
+{
+    IceProxy::Ice::Object* lhs = OBJECTPRX;
+    IceProxy::Ice::Object* rhs = [(ICEObjectPrx*)aProxy objectPrx__];
+    if(Ice::proxyIdentityEqual(lhs, rhs))
+    {
+        return NSOrderedSame;
+    } 
+    else if(Ice::proxyIdentityLess(lhs, rhs))
+    {
+        return NSOrderedAscending;
+    }
+    else
+    {
+        return NSOrderedDescending;
+    }
+}
+
 -(ICEInt) ice_getHash
 {
     return OBJECTPRX->ice_getHash();

@@ -42,6 +42,7 @@
 -(id) copyWithZone:(NSZone *)zone;
 -(NSUInteger) hash;
 -(BOOL) isEqual:(id)anObject;
+-(NSComparisonResult) compareIdentity:(id<ICEObjectPrx>)aProxy;
 
 -(ICEInt) ice_getHash;
 -(id<ICECommunicator>) ice_getCommunicator;

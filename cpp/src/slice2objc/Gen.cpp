@@ -1425,21 +1425,22 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
     // TODO :if(_stream)
 
     _H << sp << nl << "@protocol " << name;
-    if(!bases.empty())
+    if(bases.empty())
+    {
+        _H << " <ICEObject>";
+    }
+    else
     {
         _H << " <";
-    }
-    for(ClassList::const_iterator i = bases.begin(); i != bases.end(); ++i)
-    {
-        string baseName = fixName(*i);
-	if(i != bases.begin())
-	{
-	    _H << ", ";
-	}
-	_H << baseName;
-    }
-    if(!bases.empty())
-    {
+        for(ClassList::const_iterator i = bases.begin(); i != bases.end(); ++i)
+        {
+            string baseName = fixName(*i);
+            if(i != bases.begin())
+            {
+                _H << ", ";
+            }
+            _H << baseName;
+        }
         _H << ">";
     }
 
@@ -1545,6 +1546,7 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
     }
     _H << nl << "@end";
 
+#if 0
     DataMemberList classMembers = p->classDataMembers();
     DataMemberList allClassMembers = p->allClassDataMembers();
     DataMemberList dataMembers = p->dataMembers();
@@ -1600,6 +1602,7 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
 
         writeInheritedOperations(p);
     }
+#endif
 
     writeDispatchAndMarshalling(p, _stream);
 

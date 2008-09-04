@@ -45,4 +45,5 @@
 +(id<ICECommunicator>) createCommunicator:(int*)argc argv:(char*[])argv initData:(ICEInitializationData *)initData;
 +(id<ICEInputStream>) createInputStream:(id<ICECommunicator>)communicator data:(NSData*)data;
 +(id<ICEOutputStream>) createOutputStream:(id<ICECommunicator>)communicator;
++(NSString*) generateUUID;
 @end

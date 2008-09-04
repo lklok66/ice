@@ -16,6 +16,7 @@
 #import <Ice/LocalException.h>
 
 #include <IceCpp/Initialize.h>
+#include <IceUtilCpp/UUID.h>
 
 #import <Foundation/NSAutoreleasePool.h>
 #import <Foundation/NSThread.h>
@@ -295,4 +296,8 @@ private:
     }
 }
 
++(NSString*) generateUUID
+{
+    return [NSString stringWithUTF8String:IceUtil::generateUUID().c_str()];
+}
 @end

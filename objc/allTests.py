@@ -30,7 +30,7 @@ tests = [
      ("Ice/exceptions", ["core"]),
      ("Ice/facets", ["core"]),
      ("Ice/faultTolerance", ["core"]),
-#     ("Ice/inheritance", ["core"]),
+     ("Ice/inheritance", ["core"]),
 #     ("Ice/location", ["core"]),
 #     ("Ice/objects", ["core"]),
     ("Ice/proxy", ["core"]),
