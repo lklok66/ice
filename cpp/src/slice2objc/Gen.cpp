@@ -217,14 +217,14 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
         assert(cl);
 
         string opName = fixId(op->name());
-        _M << sp << nl << "-(BOOL)" << opName
-	   << "___:(ICECurrent *)current is:(id<ICEInputStream>)is_ os:(id<ICEOutputStream>)os_";
+        _M << sp << nl << "+(BOOL)" << opName << "___:(id)servant current:(ICECurrent *)current " 
+           << "is:(id<ICEInputStream>)is_ os:(id<ICEOutputStream>)os_";
         _M << sb;
 
         bool amd = false; //p->hasMetaData("amd") || op->hasMetaData("amd");
         if(!amd)
         {
-	    _M << nl << "[self checkModeAndSelector__:" << sliceModeToIceMode(op->mode()) << " selector:@selector(";
+	    _M << nl << "[servant checkModeAndSelector__:" << sliceModeToIceMode(op->mode()) << " selector:@selector(";
 	    string selector = getSelector(op);
 	    if(!selector.empty())
 	    {
@@ -294,7 +294,7 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
                 _M << nl;
             }
 	    string args = getServerArgs(op);
-	    _M << "[(id<" << name << ">)self " << opName << args;
+	    _M << "[servant " << opName << args;
 	    if(!args.empty())
 	    {
 	        _M << " current";
@@ -438,24 +438,25 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
     OperationList allOps = p->allOperations();
     if(!allOps.empty())
     {
-        StringList allOpNames;
-        transform(allOps.begin(), allOps.end(), back_inserter(allOpNames), ::IceUtil::constMemFun(&Contained::name));
+        map<string, string> allOpNames;
+        for(OperationList::const_iterator p = allOps.begin(); p != allOps.end(); ++p)
+        {
+            allOpNames.insert(make_pair((*p)->name(), fixName(ClassDefPtr::dynamicCast((*p)->container()))));
+        }
 
-        allOpNames.push_back("ice_id");
-        allOpNames.push_back("ice_ids");
-        allOpNames.push_back("ice_isA");
-        allOpNames.push_back("ice_ping");
-        allOpNames.sort();
-        allOpNames.unique();
+        allOpNames["ice_id"] = "ICEObject";
+        allOpNames["ice_ids"] = "ICEObject";
+        allOpNames["ice_isA"] = "ICEObject";
+        allOpNames["ice_ping"] = "ICEObject";
 
-        StringList::const_iterator q;
+        map<string, string>::const_iterator q;
 
         _M << sp << nl << "static const char *" << name << "_all__[] =";
         _M << sb;
         q = allOpNames.begin();
         while(q != allOpNames.end())
         {
-            _M << nl << '"' << *q << '"';
+            _M << nl << '"' << q->first << '"';
             if(++q != allOpNames.end())
             {
                 _M << ',';
@@ -472,11 +473,9 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
         int i = 0;
         for(q = allOpNames.begin(); q != allOpNames.end(); ++q)
         {
-            string opName = *q;
-
             _M << nl << "case " << i++ << ':';
 	    _M.inc();
-	    _M << nl << "return [self " << opName << "___:current is:is os:os];";
+	    _M << nl << "return [" << q->second << " " << q->first << "___:self current:current is:is os:os];";
             _M.dec();
         }
 	_M << nl << "default:";
@@ -1535,6 +1534,15 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
     string baseName = hasBaseClass ? fixName(bases.front()) : "ICEObject";
 
     _H << sp << nl << "@interface " << name << " : " << baseName;
+
+    OperationList ops = p->operations();
+    OperationList::const_iterator r;
+    for(r = ops.begin(); r != ops.end(); ++r)
+    {
+        OperationPtr op = *r;
+        _H << nl << "+(BOOL)" << fixId(op->name()) << "___:(id)servant current:(ICECurrent *)current " 
+           << "is:(id<ICEInputStream>)is_ os:(id<ICEOutputStream>)os_;";
+    }
     _H << nl << "@end";
 
     DataMemberList classMembers = p->classDataMembers();

@@ -28,8 +28,8 @@ tests = [
      ("Ice/adapterDeactivation", ["core"]),
      ("Ice/binding", ["core"]),
      ("Ice/exceptions", ["core"]),
-#     ("Ice/facets", ["core"]),
-#     ("Ice/faultTolerance", ["core"]),
+     ("Ice/facets", ["core"]),
+     ("Ice/faultTolerance", ["core"]),
 #     ("Ice/inheritance", ["core"]),
 #     ("Ice/location", ["core"]),
 #     ("Ice/objects", ["core"]),
@@ -39,10 +39,6 @@ tests = [
     ("Ice/timeout", ["core"]),
 #     ("Ice/slicing/exceptions", ["core"]),
 #     ("Ice/slicing/objects", ["core"]),
-#     ("Ice/custom", ["core"]),
-#     ("Ice/checksum", ["core"]),
-#     ("Ice/servantLocator", ["core"]),
-#     ("Ice/blobject", ["core"])
     ]
 
 if __name__ == "__main__":

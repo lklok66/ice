@@ -241,27 +241,27 @@ static const char* ICEObject_all__[4] =
                                               operation:current.operation];
     }
 }
--(BOOL) ice_isA___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
++(BOOL) ice_isA___:(id)servant current:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
     NSString* id__ = [[is readString] autorelease];
-    BOOL ret__ = [(id)self ice_isA:id__ current:current];
+    BOOL ret__ = [servant ice_isA:id__ current:current];
     [os writeBool:ret__];
     return YES;
 }
--(BOOL) ice_ping___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
++(BOOL) ice_ping___:(id)servant current:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
-    [(id)self ice_ping:current];
+    [servant ice_ping:current];
     return YES;
 }
--(BOOL) ice_id___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
++(BOOL) ice_id___:(id)servant current:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
-    NSString* ret__ = [(id)self ice_id:current];
+    NSString* ret__ = [servant ice_id:current];
     [os writeString:ret__];
     return YES;
 }
--(BOOL) ice_ids___:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
++(BOOL) ice_ids___:(id)servant current:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
-    NSArray* ret__ = [(id)self ice_ids:current];
+    NSArray* ret__ = [servant ice_ids:current];
     [os writeStringSeq:ret__];
     return YES;
 }
@@ -322,13 +322,13 @@ static const char* ICEObject_all__[4] =
                            [[current operation] UTF8String]))
     {
     case 0:
-        return [self ice_id___:current is:is os:os];
+        return [ICEObject ice_id___:self current:current is:is os:os];
     case 1:
-        return [self ice_ids___:current is:is os:os];
+        return [ICEObject ice_ids___:self current:current is:is os:os];
     case 2:
-        return [self ice_isA___:current is:is os:os];
+        return [ICEObject ice_isA___:self current:current is:is os:os];
     case 3:
-        return [self ice_ping___:current is:is os:os];
+        return [ICEObject ice_ping___:self current:current is:is os:os];
     default:
         @throw [ICEOperationNotExistException requestFailedException:__FILE__ 
                                               line:__LINE__ 

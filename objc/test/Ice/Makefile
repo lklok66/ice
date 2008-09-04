@@ -13,9 +13,11 @@ include $(top_srcdir)/config/Make.rules
 
 SUBDIRS		= adapterDeactivation \
 		  binding \
+		  facets \
 		  proxy \
 	          operations \
 		  exceptions \
+		  faultTolerance \
 		  retry \
 		  timeout
 
