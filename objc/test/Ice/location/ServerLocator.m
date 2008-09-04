@@ -30,15 +30,30 @@
 }
 -(void) setAdapterDirectProxy:(NSMutableString *)adapter proxy:(id<ICEObjectPrx>)proxy current:(ICECurrent *)current
 {
-    [adapters_ setObject:proxy forKey:adapter];
+    if(proxy == nil)
+    {
+        [adapters_ removeObjectForKey:adapter];
+    }
+    else
+    {
+        [adapters_ setObject:proxy forKey:adapter];
+    }
 }
 -(void) setReplicatedAdapterDirectProxy:(NSMutableString *)adapterId 
                          replicaGroupId:(NSMutableString *)replicaGroupId 
                                       p:(id<ICEObjectPrx>)p 
                                 current:(ICECurrent *)current
 {
-    [adapters_ setObject:p forKey:adapterId];
-    [adapters_ setObject:p forKey:replicaGroupId];
+    if(p == nil)
+    {
+        [adapters_ removeObjectForKey:adapterId];
+        [adapters_ removeObjectForKey:replicaGroupId];
+    }
+    else
+    {
+        [adapters_ setObject:p forKey:adapterId];
+        [adapters_ setObject:p forKey:replicaGroupId];
+    }
 }
 -(void) setServerProcessProxy:(NSMutableString *)id_ proxy:(id<ICEProcessPrx>)proxy current:(ICECurrent *)current
 {

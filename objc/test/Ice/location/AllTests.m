@@ -340,34 +340,34 @@ allTests(id<ICECommunicator> communicator, NSString* ref)
     }
     tprintf("ok\n");
 
-    tprintf("testing indirect proxies to collocated objects... ");
-    //
-    // Set up test for calling a collocated object through an indirect, adapterless reference.
-    //
-    id<ICEProperties> properties = [communicator getProperties];
-    [properties setProperty:@"Ice.PrintAdapterReady" value:@"0"];
-    id<ICEObjectAdapter> adapter = [communicator createObjectAdapterWithEndpoints:@"Hello" endpoints:@"default"];
-    [adapter setLocator:locator];
+//     tprintf("testing indirect proxies to collocated objects... ");
+//     //
+//     // Set up test for calling a collocated object through an indirect, adapterless reference.
+//     //
+//     id<ICEProperties> properties = [communicator getProperties];
+//     [properties setProperty:@"Ice.PrintAdapterReady" value:@"0"];
+//     id<ICEObjectAdapter> adapter = [communicator createObjectAdapterWithEndpoints:@"Hello" endpoints:@"default"];
+//     [adapter setLocator:locator];
 
-    id<TestTestLocatorRegistryPrx> registry = [TestTestLocatorRegistryPrx checkedCast:[locator getRegistry]];
-    test(registry);
+//     id<TestTestLocatorRegistryPrx> registry = [TestTestLocatorRegistryPrx checkedCast:[locator getRegistry]];
+//     test(registry);
     
-    ICEIdentity* ident = [ICEIdentity identity:[ICEUtil generateUUID] category:@""];
-    [registry addObject:[adapter add:[[DummyHelloI alloc] init] identity:ident]];
-    [adapter activate];
+//     ICEIdentity* ident = [ICEIdentity identity:[ICEUtil generateUUID] category:@""];
+//     [registry addObject:[adapter add:[[DummyHelloI alloc] init] identity:ident]];
+//     [adapter activate];
     
-    @try
-    {
-        id<TestHelloPrx> helloPrx = [TestHelloPrx checkedCast:[communicator stringToProxy:
-                                                                                [communicator identityToString:ident]]];
-        [helloPrx ice_getConnection];
-        test(NO);
-    }
-    @catch(ICECollocationOptimizationException*)
-    {
-    }
-    [adapter deactivate];
-    tprintf("ok\n");
+//     @try
+//     {
+//         id<TestHelloPrx> helloPrx = [TestHelloPrx checkedCast:[communicator stringToProxy:
+//                                                                                 [communicator identityToString:ident]]];
+//         [helloPrx ice_getConnection];
+//         test(NO);
+//     }
+//     @catch(ICECollocationOptimizationException*)
+//     {
+//     }
+//     [adapter deactivate];
+//     tprintf("ok\n");
 
     tprintf("shutdown server manager... ");
     [manager shutdown];

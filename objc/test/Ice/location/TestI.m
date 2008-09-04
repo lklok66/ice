@@ -39,7 +39,8 @@
         [c waitForShutdown];
         [c destroy];
     }
-    communicators_ = [NSMutableArray array];
+    [communicators_ release];
+    communicators_ = [[NSMutableArray alloc] init];
 
     //
     // Simulate a server: create a [[communicator alloc] init] and object
@@ -83,14 +84,23 @@
   adapter2:(id<ICEObjectAdapter>)adapter2 
   registry:(ServerLocatorRegistry*)registry
 {
-    adapter1_ = adapter;
-    adapter2_ = adapter2;
+    if(![super init])
+    {
+        return nil;
+    }
+    adapter1_ = [adapter retain];
+    adapter2_ = [adapter2 retain];
     registry_ = registry;
     [registry_ addObject:[adapter1_ add:[[HelloI alloc] init] 
                                     identity:[[adapter1_ getCommunicator] stringToIdentity:@"hello"]]];
     return self;
 }
-
+-(void) dealloc
+{
+    [adapter1_ release];
+    [adapter2_ release];
+    [super dealloc];
+}
 -(void) shutdown:(ICECurrent*)current
 {
     [[adapter1_ getCommunicator] shutdown];
