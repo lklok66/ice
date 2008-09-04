@@ -92,13 +92,13 @@
 {
     return NO;
 }
--(void)write__:(id<ICEOutputStream>)stream
+-(void)writeWithStream:(id<ICEOutputStream>)stream
 {
-    NSAssert(false, @"write__ must be overriden");
+    NSAssert(false, @"writeWithStream must be overridden");
 }
--(void)read__:(id<ICEInputStream>)stream readTypeId:(BOOL)rid
+-(void)readWithStream:(id<ICEInputStream>)stream readTypeId:(BOOL)rid
 {
-    NSAssert(false, @"read__ must be overriden");
+    NSAssert(false, @"readWithStream must be overridden");
 }
 @end
 

@@ -49,7 +49,7 @@ toObjC(const std::string& s)
 inline void
 fromObjC(id object, std::string& s)
 {
-    s = [object UTF8String];
+    s = object == [NSNull null] ? ::std::string() : [object UTF8String];
 }
 
 inline NSMutableArray*
@@ -145,14 +145,7 @@ toNSMutableString(const std::string& s)
 inline std::string
 fromNSString(NSString* s)
 {
-    if(s == nil)
-    {
-        return std::string();
-    }
-    else
-    {
-        return [s UTF8String];
-    }
+    return s == nil ? std::string() : [s UTF8String];
 }
 
 std::string toObjCSliceId(const std::string&);

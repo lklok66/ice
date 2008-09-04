@@ -1848,8 +1848,8 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
 	}
     }
 
-    _H << nl << "-(void) write__:(id<ICEOutputStream>)stream;";
-    _M << sp << nl << "-(void) write__:(id<ICEOutputStream>)os_";
+    _H << nl << "-(void) writeWithStream:(id<ICEOutputStream>)stream;";
+    _M << sp << nl << "-(void) writeWithStream:(id<ICEOutputStream>)os_";
     _M << sb;
     _M << nl << "[os_ writeString:@\"" << p->scoped() << "\"];";
     _M << nl << "[os_ startSlice];";
@@ -1857,12 +1857,12 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
     _M << nl << "[os_ endSlice];";
     if(base)
     {
-        _M << nl << "[super write__:os_];";
+        _M << nl << "[super writeWithStream:os_];";
     }
     _M << eb;
 
-    _H << nl << "-(void) read__:(id<ICEInputStream>)stream readTypeId:(BOOL)rid_;";
-    _M << sp << nl << "-(void) read__:(id<ICEInputStream>)is_ readTypeId:(BOOL)rid_";
+    _H << nl << "-(void) readWithStream:(id<ICEInputStream>)stream readTypeId:(BOOL)rid_;";
+    _M << sp << nl << "-(void) readWithStream:(id<ICEInputStream>)is_ readTypeId:(BOOL)rid_";
     _M << sb;
     _M << nl << "if(rid_)";
     _M << sb;
@@ -1873,7 +1873,7 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
     _M << nl << "[is_ endSlice];";
     if(base)
     {
-        _M << nl << "[super read__:is_ readTypeId:YES];";
+        _M << nl << "[super readWithStream:is_ readTypeId:YES];";
     }
     _M << eb;
 
@@ -2022,7 +2022,21 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     _M << sp << nl << "+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)os_";
     _M << sb;
     _M << nl << name << "*" << " p = (" << name << "*)obj;";
+    _M << nl << "if(p == nil)";
+    _M << sb;
+    _M << nl << "p = [[" << name << " alloc] init];";
+    _M << eb;
+    _M << nl << "@try";
+    _M << sb;
     writeMemberMarshal("p.", dataMembers, 0); // TODO fix second parameter
+    _M << eb;
+    _M << nl << "@finally";
+    _M << sb;
+    _M << nl << "if(obj == nil)";
+    _M << sb;
+    _M << nl << "[p release];";
+    _M << eb;
+    _M << eb;
     _M << eb;
 
     _H << nl << "+(id) readWithStream:(id<ICEInputStream>)stream;";
@@ -2738,16 +2752,16 @@ Slice::Gen::ProxyHelperVisitor::visitClassDefStart(const ClassDefPtr& p)
     ClassList bases = p->bases();
 
     _H << sp << nl << "@interface " << name;
-    _H << nl << "+(void) write__:(id<ICEOutputStream>)os proxy:(" << fixName(p) + "Prx" << " *)proxy;";
-    _H << nl << "+(void) read__:(id<ICEInputStream>)is;";
+    _H << nl << "+(void) writeWithStream:(id<ICEOutputStream>)os proxy:(" << fixName(p) + "Prx" << " *)proxy;";
+    _H << nl << "+(void) readWithStream:(id<ICEInputStream>)is;";
     _H << nl << "@end";
 
     _M << sp << nl << "@implementation " << name;
-    _M << nl << "+(void) write__:(id<ICEOutputStream>)os proxy:(" << fixName(p) + "Prx" << " *)proxy";
+    _M << nl << "+(void) writeWithStream:(id<ICEOutputStream>)os proxy:(" << fixName(p) + "Prx" << " *)proxy";
     _M << sb;
     _M << eb;
 
-    _M << sp << nl << "+(void) read__:(id<ICEInputStream>)is";
+    _M << sp << nl << "+(void) readWithStream:(id<ICEInputStream>)is";
     _M << sb;
     _M << eb;
 

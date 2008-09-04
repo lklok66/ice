@@ -15,6 +15,7 @@
 #import <Foundation/NSArray.h>
 #import <Foundation/NSDictionary.h>
 #import <Foundation/NSData.h>
+#import <Foundation/NSNull.h>
 
 #import <stdlib.h>
 

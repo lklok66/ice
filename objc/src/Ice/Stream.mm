@@ -98,7 +98,7 @@ public:
     {
         @try
         {
-            [_ex write__:_stream];
+            [_ex writeWithStream:_stream];
         }
         @catch(NSException* ex)
         {
@@ -764,7 +764,7 @@ typedef enum { dummy } Dummy_Enum;
 
     if(ex)
     {
-        [ex read__:self readTypeId:false];
+        [ex readWithStream:self readTypeId:false];
         if(usesClasses)
         {
             [self readPendingObjects];
@@ -1089,7 +1089,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-	 os_->writeString(fromNSString(v));
+	os_->writeString(fromNSString(v));
     }
     catch(const std::exception& ex)
     {
@@ -1121,7 +1121,7 @@ typedef enum { dummy } Dummy_Enum;
     [self writeSize:[arr count]];
     for(id i in arr)
     {
-	    [c writeWithStream:i stream:self];
+	[c writeWithStream:(i == [NSNull null] ? nil : i) stream:self];
     }
 }
 
@@ -1138,8 +1138,13 @@ typedef enum { dummy } Dummy_Enum;
     id key;
     while((key = [e nextObject]))
     {
+	if(key == [NSNull null])
+	{
+	    @throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"illegal NSNull value"];
+	}
 	[c.key writeWithStream:key stream:self];
-	[c.value writeWithStream:[dictionary objectForKey:key] stream:self];
+	NSObject *obj = [dictionary objectForKey:key];
+	[c.value writeWithStream:(obj == [NSNull null] ? nil : obj) stream:self];
     }
 }
 
@@ -1388,6 +1393,10 @@ typedef enum { dummy } Dummy_Enum;
 
 +(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
+    if(obj == [NSNull null])
+    {
+	@throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"illegal NSNull value"];
+    }
     [stream writeBool:[obj boolValue]];
 }
 @end
@@ -1400,6 +1409,10 @@ typedef enum { dummy } Dummy_Enum;
 
 +(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
+    if(obj == [NSNull null])
+    {
+	@throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"illegal NSNull value"];
+    }
     [stream writeByte:[obj unsignedCharValue]];
 }
 @end
@@ -1412,6 +1425,10 @@ typedef enum { dummy } Dummy_Enum;
 
 +(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
+    if(obj == [NSNull null])
+    {
+	@throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"illegal NSNull value"];
+    }
     [stream writeShort:[obj shortValue]];
 }
 @end
@@ -1424,6 +1441,10 @@ typedef enum { dummy } Dummy_Enum;
 
 +(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
+    if(obj == [NSNull null])
+    {
+	@throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"illegal NSNull value"];
+    }
     [stream writeInt:[obj intValue]];
 }
 @end
@@ -1436,6 +1457,10 @@ typedef enum { dummy } Dummy_Enum;
 
 +(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
+    if(obj == [NSNull null])
+    {
+	@throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"illegal NSNull value"];
+    }
     [stream writeLong:[obj longValue]];
 }
 @end
@@ -1448,6 +1473,10 @@ typedef enum { dummy } Dummy_Enum;
 
 +(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
+    if(obj == [NSNull null])
+    {
+	@throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"illegal NSNull value"];
+    }
     [stream writeFloat:[obj floatValue]];
 }
 @end
@@ -1460,6 +1489,10 @@ typedef enum { dummy } Dummy_Enum;
 
 +(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
+    if(obj == [NSNull null])
+    {
+	@throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"illegal NSNull value"];
+    }
     [stream writeDouble:[obj doubleValue]];
 }
 @end
@@ -1472,6 +1505,10 @@ typedef enum { dummy } Dummy_Enum;
 
 +(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
+    if(obj == [NSNull null])
+    {
+        obj = nil;
+    }
     [stream writeString:obj];
 }
 @end

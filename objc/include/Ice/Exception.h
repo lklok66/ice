@@ -33,6 +33,6 @@
 
 @interface ICEUserException : ICEException
 -(BOOL)usesClasses__;
--(void)write__:(id<ICEOutputStream>)stream;
--(void)read__:(id<ICEInputStream>)stream readTypeId:(BOOL)rid;
+-(void)writeWithStream:(id<ICEOutputStream>)stream;
+-(void)readWithStream:(id<ICEInputStream>)stream readTypeId:(BOOL)rid;
 @end
