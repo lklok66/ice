@@ -237,7 +237,7 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/../../../lib\"",
 				);
-				OTHER_LDFLAGS = "";
+				OTHER_LDFLAGS = "-ObjC";
 				PRELINK_LIBS = "";
 				PRODUCT_NAME = hello;
 			};
