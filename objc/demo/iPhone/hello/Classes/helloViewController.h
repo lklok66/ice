@@ -12,7 +12,7 @@
 @protocol ICECommunicator;
 @class DemoHelloPrx;
 
-@interface helloViewController : UIViewController<UITextFieldDelegate> {
+@interface helloViewController : UIViewController<UITextFieldDelegate,UIAlertViewDelegate> {
     IBOutlet UIButton* flushButton;
     IBOutlet UITextField* hostnameTextField;
     IBOutlet UILabel* statusLabel;
@@ -33,6 +33,7 @@
         DeliveryModeBatchDatagram
     }
     deliveryMode_;
+    BOOL showAlert_;
     BOOL batch_;
     int delay_;
     int timeout_;

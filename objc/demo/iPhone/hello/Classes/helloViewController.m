@@ -34,10 +34,12 @@
 
 NSString* hostnameKey = @"hostnameKey";
 
--(void)updateProxy
+-(void)updateProxy:(NSString*)hostname
 {
-    NSString* s = [NSString stringWithFormat:@"hello:tcp -h %@ -p 10000:udp -h %@ -p 10000", hostname_, hostname_];
+    NSString* s = [NSString stringWithFormat:@"hello:tcp -h %@ -p 10000:udp -h %@ -p 10000", hostname, hostname];
     ICEObjectPrx* prx = [communicator_ stringToProxy:s];
+    NSAssert(prx != nil, @"");
+    
     switch(deliveryMode_)
     {
         case DeliveryModeTwoway:
@@ -77,8 +79,7 @@ NSString* hostnameKey = @"hostnameKey";
     if (testValue == nil)
     {
         NSDictionary* appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
-                                                      @"127.0.0.1", hostnameKey,
-                                                  nil];
+                                     @"127.0.0.1", hostnameKey, nil];
 	
         [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
         [[NSUserDefaults standardUserDefaults] synchronize];
@@ -106,27 +107,55 @@ NSString* hostnameKey = @"hostnameKey";
     
     statusLabel.text = @"Ready";
     
+    showAlert_ = NO;
     self.hello_ = nil;
     delay_ = 0;
     timeout_ = 0;
     deliveryMode_ = DeliveryModeTwoway;
     batch_ = NO;
-    [self updateProxy];
+    [self updateProxy:self.hostname_];
+}
+
+-(void)didPresentAlertView:(UIAlertView *)alertView
+{
+    showAlert_ = YES;
+}
+
+-(void)alertView:(UIAlertView*)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
+{
+    showAlert_ = NO;
 }
 
 -(BOOL)textFieldShouldReturn:(UITextField *)theTextField
 {
-    // When the user presses return, take focus away from the text field so that the keyboard is dismissed.
-    if (theTextField == hostnameTextField)
+    // If we've already showing an invalid hostname alert, then we ignore enter.
+    if(showAlert_)
     {
-        [hostnameTextField resignFirstResponder];
+        return NO;
+    }
 
-        // Invoke the method that changes the greeting.
-        // Store the text of the text field in the 'string' instance variable.
+    // When the user presses return, take focus away from the text field so that the keyboard is dismissed.
+    if(theTextField == hostnameTextField)
+    {
+        @try
+        {
+            [self updateProxy:hostnameTextField.text];
+        }
+        @catch(ICEEndpointParseException* ex)
+        {
+            UIAlertView *alert = [[UIAlertView alloc]
+                                  initWithTitle:@"Invalid Hostname" message:@"The provided hostname is invalid."
+                                  delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+            [alert show];
+            [alert release];
+            return NO;
+        }
+
+        // Close the text field, save the hostname in the preferences.
+        [hostnameTextField resignFirstResponder];
         self.hostname_ = hostnameTextField.text;
         [[NSUserDefaults standardUserDefaults] setObject:hostname_ forKey:hostnameKey];
         [[NSUserDefaults standardUserDefaults] synchronize];
-        [self updateProxy];
     }
     return YES;
 }
@@ -192,7 +221,7 @@ NSString* hostnameKey = @"hostnameKey";
         default:
             break;
     }
-    [self updateProxy];
+    [self updateProxy:self.hostname_];
 }
 
 -(void)batchChanged:(id)thesender
@@ -216,7 +245,7 @@ NSString* hostnameKey = @"hostnameKey";
     {
         deliveryMode_ = DeliveryModeDatagram;
     }
-    [self updateProxy];
+    [self updateProxy:self.hostname_];
 }
 
 -(void)delayChanged:(id)thesender
@@ -229,7 +258,7 @@ NSString* hostnameKey = @"hostnameKey";
 {
     UISlider* sender = thesender;
     timeout_ = (int)(sender.value * 1000.0f); // Convert to ms.
-    [self updateProxy];
+    [self updateProxy:self.hostname_];
 }
 
 -(void)handleException:(ICEException*) ex
@@ -294,11 +323,13 @@ NSString* hostnameKey = @"hostnameKey";
         [activity stopAnimating];       
     }
 }
+
 -(void)sayHelloResponse
 {
     statusLabel.text = @"Ready";
     [activity stopAnimating];       
 }
+
 -(void)flushBatch:(id) sender
 {
     @try

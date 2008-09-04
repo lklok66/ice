@@ -29,9 +29,6 @@
 
 -(id)initWithLogger:(id<ICELogger>) logger timeout:(long)timeout session:(id<DemoSessionPrx>)session;
 +(id)sessionRefreshThreadWithLogger:(id<ICELogger>)logger timeout:(long)timeout session:(id<DemoSessionPrx>)session;
--(void)main;
-
--(void)dealloc;
 @end
 
 @implementation SessionRefreshThread
