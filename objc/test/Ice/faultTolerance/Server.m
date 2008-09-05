@@ -54,7 +54,7 @@ run(int argc, char* argv[], id<ICECommunicator> communicator)
     NSString* endpts = [NSString stringWithFormat:@"default  -p %d:udp", port];
     [[communicator getProperties] setProperty:@"TestAdapter.Endpoints" value:endpts];
     id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestAdapter"];
-    id<ICEObject> object = [[TestI alloc] init];
+    ICEObject* object = [[TestI alloc] init];
     [adapter add:object identity:[communicator stringToIdentity:@"test"]];
     [adapter activate];
     [communicator waitForShutdown];

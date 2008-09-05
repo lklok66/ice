@@ -82,7 +82,7 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
     {
         [[communicator getProperties] setProperty:@"TestAdapter1.Endpoints" value:@"default"];
 	id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestAdapter1"];
-	id<ICEObject> obj = [[[EmptyI alloc] init] autorelease];
+	ICEObject* obj = [[[EmptyI alloc] init] autorelease];
 	[adapter add:obj identity:[communicator stringToIdentity:@"x"]];
 	@try
 	{

@@ -61,7 +61,7 @@
     [adapter setLocator:[ICELocatorPrx uncheckedCast:locator]];
     [adapter2 setLocator:[ICELocatorPrx uncheckedCast:locator]];
 
-    id<ICEObject> object = [[TestI alloc] init:adapter adapter2:adapter2 registry:registry_];
+    ICEObject* object = [[TestI alloc] init:adapter adapter2:adapter2 registry:registry_];
     [registry_ addObject:[adapter add:object identity:[serverCommunicator stringToIdentity:@"test"]]];
     [registry_ addObject:[adapter add:object identity:[serverCommunicator stringToIdentity:@"test2"]]];
 

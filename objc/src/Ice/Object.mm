@@ -206,6 +206,7 @@ static const char* ICEObject_all__[4] =
     "ice_isA",
     "ice_ping"
 };
+
 -(void) checkModeAndSelector__:(ICEOperationMode)expected selector:(SEL)sel current:(ICECurrent*)current
 {
     ICEOperationMode received = current.mode;
@@ -241,6 +242,7 @@ static const char* ICEObject_all__[4] =
                                               operation:current.operation];
     }
 }
+
 +(BOOL) ice_isA___:(id)servant current:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
     NSString* id__ = [[is readString] autorelease];
@@ -248,37 +250,44 @@ static const char* ICEObject_all__[4] =
     [os writeBool:ret__];
     return YES;
 }
+
 +(BOOL) ice_ping___:(id)servant current:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
     [servant ice_ping:current];
     return YES;
 }
+
 +(BOOL) ice_id___:(id)servant current:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
     NSString* ret__ = [servant ice_id:current];
     [os writeString:ret__];
     return YES;
 }
+
 +(BOOL) ice_ids___:(id)servant current:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
     NSArray* ret__ = [servant ice_ids:current];
     [os writeStringSeq:ret__];
     return YES;
 }
+
 -(BOOL) ice_isA:(NSString*)typeId current:(ICECurrent*)current
 {
     int count, index;
     const char** staticIds = [[self class] staticIds__:&count idIndex:&index];
     return ICELookupString(staticIds, count, [typeId UTF8String]) >= 0;
 }
+
 -(void) ice_ping:(ICECurrent*)current
 {
     // Nothing to do.
 }
+
 -(NSString*) ice_id:(ICECurrent*)current
 {
     return [[self class] ice_staticId];
 }
+
 -(NSArray*) ice_ids:(ICECurrent*)current
 {
     try
@@ -293,21 +302,14 @@ static const char* ICEObject_all__[4] =
         return NO; // Keep the compiler happy.
     }
 }
+
 +(NSString*) ice_staticId
 {
     int count, index;
     const char** staticIds = [self staticIds__:&count idIndex:&index];
     return [NSString stringWithUTF8String:staticIds[index]];
 }
--(ICEInt) ice_hash
-{
-    return (ICEInt)[self hash];
-}
--(id<ICEObject>) ice_clone
-{
-    @throw [ICECloneNotImplementedException cloneNotImplementedException:__FILE__ line:__LINE__];
-    return nil; // avoid warning with some compilers
-}
+
 +(const char**) staticIds__:(int*)count idIndex:(int*)idx
 {
     *count = sizeof(ICEObject_ids__) / sizeof(const char*);
@@ -363,5 +365,11 @@ static const char* ICEObject_all__[4] =
     }
 
     [is endSlice];
+}
+
+-(id) copyWithZone:(NSZone*)zone
+{
+    NSAssert(NO, @"copyWithZone must be overriddent");
+    return nil;
 }
 @end

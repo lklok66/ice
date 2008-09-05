@@ -19,7 +19,7 @@ run(int argc, char* argv[], id<ICECommunicator> communicator)
     [properties setProperty:@"Ice.Warn.Dispatch" value:@"0"];
     [[communicator getProperties] setProperty:@"TestAdapter.Endpoints" value:@"default -p 12010 -t 10000:udp"];
     id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestAdapter"];
-    id<ICEObject> object = [ThrowerI throwerI:adapter];
+    ICEObject* object = [ThrowerI throwerI:adapter];
     [adapter add:object identity:[communicator stringToIdentity:@"thrower"]];
     [adapter activate];
     [communicator waitForShutdown];

@@ -17,9 +17,13 @@
 @protocol ICEOutputStream;
 @protocol ICEInputStream;
 
+@class NSCoder;
+
 @interface ICEException : NSException
 -(id) init;
 -(NSString*)ice_name;
+-(id) initWithCoder:(NSCoder*)decoder; // Implementation throws NSInvalidArchiveOperationException
+-(void) encodeWithCoder:(NSCoder*)coder; // Implementation throws NSInvalidArchiveOperationException
 @end
 
 @interface ICELocalException : ICEException

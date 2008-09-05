@@ -29,11 +29,9 @@ int ICELookupString(const char**, size_t, const char*);
 -(NSString*) ice_id:(ICECurrent*)current;
 -(NSArray*) ice_ids:(ICECurrent*)current;
 +(NSString*) ice_staticId;
--(ICEInt) ice_hash;
--(id<ICEObject>) ice_clone;
 @end
 
-@interface ICEObject : NSObject<ICEObject>
+@interface ICEObject : NSObject<ICEObject, NSCopying>
 {
     void* object__;
 }

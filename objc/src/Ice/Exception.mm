@@ -14,6 +14,8 @@
 
 #include <IceCpp/LocalException.h>
 
+#import <Foundation/NSKeyedArchiver.h>
+
 //
 // TODO: add dealloc.
 //
@@ -27,6 +29,17 @@
 {
     NSAssert(false, @"ice_name not overriden");
     return nil;
+}
+
+-(id) initWithCoder:(NSCoder*)decoder
+{
+    [NSException raise:NSInvalidArchiveOperationException format:@"ICEExceptions do not support NSCoding"];
+    return nil;
+}
+
+-(void) encodeWithCoder:(NSCoder*)coder
+{
+    [NSException raise:NSInvalidArchiveOperationException format:@"ICEExceptions do not support NSCoding"];
 }
 @end
 

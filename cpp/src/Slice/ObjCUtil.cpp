@@ -307,7 +307,7 @@ Slice::ObjCGenerator::isProtocolType(const TypePtr& type)
             }
         }
     }
-    if(ProxyPtr::dynamicCast(type) || ClassDefPtr::dynamicCast(type))
+    if(ProxyPtr::dynamicCast(type) || ClassDeclPtr::dynamicCast(type))
     {
         return true;
     }
@@ -514,30 +514,24 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
     {
         if(marshal)
         {
-            out << nl << stream << ".writeObject(" << param << ");";
+            out << nl << "[" << stream << " writeObject:" << param << "];";
         }
         else
         {
             if(isOutParam)
             {
-                out << nl << "IceInternal.ParamPatcher<" << typeToString(type) << ">" << param
-                    << "_PP = new IceInternal.ParamPatcher<" << typeToString(type) << ">(\""
-                    << cl->scoped() << "\");";
-                out << nl << stream << ".readObject(";
-                if(streamingAPI)
-                {
-                    out << "(Ice.ReadObjectCallback)";
-                }
-                out << param << "_PP);";
+                //out << nl << "IceInternal.ParamPatcher<" << typeToString(type) << ">" << param
+                    //<< "_PP = new IceInternal.ParamPatcher<" << typeToString(type) << ">(\""
+                    //<< cl->scoped() << "\");";
+                out << nl << "[" << stream << " readObject:nil];"; // TODO: instantiate patcher
+		//out << "(Ice.ReadObjectCallback)";
+                //out << param << "_PP);";
             }
             else
             {
-                out << nl << stream << ".readObject(";
-                if(streamingAPI)
-                {
-                    out << "(Ice.ReadObjectCallback)";
-                }
-                out << "new Patcher__(\"" << cl->scoped() << "\", " << patchParams << "));";
+                out << nl << "[" << stream << " readObject:nil];"; // TODO, instantiate callback
+		//out << "(Ice.ReadObjectCallback)";
+                //out << "new Patcher__(\"" << cl->scoped() << "\", " << patchParams << "));";
             }
         }
         return;

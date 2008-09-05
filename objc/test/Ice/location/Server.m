@@ -34,14 +34,14 @@ run(int argc, char* argv[], id<ICECommunicator> communicator, ICEInitializationD
     //
     ServerLocatorRegistry* registry = [[[ServerLocatorRegistry alloc] init] autorelease];
     [registry addObject:[adapter createProxy:[communicator stringToIdentity:@"ServerManager"]]];
-    id<ICEObject> object = [[[ServerManagerI alloc] init:registry initData:initData] autorelease];
+    ICEObject* object = [[[ServerManagerI alloc] init:registry initData:initData] autorelease];
     [adapter add:object identity:[communicator stringToIdentity:@"ServerManager"]];
 
     id<ICELocatorRegistryPrx> registryPrx = 
         [ICELocatorRegistryPrx uncheckedCast:[adapter add:registry 
                                                       identity:[communicator stringToIdentity:@"registry"]]];
 
-    id<ICELocator> locator = [[[ServerLocator alloc] init:registry proxy:registryPrx] autorelease];
+    ICELocator* locator = [[[ServerLocator alloc] init:registry proxy:registryPrx] autorelease];
     [adapter add:locator identity:[communicator stringToIdentity:@"locator"]];
 
     [adapter activate];
