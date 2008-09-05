@@ -11,7 +11,7 @@
 #import <Ice/CommunicatorI.h>
 #import <Ice/ProxyI.h>
 #import <Ice/Util.h>
-#import <Ice/Object.h>
+#import <Ice/ObjectI.h>
 #import <Ice/LocalException.h>
 
 #include <IceCpp/Stream.h>
@@ -53,7 +53,7 @@ class ObjectReader : public Ice::ObjectReader
 {
 public:
     
-    ObjectReader(ICEObject* obj) : _obj(obj)
+    ObjectReader(ICEObject* obj) : _obj(obj), _retain(false)
     {
     }
     
@@ -73,12 +73,23 @@ public:
     ICEObject*
     getObject()
     {
-        return _obj;
+        if(!_retain)
+        {
+            // No need to call retain for the first to get the object, the ref count already 1.
+            _retain = true;
+            return _obj;
+        }
+        else
+        {
+            // Other refereferences to the object need to increase the ref count, so we call retain.
+            return [_obj retain];
+        }
     }
 
 private:
 
     ICEObject* _obj;
+    bool _retain;
 };
 typedef IceUtil::Handle<ObjectReader> ObjectReaderPtr;
 
@@ -134,6 +145,109 @@ private:
 
     ICEUserException* _ex;
     ICEOutputStream* _stream;
+};
+
+class ReadObjectI : public Ice::ReadObjectCallback
+{
+public:
+    
+    ReadObjectI(ICEObject** addr) : _addr(addr)
+    {
+    }
+
+    virtual void
+    invoke(const Ice::ObjectPtr& obj)
+    {
+        @try
+        {
+            if(obj)
+            {
+                *_addr = ObjectReaderPtr::dynamicCast(obj)->getObject();
+            }
+            else
+            {
+                *_addr = nil;
+            }
+        }
+        @catch(NSException* ex)
+        {
+            rethrowCxxException(ex);
+        }
+    }
+
+private:
+
+    ICEObject** _addr;
+};
+
+class ReadObjectAtIndex : public Ice::ReadObjectCallback
+{
+public:
+    
+    ReadObjectAtIndex(NSMutableArray* array, ICEInt index) : _array(array), _index(index)
+    {
+    }
+
+    virtual void
+    invoke(const Ice::ObjectPtr& obj)
+    {
+        @try
+        {
+            if(obj)
+            {
+                [_array replaceObjectAtIndex:_index withObject:ObjectReaderPtr::dynamicCast(obj)->getObject()];
+            }
+        }
+        @catch(NSException* ex)
+        {
+            rethrowCxxException(ex);
+        }
+    }
+
+private:
+
+    NSMutableArray* _array;
+    ICEInt _index;
+};
+
+class ReadObjectForKey : public Ice::ReadObjectCallback
+{
+public:
+    
+    ReadObjectForKey(NSMutableDictionary* dict, id key) : _dict(dict), _key(key)
+    {
+        [_key retain];
+    }
+
+    virtual ~ReadObjectForKey()
+    {
+        [_key release];
+    }
+    
+    virtual void
+    invoke(const Ice::ObjectPtr& obj)
+    {
+        @try
+        {
+            if(obj)
+            {
+                [_dict setObject:ObjectReaderPtr::dynamicCast(obj)->getObject() forKey:_key];
+            }
+            else
+            {
+                [_dict setObject:[NSNull null] forKey:_key];
+            }
+        }
+        @catch(NSException* ex)
+        {
+            rethrowCxxException(ex);
+        }
+    }
+
+private:
+
+    NSMutableDictionary* _dict;
+    id _key;
 };
 
 class ReadObjectCallbackI : public Ice::ReadObjectCallback
@@ -631,7 +745,27 @@ typedef enum { dummy } Dummy_Enum;
     }
 }
 
--(void) readObject:(id<ICEReadObjectCallback>)callback
+-(void) readObject:(ICEObject**)object
+{
+    try
+    {
+        is_->readObject(new IceObjC::ReadObjectI(object));
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    }
+}
+
+-(void) readObject:(NSMutableArray*)array atIndex:(ICEInt)index
+{
+}
+
+-(void) readObject:(NSMutableArray*)array forKey:(id)key
+{
+}
+
+-(void) readObjectWithCallback:(id<ICEReadObjectCallback>)callback
 {
     try
     {
@@ -645,14 +779,58 @@ typedef enum { dummy } Dummy_Enum;
 
 -(NSMutableArray*) readObjectSeq
 {
-    // TODO
-    return nil;
+    ICEInt sz = [self readSize];
+    // TODO sequence size check
+    NSMutableArray* arr = [[NSMutableArray alloc] initWithCapacity:sz];
+    try
+    {
+        int i;
+        id null = [NSNull null];
+        for(i = 0; i < sz; i++)
+        {
+            [arr addObject:null];
+            is_->readObject(new IceObjC::ReadObjectAtIndex(arr, i));
+        }
+    }
+    catch(const std::exception& ex)
+    {
+        [arr release];
+        rethrowObjCException(ex);
+    }
+    return arr;
 }
 
 -(NSMutableDictionary*) readObjectDict:(Class)cl
 {
-    // TODO
-    return nil;
+    ICEInt sz = [self readSize];
+    // TODO size check
+    NSMutableDictionary* dictionary = [[NSMutableDictionary alloc] initWithCapacity:sz];
+    Class key = nil;
+    for(int i = 0; i < sz; ++i)
+    {
+        @try
+        {
+            key = [cl readWithStream:self];
+        }
+        @catch(NSException *ex)
+        {
+            [dictionary release];
+            @throw ex;
+        }
+
+        try
+        {
+            is_->readObject(new IceObjC::ReadObjectForKey(dictionary, key));
+        }
+        catch(const std::exception& ex)
+        {
+            [key release];
+            [dictionary release];
+            rethrowObjCException(ex);
+        }
+        [key release];
+    }
+    return dictionary;
 }
 
 -(NSMutableArray*) readSequence:(Class)cl
@@ -902,11 +1080,20 @@ typedef enum { dummy } Dummy_Enum;
         return nil;
     }
     os_ = dynamic_cast<Ice::OutputStream*>(cxxObject);
+    objectWriters_ = 0;
     return self;
 }
 -(Ice::OutputStream*) os
 {
     return os_;
+}
+-(void) dealloc
+{
+    if(objectWriters_)
+    {
+        delete objectWriters_;
+    }
+    [super dealloc];
 }
 
 // @protocol ICEOutputStream methods
@@ -1277,7 +1464,35 @@ typedef enum { dummy } Dummy_Enum;
 {
     try
     {
-        os_->writeObject(new IceObjC::ObjectWriter(v, self));
+        if(v == nil)
+        {
+            os_->writeObject(0);
+        }
+        else
+        {
+            //
+            // Ice::ObjectWriter is a subclass of Ice::Object that wraps an Objective-C object for marshaling.
+            // It is possible that this Objective-C object has already been marshaled, therefore we first must
+            // check the object map to see if this object is present. If so, we use the existing ObjectWriter,
+            // otherwise we create a new one.
+            //
+            if(!objectWriters_)
+            {
+                objectWriters_ = new std::map<Ice::ObjectPtr, Ice::ObjectPtr>();
+            }
+            std::map<Ice::ObjectPtr, Ice::ObjectPtr>::const_iterator p = objectWriters_->find([v object__]);
+            Ice::ObjectPtr writer;
+            if(p != objectWriters_->end())
+            {
+                writer = p->second;
+            }
+            else
+            {
+                writer = new IceObjC::ObjectWriter(v, self);
+                objectWriters_->insert(std::make_pair([v object__], writer));
+            }
+            os_->writeObject(writer);
+        }
     }
     catch(const std::exception& ex)
     {
@@ -1285,14 +1500,42 @@ typedef enum { dummy } Dummy_Enum;
     }
 }
 
--(void) writeObjectSeq:(NSArray*)v
+-(void) writeObjectSeq:(NSArray*)arr
 {
-    // TODO
+    if(arr == nil)
+    {
+        [self writeSize:0];
+        return;
+    }
+
+    [self writeSize:[arr count]];
+    for(id i in arr)
+    {
+        [self writeObject:(i == [NSNull null] ? nil : i)];
+    }
 }
 
--(void) writeObjectDict:(NSDictionary*)v c:(Class)c
+-(void) writeObjectDict:(NSDictionary*)dictionary c:(Class)c
 {
-    // TODO
+    if(dictionary == nil)
+    {
+        [self writeSize:0];
+	return;
+    }
+
+    [self writeSize:[dictionary count]];
+    NSEnumerator* e = [dictionary keyEnumerator];
+    id key;
+    while((key = [e nextObject]))
+    {
+	if(key == [NSNull null])
+	{
+	    @throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"illegal NSNull value"];
+	}
+	[c writeWithStream:key stream:self];
+	id obj = [dictionary objectForKey:key];
+        [self writeObject:(obj == [NSNull null] ? nil : obj)];
+    }
 }
 
 -(void) writeTypeId:(const char*)v
@@ -1539,6 +1782,28 @@ typedef enum { dummy } Dummy_Enum;
 {
     NSAssert(false, @"ICEEnumHelper getLimit requires override");
     return nil;
+}
+@end
+
+@implementation ICEObjectPrxSeqHelper
++(id) readWithStream:(id<ICEInputStream>)stream
+{
+    return [stream readSequence:[ICEObjectPrx class]];
+}
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
+{
+    return [stream writeSequence:obj c:[ICEObjectPrx class]];
+}
+@end
+
+@implementation ICEObjectSeqHelper
++(id) readWithStream:(id<ICEInputStream>)stream
+{
+    return [stream readObjectSeq];
+}
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
+{
+    [stream writeObjectSeq:obj];
 }
 @end
 

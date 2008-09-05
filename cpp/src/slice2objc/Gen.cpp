@@ -261,6 +261,17 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
 		_M << param << ";";
 		writeMarshalUnmarshalCode(_M, inp->first, param, false, false, false);
 	    }
+            if(op->sendsClasses())
+            {
+                _M << nl << "[is_ readPendingObjects];";
+            }
+	    for(TypeStringList::const_iterator inp = inParams.begin(); inp != inParams.end(); ++inp)
+	    {
+                if(!isValueType(inp->first))
+                {
+                    _M << nl << "[(id<NSObject>)" << fixId(inp->second) << " autorelease];";
+                }
+            }
 	    for(TypeStringList::const_iterator outp = outParams.begin(); outp != outParams.end(); ++outp)
 	    {
 	        _M << nl << typeToString(outp->first) << " ";
@@ -300,14 +311,18 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
 	        _M << " current";
 	    }
 	    _M << ":current];";
-	    for(TypeStringList::const_iterator op = outParams.begin(); op != outParams.end(); ++op)
+	    for(TypeStringList::const_iterator outp = outParams.begin(); outp != outParams.end(); ++outp)
 	    {
-		writeMarshalUnmarshalCode(_M, op->first, fixId(op->second), true, false, false);
+		writeMarshalUnmarshalCode(_M, outp->first, fixId(outp->second), true, false, false);
 	    }
 	    if(returnType)
 	    {
 		writeMarshalUnmarshalCode(_M, returnType, "ret_", true, false, false);
 	    }
+            if(op->returnsClasses())
+            {
+                _M << nl << "[os_ writePendingObjects];";
+            }
 	    if(!throws.empty())
 	    {
 		_M << eb;
@@ -749,8 +764,12 @@ Slice::ObjCVisitor::getParams(const OperationPtr& op) const
 	if(mapsToPointerType(type))
 	{
 	    result += " *";
+            if((*q)->isOutParam())
+            {
+                result += "*";
+            }
 	}
-        if((*q)->isOutParam())
+        else if((*q)->isOutParam())
 	{
 	    result += " *";
 	}
@@ -778,8 +797,12 @@ Slice::ObjCVisitor::getServerParams(const OperationPtr& op) const
 	if(mapsToPointerType(type))
 	{
 	    result += " *";
+            if((*q)->isOutParam())
+            {
+                result += "*";
+            }
 	}
-        if((*q)->isOutParam())
+        else if((*q)->isOutParam())
 	{
 	    result += " *";
 	}
@@ -1200,6 +1223,9 @@ Slice::Gen::generate(const UnitPtr& p)
     UnitVisitor unitVisitor(_H, _M, _stream);
     p->visit(&unitVisitor, false);
 
+    ObjectDeclVisitor objectDeclVisitor(_H, _M);
+    p->visit(&objectDeclVisitor, false);
+
     ProxyDeclVisitor proxyDeclVisitor(_H, _M);
     p->visit(&proxyDeclVisitor, false);
 
@@ -1362,6 +1388,19 @@ Slice::Gen::UnitVisitor::visitModuleStart(const ModulePtr& p)
     }
 #endif
     return false;
+}
+
+
+Slice::Gen::ObjectDeclVisitor::ObjectDeclVisitor(Output& H, Output& M)
+    : ObjCVisitor(H, M)
+{
+}
+
+void
+Slice::Gen::ObjectDeclVisitor::visitClassDecl(const ClassDeclPtr& p)
+{
+    _H << sp << nl << "@class " << fixName(p) << ";";
+    _H << nl << "@protocol " << fixName(p) << ";";
 }
 
 Slice::Gen::ProxyDeclVisitor::ProxyDeclVisitor(Output& H, Output& M)
@@ -1587,7 +1626,7 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
     _M << sb;
     _M << nl << "[os_ writeTypeId:\"" << p->scoped() << "\"];";
     _M << nl << "[os_ startSlice];";
-    writeMemberMarshal("", dataMembers, 0); // TODO fix second parameter
+    writeMemberMarshal("self->", dataMembers, 0); // TODO fix second parameter
     _M << nl << "[os_ endSlice];";
     _M << nl << "[super write__:os_];";
     _M << eb;
@@ -1599,10 +1638,10 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
     _M << sb;
     _M << nl << "if(rid_)";
     _M << sb;
-    _M << nl << "[[is_ readString] release];";
+    _M << nl << "[[is_ readTypeId] release];";
     _M << eb;
     _M << nl << "[is_ startSlice];";
-    writeMemberUnmarshal("self.", dataMembers, 0); // TODO fix second parameter
+    writeMemberUnmarshal("self->", dataMembers, 0); // TODO fix second parameter
     _M << nl << "[is_ endSlice];";
     _M << nl << "[super read__:is_ readTypeId:YES];";
     _M << eb;
@@ -1915,7 +1954,7 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
     _M << sb;
     _M << nl << "[os_ writeString:@\"" << p->scoped() << "\"];";
     _M << nl << "[os_ startSlice];";
-    writeMemberMarshal("", dataMembers, 0); // TODO fix second parameter
+    writeMemberMarshal("self->", dataMembers, 0); // TODO fix second parameter
     _M << nl << "[os_ endSlice];";
     if(base)
     {
@@ -1931,7 +1970,7 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
     _M << nl << "[[is_ readString] release];";
     _M << eb;
     _M << nl << "[is_ startSlice];";
-    writeMemberUnmarshal("self.", dataMembers, 0); // TODO fix second parameter
+    writeMemberUnmarshal("self->", dataMembers, 0); // TODO fix second parameter
     _M << nl << "[is_ endSlice];";
     if(base)
     {
@@ -2086,7 +2125,7 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     _M << eb;
     _M << nl << "@try";
     _M << sb;
-    writeMemberMarshal("p.", dataMembers, 0); // TODO fix second parameter
+    writeMemberMarshal("p->", dataMembers, 0); // TODO fix second parameter
     _M << eb;
     _M << nl << "@finally";
     _M << sb;
@@ -2103,7 +2142,7 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     _M << nl << name << "*" << " p = [[self alloc] init];";
     _M << nl << "@try";
     _M << sb;
-    writeMemberUnmarshal("p.", dataMembers, 0); // TODO fix second parameter
+    writeMemberUnmarshal("p->", dataMembers, 0); // TODO fix second parameter
     _M << eb;
     _M << nl << "@catch(NSException *ex)";
     _M << sb;
@@ -2891,6 +2930,17 @@ Slice::Gen::HelperVisitor::visitSequence(const SequencePtr& p)
     BuiltinPtr builtin = BuiltinPtr::dynamicCast(p->type());
     if(builtin)
     {
+        if(builtin->kind() == Builtin::KindObjectProxy)
+        {
+            _H << sp << nl << "typedef ICEObjectPrxSeqHelper " << name << ";";
+            return;
+        }
+        else if(builtin->kind() == Builtin::KindObject)
+        {
+            _H << sp << nl << "typedef ICEObjectSeqHelper " << name << ";";
+            return;
+        }
+
 	_H << sp << nl << "@interface " << name << " : NSObject";
 	_H << nl << "+(id) readWithStream:(id<ICEInputStream>)stream;";
 	_H << nl << "+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;";
@@ -2899,14 +2949,7 @@ Slice::Gen::HelperVisitor::visitSequence(const SequencePtr& p)
 	_M << sp << nl << "@implementation " << name;
 	_M << nl << "+(id) readWithStream:(id<ICEInputStream>)stream";
 	_M << sb;
-        if(builtin->kind() == Builtin::KindObjectProxy)
-        {
-            _M << nl << "return [stream readSequence:[ICEObjectPrx class]];";
-        }
-        else
-        {
-            _M << nl << "return [stream read" << getBuiltinName(builtin) << "Seq];";
-        }
+        _M << nl << "return [stream read" << getBuiltinName(builtin) << "Seq];";
 	_M << eb;
 
 	_M << sp << nl << "+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream";
@@ -2950,8 +2993,21 @@ Slice::Gen::HelperVisitor::visitSequence(const SequencePtr& p)
         return;
     }
 
+    ClassDeclPtr cl = ClassDeclPtr::dynamicCast(p->type());
+    if(cl)
+    {
+        _H << sp << nl << "typedef ICEObjectSeqHelper " << name << ";";
+        return;
+    }
+
     ContainedPtr contained = ContainedPtr::dynamicCast(p->type());
     ProxyPtr proxy = ProxyPtr::dynamicCast(p->type());
+    if(proxy)
+    {
+        _H << sp << nl << "typedef ICEObjectPrxSeqHelper " << name << ";";
+        return;
+    }
+
     assert(contained || proxy);
     _H << sp << nl << "@interface " << name << " : ICESeqHelper";
     _H << nl << "+(Class) getContained;";
@@ -2962,7 +3018,7 @@ Slice::Gen::HelperVisitor::visitSequence(const SequencePtr& p)
     _M << sb;
     if(proxy)
     {
-        _M << nl << "return [ICEObjectPrx class];";
+        _M << nl << "return [" << moduleName(findModule(proxy->_class())) << (proxy->_class()->name()) << "Prx class];";
     }
     else if(SequencePtr::dynamicCast(contained) || DictionaryPtr::dynamicCast(contained))
     {
@@ -3387,6 +3443,20 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
  	    _M << nl << "[is_ readPendingObjects];";
 	    // TODO: assign to parameters from patcher
 	}
+	for(TypeStringList::const_iterator op = outParams.begin(); op != outParams.end(); ++op)
+	{
+            if(!isValueType(op->first))
+            {
+                _M << nl << "[(id<NSObject>)" << "*" + fixId(op->second) << " autorelease];";
+            }
+        }
+        if(returnType)
+        {
+           if(!isValueType(returnType))
+           {
+               _M << nl << "[(id<NSObject>)ret_ autorelease];";
+           }
+        }
 	// _M << nl << "[is_ endEncapsulation];";
     }
     else

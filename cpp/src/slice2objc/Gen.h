@@ -99,6 +99,15 @@ private:
         bool _globalMetaDataDone;
     };
 
+    class ObjectDeclVisitor : public ObjCVisitor
+    {
+    public:
+
+        ObjectDeclVisitor(::IceUtilInternal::Output&, ::IceUtilInternal::Output&);
+
+        virtual void visitClassDecl(const ClassDeclPtr&);
+    };
+
     class ProxyDeclVisitor : public ObjCVisitor
     {
     public:

@@ -474,17 +474,7 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
 	}
 	else
 	{
-	    out << nl << param << " = [";
-	    if(!isValueType(builtin))
-	    {
-	        out << "[";
-	    }
-	    out << stream << " " << selector;
-	    if(!isValueType(builtin))
-	    {
-	        out << "] autorelease";
-	    }
-	    out << "];";
+	    out << nl << param << " = [" << stream << " " << selector << "];";
 	}
         return;
     }
@@ -503,8 +493,8 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
             //
             // We use objc_getClass to get the proxy class instead of [name class]. This is to avoid
             // a warning if the proxy is forward declared.
-	    out << nl << param << " = (id<" << name << ">)[[" << stream << " readProxy:objc_getClass(\""
-	        << name << "\")] autorelease];";
+	    out << nl << param << " = (id<" << name << ">)[" << stream 
+                << " readProxy:objc_getClass(\"" << name << "\")];";
 	}
         return;
     }
@@ -518,21 +508,22 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
         }
         else
         {
-            if(isOutParam)
-            {
-                //out << nl << "IceInternal.ParamPatcher<" << typeToString(type) << ">" << param
-                    //<< "_PP = new IceInternal.ParamPatcher<" << typeToString(type) << ">(\""
-                    //<< cl->scoped() << "\");";
-                out << nl << "[" << stream << " readObject:nil];"; // TODO: instantiate patcher
-		//out << "(Ice.ReadObjectCallback)";
-                //out << param << "_PP);";
-            }
-            else
-            {
-                out << nl << "[" << stream << " readObject:nil];"; // TODO, instantiate callback
-		//out << "(Ice.ReadObjectCallback)";
-                //out << "new Patcher__(\"" << cl->scoped() << "\", " << patchParams << "));";
-            }
+            out << nl << "[" << stream << " readObject:&" << param << "];";
+//             if(isOutParam)
+//             {
+//                 //out << nl << "IceInternal.ParamPatcher<" << typeToString(type) << ">" << param
+//                     //<< "_PP = new IceInternal.ParamPatcher<" << typeToString(type) << ">(\""
+//                     //<< cl->scoped() << "\");";
+//                 out << nl << "[" << stream << " readObject:&" << param << "];"; // TODO: instantiate patcher
+// 		//out << "(Ice.ReadObjectCallback)";
+//                 //out << param << "_PP);";
+//             }
+//             else
+//             {
+//                 out << nl << "[" << stream << " readObject:nil];"; // TODO, instantiate callback
+// 		//out << "(Ice.ReadObjectCallback)";
+//                 //out << "new Patcher__(\"" << cl->scoped() << "\", " << patchParams << "));";
+//             }
         }
         return;
     }
@@ -547,8 +538,7 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
 	}
 	else
 	{
-	    out << nl << param << " = (" << typeS << "*)[[" << typeS << " readWithStream:" << stream
-	        << "] autorelease];";
+	    out << nl << param << " = [" << typeS << " readWithStream:" << stream << "];";
 	}
         return;
     }
@@ -582,7 +572,7 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
                 }
                 else
                 {
-                    out << nl << param << " = [[" << stream << " readSequence:[ICEObjectPrx class]] autorelease];";
+                    out << nl << param << " = [" << stream << " readSequence:[ICEObjectPrx class]];";
                 }
             }
             else
@@ -594,7 +584,7 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
                 }
                 else
                 {
-                    out << nl << param << " = [[" << stream << " " << selector << "] autorelease];";
+                    out << nl << param << " = [" << stream << " " << selector << "];";
                 }
             }
 	    return;
@@ -611,7 +601,7 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
 	    }
 	    else
 	    {
-		out << nl << param << " = [[" << stream << " readEnumSeq:" << sz << "] autorelease];";
+		out << nl << param << " = [" << stream << " readEnumSeq:" << sz << "];";
 	    }
 	    return;
 	}
@@ -628,8 +618,8 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
 	    else
 	    {
 		string mName = moduleName(findModule(prx->_class()));
-		out << nl << param << " = [[" << stream << " readSequence:["
-		    << mName + prx->_class()->name() + "Prx class]] autorelease];";
+		out << nl << param << " = [" << stream << " readSequence:["
+		    << mName + prx->_class()->name() + "Prx class]];";
 	    }
 	    return;
 	}
@@ -642,7 +632,7 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
 	}
 	else
 	{
-	    out << nl << param << " = [[" << name << " readWithStream:" << stream << "] autorelease];";
+	    out << nl << param << " = [" << name << " readWithStream:" << stream << "];";
 	}
 	return;
     }
@@ -657,8 +647,8 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
     }
     else
     {
-        out << nl << param << " = [[" << name << " readWithStream:" << stream << "] autorelease];";
-    }
+        out << nl << param << " = [" << name << " readWithStream:" << stream << "];";
+    } 
 }
 
 void

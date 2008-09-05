@@ -19,6 +19,7 @@ SUBDIRS		= adapterDeactivation \
 		  exceptions \
 		  inheritance \
 		  location \
+		  objects \
 		  faultTolerance \
 		  retry \
 		  timeout

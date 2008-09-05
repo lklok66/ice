@@ -65,7 +65,8 @@ typedef struct
 
 -(id<ICEObjectPrx>) readProxy:(Class)c;
 
--(void) readObject:(id<ICEReadObjectCallback>)callback;
+-(void) readObject:(ICEObject**)object;
+-(void) readObjectWithCallback:(id<ICEReadObjectCallback>)callback;
 -(NSMutableArray*) readObjectSeq;
 -(NSMutableDictionary*) readObjectDict:(Class)c;
 
@@ -219,6 +220,22 @@ typedef struct
 +(id) readWithStream:(id<ICEInputStream>)stream;
 +(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
 +(ICEInt) getLimit;
+@end
+
+//
+// Helper for sequence of proxies
+//
+@interface ICEObjectPrxSeqHelper : NSObject
++(id) readWithStream:(id<ICEInputStream>)stream;
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
+@end
+
+//
+// Helper for sequence of objects
+//
+@interface ICEObjectSeqHelper : NSObject
++(id) readWithStream:(id<ICEInputStream>)stream;
++(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
 @end
 
 //
