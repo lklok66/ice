@@ -3497,7 +3497,7 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
         {
             _M << nl << "@catch(" << fixName(*e) << " *ex_)";
             _M << sb;
-            _M << nl << "objc_msgSend(target_, exception_, ex_);";
+            _M << nl << "objc_msgSend(target_, exception_, [ex_ autorelease]);";
             _M << eb;
         }
         _M << nl << "@catch(ICEUserException *ex_)";
@@ -3505,6 +3505,7 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
         _M << nl << "ICEUnknownUserException* uuex_;";
         _M << nl << "uuex_ = [ICEUnknownUserException unknownUserException:__FILE__ line:__LINE__ ";
         _M << "unknown:[ex_ ice_name]];";
+        _M << nl << "[ex_ release];";
         _M << nl << "objc_msgSend(target_, exception_, uuex_);";
         _M << eb;
         _M << nl << "return;";
