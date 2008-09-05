@@ -54,7 +54,7 @@ run(int argc, char* argv[], id<ICECommunicator> communicator)
     NSString* endpts = [NSString stringWithFormat:@"default  -p %d:udp", port];
     [[communicator getProperties] setProperty:@"TestAdapter.Endpoints" value:endpts];
     id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestAdapter"];
-    ICEObject* object = [[TestI alloc] init];
+    ICEObject* object = [[[TestI alloc] init] autorelease];
     [adapter add:object identity:[communicator stringToIdentity:@"test"]];
     [adapter activate];
     [communicator waitForShutdown];
@@ -75,7 +75,7 @@ main(int argc, char* argv[])
         // our test servers may time out before they are used in the
         // test.
         //
-        ICEInitializationData* initData = [[ICEInitializationData alloc] init];
+        ICEInitializationData* initData = [ICEInitializationData initializationData];
         [initData setProperties:[ICEUtil createProperties:&argc argv:argv]];
         [[initData properties] setProperty:@"Ice.ServerIdleTime" value:@"120"]; // Two minutes.
 

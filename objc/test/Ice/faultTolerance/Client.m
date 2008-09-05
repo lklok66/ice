@@ -66,7 +66,7 @@ main(int argc, char* argv[])
 
     @try
     {
-        ICEInitializationData* initData = [[ICEInitializationData alloc] init];
+        ICEInitializationData* initData = [ICEInitializationData initializationData];
         [initData setProperties:[ICEUtil createProperties:&argc argv:argv]];
 
         //

@@ -47,7 +47,7 @@ main(int argc, char* argv[])
         // In this test, we need at least two threads in the
         // client side thread pool for nested AMI.
         //
-        ICEInitializationData* initData = [[ICEInitializationData alloc] init];
+        ICEInitializationData* initData = [ICEInitializationData initializationData];
         [initData setProperties:[ICEUtil createProperties:&argc argv:argv]];
         [[initData properties] setProperty:@"Ice.ThreadPool.Client.Size" value:@"2"];
         [[initData properties] setProperty:@"Ice.ThreadPool.Client.SizeWarn" value:@"0"];

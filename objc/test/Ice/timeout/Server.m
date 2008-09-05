@@ -17,7 +17,7 @@ run(int argc, char* argv[], id<ICECommunicator> communicator)
 {
     [[communicator getProperties] setProperty:@"TestAdapter.Endpoints" value:@"default -p 12010 -t 10000:udp"];
     id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestAdapter"];
-    ICEObject* object = [[TimeoutI alloc] init];
+    ICEObject* object = [[[TimeoutI alloc] init] autorelease];
     [adapter add:object identity:[communicator stringToIdentity:@"timeout"]];
     [adapter activate];
     [communicator waitForShutdown];
@@ -33,7 +33,7 @@ main(int argc, char* argv[])
 
     @try
     {
-        ICEInitializationData* initData = [[ICEInitializationData alloc] init];
+        ICEInitializationData* initData = [ICEInitializationData initializationData];
         [initData setProperties:[ICEUtil createProperties:&argc argv:argv]];
 
         //

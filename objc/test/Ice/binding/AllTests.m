@@ -75,9 +75,47 @@
 NSString*
 getAdapterNameWithAMI(id<TestTestIntfPrx> test)
 {
-    GetAdapterNameCB* cb = [[GetAdapterNameCB alloc] init];
+    GetAdapterNameCB* cb = [[[GetAdapterNameCB alloc] init] autorelease];
     [test getAdapterName_async:cb response:@selector(response:) exception:@selector(exception:)];
     return [cb getResult];
+}
+
+NSArray*
+getEndpoints(id<TestTestIntfPrx> proxy)
+{
+    NSMutableArray* edpts = [NSMutableArray array];
+    bool escape = NO;
+    int beg = 0;
+    int length = 0;
+    NSString* s = [proxy ice_toString];
+    int index;
+    for(index = 0; index < [s length]; ++index)
+    {
+        unichar c = [s characterAtIndex:index];
+        if(c == '"')
+        {
+            escape = !escape;
+        }
+
+        if(!escape && c == ':')
+        {
+            NSRange range = { beg, length };
+            [edpts addObject:[s substringWithRange:range]];
+            beg = beg + length + 1;
+            length = 0;
+        }
+        else
+        {
+            ++length;
+        }
+    }
+    if(length > 0)
+    {
+        NSRange range = { beg, length };
+        [edpts addObject:[s substringWithRange:range]];
+    }
+    [edpts removeObjectAtIndex:0];
+    return edpts;
 }
 
 id<TestTestIntfPrx>
@@ -85,13 +123,10 @@ createTestIntfPrx(NSArray* adapters)
 {
     NSMutableArray* endpoints = [NSMutableArray arrayWithCapacity:[adapters count]];
     id<TestTestIntfPrx> test;
-    NSCharacterSet* sep = [NSCharacterSet characterSetWithCharactersInString:@":"];
     for(id<TestRemoteObjectAdapterPrx> a in adapters)
     {
         test = [a getTestIntf];
-        NSMutableArray* edpts = [[[test ice_toString] componentsSeparatedByCharactersInSet:sep] mutableCopy];
-        [edpts removeObjectAtIndex:0];
-        [endpoints addObjectsFromArray:edpts];
+        [endpoints addObjectsFromArray:getEndpoints(test)];
     }
     NSString* proxy = [[test ice_getCommunicator] identityToString:[test ice_getIdentity]];
     for(NSString* e in endpoints)
@@ -100,15 +135,6 @@ createTestIntfPrx(NSArray* adapters)
         proxy = [proxy stringByAppendingString:e];
     }
     return [TestTestIntfPrx uncheckedCast:[[test ice_getCommunicator] stringToProxy:proxy]];
-}
-
-NSArray*
-getEndpoints(id<TestTestIntfPrx> proxy)
-{
-    NSCharacterSet* sep = [NSCharacterSet characterSetWithCharactersInString:@":"];
-    NSMutableArray* edpts = [[[proxy ice_toString] componentsSeparatedByCharactersInSet:sep] mutableCopy];
-    [edpts removeObjectAtIndex:0];
-    return edpts;
 }
 
 void

@@ -537,7 +537,7 @@ twowaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 
     {
         // Check that CommunicatorDestroyedException is raised directly.
-        ICEInitializationData* initData = [[ICEInitializationData alloc] init];
+        ICEInitializationData* initData = [ICEInitializationData initializationData];
         [initData setProperties:[[communicator getProperties] clone]];
         id<ICECommunicator> ic = [ICEUtil createCommunicator:initData];
         id<ICEObjectPrx> obj = [ic stringToProxy:[p ice_toString]];

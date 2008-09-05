@@ -31,7 +31,11 @@
     [[initData_ properties] setProperty:@"Ice.PrintAdapterReady" value:@"0"];
     return self;
 }
-
+-(void) dealloc
+{
+    [communicators_ release];
+    [super dealloc];
+}
 -(void) startServer:(ICECurrent*)current
 {
     for(id<ICECommunicator> c in communicators_)
@@ -61,7 +65,7 @@
     [adapter setLocator:[ICELocatorPrx uncheckedCast:locator]];
     [adapter2 setLocator:[ICELocatorPrx uncheckedCast:locator]];
 
-    ICEObject* object = [[TestI alloc] init:adapter adapter2:adapter2 registry:registry_];
+    ICEObject* object = [[[TestI alloc] init:adapter adapter2:adapter2 registry:registry_] autorelease];
     [registry_ addObject:[adapter add:object identity:[serverCommunicator stringToIdentity:@"test"]]];
     [registry_ addObject:[adapter add:object identity:[serverCommunicator stringToIdentity:@"test2"]]];
 
@@ -91,7 +95,7 @@
     adapter1_ = [adapter retain];
     adapter2_ = [adapter2 retain];
     registry_ = registry;
-    [registry_ addObject:[adapter1_ add:[[HelloI alloc] init] 
+    [registry_ addObject:[adapter1_ add:[[[HelloI alloc] init] autorelease]
                                     identity:[[adapter1_ getCommunicator] stringToIdentity:@"hello"]]];
     return self;
 }

@@ -44,7 +44,7 @@ allTests(id<ICECommunicator> communicator)
     tprintf("testing facet registration exceptions... ");
     [[communicator getProperties] setProperty:@"FacetExceptionTestAdapter.Endpoints" value:@"default"];
     id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"FacetExceptionTestAdapter"];
-    ICEObject* obj = [[EmptyI alloc] init];
+    ICEObject* obj = [[[EmptyI alloc] init] autorelease];
     [adapter add:obj identity:[communicator stringToIdentity:@"d"]];
     [adapter addFacet:obj identity:[communicator stringToIdentity:@"d"] facet:@"facetABCD"];
     @try
@@ -67,11 +67,11 @@ allTests(id<ICECommunicator> communicator)
     tprintf("ok\n");
 
     tprintf("testing removeAllFacets... ");
-    ICEObject* obj1 = [[EmptyI alloc] init];
-    ICEObject* obj2 = [[EmptyI alloc] init];
+    ICEObject* obj1 = [[[EmptyI alloc] init] autorelease];
+    ICEObject* obj2 = [[[EmptyI alloc] init] autorelease];
     [adapter addFacet:obj1 identity:[communicator stringToIdentity:@"id1"] facet:@"f1"];
     [adapter addFacet:obj2 identity:[communicator stringToIdentity:@"id1"] facet:@"f2"];
-    ICEObject* obj3 = [[EmptyI alloc] init];
+    ICEObject* obj3 = [[[EmptyI alloc] init] autorelease];
     [adapter addFacet:obj1 identity:[communicator stringToIdentity:@"id2"] facet:@"f1"];
     [adapter addFacet:obj2 identity:[communicator stringToIdentity:@"id2"] facet:@"f2"];
     [adapter addFacet:obj3 identity:[communicator stringToIdentity:@"id2"] facet:@""];

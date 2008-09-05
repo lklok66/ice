@@ -18,7 +18,7 @@ run(int argc, char* argv[], id<ICECommunicator> communicator)
     [[communicator getProperties] setProperty:@"TestAdapter.Endpoints" value:@"default -p 12010 -t 10000:udp"];
     id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestAdapter"];
     ICEIdentity* ident = [communicator stringToIdentity:@"communicator"];
-    [adapter add:[[RemoteCommunicatorI alloc] init] identity:ident];
+    [adapter add:[[[RemoteCommunicatorI alloc] init] autorelease] identity:ident];
     [adapter activate];
 
     // Disable ready print for further adapters.

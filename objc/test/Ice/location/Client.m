@@ -30,7 +30,7 @@ main(int argc, char* argv[])
 
     @try
     {
-        ICEInitializationData* initData = [[ICEInitializationData alloc] init];
+        ICEInitializationData* initData = [ICEInitializationData initializationData];
         [initData setProperties:[ICEUtil createProperties:&argc argv:argv]];
         [[initData properties] setProperty:@"Ice.Default.Locator" value:@"locator:default -p 12010"];
         communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];

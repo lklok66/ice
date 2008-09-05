@@ -269,7 +269,7 @@ allTests(id<ICECommunicator> communicator)
         // Test Ice.Override.Timeout. This property overrides all
         // endpoint timeouts.
         //
-        ICEInitializationData* initData = [[ICEInitializationData alloc] init];
+        ICEInitializationData* initData = [ICEInitializationData initializationData];
         [initData setProperties:[[communicator getProperties] clone]];
         [[initData properties] setProperty:@"Ice.Override.Timeout" value:@"500"];
         id<ICECommunicator> comm = [ICEUtil createCommunicator:initData];
@@ -303,7 +303,7 @@ allTests(id<ICECommunicator> communicator)
         //
         // Test Ice.Override.ConnectTimeout.
         //
-        ICEInitializationData* initData = [[ICEInitializationData alloc] init];
+        ICEInitializationData* initData = [ICEInitializationData initializationData];
         [initData setProperties:[[communicator getProperties] clone]];
         [[initData properties] setProperty:@"Ice.Override.ConnectTimeout" value:@"750"];
         id<ICECommunicator> comm = [ICEUtil createCommunicator:initData];

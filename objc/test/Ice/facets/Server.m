@@ -17,12 +17,12 @@ run(int argc, char* argv[], id<ICECommunicator> communicator)
 {
     [[communicator getProperties] setProperty:@"TestAdapter.Endpoints" value:@"default -p 12010 -t 10000"];
     id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestAdapter"];
-    ICEObject* d = [[DI alloc] init];
+    ICEObject* d = [[[DI alloc] init] autorelease];
     [adapter add:d identity:[communicator stringToIdentity:@"d"]];
     [adapter addFacet:d identity:[communicator stringToIdentity:@"d"] facet:@"facetABCD"];
-    ICEObject* f = [[FI alloc] init];
+    ICEObject* f = [[[FI alloc] init] autorelease];
     [adapter addFacet:f identity:[communicator stringToIdentity:@"d"] facet:@"facetEF"];
-    ICEObject* h = [[HI alloc] init];
+    ICEObject* h = [[[HI alloc] init] autorelease];
     [adapter addFacet:h identity:[communicator stringToIdentity:@"d"] facet:@"facetGH"];
 
     [adapter activate];
