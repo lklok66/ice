@@ -24,7 +24,7 @@
 namespace IceObjC
 {
 
-class ThreadNotification : public Ice::ThreadNotification
+class ThreadNotification : public Ice::ThreadNotification, public IceUtil::Mutex
 {
 public:
 
@@ -34,11 +34,13 @@ public:
 
     virtual void start()
     {
+        Lock sync(*this);
         _pools.insert(std::make_pair(IceUtil::ThreadControl().id(), [[NSAutoreleasePool alloc] init]));
     }
 
     virtual void stop()
     {
+        Lock sync(*this);
         std::map<IceUtil::ThreadControl::ID, NSAutoreleasePool*>::iterator p =
             _pools.find(IceUtil::ThreadControl().id());
         [p->second release];
