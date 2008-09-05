@@ -72,7 +72,15 @@
     return Testenum3;
 }
 
-// TODO: opMyClass
+-(id<TestMyClassPrx>) opMyClass:(id<TestMyClassPrx>)p1 p2:(id<TestMyClassPrx> *)p2 p3:(id<TestMyClassPrx> *)p3 
+                        current:(ICECurrent *)current
+{
+    *p2 = p1;
+    *p3 = [TestMyClassPrx uncheckedCast:[[current adapter] 
+                                           createProxy:[[[current adapter] getCommunicator] 
+                                                           stringToIdentity:@"noSuchIdentity"]]];
+    return [TestMyClassPrx uncheckedCast:[[current adapter] createProxy:[current id_]]];
+}
 
 -(TestStructure *) opStruct:(TestStructure *)p1 p2:(TestStructure *)p2 p3:(TestStructure **)p3
                             current:(ICECurrent *)current;
@@ -188,6 +196,20 @@
     }
     TestMutableMyEnumS *r = [TestMutableMyEnumS dataWithData:p1];
     [r appendData:p2];
+    return r;
+}
+
+-(TestMyClassS *) opMyClassS:(TestMutableMyClassS *)p1 p2:(TestMutableMyClassS *)p2
+                          p3:(TestMyClassS **)p3 current:(ICECurrent *)current
+{
+    *p3 = [TestMutableMyClassS arrayWithArray:p1];
+    [(TestMutableMyClassS *)*p3 addObjectsFromArray:p2];
+    TestMutableMyClassS *r = [TestMutableMyClassS arrayWithCapacity:[p1 count]];
+    NSEnumerator *enumerator = [p1 reverseObjectEnumerator];
+    for(NSString *element in enumerator)
+    {
+        [r addObject:element];
+    } 
     return r;
 }
 
@@ -330,10 +352,10 @@
     int count = [p1 length] / sizeof(ICEInt);
     TestMutableIntS *r = [TestMutableIntS dataWithLength:[p1 length]];
     const int *src = [p1 bytes];
-    int *target = (int *)[r bytes] + count;
+    int *target = (int *)[r bytes];
     while(count-- > 0)
     {
-	*--target = -*src++;
+	*target++ = -*src++;
     }
     return r;
 }

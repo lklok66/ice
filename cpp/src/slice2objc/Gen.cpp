@@ -2108,7 +2108,7 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     _M << nl << "@catch(NSException *ex)";
     _M << sb;
     _M << nl << "[p release];";
-    _M << nl << "return nil;";
+    _M << nl << "@throw ex;";
     _M << eb;
     _M << nl << "return p;";
     _M << eb;
@@ -2951,7 +2951,8 @@ Slice::Gen::HelperVisitor::visitSequence(const SequencePtr& p)
     }
 
     ContainedPtr contained = ContainedPtr::dynamicCast(p->type());
-    assert(contained);
+    ProxyPtr proxy = ProxyPtr::dynamicCast(p->type());
+    assert(contained || proxy);
     _H << sp << nl << "@interface " << name << " : ICESeqHelper";
     _H << nl << "+(Class) getContained;";
     _H << nl << "@end";
@@ -2959,7 +2960,11 @@ Slice::Gen::HelperVisitor::visitSequence(const SequencePtr& p)
     _M << sp << nl << "@implementation " << name;
     _M << nl << "+(Class) getContained";
     _M << sb;
-    if(SequencePtr::dynamicCast(contained) || DictionaryPtr::dynamicCast(contained))
+    if(proxy)
+    {
+        _M << nl << "return [ICEObjectPrx class];";
+    }
+    else if(SequencePtr::dynamicCast(contained) || DictionaryPtr::dynamicCast(contained))
     {
         _M << nl << "return [" << moduleName(findModule(contained)) + contained->name() + "Helper class];";
     }

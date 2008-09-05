@@ -151,27 +151,27 @@
     test(NO);
 }
 
-// -(void) opMyClassResponse:(id<TestMyClassPrx>)r c1:(id<TestMyClassPrx>)c1 c2:(id<TestMyClassPrx>)c2
-// {
-//     test([c1 ice_getIdentity]:isEqual:[[c1 ice_getCommunicator] stringToIdentity:@"test"]);
-//     test([c2 ice_getIdentity]:isEqual:[[c1 ice_getCommunicator] stringToIdentity:@"noSuchIdentity"]);
-//     test([r ice_getIdentity]:isEqual:[[c1 ice_getCommunicator] stringToIdentity:@"test"]);
-//     // We can't do the callbacks below in connection serialization mode.
-//     if([[[c1 ice_getCommunicator] getProperties] getPropertyAsInt:@"Ice.ThreadPool.Client.Serialize"])
-//     {
-//         [r opVoid];
-//         [c1 opVoid];
-//         @try
-//         {
-//             [c2 opVoid];
-//             test(NO);
-//         }
-//         @catch(ICEObjectNotExistException*)
-//         {
-//         }
-//     }
-//     [self called];
-// }
+-(void) opMyClassResponse:(id<TestMyClassPrx>)r p2:(id<TestMyClassPrx>)c1 p3:(id<TestMyClassPrx>)c2
+{
+    test([[c1 ice_getIdentity] isEqual:[[c1 ice_getCommunicator] stringToIdentity:@"test"]]);
+    test([[c2 ice_getIdentity] isEqual:[[c1 ice_getCommunicator] stringToIdentity:@"noSuchIdentity"]]);
+    test([[r ice_getIdentity] isEqual:[[c1 ice_getCommunicator] stringToIdentity:@"test"]]);
+    // We can't do the callbacks below in connection serialization mode.
+    if([[[c1 ice_getCommunicator] getProperties] getPropertyAsInt:@"Ice.ThreadPool.Client.Serialize"])
+    {
+        [r opVoid];
+        [c1 opVoid];
+        @try
+        {
+            [c2 opVoid];
+            test(NO);
+        }
+        @catch(ICEObjectNotExistException*)
+        {
+        }
+    }
+    [self called];
+}
 
 -(void) opMyClassException:(ICEException*)ex
 {
@@ -603,13 +603,13 @@ twowaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
         test([cb check]);
         [cb release];
     }
-
-//     {
-//         Callback* cb = [[Callback alloc] init];
-//         [p opMyClass_async:cb response:@selector(opMyClassResponse:p2:p3:) exception:@selector(opMyClassException:) p1:p];
-//         test([cb check]);
-//         [cb release];
-//     }
+    
+    {
+        Callback* cb = [[Callback alloc] init];
+        [p opMyClass_async:cb response:@selector(opMyClassResponse:p2:p3:) exception:@selector(opMyClassException:) p1:p];
+        test([cb check]);
+        [cb release];
+    }
 
     {
         TestStructure *si1 = [TestStructure structure];

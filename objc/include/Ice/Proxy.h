@@ -43,8 +43,8 @@
 -(NSUInteger) hash;
 -(BOOL) isEqual:(id)anObject;
 -(NSComparisonResult) compareIdentity:(id<ICEObjectPrx>)aProxy;
+-(NSComparisonResult) compareIdentityAndFacet:(id<ICEObjectPrx>)aProxy;
 
--(ICEInt) ice_getHash;
 -(id<ICECommunicator>) ice_getCommunicator;
 -(NSString*) ice_toString;
 -(BOOL) ice_isA:(NSString*)typeId;

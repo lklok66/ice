@@ -369,16 +369,6 @@ SEL _sent;
         return [[[self alloc] initWithObjectPrx__:arg] autorelease];
     }
 }
-
-+(id) readWithStream:(id<ICEInputStream>)stream
-{
-    return [stream readProxy:nil]; // TODO: how to get this parameter into the stream?
-}
-
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
-{
-    [stream writeProxy:obj];
-}
 @end
 
 @implementation ICEObjectPrx
@@ -652,9 +642,22 @@ SEL _sent;
     }
 }
 
--(ICEInt) ice_getHash
+-(NSComparisonResult) compareIdentityAndFacet:(id<ICEObjectPrx>)aProxy
 {
-    return OBJECTPRX->ice_getHash();
+    IceProxy::Ice::Object* lhs = OBJECTPRX;
+    IceProxy::Ice::Object* rhs = [(ICEObjectPrx*)aProxy objectPrx__];
+    if(Ice::proxyIdentityAndFacetEqual(lhs, rhs))
+    {
+        return NSOrderedSame;
+    } 
+    else if(Ice::proxyIdentityAndFacetLess(lhs, rhs))
+    {
+        return NSOrderedAscending;
+    }
+    else
+    {
+        return NSOrderedDescending;
+    }
 }
 
 -(id<ICECommunicator>) ice_getCommunicator

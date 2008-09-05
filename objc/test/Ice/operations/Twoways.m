@@ -112,7 +112,33 @@ twoways(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
     }
 
     {
-        // TODO: opMyClass
+        id<TestMyClassPrx> c1;
+        id<TestMyClassPrx> c2;
+        id<TestMyClassPrx> r;
+        
+        r = [p opMyClass:p p2:&c1 p3:&c2];
+        test([c1 compareIdentityAndFacet:p] == NSOrderedSame);
+        test([c2 compareIdentityAndFacet:p] != NSOrderedSame);
+        test([r compareIdentityAndFacet:p] == NSOrderedSame);
+        test([[c1 ice_getIdentity] isEqual:[communicator stringToIdentity:@"test"]]);
+        test([[c2 ice_getIdentity]isEqual:[communicator stringToIdentity:@"noSuchIdentity"]]);
+        test([[r ice_getIdentity] isEqual:[communicator stringToIdentity:@"test"]]);
+        [r opVoid];
+        [c1 opVoid];
+        @try
+        {
+            [c2 opVoid];
+            test(NO);
+        }
+        @catch(ICEObjectNotExistException*)
+        {
+        }
+
+        r = [p opMyClass:0 p2:&c1 p3:&c2];
+        test(c1 == nil);
+        test(c2 != nil);
+        test([r compareIdentityAndFacet:p] == NSOrderedSame);
+        [r opVoid];
     }
 
     {
@@ -299,8 +325,43 @@ twoways(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 	test([[rso objectAtIndex:2] isEqualToString:@"abc"]);
     }
 
-// Commented out because other language mappings do not implement this.
-#if 0
+    @try
+    {
+        TestMutableMyClassS *ssi1 = [TestMutableMyClassS arrayWithCapacity:3];
+        TestMutableMyClassS *ssi2 = [TestMutableMyClassS arrayWithCapacity:1];
+
+        ICEIdentity *i1 = [ICEIdentity identity:@"abc" category:@""];
+        ICEIdentity *i2 = [ICEIdentity identity:@"de" category:@""];
+        ICEIdentity *i3 = [ICEIdentity identity:@"fhgi" category:@""];
+        ICEIdentity *i4 = [ICEIdentity identity:@"xyz" category:@""];
+
+	[ssi1 addObject:[p ice_identity:i1]];
+	[ssi1 addObject:[p ice_identity:i2]];
+	[ssi1 addObject:[p ice_identity:i3]];
+
+	[ssi2 addObject:[p ice_identity:i4]];
+
+	TestMutableMyClassS *sso;
+	TestMyClassS *rso;
+
+	rso = [p opMyClassS:ssi1 p2:ssi2 p3:&sso];
+
+	test([sso count] == 4);
+	test([[[sso objectAtIndex:0] ice_getIdentity] isEqual:i1]);
+	test([[[sso objectAtIndex:1] ice_getIdentity] isEqual:i2]);
+	test([[[sso objectAtIndex:2] ice_getIdentity] isEqual:i3]);
+	test([[[sso objectAtIndex:3] ice_getIdentity] isEqual:i4]);
+        test([rso count] == 3);
+	test([[[rso objectAtIndex:0] ice_getIdentity] isEqual:i3]);
+	test([[[rso objectAtIndex:1] ice_getIdentity] isEqual:i2]);
+	test([[[rso objectAtIndex:2] ice_getIdentity] isEqual:i1]);
+    }
+    @catch(ICEOperationNotExistException*)
+    {
+        // Some mapping don't implement this method.
+    }
+
+    @try
     {
 	TestMyEnum buf1[] = { Testenum2, Testenum3, Testenum3 };
 	TestMyEnum buf2[] = { Testenum1 };
@@ -328,7 +389,10 @@ twoways(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
         test(brso[2] == Testenum3);
         test(brso[3] == Testenum1);
     }
-#endif
+    @catch(ICEOperationNotExistException*)
+    {
+        // Some mapping don't implement this method.
+    }
 
     {
         TestMutableByteSS *bsi1 = [TestMutableByteSS array];
@@ -681,15 +745,13 @@ twoways(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 	test([[ro objectForKey:@"Hello!!"] intValue] == Testenum2);
     }
 
-// TODO: Commented out because getCommunicator() currently does not work.
-#if 0
     {
         const int lengths[] = { 0, 1, 2, 126, 127, 128, 129, 253, 254, 255, 256, 257, 1000 };
 
 	int l;
         for(l = 0; l != sizeof(lengths) / sizeof(*lengths); ++l)
         {
-            TestMutableIntS *s = [TestMutableIntS dataWithLength:(l * sizeof(ICEInt))];
+            TestMutableIntS *s = [TestMutableIntS dataWithLength:(lengths[l] * sizeof(ICEInt))];
 	    ICEInt *ip = (ICEInt *)[s bytes];
 	    int i;
             for(i = 0; i < lengths[l]; ++i)
@@ -706,7 +768,6 @@ twoways(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
             }
         }
     }
-#endif
 
     {
         ICEMutableContext *ctx = [ICEMutableContext dictionary];

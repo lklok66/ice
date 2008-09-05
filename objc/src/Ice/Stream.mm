@@ -666,16 +666,22 @@ typedef enum { dummy } Dummy_Enum;
 	while(sz-- > 0)
 	{
 	    obj = [cl readWithStream:self];
-	    [arr addObject:obj];
-	    [obj release];
-	    obj = nil;
+            if(obj == nil)
+            {
+                [arr addObject:[NSNull null]];
+            }
+            else
+            {
+                [arr addObject:obj];
+                [obj release];
+            }
 	}
     }
     @catch(NSException *ex)
     {
         [arr release];
 	[obj release];
-	return nil;
+        @throw ex;
     }
     return arr;
 }
@@ -693,11 +699,16 @@ typedef enum { dummy } Dummy_Enum;
 	{
 	    key = [c.key readWithStream:self];
 	    value = [c.value readWithStream:self];
-	    [dictionary setObject:value forKey:key];
+            if(value == nil)
+            {
+                [dictionary setObject:[NSNull null] forKey:key];
+            }
+            else
+            {
+                [dictionary setObject:value forKey:key];
+                [value release];
+            }
 	    [key release];
-	    key = nil;
-	    [value release];
-	    value = nil;
 	}
     }
     @catch(NSException *ex)
@@ -705,7 +716,7 @@ typedef enum { dummy } Dummy_Enum;
 	[dictionary release];
 	[key release];
 	[value release];
-	return nil;
+        @throw ex;
     }
     return dictionary;
 }

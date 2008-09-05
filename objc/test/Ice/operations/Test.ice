@@ -45,7 +45,7 @@ sequence<float> FloatS;
 sequence<double> DoubleS;
 sequence<string> StringS;
 sequence<MyEnum> MyEnumS;
-//sequence<MyClass*> MyClassS;
+sequence<MyClass*> MyClassS;
 
 sequence<ByteS> ByteSS;
 sequence<BoolS> BoolSS;
@@ -56,7 +56,7 @@ sequence<FloatS> FloatSS;
 sequence<DoubleS> DoubleSS;
 sequence<StringS> StringSS;
 sequence<MyEnumS> MyEnumSS;
-//sequence<MyClassS> MyClassSS;
+sequence<MyClassS> MyClassSS;
 
 sequence<StringSS> StringSSS;
 
@@ -89,7 +89,7 @@ dictionary<string, MyEnum> StringMyEnumD;
 
      MyEnum opMyEnum(MyEnum p1, out MyEnum p2);
 
-//     MyClass* opMyClass(MyClass* p1, out MyClass* p2, out MyClass* p3);
+     MyClass* opMyClass(MyClass* p1, out MyClass* p2, out MyClass* p3);
 
      Structure opStruct(Structure p1, Structure p2,
                         out Structure p3);
@@ -112,8 +112,8 @@ dictionary<string, MyEnum> StringMyEnumD;
      MyEnumS opMyEnumS(MyEnumS p1, MyEnumS p2,
                        out MyEnumS p3);
 
-     //MyClassS opMyClassS(MyClassS p1, MyClassS p2,
-     //                    out MyClassS p3);
+     MyClassS opMyClassS(MyClassS p1, MyClassS p2,
+                         out MyClassS p3);
     
      ByteSS opByteSS(ByteSS p1, ByteSS p2,
                      out ByteSS p3);
