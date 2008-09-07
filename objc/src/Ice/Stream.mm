@@ -958,7 +958,7 @@ typedef enum { dummy } Dummy_Enum;
         {
             [self readPendingObjects];
         }
-        @throw ex; // NOTE: like other read methods it's the responsability of the caller to release the exception.
+        @throw [ex autorelease]; // NOTE: exceptions are always auto-released, no need for the caller to do it.
     }
 }
 

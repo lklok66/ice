@@ -249,28 +249,39 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
 		    outParams.push_back(make_pair((*pli)->type(), (*pli)->name()));
 		}
             }
+	    ExceptionList throws = op->throws();
+	    throws.sort();
+	    throws.unique();
+	    throws.sort(Slice::DerivedToBaseCompare());
+
+            bool inReferenceParams = false;
 	    for(TypeStringList::const_iterator inp = inParams.begin(); inp != inParams.end(); ++inp)
 	    {
-	        string typeString = outTypeToString(inp->first);
-	        string param = fixId(inp->second);
-		_M << nl << typeString << " ";
-		if(mapsToPointerType(inp->first))
-		{
-		    _M << "*";
-		}
-		_M << param << ";";
-		writeMarshalUnmarshalCode(_M, inp->first, param, false, false, false);
+                _M << nl << outTypeToString(inp->first) << " ";
+                if(mapsToPointerType(inp->first))
+                {
+                    _M << "*";
+                }
+                _M << fixId(inp->second);
+                if(!isValueType(inp->first))
+                {
+                    inReferenceParams = true;
+                    _M << " = nil";
+                }
+                _M << ";";
+            }
+            if(inReferenceParams || !throws.empty())
+            {
+                _M << nl << "@try";
+                _M << sb;
+            }
+	    for(TypeStringList::const_iterator inp = inParams.begin(); inp != inParams.end(); ++inp)
+	    {
+		writeMarshalUnmarshalCode(_M, inp->first, fixId(inp->second), false, false, false);
 	    }
             if(op->sendsClasses())
             {
                 _M << nl << "[is_ readPendingObjects];";
-            }
-	    for(TypeStringList::const_iterator inp = inParams.begin(); inp != inParams.end(); ++inp)
-	    {
-                if(!isValueType(inp->first))
-                {
-                    _M << nl << "[(id<NSObject>)" << fixId(inp->second) << " autorelease];";
-                }
             }
 	    for(TypeStringList::const_iterator outp = outParams.begin(); outp != outParams.end(); ++outp)
 	    {
@@ -280,15 +291,6 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
 		    _M << "*";
 		}
 		_M << fixId(outp->second) << ";";
-	    }
-	    ExceptionList throws = op->throws();
-	    throws.sort();
-	    throws.unique();
-	    throws.sort(Slice::DerivedToBaseCompare());
-	    if(!throws.empty())
-	    {
-		_M << nl << "@try";
-		_M << sb;
 	    }
 	    TypePtr returnType = op->returnType();
 	    if(returnType)
@@ -323,20 +325,33 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
             {
                 _M << nl << "[os_ writePendingObjects];";
             }
-	    if(!throws.empty())
-	    {
-		_M << eb;
-		ExceptionList::const_iterator t;
-		for(t = throws.begin(); t != throws.end(); ++t)
-		{
-		    string exS = fixName(*t);
-		    _M << nl << "@catch(" << exS << " *ex)";
-		    _M << sb;
-		    _M << nl << "[os_ writeException:ex];";
-		    _M << nl << "return NO;";
-		    _M << eb;
-		}
-	    }
+            if(inReferenceParams || !throws.empty())
+            {
+                _M << eb;
+                if(!throws.empty())
+                {
+                    ExceptionList::const_iterator t;
+                    for(t = throws.begin(); t != throws.end(); ++t)
+                    {
+                        string exS = fixName(*t);
+                        _M << nl << "@catch(" << exS << " *ex)";
+                        _M << sb;
+                        _M << nl << "[os_ writeException:ex];";
+                        _M << nl << "return NO;";
+                        _M << eb;
+                    }
+                }
+                _M << nl << "@finally";
+                _M << sb;
+                for(TypeStringList::const_iterator inp = inParams.begin(); inp != inParams.end(); ++inp)
+                {
+                    if(!isValueType(inp->first))
+                    {
+                        _M << nl << "[(id<NSObject>)" << fixId(inp->second) << " release];";
+                    }
+                }
+                _M << eb;
+            }
 	    _M << nl << "return YES;";
         }
         else
@@ -1207,12 +1222,19 @@ Slice::Gen::generate(const UnitPtr& p)
 
     _M << nl << "\n#import <Ice/LocalException.h>";
     _M << nl << "#import <Ice/Stream.h>";
+
     _M << nl << "#import <";
     if(!_include.empty())
     {
         _M << _include << "/";
     }
     _M << _base << ".h>";
+
+    _M << nl;
+    if(p->hasContentsWithMetaData("ami"))
+    {
+        _M << "\n#import <objc/message.h>"; // For objc_msgSend.
+    }
 
     StringList includes = p->includeFiles();
     for(StringList::const_iterator q = includes.begin(); q != includes.end(); ++q)
@@ -3411,9 +3433,22 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
         _M << nl << retString << " ";
         if(retIsPointer)
         {
-            _M << "*";
+            _M << "*ret_ = nil;";
         }
-        _M << "ret_;";
+        else
+        {
+            _M << "ret_;";
+        }
+    }
+    if(p->returnsData())
+    {
+	for(TypeStringList::const_iterator op = outParams.begin(); op != outParams.end(); ++op)
+	{
+            if(!isValueType(op->first))
+            {
+                _M << nl << "*" << fixId(op->second) << " = nil;";
+            }
+	}
     }
     _M << nl << "@try";
     _M << sb;
@@ -3443,20 +3478,6 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
  	    _M << nl << "[is_ readPendingObjects];";
 	    // TODO: assign to parameters from patcher
 	}
-	for(TypeStringList::const_iterator op = outParams.begin(); op != outParams.end(); ++op)
-	{
-            if(!isValueType(op->first))
-            {
-                _M << nl << "[(id<NSObject>)" << "*" + fixId(op->second) << " autorelease];";
-            }
-        }
-        if(returnType)
-        {
-           if(!isValueType(returnType))
-           {
-               _M << nl << "[(id<NSObject>)ret_ autorelease];";
-           }
-        }
 	// _M << nl << "[is_ endEncapsulation];";
     }
     else
@@ -3490,6 +3511,20 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
     _M << eb;
     _M << nl << "@finally";
     _M << sb;
+    if(p->returnsData())
+    {
+	for(TypeStringList::const_iterator op = outParams.begin(); op != outParams.end(); ++op)
+	{
+            if(!isValueType(op->first))
+            {
+                _M << nl << "[(id<NSObject>)" << "*" + fixId(op->second) << " autorelease];";
+            }
+        }
+        if(returnType && !isValueType(returnType))
+        {
+            _M << nl << "[(id<NSObject>)ret_ autorelease];";
+        }
+    }
     _M << nl << "[os_ release];";
     _M << nl << "[is_ release];";
     _M << eb;
@@ -3545,11 +3580,79 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
         _M << nl << "+(void) " << name << "_async_finished___:(id)target_ response:(SEL)response_ ";
         _M << "exception:(SEL)exception_ ok:(BOOL)ok_ is:(id<ICEInputStream>)is_";
         _M << sb;
-        _M << nl << "if(!ok_)";
-        _M << sb;
+
+        bool outReferenceParams = false;
+        if(!outParams.empty() || returnType)
+        {
+            for(TypeStringList::const_iterator op = outParams.begin(); op != outParams.end(); ++op)
+            {
+                _M << nl << outTypeToString(op->first) << " ";
+                if(mapsToPointerType(op->first))
+                {
+                    _M << "*";
+                }
+                _M << fixId(op->second);
+
+                if(!isValueType(op->first))
+                {
+                    outReferenceParams = true;
+                    _M << " = nil";
+                }
+                _M << ";";
+            }
+            if(returnType)
+            {
+                _M << nl << outTypeToString(returnType) << " ";
+                if(mapsToPointerType(returnType))
+                {
+                    _M << "*";
+                }
+                _M << "ret_";
+                if(!isValueType(returnType))
+                {
+                    outReferenceParams = true;
+                    _M << " = nil";
+                }
+                _M << ";";
+            }
+        }
+
         _M << nl << "@try";
         _M << sb;
+        _M << nl << "if(!ok_)";
+        _M << sb;
         _M << nl << "[is_ throwException];";
+        _M << eb;
+
+        if(!outParams.empty() || returnType)
+        {
+            // _M << nl << "[is_ startEncapsulation];";
+            for(TypeStringList::const_iterator op = outParams.begin(); op != outParams.end(); ++op)
+            {
+                writeMarshalUnmarshalCode(_M, op->first, fixId(op->second), false, false, true, "");
+            }
+            if(returnType)
+            {
+                writeMarshalUnmarshalCode(_M, returnType, "ret_", false, false, true, "");
+            }
+            if(p->returnsClasses())
+            {
+                _M << nl << "[is_ readPendingObjects];";
+            }
+            // _M << nl << "[is_ endEncapsulation];";
+
+            //
+            // NOTE: it's necessary to cast the objc_msgSend function to the type of the callback.
+            // Otherwise, wrong parameter types are used to call the Objective-C method (this occurs
+            // when calling a function with float parameters for instance).
+            //
+            _M << nl << "((" << getSigAsyncCB(p) << ")objc_msgSend)(target_, response_, " << getArgsAsyncCB(p) << ");";
+        }
+        else
+        {
+            // _M << nl << "[is_ skipEncapsulation];";
+            _M << nl << "objc_msgSend(target_, response_);";
+        }
         _M << eb;
 
         //
@@ -3567,7 +3670,7 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
         {
             _M << nl << "@catch(" << fixName(*e) << " *ex_)";
             _M << sb;
-            _M << nl << "objc_msgSend(target_, exception_, [ex_ autorelease]);";
+            _M << nl << "objc_msgSend(target_, exception_, ex_);";
             _M << eb;
         }
         _M << nl << "@catch(ICEUserException *ex_)";
@@ -3575,55 +3678,26 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
         _M << nl << "ICEUnknownUserException* uuex_;";
         _M << nl << "uuex_ = [ICEUnknownUserException unknownUserException:__FILE__ line:__LINE__ ";
         _M << "unknown:[ex_ ice_name]];";
-        _M << nl << "[ex_ release];";
         _M << nl << "objc_msgSend(target_, exception_, uuex_);";
         _M << eb;
-        _M << nl << "return;";
-        _M << eb;
-
-        if(!outParams.empty() || returnType)
+        if(outReferenceParams)
         {
-            // _M << nl << "[is_ startEncapsulation];";
-            for(TypeStringList::const_iterator op = outParams.begin(); op != outParams.end(); ++op)
+            _M << nl << "@finally";
+            _M << sb;
             {
-                string param = outTypeToString(op->first) + " ";
-                if(mapsToPointerType(op->first))
+                for(TypeStringList::const_iterator op = outParams.begin(); op != outParams.end(); ++op)
                 {
-                    param += "*";
+                    if(!isValueType(op->first))
+                    {
+                        _M << nl << "[" << fixId(op->second) << " release];";
+                    }
                 }
-                param += fixId(op->second) + ";";
-                _M << nl << param;
-                writeMarshalUnmarshalCode(_M, op->first, fixId(op->second), false, false, true, "");
-            }
-            if(returnType)
-            {
-                string param = retString + " ";
-                if(mapsToPointerType(returnType))
+                if(returnType && !isValueType(returnType))
                 {
-                    param += "*";
+                    _M << nl << "[ret_ release];";
                 }
-                param += "ret_;";
-                _M << nl << param;
-                writeMarshalUnmarshalCode(_M, returnType, "ret_", false, false, true, "");
             }
-            if(p->returnsClasses())
-            {
-                _M << nl << "[is_ readPendingObjects];";
-                // TODO: assign to parameters from patcher
-            }
-            // _M << nl << "[is_ endEncapsulation];";
-
-            //
-            // NOTE: it's necessary to cast the objc_msgSend function to the type of the callback.
-            // Otherwise, wrong parameter types are used to call the Objective-C method (this occurs
-            // when calling a function with float parameters for instance).
-            //
-            _M << nl << "((" << getSigAsyncCB(p) << ")objc_msgSend)(target_, response_, " << getArgsAsyncCB(p) << ");";
-        }
-        else
-        {
-            // _M << nl << "[is_ skipEncapsulation];";
-            _M << nl << "objc_msgSend(target_, response_);";
+            _M << eb;
         }
 
         _M << eb;
