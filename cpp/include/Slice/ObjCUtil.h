@@ -23,11 +23,6 @@ public:
     virtual ~ObjCGenerator() {};
 
     //
-    // Convert a dimension-less array declaration to one with a dimension.
-    //
-    static std::string toArrayAlloc(const std::string& decl, const std::string& sz);
-
-    //
     // Validate all metadata in the unit with an "objc:" prefix.
     //
     static void validateMetaData(const UnitPtr&);
@@ -63,8 +58,6 @@ protected:
     //
     void writeMarshalUnmarshalCode(::IceUtilInternal::Output&, const TypePtr&, const std::string&, bool, bool,
                                    bool, const std::string& = "") const;
-    void writeSequenceMarshalUnmarshalCode(::IceUtilInternal::Output&, const SequencePtr&, const std::string&,
-                                           bool, bool) const;
 
 private:
 

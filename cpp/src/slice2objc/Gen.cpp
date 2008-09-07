@@ -1514,6 +1514,11 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
     ClassList bases = p->bases();
     bool hasBaseClass = !bases.empty() && !bases.front()->isInterface();
     string baseName = hasBaseClass ? fixName(bases.front()) : "ICEObject";
+    DataMemberList baseDataMembers;
+    if(hasBaseClass)
+    {
+        baseDataMembers = bases.front()->allDataMembers();
+    }
     DataMemberList dataMembers = p->dataMembers();
     DataMemberList allDataMembers = p->allDataMembers();
     DataMemberList::const_iterator q;
@@ -1550,10 +1555,12 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
     }
     _H << nl << "-(id) init";
     _M << sp << nl << "-(id) init";
-    writeMemberSignature(dataMembers, 0, HAndM); // TODO fix second parameter
+    writeMemberSignature(allDataMembers, 0, HAndM); // TODO fix second parameter
     _H << ";";
     _M << sb;
-    _M << nl << "if(![super init])";
+    _M << nl << "if(![super init";
+    writeMemberCall(baseDataMembers, WithEscape);
+    _M << "])";
     _M << sb;
     _M << nl << "return nil;";
     _M << eb;
@@ -1568,7 +1575,7 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
 
 	_H << nl << "+(id) " << lowerCaseName;
 	_M << sp << nl << "+(id) " << lowerCaseName;
-	writeMemberSignature(dataMembers, 0, HAndM); // TODO fix second parameter
+	writeMemberSignature(allDataMembers, 0, HAndM); // TODO fix second parameter
 	_H << ";";
 	_M << sb;
 
@@ -1577,7 +1584,7 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
 	// have members with the same name but different types.
 	//
 	_M << nl << name << " *s__ = [((" << name << " *)[" << name << " alloc]) init";
-	writeMemberCall(dataMembers, WithEscape);
+	writeMemberCall(allDataMembers, WithEscape);
 	_M << "];";
 	_M << nl << "[s__ autorelease];";
 	_M << nl << "return s__;";
@@ -1602,7 +1609,7 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
 	    _H << nl << "-(void) copy__:(" << name << " *)copy_;";
 	    _M << sp << nl << "-(void) copy__:(" << name << "*)copy_";
 	    _M << sb;
-	    if(hasBaseClass && bases.front()->allDataMembers().empty())
+	    if(hasBaseClass && !baseDataMembers.empty())
 	    {
 		_M << nl << "[super copy__:copy_];";
 	    }
