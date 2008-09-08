@@ -2612,7 +2612,7 @@ Slice::Gen::TypesVisitor::writeMemberDealloc(const DataMemberList& dataMembers, 
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
 	TypePtr type = (*q)->type();
-	if(mapsToPointerType(type))
+	if(!isValueType(type))
 	{
 	    if(!once)
 	    {
