@@ -3679,12 +3679,12 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
                 {
                     if(!isValueType(op->first))
                     {
-                        _M << nl << "[" << fixId(op->second) << " release];";
+                        _M << nl << "[(id<NSObject>)" << fixId(op->second) << " release];";
                     }
                 }
                 if(returnType && !isValueType(returnType))
                 {
-                    _M << nl << "[ret_ release];";
+                    _M << nl << "[(id<NSObject>)ret_ release];";
                 }
             }
             _M << eb;
