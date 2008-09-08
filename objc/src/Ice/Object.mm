@@ -20,7 +20,7 @@
 
 #import <Foundation/NSAutoreleasePool.h>
 
-#define OBJECT ((Ice::Object*)object__)
+#define OBJECT ((IceObjC::ObjectI*)object__)
 
 int
 ICELookupString(const char** array, size_t count, const char* str)
@@ -73,6 +73,16 @@ public:
 
     virtual ICEObject* getObject();
 
+    virtual void __incRef()
+    {
+        [_object retain];
+    }
+
+    virtual void __decRef()
+    {
+        [_object release];
+    }
+
 private:
 
     ICEObject* _object;
@@ -105,30 +115,33 @@ IceObjC::ObjectI::ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& cb
     }
 
     ICECurrent* c = [[ICECurrent alloc] initWithCurrent:current];
-    NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     BOOL ok;
+    NSException* exception = nil;
     @try
     {
         ok = [_object dispatch__:c is:is os:os];
     }
     @catch(NSException* ex)
     {
-        [c release];
-        [is release];
-        [os release];
-        try
-        {
-            rethrowCxxException(ex);
-        }
-        catch(const std::exception&)
-        {
-            [pool release];
-            throw;
-        }
+        exception = [ex retain];
     }
     [pool release];
     [c release];
     [is release];
+
+    if(exception != nil)
+    {
+        try
+        {
+            rethrowCxxException(exception);
+        }
+        catch(const std::exception&)
+        {
+            [exception release];
+            throw;
+        }
+    }
     
     std::vector<Ice::Byte> outParams;
     [os os]->finished(outParams);
@@ -151,19 +164,16 @@ IceObjC::ObjectI::getObject()
     {
         return nil;
     }
-    object__ = new IceObjC::ObjectI(self);
-    OBJECT->__incRef();
-    return self;
-}
 
--(ICEObject*)initWithObject__:(const Ice::ObjectPtr&)arg
-{
-    if(![super init])
-    {
-        return nil;
-    }
-    object__ = arg.get();
-    OBJECT->__incRef();
+    //
+    // NOTE: IceObjC::ObjectI implements it own reference counting and there's no need
+    // to call __incRef/__decRef here. The C++ object and Objective-C object are sharing
+    // the same reference count (the one of the Objective-C object). This is necessary 
+    // to properly release both objects when there's either no more C++ handle/ObjC 
+    // reference to the object (without this, servants added to the object adapter 
+    // couldn't be retained or released easily).
+    //
+    object__ = new IceObjC::ObjectI(self);
     return self;
 }
 
@@ -174,22 +184,11 @@ IceObjC::ObjectI::getObject()
 
 -(void) dealloc
 {
-    OBJECT->__decRef();
+    delete OBJECT;
     object__ = 0;
     [super dealloc];
 }
 
-+(ICEObject*)objectWithObject__:(const Ice::ObjectPtr&)arg
-{
-    if(!arg)
-    {
-        return nil;
-    }
-    else
-    {
-        return [[[self alloc] initWithObject__:arg] autorelease];
-    }
-}
 @end
 
 @implementation ICEObject

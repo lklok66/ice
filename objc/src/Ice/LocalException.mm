@@ -785,8 +785,8 @@
         return nil;
     }
     id_ = [id__ retain];
-    facet_ = [facet_ retain];
-    operation_ = [operation_ retain];
+    facet = [facet_ retain];
+    operation = [operation_ retain];
     return self;
 }
 

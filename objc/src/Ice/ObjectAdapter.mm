@@ -142,7 +142,6 @@
 {
     try
     {
-        [servant retain];
         return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->add([servant object__], [ident identity])];
     }
     catch(const std::exception& ex)
@@ -156,7 +155,6 @@
 {
     try
     {
-        [servant retain];
         return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->addFacet([servant object__], [ident identity],
                                                                               fromNSString(facet))];
     }
@@ -171,7 +169,6 @@
 {
     try
     {
-        [servant retain];
         return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->addWithUUID([servant object__])];
     }
     catch(const std::exception& ex)
@@ -185,7 +182,6 @@
 {
     try
     {
-        [servant retain];
         return [ICEObjectPrx objectPrxWithObjectPrx__:OBJECTADAPTER->addFacetWithUUID([servant object__],
                                                                                       fromNSString(facet))];
     }
@@ -201,8 +197,7 @@
     try
     {
         Ice::ObjectPtr wrapper = OBJECTADAPTER->remove([ident identity]);
-        ICEObject* servant = IceObjC::ObjectWrapperPtr::dynamicCast(wrapper)->getObject();
-        return [servant autorelease];
+        return [[IceObjC::ObjectWrapperPtr::dynamicCast(wrapper)->getObject() retain] autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -215,8 +210,7 @@
     try
     {
         Ice::ObjectPtr wrapper = OBJECTADAPTER->removeFacet([ident identity], fromNSString(facet));
-        ICEObject* servant = IceObjC::ObjectWrapperPtr::dynamicCast(wrapper)->getObject();
-        return [servant autorelease];
+        return [[IceObjC::ObjectWrapperPtr::dynamicCast(wrapper)->getObject() retain] autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -234,10 +228,8 @@
         for(Ice::FacetMap::const_iterator p = wrappers.begin(); p != wrappers.end(); ++p)
         {
             NSObject* key = toObjC(p->first);
-            NSObject* value = IceObjC::ObjectWrapperPtr::dynamicCast(p->second)->getObject();
-            [servants setObject:value forKey:key];
+            [servants setObject:IceObjC::ObjectWrapperPtr::dynamicCast(p->second)->getObject() forKey:key];
             [key release];
-            [value release];
         }
         return [servants autorelease];
     }
@@ -252,7 +244,8 @@
 {
     try
     {
-        return IceObjC::ObjectWrapperPtr::dynamicCast(OBJECTADAPTER->find([ident identity]))->getObject();
+        Ice::ObjectPtr wrapper = OBJECTADAPTER->find([ident identity]);
+        return [[IceObjC::ObjectWrapperPtr::dynamicCast(wrapper)->getObject() retain] autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -266,7 +259,7 @@
     try
     {
         Ice::ObjectPtr wrapper = OBJECTADAPTER->findFacet([ident identity], fromNSString(facet));
-        return IceObjC::ObjectWrapperPtr::dynamicCast(wrapper)->getObject();
+        return [[IceObjC::ObjectWrapperPtr::dynamicCast(wrapper)->getObject() retain] autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -283,9 +276,11 @@
         NSMutableDictionary* servants = [[NSMutableDictionary alloc] initWithCapacity:wrappers.size()];
         for(Ice::FacetMap::const_iterator p = wrappers.begin(); p != wrappers.end(); ++p)
         {
-            [servants setObject:IceObjC::ObjectWrapperPtr::dynamicCast(p->second)->getObject() forKey:toObjC(p->first)];
+            NSObject* key = toObjC(p->first);
+            [servants setObject:IceObjC::ObjectWrapperPtr::dynamicCast(p->second)->getObject() forKey:key];
+            [key release];
         }
-        return servants;
+        return [servants autorelease];
     }
     catch(const std::exception& ex)
     {
@@ -298,8 +293,8 @@
 {
     try
     {
-        Ice::ObjectPrx prx = [(ICEObjectPrx*)proxy objectPrx__];
-        return IceObjC::ObjectWrapperPtr::dynamicCast(OBJECTADAPTER->findByProxy(prx))->getObject();
+        Ice::ObjectPtr wrapper = OBJECTADAPTER->findByProxy([(ICEObjectPrx*)proxy objectPrx__]);
+        return [[IceObjC::ObjectWrapperPtr::dynamicCast(wrapper)->getObject() retain] autorelease];
     }
     catch(const std::exception& ex)
     {

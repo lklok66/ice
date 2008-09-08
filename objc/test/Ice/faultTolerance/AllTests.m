@@ -222,7 +222,7 @@ allTests(id<ICECommunicator> communicator, NSArray* ports)
             }
             else
             {
-                tprintf("aborting server %d with AMI... ");
+                tprintf("aborting server %d with AMI... ", i);
                 Callback* cb = [[Callback alloc] init];
                 [obj abort_async:cb response:@selector(abortResponse) exception:@selector(abortException:)];
                 test([cb check]);

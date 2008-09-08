@@ -93,15 +93,15 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
 	{
 	}
 
-	[adapter remove:[communicator stringToIdentity:@"x"]];
-	@try
-	{
-	    [adapter remove:[communicator stringToIdentity:@"x"]];
-	    test(false);
-	}
-	@catch(ICENotRegisteredException *ex)
-	{
-	}
+ 	[adapter remove:[communicator stringToIdentity:@"x"]];
+ 	@try
+ 	{
+ 	    [adapter remove:[communicator stringToIdentity:@"x"]];
+ 	    test(false);
+ 	}
+ 	@catch(ICENotRegisteredException *ex)
+ 	{
+ 	}
 
 	[adapter deactivate];
     }
