@@ -29,6 +29,7 @@
 #import <objc/message.h>
 
 #import <Foundation/NSThread.h>
+#import <Foundation/NSInvocation.h>
 
 #define OBJECTPRX ((IceProxy::Ice::Object*)objectPrx__)
 
@@ -312,6 +313,7 @@ SEL _sent;
 
 };
 
+
 @implementation ICECallbackOnMainThread
 -(id)init:(id)cb
 {
@@ -324,6 +326,7 @@ SEL _sent;
 }
 -(void)forwardInvocation:(NSInvocation *)inv
 {
+    [inv retainArguments];
     [inv performSelectorOnMainThread:@selector(invokeWithTarget:) withObject:cb_ waitUntilDone:NO];
 }
 -(NSMethodSignature *)methodSignatureForSelector:(SEL)selector
