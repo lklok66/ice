@@ -65,6 +65,5 @@ main(int argc, char* argv[])
     }
 
     [pool release];
-    sleep(10);
     return status;
 }
