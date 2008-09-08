@@ -52,8 +52,8 @@
 
 -(void) dealloc
 {
-    [super dealloc];
     [reason_ release];
+    [super dealloc];
 }
 
 @synthesize reason_;
@@ -98,8 +98,8 @@
 
 -(void) dealloc
 {
-    [super dealloc];
     [reason_ release];
+    [super dealloc];
 }
 
 @synthesize reason_;
@@ -163,9 +163,9 @@
 
 -(void) dealloc
 {
-    [super dealloc];
     [kindOfObject release];
     [id_ release];
+    [super dealloc];
 }
 
 @synthesize kindOfObject;
@@ -213,9 +213,9 @@
 
 -(void) dealloc
 {
-    [super dealloc];
     [kindOfObject release];
     [id_ release];
+    [super dealloc];
 }
 
 @synthesize kindOfObject;
@@ -261,8 +261,8 @@
 
 -(void) dealloc
 {
-    [super dealloc];
     [operation release];
+    [super dealloc];
 }
 
 @synthesize operation;
@@ -324,8 +324,8 @@
 
 -(void) dealloc
 {
-    [super dealloc];
     [unknown release];
+    [super dealloc];
 }
 
 @synthesize unknown;
@@ -448,8 +448,8 @@
 
 -(void) dealloc
 {
-    [super dealloc];
     [name_ release];
+    [super dealloc];
 }
 
 @synthesize name_;
@@ -494,8 +494,8 @@
 
 -(void) dealloc
 {
-    [super dealloc];
     [id_ release];
+    [super dealloc];
 }
 
 @synthesize id_;
@@ -540,8 +540,8 @@
 
 -(void) dealloc
 {
-    [super dealloc];
     [proxy release];
+    [super dealloc];
 }
 
 @synthesize proxy;
@@ -586,8 +586,8 @@
 
 -(void) dealloc
 {
-    [super dealloc];
     [str release];
+    [super dealloc];
 }
 
 @synthesize str;
@@ -632,8 +632,8 @@
 
 -(void) dealloc
 {
-    [super dealloc];
     [str release];
+    [super dealloc];
 }
 
 @synthesize str;
@@ -678,8 +678,8 @@
 
 -(void) dealloc
 {
-    [super dealloc];
     [str release];
+    [super dealloc];
 }
 
 @synthesize str;
@@ -724,8 +724,8 @@
 
 -(void) dealloc
 {
-    [super dealloc];
     [str release];
+    [super dealloc];
 }
 
 @synthesize str;
@@ -770,8 +770,8 @@
 
 -(void) dealloc
 {
-    [super dealloc];
     [id_ release];
+    [super dealloc];
 }
 
 @synthesize id_;
@@ -820,10 +820,10 @@
 
 -(void) dealloc
 {
-    [super dealloc];
     [id_ release];
     [facet release];
     [operation release];
+    [super dealloc];
 }
 
 @synthesize id_;
@@ -998,8 +998,8 @@
 
 -(void) dealloc
 {
-    [super dealloc];
     [path release];
+    [super dealloc];
 }
 
 @synthesize path;
@@ -1112,8 +1112,8 @@
 
 -(void) dealloc
 {
-    [super dealloc];
     [host release];
+    [super dealloc];
 }
 
 @synthesize error;
@@ -1227,8 +1227,8 @@
 
 -(void) dealloc
 {
-    [super dealloc];
     [reason_ release];
+    [super dealloc];
 }
 
 @synthesize reason_;
@@ -1274,8 +1274,8 @@
 
 -(void) dealloc
 {
-    [super dealloc];
     [badMagic release];
+    [super dealloc];
 }
 
 @synthesize badMagic;
@@ -1704,8 +1704,8 @@
 
 -(void) dealloc
 {
-    [super dealloc];
     [type release];
+    [super dealloc];
 }
 
 @synthesize type;
@@ -1752,9 +1752,9 @@
 
 -(void) dealloc
 {
-    [super dealloc];
     [type release];
     [expectedType release];
+    [super dealloc];
 }
 
 @synthesize type;
@@ -1888,8 +1888,8 @@
 
 -(void) dealloc
 {
-    [super dealloc];
     [unsupportedFeature release];
+    [super dealloc];
 }
 
 @synthesize unsupportedFeature;
@@ -1934,8 +1934,8 @@
 
 -(void) dealloc
 {
-    [super dealloc];
     [reason_ release];
+    [super dealloc];
 }
 
 @synthesize reason_;

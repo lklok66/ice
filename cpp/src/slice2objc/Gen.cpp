@@ -498,7 +498,7 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
 	   << "os:(id<ICEOutputStream>)os";
         _M << sb;
 	_M << nl << "switch(ICELookupString(" << name << "_all__, sizeof(" << name
-	   << "_all__) / sizeof(const char*), [[current operation] UTF8String]))";
+	   << "_all__) / sizeof(const char*), [current.operation UTF8String]))";
 	_M << sb;
         int i = 0;
         for(q = allOpNames.begin(); q != allOpNames.end(); ++q)
@@ -2088,7 +2088,7 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     //
     // hash
     //
-    writeMemberHashCode(dataMembers, 0, NoSuper); // TODO fix second parameter
+    writeMemberHashCode(dataMembers, 0); // TODO fix second parameter
 
     //
     // isEqual
@@ -2534,13 +2534,13 @@ Slice::Gen::TypesVisitor::writeMemberCopy(const SyntaxTreeBasePtr& parent, const
 }
 
 void
-Slice::Gen::TypesVisitor::writeMemberHashCode(const DataMemberList& dataMembers, int baseTypes, Super super) const
+Slice::Gen::TypesVisitor::writeMemberHashCode(const DataMemberList& dataMembers, int baseTypes) const
 {
     _H << nl << "-(NSUInteger) hash;";
 
     _M << sp << nl << "-(NSUInteger) hash";
     _M << sb;
-    _M << nl << "NSUInteger h_ = " << (super == WithSuper ? "[super hash]" : "0") << ";";
+    _M << nl << "NSUInteger h_ = 0;";
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
 	TypePtr type = (*q)->type();
@@ -2553,7 +2553,7 @@ Slice::Gen::TypesVisitor::writeMemberHashCode(const DataMemberList& dataMembers,
 	}
 	else
 	{
-	    _M << "(!" << name << " ? 0 : [" << name << " hash]);";
+	    _M << "[" << name << " hash];";
 	}
     }
     _M << nl << "return h_;";
