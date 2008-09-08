@@ -23,7 +23,7 @@
 @interface ICEOutputStream : ICEInternalWrapper<ICEOutputStream>
 {
     Ice::OutputStream* os_;
-    std::map<Ice::ObjectPtr, Ice::ObjectPtr>* objectWriters_;
+    std::map<ICEObject*, Ice::ObjectPtr>* objectWriters_;
 }
 -(Ice::OutputStream*) os;
 @end

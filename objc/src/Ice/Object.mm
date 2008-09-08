@@ -20,8 +20,6 @@
 
 #import <Foundation/NSAutoreleasePool.h>
 
-#define OBJECT ((IceObjC::ObjectI*)object__)
-
 int
 ICELookupString(const char** array, size_t count, const char* str)
 {
@@ -164,28 +162,38 @@ IceObjC::ObjectI::getObject()
     {
         return nil;
     }
-
-    //
-    // NOTE: IceObjC::ObjectI implements it own reference counting and there's no need
-    // to call __incRef/__decRef here. The C++ object and Objective-C object are sharing
-    // the same reference count (the one of the Objective-C object). This is necessary 
-    // to properly release both objects when there's either no more C++ handle/ObjC 
-    // reference to the object (without this, servants added to the object adapter 
-    // couldn't be retained or released easily).
-    //
-    object__ = new IceObjC::ObjectI(self);
+    
+    object__ = 0;
     return self;
 }
 
 -(Ice::Object*) object__
 {
-    return (Ice::Object*)object__;
+    @synchronized([self class])
+    {
+        if(object__ == 0)
+        {
+            //
+            // NOTE: IceObjC::ObjectI implements it own reference counting and there's no need
+            // to call __incRef/__decRef here. The C++ object and Objective-C object are sharing
+            // the same reference count (the one of the Objective-C object). This is necessary 
+            // to properly release both objects when there's either no more C++ handle/ObjC 
+            // reference to the object (without this, servants added to the object adapter 
+            // couldn't be retained or released easily).
+            //
+            object__ = new IceObjC::ObjectI(self);
+        }
+    }
+    return (IceObjC::ObjectI*)object__;
 }
 
 -(void) dealloc
 {
-    delete OBJECT;
-    object__ = 0;
+    if(object__)
+    {
+        delete (IceObjC::ObjectI*)object__;
+        object__ = 0;
+    }
     [super dealloc];
 }
 

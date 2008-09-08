@@ -1478,9 +1478,9 @@ typedef enum { dummy } Dummy_Enum;
             //
             if(!objectWriters_)
             {
-                objectWriters_ = new std::map<Ice::ObjectPtr, Ice::ObjectPtr>();
+                objectWriters_ = new std::map<ICEObject*, Ice::ObjectPtr>();
             }
-            std::map<Ice::ObjectPtr, Ice::ObjectPtr>::const_iterator p = objectWriters_->find([v object__]);
+            std::map<ICEObject*, Ice::ObjectPtr>::const_iterator p = objectWriters_->find(v);
             Ice::ObjectPtr writer;
             if(p != objectWriters_->end())
             {
@@ -1489,7 +1489,7 @@ typedef enum { dummy } Dummy_Enum;
             else
             {
                 writer = new IceObjC::ObjectWriter(v, self);
-                objectWriters_->insert(std::make_pair([v object__], writer));
+                objectWriters_->insert(std::make_pair(v, writer));
             }
             os_->writeObject(writer);
         }
