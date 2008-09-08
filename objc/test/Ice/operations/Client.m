@@ -12,7 +12,7 @@
 #import <Test.h>
 
 #import <Foundation/NSAutoreleasePool.h>
- 
+
 int
 run(int argc, char* argv[], id<ICECommunicator> communicator, ICEInitializationData* initData)
 {

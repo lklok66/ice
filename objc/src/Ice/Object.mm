@@ -367,9 +367,14 @@ static const char* ICEObject_all__[4] =
     [is endSlice];
 }
 
+-(void) copy__:(ICEObject*)copy_
+{
+}
+
 -(id) copyWithZone:(NSZone*)zone
 {
-    NSAssert(NO, @"copyWithZone must be overriddent");
-    return nil;
+    id copy_ = [[self class] allocWithZone:zone];
+    [self copy__:copy_];
+    return copy_;
 }
 @end

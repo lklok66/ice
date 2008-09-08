@@ -22,6 +22,8 @@
 -(id) init:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__;
 +(id) initializationException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__;
 +(id) initializationException:(const char*)file_ line:(int)line_;
+-(void) copy__:(ICEInitializationException*)copy_;
+-(void)dealloc;
 @end
 
 @interface ICEPluginInitializationException : ICELocalException
@@ -32,6 +34,8 @@
 -(id) init:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__;
 +(id) pluginInitializationException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__;
 +(id) pluginInitializationException:(const char*)file_ line:(int)line_;
+-(void) copy__:(ICEPluginInitializationException*)copy_;
+-(void)dealloc;
 @end
 
 @interface ICECollocationOptimizationException : ICELocalException
@@ -43,11 +47,13 @@
     NSString* kindOfObject;
     NSString* id_;
 }
+@property(retain, nonatomic) NSString* kindOfObject;
+@property(retain, nonatomic) NSString* id_;
 -(id) init:(const char*)file_ line:(int)line_ kindOfObject:(NSString*)kindOfObject_ id_:(NSString*)id__;
 +(id) alreadyRegisteredException:(const char*)file_ line:(int)line_ kindOfObject:(NSString*)kindOfObject_ id_:(NSString*)id_;
 +(id) alreadyRegisteredException:(const char*)file_ line:(int)line_;
-@property(retain, nonatomic) NSString* kindOfObject;
-@property(retain, nonatomic) NSString* id_;
+-(void) copy__:(ICEAlreadyRegisteredException*)copy_;
+-(void)dealloc;
 @end
 
 @interface ICENotRegisteredException : ICELocalException
@@ -55,11 +61,13 @@
     NSString* kindOfObject;
     NSString* id_;
 }
+@property(retain, nonatomic) NSString* kindOfObject;
+@property(retain, nonatomic) NSString* id_;
 -(id) init:(const char*)file_ line:(int)line_ kindOfObject:(NSString*)kindOfObject_ id_:(NSString*)id_;
 +(id) notRegisteredException:(const char*)file_ line:(int)line_ kindOfObject:(NSString*)kindOfObject_ id_:(NSString*)id_;
 +(id) notRegisteredException:(const char*)file_ line:(int)line_;
-@property(retain, nonatomic) NSString* kindOfObject;
-@property(retain, nonatomic) NSString* id_;
+-(void) copy__:(ICENotRegisteredException*)copy_;
+-(void)dealloc;
 @end
 
 @interface ICETwowayOnlyException : ICELocalException
@@ -70,6 +78,8 @@
 -(id) init:(const char*)file_ line:(int)line_ operation:(NSString*)operation_;
 +(id) twowayOnlyException:(const char*)file_ line:(int)line_ operation:(NSString*)operation_;
 +(id) twowayOnlyException:(const char*)file_ line:(int)line_;
+-(void) copy__:(ICETwowayOnlyException*)copy_;
+-(void)dealloc;
 @end
 
 @interface ICECloneNotImplementedException : ICELocalException
@@ -84,6 +94,8 @@
 -(id) init:(const char*)file_ line:(int)line_ unknown:(NSString*)unknown_;
 +(id) unknownException:(const char*)file_ line:(int)line_ unknown:(NSString*)unknown_;
 +(id) unknownException:(const char*)file_ line:(int)line_;
+-(void) copy__:(ICEUnknownException*)copy_;
+-(void)dealloc;
 @end
     
 @interface ICEUnknownLocalException : ICEUnknownException
@@ -112,6 +124,8 @@
 -(id) init:(const char*)file_ line:(int)line_ name_:(NSString*)name__;
 +(id) objectAdapterDeactivatedException:(const char*)file_ line:(int)line_ name_:(NSString*)name__;
 +(id) objectAdapterDeactivatedException:(const char*)file_ line:(int)line_;
+-(void) copy__:(ICEObjectAdapterDeactivatedException*)copy_;
+-(void)dealloc;
 @end
 
 @interface ICEObjectAdapterIdInUseException : ICELocalException
@@ -122,6 +136,8 @@
 -(id) init:(const char*)file_ line:(int)line_ id_:(NSString*)id__;
 +(id) objectAdapterIdInUseException:(const char*)file_ line:(int)line_ id_:(NSString*)id__;
 +(id) objectAdapterIdInUseException:(const char*)file_ line:(int)line_;
+-(void) copy__:(ICEObjectAdapterIdInUseException*)copy_;
+-(void)dealloc;
 @end
 
 @interface ICENoEndpointException : ICELocalException
@@ -132,6 +148,8 @@
 -(id) init:(const char*)file_ line:(int)line_ proxy:(NSString*)proxy;
 +(id) noEndpointException:(const char*)file_ line:(int)line_ proxy:(NSString*)proxy;
 +(id) noEndpointException:(const char*)file_ line:(int)line_;
+-(void) copy__:(ICENoEndpointException*)copy_;
+-(void)dealloc;
 @end
 
 @interface ICEEndpointParseException : ICELocalException
@@ -142,6 +160,8 @@
 -(id) init:(const char*)file_ line:(int)line_ str:(NSString*)str;
 +(id) endpointParseException:(const char*)file_ line:(int)line_ str:(NSString*)str;
 +(id) endpointParseException:(const char*)file_ line:(int)line_;
+-(void) copy__:(ICEEndpointParseException*)copy_;
+-(void)dealloc;
 @end
 
 @interface ICEEndpointSelectionTypeParseException : ICELocalException
@@ -152,6 +172,8 @@
 -(id) init:(const char*)file_ line:(int)line_ str:(NSString*)str;
 +(id) endpointSelectionTypeParseException:(const char*)file_ line:(int)line_ str:(NSString*)str;
 +(id) endpointSelectionTypeParseException:(const char*)file_ line:(int)line_;
+-(void) copy__:(ICEEndpointSelectionTypeParseException*)copy_;
+-(void)dealloc;
 @end
 
 @interface ICEIdentityParseException : ICELocalException
@@ -162,6 +184,8 @@
 -(id) init:(const char*)file_ line:(int)line_ str:(NSString*)str;
 +(id) identityParseException:(const char*)file_ line:(int)line_ str:(NSString*)str;
 +(id) identityParseException:(const char*)file_ line:(int)line_;
+-(void) copy__:(ICEIdentityParseException*)copy_;
+-(void)dealloc;
 @end
 
 @interface ICEProxyParseException : ICELocalException
@@ -172,6 +196,8 @@
 -(id) init:(const char*)file_ line:(int)line_ str:(NSString*)str;
 +(id) proxyParseException:(const char*)file_ line:(int)line_ str:(NSString*)str;
 +(id) proxyParseException:(const char*)file_ line:(int)line_;
+-(void) copy__:(ICEProxyParseException*)copy_;
+-(void)dealloc;
 @end
 
 @interface ICEIllegalIdentityException : ICELocalException
@@ -182,6 +208,8 @@
 -(id) init:(const char*)file_ line:(int)line_ id_:(ICEIdentity*)id__;
 +(id) illegalIdentityException:(const char*)file_ line:(int)line_ id_:(ICEIdentity*)id__;
 +(id) illegalIdentityException:(const char*)file_ line:(int)line_;
+-(void) copy__:(ICEIllegalIdentityException*)copy_;
+-(void)dealloc;
 @end
 
 @interface ICERequestFailedException : ICELocalException
@@ -190,12 +218,14 @@
     NSString* facet;
     NSString* operation;
 }
--(id) init:(const char*)file_ line:(int)line_ id_:(ICEIdentity*)id__ facet:(NSString*)facet_ operation:(NSString*)operation_;
-+(id) requestFailedException:(const char*)file_ line:(int)line_ id_:(ICEIdentity*)id__ facet:(NSString*)facet_ operation:(NSString*)operation_;
-+(id) requestFailedException:(const char*)file_ line:(int)line_;
 @property(retain, nonatomic) ICEIdentity* id_;
 @property(retain, nonatomic) NSString* facet;
 @property(retain, nonatomic) NSString* operation;
+-(id) init:(const char*)file_ line:(int)line_ id_:(ICEIdentity*)id__ facet:(NSString*)facet_ operation:(NSString*)operation_;
++(id) requestFailedException:(const char*)file_ line:(int)line_ id_:(ICEIdentity*)id__ facet:(NSString*)facet_ operation:(NSString*)operation_;
++(id) requestFailedException:(const char*)file_ line:(int)line_;
+-(void) copy__:(ICERequestFailedException*)copy_;
+-(void)dealloc;
 @end
 
 @interface ICEObjectNotExistException : ICERequestFailedException
@@ -221,6 +251,7 @@
 -(id) init:(const char*)file_ line:(int)line_ error:(ICEInt)error_;
 +(id) syscallException:(const char*)file_ line:(int)line_ error:(ICEInt)error_;
 +(id) syscallException:(const char*)file_ line:(int)line_;
+-(void) copy__:(ICESyscallException*)copy_;
 @end
 
 @interface ICESocketException : ICESyscallException
@@ -236,6 +267,8 @@
 -(id) init:(const char*)file_ line:(int)line_ error:(ICEInt)error_ path:(NSString*)path;
 +(id) fileException:(const char*)file_ line:(int)line_ error:(ICEInt)error_ path:(NSString*)path;
 +(id) fileException:(const char*)file_ line:(int)line_;
+-(void) copy__:(ICEFileException*)copy_;
+-(void)dealloc;
 @end
 
 @interface ICEConnectFailedException : ICESocketException
@@ -258,11 +291,13 @@
     ICEInt error;
     NSString* host;
 }
+@property(assign, nonatomic) ICEInt error;
+@property(retain, nonatomic) NSString* host;
 -(id) init:(const char*)file_ line:(int)line_ error:(ICEInt)error_ host:(NSString*)host_;
 +(id) dNSException:(const char*)file_ line:(int)line_ error:(ICEInt)error_ host:(NSString*)host_;
 +(id) dNSException:(const char*)file_ line:(int)line_;
-@property(assign, nonatomic) ICEInt error;
-@property(retain, nonatomic) NSString* host;
+-(void) copy__:(ICEDNSException*)copy_;
+-(void)dealloc;
 @end
 
 @interface ICETimeoutException : ICELocalException
@@ -289,6 +324,8 @@
 -(id) init:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__;
 +(id) protocolException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__;
 +(id) protocolException:(const char*)file_ line:(int)line_;
+-(void) copy__:(ICEProtocolException*)copy_;
+-(void)dealloc;
 @end
 
 @interface ICEBadMagicException : ICEProtocolException
@@ -299,6 +336,8 @@
 -(id) init:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ badMagic:(NSArray*)badMagic_;
 +(id) badMagicException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ badMagic:(NSArray*)badMagic_;
 +(id) badMagicException:(const char*)file_ line:(int)line_;
+-(void) copy__:(ICEBadMagicException*)copy_;
+-(void)dealloc;
 @end
 
 @interface ICEUnsupportedProtocolException : ICEProtocolException
@@ -308,13 +347,14 @@
     ICEInt major;
     ICEInt minor;
 }
--(id) init:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ badMajor:(ICEInt)badMajor_ badMinor:(ICEInt)badMinor_ major:(ICEInt)major_ minor:(ICEInt)minor_;
-+(id) unsupportedProtocolException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ badMajor:(ICEInt)badMajor_ badMinor:(ICEInt)badMinor_ major:(ICEInt)major_ minor:(ICEInt)minor_;
-+(id) unsupportedProtocolException:(const char*)file_ line:(int)line_;
 @property(assign, nonatomic) ICEInt badMajor;
 @property(assign, nonatomic) ICEInt badMinor;
 @property(assign, nonatomic) ICEInt major;
 @property(assign, nonatomic) ICEInt minor;
+-(id) init:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ badMajor:(ICEInt)badMajor_ badMinor:(ICEInt)badMinor_ major:(ICEInt)major_ minor:(ICEInt)minor_;
++(id) unsupportedProtocolException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ badMajor:(ICEInt)badMajor_ badMinor:(ICEInt)badMinor_ major:(ICEInt)major_ minor:(ICEInt)minor_;
++(id) unsupportedProtocolException:(const char*)file_ line:(int)line_;
+-(void) copy__:(ICEUnsupportedProtocolException*)copy_;
 @end
 
 @interface ICEUnsupportedEncodingException : ICEProtocolException
@@ -324,13 +364,14 @@
     ICEInt major;
     ICEInt minor;
 }
--(id) init:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ badMajor:(ICEInt)badMajor_ badMinor:(ICEInt)badMinor_ major:(ICEInt)major_ minor:(ICEInt)minor_;
-+(id) unsupportedEncodingException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ badMajor:(ICEInt)badMajor_ badMinor:(ICEInt)badMinor_ major:(ICEInt)major_ minor:(ICEInt)minor_;
-+(id) unsupportedEncodingException:(const char*)file_ line:(int)line_;
 @property(assign, nonatomic) ICEInt badMajor;
 @property(assign, nonatomic) ICEInt badMinor;
 @property(assign, nonatomic) ICEInt major;
 @property(assign, nonatomic) ICEInt minor;
+-(id) init:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ badMajor:(ICEInt)badMajor_ badMinor:(ICEInt)badMinor_ major:(ICEInt)major_ minor:(ICEInt)minor_;
++(id) unsupportedEncodingException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ badMajor:(ICEInt)badMajor_ badMinor:(ICEInt)badMinor_ major:(ICEInt)major_ minor:(ICEInt)minor_;
++(id) unsupportedEncodingException:(const char*)file_ line:(int)line_;
+-(void) copy__:(ICEUnsupportedEncodingException*)copy_;
 @end
 
 @interface ICEUnknownMessageException : ICEProtocolException
@@ -406,6 +447,8 @@
 -(id) init:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ type:(NSString*)type_;
 +(id) noObjectFactoryException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ type:(NSString*)type_;
 +(id) noObjectFactoryException:(const char*)file_ line:(int)line_;
+-(void) copy__:(ICENoObjectFactoryException*)copy_;
+-(void)dealloc;
 @end
 
 @interface ICEUnexpectedObjectException : ICEMarshalException
@@ -413,11 +456,13 @@
     NSString* type;
     NSString* expectedType;
 }
+@property(retain, nonatomic) NSString* type;
+@property(retain, nonatomic) NSString* expectedType;
 -(id) init:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ type:(NSString*)type_ expectedType:(NSString*)expectedType_;
 +(id) unexpectedObjectException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__ type:(NSString*)type_ expectedType:(NSString*)expectedType_;
 +(id) unexpectedObjectException:(const char*)file_ line:(int)line_;
-@property(retain, nonatomic) NSString* type;
-@property(retain, nonatomic) NSString* expectedType;
+-(void) copy__:(ICEUnexpectedObjectException*)copy_;
+-(void)dealloc;
 @end
 
 @interface ICEMemoryLimitException : ICEMarshalException
@@ -448,6 +493,8 @@
 -(id) init:(const char*)file_ line:(int)line_ unsupportedFeature:(NSString*)unsupportedFeature_;
 +(id) featureNotSupportedException:(const char*)file_ line:(int)line_ unsupportedFeature:(NSString*)unsupportedFeature_;
 +(id) featureNotSupportedException:(const char*)file_ line:(int)line_;
+-(void) copy__:(ICEFeatureNotSupportedException*)copy_;
+-(void)dealloc;
 @end
 
 @interface ICESecurityException : ICELocalException
@@ -458,6 +505,8 @@
 -(id) init:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__;
 +(id) securityException:(const char*)file_ line:(int)line_ reason_:(NSString*)reason__;
 +(id) securityException:(const char*)file_ line:(int)line_;
+-(void) copy__:(ICESecurityException*)copy_;
+-(void)dealloc;
 @end
 
 @interface ICEFixedProxyException : ICELocalException

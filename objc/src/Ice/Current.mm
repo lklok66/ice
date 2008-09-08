@@ -236,6 +236,17 @@
     return self;
 }
 
+-(void) dealloc
+{
+    [adapter release];
+    [con release];
+    [id_ release];
+    [facet release];
+    [operation release];
+    [ctx release];
+    [super dealloc];
+}
+
 @end
 
 @implementation ICEContextHelper

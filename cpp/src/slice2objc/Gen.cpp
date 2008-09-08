@@ -1602,31 +1602,17 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
     if(!p->isInterface())
     {
 	//
-	// copy__ and copyWithZone
+	// copy__
 	//
-	if(!allDataMembers.empty())
+	if(!dataMembers.empty())
 	{
 	    _H << nl << "-(void) copy__:(" << name << " *)copy_;";
 	    _M << sp << nl << "-(void) copy__:(" << name << "*)copy_";
 	    _M << sb;
-	    if(hasBaseClass && !baseDataMembers.empty())
-	    {
-		_M << nl << "[super copy__:copy_];";
-	    }
+	    _M << nl << "[super copy__:copy_];";
 	    writeMemberCopy(p, dataMembers, 0); // TODO: fix third parameter
 	    _M << eb;
 	}
-
-	_H << nl << "-(id) copyWithZone:(NSZone *)zone;";
-	_M << sp << nl << "-(id) copyWithZone:(NSZone *)zone";
-	_M << sb;
-	_M << nl << name << " *copy_ = [" << name << " allocWithZone:zone];";
-	if(!allDataMembers.empty())
-	{
-	    _M << nl << "[self copy__:copy_];";
-	}
-	_M << nl << "return copy_;";
-	_M << eb;
 
 	//
 	// dealloc
@@ -1931,31 +1917,17 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
     _M << eb;
 
     //
-    // copy__ and copyWithZone
+    // copy__
     //
-    if(!allDataMembers.empty())
+    if(!dataMembers.empty())
     {
 	_H << nl << "-(void) copy__:(" << name << " *)copy_;";
 	_M << sp << nl << "-(void) copy__:(" << name << "*)copy_";
 	_M << sb;
-	if(p->base() && !p->base()->allDataMembers().empty())
-	{
-	    _M << nl << "[super copy__:copy_];";
-	}
+	_M << nl << "[super copy__:copy_];";
 	writeMemberCopy(p, dataMembers, 0); // TODO: fix third parameter
 	_M << eb;
     }
-
-    _H << nl << "-(id) copyWithZone:(NSZone *)zone;";
-    _M << sp << nl << "-(id) copyWithZone:(NSZone *)zone";
-    _M << sb;
-    _M << nl << name << " *copy_ = [" << name << " allocWithZone:zone];";
-    if(!allDataMembers.empty())
-    {
-	_M << nl << "[self copy__:copy_];";
-    }
-    _M << nl << "return copy_;";
-    _M << eb;
 
     //
     // dealloc
@@ -2636,22 +2608,33 @@ Slice::Gen::TypesVisitor::writeMemberEquals(const DataMemberList& dataMembers, i
 void
 Slice::Gen::TypesVisitor::writeMemberDealloc(const DataMemberList& dataMembers, int baseTypes) const
 {
-    _H << nl << "-(void) dealloc;";
-
-    _M << sp << nl << "-(void) dealloc;";
-    _M << sb;
+    bool once = false;
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
 	TypePtr type = (*q)->type();
-        string name = fixId((*q)->name());
-	bool isValue = isValueType(type);
-	if(!isValue)
+	if(mapsToPointerType(type))
 	{
-	    _M << nl << "[" << name << " release];";
+	    if(!once)
+	    {
+		 once = true;
+		_H << nl << "-(void) dealloc;";
+		_M << sp << nl << "-(void) dealloc;";
+		_M << sb;
+	    }
+
+	    string name = fixId((*q)->name());
+	    bool isValue = isValueType(type);
+	    if(!isValue)
+	    {
+		_M << nl << "[" << name << " release];";
+	    }
 	}
     }
-    _M << nl << "[super dealloc];";
-    _M << eb;
+    if(once)
+    {
+	_M << nl << "[super dealloc];";
+	_M << eb;
+    }
 }
 
 void

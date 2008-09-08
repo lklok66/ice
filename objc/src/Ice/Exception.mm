@@ -41,6 +41,23 @@
 {
     [NSException raise:NSInvalidArchiveOperationException format:@"ICEExceptions do not support NSCoding"];
 }
+
+-(void) copy__:(ICEException*)copy_
+{
+    NSAssert(NO, @"copy__ must be overridden");
+}
+
+-(id) copyWithZone:(NSZone*)zone
+{
+    id copy_ = [[self class] allocWithZone:zone];
+    [self copy__:copy_];
+    return copy_;
+}
+
+-(void) dealloc
+{
+    [super dealloc];
+}
 @end
 
 @implementation ICELocalException (Internal)
@@ -54,10 +71,12 @@
     line = ex.ice_line();
     return self;
 }
+
 -(void)rethrowCxx
 {
     NSAssert(false, @"rethrowCxx must be overriden");
 }
+
 +(id)localExceptionWithLocalException:(const Ice::LocalException&)ex
 {
     return [[[self alloc] initWithLocalException:ex] autorelease];
@@ -65,6 +84,12 @@
 @end
 
 @implementation ICELocalException
+-(void)copy__:(ICELocalException*)copy_
+{
+    copy_->file = file;
+    copy_->line = line;
+}
+
 -(id)init:(const char*)f line:(int)l
 {
     if(![super init])
@@ -75,10 +100,12 @@
     line = l;
     return self;
 }
+
 +(id)localException:(const char*)file line:(int)line
 {
     return [[[self alloc] init:file line:line] autorelease];
 }
+
 -(NSString*)description
 {
     try
@@ -98,6 +125,11 @@
         return [NSString stringWithUTF8String:str.c_str()];
     }
 }
+
+-(void) dealloc
+{
+    [super dealloc];
+}
 @end
 
 @implementation ICEUserException
@@ -105,13 +137,24 @@
 {
     return NO;
 }
+
 -(void)writeWithStream:(id<ICEOutputStream>)stream
 {
     NSAssert(false, @"writeWithStream must be overridden");
 }
+
 -(void)readWithStream:(id<ICEInputStream>)stream readTypeId:(BOOL)rid
 {
     NSAssert(false, @"readWithStream must be overridden");
+}
+
+-(void) copy__:(ICEUserException*)copy_
+{
+}
+
+-(void) dealloc
+{
+    [super dealloc];
 }
 @end
 

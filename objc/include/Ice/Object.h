@@ -44,4 +44,5 @@ int ICELookupString(const char**, size_t, const char*);
 -(BOOL) dispatch__:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os;
 -(void) write__:(id<ICEOutputStream>)os;
 -(void) read__:(id<ICEInputStream>)is readTypeId:(BOOL)rid;
+-(void) copy__:(ICEObject*)copy_;
 @end
