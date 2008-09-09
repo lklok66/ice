@@ -11,7 +11,7 @@
 
 #include <IceCpp/Identity.h>
 
-@interface ICEIdentity (Internal)
+@interface ICEIdentity (ICEInternal)
 -(ICEIdentity*)initWithIdentity:(const Ice::Identity&)arg;
 -(Ice::Identity)identity;
 +(ICEIdentity*)identityWithIdentity:(const Ice::Identity&)arg;

@@ -60,19 +60,39 @@ rethrowObjCException(const std::exception& ex)
 }
 
 void
-rethrowCxxException(NSException* ex)
+rethrowCxxException(NSException* e, bool release)
 {
     @try
     {
-        @throw ex;
+        @throw e;
     }
     @catch(ICEUserException* ex)
     {
-        throw Ice::UnknownUserException(__FILE__, __LINE__, fromNSString([ex description]));
+        Ice::UnknownUserException uuex(__FILE__, __LINE__, fromNSString([ex description]));
+        if(release)
+        {
+            [ex release];
+        }
+        throw uuex;
     }
     @catch(ICELocalException* ex)
     {
-        [ex rethrowCxx];
+        if(release)
+        {
+            try
+            {
+                [ex rethrowCxx];
+            }
+            catch(const std::exception&)
+            {
+                [ex release];
+                throw;
+            }
+        }
+        else
+        {
+            [ex rethrowCxx];
+        }
     }
     @catch(NSException* ex)
     {
@@ -80,7 +100,12 @@ rethrowCxxException(NSException* ex)
         // NSException from the runtime are translated to C++ IceObjc::Exception
         //
         //throw Ice::UnknownException(__FILE__, __LINE__, fromNSString([ex description]));
-        throw IceObjC::Exception(__FILE__, __LINE__, fromNSString([ex description]));
+        IceObjC::Exception exo(__FILE__, __LINE__, fromNSString([ex description]));
+        if(release)
+        {
+            [ex release];
+        }
+        throw exo;
     }
 }
 

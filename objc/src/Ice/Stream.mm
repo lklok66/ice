@@ -109,7 +109,7 @@ public:
     {
         @try
         {
-            [_ex writeWithStream__:_stream];
+            [_ex write__:_stream];
         }
         @catch(NSException* ex)
         {
@@ -953,7 +953,7 @@ typedef enum { dummy } Dummy_Enum;
 
     if(ex)
     {
-        [ex readWithStream__:self readTypeId:false];
+        [ex read__:self readTypeId:false];
         if(usesClasses)
         {
             [self readPendingObjects];

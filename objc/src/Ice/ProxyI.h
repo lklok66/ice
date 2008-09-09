@@ -11,7 +11,7 @@
 
 #include <IceCpp/Proxy.h>
 
-@interface ICEObjectPrx (Internal)
+@interface ICEObjectPrx (ICEInternal)
 -(ICEObjectPrx*)initWithObjectPrx__:(const Ice::ObjectPrx&)arg;
 -(IceProxy::Ice::Object*) objectPrx__;
 +(ICEObjectPrx*)objectPrxWithObjectPrx__:(const Ice::ObjectPrx&)arg;

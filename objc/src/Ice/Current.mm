@@ -211,7 +211,7 @@
 }
 @end
 
-@implementation ICECurrent (Internal)
+@implementation ICECurrent (ICEInternal)
 -(ICECurrent*) initWithCurrent:(const Ice::Current&)current
 {
     if(![super init])

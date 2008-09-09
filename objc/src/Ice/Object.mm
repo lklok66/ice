@@ -130,15 +130,7 @@ IceObjC::ObjectI::ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& cb
 
     if(exception != nil)
     {
-        try
-        {
-            rethrowCxxException(exception);
-        }
-        catch(const std::exception&)
-        {
-            [exception release];
-            throw;
-        }
+        rethrowCxxException(exception, true); // True = release the exception.
     }
     
     std::vector<Ice::Byte> outParams;
@@ -154,7 +146,7 @@ IceObjC::ObjectI::getObject()
     return _object;
 }
 
-@implementation ICEObject (Internal)
+@implementation ICEObject (ICEInternal)
 
 -(ICEObject*)init
 {

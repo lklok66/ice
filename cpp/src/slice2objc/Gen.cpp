@@ -1977,8 +1977,8 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
 
     if(!p->isLocal())
     {
-	_H << nl << "-(void) writeWithStream__:(id<ICEOutputStream>)stream;";
-	_M << sp << nl << "-(void) writeWithStream__:(id<ICEOutputStream>)os_";
+	_H << nl << "-(void) write__:(id<ICEOutputStream>)stream;";
+	_M << sp << nl << "-(void) write__:(id<ICEOutputStream>)os_";
 	_M << sb;
 	_M << nl << "[os_ writeString:@\"" << p->scoped() << "\"];";
 	_M << nl << "[os_ startSlice];";
@@ -1986,12 +1986,12 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
 	_M << nl << "[os_ endSlice];";
 	if(base)
 	{
-	    _M << nl << "[super writeWithStream__:os_];";
+	    _M << nl << "[super write__:os_];";
 	}
 	_M << eb;
 
-	_H << nl << "-(void) readWithStream__:(id<ICEInputStream>)stream readTypeId:(BOOL)rid_;";
-	_M << sp << nl << "-(void) readWithStream__:(id<ICEInputStream>)is_ readTypeId:(BOOL)rid_";
+	_H << nl << "-(void) read__:(id<ICEInputStream>)stream readTypeId:(BOOL)rid_;";
+	_M << sp << nl << "-(void) read__:(id<ICEInputStream>)is_ readTypeId:(BOOL)rid_";
 	_M << sb;
 	_M << nl << "if(rid_)";
 	_M << sb;
@@ -2002,7 +2002,7 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
 	_M << nl << "[is_ endSlice];";
 	if(base)
 	{
-	    _M << nl << "[super readWithStream__:is_ readTypeId:YES];";
+	    _M << nl << "[super read__:is_ readTypeId:YES];";
 	}
 	_M << eb;
     }

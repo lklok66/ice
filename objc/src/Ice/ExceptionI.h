@@ -11,7 +11,7 @@
 
 #include <IceCpp/Exception.h>
 
-@interface ICELocalException (Internal)
+@interface ICELocalException (ICEInternal)
 -(id) initWithLocalException:(const Ice::LocalException&)ex;
 -(void) rethrowCxx;
 +(id) localExceptionWithLocalException:(const Ice::LocalException&)ex;

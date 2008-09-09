@@ -54,7 +54,7 @@ private:
 
 };
 
-@implementation ICEInitializationData (Internal)
+@implementation ICEInitializationData (ICEInternal)
 -(Ice::InitializationData)initializationData
 {
     Ice::InitializationData data;

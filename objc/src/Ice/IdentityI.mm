@@ -10,7 +10,7 @@
 #import <Ice/IdentityI.h>
 #import <Ice/Util.h>
 
-@implementation ICEIdentity (Internal)
+@implementation ICEIdentity (ICEInternal)
 
 -(ICEIdentity*) initWithIdentity:(const Ice::Identity&)arg
 {

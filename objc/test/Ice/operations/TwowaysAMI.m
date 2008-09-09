@@ -484,6 +484,125 @@
 {
     test(NO);
 }
+-(void) opByteBoolDResponse:(TestMutableByteBoolD*)ro p3:(TestMutableByteBoolD*)_do
+{
+    test([_do count] == 2);
+    test([[_do objectForKey:[NSNumber numberWithUnsignedChar:10]] boolValue] == YES);
+    test([[_do objectForKey:[NSNumber numberWithUnsignedChar:100]] boolValue] == NO);
+    test([ro count] == 4);
+    test([[ro objectForKey:[NSNumber numberWithUnsignedChar:10]] boolValue] == YES);
+    test([[ro objectForKey:[NSNumber numberWithUnsignedChar:11]] boolValue] == NO);
+    test([[ro objectForKey:[NSNumber numberWithUnsignedChar:100]] boolValue] == NO);
+    test([[ro objectForKey:[NSNumber numberWithUnsignedChar:101]] boolValue] == YES);
+    [self called];
+}
+-(void) opByteBoolDException:(ICEException*)ex
+{
+    test(NO);
+}
+-(void) opShortIntDResponse:(TestShortIntD*)ro p3:(TestShortIntD*)_do
+{
+    test([_do count] == 2);
+    test([[_do objectForKey:[NSNumber numberWithShort:110]] intValue] == -1);
+    test([[_do objectForKey:[NSNumber numberWithShort:1100]] intValue] == 123123);
+    test([ro count] == 4);
+    test([[ro objectForKey:[NSNumber numberWithShort:110]] intValue] == -1);
+    test([[ro objectForKey:[NSNumber numberWithShort:111]] intValue] == -100);
+    test([[ro objectForKey:[NSNumber numberWithShort:1100]] intValue] == 123123);
+    test([[ro objectForKey:[NSNumber numberWithShort:1101]] intValue] == 0);
+    [self called];
+}
+-(void) opShortIntDException:(ICEException*)ex
+{
+    test(NO);
+}
+-(void) opLongFloatDResponse:(TestLongFloatD*)ro p3:(TestLongFloatD*)_do
+{
+    test([_do count] == 2);
+    test((ICEFloat)[[_do objectForKey:[NSNumber numberWithLong:999999110]] floatValue] == -1.1f);
+    test((ICEFloat)[[_do objectForKey:[NSNumber numberWithLong:999999111]] floatValue] == 123123.2f);
+    test([ro count] == 4);
+    test((ICEFloat)[[ro objectForKey:[NSNumber numberWithLong:999999110]] floatValue] == -1.1f);
+    test((ICEFloat)[[ro objectForKey:[NSNumber numberWithLong:999999120]] floatValue] == -100.4f);
+    test((ICEFloat)[[ro objectForKey:[NSNumber numberWithLong:999999111]] floatValue] == 123123.2f);
+    test((ICEFloat)[[ro objectForKey:[NSNumber numberWithLong:999999130]] floatValue] == 0.5f);
+    [self called];
+}
+-(void) opLongFloatDException:(ICEException*)ex
+{
+    test(NO);
+}
+-(void) opStringStringDResponse:(TestStringStringD*)ro p3:(TestStringStringD*)_do
+{
+    test([_do count] == 2);
+    test([[_do objectForKey:@"foo"] isEqualToString:@"abc -1.1"]);
+    test([[_do objectForKey:@"bar"] isEqualToString:@"abc 123123.2"]);
+    test([ro count] == 4);
+    test([[ro objectForKey:@"foo"] isEqualToString:@"abc -1.1"]);
+    test([[ro objectForKey:@"FOO"] isEqualToString:@"abc -100.4"]);
+    test([[ro objectForKey:@"bar"] isEqualToString:@"abc 123123.2"]);
+    test([[ro objectForKey:@"BAR"] isEqualToString:@"abc 0.5"]);
+    [self called];
+}
+-(void) opStringStringDException:(ICEException*)ex
+{
+    test(NO);
+}
+-(void) opStringMyEnumDResponse:(TestStringMyEnumD*)ro p3:(TestStringMyEnumD*)_do
+{
+    test([_do count] == 2);
+    test([[_do objectForKey:@"abc"] intValue] == Testenum1);
+    test([[_do objectForKey:@""] intValue] == Testenum2);
+    test([ro count] == 4);
+    test([[ro objectForKey:@"abc"] intValue] == Testenum1);
+    test([[ro objectForKey:@"querty"] intValue] == Testenum3);
+    test([[ro objectForKey:@""] intValue] == Testenum2);
+    test([[ro objectForKey:@"Hello!!"] intValue] == Testenum2);
+    [self called];
+}
+-(void) opStringMyEnumDException:(ICEException*)ex
+{
+    test(NO);
+}
+-(void) opIntSResponse:(TestIntS*)r
+{
+    const ICEInt *rp = [r bytes];
+    int j;
+    for(j = 0; j < [r length] / sizeof(ICEInt); ++j)
+    {
+        test(rp[j] == -j);
+    }
+    [self called];
+}
+-(void) opIntSException:(ICEException*)ex
+{
+    test(NO);
+}
+-(void) opEmptyContextResponse:(ICEContext*)ctx
+{
+    test([ctx count] == 0);
+    [self called];
+}
+-(void) opNonEmptyContextResponse:(ICEContext*)ctx
+{
+    test([ctx count] == 3);
+    test([[ctx objectForKey:@"one"] isEqualToString:@"ONE"]);
+    test([[ctx objectForKey:@"two"] isEqualToString:@"TWO"]);
+    test([[ctx objectForKey:@"three"] isEqualToString:@"THREE"]);
+    [self called];
+}
+-(void) opContextException:(ICEException*)ex
+{
+    test(NO);
+}
+-(void) opDoubleMarshalingResponse
+{
+    [self called];
+}
+-(void) opDoubleMarshalingException:(ICEException*)ex
+{
+    test(NO);
+}
 @end
 
 void
@@ -848,4 +967,221 @@ twowaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
         test([cb check]);
         [cb release];
     }
+
+    {
+        TestMutableByteBoolD *di1 = [TestMutableByteBoolD dictionary];
+	[di1 setObject:[NSNumber numberWithBool:YES] forKey:[NSNumber numberWithUnsignedChar:10]];
+	[di1 setObject:[NSNumber numberWithBool:NO] forKey:[NSNumber numberWithUnsignedChar:100]];
+        TestMutableByteBoolD *di2 = [TestMutableByteBoolD dictionary];
+	[di2 setObject:[NSNumber numberWithBool:YES] forKey:[NSNumber numberWithUnsignedChar:10]];
+	[di2 setObject:[NSNumber numberWithBool:NO] forKey:[NSNumber numberWithUnsignedChar:11]];
+	[di2 setObject:[NSNumber numberWithBool:TRUE] forKey:[NSNumber numberWithUnsignedChar:101]];
+
+        Callback* cb = [[Callback alloc] init];
+        [p opByteBoolD_async:cb response:@selector(opByteBoolDResponse:p3:) exception:@selector(opByteBoolDException:) p1:di1 p2:di2];
+        test([cb check]);
+        [cb release];
+    }
+
+    {
+        TestMutableShortIntD *di1 = [TestMutableShortIntD dictionary];
+	[di1 setObject:[NSNumber numberWithInt:-1] forKey:[NSNumber numberWithShort:110]];
+	[di1 setObject:[NSNumber numberWithInt:123123] forKey:[NSNumber numberWithShort:1100]];
+        TestMutableShortIntD *di2 = [TestMutableShortIntD dictionary];
+	[di2 setObject:[NSNumber numberWithInt:-1] forKey:[NSNumber numberWithShort:110]];
+	[di2 setObject:[NSNumber numberWithInt:-100] forKey:[NSNumber numberWithShort:111]];
+	[di2 setObject:[NSNumber numberWithInt:0] forKey:[NSNumber numberWithShort:1101]];
+
+        Callback* cb = [[Callback alloc] init];
+        [p opShortIntD_async:cb response:@selector(opShortIntDResponse:p3:) exception:@selector(opShortIntDException:) p1:di1 p2:di2];
+        test([cb check]);
+        [cb release];
+    }
+
+    {
+        TestMutableLongFloatD *di1 = [TestMutableLongFloatD dictionary];
+	[di1 setObject:[NSNumber numberWithFloat:-1.1f] forKey:[NSNumber numberWithLong:999999110]];
+	[di1 setObject:[NSNumber numberWithFloat:123123.2f] forKey:[NSNumber numberWithLong:999999111]];
+        TestMutableLongFloatD *di2 = [TestMutableLongFloatD dictionary];
+	[di2 setObject:[NSNumber numberWithFloat:-1.1f] forKey:[NSNumber numberWithLong:999999110]];
+	[di2 setObject:[NSNumber numberWithFloat:-100.4f] forKey:[NSNumber numberWithLong:999999120]];
+	[di2 setObject:[NSNumber numberWithFloat:0.5f] forKey:[NSNumber numberWithLong:999999130]];
+
+        Callback* cb = [[Callback alloc] init];
+        [p opLongFloatD_async:cb response:@selector(opLongFloatDResponse:p3:) exception:@selector(opLongFloatDException:) p1:di1 p2:di2];
+        test([cb check]);
+        [cb release];
+    }
+
+    {
+        TestMutableStringStringD *di1 = [TestMutableStringStringD dictionary];
+	[di1 setObject:@"abc -1.1" forKey:@"foo"];
+	[di1 setObject:@"abc 123123.2" forKey:@"bar"];
+        TestMutableStringStringD *di2 = [TestMutableStringStringD dictionary];
+	[di2 setObject:@"abc -1.1" forKey:@"foo"];
+	[di2 setObject:@"abc -100.4" forKey:@"FOO"];
+	[di2 setObject:@"abc 0.5" forKey:@"BAR"];
+
+        Callback* cb = [[Callback alloc] init];
+        [p opStringStringD_async:cb response:@selector(opStringStringDResponse:p3:) exception:@selector(opStringStringDException:) p1:di1 p2:di2];
+        test([cb check]);
+        [cb release];
+    }
+
+    {
+        TestMutableStringMyEnumD *di1 = [TestMutableStringMyEnumD dictionary];
+	[di1 setObject:[NSNumber numberWithInt:Testenum1] forKey:@"abc"];
+	[di1 setObject:[NSNumber numberWithInt:Testenum2] forKey:@""];
+        TestMutableStringMyEnumD *di2 = [TestMutableStringMyEnumD dictionary];
+	[di2 setObject:[NSNumber numberWithInt:Testenum1] forKey:@"abc"];
+	[di2 setObject:[NSNumber numberWithInt:Testenum3] forKey:@"querty"];
+	[di2 setObject:[NSNumber numberWithInt:Testenum2] forKey:@"Hello!!"];
+
+        Callback* cb = [[Callback alloc] init];
+        [p opStringMyEnumD_async:cb response:@selector(opStringMyEnumDResponse:p3:) exception:@selector(opStringMyEnumDException:) p1:di1 p2:di2];
+        test([cb check]);
+        [cb release];
+    }
+
+    {
+        const int lengths[] = { 0, 1, 2, 126, 127, 128, 129, 253, 254, 255, 256, 257, 1000 };
+
+	int l;
+        for(l = 0; l != sizeof(lengths) / sizeof(*lengths); ++l)
+        {
+            TestMutableIntS *s = [TestMutableIntS dataWithLength:(lengths[l] * sizeof(ICEInt))];
+	    ICEInt *ip = (ICEInt *)[s bytes];
+	    int i;
+            for(i = 0; i < lengths[l]; ++i)
+            {
+                *ip++ = i;
+            }
+            Callback* cb = [[Callback alloc] init];
+            [p opIntS_async:cb response:@selector(opIntSResponse:) exception:@selector(opIntSException:) s:s];
+            test([cb check]);
+            [cb release];
+        }
+    }
+
+    {
+        ICEMutableContext *ctx = [ICEMutableContext dictionary];
+	[ctx setObject:@"ONE" forKey:@"one"];
+	[ctx setObject:@"TWO" forKey:@"two"];
+	[ctx setObject:@"THREE" forKey:@"three"];
+	{
+            Callback* cb = [[Callback alloc] init];
+            [p opContext_async:cb response:@selector(opEmptyContextResponse:) exception:@selector(opContextException:)];
+            test([cb check]);
+            [cb release];
+	}
+	{
+            Callback* cb = [[Callback alloc] init];
+            [p opContext_async:cb response:@selector(opNonEmptyContextResponse:) exception:@selector(opContextException:) context:ctx];
+            test([cb check]);
+            [cb release];
+	}
+	{
+	    id<TestMyClassPrx> p2 = [TestMyClassPrx checkedCast:[p ice_context:ctx]];
+	    test([[p2 ice_getContext] isEqual:ctx]);
+
+            Callback* cb = [[Callback alloc] init];
+            [p2 opContext_async:cb response:@selector(opNonEmptyContextResponse:) exception:@selector(opContextException:)];
+            test([cb check]);
+            [cb release];
+
+            cb = [[Callback alloc] init];
+            [p2 opContext_async:cb response:@selector(opNonEmptyContextResponse:) exception:@selector(opContextException:) context:ctx];
+            test([cb check]);
+            [cb release];
+	}
+    }
+
+//         {
+//             //
+//             // Test implicit context propagation
+//             //
+            
+//             string impls[] = {"Shared" :@"PerThread"};
+//             for(int i = 0; i < 2; i++)
+//             {
+//                 ICEInitializationData* initData = [ICEInitializationData initializationData];
+//                 [initData setProperties:[[communicator getProperties] clone]];
+//                 [[initData properties] setProperty:@"Ice.ImplicitContext" value:@[impls objectForKey:i]];
+                
+//                 id<ICECommunicator> ic = [ICEUtil createCommunicator:initData];
+
+//                 ICEContext ctx;
+//                 [ctx objectForKey:@"one"] = @"ONE";
+//                 [ctx objectForKey:@"two"] = @"TWO";
+//                 [ctx objectForKey:@"three"] = @"THREE";
+
+
+//                 id<TestMyClassPrx> p = TestMyClassPrxuncheckedCast(
+//                                         [ic stringToProxy:@"test:default -p 12010"]);
+                
+                
+//                 [[ic getImplicitContext] setContext:(ctx)];
+//                 test([[ic getImplicitContext] getContext] == ctx);
+//                 {
+//                     id<AMI_MyClass_opContextEqualI> cb = [[AMI_MyClass_opContextEqualI alloc] init](ctx);
+//                     [p opContext_async:cb];
+//                     test([cb check]);
+//                 }
+
+//                 [[ic getImplicitContext] put:@"zero" :@"ZERO"];
+          
+//                 ctx = [[ic getImplicitContext] getContext];
+//                 {
+//                     id<AMI_MyClass_opContextEqualI> cb = [[AMI_MyClass_opContextEqualI alloc] init](ctx);
+//                     [p opContext_async:cb];
+//                     test([cb check]);
+//                 }
+                
+//                 ICEContext prxContext;
+//                 [prxContext objectForKey:@"one"] = @"UN";
+//                 [prxContext objectForKey:@"four"] = @"QUATRE";
+                
+//                 ICEContext* combined = prxContext;
+//                 combined.insert(ctx.begin(), ctx.end());
+//                 test([[combined objectForKey:@"one"] isEqualToString:@"UN"]);
+                
+//                 p = [TestMyClassPrx uncheckedCast:[p ice_context:prxContext]];
+                
+//                 [[ic getImplicitContext] setContext:(ICEContext()]);
+//                 {
+//                     id<AMI_MyClass_opContextEqualI> cb = [[AMI_MyClass_opContextEqualI alloc] init](prxContext);
+//                     [p opContext_async:cb];
+//                     test([cb check]);
+//                 }
+
+//                 [[ic getImplicitContext] setContext:(ctx)];
+//                 {
+//                     id<AMI_MyClass_opContextEqualI> cb = [[AMI_MyClass_opContextEqualI alloc] init](combined);
+//                     [p opContext_async:cb];
+//                     test([cb check]);
+//                 }
+
+//                 [[ic getImplicitContext] setContext:(ICEContext()]);
+//                 [ic destroy];
+//             }
+//         }
+//     }
+
+
+
+    {
+        ICEDouble d = 1278312346.0 / 13.0;
+	TestMutableDoubleS *ds = [TestMutableDoubleS dataWithLength:(5 * sizeof(ICEDouble))];
+	ICEDouble *pb = (ICEDouble *)[ds bytes];
+	int i = 5;
+	while(i-- > 0)
+	{
+	    *pb++ = d;
+	}
+        Callback* cb = [[Callback alloc] init];
+        [p opDoubleMarshaling_async:cb response:@selector(opDoubleMarshalingResponse) exception:@selector(opDoubleMarshalingException:) p1:d p2:ds];
+        test([cb check]);
+        [cb release];
+    }
 }
+

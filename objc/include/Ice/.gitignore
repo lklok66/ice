@@ -4,3 +4,4 @@ Locator.h
 Router.h
 ProcessF.h
 Process.h
+LocalException.h

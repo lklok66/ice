@@ -860,11 +860,12 @@ twoways(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
     {
         ICEDouble d = 1278312346.0 / 13.0;
 	TestMutableDoubleS *ds = [TestMutableDoubleS dataWithLength:(5 * sizeof(ICEDouble))];
-	ICEDouble *p = (ICEDouble *)[ds bytes];
+	ICEDouble *pb = (ICEDouble *)[ds bytes];
 	int i = 5;
 	while(i-- > 0)
 	{
-	    *p++ = d;
+	    *pb++ = d;
 	}
+        [p opDoubleMarshaling:d p2:ds];
     }
 }

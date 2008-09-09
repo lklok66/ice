@@ -5,3 +5,4 @@ Locator.m
 Router.m
 Identity.m
 Process.m
+LocalException.m

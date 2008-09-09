@@ -30,232 +30,36 @@
 
 #import <Foundation/NSThread.h>
 #import <Foundation/NSInvocation.h>
+#import <Foundation/NSAutoreleasePool.h>
 
 #define OBJECTPRX ((IceProxy::Ice::Object*)objectPrx__)
 
 namespace
 {
 
-    class AMICallback : public Ice::AMI_Array_Object_ice_invoke
-    {
-    public:
-
-    AMICallback(const Ice::CommunicatorPtr& communicator, id target, SEL resp, SEL ex, Class finishedClass, SEL finished) : 
-        _target(target),
-            _communicator(communicator), 
-            _response(resp),
-            _exception(ex),
-            _finishedClass(finishedClass),
-            _finished(finished)
-            {
-                [_target retain];
-            }
-
-        virtual ~AMICallback()
-        {
-            [_target release];
-        }
-
-        virtual void
-            ice_response(bool ok , const std::pair<const Byte*, const Byte*>& outParams)
-        {
-            if(ok && !_response || !ok && !_exception)
-            {
-                return;
-            }
-    
-            ICEInputStream* is;
-            {
-                Ice::InputStreamPtr s = Ice::createInputStream(_communicator, outParams);
-                is = [ICEInputStream wrapperWithCxxObjectNoAutoRelease:s.get()];
-            }
-
-            @try
-            {
-                objc_msgSend(_finishedClass, _finished, _target, _response, _exception, ok, is);
-            }
-            @catch(NSException* ex)
-            {
-                [is release];
-                rethrowCxxException(ex);
-            }
-
-            [is release];
-        }
-
-        virtual void 
-            ice_exception(const Ice::Exception& ex)
-        {
-            if(!_exception)
-            {
-                return;
-            }
-
-            @try
-            {
-                @try
-                {
-                    rethrowObjCException(ex);
-                }
-                @catch(ICEException* e)
-                {
-                    objc_msgSend(_target, _exception, e);
-                }
-            }
-            @catch(NSException* e)
-            {
-                rethrowCxxException(e);
-            }
-        }
-
-    protected:
-
-        id _target;
-
-    private:
-
-        const Ice::CommunicatorPtr _communicator;
-        SEL _response;
-        SEL _exception;
-        Class _finishedClass;
-        SEL _finished;
-    };
-    typedef IceUtil::Handle<AMICallback> AMICallbackPtr;
-
-    class AMICallbackWithSent : public AMICallback, public Ice::AMISentCallback
-    {
-    public:
-
-    AMICallbackWithSent(const Ice::CommunicatorPtr& communicator, id target, SEL resp, SEL ex, SEL sent, 
-                        Class finishedClass ,SEL finished) : 
-        AMICallback(communicator, target, resp, ex, finishedClass, finished),
-            _sent(sent)
-            {
-            }
-
-        virtual void
-            ice_sent()
-        {
-            @try
-            {
-                objc_msgSend(_target, _sent);
-            }
-            @catch(NSException* e)
-            {
-                rethrowCxxException(e);
-            }
-        }
-
-    private:
-
-        SEL _sent;
-
-    };
-    typedef IceUtil::Handle<AMICallback> AMICallbackPtr;
-
-    class AMIIceInvokeCallback : public Ice::AMI_Array_Object_ice_invoke
-    {
-    public:
-
-    AMIIceInvokeCallback(id target, SEL response, SEL ex) : _target(target), _response(response), _exception(ex)
-        {
-            [_target retain];
-        }
-
-        virtual ~AMIIceInvokeCallback()
-        {
-            [_target release];
-        }
-
-        virtual void
-            ice_response(bool ok , const std::pair<const Byte*, const Byte*>& oP)
-        {
-            @try
-            {
-                objc_msgSend(_target, _response, ok, [NSMutableData dataWithBytes:oP.first length:(oP.second - oP.first)]);
-            }
-            @catch(NSException* e)
-            {
-                rethrowCxxException(e);
-            }
-        }
-
-        virtual void 
-            ice_exception(const Ice::Exception& ex)
-        {
-            @try
-            {
-                @try
-                {
-                    rethrowObjCException(ex);
-                }
-                @catch(ICEException* e)
-                {
-                    objc_msgSend(_target, _exception, e);
-                }
-            }
-            @catch(NSException* e)
-            {
-                rethrowCxxException(e);
-            }
-        }
-
-    protected:
-
-        id _target;
-
-    private:
-
-        SEL _response;
-        SEL _exception;
-
-    };
-
-    class AMIIceInvokeCallbackWithSent : public AMIIceInvokeCallback, public Ice::AMISentCallback
-    {
-    public:
-
-    AMIIceInvokeCallbackWithSent(id target, SEL response, SEL ex, SEL sent) :
-        AMIIceInvokeCallback(target, response, ex),
-            _sent(sent)
-            {
-            }
-
-        virtual void
-            ice_sent()
-        {
-            @try
-            {
-                objc_msgSend(_target, _sent);
-            }
-            @catch(NSException* e)
-            {
-                rethrowCxxException(e);
-            }
-        }
-
-    private:
-
-SEL _sent;
-};
-
-class AMIIceFlushBatchRequestsCallback : public Ice::AMI_Object_ice_flushBatchRequests
+class AMICallbackBase
 {
 public:
 
-AMIIceFlushBatchRequestsCallback(id target, SEL ex) : _target(target), _exception(ex)
+AMICallbackBase(id target, SEL ex) : _target(target), _exception(ex)
 {
     [_target retain];
 }
 
-virtual ~AMIIceFlushBatchRequestsCallback()
+virtual ~AMICallbackBase()
 {
     [_target release];
 }
 
-virtual void 
-ice_exception(const Ice::Exception& ex)
+void ice_exception(const Ice::Exception& ex)
 {
+    if(!_exception)
+    {
+        return;
+    }
+    
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSException* exception = nil;
     @try
     {
         @try
@@ -269,46 +73,209 @@ ice_exception(const Ice::Exception& ex)
     }
     @catch(NSException* e)
     {
-        rethrowCxxException(e);
+        exception = [e retain];
+    }
+    [pool release];
+
+    if(exception != nil)
+    {
+        rethrowCxxException(exception, true); // True = release the exception.
     }
 }
 
 protected:
 
 id _target;
-
-private:
-
 SEL _exception;
 
 };
 
-class AMIIceFlushBatchRequestsCallbackWithSent : public AMIIceFlushBatchRequestsCallback, public Ice::AMISentCallback
+class AMICallbackBaseWithSent : virtual public AMICallbackBase, public Ice::AMISentCallback
 {
 public:
 
-AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
-    AMIIceFlushBatchRequestsCallback(target, ex),
-    _sent(sent)
+AMICallbackBaseWithSent(id target, SEL ex, SEL sent) : AMICallbackBase(target, ex), _sent(sent)
 {
 }
 
-virtual void
-ice_sent()
+virtual void ice_sent()
 {
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSException* exception = nil;
     @try
     {
         objc_msgSend(_target, _sent);
     }
     @catch(NSException* e)
     {
-        rethrowCxxException(e);
+        exception = [e retain];
+    }
+    [pool release];
+
+    if(exception != nil)
+    {
+        rethrowCxxException(exception, true); // True = release the exception.
     }
 }
 
 private:
 
 SEL _sent;
+
+};
+
+class AMICallback : virtual public AMICallbackBase, public Ice::AMI_Array_Object_ice_invoke
+{
+public:
+
+AMICallback(const Ice::CommunicatorPtr& communicator, id target, SEL resp, SEL ex, Class finishedClass, SEL finished) : 
+    AMICallbackBase(target, ex),
+    _communicator(communicator), 
+    _response(resp),
+    _finishedClass(finishedClass),
+    _finished(finished)
+{
+}
+
+virtual void
+ice_response(bool ok , const std::pair<const Byte*, const Byte*>& outParams)
+{
+    if(ok && !_response || !ok && !_exception)
+    {
+        return;
+    }
+    
+    ICEInputStream* is;
+    {
+        Ice::InputStreamPtr s = Ice::createInputStream(_communicator, outParams);
+        is = [ICEInputStream wrapperWithCxxObjectNoAutoRelease:s.get()];
+    }
+    
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSException* exception = nil;
+    @try
+    {
+        objc_msgSend(_finishedClass, _finished, _target, _response, _exception, ok, is);
+    }
+    @catch(NSException* ex)
+    {
+        exception = [ex retain];
+    }
+    [pool release];
+    [is release];
+
+    if(exception != nil)
+    {
+        rethrowCxxException(exception, true); // True = release the exception.
+    }
+}
+
+virtual void ice_exception(const Ice::Exception& ex)
+{
+    AMICallbackBase::ice_exception(ex);
+}
+
+private:
+
+const Ice::CommunicatorPtr _communicator;
+SEL _response;
+Class _finishedClass;
+SEL _finished;
+};
+typedef IceUtil::Handle<AMICallback> AMICallbackPtr;
+
+class AMICallbackWithSent : public AMICallbackBaseWithSent, public AMICallback
+{
+public:
+    
+AMICallbackWithSent(const Ice::CommunicatorPtr& communicator, id target, SEL resp, SEL ex, SEL sent, 
+                    Class finishedClass ,SEL finished) : 
+    AMICallbackBase(target, ex),
+    AMICallbackBaseWithSent(target, ex, sent),
+    AMICallback(communicator, target, resp, ex, finishedClass, finished)
+{
+}
+};
+
+class AMIIceInvokeCallback : virtual public AMICallbackBase, public Ice::AMI_Array_Object_ice_invoke
+{
+public:
+    
+AMIIceInvokeCallback(id target, SEL response, SEL ex) : AMICallbackBase(target, ex), _response(response)
+{
+}
+
+virtual void
+ice_response(bool ok , const std::pair<const Byte*, const Byte*>& oP)
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSException* exception = nil;
+    @try
+    {
+        objc_msgSend(_target, _response, ok, [NSMutableData dataWithBytes:oP.first length:(oP.second - oP.first)]);
+    }
+    @catch(NSException* e)
+    {
+        exception = [e retain];
+    }
+    [pool release];
+
+    if(exception != nil)
+    {
+        rethrowCxxException(exception, true); // True = release the exception.
+    }
+}
+
+virtual void ice_exception(const Ice::Exception& ex)
+{
+    AMICallbackBase::ice_exception(ex);
+}
+
+private:
+
+SEL _response;
+
+};
+
+class AMIIceInvokeCallbackWithSent : public AMICallbackBaseWithSent, public AMIIceInvokeCallback
+{
+public:
+    
+AMIIceInvokeCallbackWithSent(id target, SEL response, SEL ex, SEL sent) :
+    AMICallbackBase(target, ex),
+    AMICallbackBaseWithSent(target, ex, sent),
+    AMIIceInvokeCallback(target, response, ex)
+{
+}
+
+};
+
+class AMIIceFlushBatchRequestsCallback : virtual public AMICallbackBase, public Ice::AMI_Object_ice_flushBatchRequests
+{
+public:
+
+AMIIceFlushBatchRequestsCallback(id target, SEL ex) : AMICallbackBase(target, ex)
+{
+}
+
+virtual void ice_exception(const Ice::Exception& ex)
+{
+    AMICallbackBase::ice_exception(ex);
+}
+
+};
+
+class AMIIceFlushBatchRequestsCallbackWithSent : public AMICallbackBaseWithSent, public AMIIceFlushBatchRequestsCallback
+{
+public:
+
+AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
+    AMICallbackBase(target, ex),
+    AMICallbackBaseWithSent(target, ex, sent),
+    AMIIceFlushBatchRequestsCallback(target, ex)
+{
+}
+
 };
 
 };
@@ -317,8 +284,13 @@ SEL _sent;
 @implementation ICECallbackOnMainThread
 -(id)init:(id)cb
 {
-    cb_ = cb;
+    cb_ = [cb retain];
     return self;
+}
+-(void) dealloc
+{
+    [cb_ release];
+    [super dealloc];
 }
 +(id)callbackOnMainThread:(id)cb
 {
@@ -335,7 +307,7 @@ SEL _sent;
 }
 @end
 
-@implementation ICEObjectPrx(Internal)
+@implementation ICEObjectPrx (ICEInternal)
 
 -(ICEObjectPrx*) initWithObjectPrx__:(const Ice::ObjectPrx&)arg
 {

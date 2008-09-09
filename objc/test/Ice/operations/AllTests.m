@@ -27,10 +27,10 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
     [derived opDerived];
     tprintf("ok\n");
 
-//     tprintf("testing oneway operations... ");
-//     void oneways(id<ICECommunicator>, id<TestMyClassPrx>);
-//     oneways(communicator, cl);
-//     tprintf("ok\n");
+    tprintf("testing oneway operations... ");
+    void oneways(id<ICECommunicator>, id<TestMyClassPrx>);
+    oneways(communicator, cl);
+    tprintf("ok\n");
     
     tprintf("testing twoway operations with AMI... ");
     void twowaysAMI(id<ICECommunicator>, id<TestMyClassPrx>);
@@ -38,16 +38,16 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
     twowaysAMI(communicator, derived);
     tprintf("ok\n");
     
-//     tprintf("testing oneway operations with AMI... ");
-//     void onewaysAMI(id<ICECommunicator>, id<TestMyClassPrx>);
-//     onewaysAMI(communicator, cl);
-//     tprintf("ok\n");
+    tprintf("testing oneway operations with AMI... ");
+    void onewaysAMI(id<ICECommunicator>, id<TestMyClassPrx>);
+    onewaysAMI(communicator, cl);
+    tprintf("ok\n");
     
-//     tprintf("testing batch oneway operations... ");
-//     void batchOneways(id<TestMyClassPrx>);
-//     batchOneways(cl);
-//     batchOneways(derived);
-//     tprintf("ok\n");
+    tprintf("testing batch oneway operations... ");
+    void batchOneways(id<TestMyClassPrx>);
+    batchOneways(cl);
+    batchOneways(derived);
+    tprintf("ok\n");
     
     return cl;
 }

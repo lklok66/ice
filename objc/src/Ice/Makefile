@@ -20,7 +20,6 @@ OBJC_OBJS	= BuiltinSequences.o \
 		  LocalException.o \
 		  Locator.o \
 		  Process.o \
-		  ProcessF.o \
 		  Router.o
 
 OBJCPP_OBJS	= Communicator.o \
@@ -29,7 +28,6 @@ OBJCPP_OBJS	= Communicator.o \
                   Exception.o \
 		  IdentityI.o \
 		  Initialize.o \
-		  LocalExCxx.o \
 	          Logger.o \
 	  	  Object.o \
 		  ObjectAdapter.o \

@@ -11,6 +11,6 @@
 
 #include <IceCpp/Current.h>
 
-@interface ICECurrent (Internal)
+@interface ICECurrent (ICEInternal)
 -(ICECurrent*) initWithCurrent:(const Ice::Current&)arg;
 @end

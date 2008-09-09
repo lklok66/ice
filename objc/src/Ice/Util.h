@@ -17,7 +17,7 @@
 #include <string>
 
 void rethrowObjCException(const std::exception& ex);
-void rethrowCxxException(NSException* ex);
+void rethrowCxxException(NSException* ex, bool = false);
 
 //
 // The toXXX methods don't auto release the returned object: the caller

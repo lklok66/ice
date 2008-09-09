@@ -60,7 +60,7 @@
 }
 @end
 
-@implementation ICELocalException (Internal)
+@implementation ICELocalException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
     if(![super init])
@@ -138,12 +138,12 @@
     return NO;
 }
 
--(void)writeWithStream__:(id<ICEOutputStream>)stream
+-(void)write__:(id<ICEOutputStream>)stream
 {
     NSAssert(false, @"writeWithStream__ must be overridden");
 }
 
--(void)readWithStream__:(id<ICEInputStream>)stream readTypeId:(BOOL)rid
+-(void)read__:(id<ICEInputStream>)stream readTypeId:(BOOL)rid
 {
     NSAssert(false, @"readWithStream__ must be overridden");
 }
@@ -158,7 +158,7 @@
 }
 @end
 
-@implementation ICEInitializationException (Internal)
+@implementation ICEInitializationException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
     if(![super initWithLocalException:ex])
@@ -170,9 +170,13 @@
     reason_ = toNSString(localEx.reason);
     return self;
 }
+-(void) rethrowCxx
+{
+    throw Ice::InitializationException(file, line, fromNSString(reason_));
+}
 @end
 
-@implementation ICEPluginInitializationException (Internal)
+@implementation ICEPluginInitializationException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
     if(![super initWithLocalException:ex])
@@ -181,12 +185,23 @@
     }
     NSAssert(dynamic_cast<const Ice::PluginInitializationException*>(&ex), @"invalid local exception type");
     const Ice::PluginInitializationException& localEx = dynamic_cast<const Ice::PluginInitializationException&>(ex);
-    reason_ = [[NSString alloc] initWithUTF8String:localEx.reason.c_str()];
+    reason_ = toNSString(localEx.reason);
     return self;
+}
+-(void) rethrowCxx
+{
+    throw Ice::PluginInitializationException(file, line, fromNSString(reason_));
 }
 @end
 
-@implementation ICEAlreadyRegisteredException (Internal)
+@implementation ICECollocationOptimizationException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::CollocationOptimizationException(file, line);
+}
+@end
+
+@implementation ICEAlreadyRegisteredException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
     if(![super initWithLocalException:ex])
@@ -196,12 +211,16 @@
     NSAssert(dynamic_cast<const Ice::AlreadyRegisteredException*>(&ex), @"invalid local exception type");
     const Ice::AlreadyRegisteredException& localEx = dynamic_cast<const Ice::AlreadyRegisteredException&>(ex);
     kindOfObject = toNSString(localEx.kindOfObject);
-    id_ = [[NSString alloc] initWithUTF8String:localEx.id.c_str()];
+    id_ = toNSString(localEx.id);
     return self;
+}
+-(void) rethrowCxx
+{
+    throw Ice::AlreadyRegisteredException(file, line, fromNSString(kindOfObject), fromNSString(id_));
 }
 @end
 
-@implementation ICENotRegisteredException (Internal)
+@implementation ICENotRegisteredException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
     if(![super initWithLocalException:ex])
@@ -211,12 +230,16 @@
     NSAssert(dynamic_cast<const Ice::NotRegisteredException*>(&ex), @"invalid local exception type");
     const Ice::NotRegisteredException& localEx = dynamic_cast<const Ice::NotRegisteredException&>(ex);
     kindOfObject = toNSString(localEx.kindOfObject);
-    id_ = [[NSString alloc] initWithUTF8String:localEx.id.c_str()];
+    id_ = toNSString(localEx.id);
     return self;
+}
+-(void) rethrowCxx
+{
+    throw Ice::NotRegisteredException(file, line, fromNSString(kindOfObject), fromNSString(id_));
 }
 @end
 
-@implementation ICETwowayOnlyException (Internal)
+@implementation ICETwowayOnlyException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
     if(![super initWithLocalException:ex])
@@ -228,9 +251,13 @@
     operation = toNSString(localEx.operation);
     return self;
 }
+-(void) rethrowCxx
+{
+    throw Ice::TwowayOnlyException(file, line, fromNSString(operation));
+}
 @end
 
-@implementation ICEUnknownException (Internal)
+@implementation ICEUnknownException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
     if(![super initWithLocalException:ex])
@@ -239,12 +266,44 @@
     }
     NSAssert(dynamic_cast<const Ice::UnknownException*>(&ex), @"invalid local exception type");
     const Ice::UnknownException& localEx = dynamic_cast<const Ice::UnknownException&>(ex);
-    unknown = [[NSString alloc] initWithUTF8String:localEx.unknown.c_str()];
+    unknown = toNSString(localEx.unknown);
     return self;
+}
+-(void) rethrowCxx
+{
+    throw Ice::UnknownException(file, line, fromNSString(unknown));
 }
 @end
 
-@implementation ICEObjectAdapterDeactivatedException (Internal)
+@implementation ICEUnknownLocalException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::UnknownLocalException(file, line, fromNSString([self unknown]));
+}
+@end
+
+@implementation ICEUnknownUserException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::UnknownUserException(file, line, fromNSString([self unknown]));
+}
+@end
+
+@implementation ICEVersionMismatchException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::VersionMismatchException(file, line);
+}
+@end
+
+@implementation ICECommunicatorDestroyedException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::CommunicatorDestroyedException(file, line);
+}
+@end
+
+@implementation ICEObjectAdapterDeactivatedException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
     if(![super initWithLocalException:ex])
@@ -256,9 +315,13 @@
     name_ = toNSString(localEx.name);
     return self;
 }
+-(void) rethrowCxx
+{
+    throw Ice::ObjectAdapterDeactivatedException(file, line, fromNSString(name_));
+}
 @end
 
-@implementation ICEObjectAdapterIdInUseException (Internal)
+@implementation ICEObjectAdapterIdInUseException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
     if(![super initWithLocalException:ex])
@@ -267,12 +330,12 @@
     }
     NSAssert(dynamic_cast<const Ice::ObjectAdapterIdInUseException*>(&ex), @"invalid local exception type");
     const Ice::ObjectAdapterIdInUseException& localEx = dynamic_cast<const Ice::ObjectAdapterIdInUseException&>(ex);
-    id_ = [[NSString alloc] initWithUTF8String:localEx.id.c_str()];
+    id_ = toNSString(localEx.id);
     return self;
 }
 @end
 
-@implementation ICENoEndpointException (Internal)
+@implementation ICENoEndpointException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
     if(![super initWithLocalException:ex])
@@ -284,9 +347,13 @@
     proxy = toNSString(localEx.proxy);
     return self;
 }
+-(void) rethrowCxx
+{
+    throw Ice::NoEndpointException(file, line, fromNSString(proxy));
+}
 @end
 
-@implementation ICEEndpointParseException (Internal)
+@implementation ICEEndpointParseException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
     if(![super initWithLocalException:ex])
@@ -295,12 +362,12 @@
     }
     NSAssert(dynamic_cast<const Ice::EndpointParseException*>(&ex), @"invalid local exception type");
     const Ice::EndpointParseException& localEx = dynamic_cast<const Ice::EndpointParseException&>(ex);
-    str = [[NSString alloc] initWithUTF8String:localEx.str.c_str()];
+    str = toNSString(localEx.str);
     return self;
 }
 @end
 
-@implementation ICEEndpointSelectionTypeParseException (Internal)
+@implementation ICEEndpointSelectionTypeParseException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
     if(![super initWithLocalException:ex])
@@ -312,9 +379,13 @@
     str = toNSString(localEx.str);
     return self;
 }
+-(void) rethrowCxx
+{
+    throw Ice::EndpointSelectionTypeParseException(file, line, fromNSString(str));
+}
 @end
 
-@implementation ICEIdentityParseException (Internal)
+@implementation ICEIdentityParseException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
     if(![super initWithLocalException:ex])
@@ -323,12 +394,12 @@
     }
     NSAssert(dynamic_cast<const Ice::IdentityParseException*>(&ex), @"invalid local exception type");
     const Ice::IdentityParseException& localEx = dynamic_cast<const Ice::IdentityParseException&>(ex);
-    str = [[NSString alloc] initWithUTF8String:localEx.str.c_str()];
+    str = toNSString(localEx.str);
     return self;
 }
 @end
 
-@implementation ICEProxyParseException (Internal)
+@implementation ICEProxyParseException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
     if(![super initWithLocalException:ex])
@@ -340,9 +411,13 @@
     str = toNSString(localEx.str);
     return self;
 }
+-(void) rethrowCxx
+{
+    throw Ice::ProxyParseException(file, line, fromNSString(str));
+}
 @end
 
-@implementation ICEIllegalIdentityException (Internal)
+@implementation ICEIllegalIdentityException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
     if(![super initWithLocalException:ex])
@@ -354,9 +429,14 @@
     id_ = [[ICEIdentity alloc] initWithIdentity:localEx.id];
     return self;
 }
+-(void) rethrowCxx
+{
+    Ice::Identity ident = { fromNSString(id_.name), fromNSString(id_.category) };
+    throw Ice::IllegalIdentityException(file, line, ident);
+}
 @end
 
-@implementation ICERequestFailedException (Internal)
+@implementation ICERequestFailedException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
     if(![super initWithLocalException:ex])
@@ -366,13 +446,42 @@
     NSAssert(dynamic_cast<const Ice::RequestFailedException*>(&ex), @"invalid local exception type");
     const Ice::RequestFailedException& localEx = dynamic_cast<const Ice::RequestFailedException&>(ex);
     id_ = [[ICEIdentity alloc] initWithIdentity:localEx.id];
-    facet = [[NSString alloc] initWithUTF8String:localEx.facet.c_str()];
-    operation = [[NSString alloc] initWithUTF8String:localEx.operation.c_str()];
+    facet = toNSString(localEx.facet);
+    operation = toNSString(localEx.operation);
     return self;
+}
+-(void) rethrowCxx
+{
+    Ice::Identity ident = { fromNSString(id_.name), fromNSString(id_.category) };
+    throw Ice::RequestFailedException(file, line, ident, fromNSString(facet), fromNSString(operation));
 }
 @end
 
-@implementation ICESyscallException (Internal)
+@implementation ICEObjectNotExistException (ICEInternal)
+-(void) rethrowCxx
+{
+    Ice::Identity ident = { fromNSString([self id_].name), fromNSString([self id_].category) };
+    throw Ice::ObjectNotExistException(file, line, ident, fromNSString([self facet]), fromNSString([self operation]));
+}
+@end
+
+@implementation ICEFacetNotExistException (ICEInternal)
+-(void) rethrowCxx
+{
+    Ice::Identity ident = { fromNSString([self id_].name), fromNSString([self id_].category) };
+    throw Ice::FacetNotExistException(file, line, ident, fromNSString([self facet]), fromNSString([self operation]));
+}
+@end
+
+@implementation ICEOperationNotExistException (ICEInternal)
+-(void) rethrowCxx
+{
+    Ice::Identity ident = { fromNSString([self id_].name), fromNSString([self id_].category) };
+    throw Ice::OperationNotExistException(file, line, ident, fromNSString([self facet]), fromNSString([self operation]));
+}
+@end
+
+@implementation ICESyscallException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
     if(![super initWithLocalException:ex])
@@ -384,9 +493,41 @@
     error = localEx.error;
     return self;
 }
+-(void) rethrowCxx
+{
+    throw Ice::SyscallException(file, line, error);
+}
 @end
 
-@implementation ICEFileException (Internal)
+@implementation ICESocketException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::SocketException(file, line, [self error]);
+}
+@end
+
+@implementation ICEConnectFailedException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::ConnectFailedException(file, line, [self error]);
+}
+@end
+
+@implementation ICEConnectionRefusedException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::ConnectionRefusedException(file, line, [self error]);
+}
+@end
+
+@implementation ICEConnectionLostException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::ConnectionLostException(file, line, [self error]);
+}
+@end
+
+@implementation ICEFileException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
     if(![super initWithLocalException:ex])
@@ -398,9 +539,13 @@
     path = toNSString(localEx.path);
     return self;
 }
+-(void) rethrowCxx
+{
+    throw Ice::FileException(file, line, [self error], fromNSString(path));
+}
 @end
 
-@implementation ICEDNSException (Internal)
+@implementation ICEDNSException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
     if(![super initWithLocalException:ex])
@@ -410,12 +555,44 @@
     NSAssert(dynamic_cast<const Ice::DNSException*>(&ex), @"invalid local exception type");
     const Ice::DNSException& localEx = dynamic_cast<const Ice::DNSException&>(ex);
     error = localEx.error;
-    host = [[NSString alloc] initWithUTF8String:localEx.host.c_str()];
+    host = toNSString(localEx.host);
     return self;
+}
+-(void) rethrowCxx
+{
+    throw Ice::DNSException(file, line, [self error], fromNSString(host));
 }
 @end
 
-@implementation ICEProtocolException (Internal)
+@implementation ICETimeoutException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::TimeoutException(file, line);
+}
+@end
+
+@implementation ICEConnectTimeoutException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::ConnectTimeoutException(file, line);
+}
+@end
+
+@implementation ICECloseTimeoutException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::CloseTimeoutException(file, line);
+}
+@end
+
+@implementation ICEConnectionTimeoutException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::ConnectionTimeoutException(file, line);
+}
+@end
+
+@implementation ICEProtocolException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
     if(![super initWithLocalException:ex])
@@ -427,9 +604,132 @@
     reason_ = toNSString(localEx.reason);
     return self;
 }
+-(void) rethrowCxx
+{
+    throw Ice::ProtocolException(file, line, fromNSString(reason_));
+}
 @end
 
-@implementation ICEBadMagicException (Internal)
+@implementation ICEUnknownMessageException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::UnknownMessageException(file, line, fromNSString([self reason_]));
+}
+@end
+
+@implementation ICEConnectionNotValidatedException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::ConnectionNotValidatedException(file, line, fromNSString([self reason_]));
+}
+@end
+
+@implementation ICEUnknownRequestIdException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::UnknownRequestIdException(file, line, fromNSString([self reason_]));
+}
+@end
+
+@implementation ICEUnknownReplyStatusException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::UnknownReplyStatusException(file, line, fromNSString([self reason_]));
+}
+@end
+
+@implementation ICECloseConnectionException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::CloseConnectionException(file, line, fromNSString([self reason_]));
+}
+@end
+
+@implementation ICEForcedCloseConnectionException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::ForcedCloseConnectionException(file, line, fromNSString([self reason_]));
+}
+@end
+
+@implementation ICEIllegalMessageSizeException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::IllegalMessageSizeException(file, line, fromNSString([self reason_]));
+}
+@end
+
+@implementation ICECompressionException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::CompressionException(file, line, fromNSString([self reason_]));
+}
+@end
+
+@implementation ICEDatagramLimitException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::DatagramLimitException(file, line, fromNSString([self reason_]));
+}
+@end
+
+@implementation ICEMarshalException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::MarshalException(file, line, fromNSString([self reason_]));
+}
+@end
+
+@implementation ICEProxyUnmarshalException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::ProxyUnmarshalException(file, line, fromNSString([self reason_]));
+}
+@end
+
+@implementation ICEUnmarshalOutOfBoundsException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::UnmarshalOutOfBoundsException(file, line, fromNSString([self reason_]));
+}
+@end
+
+@implementation ICEIllegalIndirectionException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::IllegalIndirectionException(file, line, fromNSString([self reason_]));
+}
+@end
+
+@implementation ICEMemoryLimitException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::MemoryLimitException(file, line, fromNSString([self reason_]));
+}
+@end
+
+@implementation ICEStringConversionException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::StringConversionException(file, line, fromNSString([self reason_]));
+}
+@end
+
+@implementation ICEEncapsulationException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::EncapsulationException(file, line, fromNSString([self reason_]));
+}
+@end
+
+@implementation ICENegativeSizeException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::NegativeSizeException(file, line, fromNSString([self reason_]));
+}
+@end
+
+@implementation ICEBadMagicException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
     if(![super initWithLocalException:ex])
@@ -441,9 +741,14 @@
     badMagic = toNSData(localEx.badMagic);
     return self;
 }
+-(void) rethrowCxx
+{
+    Ice::ByteSeq s;
+    throw Ice::BadMagicException(file, line, fromNSString([self reason_]), fromNSData(badMagic, s));
+}
 @end
 
-@implementation ICEUnsupportedProtocolException (Internal)
+@implementation ICEUnsupportedProtocolException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
     if(![super initWithLocalException:ex])
@@ -458,9 +763,13 @@
     minor = localEx.minor;
     return self;
 }
+-(void) rethrowCxx
+{
+    throw Ice::UnsupportedProtocolException(file, line, fromNSString([self reason_]), badMajor, badMinor, major, minor);
+}
 @end
 
-@implementation ICEUnsupportedEncodingException (Internal)
+@implementation ICEUnsupportedEncodingException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
     if(![super initWithLocalException:ex])
@@ -475,9 +784,13 @@
     minor = localEx.minor;
     return self;
 }
+-(void) rethrowCxx
+{
+    throw Ice::UnsupportedEncodingException(file, line, fromNSString([self reason_]), badMajor, badMinor, major, minor);
+}
 @end
 
-@implementation ICENoObjectFactoryException (Internal)
+@implementation ICENoObjectFactoryException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
     if(![super initWithLocalException:ex])
@@ -486,12 +799,16 @@
     }
     NSAssert(dynamic_cast<const Ice::NoObjectFactoryException*>(&ex), @"invalid local exception type");
     const Ice::NoObjectFactoryException& localEx = dynamic_cast<const Ice::NoObjectFactoryException&>(ex);
-    type = [[NSString alloc] initWithUTF8String:localEx.type.c_str()];
+    type = toNSString(localEx.type);
     return self;
+}
+-(void) rethrowCxx
+{
+    throw Ice::NoObjectFactoryException(file, line, fromNSString([self reason_]), fromNSString(type));
 }
 @end
 
-@implementation ICEUnexpectedObjectException (Internal)
+@implementation ICEUnexpectedObjectException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
     if(![super initWithLocalException:ex])
@@ -501,12 +818,16 @@
     NSAssert(dynamic_cast<const Ice::UnexpectedObjectException*>(&ex), @"invalid local exception type");
     const Ice::UnexpectedObjectException& localEx = dynamic_cast<const Ice::UnexpectedObjectException&>(ex);
     type = toNSString(localEx.type);
-    expectedType = [[NSString alloc] initWithUTF8String:localEx.expectedType.c_str()];
+    expectedType = toNSString(localEx.expectedType);
     return self;
+}
+-(void) rethrowCxx
+{
+    throw Ice::UnexpectedObjectException(file, line, fromNSString([self reason_]), fromNSString(type), fromNSString(expectedType));
 }
 @end
 
-@implementation ICEFeatureNotSupportedException (Internal)
+@implementation ICEFeatureNotSupportedException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
     if(![super initWithLocalException:ex])
@@ -518,9 +839,13 @@
     unsupportedFeature = toNSString(localEx.unsupportedFeature);
     return self;
 }
+-(void) rethrowCxx
+{
+    throw Ice::FeatureNotSupportedException(file, line, fromNSString(unsupportedFeature));
+}
 @end
 
-@implementation ICESecurityException (Internal)
+@implementation ICESecurityException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
     if(![super initWithLocalException:ex])
@@ -531,5 +856,23 @@
     const Ice::SecurityException& localEx = dynamic_cast<const Ice::SecurityException&>(ex);
     reason_ = toNSString(localEx.reason);
     return self;
+}
+-(void) rethrowCxx
+{
+    throw Ice::SecurityException(file, line, fromNSString(reason_));
+}
+@end
+
+@implementation ICEFixedProxyException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::FixedProxyException(file, line);
+}
+@end
+
+@implementation ICEResponseSentException (ICEInternal)
+-(void) rethrowCxx
+{
+    throw Ice::ResponseSentException(file, line);
 }
 @end
