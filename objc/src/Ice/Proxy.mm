@@ -375,11 +375,11 @@ SEL _sent;
 @end
 
 @implementation ICEObjectPrx
-+(id) readWithStream:(id<ICEInputStream>)stream
++(id) readWithStream__:(id<ICEInputStream>)stream
 {
     return [stream readProxy:self];
 }
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream
 {
     [stream writeProxy:obj];
 }

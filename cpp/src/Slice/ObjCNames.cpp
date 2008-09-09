@@ -31,7 +31,9 @@ struct Node
 
 static const char* NSObjectNames[] =
                     {
-                        "autorelease", "class", "conformsToProtocol:", "description",
+			// TODO: incomplete. May need to split this for class methods, instance methods,
+			// and  properties.
+                        "alloc", "allocWithZone:", "attributeKeys", "awakeAfterUsingCode:", "autorelease", "class", "conformsToProtocol:", "description",
                         "hash", "isEqual:", "isKindOfClass:", "isMemberOfClass:", "isProxy",
 			"performSelector:", "performSelector:withObject:", "performSelector:withObject:withObject:",
 			"release", "respondstoSelector:", "retain", "retainCount", "self", "superclass", "zone", 0

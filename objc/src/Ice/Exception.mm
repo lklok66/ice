@@ -138,14 +138,14 @@
     return NO;
 }
 
--(void)writeWithStream:(id<ICEOutputStream>)stream
+-(void)writeWithStream__:(id<ICEOutputStream>)stream
 {
-    NSAssert(false, @"writeWithStream must be overridden");
+    NSAssert(false, @"writeWithStream__ must be overridden");
 }
 
--(void)readWithStream:(id<ICEInputStream>)stream readTypeId:(BOOL)rid
+-(void)readWithStream__:(id<ICEInputStream>)stream readTypeId:(BOOL)rid
 {
-    NSAssert(false, @"readWithStream must be overridden");
+    NSAssert(false, @"readWithStream__ must be overridden");
 }
 
 -(void) copy__:(ICEUserException*)copy_

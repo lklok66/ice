@@ -169,56 +169,56 @@ typedef struct
 //
 
 @interface ICEBoolHelper : NSObject
-+(id) readWithStream:(id<ICEInputStream>)stream;
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
++(id) readWithStream__:(id<ICEInputStream>)stream;
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream;
 @end
 
 @interface ICEByteHelper : NSObject
-+(id) readWithStream:(id<ICEInputStream>)stream;
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
++(id) readWithStream__:(id<ICEInputStream>)stream;
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream;
 @end
 
 @interface ICEShortHelper : NSObject
-+(id) readWithStream:(id<ICEInputStream>)stream;
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
++(id) readWithStream__:(id<ICEInputStream>)stream;
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream;
 @end
 
 @interface ICEIntHelper : NSObject
-+(id) readWithStream:(id<ICEInputStream>)stream;
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
++(id) readWithStream__:(id<ICEInputStream>)stream;
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream;
 @end
 
 @interface ICELongHelper : NSObject
-+(id) readWithStream:(id<ICEInputStream>)stream;
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
++(id) readWithStream__:(id<ICEInputStream>)stream;
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream;
 @end
 
 @interface ICEFloatHelper : NSObject
-+(id) readWithStream:(id<ICEInputStream>)stream;
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
++(id) readWithStream__:(id<ICEInputStream>)stream;
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream;
 @end
 
 @interface ICEDoubleHelper : NSObject
-+(id) readWithStream:(id<ICEInputStream>)stream;
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
++(id) readWithStream__:(id<ICEInputStream>)stream;
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream;
 @end
 
 @interface ICEStringHelper : NSObject
-+(id) readWithStream:(id<ICEInputStream>)stream;
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
++(id) readWithStream__:(id<ICEInputStream>)stream;
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream;
 @end
 
 @interface ICEObjectHelper : NSObject
-+(id) readWithStream:(id<ICEInputStream>)stream;
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
++(id) readWithStream__:(id<ICEInputStream>)stream;
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream;
 @end
 
 //
 // Helper for enums.
 //
 @interface ICEEnumHelper : NSObject
-+(id) readWithStream:(id<ICEInputStream>)stream;
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
++(id) readWithStream__:(id<ICEInputStream>)stream;
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream;
 +(ICEInt) getLimit;
 @end
 
@@ -226,24 +226,24 @@ typedef struct
 // Helper for sequence of proxies
 //
 @interface ICEObjectPrxSeqHelper : NSObject
-+(id) readWithStream:(id<ICEInputStream>)stream;
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
++(id) readWithStream__:(id<ICEInputStream>)stream;
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream;
 @end
 
 //
 // Helper for sequence of objects
 //
 @interface ICEObjectSeqHelper : NSObject
-+(id) readWithStream:(id<ICEInputStream>)stream;
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
++(id) readWithStream__:(id<ICEInputStream>)stream;
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream;
 @end
 
 //
 // Helper for sequences of non-value types.
 //
 @interface ICESeqHelper : NSObject
-+(id) readWithStream:(id<ICEInputStream>)stream;
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
++(id) readWithStream__:(id<ICEInputStream>)stream;
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream;
 +(Class) getContained;
 @end
 
@@ -251,7 +251,7 @@ typedef struct
 // Helper for dictionaries.
 //
 @interface ICEDictHelper : NSObject
-+(id) readWithStream:(id<ICEInputStream>)stream;
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
++(id) readWithStream__:(id<ICEInputStream>)stream;
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream;
 +(ICEKeyValueHelper) getContained;
 @end

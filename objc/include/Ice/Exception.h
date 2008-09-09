@@ -41,8 +41,8 @@
 
 @interface ICEUserException : ICEException
 -(BOOL)usesClasses__;
--(void)writeWithStream:(id<ICEOutputStream>)stream;
--(void)readWithStream:(id<ICEInputStream>)stream readTypeId:(BOOL)rid;
+-(void)writeWithStream__:(id<ICEOutputStream>)stream;
+-(void)readWithStream__:(id<ICEInputStream>)stream readTypeId:(BOOL)rid;
 -(void) copy__:(ICEUserException*)copy_;
 -(void) dealloc;
 @end

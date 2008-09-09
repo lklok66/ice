@@ -34,14 +34,15 @@ static string
 lookupKwd(const string& name, int baseTypes, bool mangleCasts = false)
 {
     //
-    // Keyword list. *Must* be kept in alphabetical order.
+    // Keyword list. *Must* be kept in case-insensitive alphabetical order.
     //
-    static const string keywordList[] =
+    static string keywordList[] =
     {
-	"BOOL", "NO", "Nil", "SEL", "YES", "auto", "break", "bycopy", "byref", "case", "char", "const", "continue",
-	"default", "do", "double", "else", "enum", "extern", "float", "for", "goto", "id", "if", "in", "inout", "int",
-	"long", "nil", "nil", "oneway", "out", "register", "return", "self", "short", "signed", "sizeof", "static",
-	"struct", "super", "switch", "typedef", "union", "unsigned", "void", "volatile", "while"
+	"auto", "BOOL", "break", "bycopy", "byref", "case", "char", "Class", "const", "continue",
+	"default", "do", "double", "else", "enum", "extern", "float", "for", "goto",
+	"id", "if", "IMP", "in", "inout", "int", "long", "nil", "NO", "oneway", "out",
+	"register", "return", "SEL", "self", "short", "signed", "sizeof", "static", "struct", "super", "switch",
+	"typedef", "union", "unsigned", "void", "volatile", "while", "YES"
     };
                         
     bool found = binary_search(&keywordList[0],
@@ -124,9 +125,12 @@ Slice::ObjCGenerator::fixId(const string& name, int baseTypes, bool mangleCasts)
     {
         return name;
     }
+#if 0
     if(name[0] != ':')
     {
+#endif
         return lookupKwd(name, baseTypes, mangleCasts);
+#if 0
     }
     StringList ids = splitScopedName(name);
     StringList newIds;
@@ -144,6 +148,7 @@ Slice::ObjCGenerator::fixId(const string& name, int baseTypes, bool mangleCasts)
         result << *j;
     }
     return result.str();
+#endif
 }
 
 string
@@ -535,11 +540,11 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
 	string typeS = typeToString(st);
 	if(marshal)
 	{
-	    out << nl << "[" << typeS << " writeWithStream:" << param << " stream:" << stream << "];";
+	    out << nl << "[" << typeS << " writeWithStream__:" << param << " stream:" << stream << "];";
 	}
 	else
 	{
-	    out << nl << param << " = [" << typeS << " readWithStream:" << stream << "];";
+	    out << nl << param << " = [" << typeS << " readWithStream__:" << stream << "];";
 	}
         return;
     }
@@ -629,11 +634,11 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
 	string name =  prefix + seq->name() + "Helper";
 	if(marshal)
 	{
-	    out << nl << "[" << name << " writeWithStream:" << param << " stream:" << stream << "];";
+	    out << nl << "[" << name << " writeWithStream__:" << param << " stream:" << stream << "];";
 	}
 	else
 	{
-	    out << nl << param << " = [" << name << " readWithStream:" << stream << "];";
+	    out << nl << param << " = [" << name << " readWithStream__:" << stream << "];";
 	}
 	return;
     }
@@ -644,11 +649,11 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
     string name = prefix + d->name() + "Helper";
     if(marshal)
     {
-        out << nl << "[" + name << " writeWithStream:" << param << " stream:" << stream << "];";
+        out << nl << "[" + name << " writeWithStream__:" << param << " stream:" << stream << "];";
     }
     else
     {
-        out << nl << param << " = [" << name << " readWithStream:" << stream << "];";
+        out << nl << param << " = [" << name << " readWithStream__:" << stream << "];";
     } 
 }
 

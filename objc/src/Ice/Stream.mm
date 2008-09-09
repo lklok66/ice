@@ -109,7 +109,7 @@ public:
     {
         @try
         {
-            [_ex writeWithStream:_stream];
+            [_ex writeWithStream__:_stream];
         }
         @catch(NSException* ex)
         {
@@ -810,7 +810,7 @@ typedef enum { dummy } Dummy_Enum;
     {
         @try
         {
-            key = [cl readWithStream:self];
+            key = [cl readWithStream__:self];
         }
         @catch(NSException *ex)
         {
@@ -843,7 +843,7 @@ typedef enum { dummy } Dummy_Enum;
     {
 	while(sz-- > 0)
 	{
-	    obj = [cl readWithStream:self];
+	    obj = [cl readWithStream__:self];
             if(obj == nil)
             {
                 [arr addObject:[NSNull null]];
@@ -875,8 +875,8 @@ typedef enum { dummy } Dummy_Enum;
     {
 	while(sz-- > 0)
 	{
-	    key = [c.key readWithStream:self];
-	    value = [c.value readWithStream:self];
+	    key = [c.key readWithStream__:self];
+	    value = [c.value readWithStream__:self];
             if(value == nil)
             {
                 [dictionary setObject:[NSNull null] forKey:key];
@@ -953,7 +953,7 @@ typedef enum { dummy } Dummy_Enum;
 
     if(ex)
     {
-        [ex readWithStream:self readTypeId:false];
+        [ex readWithStream__:self readTypeId:false];
         if(usesClasses)
         {
             [self readPendingObjects];
@@ -1319,7 +1319,7 @@ typedef enum { dummy } Dummy_Enum;
     [self writeSize:[arr count]];
     for(id i in arr)
     {
-	[c writeWithStream:(i == [NSNull null] ? nil : i) stream:self];
+	[c writeWithStream__:(i == [NSNull null] ? nil : i) stream:self];
     }
 }
 
@@ -1340,9 +1340,9 @@ typedef enum { dummy } Dummy_Enum;
 	{
 	    @throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"illegal NSNull value"];
 	}
-	[c.key writeWithStream:key stream:self];
+	[c.key writeWithStream__:key stream:self];
 	NSObject *obj = [dictionary objectForKey:key];
-	[c.value writeWithStream:(obj == [NSNull null] ? nil : obj) stream:self];
+	[c.value writeWithStream__:(obj == [NSNull null] ? nil : obj) stream:self];
     }
 }
 
@@ -1532,7 +1532,7 @@ typedef enum { dummy } Dummy_Enum;
 	{
 	    @throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"illegal NSNull value"];
 	}
-	[c writeWithStream:key stream:self];
+	[c writeWithStream__:key stream:self];
 	id obj = [dictionary objectForKey:key];
         [self writeObject:(obj == [NSNull null] ? nil : obj)];
     }
@@ -1640,12 +1640,12 @@ typedef enum { dummy } Dummy_Enum;
 @end
 
 @implementation ICEBoolHelper
-+(id) readWithStream:(id<ICEInputStream>)stream
++(id) readWithStream__:(id<ICEInputStream>)stream
 {
     return [[NSNumber alloc] initWithBool:[stream readBool]];
 }
 
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream
 {
     if(obj == [NSNull null])
     {
@@ -1656,12 +1656,12 @@ typedef enum { dummy } Dummy_Enum;
 @end
 
 @implementation ICEByteHelper
-+(id) readWithStream:(id<ICEInputStream>)stream
++(id) readWithStream__:(id<ICEInputStream>)stream
 {
     return [[NSNumber alloc] initWithUnsignedChar:[stream readByte]];
 }
 
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream
 {
     if(obj == [NSNull null])
     {
@@ -1672,12 +1672,12 @@ typedef enum { dummy } Dummy_Enum;
 @end
 
 @implementation ICEShortHelper
-+(id) readWithStream:(id<ICEInputStream>)stream
++(id) readWithStream__:(id<ICEInputStream>)stream
 {
     return [[NSNumber alloc] initWithShort:[stream readShort]];
 }
 
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream
 {
     if(obj == [NSNull null])
     {
@@ -1688,12 +1688,12 @@ typedef enum { dummy } Dummy_Enum;
 @end
 
 @implementation ICEIntHelper
-+(id) readWithStream:(id<ICEInputStream>)stream
++(id) readWithStream__:(id<ICEInputStream>)stream
 {
     return [[NSNumber alloc] initWithInt:[stream readInt]];
 }
 
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream
 {
     if(obj == [NSNull null])
     {
@@ -1704,12 +1704,12 @@ typedef enum { dummy } Dummy_Enum;
 @end
 
 @implementation ICELongHelper
-+(id) readWithStream:(id<ICEInputStream>)stream
++(id) readWithStream__:(id<ICEInputStream>)stream
 {
     return [[NSNumber alloc] initWithLong:[stream readLong]];
 }
 
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream
 {
     if(obj == [NSNull null])
     {
@@ -1720,12 +1720,12 @@ typedef enum { dummy } Dummy_Enum;
 @end
 
 @implementation ICEFloatHelper
-+(id) readWithStream:(id<ICEInputStream>)stream
++(id) readWithStream__:(id<ICEInputStream>)stream
 {
     return [[NSNumber alloc] initWithFloat:[stream readFloat]];
 }
 
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream
 {
     if(obj == [NSNull null])
     {
@@ -1736,12 +1736,12 @@ typedef enum { dummy } Dummy_Enum;
 @end
 
 @implementation ICEDoubleHelper
-+(id) readWithStream:(id<ICEInputStream>)stream
++(id) readWithStream__:(id<ICEInputStream>)stream
 {
     return [[NSNumber alloc] initWithDouble:[stream readDouble]];
 }
 
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream
 {
     if(obj == [NSNull null])
     {
@@ -1752,12 +1752,12 @@ typedef enum { dummy } Dummy_Enum;
 @end
 
 @implementation ICEStringHelper
-+(id) readWithStream:(id<ICEInputStream>)stream
++(id) readWithStream__:(id<ICEInputStream>)stream
 {
     return [stream readString];
 }
 
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream
 {
     if(obj == [NSNull null])
     {
@@ -1768,12 +1768,12 @@ typedef enum { dummy } Dummy_Enum;
 @end
 
 @implementation ICEEnumHelper
-+(id) readWithStream:(id<ICEInputStream>)stream
++(id) readWithStream__:(id<ICEInputStream>)stream
 {
     return [[NSNumber alloc] initWithInt:[stream readEnumerator:[self getLimit]]];
 }
 
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream
 {
     [stream writeEnumerator:[obj intValue] limit:[self getLimit]];
 }
@@ -1786,34 +1786,34 @@ typedef enum { dummy } Dummy_Enum;
 @end
 
 @implementation ICEObjectPrxSeqHelper
-+(id) readWithStream:(id<ICEInputStream>)stream
++(id) readWithStream__:(id<ICEInputStream>)stream
 {
     return [stream readSequence:[ICEObjectPrx class]];
 }
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream
 {
     return [stream writeSequence:obj c:[ICEObjectPrx class]];
 }
 @end
 
 @implementation ICEObjectSeqHelper
-+(id) readWithStream:(id<ICEInputStream>)stream
++(id) readWithStream__:(id<ICEInputStream>)stream
 {
     return [stream readObjectSeq];
 }
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream
 {
     [stream writeObjectSeq:obj];
 }
 @end
 
 @implementation ICESeqHelper
-+(id) readWithStream:(id<ICEInputStream>)stream
++(id) readWithStream__:(id<ICEInputStream>)stream
 {
     return [stream readSequence:[self getContained]];
 }
 
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream
 {
     return [stream writeSequence:obj c:[self getContained]];
 }
@@ -1826,12 +1826,12 @@ typedef enum { dummy } Dummy_Enum;
 @end
 
 @implementation ICEDictHelper
-+(id) readWithStream:(id<ICEInputStream>)stream
++(id) readWithStream__:(id<ICEInputStream>)stream
 {
     return [stream readDictionary:[self getContained]];
 }
 
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream
 {
     [stream writeDictionary:obj c:[self getContained]];
 }

@@ -111,8 +111,8 @@
 {
     void* objectPrx__;
 }
-+(id) readWithStream:(id<ICEInputStream>)stream;
-+(void) writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
++(id) readWithStream__:(id<ICEInputStream>)stream;
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream;
 +(id) uncheckedCast:(id<ICEObjectPrx>)proxy;
 +(id) uncheckedCast:(id<ICEObjectPrx>)proxy facet:(NSString*)facet;
 +(id) checkedCast:(id<ICEObjectPrx>)proxy;
