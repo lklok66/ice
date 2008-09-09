@@ -347,11 +347,11 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
 @end
 
 @implementation ICEObjectPrx
-+(id) readWithStream__:(id<ICEInputStream>)stream
++(id) ice_readWithStream:(id<ICEInputStream>)stream
 {
     return [stream readProxy:self];
 }
-+(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream
++(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
     [stream writeProxy:obj];
 }

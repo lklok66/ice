@@ -2145,8 +2145,8 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     //
     // Marshaling/unmarshaling
     //
-    _H << nl << "+(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream;";
-    _M << sp << nl << "+(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)os_";
+    _H << nl << "+(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;";
+    _M << sp << nl << "+(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)os_";
     _M << sb;
     _M << nl << name << "*" << " p = (" << name << "*)obj;";
     _M << nl << "if(p == nil)";
@@ -2166,8 +2166,8 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     _M << eb;
     _M << eb;
 
-    _H << nl << "+(id) readWithStream__:(id<ICEInputStream>)stream;";
-    _M << sp << nl << "+(id) readWithStream__:(id<ICEInputStream>)is_";
+    _H << nl << "+(id) ice_readWithStream:(id<ICEInputStream>)stream;";
+    _M << sp << nl << "+(id) ice_readWithStream:(id<ICEInputStream>)is_";
     _M << sb;
     _M << nl << name << "*" << " p = [[self alloc] init];";
     _M << nl << "@try";
@@ -2925,16 +2925,16 @@ Slice::Gen::ProxyHelperVisitor::visitClassDefStart(const ClassDefPtr& p)
     ClassList bases = p->bases();
 
     _H << sp << nl << "@interface " << name;
-    _H << nl << "+(void) writeWithStream__:(id<ICEOutputStream>)os proxy:(" << fixName(p) + "Prx" << " *)proxy;";
-    _H << nl << "+(void) readWithStream__:(id<ICEInputStream>)is;";
+    _H << nl << "+(void) ice_writeWithStream:(id<ICEOutputStream>)os proxy:(" << fixName(p) + "Prx" << " *)proxy;";
+    _H << nl << "+(void) ice_readWithStream:(id<ICEInputStream>)is;";
     _H << nl << "@end";
 
     _M << sp << nl << "@implementation " << name;
-    _M << nl << "+(void) writeWithStream__:(id<ICEOutputStream>)os proxy:(" << fixName(p) + "Prx" << " *)proxy";
+    _M << nl << "+(void) ice_writeWithStream:(id<ICEOutputStream>)os proxy:(" << fixName(p) + "Prx" << " *)proxy";
     _M << sb;
     _M << eb;
 
-    _M << sp << nl << "+(void) readWithStream__:(id<ICEInputStream>)is";
+    _M << sp << nl << "+(void) ice_readWithStream:(id<ICEInputStream>)is";
     _M << sb;
     _M << eb;
 
@@ -2993,17 +2993,17 @@ Slice::Gen::HelperVisitor::visitSequence(const SequencePtr& p)
         }
 
 	_H << sp << nl << "@interface " << name << " : NSObject";
-	_H << nl << "+(id) readWithStream__:(id<ICEInputStream>)stream;";
-	_H << nl << "+(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream;";
+	_H << nl << "+(id) ice_readWithStream:(id<ICEInputStream>)stream;";
+	_H << nl << "+(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;";
 	_H << nl << "@end";
 
 	_M << sp << nl << "@implementation " << name;
-	_M << nl << "+(id) readWithStream__:(id<ICEInputStream>)stream";
+	_M << nl << "+(id) ice_readWithStream:(id<ICEInputStream>)stream";
 	_M << sb;
         _M << nl << "return [stream read" << getBuiltinName(builtin) << "Seq];";
 	_M << eb;
 
-	_M << sp << nl << "+(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream";
+	_M << sp << nl << "+(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream";
 	_M << sb;
         if(builtin->kind() == Builtin::KindObjectProxy)
         {
@@ -3023,19 +3023,19 @@ Slice::Gen::HelperVisitor::visitSequence(const SequencePtr& p)
     if(en)
     {
 	_H << sp << nl << "@interface " << name << " : NSObject";
-	_H << nl << "+(id) readWithStream__:(id<ICEInputStream>)stream;";
-	_H << nl << "+(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream;";
+	_H << nl << "+(id) ice_readWithStream:(id<ICEInputStream>)stream;";
+	_H << nl << "+(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;";
 	_H << nl << "@end";
 
 	string typeS = typeToString(en);
 	int limit = en->getEnumerators().size();
 	_M << sp << nl << "@implementation " << name;
-	_M << nl << "+(id) readWithStream__:(id<ICEInputStream>)stream";
+	_M << nl << "+(id) ice_readWithStream:(id<ICEInputStream>)stream";
 	_M << sb;
 	_M << nl << "return [stream readEnumSeq:" << limit << "];";
 	_M << eb;
 
-	_M << sp << nl << "+(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream";
+	_M << sp << nl << "+(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream";
 	_M << sb;
 	_M << nl << "[stream writeEnumSeq:obj limit:" << limit << "];";
 	_M << eb;

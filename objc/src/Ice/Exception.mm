@@ -140,12 +140,12 @@
 
 -(void)write__:(id<ICEOutputStream>)stream
 {
-    NSAssert(false, @"writeWithStream__ must be overridden");
+    NSAssert(false, @"ice_writeWithStream must be overridden");
 }
 
 -(void)read__:(id<ICEInputStream>)stream readTypeId:(BOOL)rid
 {
-    NSAssert(false, @"readWithStream__ must be overridden");
+    NSAssert(false, @"ice_readWithStream must be overridden");
 }
 
 -(void) copy__:(ICEUserException*)copy_

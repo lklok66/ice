@@ -540,11 +540,11 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
 	string typeS = typeToString(st);
 	if(marshal)
 	{
-	    out << nl << "[" << typeS << " writeWithStream__:" << param << " stream:" << stream << "];";
+	    out << nl << "[" << typeS << " ice_writeWithStream:" << param << " stream:" << stream << "];";
 	}
 	else
 	{
-	    out << nl << param << " = [" << typeS << " readWithStream__:" << stream << "];";
+	    out << nl << param << " = [" << typeS << " ice_readWithStream:" << stream << "];";
 	}
         return;
     }
@@ -634,11 +634,11 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
 	string name =  prefix + seq->name() + "Helper";
 	if(marshal)
 	{
-	    out << nl << "[" << name << " writeWithStream__:" << param << " stream:" << stream << "];";
+	    out << nl << "[" << name << " ice_writeWithStream:" << param << " stream:" << stream << "];";
 	}
 	else
 	{
-	    out << nl << param << " = [" << name << " readWithStream__:" << stream << "];";
+	    out << nl << param << " = [" << name << " ice_readWithStream:" << stream << "];";
 	}
 	return;
     }
@@ -649,11 +649,11 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
     string name = prefix + d->name() + "Helper";
     if(marshal)
     {
-        out << nl << "[" + name << " writeWithStream__:" << param << " stream:" << stream << "];";
+        out << nl << "[" + name << " ice_writeWithStream:" << param << " stream:" << stream << "];";
     }
     else
     {
-        out << nl << param << " = [" << name << " readWithStream__:" << stream << "];";
+        out << nl << param << " = [" << name << " ice_readWithStream:" << stream << "];";
     } 
 }
 
