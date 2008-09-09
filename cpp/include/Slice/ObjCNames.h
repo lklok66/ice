@@ -20,10 +20,11 @@ namespace ObjC
 
 enum BaseType
 {
-    Object=1, ICloneable=2, Exception=4, END=8 // TODO: adjust these as needed
+    NSObject=1, NSCopying=2, NSException=4, END=8 // TODO: adjust these as needed
 };
 
 extern const char * manglePrefix;
+extern const char * mangleSuffix;
 
 std::string mangleName(const std::string&, int baseTypes = 0);
 

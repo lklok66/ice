@@ -27,19 +27,49 @@ struct Node
 
 // TODO: adjust these as appropriate
 
-static const char* ObjectNames[] =
+// TODO: what to do about methods with parameters, such as performSelector:WithObject: ?
+
+static const char* NSObjectNames[] =
                     {
-                        "Equals", "Finalize", "GetHashCode", "GetType",
-                        "MemberwiseClone", "ReferenceEquals", "ToString", 0
+                        "autorelease", "class", "conformsToProtocol:", "description",
+                        "hash", "isEqual:", "isKindOfClass:", "isMemberOfClass:", "isProxy",
+			"performSelector:", "performSelector:withObject:", "performSelector:withObject:withObject:",
+			"release", "respondstoSelector:", "retain", "retainCount", "self", "superclass", "zone", 0
                     };
-static const Node* ObjectParents[] =
+static const Node* NSObjectParents[] =
                     {
                         0
                     };
-static const Node ObjectNode =
+static const Node NSObjectNode =
                     {
-                        ObjectNames, &ObjectParents[0]
+                        NSObjectNames, &NSObjectParents[0]
                     };
+
+static const char* NSCopyingNames[] =
+                    {
+		        "copyWithZone:", 0
+		    };
+static const Node* NSCopyingParents[] =
+                    {
+		        0
+		    };
+static const Node NSCopyingNode =
+                    {
+		        NSCopyingNames, &NSCopyingParents[0]
+		    };
+
+static const char* NSCodingNames[] =
+                    {
+		        "encodeWithCoder:", "initWithCoder::", 0
+		    };
+static const Node* NSCodingParents[] =
+                    {
+		        0
+		    };
+static const Node NSCodingNode =
+                    {
+		        NSCodingNames, &NSCodingParents[0]
+		    };
 
 static const char* ICloneableNames[] =
                     {
@@ -47,25 +77,25 @@ static const char* ICloneableNames[] =
                     };
 static const Node* ICloneableParents[] =
                     {
-                        &ObjectNode, 0
+                        &NSObjectNode, 0
                     };
 static const Node ICloneableNode =
                     {
                         ICloneableNames, &ICloneableParents[0]
                     };
 
-static const char* ExceptionNames[] =
+static const char* NSExceptionNames[] =
                     {
-                        "Data", "GetBaseException", "GetObjectData", "HelpLink", "HResult", "InnerException",
-                        "Message", "Source", "StackTrace", "TargetSite", 0
+                        "callStackReturnAddresses", "initWithName:reason:userInfo:", "name", "raise",
+			"reason", "userInfo", 0
                     };
-static const Node* ExceptionParents[] =
+static const Node* NSExceptionParents[] =
                     {
-                        &ObjectNode, 0
+                        &NSObjectNode, &NSCopyingNode, &NSCodingNode, 0
                     };
-static const Node ExceptionNode =
+static const Node NSExceptionNode =
                     {
-                        ExceptionNames, &ExceptionParents[0]
+                        NSExceptionNames, &NSExceptionParents[0]
                     };
 
 //
@@ -73,7 +103,7 @@ static const Node ExceptionNode =
 //
 static const Node* nodes[] =
                     {
-                        &ObjectNode, &ICloneableNode, &ExceptionNode
+                        &NSObjectNode, &NSCopyingNode, &NSExceptionNode
                     };
 
 static bool
@@ -94,7 +124,7 @@ ciEquals(const string& s, const char* p)
     return true;
 }
 
-const char* manglePrefix = "ice_";
+const char* manglePrefix = "";
 const char* mangleSuffix = "_";
 
 static bool

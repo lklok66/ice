@@ -16,18 +16,20 @@ LIBNAME		= $(call mklibname,IceObjC)
 TARGETS		= $(call mklibtargets,$(libdir)/$(LIBFILENAME),$(libdir)/$(SONAME),$(libdir)/$(LIBNAME))
 
 OBJC_OBJS	= BuiltinSequences.o \
-		  Locator.o \
-		  Router.o \
 		  Identity.o \
-		  Process.o
+		  LocalException.o \
+		  Locator.o \
+		  Process.o \
+		  ProcessF.o \
+		  Router.o
 
 OBJCPP_OBJS	= Communicator.o \
 		  Connection.o \
 		  Current.o \
-		  IdentityI.o \
                   Exception.o \
+		  IdentityI.o \
 		  Initialize.o \
-		  LocalException.o \
+		  LocalExCxx.o \
 	          Logger.o \
 	  	  Object.o \
 		  ObjectAdapter.o \
@@ -47,10 +49,11 @@ SRCS		= $(OBJCPP_OBJS:.o=.mm) \
 
 SLICE_SRCS	= $(SDIR)/BuiltinSequences.ice \
 		  $(SDIR)/Identity.ice \
+		  $(SDIR)/LocalException.ice \
 		  $(SDIR)/Locator.ice \
-		  $(SDIR)/Router.ice \
 		  $(SDIR)/Process.ice \
-		  $(SDIR)/ProcessF.ice
+		  $(SDIR)/ProcessF.ice \
+		  $(SDIR)/Router.ice
 
 HDIR		= $(includedir)/Ice
 SDIR		= $(slicedir)/Ice
@@ -94,8 +97,6 @@ endif
 $(HDIR)/Communicator.h Communicator.m:
 	
 $(HDIR)/Current.h Current.m:
-	
-$(HDIR)/LocalException.h LocalException.m:
 	
 $(HDIR)/Logger.h Logger.m:
 	

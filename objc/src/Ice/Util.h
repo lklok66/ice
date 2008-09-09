@@ -78,6 +78,18 @@ toNSArray(const std::vector<T>& seq)
     return array;
 }
 
+template<typename T> NSMutableData*
+toNSData(const std::vector<T>& seq)
+{
+    NSMutableData* array = [[NSMutableData alloc] initWithLength:seq.size() * sizeof(T)];
+    T* target = (T*)[array bytes];
+    for(typename std::vector<T>::const_iterator p = seq.begin(); p != seq.end(); ++p)
+    {
+	*target++ = *p;
+    }
+    return array;
+}
+
 template<typename T> std::vector<T>&
 fromNSArray(NSArray* array, std::vector<T>& seq)
 {
@@ -92,6 +104,22 @@ fromNSArray(NSArray* array, std::vector<T>& seq)
 	    fromObjC(obj, v);
             seq.push_back(v);
         }
+    }
+    return seq;
+}
+
+template<typename T> std::vector<T>&
+fromNSData(NSData* array, std::vector<T>& seq)
+{
+    if(array != nil)
+    {
+	int len = [array length] / sizeof(T);
+        seq.reserve(len);
+	T* src = (T*)[array bytes];
+	while(len-- > 0)
+	{
+            seq.push_back(*src++);
+	}
     }
     return seq;
 }

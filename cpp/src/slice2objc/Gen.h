@@ -141,18 +141,18 @@ private:
     private:
 
         enum Escape { NoEscape, WithEscape };
+	enum ContainerType { LocalException, Other };
 	enum Destination { MOnly , HAndM};
-	enum Super { WithSuper, NoSuper };
 
 	void writeMembers(const DataMemberList&, int) const;
-	void writeMemberSignature(const DataMemberList&, int, Destination) const;
-	void writeMemberCall(const DataMemberList&, Escape) const;
-	void writeMemberInit(const DataMemberList&) const;
+	void writeMemberSignature(const DataMemberList&, int, ContainerType, Destination) const;
+	void writeMemberCall(const DataMemberList&, int, ContainerType, Escape) const;
+	void writeMemberInit(const DataMemberList&, int) const;
 	void writeProperties(const DataMemberList&, int) const;
 	void writeSynthesize(const DataMemberList&, int) const;
         void writeMemberCopy(const SyntaxTreeBasePtr&, const DataMemberList&, int) const;
         void writeMemberHashCode(const DataMemberList&, int) const;
-        void writeMemberEquals(const DataMemberList&, int, Super) const;
+        void writeMemberEquals(const DataMemberList&, int) const;
         void writeMemberDealloc(const DataMemberList&, int) const;
         void writeMemberMarshal(const ::std::string&, const DataMemberList&, int) const;
         void writeMemberUnmarshal(const ::std::string&, const DataMemberList&, int) const;

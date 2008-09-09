@@ -20,7 +20,7 @@
 #include <IceUtil/Iterator.h>
 #include <IceUtil/UUID.h>
 #include <Slice/Checksum.h>
-#include <Slice/DotNetNames.h>
+#include <Slice/ObjCNames.h>
 #include <Slice/SignalHandler.h>
 #include <Slice/Util.h>
 
@@ -129,7 +129,7 @@ Slice::ObjCVisitor::writeInheritedOperations(const ClassDefPtr& p)
         {
             ClassDefPtr containingClass = ClassDefPtr::dynamicCast((*op)->container());
             bool amd = containingClass->hasMetaData("amd") || (*op)->hasMetaData("amd");
-            string name = fixId((*op)->name(), DotNet::ICloneable, true);
+            string name = fixId((*op)->name(), ObjC::NSObject, true); // TODO 2nd param
             if(!amd)
             {
                 vector<string> params;// = getParams(*op);
@@ -428,7 +428,7 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
             }
             else
             {
-                _M << fixId(opName, DotNet::ICloneable, true);
+                _M << fixId(opName, ObjC::NSObject, true); // TODO: 2nd param
             }
             _M << spar;
             if(amd)
@@ -547,8 +547,8 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
     _M << nl << "os__.startWriteSlice();";
     for(d = members.begin(); d != members.end(); ++d)
     {
-        writeMarshalUnmarshalCode(_M, (*d)->type(), fixId(*d, DotNet::ICloneable, true),
-                                  true, false, false);
+        writeMarshalUnmarshalCode(_M, (*d)->type(), fixId(*d, ObjC::NSObject, true),
+                                  true, false, false); // TODO: 2nd param
     }
     _M << nl << "os__.endWriteSlice();";
     _M << nl << "base.write__(os__);";
@@ -595,7 +595,7 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
                 _M << nl << "case " << memberCount << ":";
                 _M.inc();
             }
-            string memberName = fixId((*d)->name(), DotNet::ICloneable, true);
+            string memberName = fixId((*d)->name(), ObjC::NSObject, true); // TODO: 2nd param
             string memberType = typeToString((*d)->type());
             _M << nl << "_instance." << memberName << " = (" << memberType << ")v;";
             ContainedPtr contained = ContainedPtr::dynamicCast((*d)->type());
@@ -647,8 +647,8 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
                 patchParams << ", " << classMemberCount++;
             }
         }
-        writeMarshalUnmarshalCode(_M, (*d)->type(), fixId(*d, DotNet::ICloneable, true),
-                                  false, false, false, patchParams.str());
+        writeMarshalUnmarshalCode(_M, (*d)->type(), fixId(*d, ObjC::NSObject, true),
+                                  false, false, false, patchParams.str()); // TODO: ObjC::NSObject
     }
     _M << nl << "is__.endReadSlice();";
     _M << nl << "base.read__(is__, true);";
@@ -665,8 +665,8 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
         _M << nl << "outS__.startSlice();";
         for(d = members.begin(); d != members.end(); ++d)
         {
-            writeMarshalUnmarshalCode(_M, (*d)->type(), fixId(*d, DotNet::ICloneable, true),
-                                      true, true, false);
+            writeMarshalUnmarshalCode(_M, (*d)->type(), fixId(*d, ObjC::NSObject, true),
+                                      true, true, false); // TODO: Objc::NSObject
         }
         _M << nl << "outS__.endSlice();";
         _M << nl << "base.write__(outS__);";
@@ -691,8 +691,8 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
                     patchParams << ", " << classMemberCount++;
                 }
             }
-            writeMarshalUnmarshalCode(_M, (*d)->type(), fixId(*d, DotNet::ICloneable, true),
-                                      false, true, false, patchParams.str());
+            writeMarshalUnmarshalCode(_M, (*d)->type(), fixId(*d, ObjC::NSObject, true),
+                                      false, true, false, patchParams.str()); // TODO: ObjC::NSObject
         }
         _M << nl << "inS__.endSlice();";
         _M << nl << "base.read__(inS__, true);";
@@ -1555,16 +1555,16 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
     }
     _H << nl << "-(id) init";
     _M << sp << nl << "-(id) init";
-    writeMemberSignature(allDataMembers, 0, HAndM); // TODO fix second parameter
+    writeMemberSignature(allDataMembers, 0, Other, HAndM); // TODO fix second parameter
     _H << ";";
     _M << sb;
     _M << nl << "if(![super init";
-    writeMemberCall(baseDataMembers, WithEscape);
+    writeMemberCall(baseDataMembers, 0, Other, WithEscape); // TODO
     _M << "])";
     _M << sb;
     _M << nl << "return nil;";
     _M << eb;
-    writeMemberInit(dataMembers);
+    writeMemberInit(dataMembers, 0); // TODO
     _M << nl << "return self;";
     _M << eb;
 
@@ -1575,7 +1575,7 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
 
 	_H << nl << "+(id) " << lowerCaseName;
 	_M << sp << nl << "+(id) " << lowerCaseName;
-	writeMemberSignature(allDataMembers, 0, HAndM); // TODO fix second parameter
+	writeMemberSignature(allDataMembers, 0, Other, HAndM); // TODO fix second parameter
 	_H << ";";
 	_M << sb;
 
@@ -1584,7 +1584,7 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
 	// have members with the same name but different types.
 	//
 	_M << nl << name << " *s__ = [((" << name << " *)[" << name << " alloc]) init";
-	writeMemberCall(allDataMembers, WithEscape);
+	writeMemberCall(allDataMembers, 0, Other, WithEscape); // TODO
 	_M << "];";
 	_M << nl << "[s__ autorelease];";
 	_M << nl << "return s__;";
@@ -1787,7 +1787,7 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
     }
     else
     {
-        _H << "ICEUserException";
+        _H << (p->isLocal() ? "ICELocalException" : "ICEUserException");
     }
     if(!dataMembers.empty())
     {
@@ -1819,6 +1819,8 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
         baseDataMembers = p->base()->allDataMembers();
     }
 
+    const int baseTypes = ObjC::NSException;
+
     // TODO: deprecate metadata
 
     if(!dataMembers.empty())
@@ -1826,7 +1828,7 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
 	//
 	// Data member declarations.
 	//
-	writeMembers(dataMembers, 0); // TODO fix second paramater
+	writeMembers(dataMembers, baseTypes);
 
 	_H.dec();
 	_H << eb;
@@ -1836,8 +1838,8 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
 	//
 	// @property and @synthesize for each data member.
 	//
-	writeProperties(dataMembers, 0); // TODO fix second parameter
-	writeSynthesize(dataMembers, 0); // TODO fix second parameter
+	writeProperties(dataMembers, baseTypes);
+	writeSynthesize(dataMembers, baseTypes);
     }
 
     if(!dataMembers.empty())
@@ -1855,13 +1857,25 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
     _M << eb;
 
     //
-    // Constructor.
+    // Constructors.
     //
+    if(p->isLocal())
+    {
+	_H << nl << "-(id) init:(const char*)file__p line:(int)line__p;";
+	_M << sp << nl << "-(id) init:(const char*)file__p line:(int)line__p";
+	_M << sb;
+	_M << nl << "if(![super init:file__p line:line__p])";
+	_M << sb;
+	_M << nl << "return nil;";
+	_M << eb;
+	_M << nl << "return self;";
+	_M << eb;
+    }
     if(!allDataMembers.empty())
     {
 	_H << nl << "-(id) init";
 	_M << sp << nl << "-(id) init";
-	writeMemberSignature(allDataMembers, 0, HAndM); // TODO fix second parameter
+	writeMemberSignature(allDataMembers, baseTypes, p->isLocal() ? LocalException : Other, HAndM);
 	_H << ";";
 	_M << sb;
 	if(!p->base())
@@ -1871,7 +1885,7 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
 	else
 	{
 	    _M << nl << "if(![super init";
-	    writeMemberCall(baseDataMembers, WithEscape);
+	    writeMemberCall(baseDataMembers, baseTypes, p->isLocal() ? LocalException : Other, WithEscape);
 	    _M << "])";
 	}
 	_M << sb;
@@ -1879,7 +1893,7 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
 	_M << eb;
 	if(!dataMembers.empty())
 	{
-	    writeMemberInit(dataMembers);
+	    writeMemberInit(dataMembers, baseTypes);
 	}
 	_M << nl << "return self;";
 	_M << eb;
@@ -1888,33 +1902,44 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
     //
     // Convenience constructors.
     //
-    if(!allDataMembers.empty())
-    {
-	_H << nl << "+(id) " << lowerCaseName << ";";
-	_M << sp << nl << "+(id) " << lowerCaseName;
-	_M << sb;
-	_M << nl << name << " *s__ = [[" << name << " alloc] init];";
-	_M << nl << "[s__ autorelease];";
-	_M << nl << "return s__;";
-	_M << eb;
-    }
-
     _H << nl << "+(id) " << lowerCaseName;
     _M << sp << nl << "+(id) " << lowerCaseName;
-    writeMemberSignature(allDataMembers, 0, HAndM); // TODO fix second parameter
+    writeMemberSignature(allDataMembers, baseTypes, p->isLocal() ? LocalException : Other, HAndM);
     _H << ";";
-    _M << sb;
 
     //
     // The cast avoids a compiler warning that is emitted if different exceptions
     // have members with the same name but different types.
     //
+    _M << sb;
     _M << nl << name << " *s__ = [((" << name << " *)[" << name << " alloc]) init";
-    writeMemberCall(allDataMembers, WithEscape);
+    writeMemberCall(allDataMembers, baseTypes, p->isLocal() ? LocalException : Other, WithEscape);
     _M << "];";
     _M << nl << "[s__ autorelease];";
     _M << nl << "return s__;";
     _M << eb;
+
+    if (!allDataMembers.empty())
+    {
+	_H << nl << "+(id) " << lowerCaseName;
+	_M << sp << nl << "+(id) " << lowerCaseName;
+	if(p->isLocal())
+	{
+	    _H << ":(const char*)file__p line:(int)line__p";
+	    _M << ":(const char*)file__p line:(int)line__p";
+	}
+	_H << ";";
+	_M << sb;
+	_M << nl << name << " *s__ = [[" << name << " alloc] init";
+	if(p->isLocal())
+	{
+	    _M << ":file__p line:line__p";
+	}
+	_M << "];";
+	_M << nl << "[s__ autorelease];";
+	_M << nl << "return s__;";
+	_M << eb;
+    }
 
     //
     // copy__
@@ -1925,14 +1950,14 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
 	_M << sp << nl << "-(void) copy__:(" << name << "*)copy_";
 	_M << sb;
 	_M << nl << "[super copy__:copy_];";
-	writeMemberCopy(p, dataMembers, 0); // TODO: fix third parameter
+	writeMemberCopy(p, dataMembers, baseTypes);
 	_M << eb;
     }
 
     //
     // dealloc
     //
-    writeMemberDealloc(dataMembers, 0); // TODO fix second parameter
+    writeMemberDealloc(dataMembers, baseTypes);
 
     //
     // Marshaling/unmarshaling
@@ -1950,34 +1975,37 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
 	}
     }
 
-    _H << nl << "-(void) writeWithStream:(id<ICEOutputStream>)stream;";
-    _M << sp << nl << "-(void) writeWithStream:(id<ICEOutputStream>)os_";
-    _M << sb;
-    _M << nl << "[os_ writeString:@\"" << p->scoped() << "\"];";
-    _M << nl << "[os_ startSlice];";
-    writeMemberMarshal("self->", dataMembers, 0); // TODO fix second parameter
-    _M << nl << "[os_ endSlice];";
-    if(base)
+    if(!p->isLocal())
     {
-        _M << nl << "[super writeWithStream:os_];";
-    }
-    _M << eb;
+	_H << nl << "-(void) writeWithStream:(id<ICEOutputStream>)stream;";
+	_M << sp << nl << "-(void) writeWithStream:(id<ICEOutputStream>)os_";
+	_M << sb;
+	_M << nl << "[os_ writeString:@\"" << p->scoped() << "\"];";
+	_M << nl << "[os_ startSlice];";
+	writeMemberMarshal("self->", dataMembers, baseTypes);
+	_M << nl << "[os_ endSlice];";
+	if(base)
+	{
+	    _M << nl << "[super writeWithStream:os_];";
+	}
+	_M << eb;
 
-    _H << nl << "-(void) readWithStream:(id<ICEInputStream>)stream readTypeId:(BOOL)rid_;";
-    _M << sp << nl << "-(void) readWithStream:(id<ICEInputStream>)is_ readTypeId:(BOOL)rid_";
-    _M << sb;
-    _M << nl << "if(rid_)";
-    _M << sb;
-    _M << nl << "[[is_ readString] release];";
-    _M << eb;
-    _M << nl << "[is_ startSlice];";
-    writeMemberUnmarshal("self->", dataMembers, 0); // TODO fix second parameter
-    _M << nl << "[is_ endSlice];";
-    if(base)
-    {
-        _M << nl << "[super readWithStream:is_ readTypeId:YES];";
+	_H << nl << "-(void) readWithStream:(id<ICEInputStream>)stream readTypeId:(BOOL)rid_;";
+	_M << sp << nl << "-(void) readWithStream:(id<ICEInputStream>)is_ readTypeId:(BOOL)rid_";
+	_M << sb;
+	_M << nl << "if(rid_)";
+	_M << sb;
+	_M << nl << "[[is_ readString] release];";
+	_M << eb;
+	_M << nl << "[is_ startSlice];";
+	writeMemberUnmarshal("self->", dataMembers, baseTypes);
+	_M << nl << "[is_ endSlice];";
+	if(base)
+	{
+	    _M << nl << "[super readWithStream:is_ readTypeId:YES];";
+	}
+	_M << eb;
     }
-    _M << eb;
 
     _H << nl << "@end";
     _M << nl << "@end";
@@ -2010,6 +2038,7 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     string name = fixName(p);
     DataMemberList dataMembers = p->dataMembers();
     DataMemberList::const_iterator q;
+    const int baseTypes = ObjC::NSObject | ObjC::NSCopying;
 
     // TODO: deprecate metadata
 
@@ -2026,22 +2055,22 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     //
     // @property and @synthesize for each data member.
     //
-    writeProperties(dataMembers, 0); // TODO fix second parameter
-    writeSynthesize(dataMembers, 0); // TODO fix second parameter
+    writeProperties(dataMembers, baseTypes);
+    writeSynthesize(dataMembers, baseTypes);
 
     //
     // Constructors.
     //
     _H << sp << nl << "-(id) init";
     _M << sp << nl << "-(id) init";
-    writeMemberSignature(dataMembers, 0, HAndM); // TODO fix second parameter
+    writeMemberSignature(dataMembers, baseTypes, Other, HAndM);
     _H << ";";
     _M << sb;
     _M << nl << "if(![super init])";
     _M << sb;
     _M << nl << "return nil;";
     _M << eb;
-    writeMemberInit(dataMembers);
+    writeMemberInit(dataMembers, baseTypes);
     _M << nl << "return self;";
     _M << eb;
 
@@ -2050,7 +2079,7 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
 
     _H << nl << "+(id) " << lowerCaseName;
     _M << sp << nl << "+(id) " << lowerCaseName;
-    writeMemberSignature(dataMembers, 0, HAndM); // TODO fix second parameter
+    writeMemberSignature(dataMembers, baseTypes, Other, HAndM);
     _H << ";";
     _M << sb;
 
@@ -2059,7 +2088,7 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     // have members with the same name but different types.
     //
     _M << nl << name << " *s__ = [((" << name << " *)[" << name << " alloc]) init";
-    writeMemberCall(dataMembers, WithEscape);
+    writeMemberCall(dataMembers, baseTypes, Other, WithEscape);
     _M << "];";
     _M << nl << "[s__ autorelease];";
     _M << nl << "return s__;";
@@ -2081,14 +2110,14 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     _M << sp << nl << "-(id) copyWithZone:(NSZone *)zone";
     _M << sb;
     _M << nl << name << " *copy_ = [" << name << " allocWithZone:zone];";
-    writeMemberCopy(p, dataMembers, 0); // TODO: fix third parameter
+    writeMemberCopy(p, dataMembers, baseTypes); 
     _M << nl << "return copy_;";
     _M << eb;
 
     //
     // hash
     //
-    writeMemberHashCode(dataMembers, 0); // TODO fix second parameter
+    writeMemberHashCode(dataMembers, baseTypes);
 
     //
     // isEqual
@@ -2105,7 +2134,7 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     _M << sb;
     _M << nl << "return NO;";
     _M << eb;
-    writeMemberEquals(dataMembers, 0, NoSuper); // TODO fix second parameter
+    writeMemberEquals(dataMembers, baseTypes);
     _M << eb;
 
     //
@@ -2276,7 +2305,7 @@ Slice::Gen::TypesVisitor::visitDataMember(const DataMemberPtr& p)
         isValue = isValueType(StructPtr::dynamicCast(cont));
         if(!isValue || cont->hasMetaData("clr:class"))
         {
-            baseTypes = DotNet::ICloneable;
+            baseTypes = ObjC::NSObject; // TODO
         }
         if(cont->hasMetaData("clr:property"))
         {
@@ -2285,11 +2314,11 @@ Slice::Gen::TypesVisitor::visitDataMember(const DataMemberPtr& p)
     }
     else if(ExceptionPtr::dynamicCast(cont))
     {
-        baseTypes = DotNet::Exception;
+        baseTypes = ObjC::Exception;
     }
     else if(ClassDefPtr::dynamicCast(cont))
     {
-        baseTypes = DotNet::ICloneable;
+        baseTypes = ObjC::NSObject; // TODO
         isClass = true;
         if(cont->hasMetaData("clr:property"))
         {
@@ -2358,7 +2387,7 @@ Slice::Gen::TypesVisitor::writeMembers(const DataMemberList& dataMembers, int ba
     {
 	TypePtr type = (*q)->type();
 	string typeString = typeToString(type);
-        string name = fixId((*q)->name());
+        string name = fixId((*q)->name(), baseTypes);
 
 	_H << nl << typeString << " ";
 	if(mapsToPointerType(type))
@@ -2370,15 +2399,21 @@ Slice::Gen::TypesVisitor::writeMembers(const DataMemberList& dataMembers, int ba
 }
 
 void
-Slice::Gen::TypesVisitor::writeMemberSignature(const DataMemberList& dataMembers, int baseTypes, Destination d) const
+Slice::Gen::TypesVisitor::writeMemberSignature(const DataMemberList& dataMembers, int baseTypes,
+                                               ContainerType ct, Destination d) const
 {
+    if(ct == LocalException)
+    {
+	_H << ":(const char*)file__p line:(int)line__p";
+        _M << ":(const char*)file__p line:(int)line__p";
+    }
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
 	TypePtr type = (*q)->type();
 	string typeString = typeToString(type);
-        string name = fixId((*q)->name());
+        string name = fixId((*q)->name(), baseTypes);
 
-	if(q != dataMembers.begin())
+	if(q != dataMembers.begin() || ct == LocalException)
 	{
 	    _M << " " << name;
 	}
@@ -2387,11 +2422,11 @@ Slice::Gen::TypesVisitor::writeMemberSignature(const DataMemberList& dataMembers
 	{
 	    _M << " *";
 	}
-	_M << ")" << name << "_";
+	_M << ")" << fixId((*q)->name()) << "_p";
 
 	if(d == HAndM)
 	{
-	    if(q != dataMembers.begin())
+	    if(q != dataMembers.begin() || ct == LocalException)
 	    {
 		_H << " " << name;
 	    }
@@ -2400,32 +2435,37 @@ Slice::Gen::TypesVisitor::writeMemberSignature(const DataMemberList& dataMembers
 	    {
 		_H << " *";
 	    }
-	    _H << ")" << name;
+	    _H << ")" << fixId((*q)->name());
 	}
     }
 }
 
 void
-Slice::Gen::TypesVisitor::writeMemberCall(const DataMemberList& dataMembers, Escape esc) const
+Slice::Gen::TypesVisitor::writeMemberCall(const DataMemberList& dataMembers, int baseTypes,
+                                          ContainerType ct, Escape esc) const
 {
+    if(ct == LocalException)
+    {
+        _M << ":file__p line:line__p";
+    }
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
-        string name = fixId((*q)->name());
+        string name = (*q)->name();
 
-	if(q != dataMembers.begin())
+	if(q != dataMembers.begin() || ct == LocalException)
 	{
-	    _M << " " << name;
+	    _M << " " << fixId(name, baseTypes);
 	}
-	_M << ":" << name;
+	_M << ":" << fixId(name);
 	if(esc == WithEscape)
 	{
-	    _M << "_";
+	    _M << "_p";
 	}
     }
 }
 
 void
-Slice::Gen::TypesVisitor::writeMemberInit(const DataMemberList& dataMembers) const
+Slice::Gen::TypesVisitor::writeMemberInit(const DataMemberList& dataMembers, int baseTypes) const
 {
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
@@ -2433,14 +2473,14 @@ Slice::Gen::TypesVisitor::writeMemberInit(const DataMemberList& dataMembers) con
 	string typeString = typeToString(type);
 	string name = fixId((*q)->name());
 
-	_M << nl << name << " = ";
+	_M << nl << fixId((*q)->name(), baseTypes) << " = ";
 	if(isValueType(type))
 	{
-	    _M << name << "_;";
+	    _M << name << "_p;";
 	}
 	else
 	{
-	   _M << "[" << name << "_ retain];";
+	   _M << "[" << name << "_p retain];";
 	}
     }
 }
@@ -2451,7 +2491,7 @@ Slice::Gen::TypesVisitor::writeProperties(const DataMemberList& dataMembers, int
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
 	TypePtr type = (*q)->type();
-        string name = fixId((*q)->name());
+        string name = fixId((*q)->name(), baseTypes);
 	string typeString = typeToString(type);
 	bool isValue = isValueType(type);
 
@@ -2478,7 +2518,7 @@ Slice::Gen::TypesVisitor::writeSynthesize(const DataMemberList& dataMembers, int
 {
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
-        string name = fixId((*q)->name());
+        string name = fixId((*q)->name(), baseTypes);
 	_M << nl << "@synthesize " << name << ";";
     }
 }
@@ -2516,7 +2556,7 @@ Slice::Gen::TypesVisitor::writeMemberCopy(const SyntaxTreeBasePtr& parent, const
 
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
-	string name = fixId((*q)->name());
+	string name = fixId((*q)->name(), baseTypes);
 	if(isValueType((*q)->type()))
 	{
 	    _M << nl << "copy_->" << name << " = " << name << ";";
@@ -2561,7 +2601,7 @@ Slice::Gen::TypesVisitor::writeMemberHashCode(const DataMemberList& dataMembers,
 }
 
 void
-Slice::Gen::TypesVisitor::writeMemberEquals(const DataMemberList& dataMembers, int baseTypes, Super super) const
+Slice::Gen::TypesVisitor::writeMemberEquals(const DataMemberList& dataMembers, int baseTypes) const
 {
     if(!dataMembers.empty())
     {
@@ -2622,11 +2662,10 @@ Slice::Gen::TypesVisitor::writeMemberDealloc(const DataMemberList& dataMembers, 
 		_M << sb;
 	    }
 
-	    string name = fixId((*q)->name());
 	    bool isValue = isValueType(type);
 	    if(!isValue)
 	    {
-		_M << nl << "[" << name << " release];";
+		_M << nl << "[" << fixId((*q)->name(), baseTypes) << " release];";
 	    }
 	}
     }
@@ -2841,7 +2880,7 @@ Slice::Gen::OpsVisitor::writeOperations(const ClassDefPtr& p, bool noCurrent)
     {
         OperationPtr op = *r;
         bool amd = !p->isLocal() && (p->hasMetaData("amd") || op->hasMetaData("amd"));
-        string opname = amd ? (op->name() + "_async") : fixId(op->name(), DotNet::ICloneable, true);
+        string opname = amd ? (op->name() + "_async") : fixId(op->name(), ObjC::NSObject, true); // TODO: NSObject
         
         TypePtr ret;
         vector<string> params;
@@ -3202,7 +3241,7 @@ Slice::Gen::DelegateVisitor::visitClassDefStart(const ClassDefPtr& p)
     for(r = ops.begin(); r != ops.end(); ++r)
     {
         OperationPtr op = *r;
-        string opName = fixId(op->name(), DotNet::ICloneable, true);
+        string opName = fixId(op->name(), ObjC::NSObject, true); // TODO: NSObject
         TypePtr ret = op->returnType();
         string retS = typeToString(ret);
         vector<string> params;// = getParams(op);
@@ -3738,7 +3777,7 @@ Slice::Gen::DelegateDVisitor::visitClassDefStart(const ClassDefPtr& p)
     for(r = ops.begin(); r != ops.end(); ++r)
     {
         OperationPtr op = *r;
-        string opName = fixId(op->name(), DotNet::ICloneable, true);
+        string opName = fixId(op->name(), ObjC::NSObject, true); // TODO: NSObject
         TypePtr ret = op->returnType();
         string retS = typeToString(ret);
         ClassDefPtr containingClass = ClassDefPtr::dynamicCast(op->container());
@@ -3972,7 +4011,7 @@ Slice::Gen::DispatcherVisitor::visitClassDefStart(const ClassDefPtr& p)
         }
         else
         {
-            opname = fixId(opname, DotNet::ICloneable, true);
+            opname = fixId(opname, ObjC::NSObject, true); // TODO: NSObject
             //params = getParams(*op);
             ret = (*op)->returnType();
             //args = getArgs(*op);
@@ -4484,7 +4523,7 @@ Slice::Gen::TieVisitor::visitClassDefStart(const ClassDefPtr& p)
     for(r = ops.begin(); r != ops.end(); ++r)
     {
         bool hasAMD = p->hasMetaData("amd") || (*r)->hasMetaData("amd");
-        string opName = hasAMD ? (*r)->name() + "_async" : fixId((*r)->name(), DotNet::ICloneable, true);
+        string opName = hasAMD ? (*r)->name() + "_async" : fixId((*r)->name(), ObjC::NSObject, true); // TODO: NSObject
 
         TypePtr ret = (*r)->returnType();
         string retS = typeToString(ret);
@@ -4554,7 +4593,7 @@ Slice::Gen::TieVisitor::writeInheritedOperationsWithOpNames(const ClassDefPtr& p
     for(r = ops.begin(); r != ops.end(); ++r)
     {
         bool hasAMD = p->hasMetaData("amd") || (*r)->hasMetaData("amd");
-        string opName = hasAMD ? (*r)->name() + "_async" : fixId((*r)->name(), DotNet::ICloneable, true);
+        string opName = hasAMD ? (*r)->name() + "_async" : fixId((*r)->name(), ObjC::NSObject, true); // TODO: NSObject
         if(opNames.find(opName) != opNames.end())
         {
             continue;
@@ -4690,7 +4729,7 @@ Slice::Gen::BaseImplVisitor::writeOperation(const OperationPtr& op, bool comment
         {
             _M << "override ";
         }
-        _M << retS << ' ' << fixId(opName, DotNet::ICloneable, true) << spar << pDecls;
+        _M << retS << ' ' << fixId(opName, ObjC::NSObject, true) << spar << pDecls; // TODO: NSObject
         if(!cl->isLocal())
         {
             _M << "Ice.Current current__";

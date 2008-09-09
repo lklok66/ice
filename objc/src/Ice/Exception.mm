@@ -438,7 +438,7 @@
     }
     NSAssert(dynamic_cast<const Ice::BadMagicException*>(&ex), @"invalid local exception type");
     const Ice::BadMagicException& localEx = dynamic_cast<const Ice::BadMagicException&>(ex);
-    badMagic = toNSArray(localEx.badMagic);
+    badMagic = toNSData(localEx.badMagic);
     return self;
 }
 @end

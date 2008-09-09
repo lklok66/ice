@@ -43,6 +43,7 @@ lookupKwd(const string& name, int baseTypes, bool mangleCasts = false)
 	"long", "nil", "nil", "oneway", "out", "register", "return", "self", "short", "signed", "sizeof", "static",
 	"struct", "super", "switch", "typedef", "union", "unsigned", "void", "volatile", "while"
     };
+                        
     bool found = binary_search(&keywordList[0],
                                &keywordList[sizeof(keywordList) / sizeof(*keywordList)],
                                name,
@@ -53,7 +54,7 @@ lookupKwd(const string& name, int baseTypes, bool mangleCasts = false)
     }
     if(mangleCasts && (name == "checkedCast" || name == "uncheckedCast"))
     {
-        return string(ObjC::manglePrefix) + name;
+        return string(ObjC::manglePrefix) + name + string(ObjC::mangleSuffix);
     }
     return Slice::ObjC::mangleName(name, baseTypes);
     return name;
