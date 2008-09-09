@@ -225,7 +225,7 @@ typedef struct
 //
 // Helper for sequence of proxies
 //
-@interface ICEObjectPrxSeqHelper : NSObject
+@interface ICEObjectPrxSequenceHelper : NSObject
 +(id) readWithStream__:(id<ICEInputStream>)stream;
 +(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream;
 @end
@@ -233,15 +233,24 @@ typedef struct
 //
 // Helper for sequence of objects
 //
-@interface ICEObjectSeqHelper : NSObject
+@interface ICEObjectSequenceHelper : NSObject
 +(id) readWithStream__:(id<ICEInputStream>)stream;
 +(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream;
 @end
 
 //
+// Helper for dictionary of objects
+//
+@interface ICEObjectDictionaryHelper : NSObject
++(id) readWithStream__:(id<ICEInputStream>)stream;
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream;
++(Class) getKeyClass;
+@end
+
+//
 // Helper for sequences of non-value types.
 //
-@interface ICESeqHelper : NSObject
+@interface ICESequenceHelper : NSObject
 +(id) readWithStream__:(id<ICEInputStream>)stream;
 +(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream;
 +(Class) getContained;
@@ -250,7 +259,7 @@ typedef struct
 //
 // Helper for dictionaries.
 //
-@interface ICEDictHelper : NSObject
+@interface ICEDictionaryHelper : NSObject
 +(id) readWithStream__:(id<ICEInputStream>)stream;
 +(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream;
 +(ICEKeyValueHelper) getContained;

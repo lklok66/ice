@@ -20,7 +20,6 @@
 //
 // - Current.ice includes a number of other Slice files that we don't need to generate. 
 // - the Current structure is local and slice2objc doesn't support local structures.
-// - the Current structure has a "con" attribute that we don't want to support yet.
 //
 
 @implementation ICECurrent

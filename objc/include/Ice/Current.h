@@ -58,7 +58,7 @@ typedef enum
 -(void) dealloc;
 @end
 
-@interface ICEContextHelper : ICEDictHelper
+@interface ICEContextHelper : ICEDictionaryHelper
 +(ICEKeyValueHelper) getContained;
 @end
 

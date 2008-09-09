@@ -2983,12 +2983,12 @@ Slice::Gen::HelperVisitor::visitSequence(const SequencePtr& p)
     {
         if(builtin->kind() == Builtin::KindObjectProxy)
         {
-            _H << sp << nl << "typedef ICEObjectPrxSeqHelper " << name << ";";
+            _H << sp << nl << "typedef ICEObjectPrxSequenceHelper " << name << ";";
             return;
         }
         else if(builtin->kind() == Builtin::KindObject)
         {
-            _H << sp << nl << "typedef ICEObjectSeqHelper " << name << ";";
+            _H << sp << nl << "typedef ICEObjectSequenceHelper " << name << ";";
             return;
         }
 
@@ -3047,7 +3047,7 @@ Slice::Gen::HelperVisitor::visitSequence(const SequencePtr& p)
     ClassDeclPtr cl = ClassDeclPtr::dynamicCast(p->type());
     if(cl)
     {
-        _H << sp << nl << "typedef ICEObjectSeqHelper " << name << ";";
+        _H << sp << nl << "typedef ICEObjectSequenceHelper " << name << ";";
         return;
     }
 
@@ -3055,12 +3055,12 @@ Slice::Gen::HelperVisitor::visitSequence(const SequencePtr& p)
     ProxyPtr proxy = ProxyPtr::dynamicCast(p->type());
     if(proxy)
     {
-        _H << sp << nl << "typedef ICEObjectPrxSeqHelper " << name << ";";
+        _H << sp << nl << "typedef ICEObjectPrxSequenceHelper " << name << ";";
         return;
     }
 
     assert(contained || proxy);
-    _H << sp << nl << "@interface " << name << " : ICESeqHelper";
+    _H << sp << nl << "@interface " << name << " : ICESequenceHelper";
     _H << nl << "+(Class) getContained;";
     _H << nl << "@end";
 
@@ -3135,30 +3135,23 @@ Slice::Gen::HelperVisitor::visitDictionary(const DictionaryPtr& p)
         }
     }
 
-    if(valueBuiltin && valueBuiltin->kind() == Builtin::KindObject)
+    if(valueBuiltin && valueBuiltin->kind() == Builtin::KindObject || ClassDeclPtr::dynamicCast(p->valueType()))
     {
-	_H << sp << nl << "@interface " << name << " : NSObject";
-	_H << nl << "+(id) readWithStream__:(id<ICEInputStream>)stream;";
-	_H << nl << "+(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream;";
+	_H << sp << nl << "@interface " << name << " : ICEObjectDictionaryHelper";
+	_H << nl << "+(Class) getKeyClass;";
 	_H << nl << "@end";
 
-
 	_M << sp << nl << "@implementation " << name;
-	_M << nl << "+(id) readWithStream__:(id<ICEInputStream>)stream";
+	_M << nl << "+(Class) getKeyClass";
 	_M << sb;
-        _M << nl << "return [stream readObjectDict:[" << keyS << " class]];";
-	_M << eb;
-
-	_M << sp << nl << "+(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream";
-	_M << sb;
-        _M << nl << "[stream writeObjectDict:obj c:[" << keyS << " class]];";
+        _M << nl << "return [" << keyS << " class];";
 	_M << eb;
 	_M << nl << "@end";	
         return;
     }
 
 
-    _H << sp << nl << "@interface " << name << " : ICEDictHelper";
+    _H << sp << nl << "@interface " << name << " : ICEDictionaryHelper";
     _H << nl << "+(ICEKeyValueHelper) getContained;";
     _H << nl << "@end";
 

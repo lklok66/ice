@@ -1785,7 +1785,7 @@ typedef enum { dummy } Dummy_Enum;
 }
 @end
 
-@implementation ICEObjectPrxSeqHelper
+@implementation ICEObjectPrxSequenceHelper
 +(id) readWithStream__:(id<ICEInputStream>)stream
 {
     return [stream readSequence:[ICEObjectPrx class]];
@@ -1796,7 +1796,7 @@ typedef enum { dummy } Dummy_Enum;
 }
 @end
 
-@implementation ICEObjectSeqHelper
+@implementation ICEObjectSequenceHelper
 +(id) readWithStream__:(id<ICEInputStream>)stream
 {
     return [stream readObjectSeq];
@@ -1807,7 +1807,23 @@ typedef enum { dummy } Dummy_Enum;
 }
 @end
 
-@implementation ICESeqHelper
+@implementation ICEObjectDictionaryHelper
++(id) readWithStream__:(id<ICEInputStream>)stream
+{
+    return [stream readObjectDict:[self getKeyClass]];
+}
++(void) writeWithStream__:(id)obj stream:(id<ICEOutputStream>)stream
+{
+    [stream writeObjectDict:obj c:[self getKeyClass]];
+}
++(Class) getKeyClass
+{
+    NSAssert(false, @"ICEObjectDictionaryHelper getKeyClass requires override");
+    return nil;
+}
+@end
+
+@implementation ICESequenceHelper
 +(id) readWithStream__:(id<ICEInputStream>)stream
 {
     return [stream readSequence:[self getContained]];
@@ -1820,12 +1836,12 @@ typedef enum { dummy } Dummy_Enum;
 
 +(Class) getContained
 {
-    NSAssert(false, @"ICESeqHelper getContained requires override");
+    NSAssert(false, @"ICESequenceHelper getContained requires override");
     return nil;
 }
 @end
 
-@implementation ICEDictHelper
+@implementation ICEDictionaryHelper
 +(id) readWithStream__:(id<ICEInputStream>)stream
 {
     return [stream readDictionary:[self getContained]];
@@ -1838,7 +1854,7 @@ typedef enum { dummy } Dummy_Enum;
 
 +(ICEKeyValueHelper) getContained
 {
-    NSAssert(false, @"ICEDictHelper getContained requires override");
+    NSAssert(false, @"ICEDictionaryHelper getContained requires override");
     ICEKeyValueHelper dummy;
     return dummy; // Keep compiler quiet
 }
