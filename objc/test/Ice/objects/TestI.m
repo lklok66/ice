@@ -11,100 +11,89 @@
 #import <TestI.h>
 
 
-// -(XXX) BI :
-//     _postUnmarshalInvoked(NO)
-// {
-// }
+@implementation BI
+-(BOOL) postUnmarshalInvoked:(ICECurrent*)current
+{
+    return _postUnmarshalInvoked;
+}
+-(void) ice_preMarshal
+{
+    preMarshalInvoked = YES;
+}
+-(void) ice_postUnmarshal
+{
+    _postUnmarshalInvoked = YES;
+}
+@end
 
-// BOOL
-// -(XXX) postUnmarshalInvoked:(ICECurrent*)
-// {
-//     return _postUnmarshalInvoked;
-// }
+@implementation CI
+-(BOOL) postUnmarshalInvoked:(ICECurrent*)current
+{
+    return _postUnmarshalInvoked;
+}
+-(void) ice_preMarshal
+{
+    preMarshalInvoked = YES;
+}
+-(void) ice_postUnmarshal
+{
+    _postUnmarshalInvoked = YES;
+}
+@end
 
-// void
-// -(XXX) ice_preMarshal
-// {
-//     preMarshalInvoked = YES;
-// }
+@implementation DI
+-(BOOL) postUnmarshalInvoked:(ICECurrent*)current
+{
+    return _postUnmarshalInvoked;
+}
+-(void) ice_preMarshal
+{
+    preMarshalInvoked = YES;
+}
+-(void) ice_postUnmarshal
+{
+    _postUnmarshalInvoked = YES;
+}
+@end
 
-// void
-// -(XXX) ice_postUnmarshal
-// {
-//     _postUnmarshalInvoked = YES;
-// }
+@implementation EI
+-(id) init
+{
+    if(![super init:1 s:@"hello"])
+    {
+        return nil;
+    }
+    return self;
+}
+-(BOOL) checkValues:(ICECurrent*)current
+{
+    return i == 1 && [s isEqualToString:@"hello"];
+}
+@end
 
-// -(XXX) CI :
-//     _postUnmarshalInvoked(NO)
-// {
-// }
+@implementation FI
+-(id) init:(TestE*)e1_ e2:(TestE*)e2_
+{
+    if(![super init:e1_ e2:e2_])
+    {
+        return nil;
+    }
+    return self;
+}
+-(BOOL) checkValues:(ICECurrent*)current
+{
+    return e1 && e1 == e2;
+}
+@end
 
-// BOOL
-// -(XXX) postUnmarshalInvoked:(ICECurrent*)
-// {
-//     return _postUnmarshalInvoked;
-// }
+@implementation HI
+@end
 
-// void
-// -(XXX) ice_preMarshal
-// {
-//     preMarshalInvoked = YES;
-// }
+@implementation II
+@end
 
-// void
-// -(XXX) ice_postUnmarshal
-// {
-//     _postUnmarshalInvoked = YES;
-// }
-
-// -(XXX) DI :
-//     _postUnmarshalInvoked(NO)
-// {
-// }
-
-// BOOL
-// -(XXX) postUnmarshalInvoked:(ICECurrent*)
-// {
-//     return _postUnmarshalInvoked;
-// }
-
-// void
-// -(XXX) ice_preMarshal
-// {
-//     preMarshalInvoked = YES;
-// }
-
-// void
-// -(XXX) ice_postUnmarshal
-// {
-//     _postUnmarshalInvoked = YES;
-// }
-
-// -(XXX) EI :
-//     E(1, @"hello")
-// {
-// }
-
-// BOOL
-// -(XXX) checkValues:(ICECurrent*)
-// {
-//     return i == 1 && s == @"hello";
-// }
-
-// -(XXX) FI
-// {
-// }
-
-// -(XXX) FI:(id<E> e) :
-//     F(e, e)
-// {
-// }
-
-// BOOL
-// -(XXX) checkValues:(ICECurrent*)
-// {
-//     return e1 && e1 == e2;
-// }
+@implementation JI
+@end
 
 @implementation InitialI
 
@@ -115,12 +104,12 @@
         return nil;
     }
 
-    _b1 = [[TestB alloc] init];
-    _b2 = [[TestB alloc] init];
-    _c = [[TestC alloc] init];
-    _d = [[TestD alloc] init];
-    _e = [[TestE alloc] init];
-    _f = [[TestF alloc] init:_e e2:_e];
+    _b1 = [[BI alloc] init];
+    _b2 = [[BI alloc] init];
+    _c = [[CI alloc] init];
+    _d = [[DI alloc] init];
+    _e = [[EI alloc] init];
+    _f = [[FI alloc] init:_e e2:_e];
 
     _b1.theA = _b2; // Cyclic reference to another B
     _b1.theB = _b1; // Self reference.
@@ -245,16 +234,17 @@
     return [[[TestH alloc] init] autorelease];
 }
 @end
-// BOOL
-// UnexpectedObjectExceptionTestIice_invoke(stdvector<ICEByte>*,
-//                                            stdvector<ICEByte>& outParams,
-//                                            ICECurrent* current)
-// {
-//     id<ICECommunicator> communicator = [[current adapter] getCommunicator];
-//     id<ICEOutputStream> out = ICEcreateOutputStream(communicator);
-//     id<AlsoEmpty> ae = [[AlsoEmpty alloc] init];
-//     ice_writeAlsoEmpty(out, ae);
-//     [out writePendingObjects];
-//     [out finished:outParams];
-//     return YES;
-// }
+
+@implementation UnexpectedObjectExceptionTestI
+-(BOOL)ice_invoke:(NSData*)inParams outParams:(NSData**)outParams current:(ICECurrent*)current
+{
+    id<ICECommunicator> communicator = [[current adapter] getCommunicator];
+    id<ICEOutputStream> o = [ICEUtil createOutputStream:communicator];
+    TestAlsoEmpty* ae = [[TestAlsoEmpty alloc] init];
+    [o writeObject:ae];
+    [o writePendingObjects];
+    *outParams = [o finished];
+    return YES;
+}
+@end
+

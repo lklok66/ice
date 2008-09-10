@@ -242,7 +242,6 @@ private:
         {
             communicator = Ice::initialize(data);
         }
-        [ICEInputStream installObjectFactory:communicator];
         return [ICECommunicator wrapperWithCxxObject:communicator.get()];
     }
     catch(const std::exception& ex)

@@ -33,6 +33,8 @@ int ICELookupString(const char**, size_t, const char*);
 -(NSArray*) ice_ids;
 -(NSArray*) ice_ids:(ICECurrent*)current;
 +(NSString*) ice_staticId;
+-(void) ice_preMarshal;
+-(void) ice_postUnmarshal;
 @end
 
 @interface ICEObject : NSObject<ICEObject, NSCopying>
@@ -49,4 +51,11 @@ int ICELookupString(const char**, size_t, const char*);
 -(void) write__:(id<ICEOutputStream>)os;
 -(void) read__:(id<ICEInputStream>)is readTypeId:(BOOL)rid;
 -(void) copy__:(ICEObject*)copy_;
+@end
+
+@protocol ICEBlobject<ICEObject>
+-(BOOL) ice_invoke:(NSData*)inParams outParams:(NSData**)outParams current:(ICECurrent*)current;
+@end
+
+@interface ICEBlobject : ICEObject
 @end

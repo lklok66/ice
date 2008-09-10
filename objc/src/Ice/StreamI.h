@@ -16,7 +16,7 @@
 {
     Ice::InputStream* is_;
 }
-+(void)installObjectFactory:(const Ice::CommunicatorPtr&)communicator;
++(Ice::Object*)createObjectReader:(ICEObject*)obj;
 -(Ice::InputStream*) is;
 @end
 

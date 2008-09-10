@@ -25,6 +25,7 @@ class ObjectWrapper : virtual public Ice::Object
 {
 public:
 
+    virtual ~ObjectWrapper() { }
     virtual ICEObject* getObject() = 0;
 };
 typedef IceUtil::Handle<ObjectWrapper> ObjectWrapperPtr;

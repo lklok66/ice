@@ -18,6 +18,7 @@
 @protocol ICELogger;
 @protocol ICEProperties;
 @protocol ICEObjectAdapter;
+@protocol ICEObjectFactory;
 @class ICEIdentity;
 
 @protocol ICECommunicator <NSObject>
@@ -33,8 +34,8 @@
 -(id<ICEObjectAdapter>) createObjectAdapter:(NSString*)name;
 -(id<ICEObjectAdapter>) createObjectAdapterWithEndpoints:(NSString*)name endpoints:(NSString*)endpoints;
 -(id<ICEObjectAdapter>) createObjectAdapterWithRouter:(NSString*)name router:(id<ICERouterPrx>)rtr;
-//-(void) addObjectFactory(ObjectFactory factory, NSString* id);
-//-(ObjectFactory findObjectFactory(NSString* id);
+-(void) addObjectFactory:(id<ICEObjectFactory>)factory sliceId:(NSString*)sliceId;
+-(id<ICEObjectFactory>) findObjectFactory:(NSString*)sliceId;
 //-(ICEImplicitContext*) getImplicitContext;
 -(id<ICEProperties>) getProperties;
 -(id<ICELogger>) getLogger;

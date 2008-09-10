@@ -8,53 +8,54 @@
 // **********************************************************************
 
 #import <Ice/Ice.h>
+#import <TestCommon.h>
 #import <TestI.h>
 
 #import <Foundation/NSAutoreleasePool.h>
 
-// @interface MyObjectFactory : ICEObjectFactory
-// {
-// public:
+@interface MyObjectFactory : NSObject<ICEObjectFactory>
+@end
 
-//     id<ICEObject> create(string* type)
-//     {
-//         if(type == @"TestI")
-//         {
-//             return [[II alloc] init];
-//         }
-//         else if(type == @"TestJ")
-//         {
-//             return [[JI alloc] init];
-//         }
-//         else if(type == @"TestH")
-//         {
-//             return [[HI alloc] init];
-//         }
+@implementation MyObjectFactory
+-(ICEObject*) create:(NSString*)type
+{
+    if([type isEqualToString:@"::Test::I"])
+    {
+        return [[II alloc] init];
+    }
+    else if([type isEqualToString:@"::Test::J"])
+    {
+        return [[JI alloc] init];
+    }
+    else if([type isEqualToString:@"::Test::H"])
+    {
+        return [[HI alloc] init];
+    }
+    
+    test(NO); // Should never be reached
+    return 0;
+}
 
-//         assert(NO); // Should never be reached
-//         return 0;
-//     }
-
-// -(void) destroy
-//     {
-//         // Nothing to do
-//     }
-// };
+-(void) destroy
+{
+    // Nothing to do
+}
+@end
 
 int
 run(int argc, char* argv[], id<ICECommunicator> communicator)
 {
-//     id<ICEObjectFactory> factory = [[MyObjectFactory alloc] init];
-//     [communicator addObjectFactory:factory XXX:@"TestI"];
-//     [communicator addObjectFactory:factory XXX:@"TestJ"];
-//     [communicator addObjectFactory:factory XXX:@"TestH"];
-
+    id<ICEObjectFactory> factory = [[[MyObjectFactory alloc] init] autorelease];
+    [communicator addObjectFactory:factory sliceId:@"::Test::I"];
+    [communicator addObjectFactory:factory sliceId:@"::Test::J"];
+    [communicator addObjectFactory:factory sliceId:@"::Test::H"];
+    
     [[communicator getProperties] setProperty:@"TestAdapter.Endpoints" value:@"default -p 12010 -t 10000"];
     id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestAdapter"];
     ICEObject* initial = [[[InitialI alloc] init] autorelease];
     [adapter add:initial identity:[communicator stringToIdentity:@"initial"]];
-//    ICEObject* uoet = [[[UnexpectedObjectExceptionTestI alloc] init] autorelease];
-//    [adapter add:uoet identity:[communicator stringToIdentity:@"uoet"]];
+    ICEObject* uoet = [[[UnexpectedObjectExceptionTestI alloc] init] autorelease];
+    [adapter add:uoet identity:[communicator stringToIdentity:@"uoet"]];
     [adapter activate];
     [communicator waitForShutdown];
     return EXIT_SUCCESS;

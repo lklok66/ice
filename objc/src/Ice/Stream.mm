@@ -15,7 +15,6 @@
 #import <Ice/LocalException.h>
 
 #include <IceCpp/Stream.h>
-#include <IceCpp/ObjectFactory.h>
 
 #import <objc/runtime.h>
 
@@ -43,6 +42,11 @@ public:
         }
     }
 
+    virtual void ice_preMarshal()
+    {
+        [_obj ice_preMarshal];
+    }
+
 private:
 
     ICEObject* _obj;
@@ -56,7 +60,12 @@ public:
     ObjectReader(ICEObject* obj) : _obj(obj), _retain(false)
     {
     }
-    
+
+    virtual ~ObjectReader()
+    {
+        [_obj release];
+    }
+
     virtual void
     read(const Ice::InputStreamPtr& stream, bool rid)
     {
@@ -73,17 +82,12 @@ public:
     ICEObject*
     getObject()
     {
-        if(!_retain)
-        {
-            // No need to call retain for the first to get the object, the ref count already 1.
-            _retain = true;
-            return _obj;
-        }
-        else
-        {
-            // Other refereferences to the object need to increase the ref count, so we call retain.
-            return [_obj retain];
-        }
+        return [_obj retain];
+    }
+
+    virtual void ice_postUnmarshal()
+    {
+        [_obj ice_postUnmarshal];
     }
 
 private:
@@ -235,29 +239,6 @@ private:
     id<ICEReadObjectCallback> _cb;
 };
 
-class ObjectReaderFactory : public Ice::ObjectFactory
-{
-public:
-
-    virtual Ice::ObjectPtr
-    create(const std::string& type)
-    {
-        std::string tId = toObjCSliceId(type);
-        Class c = objc_lookUpClass(tId.c_str());
-        if(c == nil)
-        {
-            return 0; // No object factory.
-        }
-
-        return new ObjectReader([[c alloc] init]);
-    }
-
-    virtual void
-    destroy()
-    {
-    }
-};
-
 }
 
 @implementation ICEInputStream
@@ -270,9 +251,9 @@ public:
     is_ = dynamic_cast<Ice::InputStream*>(cxxObject);
     return self;
 }
-+(void)installObjectFactory:(const Ice::CommunicatorPtr&)communicator
++(Ice::Object*)createObjectReader:(ICEObject*)obj
 {
-    communicator->addObjectFactory(new IceObjC::ObjectReaderFactory(), "");
+    return new IceObjC::ObjectReader(obj);
 }
 -(Ice::InputStream*) is
 {

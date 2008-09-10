@@ -39,15 +39,14 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
     test([ba2.theS.str isEqualToString:@"hello"]);
     test([ba2.str isEqualToString:@"hi"]);
 
-    // TODO
-//    *ba1 = *ba2;
-//    test([ba1.theS.str isEqualToString:@"hello"]);
-//    test([ba1.str isEqualToString:@"hi"]);
-
-//    TestBase* bp1 = [TestBase base];
-//    *bp1 = *ba2;
-//    test([bp1.theS.str isEqualToString:@"hello"]);
-//    test([bp1.str isEqualToString:@"hi"]);
+//     *ba1 = *ba2;
+//     test([ba1.theS.str isEqualToString:@"hello"]);
+//     test([ba1.str isEqualToString:@"hi"]);
+    
+//     TestBase* bp1 = [TestBase base];
+//     *bp1 = *ba2;
+//     test([bp1.theS.str isEqualToString:@"hello"]);
+//     test([bp1.str isEqualToString:@"hi"]);
 
     tprintf("ok\n");
 
@@ -85,12 +84,12 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
     test(((TestB*)b1.theA).theB == b1);
     test([((TestB*)b1.theA).theC isKindOfClass:[TestC class]]);
     test(((TestC*)((TestB*)b1.theA).theC).theB == b1.theA);
-//         test(b1.preMarshalInvoked);
-//         test([b1 postUnmarshalInvoked]);
-//         test(b1.theA.preMarshalInvoked);
-//         test(b1.[theA postUnmarshalInvoked]);
-//         test(BPtrdynamicCast(b1.theA).theC.preMarshalInvoked);
-//         test(BPtrdynamicCast(b1.theA).[theC postUnmarshalInvoked]);
+    test(b1.preMarshalInvoked);
+    test([(id<TestB>)b1 postUnmarshalInvoked:nil]);
+    test(b1.theA.preMarshalInvoked);
+    test([(id<TestA>)b1.theA postUnmarshalInvoked:nil]);
+    test(((TestB*)b1.theA).theC.preMarshalInvoked);
+    test([(id<TestC>)((TestB*)b1.theA).theC postUnmarshalInvoked:nil]);
 
     // More tests possible for b2 and d, but I think this is already sufficient.
     test(b2.theA == b2);
@@ -136,17 +135,17 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
     test(d.theA == b1);
     test(d.theB == b2);
     test(d.theC == 0);
-//     if(!collocated)
-//     {
-//         test(d.preMarshalInvoked);
-//         test([d postUnmarshalInvoked]);
-//         test(d.theA.preMarshalInvoked);
-//         test(d.[theA postUnmarshalInvoked]);
-//         test(d.theB.preMarshalInvoked);
-//         test(d.[theB postUnmarshalInvoked]);
-//         test(d.theB.theC.preMarshalInvoked);
-//         test(d.theB.[theC postUnmarshalInvoked]);
-//     }
+//    if(!collocated)
+//    {
+    test(d.preMarshalInvoked);
+    test([(id<TestD>)d postUnmarshalInvoked:nil]);
+    test(d.theA.preMarshalInvoked);
+    test([(id<TestA>)d.theA postUnmarshalInvoked:nil]);
+    test(d.theB.preMarshalInvoked);
+    test([(id<TestA>)d.theB postUnmarshalInvoked:nil]);
+    test(d.theB.theC.preMarshalInvoked);
+    test([(id<TestC>)d.theB.theC postUnmarshalInvoked:nil]);
+//    }
 
     b1.theA = nil; // Break cyclic reference.
     b1.theB = nil; // Break cyclic reference.
@@ -163,13 +162,13 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
 
     tprintf("ok\n");
 
-//    tprintf("testing protected members... ");
-//    TestE* e = [initial getE];
-//    test([e checkValues]);
-//    TestF* f = [initial getF];
-//    test([f checkValues]);
-//    test(f.[e2 checkValues]);
-//    tprintf("ok\n");
+    tprintf("testing protected members... ");
+    TestE* e = [initial getE];
+    test([(id<TestE>)e checkValues:nil]);
+    TestF* f = [initial getF];
+    test([(id<TestF>)f checkValues:nil]);
+    test([(id<TestE>)f.e2 checkValues:nil]);
+    tprintf("ok\n");
 
     tprintf("getting I, J and H... ");
     TestI* i = [initial getI];
@@ -188,32 +187,27 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
 
 //     if(!collocated)
 //     {
-//         tprintf("testing UnexpectedObjectException... ");
-//         ref = @"uoet:default -p 12010 -t 10000";
-//         base = [communicator stringToProxy:ref];
-//         test(base);
-//         id<UnexpectedObjectExceptionTestPrx> uoet = [UnexpectedObjectExceptionTestPrx uncheckedCast:base];
-//         test(uoet);
-//         @try
-//         {
-//             [uoet op];
-//             test(NO);
-//         }
-//         @catch(ICEUnexpectedObjectException* ex)
-//         {
-//             test(ex.type == @"TestAlsoEmpty");
-//             test(ex.expectedType == @"TestEmpty");
-//         }
-//         @catch(ICEException* ex)
-//         {
-//             cout << ex << endl;
-//             test(NO);
-//         }
-//         catch(...)
-//         {
-//             test(NO);
-//         }
-//         tprintf("ok\n");
+//     tprintf("testing UnexpectedObjectException... ");
+//     ref = @"uoet:default -p 12010 -t 10000";
+//     base = [communicator stringToProxy:ref];
+//     test(base);
+//     id<TestUnexpectedObjectExceptionTestPrx> uoet = [TestUnexpectedObjectExceptionTestPrx uncheckedCast:base];
+//     test(uoet);
+//     @try
+//     {
+//         [uoet op];
+//         test(NO);
+//     }
+//     @catch(ICEUnexpectedObjectException* ex)
+//     {
+//         test([ex.type isEqualToString:@"::Test::AlsoEmpty"]);
+//         test([ex.expectedType isEqualToString:@"::Test::Empty"]);
+//     }
+//     @catch(ICEException* ex)
+//     {
+//         test(NO);
+//     }
+//     tprintf("ok\n");
 //     }
 
     return initial;

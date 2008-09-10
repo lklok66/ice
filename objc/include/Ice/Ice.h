@@ -22,3 +22,4 @@
 #import <Ice/Proxy.h>
 #import <Ice/Router.h>
 #import <Ice/Stream.h>
+#import <Ice/ObjectFactory.h>

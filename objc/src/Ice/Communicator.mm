@@ -16,17 +16,105 @@
 #import <Ice/Router.h>
 #import <Ice/Locator.h>
 #import <Ice/Util.h>
+#import <Ice/ObjectFactory.h>
+#import <Ice/StreamI.h>
 
 #include <IceCpp/Router.h>
 #include <IceCpp/Locator.h>
+#include <IceCpp/ObjectFactory.h>
+
+#import <objc/runtime.h>
 
 #define COMMUNICATOR dynamic_cast<Ice::Communicator*>(static_cast<IceUtil::Shared*>(cxxObject_))
 
+namespace IceObjC
+{
+
+class ObjectFactoryI : public Ice::ObjectFactory
+{
+public:
+
+    ObjectFactoryI(NSDictionary* factories) : _factories(factories)
+    {
+    }
+
+    virtual Ice::ObjectPtr
+    create(const std::string& type)
+    {
+        ICEObject* obj = nil;
+
+        NSString* sliceId = [[NSString alloc] initWithUTF8String:type.c_str()];
+        id<ICEObjectFactory> factory = nil;
+        @synchronized(_factories)
+        {
+            factory = [_factories objectForKey:sliceId];
+        }
+        if(factory != nil)
+        {
+            obj = [factory create:sliceId];
+        }
+
+        if(obj == nil)
+        {
+            std::string tId = toObjCSliceId(type);
+            Class c = objc_lookUpClass(tId.c_str());
+            if(c == nil)
+            {
+                return 0; // No object factory.
+            }
+            if([c isSubclassOfClass:[ICEObject class]])
+            {
+                obj = (ICEObject*)[[c alloc] init];
+            }
+        }
+
+        if(obj != nil)
+        {
+            return [ICEInputStream createObjectReader:obj];
+        }
+        else
+        {
+            return nil;
+        }
+    }
+
+    virtual void
+    destroy()
+    {
+        for(NSString* k in _factories)
+        {
+            [[_factories objectForKey:k] destroy];
+        }
+    }
+
+private:
+    
+    NSDictionary* _factories;
+};
+
+}
+
 @implementation ICECommunicator
+-(id) initWithCxxObject:(IceUtil::Shared*)arg;
+{
+    if(![super initWithCxxObject:arg])
+    {
+        return nil;
+    }
+    objectFactories_ = [[NSMutableDictionary alloc] init];
+    COMMUNICATOR->addObjectFactory(new IceObjC::ObjectFactoryI(objectFactories_), "");
+    return self;
+}
+-(void) dealloc
+{
+    [objectFactories_ release];
+    [super dealloc];
+}
 -(Ice::Communicator*) communicator
 {
     return COMMUNICATOR;
 }
+
 //
 // Methods from @protocol ICECommunicator
 //
@@ -193,7 +281,21 @@
         return nil; // Keep the compiler happy.
     }
 }
-
+-(void) addObjectFactory:(id<ICEObjectFactory>)factory sliceId:(NSString*)sliceId
+{
+    @synchronized(objectFactories_)
+    {
+        [objectFactories_ setObject:factory forKey:sliceId];
+    }
+}
+-(id<ICEObjectFactory>) findObjectFactory:(NSString*)sliceId
+{
+    @synchronized(objectFactories_)
+    {
+        return [objectFactories_ objectForKey:sliceId];
+    }
+    return nil; // Keep the compiler happy.
+}
 -(id<ICEProperties>) getProperties
 {
     try

@@ -13,67 +13,65 @@
 
 #import <Foundation/NSAutoreleasePool.h>
 
-// @interface MyObjectFactory : ICEObjectFactory
-// {
-// public:
+@interface MyObjectFactory : NSObject<ICEObjectFactory>
+@end
 
-//     id<ICEObject> create(string* type)
-//     {
-//         if(type == @"TestB")
-//         {
-//             return [[BI alloc] init];
-//         }
-//         else if(type == @"TestC")
-//         {
-//             return [[CI alloc] init];
-//         }
-//         else if(type == @"TestD")
-//         {
-//             return [[DI alloc] init];
-//         }
-//         else if(type == @"TestE")
-//         {
-//             return [[EI alloc] init];
-//         }
-//         else if(type == @"TestF")
-//         {
-//             return [[FI alloc] init];
-//         }
-//         else if(type == @"TestI")
-//         {
-//             return [[II alloc] init];
-//         }
-//         else if(type == @"TestJ")
-//         {
-//             return [[JI alloc] init];
-//         }
-//         else if(type == @"TestH")
-//         {
-//             return [[HI alloc] init];
-//         }
+@implementation MyObjectFactory
+-(ICEObject*) create:(NSString*)type
+{
+    if([type isEqualToString:@"::Test::B"])
+    {
+        return [[BI alloc] init];
+    }
+    else if([type isEqualToString:@"::Test::C"])
+    {
+        return [[CI alloc] init];
+    }
+    else if([type isEqualToString:@"::Test::D"])
+    {
+        return [[DI alloc] init];
+    }
+    else if([type isEqualToString:@"::Test::E"])
+    {
+        return [[EI alloc] init];
+    }
+    else if([type isEqualToString:@"::Test::F"])
+    {
+        return [[FI alloc] init];
+    }
+    else if([type isEqualToString:@"::Test::I"])
+    {
+        return [[II alloc] init];
+    }
+    else if([type isEqualToString:@"::Test::J"])
+    {
+        return [[JI alloc] init];
+    }
+    else if([type isEqualToString:@"::Test::H"])
+    {
+        return [[HI alloc] init];
+    }
+    return 0;
+}
 
-//         assert(NO); // Should never be reached
-//         return 0;
-//     }
-
-// -(void) destroy
-//     {
-//         // Nothing to do
-//     }
-// };
+-(void) destroy
+{
+    // Nothing to do
+}
+@end
 
 int
 run(int argc, char* argv[], id<ICECommunicator> communicator)
 {
-//     id<ICEObjectFactory> factory = [[MyObjectFactory alloc] init];
-//     [communicator addObjectFactory:factory XXX:@"TestB"];
-//     [communicator addObjectFactory:factory XXX:@"TestC"];
-//     [communicator addObjectFactory:factory XXX:@"TestD"];
-//     [communicator addObjectFactory:factory XXX:@"TestE"];
-//     [communicator addObjectFactory:factory XXX:@"TestF"];
-//     [communicator addObjectFactory:factory XXX:@"TestI"];
-//     [communicator addObjectFactory:factory XXX:@"TestJ"];
-//     [communicator addObjectFactory:factory XXX:@"TestH"];
+    id<ICEObjectFactory> factory = [[[MyObjectFactory alloc] init] autorelease];
+    [communicator addObjectFactory:factory sliceId:@"::Test::B"];
+    [communicator addObjectFactory:factory sliceId:@"::Test::C"];
+    [communicator addObjectFactory:factory sliceId:@"::Test::D"];
+    [communicator addObjectFactory:factory sliceId:@"::Test::E"];
+    [communicator addObjectFactory:factory sliceId:@"::Test::F"];
+    [communicator addObjectFactory:factory sliceId:@"::Test::I"];
+    [communicator addObjectFactory:factory sliceId:@"::Test::J"];
+    [communicator addObjectFactory:factory sliceId:@"::Test::H"];
 
     id<TestInitialPrx> allTests(id<ICECommunicator>, bool);
     id<TestInitialPrx> initial = allTests(communicator, NO);

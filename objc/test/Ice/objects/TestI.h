@@ -10,49 +10,38 @@
 
 #import <Test.h>
 
-// @interface BI : TestB
-// {
-//     BOOL _postUnmarshalInvoked;
-// }
-// -(bool) postUnmarshalInvoked:(ICECurrent*)current;
-// -(void) ice_preMarshal;
-// -(void) ice_postUnmarshal;
-// @end
+@interface BI : TestB<TestB>
+{
+    BOOL _postUnmarshalInvoked;
+}
+@end
 
-// @interface CI : TestC
-// {
-//     BOOL _postUnmarshalInvoked;
-// }
-// -(bool) postUnmarshalInvoked:(ICECurrent*)current;
-// -(void) ice_preMarshal;
-// -(void) ice_postUnmarshal;
-// @end
+@interface CI : TestC<TestC>
+{
+    BOOL _postUnmarshalInvoked;
+}
+@end
 
-// @interface DI : TestD
-// {
-//     BOOL _postUnmarshalInvoked;
-// }
-// -(bool) postUnmarshalInvoked:(ICECurrent*)current;
-// -(void) ice_preMarshal;
-// -(void) ice_postUnmarshal;
-// @end
+@interface DI : TestD<TestD>
+{
+    BOOL _postUnmarshalInvoked;
+}
+@end
 
-// @interface EI : TestE
-// -(bool) checkValues:(ICECurrent*)current;
-// @end
+@interface EI : TestE<TestE>
+@end
 
-// @interface FI : TestF
-// -(bool) checkValues:(ICECurrent*)current;
-// @end
+@interface FI : TestF<TestF>
+@end
 
-// @interface II : TestI
-// @end
+@interface II : TestI<TestI>
+@end
 
-// @interface JI : TestJ
-// @end
+@interface JI : TestJ<TestJ>
+@end
 
-// @interface HI : TestH
-// @end
+@interface HI : TestH<TestH>
+@end
 
 @interface InitialI : TestInitial
 {
@@ -78,11 +67,6 @@
 -(void) setI:(TestI *)theI current:(ICECurrent *)current;
 @end
 
-// @interface UnexpectedObjectExceptionTestI : ICEBlobject
-// {
-// public:
-
-// -(bool) ice_invoke:(stdvector<ICEByte>*)XXX XXX:(stdvector<ICEByte>&)XXX XXX:(stdvector<ICEByte>&)XXX;
-// };
-// typedef IceUtilHandle<UnexpectedObjectExceptionTestI> UnexpectedObjectExceptionTestIPtr;
+@interface UnexpectedObjectExceptionTestI : ICEBlobject<ICEBlobject>
+@end
 

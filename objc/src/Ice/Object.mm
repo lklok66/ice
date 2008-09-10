@@ -63,13 +63,15 @@ class ObjectI : public ObjectWrapper, public Ice::BlobjectArrayAsync
 public:
 
     ObjectI(id<ICEObject>);
-    virtual ~ObjectI();
 
     virtual void ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr&, 
                                   const std::pair<const Ice::Byte*, const Ice::Byte*>&,
                                   const Ice::Current&);
 
-    virtual ICEObject* getObject();
+    virtual ICEObject* getObject()
+    {
+        return _object;
+    }
 
     virtual void __incRef()
     {
@@ -86,16 +88,42 @@ private:
     ICEObject* _object;
 };
 
+class BlobjectI : public ObjectWrapper, public Ice::BlobjectArrayAsync
+{
+public:
+
+    BlobjectI(ICEBlobject*);
+    
+    virtual void ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr&, 
+                                  const std::pair<const Ice::Byte*, const Ice::Byte*>&,
+                                  const Ice::Current&);
+
+    virtual ICEObject* getObject()
+    {
+        return _blobject;
+    }
+
+    virtual void __incRef()
+    {
+        [_blobject retain];
+    }
+
+    virtual void __decRef()
+    {
+        [_blobject release];
+    }
+
+private:
+
+    ICEBlobject* _blobject;
+};
+
 }
 
 IceObjC::ObjectI::ObjectI(id<ICEObject> object) : _object((ICEObject*)object)
 {
 }
 
-IceObjC::ObjectI::~ObjectI()
-{
-}
-    
 void
 IceObjC::ObjectI::ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& cb, 
                                    const std::pair<const Ice::Byte*, const Ice::Byte*>& inParams,
@@ -140,10 +168,44 @@ IceObjC::ObjectI::ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& cb
     cb->ice_response(ok, std::make_pair(&outParams[0], &outParams[0] + outParams.size()));
 }
 
-ICEObject*
-IceObjC::ObjectI::getObject()
+IceObjC::BlobjectI::BlobjectI(ICEBlobject* blobject) : _blobject(blobject)
 {
-    return _object;
+}
+
+void
+IceObjC::BlobjectI::ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& cb, 
+                                     const std::pair<const Ice::Byte*, const Ice::Byte*>& inParams,
+                                     const Ice::Current& current)
+{
+
+    ICECurrent* c = [[ICECurrent alloc] initWithCurrent:current];
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    BOOL ok;
+    NSException* exception = nil;
+    NSData* inP = [NSData dataWithBytesNoCopy:const_cast<Ice::Byte*>(inParams.first) 
+                          length:(inParams.second - inParams.first) 
+                          freeWhenDone:NO];
+    NSData* outP = nil;
+    @try
+    {
+
+        ok = [(id)_blobject ice_invoke:inP outParams:&outP current:c];
+        [outP retain];
+    }
+    @catch(NSException* ex)
+    {
+        exception = [ex retain];
+    }
+    [pool release];
+    [c release];
+
+    if(exception != nil)
+    {
+        rethrowCxxException(exception, true); // True = release the exception.
+    }
+    
+    cb->ice_response(ok, std::make_pair((ICEByte*)[outP bytes], (ICEByte*)[outP bytes] + [outP length]));
+    [outP release];
 }
 
 @implementation ICEObject (ICEInternal)
@@ -173,17 +235,17 @@ IceObjC::ObjectI::getObject()
             // reference to the object (without this, servants added to the object adapter 
             // couldn't be retained or released easily).
             //
-            object__ = new IceObjC::ObjectI(self);
+            object__ = (IceObjC::ObjectWrapper*)new IceObjC::ObjectI(self);
         }
     }
-    return (IceObjC::ObjectI*)object__;
+    return (IceObjC::ObjectWrapper*)object__;
 }
 
 -(void) dealloc
 {
     if(object__)
     {
-        delete (IceObjC::ObjectI*)object__;
+        delete (IceObjC::ObjectWrapper*)object__;
         object__ = 0;
     }
     [super dealloc];
@@ -329,6 +391,14 @@ static const char* ICEObject_all__[4] =
     return [NSString stringWithUTF8String:staticIds[index]];
 }
 
+-(void) ice_preMarshal
+{
+}
+
+-(void) ice_postUnmarshal
+{
+}
+
 +(const char**) staticIds__:(int*)count idIndex:(int*)idx
 {
     *count = sizeof(ICEObject_ids__) / sizeof(const char*);
@@ -395,5 +465,27 @@ static const char* ICEObject_all__[4] =
     id copy_ = [[self class] allocWithZone:zone];
     [self copy__:copy_];
     return copy_;
+}
+@end
+
+@implementation ICEBlobject
+-(Ice::Object*) object__
+{
+    @synchronized([self class])
+    {
+        if(object__ == 0)
+        {
+            //
+            // NOTE: IceObjC::ObjectI implements it own reference counting and there's no need
+            // to call __incRef/__decRef here. The C++ object and Objective-C object are sharing
+            // the same reference count (the one of the Objective-C object). This is necessary 
+            // to properly release both objects when there's either no more C++ handle/ObjC 
+            // reference to the object (without this, servants added to the object adapter 
+            // couldn't be retained or released easily).
+            //
+            object__ = (IceObjC::ObjectWrapper*)new IceObjC::BlobjectI(self);
+        }
+    }
+    return (IceObjC::ObjectWrapper*)object__;
 }
 @end

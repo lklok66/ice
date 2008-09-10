@@ -7,18 +7,10 @@
 //
 // **********************************************************************
 
-#import <Ice/Communicator.h>
-#import <Ice/Wrapper.h>
+#import <Ice/Config.h>
 
-#import <Foundation/NSSet.h>
-
-#include <IceCpp/Communicator.h>
-
-@class ICEObjectAdapter;
-
-@interface ICECommunicator : ICEInternalWrapper<ICECommunicator>
-{
-    NSMutableDictionary* objectFactories_;
-}
--(Ice::Communicator*)communicator;
+@protocol ICEObjectFactory <NSObject>
+-(ICEObject*) create:(NSString*)sliceId;
+-(void) destroy;
 @end
+
