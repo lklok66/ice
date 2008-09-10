@@ -93,60 +93,6 @@ private:
 };
 typedef IceUtil::Handle<ObjectReader> ObjectReaderPtr;
 
-class UserExceptionWriter : public Ice::UserExceptionWriter
-{
-public:
-    
-    UserExceptionWriter(ICEUserException* ex, ICEOutputStream* stream, const Ice::CommunicatorPtr& communicator) : 
-        Ice::UserExceptionWriter(communicator),
-        _ex(ex),
-        _stream(stream)
-    {
-    }
-    
-    virtual void
-    write(const Ice::OutputStreamPtr& stream) const
-    {
-        @try
-        {
-            [_ex write__:_stream];
-        }
-        @catch(NSException* ex)
-        {
-            rethrowCxxException(ex);
-        }
-    }
-
-    virtual bool 
-    usesClasses() const
-    {
-        return [_ex usesClasses__];
-    }
-
-    virtual std::string 
-    ice_name() const
-    {
-        return fromNSString([_ex ice_name]);
-    }
-
-    virtual Ice::Exception*
-    ice_clone() const
-    {
-        return new UserExceptionWriter(*this);
-    }
-
-    virtual void 
-    ice_throw() const
-    {
-        throw *this;
-    }
-
-private:
-
-    ICEUserException* _ex;
-    ICEOutputStream* _stream;
-};
-
 class ReadObjectI : public Ice::ReadObjectCallback
 {
 public:
@@ -1552,13 +1498,12 @@ typedef enum { dummy } Dummy_Enum;
 
 -(void) writeException:(ICEUserException*)v
 {
-    try
+    BOOL usesClasses = [v usesClasses__]; 
+    [self writeBool:usesClasses];
+    [v write__:self];
+    if(usesClasses)
     {
-        os_->writeException(IceObjC::UserExceptionWriter(v, self, os_->communicator()));
-    }
-    catch(const std::exception& ex)
-    {
-        rethrowObjCException(ex);
+        [self writePendingObjects];
     }
 }
 

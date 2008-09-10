@@ -38,7 +38,7 @@ tests = [
      ("Ice/retry", ["core"]),
      ("Ice/timeout", ["core"]),
 #     ("Ice/slicing/exceptions", ["core"]),
-#     ("Ice/slicing/objects", ["core"]),
+     ("Ice/slicing/objects", ["core"]),
     ]
 
 if __name__ == "__main__":

@@ -12,7 +12,7 @@ top_srcdir	= ../../../..
 CLIENT		= client
 SERVER		= server
 
-TARGETS		= $(CLIENT) #$(SERVER)
+TARGETS		= $(CLIENT) $(SERVER)
 
 COBJS		= Test.o \
 		  ClientPrivate.o \

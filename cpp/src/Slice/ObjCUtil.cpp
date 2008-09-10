@@ -470,6 +470,19 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
     BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
     if(builtin)
     {
+        if(builtin->kind() == Builtin::KindObject)
+        {
+            if(marshal)
+            {
+                out << nl << "[" << stream << " writeObject:" << param << "];";
+            }
+            else
+            {
+                out << nl << "[" << stream << " readObject:&" << param << "];";
+            }
+            return;
+        }
+
 	string selector;
         if(builtin->kind() == Builtin::KindObjectProxy)
         {
