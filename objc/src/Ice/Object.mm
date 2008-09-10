@@ -270,6 +270,11 @@ static const char* ICEObject_all__[4] =
     return YES;
 }
 
+-(BOOL) ice_isA:(NSString*)typeId
+{
+    return [self ice_isA:typeId current:nil];
+}
+
 -(BOOL) ice_isA:(NSString*)typeId current:(ICECurrent*)current
 {
     int count, index;
@@ -277,14 +282,29 @@ static const char* ICEObject_all__[4] =
     return ICELookupString(staticIds, count, [typeId UTF8String]) >= 0;
 }
 
+-(void) ice_ping
+{
+    [self ice_ping:nil];
+}
+
 -(void) ice_ping:(ICECurrent*)current
 {
     // Nothing to do.
 }
 
+-(NSString*) ice_id
+{
+    return [self ice_id:nil];
+}
+
 -(NSString*) ice_id:(ICECurrent*)current
 {
     return [[self class] ice_staticId];
+}
+
+-(NSArray*) ice_ids
+{
+    return [self ice_ids:nil];
 }
 
 -(NSArray*) ice_ids:(ICECurrent*)current

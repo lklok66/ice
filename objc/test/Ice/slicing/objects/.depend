@@ -1,0 +1,18 @@
+Test$(OBJEXT): Test.m $(includedir)/Ice/LocalException.h $(includedir)/Ice/Config.h $(includedir)/Ice/Proxy.h $(includedir)/Ice/Current.h $(includedir)/Ice/Stream.h $(includedir)/Ice/Endpoint.h $(includedir)/Ice/Object.h $(includedir)/Ice/Exception.h $(includedir)/Ice/Identity.h $(includedir)/Ice/BuiltinSequences.h Test.h
+ClientPrivate$(OBJEXT): ClientPrivate.m $(includedir)/Ice/LocalException.h $(includedir)/Ice/Config.h $(includedir)/Ice/Proxy.h $(includedir)/Ice/Current.h $(includedir)/Ice/Stream.h $(includedir)/Ice/Endpoint.h $(includedir)/Ice/Object.h $(includedir)/Ice/Exception.h $(includedir)/Ice/Identity.h $(includedir)/Ice/BuiltinSequences.h ClientPrivate.h Test.h
+Client$(OBJEXT): Client.m $(includedir)/Ice/Ice.h $(includedir)/Ice/Communicator.h $(includedir)/Ice/Config.h $(includedir)/Ice/Connection.h $(includedir)/Ice/Current.h $(includedir)/Ice/Stream.h $(includedir)/Ice/Exception.h $(includedir)/Ice/Identity.h $(includedir)/Ice/Proxy.h $(includedir)/Ice/Endpoint.h $(includedir)/Ice/Object.h $(includedir)/Ice/Initialize.h $(includedir)/Ice/Properties.h $(includedir)/Ice/LocalException.h $(includedir)/Ice/BuiltinSequences.h $(includedir)/Ice/Locator.h $(includedir)/Ice/ProcessF.h $(includedir)/Ice/Logger.h $(includedir)/Ice/ObjectAdapter.h $(includedir)/Ice/Router.h ../../../include/TestCommon.h ClientPrivate.h Test.h
+AllTests$(OBJEXT): AllTests.m $(includedir)/Ice/Ice.h $(includedir)/Ice/Communicator.h $(includedir)/Ice/Config.h $(includedir)/Ice/Connection.h $(includedir)/Ice/Current.h $(includedir)/Ice/Stream.h $(includedir)/Ice/Exception.h $(includedir)/Ice/Identity.h $(includedir)/Ice/Proxy.h $(includedir)/Ice/Endpoint.h $(includedir)/Ice/Object.h $(includedir)/Ice/Initialize.h $(includedir)/Ice/Properties.h $(includedir)/Ice/LocalException.h $(includedir)/Ice/BuiltinSequences.h $(includedir)/Ice/Locator.h $(includedir)/Ice/ProcessF.h $(includedir)/Ice/Logger.h $(includedir)/Ice/ObjectAdapter.h $(includedir)/Ice/Router.h ../../../include/TestCommon.h ClientPrivate.h Test.h
+Forward$(OBJEXT): Forward.m $(includedir)/Ice/LocalException.h $(includedir)/Ice/Config.h $(includedir)/Ice/Proxy.h $(includedir)/Ice/Current.h $(includedir)/Ice/Stream.h $(includedir)/Ice/Endpoint.h $(includedir)/Ice/Object.h $(includedir)/Ice/Exception.h $(includedir)/Ice/Identity.h $(includedir)/Ice/BuiltinSequences.h Forward.h
+Test$(OBJEXT): Test.m $(includedir)/Ice/LocalException.h $(includedir)/Ice/Config.h $(includedir)/Ice/Proxy.h $(includedir)/Ice/Current.h $(includedir)/Ice/Stream.h $(includedir)/Ice/Endpoint.h $(includedir)/Ice/Object.h $(includedir)/Ice/Exception.h $(includedir)/Ice/Identity.h $(includedir)/Ice/BuiltinSequences.h Test.h
+ServerPrivate$(OBJEXT): ServerPrivate.m $(includedir)/Ice/LocalException.h $(includedir)/Ice/Config.h $(includedir)/Ice/Proxy.h $(includedir)/Ice/Current.h $(includedir)/Ice/Stream.h $(includedir)/Ice/Endpoint.h $(includedir)/Ice/Object.h $(includedir)/Ice/Exception.h $(includedir)/Ice/Identity.h $(includedir)/Ice/BuiltinSequences.h ServerPrivate.h Test.h
+TestI$(OBJEXT): TestI.m
+Server$(OBJEXT): Server.m
+Forward$(OBJEXT): Forward.m $(includedir)/Ice/LocalException.h $(includedir)/Ice/Config.h $(includedir)/Ice/Proxy.h $(includedir)/Ice/Current.h $(includedir)/Ice/Stream.h $(includedir)/Ice/Endpoint.h $(includedir)/Ice/Object.h $(includedir)/Ice/Exception.h $(includedir)/Ice/Identity.h $(includedir)/Ice/BuiltinSequences.h Forward.h
+Test.m: Test.ice
+ClientPrivate.m: ClientPrivate.ice ./Test.ice
+ServerPrivate.m: ServerPrivate.ice ./Test.ice
+Forward.m: Forward.ice
+Test.ice: $(SLICE2OBJC)
+ClientPrivate.ice: $(SLICE2OBJC)
+ServerPrivate.ice: $(SLICE2OBJC)
+Forward.ice: $(SLICE2OBJC)

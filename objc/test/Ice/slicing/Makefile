@@ -7,23 +7,11 @@
 #
 # **********************************************************************
 
-top_srcdir	= ../..
+top_srcdir	= ../../..
 
 include $(top_srcdir)/config/Make.rules
 
-SUBDIRS		= proxy \
-	          operations \
-		  exceptions \
-		  inheritance \
-		  facets \
-		  objects \
-		  faultTolerance \
-		  location \
-		  adapterDeactivation \
-		  slicing \
-		  binding \
-		  retry \
-		  timeout
+SUBDIRS		= objects
 
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \

@@ -381,10 +381,7 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
                 {
                     string param = fixId(q->second);
                     string typeS = typeToString(q->first);
-                    BuiltinPtr builtin = BuiltinPtr::dynamicCast(q->first);
-                    bool isClass = (builtin && builtin->kind() == Builtin::KindObject)
-                        || ClassDeclPtr::dynamicCast(q->first);
-                    if(!isClass)
+                    if(!isClass(q->first))
                     {
                         _M << nl << typeS << ' ' << param << ';';
                         StructPtr st = StructPtr::dynamicCast(q->first);
@@ -437,16 +434,13 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
             }
             for(q = inParams.begin(); q != inParams.end(); ++q)
             {
-                BuiltinPtr builtin = BuiltinPtr::dynamicCast(q->first);
-                bool isClass = (builtin && builtin->kind() == Builtin::KindObject)
-                               || ClassDeclPtr::dynamicCast(q->first);
                 string arg;
-                if(isClass)
+                if(isClass(q->first))
                 {
                     arg += "(" + typeToString(q->first) + ")";
                 }
                 arg += fixId(q->second);
-                if(isClass)
+                if(isClass(q->first))
                 {
                     arg += "_PP.value";
                 }
@@ -639,8 +633,7 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
     {
         ostringstream patchParams;
         patchParams << "this";
-        BuiltinPtr builtin = BuiltinPtr::dynamicCast((*d)->type());
-        if((builtin && builtin->kind() == Builtin::KindObject) || ClassDeclPtr::dynamicCast((*d)->type()))
+	if(isClass((*d)->type())
         {
             if(classMembers.size() > 1 || allClassMembers.size() > 1)
             {
@@ -683,8 +676,7 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
         {
             ostringstream patchParams;
             patchParams << "this";
-            BuiltinPtr builtin = BuiltinPtr::dynamicCast((*d)->type());
-            if((builtin && builtin->kind() == Builtin::KindObject) || ClassDeclPtr::dynamicCast((*d)->type()))
+            if(isClass((*d)->type()))
             {
                 if(classMembers.size() > 1 || allClassMembers.size() > 1)
                 {
@@ -1853,7 +1845,7 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
     _H << nl << "-(NSString *) ice_name;";
     _M << sp << nl << "-(NSString *) ice_name";
     _M << sb;
-    _M << nl << "return @\"" << p->scoped() << "\";";
+    _M << nl << "return @\"" << p->scoped().substr(2) << "\";";
     _M << eb;
 
     //
@@ -3539,12 +3531,13 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
 	{
             if(!isValueType(op->first))
             {
-                _M << nl << "[(id<NSObject>)" << "*" + fixId(op->second) << " autorelease];";
+                _M << nl << "[(" << (isClass(op->first) ? "NSObject*" : "id<NSObject>")
+		   << ")*" + fixId(op->second) << " autorelease];";
             }
         }
         if(returnType && !isValueType(returnType))
         {
-            _M << nl << "[(id<NSObject>)ret_ autorelease];";
+            _M << nl << "[(" << (isClass(returnType) ? "NSObject*" : "id<NSObject>") << ")ret_ autorelease];";
         }
     }
     _M << nl << "[os_ release];";
@@ -3580,7 +3573,7 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
         }
         if(p->sendsClasses())
         {
-            _M << nl << "[os_ writePendingObjects();";
+            _M << nl << "[os_ writePendingObjects];";
         }
         _M << nl << "return ";
         _M << "[prx_ invoke_async__:target_ response:response_ exception:exception_ sent:sent_ ";
@@ -3599,7 +3592,7 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
         _H << nl << "+(void) " << name << "_async_finished___:(id)target response:(SEL)response ";
         _H << "exception:(SEL)exception ok:(BOOL)ok is:(id<ICEInputStream>)is;";
 
-        _M << nl << "+(void) " << name << "_async_finished___:(id)target_ response:(SEL)response_ ";
+        _M << sp << nl << "+(void) " << name << "_async_finished___:(id)target_ response:(SEL)response_ ";
         _M << "exception:(SEL)exception_ ok:(BOOL)ok_ is:(id<ICEInputStream>)is_";
         _M << sb;
 
@@ -3711,12 +3704,13 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
                 {
                     if(!isValueType(op->first))
                     {
-                        _M << nl << "[(id<NSObject>)" << fixId(op->second) << " release];";
+                        _M << nl << "[(" << (isClass(op->first) ? "ICEObject*" : "id<NSObject>") << ")"
+			   << fixId(op->second) << " release];";
                     }
                 }
                 if(returnType && !isValueType(returnType))
                 {
-                    _M << nl << "[(id<NSObject>)ret_ release];";
+                    _M << nl << "[(" << (isClass(returnType) ? "ICEObject*" : "id<NSObject>") << ")ret_ release];";
                 }
             }
             _M << eb;
@@ -4246,8 +4240,7 @@ Slice::Gen::AsyncVisitor::visitOperation(const OperationPtr& p)
             for(q = outParams.begin(); q != outParams.end(); ++q)
             {
                 string param = fixId(q->second);
-                BuiltinPtr builtin = BuiltinPtr::dynamicCast(q->first);
-                if((builtin && builtin->kind() == Builtin::KindObject) || ClassDeclPtr::dynamicCast(q->first))
+		if(isClass(q->first))
                 {
                     string type = typeToString(q->first);
                     _M << nl << param << " = (" << type << ")" << param << "_PP.value;";
@@ -4255,8 +4248,7 @@ Slice::Gen::AsyncVisitor::visitOperation(const OperationPtr& p)
             }
             if(ret)
             {
-                BuiltinPtr builtin = BuiltinPtr::dynamicCast(ret);
-                if((builtin && builtin->kind() == Builtin::KindObject) || ClassDeclPtr::dynamicCast(ret))
+		if(isClass(ret))
                 {
                     string type = typeToString(ret);
                     _M << nl << "ret__ = (" << retS << ")ret___PP.value;";

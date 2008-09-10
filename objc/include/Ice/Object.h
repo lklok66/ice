@@ -24,9 +24,13 @@ extern "C"
 int ICELookupString(const char**, size_t, const char*);
 
 @protocol ICEObject <NSObject>
+-(BOOL) ice_isA:(NSString*)typeId;
 -(BOOL) ice_isA:(NSString*)typeId current:(ICECurrent*)current;
+-(void) ice_ping;
 -(void) ice_ping:(ICECurrent*)current;
+-(NSString*) ice_id;
 -(NSString*) ice_id:(ICECurrent*)current;
+-(NSArray*) ice_ids;
 -(NSArray*) ice_ids:(ICECurrent*)current;
 +(NSString*) ice_staticId;
 @end

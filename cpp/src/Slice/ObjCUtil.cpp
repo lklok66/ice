@@ -330,6 +330,12 @@ Slice::ObjCGenerator::isString(const TypePtr& type)
     BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
     return builtin && builtin->kind() == Builtin::KindString;
 }
+bool
+Slice::ObjCGenerator::isClass(const TypePtr& type)
+{
+    BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
+    return builtin && builtin->kind() == Builtin::KindObject || ClassDeclPtr::dynamicCast(type);
+}
 
 bool
 Slice::ObjCGenerator::mapsToPointerType(const TypePtr& type)
@@ -480,7 +486,14 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
 	}
 	else
 	{
-	    out << nl << param << " = [" << stream << " " << selector << "];";
+	    if(builtin->kind() == Builtin::KindObject)
+	    {
+		out << nl << "[" << stream << " readObject:&" << param << "];";
+	    }
+	    else
+	    {
+		out << nl << param << " = [" << stream << " " << selector << "];";
+	    }
 	}
         return;
     }
@@ -510,11 +523,12 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
     {
         if(marshal)
         {
-            out << nl << "[" << stream << " writeObject:" << param << "];";
+	    // Cast avoids warning for forward-declared classes.
+            out << nl << "[" << stream << " writeObject:(ICEObject*)" << param << "];";
         }
         else
         {
-            out << nl << "[" << stream << " readObject:&" << param << "];";
+            out << nl << "[" << stream << " readObject:(ICEObject**)&" << param << "];";
 //             if(isOutParam)
 //             {
 //                 //out << nl << "IceInternal.ParamPatcher<" << typeToString(type) << ">" << param

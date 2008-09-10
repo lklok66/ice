@@ -48,6 +48,7 @@ protected:
     static bool isValueType(const TypePtr&);
     static bool isProtocolType(const TypePtr&);
     static bool isString(const TypePtr&);
+    static bool isClass(const TypePtr&);
     static bool mapsToPointerType(const TypePtr&);
     static std::string getBuiltinName(const BuiltinPtr&);
     static std::string getBuiltinSelector(const BuiltinPtr&, bool);
