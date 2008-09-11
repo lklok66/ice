@@ -19,43 +19,43 @@
 @property (nonatomic, retain) UITableView* searchTableView;
 @property (nonatomic, retain) UISegmentedControl* searchSegmentedControl;
 
-@property (nonatomic, retain) DetailViewController* detailViewController_;
-@property (nonatomic, retain) AddViewController* addViewController_;
-@property (nonatomic, retain) UINavigationController *addNavigationController_;
-@property (nonatomic, retain) id<DemoBookQueryResultPrx> query_;
-@property (nonatomic, retain) NSMutableArray* books_;
+@property (nonatomic, retain) DetailViewController* detailViewController;
+@property (nonatomic, retain) AddViewController* addViewController;
+@property (nonatomic, retain) UINavigationController *addNavigationController;
+@property (nonatomic, retain) id<DemoBookQueryResultPrx> query;
+@property (nonatomic, retain) NSMutableArray* books;
 
 @end
 
 @implementation MainViewController
 
-@synthesize library, searchTableView, searchSegmentedControl, query_, books_;
-@synthesize addViewController_, detailViewController_, addNavigationController_;
+@synthesize library, searchTableView, searchSegmentedControl, query, books;
+@synthesize addViewController, detailViewController, addNavigationController;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
 	if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
         self.title = @"Search"; // Hostname?
 
 		// Initialization code
-        self.books_ = [NSMutableArray array];
-        nrows_ = 0;
+        self.books = [NSMutableArray array];
+        nrows = 0;
 	}
 	return self;
 }
 
 -(void)addBook:(id)sender
 {
-    AddViewController *controller = self.addViewController_;
+    AddViewController *controller = self.addViewController;
     controller.book = [[[DemoBookDescription alloc] init] autorelease];
     controller.book.authors = [NSMutableArray array];
     controller.library = library;
-    if(addNavigationController_ == nil)
+    if(addNavigationController == nil)
     {
         UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:controller];
-        self.addNavigationController_ = navController;
+        self.addNavigationController = navController;
         [navController release];
     }
-    [self.navigationController presentModalViewController:addNavigationController_ animated:YES];
+    [self.navigationController presentModalViewController:addNavigationController animated:YES];
     [controller setEditing:YES animated:NO];
 }
 
@@ -80,34 +80,34 @@
 
 - (void)dealloc
 {
+    [library release];
     [searchSegmentedControl release];
     [searchTableView release];
-    [library release];
-    [detailViewController_ release];
-    [addNavigationController_ release];
-    [addViewController_ release];
-    [query_ release];
-    [books_ release];
+    [detailViewController release];
+    [addNavigationController release];
+    [addViewController release];
+    [query release];
+    [books release];
 	[super dealloc];
 }
 
--(DetailViewController *)detailViewController_
+-(DetailViewController *)detailViewController
 {
     // Instantiate the main view controller if necessary.
-    if (detailViewController_ == nil)
+    if (detailViewController == nil)
     {
-        detailViewController_ = [[DetailViewController alloc] initWithNibName:@"DetailView" bundle:nil];
+        detailViewController = [[DetailViewController alloc] initWithNibName:@"DetailView" bundle:nil];
     }
-    return detailViewController_;
+    return detailViewController;
 }
 
--(AddViewController *)addViewController_
+-(AddViewController *)addViewController
 {
-    if (addViewController_ == nil)
+    if (addViewController == nil)
     {
-        addViewController_ = [[AddViewController alloc] initWithNibName:@"DetailView" bundle:nil];
+        addViewController = [[AddViewController alloc] initWithNibName:@"DetailView" bundle:nil];
     }
-    return addViewController_;
+    return addViewController;
 }
     
 -(void)handleException:(ICEException*)ex
@@ -126,22 +126,22 @@
 
 -(void)nextResponse:(NSArray*)seq destroyed:(BOOL)d
 {
-    [books_ addObjectsFromArray:seq];
+    [books addObjectsFromArray:seq];
     // The query has returned all available results.
     if(d)
     {
-        self.query_ = nil;
+        self.query = nil;
     }
 
     [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
     [searchTableView reloadData];
 }
 
--(void)queryResponse:(NSArray*)seq nrows:(int)nrows result:(id<DemoBookQueryResultPrx>)query
+-(void)queryResponse:(NSArray*)seq nrows:(int)n result:(id<DemoBookQueryResultPrx>)q
 {
-    [books_ addObjectsFromArray:seq];
-    nrows_ = nrows;
-    self.query_ = query;
+    [books addObjectsFromArray:seq];
+    nrows = n;
+    self.query = q;
 
     [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
     [searchTableView reloadData];
@@ -168,9 +168,9 @@
     int searchMode = searchSegmentedControl.selectedSegmentIndex;
 
     // Kill the previous query results.
-    self.query_ = nil;
-    nrows_ = 0;
-    [books_ removeAllObjects];
+    self.query = nil;
+    nrows = 0;
+    [books removeAllObjects];
     [searchTableView reloadData];
     
     // Run the query.
@@ -215,9 +215,9 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
     // If row is deleted, remove it from the list.
     if(editingStyle == UITableViewCellEditingStyleDelete)
     {
-        DemoBookDescription *book = (DemoBookDescription *)[books_ objectAtIndex:indexPath.row];
+        DemoBookDescription *book = (DemoBookDescription *)[books objectAtIndex:indexPath.row];
         [book.proxy destroy];
-        [books_ removeObjectAtIndex:indexPath.row];
+        [books removeObjectAtIndex:indexPath.row];
 
         // Animate the deletion from the table.
         [searchTableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] 
@@ -241,7 +241,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
 // One row per book, the number of books is the number of rows.
 - (NSInteger)tableView:(UITableView *)tv numberOfRowsInSection:(NSInteger)section
 {
-    return nrows_;
+    return nrows;
 }
 
 // The accessory type is the image displayed on the far right of each table cell. In order for the delegate method
@@ -260,14 +260,14 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
         cell = [[[UITableViewCell alloc] initWithFrame:CGRectZero reuseIdentifier:@"MyIdentifier"] autorelease];
     }
 
-    if(indexPath.row > books_.count-1)
+    if(indexPath.row > books.count-1)
     {
         // If we haven't loaded this part of this query, then get the next set.
         [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = YES;
-        NSAssert(query_ != nil, @"query_ != nil");
+        NSAssert(query != nil, @"query != nil");
         
         // Request the next set of books.
-        [query_ next_async:[ICECallbackOnMainThread callbackOnMainThread:self]
+        [query next_async:[ICECallbackOnMainThread callbackOnMainThread:self]
                   response:@selector(nextResponse:destroyed:)
                  exception:@selector(handleException:)
                          n:10];
@@ -275,7 +275,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
     }
     else
     {
-        DemoBookDescription *book = (DemoBookDescription *)[books_ objectAtIndex:indexPath.row];
+        DemoBookDescription *book = (DemoBookDescription *)[books objectAtIndex:indexPath.row];
         cell.text = book.title;
     }
     return cell;
@@ -283,8 +283,8 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
 
 - (NSIndexPath *)tableView:(UITableView *)tv willSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    DemoBookDescription *book = (DemoBookDescription *)[books_ objectAtIndex:indexPath.row];
-    DetailViewController* controller = self.detailViewController_;
+    DemoBookDescription *book = (DemoBookDescription *)[books objectAtIndex:indexPath.row];
+    DetailViewController* controller = self.detailViewController;
 
     // Set the detail controller's inspected item to the currently-selected book.
     controller.book = book;

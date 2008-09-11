@@ -17,7 +17,7 @@
     DemoBookDescription* book;
 @protected
     IBOutlet UITableView *tableView;
-    NSIndexPath* selectedIndexPath_;
+    NSIndexPath* selectedIndexPath;
 }
 
 @property (nonatomic, retain) DemoBookDescription* book;

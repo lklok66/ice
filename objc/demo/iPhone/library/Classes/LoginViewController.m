@@ -1,10 +1,11 @@
+// **********************************************************************
 //
-//  LoginViewController.m
-//  library
+// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
 //
-//  Created by Matthew Newhook on 9/5/08.
-//  Copyright 2008 __MyCompanyName__. All rights reserved.
+// This copy of Ice is licensed to you under the terms described in the
+// ICE_LICENSE file included in this distribution.
 //
+// **********************************************************************
 
 #import <LoginViewController.h>
 #import <MainViewController.h>
@@ -20,13 +21,13 @@
 @property (nonatomic, retain) UITextField* hostnameTextField;
 @property (nonatomic, retain) UIButton* loginButton;
 
-@property (nonatomic, retain) NSString* hostname_;
+@property (nonatomic, retain) NSString* hostname;
 
-@property (nonatomic, retain) MainViewController* mainViewController_;
+@property (nonatomic, retain) MainViewController* mainViewController;
 
-@property (retain) id<DemoLibraryPrx> library_;
-@property (retain) id<DemoSessionPrx> session_;
-@property (nonatomic, retain) NSOperationQueue* queue_;
+@property (retain) id<DemoLibraryPrx> library;
+@property (retain) id<DemoSessionPrx> session;
+@property (nonatomic, retain) NSOperationQueue* queue;
 
 @end
 
@@ -34,22 +35,22 @@
 
 @synthesize hostnameTextField;
 @synthesize loginButton;
-@synthesize hostname_;
-@synthesize library_;
-@synthesize session_;
-@synthesize mainViewController_;
-@synthesize queue_;
+@synthesize hostname;
+@synthesize library;
+@synthesize session;
+@synthesize mainViewController;
+@synthesize queue;
 
 NSString* hostnameKey = @"hostnameKey";
 
--(MainViewController *)mainViewController_
+-(MainViewController *)mainViewController
 {
     // Instantiate the main view controller if necessary.
-    if (mainViewController_ == nil)
+    if (mainViewController == nil)
     {
-        mainViewController_ = [[MainViewController alloc] initWithNibName:@"MainView" bundle:nil];
+        mainViewController = [[MainViewController alloc] initWithNibName:@"MainView" bundle:nil];
     }
-    return mainViewController_;
+    return mainViewController;
 }
 
 -(void)handleException:(ICEException*)ex
@@ -87,14 +88,14 @@ NSString* hostnameKey = @"hostnameKey";
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
 
-    self.hostname_ = [[NSUserDefaults standardUserDefaults] stringForKey:hostnameKey];
-    self.queue_ = [[[NSOperationQueue alloc] init] autorelease];
+    self.hostname = [[NSUserDefaults standardUserDefaults] stringForKey:hostnameKey];
+    self.queue = [[[NSOperationQueue alloc] init] autorelease];
 
     // When the user starts typing, show the clear button in the text field.
     hostnameTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
-    hostnameTextField.text = hostname_;
-    loginButton.enabled = hostname_.length > 0;
-    showAlert_ = NO;
+    hostnameTextField.text = hostname;
+    loginButton.enabled = hostname.length > 0;
+    showAlert = NO;
 }
 
 -(void)viewWillAppear:(BOOL)animated
@@ -118,12 +119,12 @@ NSString* hostnameKey = @"hostnameKey";
 
 -(void)didPresentAlertView:(UIAlertView *)alertView
 {
-    showAlert_ = YES;
+    showAlert = YES;
 }
 
 -(void)alertView:(UIAlertView*)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
 {
-    showAlert_ = NO;
+    showAlert = NO;
 }
 
 -(BOOL)textFieldShouldReturn:(UITextField *)theTextField
@@ -153,8 +154,8 @@ NSString* hostnameKey = @"hostnameKey";
         
         [hostnameTextField resignFirstResponder];
         
-        self.hostname_ = theTextField.text;
-        loginButton.enabled = hostname_.length > 0;
+        self.hostname = theTextField.text;
+        loginButton.enabled = hostname.length > 0;
     }
     return YES;
 }
@@ -167,8 +168,8 @@ NSString* hostnameKey = @"hostnameKey";
         [hostnameTextField resignFirstResponder];
         
         // Revert the text field to the previous value.
-        hostnameTextField.text = hostname_; 
-        loginButton.enabled = hostname_.length > 0;
+        hostnameTextField.text = hostname; 
+        loginButton.enabled = hostname.length > 0;
     }
     [super touchesBegan:touches withEvent:event];
 }
@@ -177,10 +178,10 @@ NSString* hostnameKey = @"hostnameKey";
 {
     AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
    
-    appDelegate.session = session_;
+    appDelegate.session = session;
     
-    MainViewController* controller = self.mainViewController_;
-    controller.library = library_;
+    MainViewController* controller = self.mainViewController;
+    controller.library = library;
     [self.navigationController pushViewController:controller animated:YES];
 
     // Re-enable the login button.
@@ -197,8 +198,8 @@ NSString* hostnameKey = @"hostnameKey";
      
         // This doesn't call appDelegate.session directly as we want the refresh
         // to run in the main thread.
-        self.session_ = [factory create];
-        self.library_ = [session_ getLibrary];
+        self.session = [factory create];
+        self.library = [session getLibrary];
         
         [self performSelectorOnMainThread:@selector(loginComplete:) withObject:nil waitUntilDone:NO];
     }
@@ -212,7 +213,7 @@ NSString* hostnameKey = @"hostnameKey";
 {
     AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
 
-    NSString* s = [NSString stringWithFormat:@"SessionFactory:tcp -h %@ -p 10000", hostname_];
+    NSString* s = [NSString stringWithFormat:@"SessionFactory:tcp -h %@ -p 10000", hostname];
     id<ICEObjectPrx> proxy;
     @try
     {
@@ -237,16 +238,19 @@ NSString* hostnameKey = @"hostnameKey";
     [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = YES;
     NSInvocationOperation* op = [[NSInvocationOperation alloc]
                                  initWithTarget:self selector:@selector(doLogin:) object:proxy];
-    [queue_ addOperation:op];
+    [queue addOperation:op];
     [op release];
 }
 
 - (void)dealloc
 {
-    [queue_ release];
-    [hostname_ release];
     [hostnameTextField release];
     [loginButton release];
+    [hostname release];
+    [mainViewController release];
+    [session release];
+    [library release];
+    [queue release];
     [super dealloc];
 }
 

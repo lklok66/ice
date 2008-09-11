@@ -1,10 +1,11 @@
+// **********************************************************************
 //
-//  LoginViewController.h
-//  library
+// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
 //
-//  Created by Matthew Newhook on 9/5/08.
-//  Copyright 2008 __MyCompanyName__. All rights reserved.
+// This copy of Ice is licensed to you under the terms described in the
+// ICE_LICENSE file included in this distribution.
 //
+// **********************************************************************
 
 #import <UIKit/UIKit.h>
 
@@ -19,14 +20,14 @@
     IBOutlet UIButton* loginButton;
 
 @private
-    BOOL showAlert_;
+    BOOL showAlert;
 
-    NSString* hostname_;
-    MainViewController *mainViewController_;
+    NSString* hostname;
+    MainViewController *mainViewController;
     
-    id<DemoSessionPrx> session_;
-    id<DemoLibraryPrx> library_;
-    NSOperationQueue* queue_;
+    id<DemoSessionPrx> session;
+    id<DemoLibraryPrx> library;
+    NSOperationQueue* queue;
 }
 
 -(IBAction)login:(id)sender;

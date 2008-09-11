@@ -57,6 +57,7 @@
 
 - (void)dealloc
 {
+    [library dealloc];
 	[super dealloc];
 }
 

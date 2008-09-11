@@ -232,13 +232,13 @@ static EditViewController* editViewController_ = nil;
 @interface DetailViewController ()
 
 @property (nonatomic, retain) UITableView *tableView;
-@property (nonatomic, retain) NSIndexPath *selectedIndexPath_;
+@property (nonatomic, retain) NSIndexPath *selectedIndexPath;
 
 @end
 
 @implementation DetailViewController
 
-@synthesize selectedIndexPath_, tableView, book;
+@synthesize selectedIndexPath, tableView, book;
 
 + (EditViewController *)editViewController
 {
@@ -267,7 +267,7 @@ static EditViewController* editViewController_ = nil;
 - (void)viewWillAppear:(BOOL)animated
 {
     // Remove any existing selection.
-    [tableView deselectRowAtIndexPath:selectedIndexPath_ animated:NO];
+    [tableView deselectRowAtIndexPath:selectedIndexPath animated:NO];
     // Redisplay the data.
     [tableView reloadData];
 }
@@ -296,7 +296,7 @@ static EditViewController* editViewController_ = nil;
 {
     [book release];
     [tableView release];
-    [selectedIndexPath_ release];
+    [selectedIndexPath release];
 	[super dealloc];
 }
 
@@ -357,7 +357,7 @@ static EditViewController* editViewController_ = nil;
         AuthorAddViewCallback* cb = [[[AuthorAddViewCallback alloc] initWithBook:book] autorelease];
         controller.cb = cb;
         
-        self.selectedIndexPath_ = indexPath;
+        self.selectedIndexPath = indexPath;
         [self.navigationController pushViewController:controller animated:YES];        
     }
 }
@@ -489,7 +489,7 @@ static EditViewController* editViewController_ = nil;
         }
     }
 
-    self.selectedIndexPath_ = indexPath;
+    self.selectedIndexPath = indexPath;
     [self.navigationController pushViewController:controller animated:YES];
 }
 

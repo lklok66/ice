@@ -69,7 +69,7 @@
 
 @interface AppDelegate()
 
-@property (nonatomic, retain) NSTimer* refreshTimer_;
+@property (nonatomic, retain) NSTimer* refreshTimer;
 
 @end
 
@@ -78,7 +78,7 @@
 @synthesize window;
 @synthesize navigationController;
 @synthesize communicator;
-@synthesize refreshTimer_;
+@synthesize refreshTimer;
 @dynamic session;
 
 -(id)init
@@ -132,9 +132,9 @@
     // Destroy the old session, and invalidate the refresh timer.
     if(session != nil)
     {
-        [refreshTimer_ invalidate];
+        [refreshTimer invalidate];
         [session destroy_async:nil response:nil exception:nil];
-        self.refreshTimer_ = nil;
+        self.refreshTimer = nil;
         [session release];
         session = nil;
     }
@@ -144,12 +144,12 @@
     if(session != nil)
     {
         SessionRefresh* refresh = [SessionRefresh sessionRefreshWithLogger:[communicator getLogger] session:session];
-        self.refreshTimer_ = [NSTimer timerWithTimeInterval:5
+        self.refreshTimer = [NSTimer timerWithTimeInterval:5
                                                      target:refresh
                                                    selector:@selector(refresh:)
                                                    userInfo:nil
                                                     repeats:YES];
-        [[NSRunLoop currentRunLoop] addTimer:refreshTimer_ forMode:NSDefaultRunLoopMode];
+        [[NSRunLoop currentRunLoop] addTimer:refreshTimer forMode:NSDefaultRunLoopMode];
     }
 }
 

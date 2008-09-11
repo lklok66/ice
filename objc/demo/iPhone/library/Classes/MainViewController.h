@@ -23,12 +23,12 @@
     IBOutlet UISegmentedControl* searchSegmentedControl;
     IBOutlet UITableView* searchTableView;
 
-    DetailViewController* detailViewController_;
-    UINavigationController *addNavigationController_;
-    AddViewController* addViewController_;
-    id<DemoBookQueryResultPrx> query_;
-    NSMutableArray* books_;
-    int nrows_;
+    DetailViewController* detailViewController;
+    UINavigationController *addNavigationController;
+    AddViewController* addViewController;
+    id<DemoBookQueryResultPrx> query;
+    NSMutableArray* books;
+    int nrows;
 }
 
 @property (nonatomic, retain) id<DemoLibraryPrx> library;

@@ -21,7 +21,7 @@
     id<DemoSessionPrx> session;
 
 @private
-    NSTimer* refreshTimer_;
+    NSTimer* refreshTimer;
 }
 
 @property (nonatomic, retain) UIWindow *window;
