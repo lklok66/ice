@@ -1,9 +1,9 @@
 //
 //  main.m
-//  hello
+//  library
 //
-//  Created by Benoit Foucher on 7/30/08.
-//  Copyright ZeroC, Inc. 2008. All rights reserved.
+//  Created by Matthew Newhook on 9/5/08.
+//  Copyright __MyCompanyName__ 2008. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
