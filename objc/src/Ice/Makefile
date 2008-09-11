@@ -106,6 +106,8 @@ $(HDIR)/Endpoint.h Endpoint.m:
 	
 $(HDIR)/Connection.h Connection.m:
 	
+$(HDIR)/ObjectFactory.h ObjectFactory.m:
+	
 
 ice_cpp_include = $(ice_cpp_dir)/include
 include/IceUtilCpp/%.h: $(ice_cpp_include)/IceUtil/%.h
