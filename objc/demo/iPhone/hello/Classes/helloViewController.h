@@ -23,7 +23,7 @@
     IBOutlet UIActivityIndicatorView* activity;
 
 @private
-    NSString* hostname_;
+    NSString* hostname;
     enum DeliveryMode
     {
         DeliveryModeTwoway,
@@ -32,13 +32,12 @@
         DeliveryModeBatchOneway,
         DeliveryModeBatchDatagram
     }
-    deliveryMode_;
-    BOOL showAlert_;
-    BOOL batch_;
-    int delay_;
-    int timeout_;
-    DemoHelloPrx* hello_;
-    id<ICECommunicator> communicator_;
+    deliveryMode;
+    BOOL showAlert;
+    BOOL batch;
+    int delay;
+    int timeout;
+    DemoHelloPrx* hello;
 }
 
 @property (nonatomic, retain) UIButton* flushButton;
@@ -50,9 +49,8 @@
 @property (nonatomic, retain) UISlider* delaySlider;
 @property (nonatomic, retain) UIActivityIndicatorView* activity;
 
-@property (nonatomic, copy) NSString* hostname_;
-@property (nonatomic, retain) DemoHelloPrx* hello_;
-@property (nonatomic, retain) id<ICECommunicator> communicator_;
+@property (nonatomic, copy) NSString* hostname;
+@property (nonatomic, retain) DemoHelloPrx* hello;
 
 - (void)modeChanged:(id)sender;
 - (void)batchChanged:(id)sender;

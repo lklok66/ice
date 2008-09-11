@@ -7,9 +7,10 @@
 //
 // **********************************************************************
 
-#import "helloViewController.h"
+#import <helloViewController.h>
+#import <helloAppDelegate.h>
 #import <Ice/Ice.h>
-#import "Hello.h"
+#import <Hello.h>
 
 //
 // Avoid warning for undocumented UISlider method
@@ -28,19 +29,19 @@
 @synthesize timeoutSlider;
 @synthesize delaySlider;
 @synthesize activity;
-@synthesize hostname_;
-@synthesize hello_;
-@synthesize communicator_;
+@synthesize hostname;
+@synthesize hello;
 
 NSString* hostnameKey = @"hostnameKey";
 
--(void)updateProxy:(NSString*)hostname
+-(void)updateProxy:(NSString*)h
 {
-    NSString* s = [NSString stringWithFormat:@"hello:tcp -h %@ -p 10000:udp -h %@ -p 10000", hostname, hostname];
-    ICEObjectPrx* prx = [communicator_ stringToProxy:s];
+    NSString* s = [NSString stringWithFormat:@"hello:tcp -h %@ -p 10000:udp -h %@ -p 10000", h, h];
+    helloAppDelegate *appDelegate = (helloAppDelegate *)[[UIApplication sharedApplication] delegate];
+    ICEObjectPrx* prx = [appDelegate.communicator stringToProxy:s];
     NSAssert(prx != nil, @"");
     
-    switch(deliveryMode_)
+    switch(deliveryMode)
     {
         case DeliveryModeTwoway:
             prx = [prx ice_twoway];
@@ -63,12 +64,12 @@ NSString* hostnameKey = @"hostnameKey";
             break;
     }
     
-    if(timeout_ != 0)
+    if(timeout != 0)
     {
-        prx = [prx ice_timeout:timeout_];
+        prx = [prx ice_timeout:timeout];
     }
     
-    self.hello_ = [DemoHelloPrx uncheckedCast:prx];
+    self.hello = [DemoHelloPrx uncheckedCast:prx];
 }
 
 -(void)viewDidLoad
@@ -85,15 +86,13 @@ NSString* hostnameKey = @"hostnameKey";
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
     
-    self.hostname_ = [[NSUserDefaults standardUserDefaults] stringForKey:hostnameKey];
-    
-    self.communicator_ = [ICEUtil createCommunicator];
+    self.hostname = [[NSUserDefaults standardUserDefaults] stringForKey:hostnameKey];
     
     // When the user starts typing, show the clear button in the text field.
     hostnameTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
 
     // Defaults for the UI elements.
-    hostnameTextField.text = hostname_; 
+    hostnameTextField.text = hostname; 
 
     // Disable secure switch for now, since SSL is not supported.
     secureSwitch.enabled = NO;
@@ -107,29 +106,29 @@ NSString* hostnameKey = @"hostnameKey";
     
     statusLabel.text = @"Ready";
     
-    showAlert_ = NO;
-    self.hello_ = nil;
-    delay_ = 0;
-    timeout_ = 0;
-    deliveryMode_ = DeliveryModeTwoway;
-    batch_ = NO;
-    [self updateProxy:self.hostname_];
+    showAlert = NO;
+    self.hello = nil;
+    delay = 0;
+    timeout = 0;
+    deliveryMode = DeliveryModeTwoway;
+    batch = NO;
+    [self updateProxy:self.hostname];
 }
 
 -(void)didPresentAlertView:(UIAlertView *)alertView
 {
-    showAlert_ = YES;
+    showAlert = YES;
 }
 
 -(void)alertView:(UIAlertView*)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
 {
-    showAlert_ = NO;
+    showAlert = NO;
 }
 
 -(BOOL)textFieldShouldReturn:(UITextField *)theTextField
 {
     // If we've already showing an invalid hostname alert, then we ignore enter.
-    if(showAlert_)
+    if(showAlert)
     {
         return NO;
     }
@@ -153,8 +152,8 @@ NSString* hostnameKey = @"hostnameKey";
 
         // Close the text field, save the hostname in the preferences.
         [hostnameTextField resignFirstResponder];
-        self.hostname_ = hostnameTextField.text;
-        [[NSUserDefaults standardUserDefaults] setObject:hostname_ forKey:hostnameKey];
+        self.hostname = hostnameTextField.text;
+        [[NSUserDefaults standardUserDefaults] setObject:hostname forKey:hostnameKey];
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
     return YES;
@@ -166,7 +165,7 @@ NSString* hostnameKey = @"hostnameKey";
     [hostnameTextField resignFirstResponder];
 
     // Revert the text field to the previous value.
-    hostnameTextField.text = hostname_; 
+    hostnameTextField.text = hostname; 
 
     [super touchesBegan:touches withEvent:event];
 }
@@ -185,35 +184,35 @@ NSString* hostnameKey = @"hostnameKey";
 
 -(void)modeChanged:(id)sender
 {
-    // Enable/disable the _batch mode, depending on the current sending mode.
+    // Enable/disable the batch mode, depending on the current sending mode.
     int mode = [sender selectedSegmentIndex];
     switch (mode)
     {
         case 0: // Twoway
-            deliveryMode_ = DeliveryModeTwoway;
+            deliveryMode = DeliveryModeTwoway;
             batchSwitch.enabled = NO;
             flushButton.enabled = NO;
             break;
         case 1: // Oneway
-            if(batch_)
+            if(batch)
             {
-                deliveryMode_ = DeliveryModeBatchOneway;
+                deliveryMode = DeliveryModeBatchOneway;
             }
             else
             {
-                deliveryMode_ = DeliveryModeOneway;
+                deliveryMode = DeliveryModeOneway;
             }
             batchSwitch.enabled = YES;
             flushButton.enabled = batchSwitch.isOn;
             break;
         case 2: // Datagram
-            if(batch_)
+            if(batch)
             {
-                deliveryMode_ = DeliveryModeBatchDatagram;
+                deliveryMode = DeliveryModeBatchDatagram;
             }
             else
             {
-                deliveryMode_ = DeliveryModeDatagram;
+                deliveryMode = DeliveryModeDatagram;
             }
             batchSwitch.enabled = YES;
             flushButton.enabled = batchSwitch.isOn;
@@ -221,44 +220,44 @@ NSString* hostnameKey = @"hostnameKey";
         default:
             break;
     }
-    [self updateProxy:self.hostname_];
+    [self updateProxy:self.hostname];
 }
 
 -(void)batchChanged:(id)thesender
 {
     UISwitch* sender = thesender;
-    batch_ = sender.isOn;
-    flushButton.enabled = batch_;
-    if(batch_ && deliveryMode_ == DeliveryModeOneway)
+    batch = sender.isOn;
+    flushButton.enabled = batch;
+    if(batch && deliveryMode == DeliveryModeOneway)
     {
-        deliveryMode_ = DeliveryModeBatchOneway;
+        deliveryMode = DeliveryModeBatchOneway;
     }
-    else if(batch_ && deliveryMode_ == DeliveryModeDatagram)
+    else if(batch && deliveryMode == DeliveryModeDatagram)
     {
-        deliveryMode_ = DeliveryModeBatchDatagram;
+        deliveryMode = DeliveryModeBatchDatagram;
     }
-    else if(!batch_ && deliveryMode_ == DeliveryModeBatchOneway)
+    else if(!batch && deliveryMode == DeliveryModeBatchOneway)
     {
-        deliveryMode_ = DeliveryModeOneway;
+        deliveryMode = DeliveryModeOneway;
     }
-    else if(!batch_ && deliveryMode_ == DeliveryModeBatchDatagram)
+    else if(!batch && deliveryMode == DeliveryModeBatchDatagram)
     {
-        deliveryMode_ = DeliveryModeDatagram;
+        deliveryMode = DeliveryModeDatagram;
     }
-    [self updateProxy:self.hostname_];
+    [self updateProxy:self.hostname];
 }
 
 -(void)delayChanged:(id)thesender
 {
     UISlider* sender = thesender;
-    delay_ = (int)(sender.value * 1000.0f); // Convert to ms.
+    delay = (int)(sender.value * 1000.0f); // Convert to ms.
 }
 
 -(void)timeoutChanged:(id)thesender
 {
     UISlider* sender = thesender;
-    timeout_ = (int)(sender.value * 1000.0f); // Convert to ms.
-    [self updateProxy:self.hostname_];
+    timeout = (int)(sender.value * 1000.0f); // Convert to ms.
+    [self updateProxy:self.hostname];
 }
 
 -(void)handleException:(ICEException*) ex
@@ -280,15 +279,15 @@ NSString* hostnameKey = @"hostnameKey";
 {
     @try
     {
-        if(deliveryMode_ != DeliveryModeBatchOneway && deliveryMode_ != DeliveryModeBatchDatagram)
+        if(deliveryMode != DeliveryModeBatchOneway && deliveryMode != DeliveryModeBatchDatagram)
         {
-            if([hello_ sayHello_async:[ICECallbackOnMainThread callbackOnMainThread:self]
+            if([hello sayHello_async:[ICECallbackOnMainThread callbackOnMainThread:self]
                        response:@selector(sayHelloResponse)
                        exception:@selector(handleException:) 
                        sent:@selector(sayHelloSent)
-                       delay:delay_])
+                       delay:delay])
             {
-                if(deliveryMode_ == DeliveryModeTwoway)
+                if(deliveryMode == DeliveryModeTwoway)
                 {
                     [activity startAnimating];
                     statusLabel.text = @"Waiting for response";
@@ -302,7 +301,7 @@ NSString* hostnameKey = @"hostnameKey";
         }
         else
         {
-            [hello_ sayHello:delay_];
+            [hello sayHello:delay];
             statusLabel.text = @"Queued batch request";
         }
     }
@@ -313,7 +312,7 @@ NSString* hostnameKey = @"hostnameKey";
 }
 -(void)sayHelloSent
 {
-    if(deliveryMode_ == DeliveryModeTwoway)
+    if(deliveryMode == DeliveryModeTwoway)
     {
         statusLabel.text = @"Waiting for response";
     }
@@ -334,7 +333,8 @@ NSString* hostnameKey = @"hostnameKey";
 {
     @try
     {
-        [communicator_ flushBatchRequests];
+        helloAppDelegate *appDelegate = (helloAppDelegate *)[[UIApplication sharedApplication] delegate];
+        [appDelegate.communicator flushBatchRequests];
         statusLabel.text = @"Flushed batch requests";
     }
     @catch(ICELocalException* ex)
@@ -347,8 +347,8 @@ NSString* hostnameKey = @"hostnameKey";
 {
     @try
     {
-        [hello_ shutdown];
-        if(deliveryMode_ == DeliveryModeBatchOneway || deliveryMode_ == DeliveryModeBatchDatagram)
+        [hello shutdown];
+        if(deliveryMode == DeliveryModeBatchOneway || deliveryMode == DeliveryModeBatchDatagram)
         {
             statusLabel.text = @"Queued shutdown request";
         }
@@ -375,10 +375,8 @@ NSString* hostnameKey = @"hostnameKey";
     [delaySlider release];
     [activity release];
 
-    [hostname_ release];
-    [hello_ release];
-    [communicator_ destroy];
-    [communicator_ release];
+    [hostname release];
+    [hello release];
     [super dealloc];
 }
 
