@@ -11,7 +11,7 @@ top_srcdir	= ../../..
 
 include $(top_srcdir)/config/Make.rules
 
-SUBDIRS		= objects
+SUBDIRS		= exceptions objects
 
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \

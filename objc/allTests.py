@@ -25,20 +25,20 @@ import TestUtil
 #
 tests = [ 
 #     ("Slice/keyword", ["once"]),
-     ("Ice/adapterDeactivation", ["core"]),
-     ("Ice/binding", ["core"]),
-     ("Ice/exceptions", ["core"]),
-     ("Ice/facets", ["core"]),
-     ("Ice/faultTolerance", ["core"]),
-     ("Ice/inheritance", ["core"]),
-     ("Ice/location", ["core"]),
-     ("Ice/objects", ["core"]),
      ("Ice/proxy", ["core"]),
      ("Ice/operations", ["core"]),
+     ("Ice/exceptions", ["core"]),
+     ("Ice/inheritance", ["core"]),
+     ("Ice/facets", ["core"]),
+     ("Ice/objects", ["core"]),
+     ("Ice/binding", ["core"]),
+     ("Ice/faultTolerance", ["core"]),
+     ("Ice/location", ["core"]),
+     ("Ice/adapterDeactivation", ["core"]),
+     ("Ice/slicing/exceptions", ["core"]),
+     ("Ice/slicing/objects", ["core"]),
      ("Ice/retry", ["core"]),
      ("Ice/timeout", ["core"]),
-#     ("Ice/slicing/exceptions", ["core"]),
-     ("Ice/slicing/objects", ["core"]),
     ]
 
 if __name__ == "__main__":
