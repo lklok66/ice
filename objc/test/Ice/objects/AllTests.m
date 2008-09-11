@@ -210,5 +210,70 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
 //     tprintf("ok\n");
 //     }
 
+    //
+    // Tests specific to Objective-C.
+    //
+    {
+	tprintf("setting object sequence... ");
+	TestMutableObjectSeq* seq = [TestMutableObjectSeq array];
+
+	[seq addObject:[NSNull null]];
+
+	TestBase* b = [TestBase base];
+	b.theS = [TestS s];
+	b.theS.str = @"Hello";
+	b.str = @"World";
+	[seq addObject:b];
+
+	@try
+	{
+	    TestObjectSeq* r = [initial getObjectSeq:seq];
+	    test([r objectAtIndex:0 == [NSNull null]]);
+	    TestBase* br = [r objectAtIndex:1];
+	    test([br.theS.str isEqualToString:@"Hello"]);
+	    test([br.str isEqualToString:@"World"]);
+	}
+	@catch(ICEOperationNotExistException*)
+	{
+	    // Expected if we are testing against a non-Objective-C server.
+	}
+	@catch(...)
+	{
+	    test(NO);
+	}
+	tprintf("ok\n");
+    }
+
+    {
+	tprintf("setting object dictionary... ");
+	TestMutableObjectDict* dict = [TestMutableObjectDict dictionary];
+
+	[dict setObject:[NSNull null] forKey:@"zero"];
+
+	TestBase* b = [TestBase base];
+	b.theS = [TestS s];
+	b.theS.str = @"Hello";
+	b.str = @"World";
+	[dict setObject:b forKey:@"one"];
+
+	@try
+	{
+	    TestObjectDict* r = [initial getObjectDict:dict];
+	    test([r objectForKey:@"zero"] == [NSNull null]);
+	    TestBase* br = [r objectForKey:@"one"];
+	    test([br.theS.str isEqualToString:@"Hello"]);
+	    test([br.str isEqualToString:@"World"]);
+	}
+	@catch(ICEOperationNotExistException*)
+	{
+	    // Expected if we are testing against a non-Objective-C server.
+	}
+	@catch(...)
+	{
+	    test(NO);
+	}
+	tprintf("ok\n");
+    }
+
     return initial;
 }

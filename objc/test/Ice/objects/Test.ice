@@ -87,6 +87,9 @@ class H implements I
 {
 };
 
+sequence<Object> ObjectSeq;		// For Objective-C only
+dictionary<string, Object> ObjectDict;	// For Objective-C only
+
 class Initial
 {
     void shutdown();
@@ -104,6 +107,12 @@ class Initial
     I getH();
 
     void setI(I theI);
+
+    //
+    // Remaining operations are here only for Objective-C and are not implemented by other language mappings.
+    //
+    ObjectSeq getObjectSeq(ObjectSeq s);
+    ObjectDict getObjectDict(ObjectDict d);
 };
 
 class Empty

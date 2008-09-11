@@ -220,10 +220,6 @@
     return [[[TestI alloc] init] autorelease];
 }
 
--(void) setI:(TestI*)i current:(ICECurrent*)current
-{
-}
-
 -(TestI*) getJ:(ICECurrent*)current
 {
     return [[[TestJ alloc] init] autorelease];
@@ -232,6 +228,20 @@
 -(TestI*) getH:(ICECurrent*)current
 {
     return [[[TestH alloc] init] autorelease];
+}
+
+-(void) setI:(TestI*)i current:(ICECurrent*)current
+{
+}
+
+-(TestObjectSeq *) getObjectSeq:(TestMutableObjectSeq *)s current:(ICECurrent*)current
+{
+    return s;
+}
+
+-(TestObjectDict *) getObjectDict:(TestMutableObjectDict *)d current:(ICECurrent*)current
+{
+    return d;
 }
 @end
 

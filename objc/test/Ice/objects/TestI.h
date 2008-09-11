@@ -43,7 +43,7 @@
 @interface HI : TestH<TestH>
 @end
 
-@interface InitialI : TestInitial
+@interface InitialI : TestInitial<TestInitial>
 {
     TestB* _b1;
     TestB* _b2;
@@ -65,6 +65,8 @@
 -(TestI *) getJ:(ICECurrent *)current;
 -(TestI *) getH:(ICECurrent *)current;
 -(void) setI:(TestI *)theI current:(ICECurrent *)current;
+-(TestObjectSeq *) getObjectSeq:(TestMutableObjectSeq *)s current:(ICECurrent *)current;
+-(TestObjectDict *) getObjectDict:(TestMutableObjectDict *)d current:(ICECurrent *)current;
 @end
 
 @interface UnexpectedObjectExceptionTestI : ICEBlobject<ICEBlobject>
