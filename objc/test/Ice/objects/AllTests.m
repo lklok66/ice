@@ -170,44 +170,44 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
     test([(id<TestE>)f.e2 checkValues:nil]);
     tprintf("ok\n");
 
-    tprintf("getting I, J and H... ");
-    TestI* i = [initial getI];
-    test(i);
-    TestI* j = [initial getJ];
-    test(j && [j isKindOfClass:[TestJ class]]);
-    TestI* h = [initial getH];
-    test(h && [h isKindOfClass:[TestH class]]);
-    tprintf("ok\n");
+//     tprintf("getting I, J and H... ");
+//     TestI* i = [initial getI];
+//     test(i);
+//     TestI* j = [initial getJ];
+//     test(j && [j isKindOfClass:[TestJ class]]);
+//     TestI* h = [initial getH];
+//     test(h && [h isKindOfClass:[TestH class]]);
+//     tprintf("ok\n");
 
-    tprintf("setting I... ");
-    [initial setI:i];
-    [initial setI:j];
-    [initial setI:h];
-    tprintf("ok\n");
+//     tprintf("setting I... ");
+//     [initial setI:i];
+//     [initial setI:j];
+//     [initial setI:h];
+//     tprintf("ok\n");
 
 //     if(!collocated)
 //     {
-//     tprintf("testing UnexpectedObjectException... ");
-//     ref = @"uoet:default -p 12010 -t 10000";
-//     base = [communicator stringToProxy:ref];
-//     test(base);
-//     id<TestUnexpectedObjectExceptionTestPrx> uoet = [TestUnexpectedObjectExceptionTestPrx uncheckedCast:base];
-//     test(uoet);
-//     @try
-//     {
-//         [uoet op];
-//         test(NO);
-//     }
-//     @catch(ICEUnexpectedObjectException* ex)
-//     {
-//         test([ex.type isEqualToString:@"::Test::AlsoEmpty"]);
-//         test([ex.expectedType isEqualToString:@"::Test::Empty"]);
-//     }
-//     @catch(ICEException* ex)
-//     {
-//         test(NO);
-//     }
-//     tprintf("ok\n");
+    tprintf("testing UnexpectedObjectException... ");
+    ref = @"uoet:default -p 12010 -t 10000";
+    base = [communicator stringToProxy:ref];
+    test(base);
+    id<TestUnexpectedObjectExceptionTestPrx> uoet = [TestUnexpectedObjectExceptionTestPrx uncheckedCast:base];
+    test(uoet);
+    @try
+    {
+        [uoet op];
+        test(NO);
+    }
+    @catch(ICEUnexpectedObjectException* ex)
+    {
+        test([ex.type isEqualToString:@"::Test::AlsoEmpty"]);
+        test([ex.expectedType isEqualToString:@"::Test::Empty"]);
+    }
+    @catch(ICEException* ex)
+    {
+        test(NO);
+    }
+    tprintf("ok\n");
 //     }
 
     //

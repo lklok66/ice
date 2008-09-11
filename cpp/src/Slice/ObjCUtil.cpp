@@ -470,19 +470,6 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
     BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
     if(builtin)
     {
-        if(builtin->kind() == Builtin::KindObject)
-        {
-            if(marshal)
-            {
-                out << nl << "[" << stream << " writeObject:" << param << "];";
-            }
-            else
-            {
-                out << nl << "[" << stream << " readObject:&" << param << "];";
-            }
-            return;
-        }
-
 	string selector;
         if(builtin->kind() == Builtin::KindObjectProxy)
         {
@@ -501,7 +488,7 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
 	{
 	    if(builtin->kind() == Builtin::KindObject)
 	    {
-		out << nl << "[" << stream << " readObject:&" << param << "];";
+		out << nl << "[" << stream << " readObject:&" << param << " type:[ICEObject class]];";
 	    }
 	    else
 	    {
@@ -541,7 +528,7 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
         }
         else
         {
-            out << nl << "[" << stream << " readObject:(ICEObject**)&" << param << "];";
+            out << nl << "[" << stream << " readObject:(ICEObject**)&" << param << " type:[" << typeToString(type) << " class]];";
 //             if(isOutParam)
 //             {
 //                 //out << nl << "IceInternal.ParamPatcher<" << typeToString(type) << ">" << param
@@ -601,7 +588,7 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
             {
                 if(marshal)
                 {
-                    out << nl << "[" << stream << " writeSequence:" << param << " c:[ICEObjectPrx class]];";
+                    out << nl << "[" << stream << " writeSequence:" << param << " type:[ICEObjectPrx class]];";
                 }
                 else
                 {
@@ -617,7 +604,14 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
                 }
                 else
                 {
-                    out << nl << param << " = [" << stream << " " << selector << "];";
+                    if(builtin->kind() == Builtin::KindObject)
+                    {
+                        out << nl << param << " = [" << stream << " " << selector << ":[ICEObject class]];";
+                    }
+                    else
+                    {
+                        out << nl << param << " = [" << stream << " " << selector << "];";
+                    }
                 }
             }
 	    return;
@@ -645,7 +639,7 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
 	    if(marshal)
 	    {
 		string mName = moduleName(findModule(prx->_class()));
-		out << nl << "[" << stream << " writeSequence:" << param << " c:["
+		out << nl << "[" << stream << " writeSequence:" << param << " type:["
 		    << mName + prx->_class()->name() + "Prx class]];";
 	    }
 	    else

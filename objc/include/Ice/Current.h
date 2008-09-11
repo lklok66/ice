@@ -59,7 +59,7 @@ typedef enum
 @end
 
 @interface ICEContextHelper : ICEDictionaryHelper
-+(ICEKeyValueHelper) getContained;
++(ICEKeyValueTypeHelper) getContained;
 @end
 
 @interface ICEOperationModeHelper : ICEEnumHelper

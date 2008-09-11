@@ -235,9 +235,9 @@
 @end
 
 @implementation ICEContextHelper
-+(ICEKeyValueHelper) getContained
++(ICEKeyValueTypeHelper) getContained
 {
-    ICEKeyValueHelper c;
+    ICEKeyValueTypeHelper c;
     c.key = [ICEStringHelper class];
     c.value = [ICEStringHelper class];
     return c;

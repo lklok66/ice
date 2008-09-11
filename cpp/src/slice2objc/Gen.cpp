@@ -2997,14 +2997,7 @@ Slice::Gen::HelperVisitor::visitSequence(const SequencePtr& p)
 
 	_M << sp << nl << "+(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream";
 	_M << sb;
-        if(builtin->kind() == Builtin::KindObjectProxy)
-        {
-            _M << nl << "[stream writeSequence:obj c:[ICEObjectPrx class]];";
-        }
-        else
-        {
-            _M << nl << "[stream write" << getBuiltinName(builtin) << "Seq:obj];";
-        }
+        _M << nl << "[stream write" << getBuiltinName(builtin) << "Seq:obj];";
 	_M << eb;
 	_M << nl << "@end";
 	
@@ -3036,23 +3029,18 @@ Slice::Gen::HelperVisitor::visitSequence(const SequencePtr& p)
         return;
     }
 
-    ClassDeclPtr cl = ClassDeclPtr::dynamicCast(p->type());
-    if(cl)
-    {
-        _H << sp << nl << "typedef ICEObjectSequenceHelper " << name << ";";
-        return;
-    }
-
     ContainedPtr contained = ContainedPtr::dynamicCast(p->type());
     ProxyPtr proxy = ProxyPtr::dynamicCast(p->type());
-    if(proxy)
-    {
-        _H << sp << nl << "typedef ICEObjectPrxSequenceHelper " << name << ";";
-        return;
-    }
 
     assert(contained || proxy);
-    _H << sp << nl << "@interface " << name << " : ICESequenceHelper";
+    if(ClassDeclPtr::dynamicCast(p->type()))
+    {
+        _H << sp << nl << "@interface " << name << " : ICEObjectSequenceHelper";
+    }
+    else
+    {
+        _H << sp << nl << "@interface " << name << " : ICESequenceHelper";
+    }
     _H << nl << "+(Class) getContained;";
     _H << nl << "@end";
 
@@ -3087,7 +3075,18 @@ Slice::Gen::HelperVisitor::visitDictionary(const DictionaryPtr& p)
     EnumPtr keyEnum = EnumPtr::dynamicCast(keyType);
     if(keyBuiltin)
     {
-        keyS = "ICE" + getBuiltinName(BuiltinPtr::dynamicCast(keyType)) + "Helper";
+        if(keyBuiltin->kind() == Builtin::KindObjectProxy)
+        {
+            keyS = "ICEObjectPrx";
+        }
+        else if(keyBuiltin->kind() == Builtin::KindObject)
+        {
+            keyS = "ICEObject";
+        }
+        else
+        {
+            keyS = "ICE" + getBuiltinName(BuiltinPtr::dynamicCast(keyType)) + "Helper";
+        }
     }
     else if(keyEnum)
     {
@@ -3110,7 +3109,18 @@ Slice::Gen::HelperVisitor::visitDictionary(const DictionaryPtr& p)
     EnumPtr valueEnum = EnumPtr::dynamicCast(valueType);
     if(valueBuiltin)
     {
-        valueS = "ICE" + getBuiltinName(BuiltinPtr::dynamicCast(valueType)) + "Helper";
+        if(valueBuiltin->kind() == Builtin::KindObjectProxy)
+        {
+            valueS = "ICEObjectPrx";
+        }
+        else if(valueBuiltin->kind() == Builtin::KindObject)
+        {
+            valueS = "ICEObject";
+        }
+        else
+        {
+            valueS = "ICE" + getBuiltinName(BuiltinPtr::dynamicCast(valueType)) + "Helper";
+        }
     }
     else if(valueEnum)
     {
@@ -3127,30 +3137,21 @@ Slice::Gen::HelperVisitor::visitDictionary(const DictionaryPtr& p)
         }
     }
 
-    if(valueBuiltin && valueBuiltin->kind() == Builtin::KindObject || ClassDeclPtr::dynamicCast(p->valueType()))
+    if(valueBuiltin && valueBuiltin->kind() == Builtin::KindObject || ClassDeclPtr::dynamicCast(valueType))
     {
-	_H << sp << nl << "@interface " << name << " : ICEObjectDictionaryHelper";
-	_H << nl << "+(Class) getKeyClass;";
-	_H << nl << "@end";
-
-	_M << sp << nl << "@implementation " << name;
-	_M << nl << "+(Class) getKeyClass";
-	_M << sb;
-        _M << nl << "return [" << keyS << " class];";
-	_M << eb;
-	_M << nl << "@end";	
-        return;
+        _H << sp << nl << "@interface " << name << " : ICEObjectDictionaryHelper";
     }
-
-
-    _H << sp << nl << "@interface " << name << " : ICEDictionaryHelper";
-    _H << nl << "+(ICEKeyValueHelper) getContained;";
+    else
+    {
+        _H << sp << nl << "@interface " << name << " : ICEDictionaryHelper";
+    }
+    _H << nl << "+(ICEKeyValueTypeHelper) getContained;";
     _H << nl << "@end";
 
     _M << sp << nl << "@implementation " << name;
-    _M << nl << "+(ICEKeyValueHelper) getContained";
+    _M << nl << "+(ICEKeyValueTypeHelper) getContained";
     _M << sb;
-    _M << nl << "ICEKeyValueHelper c;";
+    _M << nl << "ICEKeyValueTypeHelper c;";
     _M << nl << "c.key = [" << keyS << " class];";
     _M << nl << "c.value = [" << valueS << " class];";
     _M << nl << "return c;";

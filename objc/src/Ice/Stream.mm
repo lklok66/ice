@@ -97,11 +97,44 @@ private:
 };
 typedef IceUtil::Handle<ObjectReader> ObjectReaderPtr;
 
-class ReadObjectI : public Ice::ReadObjectCallback
+class ReadObjectBase : public Ice::ReadObjectCallback
 {
 public:
     
-    ReadObjectI(ICEObject** addr) : _addr(addr)
+    ReadObjectBase(Class expectedType) : _expectedType(expectedType)
+    {
+    }
+    
+    void checkType(ICEObject*);
+
+private:
+
+    Class _expectedType;
+};
+
+void
+ReadObjectBase::checkType(ICEObject* o)
+{
+    if(![o isKindOfClass:_expectedType])
+    {
+        NSString* actualType = [[o class] ice_staticId];
+        NSString* expectedType = [_expectedType ice_staticId];
+        NSString* reason = [NSString stringWithFormat:@"expected element of type `%@' but received `%@'",
+                                     expectedType,actualType];
+        
+        @throw [ICEUnexpectedObjectException unexpectedObjectException:__FILE__
+                                             line:__LINE__
+                                             reason_:reason
+                                             type:actualType
+                                             expectedType:expectedType];
+    }
+}
+
+class ReadObject : public ReadObjectBase
+{
+public:
+    
+    ReadObject(ICEObject** addr, Class expectedType) : ReadObjectBase(expectedType), _addr(addr)
     {
     }
 
@@ -112,7 +145,9 @@ public:
         {
             if(obj)
             {
-                *_addr = ObjectReaderPtr::dynamicCast(obj)->getObject();
+                ICEObject* o = ObjectReaderPtr::dynamicCast(obj)->getObject();
+                checkType(o);
+                *_addr = o;
             }
             else
             {
@@ -130,11 +165,12 @@ private:
     ICEObject** _addr;
 };
 
-class ReadObjectAtIndex : public Ice::ReadObjectCallback
+class ReadObjectAtIndex : public ReadObjectBase
 {
 public:
     
-    ReadObjectAtIndex(NSMutableArray* array, ICEInt index) : _array(array), _index(index)
+    ReadObjectAtIndex(NSMutableArray* array, ICEInt index, Class expectedType) : 
+        ReadObjectBase(expectedType), _array(array), _index(index)
     {
     }
 
@@ -145,7 +181,9 @@ public:
         {
             if(obj)
             {
-                [_array replaceObjectAtIndex:_index withObject:ObjectReaderPtr::dynamicCast(obj)->getObject()];
+                ICEObject* o = ObjectReaderPtr::dynamicCast(obj)->getObject();
+                checkType(o);
+                [_array replaceObjectAtIndex:_index withObject:o];
             }
         }
         @catch(NSException* ex)
@@ -160,11 +198,12 @@ private:
     ICEInt _index;
 };
 
-class ReadObjectForKey : public Ice::ReadObjectCallback
+class ReadObjectForKey : public ReadObjectBase
 {
 public:
     
-    ReadObjectForKey(NSMutableDictionary* dict, id key) : _dict(dict), _key(key)
+    ReadObjectForKey(NSMutableDictionary* dict, id key, Class expectedType) : 
+        ReadObjectBase(expectedType), _dict(dict), _key(key)
     {
         [_key retain];
     }
@@ -181,7 +220,9 @@ public:
         {
             if(obj)
             {
-                [_dict setObject:ObjectReaderPtr::dynamicCast(obj)->getObject() forKey:_key];
+                ICEObject* o = ObjectReaderPtr::dynamicCast(obj)->getObject();
+                checkType(o);
+                [_dict setObject:o forKey:_key];
             }
             else
             {
@@ -200,16 +241,17 @@ private:
     id _key;
 };
 
-class ReadObjectCallbackI : public Ice::ReadObjectCallback
+class ReadObjectCallback : public ReadObjectBase
 {
 public:
     
-    ReadObjectCallbackI(id<ICEReadObjectCallback> cb) : _cb(cb)
+    ReadObjectCallback(id<ICEReadObjectCallback> cb, Class expectedType) : 
+        ReadObjectBase(expectedType), _cb(cb)
     {
         [_cb retain];
     }
 
-    virtual ~ReadObjectCallbackI()
+    virtual ~ReadObjectCallback()
     {
         [_cb release];
     }
@@ -221,7 +263,9 @@ public:
         {
             if(obj)
             {
-                [_cb invoke:ObjectReaderPtr::dynamicCast(obj)->getObject()];
+                ICEObject* o = ObjectReaderPtr::dynamicCast(obj)->getObject();
+                checkType(o);
+                [_cb invoke:o];
             }
             else
             {
@@ -651,7 +695,7 @@ typedef enum { dummy } Dummy_Enum;
     }
 }
 
--(id<ICEObjectPrx>) readProxy:(Class)c
+-(id<ICEObjectPrx>) readProxy:(Class)type
 {
     try
     {
@@ -662,7 +706,7 @@ typedef enum { dummy } Dummy_Enum;
 	}
         else
         {
-            return [[c alloc] initWithObjectPrx__:p];
+            return [[type alloc] initWithObjectPrx__:p];
         }
     }
     catch(const std::exception& ex)
@@ -672,11 +716,11 @@ typedef enum { dummy } Dummy_Enum;
     }
 }
 
--(void) readObject:(ICEObject**)object
+-(void) readObject:(ICEObject**)object type:(Class)type
 {
     try
     {
-        is_->readObject(new IceObjC::ReadObjectI(object));
+        is_->readObject(new IceObjC::ReadObject(object, type));
     }
     catch(const std::exception& ex)
     {
@@ -684,19 +728,11 @@ typedef enum { dummy } Dummy_Enum;
     }
 }
 
--(void) readObject:(NSMutableArray*)array atIndex:(ICEInt)index
-{
-}
-
--(void) readObject:(NSMutableArray*)array forKey:(id)key
-{
-}
-
--(void) readObjectWithCallback:(id<ICEReadObjectCallback>)callback
+-(void) readObjectWithCallback:(id<ICEReadObjectCallback>)callback type:(Class)type
 {
     try
     {
-        is_->readObject(new IceObjC::ReadObjectCallbackI(callback));
+        is_->readObject(new IceObjC::ReadObjectCallback(callback, type));
     }
     catch(const std::exception& ex)
     {
@@ -704,7 +740,7 @@ typedef enum { dummy } Dummy_Enum;
     }
 }
 
--(NSMutableArray*) readObjectSeq
+-(NSMutableArray*) readObjectSeq:(Class)type
 {
     ICEInt sz = [self readSize];
     // TODO sequence size check
@@ -716,7 +752,7 @@ typedef enum { dummy } Dummy_Enum;
         for(i = 0; i < sz; i++)
         {
             [arr addObject:null];
-            is_->readObject(new IceObjC::ReadObjectAtIndex(arr, i));
+            is_->readObject(new IceObjC::ReadObjectAtIndex(arr, i, type));
         }
     }
     catch(const std::exception& ex)
@@ -727,17 +763,17 @@ typedef enum { dummy } Dummy_Enum;
     return arr;
 }
 
--(NSMutableDictionary*) readObjectDict:(Class)cl
+-(NSMutableDictionary*) readObjectDict:(ICEKeyValueTypeHelper)type
 {
     ICEInt sz = [self readSize];
     // TODO size check
     NSMutableDictionary* dictionary = [[NSMutableDictionary alloc] initWithCapacity:sz];
-    Class key = nil;
+    id key = nil;
     for(int i = 0; i < sz; ++i)
     {
         @try
         {
-            key = [cl ice_readWithStream:self];
+            key = [type.key ice_readWithStream:self];
         }
         @catch(NSException *ex)
         {
@@ -747,7 +783,7 @@ typedef enum { dummy } Dummy_Enum;
 
         try
         {
-            is_->readObject(new IceObjC::ReadObjectForKey(dictionary, key));
+            is_->readObject(new IceObjC::ReadObjectForKey(dictionary, key, type.value));
         }
         catch(const std::exception& ex)
         {
@@ -760,7 +796,7 @@ typedef enum { dummy } Dummy_Enum;
     return dictionary;
 }
 
--(NSMutableArray*) readSequence:(Class)cl
+-(NSMutableArray*) readSequence:(Class)type
 {
     ICEInt sz = [self readSize];
     // TODO sequence size check
@@ -770,7 +806,7 @@ typedef enum { dummy } Dummy_Enum;
     {
 	while(sz-- > 0)
 	{
-	    obj = [cl ice_readWithStream:self];
+	    obj = [type ice_readWithStream:self];
             if(obj == nil)
             {
                 [arr addObject:[NSNull null]];
@@ -791,19 +827,19 @@ typedef enum { dummy } Dummy_Enum;
     return arr;
 }
 
--(NSMutableDictionary*) readDictionary:(ICEKeyValueHelper)c
+-(NSMutableDictionary*) readDictionary:(ICEKeyValueTypeHelper)type
 {
     ICEInt sz = [self readSize];
     // TODO size check
     NSMutableDictionary* dictionary = [[NSMutableDictionary alloc] initWithCapacity:sz];
-    Class key = nil;
-    Class value = nil;
+    id key = nil;
+    id value = nil;
     @try
     {
 	while(sz-- > 0)
 	{
-	    key = [c.key ice_readWithStream:self];
-	    value = [c.value ice_readWithStream:self];
+	    key = [type.key ice_readWithStream:self];
+	    value = [type.value ice_readWithStream:self];
             if(value == nil)
             {
                 [dictionary setObject:[NSNull null] forKey:key];
@@ -1235,7 +1271,7 @@ typedef enum { dummy } Dummy_Enum;
     }
 }
 
--(void)writeSequence:(NSArray*)arr c:(Class)c
+-(void)writeSequence:(NSArray*)arr type:(Class)type
 {
     if(arr == nil)
     {
@@ -1246,11 +1282,11 @@ typedef enum { dummy } Dummy_Enum;
     [self writeSize:[arr count]];
     for(id i in arr)
     {
-	[c ice_writeWithStream:(i == [NSNull null] ? nil : i) stream:self];
+	[type ice_writeWithStream:(i == [NSNull null] ? nil : i) stream:self];
     }
 }
 
--(void) writeDictionary:(NSDictionary*)dictionary c:(ICEKeyValueHelper)c
+-(void) writeDictionary:(NSDictionary*)dictionary type:(ICEKeyValueTypeHelper)type
 {
     if(dictionary == nil)
     {
@@ -1267,9 +1303,9 @@ typedef enum { dummy } Dummy_Enum;
 	{
 	    @throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"illegal NSNull value"];
 	}
-	[c.key ice_writeWithStream:key stream:self];
+	[type.key ice_writeWithStream:key stream:self];
 	NSObject *obj = [dictionary objectForKey:key];
-	[c.value ice_writeWithStream:(obj == [NSNull null] ? nil : obj) stream:self];
+	[type.value ice_writeWithStream:(obj == [NSNull null] ? nil : obj) stream:self];
     }
 }
 
@@ -1442,7 +1478,7 @@ typedef enum { dummy } Dummy_Enum;
     }
 }
 
--(void) writeObjectDict:(NSDictionary*)dictionary c:(Class)c
+-(void) writeObjectDict:(NSDictionary*)dictionary type:(ICEKeyValueTypeHelper)type
 {
     if(dictionary == nil)
     {
@@ -1459,7 +1495,7 @@ typedef enum { dummy } Dummy_Enum;
 	{
 	    @throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"illegal NSNull value"];
 	}
-	[c ice_writeWithStream:key stream:self];
+	[type.key ice_writeWithStream:key stream:self];
 	id obj = [dictionary objectForKey:key];
         [self writeObject:(obj == [NSNull null] ? nil : obj)];
     }
@@ -1718,34 +1754,43 @@ typedef enum { dummy } Dummy_Enum;
 }
 +(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
-    return [stream writeSequence:obj c:[ICEObjectPrx class]];
+    return [stream writeSequence:obj type:[ICEObjectPrx class]];
 }
 @end
 
 @implementation ICEObjectSequenceHelper
 +(id) ice_readWithStream:(id<ICEInputStream>)stream
 {
-    return [stream readObjectSeq];
+    return [stream readObjectSeq:[self getContained]];
 }
+
 +(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
     [stream writeObjectSeq:obj];
+}
+
++(Class) getContained
+{
+    return [ICEObject class];
 }
 @end
 
 @implementation ICEObjectDictionaryHelper
 +(id) ice_readWithStream:(id<ICEInputStream>)stream
 {
-    return [stream readObjectDict:[self getKeyClass]];
+    return [stream readObjectDict:[self getContained]];
 }
+
 +(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
-    [stream writeObjectDict:obj c:[self getKeyClass]];
+    [stream writeObjectDict:obj type:[self getContained]];
 }
-+(Class) getKeyClass
+
++(ICEKeyValueTypeHelper) getContained
 {
-    NSAssert(false, @"ICEObjectDictionaryHelper getKeyClass requires override");
-    return nil;
+    NSAssert(false, @"ICEObjectDictionaryHelper getContained requires override");
+    ICEKeyValueTypeHelper dummy;
+    return dummy;
 }
 @end
 
@@ -1757,7 +1802,7 @@ typedef enum { dummy } Dummy_Enum;
 
 +(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
-    return [stream writeSequence:obj c:[self getContained]];
+    return [stream writeSequence:obj type:[self getContained]];
 }
 
 +(Class) getContained
@@ -1775,13 +1820,13 @@ typedef enum { dummy } Dummy_Enum;
 
 +(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
-    [stream writeDictionary:obj c:[self getContained]];
+    [stream writeDictionary:obj type:[self getContained]];
 }
 
-+(ICEKeyValueHelper) getContained
++(ICEKeyValueTypeHelper) getContained
 {
     NSAssert(false, @"ICEDictionaryHelper getContained requires override");
-    ICEKeyValueHelper dummy;
+    ICEKeyValueTypeHelper dummy;
     return dummy; // Keep compiler quiet
 }
 @end

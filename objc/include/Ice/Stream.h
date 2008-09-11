@@ -27,7 +27,7 @@ typedef struct
 {
     Class key;
     Class value;
-} ICEKeyValueHelper;
+} ICEKeyValueTypeHelper;
 
 @protocol ICEInputStream <NSObject>
 
@@ -65,14 +65,13 @@ typedef struct
 
 -(id<ICEObjectPrx>) readProxy:(Class)c;
 
--(void) readObject:(ICEObject**)object;
--(void) readObjectWithCallback:(id<ICEReadObjectCallback>)callback;
--(NSMutableArray*) readObjectSeq;
--(NSMutableDictionary*) readObjectDict:(Class)c;
+-(void) readObject:(ICEObject**)object type:(Class)type;
+-(void) readObjectWithCallback:(id<ICEReadObjectCallback>)callback type:(Class)type;
+-(NSMutableArray*) readObjectSeq:(Class)type;
+-(NSMutableDictionary*) readObjectDict:(ICEKeyValueTypeHelper)type;
 
--(NSMutableArray*) readSequence:(Class)c;
-
--(NSMutableDictionary*) readDictionary:(ICEKeyValueHelper)c;
+-(NSMutableArray*) readSequence:(Class)type;
+-(NSMutableDictionary*) readDictionary:(ICEKeyValueTypeHelper)type;
 
 -(ICEInt) readSize;
 
@@ -133,11 +132,10 @@ typedef struct
 
 -(void) writeObject:(ICEObject*)v;
 -(void) writeObjectSeq:(NSArray*)v;
--(void) writeObjectDict:(NSDictionary*)v c:(Class)c;
+-(void) writeObjectDict:(NSDictionary*)v type:(ICEKeyValueTypeHelper)type;
 
--(void) writeSequence:(NSArray*)arr c:(Class)c;
-
--(void) writeDictionary:(NSDictionary*)dictionary c:(ICEKeyValueHelper)c;
+-(void) writeSequence:(NSArray*)arr type:(Class)type;
+-(void) writeDictionary:(NSDictionary*)dictionary type:(ICEKeyValueTypeHelper)type;
 
 -(void) writeSize:(ICEInt)v;
 
@@ -236,6 +234,7 @@ typedef struct
 @interface ICEObjectSequenceHelper : NSObject
 +(id) ice_readWithStream:(id<ICEInputStream>)stream;
 +(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
++(Class) getContained;
 @end
 
 //
@@ -244,7 +243,7 @@ typedef struct
 @interface ICEObjectDictionaryHelper : NSObject
 +(id) ice_readWithStream:(id<ICEInputStream>)stream;
 +(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
-+(Class) getKeyClass;
++(ICEKeyValueTypeHelper) getContained;
 @end
 
 //
@@ -262,5 +261,5 @@ typedef struct
 @interface ICEDictionaryHelper : NSObject
 +(id) ice_readWithStream:(id<ICEInputStream>)stream;
 +(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
-+(ICEKeyValueHelper) getContained;
++(ICEKeyValueTypeHelper) getContained;
 @end
