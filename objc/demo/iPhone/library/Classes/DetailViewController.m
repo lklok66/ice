@@ -15,6 +15,7 @@
 
 static EditViewController* editViewController_ = nil;
 
+// TODO: Get rid of this and make set title, and rent.
 @interface KVMEditViewCallback : NSObject<EditViewCallback>
 {
     DemoBookDescription* book;
@@ -68,7 +69,6 @@ static EditViewController* editViewController_ = nil;
         objc_msgSend(obj, response);
         return;
     }
-    // TODO: AMI
     if(fieldKey == @"title")
     {
         [book.proxy setTitle_async:[ICECallbackOnMainThread callbackOnMainThread:obj]
@@ -200,11 +200,6 @@ static EditViewController* editViewController_ = nil;
 {
     NSMutableArray* arr = (NSMutableArray*)book.authors;
     [arr addObject:value];
-    if(book.proxy != nil)
-    {
-        // TODO: AMI
-        [book.proxy setAuthors:arr];
-    }  
 }
 
 -(void)save:(NSString*)value object:(id)obj response:(SEL)response exception:(SEL)exception
@@ -234,6 +229,52 @@ static EditViewController* editViewController_ = nil;
 @property (nonatomic, retain) UITableView *tableView;
 @property (nonatomic, retain) NSIndexPath *selectedIndexPath;
 
+@end
+
+@interface TextLabelCell : UITableViewCell
+{
+    UILabel* textLabel;
+}
+
+@property (nonatomic, retain) UILabel* textLabel;
+@end
+
+@implementation TextLabelCell
+@synthesize textLabel;
+
+- (id)initWithFrame:(CGRect)frame reuseIdentifier:(NSString *)reuseIdentifier {
+	if (self = [super initWithFrame:frame reuseIdentifier:reuseIdentifier])
+    {
+        self.textLabel = [[[UILabel alloc] initWithFrame:CGRectZero] autorelease];
+        self.textLabel.backgroundColor = [UIColor whiteColor];
+        self.textLabel.opaque = YES;
+        self.textLabel.textColor = [UIColor blackColor];
+        self.textLabel.highlightedTextColor = [UIColor lightGrayColor];
+        self.textLabel.font = [UIFont boldSystemFontOfSize:20];
+        self.textLabel.numberOfLines = 0;
+        
+		[self.contentView addSubview:self.textLabel];
+	}
+    
+	return self;
+}
+
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
+    
+    CGRect contentRect = self.contentView.bounds;
+    
+    CGRect frame = CGRectMake(10.0, 0.0f, CGRectGetWidth(contentRect)-10.f, CGRectGetHeight(contentRect));
+
+    self.textLabel.frame = frame;
+}
+
+- (void)dealloc
+{
+	[textLabel dealloc];
+	[super dealloc];
+}
 @end
 
 @implementation DetailViewController
@@ -363,8 +404,59 @@ static EditViewController* editViewController_ = nil;
     }
 }
 
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if(indexPath.section == 1)
+    {
+        // The width of the table is 320 - 20px of left & right padding. We don't want to let the title
+        // go past 200px.
+        CGSize sz = [book.title sizeWithFont:[UIFont boldSystemFontOfSize:20] constrainedToSize:CGSizeMake(300.f, 200.0f)];
+
+        return sz.height + 20.f; // 20px padding.
+    }
+    else
+    {
+        return 44.0f; // 20px padding + 22.f for the 20pt font.
+    }
+}
+
 - (UITableViewCell *)tableView:(UITableView *)tv cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
+
+    if(indexPath.section == 1)
+    {
+#ifdef never
+        TextLabelCell *cell = (TextLabelCell*)[tableView dequeueReusableCellWithIdentifier:@"TextLabelCell"];
+        if(cell == nil)
+        {
+            // Create a new cell. CGRectZero allows the cell to determine the appropriate size.
+            cell = [[[TextLabelCell alloc] initWithFrame:CGRectZero reuseIdentifier:@"TextLabelCell"] autorelease];
+        }
+        cell.textLabel.text = book.title;
+        return cell;
+#endif
+
+        UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"TitleCell"];
+        if (cell == nil)
+        {
+            // Create a new cell. CGRectZero allows the cell to determine the appropriate size.
+            cell = [[[UITableViewCell alloc] initWithFrame:CGRectZero reuseIdentifier:@"TitleCell"] autorelease];
+            // Add a label to the frame,
+            UILabel *textView = [[UILabel alloc] initWithFrame:CGRectZero];
+            [cell.contentView addSubview:textView];
+            [textView release];
+            textView.numberOfLines = 0;
+            textView.textColor = [UIColor blackColor];
+            textView.font = [UIFont boldSystemFontOfSize:20];
+        }
+        
+        UILabel* textView = [cell.contentView.subviews objectAtIndex:0];
+
+        CGSize sz = [book.title sizeWithFont:[UIFont boldSystemFontOfSize:20.0] constrainedToSize:CGSizeMake(300.f, 200.0f)];
+        textView.frame = CGRectMake(10.f, 10.f, sz.width, sz.height);
+        textView.text = book.title;
+        return cell;
+    }
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"MyIdentifier"];
     if (cell == nil)
     {

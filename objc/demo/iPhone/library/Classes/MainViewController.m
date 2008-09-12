@@ -229,8 +229,10 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
     if(editingStyle == UITableViewCellEditingStyleDelete)
     {
         DemoBookDescription *book = (DemoBookDescription *)[books objectAtIndex:indexPath.row];
+        // TODO: AMI
         [book.proxy destroy];
-        [books removeObjectAtIndex:indexPath.row];
+        [books removeObjectAtIndex:indexPath.row];        
+        --nrows;
 
         // Animate the deletion from the table.
         [searchTableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] 

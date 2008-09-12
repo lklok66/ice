@@ -57,7 +57,7 @@
 
 - (void)dealloc
 {
-    [library dealloc];
+    [library release];
 	[super dealloc];
 }
 

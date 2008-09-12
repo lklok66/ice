@@ -72,8 +72,8 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				1432BEBE0E484C0E00DAC793 /* Hello.m */,
 				1432BEBF0E484C0E00DAC793 /* Hello.h */,
+				1432BEBE0E484C0E00DAC793 /* Hello.m */,
 				1D3623240D0F684500981E51 /* helloAppDelegate.h */,
 				1D3623250D0F684500981E51 /* helloAppDelegate.m */,
 				28D7ACF60DDB3853001CB0EB /* helloViewController.h */,
