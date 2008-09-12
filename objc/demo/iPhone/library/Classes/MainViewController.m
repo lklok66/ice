@@ -19,6 +19,7 @@
 @property (nonatomic, retain) UITableView* searchTableView;
 @property (nonatomic, retain) UISegmentedControl* searchSegmentedControl;
 
+@property (nonatomic, retain) NSIndexPath* currentIndexPath;
 @property (nonatomic, retain) DetailViewController* detailViewController;
 @property (nonatomic, retain) AddViewController* addViewController;
 @property (nonatomic, retain) UINavigationController *addNavigationController;
@@ -29,8 +30,15 @@
 
 @implementation MainViewController
 
-@synthesize library, searchTableView, searchSegmentedControl, query, books;
-@synthesize addViewController, detailViewController, addNavigationController;
+@dynamic library;
+@synthesize searchTableView;
+@synthesize searchSegmentedControl;
+@synthesize query;
+@synthesize books;
+@synthesize addViewController;
+@synthesize detailViewController;
+@synthesize addNavigationController;
+@synthesize currentIndexPath;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
 	if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
@@ -60,11 +68,39 @@
     [controller setEditing:YES animated:NO];
 }
 
+-(void)setLibrary:(id<DemoLibraryPrx>)l
+{
+    if(library)
+    {
+        [library release];
+    }
+    library = [l retain];
+    
+    // Kill the previous query results.
+    self.query = nil;
+    nrows = 0;
+    rowsQueried = 10;
+    [books removeAllObjects];
+}
+
+-(id<DemoLibraryPrx>)library
+{
+    return [[library retain] autorelease];
+}
+
 - (void)viewDidLoad
 {
     self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc]
                                                initWithBarButtonSystemItem:UIBarButtonSystemItemAdd
                                                target:self action:@selector(addBook:)] autorelease];
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    // Remove any existing selection.
+    //[tableView deselectRowAtIndexPath:selectedIndexPath animated:NO];
+    // Redisplay the data.
+    [searchTableView reloadData];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -84,6 +120,7 @@
     [library release];
     [searchSegmentedControl release];
     [searchTableView release];
+    [currentIndexPath release];
     [detailViewController release];
     [addNavigationController release];
     [addViewController release];
@@ -159,6 +196,20 @@
     [searchTableView reloadData];
 }
 
+-(void)removeCurrentBook
+{
+    DemoBookDescription *book = (DemoBookDescription *)[books objectAtIndex:currentIndexPath.row];
+
+    // TODO: AMI
+    [book.proxy destroy];
+    [books removeObjectAtIndex:currentIndexPath.row];        
+    --nrows;
+    
+    // Animate the deletion from the table.
+    [searchTableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:currentIndexPath] 
+                           withRowAnimation:UITableViewRowAnimationFade];
+}
+
 #pragma mark UISearchBarDelegate
 
 -(void)searchBarCancelButtonClicked:(UISearchBar*)sender
@@ -228,15 +279,8 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
     // If row is deleted, remove it from the list.
     if(editingStyle == UITableViewCellEditingStyleDelete)
     {
-        DemoBookDescription *book = (DemoBookDescription *)[books objectAtIndex:indexPath.row];
-        // TODO: AMI
-        [book.proxy destroy];
-        [books removeObjectAtIndex:indexPath.row];        
-        --nrows;
-
-        // Animate the deletion from the table.
-        [searchTableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] 
-         withRowAnimation:UITableViewRowAnimationFade];
+        self.currentIndexPath = indexPath;
+        [self removeCurrentBook];
     }
 }
 
@@ -303,6 +347,8 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
 
 - (NSIndexPath *)tableView:(UITableView *)tv willSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    self.currentIndexPath = indexPath;
+    
     DemoBookDescription *book = (DemoBookDescription *)[books objectAtIndex:indexPath.row];
     DetailViewController* controller = self.detailViewController;
 
@@ -311,7 +357,9 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
     
     // Push the detail view on to the navigation controller's stack.
     [self.navigationController pushViewController:controller animated:YES];
+
     [controller setEditing:NO animated:NO];
+    
     return nil;
 }
 

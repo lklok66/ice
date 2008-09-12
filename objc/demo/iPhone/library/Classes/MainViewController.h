@@ -23,6 +23,8 @@
     IBOutlet UISegmentedControl* searchSegmentedControl;
     IBOutlet UITableView* searchTableView;
 
+    NSIndexPath* currentIndexPath;
+
     DetailViewController* detailViewController;
     UINavigationController *addNavigationController;
     AddViewController* addViewController;
@@ -34,4 +36,5 @@
 
 @property (nonatomic, retain) id<DemoLibraryPrx> library;
 
+-(void)removeCurrentBook;
 @end

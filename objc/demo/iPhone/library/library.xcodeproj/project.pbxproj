@@ -23,6 +23,7 @@
 		347553B00E71AB3A001C7AB8 /* DetailView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 347553AF0E71AB3A001C7AB8 /* DetailView.xib */; };
 		347553EB0E71BA29001C7AB8 /* EditViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 347553EA0E71BA29001C7AB8 /* EditViewController.m */; };
 		347553ED0E71BA33001C7AB8 /* EditView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 347553EC0E71BA33001C7AB8 /* EditView.xib */; };
+		3492A6830E7AD01600FACCC4 /* whiteButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 3492A6820E7AD01600FACCC4 /* whiteButton.png */; };
 		34B920D50E755BBD00B1565B /* Library.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B920D20E755BBD00B1565B /* Library.m */; };
 		34B920D60E755BBD00B1565B /* Session.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B920D40E755BBD00B1565B /* Session.m */; };
 		34C47AAA0E75911F00FF5739 /* libstdc++.6.0.4.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C47AA90E75911F00FF5739 /* libstdc++.6.0.4.dylib */; };
@@ -65,6 +66,7 @@
 		347553E90E71BA29001C7AB8 /* EditViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EditViewController.h; sourceTree = "<group>"; };
 		347553EA0E71BA29001C7AB8 /* EditViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EditViewController.m; sourceTree = "<group>"; };
 		347553EC0E71BA33001C7AB8 /* EditView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = EditView.xib; sourceTree = "<group>"; };
+		3492A6820E7AD01600FACCC4 /* whiteButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = whiteButton.png; sourceTree = "<group>"; };
 		34B920CD0E755B7E00B1565B /* Library.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Library.ice; sourceTree = "<group>"; };
 		34B920CE0E755B7E00B1565B /* Session.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Session.ice; sourceTree = "<group>"; };
 		34B920D10E755BBD00B1565B /* Library.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Library.h; sourceTree = "<group>"; };
@@ -127,6 +129,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				3492A6810E7AD01600FACCC4 /* Images */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
@@ -170,6 +173,14 @@
 				1D30AB110D05D00D00671497 /* Foundation.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		3492A6810E7AD01600FACCC4 /* Images */ = {
+			isa = PBXGroup;
+			children = (
+				3492A6820E7AD01600FACCC4 /* whiteButton.png */,
+			);
+			path = Images;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -228,6 +239,7 @@
 				347553680E71A029001C7AB8 /* MainView.xib in Resources */,
 				347553B00E71AB3A001C7AB8 /* DetailView.xib in Resources */,
 				347553ED0E71BA33001C7AB8 /* EditView.xib in Resources */,
+				3492A6830E7AD01600FACCC4 /* whiteButton.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
