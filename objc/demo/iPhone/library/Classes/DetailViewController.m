@@ -231,52 +231,6 @@ static EditViewController* editViewController_ = nil;
 
 @end
 
-@interface TextLabelCell : UITableViewCell
-{
-    UILabel* textLabel;
-}
-
-@property (nonatomic, retain) UILabel* textLabel;
-@end
-
-@implementation TextLabelCell
-@synthesize textLabel;
-
-- (id)initWithFrame:(CGRect)frame reuseIdentifier:(NSString *)reuseIdentifier {
-	if (self = [super initWithFrame:frame reuseIdentifier:reuseIdentifier])
-    {
-        self.textLabel = [[[UILabel alloc] initWithFrame:CGRectZero] autorelease];
-        self.textLabel.backgroundColor = [UIColor whiteColor];
-        self.textLabel.opaque = YES;
-        self.textLabel.textColor = [UIColor blackColor];
-        self.textLabel.highlightedTextColor = [UIColor lightGrayColor];
-        self.textLabel.font = [UIFont boldSystemFontOfSize:20];
-        self.textLabel.numberOfLines = 0;
-        
-		[self.contentView addSubview:self.textLabel];
-	}
-    
-	return self;
-}
-
-- (void)layoutSubviews
-{
-    [super layoutSubviews];
-    
-    CGRect contentRect = self.contentView.bounds;
-    
-    CGRect frame = CGRectMake(10.0, 0.0f, CGRectGetWidth(contentRect)-10.f, CGRectGetHeight(contentRect));
-
-    self.textLabel.frame = frame;
-}
-
-- (void)dealloc
-{
-	[textLabel dealloc];
-	[super dealloc];
-}
-@end
-
 @implementation DetailViewController
 
 @synthesize selectedIndexPath, tableView, book;
@@ -425,17 +379,6 @@ static EditViewController* editViewController_ = nil;
 
     if(indexPath.section == 1)
     {
-#ifdef never
-        TextLabelCell *cell = (TextLabelCell*)[tableView dequeueReusableCellWithIdentifier:@"TextLabelCell"];
-        if(cell == nil)
-        {
-            // Create a new cell. CGRectZero allows the cell to determine the appropriate size.
-            cell = [[[TextLabelCell alloc] initWithFrame:CGRectZero reuseIdentifier:@"TextLabelCell"] autorelease];
-        }
-        cell.textLabel.text = book.title;
-        return cell;
-#endif
-
         UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"TitleCell"];
         if (cell == nil)
         {
