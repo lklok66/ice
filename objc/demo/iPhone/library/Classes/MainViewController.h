@@ -28,6 +28,7 @@
     AddViewController* addViewController;
     id<DemoBookQueryResultPrx> query;
     NSMutableArray* books;
+    int rowsQueried;
     int nrows;
 }
 

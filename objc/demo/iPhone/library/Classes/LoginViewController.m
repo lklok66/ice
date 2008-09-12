@@ -156,6 +156,9 @@ NSString* hostnameKey = @"hostnameKey";
         
         self.hostname = theTextField.text;
         loginButton.enabled = hostname.length > 0;
+        
+        [[NSUserDefaults standardUserDefaults] setObject:hostname forKey:hostnameKey];
+        [[NSUserDefaults standardUserDefaults] synchronize];
     }
     return YES;
 }

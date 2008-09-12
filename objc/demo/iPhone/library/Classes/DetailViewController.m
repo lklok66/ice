@@ -243,7 +243,8 @@ static EditViewController* editViewController_ = nil;
 + (EditViewController *)editViewController
 {
     // Instantiate the editin view controller if necessary.
-    if (editViewController_ == nil) {
+    if(editViewController_ == nil)
+    {
         editViewController_ = [[EditViewController alloc] initWithNibName:@"EditView" bundle:nil];
     }
     return editViewController_;

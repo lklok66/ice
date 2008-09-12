@@ -39,6 +39,7 @@
 		// Initialization code
         self.books = [NSMutableArray array];
         nrows = 0;
+        rowsQueried = 0;
 	}
 	return self;
 }
@@ -139,8 +140,19 @@
 
 -(void)queryResponse:(NSArray*)seq nrows:(int)n result:(id<DemoBookQueryResultPrx>)q
 {
-    [books addObjectsFromArray:seq];
     nrows = n;
+    if(nrows == 0)
+    {
+        // open an alert with just an OK button
+        UIAlertView *alert = [[UIAlertView alloc]
+                              initWithTitle:@"No Results" message:@"The search returned no results"
+                              delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alert show];       
+        [alert release];
+        return;
+    }
+
+    [books addObjectsFromArray:seq];
     self.query = q;
 
     [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
@@ -170,6 +182,7 @@
     // Kill the previous query results.
     self.query = nil;
     nrows = 0;
+    rowsQueried = 10;
     [books removeAllObjects];
     [searchTableView reloadData];
     
@@ -262,15 +275,20 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
 
     if(indexPath.row > books.count-1)
     {
-        // If we haven't loaded this part of this query, then get the next set.
-        [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = YES;
-        NSAssert(query != nil, @"query != nil");
-        
-        // Request the next set of books.
-        [query next_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                  response:@selector(nextResponse:destroyed:)
-                 exception:@selector(handleException:)
-                         n:10];
+        // Here we are past the available cached set of data. rowsQueries records
+        // how many rows of data we've actually asked for.
+        if(indexPath.row > rowsQueried-1)
+        {
+
+            [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = YES;
+            NSAssert(query != nil, @"query != nil");
+            [query next_async:[ICECallbackOnMainThread callbackOnMainThread:self]
+                     response:@selector(nextResponse:destroyed:)
+                    exception:@selector(handleException:)
+                            n:10];
+            rowsQueried += 10;
+        }
+
         cell.text = @"<loading>";
     }
     else
