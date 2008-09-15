@@ -39,6 +39,8 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
     test([ba2.theS.str isEqualToString:@"hello"]);
     test([ba2.str isEqualToString:@"hi"]);
 
+#if 0
+    // Can't override assignment operator in Objective-C.
     *ba1 = *ba2;
     test([ba1.theS.str isEqualToString:@"hello"]);
     test([ba1.str isEqualToString:@"hi"]);
@@ -47,6 +49,7 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
     *bp1 = *ba2;
     test([bp1.theS.str isEqualToString:@"hello"]);
     test([bp1.str isEqualToString:@"hi"]);
+#endif
 
     tprintf("ok\n");
 
