@@ -213,6 +213,12 @@ Slice::ObjCGenerator::typeToString(const TypePtr& type)
         return "NSDictionary";
     }
 
+    ClassDeclPtr cl = ClassDeclPtr::dynamicCast(type);
+    if(cl && cl->isInterface())
+    {
+        return "ICEObject";
+    }
+
     ContainedPtr contained = ContainedPtr::dynamicCast(type);
     if(contained)
     {
@@ -313,11 +319,7 @@ Slice::ObjCGenerator::isProtocolType(const TypePtr& type)
             }
         }
     }
-    if(ProxyPtr::dynamicCast(type) || ClassDeclPtr::dynamicCast(type))
-    {
-        return true;
-    }
-    return false;
+    return ProxyPtr::dynamicCast(type) || ClassDeclPtr::dynamicCast(type);
 }
 
 bool
@@ -334,7 +336,11 @@ bool
 Slice::ObjCGenerator::isClass(const TypePtr& type)
 {
     BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
-    return builtin && builtin->kind() == Builtin::KindObject || ClassDeclPtr::dynamicCast(type);
+    if(builtin)
+    {
+        return builtin->kind() != Builtin::KindObjectProxy;
+    }
+    return ClassDeclPtr::dynamicCast(type);
 }
 
 bool
@@ -345,9 +351,14 @@ Slice::ObjCGenerator::mapsToPointerType(const TypePtr& type)
         return false;
     }
     BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
-    if(builtin && builtin->kind() == Builtin::KindObjectProxy)
+    if(builtin)
     {
-       return false;
+       return builtin->kind() != Builtin::KindObjectProxy;
+    }
+    ClassDeclPtr cl = ClassDeclPtr::dynamicCast(type);
+    if(cl && cl->isInterface())
+    {
+        return true;
     }
     return !ProxyPtr::dynamicCast(type);
 }

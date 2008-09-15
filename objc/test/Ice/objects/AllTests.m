@@ -39,14 +39,14 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
     test([ba2.theS.str isEqualToString:@"hello"]);
     test([ba2.str isEqualToString:@"hi"]);
 
-//     *ba1 = *ba2;
-//     test([ba1.theS.str isEqualToString:@"hello"]);
-//     test([ba1.str isEqualToString:@"hi"]);
+    *ba1 = *ba2;
+    test([ba1.theS.str isEqualToString:@"hello"]);
+    test([ba1.str isEqualToString:@"hi"]);
     
-//     TestBase* bp1 = [TestBase base];
-//     *bp1 = *ba2;
-//     test([bp1.theS.str isEqualToString:@"hello"]);
-//     test([bp1.str isEqualToString:@"hi"]);
+    TestBase* bp1 = [TestBase base];
+    *bp1 = *ba2;
+    test([bp1.theS.str isEqualToString:@"hello"]);
+    test([bp1.str isEqualToString:@"hi"]);
 
     tprintf("ok\n");
 
@@ -72,11 +72,11 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
     
     tprintf("checking consistency... ");
     test(b1 != b2);
-//    test(b1 != c);
-//    test(b1 != d);
-//    test(b2 != c);
-//    test(b2 != d);
-//    test(c != d);
+    test(b1 != (TestB*)c);
+    test(b1 != (TestB*)d);
+    test(b2 != (TestB*)c);
+    test(b2 != (TestB*)d);
+    test(c != (TestC*)d);
     test(b1.theB == b1);
     test(b1.theC == 0);
     test([b1.theA isKindOfClass:[TestB class]]);
@@ -120,11 +120,11 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
     
     tprintf("checking consistency... ");
     test(b1 != b2);
-//    test(b1 != c);
-//    test(b1 != d);
-//    test(b2 != c);
-//    test(b2 != d);
-//    test(c != d);
+    test(b1 != (TestB*)c);
+    test(b1 != (TestB*)d);
+    test(b2 != (TestB*)c);
+    test(b2 != (TestB*)d);
+    test(c != (TestC*)d);
     test(b1.theA == b2);
     test(b1.theB == b1);
     test(b1.theC == 0);
@@ -170,20 +170,20 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
     test([(id<TestE>)f.e2 checkValues:nil]);
     tprintf("ok\n");
 
-//     tprintf("getting I, J and H... ");
-//     TestI* i = [initial getI];
-//     test(i);
-//     TestI* j = [initial getJ];
-//     test(j && [j isKindOfClass:[TestJ class]]);
-//     TestI* h = [initial getH];
-//     test(h && [h isKindOfClass:[TestH class]]);
-//     tprintf("ok\n");
+    tprintf("getting I, J and H... ");
+    TestI* i = (TestI*)[initial getI];
+    test(i);
+    TestI* j = (TestI*)[initial getJ];
+    test(j && [j isKindOfClass:[TestJ class]]);
+    TestI* h = (TestI*)[initial getH];
+    test(h && [h isKindOfClass:[TestH class]]);
+    tprintf("ok\n");
 
-//     tprintf("setting I... ");
-//     [initial setI:i];
-//     [initial setI:j];
-//     [initial setI:h];
-//     tprintf("ok\n");
+    tprintf("setting I... ");
+    [initial setI:i];
+    [initial setI:j];
+    [initial setI:h];
+    tprintf("ok\n");
 
 //     if(!collocated)
 //     {

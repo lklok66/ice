@@ -120,7 +120,7 @@ ReadObjectBase::checkType(ICEObject* o)
         NSString* actualType = [[o class] ice_staticId];
         NSString* expectedType = _expectedType;
         NSString* reason = [NSString stringWithFormat:@"expected element of type `%@' but received `%@'",
-                                     expectedType,actualType];
+                                     expectedType, actualType];
         
         @throw [ICEUnexpectedObjectException unexpectedObjectException:__FILE__
                                              line:__LINE__
