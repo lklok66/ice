@@ -488,7 +488,7 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
 	{
 	    if(builtin->kind() == Builtin::KindObject)
 	    {
-		out << nl << "[" << stream << " readObject:&" << param << " type:[ICEObject class]];";
+		out << nl << "[" << stream << " readObject:&" << param << " typeId:@\"::Ice::Object\"];";
 	    }
 	    else
 	    {
@@ -528,7 +528,7 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
         }
         else
         {
-            out << nl << "[" << stream << " readObject:(ICEObject**)&" << param << " type:[" << typeToString(type) << " class]];";
+            out << nl << "[" << stream << " readObject:(ICEObject**)&" << param << " typeId:@\"" << cl->scoped() << "\"];";
 //             if(isOutParam)
 //             {
 //                 //out << nl << "IceInternal.ParamPatcher<" << typeToString(type) << ">" << param
@@ -606,7 +606,7 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
                 {
                     if(builtin->kind() == Builtin::KindObject)
                     {
-                        out << nl << param << " = [" << stream << " " << selector << ":[ICEObject class]];";
+                        out << nl << param << " = [" << stream << " " << selector << ":@\"::Ice::Object\"];";
                     }
                     else
                     {

@@ -3029,18 +3029,27 @@ Slice::Gen::HelperVisitor::visitSequence(const SequencePtr& p)
         return;
     }
 
+    ClassDeclPtr cl = ClassDeclPtr::dynamicCast(p->type());
+    if(cl)
+    {
+        _H << sp << nl << "@interface " << name << " : ICEObjectSequenceHelper";
+        _H << nl << "+(NSString*) getContained;";
+        _H << nl << "@end";
+
+        _M << sp << nl << "@implementation " << name;
+        _M << nl << "+(NSString*) getContained";
+        _M << sb;
+        _M << nl << "return @\"" << cl->scoped() << "\";";
+        _M << eb;
+        _M << nl << "@end";
+        return;
+    }
+
     ContainedPtr contained = ContainedPtr::dynamicCast(p->type());
     ProxyPtr proxy = ProxyPtr::dynamicCast(p->type());
 
     assert(contained || proxy);
-    if(ClassDeclPtr::dynamicCast(p->type()))
-    {
-        _H << sp << nl << "@interface " << name << " : ICEObjectSequenceHelper";
-    }
-    else
-    {
-        _H << sp << nl << "@interface " << name << " : ICESequenceHelper";
-    }
+    _H << sp << nl << "@interface " << name << " : ICESequenceHelper";
     _H << nl << "+(Class) getContained;";
     _H << nl << "@end";
 
@@ -3137,14 +3146,33 @@ Slice::Gen::HelperVisitor::visitDictionary(const DictionaryPtr& p)
         }
     }
 
-    if(valueBuiltin && valueBuiltin->kind() == Builtin::KindObject || ClassDeclPtr::dynamicCast(valueType))
+
+    ClassDeclPtr valueClass = ClassDeclPtr::dynamicCast(valueType);
+    if(valueBuiltin && valueBuiltin->kind() == Builtin::KindObject || valueClass)
     {
         _H << sp << nl << "@interface " << name << " : ICEObjectDictionaryHelper";
+        _H << nl << "+(Class) getContained:(NSString**)typeId;";
+        _H << nl << "@end";
+        
+        _M << sp << nl << "@implementation " << name;
+        _M << nl << "+(Class) getContained:(NSString**)typeId";
+        _M << sb;
+        if(valueBuiltin)
+        {
+            _M << nl << "*typeId = @\"::Ice::Object\";";
+        }
+        else
+        {
+            _M << nl << "*typeId = @\"" << valueClass->scoped() <<  "\";";
+        }
+        _M << nl << "return [" << keyS << " class];";
+        _M << eb;
+        _M << nl << "@end";
+        return;
     }
-    else
-    {
-        _H << sp << nl << "@interface " << name << " : ICEDictionaryHelper";
-    }
+
+    
+    _H << sp << nl << "@interface " << name << " : ICEDictionaryHelper";
     _H << nl << "+(ICEKeyValueTypeHelper) getContained;";
     _H << nl << "@end";
 
