@@ -11,8 +11,8 @@
 
 @protocol EditViewCallback<NSObject>
 @property (nonatomic, readonly) NSString *fieldName;
-@property (nonatomic, retain) NSString *textValue;
--(void)save:(NSString*)value object:(id)obj response:(SEL)response exception:(SEL)exception;
+@property (nonatomic, readonly) NSString *textValue;
+-(void)save:(NSString*)value;
 @end
 
 @interface EditViewController : UIViewController

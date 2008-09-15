@@ -43,39 +43,6 @@
 
 NSString* hostnameKey = @"hostnameKey";
 
--(MainViewController *)mainViewController
-{
-    // Instantiate the main view controller if necessary.
-    if (mainViewController == nil)
-    {
-        mainViewController = [[MainViewController alloc] initWithNibName:@"MainView" bundle:nil];
-    }
-    return mainViewController;
-}
-
--(void)handleException:(ICEException*)ex
-{
-    // Re-enable the login button.
-    loginButton.enabled = YES;
-
-    [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
-    
-    NSString* s = [NSString stringWithFormat:@"%@", ex];
-
-    // open an alert with just an OK button
-    UIAlertView *alert = [[UIAlertView alloc]
-                          initWithTitle:@"Error" message:s
-                          delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
-    [alert show];       
-    [alert release];
-}
-
-/*
- Implement loadView if you want to create a view hierarchy programmatically
-- (void)loadView {
-}
- */
-
 - (void)viewDidLoad
 {
     // Initialize the application defaults.
@@ -100,9 +67,16 @@ NSString* hostnameKey = @"hostnameKey";
 
 -(void)viewWillAppear:(BOOL)animated
 {
+    NSLog(@"LoginViewController.viewWillAppear");
     AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
     appDelegate.session = nil;
     [super viewWillAppear:animated];
+}
+
+-(void)viewDidAppear:(BOOL)animated
+{
+    NSLog(@"LoginViewController.viewDidAppear");
+    NSLog(@"view: %@", self.view);
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -117,6 +91,44 @@ NSString* hostnameKey = @"hostnameKey";
     // Release anything that's not essential, such as cached data
 }
 
+-(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    if(hostnameTextField.editing)
+    {
+        // Dismiss the keyboard when the view outside the text field is touched.
+        [hostnameTextField resignFirstResponder];
+        
+        // Revert the text field to the previous value.
+        hostnameTextField.text = hostname; 
+        loginButton.enabled = hostname.length > 0;
+    }
+    [super touchesBegan:touches withEvent:event];
+}
+
+- (void)dealloc
+{
+    [hostnameTextField release];
+    [loginButton release];
+    [hostname release];
+    [mainViewController release];
+    [session release];
+    [library release];
+    [queue release];
+    [super dealloc];
+}
+
+-(MainViewController *)mainViewController
+{
+    // Instantiate the main view controller if necessary.
+    if (mainViewController == nil)
+    {
+        mainViewController = [[MainViewController alloc] initWithNibName:@"MainView" bundle:nil];
+    }
+    return mainViewController;
+}
+
+#pragma mark UIAlertViewDelegate
+
 -(void)didPresentAlertView:(UIAlertView *)alertView
 {
     showAlert = YES;
@@ -126,6 +138,8 @@ NSString* hostnameKey = @"hostnameKey";
 {
     showAlert = NO;
 }
+
+#pragma mark UITextFieldDelegate
 
 -(BOOL)textFieldShouldReturn:(UITextField *)theTextField
 {
@@ -163,18 +177,23 @@ NSString* hostnameKey = @"hostnameKey";
     return YES;
 }
 
--(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+#pragma mark Login
+
+-(void)exception:(ICEException*)ex
 {
-    if(hostnameTextField.editing)
-    {
-        // Dismiss the keyboard when the view outside the text field is touched.
-        [hostnameTextField resignFirstResponder];
-        
-        // Revert the text field to the previous value.
-        hostnameTextField.text = hostname; 
-        loginButton.enabled = hostname.length > 0;
-    }
-    [super touchesBegan:touches withEvent:event];
+    // Re-enable the login button.
+    loginButton.enabled = YES;
+    
+    [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
+    
+    NSString* s = [NSString stringWithFormat:@"%@", ex];
+    
+    // open an alert with just an OK button
+    UIAlertView *alert = [[UIAlertView alloc]
+                          initWithTitle:@"Error" message:s
+                          delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    [alert show];       
+    [alert release];
 }
 
 -(void)loginComplete:(id)data
@@ -185,6 +204,7 @@ NSString* hostnameKey = @"hostnameKey";
     
     MainViewController* controller = self.mainViewController;
     controller.library = library;
+    NSLog(@"loginComplete");
     [self.navigationController pushViewController:controller animated:YES];
 
     // Re-enable the login button.
@@ -208,7 +228,7 @@ NSString* hostnameKey = @"hostnameKey";
     }
     @catch(ICEException* ex)
     {
-        [self performSelectorOnMainThread:@selector(handleException:) withObject:ex waitUntilDone:NO];
+        [self performSelectorOnMainThread:@selector(exception:) withObject:ex waitUntilDone:NO];
     }
 }
 
@@ -243,18 +263,6 @@ NSString* hostnameKey = @"hostnameKey";
                                  initWithTarget:self selector:@selector(doLogin:) object:proxy];
     [queue addOperation:op];
     [op release];
-}
-
-- (void)dealloc
-{
-    [hostnameTextField release];
-    [loginButton release];
-    [hostname release];
-    [mainViewController release];
-    [session release];
-    [library release];
-    [queue release];
-    [super dealloc];
 }
 
 @end

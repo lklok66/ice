@@ -113,6 +113,8 @@
 
 -(void)sessionRefreshException:(ICEException*)ex
 {
+    NSLog(@"appDelegate:  popToRootView: %@", self.navigationController);
+
     // Go back to the login view. This triggers the viewWillAppear on the
     // LoginViewController, which will invalidate the session.
     [navigationController popToRootViewControllerAnimated:YES];
@@ -122,7 +124,7 @@
     // open an alert with just an OK button
     UIAlertView *alert = [[UIAlertView alloc]
                           initWithTitle:@"Error" message:s
-                          delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+                          delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
     [alert show];       
     [alert release];    
 }

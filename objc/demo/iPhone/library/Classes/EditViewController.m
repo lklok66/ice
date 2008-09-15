@@ -53,32 +53,10 @@
     [self.navigationController popViewControllerAnimated:YES];
 }
 
--(void)saveSuccess
-{
-    cb.textValue = textField.text;
-    [self.navigationController popViewControllerAnimated:YES];
-}
-
--(void)exception:(ICEException*)ex
-{
-    textField.enabled = YES;
-    [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
-    
-    NSString* s = [NSString stringWithFormat:@"%@", ex];
-    
-    // open an alert with just an OK button
-    UIAlertView *alert = [[UIAlertView alloc]
-                          initWithTitle:@"Error" message:s
-                          delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
-    [alert show];       
-    [alert release];    
-}
-
 -(IBAction)save:(id)sender
 {
-    textField.enabled = NO;
-    [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
-    [cb save:textField.text object:self response:@selector(saveSuccess) exception:@selector(exception:)];
+    [cb save:textField.text];
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 - (void)dealloc

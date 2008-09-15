@@ -11,6 +11,7 @@
 
 @class DemoBookDescription;
 @class EditViewController;
+@class ICEException;
 
 @interface DetailViewController : UIViewController<UITableViewDelegate, UITableViewDataSource, UIActionSheetDelegate>
 {
@@ -23,5 +24,6 @@
 @property (nonatomic, retain) DemoBookDescription* book;
 
 +(EditViewController *)editViewController;
+-(void)exception:(ICEException*)ex;
 
 @end

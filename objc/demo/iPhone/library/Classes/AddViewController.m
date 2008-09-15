@@ -39,6 +39,7 @@
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    self.navigationItem.leftBarButtonItem.enabled = YES;
     self.navigationItem.rightBarButtonItem.enabled = (book.isbn && book.isbn.length > 0);
 }
 
@@ -68,11 +69,46 @@
 
 - (IBAction)save:(id)sender
 {
+    self.navigationItem.leftBarButtonItem.enabled = NO;
+    self.navigationItem.rightBarButtonItem.enabled = NO;
+    [self setEditing:NO animated:NO];
+    [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = YES;
+
     // TODO: AMI
-    [library createBook:book.isbn title:book.title authors:book.authors];
+    [library
+     createBook_async:[ICECallbackOnMainThread callbackOnMainThread:self]
+     response:@selector(createResponse)
+     exception:@selector(exception:)
+     isbn:book.isbn
+     title:book.title
+     authors:book.authors];
+}
+
+#pragma mark AMI callbacks
+-(void)createResponse
+{
+    [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
 
     // Dismiss the modal view to return to the main list
     [self.navigationController dismissModalViewControllerAnimated:YES];
 }
 
+-(void)exception:(ICEException*)ex
+{
+    [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
+    if([ex isKindOfClass:[DemoBookExistsException class]])
+    {
+        // open an alert with just an OK button
+        UIAlertView *alert = [[UIAlertView alloc]
+                              initWithTitle:@"Error" message:@"That ISBN number already exists"
+                              delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alert show];
+        [alert release];
+        self.navigationItem.leftBarButtonItem.enabled = YES;
+        self.navigationItem.rightBarButtonItem.enabled = YES;
+        [self setEditing:YES animated:NO];
+        return;
+    }
+    [super exception:ex];
+}
 @end

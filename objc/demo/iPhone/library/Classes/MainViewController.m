@@ -11,6 +11,7 @@
 #import <DetailViewController.h>
 #import <AddViewController.h>
 
+#import <Ice/Ice.h>
 #import <Library.h>
 
 @interface MainViewController()
@@ -40,8 +41,10 @@
 @synthesize addNavigationController;
 @synthesize currentIndexPath;
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
-	if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+	if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil])
+    {
         self.title = @"Search"; // Hostname?
 
 		// Initialization code
@@ -50,42 +53,6 @@
         rowsQueried = 0;
 	}
 	return self;
-}
-
--(void)addBook:(id)sender
-{
-    AddViewController *controller = self.addViewController;
-    controller.book = [[[DemoBookDescription alloc] init] autorelease];
-    controller.book.authors = [NSMutableArray array];
-    controller.library = library;
-    if(addNavigationController == nil)
-    {
-        UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:controller];
-        self.addNavigationController = navController;
-        [navController release];
-    }
-    [self.navigationController presentModalViewController:addNavigationController animated:YES];
-    [controller setEditing:YES animated:NO];
-}
-
--(void)setLibrary:(id<DemoLibraryPrx>)l
-{
-    if(library)
-    {
-        [library release];
-    }
-    library = [l retain];
-    
-    // Kill the previous query results.
-    self.query = nil;
-    nrows = 0;
-    rowsQueried = 10;
-    [books removeAllObjects];
-}
-
--(id<DemoLibraryPrx>)library
-{
-    return [[library retain] autorelease];
 }
 
 - (void)viewDidLoad
@@ -147,11 +114,72 @@
     }
     return addViewController;
 }
+
+-(void)setLibrary:(id<DemoLibraryPrx>)l
+{
+    if(library)
+    {
+        [library release];
+    }
+    library = [l retain];
     
--(void)handleException:(ICEException*)ex
+    // Kill the previous query results.
+    self.query = nil;
+    nrows = 0;
+    rowsQueried = 10;
+    [books removeAllObjects];
+}
+
+-(id<DemoLibraryPrx>)library
+{
+    return [[library retain] autorelease];
+}
+
+-(void)removeCurrentBook:(BOOL)call
+{
+    DemoBookDescription *book = (DemoBookDescription *)[books objectAtIndex:currentIndexPath.row];
+    
+    if(call)
+    {
+        [book.proxy destroy_async:[ICECallbackOnMainThread callbackOnMainThread:self]
+         response:nil
+         exception:@selector(exceptionIgnoreONE:)];
+    }
+
+    // Remove the book, and the row from the table.
+    [books removeObjectAtIndex:currentIndexPath.row];        
+    --nrows;
+    [searchTableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:currentIndexPath] 
+                           withRowAnimation:UITableViewRowAnimationFade];
+}
+
+-(void)addBook:(id)sender
+{
+    AddViewController *controller = self.addViewController;
+    controller.book = [[[DemoBookDescription alloc] init] autorelease];
+    controller.book.authors = [NSMutableArray array];
+    controller.library = library;
+    if(addNavigationController == nil)
+    {
+        UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:controller];
+        self.addNavigationController = navController;
+        [navController release];
+    }
+    [self.navigationController presentModalViewController:addNavigationController animated:YES];
+    [controller setEditing:YES animated:NO];
+}
+
+#pragma mark AMI callbacks
+
+-(void)exception:(ICEException*)ex
 {
     [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
 
+    // Go back to the login view. This triggers the viewWillAppear on the
+    // LoginViewController, which will invalidate the session.
+    NSLog(@"mainView: exception");
+    [self.navigationController popToRootViewControllerAnimated:YES];    
+    
     NSString* s = [NSString stringWithFormat:@"%@", ex];
     
     // open an alert with just an OK button
@@ -160,6 +188,19 @@
                           delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
     [alert show];       
     [alert release];
+}
+
+-(void)exceptionIgnoreONE:(ICEException*)ex
+{
+    [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
+
+    // Ignore ObjectNotExistExceptiojn
+    if([ex isKindOfClass:[ICEObjectNotExistException class]])
+    {
+        return;
+    }
+    
+    [self exception:ex];
 }
 
 -(void)nextResponse:(NSArray*)seq destroyed:(BOOL)d
@@ -196,20 +237,6 @@
     [searchTableView reloadData];
 }
 
--(void)removeCurrentBook
-{
-    DemoBookDescription *book = (DemoBookDescription *)[books objectAtIndex:currentIndexPath.row];
-
-    // TODO: AMI
-    [book.proxy destroy];
-    [books removeObjectAtIndex:currentIndexPath.row];        
-    --nrows;
-    
-    // Animate the deletion from the table.
-    [searchTableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:currentIndexPath] 
-                           withRowAnimation:UITableViewRowAnimationFade];
-}
-
 #pragma mark UISearchBarDelegate
 
 -(void)searchBarCancelButtonClicked:(UISearchBar*)sender
@@ -243,14 +270,14 @@
     {
         [library queryByIsbn_async:[ICECallbackOnMainThread callbackOnMainThread:self]
                           response:@selector(queryResponse:nrows:result:)
-                          exception:@selector(handleException:)
+                          exception:@selector(exception:)
                               isbn:search n:10];
     }
     else if(searchMode == 1) // Authors
     {
         [library queryByAuthor_async:[ICECallbackOnMainThread callbackOnMainThread:self]
                             response:@selector(queryResponse:nrows:result:)
-                            exception:@selector(handleException:)
+                            exception:@selector(exception:)
                                 author:search n:10];
     }
     else // Title
@@ -258,7 +285,7 @@
 
         [library queryByTitle_async:[ICECallbackOnMainThread callbackOnMainThread:self]
                             response:@selector(queryResponse:nrows:result:)
-                           exception:@selector(handleException:)
+                           exception:@selector(exception:)
                               title:search n:10];
     }
 }
@@ -280,7 +307,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
     if(editingStyle == UITableViewCellEditingStyleDelete)
     {
         self.currentIndexPath = indexPath;
-        [self removeCurrentBook];
+        [self removeCurrentBook:YES];
     }
 }
 
@@ -325,12 +352,11 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
         // how many rows of data we've actually asked for.
         if(indexPath.row > rowsQueried-1)
         {
-
             [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = YES;
             NSAssert(query != nil, @"query != nil");
             [query next_async:[ICECallbackOnMainThread callbackOnMainThread:self]
                      response:@selector(nextResponse:destroyed:)
-                    exception:@selector(handleException:)
+                    exception:@selector(exception:)
                             n:10];
             rowsQueried += 10;
         }
@@ -352,10 +378,11 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
     DemoBookDescription *book = (DemoBookDescription *)[books objectAtIndex:indexPath.row];
     DetailViewController* controller = self.detailViewController;
 
-    // Set the detail controller's inspected item to the currently-selected book.
+    // Set the detail controller's inspected item to the currently selected book.
     controller.book = book;
     
     // Push the detail view on to the navigation controller's stack.
+    NSLog(@"mainView: willSelectRowAtIndexPath");
     [self.navigationController pushViewController:controller animated:YES];
 
     [controller setEditing:NO animated:NO];

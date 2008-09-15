@@ -10,7 +10,9 @@
 #import <DetailViewController.h>
 #import <MainViewController.h>
 #import <EditViewController.h>
+#import <AppDelegate.h>
 
+#import <Ice/Ice.h>
 #import <Library.h>
 
 static EditViewController* editViewController_ = nil;
@@ -20,12 +22,14 @@ static EditViewController* editViewController_ = nil;
 {
     DemoBookDescription* book;
     NSString *fieldKey;
+    id view;
 }
 
--(id)initWithBook:(DemoBookDescription*)obj fieldKey:(NSString*)key;
+-(id)initWithBook:(DemoBookDescription*)obj fieldKey:(NSString*)key view:(id)view;
 
-@property (nonatomic, retain) NSString* textValue;
+@property (nonatomic, readonly) NSString* textValue;
 @property (nonatomic, readonly) NSString *fieldName;
+@property (nonatomic, retain) id view;
 
 @property (nonatomic, retain) NSString *fieldKey;
 @property (nonatomic, retain) DemoBookDescription* book;
@@ -35,14 +39,17 @@ static EditViewController* editViewController_ = nil;
 @implementation KVMEditViewCallback
 
 @dynamic textValue, fieldName;
-@synthesize fieldKey, book;
+@synthesize fieldKey;
+@synthesize book;
+@synthesize view;
 
--(id)initWithBook:(DemoBookDescription*)b fieldKey:(NSString*)key
+-(id)initWithBook:(DemoBookDescription*)b fieldKey:(NSString*)key view:(id)v
 {
     if(self = [super init])
     {
         self.book = b;
         self.fieldKey = key;
+        self.view = v;
     }
     return self;
 }
@@ -57,28 +64,22 @@ static EditViewController* editViewController_ = nil;
     return [book valueForKey:fieldKey];
 }
 
--(void)setTextValue:(NSString*)value
+-(void)save:(NSString*)value
 {
     [book setValue:value forKey:fieldKey];
-}
 
--(void)save:(NSString*)value object:(id)obj response:(SEL)response exception:(SEL)exception
-{
-    if(book.proxy == nil)
+    if(book.proxy != nil)
     {
-        objc_msgSend(obj, response);
-        return;
-    }
-    // There can be no remove changing of ISBN.
-    if(fieldKey == @"title")
-    {
-        [book.proxy setTitle_async:[ICECallbackOnMainThread callbackOnMainThread:obj]
-         response:response exception:exception title:value];
-    }
-    else if(fieldKey == @"rentedBy")
-    {
-        [book.proxy rentBook_async:[ICECallbackOnMainThread callbackOnMainThread:obj]
-         response:response exception:exception name:value];
+        if(fieldKey == @"title")
+        {
+            [book.proxy setTitle_async:[ICECallbackOnMainThread callbackOnMainThread:view]
+             response:nil exception:@selector(exception:) title:value];
+        }
+        else if(fieldKey == @"rentedBy")
+        {
+            [book.proxy rentBook_async:[ICECallbackOnMainThread callbackOnMainThread:view]
+             response:nil exception:@selector(exception:) name:value];
+        }
     }
 }
 
@@ -95,12 +96,14 @@ static EditViewController* editViewController_ = nil;
 {
     DemoBookDescription* book;
     int index;
+    id view;
 }
 
--(id)initWithBook:(DemoBookDescription*)obj index:(int)index;
+-(id)initWithBook:(DemoBookDescription*)obj index:(int)index view:(id)view;
 
-@property (nonatomic, retain) NSString* textValue;
+@property (nonatomic, readonly) NSString* textValue;
 @property (nonatomic, readonly) NSString *fieldName;
+@property (nonatomic, retain) id view;
 
 @property (nonatomic, retain) DemoBookDescription* book;
 
@@ -110,12 +113,14 @@ static EditViewController* editViewController_ = nil;
 
 @dynamic textValue, fieldName;
 @synthesize book;
+@synthesize view;
 
--(id)initWithBook:(DemoBookDescription*)b index:(int)i
+-(id)initWithBook:(DemoBookDescription*)b index:(int)i view:(id)v
 {
     if(self = [super init])
     {
         self.book = b;
+        self.view = v;
         index = i;
     }
     return self;
@@ -128,92 +133,36 @@ static EditViewController* editViewController_ = nil;
 
 -(NSString*)textValue
 {
+    if(index == book.authors.count)
+    {
+        return @"";
+    }
+    
     return [book.authors objectAtIndex:index];
 }
 
--(void)setTextValue:(NSString*)value
+-(void)save:(NSString*)value
 {
     NSMutableArray* arr = (NSMutableArray*)book.authors;
-    [arr replaceObjectAtIndex:index withObject:value];
-}
-
--(void)save:(NSString*)value object:(id)obj response:(SEL)response exception:(SEL)exception
-{
-    if(book.proxy == nil)
+    if(index == book.authors.count)
     {
-        objc_msgSend(obj, response);
-        return;
+        [arr addObject:value];
     }
-
-    NSMutableArray* arr = [book.authors mutableCopy];
-    [arr replaceObjectAtIndex:index withObject:value];
-    [book.proxy setAuthors_async:[ICECallbackOnMainThread callbackOnMainThread:obj]
-     response:response exception:exception authors:arr];
-}
-
--(void)dealloc
-{
-    [book release];
-    [super dealloc];
-}
-
-@end
-
-@interface AuthorAddViewCallback : NSObject<EditViewCallback>
-{
-    DemoBookDescription* book;
-}
-
--(id)initWithBook:(DemoBookDescription*)obj;
-
-@property (nonatomic, retain) NSString* textValue;
-@property (nonatomic, readonly) NSString *fieldName;
-
-@property (nonatomic, retain) DemoBookDescription* book;
-
-@end
-
-@implementation AuthorAddViewCallback
-
-@dynamic textValue, fieldName;
-@synthesize book;
-
--(id)initWithBook:(DemoBookDescription*)b
-{
-    if(self = [super init])
+    else
     {
-        self.book = b;
+        [arr replaceObjectAtIndex:index withObject:value];
     }
-    return self;
-}
-
--(NSString*)fieldName
-{
-    return @"Author";
-}
-
--(NSString*)textValue
-{
-    return @"";
-}
-
--(void)setTextValue:(NSString*)value
-{
-    NSMutableArray* arr = (NSMutableArray*)book.authors;
-    [arr addObject:value];
-}
-
--(void)save:(NSString*)value object:(id)obj response:(SEL)response exception:(SEL)exception
-{
-    if(book.proxy == nil)
+    
+    if(index == book.authors.count)
     {
-        objc_msgSend(obj, response);
-        return;
+        [book.proxy setAuthors_async:[ICECallbackOnMainThread callbackOnMainThread:view]
+         response:nil exception:@selector(exception:) authors:arr];      
     }
-    NSMutableArray* arr = [book.authors mutableCopy];
-    [arr addObject:value];
-    [book.proxy setAuthors_async:[ICECallbackOnMainThread callbackOnMainThread:obj]
-     response:response exception:exception authors:arr];
+    else
+    {
+        [book.proxy setAuthors_async:[ICECallbackOnMainThread callbackOnMainThread:view]
+         response:nil exception:@selector(exception:) authors:arr];
+    }
 }
 
 -(void)dealloc
@@ -237,17 +186,7 @@ static EditViewController* editViewController_ = nil;
 @synthesize tableView;
 @synthesize book;
 
-+ (EditViewController *)editViewController
-{
-    // Instantiate the editin view controller if necessary.
-    if(editViewController_ == nil)
-    {
-        editViewController_ = [[EditViewController alloc] initWithNibName:@"EditView" bundle:nil];
-    }
-    return editViewController_;
-}
-
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+-(id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
 	if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil])
     {
@@ -256,18 +195,24 @@ static EditViewController* editViewController_ = nil;
 	return self;
 }
 
-- (void)viewDidLoad
+-(void)viewDidLoad
 {
     self.navigationItem.rightBarButtonItem = self.editButtonItem;
     tableView.allowsSelectionDuringEditing = YES;
 }
 
-- (void)viewWillAppear:(BOOL)animated
+-(void)viewWillAppear:(BOOL)animated
 {
+        NSLog(@"DetailViewController.viewWillAppear");
     // Remove any existing selection.
     [tableView deselectRowAtIndexPath:selectedIndexPath animated:NO];
     // Redisplay the data.
     [tableView reloadData];
+}
+
+-(void)viewDidAppear:(BOOL)animated
+{
+    NSLog(@"DetailViewController.viewDidAppear");
 }
 
 - (void)setEditing:(BOOL)editing animated:(BOOL)animated
@@ -298,8 +243,19 @@ static EditViewController* editViewController_ = nil;
 	[super dealloc];
 }
 
++ (EditViewController *)editViewController
+{
+    // Instantiate the editin view controller if necessary.
+    if(editViewController_ == nil)
+    {
+        editViewController_ = [[EditViewController alloc] initWithNibName:@"EditView" bundle:nil];
+    }
+    return editViewController_;
+}
+
 -(IBAction)removeBook:(id)sender
 {
+    NSLog(@"removeBook");
     // Save the navigation controller. Once the view is popped, self.navigationController
     // is nil.
     UINavigationController* nc = self.navigationController;
@@ -307,7 +263,71 @@ static EditViewController* editViewController_ = nil;
 
     // The MainViewController is now the top.
     MainViewController* controller = (MainViewController*)nc.topViewController;
-    [controller removeCurrentBook];
+    [controller removeCurrentBook:YES];
+}
+
+#pragma mark AMI Callbacks
+
+-(void)exception:(ICEException*)ex
+{
+    [self.tableView deselectRowAtIndexPath:selectedIndexPath animated:NO];
+    
+    [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
+
+    NSString* s;
+    BOOL fatalException = NO;
+    
+    // Ignore ObjectNotExistExceptiojn
+    if([ex isKindOfClass:[ICEObjectNotExistException class]])
+    {
+        // The MainViewController is now the top.
+        UINavigationController* nc = self.navigationController;
+        [self.navigationController popViewControllerAnimated:YES];
+        MainViewController* controller = (MainViewController*)nc.topViewController;
+        [controller removeCurrentBook:NO];
+        s = @"The current book has been removed";
+    }
+    else if([ex isKindOfClass:[DemoBookRentedException class]])
+    {
+        DemoBookRentedException* ex2 = (DemoBookRentedException*)ex;
+        s = @"The book has already been rented";
+
+        book.rentedBy = ex2.renter;
+        [tableView reloadData];
+    }
+    else if([ex isKindOfClass:[DemoBookNotRentedException class]])
+    {
+        s = @"The book has already been returned.";
+
+        book.rentedBy = @"";
+        [tableView reloadData];
+    }
+    else
+    {
+        fatalException = YES;
+        s = [NSString stringWithFormat:@"%@", ex];
+    }
+    
+    if(fatalException)
+    {
+        [self.navigationController popToRootViewControllerAnimated:YES];
+    }
+
+    // open an alert with just an OK button
+    UIAlertView *alert = [[UIAlertView alloc]
+                          initWithTitle:@"Error" message:s
+                          delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    [alert show];
+    [alert release];
+}
+
+-(void)returnBookResponse
+{
+    [self.tableView deselectRowAtIndexPath:selectedIndexPath animated:NO];
+    [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
+    
+    book.rentedBy = @"";
+    [tableView reloadData];
 }
 
 #pragma mark <UITableViewDelegate, UITableViewDataSource> Methods
@@ -370,10 +390,14 @@ static EditViewController* editViewController_ = nil;
     else if(editingStyle == UITableViewCellEditingStyleInsert)
     {
         EditViewController *controller = [DetailViewController editViewController];
-        AuthorAddViewCallback* cb = [[[AuthorAddViewCallback alloc] initWithBook:book] autorelease];
+        AuthorEditViewCallback* cb = [[[AuthorEditViewCallback alloc]
+                                       initWithBook:book
+                                       index:book.authors.count
+                                       view:self] autorelease];
         controller.cb = cb;
         
         self.selectedIndexPath = indexPath;
+        NSLog(@"commitEditingStyle");
         [self.navigationController pushViewController:controller animated:YES];        
     }
 }
@@ -548,7 +572,8 @@ static EditViewController* editViewController_ = nil;
             }
             
             KVMEditViewCallback* cb = [[[KVMEditViewCallback alloc] 
-                                        initWithBook:book fieldKey:@"isbn"] autorelease];
+                                        initWithBook:book fieldKey:@"isbn"
+                                        view:self] autorelease];
             controller.cb = cb;
             break;
         }
@@ -556,23 +581,19 @@ static EditViewController* editViewController_ = nil;
         case 1:
         {
             KVMEditViewCallback* cb = [[[KVMEditViewCallback alloc] 
-                                        initWithBook:book fieldKey:@"title"] autorelease];
+                                        initWithBook:book fieldKey:@"title"
+                                        view:self] autorelease];
             controller.cb = cb;
             break;
         }
             
         case 2:
         {
-            if(indexPath.row == book.authors.count)
-            {
-                AuthorAddViewCallback* cb = [[[AuthorAddViewCallback alloc] initWithBook:book] autorelease];
-                controller.cb = cb;
-            }
-            else
-            {
-                AuthorEditViewCallback* cb = [[[AuthorEditViewCallback alloc] initWithBook:book index:indexPath.row] autorelease];
-                controller.cb = cb;
-            }
+            AuthorEditViewCallback* cb = [[[AuthorEditViewCallback alloc]
+                                           initWithBook:book
+                                           index:indexPath.row
+                                           view:self] autorelease];
+            controller.cb = cb;
             break;
         }
             
@@ -595,39 +616,18 @@ static EditViewController* editViewController_ = nil;
             }
 
             KVMEditViewCallback* cb = [[[KVMEditViewCallback alloc] 
-                                        initWithBook:book fieldKey:@"rentedBy"] autorelease];
+                                        initWithBook:book
+                                        fieldKey:@"rentedBy"
+                                        view:self] autorelease];
             controller.cb = cb;
             break;
         }
     }
 
     self.selectedIndexPath = indexPath;
+    NSLog(@"didSelectRowAtIndexPath");
+
     [self.navigationController pushViewController:controller animated:YES];
-}
-
--(void)handleException:(ICEException*)ex
-{
-    [self.tableView deselectRowAtIndexPath:selectedIndexPath animated:NO];
-
-    [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
-    
-    NSString* s = [NSString stringWithFormat:@"%@", ex];
-    
-    // open an alert with just an OK button
-    UIAlertView *alert = [[UIAlertView alloc]
-                          initWithTitle:@"Error" message:s
-                          delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
-    [alert show];
-    [alert release];
-}
-
--(void)returnBookResponse
-{
-    [self.tableView deselectRowAtIndexPath:selectedIndexPath animated:NO];
-    [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
-
-    book.rentedBy = @"";
-    [tableView reloadData];
 }
 
 #pragma mark - UIActionSheetDelegate
@@ -640,7 +640,7 @@ static EditViewController* editViewController_ = nil;
     {
         [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = YES;
         [book.proxy returnBook_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-         response:@selector(returnBookResponse) exception:@selector(handleException:)];
+         response:@selector(returnBookResponse) exception:@selector(exception:)];
     }
 }
 

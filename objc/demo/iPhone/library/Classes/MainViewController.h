@@ -36,5 +36,5 @@
 
 @property (nonatomic, retain) id<DemoLibraryPrx> library;
 
--(void)removeCurrentBook;
+-(void)removeCurrentBook:(BOOL)call;
 @end
