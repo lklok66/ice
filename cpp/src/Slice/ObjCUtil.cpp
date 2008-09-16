@@ -493,7 +493,14 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
 
 	if(marshal)
 	{
-	    out << nl << "[" << stream << " " << selector << ":" << param << "];";
+	    if(builtin->kind() == Builtin::KindObject)
+	    {
+		out << nl << "[" << stream << " writeObject:" << param << " typeId:@\"::Ice::Object\"];";
+	    }
+            else
+            {
+                out << nl << "[" << stream << " " << selector << ":" << param << "];";
+            }
 	}
 	else
 	{
@@ -535,11 +542,13 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
         if(marshal)
         {
 	    // Cast avoids warning for forward-declared classes.
-            out << nl << "[" << stream << " writeObject:(ICEObject*)" << param << "];";
+            out << nl << "[" << stream << " writeObject:(ICEObject*)" << param 
+                << " typeId:@\"" << cl->scoped() << "\"];";
         }
         else
         {
-            out << nl << "[" << stream << " readObject:(ICEObject**)&" << param << " typeId:@\"" << cl->scoped() << "\"];";
+            out << nl << "[" << stream << " readObject:(ICEObject**)&" << param 
+                << " typeId:@\"" << cl->scoped() << "\"];";
 //             if(isOutParam)
 //             {
 //                 //out << nl << "IceInternal.ParamPatcher<" << typeToString(type) << ">" << param
@@ -611,7 +620,14 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
                 string selector = getBuiltinSelector(builtin, marshal) + "Seq";
                 if(marshal)
                 {
-                    out << nl << "[" << stream << " " << selector << ":" << param << "];";
+                    if(builtin->kind() == Builtin::KindObject)
+                    {
+                        out << nl << "[" << stream << " " << selector << ":" << param << " typeId:@\"::Ice::Object\"];";
+                    }
+                    else
+                    {
+                        out << nl << "[" << stream << " " << selector << ":" << param << "];";
+                    }
                 }
                 else
                 {

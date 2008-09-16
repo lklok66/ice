@@ -251,7 +251,7 @@
     id<ICECommunicator> communicator = [[current adapter] getCommunicator];
     id<ICEOutputStream> o = [ICEUtil createOutputStream:communicator];
     TestAlsoEmpty* ae = [[TestAlsoEmpty alloc] init];
-    [o writeObject:ae];
+    [o writeObject:ae typeId:[TestAlsoEmpty ice_staticId]];
     [o writePendingObjects];
     *outParams = [o finished];
     return YES;
