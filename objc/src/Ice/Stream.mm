@@ -1515,11 +1515,11 @@ typedef enum { dummy } Dummy_Enum;
     }
 }
 
--(void) writeTypeId:(const char*)v
+-(void) writeTypeId:(NSString*)v
 {
     try
     {
-        os_->writeTypeId(v);
+        os_->writeTypeId([v UTF8String]);
     }
     catch(const std::exception& ex)
     {

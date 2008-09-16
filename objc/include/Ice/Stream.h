@@ -139,7 +139,7 @@ typedef struct
 
 -(void) writeSize:(ICEInt)v;
 
--(void) writeTypeId:(const char*)v;
+-(void) writeTypeId:(NSString*)v;
 
 -(void) writeException:(ICEUserException*)v;
 

@@ -21,16 +21,29 @@
 #import <Foundation/NSAutoreleasePool.h>
 
 int
-ICELookupString(const char** array, size_t count, const char* str)
+ICEInternalLookupString(NSString* array[], size_t count, NSString* str)
 {
-    //
-    // TODO: Optimize to do a binary search.
-    //
-    for(size_t i = 0; i < count; i++)
+    size_t low = 0;
+    size_t high = count - 1;
+    while(low <= high)
     {
-        if(strcmp(array[i], str) == 0)
+        size_t mid = (low + high) / 2;
+        switch([array[mid] compare:str])
         {
-            return i;
+        case NSOrderedDescending:
+            if(mid == 0)
+            {
+                return -1;
+            }
+            high = mid - 1;
+            break;
+        case NSOrderedAscending:
+            low = mid + 1;
+            break;
+        case NSOrderedSame:
+            return mid;
+        default:
+            return -1; // Can't be reached
         }
     }
     return -1;
@@ -255,17 +268,17 @@ IceObjC::BlobjectI::ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& 
 
 @implementation ICEObject
 
-static const char* ICEObject_ids__[1] =
+static NSString* ICEObject_ids__[1] =
 {
-    "::Ice::Object"
+    @"::Ice::Object"
 };
 
-static const char* ICEObject_all__[4] =
+static NSString* ICEObject_all__[4] =
 {
-    "ice_id",
-    "ice_ids",
-    "ice_isA",
-    "ice_ping"
+    @"ice_id",
+    @"ice_ids",
+    @"ice_isA",
+    @"ice_ping"
 };
 
 -(void) checkModeAndSelector__:(ICEOperationMode)expected selector:(SEL)sel current:(ICECurrent*)current
@@ -340,8 +353,8 @@ static const char* ICEObject_all__[4] =
 -(BOOL) ice_isA:(NSString*)typeId current:(ICECurrent*)current
 {
     int count, index;
-    const char** staticIds = [[self class] staticIds__:&count idIndex:&index];
-    return ICELookupString(staticIds, count, [typeId UTF8String]) >= 0;
+    NSString** staticIds = [[self class] staticIds__:&count idIndex:&index];
+    return ICEInternalLookupString(staticIds, count, typeId) >= 0;
 }
 
 -(void) ice_ping
@@ -371,24 +384,16 @@ static const char* ICEObject_all__[4] =
 
 -(NSArray*) ice_ids:(ICECurrent*)current
 {
-    try
-    {
-        int count, index;
-        const char** staticIds = [[self class] staticIds__:&count idIndex:&index];
-        return [toNSArray(staticIds, count) autorelease];
-    }
-    catch(const std::exception& ex)
-    {
-        rethrowObjCException(ex);
-        return NO; // Keep the compiler happy.
-    }
+    int count, index;
+    NSString** staticIds = [[self class] staticIds__:&count idIndex:&index];
+    return [NSArray arrayWithObjects:staticIds count:count];
 }
 
 +(NSString*) ice_staticId
 {
     int count, index;
-    const char** staticIds = [self staticIds__:&count idIndex:&index];
-    return [NSString stringWithUTF8String:staticIds[index]];
+    NSString** staticIds = [self staticIds__:&count idIndex:&index];
+    return staticIds[index];
 }
 
 -(void) ice_preMarshal
@@ -399,18 +404,16 @@ static const char* ICEObject_all__[4] =
 {
 }
 
-+(const char**) staticIds__:(int*)count idIndex:(int*)idx
++(NSString**) staticIds__:(int*)count idIndex:(int*)idx
 {
-    *count = sizeof(ICEObject_ids__) / sizeof(const char*);
+    *count = sizeof(ICEObject_ids__) / sizeof(NSString*);
     *idx = 0;
     return ICEObject_ids__;
 }
 
 -(BOOL) dispatch__:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
 {
-    switch(ICELookupString(ICEObject_all__, 
-                           sizeof(ICEObject_all__) / sizeof(const char*),
-                           [[current operation] UTF8String]))
+    switch(ICEInternalLookupString(ICEObject_all__, sizeof(ICEObject_all__) / sizeof(NSString*), current.operation))
     {
     case 0:
         return [ICEObject ice_id___:self current:current is:is os:os];
