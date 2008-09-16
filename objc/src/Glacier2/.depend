@@ -1,0 +1,8 @@
+PermissionsVerifier.m: $(slicedir)/Glacier2/PermissionsVerifier.ice $(slicedir)/Glacier2/SSLInfo.ice $(slicedir)/Ice/BuiltinSequences.ice
+Router.m: $(slicedir)/Glacier2/Router.ice $(slicedir)/Ice/Router.ice $(slicedir)/Ice/BuiltinSequences.ice $(slicedir)/Glacier2/Session.ice $(slicedir)/Ice/Identity.ice $(slicedir)/Glacier2/SSLInfo.ice
+Session.m: $(slicedir)/Glacier2/Session.ice $(slicedir)/Ice/BuiltinSequences.ice $(slicedir)/Ice/Identity.ice $(slicedir)/Glacier2/SSLInfo.ice
+SSLInfo.m: $(slicedir)/Glacier2/SSLInfo.ice $(slicedir)/Ice/BuiltinSequences.ice
+../../../slice/Glacier2/PermissionsVerifier.ice: $(SLICE2OBJC)
+../../../slice/Glacier2/Router.ice: $(SLICE2OBJC)
+../../../slice/Glacier2/Session.ice: $(SLICE2OBJC)
+../../../slice/Glacier2/SSLInfo.ice: $(SLICE2OBJC)
