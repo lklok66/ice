@@ -236,8 +236,7 @@ Slice::ObjCGenerator::outTypeToString(const TypePtr& type)
         return "void";
     }
 
-    BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
-    if(builtin && builtin->kind() == Builtin::KindString)
+    if(isString(type))
     {
 	return "NSMutableString";
     }

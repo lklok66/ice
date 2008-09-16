@@ -2220,15 +2220,23 @@ void
 Slice::Gen::TypesVisitor::visitConst(const ConstPtr& p)
 {
     _H << sp;
-    _H << nl << "static const " << typeToString(p->type()) << " ";
+    _H << nl << "static ";
+    if(!isString(p->type()))
+    {
+        _H << "const ";
+    }
+    _H << typeToString(p->type()) << " ";
     if(mapsToPointerType(p->type()))
     {
         _H << "*";
     }
+    if(isString(p->type()))
+    {
+        _H << " const ";
+    }
     _H << fixName(p) << " = ";
 
-    BuiltinPtr bp = BuiltinPtr::dynamicCast(p->type());
-    if(bp && bp->kind() == Builtin::KindString)
+    if(isString(p->type()))
     {
         //
         // Expand strings into the basic source character set. We can't use isalpha() and the like
