@@ -43,7 +43,7 @@
 
 NSString* hostnameKey = @"hostnameKey";
 
-- (void)viewDidLoad
+-(void)viewDidLoad
 {
     // Initialize the application defaults.
     NSString* testValue = [[NSUserDefaults standardUserDefaults] stringForKey:hostnameKey];
@@ -67,25 +67,19 @@ NSString* hostnameKey = @"hostnameKey";
 
 -(void)viewWillAppear:(BOOL)animated
 {
-    NSLog(@"LoginViewController.viewWillAppear");
     AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
     appDelegate.session = nil;
+    appDelegate.fatal = NO;
     [super viewWillAppear:animated];
 }
 
--(void)viewDidAppear:(BOOL)animated
-{
-    NSLog(@"LoginViewController.viewDidAppear");
-    NSLog(@"view: %@", self.view);
-}
-
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+-(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
     // Return YES for supported orientations
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
-- (void)didReceiveMemoryWarning
+-(void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning]; // Releases the view if it doesn't have a superview
     // Release anything that's not essential, such as cached data
@@ -105,7 +99,7 @@ NSString* hostnameKey = @"hostnameKey";
     [super touchesBegan:touches withEvent:event];
 }
 
-- (void)dealloc
+-(void)dealloc
 {
     [hostnameTextField release];
     [loginButton release];
@@ -204,7 +198,6 @@ NSString* hostnameKey = @"hostnameKey";
     
     MainViewController* controller = self.mainViewController;
     controller.library = library;
-    NSLog(@"loginComplete");
     [self.navigationController pushViewController:controller animated:YES];
 
     // Re-enable the login button.

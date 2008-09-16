@@ -15,14 +15,14 @@
 
 @synthesize library;
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+-(id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
 	if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
 		// Initialization code
 	}
 	return self;
 }
 
-- (void)viewDidLoad
+-(void)viewDidLoad
 {
     self.title = @"New Book";
     self.navigationItem.leftBarButtonItem = [[[UIBarButtonItem alloc]
@@ -36,45 +36,43 @@
     tableView.allowsSelectionDuringEditing = YES;
 }
 
-- (void)viewWillAppear:(BOOL)animated
+-(void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
     self.navigationItem.leftBarButtonItem.enabled = YES;
     self.navigationItem.rightBarButtonItem.enabled = (book.isbn && book.isbn.length > 0);
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+-(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
 	// Return YES for supported orientations
 	return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
-- (void)didReceiveMemoryWarning
+-(void)didReceiveMemoryWarning
 {
 	[super didReceiveMemoryWarning]; // Releases the view if it doesn't have a superview
 	// Release anything that's not essential, such as cached data
 }
 
-
-- (void)dealloc
+-(void)dealloc
 {
     [library release];
 	[super dealloc];
 }
 
-- (IBAction)cancel:(id)sender
+-(IBAction)cancel:(id)sender
 {
-    [self.navigationController dismissModalViewControllerAnimated:YES];
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
-- (IBAction)save:(id)sender
+-(IBAction)save:(id)sender
 {
     self.navigationItem.leftBarButtonItem.enabled = NO;
     self.navigationItem.rightBarButtonItem.enabled = NO;
     [self setEditing:NO animated:NO];
     [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = YES;
 
-    // TODO: AMI
     [library
      createBook_async:[ICECallbackOnMainThread callbackOnMainThread:self]
      response:@selector(createResponse)
@@ -85,12 +83,12 @@
 }
 
 #pragma mark AMI callbacks
+
 -(void)createResponse
 {
     [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
-
-    // Dismiss the modal view to return to the main list
-    [self.navigationController dismissModalViewControllerAnimated:YES];
+  
+    [self.navigationController popViewControllerAnimated:YES];
 }
 
 -(void)exception:(ICEException*)ex
@@ -101,14 +99,18 @@
         // open an alert with just an OK button
         UIAlertView *alert = [[UIAlertView alloc]
                               initWithTitle:@"Error" message:@"That ISBN number already exists"
-                              delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+                              delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
         [alert show];
         [alert release];
+        
         self.navigationItem.leftBarButtonItem.enabled = YES;
         self.navigationItem.rightBarButtonItem.enabled = YES;
         [self setEditing:YES animated:NO];
+        
         return;
     }
+
     [super exception:ex];
 }
+
 @end

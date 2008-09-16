@@ -203,19 +203,13 @@ static EditViewController* editViewController_ = nil;
 
 -(void)viewWillAppear:(BOOL)animated
 {
-        NSLog(@"DetailViewController.viewWillAppear");
     // Remove any existing selection.
     [tableView deselectRowAtIndexPath:selectedIndexPath animated:NO];
     // Redisplay the data.
     [tableView reloadData];
 }
 
--(void)viewDidAppear:(BOOL)animated
-{
-    NSLog(@"DetailViewController.viewDidAppear");
-}
-
-- (void)setEditing:(BOOL)editing animated:(BOOL)animated
+-(void)setEditing:(BOOL)editing animated:(BOOL)animated
 {
     [super setEditing:editing animated:animated];
     [tableView setEditing:editing animated:animated];
@@ -223,19 +217,19 @@ static EditViewController* editViewController_ = nil;
     [tableView reloadData];
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+-(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
 	// Return YES for supported orientations
 	return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
-- (void)didReceiveMemoryWarning
+-(void)didReceiveMemoryWarning
 {
 	[super didReceiveMemoryWarning]; // Releases the view if it doesn't have a superview
 	// Release anything that's not essential, such as cached data
 }
 
-- (void)dealloc
+-(void)dealloc
 {
     [book release];
     [tableView release];
@@ -255,7 +249,6 @@ static EditViewController* editViewController_ = nil;
 
 -(IBAction)removeBook:(id)sender
 {
-    NSLog(@"removeBook");
     // Save the navigation controller. Once the view is popped, self.navigationController
     // is nil.
     UINavigationController* nc = self.navigationController;
@@ -275,7 +268,6 @@ static EditViewController* editViewController_ = nil;
     [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
 
     NSString* s;
-    BOOL fatalException = NO;
     
     // Ignore ObjectNotExistExceptiojn
     if([ex isKindOfClass:[ICEObjectNotExistException class]])
@@ -304,19 +296,20 @@ static EditViewController* editViewController_ = nil;
     }
     else
     {
-        fatalException = YES;
         s = [NSString stringWithFormat:@"%@", ex];
-    }
-    
-    if(fatalException)
-    {
-        [self.navigationController popToRootViewControllerAnimated:YES];
+
+        // BUGFIX: In the event of a fatal exception we want to pop back to the login view.
+        // However, doing so directly by calling [self.navigationController popToRootViewControllerAnimated:YES];
+        // causes the navigation view & the bar to get out of sync. So instead, we pop to the root view
+        // in the alert view didDismissWithButtonIndex callback.
+        AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+        appDelegate.fatal = YES;
     }
 
     // open an alert with just an OK button
     UIAlertView *alert = [[UIAlertView alloc]
                           initWithTitle:@"Error" message:s
-                          delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+                          delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
     [alert show];
     [alert release];
 }
@@ -330,9 +323,20 @@ static EditViewController* editViewController_ = nil;
     [tableView reloadData];
 }
 
+#pragma mark UIAlertViewDelegate
+
+-(void)alertView:(UIAlertView*)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
+{
+    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+    if(appDelegate.fatal)
+    {
+        [self.navigationController popToRootViewControllerAnimated:YES];
+    }
+}
+
 #pragma mark <UITableViewDelegate, UITableViewDataSource> Methods
 
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tv
+-(NSInteger)numberOfSectionsInTableView:(UITableView *)tv
 {
     // If we're in "add book mode" then the rented-by section is not visible.
     if(book.proxy == nil)
@@ -343,7 +347,7 @@ static EditViewController* editViewController_ = nil;
     return 4;
 }
 
-- (NSInteger)tableView:(UITableView *)tv numberOfRowsInSection:(NSInteger)section
+-(NSInteger)tableView:(UITableView *)tv numberOfRowsInSection:(NSInteger)section
 {
     if(section == 2) // Authors
     {
@@ -356,7 +360,7 @@ static EditViewController* editViewController_ = nil;
     return 1;
 }
 
-- (UITableViewCellEditingStyle)tableView:(UITableView *)tv editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath
+-(UITableViewCellEditingStyle)tableView:(UITableView *)tv editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if(!self.editing || indexPath.section != 2)
     {
@@ -373,7 +377,7 @@ static EditViewController* editViewController_ = nil;
     }
 }
 
-- (void)tableView:(UITableView *)tv commitEditingStyle:(UITableViewCellEditingStyle)editingStyle
+-(void)tableView:(UITableView *)tv commitEditingStyle:(UITableViewCellEditingStyle)editingStyle
                                     forRowAtIndexPath:(NSIndexPath *)indexPath
 {
     // If row is deleted, remove it from the list.
@@ -397,12 +401,11 @@ static EditViewController* editViewController_ = nil;
         controller.cb = cb;
         
         self.selectedIndexPath = indexPath;
-        NSLog(@"commitEditingStyle");
         [self.navigationController pushViewController:controller animated:YES];        
     }
 }
 
-- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+-(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
     if(self.editing && section == 3) // Remove button.
     {
@@ -411,7 +414,7 @@ static EditViewController* editViewController_ = nil;
     return self.tableView.sectionHeaderHeight;
 }
 
-- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if(indexPath.section == 1)
     {
@@ -432,7 +435,7 @@ static EditViewController* editViewController_ = nil;
     }
 }
 
-- (UITableViewCell *)tableView:(UITableView *)tv cellForRowAtIndexPath:(NSIndexPath *)indexPath
+-(UITableViewCell *)tableView:(UITableView *)tv cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     UITableViewCell *cell;
     // 4 Possible sections. Section 1 and 4 are special. The title section, and the remove book section.
@@ -527,7 +530,7 @@ static EditViewController* editViewController_ = nil;
     return cell;
 }
 
-- (NSString *)tableView:(UITableView *)tv titleForHeaderInSection:(NSInteger)section
+-(NSString *)tableView:(UITableView *)tv titleForHeaderInSection:(NSInteger)section
 {
     // Return the displayed title for the specified section.
     switch (section)
@@ -548,7 +551,7 @@ static EditViewController* editViewController_ = nil;
     return nil;
 }
 
-- (NSIndexPath *)tableView:(UITableView *)tv willSelectRowAtIndexPath:(NSIndexPath *)indexPath
+-(NSIndexPath *)tableView:(UITableView *)tv willSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if(indexPath.section == 3)
     {
@@ -558,7 +561,7 @@ static EditViewController* editViewController_ = nil;
     return (self.editing) ? indexPath : nil;
 }
 
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     EditViewController *controller = [DetailViewController editViewController];
     switch(indexPath.section)
@@ -625,7 +628,6 @@ static EditViewController* editViewController_ = nil;
     }
 
     self.selectedIndexPath = indexPath;
-    NSLog(@"didSelectRowAtIndexPath");
 
     [self.navigationController pushViewController:controller animated:YES];
 }
@@ -639,8 +641,11 @@ static EditViewController* editViewController_ = nil;
     if(buttonIndex == 0)
     {
         [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = YES;
-        [book.proxy returnBook_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-         response:@selector(returnBookResponse) exception:@selector(exception:)];
+        
+        [book.proxy
+         returnBook_async:[ICECallbackOnMainThread callbackOnMainThread:self]
+         response:@selector(returnBookResponse)
+         exception:@selector(exception:)];
     }
 }
 

@@ -11,19 +11,19 @@
 #import <DetailViewController.h>
 #import <AddViewController.h>
 
+#import <AppDelegate.h>
+
 #import <Ice/Ice.h>
 #import <Library.h>
 
 @interface MainViewController()
 
-//@property (nonatomic, retain) UIActivityIndicatorView* activityView;
 @property (nonatomic, retain) UITableView* searchTableView;
 @property (nonatomic, retain) UISegmentedControl* searchSegmentedControl;
 
 @property (nonatomic, retain) NSIndexPath* currentIndexPath;
 @property (nonatomic, retain) DetailViewController* detailViewController;
 @property (nonatomic, retain) AddViewController* addViewController;
-@property (nonatomic, retain) UINavigationController *addNavigationController;
 @property (nonatomic, retain) id<DemoBookQueryResultPrx> query;
 @property (nonatomic, retain) NSMutableArray* books;
 
@@ -38,10 +38,9 @@
 @synthesize books;
 @synthesize addViewController;
 @synthesize detailViewController;
-@synthesize addNavigationController;
 @synthesize currentIndexPath;
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+-(id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
 	if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil])
     {
@@ -55,41 +54,38 @@
 	return self;
 }
 
-- (void)viewDidLoad
+-(void)viewDidLoad
 {
     self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc]
                                                initWithBarButtonSystemItem:UIBarButtonSystemItemAdd
                                                target:self action:@selector(addBook:)] autorelease];
 }
 
-- (void)viewWillAppear:(BOOL)animated
+-(void)viewWillAppear:(BOOL)animated
 {
-    // Remove any existing selection.
-    //[tableView deselectRowAtIndexPath:selectedIndexPath animated:NO];
     // Redisplay the data.
     [searchTableView reloadData];
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+-(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
 	// Return YES for supported orientations
 	return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
-- (void)didReceiveMemoryWarning
+-(void)didReceiveMemoryWarning
 {
 	[super didReceiveMemoryWarning]; // Releases the view if it doesn't have a superview
 	// Release anything that's not essential, such as cached data
 }
 
-- (void)dealloc
+-(void)dealloc
 {
     [library release];
     [searchSegmentedControl release];
     [searchTableView release];
     [currentIndexPath release];
     [detailViewController release];
-    [addNavigationController release];
     [addViewController release];
     [query release];
     [books release];
@@ -159,13 +155,8 @@
     controller.book = [[[DemoBookDescription alloc] init] autorelease];
     controller.book.authors = [NSMutableArray array];
     controller.library = library;
-    if(addNavigationController == nil)
-    {
-        UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:controller];
-        self.addNavigationController = navController;
-        [navController release];
-    }
-    [self.navigationController presentModalViewController:addNavigationController animated:YES];
+
+    [self.navigationController pushViewController:controller animated:YES];
     [controller setEditing:YES animated:NO];
 }
 
@@ -175,10 +166,12 @@
 {
     [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
 
-    // Go back to the login view. This triggers the viewWillAppear on the
-    // LoginViewController, which will invalidate the session.
-    NSLog(@"mainView: exception");
-    [self.navigationController popToRootViewControllerAnimated:YES];    
+    // BUGFIX: In the event of a fatal exception we want to pop back to the login view.
+    // However, doing so directly by calling [self.navigationController popToRootViewControllerAnimated:YES];
+    // causes the navigation view & the bar to get out of sync. So instead, we pop to the root view
+    // in the alert view didDismissWithButtonIndex callback.
+    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+    appDelegate.fatal = YES;
     
     NSString* s = [NSString stringWithFormat:@"%@", ex];
     
@@ -235,6 +228,17 @@
 
     [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
     [searchTableView reloadData];
+}
+
+#pragma mark UIAlertViewDelegate
+
+-(void)alertView:(UIAlertView*)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
+{
+    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+    if(appDelegate.fatal)
+    {
+        [self.navigationController popToRootViewControllerAnimated:YES];
+    }
 }
 
 #pragma mark UISearchBarDelegate
@@ -300,7 +304,7 @@
 
 #pragma mark UITableViewDelegate and UITableViewDataSource methods
 
-- (void)tableView:(UITableView *)tv commitEditingStyle:(UITableViewCellEditingStyle)editingStyle
+-(void)tableView:(UITableView *)tv commitEditingStyle:(UITableViewCellEditingStyle)editingStyle
 forRowAtIndexPath:(NSIndexPath *)indexPath
 {
     // If row is deleted, remove it from the list.
@@ -311,7 +315,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
     }
 }
 
-- (UITableViewCellEditingStyle)tableView:(UITableView *)tv editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath
+-(UITableViewCellEditingStyle)tableView:(UITableView *)tv editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     return UITableViewCellEditingStyleDelete;
 }
@@ -325,19 +329,19 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
 }
 
 // One row per book, the number of books is the number of rows.
-- (NSInteger)tableView:(UITableView *)tv numberOfRowsInSection:(NSInteger)section
+-(NSInteger)tableView:(UITableView *)tv numberOfRowsInSection:(NSInteger)section
 {
     return nrows;
 }
 
 // The accessory type is the image displayed on the far right of each table cell. In order for the delegate method
 // tableView:accessoryButtonClickedForRowWithIndexPath: to be called, you must return the "Detail Disclosure Button" type.
-- (UITableViewCellAccessoryType)tableView:(UITableView *)tableView accessoryTypeForRowWithIndexPath:(NSIndexPath *)indexPath
+-(UITableViewCellAccessoryType)tableView:(UITableView *)tableView accessoryTypeForRowWithIndexPath:(NSIndexPath *)indexPath
 {
     return UITableViewCellAccessoryDisclosureIndicator;
 }
 
-- (UITableViewCell *)tableView:(UITableView *)tv cellForRowAtIndexPath:(NSIndexPath *)indexPath
+-(UITableViewCell *)tableView:(UITableView *)tv cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     UITableViewCell *cell = [self.searchTableView dequeueReusableCellWithIdentifier:@"MyIdentifier"];
     if (cell == nil)
@@ -371,7 +375,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
     return cell;
 }
 
-- (NSIndexPath *)tableView:(UITableView *)tv willSelectRowAtIndexPath:(NSIndexPath *)indexPath
+-(NSIndexPath *)tableView:(UITableView *)tv willSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     self.currentIndexPath = indexPath;
     
@@ -382,11 +386,8 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
     controller.book = book;
     
     // Push the detail view on to the navigation controller's stack.
-    NSLog(@"mainView: willSelectRowAtIndexPath");
     [self.navigationController pushViewController:controller animated:YES];
-
     [controller setEditing:NO animated:NO];
-    
     return nil;
 }
 

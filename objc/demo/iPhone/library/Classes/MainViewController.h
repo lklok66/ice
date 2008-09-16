@@ -15,7 +15,8 @@
 @class DetailViewController;
 @class AddViewController;
 
-@interface MainViewController : UIViewController<UISearchBarDelegate, UITableViewDataSource, UITableViewDelegate>
+@interface MainViewController :
+    UIViewController<UISearchBarDelegate, UITableViewDataSource, UITableViewDelegate,UIAlertViewDelegate>
 {
     id<DemoLibraryPrx> library;
     
@@ -26,7 +27,6 @@
     NSIndexPath* currentIndexPath;
 
     DetailViewController* detailViewController;
-    UINavigationController *addNavigationController;
     AddViewController* addViewController;
     id<DemoBookQueryResultPrx> query;
     NSMutableArray* books;
@@ -37,4 +37,5 @@
 @property (nonatomic, retain) id<DemoLibraryPrx> library;
 
 -(void)removeCurrentBook:(BOOL)call;
+
 @end

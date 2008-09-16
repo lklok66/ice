@@ -20,14 +20,18 @@
     id<ICECommunicator> communicator;
     id<DemoSessionPrx> session;
 
+    BOOL fatal;
+    
 @private
     NSTimer* refreshTimer;
+
 }
 
 @property (nonatomic, retain) UIWindow *window;
 @property (nonatomic, retain) UINavigationController *navigationController;
 @property (nonatomic, retain) id<ICECommunicator> communicator;
 @property (nonatomic, retain) id<DemoSessionPrx> session;
+@property (nonatomic) BOOL fatal;
 
 -(void)sessionRefreshException:(ICEException*)ex;
 

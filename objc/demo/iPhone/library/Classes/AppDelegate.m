@@ -79,7 +79,9 @@
 @synthesize navigationController;
 @synthesize communicator;
 @synthesize refreshTimer;
+
 @dynamic session;
+@dynamic fatal;
 
 -(id)init
 {
@@ -97,13 +99,13 @@
     [window makeKeyAndVisible];
 }
 
-- (void)applicationWillTerminate:(UIApplication *)application
+-(void)applicationWillTerminate:(UIApplication *)application
 {
     self.session = nil;
     [communicator destroy];
 }
 
-- (void)dealloc
+-(void)dealloc
 {
     [communicator release];
     [navigationController release];
@@ -113,8 +115,6 @@
 
 -(void)sessionRefreshException:(ICEException*)ex
 {
-    NSLog(@"appDelegate:  popToRootView: %@", self.navigationController);
-
     // Go back to the login view. This triggers the viewWillAppear on the
     // LoginViewController, which will invalidate the session.
     [navigationController popToRootViewControllerAnimated:YES];
@@ -127,6 +127,20 @@
                           delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
     [alert show];       
     [alert release];    
+}
+
+-(BOOL)fatal
+{
+    return fatal;
+}
+
+-(void)setFatal:(BOOL)value
+{
+    if(value)
+    {
+        self.session = nil;
+    }
+    fatal = value;
 }
 
 -(void)setSession:(id<DemoSessionPrx>)sess

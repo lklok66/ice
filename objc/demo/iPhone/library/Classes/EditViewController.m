@@ -9,13 +9,12 @@
 
 #import <EditViewController.h>
 
-#import <Ice/Ice.h>
-
 @implementation EditViewController
 
-@synthesize textField, cb;
+@synthesize textField;
+@synthesize cb;
 
-- (void)viewDidLoad
+-(void)viewDidLoad
 {
     // Adjust the text field size and font.
     CGRect frame = textField.frame;
@@ -26,7 +25,7 @@
     self.view.backgroundColor = [UIColor groupTableViewBackgroundColor];
 }
 
-- (void)viewWillAppear:(BOOL)animated
+-(void)viewWillAppear:(BOOL)animated
 {
     NSString *capitalizedKey = cb.fieldName;
     self.title = capitalizedKey;
@@ -36,13 +35,13 @@
     [textField becomeFirstResponder];
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+-(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
 	// Return YES for supported orientations
 	return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
-- (void)didReceiveMemoryWarning
+-(void)didReceiveMemoryWarning
 {
 	[super didReceiveMemoryWarning]; // Releases the view if it doesn't have a superview
 	// Release anything that's not essential, such as cached data
@@ -59,7 +58,7 @@
     [self.navigationController popViewControllerAnimated:YES];
 }
 
-- (void)dealloc
+-(void)dealloc
 {
     [textField release];
     [cb release];

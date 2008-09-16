@@ -13,7 +13,8 @@
 @class EditViewController;
 @class ICEException;
 
-@interface DetailViewController : UIViewController<UITableViewDelegate, UITableViewDataSource, UIActionSheetDelegate>
+@interface DetailViewController :
+    UIViewController<UITableViewDelegate, UITableViewDataSource, UIActionSheetDelegate,UIAlertViewDelegate>
 {
     DemoBookDescription* book;
 @protected
