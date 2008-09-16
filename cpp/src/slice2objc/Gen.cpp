@@ -192,13 +192,13 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
     assert(scopedIter != ids.end());
     StringList::difference_type scopedPos = IceUtilInternal::distance(firstIter, scopedIter);
     
-    _M << sp << nl << "static const char *" << name << "_ids__[] = ";
+    _M << sp << nl << "static NSString *" << name << "_ids__[] = ";
     _M << sb;
     {
         StringList::const_iterator q = ids.begin();
         while(q != ids.end())
         {
-            _M << nl << '"' << *q << '"';
+            _M << nl << "@\"" << *q << '"';
             if(++q != ids.end())
             {
                 _M << ',';
@@ -475,12 +475,12 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
 
         map<string, string>::const_iterator q;
 
-        _M << sp << nl << "static const char *" << name << "_all__[] =";
+        _M << sp << nl << "static NSString *" << name << "_all__[] =";
         _M << sb;
         q = allOpNames.begin();
         while(q != allOpNames.end())
         {
-            _M << nl << '"' << q->first << '"';
+            _M << nl << "@\"" << q->first << '"';
             if(++q != allOpNames.end())
             {
                 _M << ',';
@@ -491,8 +491,8 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
         _M << sp << nl << "-(BOOL) dispatch__:(ICECurrent *)current is:(id<ICEInputStream>)is "
 	   << "os:(id<ICEOutputStream>)os";
         _M << sb;
-	_M << nl << "switch(ICELookupString(" << name << "_all__, sizeof(" << name
-	   << "_all__) / sizeof(const char*), [current.operation UTF8String]))";
+	_M << nl << "switch(ICEInternalLookupString(" << name << "_all__, sizeof(" << name
+	   << "_all__) / sizeof(NSString*), current.operation))";
 	_M << sb;
         int i = 0;
         for(q = allOpNames.begin(); q != allOpNames.end(); ++q)
@@ -517,9 +517,9 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
 	_M << eb;
     }
 
-    _M << sp << nl << "+(const char **) staticIds__:(int*)count idIndex:(int*)idx";
+    _M << sp << nl << "+(NSString **) staticIds__:(int*)count idIndex:(int*)idx";
     _M << sb;
-    _M << nl << "*count = sizeof(" << name << "_ids__) / sizeof(const char *);";
+    _M << nl << "*count = sizeof(" << name << "_ids__) / sizeof(NSString *);";
     _M << nl << "*idx = " << scopedPos << ";";
     _M << nl << "return " << name << "_ids__;";
     _M << eb;
@@ -1631,7 +1631,7 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
 
     _M << sp << nl << "-(void) write__:(id<ICEOutputStream>)os_";
     _M << sb;
-    _M << nl << "[os_ writeTypeId:\"" << p->scoped() << "\"];";
+    _M << nl << "[os_ writeTypeId:@\"" << p->scoped() << "\"];";
     _M << nl << "[os_ startSlice];";
     writeMemberMarshal("self->", dataMembers, 0); // TODO fix second parameter
     _M << nl << "[os_ endSlice];";
@@ -2274,7 +2274,16 @@ Slice::Gen::TypesVisitor::visitConst(const ConstPtr& p)
         }
         else
         {
-            _H << p->value();
+	    string value = p->value();
+	    if(value == "true")
+	    {
+	        value = "YES";
+	    }
+	    else if(value == "false")
+	    {
+	        value = "NO";
+	    }
+            _H << value;
         }
     }
 

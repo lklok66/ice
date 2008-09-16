@@ -1423,8 +1423,22 @@ typedef enum { dummy } Dummy_Enum;
     }
 }
 
--(void) writeObject:(ICEObject*)v
+-(void) writeObject:(ICEObject*)v typeId:(NSString*)typeId
 {
+    if(v && ![v ice_isA:typeId])
+    {
+        NSString* actualType = [[v class] ice_staticId];
+        NSString* expectedType = typeId;
+        NSString* reason = [NSString stringWithFormat:@"expected to marshal object of type `%@', not `%@'",
+                                     expectedType, actualType];
+        
+        @throw [ICEUnexpectedObjectException unexpectedObjectException:__FILE__
+                                             line:__LINE__
+                                             reason_:reason
+                                             type:actualType
+                                             expectedType:expectedType];
+    }
+
     try
     {
         if(v == nil)
@@ -1463,7 +1477,7 @@ typedef enum { dummy } Dummy_Enum;
     }
 }
 
--(void) writeObjectSeq:(NSArray*)arr
+-(void) writeObjectSeq:(NSArray*)arr typeId:(NSString*)typeId
 {
     if(arr == nil)
     {
@@ -1474,11 +1488,11 @@ typedef enum { dummy } Dummy_Enum;
     [self writeSize:[arr count]];
     for(id i in arr)
     {
-        [self writeObject:(i == [NSNull null] ? nil : i)];
+        [self writeObject:(i == [NSNull null] ? nil : i) typeId:typeId];
     }
 }
 
--(void) writeObjectDict:(NSDictionary*)dictionary keyType:(Class)keyType
+-(void) writeObjectDict:(NSDictionary*)dictionary keyType:(Class)keyType typeId:(NSString*)typeId
 {
     if(dictionary == nil)
     {
@@ -1497,15 +1511,15 @@ typedef enum { dummy } Dummy_Enum;
 	}
 	[keyType ice_writeWithStream:key stream:self];
 	id obj = [dictionary objectForKey:key];
-        [self writeObject:(obj == [NSNull null] ? nil : obj)];
+        [self writeObject:(obj == [NSNull null] ? nil : obj) typeId:typeId];
     }
 }
 
--(void) writeTypeId:(const char*)v
+-(void) writeTypeId:(NSString*)v
 {
     try
     {
-        os_->writeTypeId(v);
+        os_->writeTypeId([v UTF8String]);
     }
     catch(const std::exception& ex)
     {
@@ -1766,7 +1780,7 @@ typedef enum { dummy } Dummy_Enum;
 
 +(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
-    [stream writeObjectSeq:obj];
+    [stream writeObjectSeq:obj typeId:[self getContained]];
 }
 
 +(NSString*) getContained
@@ -1787,7 +1801,7 @@ typedef enum { dummy } Dummy_Enum;
 {
     NSString* typeId;
     Class keyClass = [self getContained:&typeId];
-    [stream writeObjectDict:obj keyType:keyClass];
+    [stream writeObjectDict:obj keyType:keyClass typeId:typeId];
 }
 
 +(Class) getContained:(NSString**)typeId

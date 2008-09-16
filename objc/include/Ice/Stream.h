@@ -130,16 +130,16 @@ typedef struct
 
 -(void) writeProxy:(id<ICEObjectPrx>)v;
 
--(void) writeObject:(ICEObject*)v;
--(void) writeObjectSeq:(NSArray*)v;
--(void) writeObjectDict:(NSDictionary*)v keyType:(Class)type;
+-(void) writeObject:(ICEObject*)v typeId:(NSString*)typeId;
+-(void) writeObjectSeq:(NSArray*)v typeId:(NSString*)typeId;
+-(void) writeObjectDict:(NSDictionary*)v keyType:(Class)type typeId:(NSString*)typeId;
 
 -(void) writeSequence:(NSArray*)arr type:(Class)type;
 -(void) writeDictionary:(NSDictionary*)dictionary type:(ICEKeyValueTypeHelper)type;
 
 -(void) writeSize:(ICEInt)v;
 
--(void) writeTypeId:(const char*)v;
+-(void) writeTypeId:(NSString*)v;
 
 -(void) writeException:(ICEUserException*)v;
 
