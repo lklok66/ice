@@ -2685,7 +2685,7 @@ Slice::Gen::TypesVisitor::writeMemberMarshal(const string& instance, const DataM
 {
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
-	writeMarshalUnmarshalCode(_M, (*q)->type(), instance + fixId((*q)->name()), true, false, false);
+	writeMarshalUnmarshalCode(_M, (*q)->type(), instance + fixId((*q)->name(), baseTypes), true, false, false);
     }
 }
 
@@ -2695,8 +2695,8 @@ Slice::Gen::TypesVisitor::writeMemberUnmarshal(const string& instance, const Dat
 {
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
-	writeMarshalUnmarshalCode(_M, (*q)->type(), instance + fixId((*q)->name()
-	                          /* TODO: base classes */), false, false, false);
+	writeMarshalUnmarshalCode(_M, (*q)->type(), instance + fixId((*q)->name(), baseTypes),
+	                          false, false, false);
     }
 }
 

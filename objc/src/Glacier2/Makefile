@@ -15,11 +15,12 @@ LIBNAME		= $(call mklibname,Glacier2)
 
 TARGETS		= $(call mklibtargets,$(libdir)/$(LIBFILENAME),$(libdir)/$(SONAME),$(libdir)/$(LIBNAME))
 
-OBJS	=	  PermissionsVerifier.o \
+OBJS		= PermissionsVerifier.o \
 		  Router.o \
 		  Session.o \
 		  SSLInfo.o \
 
+SRCS		= $(OBJS:.o=.m)
 
 SLICE_SRCS	= $(SDIR)/PermissionsVerifier.ice \
 		  $(SDIR)/Router.ice \
@@ -36,7 +37,7 @@ include $(top_srcdir)/config/Make.rules
 CPPFLAGS	:= -I.. -Iinclude -I../../include $(CPPFLAGS)
 SLICE2OBJCFLAGS	:= --include-dir Glacier2 $(SLICE2OBJCFLAGS)
 
-LINKWITH        := $(ICE_OS_LIBS) $(BASELIBS)
+LINKWITH        := $(LIBS) $(ICE_OS_LIBS)
 
 ifeq ($(STATICLIBS),yes)
 
