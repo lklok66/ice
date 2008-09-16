@@ -2274,7 +2274,16 @@ Slice::Gen::TypesVisitor::visitConst(const ConstPtr& p)
         }
         else
         {
-            _H << p->value();
+	    string value = p->value();
+	    if(value == "true")
+	    {
+	        value = "YES";
+	    }
+	    else if(value == "false")
+	    {
+	        value = "NO";
+	    }
+            _H << value;
         }
     }
 
