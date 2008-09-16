@@ -2220,21 +2220,15 @@ void
 Slice::Gen::TypesVisitor::visitConst(const ConstPtr& p)
 {
     _H << sp;
-    _H << nl << "static ";
-    if(!isString(p->type()))
-    {
-        _H << "const ";
-    }
-    _H << typeToString(p->type()) << " ";
-    if(mapsToPointerType(p->type()))
-    {
-        _H << "*";
-    }
     if(isString(p->type()))
     {
-        _H << " const ";
+	_H << nl << "static NSString * const";
     }
-    _H << fixName(p) << " = ";
+    else
+    {
+        _H << nl << "static const " << typeToString(p->type());
+    }
+    _H << " " << fixName(p) << " = ";
 
     if(isString(p->type()))
     {
