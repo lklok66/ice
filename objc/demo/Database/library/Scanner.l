@@ -85,6 +85,10 @@ NL	[\n]
     return TOK_FIND_AUTHORS;
 }
 
+"title" {
+    return TOK_FIND_TITLE;
+}
+
 "next" {
     return TOK_NEXT_FOUND_BOOK;
 }

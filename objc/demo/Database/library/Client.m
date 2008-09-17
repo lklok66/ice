@@ -17,11 +17,12 @@ int
 main(int argc, char* argv[])
 {
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
+
     int status = 0;
     id<ICECommunicator> communicator;
     @try
     {
-        ICEInitializationData* initData = [[ICEInitializationData alloc] init];
+        ICEInitializationData* initData = [ICEInitializationData initializationData];
         initData.properties = [ICEUtil createProperties ];
         [initData.properties load: @"config.client" ];
         communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];

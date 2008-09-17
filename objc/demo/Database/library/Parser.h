@@ -42,13 +42,13 @@ int yyparse();
 {
 @private
 
-DemoBookQueryResultPrx* query_;
-DemoBookDescription* current_;
-id<DemoLibraryPrx> library_;
+DemoBookQueryResultPrx* query;
+DemoBookDescription* current;
+id<DemoLibraryPrx> library;
 
-NSAutoreleasePool* pool_;
-BOOL continue_;
-int errors_;
+NSAutoreleasePool* pool;
+BOOL cont;
+int errors;
 }
 
 -(id)initWithLibrary:(id<DemoLibraryPrx>) library;
@@ -59,6 +59,7 @@ int errors_;
 -(void) addBook:(NSArray*) data;
 -(void) findIsbn:(NSArray*)data;
 -(void) findAuthors:(NSArray*)data;
+-(void) findTitle:(NSArray*)data;
 -(void) nextFoundBook;
 -(void) printCurrent;
 -(void) rentCurrent:(NSArray*)data;
@@ -75,9 +76,6 @@ int errors_;
 -(void) warningWithString:(NSString*) s;
 
 -(int)parse;
-
-@property(retain, nonatomic) DemoBookQueryResultPrx* query_;
-@property(retain, nonatomic) DemoBookDescription* current_;
 
 @end
 

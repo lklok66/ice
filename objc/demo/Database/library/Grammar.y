@@ -26,6 +26,7 @@ yyerror(const char* s)
 %token TOK_ADD_BOOK
 %token TOK_FIND_ISBN
 %token TOK_FIND_AUTHORS
+%token TOK_FIND_TITLE
 %token TOK_NEXT_FOUND_BOOK
 %token TOK_PRINT_CURRENT
 %token TOK_RENT_BOOK
@@ -79,6 +80,10 @@ command
 | TOK_FIND_AUTHORS strings ';'
 {
     [parser findAuthors: $2];
+}
+| TOK_FIND_TITLE strings ';'
+{
+    [parser findTitle: $2];
 }
 | TOK_NEXT_FOUND_BOOK ';'
 {
