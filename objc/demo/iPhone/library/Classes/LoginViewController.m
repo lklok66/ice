@@ -291,7 +291,7 @@ NSString* glacier2Key = @"glacier2Key";
     {
         if(glacier2Switch.isOn)
         {
-            NSString* s = [NSString stringWithFormat:@"DemoGlacier2/router:tcp -h %@ -p 4064", hostname];
+            NSString* s = [NSString stringWithFormat:@"DemoGlacier2/router:tcp -h %@ -p 4064 -t 30000", hostname];
             proxy = [appDelegate.communicator stringToProxy:s];
             id<ICERouterPrx> router = [ICERouterPrx uncheckedCast:proxy];
             
@@ -303,7 +303,7 @@ NSString* glacier2Key = @"glacier2Key";
         }
         else
         {
-            NSString* s = [NSString stringWithFormat:@"SessionFactory:tcp -h %@ -p 10000", hostname];
+            NSString* s = [NSString stringWithFormat:@"SessionFactory:tcp -h %@ -p 10000 -t 30000", hostname];
             proxy = [appDelegate.communicator stringToProxy:s];
 
             loginSelector = @selector(doLogin:);
