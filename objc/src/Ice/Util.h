@@ -16,6 +16,7 @@
 #include <map>
 #include <string>
 
+
 void rethrowObjCException(const std::exception& ex);
 void rethrowCxxException(NSException* ex, bool = false);
 
@@ -156,6 +157,12 @@ fromNSDictionary(NSDictionary* dictionary, std::map<K, V>& dict)
         }
     }
     return dict;
+}
+
+inline NSString*
+toNSString(const char* s)
+{
+    return [[NSString alloc] initWithCString:s encoding:[NSString defaultCStringEncoding]];
 }
 
 inline NSString*

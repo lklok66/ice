@@ -30,9 +30,14 @@
 
 @interface ICELocalException : ICEException
 {
+@protected
     const char* file;
     int line;
 }
+
+@property(nonatomic, readonly) NSString* file;
+@property(nonatomic, readonly) int line;
+
 -(id)init:(const char*)file line:(int)line;
 +(id)localException:(const char*)file line:(int)line;
 -(void) copy__:(ICELocalException*)copy_;

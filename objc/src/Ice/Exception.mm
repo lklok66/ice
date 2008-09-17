@@ -84,6 +84,13 @@
 @end
 
 @implementation ICELocalException
+-(NSString*) file
+{
+    return [toNSString(file) autorelease];
+}
+
+@synthesize line;
+
 -(void)copy__:(ICELocalException*)copy_
 {
     copy_->file = file;
