@@ -18,9 +18,11 @@ namespace Slice
 namespace ObjC
 {
 
+// Do not change the order of definition of enumerators without also adjusting the code in ObjCNames.cpp!
+
 enum BaseType
 {
-    NSObject=1, NSCopying=2, NSException=4, END=8 // TODO: adjust these as needed
+    NSObject=1, NSCopying=2, NSUserException=4, NSLocalException=8, END=16 // TODO: adjust these as needed
 };
 
 extern const char * manglePrefix;

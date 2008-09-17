@@ -100,12 +100,38 @@ static const Node NSExceptionNode =
                         NSExceptionNames, &NSExceptionParents[0]
                     };
 
+static const char* NSUserExceptionNames[] =
+                    {
+                        0
+                    };
+static const Node* NSUserExceptionParents[] =
+                    {
+                        &NSExceptionNode, 0
+                    };
+static const Node NSUserExceptionNode =
+                    {
+                        NSUserExceptionNames, &NSUserExceptionParents[0]
+                    };
+
+static const char* NSLocalExceptionNames[] =
+                    {
+                        "file", "line", 0
+                    };
+static const Node* NSLocalExceptionParents[] =
+                    {
+                        &NSExceptionNode, 0
+                    };
+static const Node NSLocalExceptionNode =
+                    {
+                        NSLocalExceptionNames, &NSLocalExceptionParents[0]
+                    };
+
 //
 // Must be kept in same order as definition of BaseType in header file!
 //
 static const Node* nodes[] =
                     {
-                        &NSObjectNode, &NSCopyingNode, &NSExceptionNode
+                        &NSObjectNode, &NSCopyingNode, &NSUserExceptionNode, &NSLocalExceptionNode
                     };
 
 static bool

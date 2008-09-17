@@ -1817,7 +1817,7 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
         baseDataMembers = p->base()->allDataMembers();
     }
 
-    const int baseTypes = ObjC::NSException;
+    const int baseTypes = p->isLocal() ? ObjC::NSLocalException : ObjC::NSUserException;
 
     // TODO: deprecate metadata
 
