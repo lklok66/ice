@@ -17,6 +17,8 @@
 
 @interface EditViewController : UIViewController
 {
+@private
+    
     IBOutlet UITextField* textField;
     id<EditViewCallback> cb;
 }

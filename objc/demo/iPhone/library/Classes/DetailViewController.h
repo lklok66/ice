@@ -16,9 +16,9 @@
 @interface DetailViewController :
     UIViewController<UITableViewDelegate, UITableViewDataSource, UIActionSheetDelegate,UIAlertViewDelegate>
 {
+@protected
     DemoBookDescription* book;
     
-@protected
     IBOutlet UITableView *tableView;
     NSIndexPath* selectedIndexPath;
 }

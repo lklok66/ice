@@ -18,9 +18,10 @@
 @interface MainViewController :
     UIViewController<UISearchBarDelegate, UITableViewDataSource, UITableViewDelegate,UIAlertViewDelegate>
 {
+@private
+    
     id<DemoLibraryPrx> library;
     
-@private
     IBOutlet UISegmentedControl* searchSegmentedControl;
     IBOutlet UITableView* searchTableView;
 

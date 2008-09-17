@@ -16,6 +16,8 @@
 
 @interface AddViewController : DetailViewController
 {
+@private
+    
     id<DemoLibraryPrx> library;
 }
 

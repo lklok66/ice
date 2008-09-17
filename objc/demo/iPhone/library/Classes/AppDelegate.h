@@ -16,11 +16,11 @@
 
 @interface AppDelegate : NSObject <UIApplicationDelegate>
 {
+@private
+    
     id<ICECommunicator> communicator;
     id session;
     BOOL fatal;
-    
-@private
 
     IBOutlet UIWindow *window;
     IBOutlet UINavigationController *navigationController;
@@ -29,7 +29,7 @@
     ICEInitializationData* initData;
 }
 
-@property (nonatomic, retain) id<ICECommunicator> communicator;
+@property (nonatomic, readonly) id<ICECommunicator> communicator;
 @property (nonatomic, readonly) id session;
 @property (nonatomic) BOOL fatal;
 

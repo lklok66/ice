@@ -162,8 +162,9 @@
 
     // Recreate the communicator each time the user logs out.
     [communicator destroy];
+    [communicator release];
     
-    self.communicator = [ICEUtil createCommunicator:self.initData];
+    communicator = [[ICEUtil createCommunicator:self.initData] retain];
 }
 
 -(void)setSession:(id)sess timeout:(int)timeout
