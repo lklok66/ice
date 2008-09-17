@@ -15,6 +15,8 @@
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
 		2892E4100DC94CBA00A64D0F /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2892E40F0DC94CBA00A64D0F /* CoreGraphics.framework */; };
 		28AD73600D9D9599002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD735F0D9D9599002E5188 /* MainWindow.xib */; };
+		344EB3170E8044A1003B8480 /* Glacier2Session.ice in Resources */ = {isa = PBXBuildFile; fileRef = 344EB3160E8044A1003B8480 /* Glacier2Session.ice */; };
+		344EB31F0E804511003B8480 /* Glacier2Session.m in Sources */ = {isa = PBXBuildFile; fileRef = 344EB31E0E804511003B8480 /* Glacier2Session.m */; };
 		347552BC0E71961F001C7AB8 /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 347552BB0E71961F001C7AB8 /* LoginViewController.m */; };
 		347552C10E71968B001C7AB8 /* LoginView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 347552C00E71968B001C7AB8 /* LoginView.xib */; };
 		347553660E71A018001C7AB8 /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 347553650E71A018001C7AB8 /* MainViewController.m */; };
@@ -23,6 +25,8 @@
 		347553B00E71AB3A001C7AB8 /* DetailView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 347553AF0E71AB3A001C7AB8 /* DetailView.xib */; };
 		347553EB0E71BA29001C7AB8 /* EditViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 347553EA0E71BA29001C7AB8 /* EditViewController.m */; };
 		347553ED0E71BA33001C7AB8 /* EditView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 347553EC0E71BA33001C7AB8 /* EditView.xib */; };
+		348A1D650E812EC0003DBDDD /* libGlacier2.3.3.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 348A1D640E812EC0003DBDDD /* libGlacier2.3.3.0.dylib */; };
+		348A1DBB0E8130B6003DBDDD /* libGlacier2.3.3.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 348A1D640E812EC0003DBDDD /* libGlacier2.3.3.0.dylib */; };
 		3492A6830E7AD01600FACCC4 /* whiteButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 3492A6820E7AD01600FACCC4 /* whiteButton.png */; };
 		34B920D50E755BBD00B1565B /* Library.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B920D20E755BBD00B1565B /* Library.m */; };
 		34B920D60E755BBD00B1565B /* Session.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B920D40E755BBD00B1565B /* Session.m */; };
@@ -33,10 +37,11 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		149A825C0E75B23000452027 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
+			buildActionMask = 12;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				348A1DBB0E8130B6003DBDDD /* libGlacier2.3.3.0.dylib in CopyFiles */,
 				149A82560E75B22600452027 /* libIceObjC.3.3.0.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -54,6 +59,9 @@
 		28A0AAE50D9B0CCF005BE974 /* library_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = library_Prefix.pch; sourceTree = "<group>"; };
 		28AD735F0D9D9599002E5188 /* MainWindow.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MainWindow.xib; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		344EB3160E8044A1003B8480 /* Glacier2Session.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Glacier2Session.ice; sourceTree = "<group>"; };
+		344EB31D0E804511003B8480 /* Glacier2Session.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Glacier2Session.h; sourceTree = "<group>"; };
+		344EB31E0E804511003B8480 /* Glacier2Session.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Glacier2Session.m; sourceTree = "<group>"; };
 		347552BA0E71961F001C7AB8 /* LoginViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewController.h; sourceTree = "<group>"; };
 		347552BB0E71961F001C7AB8 /* LoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewController.m; sourceTree = "<group>"; };
 		347552C00E71968B001C7AB8 /* LoginView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = LoginView.xib; sourceTree = "<group>"; };
@@ -66,6 +74,7 @@
 		347553E90E71BA29001C7AB8 /* EditViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EditViewController.h; sourceTree = "<group>"; };
 		347553EA0E71BA29001C7AB8 /* EditViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EditViewController.m; sourceTree = "<group>"; };
 		347553EC0E71BA33001C7AB8 /* EditView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = EditView.xib; sourceTree = "<group>"; };
+		348A1D640E812EC0003DBDDD /* libGlacier2.3.3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libGlacier2.3.3.0.dylib; path = ../../../lib/libGlacier2.3.3.0.dylib; sourceTree = SOURCE_ROOT; };
 		3492A6820E7AD01600FACCC4 /* whiteButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = whiteButton.png; sourceTree = "<group>"; };
 		34B920CD0E755B7E00B1565B /* Library.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Library.ice; sourceTree = "<group>"; };
 		34B920CE0E755B7E00B1565B /* Session.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Session.ice; sourceTree = "<group>"; };
@@ -89,6 +98,7 @@
 				2892E4100DC94CBA00A64D0F /* CoreGraphics.framework in Frameworks */,
 				34C47AAA0E75911F00FF5739 /* libstdc++.6.0.4.dylib in Frameworks */,
 				149A82540E75B20800452027 /* libIceObjC.3.3.0.dylib in Frameworks */,
+				348A1D650E812EC0003DBDDD /* libGlacier2.3.3.0.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -98,6 +108,8 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				344EB31D0E804511003B8480 /* Glacier2Session.h */,
+				344EB31E0E804511003B8480 /* Glacier2Session.m */,
 				34B920D10E755BBD00B1565B /* Library.h */,
 				34B920D20E755BBD00B1565B /* Library.m */,
 				34B920D30E755BBD00B1565B /* Session.h */,
@@ -142,6 +154,7 @@
 		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
 			isa = PBXGroup;
 			children = (
+				344EB3160E8044A1003B8480 /* Glacier2Session.ice */,
 				34B920CE0E755B7E00B1565B /* Session.ice */,
 				34B920CD0E755B7E00B1565B /* Library.ice */,
 				28A0AAE50D9B0CCF005BE974 /* library_Prefix.pch */,
@@ -166,6 +179,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				348A1D640E812EC0003DBDDD /* libGlacier2.3.3.0.dylib */,
 				149A82530E75B20800452027 /* libIceObjC.3.3.0.dylib */,
 				34C47AA90E75911F00FF5739 /* libstdc++.6.0.4.dylib */,
 				2892E40F0DC94CBA00A64D0F /* CoreGraphics.framework */,
@@ -240,6 +254,7 @@
 				347553B00E71AB3A001C7AB8 /* DetailView.xib in Resources */,
 				347553ED0E71BA33001C7AB8 /* EditView.xib in Resources */,
 				3492A6830E7AD01600FACCC4 /* whiteButton.png in Resources */,
+				344EB3170E8044A1003B8480 /* Glacier2Session.ice in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -254,16 +269,19 @@
 			inputPaths = (
 				"$(SRCROOT)/Library.ice",
 				"$(SRCROOT)/Session.ice",
+				"$(SRCROOT)/Glacier2Session.ice",
 			);
 			outputPaths = (
 				"$(SRCROOT)/Classes/Library.m",
 				"$(SRCROOT)/Classes/Library.h",
 				"$(SRCROOT)/Classes/Session.m",
 				"$(SRCROOT)/Classes/Session.h",
+				"$(SRCROOT)/Classes/Glacier2Session.h",
+				"$(SRCROOT)/Classes/Glacier2Session.m",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "DYLD_LIBRARY_PATH=../../../../cpp/lib ../../../../cpp/bin/slice2objc -I../../../../slice -I . --output-dir Classes Library.ice\nDYLD_LIBRARY_PATH=../../../../cpp/lib ../../../../cpp/bin/slice2objc -I../../../../slice -I . --output-dir Classes Session.ice\n";
+			shellScript = "DYLD_LIBRARY_PATH=../../../../cpp/lib ../../../../cpp/bin/slice2objc -I../../../../slice -I . --output-dir Classes Library.ice\nDYLD_LIBRARY_PATH=../../../../cpp/lib ../../../../cpp/bin/slice2objc -I../../../../slice -I . --output-dir Classes Session.ice\nDYLD_LIBRARY_PATH=../../../../cpp/lib ../../../../cpp/bin/slice2objc -I../../../../slice -I . --output-dir Classes Glacier2Session.ice\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -281,6 +299,7 @@
 				34B920D50E755BBD00B1565B /* Library.m in Sources */,
 				34B920D60E755BBD00B1565B /* Session.m in Sources */,
 				34FF1F1D0E76904300EA9DEC /* AddViewController.m in Sources */,
+				344EB31F0E804511003B8480 /* Glacier2Session.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

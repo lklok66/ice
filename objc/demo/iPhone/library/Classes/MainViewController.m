@@ -152,7 +152,7 @@
 -(void)addBook:(id)sender
 {
     AddViewController *controller = self.addViewController;
-    controller.book = [[[DemoBookDescription alloc] init] autorelease]; // TODO: Benoit: Use convenience constructor?
+    controller.book = [DemoBookDescription bookDescription];
     controller.book.authors = [NSMutableArray array];
     controller.library = library;
 
@@ -173,11 +173,9 @@
     AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
     appDelegate.fatal = YES;
     
-    NSString* s = [NSString stringWithFormat:@"%@", ex];
-    
     // open an alert with just an OK button
     UIAlertView *alert = [[UIAlertView alloc]
-                          initWithTitle:@"Error" message:s  // TODO: Benoit: use [ex description] instead of s?
+                          initWithTitle:@"Error" message:[ex description]
                           delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
     [alert show];       
     [alert release];

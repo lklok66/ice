@@ -16,60 +16,58 @@
 {
 @private
     
-    id<ICELogger> logger_;
-    id<DemoSessionPrx> session_;
+    id session;
 }
--(id) initWithLogger:(id<ICELogger>)logger session:(id<DemoSessionPrx>)session;
-+(id) sessionRefreshWithLogger:(id<ICELogger>)logger session:(id<DemoSessionPrx>)session;
+
+-(id) initWithSession:(id)session;
++(id) sessionRefreshWithSession:(id)session;
 
 -(void) refresh:(NSTimer*)timer;
 
-@property (nonatomic, retain) id<ICELogger> logger_;
-@property (nonatomic, retain) id<DemoSessionPrx> session_;
+@property (nonatomic, retain) id session;
 @end
 
 @implementation SessionRefresh
 
-@synthesize logger_;
-@synthesize session_;
+@synthesize session;
 
--(id) initWithLogger:(id<ICELogger>)logger session:(id<DemoSessionPrx>)session
+-(id)initWithSession:(id)s
 {
-    if(![super init])
+    if(self = [super init])
     {
-        return nil;
+        self.session = s;
     }
-    
-    self.logger_ = logger;
-    self.session_ = session;
-    
     return self;
 }
 
-+(id) sessionRefreshWithLogger:(id<ICELogger>)logger session:(id<DemoSessionPrx>)session;
++(id)sessionRefreshWithSession:(id)session;
 {
-    return [[[SessionRefresh alloc] initWithLogger:logger session:session] autorelease];
+    return [[[SessionRefresh alloc] initWithSession:session] autorelease];
 }
 
--(void) refresh:(NSTimer*)timer
+-(void)refresh:(NSTimer*)timer
 {
     AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-    [session_ refresh_async:[ICECallbackOnMainThread callbackOnMainThread:appDelegate]
-              response:nil
-              exception:@selector(sessionRefreshException:)];
+    [session
+     refresh_async:[ICECallbackOnMainThread callbackOnMainThread:appDelegate]
+     response:nil
+     exception:@selector(sessionRefreshException:)];
 }
 
--(void) dealloc
+-(void)dealloc
 {
-    [session_ release];
-    [logger_ release];
+    [session release];
     [super dealloc];
 }
 @end
 
 @interface AppDelegate()
 
+@property (nonatomic, retain) UIWindow *window;
+@property (nonatomic, retain) UINavigationController *navigationController;
+
 @property (nonatomic, retain) NSTimer* refreshTimer;
+@property (nonatomic, retain) ICEInitializationData* initData;
 
 @end
 
@@ -79,6 +77,7 @@
 @synthesize navigationController;
 @synthesize communicator;
 @synthesize refreshTimer;
+@synthesize initData;
 
 @dynamic session;
 @dynamic fatal;
@@ -87,7 +86,10 @@
 {
     if (self = [super init])
     {
-        self.communicator = [ICEUtil createCommunicator];
+        self.initData = [ICEInitializationData initializationData];
+        self.initData.properties = [ICEUtil createProperties ];
+        [self.initData.properties setProperty:@"Ice.ACM.Client" value:@"0"];
+        [self.initData.properties setProperty:@"Ice.RetryIntervals" value:@"-1"];
     }
     return self;
 }
@@ -101,13 +103,15 @@
 
 -(void)applicationWillTerminate:(UIApplication *)application
 {
-    self.session = nil;
+    [self logout];
+
     [communicator destroy];
 }
 
 -(void)dealloc
 {
     [communicator release];
+    [initData release];
     [navigationController release];
     [window release];
     [super dealloc];
@@ -138,12 +142,12 @@
 {
     if(value)
     {
-        self.session = nil;
+        [self logout];
     }
     fatal = value;
 }
 
--(void)setSession:(id<DemoSessionPrx>)sess
+-(void)logout
 {
     // Destroy the old session, and invalidate the refresh timer.
     if(session != nil)
@@ -154,22 +158,33 @@
         [session release];
         session = nil;
     }
+    self.fatal = NO;
+
+    // Recreate the communicator each time the user logs out.
+    [communicator destroy];
+    
+    self.communicator = [ICEUtil createCommunicator:self.initData];
+}
+
+-(void)setSession:(id)sess timeout:(int)timeout
+{
+    // We must not already have a session.
+    NSAssert(session == nil, @"session == nil");
 
     // Save the new session, and create the refresh timer.
     session = [sess retain];
-    if(session != nil)
-    {
-        SessionRefresh* refresh = [SessionRefresh sessionRefreshWithLogger:[communicator getLogger] session:session];
-        self.refreshTimer = [NSTimer timerWithTimeInterval:5
-                                                     target:refresh
-                                                   selector:@selector(refresh:)
-                                                   userInfo:nil
-                                                    repeats:YES];
-        [[NSRunLoop currentRunLoop] addTimer:refreshTimer forMode:NSDefaultRunLoopMode];
-    }
+    SessionRefresh* refresh = [SessionRefresh sessionRefreshWithSession:session];
+    // TODO: Use timeout.
+    self.refreshTimer = [NSTimer
+                         timerWithTimeInterval:timeout
+                         target:refresh
+                         selector:@selector(refresh:)
+                         userInfo:nil
+                         repeats:YES];
+    [[NSRunLoop currentRunLoop] addTimer:refreshTimer forMode:NSDefaultRunLoopMode];
 }
 
--(id<DemoSessionPrx>)session
+-(id)session
 {
     return [[session retain] autorelease];
 }

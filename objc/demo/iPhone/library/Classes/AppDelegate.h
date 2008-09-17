@@ -12,28 +12,30 @@
 @protocol ICECommunicator;
 @protocol DemoSessionPrx;
 @class ICEException;
+@class ICEInitializationData;
 
-@interface AppDelegate : NSObject <UIApplicationDelegate> {
-	
-    IBOutlet UIWindow *window;
-    IBOutlet UINavigationController *navigationController;
+@interface AppDelegate : NSObject <UIApplicationDelegate>
+{
     id<ICECommunicator> communicator;
-    id<DemoSessionPrx> session;
-
+    id session;
     BOOL fatal;
     
 @private
-    NSTimer* refreshTimer;
 
+    IBOutlet UIWindow *window;
+    IBOutlet UINavigationController *navigationController;
+
+    NSTimer* refreshTimer;
+    ICEInitializationData* initData;
 }
 
-@property (nonatomic, retain) UIWindow *window;
-@property (nonatomic, retain) UINavigationController *navigationController;
 @property (nonatomic, retain) id<ICECommunicator> communicator;
-@property (nonatomic, retain) id<DemoSessionPrx> session;
+@property (nonatomic, readonly) id session;
 @property (nonatomic) BOOL fatal;
 
 -(void)sessionRefreshException:(ICEException*)ex;
+-(void)logout;
+-(void)setSession:(id)session timeout:(int)timeout;
 
 @end
 

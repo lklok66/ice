@@ -298,7 +298,7 @@ static EditViewController* editViewController_ = nil;
     }
     else
     {
-        s = [NSString stringWithFormat:@"%@", ex]; // TODO: Benoit: use [ex description] instead
+        s = [ex description];
 
         // BUGFIX: In the event of a fatal exception we want to pop back to the login view.
         // However, doing so directly by calling [self.navigationController popToRootViewControllerAnimated:YES];

@@ -13,23 +13,27 @@
 @protocol DemoLibraryPrx;
 @protocol DemoSessionFactoryPrx;
 @class MainViewController;
+@protocol SessionAdapter;
 
 @interface LoginViewController : UIViewController<UITextFieldDelegate,UIAlertViewDelegate>
 {
+@private
     IBOutlet UITextField* hostnameTextField;
     IBOutlet UIButton* loginButton;
-
-@private
+    IBOutlet UISwitch* glacier2Switch;
+    
     BOOL showAlert;
 
     NSString* hostname;
     MainViewController *mainViewController;
     
-    id<DemoSessionPrx> session;
+    id session;
     id<DemoLibraryPrx> library;
+    int sessionTimeout;
     NSOperationQueue* queue;
 }
 
 -(IBAction)login:(id)sender;
+-(void)glacier2Changed:(id)sender;
 
 @end

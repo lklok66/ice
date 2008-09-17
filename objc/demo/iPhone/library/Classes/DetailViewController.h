@@ -17,6 +17,7 @@
     UIViewController<UITableViewDelegate, UITableViewDataSource, UIActionSheetDelegate,UIAlertViewDelegate>
 {
     DemoBookDescription* book;
+    
 @protected
     IBOutlet UITableView *tableView;
     NSIndexPath* selectedIndexPath;
