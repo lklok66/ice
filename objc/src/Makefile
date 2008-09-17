@@ -13,7 +13,8 @@ include $(top_srcdir)/config/Make.rules
 
 SUBDIRS		= IceUtilCpp \
 		  IceCpp \
-		  Ice
+		  Ice \
+		  Glacier2
 
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \
