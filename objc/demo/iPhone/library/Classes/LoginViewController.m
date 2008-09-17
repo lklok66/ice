@@ -11,7 +11,7 @@
 #import <MainViewController.h>
 #import <AppDelegate.h>
 
-#include <Ice/Ice.h>
+#include <Ice/Ice.h> // TODO: Benoit: should use #import instead
 #include <Library.h>
 #include <Session.h>
 
@@ -211,7 +211,9 @@ NSString* hostnameKey = @"hostnameKey";
     @try
     {
         id<DemoSessionFactoryPrx> factory = [DemoSessionFactoryPrx checkedCast:proxy];
-     
+
+        // TODO: Benoit: Check if factory == nil?
+
         // This doesn't call appDelegate.session directly as we want the refresh
         // to run in the main thread.
         self.session = [factory create];

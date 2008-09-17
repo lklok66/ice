@@ -152,7 +152,7 @@
 -(void)addBook:(id)sender
 {
     AddViewController *controller = self.addViewController;
-    controller.book = [[[DemoBookDescription alloc] init] autorelease];
+    controller.book = [[[DemoBookDescription alloc] init] autorelease]; // TODO: Benoit: Use convenience constructor?
     controller.book.authors = [NSMutableArray array];
     controller.library = library;
 
@@ -177,7 +177,7 @@
     
     // open an alert with just an OK button
     UIAlertView *alert = [[UIAlertView alloc]
-                          initWithTitle:@"Error" message:s
+                          initWithTitle:@"Error" message:s  // TODO: Benoit: use [ex description] instead of s?
                           delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
     [alert show];       
     [alert release];
@@ -187,7 +187,7 @@
 {
     [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
 
-    // Ignore ObjectNotExistExceptiojn
+    // Ignore ICEObjectNotExistException
     if([ex isKindOfClass:[ICEObjectNotExistException class]])
     {
         return;
@@ -256,7 +256,7 @@
     searchSegmentedControl.hidden = YES;
     sender.showsCancelButton = NO;
     
-    // Initialiate a search.
+    // Initiate a search.
     NSString* search = sender.text;
 
     int searchMode = searchSegmentedControl.selectedSegmentIndex;
@@ -352,7 +352,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
 
     if(indexPath.row > books.count-1)
     {
-        // Here we are past the available cached set of data. rowsQueries records
+        // Here we are past the available cached set of data. rowsQueried records
         // how many rows of data we've actually asked for.
         if(indexPath.row > rowsQueried-1)
         {
