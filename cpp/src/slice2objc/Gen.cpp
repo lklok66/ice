@@ -217,19 +217,14 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
         assert(cl);
 
         string opName = fixId(op->name());
-        _M << sp << nl << "+(BOOL)" << opName << "___:(id<" << name << ">)servant current:(ICECurrent *)current " 
+        _M << sp << nl << "+(BOOL)" << opName << "___:(" << name << " *)servant current:(ICECurrent *)current " 
            << "is:(id<ICEInputStream>)is_ os:(id<ICEOutputStream>)os_";
         _M << sb;
 
         bool amd = false; //p->hasMetaData("amd") || op->hasMetaData("amd");
         if(!amd)
         {
-	    //
-	    // Cast to ICEObject* to prevent warning that servant may not respond. This is necessary because
-	    // the servant is passed as id<Intf>, but checkModeAndSelector is not part of the ICEObject protocol.
-	    //
-	    _M << nl << "[(ICEObject*)servant checkModeAndSelector__:" << sliceModeToIceMode(op->mode())
-	       << " selector:@selector(";
+	    _M << nl << "[servant checkModeAndSelector__:" << sliceModeToIceMode(op->mode()) << " selector:@selector(";
 	    string selector = getSelector(op);
 	    if(!selector.empty())
 	    {
@@ -312,7 +307,7 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
                 _M << nl;
             }
 	    string args = getServerArgs(op);
-	    _M << "[servant " << opName << args;
+	    _M << "[(id<" << name << ">)servant " << opName << args;
 	    if(!args.empty())
 	    {
 	        _M << " current";
@@ -504,8 +499,8 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
         {
             _M << nl << "case " << i++ << ':';
 	    _M.inc();
-	    _M << nl << "return [" << q->second << " " << q->first << "___:(id<" << name
-	       << ">)self current:current is:is os:os];";
+	    _M << nl << "return [" << q->second << " " << q->first << "___:(" << q->second
+	       << " *)self current:current is:is os:os];";
             _M.dec();
         }
 	_M << nl << "default:";
@@ -1626,7 +1621,7 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
     for(r = ops.begin(); r != ops.end(); ++r)
     {
         OperationPtr op = *r;
-        _H << nl << "+(BOOL)" << fixId(op->name()) << "___:(id<" << name << ">)servant current:(ICECurrent *)current " 
+        _H << nl << "+(BOOL)" << fixId(op->name()) << "___:(" << name << " *)servant current:(ICECurrent *)current " 
            << "is:(id<ICEInputStream>)is_ os:(id<ICEOutputStream>)os_;";
     }
 
