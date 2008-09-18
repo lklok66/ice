@@ -96,4 +96,12 @@ LIBS			= -lIceObjC $(BASELIBS)
 
 ICEUTIL_OS_LIBS         = -lpthread
 ICE_OS_LIBS             = -ldl
+ifneq ($(COMPILE_FOR_IPHONE),yes)
+    ICE_OS_LIBS         := $(ICE_OS_LIBS) -lbz2 -liconv -framework CoreServices
+else
+    ICE_OS_LIBS         := $(ICE_OS_LIBS) -framework CFNetwork
+endif
 
+ifeq ($(STATICLIBS),yes)
+LIBS := $(LIBS) $(ICE_OS_LIBS)
+endif

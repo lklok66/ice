@@ -16,8 +16,16 @@
 #include <Ice/LocalException.h>
 #include <Ice/LoggerUtil.h>
 #include <Ice/Communicator.h>
-#if !defined(_WIN32) && !defined(ICE_IPHONE)
-#include <Ice/IconvStringConverter.h>
+
+#ifndef _WIN32
+#  ifdef __APPLE__
+#    include <TargetConditionals.h>
+#    if TARGET_OS_IPHONE == 0
+#      include <Ice/IconvStringConverter.h>
+#    endif
+#  else
+#    include <Ice/IconvStringConverter.h>
+#  endif
 #endif
 
 using namespace IceUtil;
@@ -187,7 +195,7 @@ WindowsStringConverter::fromUTF8(const Byte* sourceStart, const Byte* sourceEnd,
 
 #endif
 
-#ifndef ICE_IPHONE
+#if defined(__APPLE__) && TARGET_OS_IPHONE == 0
 
 StringConverterPlugin::StringConverterPlugin(const CommunicatorPtr& communicator,
                                              const StringConverterPtr& stringConverter, 

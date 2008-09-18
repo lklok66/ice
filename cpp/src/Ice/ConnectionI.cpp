@@ -27,8 +27,11 @@
 #include <Ice/ReferenceFactory.h> // For createProxy().
 #include <Ice/ProxyFactory.h> // For createProxy().
 
-#ifndef ICE_IPHONE
+#ifdef __APPLE__
+#include <TargetConditionals.h>
+#if TARGET_OS_IPHONE == 0
 #include <bzlib.h>
+#endif
 #endif
 
 using namespace std;
@@ -1818,7 +1821,7 @@ Ice::ConnectionI::send()
             if(!message->stream->i)
             {
                 message->stream->i = message->stream->b.begin();
-#ifndef ICE_IPHONE
+#if defined(__APPLE__) && TARGET_OS_IPHONE == 0
                 if(message->compress && message->stream->b.size() >= 100) // Only compress messages > 100 bytes.
                 {
                     //
@@ -1876,7 +1879,7 @@ Ice::ConnectionI::send()
                         traceSend(*message->stream, _logger, _traceLevels);
                     }
                 }
-#ifndef ICE_IPHONE
+#if defined(__APPLE__) && TARGET_OS_IPHONE == 0
             }
 #endif
             //
@@ -1957,7 +1960,7 @@ Ice::ConnectionI::sendMessage(OutgoingMessage& message)
 
     message.stream->i = message.stream->b.begin();
 
-#ifndef ICE_IPHONE
+#if defined(__APPLE__) && TARGET_OS_IPHONE == 0
     if(message.compress && message.stream->b.size() >= 100) // Only compress messages larger than 100 bytes.
     {
         //
@@ -2045,7 +2048,7 @@ Ice::ConnectionI::sendMessage(OutgoingMessage& message)
 
         _sendStreams.push_back(message);
         _sendStreams.back().adopt(0); // Adopt the stream.
-#ifndef ICE_IPHONE
+#if defined(__APPLE__) && TARGET_OS_IPHONE == 0
     }
 #endif
 
@@ -2054,7 +2057,7 @@ Ice::ConnectionI::sendMessage(OutgoingMessage& message)
     return false;
 }
 
-#ifndef ICE_IPHONE
+#if defined(__APPLE__) && TARGET_OS_IPHONE == 0
 static string
 getBZ2Error(int bzError)
 {
@@ -2117,7 +2120,7 @@ getBZ2Error(int bzError)
 }
 #endif
 
-#ifndef ICE_IPHONE
+#if defined(__APPLE__) && TARGET_OS_IPHONE == 0
 void
 Ice::ConnectionI::doCompress(BasicStream& uncompressed, BasicStream& compressed)
 {
@@ -2229,7 +2232,7 @@ Ice::ConnectionI::parseMessage(BasicStream& stream, Int& invokeNum, Int& request
         stream.read(compress);
         if(compress == 2)
         {
-#ifndef ICE_IPHONE
+#if defined(__APPLE__) && TARGET_OS_IPHONE == 0
             BasicStream ustream(_instance.get());
             doUncompress(stream, ustream);
             stream.b.swap(ustream.b);

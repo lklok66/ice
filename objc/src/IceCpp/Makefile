@@ -146,7 +146,7 @@ SDIR		= $(slicedir)/Ice
 
 include $(top_srcdir)/config/Make.rules
 
-CPPFLAGS	:= -DICE_IPHONE -Iinclude -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src
+CPPFLAGS	:= -Iinclude -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src
 SLICE2CPPFLAGS	:= --ice --include-dir Ice $(SLICE2CPPFLAGS)
 
 include/Ice/%F.h: $(SDIR)/%F.ice $(SLICE2CPP)
