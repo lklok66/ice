@@ -217,7 +217,8 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
         assert(cl);
 
         string opName = fixId(op->name());
-        _M << sp << nl << "+(BOOL)" << opName << "___:(" << name << " *)servant current:(ICECurrent *)current " 
+        _M << sp << nl << "+(BOOL)" << opName << "___:(ICEObject<" << name
+	   << "> *)servant current:(ICECurrent *)current " 
            << "is:(id<ICEInputStream>)is_ os:(id<ICEOutputStream>)os_";
         _M << sb;
 
@@ -307,7 +308,7 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
                 _M << nl;
             }
 	    string args = getServerArgs(op);
-	    _M << "[(id<" << name << ">)servant " << opName << args;
+	    _M << "[servant " << opName << args;
 	    if(!args.empty())
 	    {
 	        _M << " current";
@@ -499,8 +500,8 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
         {
             _M << nl << "case " << i++ << ':';
 	    _M.inc();
-	    _M << nl << "return [" << q->second << " " << q->first << "___:(" << q->second
-	       << " *)self current:current is:is os:os];";
+	    _M << nl << "return [" << q->second << " " << q->first << "___:(ICEObject<" << q->second
+	       << "> *)self current:current is:is os:os];";
             _M.dec();
         }
 	_M << nl << "default:";
@@ -1621,7 +1622,8 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
     for(r = ops.begin(); r != ops.end(); ++r)
     {
         OperationPtr op = *r;
-        _H << nl << "+(BOOL)" << fixId(op->name()) << "___:(" << name << " *)servant current:(ICECurrent *)current " 
+        _H << nl << "+(BOOL)" << fixId(op->name()) << "___:(ICEObject<" << name
+	   << "> *)servant current:(ICECurrent *)current " 
            << "is:(id<ICEInputStream>)is_ os:(id<ICEOutputStream>)os_;";
     }
 
