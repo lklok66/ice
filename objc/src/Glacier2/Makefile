@@ -9,9 +9,9 @@
 
 top_srcdir	= ../..
 
-LIBFILENAME     = $(call mklibfilename,Glacier2Objc,$(VERSION))
-SONAME          = $(call mksoname,Glacier2Objc,$(SOVERSION))  
-LIBNAME		= $(call mklibname,Glacier2Objc)
+LIBFILENAME     = $(call mklibfilename,Glacier2ObjC,$(VERSION))
+SONAME          = $(call mksoname,Glacier2ObjC,$(SOVERSION))  
+LIBNAME		= $(call mklibname,Glacier2ObjC)
 
 TARGETS		= $(call mklibtargets,$(libdir)/$(LIBFILENAME),$(libdir)/$(SONAME),$(libdir)/$(LIBNAME))
 

@@ -25,8 +25,8 @@
 		347553B00E71AB3A001C7AB8 /* DetailView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 347553AF0E71AB3A001C7AB8 /* DetailView.xib */; };
 		347553EB0E71BA29001C7AB8 /* EditViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 347553EA0E71BA29001C7AB8 /* EditViewController.m */; };
 		347553ED0E71BA33001C7AB8 /* EditView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 347553EC0E71BA33001C7AB8 /* EditView.xib */; };
-		348A1EC20E829310003DBDDD /* libGlacier2Objc.3.3.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 348A1EC10E829310003DBDDD /* libGlacier2Objc.3.3.0.dylib */; };
-		348A1EC30E829316003DBDDD /* libGlacier2Objc.3.3.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 348A1EC10E829310003DBDDD /* libGlacier2Objc.3.3.0.dylib */; };
+		348A1F8E0E82A976003DBDDD /* libGlacier2ObjC.3.3.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 348A1F8D0E82A976003DBDDD /* libGlacier2ObjC.3.3.0.dylib */; };
+		348A1F8F0E82A97E003DBDDD /* libGlacier2ObjC.3.3.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 348A1F8D0E82A976003DBDDD /* libGlacier2ObjC.3.3.0.dylib */; };
 		3492A6830E7AD01600FACCC4 /* whiteButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 3492A6820E7AD01600FACCC4 /* whiteButton.png */; };
 		34B920D50E755BBD00B1565B /* Library.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B920D20E755BBD00B1565B /* Library.m */; };
 		34B920D60E755BBD00B1565B /* Session.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B920D40E755BBD00B1565B /* Session.m */; };
@@ -41,7 +41,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				348A1EC30E829316003DBDDD /* libGlacier2Objc.3.3.0.dylib in CopyFiles */,
+				348A1F8F0E82A97E003DBDDD /* libGlacier2ObjC.3.3.0.dylib in CopyFiles */,
 				149A82560E75B22600452027 /* libIceObjC.3.3.0.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -74,7 +74,7 @@
 		347553E90E71BA29001C7AB8 /* EditViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EditViewController.h; sourceTree = "<group>"; };
 		347553EA0E71BA29001C7AB8 /* EditViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EditViewController.m; sourceTree = "<group>"; };
 		347553EC0E71BA33001C7AB8 /* EditView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = EditView.xib; sourceTree = "<group>"; };
-		348A1EC10E829310003DBDDD /* libGlacier2Objc.3.3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libGlacier2Objc.3.3.0.dylib; path = ../../../lib/libGlacier2Objc.3.3.0.dylib; sourceTree = SOURCE_ROOT; };
+		348A1F8D0E82A976003DBDDD /* libGlacier2ObjC.3.3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libGlacier2ObjC.3.3.0.dylib; path = ../../../lib/libGlacier2ObjC.3.3.0.dylib; sourceTree = SOURCE_ROOT; };
 		3492A6820E7AD01600FACCC4 /* whiteButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = whiteButton.png; sourceTree = "<group>"; };
 		34B920CD0E755B7E00B1565B /* Library.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Library.ice; sourceTree = "<group>"; };
 		34B920CE0E755B7E00B1565B /* Session.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Session.ice; sourceTree = "<group>"; };
@@ -98,7 +98,7 @@
 				2892E4100DC94CBA00A64D0F /* CoreGraphics.framework in Frameworks */,
 				34C47AAA0E75911F00FF5739 /* libstdc++.6.0.4.dylib in Frameworks */,
 				149A82540E75B20800452027 /* libIceObjC.3.3.0.dylib in Frameworks */,
-				348A1EC20E829310003DBDDD /* libGlacier2Objc.3.3.0.dylib in Frameworks */,
+				348A1F8E0E82A976003DBDDD /* libGlacier2ObjC.3.3.0.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -179,7 +179,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				348A1EC10E829310003DBDDD /* libGlacier2Objc.3.3.0.dylib */,
+				348A1F8D0E82A976003DBDDD /* libGlacier2ObjC.3.3.0.dylib */,
 				149A82530E75B20800452027 /* libIceObjC.3.3.0.dylib */,
 				34C47AA90E75911F00FF5739 /* libstdc++.6.0.4.dylib */,
 				2892E40F0DC94CBA00A64D0F /* CoreGraphics.framework */,
