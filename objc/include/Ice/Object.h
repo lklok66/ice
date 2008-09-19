@@ -9,7 +9,7 @@
 
 #import <Ice/Config.h>
 
-#include <Ice/Current.h>
+#import <Ice/Current.h>
 
 //
 // Forward declarations.
