@@ -2739,7 +2739,7 @@ Slice::Gen::ProxyVisitor::visitClassDefStart(const ClassDefPtr& p)
 void
 Slice::Gen::ProxyVisitor::visitClassDefEnd(const ClassDefPtr&)
 {
-    _H << nl << "@end;";
+    _H << nl << "@end";
 }
 
 void
