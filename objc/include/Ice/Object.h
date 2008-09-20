@@ -23,6 +23,10 @@ extern "C"
 #endif
 int ICEInternalLookupString(NSString *[], size_t, NSString *);
 
+@protocol ICERequest <NSObject>
+-(ICECurrent*) getCurrent;
+@end
+
 @protocol ICEObject <NSObject>
 -(BOOL) ice_isA:(NSString*)typeId;
 -(BOOL) ice_isA:(NSString*)typeId current:(ICECurrent*)current;
@@ -35,6 +39,7 @@ int ICEInternalLookupString(NSString *[], size_t, NSString *);
 +(NSString*) ice_staticId;
 -(void) ice_preMarshal;
 -(void) ice_postUnmarshal;
+-(BOOL) ice_dispatch:(id<ICERequest>)request;
 @end
 
 @interface ICEObject : NSObject<ICEObject, NSCopying>

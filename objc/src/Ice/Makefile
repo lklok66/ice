@@ -16,10 +16,12 @@ LIBNAME		= $(call mklibname,IceObjC)
 TARGETS		= $(call mklibtargets,$(libdir)/$(LIBFILENAME),$(libdir)/$(SONAME),$(libdir)/$(LIBNAME))
 
 OBJC_OBJS	= BuiltinSequences.o \
+                  DispatchInterceptor.o \
 		  Identity.o \
 		  LocalException.o \
 		  Locator.o \
 		  Process.o \
+                  Request.o \
 		  Router.o
 
 OBJCPP_OBJS	= Communicator.o \

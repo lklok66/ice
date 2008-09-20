@@ -12,6 +12,7 @@
 #import <Ice/CurrentI.h>
 #import <Ice/Util.h>
 #import <Ice/LocalException.h>
+#import <Ice/Request.h>
 
 #include <IceCpp/Object.h>
 #include <IceCpp/IncomingAsync.h>
@@ -409,6 +410,20 @@ static NSString* ICEObject_all__[4] =
     *count = sizeof(ICEObject_ids__) / sizeof(NSString*);
     *idx = 0;
     return ICEObject_ids__;
+}
+
+-(BOOL) ice_dispatch:(id<ICERequest>)request
+{
+    @try
+    {
+        ICERequest* requestI = (ICERequest*)request;
+        return [requestI callDispatch:self];
+    }
+    @catch(ICELocalException*)
+    {
+        @throw;
+    }
+    return FALSE;
 }
 
 -(BOOL) dispatch__:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os

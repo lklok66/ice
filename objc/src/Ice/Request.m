@@ -1,0 +1,52 @@
+// **********************************************************************
+//
+// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+//
+// This copy of Ice is licensed to you under the terms described in the
+// ICE_LICENSE file included in this distribution.
+//
+// **********************************************************************
+
+#import <Ice/Request.h>
+
+@implementation ICERequest
+-(ICECurrent*) getCurrent
+{
+    return current;
+}
+
++(id) request:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
+{
+    ICERequest* result = [((ICERequest*)[ICERequest alloc]) init:current is:is os:os];
+    [result autorelease];
+    return result;
+}
+
+-(id) init:(ICECurrent*)current_ is:(id<ICEInputStream>)is_ os:(id<ICEOutputStream>)os_
+{
+    if(![super init])
+    {
+        return nil;
+    }
+    current = [current_ retain];
+    is = [is_ retain];
+    os = [os_ retain];
+    return self;
+}
+
+-(BOOL) callDispatch:(ICEObject*)servant
+{
+    //
+    // TODO: reset is & os
+    //
+    return [servant dispatch__:current is:is os:os];
+}
+
+-(void) dealloc
+{
+    [current release];
+    [is release];
+    [os release];
+    [super dealloc];
+}
+@end
