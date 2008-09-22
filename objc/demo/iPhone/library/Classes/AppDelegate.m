@@ -112,8 +112,13 @@
 {
     [communicator release];
     [initData release];
+
+    [session release];
+    [refreshTimer release];
+    
     [navigationController release];
     [window release];
+
     [super dealloc];
 }
 

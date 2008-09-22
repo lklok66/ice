@@ -482,7 +482,7 @@ static EditViewController* editViewController_ = nil;
                                                      reuseIdentifier:@"RemoveBook"] autorelease];
                     // Add a label to the frame,
                     
-                    UIImage *buttonBackground = [UIImage imageNamed:@"whiteButton.png"];
+                    UIImage *buttonBackground = [UIImage imageNamed:@"redButton.png"];
                     UIImage *newImage = [buttonBackground stretchableImageWithLeftCapWidth:12.0 topCapHeight:0.0];
                     
                     UIButton* button = [UIButton buttonWithType:UIButtonTypeRoundedRect];
