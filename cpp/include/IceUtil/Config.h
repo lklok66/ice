@@ -151,6 +151,10 @@
 #   include <errno.h>
 #endif
 
+#ifdef __APPLE__
+#   include <TargetConditionals.h>
+#endif
+
 //
 // If we use Visual C++ 6.0, we must use STLport
 //

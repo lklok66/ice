@@ -7,7 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		140A65670E83F0270012EDD0 /* c_rsa1024.pfx in Resources */ = {isa = PBXBuildFile; fileRef = 140A65660E83F0270012EDD0 /* c_rsa1024.pfx */; };
 		1432BEC00E484C0E00DAC793 /* Hello.m in Sources */ = {isa = PBXBuildFile; fileRef = 1432BEBE0E484C0E00DAC793 /* Hello.m */; };
+		14A268EB0E83FD0A00E562FE /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14A268E90E83FD0A00E562FE /* CFNetwork.framework */; };
+		14A268EC0E83FD0A00E562FE /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14A268EA0E83FD0A00E562FE /* Security.framework */; };
+		14A269750E8408BC00E562FE /* cacert.pem in Resources */ = {isa = PBXBuildFile; fileRef = 14A269740E8408BC00E562FE /* cacert.pem */; };
 		1D3623260D0F684500981E51 /* helloAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* helloAppDelegate.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
@@ -33,9 +37,13 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		140A65660E83F0270012EDD0 /* c_rsa1024.pfx */ = {isa = PBXFileReference; lastKnownFileType = file; name = c_rsa1024.pfx; path = ../../../../certs/c_rsa1024.pfx; sourceTree = SOURCE_ROOT; };
 		1432BEBE0E484C0E00DAC793 /* Hello.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Hello.m; sourceTree = "<group>"; };
 		1432BEBF0E484C0E00DAC793 /* Hello.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Hello.h; sourceTree = "<group>"; };
 		1432BF5A0E59A5FC00DAC793 /* Hello.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Hello.ice; sourceTree = "<group>"; };
+		14A268E90E83FD0A00E562FE /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
+		14A268EA0E83FD0A00E562FE /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		14A269740E8408BC00E562FE /* cacert.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = cacert.pem; path = ../../../../certs/cacert.pem; sourceTree = SOURCE_ROOT; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623240D0F684500981E51 /* helloAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = helloAppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* helloAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = helloAppDelegate.m; sourceTree = "<group>"; };
@@ -63,6 +71,8 @@
 				A10643D10E5B6F9700338C12 /* libstdc++.6.0.4.dylib in Frameworks */,
 				A10643D20E5B6F9700338C12 /* libstdc++.6.dylib in Frameworks */,
 				A10643EA0E5B702B00338C12 /* libIceObjC.a in Frameworks */,
+				14A268EB0E83FD0A00E562FE /* CFNetwork.framework in Frameworks */,
+				14A268EC0E83FD0A00E562FE /* Security.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -115,6 +125,8 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				14A269740E8408BC00E562FE /* cacert.pem */,
+				140A65660E83F0270012EDD0 /* c_rsa1024.pfx */,
 				2899E5210DE3E06400AC0155 /* helloViewController.xib */,
 				28AD733E0D9D9553002E5188 /* MainWindow.xib */,
 				8D1107310486CEB800E47090 /* Info.plist */,
@@ -128,6 +140,8 @@
 				A10643CF0E5B6F9700338C12 /* libstdc++.6.0.4.dylib */,
 				A10643D00E5B6F9700338C12 /* libstdc++.6.dylib */,
 				A10643C70E5B6E8500338C12 /* libIceObjC.a */,
+				14A268E90E83FD0A00E562FE /* CFNetwork.framework */,
+				14A268EA0E83FD0A00E562FE /* Security.framework */,
 				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
 				1D30AB110D05D00D00671497 /* Foundation.framework */,
 			);
@@ -180,6 +194,8 @@
 			files = (
 				28AD733F0D9D9553002E5188 /* MainWindow.xib in Resources */,
 				2899E5220DE3E06400AC0155 /* helloViewController.xib in Resources */,
+				140A65670E83F0270012EDD0 /* c_rsa1024.pfx in Resources */,
+				14A269750E8408BC00E562FE /* cacert.pem in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

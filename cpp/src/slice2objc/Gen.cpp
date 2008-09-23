@@ -3487,14 +3487,14 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
     _M << nl << "id<ICEInputStream> is_ = nil;";
     if(returnType)
     {
-        _M << nl << retString << " ";
-        if(retIsPointer)
+        _M << nl << retString << " " << (retIsPointer ? "*ret_" : "ret_");
+        if(!isValueType(returnType))
         {
-            _M << "*ret_ = nil;";
+            _M << " = nil;";
         }
         else
         {
-            _M << "ret_;";
+            _M << ";";
         }
     }
     if(p->returnsData())

@@ -27,11 +27,8 @@
 #include <Ice/ReferenceFactory.h> // For createProxy().
 #include <Ice/ProxyFactory.h> // For createProxy().
 
-#ifdef __APPLE__
-#include <TargetConditionals.h>
-#if TARGET_OS_IPHONE == 0
+#if defined(__APPLE__) && TARGET_OS_IPHONE == 0
 #include <bzlib.h>
-#endif
 #endif
 
 using namespace std;
@@ -1063,6 +1060,14 @@ Ice::ConnectionI::read(BasicStream& stream)
     // update _acmAbsoluteTimeout in message().
     //
 }
+
+#if defined(__APPLE__) && TARGET_OS_IPHONE
+bool
+Ice::ConnectionI::hasMoreData()
+{
+    return _transceiver->hasMoreData();
+}
+#endif
 
 void
 Ice::ConnectionI::message(BasicStream& stream, const ThreadPoolPtr& threadPool)

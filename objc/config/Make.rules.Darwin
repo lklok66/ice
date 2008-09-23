@@ -27,15 +27,15 @@ ifeq ($(COMPILE_FOR_IPHONE),yes)
     CC       = /Developer/Platforms/$(SDK_NAME).platform/Developer/usr/bin/$(ARCH)-apple-darwin9-gcc-4.0.1
     CXX      = /Developer/Platforms/$(SDK_NAME).platform/Developer/usr/bin/$(ARCH)-apple-darwin9-g++-4.0.1
 
-    CFLAGS              = -isysroot $(SDK_HOME) -Wall
-    CXXFLAGS		= -isysroot $(SDK_HOME) -ftemplate-depth-128 -Wall -D_REENTRANT
+    CPPPLATFORMFLAGS    = -isysroot $(SDK_HOME)
+    LDPLATFORMFLAGS     = -isysroot $(SDK_HOME)
 else
     CC                  = cc
     CXX	                = c++
-
-    CFLAGS              = -Wall
-    CXXFLAGS		= -ftemplate-depth-128 -Wall -D_REENTRANT
 endif
+
+CFLAGS                  = -Wall
+CXXFLAGS		= -ftemplate-depth-128 -Wall -D_REENTRANT
 
 OPT_FLAGS		=
 ifeq ($(OPTIMIZE_SPEED),yes)
@@ -54,7 +54,7 @@ else
 endif
 
 ifeq ($(STATICLIBS),yes)
-     LDPLATFORMFLAGS    := -ObjC
+     LDPLATFORMFLAGS    := -ObjC $(LDPLATFORMFLAGS)
 endif
 
 #
@@ -63,9 +63,9 @@ endif
 CXXLIBS			=
 
 ifdef ice_src_dist
-    shlibldflags	= $(CXXFLAGS) -L$(libdir)
+    shlibldflags	= $(LDPLATFORMFLAGS) $(CXXFLAGS) -L$(libdir)
 else
-    shlibldflags	= $(CXXFLAGS) -L$(ice_dir)/$(libsubdir)
+    shlibldflags	= $(LDPLATFORMFLAGS) $(CXXFLAGS) -L$(ice_dir)/$(libsubdir)
 endif
 
 mklibfilename       	= $(if $(2),lib$(1).$(2).dylib,lib$(1).dylib)
@@ -97,9 +97,9 @@ LIBS			= -lIceObjC $(BASELIBS)
 ICEUTIL_OS_LIBS         = -lpthread
 ICE_OS_LIBS             = -ldl
 ifneq ($(COMPILE_FOR_IPHONE),yes)
-    ICE_OS_LIBS         := $(ICE_OS_LIBS) -lbz2 -liconv -framework CoreServices
+    ICE_OS_LIBS         := $(ICE_OS_LIBS) -lbz2 -liconv
 else
-    ICE_OS_LIBS         := $(ICE_OS_LIBS) -framework CFNetwork
+    ICE_OS_LIBS         := $(ICE_OS_LIBS) -framework CFNetwork -framework Security
 endif
 
 ifeq ($(STATICLIBS),yes)

@@ -472,6 +472,13 @@ IceInternal::ThreadPool::run()
                         {
                             continue; // Can't read without blocking.
                         }
+
+#if defined(__APPLE__) && TARGET_OS_IPHONE
+                        if(handler->hasMoreData())
+                        {
+                            _selector.hasMoreData(handler.get());
+                        }
+#endif
                     }
                     catch(const TimeoutException&)
                     {

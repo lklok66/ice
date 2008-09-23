@@ -7,26 +7,19 @@
 #
 # **********************************************************************
 
-top_srcdir	= ..
+top_srcdir	= ../..
+
+TARGETS		= $(OBJS)
+
+OBJS		= Acceptor.o \
+		  Connector.o \
+		  Transceiver.o \
+		  EndpointI.o
+
+SRCS		= $(OBJS:.o=.cpp)
 
 include $(top_srcdir)/config/Make.rules
 
-ifeq ($(COMPILE_FOR_IPHONE),yes)
-TRANSPORTS_SUBDIRS = Transports
-endif
+CPPFLAGS	:= -I. -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src $(CPPPLATFORMFLAGS)
 
-SUBDIRS		= IceUtilCpp \
-		  IceCpp \
-		  $(TRANSPORTS_SUBDIRS) \
-		  Ice \
-		  Glacier2
-
-$(EVERYTHING)::
-	@for subdir in $(SUBDIRS); \
-	do \
-	    if test -d $$subdir ; \
-	    then \
-		echo "making $@ in $$subdir"; \
-		( cd $$subdir && $(MAKE) $@ ) || exit 1; \
-	    fi; \
-	done
+include .depend

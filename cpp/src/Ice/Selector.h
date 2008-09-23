@@ -20,6 +20,10 @@
 #include <Ice/LocalException.h>
 #include <Ice/Instance.h>
 
+#if defined(__APPLE__) && TARGET_OS_IPHONE
+#include <set>
+#endif
+
 #if defined(__linux) && !defined(ICE_NO_EPOLL)
 #   define ICE_USE_EPOLL 1
 #elif defined(__APPLE__) && !defined(ICE_NO_KQUEUE)
@@ -206,6 +210,10 @@ public:
 
     void remove(T* handler, SocketStatus status, bool noInterrupt = false)
     {
+#if defined(__APPLE__) && TARGET_OS_IPHONE
+        _pendingHandlers.erase(handler);
+#endif
+
 #if defined(ICE_USE_EPOLL) || defined(ICE_USE_KQUEUE)
 #if defined(ICE_USE_EPOLL)
         epoll_event event;
@@ -255,6 +263,14 @@ public:
             int ret;
             _nSelectedReturned = 0;
             _nSelected = 0;
+
+#if defined(__APPLE__) && TARGET_OS_IPHONE
+            if(!_pendingHandlers.empty())
+            {
+                return _pendingHandlers.size();
+            }
+#endif
+
 #if defined(ICE_USE_EPOLL)
             ret = epoll_wait(_queueFd, &_events[0], _events.size(), _timeout > 0 ? _timeout * 1000 : -1);
 #elif defined(ICE_USE_KQUEUE)
@@ -314,6 +330,14 @@ public:
 
     T* getNextSelected()
     {
+#if defined(__APPLE__) && TARGET_OS_IPHONE
+        if(!_pendingHandlers.empty())
+        {
+            T* handler = *_pendingHandlers.begin();
+            _pendingHandlers.erase(_pendingHandlers.begin());
+            return handler;
+        }
+#endif
         assert(_nSelected > 0);
 
 #if defined(ICE_USE_EPOLL) || defined(ICE_USE_KQUEUE)
@@ -571,6 +595,13 @@ public:
     }
 #endif
 
+#if defined(__APPLE__) && TARGET_OS_IPHONE
+    void hasMoreData(T* handler)
+    {
+        _pendingHandlers.insert(handler);
+    }
+#endif
+
 private:
 
 #if !defined(ICE_USE_EPOLL) && !defined(ICE_USE_KQUEUE)
@@ -636,6 +667,7 @@ private:
     }
 #endif
 
+
     InstancePtr _instance;
     int _timeout;
     SOCKET _lastFd;
@@ -691,6 +723,11 @@ private:
     std::vector<struct pollfd> _pollFdSet;
 #endif
 #endif
+
+#if defined(__APPLE__) && TARGET_OS_IPHONE
+    std::set<T*> _pendingHandlers;
+#endif
+
 };
 
 }

@@ -36,7 +36,7 @@ NSString* hostnameKey = @"hostnameKey";
 
 -(void)updateProxy:(NSString*)h
 {
-    NSString* s = [NSString stringWithFormat:@"hello:tcp -h %@ -p 10000:udp -h %@ -p 10000", h, h];
+    NSString* s = [NSString stringWithFormat:@"hello:tcp -h %@ -p 10000:ssl -h %@ -p 10001:udp -h %@ -p 10000",h, h, h];
     helloAppDelegate *appDelegate = (helloAppDelegate *)[[UIApplication sharedApplication] delegate];
     ICEObjectPrx* prx = [appDelegate.communicator stringToProxy:s];
     NSAssert(prx != nil, @"");
@@ -68,6 +68,8 @@ NSString* hostnameKey = @"hostnameKey";
     {
         prx = [prx ice_timeout:timeout];
     }
+
+    prx = [prx ice_secure:secure];
     
     self.hello = [DemoHelloPrx uncheckedCast:prx];
 }
@@ -94,11 +96,9 @@ NSString* hostnameKey = @"hostnameKey";
     // Defaults for the UI elements.
     hostnameTextField.text = hostname; 
 
-    // Disable secure switch for now, since SSL is not supported.
-    secureSwitch.enabled = NO;
-    
     batchSwitch.enabled = NO;
     flushButton.enabled = NO;
+    secureSwitch.enabled = YES;
 
     // This generates a compile time warning, but does actually work!
     [delaySlider setShowValue:YES];
@@ -112,6 +112,7 @@ NSString* hostnameKey = @"hostnameKey";
     timeout = 0;
     deliveryMode = DeliveryModeTwoway;
     batch = NO;
+    secure = NO;
     [self updateProxy:self.hostname];
 }
 
@@ -244,6 +245,13 @@ NSString* hostnameKey = @"hostnameKey";
     {
         deliveryMode = DeliveryModeDatagram;
     }
+    [self updateProxy:self.hostname];
+}
+
+-(void)secureChanged:(id)thesender
+{
+    UISwitch* sender = thesender;
+    secure = sender.isOn;
     [self updateProxy:self.hostname];
 }
 

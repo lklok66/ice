@@ -208,6 +208,11 @@ AMIIceInvokeCallback(id target, SEL response, SEL ex) : AMICallbackBase(target, 
 virtual void
 ice_response(bool ok , const std::pair<const Byte*, const Byte*>& oP)
 {
+    if(!_response)
+    {
+        return;
+    }
+
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSException* exception = nil;
     @try

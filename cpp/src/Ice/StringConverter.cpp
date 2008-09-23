@@ -17,15 +17,8 @@
 #include <Ice/LoggerUtil.h>
 #include <Ice/Communicator.h>
 
-#ifndef _WIN32
-#  ifdef __APPLE__
-#    include <TargetConditionals.h>
-#    if TARGET_OS_IPHONE == 0
-#      include <Ice/IconvStringConverter.h>
-#    endif
-#  else
-#    include <Ice/IconvStringConverter.h>
-#  endif
+#if !defined(_WIN32) && (!defined(__APPLE__) || TARGET_OS_IPHONE == 0)
+#include <Ice/IconvStringConverter.h>
 #endif
 
 using namespace IceUtil;

@@ -33,9 +33,9 @@ embedded_runpath_prefix  ?= /opt/Ice-$(VERSION_MAJOR).$(VERSION_MINOR)
 # you want to build Ice for Objective-C with the iPhone SDK.
 #
 #COMPILE_FOR_IPHONE	    	= yes
-#COMPILE_FOR_IPHONE_SIMULATOR 	= yes
+COMPILE_FOR_IPHONE_SIMULATOR 	= yes
 
-#STATICLIBS			= yes
+STATICLIBS			= yes
 
 # ----------------------------------------------------------------------
 # Don't change anything below this line!
@@ -93,20 +93,19 @@ ifneq ($(embedded_runpath_prefix),)
    runpath_libdir	:= $(embedded_runpath_prefix)/$(libsubdir)
 endif
 
-CPPFLAGS		= -I$(includedir)
 ICECPPFLAGS		= -I$(slicedir)
 SLICE2CPPFLAGS		= $(ICECPPFLAGS)
 SLICE2OBJCFLAGS		= $(ICECPPFLAGS)
 LDFLAGS			= $(LDPLATFORMFLAGS) $(CXXFLAGS) -L$(libdir)
 
-FLEXFLAGS	       :=
+FLEXFLAGS	        :=
 BISONFLAGS		:= -dvt
 
 ifeq ($(ice_dir), /usr) 
     CPPFLAGS		= 
     LDFLAGS		= $(LDPLATFORMFLAGS) $(CXXFLAGS)
 else
-    CPPFLAGS	= -I$(includedir)
+    CPPFLAGS		= -I$(includedir) $(CPPPLATFORMFLAGS)
     ifdef ice_src_dist
         LDFLAGS		= $(LDPLATFORMFLAGS) $(CXXFLAGS) -L$(libdir) 
     else

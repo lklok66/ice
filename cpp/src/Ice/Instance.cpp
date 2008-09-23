@@ -29,7 +29,9 @@
 #include <Ice/LoggerI.h>
 #include <Ice/Network.h>
 #include <Ice/EndpointFactoryManager.h>
+#if defined(__APPLE__) && TARGET_OS_IPHONE == 0
 #include <Ice/TcpEndpointI.h>
+#endif
 #include <Ice/UdpEndpointI.h>
 #include <Ice/DynamicLibrary.h>
 #include <Ice/PluginManagerI.h>
@@ -977,8 +979,10 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
             _protocolSupport = EnableIPv6;
         }
         _endpointFactoryManager = new EndpointFactoryManager(this);
+#if defined(__APPLE__) && TARGET_OS_IPHONE == 0
         EndpointFactoryPtr tcpEndpointFactory = new TcpEndpointFactory(this);
         _endpointFactoryManager->add(tcpEndpointFactory);
+#endif
         EndpointFactoryPtr udpEndpointFactory = new UdpEndpointFactory(this);
         _endpointFactoryManager->add(udpEndpointFactory);
 
