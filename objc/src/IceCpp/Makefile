@@ -71,6 +71,10 @@ OBJS		= Acceptor.o \
                   StringConverter.o \
 		  SysLoggerI.o \
 	          ThreadPool.o \
+		  TcpEndpointI.o \
+		  TcpAcceptor.o \
+		  TcpConnector.o \
+		  TcpTransceiver.o \
 		  TraceLevels.o \
 		  TraceUtil.o \
 		  Transceiver.o \
@@ -142,14 +146,6 @@ SLICECPP_SRCS	= $(SDIR)/BuiltinSequences.ice \
 SDIR		= $(slicedir)/Ice
 
 include $(top_srcdir)/config/Make.rules
-
-ifneq ($(COMPILE_FOR_IPHONE),yes)
-OBJS		:= $(OBJS) \
-		  TcpEndpointI.o \
-		  TcpAcceptor.o \
-		  TcpConnector.o \
-		  TcpTransceiver.o
-endif
 
 CPPFLAGS	:= -Iinclude -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src $(CPPPLATFORMFLAGS)
 SLICE2CPPFLAGS	:= --ice --include-dir Ice $(SLICE2CPPFLAGS)
