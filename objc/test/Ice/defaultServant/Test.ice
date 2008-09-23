@@ -7,19 +7,17 @@
 //
 // **********************************************************************
 
-#import <Ice/Ice.h>
+#ifndef TEST_ICE
+#define TEST_ICE
 
-@interface InterceptorI : ICEDispatchInterceptor <ICEDispatchInterceptor>
+module Test
 {
-    ICEObject* servant;
-    NSString* lastOperation;
-    BOOL lastStatus;
-}
 
--(id) init:(ICEObject*)servant;
--(BOOL) getLastStatus;
--(NSString*) getLastOperation;
--(void) clear;
+interface MyObject
+{
+    string getName();
+};
 
-@end
+};
 
+#endif

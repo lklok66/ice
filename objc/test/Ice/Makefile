@@ -18,6 +18,7 @@ SUBDIRS		= proxy \
 		  facets \
 		  objects \
                   interceptor \
+ 		  defaultServant \
 		  faultTolerance \
 		  location \
 		  adapterDeactivation \

@@ -13,15 +13,22 @@
 
 @implementation InterceptorI
 
--(id) init:(id<ICEObject>) servant_
+-(id) init:(ICEObject*) servant_
 {
     if (![super init])
     {
         return nil;
     }
-    servant = servant_;
+    servant = [servant_ retain];
     return self;
 }
+
+-(void) dealloc
+{
+    [servant release];
+    [super dealloc];
+}
+
  
 -(BOOL) dispatch:(id<ICERequest>) request
 {

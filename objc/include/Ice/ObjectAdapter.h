@@ -32,6 +32,7 @@
 -(id<ICEObjectPrx>) addFacet:(ICEObject*)servant identity:(ICEIdentity*)ident facet:(NSString*)facet;
 -(id<ICEObjectPrx>) addWithUUID:(ICEObject*)servant;
 -(id<ICEObjectPrx>) addFacetWithUUID:(ICEObject*)servant facet:(NSString*)facet;
+-(void) addDefaultServant:(ICEObject*)servant category:(NSString*)category;
 -(ICEObject*) remove:(ICEIdentity*)ident;
 -(ICEObject*) removeFacet:(ICEIdentity*)ident facet:(NSString*)facet;
 -(NSDictionary*) removeAllFacets:(ICEIdentity*)ident;
@@ -39,6 +40,7 @@
 -(ICEObject*) findFacet:(ICEIdentity*)ident facet:(NSString*)facet;
 -(NSDictionary*) findAllFacets:(ICEIdentity*)ident;
 -(ICEObject*) findByProxy:(id<ICEObjectPrx>)proxy;
+-(ICEObject*) findDefaultServant:(NSString*)category;
 -(id<ICEObjectPrx>) createProxy:(ICEIdentity*)ident;
 -(id<ICEObjectPrx>) createDirectProxy:(ICEIdentity*)ident;
 -(id<ICEObjectPrx>) createIndirectProxy:(ICEIdentity*)ident;

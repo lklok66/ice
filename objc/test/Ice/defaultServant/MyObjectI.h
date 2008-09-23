@@ -7,19 +7,7 @@
 //
 // **********************************************************************
 
-#import <Ice/Ice.h>
+#import <Test.h>
 
-@interface InterceptorI : ICEDispatchInterceptor <ICEDispatchInterceptor>
-{
-    ICEObject* servant;
-    NSString* lastOperation;
-    BOOL lastStatus;
-}
-
--(id) init:(ICEObject*)servant;
--(BOOL) getLastStatus;
--(NSString*) getLastOperation;
--(void) clear;
-
+@interface MyObjectI : TestMyObject<TestMyObject>
 @end
-

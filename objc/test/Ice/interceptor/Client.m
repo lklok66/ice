@@ -23,7 +23,7 @@ run(int argc, char* argv[], id<ICECommunicator> communicator)
     //  
     id<ICEObjectAdapter> oa = [communicator createObjectAdapterWithEndpoints:@"MyOA" endpoints:@"tcp -h localhost"];
     
-    id<ICEObject> servant = [[MyObjectI alloc] init];
+    ICEObject* servant = [[MyObjectI alloc] init];
     InterceptorI* interceptor = [[InterceptorI alloc] init:servant];
     [interceptor autorelease];
     
