@@ -652,28 +652,6 @@ IceObjC::EndpointFactory::EndpointFactory(const InstancePtr& instance, bool secu
     string certAuthFile = properties->getProperty("IceSSL.CertAuthFile");
     string certFile = properties->getProperty("IceSSL.CertFile");
 
-    SecAccessRef access = 0;
-    if(!certFile.empty() || !certAuthFile.empty())
-    {
-        CFURLRef exe = CFBundleCopyExecutableURL(CFBundleGetMainBundle());
-        CFStringRef path = CFURLCopyFileSystemPath(exe, kCFURLPOSIXPathStyle);
-        CFRelease(exe);
-        
-        char p[PATH_MAX];
-        CFStringGetCString(path, p, sizeof(p), kCFStringEncodingUTF8);
-        
-        SecTrustedApplicationRef app;
-        err = SecTrustedApplicationCreateFromPath(p, &app);
-        if(err == noErr)
-        {
-            CFMutableArrayRef apps = CFArrayCreateMutable(0, 1, &kCFTypeArrayCallBacks);
-            CFArrayAppendValue(apps, app);
-            SecAccessCreate(path, apps, &access);
-            CFRelease(apps);
-        }
-        CFRelease(path);
-    }
-
     if(!certAuthFile.empty())
     {
         CFDataRef cert = readCert(defaultDir, certAuthFile);
@@ -681,7 +659,6 @@ IceObjC::EndpointFactory::EndpointFactory(const InstancePtr& instance, bool secu
         SecKeyImportExportParameters params;
         memset(&params, 0, sizeof(params));
         params.version = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
-        params.accessRef = access;
         params.keyUsage = CSSM_KEYUSE_ANY;
         params.keyAttributes = CSSM_KEYATTR_EXTRACTABLE;
         
@@ -709,7 +686,6 @@ IceObjC::EndpointFactory::EndpointFactory(const InstancePtr& instance, bool secu
         SecKeyImportExportParameters params;
         memset(&params, 0, sizeof(params));
         params.version = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
-        params.accessRef = access;
         params.passphrase = toCFString(properties->getProperty("IceSSL.Password"));
         params.keyUsage = CSSM_KEYUSE_ANY;
         params.keyAttributes = CSSM_KEYATTR_EXTRACTABLE;
@@ -745,10 +721,6 @@ IceObjC::EndpointFactory::EndpointFactory(const InstancePtr& instance, bool secu
         CFDictionarySetValue(_settings, kCFStreamSSLAllowsAnyRoot, kCFBooleanTrue);
     }
 
-    if(access)
-    {
-        CFRelease(access);
-    }
     CFRelease(keychain);
 #else
     //
