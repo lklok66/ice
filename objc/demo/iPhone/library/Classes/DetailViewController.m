@@ -487,7 +487,7 @@ static EditViewController* editViewController_ = nil;
                     
                     UIButton* button = [UIButton buttonWithType:UIButtonTypeRoundedRect];
                     
-                    button.frame = CGRectMake(0.f, 0.f, 320.f, 44.f);
+                    button.frame = CGRectMake(10.f, 0.f, 300.f, 44.f);
                     
                     [button setTitle:@"Remove Book" forState:UIControlStateNormal];
                     [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
