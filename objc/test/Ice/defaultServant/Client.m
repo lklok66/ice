@@ -36,6 +36,12 @@ run(int argc, char* argv[], id<ICECommunicator> communicator)
     //
     tprintf("testing single category... ");
 
+    ICEObject* r = [oa findDefaultServant:@"foo"];
+    test(r == servant);
+    
+    r = [oa findDefaultServant:@"bar"];
+    test(r == nil);
+
     ICEIdentity* identity = [ICEIdentity identity:@"" category:@"foo"];
 
     NSArray* stringArray = [NSArray arrayWithObjects:@"foo", @"bar", @"x", @"y", @"abcdefg", nil];
@@ -122,7 +128,13 @@ run(int argc, char* argv[], id<ICECommunicator> communicator)
     tprintf("testing default category... ");
     
     [oa addDefaultServant:servant category:@""];
-        
+    
+    r = [oa findDefaultServant:@"bar"];
+    test(r == nil);
+
+    r = [oa findDefaultServant:@""];
+    test(r == servant);
+    
     for(NSString* name in stringArray)
     {
         [identity setName:name]; 
