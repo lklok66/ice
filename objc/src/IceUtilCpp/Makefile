@@ -39,6 +39,6 @@ SRCS		= $(addprefix $(SRCS_DIR)/, $(OBJS:.o=.cpp))
 
 include $(top_srcdir)/config/Make.rules
 
-CPPFLAGS        := -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src $(CPPFLAGS)
+CPPFLAGS        := -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src $(CPPPLATFORMFLAGS)
 
 include .depend

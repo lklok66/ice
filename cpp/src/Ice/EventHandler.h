@@ -50,6 +50,18 @@ public:
     //
     virtual bool read(BasicStream&) = 0;
 
+#if defined(__APPLE__) && TARGET_OS_IPHONE
+    //
+    // It's possible that the transceiver reads more data than what
+    // was really asked. If this is the case, hasMoreData() returns
+    // true and the handler read() method should be called again
+    // (without doing a select()). This is handled by the Selector
+    // class (it adds the handler to a separate list of handlers if
+    // this method returns true.)
+    //
+    virtual bool hasMoreData() { return false; }
+#endif
+
     //
     // A complete message has been received.
     //

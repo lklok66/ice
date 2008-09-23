@@ -35,6 +35,7 @@
     deliveryMode;
     BOOL showAlert;
     BOOL batch;
+    BOOL secure;
     int delay;
     int timeout;
     DemoHelloPrx* hello;
@@ -54,6 +55,7 @@
 
 - (void)modeChanged:(id)sender;
 - (void)batchChanged:(id)sender;
+- (void)secureChanged:(id)sender;
 - (void)delayChanged:(id)sender;
 - (void)timeoutChanged:(id)sender;
 

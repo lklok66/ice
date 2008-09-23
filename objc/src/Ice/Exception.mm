@@ -372,6 +372,10 @@
     str = toNSString(localEx.str);
     return self;
 }
+-(void) rethrowCxx
+{
+    throw Ice::EndpointParseException(file, line, fromNSString(str));
+}
 @end
 
 @implementation ICEEndpointSelectionTypeParseException (ICEInternal)

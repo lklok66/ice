@@ -110,6 +110,9 @@ public:
     virtual bool datagram() const;
     virtual bool readable() const;
     virtual bool read(IceInternal::BasicStream&);
+#if defined(__APPLE__) && TARGET_OS_IPHONE
+    virtual bool hasMoreData();
+#endif
     virtual void message(IceInternal::BasicStream&, const IceInternal::ThreadPoolPtr&);
     virtual void finished(const IceInternal::ThreadPoolPtr&);
     virtual void exception(const LocalException&);

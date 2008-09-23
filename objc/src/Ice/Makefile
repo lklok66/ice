@@ -62,6 +62,11 @@ all::
 
 include $(top_srcdir)/config/Make.rules
 
+ifeq ($(COMPILE_FOR_IPHONE),yes)
+OBJS		:= $(OBJS) \
+		   $(wildcard ../Transports/*.o)
+endif
+
 CPPFLAGS	:= -I.. -Iinclude -I../../include $(CPPFLAGS)
 SLICE2OBJCFLAGS	:= --ice --include-dir Ice $(SLICE2OBJCFLAGS)
 

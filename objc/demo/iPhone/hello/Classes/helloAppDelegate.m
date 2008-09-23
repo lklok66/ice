@@ -21,7 +21,22 @@
 {
     if (self = [super init])
     {
-        self.communicator = [ICEUtil createCommunicator];
+        @try
+        {
+            ICEInitializationData* initData = [ICEInitializationData initializationData];
+            initData.properties = [ICEUtil createProperties];
+            [initData.properties setProperty:@"Ice.Plugin.IceSSL" value:@"createIceSSL"];
+            [initData.properties setProperty:@"IceSSL.KeychainPassword" value:@"password"];
+            [initData.properties setProperty:@"IceSSL.Password" value:@"password"];
+            [initData.properties setProperty:@"IceSSL.CertFile" value:@"c_rsa1024.pfx"];
+            [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.pem"];
+            self.communicator = [ICEUtil createCommunicator:initData];
+        }
+        @catch(ICELocalException* ex)
+        {
+            NSLog(@"failed to initialize communicator:\n%@", ex);
+            return nil;
+        }
     }
     return self;
 }

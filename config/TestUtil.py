@@ -687,6 +687,13 @@ sslConfigTree = {
             "server" : " --IceSSL.CertFile=s_rsa1024.pfx --IceSSL.ImportCert.CurrentUser.Root=cacert.pem",
             "colloc" : " --IceSSL.CertFile=c_rsa1024.pfx --IceSSL.ImportCert.CurrentUser.Root=cacert.pem --IceSSL.CheckCertName=0"
             },
+        "objc" : {
+            "plugin" : " --Ice.Plugin.IceSSL=createIceSSL --Ice.Default.Protocol=ssl" +
+            " --IceSSL.Password=password --IceSSL.DefaultDir=%(certsdir)s",
+            "client" : " --IceSSL.CertFile=c_rsa1024.pfx --IceSSL.CertAuthFile=cacert.pem --IceSSL.CheckCertName=0",
+            "server" : " --IceSSL.CertFile=s_rsa1024.pfx --IceSSL.CertAuthFile=cacert.pem",
+            "colloc" : " --IceSSL.CertFile=c_rsa1024.pfx --IceSSL.CertAuthFile=cacert.pem --IceSSL.CheckCertName=0"
+            },
         }
 sslConfigTree["py"] = sslConfigTree["cpp"]
 sslConfigTree["rb"] = sslConfigTree["cpp"]
@@ -927,7 +934,7 @@ def runTests(start, expanded, num = 0, script = False):
                 continue
 
             # Skip tests not supported by valgrind
-            if args.find("valgrind") and ("novalgrind" in config or args.find("ssl") != -1):
+            if args.find("valgrind") != -1 and ("novalgrind" in config or args.find("ssl") != -1):
                 print "%s*** test not supported with valgrind%s" % (prefix, suffix)
                 continue
             
