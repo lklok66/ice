@@ -125,30 +125,7 @@ Slice::ObjCGenerator::fixId(const string& name, int baseTypes, bool mangleCasts)
     {
         return name;
     }
-#if 0
-    if(name[0] != ':')
-    {
-#endif
-        return lookupKwd(name, baseTypes, mangleCasts);
-#if 0
-    }
-    StringList ids = splitScopedName(name);
-    StringList newIds;
-    for(StringList::const_iterator i = ids.begin(); i != ids.end(); ++i)
-    {
-        newIds.push_back(lookupKwd(*i, baseTypes));
-    }
-    stringstream result;
-    for(StringList::const_iterator j = newIds.begin(); j != newIds.end(); ++j)
-    {
-        if(j != newIds.begin())
-        {
-            result << '.';
-        }
-        result << *j;
-    }
-    return result.str();
-#endif
+    return lookupKwd(name, baseTypes, mangleCasts);
 }
 
 string
@@ -806,7 +783,6 @@ Slice::ObjCGenerator::MetaDataVisitor::visitStructEnd(const StructPtr&)
 void
 Slice::ObjCGenerator::MetaDataVisitor::visitOperation(const OperationPtr& p)
 {
-#if 0
     if(p->hasMetaData("UserException"))
     {
         ClassDefPtr cl = ClassDefPtr::dynamicCast(p->container());
@@ -818,7 +794,6 @@ Slice::ObjCGenerator::MetaDataVisitor::visitOperation(const OperationPtr& p)
                  << "' is not local" << endl;
         }
     }
-#endif
     validate(p);
 }
 

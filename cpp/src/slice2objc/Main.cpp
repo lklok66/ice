@@ -219,7 +219,7 @@ main(int argc, char* argv[])
                     }
                     if(checksum)
                     {
-                        gen.generateChecksums(p);
+                        // gen.generateChecksums(p);
                     }
                 }
 

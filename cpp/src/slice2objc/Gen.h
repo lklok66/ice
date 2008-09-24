@@ -136,7 +136,6 @@ private:
         virtual void visitDictionary(const DictionaryPtr&);
         virtual void visitEnum(const EnumPtr&);
         virtual void visitConst(const ConstPtr&);
-        virtual void visitDataMember(const DataMemberPtr&);
 
     private:
 
@@ -171,35 +170,6 @@ private:
         virtual void visitOperation(const OperationPtr&);
     };
 
-    class OpsVisitor : public ObjCVisitor
-    {
-    public:
-
-        OpsVisitor(::IceUtilInternal::Output&);
-
-        virtual bool visitModuleStart(const ModulePtr&);
-        virtual void visitModuleEnd(const ModulePtr&);
-        virtual bool visitClassDefStart(const ClassDefPtr&);
-
-    private:
-        void writeOperations(const ClassDefPtr&, bool);
-    };
-
-    class ProxyHelperVisitor : public ObjCVisitor
-    {
-    public:
-
-        ProxyHelperVisitor(::IceUtilInternal::Output&, ::IceUtilInternal::Output&, bool);
-
-        virtual bool visitClassDefStart(const ClassDefPtr&);
-        virtual void visitClassDefEnd(const ClassDefPtr&);
-        virtual void visitDictionary(const DictionaryPtr&);
-
-    private:
-
-        bool _stream;
-    };
-
     class HelperVisitor : public ObjCVisitor
     {
     public:
@@ -215,18 +185,6 @@ private:
         bool _stream;
     };
 
-    class DelegateVisitor : public ObjCVisitor
-    {
-    public:
-
-        DelegateVisitor(::IceUtilInternal::Output&);
-
-        virtual bool visitModuleStart(const ModulePtr&);
-        virtual void visitModuleEnd(const ModulePtr&);
-        virtual bool visitClassDefStart(const ClassDefPtr&);
-        virtual void visitClassDefEnd(const ClassDefPtr&);
-    };
-
     class DelegateMVisitor : public ObjCVisitor
     {
     public:
@@ -240,46 +198,7 @@ private:
         virtual void visitOperation(const OperationPtr&);
     };
 
-    class DelegateDVisitor : public ObjCVisitor
-    {
-    public:
-
-        DelegateDVisitor(::IceUtilInternal::Output&);
-
-        virtual bool visitModuleStart(const ModulePtr&);
-        virtual void visitModuleEnd(const ModulePtr&);
-        virtual bool visitClassDefStart(const ClassDefPtr&);
-        virtual void visitClassDefEnd(const ClassDefPtr&);
-    };
-
-    class DispatcherVisitor : public ObjCVisitor
-    {
-    public:
-
-        DispatcherVisitor(::IceUtilInternal::Output&, bool);
-
-        virtual bool visitModuleStart(const ModulePtr&);
-        virtual void visitModuleEnd(const ModulePtr&);
-        virtual bool visitClassDefStart(const ClassDefPtr&);
-
-    private:
-
-        bool _stream;
-    };
-
-    class AsyncVisitor : public ObjCVisitor
-    {
-    public:
-
-        AsyncVisitor(::IceUtilInternal::Output&);
-
-        virtual bool visitModuleStart(const ModulePtr&);
-        virtual void visitModuleEnd(const ModulePtr&);
-        virtual bool visitClassDefStart(const ClassDefPtr&);
-        virtual void visitClassDefEnd(const ClassDefPtr&);
-        virtual void visitOperation(const OperationPtr&);
-    };
-
+#if 0
     class TieVisitor : public ObjCVisitor
     {
     public:
@@ -330,6 +249,7 @@ private:
         virtual void visitModuleEnd(const ModulePtr&);
         virtual bool visitClassDefStart(const ClassDefPtr&);
     };
+#endif
 };
 
 }
