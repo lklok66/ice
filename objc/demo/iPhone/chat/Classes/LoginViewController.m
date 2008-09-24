@@ -63,7 +63,7 @@ NSString* passwordKey = @"passwordKey";
 {
     // Initialize the application defaults.
     NSString* testValue = [[NSUserDefaults standardUserDefaults] stringForKey:hostnameKey];
-    if (testValue == nil)
+    if(testValue == nil)
     {
         NSDictionary* appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:@"demo.zeroc.com", hostnameKey,
                                      @"", usernameKey,
@@ -236,7 +236,7 @@ NSString* passwordKey = @"passwordKey";
     AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
     [appDelegate logout];
     
-    loginButton.enabled = hostnameTextField.text.length > 0 && usernameTextField.text.length > 0;
+    loginButton.enabled = hostname.length > 0 && username.length > 0;
     
     [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
     

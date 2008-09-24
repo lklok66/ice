@@ -87,7 +87,7 @@
 -(BOOL) leave_async:(id)target_ response:(SEL)response_ exception:(SEL)exception_ timestamp:(ICELong)timestamp name:(NSString *)name context:(ICEContext *)context;
 -(BOOL) leave_async:(id)target_ response:(SEL)response_ exception:(SEL)exception_ sent:(SEL)sent_ timestamp:(ICELong)timestamp name:(NSString *)name;
 -(BOOL) leave_async:(id)target_ response:(SEL)response_ exception:(SEL)exception_ sent:(SEL)sent_ timestamp:(ICELong)timestamp name:(NSString *)name context:(ICEContext *)context;
-@end;
+@end
 
 @protocol ChatChatSessionPrx <Glacier2SessionPrx>
 -(void) setCallback:(id<ChatChatRoomCallbackPrx>)cb;
@@ -102,7 +102,7 @@
 -(BOOL) send_async:(id)target_ response:(SEL)response_ exception:(SEL)exception_ message:(NSString *)message context:(ICEContext *)context;
 -(BOOL) send_async:(id)target_ response:(SEL)response_ exception:(SEL)exception_ sent:(SEL)sent_ message:(NSString *)message;
 -(BOOL) send_async:(id)target_ response:(SEL)response_ exception:(SEL)exception_ sent:(SEL)sent_ message:(NSString *)message context:(ICEContext *)context;
-@end;
+@end
 
 @interface ChatChatRoomCallbackPrx : ICEObjectPrx <ChatChatRoomCallbackPrx>
 +(NSString *) ice_staticId;

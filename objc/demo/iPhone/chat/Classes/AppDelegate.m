@@ -65,43 +65,6 @@
 }
 @end
 
-@interface LoggerI : ICEObject<ICELogger>
-
--(void) print:(NSString*)message;
--(void) trace:(NSString*)category message:(NSString*)message;
--(void) warning:(NSString*)message;
--(void) error:(NSString*)message;
-
-@end
-
-@implementation LoggerI 
-
--(void) print:(NSString*)message
-{
-    NSLog(message);
-}
-
--(void) trace:(NSString*)category message:(NSString*)message
-{
-    NSMutableString* s = [NSString stringWithFormat:@"[%@] %@", [NSDate date], message];
-    [s replaceOccurrencesOfString:@"\n" withString:@" " options:0 range:NSMakeRange(0, s.length)];
-    [self print:s];
-}
-
--(void) warning:(NSString*)message
-{
-    NSString* s = [NSString stringWithFormat:@"%@: warning: %@", [NSDate date], message]; 
-    [self print:s];
-}
-
--(void) error:(NSString*)message
-{
-    NSString* s = [NSString stringWithFormat:@"%@: error: %@", [NSDate date], message];
-    [self print:s];
-}
-
-@end
-
 @interface AppDelegate()
 
 @property (nonatomic, retain) NSTimer* refreshTimer;
@@ -122,7 +85,6 @@
 	if((self = [super init]))
     {
         self.initData = [ICEInitializationData initializationData];
-        self.initData.properties = [[[LoggerI alloc] init] autorelease];
         self.initData.properties = [ICEUtil createProperties ];
         [self.initData.properties setProperty:@"Ice.ACM.Client" value:@"0"];
         [self.initData.properties setProperty:@"Ice.RetryIntervals" value:@"-1"];

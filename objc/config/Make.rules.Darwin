@@ -29,6 +29,7 @@ ifeq ($(COMPILE_FOR_IPHONE),yes)
 
     CPPPLATFORMFLAGS    = -isysroot $(SDK_HOME)
     LDPLATFORMFLAGS     = -isysroot $(SDK_HOME)
+    CODESIGN = CODESIGN_ALLOCATE=/Developer/Platforms/$(SDK_NAME).platform/Developer/usr/bin/codesign_allocate codesign
 else
     CC                  = cc
     CXX	                = c++
