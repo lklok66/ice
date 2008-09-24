@@ -51,8 +51,10 @@ $(libdir)/$(LIBFILENAME): $(OBJS)
 	rm -f $@
 ifeq ($(COMPILE_FOR_IPHONE),yes)
 	$(call mkshlib,$@,$(LIBFILENAME),$(OBJS),$(LINKWITH))
-ifneq ($(IDENTIFIER),)
-	$(CODESIGN) -s $(IDENTIFIER) $@
+ifneq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
+  ifneq ($(IDENTIFIER),)
+	$(CODESIGN) -s "$(IDENTIFIER)" $@
+  endif
 endif
 else
 	$(call mkshlib,$@,$(SONAME),$(OBJS),$(LINKWITH))
