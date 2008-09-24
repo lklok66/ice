@@ -107,24 +107,24 @@ typedef IceUtil::Handle<LoggerI> LoggerIPtr;
 
 -(void) trace:(NSString*)category message:(NSString*)message
 {
-    NSDate* date = [[NSDate alloc] init];
-    NSMutableString* s = [[NSMutableString alloc] initWithFormat:@"[%@] %@", date, message];
-    [date release];
+    NSMutableString* s = [[NSMutableString alloc] initWithFormat:@"[%@: %@]", category, message];
+#if TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR
     [s replaceOccurrencesOfString:@"\n" withString:@" " options:0 range:NSMakeRange(0, s.length)];
+#endif
     [self print:s];
     [s release];
 }
 
 -(void) warning:(NSString*)message
 {
-    NSString* s = [[NSString alloc] initWithFormat:@"%@: warning: %@", [NSDate date], message]; 
+    NSString* s = [[NSString alloc] initWithFormat:@"warning: %@", message]; 
     [self print:s];
     [s release];
 }
 
 -(void) error:(NSString*)message
 {
-    NSString* s = [[NSString alloc] initWithFormat:@"%@: error: %@", [NSDate date], message];
+    NSString* s = [[NSString alloc] initWithFormat:@"error: %@", message];
     [self print:s];
     [s release];
 }
