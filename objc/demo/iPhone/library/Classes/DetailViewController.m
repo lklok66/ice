@@ -427,8 +427,17 @@ static EditViewController* editViewController_ = nil;
         
         // The width of the table is 320 - 20px of left & right padding. We don't want to let the title
         // go past 200px.
-        CGSize sz = [book.title sizeWithFont:[UIFont boldSystemFontOfSize:20] 
-                         constrainedToSize:CGSizeMake(300.f, 200.0f)];
+        CGSize sz;
+        if(self.editing)
+        {
+            sz = [book.title sizeWithFont:[UIFont boldSystemFontOfSize:20] 
+                  constrainedToSize:CGSizeMake(250.f, 200.0f)];
+        }
+        else
+        {
+            sz = [book.title sizeWithFont:[UIFont boldSystemFontOfSize:20] 
+                  constrainedToSize:CGSizeMake(260.f, 200.0f)];
+        }
 
         return sz.height + 20.f; // 20px padding.
     }
@@ -462,8 +471,18 @@ static EditViewController* editViewController_ = nil;
             
             UILabel* textView = [cell.contentView.subviews objectAtIndex:0];
             
-            CGSize sz = [book.title sizeWithFont:[UIFont boldSystemFontOfSize:20.0] 
-                             constrainedToSize:CGSizeMake(300.f, 200.0f)];
+            CGSize sz;
+
+            if(self.editing)
+            {
+                sz = [book.title sizeWithFont:[UIFont boldSystemFontOfSize:20.0] 
+                      constrainedToSize:CGSizeMake(250.f, 200.0f)];
+            }
+            else
+            {
+                sz = [book.title sizeWithFont:[UIFont boldSystemFontOfSize:20.0] 
+                      constrainedToSize:CGSizeMake(260.f, 200.0f)];
+            }
             textView.frame = CGRectMake(10.f, 10.f, sz.width, sz.height);
             textView.text = book.title;
             break;
@@ -487,7 +506,7 @@ static EditViewController* editViewController_ = nil;
                     
                     UIButton* button = [UIButton buttonWithType:UIButtonTypeRoundedRect];
                     
-                    button.frame = CGRectMake(10.f, 0.f, 300.f, 44.f);
+                    button.frame = CGRectMake(-30.f, 0.f, 300.f, 44.f);
                     
                     [button setTitle:@"Remove Book" forState:UIControlStateNormal];
                     [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];

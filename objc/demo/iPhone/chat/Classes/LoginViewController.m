@@ -221,9 +221,10 @@ NSString* passwordKey = @"passwordKey";
         [[NSUserDefaults standardUserDefaults] setObject:password forKey:passwordKey];
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
-    loginButton.enabled = hostname.length > 0 && password.length > 0;
+    loginButton.enabled = hostname.length > 0 && username.length > 0;
 
     [theTextField resignFirstResponder];
+    self.currentTextField = nil;
 
     return YES;
 }

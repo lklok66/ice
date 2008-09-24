@@ -3,7 +3,7 @@
 	<data>
 		<int key="IBDocument.SystemTarget">512</int>
 		<string key="IBDocument.SystemVersion">9F33</string>
-		<string key="IBDocument.InterfaceBuilderVersion">670</string>
+		<string key="IBDocument.InterfaceBuilderVersion">672</string>
 		<string key="IBDocument.AppKitVersion">949.34</string>
 		<string key="IBDocument.HIToolboxVersion">352.00</string>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
@@ -83,7 +83,7 @@
 						<float key="IBUIMinimumFontSize">1.700000e+01</float>
 						<object class="IBUITextInputTraits" key="IBUITextInputTraits">
 							<int key="IBUIAutocapitalizationType">1</int>
-							<int key="IBUIKeyboardType">1</int>
+							<int key="IBUIKeyboardType">3</int>
 							<int key="IBUIReturnKeyType">9</int>
 						</object>
 					</object>
@@ -665,7 +665,7 @@
 					<bool key="EncodedWithXMLCoder">YES</bool>
 					<string>helloViewController</string>
 					<string>UIResponder</string>
-					<string>{{516, 177}, {320, 460}}</string>
+					<string>{{305, 177}, {320, 460}}</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<object class="NSArray">
 						<bool key="EncodedWithXMLCoder">YES</bool>
