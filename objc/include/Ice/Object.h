@@ -36,7 +36,6 @@ int ICEInternalLookupString(NSString *[], size_t, NSString *);
 -(NSString*) ice_id:(ICECurrent*)current;
 -(NSArray*) ice_ids;
 -(NSArray*) ice_ids:(ICECurrent*)current;
-+(NSString*) ice_staticId;
 -(void) ice_preMarshal;
 -(void) ice_postUnmarshal;
 -(BOOL) ice_dispatch:(id<ICERequest>)request;
@@ -46,6 +45,7 @@ int ICEInternalLookupString(NSString *[], size_t, NSString *);
 {
     void* object__;
 }
++(NSString*) ice_staticId;
 +(NSString**) staticIds__:(int*)count idIndex:(int*)idx;
 -(void) checkModeAndSelector__:(ICEOperationMode)expected selector:(SEL)sel current:(ICECurrent*)current;
 +(BOOL) ice_isA___:(id)servant current:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os;
