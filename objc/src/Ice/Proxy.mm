@@ -366,7 +366,7 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
     {
         if([(ICEObjectPrx*)proxy isKindOfClass:self])
         {
-            return proxy;
+            return [[proxy retain] autorelease];
         }
         else
         {
@@ -385,7 +385,7 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
     {
         if([(ICEObjectPrx*)proxy isKindOfClass:self])
         {
-            return proxy;
+            return [[proxy retain] autorelease];
         }
         else if([(ICEObjectPrx*)proxy conformsToProtocol:[self protocol__]] ||
                 [proxy ice_isA:[self ice_staticId]])
@@ -412,7 +412,7 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
     {
         if([(ICEObjectPrx*)proxy isKindOfClass:self])
         {
-            return proxy;
+            return [[proxy retain] autorelease];
         }
         else if([(ICEObjectPrx*)proxy conformsToProtocol:[self protocol__]] ||
                 [proxy ice_isA:[self ice_staticId] context:context])

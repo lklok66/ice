@@ -12,10 +12,9 @@
 
 #include <IceCpp/Logger.h>
 
-@interface ICELogger : ICEInternalWrapper<ICELogger>
+@interface ICELogger : NSObject<ICELogger>
 {
-    Ice::Logger* logger_;
 }
--(Ice::Logger*)logger;
-+(ICELogger*)loggerWithLogger:(id<ICELogger>)arg;
++(Ice::Logger*)loggerWithLogger:(id<ICELogger>)arg;
++(id) wrapperWithCxxObject:(IceUtil::Shared*)cxxObject;
 @end

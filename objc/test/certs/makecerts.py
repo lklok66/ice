@@ -118,8 +118,6 @@ if force or not os.path.exists(cppServerCert) or not os.path.exists(cppServerKey
     if os.path.exists(cppServerKey):
         os.remove(cppServerKey)
 
-    prepareCAHome(caHome, force)
-
     serial = os.path.join(caHome, "serial")
     f = open(serial, "r")
     serialNum = f.read().strip()
@@ -161,8 +159,6 @@ if force or not os.path.exists(cppClientCert) or not os.path.exists(cppClientKey
     if os.path.exists(cppClientKey):
         os.remove(cppClientKey)
 
-    prepareCAHome(caHome, force)
-
     serial = os.path.join(caHome, "serial")
     f = open(serial, "r")
     serialNum = f.read().strip()
@@ -188,116 +184,6 @@ if force or not os.path.exists(cppClientCert) or not os.path.exists(cppClientKey
     os.remove(req)
 else:
     print "Skipping C++ client RSA certificate and key."
-
-#
-# C++ DSA parameters.
-#
-dsaParams = os.path.join(certs, "dsaparam1024.pem")
-if (lang == "cpp" or lang == None) and (force or not os.path.exists(dsaParams)):
-
-    print "Generating new C++ DSA parameters..."
-
-    if os.path.exists(dsaParams):
-        os.remove(dsaParams)
-
-    prepareCAHome(caHome, force)
-
-    cmd = "openssl dsaparam -out " + dsaParams + " -outform PEM 1024"
-    if debug:
-        print "[debug]", cmd
-    os.system(cmd)
-else:
-    print "Skipping C++ DSA parameters."
-
-#
-# C++ server DSA certificate and key.
-#
-cppServerCertDSA = os.path.join(certs, "s_dsa1024_pub.pem")
-cppServerKeyDSA = os.path.join(certs, "s_dsa1024_priv.pem")
-if (lang == "cpp" or lang == None) and \
-   (force or not os.path.exists(cppServerCertDSA) or not os.path.exists(cppServerKeyDSA) or \
-   (os.path.exists(cppServerCertDSA) and newer(caCert, cppServerCertDSA)) or \
-   (os.path.exists(cppServerCertDSA) and newer(dsaParams, cppServerCertDSA))):
-
-    print "Generating new C++ server DSA certificate and key..."
-
-    if os.path.exists(cppServerCertDSA):
-        os.remove(cppServerCertDSA)
-    if os.path.exists(cppServerKeyDSA):
-        os.remove(cppServerKeyDSA)
-
-    prepareCAHome(caHome, force)
-
-    serial = os.path.join(caHome, "serial")
-    f = open(serial, "r")
-    serialNum = f.read().strip()
-    f.close()
-
-    tmpKey = os.path.join(caHome, serialNum + "_key.pem")
-    tmpCert = os.path.join(caHome, serialNum + "_cert.pem")
-    req = os.path.join(caHome, "req.pem")
-    config = os.path.join(certs, "openssl", "server.cnf")
-    cmd = "openssl req -config " + config + " -newkey dsa:" + dsaParams + " -nodes -keyout " + tmpKey + \
-          " -keyform PEM -out " + req
-    if debug:
-        print "[debug]", cmd
-    os.system(cmd)
-
-    cmd = "openssl ca -config " + config + " -batch -in " + req
-    if debug:
-        print "[debug]", cmd
-    os.system(cmd)
-    shutil.move(os.path.join(caHome, serialNum + ".pem"), tmpCert)
-    shutil.copyfile(tmpKey, cppServerKeyDSA)
-    shutil.copyfile(tmpCert, cppServerCertDSA)
-    os.remove(req)
-else:
-    print "Skipping C++ server DSA certificate and key."
-
-#
-# C++ client DSA certificate and key.
-#
-cppClientCertDSA = os.path.join(certs, "c_dsa1024_pub.pem")
-cppClientKeyDSA = os.path.join(certs, "c_dsa1024_priv.pem")
-if (lang == "cpp" or lang == None) and \
-   (force or not os.path.exists(cppClientCertDSA) or not os.path.exists(cppClientKeyDSA) or \
-   (os.path.exists(cppClientCertDSA) and newer(caCert, cppClientCertDSA)) or \
-   (os.path.exists(cppClientCertDSA) and newer(dsaParams, cppClientCertDSA))):
-
-    print "Generating new C++ client DSA certificate and key..."
-
-    if os.path.exists(cppClientCertDSA):
-        os.remove(cppClientCertDSA)
-    if os.path.exists(cppClientKeyDSA):
-        os.remove(cppClientKeyDSA)
-
-    prepareCAHome(caHome, force)
-
-    serial = os.path.join(caHome, "serial")
-    f = open(serial, "r")
-    serialNum = f.read().strip()
-    f.close()
-
-    tmpKey = os.path.join(caHome, serialNum + "_key.pem")
-    tmpCert = os.path.join(caHome, serialNum + "_cert.pem")
-    req = os.path.join(caHome, "req.pem")
-    config = os.path.join(certs, "openssl", "client.cnf")
-    cmd = "openssl req -config " + config + " -newkey dsa:" + dsaParams + " -nodes -keyout " + tmpKey + \
-          " -keyform PEM -out " + req
-    if debug:
-        print "[debug]", cmd
-    os.system(cmd)
-
-    cmd = "openssl ca -config " + config + " -batch -in " + req
-    if debug:
-        print "[debug]", cmd
-    os.system(cmd)
-    shutil.move(os.path.join(caHome, serialNum + ".pem"), tmpCert)
-    shutil.copyfile(tmpKey, cppClientKeyDSA)
-    shutil.copyfile(tmpCert, cppClientCertDSA)
-    os.remove(req)
-else:
-    print "Skipping C++ client DSA certificate and key."
 
 #
 # .NET server RSA certificate and key.
@@ -337,92 +223,6 @@ if (lang == ".net" or lang == None) and (force or not os.path.exists(csClient) o
     os.system(cmd)
 else:
     print "Skipping .NET client certificate and key."
-
-#
-# Java truststore.
-#
-truststore = "certs.jks"
-if (lang == "java" or lang == None) and (force or not os.path.exists(truststore) or \
-   (os.path.exists(truststore) and newer(caCert, truststore))):
-
-    print "Generating Java truststore..."
-
-    if os.path.exists(truststore):
-        os.remove(truststore)
-
-    tmpFile = os.path.join(certs, "cacert.der")
-    cmd = "openssl x509 -in " + caCert + " -outform DER -out " + tmpFile
-    if debug:
-        print "[debug]", cmd
-    os.system(cmd)
-    cmd = "keytool -import -alias cacert -file " + tmpFile + " -keystore " + truststore + \
-          " -storepass password -noprompt"
-    if debug:
-        print "[debug]", cmd
-    os.system(cmd)
-    os.remove(tmpFile)
-else:
-    print "Skipping Java truststore."
-
-#
-# Java server keystore.
-#
-serverKeystore = "server.jks"
-if (lang == "java" or lang == None) and (force or not os.path.exists(serverKeystore) or \
-   (os.path.exists(serverKeystore) and newer(cppServerCert, serverKeystore))):
-
-    print "Generating Java server keystore..."
-
-    if os.path.exists(serverKeystore):
-        os.remove(serverKeystore)
-
-    #
-    # Convert OpenSSL key/certificate pairs into PKCS12 format and then
-    # import them into a Java keystore.
-    #
-    tmpFile = os.path.join(certs, "server.p12")
-    cmd = "openssl pkcs12 -in " + cppServerCert + " -inkey " + cppServerKey + " -export -out " + tmpFile + \
-          " -name rsakey -passout pass:password -certfile " + caCert
-    if debug:
-        print "[debug]", cmd
-    os.system(cmd)
-    cmd = "java -classpath . ImportKey " + tmpFile + " rsakey " + caCert + " " + serverKeystore + " password"
-    if debug:
-        print "[debug]", cmd
-    os.system(cmd)
-    os.remove(tmpFile)
-else:
-    print "Skipping Java server keystore."
-
-#
-# Java client keystore.
-#
-clientKeystore = "client.jks"
-if (lang == "java" or lang == None) and (force or not os.path.exists(clientKeystore) or \
-   (os.path.exists(clientKeystore) and newer(cppClientCert, clientKeystore))):
-
-    print "Generating Java client keystore..."
-
-    if os.path.exists(clientKeystore):
-        os.remove(clientKeystore)
-
-    #
-    # Convert OpenSSL key/certificate pairs into PKCS12 format and then
-    # import them into a Java keystore.
-    #
-    tmpFile = os.path.join(certs, "client.p12")
-    cmd = "openssl pkcs12 -in " + cppClientCert + " -inkey " + cppClientKey + " -export -out " + tmpFile + \
-          " -name rsakey -passout pass:password -certfile " + caCert
-    if debug:
-        print "[debug]", cmd
-    os.system(cmd)
-    cmd = "java -classpath . ImportKey " + tmpFile + " rsakey " + caCert + " " + clientKeystore + " password"
-    if debug:
-        print "[debug]", cmd
-    os.system(cmd)
-    os.remove(tmpFile)
-else:
-    print "Skipping Java client keystore."
 
 #
 # Done.

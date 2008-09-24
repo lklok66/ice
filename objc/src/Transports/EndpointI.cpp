@@ -66,7 +66,7 @@ readCert(const string& defaultDir, const string& certFile)
     {
         ostringstream os;
         os << "IceSSL: unable to open file " << certFile << " (error = " << error << ")";
-        throw PluginInitializationException(__FILE__, __LINE__);
+        throw PluginInitializationException(__FILE__, __LINE__, os.str());
     }
     CFRelease(url);
     return cert;
@@ -604,53 +604,57 @@ IceObjC::EndpointFactory::EndpointFactory(const InstancePtr& instance, bool secu
     Ice::PropertiesPtr properties = _instance->initializationData().properties;
     _settings = CFDictionaryCreateMutable(0, 1, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
 
-#if TARGET_IPHONE_SIMULATOR
-
-    string keychainName = properties->getPropertyWithDefault("IceSSL.Keychain", "login");
-    string keychainPassword = properties->getProperty("IceSSL.KeychainPassword");
-    char *home = getenv("HOME");
-    if(home == NULL) 
-    {
-        home = "";
-    }
-    string path = string(home) + "/Library/Keychains/" + keychainName + ".keychain";
-    SecKeychainRef keychain = 0;
-    OSStatus err = SecKeychainOpen(path.c_str(),  &keychain);
-    SecKeychainStatus status;
-    err = SecKeychainGetStatus(keychain, &status);
-    if(err == noErr)
-    {
-        if(!keychainPassword.empty())
-        {
-            SecKeychainUnlock(keychain, keychainPassword.size(), keychainPassword.c_str(), true);
-        }
-        else
-        {
-            SecKeychainUnlock(keychain, 0, 0, false);
-        }
-    }
-    if(err == errSecNoSuchKeychain)
-    {
-        if(!keychainPassword.empty())
-        {
-            err = SecKeychainCreate(path.c_str(), keychainPassword.size(), keychainPassword.c_str(), false, 0, 
-                                    &keychain);
-        }
-        else
-        {
-            err = SecKeychainCreate(path.c_str(), 0, 0, true, 0, &keychain);
-        }
-    }
-    if(err != noErr)
-    {
-        ostringstream os;
-        os << "IceSSL: unable to open keychain " << path << " (error = " << err << ")";
-        throw PluginInitializationException(__FILE__, __LINE__, os.str());
-    }
-
     string defaultDir = properties->getProperty("IceSSL.DefaultDir");
     string certAuthFile = properties->getProperty("IceSSL.CertAuthFile");
     string certFile = properties->getProperty("IceSSL.CertFile");
+
+#if TARGET_IPHONE_SIMULATOR
+
+    SecKeychainRef keychain = 0;
+    OSStatus err;
+    if(!certAuthFile.empty() || !certFile.empty())
+    {
+        string keychainName = properties->getPropertyWithDefault("IceSSL.Keychain", "login");
+        string keychainPassword = properties->getProperty("IceSSL.KeychainPassword");
+        char *home = getenv("HOME");
+        if(home == NULL) 
+        {
+            home = "";
+        }
+        string path = string(home) + "/Library/Keychains/" + keychainName + ".keychain";
+        err = SecKeychainOpen(path.c_str(),  &keychain);
+        SecKeychainStatus status;
+        err = SecKeychainGetStatus(keychain, &status);
+        if(err == noErr)
+        {
+            if(!keychainPassword.empty())
+            {
+                SecKeychainUnlock(keychain, keychainPassword.size(), keychainPassword.c_str(), true);
+            }
+            else
+            {
+                SecKeychainUnlock(keychain, 0, 0, false);
+            }
+        }
+        if(err == errSecNoSuchKeychain)
+        {
+            if(!keychainPassword.empty())
+            {
+                err = SecKeychainCreate(path.c_str(), keychainPassword.size(), keychainPassword.c_str(), false, 0, 
+                                        &keychain);
+            }
+            else
+            {
+                err = SecKeychainCreate(path.c_str(), 0, 0, true, 0, &keychain);
+            }
+        }
+        if(err != noErr)
+        {
+            ostringstream os;
+            os << "IceSSL: unable to open keychain " << path << " (error = " << err << ")";
+            throw PluginInitializationException(__FILE__, __LINE__, os.str());
+        }
+    }
 
     if(!certAuthFile.empty())
     {
@@ -668,15 +672,14 @@ IceObjC::EndpointFactory::EndpointFactory(const InstancePtr& instance, bool secu
         CFStringRef filename = toCFString(certAuthFile);
         CFArrayRef items = 0;
         err = SecKeychainItemImport(cert, filename, &format, &type, 0, &params, keychain, &items);
+        CFRelease(filename);
+        CFRelease(cert);
         if(err != noErr && err != errSecDuplicateItem)
         {
             ostringstream os;
             os << "IceSSL: unable to import certificate from file " << certAuthFile << " (error = " << err << ")";
             throw PluginInitializationException(__FILE__, __LINE__, os.str());
         }
-
-        CFRelease(filename);
-        CFRelease(cert);
     }
 
     if(!certFile.empty())
@@ -696,6 +699,9 @@ IceObjC::EndpointFactory::EndpointFactory(const InstancePtr& instance, bool secu
         CFArrayRef items = 0;
         CFStringRef filename = toCFString(certFile);
         err = SecKeychainItemImport(cert, filename, &format, &type, 0, &params, keychain, &items);
+        CFRelease(params.passphrase);
+        CFRelease(filename);
+        CFRelease(cert);
         if(err != noErr)
         {
             ostringstream os;
@@ -704,14 +710,99 @@ IceObjC::EndpointFactory::EndpointFactory(const InstancePtr& instance, bool secu
         }
 
         CFDictionarySetValue(_settings, kCFStreamSSLCertificates, items);
-        
-        CFRelease(params.passphrase);
-        CFRelease(filename);
-        CFRelease(cert);
         CFRelease(items);
     }
 
-    if(properties->getPropertyAsIntWithDefault("IceSSL.CheckCertName", 1))
+    if(keychain)
+    {
+        CFRelease(keychain);
+    }
+#else
+    OSStatus err;
+    if(!certAuthFile.empty())
+    {
+        CFDataRef cert = readCert(defaultDir, certAuthFile);
+        if(!cert)
+        {
+            PluginInitializationException ex(__FILE__, __LINE__);
+            ex.reason = "IceSSL: unable to open file " + certAuthFile;
+            throw ex;
+        }
+        
+        SecCertificateRef result = SecCertificateCreateWithData(0, cert);
+        if(!result)
+        {
+            PluginInitializationException ex(__FILE__, __LINE__);
+            ex.reason = "IceSSL: certificate " + certAuthFile + " is not a valid DER-encoded certificate";
+            throw ex;
+        }
+
+        CFMutableDictionaryRef certs;
+        certs = CFDictionaryCreateMutable(0, 1, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+        CFDictionarySetValue(certs, kSecClass, kSecClassCertificate);
+        CFDictionarySetValue(certs, kSecValueRef, result);
+        err = SecItemAdd(certs, 0);
+        CFRelease(certs);
+        CFRelease(cert);
+        if(err != noErr && err != errSecDuplicateItem)
+        {
+            ostringstream os;
+            os << "IceSSL: unable to import certificate from file " << certAuthFile << " (error = " << err << ")";
+            throw PluginInitializationException(__FILE__, __LINE__, os.str());
+        }
+    }
+
+    if(!certFile.empty())
+    {
+        CFDataRef cert = readCert(defaultDir, certFile);
+        if(!cert)
+        {
+            PluginInitializationException ex(__FILE__, __LINE__);
+            ex.reason = "IceSSL: unable to open file " + certFile;
+            throw ex;
+        }
+
+        CFMutableDictionaryRef settings;
+        settings = CFDictionaryCreateMutable(0, 1, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+        CFStringRef password = toCFString(properties->getProperty("IceSSL.Password"));
+        CFDictionarySetValue(settings, kSecImportExportPassphrase, password);
+        CFRelease(password);
+        
+        CFArrayRef items = 0;
+        err = SecPKCS12Import(cert, settings, &items);
+        CFRelease(cert);
+        CFRelease(settings);
+        if(err != noErr)
+        {
+            ostringstream os;
+            os << "IceSSL: unable to import certificate from file " << certFile << " (error = " << err << ")";
+            throw PluginInitializationException(__FILE__, __LINE__, os.str());
+        }
+
+        SecIdentityRef identity = 0;
+        if(CFArrayGetCount(items) > 0)
+        {
+            identity = (SecIdentityRef)CFDictionaryGetValue((CFDictionaryRef)CFArrayGetValueAtIndex(items, 0), 
+                                                            kSecImportItemIdentity);
+        }
+        if(identity == 0)
+        {
+            ostringstream os;
+            os << "IceSSL: couldn't find identity in file " << certFile << " (error = " << err << ")";
+            throw PluginInitializationException(__FILE__, __LINE__, os.str());
+        }
+        CFRetain(identity);
+        CFRelease(items);
+
+        SecIdentityRef identities[] = { identity };
+        items = CFArrayCreate(0, (const void**)identities, 1, &kCFTypeArrayCallBacks);
+        CFDictionarySetValue(_settings, kCFStreamSSLCertificates, items);
+        CFRelease(identity);
+        CFRelease(items);
+    }
+#endif
+
+    if(!properties->getPropertyAsIntWithDefault("IceSSL.CheckCertName", 1))
     {
         CFDictionarySetValue(_settings, kCFStreamSSLPeerName, kCFNull);
     }
@@ -720,86 +811,7 @@ IceObjC::EndpointFactory::EndpointFactory(const InstancePtr& instance, bool secu
     {
         CFDictionarySetValue(_settings, kCFStreamSSLAllowsAnyRoot, kCFBooleanTrue);
     }
-
-    CFRelease(keychain);
-#else
-    //
-    // TODO: Implement for the iPhone SDK
-    //
-
-//     SecKeychainRef keychain;
-//     SecKeychainCopyDefault(&keychain);
-        
-//     string defaultDir = properties->getProperty("IceSSL.DefaultDir");
-
-//     string certAuthFile = properties->getProperty("IceSSL.CertAuthFile");
-//     if(!certAuthFile.empty())
-//     {
-//         CFDataRef cert = readCert(defaultDir, certAuthFile);
-//         if(!cert)
-//         {
-//             PluginInitializationException ex(__FILE__, __LINE__);
-//             ex.reason = "IceSSL: unable to open file " + certAuthFile;
-//             throw ex;
-//         }
-        
-//         SecKeyImportExportParameters params;
-//         memset(&params, 0, sizeof(params));
-//         params.version = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
-//         params.keyUsage = CSSM_KEYUSE_ANY;
-//         params.keyAttributes = CSSM_KEYATTR_EXTRACTABLE;
-        
-//         SecExternalFormat format = kSecFormatUnknown;
-//         SecExternalItemType type = kSecItemTypeUnknown;
-        
-//         CFStringRef filename = toCFString(certAuthFile);
-//         err = SecKeychainItemImport(cert, filename, &format, &type, 0, &params, keychain, 0);
-//         if(err != noErr && err != errSecDuplicateItem)
-//         {
-//             ostringstream os;
-//             os << "IceSSL: unable to import certificate from file " << certAuthFile << " (error = " << err << ")";
-//             throw PluginInitializationException(__FILE__, __LINE__, os.str());
-//         }
-        
-//         CFRelease(filename);
-//         CFRelease(cert);
-//     }
-
-//     string certFile = properties->getProperty("IceSSL.CertFile");
-//     if(!certFile.empty())
-//     {
-//         CFDataRef cert = readCert(defaultDir, certFile);
-//         if(!cert)
-//         {
-//             PluginInitializationException ex(__FILE__, __LINE__);
-//             ex.reason = "IceSSL: unable to open file " + certFile;
-//             throw ex;
-//         }
-
-//         CFMutableDictionary settings;
-//         settings = CFDictionaryCreateMutable(0, 1, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-//         CFStringRef password = toCFString(properties->getProperty("IceSSL.Password"))
-//         CFDictionarySetValue(settings, kSecImportExportPassphrase, password);
-//         CFRelease(password);
-        
-//         CFArrayRef items = 0;
-//         err = SecPKCS12Import(cert, settings, &items);
-//         if(err != noErr)
-//         {
-//             ostringstream os;
-//             os << "IceSSL: unable to import certificate from file " << certFile << " (error = " << err << ")";
-//             throw PluginInitializationException(__FILE__, __LINE__, os.str());
-//         }
-        
-//         CFDictionarySetValue(_settings, kCFStreamSSLCertificates, items);
-        
-//         CFRelease(cert);
-//         CFRelease(items);
-//     }
-
-//    CFDictionarySetValue(_settings, kCFStreamSSLAllowsAnyRoot, kCFBooleanTrue);
-//    CFRelease(keychain);
-#endif
+//    CFDictionarySetValue(_settings, kCFStreamSSLValidatesCertificateChain, kCFBooleanFalse);
 }
 
 IceObjC::EndpointFactory::~EndpointFactory()

@@ -11,7 +11,6 @@
 		1432BEC00E484C0E00DAC793 /* Hello.m in Sources */ = {isa = PBXBuildFile; fileRef = 1432BEBE0E484C0E00DAC793 /* Hello.m */; };
 		14A268EB0E83FD0A00E562FE /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14A268E90E83FD0A00E562FE /* CFNetwork.framework */; };
 		14A268EC0E83FD0A00E562FE /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14A268EA0E83FD0A00E562FE /* Security.framework */; };
-		14A269750E8408BC00E562FE /* cacert.pem in Resources */ = {isa = PBXBuildFile; fileRef = 14A269740E8408BC00E562FE /* cacert.pem */; };
 		1D3623260D0F684500981E51 /* helloAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* helloAppDelegate.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
@@ -44,7 +43,6 @@
 		1432BF5A0E59A5FC00DAC793 /* Hello.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Hello.ice; sourceTree = "<group>"; };
 		14A268E90E83FD0A00E562FE /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		14A268EA0E83FD0A00E562FE /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
-		14A269740E8408BC00E562FE /* cacert.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = cacert.pem; path = ../../../../certs/cacert.pem; sourceTree = SOURCE_ROOT; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623240D0F684500981E51 /* helloAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = helloAppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* helloAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = helloAppDelegate.m; sourceTree = "<group>"; };
@@ -128,7 +126,6 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				14A269740E8408BC00E562FE /* cacert.pem */,
 				140A65660E83F0270012EDD0 /* c_rsa1024.pfx */,
 				2899E5210DE3E06400AC0155 /* helloViewController.xib */,
 				28AD733E0D9D9553002E5188 /* MainWindow.xib */,
@@ -207,7 +204,6 @@
 				2899E5220DE3E06400AC0155 /* helloViewController.xib in Resources */,
 				34BB75B20E87DC1800813E0B /* icon.png in Resources */,
 				140A65670E83F0270012EDD0 /* c_rsa1024.pfx in Resources */,
-				14A269750E8408BC00E562FE /* cacert.pem in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -298,7 +294,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "B85322A9-C60E-45CB-AC56-04730BB32BDC";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "6FA8C25A-DEE9-49F0-95E0-BC5F776B7CB6";
 				SDKROOT = iphoneos2.0;
 			};
 			name = Debug;

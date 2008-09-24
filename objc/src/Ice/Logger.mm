@@ -10,6 +10,8 @@
 #import <Ice/LoggerI.h>
 #import <Ice/Util.h>
 
+#import <Foundation/NSDate.h>
+
 namespace
 {
 
@@ -19,7 +21,6 @@ public:
 
 LoggerI(id<ICELogger> logger) : _logger(logger)
 {
-    [_logger retain];
 }
 
 virtual ~LoggerI()
@@ -77,43 +78,22 @@ typedef IceUtil::Handle<LoggerI> LoggerIPtr;
 }
 
 @implementation ICELogger
--(id) initWithCxxObject:(IceUtil::Shared*)cxxObject
-{
-    if(![super initWithCxxObject:cxxObject])
-    {
-        return nil;
-    }
-    logger_ = dynamic_cast<Ice::Logger*>(cxxObject);
-    return self;
-}
--(Ice::Logger*) logger
-{
-    return logger_;
-}
-+(ICELogger*) loggerWithLogger:(id<ICELogger>)logger
++(Ice::Logger*) loggerWithLogger:(id<ICELogger>)logger
 {
     if(logger == 0)
     {
-        return nil;
-    }
-    
-    @synchronized([ICEInternalWrapper class])
-    {
-        return [[self alloc] initWithCxxObject:(new LoggerI(logger))];
-    }
-    return nil; // Keep the compiler happy.
-}
-+(id) wrapperWithCxxObjectNoAutoRelease:(IceUtil::Shared*)cxxObject
-{
-    LoggerI* impl = dynamic_cast<LoggerI*>(cxxObject);
-    if(impl)
-    {
-        return [impl->getLogger() retain];
+        return new LoggerI([[self alloc] init]);
     }
     else
     {
-        return [super wrapperWithCxxObjectNoAutoRelease:cxxObject];
+        return new LoggerI([logger retain]);
     }
+}
++(id) wrapperWithCxxObject:(IceUtil::Shared*)cxxObject
+{
+    LoggerI* impl = dynamic_cast<LoggerI*>(cxxObject);
+    assert(impl);
+    return [[impl->getLogger() retain] autorelease];
 }
 
 //
@@ -122,46 +102,30 @@ typedef IceUtil::Handle<LoggerI> LoggerIPtr;
 
 -(void) print:(NSString*)message
 {
-    try
-    {
-        logger_->print(fromNSString(message));
-    }
-    catch(const std::exception& ex)
-    {
-        rethrowObjCException(ex);
-    }
+    NSLog(message);
 }
+
 -(void) trace:(NSString*)category message:(NSString*)message
 {
-    try
-    {
-        logger_->trace(fromNSString(category), fromNSString(message));
-    }
-    catch(const std::exception& ex)
-    {
-        rethrowObjCException(ex);
-    }
+    NSDate* date = [[NSDate alloc] init];
+    NSMutableString* s = [[NSMutableString alloc] initWithFormat:@"[%@] %@", date, message];
+    [date release];
+    [s replaceOccurrencesOfString:@"\n" withString:@" " options:0 range:NSMakeRange(0, s.length)];
+    [self print:s];
+    [s release];
 }
+
 -(void) warning:(NSString*)message
 {
-    try
-    {
-        logger_->warning(fromNSString(message));
-    }
-    catch(const std::exception& ex)
-    {
-        rethrowObjCException(ex);
-    }
+    NSString* s = [[NSString alloc] initWithFormat:@"%@: warning: %@", [NSDate date], message]; 
+    [self print:s];
+    [s release];
 }
+
 -(void) error:(NSString*)message
 {
-    try
-    {
-        logger_->error(fromNSString(message));
-    }
-    catch(const std::exception& ex)
-    {
-        rethrowObjCException(ex);
-    }
+    NSString* s = [[NSString alloc] initWithFormat:@"%@: error: %@", [NSDate date], message];
+    [self print:s];
+    [s release];
 }
 @end

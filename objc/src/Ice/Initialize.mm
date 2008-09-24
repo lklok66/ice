@@ -65,7 +65,7 @@ private:
 {
     Ice::InitializationData data;
     data.properties = [(ICEProperties*)properties properties];
-    data.logger = [[ICELogger loggerWithLogger:logger] logger];
+    data.logger = [ICELogger loggerWithLogger:logger];
     return data;
 }
 @end

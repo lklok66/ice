@@ -17,6 +17,8 @@
 #include <Ice/Network.h>
 #include <Ice/LocalException.h>
 
+#import <CFNetwork/CFSocketStream.h>
+
 using namespace std;
 using namespace Ice;
 using namespace IceInternal;
