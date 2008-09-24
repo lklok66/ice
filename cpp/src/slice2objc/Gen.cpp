@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// copyright (c) 2003-2008 zeroc, inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -1600,7 +1600,6 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
 	//
 	if(!dataMembers.empty())
 	{
-	    _H << nl << "-(void) copy__:(" << name << " *)copy_;";
 	    _M << sp << nl << "-(void) copy__:(" << name << "*)copy_";
 	    _M << sb;
 	    _M << nl << "[super copy__:copy_];";
@@ -1612,6 +1611,8 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
 	// dealloc
 	//
 	writeMemberDealloc(dataMembers, 0); // TODO fix second parameter
+
+	_H << nl << "// This class also overrides copyWithZone: and dealloc.";
     }
 
     //
@@ -1630,7 +1631,6 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
     //
     // Marshaling/unmarshaling
     //
-    _H << nl << "-(void) write__:(id<ICEOutputStream>)stream;";
 
     _M << sp << nl << "-(void) write__:(id<ICEOutputStream>)os_";
     _M << sb;
@@ -1641,7 +1641,6 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
     _M << nl << "[super write__:os_];";
     _M << eb;
 
-    _H << nl << "-(void) read__:(id<ICEInputStream>)stream readTypeId:(BOOL)rid_;";
     _H << nl << "@end";
 
     _M << sp << nl << "-(void) read__:(id<ICEInputStream>)is_ readTypeId:(BOOL)rid_";
@@ -1941,7 +1940,6 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
     //
     if(!dataMembers.empty())
     {
-	_H << nl << "-(void) copy__:(" << name << " *)copy_;";
 	_M << sp << nl << "-(void) copy__:(" << name << "*)copy_";
 	_M << sb;
 	_M << nl << "[super copy__:copy_];";
@@ -1954,6 +1952,8 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
     //
     writeMemberDealloc(dataMembers, baseTypes);
 
+    _H << nl << "// This class also overrides copyWithZone: and dealloc.";
+
     //
     // Marshaling/unmarshaling
     //
@@ -1962,7 +1962,6 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
     {
 	if(!base || (base && !base->usesClasses()))
 	{
-	    _H << nl << "-(BOOL) usesClasses__;";
 	    _M << sp << nl << "-(BOOL) usesClasses__";
 	    _M << sb;
 	    _M << nl << "return YES;";
@@ -1972,7 +1971,6 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
 
     if(!p->isLocal())
     {
-	_H << nl << "-(void) write__:(id<ICEOutputStream>)stream;";
 	_M << sp << nl << "-(void) write__:(id<ICEOutputStream>)os_";
 	_M << sb;
 	_M << nl << "[os_ writeString:@\"" << p->scoped() << "\"];";
@@ -1985,7 +1983,6 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
 	}
 	_M << eb;
 
-	_H << nl << "-(void) read__:(id<ICEInputStream>)stream readTypeId:(BOOL)rid_;";
 	_M << sp << nl << "-(void) read__:(id<ICEInputStream>)is_ readTypeId:(BOOL)rid_";
 	_M << sb;
 	_M << nl << "if(rid_)";
@@ -2100,8 +2097,6 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     //
     // copyWithZone
     //
-    _H << nl << "-(id) copyWithZone:(NSZone *)zone;";
-
     _M << sp << nl << "-(id) copyWithZone:(NSZone *)zone";
     _M << sb;
     _M << nl << name << " *copy_ = [" << name << " allocWithZone:zone];";
@@ -2117,8 +2112,6 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     //
     // isEqual
     //
-    _H << nl << "-(BOOL) isEqual:(id)anObject;";
-
     _M << sp << nl << "-(BOOL) isEqual:(id)o_";
     _M << sb;
     _M << nl << "if(self == o_)";
@@ -2136,6 +2129,8 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     // dealloc
     //
     writeMemberDealloc(dataMembers, 0); // TODO fix second parameter
+
+    _H << nl << "// This class also overrides copyWithZone:, hash, isEqual:, and dealloc.";
 
     //
     // Marshaling/unmarshaling
@@ -2582,8 +2577,6 @@ Slice::Gen::TypesVisitor::writeMemberCopy(const SyntaxTreeBasePtr& parent, const
 void
 Slice::Gen::TypesVisitor::writeMemberHashCode(const DataMemberList& dataMembers, int baseTypes) const
 {
-    _H << nl << "-(NSUInteger) hash;";
-
     _M << sp << nl << "-(NSUInteger) hash";
     _M << sb;
     _M << nl << "NSUInteger h_ = 0;";
@@ -2663,7 +2656,6 @@ Slice::Gen::TypesVisitor::writeMemberDealloc(const DataMemberList& dataMembers, 
 	    if(!once)
 	    {
 		 once = true;
-		_H << nl << "-(void) dealloc;";
 		_M << sp << nl << "-(void) dealloc;";
 		_M << sb;
 	    }
