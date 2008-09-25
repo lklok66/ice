@@ -876,7 +876,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe -I. -I../../../slice Chat.ice&#x0D;&#x0A;"
+						CommandLine="slice2cppe.exe -I. -I../../../../slice Chat.ice&#x0D;&#x0A;"
 						Outputs="Chat.cpp;Chat.h"
 					/>
 				</FileConfiguration>
@@ -885,7 +885,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe -I. -I../../../slice Chat.ice&#x0D;&#x0A;"
+						CommandLine="slice2cppe.exe -I. -I../../../../slice Chat.ice&#x0D;&#x0A;"
 						Outputs="Chat.cpp;Chat.h"
 					/>
 				</FileConfiguration>
@@ -894,7 +894,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe -I. -I../../../slice Chat.ice&#x0D;&#x0A;"
+						CommandLine="slice2cppe.exe -I. -I../../../../slice Chat.ice&#x0D;&#x0A;"
 						Outputs="Chat.cpp;Chat.h"
 					/>
 				</FileConfiguration>
@@ -903,7 +903,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe -I. -I../../../slice Chat.ice&#x0D;&#x0A;"
+						CommandLine="slice2cppe.exe -I. -I../../../../slice Chat.ice&#x0D;&#x0A;"
 						Outputs="Chat.cpp;Chat.h"
 					/>
 				</FileConfiguration>
@@ -924,7 +924,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe -I. -I../../../slice Router.ice&#x0D;&#x0A;"
+						CommandLine="slice2cppe.exe -I. -I../../../../slice Router.ice&#x0D;&#x0A;"
 						Outputs="Router.cpp;Router.h"
 					/>
 				</FileConfiguration>
@@ -933,7 +933,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe -I. -I../../../slice Router.ice&#x0D;&#x0A;"
+						CommandLine="slice2cppe.exe -I. -I../../../../slice Router.ice&#x0D;&#x0A;"
 						Outputs="Router.cpp;Router.h"
 					/>
 				</FileConfiguration>
@@ -942,7 +942,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe -I. -I../../../slice Router.ice&#x0D;&#x0A;"
+						CommandLine="slice2cppe.exe -I. -I../../../../slice Router.ice&#x0D;&#x0A;"
 						Outputs="Router.cpp;Router.h"
 					/>
 				</FileConfiguration>
@@ -951,7 +951,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe -I. -I../../../slice Router.ice&#x0D;&#x0A;"
+						CommandLine="slice2cppe.exe -I. -I../../../../slice Router.ice&#x0D;&#x0A;"
 						Outputs="Router.cpp;Router.h"
 					/>
 				</FileConfiguration>
@@ -964,7 +964,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe --ice -I../../../slice Session.ice&#x0D;&#x0A;"
+						CommandLine="slice2cppe.exe --ice -I../../../../slice Session.ice&#x0D;&#x0A;"
 						Outputs="Session.cpp;Session.h"
 					/>
 				</FileConfiguration>
@@ -973,7 +973,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe --ice -I../../../slice Session.ice&#x0D;&#x0A;"
+						CommandLine="slice2cppe.exe --ice -I../../../../slice Session.ice&#x0D;&#x0A;"
 						Outputs="Session.cpp;Session.h"
 					/>
 				</FileConfiguration>
@@ -982,7 +982,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe --ice -I../../../slice Session.ice&#x0D;&#x0A;"
+						CommandLine="slice2cppe.exe --ice -I../../../../slice Session.ice&#x0D;&#x0A;"
 						Outputs="Session.cpp;Session.h"
 					/>
 				</FileConfiguration>
@@ -991,7 +991,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe --ice -I../../../slice Session.ice&#x0D;&#x0A;"
+						CommandLine="slice2cppe.exe --ice -I../../../../slice Session.ice&#x0D;&#x0A;"
 						Outputs="Session.cpp;Session.h"
 					/>
 				</FileConfiguration>

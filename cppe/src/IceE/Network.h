@@ -93,10 +93,12 @@ void setTimeout(SOCKET, bool, int);
 #endif
 void setTcpNoDelay(SOCKET);
 void setKeepAlive(SOCKET);
-void setSendBufferSize(SOCKET, int);
 int getSendBufferSize(SOCKET);
+#ifndef _WIN32_WCE
+void setSendBufferSize(SOCKET, int);
 void setRecvBufferSize(SOCKET, int);
 int getRecvBufferSize(SOCKET);
+#endif
 void setReuseAddress(SOCKET, bool);
 
 void doBind(SOCKET, struct sockaddr_in&);
@@ -117,7 +119,7 @@ std::string addrToString(const struct sockaddr_in&);
 std::vector<std::string> getHostsForEndpointExpand(const std::string&);
 
 std::vector<struct sockaddr_in> getLocalAddresses();
- void setTcpBufSize(SOCKET, const Ice::PropertiesPtr&, const Ice::LoggerPtr&);
+void setTcpBufSize(SOCKET, const Ice::PropertiesPtr&, const Ice::LoggerPtr&);
 
 int getSocketErrno();
 

@@ -1,6 +1,7 @@
 # Ignore objects and archives.
 *.[oa]
 *.obj
+*.cobj
 *.dll
 *.ilk
 *.so

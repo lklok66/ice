@@ -24,7 +24,7 @@ prefix			= C:\IceE-$(VERSION)
 
 #
 # Specify your C++ compiler. Supported values are
-# VC80 or VC80_EXPRESS
+# VC80 or VC90
 #
 !if "$(CPP_COMPILER)" == ""
 CPP_COMPILER            = VC80
@@ -49,21 +49,6 @@ CPP_COMPILER            = VC80
 #
 #EMBEDDED_OS            = WindowsMobile2003
 #EMBEDDED_DEVICE        = PocketPC
-
-#
-# For VC80 and VC80 Express it is necessary to set the location of the
-# manifest tool. This must be the 6.x version of mt.exe, not the 5.x
-# version!
-#
-# For VC80 Express mt.exe 6.x is provided by the Windows Platform SDK.
-# It is necessary to set the location of the Platform SDK through the
-# PDK_HOME environment variable (see INSTALL.WINDOWS for details).
-#
-!if "$(CPP_COMPILER)" == "VC80"
-MT = "$(VS80COMNTOOLS)bin\mt.exe"
-!elseif "$(CPP_COMPILER)" == "VC80_EXPRESS"
-MT = "$(PDK_HOME)\bin\mt.exe"
-!endif
 
 # ----------------------------------------------------------------------
 # Don't change anything below this line!
@@ -98,7 +83,8 @@ install_includedir	= $(prefix)\include
 #
 # Verify valid embedded settings
 #
-!if "$(CPP_COMPILER)" != "VC80" && "$(CPP_COMPILER)" != "VC80_EXPRESS"
+!if "$(CPP_COMPILER)" != "VC80" && "$(CPP_COMPILER)" != "VC80_EXPRESS" && \
+    "$(CPP_COMPILER)" != "VC90" && "$(CPP_COMPILER)" != "VC90_EXPRESS"
 !error Invalid setting for CPP_COMPILER: $(CPP_COMPILER)
 !endif
 
@@ -113,18 +99,21 @@ install_includedir	= $(prefix)\include
 #
 # Set executables
 #
+MT		= mt.exe
+RC		= rc.exe
 !if "$(EMBEDDED_DEVICE)" != ""
 CXX		= "$(VSINSTALLDIR)\VC\ce\bin\x86_arm\cl.exe"
 CC		= "$(VSINSTALLDIR)\VC\ce\bin\x86_arm\cl.exe"
 LINK 		= "$(VSINSTALLDIR)\VC\ce\bin\x86_arm\link.exe"
 AR		= "$(VSINSTALLDIR)\VC\ce\bin\x86_arm\lib.exe"
-RC		= rc.exe /i "$(VSINSTALLDIR)\VC\ce\atlmfc\include"
+!if "$(CPP_COMPILER)" == "VC80"
+RC		= $(RC) /i "$(VSINSTALLDIR)\VC\ce\atlmfc\include"
+!endif
 !else
 CXX		= cl.exe
 CC		= cl.exe
 LINK 		= link.exe
 AR		= lib.exe
-RC		= rc.exe
 !endif
 
 

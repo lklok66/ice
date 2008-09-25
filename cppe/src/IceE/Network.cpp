@@ -10,8 +10,10 @@
 #include <IceE/StaticMutex.h>
 #include <IceE/Network.h>
 #include <IceE/LocalException.h>
-#include <IceE/Properties.h> // For setTcpBufSize
-#include <IceE/LoggerUtil.h> // For setTcpBufSize
+#ifndef _WIN32_WCE
+#  include <IceE/Properties.h> // For setTcpBufSize
+#  include <IceE/LoggerUtil.h> // For setTcpBufSize
+#endif
 #include <IceE/SafeStdio.h>
 
 #if defined(_WIN32)
@@ -395,18 +397,6 @@ IceInternal::setKeepAlive(SOCKET fd)
     }
 }
 
-void
-IceInternal::setSendBufferSize(SOCKET fd, int sz)
-{
-    if(setsockopt(fd, SOL_SOCKET, SO_SNDBUF, (char*)&sz, int(sizeof(int))) == SOCKET_ERROR)
-    {
-        closeSocketNoThrow(fd);
-        SocketException ex(__FILE__, __LINE__);
-        ex.error = getSocketErrno();
-        throw ex;
-    }
-}
-
 int
 IceInternal::getSendBufferSize(SOCKET fd)
 {
@@ -420,6 +410,19 @@ IceInternal::getSendBufferSize(SOCKET fd)
         throw ex;
     }
     return sz;
+}
+
+#ifndef _WIN32_WCE
+void
+IceInternal::setSendBufferSize(SOCKET fd, int sz)
+{
+    if(setsockopt(fd, SOL_SOCKET, SO_SNDBUF, (char*)&sz, int(sizeof(int))) == SOCKET_ERROR)
+    {
+        closeSocketNoThrow(fd);
+        SocketException ex(__FILE__, __LINE__);
+        ex.error = getSocketErrno();
+        throw ex;
+    }
 }
 
 void
@@ -448,6 +451,7 @@ IceInternal::getRecvBufferSize(SOCKET fd)
     }
     return sz;
 }
+#endif // _WIN32_WCE
 
 void
 IceInternal::setReuseAddress(SOCKET fd, bool reuse)
@@ -1198,10 +1202,10 @@ IceInternal::getLocalAddresses()
     return result;
 }
 
-
 void
 IceInternal::setTcpBufSize(SOCKET fd, const Ice::PropertiesPtr& properties, const Ice::LoggerPtr& logger)
 {
+#ifndef _WIN32_WCE
     assert(fd != INVALID_SOCKET);
 
     //
@@ -1248,4 +1252,5 @@ IceInternal::setTcpBufSize(SOCKET fd, const Ice::PropertiesPtr& properties, cons
             out << printfToString("TCP send buffer size: requested size of %d adjusted to %d", sizeRequested, size);
         }
     }
+#endif //_WIN32_WCE
 }
