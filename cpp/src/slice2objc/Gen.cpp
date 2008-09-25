@@ -2181,18 +2181,14 @@ Slice::Gen::TypesVisitor::writeMemberCopy(const SyntaxTreeBasePtr& parent, const
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
 	string name = fixId((*q)->name(), baseTypes);
+	_M << nl << "copy_->" << name << " = ";
 	if(isValueType((*q)->type()))
 	{
-	    _M << nl << "copy_->" << name << " = " << name << ";";
-	}
-	else if(isProtocolType((*q)->type()))
-	{
-	    // Cast to NSObject to prevent warning (copy isn't part of the NSObject protocol).
-	    _M << nl << "copy_->" << name << " = [(NSObject*)" << name << " retain];";
+	    _M << name << ";";
 	}
 	else
 	{
-	    _M << nl << "copy_->" << name << " = [" << name << " copy];";
+	    _M << "[" << name << " retain];";
 	}
     }
 }
