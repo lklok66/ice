@@ -69,10 +69,10 @@ IceInternal::EndpointFactory::create(const std::string& str, bool oaEndpoint) co
             // Make a temporary stream, write the opaque endpoint data into the stream,
             // and read the endpoint data from that stream to create the actual endpoint.
             //
-            BasicStream bs(_instance.get(), _instance->messageSizeMax(),
+            BasicStream bs(_instance.get(), _instance->messageSizeMax()
 #ifdef ICEE_HAS_WSTRING
-                           _instance->initializationData().stringConverter,
-                           _instance->initializationData().wstringConverter
+                           , _instance->initializationData().stringConverter
+                           , _instance->initializationData().wstringConverter
 #endif
                            );
             ue->streamWrite(&bs);
