@@ -1319,20 +1319,23 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
     {
         _H << sp;
     }
-    _H << nl << "-(id) init";
-    _M << sp << nl << "-(id) init";
-    writeMemberSignature(allDataMembers, 0, Other, HAndM); // TODO fix second parameter
-    _H << ";";
-    _M << sb;
-    _M << nl << "if(![super init";
-    writeMemberCall(baseDataMembers, 0, Other, WithEscape); // TODO
-    _M << "])";
-    _M << sb;
-    _M << nl << "return nil;";
-    _M << eb;
-    writeMemberInit(dataMembers, 0); // TODO
-    _M << nl << "return self;";
-    _M << eb;
+    if(!p->isInterface())
+    {
+	_H << nl << "-(id) init";
+	_M << sp << nl << "-(id) init";
+	writeMemberSignature(allDataMembers, 0, Other, HAndM); // TODO fix second parameter
+	_H << ";";
+	_M << sb;
+	_M << nl << "if(![super init";
+	writeMemberCall(baseDataMembers, 0, Other, WithEscape); // TODO
+	_M << "])";
+	_M << sb;
+	_M << nl << "return nil;";
+	_M << eb;
+	writeMemberInit(dataMembers, 0); // TODO
+	_M << nl << "return self;";
+	_M << eb;
+    }
 
     if(!allDataMembers.empty())
     {
