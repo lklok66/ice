@@ -327,6 +327,13 @@ Ice::InputStreamI::readPendingObjects()
     _is->readPendingObjects();
 }
 
+void
+Ice::InputStreamI::reset()
+{
+    _is->clear();
+    _is->i = _is->b.begin();
+}
+
 //
 // OutputStreamI
 //
@@ -624,6 +631,13 @@ void
 Ice::OutputStreamI::finished(vector<Byte>& bytes)
 {
     vector<Byte>(_os->b.begin(), _os->b.end()).swap(bytes);
+}
+
+void
+Ice::OutputStreamI::reset()
+{
+    _os->clear();
+    _os->i = _os->b.begin();
 }
 
 //

@@ -95,6 +95,8 @@ typedef struct
 -(void) skipEncapsulation;
 
 -(void) readPendingObjects;
+
+-(void) reset;
 @end
 
 @protocol ICEOutputStream <NSObject>
@@ -160,6 +162,7 @@ typedef struct
 
 -(NSData*) finished;
 
+-(void) reset;
 @end
 
 //
