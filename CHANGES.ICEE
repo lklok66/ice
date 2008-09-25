@@ -14,7 +14,7 @@ change history of prior releases, refer to the cppe/CHANGES file.
 Changes since version 1.2.0
 ======================================================================
 
-- Added optional support for object-by-value controled by define in
+- Added optional support for object-by-value controlled by a define in
   Config.h. 
 
 - Added support for opaque endpoints. For example:
