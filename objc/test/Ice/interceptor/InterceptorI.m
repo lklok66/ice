@@ -47,18 +47,18 @@
             }
             @catch(TestRetryException*)
             {
-                tprintf("caught retry exception\n");
                 //
                 // Expected, retry
                 //
             }
-            @catch(ICELocalException*) 
-            {
-                tprintf("caught local exception\n");
-            }
         }
         
         [(NSMutableDictionary*)current.ctx setObject:@"no" forKey:@"retry"];
+
+        //
+        // A successful dispatch that writes a result we discard
+        //
+        [servant ice_dispatch:request];
     }
       
     lastStatus = [servant ice_dispatch:request];

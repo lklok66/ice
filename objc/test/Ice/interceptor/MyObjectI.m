@@ -23,7 +23,6 @@
                                                
     if(val == nil || ![(NSString*)val isEqualToString:@"no"])
     {
-        tprintf("throw retryException\n");
         @throw [TestRetryException retryException:__FILE__ line:__LINE__];
     }
     return x + y;

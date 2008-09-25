@@ -47,14 +47,12 @@ run(int argc, char* argv[], id<ICECommunicator> communicator)
     test([interceptor getLastStatus]);
     tprintf("ok\n");
 
-    /*
     tprintf("testing retry... ");
     test([prx addWithRetry:33 y:12] == 45);
     test([[interceptor getLastOperation] isEqualToString:@"addWithRetry"]);
     test([interceptor getLastStatus]);
     tprintf("ok\n");
-    */
-
+   
     tprintf("testing user exception... ");
     @try
     {

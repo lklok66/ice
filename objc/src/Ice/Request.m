@@ -31,14 +31,21 @@
     current = [current_ retain];
     is = [is_ retain];
     os = [os_ retain];
+    needReset = NO;
     return self;
 }
 
 -(BOOL) callDispatch:(ICEObject*)servant
 {
-    //
-    // TODO: reset is & os
-    //
+    if(needReset == NO)
+    {
+        needReset = YES;
+    }
+    else
+    {
+        [is reset];
+        [os reset];
+    }
     return [servant dispatch__:current is:is os:os];
 }
 

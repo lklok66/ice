@@ -15,6 +15,7 @@
         ICECurrent* current;
         id<ICEInputStream> is;
         id<ICEOutputStream> os;
+        BOOL needReset;
 }
 +(id) request:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os;
 -(id) init:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os;

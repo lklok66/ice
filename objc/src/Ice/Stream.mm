@@ -1033,6 +1033,18 @@ typedef enum { dummy } Dummy_Enum;
     }
 }
 
+-(void) reset
+{
+    try
+    {
+        is_->reset();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    } 
+}
+
 @end
 
 @implementation ICEOutputStream
@@ -1613,6 +1625,17 @@ typedef enum { dummy } Dummy_Enum;
     }
 }
 
+-(void) reset
+{
+    try
+    {
+        os_->reset();
+    }
+    catch(const std::exception& ex)
+    {
+        rethrowObjCException(ex);
+    } 
+}
 @end
 
 @implementation ICEBoolHelper
