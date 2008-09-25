@@ -20,12 +20,8 @@
 @class NSCoder;
 
 @interface ICEException : NSException
--(id) init;
 -(NSString*)ice_name;
--(id) initWithCoder:(NSCoder*)decoder; // Implementation throws NSInvalidArchiveOperationException
--(void) encodeWithCoder:(NSCoder*)coder; // Implementation throws NSInvalidArchiveOperationException
 -(void) copy__:(ICEException*)copy_;
--(void) dealloc;
 @end
 
 @interface ICELocalException : ICEException
@@ -41,7 +37,6 @@
 -(id)init:(const char*)file line:(int)line;
 +(id)localException:(const char*)file line:(int)line;
 -(void) copy__:(ICELocalException*)copy_;
--(void) dealloc;
 @end
 
 @interface ICEUserException : ICEException
@@ -49,5 +44,4 @@
 -(void)write__:(id<ICEOutputStream>)stream;
 -(void)read__:(id<ICEInputStream>)stream readTypeId:(BOOL)rid;
 -(void) copy__:(ICEUserException*)copy_;
--(void) dealloc;
 @end

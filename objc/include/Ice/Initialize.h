@@ -30,10 +30,7 @@
 -(id) init:(id<ICEProperties>)properties logger:(id<ICELogger>)logger;
 +(id) initializationData;
 +(id) initializationData:(id<ICEProperties>)properties logger:(id<ICELogger>)logger;
--(id) copyWithZone:(NSZone *) zone;
--(NSUInteger) hash;
--(BOOL) isEqual:(id)anObject;
--(void) dealloc;
+// This class also overrides copyWithZone:, hash, isEqual:, and dealloc.
 @end
 
 @interface ICEUtil : NSObject

@@ -39,9 +39,6 @@
 
 @protocol ICEObjectPrx <NSObject, NSCopying>
 
--(id) copyWithZone:(NSZone *)zone;
--(NSUInteger) hash;
--(BOOL) isEqual:(id)anObject;
 -(NSComparisonResult) compareIdentity:(id<ICEObjectPrx>)aProxy;
 -(NSComparisonResult) compareIdentityAndFacet:(id<ICEObjectPrx>)aProxy;
 

@@ -52,10 +52,7 @@ typedef enum
 -(id) init:(id<ICEObjectAdapter>)adapter con:(id<ICEConnection>)con_ id_:(ICEIdentity *)id_ facet:(NSString *)facet operation:(NSString *)operation mode:(ICEOperationMode)mode ctx:(NSDictionary *)ctx requestId:(ICEInt)requestId;
 +(id) current:(id<ICEObjectAdapter>)adapter con:(id<ICEConnection>)con_ id_:(ICEIdentity *)id_ facet:(NSString *)facet operation:(NSString *)operation mode:(ICEOperationMode)mode ctx:(NSDictionary *)ctx requestId:(ICEInt)requestId;
 +(id) current;
--(id) copyWithZone:(NSZone *)zone;
--(NSUInteger) hash;
--(BOOL) isEqual:(id)anObject;
--(void) dealloc;
+// This class also overrides copyWithZone:, hash, isEqual:, and dealloc.
 @end
 
 @interface ICEContextHelper : ICEDictionaryHelper
