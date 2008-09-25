@@ -89,7 +89,7 @@ public:
 
     virtual void readPendingObjects() = 0;
 
-    virtual void reset() = 0;
+    virtual void rewind() = 0;
 };
 
 class ICE_API OutputStream : public ::IceUtil::Shared
@@ -152,7 +152,7 @@ public:
 
     virtual void finished(::std::vector< ::Ice::Byte >&) = 0;
 
-    virtual void reset() = 0;
+    virtual void reset(bool) = 0;
 };
 
 class ICE_API ObjectReader : public ::Ice::Object

@@ -43,8 +43,8 @@
     }
     else
     {
-        [is reset];
-        [os reset];
+        [is rewind];
+        [os reset:NO];
     }
     return [servant dispatch__:current is:is os:os];
 }

@@ -1033,11 +1033,11 @@ typedef enum { dummy } Dummy_Enum;
     }
 }
 
--(void) reset
+-(void) rewind
 {
     try
     {
-        is_->reset();
+        is_->rewind();
     }
     catch(const std::exception& ex)
     {
@@ -1625,11 +1625,11 @@ typedef enum { dummy } Dummy_Enum;
     }
 }
 
--(void) reset
+-(void) reset:(BOOL) clearBuffer
 {
     try
     {
-        os_->reset();
+        os_->reset(clearBuffer);
     }
     catch(const std::exception& ex)
     {

@@ -96,7 +96,7 @@ typedef struct
 
 -(void) readPendingObjects;
 
--(void) reset;
+-(void) rewind;
 @end
 
 @protocol ICEOutputStream <NSObject>
@@ -162,7 +162,7 @@ typedef struct
 
 -(NSData*) finished;
 
--(void) reset;
+-(void) reset:(BOOL) clearBuffer;
 @end
 
 //

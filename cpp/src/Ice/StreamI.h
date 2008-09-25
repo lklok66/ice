@@ -85,7 +85,7 @@ public:
 
     virtual void readPendingObjects();
 
-    virtual void reset();
+    virtual void rewind();
 
 private:
 
@@ -160,7 +160,7 @@ public:
 
     virtual void finished(std::vector< Ice::Byte >&);
 
-    virtual void reset();
+    virtual void reset(bool);
 
 private:
 
