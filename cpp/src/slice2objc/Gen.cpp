@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// copyright (c) 2003-2008 zeroc, inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -525,215 +525,7 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
     _M << nl << "*idx = " << scopedPos << ";";
     _M << nl << "return " << name << "_ids__;";
     _M << eb;
-
-#if 0
-    // Marshalling support
-    DataMemberList allClassMembers = p->allClassDataMembers();
-    DataMemberList::const_iterator d;
-    DataMemberList members = p->dataMembers();
-    DataMemberList classMembers = p->classDataMembers();
-    ClassList bases = p->bases();
-    bool hasBaseClass = !bases.empty() && !bases.front()->isInterface();
-
-    _M << sp << nl << "#region Marshaling support";
-
-    _M << sp << nl << "public override void write__(IceInternal.BasicStream os__)";
-    _M << sb;
-    _M << nl << "os__.writeTypeId(ice_staticId());";
-    _M << nl << "os__.startWriteSlice();";
-    for(d = members.begin(); d != members.end(); ++d)
-    {
-        writeMarshalUnmarshalCode(_M, (*d)->type(), fixId(*d, ObjC::NSObject, true),
-                                  true, false, false); // TODO: 2nd param
-    }
-    _M << nl << "os__.endWriteSlice();";
-    _M << nl << "base.write__(os__);";
-    _M << eb;
-
-    if(allClassMembers.size() != 0)
-    {
-        _M << sp << nl << "public sealed ";
-        if(hasBaseClass && bases.front()->declaration()->usesClasses())
-        {
-            _M << "new ";
-        }
-        _M << "class Patcher__ : IceInternal.Patcher<" << name << ">";
-        _M << sb;
-        _M << sp << nl << "internal Patcher__(string type, Ice.ObjectImpl instance";
-        if(allClassMembers.size() > 1)
-        {
-            _M << ", int member";
-        }
-        _M << ") : base(type)";
-        _M << sb;
-        _M << nl << "_instance = (" << name << ")instance;";
-        if(allClassMembers.size() > 1)
-        {
-            _M << nl << "_member = member;";
-        }
-        _M << eb;
-
-        _M << sp << nl << "public override void patch(Ice.Object v)";
-        _M << sb;
-        _M << nl << "try";
-        _M << sb;
-        if(allClassMembers.size() > 1)
-        {
-            _M << nl << "switch(_member)";
-            _M << sb;
-        }
-        int memberCount = 0;
-        for(d = allClassMembers.begin(); d != allClassMembers.end(); ++d)
-        {
-            if(allClassMembers.size() > 1)
-            {
-                _M.dec();
-                _M << nl << "case " << memberCount << ":";
-                _M.inc();
-            }
-            string memberName = fixId((*d)->name(), ObjC::NSObject, true); // TODO: 2nd param
-            string memberType = typeToString((*d)->type());
-            _M << nl << "_instance." << memberName << " = (" << memberType << ")v;";
-            ContainedPtr contained = ContainedPtr::dynamicCast((*d)->type());
-            string sliceId = contained ? contained->scoped() : string("::Ice::Object");
-            _M << nl << "_typeId = \"" << sliceId << "\";";
-            if(allClassMembers.size() > 1)
-            {
-                _M << nl << "break;";
-            }
-            memberCount++;
-        }
-        if(allClassMembers.size() > 1)
-        {
-            _M << eb;
-        }
-        _M << eb;
-        _M << nl << "catch(System.InvalidCastException)";
-        _M << sb;
-        _M << nl << "IceInternal.Ex.throwUOE(_typeId, v.ice_id());";
-        _M << eb;
-        _M << eb;
-
-        _M << sp << nl << "private " << name << " _instance;";
-        if(allClassMembers.size() > 1)
-        {
-            _M << nl << "private int _member;";
-        }
-        _M << nl << "private string _typeId;";
-        _M << eb;
-    }
-
-    _M << sp << nl << "public override void read__(IceInternal.BasicStream is__, bool rid__)";
-    _M << sb;
-    _M << nl << "if(rid__)";
-    _M << sb;
-    _M << nl << "/* string myId = */ is__.readTypeId();";
-    _M << eb;
-    _M << nl << "is__.startReadSlice();";
-    int classMemberCount = static_cast<int>(allClassMembers.size() - classMembers.size());
-    for(d = members.begin(); d != members.end(); ++d)
-    {
-        ostringstream patchParams;
-        patchParams << "this";
-	if(isClass((*d)->type())
-        {
-            if(classMembers.size() > 1 || allClassMembers.size() > 1)
-            {
-                patchParams << ", " << classMemberCount++;
-            }
-        }
-        writeMarshalUnmarshalCode(_M, (*d)->type(), fixId(*d, ObjC::NSObject, true),
-                                  false, false, false, patchParams.str()); // TODO: ObjC::NSObject
-    }
-    _M << nl << "is__.endReadSlice();";
-    _M << nl << "base.read__(is__, true);";
-    _M << eb;
-
-    //
-    // Write streaming API.
-    //
-    if(stream)
-    {
-        _M << sp << nl << "public override void write__(Ice.OutputStream outS__)";
-        _M << sb;
-        _M << nl << "outS__.writeTypeId(ice_staticId());";
-        _M << nl << "outS__.startSlice();";
-        for(d = members.begin(); d != members.end(); ++d)
-        {
-            writeMarshalUnmarshalCode(_M, (*d)->type(), fixId(*d, ObjC::NSObject, true),
-                                      true, true, false); // TODO: Objc::NSObject
-        }
-        _M << nl << "outS__.endSlice();";
-        _M << nl << "base.write__(outS__);";
-        _M << eb;
-
-        _M << sp << nl << "public override void read__(Ice.InputStream inS__, bool rid__)";
-        _M << sb;
-        _M << nl << "if(rid__)";
-        _M << sb;
-        _M << nl << "/* string myId = */ inS__.readTypeId();";
-        _M << eb;
-        _M << nl << "inS__.startSlice();";
-        for(d = members.begin(); d != members.end(); ++d)
-        {
-            ostringstream patchParams;
-            patchParams << "this";
-            if(isClass((*d)->type()))
-            {
-                if(classMembers.size() > 1 || allClassMembers.size() > 1)
-                {
-                    patchParams << ", " << classMemberCount++;
-                }
-            }
-            writeMarshalUnmarshalCode(_M, (*d)->type(), fixId(*d, ObjC::NSObject, true),
-                                      false, true, false, patchParams.str()); // TODO: ObjC::NSObject
-        }
-        _M << nl << "inS__.endSlice();";
-        _M << nl << "base.read__(inS__, true);";
-        _M << eb;
-    }
-    else
-    {
-        //
-        // Emit placeholder functions to catch errors.
-        //
-        string scoped = p->scoped();
-        _M << sp << nl << "public override void write__(Ice.OutputStream outS__)";
-        _M << sb;
-        _M << nl << "Ice.MarshalException ex = new Ice.MarshalException();";
-        _M << nl << "ex.reason = \"type " << scoped.substr(2) << " was not generated with stream support\";";
-        _M << nl << "throw ex;";
-        _M << eb;
-
-        _M << sp << nl << "public override void read__(Ice.InputStream inS__, bool rid__)";
-        _M << sb;
-        _M << nl << "Ice.MarshalException ex = new Ice.MarshalException();";
-        _M << nl << "ex.reason = \"type " << scoped.substr(2) << " was not generated with stream support\";";
-        _M << nl << "throw ex;";
-        _M << eb;
-    }
-
-    _M << sp << nl << "#endregion"; // Marshalling support
-#endif
 }
-
-#if 0
-string
-Slice::ObjCVisitor::getParamAttributes(const ParamDeclPtr& p)
-{
-    string result;
-    StringList metaData = p->getMetaData();
-    for(StringList::const_iterator i = metaData.begin(); i != metaData.end(); ++i)
-    {
-        static const string prefix = "cs:attribute:";
-        if(i->find(prefix) == 0)
-        {
-            result += "[" + i->substr(prefix.size()) + "] ";
-        }
-    }
-    return result;
-}
-#endif
 
 string
 Slice::ObjCVisitor::getSelector(const OperationPtr& op) const
@@ -1254,37 +1046,15 @@ Slice::Gen::generate(const UnitPtr& p)
     DelegateMVisitor delegateMVisitor(_H, _M);
     p->visit(&delegateMVisitor, false);
 
-    ProxyHelperVisitor proxyHelperVisitor(_H, _M, _stream);
-    p->visit(&proxyHelperVisitor, false);
-
     HelperVisitor HelperVisitor(_H, _M, _stream);
     p->visit(&HelperVisitor, false);
-
-#if 0
-    OpsVisitor opsVisitor(_M);
-    p->visit(&opsVisitor, false);
-
-
-    DelegateVisitor delegateVisitor(_M);
-    p->visit(&delegateVisitor, false);
-
-
-    DelegateDVisitor delegateDVisitor(_M);
-    p->visit(&delegateDVisitor, false);
-
-    DispatcherVisitor dispatcherVisitor(_M, _stream);
-    p->visit(&dispatcherVisitor, false);
-
-    AsyncVisitor asyncVisitor(_M);
-    p->visit(&asyncVisitor, false);
-#endif
 }
 
 void
 Slice::Gen::generateTie(const UnitPtr& p)
 {
-    TieVisitor tieVisitor(_M);
-    p->visit(&tieVisitor, false);
+    //TieVisitor tieVisitor(_M);
+    //p->visit(&tieVisitor, false);
 }
 
 void
@@ -1301,6 +1071,7 @@ Slice::Gen::generateImplTie(const UnitPtr& p)
     //p->visit(&implTieVisitor, false);
 }
 
+#if 0
 void
 Slice::Gen::generateChecksums(const UnitPtr& u)
 {
@@ -1343,6 +1114,7 @@ Slice::Gen::generateChecksums(const UnitPtr& u)
         _M << eb;
     }
 }
+#endif
 
 void
 Slice::Gen::closeOutput()
@@ -1600,7 +1372,6 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
 	//
 	if(!dataMembers.empty())
 	{
-	    _H << nl << "-(void) copy__:(" << name << " *)copy_;";
 	    _M << sp << nl << "-(void) copy__:(" << name << "*)copy_";
 	    _M << sb;
 	    _M << nl << "[super copy__:copy_];";
@@ -1612,6 +1383,8 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
 	// dealloc
 	//
 	writeMemberDealloc(dataMembers, 0); // TODO fix second parameter
+
+	_H << nl << "// This class also overrides copyWithZone: and dealloc.";
     }
 
     //
@@ -1630,7 +1403,6 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
     //
     // Marshaling/unmarshaling
     //
-    _H << nl << "-(void) write__:(id<ICEOutputStream>)stream;";
 
     _M << sp << nl << "-(void) write__:(id<ICEOutputStream>)os_";
     _M << sb;
@@ -1641,7 +1413,6 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
     _M << nl << "[super write__:os_];";
     _M << eb;
 
-    _H << nl << "-(void) read__:(id<ICEInputStream>)stream readTypeId:(BOOL)rid_;";
     _H << nl << "@end";
 
     _M << sp << nl << "-(void) read__:(id<ICEInputStream>)is_ readTypeId:(BOOL)rid_";
@@ -1655,64 +1426,6 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
     _M << nl << "[is_ endSlice];";
     _M << nl << "[super read__:is_ readTypeId:YES];";
     _M << eb;
-
-#if 0
-    DataMemberList classMembers = p->classDataMembers();
-    DataMemberList allClassMembers = p->allClassDataMembers();
-    DataMemberList dataMembers = p->dataMembers();
-    DataMemberList allDataMembers = p->allDataMembers();
-    DataMemberList::const_iterator d;
-
-    if(!p->isInterface())
-    {
-        if(!allDataMembers.empty())
-        {
-            _M << sp << nl << "public " << name << spar << epar;
-            if(hasBaseClass)
-            {
-                _M << " : base()";
-            }
-            _M << sb;
-            _M << eb;
-
-            _M << sp << nl << "public " << name << spar;
-            vector<string> paramDecl;
-            for(d = allDataMembers.begin(); d != allDataMembers.end(); ++d)
-            {
-                string memberName = fixId((*d)->name());
-                string memberType = typeToString((*d)->type());
-                paramDecl.push_back(memberType + " " + memberName);
-            }
-            _M << paramDecl << epar;
-            if(hasBaseClass && allDataMembers.size() != dataMembers.size())
-            {
-                _M << " : base" << spar;
-                vector<string> baseParamNames;
-                DataMemberList baseDataMembers = bases.front()->allDataMembers();
-                for(d = baseDataMembers.begin(); d != baseDataMembers.end(); ++d)
-                {
-                    baseParamNames.push_back(fixId((*d)->name()));
-                }
-                _M << baseParamNames << epar;
-            }
-            _M << sb;
-            vector<string> paramNames;
-            for(d = dataMembers.begin(); d != dataMembers.end(); ++d)
-            {
-                paramNames.push_back(fixId((*d)->name()));
-            }
-            for(vector<string>::const_iterator i = paramNames.begin(); i != paramNames.end(); ++i)
-            {
-                _M << nl << "this." << *i << " = " << *i << ';';
-            }
-            _M << eb;
-
-            _M << sp << nl << "#endregion"; // Constructors
-        }
-
-        writeInheritedOperations(p);
-    }
-#endif
 
     writeDispatchAndMarshalling(p, _stream);
 
@@ -1941,7 +1654,6 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
     //
     if(!dataMembers.empty())
     {
-	_H << nl << "-(void) copy__:(" << name << " *)copy_;";
 	_M << sp << nl << "-(void) copy__:(" << name << "*)copy_";
 	_M << sb;
 	_M << nl << "[super copy__:copy_];";
@@ -1954,6 +1666,8 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
     //
     writeMemberDealloc(dataMembers, baseTypes);
 
+    _H << nl << "// This class also overrides copyWithZone: and dealloc.";
+
     //
     // Marshaling/unmarshaling
     //
@@ -1962,7 +1676,6 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
     {
 	if(!base || (base && !base->usesClasses()))
 	{
-	    _H << nl << "-(BOOL) usesClasses__;";
 	    _M << sp << nl << "-(BOOL) usesClasses__";
 	    _M << sb;
 	    _M << nl << "return YES;";
@@ -1972,7 +1685,6 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
 
     if(!p->isLocal())
     {
-	_H << nl << "-(void) write__:(id<ICEOutputStream>)stream;";
 	_M << sp << nl << "-(void) write__:(id<ICEOutputStream>)os_";
 	_M << sb;
 	_M << nl << "[os_ writeString:@\"" << p->scoped() << "\"];";
@@ -1985,7 +1697,6 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
 	}
 	_M << eb;
 
-	_H << nl << "-(void) read__:(id<ICEInputStream>)stream readTypeId:(BOOL)rid_;";
 	_M << sp << nl << "-(void) read__:(id<ICEInputStream>)is_ readTypeId:(BOOL)rid_";
 	_M << sb;
 	_M << nl << "if(rid_)";
@@ -2100,8 +1811,6 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     //
     // copyWithZone
     //
-    _H << nl << "-(id) copyWithZone:(NSZone *)zone;";
-
     _M << sp << nl << "-(id) copyWithZone:(NSZone *)zone";
     _M << sb;
     _M << nl << name << " *copy_ = [" << name << " allocWithZone:zone];";
@@ -2117,8 +1826,6 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     //
     // isEqual
     //
-    _H << nl << "-(BOOL) isEqual:(id)anObject;";
-
     _M << sp << nl << "-(BOOL) isEqual:(id)o_";
     _M << sb;
     _M << nl << "if(self == o_)";
@@ -2136,6 +1843,8 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     // dealloc
     //
     writeMemberDealloc(dataMembers, 0); // TODO fix second parameter
+
+    _H << nl << "// This class also overrides copyWithZone:, hash, isEqual:, and dealloc.";
 
     //
     // Marshaling/unmarshaling
@@ -2293,97 +2002,6 @@ Slice::Gen::TypesVisitor::visitConst(const ConstPtr& p)
     }
 
     _H << ';';
-}
-
-void
-Slice::Gen::TypesVisitor::visitDataMember(const DataMemberPtr& p)
-{
-#if 0
-    int baseTypes = 0;
-    bool isClass = false;
-    bool propertyMapping = false;
-    bool isValue = false;
-    bool isProtected = false;
-    ContainedPtr cont = ContainedPtr::dynamicCast(p->container());
-    assert(cont);
-    if(StructPtr::dynamicCast(cont))
-    {
-        isValue = isValueType(StructPtr::dynamicCast(cont));
-        if(!isValue || cont->hasMetaData("clr:class"))
-        {
-            baseTypes = ObjC::NSObject; // TODO
-        }
-        if(cont->hasMetaData("clr:property"))
-        {
-            propertyMapping = true;
-        }
-    }
-    else if(ExceptionPtr::dynamicCast(cont))
-    {
-        baseTypes = ObjC::Exception;
-    }
-    else if(ClassDefPtr::dynamicCast(cont))
-    {
-        baseTypes = ObjC::NSObject; // TODO
-        isClass = true;
-        if(cont->hasMetaData("clr:property"))
-        {
-            propertyMapping = true;
-        }
-        isProtected = cont->hasMetaData("protected") || p->hasMetaData("protected");
-    }
-
-    _M << sp;
-
-    emitDeprecate(p, cont, _M, "member");
-
-    emitAttributes(p);
-
-    string type = typeToString(p->type());
-    string propertyName = fixId(p->name(), baseTypes, isClass);
-    string dataMemberName = propertyName;
-    if(propertyMapping)
-    {
-        dataMemberName += "_prop";
-    }
-
-    _M << nl;
-    if(propertyMapping)
-    {
-        _M << "private";
-    }
-    else if(isProtected)
-    {
-        _M << "protected";
-    }
-    else
-    {
-        _M << "public";
-    }
-    _M << ' ' << type << ' ' << dataMemberName << ';';
-
-    if(!propertyMapping)
-    {
-        return;
-    }
-
-    _M << nl << (isProtected ? "protected" : "public");
-    if(!isValue)
-    {
-        _M << " virtual";
-    }
-    _M << ' ' << type << ' ' << propertyName;
-    _M << sb;
-    _M << nl << "get";
-    _M << sb;
-    _M << nl << "return " << dataMemberName << ';';
-    _M << eb;
-    _M << nl << "set";
-    _M << sb;
-    _M << nl << dataMemberName << " = value;";
-    _M << eb;
-    _M << eb;
-#endif
 }
 
 void
@@ -2582,8 +2200,6 @@ Slice::Gen::TypesVisitor::writeMemberCopy(const SyntaxTreeBasePtr& parent, const
 void
 Slice::Gen::TypesVisitor::writeMemberHashCode(const DataMemberList& dataMembers, int baseTypes) const
 {
-    _H << nl << "-(NSUInteger) hash;";
-
     _M << sp << nl << "-(NSUInteger) hash";
     _M << sb;
     _M << nl << "NSUInteger h_ = 0;";
@@ -2663,7 +2279,6 @@ Slice::Gen::TypesVisitor::writeMemberDealloc(const DataMemberList& dataMembers, 
 	    if(!once)
 	    {
 		 once = true;
-		_H << nl << "-(void) dealloc;";
 		_M << sp << nl << "-(void) dealloc;";
 		_M << sb;
 	    }
@@ -2791,168 +2406,6 @@ Slice::Gen::ProxyVisitor::visitOperation(const OperationPtr& p)
         _H << nl << "-(BOOL) " << name << "_async" << params << ";";
         _H << nl << "-(BOOL) " << name << "_async" << params << " context:(ICEContext *)context;";
     }
-}
-
-Slice::Gen::OpsVisitor::OpsVisitor(Output& out)
-    : ObjCVisitor(out, out)
-{
-}
-
-bool
-Slice::Gen::OpsVisitor::visitModuleStart(const ModulePtr& p)
-{
-    if(!p->hasAbstractClassDefs())
-    {
-        return false;
-    }
-
-    _M << sp << nl << "namespace " << fixId(p->name());
-    _M << sb;
-    return true;
-}
-
-void
-Slice::Gen::OpsVisitor::visitModuleEnd(const ModulePtr&)
-{
-    _M << eb;
-}
-
-bool
-Slice::Gen::OpsVisitor::visitClassDefStart(const ClassDefPtr& p)
-{
-    //
-    // Don't generate Operations interfaces for non-abstract classes.
-    //
-    if(!p->isAbstract())
-    {
-        return false;
-    }
-
-    if(!p->isLocal())
-    {
-        writeOperations(p, false);
-    }
-    writeOperations(p, true);
-
-    return false;
-}
-
-void
-Slice::Gen::OpsVisitor::writeOperations(const ClassDefPtr& p, bool noCurrent)
-{
-    string name = p->name();
-    string scoped = fixId(p->scoped());
-    ClassList bases = p->bases();
-    string opIntfName = "Operations";
-    if(noCurrent || p->isLocal())
-    {
-        opIntfName += "NC";
-    }
-
-    _M << sp << nl << "public interface " << name << opIntfName << '_';
-    if((bases.size() == 1 && bases.front()->isAbstract()) || bases.size() > 1)
-    {
-        _M << " : ";
-        ClassList::const_iterator q = bases.begin();
-        bool first = true;
-        while(q != bases.end())
-        {
-            if((*q)->isAbstract())
-            {
-                if(!first)
-                {
-                    _M << ", ";
-                }
-                else
-                {
-                    first = false;
-                }
-                string s = (*q)->scoped();
-                s += "Operations";
-                if(noCurrent)
-                {
-                    s += "NC";
-                }
-                _M << fixId(s) << '_';
-            }
-            ++q;
-        }
-    }
-    _M << sb;
-
-    OperationList ops = p->operations();
-    OperationList::const_iterator r;
-    for(r = ops.begin(); r != ops.end(); ++r)
-    {
-        OperationPtr op = *r;
-        bool amd = !p->isLocal() && (p->hasMetaData("amd") || op->hasMetaData("amd"));
-        string opname = amd ? (op->name() + "_async") : fixId(op->name(), ObjC::NSObject, true); // TODO: NSObject
-        
-        TypePtr ret;
-        vector<string> params;
-
-        if(amd)
-        {
-            //params = getParamsAsync(op, true);
-        }
-        else
-        {
-            //params = getParams(op);
-            ret = op->returnType();
-        }
-
-        _M << sp;
-
-        emitDeprecate(op, p, _M, "operation");
-
-        emitAttributes(op);
-        string retS = typeToString(ret);
-        _M << nl << retS << ' ' << opname << spar << params;
-        if(!noCurrent && !p->isLocal())
-        { 
-            _M << "Ice.Current current__";
-        }
-        _M << epar << ';';
-    }
-
-    _M << eb;
-}
-
-Slice::Gen::ProxyHelperVisitor::ProxyHelperVisitor(Output& H, Output& M, bool stream)
-    : ObjCVisitor(H, M), _stream(stream)
-{
-}
-
-bool
-Slice::Gen::ProxyHelperVisitor::visitClassDefStart(const ClassDefPtr& p)
-{
-#if 0
-    string name = fixName(p) + "PrxHelper";
-    ClassList bases = p->bases();
-
-    _H << sp << nl << "@interface " << name;
-    _H << nl << "+(void) ice_writeWithStream:(id<ICEOutputStream>)os proxy:(" << fixName(p) + "Prx" << " *)proxy;";
-    _H << nl << "+(void) ice_readWithStream:(id<ICEInputStream>)is;";
-    _H << nl << "@end";
-
-    _M << sp << nl << "@implementation " << name;
-    _M << nl << "+(void) ice_writeWithStream:(id<ICEOutputStream>)os proxy:(" << fixName(p) + "Prx" << " *)proxy";
-    _M << sb;
-    _M << eb;
-
-    _M << sp << nl << "+(void) ice_readWithStream:(id<ICEInputStream>)is";
-    _M << sb;
-    _M << eb;
-
-
-    // TODO: if(_stream)
-#endif
-    return true;
-}
-
-void
-Slice::Gen::ProxyHelperVisitor::visitClassDefEnd(const ClassDefPtr&)
-{
 }
 
 Slice::Gen::HelperVisitor::HelperVisitor(Output& H, Output& M, bool stream)
@@ -3199,92 +2652,6 @@ Slice::Gen::HelperVisitor::visitDictionary(const DictionaryPtr& p)
     _M << nl << "return c;";
     _M << eb;
     _M << nl << "@end";
-}
-
-void
-Slice::Gen::ProxyHelperVisitor::visitDictionary(const DictionaryPtr& p)
-{
-}
-
-Slice::Gen::DelegateVisitor::DelegateVisitor(Output& out)
-    : ObjCVisitor(out, out)
-{
-}
-
-bool
-Slice::Gen::DelegateVisitor::visitModuleStart(const ModulePtr& p)
-{
-    if(!p->hasNonLocalClassDecls())
-    {
-        return false;
-    }
-
-    _M << sp << nl << "namespace " << fixId(p->name());
-    _M << sb;
-    return true;
-}
-
-void
-Slice::Gen::DelegateVisitor::visitModuleEnd(const ModulePtr&)
-{
-    _M << eb;
-}
-
-bool
-Slice::Gen::DelegateVisitor::visitClassDefStart(const ClassDefPtr& p)
-{
-    if(p->isLocal())
-    {
-        return false;
-    }
-
-    string name = p->name();
-    ClassList bases = p->bases();
-
-    _M << sp << nl << "public interface " << name << "Del_ : ";
-    if(bases.empty())
-    {
-        _M << "Ice.ObjectDel_";
-    }
-    else
-    {
-        ClassList::const_iterator q = bases.begin();
-        while(q != bases.end())
-        {
-            string s = (*q)->scoped();
-            s += "Del_";
-            _M << fixId(s);
-            if(++q != bases.end())
-            {
-                _M << ", ";
-            }
-        }
-    }
-
-    _M << sb;
-
-    OperationList ops = p->operations();
-
-    OperationList::const_iterator r;
-    for(r = ops.begin(); r != ops.end(); ++r)
-    {
-        OperationPtr op = *r;
-        string opName = fixId(op->name(), ObjC::NSObject, true); // TODO: NSObject
-        TypePtr ret = op->returnType();
-        string retS = typeToString(ret);
-        vector<string> params;// = getParams(op);
-
-        _M << sp << nl << retS << ' ' << opName << spar << params
-             << "_System.Collections.Generic.Dictionary<string, string> context__" << epar << ';';
-    }
-
-    return true;
-}
-
-void
-Slice::Gen::DelegateVisitor::visitClassDefEnd(const ClassDefPtr&)
-{
-    _M << eb;
 }
 
 Slice::Gen::DelegateMVisitor::DelegateMVisitor(Output& H, Output& M)
@@ -3763,679 +3130,7 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
     }
 }
 
-Slice::Gen::DelegateDVisitor::DelegateDVisitor(Output& out)
-    : ObjCVisitor(out, out)
-{
-}
-
-bool
-Slice::Gen::DelegateDVisitor::visitModuleStart(const ModulePtr& p)
-{
-    if(!p->hasNonLocalClassDecls())
-    {
-        return false;
-    }
-
-    _M << sp << nl << "namespace " << fixId(p->name());
-    _M << sb;
-    return true;
-}
-
-void
-Slice::Gen::DelegateDVisitor::visitModuleEnd(const ModulePtr&)
-{
-    _M << eb;
-}
-
-bool
-Slice::Gen::DelegateDVisitor::visitClassDefStart(const ClassDefPtr& p)
-{
-    if(p->isLocal())
-    {
-        return false;
-    }
-
-    string name = p->name();
-    ClassList bases = p->bases();
-
-    _M << sp << nl << "public sealed class " << name << "DelD_ : Ice.ObjectDelD_, " << name << "Del_";
-    _M << sb;
-
-    OperationList ops = p->allOperations();
-
-    OperationList::const_iterator r;
-    for(r = ops.begin(); r != ops.end(); ++r)
-    {
-        OperationPtr op = *r;
-        string opName = fixId(op->name(), ObjC::NSObject, true); // TODO: NSObject
-        TypePtr ret = op->returnType();
-        string retS = typeToString(ret);
-        ClassDefPtr containingClass = ClassDefPtr::dynamicCast(op->container());
-
-        ExceptionList throws = op->throws();
-        throws.sort();
-        throws.unique();
-
-        //
-        // Arrange exceptions into most-derived to least-derived order. If we don't
-        // do this, a base exception handler can appear before a derived exception
-        // handler, causing compiler warnings.
-        //
-#if defined(__SUNPRO_CC)
-        throws.sort(Slice::derivedToBaseCompare);
-#else
-        throws.sort(Slice::DerivedToBaseCompare());
-#endif
-
-        vector<string> params;// = getParams(op);
-        vector<string> args;// = getArgs(op);
-
-        _M << sp;
-        _M << nl << "public " << retS << ' ' << opName << spar << params
-             << "_System.Collections.Generic.Dictionary<string, string> context__" << epar;
-        _M << sb;
-        if(containingClass->hasMetaData("amd") || op->hasMetaData("amd"))
-        {
-            _M << nl << "throw new Ice.CollocationOptimizationException();";
-        }
-        else
-        {
-            _M << nl << "Ice.Current current__ = new Ice.Current();";
-            _M << nl << "initCurrent__(ref current__, \"" << op->name() << "\", " 
-                 << sliceModeToIceMode(op->sendMode())
-                 << ", context__);";
-            
-          
-            //
-            // Create out holders and delArgs
-            //
-            vector<string> delArgs;
-            vector<string> outHolders;
-
-            const ParamDeclList paramList = op->parameters();
-            for(ParamDeclList::const_iterator q = paramList.begin(); q != paramList.end(); ++q)
-            {
-                string arg = fixId((*q)->name());
-                if((*q)->isOutParam())
-                {
-                    _M << nl << typeToString((*q)->type()) << " " << arg << "Holder__ = " << writeValue((*q)->type()) << ";";
-                    outHolders.push_back(arg);
-                    arg = "out " + arg + "Holder__";
-                }
-                delArgs.push_back(arg);
-            }
-            
-            if(ret)
-            {
-                _M << nl << retS << " result__ = " << writeValue(ret) << ";";
-            }
-       
-            if(!throws.empty())
-            {
-                _M << nl << "Ice.UserException userException__ = null;";
-            }
-
-            _M << nl << "IceInternal.Direct.RunDelegate run__ = delegate(Ice.Object obj__)";
-            _M << sb;
-            _M << nl << fixId(name) << " servant__ = null;";
-            _M << nl << "try";
-            _M << sb;
-            _M << nl << "servant__ = (" << fixId(name) << ")obj__;";
-            _M << eb;
-            _M << nl << "catch(_System.InvalidCastException)";
-            _M << sb;
-            _M << nl << "throw new Ice.OperationNotExistException(current__.id, current__.facet, current__.operation);";
-            _M << eb;
-
-            if(!throws.empty())
-            {
-                _M << nl << "try";
-                _M << sb;
-            }
-
-            _M << nl;
-            if(ret)
-            {
-                _M << "result__ = ";
-            }
-           
-            _M << "servant__." << opName << spar << delArgs << "current__" << epar << ';';
-            _M << nl << "return Ice.DispatchStatus.DispatchOK;";
-            
-            if(!throws.empty())
-            {
-                _M << eb;
-                _M << nl << "catch(Ice.UserException ex__)";
-                _M << sb;
-                _M << nl << "userException__ = ex__;";
-                _M << nl << "return Ice.DispatchStatus.DispatchUserException;";
-                _M << eb;
-            }
-
-            _M << eb;
-            _M << ";";
-
-            _M << nl << "IceInternal.Direct direct__ = null;";
-            _M << nl << "try";
-            _M << sb;
-            _M << nl << "direct__ = new IceInternal.Direct(current__, run__);";
-
-            _M << nl << "try";
-            _M << sb;
-            
-            _M << nl << "Ice.DispatchStatus status__ = direct__.servant().collocDispatch__(direct__);";
-            if(!throws.empty())
-            {
-                _M << nl << "if(status__ == Ice.DispatchStatus.DispatchUserException)";
-                _M << sb;
-                _M << nl << "throw userException__;";
-                _M << eb;
-            }
-            _M << nl << "_System.Diagnostics.Debug.Assert(status__ == Ice.DispatchStatus.DispatchOK);";
-
-            _M << eb;
-            _M << nl << "finally";
-            _M << sb;
-            _M << nl << "direct__.destroy();";
-            _M << eb;
-            _M << eb;
-
-            for(ExceptionList::const_iterator i = throws.begin(); i != throws.end(); ++i)
-            {
-                _M << nl << "catch(" << fixId((*i)->scoped()) << ')';
-                _M << sb;
-                _M << nl << "throw;";
-                _M << eb;
-            }
-            _M << nl << "catch(Ice.SystemException)";
-            _M << sb;
-            _M << nl << "throw;";
-            _M << eb;
-            _M << nl << "catch(System.Exception ex__)";
-            _M << sb;
-            _M << nl << "IceInternal.LocalExceptionWrapper.throwWrapper(ex__);";
-            _M << eb;
-            
-            //
-            //
-            // Set out parameters
-            //
-            for(vector<string>::iterator s = outHolders.begin(); s != outHolders.end(); ++s)
-            {
-                _M << nl << (*s) << " = " << (*s) << "Holder__;";
-            }
-            if(ret && !containingClass->hasMetaData("amd") && !op->hasMetaData("amd"))
-            {
-                _M << nl << "return result__;";
-            }
-        }
-        _M << eb;
-    }
-
-    return true;
-}
-
-void
-Slice::Gen::DelegateDVisitor::visitClassDefEnd(const ClassDefPtr&)
-{
-    _M << eb;
-}
-
-Slice::Gen::DispatcherVisitor::DispatcherVisitor(Output &out, bool stream)
-    : ObjCVisitor(out, out), _stream(stream)
-{
-}
-
-bool
-Slice::Gen::DispatcherVisitor::visitModuleStart(const ModulePtr& p)
-{
-    if(!p->hasNonLocalClassDecls())
-    {
-        return false;
-    }
-
-    _M << sp << nl << "namespace " << fixId(p->name());
-    _M << sb;
-    return true;
-}
-
-void
-Slice::Gen::DispatcherVisitor::visitModuleEnd(const ModulePtr&)
-{
-    _M << eb;
-}
-
-bool
-Slice::Gen::DispatcherVisitor::visitClassDefStart(const ClassDefPtr& p)
-{
-    if(p->isLocal() || !p->isInterface())
-    {
-        return false;
-    }
-
-    string name = p->name();
-
-    _M << sp << nl << "public abstract class " << name << "Disp_ : Ice.ObjectImpl, " << fixId(name);
-    _M << sb;
-
-    OperationList ops = p->operations();
-    if(!ops.empty())
-    {
-        _M << sp << nl << "#region Slice operations";
-    }
-
-    for(OperationList::const_iterator op = ops.begin(); op != ops.end(); ++op)
-    {
-        bool amd = p->hasMetaData("amd") || (*op)->hasMetaData("amd");
-
-        string opname = (*op)->name();
-        vector<string> params;
-        vector<string> args;
-        TypePtr ret;
-
-        if(amd)
-        {
-            opname = opname + "_async";
-            //params = getParamsAsync(*op, true);
-            //args = getArgsAsync(*op);
-        }
-        else
-        {
-            opname = fixId(opname, ObjC::NSObject, true); // TODO: NSObject
-            //params = getParams(*op);
-            ret = (*op)->returnType();
-            //args = getArgs(*op);
-        }
-
-        _M << sp << nl << "public " << typeToString(ret) << " " << opname << spar << params << epar;
-        _M << sb << nl;
-        if(ret)
-        {
-            _M << "return ";
-        }
-        _M << opname << spar << args << "Ice.ObjectImpl.defaultCurrent" << epar << ';';
-        _M << eb;
-
-        _M << sp << nl << "public abstract " << typeToString(ret) << " " << opname << spar << params;
-        if(!p->isLocal())
-        {
-            _M << "Ice.Current current__";
-        }
-        _M << epar << ';';
-    }
-
-    if(!ops.empty())
-    {
-        _M << sp << nl << "#endregion"; // Slice operations
-    }
-
-    writeInheritedOperations(p);
-
-    writeDispatchAndMarshalling(p, _stream);
-
-    _M << eb;
-
-    return true;
-}
-
-Slice::Gen::AsyncVisitor::AsyncVisitor(Output &out)
-    : ObjCVisitor(out, out)
-{
-}
-
-bool
-Slice::Gen::AsyncVisitor::visitModuleStart(const ModulePtr& p)
-{
-    if(!p->hasAsyncOps())
-    {
-        return false;
-    }
-
-    _M << sp << nl << "namespace " << fixId(p->name());
-    _M << sb;
-    return true;
-}
-
-void
-Slice::Gen::AsyncVisitor::visitModuleEnd(const ModulePtr&)
-{
-    _M << eb;
-}
-
-bool
-Slice::Gen::AsyncVisitor::visitClassDefStart(const ClassDefPtr& p)
-{
-    return true;
-}
-
-void
-Slice::Gen::AsyncVisitor::visitClassDefEnd(const ClassDefPtr&)
-{
-}
-
-void
-Slice::Gen::AsyncVisitor::visitOperation(const OperationPtr& p)
-{
-    ContainerPtr container = p->container();
-    ClassDefPtr cl = ClassDefPtr::dynamicCast(container);
-    
-    if(cl->isLocal())
-    {
-        return;
-    }
-
-    string name = p->name();
-    
-    if(cl->hasMetaData("ami") || p->hasMetaData("ami"))
-    {
-
-        TypePtr ret = p->returnType();
-        string retS = typeToString(ret);
-
-        TypeStringList inParams;
-        TypeStringList outParams;
-        ParamDeclList paramList = p->parameters();
-        for(ParamDeclList::const_iterator pli = paramList.begin(); pli != paramList.end(); ++pli)
-        {
-            if((*pli)->isOutParam())
-            {
-                outParams.push_back(make_pair((*pli)->type(), (*pli)->name()));
-            }
-            else
-            {
-                inParams.push_back(make_pair((*pli)->type(), (*pli)->name()));
-            }
-        }
-
-        ExceptionList throws = p->throws();
-        throws.sort();
-        throws.unique();
-
-        //
-        // Arrange exceptions into most-derived to least-derived order. If we don't
-        // do this, a base exception handler can appear before a derived exception
-        // handler, causing compiler warnings and resulting in the base exception
-        // being marshaled instead of the derived exception.
-        //
-#if defined(__SUNPRO_CC)
-        throws.sort(Slice::derivedToBaseCompare);
-#else
-        throws.sort(Slice::DerivedToBaseCompare());
-#endif
-
-        TypeStringList::const_iterator q;
-
-        vector<string> params;// = getParamsAsyncCB(p);
-        vector<string> args;// = getArgsAsyncCB(p);
-
-        vector<string> paramsInvoke;// = getParamsAsync(p, false);
-
-        _M << sp << nl << "public abstract class AMI_" << cl->name() << '_'
-             << name << " : IceInternal.OutgoingAsync";
-        _M << sb;
-        _M << sp;
-        _M << nl << "public abstract void ice_response" << spar << params << epar << ';';
-        
-        _M << sp << nl << "public bool invoke__" << spar << "Ice.ObjectPrx prx__"
-             << paramsInvoke << "_System.Collections.Generic.Dictionary<string, string> ctx__" << epar;
-        _M << sb;
-        _M << nl << "acquireCallback__(prx__);";
-        _M << nl << "try";
-        _M << sb;
-        if(p->returnsData())
-        {
-            _M << nl << "((Ice.ObjectPrxHelperBase)prx__).checkTwowayOnly__(\"" << p->name() << "\");";
-        }
-        _M << nl << "prepare__(prx__, \"" << name << "\", " << sliceModeToIceMode(p->sendMode()) << ", ctx__);";
-        for(q = inParams.begin(); q != inParams.end(); ++q)
-        {
-            string typeS = typeToString(q->first);
-            writeMarshalUnmarshalCode(_M, q->first, fixId(q->second), true, false, false);
-        }
-        if(p->sendsClasses())
-        {
-            _M << nl << "os__.writePendingObjects();";
-        }
-        _M << nl << "os__.endWriteEncaps();";
-        _M << nl << "return send__();";
-        _M << eb;
-        _M << nl << "catch(Ice.LocalException ex__)";
-        _M << sb;
-        _M << nl << "releaseCallback__(ex__);";
-        _M << nl << "return false;";
-        _M << eb;
-        _M << eb;
-
-        _M << sp << nl << "protected override void response__(bool ok__)";
-        _M << sb;
-        for(q = outParams.begin(); q != outParams.end(); ++q)
-        {
-            string param = fixId(q->second);
-            string typeS = typeToString(q->first);
-            _M << nl << typeS << ' ' << param << ';';
-        }
-        if(ret)
-        {
-            _M << nl << retS << " ret__;";
-        }
-        _M << nl << "try";
-        _M << sb;
-        _M << nl << "if(!ok__)";
-        _M << sb;
-        _M << nl << "try";
-        _M << sb;
-        _M << nl << "throwUserException__();";
-        _M << eb;
-        for(ExceptionList::const_iterator r = throws.begin(); r != throws.end(); ++r)
-        {
-            _M << nl << "catch(" << fixId((*r)->scoped()) << " ex__)";
-            _M << sb;
-            _M << nl << "exception__(ex__);";
-            _M << eb;
-        }
-        _M << nl << "catch(Ice.UserException ex__)";
-        _M << sb;
-        _M << nl << "throw new Ice.UnknownUserException(ex__.ice_name(), ex__);";
-        _M << eb;
-        _M << "return;";
-        _M << eb;
-        if(p->returnsData())
-        {
-            _M << nl << "is__.startReadEncaps();";
-            for(q = outParams.begin(); q != outParams.end(); ++q)
-            {
-                string param = fixId(q->second);
-                StructPtr st = StructPtr::dynamicCast(q->first);
-                if(st)
-		{
-                    if(isValueType(st))
-                    {
-                        _M << nl << param << " = new " << typeToString(q->first) << "();";
-                    }
-                    else
-                    {
-                        _M << nl << param << " = null;";
-                    }
-		}
-                writeMarshalUnmarshalCode(_M, q->first, fixId(q->second), false, false, true);
-            }
-            if(ret)
-            {
-                StructPtr st = StructPtr::dynamicCast(ret);
-                if(st)
-                {
-                    if(isValueType(ret))
-                    {
-                        _M << nl << "ret__ = new " << retS << "();";
-                    }
-                    else
-                    {
-                        _M << nl << "ret__ = null;";
-                    }
-                }
-                writeMarshalUnmarshalCode(_M, ret, "ret__", false, false, true);
-            }
-            if(p->returnsClasses())
-            {
-                _M << nl << "is__.readPendingObjects();";
-            }
-            _M << nl << "is__.endReadEncaps();";
-            for(q = outParams.begin(); q != outParams.end(); ++q)
-            {
-                string param = fixId(q->second);
-		if(isClass(q->first))
-                {
-                    string type = typeToString(q->first);
-                    _M << nl << param << " = (" << type << ")" << param << "_PP.value;";
-                }
-            }
-            if(ret)
-            {
-		if(isClass(ret))
-                {
-                    string type = typeToString(ret);
-                    _M << nl << "ret__ = (" << retS << ")ret___PP.value;";
-                }
-            }
-        }
-        else
-        {
-            _M << nl << "is__.skipEmptyEncaps();";
-        }
-        _M << eb;
-        _M << nl << "catch(Ice.LocalException ex__)";
-        _M << sb;
-        _M << nl << "finished__(ex__);";
-        _M << nl << "return;";
-        _M << eb;
-        _M << nl << "ice_response" << spar << args << epar << ';';
-        _M << nl << "releaseCallback__();";
-        _M << eb;
-        _M << eb;
-    }
-
-    if(cl->hasMetaData("amd") || p->hasMetaData("amd"))
-    {
-        string classNameAMD = "AMD_" + cl->name();
-        string classNameAMDI = "_AMD_" + cl->name();
-
-        vector<string> paramsAMD;// = getParamsAsyncCB(p);
-
-        _M << sp << nl << "public interface " << classNameAMD << '_' << name;
-        _M << sb;
-        _M << sp << nl << "void ice_response" << spar << paramsAMD << epar << ';';
-        _M << sp << nl << "void ice_exception(_System.Exception ex);";
-        _M << eb;
-    
-        TypePtr ret = p->returnType();
-        
-        TypeStringList outParams;
-        ParamDeclList paramList = p->parameters();
-        for(ParamDeclList::const_iterator pli = paramList.begin(); pli != paramList.end(); ++pli)
-        {
-            if((*pli)->isOutParam())
-            {
-                outParams.push_back(make_pair((*pli)->type(), (*pli)->name()));
-            }
-        }
-        
-        ExceptionList throws = p->throws();
-        throws.sort();
-        throws.unique();
-
-        //
-        // Arrange exceptions into most-derived to least-derived order. If we don't
-        // do this, a base exception handler can appear before a derived exception
-        // handler, causing compiler warnings and resulting in the base exception
-        // being marshaled instead of the derived exception.
-        //
-#if defined(__SUNPRO_CC)
-        throws.sort(Slice::derivedToBaseCompare);
-#else
-        throws.sort(Slice::DerivedToBaseCompare());
-#endif
-
-        TypeStringList::const_iterator q;
-        _M << sp << nl << "class " << classNameAMDI << '_' << name
-            << " : IceInternal.IncomingAsync, " << classNameAMD << '_' << name;
-        _M << sb;
-
-        _M << sp << nl << "public " << classNameAMDI << '_' << name << "(IceInternal.Incoming inc) : base(inc)";
-        _M << sb;
-        _M << eb;
-
-        _M << sp << nl << "public void ice_response" << spar << paramsAMD << epar;
-        _M << sb;
-        _M << nl << "if(validateResponse__(true))";
-        _M << sb;
-        if(ret || !outParams.empty())
-        {
-            _M << nl << "try";
-            _M << sb;
-            _M << nl << "IceInternal.BasicStream os__ = this.os__();";
-            for(q = outParams.begin(); q != outParams.end(); ++q)
-            {
-                string typeS = typeToString(q->first);
-                writeMarshalUnmarshalCode(_M, q->first, fixId(q->second), true, false, false);
-            }
-            if(ret)
-            {
-                string retS = typeToString(ret);
-                writeMarshalUnmarshalCode(_M, ret, "ret__", true, false, false);
-            }
-            if(p->returnsClasses())
-            {
-                _M << nl << "os__.writePendingObjects();";
-            }
-            _M << eb;
-            _M << nl << "catch(Ice.LocalException ex__)";
-            _M << sb;
-            _M << nl << "ice_exception(ex__);";
-            _M << eb;
-        }
-        _M << nl << "response__(true);";
-        _M << eb;
-        _M << eb;
-
-        _M << sp << nl << "public void ice_exception(_System.Exception ex)";
-        _M << sb;
-        if(throws.empty())
-        {
-            _M << nl << "if(validateException__(ex))";
-            _M << sb;
-            _M << nl << "exception__(ex);";
-            _M << eb;
-        }
-        else
-        {
-            _M << nl << "try";
-            _M << sb;
-            _M << nl << "throw ex;";
-            _M << eb;
-            ExceptionList::const_iterator r;
-            for(r = throws.begin(); r != throws.end(); ++r)
-            {
-                string exS = fixId((*r)->scoped());
-                _M << nl << "catch(" << exS << " ex__)";
-                _M << sb;
-                _M << nl << "if(validateResponse__(false))";
-                _M << sb;
-                _M << nl << "os__().writeUserException(ex__);";
-                _M << nl << "response__(false);";
-                _M << eb;
-                _M << eb;
-            }
-            _M << nl << "catch(_System.Exception ex__)";
-            _M << sb;
-            _M << nl << "exception__(ex__);";
-            _M << eb;
-        }
-        _M << eb;
-
-        _M << eb;
-    }
-}
-
+#if 0
 Slice::Gen::TieVisitor::TieVisitor(Output& out)
     : ObjCVisitor(out, out)
 {
@@ -4956,3 +3651,4 @@ Slice::Gen::ImplTieVisitor::visitClassDefStart(const ClassDefPtr& p)
 
     return true;
 }
+#endif

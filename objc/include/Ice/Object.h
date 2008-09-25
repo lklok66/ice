@@ -28,26 +28,26 @@ int ICEInternalLookupString(NSString *[], size_t, NSString *);
 @end
 
 @protocol ICEObject <NSObject>
--(BOOL) ice_isA:(NSString*)typeId;
 -(BOOL) ice_isA:(NSString*)typeId current:(ICECurrent*)current;
--(void) ice_ping;
 -(void) ice_ping:(ICECurrent*)current;
--(NSString*) ice_id;
 -(NSString*) ice_id:(ICECurrent*)current;
--(NSArray*) ice_ids;
 -(NSArray*) ice_ids:(ICECurrent*)current;
-+(NSString*) ice_staticId;
--(void) ice_preMarshal;
--(void) ice_postUnmarshal;
--(BOOL) ice_dispatch:(id<ICERequest>)request;
 @end
 
 @interface ICEObject : NSObject<ICEObject, NSCopying>
 {
     void* object__;
 }
-+(NSString**) staticIds__:(int*)count idIndex:(int*)idx;
+-(BOOL) ice_isA:(NSString*)typeId;
+-(void) ice_ping;
+-(NSString*) ice_id;
+-(NSArray*) ice_ids;
+-(void) ice_preMarshal;
+-(void) ice_postUnmarshal;
+-(BOOL) ice_dispatch:(id<ICERequest>)request;
 -(void) checkModeAndSelector__:(ICEOperationMode)expected selector:(SEL)sel current:(ICECurrent*)current;
++(NSString*) ice_staticId;
++(NSString**) staticIds__:(int*)count idIndex:(int*)idx;
 +(BOOL) ice_isA___:(id)servant current:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os;
 +(BOOL) ice_ping___:(id)servant current:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os;
 +(BOOL) ice_id___:(id)servant current:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os;

@@ -18,8 +18,7 @@ using namespace IceInternal;
 // InputStreamI
 //
 Ice::InputStreamI::InputStreamI(const Ice::CommunicatorPtr& communicator, const vector<Byte>& data) :
-    _communicator(communicator),
-    _closure(0)
+    _communicator(communicator)
 {
     _is = new BasicStream(getInstance(communicator).get());
     _is->closure(this);
@@ -338,7 +337,7 @@ Ice::InputStreamI::reset()
 // OutputStreamI
 //
 Ice::OutputStreamI::OutputStreamI(const Ice::CommunicatorPtr& communicator, BasicStream* os) :
-    _communicator(communicator), _os(os), _own(!os), _closure(0)
+    _communicator(communicator), _os(os), _own(!os)
 {
     if(!_os)
     {

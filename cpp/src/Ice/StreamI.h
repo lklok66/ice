@@ -92,7 +92,6 @@ private:
     Ice::CommunicatorPtr _communicator;
     IceInternal::BasicStream* _is;
     std::vector< ReadObjectCallbackPtr > _callbacks;
-    void* _closure;
 };
 
 //
@@ -168,7 +167,6 @@ private:
     Ice::CommunicatorPtr _communicator;
     IceInternal::BasicStream* _os;
     bool _own;
-    void* _closure;
 };
 
 }
