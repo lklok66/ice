@@ -1319,7 +1319,7 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
     {
         _H << sp;
     }
-    if(!p->isInterface())
+    if(!p->isInterface() && !allDataMembers.empty())
     {
 	_H << nl << "-(id) init";
 	_M << sp << nl << "-(id) init";
@@ -1371,7 +1371,7 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
     if(!p->isInterface())
     {
 	//
-	// copy__
+	// copy__ and dealloc
 	//
 	if(!dataMembers.empty())
 	{
@@ -1380,14 +1380,10 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
 	    _M << nl << "[super copy__:copy_];";
 	    writeMemberCopy(p, dataMembers, 0); // TODO: fix third parameter
 	    _M << eb;
+	    _H << nl << "// This class also overrides copyWithZone:.";
+
+	    writeMemberDealloc(dataMembers, 0); // TODO fix second parameter
 	}
-
-	//
-	// dealloc
-	//
-	writeMemberDealloc(dataMembers, 0); // TODO fix second parameter
-
-	_H << nl << "// This class also overrides copyWithZone: and dealloc.";
     }
 
     //
@@ -1551,10 +1547,6 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
 	//
 	writeProperties(dataMembers, baseTypes);
 	writeSynthesize(dataMembers, baseTypes);
-    }
-
-    if(!dataMembers.empty())
-    {
 	_H << sp;
     }
 
@@ -1653,7 +1645,7 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
     }
 
     //
-    // copy__
+    // copy__ and dealloc
     //
     if(!dataMembers.empty())
     {
@@ -1662,14 +1654,10 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
 	_M << nl << "[super copy__:copy_];";
 	writeMemberCopy(p, dataMembers, baseTypes);
 	_M << eb;
+	_H << nl << "// This class also overrides copyWithZone:.";
+
+	writeMemberDealloc(dataMembers, baseTypes);
     }
-
-    //
-    // dealloc
-    //
-    writeMemberDealloc(dataMembers, baseTypes);
-
-    _H << nl << "// This class also overrides copyWithZone: and dealloc.";
 
     //
     // Marshaling/unmarshaling
@@ -1842,12 +1830,12 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     writeMemberEquals(dataMembers, baseTypes);
     _M << eb;
 
+    _H << nl << "// This class also overrides copyWithZone:, hash, and isEqual:";
+
     //
     // dealloc
     //
     writeMemberDealloc(dataMembers, 0); // TODO fix second parameter
-
-    _H << nl << "// This class also overrides copyWithZone:, hash, isEqual:, and dealloc.";
 
     //
     // Marshaling/unmarshaling
@@ -2293,6 +2281,7 @@ Slice::Gen::TypesVisitor::writeMemberDealloc(const DataMemberList& dataMembers, 
     {
 	_M << nl << "[super dealloc];";
 	_M << eb;
+	_H << nl << "// This class also overrides dealloc.";
     }
 }
 
