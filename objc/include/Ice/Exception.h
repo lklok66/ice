@@ -21,7 +21,6 @@
 
 @interface ICEException : NSException
 -(NSString*)ice_name;
--(void) copy__:(ICEException*)copy_;
 @end
 
 @interface ICELocalException : ICEException
@@ -36,12 +35,10 @@
 
 -(id)init:(const char*)file line:(int)line;
 +(id)localException:(const char*)file line:(int)line;
--(void) copy__:(ICELocalException*)copy_;
 @end
 
 @interface ICEUserException : ICEException
 -(BOOL)usesClasses__;
 -(void)write__:(id<ICEOutputStream>)stream;
 -(void)read__:(id<ICEInputStream>)stream readTypeId:(BOOL)rid;
--(void) copy__:(ICEUserException*)copy_;
 @end

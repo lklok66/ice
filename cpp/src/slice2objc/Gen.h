@@ -149,7 +149,6 @@ private:
 	void writeMemberInit(const DataMemberList&, int) const;
 	void writeProperties(const DataMemberList&, int) const;
 	void writeSynthesize(const DataMemberList&, int) const;
-        void writeMemberCopy(const SyntaxTreeBasePtr&, const DataMemberList&, int) const;
         void writeMemberHashCode(const DataMemberList&, int) const;
         void writeMemberEquals(const DataMemberList&, int) const;
         void writeMemberDealloc(const DataMemberList&, int) const;

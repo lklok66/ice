@@ -27,7 +27,7 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
     test([initial isEqual:base]);
     tprintf("ok\n");
 
-    tprintf("testing constructor, copy constructor, and assignment operator... ");
+    tprintf("testing constructor, convenience constructor, and copy... ");
 
     TestBase* ba1 = [[[TestBase alloc] init] autorelease];
     test(ba1.theS.str == nil);
@@ -36,8 +36,13 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
     TestS* s = [TestS s];
     s.str = @"hello";
     TestBase* ba2 = [TestBase base:s str:@"hi"];
-    test([ba2.theS.str isEqualToString:@"hello"]);
+    test(ba2.theS == s);
     test([ba2.str isEqualToString:@"hi"]);
+
+    TestBase* ba3 = [ba2 copy];
+    test(ba3 != ba2);
+    test(ba3.theS == ba2.theS);
+    test(ba3.str == ba2.str);
 
 #if 0
     // Can't override assignment operator in Objective-C.

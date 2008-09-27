@@ -474,15 +474,10 @@ static NSString* ICEObject_all__[4] =
     [is endSlice];
 }
 
--(void) copy__:(ICEObject*)copy_
-{
-}
-
 -(id) copyWithZone:(NSZone*)zone
 {
-    id copy_ = [[self class] allocWithZone:zone];
-    [self copy__:copy_];
-    return copy_;
+    NSAssert(false, @"copyWithZone: must be overridden");
+    return nil;
 }
 @end
 

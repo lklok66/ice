@@ -103,7 +103,7 @@ private:
 -(id) copyWithZone:(NSZone *)zone
 {
     ICEInitializationData *copy = [ICEInitializationData allocWithZone:zone];
-    copy->properties = [properties clone];
+    copy->properties = [properties retain];
     copy->logger = [logger retain];
     return copy;
 }

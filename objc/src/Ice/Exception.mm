@@ -42,16 +42,10 @@
     [NSException raise:NSInvalidArchiveOperationException format:@"ICEExceptions do not support NSCoding"];
 }
 
--(void) copy__:(ICEException*)copy_
+-(id) copyWithZone:(NSZone *)zone
 {
-    NSAssert(NO, @"copy__ must be overridden");
-}
-
--(id) copyWithZone:(NSZone*)zone
-{
-    id copy_ = [[self class] allocWithZone:zone];
-    [self copy__:copy_];
-    return copy_;
+    NSAssert(false, @"copyWithZone: must be overriden");
+    return nil;
 }
 
 -(void) dealloc
@@ -91,12 +85,6 @@
 
 @synthesize line;
 
--(void)copy__:(ICELocalException*)copy_
-{
-    copy_->file = file;
-    copy_->line = line;
-}
-
 -(id)init:(const char*)f line:(int)l
 {
     if(![super init])
@@ -133,6 +121,11 @@
     }
 }
 
+-(id) copyWithZone:(NSZone *)zone
+{
+    return [[[self class] allocWithZone:zone] init:file line:line];
+}
+
 -(void) dealloc
 {
     [super dealloc];
@@ -155,8 +148,9 @@
     NSAssert(false, @"ice_readWithStream must be overridden");
 }
 
--(void) copy__:(ICEUserException*)copy_
+-(id) copyWithZone:(NSZone *)zone
 {
+    return [[[self class] allocWithZone:zone] init];
 }
 
 -(void) dealloc

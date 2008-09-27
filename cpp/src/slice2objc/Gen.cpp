@@ -1371,14 +1371,15 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
     if(!p->isInterface())
     {
 	//
-	// copy__ and dealloc
+	//  copyWithZone and dealloc
 	//
 	if(!dataMembers.empty())
 	{
-	    _M << sp << nl << "-(void) copy__:(" << name << "*)copy_";
+	    _M << sp << nl << "-(id) copyWithZone:(NSZone *)zone_p";
 	    _M << sb;
-	    _M << nl << "[super copy__:copy_];";
-	    writeMemberCopy(p, dataMembers, 0); // TODO: fix third parameter
+	    _M << nl << "return [((" << name << " *)[" << name << " allocWithZone:zone_p]) init";
+	    writeMemberCall(allDataMembers, 0, Other, NoEscape); // TODO
+	    _M << "];";
 	    _M << eb;
 	    _H << nl << "// This class also overrides copyWithZone:.";
 
@@ -1499,7 +1500,6 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
     if(!dataMembers.empty())
     {
 	_H << sb;
-	_H << nl << "@private";
 	_H.inc();
     }
 
@@ -1588,6 +1588,10 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
 	else
 	{
 	    _M << nl << "if(![super init";
+	    if(p->isLocal())
+	    {
+	        _M << ":file__p line:line__p ";
+	    }
 	    writeMemberCall(baseDataMembers, baseTypes, p->isLocal() ? LocalException : Other, WithEscape);
 	    _M << "])";
 	}
@@ -1616,13 +1620,17 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
     //
     _M << sb;
     _M << nl << name << " *s__ = [((" << name << " *)[" << name << " alloc]) init";
+    if(p->isLocal())
+    {
+        _M << ":file__p line:line__p ";
+    }
     writeMemberCall(allDataMembers, baseTypes, p->isLocal() ? LocalException : Other, WithEscape);
     _M << "];";
     _M << nl << "[s__ autorelease];";
     _M << nl << "return s__;";
     _M << eb;
 
-    if (!allDataMembers.empty())
+    if(!allDataMembers.empty())
     {
 	_H << nl << "+(id) " << lowerCaseName;
 	_M << sp << nl << "+(id) " << lowerCaseName;
@@ -1645,14 +1653,19 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
     }
 
     //
-    // copy__ and dealloc
+    // copyWithZone and dealloc
     //
     if(!dataMembers.empty())
     {
-	_M << sp << nl << "-(void) copy__:(" << name << "*)copy_";
+	_M << sp << nl << "-(id) copyWithZone:(NSZone *)zone_p";
 	_M << sb;
-	_M << nl << "[super copy__:copy_];";
-	writeMemberCopy(p, dataMembers, baseTypes);
+	_M << nl << "return [((" << name << " *)[" << name << " allocWithZone:zone_p]) init";
+	if(p->isLocal())
+	{
+	    _M << ":file line:line";
+	}
+	writeMemberCall(allDataMembers, baseTypes, p->isLocal() ? LocalException : Other, NoEscape);
+	_M << "];";
 	_M << eb;
 	_H << nl << "// This class also overrides copyWithZone:.";
 
@@ -1802,11 +1815,11 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     //
     // copyWithZone
     //
-    _M << sp << nl << "-(id) copyWithZone:(NSZone *)zone";
+    _M << sp << nl << "-(id) copyWithZone:(NSZone *)zone_p";
     _M << sb;
-    _M << nl << name << " *copy_ = [" << name << " allocWithZone:zone];";
-    writeMemberCopy(p, dataMembers, baseTypes); 
-    _M << nl << "return copy_;";
+    _M << nl << "return [((" << name << " *)[" << name << " allocWithZone:zone_p]) init";
+    writeMemberCall(dataMembers, baseTypes, Other, NoEscape);
+    _M << "];";
     _M << eb;
 
     //
@@ -2059,10 +2072,6 @@ void
 Slice::Gen::TypesVisitor::writeMemberCall(const DataMemberList& dataMembers, int baseTypes,
                                           ContainerType ct, Escape esc) const
 {
-    if(ct == LocalException)
-    {
-        _M << ":file__p line:line__p";
-    }
     for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
     {
         string name = (*q)->name();
@@ -2071,10 +2080,13 @@ Slice::Gen::TypesVisitor::writeMemberCall(const DataMemberList& dataMembers, int
 	{
 	    _M << " " << fixId(name, baseTypes);
 	}
-	_M << ":" << fixId(name);
-	if(esc == WithEscape)
+	if(esc == NoEscape)
 	{
-	    _M << "_p";
+	    _M << ":" << fixId(name, baseTypes);
+	}
+	else
+	{
+	    _M << ":" << fixId(name) << "_p";
 	}
     }
 }
@@ -2135,52 +2147,6 @@ Slice::Gen::TypesVisitor::writeSynthesize(const DataMemberList& dataMembers, int
     {
         string name = fixId((*q)->name(), baseTypes);
 	_M << nl << "@synthesize " << name << ";";
-    }
-}
-
-void
-Slice::Gen::TypesVisitor::writeMemberCopy(const SyntaxTreeBasePtr& parent, const DataMemberList& dataMembers,
-                                          int baseTypes) const
-{
-    StructPtr st = StructPtr::dynamicCast(parent);
-    ClassDefPtr cl = ClassDefPtr::dynamicCast(parent);
-    ExceptionPtr ex = ExceptionPtr::dynamicCast(parent);
-    ClassDefPtr baseCl;
-    ExceptionPtr baseEx;
-    bool hasBase;
-    if(st)
-    {
-	hasBase = false;
-    }
-    else if(cl)
-    {
-	ClassList bases = cl->bases();
-	if(!bases.empty() && !bases.front()->isInterface())
-	{
-	    baseCl = bases.front();
-	}
-    }
-    else if(ex)
-    {
-        baseEx = ex->base();
-    }
-    else
-    {
-	assert(false); // Nothing else has bases
-    }
-
-    for(DataMemberList::const_iterator q = dataMembers.begin(); q != dataMembers.end(); ++q)
-    {
-	string name = fixId((*q)->name(), baseTypes);
-	_M << nl << "copy_->" << name << " = ";
-	if(isValueType((*q)->type()))
-	{
-	    _M << name << ";";
-	}
-	else
-	{
-	    _M << "[" << name << " retain];";
-	}
     }
 }
 

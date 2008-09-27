@@ -69,11 +69,11 @@
     ICECurrent *copy_ = [ICECurrent allocWithZone:zone];
     copy_->adapter = [adapter retain];
     copy_->con = [con retain];
-    copy_->id_ = [id_ copy];
-    copy_->facet = [facet copy];
-    copy_->operation = [operation copy];
+    copy_->id_ = [id_ retain];
+    copy_->facet = [facet retain];
+    copy_->operation = [operation retain];
     copy_->mode = mode;
-    copy_->ctx = [ctx copy];
+    copy_->ctx = [ctx retain];
     copy_->requestId = requestId;
     return copy_;
 }
