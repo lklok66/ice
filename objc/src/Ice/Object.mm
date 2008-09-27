@@ -476,8 +476,7 @@ static NSString* ICEObject_all__[4] =
 
 -(id) copyWithZone:(NSZone*)zone
 {
-    NSAssert(false, @"copyWithZone: must be overridden");
-    return nil;
+    return [[[self class] alloc] init];
 }
 @end
 
