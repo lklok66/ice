@@ -476,7 +476,7 @@ static NSString* ICEObject_all__[4] =
 
 -(id) copyWithZone:(NSZone*)zone
 {
-    return [[[self class] alloc] init];
+    return [[[self class] allocWithZone:zone] init];
 }
 @end
 
