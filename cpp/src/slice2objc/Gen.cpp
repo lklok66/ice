@@ -1352,7 +1352,7 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
 	// The cast avoids a compiler warning that is emitted if different structs
 	// have members with the same name but different types.
 	//
-	_M << nl << name << " *s__ = [((" << name << " *)[" << name << " alloc]) init";
+	_M << nl << name << " *s__ = [(" << name << " *)[self alloc] init";
 	writeMemberCall(allDataMembers, 0, Other, WithEscape); // TODO
 	_M << "];";
 	_M << nl << "[s__ autorelease];";
@@ -1362,7 +1362,7 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
 	_H << nl << "+(id) " << lowerCaseName << ";";
 	_M << sp << nl << "+(id) " << lowerCaseName;
 	_M << sb;
-	_M << nl << name << " *s__ = [[" << name << " alloc] init];";
+	_M << nl << name << " *s__ = [[self alloc] init];";
 	_M << nl << "[s__ autorelease];";
 	_M << nl << "return s__;";
 	_M << eb;
@@ -1377,7 +1377,7 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
 	{
 	    _M << sp << nl << "-(id) copyWithZone:(NSZone *)zone_p";
 	    _M << sb;
-	    _M << nl << "return [((" << name << " *)[" << name << " allocWithZone:zone_p]) init";
+	    _M << nl << "return [(" << name << " *)[[self class] allocWithZone:zone_p] init";
 	    writeMemberCall(allDataMembers, 0, Other, NoEscape); // TODO
 	    _M << "];";
 	    _M << eb;
@@ -1500,7 +1500,6 @@ Slice::Gen::TypesVisitor::visitExceptionStart(const ExceptionPtr& p)
     if(!dataMembers.empty())
     {
 	_H << sb;
-	_H.inc();
     }
 
     _M << sp << nl << "@implementation " << name;
@@ -1537,7 +1536,6 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
 	//
 	writeMembers(dataMembers, baseTypes);
 
-	_H.dec();
 	_H << eb;
 	_H << sp;
 	_M << sp;
@@ -1619,10 +1617,10 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
     // have members with the same name but different types.
     //
     _M << sb;
-    _M << nl << name << " *s__ = [((" << name << " *)[" << name << " alloc]) init";
+    _M << nl << name << " *s__ = [(" << name << " *)[[self class] alloc] init";
     if(p->isLocal())
     {
-        _M << ":file__p line:line__p ";
+        _M << ":file__p line:line__p";
     }
     writeMemberCall(allDataMembers, baseTypes, p->isLocal() ? LocalException : Other, WithEscape);
     _M << "];";
@@ -1641,7 +1639,7 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
 	}
 	_H << ";";
 	_M << sb;
-	_M << nl << name << " *s__ = [[" << name << " alloc] init";
+	_M << nl << name << " *s__ = [[[self class] alloc] init";
 	if(p->isLocal())
 	{
 	    _M << ":file__p line:line__p";
@@ -1659,7 +1657,7 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
     {
 	_M << sp << nl << "-(id) copyWithZone:(NSZone *)zone_p";
 	_M << sb;
-	_M << nl << "return [((" << name << " *)[" << name << " allocWithZone:zone_p]) init";
+	_M << nl << "return [(" << name << " *)[[self class] allocWithZone:zone_p] init";
 	if(p->isLocal())
 	{
 	    _M << ":file line:line";
@@ -1797,7 +1795,7 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     // The cast avoids a compiler warning that is emitted if different structs
     // have members with the same name but different types.
     //
-    _M << nl << name << " *s__ = [((" << name << " *)[" << name << " alloc]) init";
+    _M << nl << name << " *s__ = [(" << name << " *)[[self class] alloc] init";
     writeMemberCall(dataMembers, baseTypes, Other, WithEscape);
     _M << "];";
     _M << nl << "[s__ autorelease];";
@@ -1807,7 +1805,7 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     _H << nl << "+(id) " << lowerCaseName << ";";
     _M << sp << nl << "+(id) " << lowerCaseName;
     _M << sb;
-    _M << nl << name << " *s__ = [[" << name << " alloc] init];";
+    _M << nl << name << " *s__ = [[[self class] alloc] init];";
     _M << nl << "[s__ autorelease];";
     _M << nl << "return s__;";
     _M << eb;
@@ -1817,7 +1815,7 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     //
     _M << sp << nl << "-(id) copyWithZone:(NSZone *)zone_p";
     _M << sb;
-    _M << nl << "return [((" << name << " *)[" << name << " allocWithZone:zone_p]) init";
+    _M << nl << "return [(" << name << " *)[[self class] allocWithZone:zone_p] init";
     writeMemberCall(dataMembers, baseTypes, Other, NoEscape);
     _M << "];";
     _M << eb;
@@ -1859,7 +1857,7 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     _M << nl << name << "*" << " p = (" << name << "*)obj;";
     _M << nl << "if(p == nil)";
     _M << sb;
-    _M << nl << "p = [[" << name << " alloc] init];";
+    _M << nl << "p = [[[self class] alloc] init];";
     _M << eb;
     _M << nl << "@try";
     _M << sb;
@@ -1877,7 +1875,7 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     _H << nl << "+(id) ice_readWithStream:(id<ICEInputStream>)stream;";
     _M << sp << nl << "+(id) ice_readWithStream:(id<ICEInputStream>)is_";
     _M << sb;
-    _M << nl << name << "*" << " p = [[self alloc] init];";
+    _M << nl << name << "*" << " p = [[[self class] alloc] init];";
     _M << nl << "@try";
     _M << sb;
     writeMemberUnmarshal("p->", dataMembers, 0); // TODO fix second parameter
