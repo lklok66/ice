@@ -10,6 +10,7 @@
 #import <Ice/Ice.h>
 #import <TestCommon.h>
 #import <Test.h>
+#import <stdio.h>
 
 #import <Foundation/NSAutoreleasePool.h>
 
@@ -67,14 +68,15 @@ main(int argc, char* argv[])
     @try
     {
         ICEInitializationData* initData = [ICEInitializationData initializationData];
-        [initData setProperties:[ICEUtil createProperties:&argc argv:argv]];
+        initData.properties = defaultClientProperties(&argc, argv);
 
         //
         // This test aborts servers, so we don't want warnings.
         //
-        [[initData properties] setProperty:@"Ice.Warn.Connections" value:@"0"];
+        [initData.properties setProperty:@"Ice.Warn.Connections" value:@"0"];
 
         communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];
+
         status = run(argc, argv, communicator);
     }
     @catch(ICEException* ex)

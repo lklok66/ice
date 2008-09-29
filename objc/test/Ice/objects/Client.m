@@ -13,10 +13,10 @@
 
 #import <Foundation/NSAutoreleasePool.h>
 
-@interface MyObjectFactory : NSObject<ICEObjectFactory>
+@interface ClientMyObjectFactory : NSObject<ICEObjectFactory>
 @end
 
-@implementation MyObjectFactory
+@implementation ClientMyObjectFactory
 -(ICEObject*) create:(NSString*)type
 {
     if([type isEqualToString:@"::Test::B"])
@@ -60,10 +60,10 @@
 }
 @end
 
-int
-run(int argc, char* argv[], id<ICECommunicator> communicator)
+static int
+run(id<ICECommunicator> communicator)
 {
-    id<ICEObjectFactory> factory = [[[MyObjectFactory alloc] init] autorelease];
+    id<ICEObjectFactory> factory = [[[ClientMyObjectFactory alloc] init] autorelease];
     [communicator addObjectFactory:factory sliceId:@"::Test::B"];
     [communicator addObjectFactory:factory sliceId:@"::Test::C"];
     [communicator addObjectFactory:factory sliceId:@"::Test::D"];
@@ -79,6 +79,10 @@ run(int argc, char* argv[], id<ICECommunicator> communicator)
     return EXIT_SUCCESS;
 }
 
+#if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
+#  define main startClient
+#endif
+
 int
 main(int argc, char* argv[])
 {
@@ -88,12 +92,18 @@ main(int argc, char* argv[])
 
     @try
     {
-        communicator = [ICEUtil createCommunicator:&argc argv:argv];
-        status = run(argc, argv, communicator);
+        ICEInitializationData* initData = [ICEInitializationData initializationData];
+        initData.properties = defaultClientProperties(&argc, argv);
+        communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];
+        status = run(communicator);
     }
     @catch(ICEException* ex)
     {
-        NSLog(@"%@", ex);
+        tprintf("%@\n", ex);
+        status = EXIT_FAILURE;
+    }
+    @catch(TestFailedException* ex)
+    {
         status = EXIT_FAILURE;
     }
 
@@ -105,7 +115,7 @@ main(int argc, char* argv[])
         }
         @catch(ICEException* ex)
         {
-            NSLog(@"%@", ex);
+	    tprintf("%@\n", ex);
             status = EXIT_FAILURE;
         }
     }

@@ -14,14 +14,14 @@
 
 #import <stdio.h>
 
-void
+static void
 usage(const char* n)
 {
     printf("Usage: %s port\n", n);
 }
 
-int
-run(int argc, char* argv[], id<ICECommunicator> communicator)
+static int
+run(int argc, char** argv, id<ICECommunicator> communicator)
 {
     int port = 0;
     int i;
@@ -76,8 +76,8 @@ main(int argc, char* argv[])
         // test.
         //
         ICEInitializationData* initData = [ICEInitializationData initializationData];
-        [initData setProperties:[ICEUtil createProperties:&argc argv:argv]];
-        [[initData properties] setProperty:@"Ice.ServerIdleTime" value:@"120"]; // Two minutes.
+        initData.properties = [ICEUtil createProperties:&argc argv:argv];
+        [initData.properties setProperty:@"Ice.ServerIdleTime" value:@"120"]; // Two minutes.
 
         communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];
         status = run(argc, argv, communicator);

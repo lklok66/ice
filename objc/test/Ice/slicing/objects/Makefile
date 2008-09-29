@@ -12,22 +12,25 @@ top_srcdir	= ../../../..
 CLIENT		= client
 SERVER		= server
 
-TARGETS		= $(CLIENT) $(SERVER)
+LIBNAME  	= TestSlicingObjects.dylib
 
-COBJS		= Test.o \
-		  ClientPrivate.o \
+TARGETS_IPHONE	= $(LIBNAME)
+TARGETS_MACOS	= $(CLIENT) $(SERVER)
+
+COBJS		= ClientPrivate.o \
 		  Client.o \
-		  AllTests.o \
-		  Forward.o
+		  AllTests.o
 
-SOBJS		= Test.o \
-		  ServerPrivate.o \
+SOBJS		= ServerPrivate.o \
 		  TestI.o \
-		  Server.o \
+		  Server.o
+
+SHARED_OBJS	= Test.o \
 		  Forward.o
 
 SRCS		= $(COBJS:.o=.m) \
 		  $(SOBJS:.o=.m) \
+		  $(SHARED_OBJS:.o=.m)
 
 SLICE_SRCS	= Test.ice ClientPrivate.ice ServerPrivate.ice Forward.ice
 
@@ -37,12 +40,21 @@ SLICE2OBJCFLAGS := -I.
 CPPFLAGS	:= -I. -I../../../include $(CPPFLAGS)
 LIBS		:= -lTestCommon $(LIBS)
 
-$(CLIENT): $(ICEOBJCLIB) $(COBJS)
+$(CLIENT): $(ICEOBJCLIB) $(COBJS) $(SHARED_OBJS)
 	rm -f $@
-	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(COBJS) $(LIBS)
+	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(COBJS) $(SHARED_OBJS) $(LIBS)
 
-$(SERVER): $(ICEOBJCLIB) $(SOBJS)
+$(SERVER): $(ICEOBJCLIB) $(SOBJS) $(SHARED_OBJS)
 	rm -f $@
-	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(SOBJS) $(LIBS)
+	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(SOBJS) $(SHARED_OBJS) $(LIBS)
+
+$(LIBNAME): $(ICEOBJCLIB) $(COBJS) $(SHARED_OBJS) $(SOBJS)
+	rm -f $@
+	$(CXX) -dynamiclib $(shlibldflags) -install_name @executable_path/Frameworks/$(LIBNAME) -o $@ $(COBJS) $(SHARED_OBJS) $(SOBJS) $(LIBS)
+ifneq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
+  ifneq ($(IDENTIFIER),)
+	$(CODESIGN) -s "$(IDENTIFIER)" $@
+  endif
+endif
 
 include .depend

@@ -11,11 +11,13 @@ top_srcdir	= ../../..
 
 CLIENT		= client
 SERVER		= server
+LIBNAME  	= TestOperations.dylib
 
-TARGETS		= $(CLIENT) $(SERVER)
+TARGETS_IPHONE	= $(LIBNAME)
 
-COBJS		= Test.o \
-		  Client.o \
+TARGETS_MACOS	= $(CLIENT) $(SERVER)
+
+COBJS		= Client.o \
 		  AllTests.o \
 		  Twoways.o \
 		  TwowaysAMI.o \
@@ -23,26 +25,39 @@ COBJS		= Test.o \
 		  OnewaysAMI.o \
 		  BatchOneways.o
 
-SOBJS		= Test.o \
-		  TestI.o \
+SOBJS		= TestI.o \
 		  Server.o
+
+SHARED_OBJS	= Test.o
 
 SRCS		= $(COBJS:.o=.m) \
 		  $(SOBJS:.o=.m) \
+		  $(SHARED_OBJS=.o=.m)
 
 SLICE_SRCS	= Test.ice
 
 include $(top_srcdir)/config/Make.rules
 
+# Put in Make.rules
+
 CPPFLAGS	:= -I. -I../../include $(CPPFLAGS)
 LIBS		:= -lTestCommon $(LIBS)
 
-$(CLIENT): $(ICEOBJCLIB) $(COBJS)
+$(CLIENT): $(ICEOBJCLIB) $(COBJS) $(SHARED_OBJS)
 	rm -f $@
-	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(COBJS) $(LIBS)
+	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(COBJS) $(SHARED_OBJS) $(LIBS)
 
-$(SERVER): $(ICEOBJCLIB) $(SOBJS)
+$(SERVER): $(ICEOBJCLIB) $(SOBJS) $(SHARED_OBJS)
 	rm -f $@
-	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(SOBJS) $(LIBS)
+	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(SOBJS) $(SHARED_OBJS) $(LIBS)
+
+$(LIBNAME): $(ICEOBJCLIB) $(COBJS) $(SHARED_OBJS) $(SOBJS)
+	rm -f $@
+	$(CXX) -dynamiclib $(shlibldflags) -install_name @executable_path/Frameworks/$(LIBNAME) -o $@ $(COBJS) $(SHARED_OBJS) $(SOBJS) $(LIBS)
+ifneq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
+  ifneq ($(IDENTIFIER),)
+	$(CODESIGN) -s "$(IDENTIFIER)" $@
+  endif
+endif
 
 include .depend

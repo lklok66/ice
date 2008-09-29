@@ -9,7 +9,7 @@
 
 top_srcdir	= ../..
 
-LIBNAME		= $(call mklibname,TestCommon)
+LIBNAME		= $(call mksoname,TestCommon)
 
 TARGETS		= $(libdir)/$(LIBNAME)
 
@@ -25,7 +25,16 @@ CPPFLAGS	:= -I../include $(CPPFLAGS)
 
 $(libdir)/$(LIBNAME): $(OBJS)
 	rm -f $@
-	$(call mklib,$@,$(OBJS))
+ifeq ($(COMPILE_FOR_IPHONE),yes)
+	$(call mkshlib,$@,$(LIBNAME),$(OBJS),$(LIBS))
+ifneq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
+  ifneq ($(IDENTIFIER),)
+	$(CODESIGN) -s "$(IDENTIFIER)" $@
+  endif
+endif
+else
+	$(call mkshlib,$@,$(LIBNAME),$(OBJS),$(LIBS))
+endif
 
 include .depend
 

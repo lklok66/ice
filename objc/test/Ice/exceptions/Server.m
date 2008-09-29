@@ -9,22 +9,29 @@
 
 #import <Ice/Ice.h>
 #import <TestI.h>
+#import <TestCommon.h>
 
 #import <Foundation/NSAutoreleasePool.h>
  
-int
-run(int argc, char* argv[], id<ICECommunicator> communicator)
+static int
+run(id<ICECommunicator> communicator)
 {
-    id<ICEProperties> properties = [communicator getProperties];
-    [properties setProperty:@"Ice.Warn.Dispatch" value:@"0"];
+    [[communicator getProperties] setProperty:@"Ice.Warn.Dispatch" value:@"0"];
     [[communicator getProperties] setProperty:@"TestAdapter.Endpoints" value:@"default -p 12010 -t 10000:udp"];
     id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestAdapter"];
-    ICEObject* object = [ThrowerI throwerI:adapter];
+    ICEObject* object = [[[ThrowerI alloc] init] autorelease];
     [adapter add:object identity:[communicator stringToIdentity:@"thrower"]];
     [adapter activate];
+
+    serverReady(communicator);
+
     [communicator waitForShutdown];
     return EXIT_SUCCESS;
 }
+
+#if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
+#  define main startServer
+#endif
 
 int
 main(int argc, char* argv[])
@@ -36,20 +43,21 @@ main(int argc, char* argv[])
     @try
     {
         ICEInitializationData* initData = [ICEInitializationData initializationData];
-        [initData setProperties:[ICEUtil createProperties:&argc argv:argv]];
+        initData.properties = defaultServerProperties(&argc, argv);
+
         //
         // Its possible to have batch oneway requests dispatched after
         // the adapter is deactivated due to thread scheduling so we
         // supress this warning.
         //
-        [[initData properties] setProperty:@"Ice.Warn.Dispatch" value:@"0"];
+        [initData.properties setProperty:@"Ice.Warn.Dispatch" value:@"0"];
 
         communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];
-        status = run(argc, argv, communicator);
+        status = run(communicator);
     }
     @catch(ICEException* ex)
     {
-        NSLog(@"%@", ex);
+        tprintf("%@\n", ex);
         status = EXIT_FAILURE;
     }
 
@@ -61,7 +69,7 @@ main(int argc, char* argv[])
         }
         @catch(ICEException* ex)
         {
-            NSLog(@"%@", ex);
+	    tprintf("%@\n", ex);
             status = EXIT_FAILURE;
         }
     }

@@ -15,8 +15,8 @@
 
 #import <Foundation/NSAutoreleasePool.h>
 
-int
-run(int argc, char* argv[], id<ICECommunicator> communicator)
+static int
+run(id<ICECommunicator> communicator)
 {
     //
     // Create OA and servants  
@@ -100,6 +100,16 @@ run(int argc, char* argv[], id<ICECommunicator> communicator)
     return 0;
 }
 
+#if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
+#  define main startClient
+
+int
+startServer(int argc, char* argv[])
+{
+    serverReady(nil);
+    return 0;
+}
+#endif
 
 int
 main(int argc, char* argv[])
@@ -110,12 +120,18 @@ main(int argc, char* argv[])
 
     @try
     {
-        communicator = [ICEUtil createCommunicator:&argc argv:argv];
-        status = run(argc, argv, communicator);
+        ICEInitializationData* initData = [ICEInitializationData initializationData];
+        initData.properties = defaultClientProperties(&argc, argv);
+        communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];
+        status = run(communicator);
     }
     @catch(ICEException* ex)
     {
-        NSLog(@"%@", ex);
+        tprintf("%@\n", ex);
+        status = EXIT_FAILURE;
+    }
+    @catch(TestFailedException* ex)
+    {
         status = EXIT_FAILURE;
     }
 
@@ -127,7 +143,7 @@ main(int argc, char* argv[])
         }
         @catch(ICEException* ex)
         {
-            NSLog(@"%@", ex);
+	    tprintf("%@\n", ex);
             status = EXIT_FAILURE;
         }
     }

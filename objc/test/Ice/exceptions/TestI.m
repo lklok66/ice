@@ -28,12 +28,6 @@
 @end
 
 @implementation ThrowerI
-+(id) throwerI:(id<ICEObjectAdapter>)adapter
-{
-     ThrowerI *t = [[[ThrowerI alloc] init] autorelease];
-     t->_adapter = adapter;
-     return t;
-}
 
 -(void) shutdown:(ICECurrent*)current
 {

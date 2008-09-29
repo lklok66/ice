@@ -43,4 +43,6 @@
 +(id<ICEInputStream>) createInputStream:(id<ICECommunicator>)communicator data:(NSData*)data;
 +(id<ICEOutputStream>) createOutputStream:(id<ICECommunicator>)communicator;
 +(NSString*) generateUUID;
++(NSArray*)argsToStringSeq:(int)argc argv:(char*[])argv;
++(void)stringSeqToArgs:(NSArray*)args argc:(int*)argc argv:(char*[])argv;
 @end
