@@ -8,7 +8,24 @@
 // **********************************************************************
 
 #import <Foundation/NSObject.h>
-#import <stdio.h>
+#import <Foundation/NSException.h>
+
+@interface TestFailedException : NSException
+@end
+
+#if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
+void tprintInit(id, SEL, SEL);
+#endif
+
+@protocol ICECommunicator;
+@protocol ICEProperties;
+
+id<ICEProperties> defaultServerProperties();
+id<ICEProperties> defaultClientProperties();
+
+void serverReady(id<ICECommunicator>);
+
+void serverStop();
 
 void tprintf(const char* fmt, ...);
 

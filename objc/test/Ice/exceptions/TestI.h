@@ -11,9 +11,6 @@
 
 @interface ThrowerI : TestThrower<TestThrower>
 {
-    @private
-        id<ICEObjectAdapter> _adapter;
 }
 
-+(id) throwerI:(id<ICEObjectAdapter>)adapter;
 @end

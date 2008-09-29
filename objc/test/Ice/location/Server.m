@@ -10,20 +10,20 @@
 #import <Ice/Ice.h>
 #import <ServerLocator.h>
 #import <TestI.h>
+#import <TestCommon.h>
 
 #import <Foundation/NSAutoreleasePool.h>
 
-int
-run(int argc, char* argv[], id<ICECommunicator> communicator, ICEInitializationData* initData)
+static int
+run(id<ICECommunicator> communicator, ICEInitializationData* initData)
 {
     //
     // Register the server manager. The server manager creates a new
     // 'server' (a server isn't a different process, it's just a new
     // communicator and object adapter).
     //
-    id<ICEProperties> properties = [communicator getProperties];
-    [properties setProperty:@"Ice.ThreadPool.Server.Size" value:@"2"];
-    [properties setProperty:@"ServerManager.Endpoints" value:@"default -p 12010:udp"];
+    [[communicator getProperties] setProperty:@"Ice.ThreadPool.Server.Size" value:@"2"];
+    [[communicator getProperties] setProperty:@"ServerManager.Endpoints" value:@"default -p 12010:udp"];
 
     id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"ServerManager"];
 
@@ -45,10 +45,18 @@ run(int argc, char* argv[], id<ICECommunicator> communicator, ICEInitializationD
     [adapter add:locator identity:[communicator stringToIdentity:@"locator"]];
 
     [adapter activate];
+
+    serverReady(communicator);
+
     [communicator waitForShutdown];
+    // TODO: Ensure shutdown.
 
     return EXIT_SUCCESS;
 }
+
+#if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
+#  define main startServer
+#endif
 
 int
 main(int argc, char* argv[])
@@ -60,13 +68,13 @@ main(int argc, char* argv[])
     @try
     {
         ICEInitializationData* initData = [ICEInitializationData initializationData];
-        [initData setProperties:[ICEUtil createProperties:&argc argv:argv]];
+        initData.properties = defaultServerProperties(&argc, argv);
         communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];
-        status = run(argc, argv, communicator, initData);
+        status = run(communicator, initData);
     }
     @catch(ICEException* ex)
     {
-        NSLog(@"%@", ex);
+        tprintf("%@\n", ex);
         status = EXIT_FAILURE;
     }
 
@@ -78,8 +86,8 @@ main(int argc, char* argv[])
         }
         @catch(ICEException* ex)
         {
-            NSLog(@"%@", ex);
-            status = EXIT_FAILURE;
+	    tprintf("%@\n", ex);
+	    status = EXIT_FAILURE;
         }
     }
 

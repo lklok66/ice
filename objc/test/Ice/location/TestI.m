@@ -21,14 +21,14 @@
     registry_ = registry;
     initData_ = initData;
 
-    [[initData_ properties] setProperty:@"TestAdapter.Endpoints" value:@"default"];
-    [[initData_ properties] setProperty:@"TestAdapter.AdapterId" value:@"TestAdapter"];
-    [[initData_ properties] setProperty:@"TestAdapter.ReplicaGroupId" value:@"ReplicatedAdapter"];
+    [initData_.properties setProperty:@"TestAdapter.Endpoints" value:@"default"];
+    [initData_.properties setProperty:@"TestAdapter.AdapterId" value:@"TestAdapter"];
+    [initData_.properties setProperty:@"TestAdapter.ReplicaGroupId" value:@"ReplicatedAdapter"];
     
-    [[initData_ properties] setProperty:@"TestAdapter2.Endpoints" value:@"default"];
-    [[initData_ properties] setProperty:@"TestAdapter2.AdapterId" value:@"TestAdapter2"];
+    [initData_.properties setProperty:@"TestAdapter2.Endpoints" value:@"default"];
+    [initData_.properties setProperty:@"TestAdapter2.AdapterId" value:@"TestAdapter2"];
 
-    [[initData_ properties] setProperty:@"Ice.PrintAdapterReady" value:@"0"];
+    [initData_.properties setProperty:@"Ice.PrintAdapterReady" value:@"0"];
     return self;
 }
 -(void) dealloc

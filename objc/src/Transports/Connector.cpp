@@ -30,7 +30,7 @@ IceObjC::Connector::connect()
     if(_traceLevels->network >= 2)
     {
         Trace out(_logger, _traceLevels->networkCat);
-        out << "trying to establish " << (_type == TcpEndpointType ? "tcp" : "ssl") << " connection to " << toString();
+        out << "trying to establish " << _instance->protocol() << " connection to " << toString();
     }
 
     try
@@ -54,40 +54,7 @@ IceObjC::Connector::connect()
         CFStreamCreatePairWithSocketToCFHost(NULL, host, getPort(_addr), &readStream, &writeStream);
         CFRelease(host);
 
-        if(_type == SslEndpointType)
-        {
-            if(!CFReadStreamSetProperty(readStream, kCFStreamPropertySocketSecurityLevel, 
-                                    kCFStreamSocketSecurityLevelNegotiatedSSL) ||
-               !CFWriteStreamSetProperty(writeStream, kCFStreamPropertySocketSecurityLevel, 
-                                         kCFStreamSocketSecurityLevelNegotiatedSSL))
-            {
-                throw Ice::SocketException(__FILE__, __LINE__, 0);
-            }
-            
-            if(!CFReadStreamSetProperty(readStream, kCFStreamPropertySSLSettings, _settings) ||
-               !CFWriteStreamSetProperty(writeStream, kCFStreamPropertySSLSettings, _settings))
-            {
-                throw Ice::SocketException(__FILE__, __LINE__, 0);
-            }
-        }
-
-        if(!CFReadStreamOpen(readStream) || !CFWriteStreamOpen(writeStream))
-        {
-            int error = 0;
-            if(CFReadStreamGetStatus(readStream) == kCFStreamStatusError)
-            {
-                CFErrorRef err = CFReadStreamCopyError(readStream);
-                error = CFErrorGetCode(err);
-                CFRelease(err);
-            }
-            else if(CFWriteStreamGetStatus(writeStream) == kCFStreamStatusError)
-            {
-                CFErrorRef err = CFWriteStreamCopyError(writeStream);
-                error = CFErrorGetCode(err);
-                CFRelease(err);
-            }
-            throw Ice::ConnectFailedException(__FILE__, __LINE__, error);
-        }
+        _instance->setupStreams(readStream, writeStream, false, _host);
 
         SOCKET fd;
         CFDataRef d = (CFDataRef)CFReadStreamCopyProperty(readStream, kCFStreamPropertySocketNativeHandle);
@@ -103,21 +70,14 @@ IceObjC::Connector::connect()
         setBlock(fd, false);
         setTcpBufSize(fd, _instance->initializationData().properties, _logger);
 
-        if(_type == TcpEndpointType)
-        {
-            return new Transceiver(_instance, fd, "tcp", readStream, writeStream, false);
-        }
-        else
-        {
-            return new Transceiver(_instance, fd, "ssl", readStream, writeStream, false);
-        }
+        return new Transceiver(_instance, fd, readStream, writeStream, false, _host);
     }
     catch(const Ice::LocalException& ex)
     {
         if(_traceLevels->network >= 2)
         {
             Trace out(_logger, _traceLevels->networkCat);
-            out << "failed to establish " << (_type == TcpEndpointType ? "tcp" : "ssl") << " connection to ";
+            out << "failed to establish " << _instance->protocol() << " connection to ";
             out << toString() << "\n" << ex;
         }
         throw;
@@ -127,7 +87,7 @@ IceObjC::Connector::connect()
 Short
 IceObjC::Connector::type() const
 {
-    return _type;
+    return _instance->type();
 }
 
 string
@@ -198,16 +158,18 @@ IceObjC::Connector::operator<(const IceInternal::Connector& r) const
     return compareAddress(_addr, p->_addr) == -1;
 }
 
-IceObjC::Connector::Connector(const InstancePtr& instance, const struct sockaddr_storage& addr,
-                              Ice::Int timeout, const string& connectionId, Ice::Short type, CFDictionaryRef settings) :
+IceObjC::Connector::Connector(const InstancePtr& instance, 
+                              const struct sockaddr_storage& addr, 
+                              Ice::Int timeout, 
+                              const string& connectionId,
+                              const string& host) :
     _instance(instance),
     _traceLevels(instance->traceLevels()),
     _logger(instance->initializationData().logger),
     _addr(addr),
     _timeout(timeout),
     _connectionId(connectionId),
-    _type(type),
-    _settings(settings)
+    _host(host)
 {
 }
 

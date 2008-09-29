@@ -13,14 +13,18 @@
 
 #import <Foundation/NSAutoreleasePool.h>
 
-int
-run(int argc, char* argv[], id<ICECommunicator> communicator)
+static int
+run(id<ICECommunicator> communicator)
 {
     id<TestTimeoutPrx> allTests(id<ICECommunicator>);
     id<TestTimeoutPrx> timeout = allTests(communicator);
     [timeout shutdown];
     return EXIT_SUCCESS;
 }
+
+#if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
+#  define main startClient
+#endif
 
 int
 main(int argc, char* argv[])
@@ -32,24 +36,28 @@ main(int argc, char* argv[])
     @try
     {
         ICEInitializationData* initData = [ICEInitializationData initializationData];
-        [initData setProperties:[ICEUtil createProperties:&argc argv:argv]];
+        initData.properties = defaultClientProperties(&argc, argv);
 
         //
         // For this test, we want to disable retries.
         //
-        [[initData properties] setProperty:@"Ice.RetryIntervals" value:@"-1"];
+        [initData.properties setProperty:@"Ice.RetryIntervals" value:@"-1"];
 
         //
         // This test kills connections, so we don't want warnings.
         //
-        [[initData properties] setProperty:@"Ice.Warn.Connections" value:@"0"];
+        [initData.properties setProperty:@"Ice.Warn.Connections" value:@"0"];
 
         communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];
-        status = run(argc, argv, communicator);
+        status = run(communicator);
     }
     @catch(ICEException* ex)
     {
-        NSLog(@"%@", ex);
+        tprintf("%@\n", ex);
+        status = EXIT_FAILURE;
+    }
+    @catch(TestFailedException* ex)
+    {
         status = EXIT_FAILURE;
     }
 
@@ -61,7 +69,7 @@ main(int argc, char* argv[])
         }
         @catch(ICEException* ex)
         {
-            NSLog(@"%@", ex);
+	    tprintf("%@\n", ex);
             status = EXIT_FAILURE;
         }
     }

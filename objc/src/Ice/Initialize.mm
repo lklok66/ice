@@ -329,4 +329,62 @@ private:
 {
     return [NSString stringWithUTF8String:IceUtil::generateUUID().c_str()];
 }
+
++(NSArray*)argsToStringSeq:(int)argc argv:(char*[])argv
+{
+    NSMutableArray* ns = [NSMutableArray array];
+    int i;
+    for(i = 0; i < argc; ++i)
+    {
+        [ns addObject:[NSString stringWithCString:argv[i] encoding:NSUTF8StringEncoding]];
+    }
+    return [ns copy];
+}
+
++(void)stringSeqToArgs:(NSArray*)args argc:(int*)argc argv:(char*[])argv;
+{
+    //
+    // Shift all elements in argv which are present in args to the
+    // beginning of argv. We record the original value of argc so
+    // that we can know later if we've shifted the array.
+    //
+    const int argcOrig = *argc;
+    int i = 0;
+    while(i < *argc)
+    {
+        BOOL found = NO;
+        for(NSString* s in args)
+        {
+            if([s compare:[NSString stringWithCString:argv[i] encoding:NSUTF8StringEncoding]] == 0)
+            {
+                found = YES;
+                break;
+            }
+        }
+        if(!found)
+        {
+            int j;
+            for(j = i; j < *argc - 1; j++)
+            {
+                argv[j] = argv[j + 1];
+            }
+            --(*argc);
+        }
+        else
+        {
+            ++i;
+        }
+    }
+
+    //
+    // Make sure that argv[*argc] == 0, the ISO C++ standard requires this.
+    // We can only do this if we've shifted the array, otherwise argv[*argc]
+    // may point to an invalid address.
+    //
+    if(argv && argcOrig != *argc)
+    {
+        argv[*argc] = 0;
+    }
+}
+
 @end

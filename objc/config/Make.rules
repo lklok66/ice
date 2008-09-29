@@ -182,7 +182,15 @@ $(HDIR)/%.h %.m: $(SDIR)/%.ice $(SLICE2OBJC) $(SLICEPARSERLIB)
 	cat lex.yy.c >> $@
 	rm -f lex.yy.c
 
-all:: $(SRCS) $(TARGETS)
+all:: $(SRCS)
+
+ifeq ($(COMPILE_FOR_IPHONE),yes)
+all:: $(TARGETS_IPHONE)
+else
+all:: $(TARGETS_MACOS)
+endif
+
+all:: $(TARGETS)
 
 ifneq ($(SRCS),)
 depend:: $(SRCS)
@@ -195,6 +203,14 @@ endif
 clean::
 	-rm -f $(TARGETS)
 	-rm -f core *.o *.bak
+
+ifeq ($(COMPILE_FOR_IPHONE),yes)
+clean::
+	-rm -f $(TARGETS_IPHONE)
+else
+clean::
+	-rm -f $(TARGETS_MACOS)
+endif
 
 ifneq ($(SLICE_SRCS),)
 depend:: $(SLICE_SRCS)

@@ -13,10 +13,10 @@
 
 #import <Foundation/NSAutoreleasePool.h>
 
-@interface MyObjectFactory : NSObject<ICEObjectFactory>
+@interface ServerMyObjectFactory : NSObject<ICEObjectFactory>
 @end
 
-@implementation MyObjectFactory
+@implementation ServerMyObjectFactory
 -(ICEObject*) create:(NSString*)type
 {
     if([type isEqualToString:@"::Test::I"])
@@ -42,10 +42,10 @@
 }
 @end
 
-int
-run(int argc, char* argv[], id<ICECommunicator> communicator)
+static int
+run(id<ICECommunicator> communicator)
 {
-    id<ICEObjectFactory> factory = [[[MyObjectFactory alloc] init] autorelease];
+    id<ICEObjectFactory> factory = [[[ServerMyObjectFactory alloc] init] autorelease];
     [communicator addObjectFactory:factory sliceId:@"::Test::I"];
     [communicator addObjectFactory:factory sliceId:@"::Test::J"];
     [communicator addObjectFactory:factory sliceId:@"::Test::H"];
@@ -57,9 +57,16 @@ run(int argc, char* argv[], id<ICECommunicator> communicator)
     ICEObject* uoet = [[[UnexpectedObjectExceptionTestI alloc] init] autorelease];
     [adapter add:uoet identity:[communicator stringToIdentity:@"uoet"]];
     [adapter activate];
+
+    serverReady(communicator);
+
     [communicator waitForShutdown];
     return EXIT_SUCCESS;
 }
+
+#if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
+#  define main startServer
+#endif
 
 int
 main(int argc, char* argv[])
@@ -70,12 +77,14 @@ main(int argc, char* argv[])
 
     @try
     {
-        communicator = [ICEUtil createCommunicator:&argc argv:argv];
-        status = run(argc, argv, communicator);
+        ICEInitializationData* initData = [ICEInitializationData initializationData];
+        initData.properties = defaultServerProperties(&argc, argv);
+        communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];
+        status = run(communicator);
     }
     @catch(ICEException* ex)
     {
-        NSLog(@"%@", ex);
+        tprintf("%@\n", ex);
         status = EXIT_FAILURE;
     }
 
@@ -87,7 +96,7 @@ main(int argc, char* argv[])
         }
         @catch(ICEException* ex)
         {
-            NSLog(@"%@", ex);
+	    tprintf("%@\n", ex);
             status = EXIT_FAILURE;
         }
     }

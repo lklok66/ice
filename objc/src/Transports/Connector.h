@@ -22,12 +22,13 @@
 #   include <sys/socket.h>
 #endif
 
-#include <CoreFoundation/CFDictionary.h>
-
 namespace IceObjC
 {
 
 class EndpointI;
+
+class Instance;
+typedef IceUtil::Handle<Instance> InstancePtr;
 
 class Connector : public IceInternal::Connector
 {
@@ -44,19 +45,17 @@ public:
 
 private:
     
-    Connector(const IceInternal::InstancePtr&, const struct sockaddr_storage&, Ice::Int, const std::string&,
-              Ice::Short, CFDictionaryRef);
+    Connector(const InstancePtr&, const struct sockaddr_storage&, Ice::Int, const std::string&, const std::string&);
     virtual ~Connector();
     friend class EndpointI;
 
-    const IceInternal::InstancePtr _instance;
+    const InstancePtr _instance;
     const IceInternal::TraceLevelsPtr _traceLevels;
     const Ice::LoggerPtr _logger;
     struct sockaddr_storage _addr;
     const Ice::Int _timeout;
     const std::string _connectionId;
-    const Ice::Short _type;
-    CFDictionaryRef _settings;
+    const std::string _host;
 };
 
 }

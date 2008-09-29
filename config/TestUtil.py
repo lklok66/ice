@@ -690,9 +690,8 @@ sslConfigTree = {
         "objc" : {
             "plugin" : " --Ice.Plugin.IceSSL=createIceSSL --Ice.Default.Protocol=ssl" +
             " --IceSSL.Password=password --IceSSL.DefaultDir=%(objccertsdir)s",
-            "client" : " --IceSSL.CertFile=c_rsa1024.pfx --IceSSL.CheckCertName=0",
-            "server" : " --IceSSL.CertFile=s_rsa1024.pfx",
-            "colloc" : " --IceSSL.CertFile=c_rsa1024.pfx --IceSSL.CheckCertName=0"
+            "client" : " --IceSSL.CertFile=c_rsa1024.pfx --IceSSL.CertAuthFile=cacert.pem --IceSSL.CheckCertName=0",
+            "server" : " --IceSSL.CertFile=s_rsa1024.pfx --IceSSL.CertAuthFile=cacert.pem",
             },
         }
 sslConfigTree["py"] = sslConfigTree["cpp"]
