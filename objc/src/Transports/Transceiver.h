@@ -21,6 +21,9 @@
 namespace IceObjC
 {
 
+class Instance;
+typedef IceUtil::Handle<Instance> InstancePtr;
+
 class Transceiver : public IceInternal::Transceiver
 {
     enum State
@@ -32,8 +35,7 @@ class Transceiver : public IceInternal::Transceiver
 
 public:
 
-    Transceiver(const IceInternal::InstancePtr&, SOCKET, const std::string&, CFReadStreamRef,
-                CFWriteStreamRef, bool);
+    Transceiver(const InstancePtr&, SOCKET, CFReadStreamRef, CFWriteStreamRef, bool, const std::string&);
     virtual ~Transceiver();
 
     virtual SOCKET fd();
@@ -47,18 +49,21 @@ public:
     virtual void checkSendSize(const IceInternal::Buffer&, size_t);
 
 private:
+    
+    void checkCertificates();
 
+    const InstancePtr _instance;
     const IceInternal::TraceLevelsPtr _traceLevels;
     const Ice::LoggerPtr _logger;
     const Ice::StatsPtr _stats;
-    const std::string _type;
-    
+    const std::string _host;
     SOCKET _fd;
     CFReadStreamRef _readStream;
     CFWriteStreamRef _writeStream;
 
     State _state;
     std::string _desc;
+    bool _checkCertificates;
 };
 
 }

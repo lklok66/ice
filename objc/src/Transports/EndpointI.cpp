@@ -41,12 +41,9 @@ readCert(const string& defaultDir, const string& certFile)
 {
     CFURLRef url = 0;
     CFBundleRef bundle = CFBundleGetMainBundle();
-
-    // TODO: try to figure out if this is really a bundle.
     if(bundle)
     {
         CFStringRef resourceName = toCFString(certFile);
-        //CFStringRef resourceType = 0; 
         CFStringRef subDirName = toCFString(defaultDir);
         url = CFBundleCopyResourceURL(bundle, resourceName, 0, subDirName);
         CFRelease(resourceName);
@@ -123,30 +120,295 @@ createIceSSL(const CommunicatorPtr& communicator, const string& name, const Stri
 
 }
 
-IceObjC::EndpointI::EndpointI(const InstancePtr& instance, const string& ho, Int po, Int ti,
-                              const string& conId, bool co, Ice::Short type, CFDictionaryRef settings) :
+IceObjC::Instance::Instance(const IceInternal::InstancePtr& instance, bool secure) :
+    _instance(instance),
+    _type(secure ? SslEndpointType : TcpEndpointType),
+    _protocol(secure ? string("ssl") : string("tcp")),
+    _serverSettings(0),
+    _clientSettings(0),
+    _certificateAuthorities(0)
+{
+    if(!secure)
+    {
+        return;
+    }
+
+    Ice::PropertiesPtr properties = _instance->initializationData().properties;
+    
+    _clientSettings = CFDictionaryCreateMutable(0, 1, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+
+    string defaultDir = properties->getProperty("IceSSL.DefaultDir");
+    string certAuthFile = properties->getProperty("IceSSL.CertAuthFile");
+    string certFile = properties->getProperty("IceSSL.CertFile");
+
+#if TARGET_IPHONE_SIMULATOR
+
+    OSStatus err;
+    if(!certAuthFile.empty())
+    {
+        CFDataRef cert = readCert(defaultDir, certAuthFile);
+
+        SecKeyImportExportParameters params;
+        memset(&params, 0, sizeof(params));
+        params.version = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
+        params.keyUsage = CSSM_KEYUSE_ANY;
+        params.keyAttributes = CSSM_KEYATTR_EXTRACTABLE;
+        
+        SecExternalFormat format = kSecFormatUnknown;
+        SecExternalItemType type = kSecItemTypeUnknown;
+        
+        CFStringRef filename = toCFString(certAuthFile);
+        err = SecKeychainItemImport(cert, filename, &format, &type, 0, &params, 0, &_certificateAuthorities);
+        CFRelease(filename);
+        CFRelease(cert);
+        if(err != noErr)
+        {
+            ostringstream os;
+            os << "IceSSL: unable to import certificate from file " << certAuthFile << " (error = " << err << ")";
+            throw PluginInitializationException(__FILE__, __LINE__, os.str());
+        }
+
+        // The root CA will be validated by the transciever.
+        CFDictionarySetValue(_clientSettings, kCFStreamSSLAllowsAnyRoot, kCFBooleanTrue);
+    }
+
+    if(!certFile.empty())
+    {
+        SecKeychainRef keychain = 0;
+        string keychainName = properties->getPropertyWithDefault("IceSSL.Keychain", "login");
+        string keychainPassword = properties->getProperty("IceSSL.KeychainPassword");
+        char *home = getenv("HOME");
+        if(home == NULL) 
+        {
+            home = "";
+        }
+        string path = string(home) + "/Library/Keychains/" + keychainName + ".keychain";
+        err = SecKeychainOpen(path.c_str(),  &keychain);
+        SecKeychainStatus status;
+        err = SecKeychainGetStatus(keychain, &status);
+        if(err == noErr)
+        {
+            if(!keychainPassword.empty())
+            {
+                SecKeychainUnlock(keychain, keychainPassword.size(), keychainPassword.c_str(), true);
+            }
+            else
+            {
+                SecKeychainUnlock(keychain, 0, 0, false);
+            }
+        }
+        if(err == errSecNoSuchKeychain)
+        {
+            if(!keychainPassword.empty())
+            {
+                err = SecKeychainCreate(path.c_str(), keychainPassword.size(), keychainPassword.c_str(), false, 0, 
+                                        &keychain);
+            }
+            else
+            {
+                err = SecKeychainCreate(path.c_str(), 0, 0, true, 0, &keychain);
+            }
+        }
+        if(err != noErr)
+        {
+            ostringstream os;
+            os << "IceSSL: unable to open keychain " << path << " (error = " << err << ")";
+            throw PluginInitializationException(__FILE__, __LINE__, os.str());
+        }
+
+        CFDataRef cert = readCert(defaultDir, certFile);
+        
+        SecKeyImportExportParameters params;
+        memset(&params, 0, sizeof(params));
+        params.version = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
+        params.passphrase = toCFString(properties->getProperty("IceSSL.Password"));
+        params.keyUsage = CSSM_KEYUSE_ANY;
+        params.keyAttributes = CSSM_KEYATTR_EXTRACTABLE;
+        
+        SecExternalFormat format = kSecFormatUnknown;
+        SecExternalItemType type = kSecItemTypeUnknown;
+        
+        CFArrayRef items = 0;
+        CFStringRef filename = toCFString(certFile);
+        err = SecKeychainItemImport(cert, filename, &format, &type, 0, &params, keychain, &items);
+        CFRelease(params.passphrase);
+        CFRelease(filename);
+        CFRelease(cert);
+        if(err != noErr)
+        {
+            ostringstream os;
+            os << "IceSSL: unable to import certificate from file " << certFile << " (error = " << err << ")";
+            throw PluginInitializationException(__FILE__, __LINE__, os.str());
+        }
+
+        CFDictionarySetValue(_clientSettings, kCFStreamSSLCertificates, items);
+        CFRelease(items);
+        CFRelease(keychain);
+    }
+#else
+    OSStatus err;
+    if(!certAuthFile.empty())
+    {
+        CFDataRef cert = readCert(defaultDir, certAuthFile);
+        if(!cert)
+        {
+            PluginInitializationException ex(__FILE__, __LINE__);
+            ex.reason = "IceSSL: unable to open file " + certAuthFile;
+            throw ex;
+        }
+        
+        SecCertificateRef result = SecCertificateCreateWithData(0, cert);
+        if(!result)
+        {
+            PluginInitializationException ex(__FILE__, __LINE__);
+            ex.reason = "IceSSL: certificate " + certAuthFile + " is not a valid DER-encoded certificate";
+            throw ex;
+        }
+
+        SecCertificateRef certs[] = { result };
+        _certificateAuthorities = CFArrayCreate(0, (const void**)certs, 1, &kCFTypeArrayCallBacks);
+
+        // The root CA will be validated by the transciever.
+        // NOTE: on the iPhone, setting kCFStreamSSLAllowsAnyRoot = true isn't enough.
+        //CFDictionarySetValue(_clientSettings, kCFStreamSSLAllowsAnyRoot, kCFBooleanTrue);
+        CFDictionarySetValue(_clientSettings, kCFStreamSSLValidatesCertificateChain, kCFBooleanFalse);
+    }
+
+    if(!certFile.empty())
+    {
+        CFDataRef cert = readCert(defaultDir, certFile);
+        if(!cert)
+        {
+            PluginInitializationException ex(__FILE__, __LINE__);
+            ex.reason = "IceSSL: unable to open file " + certFile;
+            throw ex;
+        }
+
+        CFMutableDictionaryRef settings;
+        settings = CFDictionaryCreateMutable(0, 1, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+        CFStringRef password = toCFString(properties->getProperty("IceSSL.Password"));
+        CFDictionarySetValue(settings, kSecImportExportPassphrase, password);
+        CFRelease(password);
+        
+        CFArrayRef items = 0;
+        err = SecPKCS12Import(cert, settings, &items);
+        CFRelease(cert);
+        CFRelease(settings);
+        if(err != noErr)
+        {
+            ostringstream os;
+            os << "IceSSL: unable to import certificate from file " << certFile << " (error = " << err << ")";
+            throw PluginInitializationException(__FILE__, __LINE__, os.str());
+        }
+
+        SecIdentityRef identity = 0;
+        if(CFArrayGetCount(items) > 0)
+        {
+            identity = (SecIdentityRef)CFDictionaryGetValue((CFDictionaryRef)CFArrayGetValueAtIndex(items, 0), 
+                                                            kSecImportItemIdentity);
+        }
+        if(identity == 0)
+        {
+            ostringstream os;
+            os << "IceSSL: couldn't find identity in file " << certFile << " (error = " << err << ")";
+            throw PluginInitializationException(__FILE__, __LINE__, os.str());
+        }
+        CFRetain(identity);
+        CFRelease(items);
+
+        SecIdentityRef identities[] = { identity };
+        items = CFArrayCreate(0, (const void**)identities, 1, &kCFTypeArrayCallBacks);
+        CFDictionarySetValue(_clientSettings, kCFStreamSSLCertificates, items);
+        CFRelease(identity);
+        CFRelease(items);
+    }
+#endif
+
+    _serverSettings = CFDictionaryCreateMutableCopy(0, 0, _clientSettings);
+    CFDictionarySetValue(_serverSettings, kCFStreamSSLIsServer, kCFBooleanTrue);
+}
+
+void
+IceObjC::Instance::setupStreams(CFReadStreamRef readStream, 
+                                CFWriteStreamRef writeStream, 
+                                bool server, 
+                                const string& host) const
+{
+    if(_type == SslEndpointType)
+    {
+        CFDictionaryRef settings = server ? _serverSettings : _clientSettings;
+
+        if(!CFReadStreamSetProperty(readStream, kCFStreamPropertySocketSecurityLevel, 
+                                    kCFStreamSocketSecurityLevelNegotiatedSSL) ||
+           !CFWriteStreamSetProperty(writeStream, kCFStreamPropertySocketSecurityLevel, 
+                                     kCFStreamSocketSecurityLevelNegotiatedSSL))
+        {
+            throw Ice::SocketException(__FILE__, __LINE__, 0);
+        }
+        
+        if(!server && 
+           _instance->initializationData().properties->getPropertyAsIntWithDefault("IceSSL.CheckCertName", 1))
+        {
+            settings = CFDictionaryCreateMutableCopy(0, 0, settings);
+
+            CFStringRef h = toCFString(host);
+            CFDictionarySetValue((CFMutableDictionaryRef)settings, kCFStreamSSLPeerName, h);
+            CFRelease(h);
+        }
+
+        if(!CFReadStreamSetProperty(readStream, kCFStreamPropertySSLSettings, settings) ||
+           !CFWriteStreamSetProperty(writeStream, kCFStreamPropertySSLSettings, settings))
+        {
+            throw Ice::SocketException(__FILE__, __LINE__, 0);
+        }
+    }
+
+    if(!CFReadStreamOpen(readStream) || !CFWriteStreamOpen(writeStream))
+    {
+        int error = 0;
+        if(CFReadStreamGetStatus(readStream) == kCFStreamStatusError)
+        {
+            CFErrorRef err = CFReadStreamCopyError(readStream);
+            error = CFErrorGetCode(err);
+            CFRelease(err);
+        }
+        else if(CFWriteStreamGetStatus(writeStream) == kCFStreamStatusError)
+        {
+            CFErrorRef err = CFWriteStreamCopyError(writeStream);
+            error = CFErrorGetCode(err);
+            CFRelease(err);
+        }
+
+        if(server)
+        {
+            throw Ice::SocketException(__FILE__, __LINE__, error);
+        }
+        else
+        {
+            throw Ice::ConnectFailedException(__FILE__, __LINE__, error); // TODO: Is ConnectFailedException correct?
+        }
+    }
+}
+
+
+IceObjC::EndpointI::EndpointI(const InstancePtr& instance, const string& ho, Int po, Int ti, const string& conId, 
+                              bool co) :
     _instance(instance),
     _host(ho),
     _port(po),
     _timeout(ti),
     _connectionId(conId),
-    _compress(co),
-    _type(type),
-    _settings(settings)
+    _compress(co)
 {
 }
 
-IceObjC::EndpointI::EndpointI(const InstancePtr& instance, const string& str, bool oaEndpoint, Ice::Short type,
-                              CFDictionaryRef settings) :
+IceObjC::EndpointI::EndpointI(const InstancePtr& instance, const string& str, bool oaEndpoint) :
     _instance(instance),
     _port(0),
     _timeout(-1),
-    _compress(false),
-    _type(type),
-    _settings(settings)
+    _compress(false)
 {
     const string delim = " \t\n\r";
-    const string protocol = _type == TcpEndpointType ? std::string("tcp") : std::string("ssl");
 
     string::size_type beg;
     string::size_type end = 0;
@@ -169,7 +431,7 @@ IceObjC::EndpointI::EndpointI(const InstancePtr& instance, const string& str, bo
         if(option.length() != 2 || option[0] != '-')
         {
             EndpointParseException ex(__FILE__, __LINE__);
-            ex.str = protocol + " " + str;
+            ex.str = _instance->protocol() + " " + str;
             throw ex;
         }
 
@@ -197,7 +459,7 @@ IceObjC::EndpointI::EndpointI(const InstancePtr& instance, const string& str, bo
                 if(argument.empty())
                 {
                     EndpointParseException ex(__FILE__, __LINE__);
-                    ex.str = protocol + " " + str;
+                    ex.str = _instance->protocol() + " " + str;
                     throw ex;
                 }
                 const_cast<string&>(_host) = argument;
@@ -210,7 +472,7 @@ IceObjC::EndpointI::EndpointI(const InstancePtr& instance, const string& str, bo
                 if(!(p >> const_cast<Int&>(_port)) || !p.eof() || _port < 0 || _port > 65535)
                 {
                     EndpointParseException ex(__FILE__, __LINE__);
-                    ex.str = protocol + " " + str;
+                    ex.str = _instance->protocol() + " " + str;
                     throw ex;
                 }
                 break;
@@ -222,7 +484,7 @@ IceObjC::EndpointI::EndpointI(const InstancePtr& instance, const string& str, bo
                 if(!(t >> const_cast<Int&>(_timeout)) || !t.eof())
                 {
                     EndpointParseException ex(__FILE__, __LINE__);
-                    ex.str = protocol + " " + str;
+                    ex.str = _instance->protocol() + " " + str;
                     throw ex;
                 }
                 break;
@@ -233,7 +495,7 @@ IceObjC::EndpointI::EndpointI(const InstancePtr& instance, const string& str, bo
                 if(!argument.empty())
                 {
                     EndpointParseException ex(__FILE__, __LINE__);
-                    ex.str = protocol + " " + str;
+                    ex.str = _instance->protocol() + " " + str;
                     throw ex;
                 }
                 const_cast<bool&>(_compress) = true;
@@ -243,7 +505,7 @@ IceObjC::EndpointI::EndpointI(const InstancePtr& instance, const string& str, bo
             default:
             {
                 EndpointParseException ex(__FILE__, __LINE__);
-                ex.str = protocol + " " + str;
+                ex.str = _instance->protocol() + " " + str;
                 throw ex;
             }
         }
@@ -262,19 +524,17 @@ IceObjC::EndpointI::EndpointI(const InstancePtr& instance, const string& str, bo
         else
         {
             EndpointParseException ex(__FILE__, __LINE__);
-            ex.str = protocol + " " + str;
+            ex.str = _instance->protocol() + " " + str;
             throw ex;
         }
     }
 }
 
-IceObjC::EndpointI::EndpointI(BasicStream* s, Ice::Short type, CFDictionaryRef settings) :
-    _instance(s->instance()),
+IceObjC::EndpointI::EndpointI(const InstancePtr& instance, BasicStream* s) :
+    _instance(instance),
     _port(0),
     _timeout(-1),
-    _compress(false),
-    _type(type),
-    _settings(settings)
+    _compress(false)
 {
     s->startReadEncaps();
     s->read(const_cast<string&>(_host), false);
@@ -287,7 +547,7 @@ IceObjC::EndpointI::EndpointI(BasicStream* s, Ice::Short type, CFDictionaryRef s
 void
 IceObjC::EndpointI::streamWrite(BasicStream* s) const
 {
-    s->write(_type);
+    s->write(_instance->type());
     s->startWriteEncaps();
     s->write(_host, false);
     s->write(_port);
@@ -307,7 +567,7 @@ IceObjC::EndpointI::toString() const
     // format of proxyToString() before changing this and related code.
     //
     ostringstream s;
-    s << (_type == TcpEndpointType ? std::string("tcp") : std::string("ssl"));
+    s << _instance->protocol();
 
     if(!_host.empty())
     {
@@ -339,7 +599,7 @@ IceObjC::EndpointI::toString() const
 Short
 IceObjC::EndpointI::type() const
 {
-    return _type;
+    return _instance->type();
 }
 
 Int
@@ -357,7 +617,7 @@ IceObjC::EndpointI::timeout(Int timeout) const
     }
     else
     {
-        return new EndpointI(_instance, _host, _port, timeout, _connectionId, _compress, _type, _settings);
+        return new EndpointI(_instance, _host, _port, timeout, _connectionId, _compress);
     }
 }
 
@@ -370,7 +630,7 @@ IceObjC::EndpointI::connectionId(const string& connectionId) const
     }
     else
     {
-        return new EndpointI(_instance, _host, _port, _timeout, connectionId, _compress, _type, _settings);
+        return new EndpointI(_instance, _host, _port, _timeout, connectionId, _compress);
     }
 }
 
@@ -389,7 +649,7 @@ IceObjC::EndpointI::compress(bool compress) const
     }
     else
     {
-        return new EndpointI(_instance, _host, _port, _timeout, _connectionId, compress, _type, _settings);
+        return new EndpointI(_instance, _host, _port, _timeout, _connectionId, compress);
     }
 }
 
@@ -402,7 +662,7 @@ IceObjC::EndpointI::datagram() const
 bool
 IceObjC::EndpointI::secure() const
 {
-    return _type == SslEndpointType;
+    return _instance->type() == SslEndpointType;
 }
 
 bool
@@ -433,8 +693,8 @@ IceObjC::EndpointI::connectors_async(const EndpointI_connectorsPtr& callback) co
 AcceptorPtr
 IceObjC::EndpointI::acceptor(EndpointIPtr& endp, const string&) const
 {
-    Acceptor* p = new Acceptor(_instance, _host, _port, _type, _settings);
-    endp = new EndpointI(_instance, _host, p->effectivePort(), _timeout, _connectionId, _compress, _type, _settings);
+    Acceptor* p = new Acceptor(_instance, _host, _port);
+    endp = new EndpointI(_instance, _host, p->effectivePort(), _timeout, _connectionId, _compress);
     return p;
 }
 
@@ -452,7 +712,7 @@ IceObjC::EndpointI::expand() const
     {
         for(vector<string>::const_iterator p = hosts.begin(); p != hosts.end(); ++p)
         {
-            endps.push_back(new EndpointI(_instance, *p, _port, _timeout, _connectionId, _compress, _type, _settings));
+            endps.push_back(new EndpointI(_instance, *p, _port, _timeout, _connectionId, _compress));
         }
     }
     return endps;
@@ -585,265 +845,42 @@ IceObjC::EndpointI::connectors(const vector<struct sockaddr_storage>& addresses)
     vector<ConnectorPtr> connectors;
     for(unsigned int i = 0; i < addresses.size(); ++i)
     {
-        connectors.push_back(new Connector(_instance, addresses[i], _timeout, _connectionId, _type, _settings));
+        connectors.push_back(new Connector(_instance, addresses[i], _timeout, _connectionId, _host));
     }
     return connectors;
 }
 
-IceObjC::EndpointFactory::EndpointFactory(const InstancePtr& instance, bool secure)
-    : _instance(instance),
-      _type(secure ? SslEndpointType : TcpEndpointType),
-      _protocol(secure ? string("ssl") : string("tcp"))
+IceObjC::EndpointFactory::EndpointFactory(const IceInternal::InstancePtr& instance, bool secure) : 
+    _instance(new Instance(instance, secure))
 {
-    if(!secure)
-    {
-        _settings = 0;
-        return;
-    }
-
-    Ice::PropertiesPtr properties = _instance->initializationData().properties;
-    _settings = CFDictionaryCreateMutable(0, 1, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-
-    string defaultDir = properties->getProperty("IceSSL.DefaultDir");
-    string certAuthFile = properties->getProperty("IceSSL.CertAuthFile");
-    string certFile = properties->getProperty("IceSSL.CertFile");
-
-#if TARGET_IPHONE_SIMULATOR
-
-    SecKeychainRef keychain = 0;
-    OSStatus err;
-    if(!certAuthFile.empty() || !certFile.empty())
-    {
-        string keychainName = properties->getPropertyWithDefault("IceSSL.Keychain", "login");
-        string keychainPassword = properties->getProperty("IceSSL.KeychainPassword");
-        char *home = getenv("HOME");
-        if(home == NULL) 
-        {
-            home = "";
-        }
-        string path = string(home) + "/Library/Keychains/" + keychainName + ".keychain";
-        err = SecKeychainOpen(path.c_str(),  &keychain);
-        SecKeychainStatus status;
-        err = SecKeychainGetStatus(keychain, &status);
-        if(err == noErr)
-        {
-            if(!keychainPassword.empty())
-            {
-                SecKeychainUnlock(keychain, keychainPassword.size(), keychainPassword.c_str(), true);
-            }
-            else
-            {
-                SecKeychainUnlock(keychain, 0, 0, false);
-            }
-        }
-        if(err == errSecNoSuchKeychain)
-        {
-            if(!keychainPassword.empty())
-            {
-                err = SecKeychainCreate(path.c_str(), keychainPassword.size(), keychainPassword.c_str(), false, 0, 
-                                        &keychain);
-            }
-            else
-            {
-                err = SecKeychainCreate(path.c_str(), 0, 0, true, 0, &keychain);
-            }
-        }
-        if(err != noErr)
-        {
-            ostringstream os;
-            os << "IceSSL: unable to open keychain " << path << " (error = " << err << ")";
-            throw PluginInitializationException(__FILE__, __LINE__, os.str());
-        }
-    }
-
-    if(!certAuthFile.empty())
-    {
-        CFDataRef cert = readCert(defaultDir, certAuthFile);
-
-        SecKeyImportExportParameters params;
-        memset(&params, 0, sizeof(params));
-        params.version = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
-        params.keyUsage = CSSM_KEYUSE_ANY;
-        params.keyAttributes = CSSM_KEYATTR_EXTRACTABLE;
-        
-        SecExternalFormat format = kSecFormatUnknown;
-        SecExternalItemType type = kSecItemTypeUnknown;
-        
-        CFStringRef filename = toCFString(certAuthFile);
-        CFArrayRef items = 0;
-        err = SecKeychainItemImport(cert, filename, &format, &type, 0, &params, keychain, &items);
-        CFRelease(filename);
-        CFRelease(cert);
-        if(err != noErr && err != errSecDuplicateItem)
-        {
-            ostringstream os;
-            os << "IceSSL: unable to import certificate from file " << certAuthFile << " (error = " << err << ")";
-            throw PluginInitializationException(__FILE__, __LINE__, os.str());
-        }
-    }
-
-    if(!certFile.empty())
-    {
-        CFDataRef cert = readCert(defaultDir, certFile);
-        
-        SecKeyImportExportParameters params;
-        memset(&params, 0, sizeof(params));
-        params.version = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
-        params.passphrase = toCFString(properties->getProperty("IceSSL.Password"));
-        params.keyUsage = CSSM_KEYUSE_ANY;
-        params.keyAttributes = CSSM_KEYATTR_EXTRACTABLE;
-        
-        SecExternalFormat format = kSecFormatUnknown;
-        SecExternalItemType type = kSecItemTypeUnknown;
-        
-        CFArrayRef items = 0;
-        CFStringRef filename = toCFString(certFile);
-        err = SecKeychainItemImport(cert, filename, &format, &type, 0, &params, keychain, &items);
-        CFRelease(params.passphrase);
-        CFRelease(filename);
-        CFRelease(cert);
-        if(err != noErr)
-        {
-            ostringstream os;
-            os << "IceSSL: unable to import certificate from file " << certFile << " (error = " << err << ")";
-            throw PluginInitializationException(__FILE__, __LINE__, os.str());
-        }
-
-        CFDictionarySetValue(_settings, kCFStreamSSLCertificates, items);
-        CFRelease(items);
-    }
-
-    if(keychain)
-    {
-        CFRelease(keychain);
-    }
-#else
-    OSStatus err;
-    if(!certAuthFile.empty())
-    {
-        CFDataRef cert = readCert(defaultDir, certAuthFile);
-        if(!cert)
-        {
-            PluginInitializationException ex(__FILE__, __LINE__);
-            ex.reason = "IceSSL: unable to open file " + certAuthFile;
-            throw ex;
-        }
-        
-        SecCertificateRef result = SecCertificateCreateWithData(0, cert);
-        if(!result)
-        {
-            PluginInitializationException ex(__FILE__, __LINE__);
-            ex.reason = "IceSSL: certificate " + certAuthFile + " is not a valid DER-encoded certificate";
-            throw ex;
-        }
-
-        CFMutableDictionaryRef certs;
-        certs = CFDictionaryCreateMutable(0, 1, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-        CFDictionarySetValue(certs, kSecClass, kSecClassCertificate);
-        CFDictionarySetValue(certs, kSecValueRef, result);
-        err = SecItemAdd(certs, 0);
-        CFRelease(certs);
-        CFRelease(cert);
-        if(err != noErr && err != errSecDuplicateItem)
-        {
-            ostringstream os;
-            os << "IceSSL: unable to import certificate from file " << certAuthFile << " (error = " << err << ")";
-            throw PluginInitializationException(__FILE__, __LINE__, os.str());
-        }
-    }
-
-    if(!certFile.empty())
-    {
-        CFDataRef cert = readCert(defaultDir, certFile);
-        if(!cert)
-        {
-            PluginInitializationException ex(__FILE__, __LINE__);
-            ex.reason = "IceSSL: unable to open file " + certFile;
-            throw ex;
-        }
-
-        CFMutableDictionaryRef settings;
-        settings = CFDictionaryCreateMutable(0, 1, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-        CFStringRef password = toCFString(properties->getProperty("IceSSL.Password"));
-        CFDictionarySetValue(settings, kSecImportExportPassphrase, password);
-        CFRelease(password);
-        
-        CFArrayRef items = 0;
-        err = SecPKCS12Import(cert, settings, &items);
-        CFRelease(cert);
-        CFRelease(settings);
-        if(err != noErr)
-        {
-            ostringstream os;
-            os << "IceSSL: unable to import certificate from file " << certFile << " (error = " << err << ")";
-            throw PluginInitializationException(__FILE__, __LINE__, os.str());
-        }
-
-        SecIdentityRef identity = 0;
-        if(CFArrayGetCount(items) > 0)
-        {
-            identity = (SecIdentityRef)CFDictionaryGetValue((CFDictionaryRef)CFArrayGetValueAtIndex(items, 0), 
-                                                            kSecImportItemIdentity);
-        }
-        if(identity == 0)
-        {
-            ostringstream os;
-            os << "IceSSL: couldn't find identity in file " << certFile << " (error = " << err << ")";
-            throw PluginInitializationException(__FILE__, __LINE__, os.str());
-        }
-        CFRetain(identity);
-        CFRelease(items);
-
-        SecIdentityRef identities[] = { identity };
-        items = CFArrayCreate(0, (const void**)identities, 1, &kCFTypeArrayCallBacks);
-        CFDictionarySetValue(_settings, kCFStreamSSLCertificates, items);
-        CFRelease(identity);
-        CFRelease(items);
-    }
-#endif
-
-    if(!properties->getPropertyAsIntWithDefault("IceSSL.CheckCertName", 1))
-    {
-        CFDictionarySetValue(_settings, kCFStreamSSLPeerName, kCFNull);
-    }
-
-    if(properties->getPropertyAsIntWithDefault("IceSSL.AllowsAnyRoot", 0))
-    {
-        CFDictionarySetValue(_settings, kCFStreamSSLAllowsAnyRoot, kCFBooleanTrue);
-    }
-//    CFDictionarySetValue(_settings, kCFStreamSSLValidatesCertificateChain, kCFBooleanFalse);
 }
 
 IceObjC::EndpointFactory::~EndpointFactory()
 {
-    if(_settings)
-    {
-        CFRelease(_settings);
-    };
 }
 
 Short
 IceObjC::EndpointFactory::type() const
 {
-    return _type;
+    return _instance->type();
 }
 
 string
 IceObjC::EndpointFactory::protocol() const
 {
-    return _protocol;
+    return _instance->protocol();
 }
 
 EndpointIPtr
 IceObjC::EndpointFactory::create(const std::string& str, bool oaEndpoint) const
 {
-    return new EndpointI(_instance, str, oaEndpoint, _type, _settings);
+    return new EndpointI(_instance, str, oaEndpoint);
 }
 
 EndpointIPtr
 IceObjC::EndpointFactory::read(BasicStream* s) const
 {
-    return new EndpointI(s, _type, _settings);
+    return new EndpointI(_instance, s);
 }
 
 void

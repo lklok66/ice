@@ -10,10 +10,12 @@
 #ifndef ICE_OBJC_ENDPOINT_I_H
 #define ICE_OBJC_ENDPOINT_I_H
 
+#include <Ice/Instance.h>
 #include <Ice/EndpointI.h>
 #include <Ice/EndpointFactory.h>
 
 #include <CoreFoundation/CFDictionary.h>
+#include <Security/Security.h>
 
 namespace IceObjC
 {
@@ -21,14 +23,42 @@ namespace IceObjC
 const Ice::Short TcpEndpointType = 1;
 const Ice::Short SslEndpointType = 2;
 
+class Instance : public IceUtil::Shared
+{
+public:
+
+    Instance(const IceInternal::InstancePtr&, bool);
+
+    Ice::Short type() const { return _type; }
+    const std::string& protocol() const { return _protocol; }
+
+    CFArrayRef certificateAuthorities() const { return _certificateAuthorities; }
+    IceInternal::TraceLevelsPtr traceLevels() const { return _instance->traceLevels(); }
+    const Ice::InitializationData& initializationData() const { return _instance->initializationData(); }
+    IceInternal::ProtocolSupport protocolSupport() const { return _instance->protocolSupport(); }
+    IceInternal::DefaultsAndOverridesPtr defaultsAndOverrides() const { return _instance->defaultsAndOverrides(); }
+    IceInternal::EndpointHostResolverPtr endpointHostResolver() const { return _instance->endpointHostResolver(); }
+
+    void setupStreams(CFReadStreamRef, CFWriteStreamRef, bool, const std::string&) const;
+
+private:
+
+    const IceInternal::InstancePtr _instance;
+    const Ice::Short _type;
+    const std::string _protocol;
+    CFMutableDictionaryRef _serverSettings;
+    CFMutableDictionaryRef _clientSettings;
+    CFArrayRef _certificateAuthorities;
+};
+typedef IceUtil::Handle<Instance> InstancePtr;
+
 class EndpointI : public IceInternal::EndpointI
 {
 public:
 
-    EndpointI(const IceInternal::InstancePtr&, const std::string&, Ice::Int, Ice::Int, const std::string&, bool, 
-              Ice::Short, CFDictionaryRef);
-    EndpointI(const IceInternal::InstancePtr&, const std::string&, bool, Ice::Short, CFDictionaryRef);
-    EndpointI(IceInternal::BasicStream*, Ice::Short, CFDictionaryRef);
+    EndpointI(const InstancePtr&, const std::string&, Ice::Int, Ice::Int, const std::string&, bool);
+    EndpointI(const InstancePtr&, const std::string&, bool);
+    EndpointI(const InstancePtr&, IceInternal::BasicStream*);
 
     virtual void streamWrite(IceInternal::BasicStream*) const;
     virtual std::string toString() const;
@@ -68,14 +98,12 @@ private:
     //
     // All members are const, because endpoints are immutable.
     //
-    const IceInternal::InstancePtr _instance;
+    const InstancePtr _instance;
     const std::string _host;
     const Ice::Int _port;
     const Ice::Int _timeout;
     const std::string _connectionId;
     const bool _compress;
-    const Ice::Short _type;
-    const CFDictionaryRef _settings;
 };
 
 class EndpointFactory : public IceInternal::EndpointFactory
@@ -94,10 +122,7 @@ public:
 
 private:
 
-    IceInternal::InstancePtr _instance;
-    const Ice::Short _type;
-    const std::string _protocol;
-    CFMutableDictionaryRef _settings;
+    InstancePtr _instance;
 };
 
 }

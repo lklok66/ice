@@ -453,7 +453,6 @@ generated from the section label.
 
     <section name="IceSSL">
         <property name="Alias" />
-        <property name="AllowsAnyRoot" />
         <property name="CertAuthDir" />
         <property name="CertAuthFile" />
         <property name="CertFile" />

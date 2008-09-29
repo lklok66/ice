@@ -37,7 +37,7 @@ IceObjC::Acceptor::close()
     if(_traceLevels->network >= 1)
     {
         Trace out(_logger, _traceLevels->networkCat);
-        out << "stopping to accept " << (_type == TcpEndpointType ? "tcp" : "ssl") << " connections at " << toString();
+        out << "stopping to accept " << _instance->protocol() << " connections at " << toString();
     }
 
     SOCKET fd = _fd;
@@ -61,7 +61,7 @@ IceObjC::Acceptor::listen()
     if(_traceLevels->network >= 1)
     {
         Trace out(_logger, _traceLevels->networkCat);
-        out << "accepting " << (_type == TcpEndpointType ? "tcp" : "ssl") << " connections at " << toString();
+        out << "accepting " << _instance->protocol() << " connections at " << toString();
     }
 }
 
@@ -75,7 +75,7 @@ IceObjC::Acceptor::accept()
     if(_traceLevels->network >= 1)
     {
         Trace out(_logger, _traceLevels->networkCat);
-        out << "accepted " << (_type == TcpEndpointType ? "tcp" : "ssl") << " connection\n" << fdToString(fd);
+        out << "accepted " << _instance->protocol() << " connection\n" << fdToString(fd);
     }
 
     //
@@ -85,49 +85,9 @@ IceObjC::Acceptor::accept()
     CFWriteStreamRef writeStream;
     CFStreamCreatePairWithSocket(NULL, fd, &readStream, &writeStream);
 
-    if(_type == SslEndpointType)
-    {
-        if(!CFReadStreamSetProperty(readStream, kCFStreamPropertySocketSecurityLevel, 
-                                    kCFStreamSocketSecurityLevelNegotiatedSSL) ||
-           !CFWriteStreamSetProperty(writeStream, kCFStreamPropertySocketSecurityLevel, 
-                                     kCFStreamSocketSecurityLevelNegotiatedSSL))
-        {
-            throw Ice::SocketException(__FILE__, __LINE__, 0);
-        }
-            
-        if(!CFReadStreamSetProperty(readStream, kCFStreamPropertySSLSettings, _settings) ||
-           !CFWriteStreamSetProperty(writeStream, kCFStreamPropertySSLSettings, _settings))
-        {
-            throw Ice::SocketException(__FILE__, __LINE__, 0);
-        }
-    }
+    _instance->setupStreams(readStream, writeStream, true, "");
 
-    if(!CFReadStreamOpen(readStream) || !CFWriteStreamOpen(writeStream))
-    {
-        int error = 0;
-        if(CFReadStreamGetStatus(readStream) == kCFStreamStatusError)
-        {
-            CFErrorRef err = CFReadStreamCopyError(readStream);
-            error = CFErrorGetCode(err);
-            CFRelease(err);
-        }
-        else if(CFWriteStreamGetStatus(writeStream) == kCFStreamStatusError)
-        {
-            CFErrorRef err = CFWriteStreamCopyError(writeStream);
-            error = CFErrorGetCode(err);
-            CFRelease(err);
-        }
-        throw Ice::ConnectFailedException(__FILE__, __LINE__, error);
-    }
-
-    if(_type == TcpEndpointType)
-    {
-        return new Transceiver(_instance, fd, "tcp", readStream, writeStream, true);
-    }
-    else
-    {
-        return new Transceiver(_instance, fd, "ssl", readStream, writeStream, true);
-    }
+    return new Transceiver(_instance, fd, readStream, writeStream, true, "");
 }
 
 string
@@ -142,12 +102,10 @@ IceObjC::Acceptor::effectivePort() const
     return getPort(_addr);
 }
 
-IceObjC::Acceptor::Acceptor(const InstancePtr& instance, const string& host, int port, Ice::Short type, 
-                            CFDictionaryRef settings) :
+IceObjC::Acceptor::Acceptor(const InstancePtr& instance, const string& host, int port) :
     _instance(instance),
     _traceLevels(instance->traceLevels()),
-    _logger(instance->initializationData().logger),
-    _type(type)
+    _logger(instance->initializationData().logger)
 {
 #ifdef SOMAXCONN
     _backlog = instance->initializationData().properties->getPropertyAsIntWithDefault("Ice.TCP.Backlog", SOMAXCONN);
@@ -179,20 +137,9 @@ IceObjC::Acceptor::Acceptor(const InstancePtr& instance, const string& host, int
         if(_traceLevels->network >= 2)
         {
             Trace out(_logger, _traceLevels->networkCat);
-            out << "attempting to bind to " << (_type == TcpEndpointType ? "tcp" : "ssl") << " socket " << toString();
+            out << "attempting to bind to " << _instance->protocol() << " socket " << toString();
         }
         doBind(_fd, _addr);
-
-        if(_type == SslEndpointType)
-        {
-            CFMutableDictionaryRef s = CFDictionaryCreateMutableCopy(0, 0, settings);
-            CFDictionarySetValue(s, kCFStreamSSLIsServer, kCFBooleanTrue);
-            _settings = s;
-        }
-        else
-        {
-            _settings = settings;
-        }
     }
     catch(...)
     {

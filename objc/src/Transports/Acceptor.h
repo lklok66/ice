@@ -20,12 +20,13 @@
 #   include <sys/socket.h> // For struct sockaddr_storage
 #endif
 
-#include <CoreFoundation/CFDictionary.h>
-
 namespace IceObjC
 {
 
 class EndpointI;
+
+class Instance;
+typedef IceUtil::Handle<Instance> InstancePtr;
 
 class Acceptor : public IceInternal::Acceptor
 {
@@ -41,18 +42,16 @@ public:
 
 private:
 
-    Acceptor(const IceInternal::InstancePtr&, const std::string&, int, Ice::Short, CFDictionaryRef);
+    Acceptor(const InstancePtr&, const std::string&, int);
     virtual ~Acceptor();
     friend class EndpointI;
 
-    IceInternal::InstancePtr _instance;
+    InstancePtr _instance;
     IceInternal::TraceLevelsPtr _traceLevels;
     Ice::LoggerPtr _logger;
     SOCKET _fd;
     int _backlog;
     struct sockaddr_storage _addr;
-    Ice::Short _type;
-    CFDictionaryRef _settings;
 };
 
 }

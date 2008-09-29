@@ -8,8 +8,10 @@
 // **********************************************************************
 
 #include <Transceiver.h>
+#include <EndpointI.h>
 
 #include <Ice/Instance.h>
+#include <Ice/Properties.h>
 #include <Ice/TraceLevels.h>
 #include <Ice/LoggerUtil.h>
 #include <Ice/Stats.h>
@@ -18,6 +20,7 @@
 #include <Ice/LocalException.h>
 
 #import <CFNetwork/CFSocketStream.h>
+#import <Security/Security.h>
 
 using namespace std;
 using namespace Ice;
@@ -36,7 +39,7 @@ IceObjC::Transceiver::close()
     if(_traceLevels->network >= 1)
     {
         Trace out(_logger, _traceLevels->networkCat);
-        out << "closing " << _type << " connection\n" << toString();
+        out << "closing " << _instance->protocol() << " connection\n" << toString();
     }
 
     CFReadStreamClose(_readStream);
@@ -68,6 +71,12 @@ IceObjC::Transceiver::write(Buffer& buf)
             return false;
         }
         assert(CFWriteStreamGetStatus(_writeStream) >= kCFStreamStatusOpen);
+
+        if(_checkCertificates)
+        {
+            checkCertificates();
+            _checkCertificates = false;
+        }
 
         assert(_fd != INVALID_SOCKET);
         CFIndex ret = CFWriteStreamWrite(_writeStream, reinterpret_cast<const UInt8*>(&*buf.i), packetSize);
@@ -112,7 +121,7 @@ IceObjC::Transceiver::write(Buffer& buf)
         if(_traceLevels->network >= 3)
         {
             Trace out(_logger, _traceLevels->networkCat);
-            out << "sent " << ret << " of " << packetSize << " bytes via " << _type << "\n" << toString();
+            out << "sent " << ret << " of " << packetSize << " bytes via " << _instance->protocol() << "\n" << toString();
         }
 
         if(_stats)
@@ -144,6 +153,12 @@ IceObjC::Transceiver::read(Buffer& buf)
             return false;
         }
         assert(CFReadStreamGetStatus(_readStream) >= kCFStreamStatusOpen);
+
+        if(_checkCertificates)
+        {
+            checkCertificates();
+            _checkCertificates = false;
+        }
 
         assert(_fd != INVALID_SOCKET);
         CFIndex ret = CFReadStreamRead(_readStream, reinterpret_cast<UInt8*>(&*buf.i), packetSize);
@@ -214,7 +229,7 @@ IceObjC::Transceiver::read(Buffer& buf)
         if(_traceLevels->network >= 3)
         {
             Trace out(_logger, _traceLevels->networkCat);
-            out << "received " << ret << " of " << packetSize << " bytes via " << _type << "\n" << toString();
+            out << "received " << ret << " of " << packetSize << " bytes via " << _instance->protocol() << "\n" << toString();
         }
 
         if(_stats)
@@ -242,7 +257,7 @@ IceObjC::Transceiver::hasMoreData()
 string
 IceObjC::Transceiver::type() const
 {
-    return _type;
+    return _instance->protocol();
 }
 
 string
@@ -303,7 +318,7 @@ IceObjC::Transceiver::initialize()
             if(_traceLevels->network >= 2)
             {
                 Trace out(_logger, _traceLevels->networkCat);
-                out << "failed to establish " << _type << " connection\n" << _desc << "\n" << ex;
+                out << "failed to establish " << _instance->protocol() << " connection\n" << _desc << "\n" << ex;
             }
             throw;
         }
@@ -311,7 +326,7 @@ IceObjC::Transceiver::initialize()
         if(_traceLevels->network >= 1)
         {
             Trace out(_logger, _traceLevels->networkCat);
-            out << _type << " connection established\n" << _desc;
+            out << _instance->protocol() << " connection established\n" << _desc;
         }
     }
     assert(_state == StateConnected);
@@ -329,19 +344,21 @@ IceObjC::Transceiver::checkSendSize(const Buffer& buf, size_t messageSizeMax)
 
 IceObjC::Transceiver::Transceiver(const InstancePtr& instance, 
                                   SOCKET fd, 
-                                  const string& type,
                                   CFReadStreamRef readStream,
                                   CFWriteStreamRef writeStream,
-                                  bool connected) :
+                                  bool connected,
+                                  const string& host) :
+    _instance(instance),
     _traceLevels(instance->traceLevels()),
     _logger(instance->initializationData().logger),
     _stats(instance->initializationData().stats),
-    _type(type),
+    _host(host),
     _fd(fd),
     _readStream(readStream),
     _writeStream(writeStream),
     _state(connected ? StateConnected : StateNeedConnect),
-    _desc(fdToString(_fd))
+    _desc(fdToString(_fd)),
+    _checkCertificates(true)
 {
 }
 
@@ -350,4 +367,105 @@ IceObjC::Transceiver::~Transceiver()
     assert(_fd == INVALID_SOCKET);
     CFRelease(_readStream);
     CFRelease(_writeStream);
+}
+
+void
+IceObjC::Transceiver::checkCertificates()
+{
+    CFTypeRef certificates = CFWriteStreamCopyProperty(_writeStream, kCFStreamPropertySSLPeerCertificates);
+    if(certificates)
+    {
+        OSStatus err;
+        bool checkCertName = !_host.empty() &&
+            _instance->initializationData().properties->getPropertyAsIntWithDefault("IceSSL.CheckCertName", 1);
+#if TARGET_IPHONE_SIMULATOR
+        SecPolicySearchRef policySearch;
+        SecPolicyRef policy;
+        CSSM_OID* oid = checkCertName ? &CSSMOID_APPLE_TP_SSL : &CSSMOID_APPLE_X509_BASIC;
+        if((err = SecPolicySearchCreate(CSSM_CERT_X_509v3, oid, NULL, &policySearch)) != noErr ||
+           (err = SecPolicySearchCopyNext(policySearch, &policy)) != noErr)
+        {
+            CFRelease(certificates);
+            SocketException ex(__FILE__, __LINE__);
+            ex.error = err;
+            throw ex;
+        }
+
+        if(checkCertName)
+        {
+            CSSMOID_APPLE_TP_SSL_OPTIONS opts;
+            memset(&opts, 0, sizeof(opts));
+            opts.ServerNameLen = _host.size();
+            opts.ServerName = _host.c_str();
+            CSSM_DATA optsData = { sizeof(opts), (uint8 *)&opts};
+            SecPolicySetValue(policy, &optsData);
+        }
+#else
+        SecPolicyRef policy;
+        if(!checkCertName)
+        {
+            policy = SecPolicyCreateBasicX509();
+        }
+        else
+        {
+            CFStringRef h = CFStringCreateWithCString(NULL, _host.c_str(), kCFStringEncodingUTF8);
+            policy = SecPolicyCreateSSL(false, h);
+            CFRelease(h);
+        }
+#endif
+        SecTrustRef trust;
+        SecTrustResultType result;
+        if((err = SecTrustCreateWithCertificates((CFArrayRef)certificates, policy, &trust)) != noErr)
+        {
+            CFRelease(certificates);
+            SocketException ex(__FILE__, __LINE__);
+            ex.error = err;
+            throw ex;
+        }
+        CFRelease(certificates);
+
+        //
+        // If IceSSL.CertAuthFile is set, we use the certificate authorities from this file
+        // instead of the ones from the keychain.
+        //
+        if(_instance->certificateAuthorities())
+        {
+            if((err = SecTrustSetAnchorCertificates(trust, _instance->certificateAuthorities())) != noErr)
+            {
+                SocketException ex(__FILE__, __LINE__);
+                ex.error = err;
+                throw ex;
+            }
+        }
+        if((err = SecTrustEvaluate(trust, &result)) != noErr)
+        {
+            SocketException ex(__FILE__, __LINE__);
+            ex.error = err;
+            throw ex;
+        }
+
+        //
+        // The kSecTrustResultUnspecified result indicates that the user didn't set any trust
+        // settings for the root CA. This is expected if the root CA is provided by the user
+        // with IceSSL.CertAuthFile or if the user didn't explicitly set any trust settings
+        // for the certificate.
+        //
+        if(result != kSecTrustResultProceed && result != kSecTrustResultUnspecified)
+        {
+            if(_traceLevels->network >= 2)
+            {
+                Trace out(_logger, _traceLevels->networkCat);
+                out << "certificate validation failed: " << result;
+            }
+            SocketException ex(__FILE__, __LINE__);
+            ex.error = 0;
+            throw ex;
+        }
+
+        if(_traceLevels->network >= 2)
+        {
+            Trace out(_logger, _traceLevels->networkCat);
+            out << "certificate validation succeeded";
+        }
+    }
 }
