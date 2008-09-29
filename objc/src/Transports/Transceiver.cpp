@@ -381,7 +381,7 @@ IceObjC::Transceiver::checkCertificates()
 #if TARGET_IPHONE_SIMULATOR
         SecPolicySearchRef policySearch;
         SecPolicyRef policy;
-        CSSM_OID* oid = checkCertName ? &CSSMOID_APPLE_TP_SSL : &CSSMOID_APPLE_X509_BASIC;
+        const CSSM_OID* oid = checkCertName ? &CSSMOID_APPLE_TP_SSL : &CSSMOID_APPLE_X509_BASIC;
         if((err = SecPolicySearchCreate(CSSM_CERT_X_509v3, oid, NULL, &policySearch)) != noErr ||
            (err = SecPolicySearchCopyNext(policySearch, &policy)) != noErr)
         {
@@ -393,7 +393,7 @@ IceObjC::Transceiver::checkCertificates()
 
         if(checkCertName)
         {
-            CSSMOID_APPLE_TP_SSL_OPTIONS opts;
+            CSSM_APPLE_TP_SSL_OPTIONS opts;
             memset(&opts, 0, sizeof(opts));
             opts.ServerNameLen = _host.size();
             opts.ServerName = _host.c_str();
