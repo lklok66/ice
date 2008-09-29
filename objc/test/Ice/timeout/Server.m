@@ -48,7 +48,6 @@ main(int argc, char* argv[])
         // This test kills connections, so we don't want warnings.
         //
         [initData.properties setProperty:@"Ice.Warn.Connections" value:@"0"];
-        printf("%d\n", argc);
 
         communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];
         status = run(communicator);
