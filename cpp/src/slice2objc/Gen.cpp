@@ -1313,17 +1313,17 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
     writeSynthesize(dataMembers, 0); // TODO fix second parameter
 
     //
-    // Constructors.
+    // Constructor.
     //
     if(!dataMembers.empty())
     {
         _H << sp;
     }
-    if(!p->isInterface() && !allDataMembers.empty())
+    if(!p->isInterface() && !dataMembers.empty())
     {
 	_H << nl << "-(id) init";
 	_M << sp << nl << "-(id) init";
-	writeMemberSignature(allDataMembers, 0, Other, HAndM); // TODO fix second parameter
+	writeMemberSignature(allDataMembers, 0, Other); // TODO fix second parameter
 	_H << ";";
 	_M << sb;
 	_M << nl << "if(![super init";
@@ -1337,6 +1337,9 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
 	_M << eb;
     }
 
+    //
+    // Convenience constructors.
+    //
     if(!allDataMembers.empty())
     {
 	string lowerCaseName = fixId(p->name());
@@ -1344,7 +1347,7 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
 
 	_H << nl << "+(id) " << lowerCaseName;
 	_M << sp << nl << "+(id) " << lowerCaseName;
-	writeMemberSignature(allDataMembers, 0, Other, HAndM); // TODO fix second parameter
+	writeMemberSignature(allDataMembers, 0, Other); // TODO fix second parameter
 	_H << ";";
 	_M << sb;
 
@@ -1352,7 +1355,7 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
 	// The cast avoids a compiler warning that is emitted if different structs
 	// have members with the same name but different types.
 	//
-	_M << nl << name << " *s__ = [(" << name << " *)[self alloc] init";
+	_M << nl << name << " *s__ = [(" << name << " *)[" << name << " alloc] init";
 	writeMemberCall(allDataMembers, 0, Other, WithEscape); // TODO
 	_M << "];";
 	_M << nl << "[s__ autorelease];";
@@ -1362,7 +1365,7 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
 	_H << nl << "+(id) " << lowerCaseName << ";";
 	_M << sp << nl << "+(id) " << lowerCaseName;
 	_M << sb;
-	_M << nl << name << " *s__ = [[self alloc] init];";
+	_M << nl << name << " *s__ = [[" << name << " alloc] init];";
 	_M << nl << "[s__ autorelease];";
 	_M << nl << "return s__;";
 	_M << eb;
@@ -1560,7 +1563,7 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
     //
     // Constructors.
     //
-    if(p->isLocal())
+    if(p->isLocal() && !dataMembers.empty())
     {
 	_H << nl << "-(id) init:(const char*)file__p line:(int)line__p;";
 	_M << sp << nl << "-(id) init:(const char*)file__p line:(int)line__p";
@@ -1572,11 +1575,11 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
 	_M << nl << "return self;";
 	_M << eb;
     }
-    if(!allDataMembers.empty())
+    if(!dataMembers.empty())
     {
 	_H << nl << "-(id) init";
 	_M << sp << nl << "-(id) init";
-	writeMemberSignature(allDataMembers, baseTypes, p->isLocal() ? LocalException : Other, HAndM);
+	writeMemberSignature(allDataMembers, baseTypes, p->isLocal() ? LocalException : Other);
 	_H << ";";
 	_M << sb;
 	if(!p->base())
@@ -1609,7 +1612,7 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
     //
     _H << nl << "+(id) " << lowerCaseName;
     _M << sp << nl << "+(id) " << lowerCaseName;
-    writeMemberSignature(allDataMembers, baseTypes, p->isLocal() ? LocalException : Other, HAndM);
+    writeMemberSignature(allDataMembers, baseTypes, p->isLocal() ? LocalException : Other);
     _H << ";";
 
     //
@@ -1617,7 +1620,7 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
     // have members with the same name but different types.
     //
     _M << sb;
-    _M << nl << name << " *s__ = [(" << name << " *)[[self class] alloc] init";
+    _M << nl << name << " *s__ = [(" << name << " *)[" << name << " alloc] init";
     if(p->isLocal())
     {
         _M << ":file__p line:line__p";
@@ -1639,7 +1642,7 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
 	}
 	_H << ";";
 	_M << sb;
-	_M << nl << name << " *s__ = [[[self class] alloc] init";
+	_M << nl << name << " *s__ = [[" << name << " alloc] init";
 	if(p->isLocal())
 	{
 	    _M << ":file__p line:line__p";
@@ -1767,11 +1770,11 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     writeSynthesize(dataMembers, baseTypes);
 
     //
-    // Constructors.
+    // Constructor.
     //
     _H << sp << nl << "-(id) init";
     _M << sp << nl << "-(id) init";
-    writeMemberSignature(dataMembers, baseTypes, Other, HAndM);
+    writeMemberSignature(dataMembers, baseTypes, Other);
     _H << ";";
     _M << sb;
     _M << nl << "if(![super init])";
@@ -1782,12 +1785,15 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     _M << nl << "return self;";
     _M << eb;
 
+    //
+    // Convenience constructor.
+    //
     string lowerCaseName = fixId(p->name());
     *(lowerCaseName.begin()) = tolower(*lowerCaseName.begin());
 
     _H << nl << "+(id) " << lowerCaseName;
     _M << sp << nl << "+(id) " << lowerCaseName;
-    writeMemberSignature(dataMembers, baseTypes, Other, HAndM);
+    writeMemberSignature(dataMembers, baseTypes, Other);
     _H << ";";
     _M << sb;
 
@@ -1795,7 +1801,7 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     // The cast avoids a compiler warning that is emitted if different structs
     // have members with the same name but different types.
     //
-    _M << nl << name << " *s__ = [(" << name << " *)[[self class] alloc] init";
+    _M << nl << name << " *s__ = [(" << name << "* )[" << name << " alloc] init";
     writeMemberCall(dataMembers, baseTypes, Other, WithEscape);
     _M << "];";
     _M << nl << "[s__ autorelease];";
@@ -1805,7 +1811,7 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     _H << nl << "+(id) " << lowerCaseName << ";";
     _M << sp << nl << "+(id) " << lowerCaseName;
     _M << sb;
-    _M << nl << name << " *s__ = [[[self class] alloc] init];";
+    _M << nl << name << " *s__ = [[" << name << " alloc] init];";
     _M << nl << "[s__ autorelease];";
     _M << nl << "return s__;";
     _M << eb;
@@ -2026,7 +2032,7 @@ Slice::Gen::TypesVisitor::writeMembers(const DataMemberList& dataMembers, int ba
 
 void
 Slice::Gen::TypesVisitor::writeMemberSignature(const DataMemberList& dataMembers, int baseTypes,
-                                               ContainerType ct, Destination d) const
+                                               ContainerType ct) const
 {
     if(ct == LocalException)
     {
@@ -2041,28 +2047,19 @@ Slice::Gen::TypesVisitor::writeMemberSignature(const DataMemberList& dataMembers
 
 	if(q != dataMembers.begin() || ct == LocalException)
 	{
+	    _H << " " << name;
 	    _M << " " << name;
 	}
+	_H << ":(" << typeString;
 	_M << ":(" << typeString;
 	if(mapsToPointerType(type))
 	{
+	    _H << " *";
 	    _M << " *";
 	}
+	_H << ")" << fixId((*q)->name());
 	_M << ")" << fixId((*q)->name()) << "_p";
 
-	if(d == HAndM)
-	{
-	    if(q != dataMembers.begin() || ct == LocalException)
-	    {
-		_H << " " << name;
-	    }
-	    _H << ":(" << typeString;
-	    if(mapsToPointerType(type))
-	    {
-		_H << " *";
-	    }
-	    _H << ")" << fixId((*q)->name());
-	}
     }
 }
 

@@ -141,10 +141,9 @@ private:
 
         enum Escape { NoEscape, WithEscape };
 	enum ContainerType { LocalException, Other };
-	enum Destination { MOnly , HAndM};
 
 	void writeMembers(const DataMemberList&, int) const;
-	void writeMemberSignature(const DataMemberList&, int, ContainerType, Destination) const;
+	void writeMemberSignature(const DataMemberList&, int, ContainerType) const;
 	void writeMemberCall(const DataMemberList&, int, ContainerType, Escape) const;
 	void writeMemberInit(const DataMemberList&, int) const;
 	void writeProperties(const DataMemberList&, int) const;
