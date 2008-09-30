@@ -376,15 +376,21 @@ IceObjC::Instance::Instance(const IceInternal::InstancePtr& instance, bool secur
         CFRelease(items);
     }
 
-    string trustOnly = properties->getPropertyWithDefault("IceSSL.TrustOnly.Client", 
-                                                          properties->getProperty("IceSSL.TrustOnly"));
+    string trustOnly = properties->getProperty("IceSSL.TrustOnly.Client");
     if(!trustOnly.empty())
     {
+        if(certAuthFile.empty())
+        {
+            ostringstream os;
+            os << "IceSSL: `IceSSL.TrustOnly.Client' can only be specified with `IceSSL.CertAuthFile'";
+            throw PluginInitializationException(__FILE__, __LINE__, os.str());
+        }
+
         unsigned char buf[20];
         if(!parseKey(trustOnly, buf, sizeof(buf)))
         {
             ostringstream os;
-            os << "IceSSL: invalid trust only property value (not a 20 bytes hexadecimal string)";
+            os << "IceSSL: invalid `IceSSL.TrustOnly.Client' property value (not a 20 bytes hexadecimal string)";
             throw PluginInitializationException(__FILE__, __LINE__, os.str());
         }
         _trustOnlyKeyID = CFDataCreate(0, (const UInt8*)buf, sizeof(buf));

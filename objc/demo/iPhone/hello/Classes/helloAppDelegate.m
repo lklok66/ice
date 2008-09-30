@@ -29,7 +29,6 @@
             [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
 	    [initData.properties setProperty:@"IceSSL.CertFile" value:@"c_rsa1024.pfx"];
 	    [initData.properties setProperty:@"IceSSL.Password" value:@"password"];
-	    [initData.properties setProperty:@"IceSSL.TrustOnly" value:@"75:FA:B7:3C:6B:1C:F8:FA:69:4B:75:A0:22:51:B2:AC:11:54:A7:E7"];
 #if TARGET_IPHONE_SIMULATOR
             [initData.properties setProperty:@"IceSSL.Keychain" value:@"test"];
             [initData.properties setProperty:@"IceSSL.KeychainPassword" value:@"password"];

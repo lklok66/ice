@@ -468,7 +468,7 @@ IceObjC::Transceiver::checkCertificates()
                 out << "certificate validation failed: " << result;
             }
             CFRelease(certificates);
-            throw SocketException(__FILE__, __LINE__);
+            throw SocketException(__FILE__, __LINE__, 0);
         }
 
 #if !TARGET_IPHONE_SIMULATOR
@@ -530,7 +530,7 @@ IceObjC::Transceiver::checkCertificates()
                     out << "certificate subject key ID doesn't match trust only property (error = " << foundErr << ")";
                 }
                 CFRelease(certificates);
-                throw SocketException(__FILE__, __LINE__);
+                throw SocketException(__FILE__, __LINE__, 0);
             }
         }
 #endif
