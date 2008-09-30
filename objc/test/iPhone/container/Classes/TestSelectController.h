@@ -14,6 +14,7 @@
 {
 @private
     IBOutlet UIPickerView* pickerView;
+    IBOutlet UISwitch* sslSwitch;
     NSArray* tests;
     NSEnumerator* testsEnum;
 }

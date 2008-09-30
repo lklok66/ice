@@ -111,8 +111,10 @@
 
 - (void)viewDidLoad
 {
+    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+    
     // Initialize testCommon.
-    tprintInit(self, @selector(add:), @selector(serverReady));
+    TestCommonInit(self, @selector(add:), @selector(serverReady), appDelegate.ssl);
     
     self.currentMessage = [NSMutableString string];
     self.messages = [NSMutableArray array];
