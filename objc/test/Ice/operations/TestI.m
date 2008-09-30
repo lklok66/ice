@@ -381,6 +381,51 @@
     }
 }
 
+-(TestStringS *) getNSNullStringSeq:(ICECurrent *)current
+{
+    return [NSArray arrayWithObjects:@"first", [NSNull null], nil];
+}
+
+-(TestMyClassS *) getNSNullASeq:(ICECurrent *)current
+{
+    return [NSArray arrayWithObjects:[TestA a:99], [NSNull null], nil];
+}
+
+-(TestStructS *) getNSNullStructSeq:(ICECurrent *)current
+{
+    TestStructure *s = [TestStructure structure:nil e:Testenum2 s:[TestAnotherStruct anotherStruct:@"Hello"]];
+    return [NSArray arrayWithObjects:s, [NSNull null], nil];
+}
+
+-(TestStringSS *) getNSNullStringSeqSeq:(ICECurrent *)current
+{
+    TestStringSS *s = [NSArray arrayWithObjects:@"first", nil];
+    return [NSArray arrayWithObjects:s, [NSNull null], nil];
+}
+
+-(TestStringStringD *) getNSNullStringStringDict:(ICECurrent *)current
+{
+    TestMutableStringStringD *d = [TestMutableStringStringD dictionary];
+    [d setObject:@"ONE" forKey:@"one"];
+    [d setObject:[NSNull null] forKey:@"two"];
+    return d;
+}
+
+-(void) putNSNullStringStringDict:(TestMutableStringStringD *)d current:(ICECurrent *)current
+{
+    // Nothing to do because this tests that an exception is thrown on the client side.
+}
+
+-(void) putNSNullShortIntDict:(TestMutableShortIntD *)d current:(ICECurrent *)current
+{
+    // Nothing to do because this tests that an exception is thrown on the client side.
+}
+
+-(void) putNSNullStringMyEnumDict:(TestMutableStringMyEnumD *)d current:(ICECurrent *)current
+{
+    // Nothing to do because this tests that an exception is thrown on the client side.
+}
+
 -(void) shutdown:(ICECurrent*)current
 {
     [[[current adapter] getCommunicator] shutdown];

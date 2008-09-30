@@ -868,4 +868,101 @@ twoways(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 	}
         [p opDoubleMarshaling:d p2:ds];
     }
+
+    //
+    // Tests below are for Objective-C only. They test that we do the right thing if NSNull
+    // is passed as part of the sequence or dictionary.
+    //
+    @try
+    {
+	{
+	    TestStringS *s = [p getNSNullStringSeq];
+	    test([s count] == 2);
+	    test([[s objectAtIndex:0] isEqualToString:@"first"]);
+	    test([[s objectAtIndex:1] isEqualToString:@""]);
+	}
+
+	{
+	    TestAS *s = [p getNSNullASeq];
+	    test([s count] == 2);
+	    test(((TestA *)[s objectAtIndex:0]).i == 99);
+	    test([s objectAtIndex:1] == [NSNull null]);
+	}
+
+	{
+	    TestStructS *seq = [p getNSNullStructSeq];
+	    test([seq count] == 2);
+	    TestStructure *s = [seq objectAtIndex:0];
+	    test(s.p == nil);
+	    test(s.e == Testenum2);
+	    test([s.s.s isEqualToString:@"Hello"]);
+	    s = [seq objectAtIndex:1];
+	    test(s.p == nil);
+	    test(s.e == Testenum1);
+	    test([s.s.s isEqualToString:@""]);
+	}
+
+	{
+	    TestStringSS *seq = [p getNSNullStringSeqSeq];
+	    test([seq count] == 2);
+	    TestStringS *s = [seq objectAtIndex:0];
+	    test([s count] == 1);
+	    test([(NSString *)[s objectAtIndex:0] isEqualToString:@"first"]);
+	    s = [seq objectAtIndex:1];
+	    test([s count] == 0);
+	}
+
+	{
+	    TestStringStringD *d = [p getNSNullStringStringDict];
+	    test([d count] == 2);
+	    test([(NSString *)[d objectForKey:@"one"] isEqualToString:@"ONE"]);
+	    test([(NSString *)[d objectForKey:@"two"] isEqualToString:@""]);
+	}
+
+	{
+	    @try
+	    {
+		TestMutableStringStringD *d = [TestMutableStringStringD dictionary];
+		[d setObject:@"bad key" forKey:[NSNull null]];
+		[p putNSNullStringStringDict:d];
+		test(NO);
+	    }
+	    @catch(ICEMarshalException *)
+	    {
+	        // Expected
+	    }
+	}
+
+	{
+	    @try
+	    {
+		TestMutableShortIntD *d = [TestMutableShortIntD dictionary];
+		[d setObject:[NSNull null] forKey:[NSNumber numberWithInt:1]];
+		[p putNSNullShortIntDict:d];
+		test(NO);
+	    }
+	    @catch(ICEMarshalException *)
+	    {
+	        // Expected
+	    }
+	}
+
+	{
+	    @try
+	    {
+		TestMutableStringMyEnumD *d = [TestMutableStringMyEnumD dictionary];
+		[d setObject:[NSNull null] forKey:@"key"];
+		[p putNSNullStringMyEnumDict:d];
+		test(NO);
+	    }
+	    @catch(ICEMarshalException *)
+	    {
+	        // Expected
+	    }
+	}
+    }
+    @catch(ICEOperationNotExistException *)
+    {
+       // Client is talking to non-Objective-C server.
+    }
 }

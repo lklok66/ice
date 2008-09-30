@@ -66,6 +66,15 @@ dictionary<long, float> LongFloatD;
 dictionary<string, string> StringStringD;
 dictionary<string, MyEnum> StringMyEnumD;
 
+sequence<Structure> StructS; // Used by Objective-C test only.
+
+class A // Used Objective-C test only.
+{
+    int i;
+};
+
+sequence<A> AS; // Used by Objective-C test only.
+
 ["ami"] class MyClass
 {
      void shutdown();
@@ -156,6 +165,20 @@ dictionary<string, MyEnum> StringMyEnumD;
      Ice::Context opContext();
 
      void opDoubleMarshaling(double p1, DoubleS p2);
+
+     //
+     // Operations below are specific to Objective-C
+     //
+
+     StringS getNSNullStringSeq();
+     AS getNSNullASeq();
+     StructS getNSNullStructSeq();
+     StringSS getNSNullStringSeqSeq();
+
+     StringStringD getNSNullStringStringDict();
+     void putNSNullStringStringDict(StringStringD d);
+     void putNSNullShortIntDict(ShortIntD d);
+     void putNSNullStringMyEnumDict(StringMyEnumD d);
 };
 
 ["ami"] class MyDerivedClass extends MyClass

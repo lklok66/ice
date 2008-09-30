@@ -1183,5 +1183,8 @@ twowaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
         test([cb check]);
         [cb release];
     }
+
+    // Marshaling tests for NSNull are present only in synchronous test because testing asynchronously
+    // would only test the same marshaling code that's been tested already.
 }
 
