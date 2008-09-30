@@ -401,6 +401,7 @@
 -(void)initUsers:(NSMutableArray *)users
 {
     self.userViewController.users = users;
+    [self.userViewController.usersTableView reloadData];
     self.navigationItem.rightBarButtonItem.title = [NSString stringWithFormat:@"%d %@",
                                                     self.userViewController.users.count,
                                                     (self.userViewController.users.count > 1 ? @"users" : @"user")];
@@ -417,6 +418,7 @@
     [self append:[ChatMessage chatMessageWithText:s who:@"system message" timestamp:timestamp]];
 
     [self.userViewController.users addObject:name];
+    [self.userViewController.usersTableView reloadData];
     
     self.navigationItem.rightBarButtonItem.title = [NSString stringWithFormat:@"%d %@",
                                                     self.userViewController.users.count,
@@ -432,6 +434,7 @@
     if(index != NSNotFound)
     {
         [self.userViewController.users removeObjectAtIndex:index];
+        [self.userViewController.usersTableView reloadData];
     }
 
     self.navigationItem.rightBarButtonItem.title = [NSString stringWithFormat:@"%d %@",

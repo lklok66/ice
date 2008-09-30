@@ -79,7 +79,17 @@
     {
         [c destroy];
     }
+    [communicators_ removeAllObjects];
     [[[current adapter] getCommunicator] shutdown];
+}
+
+-(void) terminate
+{
+    for(id<ICECommunicator> c in communicators_)
+    {
+        [c destroy];
+    }
+    [communicators_ removeAllObjects];
 }
 @end
 

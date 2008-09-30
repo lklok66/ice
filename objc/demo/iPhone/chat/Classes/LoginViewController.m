@@ -22,6 +22,8 @@
 @property (nonatomic, retain) UITextField* hostnameTextField;
 @property (nonatomic, retain) UITextField* usernameTextField;
 @property (nonatomic, retain) UITextField* passwordTextField;
+@property (nonatomic, retain) UIButton* loginButton;
+@property (nonatomic, retain) UISwitch* sslSwitch;
 
 @property (nonatomic, retain) NSString* hostname;
 @property (retain) NSString* username;
@@ -44,6 +46,8 @@
 @synthesize hostnameTextField;
 @synthesize usernameTextField;
 @synthesize passwordTextField;
+@synthesize loginButton;
+@synthesize sslSwitch;
 @synthesize hostname;
 @synthesize username;
 @synthesize password;
@@ -58,6 +62,7 @@
 NSString* hostnameKey = @"hostnameKey";
 NSString* usernameKey = @"usernameKey";
 NSString* passwordKey = @"passwordKey";
+NSString* sslKey = @"sslKey";
 
 - (void)viewDidLoad
 {
@@ -68,6 +73,7 @@ NSString* passwordKey = @"passwordKey";
         NSDictionary* appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:@"demo.zeroc.com", hostnameKey,
                                      @"", usernameKey,
                                      @"", passwordKey,
+                                     @"YES", sslKey,
                                      nil];
         
         [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
@@ -75,18 +81,17 @@ NSString* passwordKey = @"passwordKey";
     }
     
     self.queue = [[[NSOperationQueue alloc] init] autorelease];
-    
-    self.hostname = [[NSUserDefaults standardUserDefaults] stringForKey:hostnameKey];
-    hostnameTextField.text = hostname;
+
+    hostnameTextField.text = [[NSUserDefaults standardUserDefaults] stringForKey:hostnameKey];
     hostnameTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
 
-    self.username = [[NSUserDefaults standardUserDefaults] stringForKey:usernameKey];
-    usernameTextField.text = username;
+    usernameTextField.text =  [[NSUserDefaults standardUserDefaults] stringForKey:usernameKey];
     usernameTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
 
-    self.password = [[NSUserDefaults standardUserDefaults] stringForKey:passwordKey];
-    passwordTextField.text = password;
+    passwordTextField.text = [[NSUserDefaults standardUserDefaults] stringForKey:passwordKey];
     passwordTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
+    
+    sslSwitch.on =[[NSUserDefaults standardUserDefaults] boolForKey:sslKey]; 
 
     showAlert = NO;
 }
@@ -99,7 +104,7 @@ NSString* passwordKey = @"passwordKey";
     ChatViewController* controller = chatViewController;
     [controller clear];
 
-    loginButton.enabled = hostname.length > 0 && username.length > 0;
+    loginButton.enabled = hostnameTextField.text.length > 0 && usernameTextField.text.length > 0;
 
 	[super viewWillAppear:animated];
 }
@@ -135,6 +140,7 @@ NSString* passwordKey = @"passwordKey";
     [usernameTextField release];
     [passwordTextField release];
     [loginButton release];
+    [sslSwitch release];
     
     [hostname release];
     [username release];
@@ -155,6 +161,12 @@ NSString* passwordKey = @"passwordKey";
         chatViewController = [[ChatViewController alloc] initWithNibName:@"ChatView" bundle:nil];
     }
     return chatViewController;
+}
+
+-(IBAction)sslChanged:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setObject:(sslSwitch.isOn ? @"YES" : @"NO") forKey:sslKey];
+    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 #pragma mark UIAlertViewDelegate
@@ -186,8 +198,8 @@ NSString* passwordKey = @"passwordKey";
     // field so that the keyboard is dismissed.
     if(theTextField == hostnameTextField)
     {
-        NSString* s = [NSString stringWithFormat:@"SessionFactory:tcp -h %@ -p 10000",
-                       theTextField.text];
+        // The exact string doesn't matter as long as the hostname validates as correct.
+        NSString* s = [NSString stringWithFormat:@"Glacier2/router:tcp -p 4064 -h %@ -t 10000", theTextField.text];
         @try
         {
             AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
@@ -205,23 +217,20 @@ NSString* passwordKey = @"passwordKey";
             return NO;
         }
         
-        self.hostname = theTextField.text;
-        [[NSUserDefaults standardUserDefaults] setObject:hostname forKey:hostnameKey];
+        [[NSUserDefaults standardUserDefaults] setObject:theTextField.text forKey:hostnameKey];
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
     else if(theTextField == usernameTextField)
     {
-        self.username = theTextField.text;
-        [[NSUserDefaults standardUserDefaults] setObject:username forKey:usernameKey];
+        [[NSUserDefaults standardUserDefaults] setObject:theTextField.text forKey:usernameKey];
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
     else if(theTextField == passwordTextField)
     {
-        self.password = theTextField.text;
-        [[NSUserDefaults standardUserDefaults] setObject:password forKey:passwordKey];
+        [[NSUserDefaults standardUserDefaults] setObject:theTextField.text forKey:passwordKey];
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
-    loginButton.enabled = hostname.length > 0 && username.length > 0;
+    loginButton.enabled = hostnameTextField.text.length > 0 && usernameTextField.text.length > 0;
 
     [theTextField resignFirstResponder];
     self.currentTextField = nil;
@@ -236,8 +245,8 @@ NSString* passwordKey = @"passwordKey";
     // Restart the login process in the delegate.
     AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
     [appDelegate logout];
-    
-    loginButton.enabled = hostname.length > 0 && username.length > 0;
+ 
+    loginButton.enabled = hostnameTextField.text.length > 0 && usernameTextField.text.length > 0;
     
     [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
     
@@ -257,6 +266,7 @@ NSString* passwordKey = @"passwordKey";
     
     ChatViewController* controller = chatViewController;
     controller.session = session;
+    controller.title = self.hostname;
     [self.navigationController pushViewController:controller animated:YES];
     
     // Re-enable the login button.
@@ -310,15 +320,29 @@ NSString* passwordKey = @"passwordKey";
     AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
     id<ICEObjectPrx> proxy;
     
+    // Save the text field properties. We do that here since the text fields could be
+    // changed during the login process.
+    self.hostname = hostnameTextField.text;
+    self.username = usernameTextField.text;
+    self.password = passwordTextField.text;
+
     @try
     {
-            NSString* s = [NSString stringWithFormat:@"Glacier2/router:tcp -p 4064 -h %@ -t 10000", hostname];
-            proxy = [appDelegate.communicator stringToProxy:s];
-            id<ICERouterPrx> router = [ICERouterPrx uncheckedCast:proxy];
-            
-            // Configure the default router on the communicator.
-            AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-            [appDelegate.communicator setDefaultRouter:router];
+        NSString* s;
+        if(sslSwitch.isOn)
+        {
+            s = [NSString stringWithFormat:@"Glacier2/router:ssl -p 4064 -h %@ -t 10000", hostname];
+        }
+        else
+        {
+            s = [NSString stringWithFormat:@"Glacier2/router:tcp -p 4502 -h %@ -t 10000", hostname];
+        }
+        proxy = [appDelegate.communicator stringToProxy:s];
+        id<ICERouterPrx> router = [ICERouterPrx uncheckedCast:proxy];
+        
+        // Configure the default router on the communicator.
+        AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+        [appDelegate.communicator setDefaultRouter:router];
     }
     @catch(ICEEndpointParseException* ex)
     {

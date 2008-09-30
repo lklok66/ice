@@ -11,6 +11,7 @@
 
 @implementation UserViewController
 
+@synthesize usersTableView;
 @synthesize users;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil

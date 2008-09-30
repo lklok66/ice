@@ -22,6 +22,7 @@
 @property (nonatomic, retain) UITextField* hostnameTextField;
 @property (nonatomic, retain) UIButton* loginButton;
 @property (nonatomic, retain) UISwitch* glacier2Switch;
+@property (nonatomic, retain) UISwitch* sslSwitch;
 
 @property (nonatomic, retain) NSString* hostname;
 
@@ -39,6 +40,7 @@
 @synthesize hostnameTextField;
 @synthesize loginButton;
 @synthesize glacier2Switch;
+@synthesize sslSwitch;
 @synthesize hostname;
 @synthesize library;
 @synthesize session;
@@ -48,6 +50,7 @@
 
 NSString* hostnameKey = @"hostnameKey";
 NSString* glacier2Key = @"glacier2Key";
+NSString* sslKey = @"sslKey";
 
 -(void)viewDidLoad
 {
@@ -55,7 +58,10 @@ NSString* glacier2Key = @"glacier2Key";
     NSString* testValue = [[NSUserDefaults standardUserDefaults] stringForKey:hostnameKey];
     if (testValue == nil)
     {
-        NSDictionary* appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:@"127.0.0.1", hostnameKey, @"NO", glacier2Key, nil];
+        NSDictionary* appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:@"127.0.0.1", hostnameKey,
+                                     @"NO", glacier2Key,
+                                     @"NO", sslKey,
+                                     nil];
 	
         [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
         [[NSUserDefaults standardUserDefaults] synchronize];
@@ -63,6 +69,7 @@ NSString* glacier2Key = @"glacier2Key";
 
     self.hostname = [[NSUserDefaults standardUserDefaults] stringForKey:hostnameKey];
     glacier2Switch.on = [[NSUserDefaults standardUserDefaults] boolForKey:glacier2Key];
+    sslSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:sslKey];
     
     self.queue = [[[NSOperationQueue alloc] init] autorelease];
 
@@ -111,6 +118,7 @@ NSString* glacier2Key = @"glacier2Key";
     [hostnameTextField release];
     [loginButton release];
     [glacier2Switch release];
+    [sslSwitch release];
     [hostname release];
     [mainViewController release];
     [session release];
@@ -134,6 +142,14 @@ NSString* glacier2Key = @"glacier2Key";
     UISwitch* sender = (UISwitch*)s;
 
     [[NSUserDefaults standardUserDefaults] setObject:(sender.isOn ? @"YES" : @"NO") forKey:glacier2Key];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+-(void)sslChanged:(id)s
+{
+    UISwitch* sender = (UISwitch*)s;
+    
+    [[NSUserDefaults standardUserDefaults] setObject:(sender.isOn ? @"YES" : @"NO") forKey:sslKey];
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
@@ -291,7 +307,15 @@ NSString* glacier2Key = @"glacier2Key";
     {
         if(glacier2Switch.isOn)
         {
-            NSString* s = [NSString stringWithFormat:@"DemoGlacier2/router:tcp -h %@ -p 4064 -t 30000", hostname];
+            NSString* s;
+            if(sslSwitch.isOn)
+            {
+                s = [NSString stringWithFormat:@"DemoGlacier2/router:ssl -h %@ -p 4064 -t 10000", hostname];
+            }
+            else
+            {
+                s = [NSString stringWithFormat:@"DemoGlacier2/router:tcp -h %@ -p 4502 -t 10000", hostname];
+            }
             proxy = [appDelegate.communicator stringToProxy:s];
             id<ICERouterPrx> router = [ICERouterPrx uncheckedCast:proxy];
             
@@ -303,7 +327,15 @@ NSString* glacier2Key = @"glacier2Key";
         }
         else
         {
-            NSString* s = [NSString stringWithFormat:@"SessionFactory:tcp -h %@ -p 10000 -t 30000", hostname];
+            NSString* s;
+            if(sslSwitch.isOn)
+            {
+                s = [NSString stringWithFormat:@"SessionFactory:ssl -h %@ -p 10001 -t 10000", hostname];
+            }
+            else
+            {
+                s = [NSString stringWithFormat:@"SessionFactory:tcp -h %@ -p 10000 -t 10000", hostname];
+            }
             proxy = [appDelegate.communicator stringToProxy:s];
 
             loginSelector = @selector(doLogin:);

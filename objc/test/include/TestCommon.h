@@ -14,7 +14,7 @@
 @end
 
 #if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
-void tprintInit(id, SEL, SEL);
+void TestCommonInit(id, SEL, SEL, BOOL);
 #endif
 
 @protocol ICECommunicator;

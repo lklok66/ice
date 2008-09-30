@@ -7,17 +7,18 @@
 //
 // **********************************************************************
 
-#import <UIKit/UIKit.h>
+#ifndef HELLO_ICE
+#define HELLO_ICE
 
-
-@interface TestSelectController : UIViewController<UIPickerViewDataSource, UIPickerViewDelegate>
+module Demo
 {
-@private
-    IBOutlet UIPickerView* pickerView;
-    NSArray* tests;
-    NSEnumerator* testsEnum;
-}
 
--(IBAction)runTest:(id)sender;
+interface Hello
+{
+    ["cpp:const"] idempotent void sayHello(int delay);
+    void shutdown();
+};
 
-@end
+};
+
+#endif

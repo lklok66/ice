@@ -16,17 +16,21 @@
 
 @property (nonatomic, retain) NSArray* tests;
 @property (nonatomic, retain) UIPickerView* pickerView;
+@property (nonatomic, retain) UISwitch* sslSwitch;
+
 @end
 
 @implementation TestSelectController
 
 @synthesize tests;
 @synthesize pickerView;
+@synthesize sslSwitch;
 
 - (void)viewDidLoad
 {
     AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
     self.tests = appDelegate.tests;
+    self.sslSwitch.isOn = appDelegate.ssl;
     [pickerView selectRow:appDelegate.currentTest inComponent:0 animated:NO];
     if(appDelegate.autoLaunch)
     {
@@ -50,6 +54,10 @@
 
 - (void)dealloc
 {
+    [tests release];
+    [pickerView release];
+    [sslSwitch release];
+    
     [super dealloc];
 }
 
@@ -60,6 +68,7 @@
     int row = [pickerView selectedRowInComponent:0];
     AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
     appDelegate.currentTest = row;
+    appDelegate.ssl = sslSwitch.isOn;
     
     TestViewController* controller = [[[TestViewController alloc] initWithNibName:@"TestView" bundle:nil] autorelease];
     controller.test = (Test*)[tests objectAtIndex:row];

@@ -34,8 +34,8 @@ run(id<ICECommunicator> communicator, ICEInitializationData* initData)
     //
     ServerLocatorRegistry* registry = [[[ServerLocatorRegistry alloc] init] autorelease];
     [registry addObject:[adapter createProxy:[communicator stringToIdentity:@"ServerManager"]]];
-    ICEObject* object = [[[ServerManagerI alloc] init:registry initData:initData] autorelease];
-    [adapter add:object identity:[communicator stringToIdentity:@"ServerManager"]];
+    ServerManagerI* serverManager = [[[ServerManagerI alloc] init:registry initData:initData] autorelease];
+    [adapter add:serverManager identity:[communicator stringToIdentity:@"ServerManager"]];
 
     id<ICELocatorRegistryPrx> registryPrx = 
         [ICELocatorRegistryPrx uncheckedCast:[adapter add:registry 
@@ -49,7 +49,7 @@ run(id<ICECommunicator> communicator, ICEInitializationData* initData)
     serverReady(communicator);
 
     [communicator waitForShutdown];
-    // TODO: Ensure shutdown.
+    [serverManager terminate];
 
     return EXIT_SUCCESS;
 }

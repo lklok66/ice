@@ -15,6 +15,10 @@
 		2899E5220DE3E06400AC0155 /* TestView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2899E5210DE3E06400AC0155 /* TestView.xib */; };
 		28AD733F0D9D9553002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD733E0D9D9553002E5188 /* MainWindow.xib */; };
 		28D7ACF80DDB3853001CB0EB /* TestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28D7ACF70DDB3853001CB0EB /* TestViewController.m */; };
+		342EB9EE0E9261A3000051FA /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 342EB9ED0E9261A3000051FA /* icon.png */; };
+		342EBA870E926E98000051FA /* c_rsa1024.pfx in Resources */ = {isa = PBXBuildFile; fileRef = 342EBA860E926E98000051FA /* c_rsa1024.pfx */; };
+		342EBA890E926E9F000051FA /* s_rsa1024.pfx in Resources */ = {isa = PBXBuildFile; fileRef = 342EBA880E926E9F000051FA /* s_rsa1024.pfx */; };
+		342EBA8B0E926F90000051FA /* cacert.der in Resources */ = {isa = PBXBuildFile; fileRef = 342EBA8A0E926F90000051FA /* cacert.der */; };
 		34B763420E8C307700CE4701 /* libIceObjC.3.3.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 34B763410E8C307700CE4701 /* libIceObjC.3.3.0.dylib */; };
 		34B7634A0E8C309A00CE4701 /* libIceObjC.3.3.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34B763410E8C307700CE4701 /* libIceObjC.3.3.0.dylib */; };
 		34B764E10E8D250100CE4701 /* libTestCommon.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34B764DF0E8D24FE00CE4701 /* libTestCommon.dylib */; };
@@ -77,6 +81,10 @@
 		28D7ACF70DDB3853001CB0EB /* TestViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestViewController.m; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* container_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = container_Prefix.pch; sourceTree = "<group>"; };
+		342EB9ED0E9261A3000051FA /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icon.png; path = Images/icon.png; sourceTree = "<group>"; };
+		342EBA860E926E98000051FA /* c_rsa1024.pfx */ = {isa = PBXFileReference; lastKnownFileType = file; name = c_rsa1024.pfx; path = ../../certs/c_rsa1024.pfx; sourceTree = SOURCE_ROOT; };
+		342EBA880E926E9F000051FA /* s_rsa1024.pfx */ = {isa = PBXFileReference; lastKnownFileType = file; name = s_rsa1024.pfx; path = ../../certs/s_rsa1024.pfx; sourceTree = SOURCE_ROOT; };
+		342EBA8A0E926F90000051FA /* cacert.der */ = {isa = PBXFileReference; lastKnownFileType = file; name = cacert.der; path = ../../certs/cacert.der; sourceTree = SOURCE_ROOT; };
 		34B763410E8C307700CE4701 /* libIceObjC.3.3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libIceObjC.3.3.0.dylib; path = ../../../lib/libIceObjC.3.3.0.dylib; sourceTree = SOURCE_ROOT; };
 		34B764DF0E8D24FE00CE4701 /* libTestCommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libTestCommon.dylib; path = ../../../lib/libTestCommon.dylib; sourceTree = SOURCE_ROOT; };
 		34B766280E8D55E700CE4701 /* TestSelectController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestSelectController.h; sourceTree = "<group>"; };
@@ -84,19 +92,19 @@
 		34B7662B0E8D55FE00CE4701 /* TestSelect.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TestSelect.xib; sourceTree = "<group>"; };
 		34B766320E8D56C700CE4701 /* Test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Test.h; sourceTree = "<group>"; };
 		34B766330E8D56C700CE4701 /* Test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Test.m; sourceTree = "<group>"; };
-		34B7679F0E8D886200CE4701 /* TestOperations.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestOperations.dylib; path = ../operations/TestOperations.dylib; sourceTree = SOURCE_ROOT; };
-		34B767A10E8D886D00CE4701 /* TestProxy.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestProxy.dylib; path = ../proxy/TestProxy.dylib; sourceTree = SOURCE_ROOT; };
-		34B767A30E8D887700CE4701 /* TestObjects.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestObjects.dylib; path = ../objects/TestObjects.dylib; sourceTree = SOURCE_ROOT; };
-		34B767BF0E8D9D1600CE4701 /* TestAdapaterDeactivation.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestAdapaterDeactivation.dylib; path = ../adapterDeactivation/TestAdapaterDeactivation.dylib; sourceTree = SOURCE_ROOT; };
-		34B767C10E8D9D2400CE4701 /* TestBinding.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestBinding.dylib; path = ../binding/TestBinding.dylib; sourceTree = SOURCE_ROOT; };
-		34B767C30E8D9D2E00CE4701 /* TestDefaultServant.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestDefaultServant.dylib; path = ../defaultServant/TestDefaultServant.dylib; sourceTree = SOURCE_ROOT; };
-		34B767C50E8D9D3700CE4701 /* TestExceptions.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestExceptions.dylib; path = ../exceptions/TestExceptions.dylib; sourceTree = SOURCE_ROOT; };
-		34B767C70E8D9D3F00CE4701 /* TestFacets.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestFacets.dylib; path = ../facets/TestFacets.dylib; sourceTree = SOURCE_ROOT; };
-		34B767C90E8D9D4A00CE4701 /* TestInheritance.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestInheritance.dylib; path = ../inheritance/TestInheritance.dylib; sourceTree = SOURCE_ROOT; };
-		34B767CB0E8D9D5100CE4701 /* TestInterceptor.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestInterceptor.dylib; path = ../interceptor/TestInterceptor.dylib; sourceTree = SOURCE_ROOT; };
-		34B767CD0E8D9D5800CE4701 /* TestLocation.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestLocation.dylib; path = ../location/TestLocation.dylib; sourceTree = SOURCE_ROOT; };
-		34B767CF0E8D9D6400CE4701 /* TestRetry.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestRetry.dylib; path = ../retry/TestRetry.dylib; sourceTree = SOURCE_ROOT; };
-		34B767D10E8D9D6E00CE4701 /* TestTimeout.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestTimeout.dylib; path = ../timeout/TestTimeout.dylib; sourceTree = SOURCE_ROOT; };
+		34B7679F0E8D886200CE4701 /* TestOperations.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestOperations.dylib; path = ../../Ice/operations/TestOperations.dylib; sourceTree = SOURCE_ROOT; };
+		34B767A10E8D886D00CE4701 /* TestProxy.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestProxy.dylib; path = ../../Ice/proxy/TestProxy.dylib; sourceTree = SOURCE_ROOT; };
+		34B767A30E8D887700CE4701 /* TestObjects.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestObjects.dylib; path = ../../Ice/objects/TestObjects.dylib; sourceTree = SOURCE_ROOT; };
+		34B767BF0E8D9D1600CE4701 /* TestAdapaterDeactivation.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestAdapaterDeactivation.dylib; path = ../../Ice/adapterDeactivation/TestAdapaterDeactivation.dylib; sourceTree = SOURCE_ROOT; };
+		34B767C10E8D9D2400CE4701 /* TestBinding.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestBinding.dylib; path = ../../Ice/binding/TestBinding.dylib; sourceTree = SOURCE_ROOT; };
+		34B767C30E8D9D2E00CE4701 /* TestDefaultServant.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestDefaultServant.dylib; path = ../../Ice/defaultServant/TestDefaultServant.dylib; sourceTree = SOURCE_ROOT; };
+		34B767C50E8D9D3700CE4701 /* TestExceptions.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestExceptions.dylib; path = ../../Ice/exceptions/TestExceptions.dylib; sourceTree = SOURCE_ROOT; };
+		34B767C70E8D9D3F00CE4701 /* TestFacets.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestFacets.dylib; path = ../../Ice/facets/TestFacets.dylib; sourceTree = SOURCE_ROOT; };
+		34B767C90E8D9D4A00CE4701 /* TestInheritance.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestInheritance.dylib; path = ../../Ice/inheritance/TestInheritance.dylib; sourceTree = SOURCE_ROOT; };
+		34B767CB0E8D9D5100CE4701 /* TestInterceptor.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestInterceptor.dylib; path = ../../Ice/interceptor/TestInterceptor.dylib; sourceTree = SOURCE_ROOT; };
+		34B767CD0E8D9D5800CE4701 /* TestLocation.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestLocation.dylib; path = ../../Ice/location/TestLocation.dylib; sourceTree = SOURCE_ROOT; };
+		34B767CF0E8D9D6400CE4701 /* TestRetry.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestRetry.dylib; path = ../../Ice/retry/TestRetry.dylib; sourceTree = SOURCE_ROOT; };
+		34B767D10E8D9D6E00CE4701 /* TestTimeout.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestTimeout.dylib; path = ../../Ice/timeout/TestTimeout.dylib; sourceTree = SOURCE_ROOT; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -142,6 +150,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				342EB9E60E92600E000051FA /* Images */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
@@ -163,6 +172,9 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				342EBA8A0E926F90000051FA /* cacert.der */,
+				342EBA880E926E9F000051FA /* s_rsa1024.pfx */,
+				342EBA860E926E98000051FA /* c_rsa1024.pfx */,
 				2899E5210DE3E06400AC0155 /* TestView.xib */,
 				28AD733E0D9D9553002E5188 /* MainWindow.xib */,
 				8D1107310486CEB800E47090 /* Info.plist */,
@@ -194,6 +206,14 @@
 				288765A40DF7441C002DB57D /* CoreGraphics.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		342EB9E60E92600E000051FA /* Images */ = {
+			isa = PBXGroup;
+			children = (
+				342EB9ED0E9261A3000051FA /* icon.png */,
+			);
+			name = Images;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -242,6 +262,10 @@
 				28AD733F0D9D9553002E5188 /* MainWindow.xib in Resources */,
 				2899E5220DE3E06400AC0155 /* TestView.xib in Resources */,
 				34B7662C0E8D55FE00CE4701 /* TestSelect.xib in Resources */,
+				342EB9EE0E9261A3000051FA /* icon.png in Resources */,
+				342EBA870E926E98000051FA /* c_rsa1024.pfx in Resources */,
+				342EBA890E926E9F000051FA /* s_rsa1024.pfx in Resources */,
+				342EBA8B0E926F90000051FA /* cacert.der in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

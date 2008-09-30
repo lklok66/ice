@@ -25,11 +25,10 @@
         {
             ICEInitializationData* initData = [ICEInitializationData initializationData];
             initData.properties = [ICEUtil createProperties];
-            [initData.properties setProperty:@"Ice.Plugin.IceSSL" value:@"createIceSSL"];
             [initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
             [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
-	    [initData.properties setProperty:@"IceSSL.CertFile" value:@"c_rsa1024.pfx"];
-	    [initData.properties setProperty:@"IceSSL.Password" value:@"password"];
+            [initData.properties setProperty:@"IceSSL.CertFile" value:@"c_rsa1024.pfx"];
+            [initData.properties setProperty:@"IceSSL.Password" value:@"password"];
 #if TARGET_IPHONE_SIMULATOR
             [initData.properties setProperty:@"IceSSL.Keychain" value:@"test"];
             [initData.properties setProperty:@"IceSSL.KeychainPassword" value:@"password"];

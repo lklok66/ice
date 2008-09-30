@@ -17,6 +17,8 @@
     ICEInitializationData* initData_;
 }
 -(id)init:(ServerLocatorRegistry*)registry initData:(ICEInitializationData*)d;
+
+-(void)terminate;
 @end
 
 @interface HelloI : TestHello

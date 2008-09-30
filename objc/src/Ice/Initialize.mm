@@ -21,11 +21,13 @@
 #import <Foundation/NSAutoreleasePool.h>
 #import <Foundation/NSThread.h>
 
+#if TARGET_OS_IPHONE
 extern "C" 
 {
     Ice::Plugin* createIceTcp(const Ice::CommunicatorPtr&, const std::string&, const Ice::StringSeq&);
     Ice::Plugin* createIceSSL(const Ice::CommunicatorPtr&, const std::string&, const Ice::StringSeq&);
 }
+#endif
 
 namespace IceObjC
 {
@@ -247,6 +249,7 @@ private:
 
 #if TARGET_OS_IPHONE
         data.properties->setProperty("Ice.Plugin.IceTcp", "createIceTcp");
+        data.properties->setProperty("Ice.Plugin.IceSSL", "createIceSSL");
 
         //
         // TODO: If plugin initialization fails, the exe crashes, investigate.

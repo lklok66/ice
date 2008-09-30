@@ -323,6 +323,11 @@ def generateBisonFile(x, verbose = False):
     os.chdir(dir)
     (base,ext) = os.path.splitext(file)
 
+    if dir.find("objc") == -1:
+        targetext = ".cpp"
+    else:
+        targetext = ".m"
+
     #
     # Run gmake to create the output files.
     #
@@ -333,13 +338,14 @@ def generateBisonFile(x, verbose = False):
     if file == "cexp.y":
         os.system("gmake " + quiet + " cexp.c")
     else:
-        os.system("gmake " + quiet + " " + base + ".cpp")
+        os.system("gmake " + quiet + " " + base + targetext)
 
     #
     # Edit the Makefile to comment out the grammar rules.
     #
     fixMakefile("Makefile", base, ext)
-    fixMakefile("Makefile.mak", base, ext)
+    if os.path.exists("Makefile.mak"):
+        fixMakefile("Makefile.mak", base, ext)
 
     #
     # Edit the project file(s) to comment out the grammar rules.
@@ -361,6 +367,11 @@ def generateFlexFile(x, verbose = False):
     os.chdir(dir)
     (base,ext) = os.path.splitext(file)
 
+    if dir.find("objc") == -1:
+        targetext = ".cpp"
+    else:
+        targetext = ".m"
+
     #
     # Run gmake to create the output files.
     #
@@ -368,13 +379,14 @@ def generateFlexFile(x, verbose = False):
         quiet = ""
     else:
         quiet = "-s"
-    os.system("gmake " + quiet + " " + base + ".cpp")
+    os.system("gmake " + quiet + " " + base + targetext)
 
     #
     # Edit the Makefile to comment out the flex rules.
     #
     fixMakefile("Makefile", base, ext)
-    fixMakefile("Makefile.mak", base, ext)
+    if os.path.exists("Makefile.mak"):
+        fixMakefile("Makefile.mak", base, ext)
 
     #
     # Edit the project file(s) to comment out the flex rules.

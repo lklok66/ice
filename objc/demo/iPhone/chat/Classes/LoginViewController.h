@@ -18,6 +18,7 @@
     IBOutlet UITextField* usernameTextField;
     IBOutlet UITextField* passwordTextField;
     IBOutlet UIButton* loginButton;
+    IBOutlet UISwitch* sslSwitch;
 
     NSString* hostname;
     NSString* username;
@@ -32,5 +33,6 @@
 }
 
 -(IBAction)login:(id)sender;
+-(IBAction)sslChanged:(id)sender;
 
 @end

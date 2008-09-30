@@ -21,10 +21,26 @@
 }
 @end
 
+#if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
+
+#import <Foundation/NSString.h>
+#import <Foundation/NSObject.h>
+#import <Foundation/NSThread.h>
+
+#include <Ice/Ice.h>
+
+static id outputTarget;
+static SEL readySelector;
+static SEL outputSelector;
+static id<ICECommunicator> communicator;
+static BOOL ssl;
+#endif
+
 id<ICEProperties>
 defaultServerProperties(int *argc, char** argv)
 {
     id<ICEProperties> properties = [ICEUtil createProperties];
+
 #if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
     static NSString* defaults[] =
     {
@@ -37,10 +53,32 @@ defaultServerProperties(int *argc, char** argv)
         @"Ice.ServerIdleTime", @"30",
         @"Ice.Default.Host", @"127.0.0.1"
     };
+
+    static NSString* ssldefaults[] =
+    {
+        @"Ice.Default.Protocol", @"ssl",
+        @"IceSSL.CertAuthFile", @"cacert.der",
+        @"IceSSL.CheckCertName", @"0",
+	@"IceSSL.CertFile", @"s_rsa1024.pfx",
+	@"IceSSL.Password", @"password",
+#if TARGET_IPHONE_SIMULATOR
+        @"IceSSL.Keychain", @"test",
+        @"IceSSL.KeychainPassword", @"password"
+#endif     
+
+    };
+
     int i;
     for(i = 0; i < sizeof(defaults)/sizeof(defaults[0]); i += 2)
     {
         [properties setProperty:defaults[i] value:defaults[i+1]];
+    }
+    if(ssl)
+    {
+        for(i = 0; i < sizeof(ssldefaults)/sizeof(ssldefaults[0]); i += 2)
+        {
+            [properties setProperty:ssldefaults[i] value:ssldefaults[i+1]];
+        }
     }
 #endif
 
@@ -54,6 +92,7 @@ id<ICEProperties>
 defaultClientProperties(int* argc, char** argv)
 {
     id<ICEProperties> properties = [ICEUtil createProperties];
+
 #if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
     static NSString* defaults[] =
     {
@@ -61,10 +100,32 @@ defaultClientProperties(int* argc, char** argv)
         @"Ice.Warn.Connections", @"1",
         @"Ice.Default.Host", @"127.0.0.1"
     };
+
+    static NSString* ssldefaults[] =
+    {
+        @"Ice.Default.Protocol", @"ssl",
+        @"IceSSL.CheckCertName", @"0",
+        @"IceSSL.CertAuthFile", @"cacert.der",
+	@"IceSSL.CertFile", @"c_rsa1024.pfx",
+	@"IceSSL.Password", @"password",
+#if TARGET_IPHONE_SIMULATOR
+        @"IceSSL.Keychain", @"test",
+        @"IceSSL.KeychainPassword", @"password"
+#endif     
+    };
+
     int i;
     for(i = 0; i < sizeof(defaults)/sizeof(defaults[0]); i += 2)
     {
         [properties setProperty:defaults[i] value:defaults[i+1]];
+    }
+
+    if(ssl)
+    {
+        for(i = 0; i < sizeof(ssldefaults)/sizeof(ssldefaults[0]); i += 2)
+        {
+            [properties setProperty:ssldefaults[i] value:ssldefaults[i+1]];
+        }
     }
 #endif
 
@@ -76,23 +137,13 @@ defaultClientProperties(int* argc, char** argv)
 
 #if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
 
-#import <Foundation/NSString.h>
-#import <Foundation/NSObject.h>
-#import <Foundation/NSThread.h>
-
-#include <Ice/Ice.h>
-
-static id outputTarget;
-static SEL readySelector;
-static SEL outputSelector;
-static id<ICECommunicator> communicator;
-
 void
-tprintInit(id target, SEL output, SEL ready)
+TestCommonInit(id target, SEL output, SEL ready, BOOL s)
 {
     outputTarget = [target retain];
     outputSelector = output;
     readySelector = ready;
+    ssl = s;
 }
 
 void

@@ -111,8 +111,10 @@
 
 - (void)viewDidLoad
 {
+    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+    
     // Initialize testCommon.
-    tprintInit(self, @selector(add:), @selector(serverReady));
+    TestCommonInit(self, @selector(add:), @selector(serverReady), appDelegate.ssl);
     
     self.currentMessage = [NSMutableString string];
     self.messages = [NSMutableArray array];
@@ -120,8 +122,10 @@
     self.queue.maxConcurrentOperationCount = 2; // We need at least 2 concurrent operations.
     
     self.title = test.name;
-    //nextButton.enabled = NO;
-    
+    nextButton.enabled = NO;
+
+    [nextButton setTitle:@"Test is running" forState:UIControlStateDisabled];
+
     [super viewDidLoad];
 }
 
@@ -189,19 +193,41 @@
 -(void)testComplete
 {
     [activity stopAnimating];
-    nextButton.enabled = YES;
+    NSString* buttonTitle;
     AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-    [appDelegate testCompleted:YES];
+    if(appDelegate.tests.count-1 == appDelegate.currentTest)
+    {
+#if TARGET_IPHONE_SIMULATOR
+        buttonTitle = @"Launch first test";
+#else
+        buttonTitle = @"Setup first test";
+#endif
+    }
+    else
+    {
+#if TARGET_IPHONE_SIMULATOR
+        buttonTitle = @"Launch next test";
+#else
+        buttonTitle = @"Setup next test";
+#endif        
+    }
+    [nextButton setTitle:buttonTitle forState:UIControlStateNormal];
+    nextButton.enabled = YES;
 }
 
 -(IBAction)next:(id)sender
 {
-    // Note that this does not work on the iPhone.
     AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
     [appDelegate setAutoLaunch];
-
+    [appDelegate testCompleted:YES];
+    
+#if TARGET_IPHONE_SIMULATOR
+    // Note that this does not work on the iPhone.
     UIApplication* app = [UIApplication sharedApplication];
     [app launchApplicationWithIdentifier:@"com.zeroc.bounce" suspended:NO];
+#else
+    exit(0);
+#endif
 }
 
 -(void)clientComplete:(NSNumber*)rc

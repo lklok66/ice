@@ -21,6 +21,7 @@
 
 NSString* currentTestKey = @"currentTestKey";
 NSString* autoLaunchKey = @"autoLaunchKey";
+NSString* sslKey = @"sslKey";
 
 -(id)init
 {
@@ -48,7 +49,9 @@ NSString* autoLaunchKey = @"autoLaunchKey";
         if(testValue == nil)
         {
             NSDictionary* appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:@"0", currentTestKey,
-                                         @"NO", autoLaunchKey, nil];
+                                         @"NO", autoLaunchKey,
+                                         @"NO", sslKey,
+                                         nil];
             
             [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
             [[NSUserDefaults standardUserDefaults] synchronize];
@@ -67,6 +70,7 @@ NSString* autoLaunchKey = @"autoLaunchKey";
             [[NSUserDefaults standardUserDefaults] setObject:@"NO" forKey:autoLaunchKey];
             [[NSUserDefaults standardUserDefaults] synchronize];
         }
+        ssl = [[NSUserDefaults standardUserDefaults] boolForKey:sslKey];
     }
     return self;
 }
@@ -97,6 +101,19 @@ NSString* autoLaunchKey = @"autoLaunchKey";
     currentTest = test;
 
     [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithInt:currentTest] forKey:currentTestKey];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+-(BOOL)ssl
+{
+    return ssl;
+}
+
+-(void)setSsl:(BOOL)v
+{
+    ssl = v;
+    
+    [[NSUserDefaults standardUserDefaults] setObject:(v ? @"YES" : @"NO") forKey:sslKey];
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
