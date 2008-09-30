@@ -266,6 +266,7 @@ NSString* sslKey = @"sslKey";
     
     ChatViewController* controller = chatViewController;
     controller.session = session;
+    controller.title = self.hostname;
     [self.navigationController pushViewController:controller animated:YES];
     
     // Re-enable the login button.
