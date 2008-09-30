@@ -43,7 +43,12 @@ endif
 mklibfilename       	= $(if $(2),lib$(1).$(2).dylib,lib$(1).dylib)
 mksoname           	= $(if $(2),lib$(1).$(2).dylib,lib$(1).dylib)
 
-mklibname           	= lib$(1).dylib
+ifeq ($(STATICLIBS),yes)
+    mklibname	= lib$(1).a
+else
+    mklibname	= lib$(1).dylib
+endif
+
 curdir			= $(shell pwd)
 
 ifeq ($(OPTIMIZE),yes)
@@ -74,6 +79,8 @@ ifeq ($(DB_HOME),)
        endif
    endif
 endif
+
+mklib                   = ar cr $(1) $(2)
 
 BASELIBS		= -lIceUtil -lpthread 
 LIBS			= -lIce $(BASELIBS)

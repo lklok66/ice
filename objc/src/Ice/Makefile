@@ -10,10 +10,9 @@
 top_srcdir	= ../..
 
 LIBFILENAME     = $(call mklibfilename,IceObjC,$(VERSION))
-SONAME          = $(call mksoname,IceObjC,$(SOVERSION))  
 LIBNAME		= $(call mklibname,IceObjC)
 
-TARGETS		= $(call mklibtargets,$(libdir)/$(LIBFILENAME),$(libdir)/$(SONAME),$(libdir)/$(LIBNAME))
+TARGETS		= $(call mklibtargets,$(libdir)/$(LIBFILENAME),$(libdir)/$(LIBNAME))
 
 OBJC_OBJS	= BuiltinSequences.o \
                   DispatchInterceptor.o \
@@ -90,16 +89,12 @@ ifneq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
   endif
 endif
 else
-	$(call mkshlib,$@,$(SONAME),$(OBJS),$(LINKWITH))
+	$(call mkshlib,$@,$(LIBFILENAME),$(OBJS),$(LINKWITH))
 endif
 
-$(libdir)/$(SONAME): $(libdir)/$(LIBFILENAME)
+$(libdir)/$(LIBNAME): $(libdir)/$(LIBFILENAME)
 	rm -f $@
 	ln -s $(LIBFILENAME) $@
-
-$(libdir)/$(LIBNAME): $(libdir)/$(SONAME)
-	rm -f $@
-	ln -s $(SONAME) $@
 
 endif
 
