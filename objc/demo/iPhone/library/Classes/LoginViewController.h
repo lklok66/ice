@@ -21,6 +21,7 @@
     IBOutlet UITextField* hostnameTextField;
     IBOutlet UIButton* loginButton;
     IBOutlet UISwitch* glacier2Switch;
+    IBOutlet UISwitch* sslSwitch;
     
     BOOL showAlert;
 
@@ -35,5 +36,6 @@
 
 -(IBAction)login:(id)sender;
 -(void)glacier2Changed:(id)sender;
+-(void)sslChanged:(id)sender;
 
 @end

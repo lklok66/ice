@@ -91,7 +91,7 @@ NSString* sslKey = @"sslKey";
     passwordTextField.text = [[NSUserDefaults standardUserDefaults] stringForKey:passwordKey];
     passwordTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
     
-    sslSwitch.isOn =[[NSUserDefaults standardUserDefaults] boolForKey:sslKey]; 
+    sslSwitch.on =[[NSUserDefaults standardUserDefaults] boolForKey:sslKey]; 
 
     showAlert = NO;
 }
