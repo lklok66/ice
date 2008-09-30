@@ -688,10 +688,10 @@ sslConfigTree = {
             "colloc" : " --IceSSL.CertFile=c_rsa1024.pfx --IceSSL.ImportCert.CurrentUser.Root=cacert.pem --IceSSL.CheckCertName=0"
             },
         "objc" : {
-            "plugin" : " --Ice.Plugin.IceSSL=createIceSSL --Ice.Default.Protocol=ssl" +
-            " --IceSSL.Password=password --IceSSL.DefaultDir=%(objccertsdir)s",
-            "client" : " --IceSSL.CertFile=c_rsa1024.pfx --IceSSL.CertAuthFile=cacert.pem --IceSSL.CheckCertName=0",
-            "server" : " --IceSSL.CertFile=s_rsa1024.pfx --IceSSL.CertAuthFile=cacert.pem",
+            "plugin" : " --Ice.Plugin.IceSSL=IceSSL:createIceSSL --Ice.Default.Protocol=ssl" +
+            " --IceSSL.Password=password --IceSSL.CertAuthFile=cacert.pem --IceSSL.DefaultDir=%(certsdir)s",
+            "client" : " --IceSSL.CertFile=c_rsa1024.pfx",
+            "server" : " --IceSSL.CertFile=s_rsa1024.pfx",
             },
         }
 sslConfigTree["py"] = sslConfigTree["cpp"]
@@ -727,7 +727,6 @@ def getDefaultMapping(currentDir = ""):
 def getTestEnv():
     env = {}
     env["certsdir"] = os.path.abspath(os.path.join(findTopLevel(), "certs"))
-    env["objccertsdir"] = os.path.abspath(os.path.join(findTopLevel(), "objc", "test", "certs"))
     return env 
 
 class DriverConfig:

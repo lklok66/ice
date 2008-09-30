@@ -372,24 +372,29 @@ IceObjC::Transceiver::~Transceiver()
 void
 IceObjC::Transceiver::checkCertificates()
 {
-    CFTypeRef certificates = CFWriteStreamCopyProperty(_writeStream, kCFStreamPropertySSLPeerCertificates);
+    CFArrayRef certificates = (CFArrayRef)CFWriteStreamCopyProperty(_writeStream, kCFStreamPropertySSLPeerCertificates);
     if(certificates)
     {
         OSStatus err;
         bool checkCertName = !_host.empty() &&
             _instance->initializationData().properties->getPropertyAsIntWithDefault("IceSSL.CheckCertName", 1);
 #if TARGET_IPHONE_SIMULATOR
-        SecPolicySearchRef policySearch;
-        SecPolicyRef policy;
+        SecPolicySearchRef policySearch = 0;
+        SecPolicyRef policy = 0;
         const CSSM_OID* oid = checkCertName ? &CSSMOID_APPLE_TP_SSL : &CSSMOID_APPLE_X509_BASIC;
         if((err = SecPolicySearchCreate(CSSM_CERT_X_509v3, oid, NULL, &policySearch)) != noErr ||
            (err = SecPolicySearchCopyNext(policySearch, &policy)) != noErr)
         {
+            if(policySearch)
+            {
+                CFRelease(policySearch);
+            }
             CFRelease(certificates);
             SocketException ex(__FILE__, __LINE__);
             ex.error = err;
             throw ex;
         }
+        CFRelease(policySearch);
 
         if(checkCertName)
         {
@@ -415,14 +420,15 @@ IceObjC::Transceiver::checkCertificates()
 #endif
         SecTrustRef trust;
         SecTrustResultType result;
-        if((err = SecTrustCreateWithCertificates((CFArrayRef)certificates, policy, &trust)) != noErr)
+        if((err = SecTrustCreateWithCertificates(certificates, policy, &trust)) != noErr)
         {
+            CFRelease(policy);
             CFRelease(certificates);
             SocketException ex(__FILE__, __LINE__);
             ex.error = err;
             throw ex;
         }
-        CFRelease(certificates);
+        CFRelease(policy);
 
         //
         // If IceSSL.CertAuthFile is set, we use the certificate authorities from this file
@@ -439,10 +445,14 @@ IceObjC::Transceiver::checkCertificates()
         }
         if((err = SecTrustEvaluate(trust, &result)) != noErr)
         {
+            CFRelease(trust);
+            CFRelease(certificates);
             SocketException ex(__FILE__, __LINE__);
             ex.error = err;
             throw ex;
         }
+
+        CFRelease(trust);
 
         //
         // The kSecTrustResultUnspecified result indicates that the user didn't set any trust
@@ -457,15 +467,73 @@ IceObjC::Transceiver::checkCertificates()
                 Trace out(_logger, _traceLevels->networkCat);
                 out << "certificate validation failed: " << result;
             }
-            SocketException ex(__FILE__, __LINE__);
-            ex.error = 0;
-            throw ex;
+            CFRelease(certificates);
+            throw SocketException(__FILE__, __LINE__);
         }
 
-        if(_traceLevels->network >= 2)
+#if !TARGET_IPHONE_SIMULATOR
+        if(_instance->trustOnlyKeyID())
         {
-            Trace out(_logger, _traceLevels->networkCat);
-            out << "certificate validation succeeded";
+            //
+            // To check the subject key ID, we add the peer certificate to the keychain with SetItemAdd,
+            // then we lookup for the cert using the kSecAttrSubjectKeyID. Then we remove the cert from
+            // the keychain. NOTE: according to the Apple documentation, it should in theory be possible
+            // to not add/remove the item to the keychain by specifying the kSecMatchItemList key (or 
+            // kSecUseItemList?) when calling SecItemCopyMatching. Unfortunately this doesn't appear to
+            // work. Similarly, it should be possible to get back the attributes of the certificate 
+            // once it added by setting kSecReturnAttributes in the add query, again this doesn't seem
+            // to work.
+            //
+
+            CFMutableDictionaryRef query;
+            query = CFDictionaryCreateMutable(0, 1, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+            CFDictionarySetValue(query, kSecClass, kSecClassCertificate);
+            CFDictionarySetValue(query, kSecValueRef, (SecCertificateRef)CFArrayGetValueAtIndex(certificates, 0));
+            err = SecItemAdd(query, 0);
+            if(err != noErr && err != errSecDuplicateItem)
+            {
+                CFRelease(query);
+                CFRelease(certificates);
+                SocketException ex(__FILE__, __LINE__);
+                ex.error = err;
+                throw ex;
+            }
+            CFRelease(query);
+
+            query = CFDictionaryCreateMutable(0, 1, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+            CFDictionarySetValue(query, kSecClass, kSecClassCertificate);
+            CFDictionarySetValue(query, kSecValueRef, (SecCertificateRef)CFArrayGetValueAtIndex(certificates, 0));
+            CFDictionarySetValue(query, kSecAttrSubjectKeyID, _instance->trustOnlyKeyID());
+            err = SecItemCopyMatching(query, 0);
+            OSStatus foundErr = err;
+            CFRelease(query);
+
+            query = CFDictionaryCreateMutable(0, 1, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+            CFDictionarySetValue(query, kSecClass, kSecClassCertificate);
+            CFDictionarySetValue(query, kSecValueRef, CFArrayGetValueAtIndex(certificates, 0));
+            err = SecItemDelete(query);
+            if(err != noErr)
+            {
+                CFRelease(certificates);
+                CFRelease(query);
+                SocketException ex(__FILE__, __LINE__);
+                ex.error = err;
+                throw ex;
+            }
+            CFRelease(query);
+
+            if(foundErr != noErr)
+            {
+                if(_traceLevels->network >= 2)
+                {
+                    Trace out(_logger, _traceLevels->networkCat);
+                    out << "certificate subject key ID doesn't match trust only property (error = " << foundErr << ")";
+                }
+                CFRelease(certificates);
+                throw SocketException(__FILE__, __LINE__);
+            }
         }
+#endif
+        CFRelease(certificates);
     }
 }

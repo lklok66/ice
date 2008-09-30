@@ -21,11 +21,13 @@
 #import <Foundation/NSAutoreleasePool.h>
 #import <Foundation/NSThread.h>
 
+#if TARGET_OS_IPHONE
 extern "C" 
 {
     Ice::Plugin* createIceTcp(const Ice::CommunicatorPtr&, const std::string&, const Ice::StringSeq&);
     Ice::Plugin* createIceSSL(const Ice::CommunicatorPtr&, const std::string&, const Ice::StringSeq&);
 }
+#endif
 
 namespace IceObjC
 {

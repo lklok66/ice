@@ -28,11 +28,13 @@ class Instance : public IceUtil::Shared
 public:
 
     Instance(const IceInternal::InstancePtr&, bool);
+    virtual ~Instance();
 
     Ice::Short type() const { return _type; }
     const std::string& protocol() const { return _protocol; }
 
     CFArrayRef certificateAuthorities() const { return _certificateAuthorities; }
+    CFDataRef trustOnlyKeyID() const { return _trustOnlyKeyID; }
     IceInternal::TraceLevelsPtr traceLevels() const { return _instance->traceLevels(); }
     const Ice::InitializationData& initializationData() const { return _instance->initializationData(); }
     IceInternal::ProtocolSupport protocolSupport() const { return _instance->protocolSupport(); }
@@ -49,6 +51,7 @@ private:
     CFMutableDictionaryRef _serverSettings;
     CFMutableDictionaryRef _clientSettings;
     CFArrayRef _certificateAuthorities;
+    CFDataRef _trustOnlyKeyID;
 };
 typedef IceUtil::Handle<Instance> InstancePtr;
 

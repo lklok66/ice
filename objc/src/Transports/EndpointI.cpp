@@ -36,6 +36,58 @@ toCFString(const std::string& s)
     return CFStringCreateWithCString(NULL, s.c_str(), kCFStringEncodingUTF8);
 }
 
+inline int
+hexValue(char c)
+{
+    if(c >= '0' && c <= '9')
+    {
+        return c - '0';
+    }
+    else if(c >= 'A' && c <= 'F')
+    {
+        return (c - 'A') + 10;
+    }
+    else if(c >= 'a' && c <= 'f')
+    {
+        return (c - 'a') + 10;
+    }
+    return -1;
+}
+
+inline bool
+parseKey(const string& keyStr, unsigned char* key, int keyLen)
+{
+    int i = 0, j = 0;
+    const char* m = keyStr.c_str();
+    while(i < (int)keyStr.size() && j < keyLen)
+    {
+        if(isspace(m[i]) || m[i] == ':')
+        {
+            ++i;
+            continue;
+        }
+        else if(i == (int)keyStr.size() - 1)
+        {
+            return false; // Not enough bytes.
+        }
+
+        int vh = hexValue(m[i++]);
+        int vl = hexValue(m[i++]);
+        if(vh < 0 || vl < 0)
+        {
+            return false;
+        }
+        key[j] = vh << 4;
+        key[j++] += vl;
+    }
+
+    if(j == keyLen && i == (int)keyStr.size())
+    {
+        return true;
+    }
+    return false;
+}
+
 CFDataRef 
 readCert(const string& defaultDir, const string& certFile)
 {
@@ -126,7 +178,8 @@ IceObjC::Instance::Instance(const IceInternal::InstancePtr& instance, bool secur
     _protocol(secure ? string("ssl") : string("tcp")),
     _serverSettings(0),
     _clientSettings(0),
-    _certificateAuthorities(0)
+    _certificateAuthorities(0),
+    _trustOnlyKeyID(0)
 {
     if(!secure)
     {
@@ -322,10 +375,44 @@ IceObjC::Instance::Instance(const IceInternal::InstancePtr& instance, bool secur
         CFRelease(identity);
         CFRelease(items);
     }
+
+    string trustOnly = properties->getPropertyWithDefault("IceSSL.TrustOnly.Client", 
+                                                          properties->getProperty("IceSSL.TrustOnly"));
+    if(!trustOnly.empty())
+    {
+        unsigned char buf[20];
+        if(!parseKey(trustOnly, buf, sizeof(buf)))
+        {
+            ostringstream os;
+            os << "IceSSL: invalid trust only property value (not a 20 bytes hexadecimal string)";
+            throw PluginInitializationException(__FILE__, __LINE__, os.str());
+        }
+        _trustOnlyKeyID = CFDataCreate(0, (const UInt8*)buf, sizeof(buf));
+    }
 #endif
 
     _serverSettings = CFDictionaryCreateMutableCopy(0, 0, _clientSettings);
     CFDictionarySetValue(_serverSettings, kCFStreamSSLIsServer, kCFBooleanTrue);
+}
+
+IceObjC::Instance::~Instance()
+{
+    if(_trustOnlyKeyID)
+    {
+        CFRelease(_trustOnlyKeyID);
+    }
+    if(_serverSettings)
+    {
+        CFRelease(_serverSettings);
+    }
+    if(_clientSettings)
+    {
+        CFRelease(_clientSettings);
+    }
+    if(_certificateAuthorities)
+    {
+        CFRelease(_certificateAuthorities);
+    }
 }
 
 void
@@ -355,12 +442,18 @@ IceObjC::Instance::setupStreams(CFReadStreamRef readStream,
             CFDictionarySetValue((CFMutableDictionaryRef)settings, kCFStreamSSLPeerName, h);
             CFRelease(h);
         }
+        else
+        {
+            CFRetain(settings);
+        }
 
         if(!CFReadStreamSetProperty(readStream, kCFStreamPropertySSLSettings, settings) ||
            !CFWriteStreamSetProperty(writeStream, kCFStreamPropertySSLSettings, settings))
         {
+            CFRelease(settings);
             throw Ice::SocketException(__FILE__, __LINE__, 0);
         }
+        CFRelease(settings);
     }
 
     if(!CFReadStreamOpen(readStream) || !CFWriteStreamOpen(writeStream))
