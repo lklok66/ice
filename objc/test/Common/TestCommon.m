@@ -57,6 +57,7 @@ defaultServerProperties(int *argc, char** argv)
     static NSString* ssldefaults[] =
     {
         @"Ice.Default.Protocol", @"ssl",
+        @"IceSSL.CertAuthFile", @"cacert.der",
         @"IceSSL.CheckCertName", @"0",
 	@"IceSSL.CertFile", @"s_rsa1024.pfx",
 	@"IceSSL.Password", @"password",
