@@ -67,8 +67,8 @@
 
 @interface AppDelegate()
 
-@property (nonatomic, retain) NSTimer* refreshTimer;
 @property (nonatomic, retain) ICEInitializationData* initData;
+@property (nonatomic, retain) NSTimer* refreshTimer;
 
 @end
 
@@ -77,12 +77,12 @@
 @synthesize window;
 @synthesize navigationController;
 @synthesize communicator;
-@synthesize refreshTimer;
 @synthesize initData;
+@synthesize refreshTimer;
 
-- (id)init
+-(id)init
 {
-	if((self = [super init]))
+    if(self = [super init])
     {
         self.initData = [ICEInitializationData initializationData];
         self.initData.properties = [ICEUtil createProperties ];
@@ -92,23 +92,24 @@
         // Tracing properties.
         //[self.initData.properties setProperty:@"Ice.Trace.Network" value:@"1"];
         //[self.initData.properties setProperty:@"Ice.Trace.Protocol" value:@"1"];
-
-        //initData.properties.setProperty("Ice.Plugin.IceSSL", "IceSSL.PluginFactory");
-        //initData.properties.setProperty("IceSSL.TrustOnly.Client", "CN=Glacier2");
-        //initData.properties.setProperty("Ice.Default.Router", routerEndpoints);
-	}
-	return self;
+        
+        [self.initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
+        [self.initData.properties setProperty:@"IceSSL.TrustOnly.Client" value:@"C2:E8:D3:33:D7:83:99:6E:08:F7:C2:34:31:F7:1E:8E:44:87:38:57"];
+        [self.initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
+        
+#if TARGET_IPHONE_SIMULATOR
+        [self.initData.properties setProperty:@"IceSSL.Keychain" value:@"test"];
+        [self.initData.properties setProperty:@"IceSSL.KeychainPassword" value:@"password"];
+#endif
+    }
+    return self;
 }
-
-
 - (void)applicationDidFinishLaunching:(UIApplication *)application
 {
-	
 	// Configure and show the window
 	[window addSubview:[navigationController view]];
 	[window makeKeyAndVisible];
 }
-
 
 - (void)applicationWillTerminate:(UIApplication *)application
 {
@@ -117,11 +118,9 @@
     [communicator destroy];
 }
 
-
 - (void)dealloc
 {
     [communicator release];
-    [initData release];
     
     [session release];
     [refreshTimer release];
@@ -175,11 +174,10 @@
     }
     self.fatal = NO;
     
-    // Recreate the communicator each time the user logs out.
     [communicator destroy];
     [communicator release];
     
-    communicator = [[ICEUtil createCommunicator:self.initData] retain];
+    communicator = [[ICEUtil createCommunicator:initData] retain];    
 }
 
 -(void)setSession:(id)sess timeout:(int)timeout

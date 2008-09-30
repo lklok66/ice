@@ -12,9 +12,11 @@
 
 @interface UserViewController : UITableViewController
 {
+    IBOutlet UITableView* usersTableView;
     NSMutableArray* users;
 }
 
+@property (nonatomic, retain) UITableView* usersTableView;
 @property (nonatomic, retain) NSMutableArray* users;
 
 @end
