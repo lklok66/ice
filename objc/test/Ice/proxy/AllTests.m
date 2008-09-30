@@ -641,6 +641,7 @@ allTests(id<ICECommunicator> communicator)
         pstr = [communicator proxyToString:p1];
         test([pstr isEqualToString:@"test -t:tcp -h 127.0.0.1 -p 12010 -t 10000:tcp -h 127.0.0.2 -p 12011 -t 10000"]);
 
+#if !TARGET_OS_IPHONE // SSL is always enabled when targeting the iPhone
         //
         // Test that an SSL endpoint and a nonsense endpoint get written
         // back out as an opaque endpoint.
@@ -691,6 +692,7 @@ allTests(id<ICECommunicator> communicator)
         {
             test([pstr isEqualToString:@"test -t:ssl -h 127.0.0.1 -p 10001:opaque -t 99 -v abch"]);
         }
+#endif
     }
 
     tprintf("ok\n");

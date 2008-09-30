@@ -705,7 +705,7 @@ allTests(id<ICECommunicator> communicator)
     }
     tprintf("ok\n");
 
-    if([[[communicator getProperties] getProperty:@"Ice.Plugin.IceSSL"] length] > 0)
+    if([[[communicator getProperties] getProperty:@"Ice.Default.Protocol"] isEqual:@"ssl"])
     {
         tprintf("testing unsecure vs. secure endpoints... ");
         {

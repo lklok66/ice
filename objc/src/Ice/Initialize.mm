@@ -249,6 +249,7 @@ private:
 
 #if TARGET_OS_IPHONE
         data.properties->setProperty("Ice.Plugin.IceTcp", "createIceTcp");
+        data.properties->setProperty("Ice.Plugin.IceSSL", "createIceSSL");
 
         //
         // TODO: If plugin initialization fails, the exe crashes, investigate.

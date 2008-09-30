@@ -25,7 +25,6 @@
         {
             ICEInitializationData* initData = [ICEInitializationData initializationData];
             initData.properties = [ICEUtil createProperties];
-            [initData.properties setProperty:@"Ice.Plugin.IceSSL" value:@"createIceSSL"];
             [initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
             [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
 	    [initData.properties setProperty:@"IceSSL.CertFile" value:@"c_rsa1024.pfx"];
