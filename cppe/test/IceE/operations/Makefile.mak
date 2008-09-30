@@ -65,5 +65,6 @@ $(COLLOCATED): $(OBJS) $(COLOBJS)
 
 clean::
 	del /q Test.cpp Test.h
+	del /q *.cobj
 
 !include .depend

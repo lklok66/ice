@@ -106,9 +106,7 @@ CXX		= "$(VSINSTALLDIR)\VC\ce\bin\x86_arm\cl.exe"
 CC		= "$(VSINSTALLDIR)\VC\ce\bin\x86_arm\cl.exe"
 LINK 		= "$(VSINSTALLDIR)\VC\ce\bin\x86_arm\link.exe"
 AR		= "$(VSINSTALLDIR)\VC\ce\bin\x86_arm\lib.exe"
-!if "$(CPP_COMPILER)" == "VC80"
 RC		= $(RC) /i "$(VSINSTALLDIR)\VC\ce\atlmfc\include"
-!endif
 !else
 CXX		= cl.exe
 CC		= cl.exe
@@ -167,13 +165,15 @@ LDFLAGS		= /MACHINE:THUMB
 !endif
 
 
+RC		= $(RC) -I"$(SDK_DIR)\Include$(INCLUDE_SUBDIR)"
 CPPFLAGS 	= -QRarch4 -I"$(VSINSTALLDIR)\VC\ce\Include" -I"$(SDK_DIR)\Include$(INCLUDE_SUBDIR)" -fp:fast -TP $(CPPFLAGS) /D "ARM" /D "_ARM_" /D "ARMV4" /D "UNICODE" /D "_UNICODE"
 
 !if "$(OPTIMIZE_SPEED)" != "yes" && "$(OPTIMIZE_SIZE)" != "yes"
 CPPFLAGS	= $(CPPFLAGS) -GS-
 !endif
 
-LDFLAGS		= /LIBPATH:"$(VSINSTALLDIR)\VC\ce\Lib$(LIB_SUBDIR)" /LIBPATH:"$(SDK_DIR)\Lib$(LIB_SUBDIR)" -nodefaultlib:"kernel32.lib" -nodefaultlib:"oldnames.lib" /STACK:65536,4096 $(LDFLAGS)
+LDFLAGS		= /LIBPATH:"$(VSINSTALLDIR)\VC\ce\Lib$(LIB_SUBDIR)" /LIBPATH:"$(SDK_DIR)\Lib$(LIB_SUBDIR)" -nodefaultlib:"kernel32.lib" -nodefaultlib:"oldnames.lib" /STACK:65536,4096  $(LDFLAGS)
+
 
 !if "$(EMBEDDED_DEVICE)" == "PocketPC"
 CPPFLAGS	= $(CPPFLAGS) /D "WIN32_PLATFORM_PSPC"
@@ -235,7 +235,12 @@ LDFLAGS         = $(LDFLAGS) /LIBPATH:"$(ice_dir)\lib" /nologo
 !endif
 
 !if "$(EMBEDDED_DEVICE)" != ""
-LDFLAGS		= $(LDFLAGS) /subsystem:windowsce -manifest:no
+LDFLAGS		= $(LDFLAGS) -manifest:no
+!if "$(EMBEDDED_OS)" == "WindowsMobile2003"
+LDFLAGS         = $(LDFLAGS) /subsystem:windowsce,4.20
+!else
+LDFLAGS         = $(LDFLAGS) /subsystem:windowsce
+!endif
 !endif
 
 !if "$(OPTIMIZE_SPEED)" != "yes" && "$(OPTIMIZE_SIZE)" != "yes"
@@ -288,11 +293,9 @@ LIBSUFFIX	= $(LIBSUFFIX)d
 
 !if "$(EMBEDDED_DEVICE)" != ""
 
-BASELIBS	= coredll.lib ws2.lib
-!if "$(EMBEDDED_OS)" == "WindowsMobile2003"
-BASELIBS        = $(BASELIBS) ccrtrtti.lib
-!else
-BASELIBS        = $(BASELIBS) corelibc.lib 
+BASELIBS	= coredll.lib ws2.lib corelibc.lib
+!if "$(EMBEDDED_OS)" == "WindowsMobile2003" 
+BASELIBS        = $(BASELIBS) ccrtrtti.lib 
 !endif
 
 !else
