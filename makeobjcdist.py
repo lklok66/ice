@@ -247,8 +247,9 @@ print "ok"
 # Copy IceTouch specific install files.
 #
 print "Copying icetouch install files...",
-move(os.path.join("README.ICETOUCH"), os.path.join("README"))
-#move(os.path.join("CHANGES.ICETOUCH"), os.path.join("CHANGES"))
+move(os.path.join("objc", "README"), os.path.join("README"))
+move(os.path.join("objc", "INSTALL"), os.path.join("INSTALL"))
+#move(os.path.join("objc", "CHANGES"), os.path.join("CHANGES"))
 
 #
 # Move *.iceobjc to the correct names.
