@@ -245,8 +245,11 @@ def run(tests, root = False):
         elif o == "--protocol":
             if a not in ( "ssl", "tcp"):
                 usage()
-            if mono and getDefaultMapping() == "cs" and a == "ssl":
-                print "SSL is not supported with mono"
+            if (mono and getDefaultMapping() == "cs" or getDefaultMapping() == "objc") and a == "ssl":
+                if getDefaultMapping() == "cs":
+                    print "SSL is not supported with mono"
+                else:
+                    print "SSL is not supported with the Objecive-C mapping"
                 sys.exit(1)
 
         if o in ( "--protocol", "--host", "--debug", "--compress", "--valgrind", "--serialize", "--ipv6", \
@@ -927,6 +930,12 @@ def runTests(start, expanded, num = 0, script = False):
                 print "%s*** test not supported with mono%s" % (prefix, suffix)
                 continue
 
+            # If this is the Objecive-C mapping and we're running ssl protocol tests
+            # then skip. This occurs when using --all.
+            if (i.find(os.path.join("objc","test")) != -1 and args.find("ssl") != -1):
+                print "%s*** test not supported with SSL%s" % (prefix, suffix)
+                continue
+
             # If this is java and we're running ipv6 under windows then skip.
             if isWin32() and i.find(os.path.join("java","test")) != -1 and args.find("ipv6") != -1:
                 print "%s*** test not supported under windows%s" % (prefix, suffix)
@@ -1269,8 +1278,11 @@ def processCmdLine():
             if a not in ( "ssl", "tcp"):
                 usage()
             # ssl protocol isn't directly supported with mono.
-            if mono and getDefaultMapping() == "cs" and a == "ssl":
-                print "SSL is not supported with mono"
+            if (mono and getDefaultMapping() == "cs" or getDefaultMapping() == "objc") and a == "ssl":
+                if getDefaultMapping() == "cs":
+                    print "SSL is not supported with mono"
+                else:
+                    print "SSL is not supported with the Objecive-C mapping"
                 sys.exit(1)
             global protocol
             protocol = a
