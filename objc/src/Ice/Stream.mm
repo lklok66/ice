@@ -57,7 +57,7 @@ class ObjectReader : public Ice::ObjectReader
 {
 public:
     
-    ObjectReader(ICEObject* obj) : _obj(obj), _retain(false)
+    ObjectReader(ICEObject* obj) : _obj(obj)
     {
     }
 
@@ -82,7 +82,7 @@ public:
     ICEObject*
     getObject()
     {
-        return [_obj retain];
+        return _obj;
     }
 
     virtual void ice_postUnmarshal()
@@ -93,7 +93,6 @@ public:
 private:
 
     ICEObject* _obj;
-    bool _retain;
 };
 typedef IceUtil::Handle<ObjectReader> ObjectReaderPtr;
 
@@ -147,7 +146,7 @@ public:
             {
                 ICEObject* o = ObjectReaderPtr::dynamicCast(obj)->getObject();
                 checkType(o);
-                *_addr = o;
+                *_addr = [o retain];
             }
             else
             {
