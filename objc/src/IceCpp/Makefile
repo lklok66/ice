@@ -12,7 +12,6 @@ top_srcdir	= ../..
 TARGETS		= $(OBJS) $(SLICE_OBJS)
 
 OBJS		= Acceptor.o \
-		  Application.o \
                   Base64.o \
 		  Buffer.o \
 		  BasicStream.o \
@@ -64,7 +63,6 @@ OBJS		= Acceptor.o \
 		  RouterInfo.o \
 		  SelectorThread.o \
 		  ServantManager.o \
-		  Service.o \
 		  SliceChecksums.o \
 		  StreamI.o \
 		  Stream.o \
@@ -82,6 +80,8 @@ OBJS		= Acceptor.o \
 		  UdpEndpointI.o \
 		  UdpTransceiver.o \
 		  UnknownEndpointI.o
+#		  Application.o \
+#		  Service.o \
 
 SLICE_OBJS	= BuiltinSequences.o \
 		  Communicator.o \

@@ -19,7 +19,7 @@ main(int argc, char* argv[])
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 
     int status = 0;
-    id<ICECommunicator> communicator;
+    id<ICECommunicator> communicator = nil;
     @try
     {
         ICEInitializationData* initData = [ICEInitializationData initializationData];

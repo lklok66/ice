@@ -138,7 +138,7 @@ depend:: $(patsubst $(ice_cpp_include)/IceUtil/%.h,include/IceUtilCpp/%.h,$(wild
 	 $(patsubst ../IceCpp/include/Ice/%.h,include/IceCpp/%.h,$(wildcard ../IceCpp/include/Ice/*.h))
 
 install:: all
-	$(call installlib,$(install_libdir),$(libdir),$(LIBFILENAME),$(SONAME),$(LIBNAME))
+	$(call installlib,$(install_libdir),$(libdir),$(LIBFILENAME),$(LIBNAME),$(LIBNAME))
 
 clean::
 	rm -f include/IceUtilCpp/*.h

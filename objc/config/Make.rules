@@ -14,12 +14,13 @@
 prefix			 ?= /opt/IceTouch-$(VERSION)
 
 #
-# The "root directory" for runpath embedded in executables. Can be unset
-# to avoid adding a runpath to Ice executables.
+# The "root directory" for runpath embedded in executables. Can be
+# unset to avoid adding a runpath to Ice executables. This setting is
+# ignored when building for the iPhone or simulator. Instead,
+# @executable_path/Frameworks is used.
 #
-#embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
+embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 
-#
 # Define OPTIMIZE_SIZE as yes if you want to build with minimal size.
 # Define OPTIMIZE_SPEED as yes if you want to build with maximum speed.
 # These options are mutually exclusive.

@@ -52,7 +52,7 @@ main(int argc, char* argv[])
 {
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
     int status = 1;
-    id<ICECommunicator> communicator;
+    id<ICECommunicator> communicator = nil;
     @try
     {
         communicator = [ICEUtil createCommunicator:&argc argv:argv];

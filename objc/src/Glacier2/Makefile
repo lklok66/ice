@@ -10,10 +10,9 @@
 top_srcdir	= ../..
 
 LIBFILENAME     = $(call mklibfilename,Glacier2ObjC,$(VERSION))
-SONAME          = $(call mksoname,Glacier2ObjC,$(SOVERSION))  
 LIBNAME		= $(call mklibname,Glacier2ObjC)
 
-TARGETS		= $(call mklibtargets,$(libdir)/$(LIBFILENAME),$(libdir)/$(SONAME),$(libdir)/$(LIBNAME))
+TARGETS		= $(call mklibtargets,$(libdir)/$(LIBFILENAME),$(libdir)/$(LIBNAME))
 
 OBJS		= PermissionsVerifier.o \
 		  Router.o \
@@ -57,20 +56,16 @@ ifneq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
   endif
 endif
 else
-	$(call mkshlib,$@,$(SONAME),$(OBJS),$(LINKWITH))
+	$(call mkshlib,$@,$(LIBFILENAME),$(OBJS),$(LINKWITH))
 endif
 
-$(libdir)/$(SONAME): $(libdir)/$(LIBFILENAME)
+$(libdir)/$(LIBNAME): $(libdir)/$(LIBFILENAME)
 	rm -f $@
 	ln -s $(LIBFILENAME) $@
-
-$(libdir)/$(LIBNAME): $(libdir)/$(SONAME)
-	rm -f $@
-	ln -s $(SONAME) $@
 
 endif
 
 install:: all
-	$(call installlib,$(install_libdir),$(libdir),$(LIBFILENAME),$(SONAME),$(LIBNAME))
+	$(call installlib,$(install_libdir),$(libdir),$(LIBFILENAME),$(LIBNAME),$(LIBNAME))
 
 include .depend

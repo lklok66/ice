@@ -412,7 +412,8 @@ def substitute(file, regexps):
 	    if not expr is re:
 		expr = re.compile(expr)
             line = expr.sub(text, line)
-        print line,
+        if not line.startswith("<remove>"):
+            print line,
 
 def fixFilePermission(file, verbose = False):
 

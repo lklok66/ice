@@ -19,7 +19,7 @@ from DistUtils import *
 #
 filesToRemove = [
     "./cpp/src/Ice/Makefile",
-    "./cpp/src/Ice/Makefile.mak"
+    "./cpp/src/Ice/Makefile.mak",
 ]
 
 # List of files & subdirectories to keep, all others are removed.
@@ -129,8 +129,8 @@ os.chdir(os.path.dirname(__file__))
 #
 config = open(os.path.join("cpp", "config", "Make.rules.objc"), "r")
 version = re.search("VERSION[\s]*= ([0-9\.]*)", config.read()).group(1)
-versionMajor = re.search("([0-9]*)\.([0-9]*)", version).group(1)
-versionMinor = re.search("([0-9]*)\.([0-9]*)", version).group(2)
+versionMinor = re.search("([0-9\.]*).([0-9\.]*)", version).group(2)
+versionMajor = re.search("([0-9\.]*).([0-9\.]*)", version).group(1)
 
 #
 # Remove any existing "disticee-" directory and create a new one
@@ -174,7 +174,7 @@ substitute(os.path.join("cpp", "Makefile"), [(r'^SUBDIRS([\s]*)=.*', r'SUBDIRS\1
 #
 substitute(os.path.join("objc", "config", "Make.rules"),
            [(r'^([\s]*)SLICEPARSERLIB.*=.*', r'\1SLICEPARSERLIB = '),
-            (r'^[\s#]*OPTIMIZE([\s]*)=.*', r'OPTIMIZE\1= yes'),
+            (r'^[\s#]*OPTIMIZE_SPEED([\s]*)=.*', r'OPTIMIZE_SPEED\1= yes'),
             (r'^[\s#]*COMPILE_FOR_IPHONE([\s]*)=.*', r'#COMPILE_FOR_IPHONE\1= yes'),
             (r'^[\s#]*COMPILE_FOR_IPHONE_SIMULATOR([\s]*)=.*', r'COMPILE_FOR_IPHONE_SIMULATOR\1= yes')])
 
@@ -182,11 +182,12 @@ substitute(os.path.join("objc", "config", "Make.rules"),
 # Fix the versions in Make.rules.common
 #
 substitute(os.path.join("config", "Make.common.rules"),
-           [(r'VERSION_MAJOR([\s]*)=.*', r'VERSION_MAJOR\1= ' + versionMajor),
-            (r'VERSION_MAJOR([\s]*)=.*', r'VERSION_MAJOR\1= ' + versionMinor),
+           [(r'VERSION_MINOR([\s]*)=.*', r'VERSION_MINOR\1= ' + versionMinor),
+            (r'VERSION_MAJOR([\s]*)=.*', r'VERSION_MAJOR\1= ' + versionMajor),
             (r'VERSION([\s]*)=.*', r'VERSION\1= ' + version),
-            (r'SHORT_VERSION([\s]*)=.*', r''),
-            (r'SOVERSION([\s]*)=.*', r'')])
+            (r'SHORT_VERSION([\s]*)=.*', r'<remove>'),
+            (r'SOVERSION([\s]*)=.*', r'<remove>'),
+            (r'ICE_LICENSE', r'ICETOUCH_LICENSE')])
 
 for makeFileName in [os.path.join("cpp", "src", "Makefile")]:
     makeFile = open(makeFileName, "r")
@@ -271,6 +272,8 @@ for root, dirnames, filesnames in os.walk('.'):
     for f in filesnames:
         filepath = os.path.join(root, f) 
         if f == ".gitignore":
+            os.remove(filepath)
+        elif f.endswith(".mak") or f.endswith(".rc"):
             os.remove(filepath)
         else:
 

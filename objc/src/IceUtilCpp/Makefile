@@ -14,15 +14,8 @@ TARGETS		= $(OBJS)
 OBJS		= ArgVector.o \
 		  Cond.o \
 		  ConvertUTF.o \
-		  CountDownLatch.o \
-		  CtrlCHandler.o \
 		  Exception.o \
-		  FileUtil.o \
-		  InputUtil.o \
-		  Options.o \
-		  OutputUtil.o \
 		  Random.o \
-		  RWRecMutex.o \
 		  RecMutex.o \
 		  StaticMutex.o \
 		  Shared.o \
@@ -31,8 +24,15 @@ OBJS		= ArgVector.o \
 		  ThreadException.o \
 		  Time.o \
 		  Timer.o \
-		  UUID.o \
-		  Unicode.o
+		  Unicode.o \
+		  UUID.o
+#		  InputUtil.o \
+#		  OutputUtil.o \
+#		  FileUtil.o \
+# 		  CountDownLatch.o \
+# 		  CtrlCHandler.o \
+# 		  Options.o \
+# 		  RWRecMutex.o \
 
 SRCS_DIR	= $(ice_dir)/cpp/src/IceUtil
 SRCS		= $(addprefix $(SRCS_DIR)/, $(OBJS:.o=.cpp))
