@@ -7,7 +7,6 @@
 //
 // **********************************************************************
 
-#import <Ice/Ice.h>
 #import <Filesystem.h>
 
 @interface DirectoryI : FSDirectory <FSDirectory>
@@ -23,7 +22,7 @@
 @property(nonatomic, retain) ICEIdentity *ident;
 @property(nonatomic, retain) NSMutableArray *contents;
         
-+(id) directoryi:(id<ICECommunicator>)communicator name:(NSString *)name parent:(DirectoryI *)parent;
++(id) directoryi:(NSString *)name parent:(DirectoryI *)parent;
 -(void) addChild:(id<FSNodePrx>)child;
 -(void) activate:(id<ICEObjectAdapter>)a;
 @end

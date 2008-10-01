@@ -29,24 +29,24 @@ main(int argc, char* argv[])
 
 	// Create the root directory (with name "/" and no parent)
 	//
-	DirectoryI *root = [DirectoryI directoryi:communicator name:@"/" parent:nil];
+	DirectoryI *root = [DirectoryI directoryi:@"/" parent:nil];
 	[root activate:adapter];
 
 	// Create a file called "README" in the root directory
 	//
-	FileI *file = [FileI filei:communicator name:@"README" parent:root];
+	FileI *file = [FileI filei:@"README" parent:root];
 	NSMutableArray *text = [NSMutableArray arrayWithObject:@"This file system contains a collection of poetry."];
 	[file write:text current:nil];
 	[file activate:adapter];
 
 	// Create a directory called "Coleridge" in the root directory
 	//
-	DirectoryI *coleridge = [DirectoryI directoryi:communicator name:@"Coleridge" parent:root];
+	DirectoryI *coleridge = [DirectoryI directoryi:@"Coleridge" parent:root];
 	[coleridge activate:adapter];
 
 	// Create a file called "Kubla_Khan" in the Coleridge directory
 	//
-	file = [FileI filei:communicator name:@"Kubla_Khan" parent:coleridge];
+	file = [FileI filei:@"Kubla_Khan" parent:coleridge];
 	text = [NSMutableArray arrayWithObjects:
 				    @"In Xanadu did Kubla Khan",
 				    @"A stately pleasure-dome decree:",

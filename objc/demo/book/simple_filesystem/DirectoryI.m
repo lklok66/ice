@@ -7,6 +7,7 @@
 //
 // **********************************************************************
 
+#include <Ice/Ice.h>
 #include <DirectoryI.h>
 
 @implementation DirectoryI
@@ -16,7 +17,7 @@
 @synthesize ident;
 @synthesize contents;
 
-+(id) directoryi:(id<ICECommunicator>)communicator name:(NSString *)name parent:(DirectoryI *)parent
++(id) directoryi:(NSString *)name parent:(DirectoryI *)parent
 {
     DirectoryI *instance = [[[DirectoryI alloc] init] autorelease];
     if(instance == nil)

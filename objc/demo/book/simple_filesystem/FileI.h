@@ -7,9 +7,9 @@
 //
 // **********************************************************************
 
-#import <Ice/Ice.h>
 #import <Filesystem.h>
-#import <DirectoryI.h>
+
+@class DirectoryI;
 
 @interface FileI : FSFile <FSFile>
 {
@@ -25,7 +25,7 @@
 @property(nonatomic, retain) ICEIdentity *ident;
 @property(nonatomic, retain) NSArray *lines;
 
-+(id) filei:(id<ICECommunicator>)communicator name:(NSString *)name parent:(DirectoryI *)parent;
++(id) filei:(NSString *)name parent:(DirectoryI *)parent;
 -(void) write:(NSMutableArray *)text current:(ICECurrent *)current;
 -(void) activate:(id<ICEObjectAdapter>)a;
 @end
