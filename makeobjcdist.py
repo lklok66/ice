@@ -27,7 +27,7 @@ filesToKeep = [
     "./LICENSE",
     "./ICE_LICENSE",
     "./Makefile.objc",
-    "./config/Make.common.rules",
+    "./config/Make.common.rules.objc",
     "./config/TestUtil.py",
     "./cpp/Makefile",
     "./cpp/config/Make.rules.objc",
@@ -176,16 +176,6 @@ substitute(os.path.join("objc", "config", "Make.rules"),
             (r'^[\s#]*COMPILE_FOR_IPHONE([\s]*)=.*', r'#COMPILE_FOR_IPHONE\1= yes'),
             (r'^[\s#]*COMPILE_FOR_IPHONE_SIMULATOR([\s]*)=.*', r'COMPILE_FOR_IPHONE_SIMULATOR\1= yes')])
 
-#
-# Fix the versions in Make.rules.common
-#
-substitute(os.path.join("config", "Make.common.rules"),
-           [(r'VERSION_MINOR([\s]*)=.*', r'VERSION_MINOR\1= ' + versionMinor),
-            (r'VERSION_MAJOR([\s]*)=.*', r'VERSION_MAJOR\1= ' + versionMajor),
-            (r'VERSION([\s]*)=.*', r'VERSION\1= ' + version),
-            (r'SHORT_VERSION([\s]*)=.*', r'<remove>'),
-            (r'SOVERSION([\s]*)=.*', r'<remove>'),
-            (r'ICE_LICENSE', r'ICETOUCH_LICENSE')])
 
 for makeFileName in [os.path.join("cpp", "src", "Makefile")]:
     makeFile = open(makeFileName, "r")

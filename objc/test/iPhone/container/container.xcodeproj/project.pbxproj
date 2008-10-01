@@ -19,8 +19,8 @@
 		342EBA870E926E98000051FA /* c_rsa1024.pfx in Resources */ = {isa = PBXBuildFile; fileRef = 342EBA860E926E98000051FA /* c_rsa1024.pfx */; };
 		342EBA890E926E9F000051FA /* s_rsa1024.pfx in Resources */ = {isa = PBXBuildFile; fileRef = 342EBA880E926E9F000051FA /* s_rsa1024.pfx */; };
 		342EBA8B0E926F90000051FA /* cacert.der in Resources */ = {isa = PBXBuildFile; fileRef = 342EBA8A0E926F90000051FA /* cacert.der */; };
-		34B763420E8C307700CE4701 /* libIceObjC.3.3.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 34B763410E8C307700CE4701 /* libIceObjC.3.3.0.dylib */; };
-		34B7634A0E8C309A00CE4701 /* libIceObjC.3.3.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34B763410E8C307700CE4701 /* libIceObjC.3.3.0.dylib */; };
+		34B763420E8C307700CE4701 /* libIceObjC.0.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 34B763410E8C307700CE4701 /* libIceObjC.0.1.dylib */; };
+		34B7634A0E8C309A00CE4701 /* libIceObjC.0.1.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34B763410E8C307700CE4701 /* libIceObjC.0.1.dylib */; };
 		34B764E10E8D250100CE4701 /* libTestCommon.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34B764DF0E8D24FE00CE4701 /* libTestCommon.dylib */; };
 		34B765550E8D33D600CE4701 /* libTestCommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 34B764DF0E8D24FE00CE4701 /* libTestCommon.dylib */; };
 		34B7662A0E8D55E700CE4701 /* TestSelectController.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B766290E8D55E700CE4701 /* TestSelectController.m */; };
@@ -62,7 +62,7 @@
 				34B767A80E8D898700CE4701 /* TestProxy.dylib in CopyFiles */,
 				34B767A90E8D898700CE4701 /* TestOperations.dylib in CopyFiles */,
 				34B764E10E8D250100CE4701 /* libTestCommon.dylib in CopyFiles */,
-				34B7634A0E8C309A00CE4701 /* libIceObjC.3.3.0.dylib in CopyFiles */,
+				34B7634A0E8C309A00CE4701 /* libIceObjC.0.1.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -85,7 +85,7 @@
 		342EBA860E926E98000051FA /* c_rsa1024.pfx */ = {isa = PBXFileReference; lastKnownFileType = file; name = c_rsa1024.pfx; path = ../../certs/c_rsa1024.pfx; sourceTree = SOURCE_ROOT; };
 		342EBA880E926E9F000051FA /* s_rsa1024.pfx */ = {isa = PBXFileReference; lastKnownFileType = file; name = s_rsa1024.pfx; path = ../../certs/s_rsa1024.pfx; sourceTree = SOURCE_ROOT; };
 		342EBA8A0E926F90000051FA /* cacert.der */ = {isa = PBXFileReference; lastKnownFileType = file; name = cacert.der; path = ../../certs/cacert.der; sourceTree = SOURCE_ROOT; };
-		34B763410E8C307700CE4701 /* libIceObjC.3.3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libIceObjC.3.3.0.dylib; path = ../../../lib/libIceObjC.3.3.0.dylib; sourceTree = SOURCE_ROOT; };
+		34B763410E8C307700CE4701 /* libIceObjC.0.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libIceObjC.0.1.dylib; path = ../../../lib/libIceObjC.0.1.dylib; sourceTree = SOURCE_ROOT; };
 		34B764DF0E8D24FE00CE4701 /* libTestCommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libTestCommon.dylib; path = ../../../lib/libTestCommon.dylib; sourceTree = SOURCE_ROOT; };
 		34B766280E8D55E700CE4701 /* TestSelectController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestSelectController.h; sourceTree = "<group>"; };
 		34B766290E8D55E700CE4701 /* TestSelectController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestSelectController.m; sourceTree = "<group>"; };
@@ -117,7 +117,7 @@
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
 				288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */,
-				34B763420E8C307700CE4701 /* libIceObjC.3.3.0.dylib in Frameworks */,
+				34B763420E8C307700CE4701 /* libIceObjC.0.1.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -200,7 +200,7 @@
 				34B767A10E8D886D00CE4701 /* TestProxy.dylib */,
 				34B7679F0E8D886200CE4701 /* TestOperations.dylib */,
 				34B764DF0E8D24FE00CE4701 /* libTestCommon.dylib */,
-				34B763410E8C307700CE4701 /* libIceObjC.3.3.0.dylib */,
+				34B763410E8C307700CE4701 /* libIceObjC.0.1.dylib */,
 				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
 				1D30AB110D05D00D00671497 /* Foundation.framework */,
 				288765A40DF7441C002DB57D /* CoreGraphics.framework */,

@@ -52,11 +52,12 @@ embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 ice_language     = objc
 ice_require_cpp	 = yes
 slice_translator = slice2objc
-
-ifeq ($(shell test -f $(top_srcdir)/config/Make.common.rules && echo 0),0)
-    include $(top_srcdir)/config/Make.common.rules
+ICE_VERSION	 = 3.3.0
+ 
+ifeq ($(shell test -f $(top_srcdir)/config/Make.common.rules.objc && echo 0),0)
+    include $(top_srcdir)/config/Make.common.rules.objc
 else
-    include $(top_srcdir)/../config/Make.common.rules
+    include $(top_srcdir)/../config/Make.common.rules.objc
 endif
 
 ifeq ($(OPTIMIZE_SPEED),yes)
@@ -120,16 +121,16 @@ endif
 
 ifdef ice_src_dist
     ifeq ($(ice_cpp_dir), $(ice_dir)/cpp)
-        SLICEPARSERLIB = $(ice_cpp_dir)/lib/$(call mklibfilename,Slice,$(VERSION))
+        SLICEPARSERLIB = $(ice_cpp_dir)/lib/$(call mklibfilename,Slice,$(ICE_VERSION))
         SLICE2CPP = $(ice_cpp_dir)/bin/slice2cpp
         SLICE2OBJC = $(ice_cpp_dir)/bin/slice2objc
     else
-        SLICEPARSERLIB = $(ice_cpp_dir)/$(libsubdir)/$(call mklibfilename,Slice,$(VERSION))
+        SLICEPARSERLIB = $(ice_cpp_dir)/$(libsubdir)/$(call mklibfilename,Slice,$(ICE_VERSION))
         SLICE2CPP = $(ice_cpp_dir)/$(binsubdir)/slice2cpp
         SLICE2OBJC = $(ice_cpp_dir)/$(binsubdir)/slice2objc
     endif
 else
-    SLICEPARSERLIB = $(ice_dir)/$(libsubdir)/$(call mklibfilename,Slice,$(VERSION))
+    SLICEPARSERLIB = $(ice_dir)/$(libsubdir)/$(call mklibfilename,Slice,$(ICE_VERSION))
     SLICE2CPP = $(ice_dir)/$(binsubdir)/slice2cpp
     SLICE2OBJC = $(ice_dir)/$(binsubdir)/slice2objc
 endif

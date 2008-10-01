@@ -31,7 +31,7 @@ main(int argc, char* argv[])
 {
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
     int status;
-    id<ICECommunicator> communicator;
+    id<ICECommunicator> communicator = nil;
 
     @try
     {

@@ -42,7 +42,7 @@ GENPIC                  = no
 # Common definitions
 #
 ice_language     = cpp
-include $(top_srcdir)/../config/Make.common.rules
+include $(top_srcdir)/../config/Make.common.rules.objc
 
 #
 # Platform specific definitions
