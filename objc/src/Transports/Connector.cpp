@@ -40,7 +40,7 @@ IceObjC::Connector::connect()
         //
         CFReadStreamRef readStream;
         CFWriteStreamRef writeStream;
-        CFDataRef addr;
+        CFDataRef addr = nil;
         if(_addr.ss_family == AF_INET)
         {
             addr = CFDataCreate(NULL, reinterpret_cast<const UInt8*>(&_addr), sizeof(sockaddr_in));

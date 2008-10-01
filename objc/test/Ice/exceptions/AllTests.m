@@ -465,10 +465,10 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
         [thrower throwNonIceException];
         test(false);
     }
-    @catch(const ICEUnknownException *ex)
+    @catch(ICEUnknownException *)
     {
     }
-    @catch(NSException *ex)
+    @catch(NSException *)
     {
         test(false);
     }

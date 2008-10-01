@@ -572,7 +572,7 @@ private:
 
 -(ICEInt) readEnumerator:(ICEInt)limit
 {
-    ICEInt val;
+    ICEInt val = 0; // Keep the compiler happy.
     try
     {
 	if(limit <= 0x7f)
@@ -623,7 +623,7 @@ typedef enum { dummy } Dummy_Enum;
 	minWireSize = 4;
     }
 
-    NSMutableData* ret;
+    NSMutableData* ret = 0;
     try
     {
 	int count = is_->readSize();

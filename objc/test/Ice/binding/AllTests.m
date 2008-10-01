@@ -122,7 +122,7 @@ id<TestTestIntfPrx>
 createTestIntfPrx(NSArray* adapters)
 {
     NSMutableArray* endpoints = [NSMutableArray arrayWithCapacity:[adapters count]];
-    id<TestTestIntfPrx> test;
+    id<TestTestIntfPrx> test = nil;
     for(id<TestRemoteObjectAdapterPrx> a in adapters)
     {
         test = [a getTestIntf];

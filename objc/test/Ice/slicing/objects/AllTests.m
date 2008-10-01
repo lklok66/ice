@@ -461,7 +461,7 @@ allTests(id<ICECommunicator> communicator)
 
     tprintf("base as Object... ");
     {
-        ICEObject* o;
+        ICEObject* o = nil;
         @try
         {
             o = [test SBaseAsObject];
@@ -513,7 +513,7 @@ allTests(id<ICECommunicator> communicator)
 
     tprintf("base with known derived as base... ");
     {
-        TestSBase* sb;
+        TestSBase* sb = nil;
         @try
         {
             sb = [test SBSKnownDerivedAsSBase];

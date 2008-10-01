@@ -59,7 +59,7 @@ run(int argc, char* argv[], id<ICECommunicator> communicator)
 
     menu();
 
-    char c;
+    char c = 0;
     do
     {
         @try

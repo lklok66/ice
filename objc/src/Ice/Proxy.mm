@@ -470,7 +470,7 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
               is:(id<ICEInputStream>*)is 
          context:(ICEContext*)context
 {
-    BOOL ok;
+    BOOL ok = YES; // Keep the compiler happy.
     try
     {
         std::vector<Ice::Byte> inParams;

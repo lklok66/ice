@@ -156,7 +156,7 @@ IceObjC::ObjectI::ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& cb
 
     ICECurrent* c = [[ICECurrent alloc] initWithCurrent:current];
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    BOOL ok;
+    BOOL ok = YES; // Keep the compiler happy
     NSException* exception = nil;
     @try
     {
@@ -194,7 +194,7 @@ IceObjC::BlobjectI::ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& 
 
     ICECurrent* c = [[ICECurrent alloc] initWithCurrent:current];
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    BOOL ok;
+    BOOL ok = YES; // Keep the compiler happy.
     NSException* exception = nil;
     NSData* inP = [NSData dataWithBytesNoCopy:const_cast<Ice::Byte*>(inParams.first) 
                           length:(inParams.second - inParams.first) 
