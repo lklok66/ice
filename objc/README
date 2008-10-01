@@ -165,3 +165,17 @@ Auto release pool
 The Ice run time creates an NSAutoReleasePool object before each
 server-side dispatched invocation and client-side AMI callback. The
 pool is released once the dispatch is complete.
+
+
+Library demo
+------------
+
+The library demos included in the distribution (demo/Database/library,
+demo/iPhone/library) run against a new Java JDBC demo. ZeroC hosts
+a server for this demo on demo2.zeroc.com. The demos, by default,
+connect with this host.
+
+This demo will be released in the next Ice distribution. In the
+meantime, the complete source for this demo can be found at:
+
+  http://www.zeroc.com/downloads/IceTouch/0.1/JDBC-demo.tar.gz
