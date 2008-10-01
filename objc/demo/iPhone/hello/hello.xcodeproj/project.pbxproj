@@ -12,6 +12,7 @@
 		14A268EC0E83FD0A00E562FE /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14A268EA0E83FD0A00E562FE /* Security.framework */; };
 		14DF50B60E8D24BA0066CA84 /* cacert.der in Resources */ = {isa = PBXBuildFile; fileRef = 14DF50B50E8D24BA0066CA84 /* cacert.der */; };
 		14DF50C10E8D28490066CA84 /* c_rsa1024.pfx in Resources */ = {isa = PBXBuildFile; fileRef = 14DF50C00E8D28490066CA84 /* c_rsa1024.pfx */; };
+		14EAF6F20E93B19A00EF4807 /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = 14EAF6F10E93B19A00EF4807 /* README.txt */; };
 		1D3623260D0F684500981E51 /* helloAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* helloAppDelegate.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
@@ -47,6 +48,7 @@
 		14A268EA0E83FD0A00E562FE /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		14DF50B50E8D24BA0066CA84 /* cacert.der */ = {isa = PBXFileReference; lastKnownFileType = file; name = cacert.der; path = ../../../../certs/cacert.der; sourceTree = SOURCE_ROOT; };
 		14DF50C00E8D28490066CA84 /* c_rsa1024.pfx */ = {isa = PBXFileReference; lastKnownFileType = file; name = c_rsa1024.pfx; path = ../../../../certs/c_rsa1024.pfx; sourceTree = SOURCE_ROOT; };
+		14EAF6F10E93B19A00EF4807 /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623240D0F684500981E51 /* helloAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = helloAppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* helloAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = helloAppDelegate.m; sourceTree = "<group>"; };
@@ -107,6 +109,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				14EAF6F10E93B19A00EF4807 /* README.txt */,
 				34BB75B00E87DC0A00813E0B /* Images */,
 				1432BF5A0E59A5FC00DAC793 /* Hello.ice */,
 				080E96DDFE201D6D7F000001 /* Classes */,
@@ -210,6 +213,7 @@
 				34BB75B20E87DC1800813E0B /* icon.png in Resources */,
 				14DF50B60E8D24BA0066CA84 /* cacert.der in Resources */,
 				14DF50C10E8D28490066CA84 /* c_rsa1024.pfx in Resources */,
+				14EAF6F20E93B19A00EF4807 /* README.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
