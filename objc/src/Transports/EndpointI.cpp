@@ -54,12 +54,14 @@ hexValue(char c)
     return -1;
 }
 
-inline bool
-parseKey(const string& keyStr, unsigned char* key, int keyLen)
+inline CFDataRef
+parseKey(const string& keyStr)
 {
     int i = 0, j = 0;
     const char* m = keyStr.c_str();
-    while(i < (int)keyStr.size() && j < keyLen)
+    CFMutableDataRef data = CFDataCreateMutable(0, 160);
+    unsigned char buf[160];
+    while(i < (int)keyStr.size())
     {
         if(isspace(m[i]) || m[i] == ':')
         {
@@ -77,15 +79,22 @@ parseKey(const string& keyStr, unsigned char* key, int keyLen)
         {
             return false;
         }
-        key[j] = vh << 4;
-        key[j++] += vl;
+        buf[j] = vh << 4;
+        buf[j++] += vl;
+
+        if(j == sizeof(buf))
+        {
+            CFDataAppendBytes(data, (UInt8*)buf, j);
+            j = 0;
+        }
     }
 
-    if(j == keyLen && i == (int)keyStr.size())
+    if(j > 0)
     {
-        return true;
+        CFDataAppendBytes(data, buf, j);
     }
-    return false;
+
+    return data;
 }
 
 CFDataRef 
@@ -386,14 +395,13 @@ IceObjC::Instance::Instance(const IceInternal::InstancePtr& instance, bool secur
             throw PluginInitializationException(__FILE__, __LINE__, os.str());
         }
 
-        unsigned char buf[20];
-        if(!parseKey(trustOnly, buf, sizeof(buf)))
+        _trustOnlyKeyID = parseKey(trustOnly);
+        if(!_trustOnlyKeyID)
         {
             ostringstream os;
             os << "IceSSL: invalid `IceSSL.TrustOnly.Client' property value (not a 20 bytes hexadecimal string)";
             throw PluginInitializationException(__FILE__, __LINE__, os.str());
         }
-        _trustOnlyKeyID = CFDataCreate(0, (const UInt8*)buf, sizeof(buf));
     }
 #endif
 

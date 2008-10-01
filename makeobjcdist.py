@@ -24,10 +24,8 @@ filesToRemove = [
 
 # List of files & subdirectories to keep, all others are removed.
 filesToKeep = [
-    "./ICETOUCH_LICENSE",
     "./LICENSE",
-    "./CHANGES.ICETOUCH",
-    "./README.ICETOUCH",
+    "./ICE_LICENSE",
     "./Makefile.objc",
     "./config/Make.common.rules",
     "./config/TestUtil.py",
@@ -250,6 +248,7 @@ print "ok"
 print "Copying icetouch install files...",
 move(os.path.join("objc", "README"), os.path.join("README"))
 move(os.path.join("objc", "INSTALL"), os.path.join("INSTALL"))
+move(os.path.join("objc", "ICETOUCH_LICENSE"), os.path.join("ICETOUCH_LICENSE"))
 #move(os.path.join("objc", "CHANGES"), os.path.join("CHANGES"))
 
 #
