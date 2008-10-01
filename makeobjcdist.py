@@ -247,6 +247,7 @@ print "ok"
 #
 print "Copying icetouch install files...",
 move(os.path.join("objc", "README"), os.path.join("README"))
+move(os.path.join("objc", "RELEASE_NOTES"), os.path.join("RELEASE_NOTES"))
 move(os.path.join("objc", "INSTALL"), os.path.join("INSTALL"))
 move(os.path.join("objc", "ICETOUCH_LICENSE"), os.path.join("ICETOUCH_LICENSE"))
 #move(os.path.join("objc", "CHANGES"), os.path.join("CHANGES"))
@@ -276,8 +277,9 @@ for root, dirnames, filesnames in os.walk('.'):
             os.remove(filepath)
         else:
 
-            # Fix version of README/INSTALL files and keep track of bison/flex files for later processing
-            if fnmatch.fnmatch(f, "README*") or fnmatch.fnmatch(f, "INSTALL*"):
+            # Fix version of README/INSTALL/RELEASE_NOTES files and
+            # keep track of bison/flex files for later processing
+            if fnmatch.fnmatch(f, "README*") or fnmatch.fnmatch(f, "INSTALL*") or fnmatch.fnmatch(f, "RELEASE_NOTES*"):
                 substitute(filepath, [("@ver@", version)])
             elif fnmatch.fnmatch(f, "*.y"):
                 bisonFiles.append(filepath)

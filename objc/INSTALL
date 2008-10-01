@@ -6,7 +6,7 @@ Requirements
 Operating System
 ----------------
 
-IceTouch has been extensively tested on:
+Ice Touch has been extensively tested on:
 
 - Mac OS X 10.5.5 and Xcode 3.1.1.
 - iPod Touch v2 using software version 2.1.1
@@ -16,7 +16,7 @@ IceTouch has been extensively tested on:
 Compiler
 --------
 
-IceTouch requires:
+Ice Touch requires:
 
 - Xcode 3.1.1
 - iPhone SDK for iPhone OS 2.1 (build 9M2517)
@@ -94,12 +94,12 @@ There are three possible build configurations:
 
     You must logout and login again for the changes to take effect.
 
-Now you're ready to build IceTouch:
+Now you're ready to build Ice Touch:
 
 $ make
 
-This will build the IceTouch library. If you are building for Mac OS X
-this will also build the tests and examples.
+This will build the Ice Touch library. If you are building for Mac OS
+X this will also build the tests and examples.
 
 If you are building for iPhone or the iPhone simulator, you should now
 use Xcode to build the demos and test suite located in the following
@@ -136,17 +136,17 @@ relaunch. This is not possible on the iPhone.
 Installation
 ======================================================================
 
-Simply run "make install". This will install IceTouch in the directory
+Simply run "make install". This will install Ice Touch in the directory
 specified by the "prefix" variables in objc/config/Make.rules and
 cpp/config/Make.rules.
 
-For Mac OS X builds of IceTouch, the install name of the shared
+For Mac OS X builds of Ice Touch, the install name of the shared
 library is /opt/IceTouch-@ver/lib. For iPhone builds, the install
-name of the IceTouch shared libraries is @executable_path/Frameworks.
+name of the Ice Touch shared libraries is @executable_path/Frameworks.
 It is not necessary to modify DYLD_LIBRARY_PATH as long as the shared
 library is not moved from this directory.
 
-When compiling IceTouch programs, you must also make sure to pass the
+When compiling Ice Touch programs, you must also make sure to pass the
 location of the <prefix>/include directory to the compiler with the -I
 option, and the location of the <prefix>/lib directory with the -L
 option.
