@@ -10,6 +10,8 @@
 #include <IceE/IceE.h>
 #include <Throughput.h>
 
+#include <iostream>
+
 using namespace std;
 using namespace Demo;
 
@@ -65,7 +67,7 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
     ThroughputPrx throughput = ThroughputPrx::checkedCast(base);
     if(!throughput)
     {
-        fprintf(stderr, "%s: invalid proxy\n", argv[0]);
+        cerr << argv[0] << ": invalid proxy \"" << base << "\"" << endl;
         return EXIT_FAILURE;
     }
 
@@ -450,7 +452,7 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
         }
         catch(const Ice::Exception& ex)
         {
-            fprintf(stderr, "%s\n", ex.toString().c_str());
+            cerr << ex << endl;
         }
     }
     while(c != EOF && c != 'x');
@@ -474,7 +476,7 @@ main(int argc, char* argv[])
     }
     catch(const Ice::Exception& ex)
     {
-        fprintf(stderr, "%s\n", ex.toString().c_str());
+        cerr << ex << endl;
         status = EXIT_FAILURE;
     }
 
@@ -486,7 +488,7 @@ main(int argc, char* argv[])
         }
         catch(const Ice::Exception& ex)
         {
-            fprintf(stderr, "%s\n", ex.toString().c_str());
+            cerr << ex << endl;
             status = EXIT_FAILURE;
         }
     }
