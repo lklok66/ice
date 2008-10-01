@@ -24,8 +24,6 @@
 @property(nonatomic, retain) NSMutableArray *contents;
         
 +(id) directoryi:(id<ICECommunicator>)communicator name:(NSString *)name parent:(DirectoryI *)parent;
--(NSString *) name:(ICECurrent *)current;
--(NSArray *) list:(ICECurrent *)current;
 -(void) addChild:(id<FSNodePrx>)child;
 -(void) activate:(id<ICEObjectAdapter>)a;
 @end

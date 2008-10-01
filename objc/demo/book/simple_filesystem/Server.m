@@ -35,12 +35,8 @@ main(int argc, char* argv[])
 	// Create a file called "README" in the root directory
 	//
 	FileI *file = [FileI filei:communicator name:@"README" parent:root];
-	NSArray *text = [NSArray arrayWithObject:@"This file system contains a collection of poetry."];
-	@try {
-	    [file write:text current:nil];
-	} @catch (FSGenericError *e) {
-	    NSLog([e name]);
-	}
+	NSMutableArray *text = [NSMutableArray arrayWithObject:@"This file system contains a collection of poetry."];
+	[file write:text current:nil];
 	[file activate:adapter];
 
 	// Create a directory called "Coleridge" in the root directory
@@ -51,18 +47,14 @@ main(int argc, char* argv[])
 	// Create a file called "Kubla_Khan" in the Coleridge directory
 	//
 	file = [FileI filei:communicator name:@"Kubla_Khan" parent:coleridge];
-	text = [NSArray arrayWithObjects:
+	text = [NSMutableArray arrayWithObjects:
 				    @"In Xanadu did Kubla Khan",
 				    @"A stately pleasure-dome decree:",
 				    @"Where Alph, the sacred river, ran",
 				    @"Through caverns measureless to man",
 				    @"Down to a sunless sea.",
 				    nil];
-	@try {
-	    [file write:text current:nil];
-	} @catch (FSGenericError *e) {
-	    NSLog([e name]);
-	}
+	[file write:text current:nil];
 	[file activate:adapter];
 
 	// All objects are created, allow client requests now
@@ -75,13 +67,13 @@ main(int argc, char* argv[])
 
 	status = 0;
     } @catch (NSException* ex) {
-        NSLog(@"%@", [ex name]);
+        NSLog(@"%@", ex);
     }
 
     @try {
 	[communicator destroy];
     } @catch (NSException* ex) {
-	NSLog(@"%@", [ex name]);
+	NSLog(@"%@", ex);
     }
 
     [pool release];

@@ -26,9 +26,6 @@
 @property(nonatomic, retain) NSArray *lines;
 
 +(id) filei:(id<ICECommunicator>)communicator name:(NSString *)name parent:(DirectoryI *)parent;
--(NSString *) name:(ICECurrent *)current;
--(NSArray *) read:(ICECurrent *)current;
 -(void) write:(NSMutableArray *)text current:(ICECurrent *)current;
 -(void) activate:(id<ICEObjectAdapter>)a;
--(void) dealloc;
 @end
