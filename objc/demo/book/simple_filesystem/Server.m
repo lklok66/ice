@@ -35,7 +35,7 @@ main(int argc, char* argv[])
 	// Create a file called "README" in the root directory
 	//
 	FileI *file = [FileI filei:communicator name:@"README" parent:root];
-	NSMutableArray *text = [NSMutableArray arrayWithObject:@"This file system contains a collection of poetry."];
+	NSArray *text = [NSArray arrayWithObject:@"This file system contains a collection of poetry."];
 	@try {
 	    [file write:text current:nil];
 	} @catch (FSGenericError *e) {
@@ -51,7 +51,7 @@ main(int argc, char* argv[])
 	// Create a file called "Kubla_Khan" in the Coleridge directory
 	//
 	file = [FileI filei:communicator name:@"Kubla_Khan" parent:coleridge];
-	text = [NSMutableArray arrayWithObjects:
+	text = [NSArray arrayWithObjects:
 				    @"In Xanadu did Kubla Khan",
 				    @"A stately pleasure-dome decree:",
 				    @"Where Alph, the sacred river, ran",
