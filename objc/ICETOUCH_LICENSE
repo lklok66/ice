@@ -1,0 +1,40 @@
+Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+
+This copy of IceTouch is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License version 2 as
+published by the Free Software Foundation.
+
+IceTouch is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, see http://www.gnu.org/licenses.
+
+Linking IceTouch statically or dynamically with other modules is making a
+combined work based on IceTouch. Thus, the terms and conditions of the GNU
+General Public License cover the whole combination.
+
+In addition, as a special exception, ZeroC gives you permission to
+combine IceTouch with:
+
+a) the OpenSSL library (or with modified versions of OpenSSL that use the
+same license as OpenSSL)
+
+b) any Orca library (http://orca-robotics.sourceforge.net) licensed under
+the GNU Lesser General Public License (LGPL), version 2.1
+(http://www.gnu.org/licenses/lgpl.html)
+
+c) any code from the Mumble project (http://mumble.sourceforge.net)
+licensed under the BSD license
+
+You may copy and distribute such combinations following the terms of the
+GNU General Public License for IceTouch and the licenses of the other code
+concerned, provided that you include the source code of these other
+libraries or code when and as the GNU General Public License requires
+distribution of source code.
+
+If you modify this copy of IceTouch, you may extend this exception to your
+version of IceTouch, but you are not obligated to do so. If you do not wish to
+do so, delete this exception statement from your version.

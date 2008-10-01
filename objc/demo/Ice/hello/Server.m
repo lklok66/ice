@@ -20,11 +20,11 @@ run(int argc, char* argv[], id<ICECommunicator> communicator)
         NSLog(@"%s: too many arguments", argv[0]);
         return EXIT_FAILURE;
     }
-    id<ICEObjectAdapter> adpt = [communicator createObjectAdapter:@"Hello"];
-    DemoHello* hello = [[HelloI alloc] init];
-    [adpt add:hello identity:[communicator stringToIdentity:@"hello"]];
-    [hello release];
-    [adpt activate];
+
+    id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"Hello"];
+    DemoHello* hello = [[[HelloI alloc] init] autorelease];
+    [adapter add:hello identity:[communicator stringToIdentity:@"hello"]];
+    [adapter activate];
     [communicator waitForShutdown];
     return EXIT_SUCCESS;
 }
