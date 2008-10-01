@@ -1,1 +1,143 @@
-TODO
+Please see the file INSTALL for installation instructions.
+
+IceTouch Feature Set
+--------------------
+
+IceTouch supports the following Ice features
+
+  - Thread pools
+  - AMI
+  - Object by Value
+  - Opaque endpoints
+  - Router
+  - Locator
+  - Batch invocations
+  - SSL (except when targeting Mac OS X)
+  - Support for callbacks hosted by 'bi-dir' and routed OAs.
+  - default servants
+  - dispatch interceptors
+  - UDP (on the iPhone, UDP requests won't transparently establish the 3G/Edge connection).
+  - Dynamic Ice (Blobject...)
+  - Full server-side support
+  - ACM
+
+
+SSL Support
+-----------
+
+IceTouch SSL support is only a subset of the Ice for C++ SSL
+support.
+
+The following limitations apply:
+
+ - IceTouch does not support SSL when targeting Mac OS X.
+ - IceTouch servers cannot authenticate SSL clients.
+
+The following properties are supported. Unless otherwise noted, the
+properties have the same semantics as those documented in the Ice
+manual.
+
+Certificates defined by IceSSL.CertAuthFile and IceSSL.CertFile are
+loaded from the application bundle. Certificates are loaded from
+the following locations:
+
+  - First from "Resources/<DefaultDir>/<CertFile>"
+  - Next, if IceSSL.DefaultDir is defined, from
+    "<DefaultDir>/<CertFile>"
+
+ - IceSSL.DefaultDir
+
+ - IceSSL.CheckCertName
+
+ - IceSSL.CertAuthFile
+
+   If a certificate authority is not specified, all certificate
+   authorities in the keychain are used. For CA certificates IceTouch
+   only supports DER encoding.
+
+ - IceSSL.CertFile
+
+   IceTouch only supports PKCS#12 (.PFX) encoded cerficates.
+
+ - IceSSL.Password
+
+ - IceSSL.TrustOnly.Client
+
+   The property identities X509v3 subject key identifier. The property
+   value is composed of a series of hex values. For example:
+
+   "C2:E8:D3:33:D7:83:99:6E:08:F7:C2:34:31:F7:1E:8E:44:87:38:57"
+
+   Since this value is specific to a single certificate authority,
+   this property is only valid when used in conjunction with
+   IceSSL.CertAuthFile.
+
+These properties are only necessary for the iPhone simulator target.
+
+ - IceSSL.Keychain
+
+  This property specifies the keychain used to import the certificate
+  from Ice.CertFile. If not specified the "login" keychain is used by
+  default. If the specified keychain doesn't exist, it's created.
+
+ - IceSSL.KeychainPassword
+
+  The password for the above keychain.
+
+
+Loggers
+-------
+
+Custom loggers must be installed only using the ICEInitializationData.
+
+You should not use any of the Ice for C++ logger properties, such as
+Ice.UseSyslog, or attempt to install a custom logger through a plug-in
+(Ice.Plugin.*).
+
+
+Slice Module Prefixes
+---------------------
+
+IceTouch supports changing the generated Objective-C class prefix
+through "objc:prefix:" metadata. For example, the module "Ice" is
+mapped to the class prefix ICE as follows:
+
+  ["objc:prefix:ICE"]
+  module Ice
+
+Should you remap the prefix, and then receive a class or exception
+from a remote call, the IceTouch runtime will be unable to instantiate
+the correct class, and your application will receive a runtime
+exception.
+
+
+Garbage Collection
+------------------
+
+The IceTouch runtime cannot garbage collect graphs of objects
+containing cycles. For example,
+
+class Foo
+{
+    Foo next;
+};
+
+Foo a = [[Foo alloc] init];
+Foo b = [[Foo alloc] init];
+a.next = b;
+b.next = a;
+
+Should you send this graph over the wire, unless you somehow retain
+the graph and manually break the cycle, your application will leak
+memory.
+
+IceTouch has never been tested with Objective-C garbage collection on
+Mac OS X.
+
+
+Auto release pool
+-----------------
+
+The Ice runtime creates an NSAutoReleasePool object before each
+server-side dispatched invocation and client-side AMI callback. The
+pool is released once the dispatch is complete.
