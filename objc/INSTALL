@@ -57,31 +57,31 @@ Change the working directory to IceTouch-@ver@:
 
 $ cd IceTouch-@ver@
 
-Edit objc/config/Make.rules to establish your build
-configuration. There are three possible build configurations:
+Edit objc/config/Make.rules to establish your build configuration.
+There are three possible build configurations:
 
-* Build for Mac OS X. This environment is only useful for simple command
- line testing of Ice under Mac OS X. It cannot be used for development
- of iPhone applications.
+* Build for Mac OS X. This environment is only useful for simple
+  command-line testing of Ice under Mac OS X. It cannot be used for
+  development of iPhone applications.
 
-- In objc/config/Make.rules, leave COMPILE_FOR_IPHONE and
-  COMPILE_FOR_IPHONE_SIMULATOR unset.
+  - In objc/config/Make.rules, leave COMPILE_FOR_IPHONE and
+    COMPILE_FOR_IPHONE_SIMULATOR unset.
 
 * Build for the iPhone simulator
 
- - In objc/config/Make.rules, set COMPILE_FOR_IPHONE_SIMULATOR=YES.
+  - In objc/config/Make.rules, set COMPILE_FOR_IPHONE_SIMULATOR=YES.
 
 * Build for the iPhone/iTouch
 
-- In objc/config/Make.rules, set COMPILE_FOR_IPHONE=YES
+  - In objc/config/Make.rules, set COMPILE_FOR_IPHONE=YES
 
-- You must set your iPhone Developer Certificate private key
-  identifier in the environment variable IDENTIFIER. This environment
-  variable must be accessible by the build as well as by Xcode to
-  sign the demo and test iPhone binaries.
+  - You must set your iPhone Developer Certificate private key
+    identifier in the environment variable IDENTIFIER. This
+    environment variable must be accessible by the build as well as by
+    Xcode to sign the demo and test iPhone binaries.
 
-  One way of doing this is to add IDENTIFIER in your
-  ~/.Mac OS XX/environment.plist as shown below:
+    One way of doing this is to add IDENTIFIER in your
+    ~/.Mac OS XX/environment.plist as shown below:
 
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -92,7 +92,7 @@ configuration. There are three possible build configurations:
 </dict>
 </plist>
 
-  You must logout and login again for the changes to take effect.
+    You must logout and login again for the changes to take effect.
 
 Now you're ready to build IceTouch:
 
@@ -140,12 +140,11 @@ Simply run "make install". This will install IceTouch in the directory
 specified by the "prefix" variables in objc/config/Make.rules and
 cpp/config/Make.rules.
 
-For Mac OS X builds of IceTouch the install name of the shared library
-is /opt/IceTouch-@ver/lib. For iPhone builds the install name of the
-IceTouch shared libraries is @executable_path/Frameworks.
-
-As long as the shared library is not moved from this directory no
-setting of DYLD_LIBRARY_PATH is necessary.
+For Mac OS X builds of IceTouch, the install name of the shared
+library is /opt/IceTouch-@ver/lib. For iPhone builds, the install
+name of the IceTouch shared libraries is @executable_path/Frameworks.
+It is not necessary to modify DYLD_LIBRARY_PATH as long as the shared
+library is not moved from this directory.
 
 When compiling IceTouch programs, you must also make sure to pass the
 location of the <prefix>/include directory to the compiler with the -I
