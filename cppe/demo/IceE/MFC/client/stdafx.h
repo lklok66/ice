@@ -16,12 +16,20 @@
 #   define _STLP_DEBUG
 #endif
 
-#ifndef WINVER
-#define WINVER 0x0400
+#ifndef _WIN32_WINNT
+#  if defined(_MSC_VER) && _MSC_VER < 1500
+#    define _WIN32_WINNT 0x0400
+#  endif
 #endif
 
-#ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x0400
+#ifndef WINVER
+#  if defined(_MSC_VER) && _MSC_VER > 1300
+#    define WINVER 0x0400
+#  endif
+#endif
+
+#ifndef _WIN32_IE
+#define _WIN32_IE 0x0400
 #endif
 
 #else
