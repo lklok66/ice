@@ -25,7 +25,7 @@
     }
     instance.myName = name;
     instance.parent = parent;
-    instance.ident = [ICEIdentity identity:(parent ? [ICEUtil generateUUID] : nil) category:nil];
+    instance.ident = [ICEIdentity identity:(parent ? [ICEUtil generateUUID] : @"RootDir") category:nil];
     instance.contents = [[NSMutableArray alloc] init];
     return instance;
 }

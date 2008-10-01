@@ -13,42 +13,6 @@
 
 #import <Foundation/NSAutoreleasePool.h>
 
-@interface NodeI : FSNode <FSNode>
-{
-    @private
-	NSString *myName;
-}
-
-@property(nonatomic, retain) NSString *myName;
-
--(NSString *) name:(ICECurrent *)current;
-+(id) nodei:(NSString *)name;
--(void) dealloc;
-@end
-
-@implementation NodeI
-
-@synthesize myName;
-
-+(id) nodei:(NSString *)name
-{
-    NodeI *instance = [[[NodeI alloc] init] autorelease];
-    instance.myName = name;
-    return instance;
-}
-
--(NSString *) name:(ICECurrent *)current
-{
-    return myName;
-}
-
--(void) dealloc
-{
-    [myName release];
-    [super dealloc];
-}
-@end
-
 int
 main(int argc, char* argv[])
 {
@@ -75,7 +39,7 @@ main(int argc, char* argv[])
 	@try {
 	    [file write:text current:nil];
 	} @catch (FSGenericError *e) {
-	    NSLog([e reason]);
+	    NSLog([e name]);
 	}
 	[file activate:adapter];
 
@@ -97,7 +61,7 @@ main(int argc, char* argv[])
 	@try {
 	    [file write:text current:nil];
 	} @catch (FSGenericError *e) {
-	    NSLog([e reason]);
+	    NSLog([e name]);
 	}
 	[file activate:adapter];
 
@@ -111,13 +75,13 @@ main(int argc, char* argv[])
 
 	status = 0;
     } @catch (NSException* ex) {
-        NSLog(@"%@", [ex reason]);
+        NSLog(@"%@", [ex name]);
     }
 
     @try {
 	[communicator destroy];
     } @catch (NSException* ex) {
-	NSLog(@"%@", [ex reason]);
+	NSLog(@"%@", [ex name]);
     }
 
     [pool release];
