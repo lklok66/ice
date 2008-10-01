@@ -71,13 +71,13 @@ main(int argc, char* argv[])
 
 	status = 0;
     } @catch (NSException *ex) {
-        NSLog(@"%@\n", [ex name]);
+        NSLog(@"%@\n", ex);
     }
 
     @try {
 	[communicator destroy];
     } @catch (NSException* ex) {
-        NSLog(@"%@\n", [ex name]);
+        NSLog(@"%@\n", ex);
     }
 
     [pool release];
