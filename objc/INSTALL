@@ -1,1 +1,153 @@
-TODO
+======================================================================
+Requirements
+======================================================================
+
+
+Operating System
+----------------
+
+IceTouch has been extensively tested on:
+
+- Mac OS X 10.5.5 and Xcode 3.1.1.
+- iPod Touch v2 using software version 2.1.1
+- iPhone 3g using software version 2.1
+
+
+Compiler
+--------
+
+IceTouch requires:
+
+- Xcode 3.1.1
+- iPhone SDK for iPhone OS 2.1 (build 9M2517)
+
+These can be downloaded from http://developer.apple.com.
+
+
+Third-party libraries
+---------------------
+
+The Slice-to-ObjC compiler (slice2objc) has a dependency on the
+following third-party library:
+
+- mcpp 2.7 with patch
+
+We recommend downloading the Ice third-party source archive from
+
+ http://www.zeroc.com/download.html
+
+This archive contains the source distributions for each of the
+third-party dependencies, as well as required source patches and
+configuration instructions.
+
+For more information about this dependency, please refer to the link
+below:
+
+ http://mcpp.sourceforge.net
+
+
+======================================================================
+Compilation
+======================================================================
+
+Unpack the archive. The sources are contained in the IceTouch-@ver@
+subdirectory.
+
+Change the working directory to IceTouch-@ver@:
+
+$ cd IceTouch-@ver@
+
+Edit objc/config/Make.rules to establish your build
+configuration. There are three possible build configurations:
+
+* Build for Mac OS X. This environment is only useful for simple command
+ line testing of Ice under Mac OS X. It cannot be used for development
+ of iPhone applications.
+
+- In objc/config/Make.rules, leave COMPILE_FOR_IPHONE and
+  COMPILE_FOR_IPHONE_SIMULATOR unset.
+
+* Build for the iPhone simulator
+
+ - In objc/config/Make.rules, set COMPILE_FOR_IPHONE_SIMULATOR=YES.
+
+* Build for the iPhone/iTouch
+
+- In objc/config/Make.rules, set COMPILE_FOR_IPHONE=YES
+
+- You must set your iPhone Developer Certificate private key
+  identifier in the environment variable IDENTIFIER. This environment
+  variable must be accessible by the build as well as by Xcode to
+  sign the demo and test iPhone binaries.
+
+  One way of doing this is to add IDENTIFIER in your
+  ~/.Mac OS XX/environment.plist as shown below:
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDENTIFIER</key>
+	<string>iPhone Developer: Matthew Newhook</string>
+</dict>
+</plist>
+
+  You must logout and login again for the changes to take effect.
+
+Now you're ready to build IceTouch:
+
+$ make
+
+This will build the IceTouch library. If you are building for Mac OS X
+this will also build the tests and examples.
+
+If you are building for iPhone or the iPhone simulator, you should now
+use Xcode to build the demos and test suite located in the following
+subdirectories:
+
+ - demo/iPhone/chat
+ - demo/iPhone/library
+ - demo/iPhone/hello
+
+ - test/iPhone/container
+
+If you are building for the iPhone simulator, you can also build:
+
+ - test/iPhone/bounce
+
+After a successful build, you can run the test suite.
+
+Under Mac OS X, run:
+
+$ cd objc
+$ python allTests.py
+
+If everything worked out, you should see lots of "ok" messages. In
+case of a failure, the tests abort with "failed".
+
+For the iPhone or iPhone simulator, you must run the "Test Suite"
+application and then select and run each test in the picker. If you
+are running under the simulator and you have installed the Re-launch
+(test/iPhone/bounce) application, the test suite will automatically
+relaunch. This is not possible on the iPhone.
+
+
+======================================================================
+Installation
+======================================================================
+
+Simply run "make install". This will install IceTouch in the directory
+specified by the "prefix" variables in objc/config/Make.rules and
+cpp/config/Make.rules.
+
+For Mac OS X builds of IceTouch the install name of the shared library
+is /opt/IceTouch-@ver/lib. For iPhone builds the install name of the
+IceTouch shared libraries is @executable_path/Frameworks.
+
+As long as the shared library is not moved from this directory no
+setting of DYLD_LIBRARY_PATH is necessary.
+
+When compiling IceTouch programs, you must also make sure to pass the
+location of the <prefix>/include directory to the compiler with the -I
+option, and the location of the <prefix>/lib directory with the -L
+option.
