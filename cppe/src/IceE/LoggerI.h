@@ -21,6 +21,9 @@ class LoggerI : public Logger
 public:
 
     LoggerI(const std::string&);
+#ifdef _WIN32_WCE
+    ~LoggerI();
+#endif
 
     virtual void print(const std::string&);
     virtual void trace(const std::string&, const std::string&);
@@ -30,6 +33,7 @@ public:
 private:
 
     std::string _prefix;
+    FILE* _file;
 };
 
 }

@@ -47,7 +47,7 @@ CPP_COMPILER            = VC80
 #
 # Supported options for EMBEDDED_DEVICE are "PocketPC" and "Smartphone"
 #
-#EMBEDDED_OS            = WindowsMobile2003
+#EMBEDDED_OS            = WindowsMobile6
 #EMBEDDED_DEVICE        = PocketPC
 
 # ----------------------------------------------------------------------
