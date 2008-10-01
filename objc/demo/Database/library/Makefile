@@ -13,26 +13,28 @@ CLIENT		= client
 
 TARGETS		= $(CLIENT) $(SERVER)
 
-OBJS		= Library.o Session.o
-
-COBJS		= Client.o \
+OBJS		= Library.o \
+		  Session.o \
+		  Glacier2Session.o \
+		  Client.o \
 		  Grammar.o \
 		  Scanner.o \
 		  Parser.o \
 		  RunParser.o
 
-SRCS		= $(OBJS:.o=.m) \
-		  $(COBJS:.o=.m)
+SRCS		= $(OBJS:.o=.m)
 
-SLICE_SRCS	= Library.ice Session.ice
+SLICE_SRCS	= Library.ice \
+		  Session.ice \
+		  Glacier2Session.ice
 
 include $(top_srcdir)/config/Make.rules
 
 CPPFLAGS	:= -I. $(CPPFLAGS)
 
-$(CLIENT): $(ICEOBJCLIB) $(OBJS) $(COBJS) $(CPP_OBJS)
+$(CLIENT): $(ICEOBJCLIB) $(OBJS) $(CPP_OBJS)
 	rm -f $@
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(COBJS) $(CPP_OBJS) $(LIBS)
+	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(CPP_OBJS) -lGlacier2Objc $(LIBS)
 
 clean::
 	-rm -f Grammar.m Grammar.h

@@ -8,10 +8,13 @@
 // **********************************************************************
 
 #import <Ice/Ice.h>
+#import <Glacier2/Router.h>
 #import <Library.h>
 #import <Session.h>
+#import <Glacier2Session.h>
 #import <Parser.h>
 #import <stdio.h>
+#import <string.h>
 
 #import <Foundation/NSThread.h>
 #import <Foundation/NSLock.h>
@@ -21,19 +24,19 @@
 {
 @private
     id<ICELogger> logger;
-    id<DemoSessionPrx> session;
+    id session;
     NSCondition* cond;
 
     long timeout;
 }
 
--(id)initWithLogger:(id<ICELogger>) logger timeout:(long)timeout session:(id<DemoSessionPrx>)session;
-+(id)sessionRefreshThreadWithLogger:(id<ICELogger>)logger timeout:(long)timeout session:(id<DemoSessionPrx>)session;
+-(id)initWithLogger:(id<ICELogger>) logger timeout:(long)timeout session:(id)session;
++(id)sessionRefreshThreadWithLogger:(id<ICELogger>)logger timeout:(long)timeout session:(id)session;
 @end
 
 @interface SessionRefreshThread()
 @property (nonatomic, retain) id<ICELogger> logger;
-@property (nonatomic, retain) id<DemoSessionPrx> session;
+@property (nonatomic, retain) id session;
 @property (nonatomic, retain) NSCondition* cond;
 @end
 
@@ -43,7 +46,7 @@
 @synthesize session;
 @synthesize cond;
 
--(id)initWithLogger:(id<ICELogger>)l timeout:(long)t session:(id<DemoSessionPrx>)s
+-(id)initWithLogger:(id<ICELogger>)l timeout:(long)t session:(id)s
 {
     if((self = [super init]))
     {
@@ -55,7 +58,7 @@
     return self;
 } 
 
-+(id)sessionRefreshThreadWithLogger:(id<ICELogger>)logger timeout:(long)timeout session:(id<DemoSessionPrx>)session
++(id)sessionRefreshThreadWithLogger:(id<ICELogger>)logger timeout:(long)timeout session:(id)session
 {
     return [[[SessionRefreshThread alloc] initWithLogger:logger timeout:timeout session:session] autorelease];
 }
@@ -120,21 +123,72 @@ runParser(int argc, char* argv[], id<ICECommunicator> communicator)
     // For this demo we don't need to retain the below objects since
     // the autorelease pool in scope is not released until main
     // terminates.
-    id<DemoSessionFactoryPrx> factory = [DemoSessionFactoryPrx checkedCast:[
-            communicator propertyToProxy:@"SessionFactory.Proxy"] ];
-    if(factory == nil)
+    id<Glacier2RouterPrx> router = [Glacier2RouterPrx uncheckedCast:[communicator getDefaultRouter]];
+    ICELong timeout;
+    id<DemoLibraryPrx> library;
+    id session;
+    if(router != nil)
     {
-        fprintf(stderr, "%s: invalid object reference", argv[0]);
-        return 1;
+        printf("This demo accepts any user-id / password combination.\n");
+
+        while(true)
+        {
+            char id[1024];
+            printf("user id: ");
+            fflush(stdout);
+            fgets(id, sizeof(id), stdin);
+            int len = strlen(id);
+            if(id[len-1] == '\n')
+            {
+                id[len-1] = '\0';
+            }
+            printf("password: ");
+            fflush(stdout);
+            char pw[1024];
+            fgets(pw, sizeof(pw), stdin);
+            len = strlen(pw);
+            if(pw[len-1] == '\n')
+            {
+                pw[len-1] = '\0';
+            }
+
+            @try
+            {
+                session = [DemoGlacier2SessionPrx uncheckedCast:
+                            [router createSession:[NSString stringWithCString:id encoding:NSUTF8StringEncoding]
+                            password:[NSString stringWithCString:pw encoding:NSUTF8StringEncoding]]];
+                break;
+            }
+            @catch(Glacier2PermissionDeniedException* ex)
+            {
+                printf("permission denied:\n%s\n", [ex.reason UTF8String]);
+            }
+            @catch(Glacier2CannotCreateSessionException* ex)
+            {
+                printf("cannot create session:\n%s\n", [ex.reason UTF8String]);
+            }
+        }
+	timeout = [router getSessionTimeout]/2;
+        library = [session getLibrary];
+    }
+    else
+    {
+        id<DemoSessionFactoryPrx> factory = [DemoSessionFactoryPrx checkedCast:[
+                communicator propertyToProxy:@"SessionFactory.Proxy"] ];
+        if(factory == nil)
+        {
+            fprintf(stderr, "%s: invalid object reference", argv[0]);
+            return 1;
+        }
+
+        session = [factory create];
+        timeout = [factory getSessionTimeout]/2;
+        library = [session getLibrary];
     }
 
-    id<DemoSessionPrx> session = [factory create];
-
     SessionRefreshThread* refresh = [SessionRefreshThread sessionRefreshThreadWithLogger:[communicator getLogger]
-                                                          timeout:[factory getSessionTimeout]/2 session:session];
+                                                          timeout:timeout/2 session:session];
     [refresh start];
-
-    id<DemoLibraryPrx> library = [session getLibrary];
 
     Parser* parser = [Parser parserWithLibrary:library];
 
