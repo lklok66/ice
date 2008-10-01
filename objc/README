@@ -1,1 +1,167 @@
-TODO
+Please see the file INSTALL for installation instructions.
+
+IceTouch Feature Set
+--------------------
+
+IceTouch supports the following Ice features:
+
+  - Thread pools
+  - AMI
+  - Object by Value
+  - Opaque endpoints
+  - Router
+  - Locator
+  - Batch invocations
+  - SSL (except when targeting Mac OS X)
+  - Support for callbacks hosted by 'bi-dir' and routed object
+    adapters
+  - Default servants
+  - Dispatch interceptors
+  - UDP (on the iPhone, UDP requests do not transparently establish
+    the 3G/Edge connection)
+  - Dynamic Ice
+  - Full server-side support
+  - Active connection management
+
+
+SSL Support
+-----------
+
+IceTouch SSL support is only a subset of the Ice for C++ SSL support.
+
+The following limitations apply:
+
+ - IceTouch does not support SSL when targeting Mac OS X.
+ - IceTouch servers cannot authenticate SSL clients.
+
+The supported properties are listed below. Unless otherwise noted, the
+properties have the same semantics as those documented in the Ice
+manual.
+
+ - IceSSL.DefaultDir
+
+   See below for more information on how IceTouch locates certificate
+   files.
+
+ - IceSSL.CheckCertName
+
+ - IceSSL.CertAuthFile
+
+   If a certificate authority is not specified, all certificate
+   authorities in the keychain are used. For CA certificates IceTouch
+   only supports DER encoding.
+
+   See below for more information on how IceTouch locates certificate
+   files.
+
+ - IceSSL.CertFile
+
+   IceTouch only supports PKCS#12 (.PFX) encoded certificates.
+
+   See below for more information on how IceTouch locates certificate
+   files.
+
+ - IceSSL.Password
+
+ - IceSSL.TrustOnly.Client
+
+   The property specifies an X509v3 subject key identifier. The
+   property value is composed of a series of hex values separated by
+   colons or spaces. For example:
+
+   "C2:E8:D3:33:D7:83:99:6E:08:F7:C2:34:31:F7:1E:8E:44:87:38:57"
+
+   Since this value is specific to a single certificate authority,
+   this property is only valid when used in conjunction with
+   IceSSL.CertAuthFile.
+
+These properties are only necessary for the iPhone simulator target:
+
+ - IceSSL.Keychain
+
+  This property specifies the keychain used to import the certificate
+  from Ice.CertFile. If not specified, the "login" keychain is used by
+  default. If the specified keychain does not exist, it is created.
+
+ - IceSSL.KeychainPassword
+
+  The password for the above keychain.
+
+The semantics for locating certificate files identified by the
+properties IceSSL.CertAuthFile and IceSSL.CertFile depend on whether
+the IceSSL.DefaultDir property is also defined. In either case,
+IceTouch looks for the file in the application's resource bundle and
+in the file system.
+
+If IceSSL.DefaultDir is defined, IceTouch tries the following
+locations:
+
+  Resources/<DefaultDir>/<file>
+  <DefaultDir>/<file>
+
+If IceSSL.DefaultDir is not defined, IceTouch tries the following
+locations:
+
+  Resources/<file>
+  <file>
+
+
+Loggers
+-------
+
+Custom loggers must be installed via ICEInitializationData. You should
+not use any of the Ice for C++ logger properties, such as
+Ice.UseSyslog, or attempt to install a custom logger through a plug-in
+(Ice.Plugin.*).
+
+
+Slice Module Prefixes
+---------------------
+
+IceTouch supports changing the generated Objective-C class prefix
+using "objc:prefix:" metadata. For example, the module "Ice" is
+mapped to the class prefix ICE as follows:
+
+  ["objc:prefix:ICE"]
+  module Ice
+
+Be aware that the IceTouch run time currently cannot correctly
+unmarshal an instance of a Slice class or exception if its prefix has
+been changed. 
+using this metadata will prevent you from receiving an
+Should you remap the prefix, and then receive a class or exception
+from a remote call, the IceTouch run time will not be unable to
+instantiate the correct class, and your application will receive a
+run-time exception.
+
+
+Garbage Collection
+------------------
+
+The IceTouch run time cannot garbage collect graphs of objects
+containing cycles. For example,
+
+class Foo
+{
+    Foo next;
+};
+
+Foo a = [[Foo alloc] init];
+Foo b = [[Foo alloc] init];
+a.next = b;
+b.next = a;
+
+Should you send this graph over the wire, your application will leak
+memory unless you somehow retain the graph and manually break the
+cycle.
+
+IceTouch has never been tested with Objective-C garbage collection on
+Mac OS X.
+
+
+Auto release pool
+-----------------
+
+The Ice run time creates an NSAutoReleasePool object before each
+server-side dispatched invocation and client-side AMI callback. The
+pool is released once the dispatch is complete.

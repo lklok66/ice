@@ -3,7 +3,7 @@
 // Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
-// ICE_LICENSE file included in this distribution.
+// ICETOUCH_LICENSE file included in this distribution.
 //
 // **********************************************************************
 
@@ -28,11 +28,12 @@ main(int argc, char* argv[])
             NSLog(@"%s: too many arguments", argv[0]);
             return 1;
         }
-        id<ICEObjectAdapter> adpt = [communicator createObjectAdapterWithEndpoints:@"Hello" endpoints:@"tcp -p 10000"];
-        DemoHello* hello = [[HelloI alloc] init];
-        [adpt add:hello identity:[communicator stringToIdentity:@"hello"]];
-        [hello release];
-        [adpt activate];
+
+        id<ICEObjectAdapter> adapter = [communicator createObjectAdapterWithEndpoints:@"Hello"
+                                                     endpoints:@"tcp -p 10000"];
+        DemoHello* hello = [[[HelloI alloc] init] autorelease];
+        [adapter add:hello identity:[communicator stringToIdentity:@"hello"]];
+        [adapter activate];
         [communicator waitForShutdown];
     }
     @catch(ICELocalException* ex)
