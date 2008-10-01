@@ -63,7 +63,7 @@ ifeq ($(OPTIMIZE_SPEED),yes)
 else ifeq ($(OPTIMIZE_SIZE),yes)
     OPTIMIZE		= yes
 else ifeq ($(OPTIMIZE),yes)
-    OPTIMIZE_SIZE	= yes
+    OPTIMIZE_SPEED	= yes
 endif
 
 bindir			= $(top_srcdir)/bin
