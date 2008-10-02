@@ -1175,9 +1175,39 @@ Slice::Gen::UnitVisitor::visitModuleStart(const ModulePtr& p)
         _globalMetaDataDone = true; // Do this only once per source file.
     }
 #endif
+    string dummy;
+    if(p->findMetaData("objc:prefix", dummy))
+    {
+        _prefixes.push_back(modulePrefix(p));
+    }
     return false;
 }
 
+void
+Slice::Gen::UnitVisitor::visitUnitEnd(const UnitPtr& unit)
+{
+    string uuid = IceUtil::generateUUID();
+    for(string::size_type pos = 0; pos < uuid.size(); ++pos)
+    {
+        if(!isalnum(uuid[pos]))
+        {
+            uuid[pos] = '_';
+        }
+    }
+
+    if(!_prefixes.empty())
+    {
+        _M << sp << nl << "@implementation ICEPrefixTable(C" << uuid << ")";
+        _M << nl << "-(void)addPrefixes_C" << uuid << ":(NSMutableDictionary*)prefixTable";
+        _M << sb;
+        for(vector<Slice::ObjCGenerator::ModulePrefix>::const_iterator p = _prefixes.begin(); p != _prefixes.end(); ++p)
+        {
+            _M << nl << "[prefixTable setObject:@\"" << p->name << "\" forKey:@\"" << p->m->scoped() << "\"];";
+        }
+        _M << eb;
+        _M << nl << "@end";
+    }
+}
 
 Slice::Gen::ObjectDeclVisitor::ObjectDeclVisitor(Output& H, Output& M)
     : ObjCVisitor(H, M)

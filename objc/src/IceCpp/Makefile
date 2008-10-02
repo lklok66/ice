@@ -24,7 +24,6 @@ OBJS		= Acceptor.o \
 		  Connector.o \
 		  DefaultsAndOverrides.o \
 		  Direct.o \
-                  DispatchInterceptor.o \
 		  DynamicLibrary.o \
 		  EndpointFactoryManager.o \
 		  EndpointFactory.o \
@@ -76,6 +75,7 @@ OBJS		= Acceptor.o \
 		  UdpEndpointI.o \
 		  UdpTransceiver.o \
 		  UnknownEndpointI.o
+#                 DispatchInterceptor.o \
 #		  TcpEndpointI.o \
 #		  TcpAcceptor.o \
 #		  TcpConnector.o \

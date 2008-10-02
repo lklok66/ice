@@ -92,11 +92,13 @@ private:
         UnitVisitor(::IceUtilInternal::Output&, ::IceUtilInternal::Output&, bool);
 
         virtual bool visitModuleStart(const ModulePtr&);
+        virtual void visitUnitEnd(const UnitPtr&);
 
     private:
 
         bool _stream;
         bool _globalMetaDataDone;
+        std::vector<Slice::ObjCGenerator::ModulePrefix> _prefixes;
     };
 
     class ObjectDeclVisitor : public ObjCVisitor

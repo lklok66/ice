@@ -23,13 +23,15 @@
 @private
     id<ICEProperties> properties;
     id<ICELogger> logger;
+    NSDictionary* prefixTable;
 }
 @property(retain, nonatomic) id<ICEProperties> properties;
 @property(retain, nonatomic) id<ICELogger> logger;
+@property(retain, nonatomic) NSDictionary* prefixTable;
 
--(id) init:(id<ICEProperties>)properties logger:(id<ICELogger>)logger;
+-(id) init:(id<ICEProperties>)properties logger:(id<ICELogger>)logger prefixTable:(NSDictionary*)prefixTable;
 +(id) initializationData;
-+(id) initializationData:(id<ICEProperties>)properties logger:(id<ICELogger>)logger;
++(id) initializationData:(id<ICEProperties>)properties logger:(id<ICELogger>)logger prefixTable:(NSDictionary*)prefixTable;
 // This class also overrides copyWithZone:, hash, isEqual:, and dealloc.
 @end
 

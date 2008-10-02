@@ -19,6 +19,9 @@
 @interface ICECommunicator : ICEInternalWrapper<ICECommunicator>
 {
     NSMutableDictionary* objectFactories_;
+    NSDictionary* prefixTable_;
 }
+-(void)setup:(NSDictionary*)prefixTable;
 -(Ice::Communicator*)communicator;
+-(NSDictionary*)getPrefixTable;
 @end

@@ -885,7 +885,8 @@ typedef enum { dummy } Dummy_Enum;
         std::string typeId = is_->readString(false);
         for(;;)
         {
-            typeId = toObjCSliceId(typeId);
+            typeId = toObjCSliceId(typeId, 
+                                   [[ICECommunicator wrapperWithCxxObject:is_->communicator().get()] getPrefixTable]);
             Class c = objc_lookUpClass(typeId.c_str());
             if(c != nil)
             {

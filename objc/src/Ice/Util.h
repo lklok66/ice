@@ -183,7 +183,7 @@ fromNSString(NSString* s)
     return s == nil ? std::string() : [s UTF8String];
 }
 
-std::string toObjCSliceId(const std::string&);
+std::string toObjCSliceId(const std::string&, NSDictionary*);
 
 namespace IceObjC
 {

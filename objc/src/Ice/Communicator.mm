@@ -34,7 +34,8 @@ class ObjectFactoryI : public Ice::ObjectFactory
 {
 public:
 
-    ObjectFactoryI(NSDictionary* factories) : _factories(factories)
+    ObjectFactoryI(NSDictionary* factories, NSDictionary* prefixTable) : 
+        _factories(factories), _prefixTable(prefixTable)
     {
     }
 
@@ -56,7 +57,7 @@ public:
 
         if(obj == nil)
         {
-            std::string tId = toObjCSliceId(type);
+            std::string tId = toObjCSliceId(type, _prefixTable);
             Class c = objc_lookUpClass(tId.c_str());
             if(c == nil)
             {
@@ -90,29 +91,64 @@ public:
 private:
     
     NSDictionary* _factories;
+    NSDictionary* _prefixTable;
 };
 
 }
 
-@implementation ICECommunicator
--(id) initWithCxxObject:(IceUtil::Shared*)arg;
+@interface ICEPrefixTable(ICEInternal)
++(NSDictionary*) newPrefixTable;
+@end
+
+@implementation ICEPrefixTable(ICEInternal)
++(NSDictionary*) newPrefixTable
 {
-    if(![super initWithCxxObject:arg])
+    NSMutableDictionary* prefixTable = [[NSMutableDictionary alloc] init];
+    ICEPrefixTable* table = [[ICEPrefixTable alloc] init];
+    unsigned int count;
+    Method* methods = class_copyMethodList([ICEPrefixTable class], &count);
+    for(unsigned int i = 0; i < count; ++i)
     {
-        return nil;
+        SEL selector = method_getName(methods[i]);
+        const char* methodName = sel_getName(selector);
+        if(strncmp(methodName, "addPrefixes_C", 13) == 0)
+        {
+            [table performSelector:selector withObject:prefixTable];
+        }
     }
+    free(methods);
+    [table release];
+    return prefixTable;
+}
+@end
+
+@implementation ICECommunicator
+-(void)setup:(NSDictionary*)prefixTable
+{
     objectFactories_ = [[NSMutableDictionary alloc] init];
-    COMMUNICATOR->addObjectFactory(new IceObjC::ObjectFactoryI(objectFactories_), "");
-    return self;
+    if(prefixTable)
+    {
+        prefixTable_ = [prefixTable retain];
+    }
+    else
+    {
+        prefixTable_ = [ICEPrefixTable newPrefixTable];
+    }
+    COMMUNICATOR->addObjectFactory(new IceObjC::ObjectFactoryI(objectFactories_, prefixTable_), "");
 }
 -(void) dealloc
 {
+    [prefixTable_ release];
     [objectFactories_ release];
     [super dealloc];
 }
 -(Ice::Communicator*) communicator
 {
     return COMMUNICATOR;
+}
+-(NSDictionary*) getPrefixTable
+{
+    return prefixTable_;
 }
 
 //

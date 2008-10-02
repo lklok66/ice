@@ -23,6 +23,9 @@ extern "C"
 #endif
 int ICEInternalLookupString(NSString *[], size_t, NSString *);
 
+@interface ICEPrefixTable : NSObject
+@end
+
 @protocol ICERequest <NSObject>
 -(ICECurrent*) getCurrent;
 @end

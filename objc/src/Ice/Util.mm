@@ -23,7 +23,7 @@ rethrowObjCException(const std::exception& ex)
         const Ice::LocalException* lex = dynamic_cast<const Ice::LocalException*>(&ex);
         if(lex)
         {
-            std::string typeId = toObjCSliceId("::" + lex->ice_name());
+            std::string typeId = std::string("ICE") + lex->ice_name().substr(5);
             Class c = objc_getClass(typeId.c_str());
             if(c != nil)
             {
@@ -110,20 +110,30 @@ rethrowCxxException(NSException* e, bool release)
 }
 
 std::string 
-toObjCSliceId(const std::string& sliceId)
+toObjCSliceId(const std::string& sliceId, NSDictionary* prefixTable)
 {
     std::string objcType = sliceId;
+
+    std::string::size_type pos = objcType.find("::", 2);
+    if(pos != std::string::npos)
+    {
+        NSString* moduleName = toNSString(objcType.substr(0, pos - 2));
+        NSString* prefix = [prefixTable objectForKey:moduleName];
+        [moduleName release];
+        if(prefix)
+        {
+            return objcType.replace(0, pos + 2, fromNSString(prefix));
+        }
+    }
+
     if(objcType.find("::Ice::") == 0)
     {
-        objcType = objcType.replace(0, 7, "ICE");
+        return objcType.replace(0, 7, "ICE"); 
     }
-    else
+
+    while((pos = objcType.find("::")) != std::string::npos)
     {
-        std::string::size_type pos;
-        while((pos = objcType.find("::")) != std::string::npos)
-        {
-            objcType = objcType.replace(pos, 2, "");
-        }
+        objcType = objcType.replace(pos, 2, "");
     }
     return objcType;
 }
