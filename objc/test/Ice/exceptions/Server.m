@@ -17,8 +17,8 @@ static int
 run(id<ICECommunicator> communicator)
 {
     [[communicator getProperties] setProperty:@"Ice.Warn.Dispatch" value:@"0"];
-    [[communicator getProperties] setProperty:@"TestExceptionsAdapter.Endpoints" value:@"default -p 12010 -t 10000:udp"];
-    id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestExceptionsAdapter"];
+    [[communicator getProperties] setProperty:@"TestAdapter.Endpoints" value:@"default -p 12010 -t 10000:udp"];
+    id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestAdapter"];
     ICEObject* object = [[[ThrowerI alloc] init] autorelease];
     [adapter add:object identity:[communicator stringToIdentity:@"thrower"]];
     [adapter activate];

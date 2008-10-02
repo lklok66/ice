@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-#import <ServerPrivate.h>
+#import <TestServer.h>
 
-@interface TestSlicingExceptionsI : TestSlicingExceptionsTestIntf
+@interface TestSlicingExceptionsServerI : TestSlicingExceptionsServerTestIntf
 @end

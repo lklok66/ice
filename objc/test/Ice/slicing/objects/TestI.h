@@ -7,13 +7,13 @@
 //
 // **********************************************************************
 
-#import <ServerPrivate.h>
+#import <TestServer.h>
 #import <Forward.h>
 
-@interface TestI : TestTestIntf
+@interface TestSlicingObjectsServerI : TestSlicingObjectsServerTestIntf
 {
-    TestB* oneElementCycle_;
-    TestB* twoElementCycle_;
+    TestSlicingObjectsServerB* oneElementCycle_;
+    TestSlicingObjectsServerB* twoElementCycle_;
 }
 @end
 

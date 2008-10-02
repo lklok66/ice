@@ -17,10 +17,10 @@ static int
 run(id<ICECommunicator> communicator)
 {
     [[communicator getProperties] setProperty:@"Ice.Warn.Dispatch" value:@"0"];
-    [[communicator getProperties] setProperty:@"TestSlicingExceptionsAdapter.Endpoints" value:@"default -p 12010 -t 2000"];
-    id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestSlicingExceptionsAdapter"];
-    ICEObject* object = [[[TestSlicingExceptionsI alloc] init] autorelease];
-    [adapter add:object identity:[communicator stringToIdentity:@"TestSlicingExceptions"]];
+    [[communicator getProperties] setProperty:@"TestAdapter.Endpoints" value:@"default -p 12010 -t 2000"];
+    id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestAdapter"];
+    ICEObject* object = [[[TestSlicingExceptionsServerI alloc] init] autorelease];
+    [adapter add:object identity:[communicator stringToIdentity:@"Test"]];
     [adapter activate];
 
     serverReady(communicator);
@@ -44,6 +44,11 @@ main(int argc, char* argv[])
     {
         ICEInitializationData* initData = [ICEInitializationData initializationData];
         initData.properties = defaultServerProperties(&argc, argv);
+#if TARGET_OS_IPHONE
+        initData.prefixTable = [NSDictionary dictionaryWithObjectsAndKeys:
+                                @"TestSlicingExceptionsServer", @"::Test", 
+                                nil];
+#endif
         communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];
         status = run(communicator);
     }

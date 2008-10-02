@@ -15,6 +15,8 @@
 		2899E5220DE3E06400AC0155 /* TestView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2899E5210DE3E06400AC0155 /* TestView.xib */; };
 		28AD733F0D9D9553002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD733E0D9D9553002E5188 /* MainWindow.xib */; };
 		28D7ACF80DDB3853001CB0EB /* TestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28D7ACF70DDB3853001CB0EB /* TestViewController.m */; };
+		340EF2B70E958D7400E8DAA9 /* TestSlicingExceptions.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 340EF20C0E958D4B00E8DAA9 /* TestSlicingExceptions.dylib */; };
+		340EF2B80E958D7900E8DAA9 /* TestSlicingObjects.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 340EF20A0E958D4100E8DAA9 /* TestSlicingObjects.dylib */; };
 		342EB9EE0E9261A3000051FA /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 342EB9ED0E9261A3000051FA /* icon.png */; };
 		342EBA870E926E98000051FA /* c_rsa1024.pfx in Resources */ = {isa = PBXBuildFile; fileRef = 342EBA860E926E98000051FA /* c_rsa1024.pfx */; };
 		342EBA890E926E9F000051FA /* s_rsa1024.pfx in Resources */ = {isa = PBXBuildFile; fileRef = 342EBA880E926E9F000051FA /* s_rsa1024.pfx */; };
@@ -48,6 +50,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				340EF2B80E958D7900E8DAA9 /* TestSlicingObjects.dylib in CopyFiles */,
+				340EF2B70E958D7400E8DAA9 /* TestSlicingExceptions.dylib in CopyFiles */,
 				34B767D90E8D9D8B00CE4701 /* TestTimeout.dylib in CopyFiles */,
 				34B767DA0E8D9D8B00CE4701 /* TestRetry.dylib in CopyFiles */,
 				34B767DB0E8D9D8B00CE4701 /* TestLocation.dylib in CopyFiles */,
@@ -81,6 +85,8 @@
 		28D7ACF70DDB3853001CB0EB /* TestViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestViewController.m; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* container_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = container_Prefix.pch; sourceTree = "<group>"; };
+		340EF20A0E958D4100E8DAA9 /* TestSlicingObjects.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestSlicingObjects.dylib; path = ../../Ice/slicing/objects/TestSlicingObjects.dylib; sourceTree = SOURCE_ROOT; };
+		340EF20C0E958D4B00E8DAA9 /* TestSlicingExceptions.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestSlicingExceptions.dylib; path = ../../Ice/slicing/exceptions/TestSlicingExceptions.dylib; sourceTree = SOURCE_ROOT; };
 		342EB9ED0E9261A3000051FA /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icon.png; path = Images/icon.png; sourceTree = "<group>"; };
 		342EBA860E926E98000051FA /* c_rsa1024.pfx */ = {isa = PBXFileReference; lastKnownFileType = file; name = c_rsa1024.pfx; path = ../../certs/c_rsa1024.pfx; sourceTree = SOURCE_ROOT; };
 		342EBA880E926E9F000051FA /* s_rsa1024.pfx */ = {isa = PBXFileReference; lastKnownFileType = file; name = s_rsa1024.pfx; path = ../../certs/s_rsa1024.pfx; sourceTree = SOURCE_ROOT; };
@@ -186,6 +192,8 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				340EF20C0E958D4B00E8DAA9 /* TestSlicingExceptions.dylib */,
+				340EF20A0E958D4100E8DAA9 /* TestSlicingObjects.dylib */,
 				34B767D10E8D9D6E00CE4701 /* TestTimeout.dylib */,
 				34B767CF0E8D9D6400CE4701 /* TestRetry.dylib */,
 				34B767CD0E8D9D5800CE4701 /* TestLocation.dylib */,
@@ -320,6 +328,8 @@
 					"\"$(SRCROOT)/../timeout\"",
 					"\"$(SRCROOT)/../slicing/exceptions\"",
 					"\"$(SRCROOT)/../slicing/objects\"",
+					"\"$(SRCROOT)/../../Ice/slicing/objects\"",
+					"\"$(SRCROOT)/../../Ice/slicing/exceptions\"",
 				);
 				PRODUCT_NAME = container;
 			};
@@ -351,6 +361,8 @@
 					"\"$(SRCROOT)/../timeout\"",
 					"\"$(SRCROOT)/../slicing/exceptions\"",
 					"\"$(SRCROOT)/../slicing/objects\"",
+					"\"$(SRCROOT)/../../Ice/slicing/objects\"",
+					"\"$(SRCROOT)/../../Ice/slicing/exceptions\"",
 				);
 				PRODUCT_NAME = container;
 			};

@@ -16,8 +16,8 @@
 static int
 run(id<ICECommunicator> communicator)
 {
-    [[communicator getProperties] setProperty:@"TestRetryAdapter.Endpoints" value:@"default -p 12010 -t 10000:udp"];
-    id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestRetryAdapter"];
+    [[communicator getProperties] setProperty:@"TestAdapter.Endpoints" value:@"default -p 12010 -t 10000:udp"];
+    id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestAdapter"];
     ICEObject* object = [[[TestRetryRetryI alloc] init] autorelease];
     [adapter add:object identity:[communicator stringToIdentity:@"retry"]];
     [adapter activate];

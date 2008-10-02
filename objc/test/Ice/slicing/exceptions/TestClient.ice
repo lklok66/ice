@@ -10,7 +10,7 @@
 #ifndef TEST_ICE
 #define TEST_ICE
 
-["objc:prefix:TestSlicingExceptions"]
+["objc:prefix:TestSlicingExceptionsClient"]
 module Test
 {
 

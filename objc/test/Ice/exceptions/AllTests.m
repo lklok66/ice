@@ -42,7 +42,7 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
         id<ICEObjectAdapter> first;
 	@try
 	{
-	    first = [communicator createObjectAdapter:@"TestExceptionsAdapter0"];
+	    first = [communicator createObjectAdapter:@"TestAdapter0"];
 	    test(false);
 	}
 	@catch(ICEInitializationException *ex)
@@ -50,11 +50,11 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
 	    // Expeccted
 	}
 
-	[[communicator getProperties] setProperty:@"TestExceptionsAdapter0.Endpoints" value:@"default"];
-	first = [communicator createObjectAdapter:@"TestExceptionsAdapter0"];
+	[[communicator getProperties] setProperty:@"TestAdapter0.Endpoints" value:@"default"];
+	first = [communicator createObjectAdapter:@"TestAdapter0"];
 	@try
 	{
-	    [communicator createObjectAdapter:@"TestExceptionsAdapter0"];
+	    [communicator createObjectAdapter:@"TestAdapter0"];
 	    test(false);
 	}
 	@catch(ICEAlreadyRegisteredException *ex)
@@ -73,15 +73,15 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
 	//
 	// Properties must remain unaffected if an exception occurs.
 	//
-	test([[[communicator getProperties] getProperty:@"TestExceptionsAdapter0.Endpoints"] isEqualToString:@"default"]);
+	test([[[communicator getProperties] getProperty:@"TestAdapter0.Endpoints"] isEqualToString:@"default"]);
 	[first deactivate];
     }
     tprintf("ok\n");
 
     tprintf("testing servant registration exceptions... ");
     {
-        [[communicator getProperties] setProperty:@"TestExceptionsAdapter1.Endpoints" value:@"default"];
-	id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestExceptionsAdapter1"];
+        [[communicator getProperties] setProperty:@"TestAdapter1.Endpoints" value:@"default"];
+	id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestAdapter1"];
 	ICEObject* obj = [[[EmptyI alloc] init] autorelease];
 	[adapter add:obj identity:[communicator stringToIdentity:@"x"]];
 	@try

@@ -10,7 +10,8 @@
 #ifndef FORWARD_ICE
 #define FORWARD_ICE
 
-module Test
+["objc:prefix:TestSlicingObjectsShared"]
+module TestShared
 {
 
 class Forward;
