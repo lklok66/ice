@@ -51,3 +51,16 @@ IceSSL.DefaultDir=../../../../certs
 IceSSL.CertAuthFile=cacert.pem
 IceSSL.CertFile=c_rsa1024.pfx
 IceSSL.Password=password
+
+#
+# Note: we use a separate keychain for the client certificate. This is
+# necessary to prevent a conflict with the server certificate if it's
+# in the default "login" keychain. In order to be compatible with Ice
+# 3.3.0 servers, we use the 3.3.0 certificates. Unfortunately these
+# certificates have duplicate serial numbers which prevents them from
+# being imported into the same keychain (the certificates from the
+# objc/test/certs directory don't suffer from this issue).
+#
+IceSSL.Keychain="ZeroC Hello Client"
+IceSSL.KeychainPassword=password
+
