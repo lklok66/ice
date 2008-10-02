@@ -71,7 +71,7 @@ There are three possible build configurations:
 
   - In objc/config/Make.rules, set COMPILE_FOR_IPHONE_SIMULATOR=YES.
 
-* Build for the iPhone/iTouch
+* Build for the iPhone or iPod touch
 
   - In objc/config/Make.rules, set COMPILE_FOR_IPHONE=YES
 
@@ -92,14 +92,14 @@ There are three possible build configurations:
 </dict>
 </plist>
 
-    You must logout and login again for the changes to take effect.
+    You must log out and log in again for the changes to take effect.
 
-Now you're ready to build Ice Touch:
+Now you are ready to build Ice Touch:
 
 $ make
 
-This will build the Ice Touch library. If you are building for Mac OS
-X this will also build the tests and examples.
+This will build the Ice Touch library. If you are building for Mac OS X,
+this will also build the tests and examples.
 
 If you are building for iPhone or the iPhone simulator, you should now
 use Xcode to build the demos and test suite located in the following
@@ -122,7 +122,7 @@ Under Mac OS X, run:
 $ cd objc
 $ python allTests.py
 
-If everything worked out, you should see lots of "ok" messages. In
+If everything works, you should see lots of "ok" messages. In
 case of a failure, the tests abort with "failed".
 
 For the iPhone or iPhone simulator, you must run the "Test Suite"
