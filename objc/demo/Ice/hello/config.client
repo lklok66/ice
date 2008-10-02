@@ -61,6 +61,6 @@ IceSSL.Password=password
 # being imported into the same keychain (the certificates from the
 # objc/test/certs directory don't suffer from this issue).
 #
-IceSSL.Keychain="ZeroC Hello Client"
+IceSSL.Keychain=ZeroC Hello Client
 IceSSL.KeychainPassword=password
 
