@@ -17,6 +17,7 @@
 @property (nonatomic, retain) NSArray* tests;
 @property (nonatomic, retain) UIPickerView* pickerView;
 @property (nonatomic, retain) UISwitch* sslSwitch;
+@property (nonatomic, retain) TestViewController* testViewController;
 
 @end
 
@@ -25,20 +26,21 @@
 @synthesize tests;
 @synthesize pickerView;
 @synthesize sslSwitch;
+@synthesize testViewController;
 
 - (void)viewDidLoad
 {
     AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
     self.tests = appDelegate.tests;
     self.sslSwitch.isOn = appDelegate.ssl;
-    [pickerView selectRow:appDelegate.currentTest inComponent:0 animated:NO];
-    if(appDelegate.autoLaunch)
-    {
-        [self runTest:pickerView];
-    }
     [super viewDidLoad];
 }
 
+-(void)viewWillAppear:(BOOL)animated
+{
+    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+    [pickerView selectRow:appDelegate.currentTest inComponent:0 animated:NO];
+ }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
@@ -57,8 +59,19 @@
     [tests release];
     [pickerView release];
     [sslSwitch release];
+    [testViewController release];
     
     [super dealloc];
+}
+
+-(TestViewController*)testViewController
+{
+    // Instantiate the test view controller if necessary.
+    if (testViewController == nil)
+    {
+        testViewController = [[TestViewController alloc] initWithNibName:@"TestView" bundle:nil];
+    }
+    return testViewController;
 }
 
 #pragma mark -
@@ -70,11 +83,8 @@
     appDelegate.currentTest = row;
     appDelegate.ssl = sslSwitch.isOn;
     
-    TestViewController* controller = [[[TestViewController alloc] initWithNibName:@"TestView" bundle:nil] autorelease];
-    controller.test = (Test*)[tests objectAtIndex:row];
-    
-    UINavigationController *navController = [[[UINavigationController alloc] initWithRootViewController:controller] autorelease];
-    [self.navigationController presentModalViewController:navController animated:YES];
+    TestViewController* controller = self.testViewController;
+    [self.navigationController pushViewController:controller animated:YES];
 }
 
 #pragma mark UIPickerViewDelegate

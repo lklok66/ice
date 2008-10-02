@@ -32,7 +32,7 @@
 static id outputTarget;
 static SEL readySelector;
 static SEL outputSelector;
-static id<ICECommunicator> communicator;
+static id<ICECommunicator> communicator = nil;
 static BOOL ssl;
 #endif
 
@@ -149,7 +149,9 @@ TestCommonInit(id target, SEL output, SEL ready, BOOL s)
 void
 serverReady(id<ICECommunicator> c)
 {
+    [communicator release];
     communicator = [c retain];
+
     [outputTarget
      performSelectorOnMainThread:readySelector
      withObject:nil

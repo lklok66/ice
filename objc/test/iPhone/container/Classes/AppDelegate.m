@@ -17,10 +17,8 @@
 @synthesize navigationController;
 @synthesize tests;
 @synthesize currentTest;
-@synthesize autoLaunch;
 
 NSString* currentTestKey = @"currentTestKey";
-NSString* autoLaunchKey = @"autoLaunchKey";
 NSString* sslKey = @"sslKey";
 
 -(id)init
@@ -49,7 +47,6 @@ NSString* sslKey = @"sslKey";
         if(testValue == nil)
         {
             NSDictionary* appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:@"0", currentTestKey,
-                                         @"NO", autoLaunchKey,
                                          @"NO", sslKey,
                                          nil];
             
@@ -63,13 +60,6 @@ NSString* sslKey = @"sslKey";
             currentTest = 0;
         }
 
-        autoLaunch = [[NSUserDefaults standardUserDefaults] boolForKey:autoLaunchKey];
-        // If auto-launch is set, then disable immediately.
-        if(autoLaunch)
-        {
-            [[NSUserDefaults standardUserDefaults] setObject:@"NO" forKey:autoLaunchKey];
-            [[NSUserDefaults standardUserDefaults] synchronize];
-        }
         ssl = [[NSUserDefaults standardUserDefaults] boolForKey:sslKey];
     }
     return self;
@@ -121,14 +111,8 @@ NSString* sslKey = @"sslKey";
 {
     if(success)
     {
-        self.currentTest = currentTest+1;
+        self.currentTest = (currentTest+1) % tests.count;;
     }
-}
-
--(void)setAutoLaunch
-{
-    [[NSUserDefaults standardUserDefaults] setObject:@"YES" forKey:autoLaunchKey];
-    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 @end

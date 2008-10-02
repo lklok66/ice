@@ -9,6 +9,7 @@
 
 #import <UIKit/UIKit.h>
 
+@class TestViewController;
 
 @interface TestSelectController : UIViewController<UIPickerViewDataSource, UIPickerViewDelegate>
 {
@@ -17,6 +18,7 @@
     IBOutlet UISwitch* sslSwitch;
     NSArray* tests;
     NSEnumerator* testsEnum;
+    TestViewController *testViewController;
 }
 
 -(IBAction)runTest:(id)sender;
