@@ -15,6 +15,11 @@
 #include <Ice/EndpointFactory.h>
 
 #include <CoreFoundation/CFDictionary.h>
+#if TARGET_OS_IPHONE
+#    include <CFNetwork/CFNetwork.h>
+#else
+#    include <CoreServices/CoreServices.h>
+#endif
 #include <Security/Security.h>
 
 namespace IceObjC

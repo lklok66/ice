@@ -50,7 +50,7 @@ public:
     //
     virtual bool read(BasicStream&) = 0;
 
-#if defined(__APPLE__) && TARGET_OS_IPHONE
+#if defined(ICE_APPLE_CFNETWORK)
     //
     // It's possible that the transceiver reads more data than what
     // was really asked. If this is the case, hasMoreData() returns

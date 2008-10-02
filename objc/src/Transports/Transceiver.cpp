@@ -19,9 +19,6 @@
 #include <Ice/Network.h>
 #include <Ice/LocalException.h>
 
-#import <CFNetwork/CFSocketStream.h>
-#import <Security/Security.h>
-
 using namespace std;
 using namespace Ice;
 using namespace IceInternal;
@@ -378,7 +375,7 @@ IceObjC::Transceiver::checkCertificates()
         OSStatus err;
         bool checkCertName = !_host.empty() &&
             _instance->initializationData().properties->getPropertyAsIntWithDefault("IceSSL.CheckCertName", 1);
-#if TARGET_IPHONE_SIMULATOR
+#if TARGET_IPHONE_SIMULATOR || !TARGET_OS_IPHONE
         SecPolicySearchRef policySearch = 0;
         SecPolicyRef policy = 0;
         const CSSM_OID* oid = checkCertName ? &CSSMOID_APPLE_TP_SSL : &CSSMOID_APPLE_X509_BASIC;
@@ -443,6 +440,7 @@ IceObjC::Transceiver::checkCertificates()
                 throw ex;
             }
         }
+
         if((err = SecTrustEvaluate(trust, &result)) != noErr)
         {
             CFRelease(trust);
@@ -471,7 +469,7 @@ IceObjC::Transceiver::checkCertificates()
             throw SocketException(__FILE__, __LINE__, 0);
         }
 
-#if !TARGET_IPHONE_SIMULATOR
+#if !TARGET_IPHONE_SIMULATOR && TARGET_OS_IPHONE
         if(_instance->trustOnlyKeyID())
         {
             //

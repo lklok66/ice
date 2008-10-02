@@ -34,7 +34,7 @@ public:
     virtual void close() = 0;
     virtual bool write(Buffer&) = 0;
     virtual bool read(Buffer&) = 0;
-#if defined(__APPLE__) && TARGET_OS_IPHONE
+#if defined(ICE_APPLE_CFNETWORK)
     virtual bool hasMoreData() { return false; }
 #endif
     virtual std::string type() const = 0;

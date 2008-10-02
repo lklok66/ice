@@ -11,13 +11,9 @@ top_srcdir	= ..
 
 include $(top_srcdir)/config/Make.rules
 
-ifeq ($(COMPILE_FOR_IPHONE),yes)
-TRANSPORTS_SUBDIRS = Transports
-endif
-
 SUBDIRS		= IceUtilCpp \
 		  IceCpp \
-		  $(TRANSPORTS_SUBDIRS) \
+		  Transports \
 		  Ice \
 		  Glacier2
 

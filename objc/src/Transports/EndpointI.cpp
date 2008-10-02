@@ -21,8 +21,6 @@
 #include <Ice/Properties.h>
 
 #include <CoreFoundation/CoreFoundation.h>
-#include <CFNetwork/CFNetwork.h>
-#include <Security/Security.h>
 
 #include <fstream>
 
@@ -203,7 +201,7 @@ IceObjC::Instance::Instance(const IceInternal::InstancePtr& instance, bool secur
     string certAuthFile = properties->getProperty("IceSSL.CertAuthFile");
     string certFile = properties->getProperty("IceSSL.CertFile");
 
-#if TARGET_IPHONE_SIMULATOR
+#if TARGET_IPHONE_SIMULATOR || !TARGET_OS_IPHONE
 
     OSStatus err;
     if(!certAuthFile.empty())

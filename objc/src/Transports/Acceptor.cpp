@@ -19,7 +19,6 @@
 #include <Ice/Properties.h>
 
 #include <CoreFoundation/CoreFoundation.h>
-#include <CFNetwork/CFNetwork.h>
 
 using namespace std;
 using namespace Ice;

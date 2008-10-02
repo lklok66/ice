@@ -21,13 +21,11 @@
 #import <Foundation/NSAutoreleasePool.h>
 #import <Foundation/NSThread.h>
 
-#if TARGET_OS_IPHONE
 extern "C" 
 {
     Ice::Plugin* createIceTcp(const Ice::CommunicatorPtr&, const std::string&, const Ice::StringSeq&);
     Ice::Plugin* createIceSSL(const Ice::CommunicatorPtr&, const std::string&, const Ice::StringSeq&);
 }
-#endif
 
 namespace IceObjC
 {
@@ -247,13 +245,8 @@ private:
             data.properties = createProperties(*argc, argv, data.properties);
         }
 
-#if TARGET_OS_IPHONE
         data.properties->setProperty("Ice.Plugin.IceTcp", "createIceTcp");
         data.properties->setProperty("Ice.Plugin.IceSSL", "createIceSSL");
-
-        //
-        // TODO: If plugin initialization fails, the exe crashes, investigate.
-        //
 
         //
         // Fake calls to the create transport plugin C methods. This is to ensure that these methods
@@ -261,7 +254,6 @@ private:
         //
         createIceTcp(0, "", Ice::StringSeq());
         createIceSSL(0, "", Ice::StringSeq());
-#endif
 
         Ice::CommunicatorPtr communicator;
         if(argc != nil && argv != nil)

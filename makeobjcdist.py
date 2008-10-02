@@ -44,7 +44,8 @@ filesToKeep = [
     "./cpp/bin",
     "./cpp/lib",
     "./objc",
-    "./slice"
+    "./slice",
+    "./certs"
 ]
 
 def pathInList(p, l):

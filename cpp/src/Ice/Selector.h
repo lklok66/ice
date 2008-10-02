@@ -20,7 +20,7 @@
 #include <Ice/LocalException.h>
 #include <Ice/Instance.h>
 
-#if defined(__APPLE__) && TARGET_OS_IPHONE
+#if defined(ICE_APPLE_CFNETWORK)
 #include <set>
 #endif
 
@@ -210,7 +210,7 @@ public:
 
     void remove(T* handler, SocketStatus status, bool noInterrupt = false)
     {
-#if defined(__APPLE__) && TARGET_OS_IPHONE
+#if defined(ICE_APPLE_CFNETWORK)
         _pendingHandlers.erase(handler);
 #endif
 
@@ -264,7 +264,7 @@ public:
             _nSelectedReturned = 0;
             _nSelected = 0;
 
-#if defined(__APPLE__) && TARGET_OS_IPHONE
+#if defined(ICE_APPLE_CFNETWORK)
             if(!_pendingHandlers.empty())
             {
                 return _pendingHandlers.size();
@@ -330,7 +330,7 @@ public:
 
     T* getNextSelected()
     {
-#if defined(__APPLE__) && TARGET_OS_IPHONE
+#if defined(ICE_APPLE_CFNETWORK)
         if(!_pendingHandlers.empty())
         {
             T* handler = *_pendingHandlers.begin();
@@ -595,7 +595,7 @@ public:
     }
 #endif
 
-#if defined(__APPLE__) && TARGET_OS_IPHONE
+#if defined(ICE_APPLE_CFNETWORK)
     void hasMoreData(T* handler)
     {
         _pendingHandlers.insert(handler);
@@ -724,7 +724,7 @@ private:
 #endif
 #endif
 
-#if defined(__APPLE__) && TARGET_OS_IPHONE
+#if defined(ICE_APPLE_CFNETWORK)
     std::set<T*> _pendingHandlers;
 #endif
 

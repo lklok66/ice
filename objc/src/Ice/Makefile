@@ -41,7 +41,8 @@ OBJCPP_OBJS	= Communicator.o \
 OBJS		= $(OBJC_OBJS) \
 	          $(OBJCPP_OBJS) \
                   $(wildcard ../IceUtilCpp/*.o) \
-	          $(wildcard ../IceCpp/*.o)
+	          $(wildcard ../IceCpp/*.o) \
+	 	  $(wildcard ../Transports/*.o)
 
 SRCS		= $(OBJCPP_OBJS:.o=.mm) \
 		  $(OBJC_OBJS:.o=.m)
@@ -60,11 +61,6 @@ SDIR		= $(slicedir)/Ice
 all::
 
 include $(top_srcdir)/config/Make.rules
-
-ifeq ($(COMPILE_FOR_IPHONE),yes)
-OBJS		:= $(OBJS) \
-		   $(wildcard ../Transports/*.o)
-endif
 
 CPPFLAGS	:= -I.. -Iinclude -I../../include $(CPPFLAGS)
 SLICE2OBJCFLAGS	:= --ice --include-dir Ice $(SLICE2OBJCFLAGS)

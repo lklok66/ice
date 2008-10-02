@@ -245,11 +245,8 @@ def run(tests, root = False):
         elif o == "--protocol":
             if a not in ( "ssl", "tcp"):
                 usage()
-            if (mono and getDefaultMapping() == "cs" or getDefaultMapping() == "objc") and a == "ssl":
-                if getDefaultMapping() == "cs":
-                    print "SSL is not supported with mono"
-                else:
-                    print "SSL is not supported with the Objecive-C mapping"
+            if mono and getDefaultMapping() == "cs" and a == "ssl":
+                print "SSL is not supported with mono"
                 sys.exit(1)
 
         if o in ( "--protocol", "--host", "--debug", "--compress", "--valgrind", "--serialize", "--ipv6", \
@@ -691,8 +688,8 @@ sslConfigTree = {
             "colloc" : " --IceSSL.CertFile=c_rsa1024.pfx --IceSSL.ImportCert.CurrentUser.Root=cacert.pem --IceSSL.CheckCertName=0"
             },
         "objc" : {
-            "plugin" : " --Ice.Plugin.IceSSL=IceSSL:createIceSSL --Ice.Default.Protocol=ssl" +
-            " --IceSSL.Password=password --IceSSL.CertAuthFile=cacert.pem --IceSSL.DefaultDir=%(certsdir)s",
+            "plugin" : " --Ice.Default.Protocol=ssl --IceSSL.CheckCertName=0" +
+            " --IceSSL.Password=password --IceSSL.CertAuthFile=cacert.der --IceSSL.DefaultDir=%(objccertsdir)s",
             "client" : " --IceSSL.CertFile=c_rsa1024.pfx",
             "server" : " --IceSSL.CertFile=s_rsa1024.pfx",
             },
@@ -730,6 +727,7 @@ def getDefaultMapping(currentDir = ""):
 def getTestEnv():
     env = {}
     env["certsdir"] = os.path.abspath(os.path.join(findTopLevel(), "certs"))
+    env["objccertsdir"] = os.path.abspath(os.path.join(findTopLevel(), "objc", "test", "certs"))
     return env 
 
 class DriverConfig:
@@ -928,12 +926,6 @@ def runTests(start, expanded, num = 0, script = False):
             # then skip. This occurs when using --all.
             if mono and ("nomono" in config or (i.find(os.path.join("cs","test")) != -1 and args.find("ssl") != -1)):
                 print "%s*** test not supported with mono%s" % (prefix, suffix)
-                continue
-
-            # If this is the Objecive-C mapping and we're running ssl protocol tests
-            # then skip. This occurs when using --all.
-            if (i.find(os.path.join("objc","test")) != -1 and args.find("ssl") != -1):
-                print "%s*** test not supported with SSL%s" % (prefix, suffix)
                 continue
 
             # If this is java and we're running ipv6 under windows then skip.
@@ -1278,11 +1270,8 @@ def processCmdLine():
             if a not in ( "ssl", "tcp"):
                 usage()
             # ssl protocol isn't directly supported with mono.
-            if (mono and getDefaultMapping() == "cs" or getDefaultMapping() == "objc") and a == "ssl":
-                if getDefaultMapping() == "cs":
-                    print "SSL is not supported with mono"
-                else:
-                    print "SSL is not supported with the Objecive-C mapping"
+            if mono and getDefaultMapping() == "cs" and a == "ssl":
+                print "SSL is not supported with mono"
                 sys.exit(1)
             global protocol
             protocol = a

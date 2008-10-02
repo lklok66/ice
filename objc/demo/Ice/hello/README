@@ -1,5 +1,3 @@
-NOTE: SSL is currently not supported when targeting Mac OS X.
-
 This demo illustrates how to invoke ordinary (twoway) operations, as
 well as how to make oneway, datagram, secure, and batched invocations.
 

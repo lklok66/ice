@@ -1061,7 +1061,7 @@ Ice::ConnectionI::read(BasicStream& stream)
     //
 }
 
-#if defined(__APPLE__) && TARGET_OS_IPHONE
+#if defined(ICE_APPLE_CFNETWORK)
 bool
 Ice::ConnectionI::hasMoreData()
 {

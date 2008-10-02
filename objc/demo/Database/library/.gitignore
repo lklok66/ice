@@ -5,4 +5,6 @@ Library.m
 Scanner.m
 Session.h
 Session.m
+Glacier2Session.h
+Glacier2Session.m
 client

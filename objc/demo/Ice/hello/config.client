@@ -2,7 +2,7 @@
 # The client reads this property to create the reference to the
 # "hello" object in the server.
 #
-Hello.Proxy=hello:tcp -p 10000:udp -p 10000 #:ssl -p 10001
+Hello.Proxy=hello:tcp -p 10000:udp -p 10000:ssl -p 10001
 
 #
 # Warn about connection exceptions
@@ -44,13 +44,10 @@ Ice.ACM.Client=10
 #IceSSL.Trace.Security=1
 
 #
-# TODO: SSL not supported yet
+# SSL Configuration
 #
-# #
-# # SSL Configuration
-# #
-# Ice.Plugin.IceSSL=IceSSL:createIceSSL
-# IceSSL.DefaultDir=../../../../certs
-# IceSSL.CertAuthFile=cacert.pem
-# IceSSL.CertFile=c_rsa1024_pub.pem
-# IceSSL.KeyFile=c_rsa1024_priv.pem
+Ice.Plugin.IceSSL=IceSSL:createIceSSL
+IceSSL.DefaultDir=../../../../certs
+IceSSL.CertAuthFile=cacert.pem
+IceSSL.CertFile=c_rsa1024.pfx
+IceSSL.Password=password
