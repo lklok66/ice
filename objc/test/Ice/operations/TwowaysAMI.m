@@ -15,7 +15,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface Callback : NSObject
+@interface TestOperationsCallback : NSObject
 {
     BOOL called;
     NSCondition* cond;
@@ -24,7 +24,7 @@
 -(void) called;
 @end
 
-@implementation Callback
+@implementation TestOperationsCallback
 -(id) init
 {
     if(![super init])
@@ -139,10 +139,10 @@
     test(NO);
 };
 
--(void) opMyEnumResponse:(TestMyEnum)r p2:(TestMyEnum)e
+-(void) opMyEnumResponse:(TestOperationsMyEnum)r p2:(TestOperationsMyEnum)e
 {
-    test(e == Testenum2);
-    test(r == Testenum3);
+    test(e == TestOperationsenum2);
+    test(r == TestOperationsenum3);
     [self called];
 }
 
@@ -151,7 +151,7 @@
     test(NO);
 }
 
--(void) opMyClassResponse:(id<TestMyClassPrx>)r p2:(id<TestMyClassPrx>)c1 p3:(id<TestMyClassPrx>)c2
+-(void) opMyClassResponse:(id<TestOperationsMyClassPrx>)r p2:(id<TestOperationsMyClassPrx>)c1 p3:(id<TestOperationsMyClassPrx>)c2
 {
     test([[c1 ice_getIdentity] isEqual:[[c1 ice_getCommunicator] stringToIdentity:@"test"]]);
     test([[c2 ice_getIdentity] isEqual:[[c1 ice_getCommunicator] stringToIdentity:@"noSuchIdentity"]]);
@@ -178,12 +178,12 @@
     test(NO);
 }
 
--(void) opStructResponse:(TestStructure*)rso p3:(TestStructure*)so
+-(void) opStructResponse:(TestOperationsStructure*)rso p3:(TestOperationsStructure*)so
 {
     test(rso.p == nil);
-    test(rso.e == Testenum2);
+    test(rso.e == TestOperationsenum2);
     test([rso.s.s isEqualToString:@"def"]);
-    test([so e] == Testenum3);
+    test([so e] == TestOperationsenum3);
     test(so.p != nil);
     test([so.s.s isEqualToString:@"a new string"]);
     // We can't do the callbacks below in connection serialization mode.
@@ -199,7 +199,7 @@
     test(NO);
 }
 
--(void) opByteSResponse:(TestByteS*)rso p3:(TestByteS*)bso
+-(void) opByteSResponse:(TestOperationsByteS*)rso p3:(TestOperationsByteS*)bso
 {
     test([bso length] == 4);
     ICEByte *bbso = (ICEByte *)[bso bytes];
@@ -225,7 +225,7 @@
     test(NO);
 }
 
--(void) opBoolSResponse:(TestBoolS*)rso p3:(TestBoolS*)bso
+-(void) opBoolSResponse:(TestOperationsBoolS*)rso p3:(TestOperationsBoolS*)bso
 {
     test([bso length] == 4 * sizeof(BOOL));
     BOOL *bbso = (BOOL *)[bso bytes];
@@ -246,7 +246,7 @@
     test(NO);
 }
 
--(void) opShortIntLongSResponse:(TestLongS*)rso p4:(TestShortS*)sso p5:(TestIntS*)iso p6:(TestLongS*)lso
+-(void) opShortIntLongSResponse:(TestOperationsLongS*)rso p4:(TestOperationsShortS*)sso p5:(TestOperationsIntS*)iso p6:(TestOperationsLongS*)lso
 {
     test([sso length] == 3 * sizeof(ICEShort));
     ICEShort *bsso = (ICEShort *)[sso bytes];
@@ -280,7 +280,7 @@
     test(NO);
 }
 
--(void) opFloatDoubleSResponse:(TestDoubleS*)rso p3:(TestFloatS*)fso p4:(TestDoubleS*)dso
+-(void) opFloatDoubleSResponse:(TestOperationsDoubleS*)rso p3:(TestOperationsFloatS*)fso p4:(TestOperationsDoubleS*)dso
 {
     test([fso length] == 2 * sizeof(ICEFloat));
     ICEFloat *bfso = (ICEFloat *)[fso bytes];
@@ -306,7 +306,7 @@
     test(NO);
 }
 
--(void) opStringSResponse:(TestStringS*)rso p3:(TestStringS*)sso
+-(void) opStringSResponse:(TestOperationsStringS*)rso p3:(TestOperationsStringS*)sso
 {
     test([sso count] == 4);
     test([[sso objectAtIndex:0] isEqualToString:@"abc"]);
@@ -325,7 +325,7 @@
     test(NO);
 }
 
--(void) opByteSSResponse:(TestByteSS*)rso p3:(TestByteSS*)bso
+-(void) opByteSSResponse:(TestOperationsByteSS*)rso p3:(TestOperationsByteSS*)bso
 {
     const ICEByte *p;
     test([bso count] == 2);
@@ -361,7 +361,7 @@
     test(NO);
 }
 
--(void) opBoolSSResponse:(TestBoolSS*)sso p3:(TestBoolSS*)bso
+-(void) opBoolSSResponse:(TestOperationsBoolSS*)sso p3:(TestOperationsBoolSS*)bso
 {
     [self called];
 }
@@ -371,7 +371,7 @@
     test(NO);
 }
 
--(void) opShortIntLongSSResponse:(TestLongSS*)a p4:(TestShortSS*)p4 p5:(TestIntSS*)p5 p6:(TestLongSS*)p6
+-(void) opShortIntLongSSResponse:(TestOperationsLongSS*)a p4:(TestOperationsShortSS*)p4 p5:(TestOperationsIntSS*)p5 p6:(TestOperationsLongSS*)p6
 {
     [self called];
 }
@@ -381,7 +381,7 @@
     test(NO);
 }
 
--(void) opFloatDoubleSSResponse:(TestDoubleSS*)rso p3:(TestFloatSS*)fso p4:(TestDoubleSS*)dso
+-(void) opFloatDoubleSSResponse:(TestOperationsDoubleSS*)rso p3:(TestOperationsFloatSS*)fso p4:(TestOperationsDoubleSS*)dso
 {
     const ICEFloat *fp;
     const ICEDouble *dp;
@@ -419,7 +419,7 @@
     test(NO);
 }
 
--(void) opStringSSResponse:(TestStringSS*)rso p3:(TestStringSS*)sso
+-(void) opStringSSResponse:(TestOperationsStringSS*)rso p3:(TestOperationsStringSS*)sso
 {
     test([sso count] == 5);
     test([[sso objectAtIndex:0] count] == 1);
@@ -444,7 +444,7 @@
     test(NO);
 }
 
--(void) opStringSSSResponse:(TestStringSS*)rsso p3:(TestStringSS*)ssso
+-(void) opStringSSSResponse:(TestOperationsStringSS*)rsso p3:(TestOperationsStringSS*)ssso
 {
     test([ssso count] == 5);
     test([[ssso objectAtIndex:0] count] == 2);
@@ -484,7 +484,7 @@
 {
     test(NO);
 }
--(void) opByteBoolDResponse:(TestMutableByteBoolD*)ro p3:(TestMutableByteBoolD*)_do
+-(void) opByteBoolDResponse:(TestOperationsMutableByteBoolD*)ro p3:(TestOperationsMutableByteBoolD*)_do
 {
     test([_do count] == 2);
     test([[_do objectForKey:[NSNumber numberWithUnsignedChar:10]] boolValue] == YES);
@@ -500,7 +500,7 @@
 {
     test(NO);
 }
--(void) opShortIntDResponse:(TestShortIntD*)ro p3:(TestShortIntD*)_do
+-(void) opShortIntDResponse:(TestOperationsShortIntD*)ro p3:(TestOperationsShortIntD*)_do
 {
     test([_do count] == 2);
     test([[_do objectForKey:[NSNumber numberWithShort:110]] intValue] == -1);
@@ -516,7 +516,7 @@
 {
     test(NO);
 }
--(void) opLongFloatDResponse:(TestLongFloatD*)ro p3:(TestLongFloatD*)_do
+-(void) opLongFloatDResponse:(TestOperationsLongFloatD*)ro p3:(TestOperationsLongFloatD*)_do
 {
     test([_do count] == 2);
     test((ICEFloat)[[_do objectForKey:[NSNumber numberWithLong:999999110]] floatValue] == -1.1f);
@@ -532,7 +532,7 @@
 {
     test(NO);
 }
--(void) opStringStringDResponse:(TestStringStringD*)ro p3:(TestStringStringD*)_do
+-(void) opStringStringDResponse:(TestOperationsStringStringD*)ro p3:(TestOperationsStringStringD*)_do
 {
     test([_do count] == 2);
     test([[_do objectForKey:@"foo"] isEqualToString:@"abc -1.1"]);
@@ -548,23 +548,23 @@
 {
     test(NO);
 }
--(void) opStringMyEnumDResponse:(TestStringMyEnumD*)ro p3:(TestStringMyEnumD*)_do
+-(void) opStringMyEnumDResponse:(TestOperationsStringMyEnumD*)ro p3:(TestOperationsStringMyEnumD*)_do
 {
     test([_do count] == 2);
-    test([[_do objectForKey:@"abc"] intValue] == Testenum1);
-    test([[_do objectForKey:@""] intValue] == Testenum2);
+    test([[_do objectForKey:@"abc"] intValue] == TestOperationsenum1);
+    test([[_do objectForKey:@""] intValue] == TestOperationsenum2);
     test([ro count] == 4);
-    test([[ro objectForKey:@"abc"] intValue] == Testenum1);
-    test([[ro objectForKey:@"querty"] intValue] == Testenum3);
-    test([[ro objectForKey:@""] intValue] == Testenum2);
-    test([[ro objectForKey:@"Hello!!"] intValue] == Testenum2);
+    test([[ro objectForKey:@"abc"] intValue] == TestOperationsenum1);
+    test([[ro objectForKey:@"querty"] intValue] == TestOperationsenum3);
+    test([[ro objectForKey:@""] intValue] == TestOperationsenum2);
+    test([[ro objectForKey:@"Hello!!"] intValue] == TestOperationsenum2);
     [self called];
 }
 -(void) opStringMyEnumDException:(ICEException*)ex
 {
     test(NO);
 }
--(void) opIntSResponse:(TestIntS*)r
+-(void) opIntSResponse:(TestOperationsIntS*)r
 {
     const ICEInt *rp = [r bytes];
     int j;
@@ -606,13 +606,13 @@
 @end
 
 void
-twowaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
+twowaysAMI(id<ICECommunicator> communicator, id<TestOperationsMyClassPrx> p)
 {
     {
         // Check that a call to a void operation raises NoEndpointException
         // in the ice_exception() callback instead of at the point of call.
-        id<TestMyClassPrx> indirect = [TestMyClassPrx uncheckedCast:[p ice_adapterId:@"dummy"]];
-        Callback* cb = [[Callback alloc] init];
+        id<TestOperationsMyClassPrx> indirect = [TestOperationsMyClassPrx uncheckedCast:[p ice_adapterId:@"dummy"]];
+        TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
         @try 
         {
             test(![indirect opVoid_async:cb response:@selector(opVoidExResponse) 
@@ -629,8 +629,8 @@ twowaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
     {
         // Check that a call to a twoway operation raises NoEndpointException
         // in the ice_exception() callback instead of at the point of call.
-        id<TestMyClassPrx> indirect = [TestMyClassPrx uncheckedCast:[p ice_adapterId:@"dummy"]];
-        Callback* cb = [[Callback alloc] init];
+        id<TestOperationsMyClassPrx> indirect = [TestOperationsMyClassPrx uncheckedCast:[p ice_adapterId:@"dummy"]];
+        TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
         @try
         {
             test(![indirect opByte_async:cb response:@selector(opByteExResponse:p3:) 
@@ -645,7 +645,7 @@ twowaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
     }
 
     {
-        Callback* cb = [[Callback alloc] init];
+        TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
         [p opVoid_async:cb response:@selector(opVoidResponse) exception:@selector(opVoidException:)];
         test([cb check]);
         // Let's check if we can reuse the same callback object for another call.
@@ -660,11 +660,11 @@ twowaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
         [initData setProperties:[[communicator getProperties] clone]];
         id<ICECommunicator> ic = [ICEUtil createCommunicator:initData];
         id<ICEObjectPrx> obj = [ic stringToProxy:[p ice_toString]];
-        id<TestMyClassPrx> p2 = [TestMyClassPrx checkedCast:obj];
+        id<TestOperationsMyClassPrx> p2 = [TestOperationsMyClassPrx checkedCast:obj];
 
         [ic destroy];
 
-        Callback* cb = [[Callback alloc] init];
+        TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
         @try
         {
             test(![p2 opVoid_async:cb response:@selector(opVoidResponse) exception:@selector(opVoidException:)]);
@@ -678,7 +678,7 @@ twowaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
     }
 
     { 
-        Callback* cb = [[Callback alloc] init];
+        TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
         [p opByte_async:cb response:@selector(opByteResponse:p3:) exception:@selector(opByteException:) 
            p1:(ICEByte)0xff p2:(ICEByte)0x0f];
         test([cb check]);
@@ -686,21 +686,21 @@ twowaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
     }
 
     {
-        Callback* cb = [[Callback alloc] init];
+        TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
         [p opBool_async:cb response:@selector(opBoolResponse:p3:) exception:@selector(opBoolException:) p1:YES p2:NO];
         test([cb check]);
         [cb release];
     }
 
     {
-        Callback* cb = [[Callback alloc] init];
+        TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
         [p opShortIntLong_async:cb response:@selector(opShortIntLongResponse:p4:p5:p6:) exception:@selector(opShortIntLongException:) p1:10 p2:11 p3:12];
         test([cb check]);
         [cb release];
     }
 
     {
-        Callback* cb = [[Callback alloc] init];
+        TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
         [p opFloatDouble_async:cb response:@selector(opFloatDoubleResponse:p3:p4:) exception:@selector(opFloatDoubleException:) p1:3.14f p2:1.1E10];
         test([cb check]);
         // Let's check if we can reuse the same callback object for another call.
@@ -710,39 +710,39 @@ twowaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
     }
 
     {
-        Callback* cb = [[Callback alloc] init];
+        TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
         [p opString_async:cb response:@selector(opStringResponse:p3:) exception:@selector(opStringException:) p1:@"hello" p2:@"world"];
         test([cb check]);
         [cb release];
     }
 
     {
-        Callback* cb = [[Callback alloc] init];
-        [p opMyEnum_async:cb response:@selector(opMyEnumResponse:p2:) exception:@selector(opMyEnumException:) p1:Testenum2];
+        TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
+        [p opMyEnum_async:cb response:@selector(opMyEnumResponse:p2:) exception:@selector(opMyEnumException:) p1:TestOperationsenum2];
         test([cb check]);
         [cb release];
     }
     
     {
-        Callback* cb = [[Callback alloc] init];
+        TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
         [p opMyClass_async:cb response:@selector(opMyClassResponse:p2:p3:) exception:@selector(opMyClassException:) p1:p];
         test([cb check]);
         [cb release];
     }
 
     {
-        TestStructure *si1 = [TestStructure structure];
+        TestOperationsStructure *si1 = [TestOperationsStructure structure];
 	si1.p = p;
-	si1.e = Testenum3;
-	si1.s = [TestAnotherStruct anotherStruct];
+	si1.e = TestOperationsenum3;
+	si1.s = [TestOperationsAnotherStruct anotherStruct];
 	si1.s.s = @"abc";
-	TestStructure *si2 = [TestStructure structure];
+	TestOperationsStructure *si2 = [TestOperationsStructure structure];
 	si2.p = nil;
-	si2.e = Testenum2;
-	si2.s = [TestAnotherStruct anotherStruct];
+	si2.e = TestOperationsenum2;
+	si2.s = [TestOperationsAnotherStruct anotherStruct];
 	si2.s.s = @"def";
         
-        Callback* cb = [[Callback alloc] init];
+        TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
         [p opStruct_async:cb response:@selector(opStructResponse:p3:) exception:@selector(opStructException:) p1:si1 p2:si2];
         test([cb check]);
         [cb release];
@@ -751,12 +751,12 @@ twowaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
     {
 	ICEByte buf1[] = { 0x01, 0x11, 0x12, 0x22 };
 	ICEByte buf2[] = { 0xf1, 0xf2, 0xf3, 0xf4 };
-        TestMutableByteS *bsi1 = [[[TestMutableByteS alloc] init] autorelease];
-        TestMutableByteS *bsi2 = [[[TestMutableByteS alloc] init] autorelease];
+        TestOperationsMutableByteS *bsi1 = [[[TestOperationsMutableByteS alloc] init] autorelease];
+        TestOperationsMutableByteS *bsi2 = [[[TestOperationsMutableByteS alloc] init] autorelease];
 	[bsi1 appendBytes:buf1 length:sizeof(buf1)];
 	[bsi2 appendBytes:buf2 length:sizeof(buf2)];
 
-        Callback* cb = [[Callback alloc] init];
+        TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
         [p opByteS_async:cb response:@selector(opByteSResponse:p3:) exception:@selector(opByteSException:) p1:bsi1 p2:bsi2];
         test([cb check]);
         [cb release];
@@ -765,12 +765,12 @@ twowaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
     {
 	BOOL buf1[] = { YES, YES, NO };
 	BOOL buf2[] = { NO };
-        TestMutableBoolS *bsi1 = [[[TestMutableBoolS alloc] init] autorelease];
-        TestMutableBoolS *bsi2 = [[[TestMutableBoolS alloc] init] autorelease];
+        TestOperationsMutableBoolS *bsi1 = [[[TestOperationsMutableBoolS alloc] init] autorelease];
+        TestOperationsMutableBoolS *bsi2 = [[[TestOperationsMutableBoolS alloc] init] autorelease];
 	[bsi1 appendBytes:buf1 length:sizeof(buf1)];
 	[bsi2 appendBytes:buf2 length:sizeof(buf2)];
 
-        Callback* cb = [[Callback alloc] init];
+        TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
         [p opBoolS_async:cb response:@selector(opBoolSResponse:p3:) exception:@selector(opBoolSException:) p1:bsi1 p2:bsi2];
         test([cb check]);
         [cb release];
@@ -780,14 +780,14 @@ twowaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 	ICEShort buf1[] = { 1, 2, 3 };
 	ICEInt buf2[] = { 5, 6, 7, 8 };
 	ICELong buf3[] = { 10, 30, 20 };
-        TestMutableShortS *ssi = [[[TestMutableShortS alloc] init] autorelease];
-	TestMutableIntS *isi = [[[TestMutableIntS alloc] init] autorelease];
-	TestMutableLongS *lsi = [[[TestMutableLongS alloc] init] autorelease];
+        TestOperationsMutableShortS *ssi = [[[TestOperationsMutableShortS alloc] init] autorelease];
+	TestOperationsMutableIntS *isi = [[[TestOperationsMutableIntS alloc] init] autorelease];
+	TestOperationsMutableLongS *lsi = [[[TestOperationsMutableLongS alloc] init] autorelease];
 	[ssi appendBytes:buf1 length:sizeof(buf1)];
 	[isi appendBytes:buf2 length:sizeof(buf2)];
 	[lsi appendBytes:buf3 length:sizeof(buf3)];
 
-        Callback* cb = [[Callback alloc] init];
+        TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
         [p opShortIntLongS_async:cb response:@selector(opShortIntLongSResponse:p4:p5:p6:) exception:@selector(opShortIntLongSException:) p1:ssi p2:isi p3:lsi];
         test([cb check]);
         [cb release];
@@ -796,20 +796,20 @@ twowaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
     {
 	ICEFloat buf1[] = { 3.14f, 1.11f };
 	ICEDouble buf2[] = { 1.1E10, 1.2E10, 1.3E10 };
-        TestMutableFloatS *fsi = [[[TestMutableFloatS alloc] init] autorelease];
-        TestMutableDoubleS *dsi = [[[TestMutableDoubleS alloc] init] autorelease];
+        TestOperationsMutableFloatS *fsi = [[[TestOperationsMutableFloatS alloc] init] autorelease];
+        TestOperationsMutableDoubleS *dsi = [[[TestOperationsMutableDoubleS alloc] init] autorelease];
 	[fsi appendBytes:buf1 length:sizeof(buf1)];
 	[dsi appendBytes:buf2 length:sizeof(buf2)];
 
-        Callback* cb = [[Callback alloc] init];
+        TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
         [p opFloatDoubleS_async:cb response:@selector(opFloatDoubleSResponse:p3:p4:) exception:@selector(opFloatDoubleSException:) p1:fsi p2:dsi];
         test([cb check]);
         [cb release];
     }
 
     {
-        TestMutableStringS *ssi1 = [TestMutableStringS arrayWithCapacity:3];
-        TestMutableStringS *ssi2 = [TestMutableStringS arrayWithCapacity:1];
+        TestOperationsMutableStringS *ssi1 = [TestOperationsMutableStringS arrayWithCapacity:3];
+        TestOperationsMutableStringS *ssi2 = [TestOperationsMutableStringS arrayWithCapacity:1];
 
 	[ssi1 addObject:@"abc"];
 	[ssi1 addObject:@"de"];
@@ -817,18 +817,18 @@ twowaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 
 	[ssi2 addObject:@"xyz"];
 
-        Callback* cb = [[Callback alloc] init];
+        TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
         [p opStringS_async:cb response:@selector(opStringSResponse:p3:) exception:@selector(opStringSException:) p1:ssi1 p2:ssi2];
         test([cb check]);
         [cb release];
     }
 
     {
-        TestMutableByteSS *bsi1 = [TestMutableByteSS array];
-        TestMutableByteSS *bsi2 = [TestMutableByteSS array];
+        TestOperationsMutableByteSS *bsi1 = [TestOperationsMutableByteSS array];
+        TestOperationsMutableByteSS *bsi2 = [TestOperationsMutableByteSS array];
 
 	ICEByte b;
-	TestMutableByteS *tmp = [TestMutableByteS data];
+	TestOperationsMutableByteS *tmp = [TestOperationsMutableByteS data];
 
 	b = 0x01;
 	[tmp appendBytes:&b length:sizeof(b)];
@@ -838,51 +838,51 @@ twowaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 	[tmp appendBytes:&b length:sizeof(b)];
 	[bsi1 addObject:tmp];
 
-        tmp = [TestMutableByteS data];
+        tmp = [TestOperationsMutableByteS data];
 	b = 0xff;
 	[tmp appendBytes:&b length:sizeof(b)];
 	[bsi1 addObject:tmp];
 
-        tmp = [TestMutableByteS data];
+        tmp = [TestOperationsMutableByteS data];
 	b = 0x0e;
 	[tmp appendBytes:&b length:sizeof(b)];
 	[bsi2 addObject:tmp];
 
-        tmp = [TestMutableByteS data];
+        tmp = [TestOperationsMutableByteS data];
 	b = 0xf2;
 	[tmp appendBytes:&b length:sizeof(b)];
 	b = 0xf1;
 	[tmp appendBytes:&b length:sizeof(b)];
 	[bsi2 addObject:tmp];
 
-        Callback* cb = [[Callback alloc] init];
+        TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
         [p opByteSS_async:cb response:@selector(opByteSSResponse:p3:) exception:@selector(opByteSSException:) p1:bsi1 p2:bsi2];
         test([cb check]);
         [cb release];
     }
 
     {
-        TestMutableFloatSS *fsi = [TestMutableFloatSS array];
-        TestMutableDoubleSS *dsi = [TestMutableDoubleSS array];
+        TestOperationsMutableFloatSS *fsi = [TestOperationsMutableFloatSS array];
+        TestOperationsMutableDoubleSS *dsi = [TestOperationsMutableDoubleSS array];
 
 	ICEFloat f;
-	TestMutableFloatS *ftmp;
+	TestOperationsMutableFloatS *ftmp;
 
-	ftmp = [TestMutableFloatS data];
+	ftmp = [TestOperationsMutableFloatS data];
 	f = 3.14f;
 	[ftmp appendBytes:&f length:sizeof(f)];
 	[fsi addObject:ftmp];
-	ftmp = [TestMutableFloatS data];
+	ftmp = [TestOperationsMutableFloatS data];
 	f = 1.11f;
 	[ftmp appendBytes:&f length:sizeof(f)];
 	[fsi addObject:ftmp];
-	ftmp = [TestMutableFloatS data];
+	ftmp = [TestOperationsMutableFloatS data];
 	[fsi addObject:ftmp];
 
 	ICEDouble d;
-	TestMutableDoubleS *dtmp;
+	TestOperationsMutableDoubleS *dtmp;
 
-        dtmp = [TestMutableDoubleS data];
+        dtmp = [TestOperationsMutableDoubleS data];
 	d = 1.1E10;
 	[dtmp appendBytes:&d length:sizeof(d)];
 	d = 1.2E10;
@@ -891,153 +891,153 @@ twowaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 	[dtmp appendBytes:&d length:sizeof(d)];
 	[dsi addObject:dtmp];
 
-        Callback* cb = [[Callback alloc] init];
+        TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
         [p opFloatDoubleSS_async:cb response:@selector(opFloatDoubleSSResponse:p3:p4:) exception:@selector(opFloatDoubleSSException:) p1:fsi p2:dsi];
         test([cb check]);
         [cb release];
     }
 
     {
-        TestMutableStringSS * ssi1 = [TestMutableStringSS array];
-        TestMutableStringSS * ssi2 = [TestMutableStringSS array];
+        TestOperationsMutableStringSS * ssi1 = [TestOperationsMutableStringSS array];
+        TestOperationsMutableStringSS * ssi2 = [TestOperationsMutableStringSS array];
 
-	TestMutableStringS *tmp;
+	TestOperationsMutableStringS *tmp;
 
-	tmp = [TestMutableStringS array];
+	tmp = [TestOperationsMutableStringS array];
 	[tmp addObject:@"abc"];
 	[ssi1 addObject:tmp];
-	tmp = [TestMutableStringS array];
+	tmp = [TestOperationsMutableStringS array];
 	[tmp addObject:@"de"];
 	[tmp addObject:@"fghi"];
 	[ssi1 addObject:tmp];
 
-	[ssi2 addObject:[TestStringS array]];
-	[ssi2 addObject:[TestStringS array]];
-	tmp = [TestMutableStringS array];
+	[ssi2 addObject:[TestOperationsStringS array]];
+	[ssi2 addObject:[TestOperationsStringS array]];
+	tmp = [TestOperationsMutableStringS array];
 	[tmp addObject:@"xyz"];
 	[ssi2 addObject:tmp];
 
-        Callback* cb = [[Callback alloc] init];
+        TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
         [p opStringSS_async:cb response:@selector(opStringSSResponse:p3:) exception:@selector(opStringSSException:) p1:ssi1 p2:ssi2];
         test([cb check]);
         [cb release];
     }
 
     {
-        TestMutableStringSSS *sssi1 = [TestMutableStringSSS array];
-        TestMutableStringSSS *sssi2 = [TestMutableStringSSS array];
+        TestOperationsMutableStringSSS *sssi1 = [TestOperationsMutableStringSSS array];
+        TestOperationsMutableStringSSS *sssi2 = [TestOperationsMutableStringSSS array];
 
-	TestMutableStringSS *tmpss;
-	TestMutableStringS *tmps;
+	TestOperationsMutableStringSS *tmpss;
+	TestOperationsMutableStringS *tmps;
 
-	tmps = [TestMutableStringS array];
+	tmps = [TestOperationsMutableStringS array];
         [tmps addObject:@"abc"];
         [tmps addObject:@"de"];
-	tmpss = [TestMutableStringSS array];
+	tmpss = [TestOperationsMutableStringSS array];
 	[tmpss addObject:tmps];
-	tmps = [TestMutableStringS array];
+	tmps = [TestOperationsMutableStringS array];
         [tmps addObject:@"xyz"];
 	[tmpss addObject:tmps];
 	[sssi1 addObject:tmpss];
-	tmps = [TestMutableStringS array];
+	tmps = [TestOperationsMutableStringS array];
         [tmps addObject:@"hello"];
-	tmpss = [TestMutableStringSS array];
+	tmpss = [TestOperationsMutableStringSS array];
 	[tmpss addObject:tmps];
 	[sssi1 addObject:tmpss];
 
-	tmps = [TestMutableStringS array];
+	tmps = [TestOperationsMutableStringS array];
         [tmps addObject:@""];
         [tmps addObject:@""];
-	tmpss = [TestMutableStringSS array];
+	tmpss = [TestOperationsMutableStringSS array];
 	[tmpss addObject:tmps];
-	tmps = [TestMutableStringS array];
+	tmps = [TestOperationsMutableStringS array];
         [tmps addObject:@"abcd"];
 	[tmpss addObject:tmps];
 	[sssi2 addObject:tmpss];
-	tmps = [TestMutableStringS array];
+	tmps = [TestOperationsMutableStringS array];
         [tmps addObject:@""];
-	tmpss = [TestMutableStringSS array];
+	tmpss = [TestOperationsMutableStringSS array];
 	[tmpss addObject:tmps];
 	[sssi2 addObject:tmpss];
-	tmpss = [TestMutableStringSS array];
+	tmpss = [TestOperationsMutableStringSS array];
 	[sssi2 addObject:tmpss];
 
-        Callback* cb = [[Callback alloc] init];
+        TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
         [p opStringSSS_async:cb response:@selector(opStringSSSResponse:p3:) exception:@selector(opStringSSSException:) p1:sssi1 p2:sssi2];
         test([cb check]);
         [cb release];
     }
 
     {
-        TestMutableByteBoolD *di1 = [TestMutableByteBoolD dictionary];
+        TestOperationsMutableByteBoolD *di1 = [TestOperationsMutableByteBoolD dictionary];
 	[di1 setObject:[NSNumber numberWithBool:YES] forKey:[NSNumber numberWithUnsignedChar:10]];
 	[di1 setObject:[NSNumber numberWithBool:NO] forKey:[NSNumber numberWithUnsignedChar:100]];
-        TestMutableByteBoolD *di2 = [TestMutableByteBoolD dictionary];
+        TestOperationsMutableByteBoolD *di2 = [TestOperationsMutableByteBoolD dictionary];
 	[di2 setObject:[NSNumber numberWithBool:YES] forKey:[NSNumber numberWithUnsignedChar:10]];
 	[di2 setObject:[NSNumber numberWithBool:NO] forKey:[NSNumber numberWithUnsignedChar:11]];
 	[di2 setObject:[NSNumber numberWithBool:TRUE] forKey:[NSNumber numberWithUnsignedChar:101]];
 
-        Callback* cb = [[Callback alloc] init];
+        TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
         [p opByteBoolD_async:cb response:@selector(opByteBoolDResponse:p3:) exception:@selector(opByteBoolDException:) p1:di1 p2:di2];
         test([cb check]);
         [cb release];
     }
 
     {
-        TestMutableShortIntD *di1 = [TestMutableShortIntD dictionary];
+        TestOperationsMutableShortIntD *di1 = [TestOperationsMutableShortIntD dictionary];
 	[di1 setObject:[NSNumber numberWithInt:-1] forKey:[NSNumber numberWithShort:110]];
 	[di1 setObject:[NSNumber numberWithInt:123123] forKey:[NSNumber numberWithShort:1100]];
-        TestMutableShortIntD *di2 = [TestMutableShortIntD dictionary];
+        TestOperationsMutableShortIntD *di2 = [TestOperationsMutableShortIntD dictionary];
 	[di2 setObject:[NSNumber numberWithInt:-1] forKey:[NSNumber numberWithShort:110]];
 	[di2 setObject:[NSNumber numberWithInt:-100] forKey:[NSNumber numberWithShort:111]];
 	[di2 setObject:[NSNumber numberWithInt:0] forKey:[NSNumber numberWithShort:1101]];
 
-        Callback* cb = [[Callback alloc] init];
+        TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
         [p opShortIntD_async:cb response:@selector(opShortIntDResponse:p3:) exception:@selector(opShortIntDException:) p1:di1 p2:di2];
         test([cb check]);
         [cb release];
     }
 
     {
-        TestMutableLongFloatD *di1 = [TestMutableLongFloatD dictionary];
+        TestOperationsMutableLongFloatD *di1 = [TestOperationsMutableLongFloatD dictionary];
 	[di1 setObject:[NSNumber numberWithFloat:-1.1f] forKey:[NSNumber numberWithLong:999999110]];
 	[di1 setObject:[NSNumber numberWithFloat:123123.2f] forKey:[NSNumber numberWithLong:999999111]];
-        TestMutableLongFloatD *di2 = [TestMutableLongFloatD dictionary];
+        TestOperationsMutableLongFloatD *di2 = [TestOperationsMutableLongFloatD dictionary];
 	[di2 setObject:[NSNumber numberWithFloat:-1.1f] forKey:[NSNumber numberWithLong:999999110]];
 	[di2 setObject:[NSNumber numberWithFloat:-100.4f] forKey:[NSNumber numberWithLong:999999120]];
 	[di2 setObject:[NSNumber numberWithFloat:0.5f] forKey:[NSNumber numberWithLong:999999130]];
 
-        Callback* cb = [[Callback alloc] init];
+        TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
         [p opLongFloatD_async:cb response:@selector(opLongFloatDResponse:p3:) exception:@selector(opLongFloatDException:) p1:di1 p2:di2];
         test([cb check]);
         [cb release];
     }
 
     {
-        TestMutableStringStringD *di1 = [TestMutableStringStringD dictionary];
+        TestOperationsMutableStringStringD *di1 = [TestOperationsMutableStringStringD dictionary];
 	[di1 setObject:@"abc -1.1" forKey:@"foo"];
 	[di1 setObject:@"abc 123123.2" forKey:@"bar"];
-        TestMutableStringStringD *di2 = [TestMutableStringStringD dictionary];
+        TestOperationsMutableStringStringD *di2 = [TestOperationsMutableStringStringD dictionary];
 	[di2 setObject:@"abc -1.1" forKey:@"foo"];
 	[di2 setObject:@"abc -100.4" forKey:@"FOO"];
 	[di2 setObject:@"abc 0.5" forKey:@"BAR"];
 
-        Callback* cb = [[Callback alloc] init];
+        TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
         [p opStringStringD_async:cb response:@selector(opStringStringDResponse:p3:) exception:@selector(opStringStringDException:) p1:di1 p2:di2];
         test([cb check]);
         [cb release];
     }
 
     {
-        TestMutableStringMyEnumD *di1 = [TestMutableStringMyEnumD dictionary];
-	[di1 setObject:[NSNumber numberWithInt:Testenum1] forKey:@"abc"];
-	[di1 setObject:[NSNumber numberWithInt:Testenum2] forKey:@""];
-        TestMutableStringMyEnumD *di2 = [TestMutableStringMyEnumD dictionary];
-	[di2 setObject:[NSNumber numberWithInt:Testenum1] forKey:@"abc"];
-	[di2 setObject:[NSNumber numberWithInt:Testenum3] forKey:@"querty"];
-	[di2 setObject:[NSNumber numberWithInt:Testenum2] forKey:@"Hello!!"];
+        TestOperationsMutableStringMyEnumD *di1 = [TestOperationsMutableStringMyEnumD dictionary];
+	[di1 setObject:[NSNumber numberWithInt:TestOperationsenum1] forKey:@"abc"];
+	[di1 setObject:[NSNumber numberWithInt:TestOperationsenum2] forKey:@""];
+        TestOperationsMutableStringMyEnumD *di2 = [TestOperationsMutableStringMyEnumD dictionary];
+	[di2 setObject:[NSNumber numberWithInt:TestOperationsenum1] forKey:@"abc"];
+	[di2 setObject:[NSNumber numberWithInt:TestOperationsenum3] forKey:@"querty"];
+	[di2 setObject:[NSNumber numberWithInt:TestOperationsenum2] forKey:@"Hello!!"];
 
-        Callback* cb = [[Callback alloc] init];
+        TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
         [p opStringMyEnumD_async:cb response:@selector(opStringMyEnumDResponse:p3:) exception:@selector(opStringMyEnumDException:) p1:di1 p2:di2];
         test([cb check]);
         [cb release];
@@ -1049,14 +1049,14 @@ twowaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 	int l;
         for(l = 0; l != sizeof(lengths) / sizeof(*lengths); ++l)
         {
-            TestMutableIntS *s = [TestMutableIntS dataWithLength:(lengths[l] * sizeof(ICEInt))];
+            TestOperationsMutableIntS *s = [TestOperationsMutableIntS dataWithLength:(lengths[l] * sizeof(ICEInt))];
 	    ICEInt *ip = (ICEInt *)[s bytes];
 	    int i;
             for(i = 0; i < lengths[l]; ++i)
             {
                 *ip++ = i;
             }
-            Callback* cb = [[Callback alloc] init];
+            TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
             [p opIntS_async:cb response:@selector(opIntSResponse:) exception:@selector(opIntSException:) s:s];
             test([cb check]);
             [cb release];
@@ -1069,27 +1069,27 @@ twowaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 	[ctx setObject:@"TWO" forKey:@"two"];
 	[ctx setObject:@"THREE" forKey:@"three"];
 	{
-            Callback* cb = [[Callback alloc] init];
+            TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
             [p opContext_async:cb response:@selector(opEmptyContextResponse:) exception:@selector(opContextException:)];
             test([cb check]);
             [cb release];
 	}
 	{
-            Callback* cb = [[Callback alloc] init];
+            TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
             [p opContext_async:cb response:@selector(opNonEmptyContextResponse:) exception:@selector(opContextException:) context:ctx];
             test([cb check]);
             [cb release];
 	}
 	{
-	    id<TestMyClassPrx> p2 = [TestMyClassPrx checkedCast:[p ice_context:ctx]];
+	    id<TestOperationsMyClassPrx> p2 = [TestOperationsMyClassPrx checkedCast:[p ice_context:ctx]];
 	    test([[p2 ice_getContext] isEqual:ctx]);
 
-            Callback* cb = [[Callback alloc] init];
+            TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
             [p2 opContext_async:cb response:@selector(opNonEmptyContextResponse:) exception:@selector(opContextException:)];
             test([cb check]);
             [cb release];
 
-            cb = [[Callback alloc] init];
+            cb = [[TestOperationsCallback alloc] init];
             [p2 opContext_async:cb response:@selector(opNonEmptyContextResponse:) exception:@selector(opContextException:) context:ctx];
             test([cb check]);
             [cb release];
@@ -1098,7 +1098,7 @@ twowaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 
 //         {
 //             //
-//             // Test implicit context propagation
+//             // TestOperations implicit context propagation
 //             //
             
 //             string impls[] = {"Shared" :@"PerThread"};
@@ -1116,7 +1116,7 @@ twowaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 //                 [ctx objectForKey:@"three"] = @"THREE";
 
 
-//                 id<TestMyClassPrx> p = TestMyClassPrxuncheckedCast(
+//                 id<TestOperationsMyClassPrx> p = TestOperationsMyClassPrxuncheckedCast(
 //                                         [ic stringToProxy:@"test:default -p 12010"]);
                 
                 
@@ -1145,7 +1145,7 @@ twowaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 //                 combined.insert(ctx.begin(), ctx.end());
 //                 test([[combined objectForKey:@"one"] isEqualToString:@"UN"]);
                 
-//                 p = [TestMyClassPrx uncheckedCast:[p ice_context:prxContext]];
+//                 p = [TestOperationsMyClassPrx uncheckedCast:[p ice_context:prxContext]];
                 
 //                 [[ic getImplicitContext] setContext:(ICEContext()]);
 //                 {
@@ -1171,14 +1171,14 @@ twowaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> p)
 
     {
         ICEDouble d = 1278312346.0 / 13.0;
-	TestMutableDoubleS *ds = [TestMutableDoubleS dataWithLength:(5 * sizeof(ICEDouble))];
+	TestOperationsMutableDoubleS *ds = [TestOperationsMutableDoubleS dataWithLength:(5 * sizeof(ICEDouble))];
 	ICEDouble *pb = (ICEDouble *)[ds bytes];
 	int i = 5;
 	while(i-- > 0)
 	{
 	    *pb++ = d;
 	}
-        Callback* cb = [[Callback alloc] init];
+        TestOperationsCallback* cb = [[TestOperationsCallback alloc] init];
         [p opDoubleMarshaling_async:cb response:@selector(opDoubleMarshalingResponse) exception:@selector(opDoubleMarshalingException:) p1:d p2:ds];
         test([cb check]);
         [cb release];

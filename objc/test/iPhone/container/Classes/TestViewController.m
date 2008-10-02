@@ -217,6 +217,7 @@
 
 -(IBAction)next:(id)sender
 {
+    /*
     AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
     [appDelegate setAutoLaunch];
     [appDelegate testCompleted:YES];
@@ -228,6 +229,43 @@
 #else
     exit(0);
 #endif
+     */
+    [test close];
+
+    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+    [appDelegate testCompleted:YES];
+    
+    if(appDelegate.currentTest > appDelegate.tests.count-1)
+    {
+        appDelegate.currentTest = 0;
+    }
+    self.test = (Test*)[appDelegate.tests objectAtIndex:appDelegate.currentTest];
+    
+    self.title = test.name;
+    nextButton.enabled = NO;
+
+    // Clear the current message, and the the table log. Note that at present
+    // this isn't really necessary since the view can only be loaded once.
+    [currentMessage deleteCharactersInRange:NSMakeRange(0, currentMessage.length)];
+    
+    [messages removeAllObjects];
+    [output reloadData];
+    
+    if(![test open])
+    {
+        [self add:[NSString stringWithFormat:@"open of %@ failed\n", test.name]];
+    }
+    else
+    {
+        completed = 0;
+        [activity startAnimating];
+        NSInvocationOperation* op = [[[NSInvocationOperation alloc]
+                                      initWithTarget:self
+                                      selector:@selector(runServer)
+                                      object:nil] autorelease];
+        [queue addOperation:op];
+    }
+    
 }
 
 -(void)clientComplete:(NSNumber*)rc

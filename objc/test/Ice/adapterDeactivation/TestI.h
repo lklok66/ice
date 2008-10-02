@@ -9,7 +9,7 @@
 
 #import <Test.h>
 
-@interface TestI : TestTestIntf
+@interface TestAdapterDeactivationI : TestAdapterDeactivationTestIntf
 -(void) transient:(ICECurrent*)current;
 -(void) deactivate:(ICECurrent*)current;
 @end

@@ -21,35 +21,35 @@
 {
     if([type isEqualToString:@"::Test::B"])
     {
-        return [[BI alloc] init];
+        return [[TestObjectsBI alloc] init];
     }
     else if([type isEqualToString:@"::Test::C"])
     {
-        return [[CI alloc] init];
+        return [[TestObjectsCI alloc] init];
     }
     else if([type isEqualToString:@"::Test::D"])
     {
-        return [[DI alloc] init];
+        return [[TestObjectsDI alloc] init];
     }
     else if([type isEqualToString:@"::Test::E"])
     {
-        return [[EI alloc] init];
+        return [[TestObjectsEI alloc] init];
     }
     else if([type isEqualToString:@"::Test::F"])
     {
-        return [[FI alloc] init];
+        return [[TestObjectsFI alloc] init];
     }
     else if([type isEqualToString:@"::Test::I"])
     {
-        return [[II alloc] init];
+        return [[TestObjectsII alloc] init];
     }
     else if([type isEqualToString:@"::Test::J"])
     {
-        return [[JI alloc] init];
+        return [[TestObjectsJI alloc] init];
     }
     else if([type isEqualToString:@"::Test::H"])
     {
-        return [[HI alloc] init];
+        return [[TestObjectsHI alloc] init];
     }
     return 0;
 }
@@ -73,13 +73,13 @@ run(id<ICECommunicator> communicator)
     [communicator addObjectFactory:factory sliceId:@"::Test::J"];
     [communicator addObjectFactory:factory sliceId:@"::Test::H"];
 
-    id<TestInitialPrx> allTests(id<ICECommunicator>, bool);
-    id<TestInitialPrx> initial = allTests(communicator, NO);
+    id<TestObjectsInitialPrx> allTests(id<ICECommunicator>, bool);
+    id<TestObjectsInitialPrx> initial = allTests(communicator, NO);
     [initial shutdown];
     return EXIT_SUCCESS;
 }
 
-#if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
+#if TARGET_OS_IPHONE
 #  define main startClient
 #endif
 
@@ -94,6 +94,11 @@ main(int argc, char* argv[])
     {
         ICEInitializationData* initData = [ICEInitializationData initializationData];
         initData.properties = defaultClientProperties(&argc, argv);
+#if TARGET_OS_IPHONE
+        initData.prefixTable = [NSDictionary dictionaryWithObjectsAndKeys:
+                                @"TestObjects", @"::Test", 
+                                nil];
+#endif
         communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];
         status = run(communicator);
     }

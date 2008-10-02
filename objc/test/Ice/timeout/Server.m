@@ -16,8 +16,8 @@
 static int
 run(id<ICECommunicator> communicator)
 {
-    [[communicator getProperties] setProperty:@"TestAdapter.Endpoints" value:@"default -p 12010 -t 10000:udp"];
-    id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestAdapter"];
+    [[communicator getProperties] setProperty:@"TestTimeoutAdapter.Endpoints" value:@"default -p 12010 -t 10000:udp"];
+    id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestTimeoutAdapter"];
     ICEObject* object = [[[TimeoutI alloc] init] autorelease];
     [adapter add:object identity:[communicator stringToIdentity:@"timeout"]];
     [adapter activate];
@@ -28,7 +28,7 @@ run(id<ICECommunicator> communicator)
     return EXIT_SUCCESS;
 }
 
-#if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
+#if TARGET_OS_IPHONE
 #  define main startServer
 #endif
 
@@ -48,6 +48,12 @@ main(int argc, char* argv[])
         // This test kills connections, so we don't want warnings.
         //
         [initData.properties setProperty:@"Ice.Warn.Connections" value:@"0"];
+
+#if TARGET_OS_IPHONE
+        initData.prefixTable = [NSDictionary dictionaryWithObjectsAndKeys:
+                                @"TestTimeout", @"::Test", 
+                                nil];
+#endif
 
         communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];
         status = run(communicator);

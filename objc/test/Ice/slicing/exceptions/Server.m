@@ -17,10 +17,10 @@ static int
 run(id<ICECommunicator> communicator)
 {
     [[communicator getProperties] setProperty:@"Ice.Warn.Dispatch" value:@"0"];
-    [[communicator getProperties] setProperty:@"TestAdapter.Endpoints" value:@"default -p 12010 -t 2000"];
-    id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestAdapter"];
-    ICEObject* object = [[[TestI alloc] init] autorelease];
-    [adapter add:object identity:[communicator stringToIdentity:@"Test"]];
+    [[communicator getProperties] setProperty:@"TestSlicingExceptionsAdapter.Endpoints" value:@"default -p 12010 -t 2000"];
+    id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestSlicingExceptionsAdapter"];
+    ICEObject* object = [[[TestSlicingExceptionsI alloc] init] autorelease];
+    [adapter add:object identity:[communicator stringToIdentity:@"TestSlicingExceptions"]];
     [adapter activate];
 
     serverReady(communicator);

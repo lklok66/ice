@@ -22,24 +22,24 @@
 }
 
 
--(id<TestRemoteObjectAdapterPrx>) createObjectAdapter:(NSMutableString*)name endpoints:(NSMutableString*)endpts
+-(id<TestBindingRemoteObjectAdapterPrx>) createObjectAdapter:(NSMutableString*)name endpoints:(NSMutableString*)endpts
                                               current:(ICECurrent*)current
 {
-    id<ICECommunicator> com = [[current adapter] getCommunicator];
+    id<ICECommunicator> com = [current.adapter getCommunicator];
     [[com getProperties] setProperty:[name stringByAppendingString:@".ThreadPool.Size"] value:@"1"];
     id<ICEObjectAdapter> adapter = [com createObjectAdapterWithEndpoints:name endpoints:endpts];
-    return [TestRemoteObjectAdapterPrx uncheckedCast:[[current adapter] addWithUUID:[[[RemoteObjectAdapterI alloc]
-                                                                                    init:adapter] autorelease]]];
+    return [TestBindingRemoteObjectAdapterPrx uncheckedCast:[
+            current.adapter addWithUUID:[[[RemoteObjectAdapterI alloc] init:adapter] autorelease]]];
 }
 
--(void) deactivateObjectAdapter:(id<TestRemoteObjectAdapterPrx>)adapter current:(ICECurrent*)current
+-(void) deactivateObjectAdapter:(id<TestBindingRemoteObjectAdapterPrx>)adapter current:(ICECurrent*)current
 {
     [adapter deactivate]; // Collocated call
 }
 
 -(void) shutdown:(ICECurrent*)current
 {
-    [[[current adapter] getCommunicator] shutdown];
+    [[current.adapter getCommunicator] shutdown];
 }
 @end
 
@@ -51,7 +51,7 @@
         return nil;
     }
     adapter_ = [adapter retain];
-    testIntf_ = [TestTestIntfPrx uncheckedCast:[adapter_ add:[[[TestI alloc] init] autorelease]
+    testIntf_ = [TestBindingTestIntfPrx uncheckedCast:[adapter_ add:[[[TestBindingI alloc] init] autorelease]
                                                     identity:[[adapter_ getCommunicator] stringToIdentity:@"test"]]];
     [testIntf_ retain];
     [adapter_ activate];
@@ -63,7 +63,7 @@
     [adapter_ release];
     [super dealloc];
 }
--(id<TestTestIntfPrx>) getTestIntf:(ICECurrent*)current
+-(id<TestBindingTestIntfPrx>) getTestIntf:(ICECurrent*)current
 {
     return testIntf_;
 }
@@ -80,9 +80,9 @@
 }
 @end
 
-@implementation TestI
+@implementation TestBindingI
 -(NSString*) getAdapterName:(ICECurrent*)current
 {
-    return [[current adapter] getName];
+    return [current.adapter getName];
 }
 @end

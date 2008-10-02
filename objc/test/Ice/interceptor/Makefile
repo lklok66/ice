@@ -37,7 +37,7 @@ $(CLIENT): $(OBJS)
 
 $(LIBNAME): $(ICEOBJCLIB) $(OBJS)
 	rm -f $@
-	$(CXX) -dynamiclib $(shlibldflags) -install_name @executable_path/Frameworks/$(LIBNAME) -o $@ $(OBJS) $(LIBS)
+	$(CXX) -dynamiclib $(shlibldflags) -exported_symbols_list symbols -install_name @executable_path/Frameworks/$(LIBNAME) -o $@ $(OBJS) $(LIBS)
 ifneq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
   ifneq ($(IDENTIFIER),)
 	$(CODESIGN) -s "$(IDENTIFIER)" $@

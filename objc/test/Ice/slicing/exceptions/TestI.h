@@ -9,5 +9,5 @@
 
 #import <ServerPrivate.h>
 
-@interface TestI : TestTestIntf
+@interface TestSlicingExceptionsI : TestSlicingExceptionsTestIntf
 @end

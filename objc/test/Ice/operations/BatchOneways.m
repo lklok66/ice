@@ -12,14 +12,14 @@
 #import <Test.h>
 
 void
-batchOneways(id<TestMyClassPrx> p)
+batchOneways(id<TestOperationsMyClassPrx> p)
 {
     ICEByte buf1[10 * 1024];
     ICEByte buf2[99 * 1024];
     ICEByte buf3[100 * 1024];
-    TestMutableByteS *bs1 = [TestMutableByteS dataWithBytes:buf1 length:sizeof(buf1)];
-    TestMutableByteS *bs2 = [TestMutableByteS dataWithBytes:buf2 length:sizeof(buf2)];
-    TestMutableByteS *bs3 = [TestMutableByteS dataWithBytes:buf3 length:sizeof(buf3)];
+    TestOperationsMutableByteS *bs1 = [TestOperationsMutableByteS dataWithBytes:buf1 length:sizeof(buf1)];
+    TestOperationsMutableByteS *bs2 = [TestOperationsMutableByteS dataWithBytes:buf2 length:sizeof(buf2)];
+    TestOperationsMutableByteS *bs3 = [TestOperationsMutableByteS dataWithBytes:buf3 length:sizeof(buf3)];
 
     @try
     {
@@ -48,7 +48,7 @@ batchOneways(id<TestMyClassPrx> p)
     {
     }
     
-    id<TestMyClassPrx> batch = [TestMyClassPrx uncheckedCast:[p ice_batchOneway]];
+    id<TestOperationsMyClassPrx> batch = [TestOperationsMyClassPrx uncheckedCast:[p ice_batchOneway]];
     
     int i;
 

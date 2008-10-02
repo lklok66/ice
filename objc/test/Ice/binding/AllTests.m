@@ -73,7 +73,7 @@
 @end
 
 NSString*
-getAdapterNameWithAMI(id<TestTestIntfPrx> test)
+getAdapterNameWithAMI(id<TestBindingTestIntfPrx> test)
 {
     GetAdapterNameCB* cb = [[[GetAdapterNameCB alloc] init] autorelease];
     [test getAdapterName_async:cb response:@selector(response:) exception:@selector(exception:)];
@@ -81,7 +81,7 @@ getAdapterNameWithAMI(id<TestTestIntfPrx> test)
 }
 
 NSArray*
-getEndpoints(id<TestTestIntfPrx> proxy)
+getEndpoints(id<TestBindingTestIntfPrx> proxy)
 {
     NSMutableArray* edpts = [NSMutableArray array];
     bool escape = NO;
@@ -118,12 +118,12 @@ getEndpoints(id<TestTestIntfPrx> proxy)
     return edpts;
 }
 
-id<TestTestIntfPrx>
+id<TestBindingTestIntfPrx>
 createTestIntfPrx(NSArray* adapters)
 {
     NSMutableArray* endpoints = [NSMutableArray arrayWithCapacity:[adapters count]];
-    id<TestTestIntfPrx> test = nil;
-    for(id<TestRemoteObjectAdapterPrx> a in adapters)
+    id<TestBindingTestIntfPrx> test = nil;
+    for(id<TestBindingRemoteObjectAdapterPrx> a in adapters)
     {
         test = [a getTestIntf];
         [endpoints addObjectsFromArray:getEndpoints(test)];
@@ -134,13 +134,13 @@ createTestIntfPrx(NSArray* adapters)
         proxy = [proxy stringByAppendingString:@":"];
         proxy = [proxy stringByAppendingString:e];
     }
-    return [TestTestIntfPrx uncheckedCast:[[test ice_getCommunicator] stringToProxy:proxy]];
+    return [TestBindingTestIntfPrx uncheckedCast:[[test ice_getCommunicator] stringToProxy:proxy]];
 }
 
 void
-deactivate(id<TestRemoteCommunicatorPrx> com, NSArray* adapters)
+deactivate(id<TestBindingRemoteCommunicatorPrx> com, NSArray* adapters)
 {
-    for(id<TestRemoteObjectAdapterPrx> a in adapters)
+    for(id<TestBindingRemoteObjectAdapterPrx> a in adapters)
     {
         [com deactivateObjectAdapter:a];
     }
@@ -160,14 +160,15 @@ void
 allTests(id<ICECommunicator> communicator)
 {
     NSString* ref = @"communicator:default -p 12010 -t 10000";
-    id<TestRemoteCommunicatorPrx> com = [TestRemoteCommunicatorPrx uncheckedCast:[communicator stringToProxy:ref]];
+    id<TestBindingRemoteCommunicatorPrx> com = [TestBindingRemoteCommunicatorPrx uncheckedCast:[
+            communicator stringToProxy:ref]];
 
     tprintf("testing binding with single endpoint... ");
     {
-        id<TestRemoteObjectAdapterPrx> adapter = [com createObjectAdapter:@"Adapter" endpoints:@"default"];
+        id<TestBindingRemoteObjectAdapterPrx> adapter = [com createObjectAdapter:@"Adapter" endpoints:@"default"];
 
-        id<TestTestIntfPrx> test1 = [adapter getTestIntf];
-        id<TestTestIntfPrx> test2 = [adapter getTestIntf];
+        id<TestBindingTestIntfPrx> test1 = [adapter getTestIntf];
+        id<TestBindingTestIntfPrx> test2 = [adapter getTestIntf];
         test([[test1 ice_getConnection] isEqual:[test2 ice_getConnection]]);
 
         [test1 ice_ping];
@@ -175,7 +176,7 @@ allTests(id<ICECommunicator> communicator)
         
         [com deactivateObjectAdapter:adapter];
         
-        id<TestTestIntfPrx> test3 = [TestTestIntfPrx uncheckedCast:test1];
+        id<TestBindingTestIntfPrx> test3 = [TestBindingTestIntfPrx uncheckedCast:test1];
         test([[test3 ice_getConnection] isEqual:[test1 ice_getConnection]]);
         test([[test3 ice_getConnection] isEqual:[test2 ice_getConnection]]);
         
@@ -209,11 +210,11 @@ allTests(id<ICECommunicator> communicator)
         {
             NSMutableArray* adpts = [adapters mutableCopy];
 
-            id<TestTestIntfPrx> test1 = createTestIntfPrx(adpts);
+            id<TestBindingTestIntfPrx> test1 = createTestIntfPrx(adpts);
             random_shuffle(adpts);
-            id<TestTestIntfPrx> test2 = createTestIntfPrx(adpts);
+            id<TestBindingTestIntfPrx> test2 = createTestIntfPrx(adpts);
             random_shuffle(adpts);
-            id<TestTestIntfPrx> test3 = createTestIntfPrx(adpts);
+            id<TestBindingTestIntfPrx> test3 = createTestIntfPrx(adpts);
 
             test([[test1 ice_getConnection] isEqual:[test2 ice_getConnection]]);
             test([[test2 ice_getConnection] isEqual:[test3 ice_getConnection]]);
@@ -227,19 +228,19 @@ allTests(id<ICECommunicator> communicator)
         // always send the request over the same connection.)
         //
         {
-            for(id<TestRemoteObjectAdapterPrx> a in adapters)
+            for(id<TestBindingRemoteObjectAdapterPrx> a in adapters)
             {
                 [[a getTestIntf] ice_ping];
             }
             
-            id<TestTestIntfPrx> test = createTestIntfPrx(adapters);
+            id<TestBindingTestIntfPrx> test = createTestIntfPrx(adapters);
             NSString* name = [test getAdapterName];
             const int nRetry = 10;
             int i;
             for(i = 0; i < nRetry &&  [[test getAdapterName] isEqualToString:name]; i++);
             test(i == nRetry);
 
-            for(id<TestRemoteObjectAdapterPrx> a in adapters)
+            for(id<TestBindingRemoteObjectAdapterPrx> a in adapters)
             {
                 [[[a getTestIntf] ice_getConnection] close:NO];
             }
@@ -256,11 +257,11 @@ allTests(id<ICECommunicator> communicator)
         {
             NSMutableArray* adpts = [adapters mutableCopy];
 
-            id<TestTestIntfPrx> test1 = createTestIntfPrx(adpts);
+            id<TestBindingTestIntfPrx> test1 = createTestIntfPrx(adpts);
             random_shuffle(adpts);
-            id<TestTestIntfPrx> test2 = createTestIntfPrx(adpts);
+            id<TestBindingTestIntfPrx> test2 = createTestIntfPrx(adpts);
             random_shuffle(adpts);
-            id<TestTestIntfPrx> test3 = createTestIntfPrx(adpts);
+            id<TestBindingTestIntfPrx> test3 = createTestIntfPrx(adpts);
             
             test([[test1 ice_getConnection] isEqual:[test2 ice_getConnection]]);
             test([[test2 ice_getConnection] isEqual:[test3 ice_getConnection]]);
@@ -274,7 +275,7 @@ allTests(id<ICECommunicator> communicator)
         // establish the connection to the remaining adapter.
         //
         [com deactivateObjectAdapter:[adapters objectAtIndex:2]];      
-        id<TestTestIntfPrx> test = createTestIntfPrx(adapters);
+        id<TestBindingTestIntfPrx> test = createTestIntfPrx(adapters);
         test([[test getAdapterName] isEqualToString:@"Adapter12"]);
 
         deactivate(com, adapters);
@@ -300,11 +301,11 @@ allTests(id<ICECommunicator> communicator)
         {
             NSMutableArray* adpts = [adapters mutableCopy];
 
-            id<TestTestIntfPrx> test1 = createTestIntfPrx(adpts);
+            id<TestBindingTestIntfPrx> test1 = createTestIntfPrx(adpts);
             random_shuffle(adpts);
-            id<TestTestIntfPrx> test2 = createTestIntfPrx(adpts);
+            id<TestBindingTestIntfPrx> test2 = createTestIntfPrx(adpts);
             random_shuffle(adpts);
-            id<TestTestIntfPrx> test3 = createTestIntfPrx(adpts);
+            id<TestBindingTestIntfPrx> test3 = createTestIntfPrx(adpts);
 
             test([[test1 ice_getConnection] isEqual:[test2 ice_getConnection]]);
             test([[test2 ice_getConnection] isEqual:[test3 ice_getConnection]]);
@@ -318,19 +319,19 @@ allTests(id<ICECommunicator> communicator)
         // always send the request over the same connection.)
         //
         {
-            for(id<TestRemoteObjectAdapterPrx> a in adapters)
+            for(id<TestBindingRemoteObjectAdapterPrx> a in adapters)
             {
                 [[a getTestIntf] ice_ping];
             }
             
-            id<TestTestIntfPrx> test = createTestIntfPrx(adapters);
+            id<TestBindingTestIntfPrx> test = createTestIntfPrx(adapters);
             NSString* name = getAdapterNameWithAMI(test);
             const int nRetry = 10;
             int i;
             for(i = 0; i < nRetry && [getAdapterNameWithAMI(test) isEqualToString:name]; i++);
             test(i == nRetry);
 
-            for(id<TestRemoteObjectAdapterPrx> a in adapters)
+            for(id<TestBindingRemoteObjectAdapterPrx> a in adapters)
             {
                 [[[a getTestIntf] ice_getConnection] close:NO];
             }
@@ -347,11 +348,11 @@ allTests(id<ICECommunicator> communicator)
         {
             NSMutableArray* adpts = [adapters mutableCopy];
 
-            id<TestTestIntfPrx> test1 = createTestIntfPrx(adpts);
+            id<TestBindingTestIntfPrx> test1 = createTestIntfPrx(adpts);
             random_shuffle(adpts);
-            id<TestTestIntfPrx> test2 = createTestIntfPrx(adpts);
+            id<TestBindingTestIntfPrx> test2 = createTestIntfPrx(adpts);
             random_shuffle(adpts);
-            id<TestTestIntfPrx> test3 = createTestIntfPrx(adpts);
+            id<TestBindingTestIntfPrx> test3 = createTestIntfPrx(adpts);
             
             test([[test1 ice_getConnection] isEqual:[test2 ice_getConnection]]);
             test([[test2 ice_getConnection] isEqual:[test3 ice_getConnection]]);
@@ -365,7 +366,7 @@ allTests(id<ICECommunicator> communicator)
         // establish the connection to the remaining adapter.
         //
         [com deactivateObjectAdapter:[adapters objectAtIndex:2]];      
-        id<TestTestIntfPrx> test = createTestIntfPrx(adapters);
+        id<TestBindingTestIntfPrx> test = createTestIntfPrx(adapters);
         test([[test getAdapterName] isEqualToString:@"AdapterAMI12"]); 
 
         deactivate(com, adapters);
@@ -379,7 +380,7 @@ allTests(id<ICECommunicator> communicator)
         [adapters addObject:[com createObjectAdapter:@"Adapter22" endpoints:@"default"]];
         [adapters addObject:[com createObjectAdapter:@"Adapter23" endpoints:@"default"]];
 
-        id<TestTestIntfPrx> test = createTestIntfPrx(adapters);
+        id<TestBindingTestIntfPrx> test = createTestIntfPrx(adapters);
         test([test ice_getEndpointSelection] == ICERandom);
 
         NSMutableSet* names = [NSMutableSet setWithCapacity:3];
@@ -392,7 +393,7 @@ allTests(id<ICECommunicator> communicator)
             [[test ice_getConnection] close:NO];
         }
 
-        test = [TestTestIntfPrx uncheckedCast:[test ice_endpointSelection:ICERandom]];
+        test = [TestBindingTestIntfPrx uncheckedCast:[test ice_endpointSelection:ICERandom]];
         test([test ice_getEndpointSelection] == ICERandom);
 
         [names addObject:@"Adapter21"];
@@ -415,8 +416,8 @@ allTests(id<ICECommunicator> communicator)
         [adapters addObject:[com createObjectAdapter:@"Adapter32" endpoints:@"default"]];
         [adapters addObject:[com createObjectAdapter:@"Adapter33" endpoints:@"default"]];
 
-        id<TestTestIntfPrx> test = createTestIntfPrx(adapters);
-        test = [TestTestIntfPrx uncheckedCast:[test ice_endpointSelection:ICEOrdered]];
+        id<TestBindingTestIntfPrx> test = createTestIntfPrx(adapters);
+        test = [TestBindingTestIntfPrx uncheckedCast:[test ice_endpointSelection:ICEOrdered]];
         test([test ice_getEndpointSelection] == ICEOrdered);
         const int nRetry = 5;
         int i;
@@ -469,10 +470,10 @@ allTests(id<ICECommunicator> communicator)
 
     tprintf("testing per request binding with single endpoint... ");
     {
-        id<TestRemoteObjectAdapterPrx> adapter = [com createObjectAdapter:@"Adapter41" endpoints:@"default"];
+        id<TestBindingRemoteObjectAdapterPrx> adapter = [com createObjectAdapter:@"Adapter41" endpoints:@"default"];
 
-        id<TestTestIntfPrx> test1 = [TestTestIntfPrx uncheckedCast:[[adapter getTestIntf] ice_connectionCached:NO]];
-        id<TestTestIntfPrx> test2 = [TestTestIntfPrx uncheckedCast:[[adapter getTestIntf] ice_connectionCached:NO]];
+        id<TestBindingTestIntfPrx> test1 = [TestBindingTestIntfPrx uncheckedCast:[[adapter getTestIntf] ice_connectionCached:NO]];
+        id<TestBindingTestIntfPrx> test2 = [TestBindingTestIntfPrx uncheckedCast:[[adapter getTestIntf] ice_connectionCached:NO]];
         test(![test1 ice_isConnectionCached]);
         test(![test2 ice_isConnectionCached]);
         test([[test1 ice_getConnection] isEqual:[test2 ice_getConnection]]);
@@ -481,7 +482,7 @@ allTests(id<ICECommunicator> communicator)
         
         [com deactivateObjectAdapter:adapter];
         
-        id<TestTestIntfPrx> test3 = [TestTestIntfPrx uncheckedCast:test1];
+        id<TestBindingTestIntfPrx> test3 = [TestBindingTestIntfPrx uncheckedCast:test1];
         @try
         {
             test([[test3 ice_getConnection] isEqual:[test1 ice_getConnection]]);
@@ -500,7 +501,7 @@ allTests(id<ICECommunicator> communicator)
         [adapters addObject:[com createObjectAdapter:@"Adapter52" endpoints:@"default"]];
         [adapters addObject:[com createObjectAdapter:@"Adapter53" endpoints:@"default"]];
 
-        id<TestTestIntfPrx> test = [createTestIntfPrx(adapters) ice_connectionCached:NO];
+        id<TestBindingTestIntfPrx> test = [createTestIntfPrx(adapters) ice_connectionCached:NO];
         test(![test ice_isConnectionCached]);
 
         NSMutableSet* names = [NSMutableSet setWithCapacity:3];
@@ -537,7 +538,7 @@ allTests(id<ICECommunicator> communicator)
         [adapters addObject:[com createObjectAdapter:@"AdapterAMI52" endpoints:@"default"]];
         [adapters addObject:[com createObjectAdapter:@"AdapterAMI53" endpoints:@"default"]];
 
-        id<TestTestIntfPrx> test = [createTestIntfPrx(adapters) ice_connectionCached:NO];
+        id<TestBindingTestIntfPrx> test = [createTestIntfPrx(adapters) ice_connectionCached:NO];
         test(![test ice_isConnectionCached]);
 
         NSMutableSet* names = [NSMutableSet setWithCapacity:3];
@@ -573,10 +574,10 @@ allTests(id<ICECommunicator> communicator)
         [adapters addObject:[com createObjectAdapter:@"Adapter62" endpoints:@"default"]];
         [adapters addObject:[com createObjectAdapter:@"Adapter63" endpoints:@"default"]];
 
-        id<TestTestIntfPrx> test = createTestIntfPrx(adapters);
-        test = [TestTestIntfPrx uncheckedCast:[test ice_endpointSelection:ICEOrdered]];
+        id<TestBindingTestIntfPrx> test = createTestIntfPrx(adapters);
+        test = [TestBindingTestIntfPrx uncheckedCast:[test ice_endpointSelection:ICEOrdered]];
         test([test ice_getEndpointSelection] == ICEOrdered);
-        test = [TestTestIntfPrx uncheckedCast:[test ice_connectionCached:NO]];
+        test = [TestBindingTestIntfPrx uncheckedCast:[test ice_connectionCached:NO]];
         test(![test ice_isConnectionCached]);
         const int nRetry = 5;
         int i;
@@ -632,10 +633,10 @@ allTests(id<ICECommunicator> communicator)
         [adapters addObject:[com createObjectAdapter:@"AdapterAMI62" endpoints:@"default"]];
         [adapters addObject:[com createObjectAdapter:@"AdapterAMI63" endpoints:@"default"]];
 
-        id<TestTestIntfPrx> test = createTestIntfPrx(adapters);
-        test = [TestTestIntfPrx uncheckedCast:[test ice_endpointSelection:ICEOrdered]];
+        id<TestBindingTestIntfPrx> test = createTestIntfPrx(adapters);
+        test = [TestBindingTestIntfPrx uncheckedCast:[test ice_endpointSelection:ICEOrdered]];
         test([test ice_getEndpointSelection] == ICEOrdered);
-        test = [TestTestIntfPrx uncheckedCast:[test ice_connectionCached:NO]];
+        test = [TestBindingTestIntfPrx uncheckedCast:[test ice_connectionCached:NO]];
         test(![test ice_isConnectionCached]);
         const int nRetry = 5;
         int i;
@@ -690,10 +691,10 @@ allTests(id<ICECommunicator> communicator)
         [adapters addObject:[com createObjectAdapter:@"Adapter71" endpoints:@"default"]];
         [adapters addObject:[com createObjectAdapter:@"Adapter72" endpoints:@"udp"]];
 
-        id<TestTestIntfPrx> test = createTestIntfPrx(adapters);
+        id<TestBindingTestIntfPrx> test = createTestIntfPrx(adapters);
         test([[test getAdapterName] isEqualToString:@"Adapter71"]);
         
-        id<TestTestIntfPrx> testUDP = [TestTestIntfPrx uncheckedCast:[test ice_datagram]];
+        id<TestBindingTestIntfPrx> testUDP = [TestBindingTestIntfPrx uncheckedCast:[test ice_datagram]];
         test([test ice_getConnection] != [testUDP ice_getConnection]);
         @try
         {
@@ -713,7 +714,7 @@ allTests(id<ICECommunicator> communicator)
             [adapters addObject:[com createObjectAdapter:@"Adapter81" endpoints:@"ssl"]];
             [adapters addObject:[com createObjectAdapter:@"Adapter82" endpoints:@"tcp"]];
             
-            id<TestTestIntfPrx> test = createTestIntfPrx(adapters);
+            id<TestBindingTestIntfPrx> test = createTestIntfPrx(adapters);
             int i;
             for(i = 0; i < 5; i++)
             {
@@ -721,11 +722,11 @@ allTests(id<ICECommunicator> communicator)
                 [[test ice_getConnection] close:NO];
             }
             
-            id<TestTestIntfPrx> testSecure = [TestTestIntfPrx uncheckedCast:[test ice_secure:YES]];
+            id<TestBindingTestIntfPrx> testSecure = [TestBindingTestIntfPrx uncheckedCast:[test ice_secure:YES]];
             test([testSecure ice_isSecure]);
-            testSecure = [TestTestIntfPrx uncheckedCast:[test ice_secure:NO]];
+            testSecure = [TestBindingTestIntfPrx uncheckedCast:[test ice_secure:NO]];
             test(![testSecure ice_isSecure]);
-            testSecure = [TestTestIntfPrx uncheckedCast:[test ice_secure:YES]];
+            testSecure = [TestBindingTestIntfPrx uncheckedCast:[test ice_secure:YES]];
             test([testSecure ice_isSecure]);
             test([test ice_getConnection] != [testSecure ice_getConnection]);
 

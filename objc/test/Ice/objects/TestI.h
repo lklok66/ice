@@ -7,66 +7,65 @@
 //
 // **********************************************************************
 
-
 #import <Test.h>
 
-@interface BI : TestB<TestB>
+@interface TestObjectsBI : TestObjectsB<TestObjectsB>
 {
     BOOL _postUnmarshalInvoked;
 }
 @end
 
-@interface CI : TestC<TestC>
+@interface TestObjectsCI : TestObjectsC<TestObjectsC>
 {
     BOOL _postUnmarshalInvoked;
 }
 @end
 
-@interface DI : TestD<TestD>
+@interface TestObjectsDI : TestObjectsD<TestObjectsD>
 {
     BOOL _postUnmarshalInvoked;
 }
 @end
 
-@interface EI : TestE<TestE>
+@interface TestObjectsEI : TestObjectsE<TestObjectsE>
 @end
 
-@interface FI : TestF<TestF>
+@interface TestObjectsFI : TestObjectsF<TestObjectsF>
 @end
 
-@interface II : TestI<TestI>
+@interface TestObjectsII : TestObjectsI<TestObjectsI>
 @end
 
-@interface JI : TestJ<TestJ>
+@interface TestObjectsJI : TestObjectsJ<TestObjectsJ>
 @end
 
-@interface HI : TestH<TestH>
+@interface TestObjectsHI : TestObjectsH<TestObjectsH>
 @end
 
-@interface InitialI : TestInitial<TestInitial>
+@interface TestObjectsInitialI : TestObjectsInitial<TestObjectsInitial>
 {
-    TestB* _b1;
-    TestB* _b2;
-    TestC* _c;
-    TestD* _d;
-    TestE* _e;
-    TestF* _f;
+    TestObjectsB* _b1;
+    TestObjectsB* _b2;
+    TestObjectsC* _c;
+    TestObjectsD* _d;
+    TestObjectsE* _e;
+    TestObjectsF* _f;
 }
 -(id) init;
 -(void) shutdown:(ICECurrent*)current;
--(TestB *) getB1:(ICECurrent *)current;
--(TestB *) getB2:(ICECurrent *)current;
--(TestC *) getC:(ICECurrent *)current;
--(TestD *) getD:(ICECurrent *)current;
--(TestE *) getE:(ICECurrent *)current;
--(TestF *) getF:(ICECurrent *)current;
--(void) getAll:(TestB **)b1 b2:(TestB **)b2 theC:(TestC **)theC theD:(TestD **)theD current:(ICECurrent *)current;
--(TestI *) getI:(ICECurrent *)current;
--(TestI *) getJ:(ICECurrent *)current;
--(TestI *) getH:(ICECurrent *)current;
--(void) setI:(TestI *)theI current:(ICECurrent *)current;
--(TestObjectSeq *) getObjectSeq:(TestMutableObjectSeq *)s current:(ICECurrent *)current;
--(TestObjectDict *) getObjectDict:(TestMutableObjectDict *)d current:(ICECurrent *)current;
+-(TestObjectsB *) getB1:(ICECurrent *)current;
+-(TestObjectsB *) getB2:(ICECurrent *)current;
+-(TestObjectsC *) getC:(ICECurrent *)current;
+-(TestObjectsD *) getD:(ICECurrent *)current;
+-(TestObjectsE *) getE:(ICECurrent *)current;
+-(TestObjectsF *) getF:(ICECurrent *)current;
+-(void) getAll:(TestObjectsB **)b1 b2:(TestObjectsB **)b2 theC:(TestObjectsC **)theC theD:(TestObjectsD **)theD current:(ICECurrent *)current;
+-(TestObjectsI *) getI:(ICECurrent *)current;
+-(TestObjectsI *) getJ:(ICECurrent *)current;
+-(TestObjectsI *) getH:(ICECurrent *)current;
+-(void) setI:(TestObjectsI *)theI current:(ICECurrent *)current;
+-(TestObjectsObjectSeq *) getObjectSeq:(TestObjectsMutableObjectSeq *)s current:(ICECurrent *)current;
+-(TestObjectsObjectDict *) getObjectDict:(TestObjectsMutableObjectDict *)d current:(ICECurrent *)current;
 @end
 
 @interface UnexpectedObjectExceptionTestI : ICEBlobject<ICEBlobject>

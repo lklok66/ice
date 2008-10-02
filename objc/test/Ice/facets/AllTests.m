@@ -12,13 +12,13 @@
 #import <Test.h>
 
 
-@interface EmptyI : TestEmpty
+@interface EmptyI : TestFacetsEmpty
 @end
 
 @implementation EmptyI
 @end
 
-id<TestGPrx>
+id<TestFacetsGPrx>
 allTests(id<ICECommunicator> communicator)
 {
 //     tprintf("testing Ice.Admin.Facets property... ");
@@ -111,13 +111,13 @@ allTests(id<ICECommunicator> communicator)
     test([[prx2 ice_getFacet] isEqualToString:@"facetABCD"]);
     id<ICEObjectPrx> prx3 = [ICEObjectPrx uncheckedCast:prx facet:@""];
     test([[prx3 ice_getFacet] length] == 0);
-    id<TestDPrx> d = [TestDPrx uncheckedCast:db];
+    id<TestFacetsDPrx> d = [TestFacetsDPrx uncheckedCast:db];
     test([[d ice_getFacet] length] == 0);
-    id<TestDPrx> df = [TestDPrx uncheckedCast:db facet:@"facetABCD"];
+    id<TestFacetsDPrx> df = [TestFacetsDPrx uncheckedCast:db facet:@"facetABCD"];
     test([[df ice_getFacet] isEqualToString:@"facetABCD"]);
-    id<TestDPrx> df2 = [TestDPrx uncheckedCast:df];
+    id<TestFacetsDPrx> df2 = [TestFacetsDPrx uncheckedCast:df];
     test([[df2 ice_getFacet] isEqualToString:@"facetABCD"]);
-    id<TestDPrx> df3 = [TestDPrx uncheckedCast:df facet:@""];
+    id<TestFacetsDPrx> df3 = [TestFacetsDPrx uncheckedCast:df facet:@""];
     test([[df3 ice_getFacet] length] == 0);
     tprintf("ok\n");
 
@@ -130,18 +130,18 @@ allTests(id<ICECommunicator> communicator)
     test([[prx2 ice_getFacet] isEqualToString:@"facetABCD"]);
     prx3 = [ICEObjectPrx checkedCast:prx facet:@""];
     test([[prx3 ice_getFacet] length] == 0);
-    d = [TestDPrx checkedCast:db];
+    d = [TestFacetsDPrx checkedCast:db];
     test([[d ice_getFacet] length] == 0);
-    df = [TestDPrx checkedCast:db facet:@"facetABCD"];
+    df = [TestFacetsDPrx checkedCast:db facet:@"facetABCD"];
     test([[df ice_getFacet] isEqualToString:@"facetABCD"]);
-    df2 = [TestDPrx checkedCast:df];
+    df2 = [TestFacetsDPrx checkedCast:df];
     test([[df2 ice_getFacet] isEqualToString:@"facetABCD"]);
-    df3 = [TestDPrx checkedCast:df facet:@""];
+    df3 = [TestFacetsDPrx checkedCast:df facet:@""];
     test([[df3 ice_getFacet] length] == 0);
     tprintf("ok\n");
 
     tprintf("testing non-facets A, B, C, and D... ");
-    d = [TestDPrx checkedCast:db];
+    d = [TestFacetsDPrx checkedCast:db];
     test(d);
     test([d isEqual:db]);
     test([[d callA] isEqualToString:@"A"]);
@@ -151,7 +151,7 @@ allTests(id<ICECommunicator> communicator)
     tprintf("ok\n");
 
     tprintf("testing facets A, B, C, and D... ");
-    df = [TestDPrx checkedCast:d facet:@"facetABCD"];
+    df = [TestFacetsDPrx checkedCast:d facet:@"facetABCD"];
     test(df);
     test([[df callA] isEqualToString:@"A"]);
     test([[df callB] isEqualToString:@"B"]);
@@ -160,20 +160,20 @@ allTests(id<ICECommunicator> communicator)
     tprintf("ok\n");
 
     tprintf("testing facets E and F... ");
-    id<TestFPrx> ff = [TestFPrx checkedCast:d facet:@"facetEF"];
+    id<TestFacetsFPrx> ff = [TestFacetsFPrx checkedCast:d facet:@"facetEF"];
     test(ff);
     test([[ff callE] isEqualToString:@"E"]);
     test([[ff callF] isEqualToString:@"F"]);
     tprintf("ok\n");
 
     tprintf("testing facet G... ");
-    id<TestGPrx> gf = [TestGPrx checkedCast:ff facet:@"facetGH"];
+    id<TestFacetsGPrx> gf = [TestFacetsGPrx checkedCast:ff facet:@"facetGH"];
     test(gf);
     test([[gf callG] isEqualToString:@"G"]);
     tprintf("ok\n");
 
     tprintf("testing whether casting preserves the facet... ");
-    id<TestHPrx> hf = [TestHPrx checkedCast:gf];
+    id<TestFacetsHPrx> hf = [TestFacetsHPrx checkedCast:gf];
     test(hf);
     test([[hf callG] isEqualToString:@"G"]);
     test([[hf callH] isEqualToString:@"H"]);

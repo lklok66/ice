@@ -10,6 +10,7 @@
 #ifndef TEST_ICE
 #define TEST_ICE
 
+["objc:prefix:TestInterceptor"]
 module Test
 {
 
@@ -49,7 +50,6 @@ interface MyObject
     //
     int badSystemAdd(int x, int y);
 };
-
 
 };
 

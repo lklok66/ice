@@ -16,8 +16,8 @@
 static int
 run(id<ICECommunicator> communicator)
 {
-    id<TestTestIntfPrx> allTests(id<ICECommunicator>);
-    id<TestTestIntfPrx> thrower = allTests(communicator);
+    id<TestSlicingExceptionsTestIntfPrx> allTests(id<ICECommunicator>);
+    id<TestSlicingExceptionsTestIntfPrx> thrower = allTests(communicator);
     [thrower shutdown];
     return EXIT_SUCCESS;
 }

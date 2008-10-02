@@ -23,11 +23,11 @@ run(id<ICECommunicator> communicator)
     //  
     id<ICEObjectAdapter> oa = [communicator createObjectAdapterWithEndpoints:@"MyOA" endpoints:@"tcp -h localhost"];
     
-    ICEObject* servant = [[MyObjectI alloc] init];
+    ICEObject* servant = [[TestInterceptorMyObjectI alloc] init];
     InterceptorI* interceptor = [[InterceptorI alloc] init:servant];
     [interceptor autorelease];
     
-    id<TestMyObjectPrx> prx = [TestMyObjectPrx uncheckedCast:[oa addWithUUID:interceptor]];
+    id<TestInterceptorMyObjectPrx> prx = [TestInterceptorMyObjectPrx uncheckedCast:[oa addWithUUID:interceptor]];
     
     [oa activate];
        
@@ -59,7 +59,7 @@ run(id<ICECommunicator> communicator)
         [prx badAdd:33 y:12];
         test(NO);
     }
-    @catch(TestInvalidInputException*)
+    @catch(TestInterceptorInvalidInputException*)
     {
         // expected
     }
@@ -100,7 +100,7 @@ run(id<ICECommunicator> communicator)
     return 0;
 }
 
-#if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
+#if TARGET_OS_IPHONE
 #  define main startClient
 
 int
@@ -122,6 +122,11 @@ main(int argc, char* argv[])
     {
         ICEInitializationData* initData = [ICEInitializationData initializationData];
         initData.properties = defaultClientProperties(&argc, argv);
+#if TARGET_OS_IPHONE
+        initData.prefixTable = [NSDictionary dictionaryWithObjectsAndKeys:
+                                @"TestInterceptor", @"::Test", 
+                                nil];
+#endif
         communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];
         status = run(communicator);
     }

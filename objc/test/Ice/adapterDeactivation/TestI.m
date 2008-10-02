@@ -12,11 +12,11 @@
 
 #import <Foundation/NSThread.h>
 
-@implementation TestI
+@implementation TestAdapterDeactivationI
 
 -(void) transient:(ICECurrent*)current
 {
-    id<ICECommunicator> communicator = [[current adapter] getCommunicator];
+    id<ICECommunicator> communicator = [current.adapter getCommunicator];
     id<ICEObjectAdapter> adapter =
         [communicator createObjectAdapterWithEndpoints:@"TransientTestAdapter" endpoints:@"default -p 9999"];
     [adapter activate];
@@ -25,7 +25,7 @@
 
 -(void) deactivate:(ICECurrent*)current
 {
-    [[current adapter] deactivate];
+    [current.adapter deactivate];
     [NSThread sleepForTimeInterval:1];
 }
 @end

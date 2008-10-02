@@ -10,7 +10,7 @@
 #import <Test.h>
 #import <ServerLocator.h>
 
-@interface ServerManagerI : TestServerManager
+@interface ServerManagerI : TestLocationServerManager
 {
     NSMutableArray* communicators_;
     ServerLocatorRegistry* registry_;
@@ -21,10 +21,10 @@
 -(void)terminate;
 @end
 
-@interface HelloI : TestHello
+@interface HelloI : TestLocationHello
 @end
 
-@interface TestI : TestTestIntf
+@interface TestLocationI : TestLocationTestIntf
 {
     id<ICEObjectAdapter> adapter1_;
     id<ICEObjectAdapter> adapter2_;

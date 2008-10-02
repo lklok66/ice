@@ -7,28 +7,28 @@
 //
 // **********************************************************************
 
-
 #import <Test.h>
 
-@interface RemoteCommunicatorI : TestRemoteCommunicator
+@interface RemoteCommunicatorI : TestBindingRemoteCommunicator
 {
     int nextPort_;
 }
--(id<TestRemoteObjectAdapterPrx>) createObjectAdapter:(NSMutableString *)name endpoints:(NSMutableString *)endpoints current:(ICECurrent *)current;
--(void) deactivateObjectAdapter:(id<TestRemoteObjectAdapterPrx>)adapter current:(ICECurrent *)current;
+-(id<TestBindingRemoteObjectAdapterPrx>) createObjectAdapter:(NSMutableString *)name
+    endpoints:(NSMutableString *)endpoints current:(ICECurrent *)current;
+-(void) deactivateObjectAdapter:(id<TestBindingRemoteObjectAdapterPrx>)adapter current:(ICECurrent *)current;
 -(void) shutdown:(ICECurrent *)current;
 @end
 
-@interface RemoteObjectAdapterI : TestRemoteObjectAdapter
+@interface RemoteObjectAdapterI : TestBindingRemoteObjectAdapter
 {
     id<ICEObjectAdapter> adapter_;
-    id<TestTestIntfPrx> testIntf_;
+    id<TestBindingTestIntfPrx> testIntf_;
 }
--(id<TestTestIntfPrx>) getTestIntf:(ICECurrent *)current;
+-(id<TestBindingTestIntfPrx>) getTestIntf:(ICECurrent *)current;
 -(void) deactivate:(ICECurrent *)current;
 @end
 
-@interface TestI : TestTestIntf
+@interface TestBindingI : TestBindingTestIntf
 -(NSString *) getAdapterName:(ICECurrent *)current;
 @end
 

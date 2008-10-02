@@ -21,15 +21,15 @@
 {
     if([type isEqualToString:@"::Test::I"])
     {
-        return [[II alloc] init];
+        return [[TestObjectsII alloc] init];
     }
     else if([type isEqualToString:@"::Test::J"])
     {
-        return [[JI alloc] init];
+        return [[TestObjectsJI alloc] init];
     }
     else if([type isEqualToString:@"::Test::H"])
     {
-        return [[HI alloc] init];
+        return [[TestObjectsHI alloc] init];
     }
     
     test(NO); // Should never be reached
@@ -50,9 +50,9 @@ run(id<ICECommunicator> communicator)
     [communicator addObjectFactory:factory sliceId:@"::Test::J"];
     [communicator addObjectFactory:factory sliceId:@"::Test::H"];
     
-    [[communicator getProperties] setProperty:@"TestAdapter.Endpoints" value:@"default -p 12010 -t 10000"];
-    id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestAdapter"];
-    ICEObject* initial = [[[InitialI alloc] init] autorelease];
+    [[communicator getProperties] setProperty:@"TestObjectsAdapter.Endpoints" value:@"default -p 12010 -t 10000"];
+    id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestObjectsAdapter"];
+    ICEObject* initial = [[[TestObjectsInitialI alloc] init] autorelease];
     [adapter add:initial identity:[communicator stringToIdentity:@"initial"]];
     ICEObject* uoet = [[[UnexpectedObjectExceptionTestI alloc] init] autorelease];
     [adapter add:uoet identity:[communicator stringToIdentity:@"uoet"]];
@@ -64,7 +64,7 @@ run(id<ICECommunicator> communicator)
     return EXIT_SUCCESS;
 }
 
-#if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
+#if TARGET_OS_IPHONE
 #  define main startServer
 #endif
 
@@ -79,6 +79,11 @@ main(int argc, char* argv[])
     {
         ICEInitializationData* initData = [ICEInitializationData initializationData];
         initData.properties = defaultServerProperties(&argc, argv);
+#if TARGET_OS_IPHONE
+        initData.prefixTable = [NSDictionary dictionaryWithObjectsAndKeys:
+                                @"TestObjects", @"::Test", 
+                                nil];
+#endif
         communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];
         status = run(communicator);
     }

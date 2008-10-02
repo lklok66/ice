@@ -13,7 +13,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface Callback : NSObject
+@interface TestTimeoutCallback : NSObject
 {
     BOOL called;
     NSCondition* cond;
@@ -22,7 +22,7 @@
 -(void) called;
 @end
 
-@implementation Callback
+@implementation TestTimeoutCallback
 -(id) init
 {
     if(![super init])
@@ -94,14 +94,14 @@
 }
 @end
 
-id<TestTimeoutPrx>
+id<TestTimeoutTimeoutPrx>
 allTests(id<ICECommunicator> communicator)
 {
     NSString* sref = @"timeout:default -p 12010 -t 10000";
     id<ICEObjectPrx> obj = [communicator stringToProxy:sref];
     test(obj);
 
-    id<TestTimeoutPrx> timeout = [TestTimeoutPrx checkedCast:obj];
+    id<TestTimeoutTimeoutPrx> timeout = [TestTimeoutTimeoutPrx checkedCast:obj];
     test(timeout);
 
     tprintf("testing connect timeout... ");
@@ -109,7 +109,7 @@ allTests(id<ICECommunicator> communicator)
         //
         // Expect ConnectTimeoutException.
         //
-        id<TestTimeoutPrx> to = [TestTimeoutPrx uncheckedCast:[obj ice_timeout:250]];
+        id<TestTimeoutTimeoutPrx> to = [TestTimeoutTimeoutPrx uncheckedCast:[obj ice_timeout:250]];
         [to holdAdapter:750];
         [[to ice_getConnection] close:YES]; // Force a reconnect.
         @try
@@ -127,7 +127,7 @@ allTests(id<ICECommunicator> communicator)
         // Expect success.
         //
         [timeout op]; // Ensure adapter is active.
-        id<TestTimeoutPrx> to = [TestTimeoutPrx uncheckedCast:[obj ice_timeout:1000]];
+        id<TestTimeoutTimeoutPrx> to = [TestTimeoutTimeoutPrx uncheckedCast:[obj ice_timeout:1000]];
         [to holdAdapter:500];
         [[to ice_getConnection] close:YES]; // Force a reconnect.
         @try
@@ -146,7 +146,7 @@ allTests(id<ICECommunicator> communicator)
         //
         // Expect TimeoutException.
         //
-        id<TestTimeoutPrx> to = [TestTimeoutPrx uncheckedCast:[obj ice_timeout:500]];
+        id<TestTimeoutTimeoutPrx> to = [TestTimeoutTimeoutPrx uncheckedCast:[obj ice_timeout:500]];
         @try
         {
             [to sleep:750];
@@ -162,7 +162,7 @@ allTests(id<ICECommunicator> communicator)
         // Expect success.
         //
         [timeout op]; // Ensure adapter is active.
-        id<TestTimeoutPrx> to = [TestTimeoutPrx uncheckedCast:[obj ice_timeout:1000]];
+        id<TestTimeoutTimeoutPrx> to = [TestTimeoutTimeoutPrx uncheckedCast:[obj ice_timeout:1000]];
         @try
         {
             [to sleep:500];
@@ -179,11 +179,11 @@ allTests(id<ICECommunicator> communicator)
         //
         // Expect TimeoutException.
         //
-        id<TestTimeoutPrx> to = [TestTimeoutPrx uncheckedCast:[obj ice_timeout:500]];
+        id<TestTimeoutTimeoutPrx> to = [TestTimeoutTimeoutPrx uncheckedCast:[obj ice_timeout:500]];
         [to holdAdapter:2000];
         @try
         {
-            TestByteSeq* seq = [TestMutableByteSeq dataWithLength:10000];
+            TestTimeoutByteSeq* seq = [TestTimeoutMutableByteSeq dataWithLength:10000];
             [to sendData:seq];
             test(NO);
         }
@@ -197,11 +197,11 @@ allTests(id<ICECommunicator> communicator)
         // Expect success.
         //
         [timeout op]; // Ensure adapter is active.
-        id<TestTimeoutPrx> to = [TestTimeoutPrx uncheckedCast:[obj ice_timeout:1000]];
+        id<TestTimeoutTimeoutPrx> to = [TestTimeoutTimeoutPrx uncheckedCast:[obj ice_timeout:1000]];
         [to holdAdapter:500];
         @try
         {
-            TestByteSeq* seq = [TestMutableByteSeq dataWithLength:10000];
+            TestTimeoutByteSeq* seq = [TestTimeoutMutableByteSeq dataWithLength:10000];
             [to sendData:seq];
         }
         @catch(ICETimeoutException*)
@@ -216,8 +216,8 @@ allTests(id<ICECommunicator> communicator)
         //
         // Expect TimeoutException.
         //
-        id<TestTimeoutPrx> to = [TestTimeoutPrx uncheckedCast:[obj ice_timeout:500]];
-        Callback* cb = [[Callback alloc] init];
+        id<TestTimeoutTimeoutPrx> to = [TestTimeoutTimeoutPrx uncheckedCast:[obj ice_timeout:500]];
+        TestTimeoutCallback* cb = [[TestTimeoutCallback alloc] init];
         [to sleep_async:cb response:@selector(sleepExResponse) exception:@selector(sleepExException:) to:2000];
         test([cb check]);
         [cb release];
@@ -227,8 +227,8 @@ allTests(id<ICECommunicator> communicator)
         // Expect success.
         //
         [timeout op]; // Ensure adapter is active.
-        id<TestTimeoutPrx> to = [TestTimeoutPrx uncheckedCast:[obj ice_timeout:1000]];
-        Callback* cb = [[Callback alloc] init];
+        id<TestTimeoutTimeoutPrx> to = [TestTimeoutTimeoutPrx uncheckedCast:[obj ice_timeout:1000]];
+        TestTimeoutCallback* cb = [[TestTimeoutCallback alloc] init];
         [to sleep_async:cb response:@selector(sleepResponse) exception:@selector(sleepException:) to:500];
         test([cb check]);
         [cb release];
@@ -240,10 +240,10 @@ allTests(id<ICECommunicator> communicator)
         //
         // Expect TimeoutException.
         //
-        id<TestTimeoutPrx> to = [TestTimeoutPrx uncheckedCast:[obj ice_timeout:500]];
+        id<TestTimeoutTimeoutPrx> to = [TestTimeoutTimeoutPrx uncheckedCast:[obj ice_timeout:500]];
         [to holdAdapter:2000];
-        TestByteSeq* seq = [TestMutableByteSeq dataWithLength:10000];
-        Callback* cb = [[Callback alloc] init];
+        TestTimeoutByteSeq* seq = [TestTimeoutMutableByteSeq dataWithLength:10000];
+        TestTimeoutCallback* cb = [[TestTimeoutCallback alloc] init];
         [to sendData_async:cb response:@selector(sendDataExResponse) exception:@selector(sendDataExException:) seq:seq];
         test([cb check]);
         [cb release];
@@ -253,10 +253,10 @@ allTests(id<ICECommunicator> communicator)
         // Expect success.
         //
         [timeout op]; // Ensure adapter is active.
-        id<TestTimeoutPrx> to = [TestTimeoutPrx uncheckedCast:[obj ice_timeout:1000]];
+        id<TestTimeoutTimeoutPrx> to = [TestTimeoutTimeoutPrx uncheckedCast:[obj ice_timeout:1000]];
         [to holdAdapter:500];
-        TestByteSeq* seq = [TestMutableByteSeq dataWithLength:10000];
-        Callback* cb = [[Callback alloc] init];
+        TestTimeoutByteSeq* seq = [TestTimeoutMutableByteSeq dataWithLength:10000];
+        TestTimeoutCallback* cb = [[TestTimeoutCallback alloc] init];
         [to sendData_async:cb response:@selector(sendDataResponse) exception:@selector(sendDataException:) seq:seq];
         test([cb check]);
         [cb release];
@@ -266,14 +266,14 @@ allTests(id<ICECommunicator> communicator)
     tprintf("testing timeout overrides... ");
     {
         //
-        // Test Ice.Override.Timeout. This property overrides all
+        // TestTimeout Ice.Override.Timeout. This property overrides all
         // endpoint timeouts.
         //
         ICEInitializationData* initData = [ICEInitializationData initializationData];
         [initData setProperties:[[communicator getProperties] clone]];
         [[initData properties] setProperty:@"Ice.Override.Timeout" value:@"500"];
         id<ICECommunicator> comm = [ICEUtil createCommunicator:initData];
-        id<TestTimeoutPrx> to = [TestTimeoutPrx checkedCast:[comm stringToProxy:sref]];
+        id<TestTimeoutTimeoutPrx> to = [TestTimeoutTimeoutPrx checkedCast:[comm stringToProxy:sref]];
         @try
         {
             [to sleep:750];
@@ -287,7 +287,7 @@ allTests(id<ICECommunicator> communicator)
         // Calling ice_timeout() should have no effect.
         //
         [timeout op]; // Ensure adapter is active.
-        to = [TestTimeoutPrx checkedCast:[to ice_timeout:1000]];
+        to = [TestTimeoutTimeoutPrx checkedCast:[to ice_timeout:1000]];
         @try
         {
             [to sleep:750];
@@ -301,14 +301,14 @@ allTests(id<ICECommunicator> communicator)
     }
     {
         //
-        // Test Ice.Override.ConnectTimeout.
+        // TestTimeout Ice.Override.ConnectTimeout.
         //
         ICEInitializationData* initData = [ICEInitializationData initializationData];
         [initData setProperties:[[communicator getProperties] clone]];
         [[initData properties] setProperty:@"Ice.Override.ConnectTimeout" value:@"750"];
         id<ICECommunicator> comm = [ICEUtil createCommunicator:initData];
         [timeout holdAdapter:1000];
-        id<TestTimeoutPrx> to = [TestTimeoutPrx uncheckedCast:[comm stringToProxy:sref]];
+        id<TestTimeoutTimeoutPrx> to = [TestTimeoutTimeoutPrx uncheckedCast:[comm stringToProxy:sref]];
         @try
         {
             [to op];
@@ -323,7 +323,7 @@ allTests(id<ICECommunicator> communicator)
         //
         [timeout op]; // Ensure adapter is active.
         [timeout holdAdapter:1000];
-        to = [TestTimeoutPrx uncheckedCast:[to ice_timeout:1250]];
+        to = [TestTimeoutTimeoutPrx uncheckedCast:[to ice_timeout:1250]];
         @try
         {
             [to op];

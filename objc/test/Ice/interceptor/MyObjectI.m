@@ -11,7 +11,7 @@
 #import <MyObjectI.h>
 #import <TestCommon.h>
 
-@implementation MyObjectI
+@implementation TestInterceptorMyObjectI
 -(int) add:(int)x y:(int)y current:(ICECurrent*)current
 {
     return x + y;
@@ -23,14 +23,14 @@
                                                
     if(val == nil || ![(NSString*)val isEqualToString:@"no"])
     {
-        @throw [TestRetryException retryException:__FILE__ line:__LINE__];
+        @throw [TestInterceptorRetryException retryException:__FILE__ line:__LINE__];
     }
     return x + y;
 }
 
 -(int) badAdd:(int)x y:(int)y current:(ICECurrent*)current
 {
-    @throw [TestInvalidInputException invalidInputException];
+    @throw [TestInterceptorInvalidInputException invalidInputException];
 }
 
 -(int) notExistAdd:(int)x y:(int)y current:(ICECurrent*)current

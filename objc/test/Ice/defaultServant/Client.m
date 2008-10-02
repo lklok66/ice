@@ -23,7 +23,7 @@ run(id<ICECommunicator> communicator)
     id<ICEObjectAdapter> oa = [communicator createObjectAdapterWithEndpoints:@"MyOA" endpoints:@"tcp -h localhost"];
     [oa activate];
 
-    ICEObject* servant = [[MyObjectI alloc] init];
+    ICEObject* servant = [[TestDefaultServantMyObjectI alloc] init];
     [servant autorelease];
 
     //
@@ -49,13 +49,13 @@ run(id<ICECommunicator> communicator)
     for(NSString* name in stringArray)
     {
         [identity setName:name]; 
-        id<TestMyObjectPrx> prx = [TestMyObjectPrx uncheckedCast:[oa createProxy:identity]];
+        id<TestDefaultServantMyObjectPrx> prx = [TestDefaultServantMyObjectPrx uncheckedCast:[oa createProxy:identity]];
         [prx ice_ping];
         test([[prx getName] isEqualToString:name]);
     }
 
     [identity setName:@"ObjectNotExist"]; 
-    id<TestMyObjectPrx> prx = [TestMyObjectPrx uncheckedCast:[oa createProxy:identity]];
+    id<TestDefaultServantMyObjectPrx> prx = [TestDefaultServantMyObjectPrx uncheckedCast:[oa createProxy:identity]];
     @try
     {
         [prx ice_ping];
@@ -77,7 +77,7 @@ run(id<ICECommunicator> communicator)
     }
 
     [identity setName:@"FacetNotExist"]; 
-    prx = [TestMyObjectPrx uncheckedCast:[oa createProxy:identity]];
+    prx = [TestDefaultServantMyObjectPrx uncheckedCast:[oa createProxy:identity]];
 
      @try
     {
@@ -103,7 +103,7 @@ run(id<ICECommunicator> communicator)
     for(NSString* name in stringArray)
     {
         [identity setName:name]; 
-        id<TestMyObjectPrx> prx = [TestMyObjectPrx uncheckedCast:[oa createProxy:identity]];
+        id<TestDefaultServantMyObjectPrx> prx = [TestDefaultServantMyObjectPrx uncheckedCast:[oa createProxy:identity]];
 
         @try
         {
@@ -138,7 +138,7 @@ run(id<ICECommunicator> communicator)
     for(NSString* name in stringArray)
     {
         [identity setName:name]; 
-        id<TestMyObjectPrx> prx = [TestMyObjectPrx uncheckedCast:[oa createProxy:identity]];
+        id<TestDefaultServantMyObjectPrx> prx = [TestDefaultServantMyObjectPrx uncheckedCast:[oa createProxy:identity]];
         [prx ice_ping];
         test([[prx getName] isEqualToString:name]);
     }
@@ -147,7 +147,7 @@ run(id<ICECommunicator> communicator)
     return 0;
 }
 
-#if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
+#if TARGET_OS_IPHONE
 #  define main startClient
 
 int
@@ -169,6 +169,11 @@ main(int argc, char* argv[])
     {
         ICEInitializationData* initData = [ICEInitializationData initializationData];
         initData.properties = defaultClientProperties(&argc, argv);
+#if TARGET_OS_IPHONE
+        initData.prefixTable = [NSDictionary dictionaryWithObjectsAndKeys:
+                                @"TestDefaultServant", @"::Test", 
+                                nil];
+#endif
         communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];
         status = run(communicator);
     }

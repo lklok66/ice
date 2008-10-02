@@ -12,6 +12,7 @@
 
 #include <Test.ice>
 
+["objc:prefix:TestSlicingExceptions"]
 module Test
 {
 

@@ -16,8 +16,8 @@
 static int
 run(id<ICECommunicator> communicator)
 {
-    id<TestMyClassPrx> allTests(id<ICECommunicator>, BOOL);
-    id<TestMyClassPrx> myClass = allTests(communicator, NO);
+    id<TestOperationsMyClassPrx> allTests(id<ICECommunicator>, BOOL);
+    id<TestOperationsMyClassPrx> myClass = allTests(communicator, NO);
 
     tprintf("testing server shutdown... ");
     [myClass shutdown];
@@ -34,7 +34,7 @@ run(id<ICECommunicator> communicator)
     return EXIT_SUCCESS;
 }
 
-#if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
+#if TARGET_OS_IPHONE
 #  define main startClient
 #endif
 
@@ -63,6 +63,12 @@ main(int argc, char* argv[])
         // raised as expected.
         //
         [initData.properties setProperty:@"Ice.MessageSizeMax" value:@"100"];
+
+#if TARGET_OS_IPHONE
+        initData.prefixTable = [NSDictionary dictionaryWithObjectsAndKeys:
+                                @"TestOperations", @"::Test", 
+                                nil];
+#endif
 
         communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];
         status = run(communicator);

@@ -12,7 +12,7 @@
 #import <TestCommon.h>
 #import <Test.h>
  
-@interface EmptyI : TestEmpty<TestEmpty>
+@interface EmptyI : TestExceptionsEmpty<TestExceptionsEmpty>
 @end
 
 @implementation EmptyI
@@ -34,7 +34,7 @@
 @end
 #endif
 
-id<TestThrowerPrx>
+id<TestExceptionsThrowerPrx>
 allTests(id<ICECommunicator> communicator, BOOL collocated)
 {
     tprintf("testing object adapter registration exceptions... ");
@@ -42,7 +42,7 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
         id<ICEObjectAdapter> first;
 	@try
 	{
-	    first = [communicator createObjectAdapter:@"TestAdapter0"];
+	    first = [communicator createObjectAdapter:@"TestExceptionsAdapter0"];
 	    test(false);
 	}
 	@catch(ICEInitializationException *ex)
@@ -50,11 +50,11 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
 	    // Expeccted
 	}
 
-	[[communicator getProperties] setProperty:@"TestAdapter0.Endpoints" value:@"default"];
-	first = [communicator createObjectAdapter:@"TestAdapter0"];
+	[[communicator getProperties] setProperty:@"TestExceptionsAdapter0.Endpoints" value:@"default"];
+	first = [communicator createObjectAdapter:@"TestExceptionsAdapter0"];
 	@try
 	{
-	    [communicator createObjectAdapter:@"TestAdapter0"];
+	    [communicator createObjectAdapter:@"TestExceptionsAdapter0"];
 	    test(false);
 	}
 	@catch(ICEAlreadyRegisteredException *ex)
@@ -73,15 +73,15 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
 	//
 	// Properties must remain unaffected if an exception occurs.
 	//
-	test([[[communicator getProperties] getProperty:@"TestAdapter0.Endpoints"] isEqualToString:@"default"]);
+	test([[[communicator getProperties] getProperty:@"TestExceptionsAdapter0.Endpoints"] isEqualToString:@"default"]);
 	[first deactivate];
     }
     tprintf("ok\n");
 
     tprintf("testing servant registration exceptions... ");
     {
-        [[communicator getProperties] setProperty:@"TestAdapter1.Endpoints" value:@"default"];
-	id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestAdapter1"];
+        [[communicator getProperties] setProperty:@"TestExceptionsAdapter1.Endpoints" value:@"default"];
+	id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestExceptionsAdapter1"];
 	ICEObject* obj = [[[EmptyI alloc] init] autorelease];
 	[adapter add:obj identity:[communicator stringToIdentity:@"x"]];
 	@try
@@ -126,7 +126,7 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
     tprintf("ok\n");
 
     tprintf("testing checked cast... ");
-    id<TestThrowerPrx> thrower = [TestThrowerPrx checkedCast:base];
+    id<TestExceptionsThrowerPrx> thrower = [TestExceptionsThrowerPrx checkedCast:base];
     test(thrower);
     test([thrower isEqual:base]);
     tprintf("ok\n");
@@ -138,7 +138,7 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
         [thrower throwAasA:1];
 	test(false);
     }
-    @catch(TestA *ex)
+    @catch(TestExceptionsA *ex)
     {
         test(ex.aMem == 1);
     }
@@ -152,7 +152,7 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
         [thrower throwAorDasAorD:1];
         test(false);
     }
-    @catch(TestA *ex)
+    @catch(TestExceptionsA *ex)
     {
         test(ex.aMem == 1);
     }
@@ -166,7 +166,7 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
         [thrower throwAorDasAorD:-1];
         test(false);
     }
-    @catch(TestD *ex)
+    @catch(TestExceptionsD *ex)
     {
         test(ex.dMem == -1);
     }
@@ -180,7 +180,7 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
         [thrower throwBasB:1 b:2];
         test(false);
     }
-    @catch(TestB *ex)
+    @catch(TestExceptionsB *ex)
     {
         test(ex.aMem == 1);
         test(ex.bMem == 2);
@@ -195,7 +195,7 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
         [thrower throwCasC:1 b:2 c:3];
         test(false);
     }
-    @catch(TestC *ex)
+    @catch(TestExceptionsC *ex)
     {
         test(ex.aMem == 1);
         test(ex.bMem == 2);
@@ -211,7 +211,7 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
         [thrower throwModA:1 a2:2];
         test(false);
     }
-    @catch(TestModA *ex)
+    @catch(TestExceptionsModA *ex)
     {
         test(ex.aMem == 1);
         test(ex.a2Mem == 2);
@@ -236,7 +236,7 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
         [thrower throwBasB:1 b:2];
         test(false);
     }
-    @catch(TestA *ex)
+    @catch(TestExceptionsA *ex)
     {
         test(ex.aMem == 1);
     }
@@ -250,7 +250,7 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
         [thrower throwCasC:1 b:2 c:3];
         test(false);
     }
-    @catch(TestB *ex)
+    @catch(TestExceptionsB *ex)
     {
         test(ex.aMem == 1);
         test(ex.bMem == 2);
@@ -265,7 +265,7 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
         [thrower throwModA:1 a2:2];
         test(false);
     }
-    @catch(TestA *ex)
+    @catch(TestExceptionsA *ex)
     {
         test(ex.aMem == 1);
     }
@@ -289,7 +289,7 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
         [thrower throwBasA:1 b:2];
         test(false);
     }
-    @catch(TestB *ex)
+    @catch(TestExceptionsB *ex)
     {
         test(ex.aMem == 1);
         test(ex.bMem == 2);
@@ -304,7 +304,7 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
         [thrower throwCasA:1 b:2 c:3];
         test(false);
     }
-    @catch(TestC *ex)
+    @catch(TestExceptionsC *ex)
     {
         test(ex.aMem == 1);
         test(ex.bMem == 2);
@@ -320,7 +320,7 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
         [thrower throwCasB:1 b:2 c:3];
         test(false);
     }
-    @catch(TestC *ex)
+    @catch(TestExceptionsC *ex)
     {
         test(ex.aMem == 1);
         test(ex.bMem == 2);
@@ -384,7 +384,7 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
     ICEIdentity *id_ = [communicator stringToIdentity:@"does not exist"];
     @try
     {
-	id<TestThrowerPrx> thrower2 = [TestThrowerPrx uncheckedCast:[thrower ice_identity:id_]];
+	id<TestExceptionsThrowerPrx> thrower2 = [TestExceptionsThrowerPrx uncheckedCast:[thrower ice_identity:id_]];
         [thrower2 throwAasA:1];
 //      //[thrower2 ice_ping];
         test(false);
@@ -404,7 +404,7 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
 
     @try
     {
-        id<TestThrowerPrx> thrower2 = [TestThrowerPrx uncheckedCast:thrower facet:@"no such facet"];
+        id<TestExceptionsThrowerPrx> thrower2 = [TestExceptionsThrowerPrx uncheckedCast:thrower facet:@"no such facet"];
         @try
         {
             [thrower2 ice_ping];
@@ -426,7 +426,7 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
 
     @try
     {
-        id<TestWrongOperationPrx> thrower2 = [TestWrongOperationPrx uncheckedCast:thrower];
+        id<TestExceptionsWrongOperationPrx> thrower2 = [TestExceptionsWrongOperationPrx uncheckedCast:thrower];
         [thrower2 noSuchOperation];
         test(false);
     }

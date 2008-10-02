@@ -21,7 +21,7 @@ run(id<ICECommunicator> communicator)
     return EXIT_SUCCESS;
 }
 
-#if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
+#if TARGET_OS_IPHONE
 #  define main startClient
 #endif
 
@@ -37,6 +37,11 @@ main(int argc, char* argv[])
         ICEInitializationData* initData = [ICEInitializationData initializationData];
         initData.properties = defaultClientProperties(&argc, argv);
         [initData.properties setProperty:@"Ice.Default.Locator" value:@"locator:default -p 12010"];
+#if TARGET_OS_IPHONE
+        initData.prefixTable = [NSDictionary dictionaryWithObjectsAndKeys:
+                                @"TestLocation", @"::Test", 
+                                nil];
+#endif
         communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];
 
         status = run(communicator);

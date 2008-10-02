@@ -87,9 +87,9 @@
 @end
 
 void
-onewaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> proxy)
+onewaysAMI(id<ICECommunicator> communicator, id<TestOperationsMyClassPrx> proxy)
 {
-    id<TestMyClassPrx> p = [TestMyClassPrx uncheckedCast:[proxy ice_oneway]];
+    id<TestOperationsMyClassPrx> p = [TestOperationsMyClassPrx uncheckedCast:[proxy ice_oneway]];
 
     {
         OnewayCallback* cb = [[OnewayCallback alloc] init];
@@ -103,7 +103,7 @@ onewaysAMI(id<ICECommunicator> communicator, id<TestMyClassPrx> proxy)
     {
         // Check that a call to a void operation raises NoEndpointException
         // in the ice_exception() callback instead of at the point of call.
-        id<TestMyClassPrx> indirect = [TestMyClassPrx uncheckedCast:[p ice_adapterId:@"dummy"]];
+        id<TestOperationsMyClassPrx> indirect = [TestOperationsMyClassPrx uncheckedCast:[p ice_adapterId:@"dummy"]];
         OnewayCallback* cb = [[OnewayCallback alloc] init];
         @try
         {

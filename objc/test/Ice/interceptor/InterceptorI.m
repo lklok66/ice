@@ -45,7 +45,7 @@
                 [servant ice_dispatch:request];
                 test(NO);
             }
-            @catch(TestRetryException*)
+            @catch(TestInterceptorRetryException*)
             {
                 //
                 // Expected, retry

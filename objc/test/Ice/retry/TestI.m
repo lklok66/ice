@@ -10,7 +10,7 @@
 #import <Ice/Ice.h>
 #import <TestI.h>
 
-@implementation RetryI
+@implementation TestRetryRetryI
 -(void) op:(BOOL)kill current:(ICECurrent*)current
 {
    if(kill)
@@ -21,6 +21,6 @@
 
 -(void) shutdown:(ICECurrent*)current
 {
-    [[[current adapter] getCommunicator] shutdown];
+    [[current.adapter getCommunicator] shutdown];
 }
 @end

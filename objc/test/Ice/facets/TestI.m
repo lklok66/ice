@@ -10,14 +10,14 @@
 #import <Ice/Ice.h>
 #import <TestI.h>
 
-@implementation AI
+@implementation TestFacetsAI
 -(NSString*) callA:(ICECurrent*)current
 {
     return @"A";
 }
 @end
 
-@implementation BI
+@implementation TestFacetsBI
 -(NSString*) callA:(ICECurrent*)current
 {
     return @"A";
@@ -28,7 +28,7 @@
 }
 @end
 
-@implementation CI
+@implementation TestFacetsCI
 -(NSString*) callA:(ICECurrent*)current
 {
     return @"A";
@@ -39,7 +39,7 @@
 }
 @end
 
-@implementation DI
+@implementation TestFacetsDI
 -(NSString*) callA:(ICECurrent*)current
 {
     return @"A";
@@ -58,14 +58,14 @@
 }
 @end
 
-@implementation EI
+@implementation TestFacetsEI
 -(NSString*) callE:(ICECurrent*)current
 {
     return @"E";
 }
 @end
 
-@implementation FI
+@implementation TestFacetsFI
 -(NSString*) callE:(ICECurrent*)current
 {
     return @"E";
@@ -76,10 +76,10 @@
 }
 @end
 
-@implementation GI
+@implementation TestFacetsGI
 -(void) shutdown:(ICECurrent*)current
 {
-    [[[current adapter] getCommunicator] shutdown];
+    [[current.adapter getCommunicator] shutdown];
 }
 -(NSString*) callG:(ICECurrent*)current
 {
@@ -87,10 +87,10 @@
 }
 @end
 
-@implementation HI
+@implementation TestFacetsHI
 -(void) shutdown:(ICECurrent*)current
 {
-    [[[current adapter] getCommunicator] shutdown];
+    [[current.adapter getCommunicator] shutdown];
 }
 -(NSString*) callG:(ICECurrent*)current
 {

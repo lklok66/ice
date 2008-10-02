@@ -10,41 +10,41 @@
 
 #import <Test.h>
 
-@interface InitialI : TestInitial<TestInitial>
+@interface TestInheritanceInitialI : TestInheritanceInitial<TestInheritanceInitial>
 {
     id<ICEObjectAdapter> adapter_;
-    id<TestMACAPrx> ca_;
-    id<TestMBCBPrx> cb_;
-    id<TestMACCPrx> cc_;
-    id<TestMACDPrx> cd_;
-    id<TestMAIAPrx> ia_;
-    id<TestMBIB1Prx> ib1_;
-    id<TestMBIB2Prx> ib2_;
-    id<TestMAICPrx> ic_;
+    id<TestInheritanceMACAPrx> ca_;
+    id<TestInheritanceMBCBPrx> cb_;
+    id<TestInheritanceMACCPrx> cc_;
+    id<TestInheritanceMACDPrx> cd_;
+    id<TestInheritanceMAIAPrx> ia_;
+    id<TestInheritanceMBIB1Prx> ib1_;
+    id<TestInheritanceMBIB2Prx> ib2_;
+    id<TestInheritanceMAICPrx> ic_;
 }
 @end
 
-@interface CAI : TestMACA<TestMACA>
+@interface CAI : TestInheritanceMACA<TestInheritanceMACA>
 @end
 
-@interface CBI : TestMBCB<TestMBCB>
+@interface CBI : TestInheritanceMBCB<TestInheritanceMBCB>
 @end
 
-@interface CCI : TestMACC<TestMACC>
+@interface CCI : TestInheritanceMACC<TestInheritanceMACC>
 @end
 
-@interface IAI : TestMAIA<TestMAIA>
+@interface IAI : TestInheritanceMAIA<TestInheritanceMAIA>
 @end
 
-@interface IB1I : TestMBIB1<TestMBIB1>
+@interface IB1I : TestInheritanceMBIB1<TestInheritanceMBIB1>
 @end
 
-@interface IB2I : TestMBIB2<TestMBIB2>
+@interface IB2I : TestInheritanceMBIB2<TestInheritanceMBIB2>
 @end
 
-@interface ICI : TestMAIC<TestMAIC>
+@interface ICI : TestInheritanceMAIC<TestInheritanceMAIC>
 @end
 
-@interface CDI : TestMACD<TestMACD>
+@interface CDI : TestInheritanceMACD<TestInheritanceMACD>
 @end
 

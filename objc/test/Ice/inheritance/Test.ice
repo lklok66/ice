@@ -10,9 +10,11 @@
 #ifndef TEST_ICE
 #define TEST_ICE
 
+["objc:prefix:TestInheritance"]
 module Test
 {
 
+["objc:prefix:TestInheritanceMA"]
 module MA
 {
 
@@ -28,6 +30,7 @@ class CA
 
 };
 
+["objc:prefix:TestInheritanceMB"]
 module MB
 {
 
@@ -48,6 +51,7 @@ class CB extends MA::CA
 
 };
 
+["objc:prefix:TestInheritanceMA"]
 module MA
 {
 

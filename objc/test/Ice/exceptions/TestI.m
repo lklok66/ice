@@ -31,7 +31,7 @@
 
 -(void) shutdown:(ICECurrent*)current
 {
-    [[[current adapter] getCommunicator] shutdown];
+    [[current.adapter getCommunicator] shutdown];
 }
 
 -(BOOL) supportsUndeclaredExceptions:(ICECurrent*)current
@@ -46,18 +46,18 @@
 
 -(void) throwAasA:(ICEInt)a current:(ICECurrent*)current
 {
-    @throw [TestA a:a];
+    @throw [TestExceptionsA a:a];
 }
 
 -(void) throwAorDasAorD:(ICEInt)a current:(ICECurrent*)current
 {
     if(a > 0)
     {
-        @throw [TestA a:a];
+        @throw [TestExceptionsA a:a];
     }
     else
     {
-        @throw [TestD d:a];
+        @throw [TestExceptionsD d:a];
     }
 }
 
@@ -73,7 +73,7 @@
 
 -(void) throwBasB:(ICEInt)a b:(ICEInt)b current:(ICECurrent*)current
 {
-    @throw [TestB b:a bMem:b];
+    @throw [TestExceptionsB b:a bMem:b];
 }
 
 -(void) throwCasB:(ICEInt)a b:(ICEInt)b c:(ICEInt)c current:(ICECurrent*)current
@@ -83,27 +83,27 @@
 
 -(void) throwCasC:(ICEInt)a b:(ICEInt)b c:(ICEInt)c current:(ICECurrent*)current
 {
-    @throw [TestC c:a bMem:b cMem:c];
+    @throw [TestExceptionsC c:a bMem:b cMem:c];
 }
 
 -(void) throwModA:(ICEInt)a a2:(ICEInt)a2 current:(ICECurrent*)current
 {
-    @throw [TestModA a:a a2Mem:a2];
+    @throw [TestExceptionsModA a:a a2Mem:a2];
 }
 
 -(void) throwUndeclaredA:(ICEInt)a current:(ICECurrent*)current
 {
-    @throw [TestA a:a];
+    @throw [TestExceptionsA a:a];
 }
 
 -(void) throwUndeclaredB:(ICEInt)a b:(ICEInt)b current:(ICECurrent*)current
 {
-    @throw [TestB b:a bMem:b];
+    @throw [TestExceptionsB b:a bMem:b];
 }
 
 -(void) throwUndeclaredC:(ICEInt)a b:(ICEInt)b c:(ICEInt)c current:(ICECurrent*)current
 {
-    @throw [TestC c:a bMem:b cMem:c];
+    @throw [TestExceptionsC c:a bMem:b cMem:c];
 }
 
 -(void) throwLocalException:(ICECurrent*)current
