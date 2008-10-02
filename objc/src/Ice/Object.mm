@@ -222,7 +222,7 @@ IceObjC::BlobjectI::ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& 
     [outP release];
 }
 
-@implementation ICEPrefixTable
+@implementation ICEInternalPrefixTable
 @end
 
 @implementation ICEObject (ICEInternal)

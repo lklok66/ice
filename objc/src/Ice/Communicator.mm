@@ -96,17 +96,17 @@ private:
 
 }
 
-@interface ICEPrefixTable(ICEInternal)
+@interface ICEInternalPrefixTable(ICEInternal)
 +(NSDictionary*) newPrefixTable;
 @end
 
-@implementation ICEPrefixTable(ICEInternal)
+@implementation ICEInternalPrefixTable(ICEInternal)
 +(NSDictionary*) newPrefixTable
 {
     NSMutableDictionary* prefixTable = [[NSMutableDictionary alloc] init];
-    ICEPrefixTable* table = [[ICEPrefixTable alloc] init];
+    ICEInternalPrefixTable* table = [[ICEInternalPrefixTable alloc] init];
     unsigned int count;
-    Method* methods = class_copyMethodList([ICEPrefixTable class], &count);
+    Method* methods = class_copyMethodList([ICEInternalPrefixTable class], &count);
     for(unsigned int i = 0; i < count; ++i)
     {
         SEL selector = method_getName(methods[i]);
@@ -132,7 +132,7 @@ private:
     }
     else
     {
-        prefixTable_ = [ICEPrefixTable newPrefixTable];
+        prefixTable_ = [ICEInternalPrefixTable newPrefixTable];
     }
     COMMUNICATOR->addObjectFactory(new IceObjC::ObjectFactoryI(objectFactories_, prefixTable_), "");
 }

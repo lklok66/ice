@@ -1197,7 +1197,7 @@ Slice::Gen::UnitVisitor::visitUnitEnd(const UnitPtr& unit)
 
     if(!_prefixes.empty())
     {
-        _M << sp << nl << "@implementation ICEPrefixTable(C" << uuid << ")";
+        _M << sp << nl << "@implementation ICEInternalPrefixTable(C" << uuid << ")";
         _M << nl << "-(void)addPrefixes_C" << uuid << ":(NSMutableDictionary*)prefixTable";
         _M << sb;
         for(vector<Slice::ObjCGenerator::ModulePrefix>::const_iterator p = _prefixes.begin(); p != _prefixes.end(); ++p)
