@@ -25,8 +25,6 @@
     int completed;
 }
 
-@property (retain) Test* test;
-
 -(IBAction)next:(id)sender;
 
 @end

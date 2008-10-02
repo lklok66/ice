@@ -11,7 +11,7 @@
 #import <TestI.h>
 #import <TestCommon.h>
 
-@implementation MyDerivedClassI
+@implementation TestProxyMyDerivedClassI
 -(void) dealloc
 {
     [_ctx release];

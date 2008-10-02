@@ -10,8 +10,7 @@
 #import <Ice/Ice.h>
 #import <TestI.h>
 
-
-@implementation BI
+@implementation TestObjectsBI
 -(BOOL) postUnmarshalInvoked:(ICECurrent*)current
 {
     return _postUnmarshalInvoked;
@@ -26,7 +25,7 @@
 }
 @end
 
-@implementation CI
+@implementation TestObjectsCI
 -(BOOL) postUnmarshalInvoked:(ICECurrent*)current
 {
     return _postUnmarshalInvoked;
@@ -41,7 +40,7 @@
 }
 @end
 
-@implementation DI
+@implementation TestObjectsDI
 -(BOOL) postUnmarshalInvoked:(ICECurrent*)current
 {
     return _postUnmarshalInvoked;
@@ -56,7 +55,7 @@
 }
 @end
 
-@implementation EI
+@implementation TestObjectsEI
 -(id) init
 {
     if(![super init:1 s:@"hello"])
@@ -71,8 +70,8 @@
 }
 @end
 
-@implementation FI
--(id) init:(TestE*)e1_ e2:(TestE*)e2_
+@implementation TestObjectsFI
+-(id) init:(TestObjectsE*)e1_ e2:(TestObjectsE*)e2_
 {
     if(![super init:e1_ e2:e2_])
     {
@@ -86,16 +85,16 @@
 }
 @end
 
-@implementation HI
+@implementation TestObjectsHI
 @end
 
-@implementation II
+@implementation TestObjectsII
 @end
 
-@implementation JI
+@implementation TestObjectsJI
 @end
 
-@implementation InitialI
+@implementation TestObjectsInitialI
 
 -(id) init
 {
@@ -104,12 +103,12 @@
         return nil;
     }
 
-    _b1 = [[BI alloc] init];
-    _b2 = [[BI alloc] init];
-    _c = [[CI alloc] init];
-    _d = [[DI alloc] init];
-    _e = [[EI alloc] init];
-    _f = [[FI alloc] init:_e e2:_e];
+    _b1 = [[TestObjectsBI alloc] init];
+    _b2 = [[TestObjectsBI alloc] init];
+    _c = [[TestObjectsCI alloc] init];
+    _d = [[TestObjectsDI alloc] init];
+    _e = [[TestObjectsEI alloc] init];
+    _f = [[TestObjectsFI alloc] init:_e e2:_e];
 
     _b1.theA = _b2; // Cyclic reference to another B
     _b1.theB = _b1; // Self reference.
@@ -155,7 +154,7 @@
     [[current.adapter getCommunicator] shutdown];
 }
 
--(TestB*) getB1:(ICECurrent*)current
+-(TestObjectsB*) getB1:(ICECurrent*)current
 {
     _b1.preMarshalInvoked = NO;
     _b2.preMarshalInvoked = NO;
@@ -163,7 +162,7 @@
     return _b1;
 }
 
--(TestB*) getB2:(ICECurrent*)current
+-(TestObjectsB*) getB2:(ICECurrent*)current
 {
     _b1.preMarshalInvoked = NO;
     _b2.preMarshalInvoked = NO;
@@ -172,7 +171,7 @@
 }
 
 
--(TestC*) getC:(ICECurrent*)current
+-(TestObjectsC*) getC:(ICECurrent*)current
 {
     _b1.preMarshalInvoked = NO;
     _b2.preMarshalInvoked = NO;
@@ -181,7 +180,7 @@
 }
 
 
--(TestD*) getD:(ICECurrent*)current
+-(TestObjectsD*) getD:(ICECurrent*)current
 {
     _b1.preMarshalInvoked = NO;
     _b2.preMarshalInvoked = NO;
@@ -191,19 +190,19 @@
 }
 
 
--(TestE*) getE:(ICECurrent*)current
+-(TestObjectsE*) getE:(ICECurrent*)current
 {
     return _e;
 }
 
 
--(TestF*) getF:(ICECurrent*)current
+-(TestObjectsF*) getF:(ICECurrent*)current
 {
     return _f;
 }
 
 
--(void) getAll:(TestB **)b1 b2:(TestB **)b2 theC:(TestC **)theC theD:(TestD **)theD current:(ICECurrent *)current;
+-(void) getAll:(TestObjectsB **)b1 b2:(TestObjectsB **)b2 theC:(TestObjectsC **)theC theD:(TestObjectsD **)theD current:(ICECurrent *)current;
 {
     _b1.preMarshalInvoked = NO;
     _b2.preMarshalInvoked = NO;
@@ -215,31 +214,31 @@
     *theD = _d;
 }
 
--(TestI*) getI:(ICECurrent*)current
+-(TestObjectsI*) getI:(ICECurrent*)current
 {
-    return [[[TestI alloc] init] autorelease];
+    return [[[TestObjectsI alloc] init] autorelease];
 }
 
--(TestI*) getJ:(ICECurrent*)current
+-(TestObjectsI*) getJ:(ICECurrent*)current
 {
-    return [[[TestJ alloc] init] autorelease];
+    return [[[TestObjectsJ alloc] init] autorelease];
 }
 
--(TestI*) getH:(ICECurrent*)current
+-(TestObjectsI*) getH:(ICECurrent*)current
 {
-    return [[[TestH alloc] init] autorelease];
+    return [[[TestObjectsH alloc] init] autorelease];
 }
 
--(void) setI:(TestI*)i current:(ICECurrent*)current
+-(void) setI:(TestObjectsI*)i current:(ICECurrent*)current
 {
 }
 
--(TestObjectSeq *) getObjectSeq:(TestMutableObjectSeq *)s current:(ICECurrent*)current
+-(TestObjectsObjectSeq *) getObjectSeq:(TestObjectsMutableObjectSeq *)s current:(ICECurrent*)current
 {
     return s;
 }
 
--(TestObjectDict *) getObjectDict:(TestMutableObjectDict *)d current:(ICECurrent*)current
+-(TestObjectsObjectDict *) getObjectDict:(TestObjectsMutableObjectDict *)d current:(ICECurrent*)current
 {
     return d;
 }
@@ -248,10 +247,10 @@
 @implementation UnexpectedObjectExceptionTestI
 -(BOOL)ice_invoke:(NSData*)inParams outParams:(NSData**)outParams current:(ICECurrent*)current
 {
-    id<ICECommunicator> communicator = [[current adapter] getCommunicator];
+    id<ICECommunicator> communicator = [current.adapter getCommunicator];
     id<ICEOutputStream> o = [ICEUtil createOutputStream:communicator];
-    TestAlsoEmpty* ae = [[TestAlsoEmpty alloc] init];
-    [o writeObject:ae typeId:[TestAlsoEmpty ice_staticId]];
+    TestObjectsAlsoEmpty* ae = [[TestObjectsAlsoEmpty alloc] init];
+    [o writeObject:ae typeId:[TestObjectsAlsoEmpty ice_staticId]];
     [o writePendingObjects];
     *outParams = [o finished];
     return YES;

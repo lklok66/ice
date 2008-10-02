@@ -19,7 +19,9 @@
 {
     if(self = [super init])
     {
-        name = [n retain];
+        // name is "Test(something).dylib" Remove Test and dylib.
+        name = [[[n stringByReplacingOccurrencesOfString:@"Test" withString:@""]
+                 stringByReplacingOccurrencesOfString:@".dylib" withString:@""] retain];
         path = [p retain];
     }
     return self;

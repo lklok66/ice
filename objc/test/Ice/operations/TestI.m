@@ -12,7 +12,7 @@
 #import <TestI.h>
 #import <TestCommon.h>
 
-@implementation MyDerivedClassI
+@implementation TestOperationsMyDerivedClassI
 -(void) opVoid:(ICECurrent*)current
 {
 }
@@ -66,23 +66,23 @@
     return ret;
 }
 
--(TestMyEnum) opMyEnum:(TestMyEnum)p1 p2:(TestMyEnum *)p2 current:(ICECurrent *)current
+-(TestOperationsMyEnum) opMyEnum:(TestOperationsMyEnum)p1 p2:(TestOperationsMyEnum *)p2 current:(ICECurrent *)current
 {
     *p2 = p1;
-    return Testenum3;
+    return TestOperationsenum3;
 }
 
--(id<TestMyClassPrx>) opMyClass:(id<TestMyClassPrx>)p1 p2:(id<TestMyClassPrx> *)p2 p3:(id<TestMyClassPrx> *)p3 
+-(id<TestOperationsMyClassPrx>) opMyClass:(id<TestOperationsMyClassPrx>)p1 p2:(id<TestOperationsMyClassPrx> *)p2 p3:(id<TestOperationsMyClassPrx> *)p3 
                         current:(ICECurrent *)current
 {
     *p2 = p1;
-    *p3 = [TestMyClassPrx uncheckedCast:[[current adapter] 
-                                           createProxy:[[[current adapter] getCommunicator] 
+    *p3 = [TestOperationsMyClassPrx uncheckedCast:[current.adapter 
+                                           createProxy:[[current.adapter getCommunicator] 
                                                            stringToIdentity:@"noSuchIdentity"]]];
-    return [TestMyClassPrx uncheckedCast:[[current adapter] createProxy:[current id_]]];
+    return [TestOperationsMyClassPrx uncheckedCast:[current.adapter createProxy:[current id_]]];
 }
 
--(TestStructure *) opStruct:(TestStructure *)p1 p2:(TestStructure *)p2 p3:(TestStructure **)p3
+-(TestOperationsStructure *) opStruct:(TestOperationsStructure *)p1 p2:(TestOperationsStructure *)p2 p3:(TestOperationsStructure **)p3
                             current:(ICECurrent *)current;
 {
     *p3 = [[p1 copy] autorelease];
@@ -90,10 +90,10 @@
     return p2;
 }
 
--(TestByteS *) opByteS:(TestMutableByteS *)p1 p2:(TestMutableByteS *)p2 p3:(TestByteS **)p3
+-(TestOperationsByteS *) opByteS:(TestOperationsMutableByteS *)p1 p2:(TestOperationsMutableByteS *)p2 p3:(TestOperationsByteS **)p3
                        current:(ICECurrent *)current
 {
-    *p3 = [TestMutableByteS dataWithLength:[p1 length]];
+    *p3 = [TestOperationsMutableByteS dataWithLength:[p1 length]];
     ICEByte *target = (ICEByte *)[*p3 bytes];
     ICEByte *src = (ICEByte *)[p1 bytes] + [p1 length];
     int i;
@@ -101,18 +101,18 @@
     {
         *target++ = *--src;
     }
-    TestMutableByteS *r = [TestMutableByteS dataWithData:p1];
+    TestOperationsMutableByteS *r = [TestOperationsMutableByteS dataWithData:p1];
     [r appendData:p2];
     return r;
 }
 
--(TestBoolS *) opBoolS:(TestMutableBoolS *)p1 p2:(TestMutableBoolS *)p2 p3:(TestBoolS **)p3
+-(TestOperationsBoolS *) opBoolS:(TestOperationsMutableBoolS *)p1 p2:(TestOperationsMutableBoolS *)p2 p3:(TestOperationsBoolS **)p3
                        current:(ICECurrent *)current
 {
-    *p3 = [TestMutableBoolS dataWithData:p1];
-    [(TestMutableBoolS *)*p3 appendData:p2];
+    *p3 = [TestOperationsMutableBoolS dataWithData:p1];
+    [(TestOperationsMutableBoolS *)*p3 appendData:p2];
 
-    TestMutableBoolS *r = [TestMutableBoolS dataWithLength:[p1 length] * sizeof(BOOL)];
+    TestOperationsMutableBoolS *r = [TestOperationsMutableBoolS dataWithLength:[p1 length] * sizeof(BOOL)];
     BOOL *target = (BOOL *)[r bytes];
     BOOL *src = (BOOL *)([p1 bytes] + [p1 length]);
     int i;
@@ -123,12 +123,12 @@
     return r;
 }
 
--(TestLongS *) opShortIntLongS:(TestMutableShortS *)p1 p2:(TestMutableIntS *)p2 p3:(TestMutableLongS *)p3
-                               p4:(TestShortS **)p4 p5:(TestIntS **)p5 p6:(TestLongS **)p6
+-(TestOperationsLongS *) opShortIntLongS:(TestOperationsMutableShortS *)p1 p2:(TestOperationsMutableIntS *)p2 p3:(TestOperationsMutableLongS *)p3
+                               p4:(TestOperationsShortS **)p4 p5:(TestOperationsIntS **)p5 p6:(TestOperationsLongS **)p6
 			       current:(ICECurrent *)current
 {
-    *p4 = [TestMutableShortS dataWithData:p1];
-    *p5 = [TestMutableIntS dataWithLength:[p2 length]];
+    *p4 = [TestOperationsMutableShortS dataWithData:p1];
+    *p5 = [TestOperationsMutableIntS dataWithLength:[p2 length]];
     ICEInt *target = (ICEInt *)[*p5 bytes];
     ICEInt *src = (ICEInt *)([p2 bytes] + [p2 length]);
     int i;
@@ -136,16 +136,16 @@
     {
         *target++ = *--src;
     }
-    *p6 = [TestMutableLongS dataWithData:p3];
-    [(TestMutableLongS *)*p6 appendData:p3];
+    *p6 = [TestOperationsMutableLongS dataWithData:p3];
+    [(TestOperationsMutableLongS *)*p6 appendData:p3];
     return p3;
 }
 
--(TestDoubleS *) opFloatDoubleS:(TestMutableFloatS *)p1 p2:(TestMutableDoubleS *)p2
-                                p3:(TestFloatS **)p3 p4:(TestDoubleS **)p4 current:(ICECurrent *)current
+-(TestOperationsDoubleS *) opFloatDoubleS:(TestOperationsMutableFloatS *)p1 p2:(TestOperationsMutableDoubleS *)p2
+                                p3:(TestOperationsFloatS **)p3 p4:(TestOperationsDoubleS **)p4 current:(ICECurrent *)current
 {
-    *p3 = [TestMutableFloatS dataWithData:p1];
-    *p4 = [TestMutableDoubleS dataWithLength:[p2 length]];
+    *p3 = [TestOperationsMutableFloatS dataWithData:p1];
+    *p4 = [TestOperationsMutableDoubleS dataWithLength:[p2 length]];
     ICEDouble *target = (ICEDouble *)[*p4 bytes];
     ICEDouble *src = (ICEDouble *)([p2 bytes] + [p2 length]);
     int i;
@@ -153,7 +153,7 @@
     {
         *target++ = *--src;
     }
-    TestDoubleS *r = [TestMutableDoubleS dataWithLength:([p2 length]
+    TestOperationsDoubleS *r = [TestOperationsMutableDoubleS dataWithLength:([p2 length]
                                                          + ([p1 length] / sizeof(ICEFloat) * sizeof(ICEDouble)))];
     ICEDouble *rp = (ICEDouble *)[r bytes];
     ICEDouble *p2p = (ICEDouble *)[p2 bytes];
@@ -169,12 +169,12 @@
     return r;
 }
 
--(TestStringS *) opStringS:(TestMutableStringS *)p1 p2:(TestMutableStringS *)p2
-                           p3:(TestStringS **)p3 current:(ICECurrent *)current
+-(TestOperationsStringS *) opStringS:(TestOperationsMutableStringS *)p1 p2:(TestOperationsMutableStringS *)p2
+                           p3:(TestOperationsStringS **)p3 current:(ICECurrent *)current
 {
-    *p3 = [TestMutableStringS arrayWithArray:p1];
-    [(TestMutableStringS *)*p3 addObjectsFromArray:p2];
-    TestMutableStringS *r = [TestMutableStringS arrayWithCapacity:[p1 count]];
+    *p3 = [TestOperationsMutableStringS arrayWithArray:p1];
+    [(TestOperationsMutableStringS *)*p3 addObjectsFromArray:p2];
+    TestOperationsMutableStringS *r = [TestOperationsMutableStringS arrayWithCapacity:[p1 count]];
     NSEnumerator *enumerator = [p1 reverseObjectEnumerator];
     for(NSString *element in enumerator)
     {
@@ -183,28 +183,28 @@
     return r;
 }
 
--(TestMyEnumS *) opMyEnumS:(TestMutableMyEnumS *)p1 p2:(TestMutableMyEnumS *)p2
-                           p3:(TestMyEnumS **)p3 current:(ICECurrent *)current
+-(TestOperationsMyEnumS *) opMyEnumS:(TestOperationsMutableMyEnumS *)p1 p2:(TestOperationsMutableMyEnumS *)p2
+                           p3:(TestOperationsMyEnumS **)p3 current:(ICECurrent *)current
 {
-    *p3 = [TestMutableMyEnumS dataWithLength:[p1 length]];
-    TestMyEnum *target = (TestMyEnum *)[*p3 bytes];
-    TestMyEnum *src = (TestMyEnum *)([p1 bytes] + [p1 length]);
+    *p3 = [TestOperationsMutableMyEnumS dataWithLength:[p1 length]];
+    TestOperationsMyEnum *target = (TestOperationsMyEnum *)[*p3 bytes];
+    TestOperationsMyEnum *src = (TestOperationsMyEnum *)([p1 bytes] + [p1 length]);
     int i;
-    for(i = 0; i != [p1 length] / sizeof(TestMyEnum); ++i)
+    for(i = 0; i != [p1 length] / sizeof(TestOperationsMyEnum); ++i)
     {
         *target++ = *--src;
     }
-    TestMutableMyEnumS *r = [TestMutableMyEnumS dataWithData:p1];
+    TestOperationsMutableMyEnumS *r = [TestOperationsMutableMyEnumS dataWithData:p1];
     [r appendData:p2];
     return r;
 }
 
--(TestMyClassS *) opMyClassS:(TestMutableMyClassS *)p1 p2:(TestMutableMyClassS *)p2
-                          p3:(TestMyClassS **)p3 current:(ICECurrent *)current
+-(TestOperationsMyClassS *) opMyClassS:(TestOperationsMutableMyClassS *)p1 p2:(TestOperationsMutableMyClassS *)p2
+                          p3:(TestOperationsMyClassS **)p3 current:(ICECurrent *)current
 {
-    *p3 = [TestMutableMyClassS arrayWithArray:p1];
-    [(TestMutableMyClassS *)*p3 addObjectsFromArray:p2];
-    TestMutableMyClassS *r = [TestMutableMyClassS arrayWithCapacity:[p1 count]];
+    *p3 = [TestOperationsMutableMyClassS arrayWithArray:p1];
+    [(TestOperationsMutableMyClassS *)*p3 addObjectsFromArray:p2];
+    TestOperationsMutableMyClassS *r = [TestOperationsMutableMyClassS arrayWithCapacity:[p1 count]];
     NSEnumerator *enumerator = [p1 reverseObjectEnumerator];
     for(NSString *element in enumerator)
     {
@@ -213,144 +213,144 @@
     return r;
 }
 
--(TestByteSS *) opByteSS:(TestMutableByteSS *)p1 p2:(TestMutableByteSS *)p2 p3:(TestByteSS * *)p3
+-(TestOperationsByteSS *) opByteSS:(TestOperationsMutableByteSS *)p1 p2:(TestOperationsMutableByteSS *)p2 p3:(TestOperationsByteSS * *)p3
                          current:(ICECurrent *)current
 {
-    *p3 = [TestMutableByteSS array];
+    *p3 = [TestOperationsMutableByteSS array];
     NSEnumerator *enumerator = [p1 reverseObjectEnumerator]; 
-    for(TestByteS *element in enumerator)
+    for(TestOperationsByteS *element in enumerator)
     { 
-        [(TestMutableByteSS *)*p3 addObject:element];
+        [(TestOperationsMutableByteSS *)*p3 addObject:element];
     }
 
-    TestMutableByteSS *r = [TestMutableByteSS arrayWithArray:p1];
+    TestOperationsMutableByteSS *r = [TestOperationsMutableByteSS arrayWithArray:p1];
     [r addObjectsFromArray:p2];
     return r;
 }
 
--(TestBoolSS *) opBoolSS:(TestMutableBoolSS *)p1 p2:(TestMutableBoolSS *)p2 p3:(TestBoolSS * *)p3
+-(TestOperationsBoolSS *) opBoolSS:(TestOperationsMutableBoolSS *)p1 p2:(TestOperationsMutableBoolSS *)p2 p3:(TestOperationsBoolSS * *)p3
                          current:(ICECurrent *)current
 {
-    *p3 = [TestMutableBoolSS arrayWithArray:p1];
-    [(TestMutableBoolSS *)*p3 addObjectsFromArray:p2];
+    *p3 = [TestOperationsMutableBoolSS arrayWithArray:p1];
+    [(TestOperationsMutableBoolSS *)*p3 addObjectsFromArray:p2];
 
-    TestMutableBoolSS *r = [TestMutableBoolSS array];
+    TestOperationsMutableBoolSS *r = [TestOperationsMutableBoolSS array];
     NSEnumerator *enumerator = [p1 reverseObjectEnumerator]; 
-    for(TestBoolS *element in enumerator)
+    for(TestOperationsBoolS *element in enumerator)
     { 
         [r addObject:element];
     }
     return r;
 }
 
--(TestLongSS *) opShortIntLongSS:(TestMutableShortSS *)p1 p2:(TestMutableIntSS *)p2 p3:(TestMutableLongSS *)p3
-                                 p4:(TestShortSS **)p4 p5:(TestIntSS **)p5 p6:(TestLongSS **)p6
+-(TestOperationsLongSS *) opShortIntLongSS:(TestOperationsMutableShortSS *)p1 p2:(TestOperationsMutableIntSS *)p2 p3:(TestOperationsMutableLongSS *)p3
+                                 p4:(TestOperationsShortSS **)p4 p5:(TestOperationsIntSS **)p5 p6:(TestOperationsLongSS **)p6
 			         current:(ICECurrent *)current
 {
-    *p4 = [TestShortSS arrayWithArray:p1];
-    *p5 = [TestMutableIntSS array];
+    *p4 = [TestOperationsShortSS arrayWithArray:p1];
+    *p5 = [TestOperationsMutableIntSS array];
     NSEnumerator *enumerator = [p2 reverseObjectEnumerator]; 
-    for(TestIntS *element in enumerator)
+    for(TestOperationsIntS *element in enumerator)
     { 
-        [(TestMutableIntSS *)*p5 addObject:element];
+        [(TestOperationsMutableIntSS *)*p5 addObject:element];
     }
-    *p6 = [TestMutableLongSS arrayWithArray:p3];
-    [(TestMutableLongSS *)*p6 addObjectsFromArray:p3];
+    *p6 = [TestOperationsMutableLongSS arrayWithArray:p3];
+    [(TestOperationsMutableLongSS *)*p6 addObjectsFromArray:p3];
     return p3;
 }
 
--(TestDoubleSS *) opFloatDoubleSS:(TestMutableFloatSS *)p1 p2:(TestMutableDoubleSS *)p2
-                                  p3:(TestFloatSS **)p3 p4:(TestDoubleSS **)p4 current:(ICECurrent *)current
+-(TestOperationsDoubleSS *) opFloatDoubleSS:(TestOperationsMutableFloatSS *)p1 p2:(TestOperationsMutableDoubleSS *)p2
+                                  p3:(TestOperationsFloatSS **)p3 p4:(TestOperationsDoubleSS **)p4 current:(ICECurrent *)current
 {
-    *p3 = [TestFloatSS arrayWithArray:p1];
-    *p4 = [TestMutableDoubleSS array];
+    *p3 = [TestOperationsFloatSS arrayWithArray:p1];
+    *p4 = [TestOperationsMutableDoubleSS array];
     NSEnumerator *enumerator = [p2 reverseObjectEnumerator]; 
-    for(TestDoubleS *element in enumerator)
+    for(TestOperationsDoubleS *element in enumerator)
     { 
-        [(TestMutableDoubleSS *)*p4 addObject:element];
+        [(TestOperationsMutableDoubleSS *)*p4 addObject:element];
     }
-    TestMutableDoubleSS *r = [TestMutableDoubleSS arrayWithArray:p2];
+    TestOperationsMutableDoubleSS *r = [TestOperationsMutableDoubleSS arrayWithArray:p2];
     [r addObjectsFromArray:p2];
     return r;
 }
 
--(TestStringSS *) opStringSS:(TestMutableStringSS *)p1 p2:(TestMutableStringSS *)p2 p3:(TestStringSS **)p3
+-(TestOperationsStringSS *) opStringSS:(TestOperationsMutableStringSS *)p1 p2:(TestOperationsMutableStringSS *)p2 p3:(TestOperationsStringSS **)p3
                              current:(ICECurrent *)current
 {
-    *p3 = [TestMutableStringSS arrayWithArray:p1];
-    [(TestMutableStringSS *)*p3 addObjectsFromArray:p2];
-    TestMutableStringSS *r = [TestMutableStringSS array];
+    *p3 = [TestOperationsMutableStringSS arrayWithArray:p1];
+    [(TestOperationsMutableStringSS *)*p3 addObjectsFromArray:p2];
+    TestOperationsMutableStringSS *r = [TestOperationsMutableStringSS array];
     NSEnumerator *enumerator = [p2 reverseObjectEnumerator]; 
-    for(TestStringS *element in enumerator)
+    for(TestOperationsStringS *element in enumerator)
     { 
         [r addObject:element];
     }
     return r;
 }
 
--(TestStringSSS *) opStringSSS:(TestMutableStringSSS *)p1 p2:(TestMutableStringSSS *)p2 p3:(TestStringSSS **)p3
+-(TestOperationsStringSSS *) opStringSSS:(TestOperationsMutableStringSSS *)p1 p2:(TestOperationsMutableStringSSS *)p2 p3:(TestOperationsStringSSS **)p3
                                current:(ICECurrent *)current
 {
-    *p3 = [TestMutableStringSSS arrayWithArray:p1];
-    [(TestMutableStringSSS *)*p3 addObjectsFromArray:p2];
-    TestMutableStringSSS *r = [TestMutableStringSSS array];
+    *p3 = [TestOperationsMutableStringSSS arrayWithArray:p1];
+    [(TestOperationsMutableStringSSS *)*p3 addObjectsFromArray:p2];
+    TestOperationsMutableStringSSS *r = [TestOperationsMutableStringSSS array];
     NSEnumerator *enumerator = [p2 reverseObjectEnumerator];
-    for(TestStringSS *element in enumerator)
+    for(TestOperationsStringSS *element in enumerator)
     { 
         [r addObject:element];
     }
     return r;
 }
 
--(TestByteBoolD *) opByteBoolD:(TestMutableByteBoolD *)p1 p2:(TestMutableByteBoolD *)p2 p3:(TestByteBoolD **)p3
+-(TestOperationsByteBoolD *) opByteBoolD:(TestOperationsMutableByteBoolD *)p1 p2:(TestOperationsMutableByteBoolD *)p2 p3:(TestOperationsByteBoolD **)p3
                                current:(ICECurrent *)current
 {
-    *p3 = [TestMutableByteBoolD dictionaryWithDictionary:p1];
-    TestMutableByteBoolD *r = [TestMutableByteBoolD dictionaryWithDictionary:p1];
+    *p3 = [TestOperationsMutableByteBoolD dictionaryWithDictionary:p1];
+    TestOperationsMutableByteBoolD *r = [TestOperationsMutableByteBoolD dictionaryWithDictionary:p1];
     [r addEntriesFromDictionary:p2];
     return r;
 }
 
--(TestShortIntD *) opShortIntD:(TestMutableShortIntD *)p1 p2:(TestMutableShortIntD *)p2 p3:(TestShortIntD **)p3
+-(TestOperationsShortIntD *) opShortIntD:(TestOperationsMutableShortIntD *)p1 p2:(TestOperationsMutableShortIntD *)p2 p3:(TestOperationsShortIntD **)p3
                                current:(ICECurrent *)current
 {
-    *p3 = [TestMutableShortIntD dictionaryWithDictionary:p1];
-    TestMutableShortIntD *r = [TestMutableShortIntD dictionaryWithDictionary:p1];
+    *p3 = [TestOperationsMutableShortIntD dictionaryWithDictionary:p1];
+    TestOperationsMutableShortIntD *r = [TestOperationsMutableShortIntD dictionaryWithDictionary:p1];
     [r addEntriesFromDictionary:p2];
     return r;
 }
 
--(TestLongFloatD *) opLongFloatD:(TestMutableLongFloatD *)p1 p2:(TestMutableLongFloatD *)p2 p3:(TestLongFloatD **)p3
+-(TestOperationsLongFloatD *) opLongFloatD:(TestOperationsMutableLongFloatD *)p1 p2:(TestOperationsMutableLongFloatD *)p2 p3:(TestOperationsLongFloatD **)p3
                                current:(ICECurrent *)current
 {
-    *p3 = [TestMutableLongFloatD dictionaryWithDictionary:p1];
-    TestMutableLongFloatD *r = [TestMutableLongFloatD dictionaryWithDictionary:p1];
+    *p3 = [TestOperationsMutableLongFloatD dictionaryWithDictionary:p1];
+    TestOperationsMutableLongFloatD *r = [TestOperationsMutableLongFloatD dictionaryWithDictionary:p1];
     [r addEntriesFromDictionary:p2];
     return r;
 }
 
--(TestStringStringD *) opStringStringD:(TestMutableStringStringD *)p1 p2:(TestMutableStringStringD *)p2
-                                       p3:(TestStringStringD **)p3 current:(ICECurrent *)current
+-(TestOperationsStringStringD *) opStringStringD:(TestOperationsMutableStringStringD *)p1 p2:(TestOperationsMutableStringStringD *)p2
+                                       p3:(TestOperationsStringStringD **)p3 current:(ICECurrent *)current
 {
-    *p3 = [TestMutableStringStringD dictionaryWithDictionary:p1];
-    TestMutableStringStringD *r = [TestMutableStringStringD dictionaryWithDictionary:p1];
+    *p3 = [TestOperationsMutableStringStringD dictionaryWithDictionary:p1];
+    TestOperationsMutableStringStringD *r = [TestOperationsMutableStringStringD dictionaryWithDictionary:p1];
     [r addEntriesFromDictionary:p2];
     return r;
 }
 
--(TestStringMyEnumD *) opStringMyEnumD:(TestMutableStringMyEnumD *)p1 p2:(TestMutableStringMyEnumD *)p2
-                                       p3:(TestStringMyEnumD **)p3 current:(ICECurrent *)current
+-(TestOperationsStringMyEnumD *) opStringMyEnumD:(TestOperationsMutableStringMyEnumD *)p1 p2:(TestOperationsMutableStringMyEnumD *)p2
+                                       p3:(TestOperationsStringMyEnumD **)p3 current:(ICECurrent *)current
 {
-    *p3 = [TestMutableStringMyEnumD dictionaryWithDictionary:p1];
-    TestMutableStringMyEnumD *r = [TestMutableStringMyEnumD dictionaryWithDictionary:p1];
+    *p3 = [TestOperationsMutableStringMyEnumD dictionaryWithDictionary:p1];
+    TestOperationsMutableStringMyEnumD *r = [TestOperationsMutableStringMyEnumD dictionaryWithDictionary:p1];
     [r addEntriesFromDictionary:p2];
     return r;
 }
 
--(TestIntS *) opIntS:(TestMutableIntS *)p1 current:(ICECurrent *)current
+-(TestOperationsIntS *) opIntS:(TestOperationsMutableIntS *)p1 current:(ICECurrent *)current
 {
     int count = [p1 length] / sizeof(ICEInt);
-    TestMutableIntS *r = [TestMutableIntS dataWithLength:[p1 length]];
+    TestOperationsMutableIntS *r = [TestOperationsMutableIntS dataWithLength:[p1 length]];
     const int *src = [p1 bytes];
     int *target = (int *)[r bytes];
     while(count-- > 0)
@@ -360,7 +360,7 @@
     return r;
 }
 
--(void) opByteSOneway:(TestMutableByteS *)p1 current:(ICECurrent *)current
+-(void) opByteSOneway:(TestOperationsMutableByteS *)p1 current:(ICECurrent *)current
 {
 }
 
@@ -369,7 +369,7 @@
     return current.ctx;
 }
 
--(void) opDoubleMarshaling:(ICEDouble)p1 p2:(TestMutableDoubleS *)p2 current:(ICECurrent *)current
+-(void) opDoubleMarshaling:(ICEDouble)p1 p2:(TestOperationsMutableDoubleS *)p2 current:(ICECurrent *)current
 {
     ICEDouble d = 1278312346.0 / 13.0;
     test(p1 == d);
@@ -381,53 +381,53 @@
     }
 }
 
--(TestStringS *) getNSNullStringSeq:(ICECurrent *)current
+-(TestOperationsStringS *) getNSNullStringSeq:(ICECurrent *)current
 {
     return [NSArray arrayWithObjects:@"first", [NSNull null], nil];
 }
 
--(TestMyClassS *) getNSNullASeq:(ICECurrent *)current
+-(TestOperationsMyClassS *) getNSNullASeq:(ICECurrent *)current
 {
-    return [NSArray arrayWithObjects:[TestA a:99], [NSNull null], nil];
+    return [NSArray arrayWithObjects:[TestOperationsA a:99], [NSNull null], nil];
 }
 
--(TestStructS *) getNSNullStructSeq:(ICECurrent *)current
+-(TestOperationsStructS *) getNSNullStructSeq:(ICECurrent *)current
 {
-    TestStructure *s = [TestStructure structure:nil e:Testenum2 s:[TestAnotherStruct anotherStruct:@"Hello"]];
+    TestOperationsStructure *s = [TestOperationsStructure structure:nil e:TestOperationsenum2 s:[TestOperationsAnotherStruct anotherStruct:@"Hello"]];
     return [NSArray arrayWithObjects:s, [NSNull null], nil];
 }
 
--(TestStringSS *) getNSNullStringSeqSeq:(ICECurrent *)current
+-(TestOperationsStringSS *) getNSNullStringSeqSeq:(ICECurrent *)current
 {
-    TestStringSS *s = [NSArray arrayWithObjects:@"first", nil];
+    TestOperationsStringSS *s = [NSArray arrayWithObjects:@"first", nil];
     return [NSArray arrayWithObjects:s, [NSNull null], nil];
 }
 
--(TestStringStringD *) getNSNullStringStringDict:(ICECurrent *)current
+-(TestOperationsStringStringD *) getNSNullStringStringDict:(ICECurrent *)current
 {
-    TestMutableStringStringD *d = [TestMutableStringStringD dictionary];
+    TestOperationsMutableStringStringD *d = [TestOperationsMutableStringStringD dictionary];
     [d setObject:@"ONE" forKey:@"one"];
     [d setObject:[NSNull null] forKey:@"two"];
     return d;
 }
 
--(void) putNSNullStringStringDict:(TestMutableStringStringD *)d current:(ICECurrent *)current
+-(void) putNSNullStringStringDict:(TestOperationsMutableStringStringD *)d current:(ICECurrent *)current
 {
     // Nothing to do because this tests that an exception is thrown on the client side.
 }
 
--(void) putNSNullShortIntDict:(TestMutableShortIntD *)d current:(ICECurrent *)current
+-(void) putNSNullShortIntDict:(TestOperationsMutableShortIntD *)d current:(ICECurrent *)current
 {
     // Nothing to do because this tests that an exception is thrown on the client side.
 }
 
--(void) putNSNullStringMyEnumDict:(TestMutableStringMyEnumD *)d current:(ICECurrent *)current
+-(void) putNSNullStringMyEnumDict:(TestOperationsMutableStringMyEnumD *)d current:(ICECurrent *)current
 {
     // Nothing to do because this tests that an exception is thrown on the client side.
 }
 
 -(void) shutdown:(ICECurrent*)current
 {
-    [[[current adapter] getCommunicator] shutdown];
+    [[current.adapter getCommunicator] shutdown];
 }
 @end

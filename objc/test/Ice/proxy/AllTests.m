@@ -14,7 +14,7 @@
 #import <Test.h>
 
  
-TestMyClassPrx*
+TestProxyMyClassPrx*
 allTests(id<ICECommunicator> communicator)
 {
     tprintf("testing stringToProxy... ");
@@ -84,7 +84,7 @@ allTests(id<ICECommunicator> communicator)
     b1 = [communicator stringToProxy:@"test\\40test"];
     test([[[b1 ice_getIdentity] name] isEqualToString:@"test test"]);
 
-    // Test some octal and hex corner cases.
+    // TestProxy some octal and hex corner cases.
     b1 = [communicator stringToProxy:@"test\\4test"];
     test([[[b1 ice_getIdentity] name] isEqualToString:@"test\4test"]);
     b1 = [communicator stringToProxy:@"test\\04test"];
@@ -473,10 +473,10 @@ allTests(id<ICECommunicator> communicator)
     tprintf("ok\n");
 
     tprintf("testing checked cast... ");
-    id<TestMyClassPrx> cl = [TestMyClassPrx checkedCast:base];
+    id<TestProxyMyClassPrx> cl = [TestProxyMyClassPrx checkedCast:base];
     test(cl);
     
-    id<TestMyDerivedClassPrx> derived = [TestMyDerivedClassPrx checkedCast:cl];
+    id<TestProxyMyDerivedClassPrx> derived = [TestProxyMyDerivedClassPrx checkedCast:cl];
     test(derived);
     test([cl isEqual:base]);
     test([derived isEqual:base]);
@@ -488,7 +488,7 @@ allTests(id<ICECommunicator> communicator)
     //
     // Upcasting
     //
-    id<TestMyClassPrx> cl2 = [TestMyClassPrx checkedCast:derived];
+    id<TestProxyMyClassPrx> cl2 = [TestProxyMyClassPrx checkedCast:derived];
     id<ICEObjectPrx> obj = [ICEObjectPrx checkedCast:derived];
     test(cl2);
     test(obj);
@@ -503,7 +503,7 @@ allTests(id<ICECommunicator> communicator)
     
     [c setObject:@"hello" forKey:@"one"];
     [c setObject:@"world" forKey:@"two"];
-    cl = [TestMyClassPrx checkedCast:base context:c];
+    cl = [TestProxyMyClassPrx checkedCast:base context:c];
     ICEContext* c2 = [cl getContext];
     test([c isEqual:c2]);
     
@@ -643,7 +643,7 @@ allTests(id<ICECommunicator> communicator)
 
 #if 0 // SSL is always enabled
         //
-        // Test that an SSL endpoint and a nonsense endpoint get written
+        // TestProxy that an SSL endpoint and a nonsense endpoint get written
         // back out as an opaque endpoint.
         //
         p1 = [communicator stringToProxy:@"test:opaque -t 2 -v CTEyNy4wLjAuMREnAAD/////AA==:opaque -t 99 -v abch"];
@@ -677,7 +677,7 @@ allTests(id<ICECommunicator> communicator)
         }
 
         //
-        // Test that the proxy with an SSL endpoint and a nonsense
+        // TestProxy that the proxy with an SSL endpoint and a nonsense
         // endpoint (which the server doesn't understand either) can be
         // sent over the wire and returned by the server without losing
         // the opaque endpoints.

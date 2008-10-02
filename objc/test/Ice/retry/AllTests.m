@@ -13,7 +13,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface Callback : NSObject
+@interface TestRetryCallback : NSObject
 {
     BOOL called;
     NSCondition* cond;
@@ -22,7 +22,7 @@
 -(void) called;
 @end
 
-@implementation Callback
+@implementation TestRetryCallback
 -(id) init
 {
     if(![super init])
@@ -78,7 +78,7 @@
 };
 @end
 
-id<TestRetryPrx>
+id<TestRetryRetryPrx>
 allTests(id<ICECommunicator> communicator)
 {
     tprintf("testing stringToProxy... ");
@@ -90,10 +90,10 @@ allTests(id<ICECommunicator> communicator)
     tprintf("ok\n");
 
     tprintf("testing checked cast... ");
-    id<TestRetryPrx> retry1 = [TestRetryPrx checkedCast:base1];
+    id<TestRetryRetryPrx> retry1 = [TestRetryRetryPrx checkedCast:base1];
     test(retry1);
     test([retry1 isEqual:base1]);
-    id<TestRetryPrx> retry2 = [TestRetryPrx checkedCast:base2];
+    id<TestRetryRetryPrx> retry2 = [TestRetryRetryPrx checkedCast:base2];
     test(retry2);
     test([retry2 isEqual:base2]);
     tprintf("ok\n");
@@ -117,8 +117,8 @@ allTests(id<ICECommunicator> communicator)
     [retry1 op:NO];
     tprintf("ok\n");
 
-    Callback* cb1 = [[Callback alloc] init];
-    Callback* cb2 = [[Callback alloc] init];
+    TestRetryCallback* cb1 = [[TestRetryCallback alloc] init];
+    TestRetryCallback* cb2 = [[TestRetryCallback alloc] init];
 
     tprintf("calling regular AMI operation with first proxy... ");
     [retry1 op_async:cb1 response:@selector(retryOpResponse) exception:@selector(retryOpException:) kill:NO];

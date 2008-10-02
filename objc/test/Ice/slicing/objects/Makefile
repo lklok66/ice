@@ -17,22 +17,21 @@ LIBNAME  	= TestSlicingObjects.dylib
 TARGETS_IPHONE	= $(LIBNAME)
 TARGETS_MACOS	= $(CLIENT) $(SERVER)
 
-COBJS		= ClientPrivate.o \
+COBJS		= TestClient.o \
 		  Client.o \
 		  AllTests.o
 
-SOBJS		= ServerPrivate.o \
+SOBJS		= TestServer.o \
 		  TestI.o \
 		  Server.o
 
-SHARED_OBJS	= Test.o \
-		  Forward.o
+SHARED_OBJS	= Forward.o
 
 SRCS		= $(COBJS:.o=.m) \
 		  $(SOBJS:.o=.m) \
 		  $(SHARED_OBJS:.o=.m)
 
-SLICE_SRCS	= Test.ice ClientPrivate.ice ServerPrivate.ice Forward.ice
+SLICE_SRCS	= TestClient.ice TestServer.ice Forward.ice
 
 include $(top_srcdir)/config/Make.rules
 

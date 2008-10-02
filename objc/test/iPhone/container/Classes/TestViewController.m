@@ -95,8 +95,10 @@
 @property (nonatomic, retain) NSMutableString* currentMessage;
 @property (nonatomic, retain) NSMutableArray* messages;
 @property (nonatomic, retain) NSOperationQueue* queue;
+@property (retain) Test* test;
 
 -(void)add:(NSString*)d;
+-(void)startTest;
 @end
 
 @implementation TestViewController
@@ -121,37 +123,15 @@
     self.queue = [[[NSOperationQueue alloc] init] autorelease]; 
     self.queue.maxConcurrentOperationCount = 2; // We need at least 2 concurrent operations.
     
-    self.title = test.name;
-    nextButton.enabled = NO;
-
-    [nextButton setTitle:@"Test is running" forState:UIControlStateDisabled];
-
     [super viewDidLoad];
 }
 
 -(void)viewWillAppear:(BOOL)animated
 {
-    // Clear the current message, and the the table log. Note that at present
-    // this isn't really necessary since the view can only be loaded once.
-    [currentMessage deleteCharactersInRange:NSMakeRange(0, currentMessage.length)];
+    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
 
-    [messages removeAllObjects];
-    [output reloadData];
-
-    if(![test open])
-    {
-        [self add:[NSString stringWithFormat:@"open of %@ failed\n", test.name]];
-    }
-    else
-    {
-        completed = 0;
-        [activity startAnimating];
-        NSInvocationOperation* op = [[[NSInvocationOperation alloc]
-                                      initWithTarget:self
-                                      selector:@selector(runServer)
-                                      object:nil] autorelease];
-        [queue addOperation:op];
-    }
+    self.test = (Test*)[appDelegate.tests objectAtIndex:appDelegate.currentTest];
+    [self startTest];
 }
 
 -(void)viewWillDisappear:(BOOL)animated
@@ -190,44 +170,62 @@
 
 #pragma mark -
 
--(void)testComplete
+-(void)startTest
 {
-    [activity stopAnimating];
-    NSString* buttonTitle;
-    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-    if(appDelegate.tests.count-1 == appDelegate.currentTest)
+    self.title = test.name;
+    nextButton.enabled = NO;
+    [self.navigationItem setHidesBackButton:YES animated:YES];
+
+    [nextButton setTitle:@"Test is running" forState:UIControlStateDisabled];
+    
+    // Clear the current message, and the the table log. Note that at present
+    // this isn't really necessary since the view can only be loaded once.
+    [currentMessage deleteCharactersInRange:NSMakeRange(0, currentMessage.length)];
+    
+    [messages removeAllObjects];
+    [output reloadData];
+    
+    if(![test open])
     {
-#if TARGET_IPHONE_SIMULATOR
-        buttonTitle = @"Launch first test";
-#else
-        buttonTitle = @"Setup first test";
-#endif
+        [self add:[NSString stringWithFormat:@"open of %@ failed\n", test.name]];
     }
     else
     {
-#if TARGET_IPHONE_SIMULATOR
-        buttonTitle = @"Launch next test";
-#else
-        buttonTitle = @"Setup next test";
-#endif        
-    }
+        completed = 0;
+        [activity startAnimating];
+        NSInvocationOperation* op = [[[NSInvocationOperation alloc]
+                                      initWithTarget:self
+                                      selector:@selector(runServer)
+                                      object:nil] autorelease];
+        [queue addOperation:op];
+    }    
+}
+
+-(void)testComplete
+{
+    [activity stopAnimating];
+
+    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+    Test* nextTest = (Test*)[appDelegate.tests objectAtIndex:(appDelegate.currentTest+1)%(appDelegate.tests.count)];
+    NSString* buttonTitle = [NSString stringWithFormat:@"Run %@", nextTest.name];
     [nextButton setTitle:buttonTitle forState:UIControlStateNormal];
+
     nextButton.enabled = YES;
+    [self.navigationItem setHidesBackButton:NO animated:YES];
+
+    [test close];
+    self.test = nil;
 }
 
 -(IBAction)next:(id)sender
 {
+    NSAssert(test == nil, @"test == nil");
+
     AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-    [appDelegate setAutoLaunch];
     [appDelegate testCompleted:YES];
-    
-#if TARGET_IPHONE_SIMULATOR
-    // Note that this does not work on the iPhone.
-    UIApplication* app = [UIApplication sharedApplication];
-    [app launchApplicationWithIdentifier:@"com.zeroc.bounce" suspended:NO];
-#else
-    exit(0);
-#endif
+
+    self.test = (Test*)[appDelegate.tests objectAtIndex:appDelegate.currentTest];
+    [self startTest];
 }
 
 -(void)clientComplete:(NSNumber*)rc

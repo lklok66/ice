@@ -12,6 +12,7 @@
 
 #include <Ice/Current.ice>
 
+["objc:prefix:TestProxy"]
 module Test
 {
 

@@ -18,7 +18,6 @@
     IBOutlet UINavigationController *navigationController;
     NSArray* tests;
     int currentTest;
-    BOOL autoLaunch;
     BOOL ssl;
 }
 
@@ -26,11 +25,9 @@
 @property (nonatomic, retain) IBOutlet UINavigationController* navigationController;
 @property (nonatomic, readonly) NSArray* tests;
 @property (nonatomic) int currentTest;
-@property (nonatomic) BOOL autoLaunch;
 @property (nonatomic) BOOL ssl;
 
 -(void)testCompleted:(BOOL)success;
--(void)setAutoLaunch;
 
 @end
 

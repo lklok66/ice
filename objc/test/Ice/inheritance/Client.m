@@ -16,13 +16,13 @@
 static int
 run(id<ICECommunicator> communicator)
 {
-    id<TestInitialPrx> allTests(id<ICECommunicator>);
-    id<TestInitialPrx> initial = allTests(communicator);
+    id<TestInheritanceInitialPrx> allTests(id<ICECommunicator>);
+    id<TestInheritanceInitialPrx> initial = allTests(communicator);
     [initial shutdown];
     return EXIT_SUCCESS;
 }
 
-#if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
+#if TARGET_OS_IPHONE
 #  define main startClient
 #endif
 
@@ -37,6 +37,11 @@ main(int argc, char* argv[])
     {
         ICEInitializationData* initData = [ICEInitializationData initializationData];
         initData.properties = defaultClientProperties(&argc, argv);
+#if TARGET_OS_IPHONE
+        initData.prefixTable = [NSDictionary dictionaryWithObjectsAndKeys:
+                                @"TestInheritance", @"::Test", 
+                                nil];
+#endif
         communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];
         status = run(communicator);
     }

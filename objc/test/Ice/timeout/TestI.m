@@ -56,7 +56,7 @@
 {
 }
 
--(void) sendData:(TestMutableByteSeq*)seq current:(ICECurrent*)current
+-(void) sendData:(TestTimeoutMutableByteSeq*)seq current:(ICECurrent*)current
 {
 }
 
@@ -67,13 +67,13 @@
 
 -(void) holdAdapter:(ICEInt)to current:(ICECurrent*)current
 {
-    [[current adapter] hold];
-    ActivateAdapterThread* thread = [ActivateAdapterThread activateAdapterThread:[current adapter] timeout:to];
+    [current.adapter hold];
+    ActivateAdapterThread* thread = [ActivateAdapterThread activateAdapterThread:current.adapter timeout:to];
     [thread start];
 }
 
 -(void) shutdown:(ICECurrent*)current
 {
-    [[[current adapter] getCommunicator] shutdown];
+    [[current.adapter getCommunicator] shutdown];
 }
 @end

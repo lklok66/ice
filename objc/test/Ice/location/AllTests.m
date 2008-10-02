@@ -14,7 +14,7 @@
 
 #include <Foundation/NSThread.h>
 
-@interface DummyHelloI : TestHello
+@interface DummyHelloI : TestLocationHello
 @end
 
 @implementation DummyHelloI
@@ -27,13 +27,13 @@
 void
 allTests(id<ICECommunicator> communicator, NSString* ref)
 {
-    id<TestServerManagerPrx> manager = [TestServerManagerPrx checkedCast:[communicator stringToProxy:ref]];
-    id<TestTestLocatorPrx> locator = [TestTestLocatorPrx uncheckedCast:[communicator getDefaultLocator]];
+    id<TestLocationServerManagerPrx> manager = [TestLocationServerManagerPrx checkedCast:[communicator stringToProxy:ref]];
+    id<TestLocationTestLocatorPrx> locator = [TestLocationTestLocatorPrx uncheckedCast:[communicator getDefaultLocator]];
     test(manager);
 
     tprintf("testing stringToProxy... ");
-    id<ICEObjectPrx> base = [communicator stringToProxy:@"test @ TestAdapter"];
-    id<ICEObjectPrx> base2 = [communicator stringToProxy:@"test @ TestAdapter"];
+    id<ICEObjectPrx> base = [communicator stringToProxy:@"test @ TestLocationAdapter"];
+    id<ICEObjectPrx> base2 = [communicator stringToProxy:@"test @ TestLocationAdapter"];
     id<ICEObjectPrx> base3 = [communicator stringToProxy:@"test"];
     id<ICEObjectPrx> base4 = [communicator stringToProxy:@"ServerManager"]; 
     id<ICEObjectPrx> base5 = [communicator stringToProxy:@"test2"];
@@ -46,12 +46,12 @@ allTests(id<ICECommunicator> communicator, NSString* ref)
     base = [base ice_locator:anotherLocator];
     test([[base ice_getLocator] compareIdentity:anotherLocator] == NSOrderedSame);
     [communicator setDefaultLocator:0];
-    base = [communicator stringToProxy:@"test @ TestAdapter"];
+    base = [communicator stringToProxy:@"test @ TestLocationAdapter"];
     test(![base ice_getLocator]);
     base = [base ice_locator:anotherLocator];
     test([[base ice_getLocator] compareIdentity:anotherLocator] == NSOrderedSame);
     [communicator setDefaultLocator:locator];
-    base = [communicator stringToProxy:@"test @ TestAdapter"];
+    base = [communicator stringToProxy:@"test @ TestLocationAdapter"];
     test([[base ice_getLocator] compareIdentity:[communicator getDefaultLocator]] == NSOrderedSame); 
     
     //
@@ -64,10 +64,10 @@ allTests(id<ICECommunicator> communicator, NSString* ref)
     test([[base ice_getRouter] compareIdentity:anotherRouter] == NSOrderedSame);
     id<ICERouterPrx> router = [ICERouterPrx uncheckedCast:[communicator stringToProxy:@"dummyrouter"]];
     [communicator setDefaultRouter:router];
-    base = [communicator stringToProxy:@"test @ TestAdapter"];
+    base = [communicator stringToProxy:@"test @ TestLocationAdapter"];
     test([[base ice_getRouter] compareIdentity:[communicator getDefaultRouter]] == NSOrderedSame);
     [communicator setDefaultRouter:0];
-    base = [communicator stringToProxy:@"test @ TestAdapter"];
+    base = [communicator stringToProxy:@"test @ TestLocationAdapter"];
     test(![base ice_getRouter]);
     tprintf("ok\n");
 
@@ -76,20 +76,20 @@ allTests(id<ICECommunicator> communicator, NSString* ref)
     tprintf("ok\n");
 
     tprintf("testing checked cast... ");
-    id<TestTestIntfPrx> obj = [TestTestIntfPrx checkedCast:base];
-    obj = [TestTestIntfPrx checkedCast:[communicator stringToProxy:@"test@TestAdapter"]];
-    obj = [TestTestIntfPrx checkedCast:[communicator stringToProxy:@"test   @TestAdapter"]];
-    obj = [TestTestIntfPrx checkedCast:[communicator stringToProxy:@"test@   TestAdapter"]];
+    id<TestLocationTestIntfPrx> obj = [TestLocationTestIntfPrx checkedCast:base];
+    obj = [TestLocationTestIntfPrx checkedCast:[communicator stringToProxy:@"test@TestLocationAdapter"]];
+    obj = [TestLocationTestIntfPrx checkedCast:[communicator stringToProxy:@"test   @TestLocationAdapter"]];
+    obj = [TestLocationTestIntfPrx checkedCast:[communicator stringToProxy:@"test@   TestLocationAdapter"]];
     test(obj);
-    id<TestTestIntfPrx> obj2 = [TestTestIntfPrx checkedCast:base2];
+    id<TestLocationTestIntfPrx> obj2 = [TestLocationTestIntfPrx checkedCast:base2];
     test(obj2);
-    id<TestTestIntfPrx> obj3 = [TestTestIntfPrx checkedCast:base3];
+    id<TestLocationTestIntfPrx> obj3 = [TestLocationTestIntfPrx checkedCast:base3];
     test(obj3);
-    id<TestServerManagerPrx> obj4 = [TestServerManagerPrx checkedCast:base4];
+    id<TestLocationServerManagerPrx> obj4 = [TestLocationServerManagerPrx checkedCast:base4];
     test(obj4);
-    id<TestTestIntfPrx> obj5 = [TestTestIntfPrx checkedCast:base5];
+    id<TestLocationTestIntfPrx> obj5 = [TestLocationTestIntfPrx checkedCast:base5];
     test(obj5);
-    id<TestTestIntfPrx> obj6 = [TestTestIntfPrx checkedCast:base6];
+    id<TestLocationTestIntfPrx> obj6 = [TestLocationTestIntfPrx checkedCast:base6];
     test(obj6);
     tprintf("ok\n");
  
@@ -98,7 +98,7 @@ allTests(id<ICECommunicator> communicator, NSString* ref)
     [manager startServer];
     @try
     {
-        obj2 = [TestTestIntfPrx checkedCast:base2];
+        obj2 = [TestLocationTestIntfPrx checkedCast:base2];
         [obj2 ice_ping];
     }
     @catch(ICELocalException* ex)
@@ -113,7 +113,7 @@ allTests(id<ICECommunicator> communicator, NSString* ref)
     [manager startServer];
     @try
     {
-        obj6 = [TestTestIntfPrx checkedCast:base6];
+        obj6 = [TestLocationTestIntfPrx checkedCast:base6];
         [obj6 ice_ping];
     }
     @catch(ICELocalException* ex)
@@ -128,7 +128,7 @@ allTests(id<ICECommunicator> communicator, NSString* ref)
     [manager startServer];
     @try
     {
-        obj3 = [TestTestIntfPrx checkedCast:base3];
+        obj3 = [TestLocationTestIntfPrx checkedCast:base3];
         [obj3 ice_ping];
     }
     @catch(ICELocalException* ex)
@@ -138,7 +138,7 @@ allTests(id<ICECommunicator> communicator, NSString* ref)
     }
     @try
     {
-        obj2 = [TestTestIntfPrx checkedCast:base2];
+        obj2 = [TestLocationTestIntfPrx checkedCast:base2];
         [obj2 ice_ping];
     }
     @catch(ICELocalException* ex)
@@ -150,7 +150,7 @@ allTests(id<ICECommunicator> communicator, NSString* ref)
     [manager startServer];
     @try
     {
-        obj2 = [TestTestIntfPrx checkedCast:base2];
+        obj2 = [TestLocationTestIntfPrx checkedCast:base2];
         [obj2 ice_ping];
     }
     @catch(ICELocalException* ex)
@@ -160,7 +160,7 @@ allTests(id<ICECommunicator> communicator, NSString* ref)
     }
     @try
     {
-        obj3 = [TestTestIntfPrx checkedCast:base3];
+        obj3 = [TestLocationTestIntfPrx checkedCast:base3];
         [obj3 ice_ping];
     }
     @catch(ICELocalException* ex)
@@ -173,7 +173,7 @@ allTests(id<ICECommunicator> communicator, NSString* ref)
 
     @try
     {
-        obj2 = [TestTestIntfPrx checkedCast:base2];
+        obj2 = [TestLocationTestIntfPrx checkedCast:base2];
         [obj2 ice_ping];
     }
     @catch(ICELocalException* ex)
@@ -185,7 +185,7 @@ allTests(id<ICECommunicator> communicator, NSString* ref)
     [manager startServer];
     @try
     {
-        obj3 = [TestTestIntfPrx checkedCast:base3];
+        obj3 = [TestLocationTestIntfPrx checkedCast:base3];
         [obj3 ice_ping];
     }
     @catch(ICELocalException* ex)
@@ -197,7 +197,7 @@ allTests(id<ICECommunicator> communicator, NSString* ref)
     [manager startServer];
     @try
     {
-        obj2 = [TestTestIntfPrx checkedCast:base2];
+        obj2 = [TestLocationTestIntfPrx checkedCast:base2];
         [obj2 ice_ping];
     }
     @catch(ICELocalException* ex)
@@ -210,7 +210,7 @@ allTests(id<ICECommunicator> communicator, NSString* ref)
 
     @try
     {
-        obj5 = [TestTestIntfPrx checkedCast:base5];
+        obj5 = [TestLocationTestIntfPrx checkedCast:base5];
         [obj5 ice_ping];
     }
     @catch(ICELocalException* ex)
@@ -237,28 +237,28 @@ allTests(id<ICECommunicator> communicator, NSString* ref)
     tprintf("testing proxy with unknown adapter... ");
     @try
     {
-        base = [communicator stringToProxy:@"test @ TestAdapterUnknown"];
+        base = [communicator stringToProxy:@"test @ TestLocationAdapterUnknown"];
         [base ice_ping];
         test(NO);
     }
     @catch(ICENotRegisteredException* ex)
     {
         test([ex.kindOfObject isEqualToString:@"object adapter"]);
-        test([ex.id_ isEqualToString:@"TestAdapterUnknown"]);
+        test([ex.id_ isEqualToString:@"TestLocationAdapterUnknown"]);
     }
     tprintf("ok\n");
 
     tprintf("testing locator cache timeout... ");
 
     int count = [locator getRequestCount];
-    [[[communicator stringToProxy:@"test@TestAdapter"] ice_locatorCacheTimeout:0] ice_ping]; // No locator cache.
+    [[[communicator stringToProxy:@"test@TestLocationAdapter"] ice_locatorCacheTimeout:0] ice_ping]; // No locator cache.
     test(++count == [locator getRequestCount]);
-    [[[communicator stringToProxy:@"test@TestAdapter"] ice_locatorCacheTimeout:0] ice_ping]; // No locator cache.
+    [[[communicator stringToProxy:@"test@TestLocationAdapter"] ice_locatorCacheTimeout:0] ice_ping]; // No locator cache.
     test(++count == [locator getRequestCount]);
-    [[[communicator stringToProxy:@"test@TestAdapter"] ice_locatorCacheTimeout:1] ice_ping]; // 1s timeout.
+    [[[communicator stringToProxy:@"test@TestLocationAdapter"] ice_locatorCacheTimeout:1] ice_ping]; // 1s timeout.
     test(count == [locator getRequestCount]);
     [NSThread sleepForTimeInterval:1.2];
-    [[[communicator stringToProxy:@"test@TestAdapter"] ice_locatorCacheTimeout:1] ice_ping]; // 1s timeout.
+    [[[communicator stringToProxy:@"test@TestLocationAdapter"] ice_locatorCacheTimeout:1] ice_ping]; // 1s timeout.
     test(++count == [locator getRequestCount]);
 
     [[[communicator stringToProxy:@"test"] ice_locatorCacheTimeout:0] ice_ping]; // No locator cache.
@@ -271,11 +271,11 @@ allTests(id<ICECommunicator> communicator, NSString* ref)
     count += 2;
     test(count == [locator getRequestCount]);
 
-    [[[communicator stringToProxy:@"test@TestAdapter"] ice_locatorCacheTimeout:-1] ice_ping]; 
+    [[[communicator stringToProxy:@"test@TestLocationAdapter"] ice_locatorCacheTimeout:-1] ice_ping]; 
     test(count == [locator getRequestCount]);
     [[[communicator stringToProxy:@"test"] ice_locatorCacheTimeout:-1] ice_ping];
     test(count == [locator getRequestCount]);
-    [[communicator stringToProxy:@"test@TestAdapter"] ice_ping]; 
+    [[communicator stringToProxy:@"test@TestLocationAdapter"] ice_ping]; 
     test(count == [locator getRequestCount]);
     [[communicator stringToProxy:@"test"] ice_ping];
     test(count == [locator getRequestCount]);
@@ -285,8 +285,8 @@ allTests(id<ICECommunicator> communicator, NSString* ref)
     tprintf("ok\n");
 
     tprintf("testing proxy from server... ");
-    id<TestHelloPrx> hello = [obj getHello];
-    test([[hello ice_getAdapterId] isEqualToString:@"TestAdapter"]);
+    id<TestLocationHelloPrx> hello = [obj getHello];
+    test([[hello ice_getAdapterId] isEqualToString:@"TestLocationAdapter"]);
     [hello sayHello];
     hello = [obj getReplicatedHello];
     test([[hello ice_getAdapterId] isEqualToString:@"ReplicatedAdapter"]);
@@ -300,7 +300,7 @@ allTests(id<ICECommunicator> communicator, NSString* ref)
     tprintf("ok\n");
 
     tprintf("testing object migration... ");
-    hello = [TestHelloPrx checkedCast:[communicator stringToProxy:@"hello"]];
+    hello = [TestLocationHelloPrx checkedCast:[communicator stringToProxy:@"hello"]];
     [obj migrateHello];
     [hello sayHello];
     [obj migrateHello];
@@ -349,7 +349,7 @@ allTests(id<ICECommunicator> communicator, NSString* ref)
 //     id<ICEObjectAdapter> adapter = [communicator createObjectAdapterWithEndpoints:@"Hello" endpoints:@"default"];
 //     [adapter setLocator:locator];
 
-//     id<TestTestLocatorRegistryPrx> registry = [TestTestLocatorRegistryPrx checkedCast:[locator getRegistry]];
+//     id<TestLocationTestLocatorRegistryPrx> registry = [TestLocationTestLocatorRegistryPrx checkedCast:[locator getRegistry]];
 //     test(registry);
     
 //     ICEIdentity* ident = [ICEIdentity identity:[ICEUtil generateUUID] category:@""];
@@ -358,7 +358,7 @@ allTests(id<ICECommunicator> communicator, NSString* ref)
     
 //     @try
 //     {
-//         id<TestHelloPrx> helloPrx = [TestHelloPrx checkedCast:[communicator stringToProxy:
+//         id<TestLocationHelloPrx> helloPrx = [TestLocationHelloPrx checkedCast:[communicator stringToProxy:
 //                                                                                 [communicator identityToString:ident]]];
 //         [helloPrx ice_getConnection];
 //         test(NO);

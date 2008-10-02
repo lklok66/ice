@@ -114,21 +114,21 @@ toObjCSliceId(const std::string& sliceId, NSDictionary* prefixTable)
 {
     std::string objcType = sliceId;
 
-    std::string::size_type pos = objcType.find("::", 2);
+    if(objcType.find("::Ice::") == 0)
+    {
+        return objcType.replace(0, 7, "ICE"); 
+    }
+
+    std::string::size_type pos = objcType.rfind("::");
     if(pos != std::string::npos)
     {
-        NSString* moduleName = toNSString(objcType.substr(0, pos - 2));
+        NSString* moduleName = toNSString(objcType.substr(0, pos));
         NSString* prefix = [prefixTable objectForKey:moduleName];
         [moduleName release];
         if(prefix)
         {
             return objcType.replace(0, pos + 2, fromNSString(prefix));
         }
-    }
-
-    if(objcType.find("::Ice::") == 0)
-    {
-        return objcType.replace(0, 7, "ICE"); 
     }
 
     while((pos = objcType.find("::")) != std::string::npos)

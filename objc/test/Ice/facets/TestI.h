@@ -7,28 +7,27 @@
 //
 // **********************************************************************
 
-
 #import <Test.h>
 
-@interface AI : TestA<TestA>
+@interface TestFacetsAI : TestFacetsA<TestFacetsA>
 @end
 
-@interface BI : TestB<TestB>
+@interface TestFacetsBI : TestFacetsB<TestFacetsB>
 @end
 
-@interface CI : TestC<TestC>
+@interface TestFacetsCI : TestFacetsC<TestFacetsC>
 @end
 
-@interface DI : TestD<TestD>
+@interface TestFacetsDI : TestFacetsD<TestFacetsD>
 @end
 
-@interface EI : TestE<TestE>
+@interface TestFacetsEI : TestFacetsE<TestFacetsE>
 @end
 
-@interface FI : TestF<TestF>
+@interface TestFacetsFI : TestFacetsF<TestFacetsF>
 @end
 
-@interface GI : TestG<TestG>
+@interface TestFacetsGI : TestFacetsG<TestFacetsG>
 {
     id<ICECommunicator> communicator_;
 }
@@ -36,6 +35,6 @@
 -(NSString*) callG:(ICECurrent*)current;
 @end
 
-@interface HI : TestH<TestH>
+@interface TestFacetsHI : TestFacetsH<TestFacetsH>
 -(NSString*) callH:(ICECurrent*)current;
 @end

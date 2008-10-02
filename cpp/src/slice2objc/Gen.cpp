@@ -1180,7 +1180,7 @@ Slice::Gen::UnitVisitor::visitModuleStart(const ModulePtr& p)
     {
         _prefixes.push_back(modulePrefix(p));
     }
-    return false;
+    return true;
 }
 
 void

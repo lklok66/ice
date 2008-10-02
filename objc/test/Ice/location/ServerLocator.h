@@ -10,7 +10,7 @@
 #import <Ice/Locator.h>
 #import <Test.h>
 
-@interface ServerLocatorRegistry : TestTestLocatorRegistry<TestTestLocatorRegistry>
+@interface ServerLocatorRegistry : TestLocationTestLocatorRegistry<TestLocationTestLocatorRegistry>
 {
     NSMutableDictionary* adapters_;
     NSMutableDictionary* objects_;
@@ -20,7 +20,7 @@
 -(void) addObject:(id<ICEObjectPrx>)prx;
 @end
 
-@interface ServerLocator : TestTestLocator<TestTestLocator>
+@interface ServerLocator : TestLocationTestLocator<TestLocationTestLocator>
 {
     ServerLocatorRegistry* registry_;
     id<ICELocatorRegistryPrx> registryPrx_;

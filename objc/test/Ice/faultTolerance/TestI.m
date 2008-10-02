@@ -15,7 +15,7 @@
 @implementation TestI
 -(void) shutdown:(ICECurrent*)current
 {
-    [[[current adapter] getCommunicator] shutdown];
+    [[current.adapter getCommunicator] shutdown];
 }
 
 -(void) abort:(ICECurrent*)current

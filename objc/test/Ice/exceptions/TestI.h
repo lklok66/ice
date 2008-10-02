@@ -9,7 +9,7 @@
   
 #import <Test.h>
 
-@interface ThrowerI : TestThrower<TestThrower>
+@interface ThrowerI : TestExceptionsThrower<TestExceptionsThrower>
 {
 }
 

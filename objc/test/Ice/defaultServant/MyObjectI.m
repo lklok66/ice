@@ -11,7 +11,7 @@
 #import <MyObjectI.h>
 #import <TestCommon.h>
 
-@implementation MyObjectI
+@implementation TestDefaultServantMyObjectI
 
 -(void) ice_ping:(ICECurrent*)current
 {

@@ -12,6 +12,7 @@
 
 #include <Ice/Locator.ice>
 
+["objc:prefix:TestLocation"]
 module Test
 {
 

@@ -11,175 +11,175 @@
 #import <TestI.h>
 
 @implementation CAI
--(id<TestMACAPrx>) caop:(id<TestMACAPrx>)p current:(ICECurrent*)current
+-(id<TestInheritanceMACAPrx>) caop:(id<TestInheritanceMACAPrx>)p current:(ICECurrent*)current
 {
     return p;
 }
 @end
 
 @implementation CBI
--(id<TestMACAPrx>) caop:(id<TestMACAPrx>)p current:(ICECurrent*)current
+-(id<TestInheritanceMACAPrx>) caop:(id<TestInheritanceMACAPrx>)p current:(ICECurrent*)current
 {
     return p;
 }
--(id<TestMBCBPrx>) cbop:(id<TestMBCBPrx>)p current:(ICECurrent*)current
+-(id<TestInheritanceMBCBPrx>) cbop:(id<TestInheritanceMBCBPrx>)p current:(ICECurrent*)current
 {
     return p;
 }
 @end
 
 @implementation CCI
--(id<TestMACAPrx>) caop:(id<TestMACAPrx>)p current:(ICECurrent*)current
+-(id<TestInheritanceMACAPrx>) caop:(id<TestInheritanceMACAPrx>)p current:(ICECurrent*)current
 {
     return p;
 }
--(id<TestMBCBPrx>) cbop:(id<TestMBCBPrx>)p current:(ICECurrent*)current
+-(id<TestInheritanceMBCBPrx>) cbop:(id<TestInheritanceMBCBPrx>)p current:(ICECurrent*)current
 {
     return p;
 }
--(id<TestMACCPrx>) ccop:(id<TestMACCPrx>)p current:(ICECurrent*)current
+-(id<TestInheritanceMACCPrx>) ccop:(id<TestInheritanceMACCPrx>)p current:(ICECurrent*)current
 {
     return p;
 }
 @end
 
 @implementation IAI
--(id<TestMAIAPrx>) iaop:(id<TestMAIAPrx>)p current:(ICECurrent*)current
+-(id<TestInheritanceMAIAPrx>) iaop:(id<TestInheritanceMAIAPrx>)p current:(ICECurrent*)current
 {
     return p;
 }
 @end
 
 @implementation IB1I
--(id<TestMAIAPrx>) iaop:(id<TestMAIAPrx>)p current:(ICECurrent*)current
+-(id<TestInheritanceMAIAPrx>) iaop:(id<TestInheritanceMAIAPrx>)p current:(ICECurrent*)current
 {
     return p;
 }
--(id<TestMBIB1Prx>) ib1op:(id<TestMBIB1Prx>)p current:(ICECurrent*)current
+-(id<TestInheritanceMBIB1Prx>) ib1op:(id<TestInheritanceMBIB1Prx>)p current:(ICECurrent*)current
 {
     return p;
 }
 @end
 
 @implementation IB2I
--(id<TestMAIAPrx>) iaop:(id<TestMAIAPrx>)p current:(ICECurrent*)current
+-(id<TestInheritanceMAIAPrx>) iaop:(id<TestInheritanceMAIAPrx>)p current:(ICECurrent*)current
 {
     return p;
 }
--(id<TestMBIB2Prx>) ib2op:(id<TestMBIB2Prx>)p current:(ICECurrent*)current
+-(id<TestInheritanceMBIB2Prx>) ib2op:(id<TestInheritanceMBIB2Prx>)p current:(ICECurrent*)current
 {
     return p;
 }
 @end
 
 @implementation ICI
--(id<TestMAIAPrx>) iaop:(id<TestMAIAPrx>)p current:(ICECurrent*)current
+-(id<TestInheritanceMAIAPrx>) iaop:(id<TestInheritanceMAIAPrx>)p current:(ICECurrent*)current
 {
     return p;
 }
--(id<TestMBIB1Prx>) ib1op:(id<TestMBIB1Prx>)p current:(ICECurrent*)current
+-(id<TestInheritanceMBIB1Prx>) ib1op:(id<TestInheritanceMBIB1Prx>)p current:(ICECurrent*)current
 {
     return p;
 }
--(id<TestMBIB2Prx>) ib2op:(id<TestMBIB2Prx>)p current:(ICECurrent*)current
+-(id<TestInheritanceMBIB2Prx>) ib2op:(id<TestInheritanceMBIB2Prx>)p current:(ICECurrent*)current
 {
     return p;
 }
--(id<TestMAICPrx>) icop:(id<TestMAICPrx>)p current:(ICECurrent*)current
+-(id<TestInheritanceMAICPrx>) icop:(id<TestInheritanceMAICPrx>)p current:(ICECurrent*)current
 {
     return p;
 }
 @end
 
 @implementation CDI
--(id<TestMACAPrx>) caop:(id<TestMACAPrx>)p current:(ICECurrent*)current
+-(id<TestInheritanceMACAPrx>) caop:(id<TestInheritanceMACAPrx>)p current:(ICECurrent*)current
 {
     return p;
 }
--(id<TestMBCBPrx>) cbop:(id<TestMBCBPrx>)p current:(ICECurrent*)current
+-(id<TestInheritanceMBCBPrx>) cbop:(id<TestInheritanceMBCBPrx>)p current:(ICECurrent*)current
 {
     return p;
 }
--(id<TestMACCPrx>) ccop:(id<TestMACCPrx>)p current:(ICECurrent*)current
+-(id<TestInheritanceMACCPrx>) ccop:(id<TestInheritanceMACCPrx>)p current:(ICECurrent*)current
 {
     return p;
 }
--(id<TestMACDPrx>) cdop:(id<TestMACDPrx>)p current:(ICECurrent*)current
+-(id<TestInheritanceMACDPrx>) cdop:(id<TestInheritanceMACDPrx>)p current:(ICECurrent*)current
 {
     return p;
 }
--(id<TestMAIAPrx>) iaop:(id<TestMAIAPrx>)p current:(ICECurrent*)current
+-(id<TestInheritanceMAIAPrx>) iaop:(id<TestInheritanceMAIAPrx>)p current:(ICECurrent*)current
 {
     return p;
 }
--(id<TestMBIB1Prx>) ib1op:(id<TestMBIB1Prx>)p current:(ICECurrent*)current
+-(id<TestInheritanceMBIB1Prx>) ib1op:(id<TestInheritanceMBIB1Prx>)p current:(ICECurrent*)current
 {
     return p;
 }
--(id<TestMBIB2Prx>) ib2op:(id<TestMBIB2Prx>)p current:(ICECurrent*)current
+-(id<TestInheritanceMBIB2Prx>) ib2op:(id<TestInheritanceMBIB2Prx>)p current:(ICECurrent*)current
 {
     return p;
 }
 @end
 
-@implementation InitialI
+@implementation TestInheritanceInitialI
 -(id) init:(id<ICEObjectAdapter>)adapter
 {
     if(![super init])
     {
         return nil;
     }
-    ca_ = [TestMACAPrx uncheckedCast:[adapter addWithUUID:[[[CAI alloc] init] autorelease]]];
-    cb_ = [TestMBCBPrx uncheckedCast:[adapter addWithUUID:[[[CBI alloc] init] autorelease]]];
-    cc_ = [TestMACCPrx uncheckedCast:[adapter addWithUUID:[[[CCI alloc] init] autorelease]]];
-    cd_ = [TestMACDPrx uncheckedCast:[adapter addWithUUID:[[[CDI alloc] init] autorelease]]];
-    ia_ = [TestMAIAPrx uncheckedCast:[adapter addWithUUID:[[[IAI alloc] init] autorelease]]];
-    ib1_ = [TestMBIB1Prx uncheckedCast:[adapter addWithUUID:[[[IB1I alloc] init] autorelease]]];
-    ib2_ = [TestMBIB2Prx uncheckedCast:[adapter addWithUUID:[[[IB2I alloc] init] autorelease]]];
-    ic_ = [TestMAICPrx uncheckedCast:[adapter addWithUUID:[[[ICI alloc] init] autorelease]]];
+    ca_ = [TestInheritanceMACAPrx uncheckedCast:[adapter addWithUUID:[[[CAI alloc] init] autorelease]]];
+    cb_ = [TestInheritanceMBCBPrx uncheckedCast:[adapter addWithUUID:[[[CBI alloc] init] autorelease]]];
+    cc_ = [TestInheritanceMACCPrx uncheckedCast:[adapter addWithUUID:[[[CCI alloc] init] autorelease]]];
+    cd_ = [TestInheritanceMACDPrx uncheckedCast:[adapter addWithUUID:[[[CDI alloc] init] autorelease]]];
+    ia_ = [TestInheritanceMAIAPrx uncheckedCast:[adapter addWithUUID:[[[IAI alloc] init] autorelease]]];
+    ib1_ = [TestInheritanceMBIB1Prx uncheckedCast:[adapter addWithUUID:[[[IB1I alloc] init] autorelease]]];
+    ib2_ = [TestInheritanceMBIB2Prx uncheckedCast:[adapter addWithUUID:[[[IB2I alloc] init] autorelease]]];
+    ic_ = [TestInheritanceMAICPrx uncheckedCast:[adapter addWithUUID:[[[ICI alloc] init] autorelease]]];
     return self;
 }
 -(void) shutdown:(ICECurrent*)current
 {
-    [[[current adapter] getCommunicator] shutdown];
+    [[current.adapter getCommunicator] shutdown];
 }
 
--(id<TestMACAPrx>) caop:(ICECurrent*)current
+-(id<TestInheritanceMACAPrx>) caop:(ICECurrent*)current
 {
     return ca_;
 }
 
--(id<TestMBCBPrx>) cbop:(ICECurrent*)current
+-(id<TestInheritanceMBCBPrx>) cbop:(ICECurrent*)current
 {
     return cb_;
 }
 
--(id<TestMACCPrx>) ccop:(ICECurrent*)current
+-(id<TestInheritanceMACCPrx>) ccop:(ICECurrent*)current
 {
     return cc_;
 }
 
--(id<TestMACDPrx>) cdop:(ICECurrent*)current
+-(id<TestInheritanceMACDPrx>) cdop:(ICECurrent*)current
 {
     return cd_;
 }
 
--(id<TestMAIAPrx>) iaop:(ICECurrent*)current
+-(id<TestInheritanceMAIAPrx>) iaop:(ICECurrent*)current
 {
     return ia_;
 }
 
--(id<TestMBIB1Prx>) ib1op:(ICECurrent*)current
+-(id<TestInheritanceMBIB1Prx>) ib1op:(ICECurrent*)current
 {
     return ib1_;
 }
 
--(id<TestMBIB2Prx>) ib2op:(ICECurrent*)current
+-(id<TestInheritanceMBIB2Prx>) ib2op:(ICECurrent*)current
 {
     return ib2_;
 }
 
--(id<TestMAICPrx>) icop:(ICECurrent*)current
+-(id<TestInheritanceMAICPrx>) icop:(ICECurrent*)current
 {
     return ic_;
 }

@@ -22,11 +22,11 @@
     initData_ = initData;
 
     [initData_.properties setProperty:@"TestAdapter.Endpoints" value:@"default"];
-    [initData_.properties setProperty:@"TestAdapter.AdapterId" value:@"TestAdapter"];
+    [initData_.properties setProperty:@"TestAdapter.AdapterId" value:@"TestLocationAdapter"];
     [initData_.properties setProperty:@"TestAdapter.ReplicaGroupId" value:@"ReplicatedAdapter"];
     
     [initData_.properties setProperty:@"TestAdapter2.Endpoints" value:@"default"];
-    [initData_.properties setProperty:@"TestAdapter2.AdapterId" value:@"TestAdapter2"];
+    [initData_.properties setProperty:@"TestAdapter2.AdapterId" value:@"TestLocationAdapter2"];
 
     [initData_.properties setProperty:@"Ice.PrintAdapterReady" value:@"0"];
     return self;
@@ -58,14 +58,14 @@
     id<ICECommunicator> serverCommunicator = [ICEUtil createCommunicator:initData_];
     [communicators_ addObject:serverCommunicator];
 
-    id<ICEObjectAdapter> adapter = [serverCommunicator createObjectAdapter:@"TestAdapter"];
-    id<ICEObjectAdapter> adapter2 = [serverCommunicator createObjectAdapter:@"TestAdapter2"];
+    id<ICEObjectAdapter> adapter = [serverCommunicator createObjectAdapter:@"TestLocationAdapter"];
+    id<ICEObjectAdapter> adapter2 = [serverCommunicator createObjectAdapter:@"TestLocationAdapter2"];
 
     id<ICEObjectPrx> locator = [serverCommunicator stringToProxy:@"locator:default -p 12010"];
     [adapter setLocator:[ICELocatorPrx uncheckedCast:locator]];
     [adapter2 setLocator:[ICELocatorPrx uncheckedCast:locator]];
 
-    ICEObject* object = [[[TestI alloc] init:adapter adapter2:adapter2 registry:registry_] autorelease];
+    ICEObject* object = [[[TestLocationI alloc] init:adapter adapter2:adapter2 registry:registry_] autorelease];
     [registry_ addObject:[adapter add:object identity:[serverCommunicator stringToIdentity:@"test"]]];
     [registry_ addObject:[adapter add:object identity:[serverCommunicator stringToIdentity:@"test2"]]];
 
@@ -80,7 +80,7 @@
         [c destroy];
     }
     [communicators_ removeAllObjects];
-    [[[current adapter] getCommunicator] shutdown];
+    [[current.adapter getCommunicator] shutdown];
 }
 
 -(void) terminate
@@ -93,7 +93,7 @@
 }
 @end
 
-@implementation TestI
+@implementation TestLocationI
 -(id) init:(id<ICEObjectAdapter>)adapter 
   adapter2:(id<ICEObjectAdapter>)adapter2 
   registry:(ServerLocatorRegistry*)registry
@@ -120,15 +120,15 @@
     [[adapter1_ getCommunicator] shutdown];
 }
 
--(id<TestHelloPrx>) getHello:(ICECurrent*)current
+-(id<TestLocationHelloPrx>) getHello:(ICECurrent*)current
 {
-    return [TestHelloPrx uncheckedCast:[adapter1_ createIndirectProxy:[[adapter1_ getCommunicator] 
+    return [TestLocationHelloPrx uncheckedCast:[adapter1_ createIndirectProxy:[[adapter1_ getCommunicator] 
                                                                           stringToIdentity:@"hello"]]];
 }
 
--(id<TestHelloPrx>) getReplicatedHello:(ICECurrent*)current
+-(id<TestLocationHelloPrx>) getReplicatedHello:(ICECurrent*)current
 {
-    return [TestHelloPrx uncheckedCast:[adapter1_ createProxy:[[adapter1_ getCommunicator] stringToIdentity:@"hello"]]];
+    return [TestLocationHelloPrx uncheckedCast:[adapter1_ createProxy:[[adapter1_ getCommunicator] stringToIdentity:@"hello"]]];
 }
 
 -(void) migrateHello:(ICECurrent*)current

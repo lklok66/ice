@@ -10,6 +10,9 @@
 #ifndef TEST_ICE
 #define TEST_ICE
 
+#include <Forward.ice>
+
+["objc:prefix:TestSlicingObjectsServer"]
 module Test
 {
 
@@ -67,8 +70,6 @@ exception DerivedException extends BaseException
     D1 pd1;
 };
 
-class Forward;          // Forward-declared class defined in another compilation unit
-
 ["ami"] interface TestIntf
 {
     Object SBaseAsObject();
@@ -104,9 +105,40 @@ class Forward;          // Forward-declared class defined in another compilation
     void throwDerivedAsDerived() throws DerivedException;
     void throwUnknownDerivedAsBase() throws BaseException;
 
-    void useForward(out Forward f);     // Use of forward-declared class to verify that code is generated correctly.
+    void useForward(out TestShared::Forward f);     // Use of forward-declared class to verify that code is generated correctly.
 
     void shutdown();
+};
+
+
+// Things private to the server.
+
+class SBSUnknownDerived extends SBase
+{
+    string sbsud;
+};
+
+class SUnknown
+{
+    string su;
+};
+
+class D2 extends B
+{
+    string sd2;
+    B pd2;
+};
+
+class D4 extends B
+{
+    B p1;
+    B p2;
+};
+
+exception UnknownDerivedException extends BaseException
+{
+    string sude;
+    D2 pd2;
 };
 
 };

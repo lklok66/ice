@@ -9,5 +9,5 @@
 
 #import <Test.h>
 
-@interface MyObjectI : TestMyObject<TestMyObject>
+@interface TestDefaultServantMyObjectI : TestDefaultServantMyObject<TestDefaultServantMyObject>
 @end

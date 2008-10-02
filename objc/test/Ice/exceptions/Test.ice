@@ -10,6 +10,7 @@
 #ifndef TEST_ICE
 #define TEST_ICE
 
+["objc:prefix:TestExceptions"]
 module Test
 {
 
@@ -39,6 +40,7 @@ exception D
     int dMem;
 };
 
+["objc:prefix:TestExceptionsMod"]
 module Mod
 {
     exception A extends ::Test::A

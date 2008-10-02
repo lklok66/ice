@@ -9,9 +9,9 @@
 
 #import <Test.h>
 
-@interface TimeoutI : TestTimeout
+@interface TimeoutI : TestTimeoutTimeout
 -(void) op:(ICECurrent *)current;
--(void) sendData:(TestMutableByteSeq *)seq current:(ICECurrent *)current;
+-(void) sendData:(TestTimeoutMutableByteSeq *)seq current:(ICECurrent *)current;
 -(void) sleep:(ICEInt)to current:(ICECurrent *)current;
 -(void) holdAdapter:(ICEInt)to current:(ICECurrent *)current;
 -(void) shutdown:(ICECurrent *)current;

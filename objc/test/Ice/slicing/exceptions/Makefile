@@ -18,19 +18,17 @@ TARGETS_IPHONE	= $(LIBNAME)
 TARGETS_MACOS	= $(CLIENT) $(SERVER)
 
 COBJS		= Client.o \
-		  AllTests.o
+		  AllTests.o \
+		  TestClient.o
 
-SOBJS		= ServerPrivate.o \
-		  TestI.o \
-		  Server.o
-
-SHARED_OBJS	= Test.o
+SOBJS		= TestI.o \
+		  Server.o \
+		  TestServer.o
 
 SRCS		= $(COBJS:.o=.m) \
-		  $(SOBJS:.o=.m) \
-		  $(SHARED_OBJS:.o=.m)
+		  $(SOBJS:.o=.m)
 
-SLICE_SRCS	= Test.ice ServerPrivate.ice
+SLICE_SRCS	= TestClient.ice TestServer.ice
 
 include $(top_srcdir)/config/Make.rules
 
@@ -38,17 +36,17 @@ SLICE2OBJCFLAGS := -I.
 CPPFLAGS	:= -I. -I../../../include $(CPPFLAGS)
 LIBS		:= -lTestCommon $(LIBS)
 
-$(CLIENT): $(ICEOBJCLIB) $(COBJS) $(SHARED_OBJS)
+$(CLIENT): $(ICEOBJCLIB) $(COBJS)
 	rm -f $@
-	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(COBJS) $(SHARED_OBJS) $(LIBS)
+	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(COBJS) $(LIBS)
 
-$(SERVER): $(ICEOBJCLIB) $(SOBJS) $(SHARED_OBJS)
+$(SERVER): $(ICEOBJCLIB) $(SOBJS)
 	rm -f $@
-	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(SOBJS) $(SHARED_OBJS) $(LIBS)
+	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(SOBJS) $(LIBS)
 
-$(LIBNAME): $(ICEOBJCLIB) $(COBJS) $(SHARED_OBJS) $(SOBJS)
+$(LIBNAME): $(ICEOBJCLIB) $(COBJS) $(SOBJS)
 	rm -f $@
-	$(CXX) -dynamiclib $(shlibldflags) -install_name @executable_path/Frameworks/$(LIBNAME) -o $@ $(COBJS) $(SHARED_OBJS) $(SOBJS) $(LIBS)
+	$(CXX) -dynamiclib $(shlibldflags) -exported_symbols_list symbols -install_name @executable_path/Frameworks/$(LIBNAME) -o $@ $(COBJS) $(SOBJS) $(LIBS)
 ifneq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
   ifneq ($(IDENTIFIER),)
 	$(CODESIGN) -s "$(IDENTIFIER)" $@

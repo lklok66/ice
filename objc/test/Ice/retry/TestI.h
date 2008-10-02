@@ -7,10 +7,9 @@
 //
 // **********************************************************************
 
-
 #import <Test.h>
 
-@interface RetryI : TestRetry
+@interface TestRetryRetryI : TestRetryRetry
 -(void) op:(BOOL)kill current:(ICECurrent *)current;
 -(void) shutdown:(ICECurrent *)current;
 @end

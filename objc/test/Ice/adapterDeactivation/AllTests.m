@@ -11,7 +11,7 @@
 #import <TestCommon.h>
 #import <Test.h>
 
-id<TestTestIntfPrx>
+id<TestAdapterDeactivationTestIntfPrx>
 allTests(id<ICECommunicator> communicator)
 {
     tprintf("testing stringToProxy... ");
@@ -20,7 +20,7 @@ allTests(id<ICECommunicator> communicator)
     tprintf("ok\n");
 
     tprintf("testing checked cast... ");
-    id<TestTestIntfPrx> obj = [TestTestIntfPrx checkedCast:base];
+    id<TestAdapterDeactivationTestIntfPrx> obj = [TestAdapterDeactivationTestIntfPrx checkedCast:base];
     test(obj);
     test([obj isEqual:base]);
     tprintf("ok\n");

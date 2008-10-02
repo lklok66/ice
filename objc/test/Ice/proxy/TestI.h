@@ -9,7 +9,7 @@
 
 #import <Test.h>
 
-@interface MyDerivedClassI : TestMyDerivedClass<TestMyDerivedClass>
+@interface TestProxyMyDerivedClassI : TestProxyMyDerivedClass<TestProxyMyDerivedClass>
 {
 @private
     ICEContext *_ctx;

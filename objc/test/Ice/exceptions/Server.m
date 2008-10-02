@@ -29,7 +29,7 @@ run(id<ICECommunicator> communicator)
     return EXIT_SUCCESS;
 }
 
-#if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
+#if TARGET_OS_IPHONE
 #  define main startServer
 #endif
 
@@ -51,6 +51,13 @@ main(int argc, char* argv[])
         // supress this warning.
         //
         [initData.properties setProperty:@"Ice.Warn.Dispatch" value:@"0"];
+
+#if TARGET_OS_IPHONE
+        initData.prefixTable = [NSDictionary dictionaryWithObjectsAndKeys:
+                                @"TestExceptions", @"::Test", 
+                                @"TestExceptionsMod", @"::Test::Mod", 
+                                nil];
+#endif
 
         communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];
         status = run(communicator);

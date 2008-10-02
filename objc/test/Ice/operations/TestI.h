@@ -12,5 +12,5 @@
 //
 // Servant implementation
 //
-@interface MyDerivedClassI : TestMyDerivedClass<TestMyDerivedClass>
+@interface TestOperationsMyDerivedClassI : TestOperationsMyDerivedClass<TestOperationsMyDerivedClass>
 @end

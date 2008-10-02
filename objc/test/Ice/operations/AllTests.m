@@ -12,39 +12,39 @@
 #import <TestCommon.h>
 #import <Test.h>
  
-id<TestMyClassPrx>
+id<TestOperationsMyClassPrx>
 allTests(id<ICECommunicator> communicator, BOOL collocated)
 {
     NSString* ref = @"test:default -p 12010 -t 10000";
     id<ICEObjectPrx> base = [communicator stringToProxy:(ref)];
-    id<TestMyClassPrx> cl = [TestMyClassPrx checkedCast:base];
-    id<TestMyDerivedClassPrx> derived = [TestMyDerivedClassPrx checkedCast:cl];
+    id<TestOperationsMyClassPrx> cl = [TestOperationsMyClassPrx checkedCast:base];
+    id<TestOperationsMyDerivedClassPrx> derived = [TestOperationsMyDerivedClassPrx checkedCast:cl];
 
     tprintf("testing twoway operations... ");
-    void twoways(id<ICECommunicator>, id<TestMyClassPrx>);
+    void twoways(id<ICECommunicator>, id<TestOperationsMyClassPrx>);
     twoways(communicator, cl);
     twoways(communicator, derived);
     [derived opDerived];
     tprintf("ok\n");
 
     tprintf("testing oneway operations... ");
-    void oneways(id<ICECommunicator>, id<TestMyClassPrx>);
+    void oneways(id<ICECommunicator>, id<TestOperationsMyClassPrx>);
     oneways(communicator, cl);
     tprintf("ok\n");
     
     tprintf("testing twoway operations with AMI... ");
-    void twowaysAMI(id<ICECommunicator>, id<TestMyClassPrx>);
+    void twowaysAMI(id<ICECommunicator>, id<TestOperationsMyClassPrx>);
     twowaysAMI(communicator, cl);
     twowaysAMI(communicator, derived);
     tprintf("ok\n");
     
     tprintf("testing oneway operations with AMI... ");
-    void onewaysAMI(id<ICECommunicator>, id<TestMyClassPrx>);
+    void onewaysAMI(id<ICECommunicator>, id<TestOperationsMyClassPrx>);
     onewaysAMI(communicator, cl);
     tprintf("ok\n");
     
     tprintf("testing batch oneway operations... ");
-    void batchOneways(id<TestMyClassPrx>);
+    void batchOneways(id<TestOperationsMyClassPrx>);
     batchOneways(cl);
     batchOneways(derived);
     tprintf("ok\n");
