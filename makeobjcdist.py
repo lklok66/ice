@@ -159,11 +159,6 @@ print "Fixing makefiles...",
 #
 # Change SUBDIRS and INSTALL_SUBDIRS in top-level Makefile.
 #
-substitute(os.path.join("Makefile"), [(r'^SUBDIRS([\s]*)=.*', r'SUBDIRS\1= cpp objc'), 
-                                      (r'^CLEAN_SUBDIRS([\s]*)=.*', r'INSTALL_SUBDIRS\1= $(install_bindir)'),
-                                      (r'^DEPEND_SUBDIRS([\s]*)=.*', r'INSTALL_SUBDIRS\1= $(install_bindir)'),
-                                      (r'^INSTALL_SUBDIRS([\s]*)=.*', r'INSTALL_SUBDIRS\1= $(install_bindir)')])
-
 substitute(os.path.join("cpp", "Makefile"), [(r'^SUBDIRS([\s]*)=.*', r'SUBDIRS\1= src'), 
                                              (r'^INSTALL_SUBDIRS([\s]*)=.*', r'INSTALL_SUBDIRS\1= $(install_bindir)')])
 
@@ -294,6 +289,19 @@ for x in bisonFiles:
 for x in flexFiles:
     generateFlexFile(x)
 print "ok"
+
+#
+# Build the translators
+#
+shutil.copytree("cpp", "cpp-translators", True)
+os.chdir("cpp-translators")
+if os.system("make") != 0:
+    print sys.argv[0] + ": failed to the build the translators"
+    sys.exit(1)
+os.chdir("..")
+move(os.path.join("cpp-translators", "bin", "slice2objc"), os.path.join("cpp", "bin", "slice2objc"))
+move(os.path.join("cpp-translators", "bin", "slice2cpp"), os.path.join("cpp", "bin", "slice2cpp"))
+remove("cpp-translators")
 
 #
 # Everything should be clean now, we can create the source distributions archives

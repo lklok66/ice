@@ -7,10 +7,10 @@
 #
 # **********************************************************************
 
-SUBDIRS			= cpp objc
-CLEAN_SUBDIRS		= objc cpp
-DEPEND_SUBDIRS		= cpp objc
-INSTALL_SUBDIRS		= cpp objc
+SUBDIRS			= objc
+CLEAN_SUBDIRS		= objc
+DEPEND_SUBDIRS		= objc
+INSTALL_SUBDIRS		= objc
 
 all::
 	@for subdir in $(SUBDIRS); \

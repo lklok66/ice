@@ -25,6 +25,7 @@ install:: install-common
 		chmod a+rx $$subdir ; \
 	    fi ; \
 	done
+	$(call installprogram,$(ice_cpp_dir)/bin/slice2objc,$(install_bindir))
 
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \
