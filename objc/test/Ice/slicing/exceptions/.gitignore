@@ -7,3 +7,7 @@ Test.m
 Test.h
 ServerPrivate.m
 ServerPrivate.h
+TestClient.h
+TestClient.m
+TestServer.h
+TestServer.m

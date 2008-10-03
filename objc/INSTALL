@@ -93,7 +93,7 @@ There are three possible build configurations:
     Xcode to sign the demo and test iPhone binaries.
 
     One way of doing this is to add IDENTIFIER in your
-    ~/.Mac OS XX/environment.plist as shown below:
+    ~/.Mac OS X/environment.plist as shown below:
 
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -142,11 +142,10 @@ Installation
 ======================================================================
 
 Simply run "make install". This will install Ice Touch in the directory
-specified by the "prefix" variables in objc/config/Make.rules and
-cpp/config/Make.rules.
+specified by the "prefix" variable in objc/config/Make.rules.
 
 For Mac OS X builds of Ice Touch, the install name of the shared
-library is /opt/IceTouch-@ver/lib. For iPhone builds, the install
+library is /opt/IceTouch-@ver@/lib. For iPhone builds, the install
 name of the Ice Touch shared libraries is @executable_path/Frameworks.
 It is not necessary to modify DYLD_LIBRARY_PATH as long as the shared
 library is not moved from this directory.
