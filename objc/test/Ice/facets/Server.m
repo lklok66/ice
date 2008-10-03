@@ -52,9 +52,9 @@ main(int argc, char* argv[])
         ICEInitializationData* initData = [ICEInitializationData initializationData];
         initData.properties = defaultServerProperties(&argc, argv);
 #if TARGET_OS_IPHONE
-        initData.prefixTable = [NSDictionary dictionaryWithObjectsAndKeys:
-                                @"TestFacets", @"::Test", 
-                                nil];
+        initData.prefixTable__ = [NSDictionary dictionaryWithObjectsAndKeys:
+                                  @"TestFacets", @"::Test", 
+                                  nil];
 #endif
         communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];
         status = run(communicator);

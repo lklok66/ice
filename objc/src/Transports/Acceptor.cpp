@@ -80,13 +80,32 @@ IceObjC::Acceptor::accept()
     //
     // Create the read/write streams
     //
-    CFReadStreamRef readStream;
-    CFWriteStreamRef writeStream;
-    CFStreamCreatePairWithSocket(NULL, fd, &readStream, &writeStream);
-
-    _instance->setupStreams(readStream, writeStream, true, "");
-
-    return new Transceiver(_instance, fd, readStream, writeStream, true, "");
+    CFReadStreamRef readStream = nil;
+    CFWriteStreamRef writeStream = nil;
+    try
+    {
+        CFStreamCreatePairWithSocket(NULL, fd, &readStream, &writeStream);
+        
+        _instance->setupStreams(readStream, writeStream, true, "");
+        
+        return new Transceiver(_instance, fd, readStream, writeStream, true, "");
+    }
+    catch(const Ice::LocalException& ex)
+    {
+        if(fd != INVALID_SOCKET)
+        {
+            closeSocketNoThrow(fd);
+        }
+        if(readStream)
+        {
+            CFRelease(readStream);
+        }
+        if(writeStream)
+        {
+            CFRelease(writeStream);
+        }
+        throw;
+    }
 }
 
 string

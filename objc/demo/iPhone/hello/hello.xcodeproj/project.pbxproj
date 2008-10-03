@@ -20,8 +20,8 @@
 		2899E5220DE3E06400AC0155 /* helloViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2899E5210DE3E06400AC0155 /* helloViewController.xib */; };
 		28AD733F0D9D9553002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD733E0D9D9553002E5188 /* MainWindow.xib */; };
 		28D7ACF80DDB3853001CB0EB /* helloViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28D7ACF70DDB3853001CB0EB /* helloViewController.m */; };
-		345E93940E8AA17800FED1BF /* libIceObjC.0.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 345E93930E8AA17800FED1BF /* libIceObjC.0.1.dylib */; };
-		345E93950E8AA18400FED1BF /* libIceObjC.0.1.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345E93930E8AA17800FED1BF /* libIceObjC.0.1.dylib */; };
+		345E93940E8AA17800FED1BF /* libIceObjC.0.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 345E93930E8AA17800FED1BF /* libIceObjC.0.1.0.dylib */; };
+		345E93950E8AA18400FED1BF /* libIceObjC.0.1.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345E93930E8AA17800FED1BF /* libIceObjC.0.1.0.dylib */; };
 		34BB75B20E87DC1800813E0B /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 34BB75B10E87DC1800813E0B /* icon.png */; };
 		A10643D10E5B6F9700338C12 /* libstdc++.6.0.4.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A10643CF0E5B6F9700338C12 /* libstdc++.6.0.4.dylib */; };
 		A10643D20E5B6F9700338C12 /* libstdc++.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A10643D00E5B6F9700338C12 /* libstdc++.6.dylib */; };
@@ -34,7 +34,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				345E93950E8AA18400FED1BF /* libIceObjC.0.1.dylib in CopyFiles */,
+				345E93950E8AA18400FED1BF /* libIceObjC.0.1.0.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -60,7 +60,7 @@
 		28D7ACF70DDB3853001CB0EB /* helloViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = helloViewController.m; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* hello_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hello_Prefix.pch; sourceTree = "<group>"; };
-		345E93930E8AA17800FED1BF /* libIceObjC.0.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libIceObjC.0.1.dylib; path = ../../../lib/libIceObjC.0.1.dylib; sourceTree = SOURCE_ROOT; };
+		345E93930E8AA17800FED1BF /* libIceObjC.0.1.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libIceObjC.0.1.0.dylib; path = ../../../lib/libIceObjC.0.1.0.dylib; sourceTree = SOURCE_ROOT; };
 		34BB75B10E87DC1800813E0B /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icon.png; path = Images/icon.png; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A10643CF0E5B6F9700338C12 /* libstdc++.6.0.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.6.0.4.dylib"; path = "usr/lib/libstdc++.6.0.4.dylib"; sourceTree = SDKROOT; };
@@ -72,7 +72,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				345E93940E8AA17800FED1BF /* libIceObjC.0.1.dylib in Frameworks */,
+				345E93940E8AA17800FED1BF /* libIceObjC.0.1.0.dylib in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
 				A10643D10E5B6F9700338C12 /* libstdc++.6.0.4.dylib in Frameworks */,
@@ -145,7 +145,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				345E93930E8AA17800FED1BF /* libIceObjC.0.1.dylib */,
+				345E93930E8AA17800FED1BF /* libIceObjC.0.1.0.dylib */,
 				A10643CF0E5B6F9700338C12 /* libstdc++.6.0.4.dylib */,
 				A10643D00E5B6F9700338C12 /* libstdc++.6.dylib */,
 				14A268E90E83FD0A00E562FE /* CFNetwork.framework */,

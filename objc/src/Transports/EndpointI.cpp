@@ -470,27 +470,43 @@ IceObjC::Instance::setupStreams(CFReadStreamRef readStream,
 
     if(!CFReadStreamOpen(readStream) || !CFWriteStreamOpen(writeStream))
     {
-        int error = 0;
         if(CFReadStreamGetStatus(readStream) == kCFStreamStatusError)
         {
             CFErrorRef err = CFReadStreamCopyError(readStream);
-            error = CFErrorGetCode(err);
+            errno = CFErrorGetCode(err);
             CFRelease(err);
         }
         else if(CFWriteStreamGetStatus(writeStream) == kCFStreamStatusError)
         {
             CFErrorRef err = CFWriteStreamCopyError(writeStream);
-            error = CFErrorGetCode(err);
+            errno = CFErrorGetCode(err);
             CFRelease(err);
         }
 
         if(server)
         {
-            throw Ice::SocketException(__FILE__, __LINE__, error);
+            throw Ice::SocketException(__FILE__, __LINE__, errno);
         }
         else
         {
-            throw Ice::ConnectFailedException(__FILE__, __LINE__, error); // TODO: Is ConnectFailedException correct?
+            if(connectionRefused())
+            {
+                Ice::ConnectionRefusedException ex(__FILE__, __LINE__);
+                ex.error = errno;
+                throw ex;
+            }
+            else if(connectFailed())
+            {
+                Ice::ConnectFailedException ex(__FILE__, __LINE__);
+                ex.error = errno;
+                throw ex;
+            }
+            else
+            {
+                Ice::SocketException ex(__FILE__, __LINE__);
+                ex.error = errno;
+                throw ex;
+            }
         }
     }
 }

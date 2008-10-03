@@ -53,9 +53,9 @@ main(int argc, char* argv[])
         [initData.properties setProperty:@"Ice.Warn.Dispatch" value:@"0"];
 
 #if TARGET_OS_IPHONE
-        initData.prefixTable = [NSDictionary dictionaryWithObjectsAndKeys:
-                                @"TestOperations", @"::Test", 
-                                nil];
+        initData.prefixTable__ = [NSDictionary dictionaryWithObjectsAndKeys:
+                                  @"TestOperations", @"::Test", 
+                                  nil];
 #endif
 
         communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];

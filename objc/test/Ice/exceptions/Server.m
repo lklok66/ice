@@ -53,9 +53,9 @@ main(int argc, char* argv[])
         [initData.properties setProperty:@"Ice.Warn.Dispatch" value:@"0"];
 
 #if TARGET_OS_IPHONE
-        initData.prefixTable = [NSDictionary dictionaryWithObjectsAndKeys:
-                                @"TestExceptions", @"::Test", 
-                                @"TestExceptionsMod", @"::Test::Mod", 
+        initData.prefixTable__ = [NSDictionary dictionaryWithObjectsAndKeys:
+                                  @"TestExceptions", @"::Test", 
+                                  @"TestExceptionsMod", @"::Test::Mod", 
                                 nil];
 #endif
 

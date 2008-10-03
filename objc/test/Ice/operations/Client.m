@@ -65,9 +65,9 @@ main(int argc, char* argv[])
         [initData.properties setProperty:@"Ice.MessageSizeMax" value:@"100"];
 
 #if TARGET_OS_IPHONE
-        initData.prefixTable = [NSDictionary dictionaryWithObjectsAndKeys:
-                                @"TestOperations", @"::Test", 
-                                nil];
+        initData.prefixTable__ = [NSDictionary dictionaryWithObjectsAndKeys:
+                                  @"TestOperations", @"::Test", 
+                                  nil];
 #endif
 
         communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];

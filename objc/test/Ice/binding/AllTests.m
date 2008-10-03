@@ -208,7 +208,7 @@ allTests(id<ICECommunicator> communicator)
         [names addObject:@"Adapter13"];
         while([names count] != 0)
         {
-            NSMutableArray* adpts = [adapters mutableCopy];
+            NSMutableArray* adpts = [[adapters mutableCopy] autorelease];
 
             id<TestBindingTestIntfPrx> test1 = createTestIntfPrx(adpts);
             random_shuffle(adpts);
@@ -255,7 +255,7 @@ allTests(id<ICECommunicator> communicator)
         [names addObject:@"Adapter13"];
         while([names count] != 0)
         {
-            NSMutableArray* adpts = [adapters mutableCopy];
+            NSMutableArray* adpts = [[adapters mutableCopy] autorelease];
 
             id<TestBindingTestIntfPrx> test1 = createTestIntfPrx(adpts);
             random_shuffle(adpts);
@@ -299,7 +299,7 @@ allTests(id<ICECommunicator> communicator)
         [names addObject:@"AdapterAMI13"];
         while([names count] != 0)
         {
-            NSMutableArray* adpts = [adapters mutableCopy];
+            NSMutableArray* adpts = [[adapters mutableCopy] autorelease];
 
             id<TestBindingTestIntfPrx> test1 = createTestIntfPrx(adpts);
             random_shuffle(adpts);
@@ -346,7 +346,7 @@ allTests(id<ICECommunicator> communicator)
         [names addObject:@"AdapterAMI13"];
         while([names count] != 0)
         {
-            NSMutableArray* adpts = [adapters mutableCopy];
+            NSMutableArray* adpts = [[adapters mutableCopy] autorelease];
 
             id<TestBindingTestIntfPrx> test1 = createTestIntfPrx(adpts);
             random_shuffle(adpts);

@@ -22,13 +22,13 @@
 		348A1EE60E8297AC003DBDDD /* ChatSession.m in Sources */ = {isa = PBXBuildFile; fileRef = 348A1EE40E8297AC003DBDDD /* ChatSession.m */; };
 		348A1EF10E8297D3003DBDDD /* Chat.ice in Resources */ = {isa = PBXBuildFile; fileRef = 348A1EEF0E8297D3003DBDDD /* Chat.ice */; };
 		348A1EF20E8297D3003DBDDD /* ChatSession.ice in Resources */ = {isa = PBXBuildFile; fileRef = 348A1EF00E8297D3003DBDDD /* ChatSession.ice */; };
-		348A1EF60E8297E1003DBDDD /* libIceObjC.0.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 348A1EF40E8297E1003DBDDD /* libIceObjC.0.1.dylib */; };
-		348A1EF90E829817003DBDDD /* libIceObjC.0.1.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 348A1EF40E8297E1003DBDDD /* libIceObjC.0.1.dylib */; };
+		348A1EF60E8297E1003DBDDD /* libIceObjC.0.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 348A1EF40E8297E1003DBDDD /* libIceObjC.0.1.0.dylib */; };
+		348A1EF90E829817003DBDDD /* libIceObjC.0.1.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 348A1EF40E8297E1003DBDDD /* libIceObjC.0.1.0.dylib */; };
 		348A1F0D0E829947003DBDDD /* LoginView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 348A1F0C0E829947003DBDDD /* LoginView.xib */; };
 		348A1F110E829950003DBDDD /* ChatView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 348A1F100E829950003DBDDD /* ChatView.xib */; };
 		348A1F150E82995D003DBDDD /* UserView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 348A1F140E82995D003DBDDD /* UserView.xib */; };
-		348A202C0E82BDC6003DBDDD /* libGlacier2ObjC.0.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 348A202B0E82BDC6003DBDDD /* libGlacier2ObjC.0.1.dylib */; };
-		348A202D0E82BDC9003DBDDD /* libGlacier2ObjC.0.1.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 348A202B0E82BDC6003DBDDD /* libGlacier2ObjC.0.1.dylib */; };
+		348A202C0E82BDC6003DBDDD /* libGlacier2ObjC.0.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 348A202B0E82BDC6003DBDDD /* libGlacier2ObjC.0.1.0.dylib */; };
+		348A202D0E82BDC9003DBDDD /* libGlacier2ObjC.0.1.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 348A202B0E82BDC6003DBDDD /* libGlacier2ObjC.0.1.0.dylib */; };
 		34BB759D0E87DBC000813E0B /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 34BB759C0E87DBC000813E0B /* icon.png */; };
 		34E056B70E82DAA4005C6912 /* ChatRoomCallbackI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34E056B60E82DAA4005C6912 /* ChatRoomCallbackI.m */; };
 /* End PBXBuildFile section */
@@ -40,8 +40,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				348A202D0E82BDC9003DBDDD /* libGlacier2ObjC.0.1.dylib in CopyFiles */,
-				348A1EF90E829817003DBDDD /* libIceObjC.0.1.dylib in CopyFiles */,
+				348A202D0E82BDC9003DBDDD /* libGlacier2ObjC.0.1.0.dylib in CopyFiles */,
+				348A1EF90E829817003DBDDD /* libIceObjC.0.1.0.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -71,11 +71,11 @@
 		348A1EE40E8297AC003DBDDD /* ChatSession.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatSession.m; sourceTree = "<group>"; };
 		348A1EEF0E8297D3003DBDDD /* Chat.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Chat.ice; sourceTree = "<group>"; };
 		348A1EF00E8297D3003DBDDD /* ChatSession.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ChatSession.ice; sourceTree = "<group>"; };
-		348A1EF40E8297E1003DBDDD /* libIceObjC.0.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libIceObjC.0.1.dylib; path = ../../../lib/libIceObjC.0.1.dylib; sourceTree = SOURCE_ROOT; };
+		348A1EF40E8297E1003DBDDD /* libIceObjC.0.1.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libIceObjC.0.1.0.dylib; path = ../../../lib/libIceObjC.0.1.0.dylib; sourceTree = SOURCE_ROOT; };
 		348A1F0C0E829947003DBDDD /* LoginView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = LoginView.xib; sourceTree = "<group>"; };
 		348A1F100E829950003DBDDD /* ChatView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ChatView.xib; sourceTree = "<group>"; };
 		348A1F140E82995D003DBDDD /* UserView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = UserView.xib; sourceTree = "<group>"; };
-		348A202B0E82BDC6003DBDDD /* libGlacier2ObjC.0.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libGlacier2ObjC.0.1.dylib; path = ../../../lib/libGlacier2ObjC.0.1.dylib; sourceTree = SOURCE_ROOT; };
+		348A202B0E82BDC6003DBDDD /* libGlacier2ObjC.0.1.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libGlacier2ObjC.0.1.0.dylib; path = ../../../lib/libGlacier2ObjC.0.1.0.dylib; sourceTree = SOURCE_ROOT; };
 		34BB759C0E87DBC000813E0B /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icon.png; path = Images/icon.png; sourceTree = "<group>"; };
 		34E056B50E82DAA4005C6912 /* ChatRoomCallbackI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatRoomCallbackI.h; sourceTree = "<group>"; };
 		34E056B60E82DAA4005C6912 /* ChatRoomCallbackI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatRoomCallbackI.m; sourceTree = "<group>"; };
@@ -90,8 +90,8 @@
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
 				2892E4100DC94CBA00A64D0F /* CoreGraphics.framework in Frameworks */,
-				348A1EF60E8297E1003DBDDD /* libIceObjC.0.1.dylib in Frameworks */,
-				348A202C0E82BDC6003DBDDD /* libGlacier2ObjC.0.1.dylib in Frameworks */,
+				348A1EF60E8297E1003DBDDD /* libIceObjC.0.1.0.dylib in Frameworks */,
+				348A202C0E82BDC6003DBDDD /* libGlacier2ObjC.0.1.0.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -168,8 +168,8 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				348A202B0E82BDC6003DBDDD /* libGlacier2ObjC.0.1.dylib */,
-				348A1EF40E8297E1003DBDDD /* libIceObjC.0.1.dylib */,
+				348A202B0E82BDC6003DBDDD /* libGlacier2ObjC.0.1.0.dylib */,
+				348A1EF40E8297E1003DBDDD /* libIceObjC.0.1.0.dylib */,
 				2892E40F0DC94CBA00A64D0F /* CoreGraphics.framework */,
 				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
 				1D30AB110D05D00D00671497 /* Foundation.framework */,

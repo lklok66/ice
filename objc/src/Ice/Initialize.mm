@@ -74,9 +74,9 @@ private:
 
 @synthesize properties;
 @synthesize logger;
-@synthesize prefixTable;
+@synthesize prefixTable__;
 
--(id) init:(id<ICEProperties>)props logger:(id<ICELogger>)log prefixTable:(NSDictionary*)prefixTbl
+-(id) init:(id<ICEProperties>)props logger:(id<ICELogger>)log
 {
     if(![super init])
     {
@@ -84,7 +84,6 @@ private:
     }
     properties = [props retain];
     logger = [log retain];
-    prefixTable = [prefixTbl retain];
     return self;
 }
 
@@ -95,10 +94,9 @@ private:
    return s;
 }
 
-+(id) initializationData:(id<ICEProperties>)props logger:(id<ICELogger>)log prefixTable:(NSDictionary*)prefixTable
++(id) initializationData:(id<ICEProperties>)props logger:(id<ICELogger>)log
 {
-   ICEInitializationData *s = [((ICEInitializationData *)[ICEInitializationData alloc]) init:props logger:log 
-                                                                                        prefixTable:prefixTable];
+   ICEInitializationData *s = [((ICEInitializationData *)[ICEInitializationData alloc]) init:props logger:log];
    [s autorelease];
    return s;
 }
@@ -108,7 +106,7 @@ private:
     ICEInitializationData *copy = [ICEInitializationData allocWithZone:zone];
     copy->properties = [properties retain];
     copy->logger = [logger retain];
-    copy->prefixTable = [prefixTable retain];
+    copy->prefixTable__ = [prefixTable__ retain];
     return copy;
 }
 
@@ -117,7 +115,7 @@ private:
     NSUInteger h = 0;
     h = (h << 1 ^ [properties hash]);
     h = (h << 1 ^ [logger hash]);
-    h = (h << 1 ^ [prefixTable hash]);
+    h = (h << 1 ^ [prefixTable__ hash]);
     return h;
 }
 
@@ -160,16 +158,16 @@ private:
 	    return NO;
 	}
     }
-    if(!prefixTable)
+    if(!prefixTable__)
     {
-        if(obj->prefixTable)
+        if(obj->prefixTable__)
 	{
 	    return NO;
 	}
     }
     else
     {
-        if(![prefixTable isEqual:obj->prefixTable])
+        if(![prefixTable__ isEqual:obj->prefixTable__])
 	{
 	    return NO;
 	}
@@ -181,7 +179,7 @@ private:
 {
     [properties release];
     [logger release];
-    [prefixTable release];
+    [prefixTable__ release];
     [super dealloc];
 }
 @end
@@ -286,7 +284,7 @@ private:
         }
 
         ICECommunicator* c = [ICECommunicator wrapperWithCxxObject:communicator.get()];
-        [c setup:initData.prefixTable];
+        [c setup:initData.prefixTable__];
         return c;
     }
     catch(const std::exception& ex)

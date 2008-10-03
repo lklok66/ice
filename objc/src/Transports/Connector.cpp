@@ -32,13 +32,14 @@ IceObjC::Connector::connect()
         out << "trying to establish " << _instance->protocol() << " connection to " << toString();
     }
 
+    CFReadStreamRef readStream = nil;
+    CFWriteStreamRef writeStream = nil;
+    SOCKET fd = INVALID_SOCKET;
     try
     {
         //
         // Create the read/write streams
         //
-        CFReadStreamRef readStream;
-        CFWriteStreamRef writeStream;
         CFDataRef addr = nil;
         if(_addr.ss_family == AF_INET)
         {
@@ -48,6 +49,7 @@ IceObjC::Connector::connect()
         {
             addr = CFDataCreate(NULL, reinterpret_cast<const UInt8*>(&_addr), sizeof(sockaddr_in6));
         }
+
         CFHostRef host = CFHostCreateWithAddress(NULL, addr);
         CFRelease(addr);
         CFStreamCreatePairWithSocketToCFHost(NULL, host, getPort(_addr), &readStream, &writeStream);
@@ -55,16 +57,15 @@ IceObjC::Connector::connect()
 
         _instance->setupStreams(readStream, writeStream, false, _host);
 
-        SOCKET fd;
-        CFDataRef d = (CFDataRef)CFReadStreamCopyProperty(readStream, kCFStreamPropertySocketNativeHandle);
-        CFDataGetBytes(d, CFRangeMake(0, sizeof(SOCKET)), reinterpret_cast<UInt8*>(&fd));
-        CFRelease(d);
-
         if(!CFReadStreamSetProperty(readStream, kCFStreamPropertyShouldCloseNativeSocket, kCFBooleanFalse) || 
            !CFWriteStreamSetProperty(writeStream, kCFStreamPropertyShouldCloseNativeSocket, kCFBooleanFalse))
         {
-            throw Ice::ConnectFailedException(__FILE__, __LINE__, 0);
+            throw Ice::SocketException(__FILE__, __LINE__, 0);
         }
+
+        CFDataRef d = (CFDataRef)CFReadStreamCopyProperty(readStream, kCFStreamPropertySocketNativeHandle);
+        CFDataGetBytes(d, CFRangeMake(0, sizeof(SOCKET)), reinterpret_cast<UInt8*>(&fd));
+        CFRelease(d);
 
         setBlock(fd, false);
         setTcpBufSize(fd, _instance->initializationData().properties, _logger);
@@ -73,6 +74,19 @@ IceObjC::Connector::connect()
     }
     catch(const Ice::LocalException& ex)
     {
+        if(fd != INVALID_SOCKET)
+        {
+            closeSocketNoThrow(fd);
+        }
+        if(readStream)
+        {
+            CFRelease(readStream);
+        }
+        if(writeStream)
+        {
+            CFRelease(writeStream);
+        }
+
         if(_traceLevels->network >= 2)
         {
             Trace out(_logger, _traceLevels->networkCat);

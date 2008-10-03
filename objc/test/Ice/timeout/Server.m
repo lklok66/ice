@@ -50,9 +50,9 @@ main(int argc, char* argv[])
         [initData.properties setProperty:@"Ice.Warn.Connections" value:@"0"];
 
 #if TARGET_OS_IPHONE
-        initData.prefixTable = [NSDictionary dictionaryWithObjectsAndKeys:
-                                @"TestTimeout", @"::Test", 
-                                nil];
+        initData.prefixTable__ = [NSDictionary dictionaryWithObjectsAndKeys:
+                                  @"TestTimeout", @"::Test", 
+                                  nil];
 #endif
 
         communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];

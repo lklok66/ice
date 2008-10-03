@@ -46,9 +46,9 @@ main(int argc, char* argv[])
         ICEInitializationData* initData = [ICEInitializationData initializationData];
         initData.properties = defaultServerProperties(&argc, argv);
 #if TARGET_OS_IPHONE
-        initData.prefixTable = [NSDictionary dictionaryWithObjectsAndKeys:
-                                @"TestSlicingObjectsServer", @"::Test", 
-                                @"TestSlicingObjectsShared", @"::TestShared", 
+        initData.prefixTable__ = [NSDictionary dictionaryWithObjectsAndKeys:
+                                  @"TestSlicingObjectsServer", @"::Test", 
+                                  @"TestSlicingObjectsShared", @"::TestShared", 
                                 nil];
 #endif
         communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];
