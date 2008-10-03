@@ -278,7 +278,7 @@ NSString* sslKey = @"sslKey";
 {
     @try
     {
-        id<Glacier2RouterPrx> router = [Glacier2RouterPrx uncheckedCast:proxy];
+        id<Glacier2RouterPrx> router = [Glacier2RouterPrx checkedCast:proxy];
         id<Glacier2SessionPrx> glacier2session = [router createSession:username password:password];
         id<ChatChatSessionPrx> sess = [ChatChatSessionPrx uncheckedCast:glacier2session];
         

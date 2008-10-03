@@ -69,7 +69,11 @@ NSString* hostnameKey = @"hostnameKey";
         prx = [prx ice_timeout:timeout];
     }
 
-    prx = [prx ice_secure:secure];
+    // You cannot create secure datagram proxies.
+    if(deliveryMode != DeliveryModeDatagram && deliveryMode != DeliveryModeBatchDatagram)
+    {
+        prx = [prx ice_secure:secure];
+    }
     
     self.hello = [DemoHelloPrx uncheckedCast:prx];
 }
@@ -193,6 +197,7 @@ NSString* hostnameKey = @"hostnameKey";
             deliveryMode = DeliveryModeTwoway;
             batchSwitch.enabled = NO;
             flushButton.enabled = NO;
+            secureSwitch.enabled = YES;
             break;
         case 1: // Oneway
             if(batch)
@@ -205,6 +210,7 @@ NSString* hostnameKey = @"hostnameKey";
             }
             batchSwitch.enabled = YES;
             flushButton.enabled = batchSwitch.isOn;
+            secureSwitch.enabled = YES;
             break;
         case 2: // Datagram
             if(batch)
@@ -217,6 +223,7 @@ NSString* hostnameKey = @"hostnameKey";
             }
             batchSwitch.enabled = YES;
             flushButton.enabled = batchSwitch.isOn;
+            secureSwitch.enabled = NO;
             break;
         default:
             break;
