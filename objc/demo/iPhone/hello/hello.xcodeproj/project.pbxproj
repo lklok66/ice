@@ -23,8 +23,6 @@
 		345E93940E8AA17800FED1BF /* libIceObjC.0.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 345E93930E8AA17800FED1BF /* libIceObjC.0.1.0.dylib */; };
 		345E93950E8AA18400FED1BF /* libIceObjC.0.1.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345E93930E8AA17800FED1BF /* libIceObjC.0.1.0.dylib */; };
 		34BB75B20E87DC1800813E0B /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 34BB75B10E87DC1800813E0B /* icon.png */; };
-		A10643D10E5B6F9700338C12 /* libstdc++.6.0.4.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A10643CF0E5B6F9700338C12 /* libstdc++.6.0.4.dylib */; };
-		A10643D20E5B6F9700338C12 /* libstdc++.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = A10643D00E5B6F9700338C12 /* libstdc++.6.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -63,8 +61,6 @@
 		345E93930E8AA17800FED1BF /* libIceObjC.0.1.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libIceObjC.0.1.0.dylib; path = ../../../lib/libIceObjC.0.1.0.dylib; sourceTree = SOURCE_ROOT; };
 		34BB75B10E87DC1800813E0B /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icon.png; path = Images/icon.png; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A10643CF0E5B6F9700338C12 /* libstdc++.6.0.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.6.0.4.dylib"; path = "usr/lib/libstdc++.6.0.4.dylib"; sourceTree = SDKROOT; };
-		A10643D00E5B6F9700338C12 /* libstdc++.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.6.dylib"; path = "usr/lib/libstdc++.6.dylib"; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,8 +71,6 @@
 				345E93940E8AA17800FED1BF /* libIceObjC.0.1.0.dylib in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
-				A10643D10E5B6F9700338C12 /* libstdc++.6.0.4.dylib in Frameworks */,
-				A10643D20E5B6F9700338C12 /* libstdc++.6.dylib in Frameworks */,
 				14A268EB0E83FD0A00E562FE /* CFNetwork.framework in Frameworks */,
 				14A268EC0E83FD0A00E562FE /* Security.framework in Frameworks */,
 			);
@@ -146,8 +140,6 @@
 			isa = PBXGroup;
 			children = (
 				345E93930E8AA17800FED1BF /* libIceObjC.0.1.0.dylib */,
-				A10643CF0E5B6F9700338C12 /* libstdc++.6.0.4.dylib */,
-				A10643D00E5B6F9700338C12 /* libstdc++.6.dylib */,
 				14A268E90E83FD0A00E562FE /* CFNetwork.framework */,
 				14A268EA0E83FD0A00E562FE /* Security.framework */,
 				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,

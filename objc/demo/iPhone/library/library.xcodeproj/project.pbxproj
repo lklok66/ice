@@ -34,7 +34,6 @@
 		34B920D60E755BBD00B1565B /* Session.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B920D40E755BBD00B1565B /* Session.m */; };
 		34BB75760E87DAEC00813E0B /* redButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 34BB75750E87DAEC00813E0B /* redButton.png */; };
 		34BB75780E87DB1B00813E0B /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 34BB75770E87DB1B00813E0B /* icon.png */; };
-		34C47AAA0E75911F00FF5739 /* libstdc++.6.0.4.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C47AA90E75911F00FF5739 /* libstdc++.6.0.4.dylib */; };
 		34FF1F1D0E76904300EA9DEC /* AddViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 34FF1F1C0E76904300EA9DEC /* AddViewController.m */; };
 /* End PBXBuildFile section */
 
@@ -90,7 +89,6 @@
 		34B920D40E755BBD00B1565B /* Session.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Session.m; sourceTree = "<group>"; };
 		34BB75750E87DAEC00813E0B /* redButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = redButton.png; sourceTree = "<group>"; };
 		34BB75770E87DB1B00813E0B /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon.png; sourceTree = "<group>"; };
-		34C47AA90E75911F00FF5739 /* libstdc++.6.0.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libstdc++.6.0.4.dylib"; path = "usr/lib/libstdc++.6.0.4.dylib"; sourceTree = SDKROOT; };
 		34FF1F1B0E76904300EA9DEC /* AddViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AddViewController.h; sourceTree = "<group>"; };
 		34FF1F1C0E76904300EA9DEC /* AddViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AddViewController.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -104,7 +102,6 @@
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
 				2892E4100DC94CBA00A64D0F /* CoreGraphics.framework in Frameworks */,
-				34C47AAA0E75911F00FF5739 /* libstdc++.6.0.4.dylib in Frameworks */,
 				149A82540E75B20800452027 /* libIceObjC.0.1.0.dylib in Frameworks */,
 				348A1F8E0E82A976003DBDDD /* libGlacier2ObjC.0.1.0.dylib in Frameworks */,
 			);
@@ -192,7 +189,6 @@
 			children = (
 				348A1F8D0E82A976003DBDDD /* libGlacier2ObjC.0.1.0.dylib */,
 				149A82530E75B20800452027 /* libIceObjC.0.1.0.dylib */,
-				34C47AA90E75911F00FF5739 /* libstdc++.6.0.4.dylib */,
 				2892E40F0DC94CBA00A64D0F /* CoreGraphics.framework */,
 				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
 				1D30AB110D05D00D00671497 /* Foundation.framework */,
