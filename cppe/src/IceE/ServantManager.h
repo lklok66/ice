@@ -25,9 +25,12 @@ class ServantManager : public IceUtil::Shared, public IceUtil::Mutex
 public:
 
     void addServant(const Ice::ObjectPtr&, const Ice::Identity&, const std::string&);
+    void addDefaultServant(const Ice::ObjectPtr&, const std::string&);
     Ice::ObjectPtr removeServant(const Ice::Identity&, const std::string&);
+    Ice::ObjectPtr removeDefaultServant(const std::string&);
     Ice::FacetMap removeAllFacets(const Ice::Identity&);
     Ice::ObjectPtr findServant(const Ice::Identity&, const std::string&) const;
+    Ice::ObjectPtr findDefaultServant(const std::string&) const;
     Ice::FacetMap findAllFacets(const Ice::Identity&) const;
     bool hasServant(const Ice::Identity&) const;
 
@@ -43,9 +46,11 @@ private:
     const std::string _adapterName;
 
     typedef std::map<Ice::Identity, Ice::FacetMap> ServantMapMap;
+    typedef std::map<std::string, Ice::ObjectPtr> DefaultServantMap;
 
     ServantMapMap _servantMapMap;
     mutable ServantMapMap::iterator _servantMapMapHint;
+    DefaultServantMap _defaultServantMap;
 };
 
 }

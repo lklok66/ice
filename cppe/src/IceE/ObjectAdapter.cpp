@@ -410,6 +410,16 @@ Ice::ObjectAdapter::addFacetWithUUID(const ObjectPtr& object, const string& face
     return addFacet(object, ident, facet);
 }
 
+void
+Ice::ObjectAdapter::addDefaultServant(const ObjectPtr& object, const string& category)
+{
+    IceUtil::Monitor<IceUtil::RecMutex>::Lock sync(*this);
+
+    checkForDeactivation();
+
+    return _servantManager->addDefaultServant(object, category);
+}
+
 ObjectPtr
 Ice::ObjectAdapter::remove(const Identity& ident)
 {
@@ -436,6 +446,16 @@ Ice::ObjectAdapter::removeAllFacets(const Identity& ident)
     checkIdentity(ident);
 
     return _servantManager->removeAllFacets(ident);
+}
+
+ObjectPtr
+Ice::ObjectAdapter::removeDefaultServant(const string& category)
+{
+    IceUtil::Monitor<IceUtil::RecMutex>::Lock sync(*this);
+
+    checkForDeactivation();
+
+    return _servantManager->removeDefaultServant(category);
 }
 
 ObjectPtr
@@ -475,6 +495,16 @@ Ice::ObjectAdapter::findByProxy(const ObjectPrx& proxy) const
 
     ReferencePtr ref = proxy->__reference();
     return findFacet(ref->getIdentity(), ref->getFacet());
+}
+
+ObjectPtr
+Ice::ObjectAdapter::findDefaultServant(const string& category) const
+{
+    IceUtil::Monitor<IceUtil::RecMutex>::Lock sync(*this);
+
+    checkForDeactivation();
+
+    return _servantManager->findDefaultServant(category);
 }
 
 ObjectPrx

@@ -14,6 +14,14 @@ change history of prior releases, refer to the cppe/CHANGES file.
 Changes since version 1.2.0
 ======================================================================
 
+- Added the following operations to the ObjectAdapter API:
+
+   - addDefaultServant
+   - removeDefaultServant
+   - findDefaultServant
+
+  These methods allow you to use default servant with Ice=E.
+
 - On Windows Mobile the default Ice-E logger now writes output to 
   IceE_log.txt in the base directory rather than stderr.
 

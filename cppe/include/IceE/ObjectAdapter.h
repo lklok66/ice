@@ -62,13 +62,16 @@ public:
     ObjectPrx addFacet(const ObjectPtr&, const Identity&, const std::string&);
     ObjectPrx addWithUUID(const ObjectPtr&);
     ObjectPrx addFacetWithUUID(const ObjectPtr&, const std::string&);
+    void addDefaultServant(const ObjectPtr&, const std::string&);
     ObjectPtr remove(const Identity&);
     ObjectPtr removeFacet(const Identity&, const std::string&);
     FacetMap removeAllFacets(const Identity&);
+    ObjectPtr removeDefaultServant(const std::string&);
     ObjectPtr find(const Identity&) const;
     ObjectPtr findFacet(const Identity&, const std::string&) const;
     FacetMap findAllFacets(const Identity&) const;
     ObjectPtr findByProxy(const ObjectPrx&) const;
+    ObjectPtr findDefaultServant(const std::string&) const;
 
     ObjectPrx createProxy(const Identity&) const;
 #ifdef ICEE_HAS_LOCATOR

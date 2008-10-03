@@ -38,6 +38,7 @@ tests = [
     ("IceE/slicing/exceptions", ["core"]),
     ("IceE/custom", ["core"]),
     ("IceE/retry", ["core"]),
+    ("IceE/defaultServant", ["core"]),
     ]
 
 if __name__ == "__main__":
