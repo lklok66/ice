@@ -255,8 +255,8 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = hello_Prefix.pch;
 				HEADER_SEARCH_PATHS = (
-					Classes,
 					../../../include,
+					Classes,
 				);
 				INFOPLIST_FILE = Info.plist;
 				LIBRARY_SEARCH_PATHS = (
@@ -276,6 +276,10 @@
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = hello_Prefix.pch;
+				HEADER_SEARCH_PATHS = (
+					../../../include,
+					Classes,
+				);
 				INFOPLIST_FILE = Info.plist;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",

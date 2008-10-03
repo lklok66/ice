@@ -19,8 +19,7 @@
 
 @interface ChatInvalidMessageException : ICEUserException
 {
-    @private
-        NSString *reason_;
+    NSString *reason_;
 }
 
 @property(nonatomic, retain) NSString *reason_;
@@ -29,8 +28,6 @@
 -(id) init:(NSString *)reason;
 +(id) invalidMessageException:(NSString *)reason;
 +(id) invalidMessageException;
--(void) copy__:(ChatInvalidMessageException *)copy_;
--(void) dealloc;
--(void) write__:(id<ICEOutputStream>)stream;
--(void) read__:(id<ICEInputStream>)stream readTypeId:(BOOL)rid_;
+// This class also overrides copyWithZone:.
+// This class also overrides dealloc.
 @end

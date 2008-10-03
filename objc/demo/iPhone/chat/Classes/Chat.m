@@ -36,7 +36,7 @@
 
 +(id) invalidMessageException:(NSString *)reason_p
 {
-    ChatInvalidMessageException *s__ = [((ChatInvalidMessageException *)[ChatInvalidMessageException alloc]) init:reason_p];
+    ChatInvalidMessageException *s__ = [(ChatInvalidMessageException *)[ChatInvalidMessageException alloc] init:reason_p];
     [s__ autorelease];
     return s__;
 }
@@ -48,10 +48,9 @@
     return s__;
 }
 
--(void) copy__:(ChatInvalidMessageException*)copy_
+-(id) copyWithZone:(NSZone *)zone_p
 {
-    [super copy__:copy_];
-    copy_->reason_ = [reason_ copy];
+    return [(ChatInvalidMessageException *)[[self class] allocWithZone:zone_p] init:reason_];
 }
 
 -(void) dealloc;

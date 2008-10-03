@@ -40,13 +40,10 @@
 @end
 
 @interface ChatChatRoomCallback : ICEObject
--(id) init;
 +(BOOL)init___:(ICEObject<ChatChatRoomCallback> *)servant current:(ICECurrent *)current is:(id<ICEInputStream>)is_ os:(id<ICEOutputStream>)os_;
 +(BOOL)send___:(ICEObject<ChatChatRoomCallback> *)servant current:(ICECurrent *)current is:(id<ICEInputStream>)is_ os:(id<ICEOutputStream>)os_;
 +(BOOL)join___:(ICEObject<ChatChatRoomCallback> *)servant current:(ICECurrent *)current is:(id<ICEInputStream>)is_ os:(id<ICEOutputStream>)os_;
 +(BOOL)leave___:(ICEObject<ChatChatRoomCallback> *)servant current:(ICECurrent *)current is:(id<ICEInputStream>)is_ os:(id<ICEOutputStream>)os_;
--(void) write__:(id<ICEOutputStream>)stream;
--(void) read__:(id<ICEInputStream>)stream readTypeId:(BOOL)rid_;
 @end
 
 @protocol ChatChatSession <Glacier2Session>
@@ -55,11 +52,8 @@
 @end
 
 @interface ChatChatSession : ICEObject
--(id) init;
 +(BOOL)setCallback___:(ICEObject<ChatChatSession> *)servant current:(ICECurrent *)current is:(id<ICEInputStream>)is_ os:(id<ICEOutputStream>)os_;
 +(BOOL)send___:(ICEObject<ChatChatSession> *)servant current:(ICECurrent *)current is:(id<ICEInputStream>)is_ os:(id<ICEOutputStream>)os_;
--(void) write__:(id<ICEOutputStream>)stream;
--(void) read__:(id<ICEInputStream>)stream readTypeId:(BOOL)rid_;
 @end
 
 @protocol ChatChatRoomCallbackPrx <ICEObjectPrx>

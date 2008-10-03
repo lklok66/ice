@@ -18,15 +18,6 @@
 
 @implementation ChatChatRoomCallback
 
--(id) init
-{
-    if(![super init])
-    {
-        return nil;
-    }
-    return self;
-}
-
 -(void) write__:(id<ICEOutputStream>)os_
 {
     [os_ writeTypeId:@"::Chat::ChatRoomCallback"];
@@ -175,15 +166,6 @@ static NSString *ChatChatRoomCallback_all__[] =
 @end
 
 @implementation ChatChatSession
-
--(id) init
-{
-    if(![super init])
-    {
-        return nil;
-    }
-    return self;
-}
 
 -(void) write__:(id<ICEOutputStream>)os_
 {
