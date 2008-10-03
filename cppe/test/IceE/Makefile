@@ -14,6 +14,7 @@ include $(top_srcdir)/config/Make.rules
 SUBDIRS		= adapterDeactivation \
 		  binding \
 		  custom \
+		  defaultServant \
 		  exceptions \
 		  facets \
 		  faultTolerance \

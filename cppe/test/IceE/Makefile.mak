@@ -13,6 +13,7 @@ top_srcdir	= ..\..
 
 SUBDIRS		= proxy \
 		  binding \
+		  defaultServant \
                   operations \
 		  exceptions \
 		  inheritance \
