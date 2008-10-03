@@ -41,4 +41,6 @@ include $(top_srcdir)/config/Make.rules
 
 CPPFLAGS        := -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src $(CPPPLATFORMFLAGS)
 
+install:: $(OBJS)
+
 include .depend

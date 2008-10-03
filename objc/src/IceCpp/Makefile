@@ -165,6 +165,8 @@ $(addprefix $(SRCS_DIR)/, $(OBJS:.o=.cpp)): \
 	$(patsubst $(SDIR)/%.ice,include/Ice/%.h,$(wildcard $(SDIR)/*F.ice)) \
 	$(patsubst $(SDIR)/%.ice,include/Ice/%.h,$(SLICECPP_SRCS))
 
+install:: $(OBJS) $(SLICE_OBJS)
+
 depend:: $(patsubst $(SDIR)/%.ice,include/Ice/%.h,$(wildcard $(SDIR)/*F.ice)) \
 	 $(patsubst $(SDIR)/%.ice,include/Ice/%.h,$(SLICECPP_SRCS))
 	if test -n "$(SLICECPP_SRCS)" ; then \

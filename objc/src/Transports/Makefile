@@ -23,4 +23,6 @@ include $(top_srcdir)/config/Make.rules
 CPPFLAGS	:= -I. -I../IceCpp/include -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src -DICE_APPLE_CFNETWORK \
 	           $(CPPPLATFORMFLAGS)
 
+install:: $(OBJS)
+
 include .depend
