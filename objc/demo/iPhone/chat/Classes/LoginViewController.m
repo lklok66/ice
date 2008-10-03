@@ -296,6 +296,7 @@ NSString* sslKey = @"sslKey";
                                   identity:callbackId];
 
         [session setCallback:[ChatChatRoomCallbackPrx uncheckedCast:proxy]];
+        [adapter activate];
         
         [self performSelectorOnMainThread:@selector(loginComplete:) withObject:nil waitUntilDone:NO];
     }
