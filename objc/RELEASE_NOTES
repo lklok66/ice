@@ -111,25 +111,6 @@ Ice.UseSyslog, and you cannot install a custom logger with a plug-in
 (Ice.Plugin.*).
 
 
-Slice Module Prefixes
----------------------
-
-Ice Touch supports changing the generated Objective-C class prefix
-using "objc:prefix:" metadata. For example, the module "Ice" is
-mapped to the class prefix ICE as follows:
-
-  ["objc:prefix:ICE"]
-  module Ice
-
-Be aware that the Ice Touch run time currently cannot correctly
-unmarshal an instance of a Slice class or exception if its prefix has
-been changed. If your application receives such a class or exception
-as the result of a remote invocation, Ice Touch will raise a run-time
-exception.
-
-This limitation will be removed in a later release.
-
-
 Garbage Collection
 ------------------
 
