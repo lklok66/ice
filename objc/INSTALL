@@ -8,7 +8,7 @@ Operating System
 
 Ice Touch has been extensively tested on:
 
-- Mac OS X 10.5.5 and Xcode 3.1.1.
+- Mac OS X 10.5.5 and Xcode 3.1.1
 - iPod Touch v2 using software version 2.1.1
 - iPhone 3g using software version 2.1
 
@@ -27,10 +27,10 @@ These can be downloaded from http://developer.apple.com.
 Slice translators
 -----------------
 
-You will need the Slice-to-ObjC compiler (slice2objc), and the
-Slice-to-C++ compiler (slice2cpp). The distribution includes these
-translators, however, you can build the Slice translators yourself
-using this source distribution.
+You will need the Slice-to-ObjC compiler (slice2objc) and the
+Slice-to-C++ compiler (slice2cpp). The distribution includes binaries
+for these compilers as well as the source code in case you want to
+build them yourself.
 
 
 Third-party libraries
@@ -42,7 +42,7 @@ build the Slice translators yourself.
 The Slice-to-ObjC and Slice-to-C++ compilers (slice2objc/slice2cpp)
 have a dependency on the following third-party library:
 
-- mcpp 2.7 with patch, or mcpp 2.7.1.
+- mcpp 2.7 with patch, or mcpp 2.7.1
 
 We recommend downloading the Ice third-party source archive from
 
@@ -72,9 +72,7 @@ $ cd IceTouch-@ver@
 Edit objc/config/Make.rules to establish your build configuration.
 There are three possible build configurations:
 
-* Build for Mac OS X. This environment is only useful for simple
-  command-line testing of Ice under Mac OS X. It cannot be used for
-  development of iPhone applications.
+* Build for Mac OS X
 
   - In objc/config/Make.rules, leave COMPILE_FOR_IPHONE and
     COMPILE_FOR_IPHONE_SIMULATOR unset.
@@ -110,8 +108,8 @@ Now you are ready to build Ice Touch:
 
 $ make
 
-This will build the Ice Touch library. If you are building for Mac OS X,
-this will also build the tests and examples.
+This will build the Ice Touch library. If you are building for Mac OS
+X, this will also build the tests and examples.
 
 If you are building for iPhone or the iPhone simulator, you should now
 use Xcode to build the demos and test suite located in the following
@@ -133,7 +131,7 @@ If everything works, you should see lots of "ok" messages. In
 case of a failure, the tests abort with "failed".
 
 For the iPhone or iPhone simulator, the test suite runs within an
-iPhone application "Test Suite", contained in the directory
+iPhone application named "Test Suite", located in the directory
 test/iPhone/container.
 
 
@@ -141,7 +139,7 @@ test/iPhone/container.
 Installation
 ======================================================================
 
-Simply run "make install". This will install Ice Touch in the directory
+Simply run "make install" to install Ice Touch in the directory
 specified by the "prefix" variable in objc/config/Make.rules.
 
 For Mac OS X builds of Ice Touch, the install name of the shared

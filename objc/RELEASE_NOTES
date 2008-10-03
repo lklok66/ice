@@ -44,8 +44,8 @@ properties have the semantics documented in the Ice Manual.
  - IceSSL.CertAuthFile
 
    If a certificate authority is not specified, all certificate
-   authorities in the keychain are used. For CA certificates,
-   Ice Touch supports only DER encoding.
+   authorities in the keychain are used. For CA certificates, Ice
+   Touch supports only DER encoding.
 
    See below for more information on how Ice Touch locates certificate
    files.
@@ -76,8 +76,8 @@ These properties are necessary only for the iPhone simulator target:
  - IceSSL.Keychain
 
   This property specifies the keychain used to import the certificate
-  from Ice.CertFile. If not specified, the "login" keychain is used by
-  default. If the specified keychain does not exist, it is created.
+  from IceSSL.CertFile. If not specified, the "login" keychain is used
+  by default. If the specified keychain does not exist, it is created.
 
  - IceSSL.KeychainPassword
 
@@ -85,9 +85,9 @@ These properties are necessary only for the iPhone simulator target:
 
 The semantics for locating certificate files identified by the
 properties IceSSL.CertAuthFile and IceSSL.CertFile depend on whether
-the IceSSL.DefaultDir property is also defined. In either case,
-Ice Touch looks for the file in the application's resource bundle and
-in the file system.
+the IceSSL.DefaultDir property is also defined. In either case, Ice
+Touch looks for the file in the application's resource bundle and in
+the file system.
 
 If IceSSL.DefaultDir is defined, Ice Touch tries the following
 locations:
@@ -106,9 +106,8 @@ Loggers
 -------
 
 Custom loggers must be installed via ICEInitializationData. You cannot
-not use any of the Ice for C++ logger properties, such as
-Ice.UseSyslog, and you cannot install a custom logger with a plug-in
-(Ice.Plugin.*).
+use any of the Ice for C++ logger properties, such as Ice.UseSyslog,
+and you cannot install a custom logger with a plug-in (Ice.Plugin.*).
 
 
 Garbage Collection
