@@ -13,6 +13,12 @@ include $(top_srcdir)/config/Make.rules
 
 SUBDIRS		= Ice Database book
 
+ifeq ($(COMPILE_FOR_IPHONE),yes)
+  ifeq ($(COMPILE_FOR_IPHONE_SIMULATOR),no)
+    SUBDIRS	=
+  endif
+endif
+
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \
 	do \
