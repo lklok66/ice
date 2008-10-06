@@ -56,17 +56,6 @@ else
 endif
 
 #
-# The following variables might also be defined:
-# 
-# - slice_translator: the name of the slice translator required for the build.
-#   Setting this variable is required when building source trees other than the
-#   the source distribution (e.g.: the demo sources).
-#                  
-# - ice_require_cpp: define this variable to check for the presence of the C++
-#   dev kit and check for the existence of the include/Ice/Config.h header.
-#
-
-#
 # First, check if we're building a source distribution. 
 #
 # If building from a source distribution, ice_dir is defined to the
@@ -122,78 +111,44 @@ $(error Unable to find $(slice_translator) in $(ICETOUCH_HOME)/$(binsubdir), ple
         ifeq ($(shell test -f $(top_srcdir)/bin/$(slice_translator) && echo 0), 0)
             ice_dir = $(top_srcdir)
         else 
-	    ifeq ($(shell test -f /usr/bin/$(slice_translator) && echo 0), 0)
-	        ice_dir = /usr
-	        ifeq ($(shell test -f /opt/IceTouch-$(VERSION)/bin/$(slice_translator) && echo 0), 0)
-$(warning Found $(slice_translator) in both /usr/bin and /opt/IceTouch-$(VERSION)/bin, /usr/bin/$(slice_translator) will be used!)
-		endif
-	    else
-	        ifeq ($(shell test -f /opt/IceTouch-$(VERSION)/$(binsubdir)/$(slice_translator) && echo 0), 0)
-	            ice_dir = /opt/IceTouch-$(VERSION)
-		endif
+            ifeq ($(shell test -f /opt/IceTouch-$(VERSION)/$(binsubdir)/$(slice_translator) && echo 0), 0)
+	        ice_dir = /opt/IceTouch-$(VERSION)
 	    endif
         endif
     endif
 
     ifndef ice_dir
-$(error Unable to find a valid Ice-E distribution, please verify ICETOUCH_HOME is properly configured and Ice is correctly installed.)
+$(error Unable to find a valid Ice Touch distribution, please verify ICETOUCH_HOME is properly configured and Ice Touch is correctly installed.)
     endif
     ice_bin_dist = 1
 endif
 
 #
-# If ice_require_cpp is defined, ensure the C++ headers exist
-#
-ifeq ($(ice_require_cpp), "yes")
-    ifdef ice_src_dist
-        ice_cpp_header = $(ice_cpp_dir)/include/Ice/Ice.h
-    else
-        ice_cpp_header = $(ice_dir)/include/Ice/Ice.h
-    endif
-    ifneq ($(shell test -f $(ice_cpp_header) && echo 0),0)
-$(error Unable to find the C++ header file $(ice_cpp_header), please verify ICETOUCH_HOME is properly configured and Ice is correctly installed.)
-    endif
-endif
-
-#
-# Clear the embedded runpath prefix if building against RPM distribution.
-#
-ifeq ($(ice_dir), /usr)
-    embedded_runpath_prefix =
-endif
-
-#
 # Set slicedir to the path of the directory containing the Slice files.
 #
-ifeq ($(ice_dir), /usr)
-    slicedir = /usr/share/IceTouch-$(VERSION)/slice
-else
-    slicedir = $(ice_dir)/slice
-endif
+slicedir = $(ice_dir)/slice
 
 install_slicedir	= $(prefix)/slice
 
 #
 # Set environment variables for the Slice translator.
 #
-ifneq ($(ice_dir), /usr)
-    ifdef ice_src_dist
-	ifeq ($(ice_cpp_dir), $(ice_dir)/cpp)
-	    ice_lib_dir = $(ice_cpp_dir)/lib
-	else
-            ice_lib_dir = $(ice_cpp_dir)/$(libsubdir)
-	endif
+ifdef ice_src_dist
+    ifeq ($(ice_cpp_dir), $(ice_dir)/cpp)
+	ice_lib_dir = $(ice_cpp_dir)/lib
     else
-        ice_lib_dir = $(ice_dir)/$(libsubdir)
+        ice_lib_dir = $(ice_cpp_dir)/$(libsubdir)
     endif
+else
+    ice_lib_dir = $(ice_dir)/$(libsubdir)
+endif
 
-    ifeq ($(UNAME),Linux)
-        export LD_LIBRARY_PATH := $(ice_lib_dir):$(LD_LIBRARY_PATH)
-    endif
+ifeq ($(UNAME),Linux)
+    export LD_LIBRARY_PATH := $(ice_lib_dir):$(LD_LIBRARY_PATH)
+endif
 
-    ifeq ($(UNAME),Darwin)
-        export DYLD_LIBRARY_PATH := $(ice_lib_dir):$(DYLD_LIBRARY_PATH)
-    endif
+ifeq ($(UNAME),Darwin)
+    export DYLD_LIBRARY_PATH := $(ice_lib_dir):$(DYLD_LIBRARY_PATH)
 endif
 
 

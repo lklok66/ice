@@ -50,7 +50,6 @@ embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 # Common definitions
 #
 ice_language     = objc
-ice_require_cpp	 = yes
 slice_translator = slice2objc
 ICE_VERSION	 = 3.3.0
 
