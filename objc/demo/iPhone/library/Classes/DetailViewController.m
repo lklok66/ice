@@ -345,6 +345,7 @@ static EditViewController* editViewController_ = nil;
     {
         return 3;
     }
+
     // 4 sections. ISBN, Title, Authors, Rented By | Remove books.
     return 4;
 }
@@ -418,6 +419,7 @@ static EditViewController* editViewController_ = nil;
 
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
+
     if(indexPath.section == 1)
     {
         if(book.title.length == 0)
@@ -472,7 +474,6 @@ static EditViewController* editViewController_ = nil;
             UILabel* textView = [cell.contentView.subviews objectAtIndex:0];
             
             CGSize sz;
-
             if(self.editing)
             {
                 sz = [book.title sizeWithFont:[UIFont boldSystemFontOfSize:20.0] 
@@ -533,10 +534,6 @@ static EditViewController* editViewController_ = nil;
             {
                 cell.text = book.isbn;
             }
-            else if(indexPath.section == 3)
-            {
-                cell.text = book.rentedBy;
-            }
             else if(indexPath.section == 2)
             {
                 if(indexPath.row == book.authors.count)
@@ -548,6 +545,10 @@ static EditViewController* editViewController_ = nil;
                 {
                     cell.text = [book.authors objectAtIndex:(indexPath.row)];
                 }
+            }
+            else if(indexPath.section == 3)
+            {
+                cell.text = book.rentedBy;
             }
         }
     }

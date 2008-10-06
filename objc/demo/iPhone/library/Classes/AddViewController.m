@@ -15,13 +15,6 @@
 
 @synthesize library;
 
--(id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
-	if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
-		// Initialization code
-	}
-	return self;
-}
-
 -(void)viewDidLoad
 {
     self.title = @"New Book";
@@ -41,6 +34,7 @@
     [super viewWillAppear:animated];
     self.navigationItem.leftBarButtonItem.enabled = YES;
     self.navigationItem.rightBarButtonItem.enabled = (book.isbn && book.isbn.length > 0);
+    [self setEditing:YES animated:NO];
 }
 
 -(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -68,6 +62,8 @@
 
 -(IBAction)save:(id)sender
 {
+    // Disable the navigation buttons. The user is locked on this page
+    // until the save has completed.
     self.navigationItem.leftBarButtonItem.enabled = NO;
     self.navigationItem.rightBarButtonItem.enabled = NO;
     [self setEditing:NO animated:NO];

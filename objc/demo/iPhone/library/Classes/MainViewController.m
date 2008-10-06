@@ -153,6 +153,7 @@
 {
     AddViewController *controller = self.addViewController;
     controller.book = [DemoBookDescription bookDescription];
+    controller.book.title = @"";
     controller.book.authors = [NSMutableArray array];
     controller.library = library;
 
