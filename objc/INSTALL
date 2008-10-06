@@ -143,7 +143,7 @@ Simply run "make install" to install Ice Touch in the directory
 specified by the "prefix" variable in objc/config/Make.rules.
 
 For Mac OS X builds of Ice Touch, the install name of the shared
-library is /opt/IceTouch-@ver@/lib. For iPhone builds, the install
+library is /opt/IceTouch-@mmver@/lib. For iPhone builds, the install
 name of the Ice Touch shared libraries is @executable_path/Frameworks.
 It is not necessary to modify DYLD_LIBRARY_PATH as long as the shared
 library is not moved from this directory.

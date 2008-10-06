@@ -28,14 +28,14 @@ main(int argc, char* argv[])
         communicator = [ICEUtil createCommunicator:&argc argv:argv initData:initData];
         if(argc > 1)
         {
-            fprintf(stderr, "%s: too many arguments", argv[0]);
+            fprintf(stderr, "%s: too many arguments\n", argv[0]);
             return 1;
         }
         runParser(argc, argv, communicator);
     }
     @catch(ICELocalException* ex)
     {
-        fprintf(stderr, "%s", [[ex description] UTF8String]);
+        fprintf(stderr, "%s\n", [[ex description] UTF8String]);
         status = 1;
     }
 
@@ -47,7 +47,7 @@ main(int argc, char* argv[])
         }
         @catch(ICELocalException* ex)
         {
-            fprintf(stderr, "%s", [[ex description] UTF8String]);
+            fprintf(stderr, "%s\n", [[ex description] UTF8String]);
             status = 1;
         }
     }

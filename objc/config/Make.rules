@@ -96,6 +96,11 @@ ICE_LIBS = $(ICE_LIB_DIR) -lIce -lSlice -lIceUtil
 
 ifneq ($(embedded_runpath_prefix),)
    runpath_libdir	:= $(embedded_runpath_prefix)/$(libsubdir)
+   ifneq ($(COMPILE_FOR_IPHONE),yes)
+       ifneq ($(STATICLIBS),yes)
+           create_runpath_symlink ?= yes
+       endif
+   endif
 endif
 
 ICECPPFLAGS		= -I$(slicedir)

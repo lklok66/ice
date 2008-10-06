@@ -71,6 +71,6 @@ $(libdir)/$(LIBNAME): $(libdir)/$(SONAME)
 endif
 
 install:: all
-	$(call installlib,$(install_libdir),$(libdir),$(LIBFILENAME),$(LIBNAME),$(LIBNAME))
+	$(call installlib,$(install_libdir),$(libdir),$(LIBFILENAME),$(SONAME),$(LIBNAME))
 
 include .depend

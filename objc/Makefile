@@ -25,6 +25,18 @@ install:: install-common
 		chmod a+rx $$subdir ; \
 	    fi ; \
 	done
+ifeq ($(create_runpath_symlink),yes)
+	@if test -h $(embedded_runpath_prefix) ; \
+	then \
+	     if `\rm -f $(embedded_runpath_prefix) 2>/dev/null`; \
+              then echo "Removed symbolic link $(embedded_runpath_prefix)"; fi \
+        fi
+	@if ! test -d $(embedded_runpath_prefix) ; \
+	then \
+	     if `ln -s $(prefix) $(embedded_runpath_prefix) 2>/dev/null`; \
+              then echo "Created symbolic link $(embedded_runpath_prefix) --> $(prefix)"; fi \
+	fi
+endif
 	$(call installprogram,$(ice_cpp_dir)/bin/slice2objc,$(install_bindir))
 
 $(EVERYTHING)::

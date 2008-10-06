@@ -128,6 +128,7 @@ os.chdir(os.path.dirname(__file__))
 #
 config = open(os.path.join("cpp", "config", "Make.rules.objc"), "r")
 version = re.search("VERSION[\s]*= ([0-9\.]*)", config.read()).group(1)
+mmversion = re.search("([0-9]+\.[0-9b]+)[\.0-9]*", version).group(1)
 versionMinor = re.search("([0-9\.]*).([0-9\.]*)", version).group(2)
 versionMajor = re.search("([0-9\.]*).([0-9\.]*)", version).group(1)
 
@@ -259,6 +260,8 @@ for root, dirnames, filesnames in os.walk('.'):
         filepath = os.path.join(root, f) 
         if f == ".gitignore":
             os.remove(filepath)
+        elif f == "expect.py":
+            os.remove(filepath)
         elif f.endswith(".mak") or f.endswith(".rc"):
             os.remove(filepath)
         else:
@@ -266,7 +269,7 @@ for root, dirnames, filesnames in os.walk('.'):
             # Fix version of README/INSTALL/RELEASE_NOTES files and
             # keep track of bison/flex files for later processing
             if fnmatch.fnmatch(f, "README*") or fnmatch.fnmatch(f, "INSTALL*") or fnmatch.fnmatch(f, "RELEASE_NOTES*"):
-                substitute(filepath, [("@ver@", version)])
+                substitute(filepath, [("@ver@", version), ("@mmver@", mmversion)])
             elif fnmatch.fnmatch(f, "*.y"):
                 bisonFiles.append(filepath)
             elif fnmatch.fnmatch(f, "*.l"):
