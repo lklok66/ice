@@ -16,8 +16,6 @@
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
 		2892E4100DC94CBA00A64D0F /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2892E40F0DC94CBA00A64D0F /* CoreGraphics.framework */; };
 		28AD73600D9D9599002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD735F0D9D9599002E5188 /* MainWindow.xib */; };
-		342EBBB90E929BAF000051FA /* cacert.der in Resources */ = {isa = PBXBuildFile; fileRef = 342EBBB80E929BAF000051FA /* cacert.der */; };
-		342EBBBB0E929BB8000051FA /* c_rsa1024.pfx in Resources */ = {isa = PBXBuildFile; fileRef = 342EBBBA0E929BB8000051FA /* c_rsa1024.pfx */; };
 		344EB3170E8044A1003B8480 /* Glacier2Session.ice in Resources */ = {isa = PBXBuildFile; fileRef = 344EB3160E8044A1003B8480 /* Glacier2Session.ice */; };
 		344EB31F0E804511003B8480 /* Glacier2Session.m in Sources */ = {isa = PBXBuildFile; fileRef = 344EB31E0E804511003B8480 /* Glacier2Session.m */; };
 		347552BC0E71961F001C7AB8 /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 347552BB0E71961F001C7AB8 /* LoginViewController.m */; };
@@ -30,6 +28,7 @@
 		347553ED0E71BA33001C7AB8 /* EditView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 347553EC0E71BA33001C7AB8 /* EditView.xib */; };
 		348A1F8E0E82A976003DBDDD /* libGlacier2ObjC.0.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 348A1F8D0E82A976003DBDDD /* libGlacier2ObjC.0.1.0.dylib */; };
 		348A1F8F0E82A97E003DBDDD /* libGlacier2ObjC.0.1.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 348A1F8D0E82A976003DBDDD /* libGlacier2ObjC.0.1.0.dylib */; };
+		34B128E00E9A4AE900EBD53F /* cacert.der in Resources */ = {isa = PBXBuildFile; fileRef = 34B128DF0E9A4AE900EBD53F /* cacert.der */; };
 		34B920D50E755BBD00B1565B /* Library.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B920D20E755BBD00B1565B /* Library.m */; };
 		34B920D60E755BBD00B1565B /* Session.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B920D40E755BBD00B1565B /* Session.m */; };
 		34BB75760E87DAEC00813E0B /* redButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 34BB75750E87DAEC00813E0B /* redButton.png */; };
@@ -63,8 +62,6 @@
 		28A0AAE50D9B0CCF005BE974 /* library_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = library_Prefix.pch; sourceTree = "<group>"; };
 		28AD735F0D9D9599002E5188 /* MainWindow.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MainWindow.xib; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		342EBBB80E929BAF000051FA /* cacert.der */ = {isa = PBXFileReference; lastKnownFileType = file; name = cacert.der; path = ../../../../certs/cacert.der; sourceTree = SOURCE_ROOT; };
-		342EBBBA0E929BB8000051FA /* c_rsa1024.pfx */ = {isa = PBXFileReference; lastKnownFileType = file; name = c_rsa1024.pfx; path = ../../../../certs/c_rsa1024.pfx; sourceTree = SOURCE_ROOT; };
 		344EB3160E8044A1003B8480 /* Glacier2Session.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Glacier2Session.ice; sourceTree = "<group>"; };
 		344EB31D0E804511003B8480 /* Glacier2Session.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Glacier2Session.h; sourceTree = "<group>"; };
 		344EB31E0E804511003B8480 /* Glacier2Session.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Glacier2Session.m; sourceTree = "<group>"; };
@@ -81,6 +78,7 @@
 		347553EA0E71BA29001C7AB8 /* EditViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EditViewController.m; sourceTree = "<group>"; };
 		347553EC0E71BA33001C7AB8 /* EditView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = EditView.xib; sourceTree = "<group>"; };
 		348A1F8D0E82A976003DBDDD /* libGlacier2ObjC.0.1.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libGlacier2ObjC.0.1.0.dylib; path = ../../../lib/libGlacier2ObjC.0.1.0.dylib; sourceTree = SOURCE_ROOT; };
+		34B128DF0E9A4AE900EBD53F /* cacert.der */ = {isa = PBXFileReference; lastKnownFileType = file; path = cacert.der; sourceTree = "<group>"; };
 		34B920CD0E755B7E00B1565B /* Library.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Library.ice; sourceTree = "<group>"; };
 		34B920CE0E755B7E00B1565B /* Session.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Session.ice; sourceTree = "<group>"; };
 		34B920D10E755BBD00B1565B /* Library.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Library.h; sourceTree = "<group>"; };
@@ -172,8 +170,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				342EBBBA0E929BB8000051FA /* c_rsa1024.pfx */,
-				342EBBB80E929BAF000051FA /* cacert.der */,
+				34B128DF0E9A4AE900EBD53F /* cacert.der */,
 				28AD735F0D9D9599002E5188 /* MainWindow.xib */,
 				8D1107310486CEB800E47090 /* Info.plist */,
 				347552C00E71968B001C7AB8 /* LoginView.xib */,
@@ -264,9 +261,8 @@
 				344EB3170E8044A1003B8480 /* Glacier2Session.ice in Resources */,
 				34BB75760E87DAEC00813E0B /* redButton.png in Resources */,
 				34BB75780E87DB1B00813E0B /* icon.png in Resources */,
-				342EBBB90E929BAF000051FA /* cacert.der in Resources */,
-				342EBBBB0E929BB8000051FA /* c_rsa1024.pfx in Resources */,
 				14EAF7020E93B23700EF4807 /* README.txt in Resources */,
+				34B128E00E9A4AE900EBD53F /* cacert.der in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -95,11 +95,10 @@
         //[self.initData.properties setProperty:@"Ice.Trace.Network" value:@"1"];
         //[self.initData.properties setProperty:@"Ice.Trace.Protocol" value:@"1"];
         
-        [self.initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
-        [self.initData.properties setProperty:@"IceSSL.TrustOnly.Client" value:@"75:FA:B7:3C:6B:1C:F8:FA:69:4B:75:A0:22:51:B2:AC:11:54:A7:E7"];
+        //[self.initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
+        
+        [self.initData.properties setProperty:@"IceSSL.TrustOnly.Client" value:@"11:DD:28:AD:13:44:76:47:4F:BE:3C:4D:AC:AD:5A:06:88:DA:52:"];
         [self.initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
-        [self.initData.properties setProperty:@"IceSSL.CertFile" value:@"c_rsa1024.pfx"];
-        [self.initData.properties setProperty:@"IceSSL.Password" value:@"password"];
         
 #if TARGET_IPHONE_SIMULATOR
         [self.initData.properties setProperty:@"IceSSL.Keychain" value:@"test"];
