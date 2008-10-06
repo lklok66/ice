@@ -97,7 +97,7 @@
         
         //[self.initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
         
-        [self.initData.properties setProperty:@"IceSSL.TrustOnly.Client" value:@"11:DD:28:AD:13:44:76:47:4F:BE:3C:4D:AC:AD:5A:06:88:DA:52:"];
+        [self.initData.properties setProperty:@"IceSSL.TrustOnly.Client" value:@"11:DD:28:AD:13:44:76:47:4F:BE:3C:4D:AC:AD:5A:06:88:DA:52:DA"];
         [self.initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
         
 #if TARGET_IPHONE_SIMULATOR
