@@ -58,9 +58,9 @@ NSString* sslKey = @"sslKey";
     NSString* testValue = [[NSUserDefaults standardUserDefaults] stringForKey:hostnameKey];
     if (testValue == nil)
     {
-        NSDictionary* appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:@"127.0.0.1", hostnameKey,
-                                     @"NO", glacier2Key,
-                                     @"NO", sslKey,
+        NSDictionary* appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:@"demo2.zeroc.com", hostnameKey,
+                                     @"YES", glacier2Key,
+                                     @"YES", sslKey,
                                      nil];
 	
         [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
