@@ -40,7 +40,7 @@ embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 
 # Define the identity of the installed signing certificate if you want
 # to sign the Ice shared libraries.
-#IDENTIFIER = "iPhone Developer: Matthew Newhook"
+#IDENTIFIER = iPhone Developer: Matthew Newhook
 
 # ----------------------------------------------------------------------
 # Don't change anything below this line!
