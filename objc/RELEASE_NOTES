@@ -71,7 +71,8 @@ properties have the semantics documented in the Ice Manual.
    this property is valid only when used in conjunction with
    IceSSL.CertAuthFile.
 
-These properties are necessary only for the iPhone simulator target:
+These properties are necessary only for the Mac OS X or iPhone
+simulator target:
 
  - IceSSL.Keychain
 
