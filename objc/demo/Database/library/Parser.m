@@ -113,10 +113,10 @@ Parser* parser;
 	int nrows;
         [library queryByIsbn:[args objectAtIndex:0] n:1 first:&results nrows:&nrows result:&q];
 
-	printf("%d results", nrows);
+	printf("%d results\n", nrows);
 	if(nrows == 0)
 	{
-		return;
+            return;
 	}
 
         self.current = [results objectAtIndex:0];
@@ -159,8 +159,15 @@ Parser* parser;
 	int nrows;
         [library queryByAuthor:[args objectAtIndex:0] n:1 first:&results nrows:&nrows result:&q];
 
+	printf("%d results\n", nrows);
+	if(nrows == 0)
+	{
+            return;
+	}
+
         self.current = [results objectAtIndex:0];
         self.query = q;
+
         [self printCurrent];
     }
     @catch(ICELocalException* ex)
@@ -198,6 +205,12 @@ Parser* parser;
 	int nrows;
         [library queryByTitle:[args objectAtIndex:0] n:1 first:&results nrows:&nrows result:&q];
 
+	printf("%d results\n", nrows);
+	if(nrows == 0)
+	{
+            return;
+	}
+
         self.current = [results objectAtIndex:0];
         self.query = q;
         [self printCurrent];
@@ -220,7 +233,7 @@ Parser* parser;
     {
         BOOL destroyed;
         NSArray* next = [query next:1 destroyed:&destroyed];
-        if([next count] > 0)
+        if(next.count > 0)
         {
             self.current = [next objectAtIndex:0];
         }

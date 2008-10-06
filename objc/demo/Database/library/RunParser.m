@@ -82,7 +82,7 @@
                 {
                     NSString* warning = [NSString stringWithFormat:@"SessionRefreshThread: %@", [ex description]];
                     [logger warning:warning];
-                    [self cancel];
+                    [super cancel];
                 }
             }
             [pool release];
