@@ -387,9 +387,9 @@ IceObjC::Transceiver::checkCertificates()
                 CFRelease(policySearch);
             }
             CFRelease(certificates);
-            SocketException ex(__FILE__, __LINE__);
-            ex.error = err;
-            throw ex;
+            std::ostringstream os;
+            os << "unable to create policy object (error = " << err << ")";
+            throw Ice::SecurityException(__FILE__, __LINE__, os.str());
         }
         CFRelease(policySearch);
 
@@ -397,9 +397,11 @@ IceObjC::Transceiver::checkCertificates()
         {
             CSSM_APPLE_TP_SSL_OPTIONS opts;
             memset(&opts, 0, sizeof(opts));
+            opts.Version = CSSM_APPLE_TP_SSL_OPTS_VERSION;
             opts.ServerNameLen = _host.size();
             opts.ServerName = _host.c_str();
-            CSSM_DATA optsData = { sizeof(opts), (uint8 *)&opts};
+            opts.Flags = CSSM_APPLE_TP_SSL_CLIENT;
+            CSSM_DATA optsData = { sizeof(opts), (uint8 *)&opts };
             SecPolicySetValue(policy, &optsData);
         }
 #else
@@ -421,9 +423,9 @@ IceObjC::Transceiver::checkCertificates()
         {
             CFRelease(policy);
             CFRelease(certificates);
-            SocketException ex(__FILE__, __LINE__);
-            ex.error = err;
-            throw ex;
+            std::ostringstream os;
+            os << "unable to ceate trust object with peer certificates (error = " << err << ")";
+            throw Ice::SecurityException(__FILE__, __LINE__, os.str());
         }
         CFRelease(policy);
 
@@ -435,9 +437,9 @@ IceObjC::Transceiver::checkCertificates()
         {
             if((err = SecTrustSetAnchorCertificates(trust, _instance->certificateAuthorities())) != noErr)
             {
-                SocketException ex(__FILE__, __LINE__);
-                ex.error = err;
-                throw ex;
+                std::ostringstream os;
+                os << "couldn't set root CA certificates with trust object (error = " << err << ")";
+                throw Ice::SecurityException(__FILE__, __LINE__, os.str());
             }
         }
 
@@ -445,9 +447,9 @@ IceObjC::Transceiver::checkCertificates()
         {
             CFRelease(trust);
             CFRelease(certificates);
-            SocketException ex(__FILE__, __LINE__);
-            ex.error = err;
-            throw ex;
+            std::ostringstream os;
+            os << "unable to evaluate the peer certificate trust (error = " << err << ")";
+            throw Ice::SecurityException(__FILE__, __LINE__, os.str());
         }
 
         CFRelease(trust);
@@ -460,13 +462,10 @@ IceObjC::Transceiver::checkCertificates()
         //
         if(result != kSecTrustResultProceed && result != kSecTrustResultUnspecified)
         {
-            if(_traceLevels->network >= 2)
-            {
-                Trace out(_logger, _traceLevels->networkCat);
-                out << "certificate validation failed: " << result;
-            }
             CFRelease(certificates);
-            throw SocketException(__FILE__, __LINE__, 0);
+            std::ostringstream os;
+            os << "certificate validation failed (result = " << result << ")";
+            throw Ice::SecurityException(__FILE__, __LINE__, os.str());
         }
 
 #if !TARGET_IPHONE_SIMULATOR && TARGET_OS_IPHONE
@@ -492,9 +491,9 @@ IceObjC::Transceiver::checkCertificates()
             {
                 CFRelease(query);
                 CFRelease(certificates);
-                SocketException ex(__FILE__, __LINE__);
-                ex.error = err;
-                throw ex;
+                std::ostringstream os;
+                os << "unable to add peer certificate to keychain (error = " << err << ")";
+                throw Ice::SecurityException(__FILE__, __LINE__, os.str());
             }
             CFRelease(query);
 
@@ -514,21 +513,19 @@ IceObjC::Transceiver::checkCertificates()
             {
                 CFRelease(certificates);
                 CFRelease(query);
-                SocketException ex(__FILE__, __LINE__);
-                ex.error = err;
-                throw ex;
+                std::ostringstream os;
+                os << "unable to remove peer certificate from keychain (error = " << err << ")";
+                throw Ice::SecurityException(__FILE__, __LINE__, os.str());
             }
             CFRelease(query);
 
             if(foundErr != noErr)
             {
-                if(_traceLevels->network >= 2)
-                {
-                    Trace out(_logger, _traceLevels->networkCat);
-                    out << "certificate subject key ID doesn't match trust only property (error = " << foundErr << ")";
-                }
                 CFRelease(certificates);
-                throw SocketException(__FILE__, __LINE__, 0);
+                std::ostringstream os;
+                os << "the certificate subject key ID doesn't match the `IceSSL.TrustOnly.Client' property (error = ";
+                os << foundErr << ")";
+                throw Ice::SecurityException(__FILE__, __LINE__, os.str());
             }
         }
 #endif

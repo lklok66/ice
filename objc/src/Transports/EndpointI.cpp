@@ -442,7 +442,7 @@ IceObjC::Instance::setupStreams(CFReadStreamRef readStream,
            !CFWriteStreamSetProperty(writeStream, kCFStreamPropertySocketSecurityLevel, 
                                      kCFStreamSocketSecurityLevelNegotiatedSSL))
         {
-            throw Ice::SocketException(__FILE__, __LINE__, 0);
+            throw Ice::SecurityException(__FILE__, __LINE__, "couldn't set security level");
         }
         
         if(!server && 
@@ -463,7 +463,7 @@ IceObjC::Instance::setupStreams(CFReadStreamRef readStream,
            !CFWriteStreamSetProperty(writeStream, kCFStreamPropertySSLSettings, settings))
         {
             CFRelease(settings);
-            throw Ice::SocketException(__FILE__, __LINE__, 0);
+            throw Ice::SecurityException(__FILE__, __LINE__, "couldn't set security options");
         }
         CFRelease(settings);
     }
