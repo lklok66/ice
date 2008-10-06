@@ -440,22 +440,22 @@ Parser* parser;
 
 -(void)error:(const char*)s
 {
-    fprintf(stderr, "error: %s", s);
+    fprintf(stderr, "error: %s\n", s);
 }
 
 -(void)errorWithString:(NSString*)s
 {
-    fprintf(stderr, "error: %s", [s UTF8String]);
+    fprintf(stderr, "error: %s\n", [s UTF8String]);
 }
 
 -(void)warning:(const char*)s
 {
-    fprintf(stderr, "warning: %s", s);
+    fprintf(stderr, "warning: %s\n", s);
 }
 
 -(void)warningWithString:(NSString*)s
 {
-    fprintf(stderr, "warning: %s", [s UTF8String]);
+    fprintf(stderr, "warning: %s\n", [s UTF8String]);
 }
 
 -(int)parse
