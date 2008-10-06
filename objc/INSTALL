@@ -91,7 +91,7 @@ There are three possible build configurations:
     Xcode to sign the demo and test iPhone binaries.
 
     One way of doing this is to add IDENTIFIER in your
-    ~/.Mac OS X/environment.plist as shown below:
+    ~/.MacOSX/environment.plist as shown below:
 
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -108,12 +108,12 @@ Now you are ready to build Ice Touch:
 
 $ make
 
-This will build the Ice Touch library. If you are building for Mac OS
-X, this will also build the tests and examples.
+This will build the Ice Touch library and tests. If you are building
+for Mac OS X, this will also build the examples.
 
-If you are building for iPhone or the iPhone simulator, you should now
-use Xcode to build the demos and test suite located in the following
-subdirectories:
+If you are building for iPhone or the iPhone simulator, you should
+now use Xcode to build the demos and test suite GUI located in the
+following subdirectories:
 
   - demo/iPhone/chat
   - demo/iPhone/library
