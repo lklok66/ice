@@ -9,15 +9,17 @@
 
 top_srcdir	= ../..
 
+ifeq ($(STATICLIBS),yes)
+LIBNAME		= $(call mklibname,TestCommon)
+else
 LIBNAME		= $(call mksoname,TestCommon)
+endif
 
 TARGETS		= $(libdir)/$(LIBNAME)
 
 OBJS		= TestCommon.o
 
 SRCS		= $(OBJS:.o=.m)
-
-STATICLIBS	:= yes
 
 include $(top_srcdir)/config/Make.rules
 
@@ -33,7 +35,11 @@ ifneq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
   endif
 endif
 else
+ifeq ($(STATICLIBS),yes)
+	$(call mklib,$@,$(OBJS))
+else
 	$(call mkshlib,$@,$(LIBNAME),$(OBJS),$(LIBS))
+endif
 endif
 
 include .depend
