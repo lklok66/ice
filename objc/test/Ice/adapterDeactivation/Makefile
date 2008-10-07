@@ -12,7 +12,7 @@ top_srcdir	= ../../..
 CLIENT		= client
 SERVER		= server
 
-LIBNAME		= TestAdapaterDeactivation.dylib
+LIBNAME		= TestAdapterDeactivation.dylib
 
 TARGETS_IPHONE	= $(LIBNAME)
 
