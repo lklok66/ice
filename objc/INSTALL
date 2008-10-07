@@ -9,7 +9,7 @@ Operating System
 Ice Touch has been extensively tested on:
 
 - Mac OS X 10.5.5 and Xcode 3.1.1
-- iPod Touch v2 using software version 2.1.1
+- iPod touch v2 using software version 2.1.1
 - iPhone 3g using software version 2.1
 
 
@@ -33,24 +33,22 @@ for these compilers as well as the source code in case you want to
 build them yourself.
 
 
-Third-party libraries
----------------------
+mcpp
+----
 
-Building these third-party libraries is only necessary if you want to
-build the Slice translators yourself.
+Building the mcpp library is only necessary if you want to build the
+Slice translators yourself.
 
 The Slice-to-ObjC and Slice-to-C++ compilers (slice2objc/slice2cpp)
-have a dependency on the following third-party library:
-
-- mcpp 2.7 with patch, or mcpp 2.7.1
+have a dependency on mcpp 2.7 with patch, or mcpp 2.7.1.
 
 We recommend downloading the Ice third-party source archive from
 
  http://www.zeroc.com/download.html
 
-This archive contains the source distributions for each of the
-third-party dependencies, as well as required source patches and
-configuration instructions.
+This archive contains the source distribution for mcpp (along with
+other third-party dependencies for the full Ice distribution), as well
+as required source patches and configuration instructions.
 
 For more information about this dependency, please refer to the link
 below:
@@ -104,12 +102,26 @@ There are three possible build configurations:
 
     You must log out and log in again for the changes to take effect.
 
+In addition, you may also choose to build static libraries.
+
+  - In objc/config/Make.rules, set STATICLIBS=yes
+
+If you choose to use static libraries on the iPhone or the simulator
+the following restrictions apply:
+
+  - The iPhone demos will not build without modifications to link the
+    static libraries.
+
+  - The test suite cannot be run.
+
+  - Debugging applications does not appear to be possible.
+
 Now you are ready to build Ice Touch:
 
 $ make
 
 This will build the Ice Touch library and tests. If you are building
-for Mac OS X, this will also build the examples.
+for Mac OS X, this will also build the demos.
 
 If you are building for iPhone or the iPhone simulator, you should
 now use Xcode to build the demos and test suite GUI located in the
@@ -142,13 +154,20 @@ Installation
 Simply run "make install" to install Ice Touch in the directory
 specified by the "prefix" variable in objc/config/Make.rules.
 
+ - For a Mac OS X build the libraries are installed into <prefix>/lib.
+
+ - For a iPhone simulator build the libraries are installed into
+   <prefix>/lib/simulator.
+
+ - For a iPhone build the libraries are installed into
+   <prefix>/lib/device.
+
 For Mac OS X builds of Ice Touch, the install name of the shared
-library is /opt/IceTouch-@mmver@/lib. For iPhone builds, the install
+library is /opt/IceTouch-@mmver@/lib.  For iPhone builds, the install
 name of the Ice Touch shared libraries is @executable_path/Frameworks.
 It is not necessary to modify DYLD_LIBRARY_PATH as long as the shared
 library is not moved from this directory.
 
 When compiling Ice Touch programs, you must also make sure to pass the
 location of the <prefix>/include directory to the compiler with the -I
-option, and the location of the <prefix>/lib directory with the -L
-option.
+option, and the location of the lib directory with the -L option.

@@ -236,7 +236,7 @@ print "Copying icetouch install files...",
 move(os.path.join("objc", "README"), os.path.join("README"))
 move(os.path.join("objc", "RELEASE_NOTES"), os.path.join("RELEASE_NOTES"))
 move(os.path.join("objc", "INSTALL"), os.path.join("INSTALL"))
-move(os.path.join("objc", "ICETOUCH_LICENSE"), os.path.join("ICETOUCH_LICENSE"))
+move(os.path.join("objc", "ICE_TOUCH_LICENSE"), os.path.join("ICE_TOUCH_LICENSE"))
 #move(os.path.join("objc", "CHANGES"), os.path.join("CHANGES"))
 
 #

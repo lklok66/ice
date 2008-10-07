@@ -1,33 +1,56 @@
-Ice Touch Feature Set
----------------------
+======================================================================
+Release notes for Ice Touch 0.1.0
+======================================================================
 
-Ice Touch supports the following Ice features:
+Table of Contents
+-----------------
 
-  - Thread pools
-  - AMI
-  - Objects by Value
-  - Opaque endpoints
-  - Router
-  - Locator
-  - Batch invocations
-  - SSL
-  - Support for callbacks hosted by bi-directional and routed object
-    adapters
-  - Default servants
-  - Dispatch interceptors
+  1. Ice Touch Feature Set
+  2. SSL Support
+  3. Default Servants
+  4. Interceptors
+  5. Loggers
+  6. Garbage Collection
+  7. Auto release pool
+  8. Library demo
+
+
+======================================================================
+1. Ice Touch Feature Set
+======================================================================
+
+Ice Touch supports the following new features:
+
+  - Objective-C mapping. The mapping is fully documented in the Ice
+    manual.
+  - Default servants. See section 3 for full details.
+
+Compared with Ice, Ice Touch lacks support for:
+
+  - Asynchronous method dispatch (AMD).
+  - Collocation optimization.
+  - Servant Locators.
+  - Implicit Context.
+  - Protocol plug-ins.
+  - Local interfaces.
+  - Ice.Application and Service helper classes.
+  - Ice.Stats interface.
+
+Ice Touch has limited support for:
+
+  - SSL. Please see section 2 for full details.
   - UDP (on the iPhone, UDP requests do not transparently establish
-    the 3G/Edge connection)
-  - Dynamic Ice
-  - Full server-side support
-  - Active connection management
+    a 3G/Edge connection)
 
 
-SSL Support
------------
+======================================================================
+2. SSL Support
+======================================================================
 
 Ice Touch SSL provides a subset of the Ice for C++ SSL functionality.
 
-The following limitation applies:
+Due to limitations in iPhone SSL support, the following limitation
+applies:
 
  - Ice Touch servers cannot authenticate SSL clients.
 
@@ -103,16 +126,77 @@ locations:
   <file>
 
 
-Loggers
--------
+======================================================================
+3. Default Servants
+======================================================================
+
+Ice Touch adds direct support for default servants, which are a
+simplified form of servant locators. The following two methods were
+added to the ObjectAdapter interface.
+
+interface ObjectAdapter
+{
+    void addDefaultServant(Object servant, string category);
+    Object findDefaultServant(string category);
+};
+
+The object adapter allows you add and find default servants. When you
+register a default servant, you must provide an argument for the
+category parameter. The value of the category parameter controls which
+object identities the default servant is responsible for. An incoming
+request for which no explicit entry exists in the ASM and with a
+category for which no default servant is registered returns an
+ObjectNotExistException to the client.
+
+addDefaultServant has the following semantics:
+
+  - You can register exactly one default servant for a specific
+    category. Attempts to call addDefaultServant for the same category
+    more than once raises an AlreadyRegisteredException.
+
+  - It is legal to register a default servant for the empty category.
+    If a request comes in for which no entry exists in the ASM, and
+    whose category does not match the category of any other registered
+    default servant, the Ice run time dispatches the invocation on the
+    default servant registered with the empty category.
+
+Note that, once registered, you cannot change or remove the default
+servant for a category. The life cycle of the default servant for an
+object adapter ends with the life cycle of the adapter.
+
+The findDefaultServant operation allows you to retrieve the default
+servant for a specific category (including the empty category). If no
+default servant is registered for the specified category,
+findDefaultServant returns null.
+
+
+======================================================================
+4. Interceptors
+======================================================================
+
+Dispatch interceptors have the following differences from Ice.
+
+ - The dispatch method of the ICEDispatchInterceptor returns a
+   BOOL. YES is equivalent to DispatchOK, and NO is
+   DispatchUserException. Since Asynchronous method dispatch is not
+   supported, DispatchAsync is not possible.
+
+ - Since collocation optimization is not supported, ICERequest does
+   not have an isCollocated method.
+
+
+======================================================================
+5. Loggers
+======================================================================
 
 Custom loggers must be installed via ICEInitializationData. You cannot
 use any of the Ice for C++ logger properties, such as Ice.UseSyslog,
 and you cannot install a custom logger with a plug-in (Ice.Plugin.*).
 
 
-Garbage Collection
-------------------
+======================================================================
+6. Garbage Collection
+======================================================================
 
 The Ice Touch run time cannot garbage collect graphs of objects
 containing cycles. For example,
@@ -135,16 +219,18 @@ Ice Touch has not been tested with Objective-C garbage collection on
 Mac OS X.
 
 
-Auto release pool
------------------
+======================================================================
+7. Auto release pool
+======================================================================
 
 The Ice run time creates an NSAutoReleasePool object before each
 server-side dispatched invocation and client-side AMI callback. The
 pool is released once the dispatch is complete.
 
 
-Library demo
-------------
+======================================================================
+8. Library demo
+======================================================================
 
 The library demos included in the distribution (demo/Database/library,
 demo/iPhone/library) run against a new Java JDBC demo. ZeroC hosts
