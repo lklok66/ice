@@ -36,8 +36,9 @@ applications will work seamlessly with existing Ice servers as well as
 Ice services such as IceGrid, Glacier2, and IceStorm.
 
 As with all ZeroC Labs projects, we do not advise using Ice Touch in
-mission-critical projects. Also be aware that any subsequent release
-of this project may contain changes that break backward compatibility.
+mission-critical applications. Also be aware that any subsequent
+release of this product may contain changes that break backward
+compatibility.
 
 
 ======================================================================
