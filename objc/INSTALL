@@ -3,12 +3,12 @@ Requirements
 ======================================================================
 
 
-Operating System
+Operating system
 ----------------
 
-Ice Touch has been extensively tested on:
+Ice Touch requires:
 
-- Mac OS X 10.5.5 and Xcode 3.1.1
+- Mac OS X 10.5.4 or later
 - iPod touch v2 using software version 2.1.1
 - iPhone 3g using software version 2.1
 
@@ -73,11 +73,11 @@ There are three possible build configurations:
 * Build for Mac OS X
 
   - In objc/config/Make.rules, leave COMPILE_FOR_IPHONE and
-    COMPILE_FOR_IPHONE_SIMULATOR unset.
+    COMPILE_FOR_IPHONE_SIMULATOR unset
 
 * Build for the iPhone simulator
 
-  - In objc/config/Make.rules, set COMPILE_FOR_IPHONE_SIMULATOR=YES.
+  - In objc/config/Make.rules, set COMPILE_FOR_IPHONE_SIMULATOR=YES
 
 * Build for the iPhone or iPod touch
 
@@ -102,12 +102,12 @@ There are three possible build configurations:
 
     You must log out and log in again for the changes to take effect.
 
-In addition, you may also choose to build static libraries.
+In addition, you may also choose to build static libraries:
 
   - In objc/config/Make.rules, set STATICLIBS=yes
 
-If you choose to use static libraries on the iPhone or the simulator
-the following restrictions apply:
+Note that the following restrictions apply if you choose to use static
+libraries on the iPhone or the simulator:
 
   - The iPhone demos will not build without modifications to link the
     static libraries.
@@ -154,16 +154,17 @@ Installation
 Simply run "make install" to install Ice Touch in the directory
 specified by the "prefix" variable in objc/config/Make.rules.
 
- - For the Mac OS X build the libraries are installed into <prefix>/lib.
+ - For the Mac OS X build, the libraries are installed into
+   <prefix>/lib
 
- - For the iPhone simulator build the libraries are installed into
-   <prefix>/lib/simulator.
+ - For the iPhone simulator build, the libraries are installed into
+   <prefix>/lib/simulator
 
- - For the iPhone build the libraries are installed into
-   <prefix>/lib/device.
+ - For the iPhone build, the libraries are installed into
+   <prefix>/lib/device
 
 For Mac OS X builds of Ice Touch, the install name of the shared
-library is /opt/IceTouch-@mmver@/lib.  For iPhone builds, the install
+library is /opt/IceTouch-@mmver@/lib. For iPhone builds, the install
 name of the Ice Touch shared libraries is @executable_path/Frameworks.
 It is not necessary to modify DYLD_LIBRARY_PATH as long as the shared
 library is not moved from this directory.
