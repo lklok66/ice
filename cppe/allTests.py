@@ -39,6 +39,7 @@ tests = [
     ("IceE/custom", ["core"]),
     ("IceE/retry", ["core"]),
     ("IceE/defaultServant", ["core"]),
+    ("IceE/interceptor", ["core"]),
     ]
 
 if __name__ == "__main__":

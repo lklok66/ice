@@ -32,6 +32,7 @@ LOCAL_OBJS      = Base64.obj \
                   ConvertUTF.obj \
                   Current.obj \
                   DefaultsAndOverrides.obj \
+		  DispatchInterceptor.obj \
                   Endpoint.obj \
                   ExceptionBase.obj \
                   FactoryTable.obj \

@@ -96,7 +96,7 @@ IceUtil::Exception::ice_line() const
 IceUtil::NullHandleException::NullHandleException(const char* file, int line) :
     Exception(file, line)
 {
-    if(nullHandleAbort)
+    if(true) //nullHandleAbort)
     {
 #ifdef _WIN32_WCE
         //

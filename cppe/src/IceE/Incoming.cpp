@@ -8,6 +8,7 @@
 // **********************************************************************
 
 #include <IceE/Incoming.h>
+#include <IceE/IncomingRequest.h>
 #include <IceE/ServantManager.h>
 #include <IceE/Object.h>
 #include <IceE/ReplyStatus.h>
@@ -40,6 +41,34 @@ IceInternal::Incoming::Incoming(Instance* inst, Connection* con, BasicStream& is
 }
 
 void
+IceInternal::Incoming::startOver()
+{
+    if(_inParamPos == 0)
+    {
+        //
+        // That's the first startOver, so almost nothing to do
+        //
+        _inParamPos = _is.i;
+    }
+    else
+    {
+        //
+        // Let's rewind _is and clean-up _os
+        //
+        _is.i = _inParamPos;
+
+        if(_response)
+        {
+            _os.endWriteEncaps();
+            _os.b.resize(headerSize + 4);
+            _os.write(static_cast<Byte>(0));
+            _os.startWriteEncaps();
+        }
+    }
+}
+
+
+void
 IceInternal::Incoming::setAdapter(const Ice::ObjectAdapterPtr& adapter)
 {
     _adapter = adapter;
@@ -63,6 +92,8 @@ IceInternal::Incoming::invoke(bool response, Int requestId)
     assert(_adapter && _servantManager);
 
     _current.requestId = requestId;
+    _response = response;
+    _inParamPos = 0;
 
     //
     // Clear the context from the previous invocation.
@@ -482,6 +513,12 @@ IceInternal::Incoming::invoke(bool response, Int requestId)
     }
 }
 
+const Current&
+IceInternal::Incoming::getCurrent()
+{
+    return _current;
+}
+
 void
 IceInternal::Incoming::__warning(const Exception& ex) const
 {
@@ -498,3 +535,8 @@ IceInternal::Incoming::__warning(const string& msg) const
     out << "\noperation: " << _current.operation;
 }
 
+const Current&
+IceInternal::IncomingRequest::getCurrent()
+{
+    return _in.getCurrent();
+}

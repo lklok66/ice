@@ -17,6 +17,7 @@ SUBDIRS		= proxy \
                   operations \
 		  exceptions \
 		  inheritance \
+		  interceptor \
 		  facets \
 		  location \
 		  slicing \

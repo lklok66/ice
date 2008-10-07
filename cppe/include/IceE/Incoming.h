@@ -28,11 +28,15 @@ public:
     void setAdapter(const Ice::ObjectAdapterPtr&);
     const Ice::ObjectAdapterPtr& getAdapter() const { return _adapter; }
 
+    void startOver();
+
     void invoke(bool, Ice::Int);
 
     // Inlined for speed optimization.
     BasicStream* os() { return &_os; }
     BasicStream* is() { return &_is; }
+
+    const Ice::Current& getCurrent();
 
 protected:
     
@@ -45,6 +49,8 @@ protected:
     Ice::ObjectAdapterPtr _adapter;
     ServantManager* _servantManager;
     Ice::Current _current;
+    bool _response;
+    Ice::Byte* _inParamPos;
 };
 
 }

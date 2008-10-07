@@ -23,6 +23,7 @@
 #   include <IceE/ObjectAdapter.h>
 #   include <IceE/Object.h>
 #   include <IceE/UUID.h>
+#   include <IceE/DispatchInterceptor.h>
 #endif
 #include <IceE/Proxy.h>
 #include <IceE/Connection.h>

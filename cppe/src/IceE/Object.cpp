@@ -14,6 +14,7 @@
 #include <IceE/Object.h>
 #ifndef ICEE_PURE_CLIENT
 #   include <IceE/Incoming.h>
+#   include <IceE/IncomingRequest.h>
 #endif
 #include <IceE/LocalException.h>
 #include <IceE/SafeStdio.h>
@@ -143,6 +144,14 @@ string Ice::Object::__all[] =
     "ice_isA",
     "ice_ping"
 };
+
+DispatchStatus
+Ice::Object::ice_dispatch(Request& request)
+{
+    IceInternal::Incoming& in = dynamic_cast<IceInternal::IncomingRequest&>(request)._in;
+    in.startOver();
+    return __dispatch(in, in.getCurrent());
+}
 
 DispatchStatus
 Ice::Object::__dispatch(Incoming& in, const Current& current)

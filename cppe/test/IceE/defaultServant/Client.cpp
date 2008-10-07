@@ -19,7 +19,7 @@ class DefaultServantTestApplication : public TestApplication
 public:
 
     DefaultServantTestApplication() :
-        TestApplication("facets client")
+        TestApplication("default servant client")
     {
     }
 

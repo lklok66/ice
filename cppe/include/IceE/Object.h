@@ -30,6 +30,15 @@ enum DispatchStatus
     DispatchUserException
 };
 
+class ICE_API Request
+{
+public:
+
+    virtual ~Request() {}
+    virtual const Current& getCurrent() = 0;
+};
+
+
 class ICE_API Object : virtual public IceUtil::Shared
 {
 public:
@@ -55,6 +64,7 @@ public:
     DispatchStatus ___ice_id(IceInternal::Incoming&, const Current&);
 
     static std::string __all[];
+    virtual DispatchStatus ice_dispatch(Request&);
     virtual DispatchStatus __dispatch(IceInternal::Incoming&, const Current&);
 #endif
 

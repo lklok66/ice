@@ -36,6 +36,7 @@ LOCAL_OBJS	= Base64.o \
 		  ConvertUTF.o \
 		  Current.o \
 		  DefaultsAndOverrides.o \
+		  DispatchInterceptor.o \
 		  Endpoint.o \
 		  ExceptionBase.o \
 		  FactoryTable.o \
