@@ -5,188 +5,91 @@ Release notes for Ice Touch 0.1.0
 Table of Contents
 -----------------
 
-  1. Ice Touch Feature Set
-  2. SSL Support
-  3. Default Servants
-  4. Interceptors
-  5. Loggers
-  6. Garbage Collection
-  7. Auto release pool
-  8. Library demo
+  1. Introduction
+  2. Ice Touch Feature Set
+  3. SSL Support
+  4. Loggers
+  5. Garbage Collection
+  6. Auto release pool
+  7. Library demo
 
 
 ======================================================================
-1. Ice Touch Feature Set
+1. Introduction
+======================================================================
+
+Ice Touch is our most ambitious ZeroC Labs project to date, offering
+an Ice run time with as many features as we could implement in a
+relatively short development period. Although the Objective-C language
+mapping is new, it is currently implemented as a layer over the stable
+Ice for C++ 3.3.0 run time.
+
+We have strived to design an Objective-C language mapping that
+developers will find natural and intuitive, and we are counting on
+feedback from the user community to let us know what we got right and
+what we need to improve. To get you started, we have created a new
+version of the Ice 3.3.0 manual that contains Ice Touch material. You
+can view or download the manual at the link below:
+
+  http://www.zeroc.com/labs/icetouch/download.html
+
+As with all ZeroC Labs projects, we do not offer commercial licenses
+or support, and we do not advise using Ice Touch in mission-critical
+projects. Any subsequent release of this project may contain changes
+that break backward compatibility.
+
+
+======================================================================
+2. Ice Touch Feature Set
 ======================================================================
 
 Ice Touch supports the following new features:
 
-  - Objective-C mapping. The mapping is fully documented in the Ice
-    manual.
-  - Default servants. See section 3 for full details.
+  - Objective-C mapping
+  - Default servants
 
-Compared with Ice, Ice Touch lacks support for:
+These topics are described in the Ice Touch version of the manual.
 
-  - Asynchronous method dispatch (AMD).
-  - Collocation optimization.
-  - Servant Locators.
-  - Implicit Context.
-  - Protocol plug-ins.
-  - Local interfaces.
-  - Ice.Application and Service helper classes.
-  - Ice.Stats interface.
+Ice Touch currently lacks support for the following Ice features:
+
+  - Asynchronous method dispatch (AMD)
+  - Collocation optimization
+  - Servant locators
+  - Implicit contexts
+  - Protocol plug-ins
+  - Local interfaces
+  - Ice.Application and Service helper classes
+  - Ice.Stats interface
 
 Ice Touch has limited support for:
 
-  - SSL. Please see section 2 for full details.
-  - UDP (on the iPhone, UDP requests do not transparently establish
-    a 3G/Edge connection)
+  - SSL
+
+    Refer to Section 3 below for more information.
+
+  - UDP
+
+    On the iPhone, UDP requests do not transparently establish a
+    3G/Edge connection.
 
 
 ======================================================================
-2. SSL Support
+3. SSL Support
 ======================================================================
 
 Ice Touch SSL provides a subset of the Ice for C++ SSL functionality.
-
 Due to limitations in iPhone SSL support, the following limitation
 applies:
 
- - Ice Touch servers cannot authenticate SSL clients.
+  - Ice Touch servers cannot authenticate SSL clients.
 
-The supported properties are listed below. Unless otherwise noted, the
-properties have the semantics documented in the Ice Manual.
-
- - IceSSL.DefaultDir
-
-   See below for more information on how Ice Touch locates certificate
-   files.
-
- - IceSSL.CheckCertName
-
- - IceSSL.CertAuthFile
-
-   If a certificate authority is not specified, all certificate
-   authorities in the keychain are used. For CA certificates, Ice
-   Touch supports only DER encoding.
-
-   See below for more information on how Ice Touch locates certificate
-   files.
-
- - IceSSL.CertFile
-
-   Ice Touch supports only PKCS#12 (.PFX) encoded certificates.
-
-   See below for more information on how Ice Touch locates certificate
-   files.
-
- - IceSSL.Password
-
- - IceSSL.TrustOnly.Client
-
-   The property specifies an X509v3 subject key identifier. The
-   property value is composed of a series of hex values separated by
-   colons or spaces. For example:
-
-   "C2:E8:D3:33:D7:83:99:6E:08:F7:C2:34:31:F7:1E:8E:44:87:38:57"
-
-   Since this value is specific to a single certificate authority,
-   this property is valid only when used in conjunction with
-   IceSSL.CertAuthFile.
-
-These properties are necessary only for the Mac OS X or iPhone
-simulator target:
-
- - IceSSL.Keychain
-
-  This property specifies the keychain used to import the certificate
-  from IceSSL.CertFile. If not specified, the "login" keychain is used
-  by default. If the specified keychain does not exist, it is created.
-
- - IceSSL.KeychainPassword
-
-  The password for the above keychain.
-
-The semantics for locating certificate files identified by the
-properties IceSSL.CertAuthFile and IceSSL.CertFile depend on whether
-the IceSSL.DefaultDir property is also defined. In either case, Ice
-Touch looks for the file in the application's resource bundle and in
-the file system.
-
-If IceSSL.DefaultDir is defined, Ice Touch tries the following
-locations:
-
-  Resources/<DefaultDir>/<file>
-  <DefaultDir>/<file>
-
-If IceSSL.DefaultDir is not defined, Ice Touch tries the following
-locations:
-
-  Resources/<file>
-  <file>
+Furthermore, the semantics of some IceSSL configuration properties
+have changed, and new properties have been added. The IceSSL property
+reference section of the Ice Touch manual provides complete details.
 
 
 ======================================================================
-3. Default Servants
-======================================================================
-
-Ice Touch adds direct support for default servants, which are a
-simplified form of servant locators. The following two methods were
-added to the ObjectAdapter interface.
-
-interface ObjectAdapter
-{
-    void addDefaultServant(Object servant, string category);
-    Object findDefaultServant(string category);
-};
-
-The object adapter allows you add and find default servants. When you
-register a default servant, you must provide an argument for the
-category parameter. The value of the category parameter controls which
-object identities the default servant is responsible for. An incoming
-request for which no explicit entry exists in the ASM and with a
-category for which no default servant is registered returns an
-ObjectNotExistException to the client.
-
-addDefaultServant has the following semantics:
-
-  - You can register exactly one default servant for a specific
-    category. Attempts to call addDefaultServant for the same category
-    more than once raises an AlreadyRegisteredException.
-
-  - It is legal to register a default servant for the empty category.
-    If a request comes in for which no entry exists in the ASM, and
-    whose category does not match the category of any other registered
-    default servant, the Ice run time dispatches the invocation on the
-    default servant registered with the empty category.
-
-Note that, once registered, you cannot change or remove the default
-servant for a category. The life cycle of the default servant for an
-object adapter ends with the life cycle of the adapter.
-
-The findDefaultServant operation allows you to retrieve the default
-servant for a specific category (including the empty category). If no
-default servant is registered for the specified category,
-findDefaultServant returns null.
-
-
-======================================================================
-4. Interceptors
-======================================================================
-
-Dispatch interceptors have the following differences from Ice.
-
- - The dispatch method of the ICEDispatchInterceptor returns a
-   BOOL. YES is equivalent to DispatchOK, and NO is
-   DispatchUserException. Since Asynchronous method dispatch is not
-   supported, DispatchAsync is not possible.
-
- - Since collocation optimization is not supported, ICERequest does
-   not have an isCollocated method.
-
-
-======================================================================
-5. Loggers
+4. Loggers
 ======================================================================
 
 Custom loggers must be installed via ICEInitializationData. You cannot
@@ -195,7 +98,7 @@ and you cannot install a custom logger with a plug-in (Ice.Plugin.*).
 
 
 ======================================================================
-6. Garbage Collection
+5. Garbage Collection
 ======================================================================
 
 The Ice Touch run time cannot garbage collect graphs of objects
@@ -220,7 +123,7 @@ Mac OS X.
 
 
 ======================================================================
-7. Auto release pool
+6. Auto release pool
 ======================================================================
 
 The Ice run time creates an NSAutoReleasePool object before each
@@ -229,7 +132,7 @@ pool is released once the dispatch is complete.
 
 
 ======================================================================
-8. Library demo
+7. Library demo
 ======================================================================
 
 The library demos included in the distribution (demo/Database/library,
@@ -237,7 +140,7 @@ demo/iPhone/library) run against a new Java JDBC demo. ZeroC hosts
 a server for this demo on demo2.zeroc.com. The demos, by default,
 connect with this host.
 
-This demo will be released in the next Ice distribution. In the
-meantime, the complete source for this demo can be found at:
+This demo will be released in the next Ice distribution. Meanwhile,
+the complete source for this demo can be downloaded at the link below:
 
   http://www.zeroc.com/downloads/IceTouch/0.1/JDBC-demo.tar.gz
