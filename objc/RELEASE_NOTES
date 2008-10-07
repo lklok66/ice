@@ -19,24 +19,26 @@ Table of Contents
 ======================================================================
 
 Ice Touch is our most ambitious ZeroC Labs project to date, offering
-an Ice run time with as many features as we could implement in a
-relatively short development period. Although the Objective-C language
-mapping is new, it is currently implemented as a layer over the stable
-Ice for C++ 3.3.0 run time.
+an Ice run time for the iPhone and iPod touch with a new Objective-C
+language mapping.
 
-We have strived to design an Objective-C language mapping that
-developers will find natural and intuitive, and we are counting on
-feedback from the user community to let us know what we got right and
-what we need to improve. To get you started, we have created a new
-version of the Ice 3.3.0 manual that contains Ice Touch material. You
-can view or download the manual at the link below:
+We have strived to design a mapping that developers will find natural
+and intuitive, and we are counting on feedback from the user community
+to let us know what we got right and what we need to improve. To get
+you started, we have created a new version of the Ice manual that
+contains Ice Touch material. You can view or download the manual at
+the link below:
 
   http://www.zeroc.com/labs/icetouch/download.html
 
-As with all ZeroC Labs projects, we do not offer commercial licenses
-or support, and we do not advise using Ice Touch in mission-critical
-projects. Any subsequent release of this project may contain changes
-that break backward compatibility.
+The Ice Touch distribution does not include any Ice services, but
+its support for the complete Ice protocol means your Ice Touch
+applications can work seamlessly with existing Ice servers as well as
+Ice services such as IceGrid, Glacier2, and IceStorm.
+
+As with all ZeroC Labs projects, we do not advise using Ice Touch in
+mission-critical projects. Also be aware that any subsequent release
+of this project may contain changes that break backward compatibility.
 
 
 ======================================================================
