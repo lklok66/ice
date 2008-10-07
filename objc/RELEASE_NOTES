@@ -23,17 +23,16 @@ an Ice run time for the iPhone and iPod touch with a new Objective-C
 language mapping.
 
 We have strived to design a mapping that developers will find natural
-and intuitive, and we are counting on feedback from the user community
-to let us know what we got right and what we need to improve. To get
-you started, we have created a new version of the Ice manual that
-contains Ice Touch material. You can view or download the manual at
-the link below:
+and intuitive, and we are counting on your feedback to let us know
+what we got right and what we need to improve. To get you started, we
+have created a new version of the Ice manual that contains Ice Touch
+material. You can view or download this manual at the link below:
 
   http://www.zeroc.com/labs/icetouch/download.html
 
 The Ice Touch distribution does not include any Ice services, but
 its support for the complete Ice protocol means your Ice Touch
-applications can work seamlessly with existing Ice servers as well as
+applications will work seamlessly with existing Ice servers as well as
 Ice services such as IceGrid, Glacier2, and IceStorm.
 
 As with all ZeroC Labs projects, we do not advise using Ice Touch in
