@@ -382,6 +382,7 @@ IceObjC::Instance::Instance(const IceInternal::InstancePtr& instance, bool secur
         CFRelease(identity);
         CFRelease(items);
     }
+#endif
 
     string trustOnly = properties->getProperty("IceSSL.TrustOnly.Client");
     if(!trustOnly.empty())
@@ -397,11 +398,10 @@ IceObjC::Instance::Instance(const IceInternal::InstancePtr& instance, bool secur
         if(!_trustOnlyKeyID)
         {
             ostringstream os;
-            os << "IceSSL: invalid `IceSSL.TrustOnly.Client' property value (not a 20 bytes hexadecimal string)";
+            os << "IceSSL: invalid `IceSSL.TrustOnly.Client' property value";
             throw PluginInitializationException(__FILE__, __LINE__, os.str());
         }
     }
-#endif
 
     _serverSettings = CFDictionaryCreateMutableCopy(0, 0, _clientSettings);
     CFDictionarySetValue(_serverSettings, kCFStreamSSLIsServer, kCFBooleanTrue);
