@@ -468,9 +468,62 @@ IceObjC::Transceiver::checkCertificates()
             throw Ice::SecurityException(__FILE__, __LINE__, os.str());
         }
 
-#if !TARGET_IPHONE_SIMULATOR && TARGET_OS_IPHONE
         if(_instance->trustOnlyKeyID())
         {
+#if TARGET_IPHONE_SIMULATOR || !TARGET_OS_IPHONE
+            SecCertificateRef cert = (SecCertificateRef)CFArrayGetValueAtIndex(certificates, 0);
+
+            CSSM_CL_HANDLE handle;
+            CSSM_DATA data;
+            if((err = SecCertificateGetCLHandle(cert, &handle)) != noErr ||
+               (err = SecCertificateGetData(cert, &data)) != noErr)
+            {
+                CFRelease(certificates);
+                std::ostringstream os;
+                os << "couldn't obtain certificate information to check the subject key ID (error = " << err << ")";
+                throw Ice::SecurityException(__FILE__, __LINE__, os.str());
+            }
+       
+            const CSSM_OID* tag = &CSSMOID_SubjectKeyIdentifier;
+            CSSM_DATA *result;
+            uint32 count;
+            CSSM_HANDLE moreResults;
+            CSSM_RETURN error = CSSM_CL_CertGetFirstFieldValue(handle, &data, tag, &moreResults, &count, &result);
+            if(error != CSSM_OK)
+            {
+                CFRelease(certificates);
+                std::ostringstream os;
+                os << "couldn't obtain certificate information to check the subject key ID (error = " << error << ")";
+                throw Ice::SecurityException(__FILE__, __LINE__, os.str());
+            }
+
+            CSSM_X509_EXTENSION_PTR ext = (CSSM_X509_EXTENSION_PTR)result->Data;
+            if(ext->format != CSSM_X509_DATAFORMAT_PARSED)
+            {
+                CSSM_CL_CertAbortQuery(handle, moreResults);
+                CSSM_CL_FreeFieldValue(handle, tag, result);
+                CFRelease(certificates);
+                std::ostringstream os;
+                os << "unexpected format for subject key ID (format = " << ext->format << ")";
+                throw Ice::SecurityException(__FILE__, __LINE__, os.str());
+            }
+
+            CE_SubjectKeyID* peerKey = (CE_SubjectKeyID*)ext->value.parsedValue;
+            CFDataRef key = _instance->trustOnlyKeyID();
+            if(peerKey->Length != (uint32)CFDataGetLength(key) ||
+               memcmp(peerKey->Data, CFDataGetBytePtr(key), peerKey->Length) != 0)
+            {
+                CSSM_CL_CertAbortQuery(handle, moreResults);
+                CSSM_CL_FreeFieldValue(handle, tag, result);
+                CFRelease(certificates);
+                std::ostringstream os;
+                os << "the certificate subject key ID doesn't match the `IceSSL.TrustOnly.Client' property";
+                throw Ice::SecurityException(__FILE__, __LINE__, os.str());
+            }
+
+            CSSM_CL_CertAbortQuery(handle, moreResults);
+            CSSM_CL_FreeFieldValue(handle, tag, result);
+#else
             //
             // To check the subject key ID, we add the peer certificate to the keychain with SetItemAdd,
             // then we lookup for the cert using the kSecAttrSubjectKeyID. Then we remove the cert from
@@ -527,8 +580,8 @@ IceObjC::Transceiver::checkCertificates()
                 os << foundErr << ")";
                 throw Ice::SecurityException(__FILE__, __LINE__, os.str());
             }
-        }
 #endif
+        }
         CFRelease(certificates);
     }
 }
