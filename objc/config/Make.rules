@@ -67,6 +67,12 @@ else ifeq ($(OPTIMIZE),yes)
     OPTIMIZE_SPEED	= yes
 endif
 
+ifeq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
+libsubdir := $(libsubdir)/simulator
+else ifeq ($(COMPILE_FOR_IPHONE),yes)
+libsubdir := $(libsubdir)/device
+endif
+
 bindir			= $(top_srcdir)/bin
 libdir			= $(top_srcdir)/lib
 includedir		= $(top_srcdir)/include

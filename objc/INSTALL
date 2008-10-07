@@ -154,12 +154,12 @@ Installation
 Simply run "make install" to install Ice Touch in the directory
 specified by the "prefix" variable in objc/config/Make.rules.
 
- - For a Mac OS X build the libraries are installed into <prefix>/lib.
+ - For the Mac OS X build the libraries are installed into <prefix>/lib.
 
- - For a iPhone simulator build the libraries are installed into
+ - For the iPhone simulator build the libraries are installed into
    <prefix>/lib/simulator.
 
- - For a iPhone build the libraries are installed into
+ - For the iPhone build the libraries are installed into
    <prefix>/lib/device.
 
 For Mac OS X builds of Ice Touch, the install name of the shared
