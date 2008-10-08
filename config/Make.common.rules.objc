@@ -3,7 +3,7 @@
 # Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
-# ICE_LICENSE file included in this distribution.
+# ICE_TOUCH_LICENSE file included in this distribution.
 #
 # **********************************************************************
 
@@ -69,22 +69,22 @@ ifndef ice_bin_dist
         ice_src_dist = 1
 
         #
-        # When building a source distribution, if ICETOUCH_HOME is specified, it takes precedence over 
+        # When building a source distribution, if ICE_TOUCH_HOME is specified, it takes precedence over 
         # the source tree for building the language mappings. For example, this can be used to 
         # build the Python language mapping using the translators from the distribution specified
-        # by ICETOUCH_HOME.
+        # by ICE_TOUCH_HOME.
         #
-	ifneq ($(ICETOUCH_HOME),)
+	ifneq ($(ICE_TOUCH_HOME),)
 	    ifdef slice_translator
-		ifneq ($(shell test -f $(ICETOUCH_HOME)/$(binsubdir)/$(slice_translator) && echo 0), 0)
-$(error Unable to find $(slice_translator) in $(ICETOUCH_HOME)/$(binsubdir), please verify ICETOUCH_HOME is properly configured and Ice is correctly installed.)
+		ifneq ($(shell test -f $(ICE_TOUCH_HOME)/$(binsubdir)/$(slice_translator) && echo 0), 0)
+$(error Unable to find $(slice_translator) in $(ICE_TOUCH_HOME)/$(binsubdir), please verify ICE_TOUCH_HOME is properly configured and Ice is correctly installed.)
 		endif
 		ifeq ($(shell test -f $(ice_dir)/cpp/bin/$(slice_translator) && echo 0), 0)
-$(warning Found $(slice_translator) in both ICETOUCH_HOME/bin and $(ice_dir)/cpp/bin, ICETOUCH_HOME/bin/$(slice_translator) will be used!)
+$(warning Found $(slice_translator) in both ICE_TOUCH_HOME/bin and $(ice_dir)/cpp/bin, ICE_TOUCH_HOME/bin/$(slice_translator) will be used!)
 		endif
-		ice_cpp_dir = $(ICETOUCH_HOME)
+		ice_cpp_dir = $(ICE_TOUCH_HOME)
 	    else
-$(warning Ignoring ICETOUCH_HOME environment variable to build current source tree.)
+$(warning Ignoring ICE_TOUCH_HOME environment variable to build current source tree.)
 		ice_cpp_dir = $(ice_dir)/cpp
 	    endif
 	else
@@ -102,11 +102,11 @@ ifndef ice_src_dist
 $(error slice_translator must be defined)
     endif
 
-    ifneq ($(ICETOUCH_HOME),)
-        ifneq ($(shell test -f $(ICETOUCH_HOME)/$(binsubdir)/$(slice_translator) && echo 0), 0)
-$(error Unable to find $(slice_translator) in $(ICETOUCH_HOME)/$(binsubdir), please verify ICETOUCH_HOME is properly configured and Ice is correctly installed.)
+    ifneq ($(ICE_TOUCH_HOME),)
+        ifneq ($(shell test -f $(ICE_TOUCH_HOME)/$(binsubdir)/$(slice_translator) && echo 0), 0)
+$(error Unable to find $(slice_translator) in $(ICE_TOUCH_HOME)/$(binsubdir), please verify ICE_TOUCH_HOME is properly configured and Ice is correctly installed.)
         endif
-        ice_dir = $(ICETOUCH_HOME)
+        ice_dir = $(ICE_TOUCH_HOME)
     else
         ifeq ($(shell test -f $(top_srcdir)/bin/$(slice_translator) && echo 0), 0)
             ice_dir = $(top_srcdir)
@@ -118,7 +118,7 @@ $(error Unable to find $(slice_translator) in $(ICETOUCH_HOME)/$(binsubdir), ple
     endif
 
     ifndef ice_dir
-$(error Unable to find a valid Ice Touch distribution, please verify ICETOUCH_HOME is properly configured and Ice Touch is correctly installed.)
+$(error Unable to find a valid Ice Touch distribution, please verify ICE_TOUCH_HOME is properly configured and Ice Touch is correctly installed.)
     endif
     ice_bin_dist = 1
 endif
@@ -228,9 +228,9 @@ install-common::
 	    done ; \
         fi
 
-	@if test ! -f $(prefix)/ICETOUCH_LICENSE ; \
+	@if test ! -f $(prefix)/ICE_TOUCH_LICENSE ; \
 	then \
-	    $(call installdata,$(top_srcdir)/../ICETOUCH_LICENSE,$(prefix)) ; \
+	    $(call installdata,$(top_srcdir)/../ICE_TOUCH_LICENSE,$(prefix)) ; \
 	fi
 
 	@if test ! -f $(prefix)/LICENSE ; \
