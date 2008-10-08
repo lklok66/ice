@@ -689,7 +689,8 @@ sslConfigTree = {
             },
         "objc" : {
             "plugin" : " --Ice.Default.Protocol=ssl --IceSSL.CheckCertName=0" +
-            " --IceSSL.Password=password --IceSSL.CertAuthFile=cacert.der --IceSSL.DefaultDir=%(objccertsdir)s",
+            " --IceSSL.Password=password --IceSSL.CertAuthFile=cacert.der --IceSSL.DefaultDir=%(objccertsdir)s" +
+            " --IceSSL.Keychain=\"ZeroC Tests\" --IceSSL.KeychainPassword=password",
             "client" : " --IceSSL.CertFile=c_rsa1024.pfx",
             "server" : " --IceSSL.CertFile=s_rsa1024.pfx",
             },
@@ -1289,6 +1290,9 @@ def processCmdLine():
     if not x64:
         x64 = isWin32() and os.environ.get("XTARGET") == "x64" or os.environ.get("LP64") == "yes"
     
+    if getDefaultMapping() == "objc" and protocol == "ssl":
+        os.system("security delete-keychain \"ZeroC Tests.keychain\" >& /dev/null")
+
     configurePaths()
 
 if os.environ.has_key("ICE_CONFIG"):
