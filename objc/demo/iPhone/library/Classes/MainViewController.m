@@ -376,6 +376,12 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
 
 -(NSIndexPath *)tableView:(UITableView *)tv willSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    // Selecting a <loading> book does nothing.
+    if(indexPath.row > books.count-1)
+    {
+        return nil;
+    }
+    
     self.currentIndexPath = indexPath;
     
     DemoBookDescription *book = (DemoBookDescription *)[books objectAtIndex:indexPath.row];
