@@ -88,8 +88,8 @@ public:
         selectorThread(s), callback(c)
     {
     }
-    SelectorThreadPtr selectorThread;
-    SocketReadyCallbackPtr callback;
+    const SelectorThreadPtr selectorThread;
+    const SocketReadyCallbackPtr callback;
 };
 
 }
@@ -226,12 +226,15 @@ IceInternal::SelectorThread::_register(const SocketReadyCallbackPtr& cb, SocketS
                                           0 
             };
             CFOptionFlags events = kCFStreamEventOpenCompleted | kCFStreamEventErrorOccurred;
-            if(CFReadStreamSetClient(stream, events, streamOpenedCallback, &ctx))
-            {
-                CFReadStreamScheduleWithRunLoop(stream, _runLoopThread->getRunLoop(), kCFRunLoopDefaultMode);
-                CFReadStreamOpen(stream);
-                return;
-            }
+#ifdef NDEBUG
+            CFReadStreamSetClient(stream, events, streamOpenedCallback, &ctx);
+#else
+            bool rc = CFReadStreamSetClient(stream, events, streamOpenedCallback, &ctx);
+            assert(rc);
+#endif
+            CFReadStreamScheduleWithRunLoop(stream, _runLoopThread->getRunLoop(), kCFRunLoopDefaultMode);
+            CFReadStreamOpen(stream);
+            return;
         }
     }
 #endif

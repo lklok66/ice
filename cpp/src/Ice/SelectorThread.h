@@ -44,7 +44,7 @@ public:
     void incFdsInUse();
     void decFdsInUse();
 
-    void _register(const SocketReadyCallbackPtr&, SocketStatus status, int timeout);
+    void _register(const SocketReadyCallbackPtr&, SocketStatus, int);
     void unregister(const SocketReadyCallbackPtr&);
     void finish(const SocketReadyCallbackPtr&);
 
