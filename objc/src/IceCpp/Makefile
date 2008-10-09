@@ -148,7 +148,7 @@ SDIR		= $(slicedir)/Ice
 include $(top_srcdir)/config/Make.rules
 
 CPPFLAGS	:= -Iinclude -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src -DICE_APPLE_CFNETWORK $(CPPPLATFORMFLAGS)
-SLICE2CPPFLAGS	:= --ice --include-dir Ice $(SLICE2CPPFLAGS)
+SLICE2CPPFLAGS	:= -DICE_APPLE_CFSTREAM --ice --include-dir Ice $(SLICE2CPPFLAGS)
 
 include/Ice/%F.h: $(SDIR)/%F.ice $(SLICE2CPP)
 	rm -f $(*F)F.h $(*F)F.cpp

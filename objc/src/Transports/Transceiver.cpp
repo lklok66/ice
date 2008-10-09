@@ -1,5 +1,4 @@
-// **********************************************************************
-//
+// ********************************************************************** //
 // Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
@@ -22,6 +21,28 @@
 using namespace std;
 using namespace Ice;
 using namespace IceInternal;
+
+void
+Ice::CFNetworkException::ice_print(ostream& out) const
+{
+    Exception::ice_print(out);
+    out << ":\nnetwork exception: domain: " << domain << " error: " << error;
+}
+
+static inline std::string
+fromCFString(CFStringRef ref)
+{
+   const char* s = CFStringGetCStringPtr(ref, kCFStringEncodingUTF8);
+   if(s)
+   {
+       return string(s);
+   }
+
+   // Not great, but is good enough for this purpose.
+   char buf[1024];
+   CFStringGetCString(ref, buf, sizeof(buf), kCFStringEncodingUTF8);
+   return string(buf);
+}
 
 SOCKET
 IceObjC::Transceiver::fd()
@@ -85,36 +106,48 @@ IceObjC::Transceiver::write(Buffer& buf)
         {
             assert(CFWriteStreamGetStatus(_writeStream) == kCFStreamStatusError);
             CFErrorRef err = CFWriteStreamCopyError(_writeStream);
-            errno = CFErrorGetCode(err);
-            CFRelease(err);
-
-            if(interrupted())
+            CFStringRef domain = CFErrorGetDomain(err);
+            if(CFStringCompare(domain, kCFErrorDomainPOSIX, 0) == kCFCompareEqualTo)
             {
-                continue;
-            }
-
-            if(noBuffers() && packetSize > 1024)
-            {
-                packetSize /= 2;
-                continue;
-            }
-
-            if(wouldBlock())
-            {
-                return false;
-            }
-            
-            if(connectionLost())
-            {
-                ConnectionLostException ex(__FILE__, __LINE__);
-                ex.error = getSocketErrno();
-                throw ex;
+                errno = CFErrorGetCode(err);
+                CFRelease(err);
+                
+                if(interrupted())
+                {
+                    continue;
+                }
+                
+                if(noBuffers() && packetSize > 1024)
+                {
+                    packetSize /= 2;
+                    continue;
+                }
+                
+                if(wouldBlock())
+                {
+                    return false;
+                }
+                
+                if(connectionLost())
+                {
+                    ConnectionLostException ex(__FILE__, __LINE__);
+                    ex.error = getSocketErrno();
+                    throw ex;
+                }
+                else
+                {
+                    SocketException ex(__FILE__, __LINE__);
+                    ex.error = getSocketErrno();
+                    throw ex;
+                }
             }
             else
-            {
-                SocketException ex(__FILE__, __LINE__);
-                ex.error = getSocketErrno();
-                throw ex;
+            { 
+                CFNetworkException ex(__FILE__, __LINE__);
+                ex.domain = fromCFString(domain);                    
+                ex.error = CFErrorGetCode(err);
+                CFRelease(err);
+                throw ex;                
             }
         }
 
@@ -179,44 +212,56 @@ IceObjC::Transceiver::read(Buffer& buf)
         {
             assert(CFReadStreamGetStatus(_readStream) == kCFStreamStatusError);
             CFErrorRef err = CFReadStreamCopyError(_readStream);
-            errno = CFErrorGetCode(err);
-            CFRelease(err);
-
-            if(interrupted())
+            CFStringRef domain = CFErrorGetDomain(err);
+            if(CFStringCompare(domain, kCFErrorDomainPOSIX, 0) == kCFCompareEqualTo)
             {
-                continue;
-            }
-            
-            if(noBuffers() && packetSize > 1024)
-            {
-                packetSize /= 2;
-                continue;
-            }
-
-            if(wouldBlock())
-            {
-                return false;
-            }
-            
-            if(connectionLost())
-            {
-                //
-                // See the commment above about shutting down the
-                // socket if the connection is lost while reading
-                // data.
-                //
-                //assert(_fd != INVALID_SOCKET);
-                //shutdownSocketReadWrite(_fd);
-            
-                ConnectionLostException ex(__FILE__, __LINE__);
-                ex.error = getSocketErrno();
-                throw ex;
+                errno = CFErrorGetCode(err);
+                CFRelease(err);
+                
+                if(interrupted())
+                {
+                    continue;
+                }
+                
+                if(noBuffers() && packetSize > 1024)
+                {
+                    packetSize /= 2;
+                    continue;
+                }
+                
+                if(wouldBlock())
+                {
+                    return false;
+                }
+                
+                if(connectionLost())
+                {
+                    //
+                    // See the commment above about shutting down the
+                    // socket if the connection is lost while reading
+                    // data.
+                    //
+                    //assert(_fd != INVALID_SOCKET);
+                    //shutdownSocketReadWrite(_fd);
+                    
+                    ConnectionLostException ex(__FILE__, __LINE__);
+                    ex.error = getSocketErrno();
+                    throw ex;
+                }
+                else
+                {
+                    SocketException ex(__FILE__, __LINE__);
+                    ex.error = getSocketErrno();
+                    throw ex;
+                }
             }
             else
             {
-                SocketException ex(__FILE__, __LINE__);
-                ex.error = getSocketErrno();
-                throw ex;
+                CFNetworkException ex(__FILE__, __LINE__);
+                ex.domain = fromCFString(domain);                    
+                ex.error = CFErrorGetCode(err);
+                CFRelease(err);
+                throw ex;                
             }
         }
 
@@ -278,27 +323,63 @@ IceObjC::Transceiver::initialize()
             if(status == kCFStreamStatusError)
             {
                 CFErrorRef err = CFReadStreamCopyError(_readStream);
-                errno = CFErrorGetCode(err);
+                CFStringRef domain = CFErrorGetDomain(err);
+                if(CFStringCompare(domain, kCFErrorDomainPOSIX, 0) == kCFCompareEqualTo)
+                {
+                    errno = CFErrorGetCode(err);
+                    CFRelease(err);
+                    if(connectionRefused())
+                    {
+                        ConnectionRefusedException ex(__FILE__, __LINE__);
+                        ex.error = getSocketErrno();
+                        throw ex;
+                    }
+                    else if(connectFailed())
+                    {
+                        ConnectFailedException ex(__FILE__, __LINE__);
+                        ex.error = getSocketErrno();
+                        throw ex;
+                    }
+                    else
+                    {
+                        SocketException ex(__FILE__, __LINE__);
+                        ex.error = getSocketErrno();
+                        throw ex;
+                    }
+                }
+                else if(CFStringCompare(domain, kCFErrorDomainCFNetwork, 0) == kCFCompareEqualTo)
+                {
+                    int error = CFErrorGetCode(err);
+                    if(error == kCFHostErrorHostNotFound || error == kCFHostErrorUnknown)
+                    {
+                        int rs = 0;
+                        if(error == kCFHostErrorUnknown)
+                        {
+                            CFDictionaryRef dict = CFErrorCopyUserInfo(err);
+                            CFNumberRef d = (CFNumberRef)CFDictionaryGetValue(dict, kCFGetAddrInfoFailureKey);
+                            if(d != 0)
+                            {
+                                CFNumberGetValue(d, kCFNumberSInt32Type, &rs);
+                            }
+                            CFRelease(dict);
+                        }
+                        
+                        CFRelease(err);
+                        
+                        DNSException ex(__FILE__, __LINE__);
+                        ex.error = rs;
+                        ex.host = _host;
+                        
+                        throw ex;
+                    }
+                }
+                
+                // Otherwise throw a generic exception.    
+                CFNetworkException ex(__FILE__, __LINE__);
+                ex.domain = fromCFString(domain);                    
+                ex.error = CFErrorGetCode(err);
                 CFRelease(err);
-
-                if(connectionRefused())
-                {
-                    ConnectionRefusedException ex(__FILE__, __LINE__);
-                    ex.error = getSocketErrno();
-                    throw ex;
-                }
-                else if(connectFailed())
-                {
-                    ConnectFailedException ex(__FILE__, __LINE__);
-                    ex.error = getSocketErrno();
-                    throw ex;
-                }
-                else
-                {
-                    SocketException ex(__FILE__, __LINE__);
-                    ex.error = getSocketErrno();
-                    throw ex;
-                }
+                throw ex;
             }
 
             assert(status == kCFStreamStatusOpen);
