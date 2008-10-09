@@ -78,6 +78,11 @@ public:
     // Propagate an exception to the event handler.
     //
     virtual void exception(const ::Ice::LocalException&) = 0;
+    
+    //
+    // Get the file descriptor of the event handler.
+    //
+    virtual SOCKET fd() const = 0;
 
     //
     // Get a textual representation of the event handler.
@@ -86,7 +91,7 @@ public:
 
 protected:
     
-    EventHandler(const InstancePtr&, SOCKET = INVALID_SOCKET);
+    EventHandler(const InstancePtr&);
     ICE_API virtual ~EventHandler();
 
     const InstancePtr _instance;
@@ -96,7 +101,6 @@ protected:
     // connection for connection validation only.
     //
     BasicStream _stream;
-    SOCKET _fd;
     bool _serializing;
     bool _registered;
     friend class ThreadPool;

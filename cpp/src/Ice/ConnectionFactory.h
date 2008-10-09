@@ -164,6 +164,7 @@ public:
     virtual void message(BasicStream&, const ThreadPoolPtr&);
     virtual void finished(const ThreadPoolPtr&);
     virtual void exception(const Ice::LocalException&);
+    virtual SOCKET fd() const;
     virtual std::string toString() const;
 
     virtual void connectionStartCompleted(const Ice::ConnectionIPtr&);

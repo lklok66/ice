@@ -119,6 +119,7 @@ public:
     virtual void invokeException(const LocalException&, int);
     virtual std::string type() const; // From Connection.
     virtual Ice::Int timeout() const; // From Connection.
+    virtual SOCKET fd() const; // From EventHandler and SocketReadyCallback
     virtual std::string toString() const;  // From Connection and EvantHandler.
 
     //
@@ -127,6 +128,9 @@ public:
     virtual IceInternal::SocketStatus socketReady();
     virtual void socketFinished();
     virtual void socketTimeout();
+#if defined(ICE_APPLE_CFNETWORK)
+    virtual void* stream() const;
+#endif
 
     // SSL plug-in needs to be able to get the transceiver.
     IceInternal::TransceiverPtr getTransceiver() const;

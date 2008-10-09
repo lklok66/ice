@@ -13,9 +13,105 @@
 #include <Ice/Instance.h>
 #include <Ice/LoggerUtil.h>
 
+#ifdef ICE_APPLE_CFNETWORK
+#if TARGET_OS_IPHONE
+#    include <CFNetwork/CFNetwork.h>
+#else
+#    include <CoreServices/CoreServices.h>
+#endif
+#include <Ice/ConnectionI.h>
+#include <Ice/Transceiver.h>
+#endif
+
 using namespace std;
 using namespace Ice;
 using namespace IceInternal;
+
+#ifdef ICE_APPLE_CFNETWORK
+
+namespace IceInternal
+{
+
+class RunLoopThread : public IceUtil::Thread, public IceUtil::Monitor<IceUtil::Mutex>
+{
+public:
+    
+    RunLoopThread() : _runLoop(0)
+    {
+    }
+
+    virtual void
+    start()
+    {
+        IceUtil::Thread::start();
+
+        Lock sync(*this);
+        while(!_runLoop)
+        {
+            wait();
+        }
+    }
+
+    CFRunLoopRef
+    getRunLoop()
+    {
+        return _runLoop;
+    }
+
+    virtual void
+    run()
+    {
+        {
+            Lock sync(*this);
+            _runLoop = CFRunLoopGetCurrent();
+            notifyAll();
+        }
+
+        CFRunLoopSourceContext ctx;
+        memset(&ctx, 0, sizeof(CFRunLoopSourceContext));
+        CFRunLoopSourceRef source = CFRunLoopSourceCreate(0, 0, &ctx);
+        CFRunLoopAddSource(CFRunLoopGetCurrent(), source, kCFRunLoopDefaultMode);
+        CFRunLoopRun();
+        CFRunLoopRemoveSource(CFRunLoopGetCurrent(), source, kCFRunLoopDefaultMode);
+        CFRelease(source);
+    }
+
+private:
+
+    CFRunLoopRef _runLoop;
+};
+
+class StreamOpenedCallbackInfo : public IceUtil::Shared
+{
+public:
+    StreamOpenedCallbackInfo(const SelectorThreadPtr& s, const SocketReadyCallbackPtr& c) :
+        selectorThread(s), callback(c)
+    {
+    }
+    SelectorThreadPtr selectorThread;
+    SocketReadyCallbackPtr callback;
+};
+
+}
+
+void* streamOpenedCallbackInfoRetain(void* info)
+{
+    reinterpret_cast<IceInternal::StreamOpenedCallbackInfo*>(info)->__incRef();
+    return info;
+}
+
+void streamOpenedCallbackInfoRelease(void* info)
+{
+    reinterpret_cast<IceInternal::StreamOpenedCallbackInfo*>(info)->__decRef();
+}
+
+void streamOpenedCallback(CFReadStreamRef stream, CFStreamEventType eventType, void *info)
+{
+    IceInternal::StreamOpenedCallbackInfo* cbInfo = reinterpret_cast<IceInternal::StreamOpenedCallbackInfo*>(info);
+    SocketReadyCallbackPtr cb = cbInfo->callback;
+    cbInfo->selectorThread->streamOpened(cb);
+}
+#endif 
 
 ICE_DECLSPEC_EXPORT IceUtil::Shared* IceInternal::upCast(SelectorThread* p) { return p; }
 
@@ -25,15 +121,21 @@ IceInternal::SelectorThread::SelectorThread(const InstancePtr& instance) :
     _selector(instance),
     _timer(_instance->timer())
 {
-
     __setNoDelete(true);
     try
     {
+#ifdef ICE_APPLE_CFNETWORK
+        _runLoopThread = new RunLoopThread();
+        _runLoopThread->start();
+#endif
         _thread = new HelperThread(this);
         _thread->start();
     }
     catch(const IceUtil::Exception& ex)
     {
+        destroy();
+        joinWithThread();
+
         {
             Error out(_instance->initializationData().logger);
             out << "cannot create thread for selector thread:\n" << ex;
@@ -60,7 +162,16 @@ IceInternal::SelectorThread::destroy()
     Lock sync(*this);
     assert(!_destroyed);
     _destroyed = true;
-    _selector.setInterrupt();
+    if(_thread)
+    {
+        _selector.setInterrupt();
+    }
+#ifdef ICE_APPLE_CFNETWORK
+    if(_runLoopThread)
+    {
+        CFRunLoopStop(_runLoopThread->getRunLoop());
+    }
+#endif
 }
 
 void
@@ -82,14 +193,13 @@ IceInternal::SelectorThread::decFdsInUse()
 }
 
 void
-IceInternal::SelectorThread::_register(SOCKET fd, const SocketReadyCallbackPtr& cb, SocketStatus status, int timeout)
+IceInternal::SelectorThread::_register(const SocketReadyCallbackPtr& cb, SocketStatus status, int timeout)
 {
     Lock sync(*this);
     assert(!_destroyed); // The selector thread is destroyed after the incoming/outgoing connection factories.
     assert(status != Finished);
     assert(cb->_status == Finished);
 
-    cb->_fd = fd;
     cb->_status = status;
     cb->_timeout = timeout;
     if(cb->_timeout >= 0)
@@ -97,6 +207,34 @@ IceInternal::SelectorThread::_register(SOCKET fd, const SocketReadyCallbackPtr& 
         _timer->schedule(cb, IceUtil::Time::milliSeconds(cb->_timeout));
     }
 
+#ifdef ICE_APPLE_CFNETWORK
+    //
+    // When using CFNetwork transports, NeedConnect indicates that the
+    // network stream need to be opened. We then register a callback
+    // with the stream to be notified when the stream is opened to
+    // notify the socket ready callback.
+    //
+    if(status == NeedConnect)
+    {
+        CFReadStreamRef stream = reinterpret_cast<CFReadStreamRef>(cb->stream());
+        if(stream)
+        {
+            CFStreamClientContext ctx = { 0,
+                                          new IceInternal::StreamOpenedCallbackInfo(this, cb),
+                                          streamOpenedCallbackInfoRetain, 
+                                          streamOpenedCallbackInfoRelease, 
+                                          0 
+            };
+            CFOptionFlags events = kCFStreamEventOpenCompleted | kCFStreamEventErrorOccurred;
+            if(CFReadStreamSetClient(stream, events, streamOpenedCallback, &ctx))
+            {
+                CFReadStreamScheduleWithRunLoop(stream, _runLoopThread->getRunLoop(), kCFRunLoopDefaultMode);
+                CFReadStreamOpen(stream);
+                return;
+            }
+        }
+    }
+#endif
     _selector.add(cb.get(), cb->_status);
 }
 
@@ -106,10 +244,17 @@ IceInternal::SelectorThread::unregister(const SocketReadyCallbackPtr& cb)
     // Note: unregister should only be called from the socketReady() call-back.
     Lock sync(*this);
     assert(!_destroyed); // The selector thread is destroyed after the incoming/outgoing connection factories.
-    assert(cb->_fd != INVALID_SOCKET);
+    assert(cb->fd() != INVALID_SOCKET);
     assert(cb->_status != Finished);
 
+#ifdef ICE_APPLE_CFNETWORK
+    if(cb->_status != NeedConnect)
+    {
+        _selector.remove(cb.get(), cb->_status, true);
+    }
+#else
     _selector.remove(cb.get(), cb->_status, true); // No interrupt needed, it's always called from the selector thread.
+#endif
     cb->_status = Finished;
 }
 
@@ -118,12 +263,26 @@ IceInternal::SelectorThread::finish(const SocketReadyCallbackPtr& cb)
 {
     Lock sync(*this);
     assert(!_destroyed); // The selector thread is destroyed after the incoming/outgoing connection factories.
-    assert(cb->_fd != INVALID_SOCKET);
     assert(cb->_status != Finished);
 
+#ifdef ICE_APPLE_CFNETWORK
+    if(cb->_status == NeedConnect)
+    {
+        CFReadStreamRef stream = reinterpret_cast<CFReadStreamRef>(cb->stream());
+        if(stream)
+        {
+            CFReadStreamUnscheduleFromRunLoop(stream, _runLoopThread->getRunLoop(), kCFRunLoopDefaultMode);
+            CFReadStreamSetClient(stream, kCFStreamEventNone, 0, 0);
+        }
+    }
+    else
+    {
+        _selector.remove(cb.get(), cb->_status);
+    }
+#else
     _selector.remove(cb.get(), cb->_status);
+#endif
     cb->_status = Finished;
-
     _finished.push_back(cb);
     _selector.setInterrupt();
 }
@@ -136,7 +295,75 @@ IceInternal::SelectorThread::joinWithThread()
     {
         _thread->getThreadControl().join();
     }
+#ifdef ICE_APPLE_CFNETWORK
+    if(_runLoopThread)
+    {
+        _runLoopThread->getThreadControl().join();
+    }
+#endif
 }
+
+#ifdef ICE_APPLE_CFNETWORK
+void
+IceInternal::SelectorThread::streamOpened(const SocketReadyCallbackPtr& cb)
+{
+    {
+        Lock sync(*this);
+        assert(!_destroyed); // The selector thread is destroyed after the incoming/outgoing connection factories.
+        assert(cb->_status == NeedConnect || cb->_status == Finished);
+        if(cb->_status == Finished)
+        {
+            return;
+        }
+        
+        Ice::ConnectionI* connection = dynamic_cast<Ice::ConnectionI*>(cb.get());
+        assert(connection);
+        
+        CFReadStreamRef stream = reinterpret_cast<CFReadStreamRef>(cb->stream());
+        assert(stream);
+        
+        CFReadStreamUnscheduleFromRunLoop(stream, _runLoopThread->getRunLoop(), kCFRunLoopDefaultMode);
+        CFReadStreamSetClient(stream, kCFStreamEventNone, 0, 0);
+    }
+
+    SocketStatus status = Finished;
+    try
+    {
+        if(cb->_timeout >= 0)
+        {
+            _timer->cancel(cb);
+        }
+        status = cb->socketReady();
+    }
+    catch(const std::exception& ex)
+    {
+        Error out(_instance->initializationData().logger);
+        out << "exception in selector thread while calling socketReady():\n" << ex.what();
+        status = Finished;
+    }
+    catch(...)
+    {
+        Error out(_instance->initializationData().logger);
+        out << "unknown exception in selector thread while calling socketReady()";
+        status = Finished;
+    }
+
+    if(status != Finished)
+    {
+        Lock sync(*this);
+        if(cb->_status != Finished) // The callback might have been finished concurrently.
+        {
+            _selector.add(cb.get(), status);
+            cb->_status = status;
+
+            if(cb->_timeout >= 0)
+            {
+                _timer->schedule(cb, IceUtil::Time::milliSeconds(cb->_timeout));
+            }
+        }
+    }
+}
+#endif
 
 void
 IceInternal::SelectorThread::run()

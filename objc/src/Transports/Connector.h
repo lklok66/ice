@@ -45,17 +45,17 @@ public:
 
 private:
     
-    Connector(const InstancePtr&, const struct sockaddr_storage&, Ice::Int, const std::string&, const std::string&);
+    Connector(const InstancePtr&, Ice::Int, const std::string&, const std::string&, Ice::Int);
     virtual ~Connector();
     friend class EndpointI;
 
     const InstancePtr _instance;
     const IceInternal::TraceLevelsPtr _traceLevels;
     const Ice::LoggerPtr _logger;
-    struct sockaddr_storage _addr;
     const Ice::Int _timeout;
     const std::string _connectionId;
     const std::string _host;
+    const Ice::Int _port;
 };
 
 }

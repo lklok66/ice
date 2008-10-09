@@ -175,7 +175,7 @@ Ice::ConnectionI::start(const StartCallbackPtr& callback)
             }
 
             _sendInProgress = true;
-            _selectorThread->_register(_transceiver->fd(), this, status, timeout);
+            _selectorThread->_register(this, status, timeout);
 
             if(callback)
             {
@@ -1223,6 +1223,15 @@ Ice::ConnectionI::timeout() const
     return _endpoint->timeout(); // No mutex lock, _endpoint is immutable.
 }
 
+SOCKET
+Ice::ConnectionI::fd() const
+{
+    // This method is called by the thread pool or selector thread, as long as the connection is registered
+    // with either the pool or selector thread, we have the guarantee that _transceiver won't be cleared.
+    assert(_transceiver);
+    return _transceiver->fd();
+}
+
 string
 Ice::ConnectionI::toString() const
 {
@@ -1329,6 +1338,14 @@ Ice::ConnectionI::socketTimeout()
     }
 }
 
+#ifdef ICE_APPLE_CFNETWORK
+void*
+Ice::ConnectionI::stream() const
+{
+    return _transceiver->stream();
+}
+#endif
+
 //
 // Only used by the SSL plug-in.
 //
@@ -1345,7 +1362,7 @@ Ice::ConnectionI::ConnectionI(const InstancePtr& instance,
                               const TransceiverPtr& transceiver,
                               const EndpointIPtr& endpoint,
                               const ObjectAdapterPtr& adapter) :
-    EventHandler(instance, transceiver->fd()),
+    EventHandler(instance),
     _transceiver(transceiver),
     _desc(transceiver->toString()),
     _type(transceiver->type()),
@@ -2058,7 +2075,7 @@ Ice::ConnectionI::sendMessage(OutgoingMessage& message)
 #endif
 
     _sendInProgress = true;
-    _selectorThread->_register(_transceiver->fd(), this, NeedWrite, _endpoint->timeout());
+    _selectorThread->_register(this, NeedWrite, _endpoint->timeout());
     return false;
 }
 

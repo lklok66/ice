@@ -34,50 +34,18 @@ IceObjC::Connector::connect()
 
     CFReadStreamRef readStream = nil;
     CFWriteStreamRef writeStream = nil;
-    SOCKET fd = INVALID_SOCKET;
     try
     {
-        //
-        // Create the read/write streams
-        //
-        CFDataRef addr = nil;
-        if(_addr.ss_family == AF_INET)
-        {
-            addr = CFDataCreate(NULL, reinterpret_cast<const UInt8*>(&_addr), sizeof(sockaddr_in));
-        }
-        else if(_addr.ss_family == AF_INET6)
-        {
-            addr = CFDataCreate(NULL, reinterpret_cast<const UInt8*>(&_addr), sizeof(sockaddr_in6));
-        }
-
-        CFHostRef host = CFHostCreateWithAddress(NULL, addr);
-        CFRelease(addr);
-        CFStreamCreatePairWithSocketToCFHost(NULL, host, getPort(_addr), &readStream, &writeStream);
+        CFStringRef h = CFStringCreateWithCString(NULL, _host.c_str(), kCFStringEncodingUTF8);
+        CFHostRef host = CFHostCreateWithName(NULL, h);
+        CFRelease(h);
+        CFStreamCreatePairWithSocketToCFHost(NULL, host, _port, &readStream, &writeStream);
         CFRelease(host);
-
         _instance->setupStreams(readStream, writeStream, false, _host);
-
-        if(!CFReadStreamSetProperty(readStream, kCFStreamPropertyShouldCloseNativeSocket, kCFBooleanFalse) || 
-           !CFWriteStreamSetProperty(writeStream, kCFStreamPropertyShouldCloseNativeSocket, kCFBooleanFalse))
-        {
-            throw Ice::SocketException(__FILE__, __LINE__, 0);
-        }
-
-        CFDataRef d = (CFDataRef)CFReadStreamCopyProperty(readStream, kCFStreamPropertySocketNativeHandle);
-        CFDataGetBytes(d, CFRangeMake(0, sizeof(SOCKET)), reinterpret_cast<UInt8*>(&fd));
-        CFRelease(d);
-
-        setBlock(fd, false);
-        setTcpBufSize(fd, _instance->initializationData().properties, _logger);
-
-        return new Transceiver(_instance, fd, readStream, writeStream, false, _host);
+        return new Transceiver(_instance, readStream, writeStream, _host, _port);
     }
     catch(const Ice::LocalException& ex)
     {
-        if(fd != INVALID_SOCKET)
-        {
-            closeSocketNoThrow(fd);
-        }
         if(readStream)
         {
             CFRelease(readStream);
@@ -86,12 +54,10 @@ IceObjC::Connector::connect()
         {
             CFRelease(writeStream);
         }
-
         if(_traceLevels->network >= 2)
         {
             Trace out(_logger, _traceLevels->networkCat);
-            out << "failed to establish " << _instance->protocol() << " connection to ";
-            out << toString() << "\n" << ex;
+            out << "failed to establish " << _instance->protocol() << " connection to " << toString() << "\n" << ex;
         }
         throw;
     }
@@ -106,7 +72,9 @@ IceObjC::Connector::type() const
 string
 IceObjC::Connector::toString() const
 {
-    return addrToString(_addr);
+    ostringstream os;
+    os << _host << ":" << _port;
+    return os.str();
 }
 
 bool
@@ -118,17 +86,22 @@ IceObjC::Connector::operator==(const IceInternal::Connector& r) const
         return false;
     }
 
-    if(compareAddress(_addr, p->_addr) != 0)
-    {
-        return false;
-    }
-
     if(_timeout != p->_timeout)
     {
         return false;
     }
 
     if(_connectionId != p->_connectionId)
+    {
+        return false;
+    }
+
+    if(_host != p->_host)
+    {
+        return false;
+    }
+
+    if(_port != p->_port)
     {
         return false;
     }
@@ -168,21 +141,31 @@ IceObjC::Connector::operator<(const IceInternal::Connector& r) const
     {
         return false;
     }
-    return compareAddress(_addr, p->_addr) == -1;
+
+    if(_host < p->_host)
+    {
+        return true;
+    }
+    else if(p->_host < _host)
+    {
+        return false;
+    }
+
+    return _port < p->_port;
 }
 
 IceObjC::Connector::Connector(const InstancePtr& instance, 
-                              const struct sockaddr_storage& addr, 
                               Ice::Int timeout, 
                               const string& connectionId,
-                              const string& host) :
+                              const string& host,
+                              Ice::Int port) :
     _instance(instance),
     _traceLevels(instance->traceLevels()),
     _logger(instance->initializationData().logger),
-    _addr(addr),
     _timeout(timeout),
     _connectionId(connectionId),
-    _host(host)
+    _host(host.empty() ? string("127.0.0.1") : host),
+    _port(port)
 {
 }
 

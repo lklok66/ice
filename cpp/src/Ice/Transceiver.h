@@ -36,6 +36,7 @@ public:
     virtual bool read(Buffer&) = 0;
 #if defined(ICE_APPLE_CFNETWORK)
     virtual bool hasMoreData() { return false; }
+    virtual void* stream() { return 0; }
 #endif
     virtual std::string type() const = 0;
     virtual std::string toString() const = 0;

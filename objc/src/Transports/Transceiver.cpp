@@ -30,6 +30,13 @@ IceObjC::Transceiver::fd()
     return _fd;
 }
 
+void*
+IceObjC::Transceiver::stream()
+{
+    assert(_readStream);
+    return _readStream;
+}
+
 void
 IceObjC::Transceiver::close()
 {
@@ -42,16 +49,18 @@ IceObjC::Transceiver::close()
     CFReadStreamClose(_readStream);
     CFWriteStreamClose(_writeStream);
 
-    assert(_fd != INVALID_SOCKET);
-    try
+    if(_fd != INVALID_SOCKET)
     {
-        closeSocket(_fd);
-        _fd = INVALID_SOCKET;
-    }
-    catch(const SocketException&)
-    {
-        _fd = INVALID_SOCKET;
-        throw;
+        try
+        {
+            closeSocket(_fd);
+            _fd = INVALID_SOCKET;
+        }
+        catch(const SocketException&)
+        {
+            _fd = INVALID_SOCKET;
+            throw;
+        }
     }
 }
 
@@ -68,12 +77,6 @@ IceObjC::Transceiver::write(Buffer& buf)
             return false;
         }
         assert(CFWriteStreamGetStatus(_writeStream) >= kCFStreamStatusOpen);
-
-        if(_checkCertificates)
-        {
-            checkCertificates();
-            _checkCertificates = false;
-        }
 
         assert(_fd != INVALID_SOCKET);
         CFIndex ret = CFWriteStreamWrite(_writeStream, reinterpret_cast<const UInt8*>(&*buf.i), packetSize);
@@ -150,12 +153,6 @@ IceObjC::Transceiver::read(Buffer& buf)
             return false;
         }
         assert(CFReadStreamGetStatus(_readStream) >= kCFStreamStatusOpen);
-
-        if(_checkCertificates)
-        {
-            checkCertificates();
-            _checkCertificates = false;
-        }
 
         assert(_fd != INVALID_SOCKET);
         CFIndex ret = CFReadStreamRead(_readStream, reinterpret_cast<UInt8*>(&*buf.i), packetSize);
@@ -276,11 +273,9 @@ IceObjC::Transceiver::initialize()
         try
         {
             CFStreamStatus status = CFReadStreamGetStatus(_readStream);
-            if(status == kCFStreamStatusOpening)
-            {
-                return NeedConnect;
-            }
-            else if(status == kCFStreamStatusError)
+            assert(status > kCFStreamStatusOpening);
+
+            if(status == kCFStreamStatusError)
             {
                 CFErrorRef err = CFReadStreamCopyError(_readStream);
                 errno = CFErrorGetCode(err);
@@ -308,7 +303,29 @@ IceObjC::Transceiver::initialize()
 
             assert(status == kCFStreamStatusOpen);
             _state = StateConnected;
+
+            if(_fd == INVALID_SOCKET)
+            {
+                if(!CFReadStreamSetProperty(_readStream, kCFStreamPropertyShouldCloseNativeSocket, kCFBooleanFalse) || 
+                   !CFWriteStreamSetProperty(_writeStream, kCFStreamPropertyShouldCloseNativeSocket, kCFBooleanFalse))
+                {
+                    throw Ice::SocketException(__FILE__, __LINE__, 0);
+                }
+            
+                CFDataRef d = (CFDataRef)CFReadStreamCopyProperty(_readStream, kCFStreamPropertySocketNativeHandle);
+                CFDataGetBytes(d, CFRangeMake(0, sizeof(SOCKET)), reinterpret_cast<UInt8*>(&_fd));
+                CFRelease(d);
+            }
+
             _desc = fdToString(_fd);
+
+            setBlock(_fd, false);
+            setTcpBufSize(_fd, _instance->initializationData().properties, _logger);
+
+            checkCertificates();
+
+            CFWriteStreamOpen(_writeStream);
+            assert(CFWriteStreamGetStatus(_writeStream) > kCFStreamStatusOpening);
         }
         catch(const Ice::LocalException& ex)
         {
@@ -323,7 +340,14 @@ IceObjC::Transceiver::initialize()
         if(_traceLevels->network >= 1)
         {
             Trace out(_logger, _traceLevels->networkCat);
-            out << _instance->protocol() << " connection established\n" << _desc;
+            if(_host.empty())
+            {
+                out << _instance->protocol() << " connection accepted\n" << _desc;
+            }
+            else
+            {
+                out << _instance->protocol() << " connection established\n" << _desc;
+            }
         }
     }
     assert(_state == StateConnected);
@@ -340,22 +364,39 @@ IceObjC::Transceiver::checkSendSize(const Buffer& buf, size_t messageSizeMax)
 }
 
 IceObjC::Transceiver::Transceiver(const InstancePtr& instance, 
-                                  SOCKET fd, 
                                   CFReadStreamRef readStream,
                                   CFWriteStreamRef writeStream,
-                                  bool connected,
-                                  const string& host) :
+                                  const string& host,
+                                  Ice::Int port) :
     _instance(instance),
     _traceLevels(instance->traceLevels()),
     _logger(instance->initializationData().logger),
     _stats(instance->initializationData().stats),
     _host(host),
+    _fd(INVALID_SOCKET),
+    _readStream(readStream),
+    _writeStream(writeStream),
+    _state(StateNeedConnect)
+{
+    ostringstream s;
+    s << "local address = <not available>";
+    s << "\nremote address = " << host << ":" << port;
+    _desc = s.str();
+}
+
+IceObjC::Transceiver::Transceiver(const InstancePtr& instance, 
+                                  CFReadStreamRef readStream,
+                                  CFWriteStreamRef writeStream,
+                                  SOCKET fd) :
+    _instance(instance),
+    _traceLevels(instance->traceLevels()),
+    _logger(instance->initializationData().logger),
+    _stats(instance->initializationData().stats),
     _fd(fd),
     _readStream(readStream),
     _writeStream(writeStream),
-    _state(connected ? StateConnected : StateNeedConnect),
-    _desc(fdToString(_fd)),
-    _checkCertificates(true)
+    _state(StateNeedConnect),
+    _desc(fdToString(fd))
 {
 }
 

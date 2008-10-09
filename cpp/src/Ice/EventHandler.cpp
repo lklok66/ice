@@ -23,10 +23,9 @@ IceInternal::EventHandler::instance() const
     return _instance;
 }
 
-IceInternal::EventHandler::EventHandler(const InstancePtr& instance, SOCKET fd) :
+IceInternal::EventHandler::EventHandler(const InstancePtr& instance) :
     _instance(instance),
     _stream(_instance.get()),
-    _fd(fd),
     _serializing(false),
     _registered(false)
 {

@@ -1349,7 +1349,6 @@ IceInternal::IncomingConnectionFactory::finished(const ThreadPoolPtr& threadPool
     dynamic_cast<ObjectAdapterI*>(_adapter.get())->getThreadPool()->decFdsInUse();
     _acceptor->close();
     _acceptor = 0;
-    _fd = 0;
     notifyAll();
 }
 
@@ -1357,6 +1356,15 @@ void
 IceInternal::IncomingConnectionFactory::exception(const LocalException&)
 {
     assert(false); // Must not be called.
+}
+
+SOCKET
+IceInternal::IncomingConnectionFactory::fd() const
+{
+    // This method is called by the thread pool, as long as the factory is registered
+    // with the pool, we have the guarantee that _acceptor won't be cleared.
+    assert(_acceptor);
+    return _acceptor->fd();
 }
 
 string
@@ -1479,7 +1487,6 @@ IceInternal::IncomingConnectionFactory::initialize(const string& adapterName)
         _acceptor = _endpoint->acceptor(const_cast<EndpointIPtr&>(_endpoint), adapterName);
         assert(_acceptor);
         _acceptor->listen();
-        _fd = _acceptor->fd();
 
         try
         {

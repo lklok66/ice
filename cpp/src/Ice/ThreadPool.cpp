@@ -152,7 +152,7 @@ void
 IceInternal::ThreadPool::_register(const EventHandlerPtr& handler)
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
-    assert(!_destroyed && handler->_fd != INVALID_SOCKET);
+    assert(!_destroyed && handler->fd() != INVALID_SOCKET);
     if(!handler->_registered)
     {
         if(!handler->_serializing)
@@ -167,9 +167,10 @@ void
 IceInternal::ThreadPool::unregister(const EventHandlerPtr& handler)
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
-    assert(!_destroyed && handler->_fd != INVALID_SOCKET);
+    assert(!_destroyed);
     if(handler->_registered)
     {
+        assert(handler->fd() != INVALID_SOCKET);
         if(!handler->_serializing)
         {
             _selector.remove(handler.get(), NeedRead);
@@ -182,9 +183,10 @@ void
 IceInternal::ThreadPool::finish(const EventHandlerPtr& handler)
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
-    assert(!_destroyed && handler->_fd != INVALID_SOCKET);
+    assert(!_destroyed);
     if(handler->_registered)
     {
+        assert(handler->fd() != INVALID_SOCKET);
         if(!handler->_serializing)
         {
             _selector.remove(handler.get(), NeedRead);

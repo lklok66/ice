@@ -467,50 +467,7 @@ IceObjC::Instance::setupStreams(CFReadStreamRef readStream,
         }
         CFRelease(settings);
     }
-
-    if(!CFReadStreamOpen(readStream) || !CFWriteStreamOpen(writeStream))
-    {
-        if(CFReadStreamGetStatus(readStream) == kCFStreamStatusError)
-        {
-            CFErrorRef err = CFReadStreamCopyError(readStream);
-            errno = CFErrorGetCode(err);
-            CFRelease(err);
-        }
-        else if(CFWriteStreamGetStatus(writeStream) == kCFStreamStatusError)
-        {
-            CFErrorRef err = CFWriteStreamCopyError(writeStream);
-            errno = CFErrorGetCode(err);
-            CFRelease(err);
-        }
-
-        if(server)
-        {
-            throw Ice::SocketException(__FILE__, __LINE__, errno);
-        }
-        else
-        {
-            if(connectionRefused())
-            {
-                Ice::ConnectionRefusedException ex(__FILE__, __LINE__);
-                ex.error = errno;
-                throw ex;
-            }
-            else if(connectFailed())
-            {
-                Ice::ConnectFailedException ex(__FILE__, __LINE__);
-                ex.error = errno;
-                throw ex;
-            }
-            else
-            {
-                Ice::SocketException ex(__FILE__, __LINE__);
-                ex.error = errno;
-                throw ex;
-            }
-        }
-    }
 }
-
 
 IceObjC::EndpointI::EndpointI(const InstancePtr& instance, const string& ho, Int po, Int ti, const string& conId, 
                               bool co) :
@@ -802,13 +759,22 @@ IceObjC::EndpointI::transceiver(EndpointIPtr& endp) const
 vector<ConnectorPtr>
 IceObjC::EndpointI::connectors() const
 {
-    return connectors(getAddresses(_host, _port, _instance->protocolSupport(), true));
+    vector<ConnectorPtr> connectors;
+    connectors.push_back(new IceObjC::Connector(_instance, _timeout, _connectionId, _host, _port));
+    return connectors;
 }
 
 void
 IceObjC::EndpointI::connectors_async(const EndpointI_connectorsPtr& callback) const
 {
-    _instance->endpointHostResolver()->resolve(_host, _port, const_cast<EndpointI*>(this), callback);
+    try
+    {
+        callback->connectors(connectors());
+    }
+    catch(const Ice::LocalException& ex)
+    {
+        callback->exception(ex);
+    }
 }
 
 AcceptorPtr
@@ -818,7 +784,6 @@ IceObjC::EndpointI::acceptor(EndpointIPtr& endp, const string&) const
     endp = new EndpointI(_instance, _host, p->effectivePort(), _timeout, _connectionId, _compress);
     return p;
 }
-
 
 vector<EndpointIPtr>
 IceObjC::EndpointI::expand() const
@@ -960,17 +925,6 @@ IceObjC::EndpointI::operator<(const IceInternal::EndpointI& r) const
     return false;
 }
 
-vector<ConnectorPtr>
-IceObjC::EndpointI::connectors(const vector<struct sockaddr_storage>& addresses) const
-{
-    vector<ConnectorPtr> connectors;
-    for(unsigned int i = 0; i < addresses.size(); ++i)
-    {
-        connectors.push_back(new Connector(_instance, addresses[i], _timeout, _connectionId, _host));
-    }
-    return connectors;
-}
-
 IceObjC::EndpointFactory::EndpointFactory(const IceInternal::InstancePtr& instance, bool secure) : 
     _instance(new Instance(instance, secure))
 {
@@ -1009,3 +963,4 @@ IceObjC::EndpointFactory::destroy()
 {
     _instance = 0;
 }
+

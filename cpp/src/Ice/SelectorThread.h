@@ -27,6 +27,11 @@
 namespace IceInternal
 {
 
+#ifdef ICE_APPLE_CFNETWORK
+class RunLoopThread;
+typedef IceUtil::Handle<RunLoopThread> RunLoopThreadPtr;
+#endif
+
 class SelectorThread : public IceUtil::Shared, IceUtil::Mutex
 {
 public:
@@ -39,11 +44,15 @@ public:
     void incFdsInUse();
     void decFdsInUse();
 
-    void _register(SOCKET, const SocketReadyCallbackPtr&, SocketStatus status, int timeout);
+    void _register(const SocketReadyCallbackPtr&, SocketStatus status, int timeout);
     void unregister(const SocketReadyCallbackPtr&);
     void finish(const SocketReadyCallbackPtr&);
 
     void joinWithThread();
+
+#ifdef ICE_APPLE_CFNETWORK    
+    void streamOpened(const SocketReadyCallbackPtr&);
+#endif
 
 private:
 
@@ -71,6 +80,10 @@ private:
 
     IceUtil::ThreadPtr _thread;
     IceUtil::TimerPtr _timer;
+    
+#ifdef ICE_APPLE_CFNETWORK    
+    RunLoopThreadPtr _runLoopThread;
+#endif
 };
 
 }

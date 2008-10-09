@@ -22,7 +22,7 @@ class SocketReadyCallback : public IceUtil::TimerTask
 {
 public:
     
-    SocketReadyCallback() : _fd(INVALID_SOCKET), _status(Finished), _timeout(0)
+    SocketReadyCallback() : _status(Finished), _timeout(0)
     {
     }
     
@@ -37,6 +37,11 @@ public:
     //
     virtual void socketTimeout() = 0;
 
+    virtual SOCKET fd() const = 0;
+#ifdef ICE_APPLE_CFNETWORK
+    virtual void* stream() const = 0;
+#endif
+
 private:
 
     void
@@ -48,7 +53,6 @@ private:
     friend class SelectorThread;
     friend class Selector<SocketReadyCallback>;
 
-    SOCKET _fd;
     SocketStatus _status;
     int _timeout;
 };

@@ -74,7 +74,7 @@ IceObjC::Acceptor::accept()
     if(_traceLevels->network >= 1)
     {
         Trace out(_logger, _traceLevels->networkCat);
-        out << "accepted " << _instance->protocol() << " connection\n" << fdToString(fd);
+        out << "accepting " << _instance->protocol() << " connection\n" << fdToString(fd);
     }
 
     //
@@ -85,10 +85,8 @@ IceObjC::Acceptor::accept()
     try
     {
         CFStreamCreatePairWithSocket(NULL, fd, &readStream, &writeStream);
-        
         _instance->setupStreams(readStream, writeStream, true, "");
-        
-        return new Transceiver(_instance, fd, readStream, writeStream, true, "");
+        return new Transceiver(_instance, readStream, writeStream, fd);
     }
     catch(const Ice::LocalException& ex)
     {

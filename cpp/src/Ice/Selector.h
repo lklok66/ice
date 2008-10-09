@@ -154,16 +154,16 @@ public:
         memset(&event, 0, sizeof(epoll_event));
         event.events = status == NeedRead ? EPOLLIN : EPOLLOUT;
         event.data.ptr = handler;
-        if(epoll_ctl(_queueFd, EPOLL_CTL_ADD, handler->_fd, &event) != 0)
+        if(epoll_ctl(_queueFd, EPOLL_CTL_ADD, handler->fd(), &event) != 0)
 #else // ICE_USE_KQUEUE
         struct kevent event;
         if(status == NeedRead)
         {
-            EV_SET(&event, handler->_fd, EVFILT_READ, EV_ADD, 0, 0, handler);
+            EV_SET(&event, handler->fd(), EVFILT_READ, EV_ADD, 0, 0, handler);
         }
         else
         {
-            EV_SET(&event, handler->_fd, EVFILT_WRITE, EV_ADD, 0, 0, handler);
+            EV_SET(&event, handler->fd(), EVFILT_WRITE, EV_ADD, 0, 0, handler);
         }
         if(kevent(_queueFd, &event, 1, 0, 0, 0) < 0)
 #endif
@@ -196,7 +196,7 @@ public:
         memset(&event, 0, sizeof(epoll_event));
         event.events = newStatus == NeedRead ? EPOLLIN : EPOLLOUT;
         event.data.ptr = handler;
-        if(epoll_ctl(_queueFd, EPOLL_CTL_MOD, handler->_fd, &event) != 0)
+        if(epoll_ctl(_queueFd, EPOLL_CTL_MOD, handler->fd(), &event) != 0)
         {
             Ice::Error out(_instance->initializationData().logger);
             out << "error while updating filedescriptor from selector:\n";
@@ -219,16 +219,16 @@ public:
         epoll_event event;
         memset(&event, 0, sizeof(epoll_event));
         event.events = 0;
-        int rs = epoll_ctl(_queueFd, EPOLL_CTL_DEL, handler->_fd, &event);
+        int rs = epoll_ctl(_queueFd, EPOLL_CTL_DEL, handler->fd(), &event);
 #else // ICE_USE_KQUEUE
         struct kevent event;
         if(status == NeedRead)
         {
-            EV_SET(&event, handler->_fd, EVFILT_READ, EV_DELETE, 0, 0, 0);
+            EV_SET(&event, handler->fd(), EVFILT_READ, EV_DELETE, 0, 0, 0);
         }
         else
         {
-            EV_SET(&event, handler->_fd, EVFILT_WRITE, EV_DELETE, 0, 0, 0);
+            EV_SET(&event, handler->fd(), EVFILT_WRITE, EV_DELETE, 0, 0, 0);
         }
         int rs = kevent(_queueFd, &event, 1, 0, 0, 0);
 #endif
@@ -368,12 +368,12 @@ public:
                 continue;
             }
 
-            if(handler->_fd > _lastFd && (larger == 0 || handler->_fd < larger->_fd))
+            if(handler->fd() > _lastFd && (larger == 0 || handler->fd() < larger->fd()))
             {
                 larger = handler;
             }
 
-            if(smallest == 0 || handler->_fd < smallest->_fd)
+            if(smallest == 0 || handler->fd() < smallest->fd())
             {
                 smallest = handler;
             }
@@ -382,13 +382,13 @@ public:
         ++_nSelectedReturned;
         if(larger)
         {
-            _lastFd = larger->_fd;
+            _lastFd = larger->fd();
             return larger;
         }
         else
         {
             assert(smallest);
-            _lastFd = smallest->_fd;
+            _lastFd = smallest->fd();
             return smallest;
         }
 #else
@@ -607,27 +607,27 @@ private:
 #if !defined(ICE_USE_EPOLL) && !defined(ICE_USE_KQUEUE)
     void addImpl(T* handler, SocketStatus status)
     {
-        assert(_handlerMap.find(handler->_fd) == _handlerMap.end());
-        _handlerMap.insert(make_pair(handler->_fd, handler));
+        assert(_handlerMap.find(handler->fd()) == _handlerMap.end());
+        _handlerMap.insert(make_pair(handler->fd(), handler));
 #if defined(ICE_USE_SELECT)
         switch(status)
         {
         case NeedRead:
-            FD_SET(handler->_fd, &_readFdSet);
+            FD_SET(handler->fd(), &_readFdSet);
             break;
         case NeedWrite:
-            FD_SET(handler->_fd, &_writeFdSet);
+            FD_SET(handler->fd(), &_writeFdSet);
             break;
         case NeedConnect:
-            FD_SET(handler->_fd, &_writeFdSet);
-            FD_SET(handler->_fd, &_errorFdSet);
+            FD_SET(handler->fd(), &_writeFdSet);
+            FD_SET(handler->fd(), &_errorFdSet);
             break;
         case Finished:
             assert(false);
         }
 #else
         struct pollfd pollFd;
-        pollFd.fd = handler->_fd;
+        pollFd.fd = handler->fd();
         pollFd.events = status == NeedRead ? POLLIN : POLLOUT;
         _pollFdSet.push_back(pollFd);
 #endif
@@ -635,21 +635,21 @@ private:
 
     void removeImpl(T* handler, SocketStatus status)
     {
-        typename std::map<SOCKET, T*>::iterator p = _handlerMap.find(handler->_fd);
+        typename std::map<SOCKET, T*>::iterator p = _handlerMap.find(handler->fd());
         assert(p != _handlerMap.end());
         _handlerMap.erase(p);
 #if defined(ICE_USE_SELECT)
         switch(status)
         {
         case NeedRead:
-            FD_CLR(handler->_fd, &_readFdSet);
+            FD_CLR(handler->fd(), &_readFdSet);
             break;
         case NeedWrite:
-            FD_CLR(handler->_fd, &_writeFdSet);
+            FD_CLR(handler->fd(), &_writeFdSet);
             break;
         case NeedConnect:
-            FD_CLR(handler->_fd, &_writeFdSet);
-            FD_CLR(handler->_fd, &_errorFdSet);
+            FD_CLR(handler->fd(), &_writeFdSet);
+            FD_CLR(handler->fd(), &_errorFdSet);
             break;
         case Finished:
             assert(false);
@@ -657,7 +657,7 @@ private:
 #else
         for(std::vector<struct pollfd>::iterator p = _pollFdSet.begin(); p != _pollFdSet.end(); ++p)
         {
-            if(p->fd == handler->_fd)
+            if(p->fd == handler->fd())
             {
                 _pollFdSet.erase(p);
                 break;

@@ -35,10 +35,12 @@ class Transceiver : public IceInternal::Transceiver
 
 public:
 
-    Transceiver(const InstancePtr&, SOCKET, CFReadStreamRef, CFWriteStreamRef, bool, const std::string&);
+    Transceiver(const InstancePtr&, CFReadStreamRef, CFWriteStreamRef, const std::string&, Ice::Int);
+    Transceiver(const InstancePtr&, CFReadStreamRef, CFWriteStreamRef, SOCKET);
     virtual ~Transceiver();
 
     virtual SOCKET fd();
+    virtual void* stream();
     virtual void close();
     virtual bool write(IceInternal::Buffer&);
     virtual bool read(IceInternal::Buffer&);
@@ -63,7 +65,6 @@ private:
 
     State _state;
     std::string _desc;
-    bool _checkCertificates;
 };
 
 }
