@@ -169,10 +169,10 @@ substitute(os.path.join("cpp", "Makefile"), [(r'^SUBDIRS([\s]*)=.*', r'SUBDIRS\1
 #
 substitute(os.path.join("objc", "config", "Make.rules"),
            [(r'^([\s]*)SLICEPARSERLIB.*=.*', r'\1SLICEPARSERLIB = '),
-            (r'^[\s#]*OPTIMIZE_SPEED([\s]*)=.*', r'#OPTIMIZE_SPEED\1= yes'),
-            (r'^[\s#]*OPTIMIZE_SIZE([\s]*)=.*', r'#OPTIMIZE_SIZE\1= yes'),
-            (r'^[\s#]*COMPILE_FOR_IPHONE([\s]*)=.*', r'#COMPILE_FOR_IPHONE\1= yes'),
-            (r'^[\s#]*COMPILE_FOR_IPHONE_SIMULATOR([\s]*)=.*', r'#COMPILE_FOR_IPHONE_SIMULATOR\1= yes')])
+            (r'^[#]*OPTIMIZE_SPEED([\s]*)=.*', r'#OPTIMIZE_SPEED\1= yes'),
+            (r'^[#]*OPTIMIZE_SIZE([\s]*)=.*', r'#OPTIMIZE_SIZE\1= yes'),
+            (r'^[#]*COMPILE_FOR_IPHONE([\s]*)=.*', r'#COMPILE_FOR_IPHONE\1= yes'),
+            (r'^[#]*COMPILE_FOR_IPHONE_SIMULATOR([\s]*)=.*', r'#COMPILE_FOR_IPHONE_SIMULATOR\1= yes')])
 
 
 for makeFileName in [os.path.join("cpp", "src", "Makefile")]:
