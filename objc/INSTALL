@@ -104,6 +104,8 @@ There are three possible build configurations:
 </plist>
 
     You must log out and log in again for the changes to take effect.
+    Please see http://developer.apple.com/qa/qa2001/qa1067.html for
+    more information on this file.
 
 In addition, you may also choose to build static libraries:
 
