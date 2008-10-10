@@ -79,7 +79,7 @@ Ice Touch has limited support for:
 ======================================================================
 
 Ice Touch SSL provides a subset of the Ice for C++ SSL functionality.
-Due to limitations in iPhone SSL support, the following limitation
+Due to limitations in iPhone SSL support, the following restriction
 applies:
 
   - Ice Touch servers cannot authenticate SSL clients.
