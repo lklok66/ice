@@ -127,10 +127,10 @@ If you are building for iPhone or the iPhone simulator, you should
 now use Xcode to build the demos and test suite GUI located in the
 following subdirectories:
 
-  - demo/iPhone/chat
-  - demo/iPhone/library
-  - demo/iPhone/hello
-  - test/iPhone/container
+  - objc/demo/iPhone/chat
+  - objc/demo/iPhone/library
+  - objc/demo/iPhone/hello
+  - objc/test/iPhone/container
 
 After a successful build, you can run the test suite.
 
@@ -144,7 +144,7 @@ case of a failure, the tests abort with "failed".
 
 For the iPhone or iPhone simulator, the test suite runs within an
 iPhone application named "Test Suite", located in the directory
-test/iPhone/container.
+objc/test/iPhone/container.
 
 
 ======================================================================
