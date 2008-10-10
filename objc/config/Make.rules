@@ -38,9 +38,14 @@ embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 
 #STATICLIBS			= yes
 
-# Define the identity of the installed signing certificate if you want
-# to sign the Ice shared libraries.
-#IDENTIFIER = iPhone Developer: Matthew Newhook
+#
+# If you are building for the iPhone device and have not otherwise
+# defined the identity of the installed signing certificate, you can
+# define it here. Note that if IDENTIFIER is not set in your
+# ~/.MacOSX/environment.plist, you must manually fix the Xcode build
+# projects for the iPhone demos & tests before building.
+#
+#IDENTIFIER ?= iPhone Developer: Matthew Newhook
 
 # ----------------------------------------------------------------------
 # Don't change anything below this line!
