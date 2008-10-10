@@ -430,7 +430,7 @@
     NSString* s = [NSString stringWithFormat:@"%@ left.\n", name];
     [self append:[ChatMessage chatMessageWithText:s who:@"system message" timestamp:timestamp]];
     
-    int index = [self.userViewController.users indexOfObject:name inRange:NSMakeRange(0, self.userViewController.users.count-1)];
+    int index = [self.userViewController.users indexOfObject:name];
     if(index != NSNotFound)
     {
         [self.userViewController.users removeObjectAtIndex:index];
