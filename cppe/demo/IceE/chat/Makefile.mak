@@ -48,7 +48,7 @@ CPPFLAGS        = -I. $(CPPFLAGS) $(MFC_CPPFLAGS)
 
 !ifdef BUILD_MFC
 
-!if "$(STATICLIBS)" != "yes"
+!if "$(STATIC_CPP_RUNTIME)" != "yes"
 CPPFLAGS	= $(CPPFLAGS) -D_AFXDLL
 !endif
 

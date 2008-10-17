@@ -25,7 +25,7 @@ SRCS		= $(OBJS:.obj=.cpp)
 !include $(top_srcdir)/config/Make.rules.mak
 
 CPPFLAGS	= $(MFC_CPPFLAGS) -I. $(CPPFLAGS) -DVC_EXTRALEAN
-!if "$(STATICLIBS)" != "yes"
+!if "$(STATIC_CPP_RUNTIME)" != "yes"
 CPPFLAGS        = $(CPPFLAGS) -D_AFXDLL
 !endif
 
