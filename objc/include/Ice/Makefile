@@ -25,4 +25,4 @@ install::
 	    chmod a+r $(install_includedir)/Ice/$$i ; \
 	done
 
-depend:;
+depend::
