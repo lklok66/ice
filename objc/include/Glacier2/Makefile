@@ -24,3 +24,5 @@ install::
 	    $(INSTALL_DATA) $$i $(install_includedir)/Glacier2/$$i ; \
 	    chmod a+r $(install_includedir)/Glacier2/$$i ; \
 	done
+
+depend::

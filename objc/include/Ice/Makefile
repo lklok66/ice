@@ -24,3 +24,5 @@ install::
 	    $(INSTALL_DATA) $$i $(install_includedir)/Ice/$$i ; \
 	    chmod a+r $(install_includedir)/Ice/$$i ; \
 	done
+
+depend:;
