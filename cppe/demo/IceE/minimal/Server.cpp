@@ -18,7 +18,7 @@ class HelloI : public Hello
 public:
 
     virtual void
-    sayHello(const Ice::Current&) const
+    sayHello(const Ice::Current&)
     {
         printf("Hello World!\n");
     }
