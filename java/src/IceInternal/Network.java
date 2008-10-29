@@ -854,9 +854,10 @@ public final class Network
 
             for(int i = 0; i < addrs.length; ++i)
             {
+                byte[] bytes = addrs[i].getAddress();
                 if(protocol == EnableBoth ||
-                   (protocol == EnableIPv4 && addrs[i] instanceof java.net.Inet4Address) ||
-                   (protocol == EnableIPv6 && addrs[i] instanceof java.net.Inet6Address))
+                   (protocol == EnableIPv4 && bytes.length == 4) ||
+                   (protocol == EnableIPv6 && bytes.length == 16))
                 {
                     addresses.add(new java.net.InetSocketAddress(addrs[i], port));
                 }
@@ -865,6 +866,7 @@ public final class Network
         catch(java.net.UnknownHostException ex)
         {
             Ice.DNSException e = new Ice.DNSException();
+            e.initCause(ex);
             e.host = host;
             throw e;
         }
