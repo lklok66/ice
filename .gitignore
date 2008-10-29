@@ -48,3 +48,5 @@ obj
 *.RES
 ClientBin
 vcproj
+.metadata
+.DS_Store
