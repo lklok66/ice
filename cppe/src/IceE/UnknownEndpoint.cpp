@@ -81,7 +81,7 @@ IceInternal::UnknownEndpoint::UnknownEndpoint(const string& str)
                 }
                 for(string::size_type i = 0; i < argument.size(); ++i)
                 {
-                    if(!isdigit(argument[i]) && (i != 0 || argument[i] != '-'))
+                    if(!isdigit(static_cast<unsigned char>(argument[i])) && (i != 0 || argument[i] != '-'))
                     {
                         EndpointParseException ex(__FILE__, __LINE__);
                         ex.str = "opaque " + str;

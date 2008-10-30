@@ -909,8 +909,11 @@ Ice::ObjectAdapter::checkIdentity(const Identity& ident)
 vector<EndpointPtr>
 Ice::ObjectAdapter::parseEndpoints(const string& str, bool oaEndpoints) const
 {
-    string endpts = str;
-    transform(endpts.begin(), endpts.end(), endpts.begin(), ::tolower);
+    string endpts;
+    for(unsigned int i = 0; i < str.length(); ++ i)
+    {
+        endpts += tolower(static_cast<unsigned char>(str[i]));
+    }
 
     string::size_type beg;
     string::size_type end = 0;
