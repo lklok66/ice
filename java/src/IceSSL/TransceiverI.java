@@ -356,6 +356,9 @@ final class TransceiverI implements IceInternal.Transceiver
                 SSLEngineResult result = null;
                 switch(status)
                 {
+		// The Dalvik Android JVM doesn't seem to return FINISHED,
+		// so treat NOT_HANDSHAKING and FINISHED in the same way.
+                case NOT_HANDSHAKING:
                 case FINISHED:
                     handshakeCompleted();
                     break;
@@ -425,9 +428,6 @@ final class TransceiverI implements IceInternal.Transceiver
                     status = result.getHandshakeStatus();
                     break;
                 }
-                case NOT_HANDSHAKING:
-                    assert(false);
-                    break;
                 }
 
                 if(result != null)
