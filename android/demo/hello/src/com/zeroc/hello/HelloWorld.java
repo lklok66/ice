@@ -211,6 +211,7 @@ public class HelloWorld extends Activity
             else
             {
                 hello.sayHello(_delay.getProgress());
+                _status.setText("Queued hello request");
             }
         }
         catch(Ice.LocalException ex)
@@ -235,14 +236,45 @@ public class HelloWorld extends Activity
         HelloPrx hello = createProxy();
         try
         {
-            hello.shutdown();
-            if(_deliveryMode.isBatch())
+            if(!_deliveryMode.isBatch())
             {
-                _status.setText("Queued shutdown request");
+                hello.shutdown_async(new AMI_Hello_shutdown() {
+
+                    @Override
+                    public void ice_exception(final LocalException ex)
+                    {
+                        runOnUiThread(new Runnable()
+                        {
+                            public void run()
+                            {
+                                handleException(ex);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void ice_response()
+                    {
+                        runOnUiThread(new Runnable()
+                        {
+                            public void run()
+                            {
+                                _activity.setVisibility(View.INVISIBLE);
+                                _status.setText("Ready");
+                            }
+                        });
+                    }
+                });
+                if(_deliveryMode == DeliveryMode.DeliveryModeTwoway)
+                {
+                    _activity.setVisibility(View.VISIBLE);
+                    _status.setText("Waiting for response");
+                }
             }
             else
             {
-                _status.setText("Sent shutdown");
+                hello.shutdown();
+                _status.setText("Queued shutdown request");
             }
         }
         catch(Ice.LocalException ex)
@@ -253,15 +285,27 @@ public class HelloWorld extends Activity
 
     private void flush()
     {
-        try
-        {
-            _communicator.flushBatchRequests();
-            _status.setText("Flushed batch requests");
-        }
-        catch(Ice.LocalException ex)
-        {
-            handleException(ex);
-        }
+        new Thread(new Runnable() {
+            public void run()
+            {
+                try
+                {
+                    _communicator.flushBatchRequests();
+                }
+                catch(final LocalException ex)
+                {
+                    runOnUiThread(new Runnable()
+                    {
+                        public void run()
+                        {
+                            handleException(ex);
+                        }
+                    });
+                }     
+            }
+        }).start();
+
+        _status.setText("Flushed batch requests");
     }
 
     /** Called when the activity is first created. */
@@ -317,21 +361,22 @@ public class HelloWorld extends Activity
 
         _secure = (android.widget.CheckBox) findViewById(R.id.secure);
 
-        final android.widget.CheckBox batch = (android.widget.CheckBox) findViewById(R.id.batch);
-        batch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-        {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-            {
-                _deliveryMode = _deliveryMode.toggleBatch(isChecked);
-            }
-        });
-
         final Button flush = (Button) findViewById(R.id.flush);
         flush.setOnClickListener(new android.view.View.OnClickListener()
         {
             public void onClick(android.view.View v)
             {
                 flush();
+            }
+        });
+
+        final android.widget.CheckBox batch = (android.widget.CheckBox) findViewById(R.id.batch);
+        batch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+        {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+            {
+                _deliveryMode = _deliveryMode.toggleBatch(isChecked);
+                flush.setEnabled(isChecked);
             }
         });
 
