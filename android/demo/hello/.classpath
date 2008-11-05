@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="generated"/>
+	<classpathentry kind="lib" path="C:/Users/matthew/src/android-sdk-windows-1.0_r1/android.jar" sourcepath="C:/Users/matthew/src/android/mydroid/frameworks/android-src.jar"/>
+	<classpathentry kind="lib" path="C:/Users/matthew/src/ice-33/java/lib/Ice.jar" sourcepath="C:/Users/matthew/src/ice-33/java/src"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
