@@ -51,4 +51,19 @@ public interface Plugin extends Ice.Plugin
     // callback is set.
     //
     PasswordCallback getPasswordCallback();
+    
+    //
+    // Set an input stream for the keystore.
+    //
+    void loadKeystore(java.io.InputStream stream);
+    
+    //
+    // Set an input stream for the trust keystore.
+    //
+    void loadTruststore(java.io.InputStream stream);
+    
+    //
+    // Add an input stream for the random number seed.
+    //
+    void addSeed(java.io.InputStream stream);
 }
