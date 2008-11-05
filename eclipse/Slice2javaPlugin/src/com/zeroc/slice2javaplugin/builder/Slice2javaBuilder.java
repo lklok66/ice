@@ -14,6 +14,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -64,26 +66,39 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
     protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
         throws CoreException
     {
+        long start = System.currentTimeMillis();
+        
         BuildState state = new BuildState(getProject());
         state.dependencies.read();
 
-        if(kind == FULL_BUILD)
+        try
         {
-            fullBuild(state, monitor);
-        }
-        else
-        {
-            IResourceDelta delta = getDelta(getProject());
-            if(delta == null)
+            if(kind == FULL_BUILD)
             {
                 fullBuild(state, monitor);
             }
             else
             {
-                incrementalBuild(state, delta, monitor);
+                IResourceDelta delta = getDelta(getProject());
+                if(delta == null)
+                {
+                    fullBuild(state, monitor);
+                }
+                else
+                {
+                    incrementalBuild(state, delta, monitor);
+                }
             }
         }
-
+        finally
+        {
+            long end = System.currentTimeMillis();
+            if(state.out != null)
+            {
+                state.out.println("Build complete. Elapsed time: " + (end - start) / 1000 + "s.");
+            }
+            state.dependencies.write();
+        }
         return null;
     }
 
@@ -95,16 +110,21 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
         // Don't read the existing dependencies. That will have the
         // effect of trashing them.
         
-        // Now, clean the generated sub-directory.
-        Set<IFile> files = new HashSet<IFile>();
-        getResources(files, state.generated.members());
-        
-        for(Iterator<IFile> p = files.iterator(); p.hasNext();)
+        try
         {
-            p.next().delete(true, false, monitor);
+            // Now, clean the generated sub-directory.
+            Set<IFile> files = new HashSet<IFile>();
+            getResources(files, state.generated.members());
+            
+            for(Iterator<IFile> p = files.iterator(); p.hasNext();)
+            {
+                p.next().delete(true, false, monitor);
+            }
         }
-
-        state.dependencies.write();
+        finally
+        {
+            state.dependencies.write();
+        }
     }
     
     // XXX: Is this necessary, or can I just read directly from
@@ -534,15 +554,16 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
 
         if(state.out != null)
         {
-            state.out.println("--- full build ---");
-    
-            state.out.println("full candidate list");
+            java.util.Date date = new java.util.Date();
+            state.out.println("Start full build at " + new SimpleDateFormat("HH:mm:ss").format(date));
+
+            state.out.println("Candidate list:");
             // This is a complete list of slice files.
             for(Iterator<IFile> p = candidates.iterator(); p.hasNext();)
             {
                 state.out.println("    " + p.next().getProjectRelativePath().toString());
             }
-            state.out.println("phase: regenerating java source files");
+            state.out.println("Regenerating java source files.");
         }
         
         StringBuffer out = new StringBuffer();
@@ -601,10 +622,17 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
 
             if(state.out != null)
             {
-                state.out.println("emitted");
-                for(Iterator<IFile> q = newGeneratedJavaFiles.iterator(); q.hasNext();)
+                if(newGeneratedJavaFiles.isEmpty())
                 {
-                    state.out.println("    " + q.next().getProjectRelativePath().toString());
+                    state.out.println("No java files emitted.");
+                }
+                else
+                {
+                    state.out.println("Emitted:");
+                    for(Iterator<IFile> q = newGeneratedJavaFiles.iterator(); q.hasNext();)
+                    {
+                        state.out.println("    " + q.next().getProjectRelativePath().toString());
+                    }
                 }
             }
 
@@ -616,23 +644,21 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
         }
 
         // Update the slice->slice dependencies.
-        if(state.out != null)
-        {
-            state.out.println("phase: updating dependencies");
-        }
-
         // Only update the dependencies for those files with no build problems.
         if(!depends.isEmpty())
         {
+            if(state.out != null)
+            {
+                state.out.println("Updating dependencies.");
+            }
             if(build(state, depends, true, out) == 0)
             {
                 // Parse the new dependency set.
                 state.dependencies.updateDependencies(out.toString());
-                state.dependencies.write();
             }
             else if(state.err != null)
             {
-                state.err.println("dependencies not updated.");
+                state.err.println("Dependencies not updated due to error.");
                 state.err.println(out.toString());    
             }
         }
@@ -649,9 +675,10 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
 
         if(state.out != null)
         {
-            state.out.println("--- incremental build ---");
-    
-            state.out.println("candidate list");
+            java.util.Date date = new java.util.Date();
+            state.out.println("Start incremental build at " + new SimpleDateFormat("HH:mm:ss").format(date));
+            
+            state.out.println("Candidate list:");
             // This is a complete list of slice files.
             for(Iterator<IFile> p = candidates.iterator(); p.hasNext();)
             {
@@ -662,6 +689,10 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
                 state.out.println("   - " + p.next().getProjectRelativePath().toString());
             }
         }
+        
+        // The orphan candidate set.
+        Set<IFile> orphanCandidateSet = new HashSet<IFile>();
+        
         // Go through the removed list, removing the dependencies.
         for(Iterator<IFile> p = removed.iterator(); p.hasNext();)
         {
@@ -680,12 +711,39 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
             }
 
             state.dependencies.sliceSliceDependencies.remove(f);
-            state.dependencies.sliceJavaDependencies.remove(f);
+            
+            Set<IFile> oldJavaFiles = state.dependencies.sliceJavaDependencies.remove(f);
+            if(state.out != null)
+            {
+                if(oldJavaFiles.isEmpty())
+                {
+                    state.out.println("No orphans from this file.");
+                }
+                else
+                {
+                    state.out.println("Orphans from this file:");
+                    for(Iterator<IFile> q = oldJavaFiles.iterator(); q.hasNext();)
+                    {
+                        state.out.println("    " + q.next().getProjectRelativePath().toString());
+                    }
+                }
+            }
+            orphanCandidateSet.addAll(oldJavaFiles);
         }
 
         // Add the removed files to the candidates set
         // prior to determining additional candidates.
         candidates.addAll(removed);
+        
+        // Add to the candidate set any source files that have no java output files.
+        for(Iterator<Map.Entry<IFile, Set<IFile>>> p = state.dependencies.sliceJavaDependencies.entrySet().iterator(); p.hasNext(); )
+        {
+            Map.Entry<IFile, Set<IFile>> e = p.next();
+            if(e.getValue().isEmpty())
+            {
+                candidates.add(e.getKey());
+            }
+        }
 
         for(Iterator<IFile> p = candidates.iterator(); p.hasNext();)
         {
@@ -717,23 +775,24 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
 
         if(state.out != null)
         {
-            state.out.println("expanded candidate list");
-            // This is a complete list of slice files.
-            for(Iterator<IFile> p = candidates.iterator(); p.hasNext();)
+            if(candidates.isEmpty())
             {
-                state.out.println("    " + p.next().getProjectRelativePath().toString());
+                state.out.println("No remaining candidates.");
+            }
+            else
+            {
+                state.out.println("Expanded candidate list:");
+                // This is a complete list of slice files.
+                for(Iterator<IFile> p = candidates.iterator(); p.hasNext();)
+                {
+                    state.out.println("    " + p.next().getProjectRelativePath().toString());
+                }
             }
         }
-        // If there are no candidates, we're done.
-        if(candidates.isEmpty())
-        {
-            state.dependencies.write();
-            return;
-        }
 
-        if(state.out != null)
+        if(state.out != null && !candidates.isEmpty())
         {
-            state.out.println("phase: regenerating java source files");
+            state.out.println("Regenerating java source files.");
         }
 
         // All source files contained in the generated sub-directory.
@@ -742,8 +801,6 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
 
         StringBuffer out = new StringBuffer();
         
-        // The orphan candidate set.
-        Set<IFile> orphanCandidateSet = new HashSet<IFile>();
         // The complete set of generated java files by this build.
         Set<IFile> generatedJavaFiles = new HashSet<IFile>();
         // The set of files that we'll generate dependencies for.
@@ -767,11 +824,12 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
                 state.out.print(out.toString());
             }
             
-            if(status != 0)
+            // Only if the build succeeded do we add the file to the list of
+            // dependencies.
+            if(status == 0)
             {
-                continue;
+                depends.add(file);
             }
-            depends.add(file);
             
             // We need to now look at the files in the generated sub-directory,
             // and determine which files have changed. Any that have not changed
@@ -804,12 +862,20 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
 
             if(state.out != null)
             {
-                state.out.println("emitted");
-                for(Iterator<IFile> q = newGeneratedJavaFiles.iterator(); q.hasNext();)
+                if(newGeneratedJavaFiles.isEmpty())
                 {
-                    state.out.println("    " + q.next().getProjectRelativePath().toString());
+                    state.out.println("No java files emitted.");
+                }
+                else
+                {
+                    state.out.println("Emitted");
+                    for(Iterator<IFile> q = newGeneratedJavaFiles.iterator(); q.hasNext();)
+                    {
+                        state.out.println("    " + q.next().getProjectRelativePath().toString());
+                    }
                 }
             }
+
             // Compute the set difference between the old set and new set
             // of generated files. The difference should be added to the
             // orphan candidate set.
@@ -820,10 +886,17 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
                 oldJavaFiles.removeAll(newGeneratedJavaFiles);
                 if(state.out != null)
                 {
-                    state.out.println("orphans from this build");
-                    for(Iterator<IFile> q = oldJavaFiles.iterator(); q.hasNext();)
+                    if(oldJavaFiles.isEmpty())
                     {
-                        state.out.println("    " + q.next().getProjectRelativePath().toString());
+                        state.out.println("No orphans from this file.");
+                    }
+                    else
+                    {
+                        state.out.println("Orphans from this file:");
+                        for(Iterator<IFile> q = oldJavaFiles.iterator(); q.hasNext();)
+                        {
+                            state.out.println("    " + q.next().getProjectRelativePath().toString());
+                        }
                     }
                 }
                 orphanCandidateSet.addAll(oldJavaFiles);
@@ -843,13 +916,20 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
         
         if(state.out != null)
         {
-            state.out.println("orphans");
-            for(Iterator<IFile> p = orphanCandidateSet.iterator(); p.hasNext();)
+            if(orphanCandidateSet.isEmpty())
             {
-                state.out.println("    " + p.next().getProjectRelativePath().toString());
+                state.out.println("No orphans from this build.");
             }
-            state.out.println("phase: updating dependencies");
+            else
+            {
+                state.out.println("Orphans from this build:");
+                for(Iterator<IFile> p = orphanCandidateSet.iterator(); p.hasNext();)
+                {
+                    state.out.println("    " + p.next().getProjectRelativePath().toString());
+                }
+            }
         }
+        
         //
         // Remove orphans.
         //
@@ -857,22 +937,27 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
         {
             p.next().delete(true, false, monitor);
         }
-
+        
+        
         // The dependencies of any files without build errors should be updated.
 
         // We've already added markers for any errors... Only update the
         // dependencies if no problems resulted in the build.
         if(!depends.isEmpty())
         {
+            if(state.out != null)
+            {
+                state.out.println("Updating dependencies");
+            }
+
             if(build(state, depends, true, out) == 0)
             {
                 // Parse the new dependency set.
                 state.dependencies.updateDependencies(out.toString());
-                state.dependencies.write();
             }
             else if(state.err != null)
             {
-                state.err.println("dependencies not updated.");
+                state.err.println("Dependencies not updated due to error.");
                 state.err.println(out.toString());    
             }
         }

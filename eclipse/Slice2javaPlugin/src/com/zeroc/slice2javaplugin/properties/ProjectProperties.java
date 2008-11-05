@@ -176,7 +176,7 @@ public class ProjectProperties extends PropertyPage
     {
         if(!Configuration.verifyIceHome(_iceHome.getText()))
         {
-            setErrorMessage("Cannot location valid Ice installation");
+            setErrorMessage("Cannot locate valid Ice installation");
             setValid(false);
             return;
         }
@@ -555,7 +555,7 @@ public class ProjectProperties extends PropertyPage
         composite.setLayoutData(new GridData(GridData.FILL_BOTH));
         
         Label l = new Label(composite, SWT.WRAP);
-        l.setText("Enter metadata (';' separated). For example, enter java2 to define --meta=java.");
+        l.setText("Enter metadata (';' separated). For example, enter java2 to define --meta=java2.");
         GridData gridData = new GridData(GridData.FILL_BOTH);
         gridData.widthHint = 400;
         l.setLayoutData(gridData);
