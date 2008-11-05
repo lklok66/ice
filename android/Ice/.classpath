@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<classpath>
-	<classpathentry excluding="Freeze/|IceBox/|IceGridGUI/|ant/" kind="src" path="src"/>
-	<classpathentry excluding="Freeze/|Glacier2/|IceBox/|IceGrid/|IceStorm/" kind="src" path="generated"/>
-	<classpathentry kind="lib" path="C:/Program Files/Java/jre1.6.0_07/lib/jce.jar"/>
-	<classpathentry kind="lib" path="C:/Program Files/Java/jre1.6.0_07/lib/jsse.jar"/>
-	<classpathentry kind="lib" path="C:/Program Files/Java/jre1.6.0_07/lib/rt.jar"/>
-	<classpathentry kind="output" path="lib"/>
-</classpath>
