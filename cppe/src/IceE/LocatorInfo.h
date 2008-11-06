@@ -73,6 +73,15 @@ class LocatorInfo : public IceUtil::Shared, public IceUtil::Mutex
 {
 public:
 
+    class GetEndpointsCallback : virtual public IceUtil::Shared
+    {
+    public:
+        
+        virtual void locatorInfoEndpoints(const std::vector<EndpointPtr>&, bool) = 0;
+        virtual void locatorInfoException(const Ice::LocalException&) = 0;
+    };
+    typedef IceUtil::Handle<GetEndpointsCallback> GetEndpointsCallbackPtr;
+
     LocatorInfo(const Ice::LocatorPrx&, const LocatorTablePtr&);
 
     void destroy();
@@ -83,9 +92,16 @@ public:
     Ice::LocatorPrx getLocator() const;
     Ice::LocatorRegistryPrx getLocatorRegistry();
 
-    std::vector<EndpointPtr> getEndpoints(const ReferencePtr&, bool&);
+    void getEndpoints(const ReferencePtr&, const GetEndpointsCallbackPtr&);
     void clearCache(const ReferencePtr&);
     void clearObjectCache(const ReferencePtr&);
+
+    //
+    // The following methods need to be public for access by AMI callbacks.
+    //
+    void getEndpointsException(const ReferencePtr&, const Ice::Exception&, const GetEndpointsCallbackPtr&);
+    void getWellKnownObjectEndpoints(const ReferencePtr&, const Ice::ObjectPrx&, bool, const GetEndpointsCallbackPtr&);
+    void getEndpointsTrace(const ReferencePtr&, const std::vector<EndpointPtr>&, bool);
 
 private:
 

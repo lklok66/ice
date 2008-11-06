@@ -21,16 +21,22 @@
 #endif
 #include <IceE/ReferenceFactory.h>
 #include <IceE/ProxyFactory.h>
+#include <IceE/ThreadPool.h>
+#include <IceE/SelectorThread.h>
 #include <IceE/OutgoingConnectionFactory.h>
 #include <IceE/LocalException.h>
 #include <IceE/Properties.h>
 #include <IceE/LoggerI.h>
 #include <IceE/EndpointFactory.h>
+#include <IceE/Endpoint.h>
 #ifdef ICEE_HAS_OBV
 #    include <IceE/ObjectFactoryManager.h>
 #endif
 #ifndef ICEE_PURE_CLIENT
 #    include <IceE/ObjectAdapterFactory.h>
+#endif
+#ifdef ICEE_HAS_AMI
+#    include <IceE/RetryQueue.h>
 #endif
 #include <IceE/StaticMutex.h>
 #include <IceE/StringUtil.h>
@@ -185,12 +191,18 @@ IceInternal::Instance::objectAdapterFactory() const
 }
 #endif
 
-#ifndef ICEE_PURE_BLOCKING_CLIENT
-size_t
-IceInternal::Instance::threadPerConnectionStackSize() const
+#ifdef ICEE_HAS_AMI
+RetryQueuePtr
+IceInternal::Instance::retryQueue() const
 {
-    // No mutex lock, immutable.
-    return _threadPerConnectionStackSize;
+    IceUtil::RecMutex::Lock sync(*this);
+
+    if(_state == StateDestroyed)
+    {
+        throw CommunicatorDestroyedException(__FILE__, __LINE__);
+    }
+
+    return _retryQueue;
 }
 #endif
 
@@ -238,6 +250,98 @@ IceInternal::Instance::flushBatchRequests()
 
 }
 #endif
+
+ThreadPoolPtr
+IceInternal::Instance::clientThreadPool()
+{
+    IceUtil::RecMutex::Lock sync(*this);
+
+    if(_state == StateDestroyed)
+    {
+        throw CommunicatorDestroyedException(__FILE__, __LINE__);
+    }
+
+    if(!_clientThreadPool) // Lazy initialization.
+    {
+        // XXX - Remove timeout argument if unnecessary
+        _clientThreadPool = new ThreadPool(this, "Ice.ThreadPool.Client", 0);
+    }
+
+    return _clientThreadPool;
+}
+
+ThreadPoolPtr
+IceInternal::Instance::serverThreadPool()
+{
+    IceUtil::RecMutex::Lock sync(*this);
+
+    if(_state == StateDestroyed)
+    {
+        throw CommunicatorDestroyedException(__FILE__, __LINE__);
+    }
+
+    if(!_serverThreadPool) // Lazy initialization.
+    {
+        // XXX - Remove timeout argument if unnecessary
+        _serverThreadPool = new ThreadPool(this, "Ice.ThreadPool.Server", 0);
+    }
+
+    return _serverThreadPool;
+}
+
+SelectorThreadPtr
+IceInternal::Instance::selectorThread()
+{
+    IceUtil::RecMutex::Lock sync(*this);
+
+    if(_state == StateDestroyed)
+    {
+        throw CommunicatorDestroyedException(__FILE__, __LINE__);
+    }
+
+    if(!_selectorThread) // Lazy initialization.
+    {
+        _selectorThread = new SelectorThread(this);
+    }
+
+    return _selectorThread;
+}
+
+EndpointHostResolverPtr
+IceInternal::Instance::endpointHostResolver()
+{
+    IceUtil::RecMutex::Lock sync(*this);
+
+    if(_state == StateDestroyed)
+    {
+        throw CommunicatorDestroyedException(__FILE__, __LINE__);
+    }
+
+    if(!_endpointHostResolver) // Lazy initialization.
+    {
+        _endpointHostResolver = new EndpointHostResolver(this);
+    }
+
+    return _endpointHostResolver;
+}
+
+IceUtil::TimerPtr
+IceInternal::Instance::timer()
+{
+    IceUtil::RecMutex::Lock sync(*this);
+
+    if(_state == StateDestroyed)
+    {
+        throw CommunicatorDestroyedException(__FILE__, __LINE__);
+    }
+
+    if(!_timer) // Lazy initialization.
+    {
+        _timer = new IceUtil::Timer;
+    }
+
+    return _timer;
+}
 
 Identity
 IceInternal::Instance::stringToIdentity(const string& s) const
@@ -379,9 +483,6 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
     _state(StateActive),
     _initData(initData),
     _messageSizeMax(0)
-#ifndef ICEE_PURE_BLOCKING_CLIENT
-    , _threadPerConnectionStackSize(0)
-#endif
 {
     try
     {
@@ -531,17 +632,6 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
             }
         }
 
-#ifndef ICEE_PURE_BLOCKING_CLIENT
-        {
-            Int stackSize = _initData.properties->getPropertyAsInt("Ice.ThreadPerConnection.StackSize");
-            if(stackSize < 0)
-            {
-                stackSize = 0;
-            }
-            const_cast<size_t&>(_threadPerConnectionStackSize) = static_cast<size_t>(stackSize);
-        }
-#endif
-
 #ifdef ICEE_HAS_ROUTER
         _routerManager = new RouterManager;
 #endif
@@ -564,6 +654,10 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
 
 #ifndef ICEE_PURE_CLIENT
         _objectAdapterFactory = new ObjectAdapterFactory(this, communicator);
+#endif
+
+#ifdef ICEE_HAS_AMI
+        _retryQueue = new RetryQueue(this);
 #endif
 
 #ifdef ICEE_HAS_WSTRING
@@ -599,6 +693,10 @@ IceInternal::Instance::~Instance()
 #ifndef ICEE_PURE_CLIENT
     assert(!_objectAdapterFactory);
 #endif
+#ifdef ICEE_HAS_AMI
+    assert(!_retryQueue);
+#endif
+    assert(!_endpointHostResolver);
 #ifdef ICEE_HAS_ROUTER
     assert(!_routerManager);
 #endif
@@ -703,13 +801,6 @@ IceInternal::Instance::destroy()
         _state = StateDestroyInProgress;
     }
 
-#ifdef ICEE_HAS_OBV
-    if(_servantFactoryManager)
-    {
-        _servantFactoryManager->destroy();
-    }
-#endif
-
 #ifndef ICEE_PURE_CLIENT
     if(_objectAdapterFactory)
     {
@@ -738,16 +829,39 @@ IceInternal::Instance::destroy()
     }
 #endif
 
+#ifdef ICEE_HAS_AMI
+    if(_retryQueue)
+    {
+        _retryQueue->destroy();
+    }
+#endif
+
+    EndpointHostResolverPtr endpointHostResolver;
+
     {
         IceUtil::RecMutex::Lock sync(*this);
 
-#ifdef ICEE_HAS_OBV
-        _servantFactoryManager = 0;
-#endif
 #ifndef ICEE_PURE_CLIENT
         _objectAdapterFactory = 0;
 #endif
         _outgoingConnectionFactory = 0;
+#ifdef ICEE_HAS_AMI
+        _retryQueue = 0;
+#endif
+
+        if(_endpointHostResolver)
+        {
+            _endpointHostResolver->destroy();
+            std::swap(endpointHostResolver, _endpointHostResolver);
+        }
+
+#ifdef ICEE_HAS_OBV
+        if(_servantFactoryManager)
+        {
+            _servantFactoryManager->destroy();
+            _servantFactoryManager = 0;
+        }
+#endif
 
         //_referenceFactory->destroy(); // No destroy function defined.
         _referenceFactory = 0;
@@ -778,6 +892,14 @@ IceInternal::Instance::destroy()
         }
 
         _state = StateDestroyed;
+    }
+
+    //
+    // Join with threads outside the synchronization.
+    //
+    if(endpointHostResolver)
+    {
+        endpointHostResolver->getThreadControl().join();
     }
 }
 

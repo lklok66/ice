@@ -29,11 +29,14 @@ LOCAL_OBJS      = Base64.obj \
                   Communicator.obj \
                   Cond.obj \
                   Connection.obj \
+		  ConnectRequestHandler.obj \
+		  RequestHandler.obj \
                   ConvertUTF.obj \
                   Current.obj \
                   DefaultsAndOverrides.obj \
 		  DispatchInterceptor.obj \
                   Endpoint.obj \
+		  EventHandler.obj \
                   ExceptionBase.obj \
                   FactoryTable.obj \
                   FactoryTableDef.obj \
@@ -55,6 +58,7 @@ LOCAL_OBJS      = Base64.obj \
 		  ObjectFactoryManager.obj \
                   OperationMode.obj \
                   Outgoing.obj \
+		  OutgoingAsync.obj \
                   OutgoingConnectionFactory.obj \
                   Properties.obj \
                   Protocol.obj \
@@ -63,9 +67,11 @@ LOCAL_OBJS      = Base64.obj \
                   RecMutex.obj \
                   Reference.obj \
                   ReferenceFactory.obj \
+		  RetryQueue.obj \
                   Router.obj \
                   RouterInfo.obj \
                   SafeStdio.obj \
+		  SelectorThread.obj \
                   ServantManager.obj \
                   Shared.obj \
                   StaticMutex.obj \
@@ -73,7 +79,9 @@ LOCAL_OBJS      = Base64.obj \
                   StringUtil.obj \
                   Thread.obj \
                   ThreadException.obj \
+		  ThreadPool.obj \
                   Time.obj \
+		  Timer.obj \
                   TraceLevels.obj \
                   TraceUtil.obj \
                   UnknownEndpoint.obj \

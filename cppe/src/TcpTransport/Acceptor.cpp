@@ -77,23 +77,7 @@ IceInternal::Acceptor::accept()
         out << "accepted tcp connection\n" << fdToString(fd);
     }
 
-    return new Transceiver(_instance, fd);
-}
-
-void
-IceInternal::Acceptor::connectToSelf()
-{
-    SOCKET fd = createSocket();
-    setBlock(fd, false);
-    if(_addr.sin_addr.s_addr == INADDR_ANY)
-    {
-        doConnect(fd, getAddresses("127.0.0.1", ntohs(_addr.sin_port))[0], -1);
-    }
-    else
-    {
-        doConnect(fd, _addr, -1);
-    }
-    closeSocket(fd);
+    return new Transceiver(_instance, fd, true);
 }
 
 string
@@ -122,7 +106,7 @@ IceInternal::Acceptor::Acceptor(const InstancePtr& instance, const string& host,
     try
     {
         _fd = createSocket();
-        _addr = getAddresses(host, port, true)[0];
+        _addr = getAddresses(host, port, true, true)[0];
         setTcpBufSize(_fd, _instance->initializationData().properties, _logger);
 #ifndef _WIN32
         //

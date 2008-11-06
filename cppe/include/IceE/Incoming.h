@@ -23,7 +23,7 @@ class ICE_API Incoming : private IceUtil::noncopyable
 {
 public:
 
-    Incoming(Instance*, Ice::Connection*, BasicStream&, const Ice::ObjectAdapterPtr&);
+    Incoming(Instance*, Ice::Connection*, const Ice::ObjectAdapterPtr&);
 
     void setAdapter(const Ice::ObjectAdapterPtr&);
     const Ice::ObjectAdapterPtr& getAdapter() const { return _adapter; }
@@ -44,7 +44,7 @@ protected:
     void __warning(const std::string&) const;
 
     BasicStream _os;
-    BasicStream& _is;
+    BasicStream _is;
     Ice::Connection* _connection;
     Ice::ObjectAdapterPtr _adapter;
     ServantManager* _servantManager;

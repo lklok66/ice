@@ -120,7 +120,7 @@ IceUtil::Time::now(Clock clock)
         if(gettimeofday(&tv, 0) < 0)
         {
             assert(0);
-            throw SyscallException(__FILE__, __LINE__, errno);
+            throw Ice::SyscallException(__FILE__, __LINE__, errno);
         }
         return Time(tv.tv_sec * ICE_INT64(1000000) + tv.tv_usec);
 #else
@@ -205,3 +205,4 @@ Time::Time(Int64 usec) :
     _usec(usec)
 {
 }
+

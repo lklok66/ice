@@ -42,6 +42,19 @@ allTests(const Ice::CommunicatorPtr& communicator, const Ice::InitializationData
     derived->opDerived();
     tprintf("ok\n");
 
+#ifdef ICEE_HAS_AMI
+    tprintf("testing twoway operations with AMI... ");
+    void twowaysAMI(const Ice::CommunicatorPtr&, const Test::MyClassPrx&);
+    twowaysAMI(communicator, cl);
+    twowaysAMI(communicator, derived);
+    tprintf("ok\n");
+    
+    tprintf("testing oneway operations with AMI... ");
+    void onewaysAMI(const Ice::CommunicatorPtr&, const Test::MyClassPrx&);
+    onewaysAMI(communicator, cl);
+    tprintf("ok\n");
+#endif
+
     tprintf("testing batch oneway operations... ");
     void batchOneways(const Test::MyClassPrx&);
     batchOneways(cl);

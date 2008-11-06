@@ -22,7 +22,7 @@ using namespace IceInternal;
 IceUtil::Shared* IceInternal::upCast(Connector* p) { return p; }
 
 TransceiverPtr
-Connector::connect(int timeout)
+Connector::connect()
 {
     if(_traceLevels->network >= 2)
     {
@@ -30,21 +30,31 @@ Connector::connect(int timeout)
         out << "trying to establish tcp connection to " << toString();
     }
 
-    SOCKET fd = createSocket();
-    setBlock(fd, false);
-    setTcpBufSize(fd, _instance->initializationData().properties, _logger);
-    doConnect(fd, _addr, timeout);
-#ifndef ICEE_USE_SELECT_OR_POLL_FOR_TIMEOUTS
-    setBlock(fd, true);
-#endif
-
-    if(_traceLevels->network >= 1)
+    try
     {
-        Trace out(_logger, _traceLevels->networkCat);
-        out << "tcp connection established\n" << fdToString(fd);
+        SOCKET fd = createSocket();
+        setBlock(fd, false);
+        setTcpBufSize(fd, _instance->initializationData().properties, _logger);
+        bool connected = doConnect(fd, _addr);
+        if(connected)
+        {
+            if(_traceLevels->network >= 1)
+            {
+                Trace out(_logger, _traceLevels->networkCat);
+                out << "tcp connection established\n" << fdToString(fd);
+            }
+        }
+        return new Transceiver(_instance, fd, connected);
     }
-
-    return new Transceiver(_instance, fd);
+    catch(const Ice::LocalException& ex)
+    {
+        if(_traceLevels->network >= 2)
+        {
+            Trace out(_logger, _traceLevels->networkCat);
+            out << "failed to establish tcp connection to " << toString() << "\n" << ex.toString();
+        }
+        throw;
+    }
 }
 
 string

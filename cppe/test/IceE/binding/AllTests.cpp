@@ -47,6 +47,52 @@ splitString(const string& str, const string& delim)
     return result;
 }
 
+#ifdef ICEE_HAS_AMI
+class GetAdapterNameCB : public AMI_TestIntf_getAdapterName, public IceUtil::Monitor<IceUtil::Mutex>
+{
+public:
+
+    virtual void
+    ice_response(const string& name)
+    {
+        Lock sync(*this);
+        assert(!name.empty());
+        _name = name;
+        notify();
+    }
+
+    virtual void
+    ice_exception(const Ice::Exception& ex)
+    {
+        test(false);
+    }
+
+    virtual string
+    getResult()
+    {
+        Lock sync(*this);
+        while(_name.empty())
+        {
+            wait();
+        }
+        return _name;
+    }
+
+private:
+
+    string _name;
+};
+typedef IceUtil::Handle<GetAdapterNameCB> GetAdapterNameCBPtr;
+
+string
+getAdapterNameWithAMI(const TestIntfPrx& test)
+{
+    GetAdapterNameCBPtr cb = new GetAdapterNameCB();
+    test->getAdapterName_async(cb);
+    return cb->getResult();
+}
+#endif
+
 TestIntfPrx
 createTestIntfPrx(vector<RemoteObjectAdapterPrx>& adapters)
 {
@@ -202,6 +248,99 @@ allTests(const Ice::CommunicatorPtr& communicator)
     }
     tprintf("ok\n");
 
+#ifdef ICEE_HAS_AMI
+    tprintf("testing binding with multiple endpoints and AMI... ");
+    {
+        vector<RemoteObjectAdapterPrx> adapters;
+        adapters.push_back(com->createObjectAdapter("AdapterAMI11", "default"));
+        adapters.push_back(com->createObjectAdapter("AdapterAMI12", "default"));
+        adapters.push_back(com->createObjectAdapter("AdapterAMI13", "default"));
+
+        //
+        // Ensure that when a connection is opened it's reused for new
+        // proxies and that all endpoints are eventually tried.
+        //
+        set<string> names;
+        names.insert("AdapterAMI11");
+        names.insert("AdapterAMI12");
+        names.insert("AdapterAMI13");
+        while(!names.empty())
+        {
+            vector<RemoteObjectAdapterPrx> adpts = adapters;
+
+            TestIntfPrx test1 = createTestIntfPrx(adpts);
+            random_shuffle(adpts.begin(), adpts.end());
+            TestIntfPrx test2 = createTestIntfPrx(adpts);
+            random_shuffle(adpts.begin(), adpts.end());
+            TestIntfPrx test3 = createTestIntfPrx(adpts);
+
+            test(test1->ice_getConnection() == test2->ice_getConnection());
+            test(test2->ice_getConnection() == test3->ice_getConnection());
+            
+            names.erase(getAdapterNameWithAMI(test1));
+            test1->ice_getConnection()->close(false);
+        }
+
+        //
+        // Ensure that the proxy correctly caches the connection (we
+        // always send the request over the same connection.)
+        //
+        {
+            for(vector<RemoteObjectAdapterPrx>::const_iterator p = adapters.begin(); p != adapters.end(); ++p)
+            {
+                (*p)->getTestIntf()->ice_ping();
+            }
+            
+            TestIntfPrx test = createTestIntfPrx(adapters);
+            string name = getAdapterNameWithAMI(test);
+            const int nRetry = 10;
+            int i;
+            for(i = 0; i < nRetry && getAdapterNameWithAMI(test) == name; i++);
+            test(i == nRetry);
+
+            for(vector<RemoteObjectAdapterPrx>::const_iterator q = adapters.begin(); q != adapters.end(); ++q)
+            {
+                (*q)->getTestIntf()->ice_getConnection()->close(false);
+            }
+        }           
+
+        //
+        // Deactivate an adapter and ensure that we can still
+        // establish the connection to the remaining adapters.
+        //
+        com->deactivateObjectAdapter(adapters[0]);
+        names.insert("AdapterAMI12");
+        names.insert("AdapterAMI13");
+        while(!names.empty())
+        {
+            vector<RemoteObjectAdapterPrx> adpts = adapters;
+
+            TestIntfPrx test1 = createTestIntfPrx(adpts);
+            random_shuffle(adpts.begin(), adpts.end());
+            TestIntfPrx test2 = createTestIntfPrx(adpts);
+            random_shuffle(adpts.begin(), adpts.end());
+            TestIntfPrx test3 = createTestIntfPrx(adpts);
+            
+            test(test1->ice_getConnection() == test2->ice_getConnection());
+            test(test2->ice_getConnection() == test3->ice_getConnection());
+
+            names.erase(test1->getAdapterName());
+            test1->ice_getConnection()->close(false);
+        }
+        
+        //
+        // Deactivate an adapter and ensure that we can still
+        // establish the connection to the remaining adapter.
+        //
+        com->deactivateObjectAdapter(adapters[2]);      
+        TestIntfPrx test = createTestIntfPrx(adapters);
+        test(test->getAdapterName() == "AdapterAMI12"); 
+
+        deactivate(com, adapters);
+    }
+    tprintf("ok\n");
+#endif
+    
     tprintf("testing random endpoint selection... ");
     {
         vector<RemoteObjectAdapterPrx> adapters;

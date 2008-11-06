@@ -18,12 +18,10 @@ namespace IceInternal
 
 class BasicStream;
 
-void traceHeader(const char*, const BasicStream&, const ::Ice::LoggerPtr&, const TraceLevelsPtr&);
-void traceRequest(const char*, const BasicStream&, const ::Ice::LoggerPtr&, const TraceLevelsPtr&);
-#ifdef ICEE_HAS_BATCH
-void traceBatchRequest(const char*, const BasicStream&, const ::Ice::LoggerPtr&, const TraceLevelsPtr&);
-#endif
-void traceReply(const char*, const BasicStream&, const ::Ice::LoggerPtr&, const TraceLevelsPtr&);
+void traceSend(const BasicStream&, const ::Ice::LoggerPtr&, const TraceLevelsPtr&);
+void traceRecv(const BasicStream&, const ::Ice::LoggerPtr&, const TraceLevelsPtr&);
+void trace(const char*, const BasicStream&, const ::Ice::LoggerPtr&, const TraceLevelsPtr&);
+void traceSlicing(const char*, const ::std::string&, const char *, const ::Ice::LoggerPtr&);
 
 }
 

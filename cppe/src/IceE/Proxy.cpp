@@ -11,8 +11,10 @@
 #include <IceE/Proxy.h>
 #include <IceE/ProxyFactory.h>
 #include <IceE/Outgoing.h>
+#include <IceE/OutgoingAsync.h>
 #include <IceE/Connection.h>
 #include <IceE/Reference.h>
+#include <IceE/ConnectRequestHandler.h>
 #include <IceE/Instance.h>
 #include <IceE/BasicStream.h>
 #include <IceE/LocalException.h>
@@ -159,17 +161,17 @@ IceProxy::Ice::Object::ice_isA(const string& __id, const Context* __context)
     int __cnt = 0;
     while(true)
     {
-        ConnectionPtr __connection;
+        RequestHandlerPtr __handler;
         try
         {
             __checkTwowayOnly("ice_isA");
             static const string __operation("ice_isA");
-            __connection = ice_getConnection();
-            Outgoing __og(__connection.get(), _reference.get(), __operation, ::Ice::Nonmutating, __context);
-            BasicStream* __stream = __og.stream();
+            __handler = __getRequestHandler();
+            Outgoing __og(__handler.get(), _reference.get(), __operation, ::Ice::Nonmutating, __context);
+            BasicStream* __os = __og.os();
             try
             {
-                __stream->write(__id, false);
+                __os->write(__id, false);
             }
             catch(const ::Ice::LocalException& __ex)
             {
@@ -179,18 +181,19 @@ IceProxy::Ice::Object::ice_isA(const string& __id, const Context* __context)
             bool __ok = __og.invoke();
             try
             {
+                BasicStream* __is = __og.is();
                 if(!__ok)
                 {
                     try
                     {
-                        __stream->throwException();
+                        __is->throwException();
                     }
                     catch(const ::Ice::UserException& __ex)
                     {
                         throw ::Ice::UnknownUserException(__FILE__, __LINE__, __ex.ice_name());
                     }
                 }
-                __stream->read(__ret);
+                __is->read(__ret);
             }
             catch(const ::Ice::LocalException& __ex)
             {
@@ -206,11 +209,11 @@ IceProxy::Ice::Object::ice_isA(const string& __id, const Context* __context)
         }
         catch(const LocalExceptionWrapper& __ex)
         {
-            __handleExceptionWrapperRelaxed(__connection, __ex, __cnt);
+            __handleExceptionWrapperRelaxed(__handler, __ex, __cnt);
         }
         catch(const LocalException& __ex)
         {
-            __handleException(__connection, __ex, __cnt);
+            __handleException(__handler, __ex, __cnt);
         }
 #if defined(_MSC_VER) && defined(_M_ARM) // ARM bug.
         catch(...)
@@ -227,16 +230,16 @@ IceProxy::Ice::Object::ice_ping(const Context* __context)
     int __cnt = 0;
     while(true)
     {
-        ConnectionPtr __connection;
+        RequestHandlerPtr __handler;
         try
         {
             static const string __operation("ice_ping");
-            __connection = ice_getConnection();
-            Outgoing __og(__connection.get(), _reference.get(), __operation, ::Ice::Nonmutating, __context);
+            __handler = __getRequestHandler();
+            Outgoing __og(__handler.get(), _reference.get(), __operation, ::Ice::Nonmutating, __context);
             bool __ok = __og.invoke();
             try
             {
-                BasicStream* __is = __og.stream();
+                BasicStream* __is = __og.is();
                 if(!__ok)
                 {
                     try
@@ -263,11 +266,12 @@ IceProxy::Ice::Object::ice_ping(const Context* __context)
         }
         catch(const LocalExceptionWrapper& __ex)
         {
-            __handleExceptionWrapperRelaxed(__connection, __ex, __cnt);
+            __handleExceptionWrapperRelaxed(__handler, __ex, __cnt);
         }
         catch(const LocalException& __ex)
         {
-            __handleException(__connection, __ex, __cnt);
+            __handleException(__handler, __ex, __cnt);
+
         }
 #if defined(_MSC_VER) && defined(_M_ARM) // ARM bug.
         catch(...)
@@ -284,18 +288,18 @@ IceProxy::Ice::Object::ice_ids(const Context* __context)
     int __cnt = 0;
     while(true)
     {
-        ConnectionPtr __connection;
+        RequestHandlerPtr __handler;
         try
         {
             __checkTwowayOnly("ice_ids");
             static const string __operation("ice_ids");
-            __connection = ice_getConnection();
-            Outgoing __og(__connection.get(), _reference.get(), __operation, ::Ice::Nonmutating, __context);
+            __handler = __getRequestHandler();
+            Outgoing __og(__handler.get(), _reference.get(), __operation, ::Ice::Nonmutating, __context);
             vector<string> __ret;
             bool __ok = __og.invoke();
             try
             {
-                BasicStream* __is = __og.stream();
+                BasicStream* __is = __og.is();
                 if(!__ok)
                 {
                     try
@@ -323,11 +327,11 @@ IceProxy::Ice::Object::ice_ids(const Context* __context)
         }
         catch(const LocalExceptionWrapper& __ex)
         {
-            __handleExceptionWrapperRelaxed(__connection, __ex, __cnt);
+            __handleExceptionWrapperRelaxed(__handler, __ex, __cnt);
         }
         catch(const LocalException& __ex)
         {
-            __handleException(__connection, __ex, __cnt);
+            __handleException(__handler, __ex, __cnt);
         }
 #if defined(_MSC_VER) && defined(_M_ARM) // ARM bug.
         catch(...)
@@ -344,18 +348,18 @@ IceProxy::Ice::Object::ice_id(const Context* __context)
     int __cnt = 0;
     while(true)
     {
-        ConnectionPtr __connection;
+        RequestHandlerPtr __handler;
         try
         {
             __checkTwowayOnly("ice_id");
             static const string __operation("ice_id");
-            __connection = ice_getConnection();
-            Outgoing __og(__connection.get(), _reference.get(), __operation, ::Ice::Nonmutating, __context);
+            __handler = __getRequestHandler();
+            Outgoing __og(__handler.get(), _reference.get(), __operation, ::Ice::Nonmutating, __context);
             string __ret;
             bool __ok = __og.invoke();
             try
             {
-                BasicStream* __is = __og.stream();
+                BasicStream* __is = __og.is();
                 if(!__ok)
                 {
                     try
@@ -383,11 +387,11 @@ IceProxy::Ice::Object::ice_id(const Context* __context)
         }
         catch(const LocalExceptionWrapper& __ex)
         {
-            __handleExceptionWrapperRelaxed(__connection, __ex, __cnt);
+            __handleExceptionWrapperRelaxed(__handler, __ex, __cnt);
         }
         catch(const LocalException& __ex)
         {
-            __handleException(__connection, __ex, __cnt);
+            __handleException(__handler, __ex, __cnt);
         }
 #if defined(_MSC_VER) && defined(_M_ARM) // ARM bug.
         catch(...)
@@ -574,46 +578,68 @@ IceProxy::Ice::Object::ice_timeout(int t) const
 ConnectionPtr
 IceProxy::Ice::Object::ice_getConnection()
 {
-    ::IceUtil::Mutex::Lock sync(*this);
-
-    if(!_connection)
+    int __cnt = 0;
+    while(true)
     {
-        _connection = _reference->getConnection();
-
-        //
-        // If this proxy is for a non-local object, and we are
-        // using a router, then add this proxy to the router info
-        // object.
-        //
-#ifdef ICEE_HAS_ROUTER
-        RouterInfoPtr ri = _reference->getRouterInfo();
-        if(ri)
+        RequestHandlerPtr __handler;
+        try
         {
-            ri->addProxy(this);
+            return __getRequestHandler()->getConnection(true); // Wait for the connection to be established.
+        }
+        catch(const LocalException& __ex)
+        {
+            __handleException(__handler, __ex, __cnt);
+        }
+#if defined(_MSC_VER) && defined(_M_ARM) // ARM bug.
+        catch(...)
+        {
+            throw;
         }
 #endif
     }
-    return _connection;
 }
 
 ConnectionPtr
 IceProxy::Ice::Object::ice_getCachedConnection() const
 {
+    return const_cast<IceProxy::Ice::Object*>(this)->__getRequestHandler()->getConnection(false);
+}
+
+::IceInternal::RequestHandlerPtr
+IceProxy::Ice::Object::__getRequestHandler()
+{
     ::IceUtil::Mutex::Lock sync(*this);
-    return _connection;
+
+    if(!_handler)
+    {
+        ConnectRequestHandlerPtr handler = new ConnectRequestHandler(_reference, this);
+        _handler = handler->connect();
+    }
+    
+    return _handler;
+}
+
+void
+IceProxy::Ice::Object::__setRequestHandler(const RequestHandlerPtr& handler, const RequestHandlerPtr& previous)
+{
+    ::IceUtil::Mutex::Lock sync(*this);
+    if(previous.get() == _handler.get())
+    {
+        _handler = handler;
+    }
 }
 
 void
 IceProxy::Ice::Object::__copyFrom(const ObjectPrx& from)
 {
     ReferencePtr ref;
-    ConnectionPtr con;
+    RequestHandlerPtr handler;
 
     {
         ::IceUtil::Mutex::Lock sync(*from.get());
 
         ref = from->_reference;
-        con = from->_connection;
+        handler = from->_handler;
     }
 
     //
@@ -622,32 +648,45 @@ IceProxy::Ice::Object::__copyFrom(const ObjectPrx& from)
     //
 
     assert(!_reference);
-    assert(!_connection);
+    assert(!_handler);
 
     _reference = ref;
-    _connection = con;
+    _handler = handler;
 }
 
 void
-IceProxy::Ice::Object::__handleException(const ConnectionPtr& connection, const LocalException& ex, int& cnt)
+IceProxy::Ice::Object::__handleException(const RequestHandlerPtr& handler, 
+                                         const LocalException& ex, 
+#ifdef ICEE_HAS_AMI                      
+                                         OutgoingAsync* out,
+#endif
+                                         int& cnt)
 {
     //
-    // Only _connection needs to be mutex protected here.
+    // Only _handler needs to be mutex protected here.
     //
     {
         ::IceUtil::Mutex::Lock sync(*this);
-        if(connection.get() == _connection.get())
+        if(handler.get() == _handler.get())
         {
-            _connection = 0;
+            _handler = 0;
         }
     }
 
-    ProxyFactoryPtr proxyFactory = _reference->getInstance()->proxyFactory();
-    if(proxyFactory)
+    if(cnt == -1) // Don't retry if the retry count is -1.
     {
-        proxyFactory->checkRetryAfterException(ex, _reference, cnt);
+        ex.ice_throw();
     }
-    else
+
+    try
+    {
+#ifndef ICEE_HAS_AMI
+        _reference->getInstance()->proxyFactory()->checkRetryAfterException(ex, _reference, cnt);
+#else
+        _reference->getInstance()->proxyFactory()->checkRetryAfterException(ex, _reference, out, cnt);
+#endif
+    }
+    catch(const CommunicatorDestroyedException&)
     {
         //
         // The communicator is already destroyed, so we cannot retry.
@@ -657,13 +696,18 @@ IceProxy::Ice::Object::__handleException(const ConnectionPtr& connection, const 
 }
 
 void
-IceProxy::Ice::Object::__handleExceptionWrapper(const ConnectionPtr& connection, const LocalExceptionWrapper& ex)
+IceProxy::Ice::Object::__handleExceptionWrapper(const RequestHandlerPtr& handler, 
+                                                const LocalExceptionWrapper& ex
+#ifdef ICEE_HAS_AMI                      
+                                                , OutgoingAsync* out
+#endif
+    )
 {
     {
         IceUtil::Mutex::Lock sync(*this);
-        if(connection.get() == _connection.get())
+        if(handler.get() == _handler.get())
         {
-            _connection = 0;
+            _handler = 0;
         }
     }
 
@@ -671,24 +715,43 @@ IceProxy::Ice::Object::__handleExceptionWrapper(const ConnectionPtr& connection,
     {
         ex.get()->ice_throw();
     }
+
+#ifdef ICEE_HAS_AMI
+    if(out)
+    {
+        out->__send();
+    }
+#endif
 }
 
 void
-IceProxy::Ice::Object::__handleExceptionWrapperRelaxed(const ConnectionPtr& connection,
+IceProxy::Ice::Object::__handleExceptionWrapperRelaxed(const RequestHandlerPtr& handler,
                                                        const LocalExceptionWrapper& ex, 
+#ifdef ICEE_HAS_AMI                      
+                                                       OutgoingAsync* out,
+#endif
                                                        int& cnt)
 {
     if(!ex.retry())
     {
-        __handleException(connection, *ex.get(), cnt);
+        __handleException(handler, *ex.get(), out, cnt);
     }
     else
     {
-        IceUtil::Mutex::Lock sync(*this);
-        if(connection.get() == _connection.get())
         {
-            _connection = 0;
+            IceUtil::Mutex::Lock sync(*this);
+            if(handler.get() == _handler.get())
+            {
+                _handler = 0;
+            }
         }
+
+#ifdef ICEE_HAS_AMI
+        if(out)
+        {
+            out->__send();
+        }
+#endif
     }
 }
 

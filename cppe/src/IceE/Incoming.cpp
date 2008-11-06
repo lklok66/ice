@@ -25,13 +25,17 @@ using namespace std;
 using namespace Ice;
 using namespace IceInternal;
 
-IceInternal::Incoming::Incoming(Instance* inst, Connection* con, BasicStream& is, const ObjectAdapterPtr& adapter) :
+IceInternal::Incoming::Incoming(Instance* inst, Connection* con, const ObjectAdapterPtr& adapter) :
    _os(inst, inst->messageSizeMax()
 #ifdef ICEE_HAS_WSTRING
        , inst->initializationData().stringConverter, inst->initializationData().wstringConverter
 #endif
       ),
-    _is(is),
+   _is(inst, inst->messageSizeMax()
+#ifdef ICEE_HAS_WSTRING
+       , inst->initializationData().stringConverter, inst->initializationData().wstringConverter
+#endif
+      ),
     _connection(con)
 {
     setAdapter(adapter);
@@ -66,7 +70,6 @@ IceInternal::Incoming::startOver()
         }
     }
 }
-
 
 void
 IceInternal::Incoming::setAdapter(const Ice::ObjectAdapterPtr& adapter)
@@ -162,7 +165,7 @@ IceInternal::Incoming::invoke(bool response, Int requestId)
         _os.startWriteEncaps();
     }
 
-    
+
     Byte replyStatus = replyOK;
     DispatchStatus dispatchStatus = DispatchOK;
 
@@ -179,7 +182,7 @@ IceInternal::Incoming::invoke(bool response, Int requestId)
         {
             servant = _servantManager->findServant(_current.id, _current.facet);
         }
-            
+
         if(!servant)
         {
             if(_servantManager && _servantManager->hasServant(_current.id))
@@ -208,12 +211,12 @@ IceInternal::Incoming::invoke(bool response, Int requestId)
         {
             ex.id = _current.id;
         }
-        
+
         if(ex.facet.empty() && !_current.facet.empty())
         {
             ex.facet = _current.facet;
         }
-        
+
         if(ex.operation.empty() && !_current.operation.empty())
         {
             ex.operation = _current.operation;
@@ -260,14 +263,14 @@ IceInternal::Incoming::invoke(bool response, Int requestId)
             }
 
             _os.write(ex.operation, false);
-            
+
             _connection->sendResponse(&_os);
         }
         else
         {
             _connection->sendNoResponse();
         }
-        
+
         return;
     }
     catch(const UnknownLocalException& ex)
@@ -469,21 +472,21 @@ IceInternal::Incoming::invoke(bool response, Int requestId)
     // in the code below are considered fatal, and must propagate to
     // the caller of this operation.
     //
-    
+
     _is.endReadEncaps();
 
     if(response)
     {
         _os.endWriteEncaps();
-        
+
         if(replyStatus != replyOK && replyStatus != replyUserException)
         {
             assert(replyStatus == replyObjectNotExist ||
                    replyStatus == replyFacetNotExist);
-            
+
             _os.b.resize(headerSize + 4); // Reply status position.
             _os.write(replyStatus);
-            
+
             _current.id.__write(&_os);
 
             //

@@ -34,6 +34,17 @@ public:
         //initData.properties->setProperty("Ice.Trace.Protocol", "5");
 
         loadConfig(initData.properties);
+
+        //
+        // Now parse argc/argv into initData.properties
+        //
+        initData.properties = Ice::createProperties(argc, argv, initData.properties);
+
+        //
+        // We don't want connection warnings because of the timeout test.
+        //
+        initData.properties->setProperty("Ice.Warn.Connections", "0");
+
         initData.logger = getLogger();
         setCommunicator(Ice::initialize(argc, argv, initData));
         

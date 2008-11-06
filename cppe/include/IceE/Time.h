@@ -11,6 +11,7 @@
 #define ICEE_TIME_H
 
 #include <IceE/Config.h>
+#include <ostream>
 
 namespace IceUtil
 {
@@ -185,17 +186,14 @@ public:
 
 private:
 
-    // COMPILERBUG: friend statement required by gcc otherwise inline operator<<
-    // cause compile error with GCC.
-    friend ICE_API std::ostream& operator<<(std::ostream&, const Time&);
     Time(Int64);
 
     Int64 _usec;
 };
 
-inline ICE_API std::ostream& operator<<(std::ostream& os, const Time& tm)
+inline std::ostream& operator<<(std::ostream& os, const Time& tm)
 {
-    return os << tm.toMicroSeconds() / 1000000.0;
+    return os << tm.toMicroSeconds() / 100000.0;
 }
 
 } // End namespace Ice

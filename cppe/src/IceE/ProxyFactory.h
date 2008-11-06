@@ -15,6 +15,7 @@
 #include <IceE/ReferenceF.h>
 #include <IceE/ProxyF.h>
 #include <IceE/Shared.h>
+#include <IceE/OutgoingAsyncF.h>
 
 namespace Ice
 {
@@ -42,7 +43,11 @@ public:
 
     Ice::ObjectPrx referenceToProxy(const ReferencePtr&) const;
 
+#ifndef ICEE_HAS_AMI
     void checkRetryAfterException(const Ice::LocalException&, const ReferencePtr&, int&) const;
+#else
+    void checkRetryAfterException(const Ice::LocalException&, const ReferencePtr&, OutgoingAsync*, int&) const;
+#endif
 
 private:
 

@@ -213,6 +213,12 @@ IceInternal::UnknownEndpoint::connectors() const
     return ret;
 }
 
+void
+IceInternal::UnknownEndpoint::connectors_async(const Endpoint_connectorsPtr& callback) const
+{
+    callback->connectors(vector<ConnectorPtr>());
+}
+
 #ifndef ICEE_PURE_CLIENT
 AcceptorPtr
 IceInternal::UnknownEndpoint::acceptor(EndpointPtr& endp) const

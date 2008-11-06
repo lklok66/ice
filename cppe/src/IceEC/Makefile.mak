@@ -29,9 +29,11 @@ ICEE_OBJS      	= Base64.obj \
                   Communicator.obj \
                   Cond.obj \
                   Connection.obj \
+		  ConnectRequestHandler.obj \
                   ConvertUTF.obj \
                   DefaultsAndOverrides.obj \
                   Endpoint.obj \
+		  EventHandler.obj \
                   ExceptionBase.obj \
                   FactoryTable.obj \
                   FactoryTableDef.obj \
@@ -48,6 +50,7 @@ ICEE_OBJS      	= Base64.obj \
 		  ObjectFactoryManager.obj \
                   OperationMode.obj \
                   Outgoing.obj \
+		  OutgoingAsync.obj \
 		  Object.obj \
                   OutgoingConnectionFactory.obj \
                   Properties.obj \
@@ -57,16 +60,21 @@ ICEE_OBJS      	= Base64.obj \
                   RecMutex.obj \
                   Reference.obj \
                   ReferenceFactory.obj \
+		  RetryQueue.obj \
+		  RequestHandler.obj \
                   Router.obj \
                   RouterInfo.obj \
                   SafeStdio.obj \
+		  SelectorThread.obj \
                   Shared.obj \
                   StaticMutex.obj \
                   StringConverter.obj \
                   StringUtil.obj \
                   Thread.obj \
                   ThreadException.obj \
+		  ThreadPool.obj \
                   Time.obj \
+		  Timer.obj \
                   TraceLevels.obj \
                   TraceUtil.obj \
                   UnknownEndpoint.obj \

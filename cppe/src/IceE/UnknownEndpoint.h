@@ -33,6 +33,7 @@ public:
     virtual bool datagram() const;
     virtual bool unknown() const;
     virtual std::vector<ConnectorPtr> connectors() const;
+    virtual void connectors_async(const Endpoint_connectorsPtr&) const;
 #ifndef ICEE_PURE_CLIENT
     virtual AcceptorPtr acceptor(EndpointPtr&) const;
     virtual std::vector<EndpointPtr> expand() const;

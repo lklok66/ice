@@ -20,11 +20,33 @@
 #endif
 
 #include <IceE/Shared.h>
+#include <IceE/Exception.h>
+#include <IceE/Thread.h>
+#include <IceE/Monitor.h>
+
+#include <list>
+
+#ifdef _WIN32
+#  include <winsock2.h>
+#else
+#  include <netinet/in.h> // For struct sockaddr_in
+#endif
 
 namespace IceInternal
 {
 
 class BasicStream;
+
+class Endpoint_connectors : public virtual IceUtil::Shared
+{
+public:
+
+    virtual ~Endpoint_connectors() { }
+
+    virtual void connectors(const std::vector<ConnectorPtr>&) = 0;
+    virtual void exception(const Ice::LocalException&) = 0;
+};
+typedef IceUtil::Handle<Endpoint_connectors> Endpoint_connectorsPtr;
 
 class Endpoint : public IceUtil::Shared
 {
@@ -78,6 +100,7 @@ public:
     // connector is available.
     //
     virtual std::vector<ConnectorPtr> connectors() const = 0;
+    virtual void connectors_async(const Endpoint_connectorsPtr&) const = 0;
 
     //
     // Return an acceptor for this endpoint, or null if no acceptors
@@ -101,6 +124,37 @@ public:
     //
     virtual bool operator==(const Endpoint&) const = 0;
     virtual bool operator<(const Endpoint&) const = 0;
+
+protected:
+
+    virtual std::vector<ConnectorPtr> connectors(const std::vector<struct sockaddr_in>&) const;
+    friend class EndpointHostResolver;
+};
+
+class EndpointHostResolver : public IceUtil::Thread, public IceUtil::Monitor<IceUtil::Mutex>
+{   
+public:
+    
+    EndpointHostResolver(const InstancePtr&);
+
+    void resolve(const std::string&, int, const EndpointPtr&, const Endpoint_connectorsPtr&);
+    void destroy();
+    
+    virtual void run();
+
+private:
+
+    struct ResolveEntry
+    {
+        std::string host;
+        int port;
+        EndpointPtr endpoint;
+        Endpoint_connectorsPtr callback;
+    };
+
+    const InstancePtr _instance;
+    bool _destroyed;
+    std::list<ResolveEntry> _queue;
 };
 
 }

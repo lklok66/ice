@@ -29,7 +29,7 @@ public:
     virtual int
     run(int argc, char* argv[])
     {
-            Ice::InitializationData initData;
+        Ice::InitializationData initData;
         initData.properties = Ice::createProperties(argc, argv);
         initData.properties->setProperty("ServerManager.Endpoints", "default -p 12010");
 

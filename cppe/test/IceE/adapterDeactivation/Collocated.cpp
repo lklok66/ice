@@ -31,6 +31,13 @@ public:
         initData.properties = Ice::createProperties();
         initData.properties->setProperty("TestAdapter.Endpoints", "default -p 12010 -t 10000");
 
+        //
+        // Required for TestI::transient to not hang (the transient proxy call is not 
+        // collocation optimized in Ice-E).
+        //
+        initData.properties->setProperty("Ice.ThreadPool.Server.Size", "2");
+        initData.properties->setProperty("Ice.ThreadPool.Server.SizeWarn", "0");
+
         loadConfig(initData.properties);
         initData.logger = getLogger();
         setCommunicator(Ice::initialize(argc, argv, initData));

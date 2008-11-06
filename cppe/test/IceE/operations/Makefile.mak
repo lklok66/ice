@@ -19,7 +19,9 @@ OBJS		= Test.obj
 
 COBJS		= Client.obj \
 		  AllTests.obj \
-		  Twoways.obj
+		  Twoways.obj \
+		  OnewaysAMI.obj \
+		  TwowaysAMI.obj
 
 SOBJS		= TestI.obj \
 		  Server.obj
@@ -28,7 +30,9 @@ COLOBJS		= TestI.obj \
 		  Collocated.obj \
 		  AllTests.obj \
 		  Twoways.obj \
-		  BatchOneways.obj
+		  BatchOneways.obj \
+		  OnewaysAMI.obj \
+		  TwowaysAMI.obj
 
 SRCS		= $(OBJS:.obj=.cpp) \
 		  $(COBJS:.obj=.cpp) \

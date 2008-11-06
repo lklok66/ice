@@ -2,18 +2,21 @@
 //
 // Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
 //
-// This copy of Ice-E is licensed to you under the terms described in the
+// This copy of Ice is licensed to you under the terms described in the
 // ICEE_LICENSE file included in this distribution.
 //
 // **********************************************************************
 
-#include <IceE/LocalException.h> // Need to be included before Outgoing.h because of std::auto_ptr<LocalException>
 #include <IceE/Outgoing.h>
-#include <IceE/ReplyStatus.h>
+#include <IceE/Object.h>
+#include <IceE/RequestHandler.h>
 #include <IceE/Connection.h>
 #include <IceE/Reference.h>
-#include <IceE/Instance.h>
+#include <IceE/Endpoint.h>
+#include <IceE/LocalException.h>
 #include <IceE/Protocol.h>
+#include <IceE/Instance.h>
+#include <IceE/ReplyStatus.h>
 
 using namespace std;
 using namespace Ice;
@@ -31,6 +34,31 @@ IceInternal::LocalExceptionWrapper::LocalExceptionWrapper(const LocalExceptionWr
     _ex.reset(dynamic_cast<LocalException*>(ex.get()->ice_clone()));
 }
 
+void
+IceInternal::LocalExceptionWrapper::throwWrapper(const std::exception& ex)
+{
+    const UserException* ue = dynamic_cast<const UserException*>(&ex);
+    if(ue)
+    {
+        throw LocalExceptionWrapper(UnknownUserException(__FILE__, __LINE__, ue->toString()), false);
+    }
+
+    const LocalException* le = dynamic_cast<const LocalException*>(&ex);
+    if(le)
+    {
+        if(dynamic_cast<const UnknownException*>(le) ||
+           dynamic_cast<const ObjectNotExistException*>(le) ||
+           dynamic_cast<const OperationNotExistException*>(le) ||
+           dynamic_cast<const FacetNotExistException*>(le))
+        {
+            throw LocalExceptionWrapper(*le, false);
+        }
+        throw LocalExceptionWrapper(UnknownLocalException(__FILE__, __LINE__, le->toString()), false);
+    }
+    string msg = "std::exception: ";
+    throw LocalExceptionWrapper(UnknownException(__FILE__, __LINE__, msg + ex.what()), false);
+}
+
 const LocalException*
 IceInternal::LocalExceptionWrapper::get() const
 {
@@ -44,107 +72,163 @@ IceInternal::LocalExceptionWrapper::retry() const
     return _retry;
 }
 
-IceInternal::Outgoing::Outgoing(Connection* connection, Reference* ref, const string& operation,
+IceInternal::Outgoing::Outgoing(RequestHandler* handler, Reference* reference, const string& operation,
                                 OperationMode mode, const Context* context) :
-    _connection(connection),
-    _reference(ref),
+    _handler(handler),
+    _reference(reference),
     _state(StateUnsent),
-    _stream(ref->getInstance().get(), ref->getInstance()->messageSizeMax()
+    _is(reference->getInstance().get(), reference->getInstance()->messageSizeMax()
 #ifdef ICEE_HAS_WSTRING
-            , ref->getInstance()->initializationData().stringConverter,
-            ref->getInstance()->initializationData().wstringConverter
+        , reference->getInstance()->initializationData().stringConverter,
+        reference->getInstance()->initializationData().wstringConverter
 #endif
-           )
+       ),
+    _os(reference->getInstance().get(), reference->getInstance()->messageSizeMax()
+#ifdef ICEE_HAS_WSTRING
+        , reference->getInstance()->initializationData().stringConverter,
+        reference->getInstance()->initializationData().wstringConverter
+#endif
+       ),
+    _sent(false)
 {
     switch(_reference->getMode())
     {
         case ReferenceModeTwoway:
         case ReferenceModeOneway:
+        case ReferenceModeDatagram:
         {
-            _stream.writeBlob(requestHdr, sizeof(requestHdr));
+            _os.writeBlob(requestHdr, sizeof(requestHdr));
             break;
         }
 
         case ReferenceModeBatchOneway:
-#ifdef ICEE_HAS_BATCH
-        {
-            _connection->prepareBatchRequest(&_stream);
-            break;
-        }
-#endif
-        case ReferenceModeDatagram:
         case ReferenceModeBatchDatagram:
         {
-            assert(false);
+            _handler->prepareBatchRequest(&_os);
             break;
         }
     }
 
-//    _reference->getIdentity().__write(&_stream);
-    _stream.write(_reference->getIdentity().name); // Directly write name for performance reasons.
-    _stream.write(_reference->getIdentity().category); // Directly write category for performance reasons.
-
-    //
-    // For compatibility with the old FacetPath we still write an
-    // array of strings (we don't use the basic stream string array
-    // method here for performance reasons.)
-    //
-    if(_reference->getFacet().empty())
+    try
     {
-        _stream.writeSize(0);
+        _reference->getIdentity().__write(&_os);
+
+        //
+        // For compatibility with the old FacetPath.
+        //
+        if(_reference->getFacet().empty())
+        {
+            _os.write(static_cast<string*>(0), static_cast<string*>(0));
+        }
+        else
+        {
+            string facet = _reference->getFacet();
+            _os.write(&facet, &facet + 1);
+        }
+
+        _os.write(operation, false);
+
+        _os.write(static_cast<Byte>(mode));
+
+        if(context == 0)
+        {
+            context = _reference->getContext();
+        }
+
+        _os.writeSize(Int(context->size()));
+        Context::const_iterator p;
+        for(p = context->begin(); p != context->end(); ++p)
+        {
+            _os.write(p->first);
+            _os.write(p->second);
+        }
+
+        //
+        // Input and output parameters are always sent in an
+        // encapsulation, which makes it possible to forward requests as
+        // blobs.
+        //
+        _os.startWriteEncaps();
     }
-    else
+    catch(const LocalException& ex)
     {
-        _stream.writeSize(1);
-        _stream.write(_reference->getFacet());
+        abort(ex);
     }
-
-    _stream.write(operation, false);
-
-    _stream.write(static_cast<Byte>(mode));
-
-    if(context == 0)
-    {
-        context = _reference->getContext();
-    }
-
-    _stream.writeSize(Int(context->size()));
-    Context::const_iterator p;
-    for(p = context->begin(); p != context->end(); ++p)
-    {
-        _stream.write(p->first);
-        _stream.write(p->second);
-    }
-    
-    //
-    // Input and output parameters are always sent in an
-    // encapsulation, which makes it possible to forward requests as
-    // blobs.
-    //
-    _stream.startWriteEncaps();
 }
 
 bool
 IceInternal::Outgoing::invoke()
 {
     assert(_state == StateUnsent);
-    _state = StateInProgress;
 
-    _stream.endWriteEncaps();
-    
+    _os.endWriteEncaps();
+
     switch(_reference->getMode())
     {
         case ReferenceModeTwoway:
         {
-            //
-            // We let all exceptions raised by sending directly
-            // propagate to the caller, because they can be retried
-            // without violating "at-most-once". In case of such
-            // exceptions, the connection object does not call back on
-            // this object, so we don't need to lock the mutex, keep
-            // track of state, or save exceptions.
-            //
-            _connection->sendRequest(&_stream, this);
+            _state = StateInProgress;
+
+            Ice::Connection* connection = _handler->sendRequest(this, true);
+            assert(connection);
+
+            bool timedOut = false;
+
+            {
+                IceUtil::Monitor<IceUtil::Mutex>::Lock sync(_monitor);
+
+                //
+                // If the request is being sent in the background we first wait for the
+                // sent notification.
+                //
+                while(_state != StateFailed && !_sent)
+                {
+                    _monitor.wait();
+                }
+
+                //
+                // Wait until the request has completed, or until the request times out.
+                //
+
+                Int timeout = connection->timeout();
+                while(_state == StateInProgress && !timedOut)
+                {
+                    if(timeout >= 0)
+                    {
+                        _monitor.timedWait(IceUtil::Time::milliSeconds(timeout));
+
+                        if(_state == StateInProgress)
+                        {
+                            timedOut = true;
+                        }
+                    }
+                    else
+                    {
+                        _monitor.wait();
+                    }
+                }
+            }
+
+            if(timedOut)
+            {
+                //
+                // Must be called outside the synchronization of this
+                // object.
+                //
+                connection->exception(TimeoutException(__FILE__, __LINE__));
+
+                //
+                // We must wait until the exception set above has
+                // propagated to this Outgoing object.
+                //
+                {
+                    IceUtil::Monitor<IceUtil::Mutex>::Lock sync(_monitor);
+                    while(_state == StateInProgress)
+                    {
+                        _monitor.wait();
+                    }
+                }
+            }
 
             if(_exception.get())
             {
@@ -157,130 +241,146 @@ IceInternal::Outgoing::invoke()
                 // be repeated.
                 //
                 // An ObjectNotExistException can always be retried as
-                // well without violating "at-most-once".
+                // well without violating "at-most-once" (see the
+                // implementation of the checkRetryAfterException
+                // method of the ProxyFactory class for the reasons
+                // why it can be useful).
                 //
-                if(dynamic_cast<CloseConnectionException*>(_exception.get()) ||
+                if(!_sent ||
+                   dynamic_cast<CloseConnectionException*>(_exception.get()) ||
                    dynamic_cast<ObjectNotExistException*>(_exception.get()))
                 {
                     _exception->ice_throw();
                 }
-                
+
                 //
-                // Throw the exception wrapped in a LocalExceptionWrapper, to
-                // indicate that the request cannot be resent without
+                // Throw the exception wrapped in a LocalExceptionWrapper,
+                // to indicate that the request cannot be resent without
                 // potentially violating the "at-most-once" principle.
                 //
                 throw LocalExceptionWrapper(*_exception.get(), false);
             }
-            
+
             if(_state == StateUserException)
             {
                 return false;
             }
-
-            assert(_state == StateOK);
-            break;
+            else
+            {
+                assert(_state == StateOK);
+                return true;
+            }
         }
-        
+
         case ReferenceModeOneway:
+        case ReferenceModeDatagram:
         {
-            //
-            // For oneway requests, the connection object
-            // never calls back on this object. Therefore we don't
-            // need to lock the mutex or save exceptions. We simply
-            // let all exceptions from sending propagate to the
-            // caller, because such exceptions can be retried without
-            // violating "at-most-once".
-            //
-            _connection->sendRequest(&_stream, 0);
-            break;
+            _state = StateInProgress;
+            if(_handler->sendRequest(this, false))
+            {
+                //
+                // If the handler returns the connection, we must wait for the sent callback.
+                //
+                IceUtil::Monitor<IceUtil::Mutex>::Lock sync(_monitor);
+                while(_state != StateFailed && !_sent)
+                {
+                    _monitor.wait();
+                }
+
+                if(_exception.get())
+                {
+                    assert(!_sent);
+                    _exception->ice_throw();
+                }
+            }
+            return true;
         }
 
         case ReferenceModeBatchOneway:
-#ifdef ICEE_HAS_BATCH
-        {
-            //
-            // For batch oneways, the same rules as for
-            // regular oneways (see comment above)
-            // apply.
-            //
-            _connection->finishBatchRequest(&_stream);
-            break;
-        }
-#endif
-        case ReferenceModeDatagram:
         case ReferenceModeBatchDatagram:
         {
-            assert(false);
-            return false;
+            //
+            // For batch oneways and datagrams, the same rules as for
+            // regular oneways and datagrams (see comment above)
+            // apply.
+            //
+            _state = StateInProgress;
+            _handler->finishBatchRequest(&_os);
+            return true;
         }
     }
 
-    return true;
+    assert(false);
+    return false;
 }
 
 void
 IceInternal::Outgoing::abort(const LocalException& ex)
 {
     assert(_state == StateUnsent);
-    
+
     //
-    // If we didn't finish a batch request, we must notify the connection
-    // that we give up ownership of the batch stream.
+    // If we didn't finish a batch oneway or datagram request, we must
+    // notify the connection about that we give up ownership of the
+    // batch stream.
     //
-#ifdef ICEE_HAS_BATCH
-    if(_reference->getMode() == ReferenceModeBatchOneway || _reference->getMode() == ReferenceModeBatchDatagram)
+    if(_reference->getMode() == ReferenceModeBatchOneway ||
+       _reference->getMode() == ReferenceModeBatchDatagram)
     {
-        _connection->abortBatchRequest();
+        _handler->abortBatchRequest();
     }
-#endif
-    
+
     ex.ice_throw();
+}
+
+void
+IceInternal::Outgoing::sent(bool notify)
+{
+    if(notify)
+    {
+        IceUtil::Monitor<IceUtil::Mutex>::Lock sync(_monitor);
+        _sent = true;
+        _monitor.notify();
+    }
+    else
+    {
+        //
+        // No synchronization is necessary if called from sendRequest() because the connection
+        // send mutex is locked and no other threads can call on Outgoing until it's released.
+        //
+        _sent = true;
+    }
 }
 
 void
 IceInternal::Outgoing::finished(BasicStream& is)
 {
+    IceUtil::Monitor<IceUtil::Mutex>::Lock sync(_monitor);
+
     assert(_reference->getMode() == ReferenceModeTwoway); // Can only be called for twoways.
+
     assert(_state <= StateInProgress);
 
-    //
-    // Only swap the stream if the given stream is not this Outgoing object stream!
-    //
-    if(&is != &_stream)
-    {
-        _stream.swap(is);
-    }
-
+    _is.swap(is);
     Byte replyStatus;
-    _stream.read(replyStatus);
-    
+    _is.read(replyStatus);
+
     switch(replyStatus)
     {
         case replyOK:
         {
-            //
-            // Input and output parameters are always sent in an
-            // encapsulation, which makes it possible to forward
-            // oneway requests as blobs.
-            //
-            _stream.startReadEncaps();
+            _is.startReadEncaps();
             _state = StateOK; // The state must be set last, in case there is an exception.
             break;
         }
-        
+
         case replyUserException:
         {
-            //
-            // Input and output parameters are always sent in an
-            // encapsulation, which makes it possible to forward
-            // oneway requests as blobs.
-            //
-            _stream.startReadEncaps();
+            _is.startReadEncaps();
             _state = StateUserException; // The state must be set last, in case there is an exception.
             break;
         }
-        
+
         case replyObjectNotExist:
         case replyFacetNotExist:
         case replyOperationNotExist:
@@ -291,13 +391,13 @@ IceInternal::Outgoing::finished(BasicStream& is)
             // exception, you will have a memory leak.
             //
             Identity ident;
-            ident.__read(&_stream);
+            ident.__read(&_is);
 
             //
             // For compatibility with the old FacetPath.
             //
             vector<string> facetPath;
-            _stream.read(facetPath);
+            _is.read(facetPath);
             string facet;
             if(!facetPath.empty())
             {
@@ -309,8 +409,8 @@ IceInternal::Outgoing::finished(BasicStream& is)
             }
 
             string operation;
-            _stream.read(operation, false);
-            
+            _is.read(operation, false);
+
             RequestFailedException* ex;
             switch(replyStatus)
             {
@@ -319,19 +419,19 @@ IceInternal::Outgoing::finished(BasicStream& is)
                     ex = new ObjectNotExistException(__FILE__, __LINE__);
                     break;
                 }
-                
+
                 case replyFacetNotExist:
                 {
                     ex = new FacetNotExistException(__FILE__, __LINE__);
                     break;
                 }
-                
+
                 case replyOperationNotExist:
                 {
                     ex = new OperationNotExistException(__FILE__, __LINE__);
                     break;
                 }
-                
+
                 default:
                 {
                     ex = 0; // To keep the compiler from complaining.
@@ -339,7 +439,7 @@ IceInternal::Outgoing::finished(BasicStream& is)
                     break;
                 }
             }
-            
+
             ex->id = ident;
             ex->facet = facet;
             ex->operation = operation;
@@ -348,7 +448,7 @@ IceInternal::Outgoing::finished(BasicStream& is)
             _state = StateLocalException; // The state must be set last, in case there is an exception.
             break;
         }
-        
+
         case replyUnknownException:
         case replyUnknownLocalException:
         case replyUnknownUserException:
@@ -359,8 +459,8 @@ IceInternal::Outgoing::finished(BasicStream& is)
             // exception, you will have a memory leak.
             //
             string unknown;
-            _stream.read(unknown, false);
-            
+            _is.read(unknown, false);
+
             UnknownException* ex;
             switch(replyStatus)
             {
@@ -369,19 +469,19 @@ IceInternal::Outgoing::finished(BasicStream& is)
                     ex = new UnknownException(__FILE__, __LINE__);
                     break;
                 }
-                
+
                 case replyUnknownLocalException:
                 {
                     ex = new UnknownLocalException(__FILE__, __LINE__);
                     break;
                 }
-                
+
                 case replyUnknownUserException:
                 {
                     ex = new UnknownUserException(__FILE__, __LINE__);
                     break;
                 }
-                
+
                 default:
                 {
                     ex = 0; // To keep the compiler from complaining.
@@ -389,14 +489,14 @@ IceInternal::Outgoing::finished(BasicStream& is)
                     break;
                 }
             }
-            
+
             ex->unknown = unknown;
             _exception.reset(ex);
 
             _state = StateLocalException; // The state must be set last, in case there is an exception.
             break;
         }
-        
+
         default:
         {
             //_exception.reset(new UnknownReplyStatusException(__FILE__, __LINE__));
@@ -405,14 +505,86 @@ IceInternal::Outgoing::finished(BasicStream& is)
             break;
         }
     }
+
+    _monitor.notify();
 }
 
 void
 IceInternal::Outgoing::finished(const LocalException& ex)
 {
-    assert(_reference->getMode() == ReferenceModeTwoway); // Can only be called for twoways.
+    IceUtil::Monitor<IceUtil::Mutex>::Lock sync(_monitor);
     assert(_state <= StateInProgress);
-    
-    _state = StateLocalException;
+
+    _state = StateFailed;
     _exception.reset(dynamic_cast<LocalException*>(ex.ice_clone()));
+    _monitor.notify();
+}
+
+void
+IceInternal::Outgoing::throwUserException()
+{
+    try
+    {
+        _is.throwException();
+    }
+    catch(const Ice::UserException&)
+    {
+        _is.endReadEncaps();
+        throw;
+    }
+}
+
+IceInternal::BatchOutgoing::BatchOutgoing(RequestHandler* handler, Instance* instance) :
+    _handler(handler),
+    _sent(false),
+    _os(instance, instance->messageSizeMax()
+#ifdef ICEE_HAS_WSTRING
+        , instance->initializationData().stringConverter,
+        instance->initializationData().wstringConverter
+#endif
+       )
+{
+}
+
+void
+IceInternal::BatchOutgoing::invoke()
+{
+    assert(_handler);
+    if(_handler && !_handler->flushBatchRequests(this))
+    {
+        IceUtil::Monitor<IceUtil::Mutex>::Lock sync(_monitor);
+        while(!_exception.get() && !_sent)
+        {
+            _monitor.wait();
+        }
+
+        if(_exception.get())
+        {
+            assert(!_sent);
+            _exception->ice_throw();
+        }
+    }
+}
+
+void
+IceInternal::BatchOutgoing::sent(bool notify)
+{
+    if(notify)
+    {
+        IceUtil::Monitor<IceUtil::Mutex>::Lock sync(_monitor);
+        _sent = true;
+        _monitor.notify();
+    }
+    else
+    {
+        _sent = true;
+    }
+}
+
+void
+IceInternal::BatchOutgoing::finished(const Ice::LocalException& ex)
+{
+    IceUtil::Monitor<IceUtil::Mutex>::Lock sync(_monitor);
+    _exception.reset(dynamic_cast<LocalException*>(ex.ice_clone()));
+    _monitor.notify();
 }

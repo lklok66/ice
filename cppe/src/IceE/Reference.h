@@ -32,6 +32,9 @@ namespace IceInternal
 
 class BasicStream;
 
+class ConnectRequestHandler;
+typedef IceUtil::Handle<ConnectRequestHandler> ConnectRequestHandlerPtr;
+
 class Reference : public IceUtil::Shared
 {
 public:
@@ -111,7 +114,7 @@ public:
     //
     // Get a suitable connection for this reference.
     //
-    virtual Ice::ConnectionPtr getConnection() const = 0;
+    virtual void getConnection(const ConnectRequestHandlerPtr&) const = 0;
 
     virtual bool operator==(const Reference&) const;
     virtual bool operator!=(const Reference&) const;
@@ -170,7 +173,7 @@ public:
     virtual void streamWrite(BasicStream*) const;
     virtual std::string toString() const;
 
-    virtual Ice::ConnectionPtr getConnection() const;
+    virtual void getConnection(const ConnectRequestHandlerPtr&) const;
 
     virtual bool operator==(const Reference&) const;
     virtual bool operator!=(const Reference&) const;
@@ -232,9 +235,10 @@ public:
 
     virtual ReferencePtr clone() const;
 
-    virtual Ice::ConnectionPtr getConnection() const;
+    virtual void getConnection(const ConnectRequestHandlerPtr&) const;
+    virtual void getConnectionNoRouterInfo(const ConnectRequestHandlerPtr&) const;
 
-    Ice::ConnectionPtr createConnection(const std::vector<EndpointPtr>&) const;
+    void createConnection(const std::vector<EndpointPtr>&, const ConnectRequestHandlerPtr&) const;
 
     void applyOverrides(std::vector<EndpointPtr>&) const;
 

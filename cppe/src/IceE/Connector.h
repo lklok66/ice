@@ -32,7 +32,7 @@ class Connector : public ::IceUtil::Shared
 {
 public:
     
-    TransceiverPtr connect(int);
+    TransceiverPtr connect();
     std::string toString() const;
 
     bool operator==(const Connector&) const;

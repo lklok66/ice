@@ -45,6 +45,26 @@ printIdentityFacetOperation(string& s, BasicStream& stream)
     s += operation;
 }
 
+static string
+getMessageTypeAsString(Byte type)
+{
+    switch(type)
+    {
+        case requestMsg:
+            return "request";
+        case requestBatchMsg:
+            return "batch request";
+        case replyMsg:
+            return "reply";
+        case closeConnectionMsg:
+            return "close connection";
+        case validateConnectionMsg:
+            return "validate connection";
+        default:
+            return "unknown";
+    }
+}
+
 static void
 printRequestHeader(string& s, BasicStream& stream)
 {
@@ -98,7 +118,7 @@ printRequestHeader(string& s, BasicStream& stream)
     }
 }
 
-static void
+static Byte
 printHeader(string& s, BasicStream& stream)
 {
     Byte magicNumber;
@@ -123,46 +143,8 @@ printHeader(string& s, BasicStream& stream)
 
     Byte type;
     stream.read(type);
-    s += Ice::printfToString("\nmessage type = %d ", static_cast<int>(type));
-
-    switch(type)
-    {
-        case requestMsg:
-        {
-            s += "(request)";
-            break;
-        }
-
-        case requestBatchMsg:
-        {
-            s += "(batch request)";
-            break;
-        }
-
-        case replyMsg:
-        {
-            s += "(reply)";
-            break;
-        }
-
-        case closeConnectionMsg:
-        {
-            s += "(close connection)";
-            break;
-        }
-
-        case validateConnectionMsg:
-        {
-            s += "(validate connection)";
-            break;
-        }
-
-        default:
-        {
-            s += "(unknown)";
-            break;
-        }
-    }
+    string typeStr = getMessageTypeAsString(type);
+    s += Ice::printfToString("\nmessage type = %d (%s)", static_cast<int>(type), typeStr.c_str());
 
     Byte compress;
     stream.read(compress);
@@ -198,34 +180,13 @@ printHeader(string& s, BasicStream& stream)
     Int size;
     stream.read(size);
     s += Ice::printfToString("\nmessage size = %d", size);
+
+    return type;
 }
 
-void
-IceInternal::traceHeader(const char* heading, const BasicStream& str, const LoggerPtr& logger,
-                         const TraceLevelsPtr& tl)
+static void
+printRequest(string& s, BasicStream& stream)
 {
-    BasicStream& stream = const_cast<BasicStream&>(str);
-    BasicStream::Container::iterator p = stream.i;
-    stream.i = stream.b.begin();
-    
-    string s(heading);
-    printHeader(s, stream);
-    
-    logger->trace(tl->protocolCat, s);
-    stream.i = p;
-}
-
-void
-IceInternal::traceRequest(const char* heading, const BasicStream& str, const LoggerPtr& logger,
-                          const TraceLevelsPtr& tl)
-{
-    BasicStream& stream = const_cast<BasicStream&>(str);
-    BasicStream::Container::iterator p = stream.i;
-    stream.i = stream.b.begin();
-    
-    string s(heading);
-    printHeader(s, stream);
-    
     Int requestId;
     stream.read(requestId);
     s += Ice::printfToString("\nrequest id = %d", requestId);
@@ -235,23 +196,11 @@ IceInternal::traceRequest(const char* heading, const BasicStream& str, const Log
     }
 
     printRequestHeader(s, stream);
-    
-    logger->trace(tl->protocolCat, s);
-    stream.i = p;
 }
 
-#ifdef ICEE_HAS_BATCH
-void
-IceInternal::traceBatchRequest(const char* heading, const BasicStream& str, const LoggerPtr& logger,
-                               const TraceLevelsPtr& tl)
+static void
+printBatchRequest(string& s, BasicStream& stream)
 {
-    BasicStream& stream = const_cast<BasicStream&>(str);
-    BasicStream::Container::iterator p = stream.i;
-    stream.i = stream.b.begin();
-
-    string s(heading);
-    printHeader(s, stream);
-
     int batchRequestNum;
     stream.read(batchRequestNum);
     s += Ice::printfToString("\nnumber of requests = %d", batchRequestNum);
@@ -262,23 +211,11 @@ IceInternal::traceBatchRequest(const char* heading, const BasicStream& str, cons
         printRequestHeader(s, stream);
         stream.skipEncaps();
     }
-
-    logger->trace(tl->protocolCat, s);
-    stream.i = p;
 }
-#endif
 
-void
-IceInternal::traceReply(const char* heading, const BasicStream& str, const LoggerPtr& logger,
-                        const TraceLevelsPtr& tl)
+static void
+printReply(string& s, BasicStream& stream)
 {
-    BasicStream& stream = const_cast<BasicStream&>(str);
-    BasicStream::Container::iterator p = stream.i;
-    stream.i = stream.b.begin();
-
-    string s(heading);
-    printHeader(s, stream);
-
     Int requestId;
     stream.read(requestId);
     s += Ice::printfToString("\nrequest id = %d", requestId);
@@ -367,7 +304,7 @@ IceInternal::traceReply(const char* heading, const BasicStream& str, const Logge
         }
                 
         string unknown;
-        stream.read(unknown);
+        stream.read(unknown, false);
         s += "\nunknown = ";
         s += unknown;
         break;
@@ -379,7 +316,97 @@ IceInternal::traceReply(const char* heading, const BasicStream& str, const Logge
         break;
     }
     }
+}
 
-    logger->trace(tl->protocolCat, s);
-    stream.i = p;
+static Byte
+printMessage(string& s, BasicStream& stream)
+{
+    Byte type = printHeader(s, stream);
+
+    switch(type)
+    {
+    case closeConnectionMsg:
+    case validateConnectionMsg:
+    {
+        // We're done.
+        break;
+    }
+        
+    case requestMsg:
+    {
+        printRequest(s, stream);
+        break;
+    }
+        
+    case requestBatchMsg:
+    {
+        printBatchRequest(s, stream);
+        break;
+    }
+        
+    case replyMsg:
+    {
+        printReply(s, stream);
+        break;
+    }
+        
+    default:
+    {
+        break;
+    }    
+    }
+
+    return type;
+}
+
+void
+IceInternal::traceSend(const BasicStream& str, const LoggerPtr& logger, const TraceLevelsPtr& tl)
+{
+    if(tl->protocol >= 1)
+    {
+        BasicStream& stream = const_cast<BasicStream&>(str);
+        BasicStream::Container::iterator p = stream.i;
+        stream.i = stream.b.begin();
+
+        string s;
+        Byte type = printMessage(s, stream);
+
+        logger->trace(tl->protocolCat, "sending " + getMessageTypeAsString(type) + " " + s);
+        stream.i = p;
+    }
+}
+
+void
+IceInternal::traceRecv(const BasicStream& str, const LoggerPtr& logger, const TraceLevelsPtr& tl)
+{
+    if(tl->protocol >= 1)
+    {
+        BasicStream& stream = const_cast<BasicStream&>(str);
+        BasicStream::Container::iterator p = stream.i;
+        stream.i = stream.b.begin();
+
+        string s;
+        Byte type = printMessage(s, stream);
+
+        logger->trace(tl->protocolCat, "received " + getMessageTypeAsString(type) + " " + s);
+        stream.i = p;
+    }
+}
+
+void
+IceInternal::trace(const char* heading, const BasicStream& str, const LoggerPtr& logger, const TraceLevelsPtr& tl)
+{
+    if(tl->protocol >= 1)
+    {
+        BasicStream& stream = const_cast<BasicStream&>(str);
+        BasicStream::Container::iterator p = stream.i;
+        stream.i = stream.b.begin();
+
+        string s;
+        s += heading;
+        printMessage(s, stream);
+
+        logger->trace(tl->protocolCat, s);
+        stream.i = p;
+    }
 }

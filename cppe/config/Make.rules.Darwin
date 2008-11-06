@@ -31,7 +31,13 @@ shlibldflags		= $(CXXFLAGS) -L$(libdir)
 mklibfilename       	= $(if $(2),lib$(1).$(2).dylib,lib$(1).dylib)
 mksoname           	= $(if $(2),lib$(1).$(2).dylib,lib$(1).dylib)
 
-mklibname           	= lib$(1).dylib
+ifeq ($(mklibname),)
+    ifeq ($(STATICLIBS),yes)
+	mklibname	= lib$(1).a
+    else
+	mklibname	= lib$(1).dylib
+    endif
+endif
 
 mkshlib                 = $(CXX) -single_module -dynamiclib $(shlibldflags) -o $(1) -install_name $(install_libdir)/$(2) $(3) $(4)
 

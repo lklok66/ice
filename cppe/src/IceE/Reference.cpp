@@ -25,6 +25,7 @@
 #endif
 
 #include <IceE/Connection.h>
+#include <IceE/ConnectRequestHandler.h>
 #include <IceE/Functional.h>
 #include <IceE/OutgoingConnectionFactory.h>
 #include <IceE/LoggerUtil.h>
@@ -498,8 +499,8 @@ IceInternal::FixedReference::toString() const
     return string(); // To keep the compiler from complaining.
 }
 
-ConnectionPtr
-IceInternal::FixedReference::getConnection() const
+void
+IceInternal::FixedReference::getConnection(const ConnectRequestHandlerPtr& handler) const
 {
     switch(getMode())
     {
@@ -511,7 +512,8 @@ IceInternal::FixedReference::getConnection() const
         {
             if(_fixedConnection->endpoint()->datagram())
             {
-                throw NoEndpointException(__FILE__, __LINE__, "");
+                handler->setException(NoEndpointException(__FILE__, __LINE__, ""));
+                return;
             }
             break;
         }
@@ -523,7 +525,8 @@ IceInternal::FixedReference::getConnection() const
         {
             if(!_fixedConnection->endpoint()->datagram())
             {
-                throw NoEndpointException(__FILE__, __LINE__, "");
+                handler->setException(NoEndpointException(__FILE__, __LINE__, ""));
+                return;
             }
             break;
         }
@@ -532,7 +535,8 @@ IceInternal::FixedReference::getConnection() const
         case ReferenceModeBatchDatagram:
         case ReferenceModeBatchOneway:
         {
-            throw FeatureNotSupportedException(__FILE__, __LINE__, "batch proxy mode");
+            handler->setException(FeatureNotSupportedException(__FILE__, __LINE__, "batch proxy mode"));
+            return;
         }
 #endif
     }
@@ -543,12 +547,21 @@ IceInternal::FixedReference::getConnection() const
     bool secure = getSecure();
     if(secure && !_fixedConnection->endpoint()->secure())
     {
-        throw NoEndpointException(__FILE__, __LINE__, "");
+        handler->setException(NoEndpointException(__FILE__, __LINE__, ""));
+        return;
     }
 
-    _fixedConnection->throwException(); // Throw in case our connection is already destroyed.
+    try
+    {
+        _fixedConnection->throwException(); // Throw in case our connection is already destroyed.
+    }
+    catch(const Ice::LocalException& ex)
+    {
+        handler->setException(ex);
+        return;
+    }
 
-    return _fixedConnection;
+    handler->setConnection(_fixedConnection);
 }
 
 bool
@@ -994,8 +1007,8 @@ IceInternal::RoutableReference::clone() const
     return new RoutableReference(*this);
 }
 
-ConnectionPtr
-IceInternal::RoutableReference::getConnection() const
+void
+IceInternal::RoutableReference::getConnection(const ConnectRequestHandlerPtr& handler) const
 {
 #ifdef ICEE_HAS_ROUTER
     if(_routerInfo)
@@ -1004,101 +1017,46 @@ IceInternal::RoutableReference::getConnection() const
         // If we route, we send everything to the router's client
         // proxy endpoints.
         //
-        vector<EndpointPtr> endpts = _routerInfo->getClientEndpoints();
-        if(!endpts.empty())
-        {
-            applyOverrides(endpts);
-            return createConnection(endpts);
-        }
+        _routerInfo->getClientEndpoints(handler);
+        return;
     }
 #endif
-
-    if(!_endpoints.empty())
-    {
-        return createConnection(_endpoints);
-    }
-
-    while(true)
-    {
-        bool cached = false;
-        vector<EndpointPtr> endpts;
-#ifdef ICEE_HAS_LOCATOR
-        if(_locatorInfo)
-        {
-            endpts = _locatorInfo->getEndpoints(const_cast<RoutableReference*>(this), cached);
-            applyOverrides(endpts);
-        }
-#endif
-
-        if(endpts.empty())
-        {
-            throw Ice::NoEndpointException(__FILE__, __LINE__, toString());
-        }
-
-        try
-        {
-            return createConnection(endpts);
-        }
-        catch(const NoEndpointException&)
-        {
-            throw; // No need to retry if there's no endpoints.
-        }
-        catch(const LocalException& ex)
-        {
-#ifdef ICEE_HAS_LOCATOR
-            assert(_locatorInfo);
-            _locatorInfo->clearCache(const_cast<RoutableReference*>(this));
-#endif
-
-            if(cached)
-            {
-                // COMPILERFIX: Braces needed to prevent BCB from causing TraceLevels refCount from
-                //              being decremented twice when loop continues.
-                {
-                    TraceLevelsPtr traceLevels = getInstance()->traceLevels();
-                    if(traceLevels->retry >= 2)
-                    {
-                        Trace out(getInstance()->initializationData().logger, traceLevels->retryCat);
-                        out << "connection to cached endpoints failed\n"
-                            << "removing endpoints from cache and trying one more time\n" << ex.toString();
-                    }
-                }
-                continue;
-            }
-            throw;
-        }
-    }
-
-    assert(false);
-    return 0;
+    
+    getConnectionNoRouterInfo(handler);
 }
 
-ConnectionPtr
-IceInternal::RoutableReference::createConnection(const vector<EndpointPtr>& allEndpoints) const
+void
+IceInternal::RoutableReference::getConnectionNoRouterInfo(const ConnectRequestHandlerPtr& handler) const
+{
+    if(!_endpoints.empty())
+    {
+        createConnection(_endpoints, handler);
+        return;
+    }
+
+#ifdef ICEE_HAS_LOCATOR
+    if(_locatorInfo)
+    {
+        _locatorInfo->getEndpoints(const_cast<RoutableReference*>(this), handler);
+        return;
+    }
+#endif
+    
+    handler->setException(Ice::NoEndpointException(__FILE__, __LINE__, toString()));
+}
+
+void
+IceInternal::RoutableReference::createConnection(const vector<EndpointPtr>& allEndpoints, 
+                                                 const ConnectRequestHandlerPtr& handler) const
 {
     vector<EndpointPtr> endpoints = filterEndpoints(allEndpoints);
     if(endpoints.empty())
     {
-        throw Ice::NoEndpointException(__FILE__, __LINE__, toString());
+        handler->setException(Ice::NoEndpointException(__FILE__, __LINE__, toString()));
+        return;
     }
 
-    OutgoingConnectionFactoryPtr factory = getInstance()->outgoingConnectionFactory();
-    Ice::ConnectionPtr connection = factory->create(endpoints);
-    assert(connection);
-
-#if defined(ICEE_HAS_ROUTER) && !defined(ICEE_PURE_CLIENT)
-    //
-    // If we have a router, set the object adapter for this router
-    // (if any) to the new connection, so that callbacks from the
-    // router can be received over this new connection.
-    //
-    if(_routerInfo && _routerInfo->getAdapter())
-    {
-        connection->setAdapter(_routerInfo->getAdapter());
-    }
-#endif
-
-    return connection;
+    getInstance()->outgoingConnectionFactory()->create(endpoints, handler);
 }
 
 void

@@ -14,6 +14,7 @@
 #include <IceE/ProxyFactoryF.h>
 #include <IceE/ConnectionF.h>
 #include <IceE/ReferenceF.h>
+#include <IceE/RequestHandlerF.h>
 #include <IceE/CommunicatorF.h>
 //#include <IceE/RouterF.h> // Can't include RouterF.h here, otherwise we have cyclic includes
 //#include <IceE/LocatorF.h> // Can't include RouterF.h here, otherwise we have cyclic includes
@@ -23,6 +24,7 @@
 #include <IceE/Identity.h>
 #include <IceE/OperationMode.h>
 #include <IceE/Outgoing.h>
+#include <IceE/OutgoingAsyncF.h>
 
 namespace Ice
 {
@@ -200,11 +202,36 @@ public:
     {
         return _reference;
     }
+    
+    ICE_API ::IceInternal::RequestHandlerPtr __getRequestHandler();
+    void __setRequestHandler(const ::IceInternal::RequestHandlerPtr&, const ::IceInternal::RequestHandlerPtr&);
 
     ICE_API void __copyFrom(const ::Ice::ObjectPrx&);
-    ICE_API void __handleException(const ::Ice::ConnectionPtr&, const ::Ice::LocalException&, int&);
-    ICE_API void __handleExceptionWrapper(const ::Ice::ConnectionPtr&, const ::IceInternal::LocalExceptionWrapper&);
-    ICE_API void __handleExceptionWrapperRelaxed(const ::Ice::ConnectionPtr&, const ::IceInternal::LocalExceptionWrapper&, int&);
+#ifndef ICEE_HAS_AMI
+    ICE_API void __handleException(const ::IceInternal::RequestHandlerPtr&, const ::Ice::LocalException&, int&);
+    ICE_API void __handleExceptionWrapper(const ::IceInternal::RequestHandlerPtr&, const ::IceInternal::LocalExceptionWrapper&);
+    ICE_API void __handleExceptionWrapperRelaxed(const ::IceInternal::RequestHandlerPtr&, const ::IceInternal::LocalExceptionWrapper&, int&);
+#else
+    void __handleException(const ::IceInternal::RequestHandlerPtr& h, const ::Ice::LocalException& ex, int& c)
+    {
+        __handleException(h, ex, 0, c);
+    }
+    void __handleExceptionWrapper(const ::IceInternal::RequestHandlerPtr& h, 
+                                  const ::IceInternal::LocalExceptionWrapper& ex)
+    {
+        __handleExceptionWrapper(h, ex, 0);
+    }
+    void __handleExceptionWrapperRelaxed(const ::IceInternal::RequestHandlerPtr& h,
+                                         const ::IceInternal::LocalExceptionWrapper& ex,
+                                         int& c)
+    {
+        __handleExceptionWrapperRelaxed(h, ex, 0, c);
+    }
+
+    ICE_API void __handleException(const ::IceInternal::RequestHandlerPtr&, const ::Ice::LocalException&, ::IceInternal::OutgoingAsync*, int&);
+    ICE_API void __handleExceptionWrapper(const ::IceInternal::RequestHandlerPtr&, const ::IceInternal::LocalExceptionWrapper&, ::IceInternal::OutgoingAsync*);
+    ICE_API void __handleExceptionWrapperRelaxed(const ::IceInternal::RequestHandlerPtr&, const ::IceInternal::LocalExceptionWrapper&, ::IceInternal::OutgoingAsync*, int&);
+#endif
     ICE_API void __checkTwowayOnly(const char*) const;
 
 protected:
@@ -231,13 +258,13 @@ private:
         //
         
         assert(!_reference);
-        assert(!_connection);
+        assert(!_handler);
         
         _reference = ref;
     }
     friend class ::IceInternal::ProxyFactory;
 
-    ::Ice::ConnectionPtr _connection;
+    ::IceInternal::RequestHandlerPtr _handler;
 };
 
 } }

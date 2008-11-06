@@ -242,13 +242,13 @@ IceInternal::TcpEndpoint::unknown() const
 vector<ConnectorPtr>
 IceInternal::TcpEndpoint::connectors() const
 {
-    vector<ConnectorPtr> connectors;
-    vector<struct sockaddr_in> addresses = getAddresses(_host, _port);
-    for(unsigned int i = 0; i < addresses.size(); ++i)
-    {
-        connectors.push_back(new Connector(_instance, addresses[i], _timeout));
-    }
-    return connectors;
+    return connectors(getAddresses(_host, _port, false, true));
+}
+
+void
+IceInternal::TcpEndpoint::connectors_async(const Endpoint_connectorsPtr& callback) const
+{
+    _instance->endpointHostResolver()->resolve(_host, _port, const_cast<TcpEndpoint*>(this), callback);
 }
 
 bool
@@ -357,3 +357,14 @@ IceInternal::TcpEndpoint::acceptor(EndpointPtr& endp) const
 }
 
 #endif
+
+vector<ConnectorPtr>
+IceInternal::TcpEndpoint::connectors(const vector<struct sockaddr_in>& addresses) const
+{
+    vector<ConnectorPtr> connectors;
+    for(unsigned int i = 0; i < addresses.size(); ++i)
+    {
+        connectors.push_back(new Connector(_instance, addresses[i], _timeout));
+    }
+    return connectors;
+}

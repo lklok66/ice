@@ -47,7 +47,6 @@ private:
     typedef ::std::pair<Ice::ObjectFactoryPtr, int> OFPair;
     typedef ::std::map< ::std::string, OFPair> OFTable;
     OFTable _oft;
-
 #endif
 };
 

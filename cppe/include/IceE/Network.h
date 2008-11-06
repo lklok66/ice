@@ -81,6 +81,7 @@ bool connectionRefused();
 bool connectInProgress();
 bool connectionLost();
 bool notConnected();
+bool noMoreFds(int);
 
 SOCKET createSocket();
 void closeSocket(SOCKET);
@@ -103,18 +104,23 @@ void setReuseAddress(SOCKET, bool);
 
 void doBind(SOCKET, struct sockaddr_in&);
 void doListen(SOCKET, int);
-void doConnect(SOCKET, struct sockaddr_in&, int);
+bool doConnect(SOCKET, struct sockaddr_in&);
+void doFinishConnect(SOCKET);
 SOCKET doAccept(SOCKET);
 
-std::vector<struct sockaddr_in> getAddresses(const std::string&, int, bool = false);
+std::vector<struct sockaddr_in> getAddresses(const std::string&, int, bool, bool);
 int compareAddress(const struct sockaddr_in&, const struct sockaddr_in&);
+
+void createPipe(SOCKET fds[2]);
 
 std::string errorToString(int);
 std::string errorToStringDNS(int);
 std::string lastErrorToString();
 
-std::string inetAddrToString(const struct in_addr& in);
 std::string fdToString(SOCKET);
+void fdToLocalAddress(SOCKET, struct sockaddr_in&);
+bool fdToRemoteAddress(SOCKET, struct sockaddr_in&);
+std::string inetAddrToString(const struct in_addr& in);
 std::string addrToString(const struct sockaddr_in&);
 std::vector<std::string> getHostsForEndpointExpand(const std::string&);
 

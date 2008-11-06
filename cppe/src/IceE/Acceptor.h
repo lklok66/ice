@@ -39,7 +39,6 @@ public:
     void close();
     void listen();
     TransceiverPtr accept();
-    void connectToSelf();
     std::string toString() const;
 
     int effectivePort();

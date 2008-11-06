@@ -19,6 +19,7 @@
 #include <IceE/LoggerUtil.h>
 #include <IceE/TraceLevels.h>
 #include <IceE/LocalException.h>
+#include <IceE/OutgoingAsync.h>
 #include <IceE/SafeStdio.h>
 
 using namespace std;
@@ -96,7 +97,12 @@ IceInternal::ProxyFactory::referenceToProxy(const ReferencePtr& ref) const
 }
 
 void
-IceInternal::ProxyFactory::checkRetryAfterException(const LocalException& ex, const ReferencePtr& ref, int& cnt) const
+IceInternal::ProxyFactory::checkRetryAfterException(const LocalException& ex, 
+                                                    const ReferencePtr& ref, 
+#ifdef ICEE_HAS_AMI                      
+                                                    OutgoingAsync* out,
+#endif
+                                                    int& cnt) const
 {
     TraceLevelsPtr traceLevels = _instance->traceLevels();
     LoggerPtr logger = _instance->initializationData().logger;
@@ -120,7 +126,8 @@ IceInternal::ProxyFactory::checkRetryAfterException(const LocalException& ex, co
         if(li && ref->isIndirect())
         {
             //
-            // We retry ObjectNotExistException if the reference is indirect.
+            // We retry ObjectNotExistException if the reference is
+            // indirect.
             //
             li->clearObjectCache(ref);
         }
@@ -142,13 +149,19 @@ IceInternal::ProxyFactory::checkRetryAfterException(const LocalException& ex, co
                 Trace out(logger, traceLevels->retryCat);
                 out << "retrying operation call to add proxy to router\n" << ex.toString();
             }
+
+            if(out)
+            {
+                out->__send();
+            }
             return; // We must always retry, so we don't look at the retry count.
         }
         else
 #endif
         {
             //
-            // For all other cases, we don't retry  ObjectNotExistException
+            // For all other cases, we don't retry
+            // ObjectNotExistException
             //
             ex.ice_throw();
         }
@@ -217,7 +230,11 @@ IceInternal::ProxyFactory::checkRetryAfterException(const LocalException& ex, co
         out << " because of exception\n" << ex.toString();
     }
 
-    if(interval > 0)
+    if(out)
+    {
+        out->__retry(interval);
+    }
+    else if(interval > 0)
     {
         //
         // Sleep before retrying.

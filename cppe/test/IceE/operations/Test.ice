@@ -64,7 +64,7 @@ dictionary<long, float> LongFloatD;
 dictionary<string, string> StringStringD;
 dictionary<string, MyEnum> StringMyEnumD;
 
-class MyClass
+["ami"] class MyClass
 {
     void shutdown();
 
@@ -152,7 +152,7 @@ class MyClass
     void opDoubleMarshaling(double p1, DoubleS p2);
 };
 
-class MyDerivedClass extends MyClass
+["ami"] class MyDerivedClass extends MyClass
 {
     void opDerived();
 };

@@ -11,7 +11,7 @@
 #define ICEE_EXCEPTION_BASE_H
 
 #include <IceE/Config.h>
-#include <iostream>
+#include <ostream>
 
 namespace IceUtil
 {
@@ -39,7 +39,7 @@ private:
     mutable std::string _str; // Initialized lazily in what().
 };
 
-inline ICE_API std::ostream& operator<<(std::ostream& os, const Exception& ex)
+inline std::ostream& operator<<(std::ostream& os, const Exception& ex)
 {
     return os << ex.toString();
 }

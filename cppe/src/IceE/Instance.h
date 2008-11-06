@@ -19,6 +19,8 @@
 #include <IceE/LocatorInfoF.h>
 #include <IceE/ReferenceFactoryF.h>
 #include <IceE/ProxyFactoryF.h>
+#include <IceE/ThreadPoolF.h>
+#include <IceE/SelectorThreadF.h>
 #include <IceE/OutgoingConnectionFactoryF.h>
 #include <IceE/EndpointFactoryF.h>
 #ifndef ICEE_PURE_CLIENT
@@ -27,10 +29,15 @@
 #ifdef ICEE_HAS_OBV
 #   include <IceE/ObjectFactoryManagerF.h>
 #endif
+#ifdef ICEE_HAS_AMI
+#   include <IceE/RetryQueueF.h>
+#endif
+#include <IceE/EndpointF.h>
 #include <IceE/Shared.h>
 #include <IceE/RecMutex.h>
 #include <IceE/Initialize.h>
 #include <IceE/Identity.h>
+#include <IceE/Timer.h>
 
 namespace IceInternal
 {
@@ -59,10 +66,6 @@ public:
     void flushBatchRequests();
 #endif
 
-#ifndef ICEE_PURE_BLOCKING_CLIENT
-    size_t threadPerConnectionStackSize() const;
-#endif
-
 #ifdef ICEE_HAS_OBV
     ObjectFactoryManagerPtr servantFactoryManager() const;
 #endif
@@ -70,6 +73,16 @@ public:
 #ifndef ICEE_PURE_CLIENT
     ObjectAdapterFactoryPtr objectAdapterFactory() const;
 #endif
+
+#ifdef ICEE_HAS_AMI
+    RetryQueuePtr retryQueue() const;
+#endif
+
+    ThreadPoolPtr clientThreadPool();
+    ThreadPoolPtr serverThreadPool();
+    SelectorThreadPtr selectorThread();
+    EndpointHostResolverPtr endpointHostResolver();
+    IceUtil::TimerPtr timer();
 
     Ice::Identity stringToIdentity(const std::string&) const;
     std::string identityToString(const Ice::Identity&) const;
@@ -101,9 +114,6 @@ private:
     const TraceLevelsPtr _traceLevels; // Immutable, not reset by destroy().
     const DefaultsAndOverridesPtr _defaultsAndOverrides; // Immutable, not reset by destroy().
     const size_t _messageSizeMax; // Immutable, not reset by destroy().
-#ifndef ICEE_PURE_BLOCKING_CLIENT
-    const size_t _threadPerConnectionStackSize;
-#endif
 #ifdef ICEE_HAS_ROUTER
     RouterManagerPtr _routerManager;
 #endif
@@ -122,6 +132,16 @@ private:
 #ifndef ICEE_PURE_CLIENT
     ObjectAdapterFactoryPtr _objectAdapterFactory;
 #endif
+
+#ifdef ICEE_HAS_AMI
+    RetryQueuePtr _retryQueue;
+#endif
+
+    ThreadPoolPtr _clientThreadPool;
+    ThreadPoolPtr _serverThreadPool;
+    SelectorThreadPtr _selectorThread;
+    EndpointHostResolverPtr _endpointHostResolver;
+    IceUtil::TimerPtr _timer;
 };
 
 #ifdef ICEE_HAS_WSTRING

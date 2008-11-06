@@ -18,6 +18,8 @@
 #include <IceE/InstanceF.h>
 #include <IceE/AcceptorF.h>
 #include <IceE/TransceiverF.h>
+#include <IceE/EventHandler.h>
+#include <IceE/Connection.h>
 
 #include <IceE/Mutex.h>
 #include <IceE/Monitor.h>
@@ -28,7 +30,9 @@
 namespace IceInternal
 {
 
-class IncomingConnectionFactory : public IceUtil::Monitor<IceUtil::Mutex>, public IceUtil::Shared
+class IncomingConnectionFactory : public EventHandler, 
+                                  public Ice::Connection::StartCallback,
+                                  public IceUtil::Monitor<IceUtil::Mutex>
 {
 public:
 
@@ -44,7 +48,19 @@ public:
     void flushBatchRequests();
 #endif
 
+    //
+    // Operations from EventHandler
+    //
+    virtual bool datagram() const;
+    virtual bool readable() const;
+    virtual bool read(BasicStream&);
+    virtual void message(BasicStream&, const ThreadPoolPtr&);
+    virtual void finished(const ThreadPoolPtr&);
+    virtual void exception(const Ice::LocalException&);
     virtual std::string toString() const;
+
+    virtual void connectionStartCompleted(const Ice::ConnectionPtr&);
+    virtual void connectionStartFailed(const Ice::ConnectionPtr&, const Ice::LocalException&);
 
 private:
 
@@ -61,28 +77,10 @@ private:
 
     void setState(State);
 
-    void run();
-
-    class ThreadPerIncomingConnectionFactory : public IceUtil::Thread
-    {
-    public:
-        
-        ThreadPerIncomingConnectionFactory(const IncomingConnectionFactoryPtr&);
-        virtual void run();
-
-    private:
-        
-        IncomingConnectionFactoryPtr _factory;
-    };
-    friend class ThreadPerIncomingConnectionFactory;
-    IceUtil::ThreadPtr _threadPerIncomingConnectionFactory;
-
-    const InstancePtr _instance;
     AcceptorPtr _acceptor;
-    const TransceiverPtr _transceiver;
     const EndpointPtr _endpoint;
 
-    const ::Ice::ObjectAdapterPtr _adapter;
+    Ice::ObjectAdapterPtr _adapter;
 
     const bool _warn;
 

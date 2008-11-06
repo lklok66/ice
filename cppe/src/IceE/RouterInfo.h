@@ -22,6 +22,7 @@
 #include <IceE/EndpointF.h>
 #include <IceE/Shared.h>
 #include <IceE/Mutex.h>
+#include <IceE/BuiltinSequences.h>
 
 #include <set>
 
@@ -53,6 +54,18 @@ class RouterInfo : public IceUtil::Shared, public IceUtil::Mutex
 {
 public:
 
+    class GetClientEndpointsCallback : virtual public IceUtil::Shared
+    {
+    public:
+        
+        virtual ~GetClientEndpointsCallback() { }
+        
+        virtual void routerInfoEndpoints(const std::vector<EndpointPtr>&) = 0;
+        virtual void routerInfoException(const Ice::LocalException&) = 0;
+        virtual void routerInfoAddedProxy() = 0;
+    };
+    typedef IceUtil::Handle<GetClientEndpointsCallback> GetClientEndpointsCallbackPtr;
+
     RouterInfo(const Ice::RouterPrx&);
 
     void destroy();
@@ -62,12 +75,20 @@ public:
 
     Ice::RouterPrx getRouter() const;
     std::vector<IceInternal::EndpointPtr> getClientEndpoints();
+    void getClientEndpoints(const GetClientEndpointsCallbackPtr&);
     std::vector<IceInternal::EndpointPtr> getServerEndpoints();
-    void addProxy(const Ice::ObjectPrx&);
+    bool addProxy(const Ice::ObjectPrx&, const GetClientEndpointsCallbackPtr&);
 #ifndef ICEE_PURE_CLIENT
     void setAdapter(const Ice::ObjectAdapterPtr&);
     Ice::ObjectAdapterPtr getAdapter() const;
 #endif
+
+    //
+    // The following methods need to be public for access by AMI callbacks.
+    //
+    std::vector<EndpointPtr> setClientEndpoints(const Ice::ObjectPrx&);
+    std::vector<EndpointPtr> setServerEndpoints(const Ice::ObjectPrx&);
+    void addAndEvictProxies(const Ice::ObjectPrx&, const Ice::ObjectProxySeq&);
 
 private:
 
@@ -78,6 +99,7 @@ private:
     Ice::ObjectAdapterPtr _adapter;
 #endif
     std::set<Ice::Identity> _identities;
+    std::multiset<Ice::Identity> _evictedIdentities;
 };
 
 }

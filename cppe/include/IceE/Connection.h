@@ -2,7 +2,7 @@
 //
 // Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
 //
-// This copy of Ice-E is licensed to you under the terms described in the
+// This copy of Ice is licensed to you under the terms described in the
 // ICEE_LICENSE file included in this distribution.
 //
 // **********************************************************************
@@ -10,34 +10,44 @@
 #ifndef ICEE_CONNECTION_H
 #define ICEE_CONNECTION_H
 
-#include <IceE/ConnectionF.h>
-#include <IceE/OutgoingConnectionFactoryF.h>
-#include <IceE/InstanceF.h>
-#include <IceE/TransceiverF.h>
-#include <IceE/EndpointF.h>
-#include <IceE/LoggerF.h>
-#include <IceE/TraceLevelsF.h>
-
-#ifndef ICEE_PURE_CLIENT
-#   include <IceE/ObjectAdapterF.h>
-#   include <IceE/ServantManagerF.h>
-#   include <IceE/IncomingConnectionFactoryF.h>
-#   include <IceE/Incoming.h>
-#endif
-
 #include <IceE/Mutex.h>
 #include <IceE/Monitor.h>
 #include <IceE/Time.h>
-#include <IceE/Thread.h> // For ThreadPerConnection.
+#include <IceE/ConnectionF.h>
+#include <IceE/OutgoingConnectionFactoryF.h>
+#ifndef ICEE_PURE_CLIENT
+#   include <IceE/IncomingConnectionFactoryF.h>
+#endif
+#include <IceE/InstanceF.h>
+#include <IceE/TransceiverF.h>
+#ifndef ICEE_PURE_CLIENT
+#   include <IceE/ObjectAdapterF.h>
+#include <IceE/ServantManagerF.h>
+#endif
+#include <IceE/EndpointF.h>
+#include <IceE/LoggerF.h>
+#include <IceE/TraceLevelsF.h>
+#include <IceE/OutgoingAsyncF.h>
+#include <IceE/EventHandler.h>
+#include <IceE/RequestHandler.h>
+#include <IceE/SocketReadyCallback.h>
+#include <IceE/SelectorThreadF.h>
 #include <IceE/Identity.h>
-#include <IceE/BasicStream.h>
 
+#include <deque>
 #include <memory>
 
 namespace IceInternal
 {
 
 class Outgoing;
+#ifdef ICEE_HAS_BATCH
+class BatchOutgoing;
+#endif
+class OutgoingMessageCallback;
+#ifdef ICEE_HAS_AMI
+class FlushSentCallbacks;
+#endif
 
 }
 
@@ -46,11 +56,22 @@ namespace Ice
 
 class LocalException;
 
-class ICE_API Connection : public IceUtil::Monitor<IceUtil::Mutex>, public IceUtil::Shared
+class ICE_API Connection : public IceInternal::RequestHandler,
+                           public IceInternal::EventHandler,
+                           public IceInternal::SocketReadyCallback,
+                           public IceUtil::Monitor<IceUtil::Mutex>
 {
 public:
 
-    void waitForValidation();
+    class StartCallback : virtual public IceUtil::Shared
+    {
+    public:
+
+        virtual void connectionStartCompleted(const ConnectionPtr&) = 0;
+        virtual void connectionStartFailed(const ConnectionPtr&, const Ice::LocalException&) = 0;
+    };
+    typedef IceUtil::Handle<StartCallback> StartCallbackPtr;
+
     enum DestructionReason
     {
 #ifndef ICEE_PURE_CLIENT
@@ -59,14 +80,15 @@ public:
         CommunicatorDestroyed
     };
 
+    void start(const StartCallbackPtr&);
     void activate();
 #ifndef ICEE_PURE_CLIENT
     void hold();
 #endif
     void destroy(DestructionReason);
-    void close(bool); // From Connection.
+    void close(bool);
 
-    bool isDestroyed() const;
+    bool isActiveOrHolding() const;
     bool isFinished() const;
 
     void throwException() const; // Throws the connection exception if destroyed.
@@ -76,13 +98,8 @@ public:
 #endif
     void waitUntilFinished(); // Not const, as this might close the connection upon timeout.
 
-    void sendRequest(IceInternal::BasicStream*, IceInternal::Outgoing*);
-
 #ifdef ICEE_HAS_BATCH
-    void prepareBatchRequest(IceInternal::BasicStream*);
-    void finishBatchRequest(IceInternal::BasicStream*);
-    void abortBatchRequest();
-    void flushBatchRequests(); // From Connection.
+    void flushBatchRequests();
 #endif
 
 #ifndef ICEE_PURE_CLIENT
@@ -95,23 +112,58 @@ public:
 #ifndef ICEE_PURE_CLIENT
     void setAdapter(const ObjectAdapterPtr&); // From Connection.
     ObjectAdapterPtr getAdapter() const; // From Connection.
-    ObjectPrx createProxy(const Identity&) const; // From Connection.
+    ObjectPrx createProxy(const Identity& ident) const; // From Connection.
 #endif
 
-    std::string type() const; // From Connection.
-    Ice::Int timeout() const; // From Connection.
-    std::string toString() const;  // From Connection
+    //
+    // Inherited from RequestHandler.
+    //
+    virtual Connection* sendRequest(IceInternal::Outgoing*, bool);
+#ifdef ICEE_HAS_AMI
+    virtual bool sendAsyncRequest(const IceInternal::OutgoingAsyncPtr&, bool);
+#endif
+#ifdef ICEE_HAS_BATCH
+    virtual void prepareBatchRequest(IceInternal::BasicStream*);
+    virtual void finishBatchRequest(IceInternal::BasicStream*);
+    virtual void abortBatchRequest();
+    virtual bool flushBatchRequests(IceInternal::BatchOutgoing*);
+#ifdef ICEE_HAS_AMI
+    virtual bool flushAsyncBatchRequests(const IceInternal::BatchOutgoingAsyncPtr&);
+#endif
+#endif
+    virtual Ice::ConnectionPtr getConnection(bool);
+
+    //
+    // Inherited from EventHandler.
+    //
+    virtual bool datagram() const;
+    virtual bool readable() const;
+    virtual bool read(IceInternal::BasicStream&);
+    virtual void message(IceInternal::BasicStream&, const IceInternal::ThreadPoolPtr&);
+    virtual void finished(const IceInternal::ThreadPoolPtr&);
+    virtual void exception(const LocalException&);
+#ifndef ICEE_PURE_CLIENT
+    virtual void invokeException(const LocalException&, int);
+#endif
+    virtual std::string type() const; // From Connection.
+    virtual Ice::Int timeout() const; // From Connection.
+    virtual std::string toString() const;  // From Connection and EvantHandler.
+
+    //
+    // Inherited from SocketReadyCallback.
+    //
+    virtual IceInternal::SocketStatus socketReady();
+    virtual void socketFinished();
+    virtual void socketTimeout();
 
 private:
 
+    Connection(const IceInternal::InstancePtr&, const IceInternal::TransceiverPtr&, const IceInternal::EndpointPtr&
 #ifndef ICEE_PURE_CLIENT
-    Connection(const IceInternal::InstancePtr&, const IceInternal::TransceiverPtr&, 
-               const IceInternal::EndpointPtr&, const ObjectAdapterPtr&);
-#else
-    Connection(const IceInternal::InstancePtr&, const IceInternal::TransceiverPtr&, 
-               const IceInternal::EndpointPtr&);
+               , const ObjectAdapterPtr&
 #endif
-    ~Connection();
+              );
+    virtual ~Connection();
 
 #ifndef ICEE_PURE_CLIENT
     friend class IceInternal::IncomingConnectionFactory;
@@ -120,69 +172,107 @@ private:
 
     enum State
     {
+        StateNotInitialized,
         StateNotValidated,
         StateActive,
-#ifndef ICEE_PURE_CLIENT
         StateHolding,
-#endif
         StateClosing,
         StateClosed
     };
 
-    void validate();
     void setState(State, const LocalException&);
     void setState(State);
 
-    void initiateShutdown() const;
+    void initiateShutdown();
+
+    struct OutgoingMessage
+    {
+        OutgoingMessage(IceInternal::BasicStream* str) :
+	    stream(str), out(0), response(false), adopted(false)
+	{
+	}
+
+        OutgoingMessage(IceInternal::OutgoingMessageCallback* o, IceInternal::BasicStream* str, bool resp) :
+	    stream(str), out(o), response(resp), adopted(false)
+	{
+	}
+
+#ifdef ICEE_HAS_AMI
+        OutgoingMessage(const IceInternal::OutgoingAsyncMessageCallbackPtr& o, IceInternal::BasicStream* str,
+                        bool resp) :
+	    stream(str), out(0), outAsync(o), response(resp), adopted(false)
+	{
+	}
+#endif
+
+        void adopt(IceInternal::BasicStream*);
+        void sent(Connection*, bool);
+        void finished(const Ice::LocalException&);
+
+        IceInternal::BasicStream* stream;
+        IceInternal::OutgoingMessageCallback* out;
+#ifdef ICEE_HAS_AMI
+        IceInternal::OutgoingAsyncMessageCallbackPtr outAsync;
+#endif
+        bool response;
+        bool adopted;
+    };
+
+    IceInternal::SocketStatus initialize();
+    IceInternal::SocketStatus validate();
+    bool send();
+#ifdef ICEE_HAS_AMI
+    friend class IceInternal::FlushSentCallbacks;
+    void flushSentCallbacks();
+#endif
+    bool sendMessage(OutgoingMessage&);
 
 #ifndef ICEE_PURE_CLIENT
-    void readStreamAndParseMessage(IceInternal::BasicStream&, Int&, Int&);
+    void parseMessage(IceInternal::BasicStream&, Int&, Int&, IceInternal::ServantManagerPtr&, ObjectAdapterPtr&
+#ifdef ICEE_HAS_AMI
+                      , IceInternal::OutgoingAsyncPtr&
+#endif
+        );
+    void invokeAll(IceInternal::BasicStream&, Int, Int, const IceInternal::ServantManagerPtr&, const ObjectAdapterPtr&);
 #else
-    void readStreamAndParseMessage(IceInternal::BasicStream&, Int&);
+    void parseMessage(IceInternal::BasicStream&, Int&
+#ifdef ICEE_HAS_AMI
+                      , IceInternal::OutgoingAsyncPtr&
+#endif
+        );
 #endif
 
-#ifdef ICEE_HAS_BATCH
-    void flushBatchRequestsInternal(bool);
-    void resetBatch(bool);
-#endif
-
-#ifndef ICEE_PURE_BLOCKING_CLIENT
-
-    void run();
-
-    class ThreadPerConnection : public IceUtil::Thread
-    {
-    public:
-        
-        ThreadPerConnection(const ConnectionPtr&);
-        virtual void run();
-
-    private:
-        
-        ConnectionPtr _connection;
-    };
-    friend class ThreadPerConnection;
-    // Defined as mutable because "isFinished() const" sets this to 0.
-    mutable IceUtil::ThreadPtr _threadPerConnection;
-#endif
-
-    const IceInternal::InstancePtr _instance;
     IceInternal::TransceiverPtr _transceiver;
     const std::string _desc;
     const std::string _type;
     const IceInternal::EndpointPtr _endpoint;
 
+#ifndef ICEE_PURE_CLIENT
+    ObjectAdapterPtr _adapter;
+    IceInternal::ServantManagerPtr _servantManager;
+#endif
+
     const LoggerPtr _logger;
     const IceInternal::TraceLevelsPtr _traceLevels;
+    const IceInternal::ThreadPoolPtr _threadPool;
+    const IceInternal::SelectorThreadPtr _selectorThread;
+
+    StartCallbackPtr _startCallback;
 
     const bool _warn;
 
-#ifndef ICEE_PURE_CLIENT
-    IceInternal::Incoming _in;
+    Int _nextRequestId;
+
+    std::map<Int, IceInternal::Outgoing*> _requests;
+    std::map<Int, IceInternal::Outgoing*>::iterator _requestsHint;
+
+#ifdef ICEE_HAS_AMI
+    std::map<Int, IceInternal::OutgoingAsyncPtr> _asyncRequests;
+    std::map<Int, IceInternal::OutgoingAsyncPtr>::iterator _asyncRequestsHint;
 #endif
-#ifndef ICEE_PURE_BLOCKING_CLIENT
-    IceInternal::BasicStream _stream;
-#endif
+
+    std::auto_ptr<LocalException> _exception;
+
 #ifdef ICEE_HAS_BATCH
     const bool _batchAutoFlush;
     IceInternal::BasicStream _batchStream;
@@ -191,39 +281,20 @@ private:
     size_t _batchMarker;
 #endif
 
-#if !defined(ICEE_PURE_BLOCKING_CLIENT)
-    bool _blocking;
+    std::deque<OutgoingMessage> _sendStreams;
+    bool _sendInProgress;
+
+#ifdef ICEE_HAS_AMI
+    std::vector<IceInternal::OutgoingAsyncMessageCallbackPtr> _sentCallbacks;
+    IceInternal::ThreadPoolWorkItemPtr _flushSentCallbacks;
 #endif
 
-    std::auto_ptr<LocalException> _exception;
-
-    //
-    // Technically this isn't necessary for PURE_CLIENT, but its a
-    // pain to get rid of.
-    //
+#ifndef ICEE_PURE_CLIENT
     int _dispatchCount;
+#endif
 
     State _state; // The current state.
     IceUtil::Time _stateTime; // The last time when the state was changed.
-
-    //
-    // We have a separate monitor for sending, so that we don't block
-    // the whole connection when we do a blocking send. The monitor is
-    // also used by outgoing calls to wait for replies when thread per
-    // connection is used. The _nextRequestId, _requests and
-    // _requestsHint attributes are also protected by this monitor.
-    // Calls on the (non thread-safe) Outgoing objects should also
-    // only be made with this monitor locked.
-    //
-    // Finally, it's safe to lock the _sendMonitor with the connection
-    // already locked. The contrary isn't permitted.
-    //
-    IceUtil::Monitor<IceUtil::Mutex> _sendMonitor;
-    Int _nextRequestId;
-#ifndef ICEE_PURE_BLOCKING_CLIENT
-    std::map<Int, IceInternal::Outgoing*> _requests;
-    std::map<Int, IceInternal::Outgoing*>::iterator _requestsHint;
-#endif
 };
 
 }

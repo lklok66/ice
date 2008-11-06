@@ -39,6 +39,19 @@ operator<<(Print& out, const std::string& val)
     return out;
 }
 
+inline Print&
+operator<<(Print& out, int val)
+{
+    char str[24];
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+    sprintf_s(str, sizeof(str), "%d", val);
+#else
+    sprintf(str, "%d", val);
+#endif
+    out.__str() += std::string(str);
+    return out;
+}
+
 class ICE_API Warning : private IceUtil::noncopyable
 {
 public:
@@ -60,6 +73,19 @@ inline Warning&
 operator<<(Warning& out, const std::string& val)
 {
     out.__str() += val;
+    return out;
+}
+
+inline Warning&
+operator<<(Warning& out, int val)
+{
+    char str[24];
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+    sprintf_s(str, sizeof(str), "%d", val);
+#else
+    sprintf(str, "%d", val);
+#endif
+    out.__str() += std::string(str);
     return out;
 }
 
@@ -87,6 +113,19 @@ operator<<(Error& out, const std::string& val)
     return out;
 }
 
+inline Error&
+operator<<(Error& out, int val)
+{
+    char str[24];
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+    sprintf_s(str, sizeof(str), "%d", val);
+#else
+    sprintf(str, "%d", val);
+#endif
+    out.__str() += std::string(str);
+    return out;
+}
+
 class ICE_API Trace : private IceUtil::noncopyable
 {
 public:
@@ -109,6 +148,19 @@ inline Trace&
 operator<<(Trace& out, const std::string& val)
 {
     out.__str() += val;
+    return out;
+}
+
+inline Trace&
+operator<<(Trace& out, int val)
+{
+    char str[24];
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+    sprintf_s(str, sizeof(str), "%d", val);
+#else
+    sprintf(str, "%d", val);
+#endif
+    out.__str() += std::string(str);
     return out;
 }
 

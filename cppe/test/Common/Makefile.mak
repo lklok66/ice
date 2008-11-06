@@ -19,10 +19,10 @@ TARGETS		= $(LIBNAME) $(DLLNAME) $(CLIBNAME) $(CDLLNAME)
 OBJS  		= TestCommon.obj
 
 SRCS		= $(OBJS:.obj=.cpp)
-		
+
 !include $(top_srcdir)\config\Make.rules.mak
 
-CPPFLAGS	= -I..\include $(CPPFLAGS) -DICE_TEST_COMMON_API_EXPORTS
+CPPFLAGS	= -I../include $(CPPFLAGS) -DICE_TEST_COMMON_API_EXPORTS -DWIN32_LEAN_AND_MEAN
 
 !if "$(STATICLIBS)" != "yes" && "$(OPTIMIZE_SPEED)" != "yes" && "$(OPTIMIZE_SIZE)" != "yes"
 PDBFLAGS        = /pdb:$(DLLNAME:.dll=.pdb)
