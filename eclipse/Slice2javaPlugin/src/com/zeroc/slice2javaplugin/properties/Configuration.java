@@ -47,6 +47,7 @@ public class Configuration
         _store.setDefault("generated", "generated");
         _store.setDefault("defines", "");
         _store.setDefault("tie", false);
+        _store.setDefault("ice", false);
         _store.setDefault("stream", false);
         _store.setDefault("meta", "");
         _store.setDefault("console", true); // XXX: Default should be false.
@@ -272,6 +273,10 @@ public class Configuration
         {
             cmds.add("--tie");
         }
+        if(getIce())
+        {
+            cmds.add("--ice");
+        }
 
         return cmds;
     }
@@ -314,6 +319,16 @@ public class Configuration
     void setTie(boolean tie)
     {
         _store.setValue("tie", tie);
+    }
+
+    public boolean getIce()
+    {
+        return _store.getBoolean("ice");
+    }
+
+    void setIce(boolean ice)
+    {
+        _store.setValue("ice", ice);
     }
 
     public boolean getConsole()

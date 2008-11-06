@@ -76,6 +76,7 @@ public class ProjectProperties extends PropertyPage
             _config.setMeta(Configuration.toList(_meta.getText()));
             _config.setStream(_stream.getSelection());
             _config.setTie(_tie.getSelection());
+            _config.setIce(_ice.getSelection());            
             _config.setConsole(_console.getSelection());
 
             if(_config.write(project))
@@ -167,6 +168,7 @@ public class ProjectProperties extends PropertyPage
         _meta.setText(Configuration.fromList(_config.getMeta()));
         _stream.setSelection(_config.getStream());
         _tie.setSelection(_config.getTie());
+        _ice.setSelection(_config.getIce());
         _console.setSelection(_config.getConsole());
 
         checkValid();
@@ -621,7 +623,7 @@ public class ProjectProperties extends PropertyPage
         Group optionsGroup = new Group(composite, SWT.NONE);
 
         gridLayout = new GridLayout();
-        gridLayout.numColumns = 4;
+        gridLayout.numColumns = 6;
         optionsGroup.setText("Options");
         optionsGroup.setLayout(gridLayout);
         optionsGroup.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -630,6 +632,8 @@ public class ProjectProperties extends PropertyPage
         new Label(optionsGroup, SWT.NONE).setText("Enable streaming");
         _tie = new Button(optionsGroup, SWT.CHECK);
         new Label(optionsGroup, SWT.NONE).setText("Enable tie");
+        _ice = new Button(optionsGroup, SWT.CHECK);
+        new Label(optionsGroup, SWT.NONE).setText("Enable ice");
 
         return composite;
     }
@@ -645,5 +649,6 @@ public class ProjectProperties extends PropertyPage
     private Text _defines;
     private Button _stream;
     private Button _tie;
+    private Button _ice;
     private Text _meta;   
 }
