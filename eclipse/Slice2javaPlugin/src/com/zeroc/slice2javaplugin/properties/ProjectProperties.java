@@ -438,16 +438,19 @@ public class ProjectProperties extends PropertyPage
                     }
                     else
                     {
+
                         // Convert the absolute path to a relative path.
                         int n = projectLocation.matchingFirstSegments(includeLocation);
                         result = includeLocation.removeFirstSegments(n);
+                        
                         IPath up = new Path("..");
                         for(n = projectLocation.segmentCount() - n; n > 0; --n)
                         {
                             result = up.append(result);
                         }
+                        // The devices must match, so remove it.
+                        result = result.setDevice(null);                        
                     }
-                    
                     _includes.add(result.toString());
                 }
             }
