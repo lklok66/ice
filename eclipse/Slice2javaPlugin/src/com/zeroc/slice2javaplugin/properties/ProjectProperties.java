@@ -79,7 +79,7 @@ public class ProjectProperties extends PropertyPage
             _config.setIce(_ice.getSelection());            
             _config.setConsole(_console.getSelection());
 
-            if(_config.write(project))
+            if(_config.write())
             {
                 // The configuration properties were changed. We need to rebuild
                 // the slice files.

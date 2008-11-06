@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -34,25 +35,28 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import com.zeroc.slice2javaplugin.Activator;
 
-
 public class Configuration
 {
     public Configuration(IProject project)
     {
         _project = project;
+        
+        _instanceStore = new ScopedPreferenceStore(new InstanceScope(), Activator.PLUGIN_ID + "." + _project.getName());
+        
         _store = new ScopedPreferenceStore(new ProjectScope(project), Activator.PLUGIN_ID);
 
-        _store.setDefault("icehome", getDefaultHome());
-        _store.setDefault("icejar", getIceJar(getDefaultHome(), new BooleanValue()));
-        _store.setDefault("generated", "generated");
-        _store.setDefault("defines", "");
-        _store.setDefault("tie", false);
-        _store.setDefault("ice", false);
-        _store.setDefault("stream", false);
-        _store.setDefault("meta", "");
-        _store.setDefault("console", true); // XXX: Default should be false.
-        _store.setDefault("sliceSourceDirs", "slice");
-        _store.setDefault("includes", "");
+        _instanceStore.setDefault(ICE_HOME_KEY, getDefaultHome());
+        
+        _store.setDefault(ICE_JAR_KEY, getIceJar(getDefaultHome(), new BooleanValue()));
+        _store.setDefault(GENERATED_KEY, GENERATED_KEY);
+        _store.setDefault(DEFINES_KEY, "");
+        _store.setDefault(TIE_KEY, false);
+        _store.setDefault(ICE_KEY, false);
+        _store.setDefault(STREAM_KEY, false);
+        _store.setDefault(META_KEY, "");
+        _store.setDefault(CONSOLE_KEY, true); // XXX: Default should be false.
+        _store.setDefault(SLICE_SOURCE_DIRS_KEY, "slice");
+        _store.setDefault(INCLUDES_KEY, "");
     }
 
     /**
@@ -127,31 +131,38 @@ public class Configuration
         return l;
     }
 
-    public boolean write(IProject project)
+    public boolean write()
         throws CoreException, IOException
     {
+        boolean rc = false;
         if(_store.needsSaving())
         {
             _store.save();
-            return true;
+            rc = true;
         }
-        return false;
+        if(_instanceStore.needsSaving())
+        {
+            _instanceStore.save();
+            rc = true;
+        }
+
+        return rc;
     }
 
     public String getIceHome()
     {
-        return _store.getString("icehome");
+        return _instanceStore.getString(ICE_HOME_KEY);
     }
     
    void setIceHome(Shell shell, String iceHome)
         throws CoreException
     {
-        String oldIceJar = _store.getString("icejar");
-        if(setValue("icehome", iceHome))
+        String oldIceJar = _store.getString(ICE_JAR_KEY);
+        if(setValue(_instanceStore, ICE_HOME_KEY, iceHome))
         {
             BooleanValue exists = new BooleanValue();
             String newIceJar = getIceJar(iceHome, exists);
-            setValue("icejar", newIceJar);
+            setValue(ICE_JAR_KEY, newIceJar);
             fixIceJarCP(oldIceJar, newIceJar);
             if(!exists.value)
             {
@@ -205,17 +216,17 @@ public class Configuration
 
     public List<String> getSliceSourceDirs()
     {
-        return toList(_store.getString("sliceSourceDirs"));
+        return toList(_store.getString(SLICE_SOURCE_DIRS_KEY));
     }
 
     void setSliceSourceDirs(List<String> sliceSourceDirs)
     {
-        setValue("sliceSourceDirs", fromList(sliceSourceDirs));
+        setValue(SLICE_SOURCE_DIRS_KEY, fromList(sliceSourceDirs));
     }
 
     public String getGeneratedDir()
     {
-        return _store.getString("generated");
+        return _store.getString(GENERATED_KEY);
     }
 
     public void fixGeneratedCP(String oldG, String newG)
@@ -243,7 +254,7 @@ public class Configuration
         throws CoreException
     {
         String oldGenerated = getGeneratedDir();
-        if(setValue("generated", generated))
+        if(setValue(GENERATED_KEY, generated))
         {
             fixGeneratedCP(oldGenerated, generated);
         }
@@ -283,72 +294,72 @@ public class Configuration
 
     public List<String> getIncludes()
     {
-        return toList(_store.getString("includes"));
+        return toList(_store.getString(INCLUDES_KEY));
     }
 
     void setIncludes(List<String> includes)
     {
-        setValue("includes", fromList(includes));
+        setValue(INCLUDES_KEY, fromList(includes));
     }
 
     public List<String> getDefines()
     {
-        return toList(_store.getString("defines"));
+        return toList(_store.getString(DEFINES_KEY));
     }
 
     void setDefines(List<String> defines)
     {
-        setValue("defines", fromList(defines));
+        setValue(DEFINES_KEY, fromList(defines));
     }
 
     public boolean getStream()
     {
-        return _store.getBoolean("stream");
+        return _store.getBoolean(STREAM_KEY);
     }
 
     void setStream(boolean stream)
     {
-        _store.setValue("stream", stream);
+        _store.setValue(STREAM_KEY, stream);
     }
 
     public boolean getTie()
     {
-        return _store.getBoolean("tie");
+        return _store.getBoolean(TIE_KEY);
     }
 
     void setTie(boolean tie)
     {
-        _store.setValue("tie", tie);
+        _store.setValue(TIE_KEY, tie);
     }
 
     public boolean getIce()
     {
-        return _store.getBoolean("ice");
+        return _store.getBoolean(ICE_KEY);
     }
 
     void setIce(boolean ice)
     {
-        _store.setValue("ice", ice);
+        _store.setValue(ICE_KEY, ice);
     }
 
     public boolean getConsole()
     {
-        return _store.getBoolean("console");
+        return _store.getBoolean(CONSOLE_KEY);
     }
 
     void setConsole(boolean console)
     {
-        _store.setValue("console", console);
+        _store.setValue(CONSOLE_KEY, console);
     }
 
     public List<String> getMeta()
     {
-        return toList(_store.getString("meta"));
+        return toList(_store.getString(META_KEY));
     }
 
     void setMeta(List<String> meta)
     {
-        setValue("meta", fromList(meta));
+        setValue(META_KEY, fromList(meta));
     }
     
     public void setupSharedLibraryPath(Map<String, String> env)
@@ -478,9 +489,14 @@ public class Configuration
     // the new value.
     private boolean setValue(String key, String value)
     {
-        if(!_store.getString(key).equals(value))
+        return setValue(_store, key, value);
+    }
+    
+    private boolean setValue(ScopedPreferenceStore store, String key, String value)
+    {
+        if(!store.getString(key).equals(value))
         {
-            _store.setValue(key, value);
+            store.setValue(key, value);
             return true;
         }
         return false;
@@ -627,11 +643,31 @@ public class Configuration
         }
         return "/opt/Ice-3.3.0";
     }
+
     static class BooleanValue
     {
         boolean value;
     }
 
+    private static final String INCLUDES_KEY = "includes";
+    private static final String SLICE_SOURCE_DIRS_KEY = "sliceSourceDirs";
+    private static final String CONSOLE_KEY = "console";
+    private static final String META_KEY = "meta";
+    private static final String STREAM_KEY = "stream";
+    private static final String ICE_KEY = "ice";
+    private static final String TIE_KEY = "tie";
+    private static final String DEFINES_KEY = "defines";
+    private static final String GENERATED_KEY = "generated";
+    private static final String ICE_JAR_KEY = "icejar";
+    private static final String ICE_HOME_KEY = "icehome";
+    
+    // Preferences store for items which should go in SCM. This includes things
+    // like build flags.
     private ScopedPreferenceStore _store;
+    
+    // Preferences store per project items which should not go in SCM, such as
+    // the location of the Ice installation.
+    private ScopedPreferenceStore _instanceStore;
+    
     private IProject _project;
 }
