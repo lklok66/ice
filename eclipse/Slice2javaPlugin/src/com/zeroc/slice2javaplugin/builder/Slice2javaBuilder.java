@@ -68,7 +68,8 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
     {
         long start = System.currentTimeMillis();
         
-        BuildState state = new BuildState(getProject());
+        IResourceDelta delta = getDelta(getProject());
+        BuildState state = new BuildState(getProject(), delta);
         state.dependencies.read();
 
         try
@@ -79,14 +80,13 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
             }
             else
             {
-                IResourceDelta delta = getDelta(getProject());
                 if(delta == null)
                 {
                     fullBuild(state, monitor);
                 }
                 else
                 {
-                    incrementalBuild(state, delta, monitor);
+                    incrementalBuild(state, monitor);
                 }
             }
         }
@@ -105,7 +105,7 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
     protected void clean(IProgressMonitor monitor)
         throws CoreException
     {
-        BuildState state = new BuildState(getProject());
+        BuildState state = new BuildState(getProject(), null);
         
         // Don't read the existing dependencies. That will have the
         // effect of trashing them.
@@ -174,9 +174,18 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
     
     static class BuildState
     {
-        BuildState(IProject project) throws CoreException
+        
+
+        BuildState(IProject project, IResourceDelta delta) throws CoreException
         {
             config = new Configuration(project);
+            
+            if(config.getConsole())
+            {
+                initializeConsole();
+                out = _consoleout;
+                err = _consoleerr;
+            }
 
             generated = getGenerated(project);
             _sourceLocations = new HashSet<IFolder>();
@@ -184,13 +193,70 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
             {
                 _sourceLocations.add(project.getFolder(p.next()));
             }
-            dependencies = new Dependencies(project);
-            if(config.getConsole())
+            
+            project.accept(new IResourceVisitor()
             {
-                initializeConsole();
-                out = _consoleout;
-                err = _consoleerr;
+                public boolean visit(IResource resource)
+                    throws CoreException
+                {
+                    if(resource instanceof IFile)
+                    {
+                        IFile file = (IFile) resource;
+                        if(filter(file))
+                        {
+                            _resources.add((IFile) resource);
+                        }
+                    }
+                    return true;
+                }
+            });
+
+            if(delta != null)
+            {
+                delta.accept(new IResourceDeltaVisitor()
+                {
+                    public boolean visit(IResourceDelta delta)
+                        throws CoreException
+                    {
+                        IResource resource = delta.getResource();
+                        if(resource instanceof IFile)
+                        {
+                            IFile file = (IFile) resource;
+                            if(filter(file))
+                            {
+                                switch (delta.getKind())
+                                {
+                                case IResourceDelta.ADDED:
+                                case IResourceDelta.CHANGED:
+                                    _deltaCandidates.add(file);
+                                    break;
+                                case IResourceDelta.REMOVED:
+                                    _removed.add(file);
+                                    break;
+                                }
+                            }
+                        }
+                        return true;
+                    }
+                });
             }
+
+            dependencies = new Dependencies(project, _resources, out, err);
+        }
+        
+        public Set<IFile> deltas() 
+        {
+            return _deltaCandidates;
+        }
+        
+        public List<IFile> removed()
+        {
+            return _removed;
+        }
+        
+        public Set<IFile> resources()
+        {
+            return _resources;
         }
 
         private IFolder getGenerated(IProject project)
@@ -207,7 +273,8 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
         
         public boolean filter(IFile file)
         {
-            if(file.getFileExtension().equals("ice"))
+            String ext = file.getFileExtension();
+            if(ext != null && ext.equals("ice"))
             {
                 IFolder folder = (IFolder)file.getParent();
                 if(_sourceLocations.contains(folder))
@@ -245,77 +312,18 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
         Dependencies dependencies;
         IFolder generated;
         private Set<IFolder> _sourceLocations;
+        
+        private Set<IFile> _resources = new HashSet<IFile>();
+        private Set<IFile> _deltaCandidates = new HashSet<IFile>();
+        private List<IFile> _removed = new ArrayList<IFile>();
+        
         private MessageConsoleStream out = null;
         private MessageConsoleStream err = null;
  
         static private MessageConsoleStream _consoleout = null;
         static private MessageConsoleStream _consoleerr = null;
-    };
+    };    
     
-    class SampleResourceVisitor implements IResourceVisitor
-    {
-        SampleResourceVisitor(BuildState state, Set<IFile> candidates)
-        {
-            _state = state;
-            _candidates = candidates;
-        }
-
-        public boolean visit(IResource resource)
-            throws CoreException
-        {
-            if(resource instanceof IFile)
-            {
-                IFile file = (IFile)resource;
-                if(_state.filter(file))
-                {
-                    _candidates.add((IFile) resource);
-                }
-            }
-            return true;
-        }
-
-        private BuildState _state;
-        private Set<IFile> _candidates;
-    };
-
-    class SampleDeltaVisitor implements IResourceDeltaVisitor
-    {
-        SampleDeltaVisitor(BuildState state, Set<IFile> candidates, List<IFile> removed)
-        {
-            _state = state;
-            _candidates = candidates;
-            _removed = removed;
-        }
-
-        public boolean visit(IResourceDelta delta)
-            throws CoreException
-        {
-            IResource resource = delta.getResource();
-            if(resource instanceof IFile)
-            {
-                IFile file = (IFile)resource;
-                if(_state.filter(file))
-                {
-                    switch (delta.getKind())
-                    {
-                    case IResourceDelta.ADDED:
-                    case IResourceDelta.CHANGED:
-                        _candidates.add(file);
-                        break;
-                    case IResourceDelta.REMOVED:
-                        _removed.add(file);
-                        break;
-                    }
-                }
-            }
-            return true;
-        }
-
-        private BuildState _state;
-        private Set<IFile> _candidates;
-        private List<IFile> _removed;
-    }
-
     private int build(BuildState state, Set<IFile> files, boolean depend, StringBuffer out)
         throws CoreException
     {
@@ -343,7 +351,8 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
         
         for(Iterator<IFile> p = files.iterator(); p.hasNext();)
         {
-            cmd.add(p.next().getProjectRelativePath().toString());
+            //cmd.add(p.next().getProjectRelativePath().toString());
+            cmd.add(p.next().getLocation().toOSString());
         }
 
         if(state.out != null)
@@ -544,9 +553,7 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
         throws CoreException
     {
         clean(monitor);
-        Set<IFile> candidates = new HashSet<IFile>();
-        getProject().accept(new SampleResourceVisitor(state, candidates));
-        
+        Set<IFile> candidates = state.resources();
         if(candidates.isEmpty())
         {
             return;
@@ -651,6 +658,7 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
             {
                 state.out.println("Updating dependencies.");
             }
+
             if(build(state, depends, true, out) == 0)
             {
                 // Parse the new dependency set.
@@ -664,15 +672,12 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
         }
     }
 
-    private void incrementalBuild(BuildState state, IResourceDelta delta, IProgressMonitor monitor)
+    private void incrementalBuild(BuildState state, IProgressMonitor monitor)
         throws CoreException
     {
-        Set<IFile> candidates = new HashSet<IFile>();
-        List<IFile> removed = new ArrayList<IFile>();
+        Set<IFile> candidates = state.deltas();
+        List<IFile> removed = state.removed();
         
-        // Compute the set of candidates.
-        delta.accept(new SampleDeltaVisitor(state, candidates, removed));
-
         if(state.out != null)
         {
             java.util.Date date = new java.util.Date();
@@ -698,24 +703,25 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
         {
             IFile f = p.next();
             
-            Set<IFile> dependents = state.dependencies.sliceSliceDependencies.get(f);
-            Iterator<IFile> dependentsIterator = dependents.iterator();
-            while(dependentsIterator.hasNext())
+            Set<IFile> dependents = state.dependencies.sliceSliceDependencies.remove(f);
+            if(dependents != null)
             {
-                IFile dependent = dependentsIterator.next();
-                Set<IFile> files = state.dependencies.reverseSliceSliceDependencies.get(dependent);
-                if(files != null)
+                Iterator<IFile> dependentsIterator = dependents.iterator();
+                while(dependentsIterator.hasNext())
                 {
-                    files.remove(f);
+                    IFile dependent = dependentsIterator.next();
+                    Set<IFile> files = state.dependencies.reverseSliceSliceDependencies.get(dependent);
+                    if(files != null)
+                    {
+                        files.remove(f);
+                    }
                 }
             }
-
-            state.dependencies.sliceSliceDependencies.remove(f);
             
             Set<IFile> oldJavaFiles = state.dependencies.sliceJavaDependencies.remove(f);
             if(state.out != null)
             {
-                if(oldJavaFiles.isEmpty())
+                if(oldJavaFiles == null || oldJavaFiles.isEmpty())
                 {
                     state.out.println("No orphans from this file.");
                 }
@@ -728,7 +734,10 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
                     }
                 }
             }
-            orphanCandidateSet.addAll(oldJavaFiles);
+            if(oldJavaFiles != null)
+            {
+                orphanCandidateSet.addAll(oldJavaFiles);
+            }
         }
 
         // Add the removed files to the candidates set
@@ -938,7 +947,6 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
             p.next().delete(true, false, monitor);
         }
         
-        
         // The dependencies of any files without build errors should be updated.
 
         // We've already added markers for any errors... Only update the
@@ -952,6 +960,9 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
 
             if(build(state, depends, true, out) == 0)
             {
+                // XXX:
+                state.out.println(out.toString());
+                
                 // Parse the new dependency set.
                 state.dependencies.updateDependencies(out.toString());
             }

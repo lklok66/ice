@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -43,6 +44,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.ui.console.MessageConsoleStream;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -54,11 +56,28 @@ import com.zeroc.slice2javaplugin.Activator;
 
 class Dependencies
 {
-    Dependencies(IProject project)
+    Dependencies(IProject project, Set<IFile> LprojectResources, MessageConsoleStream out, MessageConsoleStream err)
     {
         _project = project;
+        _projectResources = LprojectResources;
+        _out = out;
+        _err = err;
+        
+        // Build a map of location to project resource.
+        
+        for(Iterator<IFile> p = _projectResources.iterator(); p.hasNext();)
+        {
+            IFile f = p.next();
+            _locationToResource.put(f.getLocation(), f);
+        }
     }
 
+    /**
+     *
+     * @param allDependencies The string of all dependencies.
+     * @param _projectResources a set of all slice file project resources.
+     * @throws CoreException
+     */
     public void updateDependencies(String allDependencies)
         throws CoreException
     {
@@ -67,6 +86,7 @@ class Dependencies
             BufferedReader in = new BufferedReader(new StringReader(allDependencies));
             StringBuffer depline = new StringBuffer();
             String line;
+            boolean warning = false;
 
             while((line = in.readLine()) != null)
             {
@@ -74,7 +94,23 @@ class Dependencies
                 {
                     continue;
                 }
-                else if(line.endsWith("\\"))
+                // Warnings start with a line contain ": warning:" and end when
+                // a new line is encountered starting with non-whitespace.
+                if(warning)
+                {
+                    if(Character.isWhitespace(line.charAt(0)))
+                    {
+                        continue;
+                    }
+                    warning = false;
+                }
+                if(line.contains(": warning:"))
+                {
+                    warning = true;
+                    continue;
+                }
+                
+                if(line.endsWith("\\"))
                 {
                     depline.append(line.substring(0, line.length() - 1));
                 }
@@ -84,8 +120,7 @@ class Dependencies
 
                     //
                     // It's easier to split up the filenames if we first convert
-                    // Windows
-                    // path separators into Unix path separators.
+                    // Windows path separators into Unix path separators.
                     //
                     char[] chars = depline.toString().toCharArray();
                     int pos = 0;
@@ -111,10 +146,9 @@ class Dependencies
 
                     //
                     // Split the dependencies up into filenames. Note that
-                    // filenames containing
-                    // spaces are escaped and the initial file may have escaped
-                    // colons
-                    // (e.g., "C\:/Program\ Files/...").
+                    // filenames containing spaces are escaped and the initial
+                    // file may have escaped colons (e.g., "C\:/Program\
+                    // Files/...").
                     //
                     java.util.ArrayList<String> l = new java.util.ArrayList<String>();
                     StringBuffer file = new StringBuffer();
@@ -146,20 +180,35 @@ class Dependencies
 
                     pos = source.lastIndexOf(':');
                     assert (pos == source.length() - 1);
-                    source = source.substring(0, pos);
+                    Path sourcePath = new Path(source.substring(0, pos));
+                    assert sourcePath.isAbsolute();
 
-                    IFile sourceFile = _project.getFile(source);
+                    IFile sourceFile = _locationToResource.get(sourcePath);
+                    if(sourceFile == null)
+                    {
+                        if(_err != null)
+                        {
+                            _err.println("Dependencies: ignoring non-project resource " + sourcePath.toString());
+                        }
+                        // This should not occur.
+                        continue;
+                    }
+
                     Iterator<String> p = l.iterator();
                     while(p.hasNext())
                     {
-                        IFile f = _project.getFile(p.next());
-                        Set<IFile> dependents = reverseSliceSliceDependencies.get(f);
-                        if(dependents == null)
+                        IFile f = getProjectResource(new Path(p.next()));
+                        // Ignore any resources not in the project.
+                        if(f != null)
                         {
-                            dependents = new HashSet<IFile>();
-                            reverseSliceSliceDependencies.put(f, dependents);
+                            Set<IFile> dependents = reverseSliceSliceDependencies.get(f);
+                            if(dependents == null)
+                            {
+                                dependents = new HashSet<IFile>();
+                                reverseSliceSliceDependencies.put(f, dependents);
+                            }
+                            dependents.add(sourceFile);
                         }
-                        dependents.add(sourceFile);
                     }
 
                     Set<IFile> dependents = new HashSet<IFile>();
@@ -167,7 +216,12 @@ class Dependencies
                     p = l.iterator();
                     while(p.hasNext())
                     {
-                        dependents.add(_project.getFile(p.next()));
+                        IFile f = getProjectResource(new Path(p.next()));
+                        // Ignore any resources not in the project.
+                        if(f != null)
+                        {
+                            dependents.add(f);
+                        }
                     }
 
                     depline = new StringBuffer();
@@ -179,6 +233,24 @@ class Dependencies
             throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
                     "Unable to read dependencies from slice translator: " + ex, null));
         }
+    }
+
+    private IFile getProjectResource(Path path)
+    {
+        IFile f;
+        if(path.isAbsolute())
+        {
+            f = _locationToResource.get(path);
+        }
+        else
+        {                            
+            f = _project.getFile(path);
+        }
+        if(_projectResources.contains(f))
+        {
+            return f;
+        }
+        return null;
     }
 
     public void read()
@@ -331,7 +403,7 @@ class Dependencies
     static class DependenciesParser
     {
         private IProject _project;
-        
+
         Map<IFile, Set<IFile>> sliceSliceDependencies = new java.util.HashMap<IFile, Set<IFile>>();
         Map<IFile, Set<IFile>> reverseSliceSliceDependencies = new java.util.HashMap<IFile, Set<IFile>>();
         Map<IFile, Set<IFile>> sliceJavaDependencies = new java.util.HashMap<IFile, Set<IFile>>();
@@ -411,7 +483,7 @@ class Dependencies
             visitDependencies(reverseSliceSliceDependencies, findNode(dependencies, "reverseSliceSliceDependencies"));
             visitDependencies(sliceJavaDependencies, findNode(dependencies, "sliceJavaDependencies"));
         }
-        
+
         DependenciesParser(IProject project)
         {
             _project = project;
@@ -429,6 +501,10 @@ class Dependencies
 
     // A map of slice file to java source files.
     Map<IFile, Set<IFile>> sliceJavaDependencies = new java.util.HashMap<IFile, Set<IFile>>();
-    
+
     private IProject _project;
+    private MessageConsoleStream _out;
+    private MessageConsoleStream _err;
+    private Set<IFile> _projectResources;
+    private Map<IPath, IFile> _locationToResource = new HashMap<IPath, IFile>();
 }
