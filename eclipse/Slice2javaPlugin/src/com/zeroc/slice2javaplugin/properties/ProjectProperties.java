@@ -18,8 +18,10 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -414,16 +416,39 @@ public class ProjectProperties extends PropertyPage
                 String dir = dialog.open();
                 if(dir != null)
                 {
-                    String projectDir = project.getLocation().toOSString();
-
-                    if(dir.startsWith(projectDir)) 
+                    IPath projectLocation = project.getLocation();
+                    IPath includeLocation = new Path(dir);
+                    String dev1 = projectLocation.getDevice();
+                    if(dev1 == null)
                     {
-                        dir = dir.substring(projectDir.length()+1, dir.length());
+                        dev1 = "";
                     }
-                    if(dir.length() > 0)
+                    String dev2 = includeLocation.getDevice();
+                    if(dev2 == null)
                     {
-                        _includes.add(dir);
+                        dev2 = "";
                     }
+                    IPath result;
+                    
+                    // If the directories are on different devices, then we have
+                    // no choice but to use an absolute path.
+                    if(!dev1.equals(dev2))
+                    {
+                        result = includeLocation;
+                    }
+                    else
+                    {
+                        // Convert the absolute path to a relative path.
+                        int n = projectLocation.matchingFirstSegments(includeLocation);
+                        result = includeLocation.removeFirstSegments(n);
+                        IPath up = new Path("..");
+                        for(n = projectLocation.segmentCount() - n; n > 0; --n)
+                        {
+                            result = up.append(result);
+                        }
+                    }
+                    
+                    _includes.add(result.toString());
                 }
             }
         });

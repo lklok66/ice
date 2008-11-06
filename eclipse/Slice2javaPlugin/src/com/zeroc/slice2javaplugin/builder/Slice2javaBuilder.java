@@ -960,9 +960,6 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
 
             if(build(state, depends, true, out) == 0)
             {
-                // XXX:
-                state.out.println(out.toString());
-                
                 // Parse the new dependency set.
                 state.dependencies.updateDependencies(out.toString());
             }
