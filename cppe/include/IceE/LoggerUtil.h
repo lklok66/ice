@@ -43,7 +43,7 @@ inline Print&
 operator<<(Print& out, int val)
 {
     char str[24];
-#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+#if !defined(_WIN32_WCE) && (defined(_MSC_VER) && (_MSC_VER >= 1400))
     sprintf_s(str, sizeof(str), "%d", val);
 #else
     sprintf(str, "%d", val);
@@ -80,7 +80,7 @@ inline Warning&
 operator<<(Warning& out, int val)
 {
     char str[24];
-#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+#if !defined(_WIN32_WCE) && (defined(_MSC_VER) && (_MSC_VER >= 1400))
     sprintf_s(str, sizeof(str), "%d", val);
 #else
     sprintf(str, "%d", val);
@@ -117,7 +117,7 @@ inline Error&
 operator<<(Error& out, int val)
 {
     char str[24];
-#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+#if !defined(_WIN32_WCE) && (defined(_MSC_VER) && (_MSC_VER >= 1400))
     sprintf_s(str, sizeof(str), "%d", val);
 #else
     sprintf(str, "%d", val);
@@ -155,7 +155,7 @@ inline Trace&
 operator<<(Trace& out, int val)
 {
     char str[24];
-#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+#if !defined(_WIN32_WCE) && (defined(_MSC_VER) && (_MSC_VER >= 1400))
     sprintf_s(str, sizeof(str), "%d", val);
 #else
     sprintf(str, "%d", val);

@@ -227,7 +227,11 @@ IceInternal::IncomingConnectionFactory::message(BasicStream&, const ThreadPoolPt
                 Error out(_instance->initializationData().logger);
                 out << "fatal error: can't accept more connections:\n" << ex.toString() << '\n' 
                     << _acceptor->toString();
+#ifdef _WIN32_WCE
+                exit(1);
+#else
                 abort();
+#endif
             }
 
             // Ignore socket exceptions.

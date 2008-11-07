@@ -23,7 +23,7 @@ public:
     }
 
     virtual void
-    sayHello(const Ice::Current&) const
+    sayHello(const Ice::Current&)
     {
         //
         // Its not legal to write to windows controls in a thread
