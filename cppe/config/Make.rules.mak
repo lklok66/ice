@@ -152,7 +152,7 @@ LDFLAGS		= /MACHINE:THUMB
 
 
 !if "$(EMBEDDED_DEVICE)" == "PocketPC"
-SDK_DIR		= E:\Program Files\Windows Mobile 6 SDK\PocketPC
+SDK_DIR		= C:\Program Files\Windows Mobile 6 SDK\PocketPC
 !else
 SDK_DIR		= C:\Program Files\Windows Mobile 6 SDK\Smartphone
 !endif
