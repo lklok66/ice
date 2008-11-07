@@ -392,11 +392,9 @@ IceInternal::IncomingConnectionFactory::IncomingConnectionFactory(const Instance
         {
             // Here we ignore any exceptions in close().
         }
-            
+        _acceptor = 0;
         throw;
     }
-    
-    __setNoDelete(true);
 }
 
 IceInternal::IncomingConnectionFactory::~IncomingConnectionFactory()

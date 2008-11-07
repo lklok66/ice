@@ -37,11 +37,17 @@ IceInternal::SelectorThread::SelectorThread(const InstancePtr& instance) :
             Error out(_instance->initializationData().logger);
             out << "cannot create thread for selector thread:\n" << ex.toString();
         }
+        _thread = 0;
         __setNoDelete(false);
         throw;
     }
     catch(...)
     {
+        {
+            Error out(_instance->initializationData().logger);
+            out << "cannot create thread for selector thread";
+        }
+        _thread = 0;
         __setNoDelete(false);
         throw;
     }
