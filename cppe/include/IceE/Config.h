@@ -46,13 +46,6 @@
 //
 #define ICEE_HAS_AMI
 
-// Uncomment this if want the pure client library built with
-// only the blocking concurrency model.
-// If commented, both blocking and thread-per-connections support
-// will be included in client library.
-//
-//#define ICEE_PURE_BLOCKING_CLIENT
-
 // ***********************************************************************
 //
 // User should not change anything below this line!
@@ -64,14 +57,6 @@
 //
 #if !defined(ICEE_PURE_CLIENT) && !defined(ICEE_HAS_BATCH)
 #  define ICEE_HAS_BATCH
-#endif
-
-//
-// Unless we are building a pure client we cannot build pure blocking
-// client.
-//
-#if !defined(ICEE_PURE_CLIENT) && defined(ICEE_PURE_BLOCKING_CLIENT)
-#   undef ICEE_PURE_BLOCKING_CLIENT
 #endif
 
 //
