@@ -258,7 +258,6 @@ Slice::Gen::generate(const UnitPtr& p)
             H << "\n#endif";
         }
 
-        C << "\n#include <IceE/Connection.h>";
         C << "\n#include <IceE/LocalException.h>";
         C << "\n#ifdef ICEE_HAS_OBV";
         C << "\n#  include <IceE/ObjectFactory.h>";

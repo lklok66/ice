@@ -35,8 +35,8 @@ CPP_COMPILER            = VC80
 # Otherwise IceE is built with dynamic libraries. If you want the cpp
 # runtime linked statically as well set STATIC_CPP_RUNTIME to yes.
 #
-STATICLIBS             = yes
-STATIC_CPP_RUNTIME	= yes
+#STATICLIBS             = yes
+#STATIC_CPP_RUNTIME	= yes
 
 #
 # If building for an Windows CE/Mobile embedded device with VS2005 set
@@ -47,8 +47,8 @@ STATIC_CPP_RUNTIME	= yes
 #
 # Supported options for EMBEDDED_DEVICE are "PocketPC" and "Smartphone"
 #
-EMBEDDED_OS            = WindowsMobile6
-EMBEDDED_DEVICE        = PocketPC
+#EMBEDDED_OS            = WindowsMobile6
+#EMBEDDED_DEVICE        = PocketPC
 
 # ----------------------------------------------------------------------
 # Don't change anything below this line!
