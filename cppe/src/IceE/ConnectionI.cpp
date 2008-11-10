@@ -8,7 +8,7 @@
 // **********************************************************************
 
 #include <IceE/DisableWarnings.h>
-#include <IceE/Connection.h>
+#include <IceE/ConnectionI.h>
 #include <IceE/Instance.h>
 #include <IceE/LoggerUtil.h>
 #include <IceE/Properties.h>
@@ -35,6 +35,7 @@ using namespace Ice;
 using namespace IceInternal;
 
 IceUtil::Shared* IceInternal::upCast(Connection* p) { return p; }
+IceUtil::Shared* IceInternal::upCast(ConnectionI* p) { return p; }
 
 namespace IceInternal
 {
@@ -44,7 +45,7 @@ class FlushSentCallbacks : public ThreadPoolWorkItem
 {
 public:
 
-    FlushSentCallbacks(const Ice::ConnectionPtr& connection) : _connection(connection)
+    FlushSentCallbacks(const Ice::ConnectionIPtr& connection) : _connection(connection)
     {
     }
 
@@ -57,7 +58,7 @@ public:
 
 private:
 
-    const Ice::ConnectionPtr _connection;
+    const Ice::ConnectionIPtr _connection;
 };
 
 #endif
@@ -65,7 +66,7 @@ private:
 }
 
 void
-Ice::Connection::OutgoingMessage::adopt(BasicStream* str)
+Ice::ConnectionI::OutgoingMessage::adopt(BasicStream* str)
 {
     if(adopted)
     {
@@ -110,7 +111,7 @@ Ice::Connection::OutgoingMessage::adopt(BasicStream* str)
 }
 
 void
-Ice::Connection::OutgoingMessage::sent(Connection* connection, bool notify)
+Ice::ConnectionI::OutgoingMessage::sent(ConnectionI* connection, bool notify)
 {
     if(out)
     {
@@ -131,7 +132,7 @@ Ice::Connection::OutgoingMessage::sent(Connection* connection, bool notify)
 }
 
 void
-Ice::Connection::OutgoingMessage::finished(const Ice::LocalException& ex)
+Ice::ConnectionI::OutgoingMessage::finished(const Ice::LocalException& ex)
 {
     if(!response)
     {
@@ -160,7 +161,7 @@ Ice::Connection::OutgoingMessage::finished(const Ice::LocalException& ex)
 }
 
 void
-Ice::Connection::start(const StartCallbackPtr& callback)
+Ice::ConnectionI::start(const StartCallbackPtr& callback)
 {
     try
     {
@@ -236,7 +237,7 @@ Ice::Connection::start(const StartCallbackPtr& callback)
 }
 
 void
-Ice::Connection::activate()
+Ice::ConnectionI::activate()
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
     if(_state <= StateNotValidated)
@@ -249,7 +250,7 @@ Ice::Connection::activate()
 
 #ifndef ICEE_PURE_CLIENT
 void
-Ice::Connection::hold()
+Ice::ConnectionI::hold()
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
     if(_state <= StateNotValidated)
@@ -262,7 +263,7 @@ Ice::Connection::hold()
 #endif
 
 void
-Ice::Connection::destroy(DestructionReason reason)
+Ice::ConnectionI::destroy(DestructionReason reason)
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
 
@@ -285,7 +286,7 @@ Ice::Connection::destroy(DestructionReason reason)
 }
 
 void
-Ice::Connection::close(bool force)
+Ice::ConnectionI::close(bool force)
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
 
@@ -316,7 +317,7 @@ Ice::Connection::close(bool force)
 }
 
 bool
-Ice::Connection::isActiveOrHolding() const
+Ice::ConnectionI::isActiveOrHolding() const
 {
     //
     // We can not use trylock here, otherwise the outgoing connection
@@ -329,7 +330,7 @@ Ice::Connection::isActiveOrHolding() const
 }
 
 bool
-Ice::Connection::isFinished() const
+Ice::ConnectionI::isFinished() const
 {
     //
     // We can use trylock here, because as long as there are still
@@ -357,7 +358,7 @@ Ice::Connection::isFinished() const
 }
 
 void
-Ice::Connection::throwException() const
+Ice::ConnectionI::throwException() const
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
 
@@ -370,7 +371,7 @@ Ice::Connection::throwException() const
 
 #ifndef ICEE_PURE_CLIENT
 void
-Ice::Connection::waitUntilHolding() const
+Ice::ConnectionI::waitUntilHolding() const
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
 
@@ -382,7 +383,7 @@ Ice::Connection::waitUntilHolding() const
 #endif
 
 void
-Ice::Connection::waitUntilFinished()
+Ice::ConnectionI::waitUntilFinished()
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
 
@@ -456,7 +457,7 @@ Ice::Connection::waitUntilFinished()
 
 #ifdef ICEE_HAS_BATCH
 void
-Ice::Connection::flushBatchRequests()
+Ice::ConnectionI::flushBatchRequests()
 {
     BatchOutgoing out(this, _instance.get());
     out.invoke();
@@ -466,7 +467,7 @@ Ice::Connection::flushBatchRequests()
 #ifndef ICEE_PURE_CLIENT
 
 void
-Ice::Connection::sendResponse(BasicStream* os)
+Ice::ConnectionI::sendResponse(BasicStream* os)
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
     assert(_state > StateNotValidated);
@@ -499,7 +500,7 @@ Ice::Connection::sendResponse(BasicStream* os)
 }
 
 void
-Ice::Connection::sendNoResponse()
+Ice::ConnectionI::sendNoResponse()
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
     assert(_state > StateNotValidated);
@@ -531,7 +532,7 @@ Ice::Connection::sendNoResponse()
 #endif
 
 EndpointPtr
-Ice::Connection::endpoint() const
+Ice::ConnectionI::endpoint() const
 {
     return _endpoint; // No mutex protection necessary, _endpoint is immutable.
 }
@@ -539,7 +540,7 @@ Ice::Connection::endpoint() const
 #ifndef ICEE_PURE_CLIENT
 
 void
-Ice::Connection::setAdapter(const ObjectAdapterPtr& adapter)
+Ice::ConnectionI::setAdapter(const ObjectAdapterPtr& adapter)
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
 
@@ -575,27 +576,27 @@ Ice::Connection::setAdapter(const ObjectAdapterPtr& adapter)
 }
 
 ObjectAdapterPtr
-Ice::Connection::getAdapter() const
+Ice::ConnectionI::getAdapter() const
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
     return _adapter;
 }
 
 ObjectPrx
-Ice::Connection::createProxy(const Identity& ident) const
+Ice::ConnectionI::createProxy(const Identity& ident) const
 {
     //
     // Create a reference and return a reverse proxy for this
     // reference.
     //
-    ConnectionPtr self = const_cast<Connection*>(this);
+    ConnectionIPtr self = const_cast<ConnectionI*>(this);
     return _instance->proxyFactory()->referenceToProxy(_instance->referenceFactory()->create(ident, self));
 }
 
 #endif
 
-Connection*
-Ice::Connection::sendRequest(Outgoing* out, bool response)
+ConnectionI*
+Ice::ConnectionI::sendRequest(Outgoing* out, bool response)
 {
     BasicStream* os = out->os();
 
@@ -667,7 +668,7 @@ Ice::Connection::sendRequest(Outgoing* out, bool response)
 
 #ifdef ICEE_HAS_AMI
 bool
-Ice::Connection::sendAsyncRequest(const OutgoingAsyncPtr& out, bool response)
+Ice::ConnectionI::sendAsyncRequest(const OutgoingAsyncPtr& out, bool response)
 {
     BasicStream* os = out->__getOs();
 
@@ -737,7 +738,7 @@ Ice::Connection::sendAsyncRequest(const OutgoingAsyncPtr& out, bool response)
 #ifdef ICEE_HAS_BATCH
 
 void
-Ice::Connection::prepareBatchRequest(BasicStream* os)
+Ice::ConnectionI::prepareBatchRequest(BasicStream* os)
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
 
@@ -781,7 +782,7 @@ Ice::Connection::prepareBatchRequest(BasicStream* os)
 }
 
 void
-Ice::Connection::finishBatchRequest(BasicStream* os)
+Ice::ConnectionI::finishBatchRequest(BasicStream* os)
 {
     try
     {
@@ -903,7 +904,7 @@ Ice::Connection::finishBatchRequest(BasicStream* os)
 }
 
 void
-Ice::Connection::abortBatchRequest()
+Ice::ConnectionI::abortBatchRequest()
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
 
@@ -923,7 +924,7 @@ Ice::Connection::abortBatchRequest()
 }
 
 bool
-Ice::Connection::flushBatchRequests(BatchOutgoing* out)
+Ice::ConnectionI::flushBatchRequests(BatchOutgoing* out)
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
     while(_batchStreamInUse && !_exception.get())
@@ -986,7 +987,7 @@ Ice::Connection::flushBatchRequests(BatchOutgoing* out)
 
 #ifdef ICEE_HAS_AMI
 bool
-Ice::Connection::flushAsyncBatchRequests(const BatchOutgoingAsyncPtr& outAsync)
+Ice::ConnectionI::flushAsyncBatchRequests(const BatchOutgoingAsyncPtr& outAsync)
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
     while(_batchStreamInUse && !_exception.get())
@@ -1050,32 +1051,32 @@ Ice::Connection::flushAsyncBatchRequests(const BatchOutgoingAsyncPtr& outAsync)
 
 #endif
 
-Ice::ConnectionPtr
-Ice::Connection::getConnection(bool /*wait*/)
+Ice::ConnectionIPtr
+Ice::ConnectionI::getConnection(bool /*wait*/)
 {
     return this;
 }
 
 bool
-Ice::Connection::datagram() const
+Ice::ConnectionI::datagram() const
 {
     return _endpoint->datagram(); // No mutex protection necessary, _endpoint is immutable.
 }
 
 bool
-Ice::Connection::readable() const
+Ice::ConnectionI::readable() const
 {
     return true;
 }
 
 bool
-Ice::Connection::read(BasicStream& stream)
+Ice::ConnectionI::read(BasicStream& stream)
 {
     return _transceiver->read(stream);
 }
 
 void
-Ice::Connection::message(BasicStream& stream, const ThreadPoolPtr& threadPool)
+Ice::ConnectionI::message(BasicStream& stream, const ThreadPoolPtr& threadPool)
 {
     Int requestId = 0;
 #ifndef ICEE_PURE_CLIENT
@@ -1146,7 +1147,7 @@ Ice::Connection::message(BasicStream& stream, const ThreadPoolPtr& threadPool)
 }
 
 void
-Ice::Connection::finished(const ThreadPoolPtr& threadPool)
+Ice::ConnectionI::finished(const ThreadPoolPtr& threadPool)
 {
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
@@ -1210,7 +1211,7 @@ Ice::Connection::finished(const ThreadPoolPtr& threadPool)
 }
 
 void
-Ice::Connection::exception(const LocalException& ex)
+Ice::ConnectionI::exception(const LocalException& ex)
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
     setState(StateClosed, ex);
@@ -1218,7 +1219,7 @@ Ice::Connection::exception(const LocalException& ex)
 
 #ifndef ICEE_PURE_CLIENT
 void
-Ice::Connection::invokeException(const LocalException& ex, int invokeNum)
+Ice::ConnectionI::invokeException(const LocalException& ex, int invokeNum)
 {
     //
     // Fatal exception while invoking a request. Since sendResponse/sendNoResponse isn't
@@ -1242,19 +1243,19 @@ Ice::Connection::invokeException(const LocalException& ex, int invokeNum)
 #endif
 
 string
-Ice::Connection::type() const
+Ice::ConnectionI::type() const
 {
     return _type; // No mutex lock, _type is immutable.
 }
 
 Ice::Int
-Ice::Connection::timeout() const
+Ice::ConnectionI::timeout() const
 {
     return _endpoint->timeout(); // No mutex lock, _endpoint is immutable.
 }
 
 string
-Ice::Connection::toString() const
+Ice::ConnectionI::toString() const
 {
     return _desc; // No mutex lock, _desc is immutable.
 }
@@ -1263,7 +1264,7 @@ Ice::Connection::toString() const
 // Operations from SocketReadyCallback
 //
 SocketStatus
-Ice::Connection::socketReady()
+Ice::ConnectionI::socketReady()
 {
     StartCallbackPtr callback;
 
@@ -1333,7 +1334,7 @@ Ice::Connection::socketReady()
 }
 
 void
-Ice::Connection::socketFinished()
+Ice::ConnectionI::socketFinished()
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
     assert(_sendInProgress && _state == StateClosed);
@@ -1342,7 +1343,7 @@ Ice::Connection::socketFinished()
 }
 
 void
-Ice::Connection::socketTimeout()
+Ice::ConnectionI::socketTimeout()
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
     if(_state <= StateNotValidated)
@@ -1355,11 +1356,11 @@ Ice::Connection::socketTimeout()
     }
 }
 
-Ice::Connection::Connection(const InstancePtr& instance,
-                            const TransceiverPtr& transceiver,
-                            const EndpointPtr& endpoint
+Ice::ConnectionI::ConnectionI(const InstancePtr& instance,
+                              const TransceiverPtr& transceiver,
+                              const EndpointPtr& endpoint
 #ifndef ICEE_PURE_CLIENT
-                            , const ObjectAdapterPtr& adapter
+                              , const ObjectAdapterPtr& adapter
 #endif
                            ) :
     EventHandler(instance, transceiver->fd()),
@@ -1405,29 +1406,51 @@ Ice::Connection::Connection(const InstancePtr& instance,
     }
 #endif
 
+    __setNoDelete(true);
+    try
+    {
+/* TODO: Do we have adapter-specific thread pools?
 #ifndef ICEE_PURE_CLIENT
-    if(_adapter)
-    {
-        const_cast<ThreadPoolPtr&>(_threadPool) = _instance->serverThreadPool();
-    }
-    else
-    {
-        const_cast<ThreadPoolPtr&>(_threadPool) = _instance->clientThreadPool();
-    }
+        if(_adapter)
+        {
+            const_cast<ThreadPoolPtr&>(_threadPool) = _adapter->getThreadPool();
+        }
+        else
+#endif
+        {
+            const_cast<ThreadPoolPtr&>(_threadPool) = _instance->clientThreadPool();
+        }
+*/
+#ifndef ICEE_PURE_CLIENT
+        if(_adapter)
+        {
+            const_cast<ThreadPoolPtr&>(_threadPool) = _instance->serverThreadPool();
+        }
+        else
+        {
+            const_cast<ThreadPoolPtr&>(_threadPool) = _instance->clientThreadPool();
+        }
 #else
-    const_cast<ThreadPoolPtr&>(_threadPool) = _instance->clientThreadPool();
+        const_cast<ThreadPoolPtr&>(_threadPool) = _instance->clientThreadPool();
 #endif
-    _threadPool->incFdsInUse();
-    
-    const_cast<SelectorThreadPtr&>(_selectorThread) = _instance->selectorThread();
-    _selectorThread->incFdsInUse();
-    
+        _threadPool->incFdsInUse();
+
+        const_cast<SelectorThreadPtr&>(_selectorThread) = _instance->selectorThread();
+        _selectorThread->incFdsInUse();
+
 #ifdef ICEE_HAS_AMI
-    _flushSentCallbacks = new FlushSentCallbacks(this);
+        _flushSentCallbacks = new FlushSentCallbacks(this);
 #endif
+    }
+    catch(const IceUtil::Exception&)
+    {
+        __setNoDelete(false);
+        throw;
+    }
+    __setNoDelete(false);
 }
 
-Ice::Connection::~Connection()
+Ice::ConnectionI::~ConnectionI()
 {
     assert(!_startCallback);
     assert(_state == StateClosed);
@@ -1442,7 +1465,7 @@ Ice::Connection::~Connection()
 }
 
 void
-Ice::Connection::setState(State state, const LocalException& ex)
+Ice::ConnectionI::setState(State state, const LocalException& ex)
 {
     //
     // If setState() is called with an exception, then only closed and
@@ -1498,7 +1521,7 @@ Ice::Connection::setState(State state, const LocalException& ex)
 }
 
 void
-Ice::Connection::setState(State state)
+Ice::ConnectionI::setState(State state)
 {
     //
     // We don't want to send close connection messages if the endpoint
@@ -1626,7 +1649,7 @@ Ice::Connection::setState(State state)
 }
 
 void
-Ice::Connection::initiateShutdown()
+Ice::ConnectionI::initiateShutdown()
 {
     assert(_state == StateClosing);
 #ifndef ICEE_PURE_CLIENT
@@ -1672,7 +1695,7 @@ Ice::Connection::initiateShutdown()
 }
 
 SocketStatus
-Ice::Connection::initialize()
+Ice::ConnectionI::initialize()
 {
     SocketStatus status = _transceiver->initialize();
     if(status != Finished)
@@ -1689,7 +1712,7 @@ Ice::Connection::initialize()
 }
 
 SocketStatus
-Ice::Connection::validate()
+Ice::ConnectionI::validate()
 {
     if(!_endpoint->datagram()) // Datagram connections are always implicitly validated.
     {
@@ -1790,7 +1813,7 @@ Ice::Connection::validate()
 }
 
 bool
-Ice::Connection::send()
+Ice::ConnectionI::send()
 {
     assert(_transceiver);
     assert(!_sendStreams.empty());
@@ -1890,7 +1913,7 @@ Ice::Connection::send()
 
 #ifdef ICEE_HAS_AMI
 void
-Ice::Connection::flushSentCallbacks()
+Ice::ConnectionI::flushSentCallbacks()
 {
     vector<OutgoingAsyncMessageCallbackPtr> callbacks;
     {
@@ -1906,7 +1929,7 @@ Ice::Connection::flushSentCallbacks()
 #endif
 
 bool
-Ice::Connection::sendMessage(OutgoingMessage& message)
+Ice::ConnectionI::sendMessage(OutgoingMessage& message)
 {
     assert(_state != StateClosed);
 
@@ -1976,17 +1999,17 @@ Ice::Connection::sendMessage(OutgoingMessage& message)
 void
 #ifndef ICEE_PURE_CLIENT
 #ifdef ICEE_HAS_AMI
-Ice::Connection::parseMessage(BasicStream& stream, Int& invokeNum, Int& requestId, ServantManagerPtr& servantManager,
+Ice::ConnectionI::parseMessage(BasicStream& stream, Int& invokeNum, Int& requestId, ServantManagerPtr& servantManager,
                               ObjectAdapterPtr& adapter, OutgoingAsyncPtr& outAsync)
 #else
-Ice::Connection::parseMessage(BasicStream& stream, Int& invokeNum, Int& requestId, ServantManagerPtr& servantManager,
+Ice::ConnectionI::parseMessage(BasicStream& stream, Int& invokeNum, Int& requestId, ServantManagerPtr& servantManager,
                               ObjectAdapterPtr& adapter)
 #endif
 #else
 #ifdef ICEE_HAS_AMI
-Ice::Connection::parseMessage(BasicStream& stream, Int& requestId, OutgoingAsyncPtr& outAsync)
+Ice::ConnectionI::parseMessage(BasicStream& stream, Int& requestId, OutgoingAsyncPtr& outAsync)
 #else
-Ice::Connection::parseMessage(BasicStream& stream, Int& requestId)
+Ice::ConnectionI::parseMessage(BasicStream& stream, Int& requestId)
 #endif
 #endif
 {
@@ -2225,7 +2248,7 @@ Ice::Connection::parseMessage(BasicStream& stream, Int& requestId)
 
 #ifndef ICEE_PURE_CLIENT
 void
-Ice::Connection::invokeAll(BasicStream& stream, Int invokeNum, Int requestId, const ServantManagerPtr& servantManager,
+Ice::ConnectionI::invokeAll(BasicStream& stream, Int invokeNum, Int requestId, const ServantManagerPtr& servantManager,
                            const ObjectAdapterPtr& adapter)
 {
     //

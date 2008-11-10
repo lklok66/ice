@@ -28,7 +28,7 @@ ICEE_OBJS      	= Base64.obj \
                   BuiltinSequences.obj \
                   Communicator.obj \
                   Cond.obj \
-                  Connection.obj \
+                  ConnectionI.obj \
 		  ConnectRequestHandler.obj \
                   ConvertUTF.obj \
                   DefaultsAndOverrides.obj \

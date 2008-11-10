@@ -13,13 +13,13 @@
 
 #include <IceE/IncomingConnectionFactoryF.h>
 #include <IceE/EndpointF.h>
-#include <IceE/ConnectionF.h>
+#include <IceE/ConnectionIF.h>
 #include <IceE/ObjectAdapterF.h>
 #include <IceE/InstanceF.h>
 #include <IceE/AcceptorF.h>
 #include <IceE/TransceiverF.h>
 #include <IceE/EventHandler.h>
-#include <IceE/Connection.h>
+#include <IceE/ConnectionI.h>
 
 #include <IceE/Mutex.h>
 #include <IceE/Monitor.h>
@@ -31,7 +31,7 @@ namespace IceInternal
 {
 
 class IncomingConnectionFactory : public EventHandler, 
-                                  public Ice::Connection::StartCallback,
+                                  public Ice::ConnectionI::StartCallback,
                                   public IceUtil::Monitor<IceUtil::Mutex>
 {
 public:
@@ -59,8 +59,8 @@ public:
     virtual void exception(const Ice::LocalException&);
     virtual std::string toString() const;
 
-    virtual void connectionStartCompleted(const Ice::ConnectionPtr&);
-    virtual void connectionStartFailed(const Ice::ConnectionPtr&, const Ice::LocalException&);
+    virtual void connectionStartCompleted(const Ice::ConnectionIPtr&);
+    virtual void connectionStartFailed(const Ice::ConnectionIPtr&, const Ice::LocalException&);
 
 private:
 
@@ -84,7 +84,7 @@ private:
 
     const bool _warn;
 
-    std::list<Ice::ConnectionPtr> _connections;
+    std::list<Ice::ConnectionIPtr> _connections;
 
     State _state;
 };

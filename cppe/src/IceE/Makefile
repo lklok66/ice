@@ -32,7 +32,7 @@ LOCAL_OBJS	= Base64.o \
 		  BuiltinSequences.o \
 		  Communicator.o \
 		  Cond.o \
-		  Connection.o \
+		  ConnectionI.o \
 		  ConnectRequestHandler.o \
 		  RequestHandler.o \
 		  ConvertUTF.o \

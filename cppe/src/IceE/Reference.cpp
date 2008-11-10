@@ -418,7 +418,7 @@ IceInternal::FixedReference::FixedReference(const InstancePtr& instance,
                                             const string& facet,
                                             ReferenceMode mode,
                                             bool secure,
-                                            const ConnectionPtr& fixedConnection) :
+                                            const ConnectionIPtr& fixedConnection) :
     Reference(instance, communicator, id, context, facet, mode, secure),
     _fixedConnection(fixedConnection)
 {

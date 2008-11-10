@@ -22,7 +22,7 @@
 #  include <IceE/LocatorInfoF.h>
 #  include <IceE/LocatorF.h>
 #endif
-#include <IceE/ConnectionF.h>
+#include <IceE/ConnectionIF.h>
 #include <IceE/Shared.h>
 #include <IceE/Mutex.h>
 #include <IceE/Identity.h>
@@ -151,7 +151,7 @@ class FixedReference : public Reference
 public:
 
     FixedReference(const InstancePtr&, const Ice::CommunicatorPtr&, const Ice::Identity&, const Ice::Context&,
-                   const std::string&, ReferenceMode, bool, const Ice::ConnectionPtr&);
+                   const std::string&, ReferenceMode, bool, const Ice::ConnectionIPtr&);
 
     virtual std::vector<EndpointPtr> getEndpoints() const;
 
@@ -185,7 +185,7 @@ private:
 
     FixedReference(const FixedReference&);
 
-    Ice::ConnectionPtr _fixedConnection;
+    Ice::ConnectionIPtr _fixedConnection;
 };
 
 class RoutableReference : public Reference

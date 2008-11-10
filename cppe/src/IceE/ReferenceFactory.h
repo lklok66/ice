@@ -42,7 +42,7 @@ public:
     //
     // Create a fixed reference.
     //
-    ReferencePtr create(const ::Ice::Identity&, const Ice::ConnectionPtr&);
+    ReferencePtr create(const ::Ice::Identity&, const Ice::ConnectionIPtr&);
 
     //
     // Create a reference from a string.

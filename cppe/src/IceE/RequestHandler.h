@@ -14,7 +14,7 @@
 #include <IceE/RequestHandlerF.h>
 #include <IceE/ReferenceF.h>
 #include <IceE/OutgoingAsyncF.h>
-#include <IceE/ConnectionF.h>
+#include <IceE/ConnectionIF.h>
 
 namespace IceInternal
 {
@@ -37,7 +37,7 @@ public:
     virtual void abortBatchRequest() = 0;
 #endif
 
-    virtual Ice::Connection* sendRequest(Outgoing*, bool) = 0;
+    virtual Ice::ConnectionI* sendRequest(Outgoing*, bool) = 0;
 #ifdef ICEE_HAS_AMI
     virtual bool sendAsyncRequest(const OutgoingAsyncPtr&, bool) = 0;
 #endif
@@ -49,7 +49,7 @@ public:
 #endif
 #endif
 
-    virtual Ice::ConnectionPtr getConnection(bool) = 0;
+    virtual Ice::ConnectionIPtr getConnection(bool) = 0;
 };
 
 }

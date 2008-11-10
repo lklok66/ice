@@ -11,7 +11,7 @@
 #define ICEE_INCOMING_H
 
 #include <IceE/InstanceF.h>
-#include <IceE/ConnectionF.h>
+#include <IceE/ConnectionIF.h>
 #include <IceE/ServantManagerF.h>
 #include <IceE/BasicStream.h>
 #include <IceE/Current.h>
@@ -23,7 +23,7 @@ class ICE_API Incoming : private IceUtil::noncopyable
 {
 public:
 
-    Incoming(Instance*, Ice::Connection*, const Ice::ObjectAdapterPtr&);
+    Incoming(Instance*, Ice::ConnectionI*, const Ice::ObjectAdapterPtr&);
 
     void setAdapter(const Ice::ObjectAdapterPtr&);
     const Ice::ObjectAdapterPtr& getAdapter() const { return _adapter; }
@@ -45,7 +45,7 @@ protected:
 
     BasicStream _os;
     BasicStream _is;
-    Ice::Connection* _connection;
+    Ice::ConnectionI* _connection;
     Ice::ObjectAdapterPtr _adapter;
     ServantManager* _servantManager;
     Ice::Current _current;

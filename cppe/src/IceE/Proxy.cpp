@@ -26,6 +26,7 @@
 #   include <IceE/LocatorInfo.h>
 #   include <IceE/Locator.h>
 #endif
+#include <IceE/ConnectionI.h> // To convert from ConnectionIPtr to ConnectionPtr in ice_getConnection().
 
 using namespace std;
 using namespace Ice;

@@ -10,7 +10,7 @@
 #include <IceE/Outgoing.h>
 #include <IceE/Object.h>
 #include <IceE/RequestHandler.h>
-#include <IceE/Connection.h>
+#include <IceE/ConnectionI.h>
 #include <IceE/Reference.h>
 #include <IceE/Endpoint.h>
 #include <IceE/LocalException.h>
@@ -169,7 +169,7 @@ IceInternal::Outgoing::invoke()
         {
             _state = StateInProgress;
 
-            Ice::Connection* connection = _handler->sendRequest(this, true);
+            Ice::ConnectionI* connection = _handler->sendRequest(this, true);
             assert(connection);
 
             bool timedOut = false;

@@ -8,7 +8,7 @@
 // **********************************************************************
 
 #include <IceE/IncomingConnectionFactory.h>
-#include <IceE/Connection.h>
+#include <IceE/ConnectionI.h>
 #include <IceE/Instance.h>
 #include <IceE/LoggerUtil.h>
 #include <IceE/TraceLevels.h>
@@ -51,7 +51,7 @@ IceInternal::IncomingConnectionFactory::destroy()
 void
 IceInternal::IncomingConnectionFactory::waitUntilHolding() const
 {
-    list<ConnectionPtr> connections;
+    list<ConnectionIPtr> connections;
 
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
@@ -75,13 +75,13 @@ IceInternal::IncomingConnectionFactory::waitUntilHolding() const
     //
     // Now we wait until each connection is in holding state.
     //
-    for_each(connections.begin(), connections.end(), Ice::constVoidMemFun(&Connection::waitUntilHolding));
+    for_each(connections.begin(), connections.end(), Ice::constVoidMemFun(&ConnectionI::waitUntilHolding));
 }
 
 void
 IceInternal::IncomingConnectionFactory::waitUntilFinished()
 {
-    list<ConnectionPtr> connections;
+    list<ConnectionIPtr> connections;
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
         
@@ -106,7 +106,7 @@ IceInternal::IncomingConnectionFactory::waitUntilFinished()
         connections = _connections;
     }
 
-    for_each(connections.begin(), connections.end(), Ice::voidMemFun(&Connection::waitUntilFinished));
+    for_each(connections.begin(), connections.end(), Ice::voidMemFun(&ConnectionI::waitUntilFinished));
 
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
@@ -124,13 +124,13 @@ IceInternal::IncomingConnectionFactory::endpoint() const
 void
 IceInternal::IncomingConnectionFactory::flushBatchRequests()
 {
-    list<ConnectionPtr> c;
+    list<ConnectionIPtr> c;
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
         c = _connections;
     }
 
-    for(list<ConnectionPtr>::const_iterator p = c.begin(); p != c.end(); ++p)
+    for(list<ConnectionIPtr>::const_iterator p = c.begin(); p != c.end(); ++p)
     {
         try
         {
@@ -184,7 +184,7 @@ private:
 void
 IceInternal::IncomingConnectionFactory::message(BasicStream&, const ThreadPoolPtr& threadPool)
 {
-    ConnectionPtr connection;
+    ConnectionIPtr connection;
 
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
@@ -209,7 +209,7 @@ IceInternal::IncomingConnectionFactory::message(BasicStream&, const ThreadPoolPt
         // Reap connections for which destruction has completed.
         //
         _connections.erase(remove_if(_connections.begin(), _connections.end(),
-                                     Ice::constMemFun(&Connection::isFinished)),
+                                     Ice::constMemFun(&ConnectionI::isFinished)),
                            _connections.end());
         
         //
@@ -257,7 +257,7 @@ IceInternal::IncomingConnectionFactory::message(BasicStream&, const ThreadPoolPt
 
         try
         {
-            connection = new Connection(_instance, transceiver, _endpoint, _adapter);
+            connection = new ConnectionI(_instance, transceiver, _endpoint, _adapter);
         }
         catch(const LocalException& ex)
         {
@@ -317,7 +317,7 @@ IceInternal::IncomingConnectionFactory::toString() const
 }
 
 void
-IceInternal::IncomingConnectionFactory::connectionStartCompleted(const Ice::ConnectionPtr& connection)
+IceInternal::IncomingConnectionFactory::connectionStartCompleted(const Ice::ConnectionIPtr& connection)
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
 
@@ -332,7 +332,7 @@ IceInternal::IncomingConnectionFactory::connectionStartCompleted(const Ice::Conn
 }
 
 void
-IceInternal::IncomingConnectionFactory::connectionStartFailed(const Ice::ConnectionPtr& connection,
+IceInternal::IncomingConnectionFactory::connectionStartFailed(const Ice::ConnectionIPtr& connection,
                                                               const Ice::LocalException& ex)
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
@@ -423,7 +423,7 @@ IceInternal::IncomingConnectionFactory::setState(State state)
                 return;
             }
             _instance->serverThreadPool()->_register(this);
-            for_each(_connections.begin(), _connections.end(), Ice::voidMemFun(&Connection::activate));
+            for_each(_connections.begin(), _connections.end(), Ice::voidMemFun(&ConnectionI::activate));
             break;
         }
         
@@ -434,7 +434,7 @@ IceInternal::IncomingConnectionFactory::setState(State state)
                 return;
             }
             _instance->serverThreadPool()->unregister(this);
-            for_each(_connections.begin(), _connections.end(), Ice::voidMemFun(&Connection::hold));
+            for_each(_connections.begin(), _connections.end(), Ice::voidMemFun(&ConnectionI::hold));
             break;
         }
         
@@ -444,10 +444,10 @@ IceInternal::IncomingConnectionFactory::setState(State state)
 #ifdef _STLP_BEGIN_NAMESPACE
             // voidbind2nd is an STLport extension for broken compilers in IceE/Functional.h
             for_each(_connections.begin(), _connections.end(),
-                     voidbind2nd(Ice::voidMemFun1(&Connection::destroy), Connection::ObjectAdapterDeactivated));
+                     voidbind2nd(Ice::voidMemFun1(&ConnectionI::destroy), ConnectionI::ObjectAdapterDeactivated));
 #else
             for_each(_connections.begin(), _connections.end(),
-                     bind2nd(Ice::voidMemFun1(&Connection::destroy), Connection::ObjectAdapterDeactivated));
+                     bind2nd(Ice::voidMemFun1(&ConnectionI::destroy), ConnectionI::ObjectAdapterDeactivated));
 #endif
             break;
         }

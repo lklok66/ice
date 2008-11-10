@@ -11,7 +11,7 @@
 #define ICEE_OUTGOING_CONNECTION_FACTORY_H
 
 #include <IceE/OutgoingConnectionFactoryF.h>
-#include <IceE/Connection.h>
+#include <IceE/ConnectionI.h>
 #include <IceE/ConnectRequestHandler.h>
 #include <IceE/InstanceF.h>
 #if defined(ICEE_HAS_ROUTER) && !defined(ICEE_PURE_CLIENT)
@@ -63,15 +63,15 @@ private:
         EndpointPtr endpoint;
     };
 
-    class ConnectCallback : public Ice::Connection::StartCallback, public IceInternal::Endpoint_connectors
+    class ConnectCallback : public Ice::ConnectionI::StartCallback, public IceInternal::Endpoint_connectors
     {
     public:
 
         ConnectCallback(const OutgoingConnectionFactoryPtr&, const std::vector<EndpointPtr>&, 
                         const ConnectRequestHandlerPtr&);
 
-        virtual void connectionStartCompleted(const Ice::ConnectionPtr&);
-        virtual void connectionStartFailed(const Ice::ConnectionPtr&, const Ice::LocalException&);
+        virtual void connectionStartCompleted(const Ice::ConnectionIPtr&);
+        virtual void connectionStartFailed(const Ice::ConnectionIPtr&, const Ice::LocalException&);
 
         virtual void connectors(const std::vector<ConnectorPtr>&);
         virtual void exception(const Ice::LocalException&);
@@ -97,24 +97,24 @@ private:
     friend class ConnectCallback;
 
     std::vector<EndpointPtr> applyOverrides(const std::vector<EndpointPtr>&);
-    Ice::ConnectionPtr findConnection(const std::vector<EndpointPtr>&);
+    Ice::ConnectionIPtr findConnection(const std::vector<EndpointPtr>&);
     void incPendingConnectCount();
     void decPendingConnectCount();
-    Ice::ConnectionPtr getConnection(const std::vector<ConnectorInfo>&, const ConnectCallbackPtr&);
-    void finishGetConnection(const std::vector<ConnectorInfo>&, const ConnectCallbackPtr&, const Ice::ConnectionPtr&);
-    Ice::ConnectionPtr findConnection(const std::vector<ConnectorInfo>&);
-    Ice::ConnectionPtr createConnection(const TransceiverPtr&, const ConnectorInfo&);
+    Ice::ConnectionIPtr getConnection(const std::vector<ConnectorInfo>&, const ConnectCallbackPtr&);
+    void finishGetConnection(const std::vector<ConnectorInfo>&, const ConnectCallbackPtr&, const Ice::ConnectionIPtr&);
+    Ice::ConnectionIPtr findConnection(const std::vector<ConnectorInfo>&);
+    Ice::ConnectionIPtr createConnection(const TransceiverPtr&, const ConnectorInfo&);
 
     void handleException(const Ice::LocalException&, bool);
-    void handleException(const Ice::LocalException&, const ConnectorInfo&, const Ice::ConnectionPtr&, bool);
+    void handleException(const Ice::LocalException&, const ConnectorInfo&, const Ice::ConnectionIPtr&, bool);
 
     const InstancePtr _instance;
     bool _destroyed;
 
-    std::multimap<ConnectorInfo, Ice::ConnectionPtr> _connections;
+    std::multimap<ConnectorInfo, Ice::ConnectionIPtr> _connections;
     std::map<ConnectorInfo, std::set<ConnectCallbackPtr> > _pending;
 
-    std::multimap<EndpointPtr, Ice::ConnectionPtr> _connectionsByEndpoint;
+    std::multimap<EndpointPtr, Ice::ConnectionIPtr> _connectionsByEndpoint;
     int _pendingConnectCount;
 };
 

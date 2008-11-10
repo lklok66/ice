@@ -12,7 +12,7 @@
 #include <IceE/ServantManager.h>
 #include <IceE/Object.h>
 #include <IceE/ReplyStatus.h>
-#include <IceE/Connection.h>
+#include <IceE/ConnectionI.h>
 #include <IceE/LocalException.h>
 #include <IceE/Instance.h>
 #include <IceE/Properties.h>
@@ -25,7 +25,7 @@ using namespace std;
 using namespace Ice;
 using namespace IceInternal;
 
-IceInternal::Incoming::Incoming(Instance* inst, Connection* con, const ObjectAdapterPtr& adapter) :
+IceInternal::Incoming::Incoming(Instance* inst, ConnectionI* con, const ObjectAdapterPtr& adapter) :
    _os(inst, inst->messageSizeMax()
 #ifdef ICEE_HAS_WSTRING
        , inst->initializationData().stringConverter, inst->initializationData().wstringConverter

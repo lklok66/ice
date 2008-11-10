@@ -9,7 +9,7 @@
 
 #include <IceE/OutgoingAsync.h>
 #include <IceE/Object.h>
-#include <IceE/Connection.h>
+#include <IceE/ConnectionI.h>
 #include <IceE/RequestHandler.h>
 #include <IceE/Reference.h>
 #include <IceE/Instance.h>
@@ -219,7 +219,7 @@ IceInternal::OutgoingAsyncMessageCallback::__warning(const InstancePtr& instance
 }
 
 void
-IceInternal::OutgoingAsync::__sent(Ice::Connection* connection)
+IceInternal::OutgoingAsync::__sent(Ice::ConnectionI* connection)
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock sync(__monitor);
     _sent = true;
@@ -636,7 +636,7 @@ IceInternal::OutgoingAsync::handleException(const Ice::LocalException& exc)
 void
 IceInternal::OutgoingAsync::runTimerTask() // Implementation of TimerTask::runTimerTask()
 {
-    Ice::ConnectionPtr connection;
+    Ice::ConnectionIPtr connection;
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock sync(__monitor);
         assert(_timerTaskConnection && _sent); // Can only be set once the request is sent.
@@ -656,7 +656,7 @@ IceInternal::OutgoingAsync::runTimerTask() // Implementation of TimerTask::runTi
 }
 
 void
-IceInternal::BatchOutgoingAsync::__sent(Ice::Connection* /*connection*/)
+IceInternal::BatchOutgoingAsync::__sent(Ice::ConnectionI* /*connection*/)
 {
     __releaseCallback();
 }

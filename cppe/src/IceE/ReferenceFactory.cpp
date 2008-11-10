@@ -73,7 +73,7 @@ IceInternal::ReferenceFactory::create(const Identity& ident,
 }
 
 ReferencePtr
-IceInternal::ReferenceFactory::create(const Identity& ident, const Ice::ConnectionPtr& connection)
+IceInternal::ReferenceFactory::create(const Identity& ident, const Ice::ConnectionIPtr& connection)
 {
     if(ident.name.empty() && ident.category.empty())
     {

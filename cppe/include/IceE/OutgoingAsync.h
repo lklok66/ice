@@ -16,7 +16,7 @@
 #include <IceE/OutgoingAsyncF.h>
 #include <IceE/InstanceF.h>
 #include <IceE/ReferenceF.h>
-#include <IceE/ConnectionF.h>
+#include <IceE/ConnectionIF.h>
 #include <IceE/Current.h>
 #include <IceE/RequestHandlerF.h>
 
@@ -36,7 +36,7 @@ public:
     OutgoingAsyncMessageCallback();    
     virtual ~OutgoingAsyncMessageCallback();
 
-    virtual void __sent(Ice::Connection*) = 0;
+    virtual void __sent(Ice::ConnectionI*) = 0;
     virtual void __finished(const Ice::LocalException&) = 0;
 
     virtual void ice_exception(const Ice::Exception&) = 0;
@@ -81,7 +81,7 @@ class ICE_API OutgoingAsync : public OutgoingAsyncMessageCallback, private IceUt
 {
 public:
 
-    void __sent(Ice::Connection*);
+    void __sent(Ice::ConnectionI*);
 
     void __finished(BasicStream&);
     void __finished(const Ice::LocalException&);
@@ -103,7 +103,7 @@ private:
     void handleException(const LocalExceptionWrapper&);
 
     void runTimerTask(); // Implementation of TimerTask::runTimerTask()
-    Ice::ConnectionPtr _timerTaskConnection;
+    Ice::ConnectionIPtr _timerTaskConnection;
 
     bool _sent;
     bool _sentSynchronously;
@@ -118,7 +118,7 @@ class ICE_API BatchOutgoingAsync : public OutgoingAsyncMessageCallback
 {
 public:
 
-    virtual void __sent(Ice::Connection*);
+    virtual void __sent(Ice::ConnectionI*);
     virtual void __finished(const Ice::LocalException&);
     
 protected:

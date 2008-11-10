@@ -11,7 +11,7 @@
 #include <IceE/LocalException.h>
 #include <IceE/Instance.h>
 #include <IceE/Proxy.h>
-#include <IceE/Connection.h>
+#include <IceE/ConnectionI.h>
 #include <IceE/RouterInfo.h>
 #include <IceE/LocatorInfo.h>
 #include <IceE/Outgoing.h>
@@ -238,7 +238,7 @@ ConnectRequestHandler::abortBatchRequest()
 }
 #endif
 
-Ice::Connection*
+Ice::ConnectionI*
 ConnectRequestHandler::sendRequest(Outgoing* out, bool /*response*/)
 {
     return getConnection(true)->sendRequest(out, _response);
@@ -288,7 +288,7 @@ ConnectRequestHandler::flushAsyncBatchRequests(const BatchOutgoingAsyncPtr& out)
 #endif
 #endif
 
-Ice::ConnectionPtr
+Ice::ConnectionIPtr
 ConnectRequestHandler::getConnection(bool waitInit)
 {
     if(waitInit)
@@ -316,7 +316,7 @@ ConnectRequestHandler::getConnection(bool waitInit)
 }
 
 void
-ConnectRequestHandler::setConnection(const Ice::ConnectionPtr& connection)
+ConnectRequestHandler::setConnection(const Ice::ConnectionIPtr& connection)
 {
     {
         Lock sync(*this);

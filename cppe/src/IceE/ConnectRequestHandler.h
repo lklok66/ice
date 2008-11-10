@@ -48,7 +48,7 @@ public:
     virtual void abortBatchRequest();
 #endif
 
-    virtual Ice::Connection* sendRequest(Outgoing*, bool);
+    virtual Ice::ConnectionI* sendRequest(Outgoing*, bool);
 #ifdef ICEE_HAS_AMI
     virtual bool sendAsyncRequest(const OutgoingAsyncPtr&, bool);
 #endif
@@ -60,12 +60,12 @@ public:
 #endif
 #endif
 
-    virtual Ice::ConnectionPtr getConnection(bool);
+    virtual Ice::ConnectionIPtr getConnection(bool);
 
     //
     // Called by OutgoingConnectionFactory.
     //
-    virtual void setConnection(const Ice::ConnectionPtr&); // XXX
+    virtual void setConnection(const Ice::ConnectionIPtr&); // XXX
     virtual void setException(const Ice::LocalException&); // XXX
 
     void flushRequestsWithException(const Ice::LocalException&);
@@ -122,7 +122,7 @@ private:
     const bool _batchAutoFlush;
 #endif
 
-    Ice::ConnectionPtr _connection;
+    Ice::ConnectionIPtr _connection;
     std::auto_ptr<Ice::LocalException> _exception;
     bool _initialized;
     bool _flushing;
