@@ -796,8 +796,7 @@ Ice::ObjectAdapter::ObjectAdapter(const InstancePtr& instance, const Communicato
     }
     catch(...)
     {
-        deactivate();
-        waitForDeactivate();
+        destroy();
         __setNoDelete(false);
         throw;
     }

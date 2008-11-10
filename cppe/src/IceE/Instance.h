@@ -79,7 +79,9 @@ public:
 #endif
 
     ThreadPoolPtr clientThreadPool();
+#ifndef ICEE_PURE_CLIENT
     ThreadPoolPtr serverThreadPool();
+#endif
     SelectorThreadPtr selectorThread();
     EndpointHostResolverPtr endpointHostResolver();
     IceUtil::TimerPtr timer();
@@ -138,7 +140,9 @@ private:
 #endif
 
     ThreadPoolPtr _clientThreadPool;
+#ifndef ICEE_PURE_CLIENT
     ThreadPoolPtr _serverThreadPool;
+#endif
     SelectorThreadPtr _selectorThread;
     EndpointHostResolverPtr _endpointHostResolver;
     IceUtil::TimerPtr _timer;

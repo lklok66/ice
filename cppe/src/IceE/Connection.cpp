@@ -1405,48 +1405,26 @@ Ice::Connection::Connection(const InstancePtr& instance,
     }
 #endif
 
-    __setNoDelete(true);
-    try
+#ifndef ICEE_PURE_CLIENT
+    if(_adapter)
     {
-/* TODO: Do we have adapter-specific thread pools?
-#ifndef ICEE_PURE_CLIENT
-        if(_adapter)
-        {
-            const_cast<ThreadPoolPtr&>(_threadPool) = _adapter->getThreadPool();
-        }
-        else
-#endif
-        {
-            const_cast<ThreadPoolPtr&>(_threadPool) = _instance->clientThreadPool();
-        }
-*/
-#ifndef ICEE_PURE_CLIENT
-        if(_adapter)
-        {
-            const_cast<ThreadPoolPtr&>(_threadPool) = _instance->serverThreadPool();
-        }
-        else
-        {
-            const_cast<ThreadPoolPtr&>(_threadPool) = _instance->clientThreadPool();
-        }
-#else
+        const_cast<ThreadPoolPtr&>(_threadPool) = _instance->serverThreadPool();
+    }
+    else
+    {
         const_cast<ThreadPoolPtr&>(_threadPool) = _instance->clientThreadPool();
+    }
+#else
+    const_cast<ThreadPoolPtr&>(_threadPool) = _instance->clientThreadPool();
 #endif
-        _threadPool->incFdsInUse();
-
-        const_cast<SelectorThreadPtr&>(_selectorThread) = _instance->selectorThread();
-        _selectorThread->incFdsInUse();
-
+    _threadPool->incFdsInUse();
+    
+    const_cast<SelectorThreadPtr&>(_selectorThread) = _instance->selectorThread();
+    _selectorThread->incFdsInUse();
+    
 #ifdef ICEE_HAS_AMI
-        _flushSentCallbacks = new FlushSentCallbacks(this);
+    _flushSentCallbacks = new FlushSentCallbacks(this);
 #endif
-    }
-    catch(const IceUtil::Exception&)
-    {
-        __setNoDelete(false);
-        throw;
-    }
-    __setNoDelete(false);
 }
 
 Ice::Connection::~Connection()

@@ -78,6 +78,7 @@ TraceLevelsPtr
 IceInternal::Instance::traceLevels() const
 {
     // No mutex lock, immutable.
+    assert(_traceLevels);
     return _traceLevels;
 }
 
@@ -85,6 +86,7 @@ DefaultsAndOverridesPtr
 IceInternal::Instance::defaultsAndOverrides() const
 {
     // No mutex lock, immutable.
+    assert(_defaultsAndOverrides);
     return _defaultsAndOverrides;
 }
 
@@ -100,6 +102,7 @@ IceInternal::Instance::routerManager() const
         throw CommunicatorDestroyedException(__FILE__, __LINE__);
     }
 
+    assert(_routerManager);
     return _routerManager;
 }
 
@@ -117,6 +120,7 @@ IceInternal::Instance::locatorManager() const
         throw CommunicatorDestroyedException(__FILE__, __LINE__);
     }
 
+    assert(_locatorManager);
     return _locatorManager;
 }
 
@@ -132,6 +136,7 @@ IceInternal::Instance::referenceFactory() const
         throw CommunicatorDestroyedException(__FILE__, __LINE__);
     }
 
+    assert(_referenceFactory);
     return _referenceFactory;
 }
 
@@ -145,6 +150,7 @@ IceInternal::Instance::proxyFactory() const
         throw CommunicatorDestroyedException(__FILE__, __LINE__);
     }
 
+    assert(_proxyFactory);
     return _proxyFactory;
 }
 
@@ -158,6 +164,7 @@ IceInternal::Instance::outgoingConnectionFactory() const
         throw CommunicatorDestroyedException(__FILE__, __LINE__);
     }
 
+    assert(_outgoingConnectionFactory);
     return _outgoingConnectionFactory;
 }
 
@@ -172,6 +179,7 @@ IceInternal::Instance::servantFactoryManager() const
         throw CommunicatorDestroyedException(__FILE__, __LINE__);
     }
 
+    assert(_servantFactoryManager);
     return _servantFactoryManager;
 }
 #endif
@@ -187,6 +195,7 @@ IceInternal::Instance::objectAdapterFactory() const
         throw CommunicatorDestroyedException(__FILE__, __LINE__);
     }
 
+    assert(_objectAdapterFactory);
     return _objectAdapterFactory;
 }
 #endif
@@ -201,7 +210,8 @@ IceInternal::Instance::retryQueue() const
     {
         throw CommunicatorDestroyedException(__FILE__, __LINE__);
     }
-
+    
+    assert(_retryQueue);
     return _retryQueue;
 }
 #endif
@@ -215,7 +225,8 @@ IceInternal::Instance::endpointFactory() const
     {
         throw CommunicatorDestroyedException(__FILE__, __LINE__);
     }
-
+    
+    assert(_endpointFactory);
     return _endpointFactory;
 }
 
@@ -261,15 +272,11 @@ IceInternal::Instance::clientThreadPool()
         throw CommunicatorDestroyedException(__FILE__, __LINE__);
     }
 
-    if(!_clientThreadPool) // Lazy initialization.
-    {
-        // XXX - Remove timeout argument if unnecessary
-        _clientThreadPool = new ThreadPool(this, "Ice.ThreadPool.Client", 0);
-    }
-
+    assert(_clientThreadPool);
     return _clientThreadPool;
 }
 
+#ifndef ICEE_PURE_CLIENT
 ThreadPoolPtr
 IceInternal::Instance::serverThreadPool()
 {
@@ -288,6 +295,7 @@ IceInternal::Instance::serverThreadPool()
 
     return _serverThreadPool;
 }
+#endif
 
 SelectorThreadPtr
 IceInternal::Instance::selectorThread()
@@ -299,11 +307,7 @@ IceInternal::Instance::selectorThread()
         throw CommunicatorDestroyedException(__FILE__, __LINE__);
     }
 
-    if(!_selectorThread) // Lazy initialization.
-    {
-        _selectorThread = new SelectorThread(this);
-    }
-
+    assert(_selectorThread);
     return _selectorThread;
 }
 
@@ -317,11 +321,7 @@ IceInternal::Instance::endpointHostResolver()
         throw CommunicatorDestroyedException(__FILE__, __LINE__);
     }
 
-    if(!_endpointHostResolver) // Lazy initialization.
-    {
-        _endpointHostResolver = new EndpointHostResolver(this);
-    }
-
+    assert(_endpointHostResolver);
     return _endpointHostResolver;
 }
 
@@ -335,11 +335,7 @@ IceInternal::Instance::timer()
         throw CommunicatorDestroyedException(__FILE__, __LINE__);
     }
 
-    if(!_timer) // Lazy initialization.
-    {
-        _timer = new IceUtil::Timer;
-    }
-
+    assert(_timer);
     return _timer;
 }
 
@@ -660,6 +656,33 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
         _retryQueue = new RetryQueue(this);
 #endif
 
+        try
+        {
+            _timer = new IceUtil::Timer;
+        }
+        catch(const IceUtil::Exception& ex)
+        {
+            Error out(_initData.logger);
+            out << "cannot create thread for timer:\n" << ex.toString();
+            throw;
+        }
+        
+        try
+        {
+            _endpointHostResolver = new EndpointHostResolver(this);
+        }
+        catch(const IceUtil::Exception& ex)
+        {
+            Error out(_initData.logger);
+            out << "cannot create thread for endpoint host resolver:\n" << ex.toString();
+            throw;
+        }
+
+        // XXX - Remove timeout argument if unnecessary
+        _clientThreadPool = new ThreadPool(this, "Ice.ThreadPool.Client", 0);
+
+        _selectorThread = new SelectorThread(this);
+
 #ifdef ICEE_HAS_WSTRING
         if(!_initData.wstringConverter)
         {
@@ -836,6 +859,11 @@ IceInternal::Instance::destroy()
     }
 #endif
 
+#ifndef ICEE_PURE_CLIENT
+    ThreadPoolPtr serverThreadPool;
+#endif
+    ThreadPoolPtr clientThreadPool;
+    SelectorThreadPtr selectorThread;
     EndpointHostResolverPtr endpointHostResolver;
 
     {
@@ -849,10 +877,36 @@ IceInternal::Instance::destroy()
         _retryQueue = 0;
 #endif
 
+#ifndef ICEE_PURE_CLIENT
+        if(_serverThreadPool)
+        {
+            _serverThreadPool->destroy();
+            std::swap(_serverThreadPool, serverThreadPool);
+        }
+#endif
+        
+        if(_clientThreadPool)
+        {
+            _clientThreadPool->destroy();
+            std::swap(_clientThreadPool, clientThreadPool);
+        }
+
+        if(_selectorThread)
+        {
+            _selectorThread->destroy();
+            std::swap(selectorThread, _selectorThread);
+        }
+
         if(_endpointHostResolver)
         {
             _endpointHostResolver->destroy();
             std::swap(endpointHostResolver, _endpointHostResolver);
+        }
+
+        if(_timer)
+        {
+            _timer->destroy();
+            _timer = 0;
         }
 
 #ifdef ICEE_HAS_OBV
@@ -897,6 +951,20 @@ IceInternal::Instance::destroy()
     //
     // Join with threads outside the synchronization.
     //
+    if(clientThreadPool)
+    {
+        clientThreadPool->joinWithAllThreads();
+    }
+#ifndef ICEE_PURE_CLIENT
+    if(serverThreadPool)
+    {
+        serverThreadPool->joinWithAllThreads();
+    }
+#endif
+    if(selectorThread)
+    {
+        selectorThread->joinWithThread();
+    }
     if(endpointHostResolver)
     {
         endpointHostResolver->getThreadControl().join();
