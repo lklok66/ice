@@ -798,6 +798,15 @@ Ice::ObjectAdapter::ObjectAdapter(const InstancePtr& instance, const Communicato
     }
     catch(...)
     {
+        //
+        // There's no need to remove the adapter from the factory if
+        // creation fails. Furthermore, since this code is called with
+        // the factory mutex locked, we can't call removeObjectAdapter
+        // on the factory here so we clear the factory reference to
+        // ensure it won't be called by destroy().
+        // 
+        _objectAdapterFactory = 0;
+
         destroy();
         __setNoDelete(false);
         throw;
