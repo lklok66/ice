@@ -8,7 +8,6 @@
 // **********************************************************************
 
 #include <IceE/OutgoingAsync.h>
-#include <IceE/Object.h>
 #include <IceE/ConnectionI.h>
 #include <IceE/RequestHandler.h>
 #include <IceE/Reference.h>

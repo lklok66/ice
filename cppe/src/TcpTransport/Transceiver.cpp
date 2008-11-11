@@ -15,6 +15,7 @@
 #include <IceE/Network.h>
 #include <IceE/LocalException.h>
 #include <IceE/SafeStdio.h>
+#include <IceE/Logger.h>
 
 using namespace std;
 using namespace Ice;
@@ -54,6 +55,7 @@ IceInternal::Transceiver::close()
 bool
 IceInternal::Transceiver::write(Buffer& buf)
 {
+_logger->trace("write", "write");
     // Its impossible for the packetSize to be more than an Int.
     int packetSize = static_cast<int>(buf.b.end() - buf.i);
     
@@ -74,6 +76,7 @@ IceInternal::Transceiver::write(Buffer& buf)
 
         if(ret == 0)
         {
+_logger->trace("write", "ConnectionLostException");
             ConnectionLostException ex(__FILE__, __LINE__);
             ex.error = 0;
             throw ex;
@@ -94,17 +97,20 @@ IceInternal::Transceiver::write(Buffer& buf)
 
             if(wouldBlock())
             {
+_logger->trace("write", "block");
                 return false;
             }
             
             if(connectionLost())
             {
+_logger->trace("write", "ConnectionLostException 2");
                 ConnectionLostException ex(__FILE__, __LINE__);
                 ex.error = getSocketErrno();
                 throw ex;
             }
             else
             {
+_logger->trace("write", "SocketException");
                 SocketException ex(__FILE__, __LINE__);
                 ex.error = getSocketErrno();
                 throw ex;
@@ -125,6 +131,7 @@ IceInternal::Transceiver::write(Buffer& buf)
         }
     }
 
+_logger->trace("write", "returning");
     return true;
 }
 

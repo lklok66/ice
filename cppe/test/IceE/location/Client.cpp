@@ -40,6 +40,7 @@ public:
             initData.properties->setProperty("Ice.RetryIntervals", "0 0");
             initData.properties->setProperty("Ice.Warn.Connections", "0");
         }
+        //initData.properties->setProperty("Ice.Default.Host", "192.168.3.30");
 
         initData.properties->setProperty("Ice.Default.Locator",
                         initData.properties->getPropertyWithDefault("Location.Locator", "locator:default -p 12010"));

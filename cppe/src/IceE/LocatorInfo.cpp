@@ -298,21 +298,39 @@ IceInternal::LocatorInfo::getLocator() const
     return _locator;
 }
 
+void
+IceInternal::LocatorInfo::setLogger(const Ice::LoggerPtr& logger)
+{
+    _logger = logger;
+}
+
 LocatorRegistryPrx
 IceInternal::LocatorInfo::getLocatorRegistry()
 {
     IceUtil::Mutex::Lock sync(*this);
+    _logger->trace("getLocatorRegistry", "1");
     
+    try
+    {
     if(!_locatorRegistry) // Lazy initialization.
     {
+    _logger->trace("getLocatorRegistry", "2");
         _locatorRegistry = _locator->getRegistry();
+    _logger->trace("getLocatorRegistry", "3");
 
         //
         // The locator registry can't be located.
         //
         _locatorRegistry = LocatorRegistryPrx::uncheckedCast(_locatorRegistry->ice_locator(0));
+    _logger->trace("getLocatorRegistry", "4");
+    }
+    }
+    catch(...)
+    {
+        throw;
     }
     
+    _logger->trace("getLocatorRegistry", "5");
     return _locatorRegistry;
 }
 
