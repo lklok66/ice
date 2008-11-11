@@ -51,6 +51,52 @@ CPP_COMPILER            = VC80
 #EMBEDDED_DEVICE        = PocketPC
 
 # ----------------------------------------------------------------------
+# Ice-E supports a number of optional features that are enabled via
+# build-time settings. To minimize the size of your executables, review
+# the features below and disable any setting that is not required by
+# your application.
+#
+# Prior to your first build, or after any subsequent change to the
+# settings below, you must run 'nmake /f Makefile.mak configure' to
+# generate the header file include\IceE\Features.h.
+# ----------------------------------------------------------------------
+
+#
+# Compile with support for the Ice router facility.
+#
+HAS_ROUTER		= yes
+
+#
+# Compile with support for the Ice locator facility.
+#
+HAS_LOCATOR		= yes
+
+#
+# Compile with support for batch invocations.
+#
+HAS_BATCH		= yes
+
+#
+# Compile with support for wstring and string conversion.
+#
+HAS_WSTRING		= yes
+
+#
+# Compile with support for opaque endpoints.
+#
+HAS_OPAQUE_ENDPOINTS	= yes
+
+#
+# Compile with support for objects by value.
+#
+HAS_OBV			= yes
+
+#
+# Compile with support for asynchronous method invocation (AMI).
+#
+HAS_AMI			= yes
+
+# ----------------------------------------------------------------------
 # Don't change anything below this line!
 # ----------------------------------------------------------------------
 
@@ -375,6 +421,19 @@ clean::
 !endif
 
 clean::
-	-del /q *.obj *.objc *.bak *.ilk *.exp *.pdb
+	-del /q *.obj *.cobj *.bak *.ilk *.exp *.pdb
 
 install::
+
+#
+# Generate Features.h using the settings enabled above.
+#
+configure:
+	$(top_srcdir)\config\features.bat $(top_srcdir)\include\IceE\Features.h \
+	    "HAS_ROUTER=$(HAS_ROUTER)" \
+	    "HAS_LOCATOR=$(HAS_LOCATOR)" \
+	    "HAS_BATCH=$(HAS_BATCH)" \
+	    "HAS_WSTRING=$(HAS_WSTRING)" \
+	    "HAS_OPAQUE_ENDPOINTS=$(HAS_OPAQUE_ENDPOINTS)" \
+	    "HAS_OBV=$(HAS_OBV)" \
+	    "HAS_AMI=$(HAS_AMI)"

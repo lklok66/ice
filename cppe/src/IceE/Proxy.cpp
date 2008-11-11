@@ -735,7 +735,11 @@ IceProxy::Ice::Object::__handleExceptionWrapperRelaxed(const RequestHandlerPtr& 
 {
     if(!ex.retry())
     {
+#ifdef ICEE_HAS_AMI
         __handleException(handler, *ex.get(), out, cnt);
+#else
+        __handleException(handler, *ex.get(), cnt);
+#endif
     }
     else
     {

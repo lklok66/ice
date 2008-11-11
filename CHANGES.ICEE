@@ -20,18 +20,16 @@ Changes since version 1.2.0
    - removeDefaultServant
    - findDefaultServant
 
-  These methods allow you to use default servant with Ice=E.
+  These methods allow you to use default servants with Ice=E.
 
 - On Windows Mobile the default Ice-E logger now writes output to 
   IceE_log.txt in the base directory rather than stderr.
 
 - Added support for Visual Studio 2008
 
+- Added optional support for object-by-value.
 
-- Added optional support for object-by-value controlled by a define in
-  Config.h. 
-
-- Added support for opaque endpoints. For example:
+- Added optional support for opaque endpoints. For example:
 
   opaque -t 2 -v CTEyNy4wLjAuMREnAAD/////AA==
 

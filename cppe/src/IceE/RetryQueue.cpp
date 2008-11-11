@@ -16,6 +16,8 @@ using namespace std;
 using namespace Ice;
 using namespace IceInternal;
 
+#ifdef ICEE_HAS_AMI
+
 IceUtil::Shared* IceInternal::upCast(RetryQueue* p) { return p; }
 
 IceInternal::RetryTask::RetryTask(const RetryQueuePtr& queue, const OutgoingAsyncPtr& outAsync) :
@@ -90,3 +92,4 @@ IceInternal::RetryQueue::remove(const RetryTaskPtr& task)
     return _requests.erase(task) > 0;
 }
 
+#endif

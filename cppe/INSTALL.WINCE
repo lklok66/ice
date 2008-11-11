@@ -32,7 +32,7 @@ yourself.
 Binary and source distributions for the supported platforms are
 available at
 
-http://www.zeroc.com/icee/download.html
+  http://www.zeroc.com/icee/download.html
 
 The directory containing the translator executables must be added to
 your PATH. For example, if the translator distribution is installed
@@ -76,16 +76,17 @@ like.
 Open a Visual Studio 2005 command prompt and change the working
 directory to IceE-@ver@. For example:
 
-> cd C:\IceE-@ver@
+  > cd C:\IceE-@ver@
 
 Edit config\Make.rules.mak to establish your build configuration. The
 comments in the file provide more information. In particular, you
-must set CPP_COMPILER to VC80 and set EMBEDDED_DEVICE  and EMBEDDED_OS
+must set CPP_COMPILER to VC80 and set EMBEDDED_DEVICE and EMBEDDED_OS
 to the appropriate target and os settings.
 
 Now you're ready to build Ice-E:
 
-> nmake /f Makefile.mak
+  > nmake /f Makefile.mak configure
+  > nmake /f Makefile.mak
 
 In order to run the test suite, you must build all of the tests, and
 then manually run the server followed by the client. Any failures

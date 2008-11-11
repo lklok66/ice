@@ -247,13 +247,15 @@ Ice::ObjectAdapter::deactivate()
     //
     for_each(incomingConnectionFactories.begin(), incomingConnectionFactories.end(),
              Ice::voidMemFun(&IncomingConnectionFactory::destroy));
-    
+
+#ifdef ICEE_HAS_ROUTER
     //
     // Must be called outside the thread synchronization, because
     // changing the object adapter might block if there are still
     // requests being dispatched.
     //
     outgoingConnectionFactory->removeAdapter(this);
+#endif
 }
 
 void

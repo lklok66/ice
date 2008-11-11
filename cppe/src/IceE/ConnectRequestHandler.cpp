@@ -576,7 +576,9 @@ ConnectRequestHandler::flushRequests()
     {
         while(!_requests.empty()) // _requests is immutable when _flushing = true
         {
+#if defined(ICEE_HAS_AMI) || defined(ICEE_HAS_BATCH)
             Request& req = _requests.front();
+#endif
 #ifdef ICEE_HAS_AMI
             if(req.out)
             {

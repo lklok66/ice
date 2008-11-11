@@ -29,11 +29,14 @@ using namespace std;
 using namespace Ice;
 using namespace IceInternal;
 
+#ifdef ICEE_HAS_AMI
+
 IceUtil::Shared* IceInternal::upCast(OutgoingAsyncMessageCallback* p) { return p; }
 IceUtil::Shared* IceInternal::upCast(OutgoingAsync* p) { return p; }
+#ifdef ICEE_HAS_BATCH
 IceUtil::Shared* IceInternal::upCast(BatchOutgoingAsync* p) { return p; }
 IceUtil::Shared* IceInternal::upCast(AMI_Object_ice_flushBatchRequests* p) { return p; }
-
+#endif
 
 namespace
 {
@@ -655,6 +658,8 @@ IceInternal::OutgoingAsync::runTimerTask() // Implementation of TimerTask::runTi
     }
 }
 
+#ifdef ICEE_HAS_BATCH
+
 void
 IceInternal::BatchOutgoingAsync::__sent(Ice::ConnectionI* /*connection*/)
 {
@@ -695,3 +700,6 @@ Ice::AMI_Object_ice_flushBatchRequests::__invoke(const ObjectPrx& prx)
     }
     return false;
 }
+
+#endif
+#endif

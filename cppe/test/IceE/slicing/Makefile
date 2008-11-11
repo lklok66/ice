@@ -13,6 +13,10 @@ include $(top_srcdir)/config/Make.rules
 
 SUBDIRS		= exceptions
 
+ifeq ($(HAS_OBV),yes)
+    SUBDIRS     += objects
+endif
+
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \
 	do \

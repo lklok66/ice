@@ -13,6 +13,7 @@ In order to reduce the size of the Ice-E run time, several Ice
 features have been removed, and others are optional. The differences
 are discussed in the sections below.
 
+
 Concurrency Models
 ------------------
 
@@ -37,6 +38,7 @@ enable the blocking model. In addition to the limitations of the
 thread-per-connection model described above, the blocking model also
 disallows the use of bidirectional connections.
 
+
 Transports
 ----------
 
@@ -44,16 +46,13 @@ Ice-E includes support for the TCP transport; UDP and SSL are not
 supported. The built-in TCP transport can be replaced with one of your
 own.
 
-Objects by Value
-----------------
-
-Ice-E does not allow Slice classes to be transmitted by value.
 
 Servant Locators
 ----------------
 
 Ice-E does not support servant locators. Ice-E applications must
 use the active servant map.
+
 
 Collocation Optimization
 ------------------------
@@ -62,6 +61,7 @@ Support for collocation optimization has been removed. Note that
 Ice-E applications are still able to make invocations on collocated
 servants, but those invocations are not optimized and therefore will
 be marshaled and sent over the built-in transport.
+
 
 Other Removed Features
 ----------------------
@@ -73,15 +73,16 @@ Ice-E has also eliminated the following features:
 * Active connection management
 * Protocol compression
 * Ice::Application and Ice::Service classes
-* Local interfaces.
+* Local interfaces
+
 
 Optional Features
 -----------------
 
-Support for routers, locators and batch messages is enabled by
-default but can be removed in order to further reduce the size of
-the Ice-E run time. See the "Configuration" section below for more
-information.
+A number of Ice-E features are optional and can be omitted during
+compilation to further reduce the size of the Ice-E run time. See the
+"Configuration" section below for more information.
+
 
 Compatibility
 -------------
@@ -90,6 +91,7 @@ Ice-E and Ice share the same C++ mapping and remain source-code
 compatible, given the limitations described above. Furthermore,
 since the two products also share the same protocol, a distributed
 system can use any combination of Ice and Ice-E applications.
+
 
 Customization
 -------------
@@ -114,58 +116,104 @@ A simple rule of thumb is to use the server library if your program
 creates an object adapter, otherwise you can use the client library.
 
 Users of the client library must define the preprocessor macro
-ICEE_PURE_CLIENT when compiling an application as well as link with
-the appropriate run time library.
+ICEE_PURE_CLIENT when compiling an application and link with the
+appropriate run time library.
 
 
 Configuration
 =============
 
-You may build the Ice-E run time libraries with certain components
+You may build the Ice-E run-time libraries with certain components
 disabled in order to further reduce the size of your applications. The
 default configuration enables all of the optional components, but you
-can selectively disable them by editing the file include/IceE/Config.h
-and commenting out their corresponding preprocessor macros. The
-optional components are described below. For more information on these
-features, please refer to the Ice manual.
+can selectively disable them by editing the file config/Make.rules
+(Linux) or config\Make.rules.mak (Windows) and modifying their
+corresponding settings. The optional components are described below.
+For more information on these features, please refer to the Ice
+manual.
+
+Before building Ice-E for the first time, or after any change to the
+configuration settings in Make.rules or Make.rules.mak, you must
+make the "configure" target as shown below:
+
+On Linux:
+
+  $ make configure
+
+On Windows:
+
+  > nmake /f Makefile.mak configure
+
+The purpose of the "configure" target is to generate the header file
+include/Ice/Features.h with preprocessor macros that correspond to
+your settings in Make.rules or Make.rules.mak.
+
 
 Router Support
 --------------
 
-If ICEE_HAS_ROUTER is defined, the Ice-E libraries will include
-support for routers. This component is necessary in order to use
+If HAS_ROUTER is enabled, the Ice-E libraries will include support for
+the Ice router facility. This component is necessary in order to use
 Ice-E with the Glacier2 router.
 
 Applications that use routers often also receive callbacks from remote
 servers. These applications must use the server library, because the
 client library does not provide support for callbacks.
 
+
 Locator Support
 ---------------
 
-If ICEE_HAS_LOCATOR is defined, the Ice-E libraries will include
-support for locators. This component is necessary in order to use
-indirect proxies in Ice-E.
+If HAS_LOCATOR is enabled, the Ice-E libraries will include support
+for the Ice locator facility. This component is necessary in order to
+use indirect proxies in Ice-E.
+
 
 Batch Messages Support
 ----------------------
 
-If ICEE_HAS_BATCH is defined, the Ice-E client library will include
-support for sending batch messages. This feature cannot be disabled
-in the server library.
+If HAS_BATCH is enabled, the Ice-E client library will include support
+for sending batch messages. This feature cannot be disabled in the
+server library.
 
-Blocking Client Support
------------------------
-
-If ICEE_PURE_BLOCKING_CLIENT is defined, the Ice-E client library will
-include support only for the blocking client-side concurrency model. 
 
 Wstring and String Converter Support
 ------------------------------------
 
-If ICEE_HAS_WSTRING is defined, the Ice-E libraries will include 
-support for using wide strings as well as configuring custom string
+If HAS_WSTRING is enabled, the Ice-E libraries will include support
+for using wide strings as well as configuring custom string
 converters.
+
+
+Opaque Endpoint Support
+-----------------------
+
+The HAS_OPAQUE_ENDPOINTS setting determines whether the Ice run time
+preserves proxy endpoints whose types are not recognized. This feature
+is unnecessary in an environment in which all clients and servers use
+Ice-E, since TCP is the only supported transport. When Ice-E programs
+communicate with Ice programs, however, it is possible for an Ice-E
+program to receive a proxy that contains unsupported endpoints, such
+as SSL or UDP. Ice-E discards these endpoints when this feature is
+disabled, but discarding the endpoints prevents an Ice-E program from
+forwarding the proxy with its original endpoints intact. Enabling
+opaque endpoints causes Ice-E to retain unknown endpoints in the proxy
+and include them if the proxy is later marshaled.
+
+
+Objects by Value Support
+------------------------
+
+If HAS_OBV is enabled, the Ice-E libraries will include support for
+sending and receiving objects by value.
+
+
+Asychronous Method Invocation Support
+-------------------------------------
+
+If HAS_AMI is enabled, the Ice-E client mapping and library will
+include support for issuing remote invocations asynchronously with
+guaranteed non-blocking semantics.
 
 
 Installation

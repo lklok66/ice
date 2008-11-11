@@ -125,6 +125,8 @@ private:
     IceUtil::Monitor<IceUtil::Mutex> _monitor;
 };
 
+#ifdef ICEE_HAS_BATCH
+
 class BatchOutgoing : public OutgoingMessageCallback
 {
 public:
@@ -147,6 +149,8 @@ private:
 
     BasicStream _os;
 };
+
+#endif
 
 }
 

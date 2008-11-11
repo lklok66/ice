@@ -39,10 +39,10 @@ Once installed, follow the instructions at the link below:
 You also need to add the Platform SDK directories to the INCLUDE, LIB
 and PATH environment variables. For example:
 
-@SET PDK_HOME=C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2
-@SET PATH=%PDK_HOME%\bin;%PATH%
-@SET INCLUDE=%PDK_HOME%\include;%INCLUDE%
-@SET LIB=%PDK_HOME%\lib;%LIB%
+  @SET PDK_HOME=C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2
+  @SET PATH=%PDK_HOME%\bin;%PATH%
+  @SET INCLUDE=%PDK_HOME%\include;%INCLUDE%
+  @SET LIB=%PDK_HOME%\lib;%LIB%
 
 The PDK_HOME environment variable must be defined in order to build
 the Ice-E source distribution. Note that PDK_HOME must not contain a
@@ -64,7 +64,7 @@ yourself.
 Binary and source distributions for the supported platforms are
 available at
 
-http://www.zeroc.com/icee/download.html
+  http://www.zeroc.com/icee/download.html
 
 The directory containing the translator executables must be added to
 your PATH. For example, if the translator distribution is installed
@@ -84,7 +84,7 @@ you like.
 Open a Visual Studio 2005 command prompt and change the working
 directory to IceE-@ver@. For example:
 
-> cd C:\IceE-@ver@
+  > cd C:\IceE-@ver@
 
 Edit config\Make.rules.mak to establish your build configuration. The
 comments in the file provide more information. In particular, you must
@@ -92,7 +92,8 @@ ensure that CPP_COMPILER is set appropriately for your environment.
 
 Now you're ready to build Ice-E:
 
-> nmake /f Makefile.mak
+  > nmake /f Makefile.mak configure
+  > nmake /f Makefile.mak
 
 Python is required to run the test suite:
 
@@ -100,11 +101,11 @@ Python is required to run the test suite:
 
 After a successful build, you can run the test suite:
 
-> nmake /f makefile.mak test
+  > nmake /f makefile.mak test
 
 This is equivalent to:
 
-> python allTests.py
+  > python allTests.py
 
 If everything worked out, you should see lots of "ok" messages. In
 case of a failure, the tests abort with "failed".

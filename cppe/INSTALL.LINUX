@@ -45,7 +45,7 @@ translator yourself.
 Binary and source distributions for the supported platforms are
 available at
 
-http://www.zeroc.com/icee/download.html
+  http://www.zeroc.com/icee/download.html
 
 The directory containing the translator executables must be added to
 your PATH. For example, if the translator distribution is installed
@@ -59,11 +59,11 @@ Compilation and Testing
 Extract the Ice-E archive in any directory you like (for example, in
 your home directory):
 
-$ tar xvfz IceE-@ver@.tar.gz
+  $ tar xvfz IceE-@ver@.tar.gz
 
 Change the working directory to IceE-@ver@:
 
-$ cd IceE-@ver@
+  $ cd IceE-@ver@
 
 Review the README file to determine whether you want to modify the
 default set of features provided by the run time libraries. Next,
@@ -72,7 +72,8 @@ comments in the file provide more information.
 
 Now you're ready to build Ice-E:
 
-$ make
+  $ make configure
+  $ make
 
 This will build the Ice-E library, tests and examples.
 
@@ -82,11 +83,11 @@ Python is required to run the test suite:
 
 After a successful build, you can run the test suite:
 
-$ make test
+  $ make test
 
 This is equivalent to:
 
-$ python allTests.py
+  $ python allTests.py
 
 If everything worked out, you should see lots of "ok" messages. In
 case of a failure, the tests abort with "failed".
@@ -95,7 +96,7 @@ If you want to try out any of the demos and you did not build Ice-E
 statically, make sure to update your LD_LIBRARY_PATH environment
 variable to add the "lib" directory:
 
-$ export LD_LIBRARY_PATH=`pwd`/lib:$LD_LIBRARY_PATH
+  $ export LD_LIBRARY_PATH=`pwd`/lib:$LD_LIBRARY_PATH
 
 
 Cross-compiling for Gumstix
@@ -107,22 +108,22 @@ build the buildroot toolchain. Ice-E has been tested with revision
 toolchain, please see the following link from the Gumstix Support
 Wiki:
 
-http://docwiki.gumstix.org/Buildroot
+  http://docwiki.gumstix.org/Buildroot
 
 Make sure to enable C++ support in the toolchain, as discussed at
 the link below:
 
-http://docwiki.gumstix.org/Sample_code/Cpp/Hello_World
+  http://docwiki.gumstix.org/Sample_code/Cpp/Hello_World
 
 Once you have the toolchain built, add the bin directory to your path
 by executing the following command:
 
-$ export PATH=<Buildroot install dir>/build_arm_nofpu/staging_dir/bin:$PATH
+  $ export PATH=<Buildroot install dir>/build_arm_nofpu/staging_dir/bin:$PATH
 
 You now must set the following environment variables:
 
-$ export CXX=arm-linux-c++
-$ export AR=arm-linux-ar
+  $ export CXX=arm-linux-c++
+  $ export AR=arm-linux-ar
 
 Finally, follow the regular Ice-E build steps as described above.
 
@@ -131,8 +132,8 @@ allTests.py script to run the test suite. First you need to copy the
 compiled tests and test suite scripts to your gumstix. From the Ice-E
 source distribution base directory, run the following commands:
 
-$ find . -name *.o | xargs rm
-$ scp -r allTests.py config lib test <gumstix ipaddress>:<some directory>
+  $ find . -name *.o | xargs rm
+  $ scp -r allTests.py config lib test <gumstix ipaddress>:<some directory>
 
 The first command removes the object files so you don't copy them as
 well. If you built Ice-E statically, there is no need to include "lib"
@@ -141,7 +142,7 @@ in the above command.
 Finally, start the test suite by changing to your chosen installation
 directory and running:
 
-$ python allTests.py
+  $ python allTests.py
 
 If you do not have python then you can run most tests by manually
 running the server in one window followed by the client in a separate
@@ -156,7 +157,7 @@ By default, builds on x86_64 are 64-bit. To perform a 32-bit build on
 an x86_64 Linux system, set the environment variable LP64 to no, as
 shown below:
 
-$ export LP64=no
+  $ export LP64=no
 
 
 ======================================================================

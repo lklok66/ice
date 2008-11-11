@@ -26,6 +26,8 @@
 namespace IceInternal
 {
 
+class LocalExceptionWrapper;
+
 class ConnectRequestHandler : public RequestHandler, 
 #ifdef ICEE_HAS_LOCATOR
                               public LocatorInfo::GetEndpointsCallback,

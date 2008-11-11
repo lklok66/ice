@@ -104,8 +104,12 @@ IceInternal::Outgoing::Outgoing(RequestHandler* handler, Reference* reference, c
         case ReferenceModeBatchOneway:
         case ReferenceModeBatchDatagram:
         {
+#ifdef ICEE_HAS_BATCH
             _handler->prepareBatchRequest(&_os);
             break;
+#else
+            throw FeatureNotSupportedException(__FILE__, __LINE__, "batch proxy mode");
+#endif
         }
     }
 
@@ -299,6 +303,7 @@ IceInternal::Outgoing::invoke()
         case ReferenceModeBatchOneway:
         case ReferenceModeBatchDatagram:
         {
+#ifdef ICEE_HAS_BATCH
             //
             // For batch oneways and datagrams, the same rules as for
             // regular oneways and datagrams (see comment above)
@@ -307,6 +312,7 @@ IceInternal::Outgoing::invoke()
             _state = StateInProgress;
             _handler->finishBatchRequest(&_os);
             return true;
+#endif
         }
     }
 
@@ -319,6 +325,7 @@ IceInternal::Outgoing::abort(const LocalException& ex)
 {
     assert(_state == StateUnsent);
 
+#ifdef ICEE_HAS_BATCH
     //
     // If we didn't finish a batch oneway or datagram request, we must
     // notify the connection about that we give up ownership of the
@@ -329,6 +336,7 @@ IceInternal::Outgoing::abort(const LocalException& ex)
     {
         _handler->abortBatchRequest();
     }
+#endif
 
     ex.ice_throw();
 }
@@ -534,6 +542,8 @@ IceInternal::Outgoing::throwUserException()
     }
 }
 
+#ifdef ICEE_HAS_BATCH
+
 IceInternal::BatchOutgoing::BatchOutgoing(RequestHandler* handler, Instance* instance) :
     _handler(handler),
     _sent(false),
@@ -588,3 +598,5 @@ IceInternal::BatchOutgoing::finished(const Ice::LocalException& ex)
     _exception.reset(dynamic_cast<LocalException*>(ex.ice_clone()));
     _monitor.notify();
 }
+
+#endif

@@ -114,6 +114,8 @@ private:
     Ice::OperationMode _mode;
 };
 
+#ifdef ICEE_HAS_BATCH
+
 class ICE_API BatchOutgoingAsync : public OutgoingAsyncMessageCallback
 {
 public:
@@ -125,6 +127,8 @@ protected:
 
     void __prepare(const InstancePtr&);
 };
+
+#endif
 
 }
 
@@ -140,6 +144,8 @@ public:
     virtual void ice_sent() = 0;
 };
 
+#ifdef ICEE_HAS_BATCH
+
 class ICE_API AMI_Object_ice_flushBatchRequests : public IceInternal::BatchOutgoingAsync
 {
 public:
@@ -148,6 +154,8 @@ public:
 
     virtual void ice_exception(const Ice::Exception&) = 0;
 };
+
+#endif
 
 }
 

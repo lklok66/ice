@@ -13,6 +13,11 @@ top_srcdir	= ..\..\..
 
 SUBDIRS		= exceptions
 
+!if "$(HAS_OBV)" == "yes"
+SUBDIRS		= $(SUBDIRS) \
+		  objects
+!endif
+
 $(EVERYTHING)::
 	@for %i in ( $(SUBDIRS) ) do \
 	    @echo "making $@ in %i" && \

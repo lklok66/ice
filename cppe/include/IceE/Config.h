@@ -10,41 +10,7 @@
 #ifndef ICEE_CONFIG_H
 #define ICEE_CONFIG_H
 
-//
-// Comment this out if you want to build without Router support.
-//
-#define ICEE_HAS_ROUTER
-
-//
-// Comment this out if you want to build without Locator support.
-//
-#define ICEE_HAS_LOCATOR
-
-//
-// Comment this out if you want to build without batch mode on the client side.
-//
-#define ICEE_HAS_BATCH
-
-//
-// Comment this out if you want to build without wstring and string converter
-// support.
-//
-#define ICEE_HAS_WSTRING
-
-//
-// Comment this out if you want to build without opaque endpoint support.
-//
-#define ICEE_HAS_OPAQUE_ENDPOINTS
-
-//
-// Comment this out if you want to build without object-by-value support.
-//
-#define ICEE_HAS_OBV
-
-//
-// Comment this out if you want to build without AMI support.
-//
-#define ICEE_HAS_AMI
+#include <IceE/Features.h>
 
 // ***********************************************************************
 //

@@ -26,6 +26,11 @@ SUBDIRS		= proxy \
 		  thread \
 		  uuid
 
+!if "$(HAS_OBV)" == "yes"
+SUBDIRS		= $(SUBDIRS) \
+		  objects
+!endif
+
 !if "$(EMBEDDED_DEVICE)" == ""
 SUBDIRS		= $(SUBDIRS) \
 		  faultTolerance \

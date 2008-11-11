@@ -20,6 +20,10 @@ SUBDIRS		= hello \
 		  minimal \
 		  workqueue
 
+ifeq ($(HAS_OBV),yes)
+    SUBDIRS     += value
+endif
+
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \
 	do \

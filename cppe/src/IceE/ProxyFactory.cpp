@@ -150,10 +150,12 @@ IceInternal::ProxyFactory::checkRetryAfterException(const LocalException& ex,
                 out << "retrying operation call to add proxy to router\n" << ex.toString();
             }
 
+#ifdef ICEE_HAS_AMI
             if(out)
             {
                 out->__send();
             }
+#endif
             return; // We must always retry, so we don't look at the retry count.
         }
         else
@@ -230,11 +232,14 @@ IceInternal::ProxyFactory::checkRetryAfterException(const LocalException& ex,
         out << " because of exception\n" << ex.toString();
     }
 
+#ifdef ICEE_HAS_AMI
     if(out)
     {
         out->__retry(interval);
     }
-    else if(interval > 0)
+    else
+#endif
+         if(interval > 0)
     {
         //
         // Sleep before retrying.

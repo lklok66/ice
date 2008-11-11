@@ -16,6 +16,11 @@ SUBDIRS		= minimal \
 		  throughput \
 		  chat
 
+!if "$(HAS_OBV)" == "yes"
+SUBDIRS		= $(SUBDIRS) \
+		  value
+!endif
+
 !if "$(EMBEDDED_DEVICE)" == ""
 SUBDIRS 	= $(SUBDIRS) \
 		  hello \
@@ -24,7 +29,7 @@ SUBDIRS 	= $(SUBDIRS) \
 		  workqueue
 !endif
 
-!if "$(CPP_COMPILER)" != "VC80_EXPRESS"
+!if "$(CPP_COMPILER)" != "VC80_EXPRESS" && "$(CPP_COMPILER)" != "VC90_EXPRESS"
 SUBDIRS		= $(SUBDIRS) MFC
 !endif
 

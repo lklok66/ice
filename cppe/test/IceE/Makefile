@@ -28,6 +28,10 @@ SUBDIRS		= adapterDeactivation \
 		  thread \
 		  uuid
 
+ifeq ($(HAS_OBV),yes)
+    SUBDIRS     += objects
+endif
+
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \
 	do \
