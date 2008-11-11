@@ -55,7 +55,6 @@ IceInternal::Transceiver::close()
 bool
 IceInternal::Transceiver::write(Buffer& buf)
 {
-_logger->trace("write", "write");
     // Its impossible for the packetSize to be more than an Int.
     int packetSize = static_cast<int>(buf.b.end() - buf.i);
     
@@ -76,7 +75,6 @@ _logger->trace("write", "write");
 
         if(ret == 0)
         {
-_logger->trace("write", "ConnectionLostException");
             ConnectionLostException ex(__FILE__, __LINE__);
             ex.error = 0;
             throw ex;
@@ -97,20 +95,17 @@ _logger->trace("write", "ConnectionLostException");
 
             if(wouldBlock())
             {
-_logger->trace("write", "block");
                 return false;
             }
             
             if(connectionLost())
             {
-_logger->trace("write", "ConnectionLostException 2");
                 ConnectionLostException ex(__FILE__, __LINE__);
                 ex.error = getSocketErrno();
                 throw ex;
             }
             else
             {
-_logger->trace("write", "SocketException");
                 SocketException ex(__FILE__, __LINE__);
                 ex.error = getSocketErrno();
                 throw ex;
@@ -131,7 +126,6 @@ _logger->trace("write", "SocketException");
         }
     }
 
-_logger->trace("write", "returning");
     return true;
 }
 

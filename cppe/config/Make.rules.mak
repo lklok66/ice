@@ -89,7 +89,7 @@ HAS_OPAQUE_ENDPOINTS	= yes
 #
 # Compile with support for objects by value.
 #
-HAS_OBV			= no
+HAS_OBV			= yes
 
 #
 # Compile with support for asynchronous method invocation (AMI).

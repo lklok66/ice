@@ -93,8 +93,6 @@ public:
     Ice::LocatorPrx getLocator() const;
     Ice::LocatorRegistryPrx getLocatorRegistry();
 
-    void setLogger(const Ice::LoggerPtr&);
-
     void getEndpoints(const ReferencePtr&, const GetEndpointsCallbackPtr&);
     void clearCache(const ReferencePtr&);
     void clearObjectCache(const ReferencePtr&);
@@ -113,7 +111,6 @@ private:
     const Ice::LocatorPrx _locator;
     Ice::LocatorRegistryPrx _locatorRegistry;
     const LocatorTablePtr _table;
-    Ice::LoggerPtr _logger;
 };
 
 }

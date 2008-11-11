@@ -32,8 +32,6 @@ public:
         Ice::InitializationData initData;
         initData.properties = Ice::createProperties(argc, argv);
         initData.properties->setProperty("ServerManager.Endpoints", "default -p 12010");
-        initData.properties->setProperty("Ice.Trace.Network", "2");
-        initData.properties->setProperty("Ice.Trace.Protocol", "1");
 
         loadConfig(initData.properties);
 
