@@ -107,6 +107,7 @@ public class ChatActivity extends ListActivity implements OnClickListener, OnKey
             builder.show();
             return;
         }
+        _text.setText("");
         
         _session.getSession().send_async(new Chat.AMI_ChatSession_send()
         {
