@@ -72,6 +72,9 @@ $(COLLOCATED): $(OBJS) $(COLOBJS)
 	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
 	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#2 && del /q $@.manifest
 
+AllTests.obj: AllTests.cpp
+	$(CXX) /c -DICEE_PURE_CLIENT $(CPPFLAGS) $(CXXFLAGS) AllTests.cpp
+
 TestC.obj Test.obj: Test.cpp
 	$(CXX) /c $(CPPFLAGS) $(CXXFLAGS) Test.cpp
 	$(CXX) /c -DICEE_PURE_CLIENT /FoTestC.obj $(CPPFLAGS) $(CXXFLAGS) Test.cpp
