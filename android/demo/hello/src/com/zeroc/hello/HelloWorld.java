@@ -3,16 +3,11 @@
 // Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
-// ICE_TOUCH_LICENSE file included in this distribution.
+// ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
 
 package com.zeroc.hello;
-
-import java.util.Formatter;
-
-import Demo.*;
-import Ice.*;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -45,7 +40,7 @@ public class HelloWorld extends Activity
         DeliveryModeDatagram,
         DeliveryModeBatchDatagram;
 
-        ObjectPrx apply(ObjectPrx prx, boolean secure)
+        Ice.ObjectPrx apply(Ice.ObjectPrx prx, boolean secure)
         {
             switch (this)
             {
@@ -106,7 +101,7 @@ public class HelloWorld extends Activity
         }
     }
 
-    private HelloPrx createProxy()
+    private Demo.HelloPrx createProxy()
     {
         String host = _hostname.getText().toString().trim();
         assert (host.length() > 0);
@@ -119,22 +114,22 @@ public class HelloWorld extends Activity
         }
 
         String s = "hello:tcp -h " + host + " -p 10000:ssl -h " + host + " -p 10001:udp -h " + host + " -p 10000";
-        ObjectPrx prx = _communicator.stringToProxy(s);
+        Ice.ObjectPrx prx = _communicator.stringToProxy(s);
         prx = _deliveryMode.apply(prx, _secure.isChecked());
         int timeout = _timeout.getProgress();
         if(timeout != 0)
         {
             prx = prx.ice_timeout(timeout);
         }
-        return HelloPrxHelper.uncheckedCast(prx);
+        return Demo.HelloPrxHelper.uncheckedCast(prx);
     }
 
-    class SayHelloI extends AMI_Hello_sayHello implements Ice.AMISentCallback
+    class SayHelloI extends Demo.AMI_Hello_sayHello implements Ice.AMISentCallback
     {
         private boolean _response = false;
 
         @Override
-        synchronized public void ice_exception(final LocalException ex)
+        synchronized public void ice_exception(final Ice.LocalException ex)
         {
             assert (!_response);
             _response = true;
@@ -189,7 +184,7 @@ public class HelloWorld extends Activity
 
     private void sayHello()
     {
-        HelloPrx hello = createProxy();
+        Demo.HelloPrx hello = createProxy();
         try
         {
             if(!_deliveryMode.isBatch())
@@ -220,7 +215,7 @@ public class HelloWorld extends Activity
         }
     }
 
-    private void handleException(LocalException ex)
+    private void handleException(Ice.LocalException ex)
     {
         _status.setText("Ready");
         _activity.setVisibility(View.INVISIBLE);
@@ -233,15 +228,15 @@ public class HelloWorld extends Activity
 
     private void shutdown()
     {
-        HelloPrx hello = createProxy();
+        Demo.HelloPrx hello = createProxy();
         try
         {
             if(!_deliveryMode.isBatch())
             {
-                hello.shutdown_async(new AMI_Hello_shutdown() {
+                hello.shutdown_async(new Demo.AMI_Hello_shutdown() {
 
                     @Override
-                    public void ice_exception(final LocalException ex)
+                    public void ice_exception(final Ice.LocalException ex)
                     {
                         runOnUiThread(new Runnable()
                         {
@@ -292,7 +287,7 @@ public class HelloWorld extends Activity
                 {
                     _communicator.flushBatchRequests();
                 }
-                catch(final LocalException ex)
+                catch(final Ice.LocalException ex)
                 {
                     runOnUiThread(new Runnable()
                     {
