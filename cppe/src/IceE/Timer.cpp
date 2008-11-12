@@ -15,7 +15,9 @@ using namespace IceUtil;
 
 Timer::Timer() : _destroyed(false)
 {
+    __setNoDelete(true);
     start();
+    __setNoDelete(false);
 }
 
 void
