@@ -64,37 +64,51 @@ CPP_COMPILER            = VC80
 #
 # Compile with support for the Ice router facility.
 #
+!ifndef HAS_ROUTER
 HAS_ROUTER		= yes
+!endif
 
 #
 # Compile with support for the Ice locator facility.
 #
+!ifndef HAS_LOCATOR
 HAS_LOCATOR		= yes
+!endif
 
 #
 # Compile with support for batch invocations.
 #
+!ifndef HAS_BATCH
 HAS_BATCH		= yes
+!endif
 
 #
 # Compile with support for wstring and string conversion.
 #
+!ifndef HAS_WSTRING
 HAS_WSTRING		= yes
+!endif
 
 #
 # Compile with support for opaque endpoints.
 #
+!ifndef HAS_OPAQUE_ENDPOINTS
 HAS_OPAQUE_ENDPOINTS	= yes
+!endif
 
 #
 # Compile with support for objects by value.
 #
+!ifndef HAS_OBV
 HAS_OBV			= yes
+!endif
 
 #
 # Compile with support for asynchronous method invocation (AMI).
 #
+!ifndef HAS_AMI
 HAS_AMI			= yes
+!endif
 
 # ----------------------------------------------------------------------
 # Don't change anything below this line!
