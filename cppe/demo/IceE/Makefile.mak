@@ -16,7 +16,7 @@ SUBDIRS		= minimal \
 		  throughput \
 		  chat
 
-!if "$(HAS_OBV)" == "yes"
+!if "$(EMBEDDED_DEVICE)" == "" && "$(HAS_OBV)" == "yes"
 SUBDIRS		= $(SUBDIRS) \
 		  value
 !endif

@@ -9,6 +9,7 @@
 
 #include <IceE/IceE.h>
 #include <TestI.h>
+#include <TestCommon.h>
 
 using namespace Test;
 

@@ -7,8 +7,9 @@
 //
 // **********************************************************************
 
-#include <TestI.h>
 #include <IceE/IceE.h>
+#include <TestI.h>
+#include <TestCommon.h>
 
 using namespace std;
 using namespace Test;
