@@ -79,6 +79,15 @@ sequence<EList> EListSeq;
 ["cpp:type:std::list< ::Test::ESeq>"] sequence<ESeq> ESeqList;
 
 class C {};
+#ifdef ICEE_HAS_OBV
+sequence<C> CSeq;
+["cpp:type:std::list< ::Test::CPtr>"] sequence<C> CList;
+
+["cpp:type:std::list< ::Test::CList>"] sequence<CList> CListList;
+sequence<CList> CListSeq;
+["cpp:type:std::list< ::Test::CSeq>"] sequence<CSeq> CSeqList;
+#endif
+
 sequence<C*> CPrxSeq;
 ["cpp:type:std::list< ::Test::CPrx>"] sequence<C*> CPrxList;
 
@@ -86,17 +95,17 @@ sequence<C*> CPrxSeq;
 sequence<CPrxList> CPrxListSeq;
 ["cpp:type:std::list< ::Test::CPrxSeq>"] sequence<CPrxSeq> CPrxSeqList;
 
-class TestIntf
+["ami"] class TestIntf
 {
     BoolSeq opBoolArray(["cpp:array"] BoolSeq inSeq, out BoolSeq outSeq);
 
-    ByteList opByteArray(["cpp:array"] ByteList inSeq, out ByteList outSeq);
+    ["cpp:array"] ByteList opByteArray(["cpp:array"] ByteList inSeq, out ["cpp:array"] ByteList outSeq);
 
     VariableList opVariableArray(["cpp:array"] VariableList inSeq, out VariableList outSeq);
 
     BoolSeq opBoolRange(["cpp:range"] BoolSeq inSeq, out BoolSeq outSeq);
 
-    ByteList opByteRange(["cpp:range"] ByteList inSeq, out ByteList outSeq);
+    ["cpp:range"] ByteList opByteRange(["cpp:range"] ByteList inSeq, out ["cpp:range"] ByteList outSeq);
 
     VariableList opVariableRange(["cpp:range"] VariableList inSeq, out VariableList outSeq);
 
@@ -155,6 +164,13 @@ class TestIntf
                   out ["cpp:type:std::deque< ::Test::CPrx>"] CPrxSeq outSeq);
 
     CPrxList opCPrxList(CPrxList inSeq, out CPrxList outSeq);
+
+#ifdef ICEE_HAS_OBV
+    ["cpp:type:std::deque< ::Test::CPtr>"] CSeq
+    opCSeq(["cpp:type:std::deque< ::Test::CPtr>"] CSeq inSeq, out ["cpp:type:std::deque< ::Test::CPtr>"] CSeq outSeq);
+
+    CList opCList(CList inSeq, out CList outSeq);
+#endif
 
     void shutdown();
 };

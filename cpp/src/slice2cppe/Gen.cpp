@@ -3696,6 +3696,13 @@ Slice::Gen::MetaDataVisitor::visitStructEnd(const StructPtr&)
 void
 Slice::Gen::MetaDataVisitor::visitOperation(const OperationPtr& p)
 {
+    bool ami = false;
+    ClassDefPtr cl = ClassDefPtr::dynamicCast(p->container());
+    if(cl->hasMetaData("ami") || p->hasMetaData("ami") || cl->hasMetaData("amd") || p->hasMetaData("amd"))
+    {
+        ami = true;
+    }
+
     StringList metaData = p->getMetaData();
     metaData.remove("cpp:const");
 
@@ -3716,7 +3723,7 @@ Slice::Gen::MetaDataVisitor::visitOperation(const OperationPtr& p)
         }
         else
         {
-            validate(returnType, metaData, p->definitionContext()->filename(), p->line(), false);
+            validate(returnType, metaData, p->definitionContext()->filename(), p->line(), ami);
         }
     }
 
@@ -3724,7 +3731,7 @@ Slice::Gen::MetaDataVisitor::visitOperation(const OperationPtr& p)
     for(ParamDeclList::iterator q = params.begin(); q != params.end(); ++q)
     {
         validate((*q)->type(), (*q)->getMetaData(), p->definitionContext()->filename(), (*q)->line(), 
-                 !(*q)->isOutParam());
+                 ami || !(*q)->isOutParam());
     }
 }
 

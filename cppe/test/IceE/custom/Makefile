@@ -49,7 +49,9 @@ CPPFLAGS	 := -I. -I../../include $(CPPFLAGS)
 ifdef ice_bin_dist
 LDFLAGS		:= $(LDFLAGS) -L$(libdir)
 endif
-SLICE2CPPEFLAGS  := $(SLICE2CPPFLAGS)
+ifeq ($(HAS_OBV),yes)
+SLICE2CPPEFLAGS := -DICEE_HAS_OBV $(SLICE2CPPEFLAGS)
+endif 
 
 $(CLIENT): $(OBJS) $(COBJS)
 	rm -f $@

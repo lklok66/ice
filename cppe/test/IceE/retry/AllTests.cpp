@@ -14,6 +14,85 @@
 using namespace std;
 using namespace Test;
 
+#ifdef ICEE_HAS_AMI
+class CallbackBase : public IceUtil::Monitor<IceUtil::Mutex>
+{
+public:
+
+    CallbackBase() :
+        _called(false)
+    {
+    }
+
+    virtual ~CallbackBase()
+    {
+    }
+
+    bool check()
+    {
+        IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
+        while(!_called)
+        {
+            if(!timedWait(IceUtil::Time::seconds(5)))
+            {
+                return false;
+            }
+        }
+        _called = false;
+        return true;
+    }
+
+protected:
+
+    void called()
+    {
+        IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
+        assert(!_called);
+        _called = true;
+        notify();
+    }
+
+private:
+
+    bool _called;
+};
+
+class AMIRegular : public Test::AMI_Retry_op, public CallbackBase
+{
+public:
+
+    virtual void ice_response()
+    {
+        called();
+    }
+
+    virtual void ice_exception(const ::Ice::Exception&)
+    {
+        test(false);
+    }
+};
+
+typedef IceUtil::Handle<AMIRegular> AMIRegularPtr;
+
+class AMIException : public Test::AMI_Retry_op, public CallbackBase
+{
+public:
+
+    virtual void ice_response()
+    {
+        test(false);
+    }
+
+    virtual void ice_exception(const ::Ice::Exception& ex)
+    {
+        test(dynamic_cast<const Ice::ConnectionLostException*>(&ex));
+        called();
+    }
+};
+
+typedef IceUtil::Handle<AMIException> AMIExceptionPtr;
+#endif
+
 RetryPrx
 allTests(const Ice::CommunicatorPtr& communicator)
 {
@@ -54,5 +133,24 @@ allTests(const Ice::CommunicatorPtr& communicator)
     retry1->op(false);
     tprintf("ok\n");
 
+#ifdef ICEE_HAS_AMI
+    AMIRegularPtr cb1 = new AMIRegular;
+    AMIExceptionPtr cb2 = new AMIException;
+
+    tprintf("calling regular AMI operation with first proxy... "); fflush(stdout);
+    retry1->op_async(cb1, false);
+    test(cb1->check());
+    tprintf("ok\n");
+
+    tprintf("calling AMI operation to kill connection with second proxy... "); fflush(stdout);
+    retry2->op_async(cb2, true);
+    test(cb2->check());
+    tprintf("ok\n");
+
+    tprintf("calling regular AMI operation with first proxy again... "); fflush(stdout);
+    retry1->op_async(cb1, false);
+    test(cb1->check());
+    tprintf("ok\n");
+#endif
     return retry1;
 }
