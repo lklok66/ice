@@ -55,15 +55,15 @@ public interface Plugin extends Ice.Plugin
     //
     // Set an input stream for the keystore.
     //
-    void loadKeystore(java.io.InputStream stream);
+    void setKeystoreStream(java.io.InputStream stream);
     
     //
     // Set an input stream for the trust keystore.
     //
-    void loadTruststore(java.io.InputStream stream);
+    void setTruststoreStream(java.io.InputStream stream);
     
     //
     // Add an input stream for the random number seed.
     //
-    void addSeed(java.io.InputStream stream);
+    void addSeedStream(java.io.InputStream stream);
 }

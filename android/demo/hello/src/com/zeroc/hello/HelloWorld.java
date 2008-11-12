@@ -478,9 +478,8 @@ public class HelloWorld extends Activity
         // Show the initializing dialog.
         showDialog(DIALOG_INITIALIZING);
 
-        // Since the SSL initialization can take some time it is done in a
-        // thread, so
-        // as not to block the onCreate() call.
+        // SSL initialization can take some time. To avoid blocking the
+        // calling thread, we perform the initialization in a separate thread.
         new Thread(new Runnable()
         {
             public void run()
@@ -545,8 +544,8 @@ public class HelloWorld extends Activity
             // little faster since the plugin will not initialize
             // two keystores.
             java.io.InputStream certs = getResources().openRawResource(R.raw.certs);
-            plugin.loadKeystore(certs);
-            plugin.loadTruststore(certs);
+            plugin.setKeystoreStream(certs);
+            plugin.setTruststoreStream(certs);
 
             _communicator.getPluginManager().initializePlugins();
 
