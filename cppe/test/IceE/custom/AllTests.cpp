@@ -8,7 +8,6 @@
 // **********************************************************************
 
 #include <IceE/IceE.h>
-#include <IceE/Locator.h>
 #include <TestCommon.h>
 #include <Test.h>
 #include <Wstring.h>

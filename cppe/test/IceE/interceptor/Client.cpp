@@ -56,7 +56,11 @@ InterceptorTestApplication::run(int argc, char* argv[])
 {
     Ice::InitializationData initData;
     initData.properties = Ice::createProperties();
+
     loadConfig(initData.properties);
+
+    initData.properties->setProperty("Ice.Warn.Dispatch", "0");
+
     initData.logger = getLogger();
     setCommunicator(Ice::initialize(argc, argv, initData));
 

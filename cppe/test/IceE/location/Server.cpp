@@ -36,15 +36,10 @@ public:
         loadConfig(initData.properties);
 
         //
-        // For blocking client test, set timeout so CloseConnection send will
-        // return quickly. Otherwise server will hang since client is not 
-        // listening for these messages.
+        // This test requires a server thread pool with more than one thread.
         //
-        if(initData.properties->getPropertyAsInt("Ice.Blocking") > 0)
-        {
-            initData.properties->setProperty("Ice.Override.Timeout", "100");
-            initData.properties->setProperty("Ice.Warn.Connections", "0");
-        }
+        initData.properties->setProperty("Ice.ThreadPool.Server.SizeMax", "3");
+        initData.properties->setProperty("Ice.ThreadPool.Server.SizeWarn", "0");
 
         //
         // These properties cannot be overridden. The OAs started by

@@ -9,6 +9,7 @@
 
 #include <IceE/DisableWarnings.h>
 #include <IceE/IceE.h>
+#include <TestCommon.h>
 #include <TestI.h>
 
 using namespace std;
@@ -47,6 +48,9 @@ void
 RemoteCommunicatorI::shutdown(const Ice::Current& current)
 {
     current.adapter->getCommunicator()->shutdown();
+#ifdef _WIN32_WCE
+    tprintf("The server has shutdown, close the window to terminate the server.");
+#endif
 }
 
 RemoteObjectAdapterI::RemoteObjectAdapterI(const Ice::ObjectAdapterPtr& adapter) : 

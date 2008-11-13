@@ -25,6 +25,9 @@ void
 MyDerivedClassI::shutdown(const Ice::Current& c)
 {
     c.adapter->getCommunicator()->shutdown();
+#ifdef _WIN32_WCE
+    tprintf("The server has shutdown, close the window to terminate the server.");
+#endif
 }
 
 Ice::Context
@@ -37,9 +40,5 @@ bool
 MyDerivedClassI::ice_isA(const std::string& s, const Ice::Current& current) const
 {
     _ctx = current.ctx;
-#ifdef __BCPLUSPLUS__
-    return Test::MyDerivedClass::ice_isA(s, current);
-#else
     return MyDerivedClass::ice_isA(s, current);
-#endif
 }

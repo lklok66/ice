@@ -31,6 +31,13 @@ public:
         initData.properties->setProperty("TestAdapter.Endpoints", "default -p 12010 -t 10000");
 
         loadConfig(initData.properties);
+
+        //
+        // This test requires a server thread pool with more than one thread.
+        //
+        initData.properties->setProperty("Ice.ThreadPool.Server.SizeMax", "3");
+        initData.properties->setProperty("Ice.ThreadPool.Server.SizeWarn", "0");
+
         initData.logger = getLogger();
         setCommunicator(Ice::initialize(argc, argv, initData));
 
