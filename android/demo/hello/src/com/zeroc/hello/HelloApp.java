@@ -77,11 +77,10 @@ public class HelloApp extends Application
             initData.properties.setProperty("IceSSL.KeystoreType", "BKS");
             initData.properties.setProperty("IceSSL.TruststoreType", "BKS");
             initData.properties.setProperty("IceSSL.Password", "password");
-            //initData.properties.setProperty("Ice.InitPlugins", "0");
-            //initData.properties.setProperty("Ice.Plugin.IceSSL", "IceSSL.PluginFactory");
+            initData.properties.setProperty("Ice.InitPlugins", "0");
+            initData.properties.setProperty("Ice.Plugin.IceSSL", "IceSSL.PluginFactory");
             communicator = Ice.Util.initialize(initData);
 
-            /*
             IceSSL.Plugin plugin = (IceSSL.Plugin)communicator.getPluginManager().getPlugin("IceSSL");
             // Be sure to pass the same input stream to the SSL plug-in for
             // both the keystore and the truststore. This makes startup a
@@ -92,7 +91,6 @@ public class HelloApp extends Application
             plugin.setTruststoreStream(certs);
 
             communicator.getPluginManager().initializePlugins();
-            */
             
             synchronized(this)
             {
