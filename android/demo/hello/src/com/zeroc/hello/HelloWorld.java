@@ -19,14 +19,14 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
@@ -34,70 +34,50 @@ public class HelloWorld extends Activity
 {
     enum DeliveryMode
     {
-        DeliveryModeTwoway,
-        DeliveryModeOneway,
-        DeliveryModeBatchOneway,
-        DeliveryModeDatagram,
-        DeliveryModeBatchDatagram;
+        TWOWAY,
+        TWOWAY_SECURE,
+        ONEWAY,
+        ONEWAY_BATCH,
+        ONEWAY_SECURE,
+        ONEWAY_SECURE_BATCH,
+        DATAGRAM,
+        DATAGRAM_BATCH;
 
-        Ice.ObjectPrx apply(Ice.ObjectPrx prx, boolean secure)
+        Ice.ObjectPrx apply(Ice.ObjectPrx prx)
         {
             switch (this)
             {
-            case DeliveryModeTwoway:
+            case TWOWAY:
                 prx = prx.ice_twoway();
                 break;
-            case DeliveryModeOneway:
+            case TWOWAY_SECURE:
+                prx = prx.ice_twoway().ice_secure(true);
+                break;
+            case ONEWAY:
                 prx = prx.ice_oneway();
                 break;
-            case DeliveryModeBatchOneway:
+            case ONEWAY_BATCH:
                 prx = prx.ice_batchOneway();
                 break;
-            case DeliveryModeDatagram:
+            case ONEWAY_SECURE:
+                prx = prx.ice_oneway().ice_secure(true);
+                break;
+            case ONEWAY_SECURE_BATCH:
+                prx = prx.ice_batchOneway().ice_secure(true);
+                break;
+            case DATAGRAM:
                 prx = prx.ice_datagram();
                 break;
-            case DeliveryModeBatchDatagram:
+            case DATAGRAM_BATCH:
                 prx = prx.ice_batchDatagram();
                 break;
-            }
-            if(this != DeliveryModeDatagram && this != DeliveryModeBatchDatagram)
-            {
-                prx = prx.ice_secure(secure);
             }
             return prx;
         }
 
-        public DeliveryMode toggleBatch(boolean batch)
-        {
-            if(batch)
-            {
-                switch (this)
-                {
-                case DeliveryModeOneway:
-                    return DeliveryModeBatchOneway;
-
-                case DeliveryModeDatagram:
-                    return DeliveryModeBatchDatagram;
-                }
-            }
-            else
-            {
-                switch (this)
-                {
-                case DeliveryModeBatchOneway:
-                    return DeliveryModeOneway;
-
-                case DeliveryModeBatchDatagram:
-                    return DeliveryModeDatagram;
-                }
-            }
-            assert false;
-            return this;
-        }
-
         public boolean isBatch()
         {
-            return this == DeliveryModeBatchOneway || this == DeliveryModeBatchDatagram;
+            return this == ONEWAY_BATCH || this == DATAGRAM_BATCH || this == ONEWAY_SECURE_BATCH;
         }
     }
 
@@ -115,7 +95,7 @@ public class HelloWorld extends Activity
 
         String s = "hello:tcp -h " + host + " -p 10000:ssl -h " + host + " -p 10001:udp -h " + host + " -p 10000";
         Ice.ObjectPrx prx = _communicator.stringToProxy(s);
-        prx = _deliveryMode.apply(prx, _secure.isChecked());
+        prx = _deliveryMode.apply(prx);
         int timeout = _timeout.getProgress();
         if(timeout != 0)
         {
@@ -153,7 +133,12 @@ public class HelloWorld extends Activity
             {
                 public void run()
                 {
-                    if(_deliveryMode == DeliveryMode.DeliveryModeTwoway)
+                    if(isFinishing())
+                    {
+                        return;
+                    }
+                    
+                    if(_deliveryMode == DeliveryMode.TWOWAY)
                     {
                         _status.setText("Waiting for response");
                     }
@@ -175,6 +160,11 @@ public class HelloWorld extends Activity
             {
                 public void run()
                 {
+                    if(isFinishing())
+                    {
+                        return;
+                    }
+                    
                     _activity.setVisibility(View.INVISIBLE);
                     _status.setText("Ready");
                 }
@@ -191,7 +181,7 @@ public class HelloWorld extends Activity
             {
                 if(hello.sayHello_async(new SayHelloI(), _delay.getProgress()))
                 {
-                    if(_deliveryMode == DeliveryMode.DeliveryModeTwoway)
+                    if(_deliveryMode == DeliveryMode.TWOWAY)
                     {
                         _activity.setVisibility(View.VISIBLE);
                         _status.setText("Waiting for response");
@@ -205,6 +195,7 @@ public class HelloWorld extends Activity
             }
             else
             {
+                _flushButton.setEnabled(true);
                 hello.sayHello(_delay.getProgress());
                 _status.setText("Queued hello request");
             }
@@ -217,13 +208,16 @@ public class HelloWorld extends Activity
 
     private void handleException(Ice.LocalException ex)
     {
+        if(isFinishing())
+        {
+            return;
+        }
+        
         _status.setText("Ready");
         _activity.setVisibility(View.INVISIBLE);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Error");
-        builder.setMessage(ex.toString());
-        builder.show();
+        _lastError = ex.toString();
+        showDialog(DIALOG_ERROR);
     }
 
     private void shutdown()
@@ -233,7 +227,8 @@ public class HelloWorld extends Activity
         {
             if(!_deliveryMode.isBatch())
             {
-                hello.shutdown_async(new Demo.AMI_Hello_shutdown() {
+                hello.shutdown_async(new Demo.AMI_Hello_shutdown()
+                {
 
                     @Override
                     public void ice_exception(final Ice.LocalException ex)
@@ -254,13 +249,18 @@ public class HelloWorld extends Activity
                         {
                             public void run()
                             {
+                                if(isFinishing())
+                                {
+                                    return;
+                                }
+                                
                                 _activity.setVisibility(View.INVISIBLE);
                                 _status.setText("Ready");
                             }
                         });
                     }
                 });
-                if(_deliveryMode == DeliveryMode.DeliveryModeTwoway)
+                if(_deliveryMode == DeliveryMode.TWOWAY)
                 {
                     _activity.setVisibility(View.VISIBLE);
                     _status.setText("Waiting for response");
@@ -268,6 +268,7 @@ public class HelloWorld extends Activity
             }
             else
             {
+                _flushButton.setEnabled(true);
                 hello.shutdown();
                 _status.setText("Queued shutdown request");
             }
@@ -280,7 +281,8 @@ public class HelloWorld extends Activity
 
     private void flush()
     {
-        new Thread(new Runnable() {
+        new Thread(new Runnable()
+        {
             public void run()
             {
                 try
@@ -292,15 +294,47 @@ public class HelloWorld extends Activity
                     runOnUiThread(new Runnable()
                     {
                         public void run()
-                        {
+                        {               
                             handleException(ex);
                         }
                     });
-                }     
+                }
             }
         }).start();
-
+        
+        _flushButton.setEnabled(false);
         _status.setText("Flushed batch requests");
+    }
+    
+    private void changeDeliveryMode(long id)
+    {
+        switch ((int)id)
+        {
+        case 0:
+            _deliveryMode = DeliveryMode.TWOWAY;
+            break;
+        case 1:
+            _deliveryMode = DeliveryMode.TWOWAY_SECURE;
+            break;
+        case 2:
+            _deliveryMode = DeliveryMode.ONEWAY;
+            break;
+        case 3:
+            _deliveryMode = DeliveryMode.ONEWAY_BATCH;
+            break;
+        case 4:
+            _deliveryMode = DeliveryMode.ONEWAY_SECURE;
+            break;
+        case 5:
+            _deliveryMode = DeliveryMode.ONEWAY_SECURE_BATCH;
+            break;
+        case 6:
+            _deliveryMode = DeliveryMode.DATAGRAM;
+            break;
+        case 7:
+            _deliveryMode = DeliveryMode.DATAGRAM_BATCH;
+            break;
+        }
     }
 
     /** Called when the activity is first created. */
@@ -309,17 +343,17 @@ public class HelloWorld extends Activity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-
-        _sayHelloButton = (Button) findViewById(R.id.sayHello);
-        _sayHelloButton.setOnClickListener(new android.view.View.OnClickListener()
+        
+        _sayHelloButton = (Button)findViewById(R.id.sayHello);
+        _sayHelloButton.setOnClickListener(new OnClickListener()
         {
             public void onClick(android.view.View v)
             {
                 sayHello();
             }
         });
-        _shutdownButton = (Button) findViewById(R.id.shutdown);
-        _shutdownButton.setOnClickListener(new android.view.View.OnClickListener()
+        _shutdownButton = (Button)findViewById(R.id.shutdown);
+        _shutdownButton.setOnClickListener(new OnClickListener()
         {
             public void onClick(android.view.View v)
             {
@@ -327,7 +361,7 @@ public class HelloWorld extends Activity
             }
         });
 
-        _hostname = (EditText) findViewById(R.id.hostname);
+        _hostname = (EditText)findViewById(R.id.hostname);
         _hostname.addTextChangedListener(new TextWatcher()
         {
             public void afterTextChanged(Editable s)
@@ -354,80 +388,40 @@ public class HelloWorld extends Activity
             }
         });
 
-        _secure = (android.widget.CheckBox) findViewById(R.id.secure);
-
-        final Button flush = (Button) findViewById(R.id.flush);
-        flush.setOnClickListener(new android.view.View.OnClickListener()
+        _flushButton = (Button)findViewById(R.id.flush);
+        _flushButton.setOnClickListener(new OnClickListener()
         {
-            public void onClick(android.view.View v)
+            public void onClick(View v)
             {
                 flush();
             }
         });
 
-        final android.widget.CheckBox batch = (android.widget.CheckBox) findViewById(R.id.batch);
-        batch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-        {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-            {
-                _deliveryMode = _deliveryMode.toggleBatch(isChecked);
-                flush.setEnabled(isChecked);
-            }
-        });
-
-        android.widget.Spinner mode = (android.widget.Spinner) findViewById(R.id.mode);
-        ArrayAdapter modeAdapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, new String[] {
-                "Twoway", "Oneway", "Datagram" });
+        Spinner mode = (Spinner)findViewById(R.id.mode);
+        ArrayAdapter<String> modeAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,
+                new String[] { "Twoway", "Twoway Secure", "Oneway", "Oneway Batch", "Oneway Secure",
+                        "Oneway Secure Batch", "Datagram", "Datagram Batch" });
         mode.setAdapter(modeAdapter);
-        mode.setSelection(0);
         mode.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener()
         {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
             {
-                if(id == 0) // Twoway
-                {
-                    _deliveryMode = DeliveryMode.DeliveryModeTwoway;
-                    batch.setEnabled(false);
-                    flush.setEnabled(false);
-                    _secure.setEnabled(true);
-                }
-                else if(id == 1) // Oneway
-                {
-                    if(batch.isChecked())
-                    {
-                        _deliveryMode = DeliveryMode.DeliveryModeBatchOneway;
-                    }
-                    else
-                    {
-                        _deliveryMode = DeliveryMode.DeliveryModeOneway;
-                    }
-                    batch.setEnabled(true);
-                    flush.setEnabled(batch.isChecked());
-                    _secure.setEnabled(true);
-                }
-                else if(id == 2) // Datagram
-                {
-                    if(batch.isChecked())
-                    {
-                        _deliveryMode = DeliveryMode.DeliveryModeBatchDatagram;
-                    }
-                    else
-                    {
-                        _deliveryMode = DeliveryMode.DeliveryModeDatagram;
-                    }
-                    batch.setEnabled(true);
-                    flush.setEnabled(batch.isChecked());
-                    _secure.setEnabled(false);
-                }
+                changeDeliveryMode(id);
             }
+
 
             public void onNothingSelected(AdapterView<?> arg0)
             {
             }
         });
+        if(savedInstanceState == null)
+        {
+            mode.setSelection(0);    
+        }
+        changeDeliveryMode(mode.getSelectedItemId());
 
-        final android.widget.TextView delayView = (android.widget.TextView) findViewById(R.id.delayView);
-        _delay = (SeekBar) findViewById(R.id.delay);
+        final TextView delayView = (TextView)findViewById(R.id.delayView);
+        _delay = (SeekBar)findViewById(R.id.delay);
         _delay.setOnSeekBarChangeListener(new OnSeekBarChangeListener()
         {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromThumb)
@@ -443,9 +437,14 @@ public class HelloWorld extends Activity
             {
             }
         });
+        // BUGFIX: Android doesn't save/restore SeekBar state.
+        if(savedInstanceState != null)
+        {
+            _delay.setProgress(savedInstanceState.getInt(BUNDLE_KEY_DELAY));
+        }
 
-        final android.widget.TextView timeoutView = (android.widget.TextView) findViewById(R.id.timeoutView);
-        _timeout = (SeekBar) findViewById(R.id.timeout);
+        final TextView timeoutView = (TextView)findViewById(R.id.timeoutView);
+        _timeout = (SeekBar)findViewById(R.id.timeout);
         _timeout.setOnSeekBarChangeListener(new OnSeekBarChangeListener()
         {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromThumb)
@@ -461,49 +460,86 @@ public class HelloWorld extends Activity
             {
             }
         });
+        // BUGFIX: Android doesn't save/restore SeekBar state.
+        if(savedInstanceState != null)
+        {
+            _timeout.setProgress(savedInstanceState.getInt(BUNDLE_KEY_TIMEOUT));
+        }
 
-        _activity = (ProgressBar) findViewById(R.id.activity);
+        _activity = (ProgressBar)findViewById(R.id.activity);
         _activity.setVisibility(View.INVISIBLE);
-        _status = (android.widget.TextView) findViewById(R.id.status);
-
-        _prefs = getPreferences(MODE_PRIVATE);
-        _hostname.setText(_prefs.getString(HOSTNAME_KEY, DEFAULT_HOST));
+        
+        _status = (TextView)findViewById(R.id.status);
 
         // Setup the defaults.
-        _deliveryMode = DeliveryMode.DeliveryModeTwoway;
-        batch.setEnabled(false);
-        flush.setEnabled(false);
-        _secure.setEnabled(true);
-
-        // Show the initializing dialog.
-        showDialog(DIALOG_INITIALIZING);
-
-        // SSL initialization can take some time. To avoid blocking the
-        // calling thread, we perform the initialization in a separate thread.
-        new Thread(new Runnable()
+        _prefs = getPreferences(MODE_PRIVATE);
+        if(savedInstanceState == null)
         {
-            public void run()
+            _hostname.setText(_prefs.getString(HOSTNAME_KEY, DEFAULT_HOST));
+            _flushButton.setEnabled(false);
+        }
+        else
+        {
+            _flushButton.setEnabled(savedInstanceState.getBoolean(BUNDLE_KEY_FLUSH_ENABLED));
+            _lastError = savedInstanceState.getString(BUNDLE_KEY_LAST_ERROR);
+        }
+        
+        HelloApp app = (HelloApp)getApplication();
+        app.setCommunicatorCallback(new HelloApp.CommunicatorCallback()
+        {
+            private boolean dismiss = false;
+
+            public void onCreate(final Ice.Communicator communicator)
             {
-                initializeCommunicator();
+                runOnUiThread(new Runnable()
+                {
+                    public void run()
+                    {
+                        if(dismiss)
+                        {
+                            dismissDialog(DIALOG_INITIALIZING);
+                        }
+                        _status.setText("Ready");
+                        _communicator = communicator;
+                    }
+                });
             }
-        }).start();
+
+            public void onError(final Ice.LocalException ex)
+            {
+                runOnUiThread(new Runnable()
+                {
+                    public void run()
+                    {
+                        if(dismiss)
+                        {
+                            dismissDialog(DIALOG_INITIALIZING);
+                        }
+                        _lastError = ex.toString();
+                        showDialog(DIALOG_FATAL);
+                        
+                    }
+                });
+            }
+
+            public void onWait()
+            {
+                // Show the initializing dialog.
+                dismiss = true;
+                showDialog(DIALOG_INITIALIZING);
+            }
+        });
     }
 
-    /** Called when the activity is destroyed. */
-    public void onDestroy()
+    @Override
+    protected void onSaveInstanceState(Bundle outState)
     {
-        super.onDestroy();
-        if(_communicator != null)
-        {
-            try
-            {
-                _communicator.destroy();
-            }
-            catch(Ice.LocalException ex)
-            {
-                ex.printStackTrace();
-            }
-        }
+        super.onSaveInstanceState(outState);
+        // BUGFIX: The SeekBar doesn't save/restore state automatically.
+        outState.putInt(BUNDLE_KEY_DELAY, _delay.getProgress());
+        outState.putInt(BUNDLE_KEY_TIMEOUT, _timeout.getProgress());
+        outState.putBoolean(BUNDLE_KEY_FLUSH_ENABLED, _flushButton.isEnabled());
+        outState.putString(BUNDLE_KEY_LAST_ERROR, _lastError);
     }
 
     @Override
@@ -512,6 +548,7 @@ public class HelloWorld extends Activity
         switch (id)
         {
         case DIALOG_INITIALIZING:
+        {
             ProgressDialog dialog = new ProgressDialog(this);
             dialog.setTitle("Initializing");
             dialog.setMessage("Please wait while loading...");
@@ -519,82 +556,55 @@ public class HelloWorld extends Activity
             dialog.setCancelable(false);
             return dialog;
         }
+
+        case DIALOG_ERROR:
+        case DIALOG_FATAL:
+        {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Error");
+            builder.setMessage(_lastError);
+            if(id == DIALOG_FATAL)
+            {
+                builder.setPositiveButton("Ok", new DialogInterface.OnClickListener()
+                {
+                    public void onClick(DialogInterface dialog, int whichButton)
+                    {
+                        finish();
+                    }
+                });
+            }
+            return builder.create();
+        }
+
+        }
+
         return null;
     }
 
-    // Called in a separate thread.
-    private void initializeCommunicator()
-    {
-        try
-        {
-            Ice.InitializationData initData = new Ice.InitializationData();
-            initData.properties = Ice.Util.createProperties();
-            initData.properties.setProperty("Ice.InitPlugins", "0");
-            initData.properties.setProperty("Ice.Trace.Network", "3");
-            initData.properties.setProperty("IceSSL.Trace.Security", "3");
-            initData.properties.setProperty("IceSSL.KeystoreType", "BKS");
-            initData.properties.setProperty("IceSSL.TruststoreType", "BKS");
-            initData.properties.setProperty("IceSSL.Password", "password");
-            initData.properties.setProperty("Ice.Plugin.IceSSL", "IceSSL.PluginFactory");
-            _communicator = Ice.Util.initialize(initData);
-
-            IceSSL.Plugin plugin = (IceSSL.Plugin)_communicator.getPluginManager().getPlugin("IceSSL");
-            // Be sure to pass the same input stream to the SSL plug-in for
-            // both the keystore and the truststore. This makes startup a
-            // little faster since the plugin will not initialize
-            // two keystores.
-            java.io.InputStream certs = getResources().openRawResource(R.raw.certs);
-            plugin.setKeystoreStream(certs);
-            plugin.setTruststoreStream(certs);
-
-            _communicator.getPluginManager().initializePlugins();
-
-            runOnUiThread(new Runnable()
-            {
-                public void run()
-                {
-                    dismissDialog(DIALOG_INITIALIZING);
-                    _status.setText("Ready");
-                }
-            });
-        }
-        catch(final Exception ex)
-        {
-            runOnUiThread(new Runnable()
-            {
-                public void run()
-                {
-                    dismissDialog(DIALOG_INITIALIZING);
-                    AlertDialog.Builder builder = new AlertDialog.Builder(HelloWorld.this);
-                    builder.setTitle("Initialization Error");
-                    builder.setMessage(ex.toString());
-                    builder.setPositiveButton("Ok", new DialogInterface.OnClickListener()
-                    {
-                        public void onClick(DialogInterface dialog, int whichButton)
-                        {
-                            finish();
-                        }
-                    });
-                    builder.show();
-                }
-            });
-        }
-    }
-
     private static final int DIALOG_INITIALIZING = 1;
+    private static final int DIALOG_ERROR = 2;
+    private static final int DIALOG_FATAL = 3;
+    
     private static final String DEFAULT_HOST = "10.0.2.2";
     private static final String HOSTNAME_KEY = "host";
 
+    private static final String BUNDLE_KEY_TIMEOUT = "zeroc:timeout";
+    private static final String BUNDLE_KEY_DELAY = "zeroc:delay";
+    private static final String BUNDLE_KEY_FLUSH_ENABLED = "zeroc:flush";
+    private static final String BUNDLE_KEY_LAST_ERROR = "zeroc:lastError";
+    
     private Ice.Communicator _communicator = null;
     private DeliveryMode _deliveryMode;
 
     private Button _sayHelloButton;
     private Button _shutdownButton;
     private EditText _hostname;
-    private CheckBox _secure;
     private TextView _status;
     private SeekBar _delay;
     private SeekBar _timeout;
     private ProgressBar _activity;
     private SharedPreferences _prefs;
+    private Button _flushButton;
+    
+    private String _lastError = "";
 }
