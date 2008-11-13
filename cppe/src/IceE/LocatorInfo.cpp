@@ -392,6 +392,7 @@ IceInternal::LocatorInfo::getEndpoints(const ReferencePtr& ref, const GetEndpoin
     catch(const Ice::Exception& ex)
     {
         getEndpointsException(ref, ex, callback);
+        return;
     }
 
     if(ref->getInstance()->traceLevels()->location >= 1)
