@@ -113,9 +113,7 @@ int compareAddress(const struct sockaddr_in&, const struct sockaddr_in&);
 
 void createPipe(SOCKET fds[2]);
 
-std::string errorToString(int);
 std::string errorToStringDNS(int);
-std::string lastErrorToString();
 
 std::string fdToString(SOCKET);
 void fdToLocalAddress(SOCKET, struct sockaddr_in&);

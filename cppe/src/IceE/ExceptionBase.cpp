@@ -10,6 +10,7 @@
 #include <IceE/Exception.h>
 #include <IceE/SafeStdio.h>
 #include <IceE/StaticMutex.h>
+#include <IceE/StringUtil.h>
 
 using namespace std;
 
@@ -167,3 +168,47 @@ IceUtil::IllegalArgumentException::ice_throw() const
 {
     throw *this;
 }
+
+IceUtil::SyscallException::SyscallException(const char* file, int line, int err ): 
+    Exception(file, line),
+    _error(err)
+{
+}
+    
+const char* IceUtil::SyscallException::_name = "IceUtil::SyscallException";
+
+string
+IceUtil::SyscallException::ice_name() const
+{
+    return _name;
+}
+
+string
+IceUtil::SyscallException::toString() const
+{
+    string out = Exception::toString();
+    if(_error != 0)
+    {
+        out += ":\nsyscall exception: " + IceUtilInternal::errorToString(_error);
+    }
+    return out;
+}
+
+IceUtil::Exception*
+IceUtil::SyscallException::ice_clone() const
+{
+    return new SyscallException(*this);
+}
+
+void
+IceUtil::SyscallException::ice_throw() const
+{
+    throw *this;
+}
+
+int
+IceUtil::SyscallException::error() const
+{
+    return _error;
+}
+

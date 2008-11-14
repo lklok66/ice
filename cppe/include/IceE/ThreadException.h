@@ -15,20 +15,17 @@
 namespace IceUtil
 {
 
-class ICE_API ThreadSyscallException : public Exception
+class ICE_API ThreadSyscallException : public SyscallException
 {
 public:
 
     ThreadSyscallException(const char*, int, int);
     virtual std::string ice_name() const;
-    virtual std::string toString() const;
     virtual Exception* ice_clone() const;
     virtual void ice_throw() const;
 
-    int error() const;
 private:
 
-    const int _error;
     static const char* _name;
 };
 

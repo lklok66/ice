@@ -920,49 +920,14 @@ IceInternal::createPipe(SOCKET fds[2])
 }
 
 #ifdef _WIN32
-string
-IceInternal::errorToString(int error)
-{
-#ifndef _WIN32_WCE
-    if(error < WSABASEERR)
-    {
-        LPVOID lpMsgBuf = 0;
-        DWORD ok = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
-                                 FORMAT_MESSAGE_FROM_SYSTEM |
-                                 FORMAT_MESSAGE_IGNORE_INSERTS,
-                                 NULL,
-                                 error,
-                                 MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-                                 (LPTSTR)&lpMsgBuf,
-                                 0,
-                                 NULL);
-        if(ok)
-        {
-            LPCTSTR msg = (LPCTSTR)lpMsgBuf;
-            assert(msg && strlen((const char*)msg) > 0);
-            string result = (const char*)msg;
-            LocalFree(lpMsgBuf);
-            return result;
-        }
-    }
-#endif
-
-    return printfToString("error: %d", error);
-}
 
 string
 IceInternal::errorToStringDNS(int error)
 {
-    return errorToString(error);
+    return IceUtilInternal::errorToString(error);
 }
 
 #else
-
-string
-IceInternal::errorToString(int error)
-{
-    return strerror(error);
-}
 
 string
 IceInternal::errorToStringDNS(int error)
@@ -971,16 +936,6 @@ IceInternal::errorToStringDNS(int error)
 }
 
 #endif
-
-string
-IceInternal::lastErrorToString()
-{
-#ifdef _WIN32
-    return errorToString(WSAGetLastError());
-#else
-    return errorToString(errno);
-#endif
-}
 
 std::string
 IceInternal::fdToString(SOCKET fd)

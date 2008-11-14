@@ -59,6 +59,7 @@ ICE_OBJS	= Base64.o \
 		  Protocol.o \
 		  Proxy.o \
 		  ProxyFactory.o \
+		  Random.o \
 		  RecMutex.o \
 		  Reference.o \
 		  ReferenceFactory.o \

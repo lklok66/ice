@@ -31,12 +31,25 @@
 #include <IceE/LoggerUtil.h>
 #include <IceE/TraceLevels.h>
 #include <IceE/StringUtil.h>
+#include <IceE/Random.h>
+
+#include <functional>
 
 using namespace std;
 using namespace Ice;
 using namespace IceInternal;
 
 IceUtil::Shared* IceInternal::upCast(IceInternal::Reference* p) { return p; }
+namespace
+{
+struct RandomNumberGenerator : public std::unary_function<ptrdiff_t, ptrdiff_t>
+{
+    ptrdiff_t operator()(ptrdiff_t d)
+    {
+	return IceUtilInternal::random(static_cast<int>(d));
+    }
+};
+}
 
 CommunicatorPtr
 IceInternal::Reference::getCommunicator() const
@@ -1144,7 +1157,8 @@ IceInternal::RoutableReference::filterEndpoints(const vector<EndpointPtr>& allEn
     //
     // Randomize the order of endpoints.
     //
-    random_shuffle(endpoints.begin(), endpoints.end());
+    RandomNumberGenerator rng;
+    random_shuffle(endpoints.begin(), endpoints.end(), rng);
 
     //
     // If a secure connection is requested or secure overrides is set,

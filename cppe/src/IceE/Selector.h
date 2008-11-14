@@ -165,7 +165,7 @@ public:
         {
             Ice::Error out(_instance->initializationData().logger);
             out << "error while adding filedescriptor to selector:\n";
-            out << errorToString(getSocketErrno());
+            out << IceUtilInternal::errorToString(getSocketErrno());
         }
         ++_count;
 #else // ICE_USE_SELECT or ICE_USE_POLL
@@ -194,7 +194,7 @@ public:
         {
             Ice::Error out(_instance->initializationData().logger);
             out << "error while updating filedescriptor from selector:\n";
-            out << errorToString(getSocketErrno());
+            out << IceUtilInternal::errorToString(getSocketErrno());
         }
 #else
         remove(handler, oldStatus, true);
@@ -228,7 +228,7 @@ public:
             //
             //Ice::Error out(_instance->initializationData().logger);
             //out << "error while removing filedescriptor from epoll set:\n";
-            //out << errorToString(getSocketErrno());
+            //out << IceUtilInternal::errorToString(getSocketErrno());
         }
         --_count;
 #else

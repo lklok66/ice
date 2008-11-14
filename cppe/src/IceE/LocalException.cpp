@@ -1901,7 +1901,7 @@ Ice::SyscallException::toString() const
     if(error != 0)
     {
         out += ":\nsyscall exception: ";
-        out += errorToString(error);
+        out += IceUtilInternal::errorToString(error);
     }
     return out;
 }
@@ -1911,7 +1911,7 @@ Ice::SocketException::toString() const
 {
     string out = Exception::toString();
     out += ":\nsocket exception: ";
-    out += errorToString(error);
+    out += IceUtilInternal::errorToString(error);
     return out;
 }
 
@@ -1923,7 +1923,7 @@ Ice::FileException::toString() const
 
     out += ":\nfile exception: ";
 
-    out += errorToString(error);
+    out += IceUtilInternal::errorToString(error);
 
     if(!path.empty())
 
@@ -1944,7 +1944,7 @@ Ice::ConnectFailedException::toString() const
 {
     string out = Exception::toString();
     out += ":\nconnect failed: ";
-    out += errorToString(error);
+    out += IceUtilInternal::errorToString(error);
     return out;
 }
 
@@ -1953,7 +1953,7 @@ Ice::ConnectionRefusedException::toString() const
 {
     string out = Exception::toString();
     out += ":\nconnection refused: ";
-    out += errorToString(error);
+    out += IceUtilInternal::errorToString(error);
     return out;
 }
 
@@ -1968,7 +1968,7 @@ Ice::ConnectionLostException::toString() const
     }
     else
     {
-        out += errorToString(error);
+        out += IceUtilInternal::errorToString(error);
     }
     return out;
 }

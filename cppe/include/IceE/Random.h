@@ -7,17 +7,16 @@
 //
 // **********************************************************************
 
-#ifndef ICEE_CONNECT_REQUEST_HANDLER_F_H
-#define ICEE_CONNECT_REQUEST_HANDLER_F_H
+#ifndef ICEE_UTIL_RANDOM_H
+#define ICEE_UTIL_RANDOM_H
 
-#include <IceE/Shared.h>
-#include <IceE/Handle.h>
+#include <IceE/Config.h>
 
-namespace IceInternal
+namespace IceUtilInternal
 {
 
-class ConnectRequestHandler;
-typedef IceUtil::Handle<ConnectRequestHandler> ConnectRequestHandlerPtr;
+ICE_API void generateRandom(char*, int);
+ICE_API int random(int = 0);
 
 }
 

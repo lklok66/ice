@@ -20,6 +20,8 @@
 #endif
 #include <IceE/LocalException.h>
 #include <IceE/Functional.h>
+#include <IceE/Random.h>
+
 #include <list>
 
 using namespace std;
@@ -28,10 +30,8 @@ using namespace IceInternal;
 
 IceUtil::Shared* IceInternal::upCast(OutgoingConnectionFactory* p) { return p; }
 
-#if XXX // Do we need RandomNumberGenerator?
 namespace
 {
-
 struct RandomNumberGenerator : public std::unary_function<ptrdiff_t, ptrdiff_t>
 {
     ptrdiff_t operator()(ptrdiff_t d)
@@ -39,9 +39,7 @@ struct RandomNumberGenerator : public std::unary_function<ptrdiff_t, ptrdiff_t>
         return IceUtilInternal::random(static_cast<int>(d));
     }
 };
-
 }
-#endif
 
 bool
 IceInternal::OutgoingConnectionFactory::ConnectorInfo::operator<(const ConnectorInfo& other) const
@@ -760,13 +758,8 @@ IceInternal::OutgoingConnectionFactory::ConnectCallback::connectors(const vector
 {
     vector<ConnectorPtr> cons = connectors;
 
-#if XXX // Do we need RandomNumberGenerator?
-    {
-        RandomNumberGenerator rng;
-        random_shuffle(cons.begin(), cons.end(), rng);
-    }
-#endif
-    random_shuffle(cons.begin(), cons.end());
+    RandomNumberGenerator rng;
+    random_shuffle(cons.begin(), cons.end(), rng);
 
     for(vector<ConnectorPtr>::const_iterator p = cons.begin(); p != cons.end(); ++p)
     {

@@ -408,3 +408,55 @@ IceUtilInternal::match(const string& s, const string& pat, bool matchPeriod)
 
     return sIndex == s.size() && patIndex == pat.size();
 }
+
+#ifdef _WIN32
+
+string
+IceUtilInternal::errorToString(int error, LPCVOID source)
+{
+#ifndef _WIN32_WCE
+    if(error < WSABASEERR)
+    {
+        LPVOID lpMsgBuf = 0;
+        DWORD ok = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
+                                 FORMAT_MESSAGE_FROM_SYSTEM |
+                                 FORMAT_MESSAGE_IGNORE_INSERTS | 
+                                 (source != NULL ? FORMAT_MESSAGE_FROM_HMODULE : 0),
+                                 source,
+                                 error,
+                                 MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+                                 (LPTSTR)&lpMsgBuf,
+                                 0,
+                                 NULL);
+        if(ok)
+        {
+            LPCTSTR msg = (LPCTSTR)lpMsgBuf;
+            assert(msg && strlen((const char*)msg) > 0);
+            string result = (const char*)msg;
+            if(result[result.length() - 1] == '\n')
+            {
+                result = result.substr(0, result.length() - 2);
+            }
+            LocalFree(lpMsgBuf);
+            return result;
+        }
+    }
+#endif
+    return string("error: ") + Ice::printfToString("%d", error);
+}
+
+string
+IceUtilInternal::lastErrorToString()
+{
+    return errorToString(GetLastError());
+}
+
+#else
+
+string
+IceUtilInternal::errorToString(int error)
+{
+    return strerror(error);
+}
+
+#endif
