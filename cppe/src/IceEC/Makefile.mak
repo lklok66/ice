@@ -57,6 +57,7 @@ ICEE_OBJS      	= Base64.obj \
                   Protocol.obj \
                   Proxy.obj \
                   ProxyFactory.obj \
+		  Random.obj \
                   RecMutex.obj \
                   Reference.obj \
                   ReferenceFactory.obj \

@@ -9,6 +9,7 @@
 
 #include <IceE/StringUtil.h>
 #include <IceE/ExceptionBase.h>
+#include <IceE/SafeStdio.h>
 
 using namespace std;
 using namespace IceUtil;
@@ -443,12 +444,6 @@ IceUtilInternal::errorToString(int error, LPCVOID source)
     }
 #endif
     return string("error: ") + Ice::printfToString("%d", error);
-}
-
-string
-IceUtilInternal::lastErrorToString()
-{
-    return errorToString(GetLastError());
 }
 
 #else

@@ -14,6 +14,7 @@
 #  include <IceE/Properties.h> // For setTcpBufSize
 #  include <IceE/LoggerUtil.h> // For setTcpBufSize
 #endif
+#include <IceE/StringUtil.h>
 #include <IceE/SafeStdio.h>
 
 #if defined(_WIN32)
