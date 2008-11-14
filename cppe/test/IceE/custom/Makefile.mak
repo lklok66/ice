@@ -19,7 +19,6 @@ OBJS		= Test.obj \
 	          Wstring.obj
 
 COBJS           = Client.obj \
-		  AllTests.obj \
 		  MyByteSeq.obj \
 		  StringConverterI.obj
 
@@ -57,8 +56,8 @@ SPDBFLAGS        = /pdb:$(SERVER:.exe=.pdb)
 COPDBFLAGS       = /pdb:$(COLLOCATED:.exe=.pdb)
 !endif
 
-$(CLIENT): $(OBJS) $(COBJS)
-	$(LINK) $(LDFLAGS) $(CPDBFLAGS) TestC.obj WstringC.obj $(COBJS) /out:$@ $(TESTCLIBS)
+$(CLIENT): $(OBJS) $(COBJS) AllTestsC.obj TestC.obj WstringC.obj
+	$(LINK) $(LDFLAGS) $(CPDBFLAGS) TestC.obj WstringC.obj AllTestsC.obj $(COBJS) /out:$@ $(TESTCLIBS)
 	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
 	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#2 && del /q $@.manifest
 
@@ -72,8 +71,9 @@ $(COLLOCATED): $(OBJS) $(COLOBJS)
 	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
 	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#2 && del /q $@.manifest
 
-AllTests.obj: AllTests.cpp
-	$(CXX) /c -DICEE_PURE_CLIENT $(CPPFLAGS) $(CXXFLAGS) AllTests.cpp
+AllTestsC.obj AllTests.obj: AllTests.cpp
+	$(CXX) /c $(CPPFLAGS) $(CXXFLAGS) AllTests.cpp
+	$(CXX) /c -DICEE_PURE_CLIENT /FoAllTestsC.obj $(CPPFLAGS) $(CXXFLAGS) AllTests.cpp
 
 TestC.obj Test.obj: Test.cpp
 	$(CXX) /c $(CPPFLAGS) $(CXXFLAGS) Test.cpp

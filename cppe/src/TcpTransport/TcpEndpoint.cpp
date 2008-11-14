@@ -239,17 +239,25 @@ IceInternal::TcpEndpoint::unknown() const
     return false;
 }
 
+#ifndef ICEE_HAS_AMI
 vector<ConnectorPtr>
 IceInternal::TcpEndpoint::connectors() const
 {
-    return connectors(getAddresses(_host, _port, false, true));
+    const vector<struct sockaddr_in>& addresses = getAddresses(_host, _port, false, true);
+    vector<ConnectorPtr> connectors;
+    for(unsigned int i = 0; i < addresses.size(); ++i)
+    {
+        connectors.push_back(new Connector(_instance, addresses[i], _timeout));
+    }
+    return connectors;
 }
-
+#else
 void
 IceInternal::TcpEndpoint::connectors_async(const Endpoint_connectorsPtr& callback) const
 {
     _instance->endpointHostResolver()->resolve(_host, _port, const_cast<TcpEndpoint*>(this), callback);
 }
+#endif
 
 bool
 IceInternal::TcpEndpoint::operator==(const Endpoint& r) const
@@ -328,7 +336,6 @@ IceInternal::TcpEndpoint::operator<(const Endpoint& r) const
 }
 
 #ifndef ICEE_PURE_CLIENT
-
 vector<EndpointPtr>
 IceInternal::TcpEndpoint::expand() const
 {
@@ -355,9 +362,9 @@ IceInternal::TcpEndpoint::acceptor(EndpointPtr& endp) const
     endp = new TcpEndpoint(_instance, _host, p->effectivePort(), _timeout);
     return p;
 }
-
 #endif
 
+#ifdef ICEE_HAS_AMI
 vector<ConnectorPtr>
 IceInternal::TcpEndpoint::connectors(const vector<struct sockaddr_in>& addresses) const
 {
@@ -368,3 +375,4 @@ IceInternal::TcpEndpoint::connectors(const vector<struct sockaddr_in>& addresses
     }
     return connectors;
 }
+#endif

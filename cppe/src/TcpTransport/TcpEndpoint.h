@@ -33,8 +33,11 @@ public:
     virtual bool secure() const;
     virtual bool datagram() const;
     virtual bool unknown() const;
+#ifndef ICEE_HAS_AMI
     virtual std::vector<ConnectorPtr> connectors() const;
+#else
     virtual void connectors_async(const Endpoint_connectorsPtr&) const;
+#endif
 #ifndef ICEE_PURE_CLIENT
     virtual AcceptorPtr acceptor(EndpointPtr&) const;
     virtual std::vector<EndpointPtr> expand() const;
@@ -45,7 +48,9 @@ public:
 
 protected:
 
+#ifdef ICEE_HAS_AMI
     virtual std::vector<ConnectorPtr> connectors(const std::vector<struct sockaddr_in>&) const;
+#endif
 
 private:
 

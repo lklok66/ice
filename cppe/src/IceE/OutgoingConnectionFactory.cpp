@@ -107,6 +107,115 @@ IceInternal::OutgoingConnectionFactory::waitUntilFinished()
     }
 }
 
+#ifndef ICEE_HAS_AMI
+Ice::ConnectionIPtr
+IceInternal::OutgoingConnectionFactory::create(const vector<EndpointPtr>& endpts)
+{
+    assert(!endpts.empty());
+    
+    //
+    // Apply the overrides.
+    //
+    vector<EndpointPtr> endpoints = applyOverrides(endpts);
+
+    //
+    // Try to find a connection to one of the given endpoints.
+    // 
+    Ice::ConnectionIPtr connection = findConnection(endpoints);
+    if(connection)
+    {
+        return connection;
+    }
+
+    auto_ptr<Ice::LocalException> exception;
+
+    //
+    // If we didn't find a connection with the endpoints, we create the connectors
+    // for the endpoints.
+    //
+    vector<ConnectorInfo> connectors;
+    for(vector<EndpointPtr>::const_iterator p = endpoints.begin(); p != endpoints.end(); ++p)
+    {
+        //
+        // Create connectors for the endpoint.
+        //
+        try
+        {
+            vector<ConnectorPtr> cons = (*p)->connectors();
+            assert(!cons.empty());
+            for(vector<ConnectorPtr>::const_iterator r = cons.begin(); r != cons.end(); ++r)
+            {
+                assert(*r);
+                connectors.push_back(ConnectorInfo(*r, *p));
+            }
+        }
+        catch(const Ice::LocalException& ex)
+        {
+            exception.reset(dynamic_cast<Ice::LocalException*>(ex.ice_clone()));
+            handleException(ex, p != endpoints.end() - 1);
+        }
+    }
+
+    if(connectors.empty())
+    {
+        assert(exception.get());
+        exception->ice_throw();
+    }
+    
+    //
+    // Try to get a connection to one of the connectors. A null result indicates that no
+    // connection was found and that we should try to establish the connection (and that
+    // the connectors were added to _pending to prevent other threads from establishing
+    // the connection).
+    //
+    connection = getConnection(connectors);
+    if(connection)
+    {
+        return connection;
+    }
+
+    //
+    // Try to establish the connection to the connectors.
+    //
+    DefaultsAndOverridesPtr defaultsAndOverrides = _instance->defaultsAndOverrides();
+    for(vector<ConnectorInfo>::const_iterator q = connectors.begin(); q != connectors.end(); ++q)
+    {
+        try
+        {
+            connection = createConnection(q->connector->connect(), *q);
+            connection->start(0);
+            break;
+        }
+        catch(const Ice::CommunicatorDestroyedException& ex)
+        {
+            exception.reset(dynamic_cast<Ice::LocalException*>(ex.ice_clone()));
+            handleException(*exception.get(), *q, connection, q != connectors.end() - 1);
+            connection = 0;
+            break; // No need to continue
+        }
+        catch(const Ice::LocalException& ex)
+        {
+            exception.reset(dynamic_cast<Ice::LocalException*>(ex.ice_clone()));
+            handleException(*exception.get(), *q, connection, q != connectors.end() - 1);
+            connection = 0;
+        }
+    }
+
+    //
+    // Finish creating the connection (this removes the connectors from the _pending
+    // list and notifies any waiting threads).
+    //
+    finishGetConnection(connectors, connection);
+
+    if(!connection)
+    {
+        assert(exception.get());
+        exception->ice_throw();
+    }
+
+    return connection;
+}
+#else
 void
 IceInternal::OutgoingConnectionFactory::create(const vector<EndpointPtr>& endpts, 
                                                const ConnectRequestHandlerPtr& handler)
@@ -139,6 +248,7 @@ IceInternal::OutgoingConnectionFactory::create(const vector<EndpointPtr>& endpts
     ConnectCallbackPtr cb = new ConnectCallback(this, endpoints, handler);
     cb->getConnectors();
 }
+#endif
 
 #if defined(ICEE_HAS_ROUTER) && !defined(ICEE_PURE_CLIENT)
 void
@@ -375,8 +485,11 @@ IceInternal::OutgoingConnectionFactory::decPendingConnectCount()
 }
 
 ConnectionIPtr
-IceInternal::OutgoingConnectionFactory::getConnection(const vector<ConnectorInfo>& connectors,
-                                                      const ConnectCallbackPtr& cb)
+IceInternal::OutgoingConnectionFactory::getConnection(const vector<ConnectorInfo>& connectors
+#ifdef ICEE_HAS_AMI
+                                                      , const ConnectCallbackPtr& cb
+#endif
+    )
 {
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
@@ -427,6 +540,7 @@ IceInternal::OutgoingConnectionFactory::getConnection(const vector<ConnectorInfo
             Ice::ConnectionIPtr connection = findConnection(connectors);
             if(connection)
             {
+#ifdef ICEE_HAS_AMI
                 if(cb)
                 {
                     //
@@ -444,6 +558,7 @@ IceInternal::OutgoingConnectionFactory::getConnection(const vector<ConnectorInfo
                         }
                     }
                 }
+#endif
                 return connection;
             }
 
@@ -454,14 +569,20 @@ IceInternal::OutgoingConnectionFactory::getConnection(const vector<ConnectorInfo
             bool found = false;
             for(vector<ConnectorInfo>::const_iterator p = connectors.begin(); p != connectors.end(); ++p)
             {
+#ifndef ICEE_HAS_AMI
+                set<ConnectorInfo >::iterator q = _pending.find(*p);
+#else
                 map<ConnectorInfo, set<ConnectCallbackPtr> >::iterator q = _pending.find(*p);
+#endif
                 if(q != _pending.end())
                 {
                     found = true;
+#ifdef ICEE_HAS_AMI
                     if(cb)
                     {
                         q->second.insert(cb); // Add the callback to each pending connector.
                     }
+#endif
                 }
             }
 
@@ -482,14 +603,13 @@ IceInternal::OutgoingConnectionFactory::getConnection(const vector<ConnectorInfo
                 // when the pending list changes the callback will be notified and will try to
                 // get the connection again.
                 //
-                if(!cb)
-                {
-                    wait();
-                }
-                else
+#ifdef ICEE_HAS_AMI
+                if(cb)
                 {
                     return 0;
                 }
+#endif
+                wait();
             }
         }
 
@@ -507,11 +627,16 @@ IceInternal::OutgoingConnectionFactory::getConnection(const vector<ConnectorInfo
         {
             if(_pending.find(*r) == _pending.end())
             {
+#ifndef ICEE_HAS_AMI
+                _pending.insert(*r);
+#else
                 _pending.insert(pair<ConnectorInfo, set<ConnectCallbackPtr> >(*r, set<ConnectCallbackPtr>()));
+#endif
             }
         }
     }
 
+#ifdef ICEE_HAS_AMI
     //
     // At this point, we're responsible for establishing the connection to one of
     // the given connectors. If it's a non-blocking connect, calling nextConnector
@@ -522,6 +647,7 @@ IceInternal::OutgoingConnectionFactory::getConnection(const vector<ConnectorInfo
     {
         cb->nextConnector();
     }
+#endif
 
     return 0;
 }
@@ -569,10 +695,11 @@ IceInternal::OutgoingConnectionFactory::createConnection(const TransceiverPtr& t
 
 void
 IceInternal::OutgoingConnectionFactory::finishGetConnection(const vector<ConnectorInfo>& connectors,
-                                                            const ConnectCallbackPtr& cb,
                                                             const ConnectionIPtr& connection)
 {
+#ifdef ICEE_HAS_AMI
     set<ConnectCallbackPtr> callbacks;
+#endif
 
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
@@ -585,12 +712,16 @@ IceInternal::OutgoingConnectionFactory::finishGetConnection(const vector<Connect
 
         for(vector<ConnectorInfo>::const_iterator p = connectors.begin(); p != connectors.end(); ++p)
         {
+#ifndef ICEE_HAS_AMI
+            _pending.erase(*p);
+#else
             map<ConnectorInfo, set<ConnectCallbackPtr> >::iterator q = _pending.find(*p);
             if(q != _pending.end())
             {
                 callbacks.insert(q->second.begin(), q->second.end());
                 _pending.erase(q);
             }
+#endif
         }
         notifyAll();
 
@@ -604,6 +735,7 @@ IceInternal::OutgoingConnectionFactory::finishGetConnection(const vector<Connect
         }
     }
 
+#ifdef ICEE_HAS_AMI
     //
     // Notify any waiting callbacks.
     //
@@ -611,6 +743,7 @@ IceInternal::OutgoingConnectionFactory::finishGetConnection(const vector<Connect
     {
         (*p)->getConnection();
     }
+#endif
 }
 
 void
@@ -704,6 +837,7 @@ IceInternal::OutgoingConnectionFactory::handleException(const LocalException& ex
     }
 }
 
+#ifdef ICEE_HAS_AMI
 IceInternal::OutgoingConnectionFactory::ConnectCallback::ConnectCallback(const OutgoingConnectionFactoryPtr& factory,
                                                                          const vector<EndpointPtr>& endpoints,
                                                                          const ConnectRequestHandlerPtr& handler) :
@@ -720,7 +854,7 @@ IceInternal::OutgoingConnectionFactory::ConnectCallback::ConnectCallback(const O
 void
 IceInternal::OutgoingConnectionFactory::ConnectCallback::connectionStartCompleted(const ConnectionIPtr& connection)
 {
-    _factory->finishGetConnection(_connectors, this, connection);
+    _factory->finishGetConnection(_connectors, connection);
     _handler->setConnection(connection);
     _factory->decPendingConnectCount(); // Must be called last.
 }
@@ -734,7 +868,7 @@ IceInternal::OutgoingConnectionFactory::ConnectCallback::connectionStartFailed(c
     _factory->handleException(ex, *_iter, connection, _iter != _connectors.end() - 1);
     if(dynamic_cast<const Ice::CommunicatorDestroyedException*>(&ex)) // No need to continue.
     {
-        _factory->finishGetConnection(_connectors, this, 0);
+        _factory->finishGetConnection(_connectors, 0);
         _handler->setException(ex);
         _factory->decPendingConnectCount(); // Must be called last.
     }
@@ -744,7 +878,7 @@ IceInternal::OutgoingConnectionFactory::ConnectCallback::connectionStartFailed(c
     }
     else
     {
-        _factory->finishGetConnection(_connectors, this, 0);
+        _factory->finishGetConnection(_connectors, 0);
         _handler->setException(ex);
         _factory->decPendingConnectCount(); // Must be called last.
     }
@@ -894,3 +1028,5 @@ IceInternal::OutgoingConnectionFactory::ConnectCallback::operator<(const Connect
 {
     return this < &rhs;
 }
+
+#endif

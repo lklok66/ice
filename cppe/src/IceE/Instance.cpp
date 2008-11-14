@@ -214,6 +214,20 @@ IceInternal::Instance::retryQueue() const
     assert(_retryQueue);
     return _retryQueue;
 }
+
+EndpointHostResolverPtr
+IceInternal::Instance::endpointHostResolver()
+{
+    IceUtil::RecMutex::Lock sync(*this);
+
+    if(_state == StateDestroyed)
+    {
+        throw CommunicatorDestroyedException(__FILE__, __LINE__);
+    }
+
+    assert(_endpointHostResolver);
+    return _endpointHostResolver;
+}
 #endif
 
 EndpointFactoryPtr
@@ -309,20 +323,6 @@ IceInternal::Instance::selectorThread()
 
     assert(_selectorThread);
     return _selectorThread;
-}
-
-EndpointHostResolverPtr
-IceInternal::Instance::endpointHostResolver()
-{
-    IceUtil::RecMutex::Lock sync(*this);
-
-    if(_state == StateDestroyed)
-    {
-        throw CommunicatorDestroyedException(__FILE__, __LINE__);
-    }
-
-    assert(_endpointHostResolver);
-    return _endpointHostResolver;
 }
 
 IceUtil::TimerPtr
@@ -654,6 +654,16 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
 
 #ifdef ICEE_HAS_AMI
         _retryQueue = new RetryQueue(this);
+        try
+        {
+            _endpointHostResolver = new EndpointHostResolver(this);
+        }
+        catch(const IceUtil::Exception& ex)
+        {
+            Error out(_initData.logger);
+            out << "cannot create thread for endpoint host resolver:\n" << ex.toString();
+            throw;
+        }
 #endif
 
         try
@@ -664,17 +674,6 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
         {
             Error out(_initData.logger);
             out << "cannot create thread for timer:\n" << ex.toString();
-            throw;
-        }
-        
-        try
-        {
-            _endpointHostResolver = new EndpointHostResolver(this);
-        }
-        catch(const IceUtil::Exception& ex)
-        {
-            Error out(_initData.logger);
-            out << "cannot create thread for endpoint host resolver:\n" << ex.toString();
             throw;
         }
 
@@ -718,8 +717,8 @@ IceInternal::Instance::~Instance()
 #endif
 #ifdef ICEE_HAS_AMI
     assert(!_retryQueue);
-#endif
     assert(!_endpointHostResolver);
+#endif
 #ifdef ICEE_HAS_ROUTER
     assert(!_routerManager);
 #endif
@@ -864,7 +863,9 @@ IceInternal::Instance::destroy()
 #endif
     ThreadPoolPtr clientThreadPool;
     SelectorThreadPtr selectorThread;
+#ifdef ICEE_HAS_AMI
     EndpointHostResolverPtr endpointHostResolver;
+#endif
 
     {
         IceUtil::RecMutex::Lock sync(*this);
@@ -897,11 +898,13 @@ IceInternal::Instance::destroy()
             std::swap(selectorThread, _selectorThread);
         }
 
+#ifdef ICEE_HAS_AMI
         if(_endpointHostResolver)
         {
             _endpointHostResolver->destroy();
             std::swap(endpointHostResolver, _endpointHostResolver);
         }
+#endif
 
         if(_timer)
         {
@@ -965,10 +968,12 @@ IceInternal::Instance::destroy()
     {
         selectorThread->joinWithThread();
     }
+#ifdef ICEE_HAS_AMI
     if(endpointHostResolver)
     {
         endpointHostResolver->getThreadControl().join();
     }
+#endif
 }
 
 #ifdef ICEE_HAS_WSTRING

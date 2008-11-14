@@ -1069,7 +1069,18 @@ IceInternal::RoutableReference::createConnection(const vector<EndpointPtr>& allE
         return;
     }
 
+#ifdef ICEE_HAS_AMI
     getInstance()->outgoingConnectionFactory()->create(endpoints, handler);
+#else
+    try
+    {
+        handler->setConnection(getInstance()->outgoingConnectionFactory()->create(endpoints));
+    }
+    catch(const Ice::LocalException& ex)
+    {
+        handler->setException(ex);
+    }
+#endif
 }
 
 void

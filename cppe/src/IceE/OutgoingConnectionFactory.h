@@ -36,7 +36,11 @@ public:
 
     void waitUntilFinished();
 
+#ifndef ICEE_HAS_AMI
+    Ice::ConnectionIPtr create(const std::vector<EndpointPtr>&);
+#else
     void create(const std::vector<EndpointPtr>&, const ConnectRequestHandlerPtr&);
+#endif
 #if defined(ICEE_HAS_ROUTER) && !defined(ICEE_PURE_CLIENT)
     void setRouterInfo(const RouterInfoPtr&);
     void removeAdapter(const Ice::ObjectAdapterPtr&);
@@ -63,6 +67,7 @@ private:
         EndpointPtr endpoint;
     };
 
+#ifdef ICEE_HAS_AMI
     class ConnectCallback : public Ice::ConnectionI::StartCallback, public IceInternal::Endpoint_connectors
     {
     public:
@@ -95,13 +100,18 @@ private:
     };
     typedef IceUtil::Handle<ConnectCallback> ConnectCallbackPtr;
     friend class ConnectCallback;
+#endif
 
     std::vector<EndpointPtr> applyOverrides(const std::vector<EndpointPtr>&);
     Ice::ConnectionIPtr findConnection(const std::vector<EndpointPtr>&);
     void incPendingConnectCount();
     void decPendingConnectCount();
+#ifndef ICEE_HAS_AMI
+    Ice::ConnectionIPtr getConnection(const std::vector<ConnectorInfo>&);
+#else
     Ice::ConnectionIPtr getConnection(const std::vector<ConnectorInfo>&, const ConnectCallbackPtr&);
-    void finishGetConnection(const std::vector<ConnectorInfo>&, const ConnectCallbackPtr&, const Ice::ConnectionIPtr&);
+#endif
+    void finishGetConnection(const std::vector<ConnectorInfo>&, const Ice::ConnectionIPtr&);
     Ice::ConnectionIPtr findConnection(const std::vector<ConnectorInfo>&);
     Ice::ConnectionIPtr createConnection(const TransceiverPtr&, const ConnectorInfo&);
 
@@ -112,7 +122,11 @@ private:
     bool _destroyed;
 
     std::multimap<ConnectorInfo, Ice::ConnectionIPtr> _connections;
+#ifndef ICEE_HAS_AMI
+    std::set<ConnectorInfo > _pending;
+#else
     std::map<ConnectorInfo, std::set<ConnectCallbackPtr> > _pending;
+#endif
 
     std::multimap<EndpointPtr, Ice::ConnectionIPtr> _connectionsByEndpoint;
     int _pendingConnectCount;

@@ -76,6 +76,7 @@ public:
 
 #ifdef ICEE_HAS_AMI
     RetryQueuePtr retryQueue() const;
+    EndpointHostResolverPtr endpointHostResolver();
 #endif
 
     ThreadPoolPtr clientThreadPool();
@@ -83,7 +84,6 @@ public:
     ThreadPoolPtr serverThreadPool();
 #endif
     SelectorThreadPtr selectorThread();
-    EndpointHostResolverPtr endpointHostResolver();
     IceUtil::TimerPtr timer();
 
     Ice::Identity stringToIdentity(const std::string&) const;
@@ -137,6 +137,7 @@ private:
 
 #ifdef ICEE_HAS_AMI
     RetryQueuePtr _retryQueue;
+    EndpointHostResolverPtr _endpointHostResolver;
 #endif
 
     ThreadPoolPtr _clientThreadPool;
@@ -144,7 +145,6 @@ private:
     ThreadPoolPtr _serverThreadPool;
 #endif
     SelectorThreadPtr _selectorThread;
-    EndpointHostResolverPtr _endpointHostResolver;
     IceUtil::TimerPtr _timer;
 };
 

@@ -37,6 +37,7 @@ namespace IceInternal
 
 class BasicStream;
 
+#ifdef ICEE_HAS_AMI
 class Endpoint_connectors : public virtual IceUtil::Shared
 {
 public:
@@ -47,6 +48,7 @@ public:
     virtual void exception(const Ice::LocalException&) = 0;
 };
 typedef IceUtil::Handle<Endpoint_connectors> Endpoint_connectorsPtr;
+#endif
 
 class Endpoint : public IceUtil::Shared
 {
@@ -99,8 +101,11 @@ public:
     // Return connectors for this endpoint, or empty vector if no
     // connector is available.
     //
+#ifndef ICEE_HAS_AMI
     virtual std::vector<ConnectorPtr> connectors() const = 0;
+#else
     virtual void connectors_async(const Endpoint_connectorsPtr&) const = 0;
+#endif
 
     //
     // Return an acceptor for this endpoint, or null if no acceptors
@@ -127,10 +132,13 @@ public:
 
 protected:
 
+#ifdef ICEE_HAS_AMI
     virtual std::vector<ConnectorPtr> connectors(const std::vector<struct sockaddr_in>&) const;
     friend class EndpointHostResolver;
+#endif
 };
 
+#ifdef ICEE_HAS_AMI
 class EndpointHostResolver : public IceUtil::Thread, public IceUtil::Monitor<IceUtil::Mutex>
 {   
 public:
@@ -156,6 +164,7 @@ private:
     bool _destroyed;
     std::list<ResolveEntry> _queue;
 };
+#endif
 
 }
 

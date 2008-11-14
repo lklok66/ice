@@ -206,18 +206,20 @@ IceInternal::UnknownEndpoint::unknown() const
     return true;
 }
 
+#ifndef ICEE_HAS_AMI
 vector<ConnectorPtr>
 IceInternal::UnknownEndpoint::connectors() const
 {
     vector<ConnectorPtr> ret;
     return ret;
 }
-
+#else
 void
 IceInternal::UnknownEndpoint::connectors_async(const Endpoint_connectorsPtr& callback) const
 {
     callback->connectors(vector<ConnectorPtr>());
 }
+#endif
 
 #ifndef ICEE_PURE_CLIENT
 AcceptorPtr

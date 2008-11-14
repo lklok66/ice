@@ -16,6 +16,8 @@ using namespace Ice;
 using namespace IceInternal;
 
 IceUtil::Shared* IceInternal::upCast(Endpoint* p) { return p; }
+
+#ifdef ICEE_HAS_AMI
 IceUtil::Shared* IceInternal::upCast(EndpointHostResolver* p) { return p; }
 
 vector<ConnectorPtr>
@@ -124,3 +126,5 @@ IceInternal::EndpointHostResolver::run()
     }
     _queue.clear();
 }
+
+#endif

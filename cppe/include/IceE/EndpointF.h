@@ -20,9 +20,11 @@ class Endpoint;
 ICE_API IceUtil::Shared* upCast(Endpoint*);
 typedef IceInternal::Handle<Endpoint> EndpointPtr;
 
+#ifdef ICEE_HAS_AMI
 class EndpointHostResolver;
 ICE_API IceUtil::Shared* upCast(EndpointHostResolver*);
 typedef IceInternal::Handle<EndpointHostResolver> EndpointHostResolverPtr;
+#endif
 
 }
 

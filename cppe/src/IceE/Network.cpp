@@ -351,29 +351,6 @@ IceInternal::setBlock(SOCKET fd, bool block)
     }
 }
 
-#ifndef ICEE_USE_SELECT_OR_POLL_FOR_TIMEOUTS
-void
-IceInternal::setTimeout(SOCKET fd, bool recv, int timeout)
-{
-    assert(timeout != 0);
-#ifndef _WIN32
-    struct timeval tv;
-    tv.tv_sec = timeout > 0 ? timeout / 1000 : 0;
-    tv.tv_usec = timeout > 0 ? (timeout - tv.tv_sec * 1000) * 1000 : 0;
-    if(setsockopt(fd, SOL_SOCKET, recv ? SO_RCVTIMEO : SO_SNDTIMEO, (char*)&tv, (int)sizeof(timeval)) == SOCKET_ERROR)
-#else
-    int tt = timeout > 0 ? timeout : 0;
-    if(setsockopt(fd, SOL_SOCKET, recv ? SO_RCVTIMEO : SO_SNDTIMEO, (char*)&tt, (int)sizeof(int)) == SOCKET_ERROR)
-#endif
-    {
-        closeSocketNoThrow(fd);
-        SocketException ex(__FILE__, __LINE__);
-        ex.error = getSocketErrno();
-        throw ex;
-    }
-}
-#endif
-
 void
 IceInternal::setTcpNoDelay(SOCKET fd)
 {
