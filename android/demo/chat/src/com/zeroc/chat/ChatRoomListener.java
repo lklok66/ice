@@ -13,4 +13,8 @@ public interface ChatRoomListener
     public void send(long timestamp, String name, String message);
     
     public void exception(Ice.LocalException ex);
+    
+    public void exception(Ice.UserException ex);
+
+    public void inactivity();
 }

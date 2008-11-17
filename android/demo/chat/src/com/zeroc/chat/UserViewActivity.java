@@ -13,105 +13,130 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ListActivity;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 
 public class UserViewActivity extends ListActivity
 {
-    class ChatListener implements ChatRoomListener
+    private static final int DIALOG_FATAL = 1;
+    private String _lastError = "";
+    private static final String BUNDLE_KEY_LAST_ERROR = "zeroc:lastError";
+
+    private List<String> _users = new ArrayList<String>();
+    private ArrayAdapter<String> _adapter;
+    private ChatRoomListener _listener = new ChatRoomListener()
     {
         public void init(final List<String> users)
         {
-            runOnUiThread(new Runnable()
-            {
-                public void run()
-                {
-                    _users.clear();
-                    _users.addAll(users);
-                    _adapter.notifyDataSetChanged();
-                }
-            });
+            _users.clear();
+            _users.addAll(users);
+            _adapter.notifyDataSetChanged();
         }
 
         public void join(final long timestamp, final String name)
         {
-            runOnUiThread(new Runnable()
-            {
-                public void run()
-                {
-                    _adapter.add(name);
-                }
-            });
+            _adapter.add(name);
         }
 
         public void leave(final long timestamp, final String name)
         {
-            runOnUiThread(new Runnable()
-            {
-                public void run()
-                {
-                    _adapter.remove(name);
-                }
-            });
+            _adapter.remove(name);
         }
 
         public void send(final long timestamp, final String name, final String message)
         {
         }
-        
+
         public void exception(final Ice.LocalException ex)
         {
-            runOnUiThread(new Runnable()
-            {
-                public void run()
-                {
-                    handleException(ex);
-                }
-            });
+            _lastError = ex.toString();
+            showDialog(DIALOG_FATAL);
         }
-    }
-    
-    private void handleException(Ice.LocalException ex)
-    {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Error");
-        builder.setMessage(ex.toString());
-        builder.show();
 
-        setResult(RESULT_FIRST_USER);
+        public void exception(final Ice.UserException ex)
+        {
+            _lastError = ex.toString();
+            showDialog(DIALOG_FATAL);
+        }
         
-        finish();
-    }
-    
+        public void inactivity()
+        {
+            _lastError = "You were logged out due to inactivity.";
+            showDialog(DIALOG_FATAL);
+        }
+    };
+
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.user);
+
         _adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, _users);
         setListAdapter(_adapter);
-        
-        _session = LoginActivity.getSession();
+
+        if(savedInstanceState != null)
+        {
+            _lastError = savedInstanceState.getString(BUNDLE_KEY_LAST_ERROR);
+        }
     }
-    
+
     @Override
     public void onResume()
     {
         super.onResume();
-        _session.addChatRoomListener(_listener);
+        
+        // If the add of the listener fails the session has been destroyed, and
+        // we're done.
+        if(!AppSessionManager.instance().addChatRoomListener(_listener, false))
+        {
+            finish();
+        }
     }
-    
+
     @Override
     public void onStop()
     {
         super.onStop();
-        _session.removeChatRoomListener(_listener);
+        AppSessionManager.instance().removeChatRoomListener(_listener);
     }
-    
-    private ChatListener _listener = new ChatListener();
-    private List<String> _users = new ArrayList<String>();
-    private ArrayAdapter<String> _adapter;
-    private AppSession _session;
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState)
+    {
+        super.onSaveInstanceState(outState);
+        outState.putString(BUNDLE_KEY_LAST_ERROR, _lastError);
+    }
+
+    @Override
+    protected Dialog onCreateDialog(int id)
+    {
+        switch (id)
+        {
+        case DIALOG_FATAL:
+        {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Error");
+            builder.setMessage(_lastError);
+            if(id == DIALOG_FATAL)
+            {
+                builder.setPositiveButton("Ok", new DialogInterface.OnClickListener()
+                {
+                    public void onClick(DialogInterface dialog, int whichButton)
+                    {
+                        finish();
+                    }
+                });
+            }
+            return builder.create();
+        }
+
+        }
+
+        return null;
+    }
 }
