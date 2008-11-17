@@ -183,7 +183,11 @@ IceInternal::OutgoingConnectionFactory::create(const vector<EndpointPtr>& endpts
         try
         {
             connection = createConnection(q->connector->connect(), *q);
+#if !defined(ICEE_PURE_CLIENT)
             connection->start(0);
+#else
+            connection->start();
+#endif
             break;
         }
         catch(const Ice::CommunicatorDestroyedException& ex)

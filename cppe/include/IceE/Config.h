@@ -19,36 +19,10 @@
 // ***********************************************************************
 
 //
-// Unless we're building a pure client batch mode cannot be disabled.
-//
-#if !defined(ICEE_PURE_CLIENT) && !defined(ICEE_HAS_BATCH)
-#  define ICEE_HAS_BATCH
-#endif
-
-//
 // Blackfin does not support wstring.
 //
 #if defined(__BFIN__)
 #undef ICEE_HAS_WSTRING
-#endif
-
-//
-// Use poll()/WSAEventSelect for timeouts. 
-//
-// Using WSAEventSelect for timeouts on Windows is necessary because
-// when a socket times out, it can't be re-used (and we need the
-// transceiver read() call to periodically timeout since it can't be
-// unblocked by shutting down the socket.)
-//
-// Also, on Windows CE, socket timeouts (SO_SNDTIMEO and SO_RCVTIMEO)
-// are not supported so we have to use WSAEventSelect to implement
-// timeouts.
-//
-// This macro can also be defined for non-Windows platforms to use
-// poll() for timeouts rather than using socket timeouts.
-//
-#if defined(_WIN32)
-#   define ICEE_USE_SELECT_OR_POLL_FOR_TIMEOUTS
 #endif
 
 //

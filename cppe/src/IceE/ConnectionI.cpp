@@ -161,7 +161,11 @@ Ice::ConnectionI::OutgoingMessage::finished(const Ice::LocalException& ex)
 }
 
 void
+#if defined(ICEE_HAS_AMI) || !defined(ICEE_PURE_CLIENT)
 Ice::ConnectionI::start(const StartCallbackPtr& callback)
+#else
+Ice::ConnectionI::start()
+#endif
 {
     try
     {
@@ -194,11 +198,13 @@ Ice::ConnectionI::start(const StartCallbackPtr& callback)
             _sendInProgress = true;
             _selectorThread->_register(_transceiver->fd(), this, status, timeout);
 
+#if defined(ICEE_HAS_AMI) || !defined(ICEE_PURE_CLIENT)
             if(callback)
             {
                 _startCallback = callback;
                 return;
             }
+#endif
 
             //
             // Wait for the connection to be validated.
@@ -218,22 +224,27 @@ Ice::ConnectionI::start(const StartCallbackPtr& callback)
     catch(const Ice::LocalException& ex)
     {
         exception(ex);
+#if defined(ICEE_HAS_AMI) || !defined(ICEE_PURE_CLIENT)
         if(callback)
         {
             callback->connectionStartFailed(this, *_exception.get());
             return;
         }
         else
+#endif
         {
             waitUntilFinished();
             throw;
+
         }
     }
 
+#if defined(ICEE_HAS_AMI) || !defined(ICEE_PURE_CLIENT)
     if(callback)
     {
         callback->connectionStartCompleted(this);
     }
+#endif
 }
 
 void
@@ -1163,11 +1174,13 @@ Ice::ConnectionI::finished(const ThreadPoolPtr& threadPool)
 #endif
     }
 
+#if defined(ICEE_HAS_AMI) || !defined(ICEE_PURE_CLIENT)
     if(_startCallback)
     {
         _startCallback->connectionStartFailed(this, *_exception.get());
         _startCallback = 0;
     }
+#endif
 
     for(deque<OutgoingMessage>::iterator o = _sendStreams.begin(); o != _sendStreams.end(); ++o)
     {
@@ -1266,8 +1279,9 @@ Ice::ConnectionI::toString() const
 SocketStatus
 Ice::ConnectionI::socketReady()
 {
+#if defined(ICEE_HAS_AMI) || !defined(ICEE_PURE_CLIENT)
     StartCallbackPtr callback;
-
+#endif
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
         assert(_sendInProgress);
@@ -1312,7 +1326,9 @@ Ice::ConnectionI::socketReady()
                     }
                 }
 
+#if defined(ICEE_HAS_AMI) || !defined(ICEE_PURE_CLIENT)
                 swap(_startCallback, callback);
+#endif
             }
         }
         catch(const Ice::LocalException& ex)
@@ -1326,10 +1342,12 @@ Ice::ConnectionI::socketReady()
         _sendInProgress = false;
     }
 
+#if defined(ICEE_HAS_AMI) || !defined(ICEE_PURE_CLIENT)
     if(callback)
     {
         callback->connectionStartCompleted(this);
     }
+#endif
     return Finished;
 }
 
@@ -1452,7 +1470,9 @@ Ice::ConnectionI::ConnectionI(const InstancePtr& instance,
 
 Ice::ConnectionI::~ConnectionI()
 {
+#if defined(ICEE_HAS_AMI) || !defined(ICEE_PURE_CLIENT)
     assert(!_startCallback);
+#endif
     assert(_state == StateClosed);
     assert(!_transceiver);
 #ifndef ICEE_PURE_CLIENT

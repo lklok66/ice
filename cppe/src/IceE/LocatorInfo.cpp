@@ -316,14 +316,13 @@ IceInternal::LocatorInfo::getLocatorRegistry()
     return _locatorRegistry;
 }
 
-void
-IceInternal::LocatorInfo::getEndpoints(const ReferencePtr& ref, const GetEndpointsCallbackPtr& callback)
-{
 #ifndef ICEE_HAS_AMI
+vector<EndpointPtr>
+IceInternal::LocatorInfo::getEndpoints(const ReferencePtr& ref, bool& cached)
+{
     assert(ref->isIndirect());
     vector<EndpointPtr> endpoints;
     ObjectPrx object;
-    bool cached = true;    
     try
     {
         if(!ref->isWellKnown())
@@ -376,8 +375,7 @@ IceInternal::LocatorInfo::getEndpoints(const ReferencePtr& ref, const GetEndpoin
                 }
                 else if(!r->isWellKnown())
                 {
-                    getEndpoints(r, new WellKnownObjectEndpoints(this, _table, ref, object, objectCached, callback));
-                    return;
+                    endpoints = getEndpoints(r, endpointsCached);
                 }
             }
 
@@ -391,7 +389,7 @@ IceInternal::LocatorInfo::getEndpoints(const ReferencePtr& ref, const GetEndpoin
     }
     catch(const Ice::Exception& ex)
     {
-        getEndpointsException(ref, ex, callback);
+        getEndpointsException(ref, ex);
         return;
     }
 
@@ -400,8 +398,14 @@ IceInternal::LocatorInfo::getEndpoints(const ReferencePtr& ref, const GetEndpoin
         getEndpointsTrace(ref, endpoints, cached);
     }
 
-    callback->locatorInfoEndpoints(endpoints, cached);
+    return endpoints;
+}
+
 #else
+
+void
+IceInternal::LocatorInfo::getEndpoints(const ReferencePtr& ref, const GetEndpointsCallbackPtr& callback)
+{
     assert(ref->isIndirect());
 
     string adapterId = ref->getAdapterId();
@@ -529,8 +533,9 @@ IceInternal::LocatorInfo::getEndpoints(const ReferencePtr& ref, const GetEndpoin
             return;
         }
     }
-#endif
 }
+
+#endif
 
 void
 IceInternal::LocatorInfo::clearObjectCache(const ReferencePtr& ref)
@@ -620,7 +625,10 @@ IceInternal::LocatorInfo::trace(const string& msg, const ReferencePtr& ref, cons
 void 
 IceInternal::LocatorInfo::getEndpointsException(const ReferencePtr& ref, 
                                                 const Ice::Exception& exc, 
-                                                const GetEndpointsCallbackPtr& callback)
+#ifdef ICEE_HAS_AMI
+                                                const GetEndpointsCallbackPtr& callback
+#endif
+    )
 {
     assert(ref->isIndirect());
 
@@ -641,7 +649,11 @@ IceInternal::LocatorInfo::getEndpointsException(const ReferencePtr& ref,
         NotRegisteredException ex(__FILE__, __LINE__);
         ex.kindOfObject = "object adapter";
         ex.id = ref->getAdapterId();
+#ifdef ICEE_HAS_AMI
         callback->locatorInfoException(ex);
+#else
+        throw;
+#endif
     }
     catch(const ObjectNotFoundException&)
     {
@@ -656,11 +668,19 @@ IceInternal::LocatorInfo::getEndpointsException(const ReferencePtr& ref,
         NotRegisteredException ex(__FILE__, __LINE__);
         ex.kindOfObject = "object";
         ex.id = ref->getInstance()->identityToString(ref->getIdentity());
+#ifdef ICEE_HAS_AMI
         callback->locatorInfoException(ex);
+#else
+        throw;
+#endif
     }
     catch(const NotRegisteredException& ex)
     {
+#ifdef ICEE_HAS_AMI
         callback->locatorInfoException(ex);
+#else
+        throw;
+#endif
     }
     catch(const LocalException& ex)
     {
@@ -679,10 +699,15 @@ IceInternal::LocatorInfo::getEndpointsException(const ReferencePtr& ref,
             }
             out << "reason = " << ex.toString();
         }
+#ifdef ICEE_HAS_AMI
         callback->locatorInfoException(ex);
+#else
+        throw;
+#endif
     }
 }
 
+#ifdef ICEE_HAS_AMI
 void
 IceInternal::LocatorInfo::getWellKnownObjectEndpoints(const ReferencePtr& ref,
                                                       const Ice::ObjectPrx& object,
@@ -716,6 +741,7 @@ IceInternal::LocatorInfo::getWellKnownObjectEndpoints(const ReferencePtr& ref,
     
     callback->locatorInfoEndpoints(endpoints, objectCached);
 }
+#endif
 
 void
 IceInternal::LocatorInfo::getEndpointsTrace(const ReferencePtr& ref,

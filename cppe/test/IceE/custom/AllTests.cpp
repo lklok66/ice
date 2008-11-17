@@ -928,6 +928,7 @@ private:
 
 typedef IceUtil::Handle<AMI_Test2_opStringI> AMI_Test2_opStringIPtr;
 
+#ifdef ICEE_HAS_WSTRING
 class AMI_Test1_throwExceptI : public Test1::AMI_WstringClass_throwExcept, public CallbackBase
 {
 public:
@@ -1003,6 +1004,8 @@ private:
 };
 
 typedef IceUtil::Handle<AMI_Test2_throwExceptI> AMI_Test2_throwExceptIPtr;
+#endif
+
 #endif
 
 Test::TestIntfPrx
@@ -1989,6 +1992,29 @@ allTests(const Ice::CommunicatorPtr& communicator)
     {
         test(ex.reason == wstr);
     }
+
+#ifdef ICEE_HAS_AMI
+    AMI_Test1_throwExceptIPtr cb = new AMI_Test1_throwExceptI(wstr);
+    wsc1->throwExcept_async(cb, wstr);
+    test(cb->check());
+#endif
+
+    try
+    {
+        wsc2->throwExcept(wstr);
+    }
+    catch(const Test2::WstringException& ex)
+    {
+        test(ex.reason == wstr);
+    }
+
+#ifdef ICEE_HAS_AMI
+    {
+        AMI_Test2_throwExceptIPtr cb = new AMI_Test2_throwExceptI(wstr);
+        wsc2->throwExcept_async(cb, wstr);
+        test(cb->check());
+    }
+#endif
 
     tprintf("ok\n");
 #endif

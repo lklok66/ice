@@ -114,7 +114,11 @@ public:
     //
     // Get a suitable connection for this reference.
     //
+#if !defined(ICEE_HAS_AMI) && !defined(ICEE_HAS_BATCH)
+    virtual Ice::ConnectionIPtr getConnection() const = 0;
+#else
     virtual void getConnection(const ConnectRequestHandlerPtr&) const = 0;
+#endif
 
     virtual bool operator==(const Reference&) const;
     virtual bool operator!=(const Reference&) const;
@@ -173,7 +177,11 @@ public:
     virtual void streamWrite(BasicStream*) const;
     virtual std::string toString() const;
 
+#if !defined(ICEE_HAS_AMI) && !defined(ICEE_HAS_BATCH)
+    virtual Ice::ConnectionIPtr getConnection() const;
+#else
     virtual void getConnection(const ConnectRequestHandlerPtr&) const;
+#endif
 
     virtual bool operator==(const Reference&) const;
     virtual bool operator!=(const Reference&) const;
@@ -235,10 +243,14 @@ public:
 
     virtual ReferencePtr clone() const;
 
+#if !defined(ICEE_HAS_AMI) && !defined(ICEE_HAS_BATCH)
+    virtual Ice::ConnectionIPtr getConnection() const;
+    Ice::ConnectionIPtr createConnection(const std::vector<EndpointPtr>&) const;
+#else
     virtual void getConnection(const ConnectRequestHandlerPtr&) const;
     virtual void getConnectionNoRouterInfo(const ConnectRequestHandlerPtr&) const;
-
     void createConnection(const std::vector<EndpointPtr>&, const ConnectRequestHandlerPtr&) const;
+#endif
 
     void applyOverrides(std::vector<EndpointPtr>&) const;
 

@@ -164,19 +164,10 @@ IceInternal::RouterInfo::getClientEndpoints()
     return setClientEndpoints(_router->getClientProxy());
 }
 
+#ifdef ICEE_HAS_AMI
 void
 IceInternal::RouterInfo::getClientEndpoints(const GetClientEndpointsCallbackPtr& callback)
 {
-#ifndef ICEE_HAS_AMI
-    try
-    {
-        callback->routerInfoEndpoints(getClientEndpoints());
-    }
-    catch(const Ice::LocalException& ex)
-    {
-        callback->routerInfoException(ex);
-    }
-#else
     vector<EndpointPtr> clientEndpoints;
     {
         IceUtil::Mutex::Lock sync(*this);
@@ -217,8 +208,8 @@ IceInternal::RouterInfo::getClientEndpoints(const GetClientEndpointsCallbackPtr&
     };
 
     _router->getClientProxy_async(new Callback(this, callback));
-#endif
 }
+#endif
 
 vector<EndpointPtr>
 IceInternal::RouterInfo::getServerEndpoints()
@@ -232,6 +223,29 @@ IceInternal::RouterInfo::getServerEndpoints()
     }
     return setServerEndpoints(_router->getServerProxy());
 }
+
+#ifndef ICEE_HAS_AMI
+bool
+IceInternal::RouterInfo::addProxy(const Ice::ObjectPrx& proxy, const GetClientEndpointsCallbackPtr& callback)
+{
+    assert(proxy);
+    {
+        IceUtil::Mutex::Lock sync(*this);
+        if(_identities.find(proxy->ice_getIdentity()) != _identities.end())
+        {
+            //
+            // Only add the proxy to the router if it's not already in our local map.
+            //
+            return;
+        }
+    }
+
+    Ice::ObjectProxySeq proxies;
+    proxies.push_back(proxy);
+    addAndEvictProxies(proxy, _router->addProxies(proxies));
+}
+
+#else
 
 bool
 IceInternal::RouterInfo::addProxy(const Ice::ObjectPrx& proxy, const GetClientEndpointsCallbackPtr& callback)
@@ -250,10 +264,7 @@ IceInternal::RouterInfo::addProxy(const Ice::ObjectPrx& proxy, const GetClientEn
 
     Ice::ObjectProxySeq proxies;
     proxies.push_back(proxy);
-#ifndef ICEE_HAS_AMI
-    addAndEvictProxies(proxy, _router->addProxies(proxies));
-    return true;
-#else
+
     class Callback : public AMI_Router_addProxies
     {
     public:
@@ -286,8 +297,8 @@ IceInternal::RouterInfo::addProxy(const Ice::ObjectPrx& proxy, const GetClientEn
     };
     _router->addProxies_async(new Callback(this, proxy, callback), proxies);
     return false;
-#endif
 }
+#endif
 
 #ifndef ICEE_PURE_CLIENT
 void

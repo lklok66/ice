@@ -63,6 +63,7 @@ class ICE_API ConnectionI : public Ice::Connection,
 {
 public:
 
+#if defined(ICEE_HAS_AMI) || !defined(ICEE_PURE_CLIENT)
     class StartCallback : virtual public IceUtil::Shared
     {
     public:
@@ -71,6 +72,7 @@ public:
         virtual void connectionStartFailed(const ConnectionIPtr&, const Ice::LocalException&) = 0;
     };
     typedef IceUtil::Handle<StartCallback> StartCallbackPtr;
+#endif
 
     enum DestructionReason
     {
@@ -80,7 +82,12 @@ public:
         CommunicatorDestroyed
     };
 
+#if defined(ICEE_HAS_AMI) || !defined(ICEE_PURE_CLIENT)
     void start(const StartCallbackPtr&);
+#else
+    void start();
+#endif
+
     void activate();
 #ifndef ICEE_PURE_CLIENT
     void hold();
@@ -257,7 +264,9 @@ private:
     const IceInternal::ThreadPoolPtr _threadPool;
     const IceInternal::SelectorThreadPtr _selectorThread;
 
+#if defined(ICEE_HAS_AMI) || !defined(ICEE_PURE_CLIENT)
     StartCallbackPtr _startCallback;
+#endif
 
     const bool _warn;
 

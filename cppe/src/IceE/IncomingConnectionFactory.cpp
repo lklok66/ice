@@ -121,6 +121,7 @@ IceInternal::IncomingConnectionFactory::endpoint() const
     return _endpoint;
 }
 
+#ifdef ICEE_HAS_BATCH
 void
 IceInternal::IncomingConnectionFactory::flushBatchRequests()
 {
@@ -142,6 +143,7 @@ IceInternal::IncomingConnectionFactory::flushBatchRequests()
         }
     }
 }
+#endif
 
 bool
 IceInternal::IncomingConnectionFactory::datagram() const

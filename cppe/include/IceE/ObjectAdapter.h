@@ -81,7 +81,9 @@ public:
 #endif
     void refreshPublishedEndpoints();
     
+#ifdef ICEE_HAS_BATCH
     void flushBatchRequests();
+#endif
 
     void incDirectCount();
     void decDirectCount();

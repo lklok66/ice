@@ -54,6 +54,7 @@ class RouterInfo : public IceUtil::Shared, public IceUtil::Mutex
 {
 public:
 
+#ifdef ICEE_HAS_AMI
     class GetClientEndpointsCallback : virtual public IceUtil::Shared
     {
     public:
@@ -65,6 +66,7 @@ public:
         virtual void routerInfoAddedProxy() = 0;
     };
     typedef IceUtil::Handle<GetClientEndpointsCallback> GetClientEndpointsCallbackPtr;
+#endif
 
     RouterInfo(const Ice::RouterPrx&);
 
@@ -75,9 +77,17 @@ public:
 
     Ice::RouterPrx getRouter() const;
     std::vector<IceInternal::EndpointPtr> getClientEndpoints();
+#ifdef ICEE_HAS_AMI
     void getClientEndpoints(const GetClientEndpointsCallbackPtr&);
+#endif
     std::vector<IceInternal::EndpointPtr> getServerEndpoints();
+
+#ifndef ICEE_HAS_AMI
+    void addProxy(const Ice::ObjectPrx&);
+#else
     bool addProxy(const Ice::ObjectPrx&, const GetClientEndpointsCallbackPtr&);
+#endif
+
 #ifndef ICEE_PURE_CLIENT
     void setAdapter(const Ice::ObjectAdapterPtr&);
     Ice::ObjectAdapterPtr getAdapter() const;

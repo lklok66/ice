@@ -30,8 +30,10 @@ menu()
     printf("usage:\n");
     printf("t: send callback as twoway\n");
     printf("o: send callback as oneway\n");
+#ifdef ICEE_HAS_BATCH
     printf("O: send callback as batch oneway\n");
     printf("f: flush all batch requests\n");
+#endif
     printf("s: shutdown server\n");
     printf("x: exit\n");
     printf("?: help\n");
@@ -63,8 +65,9 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
         return EXIT_FAILURE;
     }
     CallbackSenderPrx oneway = twoway->ice_oneway();
+#ifdef ICEE_HAS_BATCH
     CallbackSenderPrx batchOneway = twoway->ice_batchOneway();
-    
+#endif    
     Ice::ObjectAdapterPtr adapter = communicator->createObjectAdapter("Callback.Client");
     CallbackReceiverPtr cr = new CallbackReceiverI;
     adapter->add(cr, communicator->stringToIdentity("callbackReceiver"));
@@ -95,6 +98,7 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
             {
                 oneway->initiateCallback(onewayR);
             }
+#ifdef ICEE_HAS_BATCH
             else if(c == 'O')
             {
                 batchOneway->initiateCallback(onewayR);
@@ -103,6 +107,7 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
             {
                 communicator->flushBatchRequests();
             }
+#endif
             else if(c == 's')
             {
                 twoway->shutdown();

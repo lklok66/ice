@@ -204,7 +204,9 @@ public:
     }
     
     ICE_API ::IceInternal::RequestHandlerPtr __getRequestHandler();
+#if defined(ICEE_HAS_AMI) || defined(ICEE_HAS_BATCH)
     void __setRequestHandler(const ::IceInternal::RequestHandlerPtr&, const ::IceInternal::RequestHandlerPtr&);
+#endif
 
     ICE_API void __copyFrom(const ::Ice::ObjectPrx&);
 #ifndef ICEE_HAS_AMI

@@ -104,7 +104,6 @@ private:
 #endif
 
 };
-#endif
 
 ConnectRequestHandler::ConnectRequestHandler(const ReferencePtr& ref, const Ice::ObjectPrx& proxy) :
     _reference(ref),
@@ -120,7 +119,7 @@ ConnectRequestHandler::ConnectRequestHandler(const ReferencePtr& ref, const Ice:
 #endif
     _initialized(false),
     _flushing(false),
-#if !defined(ICEE_HAS_AMI) && (defined(ICEE_HAS_ROUTER) || defined(ICEE_HAS_LOCATOR))
+#if !defined(ICEE_HAS_AMI)
     _connect(false),
 #endif
 #ifdef ICEE_HAS_BATCH
@@ -144,27 +143,18 @@ ConnectRequestHandler::~ConnectRequestHandler()
 RequestHandlerPtr
 ConnectRequestHandler::connect()
 {
-#if !defined(ICEE_HAS_AMI) && (defined(ICEE_HAS_ROUTER) || defined(ICEE_HAS_LOCATOR))
+#if !defined(ICEE_HAS_AMI)
     //
-    // If there's no AMI support and the proxy uses a router or locator, we can't connect here
-    // as this would cause batch requests to block. Instead, the connection will be established
-    // on the first synchronous call on the proxy (or when the proxy batch requests are flushed).
+    // If there's no AMI support, we can't connect here as this would
+    // cause batch requests to block. Instead, the connection will be
+    // established on the first synchronous call on the proxy (or when
+    // the proxy batch requests are flushed).
     // 
-#if defined(ICEE_HAS_LOCATOR) && defined(ICEE_HAS_ROUTER)
-    if(_reference->getRouterInfo() || _reference->getLocatorInfo())
-#elif defined(ICEE_HAS_LOCATOR)
-    if(_reference->getLocatorInfo())
+    Lock sync(*this);
+    _connect = true;
+    _updateRequestHandler = true; // The proxy request handler will be updated when the connection is set.
+    return this;
 #else
-    if(_reference->getRouterInfo())
-#endif
-    {
-        Lock sync(*this);
-        _connect = true;
-        _updateRequestHandler = true; // The proxy request handler will be updated when the connection is set.
-        return this;
-    }
-#endif
-
     _reference->getConnection(this);
 
     Lock sync(*this);
@@ -178,6 +168,7 @@ ConnectRequestHandler::connect()
         _updateRequestHandler = true; // The proxy request handler will be updated when the connection is set.
         return this;
     }
+#endif
 }
 
 #ifdef ICEE_HAS_BATCH
@@ -322,7 +313,7 @@ ConnectRequestHandler::getConnection(bool waitInit)
         //
         // Wait for the connection establishment to complete or fail.
         //
-#if !defined(ICEE_HAS_AMI) && (defined(ICEE_HAS_LOCATOR) || defined(ICEE_HAS_ROUTER))
+#if !defined(ICEE_HAS_AMI)
         while(true)
         {
             Lock sync(*this);
@@ -743,3 +734,5 @@ ConnectRequestHandler::flushRequests()
         notifyAll();
     }
 }
+
+#endif

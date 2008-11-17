@@ -597,6 +597,7 @@ Ice::ObjectAdapter::refreshPublishedEndpoints()
 #endif
 }
 
+#ifdef ICEE_HAS_BATCH
 void
 Ice::ObjectAdapter::flushBatchRequests()
 {
@@ -607,6 +608,7 @@ Ice::ObjectAdapter::flushBatchRequests()
     }
     for_each(f.begin(), f.end(), Ice::voidMemFun(&IncomingConnectionFactory::flushBatchRequests));
 }
+#endif
 
 void
 Ice::ObjectAdapter::incDirectCount()

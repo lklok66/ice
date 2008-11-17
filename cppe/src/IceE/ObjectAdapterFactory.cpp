@@ -202,6 +202,7 @@ IceInternal::ObjectAdapterFactory::removeObjectAdapter(const string& name)
     _adapters.erase(name);
 }
 
+#ifdef ICEE_HAS_BATCH
 namespace IceInternal {
 
 struct FlushAdapter
@@ -228,6 +229,7 @@ IceInternal::ObjectAdapterFactory::flushBatchRequests() const
     }
     for_each(a.begin(), a.end(), FlushAdapter());
 }
+#endif
 
 IceInternal::ObjectAdapterFactory::ObjectAdapterFactory(const InstancePtr& instance,
                                                         const CommunicatorPtr& communicator) :

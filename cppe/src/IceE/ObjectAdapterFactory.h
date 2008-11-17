@@ -40,7 +40,9 @@ public:
 #endif
                                                     );
     void removeObjectAdapter(const std::string&);
+#ifdef ICEE_HAS_BATCH
     void flushBatchRequests() const;
+#endif
 
 private:
 

@@ -512,6 +512,59 @@ IceInternal::FixedReference::toString() const
     return string(); // To keep the compiler from complaining.
 }
 
+#if !defined(ICEE_HAS_AMI) && !defined(ICEE_HAS_BATCH)
+Ice::ConnectionIPtr
+IceInternal::FixedReference::getConnection() const
+{
+    switch(getMode())
+    {
+        case ReferenceModeTwoway:
+        case ReferenceModeOneway:
+#ifdef ICEE_HAS_BATCH
+        case ReferenceModeBatchOneway:
+#endif
+        {
+            if(_fixedConnection->endpoint()->datagram())
+            {
+                throw NoEndpointException(__FILE__, __LINE__, "");
+            }
+            break;
+        }
+
+        case ReferenceModeDatagram:
+#ifdef ICEE_HAS_BATCH
+        case ReferenceModeBatchDatagram:
+#endif
+        {
+            if(!_fixedConnection->endpoint()->datagram())
+            {
+                throw NoEndpointException(__FILE__, __LINE__, "");
+            }
+            break;
+        }
+
+#ifndef ICEE_HAS_BATCH
+        case ReferenceModeBatchDatagram:
+        case ReferenceModeBatchOneway:
+        {
+            throw FeatureNotSupportedException(__FILE__, __LINE__, "batch proxy mode");
+        }
+#endif
+    }
+
+    //
+    // If a secure connection is requested, check if the connection is secure.
+    //
+    bool secure = getSecure();
+    if(secure && !_fixedConnection->endpoint()->secure())
+    {
+        throw NoEndpointException(__FILE__, __LINE__, "");
+    }
+
+    _fixedConnection->throwException(); // Throw in case our connection is already destroyed.
+    return _fixedConnection;
+}
+#else
 void
 IceInternal::FixedReference::getConnection(const ConnectRequestHandlerPtr& handler) const
 {
@@ -576,6 +629,7 @@ IceInternal::FixedReference::getConnection(const ConnectRequestHandlerPtr& handl
 
     handler->setConnection(_fixedConnection);
 }
+#endif
 
 bool
 IceInternal::FixedReference::operator==(const Reference& r) const
@@ -1020,6 +1074,128 @@ IceInternal::RoutableReference::clone() const
     return new RoutableReference(*this);
 }
 
+#if !defined(ICEE_HAS_AMI) && !defined(ICEE_HAS_BATCH)
+
+Ice::ConnectionIPtr
+IceInternal::RoutableReference::getConnection() const
+{
+#ifdef ICEE_HAS_ROUTER
+    if(_routerInfo)
+    {
+	//
+	// If we route, we send everything to the router's client
+	// proxy endpoints.
+	//
+	vector<EndpointPtr> endpts = _routerInfo->getClientEndpoints();
+	if(!endpts.empty())
+	{
+	    applyOverrides(endpts);
+            return createConnection(endpts);
+	}
+    }
+#endif
+
+    if(!_endpoints.empty())
+    {
+        return createConnection(_endpoints);
+    }
+
+#ifdef ICEE_HAS_LOCATOR
+    while(true)
+    {
+	bool cached = false;
+	vector<EndpointPtr> endpts;
+        if(_locatorInfo)
+	{
+	    endpts = _locatorInfo->getEndpoints(const_cast<RoutableReference*>(this), cached);
+	    applyOverrides(endpts);
+	}
+
+	if(endpts.empty())
+	{
+	    throw Ice::NoEndpointException(__FILE__, __LINE__, toString());
+	}
+
+	try
+	{
+	    return createConnection(endpts);
+	}
+	catch(const NoEndpointException&)
+	{
+	    throw; // No need to retry if there's no endpoints.
+	}
+	catch(const LocalException& ex)
+	{
+	    assert(_locatorInfo);
+	    _locatorInfo->clearCache(const_cast<RoutableReference*>(this));
+
+	    if(cached)
+	    {
+		// COMPILERFIX: Braces needed to prevent BCB from causing TraceLevels refCount from
+		//		being decremented twice when loop continues.
+		{
+		    TraceLevelsPtr traceLevels = getInstance()->traceLevels();
+		    if(traceLevels->retry >= 2)
+		    {
+			Trace out(getInstance()->initializationData().logger, traceLevels->retryCat);
+			out << "connection to cached endpoints failed\n"
+			    << "removing endpoints from cache and trying one more time\n" << ex;
+		    }
+		}
+		continue;
+	    }
+	    throw;
+	}
+    }
+
+    assert(false);
+    return 0;
+#else
+    throw Ice::NoEndpointException(__FILE__, __LINE__, toString());
+#endif
+}
+
+Ice::ConnectionIPtr
+IceInternal::RoutableReference::createConnection(const vector<EndpointPtr>& endpoints) const
+{
+    vector<EndpointPtr> endpts = filterEndpoints(endpoints);
+    if(endpts.empty())
+    {
+        throw Ice::NoEndpointException(__FILE__, __LINE__, toString());
+    }
+
+    Ice::ConnectionIPtr connection = getInstance()->outgoingConnectionFactory()->create(endpts);
+#if defined(ICEE_HAS_ROUTER)
+    RouterInfoPtr ri = _reference->getRouterInfo();
+    if(ri)
+    {
+#ifndef ICEE_PURE_CLIENT 
+        //
+        // If we have a router, set the object adapter for this router
+        // (if any) to the new connection, so that callbacks from the
+        // router can be received over this new connection.
+        //
+        if(ri->getAdapter())
+        {
+            connection->setAdapter(ri->getAdapter());
+        }
+#endif
+
+        //
+        // If this proxy is for a non-local object, and we are using a router, then
+        // add this proxy to the router info object.
+        //
+        if(ri)
+        {
+            ri->addProxy(_proxy);
+        }
+    }
+#endif
+    return connection;
+}
+
+#else
+
 void
 IceInternal::RoutableReference::getConnection(const ConnectRequestHandlerPtr& handler) const
 {
@@ -1082,6 +1258,7 @@ IceInternal::RoutableReference::createConnection(const vector<EndpointPtr>& allE
     }
 #endif
 }
+#endif
 
 void
 IceInternal::RoutableReference::applyOverrides(vector<EndpointPtr>& endpts) const

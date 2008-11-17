@@ -613,13 +613,18 @@ IceProxy::Ice::Object::__getRequestHandler()
 
     if(!_handler)
     {
+#if !defined(ICEE_HAS_AMI) && !defined(ICEE_HAS_BATCH)
+        _handler = _reference->getConnection();
+#else
         ConnectRequestHandlerPtr handler = new ConnectRequestHandler(_reference, this);
         _handler = handler->connect();
+#endif
     }
     
     return _handler;
 }
 
+#if defined(ICEE_HAS_AMI) || defined(ICEE_HAS_BATCH)
 void
 IceProxy::Ice::Object::__setRequestHandler(const RequestHandlerPtr& handler, const RequestHandlerPtr& previous)
 {
@@ -629,6 +634,7 @@ IceProxy::Ice::Object::__setRequestHandler(const RequestHandlerPtr& handler, con
         _handler = handler;
     }
 }
+#endif
 
 void
 IceProxy::Ice::Object::__copyFrom(const ObjectPrx& from)

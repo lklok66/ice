@@ -26,12 +26,15 @@ class OutgoingAsyncMessageCallback;
 ICE_API IceUtil::Shared* upCast(OutgoingAsyncMessageCallback*);
 typedef IceInternal::Handle<OutgoingAsyncMessageCallback> OutgoingAsyncMessageCallbackPtr;
 
+#ifdef ICEE_HAS_BATCH
 class BatchOutgoingAsync;
 ICE_API IceUtil::Shared* upCast(BatchOutgoingAsync*);
 typedef IceInternal::Handle<BatchOutgoingAsync> BatchOutgoingAsyncPtr;
+#endif
 
 }
 
+#ifdef ICEE_HAS_BATCH
 namespace Ice
 {
 
@@ -52,6 +55,7 @@ namespace Ice
 typedef IceInternal::Handle<AMI_Object_ice_flushBatchRequests> AMI_Object_ice_flushBatchRequestsPtr;
 
 }
+#endif
 
 #endif
 

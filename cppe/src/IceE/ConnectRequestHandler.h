@@ -23,6 +23,8 @@
 #include <memory>
 #include <deque>
 
+#if defined(ICEE_HAS_AMI) || defined(ICEE_HAS_BATCH)
+
 namespace IceInternal
 {
 
@@ -67,13 +69,11 @@ public:
     //
     // Called by OutgoingConnectionFactory.
     //
-    virtual void setConnection(const Ice::ConnectionIPtr&); // XXX
-    virtual void setException(const Ice::LocalException&); // XXX
+    virtual void setConnection(const Ice::ConnectionIPtr&);
+    virtual void setException(const Ice::LocalException&);
 
-#if defined(ICEE_HAS_AMI) || defined(ICEE_HAS_BATCH)
     void flushRequestsWithException(const Ice::LocalException&);
     void flushRequestsWithException(const LocalExceptionWrapper&);
-#endif
 
 #ifdef ICEE_HAS_ROUTER
     //
@@ -101,7 +101,6 @@ private:
     bool initialized();
     void flushRequests();
 
-#if defined(ICEE_HAS_AMI) || defined(ICEE_HAS_BATCH)
     struct Request
     {
 #ifdef ICEE_HAS_AMI
@@ -114,7 +113,6 @@ private:
         BasicStream* os;
 #endif
     };
-#endif
 
     ReferencePtr _reference;
     Ice::ObjectPrx _proxy;
@@ -132,13 +130,11 @@ private:
     std::auto_ptr<Ice::LocalException> _exception;
     bool _initialized;
     bool _flushing;
-#if !defined(ICEE_HAS_AMI) && (defined(ICEE_HAS_ROUTER) || defined(ICEE_HAS_LOCATOR))
+#if !defined(ICEE_HAS_AMI)
     bool _connect;
 #endif
 
-#if defined(ICEE_HAS_AMI) || defined(ICEE_HAS_BATCH)
     std::deque<Request> _requests;
-#endif
 #ifdef ICEE_HAS_BATCH
     bool _batchRequestInProgress;
     size_t _batchRequestsSize;
@@ -149,5 +145,7 @@ private:
 typedef IceUtil::Handle<ConnectRequestHandler> ConnectRequestHandlerPtr;
 
 }
+
+#endif
 
 #endif
