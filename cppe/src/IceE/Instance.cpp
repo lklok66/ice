@@ -534,12 +534,6 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
                 }
             }
 
-            unsigned int seed = static_cast<unsigned int>(IceUtil::Time::now().toMicroSeconds());
-            srand(seed);
-#ifndef _WIN32
-            srand48(seed);
-#endif
-
             if(_initData.properties->getPropertyAsInt("Ice.NullHandleAbort") > 0)
             {
                 IceUtil::nullHandleAbort = true;
