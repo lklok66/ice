@@ -25,8 +25,10 @@
 #   include <rpc.h>
 #else
 #   include <IceE/Random.h>
-#   include <sys/types.h>
-#   include <unistd.h>
+#   if !defined(_WIN32_WCE)
+#       include <sys/types.h>
+#       include <unistd.h>
+#   endif
 #endif
 
 using namespace std;
@@ -129,11 +131,13 @@ IceUtil::generateUUID()
     uuid.clockSeqHiAndReserved &= 0x3F;
     uuid.clockSeqHiAndReserved |= 0x80;
 
+#ifndef _WIN32
     //
     // Replace the end of the node by myPid (15 bits) 
     //
     uuid.node[4] = (uuid.node[4] & 0x80) | myPid[0];
     uuid.node[5] = myPid[1];
+#endif
 
     //
     // Convert to a UUID string
