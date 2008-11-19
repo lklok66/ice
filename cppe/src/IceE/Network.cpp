@@ -7,7 +7,6 @@
 //
 // **********************************************************************
 
-#include <IceE/StaticMutex.h>
 #include <IceE/Network.h>
 #include <IceE/LocalException.h>
 #ifndef _WIN32_WCE
@@ -38,7 +37,181 @@ using namespace IceInternal;
 #    define INADDR_NONE (unsigned long)-1
 #endif
 
-static IceUtil::StaticMutex inetMutex = ICE_STATIC_MUTEX_INITIALIZER;
+namespace
+{
+
+void
+closeSocketNoThrow(SOCKET fd)
+{
+#ifdef _WIN32
+    int error = WSAGetLastError();
+    closesocket(fd);
+    WSASetLastError(error);
+#else
+    int error = errno;
+    close(fd);
+    errno = error;
+#endif
+}
+
+string
+inetAddrToString(const struct sockaddr_in& in)
+{
+    char namebuf[1024];
+    namebuf[0] = '\0';
+    getnameinfo(reinterpret_cast<const struct sockaddr *>(&in), sizeof(sockaddr_in), namebuf, sizeof(namebuf), 0, 0, 
+                NI_NUMERICHOST);
+    return string(namebuf);
+}
+
+vector<struct sockaddr_in>
+getLocalAddresses()
+{
+    vector<struct sockaddr_in> result;
+
+#if defined(_WIN32)
+    try
+    {
+        SOCKET fd = createSocket();
+
+        vector<unsigned char> buffer;
+        buffer.resize(1024);
+        unsigned long len = 0;
+        DWORD rs = WSAIoctl(fd, SIO_ADDRESS_LIST_QUERY, 0, 0, &buffer[0], buffer.size(), &len, 0, 0);
+        if(rs == SOCKET_ERROR)
+        {
+            //
+            // If the buffer wasn't big enough, resize it to the
+            // required length and try again.
+            //
+            if(getSocketErrno() == WSAEFAULT)
+            {
+                buffer.resize(len);
+                rs = WSAIoctl(fd, SIO_ADDRESS_LIST_QUERY, 0, 0, &buffer[0], buffer.size(), &len, 0, 0);
+            }
+
+            if(rs == SOCKET_ERROR)
+            {
+                closeSocketNoThrow(fd);
+                SocketException ex(__FILE__, __LINE__);
+                ex.error = getSocketErrno();
+                throw ex;
+            }
+        }
+
+        //
+        // Add the local interface addresses.
+        //
+        SOCKET_ADDRESS_LIST* addrs = reinterpret_cast<SOCKET_ADDRESS_LIST*>(&buffer[0]);
+        for (int i = 0; i < addrs->iAddressCount; ++i)
+        {
+            
+            result.push_back(*reinterpret_cast<struct sockaddr_in*>(addrs->Address[i].lpSockaddr));
+        }
+
+        closeSocket(fd);
+    }
+    catch(const Ice::LocalException&)
+    {
+        //
+        // TODO: Warning?
+        //
+    }
+#elif defined(__APPLE__) || defined(__FreeBSD__)
+    struct ifaddrs* ifap;
+    if(::getifaddrs(&ifap) == SOCKET_ERROR)
+    {
+        SocketException ex(__FILE__, __LINE__);
+        ex.error = getSocketErrno();
+        throw ex;
+    }
+
+    struct ifaddrs* curr = ifap;
+    while(curr != 0)
+    {
+        if(curr->ifa_addr && curr->ifa_addr->sa_family == AF_INET && !(curr->ifa_flags & IFF_LOOPBACK))
+        {
+            struct sockaddr_in* addr = reinterpret_cast<struct sockaddr_in*>(curr->ifa_addr);
+            if(addr->sin_addr.s_addr != 0)
+            {
+                result.push_back(*addr);
+            }
+        }
+
+        curr = curr->ifa_next;
+    }
+
+    ::freeifaddrs(ifap);
+#else
+    SOCKET fd = createSocket();
+
+#ifdef _AIX
+    int cmd = CSIOCGIFCONF;
+#else
+    int cmd = SIOCGIFCONF;
+#endif
+    struct ifconf ifc;
+    int numaddrs = 10;
+    int old_ifc_len = 0;
+
+    //
+    // Need to call ioctl multiple times since we do not know up front
+    // how many addresses there will be, and thus how large a buffer we need.
+    // We keep increasing the buffer size until subsequent calls return
+    // the same length, meaning we have all the addresses.
+    //
+    while(true)
+    {
+        int bufsize = numaddrs * sizeof(struct ifreq);
+        ifc.ifc_len = bufsize;
+        ifc.ifc_buf = (char*)malloc(bufsize);
+        int rs = ioctl(fd, cmd, &ifc);
+        if(rs == SOCKET_ERROR)
+        {
+            free(ifc.ifc_buf);
+            closeSocketNoThrow(fd);
+            SocketException ex(__FILE__, __LINE__);
+            ex.error = getSocketErrno();
+            throw ex;
+        }
+        else if(ifc.ifc_len == old_ifc_len)
+        {
+            //
+            // Returned same length twice in a row, finished.
+            //
+            break;
+        }
+        else
+        {
+            old_ifc_len = ifc.ifc_len;
+        }
+
+        numaddrs += 10;
+        free(ifc.ifc_buf);
+    }
+
+    numaddrs = ifc.ifc_len / sizeof(struct ifreq);
+    struct ifreq* ifr = ifc.ifc_req;
+    for(int i = 0; i < numaddrs; ++i)
+    {
+        if(ifr[i].ifr_addr.sa_family == AF_INET && !(ifr[i].ifr_flags & IFF_LOOPBACK))
+        {
+            struct sockaddr_in* addr = reinterpret_cast<struct sockaddr_in*>(&ifr[i].ifr_addr);
+            if(addr->sin_addr.s_addr != 0)
+            {
+                result.push_back(*addr);
+            }
+        }
+    }
+
+    free(ifc.ifc_buf);
+    closeSocket(fd);
+#endif
+
+    return result;
+}
+
+}
 
 int
 IceInternal::getSocketErrno()
@@ -199,20 +372,6 @@ IceInternal::createSocket()
     return fd;
 }
 
-static void
-closeSocketNoThrow(SOCKET fd)
-{
-#ifdef _WIN32
-    int error = WSAGetLastError();
-    closesocket(fd);
-    WSASetLastError(error);
-#else
-    int error = errno;
-    close(fd);
-    errno = error;
-#endif
-}
-
 void
 IceInternal::closeSocket(SOCKET fd)
 {
@@ -235,69 +394,6 @@ IceInternal::closeSocket(SOCKET fd)
     }
     errno = error;
 #endif
-}
-    
-void
-IceInternal::shutdownSocketWrite(SOCKET fd)
-{
-    if(shutdown(fd, SHUT_WR) == SOCKET_ERROR)
-    {
-        //
-        // Ignore errors indicating that we are shutdown already.
-        //
-#if defined(_WIN32)
-        int error = WSAGetLastError();
-        if(error == WSAENOTCONN)
-        {
-            return;
-        }
-#elif defined(__APPLE__)
-        if(errno == ENOTCONN || errno == EINVAL)
-        {
-            return;
-        }
-#else
-        if(errno == ENOTCONN)
-        {
-            return;
-        }
-#endif
-        SocketException ex(__FILE__, __LINE__);
-        ex.error = getSocketErrno();
-        throw ex;
-    }
-}
-    
-void
-IceInternal::shutdownSocketReadWrite(SOCKET fd)
-{
-    if(shutdown(fd, SHUT_RDWR) == SOCKET_ERROR)
-    {
-        //
-        // Ignore errors indicating that we are shutdown already.
-        //
-#if defined(_WIN32)
-        int error = WSAGetLastError();
-        if(error == WSAENOTCONN)
-        {
-            return;
-        }
-#elif defined(__APPLE__)
-        if(errno == ENOTCONN || errno == EINVAL)
-        {
-            return;
-        }
-#else
-        if(errno == ENOTCONN)
-        {
-            return;
-        }
-#endif
-
-        SocketException ex(__FILE__, __LINE__);
-        ex.error = getSocketErrno();
-        throw ex;
-    }
 }
     
 void
@@ -979,22 +1075,11 @@ IceInternal::fdToRemoteAddress(SOCKET fd, struct sockaddr_in& addr)
     return peerNotConnected;
 }
 
-string
-IceInternal::inetAddrToString(const struct in_addr& in)
-{
-    //
-    // inet_ntoa uses static memory on some platforms so we protect
-    // access and make a copy.
-    //
-    IceUtil::StaticMutex::Lock lock(inetMutex);
-    return string(inet_ntoa(in));
-}
-
 std::string
 IceInternal::addrToString(const struct sockaddr_in& addr)
 {
     string s;
-    s += inetAddrToString(addr.sin_addr);
+    s += inetAddrToString(addr);
     s += ":";
     s += Ice::printfToString("%d", ntohs(addr.sin_port));
     return s;
@@ -1009,7 +1094,7 @@ IceInternal::getHostsForEndpointExpand(const string& host)
         vector<struct sockaddr_in> addrs = getLocalAddresses();
         for(vector<struct sockaddr_in>::const_iterator p = addrs.begin(); p != addrs.end(); ++p)
         {
-            hosts.push_back(inetAddrToString((*p).sin_addr));
+            hosts.push_back(inetAddrToString((*p)));
         }
 
         if(hosts.empty())
@@ -1079,153 +1164,6 @@ repeatListen:
         ex.error = getSocketErrno();
         throw ex;
     }
-}
-
-vector<struct sockaddr_in>
-IceInternal::getLocalAddresses()
-{
-    vector<struct sockaddr_in> result;
-
-#if defined(_WIN32)
-    try
-    {
-        SOCKET fd = createSocket();
-
-        vector<unsigned char> buffer;
-        buffer.resize(1024);
-        unsigned long len = 0;
-        DWORD rs = WSAIoctl(fd, SIO_ADDRESS_LIST_QUERY, 0, 0, &buffer[0], buffer.size(), &len, 0, 0);
-        if(rs == SOCKET_ERROR)
-        {
-            //
-            // If the buffer wasn't big enough, resize it to the
-            // required length and try again.
-            //
-            if(getSocketErrno() == WSAEFAULT)
-            {
-                buffer.resize(len);
-                rs = WSAIoctl(fd, SIO_ADDRESS_LIST_QUERY, 0, 0, &buffer[0], buffer.size(), &len, 0, 0);
-            }
-
-            if(rs == SOCKET_ERROR)
-            {
-                closeSocketNoThrow(fd);
-                SocketException ex(__FILE__, __LINE__);
-                ex.error = getSocketErrno();
-                throw ex;
-            }
-        }
-
-        //
-        // Add the local interface addresses.
-        //
-        SOCKET_ADDRESS_LIST* addrs = reinterpret_cast<SOCKET_ADDRESS_LIST*>(&buffer[0]);
-        for (int i = 0; i < addrs->iAddressCount; ++i)
-        {
-            
-            result.push_back(*reinterpret_cast<struct sockaddr_in*>(addrs->Address[i].lpSockaddr));
-        }
-
-        closeSocket(fd);
-    }
-    catch(const Ice::LocalException&)
-    {
-        //
-        // TODO: Warning?
-        //
-    }
-#elif defined(__APPLE__) || defined(__FreeBSD__)
-    struct ifaddrs* ifap;
-    if(::getifaddrs(&ifap) == SOCKET_ERROR)
-    {
-        SocketException ex(__FILE__, __LINE__);
-        ex.error = getSocketErrno();
-        throw ex;
-    }
-
-    struct ifaddrs* curr = ifap;
-    while(curr != 0)
-    {
-        if(curr->ifa_addr && curr->ifa_addr->sa_family == AF_INET && !(curr->ifa_flags & IFF_LOOPBACK))
-        {
-            struct sockaddr_in* addr = reinterpret_cast<struct sockaddr_in*>(curr->ifa_addr);
-            if(addr->sin_addr.s_addr != 0)
-            {
-                result.push_back(*addr);
-            }
-        }
-
-        curr = curr->ifa_next;
-    }
-
-    ::freeifaddrs(ifap);
-#else
-    SOCKET fd = createSocket();
-
-#ifdef _AIX
-    int cmd = CSIOCGIFCONF;
-#else
-    int cmd = SIOCGIFCONF;
-#endif
-    struct ifconf ifc;
-    int numaddrs = 10;
-    int old_ifc_len = 0;
-
-    //
-    // Need to call ioctl multiple times since we do not know up front
-    // how many addresses there will be, and thus how large a buffer we need.
-    // We keep increasing the buffer size until subsequent calls return
-    // the same length, meaning we have all the addresses.
-    //
-    while(true)
-    {
-        int bufsize = numaddrs * sizeof(struct ifreq);
-        ifc.ifc_len = bufsize;
-        ifc.ifc_buf = (char*)malloc(bufsize);
-        int rs = ioctl(fd, cmd, &ifc);
-        if(rs == SOCKET_ERROR)
-        {
-            free(ifc.ifc_buf);
-            closeSocketNoThrow(fd);
-            SocketException ex(__FILE__, __LINE__);
-            ex.error = getSocketErrno();
-            throw ex;
-        }
-        else if(ifc.ifc_len == old_ifc_len)
-        {
-            //
-            // Returned same length twice in a row, finished.
-            //
-            break;
-        }
-        else
-        {
-            old_ifc_len = ifc.ifc_len;
-        }
-
-        numaddrs += 10;
-        free(ifc.ifc_buf);
-    }
-
-    numaddrs = ifc.ifc_len / sizeof(struct ifreq);
-    struct ifreq* ifr = ifc.ifc_req;
-    for(int i = 0; i < numaddrs; ++i)
-    {
-        if(ifr[i].ifr_addr.sa_family == AF_INET && !(ifr[i].ifr_flags & IFF_LOOPBACK))
-        {
-            struct sockaddr_in* addr = reinterpret_cast<struct sockaddr_in*>(&ifr[i].ifr_addr);
-            if(addr->sin_addr.s_addr != 0)
-            {
-                result.push_back(*addr);
-            }
-        }
-    }
-
-    free(ifc.ifc_buf);
-    closeSocket(fd);
-#endif
-
-    return result;
 }
 
 void

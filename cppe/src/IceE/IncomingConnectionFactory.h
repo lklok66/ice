@@ -51,7 +51,6 @@ public:
     //
     // Operations from EventHandler
     //
-    virtual bool datagram() const;
     virtual bool readable() const;
     virtual bool read(BasicStream&);
     virtual void message(BasicStream&, const ThreadPoolPtr&);

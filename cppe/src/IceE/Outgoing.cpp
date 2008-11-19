@@ -94,14 +94,12 @@ IceInternal::Outgoing::Outgoing(RequestHandler* handler, Reference* reference, c
     {
         case ReferenceModeTwoway:
         case ReferenceModeOneway:
-        case ReferenceModeDatagram:
         {
             _os.writeBlob(requestHdr, sizeof(requestHdr));
             break;
         }
 
         case ReferenceModeBatchOneway:
-        case ReferenceModeBatchDatagram:
         {
 #ifdef ICEE_HAS_BATCH
             _handler->prepareBatchRequest(&_os);
@@ -110,6 +108,13 @@ IceInternal::Outgoing::Outgoing(RequestHandler* handler, Reference* reference, c
             throw FeatureNotSupportedException(__FILE__, __LINE__, "batch proxy mode");
 #endif
         }
+
+	case ReferenceModeDatagram:
+	case ReferenceModeBatchDatagram:
+	{
+            throw FeatureNotSupportedException(__FILE__, __LINE__, "datagram proxy");
+	    break;
+	}
     }
 
     try
@@ -276,7 +281,6 @@ IceInternal::Outgoing::invoke()
         }
 
         case ReferenceModeOneway:
-        case ReferenceModeDatagram:
         {
             _state = StateInProgress;
             if(_handler->sendRequest(this, false))
@@ -300,7 +304,6 @@ IceInternal::Outgoing::invoke()
         }
 
         case ReferenceModeBatchOneway:
-        case ReferenceModeBatchDatagram:
         {
 #ifdef ICEE_HAS_BATCH
             //
@@ -312,6 +315,13 @@ IceInternal::Outgoing::invoke()
             _handler->finishBatchRequest(&_os);
             return true;
 #endif
+        }
+
+        case ReferenceModeDatagram:
+        case ReferenceModeBatchDatagram:
+        {
+            assert(false);
+            break;
         }
     }
 

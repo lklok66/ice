@@ -35,11 +35,6 @@ public:
     InstancePtr instance() const;
     
     //
-    // Return true if the handler is for a datagram transport, false otherwise.
-    //
-    virtual bool datagram() const = 0;
-
-    //
     // Return true if read() must be called before calling message().
     //
     virtual bool readable() const = 0;

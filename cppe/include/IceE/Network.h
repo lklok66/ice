@@ -85,8 +85,6 @@ bool noMoreFds(int);
 
 SOCKET createSocket();
 void closeSocket(SOCKET);
-void shutdownSocketWrite(SOCKET);
-void shutdownSocketReadWrite(SOCKET);
 
 void setBlock(SOCKET, bool);
 #ifndef ICEE_USE_SELECT_OR_POLL_FOR_TIMEOUTS
@@ -118,11 +116,9 @@ std::string errorToStringDNS(int);
 std::string fdToString(SOCKET);
 void fdToLocalAddress(SOCKET, struct sockaddr_in&);
 bool fdToRemoteAddress(SOCKET, struct sockaddr_in&);
-std::string inetAddrToString(const struct in_addr& in);
 std::string addrToString(const struct sockaddr_in&);
 std::vector<std::string> getHostsForEndpointExpand(const std::string&);
 
-std::vector<struct sockaddr_in> getLocalAddresses();
 void setTcpBufSize(SOCKET, const Ice::PropertiesPtr&, const Ice::LoggerPtr&);
 
 int getSocketErrno();

@@ -521,6 +521,10 @@ IceInternal::OutgoingAsync::__prepare(const ObjectPrx& prx, const string& operat
     {
         throw Ice::FeatureNotSupportedException(__FILE__, __LINE__, "can't send batch requests with AMI");
     }
+    else if(_proxy->ice_isDatagram())
+    {
+        throw Ice::FeatureNotSupportedException(__FILE__, __LINE__, "datagram proxy");
+    }
 
     __os->writeBlob(requestHdr, sizeof(requestHdr));
 

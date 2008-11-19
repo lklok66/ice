@@ -143,7 +143,6 @@ public:
     //
     // Inherited from EventHandler.
     //
-    virtual bool datagram() const;
     virtual bool readable() const;
     virtual bool read(IceInternal::BasicStream&);
     virtual void message(IceInternal::BasicStream&, const IceInternal::ThreadPoolPtr&);

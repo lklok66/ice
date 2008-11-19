@@ -40,8 +40,7 @@ IceInternal::ThreadPool::ThreadPool(const InstancePtr& instance, const string& p
     _running(0),
     _inUse(0),
     _load(1.0),
-    _promote(true),
-    _warnUdp(_instance->initializationData().properties->getPropertyAsInt("Ice.Warn.Datagrams") > 0)
+    _promote(true)
 {
     //
     // We use just one thread as the default. This is the fastest
@@ -490,12 +489,6 @@ IceInternal::ThreadPool::run()
                         assert(false); // This shouldn't occur as we only perform non-blocking reads.
                         continue;
                     }
-#if XXX // Do we need DatagramLimitException?
-                    catch(const DatagramLimitException&) // Expected.
-                    {
-                        continue;
-                    }
-#endif
                     catch(const SocketException& ex)
                     {
                         handler->exception(ex);
@@ -503,19 +496,7 @@ IceInternal::ThreadPool::run()
                     }
                     catch(const LocalException& ex)
                     {
-                        if(handler->datagram())
-                        {
-                            if(_instance->initializationData().properties->getPropertyAsInt("Ice.Warn.Connections") > 0)
-                            {
-                                Warning out(_instance->initializationData().logger);
-                                out << "datagram connection exception:\n" << ex.toString() << '\n'
-                                    << handler->toString();
-                            }
-                        }
-                        else
-                        {
-                            handler->exception(ex);
-                        }
+                        handler->exception(ex);
                         continue;
                     }
 
@@ -718,27 +699,11 @@ IceInternal::ThreadPool::read(const EventHandlerPtr& handler)
 
     if(stream.i != stream.b.end())
     {
-        if(handler->datagram())
+        if(!handler->read(stream))
         {
-            if(_warnUdp)
-            {
-                Warning out(_instance->initializationData().logger);
-                out << "DatagramLimitException: maximum size of " << pos << " exceeded";
-                stream.resize(0);
-                stream.i = stream.b.begin();
-            }
-#if XXX
-            throw DatagramLimitException(__FILE__, __LINE__);
-#endif
+            return false;
         }
-        else
-        {
-            if(!handler->read(stream))
-            {
-                return false;
-            }
-            assert(stream.i == stream.b.end());
-        }
+        assert(stream.i == stream.b.end());
     }
 
     return true;

@@ -91,8 +91,6 @@ private:
     double _load; // Current load in number of threads.
 
     bool _promote;
-
-    const bool _warnUdp;
 };
 
 }

@@ -1069,12 +1069,6 @@ Ice::ConnectionI::getConnection(bool /*wait*/)
 }
 
 bool
-Ice::ConnectionI::datagram() const
-{
-    return _endpoint->datagram(); // No mutex protection necessary, _endpoint is immutable.
-}
-
-bool
 Ice::ConnectionI::readable() const
 {
     return true;
@@ -1544,15 +1538,6 @@ void
 Ice::ConnectionI::setState(State state)
 {
     //
-    // We don't want to send close connection messages if the endpoint
-    // only supports oneway transmission from client to server.
-    //
-    if(_endpoint->datagram() && state == StateClosing)
-    {
-        state = StateClosed;
-    }
-
-    //
     // Skip graceful shutdown if we are destroyed before validation.
     //
     if(_state <= StateNotValidated && state == StateClosing)
@@ -1676,42 +1661,39 @@ Ice::ConnectionI::initiateShutdown()
     assert(_dispatchCount == 0);
 #endif
 
-    if(!_endpoint->datagram())
-    {
-        //
-        // Before we shut down, we send a close connection message.
-        //
-        BasicStream os(_instance.get(), _instance->messageSizeMax()
+    //
+    // Before we shut down, we send a close connection message.
+    //
+    BasicStream os(_instance.get(), _instance->messageSizeMax()
 #ifdef ICEE_HAS_WSTRING
-                       , _instance->initializationData().stringConverter,
-                       _instance->initializationData().wstringConverter
+                   , _instance->initializationData().stringConverter,
+                   _instance->initializationData().wstringConverter
 #endif
-                       );
-        os.write(magic[0]);
-        os.write(magic[1]);
-        os.write(magic[2]);
-        os.write(magic[3]);
-        os.write(protocolMajor);
-        os.write(protocolMinor);
-        os.write(encodingMajor);
-        os.write(encodingMinor);
-        os.write(closeConnectionMsg);
-        os.write((Byte)0); // Compression status: compression not supported.
-        os.write(headerSize); // Message size.
+        );
+    os.write(magic[0]);
+    os.write(magic[1]);
+    os.write(magic[2]);
+    os.write(magic[3]);
+    os.write(protocolMajor);
+    os.write(protocolMinor);
+    os.write(encodingMajor);
+    os.write(encodingMinor);
+    os.write(closeConnectionMsg);
+    os.write((Byte)0); // Compression status: compression not supported.
+    os.write(headerSize); // Message size.
 
-        OutgoingMessage message(&os);
-        sendMessage(message);
+    OutgoingMessage message(&os);
+    sendMessage(message);
 
-        //
-        // The CloseConnection message should be sufficient. Closing the write
-        // end of the socket is probably an artifact of how things were done
-        // in IIOP. In fact, shutting down the write end of the socket causes
-        // problems on Windows by preventing the peer from using the socket.
-        // For example, the peer is no longer able to continue writing a large
-        // message after the socket is shutdown.
-        //
-        //_transceiver->shutdownWrite();
-    }
+    //
+    // The CloseConnection message should be sufficient. Closing the write
+    // end of the socket is probably an artifact of how things were done
+    // in IIOP. In fact, shutting down the write end of the socket causes
+    // problems on Windows by preventing the peer from using the socket.
+    // For example, the peer is no longer able to continue writing a large
+    // message after the socket is shutdown.
+    //
+    //_transceiver->shutdownWrite();
 }
 
 SocketStatus
@@ -1734,92 +1716,89 @@ Ice::ConnectionI::initialize()
 SocketStatus
 Ice::ConnectionI::validate()
 {
-    if(!_endpoint->datagram()) // Datagram connections are always implicitly validated.
-    {
 #ifndef ICEE_PURE_CLIENT
-        if(_adapter) // The server side has the active role for connection validation.
+    if(_adapter) // The server side has the active role for connection validation.
+    {
+        BasicStream& os = _stream;
+        if(os.b.empty())
         {
-            BasicStream& os = _stream;
-            if(os.b.empty())
-            {
-                os.write(magic[0]);
-                os.write(magic[1]);
-                os.write(magic[2]);
-                os.write(magic[3]);
-                os.write(protocolMajor);
-                os.write(protocolMinor);
-                os.write(encodingMajor);
-                os.write(encodingMinor);
-                os.write(validateConnectionMsg);
-                os.write(static_cast<Byte>(0)); // Compression status (always zero for validate connection).
-                os.write(headerSize); // Message size.
-                os.i = os.b.begin();
-                traceSend(os, _logger, _traceLevels);
-            }
-
-            if(!_transceiver->write(os))
-            {
-                return NeedWrite;
-            }
+            os.write(magic[0]);
+            os.write(magic[1]);
+            os.write(magic[2]);
+            os.write(magic[3]);
+            os.write(protocolMajor);
+            os.write(protocolMinor);
+            os.write(encodingMajor);
+            os.write(encodingMinor);
+            os.write(validateConnectionMsg);
+            os.write(static_cast<Byte>(0)); // Compression status (always zero for validate connection).
+            os.write(headerSize); // Message size.
+            os.i = os.b.begin();
+            traceSend(os, _logger, _traceLevels);
         }
-        else // The client side has the passive role for connection validation.
+
+        if(!_transceiver->write(os))
+        {
+            return NeedWrite;
+        }
+    }
+    else // The client side has the passive role for connection validation.
 #endif
+    {
+        BasicStream& is = _stream;
+        if(is.b.empty())
         {
-            BasicStream& is = _stream;
-            if(is.b.empty())
-            {
-                is.b.resize(headerSize);
-                is.i = is.b.begin();
-            }
-
-            if(!_transceiver->read(is))
-            {
-                return NeedRead;
-            }
-
-            assert(is.i == is.b.end());
+            is.b.resize(headerSize);
             is.i = is.b.begin();
-            Byte m[4];
-            is.read(m[0]);
-            is.read(m[1]);
-            is.read(m[2]);
-            is.read(m[3]);
-            if(m[0] != magic[0] || m[1] != magic[1] || m[2] != magic[2] || m[3] != magic[3])
-            {
-                throwBadMagicException(__FILE__, __LINE__, Ice::ByteSeq(&m[0], &m[0] + sizeof(magic)));
-            }
-            Byte pMajor;
-            Byte pMinor;
-            is.read(pMajor);
-            is.read(pMinor);
-            if(pMajor != protocolMajor)
-            {
-                throwUnsupportedProtocolException(__FILE__, __LINE__, pMajor, pMinor, protocolMajor, protocolMinor);
-            }
-            Byte eMajor;
-            Byte eMinor;
-            is.read(eMajor);
-            is.read(eMinor);
-            if(eMajor != encodingMajor)
-            {
-                throwUnsupportedEncodingException(__FILE__, __LINE__, eMajor, eMinor, encodingMajor, encodingMinor);
-            }
-            Byte messageType;
-            is.read(messageType);
-            if(messageType != validateConnectionMsg)
-            {
-                throwConnectionNotValidatedException(__FILE__, __LINE__);
-            }
-            Byte compress;
-            is.read(compress); // Ignore compression status for validate connection.
-            Int size;
-            is.read(size);
-            if(size != headerSize)
-            {
-                throwIllegalMessageSizeException(__FILE__, __LINE__);
-            }
-            traceRecv(is, _logger, _traceLevels);
         }
+
+        if(!_transceiver->read(is))
+        {
+            return NeedRead;
+        }
+
+        assert(is.i == is.b.end());
+        is.i = is.b.begin();
+        Byte m[4];
+        is.read(m[0]);
+        is.read(m[1]);
+        is.read(m[2]);
+        is.read(m[3]);
+        if(m[0] != magic[0] || m[1] != magic[1] || m[2] != magic[2] || m[3] != magic[3])
+        {
+            throwBadMagicException(__FILE__, __LINE__, Ice::ByteSeq(&m[0], &m[0] + sizeof(magic)));
+        }
+        Byte pMajor;
+        Byte pMinor;
+        is.read(pMajor);
+        is.read(pMinor);
+        if(pMajor != protocolMajor)
+        {
+            throwUnsupportedProtocolException(__FILE__, __LINE__, pMajor, pMinor, protocolMajor, protocolMinor);
+        }
+        Byte eMajor;
+        Byte eMinor;
+        is.read(eMajor);
+        is.read(eMinor);
+        if(eMajor != encodingMajor)
+        {
+            throwUnsupportedEncodingException(__FILE__, __LINE__, eMajor, eMinor, encodingMajor, encodingMinor);
+        }
+        Byte messageType;
+        is.read(messageType);
+        if(messageType != validateConnectionMsg)
+        {
+            throwConnectionNotValidatedException(__FILE__, __LINE__);
+        }
+        Byte compress;
+        is.read(compress); // Ignore compression status for validate connection.
+        Int size;
+        is.read(size);
+        if(size != headerSize)
+        {
+            throwIllegalMessageSizeException(__FILE__, __LINE__);
+        }
+        traceRecv(is, _logger, _traceLevels);
     }
 
     _stream.resize(0);
@@ -2059,18 +2038,7 @@ Ice::ConnectionI::parseMessage(BasicStream& stream, Int& requestId)
             case closeConnectionMsg:
             {
                 traceRecv(stream, _logger, _traceLevels);
-                if(_endpoint->datagram())
-                {
-                    if(_warn)
-                    {
-                        Warning out(_logger);
-                        out << "ignoring close connection message for datagram connection:\n" << _desc;
-                    }
-                }
-                else
-                {
-                    setState(StateClosed, CloseConnectionException(__FILE__, __LINE__));
-                }
+                setState(StateClosed, CloseConnectionException(__FILE__, __LINE__));
                 break;
             }
 
@@ -2251,18 +2219,7 @@ Ice::ConnectionI::parseMessage(BasicStream& stream, Int& requestId)
     }
     catch(const LocalException& ex)
     {
-        if(_endpoint->datagram())
-        {
-            if(_warn)
-            {
-                Warning out(_logger);
-                out << "datagram connection exception:\n" << ex.toString() << "\n" << _desc;
-            }
-        }
-        else
-        {
-            setState(StateClosed, ex);
-        }
+        setState(StateClosed, ex);
     }
 }
 
@@ -2283,7 +2240,7 @@ Ice::ConnectionI::invokeAll(BasicStream& stream, Int invokeNum, Int requestId, c
             //
             // Prepare the invocation.
             //
-            bool response = !_endpoint->datagram() && requestId != 0;
+            bool response = requestId != 0;
             Incoming in(_instance.get(), this, adapter);
             BasicStream* is = in.is();
             stream.swap(*is);
