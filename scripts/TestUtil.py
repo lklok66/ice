@@ -181,7 +181,7 @@ def configureEmbeddedPaths():
     os.environ["CLASSPATH"] = sanitize(os.getenv("CLASSPATH", ""))
 
     if isWin32():
-        os.environ["PATH"] = getCppBinDir("cppe") + os.pathsep + os.getenv("PATH", "")
+        os.environ["PATH"] = getCppBinDir() + os.pathsep + os.getenv("PATH", "")
         if iceHome:
             os.environ["PATH"] = os.path.join(getIceDir("cppe"), "bin") + os.pathsep + os.getenv("PATH", "")
     else:
@@ -983,7 +983,10 @@ def simpleTest(exe, options = ""):
     client.waitTestSuccess()
 
 def getCppBinDir():
-    binDir = os.path.join(getIceDir("cpp"), "bin")
+    if getDefaultMapping() == "cppe":
+        binDir = os.path.join(getIceDir("cppe"), "bin")
+    else:
+        binDir = os.path.join(getIceDir("cpp"), "bin")
     if iceHome and x64:
         if isHpUx():
             binDir = os.path.join(binDir, "pa20_64")
