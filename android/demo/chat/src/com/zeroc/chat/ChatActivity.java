@@ -234,7 +234,7 @@ public class ChatActivity extends ListActivity
             return true;
 
         case LOGOUT_ID:
-            finish();
+            logout();
             return true;
         }
 
