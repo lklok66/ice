@@ -9,22 +9,23 @@
 
 package com.zeroc.chat;
 
-import java.security.cert.CertificateException;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 
-public class LoginActivity extends Activity
+public class LoginActivity extends Activity implements ServiceConnection
 {
     private static final int DIALOG_ERROR = 1;
     private static final int DIALOG_CONFIRM = 2;
@@ -46,9 +47,51 @@ public class LoginActivity extends Activity
     private CheckBox _secure;
     private SharedPreferences _prefs;
 
+    private boolean _loginInProgress = false;
+    private Chat.Android.ServicePrx _service;
+    private Chat.Android.SessionListenerPrx _listener;
+
+    private Ice.Object _listenerImpl = new Chat.Android._SessionListenerDisp()
+    {
+        public void onConnectConfirm(Ice.Current current)
+        {
+            runOnUiThread(new Runnable()
+            {
+                public void run()
+                {
+                    showDialog(DIALOG_CONFIRM);
+                }
+            });
+        }
+
+        public void onLogin(Ice.Current current)
+        {
+            runOnUiThread(new Runnable()
+            {
+                public void run()
+                {
+                    Intent result = new Intent();
+                    result.setClass(getApplicationContext(), ChatActivity.class);
+                    startActivity(result);
+                }
+            });
+        }
+
+        public void onException(final String ex, Ice.Current current)
+        {
+            runOnUiThread(new Runnable()
+            {
+                public void run()
+                {
+                    handleException(ex);
+                }
+            });
+        }
+    };
+
     private void setLoginState()
     {
-        if(AppSessionManager.instance().getLoginInProgress())
+        if(_loginInProgress)
         {
             _login.setEnabled(false);
         }
@@ -112,63 +155,63 @@ public class LoginActivity extends Activity
 
         // Kick off the login process. The activity is notified of changes
         // in the login process through calls to the SessionListener.
-        AppSessionManager.instance().login(hostname, username, password, secure);
+        _service.login(hostname, username, password, secure);
     }
 
+    public void onServiceConnected(ComponentName name, IBinder service)
+    {
+        System.out.println("LoginActivity.onServiceConnected");
+        // TODO: This is ugly. It would be better if there was a way to get the service directly using
+        // the binder.
+        ChatApp app = (ChatApp)getApplication();
+        _service = Chat.Android.ServicePrxHelper.uncheckedCast(app.getCommunicator().stringToProxy(
+                "ChatService:tcp -p 12222"));
+        _listener = Chat.Android.SessionListenerPrxHelper.uncheckedCast(app.getAdapter().addWithUUID(_listenerImpl));
+        _loginInProgress = _service.setSessionListener(_listener);
+        setLoginState();
+    }
+
+    public void onServiceDisconnected(ComponentName name)
+    {
+        System.out.println("LoginActivity.onServiceDisconnected");
+    }
+    
     @Override
     protected void onResume()
     {
         System.out.println("LoginActivity: onResume");
 
         super.onResume();
-        AppSessionManager.instance().setSessionListener(new AppSessionManager.SessionListener()
-        {
-            public void onConnectConfirm()
-            {
-                showDialog(DIALOG_CONFIRM);
-            }
-
-            public void onLogin()
-            {
-                Intent result = new Intent();
-                result.setClass(getApplicationContext(), ChatActivity.class);
-                startActivity(result);
-            }
-
-            public void onException(Ice.UserException ex)
-            {
-                try
-                {
-                    throw ex;
-                }
-                catch(final Glacier2.CannotCreateSessionException e)
-                {
-                    handleException(String.format("Session creation failed: %s", e.reason));
-                }
-                catch(final Glacier2.PermissionDeniedException e)
-                {
-                    handleException(String.format("Login failed: %s", e.reason));
-                }
-                catch(final Ice.UserException e)
-                {
-                    handleException(String.format("Login failed: %s", e.toString()));
-                }
-            }
-
-            public void onException(final Ice.LocalException ex)
-            {
-                handleException(ex.toString());
-            }
-        });
-        setLoginState();
+        
+        Intent result = new Intent();
+        result.setComponent(new ComponentName("com.zeroc.chat", "com.zeroc.chat.ChatService"));
+        bindService(result, this, BIND_AUTO_CREATE);
     }
 
     @Override
     public void onStop()
     {
         System.out.println("LoginActivity: onStop");
-        AppSessionManager.instance().setSessionListener(null);
+        
         super.onStop();
+        unbindService(this);
+        
+        if(_listener != null)
+        {
+            _service.setSessionListener(null);
+            _service = null;
+
+            try
+            {
+                ChatApp app = (ChatApp)getApplication();
+                app.getAdapter().remove(_listener.ice_getIdentity());
+            }
+            catch(Ice.NotRegisteredException ex)
+            {
+            }
+
+            _listener = null;
+        }       
     }
 
     @Override
@@ -186,6 +229,7 @@ public class LoginActivity extends Activity
                 login();
             }
         });
+        _login.setEnabled(false);
 
         _hostname = (EditText)findViewById(R.id.hostname);
         _hostname.addTextChangedListener(new TextWatcher()
@@ -237,15 +281,10 @@ public class LoginActivity extends Activity
             _lastError = savedInstanceState.getString(BUNDLE_KEY_LAST_ERROR);
         }
 
-        try
-        {
-            AppSessionManager.init(getResources().openRawResource(R.raw.zeroc_ca_cert));
-        }
-        catch(CertificateException e)
-        {
-            _lastError = "Error importing certificate: " + e.toString();
-            showDialog(DIALOG_ERROR);
-        }
+        // Start the ChatService.
+        Intent result = new Intent();
+        result.setComponent(new ComponentName("com.zeroc.chat", "com.zeroc.chat.ChatService"));
+        startService(result);
     }
 
     @Override
@@ -280,14 +319,14 @@ public class LoginActivity extends Activity
             {
                 public void onClick(DialogInterface dialog, int whichButton)
                 {
-                    AppSessionManager.instance().setConfirmConnection(true);
+                    _service.confirmConnection(true);
                 }
             });
             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
             {
                 public void onClick(DialogInterface dialog, int whichButton)
                 {
-                    AppSessionManager.instance().setConfirmConnection(false);
+                    _service.confirmConnection(false);
                 }
             });
             return builder.create();

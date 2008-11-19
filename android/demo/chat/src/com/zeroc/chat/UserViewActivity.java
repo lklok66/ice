@@ -15,11 +15,15 @@ import java.util.List;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
+import android.content.ComponentName;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.widget.ArrayAdapter;
 
-public class UserViewActivity extends ListActivity
+public class UserViewActivity extends ListActivity implements ServiceConnection
 {
     private static final int DIALOG_FATAL = 1;
     private String _lastError = "";
@@ -27,45 +31,73 @@ public class UserViewActivity extends ListActivity
 
     private List<String> _users = new ArrayList<String>();
     private ArrayAdapter<String> _adapter;
-    private ChatRoomListener _listener = new ChatRoomListener()
+    private Chat.Android.ServicePrx _service;
+    private Chat.Android.ChatRoomListenerPrx _listener;
+    private Ice.Object _listenerImpl = new Chat.Android._ChatRoomListenerDisp()
     {
-        public void init(final List<String> users)
+        public void init(final List<String> users, Ice.Current current)
         {
-            _users.clear();
-            _users.addAll(users);
-            _adapter.notifyDataSetChanged();
+            runOnUiThread(new Runnable()
+            {
+                public void run()
+                {
+                    _users.clear();
+                    _users.addAll(users);
+                    _adapter.notifyDataSetChanged();
+                }
+            });
         }
 
-        public void join(final long timestamp, final String name)
+        public void join(final long timestamp, final String name, Ice.Current current)
         {
-            _adapter.add(name);
+            runOnUiThread(new Runnable()
+            {
+                public void run()
+                {
+                    _adapter.add(name);
+                }
+            });
         }
 
-        public void leave(final long timestamp, final String name)
+        public void leave(final long timestamp, final String name, Ice.Current current)
         {
-            _adapter.remove(name);
+            runOnUiThread(new Runnable()
+            {
+                public void run()
+                {
+                    _adapter.remove(name);
+                }
+            });
         }
 
-        public void send(final long timestamp, final String name, final String message)
+        public void send(final long timestamp, final String name, final String message, Ice.Current current)
         {
         }
 
-        public void exception(final Ice.LocalException ex)
+        public void error(final String ex, Ice.Current current)
         {
-            _lastError = ex.toString();
-            showDialog(DIALOG_FATAL);
+            runOnUiThread(new Runnable()
+            {
+                public void run()
+                {
+
+                    _lastError = ex;
+                    showDialog(DIALOG_FATAL);
+                }
+            });
         }
 
-        public void exception(final Ice.UserException ex)
+        public void inactivity(Ice.Current current)
         {
-            _lastError = ex.toString();
-            showDialog(DIALOG_FATAL);
-        }
-        
-        public void inactivity()
-        {
-            _lastError = "You were logged out due to inactivity.";
-            showDialog(DIALOG_FATAL);
+            runOnUiThread(new Runnable()
+            {
+                public void run()
+                {
+
+                    _lastError = "You were logged out due to inactivity.";
+                    showDialog(DIALOG_FATAL);
+                }
+            });
         }
     };
 
@@ -85,24 +117,62 @@ public class UserViewActivity extends ListActivity
         }
     }
 
-    @Override
-    public void onResume()
+    public void onServiceConnected(ComponentName name, IBinder service)
     {
-        super.onResume();
-        
+        System.out.println("UserViewActivity.onServiceConnected");
+
+        // TODO: This is ugly. It would be better if there was a way to get the
+        // service directly using the binder.
+        ChatApp app = (ChatApp)getApplication();
+        _service = Chat.Android.ServicePrxHelper.uncheckedCast(app.getCommunicator().stringToProxy(
+                "ChatService:tcp -p 12222"));
+        _listener = Chat.Android.ChatRoomListenerPrxHelper.uncheckedCast(app.getAdapter().addWithUUID(_listenerImpl));
+
         // If the add of the listener fails the session has been destroyed, and
         // we're done.
-        if(!AppSessionManager.instance().addChatRoomListener(_listener, false))
+        if(!_service.addChatRoomListener(_listener, false))
         {
             finish();
         }
     }
 
+    public void onServiceDisconnected(ComponentName name)
+    {
+        System.out.println("UserViewActivity.onServiceDisconnected");
+    }
+
+    @Override
+    public void onResume()
+    {
+        System.out.println("ChatActivity: onResume");
+        super.onResume();
+
+        Intent result = new Intent();
+        result.setComponent(new ComponentName("com.zeroc.chat", "com.zeroc.chat.ChatService"));
+        bindService(result, this, BIND_AUTO_CREATE);
+    }
+
     @Override
     public void onStop()
     {
+        System.out.println("ChatActivity: onStop");
         super.onStop();
-        AppSessionManager.instance().removeChatRoomListener(_listener);
+        unbindService(this);
+
+        if(_listener != null)
+        {
+            _service.removeChatRoomListener(_listener);
+            _service = null;
+            try
+            {
+                ChatApp app = (ChatApp)getApplication();
+                app.getAdapter().remove(_listener.ice_getIdentity());
+            }
+            catch(Ice.NotRegisteredException ex)
+            {
+            }
+            _listener = null;
+        }
     }
 
     @Override

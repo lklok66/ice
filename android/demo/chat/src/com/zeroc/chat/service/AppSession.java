@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-package com.zeroc.chat;
+package com.zeroc.chat.service;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -15,29 +15,24 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-import android.os.Handler;
-
-class AppSession
+public class AppSession
 {
     private Ice.Communicator _communicator;
     private Chat.ChatSessionPrx _session;
-    private SessionRefresh _refresh;
-    private List<ChatRoomListener> _listeners = new LinkedList<ChatRoomListener>();
+    private List<Chat.Android.ChatRoomListenerPrx> _listeners = new LinkedList<Chat.Android.ChatRoomListenerPrx>();
     private LinkedList<ChatEventReplay> _replay = new LinkedList<ChatEventReplay>();
     private List<String> _users = new LinkedList<String>();
 
     static final int MAX_MESSAGES = 200;
     private static final int INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 Minutes
 
-    private Handler _handler;
     private boolean _destroyed = false;
     private long _lastSend;
+    private long _refreshTimeout;
 
-    AppSession(Handler handler, IceSSL.CertificateVerifier verifier, String hostname, String username, String password, boolean secure)
-        throws Glacier2.CannotCreateSessionException, Glacier2.PermissionDeniedException
+    public AppSession(IceSSL.CertificateVerifier verifier, String hostname, String username, String password,
+            boolean secure) throws Glacier2.CannotCreateSessionException, Glacier2.PermissionDeniedException
     {
-        _handler = handler;
-        
         Ice.InitializationData initData = new Ice.InitializationData();
 
         initData.properties = Ice.Util.createProperties();
@@ -78,14 +73,18 @@ class AppSession
 
         Ice.ObjectPrx cb = adapter.add(new ChatCallbackI(), callbackId);
         _session.setCallback(Chat.ChatRoomCallbackPrxHelper.uncheckedCast(cb));
-        
+
         adapter.activate();
         _lastSend = System.currentTimeMillis();
 
-        _refresh = new SessionRefresh((router.getSessionTimeout() * 1000) / 2);
-        _refresh.start();
+        _refreshTimeout = (router.getSessionTimeout() * 1000) / 2;
     }
     
+    synchronized public long getRefreshTimeout()
+    {
+        return _refreshTimeout;
+    }
+
     synchronized public void destroy()
     {
         if(_destroyed)
@@ -94,21 +93,8 @@ class AppSession
         }
 
         _destroyed = true;
-        
+
         System.out.println("AppSession: destroy");
-        
-        _refresh.destroy();
-        while(Thread.currentThread() != _refresh && _refresh.isAlive())
-        {
-            try
-            {
-                _refresh.join();
-            }
-            catch(InterruptedException e1)
-            {
-            }
-        }
-        _refresh = null;
 
         _session.destroy_async(new Glacier2.AMI_Session_destroy()
         {
@@ -123,7 +109,7 @@ class AppSession
             }
         });
         _session = null;
-        
+
         try
         {
             _communicator.destroy();
@@ -133,7 +119,7 @@ class AppSession
         }
         _communicator = null;
     }
-    
+
     // This method is only called by the UI thread.
     synchronized public void send(String t)
     {
@@ -146,15 +132,15 @@ class AppSession
         Chat.AMI_ChatSession_send cb = new Chat.AMI_ChatSession_send()
         {
             @Override
-            public void ice_exception(final Ice.LocalException ex)
+            public void ice_exception(Ice.LocalException ex)
             {
-                localException(ex);
+                localException(ex.toString());
             }
 
             @Override
-            public void ice_exception(final Ice.UserException ex)
+            public void ice_exception(Ice.UserException ex)
             {
-                localException(ex);
+                localException(ex.toString());
             }
 
             @Override
@@ -166,13 +152,13 @@ class AppSession
     }
 
     // This method is only called by the UI thread.
-    synchronized boolean addChatRoomListener(ChatRoomListener cb, boolean replay)
+    public synchronized boolean addChatRoomListener(Chat.Android.ChatRoomListenerPrx cb, boolean replay)
     {
         if(_destroyed)
         {
             return false;
         }
-        
+
         _listeners.add(cb);
         cb.init(_users);
         if(replay)
@@ -187,14 +173,49 @@ class AppSession
     }
 
     // This method is only called by the UI thread.
-    synchronized public void removeChatRoomListener(ChatRoomListener cb)
+    synchronized public void removeChatRoomListener(Chat.Android.ChatRoomListenerPrx cb)
     {
         _listeners.remove(cb);
+    }
+    
+    // Returns false if the session has been destroyed, true otherwise.
+    synchronized public boolean refresh()
+    {
+        if(_destroyed)
+        {
+            return false;
+        }
+
+        // If the user has not sent a message in the INACTIVITY_TIMEOUT interval
+        // then drop the session.
+        if(System.currentTimeMillis() - _lastSend > INACTIVITY_TIMEOUT)
+        {
+            destroy();
+            for(Iterator<Chat.Android.ChatRoomListenerPrx> p = _listeners.iterator(); p.hasNext();)
+            {
+                Chat.Android.ChatRoomListenerPrx l = p.next();
+                l.inactivity();
+            }
+            return false;
+        }
+
+        try
+        {
+            // TODO: This should be async.
+            _session.ice_ping();
+        }
+        catch(Ice.LocalException e)
+        {
+            localException(e.toString());
+            return false;
+        }
+
+        return true;
     }
 
     private interface ChatEventReplay
     {
-        public void replay(ChatRoomListener cb);
+        public void replay(Chat.Android.ChatRoomListenerPrx cb);
     }
 
     private class ChatCallbackI extends Chat._ChatRoomCallbackDisp
@@ -204,18 +225,12 @@ class AppSession
             final List<String> u = Arrays.asList(users);
             _users.clear();
             _users.addAll(u);
-     
+
             // No replay event for init.
-            for(Iterator<ChatRoomListener> p = _listeners.iterator(); p.hasNext();)
+            for(Iterator<Chat.Android.ChatRoomListenerPrx> p = _listeners.iterator(); p.hasNext();)
             {
-                final ChatRoomListener l = p.next();
-                _handler.post(new Runnable()
-                {
-                    public void run()
-                    {
-                        l.init(u);
-                    }
-                });
+                Chat.Android.ChatRoomListenerPrx l = p.next();
+                l.init(u);
             }
         }
 
@@ -223,7 +238,7 @@ class AppSession
         {
             _replay.add(new ChatEventReplay()
             {
-                public void replay(ChatRoomListener cb)
+                public void replay(Chat.Android.ChatRoomListenerPrx cb)
                 {
                     cb.join(timestamp, name);
                 }
@@ -232,19 +247,13 @@ class AppSession
             {
                 _replay.removeFirst();
             }
-            
+
             _users.add(name);
-            
-            for(Iterator<ChatRoomListener> p = _listeners.iterator(); p.hasNext();)
+
+            for(Iterator<Chat.Android.ChatRoomListenerPrx> p = _listeners.iterator(); p.hasNext();)
             {
-                final ChatRoomListener l = p.next();
-                _handler.post(new Runnable()
-                {
-                    public void run()
-                    {
-                        l.join(timestamp, name);
-                    }
-                });
+                Chat.Android.ChatRoomListenerPrx l = p.next();
+                l.join(timestamp, name);
             }
         }
 
@@ -252,7 +261,7 @@ class AppSession
         {
             _replay.add(new ChatEventReplay()
             {
-                public void replay(ChatRoomListener cb)
+                public void replay(Chat.Android.ChatRoomListenerPrx cb)
                 {
                     cb.leave(timestamp, name);
                 }
@@ -261,19 +270,13 @@ class AppSession
             {
                 _replay.removeFirst();
             }
-            
+
             _users.remove(name);
-            
-            for(Iterator<ChatRoomListener> p = _listeners.iterator(); p.hasNext();)
+
+            for(Iterator<Chat.Android.ChatRoomListenerPrx> p = _listeners.iterator(); p.hasNext();)
             {
-                final ChatRoomListener l = p.next();
-                _handler.post(new Runnable()
-                {
-                    public void run()
-                    {
-                        l.leave(timestamp, name);
-                    }
-                });
+                Chat.Android.ChatRoomListenerPrx l = p.next();
+                l.leave(timestamp, name);
             }
         }
 
@@ -281,7 +284,7 @@ class AppSession
         {
             _replay.add(new ChatEventReplay()
             {
-                public void replay(ChatRoomListener cb)
+                public void replay(Chat.Android.ChatRoomListenerPrx cb)
                 {
                     cb.send(timestamp, name, message);
                 }
@@ -290,137 +293,24 @@ class AppSession
             {
                 _replay.removeFirst();
             }
-            
-            for(Iterator<ChatRoomListener> p = _listeners.iterator(); p.hasNext();)
+
+            for(Iterator<Chat.Android.ChatRoomListenerPrx> p = _listeners.iterator(); p.hasNext();)
             {
-                final ChatRoomListener l = p.next();
-                _handler.post(new Runnable()
-                {
-                    public void run()
-                    {
-                        l.send(timestamp, name, message);
-                    }
-                });
+                Chat.Android.ChatRoomListenerPrx l = p.next();
+                l.send(timestamp, name, message);
             }
         }
     }
 
-    private class SessionRefresh extends Thread
-    {
-        SessionRefresh(long l)
-        {
-            _timeout = l;
-        }
-
-        synchronized public void destroy()
-        {
-            _destroy = true;
-            notify();
-        }
-
-        public void run()
-        {
-            while(true)
-            {
-                synchronized(this)
-                {
-                    if(_destroy)
-                    {
-                        return;
-                    }
-                    try
-                    {
-                        // Note that this is, strictly speaking, incorrect. If the
-                        // CPU goes to sleep the wait will potentially be called
-                        // much later. The correct way to manage this is with the 
-                        // AlarmManager.
-                        wait(_timeout);
-                    }
-                    catch(InterruptedException e1)
-                    {
-                    }
-                    if(_destroy)
-                    {
-                        return;
-                    }
-                }
-                refresh();
-            }
-        }
-        
-        private long _timeout;
-        private boolean _destroy = false;
-    }
-    
-    synchronized private void refresh()
-    {
-        if(_destroyed)
-        {
-            return;
-        }
-        
-        // If the user has not sent a message in the INACTIVITY_TIMEOUT interval
-        // then drop the session.
-        if(System.currentTimeMillis() - _lastSend > INACTIVITY_TIMEOUT)
-        {
-            destroy();
-            for(Iterator<ChatRoomListener> p = _listeners.iterator(); p.hasNext();)
-            {
-                final ChatRoomListener l = p.next();
-                _handler.post(new Runnable()
-                {
-                    public void run()
-                    {
-                        l.inactivity();
-                    }
-                });
-            }
-            return;
-        }
-
-        try
-        {
-            _session.ice_ping();
-        }
-        catch(Ice.LocalException e)
-        {
-            localException(e);
-            return;
-        }
-    }
-    
     // Any exception destroys the session.
-    synchronized private void localException(final Ice.LocalException ex)
+    synchronized private void localException(String msg)
     {
         destroy();
-        
-        for(Iterator<ChatRoomListener> p = _listeners.iterator(); p.hasNext();)
+
+        for(Iterator<Chat.Android.ChatRoomListenerPrx> p = _listeners.iterator(); p.hasNext();)
         {
-            final ChatRoomListener l = p.next();
-            _handler.post(new Runnable()
-            {
-                public void run()
-                {
-                    l.exception(ex);
-                }
-            });
-        }
-    }
-    
-    synchronized private void localException(final Ice.UserException ex)
-    {
-        destroy();
-        
-        for(Iterator<ChatRoomListener> p = _listeners.iterator(); p.hasNext();)
-        {
-            final ChatRoomListener l = p.next();
-            _handler.post(new Runnable()
-            {
-                public void run()
-                {
-                    l.exception(ex);
-                }
-            });
+            Chat.Android.ChatRoomListenerPrx l = p.next();
+            l.error(msg);
         }
     }
 }

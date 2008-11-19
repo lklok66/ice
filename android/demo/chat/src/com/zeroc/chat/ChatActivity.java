@@ -15,9 +15,12 @@ import java.util.List;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
+import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,7 +30,7 @@ import android.view.View.OnKeyListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 
-public class ChatActivity extends ListActivity implements OnClickListener, OnKeyListener
+public class ChatActivity extends ListActivity implements OnClickListener, OnKeyListener, ServiceConnection
 {
     private static final int DIALOG_ERROR = 1;
     private static final int DIALOG_FATAL = 2;
@@ -41,58 +44,78 @@ public class ChatActivity extends ListActivity implements OnClickListener, OnKey
     private EditText _text;
     private ArrayAdapter<String> _adapter;
     private LinkedList<String> _strings = new LinkedList<String>();
-    private ChatRoomListener _listener = new ChatRoomListener()
+    private Chat.Android.ServicePrx _service;
+    private Chat.Android.ChatRoomListenerPrx _listener;
+    private Ice.Object _listenerImpl = new Chat.Android._ChatRoomListenerDisp()
     {
-        public void init(final List<String> users)
+        public void init(final List<String> users, Ice.Current current)
         {
-            _strings.clear();
-            _adapter.notifyDataSetChanged();
+            runOnUiThread(new Runnable()
+            {
+                public void run()
+                {
+                    _strings.clear();
+                    _adapter.notifyDataSetChanged();
+                }
+            });
         }
 
-        public void join(final long timestamp, final String name)
+        public void join(final long timestamp, final String name, Ice.Current current)
         {
             add(ChatUtils.formatTimestamp(timestamp) + " - <system-message> - " + name + " joined.");
         }
 
-        public void leave(final long timestamp, final String name)
+        public void leave(final long timestamp, final String name, Ice.Current current)
         {
             add(ChatUtils.formatTimestamp(timestamp) + " - " + "<system-message> - " + name + " left.");
         }
 
-        public void send(final long timestamp, final String name, final String message)
+        public void send(final long timestamp, final String name, final String message, Ice.Current current)
         {
             add(ChatUtils.formatTimestamp(timestamp) + " - <" + name + "> " + ChatUtils.unstripHtml(message));
         }
 
-        public void exception(final Ice.LocalException ex)
+        public void error(final String error, Ice.Current current)
         {
-            _lastError = ex.toString();
-            showDialog(DIALOG_FATAL);
+            runOnUiThread(new Runnable()
+            {
+                public void run()
+                {
+                    _lastError = error;
+                    showDialog(DIALOG_FATAL);
+                }
+            });
         }
 
-        public void exception(final Ice.UserException ex)
+        public void inactivity(Ice.Current current)
         {
-            _lastError = ex.toString();
-            showDialog(DIALOG_FATAL);
-        }
-        
-        public void inactivity()
-        {
-            _lastError = "You were logged out due to inactivity.";
-            showDialog(DIALOG_FATAL);
-        }
-        
-        private void add(String msg)
-        {
-            _strings.add(msg);
-            if(_strings.size() > AppSession.MAX_MESSAGES)
+            runOnUiThread(new Runnable()
             {
-                _strings.removeFirst();
-            }
-            _adapter.notifyDataSetChanged();
+                public void run()
+                {
+                    _lastError = "You were logged out due to inactivity.";
+                    showDialog(DIALOG_FATAL);
+                }
+            });
+        }
+        
+        private void add(final String msg)
+        {
+            runOnUiThread(new Runnable()
+            {
+                public void run()
+                {
+                    _strings.add(msg);
+                    if(_strings.size() > 200) // AppSession.MAX_MESSAGES)
+                    {
+                        _strings.removeFirst();
+                    }
+                    _adapter.notifyDataSetChanged();
+                }
+            });
         }
     };
-
+    
     public void onClick(View v)
     {
         sendText();
@@ -100,7 +123,6 @@ public class ChatActivity extends ListActivity implements OnClickListener, OnKey
     
     public boolean onKey(View v, int keyCode, KeyEvent event)
     {
-        System.out.println("ChatActivity: onKey");
         if(event.getAction() == KeyEvent.ACTION_DOWN)
         {
             switch (keyCode)
@@ -147,6 +169,28 @@ public class ChatActivity extends ListActivity implements OnClickListener, OnKey
             _lastError = savedInstanceState.getString(BUNDLE_KEY_LAST_ERROR);
         }
     }
+    
+    public void onServiceConnected(ComponentName name, IBinder service)
+    {
+        System.out.println("ChatActivity.onServiceConnected");
+        // TODO: This is ugly. It would be better if there was a way to get the service directly using
+        // the binder.
+        ChatApp app = (ChatApp)getApplication();
+        _service = Chat.Android.ServicePrxHelper.uncheckedCast(app.getCommunicator().stringToProxy(
+                "ChatService:tcp -p 12222"));
+        _listener = Chat.Android.ChatRoomListenerPrxHelper.uncheckedCast(app.getAdapter().addWithUUID(_listenerImpl));
+        // If the add of the listener fails the session has been destroyed, and
+        // we're done.
+        if(!_service.addChatRoomListener(_listener, true))
+        {
+            finish();
+        }
+    }
+
+    public void onServiceDisconnected(ComponentName name)
+    {
+        System.out.println("ChatActivity.onServiceDisconnected");
+    }
 
     @Override
     public void onResume()
@@ -154,12 +198,9 @@ public class ChatActivity extends ListActivity implements OnClickListener, OnKey
         System.out.println("ChatActivity: onResume");
         super.onResume();
 
-        // If the add of the listener fails the session has been destroyed, and
-        // we're done.
-        if(!AppSessionManager.instance().addChatRoomListener(_listener, true))
-        {
-            finish();
-        }
+        Intent result = new Intent();
+        result.setComponent(new ComponentName("com.zeroc.chat", "com.zeroc.chat.ChatService"));
+        bindService(result, this, BIND_AUTO_CREATE);
     }
 
     @Override
@@ -167,8 +208,22 @@ public class ChatActivity extends ListActivity implements OnClickListener, OnKey
     {
         System.out.println("ChatActivity: onStop");
         super.onStop();
+        unbindService(this);
         
-        AppSessionManager.instance().removeChatRoomListener(_listener);
+        if(_listener != null)
+        {
+            _service.removeChatRoomListener(_listener);
+            _service = null;
+            try
+            {
+                ChatApp app = (ChatApp)getApplication();
+                app.getAdapter().remove(_listener.ice_getIdentity());
+            }
+            catch(Ice.NotRegisteredException ex)
+            {
+            }
+            _listener = null;
+        }
     }
     
     @Override
@@ -238,7 +293,7 @@ public class ChatActivity extends ListActivity implements OnClickListener, OnKey
     
     private void logout()
     {
-        AppSessionManager.instance().destroySession();
+        _service.logout();
         finish();
     }
     
@@ -257,6 +312,6 @@ public class ChatActivity extends ListActivity implements OnClickListener, OnKey
         }
         _text.setText("");
 
-        AppSessionManager.instance().send(t);
+        _service.send(t);
     }
 }
