@@ -56,6 +56,7 @@ LOCAL_OBJS      = Base64.obj \
                   ObjectAdapter.obj \
                   ObjectAdapterFactory.obj \
 		  ObjectFactoryManager.obj \
+		  ObjectFactoryManagerI.obj \
                   OperationMode.obj \
                   Outgoing.obj \
 		  OutgoingAsync.obj \

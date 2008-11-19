@@ -10,40 +10,27 @@
 #ifndef ICEE_OBJECT_FACTORY_MANAGER_H
 #define ICEE_OBJECT_FACTORY_MANAGER_H
 
-#include <IceE/Config.h>
-
-#ifdef ICEE_HAS_OBV
-
 #include <IceE/Shared.h>
-#include <IceE/Mutex.h>
 #include <IceE/ObjectFactoryManagerF.h>
 #include <IceE/ObjectFactoryF.h>
 
 namespace IceInternal
 {
 
-class ObjectFactoryManager : public ::IceUtil::Shared, public ::IceUtil::Mutex
+//
+// Code size optimization: we define this abstract class to allow the linker
+// to not import its implementation if it no user object factories are used
+// by statically linked executables.
+//
+class ObjectFactoryManager : public ::IceUtil::Shared
 {
 public:
 
-    void add(const ::Ice::ObjectFactoryPtr&, const std::string&);
-    void remove(const std::string&);
-    ::Ice::ObjectFactoryPtr find(const std::string&) const;
-
-    typedef std::map<std::string, ::Ice::ObjectFactoryPtr> FactoryMap;
-
-private:
-
-    ObjectFactoryManager();
-    void destroy();
-    friend class Instance;
-
-    FactoryMap _factoryMap;
-    mutable FactoryMap::iterator _factoryMapHint;
+    virtual void add(const ::Ice::ObjectFactoryPtr&, const std::string&) = 0;
+    virtual ::Ice::ObjectFactoryPtr find(const std::string&) const = 0;
+    virtual void destroy() = 0;
 };
 
 }
-
-#endif
 
 #endif

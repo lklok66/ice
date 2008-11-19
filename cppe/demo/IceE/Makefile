@@ -18,10 +18,11 @@ SUBDIRS		= hello \
 		  chat \
 		  bidir \
 		  minimal \
+		  value \
 		  workqueue
 
-ifeq ($(HAS_OBV),yes)
-    SUBDIRS     += value
+ifeq ($(HAS_AMI),yes)
+    SUBDIRS	+= async
 endif
 
 $(EVERYTHING)::

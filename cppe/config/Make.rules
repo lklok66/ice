@@ -90,11 +90,6 @@ HAS_WSTRING		= yes
 HAS_OPAQUE_ENDPOINTS	= yes
 
 #
-# Compile with support for objects by value.
-#
-HAS_OBV			= yes
-
-#
 # Compile with support for asynchronous method invocation (AMI).
 #
 HAS_AMI			= yes
@@ -205,8 +200,8 @@ EVERYTHING		= all depend clean install
 .c.o:
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $<
 
-%C.o: %.cpp
-	$(CXX) -c -DICEE_PURE_CLIENT -o $(*F)C.o $(CPPFLAGS) $(CXXFLAGS) $<
+%C.o: %.o %.cpp
+	$(CXX) -c -DICEE_PURE_CLIENT -o $(*F)C.o $(CPPFLAGS) $(CXXFLAGS) $(*F).cpp
 
 $(HDIR)/%F.h: $(SDIR)/%F.ice
 	rm -f $(HDIR)/$(*F)F.h $(*F)F.cpp
@@ -280,5 +275,4 @@ configure:
 	    HAS_BATCH=$(HAS_BATCH) \
 	    HAS_WSTRING=$(HAS_WSTRING) \
 	    HAS_OPAQUE_ENDPOINTS=$(HAS_OPAQUE_ENDPOINTS) \
-	    HAS_OBV=$(HAS_OBV) \
 	    HAS_AMI=$(HAS_AMI)

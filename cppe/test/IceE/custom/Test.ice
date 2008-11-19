@@ -79,14 +79,12 @@ sequence<EList> EListSeq;
 ["cpp:type:std::list< ::Test::ESeq>"] sequence<ESeq> ESeqList;
 
 class C {};
-#ifdef ICEE_HAS_OBV
 sequence<C> CSeq;
 ["cpp:type:std::list< ::Test::CPtr>"] sequence<C> CList;
 
 ["cpp:type:std::list< ::Test::CList>"] sequence<CList> CListList;
 sequence<CList> CListSeq;
 ["cpp:type:std::list< ::Test::CSeq>"] sequence<CSeq> CSeqList;
-#endif
 
 sequence<C*> CPrxSeq;
 ["cpp:type:std::list< ::Test::CPrx>"] sequence<C*> CPrxList;
@@ -165,12 +163,10 @@ sequence<CPrxList> CPrxListSeq;
 
     CPrxList opCPrxList(CPrxList inSeq, out CPrxList outSeq);
 
-#ifdef ICEE_HAS_OBV
     ["cpp:type:std::deque< ::Test::CPtr>"] CSeq
     opCSeq(["cpp:type:std::deque< ::Test::CPtr>"] CSeq inSeq, out ["cpp:type:std::deque< ::Test::CPtr>"] CSeq outSeq);
 
     CList opCList(CList inSeq, out CList outSeq);
-#endif
 
     void shutdown();
 };

@@ -10,10 +10,6 @@
 #ifndef ICEE_OBJECT_FACTORY_H
 #define ICEE_OBJECT_FACTORY_H
 
-#include <IceE/Config.h>
-
-#ifdef ICEE_HAS_OBV
-
 #include <IceE/ObjectFactoryF.h>
 #include <IceE/ObjectF.h>
 
@@ -30,7 +26,5 @@ public:
 
 
 }
-
-#endif
 
 #endif

@@ -98,7 +98,7 @@ public:
 #ifdef ICEE_HAS_AMI
     void getEndpoints(const ReferencePtr&, const GetEndpointsCallbackPtr&);
 #else
-    vector<EndpointPtr> getEndpoints(const ReferencePtr&, bool&);
+    std::vector<EndpointPtr> getEndpoints(const ReferencePtr&, bool&);
 #endif
     void clearCache(const ReferencePtr&);
     void clearObjectCache(const ReferencePtr&);

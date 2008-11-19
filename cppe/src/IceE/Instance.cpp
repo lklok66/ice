@@ -29,9 +29,7 @@
 #include <IceE/LoggerI.h>
 #include <IceE/EndpointFactory.h>
 #include <IceE/Endpoint.h>
-#ifdef ICEE_HAS_OBV
-#    include <IceE/ObjectFactoryManager.h>
-#endif
+#include <IceE/ObjectFactoryManagerI.h>
 #ifndef ICEE_PURE_CLIENT
 #    include <IceE/ObjectAdapterFactory.h>
 #endif
@@ -168,7 +166,6 @@ IceInternal::Instance::outgoingConnectionFactory() const
     return _outgoingConnectionFactory;
 }
 
-#ifdef ICEE_HAS_OBV
 ObjectFactoryManagerPtr
 IceInternal::Instance::servantFactoryManager() const
 {
@@ -179,10 +176,14 @@ IceInternal::Instance::servantFactoryManager() const
         throw CommunicatorDestroyedException(__FILE__, __LINE__);
     }
 
+    if(!_servantFactoryManager)
+    {
+        const_cast<Instance&>(*this)._servantFactoryManager = new ObjectFactoryManagerI();
+    }
+
     assert(_servantFactoryManager);
     return _servantFactoryManager;
 }
-#endif
 
 #ifndef ICEE_PURE_CLIENT
 ObjectAdapterFactoryPtr
@@ -638,10 +639,6 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
 
         _outgoingConnectionFactory = new OutgoingConnectionFactory(this);
 
-#ifdef ICEE_HAS_OBV
-        _servantFactoryManager = new ObjectFactoryManager();
-#endif
-
 #ifndef ICEE_PURE_CLIENT
         _objectAdapterFactory = new ObjectAdapterFactory(this, communicator);
 #endif
@@ -703,9 +700,7 @@ IceInternal::Instance::~Instance()
     assert(!_referenceFactory);
     assert(!_proxyFactory);
     assert(!_outgoingConnectionFactory);
-#ifdef ICEE_HAS_OBV
     assert(!_servantFactoryManager);
-#endif
 #ifndef ICEE_PURE_CLIENT
     assert(!_objectAdapterFactory);
 #endif
@@ -906,13 +901,11 @@ IceInternal::Instance::destroy()
             _timer = 0;
         }
 
-#ifdef ICEE_HAS_OBV
         if(_servantFactoryManager)
         {
             _servantFactoryManager->destroy();
             _servantFactoryManager = 0;
         }
-#endif
 
         //_referenceFactory->destroy(); // No destroy function defined.
         _referenceFactory = 0;

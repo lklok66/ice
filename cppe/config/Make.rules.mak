@@ -97,13 +97,6 @@ HAS_OPAQUE_ENDPOINTS	= yes
 !endif
 
 #
-# Compile with support for objects by value.
-#
-!ifndef HAS_OBV
-HAS_OBV			= yes
-!endif
-
-#
 # Compile with support for asynchronous method invocation (AMI).
 #
 !ifndef HAS_AMI
@@ -449,5 +442,4 @@ configure:
 	    "HAS_BATCH=$(HAS_BATCH)" \
 	    "HAS_WSTRING=$(HAS_WSTRING)" \
 	    "HAS_OPAQUE_ENDPOINTS=$(HAS_OPAQUE_ENDPOINTS)" \
-	    "HAS_OBV=$(HAS_OBV)" \
 	    "HAS_AMI=$(HAS_AMI)"

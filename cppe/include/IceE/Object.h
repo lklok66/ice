@@ -68,13 +68,11 @@ public:
     virtual DispatchStatus __dispatch(IceInternal::Incoming&, const Current&);
 #endif
 
-#ifdef ICEE_HAS_OBV
     virtual void ice_preMarshal();
     virtual void ice_postUnmarshal();
 
     virtual void __write(IceInternal::BasicStream*) const;
     virtual void __read(IceInternal::BasicStream*, bool);
-#endif
 
 protected:
 

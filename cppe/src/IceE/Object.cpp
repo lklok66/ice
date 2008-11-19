@@ -9,8 +9,6 @@
 
 #include <IceE/Config.h>
 
-#if !defined(ICEE_PURE_CLIENT) || defined(ICEE_HAS_OBV)
-
 #include <IceE/Object.h>
 #ifndef ICEE_PURE_CLIENT
 #   include <IceE/Incoming.h>
@@ -84,8 +82,6 @@ Ice::Object::ice_clone() const
     throw CloneNotImplementedException(__FILE__, __LINE__);
 }
 
-#ifdef ICEE_HAS_OBV
-
 void
 Ice::Object::ice_preMarshal()
 {
@@ -95,8 +91,6 @@ void
 Ice::Object::ice_postUnmarshal()
 {
 }
-
-#endif
 
 #ifndef ICEE_PURE_CLIENT
 
@@ -190,7 +184,6 @@ Ice::Object::__dispatch(Incoming& in, const Current& current)
 
 #endif
 
-#ifdef ICEE_HAS_OBV
 void
 Ice::Object::__write(BasicStream* __os) const
 {
@@ -228,7 +221,6 @@ Ice::__patch__ObjectPtr(void* __addr, ObjectPtr& v)
     ObjectPtr* p = static_cast<ObjectPtr*>(__addr);
     *p = v;
 }
-#endif
 
 #ifndef ICEE_PURE_CLIENT
 
@@ -275,7 +267,5 @@ Ice::Object::__invalidMode(OperationMode expected, OperationMode received)
         throw ex;
     }
 }
-
-#endif
 
 #endif

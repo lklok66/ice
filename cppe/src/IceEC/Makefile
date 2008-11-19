@@ -51,6 +51,7 @@ ICE_OBJS	= Base64.o \
 		  Network.o \
 		  Object.o \
 		  ObjectFactoryManager.o \
+		  ObjectFactoryManagerI.o \
 		  OperationMode.o \
 		  Outgoing.o \
 		  OutgoingAsync.o \

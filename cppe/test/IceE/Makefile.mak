@@ -14,6 +14,7 @@ top_srcdir	= ..\..
 SUBDIRS		= proxy \
 		  binding \
 		  defaultServant \
+		  objects \
                   operations \
 		  exceptions \
 		  inheritance \
@@ -25,11 +26,6 @@ SUBDIRS		= proxy \
 		  retry \
 		  thread \
 		  uuid
-
-!if "$(HAS_OBV)" == "yes"
-SUBDIRS		= $(SUBDIRS) \
-		  objects
-!endif
 
 !if "$(EMBEDDED_DEVICE)" == ""
 SUBDIRS		= $(SUBDIRS) \

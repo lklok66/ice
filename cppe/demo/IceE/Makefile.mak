@@ -16,17 +16,17 @@ SUBDIRS		= minimal \
 		  throughput \
 		  chat
 
-!if "$(EMBEDDED_DEVICE)" == "" && "$(HAS_OBV)" == "yes"
-SUBDIRS		= $(SUBDIRS) \
-		  value
-!endif
-
 !if "$(EMBEDDED_DEVICE)" == ""
 SUBDIRS 	= $(SUBDIRS) \
 		  hello \
 		  callback \
 		  bidir \
+		  value \
 		  workqueue
+!endif
+
+!if "$(EMBEDDED_DEVICE)" == "" && "$(HAS_AMI)" == "yes"
+SUBDIRS		= $(SUBDIRS) async
 !endif
 
 !if "$(CPP_COMPILER)" != "VC80_EXPRESS" && "$(CPP_COMPILER)" != "VC90_EXPRESS"

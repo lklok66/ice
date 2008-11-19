@@ -21,7 +21,6 @@ HAS_LOCATOR=//
 HAS_BATCH=//
 HAS_WSTRING=//
 HAS_OPAQUE_ENDPOINTS=//
-HAS_OBV=//
 HAS_AMI=//
 
 for arg; do
@@ -30,7 +29,6 @@ for arg; do
     if [ "HAS_BATCH=yes" == "$arg" ]; then HAS_BATCH=; fi
     if [ "HAS_WSTRING=yes" == "$arg" ]; then HAS_WSTRING=; fi
     if [ "HAS_OPAQUE_ENDPOINTS=yes" == "$arg" ]; then HAS_OPAQUE_ENDPOINTS=; fi
-    if [ "HAS_OBV=yes" == "$arg" ]; then HAS_OBV=; fi
     if [ "HAS_AMI=yes" == "$arg" ]; then HAS_AMI=; fi
 done
 
@@ -54,7 +52,6 @@ ${HAS_LOCATOR}#define ICEE_HAS_LOCATOR
 ${HAS_BATCH}#define ICEE_HAS_BATCH
 ${HAS_WSTRING}#define ICEE_HAS_WSTRING
 ${HAS_OPAQUE_ENDPOINTS}#define ICEE_HAS_OPAQUE_ENDPOINTS
-${HAS_OBV}#define ICEE_HAS_OBV
 ${HAS_AMI}#define ICEE_HAS_AMI
 
 #endif

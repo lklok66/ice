@@ -30,6 +30,8 @@ IceUtil::Shared* IceInternal::upCast(LocatorManager* p) { return p; }
 IceUtil::Shared* IceInternal::upCast(LocatorInfo* p) { return p; }
 IceUtil::Shared* IceInternal::upCast(LocatorTable* p) { return p; }
 
+#ifdef ICEE_HAS_AMI
+
 namespace
 {
 
@@ -86,6 +88,8 @@ private:
 };
 
 }
+
+#endif
 
 IceInternal::LocatorManager::LocatorManager() :
     _tableHint(_table.end())
@@ -390,7 +394,6 @@ IceInternal::LocatorInfo::getEndpoints(const ReferencePtr& ref, bool& cached)
     catch(const Ice::Exception& ex)
     {
         getEndpointsException(ref, ex);
-        return;
     }
 
     if(ref->getInstance()->traceLevels()->location >= 1)
@@ -624,9 +627,9 @@ IceInternal::LocatorInfo::trace(const string& msg, const ReferencePtr& ref, cons
 
 void 
 IceInternal::LocatorInfo::getEndpointsException(const ReferencePtr& ref, 
-                                                const Ice::Exception& exc, 
+                                                const Ice::Exception& exc
 #ifdef ICEE_HAS_AMI
-                                                const GetEndpointsCallbackPtr& callback
+                                                , const GetEndpointsCallbackPtr& callback
 #endif
     )
 {
@@ -652,7 +655,7 @@ IceInternal::LocatorInfo::getEndpointsException(const ReferencePtr& ref,
 #ifdef ICEE_HAS_AMI
         callback->locatorInfoException(ex);
 #else
-        throw;
+        throw ex;
 #endif
     }
     catch(const ObjectNotFoundException&)
@@ -671,7 +674,7 @@ IceInternal::LocatorInfo::getEndpointsException(const ReferencePtr& ref,
 #ifdef ICEE_HAS_AMI
         callback->locatorInfoException(ex);
 #else
-        throw;
+        throw ex;
 #endif
     }
     catch(const NotRegisteredException& ex)

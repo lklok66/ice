@@ -19,7 +19,6 @@ set HAS_LOCATOR=//
 set HAS_BATCH=//
 set HAS_WSTRING=//
 set HAS_OPAQUE_ENDPOINTS=//
-set HAS_OBV=//
 set HAS_AMI=//
 
 for %%n in (%1 %2 %3 %4 %5 %6 %7 %8 %9) do (
@@ -28,7 +27,6 @@ if %%n=="HAS_LOCATOR=yes" set HAS_LOCATOR=
 if %%n=="HAS_BATCH=yes" set HAS_BATCH=
 if %%n=="HAS_WSTRING=yes" set HAS_WSTRING=
 if %%n=="HAS_OPAQUE_ENDPOINTS=yes" set HAS_OPAQUE_ENDPOINTS=
-if %%n=="HAS_OBV=yes" set HAS_OBV=
 if %%n=="HAS_AMI=yes" set HAS_AMI=
 )
 
@@ -51,7 +49,6 @@ echo %HAS_LOCATOR%#define ICEE_HAS_LOCATOR>> %targ%
 echo %HAS_BATCH%#define ICEE_HAS_BATCH>> %targ%
 echo %HAS_WSTRING%#define ICEE_HAS_WSTRING>> %targ%
 echo %HAS_OPAQUE_ENDPOINTS%#define ICEE_HAS_OPAQUE_ENDPOINTS>> %targ%
-echo %HAS_OBV%#define ICEE_HAS_OBV>> %targ%
 echo %HAS_AMI%#define ICEE_HAS_AMI>> %targ%
 echo.>> %targ%
 echo #endif>> %targ%

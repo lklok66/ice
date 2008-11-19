@@ -95,7 +95,6 @@ protected:
     void __prepare(const Ice::ObjectPrx&, const std::string&, Ice::OperationMode, const Ice::Context*);
 
     virtual void __response(bool) = 0;
-    void __throwUserException();
 
 private:
 

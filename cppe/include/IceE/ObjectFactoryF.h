@@ -10,10 +10,6 @@
 #ifndef ICEE_OBJECT_FACTORY_F_H
 #define ICEE_OBJECT_FACTORY_F_H
 
-#include <IceE/Config.h>
-
-#ifdef ICEE_HAS_OBV
-
 #include <IceE/Handle.h>
 #include <IceE/Shared.h>
 
@@ -45,7 +41,5 @@ namespace Ice
 typedef ::IceInternal::Handle< ::Ice::ObjectFactory> ObjectFactoryPtr;
 
 }
-
-#endif
 
 #endif

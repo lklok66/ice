@@ -82,7 +82,10 @@ ifeq ($(OPTIMIZE_SIZE),yes)
    ifeq ($(LP64),yes)
       OPT_FLAGS	        = -O2
    else
-      OPT_FLAGS		= -Os
+      OPT_FLAGS	= -Os
+      ifeq ($(STATICLIBS),yes)
+          OPT_FLAGS	+= -fdata-sections -ffunction-sections
+      endif
    endif
 endif
 
@@ -116,6 +119,12 @@ mkshlib		= $(CXX) -shared $(LDFLAGS) -o $(1) -Wl,-h,$(2) $(3) $(4) -lpthread
 mklib		= $(AR) cr $(1) $(2)
 
 LDPLATFORMFLAGS 	= -Wl,--enable-new-dtags -Wl,-rpath,$(install_libdir)
+
+ifeq ($(OPTIMIZE_SIZE),yes)
+    ifeq ($(STATICLIBS),yes)
+        LDPLATFORMFLAGS += -Wl,-gc-sections
+    endif
+endif
 
 NPTL_LIB                = /usr/$(libsubdir)/nptl
 

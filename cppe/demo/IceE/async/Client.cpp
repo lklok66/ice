@@ -23,7 +23,7 @@ public:
 
     virtual void ice_exception(const Ice::Exception& ex)
     {
-        cerr << "sayHello AMI call failed:\n" << ex << endl;
+        fprintf(stderr, "sayHello AMI called failed:\n%s\n", ex.toString().c_str());
     }
 };
 

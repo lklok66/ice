@@ -11,12 +11,8 @@ top_srcdir	= ..\..\..
 
 !include $(top_srcdir)\config\Make.rules.mak
 
-SUBDIRS		= exceptions
+SUBDIRS		= objects exceptions
 
-!if "$(HAS_OBV)" == "yes"
-SUBDIRS		= $(SUBDIRS) \
-		  objects
-!endif
 
 $(EVERYTHING)::
 	@for %i in ( $(SUBDIRS) ) do \

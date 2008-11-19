@@ -1139,7 +1139,7 @@ IceInternal::RoutableReference::getConnection() const
 		    {
 			Trace out(getInstance()->initializationData().logger, traceLevels->retryCat);
 			out << "connection to cached endpoints failed\n"
-			    << "removing endpoints from cache and trying one more time\n" << ex;
+			    << "removing endpoints from cache and trying one more time\n" << ex.toString();
 		    }
 		}
 		continue;
@@ -1165,30 +1165,15 @@ IceInternal::RoutableReference::createConnection(const vector<EndpointPtr>& endp
     }
 
     Ice::ConnectionIPtr connection = getInstance()->outgoingConnectionFactory()->create(endpts);
-#if defined(ICEE_HAS_ROUTER)
-    RouterInfoPtr ri = _reference->getRouterInfo();
-    if(ri)
+#if defined(ICEE_HAS_ROUTER) && !defined(ICEE_PURE_CLIENT)
+    //
+    // If we have a router, set the object adapter for this router
+    // (if any) to the new connection, so that callbacks from the
+    // router can be received over this new connection.
+    //
+    if(_routerInfo && _routerInfo->getAdapter())
     {
-#ifndef ICEE_PURE_CLIENT 
-        //
-        // If we have a router, set the object adapter for this router
-        // (if any) to the new connection, so that callbacks from the
-        // router can be received over this new connection.
-        //
-        if(ri->getAdapter())
-        {
-            connection->setAdapter(ri->getAdapter());
-        }
-#endif
-
-        //
-        // If this proxy is for a non-local object, and we are using a router, then
-        // add this proxy to the router info object.
-        //
-        if(ri)
-        {
-            ri->addProxy(_proxy);
-        }
+        connection->setAdapter(_routerInfo->getAdapter());
     }
 #endif
     return connection;

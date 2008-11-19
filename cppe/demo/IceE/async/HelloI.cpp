@@ -20,12 +20,12 @@ HelloI::sayHello(int delay, const Ice::Current&)
     {
         IceUtil::ThreadControl::sleep(IceUtil::Time::milliSeconds(delay));
     }
-    cout << "Hello World!" << endl;
+    printf("Hello World!\n");
 }
 
 void
 HelloI::shutdown(const Ice::Current& curr)
 {
-    cout << "Shutting down..." << endl;
+    printf("Shutting down...\n");
     curr.adapter->getCommunicator()->shutdown();
 }

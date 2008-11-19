@@ -48,6 +48,7 @@ ICEE_OBJS      	= Base64.obj \
                   LoggerUtil.obj \
                   Network.obj \
 		  ObjectFactoryManager.obj \
+		  ObjectFactoryManagerI.obj \
                   OperationMode.obj \
                   Outgoing.obj \
 		  OutgoingAsync.obj \

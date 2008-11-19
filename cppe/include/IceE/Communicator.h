@@ -14,9 +14,7 @@
 #include <IceE/LoggerF.h>
 #include <IceE/PropertiesF.h>
 #include <IceE/InstanceF.h>
-#ifdef ICEE_HAS_OBV
-#  include <IceE/ObjectFactoryF.h>
-#endif
+#include <IceE/ObjectFactoryF.h>
 
 #include <IceE/RecMutex.h>
 #include <IceE/Initialize.h> // For the friend declarations.
@@ -47,10 +45,8 @@ public:
     ObjectAdapterPtr createObjectAdapterWithRouter(const std::string&, const RouterPrx&);
 #endif
 
-#ifdef ICEE_HAS_OBV
     void addObjectFactory(const ObjectFactoryPtr&, const ::std::string&);
     ObjectFactoryPtr findObjectFactory(const ::std::string&) const;
-#endif
 
     PropertiesPtr getProperties() const;
     LoggerPtr getLogger() const;

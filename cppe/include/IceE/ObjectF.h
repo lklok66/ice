@@ -33,9 +33,7 @@ namespace Ice
 
 typedef IceInternal::Handle< Object > ObjectPtr;
 
-#ifdef ICEE_HAS_OBV
 void ICE_API __patch__ObjectPtr(void*, ObjectPtr&);
-#endif
 
 }
 

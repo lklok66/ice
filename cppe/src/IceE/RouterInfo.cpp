@@ -225,8 +225,8 @@ IceInternal::RouterInfo::getServerEndpoints()
 }
 
 #ifndef ICEE_HAS_AMI
-bool
-IceInternal::RouterInfo::addProxy(const Ice::ObjectPrx& proxy, const GetClientEndpointsCallbackPtr& callback)
+void
+IceInternal::RouterInfo::addProxy(const Ice::ObjectPrx& proxy)
 {
     assert(proxy);
     {

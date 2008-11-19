@@ -562,21 +562,6 @@ IceInternal::OutgoingAsync::__prepare(const ObjectPrx& prx, const string& operat
 }
 
 void
-IceInternal::OutgoingAsync::__throwUserException()
-{
-    try
-    {
-        assert(__is);
-        __is->throwException();
-    }
-    catch(const Ice::UserException&)
-    {
-        __is->endReadEncaps();
-        throw;
-    }
-}
-
-void
 IceInternal::OutgoingAsync::handleException(const LocalExceptionWrapper& ex)
 {
     if(_mode == Nonmutating || _mode == Idempotent)

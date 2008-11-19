@@ -18,9 +18,7 @@
 #  include <IceE/StringConverter.h>
 #endif
 
-#ifdef ICEE_HAS_OBV
-#  include <IceE/ObjectF.h>
-#endif
+#include <IceE/ObjectF.h>
 
 namespace Ice
 {
@@ -30,9 +28,6 @@ ICE_API void throwUnmarshalOutOfBoundsException(const char*, int);
 ICE_API void throwNegativeSizeException(const char*, int);
 ICE_API void throwMemoryLimitException(const char*, int);
 ICE_API void throwUnsupportedEncodingException(const char*, int, ::Ice::Int, ::Ice::Int, ::Ice::Int, ::Ice::Int);
-#ifdef ICEE_HAS_OBV
-ICE_API void throwEncapsulationException(const char*, int);
-#endif
 
 }
 
@@ -88,9 +83,7 @@ public:
     };
 #endif
 
-#ifdef ICEE_HAS_OBV
     typedef void (*PatchFunc)(void*, Ice::ObjectPtr&);
-#endif
 
     BasicStream(Instance* instance, int messageSizeMax,
 #ifdef ICEE_HAS_WSTRING
@@ -107,10 +100,8 @@ public:
         _stringConverter(stringConverter),
         _wstringConverter(wstringConverter),
 #endif
-        _seqDataStack(0)
-#ifdef ICEE_HAS_OBV
-        , _objectList(0)
-#endif
+        _seqDataStack(0),
+        _objectList(0)
     {
         // Inlined for performance reasons.
     }
@@ -373,10 +364,8 @@ public:
         }
     }
 
-#ifdef ICEE_HAS_OBV
     ICE_API void writeTypeId(const std::string&);
     ICE_API void readTypeId(std::string&);
-#endif
 
     ICE_API void writeBlob(const std::vector<Ice::Byte>&);
     ICE_API void readBlob(std::vector<Ice::Byte>&, Ice::Int);
@@ -605,9 +594,9 @@ public:
     ICE_API void read(Ice::ObjectPrx&);
 
     ICE_API void write(const Ice::UserException&);
+    ICE_API void throwUnknownUserException();
     ICE_API void throwException();
 
-#ifdef ICEE_HAS_OBV
     ICE_API void write(const Ice::ObjectPtr&);
     ICE_API void read(PatchFunc, void*);
 
@@ -629,52 +618,50 @@ public:
     typedef std::map<std::string, Ice::Int> TypeIdWriteMap;
     
     typedef std::vector<Ice::ObjectPtr> ObjectList;
-#endif
-
-private:
-
-    //
-    // Optimization. The instance may not be deleted while a
-    // stack-allocated BasicStream still holds it.
-    //
-    Instance* _instance;
 
     class ReadEncaps : private ::IceUtil::noncopyable
     {
     public:
 
-        ReadEncaps() :
-#ifdef ICEE_HAS_OBV
-                       patchMap(0), unmarshaledMap(0), typeIdMap(0), typeIdIndex(0),
-#endif
-                       previous(0)
+        //
+        // Code size optimization: this class ensures that the different maps defined for
+        // object unmarshalling are not defined in statically linked executable which don't
+        // use Slice classes.
+        //
+        class ObjectReadEncaps
+        {
+        public:
+
+            virtual ~ObjectReadEncaps() { }
+
+            PatchMap* patchMap() { return reinterpret_cast<PatchMap*>(_patchMap); }
+            IndexToPtrMap* unmarshaledMap() { return reinterpret_cast<IndexToPtrMap*>(_unmarshaledMap); };
+            TypeIdReadMap* typeIdMap() { return reinterpret_cast<TypeIdReadMap*>(_typeIdMap); }
+
+            Ice::Int typeIdIndex;
+
+        protected:
+
+            void* _patchMap;
+            void* _unmarshaledMap;
+            void* _typeIdMap;
+        };
+
+        ReadEncaps() : objects(0), previous(0)
         {
             // Inlined for performance reasons.
         }
         ~ReadEncaps()
         {
             // Inlined for performance reasons.
-#ifdef ICEE_HAS_OBV
-            delete patchMap;
-            delete unmarshaledMap;
-            delete typeIdMap;
-#endif
+            delete objects;
         }
 
         void reset()
         {
             // Inlined for performance reasons.
-#ifdef ICEE_HAS_OBV
-            delete patchMap;
-            delete unmarshaledMap;
-            delete typeIdMap;
-
-            patchMap = 0;
-            unmarshaledMap = 0;
-            typeIdMap = 0;
-            typeIdIndex = 0;
-#endif
-            previous = 0;
+            delete objects;
+            objects = 0;
         }
         ICE_API void swap(ReadEncaps&);
 
@@ -684,12 +671,7 @@ private:
         Ice::Byte encodingMajor;
         Ice::Byte encodingMinor;
 
-#ifdef ICEE_HAS_OBV
-        PatchMap* patchMap;
-        IndexToPtrMap* unmarshaledMap;
-        TypeIdReadMap* typeIdMap;
-        Ice::Int typeIdIndex;
-#endif
+        ObjectReadEncaps* objects;
 
         ReadEncaps* previous;
     };
@@ -698,54 +680,63 @@ private:
     {
     public:
 
-        WriteEncaps() : writeIndex(0),
-#ifdef ICEE_HAS_OBV
-                        toBeMarshaledMap(0), marshaledMap(0), typeIdMap(0), typeIdIndex(0),
-#endif
-                        previous(0) 
+        //
+        // Code size optimization: this class ensures that the different maps defined for
+        // object unmarshalling are not defined in statically linked executable which don't
+        // use Slice classes.
+        //
+        class ObjectWriteEncaps
+        {
+        public:
+
+            virtual ~ObjectWriteEncaps() { }
+
+            PtrToIndexMap* toBeMarshaledMap() { return reinterpret_cast<PtrToIndexMap*>(_toBeMarshaledMap); }
+            PtrToIndexMap* marshaledMap() { return reinterpret_cast<PtrToIndexMap*>(_marshaledMap); } 
+            TypeIdWriteMap* typeIdMap() { return reinterpret_cast<TypeIdWriteMap*>(_typeIdMap); }
+
+            Ice::Int writeIndex;
+            Ice::Int typeIdIndex;
+
+        protected:
+
+            void* _toBeMarshaledMap;
+            void* _marshaledMap;
+            void* _typeIdMap;
+        };
+
+        WriteEncaps() : objects(0), previous(0) 
         {
             // Inlined for performance reasons.
         }
         ~WriteEncaps()
         {
             // Inlined for performance reasons.
-#ifdef ICEE_HAS_OBV
-            delete toBeMarshaledMap;
-            delete marshaledMap;
-            delete typeIdMap;
-#endif
+            delete objects;
         }
 
         void reset()
         {
             // Inlined for performance reasons.
-#ifdef ICEE_HAS_OBV
-            delete toBeMarshaledMap;
-            delete marshaledMap;
-            delete typeIdMap;
-
-            toBeMarshaledMap = 0;
-            marshaledMap = 0;
-            typeIdMap = 0;
-            typeIdIndex = 0;
-#endif
-            writeIndex = 0;
-            previous = 0;
+            delete objects;
+            objects = 0;
         }
         ICE_API void swap(WriteEncaps&);
 
         Container::size_type start;
 
-        Ice::Int writeIndex;
-#ifdef ICEE_HAS_OBV
-        PtrToIndexMap* toBeMarshaledMap;
-        PtrToIndexMap* marshaledMap;
-        TypeIdWriteMap* typeIdMap;
-        Ice::Int typeIdIndex;
-#endif
+        ObjectWriteEncaps* objects;
 
         WriteEncaps* previous;
     };
+
+private:
+
+    //
+    // Optimization. The instance may not be deleted while a
+    // stack-allocated BasicStream still holds it.
+    //
+    Instance* _instance;
 
     ReadEncaps* _currentReadEncaps;
     WriteEncaps* _currentWriteEncaps;
@@ -756,10 +747,8 @@ private:
     Container::size_type _readSlice;
     Container::size_type _writeSlice;
 
-#ifdef ICEE_HAS_OBV
     void writeInstance(const Ice::ObjectPtr&, Ice::Int);
     void patchPointers(Ice::Int, IndexToPtrMap::const_iterator, PatchMap::iterator);
-#endif
 
     const Container::size_type _messageSizeMax;
     bool _unlimited;
@@ -771,16 +760,17 @@ private:
 
     struct SeqData
     {
-        SeqData(int, int);
+        SeqData(int num, int sz) : numElements(num), minSize(sz)
+        {
+        }
+
         int numElements;
         int minSize;
         SeqData* previous;
     };
     SeqData* _seqDataStack;
 
-#ifdef ICEE_HAS_OBV
     ObjectList* _objectList;
-#endif
 };
 
 } // End namespace IceInternal

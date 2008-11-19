@@ -231,9 +231,7 @@ Slice::Gen::generate(const UnitPtr& p)
     C << _base << "." << _headerExtension << ">";
 
     H << "\n#include <IceE/ProxyF.h>";
-    H << "\n#if !defined(ICEE_PURE_CLIENT) || defined(ICEE_HAS_OBV)";
-    H << "\n#  include <IceE/ObjectF.h>";
-    H << "\n#endif";
+    H << "\n#include <IceE/ObjectF.h>";
     H << "\n#include <IceE/Exception.h>";
     H << "\n#include <IceE/ScopedArray.h>";
 
@@ -244,9 +242,7 @@ Slice::Gen::generate(const UnitPtr& p)
 
     if(p->hasNonLocalClassDefs())
     {
-        H << "\n#if !defined(ICEE_PURE_CLIENT) || defined(ICEE_HAS_OBV)";
-        H << "\n#  include <IceE/Object.h>";
-        H << "\n#endif";
+        H << "\n#include <IceE/Object.h>";
         H << "\n#ifndef ICEE_PURE_CLIENT";
         H << "\n#  include <IceE/Incoming.h>";
         H << "\n#endif";
@@ -259,15 +255,11 @@ Slice::Gen::generate(const UnitPtr& p)
         }
 
         C << "\n#include <IceE/LocalException.h>";
-        C << "\n#ifdef ICEE_HAS_OBV";
-        C << "\n#  include <IceE/ObjectFactory.h>";
-        C << "\n#endif";
+        C << "\n#include <IceE/ObjectFactory.h>";
     }
     else if(p->hasNonLocalClassDecls())
     {
-        H << "\n#if !defined(ICEE_PURE_CLIENT) || defined(ICEE_HAS_OBV)";
-        H << "\n#  include <IceE/Object.h>";
-        H << "\n#endif";
+        H << "\n#include <IceE/Object.h>";
     }
 
     if(p->hasNonLocalExceptions())
@@ -286,9 +278,7 @@ Slice::Gen::generate(const UnitPtr& p)
 
         if(!p->hasNonLocalClassDefs() && !p->hasNonLocalClassDecls())
         {
-            C << "\n#if !defined(ICEE_PURE_CLIENT) || defined(ICEE_HAS_OBV)";
-            C << "\n#  include <IceE/Object.h>";
-            C << "\n#endif";
+            C << "\n#include <IceE/Object.h>";
         }
     }
 
@@ -723,25 +713,13 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
         {
             if(!base || (base && !base->usesClasses()))
             {
-                H.zeroIndent();
-                H << nl << "#ifdef ICEE_HAS_OBV";
-                H.restoreIndent();
                 H << nl << "virtual bool __usesClasses() const;";
-                H.zeroIndent();
-                H << nl << "#endif // ICEE_HAS_OBV";
-                H.restoreIndent();
 
-                C.zeroIndent();
-                C << nl << "#ifdef ICEE_HAS_OBV";
-                C.restoreIndent();
                 C << sp << nl << "bool";
                 C << nl << scoped.substr(2) << "::__usesClasses() const";
                 C << sb;
                 C << nl << "return true;";
                 C << eb;
-                C.zeroIndent();
-                C << nl << "#endif // ICEE_HAS_OBV";
-                C.restoreIndent();
             }
         }
 
@@ -1803,13 +1781,7 @@ Slice::Gen::ProxyVisitor::visitOperation(const OperationPtr& p)
         writeMarshalCode(C, inParams, 0, StringList(), true);
         if(p->sendsClasses())
         {
-            C.zeroIndent();
-            C << nl << "#ifdef ICEE_HAS_OBV";
-            C.restoreIndent();
             C << nl << "__os->writePendingObjects();";
-            C.zeroIndent();
-            C << nl << "#endif // ICEE_HAS_OBV";
-            C.restoreIndent();
         }
         C << eb;
         C << nl << "catch(const ::Ice::LocalException& __ex)";
@@ -1822,55 +1794,62 @@ Slice::Gen::ProxyVisitor::visitOperation(const OperationPtr& p)
     C << sb;
     C << nl << "if(!__ok)";
     C << sb;
-    C << nl << "try";
-    C << sb;
-    C << nl << "__outS.throwUserException();";
-    C << eb;
-
-    //
-    // Generate a catch block for each legal user exception. This is necessary
-    // to prevent an "impossible" user exception to be thrown if client and
-    // and server use different exception specifications for an operation. For
-    // example:
-    //
-    // Client compiled with:
-    // exception A {};
-    // exception B {};
-    // interface I {
-    //     void op() throws A;
-    // };
-    //
-    // Server compiled with:
-    // exception A {};
-    // exception B {};
-    // interface I {
-    //     void op() throws B; // Differs from client
-    // };
-    //
-    // We need the catch blocks so, if the server throws B from op(), the
-    // client receives UnknownUserException instead of B.
-    //
     ExceptionList throws = p->throws();
-    throws.sort();
-    throws.unique();
-#if defined(__SUNPRO_CC)
-    throws.sort(derivedToBaseCompare);
-#else
-    throws.sort(Slice::DerivedToBaseCompare());
-#endif
-    for(ExceptionList::const_iterator i = throws.begin(); i != throws.end(); ++i)
+    if(throws.empty())
     {
-        C << nl << "catch(const " << fixKwd((*i)->scoped()) << "&)";
+        C << nl << "__outS.is()->throwUnknownUserException();";
+    }
+    else
+    {
+        C << nl << "try";
         C << sb;
-        C << nl << "throw;";
+        C << nl << "__outS.is()->throwException();";
+        C << eb;
+    
+        //
+        // Generate a catch block for each legal user exception. This is necessary
+        // to prevent an "impossible" user exception to be thrown if client and
+        // and server use different exception specifications for an operation. For
+        // example:
+        //
+        // Client compiled with:
+        // exception A {};
+        // exception B {};
+        // interface I {
+        //     void op() throws A;
+        // };
+        //
+        // Server compiled with:
+        // exception A {};
+        // exception B {};
+        // interface I {
+        //     void op() throws B; // Differs from client
+        // };
+        //
+        // We need the catch blocks so, if the server throws B from op(), the
+        // client receives UnknownUserException instead of B.
+        //
+        throws.sort();
+        throws.unique();
+#if defined(__SUNPRO_CC)
+        throws.sort(derivedToBaseCompare);
+#else
+        throws.sort(Slice::DerivedToBaseCompare());
+#endif
+        for(ExceptionList::const_iterator i = throws.begin(); i != throws.end(); ++i)
+        {
+            C << nl << "catch(const " << fixKwd((*i)->scoped()) << "&)";
+            C << sb;
+            C << nl << "throw;";
+            C << eb;
+        }
+        C << nl << "catch(const ::Ice::UserException& __ex)";
+        C << sb;
+        C << nl << "::Ice::UnknownUserException __uex(__FILE__, __LINE__);";
+        C << nl << "__uex.unknown = __ex.ice_name();";
+        C << nl << "throw __uex;";
         C << eb;
     }
-    C << nl << "catch(const ::Ice::UserException& __ex)";
-    C << sb;
-    C << nl << "::Ice::UnknownUserException __uex(__FILE__, __LINE__);";
-    C << nl << "__uex.unknown = __ex.ice_name();";
-    C << nl << "throw __uex;";
-    C << eb;
     C << eb;
 
     writeAllocateCode(C, ParamDeclList(), ret, p->getMetaData(), _useWstring);
@@ -1881,13 +1860,7 @@ Slice::Gen::ProxyVisitor::visitOperation(const OperationPtr& p)
         writeUnmarshalCode(C, outParams, ret, p->getMetaData());
         if(p->returnsClasses())
         {
-            C.zeroIndent();
-            C << nl << "#ifdef ICEE_HAS_OBV";
-            C.restoreIndent();
             C << nl << "__is->readPendingObjects();";
-            C.zeroIndent();
-            C << nl << "#endif // ICEE_HAS_OBV";
-            C.restoreIndent();
         }
     }
 
@@ -2011,11 +1984,9 @@ Slice::Gen::ObjectDeclVisitor::visitClassDecl(const ClassDeclPtr& p)
 {
     string name = fixKwd(p->name());
 
-    H << sp << nl << "#if !defined(ICEE_PURE_CLIENT) || defined(ICEE_HAS_OBV)";
     H << sp << nl << "class " << name << ';';
     H << nl << _dllExport << "bool operator==(const " << name << "&, const " << name << "&);";
     H << nl << _dllExport << "bool operator<(const " << name << "&, const " << name << "&);";
-    H << sp << nl << "#endif // ICEE_PURE_CLIENT";
 }
 
 Slice::Gen::ObjectVisitor::ObjectVisitor(Output& h, Output& c, const string& dllExport) :
@@ -2064,8 +2035,6 @@ Slice::Gen::ObjectVisitor::visitClassDefStart(const ClassDefPtr& p)
     }
     DataMemberList dataMembers = p->dataMembers();
     DataMemberList allDataMembers = p->allDataMembers();
-
-    H << sp << nl << "#if !defined(ICEE_PURE_CLIENT) || defined(ICEE_HAS_OBV)";
 
     H << sp << nl << "class " << _dllExport << name << " : ";
     H.useCurrentPosAsIndent();
@@ -2282,8 +2251,6 @@ Slice::Gen::ObjectVisitor::visitClassDefStart(const ClassDefPtr& p)
     }
     C << eb << ';';
 
-    C << sp << nl << "#if !defined(ICEE_PURE_CLIENT) || defined(ICEE_HAS_OBV)";
-
     C << sp;
     C << nl << "bool" << nl << fixKwd(p->scoped()).substr(2)
       << "::ice_isA(const ::std::string& _s, const ::Ice::Current&) const";
@@ -2414,18 +2381,11 @@ Slice::Gen::ObjectVisitor::visitClassDefEnd(const ClassDefPtr& p)
     }
 
     H << sp;
-    H.zeroIndent();
-    H << nl << "#ifdef ICEE_HAS_OBV";
-    H.restoreIndent();
 
     H << nl << "virtual void __write(::IceInternal::BasicStream*) const;";
     H << nl << "virtual void __read(::IceInternal::BasicStream*, bool);";
 
     C << sp;
-    C.zeroIndent();
-    C << nl << "#ifdef ICEE_HAS_OBV";
-    C.restoreIndent();
-
     C << nl << "void" << nl << scoped.substr(2)
       << "::__write(::IceInternal::BasicStream* __os) const";
     C << sb;
@@ -2512,14 +2472,6 @@ Slice::Gen::ObjectVisitor::visitClassDefEnd(const ClassDefPtr& p)
         C << nl << "#endif";
     }
 
-    C.zeroIndent();
-    C << nl << "#endif // ICEE_HAS_OBV";
-    C.restoreIndent();
-
-    H.zeroIndent();
-    H << nl << "#endif // ICEE_HAS_OBV";
-    H.restoreIndent();
-
     bool inProtected = false;
 
     if(!p->isAbstract())
@@ -2574,12 +2526,10 @@ Slice::Gen::ObjectVisitor::visitClassDefEnd(const ClassDefPtr& p)
     }
 
     H << eb << ';';
-    H << sp << nl << "#endif // ICEE_PURE_CLIENT";
 
     string name = p->name();
 
     C << sp;
-    //C << nl << "#if !defined(ICEE_PURE_CLIENT) || defined(ICEE_HAS_OBV)";
     C << sp;
     C << nl << "bool" << nl << scope.substr(2) << "operator==(const " << scoped
       << "& l, const " << scoped << "& r)";
@@ -2592,10 +2542,8 @@ Slice::Gen::ObjectVisitor::visitClassDefEnd(const ClassDefPtr& p)
     C << sb;
     C << nl << "return static_cast<const ::Ice::Object&>(l) < static_cast<const ::Ice::Object&>(r);";
     C << eb;
-    //C << sp << nl << "#endif // ICEE_PURE_CLIENT";
 
     C << sp;
-    C << nl << "#ifdef ICEE_HAS_OBV";
     C << nl << "void " << (_dllExport.empty() ? "" : "ICE_DECLSPEC_EXPORT ");
     C << nl << scope.substr(2) << "__patch__" << name << "Ptr(void* __addr, ::Ice::ObjectPtr& v)";
     C << sb;
@@ -2607,9 +2555,6 @@ Slice::Gen::ObjectVisitor::visitClassDefEnd(const ClassDefPtr& p)
     C << nl << "IceInternal::Ex::throwUOE(" << scoped << "::ice_staticId(), v->ice_id());";
     C << eb;
     C << eb;
-    C << nl << "#endif // ICEE_HAS_OBV";
-
-    C << sp << nl << "#endif // !ICEE_PURE_CLIENT || ICEE_HAS_OBV";
 
     _useWstring = resetUseWstring(_useWstringHist);
 }
@@ -2741,13 +2686,7 @@ Slice::Gen::ObjectVisitor::visitOperation(const OperationPtr& p)
         writeUnmarshalCode(C, inParams, 0, StringList(), true);
         if(p->sendsClasses())
         {
-            C.zeroIndent();
-            C << nl << "#ifdef ICEE_HAS_OBV";
-            C.restoreIndent();
             C << nl << "__is->readPendingObjects();";
-            C.zeroIndent();
-            C << nl << "#endif // ICEE_HAS_OBV";
-            C.restoreIndent();
         }
     }
 
@@ -2771,13 +2710,7 @@ Slice::Gen::ObjectVisitor::visitOperation(const OperationPtr& p)
     writeMarshalCode(C, outParams, ret, p->getMetaData());
     if(p->returnsClasses())
     {
-        C.zeroIndent();
-        C << nl << "#ifdef ICEE_HAS_OBV";
-        C.restoreIndent();
         C << nl << "__os->writePendingObjects();";
-        C.zeroIndent();
-        C << nl << "#endif // ICEE_HAS_OBV";
-        C.restoreIndent();
     }
     if(!throws.empty())
     {
@@ -2861,7 +2794,6 @@ Slice::Gen::ObjectVisitor::emitOneShotConstructor(const ClassDefPtr& p)
 
     if(!allDataMembers.empty())
     {
-        C << sp << nl << "#if !defined(ICEE_PURE_CLIENT) || defined(ICEE_HAS_OBV)";
         C << sp << nl << p->scoped().substr(2) << "::" << fixKwd(p->name()) << spar << allParamDecls << epar << " :";
         C.inc();
 
@@ -2897,7 +2829,6 @@ Slice::Gen::ObjectVisitor::emitOneShotConstructor(const ClassDefPtr& p)
         C.dec();
         C << sb;
         C << eb;
-        C << sp << nl << "#endif // !ICEE_PURE_CLIENT || ICEE_HAS_OBV";
     }
 }
 
@@ -3071,13 +3002,7 @@ Slice::Gen::AsyncVisitor::visitOperation(const OperationPtr& p)
         writeMarshalCode(C, inParams, 0, StringList(), true);
         if(p->sendsClasses())
         {
-            C.zeroIndent();
-            C << nl << "#ifdef ICEE_HAS_OBV";
-            C.restoreIndent();
             C << nl << "__os->writePendingObjects();";
-            C.zeroIndent();
-            C << nl << "#endif // ICEE_HAS_OBV";
-            C.restoreIndent();
         }
         C << nl << "__os->endWriteEncaps();";
         C << nl << "return __send();";
@@ -3106,34 +3031,41 @@ Slice::Gen::AsyncVisitor::visitOperation(const OperationPtr& p)
         C << sb;
         C << nl << "if(!__ok)";
         C << sb;
-        C << nl << "try";
-        C << sb;
-        C << nl << "__throwUserException();";
-        C << eb;
-        //
-        // Generate a catch block for each legal user exception.
-        //
         ExceptionList throws = p->throws();
-        throws.sort();
-        throws.unique();
-#if defined(__SUNPRO_CC)
-        throws.sort(derivedToBaseCompare);
-#else
-        throws.sort(Slice::DerivedToBaseCompare());
-#endif
-        for(ExceptionList::const_iterator i = throws.begin(); i != throws.end(); ++i)
+        if(throws.empty())
         {
-            string scoped = (*i)->scoped();
-            C << nl << "catch(const " << fixKwd((*i)->scoped()) << "& __ex)";
-            C << sb;
-            C << nl << "__exception(__ex);";
-            C << eb;
+            C << nl << "__is->throwUnknownUserException();";
         }
-        C << nl << "catch(const ::Ice::UserException& __ex)";
-        C << sb;
-        C << nl << "throw ::Ice::UnknownUserException(__FILE__, __LINE__, __ex.ice_name());";
-        C << eb;
-        C << nl << "return;";
+        else
+        {
+            C << nl << "try";
+            C << sb;
+            C << nl << "__is->throwException();";
+            C << eb;
+            //
+            // Generate a catch block for each legal user exception.
+            //
+            throws.sort();
+            throws.unique();
+#if defined(__SUNPRO_CC)
+            throws.sort(derivedToBaseCompare);
+#else
+            throws.sort(Slice::DerivedToBaseCompare());
+#endif
+            for(ExceptionList::const_iterator i = throws.begin(); i != throws.end(); ++i)
+            {
+                string scoped = (*i)->scoped();
+                C << nl << "catch(const " << fixKwd((*i)->scoped()) << "& __ex)";
+                C << sb;
+                C << nl << "__exception(__ex);";
+                C << eb;
+            }
+            C << nl << "catch(const ::Ice::UserException& __ex)";
+            C << sb;
+            C << nl << "throw ::Ice::UnknownUserException(__FILE__, __LINE__, __ex.ice_name());";
+            C << eb;
+            C << nl << "return;";
+        }
         C << eb;
 
         if(ret || !outParams.empty())
@@ -3145,13 +3077,7 @@ Slice::Gen::AsyncVisitor::visitOperation(const OperationPtr& p)
             }
             if(p->returnsClasses())
             {
-                C.zeroIndent();
-                C << nl << "#ifdef ICEE_HAS_OBV";
-                C.restoreIndent();
                 C << nl << "__is->readPendingObjects();";
-                C.zeroIndent();
-                C << nl << "#endif";
-                C.restoreIndent();
             }
         }
         C << eb;
@@ -3210,9 +3136,7 @@ Slice::Gen::IceInternalVisitor::visitClassDecl(const ClassDeclPtr& p)
     string scoped = fixKwd(p->scoped());
 
     H << sp;
-    H << nl << "#if !defined(ICEE_PURE_CLIENT) || defined(ICEE_HAS_OBV)";
     H << nl << _dllExport << "::Ice::Object* upCast(" << scoped << "*);";
-    H << nl << "#endif // ICEE_PURE_CLIENT";
     H << nl << _dllExport << "::IceProxy::Ice::Object* upCast(::IceProxy" << scoped << "*);";
 }
 
@@ -3222,9 +3146,7 @@ Slice::Gen::IceInternalVisitor::visitClassDefStart(const ClassDefPtr& p)
     string scoped = fixKwd(p->scoped());
 
     C << sp;    
-    C << nl << "#if !defined(ICEE_PURE_CLIENT) || defined(ICEE_HAS_OBV)";
     C << nl << "::Ice::Object* IceInternal::upCast(" << scoped << "* p) { return p; }";
-    C << nl << "#endif // ICEE_PURE_CLIENT";
     C << nl << "::IceProxy::Ice::Object* IceInternal::upCast(::IceProxy" << scoped << "* p) { return p; }";
 
     return true;
@@ -3264,20 +3186,14 @@ Slice::Gen::HandleVisitor::visitClassDecl(const ClassDeclPtr& p)
     string name = p->name();
     string scoped = fixKwd(p->scoped());
 
-    H << sp << nl << "#if !defined(ICEE_PURE_CLIENT) || defined(ICEE_HAS_OBV)";
-    
     H << sp;
     H << nl << "typedef ::IceInternal::Handle< " << scoped << "> " << name << "Ptr;";
-
-    H << sp << nl << "#endif // ICEE_PURE_CLIENT" << sp;
 
     H << nl << "typedef ::IceInternal::ProxyHandle< ::IceProxy" << scoped << "> " << name << "Prx;";
 
     H << sp;
     H << nl << _dllExport << "void __read(::IceInternal::BasicStream*, " << name << "Prx&);";
-    H << nl << "#ifdef ICEE_HAS_OBV";
     H << nl << _dllExport << "void __patch__" << name << "Ptr(void*, ::Ice::ObjectPtr&);";
-    H << nl << "#endif // ICEE_HAS_OBV";
 }
 
 bool

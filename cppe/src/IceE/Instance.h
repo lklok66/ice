@@ -26,9 +26,7 @@
 #ifndef ICEE_PURE_CLIENT
 #   include <IceE/ObjectAdapterFactoryF.h>
 #endif
-#ifdef ICEE_HAS_OBV
-#   include <IceE/ObjectFactoryManagerF.h>
-#endif
+#include <IceE/ObjectFactoryManagerF.h>
 #ifdef ICEE_HAS_AMI
 #   include <IceE/RetryQueueF.h>
 #endif
@@ -66,9 +64,7 @@ public:
     void flushBatchRequests();
 #endif
 
-#ifdef ICEE_HAS_OBV
     ObjectFactoryManagerPtr servantFactoryManager() const;
-#endif
 
 #ifndef ICEE_PURE_CLIENT
     ObjectAdapterFactoryPtr objectAdapterFactory() const;
@@ -126,10 +122,7 @@ private:
     ProxyFactoryPtr _proxyFactory;
     OutgoingConnectionFactoryPtr _outgoingConnectionFactory;
     EndpointFactoryPtr _endpointFactory;
-
-#ifdef ICEE_HAS_OBV
     ObjectFactoryManagerPtr _servantFactoryManager;
-#endif
 
 #ifndef ICEE_PURE_CLIENT
     ObjectAdapterFactoryPtr _objectAdapterFactory;

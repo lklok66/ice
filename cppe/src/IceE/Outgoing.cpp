@@ -527,20 +527,6 @@ IceInternal::Outgoing::finished(const LocalException& ex)
     _monitor.notify();
 }
 
-void
-IceInternal::Outgoing::throwUserException()
-{
-    try
-    {
-        _is.throwException();
-    }
-    catch(const Ice::UserException&)
-    {
-        _is.endReadEncaps();
-        throw;
-    }
-}
-
 #ifdef ICEE_HAS_BATCH
 
 IceInternal::BatchOutgoing::BatchOutgoing(RequestHandler* handler, Instance* instance) :

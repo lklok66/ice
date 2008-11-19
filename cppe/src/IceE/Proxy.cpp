@@ -185,14 +185,7 @@ IceProxy::Ice::Object::ice_isA(const string& __id, const Context* __context)
                 BasicStream* __is = __og.is();
                 if(!__ok)
                 {
-                    try
-                    {
-                        __is->throwException();
-                    }
-                    catch(const ::Ice::UserException& __ex)
-                    {
-                        throw ::Ice::UnknownUserException(__FILE__, __LINE__, __ex.ice_name());
-                    }
+                    __is->throwUnknownUserException();
                 }
                 __is->read(__ret);
             }
@@ -243,14 +236,7 @@ IceProxy::Ice::Object::ice_ping(const Context* __context)
                 BasicStream* __is = __og.is();
                 if(!__ok)
                 {
-                    try
-                    {
-                        __is->throwException();
-                    }
-                    catch(const ::Ice::UserException& __ex)
-                    {
-                        throw ::Ice::UnknownUserException(__FILE__, __LINE__, __ex.ice_name());
-                    }
+                    __is->throwUnknownUserException();
                 }
             }
             catch(const ::Ice::LocalException& __ex)
@@ -303,14 +289,7 @@ IceProxy::Ice::Object::ice_ids(const Context* __context)
                 BasicStream* __is = __og.is();
                 if(!__ok)
                 {
-                    try
-                    {
-                        __is->throwException();
-                    }
-                    catch(const ::Ice::UserException& __ex)
-                    {
-                        throw ::Ice::UnknownUserException(__FILE__, __LINE__, __ex.ice_name());
-                    }
+                    __is->throwUnknownUserException();
                 }
                 __is->read(__ret, false);
             }
@@ -363,14 +342,7 @@ IceProxy::Ice::Object::ice_id(const Context* __context)
                 BasicStream* __is = __og.is();
                 if(!__ok)
                 {
-                    try
-                    {
-                        __is->throwException();
-                    }
-                    catch(const ::Ice::UserException& __ex)
-                    {
-                        throw ::Ice::UnknownUserException(__FILE__, __LINE__, __ex.ice_name());
-                    }
+                    __is->throwUnknownUserException();
                 }
                 __is->read(__ret, false);
             }
@@ -615,6 +587,17 @@ IceProxy::Ice::Object::__getRequestHandler()
     {
 #if !defined(ICEE_HAS_AMI) && !defined(ICEE_HAS_BATCH)
         _handler = _reference->getConnection();
+
+#ifdef ICEE_HAS_ROUTER
+        //
+        // If this proxy is for a non-local object, and we are using a router, then
+        // add this proxy to the router info object.
+        //
+        if(_reference->getRouterInfo())
+        {
+            _reference->getRouterInfo()->addProxy(this);
+        }
+#endif
 #else
         ConnectRequestHandlerPtr handler = new ConnectRequestHandler(_reference, this);
         _handler = handler->connect();

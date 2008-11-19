@@ -46,9 +46,6 @@ CPPFLAGS	= -I. -I../../include $(CPPFLAGS) -WX -Zm200 -DWIN32_LEAN_AND_MEAN
 !if "$(ice_bin_dist)" != ""
 LDFLAGS		= $(LDFLAGS) /LIBPATH:"$(libdir)"
 !endif
-!if "$(HAS_OBV)" == "yes"
-SLICE2CPPEFLAGS = -DICEE_HAS_OBV $(SLICE2CPPEFLAGS)
-!endif
 
 !if "$(OPTIMIZE_SPEED)" != "yes" && "$(OPTIMIZE_SIZE)" != "yes"
 CPDBFLAGS        = /pdb:$(CLIENT:.exe=.pdb)

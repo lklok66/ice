@@ -803,7 +803,6 @@ private:
 
 typedef IceUtil::Handle<AMI_TestIntf_opCPrxListI> AMI_TestIntf_opCPrxListIPtr;
 
-#ifdef ICEE_HAS_OBV
 class AMI_TestIntf_opCSeqI : public Test::AMI_TestIntf_opCSeq, public CallbackBase
 {
 public:
@@ -870,7 +869,6 @@ private:
 };
 
 typedef IceUtil::Handle<AMI_TestIntf_opCListI> AMI_TestIntf_opCListIPtr;
-#endif
 
 class AMI_Test1_opStringI : public Test1::AMI_WstringClass_opString, public CallbackBase
 {
@@ -1452,7 +1450,6 @@ allTests(const Ice::CommunicatorPtr& communicator)
         test(ret == in);
     }
 
-#ifdef ICEE_HAS_OBV
     {
         deque<Test::CPtr> in(5);
         in[0] = new Test::C();
@@ -1491,7 +1488,6 @@ allTests(const Ice::CommunicatorPtr& communicator)
             test(*p1 == *p2);
         }
     }
-#endif
     tprintf("ok\n");
 
 #ifdef ICEE_HAS_AMI
@@ -1891,7 +1887,6 @@ allTests(const Ice::CommunicatorPtr& communicator)
         test(cb->check());
     }
 
-#ifdef ICEE_HAS_OBV
     {
         deque<Test::CPtr> in(5);
         in[0] = new Test::C();
@@ -1917,7 +1912,6 @@ allTests(const Ice::CommunicatorPtr& communicator)
         t->opCList_async(cb, in);
         test(cb->check());
     }
-#endif
 
     tprintf("ok\n");
 #endif
