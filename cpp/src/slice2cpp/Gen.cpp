@@ -65,7 +65,7 @@ Slice::Gen::Gen(const string& name, const string& base, const string& headerExte
     _ice(ice)
 {
     _gen = this;
-    SignalHandler::setCallback(closeCallback);
+    SignalHandler::setCloseCallback(closeCallback);
 
     for(vector<string>::iterator p = _includePaths.begin(); p != _includePaths.end(); ++p)
     {
@@ -87,8 +87,6 @@ Slice::Gen::Gen(const string& name, const string& base, const string& headerExte
             fileImplH = dir + '/' + fileImplH;
             fileImplC = dir + '/' + fileImplC;
         }
-        SignalHandler::addFile(fileImplH);
-        SignalHandler::addFile(fileImplC);
 
         struct stat st;
         if(stat(fileImplH.c_str(), &st) == 0)
@@ -102,6 +100,7 @@ Slice::Gen::Gen(const string& name, const string& base, const string& headerExte
             return;
         }
 
+        SignalHandler::addFileForCleanup(fileImplH);
         implH.open(fileImplH.c_str());
         if(!implH)
         {
@@ -109,6 +108,7 @@ Slice::Gen::Gen(const string& name, const string& base, const string& headerExte
             return;
         }
 
+        SignalHandler::addFileForCleanup(fileImplC);
         implC.open(fileImplC.c_str());
         if(!implC)
         {
@@ -134,9 +134,8 @@ Slice::Gen::Gen(const string& name, const string& base, const string& headerExte
         fileH = dir + '/' + fileH;
         fileC = dir + '/' + fileC;
     }
-    SignalHandler::addFile(fileH);
-    SignalHandler::addFile(fileC);
 
+    SignalHandler::addFileForCleanup(fileH);
     H.open(fileH.c_str());
     if(!H)
     {
@@ -144,6 +143,7 @@ Slice::Gen::Gen(const string& name, const string& base, const string& headerExte
         return;
     }
 
+    SignalHandler::addFileForCleanup(fileC);
     C.open(fileC.c_str());
     if(!C)
     {
@@ -178,7 +178,8 @@ Slice::Gen::~Gen()
         implC << '\n';
     }
 
-    SignalHandler::setCallback(0);
+    _gen = 0;
+    SignalHandler::setCloseCallback(0);
 }
 
 bool
@@ -2720,7 +2721,7 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
         }
     }
 
-    if(p->returnsData())
+    if(ret || !outParams.empty())
     {
         C << nl << "::IceInternal::BasicStream* __is = __og.is();";
         C << nl << "__is->startReadEncaps();";
@@ -5357,7 +5358,7 @@ Slice::Gen::AsyncVisitor::visitOperation(const OperationPtr& p)
         C << nl << "return;";
         C << eb;
 
-        if(p->returnsData())
+        if(ret || !outParams.empty())
         {
             C << nl << "__is->startReadEncaps();";
             writeUnmarshalCode(C, outParams, 0, StringList(), true);

@@ -109,21 +109,18 @@ public:
             return EXIT_FAILURE;
         }
 
+        Ice::RouterPrx defaultRouter = communicator()->getDefaultRouter();
+        if(!defaultRouter)
         {
-            IceUtil::Mutex::Lock sync(_mutex);
-            Ice::RouterPrx defaultRouter = communicator()->getDefaultRouter();
-            if(!defaultRouter)
-            {
-                cerr << argv[0] << ": no default router set" << endl;
-                return EXIT_FAILURE;
-            }
-            
-            _router = Glacier2::RouterPrx::checkedCast(defaultRouter);
-            if(!_router)
-            {
-                cerr << argv[0] << ": configured router is not a Glacier2 router" << endl;
-                return EXIT_FAILURE;
-            }
+            cerr << argv[0] << ": no default router set" << endl;
+            return EXIT_FAILURE;
+        }
+
+        _router = Glacier2::RouterPrx::checkedCast(defaultRouter);
+        if(!_router)
+        {
+            cerr << argv[0] << ": configured router is not a Glacier2 router" << endl;
+            return EXIT_FAILURE;
         }
 
         ChatSessionPrx session;
@@ -152,17 +149,14 @@ public:
             }
         }
 
-        {
-            IceUtil::Mutex::Lock sync(_mutex);
-            _ping = new SessionPingThread(session, (long)_router->getSessionTimeout() / 2);
-            _ping->start();
-        }
+        _ping = new SessionPingThread(session, (long)_router->getSessionTimeout() / 2);
+        _ping->start();
 
         Ice::Identity callbackReceiverIdent;
         callbackReceiverIdent.name = "callbackReceiver";
         callbackReceiverIdent.category = _router->getCategoryForClient();
 
-        Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapter("Chat.Client");
+        Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapterWithRouter("Chat.Client", defaultRouter);
         ChatCallbackPtr cb = new ChatCallbackI;
         ChatCallbackPrx callback = ChatCallbackPrx::uncheckedCast(
             adapter->add(cb, callbackReceiverIdent));
@@ -215,7 +209,6 @@ private:
     void
     cleanup()
     {
-        IceUtil::Mutex::Lock sync(_mutex);
         if(_router)
         {
             try
@@ -256,7 +249,6 @@ private:
         return s;
     }
 
-    IceUtil::Mutex _mutex;
     Glacier2::RouterPrx _router;
     SessionPingThreadPtr _ping;
 };

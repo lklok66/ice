@@ -15,7 +15,6 @@
 namespace Slice
 {
 
-SLICE_API bool isAbsolute(const std::string&);
 SLICE_API std::string fullPath(const std::string&);
 SLICE_API std::string changeInclude(const std::string&, const std::vector<std::string>&);
 

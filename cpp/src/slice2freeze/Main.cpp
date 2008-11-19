@@ -9,10 +9,12 @@
 
 #include <IceUtil/DisableWarnings.h>
 #include <IceUtil/Options.h>
+#include <IceUtil/CtrlCHandler.h>
 #include <Slice/Preprocessor.h>
 #include <Slice/Util.h>
 #include <Slice/CPlusPlusUtil.h>
 #include <IceUtil/OutputUtil.h>
+#include <IceUtil/StringUtil.h>
 #include <Slice/SignalHandler.h>
 #include <cstring>
 
@@ -221,7 +223,7 @@ usage(const char* n)
 bool
 checkIdentifier(string n, string t, string s)
 {
-    if(s.empty() || (!isalpha(s[0]) && s[0] != '_'))
+    if(s.empty() || (!isalpha(static_cast<unsigned char>(s[0])) && s[0] != '_'))
     {
         cerr << n << ": `" << t << "' is not a valid type name" << endl;
         return false;
@@ -229,7 +231,7 @@ checkIdentifier(string n, string t, string s)
     
     for(unsigned int i = 1; i < s.size(); ++i)
     {
-        if(!isalnum(s[i]) && s[i] != '_')
+        if(!isalnum(static_cast<unsigned char>(s[i])) && s[i] != '_')
         {
             cerr << n << ": `" << t << "' is not a valid type name" << endl;
             return false;
@@ -409,7 +411,7 @@ writeDictWithIndicesH(const string& name, const Dict& dict,
         if(!member.empty())
         {
             string capitalizedMember = member;
-            capitalizedMember[0] = toupper(capitalizedMember[0]);
+            capitalizedMember[0] = toupper(static_cast<unsigned char>(capitalizedMember[0]));
             capitalizedMembers.push_back(capitalizedMember);
         }
         else
@@ -604,7 +606,7 @@ writeDictWithIndicesC(const string& name, const string& absolute, const Dict& di
         if(!member.empty())
         {
             string capitalizedMember = member;
-            capitalizedMember[0] = toupper(capitalizedMember[0]);
+            capitalizedMember[0] = toupper(static_cast<unsigned char>(capitalizedMember[0]));
             capitalizedMembers.push_back(capitalizedMember);
         }
         else
@@ -1429,8 +1431,7 @@ main(int argc, char* argv[])
     optargs = opts.argVec("dict");
     for(i = optargs.begin(); i != optargs.end(); ++i)
     {
-        string s = *i;
-        s.erase(remove_if(s.begin(), s.end(), ::isspace), s.end());
+        string s = IceUtilInternal::removeWhitespace(*i);
         
         Dict dict;
 
@@ -1562,8 +1563,7 @@ main(int argc, char* argv[])
     optargs = opts.argVec("index");
     for(i = optargs.begin(); i != optargs.end(); ++i)
     {
-        string s = *i;
-        s.erase(remove_if(s.begin(), s.end(), ::isspace), s.end());
+        string s = IceUtilInternal::removeWhitespace(*i);
         
         Index index;
 
@@ -1629,8 +1629,7 @@ main(int argc, char* argv[])
     optargs = opts.argVec("dict-index");
     for(i = optargs.begin(); i != optargs.end(); ++i)
     {
-        string s = *i;
-        s.erase(remove_if(s.begin(), s.end(), ::isspace), s.end());
+        string s = IceUtilInternal::removeWhitespace(*i);
         
         string dictName;
         DictIndex index;
@@ -1794,7 +1793,8 @@ main(int argc, char* argv[])
 
     int status = EXIT_SUCCESS;
 
-    SignalHandler sigHandler;
+    IceUtil::CtrlCHandler ctrlCHandler;
+    ctrlCHandler.setCallback(SignalHandler::removeFilesOnInterrupt);
 
     for(vector<string>::size_type idx = 1; idx < args.size(); ++idx)
     {
@@ -1853,11 +1853,9 @@ main(int argc, char* argv[])
             }
         }
 
-        SignalHandler::addFile(fileH);
-        SignalHandler::addFile(fileC);
+        SignalHandler::setCloseCallback(closeCallback);
 
-        SignalHandler::setCallback(closeCallback);
-
+        SignalHandler::addFileForCleanup(fileH);
         _H.open(fileH.c_str());
         if(!_H)
         {
@@ -1868,6 +1866,7 @@ main(int argc, char* argv[])
         printHeader(_H);
         printFreezeTypes(_H, dicts, indices);
 
+        SignalHandler::addFileForCleanup(fileC);
         _CPP.open(fileC.c_str());
         if(!_CPP)
         {
@@ -1989,6 +1988,8 @@ main(int argc, char* argv[])
         _H << "\n\n#endif\n";
         _CPP << '\n';
 
+        _H.close();
+        _CPP.close();
     }
     
     u->destroy();

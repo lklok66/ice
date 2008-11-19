@@ -12,6 +12,7 @@
 #include <Slice/Util.h>
 #include <Slice/SignalHandler.h>
 #include <IceUtil/StringUtil.h>
+#include <IceUtil/FileUtil.h>
 #include <IceUtil/UUID.h>
 #include <IceUtil/Unicode.h>
 #include <algorithm>
@@ -40,7 +41,6 @@ static void closeCallback()
     }
 }
 
-
 //
 // mcpp defines
 //
@@ -65,14 +65,11 @@ Slice::Preprocessor::Preprocessor(const string& path, const string& fileName, co
     _cppHandle(0)
 {
     _preprocess = this;
-    SignalHandler::setCallback(closeCallback);
+    SignalHandler::setCloseCallback(closeCallback);
 }
 
 Slice::Preprocessor::~Preprocessor()
 {
-    _preprocess = 0;
-    SignalHandler::setCallback(0);
-
     close();
 }
 
@@ -114,7 +111,8 @@ Slice::Preprocessor::normalizeIncludePath(const string& path)
         result.replace(pos, 2, "/");
     }
 
-    if(result == "/" || (result.size() == 3 && isalpha(result[0]) && result[1] == ':' && result[2] == '/'))
+    if(result == "/" || (result.size() == 3 && isalpha(static_cast<unsigned char>(result[0])) && result[1] == ':' &&
+       result[2] == '/'))
     {
 	return result;
     }
@@ -175,18 +173,19 @@ Slice::Preprocessor::preprocess(bool keepComments)
         //
         char* buf = mcpp_get_mem_buffer(Out);
 
-        _cppFile = ".preprocess." + IceUtil::generateUUID();
-        SignalHandler::addFile(_cppFile);
-#ifdef _WIN32
-        _cppHandle = ::_wfopen(IceUtil::stringToWstring(_cppFile).c_str(), IceUtil::stringToWstring("w+").c_str());
-#else
-        _cppHandle = ::fopen(_cppFile.c_str(), "w+");
-#endif
-        if(buf)
+        _cppHandle = tmpfile();
+        if(_cppHandle != NULL)
         {
-            ::fwrite(buf, strlen(buf), 1, _cppHandle);
+            if(buf)
+            {
+                ::fwrite(buf, strlen(buf), 1, _cppHandle);
+            }
+            ::rewind(_cppHandle);
         }
-        ::rewind(_cppHandle);
+        else
+        {
+            fprintf(stderr, "Could not open temporary file.\n");
+        }
     }
 
     //
@@ -295,7 +294,7 @@ Slice::Preprocessor::printMakefileDependencies(Language lang, const vector<strin
     {
         end += 4;
         string file = IceUtilInternal::trim(unprocessed.substr(pos, end - pos));
-        if(isAbsolute(file))
+        if(IceUtilInternal::isAbsolutePath(file))
         {
             if(file == absoluteFileName)
             {
@@ -313,7 +312,7 @@ Slice::Preprocessor::printMakefileDependencies(Language lang, const vector<strin
                     if(file.compare(0, p->length(), *p) == 0)
                     {
                         string s = includePaths[p - fullIncludePaths.begin()] + file.substr(p->length());
-                        if(isAbsolute(newFile) || s.size() < newFile.size())
+                        if(IceUtilInternal::isAbsolutePath(newFile) || s.size() < newFile.size())
                         {
                             newFile = s;
                         }
@@ -453,6 +452,9 @@ Slice::Preprocessor::printMakefileDependencies(Language lang, const vector<strin
 bool
 Slice::Preprocessor::close()
 {
+    _preprocess = 0;
+    SignalHandler::setCloseCallback(0);
+
     if(_cppHandle != 0)
     {
         int status = fclose(_cppHandle);
@@ -462,12 +464,6 @@ Slice::Preprocessor::close()
         {
             return false;
         }
-
-#ifdef _WIN32
-        _unlink(_cppFile.c_str());
-#else
-        unlink(_cppFile.c_str());
-#endif
     }
     
     return true;
@@ -481,8 +477,7 @@ Slice::Preprocessor::checkInputFile()
     string::size_type pos = base.rfind('.');
     if(pos != string::npos)
     {
-        suffix = base.substr(pos);
-        transform(suffix.begin(), suffix.end(), suffix.begin(), ::tolower);
+        suffix = IceUtilInternal::toLower(base.substr(pos));
     }
     if(suffix != ".ice")
     {

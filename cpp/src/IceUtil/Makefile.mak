@@ -20,13 +20,14 @@ OBJS		= ArgVector.obj \
 		  CountDownLatch.obj \
 		  CtrlCHandler.obj \
 		  Exception.obj \
-		  Shared.obj \
+		  FileUtil.obj \
 		  InputUtil.obj \
 		  Options.obj \
 		  OutputUtil.obj \
 		  Random.obj \
 		  RWRecMutex.obj \
 		  RecMutex.obj \
+		  Shared.obj \
 		  StaticMutex.obj \
 		  StringUtil.obj \
 		  Thread.obj \
@@ -73,8 +74,7 @@ $(DLLNAME): $(OBJS) IceUtil.res
 !endif
 
 clean::
-	del /q $(DLLNAME:.dll=.*)
-	del /q IceUtil.res
+	-del /q IceUtil.res
 
 install:: all
 	copy $(LIBNAME) $(install_libdir)

@@ -12,13 +12,13 @@ import os, sys, re, getopt
 
 for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
     toplevel = os.path.abspath(toplevel)
-    if os.path.exists(os.path.join(toplevel, "config", "TestUtil.py")):
+    if os.path.exists(os.path.join(toplevel, "scripts", "TestUtil.py")):
         break
 else:
     raise "can't find toplevel directory!"
 
-sys.path.append(os.path.join(toplevel, "config"))
-import TestUtil
+sys.path.append(os.path.join(toplevel))
+from scripts import *
 
 #
 # List of all basic tests.
@@ -39,7 +39,7 @@ tests = [
     ("Ice/facets", ["core"]),
     ("Ice/objects", ["core"]),
     ("Ice/binding", ["core"]),
-    ("Ice/faultTolerance", ["core"]),
+    ("Ice/faultTolerance", ["core", "novalgrind"]), # valgrind reports leak with aborted servers
     ("Ice/location", ["core"]),
     ("Ice/adapterDeactivation", ["core"]),
     ("Ice/slicing/exceptions", ["core"]),
@@ -55,7 +55,8 @@ tests = [
     ("Ice/servantLocator", ["core"]),
     ("Ice/interceptor", ["core"]),
     ("Ice/stringConverter", ["core"]),
-    ("IceSSL/configuration", ["once"]),
+    ("Ice/udp", ["core"]),
+    ("IceSSL/configuration", ["once", "novalgrind"]), # valgrind doesn't work well with openssl
     ("IceBox/configuration", ["core", "noipv6"]),
     ("Freeze/dbmap", ["once"]),
     ("Freeze/complex", ["once"]),
@@ -82,7 +83,7 @@ tests = [
     ("Glacier2/router", ["service"]),
     ("Glacier2/attack", ["service"]),
     ("Glacier2/sessionControl", ["service"]),
-    ("Glacier2/ssl", ["service"]),
+    ("Glacier2/ssl", ["service", "novalgrind"]), # valgrind doesn't work well with openssl
     ("Glacier2/dynamicFiltering", ["service"]),
     ("Glacier2/staticFiltering", ["service", "noipv6"]),
     ]

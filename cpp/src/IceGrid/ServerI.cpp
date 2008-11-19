@@ -18,6 +18,7 @@
 
 #include <IcePatch2/Util.h>
 #include <IcePatch2/OS.h>
+#include <IceUtil/FileUtil.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -85,13 +86,16 @@ chownRecursive(const string& path, uid_t uid, gid_t gid)
         assert(!name.empty());
         free(namelist[i]);
 
-        if(name != ".." && name != ".")
+        if(name == ".")
         {
-            name = path + "/" + name;
-            if(chown(name.c_str(), uid, gid) != 0)
+            if(chown(path.c_str(), uid, gid) != 0)
             {
                 throw "can't change permissions on `" + name + "':\n" + IceUtilInternal::lastErrorToString();
             }
+        }
+        else if(name != "..")
+        {
+            name = path + "/" + name;
 
             OS::structstat buf;
             if(OS::osstat(name, &buf) == -1)
@@ -102,6 +106,13 @@ chownRecursive(const string& path, uid_t uid, gid_t gid)
             if(S_ISDIR(buf.st_mode))
             {
                 chownRecursive(name, uid, gid);
+            }
+            else
+            {
+                if(chown(name.c_str(), uid, gid) != 0)
+                {
+                    throw "can't change permissions on `" + name + "':\n" + IceUtilInternal::lastErrorToString();
+                }
             }
         }
     }
@@ -309,7 +320,7 @@ struct EnvironmentEval : std::unary_function<string, string>
             else
             {
                 end = beg + 1;
-                while((isalnum(v[end]) || v[end] == '_')  && end < v.size())
+                while((isalnum(static_cast<unsigned char>(v[end])) || v[end] == '_')  && end < v.size())
                 {
                     ++end;
                 }
@@ -346,7 +357,14 @@ void
 TimedServerCommand::startTimer()
 {
     _timerTask = new CommandTimeoutTimerTask(this);
-    _timer->schedule(_timerTask, IceUtil::Time::seconds(_timeout));
+    try
+    {
+        _timer->schedule(_timerTask, IceUtil::Time::seconds(_timeout));
+    }
+    catch(const IceUtil::Exception&)
+    {
+        // Ignore, timer is destroyed because node is shutting down.
+    }
 }
 
 void
@@ -896,7 +914,8 @@ ServerI::isAdapterActivatable(const string& id) const
     }
     else if(_state < Destroying)
     {
-        return true; // The server is being deactivated.
+        return _node->getActivator()->isActive(); // The server is being deactivated and the
+                                                  // node isn't shutting down yet.
     }
     else
     {
@@ -1888,6 +1907,11 @@ ServerI::updateImpl(const InternalServerDescriptorPtr& descriptor)
         _timerTask = 0;
     }   
 
+#ifndef _WIN32
+    _uid = getuid();
+    _gid = getgid();
+#endif
+
     //
     // Don't change the user if the server has the session activation
     // mode and if it's not currently owned by a session.
@@ -1901,7 +1925,7 @@ ServerI::updateImpl(const InternalServerDescriptorPtr& descriptor)
         // Check if the node is running as root, if that's the case we
         // make sure that a user is set for the process.
         //
-        if(getuid() == 0 && user.empty())
+        if(_uid == 0 && user.empty())
         {
             //
             // If no user is configured and if this server is owned by
@@ -1912,10 +1936,6 @@ ServerI::updateImpl(const InternalServerDescriptorPtr& descriptor)
         }
 #endif
     }
-
-#ifndef _WIN32
-    bool newUser = false;
-#endif
 
     if(!user.empty())
     {
@@ -1981,8 +2001,7 @@ ServerI::updateImpl(const InternalServerDescriptorPtr& descriptor)
         // running the node we throw, a regular user can't run a
         // process as another user.
         //
-        uid_t uid = getuid();
-        if(uid != 0 && pw->pw_uid != uid)
+        if(_uid != 0 && pw->pw_uid != _uid)
         {
             throw "node has insufficient privileges to load server under user account `" + user + "'";
         }
@@ -1994,25 +2013,10 @@ ServerI::updateImpl(const InternalServerDescriptorPtr& descriptor)
 	    throw "running server as `root' is not allowed";
 	}
 
-        newUser = _uid != pw->pw_uid || _gid != pw->pw_gid;
         _uid = pw->pw_uid;
         _gid = pw->pw_gid;
 #endif
     }
-#ifndef _WIN32
-    else
-    {    
-        //
-        // If no user is specified, we'll run the process as the
-        // current user.
-        //
-        uid_t uid = getuid();
-        uid_t gid = getgid();
-        newUser = _uid != uid || _gid != gid;
-        _uid = uid;
-        _gid = gid;
-    }
-#endif
 
     istringstream at(_desc->activationTimeout);
     if(!(at >> _activationTimeout) || !at.eof() || _activationTimeout == 0)
@@ -2032,7 +2036,7 @@ ServerI::updateImpl(const InternalServerDescriptorPtr& descriptor)
     for(Ice::StringSeq::const_iterator p = _desc->logs.begin(); p != _desc->logs.end(); ++p)
     {
         string path = IcePatch2::simplify(*p);
-        if(IcePatch2::isAbsolute(path))
+        if(IceUtilInternal::isAbsolutePath(path))
         {
             _logs.push_back(path);
         }
@@ -2123,6 +2127,10 @@ ServerI::updateImpl(const InternalServerDescriptorPtr& descriptor)
     // Create the configuration files, remove the old ones.
     //
     {
+        //
+        // We do not want to esapce the properties if the Ice version is 
+        // previous to Ice 3.3.
+        //
         Ice::StringSeq knownFiles;
         for(PropertyDescriptorSeqDict::const_iterator p = properties.begin(); p != properties.end(); ++p)
         {
@@ -2143,7 +2151,7 @@ ServerI::updateImpl(const InternalServerDescriptorPtr& descriptor)
                 }
                 else
                 {
-                    configfile << escapeProperty(r->name) << "=" << escapeProperty(r->value) << endl;
+                    configfile << r->name << "=" << r->value << endl;
                 }
             }
             configfile.close();
@@ -2234,12 +2242,7 @@ ServerI::updateImpl(const InternalServerDescriptorPtr& descriptor)
     }
 
 #ifndef _WIN32
-    if(newUser)
-    {
-        chownRecursive(_serverDir + "/config", _uid, _gid);
-        chownRecursive(_serverDir + "/dbs", _uid, _gid);
-        chownRecursive(_serverDir + "/distrib", _uid, _gid);
-    }
+    chownRecursive(_serverDir, _uid, _gid);
 #endif
 }
 
@@ -2523,7 +2526,14 @@ ServerI::setStateNoSync(InternalServerState st, const std::string& reason)
         if(_activation == Always)
         {
             _timerTask = new DelayedStart(this, _node->getTraceLevels());
-            _node->getTimer()->schedule(_timerTask, IceUtil::Time::milliSeconds(500));
+            try
+            {
+                _node->getTimer()->schedule(_timerTask, IceUtil::Time::milliSeconds(500));
+            }
+            catch(const IceUtil::Exception&)
+            {
+                // Ignore, timer is destroyed because node is shutting down.
+            }
         }
         else if(_activation == Disabled && _disableOnFailure > 0 && _failureTime != IceUtil::Time())
         {
@@ -2535,8 +2545,16 @@ ServerI::setStateNoSync(InternalServerState st, const std::string& reason)
             // callback is executed.  
             //
             _timerTask = new DelayedStart(this, _node->getTraceLevels());
-            _node->getTimer()->schedule(_timerTask, 
-                                        IceUtil::Time::seconds(_disableOnFailure) + IceUtil::Time::milliSeconds(500));
+            try
+            {
+                _node->getTimer()->schedule(_timerTask, 
+                                            IceUtil::Time::seconds(_disableOnFailure) + 
+                                            IceUtil::Time::milliSeconds(500));
+            }
+            catch(const IceUtil::Exception&)
+            {
+                // Ignore, timer is destroyed because node is shutting down.
+            }
         }
     }
 
@@ -2627,12 +2645,6 @@ ServerI::createOrUpdateDirectory(const string& dir)
     catch(const string&)
     {
     }
-#ifndef _WIN32
-    if(chown(dir.c_str(), _uid, _gid) != 0)
-    {
-        throw "can't set permissions on directory `" + dir + "'";
-    }    
-#endif
 }
 
 ServerState
@@ -2730,7 +2742,7 @@ ServerI::getFilePath(const string& filename) const
     else if(!filename.empty() && filename[0] == '#')
     {
         string path = IcePatch2::simplify(filename.substr(1));
-        if(!IcePatch2::isAbsolute(path))
+        if(!IceUtilInternal::isAbsolutePath(path))
         {
             path = _node->getPlatformInfo().getCwd() + "/" + path;
         }

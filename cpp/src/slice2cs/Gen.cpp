@@ -1073,7 +1073,7 @@ Slice::Gen::Gen(const string& name, const string& base, const vector<string>& in
       _stream(stream)
 {
     _gen = this;
-    SignalHandler::setCallback(closeCallback);
+    SignalHandler::setCloseCallback(closeCallback);
 
     string fileBase = base;
     string::size_type pos = base.find_last_of("/\\");
@@ -1089,9 +1089,8 @@ Slice::Gen::Gen(const string& name, const string& base, const vector<string>& in
         file = dir + '/' + file;
         fileImpl = dir + '/' + fileImpl;
     }
-    SignalHandler::addFile(file);
-    SignalHandler::addFile(fileImpl);
 
+    SignalHandler::addFileForCleanup(file);
     _out.open(file.c_str());
     if(!_out)
     {
@@ -1127,6 +1126,8 @@ Slice::Gen::Gen(const string& name, const string& base, const vector<string>& in
             cerr << name << ": `" << fileImpl << "' already exists--will not overwrite" << endl;
             return;
         }
+
+        SignalHandler::addFileForCleanup(fileImpl);
         _impl.open(fileImpl.c_str());
         if(!_impl)
         {
@@ -1147,7 +1148,7 @@ Slice::Gen::~Gen()
         _impl << '\n';
     }
 
-    SignalHandler::setCallback(0);
+    SignalHandler::setCloseCallback(0);
 }
 
 bool
@@ -1223,7 +1224,7 @@ Slice::Gen::generateChecksums(const UnitPtr& u)
         string className = "X" + IceUtil::generateUUID();
         for(string::size_type pos = 1; pos < className.size(); ++pos)
         {
-            if(!isalnum(className[pos]))
+            if(!isalnum(static_cast<unsigned char>(className[pos])))
             {
                 className[pos] = '_';
             }
@@ -3655,7 +3656,6 @@ Slice::Gen::HelperVisitor::visitDictionary(const DictionaryPtr& p)
     bool hasClassValue = (builtin && builtin->kind() == Builtin::KindObject) || ClassDeclPtr::dynamicCast(value);
     if(hasClassValue)
     {
-        string expectedType = ContainedPtr::dynamicCast(value)->scoped();
         _out << sp << nl << "public sealed class Patcher__ : IceInternal.Patcher<" << valueS << ">";
         _out << sb;
         _out << sp << nl << "internal Patcher__(string type, " << name << " m, " << keyS << " key) : base(type)";
@@ -3693,7 +3693,7 @@ Slice::Gen::HelperVisitor::visitDictionary(const DictionaryPtr& p)
     {
         if(isValueType(key))
         {
-            _out << nl << "v__ = new " << typeToString(key) << "();";
+            _out << nl << "k__ = new " << typeToString(key) << "();";
         }
         else
         {
@@ -3767,7 +3767,7 @@ Slice::Gen::HelperVisitor::visitDictionary(const DictionaryPtr& p)
         {
             if(isValueType(key))
             {
-                _out << nl << "v__ = new " << typeToString(key) << "();";
+                _out << nl << "k__ = new " << typeToString(key) << "();";
             }
             else
             {
@@ -4025,7 +4025,7 @@ Slice::Gen::DelegateMVisitor::visitClassDefStart(const ClassDefPtr& p)
         _out << nl << "throw new Ice.UnknownUserException(ex.ice_name(), ex);";
         _out << eb;
         _out << eb;
-        if(op->returnsData())
+        if(ret || !outParams.empty())
         {
             _out << nl << "IceInternal.BasicStream is__ = og__.istr();";
             _out << nl << "is__.startReadEncaps();";
@@ -4625,7 +4625,7 @@ Slice::Gen::AsyncVisitor::visitOperation(const OperationPtr& p)
         _out << eb;
         _out << "return;";
         _out << eb;
-        if(p->returnsData())
+        if(ret || !outParams.empty())
         {
             _out << nl << "is__.startReadEncaps();";
             for(q = outParams.begin(); q != outParams.end(); ++q)

@@ -22,8 +22,9 @@ About this distribution
 This binary distribution provides all Ice run time services and 
 development tools to build Ice applications:
 
- - in C++, using Visual Studio 2005 or Visual C++ 2005 Express Edition
- - in .NET, using Visual Studio 2005
+ - in C++, using Visual Studio 2005 SP1 or Visual C++ 2005 Express
+   Edition SP1
+ - in .NET, using Visual Studio 2005 SP1
  - in Java, using Java 5 or Java 6
  - in Python, using Python 2.5.2
 
@@ -73,6 +74,19 @@ running the IceGrid registry, IceGrid node, and Glacier2 router as
 Windows services.
 
 
+Using the IceGrid Administrative Console
+----------------------------------------
+
+A Java-based graphical tool for administering IceGrid applications
+is included in this distribution. The Java archive file is installed
+as
+
+<Ice installation root directory>\bin\IceGridGUI.jar
+
+With a suitable Java installation, you can execute the application
+by double-clicking on this file.
+
+
 Python Compatibility
 --------------------
 
@@ -89,11 +103,11 @@ time. An appendix in the Ice manual provides more information on
 distributing Ice applications. The link below describes the process
 of deploying the Visual C++ 8.0 run time:
 
-http://msdn2.microsoft.com/en-us/library/ms235291(VS.80).aspx
+  http://msdn2.microsoft.com/en-us/library/ms235291(VS.80).aspx
 
 
-Setting up Visual Studio 2005 to build Ice applications in C++
---------------------------------------------------------------
+Setting up Visual Studio 2005 SP1 to build Ice applications in C++
+------------------------------------------------------------------
 
 Before you can use Ice in your C++ applications, you first need to
 configure Visual Studio with the locations of the Ice header files,
@@ -122,10 +136,10 @@ libraries, and executables.
   For x64 binaries add <Ice installation root directory>\bin\x64
 
 
-Setting up Visual C++ 2005 Express Edition
-------------------------------------------
+Setting up Visual C++ 2005 Express Edition SP1
+----------------------------------------------
 
-Visual C++ 2005 Express is available for download from:
+Visual C++ 2005 Express and SP1 is available for download from:
 
   http://www.microsoft.com/express/2005/
 
@@ -159,8 +173,10 @@ your PATH, as shown below:
 
 set PATH=<Ice installation root directory>\bin;%PATH%
 
-If you built an x64 configuration, use this setting instead:
+If you built an x64 configuration, use this setting instead (the
+x64 directory must come first in your PATH):
 
+set PATH=<Ice installation root directory>\bin;%PATH%
 set PATH=<Ice installation root directory>\bin\x64;%PATH%
 
 Change to the desired demo subdirectory and review the README file if

@@ -19,11 +19,73 @@ subdirectory of each language mapping (e.g., cpp/CHANGES).
 Changes since version 3.3.0
 ======================================================================
 
+
+General Changes
+===============
+
+- Fixed a bug in IceGrid which would cause it to generate incorrect
+  config files for servers whose ice-version was set to a version
+  previous to Ice 3.3.0.
+
+- Fixed a bug in the Slice translators that prevented them from being
+  run from a directory without write permissions, even if no output 
+  files were being written to the directory.
+
+- Fixed a bug where retried AMI calls could cause the timer thread to
+  print an error message if the retry failed and if Ice.RetryIntervals
+  was configured with non zero time intervals.
+
 C++ Changes
 ===========
 
+- Fixed a bug in the IceGrid locator implementation which could cause
+  the registry to crash when resolving the endpoints of a replica
+  group and if some servers were activating.
+
+- Fixed icegridadmin `service list' command crash.
+
 - Fixed a bug where slice2cpp would generate absolute include paths
   if the command line option "-I." was used.
+
+- Fixed Freeze transactional evictor bug that could cause the
+  transaction of an asynchronous method dispatch to be rolled back if
+  rollback on user exception was enabled.
+
+- Fixed a bug that could cause the first invocation on a proxy to
+  incorrectly be sent compressed or not compressed.
+
+
+C# Changes
+==========
+
+- Fixed a bug in slice2cs that caused a core dump if a dictionary
+  had a value type of Object.
+
+
+Python Changes
+==============
+
+- Fixed bugs in getImplicitContext related to using it when an
+  implicit context had not been set.
+
+- Fixed bugs in stringToProxy and propertyToProxy related to null
+  proxies.
+
+- Ice.getSliceDir() now only searches for the slice directory in
+  a standard Ice installation.
+
+
+Ruby Changes
+============
+
+- Added helper Ice.getSliceDir, which locates the slice directory
+  in a standard Ice installation.
+
+
+PHP Changes
+===========
+
+- Fixed bugs in the ice_router and ice_locator proxy methods.
 
 
 ======================================================================

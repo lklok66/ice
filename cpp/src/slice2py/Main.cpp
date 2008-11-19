@@ -11,6 +11,7 @@
 #include <IceUtil/IceUtil.h>
 #include <IceUtil/Options.h>
 #include <IceUtil/StringUtil.h>
+#include <IceUtil/CtrlCHandler.h>
 #include <Slice/Preprocessor.h>
 #include <Slice/PythonUtil.h>
 #include <Slice/SignalHandler.h>
@@ -487,7 +488,9 @@ main(int argc, char* argv[])
 
     for(i = args.begin(); i != args.end(); ++i)
     {
-        SignalHandler sigHandler;
+        SignalHandler::clearCleanupFileList();
+        IceUtil::CtrlCHandler ctrlCHandler;
+        ctrlCHandler.setCallback(SignalHandler::removeFilesOnInterrupt);
 
         Preprocessor icecpp(argv[0], *i, cppArgs);
         FILE* cppHandle = icecpp.preprocess(false);
@@ -547,10 +550,10 @@ main(int argc, char* argv[])
                 {
                     file = output + '/' + file;
                 }
-                SignalHandler::addFile(file);
 
-                SignalHandler::setCallback(closeCallback);
+                SignalHandler::setCloseCallback(closeCallback);
 
+                SignalHandler::addFileForCleanup(file);
                 _out.open(file.c_str());
                 if(!_out)
                 {
@@ -568,7 +571,7 @@ main(int argc, char* argv[])
                 generate(u, all, checksum, includePaths, _out);
 
                 _out.close();
-                SignalHandler::setCallback(0);
+                SignalHandler::setCloseCallback(0);
 
                 //
                 // Create or update the Python package hierarchy.

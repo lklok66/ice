@@ -166,9 +166,13 @@ namespace Ice
         public abstract void write(OutputStream os);
         public abstract bool usesClasses();
 
-        public override void write__(IceInternal.BasicStream ostr)
+        public override void write__(IceInternal.BasicStream os)
         {
-            OutputStream stream = new OutputStreamI(communicator_, ostr);
+            OutputStream stream = (OutputStream)os.closure();
+            if(stream == null)
+            {
+                stream = new OutputStreamI(communicator_, os);
+            }
             write(stream);
         }
 

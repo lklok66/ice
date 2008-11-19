@@ -12,13 +12,13 @@ import os, sys
 
 for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
     toplevel = os.path.abspath(toplevel)
-    if os.path.exists(os.path.join(toplevel, "config", "TestUtil.py")):
+    if os.path.exists(os.path.join(toplevel, "scripts", "TestUtil.py")):
         break
 else:
     raise "can't find toplevel directory!"
 
-sys.path.append(os.path.join(toplevel, "config"))
-import TestUtil
+sys.path.append(os.path.join(toplevel))
+from scripts import *
 
 #
 # List of all basic tests.
@@ -35,7 +35,9 @@ tests = [
     ("IceE/faultTolerance", ["core"]),
     ("IceE/location", ["core"]),
     ("IceE/adapterDeactivation", ["core"]),
+    ("IceE/objects", ["core"]),
     ("IceE/slicing/exceptions", ["core"]),
+    ("IceE/slicing/objects", ["core"]),
     ("IceE/custom", ["core"]),
     ("IceE/retry", ["core"]),
     ("IceE/defaultServant", ["core"]),

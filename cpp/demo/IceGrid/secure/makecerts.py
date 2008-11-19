@@ -11,13 +11,8 @@
 import os, sys, shutil, glob
 
 def iceca(args):
-
-    if(os.environ.has_key("ICE_HOME")):
-        cmd = os.path.join(os.environ["ICE_HOME"], "bin", "iceca") + " " + args
-    else:
-        cmd = "iceca " + args
-
-    if os.system(cmd):
+    os.environ['PYTHONUNBUFFERED'] = '1'
+    if os.system("iceca " + args):
         sys.exit(1)
 
 def createCertificate(filename, cn):

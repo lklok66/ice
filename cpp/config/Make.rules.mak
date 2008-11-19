@@ -20,12 +20,6 @@ prefix			= C:\Ice-$(VERSION)
 #OPTIMIZE		= yes
 
 #
-# Define if you want to build the Ice-E/Ice-SL slice compilers with
-# static libraries.
-#
-#STATICLIBS             = yes
-
-#
 # Define if you want pdb files to be generated for optimized/release
 # builds
 #
@@ -204,6 +198,35 @@ all:: $(SRCS) $(TARGETS)
 
 clean::
 	-del /q $(TARGETS)
+
+!endif
+
+# Suffix set, we're using a debug build.
+!if "$(LIBSUFFIX)" != ""
+
+!if "$(LIBNAME)" != ""
+clean::
+	-del /q $(LIBNAME:d.lib=.lib)
+	-del /q $(LIBNAME)
+!endif
+!if "$(DLLNAME)" != ""
+clean::
+	-del /q $(DLLNAME:d.dll=.*)
+	-del /q $(DLLNAME:.dll=.*)
+!endif
+
+!else
+
+!if "$(LIBNAME)" != ""
+clean::
+	-del /q $(LIBNAME:.lib=d.lib)
+	-del /q $(LIBNAME)
+!endif
+!if "$(DLLNAME)" != ""
+clean::
+	-del /q $(DLLNAME:.dll=d.*)
+	-del /q $(DLLNAME:.dll=.*)
+!endif
 
 !endif
 

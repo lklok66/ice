@@ -25,6 +25,7 @@ includeSubDirs = [ \
     "vb", \
     "rb", \
     "config", \
+    "scripts", \
     "certs", \
     "slice", \
     "distribution", \
@@ -38,15 +39,7 @@ filesToRemove = [ \
     "fixCopyright.py", \
     "fixVersion.py", \
     "makedist.py", \
-    "makesldist.py", \
-    "cpp/iceemakedist.py", \
     "cpp/config/makegitignore.py", \
-    "cpp/config/Make.rules.icee", \
-    "cpp/config/Make.rules.mak.icee", \
-    "cpp/config/Make.rules.mak.icesl", \
-    "cpp/src/slice2cppe", \
-    "cpp/src/slice2javae", \
-    "cpp/src/slice2sl", \
     "rb/config/Make.rules.Darwin", \
 ]
 
@@ -199,7 +192,8 @@ for root, dirnames, filenames in os.walk('.'):
 
 move("distribution", distFilesDir) # Move the distribution directory to the top-level
 move("demoscript", os.path.join(demoscriptDir, "demoscript")) # Move the demoscript directory
-copy(os.path.join("config", "DemoUtil.py"), os.path.join(demoscriptDir, "config", "DemoUtil.py"))
+# and the associated top level demo script.
+move("allDemos.py", os.path.join(demoscriptDir, "demoscript", "allDemos.py"))
 
 print "ok"
 
@@ -232,6 +226,7 @@ for d in ["", "cpp", "java", "cs"]:
 copy(os.path.join(distFilesDir, "src", "common", "Make.rules"), os.path.join(demoDir, "config"), False)
 copy(os.path.join(distFilesDir, "src", "common", "Make.rules.cs"), os.path.join(demoDir, "config"), False)
 copy(os.path.join(distFilesDir, "src", "common", "build.properties"), os.path.join(demoDir, "config"), False)
+copy(os.path.join(srcDir, "scripts"), os.path.join(demoscriptDir, "scripts"))
 
 # Consolidate demoscript and demo distribution with files from each language mapping
 for d in os.listdir('.'):

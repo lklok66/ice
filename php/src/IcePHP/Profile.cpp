@@ -11,6 +11,7 @@
 #include <Util.h>
 
 #include <Slice/Preprocessor.h>
+#include <Slice/SignalHandler.h>
 #include <IceUtil/Options.h>
 #include <IceUtil/InputUtil.h>
 #include <fstream>
@@ -402,6 +403,8 @@ parseSlice(const string& argStr, Slice::UnitPtr& unit, bool& suppressWarnings TS
 
     for(vector<string>::iterator p = files.begin(); p != files.end(); ++p)
     {
+        SignalHandler signalHandler;
+
         Slice::Preprocessor icecpp("icecpp", *p, cppArgs);
         FILE* cppHandle = icecpp.preprocess(false);
 
@@ -893,11 +896,12 @@ ZEND_FUNCTION(Ice_loadProfileWithArgs)
     //
     Ice::StringSeq args;
     HashTable* arr = Z_ARRVAL_P(zv);
+    void* data;
     HashPosition pos;
-    zval** val;
     zend_hash_internal_pointer_reset_ex(arr, &pos);
-    while(zend_hash_get_current_data_ex(arr, reinterpret_cast<void**>(&val), &pos) != FAILURE)
+    while(zend_hash_get_current_data_ex(arr, &data, &pos) != FAILURE)
     {
+        zval** val = reinterpret_cast<zval**>(data);
         if(Z_TYPE_PP(val) != IS_STRING)
         {
             php_error_docref(0 TSRMLS_CC, E_ERROR, "argument array must contain strings");

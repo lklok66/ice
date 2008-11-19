@@ -72,6 +72,19 @@ running the IceGrid registry, IceGrid node, and Glacier2 router as
 Windows services.
 
 
+Using the IceGrid Administrative Console
+----------------------------------------
+
+A Java-based graphical tool for administering IceGrid applications
+is included in this distribution. The Java archive file is installed
+as
+
+<Ice installation root directory>\bin\IceGridGUI.jar
+
+With a suitable Java installation, you can execute the application
+by double-clicking on this file.
+
+
 Setting up Visual Studio 2008 to build Ice applications in C++
 --------------------------------------------------------------
 
@@ -139,8 +152,10 @@ your PATH, as shown below:
 
 set PATH=<Ice installation root directory>\bin;%PATH%
 
-If you built an x64 configuration, use this setting instead:
+If you built an x64 configuration, use this setting instead (the
+x64 directory must come first in your PATH):
 
+set PATH=<Ice installation root directory>\bin;%PATH%
 set PATH=<Ice installation root directory>\bin\x64;%PATH%
 
 Change to the desired demo subdirectory and review the README file if

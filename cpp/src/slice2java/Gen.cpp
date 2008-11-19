@@ -2670,7 +2670,7 @@ Slice::Gen::TypesVisitor::visitDataMember(const DataMemberPtr& p)
     if(p->hasMetaData(_getSetMetaData) || contained->hasMetaData(_getSetMetaData))
     {
         string capName = p->name();
-        capName[0] = toupper(capName[0]);
+        capName[0] = toupper(static_cast<unsigned char>(capName[0]));
 
         //
         // If container is a class, get all of its operations so that we can check for conflicts.
@@ -3057,7 +3057,7 @@ Slice::Gen::TypesVisitor::visitConst(const ConstPtr& p)
                 const string val = p->value();
                 for(string::const_iterator c = val.begin(); c != val.end(); ++c)
                 {
-                    if(isascii(*c) && isprint(*c))
+                    if(isascii(static_cast<unsigned char>(*c)) && isprint(static_cast<unsigned char>(*c)))
                     {
                         switch(*c)
                         {
@@ -4270,7 +4270,7 @@ Slice::Gen::DelegateMVisitor::visitClassDefStart(const ClassDefPtr& p)
         out << nl << "throw new Ice.UnknownUserException(__ex.ice_name());";
         out << eb;
         out << eb;
-        if(op->returnsData())
+        if(ret || !outParams.empty())
         {
             out << nl << "IceInternal.BasicStream __is = __og.is();";
             out << nl << "__is.startReadEncaps();";
@@ -5150,7 +5150,7 @@ Slice::Gen::AsyncVisitor::visitOperation(const OperationPtr& p)
         out << nl << "throw new Ice.UnknownUserException(__ex.ice_name());";
         out << eb;
         out << eb;
-        if(p->returnsData())
+        if(ret || !outParams.empty())
         {
             out << nl << "__is.startReadEncaps();";
             for(pli = outParams.begin(); pli != outParams.end(); ++pli)

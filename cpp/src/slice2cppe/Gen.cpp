@@ -84,7 +84,7 @@ Slice::Gen::Gen(const string& name, const string& base, const string& headerExte
     _ice(ice)
 {
     _gen = this;
-    SignalHandler::setCallback(closeCallback);
+    SignalHandler::setCloseCallback(closeCallback);
 
     Slice::featureProfile = Slice::IceE;
 
@@ -108,8 +108,6 @@ Slice::Gen::Gen(const string& name, const string& base, const string& headerExte
             fileImplH = dir + '/' + fileImplH;
             fileImplC = dir + '/' + fileImplC;
         }
-        SignalHandler::addFile(fileImplH);
-        SignalHandler::addFile(fileImplC);
 
         struct stat st;
         if(stat(fileImplH.c_str(), &st) == 0)
@@ -123,6 +121,7 @@ Slice::Gen::Gen(const string& name, const string& base, const string& headerExte
             return;
         }
 
+        SignalHandler::addFileForCleanup(fileImplH);
         implH.open(fileImplH.c_str());
         if(!implH)
         {
@@ -130,6 +129,7 @@ Slice::Gen::Gen(const string& name, const string& base, const string& headerExte
             return;
         }
         
+        SignalHandler::addFileForCleanup(fileImplC);
         implC.open(fileImplC.c_str());
         if(!implC)
         {
@@ -155,9 +155,8 @@ Slice::Gen::Gen(const string& name, const string& base, const string& headerExte
         fileH = dir + '/' + fileH;
         fileC = dir + '/' + fileC;
     }
-    SignalHandler::addFile(fileH);
-    SignalHandler::addFile(fileC);
 
+    SignalHandler::addFileForCleanup(fileH);
     H.open(fileH.c_str());
     if(!H)
     {
@@ -165,6 +164,7 @@ Slice::Gen::Gen(const string& name, const string& base, const string& headerExte
         return;
     }
     
+    SignalHandler::addFileForCleanup(fileC);
     C.open(fileC.c_str());
     if(!C)
     {
@@ -199,7 +199,7 @@ Slice::Gen::~Gen()
         implC << '\n';
     }
 
-    SignalHandler::setCallback(0);
+    SignalHandler::setCloseCallback(0);
 }
 
 bool

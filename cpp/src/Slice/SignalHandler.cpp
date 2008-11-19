@@ -7,32 +7,50 @@
 //
 // **********************************************************************
 
-#include <IceUtil/DisableWarnings.h>
 #include <Slice/SignalHandler.h>
-#include <vector>
-#include <cstdlib>
+#include <IceUtil/StaticMutex.h>
+#include <map>
 
-#ifndef _WIN32
-#    include <signal.h>
-#endif
-
-
-using namespace std;
 using namespace Slice;
+using namespace IceUtil;
+using namespace IceUtilInternal;
+using namespace std;
 
-//
-// Signal handler routine to unlink output files in case of translator
-// being interrupted.
-//
-static SignalHandlerCallback _callback = 0;
+static StaticMutex _mutex = ICE_STATIC_MUTEX_INITIALIZER;
+
+static SignalHandlerCloseCallback _callback = 0;
 static vector<string> _fileList;
 
-#ifdef _WIN32
-static BOOL WINAPI signalHandler(DWORD dwCtrlType)
-#else
-static void signalHandler(int signal)
-#endif
+void
+SignalHandler::addFileForCleanup(const string& file)
 {
+    StaticMutex::Lock lock(_mutex);
+
+    _fileList.push_back(file);
+}
+
+void
+SignalHandler::setCloseCallback(Slice::SignalHandlerCloseCallback callback)
+{
+    StaticMutex::Lock lock(_mutex);
+
+    _callback = callback;
+}
+
+void
+SignalHandler::clearCleanupFileList()
+{
+    StaticMutex::Lock lock(_mutex);
+
+    _fileList.clear();
+    _callback = 0;
+}
+
+void
+SignalHandler::removeFilesOnInterrupt(int signal)
+{
+    StaticMutex::Lock lock(_mutex);
+
     if(_callback != 0)
     {
         _callback();
@@ -44,41 +62,4 @@ static void signalHandler(int signal)
     }
 
     exit(1);
-}
-
-
-Slice::SignalHandler::SignalHandler()
-{
-#ifdef _WIN32
-    SetConsoleCtrlHandler(signalHandler, TRUE);
-#else
-    sigset(SIGHUP, signalHandler);
-    sigset(SIGINT, signalHandler);
-    sigset(SIGQUIT, signalHandler);
-#endif
-}
-
-Slice::SignalHandler::~SignalHandler()
-{
-#ifdef _WIN32
-    SetConsoleCtrlHandler(signalHandler, FALSE);
-#else
-    sigset(SIGHUP, SIG_DFL);
-    sigset(SIGINT, SIG_DFL);
-    sigset(SIGQUIT, SIG_DFL);
-#endif
-
-    _fileList.clear();
-}
-
-void
-Slice::SignalHandler::setCallback(SignalHandlerCallback callback)
-{
-    _callback = callback;
-}
-
-void
-Slice::SignalHandler::addFile(const string& file)
-{
-    _fileList.push_back(file);
 }
