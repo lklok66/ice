@@ -138,7 +138,7 @@ public class HelloWorld extends Activity
                         return;
                     }
                     
-                    if(_deliveryMode == DeliveryMode.TWOWAY)
+                    if(_deliveryMode == DeliveryMode.TWOWAY || _deliveryMode == DeliveryMode.TWOWAY_SECURE)
                     {
                         _status.setText("Waiting for response");
                     }
@@ -181,7 +181,7 @@ public class HelloWorld extends Activity
             {
                 if(hello.sayHello_async(new SayHelloI(), _delay.getProgress()))
                 {
-                    if(_deliveryMode == DeliveryMode.TWOWAY)
+                    if(_deliveryMode == DeliveryMode.TWOWAY || _deliveryMode == DeliveryMode.TWOWAY_SECURE)
                     {
                         _activity.setVisibility(View.VISIBLE);
                         _status.setText("Waiting for response");
@@ -260,7 +260,7 @@ public class HelloWorld extends Activity
                         });
                     }
                 });
-                if(_deliveryMode == DeliveryMode.TWOWAY)
+                if(_deliveryMode == DeliveryMode.TWOWAY || _deliveryMode == DeliveryMode.TWOWAY_SECURE)
                 {
                     _activity.setVisibility(View.VISIBLE);
                     _status.setText("Waiting for response");
