@@ -15,12 +15,9 @@ import android.os.IBinder;
 import android.os.SystemClock;
 
 import com.zeroc.chat.ChatActivity;
-import com.zeroc.chat.ChatApp;
 import com.zeroc.chat.R;
-import com.zeroc.chat.R.drawable;
-import com.zeroc.chat.R.raw;
 
-public class ChatService extends Service implements Chat.Android._ServiceOperations
+public class ChatService extends Service implements com.zeroc.chat.service.Service
 {
     private static final String REFRESH_EXTRA = "refresh";
     private AppSession _session = null;
@@ -28,21 +25,26 @@ public class ChatService extends Service implements Chat.Android._ServiceOperati
     private CertificateVerifier _verifier;
     private boolean _confirmConnectionResult = false;
     private boolean _confirmConnection = false;
-    private Chat.Android.SessionListenerPrx _cb;
+    private SessionListener _cb;
     private boolean _loginInProgress;
-    private Ice.ObjectAdapter _adapter;
+
+    public class LocalBinder extends Binder
+    {
+        public com.zeroc.chat.service.Service getService()
+        {
+            return ChatService.this;
+        }
+    }
 
     @Override
     public IBinder onBind(Intent intent)
     {
-        System.out.println("ChatService.onBind");
-        return new Binder();
+        return new LocalBinder();
     }
 
     @Override
     public void onCreate()
     {
-        System.out.println("ChatService.onCreate");
         super.onCreate();
         //
         // Read the CA certificate embedded in the Jar file.
@@ -58,33 +60,18 @@ public class ChatService extends Service implements Chat.Android._ServiceOperati
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
-        // Create the service Ice object.
-        ChatApp app = (ChatApp)getApplication();
-        _adapter = app.getCommunicator().createObjectAdapterWithEndpoints("Service", "tcp -p 12222");
-        _adapter.add(new Chat.Android._ServiceTie(this), new Ice.Identity("ChatService", ""));
-        _adapter.activate();
     }
 
     @Override
     public void onDestroy()
     {
-        System.out.println("ChatService.onDestroy");
         super.onDestroy();
-        try
-        {
-            _adapter.deactivate();
-        }
-        catch(Ice.ObjectAdapterDeactivatedException ex)
-        {
-        }
+        logout();
     }
 
     @Override
     synchronized public void onStart(Intent intent, int startId)
     {
-        System.out.println("ChatService: onStart");
-
         // Find out if we were started by the alarm manager
         // to refresh the current session.
         if(intent.hasExtra(REFRESH_EXTRA))
@@ -98,9 +85,9 @@ public class ChatService extends Service implements Chat.Android._ServiceOperati
             }
         }
     }
-    
-        // _ServiceOperations
-    synchronized public boolean setSessionListener(Chat.Android.SessionListenerPrx cb, Ice.Current current)
+
+    // _ServiceOperations
+    synchronized public boolean setSessionListener(SessionListener cb)
     {
         _cb = cb;
         if(_pendingEvent != null)
@@ -111,26 +98,26 @@ public class ChatService extends Service implements Chat.Android._ServiceOperati
         return _loginInProgress;
     }
 
-    synchronized public void confirmConnection(boolean confirm, Ice.Current current)
+    synchronized public void confirmConnection(boolean confirm)
     {
         _confirmConnectionResult = true;
         _confirmConnection = confirm;
         notify();
     }
 
-    synchronized public void logout(Ice.Current current)
+    synchronized public void logout()
     {
         if(_session != null)
         {
             _session.destroy();
             _session = null;
-            
+
             sessionDestroyed();
         }
     }
 
     synchronized public void login(final String hostname, final String username, final String password,
-                                   final boolean secure, Ice.Current current)
+                                   final boolean secure)
     {
         assert _session == null;
         assert !_loginInProgress;
@@ -150,7 +137,7 @@ public class ChatService extends Service implements Chat.Android._ServiceOperati
                 {
                     setPendingEvent(new SessionListenerEvent()
                     {
-                        public void replay(Chat.Android.SessionListenerPrx l)
+                        public void replay(SessionListener l)
                         {
                             l.onException(String.format("Session creation failed: %s", ex.reason));
                         }
@@ -160,7 +147,7 @@ public class ChatService extends Service implements Chat.Android._ServiceOperati
                 {
                     setPendingEvent(new SessionListenerEvent()
                     {
-                        public void replay(Chat.Android.SessionListenerPrx l)
+                        public void replay(SessionListener l)
                         {
                             l.onException(String.format("Login failed: %s", ex.reason));
                         }
@@ -170,7 +157,7 @@ public class ChatService extends Service implements Chat.Android._ServiceOperati
                 {
                     setPendingEvent(new SessionListenerEvent()
                     {
-                        public void replay(Chat.Android.SessionListenerPrx l)
+                        public void replay(SessionListener l)
                         {
                             l.onException(String.format("Login failed: %s", ex.toString()));
                         }
@@ -186,9 +173,8 @@ public class ChatService extends Service implements Chat.Android._ServiceOperati
             }
         }).start();
     }
-    
-    synchronized public boolean addChatRoomListener(Chat.Android.ChatRoomListenerPrx listener, boolean replay,
-                                                    Ice.Current current)
+
+    synchronized public boolean addChatRoomListener(ChatRoomListener listener, boolean replay)
     {
         if(_session == null)
         {
@@ -197,7 +183,7 @@ public class ChatService extends Service implements Chat.Android._ServiceOperati
         return _session.addChatRoomListener(listener, replay);
     }
 
-    synchronized public void removeChatRoomListener(Chat.Android.ChatRoomListenerPrx listener, Ice.Current current)
+    synchronized public void removeChatRoomListener(ChatRoomListener listener)
     {
         if(_session != null)
         {
@@ -205,7 +191,7 @@ public class ChatService extends Service implements Chat.Android._ServiceOperati
         }
     }
 
-    synchronized public void send(String message, Ice.Current current)
+    synchronized public void send(String message)
     {
         if(_session != null)
         {
@@ -215,7 +201,7 @@ public class ChatService extends Service implements Chat.Android._ServiceOperati
 
     private interface SessionListenerEvent
     {
-        public void replay(Chat.Android.SessionListenerPrx l);
+        public void replay(SessionListener l);
     }
 
     private class CertificateVerifier implements IceSSL.CertificateVerifier
@@ -239,7 +225,7 @@ public class ChatService extends Service implements Chat.Android._ServiceOperati
             {
                 setPendingEvent(new SessionListenerEvent()
                 {
-                    public void replay(Chat.Android.SessionListenerPrx l)
+                    public void replay(SessionListener l)
                     {
                         l.onConnectConfirm();
                     }
@@ -296,23 +282,21 @@ public class ChatService extends Service implements Chat.Android._ServiceOperati
         am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, firstTime, refreshTimeout, sender);
 
         // Display a notification that the user is logged in.
-        Notification notification = new Notification(R.drawable.stat_sample, "Logged In",
-                System.currentTimeMillis());
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, ChatActivity.class), 0);
+        Notification notification = new Notification(R.drawable.stat_sample, "Logged In", System.currentTimeMillis());
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, ChatActivity.class), 0);
         notification.setLatestEventInfo(this, "Chat", "You are now logged in", contentIntent);
         NotificationManager n = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
         n.notify(0, notification);
 
         setPendingEvent(new SessionListenerEvent()
         {
-            public void replay(Chat.Android.SessionListenerPrx l)
+            public void replay(SessionListener l)
             {
                 l.onLogin();
             }
         });
     }
-    
+
     private void cancelRefreshTimer()
     {
         Intent intent = new Intent(ChatService.this, ChatService.class);
@@ -323,12 +307,13 @@ public class ChatService extends Service implements Chat.Android._ServiceOperati
         AlarmManager am = (AlarmManager)getSystemService(ALARM_SERVICE);
         am.cancel(sender);
     }
-    
+
     private void sessionDestroyed()
     {
         cancelRefreshTimer();
         NotificationManager n = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-     // Cancel the notification -- we use the same ID that we had used to start it
+        // Cancel the notification -- we use the same ID that we had used to
+        // start it
         n.cancel(0);
     }
 }

@@ -25,7 +25,11 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 
-public class LoginActivity extends Activity implements ServiceConnection
+import com.zeroc.chat.service.ChatService;
+import com.zeroc.chat.service.Service;
+import com.zeroc.chat.service.SessionListener;
+
+public class LoginActivity extends Activity
 {
     private static final int DIALOG_ERROR = 1;
     private static final int DIALOG_CONFIRM = 2;
@@ -48,12 +52,12 @@ public class LoginActivity extends Activity implements ServiceConnection
     private SharedPreferences _prefs;
 
     private boolean _loginInProgress = false;
-    private Chat.Android.ServicePrx _service;
-    private Chat.Android.SessionListenerPrx _listener;
-
-    private Ice.Object _listenerImpl = new Chat.Android._SessionListenerDisp()
+    private Service _service;
+    private Intent _chatServiceIntent;
+    
+    private SessionListener _listener = new SessionListener()
     {
-        public void onConnectConfirm(Ice.Current current)
+        public void onConnectConfirm()
         {
             runOnUiThread(new Runnable()
             {
@@ -64,20 +68,18 @@ public class LoginActivity extends Activity implements ServiceConnection
             });
         }
 
-        public void onLogin(Ice.Current current)
+        public void onLogin()
         {
             runOnUiThread(new Runnable()
             {
                 public void run()
                 {
-                    Intent result = new Intent();
-                    result.setClass(getApplicationContext(), ChatActivity.class);
-                    startActivity(result);
+                    startActivity(new Intent(LoginActivity.this, ChatActivity.class));
                 }
             });
         }
 
-        public void onException(final String ex, Ice.Current current)
+        public void onException(final String ex)
         {
             runOnUiThread(new Runnable()
             {
@@ -89,6 +91,25 @@ public class LoginActivity extends Activity implements ServiceConnection
         }
     };
 
+    final private ServiceConnection _connection = new ServiceConnection()
+    {
+        public void onServiceConnected(ComponentName name, IBinder service)
+        {
+            // This is called when the connection with the service has been
+            // established, giving us the service object we can use to
+            // interact with the service.  Because we have bound to a explicit
+            // service that we know is running in our own process, we can
+            // cast its IBinder to a concrete class and directly access it.
+            _service = ((com.zeroc.chat.service.ChatService.LocalBinder)service).getService();
+            _loginInProgress = _service.setSessionListener(_listener);
+            setLoginState();
+        }
+
+        public void onServiceDisconnected(ComponentName name)
+        {
+        }
+    };
+    
     private void setLoginState()
     {
         if(_loginInProgress)
@@ -158,66 +179,31 @@ public class LoginActivity extends Activity implements ServiceConnection
         _service.login(hostname, username, password, secure);
     }
 
-    public void onServiceConnected(ComponentName name, IBinder service)
-    {
-        System.out.println("LoginActivity.onServiceConnected");
-        // TODO: This is ugly. It would be better if there was a way to get the service directly using
-        // the binder.
-        ChatApp app = (ChatApp)getApplication();
-        _service = Chat.Android.ServicePrxHelper.uncheckedCast(app.getCommunicator().stringToProxy(
-                "ChatService:tcp -p 12222"));
-        _listener = Chat.Android.SessionListenerPrxHelper.uncheckedCast(app.getAdapter().addWithUUID(_listenerImpl));
-        _loginInProgress = _service.setSessionListener(_listener);
-        setLoginState();
-    }
-
-    public void onServiceDisconnected(ComponentName name)
-    {
-        System.out.println("LoginActivity.onServiceDisconnected");
-    }
     
     @Override
     protected void onResume()
     {
-        System.out.println("LoginActivity: onResume");
-
         super.onResume();
         
-        Intent result = new Intent();
-        result.setComponent(new ComponentName("com.zeroc.chat", "com.zeroc.chat.ChatService"));
-        bindService(result, this, BIND_AUTO_CREATE);
+        bindService(_chatServiceIntent, _connection, BIND_AUTO_CREATE);
     }
 
     @Override
     public void onStop()
     {
-        System.out.println("LoginActivity: onStop");
-        
         super.onStop();
-        unbindService(this);
+        unbindService(_connection);
         
-        if(_listener != null)
+        if(_service != null)
         {
             _service.setSessionListener(null);
             _service = null;
-
-            try
-            {
-                ChatApp app = (ChatApp)getApplication();
-                app.getAdapter().remove(_listener.ice_getIdentity());
-            }
-            catch(Ice.NotRegisteredException ex)
-            {
-            }
-
-            _listener = null;
         }       
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
-        System.out.println("LoginActivity: onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
 
@@ -282,9 +268,8 @@ public class LoginActivity extends Activity implements ServiceConnection
         }
 
         // Start the ChatService.
-        Intent result = new Intent();
-        result.setComponent(new ComponentName("com.zeroc.chat", "com.zeroc.chat.ChatService"));
-        startService(result);
+        _chatServiceIntent = new Intent(LoginActivity.this, ChatService.class);
+        startService(_chatServiceIntent);
     }
 
     @Override

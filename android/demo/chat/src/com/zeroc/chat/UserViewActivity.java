@@ -12,6 +12,10 @@ package com.zeroc.chat;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.zeroc.chat.service.ChatRoomListener;
+import com.zeroc.chat.service.ChatService;
+import com.zeroc.chat.service.Service;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
@@ -23,7 +27,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.widget.ArrayAdapter;
 
-public class UserViewActivity extends ListActivity implements ServiceConnection
+public class UserViewActivity extends ListActivity
 {
     private static final int DIALOG_FATAL = 1;
     private String _lastError = "";
@@ -31,11 +35,10 @@ public class UserViewActivity extends ListActivity implements ServiceConnection
 
     private List<String> _users = new ArrayList<String>();
     private ArrayAdapter<String> _adapter;
-    private Chat.Android.ServicePrx _service;
-    private Chat.Android.ChatRoomListenerPrx _listener;
-    private Ice.Object _listenerImpl = new Chat.Android._ChatRoomListenerDisp()
+    private Service _service;
+    final private ChatRoomListener _listener = new ChatRoomListener()
     {
-        public void init(final List<String> users, Ice.Current current)
+        public void init(final List<String> users)
         {
             runOnUiThread(new Runnable()
             {
@@ -48,7 +51,7 @@ public class UserViewActivity extends ListActivity implements ServiceConnection
             });
         }
 
-        public void join(final long timestamp, final String name, Ice.Current current)
+        public void join(long timestamp, final String name)
         {
             runOnUiThread(new Runnable()
             {
@@ -59,7 +62,7 @@ public class UserViewActivity extends ListActivity implements ServiceConnection
             });
         }
 
-        public void leave(final long timestamp, final String name, Ice.Current current)
+        public void leave(long timestamp, final String name)
         {
             runOnUiThread(new Runnable()
             {
@@ -70,11 +73,11 @@ public class UserViewActivity extends ListActivity implements ServiceConnection
             });
         }
 
-        public void send(final long timestamp, final String name, final String message, Ice.Current current)
+        public void send(long timestamp, String name, String message)
         {
         }
 
-        public void error(final String ex, Ice.Current current)
+        public void error(final String ex)
         {
             runOnUiThread(new Runnable()
             {
@@ -87,7 +90,7 @@ public class UserViewActivity extends ListActivity implements ServiceConnection
             });
         }
 
-        public void inactivity(Ice.Current current)
+        public void inactivity()
         {
             runOnUiThread(new Runnable()
             {
@@ -98,6 +101,27 @@ public class UserViewActivity extends ListActivity implements ServiceConnection
                     showDialog(DIALOG_FATAL);
                 }
             });
+        }
+    };
+
+    final private ServiceConnection _connection = new ServiceConnection()
+    {
+        public void onServiceConnected(ComponentName name, IBinder service)
+        {
+            // This is called when the connection with the service has been
+            // established, giving us the service object we can use to
+            // interact with the service. Because we have bound to a explicit
+            // service that we know is running in our own process, we can
+            // cast its IBinder to a concrete class and directly access it.
+            _service = ((com.zeroc.chat.service.ChatService.LocalBinder)service).getService();
+            if(!_service.addChatRoomListener(_listener, false))
+            {
+                finish();
+            }
+        }
+
+        public void onServiceDisconnected(ComponentName name)
+        {
         }
     };
 
@@ -117,61 +141,24 @@ public class UserViewActivity extends ListActivity implements ServiceConnection
         }
     }
 
-    public void onServiceConnected(ComponentName name, IBinder service)
-    {
-        System.out.println("UserViewActivity.onServiceConnected");
-
-        // TODO: This is ugly. It would be better if there was a way to get the
-        // service directly using the binder.
-        ChatApp app = (ChatApp)getApplication();
-        _service = Chat.Android.ServicePrxHelper.uncheckedCast(app.getCommunicator().stringToProxy(
-                "ChatService:tcp -p 12222"));
-        _listener = Chat.Android.ChatRoomListenerPrxHelper.uncheckedCast(app.getAdapter().addWithUUID(_listenerImpl));
-
-        // If the add of the listener fails the session has been destroyed, and
-        // we're done.
-        if(!_service.addChatRoomListener(_listener, false))
-        {
-            finish();
-        }
-    }
-
-    public void onServiceDisconnected(ComponentName name)
-    {
-        System.out.println("UserViewActivity.onServiceDisconnected");
-    }
-
     @Override
     public void onResume()
     {
-        System.out.println("ChatActivity: onResume");
         super.onResume();
 
-        Intent result = new Intent();
-        result.setComponent(new ComponentName("com.zeroc.chat", "com.zeroc.chat.ChatService"));
-        bindService(result, this, BIND_AUTO_CREATE);
+        bindService(new Intent(UserViewActivity.this, ChatService.class), _connection, BIND_AUTO_CREATE);
     }
 
     @Override
     public void onStop()
     {
-        System.out.println("ChatActivity: onStop");
         super.onStop();
-        unbindService(this);
+        unbindService(_connection);
 
-        if(_listener != null)
+        if(_service != null)
         {
             _service.removeChatRoomListener(_listener);
             _service = null;
-            try
-            {
-                ChatApp app = (ChatApp)getApplication();
-                app.getAdapter().remove(_listener.ice_getIdentity());
-            }
-            catch(Ice.NotRegisteredException ex)
-            {
-            }
-            _listener = null;
         }
     }
 

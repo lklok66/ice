@@ -19,7 +19,7 @@ public class AppSession
 {
     private Ice.Communicator _communicator;
     private Chat.ChatSessionPrx _session;
-    private List<Chat.Android.ChatRoomListenerPrx> _listeners = new LinkedList<Chat.Android.ChatRoomListenerPrx>();
+    private List<ChatRoomListener> _listeners = new LinkedList<ChatRoomListener>();
     private LinkedList<ChatEventReplay> _replay = new LinkedList<ChatEventReplay>();
     private List<String> _users = new LinkedList<String>();
 
@@ -94,8 +94,6 @@ public class AppSession
 
         _destroyed = true;
 
-        System.out.println("AppSession: destroy");
-
         _session.destroy_async(new Glacier2.AMI_Session_destroy()
         {
             @Override
@@ -152,7 +150,7 @@ public class AppSession
     }
 
     // This method is only called by the UI thread.
-    public synchronized boolean addChatRoomListener(Chat.Android.ChatRoomListenerPrx cb, boolean replay)
+    public synchronized boolean addChatRoomListener(ChatRoomListener cb, boolean replay)
     {
         if(_destroyed)
         {
@@ -173,7 +171,7 @@ public class AppSession
     }
 
     // This method is only called by the UI thread.
-    synchronized public void removeChatRoomListener(Chat.Android.ChatRoomListenerPrx cb)
+    synchronized public void removeChatRoomListener(ChatRoomListener cb)
     {
         _listeners.remove(cb);
     }
@@ -191,9 +189,9 @@ public class AppSession
         if(System.currentTimeMillis() - _lastSend > INACTIVITY_TIMEOUT)
         {
             destroy();
-            for(Iterator<Chat.Android.ChatRoomListenerPrx> p = _listeners.iterator(); p.hasNext();)
+            for(Iterator<ChatRoomListener> p = _listeners.iterator(); p.hasNext();)
             {
-                Chat.Android.ChatRoomListenerPrx l = p.next();
+                ChatRoomListener l = p.next();
                 l.inactivity();
             }
             return false;
@@ -215,7 +213,7 @@ public class AppSession
 
     private interface ChatEventReplay
     {
-        public void replay(Chat.Android.ChatRoomListenerPrx cb);
+        public void replay(ChatRoomListener cb);
     }
 
     private class ChatCallbackI extends Chat._ChatRoomCallbackDisp
@@ -227,9 +225,9 @@ public class AppSession
             _users.addAll(u);
 
             // No replay event for init.
-            for(Iterator<Chat.Android.ChatRoomListenerPrx> p = _listeners.iterator(); p.hasNext();)
+            for(Iterator<ChatRoomListener> p = _listeners.iterator(); p.hasNext();)
             {
-                Chat.Android.ChatRoomListenerPrx l = p.next();
+                ChatRoomListener l = p.next();
                 l.init(u);
             }
         }
@@ -238,7 +236,7 @@ public class AppSession
         {
             _replay.add(new ChatEventReplay()
             {
-                public void replay(Chat.Android.ChatRoomListenerPrx cb)
+                public void replay(ChatRoomListener cb)
                 {
                     cb.join(timestamp, name);
                 }
@@ -250,9 +248,9 @@ public class AppSession
 
             _users.add(name);
 
-            for(Iterator<Chat.Android.ChatRoomListenerPrx> p = _listeners.iterator(); p.hasNext();)
+            for(Iterator<ChatRoomListener> p = _listeners.iterator(); p.hasNext();)
             {
-                Chat.Android.ChatRoomListenerPrx l = p.next();
+                ChatRoomListener l = p.next();
                 l.join(timestamp, name);
             }
         }
@@ -261,7 +259,7 @@ public class AppSession
         {
             _replay.add(new ChatEventReplay()
             {
-                public void replay(Chat.Android.ChatRoomListenerPrx cb)
+                public void replay(ChatRoomListener cb)
                 {
                     cb.leave(timestamp, name);
                 }
@@ -273,9 +271,9 @@ public class AppSession
 
             _users.remove(name);
 
-            for(Iterator<Chat.Android.ChatRoomListenerPrx> p = _listeners.iterator(); p.hasNext();)
+            for(Iterator<ChatRoomListener> p = _listeners.iterator(); p.hasNext();)
             {
-                Chat.Android.ChatRoomListenerPrx l = p.next();
+                ChatRoomListener l = p.next();
                 l.leave(timestamp, name);
             }
         }
@@ -284,7 +282,7 @@ public class AppSession
         {
             _replay.add(new ChatEventReplay()
             {
-                public void replay(Chat.Android.ChatRoomListenerPrx cb)
+                public void replay(ChatRoomListener cb)
                 {
                     cb.send(timestamp, name, message);
                 }
@@ -294,9 +292,9 @@ public class AppSession
                 _replay.removeFirst();
             }
 
-            for(Iterator<Chat.Android.ChatRoomListenerPrx> p = _listeners.iterator(); p.hasNext();)
+            for(Iterator<ChatRoomListener> p = _listeners.iterator(); p.hasNext();)
             {
-                Chat.Android.ChatRoomListenerPrx l = p.next();
+                ChatRoomListener l = p.next();
                 l.send(timestamp, name, message);
             }
         }
@@ -307,9 +305,9 @@ public class AppSession
     {
         destroy();
 
-        for(Iterator<Chat.Android.ChatRoomListenerPrx> p = _listeners.iterator(); p.hasNext();)
+        for(Iterator<ChatRoomListener> p = _listeners.iterator(); p.hasNext();)
         {
-            Chat.Android.ChatRoomListenerPrx l = p.next();
+            ChatRoomListener l = p.next();
             l.error(msg);
         }
     }

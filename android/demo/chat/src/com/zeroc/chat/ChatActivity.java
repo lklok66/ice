@@ -12,6 +12,10 @@ package com.zeroc.chat;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.zeroc.chat.service.ChatRoomListener;
+import com.zeroc.chat.service.ChatService;
+import com.zeroc.chat.service.Service;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
@@ -30,13 +34,13 @@ import android.view.View.OnKeyListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 
-public class ChatActivity extends ListActivity implements OnClickListener, OnKeyListener, ServiceConnection
+public class ChatActivity extends ListActivity
 {
     private static final int DIALOG_ERROR = 1;
     private static final int DIALOG_FATAL = 2;
     private String _lastError = "";
     private static final String BUNDLE_KEY_LAST_ERROR = "zeroc:lastError";
-    
+
     private static final int USERS_ID = Menu.FIRST;
     private static final int LOGOUT_ID = Menu.FIRST + 1;
     private static final int MAX_MESSAGE_SIZE = 1024;
@@ -44,11 +48,10 @@ public class ChatActivity extends ListActivity implements OnClickListener, OnKey
     private EditText _text;
     private ArrayAdapter<String> _adapter;
     private LinkedList<String> _strings = new LinkedList<String>();
-    private Chat.Android.ServicePrx _service;
-    private Chat.Android.ChatRoomListenerPrx _listener;
-    private Ice.Object _listenerImpl = new Chat.Android._ChatRoomListenerDisp()
+    private Service _service;
+    final private ChatRoomListener _listener = new ChatRoomListener()
     {
-        public void init(final List<String> users, Ice.Current current)
+        public void init(final List<String> users)
         {
             runOnUiThread(new Runnable()
             {
@@ -60,22 +63,22 @@ public class ChatActivity extends ListActivity implements OnClickListener, OnKey
             });
         }
 
-        public void join(final long timestamp, final String name, Ice.Current current)
+        public void join(long timestamp, String name)
         {
             add(ChatUtils.formatTimestamp(timestamp) + " - <system-message> - " + name + " joined.");
         }
 
-        public void leave(final long timestamp, final String name, Ice.Current current)
+        public void leave(long timestamp, String name)
         {
             add(ChatUtils.formatTimestamp(timestamp) + " - " + "<system-message> - " + name + " left.");
         }
 
-        public void send(final long timestamp, final String name, final String message, Ice.Current current)
+        public void send(long timestamp, String name, final String message)
         {
             add(ChatUtils.formatTimestamp(timestamp) + " - <" + name + "> " + ChatUtils.unstripHtml(message));
         }
 
-        public void error(final String error, Ice.Current current)
+        public void error(final String error)
         {
             runOnUiThread(new Runnable()
             {
@@ -87,7 +90,7 @@ public class ChatActivity extends ListActivity implements OnClickListener, OnKey
             });
         }
 
-        public void inactivity(Ice.Current current)
+        public void inactivity()
         {
             runOnUiThread(new Runnable()
             {
@@ -98,7 +101,7 @@ public class ChatActivity extends ListActivity implements OnClickListener, OnKey
                 }
             });
         }
-        
+
         private void add(final String msg)
         {
             runOnUiThread(new Runnable()
@@ -115,26 +118,25 @@ public class ChatActivity extends ListActivity implements OnClickListener, OnKey
             });
         }
     };
-    
-    public void onClick(View v)
+    final private ServiceConnection _connection = new ServiceConnection()
     {
-        sendText();
-    }
-    
-    public boolean onKey(View v, int keyCode, KeyEvent event)
-    {
-        if(event.getAction() == KeyEvent.ACTION_DOWN)
-        {
-            switch (keyCode)
+        public void onServiceConnected(ComponentName name, IBinder service)
+        { // This is called when the connection with the service has been
+            // established, giving us the service object we can use to
+            // interact with the service. Because we have bound to a explicit
+            // service that we know is running in our own process, we can
+            // cast its IBinder to a concrete class and directly access it.
+            _service = ((com.zeroc.chat.service.ChatService.LocalBinder)service).getService();
+            if(!_service.addChatRoomListener(_listener, true))
             {
-            case KeyEvent.KEYCODE_DPAD_CENTER:
-            case KeyEvent.KEYCODE_ENTER:
-                sendText();
-                return true;
+                finish();
             }
         }
-        return false;
-    }
+
+        public void onServiceDisconnected(ComponentName name)
+        {
+        }
+    };
 
     // Hook the back key to logout the session.
     @Override
@@ -152,7 +154,7 @@ public class ChatActivity extends ListActivity implements OnClickListener, OnKey
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
-        System.out.println("ChatActivity: onCreate");
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat);
 
@@ -161,71 +163,58 @@ public class ChatActivity extends ListActivity implements OnClickListener, OnKey
         _adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, _strings);
         setListAdapter(_adapter);
 
-        _text.setOnClickListener(this);
-        _text.setOnKeyListener(this);
-        
+        _text.setOnClickListener(new OnClickListener()
+        {
+            public void onClick(View v)
+            {
+                sendText();
+            }
+        });
+        _text.setOnKeyListener(new OnKeyListener()
+        {
+            public boolean onKey(View v, int keyCode, KeyEvent event)
+            {
+                if(event.getAction() == KeyEvent.ACTION_DOWN)
+                {
+                    switch (keyCode)
+                    {
+                    case KeyEvent.KEYCODE_DPAD_CENTER:
+                    case KeyEvent.KEYCODE_ENTER:
+                        sendText();
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
+
         if(savedInstanceState != null)
         {
             _lastError = savedInstanceState.getString(BUNDLE_KEY_LAST_ERROR);
         }
     }
-    
-    public void onServiceConnected(ComponentName name, IBinder service)
-    {
-        System.out.println("ChatActivity.onServiceConnected");
-        // TODO: This is ugly. It would be better if there was a way to get the service directly using
-        // the binder.
-        ChatApp app = (ChatApp)getApplication();
-        _service = Chat.Android.ServicePrxHelper.uncheckedCast(app.getCommunicator().stringToProxy(
-                "ChatService:tcp -p 12222"));
-        _listener = Chat.Android.ChatRoomListenerPrxHelper.uncheckedCast(app.getAdapter().addWithUUID(_listenerImpl));
-        // If the add of the listener fails the session has been destroyed, and
-        // we're done.
-        if(!_service.addChatRoomListener(_listener, true))
-        {
-            finish();
-        }
-    }
-
-    public void onServiceDisconnected(ComponentName name)
-    {
-        System.out.println("ChatActivity.onServiceDisconnected");
-    }
 
     @Override
     public void onResume()
     {
-        System.out.println("ChatActivity: onResume");
         super.onResume();
 
-        Intent result = new Intent();
-        result.setComponent(new ComponentName("com.zeroc.chat", "com.zeroc.chat.ChatService"));
-        bindService(result, this, BIND_AUTO_CREATE);
+        bindService(new Intent(ChatActivity.this, ChatService.class), _connection, BIND_AUTO_CREATE);
     }
 
     @Override
     public void onStop()
     {
-        System.out.println("ChatActivity: onStop");
         super.onStop();
-        unbindService(this);
-        
-        if(_listener != null)
+        unbindService(_connection);
+
+        if(_service != null)
         {
             _service.removeChatRoomListener(_listener);
             _service = null;
-            try
-            {
-                ChatApp app = (ChatApp)getApplication();
-                app.getAdapter().remove(_listener.ice_getIdentity());
-            }
-            catch(Ice.NotRegisteredException ex)
-            {
-            }
-            _listener = null;
         }
     }
-    
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
@@ -241,9 +230,7 @@ public class ChatActivity extends ListActivity implements OnClickListener, OnKey
         switch (item.getItemId())
         {
         case USERS_ID:
-            Intent result = new Intent();
-            result.setClass(getApplicationContext(), UserViewActivity.class);
-            startActivity(result);
+            startActivity(new Intent(ChatActivity.this, UserViewActivity.class));
             return true;
 
         case LOGOUT_ID:
@@ -254,7 +241,6 @@ public class ChatActivity extends ListActivity implements OnClickListener, OnKey
         return super.onOptionsItemSelected(item);
     }
 
-    
     @Override
     protected void onSaveInstanceState(Bundle outState)
     {
@@ -290,13 +276,13 @@ public class ChatActivity extends ListActivity implements OnClickListener, OnKey
 
         return null;
     }
-    
+
     private void logout()
     {
         _service.logout();
         finish();
     }
-    
+
     private void sendText()
     {
         String t = _text.getText().toString().trim();
