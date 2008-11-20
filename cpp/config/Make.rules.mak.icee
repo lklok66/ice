@@ -62,6 +62,7 @@ includedir		= $(top_srcdir)\include
 install_bindir		= $(prefix)\bin
 
 SETARGV			= setargv.obj
+MT			= mt.exe
 
 !if "$(OPTIMIZE)" != "yes"
 LIBSUFFIX	= $(LIBSUFFIX)d
