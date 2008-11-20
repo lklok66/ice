@@ -41,6 +41,7 @@ filesToKeep = [
     "./LICENSE",
     "./CHANGES.ICEE",
     "./README.ICEE",
+    "./RELEASE_NOTES.ICEE",
     "./Makefile.icee",
     "./Makefile.mak.icee",
     "./config/Make.common.rules.mak.icee",

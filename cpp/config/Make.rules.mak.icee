@@ -21,7 +21,7 @@ OPTIMIZE		= yes
 
 #
 # Specify your C++ compiler. Supported values are:
-# VC80, VC80_EXPRESS
+# VC80 and VC90
 #
 !if "$(CPP_COMPILER)" == ""
 CPP_COMPILER		= VC80
@@ -32,7 +32,7 @@ CPP_COMPILER		= VC80
 # can find it, set MCPP_HOME to the Mcpp installation directory.
 #
 !if "$(MCPP_HOME)" == ""
-MCPP_HOME		= C:\Ice-3.3.0-ThirdParty-VC80
+MCPP_HOME		= C:\Ice-3.3.0-ThirdParty-$(CPP_COMPILER)
 !endif
 
 #
