@@ -14,6 +14,7 @@ import java.util.List;
 
 import com.zeroc.chat.service.ChatRoomListener;
 import com.zeroc.chat.service.ChatService;
+import com.zeroc.chat.service.NoSessionException;
 import com.zeroc.chat.service.Service;
 
 import android.app.AlertDialog;
@@ -40,37 +41,19 @@ public class UserViewActivity extends ListActivity
     {
         public void init(final List<String> users)
         {
-            runOnUiThread(new Runnable()
-            {
-                public void run()
-                {
-                    _users.clear();
-                    _users.addAll(users);
-                    _adapter.notifyDataSetChanged();
-                }
-            });
+            _users.clear();
+            _users.addAll(users);
+            _adapter.notifyDataSetChanged();
         }
 
         public void join(long timestamp, final String name)
         {
-            runOnUiThread(new Runnable()
-            {
-                public void run()
-                {
-                    _adapter.add(name);
-                }
-            });
+            _adapter.add(name);
         }
 
         public void leave(long timestamp, final String name)
         {
-            runOnUiThread(new Runnable()
-            {
-                public void run()
-                {
-                    _adapter.remove(name);
-                }
-            });
+            _adapter.remove(name);
         }
 
         public void send(long timestamp, String name, String message)
@@ -79,28 +62,14 @@ public class UserViewActivity extends ListActivity
 
         public void error(final String ex)
         {
-            runOnUiThread(new Runnable()
-            {
-                public void run()
-                {
-
-                    _lastError = ex;
-                    showDialog(DIALOG_FATAL);
-                }
-            });
+            _lastError = ex;
+            showDialog(DIALOG_FATAL);
         }
 
         public void inactivity()
         {
-            runOnUiThread(new Runnable()
-            {
-                public void run()
-                {
-
-                    _lastError = "You were logged out due to inactivity.";
-                    showDialog(DIALOG_FATAL);
-                }
-            });
+            _lastError = "You were logged out due to inactivity.";
+            showDialog(DIALOG_FATAL);
         }
     };
 
@@ -114,7 +83,11 @@ public class UserViewActivity extends ListActivity
             // service that we know is running in our own process, we can
             // cast its IBinder to a concrete class and directly access it.
             _service = ((com.zeroc.chat.service.ChatService.LocalBinder)service).getService();
-            if(!_service.addChatRoomListener(_listener, false))
+            try
+            {
+                _service.addChatRoomListener(_listener, false);
+            }
+            catch(NoSessionException e)
             {
                 finish();
             }

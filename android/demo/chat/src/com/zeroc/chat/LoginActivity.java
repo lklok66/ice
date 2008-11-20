@@ -54,40 +54,22 @@ public class LoginActivity extends Activity
     private boolean _loginInProgress = false;
     private Service _service;
     private Intent _chatServiceIntent;
-    
+
     private SessionListener _listener = new SessionListener()
     {
         public void onConnectConfirm()
         {
-            runOnUiThread(new Runnable()
-            {
-                public void run()
-                {
-                    showDialog(DIALOG_CONFIRM);
-                }
-            });
+            showDialog(DIALOG_CONFIRM);
         }
 
         public void onLogin()
         {
-            runOnUiThread(new Runnable()
-            {
-                public void run()
-                {
-                    startActivity(new Intent(LoginActivity.this, ChatActivity.class));
-                }
-            });
+            startActivity(new Intent(LoginActivity.this, ChatActivity.class));
         }
 
         public void onException(final String ex)
         {
-            runOnUiThread(new Runnable()
-            {
-                public void run()
-                {
-                    handleException(ex);
-                }
-            });
+            handleException(ex);
         }
     };
 
@@ -97,7 +79,7 @@ public class LoginActivity extends Activity
         {
             // This is called when the connection with the service has been
             // established, giving us the service object we can use to
-            // interact with the service.  Because we have bound to a explicit
+            // interact with the service. Because we have bound to a explicit
             // service that we know is running in our own process, we can
             // cast its IBinder to a concrete class and directly access it.
             _service = ((com.zeroc.chat.service.ChatService.LocalBinder)service).getService();
@@ -109,7 +91,7 @@ public class LoginActivity extends Activity
         {
         }
     };
-    
+
     private void setLoginState()
     {
         if(_loginInProgress)
@@ -179,12 +161,11 @@ public class LoginActivity extends Activity
         _service.login(hostname, username, password, secure);
     }
 
-    
     @Override
     protected void onResume()
     {
         super.onResume();
-        
+
         bindService(_chatServiceIntent, _connection, BIND_AUTO_CREATE);
     }
 
@@ -193,12 +174,12 @@ public class LoginActivity extends Activity
     {
         super.onStop();
         unbindService(_connection);
-        
+
         if(_service != null)
         {
             _service.setSessionListener(null);
             _service = null;
-        }       
+        }
     }
 
     @Override

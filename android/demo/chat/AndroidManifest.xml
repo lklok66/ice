@@ -14,8 +14,8 @@
 </intent-filter>
 </activity>
     
-<activity android:name=".UserViewActivity"></activity>
-<service android:permission="android.permission.INTERNET" android:exported="true" android:enabled="true" android:name=".service.ChatService"></service>
+<activity android:name=".UserViewActivity" android:label="@string/users_name"></activity>
+<service android:permission="android.permission.INTERNET" android:enabled="true" android:name=".service.ChatService" android:exported="false"></service>
 
 </application>
 <uses-permission android:name="android.permission.INTERNET"></uses-permission>

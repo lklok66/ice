@@ -14,6 +14,7 @@ import java.util.List;
 
 import com.zeroc.chat.service.ChatRoomListener;
 import com.zeroc.chat.service.ChatService;
+import com.zeroc.chat.service.NoSessionException;
 import com.zeroc.chat.service.Service;
 
 import android.app.AlertDialog;
@@ -53,14 +54,8 @@ public class ChatActivity extends ListActivity
     {
         public void init(final List<String> users)
         {
-            runOnUiThread(new Runnable()
-            {
-                public void run()
-                {
-                    _strings.clear();
-                    _adapter.notifyDataSetChanged();
-                }
-            });
+            _strings.clear();
+            _adapter.notifyDataSetChanged();
         }
 
         public void join(long timestamp, String name)
@@ -80,42 +75,24 @@ public class ChatActivity extends ListActivity
 
         public void error(final String error)
         {
-            runOnUiThread(new Runnable()
-            {
-                public void run()
-                {
-                    _lastError = error;
-                    showDialog(DIALOG_FATAL);
-                }
-            });
+            _lastError = error;
+            showDialog(DIALOG_FATAL);
         }
 
         public void inactivity()
         {
-            runOnUiThread(new Runnable()
-            {
-                public void run()
-                {
-                    _lastError = "You were logged out due to inactivity.";
-                    showDialog(DIALOG_FATAL);
-                }
-            });
+            _lastError = "You were logged out due to inactivity.";
+            showDialog(DIALOG_FATAL);
         }
 
         private void add(final String msg)
         {
-            runOnUiThread(new Runnable()
+            _strings.add(msg);
+            if(_strings.size() > 200) // AppSession.MAX_MESSAGES)
             {
-                public void run()
-                {
-                    _strings.add(msg);
-                    if(_strings.size() > 200) // AppSession.MAX_MESSAGES)
-                    {
-                        _strings.removeFirst();
-                    }
-                    _adapter.notifyDataSetChanged();
-                }
-            });
+                _strings.removeFirst();
+            }
+            _adapter.notifyDataSetChanged();
         }
     };
     final private ServiceConnection _connection = new ServiceConnection()
@@ -127,7 +104,12 @@ public class ChatActivity extends ListActivity
             // service that we know is running in our own process, we can
             // cast its IBinder to a concrete class and directly access it.
             _service = ((com.zeroc.chat.service.ChatService.LocalBinder)service).getService();
-            if(!_service.addChatRoomListener(_listener, true))
+            try
+            {
+                String hostname = _service.addChatRoomListener(_listener, true);
+                setTitle(hostname);
+            }
+            catch(NoSessionException e)
             {
                 finish();
             }
@@ -187,6 +169,7 @@ public class ChatActivity extends ListActivity
                 return false;
             }
         });
+        _text.requestFocus();
 
         if(savedInstanceState != null)
         {

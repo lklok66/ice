@@ -44,8 +44,14 @@ public interface Service
      * @param replay
      *            True if all received events should be replayed.
      * 
+     * @return The name of the host of the session.
+     * 
+     * @throws NoSessionException
+     *             if there is no established session.
+     * 
      */
-    boolean addChatRoomListener(ChatRoomListener listener, boolean replay);
+    String addChatRoomListener(ChatRoomListener listener, boolean replay)
+        throws NoSessionException;
 
     /**
      * 

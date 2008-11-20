@@ -11,6 +11,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
 
@@ -19,14 +20,16 @@ import com.zeroc.chat.R;
 
 public class ChatService extends Service implements com.zeroc.chat.service.Service
 {
+    private static final int CHATACTIVE_NOTIFICATION = 0;
     private static final String REFRESH_EXTRA = "refresh";
     private AppSession _session = null;
     private SessionListenerEvent _pendingEvent;
     private CertificateVerifier _verifier;
     private boolean _confirmConnectionResult = false;
     private boolean _confirmConnection = false;
-    private SessionListener _cb;
+    private SessionListener _listener;
     private boolean _loginInProgress;
+    private Handler _handler;
 
     public class LocalBinder extends Binder
     {
@@ -46,6 +49,8 @@ public class ChatService extends Service implements com.zeroc.chat.service.Servi
     public void onCreate()
     {
         super.onCreate();
+        _handler = new Handler();
+
         //
         // Read the CA certificate embedded in the Jar file.
         //
@@ -86,13 +91,13 @@ public class ChatService extends Service implements com.zeroc.chat.service.Servi
         }
     }
 
-    // _ServiceOperations
+    // Called only from the UI thread.
     synchronized public boolean setSessionListener(SessionListener cb)
     {
-        _cb = cb;
+        _listener = cb;
         if(_pendingEvent != null)
         {
-            _pendingEvent.replay(_cb);
+            _pendingEvent.replay(_listener);
             _pendingEvent = null;
         }
         return _loginInProgress;
@@ -131,7 +136,7 @@ public class ChatService extends Service implements com.zeroc.chat.service.Servi
             {
                 try
                 {
-                    loginComplete(new AppSession(_verifier, hostname, username, password, secure));
+                    loginComplete(new AppSession(_handler, _verifier, hostname, username, password, secure), hostname);
                 }
                 catch(final Glacier2.CannotCreateSessionException ex)
                 {
@@ -174,11 +179,11 @@ public class ChatService extends Service implements com.zeroc.chat.service.Servi
         }).start();
     }
 
-    synchronized public boolean addChatRoomListener(ChatRoomListener listener, boolean replay)
+    synchronized public String addChatRoomListener(ChatRoomListener listener, boolean replay) throws NoSessionException
     {
         if(_session == null)
         {
-            return false;
+            throw new NoSessionException();
         }
         return _session.addChatRoomListener(listener, replay);
     }
@@ -244,7 +249,8 @@ public class ChatService extends Service implements com.zeroc.chat.service.Servi
         {
             try
             {
-                wait();
+                // We don't want to block the connection process forever.
+                wait(10 * 1000);
             }
             catch(InterruptedException e)
             {
@@ -255,9 +261,16 @@ public class ChatService extends Service implements com.zeroc.chat.service.Servi
 
     synchronized private void setPendingEvent(final SessionListenerEvent pending)
     {
-        if(_cb != null)
+        if(_listener != null)
         {
-            pending.replay(_cb);
+            final SessionListener listener = _listener;
+            _handler.post(new Runnable()
+            {
+                public void run()
+                {
+                    pending.replay(listener);    
+                }
+            });
         }
         else
         {
@@ -265,7 +278,7 @@ public class ChatService extends Service implements com.zeroc.chat.service.Servi
         }
     }
 
-    synchronized private void loginComplete(AppSession session)
+    synchronized private void loginComplete(AppSession session, String hostname)
     {
         _session = session;
 
@@ -284,9 +297,9 @@ public class ChatService extends Service implements com.zeroc.chat.service.Servi
         // Display a notification that the user is logged in.
         Notification notification = new Notification(R.drawable.stat_sample, "Logged In", System.currentTimeMillis());
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, ChatActivity.class), 0);
-        notification.setLatestEventInfo(this, "Chat", "You are now logged in", contentIntent);
+        notification.setLatestEventInfo(this, "Chat Demo", "You are logged into " + hostname, contentIntent);
         NotificationManager n = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-        n.notify(0, notification);
+        n.notify(CHATACTIVE_NOTIFICATION, notification);
 
         setPendingEvent(new SessionListenerEvent()
         {
@@ -314,6 +327,6 @@ public class ChatService extends Service implements com.zeroc.chat.service.Servi
         NotificationManager n = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
         // Cancel the notification -- we use the same ID that we had used to
         // start it
-        n.cancel(0);
+        n.cancel(CHATACTIVE_NOTIFICATION);
     }
 }
