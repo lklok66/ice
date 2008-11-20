@@ -50,6 +50,13 @@ CPP_COMPILER            = VC80
 #EMBEDDED_OS            = WindowsMobile6
 #EMBEDDED_DEVICE        = PocketPC
 
+#
+# Change the following setting if the Windows Mobile SDK is installed
+# in a different location than the default. For example, on Windows x64
+# the SDK is installed in "C:\Program Files (x86)" by default.
+#
+WMSDK_BASE_DIR		= C:\Program Files
+
 # ----------------------------------------------------------------------
 # Ice-E supports a number of optional features that are enabled via
 # build-time settings. To minimize the size of your executables, review
@@ -191,9 +198,9 @@ LDFLAGS		= /MACHINE:ARM
 !elseif "$(EMBEDDED_OS)" == "WindowsMobile5.0"
 
 !if "$(EMBEDDED_DEVICE)" == "PocketPC"
-SDK_DIR		= C:\Program Files\Windows CE Tools\wce500\Windows Mobile 5.0 Pocket PC SDK
+SDK_DIR		= $(WMSDK_BASE_DIR)\Windows CE Tools\wce500\Windows Mobile 5.0 Pocket PC SDK
 !else
-SDK_DIR		= C:\Program Files\Windows CE Tools\wce500\Windows Mobile 5.0 Smartphone SDK
+SDK_DIR		= $(WMSDK_BASE_DIR)\Windows CE Tools\wce500\Windows Mobile 5.0 Smartphone SDK
 !endif
 
 INCLUDE_SUBDIR	= \ArmV4i
@@ -205,9 +212,9 @@ LDFLAGS		= /MACHINE:THUMB
 
 
 !if "$(EMBEDDED_DEVICE)" == "PocketPC"
-SDK_DIR		= C:\Program Files\Windows Mobile 6 SDK\PocketPC
+SDK_DIR		= $(WMSDK_BASE_DIR)\Windows Mobile 6 SDK\PocketPC
 !else
-SDK_DIR		= C:\Program Files\Windows Mobile 6 SDK\Smartphone
+SDK_DIR		= $(WMSDK_BASE_DIR)\Windows Mobile 6 SDK\Smartphone
 !endif
 
 INCLUDE_SUBDIR	= \ArmV4i
