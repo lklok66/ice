@@ -10,7 +10,6 @@
 #include <IceUtil/DisableWarnings.h>
 #include <Slice/Preprocessor.h>
 #include <Slice/Util.h>
-#include <Slice/SignalHandler.h>
 #include <IceUtil/StringUtil.h>
 #include <IceUtil/FileUtil.h>
 #include <IceUtil/UUID.h>
@@ -27,19 +26,6 @@
 
 using namespace std;
 using namespace Slice;
-
-//
-// Callback for Crtl-C signal handling
-//
-static Preprocessor* _preprocess = 0;
-
-static void closeCallback()
-{
-    if(_preprocess != 0)
-    {
-        _preprocess->close();
-    }
-}
 
 //
 // mcpp defines
@@ -64,8 +50,6 @@ Slice::Preprocessor::Preprocessor(const string& path, const string& fileName, co
     _args(args),
     _cppHandle(0)
 {
-    _preprocess = this;
-    SignalHandler::setCloseCallback(closeCallback);
 }
 
 Slice::Preprocessor::~Preprocessor()
@@ -173,8 +157,35 @@ Slice::Preprocessor::preprocess(bool keepComments)
         //
         char* buf = mcpp_get_mem_buffer(Out);
 
+        //
+        // First try to open temporay file in tmp directory.
+        //
+#ifdef _WIN32
+        TCHAR buffer[512];
+        DWORD ret = GetTempPath(512, buffer);
+        if(ret != 0 && ret < 512)
+        {
+            _cppFile = string(buffer) + "\\.preprocess." + IceUtil::generateUUID();
+            _cppHandle = ::_wfopen(IceUtil::stringToWstring(_cppFile).c_str(), IceUtil::stringToWstring("w+").c_str());
+        }
+#else
         _cppHandle = tmpfile();
-        if(_cppHandle != NULL)
+#endif
+        
+        //
+        // If that fails try to open file in current directory.
+        //
+        if(_cppHandle == 0)
+        {
+            _cppFile = ".preprocess." + IceUtil::generateUUID();
+#ifdef _WIN32
+            _cppHandle = ::_wfopen(IceUtil::stringToWstring(_cppFile).c_str(), IceUtil::stringToWstring("w+").c_str());
+#else
+            _cppHandle = ::fopen(_cppFile.c_str(), "w+");
+#endif
+        }
+
+        if(_cppHandle != 0)
         {
             if(buf)
             {
@@ -184,7 +195,7 @@ Slice::Preprocessor::preprocess(bool keepComments)
         }
         else
         {
-            fprintf(stderr, "Could not open temporary file.\n");
+            cerr << "Could not open temporary file: " << _cppFile << endl;
         }
     }
 
@@ -452,13 +463,19 @@ Slice::Preprocessor::printMakefileDependencies(Language lang, const vector<strin
 bool
 Slice::Preprocessor::close()
 {
-    _preprocess = 0;
-    SignalHandler::setCloseCallback(0);
-
     if(_cppHandle != 0)
     {
         int status = fclose(_cppHandle);
         _cppHandle = 0;
+
+        if(_cppFile != "")
+        {
+#ifdef _WIN32
+            _unlink(_cppFile.c_str());
+#else
+            unlink(_cppFile.c_str());
+#endif
+        }
 
         if(status != 0)
         {
