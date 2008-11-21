@@ -25,6 +25,7 @@ SUBDIRS		= proxy \
 		  custom \
 		  retry \
 		  thread \
+		  timeout \
 		  uuid
 
 !if "$(WINDOWS_MOBILE_SDK)" == ""

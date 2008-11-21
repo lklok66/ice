@@ -21,16 +21,16 @@ interface ServerManager
 
 interface Hello
 {
-    idempotent void sayHello();
+    void sayHello();
 };
 
 interface TestIntf
 {
     void shutdown();
 
-    idempotent Hello* getHello();
+    Hello* getHello();
 
-    idempotent Hello* getReplicatedHello();
+    Hello* getReplicatedHello();
 
     void migrateHello();
 };

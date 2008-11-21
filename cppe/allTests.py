@@ -32,6 +32,7 @@ tests = [
     ("IceE/inheritance", ["core"]),
     ("IceE/facets", ["core"]),
     ("IceE/binding", ["core"]),
+    ("IceE/timeout", ["core"]),
     ("IceE/faultTolerance", ["core"]),
     ("IceE/location", ["core"]),
     ("IceE/adapterDeactivation", ["core"]),

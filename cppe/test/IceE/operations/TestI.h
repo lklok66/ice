@@ -22,8 +22,6 @@ public:
 
     virtual void opVoid(const Ice::Current&);
 
-    virtual void opSleep(int, const Ice::Current&);
-
     virtual Ice::Byte opByte(Ice::Byte,
                              Ice::Byte,
                              Ice::Byte&,

@@ -254,6 +254,8 @@ def run(tests, root = False):
           --debug                 Display debugging information on each test.
           --host=host             Set --Ice.Default.Host=<host>.
           --continue              Keep running when a test fails.
+          --ice-home=<path>       Use the binary distribution from the given path.
+          --cross=lang            Run cross language test.
           --script                Generate a script to run the tests.
             """
         else:
@@ -284,7 +286,7 @@ def run(tests, root = False):
         if getDefaultMapping() == "cppe" or getDefaultMapping() == "javae":
             opts, args = getopt.getopt(sys.argv[1:], "lr:R:",
                                    ["start=", "start-after=", "filter=", "rfilter=", "all", "loop", "debug",
-                                    "host=", "continue", "script"])
+                                    "host=", "continue", "ice-home=", "cross=", "script"])
         else:
             opts, args = getopt.getopt(sys.argv[1:], "lr:R:",
                                    ["start=", "start-after=", "filter=", "rfilter=", "all", "all-cross", "loop",
@@ -318,7 +320,7 @@ def run(tests, root = False):
                 filters.append((testFilter, False))
         elif o == "--cross":
             global cross
-            if not a in ["cpp", "java", "cs", "py", "rb" ]:
+            if not a in ["cpp", "java", "cs", "py", "rb", "cppe" ]:
                 print "cross must be one of cpp, java, cs, py or rb"
                 sys.exit(1)
             cross.append(a)
@@ -886,6 +888,10 @@ def clientServerTest(additionalServerOptions = "", additionalClientOptions = "",
             clientCfg.lang = clientLang
             client = getDefaultClientFile(clientLang)
             clientdir = getMirrorDir(testdir, clientLang)
+            if clientLang == "cppe":
+                clientdir = clientdir.replace("Ice", "IceE")
+            else:
+                clientdir = clientdir.replace("IceE", "Ice")
 	    print clientdir
             if not os.path.exists(clientdir):
                 print "** no matching test for %s" % clientLang
@@ -1011,14 +1017,19 @@ def getTestName():
     here = here[:i-1]
     here.reverse()
     # The crossTests list is in UNIX format.
-    return os.path.join(*here).replace(os.sep, '/')
+    name = os.path.join(*here).replace(os.sep, '/')
+    # XXX
+    return name.replace("IceE", "Ice")
 
 def processCmdLine():
     def usage():
         if getDefaultMapping() == "cppe" or getDefaultMapping() == "javae":
             print "usage: " + sys.argv[0] + """
           --debug                 Display debugging information on each test.
+          --trace=<file>          Display tracing.
           --host=host             Set --Ice.Default.Host=<host>.
+          --ice-home=<path>       Use the binary distribution from the given path.
+          --cross=lang            Run cross language test.
             """
         else:
             print "usage: " + sys.argv[0] + """
@@ -1040,7 +1051,7 @@ def processCmdLine():
     try:
         if getDefaultMapping() == "cppe" or getDefaultMapping() == "javae":
             opts, args = getopt.getopt(
-                sys.argv[1:], "", ["debug", "host="])
+                sys.argv[1:], "", ["debug", "trace=", "host=", "ice-home=", "cross="])
         else:
             opts, args = getopt.getopt(
                 sys.argv[1:], "", ["debug", "trace=", "protocol=", "compress", "valgrind", "host=", "serialize", \
@@ -1061,7 +1072,7 @@ def processCmdLine():
             #if testName == "Ice/custom":
             #if getTestName() not in crossTests:
             cross.append(a)
-            if not a in ["cpp", "java", "cs", "py", "rb" ]:
+            if not a in ["cpp", "java", "cs", "py", "rb", "cppe"]:
                 print "cross must be one of cpp, java, cs, py or rb"
                 sys.exit(1)
             if getTestName() not in crossTests:
@@ -1176,6 +1187,7 @@ def runTests(start, expanded, num = 0, script = False):
                 test = os.path.join(*i.split(os.sep)[2:])
 		# The crossTests list is in UNIX format.
 		test = test.replace(os.sep, '/')
+                test = test.replace("IceE", "Ice")
                 if not test in crossTests:
                     print "%s*** test does not support cross testing%s" % (prefix, suffix)
                     continue

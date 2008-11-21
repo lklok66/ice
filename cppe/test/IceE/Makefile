@@ -27,6 +27,7 @@ SUBDIRS		= adapterDeactivation \
 		  retry \
 		  slicing \
 		  thread \
+		  timeout \
 		  uuid
 
 $(EVERYTHING)::

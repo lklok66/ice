@@ -23,18 +23,6 @@ allTests(const Ice::CommunicatorPtr& communicator, const Ice::InitializationData
     Test::MyClassPrx cl = Test::MyClassPrx::checkedCast(base);
     Test::MyDerivedClassPrx derived = Test::MyDerivedClassPrx::checkedCast(cl);
 
-    tprintf("testing timeout...");
-    Test::MyClassPrx clTimeout = Test::MyClassPrx::uncheckedCast(cl->ice_timeout(500));
-    try
-    {
-        clTimeout->opSleep(2000);
-        test(false);
-    }
-    catch(const Ice::TimeoutException&)
-    {
-    }
-    tprintf("ok\n");
-
     tprintf("testing twoway operations... ");
     void twoways(const Ice::CommunicatorPtr&, const Ice::InitializationData&, const Test::MyClassPrx&);
     twoways(communicator, initData, cl);
