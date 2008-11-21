@@ -18,7 +18,7 @@ OBJS		= Throughput.obj
 
 !include $(top_srcdir)/config/Make.rules.mak
 
-!if "$(EMBEDDED_DEVICE)" != ""
+!if "$(WINDOWS_MOBILE_SDK)" != ""
 
 COBJS           = WinCEClient.obj
 

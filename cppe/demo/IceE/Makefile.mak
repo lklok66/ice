@@ -16,7 +16,7 @@ SUBDIRS		= minimal \
 		  throughput \
 		  chat
 
-!if "$(EMBEDDED_DEVICE)" == ""
+!if "$(WINDOWS_MOBILE_SDK)" == ""
 SUBDIRS 	= $(SUBDIRS) \
 		  hello \
 		  callback \
@@ -25,7 +25,7 @@ SUBDIRS 	= $(SUBDIRS) \
 		  workqueue
 !endif
 
-!if "$(EMBEDDED_DEVICE)" == "" && "$(HAS_AMI)" == "yes"
+!if "$(WINDOWS_MOBILE_SDK)" == "" && "$(HAS_AMI)" == "yes"
 SUBDIRS		= $(SUBDIRS) async
 !endif
 

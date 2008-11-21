@@ -33,7 +33,7 @@ CPPFLAGS        = $(CPPFLAGS) -D_AFXDLL
 PDBFLAGS        = /pdb:$(SERVER:.exe=.pdb)
 !endif
 
-!if "$(EMBEDDED_DEVICE)" == ""
+!if "$(WINDOWS_MOBILE_SDK)" == ""
 
 RESFILE         = HelloServer.res
 HelloServer.res: HelloServer.rc

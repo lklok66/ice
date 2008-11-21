@@ -31,7 +31,7 @@ CPPFLAGS	= $(CPPFLAGS) -D_AFXDLL
 PDBFLAGS        = /pdb:$(CLIENT:.exe=.pdb)
 !endif
 
-!if "$(EMBEDDED_DEVICE)" == ""
+!if "$(WINDOWS_MOBILE_SDK)" == ""
 
 RESFILE         = HelloClient.res
 HelloClient.res: HelloClient.rc

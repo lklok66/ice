@@ -39,23 +39,18 @@ CPP_COMPILER            = VC80
 #STATIC_CPP_RUNTIME	= yes
 
 #
-# If building for an Windows CE/Mobile embedded device with VS2005 set
-# the following two settting to the desired device and OS.
+# Define WINDOWS_MOBILE_SDK if building for Windows Mobile 6. The valid
+# setting are Professional and Standard, to choose to use the Windows
+# Mobile 6 Professional and Standard SDKs respectively.
 #
-# Supported options for EMBEDDED_OS are "WindowsMobile2003",
-# "WindowsMobile5.0" and "WindowsMobile6".
-#
-# Supported options for EMBEDDED_DEVICE are "PocketPC" and "Smartphone"
-#
-#EMBEDDED_OS            = WindowsMobile6
-#EMBEDDED_DEVICE        = PocketPC
+#WINDOWS_MOBILE_SDK	= Professional
 
 #
-# Change the following setting if the Windows Mobile SDK is installed
+# Change the following setting if the Windows Mobile 6 SDK is installed
 # in a different location than the default. For example, on Windows x64
 # the SDK is installed in "C:\Program Files (x86)" by default.
 #
-WMSDK_BASE_DIR		= C:\Program Files
+WMSDK_BASE_DIR		= C:\Program Files\Windows Mobile 6 SDK
 
 # ----------------------------------------------------------------------
 # Ice-E supports a number of optional features that are enabled via
@@ -148,12 +143,8 @@ install_includedir	= $(prefix)\include
 !error Invalid setting for CPP_COMPILER: $(CPP_COMPILER)
 !endif
 
-!if "$(EMBEDDED_DEVICE)" != ""
-!if "$(EMBEDDED_DEVICE)" != "PocketPC" && "$(EMBEDDED_DEVICE)" != "Smartphone"
-!error Invalid setting for EMBEDDED_DEVICE: "$(EMBEDDED_DEVICE)"
-!elseif "$(EMBEDDED_OS)" != "WindowsMobile2003" && "$(EMBEDDED_OS)" != "WindowsMobile5.0" && "$(EMBEDDED_OS)" != "WindowsMobile6"
-!error Invalid setting for EMBEDDED_OS: "$(EMBEDDED_OS)"
-!endif
+!if "$(WINDOWS_MOBILE_SDK)" != "" && "$(WINDOWS_MOBILE_SDK)" != "Professional" && "$(WINDOWS_MOBILE_SDK)" != "Standard"
+!error Invalid setting for WINDOWS_MOBILE_SDK: "$(WINDOWS_MOBILE_SDK)"
 !endif
 
 #
@@ -161,7 +152,7 @@ install_includedir	= $(prefix)\include
 #
 MT		= mt.exe
 RC		= rc.exe
-!if "$(EMBEDDED_DEVICE)" != ""
+!if "$(WINDOWS_MOBILE_SDK)" != ""
 CXX		= "$(VSINSTALLDIR)\VC\ce\bin\x86_arm\cl.exe"
 CC		= "$(VSINSTALLDIR)\VC\ce\bin\x86_arm\cl.exe"
 LINK 		= "$(VSINSTALLDIR)\VC\ce\bin\x86_arm\link.exe"
@@ -180,64 +171,27 @@ CPPFLAGS	= -nologo -W3 -GR -EHsc -FD -D_CONSOLE -I$(includedir)
 #
 # Add options for WinCE support
 #
-!if "$(EMBEDDED_DEVICE)" != ""
+!if "$(WINDOWS_MOBILE_SDK)" != ""
 
-!if "$(EMBEDDED_OS)" == "WindowsMobile2003"
-
-!if "$(EMBEDDED_DEVICE)" == "PocketPC"
-SDK_DIR		= $(VSINSTALLDIR)\SmartDevices\SDK\PocketPC2003
+!if "$(WINDOWS_MOBILE_SDK)" == "Professional"
+SDK_DIR		= $(WMSDK_BASE_DIR)\PocketPC
 !else
-SDK_DIR		= $(VSINSTALLDIR)\SmartDevices\SDK\Smartphone2003
+SDK_DIR		= $(WMSDK_BASE_DIR)\Smartphone
 !endif
 
-INCLUDE_SUBDIR	= 
-LIB_SUBDIR	= \ArmV4
-CPPFLAGS	= /D "_WIN32_WCE=0x420" /D "UNDER_CE=0x420" $(CPPFLAGS)
-LDFLAGS		= /MACHINE:ARM
-
-!elseif "$(EMBEDDED_OS)" == "WindowsMobile5.0"
-
-!if "$(EMBEDDED_DEVICE)" == "PocketPC"
-SDK_DIR		= $(WMSDK_BASE_DIR)\Windows CE Tools\wce500\Windows Mobile 5.0 Pocket PC SDK
-!else
-SDK_DIR		= $(WMSDK_BASE_DIR)\Windows CE Tools\wce500\Windows Mobile 5.0 Smartphone SDK
-!endif
-
-INCLUDE_SUBDIR	= \ArmV4i
-LIB_SUBDIR	= \ArmV4i
-CPPFLAGS	= /D "_WIN32_WCE=0x501" /D "UNDER_CE=0x501" $(CPPFLAGS)
-LDFLAGS		= /MACHINE:THUMB
-
-!else
-
-
-!if "$(EMBEDDED_DEVICE)" == "PocketPC"
-SDK_DIR		= $(WMSDK_BASE_DIR)\Windows Mobile 6 SDK\PocketPC
-!else
-SDK_DIR		= $(WMSDK_BASE_DIR)\Windows Mobile 6 SDK\Smartphone
-!endif
-
-INCLUDE_SUBDIR	= \ArmV4i
-LIB_SUBDIR	= \ArmV4i
-CPPFLAGS	= /D "_WIN32_WCE=0x502" /D "UNDER_CE=0x502" $(CPPFLAGS)
-LDFLAGS		= /MACHINE:THUMB
-
-!endif
-
-
-RC		= $(RC) -I"$(SDK_DIR)\Include$(INCLUDE_SUBDIR)"
-CPPFLAGS 	= -QRarch4 -I"$(VSINSTALLDIR)\VC\ce\Include" -I"$(SDK_DIR)\Include$(INCLUDE_SUBDIR)" -fp:fast -TP $(CPPFLAGS) /D "ARM" /D "_ARM_" /D "ARMV4" /D "UNICODE" /D "_UNICODE"
+RC		= $(RC) /d "UNDER_CE=0x502" /d "_WIN32_WCE=0x502" -I"$(SDK_DIR)\Include\ArmV4i"
+CPPFLAGS 	= -QRarch4 -I"$(VSINSTALLDIR)\VC\ce\Include" -I"$(SDK_DIR)\Include\ArmV4i" -fp:fast -TP $(CPPFLAGS) /D "_WIN32_WCE=0x502" /D "UNDER_CE=0x502" /D "ARM" /D "_ARM_" /D "ARMV4" /D "UNICODE" /D "_UNICODE"
 
 !if "$(OPTIMIZE_SPEED)" != "yes" && "$(OPTIMIZE_SIZE)" != "yes"
 CPPFLAGS	= $(CPPFLAGS) -GS-
 !endif
 
-LDFLAGS		= /LIBPATH:"$(VSINSTALLDIR)\VC\ce\Lib$(LIB_SUBDIR)" /LIBPATH:"$(SDK_DIR)\Lib$(LIB_SUBDIR)" -nodefaultlib:"kernel32.lib" -nodefaultlib:"oldnames.lib" /STACK:65536,4096  $(LDFLAGS)
+LDFLAGS		= /LIBPATH:"$(VSINSTALLDIR)\VC\ce\Lib\ArmV4i" /LIBPATH:"$(SDK_DIR)\Lib\ArmV4i" -nodefaultlib:"kernel32.lib" -nodefaultlib:"oldnames.lib" /STACK:65536,4096 /MACHINE:THUMB
 
 
-!if "$(EMBEDDED_DEVICE)" == "PocketPC"
+!if "$(WINDOWS_MOBILE_SDK)" == "Professional"
 CPPFLAGS	= $(CPPFLAGS) /D "WIN32_PLATFORM_PSPC"
-!elseif "$(EMBEDDED_DEVICE)" == "Smartphone"
+!else
 CPPFLAGS	= $(CPPFLAGS) /D "WIN32_PLATFORM_WFSP"
 !endif
 
@@ -279,7 +233,7 @@ CPPFLAGS        = $(CPPFLAGS) -MTd
 CPPFLAGS        = $(CPPFLAGS) -MDd
 !endif
 
-!if "$(EMBEDDED_DEVICE)" == ""
+!if "$(WINDOWS_MOBILE_SDK)" == ""
 CPPFLAGS        = $(CPPFLAGS) -RTC1
 !endif
 
@@ -294,13 +248,8 @@ LDFLAGS         = $(LDFLAGS) /LIBPATH:"$(libdir)" /nologo
 LDFLAGS         = $(LDFLAGS) /LIBPATH:"$(ice_dir)\lib" /nologo
 !endif
 
-!if "$(EMBEDDED_DEVICE)" != ""
-LDFLAGS		= $(LDFLAGS) -manifest:no
-!if "$(EMBEDDED_OS)" == "WindowsMobile2003"
-LDFLAGS         = $(LDFLAGS) /subsystem:windowsce,4.20
-!else
-LDFLAGS         = $(LDFLAGS) /subsystem:windowsce
-!endif
+!if "$(WINDOWS_MOBILE_SDK)" != ""
+LDFLAGS		= $(LDFLAGS) -manifest:no /subsystem:windowsce
 !endif
 
 !if "$(OPTIMIZE_SPEED)" != "yes" && "$(OPTIMIZE_SIZE)" != "yes"
@@ -318,26 +267,15 @@ ARFLAGS		= $(ARFLAGS) /LTCG
 # MFC specific flags
 #
 
-!if "$(EMBEDDED_DEVICE)" != ""
+!if "$(WINDOWS_MOBILE_SDK)" != ""
 
 MFC_CPPFLAGS	= -I"$(VSINSTALLDIR)\VC\ce\atlmfc\include" 
-MFC_LDFLAGS	= /LIBPATH:"$(VSINSTALLDIR)\VC\ce\atlmfc\lib$(LIB_SUBDIR)"
+MFC_LDFLAGS	= /LIBPATH:"$(VSINSTALLDIR)\VC\ce\atlmfc\lib\ArmV4i"
 
 !else
 
 MFC_LDFLAGS     = /subsystem:windows
 
-!endif
-
-#
-# RC specific flags
-#
-!if "$(EMBEDDED_OS)" == "WindowsMobile2003"
-RC		= $(RC) /d "UNDER_CE=0x420" /d "_WIN32_WCE=0x420"
-!elseif "$(EMBEDDED_OS)" == "WindowsMobile5.0"
-RC		= $(RC) /d "UNDER_CE=0x501" /d "_WIN32_WCE=0x501"
-!elseif "$(EMBEDDED_OS)" == "WindowsMobile6"
-RC		= $(RC) /d "UNDER_CE=0x502" /d "_WIN32_WCE=0x502"
 !endif
 
 #
@@ -351,12 +289,9 @@ LIBSUFFIX	= $(LIBSUFFIX)d
 !endif
 
 
-!if "$(EMBEDDED_DEVICE)" != ""
+!if "$(WINDOWS_MOBILE_SDK)" != ""
 
 BASELIBS	= coredll.lib ws2.lib corelibc.lib
-!if "$(EMBEDDED_OS)" == "WindowsMobile2003" 
-BASELIBS        = $(BASELIBS) ccrtrtti.lib 
-!endif
 
 !else
 
@@ -370,14 +305,14 @@ BASELIBS	= $(BASELIBS)
 LIBS		= icee$(LIBSUFFIX).lib
 MINLIBS		= iceec$(LIBSUFFIX).lib
 
-!if "$(STATICLIBS)" == "yes" || "$(EMBEDDED_DEVICE)" != ""
+!if "$(STATICLIBS)" == "yes" || "$(WINDOWS_MOBILE_SDK)" != ""
 LIBS		= $(LIBS) $(BASELIBS)
 MINLIBS		= $(MINLIBS) $(BASELIBS)
 !endif
 
 MFC_LIBS	= $(LIBS)
 MFC_MINLIBS	= $(MINLIBS)
-!if "$(EMBEDDED_DEVICE)" == "" && "$(STATICLIBS)" == "yes" && "$(STATIC_CPP_RUNTIME)" == "yes"
+!if "$(WINDOWS_MOBILE_SDK)" == "" && "$(STATICLIBS)" == "yes" && "$(STATIC_CPP_RUNTIME)" == "yes"
 !if  "$(OPTIMIZE_SPEED)" != "yes" && "$(OPTIMIZE_SIZE)" != "yes"
 MFC_LIBS        = nafxcwd.lib $(LIBS)
 MFC_MINLIBS	= nafxcwd.lib $(MINLIBS)

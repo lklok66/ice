@@ -27,7 +27,7 @@ SUBDIRS		= proxy \
 		  thread \
 		  uuid
 
-!if "$(EMBEDDED_DEVICE)" == ""
+!if "$(WINDOWS_MOBILE_SDK)" == ""
 SUBDIRS		= $(SUBDIRS) \
 		  faultTolerance \
 		  adapterDeactivation \
