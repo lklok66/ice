@@ -17,35 +17,45 @@ C++ compiler
 
 The following C++ compilers are supported:
 
-- Microsoft Visual C++ 2005 (both Professional and Express editions)
+- Microsoft Visual C++ 2008 (Professional and Express editions)
 
-  Visual C++ 2005 Express is available for download from:
+  Visual C++ 2008 Express is available for download from:
 
-  http://msdn.microsoft.com/vstudio/express/visualc/
+  http://www.microsoft.com/express/vc/
+
+- Microsoft Visual C++ 2005 SP1 (Professional and Express editions)
+
+  Service Pack 1 is available for download from:
+
+  http://msdn2.microsoft.com/en-us/vstudio/bb265237.aspx
+
+  Visual C++ 2005 Express and SP1 is available for download from:
+
+  http://www.microsoft.com/express/2005/
 
 
-Visual C++ 2005 Express Setup
------------------------------
+Visual C++ 2005 Express SP1 Setup
+---------------------------------
 
-Users of Visual C++ 2005 Express need to install the Microsoft
+Users of Visual C++ 2005 Express SP1 need to install the Microsoft
 Platform SDK:
 
   http://www.microsoft.com/downloads/details.aspx?FamilyId=A55B6B43-E24F-4EA3-A93E-40C0EC4F68E5&displaylang=en
 
 Once installed, follow the instructions at the link below:
 
-  http://msdn.microsoft.com/vstudio/express/visualc/usingpsdk/
+  http://msdn2.microsoft.com/en-us/express/aa700755.aspx
 
 You also need to add the Platform SDK directories to the INCLUDE, LIB
 and PATH environment variables. For example:
 
-  @SET PDK_HOME=C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2
-  @SET PATH=%PDK_HOME%\bin;%PATH%
-  @SET INCLUDE=%PDK_HOME%\include;%INCLUDE%
-  @SET LIB=%PDK_HOME%\lib;%LIB%
+@SET PDK_HOME=C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2
+@SET PATH=%PDK_HOME%\bin;%PATH%
+@SET INCLUDE=%PDK_HOME%\include;%INCLUDE%
+@SET LIB=%PDK_HOME%\lib;%LIB%
 
 The PDK_HOME environment variable must be defined in order to build
-the Ice-E source distribution. Note that PDK_HOME must not contain a
+the Ice source distribution. Note that PDK_HOME must not contain a
 trailing backslash (\).
 
 You may also need to execute the vsvars32.bat script, located in
@@ -56,39 +66,60 @@ configure your build environment.
 Slice-to-Embedded-C++ translator
 --------------------------------
 
-You will need the Slice-to-Embedded-C++ translator (slice2cppe) and
-preprocessor (icecpp). You can download a binary distribution from the
-ZeroC web site, or you can build the Slice-to-Embedded-C++ translator
-yourself.
+You will need the Slice-to-Embedded-C++ translator (slice2cppe). You
+can download a binary distribution from the ZeroC web site, or you
+can build the Slice-to-Embedded-C++ translator yourself using this
+source distribution.
 
-Binary and source distributions for the supported platforms are
-available at
+Binary distributions are available at
 
   http://www.zeroc.com/icee/download.html
 
-The directory containing the translator executables must be added to
-your PATH. For example, if the translator distribution is installed
-in C:\IceE-@ver@, you must add C:\IceE-@ver@\bin to your PATH.
+
+Third-party libraries
+---------------------
+
+The Ice-E slice compiler (slice2cppe) has a dependency on the
+following third-party library:
+
+- mcpp 2.7.1
+
+If you want to build the slice2cppe translator yourself, you can
+avoid building mcpp from source code by downloading ZeroC's
+Third-Party Windows installer for Visual Studio 2005/2008 that
+contains release and debug libraries for all of the third-party
+dependencies.
+
+If you intend to build the third-party dependencies from source, we
+recommend downloading the Ice third-party source archive from
+
+  http://www.zeroc.com/download.html
+
+This archive contains the source distributions for each of the
+third-party dependencies, as well as required source patches and
+configuration instructions.
+
+For more information about mcpp, please refer to the link below:
+
+  http://mcpp.sourceforge.net
 
 
 ======================================================================
 Compilation and Testing
 ======================================================================
 
-Building Ice
-------------
-
-Using your favorite Zip tool, unzip the Ice source archive anywhere
+Using your favorite Zip tool, unzip the Ice-E source archive anywhere
 you like.
 
-Open a Visual Studio 2005 command prompt and change the working
-directory to IceE-@ver@. For example:
+Open a "Visual Studio Command Prompt" for your compiler and change the
+working directory to IceE-@ver@. For example:
 
   > cd C:\IceE-@ver@
 
-Edit config\Make.rules.mak to establish your build configuration. The
-comments in the file provide more information. In particular, you must
-ensure that CPP_COMPILER is set appropriately for your environment.
+Edit cpp\config\Make.rules.mak and cppe\config\Make.rules.mak to
+establish your build configuration. The comments in the file provide
+more information. In particular, you must ensure that CPP_COMPILER is
+set appropriately for your environment.
 
 Now you're ready to build Ice-E:
 

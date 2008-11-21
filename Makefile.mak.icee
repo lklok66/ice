@@ -9,8 +9,7 @@
 
 SUBDIRS			= cpp cppe 
 CLEAN_SUBDIRS		= cppe cpp
-DEPEND_SUBDIRS		= cpp cppe
-INSTALL_SUBDIRS		= cpp cppe 
+CONFIGURE_SUBDIRS	= cppe
 
 all::
 	@for %i in ( $(SUBDIRS) ) do \
@@ -18,17 +17,22 @@ all::
 	    cmd /c "cd %i && $(MAKE) -nologo -f Makefile.mak $(MAKEFLAGS) all" || exit 1
 
 clean::
-	@for %i in ( $(SUBDIRS) ) do \
+	@for %i in ( $(CLEAN_SUBDIRS) ) do \
 	    @echo "making clean in %i" && \
 	    cmd /c "cd %i && $(MAKE) -nologo -f Makefile.mak $(MAKEFLAGS) clean" || exit 1
 
 depend::
-	@for %i in ( $(DEPEND_SUBDIRS) ) do \
+	@for %i in ( $(SUBDIRS) ) do \
 	    @echo "making depend in %i" && \
 	    cmd /c "cd %i && $(MAKE) -nologo -f Makefile.mak $(MAKEFLAGS) depend" || exit 1
 
 install::
-	@for %i in ( $(INSTALL_SUBDIRS) ) do \
+	@for %i in ( $(SUBDIRS) ) do \
+	    @echo "making install in %i" && \
+	    cmd /c "cd %i && $(MAKE) -nologo -f Makefile.mak $(MAKEFLAGS) install" || exit 1
+
+configure::
+	@for %i in ( $(CONFIGURE_SUBDIRS) ) do \
 	    @echo "making install in %i" && \
 	    cmd /c "cd %i && $(MAKE) -nologo -f Makefile.mak $(MAKEFLAGS) install" || exit 1
 
