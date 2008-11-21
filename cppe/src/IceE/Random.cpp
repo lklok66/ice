@@ -8,7 +8,7 @@
 // **********************************************************************
 
 #include <IceE/Random.h>
-#include <IceE/StaticMutex.h>
+#include <IceE/Mutex.h>
 
 #ifdef _WIN32
 #   include <Wincrypt.h>
@@ -33,7 +33,7 @@ using namespace IceUtil;
 // widespread. Therefore, we serialize access to /dev/urandom using a
 // static mutex.
 // 
-static StaticMutex staticMutex = ICE_STATIC_MUTEX_INITIALIZER;
+static Mutex* staticMutex = 0;
 #ifdef _WIN32
 static HCRYPTPROV context = NULL;
 #else
@@ -43,14 +43,16 @@ static int fd = -1;
 namespace
 {
 
-//
-// Close fd at exit
-//
-class RandomCleanup
+class Init
 {
 public:
+
+    Init()
+    {
+        staticMutex = new IceUtil::Mutex;
+    }
     
-    ~RandomCleanup()
+    ~Init()
     {
 #ifdef _WIN32
         if(context != NULL)
@@ -65,9 +67,12 @@ public:
             fd = -1;
         }
 #endif
+        delete staticMutex;
+        staticMutex = 0;
     }
 };
-static RandomCleanup uuidCleanup;
+static Init init;
+
 }
 
 void
@@ -81,7 +86,7 @@ IceUtilInternal::generateRandom(char* buffer, int size)
     // mutex.
     //
 
-    IceUtil::StaticMutex::Lock lock(staticMutex);
+    IceUtilInternal::PtrLockT<Mutex> lock(staticMutex);
     if(context == NULL)
     {
         if(!CryptAcquireContext(&context, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
@@ -99,7 +104,7 @@ IceUtilInternal::generateRandom(char* buffer, int size)
     //
     // Serialize access to /dev/urandom; see comment above.
     //
-    StaticMutex::Lock lock(staticMutex);
+    IceUtilInternal::PtrLockT<Mutex> lock(staticMutex);
     if(fd == -1)
     {
         fd = open("/dev/urandom", O_RDONLY);

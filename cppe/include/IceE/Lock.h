@@ -130,6 +130,43 @@ public:
     {}
 };
 
-} // End namespace Ice
+
+} // End namespace IceUtil
+
+namespace IceUtilInternal
+{
+
+template <typename T>
+class PtrLockT
+{
+public:
+    
+    PtrLockT(const T* mutex) : _mutex(mutex)
+    {
+        if(_mutex)
+        {
+            _mutex->lock();
+        }
+    }
+
+    ~PtrLockT()
+    {
+        if(_mutex)
+        {
+            _mutex->unlock();
+        }
+    }
+   
+private:
+    
+    // Not implemented; prevents accidental use.
+    //
+    PtrLockT(const PtrLockT&);
+    PtrLockT& operator=(const PtrLockT&);
+
+    const T* _mutex;
+};
+
+} // End namespace IceUtilInternal
 
 #endif

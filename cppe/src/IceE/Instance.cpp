@@ -36,7 +36,6 @@
 #ifdef ICEE_HAS_AMI
 #    include <IceE/RetryQueue.h>
 #endif
-#include <IceE/StaticMutex.h>
 #include <IceE/StringUtil.h>
 
 #ifdef _WIN32
@@ -51,7 +50,7 @@ using namespace std;
 using namespace Ice;
 using namespace IceInternal;
 
-static IceUtil::StaticMutex staticMutex = ICE_STATIC_MUTEX_INITIALIZER;
+static IceUtil::Mutex* staticMutex = 0;
 static bool oneOffDone = false;
 static int instanceCount = 0;
 static bool printProcessIdDone = false;
@@ -61,6 +60,27 @@ namespace IceUtil
 
 extern bool nullHandleAbort;
 
+}
+
+namespace
+{
+
+class Init
+{
+public:
+
+    Init()
+    {
+        staticMutex = new IceUtil::Mutex;
+    }
+
+    ~Init()
+    {
+        delete staticMutex;
+        staticMutex = 0;
+    }
+};
+    
 }
 
 IceUtil::Shared* IceInternal::upCast(Instance* p) { return p; }
@@ -304,8 +324,8 @@ IceInternal::Instance::serverThreadPool()
 
     if(!_serverThreadPool) // Lazy initialization.
     {
-        // XXX - Remove timeout argument if unnecessary
-        _serverThreadPool = new ThreadPool(this, "Ice.ThreadPool.Server", 0);
+        int timeout = _initData.properties->getPropertyAsInt("Ice.ServerIdleTime");
+        _serverThreadPool = new ThreadPool(this, "Ice.ThreadPool.Server", timeout);
     }
 
     return _serverThreadPool;
@@ -485,116 +505,115 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
     {
         __setNoDelete(true);
 
-        IceUtil::StaticMutex::Lock sync(staticMutex);
-        instanceCount++;
-
-        if(!oneOffDone)
         {
-            //
-            // StdOut and StdErr redirection
-            //
+            IceUtilInternal::PtrLockT<IceUtil::Mutex> lock(staticMutex);
+            instanceCount++;
 
-            string stdOutFilename = _initData.properties->getProperty("Ice.StdOut");
-            string stdErrFilename = _initData.properties->getProperty("Ice.StdErr");
-
-            if(stdOutFilename != "")
+            if(!oneOffDone)
             {
+                //
+                // StdOut and StdErr redirection
+                //
+
+                string stdOutFilename = _initData.properties->getProperty("Ice.StdOut");
+                string stdErrFilename = _initData.properties->getProperty("Ice.StdErr");
+
+                if(stdOutFilename != "")
+                {
                     FILE * file;
 #ifdef _WIN32_WCE
-                wchar_t* wtext = new wchar_t[sizeof(wchar_t) * stdOutFilename.length()];
-                mbstowcs(wtext, stdOutFilename.c_str(), stdOutFilename.length());
-                file = _wfreopen(wtext, L"a", stdout);
-                delete wtext;
+                    wchar_t* wtext = new wchar_t[sizeof(wchar_t) * stdOutFilename.length()];
+                    mbstowcs(wtext, stdOutFilename.c_str(), stdOutFilename.length());
+                    file = _wfreopen(wtext, L"a", stdout);
+                    delete wtext;
 #else
-                file = freopen(stdOutFilename.c_str(), "a", stdout);
+                    file = freopen(stdOutFilename.c_str(), "a", stdout);
 #endif
-                if(file == 0)
-                {
-                    SyscallException ex(__FILE__, __LINE__);
-                    ex.error = getSystemErrno();
-                    throw ex;
+                    if(file == 0)
+                    {
+                        SyscallException ex(__FILE__, __LINE__);
+                        ex.error = getSystemErrno();
+                        throw ex;
+                    }
                 }
-            }
 
-            if(stdErrFilename != "")
-            {
+                if(stdErrFilename != "")
+                {
                     FILE* file;
 #ifdef _WIN32_WCE
-                wchar_t* wtext = new wchar_t[sizeof(wchar_t) * stdErrFilename.length()];
-                mbstowcs(wtext, stdErrFilename.c_str(), stdErrFilename.length());
-                file = _wfreopen(wtext, L"a", stderr);
-                delete wtext;
+                    wchar_t* wtext = new wchar_t[sizeof(wchar_t) * stdErrFilename.length()];
+                    mbstowcs(wtext, stdErrFilename.c_str(), stdErrFilename.length());
+                    file = _wfreopen(wtext, L"a", stderr);
+                    delete wtext;
 #else
-                file = freopen(stdErrFilename.c_str(), "a", stderr);
+                    file = freopen(stdErrFilename.c_str(), "a", stderr);
 #endif
-                if(file == 0)
-                {
-                    SyscallException ex(__FILE__, __LINE__);
-                    ex.error = getSystemErrno();
-                    throw ex;
+                    if(file == 0)
+                    {
+                        SyscallException ex(__FILE__, __LINE__);
+                        ex.error = getSystemErrno();
+                        throw ex;
+                    }
                 }
-            }
 
-            if(_initData.properties->getPropertyAsInt("Ice.NullHandleAbort") > 0)
-            {
-                IceUtil::nullHandleAbort = true;
-            }
+                if(_initData.properties->getPropertyAsInt("Ice.NullHandleAbort") > 0)
+                {
+                    IceUtil::nullHandleAbort = true;
+                }
 
 #ifndef _WIN32
-            string newUser = _initData.properties->getProperty("Ice.ChangeUser");
-            if(!newUser.empty())
-            {
-                struct passwd* pw = getpwnam(newUser.c_str());
-                if(!pw)
+                string newUser = _initData.properties->getProperty("Ice.ChangeUser");
+                if(!newUser.empty())
                 {
-                    SyscallException ex(__FILE__, __LINE__);
-                    ex.error = getSystemErrno();
-                    throw ex;
-                }
+                    struct passwd* pw = getpwnam(newUser.c_str());
+                    if(!pw)
+                    {
+                        SyscallException ex(__FILE__, __LINE__);
+                        ex.error = getSystemErrno();
+                        throw ex;
+                    }
 
-                if(setgid(pw->pw_gid) == -1)
-                {
-                    SyscallException ex(__FILE__, __LINE__);
-                    ex.error = getSystemErrno();
-                    throw ex;
-                }
+                    if(setgid(pw->pw_gid) == -1)
+                    {
+                        SyscallException ex(__FILE__, __LINE__);
+                        ex.error = getSystemErrno();
+                        throw ex;
+                    }
 
-                if(setuid(pw->pw_uid) == -1)
-                {
-                    SyscallException ex(__FILE__, __LINE__);
-                    ex.error = getSystemErrno();
-                    throw ex;
+                    if(setuid(pw->pw_uid) == -1)
+                    {
+                        SyscallException ex(__FILE__, __LINE__);
+                        ex.error = getSystemErrno();
+                        throw ex;
+                    }
                 }
-            }
 #endif
-            oneOffDone = true;
-        }
+                oneOffDone = true;
+            }
 
-        if(instanceCount == 1)
-        {
+            if(instanceCount == 1)
+            {
 
 #ifdef _WIN32
-            WORD version = MAKEWORD(1, 1);
-            WSADATA data;
-            if(WSAStartup(version, &data) != 0)
-            {
-                SocketException ex(__FILE__, __LINE__);
-                ex.error = WSAGetLastError();
-                throw ex;
-            }
+                WORD version = MAKEWORD(1, 1);
+                WSADATA data;
+                if(WSAStartup(version, &data) != 0)
+                {
+                    SocketException ex(__FILE__, __LINE__);
+                    ex.error = WSAGetLastError();
+                    throw ex;
+                }
 #endif
 
 #ifndef _WIN32
-            struct sigaction action;
-            action.sa_handler = SIG_IGN;
-            sigemptyset(&action.sa_mask);
-            action.sa_flags = 0;
-            sigaction(SIGPIPE, &action, 0);
+                struct sigaction action;
+                action.sa_handler = SIG_IGN;
+                sigemptyset(&action.sa_mask);
+                action.sa_flags = 0;
+                sigaction(SIGPIPE, &action, 0);
 #endif
+            }
         }
-
-        sync.release();
-
 
         if(!_initData.logger)
         {
@@ -668,7 +687,6 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
             throw;
         }
 
-        // XXX - Remove timeout argument if unnecessary
         _clientThreadPool = new ThreadPool(this, "Ice.ThreadPool.Client", 0);
 
         _selectorThread = new SelectorThread(this);
@@ -685,7 +703,7 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
     catch(...)
     {
         {
-            IceUtil::StaticMutex::Lock sync(staticMutex);
+            IceUtilInternal::PtrLockT<IceUtil::Mutex> lock(staticMutex);
             --instanceCount;
         }
         destroy();
@@ -716,7 +734,7 @@ IceInternal::Instance::~Instance()
 #endif
     assert(!_endpointFactory);
 
-    IceUtil::StaticMutex::Lock sync(staticMutex);
+    IceUtilInternal::PtrLockT<IceUtil::Mutex> lock(staticMutex);
     if(--instanceCount == 0)
     {
 #ifdef _WIN32
@@ -767,7 +785,7 @@ IceInternal::Instance::finishSetup(int& argc, char* argv[])
         //
         // Safe double-check locking (no dependent variable!)
         //
-        IceUtil::StaticMutex::Lock sync(staticMutex);
+        IceUtilInternal::PtrLockT<IceUtil::Mutex> lock(staticMutex);
         printProcessId = !printProcessIdDone;
 
         //
