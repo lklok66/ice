@@ -9,6 +9,7 @@
 
 #include <IceE/Random.h>
 #include <IceE/Mutex.h>
+#include <IceE/MutexPtrLock.h>
 
 #ifdef _WIN32
 #   include <Wincrypt.h>
@@ -86,7 +87,7 @@ IceUtilInternal::generateRandom(char* buffer, int size)
     // mutex.
     //
 
-    IceUtilInternal::PtrLockT<Mutex> lock(staticMutex);
+    IceUtilInternal::MutexPtrLock lock(staticMutex);
     if(context == NULL)
     {
         if(!CryptAcquireContext(&context, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
@@ -104,7 +105,7 @@ IceUtilInternal::generateRandom(char* buffer, int size)
     //
     // Serialize access to /dev/urandom; see comment above.
     //
-    IceUtilInternal::PtrLockT<Mutex> lock(staticMutex);
+    IceUtilInternal::MutexPtrLock lock(staticMutex);
     if(fd == -1)
     {
         fd = open("/dev/urandom", O_RDONLY);

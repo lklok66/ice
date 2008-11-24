@@ -9,6 +9,7 @@
 
 #include <IceE/DisableWarnings.h>
 #include <IceE/Instance.h>
+#include <IceE/MutexPtrLock.h>
 #include <IceE/TraceLevels.h>
 #include <IceE/DefaultsAndOverrides.h>
 #ifdef ICEE_HAS_ROUTER
@@ -506,7 +507,7 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
         __setNoDelete(true);
 
         {
-            IceUtilInternal::PtrLockT<IceUtil::Mutex> lock(staticMutex);
+            IceUtilInternal::MutexPtrLock lock(staticMutex);
             instanceCount++;
 
             if(!oneOffDone)
@@ -703,7 +704,7 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
     catch(...)
     {
         {
-            IceUtilInternal::PtrLockT<IceUtil::Mutex> lock(staticMutex);
+            IceUtilInternal::MutexPtrLock lock(staticMutex);
             --instanceCount;
         }
         destroy();
@@ -734,7 +735,7 @@ IceInternal::Instance::~Instance()
 #endif
     assert(!_endpointFactory);
 
-    IceUtilInternal::PtrLockT<IceUtil::Mutex> lock(staticMutex);
+    IceUtilInternal::MutexPtrLock lock(staticMutex);
     if(--instanceCount == 0)
     {
 #ifdef _WIN32
@@ -785,7 +786,7 @@ IceInternal::Instance::finishSetup(int& argc, char* argv[])
         //
         // Safe double-check locking (no dependent variable!)
         //
-        IceUtilInternal::PtrLockT<IceUtil::Mutex> lock(staticMutex);
+        IceUtilInternal::MutexPtrLock lock(staticMutex);
         printProcessId = !printProcessIdDone;
 
         //
