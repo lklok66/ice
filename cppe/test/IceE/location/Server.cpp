@@ -124,6 +124,10 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmd
 
 #else
 
+#if defined(_WIN32) && !defined(_WIN32_WCE)
+#   include <process.h> // For _getpid()
+#endif
+
 int
 main(int argc, char* argv[])
 {

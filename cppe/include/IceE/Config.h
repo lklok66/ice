@@ -203,15 +203,6 @@ typedef long long Int64;
 #include <vector>
 #include <map>
 
-#if !defined(_WIN32_WCE)
-#   if defined(_WIN32)
-#       include <process.h>
-#   else
-#       include <sys/types.h>
-#       include <unistd.h>
-#   endif
-#endif
-
 //
 // Define the IceInternal namespace, so that we can use the following
 // everywhere in our code:

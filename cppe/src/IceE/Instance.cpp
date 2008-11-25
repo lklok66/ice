@@ -41,6 +41,9 @@
 
 #ifdef _WIN32
 #   include <winsock2.h>
+#   ifndef _WIN32_WCE
+#      include <process.h>
+#   endif
 #else
 #   include <signal.h>
 #   include <pwd.h>
