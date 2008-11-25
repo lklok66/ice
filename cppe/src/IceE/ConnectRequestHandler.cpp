@@ -418,8 +418,13 @@ ConnectRequestHandler::setException(const Ice::LocalException& ex)
                 out << "connection to cached endpoints failed\n"
                     << "removing endpoints from cache and trying one more time\n" << ex.toString();
             }
-
-            dynamic_cast<RoutableReference*>(_reference.get())->getConnectionNoRouterInfo(this); // Retry.
+            
+            //
+            // Reset locator info flags and retry.
+            //
+            _locatorInfoEndpoints = false;
+            _locatorInfoCachedEndpoints = false;
+            dynamic_cast<RoutableReference*>(_reference.get())->getConnectionNoRouterInfo(this);
             return;
         }
     }
