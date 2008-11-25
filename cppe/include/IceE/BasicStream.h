@@ -27,6 +27,7 @@ class UserException;
 ICE_API void throwUnmarshalOutOfBoundsException(const char*, int);
 ICE_API void throwNegativeSizeException(const char*, int);
 ICE_API void throwMemoryLimitException(const char*, int);
+ICE_API void throwEnumeratorOutOfRangeException(const char*, int);
 ICE_API void throwUnsupportedEncodingException(const char*, int, ::Ice::Int, ::Ice::Int, ::Ice::Int, ::Ice::Int);
 
 }
@@ -401,6 +402,14 @@ public:
     {
         b.push_back(v);
     }
+    void write(Ice::Byte v, int limit)
+    {
+        if(v >= limit)
+        {
+            Ice::throwEnumeratorOutOfRangeException(__FILE__, __LINE__);
+        }
+        write(v);
+    }
     void read(Ice::Byte& v) // Inlined for performance reasons.
     {
         if(i >= b.end())
@@ -408,6 +417,14 @@ public:
             Ice::throwUnmarshalOutOfBoundsException(__FILE__, __LINE__);
         }
         v = *i++;
+    }
+    void read(Ice::Byte& v, int limit)
+    {
+        read(v);
+        if(v >= limit)
+        {
+            Ice::throwEnumeratorOutOfRangeException(__FILE__, __LINE__);
+        }
     }
 
     ICE_API void write(const Ice::Byte*, const Ice::Byte*);
@@ -431,7 +448,23 @@ public:
     ICE_API bool* read(std::pair<const bool*, const bool*>&);
 
     ICE_API void write(Ice::Short);
+    void write(Ice::Short v, int limit)
+    {
+        if(v < 0 || v >= limit)
+        {
+            Ice::throwEnumeratorOutOfRangeException(__FILE__, __LINE__);
+        }
+        write(v);
+    }
     ICE_API void read(Ice::Short&);
+    void read(Ice::Short& v, int limit)
+    {
+        read(v);
+        if(v < 0 || v >= limit)
+        {
+            Ice::throwEnumeratorOutOfRangeException(__FILE__, __LINE__);
+        }
+    }
     ICE_API void write(const Ice::Short*, const Ice::Short*);
     ICE_API void read(std::vector<Ice::Short>&);
     ICE_API Ice::Short* read(std::pair<const Ice::Short*, const Ice::Short*>&);
@@ -456,6 +489,14 @@ public:
         *dest = *src;
 #endif
     }
+    void write(Ice::Int v, int limit)
+    {
+        if(v < 0 || v >= limit)
+        {
+            Ice::throwEnumeratorOutOfRangeException(__FILE__, __LINE__);
+        }
+        write(v);
+    }
 
     void read(Ice::Int& v) // Inlined for performance reasons.
     {
@@ -478,6 +519,14 @@ public:
         *dest++ = *src++;
         *dest = *src;
 #endif
+    }
+    void read(Ice::Int& v, int limit)
+    {
+        read(v);
+        if(v < 0 || v >= limit)
+        {
+            Ice::throwEnumeratorOutOfRangeException(__FILE__, __LINE__);
+        }
     }
 
     ICE_API void write(const Ice::Int*, const Ice::Int*);

@@ -1586,6 +1586,12 @@ Ice::throwNoObjectFactoryException(const char* file, int line, const std::string
 }
 
 void
+Ice::throwEnumeratorOutOfRangeException(const char* file, int line)
+{
+    throw MarshalException(file, line, "enumerator out of range");
+}
+
+void
 IceInternal::Ex::throwUOE(const string& expectedType, const string& actualType)
 {
     throw MarshalException(__FILE__, __LINE__, 

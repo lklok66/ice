@@ -606,6 +606,7 @@ inline void throwProxyUnmarshalException(const char* file, int line)
 }
 
 ICE_API void throwNoObjectFactoryException(const char*, int, const std::string&);
+ICE_API void throwEnumeratorOutOfRangeException(const char*, int);
 ICE_API void throwUOE(const ::std::string&, const ::std::string&);
 
 class ICE_API FeatureNotSupportedException : public ::Ice::LocalException
