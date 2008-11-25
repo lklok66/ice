@@ -9,7 +9,8 @@ Windows version
 Ice-E has been extensively tested on:
 
 - Windows XP x86
-- Windows Vista x86
+- Windows Vista x86 and x64
+- Windows Mobile 6 (ARMV4I)
 
 
 C++ compiler
@@ -17,50 +18,24 @@ C++ compiler
 
 The following C++ compilers are supported:
 
-- Microsoft Visual C++ 2008 (Professional and Express editions)
+- Microsoft Visual C++ 2008 Professional
 
-  Visual C++ 2008 Express is available for download from:
-
-  http://www.microsoft.com/express/vc/
-
-- Microsoft Visual C++ 2005 SP1 (Professional and Express editions)
+- Microsoft Visual C++ 2005 SP1 Professional
 
   Service Pack 1 is available for download from:
 
   http://msdn2.microsoft.com/en-us/vstudio/bb265237.aspx
 
-  Visual C++ 2005 Express and SP1 is available for download from:
 
-  http://www.microsoft.com/express/2005/
+Windows Mobile 6 SDK
+--------------------
 
+Ice-E requires either the Windows Mobile 6 Professional or Standard
+SDK to be installed. Both of these can be obtained from:
 
-Visual C++ 2005 Express SP1 Setup
----------------------------------
+  http://www.microsoft.com/downloads/details.aspx?FamilyId=06111A3A-A651-4745-88EF-3D48091A390B&displaylang=en
 
-Users of Visual C++ 2005 Express SP1 need to install the Microsoft
-Platform SDK:
-
-  http://www.microsoft.com/downloads/details.aspx?FamilyId=A55B6B43-E24F-4EA3-A93E-40C0EC4F68E5&displaylang=en
-
-Once installed, follow the instructions at the link below:
-
-  http://msdn2.microsoft.com/en-us/express/aa700755.aspx
-
-You also need to add the Platform SDK directories to the INCLUDE, LIB
-and PATH environment variables. For example:
-
-@SET PDK_HOME=C:\Program Files\Microsoft Platform SDK for Windows Server 2003 R2
-@SET PATH=%PDK_HOME%\bin;%PATH%
-@SET INCLUDE=%PDK_HOME%\include;%INCLUDE%
-@SET LIB=%PDK_HOME%\lib;%LIB%
-
-The PDK_HOME environment variable must be defined in order to build
-the Ice source distribution. Note that PDK_HOME must not contain a
-trailing backslash (\).
-
-You may also need to execute the vsvars32.bat script, located in
-C:\Program Files\Microsoft Visual Studio 8\Common7\Tools, to properly
-configure your build environment.
+The SDK must be installed after you install the Visual C++ compiler.
 
 
 Slice-to-Embedded-C++ translator
@@ -116,17 +91,18 @@ working directory to IceE-@ver@. For example:
 
   > cd C:\IceE-@ver@
 
-Edit cpp\config\Make.rules.mak and cppe\config\Make.rules.mak to
-establish your build configuration. The comments in the file provide
-more information. In particular, you must ensure that CPP_COMPILER is
-set appropriately for your environment.
+Edit cppe\config\Make.rules.mak to establish your build configuration.
+The comments in the file provide more information. In particular, you
+must ensure that CPP_COMPILER is set appropriately for your environment.
+For Windows Mobile, you must ensure that WINDOWS_MOBILE_SDK is set
+properly.
 
 Now you're ready to build Ice-E:
 
   > nmake /f Makefile.mak configure
   > nmake /f Makefile.mak
 
-Python is required to run the test suite:
+Python is required to run the test suite on Windows:
 
   http://www.python.org/download
 
@@ -145,15 +121,22 @@ If you want to try out any of the demos and you did not build Ice-E
 statically, make sure to update your PATH environment variable to add
 the "bin" directory that contains the Ice-E DLLs.
 
+For Windows Mobile, you must manually run each test by copying the
+server and client for each test to your hardware and then running the
+server, followed by the client. Any failures will be reported.
+
 
 ======================================================================
 Installation
 ======================================================================
 
 Simply run "nmake /f Makefile.mak install". This will install Ice-E in
-the directory specified by the "prefix" variable in the file
-config\Make.rules.mak.
+the directory specified by the "prefix" variable in the
+cpp\config\Make.rules.mak (for slice compiler) and
+cppe\config\Make.rules.mak (for rest of Ice-E) files.
 
-After installation, make sure to add the include directory to the
-Visual C++ "Include files" and the lib directory to the "Library files"
-in the IDE (Tools->Options->Projects and Solutions->VC++ Directories).
+After installation if you plan to use the Visual Studio IDE for your
+Ice-E project, make sure to add the bin directory to the Visual C++
+"Executable files", the include directory to the "Include files" and
+the lib directory to the "Library files" in the IDE
+(Tools->Options->Projects and Solutions->VC++ Directories).
