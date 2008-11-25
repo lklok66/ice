@@ -61,14 +61,6 @@ Ice::__read(::IceInternal::BasicStream* __is, ::Ice::Context& v, ::Ice::__U__Con
 ::Ice::ObjectPrx
 IceInternal::checkedCastImpl(const ObjectPrx& b, const string& f, const string& typeId)
 {
-//
-// COMPILERBUG: Without this work-around, release VC7.0 and VC7.1
-// build crash when FacetNotExistException is raised
-//
-#if defined(_MSC_VER) && (_MSC_VER >= 1300) && (_MSC_VER <= 1310)
-    ObjectPrx fooBar;
-#endif
-
     if(b)
     {
         ObjectPrx bb = b->ice_facet(f);
@@ -95,14 +87,6 @@ IceInternal::checkedCastImpl(const ObjectPrx& b, const string& f, const string& 
 ::Ice::ObjectPrx
 IceInternal::checkedCastImpl(const ObjectPrx& b, const string& f, const string& typeId, const Context& ctx)
 {
-//
-// COMPILERBUG: Without this work-around, release VC7.0 build crash
-// when FacetNotExistException is raised
-//
-#if defined(_MSC_VER) && (_MSC_VER == 1300)
-    ObjectPrx fooBar;
-#endif
-
     if(b)
     {
         ObjectPrx bb = b->ice_facet(f);

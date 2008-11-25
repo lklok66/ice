@@ -37,22 +37,6 @@ prefix			= /opt/IceE-$(VERSION)
 #
 #LP64			:= yes
 
-#
-# The values below can be overridden by defining them as environment
-# variables. For example, if you are using a bourne shell or
-# compatible, you can override the location of STLport like this:
-#
-# export STLPORT_HOME=/usr/local/STLport-4.5
-#
-
-#
-# If you want to use STLport, set STLPORT_HOME to the STLport
-# installation directory. If STLPORT_HOME is undefined or empty,
-# STLport is not used.
-#
-
-#STLPORT_HOME		?= /opt/STLport
-
 # ----------------------------------------------------------------------
 # Ice-E supports a number of optional features that are enabled via
 # build-time settings. To minimize the size of your executables, review
@@ -140,26 +124,14 @@ install_bindir	  	= $(prefix)/$(binsubdir)
 install_libdir	  	= $(prefix)/$(libsubdir)
 install_includedir	= $(prefix)/include
 
-ifneq ($(STLPORT_HOME),)
-    STLPORT_FLAGS	= -I$(STLPORT_HOME)/include/stlport
-    ifeq ($(OPTIMIZE),yes)
-	STLPORT_LIBS	= -L$(STLPORT_HOME)/$(libsubdir) -lstlport_gcc
-    else
-	STLPORT_LIBS	= -L$(STLPORT_HOME)/$(libsubdir) -lstlport_gcc_stldebug
-    endif
-else
-    STLPORT_FLAGS	=
-    STLPORT_LIBS	=
-endif
-
 ICECPPFLAGS		= -I$(slicedir)
 SLICE2CPPEFLAGS		= $(ICECPPFLAGS)
 
 ifeq ($(ice_dir), /usr) 
-    CPPFLAGS		= $(STLPORT_FLAGS)
+    CPPFLAGS		= 
     LDFLAGS		= $(LDPLATFORMFLAGS) $(CXXFLAGS)
 else
-    CPPFLAGS	= -I$(includedir) $(STLPORT_FLAGS)
+    CPPFLAGS	= -I$(includedir)
     ifdef ice_src_dist
         LDFLAGS		= $(LDPLATFORMFLAGS) $(CXXFLAGS) -L$(libdir) 
     else

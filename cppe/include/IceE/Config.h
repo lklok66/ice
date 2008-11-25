@@ -12,30 +12,6 @@
 
 #include <IceE/Features.h>
 
-// ***********************************************************************
-//
-// User should not change anything below this line!
-//
-// ***********************************************************************
-
-//
-// Blackfin does not support wstring.
-//
-#if defined(__BFIN__)
-#undef ICEE_HAS_WSTRING
-#endif
-
-//
-// Only supported/needed with VC6; Totally undocumented! And if you
-// set it lower than 512 bytes, the program crashes.  Either leave at
-// 0x200 or 0x1000
-//
-// I don't know whether this is necessary, or needed for VC7.
-//
-#if defined(_MSC_VER) && !defined(_WIN32_WCE) && (_MSC_VER < 1300) && defined(NDEBUG)
-#  pragma comment(linker,"/FILEALIGN:0x200")
-#endif
-
 //
 // Endianness
 //
@@ -43,14 +19,16 @@
 // of Itanium (IA64) and MIPS.
 //
 #if defined(__i386)  || defined(_M_IX86)    || defined (__x86_64) || \
+    defined(_M_X64)  || defined(_M_IA64)    || defined(__alpha__) || \
     defined (_M_ARM) || defined(__MIPSEL__) || defined (__ARMEL__) || \
     defined (__BFIN__)
 #   define ICE_LITTLE_ENDIAN
 #elif defined(__sparc) || defined(__sparc__) || defined(__hppa) || \
-      defined(__ppc__) || defined(_ARCH_COM) || defined(__MIPSEB__)
+      defined(__ppc__) || defined(__powerpc) || defined(_ARCH_COM) || \
+      defined(__MIPSEB__)
 #   define ICE_BIG_ENDIAN
 #else
-#    define ICE_LITTLE_ENDIAN
+#    error "Unknown architecture"
 #endif
 
 //
@@ -87,7 +65,7 @@
 #   define ICE_DECLSPEC_IMPORT /**/
 #endif
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1300)
+#if defined(_MSC_VER)
 #   define ICE_DEPRECATED_API __declspec(deprecated)
 #elif defined(__GNUC__)
 #   define ICE_DEPRECATED_API __attribute__((deprecated))
@@ -102,22 +80,6 @@
 #   define ICE_API ICE_DECLSPEC_EXPORT
 #else
 #   define ICE_API ICE_DECLSPEC_IMPORT
-#endif
-
-//
-// For STLport. If we compile in debug mode, we want to use the debug
-// STLport library. This is done by setting _STLP_DEBUG before any
-// STLport header files are included.
-//
-// TODO: figure out why IceE does not compile with _SLTP_DEBUG using
-// the Intel compiler.
-//
-#ifdef _WIN32_WCE
-#  define _STLP_NO_IOSTREAMS
-#else
-#  if !defined(NDEBUG) && !defined(_STLP_DEBUG) && !defined(__INTEL_COMPILER)
-#     define _STLP_DEBUG
-#  endif
 #endif
 
 #if defined(_WIN32)

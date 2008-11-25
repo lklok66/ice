@@ -14,16 +14,6 @@
 #include <IceE/Lock.h>
 #include <IceE/ThreadException.h>
 
-#if defined(_MSC_VER) && (_MSC_VER < 1300)
-//
-// Old versions of the Platform SDK don't have InterlockedCompareExchangePointer
-//
-#   ifndef InterlockedCompareExchangePointer
-#      define InterlockedCompareExchangePointer(Destination, ExChange, Comperand) \
-          InterlockedCompareExchange(Destination, ExChange, Comperand)
-#   endif
-#endif
-
 namespace IceUtil
 {
 

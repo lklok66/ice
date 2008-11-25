@@ -240,24 +240,12 @@ IceUtil::stringToWstring(const string& str)
 }
 
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1300)
+#if defined(_MSC_VER)
+
 //
 // See comments in IceUtil/Unicode.h
 //
 
-#   if _MSC_VER < 1400
-string
-IceUtil::wstringToString(const basic_string<__wchar_t>& str)
-{
-    return wstringToString(*reinterpret_cast<const wstring*>(&str));
-}
-
-basic_string<__wchar_t>
-IceUtil::stringToNativeWstring(const string& str)
-{
-    return reinterpret_cast<basic_string<__wchar_t>& >(stringToWstring(str));
-}
-#   else
 string
 IceUtil::wstringToString(const basic_string<unsigned short>& str)
 {
@@ -270,7 +258,6 @@ IceUtil::stringToTypedefWstring(const string& str)
     return reinterpret_cast<basic_string<unsigned short>& >(stringToWstring(str));
 }
 
-#   endif
 #endif
 
 #endif

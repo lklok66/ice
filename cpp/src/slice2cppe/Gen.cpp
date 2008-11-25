@@ -1239,17 +1239,8 @@ Slice::Gen::TypesVisitor::visitConst(const ConstPtr& p)
 void
 Slice::Gen::TypesVisitor::emitUpcall(const ExceptionPtr& base, const string& call, bool isLocal)
 {
-    C.zeroIndent();
-    C << nl << "#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug"; // COMPILERBUG
-    C.restoreIndent();
-    C << nl << (base ? fixKwd(base->name()) : string(isLocal ? "LocalException" : "UserException")) << call;
-    C.zeroIndent();
-    C << nl << "#else";
-    C.restoreIndent();
-    C << nl << (base ? fixKwd(base->scoped()) : string(isLocal ? "::Ice::LocalException" : "::Ice::UserException")) << call;
-    C.zeroIndent();
-    C << nl << "#endif";
-    C.restoreIndent();
+    C << nl << (base ? fixKwd(base->scoped()) : string(isLocal ? "::Ice::LocalException" : "::Ice::UserException"))
+      << call;
 }
 
 Slice::Gen::ProxyDeclVisitor::ProxyDeclVisitor(Output& h, Output& c, const string& dllExport) :
@@ -1409,18 +1400,7 @@ Slice::Gen::ProxyVisitor::visitClassDefEnd(const ClassDefPtr& p)
 
     H << nl << nl << "::IceInternal::ProxyHandle<" << name << "> ice_context(const ::Ice::Context& __context) const";
     H << sb;
-    H.zeroIndent();
-    H << nl << "#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug"; // COMPILERBUG
-    H.restoreIndent();
-    H << nl << "typedef ::IceProxy::Ice::Object _Base;";
-    H << nl << "return dynamic_cast<" << name << "*>(_Base::ice_context(__context).get());";
-    H.zeroIndent();
-    H << nl << "#else";
-    H.restoreIndent();
     H << nl << "return dynamic_cast<" << name << "*>(::IceProxy::Ice::Object::ice_context(__context).get());";
-    H.zeroIndent();
-    H << nl << "#endif";
-    H.restoreIndent();
     H << eb;
 
     //
@@ -1429,18 +1409,7 @@ Slice::Gen::ProxyVisitor::visitClassDefEnd(const ClassDefPtr& p)
 
     H << nl << nl << "::IceInternal::ProxyHandle<" << name << "> ice_secure(bool __secure) const";
     H << sb;
-    H.zeroIndent();
-    H << nl << "#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug"; // COMPILERBUG
-    H.restoreIndent();
-    H << nl << "typedef ::IceProxy::Ice::Object _Base;";
-    H << nl << "return dynamic_cast<" << name << "*>(_Base::ice_secure(__secure).get());";
-    H.zeroIndent();
-    H << nl << "#else";
-    H.restoreIndent();
     H << nl << "return dynamic_cast<" << name << "*>(::IceProxy::Ice::Object::ice_secure(__secure).get());";
-    H.zeroIndent();
-    H << nl << "#endif";
-    H.restoreIndent();
     H << eb;
 
 
@@ -1450,18 +1419,7 @@ Slice::Gen::ProxyVisitor::visitClassDefEnd(const ClassDefPtr& p)
     H.restoreIndent();
     H << nl << "::IceInternal::ProxyHandle<" << name << "> ice_router(const ::Ice::RouterPrx& __router) const";
     H << sb;
-    H.zeroIndent();
-    H << nl << "#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug"; // COMPILERBUG
-    H.restoreIndent();
-    H << nl << "typedef ::IceProxy::Ice::Object _Base;";
-    H << nl << "return dynamic_cast<" << name << "*>(_Base::ice_router(__router).get());";
-    H.zeroIndent();
-    H << nl << "#else";
-    H.restoreIndent();
     H << nl << "return dynamic_cast<" << name << "*>(::IceProxy::Ice::Object::ice_router(__router).get());";
-    H.zeroIndent();
-    H << nl << "#endif";
-    H.restoreIndent();
     H << eb;
     H.zeroIndent();
     H << nl << "#endif // ICEE_HAS_ROUTER";
@@ -1473,34 +1431,12 @@ Slice::Gen::ProxyVisitor::visitClassDefEnd(const ClassDefPtr& p)
     H.restoreIndent();
     H << nl << "::IceInternal::ProxyHandle<" << name << "> ice_locator(const ::Ice::LocatorPrx& __locator) const";
     H << sb;
-    H.zeroIndent();
-    H << nl << "#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug"; // COMPILERBUG
-    H.restoreIndent();
-    H << nl << "typedef ::IceProxy::Ice::Object _Base;";
-    H << nl << "return dynamic_cast<" << name << "*>(_Base::ice_locator(__locator).get());";
-    H.zeroIndent();
-    H << nl << "#else";
-    H.restoreIndent();
     H << nl << "return dynamic_cast<" << name << "*>(::IceProxy::Ice::Object::ice_locator(__locator).get());";
-    H.zeroIndent();
-    H << nl << "#endif";
-    H.restoreIndent();
     H << eb;
 
     H << nl << nl << "::IceInternal::ProxyHandle<" << name << "> ice_adapterId(const std::string& __id) const";
     H << sb;
-    H.zeroIndent();
-    H << nl << "#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug"; // COMPILERBUG
-    H.restoreIndent();
-    H << nl << "typedef ::IceProxy::Ice::Object _Base;";
-    H << nl << "return dynamic_cast<" << name << "*>(_Base::ice_adapterId(__id).get());";
-    H.zeroIndent();
-    H << nl << "#else";
-    H.restoreIndent();
     H << nl << "return dynamic_cast<" << name << "*>(::IceProxy::Ice::Object::ice_adapterId(__id).get());";
-    H.zeroIndent();
-    H << nl << "#endif";
-    H.restoreIndent();
     H << eb;
     H.zeroIndent();
     H << nl << "#endif // ICEE_HAS_LOCATOR";
@@ -1508,98 +1444,32 @@ Slice::Gen::ProxyVisitor::visitClassDefEnd(const ClassDefPtr& p)
 
     H << nl << nl << "::IceInternal::ProxyHandle<" << name << "> ice_twoway() const";
     H << sb;
-    H.zeroIndent();
-    H << nl << "#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug"; // COMPILERBUG
-    H.restoreIndent();
-    H << nl << "typedef ::IceProxy::Ice::Object _Base;";
-    H << nl << "return dynamic_cast<" << name << "*>(_Base::ice_twoway().get());";
-    H.zeroIndent();
-    H << nl << "#else";
-    H.restoreIndent();
     H << nl << "return dynamic_cast<" << name << "*>(::IceProxy::Ice::Object::ice_twoway().get());";
-    H.zeroIndent();
-    H << nl << "#endif";
-    H.restoreIndent();
     H << eb;
 
     H << nl << nl << "::IceInternal::ProxyHandle<" << name << "> ice_oneway() const";
     H << sb;
-    H.zeroIndent();
-    H << nl << "#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug"; // COMPILERBUG
-    H.restoreIndent();
-    H << nl << "typedef ::IceProxy::Ice::Object _Base;";
-    H << nl << "return dynamic_cast<" << name << "*>(_Base::ice_oneway().get());";
-    H.zeroIndent();
-    H << nl << "#else";
-    H.restoreIndent();
     H << nl << "return dynamic_cast<" << name << "*>(::IceProxy::Ice::Object::ice_oneway().get());";
-    H.zeroIndent();
-    H << nl << "#endif";
-    H.restoreIndent();
     H << eb;
 
     H << nl << nl << "::IceInternal::ProxyHandle<" << name << "> ice_batchOneway() const";
     H << sb;
-    H.zeroIndent();
-    H << nl << "#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug"; // COMPILERBUG
-    H.restoreIndent();
-    H << nl << "typedef ::IceProxy::Ice::Object _Base;";
-    H << nl << "return dynamic_cast<" << name << "*>(_Base::ice_batchOneway().get());";
-    H.zeroIndent();
-    H << nl << "#else";
-    H.restoreIndent();
     H << nl << "return dynamic_cast<" << name << "*>(::IceProxy::Ice::Object::ice_batchOneway().get());";
-    H.zeroIndent();
-    H << nl << "#endif";
-    H.restoreIndent();
     H << eb;
 
     H << nl << nl << "::IceInternal::ProxyHandle<" << name << "> ice_datagram() const";
     H << sb;
-    H.zeroIndent();
-    H << nl << "#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug"; // COMPILERBUG
-    H.restoreIndent();
-    H << nl << "typedef ::IceProxy::Ice::Object _Base;";
-    H << nl << "return dynamic_cast<" << name << "*>(_Base::ice_datagram().get());";
-    H.zeroIndent();
-    H << nl << "#else";
-    H.restoreIndent();
     H << nl << "return dynamic_cast<" << name << "*>(::IceProxy::Ice::Object::ice_datagram().get());";
-    H.zeroIndent();
-    H << nl << "#endif";
-    H.restoreIndent();
     H << eb;
 
     H << nl << nl << "::IceInternal::ProxyHandle<" << name << "> ice_batchDatagram() const";
     H << sb;
-    H.zeroIndent();
-    H << nl << "#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug"; // COMPILERBUG
-    H.restoreIndent();
-    H << nl << "typedef ::IceProxy::Ice::Object _Base;";
-    H << nl << "return dynamic_cast<" << name << "*>(_Base::ice_batchDatagram().get());";
-    H.zeroIndent();
-    H << nl << "#else";
-    H.restoreIndent();
     H << nl << "return dynamic_cast<" << name << "*>(::IceProxy::Ice::Object::ice_batchDatagram().get());";
-    H.zeroIndent();
-    H << nl << "#endif";
-    H.restoreIndent();
     H << eb;
 
     H << nl << nl << "::IceInternal::ProxyHandle<" << name << "> ice_timeout(int __timeout) const";
     H << sb;
-    H.zeroIndent();
-    H << nl << "#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug"; // COMPILERBUG
-    H.restoreIndent();
-    H << nl << "typedef ::IceProxy::Ice::Object _Base;";
-    H << nl << "return dynamic_cast<" << name << "*>(_Base::ice_timeout(__timeout).get());";
-    H.zeroIndent();
-    H << nl << "#else";
-    H.restoreIndent();
     H << nl << "return dynamic_cast<" << name << "*>(::IceProxy::Ice::Object::ice_timeout(__timeout).get());";
-    H.zeroIndent();
-    H << nl << "#endif";
-    H.restoreIndent();
     H << eb;
 
     H << nl << nl << _dllExport << "static const ::std::string& ice_staticId();";
@@ -2735,18 +2605,8 @@ Slice::Gen::ObjectVisitor::emitVirtualBaseInitializers(const ClassDefPtr& p)
     }
     upcall += ")";
 
-    C.zeroIndent();
-    C << nl << "#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug";
-    C.restoreIndent();
-    C << nl << fixKwd(p->name()) << upcall;
-    C.zeroIndent();
-    C << nl << "#else";
-    C.restoreIndent();
     C << nl << fixKwd(p->scoped()) << upcall;
-    C.zeroIndent();
-    C << nl << "#endif";
     C << nl;
-    C.restoreIndent();
 
     return true;
 }
@@ -2808,17 +2668,7 @@ Slice::Gen::ObjectVisitor::emitOneShotConstructor(const ClassDefPtr& p)
 void
 Slice::Gen::ObjectVisitor::emitUpcall(const ClassDefPtr& base, const string& call)
 {
-    C.zeroIndent();
-    C << nl << "#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug"; // COMPILERBUG
-    C.restoreIndent();
-    C << nl << (base ? fixKwd(base->name()) : string("Object")) << call;
-    C.zeroIndent();
-    C << nl << "#else";
-    C.restoreIndent();
     C << nl << (base ? fixKwd(base->scoped()) : string("::Ice::Object")) << call;
-    C.zeroIndent();
-    C << nl << "#endif";
-    C.restoreIndent();
 }
 
 Slice::Gen::AsyncVisitor::AsyncVisitor(Output& h, Output& c, const string& dllExport) :

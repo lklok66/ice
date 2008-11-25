@@ -32,20 +32,12 @@ Ice::LocalException::~LocalException() throw()
 }
 
 Ice::InitializationException::InitializationException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line)
-#else
     ::Ice::LocalException(__file, __line)
-#endif
 {
 }
 
 Ice::InitializationException::InitializationException(const char* __file, int __line, const ::std::string& __reason) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line),
-#else
     ::Ice::LocalException(__file, __line),
-#endif
     reason(__reason)
 {
 }
@@ -87,20 +79,12 @@ Ice::InitializationException::ice_throw() const
 }
 
 Ice::AlreadyRegisteredException::AlreadyRegisteredException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line)
-#else
     ::Ice::LocalException(__file, __line)
-#endif
 {
 }
 
 Ice::AlreadyRegisteredException::AlreadyRegisteredException(const char* __file, int __line, const ::std::string& __kindOfObject, const ::std::string& __id) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line),
-#else
     ::Ice::LocalException(__file, __line),
-#endif
     kindOfObject(__kindOfObject),
     id(__id)
 {
@@ -131,20 +115,12 @@ Ice::AlreadyRegisteredException::ice_throw() const
 }
 
 Ice::NotRegisteredException::NotRegisteredException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line)
-#else
     ::Ice::LocalException(__file, __line)
-#endif
 {
 }
 
 Ice::NotRegisteredException::NotRegisteredException(const char* __file, int __line, const ::std::string& __kindOfObject, const ::std::string& __id) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line),
-#else
     ::Ice::LocalException(__file, __line),
-#endif
     kindOfObject(__kindOfObject),
     id(__id)
 {
@@ -175,20 +151,12 @@ Ice::NotRegisteredException::ice_throw() const
 }
 
 Ice::TwowayOnlyException::TwowayOnlyException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line)
-#else
     ::Ice::LocalException(__file, __line)
-#endif
 {
 }
 
 Ice::TwowayOnlyException::TwowayOnlyException(const char* __file, int __line, const ::std::string& __operation) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line),
-#else
     ::Ice::LocalException(__file, __line),
-#endif
     operation(__operation)
 {
 }
@@ -218,11 +186,7 @@ Ice::TwowayOnlyException::ice_throw() const
 }
 
 Ice::CloneNotImplementedException::CloneNotImplementedException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line)
-#else
     ::Ice::LocalException(__file, __line)
-#endif
 {
 }
 
@@ -251,20 +215,12 @@ Ice::CloneNotImplementedException::ice_throw() const
 }
 
 Ice::UnknownException::UnknownException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line)
-#else
     ::Ice::LocalException(__file, __line)
-#endif
 {
 }
 
 Ice::UnknownException::UnknownException(const char* __file, int __line, const ::std::string& __unknown) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line),
-#else
     ::Ice::LocalException(__file, __line),
-#endif
     unknown(__unknown)
 {
 }
@@ -294,20 +250,12 @@ Ice::UnknownException::ice_throw() const
 }
 
 Ice::UnknownLocalException::UnknownLocalException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    UnknownException(__file, __line)
-#else
     ::Ice::UnknownException(__file, __line)
-#endif
 {
 }
 
 Ice::UnknownLocalException::UnknownLocalException(const char* __file, int __line, const ::std::string& __unknown) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    UnknownException(__file, __line, __unknown)
-#else
     ::Ice::UnknownException(__file, __line, __unknown)
-#endif
 {
 }
 
@@ -336,20 +284,12 @@ Ice::UnknownLocalException::ice_throw() const
 }
 
 Ice::UnknownUserException::UnknownUserException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    UnknownException(__file, __line)
-#else
     ::Ice::UnknownException(__file, __line)
-#endif
 {
 }
 
 Ice::UnknownUserException::UnknownUserException(const char* __file, int __line, const ::std::string& __unknown) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    UnknownException(__file, __line, __unknown)
-#else
     ::Ice::UnknownException(__file, __line, __unknown)
-#endif
 {
 }
 
@@ -378,11 +318,7 @@ Ice::UnknownUserException::ice_throw() const
 }
 
 Ice::VersionMismatchException::VersionMismatchException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line)
-#else
     ::Ice::LocalException(__file, __line)
-#endif
 {
 }
 
@@ -411,11 +347,7 @@ Ice::VersionMismatchException::ice_throw() const
 }
 
 Ice::CommunicatorDestroyedException::CommunicatorDestroyedException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line)
-#else
     ::Ice::LocalException(__file, __line)
-#endif
 {
 }
 
@@ -446,20 +378,12 @@ Ice::CommunicatorDestroyedException::ice_throw() const
 #ifndef ICEE_PURE_CLIENT
 
 Ice::ObjectAdapterDeactivatedException::ObjectAdapterDeactivatedException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line)
-#else
     ::Ice::LocalException(__file, __line)
-#endif
 {
 }
 
 Ice::ObjectAdapterDeactivatedException::ObjectAdapterDeactivatedException(const char* __file, int __line, const ::std::string& __name) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line),
-#else
     ::Ice::LocalException(__file, __line),
-#endif
     name(__name)
 {
 }
@@ -499,20 +423,12 @@ Ice::ObjectAdapterDeactivatedException::toString() const
 }
 
 Ice::ObjectAdapterIdInUseException::ObjectAdapterIdInUseException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line)
-#else
     ::Ice::LocalException(__file, __line)
-#endif
 {
 }
 
 Ice::ObjectAdapterIdInUseException::ObjectAdapterIdInUseException(const char* __file, int __line, const ::std::string& __id) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line),
-#else
     ::Ice::LocalException(__file, __line),
-#endif
     id(__id)
 {
 }
@@ -558,20 +474,12 @@ Ice::ObjectAdapterIdInUseException::toString() const
 #endif // ICEE_PURE_CLIENT
 
 Ice::NoEndpointException::NoEndpointException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line)
-#else
     ::Ice::LocalException(__file, __line)
-#endif
 {
 }
 
 Ice::NoEndpointException::NoEndpointException(const char* __file, int __line, const ::std::string& __proxy) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line),
-#else
     ::Ice::LocalException(__file, __line),
-#endif
     proxy(__proxy)
 {
 }
@@ -601,20 +509,12 @@ Ice::NoEndpointException::ice_throw() const
 }
 
 Ice::EndpointParseException::EndpointParseException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line)
-#else
     ::Ice::LocalException(__file, __line)
-#endif
 {
 }
 
 Ice::EndpointParseException::EndpointParseException(const char* __file, int __line, const ::std::string& __str) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line),
-#else
     ::Ice::LocalException(__file, __line),
-#endif
     str(__str)
 {
 }
@@ -644,20 +544,12 @@ Ice::EndpointParseException::ice_throw() const
 }
 
 Ice::IdentityParseException::IdentityParseException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line)
-#else
     ::Ice::LocalException(__file, __line)
-#endif
 {
 }
 
 Ice::IdentityParseException::IdentityParseException(const char* __file, int __line, const ::std::string& __str) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line),
-#else
     ::Ice::LocalException(__file, __line),
-#endif
     str(__str)
 {
 }
@@ -687,20 +579,12 @@ Ice::IdentityParseException::ice_throw() const
 }
 
 Ice::ProxyParseException::ProxyParseException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line)
-#else
     ::Ice::LocalException(__file, __line)
-#endif
 {
 }
 
 Ice::ProxyParseException::ProxyParseException(const char* __file, int __line, const ::std::string& __str) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line),
-#else
     ::Ice::LocalException(__file, __line),
-#endif
     str(__str)
 {
 }
@@ -730,20 +614,12 @@ Ice::ProxyParseException::ice_throw() const
 }
 
 Ice::IllegalIdentityException::IllegalIdentityException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line)
-#else
     ::Ice::LocalException(__file, __line)
-#endif
 {
 }
 
 Ice::IllegalIdentityException::IllegalIdentityException(const char* __file, int __line, const ::Ice::Identity& __id) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line),
-#else
     ::Ice::LocalException(__file, __line),
-#endif
     id(__id)
 {
 }
@@ -773,20 +649,12 @@ Ice::IllegalIdentityException::ice_throw() const
 }
 
 Ice::RequestFailedException::RequestFailedException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line)
-#else
     ::Ice::LocalException(__file, __line)
-#endif
 {
 }
 
 Ice::RequestFailedException::RequestFailedException(const char* __file, int __line, const ::Ice::Identity& __id, const ::std::string& __facet, const ::std::string& __operation) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line),
-#else
     ::Ice::LocalException(__file, __line),
-#endif
     id(__id),
     facet(__facet),
     operation(__operation)
@@ -818,20 +686,12 @@ Ice::RequestFailedException::ice_throw() const
 }
 
 Ice::ObjectNotExistException::ObjectNotExistException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    RequestFailedException(__file, __line)
-#else
     ::Ice::RequestFailedException(__file, __line)
-#endif
 {
 }
 
 Ice::ObjectNotExistException::ObjectNotExistException(const char* __file, int __line, const ::Ice::Identity& __id, const ::std::string& __facet, const ::std::string& __operation) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    RequestFailedException(__file, __line, __id, __facet, __operation)
-#else
     ::Ice::RequestFailedException(__file, __line, __id, __facet, __operation)
-#endif
 {
 }
 
@@ -860,20 +720,12 @@ Ice::ObjectNotExistException::ice_throw() const
 }
 
 Ice::FacetNotExistException::FacetNotExistException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    RequestFailedException(__file, __line)
-#else
     ::Ice::RequestFailedException(__file, __line)
-#endif
 {
 }
 
 Ice::FacetNotExistException::FacetNotExistException(const char* __file, int __line, const ::Ice::Identity& __id, const ::std::string& __facet, const ::std::string& __operation) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    RequestFailedException(__file, __line, __id, __facet, __operation)
-#else
     ::Ice::RequestFailedException(__file, __line, __id, __facet, __operation)
-#endif
 {
 }
 
@@ -902,20 +754,12 @@ Ice::FacetNotExistException::ice_throw() const
 }
 
 Ice::OperationNotExistException::OperationNotExistException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    RequestFailedException(__file, __line)
-#else
     ::Ice::RequestFailedException(__file, __line)
-#endif
 {
 }
 
 Ice::OperationNotExistException::OperationNotExistException(const char* __file, int __line, const ::Ice::Identity& __id, const ::std::string& __facet, const ::std::string& __operation) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    RequestFailedException(__file, __line, __id, __facet, __operation)
-#else
     ::Ice::RequestFailedException(__file, __line, __id, __facet, __operation)
-#endif
 {
 }
 
@@ -944,20 +788,12 @@ Ice::OperationNotExistException::ice_throw() const
 }
 
 Ice::SyscallException::SyscallException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line)
-#else
     ::Ice::LocalException(__file, __line)
-#endif
 {
 }
 
 Ice::SyscallException::SyscallException(const char* __file, int __line, ::Ice::Int __error) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line),
-#else
     ::Ice::LocalException(__file, __line),
-#endif
     error(__error)
 {
 }
@@ -987,20 +823,12 @@ Ice::SyscallException::ice_throw() const
 }
 
 Ice::SocketException::SocketException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    SyscallException(__file, __line)
-#else
     ::Ice::SyscallException(__file, __line)
-#endif
 {
 }
 
 Ice::SocketException::SocketException(const char* __file, int __line, ::Ice::Int __error) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    SyscallException(__file, __line, __error)
-#else
     ::Ice::SyscallException(__file, __line, __error)
-#endif
 {
 }
 
@@ -1029,20 +857,12 @@ Ice::SocketException::ice_throw() const
 }
 
 Ice::FileException::FileException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    SyscallException(__file, __line)
-#else
     ::Ice::SyscallException(__file, __line)
-#endif
 {
 }
 
 Ice::FileException::FileException(const char* __file, int __line, ::Ice::Int __error, const ::std::string& __path) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    SyscallException(__file, __line, __error),
-#else
     ::Ice::SyscallException(__file, __line, __error),
-#endif
     path(__path)
 {
 }
@@ -1072,20 +892,12 @@ Ice::FileException::ice_throw() const
 }
 
 Ice::ConnectFailedException::ConnectFailedException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    SocketException(__file, __line)
-#else
     ::Ice::SocketException(__file, __line)
-#endif
 {
 }
 
 Ice::ConnectFailedException::ConnectFailedException(const char* __file, int __line, ::Ice::Int __error) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    SocketException(__file, __line, __error)
-#else
     ::Ice::SocketException(__file, __line, __error)
-#endif
 {
 }
 
@@ -1114,20 +926,12 @@ Ice::ConnectFailedException::ice_throw() const
 }
 
 Ice::ConnectionRefusedException::ConnectionRefusedException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    ConnectFailedException(__file, __line)
-#else
     ::Ice::ConnectFailedException(__file, __line)
-#endif
 {
 }
 
 Ice::ConnectionRefusedException::ConnectionRefusedException(const char* __file, int __line, ::Ice::Int __error) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    ConnectFailedException(__file, __line, __error)
-#else
     ::Ice::ConnectFailedException(__file, __line, __error)
-#endif
 {
 }
 
@@ -1156,20 +960,12 @@ Ice::ConnectionRefusedException::ice_throw() const
 }
 
 Ice::ConnectionLostException::ConnectionLostException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    SocketException(__file, __line)
-#else
     ::Ice::SocketException(__file, __line)
-#endif
 {
 }
 
 Ice::ConnectionLostException::ConnectionLostException(const char* __file, int __line, ::Ice::Int __error) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    SocketException(__file, __line, __error)
-#else
     ::Ice::SocketException(__file, __line, __error)
-#endif
 {
 }
 
@@ -1198,20 +994,12 @@ Ice::ConnectionLostException::ice_throw() const
 }
 
 Ice::DNSException::DNSException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line)
-#else
     ::Ice::LocalException(__file, __line)
-#endif
 {
 }
 
 Ice::DNSException::DNSException(const char* __file, int __line, ::Ice::Int __error, const ::std::string& __host) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line),
-#else
     ::Ice::LocalException(__file, __line),
-#endif
     error(__error),
     host(__host)
 {
@@ -1242,11 +1030,7 @@ Ice::DNSException::ice_throw() const
 }
 
 Ice::TimeoutException::TimeoutException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line)
-#else
     ::Ice::LocalException(__file, __line)
-#endif
 {
 }
 
@@ -1275,11 +1059,7 @@ Ice::TimeoutException::ice_throw() const
 }
 
 Ice::ConnectTimeoutException::ConnectTimeoutException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    TimeoutException(__file, __line)
-#else
     ::Ice::TimeoutException(__file, __line)
-#endif
 {
 }
 
@@ -1308,11 +1088,7 @@ Ice::ConnectTimeoutException::ice_throw() const
 }
 
 Ice::CloseTimeoutException::CloseTimeoutException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    TimeoutException(__file, __line)
-#else
     ::Ice::TimeoutException(__file, __line)
-#endif
 {
 }
 
@@ -1341,20 +1117,12 @@ Ice::CloseTimeoutException::ice_throw() const
 }
 
 Ice::ProtocolException::ProtocolException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line)
-#else
     ::Ice::LocalException(__file, __line)
-#endif
 {
 }
 
 Ice::ProtocolException::ProtocolException(const char* __file, int __line, const ::std::string& __reason) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line),
-#else
     ::Ice::LocalException(__file, __line),
-#endif
     reason(__reason)
 {
 }
@@ -1384,11 +1152,7 @@ Ice::ProtocolException::ice_throw() const
 }
 
 Ice::CloseConnectionException::CloseConnectionException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    ProtocolException(__file, __line)
-#else
     ::Ice::ProtocolException(__file, __line)
-#endif
 {
 }
 
@@ -1417,11 +1181,7 @@ Ice::CloseConnectionException::ice_throw() const
 }
 
 Ice::ForcedCloseConnectionException::ForcedCloseConnectionException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    ProtocolException(__file, __line)
-#else
     ::Ice::ProtocolException(__file, __line)
-#endif
 {
 }
 
@@ -1478,20 +1238,12 @@ Ice::throwUnsupportedEncodingException(const char* file, int line, Int badMajor,
 }
 
 Ice::MarshalException::MarshalException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    ProtocolException(__file, __line)
-#else
     ::Ice::ProtocolException(__file, __line)
-#endif
 {
 }
 
 Ice::MarshalException::MarshalException(const char* __file, int __line, const ::std::string& __reason) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    ProtocolException(__file, __line, __reason)
-#else
     ::Ice::ProtocolException(__file, __line, __reason)
-#endif
 {
 }
 
@@ -1520,20 +1272,12 @@ Ice::MarshalException::ice_throw() const
 }
 
 Ice::MemoryLimitException::MemoryLimitException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    MarshalException(__file, __line)
-#else
     ::Ice::MarshalException(__file, __line)
-#endif
 {
 }
 
 Ice::MemoryLimitException::MemoryLimitException(const char* __file, int __line, const ::std::string& __reason) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    MarshalException(__file, __line, __reason)
-#else
     ::Ice::MarshalException(__file, __line, __reason)
-#endif
 {
 }
 
@@ -1599,20 +1343,12 @@ IceInternal::Ex::throwUOE(const string& expectedType, const string& actualType)
 }
 
 Ice::FeatureNotSupportedException::FeatureNotSupportedException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line)
-#else
     ::Ice::LocalException(__file, __line)
-#endif
 {
 }
 
 Ice::FeatureNotSupportedException::FeatureNotSupportedException(const char* __file, int __line, const string& __unsupportedFeature) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line),
-#else
     ::Ice::LocalException(__file, __line),
-#endif
     unsupportedFeature(__unsupportedFeature)
 {
 }
@@ -1642,11 +1378,7 @@ Ice::FeatureNotSupportedException::ice_throw() const
 }
 
 Ice::FixedProxyException::FixedProxyException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    LocalException(__file, __line)
-#else
     ::Ice::LocalException(__file, __line)
-#endif
 {
 }
 
@@ -1676,20 +1408,12 @@ Ice::FixedProxyException::ice_throw() const
 
 #ifdef ICEE_HAS_WSTRING
 Ice::StringConversionException::StringConversionException(const char* __file, int __line) :
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    MarshalException(__file, __line)
-#else
     ::Ice::MarshalException(__file, __line)
-#endif
 {
 }
 
 Ice::StringConversionException::StringConversionException(const char* __file, int __line, const ::std::string& __reason) :  
-#if defined(_MSC_VER) && (_MSC_VER < 1300) // VC++ 6 compiler bug
-    MarshalException(__file, __line, __reason)
-#else
     ::Ice::MarshalException(__file, __line, __reason)
-#endif
 {
 }
 

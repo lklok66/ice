@@ -16,7 +16,7 @@
 namespace IceUtil
 {
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1300)
+#if defined(_MSC_VER)
 
 //
 // With Visual C++ 7.x, wchar_t is either a typedef unsigned short or a 
@@ -32,38 +32,20 @@ namespace IceUtil
 //
 
 #   if defined(_NATIVE_WCHAR_T_DEFINED)
+
 ICE_API std::string wstringToString(const std::wstring&);
 
-#      if _MSC_VER >= 1400
 //
 // Building or using with VC8
 //
 ICE_API std::wstring stringToWstring(const std::string&);
 ICE_API std::string wstringToString(const std::basic_string<unsigned short>&);
 ICE_API std::basic_string<unsigned short> stringToTypedefWstring(const std::string&);
-#     else
-//
-// Using a VC7.x build with the non-default /Zc
-//
-ICE_API std::wstring stringToNativeWstring(const std::string&);
-inline std::wstring 
-stringToWstring(const std::string& str)
-{
-    return stringToNativeWstring(str);
-}
-#     endif
 
 #   else
+
 ICE_API std::string wstringToString(const std::wstring&);
 
-#      if _MSC_VER < 1400
-//
-// Building or using with VC7.x
-//
-ICE_API std::wstring stringToWstring(const std::string&);
-ICE_API std::string wstringToString(const std::basic_string<__wchar_t>&);
-ICE_API std::basic_string<__wchar_t> stringToNativeWstring(const std::string&);
-#      else
 //
 // Using a VC8.x build the non-default /Zc
 //
@@ -73,7 +55,7 @@ stringToWstring(const std::string& str)
 {
     return stringToTypedefWstring(str);
 }
-#      endif
+
 #   endif
 
 #else
