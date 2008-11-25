@@ -31,11 +31,13 @@ namespace IceInternal
 class LocalExceptionWrapper;
 
 class ConnectRequestHandler : public RequestHandler, 
+#ifdef ICEE_HAS_AMI
 #ifdef ICEE_HAS_LOCATOR
                               public LocatorInfo::GetEndpointsCallback,
 #endif
 #ifdef ICEE_HAS_ROUTER
                               public RouterInfo::GetClientEndpointsCallback,
+#endif
 #endif
                               public IceUtil::Monitor<IceUtil::Mutex>
 {
@@ -75,26 +77,30 @@ public:
     void flushRequestsWithException(const Ice::LocalException&);
     void flushRequestsWithException(const LocalExceptionWrapper&);
 
+#ifdef ICEE_HAS_AMI
 #ifdef ICEE_HAS_ROUTER
     //
     // Called by RouterInfo.
     //
-    void routerInfoEndpoints(const std::vector<EndpointPtr>&);
-    void routerInfoException(const Ice::LocalException& ex)
+    virtual void routerInfoEndpoints(const std::vector<EndpointPtr>&);
+    virtual void routerInfoException(const Ice::LocalException& ex)
     {
         setException(ex);
     }
-    void routerInfoAddedProxy();
+    virtual void routerInfoAddedProxy();
 #endif
 
 #ifdef ICEE_HAS_LOCATOR
     //
     // Called by LocatorInfo.
     //
-    void locatorInfoEndpoints(const std::vector<EndpointPtr>&, bool);
-    void locatorInfoWellKnownObjectEndpoints(const std::vector<EndpointPtr>&, bool);
-    void locatorInfoException(const Ice::LocalException&);
+    virtual void locatorInfoEndpoints(const std::vector<EndpointPtr>&, bool);
+    virtual void locatorInfoException(const Ice::LocalException& ex)
+    {
+        setException(ex);
+    }
 #endif
+#endif // ICEE_HAS_AMI
 
 private:
 
@@ -116,7 +122,8 @@ private:
 
     ReferencePtr _reference;
     Ice::ObjectPrx _proxy;
-#ifdef ICEE_HAS_LOCATOR
+
+#if defined(ICEE_HAS_AMI) && defined(ICEE_HAS_LOCATOR)
     bool _locatorInfoEndpoints;
     bool _locatorInfoCachedEndpoints;
 #endif

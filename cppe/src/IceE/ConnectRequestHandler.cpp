@@ -108,7 +108,7 @@ private:
 ConnectRequestHandler::ConnectRequestHandler(const ReferencePtr& ref, const Ice::ObjectPrx& proxy) :
     _reference(ref),
     _proxy(proxy),
-#ifdef ICEE_HAS_LOCATOR
+#if defined(ICEE_HAS_AMI) && defined(ICEE_HAS_LOCATOR)
     _locatorInfoEndpoints(false),
     _locatorInfoCachedEndpoints(false),
 #endif
@@ -313,33 +313,31 @@ ConnectRequestHandler::getConnection(bool waitInit)
         //
         // Wait for the connection establishment to complete or fail.
         //
-#if !defined(ICEE_HAS_AMI)
-        while(true)
-        {
-            Lock sync(*this);
-            while(!_initialized && !_exception.get() && !_connect)
-            {
-                wait();
-            }
-
-            if(_connect)
-            {
-                _connect = false;
-                sync.release();
-                _reference->getConnection(this);
-            }
-            else if(_initialized || _exception.get())
-            {
-                break;
-            }
-        }
-#else
         Lock sync(*this);
+#if !defined(ICEE_HAS_AMI)
+        if(_connect)
+        {
+            //
+            // If there's no AMI support, we establish the connection synchronously
+            // from this waiting user thread.
+            //
+            _connect = false;
+            sync.release();
+            try
+            {
+                setConnection(_reference->getConnection());
+            }
+            catch(const Ice::LocalException& ex)
+            {
+                setException(ex);
+            }
+            sync.acquire();
+        }
+#endif
         while(!_initialized && !_exception.get())
         {
             wait();
         }
-#endif
     }
 
     if(_exception.get())
@@ -360,9 +358,7 @@ ConnectRequestHandler::setConnection(const Ice::ConnectionIPtr& connection)
     {
         Lock sync(*this);
         assert(!_exception.get() && !_connection);
-#if defined(ICEE_HAS_AMI) || defined(ICEE_HAS_BATCH)
         assert(_updateRequestHandler || _requests.empty());
-#endif        
         _connection = connection;
     }
 
@@ -384,10 +380,18 @@ ConnectRequestHandler::setConnection(const Ice::ConnectionIPtr& connection)
     // If this proxy is for a non-local object, and we are using a router, then
     // add this proxy to the router info object.
     //
+#ifdef ICEE_HAS_AMI
     if(ri && !ri->addProxy(_proxy, this))
     {
         return; // The request handler will be initialized once addProxy returns.
     }
+#else
+    if(ri)
+    {
+        ri->addProxy(_proxy);
+    }
+#endif
+
 #endif
 
     //
@@ -399,7 +403,7 @@ ConnectRequestHandler::setConnection(const Ice::ConnectionIPtr& connection)
 void
 ConnectRequestHandler::setException(const Ice::LocalException& ex)
 {
-#ifdef ICEE_HAS_LOCATOR
+#if defined(ICEE_HAS_AMI) && defined(ICEE_HAS_LOCATOR)
     if(_locatorInfoEndpoints && !dynamic_cast<const Ice::NoEndpointException*>(&ex))
     {
         assert(_reference->getLocatorInfo());
@@ -415,18 +419,7 @@ ConnectRequestHandler::setException(const Ice::LocalException& ex)
                     << "removing endpoints from cache and trying one more time\n" << ex.toString();
             }
 
-            //
-            // If there's no AMI support, we can't retry directly from this thread as the retry
-            // might block calling on the locator. Instead we set the _connect flag and notify a
-            // waiting user thread to perform the connection retry.
-            // 
-#ifndef ICEE_HAS_AMI
-            Lock sync(*this);
-            _connect = true;
-            notifyAll();
-#else
             dynamic_cast<RoutableReference*>(_reference.get())->getConnectionNoRouterInfo(this); // Retry.
-#endif
             return;
         }
     }
@@ -434,11 +427,9 @@ ConnectRequestHandler::setException(const Ice::LocalException& ex)
 
     Lock sync(*this);
     assert(!_initialized && !_exception.get());
+    assert(_updateRequestHandler || _requests.empty());
     _exception.reset(dynamic_cast<Ice::LocalException*>(ex.ice_clone()));
     _proxy = 0; // Break cyclic reference count.
-
-#if defined(ICEE_HAS_AMI) || defined(ICEE_HAS_BATCH)
-    assert(_updateRequestHandler || _requests.empty());
 
     //
     // If some requests were queued, we notify them of the failure. This is done from a thread
@@ -449,12 +440,10 @@ ConnectRequestHandler::setException(const Ice::LocalException& ex)
     {
         _reference->getInstance()->clientThreadPool()->execute(new FlushRequestsWithException(this, ex));
     }
-#endif
 
     notifyAll();
 }
 
-#if defined(ICEE_HAS_AMI) || defined(ICEE_HAS_BATCH)
 void
 ConnectRequestHandler::flushRequestsWithException(const Ice::LocalException& ex)
 {
@@ -510,9 +499,8 @@ ConnectRequestHandler::flushRequestsWithException(const LocalExceptionWrapper& e
     }
     _requests.clear();
 }
-#endif
 
-#ifdef ICEE_HAS_ROUTER
+#if defined(ICEE_HAS_AMI) && defined(ICEE_HAS_ROUTER)
 void
 ConnectRequestHandler::routerInfoEndpoints(const vector<EndpointPtr>& endpoints)
 {
@@ -540,7 +528,7 @@ ConnectRequestHandler::routerInfoAddedProxy()
 }
 #endif
 
-#ifdef ICEE_HAS_LOCATOR
+#if defined(ICEE_HAS_AMI) && defined(ICEE_HAS_LOCATOR)
 void
 ConnectRequestHandler::locatorInfoEndpoints(const vector<EndpointPtr>& endpoints, bool cached)
 {
@@ -563,12 +551,6 @@ ConnectRequestHandler::locatorInfoEndpoints(const vector<EndpointPtr>& endpoints
     vector<EndpointPtr> endpts = endpoints;
     ref->applyOverrides(endpts);
     ref->createConnection(endpts, this);
-}
-
-void
-ConnectRequestHandler::locatorInfoException(const Ice::LocalException& ex)
-{
-    setException(ex);
 }
 #endif
 
@@ -624,7 +606,6 @@ ConnectRequestHandler::flushRequests()
     }
 
 
-#if defined(ICEE_HAS_AMI) || defined(ICEE_HAS_BATCH)
 #ifdef ICEE_HAS_AMI
     vector<OutgoingAsyncMessageCallbackPtr> sentCallbacks;
 #endif
@@ -707,7 +688,6 @@ ConnectRequestHandler::flushRequests()
         InstancePtr instance = _reference->getInstance();
         instance->clientThreadPool()->execute(new FlushSentRequests(instance, sentCallbacks));
     }
-#endif
 #endif
 
     //

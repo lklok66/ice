@@ -114,7 +114,7 @@ public:
     //
     // Get a suitable connection for this reference.
     //
-#if !defined(ICEE_HAS_AMI) && !defined(ICEE_HAS_BATCH)
+#ifndef ICEE_HAS_AMI
     virtual Ice::ConnectionIPtr getConnection() const = 0;
 #else
     virtual void getConnection(const ConnectRequestHandlerPtr&) const = 0;
@@ -177,7 +177,7 @@ public:
     virtual void streamWrite(BasicStream*) const;
     virtual std::string toString() const;
 
-#if !defined(ICEE_HAS_AMI) && !defined(ICEE_HAS_BATCH)
+#ifndef ICEE_HAS_AMI
     virtual Ice::ConnectionIPtr getConnection() const;
 #else
     virtual void getConnection(const ConnectRequestHandlerPtr&) const;
@@ -243,7 +243,7 @@ public:
 
     virtual ReferencePtr clone() const;
 
-#if !defined(ICEE_HAS_AMI) && !defined(ICEE_HAS_BATCH)
+#ifndef ICEE_HAS_AMI
     virtual Ice::ConnectionIPtr getConnection() const;
     Ice::ConnectionIPtr createConnection(const std::vector<EndpointPtr>&) const;
 #else

@@ -275,7 +275,7 @@ Ice::ObjectAdapter::waitForDeactivate()
         // Wait for deactivation of the adapter itself, and for
         // the return of all direct method calls using this adapter.
         //
-        while(!_deactivated || _directCount > 0)
+        while(!_deactivated)
         {
             wait();
         }
@@ -610,33 +610,6 @@ Ice::ObjectAdapter::flushBatchRequests()
 }
 #endif
 
-void
-Ice::ObjectAdapter::incDirectCount()
-{
-    IceUtil::Monitor<IceUtil::RecMutex>::Lock sync(*this);
- 
-    checkForDeactivation();
-
-    assert(_directCount >= 0);
-    ++_directCount;
-}
-
-void
-Ice::ObjectAdapter::decDirectCount()
-{
-    IceUtil::Monitor<IceUtil::RecMutex>::Lock sync(*this);
-
-    // Not check for deactivation here!
-
-    assert(_instance); // Must not be called after waitForDeactivate().
-
-    assert(_directCount > 0);
-    if(--_directCount == 0)
-    {
-        notifyAll();
-    }    
-}
-
 ServantManagerPtr
 Ice::ObjectAdapter::getServantManager() const
 {
@@ -664,7 +637,6 @@ Ice::ObjectAdapter::ObjectAdapter(const InstancePtr& instance, const Communicato
     _id(instance->initializationData().properties->getProperty(name + ".AdapterId")),
     _replicaGroupId(instance->initializationData().properties->getProperty(name + ".ReplicaGroupId")),
 #endif
-    _directCount(0),
     _waitForActivate(false),
     _destroying(false),
     _destroyed(false),
@@ -833,7 +805,6 @@ Ice::ObjectAdapter::~ObjectAdapter()
         //assert(!_servantManager); // We don't clear this reference, it needs to be immutable.
         assert(!_communicator);
         assert(_incomingConnectionFactories.empty());
-        assert(_directCount == 0);
         assert(!_waitForActivate);
     }
 }
@@ -919,14 +890,8 @@ Ice::ObjectAdapter::checkIdentity(const Identity& ident)
 }
 
 vector<EndpointPtr>
-Ice::ObjectAdapter::parseEndpoints(const string& str, bool oaEndpoints) const
+Ice::ObjectAdapter::parseEndpoints(const string& endpts, bool oaEndpoints) const
 {
-    string endpts;
-    for(unsigned int i = 0; i < str.length(); ++ i)
-    {
-        endpts += tolower(static_cast<unsigned char>(str[i]));
-    }
-
     string::size_type beg;
     string::size_type end = 0;
 

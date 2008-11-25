@@ -105,7 +105,7 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
             }
             else if(c == 'f')
             {
-                communicator->flushBatchRequests();
+                batchOneway->ice_flushBatchRequests();
             }
 #endif
             else if(c == 's')

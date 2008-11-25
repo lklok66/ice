@@ -13,6 +13,20 @@
 
 using namespace std;
 
+#if defined(ICEE_HAS_BATCH) && defined(ICEE_HAS_AMI)
+class AMI_flushBatchRequestsI : public Ice::AMI_Object_ice_flushBatchRequests
+{
+public:
+
+    virtual void ice_exception(const Ice::Exception& ex)
+    {
+        tprintf("%s\n", ex.toString().c_str());
+        test(false);
+    }
+};
+#endif
+
+
 void
 batchOneways(const Test::MyClassPrx& p)
 {
@@ -69,5 +83,37 @@ batchOneways(const Test::MyClassPrx& p)
     }
     
     batch->ice_getConnection()->flushBatchRequests();
+
+
+#ifdef ICEE_HAS_AMI
+    for(i = 0 ; i < 30 ; ++i)
+    {
+        try
+        {
+            batch->opByteSOneway(bs1);
+            test(true);
+        }
+        catch(const Ice::MemoryLimitException&)
+        {
+            test(false);
+        }
+    }
+    batch->ice_flushBatchRequests_async(new AMI_flushBatchRequestsI);
+#endif
+
+    for(i = 0 ; i < 30 ; ++i)
+    {
+        try
+        {
+            batch->opByteSOneway(bs1);
+            test(true);
+        }
+        catch(const Ice::MemoryLimitException&)
+        {
+            test(false);
+        }
+    }
+    batch->ice_flushBatchRequests();
+
 #endif
 }

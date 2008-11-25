@@ -512,7 +512,7 @@ IceInternal::FixedReference::toString() const
     return string(); // To keep the compiler from complaining.
 }
 
-#if !defined(ICEE_HAS_AMI) && !defined(ICEE_HAS_BATCH)
+#ifndef ICEE_HAS_AMI
 Ice::ConnectionIPtr
 IceInternal::FixedReference::getConnection() const
 {
@@ -564,7 +564,9 @@ IceInternal::FixedReference::getConnection() const
     _fixedConnection->throwException(); // Throw in case our connection is already destroyed.
     return _fixedConnection;
 }
+
 #else
+
 void
 IceInternal::FixedReference::getConnection(const ConnectRequestHandlerPtr& handler) const
 {
@@ -1074,7 +1076,7 @@ IceInternal::RoutableReference::clone() const
     return new RoutableReference(*this);
 }
 
-#if !defined(ICEE_HAS_AMI) && !defined(ICEE_HAS_BATCH)
+#ifndef ICEE_HAS_AMI
 
 Ice::ConnectionIPtr
 IceInternal::RoutableReference::getConnection() const
@@ -1164,19 +1166,7 @@ IceInternal::RoutableReference::createConnection(const vector<EndpointPtr>& endp
         throw Ice::NoEndpointException(__FILE__, __LINE__, toString());
     }
 
-    Ice::ConnectionIPtr connection = getInstance()->outgoingConnectionFactory()->create(endpts);
-#if defined(ICEE_HAS_ROUTER) && !defined(ICEE_PURE_CLIENT)
-    //
-    // If we have a router, set the object adapter for this router
-    // (if any) to the new connection, so that callbacks from the
-    // router can be received over this new connection.
-    //
-    if(_routerInfo && _routerInfo->getAdapter())
-    {
-        connection->setAdapter(_routerInfo->getAdapter());
-    }
-#endif
-    return connection;
+    return getInstance()->outgoingConnectionFactory()->create(endpts);
 }
 
 #else
@@ -1230,20 +1220,10 @@ IceInternal::RoutableReference::createConnection(const vector<EndpointPtr>& allE
         return;
     }
 
-#ifdef ICEE_HAS_AMI
     getInstance()->outgoingConnectionFactory()->create(endpoints, handler);
-#else
-    try
-    {
-        handler->setConnection(getInstance()->outgoingConnectionFactory()->create(endpoints));
-    }
-    catch(const Ice::LocalException& ex)
-    {
-        handler->setException(ex);
-    }
-#endif
 }
-#endif
+
+#endif // ICEE_HAS_AMI
 
 void
 IceInternal::RoutableReference::applyOverrides(vector<EndpointPtr>& endpts) const

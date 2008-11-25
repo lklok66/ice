@@ -85,9 +85,6 @@ public:
     void flushBatchRequests();
 #endif
 
-    void incDirectCount();
-    void decDirectCount();
-
     IceInternal::ServantManagerPtr getServantManager() const;
 
 private:
@@ -135,7 +132,6 @@ private:
 #ifdef ICEE_HAS_LOCATOR
     IceInternal::LocatorInfoPtr _locatorInfo;
 #endif
-    int _directCount; // The number of direct proxies dispatching on this object adapter.
     bool _waitForActivate;
     bool _destroying;
     bool _destroyed;

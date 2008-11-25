@@ -198,6 +198,13 @@ public:
     ICE_API ::Ice::ConnectionPtr ice_getConnection();
     ICE_API ::Ice::ConnectionPtr ice_getCachedConnection() const;
 
+#ifdef ICEE_HAS_BATCH
+    void ice_flushBatchRequests();
+#ifdef ICEE_HAS_AMI
+    bool ice_flushBatchRequests_async(const ::Ice::AMI_Object_ice_flushBatchRequestsPtr&);
+#endif
+#endif
+
     ::IceInternal::ReferencePtr __reference() const
     {
         return _reference;

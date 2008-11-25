@@ -578,6 +578,37 @@ IceProxy::Ice::Object::ice_getCachedConnection() const
     return const_cast<IceProxy::Ice::Object*>(this)->__getRequestHandler()->getConnection(false);
 }
 
+#ifdef ICEE_HAS_BATCH
+void
+IceProxy::Ice::Object::ice_flushBatchRequests()
+{
+    //
+    // We don't automatically retry if ice_flushBatchRequests fails. Otherwise, if some batch
+    // requests were queued with the connection, they would be lost without being noticed.
+    //
+    RequestHandlerPtr __handler;
+    int __cnt = -1; // Don't retry.
+    try
+    {
+        __handler = __getRequestHandler();
+        BatchOutgoing __og(__handler.get(), _reference->getInstance().get());
+        __og.invoke();
+    }
+    catch(const LocalException& __ex)
+    {
+        __handleException(__handler, __ex, __cnt);
+    }
+}
+
+#ifdef ICEE_HAS_AMI
+bool
+IceProxy::Ice::Object::ice_flushBatchRequests_async(const AMI_Object_ice_flushBatchRequestsPtr& cb)
+{
+    return cb->__invoke(this);
+}
+#endif
+#endif
+
 ::IceInternal::RequestHandlerPtr
 IceProxy::Ice::Object::__getRequestHandler()
 {
@@ -586,16 +617,29 @@ IceProxy::Ice::Object::__getRequestHandler()
     if(!_handler)
     {
 #if !defined(ICEE_HAS_AMI) && !defined(ICEE_HAS_BATCH)
-        _handler = _reference->getConnection();
-
+        ConnectionIPtr connection  = _reference->getConnection();
+        _handler = connection;
 #ifdef ICEE_HAS_ROUTER
+        RouterInfoPtr ri = _reference->getRouterInfo();
+#ifndef ICEE_PURE_CLIENT
+        //
+        // If we have a router, set the object adapter for this router
+        // (if any) to the new connection, so that callbacks from the
+        // router can be received over this new connection.
+        //
+        if(ri && ri->getAdapter())
+        {
+            connection->setAdapter(_reference->getRouterInfo()->getAdapter());
+        }
+#endif
+
         //
         // If this proxy is for a non-local object, and we are using a router, then
         // add this proxy to the router info object.
         //
-        if(_reference->getRouterInfo())
+        if(ri)
         {
-            _reference->getRouterInfo()->addProxy(this);
+            ri->addProxy(this);
         }
 #endif
 #else
