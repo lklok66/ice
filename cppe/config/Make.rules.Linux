@@ -125,7 +125,7 @@ BASELIBS		= -L$(NPTL_LIB) -lpthread -lrt
 LIBS			= -lIceE $(BASELIBS)
 MINLIBS			= -lIceEC $(BASELIBS)
 TESTLIBS		= -lTestCommon $(LIBS)
-TESTCLIBS		= -lTestCommon $(MINLIBS)
+TESTCLIBS		= -lTestCommonC $(MINLIBS)
 
 ICEUTIL_OS_LIBS		= 
 ICE_OS_LIBS		= -ldl

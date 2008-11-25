@@ -13,7 +13,12 @@ LIBFILENAME     = $(call mklibfilename,TestCommon,$(VERSION))
 SONAME          = $(call mksoname,TestCommon,$(SOVERSION))  
 LIBNAME		= $(call mklibname,TestCommon)
 
-TARGETS		= $(call mklibtargets,$(libdir)/$(LIBFILENAME),$(libdir)/$(SONAME),$(libdir)/$(LIBNAME))
+LIBFILENAMEC    = $(call mklibfilename,TestCommonC,$(VERSION))
+SONAMEC         = $(call mksoname,TestCommonC,$(SOVERSION))  
+LIBNAMEC	= $(call mklibname,TestCommonC)
+
+TARGETS		= $(call mklibtargets,$(libdir)/$(LIBFILENAME),$(libdir)/$(SONAME),$(libdir)/$(LIBNAME)) \
+		  $(call mklibtargets,$(libdir)/$(LIBFILENAMEC),$(libdir)/$(SONAMEC),$(libdir)/$(LIBNAMEC))
 
 OBJS		= TestCommon.o
 
@@ -24,10 +29,15 @@ HDIR		= $(includedir)/Ice
 include $(top_srcdir)/config/Make.rules
 
 CPPFLAGS	:= -I../include $(CPPFLAGS) -DICE_TEST_COMMON_API_EXPORTS
-#LINKWITH	:= -lIceE
+LINKWITH	:= -lIceE
+LINKWITHC	:= -lIceEC
 
 ifeq ($(STATICLIBS),yes)
 $(libdir)/$(LIBNAME): $(OBJS)
+	rm -f $@
+	$(call mklib,$@,$(OBJS))
+
+$(libdir)/$(LIBNAMEC): $(OBJS)
 	rm -f $@
 	$(call mklib,$@,$(OBJS))
 else
@@ -42,6 +52,18 @@ $(libdir)/$(SONAME): $(libdir)/$(LIBFILENAME)
 $(libdir)/$(LIBNAME): $(libdir)/$(SONAME)
 	rm -f $@
 	ln -s $(SONAME) $@
+
+$(libdir)/$(LIBFILENAMEC): $(OBJS)
+	rm -f $@
+	$(call mkshlib,$@,$(SONAMEC),$(OBJS),$(LINKWITHC))
+
+$(libdir)/$(SONAMEC): $(libdir)/$(LIBFILENAMEC)
+	rm -f $@
+	ln -s $(LIBFILENAMEC) $@
+
+$(libdir)/$(LIBNAMEC): $(libdir)/$(SONAMEC)
+	rm -f $@
+	ln -s $(SONAMEC) $@
 endif
 
 include .depend
