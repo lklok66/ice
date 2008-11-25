@@ -117,9 +117,6 @@ SLICE2CPPEFLAGS	:= --ice --include-dir IceE --dll-export ICE_API $(SLICE2CPPEFLA
 
 LINKWITH        := $(ICE_OS_LIBS)
 
-$(HDIR)/LocalException.h LocalException.cpp: 
-	# Dummy rule to prevent compilation of LocalException.ice
-
 ifeq ($(STATICLIBS),yes)
 $(libdir)/$(LIBNAME): $(OBJS)
 	rm -f $@

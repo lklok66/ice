@@ -106,9 +106,6 @@ PDBFLAGS        = /pdb:$(DLLNAME:.dll=.pdb)
 {$(ICEE_DIR)\}.cpp.obj::
     $(CXX) /c $(CPPFLAGS) $(CXXFLAGS) $<
 
-$(HDIR)\LocalException.h $(ICEE_DIR)\LocalException.cpp: # Dummy rule to prevent compilation of LocalException.ice
-	
-
 !if "$(STATICLIBS)" == "yes"
 
 $(DLLNAME):

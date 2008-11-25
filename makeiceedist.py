@@ -31,8 +31,7 @@ filesToRemove = [
     "./cpp/config/icegrid-slice.3.3.ice.gz",
     "./cpp/config/makegitignore.py",
     "./cpp/config/templates.xml",
-    "./cpp/config/upgradeicegrid.py",
-    "./slice/IceE/LocalException.ice"
+    "./cpp/config/upgradeicegrid.py"
 ]
 
 # List of files & subdirectories to keep, all others are removed.
