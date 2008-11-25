@@ -199,9 +199,9 @@ public:
     ICE_API ::Ice::ConnectionPtr ice_getCachedConnection() const;
 
 #ifdef ICEE_HAS_BATCH
-    void ice_flushBatchRequests();
+    ICE_API void ice_flushBatchRequests();
 #ifdef ICEE_HAS_AMI
-    bool ice_flushBatchRequests_async(const ::Ice::AMI_Object_ice_flushBatchRequestsPtr&);
+    ICE_API bool ice_flushBatchRequests_async(const ::Ice::AMI_Object_ice_flushBatchRequestsPtr&);
 #endif
 #endif
 
