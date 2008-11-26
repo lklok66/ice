@@ -42,7 +42,7 @@ install::
 configure::
 	@for subdir in $(CONFIGURE_SUBDIRS); \
 	do \
-	    echo "making install in $$subdir"; \
+	    echo "making configure in $$subdir"; \
 	    ( cd $$subdir && $(MAKE) configure ) || exit 1; \
 	done
 
