@@ -84,6 +84,7 @@ public:
         staticMutex = 0;
     }
 };
+Init init;
     
 }
 

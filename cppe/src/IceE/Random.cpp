@@ -72,7 +72,7 @@ public:
         staticMutex = 0;
     }
 };
-static Init init;
+Init init;
 
 }
 
