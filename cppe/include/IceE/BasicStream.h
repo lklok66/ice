@@ -86,7 +86,7 @@ public:
 
     typedef void (*PatchFunc)(void*, Ice::ObjectPtr&);
 
-    BasicStream(Instance* instance, int messageSizeMax,
+    BasicStream(Instance* instance, size_t messageSizeMax,
 #ifdef ICEE_HAS_WSTRING
                 const Ice::StringConverterPtr& stringConverter, const Ice::WstringConverterPtr& wstringConverter,
 #endif

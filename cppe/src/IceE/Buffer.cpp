@@ -18,8 +18,8 @@ void
 IceInternal::Buffer::swap(Buffer& other)
 {
 #ifdef ICE_SMALL_MESSAGE_BUFFER_OPTIMIZATION
-    Container::difference_type pos = i - b.begin();
-    Container::difference_type otherPos = other.i - other.b.begin();
+    Container::difference_type pos = static_cast<int>(i - b.begin());
+    Container::difference_type otherPos = static_cast<int>(other.i - other.b.begin());
     b.swap(other.b);
     i = b.begin() + otherPos;
     other.i = other.b.begin() + pos;

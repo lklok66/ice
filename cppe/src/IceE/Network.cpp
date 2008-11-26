@@ -78,7 +78,9 @@ getLocalAddresses()
         vector<unsigned char> buffer;
         buffer.resize(1024);
         unsigned long len = 0;
-        DWORD rs = WSAIoctl(fd, SIO_ADDRESS_LIST_QUERY, 0, 0, &buffer[0], buffer.size(), &len, 0, 0);
+        DWORD rs = WSAIoctl(fd, SIO_ADDRESS_LIST_QUERY, 0, 0, 
+                            &buffer[0], static_cast<DWORD>(buffer.size()),
+                            &len, 0, 0);
         if(rs == SOCKET_ERROR)
         {
             //
@@ -88,7 +90,9 @@ getLocalAddresses()
             if(getSocketErrno() == WSAEFAULT)
             {
                 buffer.resize(len);
-                rs = WSAIoctl(fd, SIO_ADDRESS_LIST_QUERY, 0, 0, &buffer[0], buffer.size(), &len, 0, 0);
+                rs = WSAIoctl(fd, SIO_ADDRESS_LIST_QUERY, 0, 0,
+                              &buffer[0], static_cast<DWORD>(buffer.size()),
+                              &len, 0, 0);
             }
 
             if(rs == SOCKET_ERROR)
@@ -1129,7 +1133,11 @@ IceInternal::acceptInterrupted()
 SOCKET
 IceInternal::doAccept(SOCKET fd)
 {
-    int ret;
+#ifdef _WIN32                   
+    SOCKET ret;
+#else       
+        int ret;    
+#endif 
 
 repeatAccept:
     if((ret = ::accept(fd, 0, 0)) == INVALID_SOCKET)

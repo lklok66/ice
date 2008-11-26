@@ -441,7 +441,7 @@ public:
         if(q == _handlerMap.end())
         {
             Ice::Error out(_instance->initializationData().logger);
-            out << "filedescriptor " << _lastFd << " not registered with selector";
+            out << "filedescriptor " << static_cast<int>(_lastFd) << " not registered with selector";
             return 0;
         }
         ++_nSelectedReturned;
