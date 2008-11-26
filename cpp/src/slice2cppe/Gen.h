@@ -166,6 +166,7 @@ private:
         virtual bool visitModuleStart(const ModulePtr&);
         virtual void visitModuleEnd(const ModulePtr&);
         virtual void visitClassDecl(const ClassDeclPtr&);
+        virtual void visitOperation(const OperationPtr&);
 
     private:
 

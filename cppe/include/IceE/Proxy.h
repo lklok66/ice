@@ -241,7 +241,7 @@ public:
     ICE_API void __handleExceptionWrapper(const ::IceInternal::RequestHandlerPtr&, const ::IceInternal::LocalExceptionWrapper&, ::IceInternal::OutgoingAsync*);
     ICE_API void __handleExceptionWrapperRelaxed(const ::IceInternal::RequestHandlerPtr&, const ::IceInternal::LocalExceptionWrapper&, ::IceInternal::OutgoingAsync*, int&);
 #endif
-    ICE_API void __checkTwowayOnly(const char*) const;
+    ICE_API void __checkTwowayOnly(const std::string&) const;
 
 protected:
 

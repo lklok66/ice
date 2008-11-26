@@ -1513,6 +1513,7 @@ Slice::Gen::ProxyVisitor::visitOperation(const OperationPtr& p)
     string name = p->name();
     string scoped = fixKwd(p->scoped());
     string scope = fixKwd(p->scope());
+    string flatName = p->flattenedScope() + name + "_name";
 
     TypePtr ret = p->returnType();
     string retS = returnTypeToString(ret, _useWstring, p->getMetaData());
@@ -1610,11 +1611,10 @@ Slice::Gen::ProxyVisitor::visitOperation(const OperationPtr& p)
     C << sb;
     if(p->returnsData())
     {
-        C << nl << "__checkTwowayOnly(\"" << name << "\");";
+        C << nl << "__checkTwowayOnly(" << flatName << ");";
     }
-    C << nl << "static const ::std::string __operation(\"" << p->name() << "\");";
     C << nl << "__handler = __getRequestHandler();";
-    C << nl << "::IceInternal::Outgoing __outS(__handler.get(), _reference.get(), __operation, "
+    C << nl << "::IceInternal::Outgoing __outS(__handler.get(), _reference.get(), " << flatName << ", "
       << operationModeToString(p->sendMode()) << ", __ctx);";
     if(!inParams.empty())
     {
@@ -1830,6 +1830,13 @@ Slice::Gen::ObjectDeclVisitor::visitClassDecl(const ClassDeclPtr& p)
     H << sp << nl << "class " << name << ';';
     H << nl << _dllExport << "bool operator==(const " << name << "&, const " << name << "&);";
     H << nl << _dllExport << "bool operator<(const " << name << "&, const " << name << "&);";
+}
+
+void
+Slice::Gen::ObjectDeclVisitor::visitOperation(const OperationPtr& p)
+{
+    string flatName = p->flattenedScope() + p->name() + "_name";
+    C << sp << nl << "static const ::std::string " << flatName << " = \"" << p->name() << "\";";
 }
 
 Slice::Gen::ObjectVisitor::ObjectVisitor(Output& h, Output& c, const string& dllExport) :
@@ -2818,10 +2825,9 @@ Slice::Gen::AsyncVisitor::visitOperation(const OperationPtr& p)
         C << sb;
         if(p->returnsData())
         {
-            C << nl << "__prx->__checkTwowayOnly(\"" << p->name() <<  "\");";
+            C << nl << "__prx->__checkTwowayOnly(" << flatName <<  ");";
         }
-        C << nl << "static const ::std::string __operation(\"" << p->name() << "\");";
-        C << nl << "__prepare(__prx, __operation, " << operationModeToString(p->sendMode()) << ", __ctx);";
+        C << nl << "__prepare(__prx, " << flatName << ", " << operationModeToString(p->sendMode()) << ", __ctx);";
         writeMarshalCode(C, inParams, 0, StringList(), true);
         if(p->sendsClasses())
         {

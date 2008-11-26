@@ -32,6 +32,11 @@ using namespace std;
 using namespace Ice;
 using namespace IceInternal;
 
+static const string ice_ping_name = "ice_ping";
+static const string ice_ids_name = "ice_ids";
+static const string ice_id_name = "ice_id";
+static const string ice_isA_name = "ice_isA";
+
 void
 Ice::__write(::IceInternal::BasicStream* __os, const ::Ice::Context& v, ::Ice::__U__Context)
 {
@@ -149,10 +154,9 @@ IceProxy::Ice::Object::ice_isA(const string& __id, const Context* __context)
         RequestHandlerPtr __handler;
         try
         {
-            __checkTwowayOnly("ice_isA");
-            static const string __operation("ice_isA");
+            __checkTwowayOnly(ice_isA_name);
             __handler = __getRequestHandler();
-            Outgoing __og(__handler.get(), _reference.get(), __operation, ::Ice::Nonmutating, __context);
+            Outgoing __og(__handler.get(), _reference.get(), ice_isA_name, ::Ice::Nonmutating, __context);
             BasicStream* __os = __og.os();
             try
             {
@@ -211,9 +215,8 @@ IceProxy::Ice::Object::ice_ping(const Context* __context)
         RequestHandlerPtr __handler;
         try
         {
-            static const string __operation("ice_ping");
             __handler = __getRequestHandler();
-            Outgoing __og(__handler.get(), _reference.get(), __operation, ::Ice::Nonmutating, __context);
+            Outgoing __og(__handler.get(), _reference.get(), ice_ping_name, ::Ice::Nonmutating, __context);
             bool __ok = __og.invoke();
             try
             {
@@ -262,10 +265,9 @@ IceProxy::Ice::Object::ice_ids(const Context* __context)
         RequestHandlerPtr __handler;
         try
         {
-            __checkTwowayOnly("ice_ids");
-            static const string __operation("ice_ids");
+            __checkTwowayOnly(ice_ids_name);
             __handler = __getRequestHandler();
-            Outgoing __og(__handler.get(), _reference.get(), __operation, ::Ice::Nonmutating, __context);
+            Outgoing __og(__handler.get(), _reference.get(), ice_ids_name, ::Ice::Nonmutating, __context);
             vector<string> __ret;
             bool __ok = __og.invoke();
             try
@@ -315,10 +317,9 @@ IceProxy::Ice::Object::ice_id(const Context* __context)
         RequestHandlerPtr __handler;
         try
         {
-            __checkTwowayOnly("ice_id");
-            static const string __operation("ice_id");
+            __checkTwowayOnly(ice_id_name);
             __handler = __getRequestHandler();
-            Outgoing __og(__handler.get(), _reference.get(), __operation, ::Ice::Nonmutating, __context);
+            Outgoing __og(__handler.get(), _reference.get(), ice_id_name, ::Ice::Nonmutating, __context);
             string __ret;
             bool __ok = __og.invoke();
             try
@@ -778,7 +779,7 @@ IceProxy::Ice::Object::__handleExceptionWrapperRelaxed(const RequestHandlerPtr& 
 }
 
 void
-IceProxy::Ice::Object::__checkTwowayOnly(const char* name) const
+IceProxy::Ice::Object::__checkTwowayOnly(const string& name) const
 {
     //
     // No mutex lock necessary, there is nothing mutable in this
