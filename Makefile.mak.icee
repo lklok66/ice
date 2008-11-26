@@ -34,7 +34,7 @@ install::
 configure::
 	@for %i in ( $(CONFIGURE_SUBDIRS) ) do \
 	    @echo "making install in %i" && \
-	    cmd /c "cd %i && $(MAKE) -nologo -f Makefile.mak $(MAKEFLAGS) install" || exit 1
+	    cmd /c "cd %i && $(MAKE) -nologo -f Makefile.mak $(MAKEFLAGS) configure" || exit 1
 
 cpp::
 	@echo "making all in cpp" && \

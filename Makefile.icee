@@ -43,7 +43,7 @@ configure::
 	@for subdir in $(CONFIGURE_SUBDIRS); \
 	do \
 	    echo "making install in $$subdir"; \
-	    ( cd $$subdir && $(MAKE) install ) || exit 1; \
+	    ( cd $$subdir && $(MAKE) configure ) || exit 1; \
 	done
 
 cpp::
