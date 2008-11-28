@@ -143,25 +143,26 @@ public class UserViewActivity extends ListActivity
     }
 
     @Override
-    protected Dialog onCreateDialog(int id)
+    protected Dialog onCreateDialog(final int id)
     {
-        switch (id)
+        switch(id)
         {
         case DIALOG_FATAL:
         {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Error");
             builder.setMessage(_lastError);
-            if(id == DIALOG_FATAL)
+            builder.setPositiveButton("Ok", new DialogInterface.OnClickListener()
             {
-                builder.setPositiveButton("Ok", new DialogInterface.OnClickListener()
+                public void onClick(DialogInterface dialog, int whichButton)
                 {
-                    public void onClick(DialogInterface dialog, int whichButton)
+                    _lastError = "";
+                    if(id == DIALOG_FATAL)
                     {
                         finish();
                     }
-                });
-            }
+                }
+            });
             return builder.create();
         }
 

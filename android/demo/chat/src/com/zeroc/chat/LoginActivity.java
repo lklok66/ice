@@ -67,9 +67,12 @@ public class LoginActivity extends Activity
             startActivity(new Intent(LoginActivity.this, ChatActivity.class));
         }
 
-        public void onException(final String ex)
+        public void onException(String ex)
         {
-            handleException(ex);
+            setLoginState();
+
+            _lastError = ex;
+            showDialog(DIALOG_ERROR);
         }
     };
 
@@ -104,14 +107,6 @@ public class LoginActivity extends Activity
             String username = _username.getText().toString().trim();
             _login.setEnabled(host.length() > 0 && username.length() > 0);
         }
-    }
-
-    private void handleException(String s)
-    {
-        setLoginState();
-
-        _lastError = s;
-        showDialog(DIALOG_ERROR);
     }
 
     private void login()
@@ -270,6 +265,13 @@ public class LoginActivity extends Activity
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Error");
             builder.setMessage(_lastError);
+            builder.setPositiveButton("Ok", new DialogInterface.OnClickListener()
+            {
+                public void onClick(DialogInterface dialog, int whichButton)
+                {
+                    _lastError = "";
+                }
+            });
             return builder.create();
         }
 
