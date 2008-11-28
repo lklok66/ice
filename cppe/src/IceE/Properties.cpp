@@ -186,13 +186,13 @@ Ice::Properties::load(const std::string& file)
     }
 
     static const size_t delta = 12;
-    int size = delta;
+    unsigned int size = delta;
     char* line = (char*)malloc(delta);
     while(fgets(line, size, in) != NULL)
     {
         while(strlen(line) == size - 1 && line[size - 1] != '\n')
         {
-            int oldSize = size;
+            unsigned int oldSize = size;
             size += delta;
             line = (char*)realloc(line, size);
             fgets(line + oldSize - 1, delta, in);
