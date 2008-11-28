@@ -430,15 +430,6 @@ public class QueryController
                         desc.proxy.setAuthors(newDesc.authors);
                         desc.authors = newDesc.authors;
                     }
-                    try
-                    {
-                        Thread.sleep(5 * 1000);
-                    }
-                    catch(InterruptedException e)
-                    {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
                     postDataChanged(true);
                 }
                 catch(Ice.LocalException ex)
