@@ -1,3 +1,11 @@
+// **********************************************************************
+//
+// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+//
+// This copy of Ice is licensed to you under the terms described in the
+// ICE_LICENSE file included in this distribution.
+//
+// **********************************************************************
 package com.zeroc.library;
 
 import java.util.ArrayList;
@@ -144,7 +152,7 @@ public class EditActivity extends SessionActivity
     public void onResume()
     {
         super.onResume();
-        _queryController.setListener(new QueryController.QueryListener()
+        _queryController.setListener(new QueryController.Listener()
         {
             public void onDataChange(QueryModel data, boolean saved)
             {

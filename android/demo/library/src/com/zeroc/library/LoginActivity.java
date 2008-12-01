@@ -1,6 +1,15 @@
+// **********************************************************************
+//
+// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+//
+// This copy of Ice is licensed to you under the terms described in the
+// ICE_LICENSE file included in this distribution.
+//
+// **********************************************************************
 package com.zeroc.library;
 
 import com.zeroc.library.controller.LoginController;
+import com.zeroc.library.controller.SessionController;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -35,7 +44,7 @@ public class LoginActivity extends Activity
     private LoginController _loginController;
     private boolean _loginInProgress = false;
 
-    private LoginController.LoginListener _listener = new LoginController.LoginListener()
+    private LoginController.Listener _listener = new LoginController.Listener()
     {
         public void loginInProgress()
         {
@@ -43,12 +52,15 @@ public class LoginActivity extends Activity
             setLoginState();
         }
 
-        public void onLogin()
+        public void onLogin(SessionController sessionController)
         {
             if(isFinishing())
             {
                 return;
             }
+
+            LibraryApp app = (LibraryApp)getApplication();
+            app.loggedIn(sessionController);
             startActivity(new Intent(LoginActivity.this, LibraryActivity.class));
         }
 
@@ -110,8 +122,7 @@ public class LoginActivity extends Activity
         edit.commit();
         
         LibraryApp app = (LibraryApp)getApplication();
-        _loginController = new LoginController(hostname, secure, glacier2, _listener);
-        app.setLoginController(_loginController);
+        _loginController = app.login(hostname, secure, glacier2, _listener);
     }
 
     /** Called when the activity is first created. */
@@ -170,7 +181,10 @@ public class LoginActivity extends Activity
         {
             _loginController.setLoginListener(_listener);
         }
-        setLoginState();
+        else
+        {
+            setLoginState();
+        }
     }
 
     @Override
@@ -203,8 +217,7 @@ public class LoginActivity extends Activity
                     if(_loginController != null)
                     {
                         LibraryApp app = (LibraryApp)getApplication();
-                        app.logout();
-                        _loginController = null;
+                        app.loginFailure();
                     }
                 }
             });

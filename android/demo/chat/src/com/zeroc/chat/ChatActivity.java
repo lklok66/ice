@@ -241,7 +241,7 @@ public class ChatActivity extends ListActivity
         {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Error");
-            builder.setMessage(_lastError);
+            builder.setMessage(""); // Details provided in onPrepareDialog
             builder.setPositiveButton("Ok", new DialogInterface.OnClickListener()
             {
                 public void onClick(DialogInterface dialog, int whichButton)
@@ -259,6 +259,14 @@ public class ChatActivity extends ListActivity
         }
 
         return null;
+    }
+    
+    @Override
+    protected void onPrepareDialog(int id, Dialog dialog)
+    {
+        super.onPrepareDialog(id, dialog);
+        AlertDialog alert = (AlertDialog)dialog;
+        alert.setMessage(_lastError);
     }
 
     private void logout()

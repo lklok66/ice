@@ -1,14 +1,24 @@
+// **********************************************************************
+//
+// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+//
+// This copy of Ice is licensed to you under the terms described in the
+// ICE_LICENSE file included in this distribution.
+//
+// **********************************************************************
 package com.zeroc.library;
 
 import com.zeroc.library.controller.LoginController;
 import com.zeroc.library.controller.SessionController;
+import com.zeroc.library.controller.LoginController.Listener;
 
 import android.app.Application;
 
 public class LibraryApp extends Application
 {
     private LoginController _loginController;
-
+    private SessionController _sessionController;
+    
     @Override
     public void onCreate()
     {
@@ -22,37 +32,55 @@ public class LibraryApp extends Application
             _loginController.destroy();
             _loginController = null;
         }
-    }
-    
-    public LoginController getLoginController()
-    {
-        return _loginController;
-    }
-    
-    public void setLoginController(LoginController controller)
-    {
-        if(_loginController != null)
+
+        if(_sessionController != null)
         {
-            _loginController.destroy();
+            _sessionController.destroy();
+            _sessionController = null;
         }
-        _loginController = controller;
     }
 
-    public SessionController getSessionController()
+    public void loggedIn(SessionController sessionController)
     {
-        if(_loginController != null)
-        {
-            return _loginController.getSessionController();
-        }
-        return null;
+        assert _sessionController == null && _loginController != null;
+        _sessionController = sessionController;
+
+        _loginController.destroy();
+        _loginController = null;
     }
     
     public void logout()
+    {
+        if(_sessionController != null)
+        {
+            _sessionController.destroy();
+            _sessionController = null;
+        }
+    }
+
+    public LoginController login(String hostname, boolean secure, boolean glacier2, Listener listener)
+    {
+        assert _loginController == null && _sessionController == null;
+        _loginController = new LoginController(hostname, secure, glacier2, listener);
+        return _loginController;
+    }
+    
+    public void loginFailure()
     {
         if(_loginController != null)
         {
             _loginController.destroy();
             _loginController = null;
         }
+    }
+
+    public SessionController getSessionController()
+    {
+        return _sessionController;
+    }
+
+    public LoginController getLoginController()
+    {
+        return _loginController;
     }
 }

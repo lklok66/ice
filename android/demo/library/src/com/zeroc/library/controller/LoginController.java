@@ -1,29 +1,37 @@
+// **********************************************************************
+//
+// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+//
+// This copy of Ice is licensed to you under the terms described in the
+// ICE_LICENSE file included in this distribution.
+//
+// **********************************************************************
 package com.zeroc.library.controller;
 
 import android.os.Handler;
 
 public class LoginController
 {
-    public interface LoginListener
+    public interface Listener
     {
         void loginInProgress();
-        void onLogin();
+        void onLogin(SessionController controller);
         void onLoginError();
     };
-    
+
     private boolean _destroyed = false;
     private Handler _handler;
     private Ice.Communicator _communicator;
     private String _loginError;
-    private LoginListener _loginListener;
+    private Listener _loginListener;
     private SessionController _sessionController;
-    
+
     synchronized private void postLoginFailure(final String loginError)
     {
         _loginError = loginError;
         if(_loginListener != null)
         {
-            final LoginListener listener = _loginListener;
+            final Listener listener = _loginListener;
             _handler.post(new Runnable()
             {
                 public void run()
@@ -34,11 +42,22 @@ public class LoginController
         }
     }
 
-    public LoginController(final String hostname, final boolean secure, final boolean glacier2, LoginListener listener)
+    public LoginController(final String hostname, final boolean secure, final boolean glacier2, Listener listener)
     {
         _handler = new Handler();
         _loginListener = listener;
         _loginListener.loginInProgress();
+
+        Ice.InitializationData initData = new Ice.InitializationData();
+
+        initData.properties = Ice.Util.createProperties();
+        initData.properties.setProperty("Ice.ACM.Client", "0");
+        initData.properties.setProperty("Ice.RetryIntervals", "-1");
+        initData.properties.setProperty("Ice.Trace.Network", "0");
+        initData.properties.setProperty("Ice.Plugin.IceSSL", "IceSSL.PluginFactory");
+        initData.properties.setProperty("IceSSL.TrustOnly.Client", "CN=Glacier2");
+
+        _communicator = Ice.Util.initialize(initData);
 
         new Thread(new Runnable()
         {
@@ -46,19 +65,9 @@ public class LoginController
             {
                 try
                 {
-                    Ice.InitializationData initData = new Ice.InitializationData();
-
-                    initData.properties = Ice.Util.createProperties();
-                    initData.properties.setProperty("Ice.ACM.Client", "0");
-                    initData.properties.setProperty("Ice.RetryIntervals", "-1");
-                    initData.properties.setProperty("Ice.Trace.Network", "0");
-                    initData.properties.setProperty("Ice.Plugin.IceSSL", "IceSSL.PluginFactory");
-                    initData.properties.setProperty("IceSSL.TrustOnly.Client", "CN=Glacier2");
-
-                    _communicator = Ice.Util.initialize(initData);
                     long refreshTimeout;
                     SessionAdapter session = null;
-                    
+
                     if(glacier2)
                     {
                         String s;
@@ -84,8 +93,9 @@ public class LoginController
                             return;
                         }
                         Glacier2.SessionPrx glacier2session = router.createSession("dummy", "none");
-                        
-                        final Demo.Glacier2SessionPrx sess = Demo.Glacier2SessionPrxHelper.uncheckedCast(glacier2session);
+
+                        final Demo.Glacier2SessionPrx sess = Demo.Glacier2SessionPrxHelper
+                                .uncheckedCast(glacier2session);
                         final Demo.LibraryPrx library = sess.getLibrary();
                         refreshTimeout = (router.getSessionTimeout() * 1000) / 2;
                         session = new SessionAdapter()
@@ -146,7 +156,7 @@ public class LoginController
                             {
                                 sess.refresh();
                             }
-                            
+
                             public Demo.LibraryPrx getLibrary()
                             {
                                 return library;
@@ -158,17 +168,35 @@ public class LoginController
                     {
                         if(_destroyed)
                         {
+                            // Here the app was terminated while session
+                            // establishment was in progress.
+                            try
+                            {
+                                session.destroy();
+                            }
+                            catch(Exception e)
+                            {
+                            }
+
+                            try
+                            {
+                                _communicator.destroy();
+                            }
+                            catch(Exception e)
+                            {
+                            }
                             return;
                         }
+
                         _sessionController = new SessionController(_handler, _communicator, session, refreshTimeout);
                         if(_loginListener != null)
                         {
-                            final LoginListener listener = _loginListener;
+                            final Listener listener = _loginListener;
                             _handler.post(new Runnable()
                             {
                                 public void run()
                                 {
-                                    listener.onLogin();
+                                    listener.onLogin(_sessionController);
                                 }
                             });
                         }
@@ -196,14 +224,20 @@ public class LoginController
         {
             return;
         }
-
         _destroyed = true;
-        if(_sessionController != null)
-        {
-            _sessionController.destroy();
-            _sessionController = null;
-        }
-        else
+        //
+        // There are three cases:
+        //
+        // 1. A session has been created. In this case the communicator is owned
+        // by the session controller.
+        //
+        // 2. The session creation failed. In this case _loginError is non-null.
+        // Destroy the communicator.
+        //
+        // 3. The session creation is in progress. In which case, things will be
+        // cleaned up once the session establishment is complete.
+        //
+        if(_sessionController == null && _loginError != null)
         {
             try
             {
@@ -214,13 +248,13 @@ public class LoginController
             }
         }
     }
-    
+
     synchronized public String getLoginError()
     {
         return _loginError;
     }
-    
-    synchronized public void setLoginListener(LoginListener listener)
+
+    synchronized public void setLoginListener(Listener listener)
     {
         _loginListener = listener;
         if(listener != null)
@@ -235,13 +269,8 @@ public class LoginController
             }
             else
             {
-                listener.onLogin();
+                listener.onLogin(_sessionController);
             }
         }
     }
-
-    synchronized public SessionController getSessionController()
-    {
-        return _sessionController;
-    }
- }
+}

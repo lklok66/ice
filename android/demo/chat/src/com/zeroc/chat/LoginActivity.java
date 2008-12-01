@@ -264,7 +264,7 @@ public class LoginActivity extends Activity
         {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Error");
-            builder.setMessage(_lastError);
+            builder.setMessage(""); // Details provided in onPrepareDialog
             builder.setPositiveButton("Ok", new DialogInterface.OnClickListener()
             {
                 public void onClick(DialogInterface dialog, int whichButton)
@@ -303,5 +303,16 @@ public class LoginActivity extends Activity
         }
 
         return null;
+    }
+    
+    @Override
+    protected void onPrepareDialog(int id, Dialog dialog)
+    {
+        super.onPrepareDialog(id, dialog);
+        if(id == DIALOG_ERROR)
+        {
+            AlertDialog alert = (AlertDialog)dialog;
+            alert.setMessage(_lastError);
+        }
     }
 }

@@ -1,18 +1,26 @@
+// **********************************************************************
+//
+// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+//
+// This copy of Ice is licensed to you under the terms described in the
+// ICE_LICENSE file included in this distribution.
+//
+// **********************************************************************
 package com.zeroc.library.controller;
 
 import android.os.Handler;
 
 public class SessionController
 {
-    public interface SessionListener
+    public interface Listener
     {
         void onDestroy();
     }
 
     private Handler _handler;
     private Ice.Communicator _communicator;
-    private QueryController _query;
-    private SessionListener _sessionListener;
+    private QueryController _queryController;
+    private Listener _sessionListener;
     private boolean _fatal = false;
     private boolean _destroyed = false;
 
@@ -70,7 +78,7 @@ public class SessionController
         _fatal = true;
         if(_sessionListener != null)
         {
-            final SessionListener listener = _sessionListener;
+            final Listener listener = _sessionListener;
             _handler.post(new Runnable()
             {
                 public void run()
@@ -90,7 +98,7 @@ public class SessionController
         _refresh = new SessionRefreshThread(refreshTimeout);
         _refresh.start();
 
-        _query = new QueryController(_handler, _session.getLibrary());
+        _queryController = new QueryController(_handler, _session.getLibrary());
     }
 
     synchronized public void destroy()
@@ -104,14 +112,18 @@ public class SessionController
         final SessionRefreshThread refresh = _refresh;
         final Ice.Communicator communicator = _communicator;
         final SessionAdapter session = _session;
+        final QueryController query = _queryController;
         _refresh = null;
         _session = null;
         _communicator = null;
+        _queryController = null;
 
         new Thread(new Runnable()
         {
             public void run()
             {
+                query.destroy();
+
                 refresh.terminate();
                 while(refresh.isAlive())
                 {
@@ -143,7 +155,7 @@ public class SessionController
         }).start();
     }
     
-    synchronized public void setSessionListener(SessionListener listener)
+    synchronized public void setSessionListener(Listener listener)
     {
         _sessionListener = listener;
         if(_fatal)
@@ -152,15 +164,15 @@ public class SessionController
         }
     }
     
-    synchronized public QueryController createQuery(QueryController.QueryListener listener, QueryController.QueryType t, String q)
+    synchronized public QueryController createQuery(QueryController.Listener listener, QueryController.QueryType t, String q)
     {
-        _query.destroy();
-        _query = new QueryController(_handler, _session.getLibrary(), listener, t, q);
-        return _query;
+        _queryController.destroy();
+        _queryController = new QueryController(_handler, _session.getLibrary(), listener, t, q);
+        return _queryController;
     }
 
     synchronized public QueryController getCurrentQuery()
     {
-        return _query;
+        return _queryController;
     }
 }

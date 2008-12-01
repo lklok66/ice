@@ -1,3 +1,11 @@
+// **********************************************************************
+//
+// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+//
+// This copy of Ice is licensed to you under the terms described in the
+// ICE_LICENSE file included in this distribution.
+//
+// **********************************************************************
 package com.zeroc.library.controller;
 
 import java.util.ArrayList;
@@ -7,7 +15,7 @@ import android.os.Handler;
 
 public class QueryController
 {
-    public interface QueryListener
+    public interface Listener
     {
         void onDataChange(QueryModel data, boolean saved);
         void onError();
@@ -25,7 +33,7 @@ public class QueryController
     private int _nrows = 0;
     private int _rowsQueried = 0;
     private Demo.BookQueryResultPrx _query = null;
-    private QueryListener _listener;
+    private Listener _listener;
     private Handler _handler;
     private Demo.LibraryPrx _library;
     private int _currentBook = NO_BOOK;
@@ -104,7 +112,7 @@ public class QueryController
         _library = library;
     }
 
-    QueryController(Handler handler, Demo.LibraryPrx library, final QueryListener listener, final QueryType _type, final String _queryString)
+    QueryController(Handler handler, Demo.LibraryPrx library, final Listener listener, final QueryType _type, final String _queryString)
     {
         _handler = handler;
         _listener = listener;
@@ -192,7 +200,7 @@ public class QueryController
         }
     }
 
-    synchronized public void setListener(QueryListener cb)
+    synchronized public void setListener(Listener cb)
     {
         _listener = cb;
         _listener.onDataChange(getQueryModel(), false);
@@ -409,7 +417,7 @@ public class QueryController
         final boolean saveAuthors = !newDesc.authors.equals(desc.authors);
 
         // If nothing changed we're done.
-        if(!saveTitle || !saveAuthors)
+        if(!saveTitle && !saveAuthors)
         {
             return false;
         }

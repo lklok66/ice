@@ -1,3 +1,11 @@
+// **********************************************************************
+//
+// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+//
+// This copy of Ice is licensed to you under the terms described in the
+// ICE_LICENSE file included in this distribution.
+//
+// **********************************************************************
 package com.zeroc.library;
 
 import com.zeroc.library.controller.QueryController;
@@ -31,7 +39,7 @@ public class SessionActivity extends Activity
             return;
         }
 
-        _sessionController.setSessionListener(new SessionController.SessionListener()
+        _sessionController.setSessionListener(new SessionController.Listener()
         {
             public void onDestroy()   
             {

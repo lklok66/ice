@@ -1,3 +1,11 @@
+// **********************************************************************
+//
+// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+//
+// This copy of Ice is licensed to you under the terms described in the
+// ICE_LICENSE file included in this distribution.
+//
+// **********************************************************************
 package com.zeroc.library;
 
 import android.content.Intent;
@@ -89,7 +97,7 @@ public class LibraryActivity extends SessionActivity
 
     private LibraryListAdapter _adapter;
 
-    private QueryController.QueryListener _queryListener = new QueryController.QueryListener()
+    private QueryController.Listener _queryListener = new QueryController.Listener()
     {
         public void onDataChange(QueryModel data, boolean saved)
         {
