@@ -185,6 +185,7 @@ public class LibraryActivity extends SessionActivity
                 new String[] { "ISBN", "Author", "Title" });
         _searchType.setAdapter(modeAdapter);
         _adapter = new LibraryListAdapter();
+
         _searchTable = (ListView)findViewById(R.id.list);
         _searchTable.setAdapter(_adapter);
         _searchTable.setOnItemClickListener(new OnItemClickListener()

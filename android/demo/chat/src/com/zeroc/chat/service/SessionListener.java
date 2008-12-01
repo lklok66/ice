@@ -10,6 +10,9 @@ package com.zeroc.chat.service;
 
 public interface SessionListener
 {
+    /** Called when a login is in progress. */
+    void onLoginInProgress();
+    
     /** Called when a new session has been established. */
     void onLogin();
 
@@ -22,5 +25,5 @@ public interface SessionListener
      * @param ex
      *            The error.
      */
-    void onException(String ex);
+    void onLoginError();
 }

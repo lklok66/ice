@@ -12,20 +12,10 @@ package com.zeroc.chat;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.zeroc.chat.service.ChatRoomListener;
-import com.zeroc.chat.service.ChatService;
-import com.zeroc.chat.service.NoSessionException;
-import com.zeroc.chat.service.Service;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.ListActivity;
-import android.content.ComponentName;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,13 +24,13 @@ import android.view.View.OnClickListener;
 import android.view.View.OnKeyListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ListView;
 
-public class ChatActivity extends ListActivity
+import com.zeroc.chat.service.ChatRoomListener;
+
+public class ChatActivity extends SessionActivity
 {
-    private static final int DIALOG_ERROR = 1;
-    private static final int DIALOG_FATAL = 2;
-    private String _lastError = "";
-    private static final String BUNDLE_KEY_LAST_ERROR = "zeroc:lastError";
+    private static final int DIALOG_MESSAGE_TOO_LONG = 2;
 
     private static final int USERS_ID = Menu.FIRST;
     private static final int LOGOUT_ID = Menu.FIRST + 1;
@@ -49,7 +39,6 @@ public class ChatActivity extends ListActivity
     private EditText _text;
     private ArrayAdapter<String> _adapter;
     private LinkedList<String> _strings = new LinkedList<String>();
-    private Service _service;
     final private ChatRoomListener _listener = new ChatRoomListener()
     {
         public void init(final List<String> users)
@@ -73,15 +62,13 @@ public class ChatActivity extends ListActivity
             add(ChatUtils.formatTimestamp(timestamp) + " - <" + name + "> " + ChatUtils.unstripHtml(message));
         }
 
-        public void error(final String error)
+        public void error()
         {
-            _lastError = error;
             showDialog(DIALOG_FATAL);
         }
 
         public void inactivity()
         {
-            _lastError = "You were logged out due to inactivity.";
             showDialog(DIALOG_FATAL);
         }
 
@@ -95,30 +82,18 @@ public class ChatActivity extends ListActivity
             _adapter.notifyDataSetChanged();
         }
     };
-    final private ServiceConnection _connection = new ServiceConnection()
-    {
-        public void onServiceConnected(ComponentName name, IBinder service)
-        { // This is called when the connection with the service has been
-            // established, giving us the service object we can use to
-            // interact with the service. Because we have bound to a explicit
-            // service that we know is running in our own process, we can
-            // cast its IBinder to a concrete class and directly access it.
-            _service = ((com.zeroc.chat.service.ChatService.LocalBinder)service).getService();
-            try
-            {
-                String hostname = _service.addChatRoomListener(_listener, true);
-                setTitle(hostname);
-            }
-            catch(NoSessionException e)
-            {
-                finish();
-            }
-        }
 
-        public void onServiceDisconnected(ComponentName name)
-        {
-        }
-    };
+    @Override
+    ChatRoomListener getChatRoomListener()
+    {
+        return _listener;
+    }
+
+    @Override
+    boolean replayEvents()
+    {
+        return true;
+    }
 
     // Hook the back key to logout the session.
     @Override
@@ -126,7 +101,8 @@ public class ChatActivity extends ListActivity
     {
         if(keyCode == KeyEvent.KEYCODE_BACK)
         {
-            logout();
+            _service.logout();
+            finish();
             return true;
         }
         return false;
@@ -136,14 +112,14 @@ public class ChatActivity extends ListActivity
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat);
 
         _text = (EditText)findViewById(R.id.text);
-
+        
+        ListView transcript = (ListView)findViewById(R.id.list);
         _adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, _strings);
-        setListAdapter(_adapter);
+        transcript.setAdapter(_adapter);
 
         _text.setOnClickListener(new OnClickListener()
         {
@@ -170,32 +146,6 @@ public class ChatActivity extends ListActivity
             }
         });
         _text.requestFocus();
-
-        if(savedInstanceState != null)
-        {
-            _lastError = savedInstanceState.getString(BUNDLE_KEY_LAST_ERROR);
-        }
-    }
-
-    @Override
-    public void onResume()
-    {
-        super.onResume();
-
-        bindService(new Intent(ChatActivity.this, ChatService.class), _connection, BIND_AUTO_CREATE);
-    }
-
-    @Override
-    public void onStop()
-    {
-        super.onStop();
-        unbindService(_connection);
-
-        if(_service != null)
-        {
-            _service.removeChatRoomListener(_listener);
-            _service = null;
-        }
     }
 
     @Override
@@ -217,7 +167,8 @@ public class ChatActivity extends ListActivity
             return true;
 
         case LOGOUT_ID:
-            logout();
+            _service.logout();
+            finish();
             return true;
         }
 
@@ -225,56 +176,19 @@ public class ChatActivity extends ListActivity
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState)
-    {
-        super.onSaveInstanceState(outState);
-        outState.putString(BUNDLE_KEY_LAST_ERROR, _lastError);
-    }
-
-    @Override
     protected Dialog onCreateDialog(final int id)
     {
-        switch(id)
-        {
-        case DIALOG_ERROR:
-        case DIALOG_FATAL:
+        if(id == DIALOG_MESSAGE_TOO_LONG)
         {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Error");
-            builder.setMessage(""); // Details provided in onPrepareDialog
-            builder.setPositiveButton("Ok", new DialogInterface.OnClickListener()
-            {
-                public void onClick(DialogInterface dialog, int whichButton)
-                {
-                    _lastError = "";
-                    if(id == DIALOG_FATAL)
-                    {
-                        finish();
-                    }
-                }
-            });
+            builder.setMessage("Message length exceeded, maximum length is " + MAX_MESSAGE_SIZE + " characters.");
             return builder.create();
         }
 
-        }
-
-        return null;
+        return super.onCreateDialog(id);
     }
     
-    @Override
-    protected void onPrepareDialog(int id, Dialog dialog)
-    {
-        super.onPrepareDialog(id, dialog);
-        AlertDialog alert = (AlertDialog)dialog;
-        alert.setMessage(_lastError);
-    }
-
-    private void logout()
-    {
-        _service.logout();
-        finish();
-    }
-
     private void sendText()
     {
         String t = _text.getText().toString().trim();
@@ -284,8 +198,7 @@ public class ChatActivity extends ListActivity
         }
         if(t.length() > MAX_MESSAGE_SIZE)
         {
-            _lastError = "Message length exceeded, maximum length is " + MAX_MESSAGE_SIZE + " characters.";
-            showDialog(DIALOG_ERROR);
+            showDialog(DIALOG_MESSAGE_TOO_LONG);
             return;
         }
         _text.setText("");

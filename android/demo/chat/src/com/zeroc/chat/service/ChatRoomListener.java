@@ -60,10 +60,8 @@ public interface ChatRoomListener
     * Called upon an error when communicating with the chat room. Once this
     * method is called the chat session has been destroyed.
     *
-    * @param ex A description of the error.
-    *
     */
-   void error(String ex);
+   void error();
    
    /**
     * 

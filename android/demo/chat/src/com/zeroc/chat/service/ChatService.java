@@ -31,13 +31,14 @@ public class ChatService extends Service implements com.zeroc.chat.service.Servi
     private static final int CHATACTIVE_NOTIFICATION = 0;
     private static final String REFRESH_EXTRA = "refresh";
     private AppSession _session = null;
-    private SessionListenerEvent _pendingEvent;
     private CertificateVerifier _verifier;
     private boolean _confirmConnectionResult = false;
     private boolean _confirmConnection = false;
+    private boolean _confirmConnectionInProgress = false;
     private SessionListener _listener;
     private boolean _loginInProgress;
     private Handler _handler;
+    private String _loginError;
 
     public class LocalBinder extends Binder
     {
@@ -70,8 +71,6 @@ public class ChatService extends Service implements com.zeroc.chat.service.Servi
         }
         catch(CertificateException e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         }
     }
 
@@ -94,7 +93,6 @@ public class ChatService extends Service implements com.zeroc.chat.service.Servi
             if(_session == null || !_session.refresh())
             {
                 sessionDestroyed();
-                _session = null;
             }
         }
     }
@@ -103,10 +101,28 @@ public class ChatService extends Service implements com.zeroc.chat.service.Servi
     synchronized public boolean setSessionListener(SessionListener cb)
     {
         _listener = cb;
-        if(_pendingEvent != null)
+        if(_listener == null)
         {
-            _pendingEvent.replay(_listener);
-            _pendingEvent = null;
+            return false;
+        }
+        if(_loginInProgress)
+        {
+            if(_confirmConnectionInProgress)
+            {
+                _listener.onConnectConfirm();
+            }
+            else
+            {
+                _listener.onLoginInProgress();
+            }
+        }
+        else if(_session != null)
+        {
+            _listener.onLogin();
+        }
+        else if(_loginError != null)
+        {
+            _listener.onLoginError();
         }
         return _loginInProgress;
     }
@@ -135,8 +151,10 @@ public class ChatService extends Service implements com.zeroc.chat.service.Servi
         assert _session == null;
         assert !_loginInProgress;
 
+        _loginError = null;
         _loginInProgress = true;
         _confirmConnectionResult = false;
+        assert !_confirmConnectionInProgress;
 
         new Thread(new Runnable()
         {
@@ -148,33 +166,15 @@ public class ChatService extends Service implements com.zeroc.chat.service.Servi
                 }
                 catch(final Glacier2.CannotCreateSessionException ex)
                 {
-                    setPendingEvent(new SessionListenerEvent()
-                    {
-                        public void replay(SessionListener l)
-                        {
-                            l.onException(String.format("Session creation failed: %s", ex.reason));
-                        }
-                    });
+                    postLoginFailure(String.format("Session creation failed: %s", ex.toString()));
                 }
                 catch(final Glacier2.PermissionDeniedException ex)
                 {
-                    setPendingEvent(new SessionListenerEvent()
-                    {
-                        public void replay(SessionListener l)
-                        {
-                            l.onException(String.format("Login failed: %s", ex.reason));
-                        }
-                    });
+                    postLoginFailure(String.format("Login failed: %s", ex.toString()));
                 }
                 catch(final Ice.LocalException ex)
                 {
-                    setPendingEvent(new SessionListenerEvent()
-                    {
-                        public void replay(SessionListener l)
-                        {
-                            l.onException(String.format("Login failed: %s", ex.toString()));
-                        }
-                    });
+                    postLoginFailure(String.format("Login failed: %s", ex.toString()));
                 }
                 finally
                 {
@@ -211,10 +211,31 @@ public class ChatService extends Service implements com.zeroc.chat.service.Servi
             _session.send(message);
         }
     }
-
-    private interface SessionListenerEvent
+    
+    synchronized public String getLoginError()
     {
-        public void replay(SessionListener l);
+        return _loginError;
+    }
+    
+    synchronized public String getSessionError()
+    {
+        return _session.getError();
+    }
+    
+    synchronized private void postLoginFailure(final String loginError)
+    {
+        _loginError = loginError;
+        if(_listener != null)
+        {
+            final SessionListener listener = _listener;
+            _handler.post(new Runnable()
+            {
+                public void run()
+                {
+                    listener.onLoginError();
+                }
+            });
+        }
     }
 
     private class CertificateVerifier implements IceSSL.CertificateVerifier
@@ -236,13 +257,6 @@ public class ChatService extends Service implements com.zeroc.chat.service.Servi
             }
             catch(Exception ex)
             {
-                setPendingEvent(new SessionListenerEvent()
-                {
-                    public void replay(SessionListener l)
-                    {
-                        l.onConnectConfirm();
-                    }
-                });
                 return waitConfirmConnection();
             }
             return false;
@@ -253,6 +267,20 @@ public class ChatService extends Service implements com.zeroc.chat.service.Servi
 
     synchronized private boolean waitConfirmConnection()
     {
+        _confirmConnectionInProgress = true;
+        if(_listener != null)
+        {
+            final SessionListener listener = _listener;
+
+            _handler.post(new Runnable()
+            {
+                public void run()
+                {
+                    listener.onConnectConfirm();    
+                }
+            });
+        }
+
         while(!_confirmConnectionResult)
         {
             try
@@ -264,26 +292,9 @@ public class ChatService extends Service implements com.zeroc.chat.service.Servi
             {
             }
         }
+        
+        _confirmConnectionInProgress = false;
         return _confirmConnection;
-    }
-
-    synchronized private void setPendingEvent(final SessionListenerEvent pending)
-    {
-        if(_listener != null)
-        {
-            final SessionListener listener = _listener;
-            _handler.post(new Runnable()
-            {
-                public void run()
-                {
-                    pending.replay(listener);    
-                }
-            });
-        }
-        else
-        {
-            _pendingEvent = pending;
-        }
     }
 
     synchronized private void loginComplete(AppSession session, String hostname)
@@ -309,15 +320,20 @@ public class ChatService extends Service implements com.zeroc.chat.service.Servi
         NotificationManager n = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
         n.notify(CHATACTIVE_NOTIFICATION, notification);
 
-        setPendingEvent(new SessionListenerEvent()
+        if(_listener != null)
         {
-            public void replay(SessionListener l)
+            final SessionListener listener = _listener;
+        
+            _handler.post(new Runnable()
             {
-                l.onLogin();
-            }
-        });
+                public void run()
+                {
+                    listener.onLogin();    
+                }
+            });
+        }
     }
-
+    
     private void cancelRefreshTimer()
     {
         Intent intent = new Intent(ChatService.this, ChatService.class);

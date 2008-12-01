@@ -14,7 +14,7 @@ public class LoginController
 {
     public interface Listener
     {
-        void loginInProgress();
+        void onLoginInProgress();
         void onLogin(SessionController controller);
         void onLoginError();
     };
@@ -46,7 +46,7 @@ public class LoginController
     {
         _handler = new Handler();
         _loginListener = listener;
-        _loginListener.loginInProgress();
+        _loginListener.onLoginInProgress();
 
         Ice.InitializationData initData = new Ice.InitializationData();
 
@@ -265,7 +265,7 @@ public class LoginController
             }
             else if(_sessionController == null)
             {
-                listener.loginInProgress();
+                listener.onLoginInProgress();
             }
             else
             {

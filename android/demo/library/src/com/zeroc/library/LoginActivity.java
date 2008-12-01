@@ -46,7 +46,7 @@ public class LoginActivity extends Activity
 
     private LoginController.Listener _listener = new LoginController.Listener()
     {
-        public void loginInProgress()
+        public void onLoginInProgress()
         {
             _loginInProgress = true;
             setLoginState();

@@ -33,17 +33,15 @@ public class LoginActivity extends Activity
 {
     private static final int DIALOG_ERROR = 1;
     private static final int DIALOG_CONFIRM = 2;
-    private String _lastError = "";
-
+    private static final int DIALOG_INVALID_HOST = 3;
+    
     private static final String DEFAULT_HOST = "demo.zeroc.com";
     private static final boolean DEFAULT_SECURE = false;
     private static final String HOSTNAME_KEY = "host";
     private static final String USERNAME_KEY = "username";
     private static final String PASSWORD_KEY = "password";
     private static final String SECURE_KEY = "secure";
-
-    private static final String BUNDLE_KEY_LAST_ERROR = "zeroc:lastError";
-
+    
     private Button _login;
     private EditText _hostname;
     private EditText _username;
@@ -57,6 +55,12 @@ public class LoginActivity extends Activity
 
     private SessionListener _listener = new SessionListener()
     {
+        public void onLoginInProgress()
+        {
+            _loginInProgress = true;
+            setLoginState();
+        }
+
         public void onConnectConfirm()
         {
             showDialog(DIALOG_CONFIRM);
@@ -67,11 +71,9 @@ public class LoginActivity extends Activity
             startActivity(new Intent(LoginActivity.this, ChatActivity.class));
         }
 
-        public void onException(String ex)
+        public void onLoginError()
         {
             setLoginState();
-
-            _lastError = ex;
             showDialog(DIALOG_ERROR);
         }
     };
@@ -85,9 +87,10 @@ public class LoginActivity extends Activity
             // interact with the service. Because we have bound to a explicit
             // service that we know is running in our own process, we can
             // cast its IBinder to a concrete class and directly access it.
-            _service = ((com.zeroc.chat.service.ChatService.LocalBinder)service).getService();
-            _loginInProgress = _service.setSessionListener(_listener);
             setLoginState();
+            
+            _service = ((com.zeroc.chat.service.ChatService.LocalBinder)service).getService();
+            _service.setSessionListener(_listener);
         }
 
         public void onServiceDisconnected(ComponentName name)
@@ -124,8 +127,7 @@ public class LoginActivity extends Activity
         final String ipre = "^([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$";
         if(!hostname.matches(hostre) && !hostname.matches(ipre))
         {
-            _lastError = "The hostname is invalid";
-            showDialog(DIALOG_ERROR);
+            showDialog(DIALOG_INVALID_HOST);
             return;
         }
 
@@ -238,21 +240,10 @@ public class LoginActivity extends Activity
             _password.setText(_prefs.getString(PASSWORD_KEY, ""));
             _secure.setChecked(_prefs.getBoolean(SECURE_KEY, DEFAULT_SECURE));
         }
-        else
-        {
-            _lastError = savedInstanceState.getString(BUNDLE_KEY_LAST_ERROR);
-        }
 
         // Start the ChatService.
         _chatServiceIntent = new Intent(LoginActivity.this, ChatService.class);
         startService(_chatServiceIntent);
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState)
-    {
-        super.onSaveInstanceState(outState);
-        outState.putString(BUNDLE_KEY_LAST_ERROR, _lastError);
     }
 
     @Override
@@ -269,7 +260,8 @@ public class LoginActivity extends Activity
             {
                 public void onClick(DialogInterface dialog, int whichButton)
                 {
-                    _lastError = "";
+                    _loginInProgress = false;
+                    setLoginState();
                 }
             });
             return builder.create();
@@ -283,6 +275,7 @@ public class LoginActivity extends Activity
             AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
             builder.setTitle("Warning");
             builder.setMessage(msg);
+            builder.setCancelable(false);
             builder.setPositiveButton("Ok", new DialogInterface.OnClickListener()
             {
                 public void onClick(DialogInterface dialog, int whichButton)
@@ -295,6 +288,20 @@ public class LoginActivity extends Activity
                 public void onClick(DialogInterface dialog, int whichButton)
                 {
                     _service.confirmConnection(false);
+                }
+            });
+            return builder.create();
+        }
+        
+        case DIALOG_INVALID_HOST:
+        {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Error");
+            builder.setMessage("The hostname is invalid.");
+            builder.setPositiveButton("Ok", new DialogInterface.OnClickListener()
+            {
+                public void onClick(DialogInterface dialog, int whichButton)
+                {
                 }
             });
             return builder.create();
@@ -312,7 +319,7 @@ public class LoginActivity extends Activity
         if(id == DIALOG_ERROR)
         {
             AlertDialog alert = (AlertDialog)dialog;
-            alert.setMessage(_lastError);
+            alert.setMessage(_service.getLoginError());
         }
     }
 }

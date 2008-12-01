@@ -11,7 +11,6 @@ package com.zeroc.chat.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -35,6 +34,7 @@ public class AppSession
     private Glacier2.RouterPrx _router;
     private Handler _handler;
     private String _hostname;
+    private String _error;
 
     public AppSession(Handler handler, IceSSL.CertificateVerifier verifier, String hostname, String username, String password,
             boolean secure) throws Glacier2.CannotCreateSessionException, Glacier2.PermissionDeniedException
@@ -126,6 +126,11 @@ public class AppSession
             }
         }).start();
     }
+    
+    synchronized public String getError()
+    {
+        return _error;
+    }
 
     // This method is only called by the UI thread.
     synchronized public void send(String t)
@@ -141,13 +146,13 @@ public class AppSession
             @Override
             public void ice_exception(Ice.LocalException ex)
             {
-                localException(ex.toString());
+                destroyWithError(ex.toString());
             }
 
             @Override
             public void ice_exception(Ice.UserException ex)
             {
-                localException(ex.toString());
+                destroyWithError(ex.toString());
             }
 
             @Override
@@ -160,24 +165,24 @@ public class AppSession
 
     // This method is only called by the UI thread.
     public synchronized String addChatRoomListener(ChatRoomListener cb, boolean replay)
-        throws NoSessionException
     {
-        if(_destroyed)
-        {
-            throw new NoSessionException();
-        }
-
         _listeners.add(cb);
         cb.init(_users);
         
         if(replay)
         {
             // Replay the entire state.
-            for(Iterator<ChatEventReplay> p = _replay.iterator(); p.hasNext();)
+            for(ChatEventReplay r : _replay)
             {
-                p.next().replay(cb);
+                r.replay(cb);
             }
         }
+        
+        if(_error != null)
+        {
+            cb.error();
+        }
+
         return _hostname;
     }
 
@@ -200,15 +205,16 @@ public class AppSession
         if(System.currentTimeMillis() - _lastSend > INACTIVITY_TIMEOUT)
         {
             destroy();
+            _error = "The session was dropped due to inactivity.";
             
             final List<ChatRoomListener> copy = new ArrayList<ChatRoomListener>(_listeners);
             _handler.post(new Runnable()
             {
                 public void run()
                 {
-                    for(Iterator<ChatRoomListener> p = copy.iterator(); p.hasNext();)
+                    for(ChatRoomListener listener : copy)
                     {
-                        p.next().inactivity();
+                        listener.inactivity();
                     }
                 }
             });
@@ -222,7 +228,7 @@ public class AppSession
         }
         catch(Ice.LocalException e)
         {
-            localException(e.toString());
+            destroyWithError(e.toString());
             return false;
         }
 
@@ -248,9 +254,9 @@ public class AppSession
             {
                 public void run()
                 {
-                    for(Iterator<ChatRoomListener> p = copy.iterator(); p.hasNext();)
+                    for(ChatRoomListener listener : copy)
                     {
-                        p.next().init(u);
+                        listener.init(u);
                     }
                 }
             });
@@ -277,9 +283,9 @@ public class AppSession
             {
                 public void run()
                 {
-                    for(Iterator<ChatRoomListener> p = copy.iterator(); p.hasNext();)
+                    for(ChatRoomListener listener : copy)
                     {
-                        p.next().join(timestamp, name);
+                        listener.join(timestamp, name);
                     }
                 }
             });
@@ -306,9 +312,9 @@ public class AppSession
             {
                 public void run()
                 {
-                    for(Iterator<ChatRoomListener> p = copy.iterator(); p.hasNext();)
+                    for(ChatRoomListener listener : copy)
                     {
-                        p.next().leave(timestamp, name);
+                        listener.leave(timestamp, name);
                     }
                 }
             });
@@ -333,9 +339,9 @@ public class AppSession
             {
                 public void run()
                 {
-                    for(Iterator<ChatRoomListener> p = copy.iterator(); p.hasNext();)
+                    for(ChatRoomListener listener : copy)
                     {
-                        p.next().send(timestamp, name, message);
+                        listener.send(timestamp, name, message);
                     }
                 }
             });
@@ -343,18 +349,19 @@ public class AppSession
     }
 
     // Any exception destroys the session.
-    synchronized private void localException(final String msg)
+    synchronized private void destroyWithError(final String msg)
     {
         destroy();
+        _error = msg;
         
         final List<ChatRoomListener> copy = new ArrayList<ChatRoomListener>(_listeners);
         _handler.post(new Runnable()
         {
             public void run()
             {
-                for(Iterator<ChatRoomListener> p = copy.iterator(); p.hasNext();)
+                for(ChatRoomListener listener : copy)
                 {
-                    p.next().error(msg);
+                    listener.error();
                 }
             }
         });

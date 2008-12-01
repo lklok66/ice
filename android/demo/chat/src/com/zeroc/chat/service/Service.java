@@ -6,6 +6,7 @@
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
+
 package com.zeroc.chat.service;
 
 public interface Service
@@ -44,6 +45,32 @@ public interface Service
 
     /**
      * 
+     * Get the last login failure error message.
+     * 
+     * @return The last login error.
+     * 
+     */
+    String getLoginError();
+    
+    /**
+     * 
+     * Called to confirm a connection establishment.
+     * 
+     * @param confirm
+     *            True if the connection should be established, false otherwise.
+     * 
+     */
+    void confirmConnection(boolean confirm);
+
+    /**
+     * 
+     * Called to logout from the current session.
+     * 
+     */
+    void logout();
+
+    /**
+     * 
      * Add a chat room listener.
      * 
      * @param listener
@@ -58,8 +85,7 @@ public interface Service
      *             if there is no established session.
      * 
      */
-    String addChatRoomListener(ChatRoomListener listener, boolean replay)
-        throws NoSessionException;
+    String addChatRoomListener(ChatRoomListener listener, boolean replay) throws NoSessionException;
 
     /**
      * 
@@ -80,18 +106,10 @@ public interface Service
 
     /**
      * 
-     * Called to confirm a connection establishment.
+     * Get the last session error message.
      * 
-     * @param confirm
-     *            True if the connection should be established, false otherwise.
-     * 
-     */
-    void confirmConnection(boolean confirm);
-
-    /**
-     * 
-     * Called to logout from the current session.
+     * @return The last session error.
      * 
      */
-    void logout();
+    String getSessionError();
 }
