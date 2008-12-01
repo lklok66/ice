@@ -168,7 +168,7 @@ Mutex::unlock() const
 {
 #ifdef _WIN32_WCE
     --_recursionCount;
-    assert(_recursionCount == 1);
+    assert(_recursionCount == 0);
 #else
     assert(_mutex.RecursionCount == 1);
 #endif
