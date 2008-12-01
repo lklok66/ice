@@ -51,11 +51,7 @@ public:
     void unlock() const;
 
 #ifdef _WIN32
-#   if defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x0400
     mutable CRITICAL_SECTION* _mutex;
-#   else
-#      error Ice-E for Windows requires fully functional critical sections
-#   endif
 #else
     mutable pthread_mutex_t _mutex;
 #endif
