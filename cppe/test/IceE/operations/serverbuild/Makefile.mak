@@ -32,10 +32,10 @@ SRCS		= $(OBJS:.obj=.cpp) \
 		  ..\Server.cpp \
 		  ..\Collocated.cpp \
 		  ..\AllTests.cpp \
-		  ..\BatchOneways.obj \
-		  ..\OnewaysAMI.obj \
-		  ..\TwowaysAMI.obj \
-		  ..\Twoways.obj
+		  ..\BatchOneways.cpp \
+		  ..\OnewaysAMI.cpp \
+		  ..\TwowaysAMI.cpp \
+		  ..\Twoways.cpp
 
 SDIR		= ..
 

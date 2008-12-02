@@ -43,7 +43,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="1"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories=".,../../../include"
+				AdditionalIncludeDirectories=".,../../../../include"
 				PreprocessorDefinitions="NDEBUG;ICEE_STATIC_LIBS;WIN32_LEAN_AND_MEAN;_CONSOLE"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -74,7 +74,7 @@
 				OutputFile="server.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="../../../lib"
+				AdditionalLibraryDirectories="../../../../lib"
 				ProgramDatabaseFile=".\ReleaseStatic/server.pdb"
 				SubSystem="1"
 				TargetMachine="1"
@@ -135,7 +135,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".,../../../include"
+				AdditionalIncludeDirectories=".,../../../../include"
 				PreprocessorDefinitions="_DEBUG;ICEE_STATIC_LIBS;WIN32_LEAN_AND_MEAN;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -168,7 +168,7 @@
 				OutputFile="server.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="../../../lib"
+				AdditionalLibraryDirectories="../../../../lib"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\DebugStatic/server.pdb"
 				SubSystem="1"
@@ -230,7 +230,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".,../../../include"
+				AdditionalIncludeDirectories=".,../../../../include"
 				PreprocessorDefinitions="_DEBUG;WIN32_LEAN_AND_MEAN;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -263,7 +263,7 @@
 				OutputFile="server.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="../../../lib"
+				AdditionalLibraryDirectories="../../../../lib"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\Debug/server.pdb"
 				SubSystem="1"
@@ -326,7 +326,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="1"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories=".,../../../include"
+				AdditionalIncludeDirectories=".,../../../../include"
 				PreprocessorDefinitions="NDEBUG;WIN32_LEAN_AND_MEAN;_CONSOLE"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -357,7 +357,7 @@
 				OutputFile="server.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="../../../lib"
+				AdditionalLibraryDirectories="../../../../lib"
 				ProgramDatabaseFile=".\Release/server.pdb"
 				SubSystem="1"
 				TargetMachine="1"
@@ -543,7 +543,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe  -I../../../../slice  Callback.ice&#x0D;&#x0A;"
+						CommandLine="slice2cppe.exe  -I../../../../../slice  Callback.ice&#x0D;&#x0A;"
 						Outputs="Callback.h;Callback.cpp"
 					/>
 				</FileConfiguration>
@@ -552,7 +552,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe  -I../../../../slice  Callback.ice&#x0D;&#x0A;"
+						CommandLine="slice2cppe.exe  -I../../../../../slice  Callback.ice&#x0D;&#x0A;"
 						Outputs="Callback.h;Callback.cpp"
 					/>
 				</FileConfiguration>
@@ -561,7 +561,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe  -I../../../../slice  Callback.ice&#x0D;&#x0A;"
+						CommandLine="slice2cppe.exe  -I../../../../../slice  Callback.ice&#x0D;&#x0A;"
 						Outputs="Callback.h;Callback.cpp"
 					/>
 				</FileConfiguration>
@@ -570,7 +570,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe  -I../../../../slice  Callback.ice&#x0D;&#x0A;"
+						CommandLine="slice2cppe.exe  -I../../../../../slice  Callback.ice&#x0D;&#x0A;"
 						Outputs="Callback.h;Callback.cpp"
 					/>
 				</FileConfiguration>

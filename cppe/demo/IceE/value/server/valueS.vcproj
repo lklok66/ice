@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="throughputC"
-	ProjectGUID="{643F05C5-57B7-443F-A49F-2B03A124F3F9}"
+	Name="valueS"
+	ProjectGUID="{FB0A09D9-BB54-442A-9449-4AFDEDFFA9C4}"
 	>
 	<Platforms>
 		<Platform
@@ -14,9 +14,9 @@
 	</ToolFiles>
 	<Configurations>
 		<Configuration
-			Name="Debug|Win32"
-			OutputDirectory=".\DebugC"
-			IntermediateDirectory=".\DebugC"
+			Name="Release Static|Win32"
+			OutputDirectory=".\ReleaseStatic"
+			IntermediateDirectory=".\ReleaseStatic"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
@@ -36,33 +36,33 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\DebugC/throughputC.tlb"
+				TypeLibraryName=".\ReleaseStatic/valueS.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="0"
+				Optimization="1"
+				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories=".,../../../../include"
-				PreprocessorDefinitions="_DEBUG;WIN32_LEAN_AND_MEAN;_CONSOLE;ICEE_PURE_CLIENT"
-				MinimalRebuild="true"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				PreprocessorDefinitions="NDEBUG;ICEE_STATIC_LIBS;WIN32_LEAN_AND_MEAN;_CONSOLE"
+				StringPooling="true"
+				RuntimeLibrary="2"
+				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\DebugC/throughputC.pch"
-				AssemblerListingLocation=".\DebugC/"
-				ObjectFile=".\DebugC/"
-				ProgramDataBaseFileName=".\DebugC/"
+				PrecompiledHeaderFile=".\ReleaseStatic/valueS.pch"
+				AssemblerListingLocation=".\ReleaseStatic/"
+				ObjectFile=".\ReleaseStatic/"
+				ProgramDataBaseFileName=".\ReleaseStatic/"
 				WarningLevel="3"
 				WarnAsError="true"
 				SuppressStartupBanner="true"
-				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG"
+				PreprocessorDefinitions="NDEBUG"
 				Culture="1033"
 			/>
 			<Tool
@@ -70,14 +70,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions="/FIXED:NO"
-				AdditionalDependencies="iceecd.lib"
-				OutputFile="client.exe"
-				LinkIncremental="2"
+				AdditionalDependencies="ws2_32.lib rpcrt4.lib icee_static.lib"
+				OutputFile="server.exe"
+				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="../../../../lib"
-				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\DebugC/client.pdb"
+				ProgramDatabaseFile=".\ReleaseStatic/server.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -93,7 +91,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\DebugC/throughputC.bsc"
+				OutputFile=".\ReleaseStatic/valueS.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -110,8 +108,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\ReleaseC"
-			IntermediateDirectory=".\ReleaseC"
+			OutputDirectory=".\Release"
+			IntermediateDirectory=".\Release"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
@@ -131,23 +129,23 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\ReleaseC/throughputC.tlb"
+				TypeLibraryName=".\Release/valueS.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="2"
+				Optimization="1"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories=".,../../../../include"
-				PreprocessorDefinitions="NDEBUG;WIN32_LEAN_AND_MEAN;_CONSOLE;ICEE_PURE_CLIENT"
+				PreprocessorDefinitions="NDEBUG;WIN32_LEAN_AND_MEAN;_CONSOLE"
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\ReleaseC/throughputC.pch"
-				AssemblerListingLocation=".\ReleaseC/"
-				ObjectFile=".\ReleaseC/"
-				ProgramDataBaseFileName=".\ReleaseC/"
+				PrecompiledHeaderFile=".\Release/valueS.pch"
+				AssemblerListingLocation=".\Release/"
+				ObjectFile=".\Release/"
+				ProgramDataBaseFileName=".\Release/"
 				WarningLevel="3"
 				WarnAsError="true"
 				SuppressStartupBanner="true"
@@ -165,12 +163,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="iceec.lib"
-				OutputFile="client.exe"
+				AdditionalDependencies="icee.lib"
+				OutputFile="server.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="../../../../lib"
-				ProgramDatabaseFile=".\ReleaseC/client.pdb"
+				ProgramDatabaseFile=".\Release/server.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -186,7 +184,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\ReleaseC/throughputC.bsc"
+				OutputFile=".\Release/valueS.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -202,9 +200,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug Static|Win32"
-			OutputDirectory=".\DebugStaticC"
-			IntermediateDirectory=".\DebugStaticC"
+			Name="Debug|Win32"
+			OutputDirectory=".\Debug"
+			IntermediateDirectory=".\Debug"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
@@ -224,22 +222,22 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\DebugStaticC/throughputC.tlb"
+				TypeLibraryName=".\Debug/valueS.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories=".,../../../../include"
-				PreprocessorDefinitions="_DEBUG;ICEE_STATIC_LIBS;WIN32_LEAN_AND_MEAN;_CONSOLE;ICEE_PURE_CLIENT"
+				PreprocessorDefinitions="_DEBUG;WIN32_LEAN_AND_MEAN;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\DebugStaticC/throughputC.pch"
-				AssemblerListingLocation=".\DebugStaticC/"
-				ObjectFile=".\DebugStaticC/"
-				ProgramDataBaseFileName=".\DebugStaticC/"
+				PrecompiledHeaderFile=".\Debug/valueS.pch"
+				AssemblerListingLocation=".\Debug/"
+				ObjectFile=".\Debug/"
+				ProgramDataBaseFileName=".\Debug/"
 				WarningLevel="3"
 				WarnAsError="true"
 				SuppressStartupBanner="true"
@@ -259,13 +257,13 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/FIXED:NO"
-				AdditionalDependencies="iceec_staticd.lib ws2_32.lib rpcrt4.lib"
-				OutputFile="client.exe"
+				AdditionalDependencies="iceed.lib"
+				OutputFile="server.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="../../../../lib"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\DebugStaticC/client.pdb"
+				ProgramDatabaseFile=".\Debug/server.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -281,7 +279,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\DebugStaticC/throughputC.bsc"
+				OutputFile=".\Debug/valueS.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -297,9 +295,9 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release Static|Win32"
-			OutputDirectory=".\ReleaseStaticC"
-			IntermediateDirectory=".\ReleaseStaticC"
+			Name="Debug Static|Win32"
+			OutputDirectory=".\DebugStatic"
+			IntermediateDirectory=".\DebugStatic"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
@@ -319,33 +317,33 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\ReleaseStaticC/throughputC.tlb"
+				TypeLibraryName=".\DebugStatic/valueS.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="2"
-				InlineFunctionExpansion="1"
+				Optimization="0"
 				AdditionalIncludeDirectories=".,../../../../include"
-				PreprocessorDefinitions="NDEBUG;ICEE_STATIC_LIBS;WIN32_LEAN_AND_MEAN;_CONSOLE;ICEE_PURE_CLIENT"
-				StringPooling="true"
-				RuntimeLibrary="2"
-				EnableFunctionLevelLinking="true"
+				PreprocessorDefinitions="_DEBUG;ICEE_STATIC_LIBS;WIN32_LEAN_AND_MEAN;_CONSOLE"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\ReleaseStaticC/throughputC.pch"
-				AssemblerListingLocation=".\ReleaseStaticC/"
-				ObjectFile=".\ReleaseStaticC/"
-				ProgramDataBaseFileName=".\ReleaseStaticC/"
+				PrecompiledHeaderFile=".\DebugStatic/valueS.pch"
+				AssemblerListingLocation=".\DebugStatic/"
+				ObjectFile=".\DebugStatic/"
+				ProgramDataBaseFileName=".\DebugStatic/"
 				WarningLevel="3"
 				WarnAsError="true"
 				SuppressStartupBanner="true"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
 			/>
 			<Tool
 				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
+				PreprocessorDefinitions="_DEBUG"
 				Culture="1033"
 			/>
 			<Tool
@@ -353,12 +351,14 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="icee.lib ws2_32.lib rpcrt4.lib iceec_static.lib"
-				OutputFile="client.exe"
-				LinkIncremental="1"
+				AdditionalOptions="/FIXED:NO"
+				AdditionalDependencies="icee_staticd.lib ws2_32.lib rpcrt4.lib"
+				OutputFile="server.exe"
+				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="../../../../lib"
-				ProgramDatabaseFile=".\ReleaseStaticC/client.pdb"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile=".\DebugStatic/server.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -374,7 +374,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\ReleaseStaticC/throughputC.bsc"
+				OutputFile=".\DebugStatic/valueS.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -398,10 +398,14 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath="Client.cpp"
+				RelativePath=".\InitialI.cpp"
+				>
+			</File>
+			<File
+				RelativePath="Server.cpp"
 				>
 				<FileConfiguration
-					Name="Debug|Win32"
+					Name="Release Static|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -419,7 +423,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug Static|Win32"
+					Name="Debug|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -428,7 +432,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release Static|Win32"
+					Name="Debug Static|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -438,10 +442,10 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="Throughput.cpp"
+				RelativePath="Value.cpp"
 				>
 				<FileConfiguration
-					Name="Debug|Win32"
+					Name="Release Static|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -459,7 +463,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug Static|Win32"
+					Name="Debug|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -468,7 +472,47 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
+					Name="Debug Static|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="ValueI.cpp"
+				>
+				<FileConfiguration
 					Name="Release Static|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug Static|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -483,7 +527,15 @@
 			Filter="h;hpp;hxx;hm;inl"
 			>
 			<File
-				RelativePath="Throughput.h"
+				RelativePath=".\InitialI.h"
+				>
+			</File>
+			<File
+				RelativePath="Value.h"
+				>
+			</File>
+			<File
+				RelativePath="ValueI.h"
 				>
 			</File>
 		</Filter>
@@ -492,15 +544,15 @@
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 			>
 			<File
-				RelativePath="Throughput.ice"
+				RelativePath="Value.ice"
 				>
 				<FileConfiguration
-					Name="Debug|Win32"
+					Name="Release Static|Win32"
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Throughput.ice&#x0D;&#x0A;"
-						Outputs="Throughput.h;Throughput.cpp"
+						CommandLine="slice2cppe.exe Value.ice&#x0D;&#x0A;"
+						Outputs="Value.h;Value.cpp"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -508,8 +560,17 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Throughput.ice&#x0D;&#x0A;"
-						Outputs="Throughput.h;Throughput.cpp"
+						CommandLine="slice2cppe.exe Value.ice&#x0D;&#x0A;"
+						Outputs="Value.h;Value.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="slice2cppe.exe Value.ice&#x0D;&#x0A;"
+						Outputs="Value.h;Value.cpp"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -517,25 +578,12 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Throughput.ice&#x0D;&#x0A;"
-						Outputs="Throughput.h;Throughput.cpp"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release Static|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Throughput.ice&#x0D;&#x0A;"
-						Outputs="Throughput.h;Throughput.cpp"
+						CommandLine="slice2cppe.exe Value.ice&#x0D;&#x0A;"
+						Outputs="Value.h;Value.cpp"
 					/>
 				</FileConfiguration>
 			</File>
 		</Filter>
-		<File
-			RelativePath="README"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

@@ -22,7 +22,7 @@ SOBJS		= TestI.obj \
 SRCS		= $(OBJS:.obj=.cpp) \
 		  ..\TestI.cpp \
 		  ..\Server.cpp \
-		  ..\ServerLocator.obj
+		  ..\ServerLocator.cpp
 
 SDIR		= ..
 
