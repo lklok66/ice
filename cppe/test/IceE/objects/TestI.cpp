@@ -108,8 +108,12 @@ FI::checkValues(const Ice::Current&)
     return e1 && e1 == e2;
 }
 
+#ifdef ICEE_PURE_CLIENT
+InitialI::InitialI() :
+#else
 InitialI::InitialI(const Ice::ObjectAdapterPtr& adapter) :
     _adapter(adapter),
+#endif
     _b1(new BI),
     _b2(new BI),
     _c(new CI),
@@ -135,9 +139,11 @@ InitialI::InitialI(const Ice::ObjectAdapterPtr& adapter) :
 void
 InitialI::shutdown(const Ice::Current&)
 {
+#ifndef ICEE_PURE_CLIENT
     _adapter->getCommunicator()->shutdown();
 #ifdef _WIN32_WCE
     tprintf("The server has shutdown, close the window to terminate the server.");
+#endif
 #endif
 }
 

@@ -4,8 +4,10 @@ back into an object provided by the client as part of that invocation.
 
 To run the demo, first start the server:
 
+$ cd server
 $ server
 
 In a separate window, start the client:
 
+$ cd client
 $ client

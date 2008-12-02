@@ -3,10 +3,12 @@ well as how to make oneway, datagram, secure, and batched invocations.
 
 To run the demo, first start the server:
 
+$ cd server
 $ server
 
 In a separate window, start the client:
 
+$ cd client
 $ client
 
 To test timeouts you can use 'T' to set a timeout on the client proxy

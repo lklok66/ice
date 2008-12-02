@@ -9,55 +9,14 @@
 
 top_srcdir	= ../../..
 
-CLIENT		= client
-SERVER		= server
-COLLOCATED	= collocated
-
-TARGETS		= $(CLIENT) $(SERVER) $(COLLOCATED)
-
-OBJS		= Test.o
-
-COBJS		= Client.o \
-		  AllTests.o \
-		  Twoways.o \
-		  OnewaysAMI.o \
-		  TwowaysAMI.o
-
-SOBJS		= TestI.o \
-		  Server.o
-
-COLOBJS		= TestI.o \
-		  Collocated.o \
-		  AllTests.o \
-		  Twoways.o \
-		  BatchOneways.o \
-		  OnewaysAMI.o \
-		  TwowaysAMI.o
-
-SRCS		= $(OBJS:.o=.cpp) \
-		  $(COBJS:.o=.cpp) \
-		  $(SOBJS:.o=.cpp) \
-		  $(COLOBJS:.o=.cpp)
-
-SLICE_SRCS	= Test.ice
-
 include $(top_srcdir)/config/Make.rules
 
-CPPFLAGS	:= -I. -I../../include $(CPPFLAGS)
-ifdef ice_bin_dist
-LDFLAGS		:= $(LDFLAGS) -L$(libdir)
-endif
+SUBDIRS		= clientbuild \
+		  serverbuild
 
-$(CLIENT): $(OBJS) $(COBJS) BatchOnewaysC.o TestC.o
-	rm -f $@
-	$(CXX) $(LDFLAGS) -o $@ BatchOnewaysC.o TestC.o $(COBJS) $(TESTCLIBS)
-
-$(SERVER): $(OBJS) $(SOBJS)
-	rm -f $@
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(SOBJS) $(TESTLIBS)
-
-$(COLLOCATED): $(OBJS) $(COLOBJS)
-	rm -f $@
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(COLOBJS) $(TESTLIBS)
-
-include .depend
+$(EVERYTHING)::
+	@for subdir in $(SUBDIRS); \
+	do \
+	    echo "making $@ in $$subdir"; \
+	    ( cd $$subdir && $(MAKE) $@ ) || exit 1; \
+	done

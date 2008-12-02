@@ -9,34 +9,14 @@
 
 top_srcdir	= ../../..
 
-CLIENT		= client
-SERVER		= server
-
-TARGETS		= $(CLIENT) $(SERVER)
-
-OBJS		= Callback.o
-
-COBJS		= Client.o
-
-SOBJS		= Server.o \
-		  CallbackI.o
-
-SRCS		= $(OBJS:.o=.cpp) \
-		  $(COBJS:.o=.cpp) \
-		  $(SOBJS:.o=.cpp)
-
-SLICE_SRCS	= Callback.ice
-
 include $(top_srcdir)/config/Make.rules
 
-CPPFLAGS	:= -I. $(CPPFLAGS)
+SUBDIRS		= client \
+		  server
 
-$(CLIENT): $(OBJS) $(COBJS)
-	rm -f $@
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(COBJS) $(LIBS)
-
-$(SERVER): $(OBJS) $(SOBJS)
-	rm -f $@
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(SOBJS) $(LIBS)
-
-include .depend
+$(EVERYTHING)::
+	@for subdir in $(SUBDIRS); \
+	do \
+	    echo "making $@ in $$subdir"; \
+	    ( cd $$subdir && $(MAKE) $@ ) || exit 1; \
+	done

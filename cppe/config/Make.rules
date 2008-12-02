@@ -181,10 +181,21 @@ $(HDIR)/%F.h: $(SDIR)/%F.ice
 	mv $(*F)F.h $(HDIR)
 	rm -f $(*F)F.cpp
 
+
+ifneq ($(HDIR),)
+
 $(HDIR)/%.h %.cpp: $(SDIR)/%.ice
 	rm -f $(HDIR)/$(*F).h $(*F).cpp
 	$(SLICE2CPPE) $(SLICE2CPPEFLAGS) $<
 	mv $(*F).h $(HDIR)
+
+else
+
+%.h %.cpp: $(SDIR)/%.ice
+	rm -f $(*F).h $(*F).cpp
+	$(SLICE2CPPE) $(SLICE2CPPEFLAGS) $<
+
+endif
 
 %.h %.cpp: %.ice
 	rm -f $(*F).h $(*F).cpp

@@ -931,14 +931,16 @@ def clientServerTest(additionalServerOptions = "", additionalClientOptions = "",
         clientProc.waitTestSuccess()
         serverProc.waitTestSuccess()
 
-def collocatedTest(additionalOptions = ""):
+def collocatedTest(additionalOptions = "", collocated = None):
     lang = getDefaultMapping()
     if len(cross) > 1 or cross[0] != lang:
         print "** skipping cross test"
         return
     testdir = os.getcwd()
 
-    collocated = getDefaultCollocatedFile()
+    if collocated == None:
+        collocated = getDefaultCollocatedFile()
+    collocatedDesc = collocated
     if lang != "java" and lang != "javae":
         collocated = os.path.join(testdir, collocated) 
         if lang == "cpp":
@@ -950,7 +952,7 @@ def collocatedTest(additionalOptions = ""):
         env = copy.deepcopy(os.environ)
         addClasspath(os.path.join(testdir, "classes"), env)
 
-    print "starting collocated...",
+    print "starting %s ..." % (collocatedDesc),
     collocated = getCommandLine(collocated, DriverConfig("colloc")) + ' ' + additionalOptions 
     collocatedProc = spawnClient(collocated, env = env)
     print "ok"

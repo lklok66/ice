@@ -348,13 +348,14 @@ EVERYTHING		= all clean install
 .c.obj:
 	$(CC) /c $(CPPFLAGS) $(CFLAGS) $<
 
-.cpp.cobj:
-	$(CXX) -DICEE_PURE_CLIENT /Fo$(*F).cobj /c $(CPPFLAGS) $(CXXFLAGS) $<
-
 {$(SDIR)\}.ice{$(HDIR)}.h:
 	del /q $(HDIR)\$(*F).h $(*F).cpp
 	$(SLICE2CPPE) $(SLICE2CPPEFLAGS) $<
 	move $(*F).h $(HDIR)
+
+{$(SDIR)\}.ice.h:
+	del /q $(*F).h $(*F).cpp
+	$(SLICE2CPPE) $(SLICE2CPPEFLAGS) $<
 
 .ice.cpp:
 	del /q $(*F).h $(*F).cpp
