@@ -13,10 +13,10 @@ CLIENT		= ../client
 
 TARGETS		= $(CLIENT)
 
-OBJS		= Test.o
+OBJS		= Test.o \
+		  Wstring.o
 
-TOBJS		= Wstring.o \
-		  Client.o \
+TOBJS		= Client.o \
 		  AllTests.o \
 		  MyByteSeq.o \
 		  StringConverterI.o

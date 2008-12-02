@@ -14,10 +14,10 @@ COLLOCATED	= ../collocated
 
 TARGETS		= $(SERVER) $(COLLOCATED)
 
-OBJS		= Test.o
+OBJS		= Test.o \
+		  Wstring.o
 
 TOBJS		= TestI.o \
-		  Wstring.o \
 		  WstringI.o \
 		  MyByteSeq.o \
 		  StringConverterI.o
