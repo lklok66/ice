@@ -24,7 +24,8 @@ TOBJS		= Client.o \
 SRCS		= $(OBJS:.o=.cpp) \
 		  $(patsubst %.o,../%.cpp,$(TOBJS))
 		 
-SLICE_SRCS	= $(SDIR)/Test.ice
+SLICE_SRCS	= $(SDIR)/Test.ice \
+		  $(SDIR)/Wstring.ice
 
 SDIR		= ..
 

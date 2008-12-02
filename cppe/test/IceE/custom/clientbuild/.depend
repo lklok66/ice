@@ -5,3 +5,4 @@ AllTests$(OBJEXT): ../AllTests.cpp $(includedir)/IceE/IceE.h $(includedir)/IceE/
 MyByteSeq$(OBJEXT): ../MyByteSeq.cpp ../MyByteSeq.h $(includedir)/IceE/Config.h $(includedir)/IceE/Features.h
 StringConverterI$(OBJEXT): ../StringConverterI.cpp $(includedir)/IceE/Config.h $(includedir)/IceE/Features.h ../StringConverterI.h $(includedir)/IceE/StringConverter.h $(includedir)/IceE/Exception.h $(includedir)/IceE/ExceptionBase.h $(includedir)/IceE/Handle.h $(includedir)/IceE/Shared.h $(includedir)/IceE/Unicode.h
 Test.cpp: ../Test.ice
+Wstring.cpp: ../Wstring.ice

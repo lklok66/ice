@@ -32,7 +32,8 @@ SRCS		= $(OBJS:.o=.cpp) \
 		  $(patsubst %.o,../%.cpp,$(SOBJS)) \
 		  $(patsubst %.o,../%.cpp,$(COBJS))
 
-SLICE_SRCS	= $(SDIR)/Test.ice
+SLICE_SRCS	= $(SDIR)/Test.ice \
+		  $(SDIR)/Wstring.ice
 
 SDIR		= ..
 
