@@ -14,7 +14,8 @@ top_srcdir	= ..\..
 SUBDIRS		= minimal \
 		  latency \
 		  throughput \
-		  chat
+		  chat \
+		  MFC
 
 !if "$(WINDOWS_MOBILE_SDK)" == ""
 SUBDIRS 	= $(SUBDIRS) \
@@ -27,10 +28,6 @@ SUBDIRS 	= $(SUBDIRS) \
 
 !if "$(WINDOWS_MOBILE_SDK)" == "" && "$(HAS_AMI)" == "yes"
 SUBDIRS		= $(SUBDIRS) async
-!endif
-
-!if "$(CPP_COMPILER)" != "VC80_EXPRESS" && "$(CPP_COMPILER)" != "VC90_EXPRESS"
-SUBDIRS		= $(SUBDIRS) MFC
 !endif
 
 $(EVERYTHING)::

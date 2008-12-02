@@ -92,9 +92,8 @@ working directory to IceE-@ver@. For example:
   > cd C:\IceE-@ver@
 
 Edit cppe\config\Make.rules.mak to establish your build configuration.
-The comments in the file provide more information. In particular, you
-must ensure that CPP_COMPILER is set appropriately for your environment.
-For Windows Mobile, you must ensure that WINDOWS_MOBILE_SDK is set
+The comments in the file provide more information. For example for 
+Windows Mobile, you must ensure that WINDOWS_MOBILE_SDK is set
 properly.
 
 Now you're ready to build Ice-E:
