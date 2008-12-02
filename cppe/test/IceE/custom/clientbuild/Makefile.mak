@@ -13,16 +13,15 @@ CLIENT		= ..\client.exe
 
 TARGETS		= $(CLIENT)
 
-OBJS		= Test.obj
+OBJS		= Test.obj \
+		  Wstring.obj
 
-TOBJS		= Wstring.obj \
-		  Client.obj \
+TOBJS		= Client.obj \
 		  AllTests.obj \
 		  MyByteSeq.obj \
 		  StringConverterI.obj
 
 SRCS		= $(OBJS:.obj=.cpp) \
-		  ..\Wstring.cpp \
 		  ..\Client.cpp \
 		  ..\AllTests.cpp \
 		  ..\MyByteSeq.cpp \
@@ -51,5 +50,6 @@ $(CLIENT): $(OBJS) $(TOBJS)
 
 clean::
 	del /q Test.cpp Test.h
+	del /q Wstring.cpp Wstring.h
 
 !include .depend

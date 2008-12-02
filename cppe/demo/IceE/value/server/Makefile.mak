@@ -13,19 +13,14 @@ SERVER		= server.exe
 
 TARGETS		= $(SERVER)
 
-OBJS		= Throughput.obj \
-		  ThroughputI.obj
+OBJS		= InitialI.obj \
+		  Value.obj \
+		  ValueI.obj \
+		  Server.obj
+
+SRCS		= $(OBJS:.obj=.cpp)
 
 !include $(top_srcdir)/config/Make.rules.mak
-
-!if "$(WINDOWS_MOBILE_SDK)" != ""
-SOBJS           = WinCEServer.obj
-!else
-SOBJS           = Server.obj
-!endif
-
-SRCS		= $(OBJS:.obj=.cpp) \
-		  $(SOBJS:.obj=.cpp)
 
 CPPFLAGS	= -I. $(CPPFLAGS) -WX -DWIN32_LEAN_AND_MEAN
 
@@ -33,12 +28,12 @@ CPPFLAGS	= -I. $(CPPFLAGS) -WX -DWIN32_LEAN_AND_MEAN
 PDBFLAGS        = /pdb:$(SERVER:.exe=.pdb)
 !endif
 
-$(SERVER): $(OBJS) $(SOBJS)
-	$(LINK) $(LDFLAGS) $(PDBFLAGS) $(OBJS) $(SOBJS) /out:$@ $(LIBS)
+$(SERVER): $(OBJS)
+	$(LINK) $(LDFLAGS) $(PDBFLAGS) $(OBJS) /out:$@ $(LIBS)
 	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
 	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#2 && del /q $@.manifest
 
 clean::
-	del /q Throughput.cpp Throughput.h
+	del /q Value.cpp Value.h
 
 !include .depend

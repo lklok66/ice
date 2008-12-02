@@ -348,14 +348,20 @@ EVERYTHING		= all clean install
 .c.obj:
 	$(CC) /c $(CPPFLAGS) $(CFLAGS) $<
 
+!if "$(HDIR)" != ""
+
 {$(SDIR)\}.ice{$(HDIR)}.h:
 	del /q $(HDIR)\$(*F).h $(*F).cpp
 	$(SLICE2CPPE) $(SLICE2CPPEFLAGS) $<
 	move $(*F).h $(HDIR)
 
+!else
+
 {$(SDIR)\}.ice.h:
 	del /q $(*F).h $(*F).cpp
 	$(SLICE2CPPE) $(SLICE2CPPEFLAGS) $<
+
+!endif
 
 .ice.cpp:
 	del /q $(*F).h $(*F).cpp

@@ -14,10 +14,10 @@ COLLOCATED	= ..\collocated.exe
 
 TARGETS		= $(SERVER) $(COLLOCATED)
 
-OBJS		= Test.obj
+OBJS		= Test.obj \
+	   	  Wstring.obj
 
 TOBJS		= TestI.obj \
-		  Wstring.obj \
 		  WstringI.obj \
 		  MyByteSeq.obj \
 		  StringConverterI.obj
@@ -29,7 +29,6 @@ COBJS		= Collocated.obj \
 
 SRCS		= $(OBJS:.obj=.cpp) \
 		  ..\TestI.cpp \
-		  ..\Wstring.cpp \
 		  ..\WstringI.cpp \
 		  ..\MyByteSeq.cpp \
 		  ..\StringConverterI.cpp \

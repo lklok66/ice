@@ -16,7 +16,7 @@ TARGETS		= $(CLIENT)
 OBJS		= Test.obj
 
 TOBJS		= Client.obj \
-		  AllTests.obj
+		  AllTests.obj \
 		  BatchOneways.obj \
 		  OnewaysAMI.obj \
 		  TwowaysAMI.obj \
