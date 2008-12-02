@@ -332,6 +332,9 @@ EVERYTHING		= all clean install
 .cpp.obj::
 	$(CXX) /c $(CPPFLAGS) $(CXXFLAGS) $<
 
+{..\}.cpp.obj::
+	$(CXX) /c $(CPPFLAGS) $(CXXFLAGS) $<
+
 .c.obj:
 	$(CC) /c $(CPPFLAGS) $(CFLAGS) $<
 

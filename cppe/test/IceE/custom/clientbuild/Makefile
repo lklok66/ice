@@ -31,9 +31,6 @@ SDIR		= ..
 
 include $(top_srcdir)/config/Make.rules
 
-%.o: ../%.cpp
-	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<
-
 CPPFLAGS	:= -I. -I.. -DICEE_PURE_CLIENT -I../../../include $(CPPFLAGS)
 ifdef ice_bin_dist
 LDFLAGS		:= $(LDFLAGS) -L$(libdir)

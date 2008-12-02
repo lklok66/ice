@@ -34,9 +34,6 @@ SDIR		= ..
 
 !include $(top_srcdir)/config/Make.rules.mak
 
-{..\}.cpp.obj::
-	$(CXX) /c $(CPPFLAGS) $(CXXFLAGS) $<
-
 CPPFLAGS	= -I. -I.. -I../../../include -DICEE_PURE_CLIENT $(CPPFLAGS) -WX -DWIN32_LEAN_AND_MEAN
 !if "$(ice_bin_dist)" != ""
 LDFLAGS		= $(LDFLAGS) /LIBPATH:"$(libdir)"

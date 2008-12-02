@@ -31,9 +31,6 @@ SDIR		= ..
 
 include $(top_srcdir)/config/Make.rules
 
-%.o: ../%.cpp
-	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<
-
 SLICE2CPPEFLAGS	:= -I.. $(SLICE2CPPEFLAGS)
 CPPFLAGS	:= -I. -I.. -I../../../../include $(CPPFLAGS)
 ifdef ice_bin_dist

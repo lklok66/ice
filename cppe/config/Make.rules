@@ -169,6 +169,9 @@ EVERYTHING		= all depend clean install
 .cpp.o:
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<
 
+%.o: ../%.cpp
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<
+
 .c.o:
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $<
 

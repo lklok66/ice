@@ -27,9 +27,6 @@ SDIR		= ..
 
 !include $(top_srcdir)/config/Make.rules.mak
 
-{..\}.cpp.obj::
-	$(CXX) /c $(CPPFLAGS) $(CXXFLAGS) $<
-
 SLICE2CPPEFLAGS	= -I.. $(SLICE2CPPEFLAGS)
 CPPFLAGS	= -I. -I.. -I../../../../include $(CPPFLAGS) -WX -DWIN32_LEAN_AND_MEAN
 !if "$(ice_bin_dist)" != ""
