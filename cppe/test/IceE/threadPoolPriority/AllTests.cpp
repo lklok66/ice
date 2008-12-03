@@ -29,7 +29,7 @@ allTests(const Ice::CommunicatorPtr& communicator)
 #ifdef _WIN32_WCE
         test(0 == priority->getPriority());
 #elif defined _WIN32
-        test(THREAD_PRIORITY_ABOVE_NORMAL == priority->getPriority());
+        test(1 == priority->getPriority());
 #else
         test(50 == priority->getPriority());
 #endif
