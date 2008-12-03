@@ -84,28 +84,32 @@
 #   define ICE_API ICE_DECLSPEC_IMPORT
 #endif
 
-#if defined(_WIN32)
+#ifdef _WIN32
 
-//
-// Comment out the following block if you want to run on Windows 9x
-// or Windows NT 3.51.
-//
-#   ifndef _WIN32_WINNT
-        //
-        // Necessary for TryEnterCriticalSection.
-        //
-#       define _WIN32_WINNT 0x0400
+#   ifndef _WIN32_WCE
+#      ifndef _WIN32_WINNT
+           //
+           // Necessary for TryEnterCriticalSection (see IceE/Mutex.h).
+           //
+#          if defined(_MSC_VER) && _MSC_VER < 1500
+#             define _WIN32_WINNT 0x0400
+#          endif
+#      elif _WIN32_WINNT < 0x0400
+#         error "TryEnterCricalSection requires _WIN32_WINNT >= 0x0400"
+#      endif
+
 #   endif
+
 
 #   include <windows.h>
 
-#if defined(_WIN32_WCE) && defined(_MSC_VER)
-    //
-    // return type for ... (ie; not a UDT or reference to a UDT.  Will
-    // produce errors if applied using infix notation)
-    //
-#   pragma warning( disable : 4284 )
-#endif
+#   if defined(_WIN32_WCE) && defined(_MSC_VER)
+       //
+       // return type for ... (ie; not a UDT or reference to a UDT.  Will
+       // produce errors if applied using infix notation)
+       //
+#      pragma warning( disable : 4284 )
+#   endif
 
 // '...' : forcing value to bool 'true' or 'false' (performance warning)
 #   pragma warning( disable : 4800 )
@@ -145,8 +149,7 @@ namespace IceUtil
 // TODO: Constructor and destructor should not be inlined, as they are
 // not performance critical.
 //
-// TODO: Naming conventions?
-//
+
 class noncopyable
 {
 protected:

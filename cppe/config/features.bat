@@ -51,6 +51,10 @@ echo %HAS_WSTRING%#define ICEE_HAS_WSTRING>> %targ%
 echo %HAS_OPAQUE_ENDPOINTS%#define ICEE_HAS_OPAQUE_ENDPOINTS>> %targ%
 echo %HAS_AMI%#define ICEE_HAS_AMI>> %targ%
 echo.>> %targ%
+echo #ifndef _WIN32>> %targ%
+echo #define ICEE_DEFAULT_MUTEX_PROTOCOL PrioNone>> %targ%
+echo #endif>> %targ%
+echo.>> %targ%
 echo #endif>> %targ%
 
 goto DONE

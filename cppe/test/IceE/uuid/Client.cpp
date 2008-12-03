@@ -10,7 +10,8 @@
 #include <IceE/UUID.h>
 #include <IceE/Time.h>
 #include <IceE/Thread.h>
-#include <IceE/StaticMutex.h>
+#include <IceE/Mutex.h>
+#include <IceE/MutexPtrLock.h>
 #include <IceE/Monitor.h>
 #include <TestApplication.h>
 #include <set>
@@ -19,7 +20,29 @@
 using namespace IceUtil;
 using namespace std;
 
-static StaticMutex staticMutex = ICE_STATIC_MUTEX_INITIALIZER;
+static Mutex* staticMutex = 0;
+
+namespace
+{
+
+class Init
+{
+public:
+
+    Init()
+    {
+        staticMutex = new IceUtil::Mutex;
+    }
+
+    ~Init()
+    {
+        delete staticMutex;
+        staticMutex = 0;
+    }
+};
+
+Init init;
+}
 
 inline void usage(const char* myName)
 {
@@ -88,7 +111,7 @@ public:
         {
             string uuid = generateUUID();
             {
-                StaticMutex::Lock lock(staticMutex);
+                IceUtilInternal::MutexPtrLock lock(staticMutex);
                 pair<set<string>::iterator, bool> ok = _uuidSet.insert(uuid);
                 if(!ok.second)
                 {

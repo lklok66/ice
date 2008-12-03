@@ -95,7 +95,11 @@ class InitialI : public Test::Initial
 {
 public:
 
+#ifdef ICEE_PURE_CLIENT
+    InitialI();
+#else
     InitialI(const Ice::ObjectAdapterPtr&);
+#endif
 
     virtual void shutdown(const Ice::Current&);
     virtual Test::BPtr getB1(const Ice::Current&);
@@ -113,7 +117,9 @@ public:
 
 private:
 
+#ifndef ICEE_PURE_CLIENT
     Ice::ObjectAdapterPtr _adapter;
+#endif
     Test::BPtr _b1;
     Test::BPtr _b2;
     Test::CPtr _c;

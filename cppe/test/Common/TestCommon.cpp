@@ -11,7 +11,8 @@
 #include <TestCommon.h>
 #include <TestApplication.h>
 
-#include <IceE/StaticMutex.h>
+#include <IceE/Mutex.h>
+#include <IceE/MutexPtrLock.h>
 #include <IceE/Thread.h>
 #include <IceE/Time.h>
 
@@ -20,7 +21,29 @@
 using namespace std;
 using namespace Ice;
 
-static IceUtil::StaticMutex globalMutex = ICE_STATIC_MUTEX_INITIALIZER;
+static IceUtil::Mutex* globalMutex = 0;
+
+namespace
+{
+
+class Init
+{
+public:
+
+    Init()
+    {
+        globalMutex = new IceUtil::Mutex;
+    }
+
+    ~Init()
+    {
+        delete globalMutex;
+        globalMutex = 0;
+    }
+};
+
+Init init;
+}
 
 class LoggerI : public Logger
 {
@@ -29,14 +52,14 @@ public:
     virtual void
     print(const string& message)
     {
-        IceUtil::StaticMutex::Lock sync(globalMutex);
+        IceUtilInternal::MutexPtrLock sync(globalMutex);
         tprintf("%s\n", message.c_str());
     }
     
     virtual void
     trace(const string& category, const string& message)
     {
-        IceUtil::StaticMutex::Lock sync(globalMutex);
+        IceUtilInternal::MutexPtrLock sync(globalMutex);
         string s = "[ ";
         {
             char buf[1024];
@@ -67,20 +90,42 @@ public:
     virtual void
     warning(const string& message)
     {
-        IceUtil::StaticMutex::Lock sync(globalMutex);
+        IceUtilInternal::MutexPtrLock sync(globalMutex);
         tprintf("warning: %s\n", message.c_str());
     }
 
     virtual void
     error(const string& message)
     {
-        IceUtil::StaticMutex::Lock sync(globalMutex);
+        IceUtilInternal::MutexPtrLock sync(globalMutex);
         tprintf("error: %s\n", message.c_str());
     }
 };
 
-static IceUtil::StaticMutex terminatedMutex = ICE_STATIC_MUTEX_INITIALIZER;
+static IceUtil::Mutex* terminatedMutex = 0;
 static bool appTerminated= false;
+
+namespace
+{
+
+class InitT
+{
+public:
+
+    InitT()
+    {
+        terminatedMutex = new IceUtil::Mutex;
+    }
+
+    ~InitT()
+    {
+        delete terminatedMutex;
+        terminatedMutex = 0;
+    }
+};
+
+InitT initT;
+}
 
 #ifdef _WIN32_WCE
 
@@ -223,7 +268,7 @@ WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_DESTROY:
     {
         PostQuitMessage(0);
-        IceUtil::StaticMutex::Lock sync(terminatedMutex);
+        IceUtilInternal::MutexPtrLock sync(terminatedMutex);
         appTerminated = true;
         break;
     }
@@ -385,12 +430,34 @@ TestApplication::loadConfig(const PropertiesPtr& properties)
 }
 #else
 
-static IceUtil::StaticMutex tprintMutex = ICE_STATIC_MUTEX_INITIALIZER;
+static IceUtil::Mutex* tprintMutex = 0;
+
+namespace
+{
+
+class InitTp
+{
+public:
+
+    InitTp()
+    {
+        tprintMutex = new IceUtil::Mutex;
+    }
+
+    ~InitTp()
+    {
+        delete tprintMutex;
+        tprintMutex = 0;
+    }
+};
+
+InitTp initTp;
+}
 
 void
 tprintf(const char* fmt, ...)
 {
-    IceUtil::StaticMutex::Lock sync(tprintMutex);
+    IceUtilInternal::MutexPtrLock sync(tprintMutex);
 
     va_list va;
     va_start(va, fmt);
@@ -505,7 +572,7 @@ TestApplication::communicator()
 bool
 TestApplication::terminated() const
 {
-    IceUtil::StaticMutex::Lock sync(terminatedMutex);
+    IceUtilInternal::MutexPtrLock sync(terminatedMutex);
     return appTerminated;
 }
 

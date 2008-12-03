@@ -23,14 +23,6 @@ prefix			= C:\IceE-$(VERSION)
 #OPTIMIZE_SPEED		= yes
 
 #
-# Specify your C++ compiler. Supported values are
-# VC80 or VC90
-#
-!if "$(CPP_COMPILER)" == ""
-CPP_COMPILER            = VC80
-!endif
-
-#
 # Define STATICLIBS as yes if you want to build with static libraries.
 # Otherwise IceE is built with dynamic libraries. If you want the cpp
 # runtime linked statically as well set STATIC_CPP_RUNTIME to yes.
@@ -138,11 +130,6 @@ install_includedir	= $(prefix)\include
 #
 # Verify valid embedded settings
 #
-!if "$(CPP_COMPILER)" != "VC80" && "$(CPP_COMPILER)" != "VC80_EXPRESS" && \
-    "$(CPP_COMPILER)" != "VC90" && "$(CPP_COMPILER)" != "VC90_EXPRESS"
-!error Invalid setting for CPP_COMPILER: $(CPP_COMPILER)
-!endif
-
 !if "$(WINDOWS_MOBILE_SDK)" != "" && "$(WINDOWS_MOBILE_SDK)" != "Professional" && "$(WINDOWS_MOBILE_SDK)" != "Standard"
 !error Invalid setting for WINDOWS_MOBILE_SDK: "$(WINDOWS_MOBILE_SDK)"
 !endif
@@ -255,7 +242,7 @@ LDFLAGS		= $(LDFLAGS) -manifest:no /subsystem:windowsce
 !if "$(OPTIMIZE_SPEED)" != "yes" && "$(OPTIMIZE_SIZE)" != "yes"
 LDFLAGS		= $(LDFLAGS) /debug /fixed:no /incremental:yes
 !else
-LDFLAGS         = $(LDFLAGS) /OPT:REF /incremental:no /OPT:NOWIN98 /LTCG
+LDFLAGS         = $(LDFLAGS) /OPT:REF /incremental:no /LTCG
 !endif
 
 ARFLAGS		= /nologo
@@ -345,16 +332,26 @@ EVERYTHING		= all clean install
 .cpp.obj::
 	$(CXX) /c $(CPPFLAGS) $(CXXFLAGS) $<
 
+{..\}.cpp.obj::
+	$(CXX) /c $(CPPFLAGS) $(CXXFLAGS) $<
+
 .c.obj:
 	$(CC) /c $(CPPFLAGS) $(CFLAGS) $<
 
-.cpp.cobj:
-	$(CXX) -DICEE_PURE_CLIENT /Fo$(*F).cobj /c $(CPPFLAGS) $(CXXFLAGS) $<
+!if "$(HDIR)" != ""
 
 {$(SDIR)\}.ice{$(HDIR)}.h:
 	del /q $(HDIR)\$(*F).h $(*F).cpp
 	$(SLICE2CPPE) $(SLICE2CPPEFLAGS) $<
 	move $(*F).h $(HDIR)
+
+!else
+
+{$(SDIR)\}.ice.h:
+	del /q $(*F).h $(*F).cpp
+	$(SLICE2CPPE) $(SLICE2CPPEFLAGS) $<
+
+!endif
 
 .ice.cpp:
 	del /q $(*F).h $(*F).cpp
@@ -385,3 +382,4 @@ configure:
 	    "HAS_WSTRING=$(HAS_WSTRING)" \
 	    "HAS_OPAQUE_ENDPOINTS=$(HAS_OPAQUE_ENDPOINTS)" \
 	    "HAS_AMI=$(HAS_AMI)"
+

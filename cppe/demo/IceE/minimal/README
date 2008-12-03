@@ -3,10 +3,12 @@ client is run a "sayHello" invocation is sent to the server.
 
 To run the demo, first start the server:
 
+$ cd server
 $ server
 
 In a separate window, start the client:
 
+$ cd client
 $ client
 
 Note that this demo hardwires port 10000. If port 10000 is not

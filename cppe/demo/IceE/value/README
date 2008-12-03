@@ -4,8 +4,10 @@ Ice-E must be built with OBV support.
 
 To run the demo, first start the server:
 
+$ cd server
 $ server
 
 In a separate window, start the client:
 
+$ cd client
 $ client

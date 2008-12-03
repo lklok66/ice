@@ -2,53 +2,21 @@
 #
 # Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
 #
-# This copy of Ice is licensed to you under the terms described in the
-# ICE_LICENSE file included in this distribution.
+# This copy of Ice-E is licensed to you under the terms described in the
+# ICEE_LICENSE file included in this distribution.
 #
 # **********************************************************************
 
 top_srcdir	= ../../..
 
-CLIENT		= client
-SERVER		= server
-COLLOCATED	= collocated
-
-TARGETS		= $(CLIENT) $(SERVER) $(COLLOCATED)
-
-OBJS		= Test.o \
-                  TestI.o
-
-COBJS		= Client.o \
-		  AllTests.o \
-		  MyObjectFactory.o
-
-SOBJS		= Server.o
-
-COLOBJS		= Collocated.o \
-		  AllTests.o \
-		  MyObjectFactory.o
-
-SRCS		= $(OBJS:.o=.cpp) \
-		  $(COBJS:.o=.cpp) \
-		  $(SOBJS:.o=.cpp) \
-		  $(COLOBJS:.o=.cpp)
-
-SLICE_SRCS	= Test.ice
-
 include $(top_srcdir)/config/Make.rules
 
-CPPFLAGS	:= -I. -I../../include $(CPPFLAGS)
+SUBDIRS		= clientbuild \
+		  serverbuild
 
-$(CLIENT): $(OBJS) $(COBJS)
-	rm -f $@
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(COBJS) $(TESTLIBS)
-
-$(SERVER): $(OBJS) $(SOBJS)
-	rm -f $@
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(SOBJS) $(TESTLIBS)
-
-$(COLLOCATED): $(OBJS) $(COLOBJS)
-	rm -f $@
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(COLOBJS) $(TESTLIBS)
-
-include .depend
+$(EVERYTHING)::
+	@for subdir in $(SUBDIRS); \
+	do \
+	    echo "making $@ in $$subdir"; \
+	    ( cd $$subdir && $(MAKE) $@ ) || exit 1; \
+	done

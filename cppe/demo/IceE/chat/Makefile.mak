@@ -97,10 +97,8 @@ clean::
 	del /q Session.cpp Session.h
 	del /q $(RESFILE)
 
-!if "$(CPP_COMPILER)" != "VC80_EXPRESS" && "$(CPP_COMPILER)" != "VC90_EXPRESS"
 $(EVERYTHING)::
 	$(MAKE) -nologo /f Makefile.mak BUILD_MFC=1 $@
-!endif
 
 !endif
 

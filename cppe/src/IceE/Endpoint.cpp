@@ -10,6 +10,8 @@
 #include <IceE/Endpoint.h>
 #include <IceE/Network.h>
 #include <IceE/LocalException.h>
+#include <IceE/Instance.h>
+#include <IceE/Properties.h>
 
 using namespace std;
 using namespace Ice;
@@ -36,7 +38,14 @@ IceInternal::EndpointHostResolver::EndpointHostResolver(const InstancePtr& insta
     _destroyed(false)
 {
     __setNoDelete(true);
-    start();
+    if(_instance->initializationData().properties->getProperty("Ice.ThreadPriority") != "")
+    {
+        start(0, _instance->initializationData().properties->getPropertyAsInt("Ice.ThreadPriority"));
+    }
+    else
+    {
+        start();
+    }
     __setNoDelete(false);
 }
 

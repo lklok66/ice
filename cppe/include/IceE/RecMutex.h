@@ -13,6 +13,7 @@
 #include <IceE/Config.h>
 #include <IceE/Lock.h>
 #include <IceE/ThreadException.h>
+#include <IceE/MutexProtocol.h>
 
 namespace IceUtil
 {
@@ -36,6 +37,7 @@ public:
     typedef TryLockT<RecMutex> TryLock;
 
     RecMutex();
+    RecMutex(MutexProtocol);
     ~RecMutex();
 
     //
@@ -66,6 +68,8 @@ public:
 
 private:
 
+    void init(MutexProtocol);
+
     // noncopyable
     RecMutex(const RecMutex&);
     void operator=(const RecMutex&);
@@ -93,11 +97,7 @@ private:
     friend class Cond;
 
 #ifdef _WIN32
-#   if defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x0400
     mutable CRITICAL_SECTION _mutex;
-#   else
-    HANDLE _mutex;
-#   endif
 #else
     mutable pthread_mutex_t _mutex;
 #endif    

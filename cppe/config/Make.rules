@@ -78,6 +78,11 @@ HAS_OPAQUE_ENDPOINTS	= yes
 #
 HAS_AMI			= yes
 
+#
+# Default Mutex protocol: one of PrioNone or PrioInherit.
+#
+DEFAULT_MUTEX_PROTOCOL  ?= PrioNone
+
 # ----------------------------------------------------------------------
 # Don't change anything below this line!
 # ----------------------------------------------------------------------
@@ -169,6 +174,9 @@ EVERYTHING		= all depend clean install
 .cpp.o:
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<
 
+%.o: ../%.cpp
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<
+
 .c.o:
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) $<
 
@@ -181,10 +189,21 @@ $(HDIR)/%F.h: $(SDIR)/%F.ice
 	mv $(*F)F.h $(HDIR)
 	rm -f $(*F)F.cpp
 
+
+ifneq ($(HDIR),)
+
 $(HDIR)/%.h %.cpp: $(SDIR)/%.ice
 	rm -f $(HDIR)/$(*F).h $(*F).cpp
 	$(SLICE2CPPE) $(SLICE2CPPEFLAGS) $<
 	mv $(*F).h $(HDIR)
+
+else
+
+%.h %.cpp: $(SDIR)/%.ice
+	rm -f $(*F).h $(*F).cpp
+	$(SLICE2CPPE) $(SLICE2CPPEFLAGS) $<
+
+endif
 
 %.h %.cpp: %.ice
 	rm -f $(*F).h $(*F).cpp
@@ -247,4 +266,5 @@ configure:
 	    HAS_BATCH=$(HAS_BATCH) \
 	    HAS_WSTRING=$(HAS_WSTRING) \
 	    HAS_OPAQUE_ENDPOINTS=$(HAS_OPAQUE_ENDPOINTS) \
-	    HAS_AMI=$(HAS_AMI)
+	    HAS_AMI=$(HAS_AMI) \
+	    DEFAULT_MUTEX_PROTOCOL=$(DEFAULT_MUTEX_PROTOCOL)

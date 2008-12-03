@@ -55,6 +55,7 @@ LOCAL_OBJS	= Base64.o \
 		  Logger.o \
 		  LoggerI.o \
 		  LoggerUtil.o \
+		  MutexProtocol.o \
 		  Network.o \
 		  Object.o \
 		  ObjectAdapter.o \
@@ -80,7 +81,6 @@ LOCAL_OBJS	= Base64.o \
 		  SelectorThread.o \
 		  ServantManager.o \
 		  Shared.o \
-		  StaticMutex.o \
 		  StringConverter.o \
 		  StringUtil.o \
 		  Thread.o \

@@ -20,6 +20,12 @@ Timer::Timer() : _destroyed(false)
     __setNoDelete(false);
 }
 
+Timer::Timer(int priority) : _destroyed(false)
+{
+    __setNoDelete(true);
+    start(0, priority);
+    __setNoDelete(false);
+}
 void
 Timer::destroy()
 {

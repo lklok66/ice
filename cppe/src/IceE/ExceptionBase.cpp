@@ -9,10 +9,35 @@
 
 #include <IceE/Exception.h>
 #include <IceE/SafeStdio.h>
-#include <IceE/StaticMutex.h>
+#include <IceE/Mutex.h>
+#include <IceE/MutexPtrLock.h>
 #include <IceE/StringUtil.h>
 
 using namespace std;
+
+static IceUtil::Mutex* staticMutex = 0;
+
+namespace
+{
+
+class Init
+{
+public:
+
+    Init()
+    {
+        staticMutex = new IceUtil::Mutex;
+    }
+
+    ~Init()
+    {
+        delete staticMutex;
+        staticMutex = 0;
+    }
+};
+
+Init init;
+}
 
 namespace IceUtil
 {
@@ -60,7 +85,7 @@ IceUtil::Exception::toString() const
 const char*
 IceUtil::Exception::what() const throw()
 {
-    StaticMutex::Lock lock(globalMutex);
+    IceUtilInternal::MutexPtrLock lock(staticMutex);
     {
         if(_str.empty())
         {

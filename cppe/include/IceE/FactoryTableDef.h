@@ -12,7 +12,6 @@
 
 #include <IceE/UserExceptionFactoryF.h>
 #include <IceE/ObjectFactoryF.h>
-#include <IceE/StaticMutex.h>
 #include <IceE/Mutex.h>
 
 namespace IceInternal

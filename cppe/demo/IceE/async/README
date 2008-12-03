@@ -3,10 +3,12 @@ This demo illustrates the use of Asynchronous Message Invocation
 
 To run the demo, first start the server:
 
+$ cd server
 $ server
 
 In a second window, start the client:
 
+$ cd client
 $ client 
 
 The demo invocation can either have a short response time or require a

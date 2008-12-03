@@ -9,36 +9,14 @@
 
 top_srcdir	= ../../..
 
-CLIENT		= client
-SERVER		= server
-
-TARGETS		= $(CLIENT) $(SERVER)
-
-OBJS		= Throughput.o
-
-COBJS		= Client.o
-
-SOBJS		= Server.o ThroughputI.o
-
-SRCS		= $(OBJS:.o=.cpp) \
-		  $(COBJS:.o=.cpp) \
-		  $(SOBJS:.o=.cpp)
-
-SLICE_SRCS	= Throughput.ice
-
 include $(top_srcdir)/config/Make.rules
 
-CPPFLAGS	:= -I. $(CPPFLAGS)
+SUBDIRS		= client \
+		  server
 
-$(CLIENT): $(OBJS) $(COBJS) ThroughputC.o
-	rm -f $@
-	$(CXX) $(LDFLAGS) -o $@ ThroughputC.o $(COBJS) $(MINLIBS)
-
-$(SERVER): $(OBJS) $(SOBJS)
-	rm -f $@
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(SOBJS) $(LIBS)
-
-Client.o: Client.cpp
-	$(CXX) -c -DICEE_PURE_CLIENT $(CPPFLAGS) $(CXXFLAGS) $<
-
-include .depend
+$(EVERYTHING)::
+	@for subdir in $(SUBDIRS); \
+	do \
+	    echo "making $@ in $$subdir"; \
+	    ( cd $$subdir && $(MAKE) $@ ) || exit 1; \
+	done

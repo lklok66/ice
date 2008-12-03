@@ -22,6 +22,7 @@ HAS_BATCH=//
 HAS_WSTRING=//
 HAS_OPAQUE_ENDPOINTS=//
 HAS_AMI=//
+DEFAULT_MUTEX_PROTOCOL=PrioNone
 
 for arg; do
     if [ "HAS_ROUTER=yes" == "$arg" ]; then HAS_ROUTER=; fi
@@ -30,6 +31,7 @@ for arg; do
     if [ "HAS_WSTRING=yes" == "$arg" ]; then HAS_WSTRING=; fi
     if [ "HAS_OPAQUE_ENDPOINTS=yes" == "$arg" ]; then HAS_OPAQUE_ENDPOINTS=; fi
     if [ "HAS_AMI=yes" == "$arg" ]; then HAS_AMI=; fi
+    if [ "DEFAULT_MUTEX_PROTOCOL=PrioInherit" == "$arg" ]; then DEFAULT_MUTEX_PROTOCOL=PrioInherit; fi
 done
 
 cat > $targ <<HERE
@@ -53,6 +55,10 @@ ${HAS_BATCH}#define ICEE_HAS_BATCH
 ${HAS_WSTRING}#define ICEE_HAS_WSTRING
 ${HAS_OPAQUE_ENDPOINTS}#define ICEE_HAS_OPAQUE_ENDPOINTS
 ${HAS_AMI}#define ICEE_HAS_AMI
+
+#ifndef _WIN32
+    #define ICEE_DEFAULT_MUTEX_PROTOCOL ${DEFAULT_MUTEX_PROTOCOL} 
+#endif
 
 #endif
 HERE

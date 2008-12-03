@@ -9,45 +9,14 @@
 
 top_srcdir	= ../../../..
 
-CLIENT		= client
-SERVER		= server
-
-TARGETS		= $(CLIENT) $(SERVER)
-
-OBJS		= Test.o
-
-COBJS		= Client.o \
-		  AllTests.o
-
-SOBJS		= ServerPrivate.o \
-		  TestI.o \
-		  Server.o
-
-SRCS		= $(OBJS:.o=.cpp) \
-		  $(COBJS:.o=.cpp) \
-		  $(SOBJS:.o=.cpp)
-
-SLICE_SRCS	= Test.ice ServerPrivate.ice
-
 include $(top_srcdir)/config/Make.rules
 
-ICECPPFLAGS	:= -I. $(ICECPPFLAGS)
+SUBDIRS		= clientbuild \
+		  serverbuild
 
-CPPFLAGS	:= -I. -I../../../include $(CPPFLAGS)
-ifdef ice_bin_dist
-LDFLAGS		:= $(LDFLAGS) -L$(libdir)
-endif
-
-$(CLIENT): $(OBJS) $(COBJS)
-	rm -f $@
-	$(CXX) $(LDFLAGS) -o $@ TestC.o $(COBJS) $(TESTCLIBS)
-
-$(SERVER): $(OBJS) $(SOBJS)
-	rm -f $@
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(SOBJS) $(TESTLIBS)
-
-TestC.o Test.o: Test.cpp
-	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<
-	$(CXX) -c -DICEE_PURE_CLIENT -o TestC.o $(CPPFLAGS) $(CXXFLAGS) $<
-
-include .depend
+$(EVERYTHING)::
+	@for subdir in $(SUBDIRS); \
+	do \
+	    echo "making $@ in $$subdir"; \
+	    ( cd $$subdir && $(MAKE) $@ ) || exit 1; \
+	done

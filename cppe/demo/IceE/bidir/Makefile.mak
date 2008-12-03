@@ -9,42 +9,12 @@
 
 top_srcdir	= ..\..\..
 
-CLIENT		= client.exe
-SERVER		= server.exe
+!include $(top_srcdir)\config\Make.rules.mak
 
-TARGETS		= $(CLIENT) $(SERVER)
+SUBDIRS		= client \
+		  server
 
-OBJS		= Callback.obj
-
-COBJS		= Client.obj
-
-SOBJS		= CallbackI.obj \
-		  Server.obj
-
-SRCS		= $(OBJS:.obj=.cpp) \
-		  $(COBJS:.obj=.cpp) \
-		  $(SOBJS:.obj=.cpp)
-
-!include $(top_srcdir)/config/Make.rules.mak
-
-CPPFLAGS	= -I. $(CPPFLAGS) -WX -DWIN32_LEAN_AND_MEAN
-
-!if "$(OPTIMIZE_SPEED)" != "yes" && "$(OPTIMIZE_SIZE)" != "yes"
-CPDBFLAGS        = /pdb:$(CLIENT:.exe=.pdb)
-SPDBFLAGS        = /pdb:$(SERVER:.exe=.pdb)
-!endif
-
-$(CLIENT): $(OBJS) $(COBJS)
-	$(LINK) $(LDFLAGS) $(CPDBFLAGS) $(OBJS) $(COBJS) /out:$@ $(LIBS)
-	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
-	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#2 && del /q $@.manifest
-
-$(SERVER): $(OBJS) $(SOBJS)
-	$(LINK) $(LDFLAGS) $(SPDBFLAGS) $(OBJS) $(SOBJS) /out:$@ $(LIBS)
-	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
-	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#2 && del /q $@.manifest
-
-clean::
-	del /q Callback.cpp Callback.h
-
-!include .depend
+$(EVERYTHING)::
+	@for %i in ( $(SUBDIRS) ) do \
+	    @echo "making $@ in %i" && \
+	    cmd /c "cd %i && $(MAKE) -nologo -f Makefile.mak $@" || exit 1

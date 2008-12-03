@@ -13,6 +13,7 @@
 #include <IceE/Config.h>
 #include <IceE/Lock.h>
 #include <IceE/ThreadException.h>
+#include <IceE/MutexProtocol.h>
 
 namespace IceUtil
 {
@@ -43,6 +44,7 @@ public:
     typedef TryLockT<Mutex> TryLock;
 
     inline Mutex();
+    inline Mutex(MutexProtocol);
     ~Mutex();
 
     //
@@ -72,10 +74,11 @@ public:
 
 private:
 
+    inline void init(MutexProtocol);
+
     // noncopyable
     Mutex(const Mutex&);
     void operator=(const Mutex&);
-
     //
     // LockState and the lock/unlock variations are for use by the
     // Condition variable implementation.
@@ -97,12 +100,10 @@ private:
     friend class Cond;
 
 #ifdef _WIN32
-# if !defined(_WIN32_WCE) && defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x0400
     mutable CRITICAL_SECTION _mutex;
-#   else
-    mutable HANDLE _mutex;
+#ifdef _WIN32_WCE
     mutable int _recursionCount;
-#   endif
+#endif
 #else
     mutable pthread_mutex_t _mutex;
 #endif
@@ -112,12 +113,29 @@ private:
 // For performance reasons the following functions are inlined.
 //
 
-#ifdef _WIN32
-
-# if !defined(_WIN32_WCE) && defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x0400
-
 inline
 Mutex::Mutex()
+#ifdef _WIN32_WCE
+    : _recursionCount(0)
+#endif
+{
+#ifdef _WIN32
+    init(PrioNone);
+#else
+    init(getDefaultMutexProtocol());
+#endif
+}
+
+inline
+Mutex::Mutex(const MutexProtocol protocol)
+{
+    init(protocol);
+}
+
+#ifdef _WIN32
+
+inline void
+Mutex::init(MutexProtocol)
 {
     InitializeCriticalSection(&_mutex);
 }
@@ -132,7 +150,12 @@ inline void
 Mutex::lock() const
 {
     EnterCriticalSection(&_mutex);
+#ifdef _WIN32_WCE
+    ++_recursionCount;
+    assert(_recursionCount == 1);
+#else
     assert(_mutex.RecursionCount == 1);
+#endif
 }
 
 inline bool
@@ -142,108 +165,37 @@ Mutex::tryLock() const
     {
         return false;
     }
+#ifdef _WIN32_WCE
+    if(_recursionCount > 0)
+#else
     if(_mutex.RecursionCount > 1)
+#endif
     {
         LeaveCriticalSection(&_mutex);
         throw ThreadLockedException(__FILE__, __LINE__);
     }
+
+#ifdef _WIN32_WCE
+    ++_recursionCount;
+    assert(_recursionCount == 1);
+#endif
     return true;
 }
 
 inline void
 Mutex::unlock() const
 {
+#ifdef _WIN32_WCE
+    --_recursionCount;
+    assert(_recursionCount == 0);
+#else
     assert(_mutex.RecursionCount == 1);
+#endif
     LeaveCriticalSection(&_mutex);
 }
 
 inline void
 Mutex::unlock(LockState&) const
-{
-    LeaveCriticalSection(&_mutex);
-}
-
-inline void
-Mutex::lock(LockState&) const
-{
-    EnterCriticalSection(&_mutex);
-}
-
-#   else
-
-inline
-Mutex::Mutex() :
-    _recursionCount(0)
-{
-    _mutex = CreateMutex(0, false, 0);
-    if(_mutex == 0)
-    {
-        throw ThreadSyscallException(__FILE__, __LINE__, GetLastError());
-    }
-}
-
-inline
-Mutex::~Mutex()
-{
-    BOOL rc = CloseHandle(_mutex);
-    if(rc == 0)
-    {
-        throw ThreadSyscallException(__FILE__, __LINE__, GetLastError());
-    }
-}
-
-inline void
-Mutex::lock() const
-{
-    DWORD rc = WaitForSingleObject(_mutex, INFINITE);
-    if(rc != WAIT_OBJECT_0)
-    {
-        if(rc == WAIT_FAILED)
-        {
-            throw ThreadSyscallException(__FILE__, __LINE__, GetLastError());
-        }
-        else
-        {
-            throw ThreadSyscallException(__FILE__, __LINE__, 0);
-        }
-    }
-    _recursionCount++;
-}
-
-inline bool
-Mutex::tryLock() const
-{
-    DWORD rc = WaitForSingleObject(_mutex, 0);
-    if(rc != WAIT_OBJECT_0)
-    {
-        return false;
-    }
-    else if(_recursionCount == 1)
-    {
-        _recursionCount++;
-        unlock();
-        throw ThreadLockedException(__FILE__, __LINE__);
-    }
-    else
-    {
-        _recursionCount++;
-        return true;
-    }
-}
-
-inline void
-Mutex::unlock() const
-{
-    _recursionCount--;
-    BOOL rc = ReleaseMutex(_mutex);
-    if(rc == 0)
-    {
-        throw ThreadSyscallException(__FILE__, __LINE__, GetLastError());
-    }
-}
-
-inline void
-Mutex::unlock(LockState& state) const
 {
     unlock();
 }
@@ -254,15 +206,26 @@ Mutex::lock(LockState&) const
     lock();
 }
 
-#   endif
-
 #else
 
-inline
-Mutex::Mutex()
+inline void
+Mutex::init(MutexProtocol protocol)
 {
 #ifdef NDEBUG
-    int rc = pthread_mutex_init(&_mutex, 0);
+    int rc;
+    pthread_mutexattr_t attr;
+    rc = pthread_mutexattr_init(&attr);
+#if defined(_POSIX_THREAD_PRIO_INHERIT) && _POSIX_THREAD_PRIO_INHERIT > 0
+    if(PrioInherit == protocol)
+    {
+        rc = pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_INHERIT);
+        if(rc != 0)
+        {
+            throw ThreadSyscallException(__FILE__, __LINE__, rc);
+        }
+    }
+#endif
+    rc = pthread_mutex_init(&_mutex, &attr);
 #else
 
     int rc;
@@ -274,6 +237,17 @@ Mutex::Mutex()
     assert(rc == 0);
     rc = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK);
     assert(rc == 0);
+#endif
+
+#if defined(_POSIX_THREAD_PRIO_INHERIT) && _POSIX_THREAD_PRIO_INHERIT > 0
+    if(PrioInherit == protocol)
+    {
+        rc = pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_INHERIT);
+        if(rc != 0)
+        {
+            throw ThreadSyscallException(__FILE__, __LINE__, rc);
+        }
+    }
 #endif
     rc = pthread_mutex_init(&_mutex, &attr);
 

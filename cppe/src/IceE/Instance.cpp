@@ -37,6 +37,7 @@
 #ifdef ICEE_HAS_AMI
 #    include <IceE/RetryQueue.h>
 #endif
+#include <IceE/Mutex.h>
 #include <IceE/StringUtil.h>
 
 #ifdef _WIN32
@@ -85,7 +86,7 @@ public:
     }
 };
 Init init;
-    
+
 }
 
 IceUtil::Shared* IceInternal::upCast(Instance* p) { return p; }
@@ -683,7 +684,14 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
 
         try
         {
-            _timer = new IceUtil::Timer;
+            if(_initData.properties->getProperty("Ice.ThreadPriority") != "")
+            {
+                _timer = new IceUtil::Timer(_initData.properties->getPropertyAsInt("Ice.ThreadPriority"));
+            }
+            else
+            {
+                _timer = new IceUtil::Timer;
+            }
         }
         catch(const IceUtil::Exception& ex)
         {

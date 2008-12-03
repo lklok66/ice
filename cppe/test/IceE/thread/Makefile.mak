@@ -18,7 +18,6 @@ OBJS		= TestBase.obj \
 		  AliveTest.obj \
 		  StartTest.obj \
 		  RecMutexTest.obj \
-		  StaticMutexTest.obj \
 		  MutexTest.obj \
 		  MonitorMutexTest.obj \
 		  MonitorRecMutexTest.obj \
