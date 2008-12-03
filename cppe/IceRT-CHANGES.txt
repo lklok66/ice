@@ -17,13 +17,6 @@ as was the previous behaviour.
 
 Note that in Posix root privileges are required for use SCHED_RR.
 
-ThreadControl Api addtions.
----------------------------
-
-added Method for getPriority setPriority that permit get/set the 
-priority of runing thread, get/set the priority of not runing thread 
-should not be valid.
-
 Posix mutex implementation aditions.
 ------------------------------------
 
@@ -39,7 +32,8 @@ Mutex and RecMutex has a new ctor that permit pass a MutexProtocol parameter
 that would be used to initialize the underliying posix mutex on non posix this
 parameter does nothing.
 
-Default construted Mutex and RecMutex use the MutexProtocol returned by getDefaultMutexProtocol
+Default construted Mutex and RecMutex in Posix use the MutexProtocol returned 
+by getDefaultMutexProtocol
 
 this function is defined in MutexProtocol.h with ICE_API so it could be override in the
 application main.
@@ -47,7 +41,7 @@ application main.
 Timer
 ----------------------
 
-Timer has now a new construtor that permit set the priority used by the thread owned 
+Timer has now a new construtor that permit set the priority used by the thread owned
 by this timer
 
 
@@ -62,8 +56,8 @@ Ice.ThreadPriority
     In Posix system the priority should be a valid priority for SCHED_RR
     scheduller.
 
-    In WindowsCe is any of the valid system priorities and you should use the number
-    not equivalent constants when set the property.
+    In Windows WindowsCe is any of the valid system priorities and you should use
+    the number not equivalent constants when set the property.
 
     This priority is also used for Threads create in any thread pool, if not specific
     priority is set for a thread pool.
@@ -73,14 +67,15 @@ Ice.ThreadPool.Server.ThreadPriority
 
     This property set the priority of the threads create in this ThreadPool.
 
-Ice.ThreadPool.Server.ThreadPriority
+Ice.ThreadPool.Client.ThreadPriority
 
     This property set the priority of the threads create in this ThreadPool.
 
 Tests
 ---------------------
 
-Real time tests need to run as super user on posix systems.
+Real time tests need to run as super user on posix systems allTest.py has been
+changed to only execute this when user is root in unix.
 
 There are 2 different test for real time features
 
