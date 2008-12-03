@@ -9,6 +9,7 @@
 
 #include <IceE/FactoryTable.h>
 #include <IceE/UserExceptionFactory.h>
+#include <IceE/MutexPtrLock.h>
 
 namespace IceInternal
 {
@@ -24,9 +25,25 @@ ICE_DECLSPEC_EXPORT FactoryTableDef* factoryTable;
 namespace
 {
 
-static int initCount = 0;   // Initialization count
-IceUtil::StaticMutex initCountMutex = ICE_STATIC_MUTEX_INITIALIZER;
+static int initCount = 0;  // Initialization count
+IceUtil::Mutex* initCountMutex = 0;
 
+class Init
+{
+public:
+
+    Init()
+    {
+        initCountMutex = new IceUtil::Mutex;
+    }
+
+    ~Init()
+    {
+        delete initCountMutex;
+        initCountMutex = 0;
+    }
+};
+Init init;
 
 }
 
@@ -41,7 +58,7 @@ IceUtil::StaticMutex initCountMutex = ICE_STATIC_MUTEX_INITIALIZER;
 //
 IceInternal::FactoryTable::FactoryTable()
 {
-    IceUtil::StaticMutex::Lock lock(initCountMutex);
+    IceUtilInternal::MutexPtrLock lock(initCountMutex);
     if(0 == initCount++)
     {
         factoryTable = new FactoryTableDef;
@@ -54,7 +71,7 @@ IceInternal::FactoryTable::FactoryTable()
 //
 IceInternal::FactoryTable::~FactoryTable()
 {
-    IceUtil::StaticMutex::Lock lock(initCountMutex);
+    IceUtilInternal::MutexPtrLock lock(initCountMutex);
     if(0 == --initCount)
     {
         delete factoryTable;

@@ -48,6 +48,7 @@ ICE_OBJS	= Base64.o \
 		  Logger.o \
 		  LoggerI.o \
 		  LoggerUtil.o \
+		  MutexProtocol.o \
 		  Network.o \
 		  Object.o \
 		  ObjectFactoryManager.o \
@@ -71,7 +72,6 @@ ICE_OBJS	= Base64.o \
 		  SafeStdio.o \
 		  SelectorThread.o \
 		  Shared.o \
-		  StaticMutex.o \
 		  StringConverter.o \
 		  StringUtil.o \
 		  Thread.o \

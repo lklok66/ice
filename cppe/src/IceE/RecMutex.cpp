@@ -9,13 +9,32 @@
 
 #include <IceE/RecMutex.h>
 #include <IceE/Exception.h>
+#include <IceE/MutexProtocol.h>
 
 using namespace std;
 
-#ifdef _WIN32
 
 IceUtil::RecMutex::RecMutex() :
     _count(0)
+{
+#ifdef _WIN32
+    init(PrioNone);
+#else
+    init(getDefaultMutexProtocol());
+#endif
+}
+
+IceUtil::RecMutex::RecMutex(MutexProtocol protocol) :
+    _count(0)
+{
+    init(protocol);
+}
+
+
+#ifdef _WIN32
+
+void
+IceUtil::RecMutex::init(MutexProtocol)
 {
     InitializeCriticalSection(&_mutex);
 }
@@ -76,8 +95,8 @@ IceUtil::RecMutex::lock(LockState& state) const
 
 #else
 
-IceUtil::RecMutex::RecMutex() :
-    _count(0)
+void
+IceUtil::RecMutex::init(MutexProtocol protocol)
 {
     int rc;
 
@@ -96,7 +115,18 @@ IceUtil::RecMutex::RecMutex() :
         throw ThreadSyscallException(__FILE__, __LINE__, rc);
     }
 #endif
-    
+
+#if defined(_POSIX_THREAD_PRIO_INHERIT) && _POSIX_THREAD_PRIO_INHERIT > 0
+    if(PrioInherit == protocol)
+    {
+        rc = pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_INHERIT);
+        if(rc != 0)
+        {
+            throw ThreadSyscallException(__FILE__, __LINE__, rc);
+        }
+    }
+#endif
+
     rc = pthread_mutex_init(&_mutex, &attr);
     if(rc != 0)
     {

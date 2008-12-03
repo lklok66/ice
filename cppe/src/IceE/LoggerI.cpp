@@ -8,13 +8,10 @@
 // **********************************************************************
 
 #include <IceE/LoggerI.h>
-#include <IceE/StaticMutex.h>
 
 using namespace std;
 using namespace Ice;
 using namespace IceInternal;
-
-static IceUtil::StaticMutex globalMutex = ICE_STATIC_MUTEX_INITIALIZER;
 
 Ice::LoggerI::LoggerI(const string& prefix)
 {
@@ -44,7 +41,6 @@ Ice::LoggerI::~LoggerI()
 void
 Ice::LoggerI::print(const string& message)
 {
-    IceUtil::StaticMutex::Lock sync(globalMutex);
     fprintf(_file, "%s\n", message.c_str());
 }
 
@@ -66,20 +62,17 @@ Ice::LoggerI::trace(const string& category, const string& message)
         ++idx;
     }
 
-    IceUtil::StaticMutex::Lock sync(globalMutex);
     fprintf(_file, "%s\n", s.c_str());
 }
 
 void
 Ice::LoggerI::warning(const string& message)
 {
-    IceUtil::StaticMutex::Lock sync(globalMutex);
     fprintf(_file, "%swarning: %s\n", _prefix.c_str(), message.c_str());
 }
 
 void
 Ice::LoggerI::error(const string& message)
 {
-    IceUtil::StaticMutex::Lock sync(globalMutex);
     fprintf(_file, "%serror: %s\n", _prefix.c_str(), message.c_str());
 }

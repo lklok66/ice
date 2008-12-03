@@ -25,6 +25,8 @@ SUBDIRS		= proxy \
 		  custom \
 		  retry \
 		  thread \
+		  priority \
+		  threadPoolPriority \
 		  timeout \
 		  uuid
 

@@ -40,14 +40,18 @@ IceInternal::ThreadPool::ThreadPool(const InstancePtr& instance, const string& p
     _running(0),
     _inUse(0),
     _load(1.0),
-    _promote(true)
+    _promote(true),
+    _hasPriority(false),
+    _priority(0)
 {
     //
     // We use just one thread as the default. This is the fastest
     // possible setting, still allows one level of nesting, and
     // doesn't require to make the servants thread safe.
     //
-    int size = _instance->initializationData().properties->getPropertyAsIntWithDefault(_prefix + ".Size", 1);
+    Ice::PropertiesPtr properties = _instance->initializationData().properties;
+
+    int size = properties->getPropertyAsIntWithDefault(_prefix + ".Size", 1);
     if(size < 1)
     {
         Warning out(_instance->initializationData().logger);
@@ -55,8 +59,7 @@ IceInternal::ThreadPool::ThreadPool(const InstancePtr& instance, const string& p
         size = 1;
     }
 
-    int sizeMax =
-        _instance->initializationData().properties->getPropertyAsIntWithDefault(_prefix + ".SizeMax", size);
+    int sizeMax = properties->getPropertyAsIntWithDefault(_prefix + ".SizeMax", size);
     if(sizeMax < size)
     {
         Warning out(_instance->initializationData().logger);
@@ -64,8 +67,7 @@ IceInternal::ThreadPool::ThreadPool(const InstancePtr& instance, const string& p
         sizeMax = size;
     }
 
-    int sizeWarn = _instance->initializationData().properties->
-                        getPropertyAsIntWithDefault(_prefix + ".SizeWarn", sizeMax * 80 / 100);
+    int sizeWarn = properties->getPropertyAsIntWithDefault(_prefix + ".SizeWarn", sizeMax * 80 / 100);
     if(sizeWarn > sizeMax)
     {
         Warning out(_instance->initializationData().logger);
@@ -77,7 +79,7 @@ IceInternal::ThreadPool::ThreadPool(const InstancePtr& instance, const string& p
     const_cast<int&>(_sizeMax) = sizeMax;
     const_cast<int&>(_sizeWarn) = sizeWarn;
 
-    int stackSize = _instance->initializationData().properties->getPropertyAsInt(_prefix + ".StackSize");
+    int stackSize = properties->getPropertyAsInt(_prefix + ".StackSize");
     if(stackSize < 0)
     {
         Warning out(_instance->initializationData().logger);
@@ -86,13 +88,27 @@ IceInternal::ThreadPool::ThreadPool(const InstancePtr& instance, const string& p
     }
     const_cast<size_t&>(_stackSize) = static_cast<size_t>(stackSize);
 
+    const_cast<bool&>(_hasPriority) = properties->getProperty(_prefix + ".ThreadPriority") != "";
+    const_cast<int&>(_priority) = properties->getPropertyAsInt(_prefix + ".ThreadPriority");
+    if(!_hasPriority)
+    {
+        const_cast<bool&>(_hasPriority) = properties->getProperty("Ice.ThreadPriority") != "";
+        const_cast<int&>(_priority) = properties->getPropertyAsInt("Ice.ThreadPriority");
+    }
     __setNoDelete(true);
     try
     {
         for(int i = 0 ; i < _size ; ++i)
         {
             IceUtil::ThreadPtr thread = new EventHandlerThread(this);
-            thread->start(_stackSize);
+            if(_hasPriority)
+            {
+                thread->start(_stackSize, _priority);
+            }
+            else
+            {
+                thread->start(_stackSize);
+            }
             _threads.push_back(thread);
             ++_running;
         }
@@ -246,7 +262,14 @@ IceInternal::ThreadPool::promoteFollower(EventHandler* handler)
                 try
                 {
                     IceUtil::ThreadPtr thread = new EventHandlerThread(this);
-                    thread->start(_stackSize);
+                    if(_hasPriority)
+                    {
+                        thread->start(_stackSize, _priority);
+                    }
+                    else
+                    {
+                        thread->start(_stackSize);
+                    }
                     _threads.push_back(thread);
                     ++_running;
                 }

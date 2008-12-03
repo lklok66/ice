@@ -13,6 +13,7 @@
 #include <IceE/Config.h>
 #include <IceE/Lock.h>
 #include <IceE/ThreadException.h>
+#include <IceE/MutexProtocol.h>
 
 namespace IceUtil
 {
@@ -43,6 +44,7 @@ public:
     typedef TryLockT<Mutex> TryLock;
 
     inline Mutex();
+    inline Mutex(MutexProtocol);
     ~Mutex();
 
     //
@@ -72,10 +74,11 @@ public:
 
 private:
 
+    inline void init(MutexProtocol);
+
     // noncopyable
     Mutex(const Mutex&);
     void operator=(const Mutex&);
-
     //
     // LockState and the lock/unlock variations are for use by the
     // Condition variable implementation.
@@ -110,13 +113,29 @@ private:
 // For performance reasons the following functions are inlined.
 //
 
-#ifdef _WIN32
-
 inline
 Mutex::Mutex()
 #ifdef _WIN32_WCE
     : _recursionCount(0)
 #endif
+{
+#ifdef _WIN32
+    init(PrioNone);
+#else
+    init(getDefaultMutexProtocol());
+#endif
+}
+
+inline
+Mutex::Mutex(const MutexProtocol protocol)
+{
+    init(protocol);
+}
+
+#ifdef _WIN32
+
+inline void
+Mutex::init(MutexProtocol)
 {
     InitializeCriticalSection(&_mutex);
 }
@@ -189,11 +208,24 @@ Mutex::lock(LockState&) const
 
 #else
 
-inline
-Mutex::Mutex()
+inline void
+Mutex::init(MutexProtocol protocol)
 {
 #ifdef NDEBUG
-    int rc = pthread_mutex_init(&_mutex, 0);
+    int rc;
+    pthread_mutexattr_t attr;
+    rc = pthread_mutexattr_init(&attr);
+#if defined(_POSIX_THREAD_PRIO_INHERIT) && _POSIX_THREAD_PRIO_INHERIT > 0
+    if(PrioInherit == protocol)
+    {
+        rc = pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_INHERIT);
+        if(rc != 0)
+        {
+            throw ThreadSyscallException(__FILE__, __LINE__, rc);
+        }
+    }
+#endif
+    rc = pthread_mutex_init(&_mutex, &attr);
 #else
 
     int rc;
@@ -205,6 +237,17 @@ Mutex::Mutex()
     assert(rc == 0);
     rc = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK);
     assert(rc == 0);
+#endif
+
+#if defined(_POSIX_THREAD_PRIO_INHERIT) && _POSIX_THREAD_PRIO_INHERIT > 0
+    if(PrioInherit == protocol)
+    {
+        rc = pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_INHERIT);
+        if(rc != 0)
+        {
+            throw ThreadSyscallException(__FILE__, __LINE__, rc);
+        }
+    }
 #endif
     rc = pthread_mutex_init(&_mutex, &attr);
 

@@ -46,6 +46,7 @@ ICEE_OBJS      	= Base64.obj \
                   Logger.obj \
                   LoggerI.obj \
                   LoggerUtil.obj \
+		  MutexProtocol.obj \
                   Network.obj \
 		  ObjectFactoryManager.obj \
 		  ObjectFactoryManagerI.obj \
@@ -69,7 +70,6 @@ ICEE_OBJS      	= Base64.obj \
                   SafeStdio.obj \
 		  SelectorThread.obj \
                   Shared.obj \
-                  StaticMutex.obj \
                   StringConverter.obj \
                   StringUtil.obj \
                   Thread.obj \

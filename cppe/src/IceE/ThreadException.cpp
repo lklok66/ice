@@ -136,4 +136,3 @@ IceUtil::BadThreadControlException::ice_throw() const
 {
     throw *this;
 }
-

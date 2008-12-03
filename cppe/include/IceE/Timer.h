@@ -53,6 +53,11 @@ public:
     Timer();
 
     //
+    // Construct a timer and starts its execution thread with the given priority.
+    //
+    Timer(int priority);
+
+    //
     // Destroy the timer and detach its execution thread if the calling thread 
     // is the timer thread, join the timer execution thread otherwise.
     //

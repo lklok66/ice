@@ -7,20 +7,17 @@
 //
 // **********************************************************************
 
-#ifndef STATIC_MUTEX_TEST_H
-#define STATIC_MUTEX_TEST_H
+#include <TestSuite.h>
+#include <ThreadPriorityTest.h>
+#include <TimerPriorityTest.h>
+#include <PriorityInversion.h>
 
-#include <TestBase.h>
+std::list<TestBasePtr> allTests;
 
-class StaticMutexTest : public TestBase
+void
+initializeTestSuite()
 {
-public:
-
-    StaticMutexTest();
-
-private:
-    
-    virtual void run();
-};
-
-#endif
+    allTests.push_back(new ThreadPriorityTest);
+    allTests.push_back(new TimerPriorityTest);
+    allTests.push_back(new PriorityInversionTest);
+}

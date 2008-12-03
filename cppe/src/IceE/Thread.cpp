@@ -161,6 +161,12 @@ WINAPI startHook(void* arg)
 IceUtil::ThreadControl
 IceUtil::Thread::start(size_t stackSize)
 {
+    return start(stackSize, THREAD_PRIORITY_NORMAL);
+}
+
+IceUtil::ThreadControl
+IceUtil::Thread::start(size_t stackSize, int priority)
+{
     //
     // Keep this alive for the duration of start
     //
@@ -183,21 +189,39 @@ IceUtil::Thread::start(size_t stackSize)
     // __decRef().
     //
     __incRef();
-    
+
 #ifdef _WIN32_WCE
     _handle = CreateThread(0, stackSize,
-                           startHook, this, 0, &_id);
+                           startHook, this, CREATE_SUSPENDED, &_id);
 #else
     unsigned int id;
     _handle = 
         reinterpret_cast<HANDLE>(
             _beginthreadex(0, 
-                           static_cast<unsigned int>(stackSize), 
-                           startHook, this, 0, &id));
+                            static_cast<unsigned int>(stackSize), 
+                            startHook, this, CREATE_SUSPENDED, &id));
     _id = id;
 #endif
-   
+
     if(_handle == 0)
+    {
+        __decRef();
+        throw ThreadSyscallException(__FILE__, __LINE__, GetLastError());
+    }
+#ifdef _WIN32_WCE
+    if(CeSetThreadPriority(_handle, priority) == 0)
+    {
+        __decRef();
+        throw ThreadSyscallException(__FILE__, __LINE__, GetLastError());
+    }
+#else
+    if(SetThreadPriority(_handle, priority) == 0)
+    {
+        __decRef();
+        throw ThreadSyscallException(__FILE__, __LINE__, GetLastError());
+    }
+#endif
+    if(ResumeThread(_handle) == -1)
     {
         __decRef();
         throw ThreadSyscallException(__FILE__, __LINE__, GetLastError());
@@ -205,7 +229,7 @@ IceUtil::Thread::start(size_t stackSize)
 
     _started = true;
     _running = true;
-                        
+    
     return ThreadControl(_handle, _id);
 }
 
@@ -382,6 +406,18 @@ startHook(void* arg)
 IceUtil::ThreadControl
 IceUtil::Thread::start(size_t stackSize)
 {
+    return start(stackSize, false, 0);
+}
+
+IceUtil::ThreadControl
+IceUtil::Thread::start(size_t stackSize, int priority)
+{
+    return start(stackSize, true, priority);
+}
+
+IceUtil::ThreadControl
+IceUtil::Thread::start(size_t stackSize, bool realtimeScheduling, int priority)
+{
     //
     // Keep this alive for the duration of start
     //
@@ -405,15 +441,15 @@ IceUtil::Thread::start(size_t stackSize)
     //
     __incRef();
 
+    pthread_attr_t attr;
+    int rc = pthread_attr_init(&attr);
+    if(rc != 0)
+    {
+        __decRef();
+        throw ThreadSyscallException(__FILE__, __LINE__, rc);
+    }
     if(stackSize > 0)
     {
-        pthread_attr_t attr;
-        int rc = pthread_attr_init(&attr);
-        if(rc != 0)
-        {
-            __decRef();
-            throw ThreadSyscallException(__FILE__, __LINE__, rc);
-        }
         if(stackSize < PTHREAD_STACK_MIN)
         {
             stackSize = PTHREAD_STACK_MIN;
@@ -430,26 +466,35 @@ IceUtil::Thread::start(size_t stackSize)
             __decRef();
             throw ThreadSyscallException(__FILE__, __LINE__, rc);
         }
-        rc = pthread_create(&_thread, &attr, startHook, this);
-        if(rc != 0)
-        {
-            __decRef();
-            throw ThreadSyscallException(__FILE__, __LINE__, rc);
-        }
     }
-    else
+
+    if(realtimeScheduling)
     {
-        int rc = pthread_create(&_thread, 0, startHook, this);
+        rc = pthread_attr_setschedpolicy(&attr, SCHED_RR);
         if(rc != 0)
         {
             __decRef();
             throw ThreadSyscallException(__FILE__, __LINE__, rc);
         }
+        sched_param param;
+        param.sched_priority = priority;
+        rc = pthread_attr_setschedparam(&attr, &param);
+        if(rc != 0)
+        {
+            __decRef();
+            throw ThreadSyscallException(__FILE__, __LINE__, rc);
+        }
+        pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
+    }
+    rc = pthread_create(&_thread, &attr, startHook, this);
+    if(rc != 0)
+    {
+        __decRef();
+        throw ThreadSyscallException(__FILE__, __LINE__, rc);
     }
 
     _started = true;
     _running = true;
-
     return ThreadControl(_thread);
 }
 

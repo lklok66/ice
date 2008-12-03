@@ -109,6 +109,7 @@ public:
     virtual void run() = 0;
 
     ThreadControl start(size_t = 0);
+    ThreadControl start(size_t, int priority);
 
     ThreadControl getThreadControl() const;
 
@@ -140,6 +141,11 @@ protected:
 #endif
 
 private:
+
+#ifndef _WIN32 
+    ThreadControl start(size_t, bool, int);
+#endif
+
     Thread(const Thread&);                // Copying is forbidden
     void operator=(const Thread&);        // Assignment is forbidden
 };

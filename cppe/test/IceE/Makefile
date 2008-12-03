@@ -27,6 +27,8 @@ SUBDIRS		= adapterDeactivation \
 		  retry \
 		  slicing \
 		  thread \
+		  priority \
+		  threadPoolPriority \
 		  timeout \
 		  uuid
 

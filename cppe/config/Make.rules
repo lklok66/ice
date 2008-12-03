@@ -78,6 +78,11 @@ HAS_OPAQUE_ENDPOINTS	= yes
 #
 HAS_AMI			= yes
 
+#
+# Default Mutex protocol: one of PrioNone or PrioInherit.
+#
+DEFAULT_MUTEX_PROTOCOL  ?= PrioNone
+
 # ----------------------------------------------------------------------
 # Don't change anything below this line!
 # ----------------------------------------------------------------------
@@ -261,4 +266,5 @@ configure:
 	    HAS_BATCH=$(HAS_BATCH) \
 	    HAS_WSTRING=$(HAS_WSTRING) \
 	    HAS_OPAQUE_ENDPOINTS=$(HAS_OPAQUE_ENDPOINTS) \
-	    HAS_AMI=$(HAS_AMI)
+	    HAS_AMI=$(HAS_AMI) \
+	    DEFAULT_MUTEX_PROTOCOL=$(DEFAULT_MUTEX_PROTOCOL)

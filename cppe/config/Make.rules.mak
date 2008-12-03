@@ -382,3 +382,4 @@ configure:
 	    "HAS_WSTRING=$(HAS_WSTRING)" \
 	    "HAS_OPAQUE_ENDPOINTS=$(HAS_OPAQUE_ENDPOINTS)" \
 	    "HAS_AMI=$(HAS_AMI)"
+
