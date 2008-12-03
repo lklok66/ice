@@ -37,7 +37,7 @@ public:
     typedef TryLockT<RecMutex> TryLock;
 
     RecMutex();
-    RecMutex(MutexProtocol);
+    explicit RecMutex(MutexProtocol);
     ~RecMutex();
 
     //

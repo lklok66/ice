@@ -44,7 +44,7 @@ public:
     typedef TryLockT<Mutex> TryLock;
 
     inline Mutex();
-    inline Mutex(MutexProtocol);
+    explicit inline Mutex(MutexProtocol);
     ~Mutex();
 
     //
@@ -127,7 +127,7 @@ Mutex::Mutex()
 }
 
 inline
-Mutex::Mutex(const MutexProtocol protocol)
+Mutex::Mutex(MutexProtocol protocol)
 {
     init(protocol);
 }
