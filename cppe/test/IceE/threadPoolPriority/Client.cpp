@@ -24,29 +24,29 @@ public:
     {
     }
 
-int
-run(int argc, char** argv)
-{
-    Ice::InitializationData initData;
-    initData.properties = Ice::createProperties();
+    int
+    run(int argc, char** argv)
+    {
+        Ice::InitializationData initData;
+        initData.properties = Ice::createProperties();
 
-    loadConfig(initData.properties);
+        loadConfig(initData.properties);
 
-    //
-    // Now parse argc/argv into initData
-    //
-    initData.properties = Ice::createProperties(argc, argv, initData.properties); 
+        //
+        // Now parse argc/argv into initData
+        //
+        initData.properties = Ice::createProperties(argc, argv, initData.properties); 
 
-    initData.logger = getLogger();        
-    setCommunicator(Ice::initialize(argc, argv, initData));
+        initData.logger = getLogger();        
+        setCommunicator(Ice::initialize(argc, argv, initData));
 
-    Test::PriorityPrx allTests(const Ice::CommunicatorPtr&);
-    Test::PriorityPrx myClass = allTests(communicator());
+        Test::PriorityPrx allTests(const Ice::CommunicatorPtr&);
+        Test::PriorityPrx myClass = allTests(communicator());
 
-    myClass->shutdown();
+        myClass->shutdown();
 
-    return EXIT_SUCCESS;
-}
+        return EXIT_SUCCESS;
+    }
 };
 
 #ifdef _WIN32_WCE

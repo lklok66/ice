@@ -24,7 +24,5 @@ if not TestUtil.isWin32() and os.getuid() != 0:
     print "*** This test can only be run as root"
     sys.exit(0)
 
-print "tests server thread pool priorities."
+print "tests with regular server"
 TestUtil.clientServerTest()
-print "tests server thread pool wrong priorities."
-TestUtil.simpleTest(exe = "./serverwrong")

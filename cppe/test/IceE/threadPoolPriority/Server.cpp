@@ -22,33 +22,60 @@ public:
     {
     }
 
-int
-run(int argc, char** argv)
-{
-    Ice::InitializationData initData;
-    initData.properties = Ice::createProperties();
-    initData.properties->setProperty("TestAdapter.Endpoints", "default -p 12010 -t 10000");
+    int
+    run(int argc, char** argv)
+    {
+        Ice::InitializationData initData;
+        initData.properties = Ice::createProperties();
+        initData.properties->setProperty("TestAdapter.Endpoints", "default -p 12010 -t 10000");
+        loadConfig(initData.properties);
+        initData.logger = getLogger();
+
+        //
+        // First try to use an invalid priority.
+        //
+        initData.properties->setProperty("Ice.ThreadPool.Server.ThreadPriority", "1024");
+        setCommunicator(Ice::initialize(argc, argv, initData));
+        try
+        {
+            Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapter("TestAdapter");
+            test(false);
+        }
+        catch(const IceUtil::ThreadSyscallException&)
+        {
+            //expected
+        }
+        catch(...)
+        {
+            test(false);
+        }
+
+        //
+        // Now set the priority correctly.
+        //
+        initData.properties = communicator()->getProperties();
 #ifdef _WIN32_WCE
-    initData.properties->setProperty("Ice.ThreadPool.Server.ThreadPriority", "0");
+        initData.properties->setProperty("Ice.ThreadPool.Server.ThreadPriority", "0");
 #elif defined _WIN32
-    initData.properties->setProperty("Ice.ThreadPool.Server.ThreadPriority", "1");
+        initData.properties->setProperty("Ice.ThreadPool.Server.ThreadPriority", "1");
 #else
-    initData.properties->setProperty("Ice.ThreadPool.Server.ThreadPriority", "50");
+        initData.properties->setProperty("Ice.ThreadPool.Server.ThreadPriority", "50");
 #endif
-    loadConfig(initData.properties);
-    initData.logger = getLogger();
-    setCommunicator(Ice::initialize(argc, argv, initData));
+        cout << "PrintAdapterReady = " << initData.properties->getProperty("Ice.PrintAdapterReady") << endl;
+        setCommunicator(Ice::initialize(argc, argv, initData));
     
-    Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapter("TestAdapter");
-    adapter->add(new PriorityI(adapter), communicator()->stringToIdentity("test"));
-    adapter->activate();
+        Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapter("TestAdapter");
+        adapter->add(new PriorityI(adapter), communicator()->stringToIdentity("test"));
+        adapter->activate();
+
 #ifndef _WIN32_WCE
         communicator()->waitForShutdown();
 #endif
-    return EXIT_SUCCESS;
-}
+        return EXIT_SUCCESS;
+    }
 
 };
+
 #ifdef _WIN32_WCE
 
 int WINAPI
