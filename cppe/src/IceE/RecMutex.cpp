@@ -99,22 +99,23 @@ void
 IceUtil::RecMutex::init(MutexProtocol protocol)
 {
     int rc;
-
-#if defined(__linux) && !defined(__USE_UNIX98)
-    const pthread_mutexattr_t attr = { PTHREAD_MUTEX_RECURSIVE_NP };
-#else
     pthread_mutexattr_t attr;
     rc = pthread_mutexattr_init(&attr);
     if(rc != 0)
     {
         throw ThreadSyscallException(__FILE__, __LINE__, rc);
     }
+
+#if defined(__linux) && !defined(__USE_UNIX98)
+    rc = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE_NP);
+#else
     rc = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+#endif
+
     if(rc != 0)
     {
         throw ThreadSyscallException(__FILE__, __LINE__, rc);
     }
-#endif
 
 #if defined(_POSIX_THREAD_PRIO_INHERIT) && _POSIX_THREAD_PRIO_INHERIT > 0
     if(PrioInherit == protocol)
@@ -133,15 +134,11 @@ IceUtil::RecMutex::init(MutexProtocol protocol)
         throw ThreadSyscallException(__FILE__, __LINE__, rc);
     }
 
-#if defined(__linux) && !defined(__USE_UNIX98)
-// Nothing to do
-#else
     rc = pthread_mutexattr_destroy(&attr);
     if(rc != 0)
     {
         throw ThreadSyscallException(__FILE__, __LINE__, rc);
     }
-#endif
 }
 
 IceUtil::RecMutex::~RecMutex()

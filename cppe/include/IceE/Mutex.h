@@ -211,34 +211,35 @@ Mutex::lock(LockState&) const
 inline void
 Mutex::init(MutexProtocol protocol)
 {
-#ifdef NDEBUG
     int rc;
-    pthread_mutexattr_t attr;
-    rc = pthread_mutexattr_init(&attr);
-#if defined(_POSIX_THREAD_PRIO_INHERIT) && _POSIX_THREAD_PRIO_INHERIT > 0
-    if(PrioInherit == protocol)
-    {
-        rc = pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_INHERIT);
-        if(rc != 0)
-        {
-            throw ThreadSyscallException(__FILE__, __LINE__, rc);
-        }
-    }
-#endif
-    rc = pthread_mutex_init(&_mutex, &attr);
-#else
-
-    int rc;
-#if defined(__linux) && !defined(__USE_UNIX98)
-    const pthread_mutexattr_t attr = { PTHREAD_MUTEX_ERRORCHECK_NP };
-#else
     pthread_mutexattr_t attr;
     rc = pthread_mutexattr_init(&attr);
     assert(rc == 0);
+    if(rc != 0)
+    {
+        throw ThreadSyscallException(__FILE__, __LINE__, rc);
+    }
+
+    //
+    // Enable mutex error checking in debug builds
+    //
+#ifndef NDEBUG
+#if defined(__linux) && !defined(__USE_UNIX98)
+    rc = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK_NP);
+#else
     rc = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK);
+#endif
     assert(rc == 0);
+    if(rc != 0)
+    {
+        throw ThreadSyscallException(__FILE__, __LINE__, rc);
+    }
 #endif
 
+    //
+    // If system has support for priority inheritance we set the protocol
+    // attribute of the mutex
+    //
 #if defined(_POSIX_THREAD_PRIO_INHERIT) && _POSIX_THREAD_PRIO_INHERIT > 0
     if(PrioInherit == protocol)
     {
@@ -249,16 +250,16 @@ Mutex::init(MutexProtocol protocol)
         }
     }
 #endif
-    rc = pthread_mutex_init(&_mutex, &attr);
 
-#if defined(__linux) && !defined(__USE_UNIX98)
-// Nothing to do
-#else
+    rc = pthread_mutex_init(&_mutex, &attr);
+    assert(rc == 0);
+    if(rc != 0)
+    {
+        throw ThreadSyscallException(__FILE__, __LINE__, rc);
+    }
+
     rc = pthread_mutexattr_destroy(&attr);
     assert(rc == 0);
-#endif
-#endif
-
     if(rc != 0)
     {
         throw ThreadSyscallException(__FILE__, __LINE__, rc);
