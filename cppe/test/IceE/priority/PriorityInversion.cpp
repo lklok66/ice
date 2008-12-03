@@ -1,3 +1,11 @@
+// **********************************************************************
+//
+// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+//
+// This copy of Ice-E is licensed to you under the terms described in the
+// ICEE_LICENSE file included in this distribution.
+//
+// **********************************************************************
 
 #include <PriorityInversion.h>
 #include <IceE/Thread.h>
@@ -9,6 +17,10 @@
 #include <TestCommon.h>
 #include <vector>
 #include <map>
+
+#ifndef _WIN32
+#  include<unistd.h>
+#endif
 
 using namespace std;
 using namespace IceUtil;

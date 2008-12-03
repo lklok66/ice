@@ -11,8 +11,12 @@
 #include <TestCommon.h>
 #include <TestI.h>
 
-#if defined(_WIN32) && !defined(_WIN32_WCE)
+#if !defined(_WIN32_WCE)
+#if defined(_WIN32)
 #   include <process.h> // For _getpid()
+#else
+#   include <unistd.h> // For getpid()
+#endif
 #endif
 
 TestI::TestI(const Ice::ObjectAdapterPtr& adapter) :
