@@ -166,8 +166,13 @@ SDK_DIR		= $(WMSDK_BASE_DIR)\PocketPC
 SDK_DIR		= $(WMSDK_BASE_DIR)\Smartphone
 !endif
 
+#
+# Windows Mobile 6 is based on Windows CE 5.2
+# Windows CE is a Unicode operating system: http://msdn.microsoft.com/en-us/library/ms904336.aspx
+#
+
 RC		= $(RC) /d "UNDER_CE=0x502" /d "_WIN32_WCE=0x502" -I"$(SDK_DIR)\Include\ArmV4i"
-CPPFLAGS 	= -QRarch4 -I"$(VSINSTALLDIR)\VC\ce\Include" -I"$(SDK_DIR)\Include\ArmV4i" -fp:fast -TP $(CPPFLAGS) /D "_WIN32_WCE=0x502" /D "UNDER_CE=0x502" /D "ARM" /D "_ARM_" /D "ARMV4" /D "UNICODE" /D "_UNICODE"
+CPPFLAGS 	= -QRarch4 -I"$(VSINSTALLDIR)\VC\ce\Include" -I"$(SDK_DIR)\Include\ArmV4i" -fp:fast -TP $(CPPFLAGS) /D "_WIN32_WCE=0x502" /D "UNDER_CE=0x502" /D "ARM" /D "_ARM_" /D "ARMV4" /D "_UNICODE" /D "UNICODE"
 
 !if "$(OPTIMIZE_SPEED)" != "yes" && "$(OPTIMIZE_SIZE)" != "yes"
 CPPFLAGS	= $(CPPFLAGS) -GS-
