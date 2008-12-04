@@ -7,46 +7,31 @@
 //
 // **********************************************************************
 
-public class Client
+package test.Ice.binding;
+
+public class Client extends test.Util.Application
 {
-    private static int
-    run(String[] args, Ice.Communicator communicator)
+    public int
+    run(String[] args)
     {
-        AllTests.allTests(communicator);
+        AllTests.allTests(communicator(), getWriter());
         return 0;
     }
+
+	protected Ice.InitializationData getInitData(Ice.StringSeqHolder argsH)
+	{
+		Ice.InitializationData initData = new Ice.InitializationData();
+        initData.properties = Ice.Util.createProperties(argsH);
+        initData.properties.setProperty("Ice.Package.Test", "test.Ice.binding");
+        return initData;
+	}
 
     public static void
     main(String[] args)
     {
-        int status = 0;
-        Ice.Communicator communicator = null;
-
-        try
-        {
-            communicator = Ice.Util.initialize(args);
-            status = run(args, communicator);
-        }
-        catch(Exception ex)
-        {
-            ex.printStackTrace();
-            status = 1;
-        }
-
-        if(communicator != null)
-        {
-            try
-            {
-                communicator.destroy();
-            }
-            catch (Ice.LocalException ex)
-            {
-                ex.printStackTrace();
-                status = 1;
-            }
-        }
-
+    	Client app = new Client();
+        int result = app.main("Client", args);
         System.gc();
-        System.exit(status);
+        System.exit(result);
     }
 }

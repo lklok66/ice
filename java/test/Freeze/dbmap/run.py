@@ -20,12 +20,10 @@ if len(path) == 0:
 sys.path.append(os.path.join(path[0]))
 from scripts import *
 
-TestUtil.addClasspath(os.path.join(os.getcwd(), "classes"))
-
 dbdir = os.path.join(os.getcwd(), "db")
 TestUtil.cleanDbDir(dbdir)
 
 print "starting client...",
-clientProc = TestUtil.startClient("Client", os.getcwd())
+clientProc = TestUtil.startClient("test.Freeze.dbmap.Client", os.getcwd())
 print "ok"
 clientProc.waitTestSuccess()

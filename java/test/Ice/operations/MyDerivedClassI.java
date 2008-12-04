@@ -7,7 +7,39 @@
 //
 // **********************************************************************
 
-public final class MyDerivedClassI extends Test.MyDerivedClass
+package test.Ice.operations;
+import test.Ice.operations.Test.BoolSHolder;
+import test.Ice.operations.Test.BoolSSHolder;
+import test.Ice.operations.Test.ByteBoolDHolder;
+import test.Ice.operations.Test.ByteSHolder;
+import test.Ice.operations.Test.ByteSSHolder;
+import test.Ice.operations.Test.DoubleSHolder;
+import test.Ice.operations.Test.DoubleSSHolder;
+import test.Ice.operations.Test.FloatSHolder;
+import test.Ice.operations.Test.FloatSSHolder;
+import test.Ice.operations.Test.IntSHolder;
+import test.Ice.operations.Test.IntSSHolder;
+import test.Ice.operations.Test.LongFloatDHolder;
+import test.Ice.operations.Test.LongSHolder;
+import test.Ice.operations.Test.LongSSHolder;
+import test.Ice.operations.Test.MyClassPrx;
+import test.Ice.operations.Test.MyClassPrxHelper;
+import test.Ice.operations.Test.MyClassPrxHolder;
+import test.Ice.operations.Test.MyDerivedClass;
+import test.Ice.operations.Test.MyEnum;
+import test.Ice.operations.Test.MyEnumHolder;
+import test.Ice.operations.Test.ShortIntDHolder;
+import test.Ice.operations.Test.ShortSHolder;
+import test.Ice.operations.Test.ShortSSHolder;
+import test.Ice.operations.Test.StringMyEnumDHolder;
+import test.Ice.operations.Test.StringSHolder;
+import test.Ice.operations.Test.StringSSHolder;
+import test.Ice.operations.Test.StringSSSHolder;
+import test.Ice.operations.Test.StringStringDHolder;
+import test.Ice.operations.Test.Structure;
+import test.Ice.operations.Test.StructureHolder;
+
+public final class MyDerivedClassI extends MyDerivedClass
 {
     private static void
     test(boolean b)
@@ -40,7 +72,7 @@ public final class MyDerivedClassI extends Test.MyDerivedClass
 
     public boolean[]
     opBoolS(boolean[] p1, boolean[] p2,
-            Test.BoolSHolder p3,
+            BoolSHolder p3,
             Ice.Current current)
     {
         p3.value = new boolean[p1.length + p2.length];
@@ -57,7 +89,7 @@ public final class MyDerivedClassI extends Test.MyDerivedClass
 
     public boolean[][]
     opBoolSS(boolean[][] p1, boolean[][] p2,
-             Test.BoolSSHolder p3,
+             BoolSSHolder p3,
              Ice.Current current)
     {
         p3.value = new boolean[p1.length + p2.length][];
@@ -83,7 +115,7 @@ public final class MyDerivedClassI extends Test.MyDerivedClass
 
     public java.util.Map<Byte, Boolean>
     opByteBoolD(java.util.Map p1, java.util.Map p2,
-                Test.ByteBoolDHolder p3,
+                ByteBoolDHolder p3,
                 Ice.Current current)
     {
         p3.value = p1;
@@ -95,7 +127,7 @@ public final class MyDerivedClassI extends Test.MyDerivedClass
 
     public byte[]
     opByteS(byte[] p1, byte[] p2,
-            Test.ByteSHolder p3,
+            ByteSHolder p3,
             Ice.Current current)
     {
         p3.value = new byte[p1.length];
@@ -112,7 +144,7 @@ public final class MyDerivedClassI extends Test.MyDerivedClass
 
     public byte[][]
     opByteSS(byte[][] p1, byte[][] p2,
-             Test.ByteSSHolder p3,
+             ByteSSHolder p3,
              Ice.Current current)
     {
         p3.value = new byte[p1.length][];
@@ -139,7 +171,7 @@ public final class MyDerivedClassI extends Test.MyDerivedClass
 
     public double[]
     opFloatDoubleS(float[] p1, double[] p2,
-                   Test.FloatSHolder p3, Test.DoubleSHolder p4,
+                   FloatSHolder p3, DoubleSHolder p4,
                    Ice.Current current)
     {
         p3.value = p1;
@@ -159,7 +191,7 @@ public final class MyDerivedClassI extends Test.MyDerivedClass
 
     public double[][]
     opFloatDoubleSS(float[][] p1, double[][] p2,
-                    Test.FloatSSHolder p3, Test.DoubleSSHolder p4,
+                    FloatSSHolder p3, DoubleSSHolder p4,
                     Ice.Current current)
     {
         p3.value = p1;
@@ -176,7 +208,7 @@ public final class MyDerivedClassI extends Test.MyDerivedClass
 
     public java.util.Map<Long, Float>
     opLongFloatD(java.util.Map p1, java.util.Map p2,
-                 Test.LongFloatDHolder p3,
+                 LongFloatDHolder p3,
                  Ice.Current current)
     {
         p3.value = p1;
@@ -186,29 +218,29 @@ public final class MyDerivedClassI extends Test.MyDerivedClass
         return r;
     }
 
-    public Test.MyClassPrx
-    opMyClass(Test.MyClassPrx p1,
-              Test.MyClassPrxHolder p2, Test.MyClassPrxHolder p3,
+    public MyClassPrx
+    opMyClass(MyClassPrx p1,
+              MyClassPrxHolder p2, MyClassPrxHolder p3,
               Ice.Current current)
     {
         p2.value = p1;
-        p3.value = Test.MyClassPrxHelper.uncheckedCast(
+        p3.value = MyClassPrxHelper.uncheckedCast(
             current.adapter.createProxy(current.adapter.getCommunicator().stringToIdentity("noSuchIdentity")));
-        return Test.MyClassPrxHelper.uncheckedCast(current.adapter.createProxy(current.id));
+        return MyClassPrxHelper.uncheckedCast(current.adapter.createProxy(current.id));
     }
 
-    public Test.MyEnum
-    opMyEnum(Test.MyEnum p1,
-             Test.MyEnumHolder p2,
+    public MyEnum
+    opMyEnum(MyEnum p1,
+             MyEnumHolder p2,
              Ice.Current current)
     {
         p2.value = p1;
-        return Test.MyEnum.enum3;
+        return MyEnum.enum3;
     }
 
     public java.util.Map<Short, Integer>
     opShortIntD(java.util.Map p1, java.util.Map p2,
-                Test.ShortIntDHolder p3,
+                ShortIntDHolder p3,
                 Ice.Current current)
     {
         p3.value = p1;
@@ -231,7 +263,7 @@ public final class MyDerivedClassI extends Test.MyDerivedClass
 
     public long[]
     opShortIntLongS(short[] p1, int[] p2, long[] p3,
-                    Test.ShortSHolder p4, Test.IntSHolder p5, Test.LongSHolder p6,
+                    ShortSHolder p4, IntSHolder p5, LongSHolder p6,
                     Ice.Current current)
     {
         p4.value = p1;
@@ -248,7 +280,7 @@ public final class MyDerivedClassI extends Test.MyDerivedClass
 
     public long[][]
     opShortIntLongSS(short[][] p1, int[][] p2, long[][] p3,
-                     Test.ShortSSHolder p4, Test.IntSSHolder p5, Test.LongSSHolder p6,
+                     ShortSSHolder p4, IntSSHolder p5, LongSSHolder p6,
                      Ice.Current current)
     {
         p4.value = p1;
@@ -272,13 +304,13 @@ public final class MyDerivedClassI extends Test.MyDerivedClass
         return p1 + " " + p2;
     }
 
-    public java.util.Map<String, Test.MyEnum>
+    public java.util.Map<String, MyEnum>
     opStringMyEnumD(java.util.Map p1, java.util.Map p2,
-                    Test.StringMyEnumDHolder p3,
+                    StringMyEnumDHolder p3,
                     Ice.Current current)
     {
         p3.value = p1;
-        java.util.Map<String, Test.MyEnum> r = new java.util.HashMap<String, Test.MyEnum>();
+        java.util.Map<String, MyEnum> r = new java.util.HashMap<String, MyEnum>();
         r.putAll(p1);
         r.putAll(p2);
         return r;
@@ -319,7 +351,7 @@ public final class MyDerivedClassI extends Test.MyDerivedClass
 
     public String[]
     opStringS(String[] p1, String[] p2,
-              Test.StringSHolder p3,
+              StringSHolder p3,
               Ice.Current current)
     {
         p3.value = new String[p1.length + p2.length];
@@ -336,7 +368,7 @@ public final class MyDerivedClassI extends Test.MyDerivedClass
 
     public String[][]
     opStringSS(String[][] p1, String[][] p2,
-               Test.StringSSHolder p3,
+               StringSSHolder p3,
                Ice.Current current)
     {
         p3.value = new String[p1.length + p2.length][];
@@ -353,7 +385,7 @@ public final class MyDerivedClassI extends Test.MyDerivedClass
 
     public String[][][]
     opStringSSS(String[][][] p1, String[][][] p2,
-               Test.StringSSSHolder p3,
+               StringSSSHolder p3,
                Ice.Current current)
     {
         p3.value = new String[p1.length + p2.length][][];
@@ -370,7 +402,7 @@ public final class MyDerivedClassI extends Test.MyDerivedClass
 
     public java.util.Map<String, String>
     opStringStringD(java.util.Map p1, java.util.Map p2,
-                    Test.StringStringDHolder p3,
+                    StringStringDHolder p3,
                     Ice.Current current)
     {
         p3.value = p1;
@@ -380,9 +412,9 @@ public final class MyDerivedClassI extends Test.MyDerivedClass
         return r;
     }
 
-    public Test.Structure
-    opStruct(Test.Structure p1, Test.Structure p2,
-             Test.StructureHolder p3,
+    public Structure
+    opStruct(Structure p1, Structure p2,
+             StructureHolder p3,
              Ice.Current current)
     {
         p3.value = p1;

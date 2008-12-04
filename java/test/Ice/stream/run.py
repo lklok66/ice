@@ -23,7 +23,7 @@ from scripts import *
 TestUtil.addClasspath(os.path.join(os.getcwd(), "classes"))
 
 print "starting test...",
-clientProc = TestUtil.startClient("Client")
+clientProc = TestUtil.startClient("test.Ice.stream.Client")
 print "ok"
 
 clientProc.waitTestSuccess()

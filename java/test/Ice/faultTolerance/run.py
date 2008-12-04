@@ -28,14 +28,14 @@ base = 12340
 serverProc = []
 for i in range(0, num):
     print "starting server #%d..." % (i + 1),
-    serverProc.append(TestUtil.startServer("Server", " %d" % (base + i)))
+    serverProc.append(TestUtil.startServer("test.Ice.faultTolerance.Server", " %d" % (base + i)))
     print "ok"
 
 ports = ""
 for i in range(0, num):
     ports = "%s %d" % (ports, base + i)
 print "starting client...",
-clientProc = TestUtil.startClient("Client", ports)
+clientProc = TestUtil.startClient("test.Ice.faultTolerance.Client", ports)
 print "ok"
 
 clientProc.waitTestSuccess()

@@ -20,8 +20,6 @@ if len(path) == 0:
 sys.path.append(os.path.join(path[0]))
 from scripts import *
 
-TestUtil.addClasspath(os.path.join(os.getcwd(), "classes"))
-
 #
 # Clean the contents of the database directory.
 #
@@ -29,13 +27,13 @@ dbdir = os.path.join(os.getcwd(), "db")
 TestUtil.cleanDbDir(dbdir)
 
 print "starting populate...",
-populateProc = TestUtil.startClient("Client", " --dbdir %s populate" % os.getcwd())
+populateProc = TestUtil.startClient("test.Freeze.complex.Client", " --dbdir %s populate" % os.getcwd())
 print "ok"
 
 populateProc.waitTestSuccess()
 
 print "starting verification client...",
-clientProc = TestUtil.startClient("Client", " --dbdir %s validate" % os.getcwd())
+clientProc = TestUtil.startClient("test.Freeze.complex.Client", " --dbdir %s validate" % os.getcwd())
 
 print "ok"
 clientProc.waitTestSuccess()

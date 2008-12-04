@@ -7,7 +7,14 @@
 //
 // **********************************************************************
 
-import Test.*;
+package test.Ice.timeout;
+
+import java.io.PrintWriter;
+
+import test.Ice.timeout.Test.AMI_Timeout_sendData;
+import test.Ice.timeout.Test.AMI_Timeout_sleep;
+import test.Ice.timeout.Test.TimeoutPrx;
+import test.Ice.timeout.Test.TimeoutPrxHelper;
 
 public class AllTests
 {
@@ -62,7 +69,7 @@ public class AllTests
         private boolean _called;
     }
 
-    private static class AMISendData extends Test.AMI_Timeout_sendData
+    private static class AMISendData extends AMI_Timeout_sendData
     {
         public void
         ice_response()
@@ -85,54 +92,7 @@ public class AllTests
         private Callback callback = new Callback();
     }
 
-    private static class AMISendDataEx extends Test.AMI_Timeout_sendData
-    {
-        public void
-        ice_response()
-        {
-            test(false);
-        }
-
-        public void
-        ice_exception(Ice.LocalException ex)
-        {
-            test(ex instanceof Ice.TimeoutException);
-            callback.called();
-        }
-
-        public boolean
-        check()
-        {
-            return callback.check();
-        }
-
-        private Callback callback = new Callback();
-    }
-
-    private static class AMISleep extends Test.AMI_Timeout_sleep
-    {
-        public void
-        ice_response()
-        {
-            callback.called();
-        }
-
-        public void
-        ice_exception(Ice.LocalException ex)
-        {
-            test(false);
-        }
-
-        public boolean
-        check()
-        {
-            return callback.check();
-        }
-
-        private Callback callback = new Callback();
-    }
-
-    private static class AMISleepEx extends Test.AMI_Timeout_sleep
+    private static class AMISendDataEx extends AMI_Timeout_sendData
     {
         public void
         ice_response()
@@ -156,8 +116,55 @@ public class AllTests
         private Callback callback = new Callback();
     }
 
-    public static Test.TimeoutPrx
-    allTests(Ice.Communicator communicator, java.io.PrintStream out)
+    private static class AMISleep extends AMI_Timeout_sleep
+    {
+        public void
+        ice_response()
+        {
+            callback.called();
+        }
+
+        public void
+        ice_exception(Ice.LocalException ex)
+        {
+            test(false);
+        }
+
+        public boolean
+        check()
+        {
+            return callback.check();
+        }
+
+        private Callback callback = new Callback();
+    }
+
+    private static class AMISleepEx extends AMI_Timeout_sleep
+    {
+        public void
+        ice_response()
+        {
+            test(false);
+        }
+
+        public void
+        ice_exception(Ice.LocalException ex)
+        {
+            test(ex instanceof Ice.TimeoutException);
+            callback.called();
+        }
+
+        public boolean
+        check()
+        {
+            return callback.check();
+        }
+
+        private Callback callback = new Callback();
+    }
+
+    public static TimeoutPrx
+    allTests(Ice.Communicator communicator, PrintWriter out)
     {
         String sref = "timeout:default -p 12010 -t 10000";
         Ice.ObjectPrx obj = communicator.stringToProxy(sref);

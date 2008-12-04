@@ -7,7 +7,9 @@
 //
 // **********************************************************************
 
-import Test.*;
+package test.Ice.hold;
+
+import test.Ice.hold.Test._HoldDisp;
 
 public final class HoldI extends _HoldDisp
 {

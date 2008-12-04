@@ -7,7 +7,20 @@
 //
 // **********************************************************************
 
-import Test.*;
+package test.Ice.location;
+
+import java.io.PrintWriter;
+
+import test.Ice.location.Test.HelloPrx;
+import test.Ice.location.Test.HelloPrxHelper;
+import test.Ice.location.Test.ServerManagerPrx;
+import test.Ice.location.Test.ServerManagerPrxHelper;
+import test.Ice.location.Test.TestIntfPrx;
+import test.Ice.location.Test.TestIntfPrxHelper;
+import test.Ice.location.Test.TestLocatorPrx;
+import test.Ice.location.Test.TestLocatorPrxHelper;
+import test.Ice.location.Test.TestLocatorRegistryPrx;
+import test.Ice.location.Test.TestLocatorRegistryPrxHelper;
 
 public class AllTests
 {
@@ -21,7 +34,7 @@ public class AllTests
     }
 
     public static void
-    allTests(Ice.Communicator communicator)
+    allTests(Ice.Communicator communicator, PrintWriter out)
     {
         ServerManagerPrx manager = ServerManagerPrxHelper.checkedCast(
             communicator.stringToProxy("ServerManager :default -t 10000 -p 12010"));
@@ -29,17 +42,17 @@ public class AllTests
         TestLocatorPrx locator = TestLocatorPrxHelper.uncheckedCast(communicator.getDefaultLocator());
         test(locator != null);
 
-        System.out.print("testing stringToProxy... ");
-        System.out.flush();
+		out.print("testing stringToProxy... ");
+        out.flush();
         Ice.ObjectPrx base = communicator.stringToProxy("test @ TestAdapter");
         Ice.ObjectPrx base2 = communicator.stringToProxy("test @ TestAdapter");
         Ice.ObjectPrx base3 = communicator.stringToProxy("test");
         Ice.ObjectPrx base4 = communicator.stringToProxy("ServerManager");
         Ice.ObjectPrx base5 = communicator.stringToProxy("test2");
         Ice.ObjectPrx base6 = communicator.stringToProxy("test @ ReplicatedAdapter");
-        System.out.println("ok");
+        out.println("ok");
 
-        System.out.print("testing ice_locator and ice_getLocator... ");
+        out.print("testing ice_locator and ice_getLocator... ");
         test(Ice.Util.proxyIdentityCompare(base.ice_getLocator(), communicator.getDefaultLocator()) == 0);
         Ice.LocatorPrx anotherLocator = 
             Ice.LocatorPrxHelper.uncheckedCast(communicator.stringToProxy("anotherLocator"));
@@ -69,20 +82,20 @@ public class AllTests
         communicator.setDefaultRouter(null);
         base = communicator.stringToProxy("test @ TestAdapter");
         test(base.ice_getRouter() == null);
-        System.out.println("ok");
+        out.println("ok");
 
         //
         // Start a server, get the port of the adapter it's listening on,
         // and add it to the configuration so that the client can locate
         // the TestAdapter adapter.
         //
-        System.out.print("starting server... ");
-        System.out.flush();
+        out.print("starting server... ");
+        out.flush();
         manager.startServer();
-        System.out.println("ok");
+        out.println("ok");
 
-        System.out.print("testing checked cast... ");
-        System.out.flush();
+        out.print("testing checked cast... ");
+        out.flush();
         TestIntfPrx obj = TestIntfPrxHelper.checkedCast(base);
         test(obj != null);
         TestIntfPrx obj2 = TestIntfPrxHelper.checkedCast(base2);
@@ -95,10 +108,10 @@ public class AllTests
         test(obj5 != null);
         TestIntfPrx obj6 = TestIntfPrxHelper.checkedCast(base6);
         test(obj6 != null);
-        System.out.println("ok");
+        out.println("ok");
  
-        System.out.print("testing id@AdapterId indirect proxy... ");
-        System.out.flush();
+        out.print("testing id@AdapterId indirect proxy... ");
+        out.flush();
         obj.shutdown();
         manager.startServer();
         try
@@ -109,10 +122,10 @@ public class AllTests
         {
             test(false);
         }
-        System.out.println("ok");    
+        out.println("ok");    
     
-        System.out.print("testing id@ReplicaGroupId indirect proxy... ");
-        System.out.flush();
+        out.print("testing id@ReplicaGroupId indirect proxy... ");
+        out.flush();
         obj.shutdown();
         manager.startServer();
         try
@@ -124,10 +137,10 @@ public class AllTests
         {
             test(false);
         }
-        System.out.println("ok");    
+        out.println("ok");    
     
-        System.out.print("testing identity indirect proxy... ");
-        System.out.flush();
+        out.print("testing identity indirect proxy... ");
+        out.flush();
         obj.shutdown();
         manager.startServer();
         try
@@ -202,10 +215,10 @@ public class AllTests
             test(false);
         }
 
-        System.out.println("ok");    
+        out.println("ok");    
 
-        System.out.print("testing proxy with unknown identity... ");
-        System.out.flush();
+        out.print("testing proxy with unknown identity... ");
+        out.flush();
         try
         {
             base = communicator.stringToProxy("unknown/unknown");
@@ -217,10 +230,10 @@ public class AllTests
             test(ex.kindOfObject.equals("object"));
             test(ex.id.equals("unknown/unknown"));
         }
-        System.out.println("ok");       
+        out.println("ok");       
 
-        System.out.print("testing proxy with unknown adapter... ");
-        System.out.flush();
+        out.print("testing proxy with unknown adapter... ");
+        out.flush();
         try
         {
             base = communicator.stringToProxy("test @ TestAdapterUnknown");
@@ -232,10 +245,10 @@ public class AllTests
             test(ex.kindOfObject.equals("object adapter"));
             test(ex.id.equals("TestAdapterUnknown"));
         }
-        System.out.println("ok");       
+        out.println("ok");       
 
-        System.out.print("testing locator cache timeout... ");
-        System.out.flush();
+        out.print("testing locator cache timeout... ");
+        out.flush();
         
         int count = locator.getRequestCount();
         communicator.stringToProxy("test@TestAdapter").ice_locatorCacheTimeout(0).ice_ping(); // No locator cache.
@@ -281,26 +294,26 @@ public class AllTests
 
         test(communicator.stringToProxy("test").ice_locatorCacheTimeout(99).ice_getLocatorCacheTimeout() == 99);
         
-        System.out.println("ok");
+        out.println("ok");
 
-        System.out.print("testing proxy from server... ");
-        System.out.flush();
+        out.print("testing proxy from server... ");
+        out.flush();
         HelloPrx hello = obj.getHello();
         test(hello.ice_getAdapterId().equals("TestAdapter"));
         hello = obj.getReplicatedHello();
         test(hello.ice_getAdapterId().equals("ReplicatedAdapter"));
         hello.sayHello();
-        System.out.println("ok");
+        out.println("ok");
 
-        System.out.print("testing proxy from server after shutdown... ");
-        System.out.flush();
+        out.print("testing proxy from server after shutdown... ");
+        out.flush();
         obj.shutdown();
         manager.startServer();
         hello.sayHello();
-        System.out.println("ok");
+        out.println("ok");
 
-        System.out.print("testing object migration...");
-        System.out.flush();
+        out.print("testing object migration...");
+        out.flush();
         hello = HelloPrxHelper.checkedCast(communicator.stringToProxy("hello"));
         obj.migrateHello();
         hello.sayHello();
@@ -308,10 +321,10 @@ public class AllTests
         hello.sayHello();
         obj.migrateHello();
         hello.sayHello();
-        System.out.println("ok");
+        out.println("ok");
 
-        System.out.print("testing whether server is gone... ");
-        System.out.flush();
+        out.print("testing whether server is gone... ");
+        out.flush();
         obj.shutdown();
         try
         {
@@ -320,10 +333,10 @@ public class AllTests
         }
         catch(Ice.LocalException ex)
         {
-            System.out.println("ok");
+            out.println("ok");
         }
 
-        System.out.print("testing indirect proxies to collocated objects... ");
+        out.print("testing indirect proxies to collocated objects... ");
         Ice.Properties properties = communicator.getProperties();
         properties.setProperty("Ice.PrintAdapterReady", "0");
         Ice.ObjectAdapter adapter = communicator.createObjectAdapterWithEndpoints("Hello", "default");
@@ -345,13 +358,13 @@ public class AllTests
         }
         catch(Ice.CollocationOptimizationException ex)
         {
-            System.out.println("ok");
+            out.println("ok");
         }
         adapter.deactivate();
 
-        System.out.print("shutdown server manager... ");
-        System.out.flush();
+        out.print("shutdown server manager... ");
+        out.flush();
         manager.shutdown();
-        System.out.println("ok");
+        out.println("ok");
     }
 }

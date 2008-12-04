@@ -7,6 +7,8 @@
 //
 // **********************************************************************
 
+package test.Ice.background;
+
 class Acceptor implements IceInternal.Acceptor
 {
     public java.nio.channels.ServerSocketChannel
