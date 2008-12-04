@@ -118,6 +118,7 @@ Ice-E has also eliminated the following features:
 * Protocol compression
 * Ice::Application and Ice::Service classes
 * Local interfaces
+* StaticMutex
 
 
 Optional Features
@@ -162,6 +163,8 @@ as was the previous behaviour.
 
 Note that in Posix root privileges are required for use SCHED_RR.
 
+an attempt to start a thread with an invalid priority raise ThreadSyscallException.
+
 Posix mutex implementation aditions.
 ------------------------------------
 
@@ -180,14 +183,14 @@ parameter does nothing.
 Default construted Mutex and RecMutex in Posix use the MutexProtocol returned 
 by getDefaultMutexProtocol
 
-this function is defined in MutexProtocol.h with ICE_API so it could be override in the
-application main.
+this function is defined in MutexProtocol.h with ICE_API and could be override
+in the application main.
 
 Timer
 -----
 
-Timer has now a new construtor that permit set the priority used by the thread owned
-by this timer
+Timer has now a new ctor that permit set the priority used by the thread owned
+by this timer.
 
 
 New Properties
@@ -219,7 +222,7 @@ Ice.ThreadPool.Client.ThreadPriority
 Tests
 -----
 
-Real time tests need to run as super user on posix systems allTest.py has been
+Real time tests need to run as super user on posix systems, allTest.py has been
 changed to only execute this when user is root in unix.
 
 There are 2 different test for real time features
