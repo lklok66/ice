@@ -18,7 +18,7 @@ HelloI::HelloI(const LogIPtr& log, CDialog* dialog) :
 }
 
 void
-HelloI::sayHello(int delay, const Ice::Current&)
+HelloI::sayHello(int delay, const Ice::Current&) const
 {
     if(delay != 0)
     {
