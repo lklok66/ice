@@ -17,7 +17,7 @@
 
 CHelloClientDlg::CHelloClientDlg(const Ice::CommunicatorPtr& communicator, CWnd* pParent /*=NULL*/) :
     CDialog(CHelloClientDlg::IDD, pParent), _communicator(communicator), _currentMode(0),
-    _useSecure(false), _useTimeout(false)
+    _useTimeout(false)
 {
     _hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -52,6 +52,7 @@ CHelloClientDlg::OnInitDialog()
     //
     _mode = (CComboBox*)GetDlgItem(IDC_MODE);
     _timeout = (CButton*)GetDlgItem(IDC_TIMEOUT);
+    _delay = (CButton*)GetDlgItem(IDC_DELAY);
     _status = (CStatic*)GetDlgItem(IDC_STATUSBAR);
 
     //
@@ -128,7 +129,7 @@ CHelloClientDlg::OnSayHello()
     try
     {
         updateProxy();
-        _currentProxy->sayHello();
+        _currentProxy->sayHello(_delay->GetCheck() == BST_CHECKED ? 2500 : 0);
 #ifdef ICEE_HAS_BATCH
         if(_currentProxy->ice_isBatchOneway())
         {
