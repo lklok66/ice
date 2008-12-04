@@ -187,15 +187,15 @@ Ice::Properties::load(const std::string& file)
 
     static const size_t delta = 12;
     unsigned int size = delta;
-    char* line = (char*)malloc(delta);
+    char* line = (char*)malloc(size);
     while(fgets(line, size, in) != NULL)
     {
-        while(strlen(line) == size - 1 && line[size - 1] != '\n')
+        while(strlen(line) == (size - 1) && line[size - 1] != '\n')
         {
             unsigned int oldSize = size;
             size += delta;
             line = (char*)realloc(line, size);
-            fgets(line + oldSize - 1, delta, in);
+            fgets(line + oldSize - 1, delta + 1, in);
         }
 
         parseLine(line
