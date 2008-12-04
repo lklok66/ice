@@ -189,6 +189,7 @@
             <include name="**/*.class"/>
             <exclude name="Freeze/**"/>
             <exclude name="IceGridGUI/**"/>
+            <exclude name="test/**"/>
             <exclude name="ant/**"/>
             <exclude name="*.jar"/>
             <manifest>
@@ -493,7 +494,7 @@
 
     <target name="test-jar" depends="test-compile">
         <jar jarfile="${lib.dir}/IceTest.jar" basedir="${lib.dir}">
-            <include name="test/*.class"/>
+            <include name="test/**"/>
             <manifest>
                 <attribute name="Built-By" value="ZeroC, Inc."/>
                 <attribute name="Class-Path" value="Ice.jar"/>
