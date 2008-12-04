@@ -11,6 +11,21 @@ significant new additions, while others represent minor corrections.
 Changes since version 1.2.0
 ======================================================================
 
+- Added support for setting thread priorities. See README for more
+  information.
+
+- The StaticMutex class has been removed.
+
+- Added the proxy methods ice_flushBatchRequests() and
+  ice_flushBatchRequests_async() to flush the batch requests of the
+  connection associated with the proxy. 
+
+- The blocking and thread-per-connection concurency models are no
+  longer supported. Instead, Ice-E now only supports the thread pool
+  concurrency model.
+
+- Added optional suppport for Asynchronous Message Invocation (AMI).
+
 - Added the following operations to the ObjectAdapter API:
 
    - addDefaultServant
