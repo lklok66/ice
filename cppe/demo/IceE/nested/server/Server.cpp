@@ -2,27 +2,17 @@
 //
 // Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
 //
-// This copy of Ice-E is licensed to you under the terms described in the
-// ICEE_LICENSE file included in this distribution.
+// This copy of Ice is licensed to you under the terms described in the
+// ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
 
-#include <Callback.h>
 #include <IceE/IceE.h>
+#include <NestedI.h>
 
 using namespace std;
 using namespace Demo;
 
-class CallbackReceiverI : public CallbackReceiver
-{
-public:
-
-    virtual void
-    callback(Ice::Int num, const Ice::Current&)
-    {
-        printf("received callback #%d\n", num); fflush(stdout);
-    }
-};
 
 int
 run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
@@ -33,33 +23,12 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
         return EXIT_FAILURE;
     }
 
-    Ice::PropertiesPtr properties = communicator->getProperties();
-    const char* proxyProperty = "CallbackSender.Proxy";
-    string proxy = properties->getProperty(proxyProperty);
-    if(proxy.empty())
-    {
-        fprintf(stderr, "%s: property `%s' not set\n", argv[0], proxyProperty);
-        return EXIT_FAILURE;
-    }
-
-    CallbackSenderPrx server = CallbackSenderPrx::checkedCast(communicator->stringToProxy(proxy));
-    if(!server)
-    {
-        fprintf(stderr, "%s: invalid proxy\n", argv[0]);
-        return EXIT_FAILURE;
-    }
-
-    Ice::ObjectAdapterPtr adapter = communicator->createObjectAdapter("Callback.Client");
-    Ice::Identity ident;
-    ident.name = IceUtil::generateUUID();
-    ident.category = "";
-    CallbackReceiverPtr cr = new CallbackReceiverI;
-    adapter->add(cr, ident);
+    Ice::ObjectAdapterPtr adapter = communicator->createObjectAdapter("Nested.Server");
+    NestedPrx self = NestedPrx::uncheckedCast(adapter->createProxy(communicator->stringToIdentity("nestedServer")));
+    NestedPtr servant = new NestedI(self);
+    adapter->add(servant, communicator->stringToIdentity("nestedServer"));
     adapter->activate();
-    server->ice_getConnection()->setAdapter(adapter);
-    server->addClient(ident);
     communicator->waitForShutdown();
-
     return EXIT_SUCCESS;
 }
 
@@ -74,6 +43,7 @@ main(int argc, char* argv[])
         Ice::InitializationData initData;
         initData.properties = Ice::createProperties();
         initData.properties->load("config");
+        initData.properties->setProperty("Ice.Override.Timeout", "100");
         communicator = Ice::initialize(argc, argv, initData);
         status = run(argc, argv, communicator);
     }

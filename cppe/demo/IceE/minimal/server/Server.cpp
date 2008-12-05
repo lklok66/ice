@@ -20,7 +20,7 @@ public:
     virtual void
     sayHello(const Ice::Current&)
     {
-        printf("Hello World!\n");
+        printf("Hello World!\n"); fflush(stdout);
     }
 };
 

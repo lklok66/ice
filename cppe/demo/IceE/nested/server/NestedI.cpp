@@ -7,24 +7,24 @@
 //
 // **********************************************************************
 
-#include <HelloI.h>
 #include <IceE/IceE.h>
+#include <NestedI.h>
 
 using namespace std;
+using namespace Ice;
+using namespace Demo;
 
-void
-HelloI::sayHello(int delay, const Ice::Current&)
+NestedI::NestedI(const NestedPrx& self) :
+    _self(self)
 {
-    if(delay != 0)
-    {
-        IceUtil::ThreadControl::sleep(IceUtil::Time::milliSeconds(delay));
-    }
-    printf("Hello World!\n"); fflush(stdout);
 }
 
 void
-HelloI::shutdown(const Ice::Current& c)
+NestedI::nestedCall(Int level, const NestedPrx& proxy, const Ice::Current& current)
 {
-    printf("Shutting down...\n");
-    c.adapter->getCommunicator()->shutdown();
+    printf("%d\n", level); fflush(stdout);
+    if(--level > 0)
+    {
+        proxy->nestedCall(level, _self, current.ctx);
+    }
 }

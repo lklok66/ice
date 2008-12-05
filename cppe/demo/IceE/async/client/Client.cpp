@@ -61,7 +61,7 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
     {
         try
         {
-            printf("==> ");
+            printf("==> "); fflush(stdout);
             do
             {
                 c = getchar();

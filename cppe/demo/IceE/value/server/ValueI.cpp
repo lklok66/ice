@@ -19,7 +19,7 @@ PrinterI::printBackwards(const Ice::Current&)
     string s;
     s.resize(message.length());
     reverse_copy(message.begin(), message.end(), s.begin());
-    printf("%s\n", s.c_str());
+    printf("%s\n", s.c_str()); fflush(stdout);
 }
 
 void
@@ -28,5 +28,5 @@ DerivedPrinterI::printUppercase(const Ice::Current&)
     string s;
     s.resize(derivedMessage.length());
     transform(derivedMessage.begin(), derivedMessage.end(), s.begin(), ::toupper);
-    printf("%s\n", s.c_str());
+    printf("%s\n", s.c_str()); fflush(stdout);
 }

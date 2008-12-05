@@ -7,22 +7,11 @@
 //
 // **********************************************************************
 
-#include <Callback.h>
 #include <IceE/IceE.h>
+#include <NestedI.h>
 
 using namespace std;
 using namespace Demo;
-
-class CallbackReceiverI : public CallbackReceiver
-{
-public:
-
-    virtual void
-    callback(Ice::Int num, const Ice::Current&)
-    {
-        printf("received callback #%d\n", num); fflush(stdout);
-    }
-};
 
 int
 run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
@@ -33,32 +22,48 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
         return EXIT_FAILURE;
     }
 
-    Ice::PropertiesPtr properties = communicator->getProperties();
-    const char* proxyProperty = "CallbackSender.Proxy";
-    string proxy = properties->getProperty(proxyProperty);
-    if(proxy.empty())
-    {
-        fprintf(stderr, "%s: property `%s' not set\n", argv[0], proxyProperty);
-        return EXIT_FAILURE;
-    }
-
-    CallbackSenderPrx server = CallbackSenderPrx::checkedCast(communicator->stringToProxy(proxy));
-    if(!server)
+    NestedPrx nested = NestedPrx::checkedCast(communicator->propertyToProxy("Nested.Proxy"));
+    if(!nested)
     {
         fprintf(stderr, "%s: invalid proxy\n", argv[0]);
         return EXIT_FAILURE;
     }
 
-    Ice::ObjectAdapterPtr adapter = communicator->createObjectAdapter("Callback.Client");
-    Ice::Identity ident;
-    ident.name = IceUtil::generateUUID();
-    ident.category = "";
-    CallbackReceiverPtr cr = new CallbackReceiverI;
-    adapter->add(cr, ident);
+    Ice::ObjectAdapterPtr adapter = communicator->createObjectAdapter("Nested.Client");
+    NestedPrx self = NestedPrx::uncheckedCast(adapter->createProxy(communicator->stringToIdentity("nestedClient")));
+    NestedPtr servant = new NestedI(self);
+    adapter->add(servant, communicator->stringToIdentity("nestedClient"));
     adapter->activate();
-    server->ice_getConnection()->setAdapter(adapter);
-    server->addClient(ident);
-    communicator->waitForShutdown();
+
+    printf("Note: The maximum nesting level is sz * 2, with sz being\n");
+    printf("the maximum number of threads in the server thread pool. if\n");
+    printf("you specify a value higher than that, the application will\n");
+    printf("block or timeout.\n\n");
+
+
+    char buf[64];
+    unsigned int size = 64;
+    do
+    {
+        try
+        {
+            printf("enter nesting level or 'x' for exit: "); fflush(stdout);
+            if(fgets(buf, size, stdin) == NULL)
+            {
+                break;
+            }
+            int level = atoi(buf);
+            if(level > 0)
+            {
+                nested->nestedCall(level, self);
+            }
+        }
+        catch(const Ice::Exception& ex)
+        {
+            fprintf(stderr, "%s\n", ex.toString().c_str());
+        }
+    }
+    while(buf[0] != 'x');
 
     return EXIT_SUCCESS;
 }

@@ -7,24 +7,12 @@
 #
 # **********************************************************************
 
-top_srcdir	= ../..
+top_srcdir	= ../../..
 
 include $(top_srcdir)/config/Make.rules
 
-SUBDIRS		= hello \
-		  latency \
-		  throughput \
-		  callback \
-		  chat \
-		  bidir \
-		  minimal \
-		  nested \
-		  value \
-		  workqueue
-
-ifeq ($(HAS_AMI),yes)
-    SUBDIRS	+= async
-endif
+SUBDIRS		= client \
+		  server
 
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \

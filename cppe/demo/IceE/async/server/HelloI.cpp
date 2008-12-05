@@ -20,7 +20,7 @@ HelloI::sayHello(int delay, const Ice::Current&)
     {
         IceUtil::ThreadControl::sleep(IceUtil::Time::milliSeconds(delay));
     }
-    printf("Hello World!\n");
+    printf("Hello World!\n"); fflush(stdout);
 }
 
 void

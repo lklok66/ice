@@ -12,7 +12,7 @@ import sys
 from demoscript import *
 from scripts import Expect
 
-def runtests(client, server, secure):
+def runtests(client, server, icee, secure):
     print "testing twoway",
     sys.stdout.flush()
     client.sendline('t')
@@ -23,7 +23,7 @@ def runtests(client, server, secure):
     client.sendline('o')
     server.expect('initiating callback')
     client.expect('received callback')
-    if not secure:
+    if not icee and not secure:
         print "datagram",
         sys.stdout.flush()
         client.sendline('d')
@@ -44,7 +44,7 @@ def runtests(client, server, secure):
     client.expect('received callback')
     server.expect('initiating callback')
     client.expect('received callback')
-    if not secure:
+    if not icee and not secure:
         print "datagram",
         sys.stdout.flush()
         client.sendline('D')
@@ -60,12 +60,13 @@ def runtests(client, server, secure):
         client.expect('received callback')
     print "... ok"
 
-def run(client, server):
-    runtests(client, server, False)
+def run(client, server, icee=False):
+    runtests(client, server, icee, False)
 
-    print "repeating tests with SSL"
-    client.sendline('S')
-    runtests(client, server, True)
+    if not icee:
+        print "repeating tests with SSL"
+        client.sendline('S')
+        runtests(client, server, True)
 
     client.sendline('s')
     server.waitTestSuccess()

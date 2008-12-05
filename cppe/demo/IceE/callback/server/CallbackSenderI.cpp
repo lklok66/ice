@@ -16,7 +16,7 @@ using namespace Demo;
 void
 CallbackSenderI::initiateCallback(const CallbackReceiverPrx& proxy, const Ice::Current& current)
 {
-    printf("initiating callback\n");
+    printf("initiating callback\n"); fflush(stdout);
     try
     {
         proxy->callback(current.ctx);

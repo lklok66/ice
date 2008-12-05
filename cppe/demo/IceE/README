@@ -39,6 +39,11 @@ Demos in this directory:
 
   The simplest Ice-E demo, equivalent to "Hello, World".
 
+- nested
+
+  A demo to illustrate how nested callbacks work, and how the size of
+  the thread pool affects the maximum nesting depth.
+
 - throughput
 
   This demo allows you to send sequences of various types between

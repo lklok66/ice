@@ -7,29 +7,12 @@
 #
 # **********************************************************************
 
-top_srcdir	= ..\..
+top_srcdir	= ..\..\..
 
 !include $(top_srcdir)\config\Make.rules.mak
 
-SUBDIRS		= minimal \
-		  latency \
-		  throughput \
-		  chat \
-		  MFC
-
-!if "$(WINDOWS_MOBILE_SDK)" == ""
-SUBDIRS 	= $(SUBDIRS) \
-		  hello \
-		  callback \
-		  bidir \
-		  nested \
-		  value \
-		  workqueue
-!endif
-
-!if "$(WINDOWS_MOBILE_SDK)" == "" && "$(HAS_AMI)" == "yes"
-SUBDIRS		= $(SUBDIRS) async
-!endif
+SUBDIRS		= client \
+		  server
 
 $(EVERYTHING)::
 	@for %i in ( $(SUBDIRS) ) do \

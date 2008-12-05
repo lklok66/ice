@@ -145,6 +145,7 @@ def configurePaths():
 # Mapping to the associated subdirectory.
 mappingDirs = {
     "cpp" : ( os.path.join("cpp", "demo"), "demo"),
+    "cppe" : ( os.path.join("cppe", "demo"), "demo"),
     "java" : ( os.path.join("java", "demo"), "demoj"),
     "cs" : ( os.path.join("cs", "demo"), "democs"),
     "vb" : ( os.path.join("vb", "demo"), "demovb"),
@@ -231,9 +232,9 @@ def getMapping():
     dir = here[len(toplevel)+1:].split(os.sep)[0]
 
     if sourcedist:
-        mapping = { "cpp": "cpp", "cs": "cs", "java": "java", "php": "php", "py": "py", "rb": "rb", "vb": "vb" }
+        mapping = { "cpp": "cpp", "cppe" : "cppe", "cs": "cs", "java": "java", "php": "php", "py": "py", "rb": "rb", "vb": "vb" }
     else:
-        mapping = { "demo": "cpp", "democs": "cs", "demoj": "java", "demophp": "php", "demopy": "py",
+        mapping = { "demo": "cpp", "cppe" : "cppe", "democs": "cs", "demoj": "java", "demophp": "php", "demopy": "py",
                     "demorb": "rb", "demovb": "vb" }
     return mapping[dir]
 

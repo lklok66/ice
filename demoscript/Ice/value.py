@@ -12,7 +12,7 @@ import sys
 from demoscript import *
 from scripts import Expect
 
-def run(client, server, ruby = False):
+def run(client, server, icee = False, ruby = False):
     print "testing...",
     sys.stdout.flush()
     client.expect('press enter')
@@ -20,7 +20,10 @@ def run(client, server, ruby = False):
     client.expect('==> a message 4 u.*press enter')
     client.sendline('')
     if not ruby:
-        client.expect('NoObjectFactoryException.*press enter')
+        if icee:
+            client.expect('MarshalException.*press enter')
+        else:
+            client.expect('NoObjectFactoryException.*press enter')
         client.sendline('')
     client.expect('==> Ice rulez!.*press enter')
     client.sendline('')

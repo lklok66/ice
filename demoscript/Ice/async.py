@@ -12,7 +12,7 @@ import sys
 from demoscript import *
 from scripts import Expect
 
-def run(client, server):
+def run(client, server, icee=False):
     print "testing client... ",
     sys.stdout.flush()
     client.sendline('i')
@@ -29,11 +29,13 @@ def run(client, server):
 
     print "testing shutdown... ",
     sys.stdout.flush()
-    client.sendline('d')
+    if not icee:
+        client.sendline('d')
     client.sendline('s')
     server.waitTestSuccess()
 
-    client.expect('RequestCanceledException')
+    if not icee:
+        client.expect('RequestCanceledException')
     client.sendline('x')
     client.waitTestSuccess()
     print "ok"

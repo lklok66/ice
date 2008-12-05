@@ -464,6 +464,11 @@ class Expect (object):
                         assert False
             else:
                 assert self.exitstatus == exitstatus
+        elif self.mapping == "cppe":
+            if self.killed is not None:
+                test(self.exitstatus, -2)
+            else:
+                test(self.exitstatus, exitstatus)
         else:
             test(self.exitstatus, exitstatus)
 

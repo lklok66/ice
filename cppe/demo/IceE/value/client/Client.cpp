@@ -62,7 +62,7 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
     printf("Let's first transfer a simple object, for a class without\n");
     printf("operations, and print its contents. No factory is required\n");
     printf("for this.\n");
-    printf("[press enter]\n");
+    printf("[press enter]\n"); fflush(stdout);
     do
     {
         c = getchar();
@@ -76,7 +76,7 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
     printf("Yes, this worked. Now let's try to transfer an object for a class\n");
     printf("with operations as type ::Demo::Printer, without installing a factory first.\n");
     printf("This should give us a `no factory' exception.\n");
-    printf("[press enter]\n");
+    printf("[press enter]\n"); fflush(stdout);
     do
     {
         c = getchar();
@@ -100,7 +100,7 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
     printf("Yep, that's what we expected. Now let's try again, but with\n");
     printf("installing an appropriate factory first. If successful, we print\n");
     printf("the object's content.\n");
-    printf("[press enter]\n");
+    printf("[press enter]\n"); fflush(stdout);
     do
     {
         c = getchar();
@@ -116,7 +116,7 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
     printf("\n");
     printf("Cool, it worked! Let's try calling the printBackwards() method\n");
     printf("on the object we just received locally.\n");
-    printf("[press enter]\n");
+    printf("[press enter]\n"); fflush(stdout);
     do
     {
         c = getchar();
@@ -129,7 +129,7 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
     printf("\n");
     printf("Now we call the same method, but on the remote object. Watch the\n");
     printf("server's output.\n");
-    printf("[press enter]\n");
+    printf("[press enter]\n"); fflush(stdout);
     do
     {
         c = getchar();
@@ -143,7 +143,7 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
     printf("object. Since we haven't yet installed a factory for the derived\n");
     printf("class, the derived class (::Demo::DerivedPrinter) is sliced\n");
     printf("to its base class (::Demo::Printer).\n");
-    printf("[press enter]\n");
+    printf("[press enter]\n"); fflush(stdout);
     do
     {
         c = getchar();
@@ -159,7 +159,7 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
     printf("Now we install a factory for the derived class, and try again.\n");
     printf("Because we receive the derived object as a base object, we\n");
     printf("we need to do a dynamic_cast<> to get from the base to the derived object.\n");
-    printf("[press enter]\n");
+    printf("[press enter]\n"); fflush(stdout);
     do
     {
         c = getchar();
@@ -178,7 +178,7 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
     printf("Let's print the message contained in the derived object, and\n");
     printf("call the operation printUppercase() on the derived object\n");
     printf("locally.\n");
-    printf("[press enter]\n");
+    printf("[press enter]\n"); fflush(stdout);
     do
     {
         c = getchar();
@@ -193,7 +193,7 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
     printf("Finally, we try the same again, but instead of returning the\n");
     printf("derived object, we throw an exception containing the derived\n");
     printf("object.\n");
-    printf("[press enter]\n");
+    printf("[press enter]\n"); fflush(stdout);
     do
     {
         c = getchar();

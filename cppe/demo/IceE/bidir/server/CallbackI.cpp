@@ -44,7 +44,7 @@ CallbackSenderI::addClient(const Ice::Identity& ident, const Ice::Current& curre
 {
     Lock lock(*this);
 
-    printf("adding client `%s'\n", _communicator->identityToString(ident).c_str());
+    printf("adding client `%s'\n", _communicator->identityToString(ident).c_str()); fflush(stdout);
 
     CallbackReceiverPrx client = CallbackReceiverPrx::uncheckedCast(current.con->createProxy(ident));
     _clients.insert(client);

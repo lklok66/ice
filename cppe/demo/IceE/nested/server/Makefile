@@ -7,28 +7,26 @@
 #
 # **********************************************************************
 
-top_srcdir	= ../..
+top_srcdir	= ../../../..
+
+SERVER		= server
+
+TARGETS		= $(SERVER)
+
+OBJS		= Nested.o \
+		  NestedI.o \
+		  Server.o
+
+SRCS		= $(OBJS:.o=.cpp)
+
+SLICE_SRCS	= Nested.ice
 
 include $(top_srcdir)/config/Make.rules
 
-SUBDIRS		= hello \
-		  latency \
-		  throughput \
-		  callback \
-		  chat \
-		  bidir \
-		  minimal \
-		  nested \
-		  value \
-		  workqueue
+CPPFLAGS	:= -I. $(CPPFLAGS)
 
-ifeq ($(HAS_AMI),yes)
-    SUBDIRS	+= async
-endif
+$(SERVER): $(OBJS)
+	rm -f $@
+	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
-$(EVERYTHING)::
-	@for subdir in $(SUBDIRS); \
-	do \
-	    echo "making $@ in $$subdir"; \
-	    ( cd $$subdir && $(MAKE) $@ ) || exit 1; \
-	done
+include .depend
