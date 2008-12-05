@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by HelloClientCE.rc
+// Used by HelloClient.rc
 //
 #define IDD_HELLOCLIENT_DIALOG          101
 #define IDR_MAINFRAME                   128
@@ -12,9 +12,10 @@
 #define IDC_FLUSH                       1005
 #define IDC_SHUTDOWN                    1006
 #define IDC_STATUSBAR                   1007
-#define IDC_TIMEOUT2                    1008
-#define IDC_DELAY                       1009
-#define IDC_TIMEOUT3                    1009
+#define IDC_DELAY                       1008
+#define IDC_HOST                        1009
+#define IDC_HOSTNAME                    1010
+#define IDC_HOSTLABEL                   1010
 
 // Next default values for new objects
 // 

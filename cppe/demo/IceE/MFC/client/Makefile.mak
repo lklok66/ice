@@ -17,7 +17,7 @@ OBJS		= Hello.obj \
 		  HelloClient.obj \
 		  HelloClientDlg.obj \
 		  stdafx.obj
-		
+
 SRCS		= $(OBJS:.obj=.cpp)
 
 !include $(top_srcdir)/config/Make.rules.mak
