@@ -159,7 +159,7 @@ run(int argc, char* argv[], const Ice::CommunicatorPtr& communicator)
         }
         catch(const Ice::Exception& ex)
         {
-            fprintf(stderr, "%s\n", ex.toString().c_str());
+            fprintf(stderr, "%s\n", ex.toString().c_str()); fflush(stderr);
         }
     }
     while(c != EOF && c != 'x');

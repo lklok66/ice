@@ -25,6 +25,14 @@ NestedI::nestedCall(Int level, const NestedPrx& proxy, const Ice::Current& curre
     printf("%d\n", level); fflush(stdout);
     if(--level > 0)
     {
-        proxy->nestedCall(level, _self, current.ctx);
+        try
+        {
+            proxy->nestedCall(level, _self, current.ctx);
+        }
+        catch(const Ice::Exception& ex)
+        {
+            fprintf(stderr, "%s\n", ex.toString().c_str()); fflush(stderr);
+            throw;
+        }
     }
 }
