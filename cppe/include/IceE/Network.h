@@ -93,8 +93,8 @@ void setTimeout(SOCKET, bool, int);
 void setTcpNoDelay(SOCKET);
 void setKeepAlive(SOCKET);
 int getSendBufferSize(SOCKET);
-#ifndef _WIN32_WCE
 void setSendBufferSize(SOCKET, int);
+#ifndef _WIN32_WCE
 void setRecvBufferSize(SOCKET, int);
 int getRecvBufferSize(SOCKET);
 #endif

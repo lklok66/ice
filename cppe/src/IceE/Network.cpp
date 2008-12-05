@@ -9,10 +9,8 @@
 
 #include <IceE/Network.h>
 #include <IceE/LocalException.h>
-#ifndef _WIN32_WCE
-#  include <IceE/Properties.h> // For setTcpBufSize
-#  include <IceE/LoggerUtil.h> // For setTcpBufSize
-#endif
+#include <IceE/Properties.h> // For setTcpBufSize
+#include <IceE/LoggerUtil.h> // For setTcpBufSize
 #include <IceE/StringUtil.h>
 #include <IceE/SafeStdio.h>
 
@@ -493,7 +491,6 @@ IceInternal::getSendBufferSize(SOCKET fd)
     return sz;
 }
 
-#ifndef _WIN32_WCE
 void
 IceInternal::setSendBufferSize(SOCKET fd, int sz)
 {
@@ -506,6 +503,7 @@ IceInternal::setSendBufferSize(SOCKET fd, int sz)
     }
 }
 
+#ifndef _WIN32_WCE
 void
 IceInternal::setRecvBufferSize(SOCKET fd, int sz)
 {
@@ -1114,7 +1112,6 @@ repeatListen:
 void
 IceInternal::setTcpBufSize(SOCKET fd, const Ice::PropertiesPtr& properties, const Ice::LoggerPtr& logger)
 {
-#ifndef _WIN32_WCE
     assert(fd != INVALID_SOCKET);
 
     //
@@ -1128,6 +1125,10 @@ IceInternal::setTcpBufSize(SOCKET fd, const Ice::PropertiesPtr& properties, cons
 #endif
     Int sizeRequested;
 
+#ifndef _WIN32_WCE
+    //
+    // Sockect option is not available on CE to set receive buffer size.
+    //
     sizeRequested = properties->getPropertyAsIntWithDefault("Ice.TCP.RcvSize", dfltBufSize);
     if(sizeRequested > 0)
     {
@@ -1144,6 +1145,8 @@ IceInternal::setTcpBufSize(SOCKET fd, const Ice::PropertiesPtr& properties, cons
             out << printfToString("TCP receive buffer size: requested size of %d adjusted to %d", sizeRequested, size);
         }
     }
+#endif //_WIN32_WCE
+
 
     sizeRequested = properties->getPropertyAsIntWithDefault("Ice.TCP.SndSize", dfltBufSize);
     if(sizeRequested > 0)
@@ -1161,5 +1164,4 @@ IceInternal::setTcpBufSize(SOCKET fd, const Ice::PropertiesPtr& properties, cons
             out << printfToString("TCP send buffer size: requested size of %d adjusted to %d", sizeRequested, size);
         }
     }
-#endif //_WIN32_WCE
 }
