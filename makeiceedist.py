@@ -153,7 +153,9 @@ os.mkdir(distDir)
 
 print "Creating " + version + " source distributions in " + distDir
 
+demoscriptDir = os.path.join(distDir, "IceE-" + version + "-demo-scripts")
 srcDir = os.path.join(distDir, "IceE-" + version)
+os.mkdir(demoscriptDir)
 
 #
 # Extract the sources with git archive using the given tag.
@@ -235,6 +237,17 @@ for root, dirnames, filesnames in os.walk('.'):
     for d in dirnames:
         os.chmod(os.path.join(root, d), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) # rwxr-xr-x
 
+for root, dirnames, filesnames in os.walk('cppe'):
+
+    for f in filesnames:
+        filepath = os.path.join(root, f)
+        if f == "expect.py":
+            move(filepath, os.path.join(distDir, demoscriptDir, filepath))
+
+move("demoscript", os.path.join(demoscriptDir, "demoscript")) # Move the demoscript directory
+move("scripts", os.path.join(demoscriptDir, "scripts")) # Move the scripts directory
+move(os.path.join("cppe", "allDemos.py"), os.path.join(demoscriptDir, "cppe", "allDemos.py"))
+
 print "ok"
 
 #
@@ -287,8 +300,12 @@ os.chdir(distDir)
 
 for d in [srcDir]:
     zipArchive(srcDir, verbose)
+
 for d in [srcDir]:
     tarArchive(srcDir, verbose)
+
+for (dir, archiveDir) in [(demoscriptDir, "IceE-" + version + "-demos")]:
+    tarArchive(dir, verbose, archiveDir)
 
 #
 # Write source distribution report in README file.
@@ -301,6 +318,7 @@ writeSrcDistReport("IceE", version, compareToDir, [srcDir])
 print "Cleaning up...",
 sys.stdout.flush()
 remove(srcDir)
+remove(demoscriptDir)
 print "ok"
 
 os.chdir(cwd)
