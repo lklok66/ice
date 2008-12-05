@@ -11,8 +11,11 @@ top_srcdir	= ..\..\..
 
 !include $(top_srcdir)\config\Make.rules.mak
 
-SUBDIRS		= client \
-		  server
+!if "$(HAS_AMI)" == "yes"
+SUBDIRS		= server client
+!else
+SUBDIRS		= server
+!endif
 
 $(EVERYTHING)::
 	@for %i in ( $(SUBDIRS) ) do \

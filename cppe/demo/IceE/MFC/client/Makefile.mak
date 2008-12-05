@@ -34,19 +34,25 @@ PDBFLAGS        = /pdb:$(CLIENT:.exe=.pdb)
 !if "$(WINDOWS_MOBILE_SDK)" == ""
 
 RESFILE         = HelloClient.res
+
 HelloClient.res: HelloClient.rc
         $(RC) $(RCFLAGS) HelloClient.rc
+
+LIBS		= $(MFC_MINLIBS)
 
 !else
 
 RESFILE         = HelloClientCE.res
+
 HelloClientCE.res: HelloClientCE.rc
         $(RC) $(RCFLAGS) HelloClientCE.rc
+
+LIBS		= cellcore.lib $(MFC_MINLIBS)
 
 !endif
 
 $(CLIENT): $(OBJS) $(COBJS) $(RESFILE)
-	$(LINK) $(LDFLAGS) $(MFC_LDFLAGS) $(PDBFLAGS) $(OBJS) $(COBJS) $(RESFILE) /out:$@ $(MFC_MINLIBS)
+	$(LINK) $(LDFLAGS) $(MFC_LDFLAGS) $(PDBFLAGS) $(OBJS) $(COBJS) $(RESFILE) /out:$@ $(LIBS)
 	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
 	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#2 && del /q $@.manifest
 

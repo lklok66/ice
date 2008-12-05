@@ -1,5 +1,10 @@
 Demos in this directory:
 
+- async
+
+  This demo illustrates the use of Asynchronous Message Invocation
+  (AMI).
+
 - MFC
 
   Shows how to use Ice-E in conjunction with the Microsoft Foundation
@@ -49,6 +54,11 @@ Demos in this directory:
   This demo allows you to send sequences of various types between
   client and server and measure the maximum bandwidth that can be
   achieved using serialized synchronous requests.
+
+- value
+
+  This demo shows how to use classes, class factories, and the
+  difference between local and remote invocations of class operations.
 
 - workqueue
 

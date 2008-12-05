@@ -59,6 +59,10 @@ protected:
 
     void updateProxy();
     void handleException(const IceUtil::Exception&);
+
+private:
+
+    HANDLE _connection;
 };
 
 #endif

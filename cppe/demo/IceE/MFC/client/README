@@ -1,6 +1,9 @@
+NOTE: This client requires AMI support to be built-in the Ice-E client
+library.
+
 The client-side portion of the MFC hello demo. Note that this demo can
-be used with the MFC server, or any of the other hello servers (for 
-example, the one contained in demo/Ice/hello).
+be used with the MFC server, or any of the other hello servers (for
+example, the one contained in demo/Ice/hello). 
 
 To run the demo, first start the server:
 

@@ -15,6 +15,11 @@
 //#define new DEBUG_NEW
 //#endif
 
+#ifdef _WIN32_WCE
+#  include <initguid.h>
+#  include <connmgr.h>
+#endif
+
 #define WM_AMI_EXCEPTION                      (WM_USER + 1)
 #define WM_AMI_SAY_HELLO_RESPONSE             (WM_USER + 2)
 #define WM_AMI_SAY_HELLO_SENT                 (WM_USER + 3)
@@ -113,8 +118,11 @@ private:
 };
 
 CHelloClientDlg::CHelloClientDlg(const Ice::CommunicatorPtr& communicator, CWnd* pParent /*=NULL*/) :
-    CDialog(CHelloClientDlg::IDD, pParent), _communicator(communicator), _currentMode(0),
-    _useTimeout(false)
+    CDialog(CHelloClientDlg::IDD, pParent), 
+    _communicator(communicator), 
+    _currentMode(0),
+    _useTimeout(false),
+    _connection(INVALID_HANDLE_VALUE)
 {
     _hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -175,14 +183,33 @@ CHelloClientDlg::OnInitDialog()
     //
     updateProxy();
     _host->SetWindowText(CString(_hostname.c_str()));
-    _status->SetWindowText(CString(" Ready"));
 
-    return TRUE;  // return TRUE  unless you set the focus to a control
+#ifdef _WIN32_WCE
+    CONNMGR_CONNECTIONINFO info = { 0 };
+    info.cbSize = sizeof(info);
+    info.dwParams = CONNMGR_PARAM_GUIDDESTNET;
+    info.dwPriority = CONNMGR_PRIORITY_USERINTERACTIVE;
+    info.guidDestNet = IID_DestNetInternet;
+    if(ConnMgrEstablishConnection(&info, &_connection) != S_OK)
+    {
+        AfxMessageBox(CString("Couldn't establish internet connection"), MB_OK|MB_ICONEXCLAMATION);
+    }
+#endif
+
+    _status->SetWindowText(CString(" Ready"));
+    return TRUE;  // return TRUE unless you set the focus to a control
 }
 
 void
 CHelloClientDlg::OnClose()
 {
+#ifdef _WIN32_WCE
+    if(_connection != INVALID_HANDLE_VALUE)
+    {
+        ConnMgrReleaseConnection(_connection, true);
+    }
+#endif
+
     //
     // Destroy the communicator. If AMI calls are still in progress they will be
     // interrupted with an Ice::CommunicatorDestroyedException.
@@ -403,17 +430,14 @@ CHelloClientDlg::updateProxy()
 
     if(!_proxy)
     {
-        _proxy = HelloPrx::uncheckedCast(_communicator->stringToProxy("hello:tcp -p 10000:udp -p 10000:ssl -p 10001"));
+        _proxy = HelloPrx::uncheckedCast(_communicator->stringToProxy("hello:tcp -p 10000"));
         _hostname = "localhost";
     }
     else if(hostname != _hostname)
     {
         try
         {
-            _proxy = HelloPrx::uncheckedCast(_communicator->stringToProxy(string("hello") + 
-                                                                          ":tcp -p 10000 -h " + hostname +
-                                                                          ":udp -p 10000 -h " + hostname +
-                                                                          ":ssl -p 10001 -h " + hostname));
+            _proxy = HelloPrx::uncheckedCast(_communicator->stringToProxy("hello:tcp -p 10000 -h " + hostname));
             _hostname = hostname;
         }
         catch(const Ice::EndpointParseException&)

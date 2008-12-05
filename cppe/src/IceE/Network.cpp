@@ -623,14 +623,6 @@ repeatConnect:
 void
 IceInternal::doFinishConnect(SOCKET fd)
 {
-    // TODO: XXX: See 1.2.0 impl of doConnect
-    //
-    // Under WinCE it's not possible to find out the connection failure
-    // reason with SO_ERROR, so it's necessary to use the WSAEVENT
-    // mechanism. We use the same mechanism for any Winsock platform.
-    //
-
-
     //
     // Note: we don't close the socket if there's an exception. It's the responsability
     // of the caller to do so.
