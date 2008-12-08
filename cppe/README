@@ -195,6 +195,9 @@ systems:
   application can "override" this function by defining its own version
   of IceUtil::getDefaultMutexProtocol.
 
+  By default, this method returns the mutex protocol defined by the
+  DEFAULT_MUTEX_PROTOCOL macro defined in the cppe/config/Make.rules
+  file.
 
 Timer API
 ---------
