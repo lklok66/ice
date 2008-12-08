@@ -59,7 +59,8 @@ filesToKeep = [
     "./cpp/bin",
     "./cpp/lib",
     "./cppe",
-    "./slice/IceE"
+    "./slice/IceE",
+    "./scripts"
 ]
 
 def pathInList(p, l):
@@ -245,7 +246,7 @@ for root, dirnames, filesnames in os.walk('cppe'):
             move(filepath, os.path.join(distDir, demoscriptDir, filepath))
 
 move("demoscript", os.path.join(demoscriptDir, "demoscript")) # Move the demoscript directory
-move("scripts", os.path.join(demoscriptDir, "scripts")) # Move the scripts directory
+copy("scripts", os.path.join(demoscriptDir, "scripts")) # Move the scripts directory
 move(os.path.join("cppe", "allDemos.py"), os.path.join(demoscriptDir, "cppe", "allDemos.py"))
 
 print "ok"
