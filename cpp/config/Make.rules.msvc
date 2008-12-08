@@ -32,7 +32,7 @@ CPPFLAGS	= $(CPPFLAGS) -nologo -W3 -WX -GR -EHsc -FD -D_CONSOLE
 
 CPPFLAGS	= $(CPPFLAGS) -O2 -DNDEBUG
 
-!if "$(STATICLIBS)" == "yes"
+!if "$(STATIC_CPP_RUNTIME)" == "yes"
 CPPFLAGS	= $(CPPFLAGS) -MT
 !else
 CPPFLAGS	= $(CPPFLAGS) -MD
@@ -42,7 +42,7 @@ CPPFLAGS	= $(CPPFLAGS) -MD
 
 CPPFLAGS	= $(CPPFLAGS) -Zi -Gm -Od -D_DEBUG
 
-!if "$(STATICLIBS)" == "yes"
+!if "$(STATIC_CPP_RUNTIME)" == "yes"
 CPPFLAGS	= $(CPPFLAGS) -MTd
 !else
 CPPFLAGS	= $(CPPFLAGS) -MDd

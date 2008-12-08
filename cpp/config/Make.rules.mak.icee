@@ -41,6 +41,9 @@ MCPP_HOME		= C:\Ice-3.3.0-ThirdParty-$(CPP_COMPILER)
 # ----------------------------------------------------------------------
 
 STATICLIBS              = yes
+!if "$(STATIC_CPP_RUNTIME)" == ""
+STATIC_CPP_RUNTIME	= no
+!endif
 
 #
 # Common definitions
