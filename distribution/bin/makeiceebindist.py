@@ -134,7 +134,8 @@ if not nobuild:
     
     os.chdir(os.path.join(srcDir, "cpp"))
 
-    if os.system(platform.getMake() + " " + platform.getMakeEnvs(version, "cpp")) != 0:
+    # Build using static C++ runtime on Windows
+    if os.system(platform.getMake() + " " + platform.getMakeEnvs(version, "cpp") + " STATIC_CPP_RUNTIME=yes") != 0:
         print sys.argv[0] + ": failed to the build the translator"
         sys.exit(1)
 
