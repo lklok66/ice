@@ -20,7 +20,7 @@ install:: install-common
 	    @if not exist %i \
 		@echo "Creating %i..." && \
 		mkdir %i
-	copy $(ice_cpp_dir)\bin\slice2cppe $(install_bindir)
+	copy $(ice_cpp_dir)\bin\slice2cppe.exe $(install_bindir)
 
 $(EVERYTHING)::
 	@if not exist include\IceE\Features.h \
