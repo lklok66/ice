@@ -10,7 +10,7 @@ Ice-E is expected to build and run properly on any recent Linux
 distribution for x86 and x86_64. However, Ice-E is officially
 supported only on:
 
-Development Platform           | Runtime Platform
+Development Platform           | Run-time Platform
 -------------------------------|--------------------------------------
 Red Hat Enterprise Linux       | Same as development
 5 update 2 (i386 and x86_64)   |
@@ -42,12 +42,12 @@ mcpp
 ----
 
 Building the mcpp library is only necessary if you want to build the
-Ice-E slice compiler yourself.
+Ice-E Slice compiler yourself.
 
-The Ice-E slice compiler (slice2cppe) has a dependency on mcpp 2.7.2.
+The Ice-E Slice compiler (slice2cppe) has a dependency on mcpp 2.7.2.
 
-If you intend to build mcpp from source, you can download the source,
-as well as get more information about mcpp from:
+If you intend to build mcpp from source, you can download the source
+and get more information about mcpp from:
 
   http://mcpp.sourceforge.net
 
@@ -55,16 +55,16 @@ Follow these instructions for building mcpp:
 
 - Untar the mcpp archive.
 
-- Change to the mcpp base directory.
+- Change to the mcpp base directory:
 
   $ cd mcpp-2.7.2
 
-- Run configure to enable library build.
+- Run configure to enable a library build:
 
   $ ./configure CFLAGS=-fPIC --enable-mcpplib --disable-shared
   (and --prefix=<dir> if you like)
 
-- Build mcpp
+- Build mcpp:
 
   $ gmake
 
@@ -83,7 +83,7 @@ Change the working directory to IceE-@ver@:
   $ cd IceE-@ver@
 
 Review the README file to determine whether you want to modify the
-default set of features provided by the run time libraries. Next,
+default set of features provided by the run-time libraries. Next,
 edit cppe/config/Make.rules to establish your build configuration.
 The comments in the file provide more information.
 
@@ -137,7 +137,7 @@ by executing the following command:
 
   $ export PATH=<Buildroot install dir>/build_arm_nofpu/staging_dir/bin:$PATH
 
-You now must set the following environment variables:
+Now you must set the following environment variables:
 
   $ export CXX=arm-linux-c++
   $ export AR=arm-linux-ar
@@ -165,6 +165,7 @@ If you do not have python then you can run most tests by manually
 running the server in one window followed by the client in a separate
 window.
 
+
 Building the Slice-to-Embedded-C++ translator
 ---------------------------------------------
 
@@ -183,6 +184,7 @@ Now you're ready to build the Slice-to-Embedded-C++ translator:
   $ make
 
 This will build the slice2cppe translator in the cpp/bin directory.
+
 
 ======================================================================
 32 bit builds on x86_64

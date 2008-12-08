@@ -1,5 +1,5 @@
 This demo illustrates how to invoke ordinary (twoway) operations, as
-well as how to make oneway, datagram, secure, and batched invocations.
+well as how to make oneway, datagram, and batched invocations.
 
 To run the demo, first start the server:
 

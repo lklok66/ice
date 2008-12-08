@@ -21,8 +21,8 @@ are discussed in the sections below.
 Concurrency Models
 ------------------
 
-Ice-E supports only the thread pool concurrenny model like Ice.
-However, unlike Ice, Ice-E does not support the configuring of
+As in Ice, Ice-E supports only the thread pool concurrency model.
+However, unlike Ice, Ice-E does not support the configuration of
 per-adapter thread pools.
 
 
@@ -66,40 +66,42 @@ module Ice {
 As you can see, the object adapter allows you to add, remove and find
 default servants. Note that, when you register a default servant, you
 must provide an argument for the category parameter. The value of the
-category parameter controls which object identities the default servant
-is responsible for: only object identities with a matching category
-member trigger a dispatch to this default servant. An incoming request
-for which no explicit entry exists in the ASM and with a category for
-which no default servant is registered returns an ObjectNotExistException
-to the client.
+category parameter controls which object identities the default
+servant is responsible for: only object identities with a matching
+category member trigger a dispatch to this default servant. An
+incoming request for which no explicit entry exists in the ASM and
+with a category for which no default servant is registered returns an
+ObjectNotExistException to the client.
 
 addDefaultServant has the following semantics:
 
- * You can register exactly one default servant for a specific category.
-   Attempts to call addDefaultServant for the same category more than
-   once raise an AlreadyRegisteredException.
+ * You can register exactly one default servant for a specific
+   category.  Attempts to call addDefaultServant for the same category
+   more than once raise an AlreadyRegisteredException.
 
- * You can register different default servants for different categories,
-   or you can register the same single default servant multiple times
-   (each time for a different category). In the former case, the category
-   is implicit in the default servant instance that is called by the Ice-E
-   run time; in the latter case, the servant can find out which category
-   the incoming request is for by examining the object identity member of
-   the Current object that is passed to the dispatched operation.
+ * You can register different default servants for different
+   categories, or you can register the same single default servant
+   multiple times (each time for a different category). In the former
+   case, the category is implicit in the default servant instance that
+   is called by the Ice-E run time; in the latter case, the servant
+   can find out which category the incoming request is for by
+   examining the object identity member of the Current object that is
+   passed to the dispatched operation.
 
- * It is legal to register a default servant for the empty category. Such
-   a servant is used if a request comes in for which no entry exists in
-   the ASM, and whose category does not match the category of any other
-   registered default servant.
+ * It is legal to register a default servant for the empty category.
+   Such a servant is used if a request comes in for which no entry
+   exists in the ASM, and whose category does not match the category
+   of any other registered default servant.
 
-The removeDefaultServant operation allows you to remove the default servant
-for a specific category. It returns the servant that was removed. If no
-default servant is registered for the specified category, removeDefaultServant
-throws a NotRegisteredException.
+The removeDefaultServant operation allows you to remove the default
+servant for a specific category. It returns the servant that was
+removed. If no default servant is registered for the specified
+category, removeDefaultServant throws a NotRegisteredException.
 
-The findDefaultServant operation allows you to retrieve the default servant
-for a specific category (including the empty category). If no default servant
-is registered for the specified category, findDefaultServant returns null.
+The findDefaultServant operation allows you to retrieve the default
+servant for a specific category (including the empty category). If no
+default servant is registered for the specified category,
+findDefaultServant returns null.
 
 
 Collocation Optimization
@@ -150,96 +152,103 @@ customize Ice-E for commercial users. Please contact us at
 info@zeroc.com for more information.
 
 
-Realtime Features
-=================
+Real-time Features
+==================
 
-Thead
------
-
-Added a new start operation that permit pass a priority that should
-be used to start the thread, the priority value is representend as a
-int and is system depended, for Posix system the priority should be a 
-valid priority for the underliying SCHED_RR scheduller. Other supported
-system has not the scheduller concept.
-
-Threads that are started without a priority use the system default priority
-as was the previous behaviour.
-
-Note that in Posix root privileges are required for use SCHED_RR.
-
-an attempt to start a thread with an invalid priority raise ThreadSyscallException.
-
-Posix mutex implementation aditions.
-------------------------------------
-
-MutexProtocol enumerator
----------------------------------
-This enumerator that could be one of PrioNone or PrioInherit is used to
-set the underlying protocol of a posix mutex.
+Ice-E includes support for the real-time features described below.
 
 
-RecMutex Mutex updates.
------------------------
-Mutex and RecMutex has a new ctor that permit pass a MutexProtocol parameter
-that would be used to initialize the underliying posix mutex on non posix this
-parameter does nothing.
+Thread API
+----------
 
-Default construted Mutex and RecMutex in Posix use the MutexProtocol returned 
-by getDefaultMutexProtocol
+Added a new start operation with an integer parameter representing the
+new thread's initial priority. The priority value is system-dependent;
+on POSIX systems the parameter must be a legal value for the
+underlying SCHED_RR scheduler. Note that root privileges are required
+when using SCHED_RR. Attempting to start a thread with an invalid
+priority raises ThreadSyscallException.
 
-this function is defined in MutexProtocol.h with ICE_API and could be override
-in the application main.
+Threads that are started without a priority use the system's default
+priority, which is backward-compatible with prior Ice-E releases.
 
-Timer
------
 
-Timer has now a new ctor that permit set the priority used by the thread owned
-by this timer.
+Mutex API
+---------
+
+Ice-E includes some real-time enhancements to the mutex API for POSIX
+systems:
+
+* MutexProtocol enumeration
+
+  This enumeration specifies the underlying protocol used by a mutex.
+  The enumerators are PrioNone and PrioInherit.
+
+* Constructors
+
+  The Mutex and RecMutex classes have new constructors that accept a
+  MutexProtocol parameter.
+
+  If a Mutex or RecMutex object is instantiated using the default
+  constructor, it uses the mutex protocol returned by the function
+  IceUtil::getDefaultMutexProtocol declared in MutexProtocol.h. On
+  Linux, and possibly on other unsupported POSIX platforms, an
+  application can "override" this function by defining its own version
+  of IceUtil::getDefaultMutexProtocol.
+
+
+Timer API
+---------
+
+The IceUtil::Timer class has a constructor that accepts an integer
+parameter representing the priority to use for the internal thread
+created by the timer. The priority parameter has the same semantics as
+for starting a thread (see Thread API above).
 
 
 New Properties
 --------------
 
-Ice.ThreadPriority
+* Ice.ThreadPriority
 
-    This property set the priority of Ice internal threads to a os native thread
-    priority.
+  The property sets the priority of Ice's internal threads to a native
+  thread priority. On POSIX systems, the priority must be a legal
+  value for the SCHED_RR scheduler. On Windows and Windows CE, the
+  priority can be any of the valid system priorities. Regardless of
+  platform, the value must be expressed as an integer.
 
-    In Posix system the priority should be a valid priority for SCHED_RR
-    scheduller.
+  The value of this property is also used as the default priority for
+  the threads in an Ice thread pool if not otherwise specified using
+  one of the thread pool properties described below.
 
-    In Windows WindowsCe is any of the valid system priorities and you should use
-    the number not equivalent constants when set the property.
+* Ice.ThreadPool.Server.ThreadPriority
 
-    This priority is also used for Threads create in any thread pool, if not specific
-    priority is set for a thread pool.
+  This property sets the priority for all threads in the server thread
+  pool.
 
+* Ice.ThreadPool.Client.ThreadPriority
 
-Ice.ThreadPool.Server.ThreadPriority
+  This property sets the priority for all threads in the client thread
+  pool.
 
-    This property set the priority of the threads create in this ThreadPool.
-
-Ice.ThreadPool.Client.ThreadPriority
-
-    This property set the priority of the threads create in this ThreadPool.
 
 Tests
 -----
 
-Real time tests need to run as super user on posix systems, allTest.py has been
-changed to only execute this when user is root in unix.
+Real-time tests need to run as super user on POSIX systems, therefore
+allTests.py has been changed to only execute these tests when the user
+is root on Linux.
 
-There are 2 different test for real time features
+There are two tests for real-time features:
 
-test/IceE/priority
-test/IceE/threadPoolPriority
+* test/IceE/priority
+* test/IceE/threadPoolPriority
 
 
 Run-time Libraries
 ==================
 
 In order to minimize the size of Ice-E applications, two versions of
-the run time library are provided:
+the run-time library are provided:
 
 * The "client" library is suitable for applications requiring only
   client-side functionality.
@@ -251,7 +260,7 @@ creates an object adapter, otherwise you can use the client library.
 
 Users of the client library must define the preprocessor macro
 ICEE_PURE_CLIENT when compiling an application and link with the
-appropriate run time library.
+appropriate run-time library.
 
 
 Configuration
@@ -279,7 +288,7 @@ On Windows:
   > nmake /f Makefile.mak configure
 
 The purpose of the "configure" target is to generate the header file
-include/Ice/Features.h with preprocessor macros that correspond to
+include/IceE/Features.h with preprocessor macros that correspond to
 your settings in Make.rules or Make.rules.mak.
 
 
@@ -335,8 +344,8 @@ opaque endpoints causes Ice-E to retain unknown endpoints in the proxy
 and include them if the proxy is later marshaled.
 
 
-Asychronous Method Invocation Support
--------------------------------------
+Asynchronous Method Invocation Support
+--------------------------------------
 
 If HAS_AMI is enabled, the Ice-E client mapping and library will
 include support for issuing remote invocations asynchronously with

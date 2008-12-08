@@ -1,5 +1,5 @@
 A simple latency test that measures the basic call dispatch delay of
-Ice.
+Ice-E.
 
 To run the demo, first start the server:
 
