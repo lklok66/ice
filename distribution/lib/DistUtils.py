@@ -595,9 +595,7 @@ class ThirdParty :
         self.languages = languages
         self.buildOption = buildOption
 
-        if str(platform) == "Windows":
-            self.buildEnv = "THIRDPARTY_HOME"
-        elif buildEnv:
+        if buildEnv:
             self.buildEnv = buildEnv
         else:
             self.buildEnv = self.name.upper() + "_HOME"
