@@ -111,20 +111,6 @@ ice_bin_dist = 1
 !endif
 
 #
-# If ice_require_cpp is defined, ensure the C++ headers exist
-#
-!if "$(ice_require_cpp)" == "yes"
-!if "$(ice_src_dist)" != ""
-ice_cpp_header = $(ice_cpp_dir)\include\IceE\IceE.h
-!else
-ice_cpp_header = $(ice_dir)\include\IceE\IceE.h
-!endif
-!if !exist ($(ice_cpp_header))
-!error Unable to find the C++ header file $(ice_cpp_header), please verify ICEE_HOME is properly configured and Ice-E is correctly installed.
-!endif
-!endif
-
-#
 # Set slicedir to the path of the directory containing the Slice files.
 #
 slicedir		= $(ice_dir)\slice

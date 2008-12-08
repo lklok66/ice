@@ -1,6 +1,0 @@
-This archive contains the Ice-E source code for the C++
-language mapping as well as the C++ source code for the 
-Slice-to-Embedded-C++ translators.
-
-Please refer to the README and INSTALL files in the appropriate
-subdirectory for more information.

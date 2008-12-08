@@ -7,9 +7,7 @@
 #
 # **********************************************************************
 
-SUBDIRS			= cpp cppe 
-CLEAN_SUBDIRS		= cppe cpp
-CONFIGURE_SUBDIRS	= cppe
+SUBDIRS			= cppe 
 
 all::
 	@for %i in ( $(SUBDIRS) ) do \
@@ -17,7 +15,7 @@ all::
 	    cmd /c "cd %i && $(MAKE) -nologo -f Makefile.mak $(MAKEFLAGS) all" || exit 1
 
 clean::
-	@for %i in ( $(CLEAN_SUBDIRS) ) do \
+	@for %i in ( $(SUBDIRS) ) do \
 	    @echo "making clean in %i" && \
 	    cmd /c "cd %i && $(MAKE) -nologo -f Makefile.mak $(MAKEFLAGS) clean" || exit 1
 
@@ -32,9 +30,14 @@ install::
 	    cmd /c "cd %i && $(MAKE) -nologo -f Makefile.mak $(MAKEFLAGS) install" || exit 1
 
 configure::
-	@for %i in ( $(CONFIGURE_SUBDIRS) ) do \
+	@for %i in ( $(SUBDIRS) ) do \
 	    @echo "making configure in %i" && \
 	    cmd /c "cd %i && $(MAKE) -nologo -f Makefile.mak $(MAKEFLAGS) configure" || exit 1
+
+test::
+	@for %i in ( $(SUBDIRS) ) do \
+	    @echo "making test in %i" && \
+	    cmd /c "cd %i && $(MAKE) -nologo -f Makefile.mak $(MAKEFLAGS) test" || exit 1
 
 cpp::
 	@echo "making all in cpp" && \

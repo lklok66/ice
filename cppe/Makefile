@@ -13,29 +13,31 @@ include $(top_srcdir)/config/Make.rules
 
 SUBDIRS		= src include test demo
 
+INSTALL_SUBDIRS = $(install_bindir) $(install_libdir) $(install_includedir)
+
 install:: install-common
-	@if test ! -d $(install_bindir) ; \
+	@if [ ! -f cppe/include/IceE/Features.h ]; \
 	then \
-	    echo "Creating $(install_bindir)..." ; \
-	    mkdir -p $(install_bindir) ; \
-	    chmod a+rx $(install_bindir) ; \
-	fi
-
-	@if test ! -d $(install_libdir) ; \
-	then \
-	    echo "Creating $(install_libdir)..." ; \
-	    mkdir -p $(install_libdir) ; \
-	    chmod a+rx $(install_libdir) ; \
-	fi
-
-	@if test ! -d $(install_includedir) ; \
-	then \
-	    echo "Creating $(install_includedir)..." ; \
-	    mkdir $(install_includedir) ; \
-	    chmod a+rx $(install_includedir) ; \
-	fi
+	    echo "*** You must run make configure first."; \
+	    exit 1; \
+        fi
+	@for subdir in $(INSTALL_SUBDIRS); \
+	do \
+	    if test ! -d $$subdir ; \
+	    then \
+	        echo "Creating $$subdir..." ; \
+	        mkdir -p $$subdir ; \
+	        chmod a+rx $$subdir ; \
+	    fi ; \
+	done
+	$(call installprogram,$(ice_cpp_dir)/bin/slice2cppe,$(install_bindir))
 
 $(EVERYTHING)::
+	@if [ ! -f include/IceE/Features.h ]; \
+	then \
+	    echo "*** You must run make configure first."; \
+	    exit 1; \
+        fi
 	@for subdir in $(SUBDIRS); \
 	do \
 	    echo "making $@ in $$subdir"; \

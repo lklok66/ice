@@ -18,37 +18,27 @@ from DistUtils import *
 # other files are all removed by reversing the below list.
 #
 filesToRemove = [
-    "./cpp/config/Make.rules",
-    "./cpp/config/Make.rules.mak",
-    "./cpp/config/convertssl.py",
-    "./cpp/config/findSliceFiles.py",
-    "./cpp/config/glacier2router.cfg",
-    "./cpp/config/ice_ca.cnf",
-    "./cpp/config/icegridnode.cfg",
-    "./cpp/config/icegridregistry.cfg",
-    "./cpp/config/icegrid-slice.3.1.ice.gz",
-    "./cpp/config/icegrid-slice.3.2.ice.gz",
-    "./cpp/config/icegrid-slice.3.3.ice.gz",
-    "./cpp/config/makegitignore.py",
-    "./cpp/config/templates.xml",
-    "./cpp/config/upgradeicegrid.py"
+    "./cppe/buildall.py",
+    "./scripts/IceGridAdmin.py",
+    "./scripts/IceStormUtil.py"
 ]
 
 # List of files & subdirectories to keep, all others are removed.
 filesToKeep = [
-    "./ICEE_LICENSE",
     "./LICENSE",
-    "./CHANGES.ICEE",
-    "./README.ICEE",
-    "./RELEASE_NOTES.ICEE",
+    "./ICEE_LICENSE",
     "./Makefile.icee",
     "./Makefile.mak.icee",
-    "./config/Make.common.rules.mak.icee",
     "./config/Make.common.rules.icee",
+    "./config/Make.common.rules.mak.icee",
     "./config/TestUtil.py",
-    "./cpp/Makefile.mak",
     "./cpp/Makefile",
-    "./cpp/config",
+    "./cpp/Makefile.mak",
+    "./cpp/config/Make.rules.icee",
+    "./cpp/config/Make.rules.mak.icee",
+    "./cpp/config/Make.rules.Linux",
+    "./cpp/config/Make.rules.msvc",
+    "./cpp/config/Make.rules.Darwin",
     "./cpp/include/IceUtil",
     "./cpp/include/Slice",
     "./cpp/src/Makefile.mak",
@@ -60,7 +50,9 @@ filesToKeep = [
     "./cpp/lib",
     "./cppe",
     "./slice/IceE",
-    "./scripts"
+    "./scripts",
+    "./distribution/bin/makeiceebindist.py",
+    "./distribution/lib/DistUtils.py"
 ]
 
 def pathInList(p, l):
@@ -155,6 +147,7 @@ os.mkdir(distDir)
 print "Creating " + version + " source distributions in " + distDir
 
 demoscriptDir = os.path.join(distDir, "IceE-" + version + "-demo-scripts")
+distFilesDir = os.path.join(distDir, "distfiles-" + version)
 srcDir = os.path.join(distDir, "IceE-" + version)
 os.mkdir(demoscriptDir)
 
@@ -215,6 +208,8 @@ print "ok"
 print "Walking through distribution to fix permissions, versions, etc...",
 sys.stdout.flush()
 
+fixVersion(os.path.join("distribution", "bin", "makeiceebindist.py"), version)
+
 bisonFiles = []
 flexFiles = []
 for root, dirnames, filesnames in os.walk('.'):
@@ -227,7 +222,7 @@ for root, dirnames, filesnames in os.walk('.'):
 
             # Fix version of README/INSTALL files and keep track of bison/flex files for later processing
             if fnmatch.fnmatch(f, "README*") or fnmatch.fnmatch(f, "INSTALL*"):
-                substitute(filepath, [("@ver@", version)])
+                fixVersion(filepath, version)
             elif fnmatch.fnmatch(f, "*.y"):
                 bisonFiles.append(filepath)
             elif fnmatch.fnmatch(f, "*.l"):
@@ -278,9 +273,11 @@ print "ok"
 # Copy IceE specific install files.
 #
 print "Copying icee install files...",
-move(os.path.join("README.ICEE"), os.path.join("README"))
-move(os.path.join("CHANGES.ICEE"), os.path.join("CHANGES"))
-move(os.path.join("RELEASE_NOTES.ICEE"), os.path.join("RELEASE_NOTES"))
+move(os.path.join("cppe", "README"), os.path.join("README"))
+move(os.path.join("cppe", "CHANGES"), os.path.join("CHANGES"))
+move(os.path.join("cppe", "RELEASE_NOTES"), os.path.join("RELEASE_NOTES"))
+move(os.path.join("cppe", "INSTALL.LINUX"), os.path.join("INSTALL.LINUX"))
+move(os.path.join("cppe", "INSTALL.WINDOWS"), os.path.join("INSTALL.WINDOWS"))
 
 #
 # Move *.icee to the correct names.
@@ -290,6 +287,10 @@ move(os.path.join("cpp", "config", "Make.rules.icee"), os.path.join("cpp", "conf
 move(os.path.join("Makefile.mak.icee"), os.path.join("Makefile.mak"))
 move(os.path.join("Makefile.icee"), os.path.join("Makefile"))
 
+#
+# Move the distribution directory to the distribution directory
+#
+move("distribution", distFilesDir)
 print "ok"
 
 #
@@ -299,13 +300,10 @@ print "Archiving..."
 sys.stdout.flush()
 os.chdir(distDir)
 
-for d in [srcDir]:
-    zipArchive(srcDir, verbose)
+for d in [srcDir, distFilesDir]:
+    tarArchive(d, verbose)
 
-for d in [srcDir]:
-    tarArchive(srcDir, verbose)
-
-for (dir, archiveDir) in [(demoscriptDir, "IceE-" + version + "-demos")]:
+for (dir, archiveDir) in [(demoscriptDir, "IceE-" + version)]:
     tarArchive(dir, verbose, archiveDir)
 
 #
@@ -320,6 +318,7 @@ print "Cleaning up...",
 sys.stdout.flush()
 remove(srcDir)
 remove(demoscriptDir)
+remove(distFilesDir)
 print "ok"
 
 os.chdir(cwd)

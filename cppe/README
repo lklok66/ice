@@ -1,6 +1,10 @@
 Introduction
 ============
 
+This archive contains the Ice-E source code for the C++ language
+mapping (in the cppe directory) as well as the C++ source code for the
+Slice-to-Embedded-C++ translators (in the cpp directory).
+
 Ice-E is a compact subset of Ice designed for embedded environments
 while retaining many of the features that have made Ice such a
 compelling alternative for distributed applications.

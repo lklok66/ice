@@ -140,20 +140,6 @@ $(error Unable to find a valid Ice-E distribution, please verify ICEE_HOME is pr
 endif
 
 #
-# If ice_require_cpp is defined, ensure the C++ headers exist
-#
-ifeq ($(ice_require_cpp), "yes")
-    ifdef ice_src_dist
-        ice_cpp_header = $(ice_cpp_dir)/include/IceE/IceE.h
-    else
-        ice_cpp_header = $(ice_dir)/include/IceE/IceE.h
-    endif
-    ifneq ($(shell test -f $(ice_cpp_header) && echo 0),0)
-$(error Unable to find the C++ header file $(ice_cpp_header), please verify ICEE_HOME is properly configured and Ice is correctly installed.)
-    endif
-endif
-
-#
 # Clear the embedded runpath prefix if building against RPM distribution.
 #
 ifeq ($(ice_dir), /usr)

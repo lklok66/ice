@@ -19,6 +19,7 @@ languages = { \
     'HP-UX' : ['cpp'], \
     'Darwin' : ['cpp', 'java', 'py'], \
     'Linux' : ['cpp', 'java', 'cs', 'py', 'rb', 'php'], \
+    'Windows': ['cpp'], \
 }
 
 #
@@ -53,7 +54,7 @@ openssl = { \
 mcpp = { 
     'SunOS' : '/opt/mcpp', \
     'HP-UX' : '/opt/mcpp', \
-    'Darwin' : '/opt/mcpp' 
+    'Darwin' : '/opt/mcpp'
 }
 
 jgoodies_looks = { \
@@ -73,10 +74,6 @@ proguard = { \
     'Darwin' : '/opt/proguard/lib/proguard.jar', \
     'Linux' : '/opt/proguard/lib/proguard.jar', \
 }    
-
-#
-# Some utility methods
-# 
 
 #
 # Remove file or directory, warn if it doesn't exist.
@@ -597,7 +594,10 @@ class ThirdParty :
         self.name = name
         self.languages = languages
         self.buildOption = buildOption
-        if buildEnv:
+
+        if str(platform) == "Windows":
+            self.buildEnv = "THIRDPARTY_HOME"
+        elif buildEnv:
             self.buildEnv = buildEnv
         else:
             self.buildEnv = self.name.upper() + "_HOME"
@@ -709,6 +709,9 @@ class Platform:
             print "  ",
             found &= t.checkAndPrint()
         return found
+
+    def getMake(self):
+        return "gmake"
 
     def getMakeEnvs(self, version, language):
 
@@ -839,6 +842,13 @@ class SunOS(Platform):
         else:
             Platform.__init__(self, uname, "solaris", "sparc", languages, "sparcv9", "so")
 
+class Windows(Platform):
+    def __init__(self, languages):
+        Platform.__init__(self, "Windows", "windows", None, languages, "", "dll")
+
+    def getMake(self):
+        return "nmake /f Makefile.mak"
+
 #
 # Third-party helper classes 
 #
@@ -917,10 +927,13 @@ def getPlatform(thirdParties):
 
     global platform
     if not platform:
-        (sysname, nodename, release, ver, machine) = os.uname();
-        if not languages.has_key(sysname):
-            print sys.argv[0] + ": error: `" + sysname + "' is not a supported system"
-        platform = eval(sysname.replace("-", ""))(sysname, machine, languages[sysname])
+        if sys.platform == "win32":
+            platform = Windows(languages["Windows"])
+        else:
+            (sysname, nodename, release, ver, machine) = os.uname();
+            if not languages.has_key(sysname):
+                print sys.argv[0] + ": error: `" + sysname + "' is not a supported system"
+            platform = eval(sysname.replace("-", ""))(sysname, machine, languages[sysname])
         for t in thirdParties:
             eval(t)(platform)
     return platform

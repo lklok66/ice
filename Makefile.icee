@@ -7,9 +7,7 @@
 #
 # **********************************************************************
 
-SUBDIRS			= cpp cppe 
-CLEAN_SUBDIRS		= cppe cpp
-CONFIGURE_SUBDIRS	= cppe
+SUBDIRS			= cppe 
 
 all::
 	@for subdir in $(SUBDIRS); \
@@ -19,7 +17,7 @@ all::
 	done
 
 clean::
-	@for subdir in $(CLEAN_SUBDIRS); \
+	@for subdir in $(SUBDIRS); \
 	do \
 	    echo "making clean in $$subdir"; \
 	    ( cd $$subdir && $(MAKE) clean ) || exit 1; \
@@ -40,10 +38,17 @@ install::
 	done
 
 configure::
-	@for subdir in $(CONFIGURE_SUBDIRS); \
+	@for subdir in $(SUBDIRS); \
 	do \
 	    echo "making configure in $$subdir"; \
 	    ( cd $$subdir && $(MAKE) configure ) || exit 1; \
+	done
+
+test::
+	@for subdir in $(SUBDIRS); \
+	do \
+	    echo "making test in $$subdir"; \
+	    ( cd $$subdir && $(MAKE) test ) || exit 1; \
 	done
 
 cpp::
@@ -53,3 +58,4 @@ cpp::
 cppe::
 	echo "making all in cppe";
 	( cd cppe && $(MAKE) all ) || exit 1;
+

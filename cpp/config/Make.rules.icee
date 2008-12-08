@@ -8,12 +8,6 @@
 # **********************************************************************
 
 #
-# Select an installation base directory. The directory will be created
-# if it does not exist.
-#
-prefix			 ?= /opt/IceE-$(VERSION)
-
-#
 # Define OPTIMIZE as yes if you want to build with
 # optimization. Otherwise build with debug information.
 #

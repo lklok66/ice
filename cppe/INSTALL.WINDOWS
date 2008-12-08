@@ -41,29 +41,23 @@ The SDK must be installed after you install the Visual C++ compiler.
 Slice-to-Embedded-C++ translator
 --------------------------------
 
-You will need the Slice-to-Embedded-C++ translator (slice2cppe). You
-can download a binary distribution from the ZeroC web site, or you
-can build the Slice-to-Embedded-C++ translator yourself using this
-source distribution.
-
-Binary distributions are available at
-
-  http://www.zeroc.com/icee/download.html
+You will need the Slice-to-Embedded-C++ translator (slice2cppe). The
+distribution includes a binary for this compiler as well as the source
+code in case you want to build it yourself.
 
 
-Third-party libraries
----------------------
+mcpp
+----
 
-The Ice-E slice compiler (slice2cppe) has a dependency on the
-following third-party library:
+Building the mcpp library is only necessary if you want to build the
+Ice-E slice compiler yourself.
 
-- mcpp 2.7.1
+The Ice-E slice compiler (slice2cppe) has a dependency on mcpp 2.7.1.
 
-If you want to build the slice2cppe translator yourself, you can
-avoid building mcpp from source code by downloading ZeroC's
-Third-Party Windows installer for Visual Studio 2005/2008 that
-contains release and debug libraries for all of the third-party
-dependencies.
+If you want to build the slice2cppe translator yourself, you can avoid
+building mcpp from source code by downloading ZeroC's Third-Party
+Windows installer for Visual Studio 2005 or 2008 that contains release
+and debug libraries for all of the third-party dependencies.
 
 If you intend to build the third-party dependencies from source, we
 recommend downloading the Ice third-party source archive from
@@ -111,19 +105,37 @@ After a successful build, you can run the test suite:
 
 This is equivalent to:
 
-  > python allTests.py
+  > python cppe/allTests.py
 
 If everything worked out, you should see lots of "ok" messages. In
 case of a failure, the tests abort with "failed".
 
 If you want to try out any of the demos and you did not build Ice-E
 statically, make sure to update your PATH environment variable to add
-the "bin" directory that contains the Ice-E DLLs.
+the "cppe/bin" directory that contains the Ice-E DLLs.
 
 For Windows Mobile, you must manually run each test by copying the
 server and client for each test to your hardware and then running the
 server, followed by the client. Any failures will be reported.
 
+Building the Slice-to-Embedded-C++ translator
+---------------------------------------------
+
+If you want to re-build the Slice-to-Embedded-C++ translator, change
+the working directory to the IceE-@ver@\cpp directory:
+
+  > cd IceE-@ver@\cpp
+
+Edit config\Make.rules.mak to establish your build configuration. The
+comments in the file provide more information. Pay particular
+attention to the variables that define the locations of the third-
+party libraries.
+
+Now you're ready to build the Slice-to-Embedded-C++ translator:
+
+  > nmake /f Makefile.mak
+
+This will build the slice2cppe translator in the cpp\bin directory.
 
 ======================================================================
 Installation
@@ -131,8 +143,7 @@ Installation
 
 Simply run "nmake /f Makefile.mak install". This will install Ice-E in
 the directory specified by the "prefix" variable in the
-cpp\config\Make.rules.mak (for slice compiler) and
-cppe\config\Make.rules.mak (for rest of Ice-E) files.
+cppe\config\Make.rules.mak file.
 
 After installation if you plan to use the Visual Studio IDE for your
 Ice-E project, make sure to add the bin directory to the Visual C++
