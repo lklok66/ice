@@ -52,25 +52,38 @@ mcpp
 Building the mcpp library is only necessary if you want to build the
 Ice-E slice compiler yourself.
 
-The Ice-E slice compiler (slice2cppe) has a dependency on mcpp 2.7.1.
+The Ice-E slice compiler (slice2cppe) has a dependency on mcpp 2.7.2.
 
 If you want to build the slice2cppe translator yourself, you can avoid
 building mcpp from source code by downloading ZeroC's Third-Party
 Windows installer for Visual Studio 2005 or 2008 that contains release
-and debug libraries for all of the third-party dependencies.
+and debug mcpp libraries (patched 2.7.1 version).
 
-If you intend to build the third-party dependencies from source, we
-recommend downloading the Ice third-party source archive from
-
-  http://www.zeroc.com/download.html
-
-This archive contains the source distributions for each of the
-third-party dependencies, as well as required source patches and
-configuration instructions.
-
-For more information about mcpp, please refer to the link below:
+If you intend to build mcpp from source, you can download the source,
+as well as get more information about mcpp from:
 
   http://mcpp.sourceforge.net
+
+Follow these instructions for building mcpp:
+
+- Unzip the mcpp source archive.
+
+- Change to the mcpp src directory:
+
+  > cd mcpp-2.7.2\src
+
+- Apply the patch for noconfig.H appropriate for your compiler from
+  the noconfig directory. For example, for VS2005 you would run:
+
+  > patch -p0 < ..\noconfig\vc2005.dif
+
+- Build the mcpp release library:
+
+  > nmake MCPP_LIB=1 /f ..\noconfig\visualc.mak mcpplib
+
+  To build the debug version of the library:
+
+  > nmake MCPP_LIB=1 DEBUG=1 /f ..\noconfig\visualc.mak mcpplib
 
 
 ======================================================================

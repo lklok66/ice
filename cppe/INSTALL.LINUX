@@ -13,7 +13,7 @@ supported only on:
 Development Platform           | Runtime Platform
 -------------------------------|--------------------------------------
 Red Hat Enterprise Linux       | Same as development
-5 update 2 (i386)              |
+5 update 2 (i386 and x86_64)   |
                                | 
 Red Hat Enterprise Linux       | Gumstix Linux buildroot revision 1364
 5 update 2 (i386) with Gumstix |
@@ -44,20 +44,29 @@ mcpp
 Building the mcpp library is only necessary if you want to build the
 Ice-E slice compiler yourself.
 
-The Ice-E slice compiler (slice2cppe) has a dependency on mcpp
-2.7.1. If you intend to build the third-party dependencies from
-source, we recommend downloading the Ice third-party source archive
-from
+The Ice-E slice compiler (slice2cppe) has a dependency on mcpp 2.7.2.
 
-  http://www.zeroc.com/download.html
-
-This archive contains the source distributions for each of the
-third-party dependencies, as well as required source patches and
-configuration instructions.
-
-For more information about mcpp, please refer to the link below:
+If you intend to build mcpp from source, you can download the source,
+as well as get more information about mcpp from:
 
   http://mcpp.sourceforge.net
+
+Follow these instructions for building mcpp:
+
+- Untar the mcpp archive.
+
+- Change to the mcpp base directory.
+
+  $ cd mcpp-2.7.2
+
+- Run configure to enable library build.
+
+  $ ./configure CFLAGS=-fPIC --enable-mcpplib --disable-shared
+  (and --prefix=<dir> if you like)
+
+- Build mcpp
+
+  $ gmake
 
 
 ======================================================================
