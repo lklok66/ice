@@ -211,9 +211,20 @@ Mutex::lock(LockState&) const
 inline void
 Mutex::init(MutexProtocol protocol)
 {
-    int rc;
+#if defined(__linux) && !defined(__USE_UNIX98)
+#ifdef NDEBUG
+    int rc = pthread_mutex_init(&_mutex, 0);
+#else
+    const pthread_mutexattr_t attr = { PTHREAD_MUTEX_ERRORCHECK_NP };
+    int rc = pthread_mutex_init(&_mutex, &attr);
+#endif
+    if(rc != 0)
+    {
+        throw ThreadSyscallException(__FILE__, __LINE__, rc);
+    }
+#else // !defined(__linux) || defined(__USE_UNIX98)
     pthread_mutexattr_t attr;
-    rc = pthread_mutexattr_init(&attr);
+    int rc = pthread_mutexattr_init(&attr);
     assert(rc == 0);
     if(rc != 0)
     {
@@ -224,11 +235,7 @@ Mutex::init(MutexProtocol protocol)
     // Enable mutex error checking in debug builds
     //
 #ifndef NDEBUG
-#if defined(__linux) && !defined(__USE_UNIX98)
-    rc = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK_NP);
-#else
     rc = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_ERRORCHECK);
-#endif
     assert(rc == 0);
     if(rc != 0)
     {
@@ -264,6 +271,7 @@ Mutex::init(MutexProtocol protocol)
     {
         throw ThreadSyscallException(__FILE__, __LINE__, rc);
     }
+#endif
 }
 
 inline
