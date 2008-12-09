@@ -10,7 +10,7 @@ Table of Contents
   2. Comparing Ice-E and Ice
      - Concurrency Models
      - Transports
-     - Servant Locators
+     - Default Servants
      - Collocation Optimization
      - Other Removed Features
      - Optional Features
@@ -61,7 +61,7 @@ Ice-E includes support for the TCP transport; UDP and SSL are not
 supported.
 
 
-Servant Locators
+Default Servants
 ----------------
 
 Ice-E does not support servant locators. However, Ice-E does support
@@ -205,7 +205,7 @@ IceUtil::ThreadSyscallException.
 Threads that are started without a priority use the system's default
 priority, which is backward-compatible with prior Ice-E releases.
 
-On Posix systems, root privileges are required when starting threads
+On POSIX systems, root privileges are required when starting threads
 with the SCHED_RR scheduling policy.
 
 
@@ -270,8 +270,7 @@ default protocol.
 The DEFAULT_MUTEX_PROTOCOL setting is used only in the implementation
 of the IceUtil::getDefaultMutexProtocol function, therefore you can
 also override the setting in the Ice-E library by defining this
-function in your main program and returning the desired value. Please
-refer to the xxx demo for an example.
+function in your main program and returning the desired value.
 
 Please note that while all mutexes created by Ice-E will use the
 configured mutex protocol, Ice-E also uses a number of systems calls
@@ -347,8 +346,7 @@ There are two tests for real-time features:
 4. Run-time Libraries
 ======================================================================
 
-Ice-E supports both building static and dynamic Ice-E run-time
-libraries.
+Ice-E supports building static and dynamic Ice-E run-time libraries.
 
 Futhermore, in order to minimize the size of Ice-E applications, two
 versions of the run-time library are provided:
@@ -356,7 +354,7 @@ versions of the run-time library are provided:
 * The "client" library is suitable for applications requiring only
   client-side functionality.
 
-* The "server" library supports client- and server-side functionality.
+* The "server" library supports client and server-side functionality.
 
 A simple rule of thumb is to use the server library if your program
 creates an object adapter, otherwise you can use the client library.
