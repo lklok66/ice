@@ -15,7 +15,7 @@ Table of Contents
      - Objects by value
      - Dynamic network interfaces
   2. Platforms
-     - New supported platforms
+     - Supported platforms
      - Desupported platforms
   3. Fixes and improvements
   4. Desupported components
@@ -139,8 +139,8 @@ manual for further details.
 2. Platforms
 ======================================================================
 
-New supported platforms
------------------------
+Supported platforms
+-------------------
 
 The following operating systems are now supported for Ice-E (platforms
 with a '(*)' are new supported platforms):
