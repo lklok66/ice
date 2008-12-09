@@ -72,7 +72,7 @@ Real-time
 Ice-E supports new real-time features. 
 
 A new IceUtil::Thread start operation allows starting a thread with a
-given priority. On POSIX systems, realtime threads use the SCHED_RR
+given priority. On POSIX systems, real-time threads use the SCHED_RR
 scheduling policy.
 
 Ice-E mutexes can also be configured to use the priority inheritance
