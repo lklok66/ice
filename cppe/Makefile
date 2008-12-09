@@ -16,11 +16,6 @@ SUBDIRS		= src include test demo
 INSTALL_SUBDIRS = $(install_bindir) $(install_libdir) $(install_includedir)
 
 install:: install-common
-	@if [ ! -f cppe/include/IceE/Features.h ]; \
-	then \
-	    echo "*** You must run make configure first."; \
-	    exit 1; \
-        fi
 	@for subdir in $(INSTALL_SUBDIRS); \
 	do \
 	    if test ! -d $$subdir ; \
