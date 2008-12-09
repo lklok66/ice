@@ -13,7 +13,6 @@
 
 using namespace std;
 
-
 IceUtil::RecMutex::RecMutex() :
     _count(0)
 {
@@ -98,6 +97,14 @@ IceUtil::RecMutex::lock(LockState& state) const
 void
 IceUtil::RecMutex::init(MutexProtocol protocol)
 {
+#if defined(__linux) && !defined(__USE_UNIX98)
+    const pthread_mutexattr_t attr = { PTHREAD_MUTEX_RECURSIVE_NP };
+    int rc = pthread_mutex_init(&_mutex, &attr);
+    if(rc != 0)
+    {
+        throw ThreadSyscallException(__FILE__, __LINE__, rc);
+    }
+#else // !defined(__linux) || defined(__USE_UNIX98)
     int rc;
     pthread_mutexattr_t attr;
     rc = pthread_mutexattr_init(&attr);
@@ -105,13 +112,7 @@ IceUtil::RecMutex::init(MutexProtocol protocol)
     {
         throw ThreadSyscallException(__FILE__, __LINE__, rc);
     }
-
-#if defined(__linux) && !defined(__USE_UNIX98)
-    rc = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE_NP);
-#else
     rc = pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-#endif
-
     if(rc != 0)
     {
         throw ThreadSyscallException(__FILE__, __LINE__, rc);
@@ -139,6 +140,7 @@ IceUtil::RecMutex::init(MutexProtocol protocol)
     {
         throw ThreadSyscallException(__FILE__, __LINE__, rc);
     }
+#endif
 }
 
 IceUtil::RecMutex::~RecMutex()
