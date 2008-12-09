@@ -11,6 +11,8 @@ significant new additions, while others represent minor corrections.
 Changes since version 1.2.0
 ======================================================================
 
+- Added support for dispatch interceptors.
+
 - Added support for setting thread priorities. See README for more
   information.
 

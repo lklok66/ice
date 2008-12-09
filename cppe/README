@@ -43,7 +43,7 @@ compelling alternative for distributed applications.
 
 In order to reduce the size of the Ice-E run time, several Ice
 features have been removed, and others are optional. The differences
-are discussed in the sections below.
+discussed in the sections below refer to differences with Ice 3.3.
 
 
 Concurrency Models

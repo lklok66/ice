@@ -135,6 +135,21 @@ adapter to refresh its endpoint list using the new operation
 refreshPublishedEndpoints. See the "Ice Run Time" chapter in the Ice
 manual for further details.
 
+Dispatch Interceptors
+---------------------
+
+A dispatch interceptor is a server-side mechanism that allows you to
+intercept incoming client requests before they are given to a servant.
+The interceptor can examine the incoming request; in particular, it
+can examine the Current information for the request (which provides
+access to the operation name, object identity, and so on).
+
+A dispatch interceptor can dispatch a request to a servant and check
+whether the dispatch was successful; if not, the interceptor can
+choose to retry the dispatch. This functionality is useful to
+automatically retry requests that have failed due to a recoverable
+error condition.
+
 
 ======================================================================
 2. Platforms
