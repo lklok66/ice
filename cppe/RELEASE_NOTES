@@ -10,7 +10,7 @@ Table of Contents
   1. New Features
      - Thread pool concurrency model
      - Non-blocking AMI
-     - Realtime
+     - Real-time
      - Default servants
      - Objects by value
      - Dynamic network interfaces
@@ -66,30 +66,31 @@ Please refer to the "Asynchronous Programming" chapter in the Ice
 manual for more information on the AMI semantics.
 
 
-Realtime
---------
+Real-time
+---------
 
 Ice-E supports new real-time features. 
 
 A new IceUtil::Thread start operation allows starting a thread with a
-given priority. On Posix systems, realtime threads use the SCHED_RR
+given priority. On POSIX systems, realtime threads use the SCHED_RR
 scheduling policy.
 
 Ice-E mutexes can also be configured to use the priority inheritance
-protocol on Posix systems. This protocol is useful to avoid thread
-priority inversion. Which mutex protocol is used by default is
-specified by the DEFAULT_MUTEX_PROTOCOL macro defined in the
+protocol on POSIX systems. This protocol is useful to avoid thread
+priority inversion. The mutex protocol used by default is specified 
+by the DEFAULT_MUTEX_PROTOCOL macro defined in the 
 cppe/config/Make.rules file.
 
-Please refer to the README file for more information on Ice-E realtime
-features.
+Please refer to the README file for more information on Ice-E 
+real-time features.
 
 
 Default servants
 ----------------
 
-This Ice-E release introduces a new default servant API. This API can
-be used as a replacement for servant locators which are not supported.
+This Ice-E release introduces a new default servant API. When combined
+with dispatch interceptors, default servants can be used as a 
+replacement for servant locators which are not supported in Ice-E.
 
 Default servants dispatch requests for Ice objects which are not
 registered with the object adapter Active Servant Map (ASM). Defaults
@@ -186,8 +187,7 @@ distribution.
 * The new property Ice.TCP.Backlog allows you to specify the size of
   incoming connection backlog for TCP/IP sockets. This setting is
   also used for SSL. In C++ the default value is SOMAXCONN or 511 if
-  that macro is not defined. In Java and .NET the default value is
-  511.
+  that macro is not defined.
 
 * Batch requests can be flushed for individual proxies using two new
   proxy methods:
