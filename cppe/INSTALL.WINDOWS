@@ -98,15 +98,27 @@ working directory to IceE-@ver@. For example:
 
   > cd C:\IceE-@ver@
 
-Edit cppe\config\Make.rules.mak to establish your build configuration.
-The comments in the file provide more information. For example for 
-Windows Mobile, you must ensure that WINDOWS_MOBILE_SDK is set
-properly.
+Edit cppe\config\Make.rules.mak to establish your build configuration
+and default set of features provided by the run-time libraries. The
+comments in the file provide more information. For example for Windows
+Mobile, you must ensure that WINDOWS_MOBILE_SDK is set properly. For
+more information on optional features see the "Configuration" section
+in the README file.
+
+Next, you must make the "configure" target:
+
+  > nmake /f Makefile.mak configure
+
+The purpose of the "configure" target is to generate the header file
+include/IceE/Features.h with preprocessor macros that correspond to
+your settings in Make.rules.mak. You must peform this step after any
+change to the configuration settings in Make.rules.mak.
 
 Now you're ready to build Ice-E:
 
-  > nmake /f Makefile.mak configure
   > nmake /f Makefile.mak
+
+This will build the Ice-E library, tests and examples.
 
 Python is required to run the test suite on Windows:
 

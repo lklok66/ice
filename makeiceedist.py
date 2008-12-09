@@ -19,8 +19,6 @@ from DistUtils import *
 #
 filesToRemove = [
     "./cppe/buildall.py",
-    "./scripts/IceGridAdmin.py",
-    "./scripts/IceStormUtil.py"
 ]
 
 # List of files & subdirectories to keep, all others are removed.

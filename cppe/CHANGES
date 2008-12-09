@@ -40,7 +40,7 @@ Changes since version 1.2.0
 
 - Added support for Visual Studio 2008.
 
-- Added optional support for object-by-value.
+- Added support for object-by-value.
 
 - Added optional support for opaque endpoints. For example:
 

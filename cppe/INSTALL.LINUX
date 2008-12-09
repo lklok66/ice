@@ -82,14 +82,22 @@ Change the working directory to IceE-@ver@:
 
   $ cd IceE-@ver@
 
-Review the README file to determine whether you want to modify the
-default set of features provided by the run-time libraries. Next,
-edit cppe/config/Make.rules to establish your build configuration.
-The comments in the file provide more information.
+Edit cppe/config/Make.rules to establish your build configuration and
+default set of features provided by the run-time libraries. The
+comments in the file provide more information. For more information on
+optional features see the "Configuration" section in the README file.
+
+Next, you must make the "configure" target:
+
+  $ make configure
+
+The purpose of the "configure" target is to generate the header file
+include/IceE/Features.h with preprocessor macros that correspond to
+your settings in Make.rules. You must peform this step after any
+change to the configuration settings in Make.rules.
 
 Now you're ready to build Ice-E:
 
-  $ make configure
   $ make
 
 This will build the Ice-E library, tests and examples.

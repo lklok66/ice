@@ -1,17 +1,45 @@
-Introduction
-============
-
 This archive contains the Ice-E source code for the C++ language
 mapping (in the cppe directory) as well as the C++ source code for the
-Slice-to-Embedded-C++ translators (in the cpp directory).
+Slice-to-Embedded-C++ translators (in the cpp directory). The sections
+below describe and document Ice-E specific features.
+
+Table of Contents
+-----------------
+
+  1. Introduction
+  2. Comparing Ice-E and Ice
+     - Concurrency Models
+     - Transports
+     - Servant Locators
+     - Collocation Optimization
+     - Other Removed Features
+     - Optional Features
+     - Compatibility
+     - Customization
+  3. Real-time Features
+     - Thread API
+     - Mutex API
+     - Timer API
+     - Priority Inversion
+     - Distributed Priority Inversion
+     - Real-time Properties
+     - Tests
+  4. Run-time Libraries
+  5. Configuration
+  6. Installation
+
+======================================================================
+1. Introduction
+======================================================================
 
 Ice-E is a compact subset of Ice designed for embedded environments
 while retaining many of the features that have made Ice such a
 compelling alternative for distributed applications.
 
 
-Comparing Ice-E and Ice
-=======================
+======================================================================
+2. Comparing Ice-E and Ice
+======================================================================
 
 In order to reduce the size of the Ice-E run time, several Ice
 features have been removed, and others are optional. The differences
@@ -30,8 +58,7 @@ Transports
 ----------
 
 Ice-E includes support for the TCP transport; UDP and SSL are not
-supported. The built-in TCP transport can be replaced with one of your
-own.
+supported.
 
 
 Servant Locators
@@ -119,12 +146,16 @@ Other Removed Features
 Ice-E has also eliminated the following features:
 
 * Asynchronous dispatch (AMD)
-* Streaming APIs
+* Dynamic Ice (blobject and streaming APIs)
 * Active connection management
 * Protocol compression
 * Ice::Application and Ice::Service classes
 * Local interfaces
-* StaticMutex
+* IceUtil::StaticMutex class
+* Object by Value garbage collection
+* Slice checksums
+* The Ice::Stats interface
+* The IceUtil::CtrlCHandler class
 
 
 Optional Features
@@ -151,9 +182,9 @@ If the current features do not meet your requirements, ZeroC can
 customize Ice-E for commercial users. Please contact us at
 info@zeroc.com for more information.
 
-
-Real-time Features
-==================
+======================================================================
+3. Real-time Features
+======================================================================
 
 Ice-E includes support for the real-time features described below.
 
@@ -161,15 +192,21 @@ Ice-E includes support for the real-time features described below.
 Thread API
 ----------
 
-Added a new start operation with an integer parameter representing the
-new thread's initial priority. The priority value is system-dependent;
-on POSIX systems the parameter must be a legal value for the
-underlying SCHED_RR scheduler. Note that root privileges are required
-when using SCHED_RR. Attempting to start a thread with an invalid
-priority raises ThreadSyscallException.
+The IceUtil::Thread class supports an additional start method:
+
+    ThreadControl start(size_t stackSize, int priority);
+
+The priority integer parameter represents the new thread's initial
+priority. The priority value is system-dependent; on POSIX systems the
+parameter must be a legal value for the underlying SCHED_RR scheduling
+policy. Attempting to start a thread with an invalid priority raises
+IceUtil::ThreadSyscallException.
 
 Threads that are started without a priority use the system's default
 priority, which is backward-compatible with prior Ice-E releases.
+
+On Posix systems, root privileges are required when starting threads
+with the SCHED_RR scheduling policy.
 
 
 Mutex API
@@ -178,26 +215,22 @@ Mutex API
 Ice-E includes some real-time enhancements to the mutex API for POSIX
 systems:
 
-* MutexProtocol enumeration
+* IceUtil::MutexProtocol enumeration
 
   This enumeration specifies the underlying protocol used by a mutex.
   The enumerators are PrioNone and PrioInherit.
 
 * Constructors
 
-  The Mutex and RecMutex classes have new constructors that accept a
-  MutexProtocol parameter.
+  The IceUtil::Mutex and IceUtil::RecMutex classes have new
+  constructors that accept an IceUtil::MutexProtocol parameter.
 
-  If a Mutex or RecMutex object is instantiated using the default
-  constructor, it uses the mutex protocol returned by the function
-  IceUtil::getDefaultMutexProtocol declared in MutexProtocol.h. On
-  Linux, and possibly on other unsupported POSIX platforms, an
-  application can "override" this function by defining its own version
-  of IceUtil::getDefaultMutexProtocol.
+  If an IceUtil::Mutex or IceUtil::RecMutex object is instantiated
+  using the default constructor, it uses the mutex protocol returned
+  by the function IceUtil::getDefaultMutexProtocol declared in
+  MutexProtocol.h. See the "Priority inversion" section below for more
+  information on this method.
 
-  By default, this method returns the mutex protocol defined by the
-  DEFAULT_MUTEX_PROTOCOL macro defined in the cppe/config/Make.rules
-  file.
 
 Timer API
 ---------
@@ -211,73 +244,76 @@ for starting a thread (see Thread API above).
 Priority Inversion
 ------------------
 
-A priority inversion occurs when a low priority thread prevents a 
-higher priority thread from running. This inversion often occurs
-when a low priority thread acquires a mutex, and is pre-empted by
-one or more medium priority threads. If a high priority thread then
-attempts to acquire the mutex locked by the low priority thread, it 
-will wait (potentially forever) for the medium priority threads 
-to complete.
+A priority inversion occurs when a low priority thread prevents a
+higher priority thread from running. This inversion often occurs when
+a low priority thread acquires a mutex, and is pre-empted by one or
+more medium priority threads. If a high priority thread then attempts
+to acquire the mutex locked by the low priority thread, it will wait
+(potentially forever) for the medium priority threads to complete.
 
 To avoid this kind of priority inversion, applications should use
 special priority-aware mutexes. 
 
-On POSIX systems, such as Linux, Ice-E allows you to use normal mutexes 
-(that are subject to priority inversion) or mutexes configured with 
-the priority inheritance protocol. These latter mutexes will dynamically
-increase the priority of the thread that owns the mutex when a thread
-of higher priority is waiting for this mutex, until the "low priority"
-thread releases this mutex. 
-You can build Ice-E to create by default either type of mutex by setting
-DEFAULT_MUTEX_PROTOCOL to PrioNone or PriInherit in config/Make.rules. 
-This setting has no effect on Windows or Windows Mobile. Ice-E itself uses 
-internally only mutexes created with this default protocol. 
-The DEFAULT_MUTEX_PROTOCOL setting is used only in the implementation of
-the IceUtil::getDefaultMutexProtocol function, therefore you can also
-override the setting in the Ice-E library by defining this function in
-your main program and returning the desired value. Please refer to the
-xxx demo for an example.
+On POSIX systems, such as Linux, Ice-E allows you to use normal
+mutexes (that are subject to priority inversion) or mutexes configured
+with the priority inheritance protocol. These latter mutexes will
+dynamically increase the priority of the thread that owns the mutex
+when a thread of higher priority is waiting for this mutex, until the
+"low priority" thread releases this mutex.
+
+You can build Ice-E to create by default either type of mutex by
+setting DEFAULT_MUTEX_PROTOCOL to PrioNone or PriInherit in
+config/Make.rules.  This setting has no effect on Windows or Windows
+Mobile. Ice-E itself uses internally only mutexes created with this
+default protocol.
+
+The DEFAULT_MUTEX_PROTOCOL setting is used only in the implementation
+of the IceUtil::getDefaultMutexProtocol function, therefore you can
+also override the setting in the Ice-E library by defining this
+function in your main program and returning the desired value. Please
+refer to the xxx demo for an example.
+
 Please note that while all mutexes created by Ice-E will use the
 configured mutex protocol, Ice-E also uses a number of systems calls
-and C++ calls that may lock internal mutexes. Since Ice-E has no control
-over these internal mutexes, priority inversion is still possible if 
-these libraries (C++ runtime, socket library, etc.) are implemented
-or configured with regular mutexes.
+and C++ calls that may lock internal mutexes. Since Ice-E has no
+control over these internal mutexes, priority inversion is still
+possible if these libraries (C++ runtime, socket library, etc.) are
+implemented or configured with regular mutexes.
 
 On Windows Mobile, all mutexes and critical sections support priority
-inheritance, with one level. See 
-http://msdn.microsoft.com/en-us/library/aa450594.aspx for details.
-No special Ice-E build configuration is required.
+inheritance, with one level. See
+http://msdn.microsoft.com/en-us/library/aa450594.aspx for details. No
+special Ice-E build configuration is required.
 
 Unfortunately regular Windows does not provide such mutexes and
-critical sections, and therefore there is no good solution to
-priority inversions on Windows systems.
+critical sections, and therefore there is no good solution to priority
+inversions on Windows systems.
 
 
 Distributed Priority Inversion
 ------------------------------
 
-The Priority Inversion problem described above can also occur in
-a distributed setup, for example:
+The Priority Inversion problem described above can also occur in a
+distributed setup, for example:
+
  - a number of low priority clients and high priority clients 
    send requests to the same Ice-E server.
+
  - the Ice-E server treats all request the same way, and as
    a result the processing of the requests from the low priority
    clients will delay the high priority clients
 
-As of this release, Ice-E does not provide any solution to this
-type of distributed priority inversion.
+As of this release, Ice-E does not provide any solution to this type
+of distributed priority inversion.
 
-New Properties
---------------
+
+Real-time Properties
+--------------------
 
 * Ice.ThreadPriority
 
   The property sets the priority of Ice's internal threads to a native
-  thread priority. On POSIX systems, the priority must be a legal
-  value for the SCHED_RR scheduler. On Windows and Windows CE, the
-  priority can be any of the valid system priorities. Regardless of
-  platform, the value must be expressed as an integer.
+  thread priority. The value must be expressed as an integer.
 
   The value of this property is also used as the default priority for
   the threads in an Ice thread pool if not otherwise specified using
@@ -307,11 +343,15 @@ There are two tests for real-time features:
 * test/IceE/threadPoolPriority
 
 
-Run-time Libraries
-==================
+======================================================================
+4. Run-time Libraries
+======================================================================
 
-In order to minimize the size of Ice-E applications, two versions of
-the run-time library are provided:
+Ice-E supports both building static and dynamic Ice-E run-time
+libraries.
+
+Futhermore, in order to minimize the size of Ice-E applications, two
+versions of the run-time library are provided:
 
 * The "client" library is suitable for applications requiring only
   client-side functionality.
@@ -326,8 +366,9 @@ ICEE_PURE_CLIENT when compiling an application and link with the
 appropriate run-time library.
 
 
-Configuration
-=============
+======================================================================
+5. Configuration
+======================================================================
 
 You may build the Ice-E run-time libraries with certain components
 disabled in order to further reduce the size of your applications. The
@@ -337,22 +378,6 @@ can selectively disable them by editing the file config/Make.rules
 corresponding settings. The optional components are described below.
 For more information on these features, please refer to the Ice
 manual.
-
-Before building Ice-E for the first time, or after any change to the
-configuration settings in Make.rules or Make.rules.mak, you must
-make the "configure" target as shown below:
-
-On Linux:
-
-  $ make configure
-
-On Windows:
-
-  > nmake /f Makefile.mak configure
-
-The purpose of the "configure" target is to generate the header file
-include/IceE/Features.h with preprocessor macros that correspond to
-your settings in Make.rules or Make.rules.mak.
 
 
 Router Support
@@ -415,8 +440,9 @@ include support for issuing remote invocations asynchronously with
 guaranteed non-blocking semantics.
 
 
-Installation
-============
+======================================================================
+6. Installation
+======================================================================
 
 For installation instructions, please refer to the INSTALL.* file for
 your platform.

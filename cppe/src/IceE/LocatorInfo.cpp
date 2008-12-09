@@ -677,11 +677,13 @@ IceInternal::LocatorInfo::getEndpointsException(const ReferencePtr& ref,
         throw ex;
 #endif
     }
+#ifdef ICEE_HAS_AMI
     catch(const NotRegisteredException& ex)
     {
-#ifdef ICEE_HAS_AMI
         callback->locatorInfoException(ex);
 #else
+    catch(const NotRegisteredException&)
+    {
         throw;
 #endif
     }
