@@ -17,10 +17,8 @@ public class Server extends test.Util.Application
         adapter.addServantLocator(new ServantLocatorI("category"), "category");
         adapter.addServantLocator(new ServantLocatorI(""), "");
         adapter.add(new TestI(), communicator().stringToIdentity("asm"));
-
         adapter.activate();
-        adapter.waitForDeactivate();
-        return 0;
+        return WAIT;
     }
 
     protected Ice.InitializationData getInitData(Ice.StringSeqHolder argsH)

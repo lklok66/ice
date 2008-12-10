@@ -19,8 +19,7 @@ public class AMDServer extends test.Util.Application
         adapter.add(new AMDMyDerivedClassI(), communicator.stringToIdentity("test"));
         adapter.activate();
 
-        communicator.waitForShutdown();
-        return 0;
+        return WAIT;
     }
 
     protected Ice.InitializationData getInitData(Ice.StringSeqHolder argsH)

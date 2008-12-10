@@ -32,7 +32,7 @@ class Acceptor implements IceInternal.Acceptor
     public IceInternal.Transceiver
     accept()
     {
-        return new Transceiver(_acceptor.accept());
+        return new Transceiver(_configuration, _acceptor.accept());
     }
 
     public String
@@ -41,8 +41,9 @@ class Acceptor implements IceInternal.Acceptor
         return _acceptor.toString();
     }
 
-    Acceptor(IceInternal.Acceptor acceptor)
+    Acceptor(Configuration configuration, IceInternal.Acceptor acceptor)
     {
+        _configuration = configuration;
         _acceptor = acceptor;
     }
 
@@ -54,4 +55,5 @@ class Acceptor implements IceInternal.Acceptor
     }
 
     final private IceInternal.Acceptor _acceptor;
+    private Configuration _configuration;
 }

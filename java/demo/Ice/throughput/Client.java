@@ -106,6 +106,7 @@ public class Client extends Ice.Application
         // accurate throughput measurement, we need to "warm up" the
         // JIT compiler.
         //
+	/*
         {
             byte[] emptyBytes= new byte[1];
             String[] emptyStrings = new String[1];
@@ -139,6 +140,7 @@ public class Client extends Ice.Application
             
             System.out.println(" ok");
         }
+	*/
 
         menu();
 

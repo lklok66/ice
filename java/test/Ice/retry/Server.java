@@ -17,9 +17,7 @@ public class Server extends test.Util.Application
         Ice.ObjectAdapter adapter = communicator.createObjectAdapter("TestAdapter");
         adapter.add(new RetryI(), communicator.stringToIdentity("retry"));
         adapter.activate();
-
-        communicator.waitForShutdown();
-        return 0;
+        return WAIT;
     }
 
     protected Ice.InitializationData getInitData(Ice.StringSeqHolder argsH)

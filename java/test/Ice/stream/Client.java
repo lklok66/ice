@@ -569,7 +569,7 @@ public class Client extends test.Util.Application
         return 0;
     }
 
-	protected Ice.InitializationData getInitData(Ice.StringSeqHolder argsH)
+    protected Ice.InitializationData getInitData(Ice.StringSeqHolder argsH)
     {
         Ice.InitializationData initData = new Ice.InitializationData();
         initData.properties = Ice.Util.createProperties(argsH);

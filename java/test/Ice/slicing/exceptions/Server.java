@@ -18,8 +18,7 @@ public class Server extends test.Util.Application
         Ice.Object object = new TestI(adapter);
         adapter.add(object, Ice.Util.stringToIdentity("Test"));
         adapter.activate();
-        adapter.waitForDeactivate();
-        return 0;
+        return WAIT;
     }
 
     protected Ice.InitializationData getInitData(Ice.StringSeqHolder argsH)

@@ -16,25 +16,16 @@ public class Server extends test.Util.Application
         Ice.Communicator communicator = communicator();
         java.util.Timer timer = new java.util.Timer();
 
-        communicator.getProperties().setProperty("TestAdapter1.Endpoints", "default -p 12010 -t 10000:udp");
-        communicator.getProperties().setProperty("TestAdapter1.ThreadPool.Size", "5");
-        communicator.getProperties().setProperty("TestAdapter1.ThreadPool.SizeMax", "5");
-        communicator.getProperties().setProperty("TestAdapter1.ThreadPool.SizeWarn", "0");
-        communicator.getProperties().setProperty("TestAdapter1.ThreadPool.Serialize", "0");
         Ice.ObjectAdapter adapter1 = communicator.createObjectAdapter("TestAdapter1");
         adapter1.add(new HoldI(timer, adapter1), communicator.stringToIdentity("hold"));
 
-        communicator.getProperties().setProperty("TestAdapter2.Endpoints", "default -p 12011 -t 10000:udp");
-        communicator.getProperties().setProperty("TestAdapter2.ThreadPool.Size", "5");
-        communicator.getProperties().setProperty("TestAdapter2.ThreadPool.SizeMax", "5");
-        communicator.getProperties().setProperty("TestAdapter2.ThreadPool.SizeWarn", "0");
-        communicator.getProperties().setProperty("TestAdapter2.ThreadPool.Serialize", "1");
         Ice.ObjectAdapter adapter2 = communicator.createObjectAdapter("TestAdapter2");
         adapter2.add(new HoldI(timer, adapter2), communicator.stringToIdentity("hold"));
 
         adapter1.activate();
         adapter2.activate();
 
+        serverReady();
         communicator.waitForShutdown();
 
         timer.cancel();
@@ -47,6 +38,17 @@ public class Server extends test.Util.Application
         Ice.InitializationData initData = new Ice.InitializationData();
         initData.properties = Ice.Util.createProperties(argsH);
         initData.properties.setProperty("Ice.Package.Test", "test.Ice.hold");
+        initData.properties.setProperty("TestAdapter1.Endpoints", "default -p 12010 -t 10000:udp");
+        initData.properties.setProperty("TestAdapter1.ThreadPool.Size", "5");
+        initData.properties.setProperty("TestAdapter1.ThreadPool.SizeMax", "5");
+        initData.properties.setProperty("TestAdapter1.ThreadPool.SizeWarn", "0");
+        initData.properties.setProperty("TestAdapter1.ThreadPool.Serialize", "0");
+
+        initData.properties.setProperty("TestAdapter2.Endpoints", "default -p 12011 -t 10000:udp");
+        initData.properties.setProperty("TestAdapter2.ThreadPool.Size", "5");
+        initData.properties.setProperty("TestAdapter2.ThreadPool.SizeMax", "5");
+        initData.properties.setProperty("TestAdapter2.ThreadPool.SizeWarn", "0");
+        initData.properties.setProperty("TestAdapter2.ThreadPool.Serialize", "1");
         return initData;
     }
 

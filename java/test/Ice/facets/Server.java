@@ -25,9 +25,8 @@ public class Server extends test.Util.Application
         adapter.addFacet(h, communicator.stringToIdentity("d"), "facetGH");
 
         adapter.activate();
-        communicator.waitForShutdown();
 
-        return 0;
+        return WAIT;
     }
 
     protected Ice.InitializationData getInitData(Ice.StringSeqHolder argsH)

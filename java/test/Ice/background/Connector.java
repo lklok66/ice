@@ -14,7 +14,7 @@ final class Connector implements IceInternal.Connector, java.lang.Comparable
     connect()
     {
         _configuration.checkConnectException();
-        return new Transceiver(_connector.connect());
+        return new Transceiver(_configuration, _connector.connect());
     }
 
     public short
@@ -38,9 +38,9 @@ final class Connector implements IceInternal.Connector, java.lang.Comparable
     //
     // Only for use by Endpoint
     //
-    Connector(IceInternal.Connector connector)
+    Connector(Configuration configuration, IceInternal.Connector connector)
     {
-        _configuration = Configuration.getInstance();
+        _configuration = configuration;
         _connector = connector;
     }
 

@@ -284,6 +284,9 @@
 	    <fileset dir="test/Slice/keyword/">
                 <include name="Key.ice" />
             </fileset>
+            <fileset dir="test/Ice/throughput">
+                <include name="Throughput.ice" />
+            </fileset>
         </slice2java>
 
         <slice2java tie="on" outputdir="${generated.test.dir}" dependencyfile="${generated.test.dir}/.depend.Test">
@@ -467,6 +470,7 @@
 	    <include name="test/IceSSL/configuration/"/>
 	    <include name="test/IceUtil/inputUtil/"/>
 	    <include name="test/Slice/keyword/"/>
+	    <include name="test/Ice/throughput/"/>
             <compilerarg value="${javac.lint}"/>
         </javac>
     </target>
@@ -495,6 +499,7 @@
     <target name="test-jar" depends="test-compile">
         <jar jarfile="${lib.dir}/IceTest.jar" basedir="${lib.dir}">
             <include name="test/**"/>
+            <exclude name="test/Freeze/**"/>
             <manifest>
                 <attribute name="Built-By" value="ZeroC, Inc."/>
                 <attribute name="Class-Path" value="Ice.jar"/>

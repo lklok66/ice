@@ -53,8 +53,8 @@ public class Server extends test.Util.Application
         object = new UnexpectedObjectExceptionTestI();
         adapter.add(object, communicator.stringToIdentity("uoet"));
         adapter.activate();
-        communicator.waitForShutdown();
-        return 0;
+
+        return WAIT;
     }
 
     protected Ice.InitializationData getInitData(Ice.StringSeqHolder argsH)

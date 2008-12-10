@@ -20,9 +20,8 @@ public class Server extends test.Util.Application
         adapter.add(test, communicator.stringToIdentity("test"));
 
         adapter.activate();
-        communicator.waitForShutdown();
 
-        return 0;
+        return WAIT;
     }
 
     protected Ice.InitializationData getInitData(Ice.StringSeqHolder argsH)

@@ -18,6 +18,18 @@ import Ice.Util;
 
 public abstract class Application
 {
+    public final int WAIT = 2;
+
+    public interface ServerReadyListener
+    {
+        void serverReady();
+    };
+
+    public interface CommunicatorListener
+    {
+        void communicatorInitialized(Communicator c);
+    };
+
     public
     Application()
     {
@@ -57,7 +69,7 @@ public abstract class Application
         StringSeqHolder argHolder = new StringSeqHolder(args);
         if(initializationData == null)
         {
-        	initializationData = getInitData(argHolder);
+            initializationData = getInitData(argHolder);
         }
         
         InitializationData initData;
@@ -85,8 +97,20 @@ public abstract class Application
         try
         {
             _communicator = Util.initialize(argHolder, initData);
-
+            if(_communicatorListener != null)
+            {
+                _communicatorListener.communicatorInitialized(_communicator);
+            }
             status = run(argHolder.value);
+            if(status == WAIT)
+            {
+                if(_cb != null)
+                {
+                    _cb.serverReady();
+                }
+                _communicator.waitForShutdown();
+                status = 0;
+            }
         }
         catch(LocalException ex)
         {
@@ -135,23 +159,49 @@ public abstract class Application
         return status;
     }
 
+    public void stop()
+    {
+        if(_communicator != null)
+        {
+            _communicator.shutdown();
+        }
+    }
+
     public abstract int run(String[] args);
 
     // Hook to override the initialization data.
-	protected Ice.InitializationData getInitData(Ice.StringSeqHolder argsH)
-	{
-		return null;
-	}
-	
-	public java.io.PrintWriter getWriter()
-	{
-		return _printWriter;
-	}
-	
-	public void setWriter(java.io.Writer writer)
-	{
-		_printWriter = new java.io.PrintWriter(writer);
-	}
+    protected Ice.InitializationData getInitData(Ice.StringSeqHolder argsH)
+    {
+        return null;
+    }
+
+    public java.io.PrintWriter getWriter()
+    {
+        return _printWriter;
+    }
+
+    public void setWriter(java.io.Writer writer)
+    {
+        _printWriter = new java.io.PrintWriter(writer);
+    }
+
+    public void setServerReadyListener(ServerReadyListener cb)
+    {
+        _cb = cb;
+    }
+
+    public void setCommunicatorListener(CommunicatorListener listener)
+    {
+        _communicatorListener = listener;
+    }
+
+    public void serverReady()
+    {
+        if(_cb != null)
+        {
+            _cb.serverReady();
+        }
+    }
 
     //
     // Return the application name, i.e., argv[0].
@@ -170,5 +220,7 @@ public abstract class Application
 
     private String _testName;
     private Communicator _communicator;
-	private java.io.PrintWriter _printWriter = new java.io.PrintWriter(new java.io.OutputStreamWriter(System.out));
+    private java.io.PrintWriter _printWriter = new java.io.PrintWriter(new java.io.OutputStreamWriter(System.out));
+    private ServerReadyListener _cb = null;
+    private CommunicatorListener _communicatorListener = null;
 }

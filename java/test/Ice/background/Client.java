@@ -8,6 +8,7 @@
 // **********************************************************************
 package test.Ice.background;
 
+import test.Ice.background.PluginFactory.PluginI;
 import test.Ice.background.Test.BackgroundPrx;
 
 public class Client extends test.Util.Application
@@ -15,14 +16,19 @@ public class Client extends test.Util.Application
     public int
     run(String[] args)
     {
-        BackgroundPrx background = AllTests.allTests(communicator(), getWriter());
+        Configuration configuration = new Configuration();
+        PluginI plugin = (PluginI)communicator().getPluginManager().getPlugin("Test");
+        plugin.setConfiguration(configuration);
+        communicator().getPluginManager().initializePlugins();
+
+        BackgroundPrx background = AllTests.allTests(configuration, communicator(), getWriter());
         background.shutdown();
         return 0;
     }
     
-	protected Ice.InitializationData getInitData(Ice.StringSeqHolder argsH)
-	{
-		Ice.InitializationData initData = new Ice.InitializationData();
+    protected Ice.InitializationData getInitData(Ice.StringSeqHolder argsH)
+    {
+        Ice.InitializationData initData = new Ice.InitializationData();
         initData.properties = Ice.Util.createProperties(argsH);
 
         // For this test, we want to disable retries.
@@ -42,8 +48,12 @@ public class Client extends test.Util.Application
         initData.properties.setProperty("Ice.Default.Protocol", "test-" + defaultProtocol);
         
         initData.properties.setProperty("Ice.Package.Test", "test.Ice.background");
+        
+        // Don't initialize the plugin until I've set the configuration.
+        initData.properties.setProperty("Ice.InitPlugins", "0");
+
         return initData;
-	}
+    }
 
     public static void
     main(String[] args)

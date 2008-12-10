@@ -236,23 +236,21 @@ public class AllTests
     };
 
     public static BackgroundPrx
-    allTests(Ice.Communicator communicator, PrintWriter out)
+    allTests(Configuration configuration, Ice.Communicator communicator, PrintWriter out)
     {
-        String sref = "background:default -p 12010 -t 10000";
+        String sref = "background:default -p 12010 -t 20000";
         Ice.ObjectPrx obj = communicator.stringToProxy(sref);
         test(obj != null);
 
         BackgroundPrx background = BackgroundPrxHelper.uncheckedCast(obj);
 
-        sref = "backgroundController:tcp -p 12011 -t 10000";
+        sref = "backgroundController:tcp -p 12011 -t 20000";
         obj = communicator.stringToProxy(sref);
         test(obj != null);
 
         BackgroundControllerPrx backgroundController = BackgroundControllerPrxHelper.uncheckedCast(obj);
 
-        Configuration configuration = Configuration.getInstance();
-
-		out.print("testing connect... ");
+        out.print("testing connect... ");
         out.flush();
         {
             connectTests(configuration, background);
@@ -298,7 +296,7 @@ public class AllTests
             }
             backgroundController.resumeCall("findAdapterById");
 
-            obj = communicator.stringToProxy("locator:default -p 12010 -t 10000");
+            obj = communicator.stringToProxy("locator:default -p 12010 -t 20000");
             locator = Ice.LocatorPrxHelper.uncheckedCast(obj);
             obj = obj.ice_locator(locator);
             obj.ice_ping();
@@ -338,7 +336,7 @@ public class AllTests
             }
             backgroundController.resumeCall("getClientProxy");
 
-            obj = communicator.stringToProxy("router:default -p 12010 -t 10000");
+            obj = communicator.stringToProxy("router:default -p 12010 -t 20000");
             router = Ice.RouterPrxHelper.uncheckedCast(obj);
             obj = communicator.stringToProxy("background@Test").ice_router(router);
             BackgroundPrx bg = BackgroundPrxHelper.uncheckedCast(obj);

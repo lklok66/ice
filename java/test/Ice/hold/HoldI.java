@@ -80,6 +80,7 @@ public final class HoldI extends _HoldDisp
     {
         if(_last != expected)
         {
+            System.err.println("_last = " + _last + " expected = " + expected);
             _adapter.getCommunicator().shutdown();
             test(false);
         }

@@ -19,8 +19,7 @@ public class Server extends test.Util.Application
         Ice.Object object = new InitialI(adapter);
         adapter.add(object, communicator.stringToIdentity("initial"));
         adapter.activate();
-        communicator.waitForShutdown();
-        return 0;
+        return WAIT;
     }
 
     protected Ice.InitializationData getInitData(Ice.StringSeqHolder argsH)

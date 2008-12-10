@@ -1,0 +1,608 @@
+package com.zeroc.testsuite;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
+
+import test.Util.Application.CommunicatorListener;
+import Ice.Communicator;
+import android.app.Application;
+import android.os.Handler;
+
+public class TestApp extends Application
+{
+    static class TestSuiteEntry
+    {
+        TestSuiteEntry(String name, Class<? extends test.Util.Application> client,
+                Class<? extends test.Util.Application> server, Class<? extends test.Util.Application> collocated)
+        {
+            _name = name;
+            _client = client;
+            _server = server;
+            _collocated = collocated;
+        }
+
+        String getName()
+        {
+            return _name;
+        }
+
+        test.Util.Application getClient()
+            throws IllegalAccessException, InstantiationException
+        {
+            if(_client == null)
+            {
+                return null;
+            }
+            return _client.newInstance();
+        }
+
+        test.Util.Application getServer()
+            throws IllegalAccessException, InstantiationException
+        {
+            if(_server == null)
+            {
+                return null;
+            }
+
+            return _server.newInstance();
+        }
+
+        test.Util.Application getCollocated()
+            throws IllegalAccessException, InstantiationException
+        {
+            if(_collocated == null)
+            {
+                return null;
+            }
+
+            return _collocated.newInstance();
+        }
+
+        private String _name;
+        private Class<? extends test.Util.Application> _client;
+        private Class<? extends test.Util.Application> _server;
+        private Class<? extends test.Util.Application> _collocated;
+    };
+
+    private TestSuiteEntry[] _tests =
+    {
+        new TestSuiteEntry("throughput", test.Ice.throughput.Client.class, test.Ice.throughput.Server.class, null),
+        new TestSuiteEntry("adapterDeactivation", test.Ice.adapterDeactivation.Client.class,
+                test.Ice.adapterDeactivation.Server.class, test.Ice.adapterDeactivation.Collocated.class),
+        new TestSuiteEntry("background", test.Ice.background.Client.class, test.Ice.background.Server.class, null),
+        new TestSuiteEntry("binding", test.Ice.binding.Client.class, test.Ice.binding.Server.class, null),
+        new TestSuiteEntry("checksum", test.Ice.checksum.Client.class, test.Ice.checksum.Server.class, null),
+        new TestSuiteEntry("custom15", test.Ice.custom15.Client.class, test.Ice.custom15.Server.class,
+                test.Ice.custom15.Collocated.class),
+        new TestSuiteEntry("exceptions", test.Ice.exceptions.Client.class, test.Ice.exceptions.Server.class,
+                test.Ice.exceptions.Collocated.class),
+        new TestSuiteEntry("facets", test.Ice.facets.Client.class, test.Ice.facets.Server.class,
+                test.Ice.facets.Collocated.class),
+        new TestSuiteEntry("hold", test.Ice.hold.Client.class, test.Ice.hold.Server.class, null),
+        new TestSuiteEntry("inheritance", test.Ice.inheritance.Client.class, test.Ice.inheritance.Server.class,
+                test.Ice.inheritance.Collocated.class),
+        new TestSuiteEntry("interceptor", test.Ice.interceptor.Client.class, null, null),
+        new TestSuiteEntry("location", test.Ice.location.Client.class, test.Ice.location.Server.class, null),
+        new TestSuiteEntry("objects", test.Ice.objects.Client.class, test.Ice.objects.Server.class,
+                test.Ice.objects.Collocated.class),
+        new TestSuiteEntry("operations", test.Ice.operations.Client.class, test.Ice.operations.Server.class,
+                test.Ice.operations.Collocated.class),
+        new TestSuiteEntry("packagemd", test.Ice.packagemd.Client.class, test.Ice.packagemd.Server.class, null),
+        new TestSuiteEntry("proxy", test.Ice.proxy.Client.class, test.Ice.proxy.Server.class,
+                test.Ice.proxy.Collocated.class),
+        new TestSuiteEntry("retry", test.Ice.retry.Client.class, test.Ice.retry.Server.class, null),
+        new TestSuiteEntry("servantLocator", test.Ice.servantLocator.Client.class,
+                test.Ice.servantLocator.Server.class, test.Ice.servantLocator.Collocated.class),
+        new TestSuiteEntry("slicing/exceptions", test.Ice.slicing.exceptions.Client.class,
+                test.Ice.slicing.exceptions.Server.class, null),
+        new TestSuiteEntry("slicing/objects", test.Ice.slicing.objects.Client.class,
+                test.Ice.slicing.objects.Server.class, null),
+        new TestSuiteEntry("stream", test.Ice.stream.Client.class, null, null),
+
+        new TestSuiteEntry("timeout", test.Ice.timeout.Client.class, test.Ice.timeout.Server.class, null),
+    };
+
+    class MyWriter extends Writer
+    {
+        @Override
+        public void close()
+            throws IOException
+        {
+            flush();
+        }
+
+        @Override
+        public void flush()
+            throws IOException
+        {
+            final String s = _data.toString();
+            if(s.length() > 0)
+            {
+                postOnOutput(s);
+            }
+            _data = new StringBuffer();
+        }
+
+        @Override
+        public void write(char[] buf, int offset, int count)
+            throws IOException
+        {
+            _data.append(buf, offset, count);
+        }
+
+        private StringBuffer _data = new StringBuffer();
+    };
+
+    private Handler _handler;
+    private LinkedList<String> _strings = new LinkedList<String>();
+
+    public interface TestListener
+    {
+        public void onStartTest(String test);
+
+        public void onOutput(String s);
+
+        public void onComplete(int status);
+    };
+
+    private TestListener _listener = null;
+
+    private boolean _complete = false;
+    private int _status = 0;
+    private int _currentTest = -1;
+    private boolean _ssl = false;
+    private boolean _sslInitialized = false;
+    private SSLContext _clientContext = null;
+    private SSLContext _serverContext = null;
+    private SSLInitializationListener _ssllistener;
+
+    static abstract class TestThread extends Thread
+    {
+        test.Util.Application _app;
+        protected int _status;
+
+        TestThread(test.Util.Application app)
+        {
+            _app = app;
+        }
+
+        public int getStatus()
+        {
+            return _status;
+        }
+
+        protected String[] setupssl(String[] args, final SSLContext context)
+        {
+            String[] sslargs =
+            {
+                "--Ice.Plugin.IceSSL=IceSSL.PluginFactory", "--Ice.Default.Protocol=ssl", "--Ice.InitPlugins=0"
+            };
+            String[] nargs = new String[args.length + sslargs.length];
+            System.arraycopy(args, 0, nargs, 0, args.length);
+            System.arraycopy(sslargs, 0, nargs, args.length, sslargs.length);
+            args = nargs;
+            _app.setCommunicatorListener(new CommunicatorListener()
+            {
+                public void communicatorInitialized(Communicator c)
+                {
+                    IceSSL.Plugin plugin = (IceSSL.Plugin)c.getPluginManager().getPlugin("IceSSL");
+                    plugin.setContext(context);
+                    c.getPluginManager().initializePlugins();
+                }
+
+            });
+            return args;
+        }
+    }
+
+    class ClientThread extends TestThread
+    {
+        private test.Util.Application _server;
+
+        ClientThread(test.Util.Application c, test.Util.Application s)
+        {
+            super(c);
+            _server = s;
+        }
+
+        public void run()
+        {
+            String[] args =
+            {
+                "--Ice.NullHandleAbort=1", "--Ice.Warn.Connections=1", "--Ice.Default.Host=127.0.0.1"
+            };
+            if(_ssl)
+            {
+                args = setupssl(args, _clientContext);
+            }
+            _status = _app.main("Client", args);
+            // If the client failed, then stop the server the test is over.
+            if(_status != 0 && _server != null)
+            {
+                _server.stop();
+            }
+        }
+    }
+
+    class ServerThread extends TestThread
+    {
+        private test.Util.Application _client;
+        private ClientThread _clientThread;
+
+        ServerThread(test.Util.Application c, test.Util.Application s)
+        {
+            super(s);
+            _client = c;
+        }
+
+        public void run()
+        {
+            String[] args =
+            {
+                "--Ice.NullHandleAbort=1",
+                "--Ice.Warn.Connections=1",
+                "--Ice.ThreadPool.Server.Size=1",
+                "--Ice.ThreadPool.Server.SizeMax=3",
+                "--Ice.ThreadPool.Server.SizeWarn=0",
+                "--Ice.PrintAdapterReady=1",
+                "--Ice.Default.Host=127.0.0.1"
+            };
+            if(_ssl)
+            {
+                args = setupssl(args, _serverContext);
+            }
+            _app.setServerReadyListener(new test.Util.Application.ServerReadyListener()
+            {
+                public void serverReady()
+                {
+                    _clientThread = new ClientThread(_client, _app);
+                    _clientThread.start();
+                }
+            });
+
+            _status = _app.main("Server", args);
+            if(_clientThread != null)
+            {
+                while(_clientThread.isAlive())
+                {
+                    try
+                    {
+                        _clientThread.join();
+                    }
+                    catch(InterruptedException e1)
+                    {
+                    }
+                }
+                if(_clientThread.getStatus() != 0)
+                {
+                    _status = _clientThread.getStatus();
+                }
+            }
+        }
+    }
+
+    class CollocatedThread extends TestThread
+    {
+        CollocatedThread(test.Util.Application c)
+        {
+            super(c);
+        }
+
+        public void run()
+        {
+            String[] args =
+            {
+                "--Ice.NullHandleAbort=1"
+            };
+            if(_ssl)
+            {
+                args = setupssl(args, _clientContext);
+            }
+            _status = _app.main("Collocated", args);
+        }
+    }
+
+    class TestRunner extends Thread
+    {
+        private List<TestThread> _threads;
+
+        TestRunner(List<TestThread> l)
+        {
+            _threads = l;
+        }
+
+        public void run()
+        {
+            for(TestThread t : _threads)
+            {
+                t.start();
+                while(t.isAlive())
+                {
+                    try
+                    {
+                        t.join();
+                    }
+                    catch(InterruptedException e)
+                    {
+                    }
+                }
+                int status = t.getStatus();
+                if(status != 0)
+                {
+                    postOnComplete(status);
+                    return;
+                }
+            }
+            postOnComplete(0);
+        }
+    }
+
+    synchronized private void postOnOutput(final String s)
+    {
+        _strings.add(s);
+        if(_listener != null)
+        {
+            final TestListener l = _listener;
+            _handler.post(new Runnable()
+            {
+                public void run()
+                {
+                    l.onOutput(s);
+                }
+            });
+        }
+    }
+
+    synchronized private void postOnComplete(final int status)
+    {
+        _status = status;
+        _complete = true;
+        if(_listener != null)
+        {
+            final TestListener l = _listener;
+            _handler.post(new Runnable()
+            {
+                public void run()
+                {
+                    l.onComplete(status);
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onCreate()
+    {
+        _handler = new Handler();
+    }
+
+    @Override
+    public void onTerminate()
+    {
+    }
+
+    public List<String> getTestNames()
+    {
+        List<String> s = new ArrayList<String>();
+        for(TestSuiteEntry t : _tests)
+        {
+            s.add(t.getName());
+        }
+        return s;
+    }
+
+    synchronized public void setTestListener(TestListener listener)
+    {
+        _listener = listener;
+        if(_listener != null && _currentTest != -1)
+        {
+            _listener.onStartTest(_tests[_currentTest].getName());
+            for(String s : _strings)
+            {
+                _listener.onOutput(s);
+            }
+            if(_complete)
+            {
+                _listener.onComplete(_status);
+            }
+        }
+    }
+
+    public void startNextTest()
+    {
+        assert _complete;
+        startTest((_currentTest + 1) % _tests.length);
+    }
+
+    synchronized public void startTest(int position)
+    {
+        PrintWriter pw = new PrintWriter(new MyWriter());
+
+        _currentTest = position;
+        _complete = false;
+        _strings.clear();
+
+        TestSuiteEntry entry = _tests[position];
+        test.Util.Application client;
+        test.Util.Application server;
+        test.Util.Application collocated;
+
+        if(_listener != null)
+        {
+            _listener.onStartTest(entry.getName());
+        }
+
+        try
+        {
+            client = entry.getClient();
+            server = entry.getServer();
+            collocated = entry.getCollocated();
+        }
+        catch(IllegalAccessException e)
+        {
+            e.printStackTrace(pw);
+            postOnComplete(-1);
+            return;
+        }
+        catch(InstantiationException e)
+        {
+            e.printStackTrace(pw);
+            postOnComplete(-1);
+            return;
+        }
+
+        List<TestThread> l = new ArrayList<TestThread>();
+        if(server != null)
+        {
+            server.setWriter(new MyWriter());
+            client.setWriter(new MyWriter());
+            l.add(new ServerThread(client, server));
+            if(collocated != null)
+            {
+                collocated.setWriter(new MyWriter());
+                l.add(new CollocatedThread(collocated));
+            }
+        }
+        else
+        {
+            client.setWriter(new MyWriter());
+            l.add(new ClientThread(client, null));
+        }
+        TestRunner r = new TestRunner(l);
+        r.setDaemon(true);
+        r.start();
+    }
+
+    public interface SSLInitializationListener
+    {
+        public void onComplete();
+
+        public void onError();
+
+        public void onWait();
+    }
+
+    public void setSSL(boolean ssl)
+    {
+        _ssl = ssl;
+        if(_ssl && !_sslInitialized)
+        {
+            if(_ssllistener != null)
+            {
+                _ssllistener.onWait();
+            }
+            Runnable r = new Runnable()
+            {
+                private SSLContext initializeContext(java.io.InputStream cert)
+                    throws NoSuchAlgorithmException, KeyStoreException, IOException, CertificateException,
+                    FileNotFoundException, UnrecoverableKeyException, KeyManagementException
+                {
+                    SSLContext context = SSLContext.getInstance("TLS");
+                    KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+
+                    KeyStore ks = KeyStore.getInstance("BKS");
+                    char[] passphrase = "password".toCharArray();
+                    ks.load(cert, passphrase);
+                    kmf.init(ks, passphrase);
+
+                    TrustManagerFactory tmf = TrustManagerFactory
+                            .getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                    // KeyStore trustKeys = KeyStore.getInstance("BKS");
+                    // trustKeys.load(cert, passphrase);
+                    // tmf.init(trustKeys);
+                    tmf.init(ks);
+
+                    context.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+                    return context;
+                }
+
+                public void run()
+                {
+                    SSLContext clientContext = null;
+                    SSLContext serverContext = null;
+                    try
+                    {
+                        clientContext = initializeContext(getResources().openRawResource(R.raw.client));
+                        serverContext = initializeContext(getResources().openRawResource(R.raw.server));
+                    }
+                    catch(Exception ex)
+                    {
+                        ex.printStackTrace();
+                    }
+                    sslContextInitialized(clientContext, serverContext);
+                }
+            };
+
+            Thread t = new Thread(r);
+            t.setDaemon(true);
+            t.start();
+        }
+    }
+
+    // Run inside the thread
+    synchronized private void sslContextInitialized(SSLContext clientContext, SSLContext serverContext)
+    {
+        _clientContext = clientContext;
+        _serverContext = serverContext;
+        _sslInitialized = true;
+        if(_ssllistener != null)
+        {
+            final SSLInitializationListener listener = _ssllistener;
+            if(_clientContext == null | _serverContext == null)
+            {
+                _handler.post(new Runnable()
+                {
+                    public void run()
+                    {
+                        listener.onError();
+                    }
+                });
+            }
+            else
+            {
+                _handler.post(new Runnable()
+                {
+                    public void run()
+                    {
+                        listener.onComplete();
+                    }
+                });
+            }
+        }
+    }
+
+    synchronized public void setSSInitializationListener(SSLInitializationListener listener)
+    {
+        _ssllistener = listener;
+        if(_ssl)
+        {
+            if(!_sslInitialized)
+            {
+                listener.onWait();
+            }
+            else if(_clientContext == null | _serverContext == null)
+            {
+                listener.onError();
+            }
+            else
+            {
+                listener.onComplete();
+            }
+        }
+    }
+}

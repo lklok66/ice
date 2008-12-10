@@ -8,6 +8,8 @@
 // **********************************************************************
 package test.Ice.background;
 
+import test.Ice.background.PluginFactory.PluginI;
+
 public class Server extends test.Util.Application
 {
     static public class LocatorI extends Ice._LocatorDisp
@@ -84,25 +86,15 @@ public class Server extends test.Util.Application
     public int
     run(String[] args)
     {
-        //
-        // When running as a MIDlet the properties for the server may be
-        // overridden by configuration. If it isn't then we assume
-        // defaults.
-        //
-        if(communicator().getProperties().getProperty("TestAdapter.Endpoints").length() == 0)
-        {
-        	communicator().getProperties().setProperty("TestAdapter.Endpoints", "default -p 12010 -t 10000");
-        }
-        if(communicator().getProperties().getProperty("ControllerAdapter.Endpoints").length() == 0)
-        {
-        	communicator().getProperties().setProperty("ControllerAdapter.Endpoints", "tcp -p 12011");
-        	communicator().getProperties().setProperty("ControllerAdapter.ThreadPool.Size", "1");
-        }
-
+        Configuration configuration = new Configuration();
+        PluginI plugin = (PluginI)communicator().getPluginManager().getPlugin("Test");
+        plugin.setConfiguration(configuration);
+        communicator().getPluginManager().initializePlugins();
+        
         Ice.ObjectAdapter adapter = communicator().createObjectAdapter("TestAdapter");
         Ice.ObjectAdapter adapter2 = communicator().createObjectAdapter("ControllerAdapter");
 
-        BackgroundControllerI backgroundController = new BackgroundControllerI(adapter);
+        BackgroundControllerI backgroundController = new BackgroundControllerI(configuration, adapter);
 
         adapter.add(new BackgroundI(backgroundController), communicator().stringToIdentity("background"));
         adapter.add(new LocatorI(backgroundController), communicator().stringToIdentity("locator"));
@@ -112,20 +104,19 @@ public class Server extends test.Util.Application
         adapter2.add(backgroundController, communicator().stringToIdentity("backgroundController"));
         adapter2.activate();
 
-        communicator().waitForShutdown();
-        return 0;
+        return WAIT;
     }
 
-	protected Ice.InitializationData getInitData(Ice.StringSeqHolder argsH)
-	{
-		Ice.InitializationData initData = new Ice.InitializationData();
+    protected Ice.InitializationData getInitData(Ice.StringSeqHolder argsH)
+    {
+        Ice.InitializationData initData = new Ice.InitializationData();
         initData.properties = Ice.Util.createProperties(argsH);
-
+        
         //
         // This test kills connections, so we don't want warnings.
         //
         initData.properties.setProperty("Ice.Warn.Connections", "0");
-
+        
         //
         // Setup the test transport plugin.
         //
@@ -134,8 +125,16 @@ public class Server extends test.Util.Application
         initData.properties.setProperty("Ice.Default.Protocol", "test-" + defaultProtocol);
         
         initData.properties.setProperty("Ice.Package.Test", "test.Ice.background");
+
+        initData.properties.setProperty("TestAdapter.Endpoints", "default -p 12010 -t 20000");
+        initData.properties.setProperty("ControllerAdapter.Endpoints", "tcp -p 12011");
+        initData.properties.setProperty("ControllerAdapter.ThreadPool.Size", "1");
+        
+        // Don't initialize the plugin until I've set the configuration.
+        initData.properties.setProperty("Ice.InitPlugins", "0");
+        
         return initData;
-	}
+    }
 
     public static void
     main(String[] args)

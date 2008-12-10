@@ -19,9 +19,7 @@ public class AMDServer extends test.Util.Application
         adapter.addServantLocator(new AMDServantLocatorI(""), "");
         adapter.add(new AMDTestI(), communicator().stringToIdentity("asm"));
 
-        adapter.activate();
-        adapter.waitForDeactivate();
-        return 0;
+        return WAIT;
     }
 
     protected Ice.InitializationData getInitData(Ice.StringSeqHolder argsH)

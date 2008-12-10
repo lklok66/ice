@@ -106,10 +106,10 @@ class BackgroundControllerI extends _BackgroundControllerDisp
     }
     
     public
-    BackgroundControllerI(Ice.ObjectAdapter adapter)
+    BackgroundControllerI(Configuration configuration, Ice.ObjectAdapter adapter)
     {
         _adapter = adapter;
-        _configuration = Configuration.getInstance();
+        _configuration = configuration;
     }
 
     final private Ice.ObjectAdapter _adapter;

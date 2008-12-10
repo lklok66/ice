@@ -45,9 +45,8 @@ public class Server extends test.Util.Application
         adapter.add(locator, communicator.stringToIdentity("locator"));
 
         adapter.activate();
-        communicator.waitForShutdown();
 
-        return 0;
+        return WAIT;
     }
 
     protected Ice.InitializationData getInitData(Ice.StringSeqHolder argsH)

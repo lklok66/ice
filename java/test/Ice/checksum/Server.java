@@ -20,18 +20,16 @@ public class Server extends test.Util.Application
         Ice.Object object = new ChecksumI(adapter);
         adapter.add(object, communicator.stringToIdentity("test"));
         adapter.activate();
-        communicator.waitForShutdown();
-        return 0;
+        return WAIT;
     }
-
-
-	protected Ice.InitializationData getInitData(Ice.StringSeqHolder argsH)
-	{
-		Ice.InitializationData initData = new Ice.InitializationData();
+    
+    protected Ice.InitializationData getInitData(Ice.StringSeqHolder argsH)
+    {
+        Ice.InitializationData initData = new Ice.InitializationData();
         initData.properties = Ice.Util.createProperties(argsH);
         initData.properties.setProperty("Ice.Package.Test", "test.Ice.checksum.server");
         return initData;
-	}
+    }
 
     public static void
     main(String[] args)

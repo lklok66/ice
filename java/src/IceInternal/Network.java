@@ -804,9 +804,14 @@ public final class Network
             //
         }
 
+        byte[] bytes = null;
+        if(addr != null)
+        {
+            bytes = addr.getAddress();
+        }
         if(addr == null ||
-           (addr instanceof java.net.Inet4Address && protocol == EnableIPv6) ||
-           (addr instanceof java.net.Inet6Address && protocol == EnableIPv4))
+           (protocol == EnableIPv4 && bytes.length == 4) ||
+           (protocol == EnableIPv6 && bytes.length == 16))
         {
             //
             // Iterate over the network interfaces and pick an IP
@@ -817,9 +822,10 @@ public final class Network
             while(addr == null && iter.hasNext())
             {
                 java.net.InetAddress a = iter.next();
+                bytes = a.getAddress();
                 if(protocol == EnableBoth ||
-                   (protocol == EnableIPv4 && a instanceof java.net.Inet4Address) ||
-                   (protocol == EnableIPv6 && a instanceof java.net.Inet6Address))
+                   (protocol == EnableIPv4 && bytes.length == 4) ||
+                   (protocol == EnableIPv6 && bytes.length == 16))
                 {
                     addr = a;
                 }
@@ -900,9 +906,10 @@ public final class Network
                     java.net.InetAddress addr = addrs.nextElement();
                     if(!addr.isLoopbackAddress())
                     {
+                        byte[] bytes = addr.getAddress();
                         if(protocol == EnableBoth ||
-                           (protocol == EnableIPv4 && addr instanceof java.net.Inet4Address) ||
-                           (protocol == EnableIPv6 && addr instanceof java.net.Inet6Address))
+                           (protocol == EnableIPv4 && bytes.length == 4) ||
+                           (protocol == EnableIPv6 && bytes.length == 16))
                         {
                             result.add(addr);
                         }
@@ -1189,9 +1196,10 @@ public final class Network
 
             for(int i = 0; i < addrs.length; ++i)
             {
+                byte[] bytes = addrs[i].getAddress();
                 if(protocol == EnableBoth ||
-                   (protocol == EnableIPv4 && addrs[i] instanceof java.net.Inet4Address) ||
-                   (protocol == EnableIPv6 && addrs[i] instanceof java.net.Inet6Address))
+                   (protocol == EnableIPv4 && bytes.length == 4) ||
+                   (protocol == EnableIPv6 && bytes.length == 16))
                 {
                     return new java.net.InetSocketAddress(addrs[i], port);
                 }

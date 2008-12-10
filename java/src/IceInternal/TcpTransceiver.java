@@ -9,6 +9,9 @@
 
 package IceInternal;
 
+///
+//import org.apache.harmony.luni.util.ErrorCodeException;
+
 final class TcpTransceiver implements Transceiver
 {
     public java.nio.channels.SelectableChannel
@@ -96,7 +99,10 @@ final class TcpTransceiver implements Transceiver
             try
             {
                 assert(_fd != null);
+                long first = System.currentTimeMillis();
+                System.out.println("-> write " + System.currentTimeMillis());
                 int ret = _fd.write(buf.b);
+                System.out.println("<- wrote " + ret + " bytes in " + (System.currentTimeMillis() - first) + " ms");
 
                 if(ret == -1)
                 {
@@ -105,7 +111,7 @@ final class TcpTransceiver implements Transceiver
                 else if(ret == 0)
                 {
                     //
-                    // Writing would block, so we reset the limit (if necessary) and return true to indicate
+                    // Writing would block, so we reset the limit (if necessary) and return false to indicate
                     // that more data must be sent.
                     //
                     if(packetSize == _maxPacketSize)

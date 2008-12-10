@@ -20,18 +20,17 @@ public class Server extends test.Util.Application
         adapter.add(new RemoteCommunicatorI(), id);
         adapter.activate();
 
-        communicator.waitForShutdown();
-        return 0;
+        return WAIT;
     }
 
-	protected Ice.InitializationData getInitData(Ice.StringSeqHolder argsH)
-	{
-		Ice.InitializationData initData = new Ice.InitializationData();
+    protected Ice.InitializationData getInitData(Ice.StringSeqHolder argsH)
+    {
+        Ice.InitializationData initData = new Ice.InitializationData();
         initData.properties = Ice.Util.createProperties(argsH);
         initData.properties.setProperty("Ice.Package.Test", "test.Ice.binding");
         initData.properties.setProperty("TestAdapter.Endpoints", "default -p 12010:udp");
         return initData;
-	}
+    }
 
     public static void
     main(String[] args)
