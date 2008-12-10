@@ -117,7 +117,7 @@ main(int argc, char** argv)
 int WINAPI
 WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
-    tprintf("Adapter Ready\n");
+    tprintf("Adapter ready\n");
 
     return 0;
 }
@@ -136,7 +136,7 @@ main(int argc, char* argv[])
 #else
     tprintf("%d\n", getpid());
 #endif
-    tprintf("Adapter Ready\n");
+    tprintf("Adapter ready\n");
 
     return 0;
 }

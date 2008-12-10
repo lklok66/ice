@@ -67,7 +67,7 @@ endif
 
 CXXFLAGS		= $(CXXARCHFLAGS) -ftemplate-depth-128 -Wall -D_REENTRANT -I/usr/include/nptl
 
-ifeq ($(STATICLIBS),)
+ifneq ($(STATICLIBS),yes)
    CXXFLAGS		+= -fPIC
 endif
 
@@ -90,14 +90,14 @@ endif
 
 ifeq ($(USE_SPARC_ASM),yes)
    CFLAGS		= $(OPT_FLAGS) -mcpu=ultrasparc -pipe -DNDEBUG -DUSE_SPARC_ASM
-   ifeq ($(STATICLIBS),)
+   ifneq ($(STATICLIBS),yes)
       CFLAGS		+= -fPIC
    endif
 endif
 
 ifeq ($(USE_SPARC_ASM),no)
    CFLAGS		= $(OPT_FLAGS) -mcpu=v8 -pipe -DNDEBUG -DICE_USE_MUTEX_SHARED
-   ifeq ($(STATICLIBS),)
+   ifneq ($(STATICLIBS),yes)
       CFLAGS		+= -fPIC
    endif
 endif
