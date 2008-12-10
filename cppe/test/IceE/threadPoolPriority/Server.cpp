@@ -32,11 +32,12 @@ public:
     {
     }
 };
+
 class PriorityTestApplication : public TestApplication
 {
 public:
     PriorityTestApplication() :
-        TestApplication("priority server")
+        TestApplication("thread pool priority server")
     {
     }
 

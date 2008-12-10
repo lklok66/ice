@@ -18,7 +18,7 @@ class SlicingObjectsTestApplication : public TestApplication
 public:
 
     SlicingObjectsTestApplication() :
-        TestApplication("exceptions client")
+        TestApplication("slicing objects  client")
     {
     }
 

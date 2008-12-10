@@ -25,7 +25,7 @@ class FaultToleranceTestApplication : public TestApplication
 public:
 
     FaultToleranceTestApplication() :
-        TestApplication("fault server")
+        TestApplication("fault tolerance server")
     {
     }
 

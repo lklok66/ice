@@ -20,7 +20,7 @@ class PriorityTestApplication : public TestApplication
 public:
 
     PriorityTestApplication() :
-        TestApplication("priority client")
+        TestApplication("thread pool priority client")
     {
     }
 
