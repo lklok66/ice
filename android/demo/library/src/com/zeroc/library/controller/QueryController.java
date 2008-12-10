@@ -141,7 +141,7 @@ public class QueryController
 
             _library.queryByIsbn_async(cb, _queryString, 10);
         }
-        else if(_type == QueryType.TITLE)
+        else if(_type == QueryType.AUTHOR)
         {
             Demo.AMI_Library_queryByAuthor cb = new Demo.AMI_Library_queryByAuthor()
             {

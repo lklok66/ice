@@ -296,7 +296,7 @@ final class TransceiverI implements IceInternal.Transceiver
     //
     // Only for use by ConnectorI, AcceptorI.
     //
-    TransceiverI(Instance instance, javax.net.ssl.SSLEngine engine, java.nio.channels.SocketChannel fd,
+    TransceiverI(Instance instance, SSLEngine engine, java.nio.channels.SocketChannel fd,
                  String host, boolean connected, boolean incoming, String adapterName)
     {
         _instance = instance;
@@ -321,7 +321,7 @@ final class TransceiverI implements IceInternal.Transceiver
         {
             //
             // On Windows, limiting the buffer size is important to prevent
-            // poor throughput performances when transfering large amount of
+            // poor throughput performance when transferring large amounts of
             // data. See Microsoft KB article KB823764.
             //
             _maxPacketSize = IceInternal.Network.getSendBufferSize(_fd) / 2;
@@ -330,10 +330,15 @@ final class TransceiverI implements IceInternal.Transceiver
                 _maxPacketSize = 0;
             }
         }
+        _lastHandshakeSocketStatus = IceInternal.SocketStatus.Finished;
 
-        _appInput = ByteBuffer.allocateDirect(engine.getSession().getApplicationBufferSize() * 2);
-        _netInput = ByteBuffer.allocateDirect(engine.getSession().getPacketBufferSize() * 2);
-        _netOutput = ByteBuffer.allocateDirect(engine.getSession().getPacketBufferSize() * 2);
+        //
+        // Do not use direct byte buffers as they have been known to cause problems
+        // (see bug 1582 and Android bug 1465).
+        //
+        _appInput = ByteBuffer.allocate(engine.getSession().getApplicationBufferSize() * 2);
+        _netInput = ByteBuffer.allocate(engine.getSession().getPacketBufferSize() * 2);
+        _netOutput = ByteBuffer.allocate(engine.getSession().getPacketBufferSize() * 2);
     }
 
     protected void
@@ -348,6 +353,29 @@ final class TransceiverI implements IceInternal.Transceiver
     private IceInternal.SocketStatus
     handshakeNonBlocking()
     {
+        //
+        // We may be re-entering this method after waiting for a socket to become ready for
+        // an I/O operation. Complete that operation now if necessary.
+        //
+        switch(_lastHandshakeSocketStatus.value())
+        {
+        case IceInternal.SocketStatus._Finished:
+            // Nothing to do.
+            break;
+
+        case IceInternal.SocketStatus._NeedRead:
+            _lastHandshakeSocketStatus = readNonBlocking();
+            break;
+
+        case IceInternal.SocketStatus._NeedWrite:
+            _lastHandshakeSocketStatus = flushNonBlocking();
+            break;
+        }
+        if(_lastHandshakeSocketStatus != IceInternal.SocketStatus.Finished)
+        {
+            return _lastHandshakeSocketStatus;
+        }
+
         try
         {
             HandshakeStatus status = _engine.getHandshakeStatus();
@@ -358,7 +386,7 @@ final class TransceiverI implements IceInternal.Transceiver
                 {
                 //
                 // The Dalvik Android JVM doesn't seem to return FINISHED,
-                // so treat NOT_HANDSHAKING and FINISHED in the same way.
+                // so treat NOT_HANDSHAKING the same as FINISHED.
                 //
                 case NOT_HANDSHAKING:
                 case FINISHED:
@@ -377,77 +405,73 @@ final class TransceiverI implements IceInternal.Transceiver
                 case NEED_UNWRAP:
                 {
                     //
-                    // The engine needs more data. We might already have enough data in
-                    // the _netInput buffer to satisfy the engine. If not, the engine
-                    // responds with BUFFER_UNDERFLOW and we'll read from the socket.
+                    // Call unwrap() repeatedly until we transition to another state, or until
+                    // the engine needs more data in the input buffer.
                     //
-                    _netInput.flip();
-                    result = _engine.unwrap(_netInput, _appInput);
-                    _netInput.compact();
-                    //
-                    // FINISHED is only returned from wrap or unwrap, not from engine.getHandshakeResult().
-                    //
-                    status = result.getHandshakeStatus();
-                    switch(result.getStatus())
+                    do
                     {
-                    case BUFFER_OVERFLOW:
-                        assert(false);
-                        break;
-                    case BUFFER_UNDERFLOW:
+                        _netInput.flip();
+                        result = _engine.unwrap(_netInput, _appInput);
+                        _netInput.compact();
+
+                        //
+                        // We need to retrieve the handshake status from the unwrap result, and not
+                        // use the one from engine.getHandshakeStatus(), because FINISHED is only
+                        // returned from wrap or unwrap.
+                        //
+                        status = result.getHandshakeStatus();
+                    } while(status == HandshakeStatus.NEED_UNWRAP && result.getStatus() == Status.OK);
+
+                    if(result.getStatus() == Status.BUFFER_UNDERFLOW)
                     {
-                        assert(status == javax.net.ssl.SSLEngineResult.HandshakeStatus.NEED_UNWRAP);
-                        IceInternal.SocketStatus ss = readNonBlocking();
-                        if(ss != IceInternal.SocketStatus.Finished)
+                        //
+                        // The engine requires more data in the input buffer.
+                        //
+                        _lastHandshakeSocketStatus = readNonBlocking();
+                        if(_lastHandshakeSocketStatus != IceInternal.SocketStatus.Finished)
                         {
-                            return ss;
+                            //
+                            // No data was available so we wait for the socket to become readable.
+                            //
+                            assert(_lastHandshakeSocketStatus == IceInternal.SocketStatus.NeedRead);
+                            return _lastHandshakeSocketStatus;
                         }
-                        break;
                     }
-                    case CLOSED:
-                        throw new Ice.ConnectionLostException();
-                    case OK:
-                        break;
-                    }
+
                     break;
                 }
                 case NEED_WRAP:
                 {
                     //
-                    // The engine needs to send a message.
+                    // The engine needs to send a message. NEED_WRAP can be reported multiple
+                    // times, so we accumulate all of the data until the engine reports a different
+                    // handshake status, or until the output buffer overflows.
                     //
-                    result = _engine.wrap(_emptyBuffer, _netOutput);
-                    if(result.bytesProduced() > 0)
+                    do
                     {
-                        IceInternal.SocketStatus ss = flushNonBlocking();
-                        if(ss != IceInternal.SocketStatus.Finished)
-                        {
-                            return ss;
-                        }
+                        result = _engine.wrap(_emptyBuffer, _netOutput);
+                        //
+                        // We need to check the handshake status from the wrap result, and not the one
+                        // from engine.getHandshakeStatus(), because FINISHED is only returned from
+                        // wrap or unwrap.
+                        //
+                        status = result.getHandshakeStatus();
+                    } while(status == HandshakeStatus.NEED_WRAP &&
+                            result.getStatus() == Status.OK);
+
+                    _lastHandshakeSocketStatus = flushNonBlocking();
+                    if(_lastHandshakeSocketStatus != IceInternal.SocketStatus.Finished)
+                    {
+                        return _lastHandshakeSocketStatus;
                     }
-                    //
-                    // FINISHED is only returned from wrap or unwrap, not from engine.getHandshakeResult().
-                    //
-                    status = result.getHandshakeStatus();
+
                     break;
                 }
                 }
 
-                if(result != null)
+                if(result != null && result.getStatus() == Status.CLOSED)
                 {
-                    switch(result.getStatus())
-                    {
-                    case BUFFER_OVERFLOW:
-                        assert(false);
-                        break;
-                    case BUFFER_UNDERFLOW:
-                        // Need to read again.
-                        assert(status == HandshakeStatus.NEED_UNWRAP);
-                        break;
-                    case CLOSED:
-                        throw new Ice.ConnectionLostException();
-                    case OK:
-                        break;
-                    }
+                    throw new Ice.ConnectionLostException();
                 }
             }
         }
@@ -481,7 +505,7 @@ final class TransceiverI implements IceInternal.Transceiver
                 {
                     _engine.getSession().getPeerCertificates();
                 }
-                catch(javax.net.ssl.SSLPeerUnverifiedException ex)
+                catch(SSLPeerUnverifiedException ex)
                 {
                     Ice.SecurityException e = new Ice.SecurityException();
                     e.reason = "IceSSL: server did not supply a certificate";
@@ -639,7 +663,6 @@ final class TransceiverI implements IceInternal.Transceiver
 
                 if(packetSize == _maxPacketSize)
                 {
-                    assert(_netOutput.position() == _netOutput.limit());
                     packetSize = size - _netOutput.position();
                     if(packetSize > _maxPacketSize)
                     {
@@ -771,7 +794,7 @@ final class TransceiverI implements IceInternal.Transceiver
 
     private Instance _instance;
     private java.nio.channels.SocketChannel _fd;
-    private javax.net.ssl.SSLEngine _engine;
+    private SSLEngine _engine;
     private String _host;
     private String _adapterName;
     private boolean _incoming;
@@ -780,6 +803,7 @@ final class TransceiverI implements IceInternal.Transceiver
     private Ice.Stats _stats;
     private String _desc;
     private int _maxPacketSize;
+    private IceInternal.SocketStatus _lastHandshakeSocketStatus;
     private ByteBuffer _appInput; // Holds clear-text data to be read by the application.
     private ByteBuffer _netInput; // Holds encrypted data read from the socket.
     private ByteBuffer _netOutput; // Holds encrypted data to be written to the socket.
