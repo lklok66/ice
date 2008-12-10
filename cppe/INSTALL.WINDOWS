@@ -148,6 +148,11 @@ For Windows Mobile, you must manually run each test by copying the
 server and client for each test to your hardware and then running the
 server, followed by the client. Any failures will be reported.
 
+For the demos there are also Visual Studio project files provided
+which can also be used to compile the demos. The project solutions
+can be found at cppe/demo/demo.sln and cppe/demo/demo_CE.sln, for
+Windows and Windows Mobile respectively.
+
 
 Building the Slice-to-Embedded-C++ translator
 ---------------------------------------------
