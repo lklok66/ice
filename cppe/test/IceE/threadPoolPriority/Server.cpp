@@ -10,10 +10,28 @@
 #include <IceE/IceE.h>
 #include <TestI.h>
 #include <TestApplication.h>
-#include <iostream>
 
 using namespace std;
 
+class NullLogger : public Ice::Logger
+{
+public:
+    virtual void print(const ::std::string&)
+    {
+    }
+
+    virtual void trace(const ::std::string&, const ::std::string&)
+    {
+    }
+
+    virtual void warning(const ::std::string&)
+    {
+    }
+
+    virtual void error(const ::std::string&)
+    {
+    }
+};
 class PriorityTestApplication : public TestApplication
 {
 public:
@@ -29,7 +47,11 @@ public:
         initData.properties = Ice::createProperties();
         initData.properties->setProperty("TestAdapter.Endpoints", "default -p 12010 -t 10000");
         loadConfig(initData.properties);
-        initData.logger = getLogger();
+        //
+        // Set a NullLogger so adapter errors are not printed when try to start with
+        // an invalid priority.
+        //
+        initData.logger = new NullLogger();
 
         //
         // First try to use an invalid priority.
@@ -61,9 +83,9 @@ public:
 #else
         initData.properties->setProperty("Ice.ThreadPool.Server.ThreadPriority", "50");
 #endif
-        cout << "PrintAdapterReady = " << initData.properties->getProperty("Ice.PrintAdapterReady") << endl;
+        initData.logger = getLogger();
         setCommunicator(Ice::initialize(argc, argv, initData));
-    
+
         Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapter("TestAdapter");
         adapter->add(new PriorityI(adapter), communicator()->stringToIdentity("test"));
         adapter->activate();
