@@ -74,27 +74,14 @@ main(int argc, char** argv)
 int WINAPI
 WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
-    tprintf("Adapter Ready\n");
-
     return 0;
 }
 
 #else
 
-#if defined(_WIN32) && !defined(_WIN32_WCE)
-#   include <process.h> // For _getpid()
-#endif
-
 int
 main(int argc, char* argv[])
 {
-#ifdef _WIN32
-    tprintf("%d\n", _getpid());
-#else
-    tprintf("%d\n", getpid());
-#endif
-    tprintf("Adapter Ready\n");
-
     return 0;
 }
 
