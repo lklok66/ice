@@ -50,11 +50,11 @@ protected:
     afx_msg void OnSayHello();
     afx_msg void OnFlush();
     afx_msg void OnShutdown();
-    afx_msg LRESULT OnAMIException(UINT, LONG);
-    afx_msg LRESULT OnAMISayHelloResponse(UINT, LONG);
-    afx_msg LRESULT OnAMISayHelloSent(UINT, LONG);
-    afx_msg LRESULT OnAMIFlushBatchRequestsSent(UINT, LONG);
-    afx_msg LRESULT OnAMIShutdownSent(UINT, LONG);
+    afx_msg LRESULT OnAMIException(WPARAM, LPARAM);
+    afx_msg LRESULT OnAMISayHelloResponse(WPARAM, LPARAM);
+    afx_msg LRESULT OnAMISayHelloSent(WPARAM, LPARAM);
+    afx_msg LRESULT OnAMIFlushBatchRequestsSent(WPARAM, LPARAM);
+    afx_msg LRESULT OnAMIShutdownSent(WPARAM, LPARAM);
     DECLARE_MESSAGE_MAP()
 
     void updateProxy();
