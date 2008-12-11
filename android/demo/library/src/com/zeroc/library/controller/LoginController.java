@@ -56,11 +56,11 @@ public class LoginController
         initData.properties = Ice.Util.createProperties();
         initData.properties.setProperty("Ice.ACM.Client", "0");
         initData.properties.setProperty("Ice.RetryIntervals", "-1");
-        initData.properties.setProperty("Ice.Trace.Network", "3");
+        initData.properties.setProperty("Ice.Trace.Network", "0");
         
         if(secure)
         {
-            initData.properties.setProperty("IceSSL.Trace.Security", "3");
+            initData.properties.setProperty("IceSSL.Trace.Security", "0");
             initData.properties.setProperty("IceSSL.TruststoreType", "BKS");
             initData.properties.setProperty("IceSSL.Password", "password");
             initData.properties.setProperty("Ice.InitPlugins", "0");
