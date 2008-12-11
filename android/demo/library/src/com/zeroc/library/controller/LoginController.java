@@ -8,6 +8,9 @@
 // **********************************************************************
 package com.zeroc.library.controller;
 
+import com.zeroc.library.R;
+
+import android.content.res.Resources;
 import android.os.Handler;
 
 public class LoginController
@@ -42,7 +45,7 @@ public class LoginController
         }
     }
 
-    public LoginController(final String hostname, final boolean secure, final boolean glacier2, Listener listener)
+    public LoginController(Resources resources, final String hostname, final boolean secure, final boolean glacier2, Listener listener)
     {
         _handler = new Handler();
         _loginListener = listener;
@@ -53,11 +56,38 @@ public class LoginController
         initData.properties = Ice.Util.createProperties();
         initData.properties.setProperty("Ice.ACM.Client", "0");
         initData.properties.setProperty("Ice.RetryIntervals", "-1");
-        initData.properties.setProperty("Ice.Trace.Network", "0");
-        initData.properties.setProperty("Ice.Plugin.IceSSL", "IceSSL.PluginFactory");
-        initData.properties.setProperty("IceSSL.TrustOnly.Client", "CN=Glacier2");
-
-        _communicator = Ice.Util.initialize(initData);
+        initData.properties.setProperty("Ice.Trace.Network", "3");
+        
+        if(secure)
+        {
+            initData.properties.setProperty("IceSSL.Trace.Security", "3");
+            initData.properties.setProperty("IceSSL.TruststoreType", "BKS");
+            initData.properties.setProperty("IceSSL.Password", "password");
+            initData.properties.setProperty("Ice.InitPlugins", "0");
+            initData.properties.setProperty("Ice.Plugin.IceSSL", "IceSSL.PluginFactory");
+            java.io.InputStream certStream;
+            
+            // This is setup to only connect with the demo2.zeroc.com hosted glacier2.
+            if(glacier2 && hostname.toLowerCase().equals("demo2.zeroc.com"))
+            {
+                initData.properties.setProperty("IceSSL.TrustOnly.Client", "CN=\"ZeroC library demo Glacier2\"");
+                certStream = resources.openRawResource(R.raw.demo2_ca_cert);
+            }
+            else
+            {
+                initData.properties.setProperty("IceSSL.TrustOnly.Client", "CN=Server");
+                certStream = resources.openRawResource(R.raw.zeroc_demo_ca_cert);
+            }
+            _communicator = Ice.Util.initialize(initData);
+            
+            IceSSL.Plugin plugin = (IceSSL.Plugin)_communicator.getPluginManager().getPlugin("IceSSL");
+            plugin.setTruststoreStream(certStream);
+            _communicator.getPluginManager().initializePlugins();
+        }
+        else
+        {
+            _communicator = Ice.Util.initialize(initData);
+        }
 
         new Thread(new Runnable()
         {
