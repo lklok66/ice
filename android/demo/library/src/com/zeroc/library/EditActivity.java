@@ -42,16 +42,16 @@ public class EditActivity extends SessionActivity
     private List<View> _authorEntries = new ArrayList<View>();
     private EditText _isbn;
     private EditText _title;
-    private LinearLayout _layout;
+    private LinearLayout _authorsLayout;
     private LayoutInflater _inflater;
     private Button _save;
     
     private void addAuthorView(String author)
     {
-        final View authorView = _inflater.inflate(R.layout.author, _layout, false);
+        final View authorView = _inflater.inflate(R.layout.author, _authorsLayout, false);
         EditText auth = (EditText)authorView.findViewById(R.id.author);
         auth.setText(author);
-        _layout.addView(authorView, _layout.getChildCount()-2);
+        _authorsLayout.addView(authorView, _authorsLayout.getChildCount()-2);
         _authorEntries.add(authorView);
         
         Button delete = (Button)authorView.findViewById(R.id.delete);
@@ -59,7 +59,7 @@ public class EditActivity extends SessionActivity
         {
             public void onClick(View v)
             {
-                _layout.removeView(authorView);
+                _authorsLayout.removeView(authorView);
                 _authorEntries.remove(authorView);
             }
         });
@@ -85,7 +85,7 @@ public class EditActivity extends SessionActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.edit);
-        _layout = (LinearLayout)findViewById(R.id.list);
+        _authorsLayout = (LinearLayout)findViewById(R.id.authorsList);
         
         _isbn = (EditText)findViewById(R.id.isbn);
         _isbn.addTextChangedListener(new TextWatcher()

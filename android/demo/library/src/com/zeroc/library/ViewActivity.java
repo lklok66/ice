@@ -50,14 +50,16 @@ public class ViewActivity extends SessionActivity
         // Update the fields.
         _isbn.setText(_desc.isbn);
         _title.setText(_desc.title);
-        _authorsLayout.removeAllViews();
+        // Remove all the authors.
+        _authorsLayout.removeViews(0, _authorsLayout.getChildCount()-1);
+        // Add them back.
         for(String author : _desc.authors)
         {
-            View authorView = _inflater.inflate(R.layout.authorview, _authorsLayout, false);
-            TextView auth = (TextView)authorView.findViewById(R.id.author);
+            TextView auth = (TextView)_inflater.inflate(R.layout.authorview, _authorsLayout, false);
             auth.setText(author);
-            _authorsLayout.addView(authorView, _authorsLayout.getChildCount()-2);
+            _authorsLayout.addView(auth, _authorsLayout.getChildCount()-1);
         }
+
         _rent.setEnabled(true);
         if(_desc.rentedBy.length() == 0)
         {
@@ -79,7 +81,7 @@ public class ViewActivity extends SessionActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.view);
         
-        _authorsLayout = (LinearLayout)findViewById(R.id.list);
+        _authorsLayout = (LinearLayout)findViewById(R.id.authorsList);
         _isbn = (TextView)findViewById(R.id.isbn);
         _title = (TextView)findViewById(R.id.title);
         _rentedBy = (TextView)findViewById(R.id.rentedBy);

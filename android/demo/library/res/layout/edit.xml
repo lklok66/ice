@@ -122,7 +122,7 @@
 		>
 	
 			<!-- The edit items -->
-		    <LinearLayout android:id="@+id/list"
+		    <LinearLayout android:id="@+id/authorsList"
 		        android:layout_width="fill_parent"
 		        android:layout_height="wrap_content"
 		        android:orientation="vertical"
