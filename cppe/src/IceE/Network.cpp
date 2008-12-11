@@ -699,6 +699,60 @@ IceInternal::getAddresses(const string& host, int port, bool server, bool blocki
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(struct sockaddr_in));
 
+#ifdef GUMSTIX
+    if(!host.empty())
+    {
+        //
+        // gethostbyname() may block.
+        //
+        if(!blocking)
+        {
+            return result; // Empty result indicates that a blocking lookup is necessary.
+        }
+
+        struct hostent* entry = 0;
+        int retry = 5;
+
+        do
+        {
+            entry = gethostbyname(host.c_str());
+        }
+        while(entry == 0 && h_errno == TRY_AGAIN && --retry >= 0);
+
+        if(entry == 0)
+        {
+            DNSException ex(__FILE__, __LINE__);
+            ex.error = h_errno;
+            ex.host = host;
+            throw ex;
+        }
+
+        char** p = entry->h_addr_list;
+        while(*p)
+        {
+            addr.sin_family = AF_INET;
+            addr.sin_port = htons(port);
+            memcpy(&addr.sin_addr, *p, entry->h_length);
+            result.push_back(addr);
+            p++;
+        }
+    }
+    else
+    {
+        struct sockaddr_in addr;
+        addr.sin_family = AF_INET;
+        addr.sin_port = htons(port);
+        if(server)
+        {
+            addr.sin_addr.s_addr = htonl(INADDR_ANY);
+        }
+        else
+        {
+            addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+        }
+        result.push_back(addr);
+    }
+#else
     struct addrinfo* info = 0;
     int retry = 5;
 
@@ -776,6 +830,7 @@ IceInternal::getAddresses(const string& host, int port, bool server, bool blocki
     }
 
     freeaddrinfo(info);
+#endif
 
     if(result.size() == 0)
     {

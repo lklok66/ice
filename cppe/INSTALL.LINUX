@@ -155,6 +155,9 @@ Now you must set the following environment variables:
   $ export CXX=arm-linux-c++
   $ export AR=arm-linux-ar
 
+Now edit cppe/config/Make.rules and make sure that the GUMSTIX=yes
+line is uncommented.
+
 Finally, follow the regular Ice-E build steps as described above.
 
 If you have python installed on your gumstix, you can execute the

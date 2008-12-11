@@ -102,6 +102,10 @@ ifeq ($(USE_SPARC_ASM),no)
    endif
 endif
 
+ifeq ($(USE_SPARC_ASM),no)
+    CXXFLAGS		+= -DGUMSTIX
+endif
+
 #
 # C++ run-time libraries, necessary for linking some shared libraries.
 #
@@ -119,7 +123,10 @@ ifeq ($(OPTIMIZE_SIZE),yes)
     endif
 endif
 
+
+ifneq ($(GUMSTIX),yes)
 NPTL_LIB                = /usr/$(libsubdir)/nptl
+endif
 
 BASELIBS		= -L$(NPTL_LIB) -lpthread -lrt
 LIBS			= -lIceE $(BASELIBS)
