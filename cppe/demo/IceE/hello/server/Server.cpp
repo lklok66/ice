@@ -40,7 +40,6 @@ main(int argc, char* argv[])
         Ice::InitializationData initData;
         initData.properties = Ice::createProperties();
         initData.properties->load("config");
-        initData.properties->setProperty("Ice.Override.Timeout", "100");
         communicator = Ice::initialize(argc, argv, initData);
         status = run(argc, argv, communicator);
     }
