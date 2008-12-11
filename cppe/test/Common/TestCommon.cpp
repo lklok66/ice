@@ -553,6 +553,19 @@ TestApplication::getLogger()
 void
 TestApplication::setCommunicator(const CommunicatorPtr& communicator)
 {
+    if(_communicator)
+    {
+        try
+        {
+            _communicator->destroy();
+        }
+        catch(const Exception& ex)
+        {
+                tprintf("communicator::destroy() failed: %s\n", ex.toString().c_str());
+        }
+        _communicator = 0;
+    }
+
     _communicator = communicator;
 #ifdef _WIN32_WCE
     if(communicator->getProperties()->getPropertyWithDefault("LogToFile", "0") != "0")

@@ -176,26 +176,25 @@ def configurePaths():
 def configureEmbeddedPaths():
     if iceHome:
         print "*** using Ice-E installation from " + iceHome,
-
-    # First sanitize the environment.
-    os.environ["CLASSPATH"] = sanitize(os.getenv("CLASSPATH", ""))
+        if x64:
+            print "(64bit)",
+        print
 
     if isWin32():
-        os.environ["PATH"] = getCppBinDir() + os.pathsep + os.getenv("PATH", "")
-        if iceHome:
-            os.environ["PATH"] = os.path.join(getIceDir("cppe"), "bin") + os.pathsep + os.getenv("PATH", "")
+        libDir = getCppBinDir()
     else:
         libDir = os.path.join(getIceDir("cppe"), "lib")
-        if iceHome:
-            libDir = libDir + os.pathsep + os.path.join(findTopLevel(), "cppe", "lib")
-        if isDarwin():
-            os.environ["DYLD_LIBRARY_PATH"] = libDir + os.pathsep + os.getenv("DYLD_LIBRARY_PATH", "")
-        else:
-            os.environ["LD_LIBRARY_PATH"] = libDir + os.pathsep + os.getenv("LD_LIBRARY_PATH", "")
-
-    javaDir = os.path.join(getIceDir("javae"), "lib")
-    os.environ["CLASSPATH"] = os.path.join(javaDir, "IceE.jar") + os.pathsep + os.getenv("CLASSPATH", "")
-    os.environ["CLASSPATH"] = os.path.join(javaDir, "jdk") + os.pathsep + os.getenv("CLASSPATH", "")
+        if iceHome and x64: 
+            if isHpUx():
+                libDir = os.path.join(libDir, "pa20_64")
+	    elif isSolaris():
+		if isSparc():
+		    libDir = os.path.join(libDir, "sparcv9")
+		else:
+		    libDir = os.path.join(libDir, "amd64")
+	    else:
+		libDir = libDir + "64"
+    addLdPath(libDir)
 
 def addLdPath(libpath, env = None):
     if env is None:
@@ -244,7 +243,7 @@ crossTests = [
     
 def run(tests, root = False):
     def usage():
-        if getDefaultMapping() == "cppe" or getDefaultMapping() == "javae":
+        if getDefaultMapping() == "cppe":
             print "usage: " + sys.argv[0] + """
           --all                   Run all sensible permutations of the tests.
           --start=index           Start running the tests at the given index.
@@ -255,6 +254,7 @@ def run(tests, root = False):
           --host=host             Set --Ice.Default.Host=<host>.
           --continue              Keep running when a test fails.
           --ice-home=<path>       Use the binary distribution from the given path.
+          --x64                   Binary distribution is 64-bit.
           --cross=lang            Run cross language test.
           --script                Generate a script to run the tests.
             """
@@ -283,10 +283,10 @@ def run(tests, root = False):
         sys.exit(2)
 
     try:
-        if getDefaultMapping() == "cppe" or getDefaultMapping() == "javae":
+        if getDefaultMapping() == "cppe":
             opts, args = getopt.getopt(sys.argv[1:], "lr:R:",
                                    ["start=", "start-after=", "filter=", "rfilter=", "all", "loop", "debug",
-                                    "host=", "continue", "ice-home=", "cross=", "script"])
+                                    "host=", "continue", "ice-home=", "x64", "cross=", "script"])
         else:
             opts, args = getopt.getopt(sys.argv[1:], "lr:R:",
                                    ["start=", "start-after=", "filter=", "rfilter=", "all", "all-cross", "loop",
@@ -320,7 +320,7 @@ def run(tests, root = False):
                 filters.append((testFilter, False))
         elif o == "--cross":
             global cross
-            if not a in ["cpp", "java", "cs", "py", "rb", "cppe" ]:
+            if not a in ["cpp", "java", "cs", "py", "rb", "cppe"]:
                 print "cross must be one of cpp, java, cs, py or rb"
                 sys.exit(1)
             cross.append(a)
@@ -353,7 +353,7 @@ def run(tests, root = False):
     if all:
         expanded.append([(test, arg, config) for test,config in tests if "once" in config ])
 
-        if getDefaultMapping() == "cppe" or getDefaultMapping() == "javae":
+        if getDefaultMapping() == "cppe":
             expanded.append([ (test, arg, config) for test,config in tests if "core" in config])
         else:
             a = '--protocol=tcp %s'  % arg
@@ -611,7 +611,7 @@ def getDefaultMapping():
     while len(here) > 0:
 	current = os.path.basename(here)
 	here = os.path.dirname(here)
-        if current in ["cpp", "cs", "java", "php", "py", "rb", "tmp", "cppe", "javae"]:
+        if current in ["cpp", "cs", "java", "php", "py", "rb", "tmp", "cppe"]:
 	    return current
     else:
         raise "cannot determine mapping"
@@ -687,8 +687,7 @@ def getCommandLine(exe, config, env=None):
     # all test drivers.
     #
     components = ["--Ice.NullHandleAbort=1"]
-    if getDefaultMapping() != "javae":
-        components += ["--Ice.Warn.Connections=1"]
+    components += ["--Ice.Warn.Connections=1"]
 
     #
     # Turn on network tracing.
@@ -742,7 +741,7 @@ def getCommandLine(exe, config, env=None):
         print >>output, "mono", "--debug %s.exe" % exe,
     elif config.lang == "rb" and config.type == "client":
         print >>output, "ruby", exe,
-    elif config.lang == "java" or config.lang == "javae":
+    elif config.lang == "java":
         print >>output, "%s -ea" % javaCmd,
         if isSolaris() and config.x64:
             print >>output, "-d64",
@@ -774,7 +773,7 @@ def getDefaultServerFile():
         return "server"
     if lang == "py":
         return "Server.py"
-    if lang in ["java", "javae"]:
+    if lang in ["java"]:
         return "Server"
 
 def getDefaultClientFile(lang = None):
@@ -788,7 +787,7 @@ def getDefaultClientFile(lang = None):
         return "client"
     if lang == "py":
         return "Client.py"
-    if lang in ["java", "javae"]:
+    if lang in ["java"]:
         return "Client"
 
 def getDefaultCollocatedFile():
@@ -801,7 +800,7 @@ def getDefaultCollocatedFile():
         return "collocated"
     if lang == "py":
         return "Collocated.py"
-    if lang in ["java", "javae"]:
+    if lang in ["java"]:
         return "Collocated"
 
 def isDebug():
@@ -864,14 +863,14 @@ def clientServerTest(additionalServerOptions = "", additionalClientOptions = "",
         serverdir = getMirrorDir(testdir, "cpp")
     else:
         serverdir = testdir
-    if lang != "java" and lang != "javae":
+    if lang != "java":
         server = os.path.join(serverdir, server)
 
     if serverenv is None:
         serverenv = copy.deepcopy(os.environ)
         if lang == "cpp" or lang == "cppe":
             addLdPath(os.path.join(serverdir), serverenv)
-        elif lang == "java" or lang == "javae":
+        elif lang == "java":
             addClasspath(os.path.join(serverdir, "classes"), serverenv)
 
     global cross
@@ -899,14 +898,14 @@ def clientServerTest(additionalServerOptions = "", additionalClientOptions = "",
         else:
             clientdir = testdir
 
-        if clientLang != "java" and clientLang != "javae":
+        if clientLang != "java":
             client = os.path.join(clientdir, client)
 
         if clientenv is None:
             clientenv = copy.deepcopy(os.environ)
             if clientLang == "cpp" or clientLang == "cppe":
                 addLdPath(os.path.join(clientdir), clientenv)
-            elif clientLang == "java" or clientLang == "javae":
+            elif clientLang == "java":
                 addClasspath(os.path.join(clientdir, "classes"), clientenv)
 
         print "starting " + serverDesc + "...",
@@ -941,7 +940,7 @@ def collocatedTest(additionalOptions = "", collocated = None):
     if collocated == None:
         collocated = getDefaultCollocatedFile()
     collocatedDesc = collocated
-    if lang != "java" and lang != "javae":
+    if lang != "java":
         collocated = os.path.join(testdir, collocated) 
         if lang == "cpp":
             env = copy.deepcopy(os.environ)
@@ -1025,12 +1024,13 @@ def getTestName():
 
 def processCmdLine():
     def usage():
-        if getDefaultMapping() == "cppe" or getDefaultMapping() == "javae":
+        if getDefaultMapping() == "cppe":
             print "usage: " + sys.argv[0] + """
           --debug                 Display debugging information on each test.
           --trace=<file>          Display tracing.
           --host=host             Set --Ice.Default.Host=<host>.
           --ice-home=<path>       Use the binary distribution from the given path.
+          --x64                   Binary distribution is 64-bit.
           --cross=lang            Run cross language test.
             """
         else:
@@ -1051,9 +1051,9 @@ def processCmdLine():
         sys.exit(2)
 
     try:
-        if getDefaultMapping() == "cppe" or getDefaultMapping() == "javae":
+        if getDefaultMapping() == "cppe":
             opts, args = getopt.getopt(
-                sys.argv[1:], "", ["debug", "trace=", "host=", "ice-home=", "cross="])
+                sys.argv[1:], "", ["debug", "trace=", "host=", "ice-home=", "x64", "cross="])
         else:
             opts, args = getopt.getopt(
                 sys.argv[1:], "", ["debug", "trace=", "protocol=", "compress", "valgrind", "host=", "serialize", \
@@ -1131,7 +1131,7 @@ def processCmdLine():
 
     # Only use binary distribution from ICE_HOME environment variable if USE_BIN_DIST=yes
     if not iceHome and os.environ.get("USE_BIN_DIST", "no") == "yes":
-        if getDefaultMapping() == "cppe" or getDefaultMapping() == "javae":
+        if getDefaultMapping() == "cppe":
             if os.environ.get("ICEE_HOME", "") != "":
                 iceHome = os.environ["ICEE_HOME"]
             elif isLinux():
@@ -1145,7 +1145,7 @@ def processCmdLine():
     if not x64:
         x64 = isWin32() and os.environ.get("XTARGET") == "x64" or os.environ.get("LP64") == "yes"
     
-    if getDefaultMapping() == "cppe" or getDefaultMapping() == "javae":
+    if getDefaultMapping() == "cppe":
         configureEmbeddedPaths()
     else:
         configurePaths()

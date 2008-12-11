@@ -89,6 +89,8 @@ CallbackSenderI::run()
                     fprintf(stderr, "removing client `%s':\n%s\n",
                             _communicator->identityToString((*p)->ice_getIdentity()).c_str(),
                                 ex.toString().c_str()); fflush(stderr);
+
+                    Lock lock(*this);
                     _clients.erase(*p);
                 }
             }

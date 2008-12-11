@@ -112,7 +112,7 @@ def configurePaths():
             binDir = binDir + "64"
 
     # Only add the lib directory to the shared library path if we're
-     # not using the embedded location.
+    # not using the embedded location.
     if libDir and iceHome != "/opt/Ice-3.3":
         addLdPath(libDir)
 
@@ -141,6 +141,37 @@ def configurePaths():
     else:
         addenv("PYTHONPATH", os.path.join(getIceDir("py"), "python"))
     addenv("RUBYLIB", os.path.join(getIceDir("rb"), "ruby"))
+
+def configureEmbeddedPaths():
+
+    if iceHome:
+        print "[ using Ice-E installation from " + iceHome,
+        if x64:
+            print "(64bit)",
+        print "]"
+
+    libDir = None
+    if isWin32():
+        libDir = os.path.join(getIceDir("cppe"), "bin")
+    else:
+        # 64-bits binaries are located in a subdirectory with binary
+        # distributions.
+        libDir = os.path.join(getIceDir("cppe"), "lib")
+        if iceHome and x64: 
+            if isHpUx():
+                libDir = os.path.join(libDir, "pa20_64")
+            elif isSolaris():
+                if isSparc():
+                    libDir = os.path.join(libDir, "sparcv9")
+                else:
+                    libDir = os.path.join(libDir, "amd64")
+            else:
+                libDir = libDir + "64"
+
+    # Only add the lib directory to the shared library path if we're
+    # not using the embedded location.
+    if libDir and iceHome != "/opt/IceE-1.3.0":
+        addLdPath(libDir)
 
 # Mapping to the associated subdirectory.
 mappingDirs = {
@@ -584,7 +615,10 @@ def processCmdLine():
     if not x64:
         x64 = isWin32() and os.environ.get("XTARGET") == "x64" or os.environ.get("LP64") == "yes"
 
-    configurePaths()
+    if getMapping() == "cppe":
+        configureEmbeddedPaths()
+    else:
+        configurePaths()
     if env:
         dumpenv()
 
