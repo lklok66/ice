@@ -258,6 +258,9 @@ dynamically increase the priority of the thread that owns the mutex
 when a thread of higher priority is waiting for this mutex, until the
 "low priority" thread releases this mutex.
 
+Note that on gumstix the priority inheritance protocol is not
+supported. 
+
 You can build Ice-E to create by default either type of mutex by
 setting DEFAULT_MUTEX_PROTOCOL to PrioNone or PriInherit in
 config/Make.rules.  This setting has no effect on Windows or Windows
