@@ -24,8 +24,9 @@ class Oneways
     }
 
     static void
-    oneways(Ice.Communicator communicator, MyClassPrx p)
+    oneways(test.Util.Application app, MyClassPrx p)
     {
+        Ice.Communicator communicator = app.communicator();
         p = MyClassPrxHelper.uncheckedCast(p.ice_oneway());
 
         {

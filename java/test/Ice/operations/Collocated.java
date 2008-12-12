@@ -19,7 +19,7 @@ public class Collocated extends test.Util.Application
         adapter.add(new MyDerivedClassI(), communicator().stringToIdentity("test"));
         adapter.activate();
 
-        AllTests.allTests(communicator(), true, out);
+        AllTests.allTests(this, true, out);
 
         return 0;
     }

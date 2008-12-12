@@ -25,7 +25,7 @@ import android.os.Handler;
 
 public class TestApp extends Application
 {
-    static class TestSuiteEntry
+    static private class TestSuiteEntry
     {
         TestSuiteEntry(String name, Class<? extends test.Util.Application> client,
                 Class<? extends test.Util.Application> server, Class<? extends test.Util.Application> collocated)
@@ -79,8 +79,10 @@ public class TestApp extends Application
         private Class<? extends test.Util.Application> _collocated;
     };
 
-    private TestSuiteEntry[] _tests =
+    static final private TestSuiteEntry[] _tests =
     {
+        new TestSuiteEntry("operations client", test.Ice.operations.Client.class, null, null),
+        new TestSuiteEntry("operations server", null, test.Ice.operations.Server.class, null),
         new TestSuiteEntry("throughput", test.Ice.throughput.Client.class, test.Ice.throughput.Server.class, null),
         new TestSuiteEntry("adapterDeactivation", test.Ice.adapterDeactivation.Client.class,
                 test.Ice.adapterDeactivation.Server.class, test.Ice.adapterDeactivation.Collocated.class),
@@ -165,6 +167,7 @@ public class TestApp extends Application
     private boolean _complete = false;
     private int _status = 0;
     private int _currentTest = -1;
+    
     private boolean _ssl = false;
     private boolean _sslInitialized = false;
     private SSLContext _clientContext = null;
@@ -204,7 +207,6 @@ public class TestApp extends Application
                     plugin.setContext(context);
                     c.getPluginManager().initializePlugins();
                 }
-
             });
             return args;
         }
@@ -224,7 +226,8 @@ public class TestApp extends Application
         {
             String[] args =
             {
-                "--Ice.NullHandleAbort=1", "--Ice.Warn.Connections=1", "--Ice.Default.Host=127.0.0.1"
+                //"--Ice.NullHandleAbort=1", "--Ice.Warn.Connections=1", "--Ice.Default.Host=127.0.0.1"
+                "--Ice.NullHandleAbort=1", "--Ice.Warn.Connections=1", "--Ice.Default.Host=10.0.2.2"
             };
             if(_ssl)
             {
@@ -260,7 +263,9 @@ public class TestApp extends Application
                 "--Ice.ThreadPool.Server.SizeMax=3",
                 "--Ice.ThreadPool.Server.SizeWarn=0",
                 "--Ice.PrintAdapterReady=1",
-                "--Ice.Default.Host=127.0.0.1"
+                "--Ice.Trace.Network=1",
+                "--Ice.Default.Host=10.0.2.15",
+                //"--Ice.Default.Host=127.0.0.1"
             };
             if(_ssl)
             {
@@ -270,8 +275,11 @@ public class TestApp extends Application
             {
                 public void serverReady()
                 {
-                    _clientThread = new ClientThread(_client, _app);
-                    _clientThread.start();
+                    if(_client != null)
+                    {
+                        _clientThread = new ClientThread(_client, _app);
+                        _clientThread.start();
+                    }
                 }
             });
 
@@ -384,6 +392,48 @@ public class TestApp extends Application
             });
         }
     }
+    
+    public interface SSLInitializationListener
+    {
+        public void onComplete();
+
+        public void onError();
+
+        public void onWait();
+    }
+
+    // This is called from the SSL initialization thread.
+    synchronized private void sslContextInitialized(SSLContext clientContext, SSLContext serverContext)
+    {
+        _clientContext = clientContext;
+        _serverContext = serverContext;
+        _sslInitialized = true;
+
+        if(_ssllistener != null)
+        {
+            final SSLInitializationListener listener = _ssllistener;
+            if(_clientContext == null | _serverContext == null)
+            {
+                _handler.post(new Runnable()
+                {
+                    public void run()
+                    {
+                        listener.onError();
+                    }
+                });
+            }
+            else
+            {
+                _handler.post(new Runnable()
+                {
+                    public void run()
+                    {
+                        listener.onComplete();
+                    }
+                });
+            }
+        }
+    }
 
     @Override
     public void onCreate()
@@ -431,6 +481,8 @@ public class TestApp extends Application
 
     synchronized public void startTest(int position)
     {
+        assert !_ssl || (_ssl && _sslInitialized);
+
         PrintWriter pw = new PrintWriter(new MyWriter());
 
         _currentTest = position;
@@ -470,7 +522,10 @@ public class TestApp extends Application
         if(server != null)
         {
             server.setWriter(new MyWriter());
-            client.setWriter(new MyWriter());
+            if(client != null) // TODO:
+            {
+                client.setWriter(new MyWriter());    
+            }
             l.add(new ServerThread(client, server));
             if(collocated != null)
             {
@@ -486,15 +541,6 @@ public class TestApp extends Application
         TestRunner r = new TestRunner(l);
         r.setDaemon(true);
         r.start();
-    }
-
-    public interface SSLInitializationListener
-    {
-        public void onComplete();
-
-        public void onError();
-
-        public void onWait();
     }
 
     public void setSSL(boolean ssl)
@@ -554,38 +600,6 @@ public class TestApp extends Application
         }
     }
 
-    // Run inside the thread
-    synchronized private void sslContextInitialized(SSLContext clientContext, SSLContext serverContext)
-    {
-        _clientContext = clientContext;
-        _serverContext = serverContext;
-        _sslInitialized = true;
-        if(_ssllistener != null)
-        {
-            final SSLInitializationListener listener = _ssllistener;
-            if(_clientContext == null | _serverContext == null)
-            {
-                _handler.post(new Runnable()
-                {
-                    public void run()
-                    {
-                        listener.onError();
-                    }
-                });
-            }
-            else
-            {
-                _handler.post(new Runnable()
-                {
-                    public void run()
-                    {
-                        listener.onComplete();
-                    }
-                });
-            }
-        }
-    }
-
     synchronized public void setSSInitializationListener(SSLInitializationListener listener)
     {
         _ssllistener = listener;
@@ -595,7 +609,7 @@ public class TestApp extends Application
             {
                 listener.onWait();
             }
-            else if(_clientContext == null | _serverContext == null)
+            else if(_clientContext == null || _serverContext == null)
             {
                 listener.onError();
             }

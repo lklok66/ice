@@ -20,6 +20,7 @@
 core
 /*/dist
 generated
+generated.test
 cgenerated
 sgenerated
 /java/depcache

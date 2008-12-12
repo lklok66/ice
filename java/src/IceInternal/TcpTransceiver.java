@@ -100,9 +100,7 @@ final class TcpTransceiver implements Transceiver
             {
                 assert(_fd != null);
                 long first = System.currentTimeMillis();
-                System.out.println("-> write " + System.currentTimeMillis());
                 int ret = _fd.write(buf.b);
-                System.out.println("<- wrote " + ret + " bytes in " + (System.currentTimeMillis() - first) + " ms");
 
                 if(ret == -1)
                 {

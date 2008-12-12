@@ -1128,8 +1128,10 @@ class TwowaysAMI
     }
 
     static void
-    twowaysAMI(Ice.Communicator communicator, MyClassPrx p)
+    twowaysAMI(test.Util.Application app, MyClassPrx p)
     {
+        Ice.Communicator communicator = app.communicator();
+
         {
             // Check that a call to a void operation raises NoEndpointException
             // in the ice_exception() callback instead of at the point of call.
@@ -1175,7 +1177,7 @@ class TwowaysAMI
             // Check that CommunicatorDestroyedException is raised directly.
             Ice.InitializationData initData = new Ice.InitializationData();
             initData.properties = communicator.getProperties()._clone();
-            Ice.Communicator ic = Ice.Util.initialize(initData);
+            Ice.Communicator ic = app.initialize(initData);
             Ice.ObjectPrx obj = ic.stringToProxy(p.ice_toString());
             MyClassPrx p2 = MyClassPrxHelper.checkedCast(obj);
 
@@ -1629,7 +1631,7 @@ class TwowaysAMI
                 initData.properties = communicator.getProperties()._clone();
                 initData.properties.setProperty("Ice.ImplicitContext", impls[i]);
 
-                Ice.Communicator ic = Ice.Util.initialize(initData);
+                Ice.Communicator ic = app.initialize(initData);
 
                 java.util.Map<String, String> ctx = new java.util.HashMap<String, String>();
                 ctx.put("one", "ONE");

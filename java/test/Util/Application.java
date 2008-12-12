@@ -167,9 +167,22 @@ public abstract class Application
         }
     }
 
+    // Initialize a new communicator.
+    public Ice.Communicator initialize(InitializationData initData)
+    {
+        Ice.Communicator communicator = Util.initialize(initData);
+        if(_communicatorListener != null)
+        {
+            _communicatorListener.communicatorInitialized(communicator);
+        }
+        return communicator;
+    }
+
     public abstract int run(String[] args);
 
-    // Hook to override the initialization data.
+    // Hook to override the initialization data. This hook is
+    // necessary because some properties must be set prior to
+    // communicator initialization.
     protected Ice.InitializationData getInitData(Ice.StringSeqHolder argsH)
     {
         return null;

@@ -18,36 +18,37 @@ import test.Ice.operations.Test.MyDerivedClassPrxHelper;
 public class AllTests
 {
     public static MyClassPrx
-    allTests(Ice.Communicator communicator, boolean collocated, PrintWriter out)
+    allTests(test.Util.Application app, boolean collocated, PrintWriter out)
     {
+        Ice.Communicator communicator = app.communicator();
         String ref = "test:default -p 12010 -t 10000";
         Ice.ObjectPrx base = communicator.stringToProxy(ref);
         MyClassPrx cl = MyClassPrxHelper.checkedCast(base);
         MyDerivedClassPrx derived = MyDerivedClassPrxHelper.checkedCast(cl);
 
-		out.print("testing twoway operations... ");
+        out.print("testing twoway operations... ");
         out.flush();
-        Twoways.twoways(communicator, cl);
-        Twoways.twoways(communicator, derived);
+        Twoways.twoways(app, cl);
+        Twoways.twoways(app, derived);
         derived.opDerived();
         out.println("ok");
 
         out.print("testing oneway operations... ");
         out.flush();
-        Oneways.oneways(communicator, cl);
+        Oneways.oneways(app, cl);
         out.println("ok");
 
         if(!collocated)
         {
             out.print("testing twoway operations with AMI... ");
             out.flush();
-            TwowaysAMI.twowaysAMI(communicator, cl);
-            TwowaysAMI.twowaysAMI(communicator, derived);
+            TwowaysAMI.twowaysAMI(app, cl);
+            TwowaysAMI.twowaysAMI(app, derived);
             out.println("ok");
 
             out.print("testing oneway operations with AMI... ");
             out.flush();
-            OnewaysAMI.onewaysAMI(communicator, cl);
+            OnewaysAMI.onewaysAMI(app, cl);
             out.println("ok");
 
             out.print("testing batch oneway operations... ");

@@ -1,4 +1,4 @@
-#Thu Nov 13 09:45:48 NST 2008
+#Mon Dec 08 10:55:23 NST 2008
 eclipse.preferences.version=1
 org.eclipse.jdt.core.compiler.codegen.targetPlatform=1.5
 org.eclipse.jdt.core.compiler.compliance=1.5
@@ -14,7 +14,7 @@ org.eclipse.jdt.core.formatter.alignment_for_binary_expression=16
 org.eclipse.jdt.core.formatter.alignment_for_compact_if=16
 org.eclipse.jdt.core.formatter.alignment_for_conditional_expression=80
 org.eclipse.jdt.core.formatter.alignment_for_enum_constants=48
-org.eclipse.jdt.core.formatter.alignment_for_expressions_in_array_initializer=16
+org.eclipse.jdt.core.formatter.alignment_for_expressions_in_array_initializer=52
 org.eclipse.jdt.core.formatter.alignment_for_multiple_fields=16
 org.eclipse.jdt.core.formatter.alignment_for_parameters_in_constructor_declaration=16
 org.eclipse.jdt.core.formatter.alignment_for_parameters_in_method_declaration=18
@@ -37,7 +37,7 @@ org.eclipse.jdt.core.formatter.blank_lines_between_import_groups=1
 org.eclipse.jdt.core.formatter.blank_lines_between_type_declarations=1
 org.eclipse.jdt.core.formatter.brace_position_for_annotation_type_declaration=next_line
 org.eclipse.jdt.core.formatter.brace_position_for_anonymous_type_declaration=next_line
-org.eclipse.jdt.core.formatter.brace_position_for_array_initializer=end_of_line
+org.eclipse.jdt.core.formatter.brace_position_for_array_initializer=next_line
 org.eclipse.jdt.core.formatter.brace_position_for_block=next_line
 org.eclipse.jdt.core.formatter.brace_position_for_block_in_case=next_line
 org.eclipse.jdt.core.formatter.brace_position_for_constructor_declaration=next_line
@@ -77,10 +77,10 @@ org.eclipse.jdt.core.formatter.indentation.size=8
 org.eclipse.jdt.core.formatter.insert_new_line_after_annotation_on_local_variable=insert
 org.eclipse.jdt.core.formatter.insert_new_line_after_annotation_on_member=insert
 org.eclipse.jdt.core.formatter.insert_new_line_after_annotation_on_parameter=do not insert
-org.eclipse.jdt.core.formatter.insert_new_line_after_opening_brace_in_array_initializer=do not insert
+org.eclipse.jdt.core.formatter.insert_new_line_after_opening_brace_in_array_initializer=insert
 org.eclipse.jdt.core.formatter.insert_new_line_at_end_of_file_if_missing=insert
 org.eclipse.jdt.core.formatter.insert_new_line_before_catch_in_try_statement=insert
-org.eclipse.jdt.core.formatter.insert_new_line_before_closing_brace_in_array_initializer=do not insert
+org.eclipse.jdt.core.formatter.insert_new_line_before_closing_brace_in_array_initializer=insert
 org.eclipse.jdt.core.formatter.insert_new_line_before_else_in_if_statement=insert
 org.eclipse.jdt.core.formatter.insert_new_line_before_finally_in_try_statement=insert
 org.eclipse.jdt.core.formatter.insert_new_line_before_while_in_do_statement=insert

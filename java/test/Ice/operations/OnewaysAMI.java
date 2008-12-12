@@ -131,8 +131,9 @@ class OnewaysAMI
     }
 
     static void
-    onewaysAMI(Ice.Communicator communicator, MyClassPrx p)
+    onewaysAMI(test.Util.Application app, MyClassPrx p)
     {
+        Ice.Communicator communicator = app.communicator();
         p = MyClassPrxHelper.uncheckedCast(p.ice_oneway());
 
         {

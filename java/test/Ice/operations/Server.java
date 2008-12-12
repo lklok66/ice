@@ -32,6 +32,8 @@ public class Server extends test.Util.Application
         //
         initData.properties.setProperty("Ice.Warn.Dispatch", "0");
         initData.properties.setProperty("Ice.Package.Test", "test.Ice.operations");
+        initData.properties.setProperty("TestAdapter.Endpoints", "default -p 12010:udp");
+        initData.properties.setProperty("TestAdapter.PublishedEndpoints", "default -p 12010 -h 127.0.0.1:udp -h 127.0.0.1");
         return initData;
     }
 

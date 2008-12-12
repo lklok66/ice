@@ -68,8 +68,9 @@ class Twoways
     }
 
     static void
-    twoways(Ice.Communicator communicator, MyClassPrx p)
+    twoways(test.Util.Application app, MyClassPrx p)
     {
+        Ice.Communicator communicator = app.communicator();
         {
             p.opVoid();
         }
@@ -726,7 +727,7 @@ class Twoways
                 initData.properties = communicator.getProperties()._clone();
                 initData.properties.setProperty("Ice.ImplicitContext", impls[i]);
 
-                Ice.Communicator ic = Ice.Util.initialize(initData);
+                Ice.Communicator ic = app.initialize(initData);
 
                 java.util.Map<String, String> ctx = new java.util.HashMap<String, String>();
                 ctx.put("one", "ONE");
