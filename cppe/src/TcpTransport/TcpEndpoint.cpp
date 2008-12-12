@@ -243,7 +243,7 @@ IceInternal::TcpEndpoint::unknown() const
 vector<ConnectorPtr>
 IceInternal::TcpEndpoint::connectors() const
 {
-    const vector<struct sockaddr_in>& addresses = getAddresses(_host, _port, false, true);
+    vector<struct sockaddr_in> addresses = getAddresses(_host, _port, false, true);
     vector<ConnectorPtr> connectors;
     for(unsigned int i = 0; i < addresses.size(); ++i)
     {
