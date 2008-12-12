@@ -35,7 +35,7 @@ prefix			= /opt/IceE-$(VERSION)
 # Define GUMSTIX as yes if building for gumstix target.
 #
 
-#GUMSTIX			= yes
+#GUMSTIX		= yes
 
 #
 # Define LP64 as yes or no if you want force a 32 or 64 bit. The default
