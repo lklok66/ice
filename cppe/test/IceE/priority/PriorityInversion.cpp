@@ -299,7 +299,7 @@ void
 PriorityInversionTest::run()
 {
     int cores, high, medium, low, timeout;
-    timeout = 2;
+    timeout = 10;
 #ifdef _WIN32_WCE
     cores = 1;
     high = 140;
