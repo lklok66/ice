@@ -682,7 +682,7 @@ IceInternal::doFinishConnect(SOCKET fd)
     struct sockaddr_in localAddr;
     fdToLocalAddress(fd, localAddr);
     struct sockaddr_in remoteAddr;
-    if(fdToRemoteAddress(fd, remoteAddr) && compareAddress(remoteAddr, localAddr) == 0)
+    if(!fdToRemoteAddress(fd, remoteAddr) && compareAddress(remoteAddr, localAddr) == 0)
     {
         ConnectionRefusedException ex(__FILE__, __LINE__);
         ex.error = 0; // No appropriate errno
