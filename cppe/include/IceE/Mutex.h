@@ -212,12 +212,12 @@ inline void
 Mutex::init(MutexProtocol protocol)
 {
 #if defined(__linux) && !defined(__USE_UNIX98)
-#ifdef NDEBUG
+#   ifdef NDEBUG
     int rc = pthread_mutex_init(&_mutex, 0);
-#else
+#   else
     const pthread_mutexattr_t attr = { PTHREAD_MUTEX_ERRORCHECK_NP };
     int rc = pthread_mutex_init(&_mutex, &attr);
-#endif
+#   endif
     if(rc != 0)
     {
         throw ThreadSyscallException(__FILE__, __LINE__, rc);
