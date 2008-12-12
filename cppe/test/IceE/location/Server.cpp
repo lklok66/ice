@@ -128,6 +128,10 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmd
 #   include <process.h> // For _getpid()
 #endif
 
+#if !defined(_WIN32)
+#   include <unistd.h>
+#endif
+
 int
 main(int argc, char* argv[])
 {

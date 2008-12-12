@@ -381,9 +381,9 @@
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="$(PlatformName)\$(ConfigurationName)/throughputC.pch"
-				AssemblerListingLocation="$(PlatformName)\$(ConfigurationName)C/"
-				ObjectFile="$(PlatformName)\$(ConfigurationName)C/"
-				ProgramDataBaseFileName="$(PlatformName)\$(ConfigurationName)C/"
+				AssemblerListingLocation="$(PlatformName)\$(ConfigurationName)/"
+				ObjectFile="$(PlatformName)\$(ConfigurationName)/"
+				ProgramDataBaseFileName="$(PlatformName)\$(ConfigurationName)/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -899,9 +899,9 @@
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="$(PlatformName)\$(ConfigurationName)/throughputC.pch"
-				AssemblerListingLocation="$(PlatformName)\$(ConfigurationName)C/"
-				ObjectFile="$(PlatformName)\$(ConfigurationName)C/"
-				ProgramDataBaseFileName="$(PlatformName)\$(ConfigurationName)C/"
+				AssemblerListingLocation="$(PlatformName)\$(ConfigurationName)/"
+				ObjectFile="$(PlatformName)\$(ConfigurationName)/"
+				ProgramDataBaseFileName="$(PlatformName)\$(ConfigurationName)/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 			/>
@@ -1413,9 +1413,9 @@
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="$(PlatformName)\$(ConfigurationName)/throughputC.pch"
-				AssemblerListingLocation="$(PlatformName)\$(ConfigurationName)C/"
-				ObjectFile="$(PlatformName)\$(ConfigurationName)C/"
-				ProgramDataBaseFileName="$(PlatformName)\$(ConfigurationName)C/"
+				AssemblerListingLocation="$(PlatformName)\$(ConfigurationName)/"
+				ObjectFile="$(PlatformName)\$(ConfigurationName)/"
+				ProgramDataBaseFileName="$(PlatformName)\$(ConfigurationName)/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 			/>
@@ -1927,9 +1927,9 @@
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="$(PlatformName)\$(ConfigurationName)/throughputC.pch"
-				AssemblerListingLocation="$(PlatformName)\$(ConfigurationName)C/"
-				ObjectFile="$(PlatformName)\$(ConfigurationName)C/"
-				ProgramDataBaseFileName="$(PlatformName)\$(ConfigurationName)C/"
+				AssemblerListingLocation="$(PlatformName)\$(ConfigurationName)/"
+				ObjectFile="$(PlatformName)\$(ConfigurationName)/"
+				ProgramDataBaseFileName="$(PlatformName)\$(ConfigurationName)/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -3000,7 +3000,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Throughput.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Throughput.ice&#x0D;&#x0A;"
 						Outputs="Throughput.cpp;Throughput.h"
 					/>
 				</FileConfiguration>
@@ -3045,7 +3045,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Throughput.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Throughput.ice&#x0D;&#x0A;"
 						Outputs="Throughput.cpp;Throughput.h"
 					/>
 				</FileConfiguration>
@@ -3090,7 +3090,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Throughput.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Throughput.ice&#x0D;&#x0A;"
 						Outputs="Throughput.cpp;Throughput.h"
 					/>
 				</FileConfiguration>
@@ -3135,7 +3135,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Throughput.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Throughput.ice&#x0D;&#x0A;"
 						Outputs="Throughput.cpp;Throughput.h"
 					/>
 				</FileConfiguration>

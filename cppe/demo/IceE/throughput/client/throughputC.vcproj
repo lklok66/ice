@@ -15,8 +15,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\DebugC"
-			IntermediateDirectory=".\DebugC"
+			OutputDirectory=".\Debug"
+			IntermediateDirectory=".\Debug"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
@@ -36,7 +36,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\DebugC/throughputC.tlb"
+				TypeLibraryName=".\Debug/throughputC.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -48,10 +48,10 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\DebugC/throughputC.pch"
-				AssemblerListingLocation=".\DebugC/"
-				ObjectFile=".\DebugC/"
-				ProgramDataBaseFileName=".\DebugC/"
+				PrecompiledHeaderFile=".\Debug/throughputC.pch"
+				AssemblerListingLocation=".\Debug/"
+				ObjectFile=".\Debug/"
+				ProgramDataBaseFileName=".\Debug/"
 				WarningLevel="3"
 				WarnAsError="true"
 				SuppressStartupBanner="true"
@@ -77,7 +77,7 @@
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="../../../../lib"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\DebugC/client.pdb"
+				ProgramDatabaseFile=".\Debug/client.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -93,7 +93,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\DebugC/throughputC.bsc"
+				OutputFile=".\Debug/throughputC.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -110,8 +110,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\ReleaseC"
-			IntermediateDirectory=".\ReleaseC"
+			OutputDirectory=".\Release"
+			IntermediateDirectory=".\Release"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
@@ -131,7 +131,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\ReleaseC/throughputC.tlb"
+				TypeLibraryName=".\Release/throughputC.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -144,10 +144,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\ReleaseC/throughputC.pch"
-				AssemblerListingLocation=".\ReleaseC/"
-				ObjectFile=".\ReleaseC/"
-				ProgramDataBaseFileName=".\ReleaseC/"
+				PrecompiledHeaderFile=".\Release/throughputC.pch"
+				AssemblerListingLocation=".\Release/"
+				ObjectFile=".\Release/"
+				ProgramDataBaseFileName=".\Release/"
 				WarningLevel="3"
 				WarnAsError="true"
 				SuppressStartupBanner="true"
@@ -170,7 +170,7 @@
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="../../../../lib"
-				ProgramDatabaseFile=".\ReleaseC/client.pdb"
+				ProgramDatabaseFile=".\Release/client.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -186,7 +186,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\ReleaseC/throughputC.bsc"
+				OutputFile=".\Release/throughputC.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -203,8 +203,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug Static|Win32"
-			OutputDirectory=".\DebugStaticC"
-			IntermediateDirectory=".\DebugStaticC"
+			OutputDirectory=".\DebugStatic"
+			IntermediateDirectory=".\DebugStatic"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
@@ -224,7 +224,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\DebugStaticC/throughputC.tlb"
+				TypeLibraryName=".\DebugStatic/throughputC.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -236,10 +236,10 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\DebugStaticC/throughputC.pch"
-				AssemblerListingLocation=".\DebugStaticC/"
-				ObjectFile=".\DebugStaticC/"
-				ProgramDataBaseFileName=".\DebugStaticC/"
+				PrecompiledHeaderFile=".\DebugStatic/throughputC.pch"
+				AssemblerListingLocation=".\DebugStatic/"
+				ObjectFile=".\DebugStatic/"
+				ProgramDataBaseFileName=".\DebugStatic/"
 				WarningLevel="3"
 				WarnAsError="true"
 				SuppressStartupBanner="true"
@@ -265,7 +265,7 @@
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="../../../../lib"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\DebugStaticC/client.pdb"
+				ProgramDatabaseFile=".\DebugStatic/client.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -281,7 +281,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\DebugStaticC/throughputC.bsc"
+				OutputFile=".\DebugStatic/throughputC.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -298,8 +298,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release Static|Win32"
-			OutputDirectory=".\ReleaseStaticC"
-			IntermediateDirectory=".\ReleaseStaticC"
+			OutputDirectory=".\ReleaseStatic"
+			IntermediateDirectory=".\ReleaseStatic"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
@@ -319,7 +319,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\ReleaseStaticC/throughputC.tlb"
+				TypeLibraryName=".\ReleaseStatic/throughputC.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -332,10 +332,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\ReleaseStaticC/throughputC.pch"
-				AssemblerListingLocation=".\ReleaseStaticC/"
-				ObjectFile=".\ReleaseStaticC/"
-				ProgramDataBaseFileName=".\ReleaseStaticC/"
+				PrecompiledHeaderFile=".\ReleaseStatic/throughputC.pch"
+				AssemblerListingLocation=".\ReleaseStatic/"
+				ObjectFile=".\ReleaseStatic/"
+				ProgramDataBaseFileName=".\ReleaseStatic/"
 				WarningLevel="3"
 				WarnAsError="true"
 				SuppressStartupBanner="true"
@@ -358,7 +358,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="../../../../lib"
-				ProgramDatabaseFile=".\ReleaseStaticC/client.pdb"
+				ProgramDatabaseFile=".\ReleaseStatic/client.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -374,7 +374,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\ReleaseStaticC/throughputC.bsc"
+				OutputFile=".\ReleaseStatic/throughputC.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -499,7 +499,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Throughput.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Throughput.ice&#x0D;&#x0A;"
 						Outputs="Throughput.h;Throughput.cpp"
 					/>
 				</FileConfiguration>
@@ -508,7 +508,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Throughput.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Throughput.ice&#x0D;&#x0A;"
 						Outputs="Throughput.h;Throughput.cpp"
 					/>
 				</FileConfiguration>
@@ -517,7 +517,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Throughput.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Throughput.ice&#x0D;&#x0A;"
 						Outputs="Throughput.h;Throughput.cpp"
 					/>
 				</FileConfiguration>
@@ -526,7 +526,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Throughput.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Throughput.ice&#x0D;&#x0A;"
 						Outputs="Throughput.h;Throughput.cpp"
 					/>
 				</FileConfiguration>

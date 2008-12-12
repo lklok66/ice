@@ -543,7 +543,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe  -I../../../../../slice  Callback.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe  -I../../../../../slice  Callback.ice&#x0D;&#x0A;"
 						Outputs="Callback.h;Callback.cpp"
 					/>
 				</FileConfiguration>
@@ -552,7 +552,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe  -I../../../../../slice  Callback.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe  -I../../../../../slice  Callback.ice&#x0D;&#x0A;"
 						Outputs="Callback.h;Callback.cpp"
 					/>
 				</FileConfiguration>
@@ -561,7 +561,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe  -I../../../../../slice  Callback.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe  -I../../../../../slice  Callback.ice&#x0D;&#x0A;"
 						Outputs="Callback.h;Callback.cpp"
 					/>
 				</FileConfiguration>
@@ -570,7 +570,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe  -I../../../../../slice  Callback.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe  -I../../../../../slice  Callback.ice&#x0D;&#x0A;"
 						Outputs="Callback.h;Callback.cpp"
 					/>
 				</FileConfiguration>

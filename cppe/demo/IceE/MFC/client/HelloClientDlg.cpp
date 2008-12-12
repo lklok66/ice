@@ -358,7 +358,7 @@ CHelloClientDlg::OnShutdown()
 }
 
 LRESULT
-CHelloClientDlg::OnAMIException(UINT wParam, LONG lParam)
+CHelloClientDlg::OnAMIException(WPARAM, LPARAM lParam)
 {
     Ice::Exception* ex = reinterpret_cast<Ice::Exception*>(lParam);
     if(!dynamic_cast<Ice::CommunicatorDestroyedException*>(ex))
@@ -370,7 +370,7 @@ CHelloClientDlg::OnAMIException(UINT wParam, LONG lParam)
 }
 
 LRESULT
-CHelloClientDlg::OnAMISayHelloSent(UINT wParam, LONG lParam)
+CHelloClientDlg::OnAMISayHelloSent(WPARAM, LPARAM)
 {
     if(_currentProxy->ice_isTwoway())
     {
@@ -384,21 +384,21 @@ CHelloClientDlg::OnAMISayHelloSent(UINT wParam, LONG lParam)
 }
 
 LRESULT
-CHelloClientDlg::OnAMISayHelloResponse(UINT wParam, LONG lParam)
+CHelloClientDlg::OnAMISayHelloResponse(WPARAM, LPARAM)
 {
     _status->SetWindowText(CString(" Ready"));
     return 0;
 }
 
 LRESULT
-CHelloClientDlg::OnAMIFlushBatchRequestsSent(UINT wParam, LONG lParam)
+CHelloClientDlg::OnAMIFlushBatchRequestsSent(WPARAM, LPARAM)
 {
     _status->SetWindowText(CString(" Flushed batch requests"));
     return 0;
 }
 
 LRESULT
-CHelloClientDlg::OnAMIShutdownSent(UINT wParam, LONG lParam)
+CHelloClientDlg::OnAMIShutdownSent(WPARAM, LPARAM)
 {
     _status->SetWindowText(CString(" Sent shutdown request"));
     return 0;

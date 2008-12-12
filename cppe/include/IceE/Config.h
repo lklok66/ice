@@ -244,4 +244,9 @@ inline int getSystemErrno() { return GetLastError(); }
 inline int getSystemErrno() { return errno; }
 #endif
 
+// Epoll not available on gumstix
+#ifdef GUMSTIX
+#define ICE_NO_EPOLL 1
+#endif
+
 #endif

@@ -699,6 +699,27 @@ IceInternal::getAddresses(const string& host, int port, bool server, bool blocki
     struct sockaddr_in addr;
     memset(&addr, 0, sizeof(struct sockaddr_in));
 
+#ifdef GUMSTIX
+    //
+    // Gumstix does not support calling getaddrinfo with empty host.
+    //
+    if(host.empty())
+    {
+        addr.sin_family = AF_INET;
+        addr.sin_port = htons(port);
+        if(server)
+        {
+            addr.sin_addr.s_addr = htonl(INADDR_ANY);
+        }
+        else
+        {
+            addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+        }
+        result.push_back(addr);
+        return result;
+    }
+#endif
+
     struct addrinfo* info = 0;
     int retry = 5;
 

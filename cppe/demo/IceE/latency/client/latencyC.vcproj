@@ -15,8 +15,8 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\ReleaseC"
-			IntermediateDirectory=".\ReleaseC"
+			OutputDirectory=".\Release"
+			IntermediateDirectory=".\Release"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
@@ -36,7 +36,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\ReleaseC/latencyC.tlb"
+				TypeLibraryName=".\Release/latencyC.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -49,10 +49,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\ReleaseC/latencyC.pch"
-				AssemblerListingLocation=".\ReleaseC/"
-				ObjectFile=".\ReleaseC/"
-				ProgramDataBaseFileName=".\ReleaseC/"
+				PrecompiledHeaderFile=".\Release/latencyC.pch"
+				AssemblerListingLocation=".\Release/"
+				ObjectFile=".\Release/"
+				ProgramDataBaseFileName=".\Release/"
 				WarningLevel="3"
 				WarnAsError="true"
 				SuppressStartupBanner="true"
@@ -75,7 +75,7 @@
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="../../../../lib"
-				ProgramDatabaseFile=".\ReleaseC/client.pdb"
+				ProgramDatabaseFile=".\Release/client.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -91,7 +91,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\ReleaseC/latencyC.bsc"
+				OutputFile=".\Release/latencyC.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -108,8 +108,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release Static|Win32"
-			OutputDirectory=".\ReleaseStaticC"
-			IntermediateDirectory=".\ReleaseStaticC"
+			OutputDirectory=".\ReleaseStatic"
+			IntermediateDirectory=".\ReleaseStatic"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
@@ -129,7 +129,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\ReleaseStaticC/latencyC.tlb"
+				TypeLibraryName=".\ReleaseStatic/latencyC.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -142,10 +142,10 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\ReleaseStaticC/latencyC.pch"
-				AssemblerListingLocation=".\ReleaseStaticC/"
-				ObjectFile=".\ReleaseStaticC/"
-				ProgramDataBaseFileName=".\ReleaseStaticC/"
+				PrecompiledHeaderFile=".\ReleaseStatic/latencyC.pch"
+				AssemblerListingLocation=".\ReleaseStatic/"
+				ObjectFile=".\ReleaseStatic/"
+				ProgramDataBaseFileName=".\ReleaseStatic/"
 				WarningLevel="3"
 				WarnAsError="true"
 				SuppressStartupBanner="true"
@@ -168,7 +168,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="../../../../lib"
-				ProgramDatabaseFile=".\ReleaseStaticC/client.pdb"
+				ProgramDatabaseFile=".\ReleaseStatic/client.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -184,7 +184,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\ReleaseStaticC/latencyC.bsc"
+				OutputFile=".\ReleaseStatic/latencyC.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -201,8 +201,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\DebugC"
-			IntermediateDirectory=".\DebugC"
+			OutputDirectory=".\Debug"
+			IntermediateDirectory=".\Debug"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
@@ -222,7 +222,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\DebugC/latencyC.tlb"
+				TypeLibraryName=".\Debug/latencyC.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -234,10 +234,10 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\DebugC/latencyC.pch"
-				AssemblerListingLocation=".\DebugC/"
-				ObjectFile=".\DebugC/"
-				ProgramDataBaseFileName=".\DebugC/"
+				PrecompiledHeaderFile=".\Debug/latencyC.pch"
+				AssemblerListingLocation=".\Debug/"
+				ObjectFile=".\Debug/"
+				ProgramDataBaseFileName=".\Debug/"
 				WarningLevel="3"
 				WarnAsError="true"
 				SuppressStartupBanner="true"
@@ -263,7 +263,7 @@
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="../../../../lib"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\DebugC/client.pdb"
+				ProgramDatabaseFile=".\Debug/client.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -279,7 +279,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\DebugC/latencyC.bsc"
+				OutputFile=".\Debug/latencyC.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -296,8 +296,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug Static|Win32"
-			OutputDirectory=".\DebugStaticC"
-			IntermediateDirectory=".\DebugStaticC"
+			OutputDirectory=".\DebugStatic"
+			IntermediateDirectory=".\DebugStatic"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
 			UseOfMFC="0"
@@ -317,7 +317,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\DebugStaticC/latencyC.tlb"
+				TypeLibraryName=".\DebugStatic/latencyC.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -329,10 +329,10 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\DebugStaticC/latencyC.pch"
-				AssemblerListingLocation=".\DebugStaticC/"
-				ObjectFile=".\DebugStaticC/"
-				ProgramDataBaseFileName=".\DebugStaticC/"
+				PrecompiledHeaderFile=".\DebugStatic/latencyC.pch"
+				AssemblerListingLocation=".\DebugStatic/"
+				ObjectFile=".\DebugStatic/"
+				ProgramDataBaseFileName=".\DebugStatic/"
 				WarningLevel="3"
 				WarnAsError="true"
 				SuppressStartupBanner="true"
@@ -358,7 +358,7 @@
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="../../../../lib"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\DebugStaticC/client.pdb"
+				ProgramDatabaseFile=".\DebugStatic/client.pdb"
 				SubSystem="1"
 				TargetMachine="1"
 			/>
@@ -374,7 +374,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\DebugStaticC/latencyC.bsc"
+				OutputFile=".\DebugStatic/latencyC.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -499,7 +499,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Latency.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Latency.ice&#x0D;&#x0A;"
 						Outputs="Latency.h;Latency.cpp"
 					/>
 				</FileConfiguration>
@@ -508,7 +508,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Latency.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Latency.ice&#x0D;&#x0A;"
 						Outputs="Latency.h;Latency.cpp"
 					/>
 				</FileConfiguration>
@@ -517,7 +517,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Latency.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Latency.ice&#x0D;&#x0A;"
 						Outputs="Latency.h;Latency.cpp"
 					/>
 				</FileConfiguration>
@@ -526,7 +526,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Latency.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Latency.ice&#x0D;&#x0A;"
 						Outputs="Latency.h;Latency.cpp"
 					/>
 				</FileConfiguration>

@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="helloS"
-	ProjectGUID="{FB0A09D9-BB54-442A-9449-40DF0DFFA9C4}"
+	Name="nestedS"
+	ProjectGUID="{C4D7F613-736F-48AE-A430-9AD19E74D552}"
 	>
 	<Platforms>
 		<Platform
@@ -36,7 +36,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\ReleaseStatic/helloS.tlb"
+				TypeLibraryName=".\ReleaseStatic/nestedS.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -49,7 +49,7 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\ReleaseStatic/helloS.pch"
+				PrecompiledHeaderFile=".\ReleaseStatic/nestedS.pch"
 				AssemblerListingLocation=".\ReleaseStatic/"
 				ObjectFile=".\ReleaseStatic/"
 				ProgramDataBaseFileName=".\ReleaseStatic/"
@@ -91,7 +91,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\ReleaseStatic/helloS.bsc"
+				OutputFile=".\ReleaseStatic/nestedS.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -129,7 +129,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Release/helloS.tlb"
+				TypeLibraryName=".\Release/nestedS.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -142,7 +142,7 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\Release/helloS.pch"
+				PrecompiledHeaderFile=".\Release/nestedS.pch"
 				AssemblerListingLocation=".\Release/"
 				ObjectFile=".\Release/"
 				ProgramDataBaseFileName=".\Release/"
@@ -184,7 +184,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Release/helloS.bsc"
+				OutputFile=".\Release/nestedS.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -222,7 +222,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\Debug/helloS.tlb"
+				TypeLibraryName=".\Debug/nestedS.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -234,7 +234,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\Debug/helloS.pch"
+				PrecompiledHeaderFile=".\Debug/nestedS.pch"
 				AssemblerListingLocation=".\Debug/"
 				ObjectFile=".\Debug/"
 				ProgramDataBaseFileName=".\Debug/"
@@ -279,7 +279,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Debug/helloS.bsc"
+				OutputFile=".\Debug/nestedS.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -317,7 +317,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\DebugStatic/helloS.tlb"
+				TypeLibraryName=".\DebugStatic/nestedS.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
@@ -329,7 +329,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="true"
-				PrecompiledHeaderFile=".\DebugStatic/helloS.pch"
+				PrecompiledHeaderFile=".\DebugStatic/nestedS.pch"
 				AssemblerListingLocation=".\DebugStatic/"
 				ObjectFile=".\DebugStatic/"
 				ProgramDataBaseFileName=".\DebugStatic/"
@@ -374,7 +374,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\DebugStatic/helloS.bsc"
+				OutputFile=".\DebugStatic/nestedS.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -398,84 +398,12 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath="Hello.cpp"
+				RelativePath=".\Nested.cpp"
 				>
-				<FileConfiguration
-					Name="Release Static|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug Static|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="HelloI.cpp"
+				RelativePath=".\NestedI.cpp"
 				>
-				<FileConfiguration
-					Name="Release Static|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug Static|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="Server.cpp"
@@ -523,11 +451,11 @@
 			Filter="h;hpp;hxx;hm;inl"
 			>
 			<File
-				RelativePath="Hello.h"
+				RelativePath=".\Nested.h"
 				>
 			</File>
 			<File
-				RelativePath="HelloI.h"
+				RelativePath=".\NestedI.h"
 				>
 			</File>
 		</Filter>
@@ -536,44 +464,8 @@
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 			>
 			<File
-				RelativePath="Hello.ice"
+				RelativePath="..\client\Nested.ice"
 				>
-				<FileConfiguration
-					Name="Release Static|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
-						Outputs="Hello.h;Hello.cpp"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
-						Outputs="Hello.h;Hello.cpp"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
-						Outputs="Hello.h;Hello.cpp"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug Static|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
-						Outputs="Hello.h;Hello.cpp"
-					/>
-				</FileConfiguration>
 			</File>
 		</Filter>
 	</Files>

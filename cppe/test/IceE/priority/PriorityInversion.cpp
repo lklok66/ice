@@ -66,7 +66,9 @@ public:
         Monitor<Mutex>::Lock lock(_monitor);
         while(_mediumBegin < _cores)
         {
-            //Wait until all task are ready to compete by processors
+            //
+            // Wait until all the tasks are ready to compete.
+            //
             _monitor.wait();
         }
     }
@@ -93,7 +95,7 @@ public:
     {
         Monitor<Mutex>::Lock lock(_monitor);
         //
-        // Test all task begin run before any task ends.
+        // Make sure all tasks have begun before any task ends.
         //
         test(_lowBegin == 1);
         test(_highBegin == 1);
@@ -109,8 +111,8 @@ public:
         else if(priority == _medium)
         {
             //
-            // When the first medium priority task end the
-            // low priority task completed.
+            // When the first medium priority task ends the low
+            // priority task should have completed.
             //
             test(_lowEnd > 0);
             _mediumEnd++;
@@ -261,9 +263,13 @@ public:
         {
             if(IceUtil::Time::now(IceUtil::Time::Monotonic) - timestamp > _timeout)
             {
-                // If high priority task do not end with the specific timeout means
-                // that the low priority task priority was not bosted so we are having
-                // the clasic priority inversion issue.
+                //
+                // If the high priority task does not end within the
+                // specific timeout, this means that the low priority
+                // thread didn't inherit the high priority thread
+                // priority and we are having the clasic priority
+                // inversion issue.
+                //
                 test(false);
             }
             if(!_highPriorityThread->isAlive())
@@ -299,8 +305,6 @@ PriorityInversionTest::run()
     high = 140;
     medium = 150;
     low = 160;
-#elif defined _WIN32
-    return; //Priority inversion is not supported by WIN32
 #else
     cores = sysconf(_SC_NPROCESSORS_ONLN);
     high = 45;
@@ -322,8 +326,8 @@ PriorityInversionTest::run()
         threads.push_back(lowThread->start(128, low));
 
         //
-        // Create one high priority thread that use the same shared resource
-        // as the previous low priority thread
+        // Create one high priority thread that uses the same shared resource
+        // as the low priority thread.
         //
         ThreadPtr highThread = new Task(shared);
         threads.push_back(highThread->start(128, high));
@@ -371,15 +375,14 @@ PriorityInversionTest::run()
         threads.push_back(lowThread->start(128, low));
 
         //
-        // Create one high priority thread that use the same shared resource
-        // as the previous low priority thread.
+        // Create one high priority thread that uses the same shared resource
+        // as the low priority thread.
         //
         ThreadPtr highThread = new Task(shared);
         threads.push_back(highThread->start(128, high));
 
         //
-        // Create one medium priority tasks per core that runs until
-        // the high priority thread is running.
+        // Create one medium priority task per core.
         //
         for(int cont = 0; cont < cores; ++cont)
         {

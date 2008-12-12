@@ -551,7 +551,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Value.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Value.ice&#x0D;&#x0A;"
 						Outputs="Value.h;Value.cpp"
 					/>
 				</FileConfiguration>
@@ -560,7 +560,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Value.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Value.ice&#x0D;&#x0A;"
 						Outputs="Value.h;Value.cpp"
 					/>
 				</FileConfiguration>
@@ -569,7 +569,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Value.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Value.ice&#x0D;&#x0A;"
 						Outputs="Value.h;Value.cpp"
 					/>
 				</FileConfiguration>
@@ -578,7 +578,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Value.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Value.ice&#x0D;&#x0A;"
 						Outputs="Value.h;Value.cpp"
 					/>
 				</FileConfiguration>

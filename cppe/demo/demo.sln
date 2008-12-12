@@ -46,6 +46,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "valueC", "IceE\value\client
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "valueS", "IceE\value\server\valueS.vcproj", "{FB0A09D9-BB54-442A-9449-4AFDEDFFA9C4}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nestedC", "IceE\nested\client\nestedC.vcproj", "{BBCDD5EC-2D1F-4378-9575-1A60A62CBAC9}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nestedS", "IceE\nested\server\nestedS.vcproj", "{C4D7F613-736F-48AE-A430-9AD19E74D552}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug Static|Win32 = Debug Static|Win32
@@ -222,6 +226,22 @@ Global
 		{FB0A09D9-BB54-442A-9449-4AFDEDFFA9C4}.Release Static|Win32.Build.0 = Release Static|Win32
 		{FB0A09D9-BB54-442A-9449-4AFDEDFFA9C4}.Release|Win32.ActiveCfg = Release|Win32
 		{FB0A09D9-BB54-442A-9449-4AFDEDFFA9C4}.Release|Win32.Build.0 = Release|Win32
+		{BBCDD5EC-2D1F-4378-9575-1A60A62CBAC9}.Debug Static|Win32.ActiveCfg = Debug Static|Win32
+		{BBCDD5EC-2D1F-4378-9575-1A60A62CBAC9}.Debug Static|Win32.Build.0 = Debug Static|Win32
+		{BBCDD5EC-2D1F-4378-9575-1A60A62CBAC9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BBCDD5EC-2D1F-4378-9575-1A60A62CBAC9}.Debug|Win32.Build.0 = Debug|Win32
+		{BBCDD5EC-2D1F-4378-9575-1A60A62CBAC9}.Release Static|Win32.ActiveCfg = Release Static|Win32
+		{BBCDD5EC-2D1F-4378-9575-1A60A62CBAC9}.Release Static|Win32.Build.0 = Release Static|Win32
+		{BBCDD5EC-2D1F-4378-9575-1A60A62CBAC9}.Release|Win32.ActiveCfg = Release|Win32
+		{BBCDD5EC-2D1F-4378-9575-1A60A62CBAC9}.Release|Win32.Build.0 = Release|Win32
+		{C4D7F613-736F-48AE-A430-9AD19E74D552}.Debug Static|Win32.ActiveCfg = Debug Static|Win32
+		{C4D7F613-736F-48AE-A430-9AD19E74D552}.Debug Static|Win32.Build.0 = Debug Static|Win32
+		{C4D7F613-736F-48AE-A430-9AD19E74D552}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C4D7F613-736F-48AE-A430-9AD19E74D552}.Debug|Win32.Build.0 = Debug|Win32
+		{C4D7F613-736F-48AE-A430-9AD19E74D552}.Release Static|Win32.ActiveCfg = Release Static|Win32
+		{C4D7F613-736F-48AE-A430-9AD19E74D552}.Release Static|Win32.Build.0 = Release Static|Win32
+		{C4D7F613-736F-48AE-A430-9AD19E74D552}.Release|Win32.ActiveCfg = Release|Win32
+		{C4D7F613-736F-48AE-A430-9AD19E74D552}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -18,13 +18,13 @@
 			Name="Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
 		/>
 		<Platform
-			Name="Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-		/>
-		<Platform
 			Name="Windows Mobile 6 Professional SDK (ARMV4I)"
 		/>
 		<Platform
 			Name="Windows Mobile 6 Standard SDK (ARMV4I)"
+		/>
+		<Platform
+			Name="Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
 		/>
 	</Platforms>
 	<ToolFiles>
@@ -307,107 +307,6 @@
 				StackCommitSize="4096"
 				EntryPointSymbol=""
 				BaseAddress=""
-				TargetMachine="0"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-				SuppressStartupBanner="true"
-				OutputFile="$(PlatformName)\$(ConfigurationName)/mfchelloC.bsc"
-			/>
-			<Tool
-				Name="VCCodeSignTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-			<DeploymentTool
-				ForceDirty="-1"
-				RemoteDirectory=""
-				RegisterOutput="0"
-				AdditionalFiles=""
-			/>
-			<DebuggerTool
-			/>
-		</Configuration>
-		<Configuration
-			Name="Release|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-			OutputDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
-			IntermediateDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
-			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
-			UseOfMFC="2"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			CharacterSet="1"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
-				TargetEnvironment="1"
-				TypeLibraryName="$(PlatformName)\$(ConfigurationName)/mfchelloC.tlb"
-				HeaderFileName=""
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				ExecutionBucket="7"
-				Optimization="4"
-				AdditionalIncludeDirectories=".,..\..\..\..\include"
-				PreprocessorDefinitions="ARM;_ARM_;ARMV4;NDEBUG;ICEE_PURE_CLIENT;_WIN32_WCE=$(CEVER);$(CePlatform);UNDER_CE=$(CEVER);UNICODE"
-				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="true"
-				RuntimeTypeInfo="true"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(PlatformName)\$(ConfigurationName)/mfchelloC.pch"
-				AssemblerListingLocation="$(PlatformName)\$(ConfigurationName)/"
-				ObjectFile="$(PlatformName)\$(ConfigurationName)/"
-				ProgramDataBaseFileName="$(PlatformName)\$(ConfigurationName)/"
-				SuppressStartupBanner="true"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				AdditionalOptions="/r "
-				PreprocessorDefinitions="UNDER_CE=$(CEVER);_WIN32_WCE=$(CEVER);NDEBUG;UNICODE;_UNICODE;$(CePlatform);ARM;_ARM_;ARMV4"
-				Culture="1033"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalOptions="/ALIGN:4096 /subsystem:$(CESubsystem) /MACHINE:THUMB"
-				AdditionalDependencies="iceec.lib commctrl.lib coredll.lib"
-				OutputFile="mfchelloC.exe"
-				LinkIncremental="1"
-				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\..\..\..\lib"
-				IgnoreDefaultLibraryNames="$(CENoDefaultLib)"
-				ProgramDatabaseFile="$(PlatformName)\$(ConfigurationName)/mfchelloC.pdb"
-				StackReserveSize="65536"
-				StackCommitSize="4096"
-				EntryPointSymbol="wWinMainCRTStartup"
-				BaseAddress="0x00010000"
 				TargetMachine="0"
 			/>
 			<Tool
@@ -948,109 +847,6 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-			OutputDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
-			IntermediateDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
-			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
-			UseOfMFC="2"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			CharacterSet="1"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
-				TargetEnvironment="1"
-				TypeLibraryName="$(PlatformName)\$(ConfigurationName)/mfchelloC.tlb"
-				HeaderFileName=""
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				ExecutionBucket="7"
-				Optimization="0"
-				AdditionalIncludeDirectories=".,..\..\..\..\include"
-				PreprocessorDefinitions="DEBUG;ARM;_ARM_;ARMV4;ICEE_PURE_CLIENT;_WIN32_WCE=$(CEVER);$(CePlatform);UNDER_CE=$(CEVER);UNICODE"
-				RuntimeLibrary="1"
-				EnableFunctionLevelLinking="true"
-				RuntimeTypeInfo="true"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(PlatformName)\$(ConfigurationName)/mfchelloC.pch"
-				AssemblerListingLocation="$(PlatformName)\$(ConfigurationName)/"
-				ObjectFile="$(PlatformName)\$(ConfigurationName)/"
-				ProgramDataBaseFileName="$(PlatformName)\$(ConfigurationName)/"
-				SuppressStartupBanner="true"
-				DebugInformationFormat="3"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				AdditionalOptions="/r "
-				PreprocessorDefinitions="UNDER_CE=$(CEVER);_WIN32_WCE=$(CEVER);DEBUG;UNICODE;_UNICODE;$(CePlatform);ARM;_ARM_;ARMV4"
-				Culture="1033"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalOptions="/ALIGN:4096 /subsystem:$(CESubsystem) /MACHINE:THUMB"
-				AdditionalDependencies="iceecd.lib commctrl.lib coredll.lib"
-				OutputFile="mfchelloC.exe"
-				LinkIncremental="2"
-				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\..\..\..\lib"
-				IgnoreDefaultLibraryNames="$(CENoDefaultLib)"
-				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(PlatformName)\$(ConfigurationName)/mfchelloC.pdb"
-				StackReserveSize="65536"
-				StackCommitSize="4096"
-				EntryPointSymbol="wWinMainCRTStartup"
-				BaseAddress="0x00010000"
-				TargetMachine="0"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-				SuppressStartupBanner="true"
-				OutputFile="$(PlatformName)\$(ConfigurationName)/mfchelloC.bsc"
-			/>
-			<Tool
-				Name="VCCodeSignTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-			<DeploymentTool
-				ForceDirty="-1"
-				RemoteDirectory=""
-				RegisterOutput="0"
-				AdditionalFiles=""
-			/>
-			<DebuggerTool
-			/>
-		</Configuration>
-		<Configuration
 			Name="Debug|Windows Mobile 6 Professional SDK (ARMV4I)"
 			OutputDirectory="Windows Mobile 6 Professional SDK (ARMV4I)\$(ConfigurationName)"
 			IntermediateDirectory="Windows Mobile 6 Professional SDK (ARMV4I)\$(ConfigurationName)"
@@ -1533,107 +1329,6 @@
 				StackCommitSize="4096"
 				EntryPointSymbol=""
 				BaseAddress=""
-				TargetMachine="0"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-				SuppressStartupBanner="true"
-				OutputFile="$(PlatformName)\$(ConfigurationName)/mfchelloC.bsc"
-			/>
-			<Tool
-				Name="VCCodeSignTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-			<DeploymentTool
-				ForceDirty="-1"
-				RemoteDirectory=""
-				RegisterOutput="0"
-				AdditionalFiles=""
-			/>
-			<DebuggerTool
-			/>
-		</Configuration>
-		<Configuration
-			Name="Release Static|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-			OutputDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
-			IntermediateDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
-			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
-			UseOfMFC="2"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			CharacterSet="1"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
-				TargetEnvironment="1"
-				TypeLibraryName="$(PlatformName)\$(ConfigurationName)/mfchelloC.tlb"
-				HeaderFileName=""
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				ExecutionBucket="7"
-				Optimization="4"
-				AdditionalIncludeDirectories=".,..\..\..\..\include"
-				PreprocessorDefinitions="ARM;_ARM_;ARMV4;NDEBUG;ICEE_STATIC_LIBS;ICEE_PURE_CLIENT;_WIN32_WCE=$(CEVER);$(CePlatform);UNDER_CE=$(CEVER);UNICODE"
-				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="true"
-				RuntimeTypeInfo="true"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(PlatformName)\$(ConfigurationName)/mfchelloC.pch"
-				AssemblerListingLocation="$(PlatformName)\$(ConfigurationName)/"
-				ObjectFile="$(PlatformName)\$(ConfigurationName)/"
-				ProgramDataBaseFileName="$(PlatformName)\$(ConfigurationName)/"
-				SuppressStartupBanner="true"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				AdditionalOptions="/r "
-				PreprocessorDefinitions="UNDER_CE=$(CEVER);_WIN32_WCE=$(CEVER);NDEBUG;UNICODE;_UNICODE;$(CePlatform);ARM;_ARM_;ARMV4"
-				Culture="1033"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalOptions="/ALIGN:4096 /subsystem:$(CESubsystem) /MACHINE:THUMB"
-				AdditionalDependencies="iceec_static.lib commctrl.lib coredll.lib ws2.lib"
-				OutputFile="mfchelloC.exe"
-				LinkIncremental="1"
-				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\..\..\..\lib"
-				IgnoreDefaultLibraryNames="$(CENoDefaultLib)"
-				ProgramDatabaseFile="$(PlatformName)\$(ConfigurationName)/mfchelloC.pdb"
-				StackReserveSize="65536"
-				StackCommitSize="4096"
-				EntryPointSymbol="wWinMainCRTStartup"
-				BaseAddress="0x00010000"
 				TargetMachine="0"
 			/>
 			<Tool
@@ -2174,109 +1869,6 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug Static|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-			OutputDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
-			IntermediateDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
-			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
-			UseOfMFC="2"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			CharacterSet="1"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
-				TargetEnvironment="1"
-				TypeLibraryName="$(PlatformName)\$(ConfigurationName)/mfchelloC.tlb"
-				HeaderFileName=""
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				ExecutionBucket="7"
-				Optimization="0"
-				AdditionalIncludeDirectories=".,..\..\..\..\include"
-				PreprocessorDefinitions="DEBUG;ARM;_ARM_;ARMV4;ICEE_STATIC_LIBS;ICEE_PURE_CLIENT;_WIN32_WCE=$(CEVER);$(CePlatform);UNDER_CE=$(CEVER);UNICODE"
-				RuntimeLibrary="1"
-				EnableFunctionLevelLinking="true"
-				RuntimeTypeInfo="true"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="$(PlatformName)\$(ConfigurationName)/mfchelloC.pch"
-				AssemblerListingLocation="$(PlatformName)\$(ConfigurationName)/"
-				ObjectFile="$(PlatformName)\$(ConfigurationName)/"
-				ProgramDataBaseFileName="$(PlatformName)\$(ConfigurationName)/"
-				SuppressStartupBanner="true"
-				DebugInformationFormat="3"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				AdditionalOptions="/r "
-				PreprocessorDefinitions="UNDER_CE=$(CEVER);_WIN32_WCE=$(CEVER);DEBUG;UNICODE;_UNICODE;$(CePlatform);ARM;_ARM_;ARMV4"
-				Culture="1033"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalOptions="/ALIGN:4096 /subsystem:$(CESubsystem) /MACHINE:THUMB"
-				AdditionalDependencies="iceec_staticd.lib commctrl.lib coredll.lib ws2.lib"
-				OutputFile="mfchelloC.exe"
-				LinkIncremental="2"
-				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\..\..\..\lib"
-				IgnoreDefaultLibraryNames="$(CENoDefaultLib)"
-				GenerateDebugInformation="true"
-				ProgramDatabaseFile="$(PlatformName)\$(ConfigurationName)/mfchelloC.pdb"
-				StackReserveSize="65536"
-				StackCommitSize="4096"
-				EntryPointSymbol="wWinMainCRTStartup"
-				BaseAddress="0x00010000"
-				TargetMachine="0"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-				SuppressStartupBanner="true"
-				OutputFile="$(PlatformName)\$(ConfigurationName)/mfchelloC.bsc"
-			/>
-			<Tool
-				Name="VCCodeSignTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-			<DeploymentTool
-				ForceDirty="-1"
-				RemoteDirectory=""
-				RegisterOutput="0"
-				AdditionalFiles=""
-			/>
-			<DebuggerTool
-			/>
-		</Configuration>
-		<Configuration
 			Name="Debug Static|Windows Mobile 6 Professional SDK (ARMV4I)"
 			OutputDirectory="Windows Mobile 6 Professional SDK (ARMV4I)\$(ConfigurationName)"
 			IntermediateDirectory="Windows Mobile 6 Professional SDK (ARMV4I)\$(ConfigurationName)"
@@ -2482,6 +2074,414 @@
 			<DebuggerTool
 			/>
 		</Configuration>
+		<Configuration
+			Name="Release|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+			OutputDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
+			IntermediateDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
+			UseOfMFC="2"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="NDEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="1"
+				TypeLibraryName="$(PlatformName)\$(ConfigurationName)/mfchelloC.tlb"
+				HeaderFileName=""
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				ExecutionBucket="7"
+				Optimization="4"
+				AdditionalIncludeDirectories=".,..\..\..\..\include"
+				PreprocessorDefinitions="ARM;_ARM_;ARMV4;NDEBUG;ICEE_PURE_CLIENT;_WIN32_WCE=$(CEVER);$(CePlatform);UNDER_CE=$(CEVER);UNICODE"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderFile="$(PlatformName)\$(ConfigurationName)/mfchelloC.pch"
+				AssemblerListingLocation="$(PlatformName)\$(ConfigurationName)/"
+				ObjectFile="$(PlatformName)\$(ConfigurationName)/"
+				ProgramDataBaseFileName="$(PlatformName)\$(ConfigurationName)/"
+				SuppressStartupBanner="true"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				AdditionalOptions="/r "
+				PreprocessorDefinitions="UNDER_CE=$(CEVER);_WIN32_WCE=$(CEVER);NDEBUG;UNICODE;_UNICODE;$(CePlatform);ARM;_ARM_;ARMV4"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions="/ALIGN:4096 /subsystem:$(CESubsystem) /MACHINE:THUMB"
+				AdditionalDependencies="iceec.lib commctrl.lib coredll.lib"
+				OutputFile="mfchelloC.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="..\..\..\..\lib"
+				IgnoreDefaultLibraryNames="$(CENoDefaultLib)"
+				ProgramDatabaseFile="$(PlatformName)\$(ConfigurationName)/mfchelloC.pdb"
+				StackReserveSize="65536"
+				StackCommitSize="4096"
+				EntryPointSymbol="wWinMainCRTStartup"
+				BaseAddress="0x00010000"
+				TargetMachine="0"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+				SuppressStartupBanner="true"
+				OutputFile="$(PlatformName)\$(ConfigurationName)/mfchelloC.bsc"
+			/>
+			<Tool
+				Name="VCCodeSignTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+			<DeploymentTool
+				ForceDirty="-1"
+				RemoteDirectory=""
+				RegisterOutput="0"
+				AdditionalFiles=""
+			/>
+			<DebuggerTool
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+			OutputDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
+			IntermediateDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
+			UseOfMFC="2"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="_DEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="1"
+				TypeLibraryName="$(PlatformName)\$(ConfigurationName)/mfchelloC.tlb"
+				HeaderFileName=""
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				ExecutionBucket="7"
+				Optimization="0"
+				AdditionalIncludeDirectories=".,..\..\..\..\include"
+				PreprocessorDefinitions="DEBUG;ARM;_ARM_;ARMV4;ICEE_PURE_CLIENT;_WIN32_WCE=$(CEVER);$(CePlatform);UNDER_CE=$(CEVER);UNICODE"
+				RuntimeLibrary="1"
+				EnableFunctionLevelLinking="true"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderFile="$(PlatformName)\$(ConfigurationName)/mfchelloC.pch"
+				AssemblerListingLocation="$(PlatformName)\$(ConfigurationName)/"
+				ObjectFile="$(PlatformName)\$(ConfigurationName)/"
+				ProgramDataBaseFileName="$(PlatformName)\$(ConfigurationName)/"
+				SuppressStartupBanner="true"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				AdditionalOptions="/r "
+				PreprocessorDefinitions="UNDER_CE=$(CEVER);_WIN32_WCE=$(CEVER);DEBUG;UNICODE;_UNICODE;$(CePlatform);ARM;_ARM_;ARMV4"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions="/ALIGN:4096 /subsystem:$(CESubsystem) /MACHINE:THUMB"
+				AdditionalDependencies="iceecd.lib commctrl.lib coredll.lib"
+				OutputFile="mfchelloC.exe"
+				LinkIncremental="2"
+				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="..\..\..\..\lib"
+				IgnoreDefaultLibraryNames="$(CENoDefaultLib)"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(PlatformName)\$(ConfigurationName)/mfchelloC.pdb"
+				StackReserveSize="65536"
+				StackCommitSize="4096"
+				EntryPointSymbol="wWinMainCRTStartup"
+				BaseAddress="0x00010000"
+				TargetMachine="0"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+				SuppressStartupBanner="true"
+				OutputFile="$(PlatformName)\$(ConfigurationName)/mfchelloC.bsc"
+			/>
+			<Tool
+				Name="VCCodeSignTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+			<DeploymentTool
+				ForceDirty="-1"
+				RemoteDirectory=""
+				RegisterOutput="0"
+				AdditionalFiles=""
+			/>
+			<DebuggerTool
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release Static|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+			OutputDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
+			IntermediateDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
+			UseOfMFC="2"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="NDEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="1"
+				TypeLibraryName="$(PlatformName)\$(ConfigurationName)/mfchelloC.tlb"
+				HeaderFileName=""
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				ExecutionBucket="7"
+				Optimization="4"
+				AdditionalIncludeDirectories=".,..\..\..\..\include"
+				PreprocessorDefinitions="ARM;_ARM_;ARMV4;NDEBUG;ICEE_STATIC_LIBS;ICEE_PURE_CLIENT;_WIN32_WCE=$(CEVER);$(CePlatform);UNDER_CE=$(CEVER);UNICODE"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderFile="$(PlatformName)\$(ConfigurationName)/mfchelloC.pch"
+				AssemblerListingLocation="$(PlatformName)\$(ConfigurationName)/"
+				ObjectFile="$(PlatformName)\$(ConfigurationName)/"
+				ProgramDataBaseFileName="$(PlatformName)\$(ConfigurationName)/"
+				SuppressStartupBanner="true"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				AdditionalOptions="/r "
+				PreprocessorDefinitions="UNDER_CE=$(CEVER);_WIN32_WCE=$(CEVER);NDEBUG;UNICODE;_UNICODE;$(CePlatform);ARM;_ARM_;ARMV4"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions="/ALIGN:4096 /subsystem:$(CESubsystem) /MACHINE:THUMB"
+				AdditionalDependencies="iceec_static.lib commctrl.lib coredll.lib ws2.lib"
+				OutputFile="mfchelloC.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="..\..\..\..\lib"
+				IgnoreDefaultLibraryNames="$(CENoDefaultLib)"
+				ProgramDatabaseFile="$(PlatformName)\$(ConfigurationName)/mfchelloC.pdb"
+				StackReserveSize="65536"
+				StackCommitSize="4096"
+				EntryPointSymbol="wWinMainCRTStartup"
+				BaseAddress="0x00010000"
+				TargetMachine="0"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+				SuppressStartupBanner="true"
+				OutputFile="$(PlatformName)\$(ConfigurationName)/mfchelloC.bsc"
+			/>
+			<Tool
+				Name="VCCodeSignTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+			<DeploymentTool
+				ForceDirty="-1"
+				RemoteDirectory=""
+				RegisterOutput="0"
+				AdditionalFiles=""
+			/>
+			<DebuggerTool
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug Static|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+			OutputDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
+			IntermediateDirectory="Windows Mobile 5.0 Smartphone SDK (ARMV4I)\$(ConfigurationName)"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
+			UseOfMFC="2"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="_DEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="1"
+				TypeLibraryName="$(PlatformName)\$(ConfigurationName)/mfchelloC.tlb"
+				HeaderFileName=""
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				ExecutionBucket="7"
+				Optimization="0"
+				AdditionalIncludeDirectories=".,..\..\..\..\include"
+				PreprocessorDefinitions="DEBUG;ARM;_ARM_;ARMV4;ICEE_STATIC_LIBS;ICEE_PURE_CLIENT;_WIN32_WCE=$(CEVER);$(CePlatform);UNDER_CE=$(CEVER);UNICODE"
+				RuntimeLibrary="1"
+				EnableFunctionLevelLinking="true"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderFile="$(PlatformName)\$(ConfigurationName)/mfchelloC.pch"
+				AssemblerListingLocation="$(PlatformName)\$(ConfigurationName)/"
+				ObjectFile="$(PlatformName)\$(ConfigurationName)/"
+				ProgramDataBaseFileName="$(PlatformName)\$(ConfigurationName)/"
+				SuppressStartupBanner="true"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				AdditionalOptions="/r "
+				PreprocessorDefinitions="UNDER_CE=$(CEVER);_WIN32_WCE=$(CEVER);DEBUG;UNICODE;_UNICODE;$(CePlatform);ARM;_ARM_;ARMV4"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions="/ALIGN:4096 /subsystem:$(CESubsystem) /MACHINE:THUMB"
+				AdditionalDependencies="iceec_staticd.lib commctrl.lib coredll.lib ws2.lib"
+				OutputFile="mfchelloC.exe"
+				LinkIncremental="2"
+				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="..\..\..\..\lib"
+				IgnoreDefaultLibraryNames="$(CENoDefaultLib)"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(PlatformName)\$(ConfigurationName)/mfchelloC.pdb"
+				StackReserveSize="65536"
+				StackCommitSize="4096"
+				EntryPointSymbol="wWinMainCRTStartup"
+				BaseAddress="0x00010000"
+				TargetMachine="0"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+				SuppressStartupBanner="true"
+				OutputFile="$(PlatformName)\$(ConfigurationName)/mfchelloC.bsc"
+			/>
+			<Tool
+				Name="VCCodeSignTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+			<DeploymentTool
+				ForceDirty="-1"
+				RemoteDirectory=""
+				RegisterOutput="0"
+				AdditionalFiles=""
+			/>
+			<DebuggerTool
+			/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -2521,15 +2521,6 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Windows Mobile 6 Professional SDK (ARMV4I)"
 					>
 					<Tool
@@ -2567,15 +2558,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2629,15 +2611,6 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release Static|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release Static|Windows Mobile 6 Professional SDK (ARMV4I)"
 					>
 					<Tool
@@ -2683,15 +2656,6 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug Static|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug Static|Windows Mobile 6 Professional SDK (ARMV4I)"
 					>
 					<Tool
@@ -2702,6 +2666,42 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug Static|Windows Mobile 6 Standard SDK (ARMV4I)"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release Static|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug Static|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2741,15 +2741,6 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Windows Mobile 6 Professional SDK (ARMV4I)"
 					>
 					<Tool
@@ -2787,15 +2778,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2849,15 +2831,6 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release Static|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release Static|Windows Mobile 6 Professional SDK (ARMV4I)"
 					>
 					<Tool
@@ -2903,15 +2876,6 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug Static|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug Static|Windows Mobile 6 Professional SDK (ARMV4I)"
 					>
 					<Tool
@@ -2922,6 +2886,42 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug Static|Windows Mobile 6 Standard SDK (ARMV4I)"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release Static|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug Static|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -2961,15 +2961,6 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Windows Mobile 6 Professional SDK (ARMV4I)"
 					>
 					<Tool
@@ -3007,15 +2998,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3069,15 +3051,6 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release Static|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release Static|Windows Mobile 6 Professional SDK (ARMV4I)"
 					>
 					<Tool
@@ -3123,15 +3096,6 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug Static|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug Static|Windows Mobile 6 Professional SDK (ARMV4I)"
 					>
 					<Tool
@@ -3142,6 +3106,42 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug Static|Windows Mobile 6 Standard SDK (ARMV4I)"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release Static|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug Static|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3181,15 +3181,6 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Windows Mobile 6 Professional SDK (ARMV4I)"
 					>
 					<Tool
@@ -3227,15 +3218,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3289,15 +3271,6 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release Static|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release Static|Windows Mobile 6 Professional SDK (ARMV4I)"
 					>
 					<Tool
@@ -3343,15 +3316,6 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug Static|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug Static|Windows Mobile 6 Professional SDK (ARMV4I)"
 					>
 					<Tool
@@ -3362,6 +3326,42 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug Static|Windows Mobile 6 Standard SDK (ARMV4I)"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release Static|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug Static|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -3431,20 +3431,11 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
-						Outputs="Hello.cpp;Hello.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release|Windows Mobile 6 Professional SDK (ARMV4I)"
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Hello.ice&#x0D;&#x0A;"
 						Outputs="Hello.cpp;Hello.h"
 					/>
 				</FileConfiguration>
@@ -3485,20 +3476,11 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
-						Outputs="Hello.cpp;Hello.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug|Windows Mobile 6 Professional SDK (ARMV4I)"
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Hello.ice&#x0D;&#x0A;"
 						Outputs="Hello.cpp;Hello.h"
 					/>
 				</FileConfiguration>
@@ -3539,20 +3521,11 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release Static|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
-						Outputs="Hello.cpp;Hello.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release Static|Windows Mobile 6 Professional SDK (ARMV4I)"
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Hello.ice&#x0D;&#x0A;"
 						Outputs="Hello.cpp;Hello.h"
 					/>
 				</FileConfiguration>
@@ -3593,25 +3566,52 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug Static|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
-						Outputs="Hello.cpp;Hello.h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Debug Static|Windows Mobile 6 Professional SDK (ARMV4I)"
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Hello.ice&#x0D;&#x0A;"
 						Outputs="Hello.cpp;Hello.h"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug Static|Windows Mobile 6 Standard SDK (ARMV4I)"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						Outputs="Hello.cpp;Hello.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						Outputs="Hello.cpp;Hello.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						Outputs="Hello.cpp;Hello.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release Static|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						Outputs="Hello.cpp;Hello.h"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug Static|Windows Mobile 5.0 Smartphone SDK (ARMV4I)"
 					>
 					<Tool
 						Name="VCCustomBuildTool"
