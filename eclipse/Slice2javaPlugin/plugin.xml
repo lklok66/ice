@@ -97,4 +97,11 @@
             </enabledWhen>
       </page>
    </extension>
+   <extension
+         point="org.eclipse.jdt.core.classpathContainerInitializer">
+      <classpathContainerInitializer
+            class="com.zeroc.com.slice2javaplugin.internal.IceClasspathContainerIntializer"
+            id="com.zeroc.Slice2javaPlugin.ICE_FRAMEWORK">
+      </classpathContainerInitializer>
+   </extension>
 </plugin>

@@ -14,7 +14,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,8 +48,9 @@ import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 
+import com.zeroc.com.slice2javaplugin.internal.Configuration;
+import com.zeroc.com.slice2javaplugin.internal.Dependencies;
 import com.zeroc.slice2javaplugin.Activator;
-import com.zeroc.slice2javaplugin.properties.Configuration;
 
 
 public class Slice2javaBuilder extends IncrementalProjectBuilder
@@ -69,7 +69,7 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
         long start = System.currentTimeMillis();
         
         IResourceDelta delta = getDelta(getProject());
-        BuildState state = new BuildState(getProject(), delta);
+        BuildState state = new BuildState(getProject(), delta, monitor);
         state.dependencies.read();
 
         try
@@ -105,7 +105,7 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
     protected void clean(IProgressMonitor monitor)
         throws CoreException
     {
-        BuildState state = new BuildState(getProject(), null);
+        BuildState state = new BuildState(getProject(), null, monitor);
         
         // Don't read the existing dependencies. That will have the
         // effect of trashing them.
@@ -174,9 +174,7 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
     
     static class BuildState
     {
-        
-
-        BuildState(IProject project, IResourceDelta delta) throws CoreException
+        BuildState(IProject project, IResourceDelta delta, IProgressMonitor monitor) throws CoreException
         {
             config = new Configuration(project);
             
@@ -186,8 +184,13 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
                 out = _consoleout;
                 err = _consoleerr;
             }
+            
+            IFolder generated = project.getFolder(config.getGeneratedDir());
+            if(!generated.exists())
+            {
+                generated.create(false, true, monitor);
+            }
 
-            generated = getGenerated(project);
             _sourceLocations = new HashSet<IFolder>();
             for(Iterator<String> p = config.getSliceSourceDirs().iterator(); p.hasNext();)
             {
@@ -241,7 +244,7 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
                 });
             }
 
-            dependencies = new Dependencies(project, _resources, out, err);
+            dependencies = new Dependencies(project, _resources, err);
         }
         
         public Set<IFile> deltas() 
@@ -259,18 +262,6 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
             return _resources;
         }
 
-        private IFolder getGenerated(IProject project)
-            throws CoreException
-        {
-            IFolder generated = project.getFolder(config.getGeneratedDir());
-            if(!generated.exists())
-            {
-                throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
-                        "Plugin configuration incorrect: missing generated dir", null));
-            }
-            return generated;
-        }
-        
         public boolean filter(IFile file)
         {
             String ext = file.getFileExtension();

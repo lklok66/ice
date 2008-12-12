@@ -16,7 +16,7 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
 
-import com.zeroc.slice2javaplugin.properties.Configuration;
+import com.zeroc.com.slice2javaplugin.internal.Configuration;
 
 public class Slice2javaNature implements IProjectNature
 {

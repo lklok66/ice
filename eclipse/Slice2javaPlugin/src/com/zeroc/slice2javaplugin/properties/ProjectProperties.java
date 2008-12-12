@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ContainerSelectionDialog;
 import org.eclipse.ui.dialogs.PropertyPage;
 
+import com.zeroc.com.slice2javaplugin.internal.Configuration;
 import com.zeroc.slice2javaplugin.Activator;
 import com.zeroc.slice2javaplugin.builder.Slice2javaBuilder;
 
