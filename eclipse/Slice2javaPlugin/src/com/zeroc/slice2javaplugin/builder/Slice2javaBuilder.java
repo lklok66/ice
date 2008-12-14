@@ -185,7 +185,7 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
                 err = _consoleerr;
             }
             
-            IFolder generated = project.getFolder(config.getGeneratedDir());
+            generated = project.getFolder(config.getGeneratedDir());
             if(!generated.exists())
             {
                 generated.create(false, true, monitor);
