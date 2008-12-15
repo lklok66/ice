@@ -123,8 +123,8 @@ includedir		= $(top_srcdir)\include
 includedir		= $(ice_dir)\include
 !endif
 
-install_bindir		= $(prefix)\bin
-install_libdir	  	= $(prefix)\lib
+install_bindir		= $(prefix)\bin$(x64suffix)
+install_libdir	  	= $(prefix)\lib$(x64suffix)
 install_includedir	= $(prefix)\include
 
 #
@@ -237,7 +237,7 @@ CPPFLAGS        = $(CPPFLAGS) -RTC1
 !if "$(ice_src_dist)" != ""
 LDFLAGS         = $(LDFLAGS) /LIBPATH:"$(libdir)" /nologo
 !else
-LDFLAGS         = $(LDFLAGS) /LIBPATH:"$(ice_dir)\lib" /nologo
+LDFLAGS         = $(LDFLAGS) /LIBPATH:"$(ice_dir)\lib$(x64suffix)" /nologo
 !endif
 
 !if "$(WINDOWS_MOBILE_SDK)" != ""
