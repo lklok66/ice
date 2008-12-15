@@ -98,7 +98,7 @@ Next, you must make the "configure" target:
 
 The purpose of the "configure" target is to generate the header file
 include/IceE/Features.h with preprocessor macros that correspond to
-your settings in Make.rules. You must peform this step after any
+your settings in Make.rules. You must perform this step after any
 change to the configuration settings in Make.rules.
 
 Now you're ready to build Ice-E:
@@ -155,7 +155,7 @@ Now you must set the following environment variables:
   $ export CXX=arm-linux-c++
   $ export AR=arm-linux-ar
 
-Now edit cppe/config/Make.rules and make sure that the GUMSTIX=yes
+Next, edit cppe/config/Make.rules and make sure that the GUMSTIX=yes
 line is uncommented.
 
 Finally, follow the regular Ice-E build steps as described above.

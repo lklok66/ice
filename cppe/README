@@ -25,6 +25,7 @@ Table of Contents
   5. Configuration
   6. Installation
 
+
 ======================================================================
 1. Introduction
 ======================================================================
@@ -179,6 +180,7 @@ If the current features do not meet your requirements, ZeroC can
 customize Ice-E for commercial users. Please contact us at
 info@zeroc.com for more information.
 
+
 ======================================================================
 3. Real-time Features
 ======================================================================
@@ -243,7 +245,7 @@ Priority Inversion
 
 A priority inversion occurs when a low priority thread prevents a
 higher priority thread from running. This inversion often occurs when
-a low priority thread acquires a mutex, and is pre-empted by one or
+a low priority thread acquires a mutex and is pre-empted by one or
 more medium priority threads. If a high priority thread then attempts
 to acquire the mutex locked by the low priority thread, it will wait
 (potentially forever) for the medium priority threads to complete.
@@ -263,9 +265,9 @@ supported.
 
 You can build Ice-E to create by default either type of mutex by
 setting DEFAULT_MUTEX_PROTOCOL to PrioNone or PriInherit in
-config/Make.rules.  This setting has no effect on Windows or Windows
-Mobile. Ice-E itself uses internally only mutexes created with this
-default protocol.
+config/Make.rules. This setting has no effect on Windows or Windows
+Mobile. Ice-E internally uses only mutexes created with this default
+protocol.
 
 The DEFAULT_MUTEX_PROTOCOL setting is used only in the implementation
 of the IceUtil::getDefaultMutexProtocol function, therefore you can
@@ -280,9 +282,11 @@ possible if these libraries (C++ runtime, socket library, etc.) are
 implemented or configured with regular mutexes.
 
 On Windows Mobile, all mutexes and critical sections support priority
-inheritance, with one level. See
-http://msdn.microsoft.com/en-us/library/aa450594.aspx for details. No
-special Ice-E build configuration is required.
+inheritance, with one level. Refer to the link below for more details:
+
+http://msdn.microsoft.com/en-us/library/aa450594.aspx
+
+No special Ice-E build configuration is required on Windows Mobile.
 
 Unfortunately regular Windows does not provide such mutexes and
 critical sections, and therefore there is no good solution to priority
@@ -311,8 +315,8 @@ Real-time Properties
 
 * Ice.ThreadPriority
 
-  The property sets the priority of Ice's internal threads to a native
-  thread priority. The value must be expressed as an integer.
+  This property sets the priority of Ice's internal threads to a
+  native thread priority. The value must be expressed as an integer.
 
   The value of this property is also used as the default priority for
   the threads in an Ice thread pool if not otherwise specified using
@@ -347,8 +351,7 @@ There are two tests for real-time features:
 ======================================================================
 
 Ice-E supports building static and dynamic Ice-E run-time libraries.
-
-Futhermore, in order to minimize the size of Ice-E applications, two
+Furthermore, in order to minimize the size of Ice-E applications, two
 versions of the run-time library are provided:
 
 * The "client" library is suitable for applications requiring only
