@@ -399,7 +399,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/ALIGN:4096 /subsystem:$(CESubsystem) /MACHINE:THUMB"
-				AdditionalDependencies="iceec.lib commctrl.lib coredll.lib"
+				AdditionalDependencies="iceec.lib commctrl.lib coredll.lib cellcore.lib"
 				OutputFile="mfchelloC.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -909,7 +909,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/ALIGN:4096 /subsystem:$(CESubsystem) /MACHINE:THUMB"
-				AdditionalDependencies="iceecd.lib commctrl.lib coredll.lib"
+				AdditionalDependencies="iceecd.lib commctrl.lib coredll.lib cellcore.lib"
 				OutputFile="mfchelloC.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -1421,7 +1421,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/ALIGN:4096 /subsystem:$(CESubsystem) /MACHINE:THUMB"
-				AdditionalDependencies="iceec_static.lib commctrl.lib coredll.lib ws2.lib"
+				AdditionalDependencies="iceec_static.lib commctrl.lib coredll.lib ws2.lib cellcore.lib"
 				OutputFile="mfchelloC.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -1931,7 +1931,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/ALIGN:4096 /subsystem:$(CESubsystem) /MACHINE:THUMB"
-				AdditionalDependencies="iceec_staticd.lib commctrl.lib coredll.lib ws2.lib"
+				AdditionalDependencies="iceec_staticd.lib commctrl.lib coredll.lib ws2.lib cellcore.lib"
 				OutputFile="mfchelloC.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"

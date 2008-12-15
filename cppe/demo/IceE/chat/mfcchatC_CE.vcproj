@@ -404,7 +404,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/ALIGN:4096 /subsystem:$(CESubsystem) /MACHINE:THUMB"
-				AdditionalDependencies="icee_staticd.lib commctrl.lib coredll.lib ws2.lib "
+				AdditionalDependencies="icee_staticd.lib commctrl.lib coredll.lib ws2.lib"
 				OutputFile="mfcchatC.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
