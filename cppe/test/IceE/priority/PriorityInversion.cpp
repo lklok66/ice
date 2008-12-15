@@ -305,6 +305,8 @@ PriorityInversionTest::run()
     high = 140;
     medium = 150;
     low = 160;
+#elif defined(_WIN32)
+    return; // Not supported on Windows
 #else
     cores = sysconf(_SC_NPROCESSORS_ONLN);
     high = 45;
