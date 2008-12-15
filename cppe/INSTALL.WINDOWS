@@ -131,7 +131,7 @@ Python is required to run the test suite on Windows:
 
 After a successful build, you can run the test suite:
 
-  > nmake /f makefile.mak test
+  > nmake /f Makefile.mak test
 
 This is equivalent to:
 
