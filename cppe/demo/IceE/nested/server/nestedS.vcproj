@@ -466,6 +466,42 @@
 			<File
 				RelativePath="..\client\Nested.ice"
 				>
+				<FileConfiguration
+					Name="Release Static|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Nested.ice"
+						Outputs="Nested.h,Nested.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Nested.ice"
+						Outputs="Nested.h,Nested.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Nested.ice"
+						Outputs="Nested.h,Nested.cpp"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug Static|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Nested.ice"
+						Outputs="Nested.h;Nested.cpp"
+					/>
+				</FileConfiguration>
 			</File>
 		</Filter>
 	</Files>
