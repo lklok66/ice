@@ -3408,7 +3408,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Hello.ice&#x0D;&#x0A;"
 						Outputs="Hello.cpp;Hello.h"
 					/>
 				</FileConfiguration>
@@ -3417,7 +3417,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Hello.ice&#x0D;&#x0A;"
 						Outputs="Hello.cpp;Hello.h"
 					/>
 				</FileConfiguration>
@@ -3426,7 +3426,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Hello.ice&#x0D;&#x0A;"
 						Outputs="Hello.cpp;Hello.h"
 					/>
 				</FileConfiguration>
@@ -3444,7 +3444,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Hello.ice&#x0D;&#x0A;"
 						Outputs="Hello.cpp;Hello.h"
 					/>
 				</FileConfiguration>
@@ -3453,7 +3453,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Hello.ice&#x0D;&#x0A;"
 						Outputs="Hello.cpp;Hello.h"
 					/>
 				</FileConfiguration>
@@ -3462,7 +3462,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Hello.ice&#x0D;&#x0A;"
 						Outputs="Hello.cpp;Hello.h"
 					/>
 				</FileConfiguration>
@@ -3471,7 +3471,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Hello.ice&#x0D;&#x0A;"
 						Outputs="Hello.cpp;Hello.h"
 					/>
 				</FileConfiguration>
@@ -3489,7 +3489,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Hello.ice&#x0D;&#x0A;"
 						Outputs="Hello.cpp;Hello.h"
 					/>
 				</FileConfiguration>
@@ -3498,7 +3498,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Hello.ice&#x0D;&#x0A;"
 						Outputs="Hello.cpp;Hello.h"
 					/>
 				</FileConfiguration>
@@ -3507,7 +3507,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Hello.ice&#x0D;&#x0A;"
 						Outputs="Hello.cpp;Hello.h"
 					/>
 				</FileConfiguration>
@@ -3516,7 +3516,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Hello.ice&#x0D;&#x0A;"
 						Outputs="Hello.cpp;Hello.h"
 					/>
 				</FileConfiguration>
@@ -3534,7 +3534,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Hello.ice&#x0D;&#x0A;"
 						Outputs="Hello.cpp;Hello.h"
 					/>
 				</FileConfiguration>
@@ -3543,7 +3543,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Hello.ice&#x0D;&#x0A;"
 						Outputs="Hello.cpp;Hello.h"
 					/>
 				</FileConfiguration>
@@ -3552,7 +3552,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Hello.ice&#x0D;&#x0A;"
 						Outputs="Hello.cpp;Hello.h"
 					/>
 				</FileConfiguration>
@@ -3561,7 +3561,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Hello.ice&#x0D;&#x0A;"
 						Outputs="Hello.cpp;Hello.h"
 					/>
 				</FileConfiguration>
@@ -3579,7 +3579,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Hello.ice&#x0D;&#x0A;"
 						Outputs="Hello.cpp;Hello.h"
 					/>
 				</FileConfiguration>
@@ -3588,7 +3588,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Hello.ice&#x0D;&#x0A;"
 						Outputs="Hello.cpp;Hello.h"
 					/>
 				</FileConfiguration>
@@ -3597,7 +3597,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Hello.ice&#x0D;&#x0A;"
 						Outputs="Hello.cpp;Hello.h"
 					/>
 				</FileConfiguration>
@@ -3606,7 +3606,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Hello.ice&#x0D;&#x0A;"
 						Outputs="Hello.cpp;Hello.h"
 					/>
 				</FileConfiguration>
@@ -3615,7 +3615,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="slice2cppe.exe Hello.ice&#x0D;&#x0A;"
+						CommandLine="..\..\..\..\..\cpp\bin\slice2cppe.exe Hello.ice&#x0D;&#x0A;"
 						Outputs="Hello.cpp;Hello.h"
 					/>
 				</FileConfiguration>
