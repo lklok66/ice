@@ -11,9 +11,9 @@ package IceInternal;
 
 public interface Acceptor
 {
-    java.nio.channels.ServerSocketChannel fd();
     void close();
     void listen();
     Transceiver accept();
+    void connectToSelf();
     String toString();
 }

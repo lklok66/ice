@@ -210,9 +210,6 @@
             <fileset dir="test/Ice/adapterDeactivation">
                 <include name="Test.ice" />
             </fileset>
-            <fileset dir="test/Ice/background">
-                <include name="Test.ice" />
-            </fileset>
             <fileset dir="test/Ice/binding">
                 <include name="Test.ice" />
             </fileset>
@@ -437,7 +434,6 @@
 
 	    <include name="test/Util/"/>
 	    <include name="test/Ice/adapterDeactivation/"/>
-	    <include name="test/Ice/background/"/>
 	    <include name="test/Ice/binding/"/>
 	    <include name="test/Ice/exceptions/"/>
 	    <include name="test/Ice/exceptionsAMD/"/>

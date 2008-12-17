@@ -13,11 +13,15 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import Ice.Logger;
+import IceInternal.TraceLevels;
+
 class Instance
 {
     Instance(Ice.Communicator communicator)
     {
         _logger = communicator.getLogger();
+        _traceLevels = Ice.Util.getInstance(communicator).traceLevels();
         _facade = Ice.Util.getProtocolPluginFacade(communicator);
         _securityTraceLevel = communicator.getProperties().getPropertyAsIntWithDefault("IceSSL.Trace.Security", 0);
         _securityTraceCategory = "Security";
@@ -627,18 +631,6 @@ class Instance
     }
 
     int
-    networkTraceLevel()
-    {
-        return _facade.getNetworkTraceLevel();
-    }
-
-    String
-    networkTraceCategory()
-    {
-        return _facade.getNetworkTraceCategory();
-    }
-
-    int
     securityTraceLevel()
     {
         return _securityTraceLevel;
@@ -650,88 +642,21 @@ class Instance
         return _securityTraceCategory;
     }
 
+    void
+    traceConnection(javax.net.ssl.SSLSocket fd, boolean incoming)
+    {
+        javax.net.ssl.SSLSession session = fd.getSession();
+        String msg = "SSL summary for " + (incoming ? "incoming" : "outgoing") + " connection\n" +
+            "cipher = " + session.getCipherSuite() + "\n" +
+            "protocol = " + session.getProtocol() + "\n" +
+            IceInternal.Network.fdToString(fd);
+        _logger.trace(_securityTraceCategory, msg);
+    }
+    
     boolean
     initialized()
     {
         return _initialized;
-    }
-
-    javax.net.ssl.SSLEngine
-    createSSLEngine(boolean incoming)
-    {
-        javax.net.ssl.SSLEngine engine = _context.createSSLEngine();
-        engine.setUseClientMode(!incoming);
-
-        String[] cipherSuites = filterCiphers(engine.getSupportedCipherSuites(), engine.getEnabledCipherSuites());
-        try
-        {
-            engine.setEnabledCipherSuites(cipherSuites);
-        }
-        catch(IllegalArgumentException ex)
-        {
-            Ice.SecurityException e = new Ice.SecurityException();
-            e.reason = "IceSSL: invalid ciphersuite";
-            e.initCause(ex);
-            throw e;
-        }
-
-        if(_securityTraceLevel >= 1)
-        {
-            StringBuffer s = new StringBuffer();
-            s.append("enabling SSL ciphersuites:");
-            for(int i = 0; i < cipherSuites.length; ++i)
-            {
-                s.append("\n  " + cipherSuites[i]);
-            }
-            _logger.trace(_securityTraceCategory, s.toString());
-        }
-
-        if(_protocols != null)
-        {
-            try
-            {
-                engine.setEnabledProtocols(_protocols);
-            }
-            catch(IllegalArgumentException ex)
-            {
-                Ice.SecurityException e = new Ice.SecurityException();
-                e.reason = "IceSSL: invalid protocol";
-                e.initCause(ex);
-                throw e;
-            }
-        }
-
-        if(incoming)
-        {
-            int verifyPeer = communicator().getProperties().getPropertyAsIntWithDefault("IceSSL.VerifyPeer", 2);
-            if(verifyPeer == 0)
-            {
-                engine.setWantClientAuth(false);
-                engine.setNeedClientAuth(false);
-            }
-            else if(verifyPeer == 1)
-            {
-                engine.setWantClientAuth(true);
-            }
-            else
-            {
-                engine.setNeedClientAuth(true);
-            }
-        }
-
-        try
-        {
-            engine.beginHandshake();
-        }
-        catch(javax.net.ssl.SSLException ex)
-        {
-            Ice.SecurityException e = new Ice.SecurityException();
-            e.reason = "IceSSL: handshake error";
-            e.initCause(ex);
-            throw e;
-        }
-
-        return engine;
     }
 
     String[]
@@ -815,20 +740,8 @@ class Instance
         return _protocols;
     }
 
-    // TODO: Remove
     void
-    traceConnection(java.nio.channels.SocketChannel fd, javax.net.ssl.SSLEngine engine, boolean incoming)
-    {
-        javax.net.ssl.SSLSession session = engine.getSession();
-        String msg = "SSL summary for " + (incoming ? "incoming" : "outgoing") + " connection\n" +
-            "cipher = " + session.getCipherSuite() + "\n" +
-            "protocol = " + session.getProtocol() + "\n" +
-            IceInternal.Network.fdToString(fd);
-        _logger.trace(_securityTraceCategory, msg);
-    }
-
-    void
-    verifyPeer(ConnectionInfo info, java.nio.channels.SelectableChannel fd, String address, boolean incoming)
+    verifyPeer(ConnectionInfo info, javax.net.ssl.SSLSocket fd, String address, boolean incoming)
     {
         if(_verifyDepthMax > 0 && info.certs != null && info.certs.length > _verifyDepthMax)
         {
@@ -1082,6 +995,16 @@ class Instance
 
         return false;
     }
+    
+    public TraceLevels traceLevels()
+    {
+        return _traceLevels;
+    }
+
+    public Logger getLogger()
+    {
+        return _logger;
+    }
 
     private static class CipherExpression
     {
@@ -1091,6 +1014,7 @@ class Instance
     }
 
     private Ice.Logger _logger;
+    private TraceLevels _traceLevels;
     private IceInternal.ProtocolPluginFacade _facade;
     private int _securityTraceLevel;
     private String _securityTraceCategory;

@@ -95,7 +95,7 @@ public final class Util
     }
 
     static ConnectionInfo
-    populateConnectionInfo(javax.net.ssl.SSLSession session, java.net.Socket fd, String adapterName, boolean incoming)
+    populateConnectionInfo(javax.net.ssl.SSLSession session, javax.net.ssl.SSLSocket fd, String adapterName, boolean incoming)
     {
         ConnectionInfo info = new ConnectionInfo();
         try

@@ -83,6 +83,6 @@ public final class TestI extends _TestIntfDisp
     public void
     shutdown(Ice.Current current)
     {
-        current.adapter.deactivate();
+        current.adapter.getCommunicator().shutdown();
     }
 }

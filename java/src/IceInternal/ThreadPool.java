@@ -12,12 +12,8 @@ package IceInternal;
 public final class ThreadPool
 {
     private final static boolean TRACE_REGISTRATION = false;
-    private final static boolean TRACE_INTERRUPT = false;
     private final static boolean TRACE_SHUTDOWN = false;
-    private final static boolean TRACE_SELECT = false;
-    private final static boolean TRACE_EXCEPTION = false;
     private final static boolean TRACE_THREAD = false;
-    private final static boolean TRACE_STACK_TRACE = false;
 
     public
     ThreadPool(Instance instance, String prefix, int timeout)
@@ -26,14 +22,11 @@ public final class ThreadPool
         _destroyed = false;
         _prefix = prefix;
         _timeout = timeout;
-        _selector = new Selector(instance, timeout);
         _threadIndex = 0;
         _running = 0;
         _inUse = 0;
         _load = 1.0;
-        _promote = true;
         _serialize = _instance.initializationData().properties.getPropertyAsInt(_prefix + ".Serialize") > 0;
-        _warnUdp = _instance.initializationData().properties.getPropertyAsInt("Ice.Warn.Datagrams") > 0;
 
         String programName = _instance.initializationData().properties.getProperty("Ice.ProgramName");
         if(programName.length() > 0)
@@ -82,10 +75,10 @@ public final class ThreadPool
         
         try
         {
-            _threads = new java.util.ArrayList<EventHandlerThread>();
+            _threads = new java.util.ArrayList<WorkerThread>();
             for(int i = 0; i < _size; i++)
             {
-                EventHandlerThread thread = new EventHandlerThread(_programNamePrefix + _prefix + "-" +
+                WorkerThread thread = new WorkerThread(_programNamePrefix + _prefix + "-" +
                                                                    _threadIndex++);
                 _threads.add(thread);
                 thread.start();
@@ -107,13 +100,6 @@ public final class ThreadPool
         }
     }
 
-    protected synchronized void
-    finalize()
-        throws Throwable
-    {
-        IceUtilInternal.Assert.FinalizerAssert(_destroyed);
-    }
-
     public synchronized void
     destroy()
     {
@@ -124,140 +110,36 @@ public final class ThreadPool
 
         assert(!_destroyed);
         _destroyed = true;
-        _selector.setInterrupt();
+        notifyAll();
     }
-
-    public synchronized void
-    _register(EventHandler handler)
-    {
-        assert(!_destroyed);
-
-        if(!handler._registered)
-        {
-            if(TRACE_REGISTRATION)
-            {
-                trace("adding handler of type " + handler.getClass().getName() + " for channel " + handler.fd());
-            }
-
-            if(!handler._serializing)
-            {
-                _selector.add(handler, SocketStatus.NeedRead);
-            }
-            handler._registered = true;
-        }
-    }
-
-    public synchronized void
-    unregister(EventHandler handler)
-    {
-        assert(!_destroyed);
-        if(handler._registered)
-        {
-            if(TRACE_REGISTRATION)
-            {
-                trace("removing handler for channel " + handler.fd());
-            }
-
-            if(!handler._serializing)
-            {
-                _selector.remove(handler);
-            }
-            handler._registered = false;
-        }
-    }
-
-    public synchronized void
-    finish(EventHandler handler)
-    {
-        assert(!_destroyed);
-
-        if(TRACE_REGISTRATION)
-        {
-            trace("finishing handler for channel " + handler.fd());
-        }
-
-        if(handler._registered)
-        {
-            if(!handler._serializing)
-            {
-                _selector.remove(handler);
-            }
-            handler._registered = false;
-        }
-
-        _finished.add(handler);
-        _selector.setInterrupt();
-    }            
-
+    
     public synchronized void
     execute(ThreadPoolWorkItem workItem)
     {
+        if(TRACE_REGISTRATION)
+        {
+            trace("adding work item");
+        }
+
         if(_destroyed)
         {
             throw new Ice.CommunicatorDestroyedException();
         }
         _workItems.add(workItem);
-        _selector.setInterrupt();
+        notify();
     }
-
-    public void
-    promoteFollower(EventHandler handler)
+    
+    public synchronized void
+    finish(Ice.ConnectionI connection)
     {
-        if(_sizeMax > 1)
+        if(_destroyed)
         {
-            synchronized(this)
-            {
-                if(_serialize && handler != null)
-                {
-                    handler._serializing = true;
-                    if(handler._registered)
-                    {
-                        _selector.remove(handler); 
-                    }
-                }
-
-                assert(!_promote);
-                _promote = true;
-                notify();
-                    
-                if(!_destroyed)
-                {
-                    assert(_inUse >= 0);
-                    ++_inUse;
-                    
-                    if(_inUse == _sizeWarn)
-                    {
-                        String s = "thread pool `" + _prefix + "' is running low on threads\n"
-                            + "Size=" + _size + ", " + "SizeMax=" + _sizeMax + ", " + "SizeWarn=" + _sizeWarn;
-                        _instance.initializationData().logger.warning(s);
-                    }
-                    
-                    assert(_inUse <= _running);
-                    if(_inUse < _sizeMax && _inUse == _running)
-                    {
-                        try
-                        {
-                            EventHandlerThread thread = new EventHandlerThread(_programNamePrefix + _prefix + "-" +
-                                                                               _threadIndex++);
-                            _threads.add(thread);
-                            thread.start();
-                            ++_running;
-                        }
-                        catch(RuntimeException ex)
-                        {
-                            java.io.StringWriter sw = new java.io.StringWriter();
-                            java.io.PrintWriter pw = new java.io.PrintWriter(sw);
-                            ex.printStackTrace(pw);
-                            pw.flush();
-                            String s = "cannot create thread for `" + _prefix + "':\n" + sw.toString();
-                            _instance.initializationData().logger.error(s);
-                        }
-                    }
-                }
-            }
+            throw new Ice.CommunicatorDestroyedException();
         }
+        _finished.add(connection);
+        notify();
     }
-
+    
     public void
     joinWithAllThreads()
     {
@@ -267,10 +149,10 @@ public final class ThreadPool
         // wouldn't be possible here anyway, because otherwise the
         // other threads would never terminate.)
         //
-        java.util.Iterator<EventHandlerThread> i = _threads.iterator();
+        java.util.Iterator<WorkerThread> i = _threads.iterator();
         while(i.hasNext())
         {
-            EventHandlerThread thread = i.next();
+            WorkerThread thread = i.next();
             
             while(true)
             {
@@ -284,11 +166,6 @@ public final class ThreadPool
                 }
             }
         }
-
-        //
-        // Destroy the selector
-        //
-        _selector.destroy();
     }
 
     public String
@@ -296,119 +173,117 @@ public final class ThreadPool
     {
         return _prefix;
     }
+    
+    public boolean
+    serialize()
+    {
+        return _serialize;
+    }
 
     //
     // Each thread supplies a BasicStream, to avoid creating excessive
     // garbage (Java only).
     //
-    private boolean
-    run(BasicStream stream)
+    private void
+    run()
     {
-        if(_sizeMax > 1)
+        while(true)
         {
+            ThreadPoolWorkItem workItem = null;
+            Ice.ConnectionI handler = null;
+
             synchronized(this)
             {
-                while(!_promote)
+                while(_finished.size() == 0 && _workItems.size() == 0 && !_destroyed)
                 {
                     try
                     {
-                        wait();
+                        if(_timeout > 0)
+                        {
+                            wait(_timeout * 1000);
+                            // TODO: If timeed out
+                            boolean timedOut = false;
+                            if(timedOut)
+                            {
+                                //
+                                // Initiate server shutdown.
+                                //
+                                try
+                                {
+                                    _instance.objectAdapterFactory().shutdown();
+                                }
+                                catch(Ice.CommunicatorDestroyedException e)
+                                {
+                                }
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            wait();
+                        }
                     }
-                    catch(InterruptedException ex)
+                    catch(InterruptedException e)
                     {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
                     }
+
                 }
-                
-                _promote = false;
-            }
-            
-            if(TRACE_THREAD)
-            {
-                trace("thread " + Thread.currentThread() + " has the lock");
-            }
-        }
+                assert _finished.size() > 0 || _workItems.size() > 0 || _destroyed;
+                    
+                //
+                // There are two possibilities for an interrupt:
+                //
+                // 1. The thread pool has been destroyed.
+                //
+                // 2. A work item has been scheduled.
+                //
 
-        while(true)
-        {
-            try
-            {
-                _selector.select();
-            }
-            catch(java.io.IOException ex)
-            {
-                Ice.SocketException se = new Ice.SocketException();
-                se.initCause(ex);
-                //throw se;
-                java.io.StringWriter sw = new java.io.StringWriter();
-                java.io.PrintWriter pw = new java.io.PrintWriter(sw);
-                se.printStackTrace(pw);
-                pw.flush();
-                String s = "exception in `" + _prefix + "':\n" + sw.toString();
-                _instance.initializationData().logger.error(s);
-                continue;
-            }
-
-            EventHandler handler = null;
-            ThreadPoolWorkItem workItem = null;
-            boolean finished = false;
-            boolean shutdown = false;
-
-            synchronized(this)
-            {
-                if(_selector.checkTimeout())
+                if(!_finished.isEmpty())
                 {
-                    assert(_timeout > 0);
-                    shutdown = true;
+                    handler = _finished.removeFirst();
                 }
-                else if(_selector.isInterrupted())
+                else if(!_workItems.isEmpty())
                 {
-                    if(_selector.processInterrupt())
-                    {
-                        continue;
-                    }
-                    
                     //
-                    // There are three possiblities for an interrupt:
+                    // Work items must be executed first even if the thread pool is destroyed.
                     //
-                    // 1. The thread pool has been destroyed.
-                    //
-                    // 2. An event handler is being finished.
-                    //
-                    // 3. A work item has been scheduled.
-                    //
-                    
-                    if(!_finished.isEmpty())
-                    {
-                        _selector.clearInterrupt();
-                        handler = _finished.removeFirst();
-                        finished = true;
-                    }
-                    else if(!_workItems.isEmpty())
-                    {
-                        //
-                        // Work items must be executed first even if the thread pool is destroyed.
-                        //
-                        _selector.clearInterrupt();
-                        workItem = _workItems.removeFirst();
-                    }
-                    else if(_destroyed)
-                    {
-                        //
-                        // Don't clear the interrupt if destroyed, so that the other threads exit as well.
-                        //
-                        return true;
-                    }
-                    else
-                    {
-                        assert(false);
-                    }
+                    workItem = _workItems.removeFirst();
                 }
                 else
                 {
-                    handler = (EventHandler)_selector.getNextSelected();
-                    if(handler == null)
+                    assert _destroyed;
+                    return;
+                }
+                
+                if(_sizeMax > 1)
+                {
+                    assert(_inUse >= 0);
+                    ++_inUse;
+
+                    if(_inUse == _sizeWarn)
                     {
-                        continue;
+                        String s = "thread pool `" + _prefix + "' is running low on threads\n"
+                            + "Size=" + _size + ", " + "SizeMax=" + _sizeMax + ", " + "SizeWarn=" + _sizeWarn;
+                        _instance.initializationData().logger.warning(s);
+                    }
+                    
+                    assert _inUse <= _running;
+                    if(_inUse < _sizeMax && _inUse == _running)
+                    {
+                        try
+                        {
+                            WorkerThread thread = new WorkerThread(_programNamePrefix + _prefix + "-" + _threadIndex++);
+                            thread.start();
+                            _threads.add(thread);
+                            ++_running;
+                        }
+                        catch(RuntimeException ex)
+                        {
+                            String s = "cannot create thread for `" + _prefix + "':\n" + ex;
+                            _instance.initializationData().logger.error(s);
+                        }
                     }
                 }
             }
@@ -416,36 +291,11 @@ public final class ThreadPool
             //
             // Now we are outside the thread synchronization.
             //
-            
-            if(shutdown)
-            {
-                //
-                // Initiate server shutdown.
-                //
-                ObjectAdapterFactory factory;
-                try
-                {
-                    factory = _instance.objectAdapterFactory();
-                }
-                catch(Ice.CommunicatorDestroyedException e)
-                {
-                    continue;
-                }
-
-                promoteFollower(null);
-                factory.shutdown();
-
-                //
-                // No "continue", because we want shutdown to be done in
-                // its own thread from this pool. Therefore we called
-                // promoteFollower().
-                //
-            }
-            else if(workItem != null)
+            if(workItem != null)
             {
                 try
                 {
-                    workItem.execute(this);
+                    workItem.execute();
                 }
                 catch(Ice.LocalException ex)
                 {
@@ -456,146 +306,27 @@ public final class ThreadPool
                     String s = "exception in `" + _prefix + "' while calling execute():\n" + sw.toString();
                     _instance.initializationData().logger.error(s);
                 }
-
-                //
-                // No "continue", because we want execute() to
-                // be called in its own thread from this
-                // pool. Note that this means that execute()
-                // must call promoteFollower().
-                //
             }
             else
             {
-                assert(handler != null);
+                assert handler != null;
 
-                if(finished)
+                //
+                // Notify a handler about its removal from the thread pool.
+                //
+                try
                 {
-                    //
-                    // Notify a handler about its removal from the thread pool.
-                    //
-                    try
-                    {
-                        handler.finished(this);
-                    }
-                    catch(Ice.LocalException ex)
-                    {
-                        java.io.StringWriter sw = new java.io.StringWriter();
-                        java.io.PrintWriter pw = new java.io.PrintWriter(sw);
-                        ex.printStackTrace(pw);
-                        pw.flush();
-                        String s = "exception in `" + _prefix + "' while calling finished():\n" +
-                            sw.toString() + "\n" + handler.toString();
-                        _instance.initializationData().logger.error(s);
-                    }
-
-                    //
-                    // No "continue", because we want finished() to be
-                    // called in its own thread from this pool. Note
-                    // that this means that finished() must call
-                    // promoteFollower().
-                    //
+                    handler.finished(this);
                 }
-                else
+                catch(Ice.LocalException ex)
                 {
-                    //
-                    // If the handler is "readable", try to read a
-                    // message.
-                    //
-                    try
-                    {
-                        if(handler.readable())
-                        {
-                            try
-                            {
-                                if(!read(handler))
-                                {
-                                    continue; // Can't read without blocking.
-                                }
-
-                                if(handler.hasMoreData())
-                                {
-                                    _selector.hasMoreData(handler);
-                                }
-                            }
-                            catch(Ice.TimeoutException ex)
-                            {
-                                assert(false); // This shouldn't occur as we only perform non-blocking reads.
-                                continue;
-                            }
-                            catch(Ice.DatagramLimitException ex) // Expected.
-                            {
-                                continue;
-                            }
-                            catch(Ice.SocketException ex)
-                            {
-                                if(TRACE_EXCEPTION)
-                                {
-                                    trace("informing handler (" + handler.getClass().getName() +
-                                          ") about exception " + ex);
-                                    ex.printStackTrace();
-                                }
-                                    
-                                handler.exception(ex);
-                                continue;
-                            }
-                            catch(Ice.LocalException ex)
-                            {
-                                if(handler.datagram())
-                                {
-                                    if(_instance.initializationData().properties.getPropertyAsInt(
-                                                                                "Ice.Warn.Connections") > 0)
-                                    {
-                                        _instance.initializationData().logger.warning(
-                                            "datagram connection exception:\n" + ex + "\n" + handler.toString());
-                                    }
-                                }
-                                else
-                                {
-                                    if(TRACE_EXCEPTION)
-                                    {
-                                        trace("informing handler (" + handler.getClass().getName() +
-                                              ") about exception " + ex);
-                                        ex.printStackTrace();
-                                    }
-                                    
-                                    handler.exception(ex);
-                                }
-                                continue;
-                            }
-                                
-                            stream.swap(handler._stream);
-                            assert(stream.pos() == stream.size());
-                        }
-                            
-                        //
-                        // Provide a new message to the handler.
-                        //
-                        try
-                        {
-                            handler.message(stream, this);
-                        }
-                        catch(Ice.LocalException ex)
-                        {
-                            java.io.StringWriter sw = new java.io.StringWriter();
-                            java.io.PrintWriter pw = new java.io.PrintWriter(sw);
-                            ex.printStackTrace(pw);
-                            pw.flush();
-                            String s = "exception in `" + _prefix + "' while calling message():\n" +
-                                sw.toString() + "\n" + handler.toString();
-                            _instance.initializationData().logger.error(s);
-                        }
-
-                        //
-                        // No "continue", because we want message() to
-                        // be called in its own thread from this
-                        // pool. Note that this means that message()
-                        // must call promoteFollower().
-                        //
-                    }
-                    finally
-                    {
-                        stream.reset();
-                    }
+                    java.io.StringWriter sw = new java.io.StringWriter();
+                    java.io.PrintWriter pw = new java.io.PrintWriter(sw);
+                    ex.printStackTrace(pw);
+                    pw.flush();
+                    String s = "exception in `" + _prefix + "' while calling finished():\n" +
+                    sw.toString() + "\n" + handler.toString();
+                    _instance.initializationData().logger.error(s);
                 }
             }
 
@@ -605,15 +336,6 @@ public final class ThreadPool
                 {
                     if(!_destroyed)
                     {
-                        if(_serialize && handler != null && handler._serializing)
-                        {
-                            if(handler._registered)
-                            {
-                                _selector.add(handler, SocketStatus.NeedRead);
-                            }
-                            handler._serializing = false;
-                        }
-
                         //
                         // First we reap threads that have been
                         // destroyed before.
@@ -622,10 +344,10 @@ public final class ThreadPool
                         assert(_running <= sz);
                         if(_running < sz)
                         {
-                            java.util.Iterator<EventHandlerThread> i = _threads.iterator();
+                            java.util.Iterator<WorkerThread> i = _threads.iterator();
                             while(i.hasNext())
                             {
-                                EventHandlerThread thread = i.next();
+                                WorkerThread thread = i.next();
 
                                 if(!thread.isAlive())
                                 {
@@ -683,210 +405,24 @@ public final class ThreadPool
                                 assert(_running > 0);
                                 --_running;
                                 
-                                return false;
+                                return;
                             }
                         }
                         
                         assert(_inUse > 0);
                         --_inUse;
                     }
-
-                    while(!_promote)
-                    {
-                        try
-                        {
-                            wait();
-                        }
-                        catch(InterruptedException ex)
-                        {
-                        }
-                    }
-                    
-                    _promote = false;
                 }
                 
                 if(TRACE_THREAD)
                 {
-                    trace("thread " + Thread.currentThread() + " has the lock");
+                    trace("thread " + Thread.currentThread() + " is active");
                 }
             }
         }
     }
 
-    private boolean
-    read(EventHandler handler)
-    {
-        BasicStream stream = handler._stream;
-
-        if(stream.size() == 0)
-        {
-            stream.resize(Protocol.headerSize, true);
-            stream.pos(0);
-        }
-
-        if(stream.pos() != stream.size())
-        {
-            if(!handler.read(stream))
-            {
-                return false;
-            }
-            assert(stream.pos() == stream.size());
-        }
-
-        int pos = stream.pos();
-        if(pos < Protocol.headerSize)
-        {
-            //
-            // This situation is possible for small UDP packets.
-            //
-            throw new Ice.IllegalMessageSizeException();
-        }
-        stream.pos(0);
-        byte[] m = new byte[4];
-        m[0] = stream.readByte();
-        m[1] = stream.readByte();
-        m[2] = stream.readByte();
-        m[3] = stream.readByte();
-        if(m[0] != Protocol.magic[0] || m[1] != Protocol.magic[1]
-           || m[2] != Protocol.magic[2] || m[3] != Protocol.magic[3])
-        {
-            Ice.BadMagicException ex = new Ice.BadMagicException();
-            ex.badMagic = m;
-            throw ex;
-        }
-
-        byte pMajor = stream.readByte();
-        byte pMinor = stream.readByte();
-        if(pMajor != Protocol.protocolMajor || pMinor > Protocol.protocolMinor)
-        {
-            Ice.UnsupportedProtocolException e = new Ice.UnsupportedProtocolException();
-            e.badMajor = pMajor < 0 ? pMajor + 255 : pMajor;
-            e.badMinor = pMinor < 0 ? pMinor + 255 : pMinor;
-            e.major = Protocol.protocolMajor;
-            e.minor = Protocol.protocolMinor;
-            throw e;
-        }
-
-        byte eMajor = stream.readByte();
-        byte eMinor = stream.readByte();
-        if(eMajor != Protocol.encodingMajor || eMinor > Protocol.encodingMinor)
-        {
-            Ice.UnsupportedEncodingException e = new Ice.UnsupportedEncodingException();
-            e.badMajor = eMajor < 0 ? eMajor + 255 : eMajor;
-            e.badMinor = eMinor < 0 ? eMinor + 255 : eMinor;
-            e.major = Protocol.encodingMajor;
-            e.minor = Protocol.encodingMinor;
-            throw e;
-        }
-
-        byte messageType = stream.readByte();
-        byte compress = stream.readByte();
-        int size = stream.readInt();
-        if(size < Protocol.headerSize)
-        {
-            throw new Ice.IllegalMessageSizeException();
-        }
-        if(size > _instance.messageSizeMax())
-        {
-            throw new Ice.MemoryLimitException();
-        }
-        if(size > stream.size())
-        {
-            stream.resize(size, true);
-        }
-        stream.pos(pos);
-
-        if(stream.pos() != stream.size())
-        {
-            if(handler.datagram())
-            {
-                if(_warnUdp)
-                {
-                    _instance.initializationData().logger.warning("DatagramLimitException: maximum size of "
-                                                                  + stream.pos() + " exceeded");
-                }
-                stream.pos(0);
-                stream.resize(0, true);
-                throw new Ice.DatagramLimitException();
-            }
-            else
-            {
-                if(!handler.read(stream))
-                {
-                    return false;
-                }
-                assert(stream.pos() == stream.size());
-            }
-        }
-
-        return true;
-    }
-
-/*
- *  Commented out because it is unused.
- *
-    private void
-    selectNonBlocking()
-    {
-        while(true)
-        {
-            try
-            {
-                if(TRACE_SELECT)
-                {
-                    trace("non-blocking select on " + _selector.keys().size() + " keys, thread id = " +
-                          Thread.currentThread());
-                }
-
-                _selector.selectNow();
-
-                if(TRACE_SELECT)
-                {
-                    if(_keys.size() > 0)
-                    {
-                        trace("after selectNow, there are " + _keys.size() + " selected keys:");
-                        java.util.Iterator<java.nio.channels.SelectionKey> i = _keys.iterator();
-                        while(i.hasNext())
-                        {
-                            java.nio.channels.SelectionKey key = i.next();
-                            trace("  " + keyToString(key));
-                        }
-                    }
-                }
-
-                break;
-            }
-            catch(java.io.InterruptedIOException ex)
-            {
-                continue;
-            }
-            catch(java.io.IOException ex)
-            {
-                //
-                // Pressing Ctrl-C causes select() to raise an
-                // IOException, which seems like a JDK bug. We trap
-                // for that special case here and ignore it.
-                // Hopefully we're not masking something important!
-                //
-                if(ex.getMessage().indexOf("Interrupted system call") != -1)
-                {
-                    continue;
-                }
-
-                Ice.SocketException se = new Ice.SocketException();
-                se.initCause(ex);
-                //throw se;
-                java.io.StringWriter sw = new java.io.StringWriter();
-                java.io.PrintWriter pw = new java.io.PrintWriter(sw);
-                se.printStackTrace(pw);
-                pw.flush();
-                String s = "exception in `" + _prefix + "':\n" + sw.toString();
-                _instance.initializationData().logger.error(s);
-                continue;
-            }
-        }
-    }
-*/
+    
 
     private void
     trace(String msg)
@@ -894,42 +430,19 @@ public final class ThreadPool
         System.err.println(_prefix + ": " + msg);
     }
 
-    private String
-    keyToString(java.nio.channels.SelectionKey key)
-    {
-        String ops = "[";
-        if(key.isAcceptable())
-        {
-            ops += " OP_ACCEPT";
-        }
-        if(key.isReadable())
-        {
-            ops += " OP_READ";
-        }
-        if(key.isConnectable())
-        {
-            ops += " OP_CONNECT";
-        }
-        if(key.isWritable())
-        {
-            ops += " OP_WRITE";
-        }
-        ops += " ]";
-        return key.channel() + " " + ops;
-    }
-
     private Instance _instance;
     private boolean _destroyed;
     private final String _prefix;
     private final String _programNamePrefix;
-    private final Selector _selector;
+
     private java.util.LinkedList<ThreadPoolWorkItem> _workItems = new java.util.LinkedList<ThreadPoolWorkItem>();
-    private java.util.LinkedList<EventHandler> _finished = new java.util.LinkedList<EventHandler>();
+    private java.util.LinkedList<Ice.ConnectionI> _finished = new java.util.LinkedList<Ice.ConnectionI>();
+    
     private int _timeout;
 
-    private final class EventHandlerThread extends Thread
+    private final class WorkerThread extends Thread
     {
-        EventHandlerThread(String name)
+        WorkerThread(String name)
         {
             super(name);
         }
@@ -942,13 +455,9 @@ public final class ThreadPool
                 _instance.initializationData().threadHook.start();
             }
 
-            BasicStream stream = new BasicStream(_instance);
-
-            boolean promote;
-
             try
             {
-                promote = ThreadPool.this.run(stream);
+                ThreadPool.this.run();
             }
             catch(Ice.LocalException ex)
             {
@@ -958,7 +467,6 @@ public final class ThreadPool
                 pw.flush();
                 String s = "exception in `" + _prefix + "' thread " + getName() + ":\n" + sw.toString();
                 _instance.initializationData().logger.error(s);
-                promote = true;
             }
             catch(java.lang.Exception ex)
             {
@@ -968,31 +476,15 @@ public final class ThreadPool
                 pw.flush();
                 String s = "unknown exception in `" + _prefix + "' thread " + getName() + ":\n" + sw.toString();
                 _instance.initializationData().logger.error(s);
-                promote = true;
             }
-
-            if(promote && _sizeMax > 1)
+            if(_instance.initializationData().threadHook != null)
             {
-                //
-                // Promote a follower, but w/o modifying _inUse or
-                // creating new threads.
-                //
-                synchronized(ThreadPool.this)
-                {
-                    assert(!_promote);
-                    _promote = true;
-                    ThreadPool.this.notify();
-                }
+                _instance.initializationData().threadHook.stop();
             }
 
             if(TRACE_THREAD)
             {
                 trace("run() terminated");
-            }
-
-            if(_instance.initializationData().threadHook != null)
-            {
-                _instance.initializationData().threadHook.stop();
             }
         }
     }
@@ -1002,13 +494,9 @@ public final class ThreadPool
     private final int _sizeWarn; // If _inUse reaches _sizeWarn, a "low on threads" warning will be printed.
     private final boolean _serialize; // True if requests need to be serialized over the connection.
 
-    private java.util.List<EventHandlerThread> _threads; // All threads, running or not.
+    private java.util.List<WorkerThread> _threads; // All threads, running or not.
     private int _threadIndex; // For assigning thread names.
     private int _running; // Number of running threads.
     private int _inUse; // Number of threads that are currently in use.
     private double _load; // Current load in number of threads.
-
-    private boolean _promote;
-
-    private final boolean _warnUdp;
 }

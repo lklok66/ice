@@ -9,6 +9,8 @@
 
 package IceSSL;
 
+import IceInternal.TraceLevels;
+
 final class ConnectorI implements IceInternal.Connector, java.lang.Comparable
 {
     public IceInternal.Transceiver
@@ -24,39 +26,15 @@ final class ConnectorI implements IceInternal.Connector, java.lang.Comparable
             throw ex;
         }
 
-        if(_instance.networkTraceLevel() >= 2)
+        if(_traceLevels.network >= 2)
         {
             String s = "trying to establish ssl connection to " + toString();
-            _logger.trace(_instance.networkTraceCategory(), s);
+            _logger.trace(_traceLevels.networkCat, s);
         }
 
-        try
-        {
-            java.nio.channels.SocketChannel fd = IceInternal.Network.createTcpSocket();
-            IceInternal.Network.setBlock(fd, false);
-            IceInternal.Network.setTcpBufSize(fd, _instance.communicator().getProperties(), _logger);
-            boolean connected = IceInternal.Network.doConnect(fd, _addr);
-            try
-            {
-                javax.net.ssl.SSLEngine engine = _instance.createSSLEngine(false);
-                return new TransceiverI(_instance, engine, fd, _host, connected, false, "");
-            }
-            catch(RuntimeException ex)
-            {
-                IceInternal.Network.closeSocketNoThrow(fd);
-                throw ex;
-            }
-        }
-        catch(Ice.LocalException ex)
-        {
-            if(_instance.networkTraceLevel() >= 2)
-            {
-                String s = "failed to establish ssl connection to " + toString() + "\n" + ex;
-                _logger.trace(_instance.networkTraceCategory(), s);
-            }
-            throw ex;
-        }
+        return new TransceiverI(_instance, _addr);
     }
+
 
     public short
     type()
@@ -82,6 +60,7 @@ final class ConnectorI implements IceInternal.Connector, java.lang.Comparable
     ConnectorI(Instance instance, java.net.InetSocketAddress addr, int timeout, String connectionId)
     {
         _instance = instance;
+        _traceLevels = instance.traceLevels();
         _logger = instance.communicator().getLogger();
         _host = addr.getHostName();
         _addr = addr;
@@ -164,6 +143,7 @@ final class ConnectorI implements IceInternal.Connector, java.lang.Comparable
     }
 
     private Instance _instance;
+    private TraceLevels _traceLevels;
     private Ice.Logger _logger;
     private String _host;
     private java.net.InetSocketAddress _addr;

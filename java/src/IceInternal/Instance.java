@@ -169,22 +169,6 @@ public final class Instance
         return _serverThreadPool;
     }
 
-    public synchronized SelectorThread
-    selectorThread()
-    {
-        if(_state == StateDestroyed)
-        {
-            throw new Ice.CommunicatorDestroyedException();
-        }        
-
-        if(_selectorThread == null) // Lazy initialization.
-        {
-            _selectorThread = new SelectorThread(this);
-        }
-
-        return _selectorThread;
-    }
-
     public synchronized EndpointHostResolver
     endpointHostResolver()
     {
@@ -746,7 +730,6 @@ public final class Instance
         IceUtilInternal.Assert.FinalizerAssert(_objectAdapterFactory == null);
         IceUtilInternal.Assert.FinalizerAssert(_clientThreadPool == null);
         IceUtilInternal.Assert.FinalizerAssert(_serverThreadPool == null);
-        IceUtilInternal.Assert.FinalizerAssert(_selectorThread == null);
         IceUtilInternal.Assert.FinalizerAssert(_endpointHostResolver == null);
         IceUtilInternal.Assert.FinalizerAssert(_timer == null);
         IceUtilInternal.Assert.FinalizerAssert(_routerManager == null);
@@ -871,7 +854,6 @@ public final class Instance
         
         ThreadPool serverThreadPool = null;
         ThreadPool clientThreadPool = null;
-        SelectorThread selectorThread = null;
         EndpointHostResolver endpointHostResolver = null;
 
         synchronized(this)
@@ -898,13 +880,6 @@ public final class Instance
                 _clientThreadPool.destroy();
                 clientThreadPool = _clientThreadPool;
                 _clientThreadPool = null;
-            }
-
-            if(_selectorThread != null)
-            {
-                _selectorThread.destroy();
-                selectorThread = _selectorThread;
-                _selectorThread = null;
             }
 
             if(_endpointHostResolver != null)
@@ -975,10 +950,6 @@ public final class Instance
         if(serverThreadPool != null)
         {
             serverThreadPool.joinWithAllThreads();
-        }
-        if(selectorThread != null)
-        {
-            selectorThread.joinWithThread();
         }
         if(endpointHostResolver != null)
         {
@@ -1052,7 +1023,6 @@ public final class Instance
     private int _protocolSupport;
     private ThreadPool _clientThreadPool;
     private ThreadPool _serverThreadPool;
-    private SelectorThread _selectorThread;
     private EndpointHostResolver _endpointHostResolver;
     private Timer _timer;
     private EndpointFactoryManager _endpointFactoryManager;

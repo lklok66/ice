@@ -9,67 +9,232 @@
 
 package IceInternal;
 
-///
-//import org.apache.harmony.luni.util.ErrorCodeException;
 
 final class TcpTransceiver implements Transceiver
 {
-    public java.nio.channels.SelectableChannel
-    fd()
-    {
-        assert(_fd != null);
-        return _fd;
-    }
-
-    public SocketStatus
-    initialize()
+    public boolean
+    initialize(final AsyncCallback callback)
     {
         if(_state == StateNeedConnect)
         {
-            _state = StateConnectPending;
-            return SocketStatus.NeedConnect;
-        }
-        else if(_state <= StateConnectPending)
-        {
-            try
+            _state = StateConnecting;
+            Thread t = new Thread(new Runnable()
             {
-                Network.doFinishConnect(_fd);
-                _state = StateConnected;
-                _desc = Network.fdToString(_fd);
-            }
-            catch(Ice.LocalException ex)
-            {
-                if(_traceLevels.network >= 2)
+                public void run()
                 {
-                    String s = "failed to establish tcp connection\n" + _desc + "\n" + ex;
-                    _logger.trace(_traceLevels.networkCat, s);
+                    // Here the connect blocks until complete. If the
+                    // transceiver is closed in the meantime, an IOException is
+                    // thrown.
+                    try
+                    {
+                        Network.doFinishConnect(_fd);
+                    }
+                    catch(Ice.LocalException ex)
+                    {
+                        if(_traceLevels.network >= 2)
+                        {
+                            String s = "failed to establish tcp connection\n" + _desc + "\n" + ex;
+                            _logger.trace(_traceLevels.networkCat, s);
+                        }
+                        callback.complete(ex);
+                        return;
+                    }
+                    connectComplete();
+                    callback.complete(null);
                 }
-                throw ex;
+            });
+            
+            t.setName("TcpConnectorThread");
+            t.start();
+            return false;
+        }
+        
+        return _state == StateConnected;
+    }
+    
+    class ReadThread extends TransceiverReadThread
+    {
+        protected void read(Buffer buf)
+        {
+            int remaining = 0;
+            if(_traceLevels.network >= 3)
+            {
+                remaining = buf.b.remaining();
             }
 
-            if(_traceLevels.network >= 1)
+            while(buf.b.hasRemaining())
             {
-                String s = "tcp connection established\n" + _desc;
-                _logger.trace(_traceLevels.networkCat, s);
+                try
+                {
+                    assert(_fd != null);
+                    int ret = _fd.read(buf.b);
+
+                    if(ret == -1)
+                    {
+                        throw new Ice.ConnectionLostException();
+                    }
+                    assert ret != 0;
+
+                    if(ret > 0)
+                    {
+                        if(_traceLevels.network >= 3)
+                        {
+                            String s = "received " + ret + " of " + remaining + " bytes via tcp\n" + _desc;
+                            _logger.trace(_traceLevels.networkCat, s);
+                        }
+
+                        if(_stats != null)
+                        {
+                            _stats.bytesReceived(type(), ret);
+                        }
+                    }
+                }
+                catch(java.io.InterruptedIOException ex)
+                {
+                    continue;
+                }
+                catch(java.io.IOException ex)
+                {
+                    if(Network.connectionLost(ex))
+                    {
+                        Ice.ConnectionLostException se = new Ice.ConnectionLostException();
+                        se.initCause(ex);
+                        throw se;
+                    }
+
+                    Ice.SocketException se = new Ice.SocketException();
+                    se.initCause(ex);
+                    throw se;
+                }
             }
         }
-        assert(_state == StateConnected);
-        return SocketStatus.Finished;
+    }
+    
+    class WriteThread extends TransceiverWriteThread
+    {
+        protected void write(Buffer buf)
+        {
+            final int size = buf.b.limit();
+            int packetSize = size - buf.b.position();
+            if(_maxPacketSize > 0 && packetSize > _maxPacketSize)
+            {
+                packetSize = _maxPacketSize;
+                buf.b.limit(buf.b.position() + packetSize);
+            }
+
+            while(buf.b.hasRemaining())
+            {
+                try
+                {
+                    assert (_fd != null);
+                    int ret = _fd.write(buf.b);
+
+                    if(ret == -1)
+                    {
+                        throw new Ice.ConnectionLostException();
+                    }
+                    assert ret != 0;
+                    if(_traceLevels.network >= 3)
+                    {
+                        String s = "sent " + ret + " of " + size + " bytes via tcp\n" + _desc;
+                        _logger.trace(_traceLevels.networkCat, s);
+                    }
+
+                    if(_stats != null)
+                    {
+                        _stats.bytesSent(type(), ret);
+                    }
+
+                    if(packetSize == _maxPacketSize)
+                    {
+                        assert (buf.b.position() == buf.b.limit());
+                        packetSize = size - buf.b.position();
+                        if(packetSize > _maxPacketSize)
+                        {
+                            packetSize = _maxPacketSize;
+                        }
+                        buf.b.limit(buf.b.position() + packetSize);
+                    }
+                }
+                catch(java.io.InterruptedIOException ex)
+                {
+                    continue;
+                }
+                catch(java.io.IOException ex)
+                {
+                    Ice.SocketException se = new Ice.SocketException();
+                    se.initCause(ex);
+                    throw se;
+                }
+            }
+        }
     }
 
-    public void
+    private void startThreads()
+    {
+        // Post connection establishment the socket should be blocking.
+        Network.setBlock(_fd, true);
+        
+        StringBuffer desc = new StringBuffer();
+        desc.append(_fd.socket().getLocalAddress());
+        desc.append(':');
+        desc.append(_fd.socket().getLocalPort());
+
+        _readThread = new ReadThread();
+        _readThread.setName("TcpTransceiverReadThread-" + desc);
+        _readThread.start();
+        
+        _writeThread = new WriteThread();
+        _writeThread.setName("TcpTransceiverWriteThread-" + desc);
+        _writeThread.start();
+    }
+
+    // This has to be synchronized to prevent a race between
+    // connection completion, and the transceiver closing.
+    synchronized public void
     close()
     {
         if(_traceLevels.network >= 1)
         {
-            String s = "closing tcp connection\n" + toString();
+            String s = "closing tcp connection\n" + _desc;
             _logger.trace(_traceLevels.networkCat, s);
         }
 
+        if(_readThread != null)
+        {
+            assert Thread.currentThread() != _readThread;
+            _readThread.destroyThread();
+            while(_readThread.isAlive())
+            {
+                try
+                {
+                    _readThread.join();
+                }
+                catch(InterruptedException e)
+                {
+                }
+            }
+        }
+        if(_writeThread != null)
+        {
+            assert Thread.currentThread() != _writeThread;
+            _writeThread.destroyThread();
+            while(_writeThread.isAlive())
+            {
+                try
+                {
+                    _writeThread.join();
+                }
+                catch(InterruptedException e)
+                {
+                }
+            }
+        }
+        
         assert(_fd != null);
         try
         {
-                _fd.close();
+            _fd.close();
         }
         catch(java.io.IOException ex)
         {
@@ -83,139 +248,42 @@ final class TcpTransceiver implements Transceiver
         }
     }
     
-    public boolean
-    write(Buffer buf)
+    public void
+    shutdownReadWrite()
     {
-        final int size = buf.b.limit();
-        int packetSize = size - buf.b.position();
-        if(_maxPacketSize > 0 && packetSize > _maxPacketSize)
+        if(_traceLevels.network >= 2)
         {
-            packetSize = _maxPacketSize;
-            buf.b.limit(buf.b.position() + packetSize);
+            String s = "shutting down tcp connection for reading and writing\n" + _desc;
+            _logger.trace(_traceLevels.networkCat, s);
         }
-
-        while(buf.b.hasRemaining())
+        
+        assert(_fd != null);
+        java.net.Socket socket = _fd.socket();
+        try
         {
-            try
-            {
-                assert(_fd != null);
-                long first = System.currentTimeMillis();
-                int ret = _fd.write(buf.b);
-
-                if(ret == -1)
-                {
-                    throw new Ice.ConnectionLostException();
-                }
-                else if(ret == 0)
-                {
-                    //
-                    // Writing would block, so we reset the limit (if necessary) and return false to indicate
-                    // that more data must be sent.
-                    //
-                    if(packetSize == _maxPacketSize)
-                    {
-                        buf.b.limit(size);
-                    }
-                    return false;
-                }
-
-                if(_traceLevels.network >= 3)
-                {
-                    String s = "sent " + ret + " of " + size + " bytes via tcp\n" + toString();
-                    _logger.trace(_traceLevels.networkCat, s);
-                }
-
-                if(_stats != null)
-                {
-                    _stats.bytesSent(type(), ret);
-                }
-
-                if(packetSize == _maxPacketSize)
-                {
-                    assert(buf.b.position() == buf.b.limit());
-                    packetSize = size - buf.b.position();
-                    if(packetSize > _maxPacketSize)
-                    {
-                        packetSize = _maxPacketSize;
-                    }
-                    buf.b.limit(buf.b.position() + packetSize);
-                }
-            }
-            catch(java.io.InterruptedIOException ex)
-            {
-                continue;
-            }
-            catch(java.io.IOException ex)
-            {
-                Ice.SocketException se = new Ice.SocketException();
-                se.initCause(ex);
-                throw se;
-            }
+            socket.shutdownInput(); // Shutdown socket for reading
+            socket.shutdownOutput(); // Shutdown socket for writing
         }
-        return true;
+        catch(java.net.SocketException ex)
+        {
+            // Ignore.
+        }
+        catch(java.io.IOException ex)
+        {
+            // Ignore this. It can occur if a connection attempt fails.
+        }
+    }
+    
+    public void
+    write(Buffer buf, AsyncCallback callback)
+    {
+        _writeThread.write(buf, callback);
     }
 
-    public boolean
-    read(Buffer buf, Ice.BooleanHolder moreData)
+    public void
+    read(Buffer buf, AsyncCallback callback)
     {
-        int remaining = 0;
-        if(_traceLevels.network >= 3)
-        {
-            remaining = buf.b.remaining();
-        }
-        moreData.value = false;
-
-        while(buf.b.hasRemaining())
-        {
-            try
-            {
-                assert(_fd != null);
-                int ret = _fd.read(buf.b);
-                
-                if(ret == -1)
-                {
-                    throw new Ice.ConnectionLostException();
-                }
-                
-                if(ret == 0)
-                {
-                    return false;
-                }
-                
-                if(ret > 0)
-                {
-                    if(_traceLevels.network >= 3)
-                    {
-                        String s = "received " + ret + " of " + remaining + " bytes via tcp\n" + toString();
-                        _logger.trace(_traceLevels.networkCat, s);
-                    }
-
-                    if(_stats != null)
-                    {
-                        _stats.bytesReceived(type(), ret);
-                    }
-                }
-            }
-            catch(java.io.InterruptedIOException ex)
-            {
-                continue;
-            }
-            catch(java.io.IOException ex)
-            {
-                if(Network.connectionLost(ex))
-                {
-                    Ice.ConnectionLostException se = new Ice.ConnectionLostException();
-                    se.initCause(ex);
-                    throw se;
-                }
-                
-                Ice.SocketException se = new Ice.SocketException();
-                se.initCause(ex);
-                throw se;
-            }
-        }
-
-        return true;
+        _readThread.read(buf, callback);
     }
 
     public String
@@ -248,8 +316,18 @@ final class TcpTransceiver implements Transceiver
         _traceLevels = instance.traceLevels();
         _logger = instance.initializationData().logger;
         _stats = instance.initializationData().stats;
-        _state = connected ? StateConnected : StateNeedConnect;
         _desc = Network.fdToString(_fd);
+
+        // If we're already connected, then start the read/write threads.
+        if(connected)
+        {
+            _state = StateConnected;
+            startThreads();            
+        }
+        else
+        {
+            _state = StateNeedConnect;   
+        }
 
         _maxPacketSize = 0;
         if(System.getProperty("os.name").startsWith("Windows"))
@@ -276,6 +354,34 @@ final class TcpTransceiver implements Transceiver
         super.finalize();
     }
 
+    // This can only be called by the connect thread.
+    //
+    // This can race with close(). If the transceiver has been shutdown, then
+    // we're done.
+    //
+    synchronized private void connectComplete()
+    {
+        // If _fd is null, the transceiver has been closed, complete immediately.
+        if(_fd == null)
+        {
+            return;
+        }
+
+        _state = StateConnected;
+        _desc = Network.fdToString(_fd);
+
+        if(_traceLevels.network >= 1)
+        {
+            String s = "tcp connection established\n" + _desc;
+            _logger.trace(_traceLevels.networkCat, s);
+        }
+        
+        startThreads();
+    }
+
+    private WriteThread _writeThread;
+    private ReadThread _readThread;
+
     private java.nio.channels.SocketChannel _fd;
     private TraceLevels _traceLevels;
     private Ice.Logger _logger;
@@ -285,6 +391,6 @@ final class TcpTransceiver implements Transceiver
     private int _maxPacketSize;
     
     private static final int StateNeedConnect = 0;
-    private static final int StateConnectPending = 1;
+    private static final int StateConnecting = 1;
     private static final int StateConnected = 2;
 }

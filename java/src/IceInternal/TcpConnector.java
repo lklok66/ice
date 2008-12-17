@@ -23,6 +23,7 @@ final class TcpConnector implements Connector, java.lang.Comparable
         try
         {
             java.nio.channels.SocketChannel fd = Network.createTcpSocket();
+            // The connection should be established non-blocking.
             Network.setBlock(fd, false);
             Network.setTcpBufSize(fd, _instance.initializationData().properties, _logger);
             boolean connected = Network.doConnect(fd, _addr);

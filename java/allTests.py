@@ -51,7 +51,6 @@ tests = [
     ("Ice/hold", ["core"]),
     ("Ice/retry", ["core"]),
     ("Ice/timeout", ["core"]),
-    ("Ice/background", ["core"]),
     ("Ice/servantLocator", ["core"]),
     ("Ice/interceptor", ["core"]),
     ("IceBox/configuration", ["core", "noipv6"]),

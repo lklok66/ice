@@ -33,12 +33,6 @@ public interface ProtocolPluginFacade
     String getDefaultHost();
 
     //
-    // Get the network trace level and category name.
-    //
-    int getNetworkTraceLevel();
-    String getNetworkTraceCategory();
-
-    //
     // Register an EndpointFactory.
     //
     void addEndpointFactory(EndpointFactory factory);

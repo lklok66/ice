@@ -55,21 +55,6 @@ public class ProtocolPluginFacadeI implements ProtocolPluginFacade
     }
 
     //
-    // Get the network trace level and category name.
-    //
-    public int
-    getNetworkTraceLevel()
-    {
-        return _instance.traceLevels().network;
-    }
-
-    public String
-    getNetworkTraceCategory()
-    {
-        return _instance.traceLevels().networkCat;
-    }
-
-    //
     // Register an EndpointFactory.
     //
     public void

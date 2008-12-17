@@ -18,7 +18,7 @@ public class AMDServer extends test.Util.Application
         adapter.addServantLocator(new AMDServantLocatorI("category"), "category");
         adapter.addServantLocator(new AMDServantLocatorI(""), "");
         adapter.add(new AMDTestI(), communicator().stringToIdentity("asm"));
-
+        adapter.activate();
         return WAIT;
     }
 

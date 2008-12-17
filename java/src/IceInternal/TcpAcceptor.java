@@ -11,12 +11,6 @@ package IceInternal;
 
 class TcpAcceptor implements Acceptor
 {
-    public java.nio.channels.ServerSocketChannel
-    fd()
-    {
-        return _fd;
-    }
-
     public void
     close()
     {
@@ -47,7 +41,6 @@ class TcpAcceptor implements Acceptor
     accept()
     {
         java.nio.channels.SocketChannel fd = Network.doAccept(_fd);
-        Network.setBlock(fd, false);
         Network.setTcpBufSize(fd, _instance.initializationData().properties, _logger);
 
         if(_traceLevels.network >= 1)
@@ -57,6 +50,16 @@ class TcpAcceptor implements Acceptor
         }
 
         return new TcpTransceiver(_instance, fd, true);
+    }
+    
+    public void
+    connectToSelf()
+    {
+        java.nio.channels.SocketChannel fd = Network.createTcpSocket();
+        // TODO:
+        //Network.setBlock(fd, false);
+        Network.doConnect(fd, _addr);
+        Network.closeSocket(fd);
     }
 
     public String
@@ -81,7 +84,6 @@ class TcpAcceptor implements Acceptor
         try
         {
             _fd = Network.createTcpServerSocket();
-            Network.setBlock(_fd, false);
             Network.setTcpBufSize(_fd, _instance.initializationData().properties, _logger);
             if(!System.getProperty("os.name").startsWith("Windows"))
             {

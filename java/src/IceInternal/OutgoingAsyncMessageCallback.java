@@ -105,9 +105,8 @@ abstract public class OutgoingAsyncMessageCallback
                 __os.instance().clientThreadPool().execute(new ThreadPoolWorkItem()
                     {
                         public void
-                        execute(ThreadPool threadPool)
+                        execute()
                         {
-                            threadPool.promoteFollower(null);
                             __exception(ex);
                         }
                     });

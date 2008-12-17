@@ -103,7 +103,7 @@ public final class AMDTestI extends _TestIntfDisp
     public void
     shutdown_async(AMD_TestIntf_shutdown cb, Ice.Current current)
     {
-        current.adapter.deactivate();
+        current.adapter.getCommunicator().shutdown();
         cb.ice_response();
     }
 }

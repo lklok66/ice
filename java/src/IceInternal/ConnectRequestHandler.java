@@ -295,9 +295,8 @@ public class ConnectRequestHandler
             _reference.getInstance().clientThreadPool().execute(new ThreadPoolWorkItem() 
                 {
                     public void
-                    execute(ThreadPool threadPool)
+                    execute()
                     {
-                        threadPool.promoteFollower(null);
                         flushRequestsWithException(ex);
                     };
                 });
@@ -448,9 +447,8 @@ public class ConnectRequestHandler
                 _reference.getInstance().clientThreadPool().execute(new ThreadPoolWorkItem() 
                     {
                         public void
-                        execute(ThreadPool threadPool)
+                        execute()
                         {
-                            threadPool.promoteFollower(null);
                             flushRequestsWithException(ex);
                         };
                     });
@@ -465,9 +463,8 @@ public class ConnectRequestHandler
                 _reference.getInstance().clientThreadPool().execute(new ThreadPoolWorkItem() 
                     {
                         public void
-                        execute(ThreadPool threadPool)
+                        execute()
                         {
-                            threadPool.promoteFollower(null);
                             flushRequestsWithException(ex);
                         };
                     });
@@ -480,9 +477,8 @@ public class ConnectRequestHandler
             instance.clientThreadPool().execute(new ThreadPoolWorkItem() 
                                                 {
                                                     public void
-                                                    execute(ThreadPool threadPool)
+                                                    execute()
                                                     {
-                                                        threadPool.promoteFollower(null);
                                                         for(OutgoingAsyncMessageCallback callback : sentCallbacks)
                                                         {
                                                             callback.__sent(instance);

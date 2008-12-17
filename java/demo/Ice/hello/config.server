@@ -26,7 +26,7 @@ Ice.ACM.Server=10
 # 2 = like 1, but more detailed
 # 3 = like 2, but also trace data transfer
 #
-#Ice.Trace.Network=1
+Ice.Trace.Network=3
 
 #
 # Protocol Tracing
@@ -34,7 +34,7 @@ Ice.ACM.Server=10
 # 0 = no protocol tracing
 # 1 = trace protocol messages
 #
-#Ice.Trace.Protocol=1
+#Ice.Trace.Protocol=3
 
 #
 # Security Tracing
@@ -42,13 +42,14 @@ Ice.ACM.Server=10
 # 0 = no security tracing
 # 1 = trace messages
 #
-#IceSSL.Trace.Security=1
+IceSSL.Trace.Security=1
 
 #
 # SSL Configuration
 #
 Ice.Plugin.IceSSL=IceSSL.PluginFactory
-IceSSL.DefaultDir=../../../../certs
+#IceSSL.DefaultDir=../../../../certs
+IceSSL.DefaultDir=/Users/matthew/cvs/ice-33/certs
 IceSSL.Keystore=server.jks
 IceSSL.Password=password
 IceSSL.Truststore=certs.jks
