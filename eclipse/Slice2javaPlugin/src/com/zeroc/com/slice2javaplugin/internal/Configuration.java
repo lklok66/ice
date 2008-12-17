@@ -52,7 +52,22 @@ public class Configuration
         _store.setDefault(CONSOLE_KEY, true); // TODO: Default should be false.
         _store.setDefault(SLICE_SOURCE_DIRS_KEY, "slice");
         _store.setDefault(INCLUDES_KEY, "");
-        _store.setDefault(JARS_KEY, "Ice.jar");
+        boolean androidProject = false;
+        try
+        {
+            androidProject = project.hasNature("com.android.ide.eclipse.adt.AndroidNature");
+        }
+        catch(CoreException e)
+        {
+        }
+        if(androidProject)
+        {
+            _store.setDefault(JARS_KEY, "IceAndroid.jar");
+        }
+        else
+        {
+            _store.setDefault(JARS_KEY, "Ice.jar");
+        }
     }
 
     /**
