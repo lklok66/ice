@@ -96,7 +96,7 @@ PDBFLAGS        = /pdb:$(DLLNAME:.dll=.pdb)
 
 {$(SDIR)\}.ice{$(HDIR)}.h:
 	del /q $(HDIR)\$(*F).h $(ICEE_DIR)\$(*F).cpp 
-	$(SLICE2CPP) $(SLICE2CPPEFLAGS) $< 
+	$(SLICE2CPPE) $(SLICE2CPPEFLAGS) $< 
 	move $(*F).h $(HDIR)
 	move $(*F).cpp $(ICEE_DIR)
 
