@@ -647,7 +647,8 @@ class Instance
     {
         javax.net.ssl.SSLSession session = fd.getSession();
         String msg = "SSL summary for " + (incoming ? "incoming" : "outgoing") + " connection\n" +
-            "cipher = " + session.getCipherSuite() + "\n" +
+            // This isn't implemented for Android.
+            //"cipher = " + session.getCipherSuite() + "\n" +
             "protocol = " + session.getProtocol() + "\n" +
             IceInternal.Network.fdToString(fd);
         _logger.trace(_securityTraceCategory, msg);

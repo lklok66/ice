@@ -44,7 +44,7 @@ final class TransceiverI implements IceInternal.Transceiver
                 assert(false);
             }
 
-            int interval = 500;
+            int interval = 2000;
             while(buf.b.hasRemaining() && !destroyed())
             {
                 int pos = buf.b.position();
@@ -53,7 +53,7 @@ final class TransceiverI implements IceInternal.Transceiver
                     assert(_fd != null);
                     _fd.setSoTimeout(interval);
                     int ret = _in.read(data, off + pos, buf.b.remaining());
-                    
+
                     if(ret == -1)
                     {
                         throw new Ice.ConnectionLostException();
@@ -277,6 +277,7 @@ final class TransceiverI implements IceInternal.Transceiver
                         }
 
                         fd.startHandshake();
+                        fd.getSession().invalidate();
                         
                         return fd;
                     }
