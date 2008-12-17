@@ -10,6 +10,9 @@
 
 package com.zeroc.com.slice2javaplugin.internal;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -22,6 +25,7 @@ import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import com.zeroc.com.slice2javaplugin.internal.Configuration.BooleanValue;
 
@@ -36,11 +40,7 @@ public class IceClasspathContainerIntializer extends ClasspathContainerInitializ
         if(containerPath.toString().equals(CONTAINER_ID))
         {
             Configuration c = new Configuration(project.getProject());
-            IPath iceLib = new Path(c.getIceJar(c.getIceHome(), new BooleanValue()));
-            IClasspathEntry classpathEntry = JavaCore.newLibraryEntry(iceLib, null, null, new IAccessRule[0], new IClasspathAttribute[0], false);
-            IClasspathContainer container = new IceClasspathContainer(classpathEntry, new Path(CONTAINER_ID));
-            JavaCore.setClasspathContainer(containerPath, new IJavaProject[] { project },
-                    new IClasspathContainer[] { container }, new NullProgressMonitor());
+            configure(c, project, containerPath);
         }
     }
 
@@ -49,13 +49,29 @@ public class IceClasspathContainerIntializer extends ClasspathContainerInitializ
         return JavaCore.newContainerEntry(new Path(CONTAINER_ID));
     }
 
-    public static void reinitialize(IProject _project, String newIceJar) throws CoreException
+    public static void reinitialize(IProject _project, Configuration c)
+        throws CoreException
     {
         IJavaProject javaProject = JavaCore.create(_project);
-        IPath iceLib = new Path(newIceJar);
-        IClasspathEntry classpathEntry = JavaCore.newLibraryEntry(iceLib, null, null, new IAccessRule[0], new IClasspathAttribute[0], false);
-        IClasspathContainer container = new IceClasspathContainer(classpathEntry, new Path(CONTAINER_ID));
-        JavaCore.setClasspathContainer(new Path(CONTAINER_ID), new IJavaProject[] { javaProject },
+        IPath containerPath = new Path(CONTAINER_ID);
+
+        configure(c, javaProject, containerPath);
+    }
+
+    private static void configure(Configuration c, IJavaProject javaProject, IPath containerPath)
+        throws JavaModelException
+    {
+        Path dir = new Path(Configuration.getJarDirForHome(c.getIceHome()));
+        List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
+        for(String jar : c.getJars())
+        {
+            IPath path = dir.append(new Path(jar));
+            IClasspathEntry classpathEntry = JavaCore.newLibraryEntry(path, null, null, new IAccessRule[0], new IClasspathAttribute[0], false);
+            entries.add(classpathEntry);
+        }
+         
+        IClasspathContainer container = new IceClasspathContainer(entries.toArray(new IClasspathEntry[0]), containerPath);
+        JavaCore.setClasspathContainer(containerPath, new IJavaProject[] { javaProject },
                 new IClasspathContainer[] { container }, new NullProgressMonitor());
     }
 }

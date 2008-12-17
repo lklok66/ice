@@ -19,9 +19,9 @@ public class IceClasspathContainer implements IClasspathContainer
     private IClasspathEntry[] _cpEntry;
     private IPath _path;
 
-    IceClasspathContainer(IClasspathEntry entry, IPath path)
+    IceClasspathContainer(IClasspathEntry[] entries, IPath path)
     {
-        _cpEntry = new IClasspathEntry[] { entry };
+        _cpEntry = entries;
         _path = path;
     }
 

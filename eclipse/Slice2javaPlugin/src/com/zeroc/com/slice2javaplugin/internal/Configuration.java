@@ -28,8 +28,6 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import com.zeroc.slice2javaplugin.Activator;
@@ -52,9 +50,10 @@ public class Configuration
         _store.setDefault(ICE_KEY, false);
         _store.setDefault(STREAM_KEY, false);
         _store.setDefault(META_KEY, "");
-        _store.setDefault(CONSOLE_KEY, true); // XXX: Default should be false.
+        _store.setDefault(CONSOLE_KEY, true); // TODO: Default should be false.
         _store.setDefault(SLICE_SOURCE_DIRS_KEY, "slice");
         _store.setDefault(INCLUDES_KEY, "");
+        _store.setDefault(JARS_KEY, "Ice.jar");
     }
 
     /**
@@ -149,56 +148,17 @@ public class Configuration
         return rc;
     }
     
-    public String getIceJar(String iceHome, BooleanValue exists)
-    {
-        exists.value = true;
-        String os = System.getProperty("os.name");
-        if(os.equals("Linux") && iceHome.equals("/usr"))
-        {
-            File f = new File(iceHome + File.separator + "share" + File.separator + "java" + File.separator + "Ice.jar");
-            if(f.exists())
-            {
-                return f.toString();
-            }
-        }
-
-        File f = new File(iceHome + File.separator + "lib" + File.separator + "Ice.jar");
-        if(!f.exists())
-        {
-            File f2 = new File(iceHome + File.separator + "java" + File.separator + "lib" + File.separator + "Ice.jar");
-            if(f2.exists())
-            {
-                return f2.toString();
-            }
-            exists.value = false;
-        }
-        // Add the platform default even if it cannot be found.
-        return f.toString();
-    }
-
     public String getIceHome()
     {
         return _instanceStore.getString(ICE_HOME_KEY);
     }
 
-    public void setIceHome(Shell shell, String iceHome)
+    public void setIceHome(String iceHome)
         throws CoreException
     {
         if(setValue(_instanceStore, ICE_HOME_KEY, iceHome))
         {
-            BooleanValue exists = new BooleanValue();
-            String newIceJar = getIceJar(iceHome, exists);
-            IceClasspathContainerIntializer.reinitialize(_project, newIceJar);
-            if(!exists.value)
-            {
-                ErrorDialog
-                        .openError(
-                                shell,
-                                "Missing Resource",
-                                "Cannot find Ice.jar. You must either fix the Ice installation location, or manually add Ice.jar to the java build path.",
-                                new Status(Status.WARNING, Activator.PLUGIN_ID, 0, "Missing 'Ice.jar' resource in "
-                                        + iceHome, null));
-            }
+            IceClasspathContainerIntializer.reinitialize(_project, this);
         }
     }
 
@@ -220,19 +180,6 @@ public class Configuration
         if(!generated.exists())
         {
             generated.create(false, true, null);
-        }
-
-        BooleanValue exists = new BooleanValue();
-        getIceJar(getIceHome(), exists);
-        if(!exists.value)
-        {
-            ErrorDialog
-                    .openError(
-                            null,
-                            "Missing Resource",
-                            "Cannot find Ice.jar. You must either fix the Ice installation location, or manually add Ice.jar to the java build path.",
-                            new Status(Status.WARNING, Activator.PLUGIN_ID, 0, "Missing 'Ice.jar' resource in "
-                                    + getIceHome(), null));
         }
 
         fixGeneratedCP(null, getGeneratedDir());
@@ -405,6 +352,19 @@ public class Configuration
     public void setIncludes(List<String> includes)
     {
         setValue(INCLUDES_KEY, fromList(includes));
+    }
+    
+    public List<String> getJars()
+    {
+        return toList(_store.getString(JARS_KEY));
+    }
+
+    public void setJars(List<String> jars) throws CoreException
+    {
+        if(setValue(JARS_KEY, fromList(jars)))
+        {
+            IceClasspathContainerIntializer.reinitialize(_project, this);
+        }
     }
 
     public List<String> getDefines()
@@ -589,6 +549,31 @@ public class Configuration
         return getTranslatorForHome(dir) != null;
     }
 
+    public static String getJarDirForHome(String iceHome)
+    {
+        String os = System.getProperty("os.name");
+        if(os.equals("Linux") && iceHome.equals("/usr"))
+        {
+            File f = new File(iceHome + File.separator + "share" + File.separator + "java");
+            if(f.exists())
+            {
+                return f.toString();
+            }
+        }
+
+        File f = new File(iceHome + File.separator + "lib");
+        if(!f.exists())
+        {
+            File f2 = new File(iceHome + File.separator + "java" + File.separator + "lib");
+            if(f2.exists())
+            {
+                return f2.toString();
+            }
+        }
+        // Add the platform default even if it cannot be found.
+        return f.toString();
+    }
+
     // For some reason ScopedPreferenceStore.setValue(String, String)
     // doesn't check to see whether the stored value is the same as
     // the new value.
@@ -644,6 +629,7 @@ public class Configuration
         }
         return null;
     }
+    
 
     private String getDefaultHome()
     {
@@ -673,6 +659,7 @@ public class Configuration
         boolean value;
     }
 
+    private static final String JARS_KEY = "jars";
     private static final String INCLUDES_KEY = "includes";
     private static final String SLICE_SOURCE_DIRS_KEY = "sliceSourceDirs";
     private static final String CONSOLE_KEY = "console";

@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
@@ -71,10 +72,11 @@ public class ProjectProperties extends PropertyPage
         
         try
         {
-            _config.setIceHome(getShell(), _iceHome.getText());
+            _config.setIceHome(_iceHome.getText());
             _config.setGeneratedDir(_generatedDir.getText());
             _config.setSliceSourceDirs(Arrays.asList(_sourceDirectories.getItems()));
             _config.setIncludes(Arrays.asList(_includes.getItems()));
+            _config.setJars(Arrays.asList(_jars.getItems()));
             _config.setDefines(Configuration.toList(_defines.getText()));
             _config.setMeta(Configuration.toList(_meta.getText()));
             _config.setStream(_stream.getSelection());
@@ -167,6 +169,10 @@ public class ProjectProperties extends PropertyPage
         {
             _includes.add(iter.next());
         }
+        for(Iterator<String> iter = _config.getJars().iterator(); iter.hasNext();)
+        {
+            _jars.add(iter.next());
+        }
         _defines.setText(Configuration.fromList(_config.getDefines()));
         _meta.setText(Configuration.fromList(_config.getMeta()));
         _stream.setSelection(_config.getStream());
@@ -251,6 +257,15 @@ public class ProjectProperties extends PropertyPage
 
         _console = new Button(optionsGroup, SWT.CHECK);
         new Label(optionsGroup, SWT.NONE).setText("Enable console");
+        
+        Group includesGroup = new Group(composite, SWT.NONE);
+        includesGroup.setText("Jar Files to Reference");
+        gridLayout = new GridLayout();
+        gridLayout.numColumns = 1;
+        includesGroup.setLayout(gridLayout);
+        includesGroup.setLayoutData(new GridData(GridData.FILL_BOTH));
+        
+        createLinkList(includesGroup);
         
         return composite;
     }
@@ -511,6 +526,60 @@ public class ProjectProperties extends PropertyPage
         return composite;
     }
     
+    private Control createLinkList(Composite parent)
+    {
+        Composite composite = new Composite(parent, SWT.NONE);
+
+        GridLayout gridLayout = new GridLayout();
+        gridLayout.numColumns = 2;
+        composite.setLayout(gridLayout);
+        composite.setLayoutData(new GridData(GridData.FILL_BOTH));
+
+        _jars = new List(composite, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.BORDER);
+        _jars.setLayoutData(new GridData(GridData.FILL_BOTH));
+
+        Composite c2 = new Composite(composite, SWT.NONE);
+
+        gridLayout = new GridLayout();
+        gridLayout.numColumns = 1;
+        c2.setLayout(gridLayout);
+
+        Button but1 = new Button(c2, SWT.PUSH);
+        but1.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        but1.setText("Add");
+        but1.addSelectionListener(new SelectionAdapter()
+        {
+            public void widgetSelected(SelectionEvent e)
+            {
+                FileDialog dialog = new FileDialog(getShell());
+                dialog.setFilterPath(Configuration.getJarDirForHome(_iceHome.getText()));
+                dialog.setFilterExtensions(new String[] { "jar" });
+                String file = dialog.open();
+                if(file != null)
+                {
+                    String selected[] = dialog.getFileNames();
+                    for(int i = 0; i < selected.length; ++i)
+                    {
+                        Path p = new Path(selected[i]);
+                        _jars.add(p.lastSegment());
+                    }
+                }
+            }
+        });
+        Button but2 = new Button(c2, SWT.PUSH);
+        but2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        but2.setText("Remove");
+        but2.addSelectionListener(new SelectionAdapter()
+        {
+            public void widgetSelected(SelectionEvent e)
+            {
+                _jars.remove(_jars.getSelectionIndices());
+            }
+        });
+     
+        return composite;
+    }
+    
     private String
     semiFilter(String text)
     {
@@ -675,6 +744,7 @@ public class ProjectProperties extends PropertyPage
     private Text _generatedDir;
     private List _sourceDirectories;
     private List _includes;
+    private List _jars;
     private Text _defines;
     private Button _stream;
     private Button _tie;
