@@ -586,8 +586,10 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
                 state.out.print(out.toString());
             }
 
+            // If the build failed, add the file to the error set.
             if(status != 0)
             {
+                state.dependencies.errorSliceFiles.add(file);
                 continue;
             }
             depends.add(file);
@@ -694,6 +696,12 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
         {
             IFile f = p.next();
             
+            // Remove the file from the error list, if necessary.
+            if(state.dependencies.errorSliceFiles.contains(f))
+            {
+                state.dependencies.errorSliceFiles.remove(f);
+            }
+            
             Set<IFile> dependents = state.dependencies.sliceSliceDependencies.remove(f);
             if(dependents != null)
             {
@@ -725,6 +733,7 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
                     }
                 }
             }
+
             if(oldJavaFiles != null)
             {
                 orphanCandidateSet.addAll(oldJavaFiles);
@@ -735,15 +744,10 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
         // prior to determining additional candidates.
         candidates.addAll(removed);
         
-        // Add to the candidate set any source files that have no java output files.
-        for(Iterator<Map.Entry<IFile, Set<IFile>>> p = state.dependencies.sliceJavaDependencies.entrySet().iterator(); p.hasNext(); )
-        {
-            Map.Entry<IFile, Set<IFile>> e = p.next();
-            if(e.getValue().isEmpty())
-            {
-                candidates.add(e.getKey());
-            }
-        }
+        // Add to the candidate set any slice files that are in error. Clear the
+        // error list.
+        candidates.addAll(state.dependencies.errorSliceFiles);
+        state.dependencies.errorSliceFiles.clear();
 
         for(Iterator<IFile> p = candidates.iterator(); p.hasNext();)
         {
@@ -823,12 +827,16 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
             {
                 state.out.print(out.toString());
             }
-            
-            // Only if the build succeeded do we add the file to the list of
-            // dependencies.
+
+            // If the build succeeded add the file to the list of
+            // dependencies. Otherwise, add the file to the error list.
             if(status == 0)
             {
                 depends.add(file);
+            }
+            else
+            {
+                state.dependencies.errorSliceFiles.add(file);
             }
             
             // We need to now look at the files in the generated sub-directory,

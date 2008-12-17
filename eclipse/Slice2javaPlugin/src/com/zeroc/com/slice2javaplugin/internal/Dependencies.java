@@ -270,6 +270,7 @@ public class Dependencies
             sliceSliceDependencies = parser.sliceSliceDependencies;
             reverseSliceSliceDependencies = parser.reverseSliceSliceDependencies;
             sliceJavaDependencies = parser.sliceJavaDependencies;
+            errorSliceFiles = parser.errorSliceFiles;
         }
         catch(SAXException e)
         {
@@ -309,6 +310,7 @@ public class Dependencies
         writeDependencies(sliceSliceDependencies, doc, "sliceSliceDependencies", root);
         writeDependencies(reverseSliceSliceDependencies, doc, "reverseSliceSliceDependencies", root);
         writeDependencies(sliceJavaDependencies, doc, "sliceJavaDependencies", root);
+        writeErrorSliceFiles(errorSliceFiles, doc, "errorSliceFiles", root);
 
         // Write the DOM to the dependencies.xml file.
         TransformerFactory transfac = TransformerFactory.newInstance();
@@ -351,6 +353,20 @@ public class Dependencies
         {
             throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
                     "internal error writing dependencies", e));
+        }
+    }
+
+    private void writeErrorSliceFiles(Set<IFile> s, Document doc, String name, Element root)
+    {
+        Element jsd = doc.createElement(name);
+        root.appendChild(jsd);
+
+        for(IFile f : s)
+        {
+            Element elem = doc.createElement("file");
+            jsd.appendChild(elem);
+            Text text = doc.createTextNode(f.getProjectRelativePath().toString());
+            elem.appendChild(text);
         }
     }
 
@@ -406,6 +422,7 @@ public class Dependencies
         Map<IFile, Set<IFile>> sliceSliceDependencies = new java.util.HashMap<IFile, Set<IFile>>();
         Map<IFile, Set<IFile>> reverseSliceSliceDependencies = new java.util.HashMap<IFile, Set<IFile>>();
         Map<IFile, Set<IFile>> sliceJavaDependencies = new java.util.HashMap<IFile, Set<IFile>>();
+        Set<IFile> errorSliceFiles = new java.util.HashSet<IFile>();
 
         private Node findNode(Node n, String qName)
             throws SAXException
@@ -473,6 +490,19 @@ public class Dependencies
                 }
             }
         }
+        
+        public void visitErrorList(Set<IFile> s, Node n) throws SAXException
+        {
+            NodeList children = n.getChildNodes();
+            for(int i = 0; i < children.getLength(); ++i)
+            {
+                Node child = children.item(i);
+                if(child.getNodeType() == Node.ELEMENT_NODE && child.getNodeName().equals("file"))
+                {
+                    s.add(_project.getFile(new Path(getText(child))));
+                }
+            }
+        }
 
         public void visit(Node doc)
             throws SAXException
@@ -481,6 +511,14 @@ public class Dependencies
             visitDependencies(sliceSliceDependencies, findNode(dependencies, "sliceSliceDependencies"));
             visitDependencies(reverseSliceSliceDependencies, findNode(dependencies, "reverseSliceSliceDependencies"));
             visitDependencies(sliceJavaDependencies, findNode(dependencies, "sliceJavaDependencies"));
+            try
+            {
+                visitErrorList(errorSliceFiles, findNode(dependencies, "errorSliceFiles"));
+            }
+            catch(SAXException e)
+            {
+                // Optional.
+            }
         }
 
         DependenciesParser(IProject project)
@@ -500,6 +538,9 @@ public class Dependencies
 
     // A map of slice file to java source files.
     public Map<IFile, Set<IFile>> sliceJavaDependencies = new java.util.HashMap<IFile, Set<IFile>>();
+    
+    // A set of slice files that have not, or cannot be built.
+    public Set<IFile> errorSliceFiles = new java.util.HashSet<IFile>();
 
     private IProject _project;
     private MessageConsoleStream _err;
