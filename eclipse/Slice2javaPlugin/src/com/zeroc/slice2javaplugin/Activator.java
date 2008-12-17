@@ -10,9 +10,32 @@
 
 package com.zeroc.slice2javaplugin;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Preferences;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
+import org.eclipse.core.runtime.Preferences.PropertyChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+
+import com.zeroc.com.slice2javaplugin.internal.IceClasspathContainerIntializer;
+import com.zeroc.slice2javaplugin.builder.Slice2javaBuilder;
+import com.zeroc.slice2javaplugin.builder.Slice2javaNature;
+import com.zeroc.slice2javaplugin.preferences.PluginPreferencePage;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -42,6 +65,72 @@ public class Activator extends AbstractUIPlugin
     {
         super.start(context);
         _plugin = this;
+
+        // set the listener for the preference change
+        Preferences prefs = getPluginPreferences();
+        prefs.addPropertyChangeListener(new IPropertyChangeListener()
+        {
+            public List<IJavaProject> getSlice2JavaProjects(IJavaModel javaModel)
+            {
+                ArrayList<IJavaProject> pl = new ArrayList<IJavaProject>();
+                try
+                {
+                    for(IJavaProject p : javaModel.getJavaProjects())
+                    {
+                        try
+                        {
+                            if(p.getProject().hasNature(Slice2javaNature.NATURE_ID))
+                            {
+                                pl.add(p);
+                            }
+                        }
+                        catch(CoreException e)
+                        {
+                            // The project isn't opened, or does not exist.
+                        }
+                    }
+                }
+                catch(JavaModelException jme)
+                {
+                }
+
+                return pl;
+            }
+            public void propertyChange(PropertyChangeEvent event)
+            {
+                String property = event.getProperty();
+                if(PluginPreferencePage.SDK_PATH.equals(property))
+                {
+                    IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
+                    IJavaModel javaModel = JavaCore.create(workspaceRoot);
+                    List<IJavaProject> projects = getSlice2JavaProjects(javaModel);
+                    String value = (String)event.getNewValue();
+                    IceClasspathContainerIntializer.updateProjects(value, projects);
+                    // Need to trigger a clean build of the projects.
+                    for(final IJavaProject p : projects)
+                    {
+                        Job job = new Job("Rebuild")
+                        {
+                            protected IStatus run(IProgressMonitor monitor)
+                            {
+                                try
+                                {
+                                    p.getProject().build(IncrementalProjectBuilder.FULL_BUILD, Slice2javaBuilder.BUILDER_ID, null,
+                                            monitor);
+                                }
+                                catch(CoreException e)
+                                {
+                                    return new Status(Status.ERROR, Activator.PLUGIN_ID, 0, "rebuild failed", e);
+                                }
+                                return Status.OK_STATUS;
+                            }
+                        };
+                        job.setPriority(Job.BUILD);
+                        job.schedule(); // start as soon as possible
+                    }
+                }
+            }
+        });
     }
 
     /*

@@ -56,7 +56,7 @@ public class ProjectProperties extends PropertyPage
     public ProjectProperties()
     {
         super();
-        setTitle("Slice2java settings");
+        setTitle("Slice2Java Settings");
         noDefaultAndApplyButton();
     }
     
@@ -72,7 +72,6 @@ public class ProjectProperties extends PropertyPage
         
         try
         {
-            _config.setIceHome(_iceHome.getText());
             _config.setGeneratedDir(_generatedDir.getText());
             _config.setSliceSourceDirs(Arrays.asList(_sourceDirectories.getItems()));
             _config.setIncludes(Arrays.asList(_includes.getItems()));
@@ -131,8 +130,8 @@ public class ProjectProperties extends PropertyPage
         TabFolder tabFolder = new TabFolder(parent, SWT.NONE);
         {
             TabItem tabItem = new TabItem(tabFolder, SWT.NONE);
-            tabItem.setText("Installation");
-            Control source = createInstallation(tabFolder);
+            tabItem.setText("Configuration");
+            Control source = createConfiguration(tabFolder);
             tabItem.setControl(source);
         }
         {
@@ -159,7 +158,6 @@ public class ProjectProperties extends PropertyPage
         IProject project = (IProject)getElement();
         _config = new Configuration(project);
 
-        _iceHome.setText(_config.getIceHome());
         _generatedDir.setText(_config.getGeneratedDir());
         for(Iterator<String> iter = _config.getSliceSourceDirs().iterator(); iter.hasNext();)
         {
@@ -185,12 +183,6 @@ public class ProjectProperties extends PropertyPage
 
     private void checkValid()
     {
-        if(!Configuration.verifyIceHome(_iceHome.getText()))
-        {
-            setErrorMessage("Cannot locate valid Ice installation");
-            setValid(false);
-            return;
-        }
         IProject project = (IProject) getElement();
         IFolder folder = project.getFolder(_generatedDir.getText());
         if(!folder.exists())
@@ -203,50 +195,13 @@ public class ProjectProperties extends PropertyPage
         setErrorMessage(null);
     }
     
-    private Control createInstallation(Composite parent)
+    private Control createConfiguration(Composite parent)
     {
         Composite composite = new Composite(parent, SWT.NONE);
         
         GridLayout gridLayout = new GridLayout();
         gridLayout.numColumns = 1;
         composite.setLayout(gridLayout);
-        
-        Group iceHomeGroup = new Group(composite, SWT.NONE);
-        iceHomeGroup.setText("Location of Ice installation");
-        gridLayout = new GridLayout();
-        gridLayout.numColumns = 1;
-        iceHomeGroup.setLayout(gridLayout);
-        iceHomeGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-        Composite c = new Composite(iceHomeGroup, SWT.NONE);
-
-        GridLayout gridLayout2 = new GridLayout();
-        gridLayout2.numColumns = 2;
-        gridLayout2.marginLeft = 0;
-        gridLayout2.marginTop = 0;
-        gridLayout2.marginBottom = 0;
-        
-        c.setLayout(gridLayout2);
-        c.setLayoutData(new GridData(GridData.FILL_BOTH));
-
-        _iceHome = new Text(c, SWT.BORDER | SWT.READ_ONLY);
-        _iceHome.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-        Button but = new Button(c, SWT.PUSH);
-        but.setText("Browse");
-        but.addSelectionListener(new SelectionAdapter()
-        {
-            public void widgetSelected(SelectionEvent e)
-            {
-                DirectoryDialog chooser = new DirectoryDialog(getShell(), SWT.NONE);
-                String dir = chooser.open();
-                if(dir != null)
-                {
-                    _iceHome.setText(dir);
-                    checkValid();
-                }
-            }
-        });
         
         Group optionsGroup = new Group(composite, SWT.NONE);
         optionsGroup.setText("Builder Options");
@@ -552,7 +507,7 @@ public class ProjectProperties extends PropertyPage
             public void widgetSelected(SelectionEvent e)
             {
                 FileDialog dialog = new FileDialog(getShell());
-                dialog.setFilterPath(Configuration.getJarDirForHome(_iceHome.getText()));
+                dialog.setFilterPath(_config.getJarDir());
                 dialog.setFilterExtensions(new String[] { "jar" });
                 String file = dialog.open();
                 if(file != null)
@@ -735,8 +690,6 @@ public class ProjectProperties extends PropertyPage
 
         return composite;
     }
-
-
     
     private Configuration _config;
     private Text _iceHome;

@@ -27,8 +27,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import com.zeroc.com.slice2javaplugin.internal.Configuration.BooleanValue;
-
 public class IceClasspathContainerIntializer extends ClasspathContainerInitializer
 {
     private final static String CONTAINER_ID = "com.zeroc.Slice2javaPlugin.ICE_FRAMEWORK";
@@ -61,7 +59,7 @@ public class IceClasspathContainerIntializer extends ClasspathContainerInitializ
     private static void configure(Configuration c, IJavaProject javaProject, IPath containerPath)
         throws JavaModelException
     {
-        Path dir = new Path(Configuration.getJarDirForHome(c.getIceHome()));
+        Path dir = new Path(c.getJarDir());
         List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
         for(String jar : c.getJars())
         {
@@ -73,5 +71,23 @@ public class IceClasspathContainerIntializer extends ClasspathContainerInitializ
         IClasspathContainer container = new IceClasspathContainer(entries.toArray(new IClasspathEntry[0]), containerPath);
         JavaCore.setClasspathContainer(containerPath, new IJavaProject[] { javaProject },
                 new IClasspathContainer[] { container }, new NullProgressMonitor());
+    }
+    
+    public static void updateProjects(String value, List<IJavaProject> projects)
+    {
+        for(IJavaProject p : projects)
+        {
+            IPath containerPath = new Path(CONTAINER_ID);
+            Configuration c = new Configuration(p.getProject());
+            try
+            {
+                configure(c, p, containerPath);
+            }
+            catch(JavaModelException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
     }
 }

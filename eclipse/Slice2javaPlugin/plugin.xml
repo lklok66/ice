@@ -104,4 +104,18 @@
             id="com.zeroc.Slice2javaPlugin.ICE_FRAMEWORK">
       </classpathContainerInitializer>
    </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="com.zeroc.slice2javaplugin.preferences.PluginPreferencePage"
+            id="com.zeroc.slice2javaplugin.preferences.PluginPreferencePage"
+            name="Slice2Java">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="com.zeroc.slice2javaplugin.preferences.PreferenceInitializer">
+      </initializer>
+   </extension>
 </plugin>

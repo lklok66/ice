@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import com.zeroc.slice2javaplugin.Activator;
+import com.zeroc.slice2javaplugin.preferences.PluginPreferencePage;
 
 public class Configuration
 {
@@ -41,8 +42,6 @@ public class Configuration
         _instanceStore = new ScopedPreferenceStore(new InstanceScope(), Activator.PLUGIN_ID + "." + _project.getName());
 
         _store = new ScopedPreferenceStore(new ProjectScope(project), Activator.PLUGIN_ID);
-
-        _instanceStore.setDefault(ICE_HOME_KEY, getDefaultHome());
 
         _store.setDefault(GENERATED_KEY, GENERATED_KEY);
         _store.setDefault(DEFINES_KEY, "");
@@ -148,20 +147,6 @@ public class Configuration
         return rc;
     }
     
-    public String getIceHome()
-    {
-        return _instanceStore.getString(ICE_HOME_KEY);
-    }
-
-    public void setIceHome(String iceHome)
-        throws CoreException
-    {
-        if(setValue(_instanceStore, ICE_HOME_KEY, iceHome))
-        {
-            IceClasspathContainerIntializer.reinitialize(_project, this);
-        }
-    }
-
     public void initialize()
         throws CoreException
     {
@@ -549,8 +534,9 @@ public class Configuration
         return getTranslatorForHome(dir) != null;
     }
 
-    public static String getJarDirForHome(String iceHome)
+    public String getJarDir()
     {
+        String iceHome = getIceHome();
         String os = System.getProperty("os.name");
         if(os.equals("Linux") && iceHome.equals("/usr"))
         {
@@ -572,6 +558,11 @@ public class Configuration
         }
         // Add the platform default even if it cannot be found.
         return f.toString();
+    }
+
+    private String getIceHome()
+    {
+        return Activator.getDefault().getPreferenceStore().getString(PluginPreferencePage.SDK_PATH);
     }
 
     // For some reason ScopedPreferenceStore.setValue(String, String)
@@ -629,35 +620,6 @@ public class Configuration
         }
         return null;
     }
-    
-
-    private String getDefaultHome()
-    {
-        String os = System.getProperty("os.name");
-        if(os.equals("Linux"))
-        {
-            return "/usr";
-        }
-        else if(os.startsWith("Windows"))
-        {
-            File f = new File("C:\\Ice-3.3.0");
-            if(!f.exists())
-            {
-                File f2 = new File("C:\\Ice-3.3.0-VC90");
-                if(f2.exists())
-                {
-                    return f2.toString();
-                }
-            }
-            return f.toString();
-        }
-        return "/opt/Ice-3.3.0";
-    }
-
-    static class BooleanValue
-    {
-        boolean value;
-    }
 
     private static final String JARS_KEY = "jars";
     private static final String INCLUDES_KEY = "includes";
@@ -669,7 +631,6 @@ public class Configuration
     private static final String TIE_KEY = "tie";
     private static final String DEFINES_KEY = "defines";
     private static final String GENERATED_KEY = "generated";
-    private static final String ICE_HOME_KEY = "icehome";
 
     // Preferences store for items which should go in SCM. This includes things
     // like build flags.
@@ -680,5 +641,4 @@ public class Configuration
     private ScopedPreferenceStore _instanceStore;
 
     private IProject _project;
-
 }
