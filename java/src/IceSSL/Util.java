@@ -106,7 +106,9 @@ public final class Util
         {
             // No peer certificates.
         }
-        info.cipher = session.getCipherSuite();
+        // This isn't implemented for Android.
+        //info.cipher = session.getCipherSuite();
+        info.cipher = null;
         info.localAddr = (java.net.InetSocketAddress)fd.getLocalSocketAddress();
         info.remoteAddr = (java.net.InetSocketAddress)fd.getRemoteSocketAddress();
         info.adapterName = adapterName;

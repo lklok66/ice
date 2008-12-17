@@ -196,7 +196,7 @@ final class TransceiverI implements IceInternal.Transceiver
                         fd = connect();
                         validateConnection(fd);
                     }
-                    catch(Ice.LocalException ex)
+                    catch(RuntimeException ex)
                     {
                         if(_traceLevels.network >= 2)
                         {

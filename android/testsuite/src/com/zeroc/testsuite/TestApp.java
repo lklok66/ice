@@ -81,12 +81,9 @@ public class TestApp extends Application
 
     static final private TestSuiteEntry[] _tests =
     {
-        new TestSuiteEntry("operations client", test.Ice.operations.Client.class, null, null),
-        new TestSuiteEntry("operations server", null, test.Ice.operations.Server.class, null),
         new TestSuiteEntry("throughput", test.Ice.throughput.Client.class, test.Ice.throughput.Server.class, null),
         new TestSuiteEntry("adapterDeactivation", test.Ice.adapterDeactivation.Client.class,
                 test.Ice.adapterDeactivation.Server.class, test.Ice.adapterDeactivation.Collocated.class),
-        new TestSuiteEntry("background", test.Ice.background.Client.class, test.Ice.background.Server.class, null),
         new TestSuiteEntry("binding", test.Ice.binding.Client.class, test.Ice.binding.Server.class, null),
         new TestSuiteEntry("checksum", test.Ice.checksum.Client.class, test.Ice.checksum.Server.class, null),
         new TestSuiteEntry("custom15", test.Ice.custom15.Client.class, test.Ice.custom15.Server.class,
@@ -226,8 +223,7 @@ public class TestApp extends Application
         {
             String[] args =
             {
-                //"--Ice.NullHandleAbort=1", "--Ice.Warn.Connections=1", "--Ice.Default.Host=127.0.0.1"
-                "--Ice.NullHandleAbort=1", "--Ice.Warn.Connections=1", "--Ice.Default.Host=10.0.2.2"
+                "--Ice.NullHandleAbort=1", "--Ice.Warn.Connections=1", "--Ice.Default.Host=127.0.0.1"
             };
             if(_ssl)
             {
@@ -264,8 +260,7 @@ public class TestApp extends Application
                 "--Ice.ThreadPool.Server.SizeWarn=0",
                 "--Ice.PrintAdapterReady=1",
                 "--Ice.Trace.Network=1",
-                "--Ice.Default.Host=10.0.2.15",
-                //"--Ice.Default.Host=127.0.0.1"
+                "--Ice.Default.Host=127.0.0.1"
             };
             if(_ssl)
             {

@@ -29,7 +29,7 @@ final class TcpTransceiver implements Transceiver
                     {
                         Network.doFinishConnect(_fd);
                     }
-                    catch(Ice.LocalException ex)
+                    catch(RuntimeException ex)
                     {
                         if(_traceLevels.network >= 2)
                         {

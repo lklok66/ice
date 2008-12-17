@@ -99,8 +99,6 @@ final class AcceptorI implements IceInternal.Acceptor
                 }
             }
 
-            fd.setUseClientMode(false);
-
             fd.getSession();
         }
         catch(javax.net.ssl.SSLException ex)
@@ -248,6 +246,7 @@ final class AcceptorI implements IceInternal.Acceptor
             {
                 _fd.setNeedClientAuth(true);
             }
+            _fd.setUseClientMode(false);
 
             String[] cipherSuites =
                 _instance.filterCiphers(_fd.getSupportedCipherSuites(), _fd.getEnabledCipherSuites());

@@ -470,6 +470,10 @@ public final class IncomingConnectionFactory implements Ice.ConnectionI.StartCal
                     warning(ex);
                 }
             }
+            catch(RuntimeException ex)
+            {
+                error("acceptAsync", ex);
+            }
         }
     }
 
