@@ -485,9 +485,7 @@ public class Client extends test.Util.Application
         Ice.InitializationData initData = new Ice.InitializationData();
         initData.properties = Ice.Util.createProperties(argsH);
         initData.properties.setProperty("Ice.Package.Test", "test.Ice.throughput");
-        //initData.properties.setProperty("Throughput.Proxy", "throughput:default -p 10000 -h 127.0.0.1");
-        //initData.properties.setProperty("Throughput.Proxy", "throughput:default -p 10000 -h 10.0.2.2");
-        initData.properties.setProperty("Throughput.Proxy", "throughput:default -p 10000 -h 77.195.141.196");
+        initData.properties.setProperty("Throughput.Proxy", "throughput:default -p 10000 -h 127.0.0.1");
         initData.properties.setProperty("Ice.ACM.Client", "0");
         initData.properties.setProperty("Ice.Trace.Network", "3");
         return initData;

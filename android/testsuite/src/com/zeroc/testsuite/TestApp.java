@@ -81,7 +81,6 @@ public class TestApp extends Application
 
     static final private TestSuiteEntry[] _tests =
     {
-        new TestSuiteEntry("throughput", test.Ice.throughput.Client.class, test.Ice.throughput.Server.class, null),
         new TestSuiteEntry("adapterDeactivation", test.Ice.adapterDeactivation.Client.class,
                 test.Ice.adapterDeactivation.Server.class, test.Ice.adapterDeactivation.Collocated.class),
         new TestSuiteEntry("binding", test.Ice.binding.Client.class, test.Ice.binding.Server.class, null),
@@ -112,7 +111,7 @@ public class TestApp extends Application
         new TestSuiteEntry("slicing/objects", test.Ice.slicing.objects.Client.class,
                 test.Ice.slicing.objects.Server.class, null),
         new TestSuiteEntry("stream", test.Ice.stream.Client.class, null, null),
-
+        new TestSuiteEntry("throughput", test.Ice.throughput.Client.class, test.Ice.throughput.Server.class, null),
         new TestSuiteEntry("timeout", test.Ice.timeout.Client.class, test.Ice.timeout.Server.class, null),
     };
 
@@ -258,8 +257,6 @@ public class TestApp extends Application
                 "--Ice.ThreadPool.Server.Size=1",
                 "--Ice.ThreadPool.Server.SizeMax=3",
                 "--Ice.ThreadPool.Server.SizeWarn=0",
-                "--Ice.PrintAdapterReady=1",
-                "--Ice.Trace.Network=1",
                 "--Ice.Default.Host=127.0.0.1"
             };
             if(_ssl)

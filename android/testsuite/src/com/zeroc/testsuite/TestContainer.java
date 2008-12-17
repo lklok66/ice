@@ -57,6 +57,7 @@ public class TestContainer extends ListActivity implements TestApp.TestListener
         _partial = false;
         _strings.clear();
         _adapter.notifyDataSetChanged();
+        _next.setEnabled(false);
     }
     
     public void onComplete(int status)
