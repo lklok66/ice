@@ -1,5 +1,6 @@
-#Sat Nov 22 10:52:28 NST 2008
+#Thu Dec 18 13:31:30 NST 2008
 eclipse.preferences.version=1
 icejar=/Users/matthew/cvs/ice-33/java/lib/Ice.jar
 includes=../../../slice
+jars=
 stream=true

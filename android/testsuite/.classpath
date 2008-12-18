@@ -4,5 +4,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="com.zeroc.Slice2javaPlugin.ICE_FRAMEWORK"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
+	<classpathentry kind="lib" path="/Users/matthew/cvs/ice-33/java/lib/IceAndroid.jar"/>
+	<classpathentry kind="lib" path="/Users/matthew/cvs/ice-33/java/lib/IceTest.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
