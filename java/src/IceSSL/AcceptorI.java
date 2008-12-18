@@ -66,7 +66,7 @@ final class AcceptorI implements IceInternal.Acceptor
             ex.reason = "IceSSL: plugin is not initialized";
             throw ex;
         }
-        
+
         javax.net.ssl.SSLSocket fd = null;
         try
         {
@@ -74,28 +74,34 @@ final class AcceptorI implements IceInternal.Acceptor
 
             //
             // Check whether this socket is the result of a call to connectToSelf.
-            // Despite the fact that connectToSelf immediately closes the socket,
-            // the server-side handshake process does not raise an exception.
-            // Furthermore, we can't simply proceed with the regular handshake
-            // process because we don't want to pass such a socket to the
-            // certificate verifier (if any).
-            //
             // In order to detect a call to connectToSelf, we compare the remote
-            // address of the newly-accepted socket to that in _connectToSelfAddr.
+            // address of the newly-accepted socket to the local address of
+            // _connectToSelfFd.
             //
             java.net.SocketAddress remoteAddr = fd.getRemoteSocketAddress();
             synchronized(this)
             {
-                if(remoteAddr.equals(_connectToSelfAddr))
+                if(_connectToSelfFd != null)
                 {
-                    try
+                    java.net.SocketAddress addr = _connectToSelfFd.getLocalSocketAddress();
+                    if(remoteAddr.equals(addr))
                     {
-                        fd.close();
+                        try
+                        {
+                            fd.close();
+                        }
+                        catch(java.io.IOException e)
+                        {
+                        }
+                        try
+                        {
+                            _connectToSelfFd.close();
+                        }
+                        catch(java.io.IOException e)
+                        {
+                        }
+                        return null;
                     }
-                    catch(java.io.IOException e)
-                    {
-                    }
-                    return null;
                 }
             }
 
@@ -182,18 +188,37 @@ final class AcceptorI implements IceInternal.Acceptor
 
     public void connectToSelf()
     {
-        java.nio.channels.SocketChannel fd = IceInternal.Network.createTcpSocket();
-        synchronized(this)
+        //
+        // This method is called when it is time to shut down this acceptor. The objective
+        // is to wake up the thread blocked in accept(). Android requires that we establish
+        // an SSL connection in order to unblock accept(). We do this in a separate thread
+        // because SSL connections are expensive.
+        //
+        new Thread()
         {
-            //
-            // connectToSelf is called to wake up the thread blocked in
-            // accept. We remember the originating address for use in
-            // accept. See accept for details.
-            //
-            IceInternal.Network.doConnect(fd, _addr);
-            _connectToSelfAddr = (java.net.InetSocketAddress)fd.socket().getLocalSocketAddress();
-        }
-        IceInternal.Network.closeSocket(fd);
+            public void run()
+            {
+                javax.net.ssl.SSLSocket fd = null;
+                try
+                {
+                    javax.net.SocketFactory factory = _instance.context().getSocketFactory();
+                    fd = (javax.net.ssl.SSLSocket)factory.createSocket(_addr.getAddress(), _addr.getPort());
+                    synchronized(AcceptorI.this)
+                    {
+                        //
+                        // accept() will close this socket.
+                        //
+                        _connectToSelfFd = fd;
+                    }
+                    fd.setUseClientMode(true);
+                    fd.startHandshake();
+                    fd.getSession().invalidate();
+                }
+                catch(java.io.IOException ex)
+                {
+                }
+            }
+        }.start();
     }
 
     public String
@@ -324,5 +349,5 @@ final class AcceptorI implements IceInternal.Acceptor
     private javax.net.ssl.SSLServerSocket _fd;
     private int _backlog;
     private java.net.InetSocketAddress _addr;
-    private java.net.InetSocketAddress _connectToSelfAddr;
+    private java.net.Socket _connectToSelfFd;
 }

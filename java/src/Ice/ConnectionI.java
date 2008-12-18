@@ -175,7 +175,7 @@ public final class ConnectionI implements Connection, IceInternal.TimerTask
 
     public synchronized boolean isFinished()
     {
-        if(_transceiver != null || _dispatchCount != 0)
+        if(!_finished || _dispatchCount != 0)
         {
             return false;
         }
@@ -231,7 +231,7 @@ public final class ConnectionI implements Connection, IceInternal.TimerTask
         // Now we must wait until close() has been called on the
         // transceiver.
         //
-        while(_transceiver != null)
+        while(!_finished)
         {
             try
             {
@@ -963,6 +963,7 @@ public final class ConnectionI implements Connection, IceInternal.TimerTask
             }
         };
         _reading = false;
+        _finished = false;
 
         _warn = initData.properties.getPropertyAsInt("Ice.Warn.Connections") > 0 ? true : false;
         _warnUdp = initData.properties.getPropertyAsInt("Ice.Warn.Datagrams") > 0;
@@ -1476,7 +1477,7 @@ public final class ConnectionI implements Connection, IceInternal.TimerTask
         {
             assert _sendInProgress;
             assert _sendStreams.size() > 0;
-            assert _transceiver != null;
+            assert !_finished;
 
             //
             // An I/O request has completed, so cancel a pending timeout.
@@ -1592,7 +1593,7 @@ public final class ConnectionI implements Connection, IceInternal.TimerTask
                     return;
                 }
 
-                assert (_transceiver != null);
+                assert !_finished;
 
                 if(readEx != null)
                 {
@@ -2360,7 +2361,7 @@ public final class ConnectionI implements Connection, IceInternal.TimerTask
         // such as the timer might be destroyed too).
         synchronized(this)
         {
-            _transceiver = null;
+            _finished = true;
             notifyAll();
         }
     }
@@ -2656,4 +2657,5 @@ public final class ConnectionI implements Connection, IceInternal.TimerTask
     private boolean _overrideCompress;
     private boolean _overrideCompressValue;
     private boolean _cacheBuffers;
+    private boolean _finished;
 }
