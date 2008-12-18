@@ -210,16 +210,6 @@ final class TransceiverI implements IceInternal.Transceiver
                     String s = "failed to establish ssl connection\n" + _desc + "\n" + ex;
                     _logger.trace(_traceLevels.networkCat, s);
                 }
-                if(_connectfd != null)
-                {
-                    try
-                    {
-                        _connectfd.close();
-                    }
-                    catch(java.io.IOException e)
-                    {
-                    }
-                }
                 _callback.complete(ex);
                 return;
             }
