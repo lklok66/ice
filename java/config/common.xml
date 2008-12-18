@@ -223,32 +223,17 @@
             </and>
         </condition>
 
-        <condition property="dist.jar.file" value="${dist.lib.dir}/Ice-java2-${ice.version}.jar">
-            <and>
-                <available file="${dist.lib.dir}/Ice-java2-${ice.version}.jar"/>
-                <isset property="java2"/>
-            </and>
-        </condition>
-
-        <condition property="dist.jar.file" value="${dist.lib.dir}/java2/Ice.jar">
-            <and>
-                <not><isset property="dist.jar.file"/></not>
-                <available file="${dist.lib.dir}/java2/Ice.jar"/>
-                <isset property="java2"/>
-            </and>
-        </condition>
-
-        <condition property="dist.jar.file" value="${dist.lib.dir}/Ice-${ice.version}.jar">
+        <condition property="dist.jar.file" value="${dist.lib.dir}/IceAndroid-${ice.version}.jar">
             <and>
                 <not><isset property="dist.jar.file"/></not>
                 <available file="${dist.lib.dir}/Ice-${ice.version}.jar"/>
             </and>
         </condition>
 
-        <condition property="dist.jar.file" value="${dist.lib.dir}/Ice.jar">
+        <condition property="dist.jar.file" value="${dist.lib.dir}/IceAndroid.jar">
             <and>
                 <not><isset property="dist.jar.file"/></not>
-                <available file="${dist.lib.dir}/Ice.jar"/>
+                <available file="${dist.lib.dir}/IceAndroid.jar"/>
             </and>
         </condition>
 

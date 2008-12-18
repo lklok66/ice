@@ -13,22 +13,10 @@
 
     <target name="all">
         <ant dir="Ice"/>
-        <ant dir="Freeze"/>
-        <ant dir="IceBox"/>
-        <ant dir="IceStorm"/>
-        <ant dir="Glacier2"/>
-        <ant dir="IceGrid"/>
-        <ant dir="book"/>
     </target>
 
     <target name="clean">
         <ant dir="Ice" target="clean"/>
-        <ant dir="Freeze" target="clean"/>
-        <ant dir="IceBox" target="clean"/>
-        <ant dir="IceStorm" target="clean"/>
-        <ant dir="Glacier2" target="clean"/>
-        <ant dir="IceGrid" target="clean"/>
-        <ant dir="book" target="clean"/>
     </target>
 
 </project>

@@ -78,39 +78,7 @@
                 <include name="Stats.ice" />
                 <include name="Connection.ice" />
             </fileset>
-            <fileset dir="${slice.dir}/Freeze">
-                <include name="DB.ice" />
-                <include name="Connection.ice" />
-                <include name="Transaction.ice" />
-                <include name="Exception.ice" />
-                <include name="Evictor.ice" />
-                <include name="TransactionalEvictor.ice" />
-                <include name="BackgroundSaveEvictor.ice" />
-                <include name="EvictorStorage.ice" />
-                <include name="CatalogData.ice" />
-            </fileset>
-            <fileset dir="${src.dir}/Freeze">
-                <include name="PingObject.ice" />
-            </fileset>
         </slice2java>
-
-        <slice2freezej outputdir="${generated.dir}" dependencyfile="${generated.dir}/.depend.Freeze">
-            <meta value="${java2metadata}"/>
-            <includepath>
-                <pathelement path="${slice.dir}" />
-            </includepath>
-            <fileset dir="${slice.dir}/Freeze" includes="CatalogData.ice"/>
-            <dict name="Freeze.Catalog" key="string" value="Freeze::CatalogData"/>
-        </slice2freezej>
-
-        <slice2freezej ice="on" outputdir="${generated.dir}" dependencyfile="${generated.dir}/.depend.Freeze">
-            <meta value="${java2metadata}"/>
-            <includepath>
-                <pathelement path="${slice.dir}" />
-            </includepath>
-            <fileset dir="${slice.dir}/Ice" includes="BuiltinSequences.ice"/>
-            <dict name="Freeze.CatalogIndexList" key="string" value="Ice::StringSeq"/>
-        </slice2freezej>
 
         <!-- Generate Slice checksums for the Ice services. -->
 
@@ -178,23 +146,19 @@
         <javac srcdir="${generated.dir}:${src.dir}" destdir="${lib.dir}"
             source="1.5" debug="${debug}"
 	    includes="**"
-	    excludes="IceGridGUI/**"
 	    deprecation="on">
             <compilerarg value="${javac.lint}"/>
         </javac>
     </target>
 
     <target name="ice-jar" depends="ice-compile">
-        <jar jarfile="${lib.dir}/Ice.jar" basedir="${lib.dir}">
+        <jar jarfile="${lib.dir}/IceAndroid.jar" basedir="${lib.dir}">
             <include name="**/*.class"/>
-            <exclude name="Freeze/**"/>
-            <exclude name="IceGridGUI/**"/>
             <exclude name="test/**"/>
             <exclude name="ant/**"/>
             <exclude name="*.jar"/>
             <manifest>
                 <attribute name="Built-By" value="ZeroC, Inc."/>
-                <attribute name="Class-Path" value="Freeze.jar"/>
             </manifest>
         </jar>
     </target>
@@ -263,18 +227,6 @@
             <fileset dir="test/Ice/timeout">
                 <include name="Test.ice" />
             </fileset>
-            <fileset dir="test/Freeze/complex">
-                <include name="Complex.ice" />
-            </fileset>
-	    <fileset dir="test/Glacier2/router/">
-                <include name="Callback.ice" />
-            </fileset>
-	    <fileset dir="test/IceGrid/simple/">
-                <include name="Test.ice" />
-            </fileset>
-	    <fileset dir="test/IceBox/configuration/">
-                <include name="Test.ice" />
-            </fileset>
 	    <fileset dir="test/IceSSL/configuration/">
                 <include name="Test.ice" />
             </fileset>
@@ -285,61 +237,6 @@
                 <include name="Throughput.ice" />
             </fileset>
         </slice2java>
-
-        <slice2java tie="on" outputdir="${generated.test.dir}" dependencyfile="${generated.test.dir}/.depend.Test">
-            <includepath>
-                <pathelement path="${slice.dir}" />
-            </includepath>
-            <meta value="${java2metadata}"/>
-            <fileset dir="test/Freeze/evictor">
-                <include name="Test.ice" />
-            </fileset>
-            <fileset dir="test/Freeze/oldevictor">
-                <include name="Test.ice" />
-            </fileset>
-        </slice2java>
-
-        <!-- test/Freeze/complex -->
-        <slice2freezej outputdir="${generated.test.dir}" dependencyfile="${generated.test.dir}/.depend.Test">
-	    <meta value="${java2metadata}"/>
-            <dict name="test.Freeze.complex.Complex.ComplexDict" key="Complex::Key" value="Complex::Node"/>
-            <fileset dir="test/Freeze/complex">
-                <include name="Complex.ice" />
-            </fileset>
-        </slice2freezej>
-
-        <!-- test/Freeze/dbmap -->
-        <slice2freezej outputdir="${generated.test.dir}" dependencyfile="${generated.test.dir}/.depend.Test">
-	    <meta value="${java2metadata}"/>
-            <dict name="test.Freeze.dbmap.ByteIntMap" key="byte" value="int"/>
-            <dictindex name="test.Freeze.dbmap.ByteIntMap"/>
-        </slice2freezej>
-        <slice2freezej ice="on" outputdir="${generated.test.dir}">
-	    <meta value="${java2metadata}"/>
-            <includepath>
-                <pathelement path="${slice.dir}" />
-            </includepath>
-            <fileset dir="${slice.dir}/Ice" includes="Identity.ice"/>
-            <dict name="test.Freeze.dbmap.IntIdentityMap" key="int" value="Ice::Identity"/>
-        </slice2freezej>
-        <slice2freezej ice="on" outputdir="${generated.test.dir}">
-	    <meta value="${java2metadata}"/>
-           <includepath>
-                <pathelement path="${slice.dir}" />
-            </includepath>
-            <fileset dir="${slice.dir}/Ice" includes="Identity.ice"/>
-           <dict name="test.Freeze.dbmap.IntIdentityMapWithIndex" key="int" value="Ice::Identity"/>
-           <dictindex name="test.Freeze.dbmap.IntIdentityMapWithIndex" member="category"/>  
-        </slice2freezej>
-        <slice2freezej ice="on" outputdir="${generated.test.dir}">
-	    <meta value="${java2metadata}"/>
-           <includepath>
-                <pathelement path="${slice.dir}" />
-            </includepath>
-            <fileset dir="${slice.dir}/Ice" includes="Identity.ice"/>
-           <dict name="test.Freeze.dbmap.SortedMap" key="int" value="Ice::Identity"/>
-           <dictindex name="test.Freeze.dbmap.SortedMap" member="category"/>  
-        </slice2freezej>
 
         <slice2java stream="on" outputdir="${generated.test.dir}" dependencyfile="${generated.test.dir}/.depend.Test">
             <meta value="${java2metadata}"/>
@@ -390,18 +287,7 @@
         </slice2java>
     </target>
 
-    <target name="custom-test-generate4" depends="test-generate" if="java2">
-        <!-- Create the output directory for generated code -->
-        <mkdir dir="${generated.test.dir}"/>
-        <slice2java outputdir="${generated.test.dir}" dependencyfile="${generated.test.dir}/.depend.Test">
-            <meta value="${java2metadata}"/>
-            <fileset dir="test/Ice/custom14">
-                <include name="Test.ice" />
-            </fileset>
-        </slice2java>
-    </target>
-
-    <target name="custom-test-generate5" depends="test-generate" unless="java2">
+    <target name="custom-test-generate5" depends="test-generate">
         <!-- Create the output directory for generated code -->
         <mkdir dir="${generated.test.dir}"/>
         <slice2java outputdir="${generated.test.dir}" dependencyfile="${generated.test.dir}/.depend.Test">
@@ -411,7 +297,7 @@
         </slice2java>
     </target>
 
-    <target name="custom-test-generate" depends="custom-test-generate4,custom-test-generate5"/>
+    <target name="custom-test-generate" depends="custom-test-generate5"/>
 
     <target name="test-compile-generated" depends="ice-compile,test-generate,custom-test-generate">
         <mkdir dir="${lib.dir}"/>
@@ -456,13 +342,6 @@
 	    <include name="test/Ice/slicing/objects/"/>
 	    <include name="test/Ice/stream/"/>
 	    <include name="test/Ice/timeout/"/>
-	    <include name="test/Freeze/complex/"/>
-	    <include name="test/Freeze/dbmap/"/>
-	    <include name="test/Freeze/evictor/"/>
-	    <include name="test/Freeze/oldevictor/"/>
-	    <include name="test/Glacier2/router/"/>
-	    <include name="test/IceGrid/simple/"/>
-	    <include name="test/IceBox/configuration/"/>
 	    <include name="test/IceSSL/configuration/"/>
 	    <include name="test/IceUtil/inputUtil/"/>
 	    <include name="test/Slice/keyword/"/>
@@ -471,16 +350,7 @@
         </javac>
     </target>
 
-    <target name="test-custom-compile4" depends="test-compile-generated" if="java2">
-        <mkdir dir="${lib.dir}"/>
-        <mkdir dir="${cache.dir}"/>
-        <depend srcdir="." destdir="${lib.dir}" cache="${cache.dir}"/>
-        <javac srcdir="." destdir="${lib.dir}" debug="${debug}">
-	    <include name="test/Ice/custom14/"/>
-	</javac>
-    </target>
-
-    <target name="test-custom-compile5" depends="test-compile-generated" unless="java2">
+    <target name="test-custom-compile5" depends="test-compile-generated">
         <mkdir dir="${lib.dir}"/>
         <mkdir dir="${cache.dir}"/>
         <depend srcdir="." destdir="${lib.dir}" cache="${cache.dir}"/>
@@ -490,123 +360,29 @@
 	</javac>
     </target>
 
-    <target name="test-compile" depends="test-compile-base,test-custom-compile4,test-custom-compile5"/>
+    <target name="test-compile" depends="test-compile-base,test-custom-compile5"/>
 
     <target name="test-jar" depends="test-compile">
         <jar jarfile="${lib.dir}/IceTest.jar" basedir="${lib.dir}">
             <include name="test/**"/>
-            <exclude name="test/Freeze/**"/>
             <manifest>
                 <attribute name="Built-By" value="ZeroC, Inc."/>
-                <attribute name="Class-Path" value="Ice.jar"/>
+                <attribute name="Class-Path" value="IceAndroid.jar"/>
             </manifest>
         </jar>
     </target>
 
-    <target name="freeze-jar" depends="ice-compile">
-        <jar jarfile="${lib.dir}/Freeze.jar" basedir="${lib.dir}">
-            <include name="Freeze/**"/>
-            <manifest>
-                <attribute name="Built-By" value="ZeroC, Inc."/>
-                <attribute name="Class-Path" value="db.jar db-${db.version}.jar /usr/share/java/db-${db.version}.jar ../db.jar"/>
-            </manifest>
-        </jar>
-    </target>
-
-    <target name="icegridadmin-compile" depends="ice-compile" unless="java2">
-        <javac srcdir="${src.dir}" destdir="${lib.dir}"
-            source="1.5" debug="${debug}"
-            includes="IceGridGUI/**"
-            classpath="${jgoodies.looks}:${jgoodies.forms}"
-            deprecation="on"/>
-    </target>
-
-    <condition property="build-icegridadmin-pro-jar">
-        <and>
-            <available classname="proguard.ant.ProGuardTask" classpath="${env.CLASSPATH}" />
-            <available file="${jgoodies.looks}" />
-            <available file="${jgoodies.forms}" />
-            <not><isset property="java2"/></not>
-        </and>
-    </condition>
-
-    <condition property="build-icegridadmin-plain-jar">
-        <and>
-            <not><isset property="build-icegridadmin-pro-jar"/></not>
-            <not><isset property="java2"/></not>
-        </and>
-    </condition>
-
-    <target name="icegridadmin-plain-jar" depends="icegridadmin-compile" if="build-icegridadmin-plain-jar">
-        <manifest file="${lib.dir}/icegridgui.mf">
-            <attribute name="Class-Path" value="Ice.jar ../resources/"/>
-        </manifest>
-        <jar jarfile="${lib.dir}/IceGridGUI.jar" manifest="${lib.dir}/icegridgui.mf" basedir="${lib.dir}">
-            <include name="IceGridGUI/**"/>
-        </jar>
-        <delete file="${lib.dir}/icegridgui.mf" />
-    </target>
-
-    <target name="icegridadmin-pro-jar" depends="icegridadmin-compile" if="build-icegridadmin-pro-jar">
-        <condition property="library.jarfiles" value="classes.jar,jsse.jar">
-            <os family="mac"/>
-        </condition>
-        <condition property="library.jarfiles" value="rt.jar,jsse.jar">
-            <!-- Library jar files for Sun JDK -->
-            <available file="${java.home}/lib/rt.jar"/>
-        </condition>
-        <condition property="library.jarfiles" value="vm.jar,core.jar,graphics.jar,security.jar">
-            <!-- Library jar files for IBM J9 (from Linux SuSE) -->
-            <available file="${java.home}/lib/vm.jar"/>
-        </condition>
-        <condition property="library.jarpath" value="${java.home}/../Classes" else="${java.home}/lib">
-            <os family="mac"/>
-        </condition>
-        <pathconvert property="library.jars">
-           <filelist dir="${library.jarpath}" files="${library.jarfiles}"/>
-           <mapper>
-              <!-- Add quotes around the patch of each Jar file (necessary for Windows) -->
-              <globmapper from="*" to="&quot;*&quot;"/>   
-           </mapper>
-        </pathconvert>
-
-        <manifest file="${lib.dir}/icegridgui.mf">
-            <attribute name="Main-Class" value="IceGridGUI.Main"/>
-            <attribute name="Class-Path" value="../help/ ../resources/ ../doc/ice-${ice.version}/help/ ../doc/packages/ice-${ice.version}/help/"/>
-        </manifest>
-        <jar jarfile="${lib.dir}/IceGridGUItemp.jar" manifest="${lib.dir}/icegridgui.mf" basedir="${lib.dir}">
-            <include name="IceGridGUI/**"/>
-        </jar>
-        <jar jarfile="${lib.dir}/IceGridGUItemp.jar" manifest="${lib.dir}/icegridgui.mf" basedir="resources"
-            update="true">
-            <include name="icons/**"/>
-        </jar>
-        <delete file="${lib.dir}/icegridgui.mf" />
-        <taskdef resource="proguard/ant/task.properties"/>
-
-        <proguard>
-             -injars ${lib.dir}/IceGridGUItemp.jar
-             -injars ${lib.dir}/Ice.jar(!META-INF/**,!Freeze/**)
-             -injars ${jgoodies.looks}(!META-INF/**)
-             -injars ${jgoodies.forms}(!META-INF/**)
-             -outjars ${lib.dir}/IceGridGUI.jar
-             -libraryjars ${library.jars}
-             -include config/icegridgui.pro
-        </proguard>
-        <delete file="${lib.dir}/IceGridGUItemp.jar" />
-    </target>
-
-    <target name="compile" depends="ice-compile, icegridadmin-compile">
+    <target name="compile" depends="ice-compile">
     </target>
 
     <target name="test" depends="test-compile, ice-compile">
     </target>
 
-    <target name="jar" depends="ice-jar, test-jar, freeze-jar, icegridadmin-plain-jar, icegridadmin-pro-jar"/>
+    <target name="jar" depends="ice-jar, test-jar"/>
 
     <target name="all" depends="jar">
-        <ant inheritAll="false" dir="demo"/>
         <ant inheritAll="false" dir="test"/>
+        <ant inheritAll="false" dir="demo"/>
     </target>
 
     <target name="install-common">
@@ -629,28 +405,16 @@
         </copy>
     </target>
 
-    <target name="install-icegridgui-jar" unless="java2">
-        <mkdir dir="${prefix}/help"/>
-        <copy file="${lib.dir}/IceGridGUI.jar" todir="${prefix}/lib"/>
-        <copy todir="${prefix}/help">
-            <fileset dir="resources" includes="IceGridAdmin/**"/>
-        </copy>
-    </target>
-
-    <target name="install-jar" unless="java2">
-        <copy file="${lib.dir}/Ice.jar" todir="${prefix}/lib"/>
-    </target>
-
-    <target name="install-java2-jar" if="java2">
-        <mkdir dir="${prefix}/lib/java2"/>
-        <copy file="${lib.dir}/Ice.jar" todir="${prefix}/lib/java2"/>
+    <target name="install-jar">
+        <copy file="${lib.dir}/IceAndroid.jar" todir="${prefix}/lib"/>
+        <copy file="${lib.dir}/IceTest.jar" todir="${prefix}/lib"/>
     </target>
 
     <target name="install-tasks">
         <copy file="${lib.dir}/ant-ice.jar" todir="${prefix}/lib"/>
     </target>
 
-    <target name="install" depends="jar, install-common, install-jar, install-java2-jar, install-icegridgui-jar, install-tasks, install-slice">
+    <target name="install" depends="jar, install-common, install-jar, install-tasks, install-slice">
     </target>
 
     <target name="clean" depends="config-init">
@@ -658,7 +422,6 @@
         <delete dir="${generated.test.dir}"/>
         <delete deleteonexit="true" dir="${lib.dir}"/>
         <delete dir="${cache.dir}"/>
-        <ant inheritAll="false" dir="demo" target="clean"/>
         <ant inheritAll="false" dir="test" target="clean"/>
     </target>
 
