@@ -38,30 +38,6 @@ public class Client extends test.Util.Application
         }
     }
 
-    private static void
-    menu()
-    {
-        System.out.println(
-        "usage:\n" +
-        "\n" +
-        "toggle type of data to send:\n" +
-        "1: sequence of bytes (default)\n" +
-        "2: sequence of strings (\"hello\")\n" +
-        "3: sequence of structs with a string (\"hello\") and a double\n" +
-        "4: sequence of structs with two ints and a double\n" +
-        "\n" +
-        "select test to run:\n" +
-        "t: Send sequence as twoway\n" +
-        "o: Send sequence as oneway\n" +
-        "r: Receive sequence\n" +
-        "e: Echo (send and receive) sequence\n" +
-        "\n" +
-        "other commands:\n" +
-        "s: shutdown server\n" +
-        "x: exit\n" +
-        "?: help\n");
-    }
-
     public int
     run(String[] args)
     {
@@ -86,24 +62,30 @@ public class Client extends test.Util.Application
         }
         ThroughputPrx throughputOneway = ThroughputPrxHelper.uncheckedCast(throughput.ice_oneway());
 
-        byte[] byteSeq = new byte[ByteSeqSize.value];
+        int factor = 1;
+        if(communicator().getProperties().getPropertyWithDefault("Ice.Default.Protocol", "tcp").equals("ssl"))
+        {
+            factor = 10;
+        }
 
-        String[] stringSeq = new String[StringSeqSize.value];
-        for(int i = 0; i < StringSeqSize.value; ++i)
+        byte[] byteSeq = new byte[ByteSeqSize.value / factor];
+
+        String[] stringSeq = new String[StringSeqSize.value / factor];
+        for(int i = 0; i < StringSeqSize.value / factor; ++i)
         {
             stringSeq[i] = "hello";
         }
 
-        StringDouble[] structSeq = new StringDouble[StringDoubleSeqSize.value];
-        for(int i = 0; i < StringDoubleSeqSize.value; ++i)
+        StringDouble[] structSeq = new StringDouble[StringDoubleSeqSize.value / factor];
+        for(int i = 0; i < StringDoubleSeqSize.value / factor; ++i)
         {
             structSeq[i] = new StringDouble();
             structSeq[i].s = "hello";
             structSeq[i].d = 3.14;
         }
 
-        Fixed[] fixedSeq = new Fixed[FixedSeqSize.value];
-        for(int i = 0; i < FixedSeqSize.value; ++i)
+        Fixed[] fixedSeq = new Fixed[FixedSeqSize.value / factor];
+        for(int i = 0; i < FixedSeqSize.value / factor; ++i)
         {
             fixedSeq[i] = new Fixed();
             fixedSeq[i].i = 0;
@@ -111,55 +93,10 @@ public class Client extends test.Util.Application
             fixedSeq[i].d = 0;
         }
 
-        //
-        // A method needs to be invoked thousands of times before the
-        // JIT compiler will convert it to native code. To ensure an
-        // accurate throughput measurement, we need to "warm up" the
-        // JIT compiler.
-        //
-
-/*
-        {
-            byte[] emptyBytes= new byte[1];
-            String[] emptyStrings = new String[1];
-            StringDouble[] emptyStructs = new StringDouble[1];
-            emptyStructs[0] = new StringDouble();
-            Fixed[] emptyFixed = new Fixed[1];
-            emptyFixed[0] = new Fixed();
-
-            throughput.startWarmup();
-
-            out.print("warming up the client/server...");
-            out.flush();
-            for(int i = 0; i < 10000; i++)
-            {
-                throughput.sendByteSeq(emptyBytes);
-                throughput.sendStringSeq(emptyStrings);
-                throughput.sendStructSeq(emptyStructs);
-                throughput.sendFixedSeq(emptyFixed);
-
-                throughput.recvByteSeq();
-                throughput.recvStringSeq();
-                throughput.recvStructSeq();
-                throughput.recvFixedSeq();
-                
-                throughput.echoByteSeq(emptyBytes);
-                throughput.echoStringSeq(emptyStrings);
-                throughput.echoStructSeq(emptyStructs);
-                throughput.echoFixedSeq(emptyFixed);
-            }
-            throughput.endWarmup();
-            
-            out.println(" ok");
-        }
-*/
-
-        menu();
-
-        java.io.BufferedReader in = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
+        // No warm up for Android.
 
         char currentType = '1';
-        int seqSize = ByteSeqSize.value;
+        int seqSize = ByteSeqSize.value / factor;
 
         // Initial ping to setup the connection.
         throughput.ice_ping();
@@ -171,13 +108,6 @@ public class Client extends test.Util.Application
         {
             try
             {
-                //out.print("==> ");
-                //out.flush();
-                //line = in.readLine();
-                //if(line == null)
-                //{
-                //    break;
-                //}
                 line = input[inputIndex++];
 
                 long tmsec = System.currentTimeMillis();
@@ -192,28 +122,28 @@ public class Client extends test.Util.Application
                         case '1':
                         {
                             out.println("using byte sequences");
-                            seqSize = ByteSeqSize.value;
+                            seqSize = ByteSeqSize.value / factor;
                             break;
                         }
 
                         case '2':
                         {
                             out.println("using string sequences");
-                            seqSize = StringSeqSize.value;
+                            seqSize = StringSeqSize.value / factor;
                             break;
                         }
 
                         case '3':
                         {
                             out.println("using variable-length struct sequences");
-                            seqSize = StringDoubleSeqSize.value;
+                            seqSize = StringDoubleSeqSize.value / factor;
                             break;
                         }
 
                         case '4':
                         {
                             out.println("using fixed-length struct sequences");
-                            seqSize = FixedSeqSize.value;
+                            seqSize = FixedSeqSize.value / factor;
                             break;
                         }
                     }
@@ -462,12 +392,10 @@ public class Client extends test.Util.Application
                 }
                 else if(line.equals("?"))
                 {
-                    menu();
                 }
                 else
                 {
                     out.println("unknown command `" + line + "'");
-                    menu();
                 }
             }
             catch(Ice.LocalException ex)

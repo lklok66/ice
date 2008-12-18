@@ -20,26 +20,32 @@ import test.Ice.throughput.Demo._ThroughputDisp;
 public final class ThroughputI extends _ThroughputDisp
 {
     public
-    ThroughputI()
+    ThroughputI(Ice.Communicator communicator)
     {
-        _byteSeq = new byte[ByteSeqSize.value];
+        int factor = 1;
+        if(communicator.getProperties().getPropertyWithDefault("Ice.Default.Protocol", "tcp").equals("ssl"))
+        {
+            factor = 10;
+        }
 
-        _stringSeq = new String[StringSeqSize.value];
-        for(int i = 0; i < StringSeqSize.value; ++i)
+        _byteSeq = new byte[ByteSeqSize.value / factor];
+
+        _stringSeq = new String[StringSeqSize.value / factor];
+        for(int i = 0; i < StringSeqSize.value / factor; ++i)
         {
             _stringSeq[i] = "hello";
         }
 
-        _structSeq = new StringDouble[StringDoubleSeqSize.value];
-        for(int i = 0; i < StringDoubleSeqSize.value; ++i)
+        _structSeq = new StringDouble[StringDoubleSeqSize.value / factor];
+        for(int i = 0; i < StringDoubleSeqSize.value / factor; ++i)
         {
             _structSeq[i] = new StringDouble();
             _structSeq[i].s = "hello";
             _structSeq[i].d = 3.14;
         }
 
-        _fixedSeq = new Fixed[FixedSeqSize.value];
-        for(int i = 0; i < FixedSeqSize.value; ++i)
+        _fixedSeq = new Fixed[FixedSeqSize.value / factor];
+        for(int i = 0; i < FixedSeqSize.value / factor; ++i)
         {
             _fixedSeq[i] = new Fixed();
             _fixedSeq[i].i = 0;
