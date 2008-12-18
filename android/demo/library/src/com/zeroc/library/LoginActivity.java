@@ -26,7 +26,7 @@ import android.widget.EditText;
 
 public class LoginActivity extends Activity
 {
-    private static final String DEFAULT_HOST = "demo.zeroc.com";
+    private static final String DEFAULT_HOST = "demo2.zeroc.com";
     private static final boolean DEFAULT_SECURE = false;
     private static final boolean DEFAULT_GLACIER2 = false;
     private static final String HOSTNAME_KEY = "host";
