@@ -31,7 +31,7 @@ CPPFLAGS	= $(CPPFLAGS) -D_AFXDLL
 PDBFLAGS        = /pdb:$(CLIENT:.exe=.pdb)
 !endif
 
-!if "$(WINDOWS_MOBILE_SDK)" == ""
+!if "$(WINDOWS_MOBILE_SDK)" != "yes"
 
 RESFILE         = HelloClient.res
 

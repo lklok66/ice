@@ -17,7 +17,7 @@ SUBDIRS		= minimal \
 		  chat \
 		  MFC
 
-!if "$(WINDOWS_MOBILE_SDK)" == ""
+!if "$(WINDOWS_MOBILE_SDK)" != "yes"
 SUBDIRS 	= $(SUBDIRS) \
 		  hello \
 		  callback \
@@ -27,7 +27,7 @@ SUBDIRS 	= $(SUBDIRS) \
 		  workqueue
 !endif
 
-!if "$(WINDOWS_MOBILE_SDK)" == "" && "$(HAS_AMI)" == "yes"
+!if "$(WINDOWS_MOBILE_SDK)" != "yes" && "$(HAS_AMI)" == "yes"
 SUBDIRS		= $(SUBDIRS) async
 !endif
 

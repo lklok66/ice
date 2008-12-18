@@ -31,11 +31,10 @@ prefix			= C:\IceE-$(VERSION)
 #STATIC_CPP_RUNTIME	= yes
 
 #
-# Define WINDOWS_MOBILE_SDK if building for Windows Mobile 6. The valid
-# setting are Professional and Standard, to choose to use the Windows
-# Mobile 6 Professional and Standard SDKs respectively.
+# Define WINDOWS_MOBILE_SDK as yes if building for Windows Mobile 6
+# Professional.
 #
-#WINDOWS_MOBILE_SDK	= Professional
+#WINDOWS_MOBILE_SDK	= yes
 
 #
 # Change the following setting if the Windows Mobile 6 SDK is installed
@@ -127,19 +126,13 @@ install_bindir		= $(prefix)\bin$(x64suffix)
 install_libdir	  	= $(prefix)\lib$(x64suffix)
 install_includedir	= $(prefix)\include
 
-#
-# Verify valid embedded settings
-#
-!if "$(WINDOWS_MOBILE_SDK)" != "" && "$(WINDOWS_MOBILE_SDK)" != "Professional" && "$(WINDOWS_MOBILE_SDK)" != "Standard"
-!error Invalid setting for WINDOWS_MOBILE_SDK: "$(WINDOWS_MOBILE_SDK)"
-!endif
 
 #
 # Set executables
 #
 MT		= mt.exe
 RC		= rc.exe
-!if "$(WINDOWS_MOBILE_SDK)" != ""
+!if "$(WINDOWS_MOBILE_SDK)" == "yes"
 CXX		= "$(VSINSTALLDIR)\VC\ce\bin\x86_arm\cl.exe"
 CC		= "$(VSINSTALLDIR)\VC\ce\bin\x86_arm\cl.exe"
 LINK 		= "$(VSINSTALLDIR)\VC\ce\bin\x86_arm\link.exe"
@@ -158,13 +151,9 @@ CPPFLAGS	= -nologo -W3 -GR -EHsc -FD -D_CONSOLE -I$(includedir)
 #
 # Add options for WinCE support
 #
-!if "$(WINDOWS_MOBILE_SDK)" != ""
+!if "$(WINDOWS_MOBILE_SDK)" == "yes"
 
-!if "$(WINDOWS_MOBILE_SDK)" == "Professional"
 SDK_DIR		= $(WMSDK_BASE_DIR)\PocketPC
-!else
-SDK_DIR		= $(WMSDK_BASE_DIR)\Smartphone
-!endif
 
 #
 # Windows Mobile 6 is based on Windows CE 5.2
@@ -181,11 +170,7 @@ CPPFLAGS	= $(CPPFLAGS) -GS-
 LDFLAGS		= /LIBPATH:"$(VSINSTALLDIR)\VC\ce\Lib\ArmV4i" /LIBPATH:"$(SDK_DIR)\Lib\ArmV4i" -nodefaultlib:"kernel32.lib" -nodefaultlib:"oldnames.lib" /STACK:65536,4096 /MACHINE:THUMB
 
 
-!if "$(WINDOWS_MOBILE_SDK)" == "Professional"
 CPPFLAGS	= $(CPPFLAGS) /D "WIN32_PLATFORM_PSPC"
-!else
-CPPFLAGS	= $(CPPFLAGS) /D "WIN32_PLATFORM_WFSP"
-!endif
 
 !endif
 
@@ -214,7 +199,7 @@ CPPFLAGS	= $(CPPFLAGS) -O2
 !else
 CPPFLAGS        = $(CPPFLAGS) -O1
 !endif
- 
+
 !else # Debug
 
 CPPFLAGS	= $(CPPFLAGS) -Zi -Gm -Od -D_DEBUG
@@ -225,7 +210,7 @@ CPPFLAGS        = $(CPPFLAGS) -MTd
 CPPFLAGS        = $(CPPFLAGS) -MDd
 !endif
 
-!if "$(WINDOWS_MOBILE_SDK)" == ""
+!if "$(WINDOWS_MOBILE_SDK)" != "yes"
 CPPFLAGS        = $(CPPFLAGS) -RTC1
 !endif
 
@@ -240,7 +225,7 @@ LDFLAGS         = $(LDFLAGS) /LIBPATH:"$(libdir)" /nologo
 LDFLAGS         = $(LDFLAGS) /LIBPATH:"$(ice_dir)\lib$(x64suffix)" /nologo
 !endif
 
-!if "$(WINDOWS_MOBILE_SDK)" != ""
+!if "$(WINDOWS_MOBILE_SDK)" == "yes"
 LDFLAGS		= $(LDFLAGS) -manifest:no /subsystem:windowsce
 !endif
 
@@ -259,7 +244,7 @@ ARFLAGS		= $(ARFLAGS) /LTCG
 # MFC specific flags
 #
 
-!if "$(WINDOWS_MOBILE_SDK)" != ""
+!if "$(WINDOWS_MOBILE_SDK)" == "yes"
 
 MFC_CPPFLAGS	= -I"$(VSINSTALLDIR)\VC\ce\atlmfc\include" 
 MFC_LDFLAGS	= /LIBPATH:"$(VSINSTALLDIR)\VC\ce\atlmfc\lib\ArmV4i"
@@ -281,7 +266,7 @@ LIBSUFFIX	= $(LIBSUFFIX)d
 !endif
 
 
-!if "$(WINDOWS_MOBILE_SDK)" != ""
+!if "$(WINDOWS_MOBILE_SDK)" == "yes"
 
 BASELIBS	= coredll.lib ws2.lib corelibc.lib
 
@@ -297,7 +282,7 @@ BASELIBS	= $(BASELIBS)
 LIBS		= icee$(LIBSUFFIX).lib
 MINLIBS		= iceec$(LIBSUFFIX).lib
 
-!if "$(STATICLIBS)" == "yes" || "$(WINDOWS_MOBILE_SDK)" != ""
+!if "$(STATICLIBS)" == "yes" || "$(WINDOWS_MOBILE_SDK)" == "yes"
 LIBS		= $(LIBS) $(BASELIBS)
 MINLIBS		= $(MINLIBS) $(BASELIBS)
 !endif

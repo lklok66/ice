@@ -164,7 +164,7 @@ with a '(*)' are new supported platforms):
  * Red Hat Enterprise Linux 5 update 2 (RHEL 5.2) i386 and x86_64 (*)
  * Windows XP and Vista x86
  * Windows Vista x64 (*)
- * Windows Mobile 6 (ARMV4I)
+ * Windows Mobile 6 Professional (ARMV4I)
  * Gumstix Linux buildroot revision 1364
 
 The following C++ compiler are supported (compilers with a '(*)' are

@@ -30,7 +30,7 @@ SUBDIRS		= proxy \
 		  timeout \
 		  uuid
 
-!if "$(WINDOWS_MOBILE_SDK)" == ""
+!if "$(WINDOWS_MOBILE_SDK)" != "yes"
 SUBDIRS		= $(SUBDIRS) \
 		  faultTolerance \
 		  adapterDeactivation \

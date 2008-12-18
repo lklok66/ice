@@ -15,7 +15,7 @@ Ice-E has been extensively tested on:
 
 - Windows XP x86
 - Windows Vista x86 and x64
-- Windows Mobile 6 (ARMV4I)
+- Windows Mobile 6 Professional (ARMV4I)
 
 
 C++ compiler
@@ -32,11 +32,11 @@ The following C++ compilers are supported:
   http://msdn2.microsoft.com/en-us/vstudio/bb265237.aspx
 
 
-Windows Mobile 6 SDK
---------------------
+Windows Mobile 6 Professional SDK
+---------------------------------
 
-Ice-E requires either the Windows Mobile 6 Professional or Standard
-SDK to be installed. Both of these can be obtained from:
+Ice-E requires the Windows Mobile 6 Professional SDK to be
+installed. It can be obtained from:
 
   http://www.microsoft.com/downloads/details.aspx?FamilyId=06111A3A-A651-4745-88EF-3D48091A390B&displaylang=en
 

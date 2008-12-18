@@ -9,7 +9,7 @@
 
 top_srcdir	= ..\..\..
 
-!if "$(WINDOWS_MOBILE_SDK)" == ""
+!if "$(WINDOWS_MOBILE_SDK)" != "yes"
 CLIENT		= client.exe
 !endif
 MFCCLIENT	= mfcclient.exe
@@ -63,7 +63,7 @@ CPDBFLAGS        = /pdb:$(CLIENT:.exe=.pdb)
 MPDBFLAGS        = /pdb:$(MFCCLIENT:.exe=.pdb)
 !endif
 
-!if "$(WINDOWS_MOBILE_SDK)" == ""
+!if "$(WINDOWS_MOBILE_SDK)" != "yes"
 
 $(CLIENT): $(OBJS) $(COBJS)
 	$(LINK) $(LDFLAGS) $(CPDBFLAGS) $(OBJS) $(COBJS) /out:$@ $(LIBS)

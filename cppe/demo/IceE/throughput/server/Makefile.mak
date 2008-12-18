@@ -18,7 +18,7 @@ OBJS		= Throughput.obj \
 
 !include $(top_srcdir)/config/Make.rules.mak
 
-!if "$(WINDOWS_MOBILE_SDK)" != ""
+!if "$(WINDOWS_MOBILE_SDK)" == "yes"
 SOBJS           = WinCEServer.obj
 !else
 SOBJS           = Server.obj

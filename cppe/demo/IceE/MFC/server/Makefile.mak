@@ -19,7 +19,7 @@ OBJS		= Hello.obj \
 		  HelloServerDlg.obj \
 		  LogI.obj \
 		  stdafx.obj
-		
+
 SRCS		= $(OBJS:.obj=.cpp)
 
 !include $(top_srcdir)/config/Make.rules.mak
@@ -33,7 +33,7 @@ CPPFLAGS        = $(CPPFLAGS) -D_AFXDLL
 PDBFLAGS        = /pdb:$(SERVER:.exe=.pdb)
 !endif
 
-!if "$(WINDOWS_MOBILE_SDK)" == ""
+!if "$(WINDOWS_MOBILE_SDK)" != "yes"
 
 RESFILE         = HelloServer.res
 HelloServer.res: HelloServer.rc
