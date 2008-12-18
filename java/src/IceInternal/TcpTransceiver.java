@@ -15,10 +15,15 @@ final class TcpTransceiver implements Transceiver
     public boolean
     initialize(final AsyncCallback callback)
     {
-        if(_state == StateNeedConnect)
+        switch(_state)
         {
+        case StateNeedConnect:
+        {
+            // Don't share the _fd with the transceiver. close could be called
+            // while the connect thread is running.
+            final java.nio.channels.SocketChannel fd = _fd;
             _state = StateConnecting;
-            Thread t = new Thread(new Runnable()
+            Thread connectThread = new Thread(new Runnable()
             {
                 public void run()
                 {
@@ -27,7 +32,7 @@ final class TcpTransceiver implements Transceiver
                     // thrown.
                     try
                     {
-                        Network.doFinishConnect(_fd);
+                        Network.doFinishConnect(fd);
                     }
                     catch(RuntimeException ex)
                     {
@@ -39,17 +44,38 @@ final class TcpTransceiver implements Transceiver
                         callback.complete(ex);
                         return;
                     }
-                    connectComplete();
                     callback.complete(null);
                 }
             });
             
-            t.setName("TcpConnectorThread");
-            t.start();
+            connectThread.setName("TcpConnectorThread");
+            connectThread.start();
             return false;
         }
         
-        return _state == StateConnected;
+        case StateConnecting:
+        {
+            assert(_fd != null);
+
+            _state = StateConnected;
+            _desc = Network.fdToString(_fd);
+
+            if(_traceLevels.network >= 1)
+            {
+                String s = "tcp connection established\n" + _desc;
+                _logger.trace(_traceLevels.networkCat, s);
+            }
+            
+            startThreads();
+            break;
+        }
+        
+        case StateConnected:
+        case StateShutdown:
+            break;
+        }
+
+        return true;
     }
     
     class ReadThread extends TransceiverReadThread
@@ -189,9 +215,7 @@ final class TcpTransceiver implements Transceiver
         _writeThread.start();
     }
 
-    // This has to be synchronized to prevent a race between
-    // connection completion, and the transceiver closing.
-    synchronized public void
+    public void
     close()
     {
         if(_traceLevels.network >= 1)
@@ -257,6 +281,8 @@ final class TcpTransceiver implements Transceiver
             _logger.trace(_traceLevels.networkCat, s);
         }
         
+        _state = StateShutdown;
+
         assert(_fd != null);
         java.net.Socket socket = _fd.socket();
         try
@@ -317,6 +343,7 @@ final class TcpTransceiver implements Transceiver
         _logger = instance.initializationData().logger;
         _stats = instance.initializationData().stats;
         _desc = Network.fdToString(_fd);
+        _state = (connected) ? StateConnecting : StateNeedConnect;
 
         // If we're already connected, then start the read/write threads.
         if(connected)
@@ -354,31 +381,6 @@ final class TcpTransceiver implements Transceiver
         super.finalize();
     }
 
-    // This can only be called by the connect thread.
-    //
-    // This can race with close(). If the transceiver has been shutdown, then
-    // we're done.
-    //
-    synchronized private void connectComplete()
-    {
-        // If _fd is null, the transceiver has been closed, complete immediately.
-        if(_fd == null)
-        {
-            return;
-        }
-
-        _state = StateConnected;
-        _desc = Network.fdToString(_fd);
-
-        if(_traceLevels.network >= 1)
-        {
-            String s = "tcp connection established\n" + _desc;
-            _logger.trace(_traceLevels.networkCat, s);
-        }
-        
-        startThreads();
-    }
-
     private WriteThread _writeThread;
     private ReadThread _readThread;
 
@@ -393,4 +395,5 @@ final class TcpTransceiver implements Transceiver
     private static final int StateNeedConnect = 0;
     private static final int StateConnecting = 1;
     private static final int StateConnected = 2;
+    private static final int StateShutdown = 3;
 }

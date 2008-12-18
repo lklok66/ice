@@ -1151,7 +1151,7 @@ public final class ConnectionI implements Connection, IceInternal.TimerTask
                 // Start reading.
                 //
                 _reading = true;
-                _transceiver.read(_stream.getBuffer(), _readAsyncCallback);
+                _transceiver.read(_stream.getBuffer(), _readAsyncCallback); // Continue reading.
             }
             break;
         }
@@ -1185,7 +1185,7 @@ public final class ConnectionI implements Connection, IceInternal.TimerTask
                 // We need to continue to read in closing state.
                 //
                 _reading = true;
-                _transceiver.read(_stream.getBuffer(), _readAsyncCallback);
+                _transceiver.read(_stream.getBuffer(), _readAsyncCallback); // Continue reading.
             }
             break;
         }
@@ -1285,6 +1285,8 @@ public final class ConnectionI implements Connection, IceInternal.TimerTask
         {
             if(_state == StateClosed)
             {
+                // Call one more time to do any pending shutdown.
+                _transceiver.initialize(null);
                 return;
             }
 
@@ -1495,16 +1497,17 @@ public final class ConnectionI implements Connection, IceInternal.TimerTask
                 return;
             }
 
-            OutgoingMessage message = _sendStreams.remove();
+            // If we had an error, raise it here.
+            if(writeEx != null)
+            {
+                throw writeEx;
+            }
 
             //
             // If we have a result, it means we need to complete a
             // pending I/O request.
             //
-            if(writeEx != null)
-            {
-                throw writeEx;
-            }
+            OutgoingMessage message = _sendStreams.remove();
 
             message.sent(this, true); // true indicates that this is
             // called by the async
