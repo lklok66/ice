@@ -24,7 +24,7 @@
     <property name="cache.dir" value="depcache${build.suffix}"/>
 
     <!-- This target cannot depend on init because the tasks may not be compiled yet -->
-    <target name="tasks" depends="config-init">
+    <target name="tasks" depends="config-init" if="ice.src.dist">
         <mkdir dir="${lib.dir}/ant"/>
         <javac srcdir="${src.dir}/ant" destdir="${lib.dir}/ant"
             source="1.5"
@@ -146,6 +146,7 @@
         <javac srcdir="${generated.dir}:${src.dir}" destdir="${lib.dir}"
             source="1.5" debug="${debug}"
 	    includes="**"
+            excludes="ant/**"
 	    deprecation="on">
             <compilerarg value="${javac.lint}"/>
         </javac>
@@ -388,21 +389,8 @@
     <target name="install-common">
         <mkdir dir="${prefix}"/>
         <mkdir dir="${prefix}/lib"/>
-        <copy file="${ice.dir}/LICENSE" todir="${prefix}"/>
-        <copy file="${ice.dir}/ICE_LICENSE" todir="${prefix}"/>
-    </target>
-
-    <condition property="slice-installed">
-        <and>
-            <available file="${prefix}/slice/Ice/Communicator.ice"/>
-        </and>
-    </condition>
-
-    <target name="install-slice" unless="slice-installed">
-        <mkdir dir="${prefix}/slice"/>
-        <copy todir="${prefix}/slice">
-            <fileset dir="../slice" includes="**"/>
-        </copy>
+        <copy file="${top.dir}/../LICENSE" todir="${prefix}"/>
+        <copy file="${top.dir}/../ICE_LICENSE" todir="${prefix}"/>
     </target>
 
     <target name="install-jar">
@@ -410,11 +398,7 @@
         <copy file="${lib.dir}/IceTest.jar" todir="${prefix}/lib"/>
     </target>
 
-    <target name="install-tasks">
-        <copy file="${lib.dir}/ant-ice.jar" todir="${prefix}/lib"/>
-    </target>
-
-    <target name="install" depends="jar, install-common, install-jar, install-tasks, install-slice">
+    <target name="install" depends="jar, install-common, install-jar">
     </target>
 
     <target name="clean" depends="config-init">

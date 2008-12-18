@@ -93,13 +93,13 @@
         </or>
     </condition>
 
-    <!-- First, check if we're building a source distribution. -->
+    <!-- First, check if we're building from an Ice source distribution. -->
 
     <condition property="ice.dir" value="${ice.top.dir}/..">
         <and>
             <!-- Don't just look for ${ice.top.dir}/../java - we want to make sure we are really
                  in a source distribution. -->
-            <available file="${ice.top.dir}/../java/src/Ice/Util.java"/>
+            <available file="${ice.top.dir}/../cpp/src/Ice/ConnectionI.cpp"/>
             <not><isset property="ice.bin.dist"/></not>
         </and>
     </condition>
@@ -206,7 +206,17 @@
             <equals arg1="${ice.dir}" arg2="/usr"/>
         </condition>
 
-        <!-- Set ice.classpath with the distribution Ice.jar file -->
+        <!-- Set ice.classpath with the distribution IceAndroid.jar file -->
+        <path id="ice.classpath">
+            <fileset file="${ice.top.dir}/lib${build.suffix}/IceAndroid.jar"/>
+        </path>
+
+    </target>
+
+    <!-- Install the Slice ant tasks. -->
+    <target name="task-init">
+
+        <!-- Set ice.classpath with the distribution IceAndroid.jar file -->
         <condition property="dist.lib.dir" value="${ice.dir}/java/lib${build.suffix}">
             <isset property="ice.src.dist"/>
         </condition>
@@ -222,29 +232,6 @@
                 <equals arg1="${ice.dir}" arg2="/usr"/>
             </and>
         </condition>
-
-        <condition property="dist.jar.file" value="${dist.lib.dir}/IceAndroid-${ice.version}.jar">
-            <and>
-                <not><isset property="dist.jar.file"/></not>
-                <available file="${dist.lib.dir}/Ice-${ice.version}.jar"/>
-            </and>
-        </condition>
-
-        <condition property="dist.jar.file" value="${dist.lib.dir}/IceAndroid.jar">
-            <and>
-                <not><isset property="dist.jar.file"/></not>
-                <available file="${dist.lib.dir}/IceAndroid.jar"/>
-            </and>
-        </condition>
-
-        <path id="ice.classpath">
-            <fileset file="${dist.jar.file}"/>
-        </path>
-
-    </target>
-
-    <!-- Install the Slice ant tasks. -->
-    <target name="task-init">
 
         <condition property="task.jar.file" value="${dist.lib.dir}/ant-ice-${ice.version}.jar">
             <available file="${dist.lib.dir}/ant-ice-${ice.version}.jar"/>
