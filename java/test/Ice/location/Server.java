@@ -16,11 +16,7 @@ public class Server extends test.Util.Application
     public int run(String[] args)
     {
         Ice.Communicator communicator = communicator();
-        Ice.Properties properties = communicator.getProperties();
-        properties.setProperty("Ice.ThreadPool.Server.Size", "2");
-        properties.setProperty("Ice.ThreadPool.Server.SizeWarn", "0");
-        properties.setProperty("ServerManagerAdapter.Endpoints", "default -p 12010 -t 30000:udp");
-
+        
         //
         // Register the server manager. The server manager creates a new
         // 'server' (a server isn't a different process, it's just a new
@@ -35,7 +31,7 @@ public class Server extends test.Util.Application
         //
         ServerLocatorRegistry registry = new ServerLocatorRegistry();
         registry.addObject(adapter.createProxy(communicator.stringToIdentity("ServerManager")));
-        Ice.Object object = new ServerManagerI(adapter, registry, _initData);
+        Ice.Object object = new ServerManagerI(adapter, registry, _initData, this);
         adapter.add(object, communicator.stringToIdentity("ServerManager"));
 
         Ice.LocatorRegistryPrx registryPrx = Ice.LocatorRegistryPrxHelper.uncheckedCast(adapter.add(registry,
@@ -54,6 +50,9 @@ public class Server extends test.Util.Application
         Ice.InitializationData initData = new Ice.InitializationData();
         initData.properties = Ice.Util.createProperties(argsH);
         initData.properties.setProperty("Ice.Package.Test", "test.Ice.location");
+        initData.properties.setProperty("Ice.ThreadPool.Server.Size", "2");
+        initData.properties.setProperty("Ice.ThreadPool.Server.SizeWarn", "0");
+        initData.properties.setProperty("ServerManagerAdapter.Endpoints", "default -p 12010 -t 30000:udp");
 
         _initData = initData;
         return initData;

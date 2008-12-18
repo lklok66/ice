@@ -14,7 +14,7 @@ public class Collocated extends test.Util.Application
     public int run(String[] args)
     {
         java.io.PrintWriter out = getWriter();
-        communicator().getProperties().setProperty("TestAdapter.Endpoints", "default -p 12010 -t 10000");
+        communicator().getProperties().setProperty("TestAdapter.Endpoints", "default -p 12010 -t 20000");
         Ice.ObjectAdapter adapter = communicator().createObjectAdapter("TestAdapter");
         adapter.add(new MyDerivedClassI(), communicator().stringToIdentity("test"));
         adapter.activate();

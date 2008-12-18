@@ -742,7 +742,7 @@ public class AllTests
     public static ThrowerPrx
     allTests(Ice.Communicator communicator, boolean collocated, PrintWriter out)
     {
-		{
+        {
             out.print("testing object adapter registration exceptions... ");
             Ice.ObjectAdapter first;
             try

@@ -446,13 +446,17 @@ final class TransceiverI implements IceInternal.Transceiver
             desc.append(_fd.getLocalAddress());
             desc.append(':');
             desc.append(_fd.getLocalPort());
+            desc.append("/");
+            desc.append(_fd.getInetAddress());
+            desc.append(':');
+            desc.append(_fd.getPort());
 
             _readThread = new ReadThread();
-            _readThread.setName("SSLTransceiverReadThread-" + desc);
+            _readThread.setName("SSLTransceiverReadThread:" + desc);
             _readThread.start();
             
             _writeThread = new WriteThread();
-            _writeThread.setName("SSLTransceiverWriteThread: " + desc);
+            _writeThread.setName("SSLTransceiverWriteThread:" + desc);
             _writeThread.start();
             break;
         }

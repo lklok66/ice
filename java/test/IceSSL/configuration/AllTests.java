@@ -68,8 +68,9 @@ public class AllTests
     }
     
     public static ServerFactoryPrx
-    allTests(Ice.Communicator communicator, String testDir, PrintWriter out)
+    allTests(test.Util.Application app, String testDir, PrintWriter out)
     {
+        Ice.Communicator communicator = app.communicator();
         final String factoryRef = "factory:tcp -p 12010 -t 10000";
         Ice.ObjectPrx b = communicator.stringToProxy(factoryRef);
         test(b != null);

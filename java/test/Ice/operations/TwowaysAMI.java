@@ -1639,7 +1639,7 @@ class TwowaysAMI
                 ctx.put("three", "THREE");
 
                 MyClassPrx p3 = MyClassPrxHelper.uncheckedCast(
-                    ic.stringToProxy("test:default -p 12010 -t 10000"));
+                    ic.stringToProxy("test:default -p 12010 -t 20000"));
 
                 ic.getImplicitContext().setContext(ctx);
                 test(ic.getImplicitContext().getContext().equals(ctx));

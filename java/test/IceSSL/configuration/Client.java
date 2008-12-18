@@ -24,7 +24,7 @@ public class Client extends test.Util.Application
             return 1;
         }
 
-        ServerFactoryPrx factory = AllTests.allTests(communicator(), args[0], out);
+        ServerFactoryPrx factory = AllTests.allTests(this, args[0], out);
         factory.shutdown();
 
         return 0;
