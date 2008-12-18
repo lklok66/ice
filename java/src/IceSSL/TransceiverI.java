@@ -483,6 +483,29 @@ final class TransceiverI implements IceInternal.Transceiver
             String s = "closing ssl connection\n" + _desc;
             _logger.trace(_traceLevels.networkCat, s);
         }
+
+        // If initialize was never called then close the _incomingfd.
+        if(_state == StateNeedConnect)
+        {
+            if(_incomingfd != null)
+            {
+                try
+                {
+                    _incomingfd.close();
+                }
+                catch(java.io.IOException ex)
+                {
+                    Ice.SocketException se = new Ice.SocketException();
+                    se.initCause(ex);
+                    throw se;
+                }
+                finally
+                {
+                    _incomingfd = null;
+                }
+            }
+            return;
+        }
         
         // Return immediately if the connection hasn't completed yet.
         if(_fd == null)
@@ -543,7 +566,12 @@ final class TransceiverI implements IceInternal.Transceiver
             String s = "shutting down ssl connection for reading and writing\n" + _desc;
             _logger.trace(_traceLevels.networkCat, s);
         }
-        _state = StateShutdown;
+
+        // If we've been initialized move to the shutdown state.
+        if(_state != StateNeedConnect)
+        {
+            _state = StateShutdown;
+        }
 
         if(_readThread != null)
         {
