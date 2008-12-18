@@ -4,7 +4,7 @@
 
    <extension
          id="com.zeroc.Slice2javaPlugin.Slice2javaBuilder"
-         name="Slice2java Builder"
+         name="Slice2Java Builder"
          point="org.eclipse.core.resources.builders">
       <builder
             hasNature="true"
@@ -16,7 +16,7 @@
    </extension>
    <extension
          id="com.zeroc.Slice2javaPlugin.Slice2javaNature"
-         name="Slice2java Nature"
+         name="Slice2Java Nature"
          point="org.eclipse.core.resources.natures">
       <runtime>
          <run
