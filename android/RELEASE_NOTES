@@ -1,1 +1,132 @@
-TODO: placeholder
+======================================================================
+Release notes for Ice for Android 0.1.0
+======================================================================
+
+Table of Contents
+-----------------
+
+  1. Introduction
+  2. Ice Touch Feature Set
+  3. SSL Support
+  4. Loggers
+  5. Garbage Collection
+  6. Auto release pool
+
+
+======================================================================
+1. Introduction
+======================================================================
+
+Ice Touch is our most ambitious ZeroC Labs project to date, offering
+an Ice run time for the iPhone and iPod touch with a new Objective-C
+language mapping.
+
+We have strived to design a mapping that developers will find natural
+and intuitive, and we are counting on your feedback to let us know
+what we got right and what we need to improve. To get you started, we
+have created a new version of the Ice manual that contains Ice Touch
+material. You can view or download this manual at the link below:
+
+  http://www.zeroc.com/labs/icetouch/download.html
+
+The Ice Touch distribution does not include any Ice services, but
+its support for the complete Ice protocol means your Ice Touch
+applications will work seamlessly with existing Ice servers as well as
+Ice services such as IceGrid, Glacier2, and IceStorm.
+
+As with all ZeroC Labs projects, we do not advise using Ice Touch in
+mission-critical applications. Also be aware that any subsequent
+release of this product may contain changes that break backward
+compatibility.
+
+
+======================================================================
+2. Ice Touch Feature Set
+======================================================================
+
+Ice Touch supports the following new features:
+
+  - Objective-C mapping
+  - Default servants
+
+These topics are described in the Ice Touch version of the manual.
+
+Ice Touch currently lacks support for the following Ice features:
+
+  - Asynchronous method dispatch (AMD)
+  - Collocation optimization
+  - Servant locators
+  - Implicit contexts
+  - Protocol plug-ins
+  - Local interfaces
+  - Ice.Application and Service helper classes
+  - Ice.Stats interface
+
+Ice Touch has limited support for:
+
+  - SSL
+
+    Refer to Section 3 below for more information.
+
+  - UDP
+
+    On the iPhone, UDP requests do not transparently establish a
+    3G/Edge connection.
+
+
+======================================================================
+3. SSL Support
+======================================================================
+
+Ice Touch SSL provides a subset of the Ice for C++ SSL functionality.
+Due to limitations in iPhone SSL support, the following restriction
+applies:
+
+  - Ice Touch servers cannot authenticate SSL clients.
+
+Furthermore, the semantics of some IceSSL configuration properties
+have changed, and new properties have been added. The IceSSL property
+reference section of the Ice Touch manual provides complete details.
+
+
+======================================================================
+4. Loggers
+======================================================================
+
+Custom loggers must be installed via ICEInitializationData. You cannot
+use any of the Ice for C++ logger properties, such as Ice.UseSyslog,
+and you cannot install a custom logger with a plug-in (Ice.Plugin.*).
+
+
+======================================================================
+5. Garbage Collection
+======================================================================
+
+The Ice Touch run time cannot garbage collect graphs of objects
+containing cycles. For example,
+
+class Foo
+{
+    Foo next;
+};
+
+Foo a = [[Foo alloc] init];
+Foo b = [[Foo alloc] init];
+a.next = b;
+b.next = a;
+
+If you send this graph over the wire, your application will leak
+memory unless you somehow retain the graph and manually break the
+cycle.
+
+Ice Touch has not been tested with Objective-C garbage collection on
+Mac OS X.
+
+
+======================================================================
+6. Auto release pool
+======================================================================
+
+The Ice run time creates an NSAutoReleasePool object before each
+server-side dispatched invocation and client-side AMI callback. The
+pool is released once the dispatch is complete.

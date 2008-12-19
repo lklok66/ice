@@ -1,1 +1,160 @@
-TODO: placeholder
+======================================================================
+Introduction
+======================================================================
+
+This Ice for Android distribution contains the following components:
+
+ * Ice for Android run time (java/lib/IceAndroid.jar)
+ * Eclipse projects for three sample clients and a test suite
+ * Source code for the Ice for Android run time, demos, and tests
+
+We also encourage you to review the RELEASE_NOTES file for important
+information about this release. If you are interested in building Ice
+for Android from source, please consult the INSTALL file.
+
+
+======================================================================
+Developing an Android application with Ice for Android
+======================================================================
+
+This section discusses Ice for Android development using Eclipse. If
+you are not using Eclipse to develop your Android application, you may
+find the information in the INSTALL file useful.
+
+
+Eclipse Plugin
+--------------
+
+ZeroC has created a Slice2Java plugin for Eclipse that automates the
+translation of your Slice files. We strongly recommend using this
+plugin for your own development, and the plugin is required if you
+intend to build any of the Eclipse projects included in this
+distribution.
+
+For more information on installing and using the plugin, please refer
+to the link below:
+
+  http://www.zeroc.com/eclipse.html
+
+The instructions in this file assume that you have already installed
+and configured the Slice2Java plugin.
+
+
+Activating the Plugin
+---------------------
+
+To use the Slice2Java plugin in an Eclipse project, right-click on the
+project and choose Slice2Java->Add Slice2Java Builder. In an Android
+project, the Slice2Java plugin automatically adds a reference to
+IceAndroid.jar and assumes that this file is installed in the Ice
+installation directory you specified in the plugin's configuration.
+
+If IceAndroid.jar cannot be found in the Ice installation directory,
+Eclipse will show an error indication on the project's icon in the
+Package Explorer view; in this situation, right click on the project
+and choose Build Path->Configure Build Path. Select the Libraries tab,
+remove the Ice Library entry, and click Add External JARs to add a
+reference to IceAndroid.jar.
+
+
+======================================================================
+Sample Projects
+======================================================================
+
+Prior to opening the Eclipse projects included in this distribution,
+you need to perform the following steps:
+
+ 1. In Eclipse, choose Window->Preferences
+ 2. Open the General->Workspace folder
+ 3. Select the Linked Resources entry
+ 4. Click New... to add a new path variable
+ 5. Enter ICE_JAR_HOME in the Name field
+ 6. Enter the path name <IceAndroid-install>\java\lib in the Location
+    field, such as C:\IceAndroid-@ver@\java\lib on Windows or
+    /opt/IceAndroid-@ver@/java/lib on Linux.
+ 7. Click OK to save the path variable
+
+
+Hello
+-----
+
+The hello client is the Android equivalent of our command-line demo
+of the same name. In order to use this client, you must run a hello
+server and enter the server's address in the client's "Hostname" 
+field. This distribution includes the Java version of the command-
+line demo in java/demo/Ice/hello (see the README file in that
+directory for usage information), or you can use a server from your
+Ice installation.
+
+Note that in order to use the server in java/demo/Ice/hello you must
+build the demo. As discussed in the INSTALL file, you must have Ant
+and Ice installed on your system, and the ICE_HOME environment
+variable must be set to the location of your Ice installation. To
+build the demo, open a command window, change to the demo directory,
+and run 'ant'. You will need to add IceAndroid.jar to your CLASSPATH
+when executing the server.
+
+
+Chat
+----
+
+The chat client provides Android devices with native access to our
+sample chat system. This client demonstrates several useful techniques
+that are instructive for Android developers:
+
+ * Issuing asynchronous Ice invocations to maintain a responsive user
+   interface
+ * Using Glacier2 and bidirectional connections to receive "push
+   notifications" from a remote server
+ * Proper separation of UI and application logic
+
+By default the client uses "demo.zeroc.com" as its server, which
+refers to the public chat server hosted by ZeroC. For more information
+about the chat system, or to download the source code for the chat
+system so that you can run your own server, please refer to the link
+below:
+
+
+  http://www.zeroc.com/chat/index.html
+
+
+Library
+-------
+
+The library client is an example of an Android front-end for an
+enterprise-style application. It allows you to query and manipulate
+a library of books by issuing Ice invocations to a remote server
+implemented using JDBC and MySQL. Like the chat client, this program
+defaults to a ZeroC-hosted server on "demo2.zeroc.com". If you prefer,
+you can download the source code for the library server at the link
+below:
+
+  http://www.zeroc.com/labs/icetouch/download.html
+
+
+======================================================================
+Application Notes
+======================================================================
+
+
+Protocol Compression
+--------------------
+
+Ice for Android supports protocol compression using the bzip2 classes
+included with Apache Ant. To enable this feature, the classes must be
+present in the application's CLASSPATH or Android package (.apk) file.
+The bzip2 classes can be found in ant.jar, or you can download only
+the bzip2 classes from
+
+  http://www.kohsuke.org/bzip2/
+
+Note that these classes are a pure Java implementation of the bzip2
+algorithm and therefore add significant latency to Ice requests.
+
+Also be aware that the Ice run time loads these classes dynamically;
+if you use a packaging tool such as ProGuard, you may need to
+explicitly include the bzip2 classes to ensure that they are included
+with the application. For more information on protocol compression,
+see this issue of the newsletter:
+
+  http://www.zeroc.com/newsletter/issue7.pdf
