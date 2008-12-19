@@ -13,14 +13,10 @@
 
     <target name="all">
         <ant dir="Ice"/>
-        <ant dir="Freeze"/>
-        <ant dir="IceGrid"/>
     </target>
 
     <target name="clean">
         <ant dir="Ice" target="clean"/>
-        <ant dir="Freeze" target="clean"/>
-        <ant dir="IceGrid" target="clean"/>
     </target>
 
 </project>
