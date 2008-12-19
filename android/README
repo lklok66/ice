@@ -57,9 +57,8 @@ remove the Ice Library entry, and click Add External JARs to add a
 reference to IceAndroid.jar.
 
 
-======================================================================
-Sample Projects
-======================================================================
+Configuring your Workspace
+--------------------------
 
 Prior to opening the Eclipse projects included in this distribution,
 you need to perform the following steps:
@@ -69,10 +68,21 @@ you need to perform the following steps:
  3. Select the Linked Resources entry
  4. Click New... to add a new path variable
  5. Enter ICE_JAR_HOME in the Name field
- 6. Enter the path name <IceAndroid-install>\java\lib in the Location
+ 6. Enter the path name <IceAndroid-install>/java/lib in the Location
     field, such as C:\IceAndroid-@ver@\java\lib on Windows or
     /opt/IceAndroid-@ver@/java/lib on Linux.
  7. Click OK to save the path variable
+
+It is not necessary to define this variable for your own projects.
+
+
+======================================================================
+Sample Projects
+======================================================================
+
+To open a sample project, choose File->Import... and select one of the
+subdirectories of <IceAndroid-install>/android/demo. The projects are
+described below.
 
 
 Hello
@@ -114,7 +124,6 @@ about the chat system, or to download the source code for the chat
 system so that you can run your own server, please refer to the link
 below:
 
-
   http://www.zeroc.com/chat/index.html
 
 
@@ -130,6 +139,23 @@ you can download the source code for the library server at the link
 below:
 
   http://www.zeroc.com/labs/icetouch/download.html
+
+
+======================================================================
+Test Suite
+======================================================================
+
+The Ice for Android test suite is encapsulated in the JAR file named
+<IceAndroid-install>/java/lib/IceTest.jar, and an Android front-end
+is provided in the Eclipse project located in the subdirectory
+<IceAndroid-install>/android/testsuite.
+
+In order to build this project, it may be necessary for you to
+increase Eclipse's maximum memory limit. Locate the eclipse.ini file
+in your Eclipse installation and change it to contain the following
+line:
+
+  -Xmx512m
 
 
 ======================================================================
