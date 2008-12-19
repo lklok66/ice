@@ -48,8 +48,9 @@ public class Configuration
         _store.setDefault(TIE_KEY, false);
         _store.setDefault(ICE_KEY, false);
         _store.setDefault(STREAM_KEY, false);
+        _store.setDefault(ICE_INCLUDE_KEY, false);
         _store.setDefault(META_KEY, "");
-        _store.setDefault(CONSOLE_KEY, true); // TODO: Default should be false.
+        _store.setDefault(CONSOLE_KEY, false);
         _store.setDefault(SLICE_SOURCE_DIRS_KEY, "slice");
         _store.setDefault(INCLUDES_KEY, "");
         boolean androidProject = false;
@@ -62,7 +63,9 @@ public class Configuration
         }
         if(androidProject)
         {
-            _store.setDefault(JARS_KEY, "IceAndroid.jar");
+            // TODO: At present android does not work with indirect libraries.
+            //_store.setDefault(JARS_KEY, "IceAndroid.jar");
+            _store.setDefault(JARS_KEY, "");
         }
         else
         {
@@ -344,7 +347,28 @@ public class Configuration
         return cmds;
     }
 
+    public boolean getIceInclude()
+    {
+        return _store.getBoolean(ICE_INCLUDE_KEY);
+    }
+
+    public void setIceInclude(boolean selection)
+    {
+        _store.setValue(ICE_INCLUDE_KEY, selection);
+    }
+
     public List<String> getIncludes()
+    {
+        List<String> s = toList(_store.getString(INCLUDES_KEY));
+        if(getIceInclude())
+        {
+            s.add(getIceSliceDir());
+        }
+        return s;
+    }
+
+    // The bare include list.
+    public List<String> getBareIncludes()
     {
         return toList(_store.getString(INCLUDES_KEY));
     }
@@ -575,6 +599,25 @@ public class Configuration
         return f.toString();
     }
 
+    
+    // The location of the system slice files.
+    public String getIceSliceDir()
+    {
+        String iceHome = getIceHome();
+        String os = System.getProperty("os.name");
+        if(os.equals("Linux") && iceHome.equals("/usr"))
+        {
+            // TODO: This really isn't very good...
+            File f = new File("/usr/share/Ice-3.3.0/slice");
+            if(f.exists())
+            {
+                return f.toString();
+            }
+        }
+
+        return new File(iceHome + File.separator + "slice").toString();
+    }
+
     private String getIceHome()
     {
         return Activator.getDefault().getPreferenceStore().getString(PluginPreferencePage.SDK_PATH);
@@ -642,6 +685,7 @@ public class Configuration
     private static final String CONSOLE_KEY = "console";
     private static final String META_KEY = "meta";
     private static final String STREAM_KEY = "stream";
+    private static final String ICE_INCLUDE_KEY = "iceIncludes";
     private static final String ICE_KEY = "ice";
     private static final String TIE_KEY = "tie";
     private static final String DEFINES_KEY = "defines";
@@ -656,4 +700,5 @@ public class Configuration
     private ScopedPreferenceStore _instanceStore;
 
     private IProject _project;
+
 }

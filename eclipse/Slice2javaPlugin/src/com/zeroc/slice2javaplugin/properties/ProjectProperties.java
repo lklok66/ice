@@ -53,6 +53,7 @@ import com.zeroc.slice2javaplugin.builder.Slice2javaBuilder;
 
 public class ProjectProperties extends PropertyPage
 {
+    private Button _iceInclude;
     public ProjectProperties()
     {
         super();
@@ -79,8 +80,8 @@ public class ProjectProperties extends PropertyPage
             _config.setDefines(Configuration.toList(_defines.getText()));
             _config.setMeta(Configuration.toList(_meta.getText()));
             _config.setStream(_stream.getSelection());
-            _config.setTie(_tie.getSelection());
-            _config.setIce(_ice.getSelection());            
+            _config.setIce(_ice.getSelection());
+            _config.setIceInclude(_iceInclude.getSelection());       
             _config.setConsole(_console.getSelection());
 
             if(_config.write())
@@ -130,12 +131,6 @@ public class ProjectProperties extends PropertyPage
         TabFolder tabFolder = new TabFolder(parent, SWT.NONE);
         {
             TabItem tabItem = new TabItem(tabFolder, SWT.NONE);
-            tabItem.setText("Configuration");
-            Control source = createConfiguration(tabFolder);
-            tabItem.setControl(source);
-        }
-        {
-            TabItem tabItem = new TabItem(tabFolder, SWT.NONE);
             tabItem.setText("Source");
             Control source = createSource(tabFolder);
             tabItem.setControl(source);
@@ -146,6 +141,13 @@ public class ProjectProperties extends PropertyPage
             Control source = createOptions(tabFolder);
             tabItem.setControl(source);
         }
+        {
+            TabItem tabItem = new TabItem(tabFolder, SWT.NONE);
+            tabItem.setText("Libraries");
+            Control source = createLibraries(tabFolder);
+            tabItem.setControl(source);
+        }
+
         tabFolder.pack();
 
         loadPrefs();
@@ -163,7 +165,7 @@ public class ProjectProperties extends PropertyPage
         {
             _sourceDirectories.add(iter.next());
         }
-        for(Iterator<String> iter = _config.getIncludes().iterator(); iter.hasNext();)
+        for(Iterator<String> iter = _config.getBareIncludes().iterator(); iter.hasNext();)
         {
             _includes.add(iter.next());
         }
@@ -176,6 +178,7 @@ public class ProjectProperties extends PropertyPage
         _stream.setSelection(_config.getStream());
         _tie.setSelection(_config.getTie());
         _ice.setSelection(_config.getIce());
+        _iceInclude.setSelection(_config.getIceInclude());
         _console.setSelection(_config.getConsole());
 
         checkValid();
@@ -195,23 +198,13 @@ public class ProjectProperties extends PropertyPage
         setErrorMessage(null);
     }
     
-    private Control createConfiguration(Composite parent)
+    private Control createLibraries(Composite parent)
     {
         Composite composite = new Composite(parent, SWT.NONE);
         
         GridLayout gridLayout = new GridLayout();
         gridLayout.numColumns = 1;
         composite.setLayout(gridLayout);
-        
-        Group optionsGroup = new Group(composite, SWT.NONE);
-        optionsGroup.setText("Builder Options");
-        gridLayout = new GridLayout();
-        gridLayout.numColumns = 2;
-        optionsGroup.setLayout(gridLayout);
-        optionsGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-        _console = new Button(optionsGroup, SWT.CHECK);
-        new Label(optionsGroup, SWT.NONE).setText("Enable console");
         
         Group includesGroup = new Group(composite, SWT.NONE);
         includesGroup.setText("Jar Files to Reference");
@@ -687,12 +680,15 @@ public class ProjectProperties extends PropertyPage
         new Label(optionsGroup, SWT.NONE).setText("Enable tie");
         _ice = new Button(optionsGroup, SWT.CHECK);
         new Label(optionsGroup, SWT.NONE).setText("Enable ice");
+        _iceInclude = new Button(optionsGroup, SWT.CHECK);
+        new Label(optionsGroup, SWT.NONE).setText("Include Ice Slice Files");
+        _console = new Button(optionsGroup, SWT.CHECK);
+        new Label(optionsGroup, SWT.NONE).setText("Enable console");
 
         return composite;
     }
     
     private Configuration _config;
-    private Text _iceHome;
     private Button _console;
     private Text _generatedDir;
     private List _sourceDirectories;
