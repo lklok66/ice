@@ -145,7 +145,8 @@ def configurePaths():
     addLdPath(libDir)
 
     javaDir = os.path.join(getIceDir("java"), "lib")
-    addClasspath(os.path.join(javaDir, "Ice.jar"))
+    addClasspath(os.path.join(javaDir, "IceAndroid.jar"))
+    addClasspath(os.path.join(javaDir, "IceTest.jar"))
     addClasspath(os.path.join(javaDir))
     
     # 

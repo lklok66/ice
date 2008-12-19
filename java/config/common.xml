@@ -217,7 +217,7 @@
     <target name="task-init">
 
         <!-- Set ice.classpath with the distribution IceAndroid.jar file -->
-        <condition property="dist.lib.dir" value="${ice.dir}/java/lib${build.suffix}">
+        <condition property="dist.lib.dir" value="${ice.top.dir}/lib${build.suffix}">
             <isset property="ice.src.dist"/>
         </condition>
         <condition property="dist.lib.dir" value="${ice.dir}/lib">

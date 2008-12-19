@@ -18,7 +18,16 @@ from DistUtils import *
 # other files are all removed by reversing the below list.
 #
 filesToRemove = [
-    "./java/src/ant"
+    "./java/src/ant",
+    "./java/resources",
+    "./java/CHANGES",
+    "./java/INSTALL",
+    "./java/README",
+    "./java/THIRD_PARTY_LICENSE",
+    "./java/THIRD_PARTY_SOURCES",
+    "./scripts/IceStormUtil.py",
+    "./scripts/IceGridAdmin.py",
+    "./java/allDemos.py"
 ]
 
 # List of files & subdirectories to keep, all others are removed.
@@ -30,8 +39,7 @@ filesToKeep = [
     "./java",
     "./android",
     "./scripts",
-    "./distribution/bin/makeandroidbindist.py",
-    "./distribution/lib/DistUtils.py"
+    "./certs"
 ]
 
 def pathInList(p, l):
@@ -125,7 +133,6 @@ os.mkdir(distDir)
 
 print "Creating Ice Android " + version + " source distributions in " + distDir
 
-distFilesDir = os.path.join(distDir, "distfiles-" + version)
 srcDir = os.path.join(distDir, "IceAndroid-" + version)
 
 #
@@ -193,34 +200,17 @@ for root, dirnames, filesnames in os.walk('.'):
 
     for f in filesnames:
         filepath = os.path.join(root, f) 
-        if f == ".gitignore":
+        if f == ".gitignore" or f == "expect.py":
             os.remove(filepath)
         else:
-
             # Fix version of README/INSTALL files and keep track of bison/flex files for later processing
             if fnmatch.fnmatch(f, "README*") or fnmatch.fnmatch(f, "INSTALL*"):
                 fixVersion(filepath, version)
-            elif fnmatch.fnmatch(f, "*.y"):
-                bisonFiles.append(filepath)
-            elif fnmatch.fnmatch(f, "*.l"):
-                flexFiles.append(filepath)
-
             fixFilePermission(filepath)
     
     for d in dirnames:
         os.chmod(os.path.join(root, d), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) # rwxr-xr-x
 
-print "ok"
-
-#
-# Generate bison & flex files.
-#
-print "Generating bison and flex files...",
-sys.stdout.flush()
-for x in bisonFiles:
-    generateBisonFile(x)
-for x in flexFiles:
-    generateFlexFile(x)
 print "ok"
 
 #
@@ -243,17 +233,22 @@ move(os.path.join("android", "README"), os.path.join("README"))
 move(os.path.join("android", "RELEASE_NOTES"), os.path.join("RELEASE_NOTES"))
 move(os.path.join("android", "INSTALL"), os.path.join("INSTALL"))
 
-#
-# Move *.icee to the correct names.
-#
 move(os.path.join("Makefile.mak.android"), os.path.join("Makefile.mak"))
 move(os.path.join("Makefile.android"), os.path.join("Makefile"))
+print "ok"
 
 #
-# Move the distribution directory to the distribution directory
+# Build the .jar files.
 #
-move("distribution", distFilesDir)
-print "ok"
+copy("java", "java-build")
+os.chdir("java-build")
+if os.system("ant jar") != 0:
+    print sys.argv[0] + ": failed to the build the Ice Android jar files"
+os.chdir("..")
+os.mkdir(os.path.join("java", "lib"))
+move(os.path.join("java-build", "lib", "IceAndroid.jar"), os.path.join("java", "lib", "IceAndroid.jar"))
+move(os.path.join("java-build", "lib", "IceTest.jar"), os.path.join("java", "lib", "IceTest.jar"))
+remove("java-build")
 
 #
 # Everything should be clean now, we can create the source distributions archives
@@ -262,8 +257,11 @@ print "Archiving..."
 sys.stdout.flush()
 os.chdir(distDir)
 
-for d in [srcDir, distFilesDir]:
+for d in [srcDir]:
     tarArchive(d, verbose)
+
+for d in [srcDir]:
+    zipArchive(d, verbose)
 
 #
 # Write source distribution report in README file.
@@ -276,7 +274,6 @@ writeSrcDistReport("IceAndroid", version, compareToDir, [srcDir])
 print "Cleaning up...",
 sys.stdout.flush()
 remove(srcDir)
-remove(distFilesDir)
 print "ok"
 
 os.chdir(cwd)

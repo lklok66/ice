@@ -5,6 +5,7 @@ Introduction
 This Ice for Android distribution contains the following components:
 
  * Ice for Android run time (java/lib/IceAndroid.jar)
+ * Ice for Android tests (java/lib/IceTest.jar)
  * Eclipse projects for three sample clients and a test suite
  * Source code for the Ice for Android run time, demos, and tests
 

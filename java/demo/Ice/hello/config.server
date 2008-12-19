@@ -48,8 +48,7 @@ IceSSL.Trace.Security=1
 # SSL Configuration
 #
 Ice.Plugin.IceSSL=IceSSL.PluginFactory
-#IceSSL.DefaultDir=../../../../certs
-IceSSL.DefaultDir=/Users/matthew/cvs/ice-33/certs
+IceSSL.DefaultDir=../../../../certs
 IceSSL.Keystore=server.jks
 IceSSL.Password=password
 IceSSL.Truststore=certs.jks

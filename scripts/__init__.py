@@ -7,4 +7,12 @@
 #
 # **********************************************************************
 
-__all__ = [ "Expect", "IceGridAdmin", "IceStormUtil", "TestUtil", "subprocess" ]
+import os
+
+__all__ = [ "Expect", "TestUtil", "subprocess" ]
+
+if os.path.exists("IceGridAdmin.py"):
+    __all__ += [ "IceGridAdmin.py" ]
+
+if os.path.exists("IceStormUtil"):
+    __all__ += [ "IceStormUtil" ]

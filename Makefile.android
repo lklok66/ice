@@ -30,6 +30,13 @@ install::
 	    ( cd $$subdir && $(MAKE) install ) || exit 1; \
 	done
 
+test::
+	@for subdir in $(SUBDIRS); \
+	do \
+	    echo "making test in $$subdir"; \
+	    ( cd $$subdir && $(MAKE) test ) || exit 1; \
+	done
+
 java::
 	echo "making all in java";
 	( cd java && $(MAKE) all ) || exit 1;
