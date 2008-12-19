@@ -95,7 +95,7 @@ public class ToggleNatureAction implements IObjectActionDelegate
 
             for(int i = 0; i < natures.length; ++i)
             {
-                if(Slice2javaNature.NATURE_ID.equals(natures[i]))
+                if(Slice2JavaNature.NATURE_ID.equals(natures[i]))
                 {
                     // Remove the nature
                     String[] newNatures = new String[natures.length - 1];
@@ -114,7 +114,7 @@ public class ToggleNatureAction implements IObjectActionDelegate
             // Add the nature
             String[] newNatures = new String[natures.length + 1];
             System.arraycopy(natures, 0, newNatures, 0, natures.length);
-            newNatures[natures.length] = Slice2javaNature.NATURE_ID;
+            newNatures[natures.length] = Slice2JavaNature.NATURE_ID;
             description.setNatureIds(newNatures);
             project.setDescription(description, null);
         }

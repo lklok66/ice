@@ -53,9 +53,9 @@ import com.zeroc.slice2javaplugin.internal.Configuration;
 import com.zeroc.slice2javaplugin.internal.Dependencies;
 
 
-public class Slice2javaBuilder extends IncrementalProjectBuilder
+public class Slice2JavaBuilder extends IncrementalProjectBuilder
 {
-    public static final String BUILDER_ID = "com.zeroc.Slice2javaPlugin.Slice2javaBuilder";
+    public static final String BUILDER_ID = "com.zeroc.Slice2JavaPlugin.Slice2JavaBuilder";
     
     /*
      * (non-Javadoc)

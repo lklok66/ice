@@ -3,28 +3,28 @@
 <plugin>
 
    <extension
-         id="com.zeroc.Slice2JavaPlugin.Slice2javaBuilder"
+         id="com.zeroc.Slice2JavaPlugin.Slice2JavaBuilder"
          name="Slice2Java Builder"
          point="org.eclipse.core.resources.builders">
       <builder
             hasNature="true"
             isConfigurable="true">
          <run
-               class="com.zeroc.slice2javaplugin.builder.Slice2javaBuilder">
+               class="com.zeroc.slice2javaplugin.builder.Slice2JavaBuilder">
          </run>
       </builder>
    </extension>
    <extension
-         id="com.zeroc.Slice2JavaPlugin.Slice2javaNature"
+         id="com.zeroc.Slice2JavaPlugin.Slice2JavaNature"
          name="Slice2Java Nature"
          point="org.eclipse.core.resources.natures">
       <runtime>
          <run
-               class="com.zeroc.slice2javaplugin.builder.Slice2javaNature">
+               class="com.zeroc.slice2javaplugin.builder.Slice2JavaNature">
          </run>
       </runtime>
       <builder
-            id="com.zeroc.Slice2JavaPlugin.Slice2javaBuilder">
+            id="com.zeroc.Slice2JavaPlugin.Slice2JavaBuilder">
       </builder>
    </extension>
    <extension
@@ -32,53 +32,53 @@
       <objectContribution
             adaptable="true"
             objectClass="org.eclipse.core.resources.IProject"
-            id="Slice2javaPlugin.contribution1">
+            id="Slice2JavaPlugin.contribution1">
          <menu
-               id="Slice2javaPlugin.menu1"
+               id="Slice2JavaPlugin.menu1"
                label="%menu.label.0">
             <separator
-                  name="Slice2javaPlugin.separator1">
+                  name="Slice2JavaPlugin.separator1">
             </separator>
          </menu>
          <visibility>
          	<objectState
                   name="projectNature"
-                  value="com.zeroc.Slice2javaPlugin.Slice2javaNature">
+                  value="com.zeroc.Slice2JavaPlugin.Slice2JavaNature">
             </objectState>
          </visibility>
          <action
                class="com.zeroc.slice2javaplugin.builder.ToggleNatureAction"
                enablesFor="*"             
-               id="com.zeroc.Slice2javaPlugin.removeNatureAction"
+               id="com.zeroc.Slice2JavaPlugin.removeNatureAction"
                label="%action.label.0"
-               menubarPath="Slice2javaPlugin.menu1/Slice2javaPlugin.separator1">
+               menubarPath="Slice2JavaPlugin.menu1/Slice2JavaPlugin.separator1">
          </action>
       </objectContribution>
       <objectContribution
             adaptable="true"
-            id="Slice2javaPlugin.contribution2"
+            id="Slice2JavaPlugin.contribution2"
             objectClass="org.eclipse.core.resources.IProject">
          <menu
-               id="Slice2javaPlugin.menu2"
+               id="Slice2JavaPlugin.menu2"
                label="%menu.label.1">
             <separator
-                  name="Slice2javaPlugin.separator1">
+                  name="Slice2JavaPlugin.separator1">
             </separator>
          </menu>
          <visibility>
          	<not>
             <objectState
                   name="projectNature"
-                  value="com.zeroc.Slice2javaPlugin.Slice2javaNature">
+                  value="com.zeroc.Slice2JavaPlugin.Slice2JavaNature">
             </objectState>
             </not>
          </visibility>
          <action
                class="com.zeroc.slice2javaplugin.builder.ToggleNatureAction"
                enablesFor="*"
-               id="Slice2javaPlugin.addNatureAction"
+               id="Slice2JavaPlugin.addNatureAction"
                label="%action.label.1"
-               menubarPath="Slice2javaPlugin.menu2/Slice2javaPlugin.separator1">
+               menubarPath="Slice2JavaPlugin.menu2/Slice2JavaPlugin.separator1">
          </action>
       </objectContribution>
    </extension>
@@ -87,12 +87,12 @@
       <page
             adaptable="true"
             class="com.zeroc.slice2javaplugin.properties.ProjectProperties"
-            id="slice2javaplugin.properties.samplePropertyPage"
+            id="Slice2JavaPlugin.properties.samplePropertyPage"
             name="%page.name.0"
             objectClass="org.eclipse.core.resources.IProject">
             <enabledWhen>
                 <adapt type="org.eclipse.core.resources.IProject">
-                    <test property="org.eclipse.core.resources.projectNature" value="com.zeroc.Slice2javaPlugin.Slice2javaNature"/>
+                    <test property="org.eclipse.core.resources.projectNature" value="com.zeroc.Slice2JavaPlugin.Slice2JavaNature"/>
                 </adapt>
             </enabledWhen>
       </page>
@@ -101,7 +101,7 @@
          point="org.eclipse.jdt.core.classpathContainerInitializer">
       <classpathContainerInitializer
             class="com.zeroc.slice2javaplugin.internal.IceClasspathContainerIntializer"
-            id="com.zeroc.Slice2javaPlugin.ICE_FRAMEWORK">
+            id="com.zeroc.Slice2JavaPlugin.ICE_FRAMEWORK">
       </classpathContainerInitializer>
    </extension>
    <extension

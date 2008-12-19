@@ -3,7 +3,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="generated"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
-	<classpathentry kind="con" path="com.zeroc.Slice2javaPlugin.ICE_FRAMEWORK"/>
+	<classpathentry kind="con" path="com.zeroc.Slice2JavaPlugin.ICE_FRAMEWORK"/>
 	<classpathentry kind="lib" path="ICE_JAR_HOME/IceAndroid.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

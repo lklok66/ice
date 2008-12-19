@@ -18,12 +18,12 @@ import org.eclipse.core.runtime.CoreException;
 
 import com.zeroc.slice2javaplugin.internal.Configuration;
 
-public class Slice2javaNature implements IProjectNature
+public class Slice2JavaNature implements IProjectNature
 {
     /**
      * ID of this project nature
      */
-    public static final String NATURE_ID = "com.zeroc.Slice2javaPlugin.Slice2javaNature";
+    public static final String NATURE_ID = "com.zeroc.Slice2JavaPlugin.Slice2JavaNature";
 
     /*
      * (non-Javadoc)
@@ -38,7 +38,7 @@ public class Slice2javaNature implements IProjectNature
 
         for(int i = 0; i < commands.length; ++i)
         {
-            if(commands[i].getBuilderName().equals(Slice2javaBuilder.BUILDER_ID))
+            if(commands[i].getBuilderName().equals(Slice2JavaBuilder.BUILDER_ID))
             {
                 return;
             }
@@ -47,7 +47,7 @@ public class Slice2javaNature implements IProjectNature
         ICommand[] newCommands = new ICommand[commands.length + 1];
         System.arraycopy(commands, 0, newCommands, 0, commands.length);
         ICommand command = desc.newCommand();
-        command.setBuilderName(Slice2javaBuilder.BUILDER_ID);
+        command.setBuilderName(Slice2JavaBuilder.BUILDER_ID);
         newCommands[newCommands.length - 1] = command;
         desc.setBuildSpec(newCommands);
         
@@ -70,7 +70,7 @@ public class Slice2javaNature implements IProjectNature
         ICommand[] commands = description.getBuildSpec();
         for(int i = 0; i < commands.length; ++i)
         {
-            if(commands[i].getBuilderName().equals(Slice2javaBuilder.BUILDER_ID))
+            if(commands[i].getBuilderName().equals(Slice2JavaBuilder.BUILDER_ID))
             {
                 ICommand[] newCommands = new ICommand[commands.length - 1];
                 System.arraycopy(commands, 0, newCommands, 0, i);

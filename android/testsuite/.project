@@ -26,7 +26,7 @@
 			</arguments>
 		</buildCommand>
 		<buildCommand>
-			<name>com.zeroc.Slice2javaPlugin.Slice2javaBuilder</name>
+			<name>com.zeroc.Slice2JavaPlugin.Slice2JavaBuilder</name>
 			<arguments>
 			</arguments>
 		</buildCommand>
@@ -34,7 +34,7 @@
 	<natures>
 		<nature>com.android.ide.eclipse.adt.AndroidNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
-		<nature>com.zeroc.Slice2javaPlugin.Slice2javaNature</nature>
+		<nature>com.zeroc.Slice2JavaPlugin.Slice2JavaNature</nature>
 	</natures>
 	<linkedResources>
 		<link>

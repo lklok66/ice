@@ -48,7 +48,7 @@ import org.eclipse.ui.dialogs.ContainerSelectionDialog;
 import org.eclipse.ui.dialogs.PropertyPage;
 
 import com.zeroc.slice2javaplugin.Activator;
-import com.zeroc.slice2javaplugin.builder.Slice2javaBuilder;
+import com.zeroc.slice2javaplugin.builder.Slice2JavaBuilder;
 import com.zeroc.slice2javaplugin.internal.Configuration;
 
 public class ProjectProperties extends PropertyPage
@@ -94,7 +94,7 @@ public class ProjectProperties extends PropertyPage
                     {
                         try
                         {
-                            project.build(IncrementalProjectBuilder.FULL_BUILD, Slice2javaBuilder.BUILDER_ID, null,
+                            project.build(IncrementalProjectBuilder.FULL_BUILD, Slice2JavaBuilder.BUILDER_ID, null,
                                     monitor);
                         }
                         catch(CoreException e)

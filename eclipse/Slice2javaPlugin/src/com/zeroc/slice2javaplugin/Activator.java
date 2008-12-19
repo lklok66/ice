@@ -32,8 +32,8 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-import com.zeroc.slice2javaplugin.builder.Slice2javaBuilder;
-import com.zeroc.slice2javaplugin.builder.Slice2javaNature;
+import com.zeroc.slice2javaplugin.builder.Slice2JavaBuilder;
+import com.zeroc.slice2javaplugin.builder.Slice2JavaNature;
 import com.zeroc.slice2javaplugin.internal.IceClasspathContainerIntializer;
 import com.zeroc.slice2javaplugin.preferences.PluginPreferencePage;
 
@@ -44,7 +44,7 @@ public class Activator extends AbstractUIPlugin
 {
 
     // The plug-in ID
-    public static final String PLUGIN_ID = "com.zeroc.Slice2javaPlugin";
+    public static final String PLUGIN_ID = "com.zeroc.Slice2JavaPlugin";
     
     /**
      * The constructor
@@ -79,7 +79,7 @@ public class Activator extends AbstractUIPlugin
                     {
                         try
                         {
-                            if(p.getProject().hasNature(Slice2javaNature.NATURE_ID))
+                            if(p.getProject().hasNature(Slice2JavaNature.NATURE_ID))
                             {
                                 pl.add(p);
                             }
@@ -115,7 +115,7 @@ public class Activator extends AbstractUIPlugin
                             {
                                 try
                                 {
-                                    p.getProject().build(IncrementalProjectBuilder.FULL_BUILD, Slice2javaBuilder.BUILDER_ID, null,
+                                    p.getProject().build(IncrementalProjectBuilder.FULL_BUILD, Slice2JavaBuilder.BUILDER_ID, null,
                                             monitor);
                                 }
                                 catch(CoreException e)
