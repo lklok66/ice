@@ -508,7 +508,7 @@ public class ProjectProperties extends PropertyPage
             {
                 FileDialog dialog = new FileDialog(getShell());
                 dialog.setFilterPath(_config.getJarDir());
-                dialog.setFilterExtensions(new String[] { "jar" });
+                dialog.setFilterExtensions(new String[] { "*.jar" });
                 String file = dialog.open();
                 if(file != null)
                 {
