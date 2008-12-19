@@ -158,6 +158,17 @@ line:
 
   -Xmx512m
 
+The test suite is entirely self-contained in that the client-server
+communication all occurs locally between sockets in the same Android
+process. When you start the test suite program, you are presented with
+a list of all possible tests along with a checkbox that, when enabled,
+forces all communication to use SSL instead of the default TCP. Each
+test must be run individually; after starting a test, its progress is
+displayed with "ok" messages indicating success. Upon the test's
+completion, you can press the Next button to start the next test in
+the sequence or press the Back button if you want to start a different
+test.
+
 
 ======================================================================
 Application Notes
