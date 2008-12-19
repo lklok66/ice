@@ -360,7 +360,7 @@ public class AllTests
         {
             out.println("ok");
         }
-        adapter.deactivate();
+        adapter.destroy();
 
         out.print("shutdown server manager... ");
         out.flush();

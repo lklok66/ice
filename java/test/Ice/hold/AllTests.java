@@ -181,7 +181,7 @@ public class AllTests
             Condition cond = new Condition(true);
             int value = 0;
             AMICheckSetValue cb = null;
-            while(value < 3000 && cond.value())
+            while(value < 500 && cond.value())
             {
                 cb = new AMICheckSetValue(cond, value);
                 if(holdSerialized.set_async(cb, ++value, 0))
@@ -204,7 +204,7 @@ public class AllTests
             }
             test(cond.value());
 
-            for(int i = 0; i < 20000; ++i)
+            for(int i = 0; i < 1000; ++i)
             {
                 holdSerializedOneway.setOneway(value + 1, value);
                 ++value;
@@ -222,4 +222,3 @@ public class AllTests
         out.println("ok");
     }
 }
-        
