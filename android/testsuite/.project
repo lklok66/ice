@@ -36,4 +36,11 @@
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>com.zeroc.Slice2javaPlugin.Slice2javaNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>ICE_JAR_HOME</name>
+			<type>2</type>
+			<locationURI>ICE_JAR_HOME</locationURI>
+		</link>
+	</linkedResources>
 </projectDescription>
