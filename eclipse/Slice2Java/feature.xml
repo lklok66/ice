@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="com.zeroc.Slice2java"
-      label="Slice2java Eclipse Plugin"
+      id="com.zeroc.Slice2Java"
+      label="Slice2Java Eclipse Plugin"
       version="0.1.0.qualifier"
       provider-name="ZeroC, Inc.">
 
@@ -26,7 +26,7 @@ the EPL is available at http://www.eclipse.org/legal/epl-v10.html.
    </license>
 
    <plugin
-         id="com.zeroc.Slice2javaPlugin"
+         id="com.zeroc.Slice2JavaPlugin"
          download-size="0"
          install-size="0"
          version="0.0.0"

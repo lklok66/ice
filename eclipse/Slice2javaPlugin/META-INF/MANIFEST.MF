@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name.0
-Bundle-SymbolicName: com.zeroc.Slice2javaPlugin;singleton:=true
+Bundle-SymbolicName: com.zeroc.Slice2JavaPlugin;singleton:=true
 Bundle-Version: 0.1.0.qualifier
 Bundle-Activator: com.zeroc.slice2javaplugin.Activator
 Bundle-Vendor: %Bundle-Vendor.0
