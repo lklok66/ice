@@ -514,10 +514,9 @@ public class TestApp extends Application
         if(server != null)
         {
             server.setWriter(new MyWriter());
-            if(client != null) // TODO:
-            {
-                client.setWriter(new MyWriter());    
-            }
+            // All servers must have a client.
+            assert client != null;
+            client.setWriter(new MyWriter());    
             l.add(new ServerThread(client, server));
             if(collocated != null)
             {
@@ -560,9 +559,6 @@ public class TestApp extends Application
 
                     TrustManagerFactory tmf = TrustManagerFactory
                             .getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                    // KeyStore trustKeys = KeyStore.getInstance("BKS");
-                    // trustKeys.load(cert, passphrase);
-                    // tmf.init(trustKeys);
                     tmf.init(ks);
 
                     context.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
