@@ -22,7 +22,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
-import com.zeroc.com.slice2javaplugin.internal.Configuration;
+import com.zeroc.slice2javaplugin.internal.Configuration;
 
 public class ToggleNatureAction implements IObjectActionDelegate
 {

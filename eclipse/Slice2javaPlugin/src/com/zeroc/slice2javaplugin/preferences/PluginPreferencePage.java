@@ -16,8 +16,8 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.IWorkbench;
 
-import com.zeroc.com.slice2javaplugin.internal.Configuration;
 import com.zeroc.slice2javaplugin.Activator;
+import com.zeroc.slice2javaplugin.internal.Configuration;
 
 /**
  * This class represents a preference page that is contributed to the

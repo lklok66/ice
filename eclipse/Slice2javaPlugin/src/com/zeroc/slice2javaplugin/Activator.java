@@ -32,9 +32,9 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-import com.zeroc.com.slice2javaplugin.internal.IceClasspathContainerIntializer;
 import com.zeroc.slice2javaplugin.builder.Slice2javaBuilder;
 import com.zeroc.slice2javaplugin.builder.Slice2javaNature;
+import com.zeroc.slice2javaplugin.internal.IceClasspathContainerIntializer;
 import com.zeroc.slice2javaplugin.preferences.PluginPreferencePage;
 
 /**

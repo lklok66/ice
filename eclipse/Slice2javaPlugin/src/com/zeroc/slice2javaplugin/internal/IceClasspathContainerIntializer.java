@@ -8,7 +8,7 @@
 //
 // **********************************************************************
 
-package com.zeroc.com.slice2javaplugin.internal;
+package com.zeroc.slice2javaplugin.internal;
 
 import java.util.ArrayList;
 import java.util.List;

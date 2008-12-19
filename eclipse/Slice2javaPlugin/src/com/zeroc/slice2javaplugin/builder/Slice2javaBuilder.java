@@ -48,9 +48,9 @@ import org.eclipse.ui.console.IConsoleManager;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
 
-import com.zeroc.com.slice2javaplugin.internal.Configuration;
-import com.zeroc.com.slice2javaplugin.internal.Dependencies;
 import com.zeroc.slice2javaplugin.Activator;
+import com.zeroc.slice2javaplugin.internal.Configuration;
+import com.zeroc.slice2javaplugin.internal.Dependencies;
 
 
 public class Slice2javaBuilder extends IncrementalProjectBuilder
@@ -116,9 +116,13 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
             Set<IFile> files = new HashSet<IFile>();
             getResources(files, state.generated.members());
             
-            for(Iterator<IFile> p = files.iterator(); p.hasNext();)
+            for(IFile file : files)
             {
-                p.next().delete(true, false, monitor);
+                // Don't delete "." files (such as .gitignore).
+                if(!file.getName().startsWith("."))
+                {
+                    file.delete(true, false, monitor);
+                }
             }
         }
         finally
@@ -127,7 +131,7 @@ public class Slice2javaBuilder extends IncrementalProjectBuilder
         }
     }
     
-    // XXX: Is this necessary, or can I just read directly from
+    // TODO: Is this necessary, or can I just read directly from
     // the build method?
     static class StreamReaderThread extends Thread
     {
