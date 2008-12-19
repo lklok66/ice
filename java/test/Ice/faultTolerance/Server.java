@@ -60,6 +60,7 @@ public class Server extends test.Util.Application
             return 1;
         }
 
+        // Don't move this, it needs the port.
         communicator.getProperties().setProperty("TestAdapter.Endpoints", "default -p " + port + ":udp");
         Ice.ObjectAdapter adapter = communicator.createObjectAdapter("TestAdapter");
         Ice.Object object = new TestI(adapter, port);
@@ -73,8 +74,8 @@ public class Server extends test.Util.Application
         Ice.InitializationData initData = new Ice.InitializationData();
         initData.properties = Ice.Util.createProperties(argsH);
         initData.properties.setProperty("Ice.Package.Test", "test.Ice.faultTolerance");
-        initData.properties.setProperty("Ice.ServerIdleTime", "120"); // Two
-                                                                      // minutes.
+        // Two minutes.
+        initData.properties.setProperty("Ice.ServerIdleTime", "120");
         return initData;
     }
 

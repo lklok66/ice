@@ -14,9 +14,6 @@ public class AMDServer extends test.Util.Application
     public int run(String[] args)
     {
         Ice.Communicator communicator = communicator();
-        Ice.Properties properties = communicator.getProperties();
-        properties.setProperty("Ice.Warn.Dispatch", "0");
-        properties.setProperty("TestAdapter.Endpoints", "default -p 12010 -t 2000");
         Ice.ObjectAdapter adapter = communicator.createObjectAdapter("TestAdapter");
         Ice.Object object = new AMDTestI(adapter);
         adapter.add(object, communicator.stringToIdentity("Test"));
@@ -28,6 +25,8 @@ public class AMDServer extends test.Util.Application
         Ice.InitializationData initData = new Ice.InitializationData();
         initData.properties = Ice.Util.createProperties(argsH);
         initData.properties.setProperty("Ice.Package.Test", "test.Ice.slicing.objects.serverAMD");
+        initData.properties.setProperty("Ice.Warn.Dispatch", "0");
+        initData.properties.setProperty("TestAdapter.Endpoints", "default -p 12010 -t 2000");
         return initData;
     }
 

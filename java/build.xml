@@ -228,9 +228,6 @@
             <fileset dir="test/Ice/timeout">
                 <include name="Test.ice" />
             </fileset>
-	    <fileset dir="test/IceSSL/configuration/">
-                <include name="Test.ice" />
-            </fileset>
 	    <fileset dir="test/Slice/keyword/">
                 <include name="Key.ice" />
             </fileset>
@@ -343,7 +340,6 @@
 	    <include name="test/Ice/slicing/objects/"/>
 	    <include name="test/Ice/stream/"/>
 	    <include name="test/Ice/timeout/"/>
-	    <include name="test/IceSSL/configuration/"/>
 	    <include name="test/IceUtil/inputUtil/"/>
 	    <include name="test/Slice/keyword/"/>
 	    <include name="test/Ice/throughput/"/>

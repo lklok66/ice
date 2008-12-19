@@ -13,7 +13,6 @@ public class AMDServer extends test.Util.Application
 {
     public int run(String[] args)
     {
-        communicator().getProperties().setProperty("TestAdapter.Endpoints", "default -p 12010 -t 20000:udp");
         Ice.ObjectAdapter adapter = communicator().createObjectAdapter("TestAdapter");
         adapter.add(new AMDMyDerivedClassI(), communicator().stringToIdentity("test"));
         adapter.activate();
@@ -32,7 +31,7 @@ public class AMDServer extends test.Util.Application
         //
         initData.properties.setProperty("Ice.Warn.Dispatch", "0");
         initData.properties.setProperty("Ice.Package.Test", "test.Ice.operationsAMD");
-        return initData;
+        initData.properties.setProperty("TestAdapter.Endpoints", "default -p 12010 -t 20000:udp"); return initData;
     }
 
     public static void main(String[] args)

@@ -47,7 +47,6 @@ tests = [
     ("Ice/timeout", ["core"]),
     ("Ice/servantLocator", ["core"]),
     ("Ice/interceptor", ["core"]),
-    ("IceSSL/configuration", ["once"]),
     ]
 
 if __name__ == "__main__":

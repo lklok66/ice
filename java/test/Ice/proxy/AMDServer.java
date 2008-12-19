@@ -14,7 +14,6 @@ public class AMDServer extends test.Util.Application
     public int run(String[] args)
     {
         Ice.Communicator communicator = communicator();
-        communicator.getProperties().setProperty("TestAdapter.Endpoints", "default -p 12010 -t 10000:udp");
         Ice.ObjectAdapter adapter = communicator.createObjectAdapter("TestAdapter");
         adapter.add(new AMDMyDerivedClassI(), communicator.stringToIdentity("test"));
         adapter.activate();
@@ -27,6 +26,7 @@ public class AMDServer extends test.Util.Application
         Ice.InitializationData initData = new Ice.InitializationData();
         initData.properties = Ice.Util.createProperties(argsH);
         initData.properties.setProperty("Ice.Package.Test", "test.Ice.proxy");
+        initData.properties.setProperty("TestAdapter.Endpoints", "default -p 12010 -t 10000:udp");
         return initData;
     }
 
