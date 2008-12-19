@@ -24,7 +24,7 @@ public class Server extends test.Util.Application
     {
         Ice.InitializationData initData = new Ice.InitializationData();
         initData.properties = Ice.Util.createProperties(argsH);
-        initData.properties.setProperty("Ice.Package.Test", "test.Ice.throughput");
+        initData.properties.setProperty("Ice.Package.Demo", "test.Ice.throughput");
         initData.properties.setProperty("Throughput.Endpoints", "default -p 10000 -h 127.0.0.1");
         return initData;
     }
