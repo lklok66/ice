@@ -1,6 +1,7 @@
-#Thu Dec 18 13:31:45 NST 2008
+#Fri Dec 19 14:20:37 NST 2008
 eclipse.preferences.version=1
+iceIncludes=true
 icejar=C\:\\Users\\matthew\\src\\ice-33\\java\\lib\\Ice.jar
-includes=slice;../../../slice
+includes=slice
 jars=
 tie=true
