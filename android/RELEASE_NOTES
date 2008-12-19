@@ -6,9 +6,40 @@ Table of Contents
 -----------------
 
   1. Introduction
+  2. Known Limitations
 
 
 ======================================================================
 1. Introduction
 ======================================================================
 
+Ice for Android provides a complete implementation of the Ice run time
+for devices running Google's Android platform. This release of Ice for
+Android is a port of Ice for Java 3.3, therefore you can refer to the
+Ice 3.3 manual for more information about Ice and the Java language
+mapping.
+
+The Ice for Android distribution does not include any Ice services,
+but its support for the complete Ice protocol means your Android
+applications will work seamlessly with existing Ice servers as well as
+Ice services such as IceGrid, Glacier2, and IceStorm.
+
+As with all ZeroC Labs projects, we do not advise using Ice for
+Android in mission-critical applications. Also be aware that any
+subsequent release of this product may contain changes that break
+backward compatibility.
+
+
+======================================================================
+2. Known Limitations
+======================================================================
+
+This section describes known issues in this release that may affect
+your applications.
+
+
+SSL
+---
+
+Due to performance and stability issues in the current Android SSL
+implementation, we recommend using TCP over SSL whenever feasible.

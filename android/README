@@ -41,23 +41,6 @@ The instructions in this file assume that you have already installed
 and configured the Slice2Java plugin.
 
 
-Activating the Plugin
----------------------
-
-To use the Slice2Java plugin in an Eclipse project, right-click on the
-project and choose Slice2Java->Add Slice2Java Builder. In an Android
-project, the Slice2Java plugin automatically adds a reference to
-IceAndroid.jar and assumes that this file is installed in the Ice
-installation directory you specified in the plugin's configuration.
-
-If IceAndroid.jar cannot be found in the Ice installation directory,
-Eclipse will show an error indication on the project's icon in the
-Package Explorer view; in this situation, right click on the project
-and choose Build Path->Configure Build Path. Select the Libraries tab,
-remove the Ice Library entry, and click Add External JARs to add a
-reference to IceAndroid.jar.
-
-
 Configuring your Workspace
 --------------------------
 
