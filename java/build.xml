@@ -391,7 +391,6 @@
 
     <target name="install-jar">
         <copy file="${lib.dir}/IceAndroid.jar" todir="${prefix}/lib"/>
-        <copy file="${lib.dir}/IceTest.jar" todir="${prefix}/lib"/>
     </target>
 
     <target name="install" depends="jar, install-common, install-jar">
