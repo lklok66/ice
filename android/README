@@ -15,7 +15,7 @@ for Android from source, please consult the INSTALL file.
 
 
 ======================================================================
-Developing an Android application with Ice for Android
+Eclipse Development
 ======================================================================
 
 This section discusses Ice for Android development using Eclipse. If
@@ -64,9 +64,31 @@ It is not necessary to define this variable for your own projects.
 Sample Projects
 ======================================================================
 
-To open a sample project, choose File->Import... and select one of the
-subdirectories of <IceAndroid-install>/android/demo. The projects are
-described below.
+The following prerequisites are necessary for using the sample
+projects in this distribution:
+
+ 1. Eclipse is installed
+
+    See http://www.eclipse.org
+
+ 2. Android ADT is installed and configured
+
+    See http://code.google.com/android/intro/installing.html#installingplugin
+
+ 3. Ice 3.3 is installed
+
+    See http://www.zeroc.com/download.html
+
+ 4. Slice2Java plugin is installed and configured
+
+    See the section "Eclipse Development" above
+
+In Eclipse, you can open a sample project by choosing File->Import...
+and selecting one of the subdirectories of
+
+  <IceAndroid-install>/android/demo
+
+The projects are described below.
 
 
 Hello
