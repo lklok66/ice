@@ -115,6 +115,42 @@ public class TestApp extends Application
         new TestSuiteEntry("timeout", test.Ice.timeout.Client.class, test.Ice.timeout.Server.class, null),
     };
 
+    static final private TestSuiteEntry[] _ssltests =
+    {
+        new TestSuiteEntry("adapterDeactivation", test.Ice.adapterDeactivation.Client.class,
+                test.Ice.adapterDeactivation.Server.class, test.Ice.adapterDeactivation.Collocated.class),
+        new TestSuiteEntry("binding", test.Ice.binding.Client.class, test.Ice.binding.Server.class, null),
+        new TestSuiteEntry("checksum", test.Ice.checksum.Client.class, test.Ice.checksum.Server.class, null),
+        new TestSuiteEntry("custom15", test.Ice.custom15.Client.class, test.Ice.custom15.Server.class,
+                test.Ice.custom15.Collocated.class),
+        new TestSuiteEntry("exceptions", test.Ice.exceptions.Client.class, test.Ice.exceptions.Server.class,
+                test.Ice.exceptions.Collocated.class),
+        new TestSuiteEntry("facets", test.Ice.facets.Client.class, test.Ice.facets.Server.class,
+                test.Ice.facets.Collocated.class),
+        new TestSuiteEntry("hold", test.Ice.hold.Client.class, test.Ice.hold.Server.class, null),
+        new TestSuiteEntry("inheritance", test.Ice.inheritance.Client.class, test.Ice.inheritance.Server.class,
+                test.Ice.inheritance.Collocated.class),
+        new TestSuiteEntry("interceptor", test.Ice.interceptor.Client.class, null, null),
+        new TestSuiteEntry("location", test.Ice.location.Client.class, test.Ice.location.Server.class, null),
+        new TestSuiteEntry("objects", test.Ice.objects.Client.class, test.Ice.objects.Server.class,
+                test.Ice.objects.Collocated.class),
+        new TestSuiteEntry("operations", test.Ice.operations.Client.class, test.Ice.operations.Server.class,
+                test.Ice.operations.Collocated.class),
+        new TestSuiteEntry("packagemd", test.Ice.packagemd.Client.class, test.Ice.packagemd.Server.class, null),
+        new TestSuiteEntry("proxy", test.Ice.proxy.Client.class, test.Ice.proxy.Server.class,
+                test.Ice.proxy.Collocated.class),
+        new TestSuiteEntry("retry", test.Ice.retry.Client.class, test.Ice.retry.Server.class, null),
+        new TestSuiteEntry("servantLocator", test.Ice.servantLocator.Client.class,
+                test.Ice.servantLocator.Server.class, test.Ice.servantLocator.Collocated.class),
+        new TestSuiteEntry("slicing/exceptions", test.Ice.slicing.exceptions.Client.class,
+                test.Ice.slicing.exceptions.Server.class, null),
+        new TestSuiteEntry("slicing/objects", test.Ice.slicing.objects.Client.class,
+                test.Ice.slicing.objects.Server.class, null),
+        new TestSuiteEntry("stream", test.Ice.stream.Client.class, null, null),
+        new TestSuiteEntry("timeout", test.Ice.timeout.Client.class, test.Ice.timeout.Server.class, null),
+    };
+    private TestSuiteEntry[] _curtests = _tests;
+    
     class MyWriter extends Writer
     {
         @Override
@@ -216,6 +252,7 @@ public class TestApp extends Application
         {
             super(c);
             _server = s;
+            setName("ClientThread");
         }
 
         public void run()
@@ -245,6 +282,7 @@ public class TestApp extends Application
         ServerThread(test.Util.Application c, test.Util.Application s)
         {
             super(s);
+            setName("ServerThread");
             _client = c;
         }
 
@@ -301,6 +339,7 @@ public class TestApp extends Application
         CollocatedThread(test.Util.Application c)
         {
             super(c);
+            setName("CollocatedThread");
         }
 
         public void run()
@@ -441,7 +480,7 @@ public class TestApp extends Application
     public List<String> getTestNames()
     {
         List<String> s = new ArrayList<String>();
-        for(TestSuiteEntry t : _tests)
+        for(TestSuiteEntry t : _curtests)
         {
             s.add(t.getName());
         }
@@ -453,7 +492,7 @@ public class TestApp extends Application
         _listener = listener;
         if(_listener != null && _currentTest != -1)
         {
-            _listener.onStartTest(_tests[_currentTest].getName());
+            _listener.onStartTest(_curtests[_currentTest].getName());
             for(String s : _strings)
             {
                 _listener.onOutput(s);
@@ -468,7 +507,7 @@ public class TestApp extends Application
     public void startNextTest()
     {
         assert _complete;
-        startTest((_currentTest + 1) % _tests.length);
+        startTest((_currentTest + 1) % _curtests.length);
     }
 
     synchronized public void startTest(int position)
@@ -481,7 +520,7 @@ public class TestApp extends Application
         _complete = false;
         _strings.clear();
 
-        TestSuiteEntry entry = _tests[position];
+        TestSuiteEntry entry = _curtests[position];
         test.Util.Application client;
         test.Util.Application server;
         test.Util.Application collocated;
@@ -537,6 +576,19 @@ public class TestApp extends Application
     public void setSSL(boolean ssl)
     {
         _ssl = ssl;
+        if(_ssl)
+        {
+            _curtests = _ssltests;
+        }
+        else
+        {
+            _curtests = _tests;
+        }
+        if(_currentTest > _curtests.length-1)
+        {
+            _currentTest = _curtests.length-1;
+        }
+
         if(_ssl && !_sslInitialized)
         {
             if(_ssllistener != null)
@@ -583,6 +635,7 @@ public class TestApp extends Application
             };
 
             Thread t = new Thread(r);
+            t.setName("Initialize SSL Thread");
             t.setDaemon(true);
             t.start();
         }

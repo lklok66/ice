@@ -204,45 +204,45 @@ final class UdpTransceiver implements Transceiver
         //
         // NOTE: close() may have already been invoked by shutdownReadWrite().
         //
+        if(_traceLevels.network >= 1)
+        {
+            String s = "closing udp connection\n" + _desc;
+            _logger.trace(_traceLevels.networkCat, s);
+        }
+
+        if(_readThread != null)
+        {
+            assert Thread.currentThread() != _readThread;
+            _readThread.destroyThread();
+            while(_readThread.isAlive())
+            {
+                try
+                {
+                    _readThread.join();
+                }
+                catch(InterruptedException e)
+                {
+                }
+            }
+        }
+        if(_writeThread != null)
+        {
+            assert Thread.currentThread() != _writeThread;
+            _writeThread.destroyThread();
+            while(_writeThread.isAlive())
+            {
+                try
+                {
+                    _writeThread.join();
+                }
+                catch(InterruptedException e)
+                {
+                }
+            }
+        }
+    
         if(_fd != null)
         {
-            if(_traceLevels.network >= 1)
-            {
-                String s = "closing udp connection\n" + _desc;
-                _logger.trace(_traceLevels.networkCat, s);
-            }
-
-            if(_readThread != null)
-            {
-                assert Thread.currentThread() != _readThread;
-                _readThread.destroyThread();
-                while(_readThread.isAlive())
-                {
-                    try
-                    {
-                        _readThread.join();
-                    }
-                    catch(InterruptedException e)
-                    {
-                    }
-                }
-            }
-            if(_writeThread != null)
-            {
-                assert Thread.currentThread() != _writeThread;
-                _writeThread.destroyThread();
-                while(_writeThread.isAlive())
-                {
-                    try
-                    {
-                        _writeThread.join();
-                    }
-                    catch(InterruptedException e)
-                    {
-                    }
-                }
-            }
-    
             try
             {
                 if(!_closed)
