@@ -43,3 +43,14 @@ SSL
 
 Due to performance and stability issues in the current Android SSL
 implementation, we recommend using TCP over SSL whenever feasible.
+
+
+Eclipse Projects
+----------------
+
+It may be necessary to "refresh" an Eclipse project after Slice files
+have been translated. For example, after Eclipse attempts to build a
+workspace, it may report errors indicating that a type cannot be found
+whose definition is provided by a Slice-generated class. In this
+situation, you can refresh the project by selecting it and pressing
+the F5 key, or by right-clicking on the project and choosing Refresh.
