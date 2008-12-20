@@ -39,7 +39,8 @@ public final class ConnectionI implements Connection, IceInternal.TimerTask
                 //
                 // Use asynchronous I/O. We cannot begin an
                 // asynchronous I/O request from this thread if a
-                // callback is provided, so we queue a work item.
+                // callback is provided (it can cause a deadlock in
+                // the call to the callback), so we queue a work item.
                 //
                 if(callback == null)
                 {
@@ -48,7 +49,14 @@ public final class ConnectionI implements Connection, IceInternal.TimerTask
                 else
                 {
                     _startCallback = callback;
-                    initializeAsync(null);
+                    // Do the intializeAsync in a thread.
+                    new Thread(new Runnable()
+                    {
+                        public void run()
+                        {
+                            initializeAsync(null);
+                        }
+                    }).start();
                     return;
                 }
 
