@@ -88,6 +88,10 @@ and selecting one of the subdirectories of
 
   <IceAndroid-install>/android/demo
 
+To open the testsuite project, select the following subdirectory:
+
+  <IceAndroid-install>/android/testsuite
+
 The projects are described below.
 
 
@@ -147,14 +151,12 @@ below:
   http://www.zeroc.com/labs/icetouch/download.html
 
 
-======================================================================
 Test Suite
-======================================================================
+----------
 
-The Ice for Android test suite is encapsulated in the JAR file named
-<IceAndroid-install>/java/lib/IceTest.jar, and an Android front-end
-is provided in the Eclipse project located in the subdirectory
-<IceAndroid-install>/android/testsuite.
+The Ice for Android test suite project is an Android front end for
+the tests encapsulated in the JAR file named
+<IceAndroid-install>/java/lib/IceTest.jar.
 
 In order to build this project, it may be necessary for you to
 increase Eclipse's maximum memory limit. Locate the eclipse.ini file
