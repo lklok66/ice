@@ -1,5 +1,19 @@
 ======================================================================
-Introduction
+Contents
+======================================================================
+
+Table of Contents
+-----------------
+
+  1. Introduction
+  2. Installation
+  3. Eclipse Development
+  4. Sample Projects
+  5. Application Notes
+
+
+======================================================================
+1. Introduction
 ======================================================================
 
 This Ice for Android distribution contains the following components:
@@ -9,13 +23,28 @@ This Ice for Android distribution contains the following components:
  * Eclipse projects for three sample clients and a test suite
  * Source code for the Ice for Android run time, demos, and tests
 
+You must install Ice 3.3 to use Ice for Android. Binary and source
+distributions of Ice can be downloaded at the link below:
+
+  http://www.zeroc.com/download.html
+
 We also encourage you to review the RELEASE_NOTES file for important
 information about this release. If you are interested in building Ice
 for Android from source, please consult the INSTALL file.
 
 
 ======================================================================
-Eclipse Development
+2. Installation
+======================================================================
+
+You can extract this archive in the location of your choice. The only
+file that is necessary for developing your own Android applications is
+the Ice for Android run time JAR file (java/lib/IceAndroid.jar), which
+you may prefer to copy to another directory.
+
+
+======================================================================
+3. Eclipse Development
 ======================================================================
 
 This section discusses Ice for Android development using Eclipse. If
@@ -23,8 +52,8 @@ you are not using Eclipse to develop your Android application, you may
 find the information in the INSTALL file useful.
 
 
-Eclipse Plugin
---------------
+Slice2Java Plugin
+-----------------
 
 ZeroC has created a Slice2Java plugin for Eclipse that automates the
 translation of your Slice files. We strongly recommend using this
@@ -41,27 +70,21 @@ The instructions in this file assume that you have already installed
 and configured the Slice2Java plugin.
 
 
-Configuring your Workspace
---------------------------
+Configuring your Project
+------------------------
 
-Prior to opening the Eclipse projects included in this distribution,
-you need to perform the following steps:
+After installation and configuring the Slice2Java plugin, you will
+need to add the Ice for Android run time JAR file to your project:
 
- 1. In Eclipse, choose Window->Preferences
- 2. Open the General->Workspace folder
- 3. Select the Linked Resources entry
- 4. Click New... to add a new path variable
- 5. Enter ICE_JAR_HOME in the Name field
- 6. Enter the path name <IceAndroid-install>/java/lib in the Location
-    field, such as C:\IceAndroid-@ver@\java\lib on Windows or
-    /opt/IceAndroid-@ver@/java/lib on Linux.
- 7. Click OK to save the path variable
-
-It is not necessary to define this variable for your own projects.
+ 1. Select Java Build Path in the project's properties
+ 2. Click on the Libraries tab
+ 3. Click Add External JARs... and choose IceAndroid.jar from the
+    directory in which you installed it
+ 4. Click OK to save your changes 
 
 
 ======================================================================
-Sample Projects
+4. Sample Projects
 ======================================================================
 
 The following prerequisites are necessary for using the sample
@@ -81,7 +104,25 @@ projects in this distribution:
 
  4. Slice2Java plugin is installed and configured
 
-    See the section "Eclipse Development" above
+    See the section "Eclipse Development" above.
+
+ 5. Your workspace is configured with a linked resource, which allows
+    the sample projects to locate the Ice for Android run time JAR
+    file. Perform the following steps to add the resource:
+
+    1. In Eclipse, choose Window->Preferences
+    2. Open the General->Workspace folder
+    3. Select the Linked Resources entry
+    4. Click New... to add a new path variable
+    5. Enter ICE_JAR_HOME in the Name field
+    6. Enter the path name <IceAndroid-install>/java/lib in the Location
+       field, such as C:\IceAndroid-@ver@\java\lib on Windows or
+       /opt/IceAndroid-@ver@/java/lib on Linux.
+    7. Click OK to save the path variable
+
+    It is not necessary to define this resource in your own projects,
+    and you can remove it as soon as you are finished using the sample
+    projects.
 
 In Eclipse, you can open a sample project by choosing File->Import...
 and selecting one of the subdirectories of
@@ -178,7 +219,7 @@ test.
 
 
 ======================================================================
-Application Notes
+5. Application Notes
 ======================================================================
 
 
