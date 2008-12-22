@@ -37,10 +37,11 @@ for Android from source, please consult the INSTALL file.
 2. Installation
 ======================================================================
 
-You can extract this archive in the location of your choice. The only
-file that is necessary for developing your own Android applications is
-the Ice for Android run time JAR file (java/lib/IceAndroid.jar), which
-you may prefer to copy to another directory.
+You can extract this distribution in the location of your choice. The
+only file in this distribution that is necessary for developing your
+own Android applications is the Ice for Android run time JAR file
+(java/lib/IceAndroid.jar), which you may prefer to copy to another
+directory.
 
 
 ======================================================================
@@ -106,7 +107,7 @@ projects in this distribution:
 
     See the section "Eclipse Development" above.
 
- 5. Your workspace is configured with a linked resource, which allows
+ 5. Your workspace is configured with a linked resource that allows
     the sample projects to locate the Ice for Android run time JAR
     file. Perform the following steps to add the resource:
 
