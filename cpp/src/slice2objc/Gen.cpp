@@ -1008,6 +1008,7 @@ Slice::Gen::generate(const UnitPtr& p)
 
     _M << nl << "\n#import <Ice/LocalException.h>";
     _M << nl << "#import <Ice/Stream.h>";
+    _M << nl << "#import <Ice/Internal.h>";
 
     _M << nl << "#import <";
     if(!_include.empty())
@@ -2189,7 +2190,26 @@ Slice::Gen::TypesVisitor::writeMemberHashCode(const DataMemberList& dataMembers,
 	_M << nl << "h_ = (h_ << 1) ^ ";
 	if(isValueType(type))
 	{
-	    _M << name << ";";
+            BuiltinPtr builtin = BuiltinPtr::dynamicCast(type);
+            if(builtin)
+            {
+                if(builtin->kind() == Builtin::KindFloat)
+                {
+                    _M << "ICEInternalHashFloat(" << name << ");";
+                }
+                else if(builtin->kind() == Builtin::KindDouble)
+                {
+                    _M << "ICEInternalHashDouble(" << name << ");";
+                }
+                else
+                {
+                    _M << name << ";";
+                }
+            }
+            else
+            {
+                _M << name << ";";
+            }
 	}
 	else
 	{

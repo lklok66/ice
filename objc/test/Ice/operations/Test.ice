@@ -69,6 +69,20 @@ dictionary<string, MyEnum> StringMyEnumD;
 
 sequence<Structure> StructS; // Used by Objective-C test only.
 
+struct Struct2 // Ensures the generated code for this struct compiles
+{
+    bool b;
+    int i;
+    float f;
+    double d;
+    byte by;
+    short sh;
+    long l;
+    StructS ss;
+    ByteBoolD dict;
+    MyEnumSS seq;
+};
+
 class A // Used Objective-C test only.
 {
     int i;
