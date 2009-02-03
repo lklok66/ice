@@ -9,11 +9,12 @@
 
 top_srcdir	= ..
 
-!include $(top_srcdir)\config\Make.rules.mak
+!include $(top_srcdir)/config/Make.rules.mak
 
-SUBDIRS		= simple
+SUBDIRS		= cpp cs
 
 $(EVERYTHING)::
 	@for %i in ( $(SUBDIRS) ) do \
-	    @echo "making $@ in %i" && \
-	    cmd /c "cd %i && $(MAKE) -nologo -f Makefile.mak $@" || exit 1
+	    @if exist %i \
+	        @echo "making $@ in %i" && \
+	        cmd /c "cd %i && $(MAKE) -nologo -f Makefile.mak $@" || exit 1

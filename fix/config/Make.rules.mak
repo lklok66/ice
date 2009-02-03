@@ -75,6 +75,13 @@ MT = "$(PDK_HOME)\bin\mt.exe"
 MT = mt.exe
 !endif
 
+#
+# If QuickFix is not installed in a standard location where the
+# compiler can find it, set QF_HOME to the QuickFix installation
+# directory.
+#
+#QF_HOME		?= c:\quickfix
+
 
 # ----------------------------------------------------------------------
 # Don't change anything below this line!
@@ -89,20 +96,18 @@ slice_translator = slice2cpp.exe
 ice_require_cpp  = 1
 !endif
 
-!if exist ($(top_srcdir)\..\config\Make.common.rules.mak)
-!include $(top_srcdir)\..\config\Make.common.rules.mak
-!else
 !include $(top_srcdir)\config\Make.common.rules.mak
-!endif
 
 bindir			= $(top_srcdir)\bin
 libdir			= $(top_srcdir)\lib
 headerdir		= $(top_srcdir)\include
 
-!if "$(ice_src_dist)" != ""
 includedir		= $(top_srcdir)\include
+
+!if "$(ice_src_dist)" != ""
+ice_includedir		= $(ice_dir)\cpp\include
 !else
-includedir		= $(ice_dir)\include
+ice_includedir		= $(ice_dir)\include
 !endif
 
 install_bindir		= $(prefix)\bin$(x64suffix)
@@ -128,27 +133,39 @@ LIBSUFFIX	= $(LIBSUFFIX)d
 RCFLAGS		= -D_DEBUG
 !endif
 
-OPENSSL_LIBS            = ssleay32.lib libeay32.lib
-EXPAT_LIBS              = libexpat.lib
+!if "$(QF_HOME)" != ""
+QF_FLAGS	= -I$(QF_HOME)\include
+!if "$(OPTIMIZE)" != "yes"
+QF_LIBS		= $(QF_HOME)\lib\debug\quickfix.lib wsock32.lib
+!else
+QF_LIBS		= $(QF_HOME)\lib\quickfix.lib wsock32.lib
+!endif
+!endif
 
-CPPFLAGS		= $(CPPFLAGS) -I$(includedir)
-ICECPPFLAGS		= -I$(slicedir)
+
+slicedir		= $(top_srcdir)\slice
+
+CPPFLAGS		= $(CPPFLAGS) -I$(includedir) -I$(ice_includedir)
+ICECPPFLAGS		= -I$(slicedir) -I$(ice_slicedir)
 SLICE2CPPFLAGS		= $(ICECPPFLAGS)
 
 LDFLAGS			= $(LDFLAGS) $(LDPLATFORMFLAGS) $(CXXFLAGS)
 
 !if "$(ice_src_dist)" != ""
-SLICEPARSERLIB		= $(libdir)\slice$(LIBSUFFIX).lib
-SLICE2CPP		= $(bindir)\slice2cpp.exe
-SLICE2XSD		= $(bindir)\slice2xsd.exe
-SLICE2FREEZE		= $(bindir)\slice2freeze.exe
-SLICE2DOCBOOK		= $(bindir)\slice2docbook.exe
+SLICEPARSERLIB		= $(ice_dir)\cpp\bin\slice$(LIBSUFFIX).lib
+SLICE2CPP		= $(ice_dir)\cpp\bin\slice2cpp.exe
+SLICE2XSD		= $(ice_dir)\cpp\bin\slice2xsd.exe
+SLICE2FREEZE		= $(ice_dir)\cpp\bin\slice2freeze.exe
+SLICE2DOCBOOK		= $(ice_dir)\cpp\bin\slice2docbook.exe
+
+ice_libdir		= $(ice_dir)\cpp\$(libdir)
 !else
 SLICEPARSERLIB		= $(ice_dir)\lib$(x64suffix)\slice$(LIBSUFFIX).lib
 SLICE2CPP		= $(ice_dir)\bin$(x64suffix)\slice2cpp.exe
 SLICE2XSD		= $(ice_dir)\bin$(x64suffix)\slice2xsd.exe
 SLICE2FREEZE		= $(ice_dir)\bin$(x64suffix)\slice2freeze.exe
 SLICE2DOCBOOK		= $(ice_dir)\bin$(x64suffix)\slice2docbook.exe
+ice_libdir		= $(ice_dir)\lib$(x64suffix)
 !endif
 
 EVERYTHING		= all clean install

@@ -7,7 +7,7 @@
 #
 # **********************************************************************
 
-top_srcdir	= ..\..\..
+top_srcdir	= ..\..
 
 TARGETS		= client.exe
 TARGETS_CONFIG	= $(TARGETS:.exe=.exe.config)
@@ -21,6 +21,6 @@ SDIR		= .
 MCSFLAGS	= $(MCSFLAGS) -target:exe
 
 client.exe: $(C_SRCS) $(GEN_SRCS)
-	$(MCS) $(MCSFLAGS) -out:$@ -r:$(refdir)\Ice.dll -r:$(refdir)\IceFIX.dll  $(QF_FLAGS) $(C_SRCS) $(GEN_SRCS)
+	$(MCS) $(MCSFLAGS) -out:$@ -r:$(ice_refdir)\Ice.dll -r:$(refdir)\IceFIX.dll  $(QF_FLAGS) $(C_SRCS) $(GEN_SRCS)
 
 !include .depend

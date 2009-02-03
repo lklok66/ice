@@ -7,13 +7,24 @@
 #
 # **********************************************************************
 
-top_srcdir	= ..
+top_srcdir	= .
 
-!include $(top_srcdir)\config\Make.rules.mak
+!include $(top_srcdir)/config/Make.rules.mak
 
-SUBDIRS		= simple
+SUBDIRS		= config src include demo slice
+
+INSTALL_SUBDIRS	= $(install_bindir) $(install_libdir) $(install_includedir) $(install_configdir)
+
+install:: install-common
+	@for %i in ( $(INSTALL_SUBDIRS) ) do \
+	    @if not exist %i \
+		@echo "Creating %i..." && \
+		mkdir %i
 
 $(EVERYTHING)::
 	@for %i in ( $(SUBDIRS) ) do \
 	    @echo "making $@ in %i" && \
 	    cmd /c "cd %i && $(MAKE) -nologo -f Makefile.mak $@" || exit 1
+
+test::
+	@python $(top_srcdir)/allTests.py

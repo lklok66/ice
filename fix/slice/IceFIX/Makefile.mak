@@ -7,13 +7,15 @@
 #
 # **********************************************************************
 
-top_srcdir	= ..
+top_srcdir	= ..\..
 
-!include $(top_srcdir)\config\Make.rules.mak
+!include $(top_srcdir)/config/Make.rules.mak
 
-SUBDIRS		= simple
+install::
+	@if not exist $(install_slicedir)\IceFIX \
+	    @echo "Creating $(install_slicedir)\IceFIX..." && \
+	    mkdir $(install_slicedir)\IceFIX
 
-$(EVERYTHING)::
-	@for %i in ( $(SUBDIRS) ) do \
-	    @echo "making $@ in %i" && \
-	    cmd /c "cd %i && $(MAKE) -nologo -f Makefile.mak $@" || exit 1
+	@for %i in ( *.ice ) do \
+	    @echo Installing %i && \
+	    copy %i $(install_slicedir)\IceFIX

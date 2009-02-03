@@ -41,14 +41,10 @@ SDIR		= $(slicedir)\IceFIX
 
 !include $(top_srcdir)\config\Make.rules.mak
 
-ICECPPFLAGS	= $(ICECPPFLAGS) -I..
-SLICE2CPPFLAGS	= --ice --include-dir IceFIX -I.. $(SLICE2CPPFLAGS)
-SLICE2FREEZECMD = $(SLICE2FREEZE) $(SLICE2CPPFLAGS)
-CPPFLAGS	= -I.. -Idummyinclude $(CPPFLAGS) -DWIN32_LEAN_AND_MEAN $(QF_FLAGS)
+SLICE2CPPFLAGS	= -I./ $(SLICE2CPPFLAGS)
+CPPFLAGS	= -I. -Idummyinclude $(CPPFLAGS) -DWIN32_LEAN_AND_MEAN $(QF_FLAGS)
 SLINKWITH 	= $(LIBS) icefix$(LIBSUFFIX).lib freeze$(LIBSUFFIX).lib $(QF_LIBS)
 ALINKWITH 	= $(LIBS) icefix$(LIBSUFFIX).lib
-
-SLICE2FREEZECMD = $(SLICE2FREEZE) --ice --include-dir IceFIX -I.. -I$(slicedir)
 
 !if "$(GENERATE_PDB)" == "yes"
 PDBFLAGS        = /pdb:$(DLLNAME:.dll=.pdb)
@@ -81,33 +77,29 @@ $(SERVER): $(SOBJS) IceFIXServer.res
 	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
 	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#1 && del /q $@.manifest
 
-IceFIX.cpp $(HDIR)\IceFIX.h: $(SDIR)\IceFIX.ice $(SLICE2CPP) $(SLICEPARSERLIB)
+IceFIX.cpp $(HDIR)\IceFIX.h: $(SDIR)\IceFIX.ice
 	del /q $(HDIR)\IceFIX.h IceFIX.cpp
-	$(SLICE2CPP) --dll-export ICE_FIX_LIB_API $(SLICE2CPPFLAGS) $(SDIR)\IceFIX.ice
+	$(SLICE2CPP) --dll-export ICE_FIX_LIB_API --ice --include-dir IceFIX $(SLICE2CPPFLAGS) $(SDIR)\IceFIX.ice
 	move IceFIX.h $(HDIR)
 
-BridgeTypes.cpp BridgeTypes.h: ..\IceFIX\BridgeTypes.ice $(SLICE2CPP) $(SLICEPARSERLIB)
+BridgeTypes.cpp BridgeTypes.h: BridgeTypes.ice
 	del /q BridgeTypes.h BridgeTypes.cpp
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) ..\IceFIX\BridgeTypes.ice
+	$(SLICE2CPP) $(SLICE2CPPFLAGS) BridgeTypes.ice
 
-RoutingRecordDB.h RoutingRecordDB.cpp: ..\IceFix\BridgeTypes.ice $(SLICE2FREEZE) $(SLICEPARSERLIB)
+RoutingRecordDB.h RoutingRecordDB.cpp: BridgeTypes.ice
 	del /q RoutingRecordDB.h RoutingRecordDB.cpp
-	$(SLICE2FREEZECMD) --dict FIXBridge::RoutingRecordDB,string,FIXBridge::RoutingRecord \
-	RoutingRecordDB ..\IceFix\BridgeTypes.ice
+	$(SLICE2FREEZE) $(SLICE2CPPFLAGS) --dict FIXBridge::RoutingRecordDB,string,FIXBridge::RoutingRecord \
+	RoutingRecordDB BridgeTypes.ice
 
-ClientDB.h ClientDB.cpp: ..\IceFix\BridgeTypes.ice $(SLICE2FREEZE) $(SLICEPARSERLIB)
+ClientDB.h ClientDB.cpp: BridgeTypes.ice
 	del /q ClientDB.h ClientDB.cpp
-	$(SLICE2FREEZECMD) --dict FIXBridge::ClientDB,string,FIXBridge::Client ClientDB \
-		..\IceFix\BridgeTypes.ice
+	$(SLICE2FREEZE) $(SLICE2CPPFLAGS) --dict FIXBridge::ClientDB,string,FIXBridge::Client ClientDB \
+		BridgeTypes.ice
 
-MessageDB.h MessageDB.cpp: ..\IceFix\BridgeTypes.ice $(SLICE2FREEZE) $(SLICEPARSERLIB)
+MessageDB.h MessageDB.cpp: BridgeTypes.ice
 	del /q MessageDB.h MessageDB.cpp
-	$(SLICE2FREEZECMD) --dict FIXBridge::MessageDB,int,FIXBridge::Message MessageDB ..\IceFix\BridgeTypes.ice
+	$(SLICE2FREEZE) $(SLICE2CPPFLAGS) --dict FIXBridge::MessageDB,int,FIXBridge::Message MessageDB BridgeTypes.ice
 
-# Implicit rule to build the private IceFIX .ice files.
-{..\IceFIX\}.ice{..\IceFIX\}.h:
-	del /q $(*F).h $(*F).cpp
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) $(*F).ice
 
 Scanner.cpp: Scanner.l
 	flex Scanner.l

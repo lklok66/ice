@@ -75,8 +75,10 @@ CPPFLAGS        = $(CPPFLAGS) -RTC1
 CPPFLAGS        = $(CPPFLAGS) -DICE_STATIC_LIBS
 !endif
 
-!if "$(ice_src_dist)" != ""
 LDFLAGS		= $(LDFLAGS) /LIBPATH:"$(libdir)"
+
+!if "$(ice_src_dist)" != ""
+LDFLAGS		= $(LDFLAGS) /LIBPATH:"$(ice_dir)\cpp\lib"
 !else
 LDFLAGS		= $(LDFLAGS) /LIBPATH:"$(ice_dir)\lib$(x64suffix)"
 !endif

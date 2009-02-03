@@ -127,14 +127,14 @@ ice_cpp_header = $(ice_dir)\include\Ice\Ice.h
 !endif
 !endif
 
-#
-# Set slicedir to the path of the directory containing the Slice files.
-#
-slicedir		= $(ice_dir)\slice
-
 !if exist ($(top_srcdir)\..\slice)
 install_slicedir    	= $(prefix)\slice
 !endif
+
+#
+# Set slicedir to the path of the directory containing the Slice files.
+#
+ice_slicedir		= $(ice_dir)\slice
 
 all::
 
