@@ -1,0 +1,21 @@
+This demo demonstrates a simple IceFIX client.
+
+To run the demo, first start a FIX server.
+
+For example, use the ordermatch server that comes with the QuickFIX
+distribution. The config.cfg configuration can be used with this
+demo.
+
+$ ordermatch config.cfg
+
+In a separate window, start the IceFIX server.
+
+$ icefixserver
+
+In a separate window, activate the IceFIX server.
+
+$ icefixadmin --Ice.Config=config.client -e activate
+
+Next, run the client.
+
+$ client --Ice.Config=config.client
