@@ -51,9 +51,9 @@ include $(top_srcdir)/config/Make.rules
 BT_SLICE2CPPFLAGS := -I./ $(SLICE2CPPFLAGS)
 SLICE2FREEZECMD := $(SLICE2FREEZE) -I./ $(SLICE2CPPFLAGS)
 SLICE2CPPFLAGS	:= --ice --include-dir IceFIX -I. $(SLICE2CPPFLAGS)
-CPPFLAGS	:= -I. $(CPPFLAGS) $(QF_FLAGS)
-LINKWITH	:= $(BZIP2_RPATH_LINK) -lIce -lIceUtil
-LIBS 		:= $(LIBS) -lIceFIX -lFreeze $(QF_LIBS)
+CPPFLAGS	:= -I. $(ICE_FLAGS) $(CPPFLAGS) $(QF_FLAGS)
+LINKWITH	:= $(ICE_LIBS)
+LIBS 		:= $(ICE_LIBS) -lFreeze -lIceFIX $(QF_LIBS)
 
 $(libdir)/$(LIBFILENAME): $(OBJS)
 	rm -f $@

@@ -19,8 +19,8 @@ SRCS		= $(COBJS:.o=.cpp) \
 
 include $(top_srcdir)/config/Make.rules
 
-CPPFLAGS	:= -I.. $(CPPFLAGS) $(QF_FLAGS)
-LIBS 		:= $(LIBS) -lIceFIX $(QF_LIBS)
+CPPFLAGS	:= $(ICE_FLAGS) $(CPPFLAGS) $(QF_FLAGS)
+LIBS 		:= $(ICE_LIBS) $(LIBS) -lIceFIX $(QF_LIBS)
 
 $(CLIENT): $(OBJS) $(COBJS)
 	rm -f $@
