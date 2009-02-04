@@ -19,6 +19,9 @@
 // Puts a pointer-difference into an int
 //
 #   pragma warning( 4 : 4244 )
+#endif
+
+#if defined(_MSC_VER) && defined(ICE_64)
 #   pragma warning( 4 : 4003 )
 #endif
 
