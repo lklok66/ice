@@ -48,9 +48,8 @@ SLICE_SRCS	= $(SDIR)/IceFIX.ice BridgeTypes.ice
 
 include $(top_srcdir)/config/Make.rules
 
-BT_SLICE2CPPFLAGS := -I./ $(SLICE2CPPFLAGS)
-SLICE2FREEZECMD := $(SLICE2FREEZE) -I./ $(SLICE2CPPFLAGS)
-SLICE2CPPFLAGS	:= --ice --include-dir IceFIX -I. $(SLICE2CPPFLAGS)
+# The -I./ is a work-around for the bug 3224.
+SLICE2CPPFLAGS	:= -I./ $(SLICE2CPPFLAGS)
 CPPFLAGS	:= -I. $(ICE_FLAGS) $(CPPFLAGS) $(QF_FLAGS)
 LINKWITH	:= $(ICE_LIBS)
 LIBS 		:= $(ICE_LIBS) -lFreeze -lIceFIX $(QF_LIBS)
@@ -77,20 +76,22 @@ $(ADMIN): $(AOBJS) $(LIBTARGETS)
 
 RoutingRecordDB.h RoutingRecordDB.cpp: BridgeTypes.cpp BridgeTypes.h
 	rm -f RoutingRecordDB.h RoutingRecordDB.cpp
-	$(SLICE2FREEZECMD) --dict FIXBridge::RoutingRecordDB,string,FIXBridge::RoutingRecord \
+	$(SLICE2FREEZE) $(SLICE2CPPFLAGS) --dict FIXBridge::RoutingRecordDB,string,FIXBridge::RoutingRecord \
 	    RoutingRecordDB BridgeTypes.ice
 
 ClientDB.h ClientDB.cpp: BridgeTypes.cpp BridgeTypes.h
 	rm -f ClientDB.h ClientDB.cpp
-	$(SLICE2FREEZECMD) --dict FIXBridge::ClientDB,string,FIXBridge::Client ClientDB \
+	$(SLICE2FREEZE)  $(SLICE2CPPFLAGS) --dict FIXBridge::ClientDB,string,FIXBridge::Client ClientDB \
 	    BridgeTypes.ice
 
 MessageDB.h MessageDB.cpp: BridgeTypes.cpp BridgeTypes.h
 	rm -f MessageDB.h MessageDB.cpp
-	$(SLICE2FREEZECMD) --dict FIXBridge::MessageDB,int,FIXBridge::Message MessageDB BridgeTypes.ice
+	$(SLICE2FREEZE) $(SLICE2CPPFLAGS) --dict FIXBridge::MessageDB,int,FIXBridge::Message MessageDB BridgeTypes.ice
 
-BridgeTypes.h BridgeTypes.cpp: BridgeTypes.ice
-	$(SLICE2CPP) $(BT_SLICE2CPPFLAGS) BridgeTypes.ice
+$(HDIR)/IceFIX.h IceFIX.cpp: $(SDIR)/IceFIX.ice
+	rm -f $(HDIR)/IceFIX.h IceFIX.cpp
+	$(SLICE2CPP) --ice --include-dir IceFIX $(SLICE2CPPFLAGS) $<
+	mv IceFIX.h $(HDIR)
 
 clean::
 	-rm -f RoutingRecordDB.h RoutingRecordDB.cpp
@@ -99,7 +100,6 @@ clean::
 
 install:: all
 	$(call installlib,$(install_libdir),$(libdir),$(LIBFILENAME),$(SONAME),$(LIBNAME))
-	$(call installlib,$(install_libdir),$(libdir),$(SVCLIBFILENAME),$(SVCSONAME),$(SVCLIBNAME))
 	$(call installprogram,$(SERVER),$(install_bindir))
 	$(call installprogram,$(ADMIN),$(install_bindir))
 

@@ -11,13 +11,13 @@
 # Select an installation base directory. The directory will be created
 # if it does not exist.
 #
-prefix			 ?= /opt/IceFIX-$(VERSION)
+prefix			 ?= /opt/IceFIX-$(ICEFIX_VERSION)
 
 #
 # The "root directory" for runpath embedded in executables. Can be unset
 # to avoid adding a runpath to Ice executables.
 #
-embedded_runpath_prefix  ?= /opt/IceFIX-$(VERSION_MAJOR).$(VERSION_MINOR)
+embedded_runpath_prefix  ?= /opt/IceFIX-$(ICEFIX_VERSION_MAJOR).$(ICEFIX_VERSION_MINOR)
 
 #
 # Define OPTIMIZE as yes if you want to build with
