@@ -9,8 +9,8 @@
 
 top_srcdir	= ../..
 
-LIBFILENAME     = $(call mklibfilename,IceFIX,$(VERSION))
-SONAME          = $(call mksoname,IceFIX,$(SOVERSION))  
+LIBFILENAME     = $(call mklibfilename,IceFIX,$(ICEFIX_VERSION))
+SONAME          = $(call mksoname,IceFIX,$(ICEFIX_SOVERSION))  
 LIBNAME		= $(call mklibname,IceFIX)
 
 SERVER		= $(top_srcdir)/bin/icefixserver
