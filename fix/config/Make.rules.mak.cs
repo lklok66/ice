@@ -45,7 +45,11 @@ OPTIMIZE		= yes
 #
 
 !if "$(KEYFILE)" == ""
+!if exist ($(top_srcdir)\config\IceDevKey.snk)
+KEYFILE                 = $(top_srcdir)\config\IceDevKey.snk
+!else
 KEYFILE                 = $(top_srcdir)\..\config\IceDevKey.snk
+!endif
 !endif
 
 
