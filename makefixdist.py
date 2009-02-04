@@ -395,6 +395,11 @@ cwd = os.getcwd()
 os.chdir(os.path.dirname(__file__))
 
 #
+# Hack to set ICE_HOME.
+#
+os.environ["ICE_HOME"] = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cpp")
+
+#
 # Get IceFIX version.
 #
 config = open(os.path.join("fix", "config", "Make.common.rules.icefix"), "r")
