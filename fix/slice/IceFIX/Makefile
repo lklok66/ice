@@ -12,11 +12,6 @@ top_srcdir	= ../..
 include $(top_srcdir)/config/Make.rules
 
 install::
-	@if test ! -d $(prefix)/slice ; \
-	then \
-	    echo "Creating $(prefix)/slice..." ; \
-	    $(call mkdir,$(prefix)/slice) ; \
-	fi
 	@if test ! -d $(prefix)/slice/IceFIX ; \
 	then \
 	    echo "Creating $(prefix)/slice/IceFIX..." ; \

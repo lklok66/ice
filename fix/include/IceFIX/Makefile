@@ -14,8 +14,8 @@ include $(top_srcdir)/config/Make.rules
 install::
 	@if test ! -d $(install_includedir)/IceFIX ; \
 	then \
-	    echo "Creating $(install_includedir)/IceFix..." ; \
-	    $(call mkdir,$(install_includedir)/IceFix) ; \
+	    echo "Creating $(install_includedir)/IceFIX..." ; \
+	    $(call mkdir,$(install_includedir)/IceFIX) ; \
 	fi
 
 	@for i in *.h ; \

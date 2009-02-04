@@ -15,7 +15,18 @@ SUBDIRS		= src include demo slice
 
 INSTALL_SUBDIRS	= $(install_bindir) $(install_libdir) $(install_includedir)
 
-install:: install-common
+install::
+	@if test ! -d $(prefix) ; \
+	then \
+	    echo "Creating $(prefix)..." ; \
+	    $(call mkdir,$(prefix)) ; \
+	fi
+	@if test ! -d $(prefix)/slice ; \
+	then \
+	    echo "Creating $(prefix)/slice..." ; \
+	    $(call mkdir,$(prefix)/slice) ; \
+	fi
+	$(call installdata,$(top_srcdir)/LICENSE,$(prefix))
 	@for subdir in $(INSTALL_SUBDIRS); \
 	do \
 	    if test ! -d $$subdir ; \
