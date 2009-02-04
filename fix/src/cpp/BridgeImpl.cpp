@@ -833,21 +833,32 @@ BridgeImpl::toApp(FIX::Message& message, const FIX::SessionID&)
         {
             Freeze::TransactionHolder txn(connection);
 
-            pair<RoutingRecordDB::iterator, bool> p = clordidDB.insert(make_pair(clOrdID, o));
-            // Duplicate ClOrdID is a client error.
-            if(!p.second)
+            pair<RoutingRecordDB::iterator, bool> p;
+            // We don't insert routing records for OrderStatusRequest
+            // messages.
+            const string& msgTypeValue = message.getHeader().getField(FIX::FIELD::MsgType);
+            if(msgTypeValue != "H")
             {
-                if(p.first->second.id != clientId)
+                p = clordidDB.insert(make_pair(clOrdID, o));
+                // Duplicate ClOrdID is a client error.
+                if(!p.second)
                 {
-                    Ice::Warning warning(_communicator->getLogger());
-                    warning << "duplicate ClOrdID detected";
+                    if(p.first->second.id != clientId)
+                    {
+                        Ice::Warning warning(_communicator->getLogger());
+                        warning << "duplicate ClOrdID detected";
+                    }
+                    return;
                 }
-                return;
             }
 
+            // seqnum routing messages are inserted regardless of
+            // message type, for reverse routing of BusinessReject
+            // messages.
             ostringstream os;
             os << seqNum;
             p = seqnumDB.insert(make_pair(os.str(), o));
+
             // If a record already exists for this sequence number,
             // overwrite it.
             if(!p.second)

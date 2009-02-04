@@ -32,6 +32,8 @@ ExecutorI::execute(const string& data, const Ice::Current& current)
         FIX::ClOrdID id;
         message.getField(id);
 
+        const std::string& msgTypeValue = message.getHeader().getField(FIX::FIELD::MsgType);
+
         Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _name);
         RoutingRecordDB clordidDB(connection, clordIdDBName);
         for(;;)
@@ -39,11 +41,31 @@ ExecutorI::execute(const string& data, const Ice::Current& current)
             try
             {
                 RoutingRecordDB::const_iterator p = clordidDB.find(id);
-                if(p != clordidDB.end())
+                // OrderStatusRequest messages are restricted to come
+                // from the client that originated the order.
+                if(msgTypeValue == "H")
                 {
-                    Ice::Warning warning(_communicator->getLogger());
-                    warning << "duplicate ClOrdID detected";
-                    throw ExecuteException("duplicate ClOrdID");
+                    if(p == clordidDB.end())
+                    {
+                        Ice::Warning warning(_communicator->getLogger());
+                        warning << "OrderStatusRequest: No matching ClOrdID: `" << id << "'";
+                        throw ExecuteException("No matching ClOrdID for OrderStatusRequest");
+                    }
+                    if(p->second.id != current.id.name)
+                    {
+                        Ice::Warning warning(_communicator->getLogger());
+                        warning << "OrderStatusRequest: OrderStatusRequest are limited to originating client";
+                        throw ExecuteException("client mismatch in ClOrdID for OrderStatusRequest");
+                    }
+                }
+                else
+                {
+                    if(p != clordidDB.end())
+                    {
+                        Ice::Warning warning(_communicator->getLogger());
+                        warning << "duplicate ClOrdID detected";
+                        throw ExecuteException("duplicate ClOrdID");
+                    }
                 }
                 break;
             }
