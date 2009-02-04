@@ -96,19 +96,13 @@ slice_translator = slice2cpp.exe
 ice_require_cpp  = 1
 !endif
 
-!include $(top_srcdir)\config\Make.common.rules.mak
+!include $(top_srcdir)\config\Make.common.rules.icefix.mak
 
 bindir			= $(top_srcdir)\bin
 libdir			= $(top_srcdir)\lib
 headerdir		= $(top_srcdir)\include
 
 includedir		= $(top_srcdir)\include
-
-!if "$(ice_src_dist)" != ""
-ice_includedir		= $(ice_dir)\cpp\include
-!else
-ice_includedir		= $(ice_dir)\include
-!endif
 
 install_bindir		= $(prefix)\bin$(x64suffix)
 install_libdir	  	= $(prefix)\lib$(x64suffix)
@@ -118,14 +112,10 @@ install_configdir	= $(prefix)\config
 
 SETARGV			= setargv.obj
 
-!if "$(CPP_COMPILER)" == "BCC2007"
-!include 	$(top_srcdir)/config/Make.rules.bcc
-!elseif "$(CPP_COMPILER)" == "VC60" || "$(CPP_COMPILER)" == "VC71" || \
-        "$(CPP_COMPILER)" == "VC80" || "$(CPP_COMPILER)" == "VC80_EXPRESS" || \
-        "$(CPP_COMPILER)" == "VC90" || "$(CPP_COMPILER)" == "VC90_EXPRESS" 
-!include        $(top_srcdir)/config/Make.rules.msvc
-! else
-!error Invalid setting for CPP_COMPILER: $(CPP_COMPILER)
+!if exist ($(top_srcdir)\config\Make.rules.msvc)
+!include $(top_srcdir)\config\Make.rules.msvc
+!else
+!include $(top_srcdir)\..\cpp\config\Make.rules.msvc
 !endif
 
 !if "$(OPTIMIZE)" != "yes"
@@ -142,31 +132,34 @@ QF_LIBS		= $(QF_HOME)\lib\quickfix.lib wsock32.lib
 !endif
 !endif
 
-
 slicedir		= $(top_srcdir)\slice
 
-CPPFLAGS		= $(CPPFLAGS) -I$(includedir) -I$(ice_includedir)
-ICECPPFLAGS		= -I$(slicedir) -I$(ice_slicedir)
-SLICE2CPPFLAGS		= $(ICECPPFLAGS)
-
+CPPFLAGS		= $(CPPFLAGS) -I$(includedir)
+SLICE2CPPFLAGS		= -I$(slicedir) -I$(ice_slicedir)
 LDFLAGS			= $(LDFLAGS) $(LDPLATFORMFLAGS) $(CXXFLAGS)
 
 !if "$(ice_src_dist)" != ""
 SLICEPARSERLIB		= $(ice_dir)\cpp\bin\slice$(LIBSUFFIX).lib
 SLICE2CPP		= $(ice_dir)\cpp\bin\slice2cpp.exe
-SLICE2XSD		= $(ice_dir)\cpp\bin\slice2xsd.exe
 SLICE2FREEZE		= $(ice_dir)\cpp\bin\slice2freeze.exe
-SLICE2DOCBOOK		= $(ice_dir)\cpp\bin\slice2docbook.exe
 
-ice_libdir		= $(ice_dir)\cpp\$(libdir)
+ICE_CPPFLAGS		= -I"$(ice_cpp_dir)\include"
+!if "$(ice_cpp_dir)" == "$(ice_dir)\cpp"
+ICE_LDFLAGS		= /LIBPATH:"$(ice_cpp_dir)\lib"
 !else
+ICE_LDFLAGS		= /LIBPATH:"$(ice_cpp_dir)\lib$(x64suffix)"
+!endif
+!else
+
 SLICEPARSERLIB		= $(ice_dir)\lib$(x64suffix)\slice$(LIBSUFFIX).lib
 SLICE2CPP		= $(ice_dir)\bin$(x64suffix)\slice2cpp.exe
-SLICE2XSD		= $(ice_dir)\bin$(x64suffix)\slice2xsd.exe
 SLICE2FREEZE		= $(ice_dir)\bin$(x64suffix)\slice2freeze.exe
-SLICE2DOCBOOK		= $(ice_dir)\bin$(x64suffix)\slice2docbook.exe
-ice_libdir		= $(ice_dir)\lib$(x64suffix)
+
+ICE_CPPFLAGS		= -I"$(ice_dir)\include"
+ICE_LDFLAGS		= /LIBPATH:"$(ice_dir)\lib$(x64suffix)"
 !endif
+
+ICE_LIBS		= ice$(LIBSUFFIX).lib iceutil$(LIBSUFFIX).lib
 
 EVERYTHING		= all clean install
 

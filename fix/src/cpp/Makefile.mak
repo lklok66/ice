@@ -10,7 +10,7 @@
 top_srcdir	= ..\..
 
 LIBNAME		= $(top_srcdir)\lib\icefix$(LIBSUFFIX).lib
-DLLNAME		= $(top_srcdir)\bin\icefix$(SOVERSION)$(LIBSUFFIX).dll
+DLLNAME		= $(top_srcdir)\bin\icefix$(ICEFIX_SOVERSION)$(LIBSUFFIX).dll
 
 ADMIN		= $(top_srcdir)\bin\icefixadmin.exe
 SERVER		= $(top_srcdir)\bin\icefixserver.exe
@@ -42,20 +42,14 @@ SDIR		= $(slicedir)\IceFIX
 !include $(top_srcdir)\config\Make.rules.mak
 
 SLICE2CPPFLAGS	= -I./ $(SLICE2CPPFLAGS)
-CPPFLAGS	= -I. -Idummyinclude $(CPPFLAGS) -DWIN32_LEAN_AND_MEAN $(QF_FLAGS)
-SLINKWITH 	= $(LIBS) icefix$(LIBSUFFIX).lib freeze$(LIBSUFFIX).lib $(QF_LIBS)
-ALINKWITH 	= $(LIBS) icefix$(LIBSUFFIX).lib
+CPPFLAGS	= -I. -Idummyinclude $(ICE_CPPFLAGS) $(CPPFLAGS) -DWIN32_LEAN_AND_MEAN $(QF_FLAGS)
+SLINKWITH 	= $(ICE_LIBS) $(LIBS) icefix$(LIBSUFFIX).lib freeze$(LIBSUFFIX).lib $(QF_LIBS)
+ALINKWITH 	= $(ICE_LIBS) $(LIBS) icefix$(LIBSUFFIX).lib
 
 !if "$(GENERATE_PDB)" == "yes"
 PDBFLAGS        = /pdb:$(DLLNAME:.dll=.pdb)
 APDBFLAGS       = /pdb:$(ADMIN:.exe=.pdb)
 SPDBFLAGS       = /pdb:$(SERVER:.exe=.pdb)
-!endif
-
-!if "$(CPP_COMPILER)" == "BCC2007"
-RES_FILE        = IceFIX.res
-ARES_FILE       = IceFIXAdmin.res
-MRES_FILE       = IceFIXServer.res
 !endif
 
 $(LIBNAME): $(DLLNAME)

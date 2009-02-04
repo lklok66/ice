@@ -17,11 +17,10 @@ OBJS		= Client.obj
 
 SRCS		= $(OBJS:.obj=.cpp)
 
-
 !include $(top_srcdir)/config/Make.rules.mak
 
-CPPFLAGS	= -I. $(CPPFLAGS) -DWIN32_LEAN_AND_MEAN $(QF_FLAGS)
-LIBS		= $(libdir)\icefix$(LIBSUFFIX).lib $(LIBS) $(QF_LIBS)
+CPPFLAGS	= -I. $(ICE_CPPFLAGS) $(CPPFLAGS) -DWIN32_LEAN_AND_MEAN $(QF_FLAGS)
+LIBS		= $(ICE_LIBS) $(libdir)\icefix$(LIBSUFFIX).lib $(LIBS) $(QF_LIBS)
 
 !if "$(GENERATE_PDB)" == "yes"
 PPDBFLAGS        = /pdb:$(CLIENT:.exe=.pdb)
