@@ -16,6 +16,7 @@ SUBDIRS		= src include demo slice
 INSTALL_SUBDIRS	= $(install_bindir) $(install_libdir) $(install_includedir)
 
 install:: install-common
+        @copy LICENSE $(prefix)
 	@for %i in ( $(INSTALL_SUBDIRS) ) do \
 	    @if not exist %i \
 		@echo "Creating %i..." && \

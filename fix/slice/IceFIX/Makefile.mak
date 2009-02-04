@@ -12,10 +12,10 @@ top_srcdir	= ..\..
 !include $(top_srcdir)/config/Make.rules.mak
 
 install::
-	@if not exist $(install_slicedir)\IceFIX \
-	    @echo "Creating $(install_slicedir)\IceFIX..." && \
-	    mkdir $(install_slicedir)\IceFIX
+	@if not exist $(prefix)\slice\IceFIX \
+	    @echo "Creating $(prefix)\slice\IceFIX..." && \
+	    mkdir $(prefix)\slice\IceFIX
 
 	@for %i in ( *.ice ) do \
 	    @echo Installing %i && \
-	    copy %i $(install_slicedir)\IceFIX
+	    copy %i $(prefix)\slice\IceFIX
