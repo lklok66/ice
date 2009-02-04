@@ -90,16 +90,6 @@ headerdir		= $(top_srcdir)/include
 
 includedir		= $(top_srcdir)/include
 
-ifdef ice_src_dist
-    ice_includedir	= $(ice_dir)/cpp/include
-else
-    ice_includedir	= $(ice_dir)/include
-endif
-
-#
-# Platform specific definitions
-#
-#include	 $(top_srcdir)/config/Make.rules.$(UNAME)
 #
 # Platform specific definitions
 #
@@ -146,26 +136,22 @@ ifdef ice_src_dist
    endif
    ICE_LIB_DIR = -L$(ice_cpp_dir)/lib
    ICE_FLAGS     = -I$(ice_cpp_dir)/include
-endif
-ifdef ice_bin_dist
-   ICE_LIB_DIR = -L$(ice_dir)/$(libsubdir)
-   ICE_FLAGS    = -I$(ice_dir)/include
-endif
-ICE_LIBS = $(ICE_LIB_DIR) -lIce -lIceUtil
 
-ifdef ice_src_dist
     SLICEPARSERLIB	= $(ice_dir)/cpp/$(libsubdir)/$(call mklibfilename,Slice,$(VERSION))
     SLICE2CPP		= $(ice_dir)/cpp/$(binsubdir)/slice2cpp
     SLICE2FREEZE	= $(ice_dir)/cpp/$(binsubdir)/slice2freeze
+endif
 
-    ice_libdir		= $(ice_dir)/cpp/$(libsubdir)
-else
+ifdef ice_bin_dist
+   ICE_LIB_DIR = -L$(ice_dir)/$(libsubdir)
+   ICE_FLAGS    = -I$(ice_dir)/include
+
     SLICEPARSERLIB	= $(ice_dir)/$(libsubdir)/$(call mklibfilename,Slice,$(VERSION))
     SLICE2CPP		= $(ice_dir)/$(binsubdir)/slice2cpp
     SLICE2FREEZE	= $(ice_dir)/$(binsubdir)/slice2freeze
-
-    ice_libdir		= $(ice_dir)/$(libsubdir)
 endif
+
+ICE_LIBS = $(ICE_LIB_DIR) -lIce -lIceUtil
 
 ifeq ($(FLEX_NOLINE),yes)
     FLEXFLAGS	       := -L
