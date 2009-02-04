@@ -12,7 +12,7 @@
 # if it does not exist.
 #
 
-prefix			= C:\Ice-$(VERSION)
+prefix	= C:\IceFIX-$(ICEFIX_VERSION)
 
 #
 # Ice invokes unmanaged code to implement the following features:
@@ -66,7 +66,7 @@ KEYFILE                 = $(top_srcdir)\..\config\IceDevKey.snk
 ice_language = cs
 slice_translator = slice2cs.exe
 
-!include $(top_srcdir)\config\Make.common.rules.mak
+!include $(top_srcdir)\config\Make.common.rules.icefix.mak
 
 bindir			= $(top_srcdir)\bin
 
@@ -75,11 +75,6 @@ install_libdir		= $(prefix)\lib
 
 refdir = $(bindir)
 
-!if "$(ice_src_dist)" != ""
-ice_refdir = $(ice_dir)\cs\bin
-!else
-ice_refdir = $(ice_dir)\bin
-!endif
 
 slicedir		= $(top_srcdir)\slice
 
@@ -103,13 +98,20 @@ QF_FLAGS		= -r:$(QF_HOME)\lib\quickfix_net.dll -r:$(QF_HOME)\lib\quickfix_net_me
 !endif
 
 !if "$(ice_src_dist)" != ""
+
+ice_refdir 		= $(ice_dir)\cs\bin
+
 !if "$(ice_cpp_dir)" == "$(ice_dir)\cpp"
 SLICE2CS		= "$(ice_cpp_dir)\bin\slice2cs.exe"
 !else
 SLICE2CS		= "$(ice_cpp_dir)\bin$(x64suffix)\slice2cs.exe"
 !endif
+
 !else
+
+ice_refdir 		= $(ice_dir)\bin
 SLICE2CS		= "$(ice_dir)\bin$(x64suffix)\slice2cs.exe"
+
 !endif
 
 EVERYTHING		= all clean install config
@@ -126,7 +128,7 @@ EVERYTHING		= all clean install config
 all:: $(TARGETS) $(TARGETS_CONFIG)
 
 AL      = al
-POLICY  = policy.$(SHORT_VERSION).$(PKG)
+POLICY  = policy.$(ICEFIX_SHORT_VERSION).$(PKG)
 
 !if "$(POLICY_TARGET)" != ""
 all:: $(bindir)/$(POLICY_TARGET)
@@ -277,7 +279,7 @@ $(TARGETS_CONFIG):
         </dependentAssembly>
         <dependentAssembly>
           <assemblyIdentity name="IceFIX" culture="neutral" publicKeyToken="$(publicKeyToken)"/>
-          <codeBase version="$(INTVERSION).0" href="$(refdir)\IceFIX.dll"/>
+          <codeBase version="$(ICEFIX_INTVERSION).0" href="$(refdir)\IceFIX.dll"/>
         </dependentAssembly>
 	<qualifyAssembly partialName="IceSSL" fullName="IceSSL, Version=$(INTVERSION).0, Culture=neutral, PublicKeyToken=$(publicKeyToken)"/>
     </assemblyBinding>
