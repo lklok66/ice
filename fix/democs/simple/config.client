@@ -1,10 +1,10 @@
-IceFIX.Bridge=bridge:tcp -p 12000
-IceFIX.BridgeAdmin=admin:tcp -p 12000
+Bridge=bridge:tcp -p 12000
+BridgeAdmin=admin:tcp -p 12000
 
-IceFIX.Client.Endpoints=tcp
+Client.Endpoints=tcp
 
 # The default client id
-IceFIX.ClientId=test
+ClientId=test
 
 # The default filtered value.
-IceFIX.Filtered=true
+Filtered=true

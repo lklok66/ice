@@ -26,82 +26,78 @@ class SendTimerTask : public IceUtil::TimerTask
 {
 public:
 
-    SendTimerTask(const BridgeImplPtr& bridge, int id) :
-        _bridge(bridge), _id(id)
+    SendTimerTask(const BridgeImplPtr& bridge, int messageId) :
+        _bridge(bridge), _messageId(messageId)
     {
     }
 
     virtual void
     runTimerTask()
     {
-        _bridge->send(_id);
+        _bridge->send(_messageId);
     }
 
 private:
 
     const BridgeImplPtr _bridge;
-    const int _id;
+    const int _messageId;
 };
 
 class RoutingHandler : public IceUtil::Shared, public IceUtil::Mutex
 {
 public:
 
-    RoutingHandler(const BridgeImplPtr& bridge, int trace, int id, const Ice::CommunicatorPtr& communicator) :
-        _bridge(bridge), _trace(trace), _id(id), _communicator(communicator)
+    RoutingHandler(const BridgeImplPtr& bridge, int trace, int messageId, const Ice::CommunicatorPtr& communicator) :
+        _bridge(bridge), _trace(trace), _messageId(messageId), _communicator(communicator)
     {
     }
 
-    void add(const string& id)
+    void add(const string& clientId)
     {
         IceUtil::Mutex::Lock sync(*this);
-        _replies.insert(id);
+        _replies.insert(clientId);
     }
 
-    void exception(const string& id, const Ice::Exception& ex)
+    void exception(const string& clientId, const ReporterPrx& reporter, const Ice::Exception& ex)
     {
         bool done = false;
         {
             IceUtil::Mutex::Lock sync(*this);
-            if(_replies.erase(id) != 0)
-            {
-                // assert.
-            }
+            int count = _replies.erase(clientId);
+            assert(count == 1);
             done = _replies.empty();
         }
 
         if(_trace > 1)
         {
             Ice::Trace trace(_communicator->getLogger(), "Bridge");
-            trace << "routing: " << _id << ": client: " << id << ": failed: " << ex;
+            trace << "routing: " << _messageId << ": client: " << clientId << ": failed: " << ex;
         }
 
         if(dynamic_cast<const Ice::ObjectNotExistException*>(&ex))
         {
-            _bridge->clientError(id);
+            _bridge->clientError(clientId, reporter);
         }
 
         if(done)
         {
-            _bridge->sendComplete(_id, _routed);
+            _bridge->sendComplete(_messageId, _routed);
         }
     }
 
-    void response(const string& id)
+    void response(const string& clientId)
     {
         bool done = false;
         {
             IceUtil::Mutex::Lock sync(*this);
-            if(_replies.erase(id) != 0)
-            {
-                // assert.
-            }
+            int count = _replies.erase(clientId);
+            assert(count == 1);
             done = _replies.empty();
-            _routed.insert(id);
+            _routed.insert(clientId);
         }
         if(done)
         {
-            _bridge->sendComplete(_id,_routed);
+            _bridge->sendComplete(_messageId,_routed);
         }
     }
 
@@ -109,7 +105,7 @@ private:
 
     const BridgeImplPtr _bridge;
     const int _trace;
-    const int _id;
+    const int _messageId;
     const Ice::CommunicatorPtr _communicator;
     set<string> _replies;
     set<string> _routed;
@@ -120,24 +116,25 @@ class MessageAsyncI : public AMI_Reporter_message
 {
 public:
 
-    MessageAsyncI(const string& id, const RoutingHandlerPtr& handler) :
-        _id(id), _handler(handler)
+    MessageAsyncI(const string& clientId, const ReporterPrx& reporter, const RoutingHandlerPtr& handler) :
+        _clientId(clientId), _reporter(reporter), _handler(handler)
     {
     }
 
     virtual void ice_response() 
     {
-        _handler->response(_id);
+        _handler->response(_clientId);
     }
 
     virtual void ice_exception(const ::Ice::Exception& ex)
     {
-        _handler->exception(_id, ex);
+        _handler->exception(_clientId, _reporter, ex);
     }
 
 private:
 
-    const string _id;
+    const string _clientId;
+    const ReporterPrx _reporter;
     const RoutingHandlerPtr _handler;
 };
 
@@ -220,8 +217,8 @@ BridgeImpl::_cpp_register(const QoS& qos, const Ice::Current& current)
     validateQoS(qos);
 
     Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _name);
-    ClientDB clients(connection, "clients");
-    string id = IceUtil::generateUUID();
+    ClientDB clients(connection, clientDBName);
+    string clientId = IceUtil::generateUUID();
 
     for(;;)
     {
@@ -229,9 +226,9 @@ BridgeImpl::_cpp_register(const QoS& qos, const Ice::Current& current)
         {
 
             Client c;
-            c.id = id;
+            c.id = clientId;
             c.qos = qos;
-            pair<ClientDB::iterator, bool> q = clients.insert(make_pair(id, c));
+            pair<ClientDB::iterator, bool> q = clients.insert(make_pair(clientId, c));
             assert(q.second);
             break;
         }
@@ -248,23 +245,23 @@ BridgeImpl::_cpp_register(const QoS& qos, const Ice::Current& current)
     if(_trace > 0)
     {
         Ice::Trace trace(_communicator->getLogger(), "Bridge");
-        trace << "register: " << id;
+        trace << "register: " << clientId;
     }
-    return id;
+    return clientId;
 }
 
 void
-BridgeImpl::registerWithId(const string& id, const QoS& qos, const Ice::Current& current)
+BridgeImpl::registerWithId(const string& clientId, const QoS& qos, const Ice::Current& current)
 {
     validateQoS(qos);
 
     Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _name);
-    ClientDB clients(connection, "clients");
+    ClientDB clients(connection, clientDBName);
     for(;;)
     {
         try
         {
-            ClientDB::const_iterator p = clients.find(id);
+            ClientDB::const_iterator p = clients.find(clientId);
             if(p != clients.end())
             {
                 throw RegistrationException("id is already registered");
@@ -273,8 +270,8 @@ BridgeImpl::registerWithId(const string& id, const QoS& qos, const Ice::Current&
 
             Client c;
             c.qos = qos;
-            c.id = id;
-            pair<ClientDB::iterator, bool> q = clients.insert(make_pair(id, c));
+            c.id = clientId;
+            pair<ClientDB::iterator, bool> q = clients.insert(make_pair(clientId, c));
             assert(q.second);
             p = q.first;
             break;
@@ -292,12 +289,12 @@ BridgeImpl::registerWithId(const string& id, const QoS& qos, const Ice::Current&
     if(_trace > 0)
     {
         Ice::Trace trace(_communicator->getLogger(), "Bridge");
-        trace << "register: " << id;
+        trace << "register: " << clientId;
     }
 }
 
 void
-BridgeImpl::unregister(const string& id, const Ice::Current& current)
+BridgeImpl::unregister(const string& clientId, const Ice::Current& current)
 {
     Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _name);
     ClientDB clients(connection, clientDBName);
@@ -305,7 +302,7 @@ BridgeImpl::unregister(const string& id, const Ice::Current& current)
     {
         try
         {
-            ClientDB::iterator p = clients.find(id);
+            ClientDB::iterator p = clients.find(clientId);
             if(p == clients.end())
             {
                 throw RegistrationException("client is not registered");
@@ -318,7 +315,7 @@ BridgeImpl::unregister(const string& id, const Ice::Current& current)
             if(_trace > 0)
             {
                 Ice::Trace trace(_communicator->getLogger(), "Bridge");
-                trace << "unregister: " << id;
+                trace << "unregister: " << clientId;
             }
 
             clients.erase(p);
@@ -336,16 +333,17 @@ BridgeImpl::unregister(const string& id, const Ice::Current& current)
 }
 
 void
-BridgeImpl::connect(const string& id, const ReporterPrx& reporter, ExecutorPrx& executor, const Ice::Current& current)
+BridgeImpl::connect(const string& clientId, const ReporterPrx& reporter, ExecutorPrx& executor,
+                    const Ice::Current& current)
 {
     Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _name);
-    ClientDB clients(connection, "clients");
+    ClientDB clients(connection, clientDBName);
     for(;;)
     {
         try
         {
             Client c;
-            ClientDB::iterator p = clients.find(id);
+            ClientDB::iterator p = clients.find(clientId);
             if(p == clients.end())
             {
                 throw RegistrationException("id not registered");
@@ -358,12 +356,12 @@ BridgeImpl::connect(const string& id, const ReporterPrx& reporter, ExecutorPrx& 
             if(_trace > 0)
             {
                 Ice::Trace trace(_communicator->getLogger(), "Bridge");
-                trace << "connect: " << id;
+                trace << "connect: " << clientId;
             }
 
             Ice::Identity oid;
             oid.category = "executor";
-            oid.name = id;
+            oid.name = clientId;
             executor = ExecutorPrx::uncheckedCast(current.adapter->createProxy(oid));
 
             break;
@@ -486,12 +484,12 @@ BridgeImpl::getClients(const Ice::Current&)
 
 // For use by the SendTimerTask.
 void
-BridgeImpl::send(int id)
+BridgeImpl::send(int messageId)
 {
     if(_trace > 0)
     {
         Ice::Trace trace(_communicator->getLogger(), "Bridge");
-        trace << "send: `" << id << "'";
+        trace << "send: `" << messageId << "'";
     }
 
     // A list of client id, reporter proxy.
@@ -507,7 +505,7 @@ BridgeImpl::send(int id)
     {
         try
         {
-            MessageDB::const_iterator q = messageDB.find(id);
+            MessageDB::const_iterator q = messageDB.find(messageId);
             assert(q != messageDB.end());
             // Ensure that the same message is not routed twice in the
             // event of a deadlock exception in accessing the
@@ -530,7 +528,7 @@ BridgeImpl::send(int id)
                             routing.begin()));
 
             // Forward the message to the clients in the routing list.
-            clients.clear();
+            c.clear();
             for(set<string>::const_iterator p = routing.begin(); p != routing.end(); ++p)
             {
                 ClientDB::iterator q = clientsDB.find(*p);
@@ -553,7 +551,7 @@ BridgeImpl::send(int id)
 
     // The routing handler keeps track of the number of pending
     // replies for the given message.
-    RoutingHandlerPtr handler = new RoutingHandler(this, _trace, id, _communicator);
+    RoutingHandlerPtr handler = new RoutingHandler(this, _trace, messageId, _communicator);
     int queued = 0;
     for(list<pair<string, ReporterPrx> >::const_iterator p = c.begin(); p != c.end(); ++p)
     {
@@ -563,14 +561,14 @@ BridgeImpl::send(int id)
             handler->add(p->first);
 
             ReporterPrx reporter = p->second->ice_timeout(_forwardTimeout);
-            reporter->message_async(new MessageAsyncI(p->first, handler), msg.data);
+            reporter->message_async(new MessageAsyncI(p->first, reporter, handler), msg.data);
         }
         else
         {
             if(_trace > 0)
             {
                 Ice::Trace trace(_communicator->getLogger(), "Bridge");
-                trace << "routing: `" << id << "': client: `" << p->first << "': unavailable";
+                trace << "routing: `" << messageId << "': client: `" << p->first << "': unavailable";
             }
         }
     }
@@ -580,14 +578,14 @@ BridgeImpl::send(int id)
         if(_trace > 0)
         {
             Ice::Trace trace(_communicator->getLogger(), "Bridge");
-            trace << "send: `" << id << "': retry sending message";
+            trace << "send: `" << messageId << "': retry sending message";
         }
-        _timer->schedule(new SendTimerTask(this, id), _retryInterval);
+        _timer->schedule(new SendTimerTask(this, messageId), _retryInterval);
     }
 }
 
 void
-BridgeImpl::sendComplete(int id, const set<string>& routed)
+BridgeImpl::sendComplete(int messageId, const set<string>& routed)
 {
     bool retry = true;
 
@@ -601,7 +599,7 @@ BridgeImpl::sendComplete(int id, const set<string>& routed)
         {
             try
             {
-                MessageDB::iterator q = messageDB.find(id);
+                MessageDB::iterator q = messageDB.find(messageId);
                 assert(q != messageDB.end());
                 // Ensure that the same message is not routed twice in the event of a deadlock exception
                 // in accessing the database.
@@ -613,7 +611,7 @@ BridgeImpl::sendComplete(int id, const set<string>& routed)
                     if(_trace > 0)
                     {
                         Ice::Trace trace(_communicator->getLogger(), "Bridge");
-                        trace << "send: " << id << ": message fully routed, erasing";
+                        trace << "send: " << messageId << ": message fully routed, erasing";
                     }
 
                     messageDB.erase(q);
@@ -641,14 +639,14 @@ BridgeImpl::sendComplete(int id, const set<string>& routed)
         if(_trace > 0)
         {
             Ice::Trace trace(_communicator->getLogger(), "Bridge");
-            trace << "send: " << id << ": retry sending message";
+            trace << "send: " << messageId << ": retry sending message";
         }
-        _timer->schedule(new SendTimerTask(this, id), _retryInterval);
+        _timer->schedule(new SendTimerTask(this, messageId), _retryInterval);
     }
 }
 
 void
-BridgeImpl::clientError(const string& id)
+BridgeImpl::clientError(const string& clientId, const ReporterPrx& reporter)
 {
 
     // The reporter proxy is cleared under two circumstances.
@@ -662,12 +660,19 @@ BridgeImpl::clientError(const string& id)
     {
         try
         {
-            ClientDB::iterator p = clientsDB.find(id);
+            ClientDB::iterator p = clientsDB.find(clientId);
             if(p != clientsDB.end())
             {
                 Client c = p->second;
-                c.reporter = 0;
-                p.set(c);
+                // Only clear the reporter if the reporter proxy
+                // hasn't changed, otherwise there could be a race
+                // condition between a new client connecting, and an
+                // exiting message failing.
+                if(c.reporter == reporter)
+                {
+                    c.reporter = 0;
+                    p.set(c);
+                }
             }
             break;
         }
@@ -799,8 +804,8 @@ BridgeImpl::toApp(FIX::Message& message, const FIX::SessionID&)
     FIX::MsgSeqNum seqNum;
     message.getHeader().getField(seqNum);
 
-    FIX::ClOrdID id;
-    message.getField(id);
+    FIX::ClOrdID clOrdID;
+    message.getField(clOrdID);
 
     FIX::IceFIXClientId clientId;
     try
@@ -828,7 +833,7 @@ BridgeImpl::toApp(FIX::Message& message, const FIX::SessionID&)
         {
             Freeze::TransactionHolder txn(connection);
 
-            pair<RoutingRecordDB::iterator, bool> p = clordidDB.insert(make_pair(id, o));
+            pair<RoutingRecordDB::iterator, bool> p = clordidDB.insert(make_pair(clOrdID, o));
             // Duplicate ClOrdID is a client error.
             if(!p.second)
             {
@@ -842,8 +847,13 @@ BridgeImpl::toApp(FIX::Message& message, const FIX::SessionID&)
 
             ostringstream os;
             os << seqNum;
-            // If a record already exists, overwrite it.
-            seqnumDB.insert(make_pair(os.str(), o));
+            p = seqnumDB.insert(make_pair(os.str(), o));
+            // If a record already exists for this sequence number,
+            // overwrite it.
+            if(!p.second)
+            {
+                p.first.set(o);
+            }
 
             txn.commit();
             break;
@@ -912,9 +922,7 @@ BridgeImpl::fromApp(const FIX::Message& message, const FIX::SessionID& session) 
 
             Message m;
 
-            string data = message.toString();
-            m.data.resize(data.size());
-            memcpy(&m.data[0],&data[0], data.size());
+            m.data = message.toString();
             m.seqNum = seqNum;
 
             set<string> clients;

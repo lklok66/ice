@@ -15,6 +15,10 @@ IceFIX.FIXConfig=config.fix
 #
 IceFIX.Trace=2
 
+#
+# The location of the IceFIX databases.
+#
+IceFIX.Data=db
 
 #
 # The bridge retry interval.
@@ -25,11 +29,6 @@ IceFIX.RetryInterval=60
 # Warn about connection exceptions
 #
 Ice.Warn.Connections=1
-
-#
-# Display retries.
-#
-Ice.RetryIntervals=-1
 
 #
 # Server-side ACM is disabled by default. For this demo, we want it

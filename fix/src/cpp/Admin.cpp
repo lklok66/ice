@@ -102,7 +102,7 @@ Client::run(int argc, char* argv[])
     debug = opts.isSet("debug");
 
     IceFIX::BridgeAdminPrx admin =
-        IceFIX::BridgeAdminPrx::uncheckedCast(communicator()->propertyToProxy("IceFIX.BridgeAdmin"));
+        IceFIX::BridgeAdminPrx::uncheckedCast(communicator()->propertyToProxy("IceFIXAdmin.BridgeAdmin"));
     if(!admin)
     {
         cerr << appName() << ": no bridge admin proxy configured" << endl;

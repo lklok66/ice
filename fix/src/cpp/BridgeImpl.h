@@ -45,7 +45,7 @@ public:
 
     void send(int id);
     void sendComplete(int, const std::set<std::string>&);
-    void clientError(const std::string&);
+    void clientError(const std::string&, const IceFIX::ReporterPrx&);
 
 private:
 

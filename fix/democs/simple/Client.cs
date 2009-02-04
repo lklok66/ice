@@ -48,8 +48,8 @@ public class Client
         public override int run(string[] args)
         {
 	    Ice.Properties properties = communicator().getProperties();
-	    String id = properties.getPropertyWithDefault("IceFIX.ClientId", "test");
-	    String filtered = properties.getPropertyWithDefault("IceFIX.Filtered", "true");
+	    String id = properties.getPropertyWithDefault("ClientId", "test");
+	    String filtered = properties.getPropertyWithDefault("Filtered", "true");
 
             if(args.Length > 0)
             {
@@ -58,7 +58,7 @@ public class Client
             }
 
 	    IceFIX.BridgePrx bridge =
-            IceFIX.BridgePrxHelper.uncheckedCast(communicator().propertyToProxy("IceFIX.Bridge"));
+            IceFIX.BridgePrxHelper.uncheckedCast(communicator().propertyToProxy("Bridge"));
 	    if(bridge == null)
 	    {
                 Console.Error.WriteLine(appName() + ": invalid proxy");
@@ -66,14 +66,14 @@ public class Client
 	    }
 
 	    IceFIX.BridgeAdminPrx admin = IceFIX.BridgeAdminPrxHelper.uncheckedCast(
-                communicator().propertyToProxy("IceFIX.BridgeAdmin"));
+                communicator().propertyToProxy("BridgeAdmin"));
 	    if(admin == null)
 	    {
                 Console.Error.WriteLine(appName() + ": invalid proxy");
 		return 1;
 	    }
 
-	    Ice.ObjectAdapter adapter = communicator().createObjectAdapter("IceFIX.Client");
+	    Ice.ObjectAdapter adapter = communicator().createObjectAdapter("Client");
 	    IceFIX.ReporterPrx reporter = IceFIX.ReporterPrxHelper.uncheckedCast(adapter.addWithUUID(new ReporterI()));
 	    try
 	    {

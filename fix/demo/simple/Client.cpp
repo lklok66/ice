@@ -75,8 +75,8 @@ int
 IceFIXClient::run(int argc, char* argv[])
 {
     Ice::PropertiesPtr properties = communicator()->getProperties();
-    string id = properties->getPropertyWithDefault("IceFIX.ClientId", "test");
-    string filtered = properties->getPropertyWithDefault("IceFIX.Filtered", "true");
+    string id = properties->getPropertyWithDefault("ClientId", "test");
+    string filtered = properties->getPropertyWithDefault("Filtered", "true");
 
     int i;
     for(i = 1; i < argc; ++i)
@@ -116,7 +116,7 @@ IceFIXClient::run(int argc, char* argv[])
     }
 
     IceFIX::BridgePrx bridge =
-    IceFIX::BridgePrx::uncheckedCast(communicator()->propertyToProxy("IceFIX.Bridge"));
+    IceFIX::BridgePrx::uncheckedCast(communicator()->propertyToProxy("Bridge"));
     if(!bridge)
     {
         cerr << argv[0] << ": invalid proxy" << endl;
@@ -124,14 +124,14 @@ IceFIXClient::run(int argc, char* argv[])
     }
 
     IceFIX::BridgeAdminPrx admin =
-    IceFIX::BridgeAdminPrx::uncheckedCast(communicator()->propertyToProxy("IceFIX.BridgeAdmin"));
+    IceFIX::BridgeAdminPrx::uncheckedCast(communicator()->propertyToProxy("BridgeAdmin"));
     if(!admin)
     {
         cerr << argv[0] << ": invalid proxy" << endl;
         return EXIT_FAILURE;
     }
 
-    Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapter("IceFIX.Client");
+    Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapter("Client");
     IceFIX::ReporterPrx reporter = IceFIX::ReporterPrx::uncheckedCast(adapter->addWithUUID(new ReporterI()));
     try
     {

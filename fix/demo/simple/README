@@ -14,7 +14,7 @@ $ icefixserver
 
 In a separate window, activate the IceFIX server.
 
-$ icefixadmin --Ice.Config=config.client -e activate
+$ icefixadmin --Ice.Config=config.admin -e activate
 
 Next, run the client.
 

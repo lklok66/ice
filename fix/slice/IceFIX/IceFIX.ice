@@ -73,8 +73,13 @@ dictionary<string, string> QoS;
 /** The bridge status. */
 enum BridgeStatus
 {
+    /** The bridge is inactive. */
     BridgeStatusNotActive,
+    /** The bridge is active, and trying to login with the trading
+     * partner. */
     BridgeStatusActive,
+    /** The bridge is active, and currently logged in with the trading
+     * partner. */
     BridgeStatusLoggedOn
 };
 

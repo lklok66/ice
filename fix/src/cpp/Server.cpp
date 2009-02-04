@@ -42,6 +42,7 @@ public:
     {
     }
 
+
     virtual void
     connect(const string& id, const ReporterPrx& reporter, ExecutorPrx& executor, const Ice::Current& current)
     {
@@ -130,8 +131,26 @@ public:
 int
 main(int argc, char* argv[])
 {
+    Ice::InitializationData initData;
+    try
+    {
+        initData.properties = Ice::createProperties();
+        initData.properties->setProperty("Ice.RetryIntervals", "-1");
+        initData.properties->load("config.icefix");
+    }
+    catch(const std::exception& ex)
+    {
+        cerr << argv[0] << ": " << ex.what() << endl;
+        return EXIT_FAILURE;
+    }
+    catch(...)
+    {
+        cerr << argv[0] << ": unknown exception" << endl;
+        return EXIT_FAILURE;
+    }
+
     BridgeServer app;
-    return app.main(argc, argv, "config.icefix");
+    return app.main(argc, argv, initData);
 }
 
 BridgeServer::BridgeServer()
@@ -149,10 +168,11 @@ BridgeServer::run(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    const string dbenv = "db";
+    Ice::PropertiesPtr properties = communicator()->getProperties();
+    const string dbenv = properties->getPropertyWithDefault("IceFIX.Data", "db");
     BridgeImplPtr bridge = new BridgeImpl(communicator(), dbenv);
 
-    const string fixConfig = communicator()->getProperties()->getProperty("IceFIX.FIXConfig");
+    const string fixConfig = properties->getProperty("IceFIX.FIXConfig");
     if(fixConfig.empty())
     {
         cerr << appName() << ": the property `IceFIX.FIXConfig' is not set" << endl;
