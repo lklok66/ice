@@ -12,15 +12,20 @@ top_srcdir	= ../..
 include $(top_srcdir)/config/Make.rules
 
 install::
-	@if test ! -d $(install_slicedir)/IceFIX ; \
+	@if test ! -d $(prefix)/slice ; \
 	then \
-	    echo "Creating $(install_slicedir)/Ice..." ; \
-	    $(call mkdir,$(install_slicedir)/Ice) ; \
+	    echo "Creating $(prefix)/slice..." ; \
+	    $(call mkdir,$(prefix)/slice) ; \
+	fi
+	@if test ! -d $(prefix)/slice/IceFIX ; \
+	then \
+	    echo "Creating $(prefix)/slice/IceFIX..." ; \
+	    $(call mkdir,$(prefix)/slice/IceFIX) ; \
 	fi
 
 	@for i in *.ice ; \
 	do \
 	    echo "Installing $$i" ; \
-	    $(INSTALL_DATA) $$i $(install_slicedir)/IceFIX/$$i ; \
-	    chmod a+r $(install_slicedir)/IceFIX/$$i ; \
+	    $(INSTALL_DATA) $$i $(prefix)/slice/IceFIX/$$i ; \
+	    chmod a+r $(prefix)/slice/IceFIX/$$i ; \
 	done

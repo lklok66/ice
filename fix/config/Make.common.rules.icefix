@@ -27,4 +27,3 @@ ifeq ($(shell test -f $(top_srcdir)/config/Make.common.rules && echo 0),0)
 else
    include $(top_srcdir)/../config/Make.common.rules
 endif 
-
