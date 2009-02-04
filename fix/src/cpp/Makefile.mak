@@ -43,8 +43,8 @@ SDIR		= $(slicedir)\IceFIX
 
 SLICE2CPPFLAGS	= -I./ $(SLICE2CPPFLAGS)
 CPPFLAGS	= -I. -Idummyinclude $(ICE_CPPFLAGS) $(CPPFLAGS) -DWIN32_LEAN_AND_MEAN $(QF_FLAGS)
-SLINKWITH 	= $(ICE_LIBS) $(LIBS) icefix$(LIBSUFFIX).lib freeze$(LIBSUFFIX).lib $(QF_LIBS)
-ALINKWITH 	= $(ICE_LIBS) $(LIBS) icefix$(LIBSUFFIX).lib
+SLINKWITH 	= $(LIBS) icefix$(LIBSUFFIX).lib freeze$(LIBSUFFIX).lib $(QF_LIBS)
+ALINKWITH 	= $(LIBS) icefix$(LIBSUFFIX).lib
 
 !if "$(GENERATE_PDB)" == "yes"
 PDBFLAGS        = /pdb:$(DLLNAME:.dll=.pdb)
@@ -55,19 +55,19 @@ SPDBFLAGS       = /pdb:$(SERVER:.exe=.pdb)
 $(LIBNAME): $(DLLNAME)
 
 $(DLLNAME): $(OBJS) IceFIX.res
-	$(LINK) $(LD_DLLFLAGS) $(PDBFLAGS) $(OBJS) $(PREOUT)$@ $(PRELIBS)$(LIBS) $(RES_FILE)
+	$(LINK) $(LD_DLLFLAGS) $(ICE_LDFLAGS) $(PDBFLAGS) $(OBJS) $(PREOUT)$@ $(PRELIBS)$(LIBS) $(RES_FILE)
 	move $(DLLNAME:.dll=.lib) $(LIBNAME)
 	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
 	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#2 && del /q $@.manifest
 	@if exist $(DLLNAME:.dll=.exp) del /q $(DLLNAME:.dll=.exp)
 
 $(ADMIN): $(AOBJS) IceFIXAdmin.res 
-	$(LINK) $(LD_EXEFLAGS) $(APDBFLAGS) $(AOBJS) $(SETARGV) $(PREOUT)$@ $(PRELIBS)$(ALINKWITH) $(ARES_FILE)
+	$(LINK) $(LD_EXEFLAGS) $(ICE_LDFLAGS) $(APDBFLAGS) $(AOBJS) $(SETARGV) $(PREOUT)$@ $(PRELIBS)$(ALINKWITH) $(ARES_FILE)
 	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
 	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#1 && del /q $@.manifest
 
 $(SERVER): $(SOBJS) IceFIXServer.res
-	$(LINK) $(LD_EXEFLAGS) $(SPDBFLAGS) $(SOBJS) $(SETARGV) $(PREOUT)$@ $(PRELIBS)$(SLINKWITH) $(SRES_FILE)
+	$(LINK) $(LD_EXEFLAGS) $(ICE_LDFLAGS) $(SPDBFLAGS) $(SOBJS) $(SETARGV) $(PREOUT)$@ $(PRELIBS)$(SLINKWITH) $(SRES_FILE)
 	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
 	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#1 && del /q $@.manifest
 

@@ -130,7 +130,7 @@ slicedir		= $(top_srcdir)\slice
 
 CPPFLAGS		= $(CPPFLAGS) -I$(includedir)
 SLICE2CPPFLAGS		= -I$(slicedir) -I$(ice_slicedir)
-LDFLAGS			= $(LDFLAGS) $(LDPLATFORMFLAGS) $(CXXFLAGS)
+LDFLAGS			= /LIBPATH:"$(libdir)" $(LDFLAGS) $(LDPLATFORMFLAGS) $(CXXFLAGS)
 
 !if "$(ice_src_dist)" != ""
 SLICEPARSERLIB		= $(ice_dir)\cpp\bin\slice$(LIBSUFFIX).lib
@@ -152,8 +152,6 @@ SLICE2FREEZE		= $(ice_dir)\bin$(x64suffix)\slice2freeze.exe
 ICE_CPPFLAGS		= -I"$(ice_dir)\include"
 ICE_LDFLAGS		= /LIBPATH:"$(ice_dir)\lib$(x64suffix)"
 !endif
-
-ICE_LIBS		= ice$(LIBSUFFIX).lib iceutil$(LIBSUFFIX).lib
 
 EVERYTHING		= all clean install
 
