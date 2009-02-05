@@ -58,7 +58,7 @@ KEYFILE                 = $(top_srcdir)\..\config\IceDevKey.snk
 # compiler can find it, set QF_HOME to the QuickFix installation
 # directory.
 #
-#QF_HOME		?= c:\quickfix
+#QF_HOME		= c:\quickfix
 
 # ----------------------------------------------------------------------
 # Don't change anything below this line!
