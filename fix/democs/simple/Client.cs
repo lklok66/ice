@@ -40,7 +40,7 @@ public class Client
                 "c: order cancel\n" +
                 "r: submit cancel replace\n" +
                 "t: status inquiry\n" +
-                "o: submit bad order\n" +
+                "b: submit bad order\n" +
                 "x: exit\n" +
                 "?: help\n");
         }
