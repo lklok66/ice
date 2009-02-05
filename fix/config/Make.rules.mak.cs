@@ -233,6 +233,7 @@ $(TARGETS_CONFIG):
 	sn -q -t tmp.pub > tmp.publicKeyToken && \
 	set /P TMP_TOKEN= < tmp.publicKeyToken && \
         cmd /c "set PUBLIC_KEY_TOKEN=%TMP_TOKEN:~-16% && \
+        cmd /c "set ICEFIX_PUBLIC_KEY_TOKEN=%TMP_TOKEN:~-16% && \
 	del /q tmp.pub tmp.publicKeyToken && \
 	nmake /nologo /f Makefile.mak config"
 !else
@@ -241,12 +242,17 @@ $(TARGETS_CONFIG):
 	set /P TMP_TOKEN= < tmp.publicKeyToken && \
         cmd /c "set PUBLIC_KEY_TOKEN=%TMP_TOKEN:~-16% && \
 	del /q tmp.pub tmp.publicKeyToken && \
+	@sn -q -T $(refdir)\IceFIX.dll > tmp.publicKeyToken && \
+	set /P TMP_TOKEN= < tmp.publicKeyToken && \
+        cmd /c "set ICEFIX_PUBLIC_KEY_TOKEN=%TMP_TOKEN:~-16% && \
+	del /q tmp.pub tmp.publicKeyToken && \
 	nmake /nologo /f Makefile.mak config"
 !endif
 
 !else
 
 publicKeyToken = $(PUBLIC_KEY_TOKEN: =)
+iceFixPublicKeyToken = $(ICEFIX_PUBLIC_KEY_TOKEN: =)
 $(TARGETS_CONFIG):
         @echo "Generating" <<$@ "..."
 <?xml version="1.0"?>
@@ -282,7 +288,7 @@ $(TARGETS_CONFIG):
           <codeBase version="$(INTVERSION).0" href="$(ice_refdir)\IceSSL.dll"/>
         </dependentAssembly>
         <dependentAssembly>
-          <assemblyIdentity name="IceFIX" culture="neutral" publicKeyToken="$(publicKeyToken)"/>
+          <assemblyIdentity name="IceFIX" culture="neutral" publicKeyToken="$(iceFixPublicKeyToken)"/>
           <codeBase version="$(ICEFIX_INTVERSION).0" href="$(refdir)\IceFIX.dll"/>
         </dependentAssembly>
 	<qualifyAssembly partialName="IceSSL" fullName="IceSSL, Version=$(INTVERSION).0, Culture=neutral, PublicKeyToken=$(publicKeyToken)"/>
