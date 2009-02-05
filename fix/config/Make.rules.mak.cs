@@ -233,19 +233,19 @@ $(TARGETS_CONFIG):
 	sn -q -t tmp.pub > tmp.publicKeyToken && \
 	set /P TMP_TOKEN= < tmp.publicKeyToken && \
         cmd /c "set PUBLIC_KEY_TOKEN=%TMP_TOKEN:~-16% && \
-        cmd /c "set ICEFIX_PUBLIC_KEY_TOKEN=%TMP_TOKEN:~-16% && \
+        set ICEFIX_PUBLIC_KEY_TOKEN=%TMP_TOKEN:~-16% && \
 	del /q tmp.pub tmp.publicKeyToken && \
 	nmake /nologo /f Makefile.mak config"
 !else
 $(TARGETS_CONFIG):
 	@sn -q -T $(ice_dir)\bin\Ice.dll > tmp.publicKeyToken && \
 	set /P TMP_TOKEN= < tmp.publicKeyToken && \
+	@sn -q -T $(refdir)\IceFIX.dll > tmp.iceFixPublicKeyToken && \
+	set /P ICEFIX_TMP_TOKEN= < tmp.iceFixPublicKeyToken && \
         cmd /c "set PUBLIC_KEY_TOKEN=%TMP_TOKEN:~-16% && \
-	del /q tmp.pub tmp.publicKeyToken && \
-	@sn -q -T $(refdir)\IceFIX.dll > tmp.publicKeyToken && \
-	set /P TMP_TOKEN= < tmp.publicKeyToken && \
-        cmd /c "set ICEFIX_PUBLIC_KEY_TOKEN=%TMP_TOKEN:~-16% && \
-	del /q tmp.pub tmp.publicKeyToken && \
+        set ICEFIX_PUBLIC_KEY_TOKEN=%ICEFIX_TMP_TOKEN:~-16% && \
+	del /q tmp.publicKeyToken && \
+	del /q tmp.iceFixPublicKeyToken && \
 	nmake /nologo /f Makefile.mak config"
 !endif
 
