@@ -12,14 +12,16 @@ top_srcdir	= ..\..
 LIBNAME		= $(top_srcdir)\lib\icefix$(LIBSUFFIX).lib
 DLLNAME		= $(top_srcdir)\bin\icefix$(ICEFIX_SOVERSION)$(LIBSUFFIX).dll
 
-ADMIN		= $(top_srcdir)\bin\icefixadmin.exe
-SERVER		= $(top_srcdir)\bin\icefixserver.exe
+SVCLIBNAME      = $(top_srcdir)\lib\icefixservice$(LIBSUFFIX).lib
+SVCDLLNAME      = $(top_srcdir)\bin\icefixservice$(ICEFIX_SOVERSION)$(LIBSUFFIX).dll
 
-TARGETS         = $(LIBNAME) $(DLLNAME) $(ADMIN) $(SERVER)
+ADMIN		= $(top_srcdir)\bin\icefixadmin.exe
+
+TARGETS         = $(LIBNAME) $(DLLNAME) $(SVCLIBNAME) $(SVCDLLNAME) $(ADMIN)
 
 OBJS		= IceFIX.obj
 
-SOBJS		= Server.obj \
+SOBJS		= ServiceI.obj \
 		  ExecutorI.obj \
 		  BridgeImpl.obj \
 		  RoutingRecordDB.obj \
@@ -43,13 +45,13 @@ SDIR		= $(slicedir)\IceFIX
 
 SLICE2CPPFLAGS	= -I./ $(SLICE2CPPFLAGS)
 CPPFLAGS	= -I. -Idummyinclude $(ICE_CPPFLAGS) $(CPPFLAGS) -DWIN32_LEAN_AND_MEAN $(QF_FLAGS)
-SLINKWITH 	= $(LIBS) icefix$(LIBSUFFIX).lib freeze$(LIBSUFFIX).lib $(QF_LIBS)
-ALINKWITH 	= $(LIBS) icefix$(LIBSUFFIX).lib
+SLINKWITH 	= $(LIBS) icefix$(LIBSUFFIX).lib icebox$(LIBSUFFIX).lib freeze$(LIBSUFFIX).lib $(QF_LIBS)
+ALINKWITH 	= icefix$(LIBSUFFIX).lib $(LIBS)
 
 !if "$(GENERATE_PDB)" == "yes"
 PDBFLAGS        = /pdb:$(DLLNAME:.dll=.pdb)
 APDBFLAGS       = /pdb:$(ADMIN:.exe=.pdb)
-SPDBFLAGS       = /pdb:$(SERVER:.exe=.pdb)
+SPDBFLAGS       = /pdb:$(SVCDLLNAME:.dll=.pdb)
 !endif
 
 $(LIBNAME): $(DLLNAME)
@@ -61,13 +63,17 @@ $(DLLNAME): $(OBJS) IceFIX.res
 	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#2 && del /q $@.manifest
 	@if exist $(DLLNAME:.dll=.exp) del /q $(DLLNAME:.dll=.exp)
 
+$(SVCLIBNAME): $(SVCDLLNAME)
+
+$(SVCDLLNAME): $(SOBJS) IceFIXServer.res
+	$(LINK) $(LD_DLLFLAGS) $(ICE_LDFLAGS) $(PDBFLAGS) $(SOBJS) $(PREOUT)$@ $(PRELIBS)$(SLINKWITH) $(RES_FILE)
+	move $(SVCDLLNAME:.dll=.lib) $(SVCLIBNAME)
+	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
+	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#2 && del /q $@.manifest
+	@if exist $(SVCDLLNAME:.dll=.exp) del /q $(SVCDLLNAME:.dll=.exp)
+
 $(ADMIN): $(AOBJS) IceFIXAdmin.res 
 	$(LINK) $(LD_EXEFLAGS) $(ICE_LDFLAGS) $(APDBFLAGS) $(AOBJS) $(SETARGV) $(PREOUT)$@ $(PRELIBS)$(ALINKWITH) $(ARES_FILE)
-	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
-	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#1 && del /q $@.manifest
-
-$(SERVER): $(SOBJS) IceFIXServer.res
-	$(LINK) $(LD_EXEFLAGS) $(ICE_LDFLAGS) $(SPDBFLAGS) $(SOBJS) $(SETARGV) $(PREOUT)$@ $(PRELIBS)$(SLINKWITH) $(SRES_FILE)
 	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
 	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#1 && del /q $@.manifest
 
@@ -113,8 +119,8 @@ Grammar.cpp Grammar.h: Grammar.y
 clean::
 	del /q IceFIX.cpp $(HDIR)\IceFIX.h
 	del /q $(DLLNAME:.dll=.*)
+	del /q $(SVCDLLNAME:.dll=.*)
 	del /q $(ADMIN:.exe=.*)
-	del /q $(SERVER:.exe=.*)
 	del /q IceFIXAdmin.res IceFIXMigrate.res IceFIX.res IceFIXService.res
 
 clean::
@@ -128,16 +134,17 @@ clean::
 install:: all
 	copy $(LIBNAME) $(install_libdir)
 	copy $(DLLNAME) $(install_bindir)
+	copy $(SVCLIBNAME) $(install_libdir)
+	copy $(SVCDLLNAME) $(install_bindir)
 	copy $(ADMIN) $(install_bindir)
-	copy $(SERVER) $(install_bindir)
 
 
 !if "$(GENERATE_PDB)" == "yes"
 
 install:: all
 	copy $(DLLNAME:.dll=.pdb) $(install_bindir)
+	copy $(SVCDLLNAME:.dll=.pdb) $(install_bindir)
 	copy $(ADMIN:.exe=.pdb) $(install_bindir)
-	copy $(SERVER:.exe=.pdb) $(install_bindir)
 
 !endif
 
