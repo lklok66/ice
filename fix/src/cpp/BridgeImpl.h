@@ -29,27 +29,27 @@ class BridgeImpl : public FIX::Application, public IceUtil::Shared, public IceUt
 {
 public:
 
-    BridgeImpl(const Ice::CommunicatorPtr& communicator, const std::string& name);
+    BridgeImpl(const Ice::CommunicatorPtr& communicator, const std::string&, const std::string& name);
 
     void stop();
     void setInitiator(FIX::Initiator*);
-    std::string _cpp_register(const IceFIX::QoS&, const Ice::Current&);
-    void registerWithId(const std::string&, const IceFIX::QoS&, const Ice::Current&);
+    std::string _cpp_register(const QoS&, const Ice::Current&);
+    void registerWithId(const std::string&, const QoS&, const Ice::Current&);
     void unregister(const std::string&, const Ice::Current&);
-    void connect(const std::string&, const IceFIX::ReporterPrx&, IceFIX::ExecutorPrx&, const Ice::Current&);
+    void connect(const std::string&, const ReporterPrx&, ExecutorPrx&, const Ice::Current&);
     void activate(const Ice::Current&);
     void deactivate(const Ice::Current&);
     void clean(Ice::Long, const Ice::Current&);
-    IceFIX::BridgeStatus getStatus(const Ice::Current&);
-    IceFIX::ClientInfoSeq getClients(const Ice::Current&);
+    BridgeStatus getStatus(const Ice::Current&);
+    ClientInfoSeq getClients(const Ice::Current&);
 
     void send(int id);
     void sendComplete(int, const std::set<std::string>&);
-    void clientError(const std::string&, const IceFIX::ReporterPrx&);
+    void clientError(const std::string&, const ReporterPrx&);
 
 private:
 
-    void validateQoS(const IceFIX::QoS&);
+    void validateQoS(const QoS&);
     void halt(const Freeze::DatabaseException&) const;
     virtual void onCreate(const FIX::SessionID&);
     virtual void onLogon(const FIX::SessionID&);
@@ -64,6 +64,7 @@ private:
         throw (FIX::FieldNotFound, FIX::IncorrectDataFormat, FIX::IncorrectTagValue, FIX::UnsupportedMessageType);
 
     const Ice::CommunicatorPtr _communicator;
+    const std::string _instanceName;
     const std::string _name;
     const DBCachePtr _dbCache;
     const int _trace;

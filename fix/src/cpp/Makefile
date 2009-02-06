@@ -13,16 +13,20 @@ LIBFILENAME     = $(call mklibfilename,IceFIX,$(ICEFIX_VERSION))
 SONAME          = $(call mksoname,IceFIX,$(ICEFIX_SOVERSION))  
 LIBNAME		= $(call mklibname,IceFIX)
 
-SERVER		= $(top_srcdir)/bin/icefixserver
+SVCLIBFILENAME  = $(call mklibfilename,IceFIXService,$(ICEFIX_VERSION))
+SVCSONAME       = $(call mksoname,IceFIXService,$(ICEFIX_SOVERSION))  
+SVCLIBNAME	= $(call mklibname,IceFIXService)
+
 ADMIN		= $(top_srcdir)/bin/icefixadmin
 
 LIBTARGETS	= $(call mklibtargets,$(libdir)/$(LIBFILENAME),$(libdir)/$(SONAME),$(libdir)/$(LIBNAME))
+SVCLIBTARGETS   = $(call mklibtargets,$(libdir)/$(SVCLIBFILENAME),$(libdir)/$(SVCSONAME),$(libdir)/$(SVCLIBNAME))
 
-TARGETS		= $(LIBTARGETS) $(SERVER) $(ADMIN)
+TARGETS		= $(LIBTARGETS) $(SVCLIBTARGETS) $(ADMIN)
 
 OBJS		= IceFIX.o
 
-SOBJS		= Server.o \
+SOBJS		= ServiceI.o \
 		  ExecutorI.o \
 		  BridgeImpl.o \
 		  RoutingRecordDB.o \
@@ -52,7 +56,8 @@ include $(top_srcdir)/config/Make.rules
 SLICE2CPPFLAGS	:= -I./ $(SLICE2CPPFLAGS)
 CPPFLAGS	:= -I. $(ICE_FLAGS) $(CPPFLAGS) $(QF_FLAGS)
 LINKWITH	:= $(ICE_LIBS)
-LIBS 		:= $(ICE_LIBS) -lFreeze -lIceFIX $(QF_LIBS)
+SVCLINKWITH	:= $(ICE_LIBS) -lFreeze -lIceBox -lIceFIX $(QF_LIBS)
+LIBS		:= $(ICE_LIBS) -lIceFIX $(QF_LIBS)
 
 $(libdir)/$(LIBFILENAME): $(OBJS)
 	rm -f $@
@@ -66,9 +71,17 @@ $(libdir)/$(LIBNAME): $(libdir)/$(SONAME)
 	rm -f $@
 	ln -s $(SONAME) $@
 
-$(SERVER): $(OBJS) $(SOBJS) $(LIBTARGETS)
+$(libdir)/$(SVCLIBFILENAME): $(SOBJS)
 	rm -f $@
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(SOBJS) $(LIBS)
+	$(call mkshlib,$@,$(SVCSONAME),$(SOBJS),$(SVCLINKWITH))
+
+$(libdir)/$(SVCSONAME): $(libdir)/$(SVCLIBFILENAME)
+	rm -f $@
+	ln -s $(SVCLIBFILENAME) $@
+
+$(libdir)/$(SVCLIBNAME): $(libdir)/$(SVCSONAME)
+	rm -f $@
+	ln -s $(SVCSONAME) $@
 
 $(ADMIN): $(AOBJS) $(LIBTARGETS)
 	rm -f $@
@@ -100,7 +113,7 @@ clean::
 
 install:: all
 	$(call installlib,$(install_libdir),$(libdir),$(LIBFILENAME),$(SONAME),$(LIBNAME))
-	$(call installprogram,$(SERVER),$(install_bindir))
+	$(call installlib,$(install_libdir),$(libdir),$(SVCLIBFILENAME),$(SONAME),$(LIBNAME))
 	$(call installprogram,$(ADMIN),$(install_bindir))
 
 include .depend

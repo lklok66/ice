@@ -1,1 +1,7 @@
-TODO
+Changes since first release to QIM (Feb 5th, 2009)
+
+- Changed the icefixserver to an IceBox service. As such the default
+  identities of the default bridge & admin objects have changed to
+  IceFIX/Admin, IceFIX/Bridge.
+
+- Fixed bug where Executor::destroy would lose the client QoS.

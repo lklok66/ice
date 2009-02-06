@@ -171,8 +171,9 @@ private:
 
 }
 
-BridgeImpl::BridgeImpl(const Ice::CommunicatorPtr& communicator, const string& name) :
+BridgeImpl::BridgeImpl(const Ice::CommunicatorPtr& communicator, const string& instanceName, const string& name) :
     _communicator(communicator),
+    _instanceName(instanceName),
     _name(name),
     _dbCache(new DBCache(communicator, name)),
     _trace(communicator->getProperties()->getPropertyAsIntWithDefault("IceFIX.Trace", 0)),
@@ -360,7 +361,7 @@ BridgeImpl::connect(const string& clientId, const ReporterPrx& reporter, Executo
             }
 
             Ice::Identity oid;
-            oid.category = "executor";
+            oid.category = _instanceName + "-Executor";
             oid.name = clientId;
             executor = ExecutorPrx::uncheckedCast(current.adapter->createProxy(oid));
 

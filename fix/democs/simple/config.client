@@ -1,5 +1,5 @@
-Bridge=bridge:tcp -p 12000
-BridgeAdmin=admin:tcp -p 12000
+Bridge=IceFIX/Bridge:tcp -p 12000
+BridgeAdmin=IceFIX/Admin:tcp -p 12000
 
 Client.Endpoints=tcp
 

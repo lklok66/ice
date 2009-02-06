@@ -10,7 +10,7 @@ $ ordermatch config.cfg
 
 In a separate window, start the IceFIX server.
 
-$ icefixserver
+$ icebox --Ice.Config=config.icebox
 
 In a separate window, activate the IceFIX server.
 

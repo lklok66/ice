@@ -108,6 +108,7 @@ ExecutorI::destroy(const Ice::Current& current)
             ClientDB::iterator p = clients.find(current.id.name);
             if(p != clients.end())
             {
+                c = p->second;
                 c.reporter = 0;
                 p.set(c);
             }
