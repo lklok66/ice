@@ -1,0 +1,72 @@
+<!--
+ **********************************************************************
+
+ Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+
+ This copy of Ice is licensed to you under the terms described in the
+ ICE_LICENSE file included in this distribution.
+
+ **********************************************************************
+-->
+
+<icegrid>
+
+    <application name="IceFIX">
+    <service-template id="IceFIX">
+      <parameter name="instance-name" default="${application}.IceFIX"/>
+      <parameter name="bridge-endpoints" default="default"/>
+      <parameter name="fix-config"/>
+      <parameter name="db-home" default=""/>
+
+      <service name="${instance-name}" entry="IceFIXService,10:create">
+
+        <dbenv name="${service}" home="${db-home}"/>
+
+        <adapter name="${service}.Bridge"
+		 id="${instance-name}.Bridge" 
+		 endpoints="${bridge-endpoints}">
+          <object identity="${instance-name}/Bridge" type="::IceFIX::Bridge"/>
+          <object identity="${instance-name}/Admin" type="::IceFIX::BridgeAdmin"/>
+	</adapter>
+
+        <properties>
+           <property name="${service}.InstanceName" value="${instance-name}"/>
+           <property name="${service}.FIXConfig" value="${fix-config}"/>
+        </properties>
+      </service>
+
+    </service-template>
+
+    <server-template id="IceFIX">
+
+      <parameter name="instance-name" default="${application}.IceFIX"/>
+      <parameter name="bridge-endpoints" default="default"/>
+      <parameter name="fix-config"/>
+      <parameter name="db-home" default=""/>
+
+      <icebox id="${instance-name}" exe="icebox" activation="on-demand">
+        <service-instance template="IceFIX"
+			  instance-name="${instance-name}" 
+			  bridge-endpoints="${bridge-endpoints}"
+			  fix-config="${fix-config}"
+			  db-home="${db-home}"/>
+      </icebox>
+
+    </server-template>
+
+    <node name="localhost">
+      <server-instance
+         template="IceFIX"
+         instance-name="TP1"
+	 fix-config="config.fix-tp1"
+	 db-home="db-tp1"/>
+      <server-instance
+         template="IceFIX"
+         instance-name="TP2"
+	 fix-config="config.fix-tp2"
+	 db-home="db-tp2"/>
+    </node>
+
+  </application>
+
+</icegrid>

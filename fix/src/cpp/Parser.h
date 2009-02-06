@@ -50,14 +50,14 @@ class Parser : public ::IceUtil::SimpleShared
 {
 public:
 
-    static ParserPtr createParser(const Ice::CommunicatorPtr&, const IceFIX::BridgeAdminPrx&);
+    static ParserPtr createParser(const Ice::CommunicatorPtr&, const std::vector<std::pair<std::string, IceFIX::BridgeAdminPrx> >&);
 
     void usage();
 
-    void activate();
-    void deactivate();
-    void list();
-    void status();
+    void activate(const std::list<std::string>&);
+    void deactivate(const std::list<std::string>&);
+    void list(const std::list<std::string>&);
+    void status(const std::list<std::string>&);
     void unregister(const std::list<std::string>&);
 
     void showBanner();
@@ -79,12 +79,12 @@ public:
 
 private:
 
-    Parser(const Ice::CommunicatorPtr&, const IceFIX::BridgeAdminPrx&);
+    Parser(const Ice::CommunicatorPtr&, const std::vector<std::pair<std::string, IceFIX::BridgeAdminPrx> >&);
     
     void exception(const Ice::Exception&, bool = false);
 
     const Ice::CommunicatorPtr _communicator;
-    IceFIX::BridgeAdminPrx _admin;
+    std::vector<std::pair<std::string, IceFIX::BridgeAdminPrx> > _admin;
     std::string _commands;
     bool _continue;
     int _errors;

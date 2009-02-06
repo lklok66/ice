@@ -28,7 +28,7 @@ using namespace Ice;
 Parser* parser;
 
 ParserPtr
-Parser::createParser(const CommunicatorPtr& communicator, const IceFIX::BridgeAdminPrx& admin)
+Parser::createParser(const CommunicatorPtr& communicator, const vector<pair<string, IceFIX::BridgeAdminPrx> >& admin)
 {
     return new Parser(communicator, admin);
 }
@@ -48,103 +48,150 @@ Parser::usage()
 }
 
 void
-Parser::activate()
+Parser::activate(const std::list<string>& args)
 {
-    try
+    for(vector<pair<string, IceFIX::BridgeAdminPrx> >::const_iterator p = _admin.begin(); p != _admin.end(); ++p)
     {
-        _admin->activate();
-    }
-    catch(const Ice::Exception& ex)
-    {
-        cerr << "activate: " << ex << endl;
-    }
-}
-
-void
-Parser::deactivate()
-{
-    try
-    {
-        _admin->deactivate();
-    }
-    catch(const Ice::Exception& ex)
-    {
-        cerr << "deactivate: " << ex << endl;
-    }
-}
-
-void
-Parser::status()
-{
-    try
-    {
-        IceFIX::BridgeStatus status = _admin->getStatus();
-        cout << "status: ";
-        switch(status)
+        if(args.size() == 0 || find(args.begin(), args.end(), p->first) != args.end())
         {
-        case IceFIX::BridgeStatusNotActive:
-            cout << "not active";
-            break;
-        case IceFIX::BridgeStatusActive:
-            cout << "active";
-            break;
-        case IceFIX::BridgeStatusLoggedOn:
-            cout << "logged on";
-            break;
-
-        }
-        cout << endl;
-    }
-    catch(const Ice::Exception& ex)
-    {
-        cerr << "status: " << ex << endl;
-    }
-}
-
-void
-Parser::list()
-{
-    try
-    {
-        IceFIX::ClientInfoSeq clients = _admin->getClients();
-        cout << clients.size() << " registered clients" << endl;
-        for(IceFIX::ClientInfoSeq::const_iterator p = clients.begin(); p != clients.end(); ++p)
-        {
-            cout << "  id: " << p->id << endl;
-            cout << "  connected: " << (p->isConnected ? "TRUE" : "FALSE") << endl;
+            cout << "activating " << p->first << endl;
+            try
+            {
+                p->second->activate();
+            }
+            catch(const Ice::Exception& ex)
+            {
+                cerr << "activate: " << ex << endl;
+            }
         }
     }
-    catch(const Ice::Exception& ex)
+}
+
+void
+Parser::deactivate(const std::list<string>& args)
+{
+    for(vector<pair<string, IceFIX::BridgeAdminPrx> >::const_iterator p = _admin.begin(); p != _admin.end(); ++p)
     {
-        cerr << "list: " << ex << endl;
+        if(args.size() == 0 || find(args.begin(), args.end(), p->first) != args.end())
+        {
+            cout << "deactivating " << p->first << endl;
+            try
+            {
+                p->second->deactivate();
+            }
+            catch(const Ice::Exception& ex)
+            {
+                cerr << "deactivate: " << ex << endl;
+            }
+        }
     }
 }
 
 void
-Parser::unregister(const std::list<std::string>& args)
+Parser::status(const std::list<string>& args)
 {
-    if(args.empty())
+    for(vector<pair<string, IceFIX::BridgeAdminPrx> >::const_iterator p = _admin.begin(); p != _admin.end(); ++p)
+    {
+        try
+        {
+            if(args.size() == 0 || find(args.begin(), args.end(), p->first) != args.end())
+            {
+                cout << p->first << endl;
+                IceFIX::BridgeStatus status = p->second->getStatus();
+                cout << "  status: ";
+                switch(status)
+                {
+                case IceFIX::BridgeStatusNotActive:
+                    cout << "not active";
+                    break;
+                case IceFIX::BridgeStatusActive:
+                    cout << "active";
+                    break;
+                case IceFIX::BridgeStatusLoggedOn:
+                    cout << "logged on";
+                    break;
+
+                }
+                cout << endl;
+            }
+        }
+        catch(const Ice::Exception& ex)
+        {
+            cerr << "  status: " << ex << endl;
+        }
+    }
+}
+
+void
+Parser::list(const std::list<string>& args)
+{
+    for(vector<pair<string, IceFIX::BridgeAdminPrx> >::const_iterator p = _admin.begin(); p != _admin.end(); ++p)
+    {
+        if(args.size() == 0 || find(args.begin(), args.end(), p->first) != args.end())
+        {
+            cout << p->first << endl;
+            try
+            {
+                IceFIX::ClientInfoSeq clients = p->second->getClients();
+                cout << clients.size() << " registered clients" << endl;
+                for(IceFIX::ClientInfoSeq::const_iterator p = clients.begin(); p != clients.end(); ++p)
+                {
+                    cout << "  id: " << p->id << endl;
+                    cout << "  connected: " << (p->isConnected ? "TRUE" : "FALSE") << endl;
+                }
+            }
+            catch(const Ice::Exception& ex)
+            {
+                cerr << "list: " << ex << endl;
+            }
+        }
+    }
+}
+
+void
+Parser::unregister(const std::list<string>& _args)
+{
+    std::list<string> args = _args;
+    if(args.empty() || args.size() > 2)
     {
         error("`unregister' requires at least one argument (type `help' for more info)");
         return;
     }
 
-    for(std::list<std::string>::const_iterator p = args.begin(); p != args.end() ; ++p)
+    string bridge;
+    string id;
+    
+    if(args.size() == 1)
     {
-        try
+        id = args.front();
+    }
+    else
+    {
+        bridge = args.front();
+        args.pop_front();
+        id = args.front();
+    }
+    for(vector<pair<string, IceFIX::BridgeAdminPrx> >::const_iterator p = _admin.begin(); p != _admin.end(); ++p)
+    {
+        if(bridge.empty() || bridge == p->first)
         {
-            _admin->unregister(*p);
-        }
-        catch(const IceFIX::RegistrationException& ex)
-        {
-            cerr << "unregister: " << ex << ": " << ex.reason << endl;
-        }
-        catch(const Ice::Exception& ex)
-        {
-            cerr << "unregister: " << ex << endl;
+            cout << p->first << endl;
+            try
+            {
+                p->second->unregister(id);
+            }
+            catch(const IceFIX::RegistrationException& ex)
+            {
+                cerr << "  unregister: " << ex << ": " << ex.reason << endl;
+            }
+            catch(const Ice::Exception& ex)
+            {
+                cerr << "  unregister: " << ex << endl;
+            }
         }
     }
 }
+
 
 void
 Parser::showBanner()
@@ -329,7 +376,7 @@ Parser::parse(FILE* file, bool debug)
 }
 
 int
-Parser::parse(const std::string& commands, bool debug)
+Parser::parse(const string& commands, bool debug)
 {
     yydebug = debug ? 1 : 0;
 
@@ -353,7 +400,7 @@ Parser::parse(const std::string& commands, bool debug)
     return status;
 }
 
-Parser::Parser(const CommunicatorPtr& communicator, const IceFIX::BridgeAdminPrx& admin) :
+Parser::Parser(const CommunicatorPtr& communicator, const vector<pair<string, IceFIX::BridgeAdminPrx> >& admin) :
     _communicator(communicator),
     _admin(admin)
 {

@@ -57,7 +57,7 @@ SLICE2CPPFLAGS	:= -I./ $(SLICE2CPPFLAGS)
 CPPFLAGS	:= -I. $(ICE_FLAGS) $(CPPFLAGS) $(QF_FLAGS)
 LINKWITH	:= $(ICE_LIBS)
 SVCLINKWITH	:= $(ICE_LIBS) -lFreeze -lIceBox -lIceFIX $(QF_LIBS)
-LIBS		:= $(ICE_LIBS) -lIceFIX $(QF_LIBS)
+LIBS		:= $(ICE_LIBS) -lIceFIX -lIceGrid -lGlacier2 $(QF_LIBS)
 
 $(libdir)/$(LIBFILENAME): $(OBJS)
 	rm -f $@

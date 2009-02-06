@@ -13,6 +13,8 @@
 #include <Ice/SliceChecksums.h>
 #include <Parser.h>
 
+#include <IceGrid/IceGrid.h>
+
 #include <fstream>
 
 using namespace std;
@@ -101,15 +103,31 @@ Client::run(int argc, char* argv[])
     }
     debug = opts.isSet("debug");
 
-    IceFIX::BridgeAdminPrx admin =
-        IceFIX::BridgeAdminPrx::uncheckedCast(communicator()->propertyToProxy("IceFIXAdmin.BridgeAdmin"));
-    if(!admin)
+    vector<pair<string, IceFIX::BridgeAdminPrx> > admins;
+    Ice::LocatorPrx locator = communicator()->getDefaultLocator();
+    if(locator)
     {
-        cerr << appName() << ": no bridge admin proxy configured" << endl;
-        return EXIT_FAILURE;
+        IceGrid::LocatorPrx loc = IceGrid::LocatorPrx::uncheckedCast(locator);
+        IceGrid::QueryPrx query = loc->getLocalQuery();
+        Ice::ObjectProxySeq a = query->findAllObjectsByType(IceFIX::BridgeAdmin::ice_staticId());
+        for(Ice::ObjectProxySeq::const_iterator p = a.begin(); p != a.end(); ++p)
+        {
+            admins.push_back(make_pair((*p)->ice_getIdentity().category, IceFIX::BridgeAdminPrx::uncheckedCast(*p)));
+        }
+    }
+    else
+    {
+        IceFIX::BridgeAdminPrx admin = IceFIX::BridgeAdminPrx::uncheckedCast(
+            communicator()->propertyToProxy("IceFIXAdmin.BridgeAdmin"));
+        if(!admin)
+        {
+            cerr << appName() << ": no bridge admin proxy configured" << endl;
+            return EXIT_FAILURE;
+        }
+        admins.push_back(make_pair("default", admin));
     }
 
-    ParserPtr p = Parser::createParser(communicator(), admin);
+    ParserPtr p = Parser::createParser(communicator(), admins);
     int status = EXIT_SUCCESS;
 
     if(!commands.empty()) // Commands were given

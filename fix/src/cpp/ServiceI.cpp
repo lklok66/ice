@@ -181,7 +181,8 @@ void
 ServiceI::start(const string& name, const Ice::CommunicatorPtr& communicator, const Ice::StringSeq& args)
 {
     Ice::PropertiesPtr properties = communicator->getProperties();
-    const string dbenv = properties->getPropertyWithDefault(name + ".Data", "db");
+    //const string dbenv = properties->getPropertyWithDefault(name + ".Data", "db");
+    const string dbenv = name;
     string instanceName = properties->getPropertyWithDefault(name + ".InstanceName", "IceFIX");
     BridgeImplPtr bridge = new BridgeImpl(communicator, instanceName, dbenv);
 

@@ -82,21 +82,21 @@ command
 {
     return 0;
 }
-| ICEFIX_ACTIVATE ';'
+| ICEFIX_ACTIVATE strings ';'
 {
-    parser->activate();
+    parser->activate($2);
 }
-| ICEFIX_DEACTIVATE ';'
+| ICEFIX_DEACTIVATE strings ';'
 {
-    parser->deactivate();
+    parser->deactivate($2);
 }
-| ICEFIX_LIST ';'
+| ICEFIX_LIST strings ';'
 {
-    parser->list();
+    parser->list($2);
 }
-| ICEFIX_STATUS ';'
+| ICEFIX_STATUS strings ';'
 {
-    parser->status();
+    parser->status($2);
 }
 | ICEFIX_UNREGISTER strings ';'
 {

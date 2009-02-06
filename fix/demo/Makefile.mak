@@ -11,7 +11,7 @@ top_srcdir	= ..
 
 !include $(top_srcdir)\config\Make.rules.mak
 
-SUBDIRS		= simple
+SUBDIRS		= simple grid
 
 $(EVERYTHING)::
 	@for %i in ( $(SUBDIRS) ) do \

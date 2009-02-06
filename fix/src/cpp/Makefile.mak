@@ -46,7 +46,7 @@ SDIR		= $(slicedir)\IceFIX
 SLICE2CPPFLAGS	= -I./ $(SLICE2CPPFLAGS)
 CPPFLAGS	= -I. -Idummyinclude $(ICE_CPPFLAGS) $(CPPFLAGS) -DWIN32_LEAN_AND_MEAN $(QF_FLAGS)
 SLINKWITH 	= $(LIBS) icefix$(LIBSUFFIX).lib icebox$(LIBSUFFIX).lib freeze$(LIBSUFFIX).lib $(QF_LIBS)
-ALINKWITH 	= icefix$(LIBSUFFIX).lib $(LIBS)
+ALINKWITH 	= icegrid$(LIBSUFFIX).lib glacier2$(LIBSUFFIX).lib icefix$(LIBSUFFIX).lib $(LIBS)
 
 !if "$(GENERATE_PDB)" == "yes"
 PDBFLAGS        = /pdb:$(DLLNAME:.dll=.pdb)
@@ -65,7 +65,7 @@ $(DLLNAME): $(OBJS) IceFIX.res
 
 $(SVCLIBNAME): $(SVCDLLNAME)
 
-$(SVCDLLNAME): $(SOBJS) IceFIXServer.res
+$(SVCDLLNAME): $(SOBJS) IceFIXService.res
 	$(LINK) $(LD_DLLFLAGS) $(ICE_LDFLAGS) $(PDBFLAGS) $(SOBJS) $(PREOUT)$@ $(PRELIBS)$(SLINKWITH) $(RES_FILE)
 	move $(SVCDLLNAME:.dll=.lib) $(SVCLIBNAME)
 	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
