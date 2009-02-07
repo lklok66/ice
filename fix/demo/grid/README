@@ -33,8 +33,7 @@ $ ordermatch config.tp2
 
 Now activate the bridges.
 
-$ icefixadmin --Ice.Config=config.admin -e activate TP1
-$ icefixadmin --Ice.Config=config.admin -e activate TP2
+$ icefixadmin --Ice.Config=config.admin -e activate
 
 Now, run the client.
 

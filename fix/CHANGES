@@ -1,5 +1,12 @@
 Changes since first release to QIM (Feb 5th, 2009)
 
+- Removed property IceFix.Data. To set the database location, the
+  standard Freeze property "Freeze.DbEnv.<service-name>.DbHome"
+  should be used.  Note that the IceGrid deployment, as demonstrated
+  in demo/grid and democs/grid, automatically sets this property.
+
+- Added new IceGrid deployment demos demo/grid, democs/grid.
+
 - Changed the icefixserver to an IceBox service. As such the default
   identities of the default bridge & admin objects have changed to
   IceFIX/Admin, IceFIX/Bridge.

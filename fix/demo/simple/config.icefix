@@ -23,7 +23,7 @@ IceFIX.RetryInterval=60
 #
 # The location of the IceFIX databases.
 #
-IceFIX.Data=db
+Freeze.DbEnv.IceFIX.DbHome=db
 
 #
 # Warn about connection exceptions
