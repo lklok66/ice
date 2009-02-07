@@ -54,7 +54,7 @@
 
     </server-template>
 
-    <node name="localhost">
+    <node name="node1">
       <server-instance
          template="IceFIX"
          instance-name="TP1"

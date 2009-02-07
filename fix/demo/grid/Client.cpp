@@ -10,6 +10,7 @@
 #include <IceUtil/IceUtil.h>
 #include <Ice/Ice.h>
 #include <IceFIX/IceFIX.h>
+#include <IceGrid/IceGrid.h>
 
 #include <quickfix/Message.h>
 #include <quickfix/fix42/NewOrderSingle.h>
@@ -32,9 +33,9 @@ private:
 
     void menu();
 
-    bool send(const FIX::Message&);
+    bool send(const IceFIX::ExecutorPrx&, const FIX::Message&);
 
-    IceFIX::ExecutorPrx _executor;
+    map<string, IceFIX::ExecutorPrx> _executors;
 };
 
 int
@@ -115,53 +116,85 @@ IceFIXClient::run(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    IceFIX::BridgePrx bridge =
-    IceFIX::BridgePrx::uncheckedCast(communicator()->propertyToProxy("Bridge"));
-    if(!bridge)
+    Ice::LocatorPrx locator = communicator()->getDefaultLocator();
+    if(!locator)
     {
-        cerr << argv[0] << ": invalid proxy" << endl;
+        cerr << argv[0] << ": no locator configured" << endl;
         return EXIT_FAILURE;
     }
 
-    IceFIX::BridgeAdminPrx admin =
-    IceFIX::BridgeAdminPrx::uncheckedCast(communicator()->propertyToProxy("BridgeAdmin"));
-    if(!admin)
+    map<string, IceFIX::BridgeAdminPrx > admins;
+    map<string, IceFIX::BridgePrx > bridges;
+
+    IceGrid::LocatorPrx loc = IceGrid::LocatorPrx::uncheckedCast(locator);
+    IceGrid::QueryPrx query = loc->getLocalQuery();
+    Ice::ObjectProxySeq a = query->findAllObjectsByType(IceFIX::BridgeAdmin::ice_staticId());
+    for(Ice::ObjectProxySeq::const_iterator p = a.begin(); p != a.end(); ++p)
     {
-        cerr << argv[0] << ": invalid proxy" << endl;
-        return EXIT_FAILURE;
+	admins.insert(make_pair((*p)->ice_getIdentity().category, IceFIX::BridgeAdminPrx::uncheckedCast(*p)));
+    }
+
+    a = query->findAllObjectsByType(IceFIX::Bridge::ice_staticId());
+    for(Ice::ObjectProxySeq::const_iterator p = a.begin(); p != a.end(); ++p)
+    {
+	bridges.insert(make_pair((*p)->ice_getIdentity().category, IceFIX::BridgePrx::uncheckedCast(*p)));
+    }
+    if(bridges.empty() || admins.empty())
+    {
+    	cerr << argv[0] << ": cannot locate any bridges or admins" << endl;
+	return EXIT_FAILURE;
     }
 
     Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapter("Client");
     IceFIX::ReporterPrx reporter = IceFIX::ReporterPrx::uncheckedCast(adapter->addWithUUID(new ReporterI()));
-    try
+    for(map<string, IceFIX::BridgePrx>::const_iterator p = bridges.begin(); p != bridges.end(); ++p)
     {
-        bridge->connect(id, reporter, _executor);
-    }
-    catch(const IceFIX::RegistrationException&)
-    {
-        try
-        {
-            IceFIX::QoS qos;
-            qos["filtered"] = filtered;
-            admin->registerWithId(id, qos);
-            bridge->connect(id, reporter, _executor);
-        }
-        catch(const IceFIX::RegistrationException& ex)
-        {
-            cerr << argv[0] << ": registration failed: `" << ex.reason << "'" << endl;
-            return EXIT_FAILURE;
-        }
+    	cout << "connecting with `" << p->first << "'..." << flush;
+	try
+	{
+	    IceFIX::ExecutorPrx executor;
+	    p->second->connect(id, reporter, executor);
+	    _executors.insert(make_pair(p->first, executor));
+	}
+	catch(const IceFIX::RegistrationException&)
+	{
+	    try
+	    {
+		cout << " not registered, registering..." << flush;
+		map<string, IceFIX::BridgeAdminPrx>::const_iterator q = admins.find(p->first);
+		if(q == admins.end())
+		{
+		    cerr << argv[0] << ": cannot locate BridgeAdmin for " << p->first << endl;
+		    return EXIT_FAILURE;
+		}
+		IceFIX::QoS qos;
+		qos["filtered"] = filtered;
+		q->second->registerWithId(id, qos);
+
+		IceFIX::ExecutorPrx executor;
+		p->second->connect(id, reporter, executor);
+		_executors.insert(make_pair(p->first, executor));
+	    }
+	    catch(const IceFIX::RegistrationException& ex)
+	    {
+		cerr << argv[0] << ": registration with `" << p->first << "' failed: `" << ex.reason << "'" << endl;
+		return EXIT_FAILURE;
+	    }
+	}
+	cout << " ok" << endl;
     }
     adapter->activate();
 
     menu();
 
+    IceFIX::ExecutorPrx executor = _executors.begin()->second;
+    string bridge = _executors.begin()->first;
     char c;
     do
     {
         try
         {
-            cout << "==> ";
+	    cout << bridge << " ==> ";
             cin >> c;
 
             if(c == 'o' || c == 'b')
@@ -182,7 +215,7 @@ IceFIXClient::run(int argc, char* argv[])
                 }
                 req.set( FIX::TimeInForce( FIX::TimeInForce_DAY ));
                 
-                if(send(req))
+                if(send(executor, req))
                 {
                     cout << "submitted order: `" << clOrdID << "'" << endl;
                 }
@@ -205,7 +238,7 @@ IceFIXClient::run(int argc, char* argv[])
                     FIX::Side( FIX::Side_BUY ),
                     FIX::TransactTime());
 
-                if(send(req))
+                if(send(executor, req))
                 {
                     cout << "submitted cancel order: `" << clOrdID << "'" << endl;
                 }
@@ -233,7 +266,7 @@ IceFIXClient::run(int argc, char* argv[])
                 req.set( FIX::OrderQty( 50 ));
                 req.set( FIX::TimeInForce( FIX::TimeInForce_DAY ));
 
-                if(send(req))
+                if(send(executor, req))
                 {
                     cout << "submitted cancel replace order: `" << clOrdID << "'" << endl;
                 }
@@ -253,7 +286,26 @@ IceFIXClient::run(int argc, char* argv[])
                     FIX::Symbol( "AAPL"),
                     FIX::Side( FIX::Side_BUY ));
 
-                send(req);
+                send(executor, req);
+            }
+            else if(c == 's')
+            {
+                cout << "bridge: ";
+                string id;
+                cin >> id;
+                if(id.empty())
+                {
+                    cout << "invalid" << endl;
+                    continue;
+                }
+		map<string, IceFIX::ExecutorPrx>::const_iterator p = _executors.find(id);
+		if(p == _executors.end())
+		{
+		    cout << "cannot locate" << endl;
+		    continue;
+		}
+		bridge = id;
+		executor = p->second;
             }
             else if(c == 'x')
             {
@@ -276,13 +328,16 @@ IceFIXClient::run(int argc, char* argv[])
     }
     while(cin.good() && c != 'x');
 
-    try
+    for(map<string, IceFIX::ExecutorPrx>::const_iterator p = _executors.begin(); p != _executors.end(); ++p)
     {
-        _executor->destroy();
-    }
-    catch(const Ice::Exception& ex)
-    {
-        cerr << "error when destroying excecutor: " << ex << endl;
+	try
+	{
+	    p->second->destroy();
+	}
+	catch(const Ice::Exception& ex)
+	{
+	    cerr << "error when destroying excecutor `" << p->first << "': " << ex << endl;
+	}
     }
     return EXIT_SUCCESS;
 }
@@ -297,16 +352,17 @@ IceFIXClient::menu()
         "r: order cancel replace\n"
         "t: status inquiry\n"
         "b: submit bad order\n"
+        "s: switch bridge\n"
         "x: exit\n"
         "?: help\n";
 }
 
 bool
-IceFIXClient::send(const FIX::Message& msg)
+IceFIXClient::send(const IceFIX::ExecutorPrx& executor, const FIX::Message& msg)
 {
     try
     {
-        _executor->execute(msg.toString());
+        executor->execute(msg.toString());
     }
     catch(const IceFIX::ExecuteException& e)
     {

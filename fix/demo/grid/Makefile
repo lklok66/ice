@@ -20,7 +20,7 @@ SRCS		= $(COBJS:.o=.cpp) \
 include $(top_srcdir)/config/Make.rules
 
 CPPFLAGS	:= $(ICE_FLAGS) $(CPPFLAGS) $(QF_FLAGS)
-LIBS 		:= $(ICE_LIBS) $(LIBS) -lIceFIX $(QF_LIBS)
+LIBS 		:= $(ICE_LIBS) $(LIBS) -lIceGrid -lGlacier2 -lIceFIX $(QF_LIBS)
 
 $(CLIENT): $(OBJS) $(COBJS)
 	rm -f $@
