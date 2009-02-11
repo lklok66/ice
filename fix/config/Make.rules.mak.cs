@@ -32,7 +32,7 @@ prefix	= C:\IceFIX-$(ICEFIX_VERSION)
 # assertions enabled.
 #
 
-#DEBUG			= yes
+DEBUG			= yes
 
 #
 # Define OPTIMIZE as yes if you want to build with optimization.
@@ -58,7 +58,7 @@ KEYFILE                 = $(top_srcdir)\..\config\IceDevKey.snk
 # compiler can find it, set QF_HOME to the QuickFix installation
 # directory.
 #
-QF_HOME		= e:\src\quickfix
+#QF_HOME		= c:\quickfix
 
 # ----------------------------------------------------------------------
 # Don't change anything below this line!

@@ -17,7 +17,7 @@ prefix			= C:\IceFIX-$(ICEFIX_VERSION)
 # Define OPTIMIZE as yes if you want to build with
 # optimization. Otherwise Ice is build with debug information.
 #
-OPTIMIZE		= yes
+#OPTIMIZE		= yes
 
 #
 # Define if you want pdb files to be generated for optimized/release
@@ -74,7 +74,7 @@ MT = mt.exe
 # compiler can find it, set QF_HOME to the QuickFix installation
 # directory.
 #
-QF_HOME		= e:\src\quickfix
+#QF_HOME		= c:\quickfix
 
 
 # ----------------------------------------------------------------------
