@@ -77,11 +77,16 @@ class BridgeI : public Bridge
 {
 public:
 
-    BridgeI(const BridgeImplPtr& bridge) :
-        _bridge(bridge)
+    BridgeI(const BridgeImplPtr& bridge, const IceFIX::BridgeAdminPrx& admin) :
+        _bridge(bridge), _admin(admin)
     {
     }
 
+    virtual IceFIX::BridgeAdminPrx
+    getAdmin(const Ice::Current&)
+    {
+        return _admin;
+    }
 
     virtual void
     connect(const string& id, const ReporterPrx& reporter, ExecutorPrx& executor, const Ice::Current& current)
@@ -92,6 +97,7 @@ public:
 private:
 
     const BridgeImplPtr _bridge;
+    const IceFIX::BridgeAdminPrx _admin;
 };
 
 class BridgeAdminI : public BridgeAdmin
@@ -191,7 +197,7 @@ ServiceI::start(const string& name, const Ice::CommunicatorPtr& communicator, co
     {
         Ice::Warning warning(communicator->getLogger());
         warning << "the property `" << name << ".FIXConfig' is not set";
-        throw "IceGrid deployment is uncorrect";
+        throw IceBox::FailureException(__FILE__, __LINE__, "IceFIX service configuration is uncorrect");
     }
     _impl = new ServiceImpl(fixConfig, bridge);
 
@@ -203,21 +209,24 @@ ServiceI::start(const string& name, const Ice::CommunicatorPtr& communicator, co
     {
         Ice::Warning warning(communicator->getLogger());
         warning << "one FIX session must be defined";
-        throw "IceGrid deployment is uncorrect";
+        throw IceBox::FailureException(__FILE__, __LINE__, "IceFIX service configuration is uncorrect");
     }
+
     FIX::SessionID sessionID = *sessions.begin();
     if(_impl->settings.get(sessionID).getString( "ConnectionType" ) != "initiator" )
     {
         Ice::Warning warning(communicator->getLogger());
         warning << "the session must be an initiator";
-        throw "IceGrid deployment is uncorrect";
+        throw IceBox::FailureException(__FILE__, __LINE__, "IceFIX service configuration is uncorrect");
     }
 
     _impl->adapter = communicator->createObjectAdapter(name + ".Bridge");
     _impl->adapter->addServantLocator(new ExecutorLocatorI(new ExecutorI(communicator, dbenv, sessionID)),
                                       instanceName + "-Executor");
-    _impl->adapter->add(new BridgeI(bridge), communicator->stringToIdentity(instanceName + "/Bridge"));
-    _impl->adapter->add(new BridgeAdminI(bridge), communicator->stringToIdentity(instanceName + "/Admin"));
+    IceFIX::BridgeAdminPrx adminPrx = IceFIX::BridgeAdminPrx::uncheckedCast(
+        _impl->adapter->createProxy(communicator->stringToIdentity(instanceName + "/Admin")));
+    _impl->adapter->add(new BridgeI(bridge, adminPrx), communicator->stringToIdentity(instanceName + "/Bridge"));
+    _impl->adapter->add(new BridgeAdminI(bridge), adminPrx->ice_getIdentity());
     _impl->adapter->activate();
 }
 

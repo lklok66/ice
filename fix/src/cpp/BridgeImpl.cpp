@@ -953,7 +953,7 @@ BridgeImpl::fromApp(const FIX::Message& message, const FIX::SessionID& session) 
                 }
             }
 
-            if(msgTypeValue == "j")
+            if(msgTypeValue == "j" || msgTypeValue == "3")
             {
                 try
                 {

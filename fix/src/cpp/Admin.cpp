@@ -109,10 +109,15 @@ Client::run(int argc, char* argv[])
     {
         IceGrid::LocatorPrx loc = IceGrid::LocatorPrx::uncheckedCast(locator);
         IceGrid::QueryPrx query = loc->getLocalQuery();
-        Ice::ObjectProxySeq a = query->findAllObjectsByType(IceFIX::BridgeAdmin::ice_staticId());
+        Ice::ObjectProxySeq a = query->findAllObjectsByType(IceFIX::Bridge::ice_staticId());
         for(Ice::ObjectProxySeq::const_iterator p = a.begin(); p != a.end(); ++p)
         {
-            admins.push_back(make_pair((*p)->ice_getIdentity().category, IceFIX::BridgeAdminPrx::uncheckedCast(*p)));
+            // Don't use the getAdmin() call, as this requires the
+            // bridge to be running.
+            Ice::Identity id = (*p)->ice_getIdentity();
+            id.name = "Admin";
+            IceFIX::BridgeAdminPrx admin = IceFIX::BridgeAdminPrx::uncheckedCast((*p)->ice_identity(id));
+            admins.push_back(make_pair((*p)->ice_getIdentity().category, admin));
         }
     }
     else

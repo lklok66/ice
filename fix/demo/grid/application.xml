@@ -26,7 +26,6 @@
 		 id="${instance-name}.Bridge" 
 		 endpoints="${bridge-endpoints}">
           <object identity="${instance-name}/Bridge" type="::IceFIX::Bridge"/>
-          <object identity="${instance-name}/Admin" type="::IceFIX::BridgeAdmin"/>
 	</adapter>
 
         <properties>

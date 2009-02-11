@@ -178,6 +178,15 @@ interface Bridge
 {
     /**
      *
+     * Retrieve the bridge admin.
+     *
+     * @return A proxy to the bridge admin.
+     *
+     **/
+    BridgeAdmin* getAdmin();
+
+    /**
+     *
      * Connect a client with the given id.
      *
      * @param id The client id.

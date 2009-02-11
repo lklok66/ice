@@ -123,23 +123,16 @@ IceFIXClient::run(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    map<string, IceFIX::BridgeAdminPrx > admins;
     map<string, IceFIX::BridgePrx > bridges;
 
     IceGrid::LocatorPrx loc = IceGrid::LocatorPrx::uncheckedCast(locator);
     IceGrid::QueryPrx query = loc->getLocalQuery();
-    Ice::ObjectProxySeq a = query->findAllObjectsByType(IceFIX::BridgeAdmin::ice_staticId());
-    for(Ice::ObjectProxySeq::const_iterator p = a.begin(); p != a.end(); ++p)
-    {
-	admins.insert(make_pair((*p)->ice_getIdentity().category, IceFIX::BridgeAdminPrx::uncheckedCast(*p)));
-    }
-
-    a = query->findAllObjectsByType(IceFIX::Bridge::ice_staticId());
+    Ice::ObjectProxySeq a = query->findAllObjectsByType(IceFIX::Bridge::ice_staticId());
     for(Ice::ObjectProxySeq::const_iterator p = a.begin(); p != a.end(); ++p)
     {
 	bridges.insert(make_pair((*p)->ice_getIdentity().category, IceFIX::BridgePrx::uncheckedCast(*p)));
     }
-    if(bridges.empty() || admins.empty())
+    if(bridges.empty())
     {
     	cerr << argv[0] << ": cannot locate any bridges or admins" << endl;
 	return EXIT_FAILURE;
@@ -161,15 +154,10 @@ IceFIXClient::run(int argc, char* argv[])
 	    try
 	    {
 		cout << " not registered, registering..." << flush;
-		map<string, IceFIX::BridgeAdminPrx>::const_iterator q = admins.find(p->first);
-		if(q == admins.end())
-		{
-		    cerr << argv[0] << ": cannot locate BridgeAdmin for " << p->first << endl;
-		    return EXIT_FAILURE;
-		}
+		IceFIX::BridgeAdminPrx admin = p->second->getAdmin();
 		IceFIX::QoS qos;
 		qos["filtered"] = filtered;
-		q->second->registerWithId(id, qos);
+		admin->registerWithId(id, qos);
 
 		IceFIX::ExecutorPrx executor;
 		p->second->connect(id, reporter, executor);
