@@ -1,5 +1,8 @@
 Changes since first release to QIM (Feb 5th, 2009)
 
+- Added Bridge::getAdmin() to get the administrative object associated
+  with the bridge.
+
 - The IceFIX now correctly reverse routes "Reject" messages.
 
 - Removed property IceFix.Data. To set the database location, the
