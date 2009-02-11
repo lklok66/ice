@@ -87,46 +87,82 @@ public class Client
                 }
             }
 
-	    IceFIX.BridgePrx bridge =
-            IceFIX.BridgePrxHelper.uncheckedCast(communicator().propertyToProxy("Bridge"));
-	    if(bridge == null)
-	    {
-                Console.Error.WriteLine(appName() + ": invalid proxy");
+            Ice.LocatorPrx locator = communicator().getDefaultLocator();
+            if(locator == null)
+            {
+                Console.Error.WriteLine(appName() + ": no locator configured");
 		return 1;
-	    }
+            }
+
+            Dictionary<string, IceFIX.BridgePrx> bridges = new Dictionary<string, IceFIX.BridgePrx>();
+
+            IceGrid.LocatorPrx loc = IceGrid.LocatorPrxHelper.uncheckedCast(locator);
+            IceGrid.QueryPrx query = loc.getLocalQuery();
+            Ice.ObjectPrx[] a = query.findAllObjectsByType(IceFIX.BridgeDisp_.ice_staticId());
+            for(i = 0; i < a.Length; ++i)
+            {
+                bridges[a[i].ice_getIdentity().category] = IceFIX.BridgePrxHelper.uncheckedCast(a[i]);
+            }
+            if(bridges.Count == 0)
+            {
+                Console.Error.WriteLine(appName() + ": cannot locate any bridges or admins");
+                return 1;
+            }
 
 	    Ice.ObjectAdapter adapter = communicator().createObjectAdapter("Client");
 	    IceFIX.ReporterPrx reporter = IceFIX.ReporterPrxHelper.uncheckedCast(adapter.addWithUUID(new ReporterI()));
-	    try
-	    {
-		bridge.connect(id, reporter, out _executor);
-	    }
-	    catch(IceFIX.RegistrationException)
-	    {
-		try
-		{
-                    IceFIX.BridgeAdminPrx admin = bridge.getAdmin();
-                    Dictionary<string, string> qos = new Dictionary<string, string>();
-		    qos["filtered"] = filtered;
-		    admin.registerWithId(id, qos);
-		    bridge.connect(id, reporter, out _executor);
-		}
-		catch(IceFIX.RegistrationException ex)
-		{
-		    Console.Error.WriteLine(appName() + ": registration failed: `" + ex.reason + "'");
-		    return 1;
-		}
-	    }
+            foreach(KeyValuePair<string, IceFIX.BridgePrx> p in bridges)
+            {
+                Console.Write("connecting with `" + p.Key + "'...");
+                Console.Out.Flush();
+	        try
+	        {
+                    IceFIX.ExecutorPrx executor;
+                    p.Value.connect(id, reporter, out executor);
+                    _executors[p.Key] = executor;
+	        }
+	        catch(IceFIX.RegistrationException)
+	        {
+	    	    try
+		    {
+                        Console.Write(" not registered, registering...");
+                        Console.Out.Flush();
+                        IceFIX.BridgeAdminPrx admin = p.Value.getAdmin();
+                        Dictionary<string, string> qos = new Dictionary<string, string>();
+		        qos["filtered"] = filtered;
+		        admin.registerWithId(id, qos);
+
+                        IceFIX.ExecutorPrx executor;
+                        p.Value.connect(id, reporter, out executor);
+                        _executors[p.Key] = executor;
+		    }
+		    catch(IceFIX.RegistrationException ex)
+		    {
+		        Console.Error.WriteLine(appName() + ": registration with  `" + p.Key + "' failed: `" +
+                                                ex.reason + "'");
+		        return 1;
+		    }
+	        }
+            }
 	    adapter.activate();
 
             menu();
+
+            string bridge = null;
+            IceFIX.ExecutorPrx currentExecutor = null;
+            foreach(KeyValuePair<string, IceFIX.ExecutorPrx> p in _executors)
+            {
+                bridge = p.Key;
+                currentExecutor = p.Value;
+                break;
+            }
 
             string line = null;
             do 
             {
                 try
                 {
-                    Console.Out.Write("==> ");
+                    Console.Out.Write(bridge + " ==> ");
                     Console.Out.Flush();
                     line = Console.In.ReadLine();
                     if(line == null)
@@ -151,7 +187,7 @@ public class Client
                         }
                         req.set( new TimeInForce( TimeInForce.DAY ));
                         
-                        if(send(req))
+                        if(send(currentExecutor, req))
                         {
                             Console.Out.WriteLine("submitted order: `" + clOrdID + "'");
                         }
@@ -178,7 +214,7 @@ public class Client
                             new Side( Side.BUY ),
                             new TransactTime());
 
-                        if(send(req))
+                        if(send(currentExecutor, req))
                         {
                             Console.Out.WriteLine("submitted cancel order: `" + clOrdID + "'");
                         }
@@ -211,7 +247,7 @@ public class Client
                         req.set( new OrderQty( 50 ));
                         req.set( new TimeInForce( TimeInForce.DAY ));
                         
-                        if(send(req))
+                        if(send(currentExecutor, req))
                         {
                             Console.Out.WriteLine("submitted cancel replace order: `" + ClOrdID + "'");
                         }
@@ -236,8 +272,33 @@ public class Client
                             new Symbol( "AAPL"),
                             new Side( Side.BUY ));
 
-                        send(req);
+                        send(currentExecutor, req);
 		    }
+                    else if(line.Equals("s"))
+                    {
+                        Console.Write("bridge:");
+                        string newid;
+                        newid = Console.In.ReadLine();
+                        if(line == null)
+                        {
+                            break;
+                        }
+                        if(line.Length == 0)
+                        {
+                            Console.WriteLine("invalid");
+                            continue;
+                        }
+                        try
+                        {
+                            currentExecutor = _executors[id];
+                        }
+                        catch(KeyNotFoundException)
+                        {
+                            Console.WriteLine("cannot locate");
+                            continue;
+                        }
+                        bridge = newid;
+                    }
                     else if(line.Equals("x"))
                     {
                         // Nothing to do
@@ -259,23 +320,26 @@ public class Client
             }
             while (!line.Equals("x"));
 
-	    try
-	    {
-		_executor.destroy();
-	    }
-	    catch(Ice.Exception ex)
-	    {
-		Console.Error.WriteLine("error when destroying excecutor: " + ex);
-	    }
+            foreach(KeyValuePair<string, IceFIX.ExecutorPrx> p in _executors)
+            {
+	        try
+	        {
+	    	    p.Value.destroy();
+	        }
+	        catch(Ice.Exception ex)
+	        {
+		    Console.Error.WriteLine("error when destroying excecutor `" + p.Key + "': " + ex);
+	        }
+            }
             
             return 0;
         }
 
-        private bool send(Message msg)
+        private bool send(IceFIX.ExecutorPrx executor, Message msg)
         {
             try
             {
-                _executor.execute(msg.ToString());
+                executor.execute(msg.ToString());
             }
             catch(IceFIX.ExecuteException e)
             {
@@ -285,7 +349,7 @@ public class Client
             return true;
         }
 
-        private IceFIX.ExecutorPrx _executor;
+        private Dictionary<string, IceFIX.ExecutorPrx> _executors = new Dictionary<string, IceFIX.ExecutorPrx>();
     }
 
     public static void Main(string[] args)
