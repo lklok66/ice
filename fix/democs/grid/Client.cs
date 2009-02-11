@@ -30,7 +30,7 @@ public class Client
 	}
     };
 
-    public class App : Ice.Application
+    public class IceFIXClient : Ice.Application
     {
         private static void menu()
         {
@@ -41,6 +41,7 @@ public class Client
                 "r: submit cancel replace\n" +
                 "t: status inquiry\n" +
                 "b: submit bad order\n" +
+                "s: switch bridges\n" +
                 "x: exit\n" +
                 "?: help\n");
         }
@@ -48,6 +49,11 @@ public class Client
         private static void usage()
         {
             Console.WriteLine("Usage: " + appName() + " [--filtered true|false] [--id id]");
+        }
+
+        public IceFIXClient() :
+            base(Ice.SignalPolicy.NoSignalHandling)
+        {
         }
 
         public override int run(string[] args)
@@ -143,6 +149,7 @@ public class Client
 		        return 1;
 		    }
 	        }
+                Console.WriteLine(" ok");
             }
 	    adapter.activate();
 
@@ -290,7 +297,7 @@ public class Client
                         }
                         try
                         {
-                            currentExecutor = _executors[id];
+                            currentExecutor = _executors[newid];
                         }
                         catch(KeyNotFoundException)
                         {
@@ -354,7 +361,7 @@ public class Client
 
     public static void Main(string[] args)
     {
-        App app = new App();
+        IceFIXClient app = new IceFIXClient();
         int status = app.main(args, "config.client");
         if(status != 0)
         {
