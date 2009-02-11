@@ -123,14 +123,6 @@ IceFIXClient::run(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    IceFIX::BridgeAdminPrx admin =
-    IceFIX::BridgeAdminPrx::uncheckedCast(communicator()->propertyToProxy("BridgeAdmin"));
-    if(!admin)
-    {
-        cerr << argv[0] << ": invalid proxy" << endl;
-        return EXIT_FAILURE;
-    }
-
     Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapter("Client");
     IceFIX::ReporterPrx reporter = IceFIX::ReporterPrx::uncheckedCast(adapter->addWithUUID(new ReporterI()));
     try
@@ -141,6 +133,7 @@ IceFIXClient::run(int argc, char* argv[])
     {
         try
         {
+            IceFIX::BridgeAdminPrx admin = bridge->getAdmin();
             IceFIX::QoS qos;
             qos["filtered"] = filtered;
             admin->registerWithId(id, qos);
