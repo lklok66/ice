@@ -32,6 +32,11 @@ $(CLIENT): $(OBJS) $(POBJS)
 	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#1 && del /q $@.manifest
 
 clean::
-	-for %f in (db\*) do if not %f == db\.gitignore del /q %f
+	-for %f in (db\registry\*) do if not %f == db\registry\.gitignore del /q %f
+	-for %f in (distrib servers tmp) do if exist db\node\%f rmdir /s /q db\node\%f
+	-for %f in (db-tp1\*) do if not %f == db-tp1\.gitignore del /q %f
+	-for %f in (store-tp1\*) do if not %f == store-tp1\.gitignore del /q %f
+	-for %f in (db-tp2\*) do if not %f == db-tp2\.gitignore del /q %f
+	-for %f in (store-tp2\*) do if not %f == store-tp2\.gitignore del /q %f
 
 !include .depend

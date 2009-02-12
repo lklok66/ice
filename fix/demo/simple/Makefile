@@ -26,4 +26,7 @@ $(CLIENT): $(OBJS) $(COBJS)
 	rm -f $@
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(COBJS) $(LIBS)
 
+clean::
+	-rm -rf db/* store/*
+
 include .depend

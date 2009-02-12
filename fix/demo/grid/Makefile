@@ -26,4 +26,9 @@ $(CLIENT): $(OBJS) $(COBJS)
 	rm -f $@
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(COBJS) $(LIBS)
 
+clean::
+	-rm -rf db/node/* db/registry/*
+	-rm -rf db-tp1/* store-tp1/*
+	-rm -rf db-tp2/* store-tp2/*
+
 include .depend
