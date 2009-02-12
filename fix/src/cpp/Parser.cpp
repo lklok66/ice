@@ -39,11 +39,11 @@ Parser::usage()
     cout <<
         "help                     Print this message.\n"
         "exit, quit               Exit this program.\n"
-        "activate                 Activate the bridge.\n"
-        "deactivate               Deactivate the bridge.\n"
-        "status                   Report the bridge status.\n"
-        "list                     List the connected clients.\n"
-        "unregister ID            Unregister the given client.\n"
+        "activate [list]          Activate the listed bridges, or all by default.\n"
+        "deactivate [list]        Deactivate the listed bridges, or all by default.\n"
+        "status [list]            Report the status for the listed bridges, or all by default.\n"
+        "list [list]              List the connected clients for the listed bridges, or all by default.\n"
+        "unregister [bridge] ID   Unregister the given client from the listed bridge, or all by default.\n"
         ;
 }
 
