@@ -99,6 +99,8 @@ else
    include $(top_srcdir)/../cpp/config/Make.rules.$(UNAME)
 endif 
 
+shlibldflags	:= -L$(libdir) $(shlibldflags)
+
 install_includedir	:= $(prefix)/include
 install_docdir		:= $(prefix)/doc
 install_bindir	  	:= $(prefix)/$(binsubdir)
