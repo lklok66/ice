@@ -42,6 +42,9 @@ Parser::usage()
         "activate [list]          Activate the listed bridges, or all by default.\n"
         "deactivate [list]        Deactivate the listed bridges, or all by default.\n"
         "status [list]            Report the status for the listed bridges, or all by default.\n"
+        "clean timeout [list]     Clean the database of all records older than timeout for the listed bridges, or all by default.\n"
+        "dbstat [list]            Report the status of the databases for the listed bridges, or all by default.\n"
+        "status [list]            Report the status for the listed bridges, or all by default.\n"
         "list [list]              List the connected clients for the listed bridges, or all by default.\n"
         "unregister [bridge] ID   Unregister the given client from the listed bridge, or all by default.\n"
         ;
@@ -118,6 +121,145 @@ Parser::status(const std::list<string>& args)
         catch(const Ice::Exception& ex)
         {
             cerr << "  status: " << ex << endl;
+        }
+    }
+}
+
+static long
+parseTimeout(const string& timeout)
+{
+    int days = 0;
+    int hours = 0;
+    int minutes = 0;
+    int seconds = 0;
+
+    int state = 0;
+    string::size_type pos = 0;
+    while(pos < timeout.size() && state < 4)
+    {
+        string num;
+        while(pos < timeout.size() && isdigit(timeout[pos]))
+        {
+            num += timeout[pos];
+            ++pos;
+        }
+        int n = atoi(num.c_str());
+
+        char qual = 0;
+        if(pos < timeout.size())
+        {
+            qual = timeout[pos];
+            ++pos;
+            while(pos < timeout.size() && isspace(timeout[pos]))
+            {
+                ++pos;
+            }
+        }
+
+        switch(state)
+        {
+        case 0: // d
+            if(qual == 'd')
+            {
+                days = n;
+                break;
+            }
+            else
+            {
+                state = 1;
+                // fall through
+            }
+
+        case 1:
+            hours = n;
+            break;
+
+        case 2:
+            minutes = n;
+            break;
+
+        case 3:
+            seconds = n;
+            break;
+        }
+
+        if((qual == 'd' && state == 0) || qual == ':')
+        {
+            ++state;
+        }
+        else if(qual == 0)
+        {
+            break;
+        }
+        else
+        {
+            return 0; // Invalid
+        }
+    }
+
+    return seconds + (minutes * 60) + (hours * 60 * 60) + (days * 24 * 60 * 60);
+}
+
+void
+Parser::clean(bool commit, const std::list<string>& _args)
+{
+    std::list<string> args = _args;
+    if(args.empty())
+    {
+        error("`clean' requires at least one argument (type `help' for more info)");
+        return;
+    }
+
+    int timeout = parseTimeout(args.front());
+    args.pop_front();
+    cout << "timeout " << timeout << endl;
+    if(timeout == 0)
+    {
+        error("`timeout' is either zero, or invalid. timeout format is [nd]hh[:mm[:ss]]");
+        return;
+    }
+
+    for(vector<pair<string, IceFIX::BridgeAdminPrx> >::const_iterator p = _admin.begin(); p != _admin.end(); ++p)
+    {
+        try
+        {
+            if(args.size() == 0 || find(args.begin(), args.end(), p->first) != args.end())
+            {
+                cout << p->first << endl;
+                int erased = p->second->clean(timeout, commit);
+                if(commit)
+                {
+                    cout << erased << " records were erased." << endl;
+                }
+                else
+                {
+                    cout << erased << " records would be erased." << endl;
+                }
+            }
+        }
+        catch(const Ice::Exception& ex)
+        {
+            cerr << "  clean: " << ex << endl;
+        }
+    }
+}
+
+void
+Parser::dbstat(const std::list<string>& args)
+{
+    for(vector<pair<string, IceFIX::BridgeAdminPrx> >::const_iterator p = _admin.begin(); p != _admin.end(); ++p)
+    {
+        try
+        {
+            if(args.size() == 0 || find(args.begin(), args.end(), p->first) != args.end())
+            {
+                cout << p->first << endl;
+                cout << p->second->dbstat();
+            }
+        }
+        catch(const Ice::Exception& ex)
+        {
+            cerr << "  dbstat: " << ex << endl;
         }
     }
 }

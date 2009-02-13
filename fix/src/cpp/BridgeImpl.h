@@ -39,7 +39,8 @@ public:
     void connect(const std::string&, const ReporterPrx&, ExecutorPrx&, const Ice::Current&);
     void activate(const Ice::Current&);
     void deactivate(const Ice::Current&);
-    void clean(Ice::Long, const Ice::Current&);
+    Ice::Long clean(Ice::Long, bool, const Ice::Current&);
+    std::string dbstat(const Ice::Current&);
     BridgeStatus getStatus(const Ice::Current&);
     ClientInfoSeq getClients(const Ice::Current&);
 

@@ -1,5 +1,6 @@
 %{
 
+    
 // **********************************************************************
 //
 // Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
@@ -44,6 +45,9 @@ yyerror(const char* s)
 %token ICEFIX_DEACTIVATE
 %token ICEFIX_LIST
 %token ICEFIX_STATUS
+%token ICEFIX_CLEAN
+%token ICEFIX_TESTCLEAN
+%token ICEFIX_DBSTAT
 %token ICEFIX_UNREGISTER
 %token ICEFIX_STRING
 
@@ -97,6 +101,18 @@ command
 | ICEFIX_STATUS strings ';'
 {
     parser->status($2);
+}
+| ICEFIX_CLEAN strings ';'
+{
+    parser->clean(true, $2);
+}
+| ICEFIX_TESTCLEAN strings ';'
+{
+    parser->clean(false, $2);
+}
+| ICEFIX_DBSTAT strings ';'
+{
+    parser->dbstat($2);
 }
 | ICEFIX_UNREGISTER strings ';'
 {

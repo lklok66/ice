@@ -3,3 +3,8 @@ Demos in this directory:
 - simple
 
   A simple client for IceFIX.
+
+- grid
+
+  A demo that shows how to manage multiple IceFIX bridges with
+  IceGrid.

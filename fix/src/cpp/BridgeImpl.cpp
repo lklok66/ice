@@ -424,10 +424,111 @@ BridgeImpl::deactivate(const Ice::Current&)
     }
 }
 
-void
-BridgeImpl::clean(Ice::Long timeout, const Ice::Current&)
+Ice::Long
+BridgeImpl::clean(Ice::Long t, bool commit, const Ice::Current&)
 {
-    // TODO: Implement
+    IceUtil::Time timeout = IceUtil::Time::seconds(t);
+
+    long before;
+    long after;
+
+    IceUtil::Time start = IceUtil::Time::now();
+
+    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _name);
+    RoutingRecordDB clordidDB(connection, clordIdDBName);
+    RoutingRecordDB seqnumDB(connection, seqnumDBName);
+    for(;;)
+    {
+        try
+        {
+            Freeze::TransactionHolder txn(connection);
+
+            before = clordidDB.size() + seqnumDB.size();
+            RoutingRecordDB::iterator p = clordidDB.begin();
+            while(p != clordidDB.end())
+            {
+                if(start - IceUtil::Time::seconds(p->second.timestamp) > timeout)
+                {
+                    RoutingRecordDB::iterator tmp = p;
+                    ++p;
+                    clordidDB.erase(tmp);
+                }
+                else
+                {
+                    ++p;
+                }
+            }
+            p = seqnumDB.begin();
+            while(p != seqnumDB.end())
+            {
+                if(start - IceUtil::Time::seconds(p->second.timestamp) > timeout)
+                {
+                    RoutingRecordDB::iterator tmp = p;
+                    ++p;
+                    seqnumDB.erase(tmp);
+                }
+                else
+                {
+                    ++p;
+                }
+            }
+            after = clordidDB.size() + seqnumDB.size();
+            if(commit)
+            {
+                txn.commit();
+            }
+            break;
+        }
+        catch(const Freeze::DeadlockException&)
+        {
+            continue;
+        }
+        catch(const Freeze::DatabaseException& ex)
+        {
+            halt(ex);
+        }
+    }
+
+    if(_trace > 0)
+    {
+        Ice::Trace trace(_communicator->getLogger(), "Bridge");
+        trace << "clean: removed " << (before-after) << " records out of " << before;
+    }
+    return before - after;
+}
+
+string
+BridgeImpl::dbstat(const Ice::Current&)
+{
+    ostringstream os;
+
+    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _name);
+    RoutingRecordDB clordidDB(connection, clordIdDBName);
+    RoutingRecordDB seqnumDB(connection, seqnumDBName);
+    ClientDB clientDB(connection, clientDBName);
+    MessageDB messageDB(connection, messageDBName);
+    for(;;)
+    {
+        try
+        {
+            Freeze::TransactionHolder txn(connection);
+
+            os.clear();
+            os << "client database has " << clientDB.size() << " records" << endl;
+            os << "routing databases have " << clordidDB.size() + seqnumDB.size() << " records" << endl;
+            os << "message databases has " << messageDB.size() << " records" << endl;
+            break;
+        }
+        catch(const Freeze::DeadlockException&)
+        {
+            continue;
+        }
+        catch(const Freeze::DatabaseException& ex)
+        {
+            halt(ex);
+        }
+    }
+    return os.str();
 }
 
 BridgeStatus

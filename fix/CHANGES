@@ -1,9 +1,19 @@
+Changes since second release to QIM (Feb 12th, 2009)
+
+- Implemented Bridge::clean.
+
+- Changed signature of Bridge::clean to return the number of records
+  erased (or would be erased), and take a boolean argument which
+  indicates whether the records are actually erased.
+
+- Added new icefixadmin command clean and testclean.
+
 Changes since first release to QIM (Feb 5th, 2009)
 
 - Added Bridge::getAdmin() to get the administrative object associated
   with the bridge.
 
-- The IceFIX now correctly reverse routes "Reject" messages.
+- The IceFIX bridge now correctly reverse routes "Reject" messages.
 
 - Removed property IceFix.Data. To set the database location, the
   standard Freeze property "Freeze.DbEnv.<service-name>.DbHome"

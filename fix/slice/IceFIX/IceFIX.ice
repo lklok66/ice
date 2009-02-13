@@ -107,8 +107,21 @@ interface BridgeAdmin
      *
      * @param timeout The timeout in seconds.
      *
+     * @param commit true if the records should be erased, false
+     * otherwise.
+     *
+     * @return The number of records erase, or if commit is false the
+     * number of records that would be erased.
+     *
      */
-    void clean(long timeout);
+    long clean(long timeout, bool commit);
+
+    /**
+     *
+     * Return some stats about the bridge database.
+     *
+     */
+    string dbstat();
 
     /**
      *

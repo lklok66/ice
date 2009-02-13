@@ -121,10 +121,16 @@ public:
         _bridge->deactivate(current);
     }
 
-    virtual void
-    clean(Ice::Long l, const Ice::Current& current)
+    virtual Ice::Long
+    clean(Ice::Long l, bool commit, const Ice::Current& current)
     {
-        _bridge->clean(l, current);
+        return _bridge->clean(l, commit, current);
+    }
+
+    virtual string
+    dbstat(const Ice::Current& current)
+    {
+        return _bridge->dbstat(current);
     }
 
     virtual BridgeStatus
