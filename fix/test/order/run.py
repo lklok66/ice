@@ -27,6 +27,11 @@ TestUtil.addLdPath(os.path.join(toplevel, "fix", "lib"))
 name = os.path.join("order")
 testdir = os.path.dirname(os.path.abspath(__file__))
 
+# Clean the store.
+storedir = os.path.join(testdir, "store")
+for filename in [ os.path.join(storedir, f) for f in os.listdir(storedir) if f != ".gitignore" ]:
+    os.remove(filename)
+
 #
 # Test client/server with on demand activation.
 #

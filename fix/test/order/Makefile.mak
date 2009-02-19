@@ -61,7 +61,6 @@ clean::
         -if exist db\node rmdir /s /q db\node
         -if exist db\registry rmdir /s /q db\registry
         -if exist db\replica-1 rmdir /s /q db\replica-1
-	-for %f in (store-tp1\*) do if not %f == store-tp1\.gitignore del /q %f
-	-for %f in (store-tp2\*) do if not %f == store-tp2\.gitignore del /q %f
+	-for %f in (store\*) do if not %f == store\.gitignore del /q %f
 
 !include .depend

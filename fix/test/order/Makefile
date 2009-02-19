@@ -37,8 +37,6 @@ $(SERVER): $(SOBJS)
 	$(CXX) $(LDFLAGS) -o $@ $(SOBJS) $(LIBS)
 
 clean::
-	-rm -rf db/node/* db/registry/*
-	-rm -rf db-tp1/* store-tp1/*
-	-rm -rf db-tp2/* store-tp2/*
+	-rm -rf db/node/* db/registry/* store/*
 
 include .depend
