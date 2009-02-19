@@ -469,7 +469,7 @@ IceFIXClient::run(int argc, char* argv[])
     // TEST: clean
     cout << "testing clean... " << flush;
     {
-        long count = tp1Admin->clean(60*60, true);
+        Ice::Long count = tp1Admin->clean(60*60, true);
         test(count == 0);
         count = tp2Admin->clean(60*60, true);
         test(count == 0);

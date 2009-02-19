@@ -30,5 +30,5 @@ testdir = os.path.dirname(os.path.abspath(__file__))
 #
 # Test client/server with on demand activation.
 #
-IceGridAdmin.iceGridTest(testdir, name, "application.xml")
+IceGridAdmin.iceGridTest(testdir, name, "application.xml", "", "icebox.exe=" + TestUtil.getIceBox(testdir))
 sys.exit(0)

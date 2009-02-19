@@ -316,11 +316,11 @@ private:
               const FIX::SenderCompID& senderCompID, const FIX::TargetCompID& targetCompID)
     {
         // Fill in a number of 100 share fills.
-        int open = orderQty;
-        int cum = 0;
+        double open = orderQty;
+        double cum = 0;
         while(open > 0)
         {
-            int fill = 100;
+            double fill = 100;
             if(fill > open)
             {
                 fill = open;
@@ -337,7 +337,7 @@ private:
                 status = FIX::OrdStatus_FILLED;
             }
                
-            FIX42::ExecutionReport report(
+            FIX42::ExecutionReport report = FIX42::ExecutionReport(
                 FIX::OrderID(clOrdID),
                 FIX::ExecID(nextExecId()),
                 FIX::ExecTransType(FIX::ExecTransType_NEW),

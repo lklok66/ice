@@ -226,7 +226,7 @@ Parser::clean(bool commit, const std::list<string>& _args)
             if(args.size() == 0 || find(args.begin(), args.end(), p->first) != args.end())
             {
                 cout << p->first << endl;
-                int erased = p->second->clean(timeout, commit);
+                Ice::Long erased = p->second->clean(timeout, commit);
                 if(commit)
                 {
                     cout << erased << " records were erased." << endl;
