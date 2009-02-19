@@ -598,7 +598,7 @@ def getIceBox(testdir):
     # Get and return the path of the IceBox executable
     #
     lang = getDefaultMapping()
-    if lang == "cpp":
+    if lang == "cpp" or lang == "fix":
         iceBox = ""
         if isWin32():
             #
@@ -685,6 +685,7 @@ sslConfigTree = {
 sslConfigTree["py"] = sslConfigTree["cpp"]
 sslConfigTree["rb"] = sslConfigTree["cpp"]
 sslConfigTree["php"] = sslConfigTree["cpp"]
+sslConfigTree["fix"] = sslConfigTree["cpp"]
 
 def getDefaultMapping(currentDir = ""):
     """Try and guess the language mapping out of the current path"""
@@ -694,19 +695,19 @@ def getDefaultMapping(currentDir = ""):
         scriptPath = os.path.abspath(currentDir).split(os.sep)
         scriptPath.reverse()
         for p in scriptPath: 
-            if p in ["cpp", "cs", "java", "php", "py", "rb", "tmp"]:
+            if p in ["fix", "cpp", "cs", "java", "php", "py", "rb", "tmp"]:
                 return p
 
     scriptPath = os.path.abspath(sys.argv[0]).split(os.sep)
     scriptPath.reverse()
     for p in scriptPath: 
-        if p in ["cpp", "cs", "java", "php", "py", "rb", "tmp"]:
+        if p in ["fix", "cpp", "cs", "java", "php", "py", "rb", "tmp"]:
             return p
 
     scriptPath = os.path.abspath(os.getcwd()).split(os.sep)
     scriptPath.reverse()
     for p in scriptPath: 
-        if p in ["cpp", "cs", "java", "php", "py", "rb", "tmp"]:
+        if p in ["fix", "cpp", "cs", "java", "php", "py", "rb", "tmp"]:
             return p
 
     #  Default to C++
@@ -945,7 +946,7 @@ def runTests(start, expanded, num = 0, script = False):
 
 def getDefaultServerFile():
     lang = getDefaultMapping()
-    if lang in ["rb", "php", "cpp", "cs"]:
+    if lang in ["rb", "php", "fix", "cpp", "cs"]:
         return "server"
     if lang == "py":
         return "Server.py"
@@ -958,7 +959,7 @@ def getDefaultClientFile():
         return "Client.rb"
     if lang == "php":
         return "Client.php"
-    if lang in ["cpp", "cs"]:
+    if lang in ["fix", "cpp", "cs"]:
         return "client"
     if lang == "py":
         return "Client.py"
@@ -971,7 +972,7 @@ def getDefaultCollocatedFile():
         return "Collocated.rb"
     if lang == "php":
         return "Collocated.php"
-    if lang in ["cpp", "cs"]:
+    if lang in ["fix", "cpp", "cs"]:
         return "collocated"
     if lang == "py":
         return "Collocated.py"
