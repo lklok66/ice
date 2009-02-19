@@ -21,7 +21,7 @@ ExecutorI::ExecutorI(const Ice::CommunicatorPtr& communicator, const string& nam
 {
 }
 
-void
+int
 ExecutorI::execute(const string& data, const Ice::Current& current)
 {
     FIX::Message message(data);
@@ -54,7 +54,7 @@ ExecutorI::execute(const string& data, const Ice::Current& current)
                     if(p->second.id != current.id.name)
                     {
                         Ice::Warning warning(_communicator->getLogger());
-                        warning << "OrderStatusRequest: OrderStatusRequest are limited to originating client";
+                        warning << "OrderStatusRequest: OrderStatusRequest is limited to originating client";
                         throw ExecuteException("client mismatch in ClOrdID for OrderStatusRequest");
                     }
                 }
@@ -91,6 +91,11 @@ ExecutorI::execute(const string& data, const Ice::Current& current)
         throw ExecuteException("no session");
     }
     session->send(message);
+
+    FIX::MsgSeqNum seqNum;
+    message.getHeader().getField(seqNum);
+
+    return seqNum;
 }
 
 void

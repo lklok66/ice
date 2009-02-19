@@ -1,5 +1,16 @@
 Changes since second release to QIM (Feb 12th, 2009)
 
+- Added property validation, such that unknown IceFIX properties
+  generate an Ice logger warning.
+
+- Bridge properties are now correctly prefixed with the service name.
+
+- Added test suite.
+
+- Executor::execute now returns the sequence number of the sent FIX
+  message. This allows correlation of the FIX message to Reject or
+  BusinessRejectMessage.
+
 - Implemented Bridge::clean.
 
 - Changed signature of Bridge::clean to return the number of records
@@ -7,6 +18,16 @@ Changes since second release to QIM (Feb 12th, 2009)
   indicates whether the records are actually erased.
 
 - Added new icefixadmin command clean and testclean.
+
+- Stopped using the FIX::ScreenLogFactory. The bridge nows logs to the
+  Communicator Logger. Added three properties to control the logged
+  events. Each of these properties default to 0, meaning log no
+  information.
+
+    * IceFIX.Trace.Incoming: log incoming FIX messages.
+    * IceFIX.Trace.Outgoing: log outgoing FIX messages.
+    * IceFIX.Trace.Event: log FIX lifecycle events.
+
 
 Changes since first release to QIM (Feb 5th, 2009)
 

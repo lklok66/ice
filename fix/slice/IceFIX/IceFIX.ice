@@ -25,9 +25,11 @@ interface Executor
      *
      * @param data The FIX encoded message.
      *
+     * @return The sequence number of this message.
+     *
      * @raises ExecuteException if the message send failed.
      */
-    void execute(string data)
+    int execute(string data)
         throws ExecuteException;
 
     /**

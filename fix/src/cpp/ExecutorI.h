@@ -30,7 +30,7 @@ class ExecutorI : public IceFIX::Executor
 public:
 
     ExecutorI(const Ice::CommunicatorPtr&, const std::string&, const FIX::SessionID&);
-    virtual void execute(const std::string&, const ::Ice::Current&);
+    virtual int execute(const std::string&, const ::Ice::Current&);
     virtual void destroy(const ::Ice::Current&);
 
 private:

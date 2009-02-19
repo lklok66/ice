@@ -29,7 +29,8 @@ class BridgeImpl : public FIX::Application, public IceUtil::Shared, public IceUt
 {
 public:
 
-    BridgeImpl(const Ice::CommunicatorPtr& communicator, const std::string&, const std::string& name);
+    BridgeImpl(const std::string&, const Ice::CommunicatorPtr& communicator, const std::string&,
+               const std::string&);
 
     void stop();
     void setInitiator(FIX::Initiator*);
@@ -57,16 +58,17 @@ private:
     virtual void onLogout(const FIX::SessionID&);
     virtual void toAdmin(FIX::Message&, const FIX::SessionID&);
     virtual void toApp(FIX::Message& message, const FIX::SessionID&)
-        throw (FIX::DoNotSend);
+        throw(FIX::DoNotSend);
     virtual void fromAdmin(const FIX::Message&, const FIX::SessionID&)
-        throw (FIX::FieldNotFound, FIX::IncorrectDataFormat, FIX::IncorrectTagValue, FIX::RejectLogon);
-    virtual void
-    fromApp(const FIX::Message&, const FIX::SessionID&)
-        throw (FIX::FieldNotFound, FIX::IncorrectDataFormat, FIX::IncorrectTagValue, FIX::UnsupportedMessageType);
+        throw(FIX::FieldNotFound, FIX::IncorrectDataFormat, FIX::IncorrectTagValue, FIX::RejectLogon);
+    virtual void fromApp(const FIX::Message&, const FIX::SessionID&)
+        throw(FIX::FieldNotFound, FIX::IncorrectDataFormat, FIX::IncorrectTagValue, FIX::UnsupportedMessageType);
+    void route(const FIX::Message&);
 
+    const std::string _name;
     const Ice::CommunicatorPtr _communicator;
     const std::string _instanceName;
-    const std::string _name;
+    const std::string _dbenv;
     const DBCachePtr _dbCache;
     const int _trace;
     const IceUtil::TimerPtr _timer;

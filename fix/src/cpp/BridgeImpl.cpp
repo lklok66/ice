@@ -171,17 +171,19 @@ private:
 
 }
 
-BridgeImpl::BridgeImpl(const Ice::CommunicatorPtr& communicator, const string& instanceName, const string& name) :
+BridgeImpl::BridgeImpl(const string& name, const Ice::CommunicatorPtr& communicator, const string& instanceName,
+                       const string& dbenv) :
+    _name(name),
     _communicator(communicator),
     _instanceName(instanceName),
-    _name(name),
+    _dbenv(dbenv),
     _dbCache(new DBCache(communicator, name)),
-    _trace(communicator->getProperties()->getPropertyAsIntWithDefault("IceFIX.Trace", 0)),
+    _trace(communicator->getProperties()->getPropertyAsIntWithDefault(name + ".Trace", 0)),
     _timer(new IceUtil::Timer()),
     _retryInterval(IceUtil::Time::seconds(communicator->getProperties()->getPropertyAsIntWithDefault(
-                                              "IceFIX.RetryInterval", 60))),
+                                              name + ".RetryInterval", 60))),
     _forwardTimeout(communicator->getProperties()->getPropertyAsIntWithDefault(
-                        "IceFIX.RetryInterval", 60)/2 * 1000),
+                        name + ".RetryInterval", 60)/2 * 1000),
 
     _active(false),
     _session(0)
@@ -217,7 +219,7 @@ BridgeImpl::_cpp_register(const QoS& qos, const Ice::Current& current)
 {
     validateQoS(qos);
 
-    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _name);
+    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
     ClientDB clients(connection, clientDBName);
     string clientId = IceUtil::generateUUID();
 
@@ -256,7 +258,7 @@ BridgeImpl::registerWithId(const string& clientId, const QoS& qos, const Ice::Cu
 {
     validateQoS(qos);
 
-    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _name);
+    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
     ClientDB clients(connection, clientDBName);
     for(;;)
     {
@@ -297,7 +299,7 @@ BridgeImpl::registerWithId(const string& clientId, const QoS& qos, const Ice::Cu
 void
 BridgeImpl::unregister(const string& clientId, const Ice::Current& current)
 {
-    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _name);
+    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
     ClientDB clients(connection, clientDBName);
     for(;;)
     {
@@ -337,7 +339,7 @@ void
 BridgeImpl::connect(const string& clientId, const ReporterPrx& reporter, ExecutorPrx& executor,
                     const Ice::Current& current)
 {
-    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _name);
+    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
     ClientDB clients(connection, clientDBName);
     for(;;)
     {
@@ -434,7 +436,7 @@ BridgeImpl::clean(Ice::Long t, bool commit, const Ice::Current&)
 
     IceUtil::Time start = IceUtil::Time::now();
 
-    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _name);
+    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
     RoutingRecordDB clordidDB(connection, clordIdDBName);
     RoutingRecordDB seqnumDB(connection, seqnumDBName);
     for(;;)
@@ -502,7 +504,7 @@ BridgeImpl::dbstat(const Ice::Current&)
 {
     ostringstream os;
 
-    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _name);
+    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
     RoutingRecordDB clordidDB(connection, clordIdDBName);
     RoutingRecordDB seqnumDB(connection, seqnumDBName);
     ClientDB clientDB(connection, clientDBName);
@@ -557,7 +559,7 @@ BridgeImpl::getStatus(const Ice::Current&)
 ClientInfoSeq
 BridgeImpl::getClients(const Ice::Current&)
 {
-    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _name);
+    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
     ClientDB clients(connection, clientDBName);
     for(;;)
     {
@@ -600,7 +602,7 @@ BridgeImpl::send(int messageId)
     Message msg;
 
     // Gather the set of clients to which to forward the message.
-    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _name);
+    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
     MessageDB messageDB(connection, messageDBName);
     ClientDB clientsDB(connection, clientDBName);
     for(;;)
@@ -694,7 +696,7 @@ BridgeImpl::sendComplete(int messageId, const set<string>& routed)
     // Update the forwarded list, if necessary.
     if(routed.size() > 0)
     {
-        Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _name);
+        Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
         MessageDB messageDB(connection, messageDBName);
 
         for(;;)
@@ -755,7 +757,7 @@ BridgeImpl::clientError(const string& clientId, const ReporterPrx& reporter)
     // Firstly, when if the executor is destroyed, and
     // secondly if the bridge receives an ONE.
 
-    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _name);
+    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
     ClientDB clientsDB(connection, clientDBName);
 
     for(;;)
@@ -831,7 +833,7 @@ BridgeImpl::onCreate(const FIX::SessionID& session)
 
     // Build a queue of pending messages, and schedule each for retry.
     list<int> queue;
-    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _name);
+    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
     MessageDB messageDB(connection, messageDBName);
     for(;;)
     {
@@ -915,7 +917,7 @@ BridgeImpl::toApp(FIX::Message& message, const FIX::SessionID&)
         message.getHeader().getField(clientId);
         message.getHeader().removeField(clientId.getField());
     }
-    catch(FIX::FieldNotFound&)
+    catch(const FIX::FieldNotFound&)
     {
         Ice::Warning warning(_communicator->getLogger());
         warning << "message is missing IceFIXClientId";
@@ -926,7 +928,7 @@ BridgeImpl::toApp(FIX::Message& message, const FIX::SessionID&)
     o.id = clientId;
     o.timestamp = IceUtil::Time::now().toSeconds();
 
-    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _name);
+    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
     RoutingRecordDB clordidDB(connection, clordIdDBName);
     RoutingRecordDB seqnumDB(connection, seqnumDBName);
     for(;;)
@@ -983,25 +985,46 @@ BridgeImpl::toApp(FIX::Message& message, const FIX::SessionID&)
 }
 
 void
-BridgeImpl::fromAdmin(const FIX::Message&, const FIX::SessionID&) throw (FIX::FieldNotFound, FIX::IncorrectDataFormat,
-                FIX::IncorrectTagValue, FIX::RejectLogon)
+BridgeImpl::fromAdmin(const FIX::Message& message, const FIX::SessionID& session)
+    throw (FIX::FieldNotFound, FIX::IncorrectDataFormat, FIX::IncorrectTagValue, FIX::RejectLogon)
 {
-}
-
-void
-BridgeImpl::fromApp(const FIX::Message& message, const FIX::SessionID& session) throw (FIX::FieldNotFound,
-                FIX::IncorrectDataFormat, FIX::IncorrectTagValue, FIX::UnsupportedMessageType)
-{
-    FIX::MsgSeqNum seqNum;
-    message.getHeader().getField(seqNum);
+    const std::string& msgTypeValue = message.getHeader().getField(FIX::FIELD::MsgType);
+    if(msgTypeValue != "3") // Reject
+    {
+        return;
+    }
 
     if(_trace > 0)
     {
+        FIX::MsgSeqNum seqNum;
+        message.getHeader().getField(seqNum);
+
+        Ice::Trace trace(_communicator->getLogger(), "Bridge");
+        trace << "fromAdmin: " << seqNum << " session: " << session;
+        trace << " XML\n" << message.toXML();
+    }
+    route(message);
+}
+
+void
+BridgeImpl::fromApp(const FIX::Message& message, const FIX::SessionID& session)
+    throw (FIX::FieldNotFound, FIX::IncorrectDataFormat, FIX::IncorrectTagValue, FIX::UnsupportedMessageType)
+{
+    if(_trace > 0)
+    {
+        FIX::MsgSeqNum seqNum;
+        message.getHeader().getField(seqNum);
+
         Ice::Trace trace(_communicator->getLogger(), "Bridge");
         trace << "fromApp: " << seqNum << " session: " << session;
         trace << " XML\n" << message.toXML();
     }
+    route(message);
+}
 
+void
+BridgeImpl::route(const FIX::Message& message)
+{
     const std::string& msgTypeValue = message.getHeader().getField(FIX::FIELD::MsgType);
 
     if(_trace > 1)
@@ -1010,7 +1033,10 @@ BridgeImpl::fromApp(const FIX::Message& message, const FIX::SessionID& session) 
         trace << "msgTypeValue: " << msgTypeValue;
     }
 
-    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _name);
+    FIX::MsgSeqNum seqNum;
+    message.getHeader().getField(seqNum);
+
+    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
     MessageDB messageDB(connection, messageDBName);
     RoutingRecordDB clordidDB(connection, clordIdDBName);
     RoutingRecordDB seqnumDB(connection, seqnumDBName);
@@ -1083,7 +1109,7 @@ BridgeImpl::fromApp(const FIX::Message& message, const FIX::SessionID& session) 
                         }
                     }
                 }
-                catch(FIX::FieldNotFound&)
+                catch(const FIX::FieldNotFound&)
                 {
                     Ice::Warning warning(_communicator->getLogger());
                     warning << "Bridge: fromApp: unable to route business reject message because of missing RefSeqNum";
