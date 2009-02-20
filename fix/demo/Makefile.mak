@@ -11,7 +11,7 @@ top_srcdir	= ..
 
 !include $(top_srcdir)\config\Make.rules.mak
 
-SUBDIRS		= simple grid
+SUBDIRS		= simple grid backup
 
 $(EVERYTHING)::
 	@for %i in ( $(SUBDIRS) ) do \
