@@ -12,7 +12,8 @@ top_srcdir	= ..
 !include $(top_srcdir)\config\Make.rules.mak.cs
 
 SUBDIRS		= simple \
-		  grid
+		  grid \
+		  backup
 
 $(EVERYTHING)::
 	@for %i in ( $(SUBDIRS) ) do \
