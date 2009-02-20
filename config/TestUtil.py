@@ -598,7 +598,7 @@ def getIceBox(testdir):
     # Get and return the path of the IceBox executable
     #
     lang = getDefaultMapping()
-    if lang == "cpp" or lang == "fix":
+    if len(lang) == 0 or lang == "cpp" or lang == "fix":
         iceBox = ""
         if isWin32():
             #
@@ -711,7 +711,7 @@ def getDefaultMapping(currentDir = ""):
             return p
 
     #  Default to C++
-    return "cpp"
+    return ""
 
 def getTestEnv():
     env = {}
@@ -946,7 +946,7 @@ def runTests(start, expanded, num = 0, script = False):
 
 def getDefaultServerFile():
     lang = getDefaultMapping()
-    if lang in ["rb", "php", "fix", "cpp", "cs"]:
+    if lang in ["", "rb", "php", "fix", "cpp", "cs"]:
         return "server"
     if lang == "py":
         return "Server.py"
@@ -959,7 +959,7 @@ def getDefaultClientFile():
         return "Client.rb"
     if lang == "php":
         return "Client.php"
-    if lang in ["fix", "cpp", "cs"]:
+    if lang in ["", "fix", "cpp", "cs"]:
         return "client"
     if lang == "py":
         return "Client.py"
@@ -972,7 +972,7 @@ def getDefaultCollocatedFile():
         return "Collocated.rb"
     if lang == "php":
         return "Collocated.php"
-    if lang in ["fix", "cpp", "cs"]:
+    if lang in ["", "fix", "cpp", "cs"]:
         return "collocated"
     if lang == "py":
         return "Collocated.py"
