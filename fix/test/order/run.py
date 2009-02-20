@@ -24,8 +24,10 @@ import IceGridAdmin
 
 if os.path.exists(os.path.join(toplevel, "fix")):
     TestUtil.addLdPath(os.path.join(toplevel, "fix", "lib"))
+    TestUtil.addLdPath(os.path.join(toplevel, "fix", "bin"))
 else:
     TestUtil.addLdPath(os.path.join(toplevel, "lib"))
+    TestUtil.addLdPath(os.path.join(toplevel, "bin"))
 
 name = os.path.join("order")
 testdir = os.path.dirname(os.path.abspath(__file__))
