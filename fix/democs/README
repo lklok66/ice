@@ -8,3 +8,8 @@ Demos in this directory:
 
   A demo that shows how to manage multiple IceFIX bridges with
   IceGrid.
+
+- backup
+
+  A demo that shows how to do a hot backup of the IceFIX bridge
+  database files.
