@@ -326,7 +326,7 @@ ServiceI::start(const string& name, const Ice::CommunicatorPtr& communicator, co
     {
         Ice::Warning warning(communicator->getLogger());
         warning << "the property `" << name << ".FIXConfig' is not set";
-        throw IceBox::FailureException(__FILE__, __LINE__, "IceFIX service configuration is uncorrect");
+        throw IceBox::FailureException(__FILE__, __LINE__, "IceFIX service configuration is invalid");
     }
     _impl = new ServiceImpl(name, communicator, fixConfig, bridge);
 
@@ -338,7 +338,7 @@ ServiceI::start(const string& name, const Ice::CommunicatorPtr& communicator, co
     {
         Ice::Warning warning(communicator->getLogger());
         warning << "one FIX session must be defined";
-        throw IceBox::FailureException(__FILE__, __LINE__, "IceFIX service configuration is uncorrect");
+        throw IceBox::FailureException(__FILE__, __LINE__, "IceFIX service configuration is invalid");
     }
 
     FIX::SessionID sessionID = *sessions.begin();
@@ -346,7 +346,7 @@ ServiceI::start(const string& name, const Ice::CommunicatorPtr& communicator, co
     {
         Ice::Warning warning(communicator->getLogger());
         warning << "the session must be an initiator";
-        throw IceBox::FailureException(__FILE__, __LINE__, "IceFIX service configuration is uncorrect");
+        throw IceBox::FailureException(__FILE__, __LINE__, "IceFIX service configuration is invalid");
     }
 
     _impl->adapter = communicator->createObjectAdapter(name + ".Bridge");
@@ -474,11 +474,10 @@ ServiceI::validateProperties(const string& name, const Ice::PropertiesPtr& prope
     if(!unknownProps.empty())
     {
         Ice::Warning out(logger);
-        out << "found unknown properties for IceFIX service '" << name << "':";
+        out << "found unknown properties for IceFIX service `" << name << "':";
         for(vector<string>::const_iterator p = unknownProps.begin(); p != unknownProps.end(); ++p)
         {
             out << "\n    " << *p;
         }
     }
 }
-

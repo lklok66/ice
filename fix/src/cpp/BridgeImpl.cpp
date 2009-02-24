@@ -518,7 +518,7 @@ BridgeImpl::dbstat(const Ice::Current&)
             os.clear();
             os << "client database has " << clientDB.size() << " records" << endl;
             os << "routing databases have " << clordidDB.size() + seqnumDB.size() << " records" << endl;
-            os << "message databases has " << messageDB.size() << " records" << endl;
+            os << "message database has " << messageDB.size() << " records" << endl;
             break;
         }
         catch(const Freeze::DeadlockException&)
@@ -801,7 +801,7 @@ BridgeImpl::validateQoS(const IceFIX::QoS& qos)
         }
         else
         {
-            throw RegistrationException("invalid qos `" + p->first + "`");
+            throw RegistrationException("invalid qos `" + p->first + "'");
         }
     }
 }
