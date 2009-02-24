@@ -9,20 +9,20 @@
 
 top_srcdir	= ../..
 
-CLIENT		= client
+SERVER		= server
 
-TARGETS		= $(CLIENT)
+TARGETS		= $(SERVER)
 
-OBJS		= Client.o
+OBJS		= Server.o
 
-SRCS		= $(OBJS:.o=.cpp) \
+SRCS		= $(OBJS:.o=.cpp)
 
 include $(top_srcdir)/config/Make.rules
 
 CPPFLAGS	:= $(ICE_FLAGS) $(CPPFLAGS) $(QF_FLAGS)
 LIBS 		:= $(ICE_LIBS) $(LIBS) -lIceFIX $(QF_LIBS)
 
-$(CLIENT): $(OBJS)
+$(SERVER): $(OBJS) $(OBJS)
 	rm -f $@
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 

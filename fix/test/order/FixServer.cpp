@@ -148,6 +148,7 @@ private:
         FIX::SenderCompID senderCompID;
         FIX::TargetCompID targetCompID;
 
+        FIX::ClOrdID clOrdID;
         FIX::OrigClOrdID origClOrdID;
         FIX::Symbol symbol;
         FIX::Side side;
@@ -155,11 +156,34 @@ private:
         req.getHeader().get(senderCompID);
         req.getHeader().get(targetCompID);
 
+        req.get(clOrdID);
         req.get(origClOrdID);
         req.get(symbol);
         req.get(side);
 
-        cancel(FIX::ClOrdID(origClOrdID), symbol, senderCompID, targetCompID);
+        FIX42::ExecutionReport report(
+            FIX::OrderID(clOrdID),
+            FIX::ExecID(nextExecId()),
+            FIX::ExecTransType(FIX::ExecTransType_NEW),
+            FIX::ExecType(FIX::OrdStatus_CANCELED),
+            FIX::OrdStatus(FIX::OrdStatus_CANCELED),
+            FIX::Symbol(symbol),
+            FIX::Side(FIX::Side_BUY),
+            FIX::LeavesQty(0),
+            FIX::CumQty(0),
+            FIX::AvgPx(0));
+
+        report.set(clOrdID);
+        report.set(origClOrdID);
+
+        try
+        {
+            FIX::Session::sendToTarget(report, targetCompID, senderCompID);
+        }
+        catch(const FIX::SessionNotFound&)
+        {
+            test(false);
+        }
     }
 
     void onMessage(const FIX42::OrderCancelReplaceRequest& req, const FIX::SessionID& id)
@@ -167,8 +191,8 @@ private:
         FIX::SenderCompID senderCompID;
         FIX::TargetCompID targetCompID;
 
-        FIX::OrigClOrdID origClOrdID;
         FIX::ClOrdID clOrdID;
+        FIX::OrigClOrdID origClOrdID;
         FIX::Symbol symbol;
         FIX::Side side;
         FIX::Price price;
@@ -186,7 +210,55 @@ private:
 
         // Note that the original quantity isn't actually known,
         // however, for the purposes of the test its not a real issue.
-        replace(FIX::ClOrdID(origClOrdID), clOrdID, symbol, orderQty, senderCompID, targetCompID);
+        FIX42::ExecutionReport pendingReplace(
+            FIX::OrderID(clOrdID),
+            FIX::ExecID(nextExecId()),
+            FIX::ExecTransType(FIX::ExecTransType_NEW),
+            FIX::ExecType(FIX::ExecType_PENDING_REPLACE),
+            FIX::OrdStatus(FIX::OrdStatus_PENDING_REPLACE),
+            FIX::Symbol(symbol),
+            FIX::Side(FIX::Side_BUY),
+            FIX::LeavesQty(orderQty),
+            FIX::CumQty(0),
+            FIX::AvgPx(0));
+
+        pendingReplace.set(clOrdID);
+        pendingReplace.set(origClOrdID);
+        pendingReplace.set(orderQty);
+
+        try
+        {
+            FIX::Session::sendToTarget(pendingReplace, targetCompID, senderCompID);
+        }
+        catch(const FIX::SessionNotFound&)
+        {
+            test(false);
+        }
+
+        FIX42::ExecutionReport replaceReport(
+            FIX::OrderID(clOrdID),
+            FIX::ExecID(nextExecId()),
+            FIX::ExecTransType(FIX::ExecTransType_NEW),
+            FIX::ExecType(FIX::ExecType_REPLACE),
+            FIX::OrdStatus(FIX::OrdStatus_NEW),
+            FIX::Symbol(symbol),
+            FIX::Side(FIX::Side_BUY),
+            FIX::LeavesQty(orderQty),
+            FIX::CumQty(0),
+            FIX::AvgPx(0));
+
+        replaceReport.set(clOrdID);
+        replaceReport.set(origClOrdID);
+        replaceReport.set(orderQty);
+
+        try
+        {
+            FIX::Session::sendToTarget(replaceReport, targetCompID, senderCompID);
+        }
+        catch(const FIX::SessionNotFound&)
+        {
+            test(false);
+        }
 
         multiFill(clOrdID, symbol, orderQty, price, senderCompID, targetCompID);
     }
@@ -366,88 +438,6 @@ private:
         }
     }
 
-    void
-    cancel(const FIX::ClOrdID& clOrdID, const FIX::Symbol& symbol,
-           const FIX::SenderCompID& senderCompID, const FIX::TargetCompID& targetCompID)
-    {
-        FIX42::ExecutionReport report(
-            FIX::OrderID(clOrdID),
-            FIX::ExecID(nextExecId()),
-            FIX::ExecTransType(FIX::ExecTransType_NEW),
-            FIX::ExecType(FIX::OrdStatus_CANCELED),
-            FIX::OrdStatus(FIX::OrdStatus_CANCELED),
-            FIX::Symbol(symbol),
-            FIX::Side(FIX::Side_BUY),
-            FIX::LeavesQty(0),
-            FIX::CumQty(0),
-            FIX::AvgPx(0));
-
-        report.set(clOrdID);
-
-        try
-        {
-            FIX::Session::sendToTarget(report, targetCompID, senderCompID);
-        }
-        catch(const FIX::SessionNotFound&)
-        {
-            test(false);
-        }
-    }
-
-    void
-    replace(const FIX::ClOrdID& clOrdID, const FIX::ClOrdID& replaceClOrdID, const FIX::Symbol& symbol,
-            const FIX::OrderQty& orderQty,
-           const FIX::SenderCompID& senderCompID, const FIX::TargetCompID& targetCompID)
-    {
-        FIX42::ExecutionReport pendingReplace(
-            FIX::OrderID(clOrdID),
-            FIX::ExecID(nextExecId()),
-            FIX::ExecTransType(FIX::ExecTransType_NEW),
-            FIX::ExecType(FIX::ExecType_PENDING_REPLACE),
-            FIX::OrdStatus(FIX::OrdStatus_PENDING_REPLACE),
-            FIX::Symbol(symbol),
-            FIX::Side(FIX::Side_BUY),
-            FIX::LeavesQty(orderQty),
-            FIX::CumQty(0),
-            FIX::AvgPx(0));
-
-        pendingReplace.set(clOrdID);
-        pendingReplace.set(orderQty);
-
-        try
-        {
-            FIX::Session::sendToTarget(pendingReplace, targetCompID, senderCompID);
-        }
-        catch(const FIX::SessionNotFound&)
-        {
-            test(false);
-        }
-
-        FIX42::ExecutionReport replaceReport(
-            FIX::OrderID(replaceClOrdID),
-            FIX::ExecID(nextExecId()),
-            FIX::ExecTransType(FIX::ExecTransType_NEW),
-            FIX::ExecType(FIX::ExecType_REPLACE),
-            FIX::OrdStatus(FIX::OrdStatus_NEW),
-            FIX::Symbol(symbol),
-            FIX::Side(FIX::Side_BUY),
-            FIX::LeavesQty(orderQty),
-            FIX::CumQty(0),
-            FIX::AvgPx(0));
-
-        replaceReport.set(replaceClOrdID);
-        replaceReport.set(orderQty);
-
-        try
-        {
-            FIX::Session::sendToTarget(replaceReport, targetCompID, senderCompID);
-        }
-        catch(const FIX::SessionNotFound&)
-        {
-            test(false);
-        }
-    }
-    
     string nextExecId()
     {
         ostringstream os;

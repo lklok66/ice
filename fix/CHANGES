@@ -1,5 +1,8 @@
 Changes since second release to QIM (Feb 12th, 2009)
 
+- Added democs/backup to show how to backup the IceFIX bridge
+  database.
+
 - Added property validation, such that unknown IceFIX properties
   generate an Ice logger warning.
 

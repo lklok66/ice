@@ -1,8 +1,16 @@
 Demos in this directory:
 
+- server
+
+  A QuickFIX server to run against the clients.
+
 - simple
 
   A simple client for IceFIX.
+
+- nonfiltered
+
+  A client which demonstrates the filtered QoS.
 
 - grid
 

@@ -189,6 +189,19 @@ public:
         FIX::ClOrdID clOrdID;
         report.get(clOrdID);
 
+        FIX::OrdStatus ordStatus;
+        report.get(ordStatus);
+        // For cancel, pending replace swap the orig clOrdID and the
+        // clOrdID.
+        if(ordStatus == FIX::OrdStatus_CANCELED || 
+           ordStatus == FIX::OrdStatus_PENDING_CANCEL || 
+           ordStatus == FIX::OrdStatus_PENDING_REPLACE)
+        {
+            FIX::OrigClOrdID origClOrdID;
+            report.get(origClOrdID);
+            clOrdID = string(origClOrdID);
+        }
+
         FIX::ExecType execType;
         report.get(execType);
         for(list<Order>::iterator p = _orders.begin(); p != _orders.end(); ++p)
@@ -563,6 +576,7 @@ IceFIXClient::run(int argc, char* argv[])
             FIX::Symbol("CANC"),
             FIX::Side(FIX::Side_BUY),
             FIX::TransactTime());
+        cout << "cancel: " << getClOrdID(cancelReq) << endl;
 
         send(tp1, cancelReq);
 
