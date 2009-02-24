@@ -15,4 +15,4 @@ PersistMessages=Y
 BeginString=FIX.4.2
 SenderCompID=CLIENT1
 TargetCompID=TP1
-SocketConnectPort=10500
+SocketConnectPort=10000

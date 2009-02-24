@@ -4,6 +4,10 @@ Demos in this directory:
 
   A simple client application for IceFIX.
 
+- nonfiltered
+
+  A client that demonstrates the filtered QoS.
+
 - grid
 
   A demo that shows how to manage multiple IceFIX bridges with

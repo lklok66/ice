@@ -1,4 +1,4 @@
-This demo shows a simple IceFIX client.
+This demo shows a simple nonfiltered IceFIX client.
 
 To run the demo, first start a FIX server such as the demo FIX server
 in fix\demo\server:
@@ -16,3 +16,7 @@ In a separate window, activate the IceFIX server:
 Finally, run the client:
 
 > client --Ice.Config=config.client
+
+The client will print any received messages. Press ^C to terminate the
+client. To see some messages, run the simple client (in ..\simple) and
+submit some orders.

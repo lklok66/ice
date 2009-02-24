@@ -1,41 +1,36 @@
-This demo demonstrates a more complex IceFIX deployment using
-IceGrid.
+This demo shows a more complex IceFIX deployment using IceGrid. It
+configures IceFIX bridges for two trading partners named TP1 and TP2.
 
-The demo configures IceFIX bridges for two trading partners TP1 and
-TP2.
+TP1 uses the QuickFIX configuration in "config.fix-tp1". This
+configuration creates a file system store in the directory "store".
+The associated Freeze databases are contained in "db-tp1".
 
-TP1 is configured to use a QuickFIX configuration contained in
-config.fix-tp1. This configuration creates a file system store,
-contained in the directory store-tp1. The associated Freeze databases
-are contained in db-tp1.
+TP2 is likewise configured, except the file suffixes are "tp2".
 
-TP2 is likewise configured, except the file suffixes are tp2.
+To run the demo, first start the IceGrid service:
 
-To run the demo, first start the IceGrid service.
-
-$ icegridnode --Ice.Config=config.grid
+> icegridnode --Ice.Config=config.grid
 
 In a separate window:
 
-$ icegridadmin --Ice.Config=config.grid -e \
-    "application add 'application.xml'"
+> icegridadmin --Ice.Config=config.grid -e \
+    "application add application.xml"
 
 Messages will be displayed in the IceGrid service window.
 
-Next start an QuickFIX sample ordermatch server for each trading
-partner.
+Next start a FIX server, such as the demo FIX server in
+fix\demo\server:
 
-$ ordermatch config.tp1
+> ..\..\demo\server\server config.tp1
 
-In a separate window, start the second ordermatch server.
+In a separate window, start the FIX server:
 
-$ ordermatch config.tp2
+> ..\..\demo\server\server config.tp2
 
-Now activate the bridges.
+Now activate the bridges:
 
-$ icefixadmin --Ice.Config=config.admin -e activate
+> icefixadmin --Ice.Config=config.admin -e activate
 
-Now, run the client.
+Finally, run the client:
 
-$ client --Ice.Config=config.client
-
+> client --Ice.Config=config.client

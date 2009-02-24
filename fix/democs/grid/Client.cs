@@ -13,21 +13,153 @@ using IceFIX;
 using System.Collections.Generic;
 using System.Reflection;
 
-[assembly: CLSCompliant(true)]
+// The QuickFix.MessageCracker is not CLS compliant, so don't
+// specify that.
+//[assembly: CLSCompliant(true)]
 
-[assembly: AssemblyTitle("IceFIXClient")]
-[assembly: AssemblyDescription("Ice FIX demo client")]
+[assembly: AssemblyTitle("IceFIXGridClient")]
+[assembly: AssemblyDescription("Ice FIX demo grid client")]
 [assembly: AssemblyCompany("ZeroC, Inc.")]
 
 public class Client
 {
-    public class ReporterI : IceFIX.ReporterDisp_
+    public class ReporterI : QuickFix42.MessageCracker, IceFIX.ReporterOperations_
     {
-	public override void message(String data, Ice.Current current)
-	{
-	    Message message = new Message(data);
-	    Console.Out.WriteLine("message: " + message.ToXML());
-	}
+        public void message(String data, Ice.Current current)
+        {
+            Message message = new Message(data);
+            String msgType = message.getHeader().getField(MsgType.FIELD);
+            QuickFix.MessageFactory factory = new QuickFix42.MessageFactory();
+            Message msg = factory.create(data, msgType);
+            msg.setString(data);
+
+            SessionID id = new SessionID();
+            crack(msg, id);
+        }
+
+        public override void onMessage(QuickFix42.BusinessMessageReject reject, SessionID id) 
+        {
+            Console.WriteLine("BusinessMessageReject");
+            try
+            {
+                RefSeqNum seqNum = new RefSeqNum();
+                reject.get(seqNum);
+                Console.WriteLine("\tRefSeqNum: " + seqNum);
+            }
+            catch(FieldNotFound)
+            {
+            }
+        }
+
+        public override void onMessage(QuickFix42.Reject reject, SessionID id) 
+        {
+            Console.WriteLine("Reject");
+            try
+            {
+                RefSeqNum seqNum = new RefSeqNum();
+                reject.get(seqNum);
+                Console.WriteLine("\tRefSeqNum: " + seqNum);
+            }
+            catch(FieldNotFound)
+            {
+            }
+        }
+
+        public override void onMessage(QuickFix42.OrderCancelReject reject, SessionID id) 
+        {
+            OrigClOrdID origClOrdID = new OrigClOrdID();
+            reject.get(origClOrdID);
+
+            Console.WriteLine("OrderCancelReject");
+            Console.WriteLine("OrigClOrdID: " + origClOrdID);
+        }
+
+        public override void onMessage(QuickFix42.ExecutionReport report, SessionID id)  
+        {
+            ClOrdID clOrdID = new
+            ClOrdID();
+            report.get(clOrdID);
+
+            ExecType execType = new ExecType();
+            report.get(execType);
+
+            OrdStatus ordStatus = new OrdStatus();
+            report.get(ordStatus);
+
+            LeavesQty leavesQty = new LeavesQty();
+            report.get(leavesQty);
+
+            CumQty orderQty = new CumQty();
+            report.get(orderQty);
+
+            Symbol symbol = new Symbol();
+            report.get(symbol);
+
+            Side side = new Side();
+            report.get(side);
+
+            CumQty cumQty = new CumQty();
+            report.get(cumQty);
+
+            AvgPx avgPx = new AvgPx();
+            report.get(avgPx);
+
+            Console.WriteLine("ExecutionReport");
+            Console.WriteLine("\tClOrdID: " + clOrdID);
+
+            Console.Write("\tExecType: ");
+
+            switch(execType.getValue())
+            {
+            case ExecType.NEW: Console.Write("new"); break;
+            case ExecType.PARTIAL_FILL: Console.Write("partial fill"); break;
+            case ExecType.FILL: Console.Write("fill"); break;
+            case ExecType.DONE_FOR_DAY: Console.Write("done for day"); break;
+            case ExecType.CANCELED: Console.Write("canceled"); break;
+            case ExecType.REPLACE: Console.Write("replace"); break;
+            case ExecType.PENDING_CANCEL: Console.Write("pending cancel"); break;
+            case ExecType.STOPPED: Console.Write("stopped"); break;
+            case ExecType.REJECTED: Console.Write("rejected"); break;
+            case ExecType.SUSPENDED: Console.Write("suspended"); break;
+            case ExecType.PENDING_NEW: Console.Write("pending new"); break;
+            case ExecType.CALCULATED: Console.Write("calculated"); break;
+            case ExecType.EXPIRED: Console.Write("expired"); break;
+            case ExecType.RESTATED: Console.Write("restated"); break;
+            case ExecType.PENDING_REPLACE: Console.Write("pending replace"); break;
+            case ExecType.TRADE: Console.Write("trade"); break;
+            case ExecType.TRADE_CORRECT: Console.Write("trade correct"); break;
+            case ExecType.TRADE_CANCEL: Console.Write("trade cancel"); break;
+            case ExecType.ORDER_STATUS: Console.Write("order status"); break;
+            }
+            Console.WriteLine("");
+
+            Console.Write("\tOrdStatus: ");
+            switch(ordStatus.getValue())
+            {
+            case OrdStatus.NEW: Console.Write("new"); break;
+            case OrdStatus.PARTIALLY_FILLED: Console.Write("partially filled"); break;
+            case OrdStatus.FILLED: Console.Write("filled"); break;
+            case OrdStatus.DONE_FOR_DAY: Console.Write("done for day"); break;
+            case OrdStatus.CANCELED: Console.Write("canceled"); break;
+            case OrdStatus.REPLACED: Console.Write("replaced"); break;
+            case OrdStatus.PENDING_CANCEL: Console.Write("pending cancel"); break;
+            case OrdStatus.STOPPED: Console.Write("stopped"); break;
+            case OrdStatus.REJECTED: Console.Write("rejected"); break;
+            case OrdStatus.SUSPENDED: Console.Write("suspended"); break;
+            case OrdStatus.PENDING_NEW: Console.Write("pending new"); break;
+            case OrdStatus.CALCULATED: Console.Write("calculated"); break;
+            case OrdStatus.EXPIRED: Console.Write("expired"); break;
+            case OrdStatus.ACCEPTED_FOR_BIDDING: Console.Write("accepted for bidding"); break;
+            case OrdStatus.PENDING_REPLACE: Console.Write("pending replace"); break;
+            }
+            Console.WriteLine("");
+
+            Console.WriteLine("\tSymbol: " + symbol);
+            Console.WriteLine("\tSide: " + ((side.getValue() == Side.BUY) ? "Buy" : "Sell"));
+            Console.WriteLine("\tLeavesQty: " + leavesQty);
+            Console.WriteLine("\tCumQty: " + cumQty);
+            Console.WriteLine("\tAvgPx: " + avgPx);
+        }
     };
 
     public class IceFIXClient : Ice.Application
@@ -36,19 +168,19 @@ public class Client
         {
             Console.Write(
                 "usage:\n" +
-                "o: submit order\n" +
-                "c: order cancel\n" +
-                "r: submit cancel replace\n" +
-                "t: status inquiry\n" +
-                "b: submit bad order\n" +
-                "s: switch bridges\n" +
-                "x: exit\n" +
+                "buy symbol price quantity                   submit buy order\n" +
+                "sell symbol price quantity                  submit sell order\n" +
+                "cancel id sell|buy symbol                   order cancel\n" +
+                "replace id sell|buy symbol price quantity   order cancel replace\n" +
+                "status id sell|buy symbol                   status inquiry\n" +
+                "bridge name                                 switch bridge\n" +
+                "exit                                        exit\n" +
                 "?: help\n");
         }
 
         private static void usage()
         {
-            Console.WriteLine("Usage: " + appName() + " [--filtered true|false] [--id id]");
+            Console.WriteLine("Usage: " + appName() + " [--id id]");
         }
 
         public IceFIXClient() :
@@ -60,7 +192,6 @@ public class Client
         {
 	    Ice.Properties properties = communicator().getProperties();
 	    String id = properties.getPropertyWithDefault("ClientId", "test");
-	    String filtered = properties.getPropertyWithDefault("Filtered", "true");
 
             int i;
             for(i = 0; i < args.Length; ++i)
@@ -75,16 +206,6 @@ public class Client
                         return 1;
                     }
                     id = args[i];
-                }
-                else if(opt == "--filtered")
-                {
-                    ++i;
-                    if(i >= args.Length)
-                    {
-                        usage();
-                        return 1;
-                    }
-                    filtered = args[i];
                 }
                 else
                 {
@@ -115,6 +236,7 @@ public class Client
                 return 1;
             }
 
+            Dictionary<string, IceFIX.ExecutorPrx> executors = new Dictionary<string, IceFIX.ExecutorPrx>();
 	    Ice.ObjectAdapter adapter = communicator().createObjectAdapter("Client");
 	    IceFIX.ReporterPrx reporter = IceFIX.ReporterPrxHelper.uncheckedCast(adapter.addWithUUID(new ReporterI()));
             foreach(KeyValuePair<string, IceFIX.BridgePrx> p in bridges)
@@ -125,7 +247,7 @@ public class Client
 	        {
                     IceFIX.ExecutorPrx executor;
                     p.Value.connect(id, reporter, out executor);
-                    _executors[p.Key] = executor;
+                    executors[p.Key] = executor;
 	        }
 	        catch(IceFIX.RegistrationException)
 	        {
@@ -140,7 +262,7 @@ public class Client
 
                         IceFIX.ExecutorPrx executor;
                         p.Value.connect(id, reporter, out executor);
-                        _executors[p.Key] = executor;
+                        executors[p.Key] = executor;
 		    }
 		    catch(IceFIX.RegistrationException ex)
 		    {
@@ -156,16 +278,16 @@ public class Client
             menu();
 
             string bridge = null;
-            IceFIX.ExecutorPrx currentExecutor = null;
-            foreach(KeyValuePair<string, IceFIX.ExecutorPrx> p in _executors)
+            IceFIX.ExecutorPrx executor = null;
+            foreach(KeyValuePair<string, IceFIX.ExecutorPrx> p in executors)
             {
                 bridge = p.Key;
-                currentExecutor = p.Value;
+                executor = p.Value;
                 break;
             }
 
             string line = null;
-            do 
+            while(true)
             {
                 try
                 {
@@ -176,128 +298,126 @@ public class Client
                     {
                         break;
                     }
-                    if(line.Equals("o") || line.Equals("b"))
-		    {
-			String clOrdID = Ice.Util.generateUUID();
-			QuickFix42.NewOrderSingle req = new QuickFix42.NewOrderSingle(
-                            new ClOrdID( clOrdID ),
-                            new HandlInst('1'),
-                            new Symbol( "AAPL"),
-                            new Side( Side.BUY ),
-                            new TransactTime(),
-                            new OrdType( OrdType.LIMIT ));
-                        
-                        req.set( new Price( 100.0) );
-                        if(line.Equals("o"))
-                        {
-                            req.set( new OrderQty( 100 ));
-                        }
-                        req.set( new TimeInForce( TimeInForce.DAY ));
-                        
-                        if(send(currentExecutor, req))
-                        {
-                            Console.Out.WriteLine("submitted order: `" + clOrdID + "'");
-                        }
-		    }
-		    else if(line.Equals("c"))
-		    {
-			Console.Out.Write("order id: ");
-			Console.Out.Flush();
-			String origClOrdID = Console.In.ReadLine();
-			if(origClOrdID == null)
-			{
-			    continue;
-			}
-			if(origClOrdID.Length == 0)
-			{
-			    Console.Error.WriteLine("invalid");
-			    continue;
-			}
-			String clOrdID = Ice.Util.generateUUID();
-			QuickFix42.OrderCancelRequest req = new QuickFix42.OrderCancelRequest(
-                            new OrigClOrdID( origClOrdID ),
-                            new ClOrdID( clOrdID ),
-                            new Symbol( "AAPL"),
-                            new Side( Side.BUY ),
-                            new TransactTime());
-
-                        if(send(currentExecutor, req))
-                        {
-                            Console.Out.WriteLine("submitted cancel order: `" + clOrdID + "'");
-                        }
-		    }
-		    else if(line.Equals("r"))
-		    {
-			Console.Out.Write("order id: ");
-			Console.Out.Flush();
-			String origClOrdID = Console.In.ReadLine();
-			if(origClOrdID == null)
-			{
-			    continue;
-			}
-			if(origClOrdID.Length == 0)
-			{
-			    Console.Error.WriteLine("invalid");
-			    continue;
-			}
-
-			String ClOrdID = Ice.Util.generateUUID();
-			QuickFix42.OrderCancelReplaceRequest req = new QuickFix42.OrderCancelReplaceRequest(
-			    new OrigClOrdID( origClOrdID ),
-			    new ClOrdID( ClOrdID ),
-			    new HandlInst('1'),
-			    new Symbol( "AAPL"),
-			    new Side( Side.BUY ),
-			    new TransactTime(),
-			    new OrdType( OrdType.LIMIT ));
-                        req.set( new Price( 110.0) );
-                        req.set( new OrderQty( 50 ));
-                        req.set( new TimeInForce( TimeInForce.DAY ));
-                        
-                        if(send(currentExecutor, req))
-                        {
-                            Console.Out.WriteLine("submitted cancel replace order: `" + ClOrdID + "'");
-                        }
-		    }
-		    else if(line.Equals("t"))
-		    {
-			Console.Out.Write("order id: ");
-			Console.Out.Flush();
-			String clOrdID = Console.In.ReadLine();
-			if(clOrdID == null)
-			{
-			    continue;
-			}
-			if(clOrdID.Length == 0)
-			{
-			    Console.Error.WriteLine("invalid");
-			    continue;
-			}
-
-			QuickFix42.OrderStatusRequest req = new QuickFix42.OrderStatusRequest(
-                            new ClOrdID( clOrdID ),
-                            new Symbol( "AAPL"),
-                            new Side( Side.BUY ));
-
-                        send(currentExecutor, req);
-		    }
-                    else if(line.Equals("s"))
+                    String[] tok = line.Split(new Char[]{' ', '\t'});
+                    if(tok.Length == 0)
                     {
-                        Console.Write("bridge:");
-                        string newid;
-                        newid = Console.In.ReadLine();
-                        if(line == null)
+                        menu();
+                        continue;
+                    }
+                    if(tok[0].Equals("buy") || tok[0].Equals("sell"))
+                    {
+                        if(tok.Length != 4)
                         {
-                            break;
-                        }
-                        if(line.Length == 0)
-                        {
-                            Console.WriteLine("invalid");
+                            menu();
                             continue;
                         }
+
+                        char side = tok[0].Equals("buy") ? Side.BUY : Side.SELL;
+                        String symbol = tok[1];
+                        double price = Convert.ToDouble(tok[2]);
+                        long quantity = Convert.ToInt64(tok[3]);
+                        String clOrdID = Ice.Util.generateUUID();
+
+                        QuickFix42.NewOrderSingle req = new QuickFix42.NewOrderSingle(
+                            new ClOrdID( clOrdID ),
+                            new HandlInst('1'),
+                            new Symbol(symbol),
+                            new Side(side),
+                            new TransactTime(),
+                            new OrdType(OrdType.LIMIT));
+                        
+                        req.set(new Price(price));
+                        req.set(new OrderQty(quantity));
+                        req.set(new TimeInForce(TimeInForce.DAY));
+                        
+                        int seqNum = executor.execute(req.ToString());
+                        Console.Out.WriteLine("submitted order: " + seqNum + " `" + clOrdID + "'");
+                    }
+                    else if(tok[0].Equals("cancel"))
+                    {
+                        if(tok.Length != 4)
+                        {
+                            menu();
+                            continue;
+                        }
+
+                        String origClOrdID = tok[1];
+                        char side = tok[2].Equals("buy") ? Side.BUY : Side.SELL;
+                        String symbol = tok[3];
+                        String clOrdID = Ice.Util.generateUUID();
+
+                        QuickFix42.OrderCancelRequest req = new QuickFix42.OrderCancelRequest(
+                            new OrigClOrdID(origClOrdID),
+                            new ClOrdID(clOrdID),
+                            new Symbol(symbol),
+                            new Side(side),
+                            new TransactTime());
+
+                        int seqNum = executor.execute(req.ToString());
+                        Console.Out.WriteLine("submitted cancel order: " + seqNum + " `" + clOrdID + "'");
+                    }
+                    else if(tok[0].Equals("replace"))
+                    {
+                        if(tok.Length != 6)
+                        {
+                            menu();
+                            continue;
+                        }
+
+                        String origClOrdID = tok[1];
+                        char side = tok[2].Equals("buy") ? Side.BUY : Side.SELL;
+                        String symbol = tok[3];
+                        double price = Convert.ToDouble(tok[4]);
+                        long quantity = Convert.ToInt64(tok[5]);
+                        String clOrdID = Ice.Util.generateUUID();
+
+                        QuickFix42.OrderCancelReplaceRequest req = new QuickFix42.OrderCancelReplaceRequest(
+                            new OrigClOrdID(origClOrdID),
+                            new ClOrdID(clOrdID),
+                            new HandlInst('1'),
+                            new Symbol(symbol),
+                            new Side(side),
+                            new TransactTime(),
+                            new OrdType( OrdType.LIMIT ));
+                        req.set(new Price(price));
+                        req.set(new OrderQty(quantity));
+                        req.set(new TimeInForce(TimeInForce.DAY));
+                        
+                        int seqNum = executor.execute(req.ToString());
+                        Console.Out.WriteLine("submitted cancel replace order: " + seqNum + " `" + clOrdID + "'");
+                    }
+                    else if(tok[0].Equals("status"))
+                    {
+                        if(tok.Length != 6)
+                        {
+                            menu();
+                            continue;
+                        }
+
+                        String clOrdID = tok[1];
+                        char side = tok[2].Equals("buy") ? Side.BUY : Side.SELL;
+                        String symboll = tok[3];
+
+                        QuickFix42.OrderStatusRequest req = new QuickFix42.OrderStatusRequest(
+                            new ClOrdID(clOrdID),
+                            new Symbol(symbol),
+                            new Side(side));
+
+                        int seqNum = executor.execute(req.ToString());
+                        Console.Out.WriteLine("submitted order status: " + seqNum);
+                    }
+                    else if(tok[0].Equals("bridge"))
+                    {
+                        if(tok.Length != 2)
+                        {
+                            menu();
+                            continue;
+                        }
+
+                        String id = tok[1];
                         try
                         {
-                            currentExecutor = _executors[newid];
+                            executor = executors[id];
                         }
                         catch(KeyNotFoundException)
                         {
@@ -306,11 +426,11 @@ public class Client
                         }
                         bridge = newid;
                     }
-                    else if(line.Equals("x"))
+                    else if(tok[0].Equals("exit"))
                     {
-                        // Nothing to do
+                        break;
                     }
-                    else if(line.Equals("?"))
+                    else if(tok[0].Equals("?"))
                     {
                         menu();
                     }
@@ -320,14 +440,17 @@ public class Client
                         menu();
                     }
                 }
+                catch(IceFIX.ExecuteException e)
+                {
+                    Console.Error.WriteLine("ExecuteException: " + e.reason);
+                }
                 catch(System.Exception ex)
                 {
                     Console.Error.WriteLine(ex);
                 }
             }
-            while (!line.Equals("x"));
 
-            foreach(KeyValuePair<string, IceFIX.ExecutorPrx> p in _executors)
+            foreach(KeyValuePair<string, IceFIX.ExecutorPrx> p in executors)
             {
 	        try
 	        {
@@ -341,22 +464,6 @@ public class Client
             
             return 0;
         }
-
-        private bool send(IceFIX.ExecutorPrx executor, Message msg)
-        {
-            try
-            {
-                executor.execute(msg.ToString());
-            }
-            catch(IceFIX.ExecuteException e)
-            {
-                Console.Error.WriteLine("ExecuteException: " + e.reason);
-                return false;
-            }
-            return true;
-        }
-
-        private Dictionary<string, IceFIX.ExecutorPrx> _executors = new Dictionary<string, IceFIX.ExecutorPrx>();
     }
 
     public static void Main(string[] args)

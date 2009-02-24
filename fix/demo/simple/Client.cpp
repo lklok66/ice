@@ -346,6 +346,7 @@ IceFIXClient::run(int argc, char* argv[])
                     continue;
                 }
 
+                char side = (tok[0] == "buy") ? FIX::Side_BUY : FIX::Side_SELL;
                 string symbol(tok[1]);
                 double price = atof(tok[2].c_str());
                 long quantity = atoi(tok[3].c_str());
@@ -355,7 +356,7 @@ IceFIXClient::run(int argc, char* argv[])
                     FIX::ClOrdID(clOrdID),
                     FIX::HandlInst('1'),
                     FIX::Symbol(symbol),
-                    FIX::Side((tok[0] == "buy") ? FIX::Side_BUY : FIX::Side_SELL),
+                    FIX::Side(side),
                     FIX::TransactTime(),
                     FIX::OrdType(FIX::OrdType_LIMIT));
 
@@ -374,13 +375,15 @@ IceFIXClient::run(int argc, char* argv[])
                     continue;
                 }
 
-                FIX::Side side = (tok[2] == "buy") ? FIX::Side_BUY : FIX::Side_SELL;
+                string origClOrdID = tok[1];
+                char side = (tok[2] == "buy") ? FIX::Side_BUY : FIX::Side_SELL;
+                string symbol = tok[3];
 
                 string clOrdID = IceUtil::generateUUID();
                 FIX42::OrderCancelRequest req = FIX42::OrderCancelRequest(
-                    FIX::OrigClOrdID(tok[1]),
+                    FIX::OrigClOrdID(origClOrdID),
                     FIX::ClOrdID(clOrdID),
-                    FIX::Symbol(tok[3]),
+                    FIX::Symbol(symbol),
                     FIX::Side(side),
                     FIX::TransactTime());
 
@@ -394,15 +397,16 @@ IceFIXClient::run(int argc, char* argv[])
                     menu();
                     continue;
                 }
-                FIX::Side side = (tok[2] == "buy") ? FIX::Side_BUY : FIX::Side_SELL;
 
+                string origClOrdID = tok[1];
+                char side = (tok[2] == "buy") ? FIX::Side_BUY : FIX::Side_SELL;
                 string symbol(tok[3]);
                 double price = atof(tok[4].c_str());
                 long quantity = atoi(tok[5].c_str());
 
                 string clOrdID = IceUtil::generateUUID();
                 FIX42::OrderCancelReplaceRequest req(
-                    FIX::OrigClOrdID(tok[1]),
+                    FIX::OrigClOrdID(origClOrdID),
                     FIX::ClOrdID(clOrdID),
                     FIX::HandlInst('1'),
                     FIX::Symbol(symbol),
@@ -423,10 +427,12 @@ IceFIXClient::run(int argc, char* argv[])
                     menu();
                     continue;
                 }
-                FIX::Side side = (tok[2] == "buy") ? FIX::Side_BUY : FIX::Side_SELL;
+                string clOrdID = tok[1];
+                char side = (tok[2] == "buy") ? FIX::Side_BUY : FIX::Side_SELL;
+                string symbol = tok[3];
                 FIX42::OrderStatusRequest req = FIX42::OrderStatusRequest(
-                    FIX::ClOrdID(tok[1]),
-                    FIX::Symbol(tok[3]),
+                    FIX::ClOrdID(clOrdID),
+                    FIX::Symbol(symbol),
                     FIX::Side(side));
 
                 int seqNum = executor->execute(req.toString());

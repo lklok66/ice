@@ -15,7 +15,7 @@ When the server is running you can issue various commands:
 
   This lists the order books for the symbols offered by the server.
 
-- automatch
+- automatch (default)
 
   The server will automatically match any orders that arrive.
 
@@ -27,3 +27,11 @@ When the server is running you can issue various commands:
 - match
 
   The server will only match any open orders.
+
+- trace
+
+  The server will only trace FIX messages.
+
+- notrace (default)
+
+  The server will only not trace FIX messages.
