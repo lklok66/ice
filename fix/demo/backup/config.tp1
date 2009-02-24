@@ -8,9 +8,8 @@ SenderCompID=TP1
 TargetCompID=CLIENT1
 FileStorePath=store
 HttpAcceptPort=8080
-#ResetOnLogon=Y
 
 [SESSION]
 BeginString=FIX.4.2
-DataDictionary=spec/FIX42.xml
+DataDictionary=../server/FIX42.xml
 

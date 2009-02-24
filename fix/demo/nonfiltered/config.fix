@@ -14,6 +14,5 @@ PersistMessages=Y
 [SESSION]
 BeginString=FIX.4.2
 SenderCompID=CLIENT1
-TargetCompID=EXECUTOR
+TargetCompID=TP1
 SocketConnectPort=10000
-#SocketConnectHost=192.168.2.58

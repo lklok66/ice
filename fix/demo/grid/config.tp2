@@ -12,5 +12,5 @@ HttpAcceptPort=8081
 
 [SESSION]
 BeginString=FIX.4.2
-DataDictionary=spec/FIX42.xml
+DataDictionary=../server/FIX42.xml
 

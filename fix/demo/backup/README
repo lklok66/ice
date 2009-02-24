@@ -1,11 +1,12 @@
-This demo demonstrates how to backup an IceGrid deployed IceFIX database.
+This demo demonstrates how to backup an IceGrid deployed IceFIX
+database.
 
-The demo configures a single IceFIX bridges for a trading partner TP1.
+The demo configures a single IceFIX bridge for a trading partner TP1.
 
 TP1 is configured to use a QuickFIX configuration contained in
-config.fix. This configuration creates a file system store,
-contained in the directory store. The associated Freeze database
-is contained in db-tp1.
+config.fix. This configuration creates a file system store, contained
+in the directory store. The associated Freeze database is contained in
+db-tp1.
 
 To run the demo, first start the IceGrid service.
 
@@ -27,9 +28,9 @@ Now activate the IceFIX bridge.
 
 $ icefixadmin --Ice.Config=config.admin -e activate
 
-Now, run the client.
+Now, run the grid client.
 
-$ client --Ice.Config=config.client
+$ ../grid/client --Ice.Config=config.client
 
 
 Backup

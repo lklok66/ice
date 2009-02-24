@@ -9,25 +9,10 @@
 
 top_srcdir	= ../..
 
-CLIENT		= client
-
-TARGETS		= $(CLIENT)
-
-COBJS		= Client.o
-
-SRCS		= $(COBJS:.o=.cpp) \
+TARGETS		= 
 
 include $(top_srcdir)/config/Make.rules
-
-CPPFLAGS	:= $(ICE_FLAGS) $(CPPFLAGS) $(QF_FLAGS)
-LIBS 		:= $(ICE_LIBS) $(LIBS) -lIceGrid -lGlacier2 -lIceFIX $(QF_LIBS)
-
-$(CLIENT): $(OBJS) $(COBJS)
-	rm -f $@
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(COBJS) $(LIBS)
 
 clean::
 	-rm -rf db/node/* db/registry/*
 	-rm -rf db-tp1/data/* db-tp1/logs/* store/*
-
-include .depend

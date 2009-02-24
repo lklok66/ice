@@ -12,47 +12,18 @@
 #include <IceFIX/IceFIX.h>
 
 #include <quickfix/Message.h>
+#include <quickfix/Values.h>
 #include <quickfix/fix42/NewOrderSingle.h>
 #include <quickfix/fix42/OrderCancelRequest.h>
 #include <quickfix/fix42/OrderCancelReplaceRequest.h>
 #include <quickfix/fix42/OrderStatusRequest.h>
 #include <quickfix/fix42/OrderCancelReject.h>
+#include <quickfix/fix42/BusinessMessageReject.h>
+#include <quickfix/fix42/Reject.h>
 #include <quickfix/fix42/ExecutionReport.h>
 #include <quickfix/fix42/MessageCracker.h>
-#include <quickfix/Values.h>
 
 using namespace std;
-
-class IceFIXClient : public Ice::Application
-{
-public:
-
-    IceFIXClient();
-
-    virtual int run(int, char*[]);
-
-private:
-
-    void menu();
-
-    bool send(const FIX::Message&);
-
-    IceFIX::ExecutorPrx _executor;
-};
-
-int
-main(int argc, char* argv[])
-{
-    IceFIXClient app;
-    return app.main(argc, argv, "config.client");
-}
-
-void
-usage(const string& n)
-{
-     cerr << "Usage: " << n
-          << " [--id id]" << endl;
-}
 
 static bool
 splitString(const string& str, const string& delim, vector<string>& result)
@@ -110,15 +81,6 @@ splitString(const string& str, const string& delim, vector<string>& result)
     return true;
 }
 
-IceFIXClient::IceFIXClient() :
-    //
-    // Since this is an interactive demo we don't want any signal
-    // handling.
-    //
-    Ice::Application(Ice::NoSignalHandling)
-{
-}
-
 class ReporterI : public IceFIX::Reporter, public FIX42::MessageCracker
 {
 public:
@@ -133,11 +95,29 @@ public:
     virtual void onMessage(const FIX42::BusinessMessageReject& reject, const FIX::SessionID&) 
     {
         cout << "BusinessMessageReject" << endl;
+        try
+        {
+            FIX::RefSeqNum seqNum;
+            reject.get(seqNum);
+            cout << "\tRefSeqNum: " << seqNum << endl;
+        }
+        catch(const FIX::FieldNotFound&)
+        {
+        }
     }
 
     virtual void onMessage(const FIX42::Reject& reject, const FIX::SessionID&) 
     {
         cout << "Reject" << endl;
+        try
+        {
+            FIX::RefSeqNum seqNum;
+            reject.get(seqNum);
+            cout << "\tRefSeqNum: " << seqNum << endl;
+        }
+        catch(const FIX::FieldNotFound&)
+        {
+        }
     }
 
     virtual void onMessage(const FIX42::OrderCancelReject& reject, const FIX::SessionID&) 
@@ -180,7 +160,6 @@ public:
 
         cout << "\tExecType: ";
 
-
         switch(execType)
         {
         case FIX::ExecType_NEW: cout << "new"; break;
@@ -204,8 +183,8 @@ public:
         case FIX::ExecType_ORDER_STATUS: cout << "order status"; break;
         }
         cout << endl;
-        cout << "\tOrdStatus: ";
 
+        cout << "\tOrdStatus: ";
         switch(ordStatus)
         {
         case FIX::OrdStatus_NEW: cout << "new"; break;
@@ -233,6 +212,42 @@ public:
         cout << "\tAvgPx: " << avgPx << endl;
     }
 };
+
+class IceFIXClient : public Ice::Application
+{
+public:
+
+    IceFIXClient();
+
+    virtual int run(int, char*[]);
+
+private:
+
+    void menu();
+};
+
+int
+main(int argc, char* argv[])
+{
+    IceFIXClient app;
+    return app.main(argc, argv, "config.client");
+}
+
+void
+usage(const string& n)
+{
+     cerr << "Usage: " << n
+          << " [--id id]" << endl;
+}
+
+IceFIXClient::IceFIXClient() :
+    //
+    // Since this is an interactive demo we don't want any signal
+    // handling.
+    //
+    Ice::Application(Ice::NoSignalHandling)
+{
+}
 
 int
 IceFIXClient::run(int argc, char* argv[])
@@ -274,11 +289,12 @@ IceFIXClient::run(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
+    IceFIX::ExecutorPrx executor;
     Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapter("Client");
     IceFIX::ReporterPrx reporter = IceFIX::ReporterPrx::uncheckedCast(adapter->addWithUUID(new ReporterI()));
     try
     {
-        bridge->connect(id, reporter, _executor);
+        bridge->connect(id, reporter, executor);
     }
     catch(const IceFIX::RegistrationException&)
     {
@@ -287,7 +303,7 @@ IceFIXClient::run(int argc, char* argv[])
             IceFIX::BridgeAdminPrx admin = bridge->getAdmin();
             IceFIX::QoS qos;
             admin->registerWithId(id, qos);
-            bridge->connect(id, reporter, _executor);
+            bridge->connect(id, reporter, executor);
         }
         catch(const IceFIX::RegistrationException& ex)
         {
@@ -316,11 +332,12 @@ IceFIXClient::run(int argc, char* argv[])
                 menu();
                 continue;
             }
-            if(tok.size() == 0)
+            if(tok.empty())
             {
                 menu();
                 continue;
             }
+
             if(tok[0] == "buy" || tok[0] == "sell")
             {
                 if(tok.size() != 4)
@@ -335,21 +352,19 @@ IceFIXClient::run(int argc, char* argv[])
 
                 string clOrdID = IceUtil::generateUUID();
                 FIX42::NewOrderSingle req(
-                    FIX::ClOrdID( clOrdID ),
+                    FIX::ClOrdID(clOrdID),
                     FIX::HandlInst('1'),
-                    FIX::Symbol( symbol),
-                    FIX::Side( (tok[0] == "buy") ? FIX::Side_BUY : FIX::Side_SELL ),
+                    FIX::Symbol(symbol),
+                    FIX::Side((tok[0] == "buy") ? FIX::Side_BUY : FIX::Side_SELL),
                     FIX::TransactTime(),
-                    FIX::OrdType( FIX::OrdType_LIMIT ));
+                    FIX::OrdType(FIX::OrdType_LIMIT));
 
-                req.set( FIX::Price(price));
+                req.set(FIX::Price(price));
                 req.set(FIX::OrderQty(quantity));
-                req.set( FIX::TimeInForce( FIX::TimeInForce_DAY ));
+                req.set(FIX::TimeInForce(FIX::TimeInForce_DAY));
                 
-                if(send(req))
-                {
-                    cout << "submitted order: `" << clOrdID << "'" << endl;
-                }
+                int seqNum = executor->execute(req.toString());
+                cout << "submitted order: " << seqNum << " `" << clOrdID << "'" << endl;
             }
             else if(tok[0] == "cancel")
             {
@@ -369,10 +384,8 @@ IceFIXClient::run(int argc, char* argv[])
                     FIX::Side(side),
                     FIX::TransactTime());
 
-                if(send(req))
-                {
-                    cout << "submitted cancel order: `" << clOrdID << "'" << endl;
-                }
+                int seqNum = executor->execute(req.toString());
+                cout << "submitted cancel order: " << seqNum << " clOrdID: `" << clOrdID << "'" << endl;
             }
             else if(tok[0] == "replace")
             {
@@ -389,21 +402,19 @@ IceFIXClient::run(int argc, char* argv[])
 
                 string clOrdID = IceUtil::generateUUID();
                 FIX42::OrderCancelReplaceRequest req(
-                    FIX::OrigClOrdID( tok[1] ),
-                    FIX::ClOrdID( clOrdID ),
+                    FIX::OrigClOrdID(tok[1]),
+                    FIX::ClOrdID(clOrdID),
                     FIX::HandlInst('1'),
                     FIX::Symbol(symbol),
                     FIX::Side(side),
                     FIX::TransactTime(),
-                    FIX::OrdType( FIX::OrdType_LIMIT ));
-                req.set(FIX::Price( price));
+                    FIX::OrdType(FIX::OrdType_LIMIT));
+                req.set(FIX::Price(price));
                 req.set(FIX::OrderQty(quantity));
-                req.set(FIX::TimeInForce( FIX::TimeInForce_DAY ));
+                req.set(FIX::TimeInForce(FIX::TimeInForce_DAY));
 
-                if(send(req))
-                {
-                    cout << "submitted cancel replace order: `" << clOrdID << "'" << endl;
-                }
+                int seqNum = executor->execute(req.toString());
+                cout << "submitted cancel replace order: " << seqNum << " `" << clOrdID << "'" << endl;
             }
             else if(tok[0] == "status")
             {
@@ -418,7 +429,8 @@ IceFIXClient::run(int argc, char* argv[])
                     FIX::Symbol(tok[3]),
                     FIX::Side(side));
 
-                send(req);
+                int seqNum = executor->execute(req.toString());
+                cout << "submitted order status: " << seqNum << endl;
             }
             else if(tok[0] == "exit")
             {
@@ -434,6 +446,10 @@ IceFIXClient::run(int argc, char* argv[])
                 menu();
             }
         }
+        catch(const IceFIX::ExecuteException& e)
+        {
+            cout << "ExecuteException: `" << e.reason << "'" << endl;
+        }
         catch(const Ice::Exception& ex)
         {
             cerr << ex << endl;
@@ -442,7 +458,7 @@ IceFIXClient::run(int argc, char* argv[])
 
     try
     {
-        _executor->destroy();
+        executor->destroy();
     }
     catch(const Ice::Exception& ex)
     {
@@ -463,19 +479,4 @@ IceFIXClient::menu()
         "status id sell|buy symbol                   status inquiry\n"
         "exit                                        exit\n"
         "?: help\n";
-}
-
-bool
-IceFIXClient::send(const FIX::Message& msg)
-{
-    try
-    {
-        _executor->execute(msg.toString());
-    }
-    catch(const IceFIX::ExecuteException& e)
-    {
-        cout << "ExecuteException: " << e.reason << endl;
-        return false;
-    }
-    return true;
 }

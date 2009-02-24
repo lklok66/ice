@@ -6,7 +6,7 @@ TP2.
 
 TP1 is configured to use a QuickFIX configuration contained in
 config.fix-tp1. This configuration creates a file system store,
-contained in the directory store-tp1. The associated Freeze databases
+contained in the directory store. The associated Freeze databases
 are contained in db-tp1.
 
 TP2 is likewise configured, except the file suffixes are tp2.
@@ -27,7 +27,7 @@ fix/demo/server.
 
 $ ../server/server config.tp1
 
-In a separate window, start the second ordermatch server.
+In a separate window, start the FIX server.
 
 $ ../server/server config.tp2
 

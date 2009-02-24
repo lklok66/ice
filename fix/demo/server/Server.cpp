@@ -632,15 +632,15 @@ class FSLog : public FIX::Log
 public:
 
     FSLog() :
-        _prefix("GLOBAL")
+        _prefix("GLOBAL"),
+        _trace(false)
     {
-        init();
     }
 
     FSLog(const FIX::SessionID& id) :
-        _prefix(id.toString())
+        _prefix(id.toString()),
+        _trace(false)
     {
-        init();
     }
     
     virtual void clear() 
@@ -649,33 +649,38 @@ public:
 
     virtual void onIncoming(const string& msg)
     {
-        //cout << _prefix << ":" << msg << endl;
+        if(_trace)
+        {
+            cout << _prefix << ":" << msg << endl;
+        }
     }
 
     virtual void onOutgoing(const string& msg)
     {
-        //cout << _prefix << ":" << msg << endl;
+        if(_trace)
+        {
+            cout << _prefix << ":" << msg << endl;
+        }
     }
 
     virtual void onEvent(const string& msg)
     {
-        //cout << _prefix << ":" << msg << endl;
+        if(_trace)
+        {
+            cout << _prefix << ":" << msg << endl;
+        }
+    }
+
+    void
+    setTrace(bool f)
+    {
+        _trace = f;
     }
 
 private:
 
-    void init()
-    {
-        //_traceIncoming = properties->getPropertyAsIntWithDefault("Trace.Incoming", 0);
-        //_traceOutgoing = properties->getPropertyAsIntWithDefault("Trace.Outgoing", 0);
-        //_traceEvent = properties->getPropertyAsIntWithDefault("Trace.Event", 0);
-    }
-
     const string _prefix;
-    // TODO: trace
-    ///*const*/ int _traceIncoming;
-    ///*const*/ int _traceOutgoing;
-    ///*const*/ int _traceEvent;
+    bool _trace;
 };
 
 class FSLogFactory : public FIX::LogFactory
@@ -688,19 +693,40 @@ public:
 
     virtual FIX::Log* create()
     {
-        return new FSLog();
+        FSLog* l = new FSLog();
+        _logs.push_back(l);
+        return l;
     }
 
     virtual FIX::Log* create(const FIX::SessionID& id)
     {
-        return new FSLog(id);
+        FSLog* l = new FSLog(id);
+        _logs.push_back(l);
+        return l;
+    }
+
+    void
+    setTrace(bool f)
+    {
+        for(vector<FSLog*>::const_iterator p = _logs.begin(); p != _logs.end(); ++p)
+        {
+            (*p)->setTrace(f);
+        }
     }
 
     virtual void destroy(FIX::Log* l)
     {
+        vector<FSLog*>::iterator p = find(_logs.begin(), _logs.end(), l);
+        if(p != _logs.end())
+        {
+            _logs.erase(p);
+        }
         delete l;
     }
 
+private:
+
+    vector<FSLog*> _logs;
 };
 
 void
@@ -711,9 +737,11 @@ menu()
         "match        match all pending orders\n"
         "automatch    enable automatch\n"
         "noautomatch  disable automatch\n"
-        "list        list the order books\n"
-        "exit        exit\n"
-        "?           help\n";
+        "trace        enable FIX tracing\n"
+        "notrace      disable FIX tracing\n"
+        "list         list the order books\n"
+        "exit         exit\n"
+        "?            help\n";
 }
 
 int
@@ -759,6 +787,14 @@ main(int argc, char* argv[])
             else if(s == "noautomatch")
             {
                application.setAutoMatch(false);
+            }
+            else if(s == "trace")
+            {
+                logFactory.setTrace(true);
+            }
+            else if(s == "notrace")
+            {
+                logFactory.setTrace(false);
             }
             else if(s == "exit")
             {
