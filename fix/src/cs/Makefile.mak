@@ -25,7 +25,7 @@ GDIR		= generated
 MCSFLAGS	= $(MCSFLAGS) -target:library -out:$(TARGETS) -warnaserror-
 MCSFLAGS	= $(MCSFLAGS) -keyfile:$(KEYFILE)
 
-SLICE2CSFLAGS	= $(SLICE2CSFLAGS) -I$(slicedir) --ice
+SLICE2CSFLAGS	= $(SLICE2CSFLAGS) -I$(slicedir) --ice --tie
 
 $(TARGETS):: $(SRCS) $(GEN_SRCS)
 	$(MCS) $(MCSFLAGS) -r:$(ice_refdir)\Ice.dll $(SRCS) $(GEN_SRCS)

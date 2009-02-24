@@ -4,6 +4,3 @@ Client.Endpoints=tcp
 
 # The default client id
 ClientId=test
-
-# The default filtered value.
-Filtered=true
