@@ -19,14 +19,14 @@ SRCS		= $(OBJS:.o=.cpp)
 
 include $(top_srcdir)/config/Make.rules
 
-CPPFLAGS	:= $(ICE_FLAGS) $(CPPFLAGS) $(QF_FLAGS)
-LIBS 		:= $(ICE_LIBS) $(LIBS) -lIceFIX $(QF_LIBS)
+CPPFLAGS	:= $(CPPFLAGS) $(QF_FLAGS)
+LIBS 		:= $(QF_LIBS)
 
 $(SERVER): $(OBJS) $(OBJS)
 	rm -f $@
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
 clean::
-	-rm -rf db/* store/*
+	-rm -rf store/*
 
 include .depend

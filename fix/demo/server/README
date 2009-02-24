@@ -1,10 +1,6 @@
-This demo is a simple QuickFIX server for use with the various IceFIX
-demos.
-
-To run the server, use the appropriate configuration on the command
-line.
-
-$ server ../simple/config.cfg
+This demo is a simple QuickFIX server for use with the various
+IceFIX demos. The server should be run from one of the demo
+directories.
 
 The server supports the following FIX messages
 

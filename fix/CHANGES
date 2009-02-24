@@ -1,5 +1,14 @@
 Changes since second release to QIM (Feb 12th, 2009)
 
+- Changed the demo clients to support more FIX messages.
+
+- Added FIX server demo/server. This server is an order matching
+  server, which supports NewOrderSingle, OrderStatusRequest,
+  OrderCancelRequest and OrderCancelReplaceRequest.
+
+- Added new demo for nonfiltered QoS clients. demo/nonfiltered,
+  democs/nonfiltered.
+
 - Added democs/backup to show how to backup the IceFIX bridge
   database.
 

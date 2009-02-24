@@ -7,8 +7,6 @@
 //
 // **********************************************************************
 
-#include <IceUtil/IceUtil.h>
-
 #include <quickfix/FileStore.h>
 #include <quickfix/SocketAcceptor.h>
 #include <quickfix/ThreadedSocketAcceptor.h>
@@ -32,8 +30,12 @@
 
 using namespace std;
 
-struct Order : public IceUtil::Shared
+struct Order
 {
+    Order()
+    {
+    }
+
     Order(const string& fsenderCompID, const string& ftargetCompID, const string& fclOrdID, const string& fsymbol,
           FIX::Side fside, double fprice, long forderQty)
     {
@@ -75,22 +77,21 @@ struct Order : public IceUtil::Shared
     double lastExecutedPrice;
     long lastExecutedQuantity;
 };
-typedef IceUtil::Handle<Order> OrderPtr;
 
 static bool
-BidSort(const OrderPtr& left, const OrderPtr& right)
+BidSort(const Order& left, const Order& right)
 {
-    return left->price > right->price;
+    return left.price > right.price;
 }
 
 static bool
-AskSort(const OrderPtr& left, const OrderPtr& right)
+AskSort(const Order& left, const Order& right)
 {
-    return left->price < right->price;
+    return left.price < right.price;
 }
 
 // The order book for a given symbol.
-class OrderBook : public IceUtil::Shared
+class OrderBook
 {
 public:
 
@@ -100,9 +101,9 @@ public:
     }
 
     void
-    add(const OrderPtr& order)
+    add(const Order& order)
     {
-        if(order->side == FIX::Side_BUY)
+        if(order.side == FIX::Side_BUY)
         {
             _bids.push_back(order);
             sort(_bids.begin(), _bids.end(), BidSort);
@@ -114,40 +115,38 @@ public:
         }
     }
 
-    OrderPtr
-    cancel(const string& clOrdID, FIX::Side side)
+    bool
+    cancel(const string& clOrdID, FIX::Side side, Order& o)
     {
-        OrderPtr o;
-        vector<OrderPtr>& v = (side == FIX::Side_BUY) ? _bids : _asks;
-        for(vector<OrderPtr>::iterator p = v.begin(); p != v.end(); ++p)
+        vector<Order>& v = (side == FIX::Side_BUY) ? _bids : _asks;
+        for(vector<Order>::iterator p = v.begin(); p != v.end(); ++p)
         {
-            if((*p)->clOrdID == clOrdID)
+            if(p->clOrdID == clOrdID)
             {
                 o = *p;
                 v.erase(p);
-                break;
+                return true;
             }
         }
-        return o;
+        return false;
     }
 
-    OrderPtr
-    find(const string& clOrdID, FIX::Side side)
+    bool
+    find(const string& clOrdID, FIX::Side side, Order& o) const
     {
-        OrderPtr o;
-        vector<OrderPtr>& v = (side == FIX::Side_BUY) ? _bids : _asks;
-        for(vector<OrderPtr>::iterator p = v.begin(); p != v.end(); ++p)
+        const vector<Order>& v = (side == FIX::Side_BUY) ? _bids : _asks;
+        for(vector<Order>::const_iterator p = v.begin(); p != v.end(); ++p)
         {
-            if((*p)->clOrdID == clOrdID)
+            if(p->clOrdID == clOrdID)
             {
                 o = *p;
-                break;
+                return true;
             }
         }
-        return o;
+        return false;
     }
 
-    void match(vector<OrderPtr>& orders)
+    void match(vector<Order>& orders)
     {
         for(;;)
         {
@@ -155,28 +154,28 @@ public:
             {
                 return;
             }
-            OrderPtr bid = _bids.front();
-            OrderPtr ask = _asks.front();
+            Order& bid = _bids.front();
+            Order& ask = _asks.front();
 
-            if(bid->price < ask->price)
+            if(bid.price < ask.price)
             {
                 break;
             }
 
-            double price = ask->price;
-            long quantity = (bid->openQuantity > ask->openQuantity) ? ask->openQuantity : bid->openQuantity;
+            double price = ask.price;
+            long quantity = (bid.openQuantity > ask.openQuantity) ? ask.openQuantity : bid.openQuantity;
 
-            ask->execute(price, quantity);
-            bid->execute(price, quantity);
+            ask.execute(price, quantity);
+            bid.execute(price, quantity);
 
             orders.push_back(ask);
             orders.push_back(bid);
 
-            if(ask->openQuantity == 0)
+            if(ask.openQuantity == 0)
             {
                 _asks.erase(_asks.begin());
             }
-            if(bid->openQuantity == 0)
+            if(bid.openQuantity == 0)
             {
                 _bids.erase(_bids.begin());
             }
@@ -184,7 +183,7 @@ public:
     }
 
     void
-    list()
+    list() const
     {
         cout << "Symbol: " << _symbol << endl;
         cout << "Order Book" << endl;
@@ -193,27 +192,19 @@ public:
         //       0123456789012345678901234567890123456789
         for(unsigned int index = 0; index < _bids.size() || index < _asks.size(); ++index)
         {
-            OrderPtr bid;
-            OrderPtr ask;
             if(index < _bids.size())
             {
-                bid = _bids[index];
-            }
-            if(index < _asks.size())
-            {
-                ask = _asks[index];
-            }
-            if(bid)
-            {
-                printf("%-10.2f%-10ld", (float)bid->price, bid->openQuantity);
+                Order bid = _bids[index];
+                printf("%-10.2f%-10ld", (float)bid.price, bid.openQuantity);
             }
             else
             {
                 printf("%20s", "");
             }
-            if(ask)
+            if(index < _asks.size())
             {
-                printf("%-10.2f%-10ld", (float)ask->price, ask->openQuantity);
+                Order ask = _asks[index];
+                printf("%-10.2f%-10ld", (float)ask.price, ask.openQuantity);
             }
             else
             {
@@ -226,10 +217,9 @@ public:
 private:
 
     const string _symbol;
-    vector<OrderPtr> _bids;
-    vector<OrderPtr> _asks;
+    vector<Order> _bids;
+    vector<Order> _asks;
 };
-typedef IceUtil::Handle<OrderBook> OrderBookPtr;
 
 class FixApplication : public FIX::Application, public FIX42::MessageCracker
 {
@@ -243,16 +233,16 @@ public:
 
     void list()
     {
-        for(map<string, OrderBookPtr>::const_iterator p = _symbols.begin(); p != _symbols.end(); ++p)
+        for(map<string, OrderBook>::const_iterator p = _symbols.begin(); p != _symbols.end(); ++p)
         {
-            p->second->list();
+            p->second.list();
         }
     }
 
     void
     match()
     {
-        for(map<string, OrderBookPtr>::const_iterator p = _symbols.begin(); p != _symbols.end(); ++p)
+        for(map<string, OrderBook>::iterator p = _symbols.begin(); p != _symbols.end(); ++p)
         {
             match(p->second);
         }
@@ -329,7 +319,7 @@ private:
         {
             cerr << "SessionNotFound: `" << targetCompID << "'" << endl;
         }
-        addOrder(new Order(senderCompID, targetCompID, clOrdID, symbol, side, price, static_cast<long>(orderQty)));
+        addOrder(Order(senderCompID, targetCompID, clOrdID, symbol, side, price, static_cast<long>(orderQty)));
     }
 
     void onMessage(const FIX42::OrderCancelRequest& req, const FIX::SessionID&)
@@ -350,59 +340,56 @@ private:
         req.get(symbol);
         req.get(side);
 
-        OrderPtr order;
-        map<string, OrderBookPtr>::const_iterator p = _symbols.find(symbol);
+        map<string, OrderBook>::iterator p = _symbols.find(symbol);
         if(p != _symbols.end())
         {
-            order = p->second->cancel(origClOrdID, side);
+            Order order;
+            if(p->second.cancel(origClOrdID, side, order))
+            {
+                FIX42::ExecutionReport report(
+                    FIX::OrderID(order.clOrdID),
+                    FIX::ExecID(nextExecId()),
+                    FIX::ExecTransType(FIX::ExecTransType_NEW),
+                    FIX::ExecType(FIX::OrdStatus_CANCELED),
+                    FIX::OrdStatus(FIX::OrdStatus_CANCELED),
+                    FIX::Symbol(order.symbol),
+                    FIX::Side(order.side),
+                    FIX::LeavesQty(order.openQuantity),
+                    FIX::CumQty(order.executedQuantity),
+                    FIX::AvgPx(order.avgExecutedPrice));
+
+                report.set(clOrdID);
+                report.set(origClOrdID);
+                report.set(FIX::OrderQty(order.orderQty));
+
+                report.set(FIX::LastShares(order.lastExecutedQuantity));
+                report.set(FIX::LastPx(order.lastExecutedPrice));
+
+                try
+                {
+                    FIX::Session::sendToTarget(report, order.targetCompID, order.senderCompID);
+                }
+                catch(const FIX::SessionNotFound&)
+                {
+                    cerr << "SessionNotFound: `" << order.targetCompID << "'" << endl;
+                }
+                return;
+            }
         }
 
-        if(order)
+        FIX42::OrderCancelReject report = FIX42::OrderCancelReject(
+            FIX::OrderID("NONE"),
+            FIX::ClOrdID(clOrdID),
+            FIX::OrigClOrdID(origClOrdID),
+            FIX::OrdStatus(FIX::OrdStatus_REJECTED),
+            FIX::CxlRejResponseTo(FIX::CxlRejResponseTo_ORDER_CANCEL_REQUEST));
+        try
         {
-            FIX42::ExecutionReport report(
-                FIX::OrderID(order->clOrdID),
-                FIX::ExecID(nextExecId()),
-                FIX::ExecTransType(FIX::ExecTransType_NEW),
-                FIX::ExecType(FIX::OrdStatus_CANCELED),
-                FIX::OrdStatus(FIX::OrdStatus_CANCELED),
-                FIX::Symbol(order->symbol),
-                FIX::Side(order->side),
-                FIX::LeavesQty(order->openQuantity),
-                FIX::CumQty(order->executedQuantity),
-                FIX::AvgPx(order->avgExecutedPrice));
-
-            report.set(clOrdID);
-            report.set(origClOrdID);
-            report.set(FIX::OrderQty(order->orderQty));
-
-            report.set(FIX::LastShares(order->lastExecutedQuantity));
-            report.set(FIX::LastPx(order->lastExecutedPrice));
-
-            try
-            {
-                FIX::Session::sendToTarget(report, order->targetCompID, order->senderCompID);
-            }
-            catch(const FIX::SessionNotFound&)
-            {
-                cerr << "SessionNotFound: `" << order->targetCompID << "'" << endl;
-            }
+            FIX::Session::sendToTarget(report, targetCompID, senderCompID);
         }
-        else
+        catch(const FIX::SessionNotFound&)
         {
-            FIX42::OrderCancelReject report = FIX42::OrderCancelReject(
-                FIX::OrderID("NONE"),
-                FIX::ClOrdID(clOrdID),
-                FIX::OrigClOrdID(origClOrdID),
-                FIX::OrdStatus(FIX::OrdStatus_REJECTED),
-                FIX::CxlRejResponseTo(FIX::CxlRejResponseTo_ORDER_CANCEL_REQUEST));
-            try
-            {
-                FIX::Session::sendToTarget(report, targetCompID, senderCompID);
-            }
-            catch(const FIX::SessionNotFound&)
-            {
-                cerr << "SessionNotFound: `" << targetCompID << "'" << endl;
-            }
+            cerr << "SessionNotFound: `" << targetCompID << "'" << endl;
         }
     }
 
@@ -428,85 +415,83 @@ private:
         req.get(price);
         req.get(orderQty);
 
-        OrderPtr order;
-        map<string, OrderBookPtr>::const_iterator p = _symbols.find(symbol);
+        map<string, OrderBook>::iterator p = _symbols.find(symbol);
         if(p != _symbols.end())
         {
-            order = p->second->cancel(origClOrdID, side);
+            Order order;
+            if(p->second.cancel(origClOrdID, side, order))
+            {
+                FIX42::ExecutionReport pendingReplace(
+                    FIX::OrderID(order.clOrdID),
+                    FIX::ExecID(nextExecId()),
+                    FIX::ExecTransType(FIX::ExecTransType_NEW),
+                    FIX::ExecType(FIX::ExecType_PENDING_REPLACE),
+                    FIX::OrdStatus(FIX::OrdStatus_PENDING_REPLACE),
+                    FIX::Symbol(order.symbol),
+                    FIX::Side(order.side),
+                    FIX::LeavesQty(order.openQuantity),
+                    FIX::CumQty(order.executedQuantity),
+                    FIX::AvgPx(order.avgExecutedPrice));
+
+                pendingReplace.set(clOrdID);
+                pendingReplace.set(origClOrdID);
+                pendingReplace.set(FIX::OrderQty(order.orderQty));
+
+                pendingReplace.set(FIX::LastShares(order.lastExecutedQuantity));
+                pendingReplace.set(FIX::LastPx(order.lastExecutedPrice));
+
+                try
+                {
+                    FIX::Session::sendToTarget(pendingReplace, targetCompID, senderCompID);
+                }
+                catch(const FIX::SessionNotFound&)
+                {
+                    cerr << "SessionNotFound: `" << targetCompID << "'" << endl;
+                }
+
+                FIX42::ExecutionReport report(
+                    FIX::OrderID(clOrdID),
+                    FIX::ExecID(nextExecId()),
+                    FIX::ExecTransType(FIX::ExecTransType_NEW),
+                    FIX::ExecType(FIX::ExecType_REPLACE),
+                    FIX::OrdStatus(FIX::OrdStatus_NEW),
+                    FIX::Symbol(symbol),
+                    FIX::Side(side),
+                    FIX::LeavesQty(orderQty),
+                    FIX::CumQty(0),
+                    FIX::AvgPx(0));
+
+                report.set(origClOrdID);
+                report.set(clOrdID);
+                report.set(FIX::OrderQty(orderQty));
+
+                try
+                {
+                    FIX::Session::sendToTarget(report, targetCompID, senderCompID);
+                }
+                catch(const FIX::SessionNotFound&)
+                {
+                    cerr << "SessionNotFound: `" << targetCompID << "'" << endl;
+                }
+
+                addOrder(Order(senderCompID, targetCompID, clOrdID, symbol, side, price, static_cast<long>(orderQty)));
+            }
+            return;
         }
-        if(order)
+
+        FIX42::OrderCancelReject report = FIX42::OrderCancelReject(
+            FIX::OrderID("NONE"),
+            FIX::ClOrdID(clOrdID),
+            FIX::OrigClOrdID(origClOrdID),
+            FIX::OrdStatus(FIX::OrdStatus_REJECTED),
+            FIX::CxlRejResponseTo(FIX::CxlRejResponseTo_ORDER_CANCEL_REPLACE_REQUEST));
+        try
         {
-            FIX42::ExecutionReport pendingReplace(
-                FIX::OrderID(order->clOrdID),
-                FIX::ExecID(nextExecId()),
-                FIX::ExecTransType(FIX::ExecTransType_NEW),
-                FIX::ExecType(FIX::ExecType_PENDING_REPLACE),
-                FIX::OrdStatus(FIX::OrdStatus_PENDING_REPLACE),
-                FIX::Symbol(order->symbol),
-                FIX::Side(order->side),
-                FIX::LeavesQty(order->openQuantity),
-                FIX::CumQty(order->executedQuantity),
-                FIX::AvgPx(order->avgExecutedPrice));
-
-            pendingReplace.set(clOrdID);
-            pendingReplace.set(origClOrdID);
-            pendingReplace.set(FIX::OrderQty(order->orderQty));
-
-            pendingReplace.set(FIX::LastShares(order->lastExecutedQuantity));
-            pendingReplace.set(FIX::LastPx(order->lastExecutedPrice));
-
-            try
-            {
-                FIX::Session::sendToTarget(pendingReplace, targetCompID, senderCompID);
-            }
-            catch(const FIX::SessionNotFound&)
-            {
-                cerr << "SessionNotFound: `" << targetCompID << "'" << endl;
-            }
-
-            FIX42::ExecutionReport report(
-                FIX::OrderID(clOrdID),
-                FIX::ExecID(nextExecId()),
-                FIX::ExecTransType(FIX::ExecTransType_NEW),
-                FIX::ExecType(FIX::ExecType_REPLACE),
-                FIX::OrdStatus(FIX::OrdStatus_NEW),
-                FIX::Symbol(symbol),
-                FIX::Side(side),
-                FIX::LeavesQty(orderQty),
-                FIX::CumQty(0),
-                FIX::AvgPx(0));
-
-            report.set(origClOrdID);
-            report.set(clOrdID);
-            report.set(FIX::OrderQty(orderQty));
-
-            try
-            {
-                FIX::Session::sendToTarget(report, targetCompID, senderCompID);
-            }
-            catch(const FIX::SessionNotFound&)
-            {
-                cerr << "SessionNotFound: `" << targetCompID << "'" << endl;
-            }
-
-            addOrder(new Order(senderCompID, targetCompID, clOrdID, symbol, side, price, static_cast<long>(orderQty)));
+            FIX::Session::sendToTarget(report, targetCompID, senderCompID);
         }
-        else
+        catch(const FIX::SessionNotFound&)
         {
-            FIX42::OrderCancelReject report = FIX42::OrderCancelReject(
-                FIX::OrderID("NONE"),
-                FIX::ClOrdID(clOrdID),
-                FIX::OrigClOrdID(origClOrdID),
-                FIX::OrdStatus(FIX::OrdStatus_REJECTED),
-                FIX::CxlRejResponseTo(FIX::CxlRejResponseTo_ORDER_CANCEL_REPLACE_REQUEST));
-            try
-            {
-                FIX::Session::sendToTarget(report, targetCompID, senderCompID);
-            }
-            catch(const FIX::SessionNotFound&)
-            {
-                cerr << "SessionNotFound: `" << targetCompID << "'" << endl;
-            }
+            cerr << "SessionNotFound: `" << targetCompID << "'" << endl;
         }
     }
 
@@ -526,12 +511,11 @@ private:
         req.get(symbol);
         req.get(side);
 
-        OrderBookPtr orderBook;
-        map<string, OrderBookPtr>::const_iterator p = _symbols.find(symbol);
+        map<string, OrderBook>::const_iterator p = _symbols.find(symbol);
         if(p != _symbols.end())
         {
-            OrderPtr order = p->second->find(clOrdID, side);
-            if(order)
+            Order order;
+            if(p->second.find(clOrdID, side, order))
             {
                 FIX42::ExecutionReport report(
                     FIX::OrderID(clOrdID),
@@ -541,15 +525,15 @@ private:
                     FIX::OrdStatus(FIX::OrdStatus_NEW),
                     FIX::Symbol(symbol),
                     FIX::Side(FIX::Side_BUY),
-                    FIX::LeavesQty(order->openQuantity),
-                    FIX::CumQty(order->executedQuantity),
-                    FIX::AvgPx(order->avgExecutedPrice));
+                    FIX::LeavesQty(order.openQuantity),
+                    FIX::CumQty(order.executedQuantity),
+                    FIX::AvgPx(order.avgExecutedPrice));
 
-                report.set(FIX::ClOrdID(order->clOrdID));
-                report.set(FIX::OrderQty(order->orderQty));
+                report.set(FIX::ClOrdID(order.clOrdID));
+                report.set(FIX::OrderQty(order.orderQty));
 
-                report.set(FIX::LastShares(order->lastExecutedQuantity));
-                report.set(FIX::LastPx(order->lastExecutedPrice));
+                report.set(FIX::LastShares(order.lastExecutedQuantity));
+                report.set(FIX::LastPx(order.lastExecutedPrice));
 
                 try
                 {
@@ -566,38 +550,34 @@ private:
 private:
 
     void
-    addOrder(const OrderPtr& order)
+    addOrder(const Order& order)
     {
-        OrderBookPtr orderBook;
-        map<string, OrderBookPtr>::const_iterator p = _symbols.find(order->symbol);
+        map<string, OrderBook>::iterator p = _symbols.find(order.symbol);
         if(p == _symbols.end())
         {
-            orderBook = new OrderBook(order->symbol);
-            _symbols.insert(make_pair(order->symbol, orderBook));
-        }
-        else
-        {
-            orderBook = p->second;
+            pair<map<string, OrderBook>::iterator, bool> i =
+                _symbols.insert(make_pair(order.symbol, OrderBook(order.symbol)));
+            assert(i.second);
+            p = i.first;
         }
 
-        orderBook->add(order);
+        p->second.add(order);
 
         if(_autoMatch)
         {
-            match(orderBook);
+            match(p->second);
         }
     }
 
     void
-    match(const OrderBookPtr& orderBook)
+    match(OrderBook& orderBook)
     {
-        vector<OrderPtr> orders;
-        orderBook->match(orders);
-        for(vector<OrderPtr>::const_iterator q = orders.begin(); q != orders.end(); ++q)
+        vector<Order> orders;
+        orderBook.match(orders);
+        for(vector<Order>::const_iterator q = orders.begin(); q != orders.end(); ++q)
         {
-            OrderPtr order = *q;
             FIX::OrdStatus status;
-            if(order->openQuantity > 0)
+            if(q->openQuantity > 0)
             {
                 status = FIX::OrdStatus_PARTIALLY_FILLED;
             }
@@ -607,30 +587,30 @@ private:
             }
 
             FIX42::ExecutionReport report = FIX42::ExecutionReport(
-                FIX::OrderID(order->clOrdID),
+                FIX::OrderID(q->clOrdID),
                 FIX::ExecID(nextExecId()),
                 FIX::ExecTransType(FIX::ExecTransType_NEW),
                 FIX::ExecType(FIX::ExecType_TRADE),
                 FIX::OrdStatus(status),
-                FIX::Symbol(order->symbol),
-                FIX::Side(order->side),
-                FIX::LeavesQty(order->openQuantity),
-                FIX::CumQty(order->executedQuantity),
-                FIX::AvgPx(order->avgExecutedPrice));
+                FIX::Symbol(q->symbol),
+                FIX::Side(q->side),
+                FIX::LeavesQty(q->openQuantity),
+                FIX::CumQty(q->executedQuantity),
+                FIX::AvgPx(q->avgExecutedPrice));
 
-            report.set(FIX::ClOrdID(order->clOrdID));
-            report.set(FIX::OrderQty(order->orderQty));
+            report.set(FIX::ClOrdID(q->clOrdID));
+            report.set(FIX::OrderQty(q->orderQty));
 
-            report.set(FIX::LastShares(order->lastExecutedQuantity));
-            report.set(FIX::LastPx(order->lastExecutedPrice));
+            report.set(FIX::LastShares(q->lastExecutedQuantity));
+            report.set(FIX::LastPx(q->lastExecutedPrice));
 
             try
             {
-                FIX::Session::sendToTarget(report, order->targetCompID, order->senderCompID);
+                FIX::Session::sendToTarget(report, q->targetCompID, q->senderCompID);
             }
             catch(const FIX::SessionNotFound&)
             {
-                cerr << "SessionNotFound: `" << order->targetCompID << "'" << endl;
+                cerr << "SessionNotFound: `" << q->targetCompID << "'" << endl;
             }
         }
     }
@@ -644,7 +624,7 @@ private:
     
     int _nextExecId;
     bool _autoMatch;
-    map<string, OrderBookPtr> _symbols;
+    map<string, OrderBook> _symbols;
 };
 
 class FSLog : public FIX::Log

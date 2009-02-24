@@ -20,7 +20,7 @@ SRCS		= $(OBJS:.obj=.cpp)
 !include $(top_srcdir)/config/Make.rules.mak
 
 CPPFLAGS	= -I. $(ICE_CPPFLAGS) $(CPPFLAGS) -DWIN32_LEAN_AND_MEAN $(QF_FLAGS)
-LIBS		= $(libdir)\icefix$(LIBSUFFIX).lib $(LIBS) $(QF_LIBS)
+LIBS		= $(LIBS) $(QF_LIBS)
 
 !if "$(GENERATE_PDB)" == "yes"
 PPDBFLAGS        = /pdb:$(SERVER:.exe=.pdb)
@@ -32,7 +32,6 @@ $(SERVER): $(OBJS)
 	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#1 && del /q $@.manifest
 
 clean::
-	-for %f in (db\*) do if not %f == db\.gitignore del /q %f
 	-for %f in (store\*) do if not %f == store\.gitignore del /q %f
 
 !include .depend

@@ -22,14 +22,14 @@ $ icegridadmin --Ice.Config=config.grid -e \
 
 Messages will be displayed in the IceGrid service window.
 
-Next start an QuickFIX sample ordermatch server for each trading
-partner.
+Next start a FIX server, such as the demo FIX server in
+fix/demo/server.
 
-$ ordermatch config.tp1
+$ ../server/server config.tp1
 
 In a separate window, start the second ordermatch server.
 
-$ ordermatch config.tp2
+$ ../server/server config.tp2
 
 Now activate the bridges.
 
