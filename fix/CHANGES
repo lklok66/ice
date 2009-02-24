@@ -4,10 +4,10 @@ Changes since second release to QIM (Feb 12th, 2009)
 
 - Added FIX server demo/server. This server is an order matching
   server, which supports NewOrderSingle, OrderStatusRequest,
-  OrderCancelRequest and OrderCancelReplaceRequest.
+  OrderCancelRequest, and OrderCancelReplaceRequest.
 
-- Added new demo for nonfiltered QoS clients. demo/nonfiltered,
-  democs/nonfiltered.
+- Added new demos for nonfiltered QoS clients: demo/nonfiltered
+  and democs/nonfiltered.
 
 - Added democs/backup to show how to backup the IceFIX bridge
   database.
@@ -29,16 +29,16 @@ Changes since second release to QIM (Feb 12th, 2009)
   erased (or would be erased), and take a boolean argument which
   indicates whether the records are actually erased.
 
-- Added new icefixadmin command clean and testclean.
+- Added the new icefixadmin commands "clean" and "testclean".
 
-- Stopped using the FIX::ScreenLogFactory. The bridge nows logs to the
+- Stopped using the FIX::ScreenLogFactory. The bridge now logs to the
   Communicator Logger. Added three properties to control the logged
   events. Each of these properties default to 0, meaning log no
   information.
 
-    * IceFIX.Trace.Incoming: log incoming FIX messages.
-    * IceFIX.Trace.Outgoing: log outgoing FIX messages.
-    * IceFIX.Trace.Event: log FIX lifecycle events.
+    * IceFIX.Trace.Incoming: log incoming FIX messages
+    * IceFIX.Trace.Outgoing: log outgoing FIX messages
+    * IceFIX.Trace.Event: log FIX lifecycle events
 
 
 Changes since first release to QIM (Feb 5th, 2009)
@@ -49,14 +49,14 @@ Changes since first release to QIM (Feb 5th, 2009)
 - The IceFIX bridge now correctly reverse routes "Reject" messages.
 
 - Removed property IceFix.Data. To set the database location, the
-  standard Freeze property "Freeze.DbEnv.<service-name>.DbHome"
-  should be used.  Note that the IceGrid deployment, as demonstrated
-  in demo/grid and democs/grid, automatically sets this property.
+  standard Freeze property "Freeze.DbEnv.<service-name>.DbHome" should
+  be used. Note that the IceGrid deployment, as demonstrated in
+  demo/grid and democs/grid, automatically sets this property.
 
-- Added new IceGrid deployment demos demo/grid, democs/grid.
+- Added new IceGrid deployment demos demo/grid and democs/grid.
 
 - Changed the icefixserver to an IceBox service. As such the default
-  identities of the default bridge & admin objects have changed to
-  IceFIX/Admin, IceFIX/Bridge.
+  identities of the default bridge and admin objects have changed to
+  IceFIX/Admin and IceFIX/Bridge, respectively.
 
 - Fixed bug where Executor::destroy would lose the client QoS.

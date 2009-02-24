@@ -1,22 +1,22 @@
-This demo demonstrates a simple nonfiltered IceFIX client.
+This demo shows a simple nonfiltered IceFIX client.
 
 To run the demo, first start a FIX server such as the demo FIX server
-in fix/demo/server.
+in fix\demo\server:
 
-$ ../server/server config.cfg
+> ..\server\server config.cfg
 
-In a separate window, start the IceFIX server.
+In a separate window, start the IceFIX server:
 
-$ icebox --Ice.Config=config.icebox
+> icebox --Ice.Config=config.icebox
 
-In a separate window, activate the IceFIX server.
+In a separate window, activate the IceFIX server:
 
-$ icefixadmin --Ice.Config=config.admin -e activate
+> icefixadmin --Ice.Config=config.admin -e activate
 
-Next, run the client.
+Finally, run the client:
 
-$ client --Ice.Config=config.client
+> client --Ice.Config=config.client
 
-The client will print any received messages. To terminate the client
-press ^C.  To see some messages run the simple client, and submit some
-orders.
+The client will print any received messages. Press ^C to terminate the
+client. To see some messages, run the simple client (in ..\simple) and
+submit some orders.
