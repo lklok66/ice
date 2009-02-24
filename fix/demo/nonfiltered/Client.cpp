@@ -119,7 +119,7 @@ IceFIXClient::run(int argc, char* argv[])
     }
     adapter->activate();
 
-    communicator()->waitUntilShutdown();
+    communicator()->waitForShutdown();
 
     try
     {
