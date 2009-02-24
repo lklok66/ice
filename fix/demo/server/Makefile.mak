@@ -9,11 +9,11 @@
 
 top_srcdir	= ..\..
 
-CLIENT		= client.exe
+SERVER		= server.exe
 
-TARGETS		= $(CLIENT)
+TARGETS		= $(SERVER)
 
-OBJS		= Client.obj
+OBJS		= Server.obj
 
 SRCS		= $(OBJS:.obj=.cpp)
 
@@ -23,11 +23,11 @@ CPPFLAGS	= -I. $(ICE_CPPFLAGS) $(CPPFLAGS) -DWIN32_LEAN_AND_MEAN $(QF_FLAGS)
 LIBS		= $(libdir)\icefix$(LIBSUFFIX).lib $(LIBS) $(QF_LIBS)
 
 !if "$(GENERATE_PDB)" == "yes"
-PPDBFLAGS        = /pdb:$(CLIENT:.exe=.pdb)
+PPDBFLAGS        = /pdb:$(SERVER:.exe=.pdb)
 !endif
 
-$(CLIENT): $(OBJS) $(POBJS)
-	$(LINK) $(LD_EXEFLAGS) $(ICE_LDFLAGS) $(PPDBFLAGS) $(SETARGV) $(OBJS) $(POBJS) $(PREOUT)$@ $(PRELIBS)$(LIBS)
+$(SERVER): $(OBJS)
+	$(LINK) $(LD_EXEFLAGS) $(ICE_LDFLAGS) $(PPDBFLAGS) $(SETARGV) $(OBJS) $(PREOUT)$@ $(PRELIBS)$(LIBS)
 	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
 	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#1 && del /q $@.manifest
 

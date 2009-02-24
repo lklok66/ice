@@ -329,7 +329,7 @@ private:
         {
             cerr << "SessionNotFound: `" << targetCompID << "'" << endl;
         }
-        addOrder(new Order(senderCompID, targetCompID, clOrdID, symbol, side, price, orderQty));
+        addOrder(new Order(senderCompID, targetCompID, clOrdID, symbol, side, price, static_cast<long>(orderQty)));
     }
 
     void onMessage(const FIX42::OrderCancelRequest& req, const FIX::SessionID&)
@@ -489,7 +489,7 @@ private:
                 cerr << "SessionNotFound: `" << targetCompID << "'" << endl;
             }
 
-            addOrder(new Order(senderCompID, targetCompID, clOrdID, symbol, side, price, orderQty));
+            addOrder(new Order(senderCompID, targetCompID, clOrdID, symbol, side, price, static_cast<long>(orderQty)));
         }
         else
         {
