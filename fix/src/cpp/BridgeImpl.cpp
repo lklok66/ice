@@ -1144,7 +1144,8 @@ BridgeImpl::route(const FIX::Message& message)
             if(clients.empty())
             {
                 Ice::Warning warning(_communicator->getLogger());
-                warning << "Bridge: fromApp: `" << seqNum << "': no route for message";
+                warning << "Bridge: fromApp: `" << seqNum << "': no route for message\n";
+                warning << message.toXML();
                 return;
             }
 

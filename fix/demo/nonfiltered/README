@@ -19,3 +19,7 @@ $ icefixadmin --Ice.Config=config.admin -e activate
 Next, run the client.
 
 $ client --Ice.Config=config.client
+
+The client will print any received messages. To terminate the client
+press ^C.  To see some messages run the simple client, and submit some
+orders.

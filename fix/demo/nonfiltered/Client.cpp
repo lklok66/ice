@@ -12,13 +12,19 @@
 #include <IceFIX/IceFIX.h>
 
 #include <quickfix/Message.h>
-#include <quickfix/fix42/NewOrderSingle.h>
-#include <quickfix/fix42/OrderCancelRequest.h>
-#include <quickfix/fix42/OrderCancelReplaceRequest.h>
-#include <quickfix/fix42/OrderStatusRequest.h>
-#include <quickfix/Values.h>
 
 using namespace std;
+
+class ReporterI : public IceFIX::Reporter
+{
+public:
+
+    virtual void message(const string& data, const Ice::Current&)
+    {
+        FIX::Message message(data);
+        cout << "message: " << message.toXML() << endl;
+    }
+};
 
 class IceFIXClient : public Ice::Application
 {
@@ -27,14 +33,6 @@ public:
     IceFIXClient();
 
     virtual int run(int, char*[]);
-
-private:
-
-    void menu();
-
-    bool send(const FIX::Message&);
-
-    IceFIX::ExecutorPrx _executor;
 };
 
 int
@@ -51,25 +49,9 @@ usage(const string& n)
           << " [--id id]" << endl;
 }
 
-IceFIXClient::IceFIXClient() :
-    //
-    // Since this is an interactive demo we don't want any signal
-    // handling.
-    //
-    Ice::Application(Ice::NoSignalHandling)
+IceFIXClient::IceFIXClient()
 {
 }
-
-class ReporterI : public IceFIX::Reporter
-{
-public:
-
-    virtual void message(const string& data, const Ice::Current&)
-    {
-        FIX::Message message(data);
-        cout << "message: " << message.toXML() << endl;
-    }
-};
 
 int
 IceFIXClient::run(int argc, char* argv[])
@@ -114,9 +96,10 @@ IceFIXClient::run(int argc, char* argv[])
 
     Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapter("Client");
     IceFIX::ReporterPrx reporter = IceFIX::ReporterPrx::uncheckedCast(adapter->addWithUUID(new ReporterI()));
+    IceFIX::ExecutorPrx executor;
     try
     {
-        bridge->connect(id, reporter, _executor);
+        bridge->connect(id, reporter, executor);
     }
     catch(const IceFIX::RegistrationException&)
     {
@@ -126,7 +109,7 @@ IceFIXClient::run(int argc, char* argv[])
             IceFIX::QoS qos;
             qos["filtered"] = "false";
             admin->registerWithId(id, qos);
-            bridge->connect(id, reporter, _executor);
+            bridge->connect(id, reporter, executor);
         }
         catch(const IceFIX::RegistrationException& ex)
         {
@@ -136,68 +119,15 @@ IceFIXClient::run(int argc, char* argv[])
     }
     adapter->activate();
 
-    menu();
-
-    char c;
-    do
-    {
-        try
-        {
-            cout << "==> ";
-            cin >> c;
-
-            if(c == 'x')
-            {
-                // Nothing to do
-            }
-            else if(c == '?')
-            {
-                menu();
-            }
-            else
-            {
-                cout << "unknown command `" << c << "'" << endl;
-                menu();
-            }
-        }
-        catch(const Ice::Exception& ex)
-        {
-            cerr << ex << endl;
-        }
-    }
-    while(cin.good() && c != 'x');
+    communicator()->waitUntilShutdown();
 
     try
     {
-        _executor->destroy();
+        executor->destroy();
     }
     catch(const Ice::Exception& ex)
     {
         cerr << "error when destroying excecutor: " << ex << endl;
     }
     return EXIT_SUCCESS;
-}
-
-void
-IceFIXClient::menu()
-{
-    cout <<
-        "usage:\n"
-        "x: exit\n"
-        "?: help\n";
-}
-
-bool
-IceFIXClient::send(const FIX::Message& msg)
-{
-    try
-    {
-        _executor->execute(msg.toString());
-    }
-    catch(const IceFIX::ExecuteException& e)
-    {
-        cout << "ExecuteException: " << e.reason << endl;
-        return false;
-    }
-    return true;
 }
