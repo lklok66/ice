@@ -50,8 +50,6 @@ private:
 
     string nextid();
 
-    int send(const IceFIX::ExecutorPrx&, const FIX::Message&);
-
     int _nextClOrdID;
 };
 
@@ -460,7 +458,9 @@ IceFIXClient::run(int argc, char* argv[])
         newOrderSingle1.set(FIX::TimeInForce(FIX::TimeInForce_DAY));
 
         reporter->addOrder(createOrder(tp1ReporterId, newOrderSingle1));
-        send(tp1, newOrderSingle1);
+
+        tp1->execute(newOrderSingle1.toString());
+
         // There should be no fill received in 5 seconds.
         Order o = reporter->waitFill(getClOrdID(newOrderSingle1), IceUtil::Time::seconds(5));
         test(o.ordStatus != FIX::OrdStatus_FILLED);
@@ -512,7 +512,7 @@ IceFIXClient::run(int argc, char* argv[])
 
         reporter->addOrder(createOrder(tp2ReporterId, newOrderSingle));
 
-        send(tp2, newOrderSingle);
+        tp2->execute(newOrderSingle.toString());
 
         Order o = reporter->waitFill(getClOrdID(newOrderSingle));
         test(o.ordStatus == FIX::OrdStatus_FILLED);
@@ -538,7 +538,7 @@ IceFIXClient::run(int argc, char* argv[])
 
         reporter->addOrder(createOrder(tp1ReporterId, newOrderSingle));
 
-        send(tp1, newOrderSingle);
+        tp1->execute(newOrderSingle.toString());
 
         Order o = reporter->waitFill(getClOrdID(newOrderSingle));
         test(o.ordStatus == FIX::OrdStatus_FILLED && o.trades > 1);
@@ -564,7 +564,7 @@ IceFIXClient::run(int argc, char* argv[])
 
         reporter->addOrder(createOrder(tp1ReporterId, newOrderSingle));
 
-        send(tp1, newOrderSingle);
+        tp1->execute(newOrderSingle.toString());
 
         FIX42::OrderCancelRequest cancelReq(
             FIX::OrigClOrdID(clOrdID),
@@ -572,9 +572,8 @@ IceFIXClient::run(int argc, char* argv[])
             FIX::Symbol("CANC"),
             FIX::Side(FIX::Side_BUY),
             FIX::TransactTime());
-        cout << "cancel: " << getClOrdID(cancelReq) << endl;
 
-        send(tp1, cancelReq);
+        tp1->execute(cancelReq.toString());
 
         Order o = reporter->waitFill(clOrdID);
         test(o.ordStatus == FIX::OrdStatus_CANCELED);
@@ -598,7 +597,7 @@ IceFIXClient::run(int argc, char* argv[])
         newOrderSingle.set(FIX::TimeInForce(FIX::TimeInForce_DAY));
 
         reporter->addOrder(createOrder(tp1ReporterId, newOrderSingle));
-        send(tp1, newOrderSingle);
+        tp1->execute(newOrderSingle.toString());
 
         FIX::ClOrdID replaceClOrdID = FIX::ClOrdID(nextid());
         FIX42::OrderCancelReplaceRequest req(
@@ -615,7 +614,7 @@ IceFIXClient::run(int argc, char* argv[])
 
         reporter->addOrder(createOrder(tp1ReporterId, req));
         
-        send(tp1, req);
+        tp1->execute(req.toString());
 
         Order o = reporter->waitFill(clOrdID);
         test(o.ordStatus == FIX::OrdStatus_PENDING_REPLACE);
@@ -643,14 +642,14 @@ IceFIXClient::run(int argc, char* argv[])
 
         reporter->addOrder(createOrder(tp1ReporterId, newOrderSingle));
 
-        send(tp1, newOrderSingle);
+        tp1->execute(newOrderSingle.toString());
 
         FIX42::OrderStatusRequest req(
             FIX::ClOrdID( clOrdID ),
             FIX::Symbol("STATUS"),
             FIX::Side( FIX::Side_BUY ));
 
-        send(tp1, req);
+        tp1->execute(req.toString());
 
         Order o = reporter->waitFill(clOrdID);
         test(o.ordStatus == FIX::OrdStatus_FILLED && o.status > 0);
@@ -675,7 +674,7 @@ IceFIXClient::run(int argc, char* argv[])
 
         reporter->addOrder(createOrder(tp2ReporterId, newOrderSingle));
 
-        int seqNum = send(tp2, newOrderSingle);
+        int seqNum = tp2->execute(newOrderSingle.toString());
         test(reporter->waitReject(tp2ReporterId, seqNum));
     }
     cout << "ok" << endl;
@@ -697,7 +696,7 @@ IceFIXClient::run(int argc, char* argv[])
 
         reporter->addOrder(createOrder(tp2ReporterId, newOrderSingle));
 
-        int seqNum = send(tp2, newOrderSingle);
+        int seqNum = tp2->execute(newOrderSingle.toString());
         test(reporter->waitReject(tp2ReporterId, seqNum));
     }
     cout << "ok" << endl;
@@ -721,7 +720,7 @@ IceFIXClient::run(int argc, char* argv[])
 
         reporter->addOrder(createOrder(tp1ReporterId, newOrderSingle3));
 
-        send(tp1, newOrderSingle3);
+        tp1->execute(newOrderSingle3.toString());
 
         Order o = reporter->waitFill(getClOrdID(newOrderSingle3), IceUtil::Time::seconds(5));
         test(o.ordStatus != FIX::OrdStatus_FILLED);
@@ -740,7 +739,7 @@ IceFIXClient::run(int argc, char* argv[])
 
         reporter->addOrder(createOrder(tp2ReporterId, newOrderSingle4));
 
-        send(tp2, newOrderSingle4);
+        tp2->execute(newOrderSingle4.toString());
 
         o = reporter->waitFill(getClOrdID(newOrderSingle4));
         test(o.ordStatus == FIX::OrdStatus_FILLED);
@@ -783,7 +782,7 @@ IceFIXClient::run(int argc, char* argv[])
         reporter->addOrder(createOrder(tp2ReporterId, newOrderSingle));
         nonFilteredReporter->addOrder(createOrder(nonFilteredReporterId, newOrderSingle));
 
-        send(tp2, newOrderSingle);
+        tp2->execute(newOrderSingle.toString());
 
         Order o = reporter->waitFill(getClOrdID(newOrderSingle));
         test(o.ordStatus == FIX::OrdStatus_FILLED);
@@ -814,7 +813,7 @@ IceFIXClient::run(int argc, char* argv[])
         reporter->addOrder(createOrder(tp2ReporterId, newOrderSingle));
         nonFilteredReporter->addOrder(createOrder(nonFilteredReporterId, newOrderSingle));
 
-        send(tp2, newOrderSingle);
+        tp2->execute(newOrderSingle.toString());
 
         Order o = reporter->waitFill(getClOrdID(newOrderSingle));
         test(o.ordStatus == FIX::OrdStatus_FILLED);
@@ -850,7 +849,7 @@ IceFIXClient::run(int argc, char* argv[])
         reporter->addOrder(createOrder(tp2ReporterId, newOrderSingle));
         nonFilteredReporter->addOrder(createOrder(nonFilteredReporterId, newOrderSingle));
 
-        send(tp2, newOrderSingle);
+        tp2->execute(newOrderSingle.toString());
 
         Order o = reporter->waitFill(getClOrdID(newOrderSingle));
         test(o.ordStatus == FIX::OrdStatus_FILLED);
@@ -901,23 +900,7 @@ IceFIXClient::run(int argc, char* argv[])
         cerr << "error when destroying excecutor: " << ex << endl;
     }
 
-
     return EXIT_SUCCESS;
-}
-
-int
-IceFIXClient::send(const IceFIX::ExecutorPrx& executor, const FIX::Message& msg)
-{
-    try
-    {
-        return executor->execute(msg.toString());
-    }
-    catch(const IceFIX::ExecuteException& e)
-    {
-        cout << "ExecuteException: " << e.reason << endl;
-        return false;
-    }
-    return -1;
 }
 
 string
