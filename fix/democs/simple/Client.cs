@@ -358,7 +358,7 @@ public class Client
 
                         String clOrdID = tok[1];
                         char side = tok[2].Equals("buy") ? Side.BUY : Side.SELL;
-                        String symboll = tok[3];
+                        String symbol = tok[3];
 
                         QuickFix42.OrderStatusRequest req = new QuickFix42.OrderStatusRequest(
                             new ClOrdID(clOrdID),

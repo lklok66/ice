@@ -101,7 +101,7 @@ public class Client
 	    }
 	    adapter.activate();
 
-            communicator()->waitForShutdown();
+            communicator().waitForShutdown();
 
 	    try
 	    {

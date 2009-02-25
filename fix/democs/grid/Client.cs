@@ -238,16 +238,16 @@ public class Client
 
             Dictionary<string, IceFIX.ExecutorPrx> executors = new Dictionary<string, IceFIX.ExecutorPrx>();
 	    Ice.ObjectAdapter adapter = communicator().createObjectAdapter("Client");
-	    IceFIX.ReporterPrx reporter = IceFIX.ReporterPrxHelper.uncheckedCast(adapter.addWithUUID(new ReporterI()));
+	    IceFIX.ReporterPrx reporter = IceFIX.ReporterPrxHelper.uncheckedCast(adapter.addWithUUID(new ReporterTie_(new ReporterI())));
             foreach(KeyValuePair<string, IceFIX.BridgePrx> p in bridges)
             {
                 Console.Write("connecting with `" + p.Key + "'...");
                 Console.Out.Flush();
 	        try
 	        {
-                    IceFIX.ExecutorPrx executor;
-                    p.Value.connect(id, reporter, out executor);
-                    executors[p.Key] = executor;
+                    IceFIX.ExecutorPrx e;
+                    p.Value.connect(id, reporter, out e);
+                    executors[p.Key] = e;
 	        }
 	        catch(IceFIX.RegistrationException)
 	        {
@@ -257,12 +257,11 @@ public class Client
                         Console.Out.Flush();
                         IceFIX.BridgeAdminPrx admin = p.Value.getAdmin();
                         Dictionary<string, string> qos = new Dictionary<string, string>();
-		        qos["filtered"] = filtered;
 		        admin.registerWithId(id, qos);
 
-                        IceFIX.ExecutorPrx executor;
-                        p.Value.connect(id, reporter, out executor);
-                        executors[p.Key] = executor;
+                        IceFIX.ExecutorPrx e;
+                        p.Value.connect(id, reporter, out e);
+                        executors[p.Key] = e;
 		    }
 		    catch(IceFIX.RegistrationException ex)
 		    {
@@ -396,7 +395,7 @@ public class Client
 
                         String clOrdID = tok[1];
                         char side = tok[2].Equals("buy") ? Side.BUY : Side.SELL;
-                        String symboll = tok[3];
+                        String symbol = tok[3];
 
                         QuickFix42.OrderStatusRequest req = new QuickFix42.OrderStatusRequest(
                             new ClOrdID(clOrdID),
@@ -414,17 +413,16 @@ public class Client
                             continue;
                         }
 
-                        String id = tok[1];
                         try
                         {
-                            executor = executors[id];
+                            executor = executors[tok[1]];
                         }
                         catch(KeyNotFoundException)
                         {
                             Console.WriteLine("cannot locate");
                             continue;
                         }
-                        bridge = newid;
+                        bridge = tok[1];
                     }
                     else if(tok[0].Equals("exit"))
                     {
