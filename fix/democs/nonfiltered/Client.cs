@@ -44,6 +44,8 @@ public class Client
 
         public override int run(string[] args)
         {
+            shutdownOnInterrupt();
+
 	    Ice.Properties properties = communicator().getProperties();
 	    String id = properties.getPropertyWithDefault("ClientId", "logger");
 

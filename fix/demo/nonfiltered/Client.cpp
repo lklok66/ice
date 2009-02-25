@@ -56,6 +56,8 @@ IceFIXClient::IceFIXClient()
 int
 IceFIXClient::run(int argc, char* argv[])
 {
+    shutdownOnInterrupt();
+
     Ice::PropertiesPtr properties = communicator()->getProperties();
     string id = properties->getPropertyWithDefault("ClientId", "logger");
 
