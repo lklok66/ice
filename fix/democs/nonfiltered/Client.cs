@@ -81,7 +81,7 @@ public class Client
 	    IceFIX.ReporterPrx reporter = IceFIX.ReporterPrxHelper.uncheckedCast(adapter.addWithUUID(new ReporterI()));
 	    try
 	    {
-		bridge.connect(id, reporter, out executor);
+		executor = bridge.connect(id, reporter);
 	    }
 	    catch(IceFIX.RegistrationException)
 	    {
@@ -91,7 +91,7 @@ public class Client
                     Dictionary<string, string> qos = new Dictionary<string, string>();
 		    qos["filtered"] = "false";
 		    admin.registerWithId(id, qos);
-		    bridge.connect(id, reporter, out executor);
+                    executor = bridge.connect(id, reporter);
 		}
 		catch(IceFIX.RegistrationException ex)
 		{

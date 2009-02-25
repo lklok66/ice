@@ -335,9 +335,8 @@ BridgeImpl::unregister(const string& clientId, const Ice::Current& current)
     }
 }
 
-void
-BridgeImpl::connect(const string& clientId, const ReporterPrx& reporter, ExecutorPrx& executor,
-                    const Ice::Current& current)
+ExecutorPrx
+BridgeImpl::connect(const string& clientId, const ReporterPrx& reporter, const Ice::Current& current)
 {
     Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
     ClientDB clients(connection, clientDBName);
@@ -365,9 +364,7 @@ BridgeImpl::connect(const string& clientId, const ReporterPrx& reporter, Executo
             Ice::Identity oid;
             oid.category = _instanceName + "-Executor";
             oid.name = clientId;
-            executor = ExecutorPrx::uncheckedCast(current.adapter->createProxy(oid));
-
-            break;
+            return ExecutorPrx::uncheckedCast(current.adapter->createProxy(oid));
         }
         catch(const Freeze::DeadlockException&)
         {

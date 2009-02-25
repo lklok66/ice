@@ -313,8 +313,7 @@ IceFIXClient::run(int argc, char* argv[])
     	cout << "connecting with `" << p->first << "'..." << flush;
 	try
 	{
-	    IceFIX::ExecutorPrx executor;
-	    p->second->connect(id, reporter, executor);
+	    IceFIX::ExecutorPrx executor =  p->second->connect(id, reporter);
 	    executors.insert(make_pair(p->first, executor));
 	}
 	catch(const IceFIX::RegistrationException&)
@@ -326,8 +325,7 @@ IceFIXClient::run(int argc, char* argv[])
 		IceFIX::QoS qos;
 		admin->registerWithId(id, qos);
 
-		IceFIX::ExecutorPrx executor;
-		p->second->connect(id, reporter, executor);
+		IceFIX::ExecutorPrx executor = p->second->connect(id, reporter);
 		executors.insert(make_pair(p->first, executor));
 	    }
 	    catch(const IceFIX::RegistrationException& ex)

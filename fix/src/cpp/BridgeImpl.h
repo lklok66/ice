@@ -37,7 +37,7 @@ public:
     std::string _cpp_register(const QoS&, const Ice::Current&);
     void registerWithId(const std::string&, const QoS&, const Ice::Current&);
     void unregister(const std::string&, const Ice::Current&);
-    void connect(const std::string&, const ReporterPrx&, ExecutorPrx&, const Ice::Current&);
+    ExecutorPrx connect(const std::string&, const ReporterPrx&, const Ice::Current&);
     void activate(const Ice::Current&);
     void deactivate(const Ice::Current&);
     Ice::Long clean(Ice::Long, bool, const Ice::Current&);

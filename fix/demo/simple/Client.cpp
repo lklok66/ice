@@ -294,7 +294,7 @@ IceFIXClient::run(int argc, char* argv[])
     IceFIX::ReporterPrx reporter = IceFIX::ReporterPrx::uncheckedCast(adapter->addWithUUID(new ReporterI()));
     try
     {
-        bridge->connect(id, reporter, executor);
+        executor = bridge->connect(id, reporter);
     }
     catch(const IceFIX::RegistrationException&)
     {
@@ -303,7 +303,7 @@ IceFIXClient::run(int argc, char* argv[])
             IceFIX::BridgeAdminPrx admin = bridge->getAdmin();
             IceFIX::QoS qos;
             admin->registerWithId(id, qos);
-            bridge->connect(id, reporter, executor);
+            executor = bridge->connect(id, reporter);
         }
         catch(const IceFIX::RegistrationException& ex)
         {

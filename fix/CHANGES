@@ -1,5 +1,8 @@
 Changes since second release to QIM (Feb 12th, 2009)
 
+- The Bridge::connect method signature was changed to return the
+  executor proxy, rather than use an out parameter.
+
 - Changed the C# build to generate tie servants for IceFIX.
 
 - Changed the demo clients to support more FIX messages.

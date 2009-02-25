@@ -245,8 +245,7 @@ public class Client
                 Console.Out.Flush();
 	        try
 	        {
-                    IceFIX.ExecutorPrx e;
-                    p.Value.connect(id, reporter, out e);
+                    IceFIX.ExecutorPrx e = p.Value.connect(id, reporter);
                     executors[p.Key] = e;
 	        }
 	        catch(IceFIX.RegistrationException)
@@ -259,8 +258,7 @@ public class Client
                         Dictionary<string, string> qos = new Dictionary<string, string>();
 		        admin.registerWithId(id, qos);
 
-                        IceFIX.ExecutorPrx e;
-                        p.Value.connect(id, reporter, out e);
+                        IceFIX.ExecutorPrx e = p.Value.connect(id, reporter);
                         executors[p.Key] = e;
 		    }
 		    catch(IceFIX.RegistrationException ex)

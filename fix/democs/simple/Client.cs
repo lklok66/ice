@@ -227,7 +227,7 @@ public class Client
                 adapter.addWithUUID(new IceFIX.ReporterTie_(new ReporterI())));
             try
             {
-                bridge.connect(id, reporter, out executor);
+                executor = bridge.connect(id, reporter);
             }
             catch(IceFIX.RegistrationException)
             {
@@ -236,7 +236,7 @@ public class Client
                     IceFIX.BridgeAdminPrx admin = bridge.getAdmin();
                     Dictionary<string, string> qos = new Dictionary<string, string>();
                     admin.registerWithId(id, qos);
-                    bridge.connect(id, reporter, out executor);
+                    executor = bridge.connect(id, reporter);
                 }
                 catch(IceFIX.RegistrationException ex)
                 {

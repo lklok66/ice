@@ -357,8 +357,7 @@ IceFIXClient::run(int argc, char* argv[])
     try
     {
         IceFIX::ReporterPrx testReporterPrx;
-        IceFIX::ExecutorPrx testExecutor;
-        tp1Bridge->connect("client",  testReporterPrx, testExecutor);
+        IceFIX::ExecutorPrx testExecutor = tp1Bridge->connect("client",  testReporterPrx);
         test(false);
     }
     catch(const IceFIX::RegistrationException&)
@@ -410,8 +409,7 @@ IceFIXClient::run(int argc, char* argv[])
 
     Ice::Identity tp1ReporterId = communicator()->stringToIdentity("TP1Reporter");
     IceFIX::ReporterPrx tp1ReporterPrx = IceFIX::ReporterPrx::uncheckedCast(adapter->add(reporter, tp1ReporterId));
-    IceFIX::ExecutorPrx tp1;
-    tp1Bridge->connect(clientId, tp1ReporterPrx, tp1);
+    IceFIX::ExecutorPrx tp1 = tp1Bridge->connect(clientId, tp1ReporterPrx);
 
     //
     // TEST: Ensure the id namespace of the two bridges are separate.
@@ -419,8 +417,7 @@ IceFIXClient::run(int argc, char* argv[])
     try
     {
         IceFIX::ReporterPrx testReporterPrx;
-        IceFIX::ExecutorPrx testExecutor;
-        tp2Bridge->connect(clientId,  testReporterPrx, testExecutor);
+        IceFIX::ExecutorPrx testExecutor = tp2Bridge->connect(clientId,  testReporterPrx);
         test(false);
     }
     catch(const IceFIX::RegistrationException&)
@@ -433,8 +430,7 @@ IceFIXClient::run(int argc, char* argv[])
 
     Ice::Identity tp2ReporterId = communicator()->stringToIdentity("TP2Reporter");
     IceFIX::ReporterPrx tp2ReporterPrx = IceFIX::ReporterPrx::uncheckedCast(adapter->add(reporter, tp2ReporterId));
-    IceFIX::ExecutorPrx tp2;
-    tp2Bridge->connect(clientId, tp2ReporterPrx, tp2);
+    IceFIX::ExecutorPrx tp2 = tp2Bridge->connect(clientId, tp2ReporterPrx);
     cout << "ok" << endl;
 
     adapter->activate();
@@ -762,7 +758,6 @@ IceFIXClient::run(int argc, char* argv[])
 
     Ice::Identity nonFilteredReporterId = communicator()->stringToIdentity("FilteredReporter");
     ReporterIPtr nonFilteredReporter = new ReporterI(communicator());
-    IceFIX::ExecutorPrx nonFilteredTp;
 
     IceFIX::QoS nonFilteredQoS;
     nonFilteredQoS["filtered"] = "false";
@@ -770,7 +765,7 @@ IceFIXClient::run(int argc, char* argv[])
 
     IceFIX::ReporterPrx nonFilteredTp2ReporterPrx = IceFIX::ReporterPrx::uncheckedCast(
         adapter->add(nonFilteredReporter, nonFilteredReporterId));
-    tp2Bridge->connect(nonFilteredClientId, nonFilteredTp2ReporterPrx, nonFilteredTp);
+    IceFIX::ExecutorPrx nonFilteredTp = tp2Bridge->connect(nonFilteredClientId, nonFilteredTp2ReporterPrx);
 
     {
         FIX42::NewOrderSingle newOrderSingle(
@@ -827,7 +822,7 @@ IceFIXClient::run(int argc, char* argv[])
         // Now the message has been queued for the non-filtered
         // client, so reconnect the client and wait for the message to
         // arrive.
-        tp2Bridge->connect(nonFilteredClientId, nonFilteredTp2ReporterPrx, nonFilteredTp);
+        nonFilteredTp = tp2Bridge->connect(nonFilteredClientId, nonFilteredTp2ReporterPrx);
 
         o = nonFilteredReporter->waitFill(getClOrdID(newOrderSingle));
         test(o.ordStatus == FIX::OrdStatus_FILLED);
@@ -882,7 +877,7 @@ IceFIXClient::run(int argc, char* argv[])
         // Now the message has been queued for the non-filtered
         // client, so reconnect the client and wait for the message to
         // arrive.
-        tp2Bridge->connect(nonFilteredClientId, nonFilteredTp2ReporterPrx, nonFilteredTp);
+        nonFilteredTp = tp2Bridge->connect(nonFilteredClientId, nonFilteredTp2ReporterPrx);
 
         // We need more timeout here because it takes some time to
         // restart the server.

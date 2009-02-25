@@ -210,10 +210,10 @@ public:
         return _admin;
     }
 
-    virtual void
-    connect(const string& id, const ReporterPrx& reporter, ExecutorPrx& executor, const Ice::Current& current)
+    virtual ExecutorPrx
+    connect(const string& id, const ReporterPrx& reporter, const Ice::Current& current)
     {
-        _bridge->connect(id, reporter, executor, current);
+        return _bridge->connect(id, reporter, current);
     }
 
 private:

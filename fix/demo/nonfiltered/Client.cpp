@@ -99,7 +99,7 @@ IceFIXClient::run(int argc, char* argv[])
     IceFIX::ExecutorPrx executor;
     try
     {
-        bridge->connect(id, reporter, executor);
+        executor = bridge->connect(id, reporter);
     }
     catch(const IceFIX::RegistrationException&)
     {
@@ -109,7 +109,7 @@ IceFIXClient::run(int argc, char* argv[])
             IceFIX::QoS qos;
             qos["filtered"] = "false";
             admin->registerWithId(id, qos);
-            bridge->connect(id, reporter, executor);
+            executor = bridge->connect(id, reporter);
         }
         catch(const IceFIX::RegistrationException& ex)
         {

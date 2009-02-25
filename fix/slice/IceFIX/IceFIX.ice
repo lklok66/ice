@@ -209,12 +209,12 @@ interface Bridge
      * @param cb The callback the client uses for receiving incoming
      * messages.
      *
-     * @param ex The executor for the client to call on.
+     * @return The executor on which the client should call.
      *
      * @raises RegistrationException if the client cannot register.
      *
      **/
-    void connect(string id, Reporter* cb, out Executor* exec)
+    Executor* connect(string id, Reporter* cb)
         throws RegistrationException;
 };
 
