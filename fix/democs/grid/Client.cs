@@ -8,6 +8,7 @@
 // **********************************************************************
 
 using System;
+using System.IO;
 using QuickFix;
 using IceFIX;
 using System.Collections.Generic;
@@ -162,6 +163,48 @@ public class Client
         }
     };
 
+    private class ClOrdIDGenerator
+    {
+        public ClOrdIDGenerator(String name)
+        {
+            _name = name;
+            _dbname = name + "-clordid";
+            _file = new FileStream(_dbname, FileMode.OpenOrCreate);
+	    try
+	    {
+		StreamReader reader = new StreamReader(_file);
+		String s = reader.ReadLine();
+		_nextId = Convert.ToInt32(s);
+	    }
+	    catch(ArgumentException)
+	    {
+		_nextId = 0;
+	    }
+	    catch(IOException)
+	    {
+		_nextId = 0;
+	    }
+        }
+
+	public String next()
+	{
+	    String clOrdID = _name + "-"+ _nextId;
+	    ++_nextId;
+
+	    _file.Seek(0, SeekOrigin.Begin);
+	    StreamWriter writer = new StreamWriter(_file);
+	    writer.WriteLine(_nextId);
+	    writer.Flush();
+
+	    return clOrdID;
+	}
+
+	private String _name;
+	private String _dbname;
+	private int _nextId;
+	private FileStream _file;
+    };
+
     public class IceFIXClient : Ice.Application
     {
         private static void menu()
@@ -213,6 +256,8 @@ public class Client
                     return 1;
                 }
             }
+
+	    ClOrdIDGenerator gen = new ClOrdIDGenerator(id);
 
             Ice.LocatorPrx locator = communicator().getDefaultLocator();
             if(locator == null)
@@ -313,7 +358,7 @@ public class Client
                         String symbol = tok[1];
                         double price = Convert.ToDouble(tok[2]);
                         long quantity = Convert.ToInt64(tok[3]);
-                        String clOrdID = Ice.Util.generateUUID();
+                        String clOrdID = gen.next();
 
                         QuickFix42.NewOrderSingle req = new QuickFix42.NewOrderSingle(
                             new ClOrdID( clOrdID ),
@@ -341,7 +386,7 @@ public class Client
                         String origClOrdID = tok[1];
                         char side = tok[2].Equals("buy") ? Side.BUY : Side.SELL;
                         String symbol = tok[3];
-                        String clOrdID = Ice.Util.generateUUID();
+                        String clOrdID = gen.next();
 
                         QuickFix42.OrderCancelRequest req = new QuickFix42.OrderCancelRequest(
                             new OrigClOrdID(origClOrdID),
@@ -366,7 +411,7 @@ public class Client
                         String symbol = tok[3];
                         double price = Convert.ToDouble(tok[4]);
                         long quantity = Convert.ToInt64(tok[5]);
-                        String clOrdID = Ice.Util.generateUUID();
+                        String clOrdID = gen.next();
 
                         QuickFix42.OrderCancelReplaceRequest req = new QuickFix42.OrderCancelReplaceRequest(
                             new OrigClOrdID(origClOrdID),
