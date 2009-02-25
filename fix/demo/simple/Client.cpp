@@ -276,7 +276,6 @@ public:
 private:
 
     void menu();
-    string nextClOrdID();
 };
 
 int
