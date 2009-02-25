@@ -1,5 +1,8 @@
 Changes since second release to QIM (Feb 12th, 2009)
 
+- The CLOrdID generation in the demos was changed to be a counter,
+  instead of a UUID.
+
 - Removed some unused options from the icefixadmin usage message.
 
 - The Bridge::connect method signature was changed to return the

@@ -7,10 +7,11 @@
 //
 // **********************************************************************
 
-#include <IceUtil/IceUtil.h>
 #include <Ice/Ice.h>
 #include <IceFIX/IceFIX.h>
 #include <IceGrid/IceGrid.h>
+
+#include <fstream>
 
 #include <quickfix/Message.h>
 #include <quickfix/Values.h>
@@ -214,6 +215,57 @@ public:
     }
 };
 
+class ClOrdIDGenerator
+{
+public:
+
+    ClOrdIDGenerator(const string& name) :
+        _name(name),
+        _dbname(name + "-clordid"),
+        _os(_dbname.c_str(), fstream::in|fstream::out)
+    {
+        if(!_os.is_open())
+        {
+            _os.open(_dbname.c_str(), fstream::out);
+            if(!_os.is_open())
+            {
+                throw "failed to open: `" + _dbname + "'";
+            }
+        }
+        
+        // Give me exceptions from now on.
+        _os.exceptions(fstream::eofbit|fstream::failbit|fstream::badbit);
+        try
+        {
+            _os >> _nextId;
+        }
+        catch(const fstream::failure&)
+        {
+            _os.clear();
+            _nextId = 0;
+        }
+    }
+
+    string next()
+    {
+        ostringstream clOrdID;
+        clOrdID << _name << "-" << _nextId;
+        
+        ++_nextId;
+        _os.seekp(0, fstream::beg);
+        _os << _nextId << "\n" << flush;
+
+        return clOrdID.str();
+    }
+    
+private:
+
+    const string _name;
+    const string _dbname;
+    fstream _os;
+    long _nextId;
+};
+
 class IceFIXClient : public Ice::Application
 {
 public:
@@ -238,7 +290,7 @@ void
 usage(const string& n)
 {
      cerr << "Usage: " << n
-          << " [--filtered true|false] [--id id]" << endl;
+          << " [--id id]" << endl;
 }
 
 IceFIXClient::IceFIXClient() :
@@ -282,6 +334,8 @@ IceFIXClient::run(int argc, char* argv[])
         usage(argv[0]);
         return EXIT_FAILURE;
     }
+
+    ClOrdIDGenerator gen(id);
 
     Ice::LocatorPrx locator = communicator()->getDefaultLocator();
     if(!locator)
@@ -378,7 +432,7 @@ IceFIXClient::run(int argc, char* argv[])
                 double price = atof(tok[2].c_str());
                 long quantity = atoi(tok[3].c_str());
 
-                string clOrdID = IceUtil::generateUUID();
+                string clOrdID = gen.next();
                 FIX42::NewOrderSingle req(
                     FIX::ClOrdID(clOrdID),
                     FIX::HandlInst('1'),
@@ -406,7 +460,7 @@ IceFIXClient::run(int argc, char* argv[])
                 char side = (tok[2] == "buy") ? FIX::Side_BUY : FIX::Side_SELL;
                 string symbol = tok[3];
 
-                string clOrdID = IceUtil::generateUUID();
+                string clOrdID = gen.next();
                 FIX42::OrderCancelRequest req = FIX42::OrderCancelRequest(
                     FIX::OrigClOrdID(origClOrdID),
                     FIX::ClOrdID(clOrdID),
@@ -431,7 +485,7 @@ IceFIXClient::run(int argc, char* argv[])
                 double price = atof(tok[4].c_str());
                 long quantity = atoi(tok[5].c_str());
 
-                string clOrdID = IceUtil::generateUUID();
+                string clOrdID = gen.next();
                 FIX42::OrderCancelReplaceRequest req(
                     FIX::OrigClOrdID(origClOrdID),
                     FIX::ClOrdID(clOrdID),

@@ -38,5 +38,6 @@ clean::
 	-for %f in (store-tp1\*) do if not %f == store-tp1\.gitignore del /q %f
 	-for %f in (db-tp2\*) do if not %f == db-tp2\.gitignore del /q %f
 	-for %f in (store-tp2\*) do if not %f == store-tp2\.gitignore del /q %f
+	-del /q *-clordid
 
 !include .depend

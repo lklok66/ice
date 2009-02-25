@@ -28,5 +28,6 @@ $(CLIENT): $(OBJS)
 
 clean::
 	-rm -rf db/* store/*
+	-rm -f *-clordid
 
 include .depend
