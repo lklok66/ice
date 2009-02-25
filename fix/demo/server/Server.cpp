@@ -520,12 +520,12 @@ private:
             {
                 FIX42::ExecutionReport report(
                     FIX::OrderID(clOrdID),
-                    FIX::ExecID(0), // No exec id for order status.
+                    FIX::ExecID("0"), // No exec id for order status.
                     FIX::ExecTransType(FIX::ExecTransType_NEW),
                     FIX::ExecType(FIX::ExecType_ORDER_STATUS),
                     FIX::OrdStatus(FIX::OrdStatus_NEW),
                     FIX::Symbol(symbol),
-                    FIX::Side(FIX::Side_BUY),
+                    FIX::Side(side),
                     FIX::LeavesQty(order.openQuantity),
                     FIX::CumQty(order.executedQuantity),
                     FIX::AvgPx(order.avgExecutedPrice));
@@ -544,7 +544,32 @@ private:
                 {
                     cerr << "SessionNotFound: `" << targetCompID << "'" << endl;
                 }
+                return;
             }
+        }
+
+        FIX42::ExecutionReport report(
+            FIX::OrderID(clOrdID),
+            FIX::ExecID("0"), // No exec id for order status.
+            FIX::ExecTransType(FIX::ExecTransType_NEW),
+            FIX::ExecType(FIX::ExecType_ORDER_STATUS),
+            FIX::OrdStatus(FIX::OrdStatus_REJECTED),
+            FIX::Symbol(symbol),
+            FIX::Side(side),
+            FIX::LeavesQty(0),
+            FIX::CumQty(0),
+            FIX::AvgPx(0));
+
+        report.set(FIX::ClOrdID(clOrdID));
+        report.set(FIX::OrdRejReason(FIX::OrdRejReason_UNKNOWN_ORDER));
+
+        try
+        {
+            FIX::Session::sendToTarget(report, targetCompID, senderCompID);
+        }
+        catch(const FIX::SessionNotFound&)
+        {
+            cerr << "SessionNotFound: `" << targetCompID << "'" << endl;
         }
     }
             
