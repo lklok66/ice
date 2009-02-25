@@ -230,6 +230,7 @@ public:
             {
                 throw "failed to open: `" + _dbname + "'";
             }
+            _os.clear();
         }
         
         // Give me exceptions from now on.
