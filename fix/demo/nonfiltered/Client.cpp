@@ -57,7 +57,7 @@ int
 IceFIXClient::run(int argc, char* argv[])
 {
     Ice::PropertiesPtr properties = communicator()->getProperties();
-    string id = properties->getPropertyWithDefault("ClientId", "test");
+    string id = properties->getPropertyWithDefault("ClientId", "logger");
 
     int i;
     for(i = 1; i < argc; ++i)

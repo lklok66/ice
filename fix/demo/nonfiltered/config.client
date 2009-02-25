@@ -3,7 +3,4 @@ Bridge=IceFIX/Bridge:tcp -p 12000
 Client.Endpoints=tcp
 
 # The default client id
-ClientId=test
-
-# The default filtered value.
-Filtered=true
+ClientId=logger

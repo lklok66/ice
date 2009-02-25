@@ -45,7 +45,7 @@ public class Client
         public override int run(string[] args)
         {
 	    Ice.Properties properties = communicator().getProperties();
-	    String id = properties.getPropertyWithDefault("ClientId", "test");
+	    String id = properties.getPropertyWithDefault("ClientId", "logger");
 
             int i;
             for(i = 0; i < args.Length; ++i)
