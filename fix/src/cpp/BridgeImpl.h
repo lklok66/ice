@@ -46,7 +46,7 @@ public:
     ClientInfoSeq getClients(const Ice::Current&);
 
     void send(Ice::Long);
-    void sendComplete(int, const std::set<std::string>&);
+    void sendComplete(Ice::Long, const std::set<std::string>&);
     void clientError(const std::string&, const ReporterPrx&);
 
 private:

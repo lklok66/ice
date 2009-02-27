@@ -100,7 +100,7 @@ ClientDB.h ClientDB.cpp: BridgeTypes.cpp BridgeTypes.h
 
 MessageDB.h MessageDB.cpp: BridgeTypes.cpp BridgeTypes.h
 	rm -f MessageDB.h MessageDB.cpp
-	$(SLICE2FREEZE) $(SLICE2CPPFLAGS) --dict "FIXBridge::MessageDB,long,FIXBridge::Message,sort,std::less<long>" MessageDB BridgeTypes.ice
+	$(SLICE2FREEZE) $(SLICE2CPPFLAGS) --dict "FIXBridge::MessageDB,long,FIXBridge::Message,sort,std::less<Ice::Long>" MessageDB BridgeTypes.ice
 
 MessageDBKey.h MessageDBKey.cpp: 
 	rm -f MessageDBKey.h MessageDBKey.cpp

@@ -99,7 +99,7 @@ ClientDB.h ClientDB.cpp: BridgeTypes.ice
 
 MessageDB.h MessageDB.cpp: BridgeTypes.ice
 	del /q MessageDB.h MessageDB.cpp
-	$(SLICE2FREEZE) $(SLICE2CPPFLAGS) --dict "FIXBridge::MessageDB,long,FIXBridge::Message MessageDB,sort,std::less<long>" BridgeTypes.ice
+	$(SLICE2FREEZE) $(SLICE2CPPFLAGS) --dict "FIXBridge::MessageDB,long,FIXBridge::Message,sort,std::less<Ice::Long>" MessageDB BridgeTypes.ice
 
 MessageDBKey.h MessageDBKey.cpp:
 	del /q MessageDBKey.h MessageDBKey.cpp

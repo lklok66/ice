@@ -48,7 +48,7 @@ class RoutingHandler : public IceUtil::Shared, public IceUtil::Mutex
 {
 public:
 
-    RoutingHandler(const BridgeImplPtr& bridge, int trace, int messageId, const Ice::CommunicatorPtr& communicator) :
+    RoutingHandler(const BridgeImplPtr& bridge, int trace, Ice::Long messageId, const Ice::CommunicatorPtr& communicator) :
         _bridge(bridge), _trace(trace), _messageId(messageId), _communicator(communicator)
     {
     }
@@ -106,7 +106,7 @@ private:
 
     const BridgeImplPtr _bridge;
     const int _trace;
-    const int _messageId;
+    const Ice::Long _messageId;
     const Ice::CommunicatorPtr _communicator;
     set<string> _replies;
     set<string> _routed;
@@ -713,7 +713,7 @@ BridgeImpl::send(Ice::Long messageId)
 }
 
 void
-BridgeImpl::sendComplete(int messageId, const set<string>& routed)
+BridgeImpl::sendComplete(Ice::Long messageId, const set<string>& routed)
 {
     bool retry = true;
 
@@ -856,7 +856,7 @@ BridgeImpl::onCreate(const FIX::SessionID& session)
     _session = FIX::Session::lookupSession(session);
 
     // Build a queue of pending messages, and schedule each for retry.
-    list<int> queue;
+    list<Ice::Long> queue;
     Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
     MessageDB messageDB(connection, messageDBName);
     for(;;)
@@ -885,7 +885,7 @@ BridgeImpl::onCreate(const FIX::SessionID& session)
     // respect order, therefore ensure the timestamp is different for
     // each.
     Ice::Long usec = 0;
-    for(list<int>::const_iterator p = queue.begin(); p != queue.end(); ++p)
+    for(list<Ice::Long>::const_iterator p = queue.begin(); p != queue.end(); ++p)
     {
         _timer->schedule(new SendTimerTask(this, *p), IceUtil::Time::microSeconds(usec++));
     }
