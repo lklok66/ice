@@ -45,7 +45,7 @@ public:
     BridgeStatus getStatus(const Ice::Current&);
     ClientInfoSeq getClients(const Ice::Current&);
 
-    void send(int id);
+    void send(Ice::Long);
     void sendComplete(int, const std::set<std::string>&);
     void clientError(const std::string&, const ReporterPrx&);
 
@@ -74,11 +74,12 @@ private:
     const IceUtil::TimerPtr _timer;
     const IceUtil::Time _retryInterval;
     const int _forwardTimeout; // This must be < _retryInterval.
+    // The initiator is conceptually const also, since it is set at
+    // startup and never changed.
+    /*const*/ FIX::Initiator* _initiator;
 
     bool _active;
     FIX::Session* _session;
-    FIX::Initiator* _initiator;
-
 };
 typedef IceUtil::Handle<BridgeImpl> BridgeImplPtr;
 

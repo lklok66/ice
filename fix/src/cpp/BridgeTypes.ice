@@ -15,7 +15,6 @@ module FIXBridge
 
 struct Message
 {
-    int seqNum; // The message sequence number
     string data; // Message data
     Ice::StringSeq clients; // The list of clients that will receive this message.
     Ice::StringSeq forwarded; // Clients that have received the message. 

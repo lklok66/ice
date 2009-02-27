@@ -9,6 +9,7 @@
 
 #include <IceUtil/IceUtil.h>
 #include <MessageDB.h>
+#include <MessageDBKey.h>
 #include <ExecutorI.h>
 #include <BridgeImpl.h>
 #include <dbname.h>
@@ -26,7 +27,7 @@ class SendTimerTask : public IceUtil::TimerTask
 {
 public:
 
-    SendTimerTask(const BridgeImplPtr& bridge, int messageId) :
+    SendTimerTask(const BridgeImplPtr& bridge, Ice::Long messageId) :
         _bridge(bridge), _messageId(messageId)
     {
     }
@@ -40,7 +41,7 @@ public:
 private:
 
     const BridgeImplPtr _bridge;
-    const int _messageId;
+    const Ice::Long _messageId;
 };
 
 class RoutingHandler : public IceUtil::Shared, public IceUtil::Mutex
@@ -152,7 +153,8 @@ public:
         _clientDB(_con, clientDBName),
         _clordIdDB(_con, clordIdDBName),
         _seqNumDB(_con, seqnumDBName),
-        _messageDB(_con, messageDBName)
+        _messageDB(_con, messageDBName),
+        _messageDBKey(_con, messageDBKeyName)
     {
     }
 
@@ -167,6 +169,7 @@ private:
     const FIXBridge::RoutingRecordDB _clordIdDB;
     const FIXBridge::RoutingRecordDB _seqNumDB;
     const FIXBridge::MessageDB _messageDB;
+    const FIXBridge::MessageDBKey _messageDBKey;
 };
 
 }
@@ -184,10 +187,33 @@ BridgeImpl::BridgeImpl(const string& name, const Ice::CommunicatorPtr& communica
                                               name + ".RetryInterval", 60))),
     _forwardTimeout(communicator->getProperties()->getPropertyAsIntWithDefault(
                         name + ".RetryInterval", 60)/2 * 1000),
-
+    _initiator(0),
     _active(false),
     _session(0)
 {
+    // Initialize the database, if necessary.
+    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
+    MessageDBKey messageDBKey(connection, messageDBKeyName);
+    for(;;)
+    {
+        try
+        {
+            MessageDBKey::iterator p = messageDBKey.find(0);
+            if(p == messageDBKey.end())
+            {
+                messageDBKey.insert(make_pair(0, 0));
+            }
+            break;
+        }
+        catch(const Freeze::DeadlockException&)
+        {
+            continue;
+        }
+        catch(const Freeze::DatabaseException& ex)
+        {
+            halt(ex);
+        }
+    }
 }
 
 void
@@ -585,7 +611,7 @@ BridgeImpl::getClients(const Ice::Current&)
 
 // For use by the SendTimerTask.
 void
-BridgeImpl::send(int messageId)
+BridgeImpl::send(Ice::Long messageId)
 {
     if(_trace > 0)
     {
@@ -673,6 +699,7 @@ BridgeImpl::send(int messageId)
             }
         }
     }
+
     // If no messages were sent, then immediately schedule a retry.
     if(queued == 0)
     {
@@ -853,9 +880,14 @@ BridgeImpl::onCreate(const FIX::SessionID& session)
         }
     }
 
+    // The messages should be sent in order. If I use
+    // Time::seconds(0), then timers with the stamp timestamp do not
+    // respect order, therefore ensure the timestamp is different for
+    // each.
+    Ice::Long usec = 0;
     for(list<int>::const_iterator p = queue.begin(); p != queue.end(); ++p)
     {
-        _timer->schedule(new SendTimerTask(this, *p), IceUtil::Time::seconds(0));
+        _timer->schedule(new SendTimerTask(this, *p), IceUtil::Time::microSeconds(usec++));
     }
 }
 
@@ -1005,7 +1037,7 @@ BridgeImpl::fromAdmin(const FIX::Message& message, const FIX::SessionID& session
 
 void
 BridgeImpl::fromApp(const FIX::Message& message, const FIX::SessionID& session)
-    throw (FIX::FieldNotFound, FIX::IncorrectDataFormat, FIX::IncorrectTagValue, FIX::UnsupportedMessageType)
+    throw(FIX::FieldNotFound, FIX::IncorrectDataFormat, FIX::IncorrectTagValue, FIX::UnsupportedMessageType)
 {
     if(_trace > 0)
     {
@@ -1030,11 +1062,14 @@ BridgeImpl::route(const FIX::Message& message)
         trace << "msgTypeValue: " << msgTypeValue;
     }
 
+    Ice::Long key = -1;
+
     FIX::MsgSeqNum seqNum;
     message.getHeader().getField(seqNum);
 
     Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
     MessageDB messageDB(connection, messageDBName);
+    MessageDBKey messageDBKey(connection, messageDBKeyName);
     RoutingRecordDB clordidDB(connection, clordIdDBName);
     RoutingRecordDB seqnumDB(connection, seqnumDBName);
     ClientDB clientsDB(connection, clientDBName);
@@ -1044,22 +1079,14 @@ BridgeImpl::route(const FIX::Message& message)
         {
             Freeze::TransactionHolder txn(connection);
 
-            // Discard duplicates.
-            MessageDB::const_iterator p = messageDB.find(seqNum);
-            if(p != messageDB.end())
-            {
-                if(_trace > 0)
-                {
-                    Ice::Trace trace(_communicator->getLogger(), "Bridge");
-                    trace << "fromApp: discarding duplicate message";
-                }
-                return;
-            }
+            MessageDBKey::iterator p = messageDBKey.find(0);
+            assert(p != messageDBKey.end());
+            key = p->second;
+            p.set(key+1);
 
             Message m;
 
             m.data = message.toString();
-            m.seqNum = seqNum;
 
             set<string> clients;
 
@@ -1162,7 +1189,7 @@ BridgeImpl::route(const FIX::Message& message)
 
             copy(clients.begin(), clients.end(), back_inserter(m.clients));
 
-            messageDB.insert(make_pair(seqNum, m));
+            messageDB.insert(make_pair(key, m));
 
             txn.commit();
             break;
@@ -1180,5 +1207,5 @@ BridgeImpl::route(const FIX::Message& message)
     // TODO: Stop scheduling messages if all clients are offline.
 
     // Schedule a timer to send this message immediately.
-    _timer->schedule(new SendTimerTask(this, seqNum), IceUtil::Time::seconds(0));
+    _timer->schedule(new SendTimerTask(this, key), IceUtil::Time::seconds(0));
 }

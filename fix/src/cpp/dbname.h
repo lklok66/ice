@@ -17,6 +17,7 @@ extern const char* clordIdDBName;
 extern const char* seqnumDBName;
 extern const char* clientDBName;
 extern const char* messageDBName;
+extern const char* messageDBKeyName;
 
 }
 

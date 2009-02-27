@@ -27,7 +27,8 @@ SOBJS		= ServiceI.obj \
 		  RoutingRecordDB.obj \
 		  BridgeTypes.obj \
 		  ClientDB.obj \
-		  MessageDB.obj
+		  MessageDB.obj \
+		  MessageDBKey.obj
 
 AOBJS		= Admin.obj \
 		  Grammar.obj \
@@ -98,8 +99,11 @@ ClientDB.h ClientDB.cpp: BridgeTypes.ice
 
 MessageDB.h MessageDB.cpp: BridgeTypes.ice
 	del /q MessageDB.h MessageDB.cpp
-	$(SLICE2FREEZE) $(SLICE2CPPFLAGS) --dict FIXBridge::MessageDB,int,FIXBridge::Message MessageDB BridgeTypes.ice
+	$(SLICE2FREEZE) $(SLICE2CPPFLAGS) --dict "FIXBridge::MessageDB,long,FIXBridge::Message MessageDB,sort,std::less<long>" BridgeTypes.ice
 
+MessageDBKey.h MessageDBKey.cpp:
+	del /q MessageDBKey.h MessageDBKey.cpp
+	$(SLICE2FREEZE) $(SLICE2CPPFLAGS) --dict "FIXBridge::MessageDBKey,int,long"  MessageDBKey
 
 Scanner.cpp: Scanner.l
 	flex Scanner.l
@@ -130,6 +134,7 @@ clean::
 	del /q BridgeTypes.h BridgeTypes.cpp
 	del /q RoutingRecordDB.h RoutingRecordDB.cpp
 	del /q MessageDB.h MessageDB.cpp
+	del /q MessageDBKey.h MessageDBKey.cpp
 
 install:: all
 	copy $(LIBNAME) $(install_libdir)
@@ -137,7 +142,6 @@ install:: all
 	copy $(SVCLIBNAME) $(install_libdir)
 	copy $(SVCDLLNAME) $(install_bindir)
 	copy $(ADMIN) $(install_bindir)
-
 
 !if "$(GENERATE_PDB)" == "yes"
 

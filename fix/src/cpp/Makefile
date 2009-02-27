@@ -32,7 +32,8 @@ SOBJS		= ServiceI.o \
 		  RoutingRecordDB.o \
 		  BridgeTypes.o \
 		  ClientDB.o \
-		  MessageDB.o
+		  MessageDB.o \
+		  MessageDBKey.o
 
 AOBJS		= Admin.o \
 		  Grammar.o \
@@ -99,7 +100,11 @@ ClientDB.h ClientDB.cpp: BridgeTypes.cpp BridgeTypes.h
 
 MessageDB.h MessageDB.cpp: BridgeTypes.cpp BridgeTypes.h
 	rm -f MessageDB.h MessageDB.cpp
-	$(SLICE2FREEZE) $(SLICE2CPPFLAGS) --dict FIXBridge::MessageDB,int,FIXBridge::Message MessageDB BridgeTypes.ice
+	$(SLICE2FREEZE) $(SLICE2CPPFLAGS) --dict "FIXBridge::MessageDB,long,FIXBridge::Message,sort,std::less<long>" MessageDB BridgeTypes.ice
+
+MessageDBKey.h MessageDBKey.cpp: 
+	rm -f MessageDBKey.h MessageDBKey.cpp
+	$(SLICE2FREEZE) $(SLICE2CPPFLAGS) --dict "FIXBridge::MessageDBKey,int,long" MessageDBKey
 
 $(HDIR)/IceFIX.h IceFIX.cpp: $(SDIR)/IceFIX.ice
 	rm -f $(HDIR)/IceFIX.h IceFIX.cpp
@@ -110,6 +115,7 @@ clean::
 	-rm -f RoutingRecordDB.h RoutingRecordDB.cpp
 	-rm -f ClientDB.h ClientDB.cpp
 	-rm -f MessageDB.h MessageDB.cpp
+	-rm -f MessageDBKey.h MessageDBKey.cpp
 
 install:: all
 	$(call installlib,$(install_libdir),$(libdir),$(LIBFILENAME),$(SONAME),$(LIBNAME))

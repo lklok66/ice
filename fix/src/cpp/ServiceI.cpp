@@ -68,6 +68,7 @@ const char* clordIdDBName = "clordidRR";
 const char* seqnumDBName = "seqnumRR";
 const char* clientDBName = "clients";
 const char* messageDBName = "messages";
+const char* messageDBKeyName = "messageKey";
 
 class Log : public FIX::Log
 {
