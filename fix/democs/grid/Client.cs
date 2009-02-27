@@ -430,7 +430,7 @@ public class Client
                     }
                     else if(tok[0].Equals("status"))
                     {
-                        if(tok.Length != 6)
+                        if(tok.Length != 4)
                         {
                             menu();
                             continue;

@@ -1,5 +1,7 @@
 Changes since third release to QIM (Feb 25th, 2009)
 
+- Fixed a bug with the status command with the C# clients.
+
 - Changed the message database key from the FIX message sequence
   number to an ever increasing 64 bit value.
 
