@@ -1,1 +1,1 @@
-IceFIXAdmin.BridgeAdmin=IceFIX/Admin:tcp -p 12000
+IceFIXAdmin.Bridge=IceFIX/Bridge:tcp -p 12000

@@ -27,7 +27,7 @@ interface Executor
      *
      * @return The sequence number of this message.
      *
-     * @raises ExecuteException if the message send failed.
+     * @raise ExecuteException if the message send failed.
      */
     int execute(string data)
         throws ExecuteException;
@@ -112,7 +112,7 @@ interface BridgeAdmin
      * @param commit true if the records should be erased, false
      * otherwise.
      *
-     * @return The number of records erase, or if commit is false the
+     * @return The number of records erased, or if commit is false the
      * number of records that would be erased.
      *
      */
@@ -120,7 +120,7 @@ interface BridgeAdmin
 
     /**
      *
-     * Return some stats about the bridge database.
+     * Return some statistics about the bridge database.
      *
      */
     string dbstat();
@@ -142,7 +142,7 @@ interface BridgeAdmin
      *
      * @param id The id of the client to unregister.
      *
-     * @raises RegistrationException if the unregister cannot proceed.
+     * @raise RegistrationException if the unregister cannot proceed.
      *
      */
     void unregister(string id)
@@ -150,13 +150,13 @@ interface BridgeAdmin
 
     /**
      *
-     * Register a client with the given id.
+     * Register a client and return a new id.
      *
      * @param clientQoS The requested quality of service.
      *
      * @return The new client id.
      *
-     * @raises RegistrationException if the client cannot register.
+     * @raise RegistrationException if the client cannot register.
      *
      **/
     string register(QoS clientQoS)
@@ -170,9 +170,7 @@ interface BridgeAdmin
      *
      * @param clientQoS The requested quality of service.
      *
-     * @return The new client id.
-     *
-     * @raises RegistrationException if the client cannot register.
+     * @raise RegistrationException if the client cannot register.
      *
      **/
     void registerWithId(string id, QoS clientQoS)
@@ -211,7 +209,7 @@ interface Bridge
      *
      * @return The executor on which the client should call.
      *
-     * @raises RegistrationException if the client cannot register.
+     * @raise RegistrationException if the client cannot register.
      *
      **/
     Executor* connect(string id, Reporter* cb)

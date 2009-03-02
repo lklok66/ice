@@ -118,14 +118,14 @@ Client::run(int argc, char* argv[])
     }
     else
     {
-        IceFIX::BridgeAdminPrx admin = IceFIX::BridgeAdminPrx::uncheckedCast(
-            communicator()->propertyToProxy("IceFIXAdmin.BridgeAdmin"));
-        if(!admin)
+        IceFIX::BridgePrx bridge = IceFIX::BridgePrx::uncheckedCast(
+            communicator()->propertyToProxy("IceFIXAdmin.Bridge"));
+        if(!bridge)
         {
-            cerr << appName() << ": no bridge admin proxy configured" << endl;
+            cerr << appName() << ": no bridge proxy configured" << endl;
             return EXIT_FAILURE;
         }
-        admins.push_back(make_pair("default", admin));
+        admins.push_back(make_pair("default", bridge->getAdmin()));
     }
 
     ParserPtr p = Parser::createParser(communicator(), admins);
