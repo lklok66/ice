@@ -45,7 +45,7 @@ Parser::usage()
         "testclean timeout [list] Show the number of records older than timeout for the listed bridges, or all by default that would be erased.\n"
         "clean timeout [list]     Clean the database of all records older than timeout for the listed bridges, or all by default.\n"
         "dbstat [list]            Report the status of the databases for the listed bridges, or all by default.\n"
-        "list [list]              List the registered clients for the listed bridges, or all by default.\n"
+        "clients [list]           List the registered clients for the listed bridges, or all by default.\n"
         "unregister [--force] [bridge] ID"
         "                        Unregister the given client from the listed bridge, or all by default.\n"
         ;
@@ -265,7 +265,7 @@ Parser::dbstat(const std::list<string>& args)
 }
 
 void
-Parser::list(const std::list<string>& args)
+Parser::clients(const std::list<string>& args)
 {
     for(vector<pair<string, IceFIX::BridgeAdminPrx> >::const_iterator p = _admin.begin(); p != _admin.end(); ++p)
     {

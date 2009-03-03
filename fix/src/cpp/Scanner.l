@@ -238,7 +238,7 @@ initScanner()
     keywordMap["exit"] = ICEFIX_EXIT;
     keywordMap["activate"] = ICEFIX_ACTIVATE;
     keywordMap["deactivate"] = ICEFIX_DEACTIVATE;
-    keywordMap["list"] = ICEFIX_LIST;
+    keywordMap["clients"] = ICEFIX_CLIENTS;
     keywordMap["status"] = ICEFIX_STATUS;
     keywordMap["clean"] = ICEFIX_CLEAN;
     keywordMap["testclean"] = ICEFIX_TESTCLEAN;

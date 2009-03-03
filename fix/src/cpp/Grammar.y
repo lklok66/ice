@@ -43,7 +43,7 @@ yyerror(const char* s)
 %token ICEFIX_EXIT
 %token ICEFIX_ACTIVATE
 %token ICEFIX_DEACTIVATE
-%token ICEFIX_LIST
+%token ICEFIX_CLIENTS
 %token ICEFIX_STATUS
 %token ICEFIX_CLEAN
 %token ICEFIX_TESTCLEAN
@@ -94,9 +94,9 @@ command
 {
     parser->deactivate($2);
 }
-| ICEFIX_LIST strings ';'
+| ICEFIX_CLIENTS strings ';'
 {
-    parser->list($2);
+    parser->clients($2);
 }
 | ICEFIX_STATUS strings ';'
 {
@@ -165,7 +165,7 @@ keyword
 | ICEFIX_DEACTIVATE
 {
 }
-| ICEFIX_LIST
+| ICEFIX_CLIENTS
 {
 }
 | ICEFIX_STATUS

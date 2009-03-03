@@ -5,7 +5,7 @@ Changes since third release to QIM (Feb 25th, 2009)
 - Changed the message database key from the FIX message sequence
   number to an ever increasing 64 bit value.
 
-- Fixed some comments in the slice.
+- Fixed some comments in the IceFIX slice file.
 
 - Changed IceFIXAdmin.BridgeAdmin property to IceFIXAdmin.Bridge.
 
@@ -19,6 +19,8 @@ Changes since third release to QIM (Feb 25th, 2009)
 - Added test for new BridgeAdmin::unregister behavior.
 
 - Changed name.Trace to name.Trace.Bridge.
+
+- Changed the icefixadmin "list" command to "clients".
 
 Changes since second release to QIM (Feb 12th, 2009)
 

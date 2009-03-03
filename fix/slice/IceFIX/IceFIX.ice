@@ -41,12 +41,12 @@ interface Executor
     void destroy();
 };
 
-/** Used by the bridge to forward incoming messages. */
+/** Used by the bridge to forward incoming messages from the acceptor to a client. */
 interface Reporter
 {
     /**
      *
-     * Forward received messages to attached clients.
+     * Forwards a message to a client.
      *
      * @param data The FIX encoded message.
      *
@@ -60,13 +60,13 @@ exception RegistrationException
     string reason;
 };
 
-/**  Client info. */
+/**  Information about a client. */
 struct ClientInfo
 {
     string id; /** The client id. */
     bool isConnected; /** Is the client active? */
 };
-/** A sequence of client info. */
+/** A sequence of ClientInfo structures. */
 sequence<ClientInfo> ClientInfoSeq;
 
 /** Requested quality of service. */
@@ -80,7 +80,7 @@ enum BridgeStatus
     /** The bridge is active, and trying to login with the trading
      * partner. */
     BridgeStatusActive,
-    /** The bridge is active, and currently logged in with the trading
+    /** The bridge is active, and currently logged into the trading
      * partner. */
     BridgeStatusLoggedOn
 };
@@ -142,10 +142,10 @@ interface BridgeAdmin
      *
      * @param id The id of the client to unregister.
      *
-     * @param force If true erase the client even if there queued
+     * @param force If true erase the client even if there are queued
      * messages.
      *
-     * @raise RegistrationException if the unregister cannot proceed.
+     * @raise RegistrationException if the request cannot be fulfilled.
      *
      */
     void unregister(string id, bool force)
@@ -208,11 +208,11 @@ interface Bridge
      * @param id The client id.
      *
      * @param cb The callback the client uses for receiving incoming
-     * messages.
+     * messages from the acceptor.
      *
      * @return The executor on which the client should call.
      *
-     * @raise RegistrationException if the client cannot register.
+     * @raise RegistrationException if the client cannot connect.
      *
      **/
     Executor* connect(string id, Reporter* cb)

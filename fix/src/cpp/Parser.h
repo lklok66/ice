@@ -56,7 +56,7 @@ public:
 
     void activate(const std::list<std::string>&);
     void deactivate(const std::list<std::string>&);
-    void list(const std::list<std::string>&);
+    void clients(const std::list<std::string>&);
     void status(const std::list<std::string>&);
     void clean(bool, const std::list<std::string>&);
     void dbstat(const std::list<std::string>&);
