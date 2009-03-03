@@ -34,6 +34,11 @@
            <property name="${service}.FIXConfig" value="${fix-config}"/>
            <property name="${service}.RetryInterval" value="${retry-interval}"/>
         </properties>
+        <target name="debug">
+          <properties>
+            <property name="${service}.Trace" value="2"/>
+          </properties>
+        </target>
       </service>
 
     </service-template>
@@ -76,6 +81,13 @@
         <adapter name="FixTP1.FixServer" endpoints="default">
             <object identity="FixTP1/Control" type="::Test::Control"/>
         </adapter>
+        <target name="debug">
+          <properties>
+            <property name="Trace.Incoming" value="1"/>
+            <property name="Trace.Outgoing" value="1"/>
+            <property name="Trace.Event" value="1"/>
+           </properties>
+        </target>
       </server>
 
       <server id="FixTP2" exe="${test.dir}/server" activation="on-demand">
@@ -84,6 +96,13 @@
         <adapter name="FixTP2.FixServer" endpoints="default">
             <object identity="FixTP2/Control" type="::Test::Control"/>
         </adapter>
+        <target name="debug">
+          <properties>
+            <property name="Trace.Incoming" value="1"/>
+            <property name="Trace.Outgoing" value="1"/>
+            <property name="Trace.Event" value="1"/>
+          </properties>
+        </target>
       </server>
     </node>
 

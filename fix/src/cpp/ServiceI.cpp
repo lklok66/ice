@@ -275,9 +275,9 @@ public:
     }
 
     virtual void
-    unregister(const string& id, const Ice::Current& current)
+    unregister(const string& id, bool force, const Ice::Current& current)
     {
-        _bridge->unregister(id, current);
+        _bridge->unregister(id, force, current);
     }
 
     virtual ClientInfoSeq

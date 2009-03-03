@@ -9,6 +9,15 @@ Changes since third release to QIM (Feb 25th, 2009)
 
 - Changed IceFIXAdmin.BridgeAdmin property to IceFIXAdmin.Bridge.
 
+- Added --force command to icefixadmin unregister.
+
+- Fixed BridgeAdmin::unregister to remove queued messages, if
+  necessary.
+
+- Fixed BridgeAdmin::unregister to clean associated routing records.
+
+- Added test for new BridgeAdmin::unregister behavior.
+
 Changes since second release to QIM (Feb 12th, 2009)
 
 - The CLOrdID generation in the demos was changed to be a counter,

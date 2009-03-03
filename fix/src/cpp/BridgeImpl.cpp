@@ -323,10 +323,11 @@ BridgeImpl::registerWithId(const string& clientId, const QoS& qos, const Ice::Cu
 }
 
 void
-BridgeImpl::unregister(const string& clientId, const Ice::Current& current)
+BridgeImpl::unregister(const string& clientId, bool force, const Ice::Current& current)
 {
     Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
     ClientDB clients(connection, clientDBName);
+    MessageDB messageDB(connection, messageDBName);
     for(;;)
     {
         try
@@ -339,6 +340,26 @@ BridgeImpl::unregister(const string& clientId, const Ice::Current& current)
             if(p->second.reporter)
             {
                 throw RegistrationException("client is active");
+            }
+
+            if(!force)
+            {
+                Ice::Long count = 0;
+                for(MessageDB::const_iterator q = messageDB.begin(); q != messageDB.end(); ++q)
+                {
+                    if(find(q->second.clients.begin(), q->second.clients.end(), clientId) != q->second.clients.end() &&
+                       find(q->second.forwarded.begin(), q->second.forwarded.end(),
+                            clientId) == q->second.forwarded.end())
+                    {
+                        ++count;
+                    }
+                }
+                if(count > 0)
+                {
+                    ostringstream os;
+                    os << "client has " << count << " queued messages";
+                    throw RegistrationException(os.str());
+                }
             }
 
             if(_trace > 0)
@@ -632,7 +653,7 @@ BridgeImpl::send(Ice::Long messageId)
     {
         try
         {
-            MessageDB::const_iterator q = messageDB.find(messageId);
+            MessageDB::iterator q = messageDB.find(messageId);
             assert(q != messageDB.end());
             // Ensure that the same message is not routed twice in the
             // event of a deadlock exception in accessing the
@@ -656,13 +677,33 @@ BridgeImpl::send(Ice::Long messageId)
 
             // Forward the message to the clients in the routing list.
             c.clear();
+            Ice::Long erased = 0;
             for(set<string>::const_iterator p = routing.begin(); p != routing.end(); ++p)
             {
                 ClientDB::iterator q = clientsDB.find(*p);
-                if(q != clientsDB.end())
+                if(q == clientsDB.end())
+                {
+                    ++erased;
+                }
+                else
                 {
                     c.push_back(make_pair(*p, q->second.reporter));
                 }
+            }
+
+            // If there are no items in the routing table (which in
+            // theory should not occur), or if the only clients in the
+            // routing table are no longer registered, then erase the
+            // message, we're done.
+            if(erased == routing.size())
+            {
+                if(_trace > 0)
+                {
+                    Ice::Trace trace(_communicator->getLogger(), "Bridge");
+                    trace << "send: " << messageId << ": message fully routed, erasing";
+                }
+                messageDB.erase(q);
+                return;
             }
             break;
         }

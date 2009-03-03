@@ -387,7 +387,7 @@ IceFIXClient::run(int argc, char* argv[])
     //
     try
     {
-        tp1Admin->unregister(clientId);
+        tp1Admin->unregister(clientId, false);
     }
     catch(const IceFIX::RegistrationException&)
     {
@@ -396,7 +396,7 @@ IceFIXClient::run(int argc, char* argv[])
 
     try
     {
-        tp1Admin->unregister(clientId);
+        tp1Admin->unregister(clientId, false);
         test(false);
     }
     catch(const IceFIX::RegistrationException&)
@@ -493,6 +493,7 @@ IceFIXClient::run(int argc, char* argv[])
         test(count == 0);
     }
     cout << "ok" << endl;
+
 
     // TEST: NewOrderSingle execution reports are correctly reverse
     // routed.
@@ -882,11 +883,58 @@ IceFIXClient::run(int argc, char* argv[])
         // restart the server.
         o = nonFilteredReporter->waitFill(getClOrdID(newOrderSingle), IceUtil::Time::seconds(30));
         test(o.ordStatus == FIX::OrdStatus_FILLED);
+    }
+    cout << "ok" << endl;
 
+    // TEST: unregister force.
+    cout << "testing unregister with force... " << flush;
+    {
+        // Reactivate TP2.
+        tp2Admin->activate();
+
+        // Destroy the non-filtered client, and then send a message.
         nonFilteredTp->destroy();
-        tp2Admin->unregister(nonFilteredClientId);
-        adapter->remove(nonFilteredReporterId);
 
+        FIX42::NewOrderSingle newOrderSingle(
+            FIX::ClOrdID(nextid()),
+            FIX::HandlInst('1'),
+            FIX::Symbol("AAPL"),
+            FIX::Side(FIX::Side_BUY),
+            FIX::TransactTime(),
+            FIX::OrdType(FIX::OrdType_LIMIT));
+
+        newOrderSingle.set(FIX::Price(100.0));
+        newOrderSingle.set(FIX::OrderQty(200));
+        newOrderSingle.set(FIX::TimeInForce(FIX::TimeInForce_DAY));
+
+        reporter->addOrder(createOrder(tp2ReporterId, newOrderSingle));
+        nonFilteredReporter->addOrder(createOrder(nonFilteredReporterId, newOrderSingle));
+
+        tp2->execute(newOrderSingle.toString());
+
+        Order o = reporter->waitFill(getClOrdID(newOrderSingle));
+        test(o.ordStatus == FIX::OrdStatus_FILLED);
+
+        // At this point it shouldn't be possible to unregister the
+        // client since there is a queued message.
+        try
+        {
+            tp2Admin->unregister(nonFilteredClientId, false);
+            test(false);
+        }
+        catch(const IceFIX::RegistrationException&)
+        {
+        }
+
+        // Force the removal.
+        try
+        {
+            tp2Admin->unregister(nonFilteredClientId, true);
+        }
+        catch(const IceFIX::RegistrationException&)
+        {
+            test(false);
+        }
     }
     cout << "ok" << endl;
 

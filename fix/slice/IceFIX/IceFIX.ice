@@ -136,16 +136,19 @@ interface BridgeAdmin
 
     /**
      *
-     * Unregister the given client id. This cleans all records
-     * associated with the client, and removes the client record from
-     * the database.
+     * Unregister the given client id. If the client is active, or the
+     * client has associated unrouted messages and force is false,
+     * then unregister fails.
      *
      * @param id The id of the client to unregister.
+     *
+     * @param force If true erase the client even if there queued
+     * messages.
      *
      * @raise RegistrationException if the unregister cannot proceed.
      *
      */
-    void unregister(string id)
+    void unregister(string id, bool force)
         throws RegistrationException;
 
     /**

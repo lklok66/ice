@@ -42,11 +42,12 @@ Parser::usage()
         "activate [list]          Activate the listed bridges, or all by default.\n"
         "deactivate [list]        Deactivate the listed bridges, or all by default.\n"
         "status [list]            Report the status for the listed bridges, or all by default.\n"
+        "testclean timeout [list] Show the number of records older than timeout for the listed bridges, or all by default that would be erased.\n"
         "clean timeout [list]     Clean the database of all records older than timeout for the listed bridges, or all by default.\n"
         "dbstat [list]            Report the status of the databases for the listed bridges, or all by default.\n"
-        "status [list]            Report the status for the listed bridges, or all by default.\n"
-        "list [list]              List the connected clients for the listed bridges, or all by default.\n"
-        "unregister [bridge] ID   Unregister the given client from the listed bridge, or all by default.\n"
+        "list [list]              List the registered clients for the listed bridges, or all by default.\n"
+        "unregister [--force] [bridge] ID"
+        "                        Unregister the given client from the listed bridge, or all by default.\n"
         ;
 }
 
@@ -212,7 +213,6 @@ Parser::clean(bool commit, const std::list<string>& _args)
 
     int timeout = parseTimeout(args.front());
     args.pop_front();
-    cout << "timeout " << timeout << endl;
     if(timeout == 0)
     {
         error("`timeout' is either zero, or invalid. timeout format is [nd]hh[:mm[:ss]]");
@@ -294,12 +294,19 @@ void
 Parser::unregister(const std::list<string>& _args)
 {
     std::list<string> args = _args;
-    if(args.empty() || args.size() > 2)
+    if(args.empty() || args.size() > 3)
     {
         error("`unregister' requires at least one argument (type `help' for more info)");
         return;
     }
 
+    bool force = false;
+    if(args.front() == "--force")
+    {
+        force = true;
+        args.pop_front();
+    }
+    
     string bridge;
     string id;
     
@@ -320,7 +327,7 @@ Parser::unregister(const std::list<string>& _args)
             cout << p->first << endl;
             try
             {
-                p->second->unregister(id);
+                p->second->unregister(id, force);
             }
             catch(const IceFIX::RegistrationException& ex)
             {

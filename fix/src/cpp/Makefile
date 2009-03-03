@@ -38,8 +38,7 @@ SOBJS		= ServiceI.o \
 AOBJS		= Admin.o \
 		  Grammar.o \
 		  Scanner.o \
-		  Parser.o \
-		  IceFIX.o
+		  Parser.o
 
 SRCS		= $(OBJS:.o=.cpp) \
 		  $(COBJS:.o=.cpp) \
