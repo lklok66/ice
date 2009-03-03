@@ -145,7 +145,7 @@ interface BridgeAdmin
      * @param force If true erase the client even if there are queued
      * messages.
      *
-     * @raise RegistrationException if the request cannot be fulfilled.
+     * @throws RegistrationException if the request cannot be fulfilled.
      *
      */
     void unregister(string id, bool force)
@@ -159,7 +159,7 @@ interface BridgeAdmin
      *
      * @return The new client id.
      *
-     * @raise RegistrationException if the client cannot register.
+     * @throws RegistrationException if the client cannot register.
      *
      **/
     string register(QoS clientQoS)
@@ -173,7 +173,7 @@ interface BridgeAdmin
      *
      * @param clientQoS The requested quality of service.
      *
-     * @raise RegistrationException if the client cannot register.
+     * @throws RegistrationException if the client cannot register.
      *
      **/
     void registerWithId(string id, QoS clientQoS)
@@ -212,7 +212,7 @@ interface Bridge
      *
      * @return The executor on which the client should call.
      *
-     * @raise RegistrationException if the client cannot connect.
+     * @throws RegistrationException if the client cannot connect.
      *
      **/
     Executor* connect(string id, Reporter* cb)
