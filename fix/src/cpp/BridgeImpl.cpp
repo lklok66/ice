@@ -181,7 +181,7 @@ BridgeImpl::BridgeImpl(const string& name, const Ice::CommunicatorPtr& communica
     _instanceName(instanceName),
     _dbenv(dbenv),
     _dbCache(new DBCache(communicator, name)),
-    _trace(communicator->getProperties()->getPropertyAsIntWithDefault(name + ".Trace", 0)),
+    _trace(communicator->getProperties()->getPropertyAsIntWithDefault(name + ".Trace.Bridge", 0)),
     _timer(new IceUtil::Timer()),
     _retryInterval(IceUtil::Time::seconds(communicator->getProperties()->getPropertyAsIntWithDefault(
                                               name + ".RetryInterval", 60))),
@@ -1064,7 +1064,7 @@ BridgeImpl::fromAdmin(const FIX::Message& message, const FIX::SessionID& session
         return;
     }
 
-    if(_trace > 0)
+    if(_trace > 1)
     {
         FIX::MsgSeqNum seqNum;
         message.getHeader().getField(seqNum);

@@ -13,7 +13,7 @@ IceFIX.FIXConfig=config.fix
 #
 # The bridge tracing.
 #
-IceFIX.Trace=2
+IceFIX.Trace.Bridge=2
 
 #
 # The bridge retry interval.

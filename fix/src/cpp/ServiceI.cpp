@@ -445,7 +445,7 @@ ServiceI::validateProperties(const string& name, const Ice::PropertiesPtr& prope
         "Trace.Incoming",
         "Trace.Outgoing",
         "Trace.Event",
-        "Trace",
+        "Trace.Bridge",
         "InstanceName",
         "RetryInterval",
         "FIXConfig",
