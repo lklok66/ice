@@ -912,7 +912,7 @@ IceFIXClient::run(int argc, char* argv[])
 
         tp2->execute(newOrderSingle.toString());
 
-        Order o = reporter->waitFill(getClOrdID(newOrderSingle));
+        Order o = reporter->waitFill(getClOrdID(newOrderSingle), IceUtil::Time::seconds(30));
         test(o.ordStatus == FIX::OrdStatus_FILLED);
 
         // At this point it shouldn't be possible to unregister the

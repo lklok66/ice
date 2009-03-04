@@ -62,9 +62,11 @@ ExecutorI::execute(const string& data, const Ice::Current& current)
                 {
                     if(p != clordidDB.end())
                     {
+						ostringstream os;
+						os << "duplicate ClOrdID: `" << id << "'";
                         Ice::Warning warning(_communicator->getLogger());
-                        warning << "duplicate ClOrdID detected";
-                        throw ExecuteException("duplicate ClOrdID");
+                        warning << os.str();
+                        throw ExecuteException(os.str());
                     }
                 }
                 break;

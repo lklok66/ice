@@ -36,7 +36,7 @@
         </properties>
         <target name="debug">
           <properties>
-            <property name="${service}.Trace" value="2"/>
+            <property name="${service}.Trace.Bridge" value="2"/>
           </properties>
         </target>
       </service>

@@ -48,31 +48,25 @@ class RoutingHandler : public IceUtil::Shared, public IceUtil::Mutex
 {
 public:
 
-    RoutingHandler(const BridgeImplPtr& bridge, int trace, Ice::Long messageId, const Ice::CommunicatorPtr& communicator) :
-        _bridge(bridge), _trace(trace), _messageId(messageId), _communicator(communicator)
+    RoutingHandler(const BridgeImplPtr& bridge, int trace, Ice::Long messageId, const Ice::CommunicatorPtr& communicator,
+				   unsigned int nreplies) :
+        _bridge(bridge), _trace(trace), _messageId(messageId), _communicator(communicator), _nreplies(nreplies)
     {
-    }
-
-    void add(const string& clientId)
-    {
-        IceUtil::Mutex::Lock sync(*this);
-        _replies.insert(clientId);
     }
 
     void exception(const string& clientId, const ReporterPrx& reporter, const Ice::Exception& ex)
     {
-        bool done = false;
+        bool complete;
         {
             IceUtil::Mutex::Lock sync(*this);
-            int count = _replies.erase(clientId);
-            assert(count == 1);
-            done = _replies.empty();
+			--_nreplies;
+            complete = _nreplies == 0;
         }
 
         if(_trace > 1)
         {
             Ice::Trace trace(_communicator->getLogger(), "Bridge");
-            trace << "routing: " << _messageId << ": client: " << clientId << ": failed: " << ex;
+            trace << "routing messageId: " << _messageId << ": client: " << clientId << ": failed: " << ex;
         }
 
         if(dynamic_cast<const Ice::ObjectNotExistException*>(&ex))
@@ -80,7 +74,7 @@ public:
             _bridge->clientError(clientId, reporter);
         }
 
-        if(done)
+        if(complete)
         {
             _bridge->sendComplete(_messageId, _routed);
         }
@@ -88,15 +82,15 @@ public:
 
     void response(const string& clientId)
     {
-        bool done = false;
+        bool complete;
         {
             IceUtil::Mutex::Lock sync(*this);
-            int count = _replies.erase(clientId);
-            assert(count == 1);
-            done = _replies.empty();
+			--_nreplies;
+            complete = _nreplies == 0;
             _routed.insert(clientId);
-        }
-        if(done)
+		}
+
+        if(complete)
         {
             _bridge->sendComplete(_messageId,_routed);
         }
@@ -108,7 +102,7 @@ private:
     const int _trace;
     const Ice::Long _messageId;
     const Ice::CommunicatorPtr _communicator;
-    set<string> _replies;
+	unsigned int _nreplies;
     set<string> _routed;
 };
 typedef IceUtil::Handle<RoutingHandler> RoutingHandlerPtr;
@@ -637,11 +631,13 @@ BridgeImpl::send(Ice::Long messageId)
     if(_trace > 0)
     {
         Ice::Trace trace(_communicator->getLogger(), "Bridge");
-        trace << "send: `" << messageId << "'";
+        trace << "send messageId: " << messageId;
     }
 
     // A list of client id, reporter proxy.
-    list<pair<string, ReporterPrx> > c;
+    list<pair<string, ReporterPrx> > routingList;
+	list<string> unavailable;
+
     // The message itself.
     Message msg;
 
@@ -676,7 +672,8 @@ BridgeImpl::send(Ice::Long messageId)
                             routing.begin()));
 
             // Forward the message to the clients in the routing list.
-            c.clear();
+            routingList.clear();
+			unavailable.clear();
             Ice::Long erased = 0;
             for(set<string>::const_iterator p = routing.begin(); p != routing.end(); ++p)
             {
@@ -687,7 +684,14 @@ BridgeImpl::send(Ice::Long messageId)
                 }
                 else
                 {
-                    c.push_back(make_pair(*p, q->second.reporter));
+					if(q->second.reporter)
+					{
+						routingList.push_back(make_pair(*p, q->second.reporter));
+					}
+					else
+					{
+						unavailable.push_back(*p);
+					}
                 }
             }
 
@@ -697,10 +701,10 @@ BridgeImpl::send(Ice::Long messageId)
             // message, we're done.
             if(erased == routing.size())
             {
-                if(_trace > 0)
+                if(_trace > 1)
                 {
                     Ice::Trace trace(_communicator->getLogger(), "Bridge");
-                    trace << "send: " << messageId << ": message fully routed, erasing";
+                    trace << "send messageId: " << messageId << ": message fully routed (unregistered client), erasing";
                 }
                 messageDB.erase(q);
                 return;
@@ -719,35 +723,36 @@ BridgeImpl::send(Ice::Long messageId)
 
     // The routing handler keeps track of the number of pending
     // replies for the given message.
-    RoutingHandlerPtr handler = new RoutingHandler(this, _trace, messageId, _communicator);
-    int queued = 0;
-    for(list<pair<string, ReporterPrx> >::const_iterator p = c.begin(); p != c.end(); ++p)
-    {
-        if(p->second)
-        {
-            ++queued;
-            handler->add(p->first);
+	if(_trace > 1 && !unavailable.empty())
+	{
+		Ice::Trace trace(_communicator->getLogger(), "Bridge");
+		trace << "sent messageId: " << messageId << ": unavailable clients: ";
+		for(list<string>::const_iterator p = unavailable.begin(); p != unavailable.end(); ++p)
+		{
+			if(p != unavailable.begin())
+			{
+				trace << ",";
+			}
+			trace << "`" << *p << "'";
+		}
+	}
 
-            ReporterPrx reporter = p->second->ice_timeout(_forwardTimeout);
-            reporter->message_async(new MessageAsyncI(p->first, reporter, handler), msg.data);
-        }
-        else
-        {
-            if(_trace > 0)
-            {
-                Ice::Trace trace(_communicator->getLogger(), "Bridge");
-                trace << "routing: `" << messageId << "': client: `" << p->first << "': unavailable";
-            }
-        }
-    }
-
-    // If no messages were sent, then immediately schedule a retry.
-    if(queued == 0)
-    {
-        if(_trace > 0)
+	if(!routingList.empty())
+	{
+		RoutingHandlerPtr handler = new RoutingHandler(this, _trace, messageId, _communicator, routingList.size());
+		for(list<pair<string, ReporterPrx> >::const_iterator p = routingList.begin(); p != routingList.end(); ++p)
+		{
+			ReporterPrx reporter = p->second->ice_timeout(_forwardTimeout);
+			reporter->message_async(new MessageAsyncI(p->first, reporter, handler), msg.data);
+		}
+	}
+	else
+	{
+	    // If no messages could be forwarded, then immediately schedule a retry.
+        if(_trace > 1)
         {
             Ice::Trace trace(_communicator->getLogger(), "Bridge");
-            trace << "send: `" << messageId << "': retry sending message";
+            trace << "send messageId: " << messageId << ": retry sending message";
         }
         _timer->schedule(new SendTimerTask(this, messageId), _retryInterval);
     }
@@ -777,10 +782,10 @@ BridgeImpl::sendComplete(Ice::Long messageId, const set<string>& routed)
                 copy(routed.begin(), routed.end(), back_inserter(msg.forwarded));
                 if(msg.forwarded.size() == msg.clients.size())
                 {
-                    if(_trace > 0)
+                    if(_trace > 1)
                     {
                         Ice::Trace trace(_communicator->getLogger(), "Bridge");
-                        trace << "send: " << messageId << ": message fully routed, erasing";
+                        trace << "sendComplete messageId: " << messageId << ": message fully routed, erasing";
                     }
 
                     messageDB.erase(q);
@@ -805,10 +810,10 @@ BridgeImpl::sendComplete(Ice::Long messageId, const set<string>& routed)
 
     if(retry)
     {
-        if(_trace > 0)
+        if(_trace > 1)
         {
             Ice::Trace trace(_communicator->getLogger(), "Bridge");
-            trace << "send: " << messageId << ": retry sending message";
+            trace << "sendComplete messageId: " << messageId << ": retry sending message";
         }
         _timer->schedule(new SendTimerTask(this, messageId), _retryInterval);
     }
@@ -928,6 +933,11 @@ BridgeImpl::onCreate(const FIX::SessionID& session)
     Ice::Long usec = 0;
     for(list<Ice::Long>::const_iterator p = queue.begin(); p != queue.end(); ++p)
     {
+		if(_trace > 1)
+		{
+			Ice::Trace trace(_communicator->getLogger(), "Bridge");
+			trace << "queue send messageId: " << *p;
+		}
         _timer->schedule(new SendTimerTask(this, *p), IceUtil::Time::microSeconds(usec++));
     }
 }
@@ -1070,7 +1080,7 @@ BridgeImpl::fromAdmin(const FIX::Message& message, const FIX::SessionID& session
         message.getHeader().getField(seqNum);
 
         Ice::Trace trace(_communicator->getLogger(), "Bridge");
-        trace << "fromAdmin: " << seqNum << " session: " << session;
+        trace << "fromAdmin: seqNum: " << seqNum << " session: `" << session << "'";
         trace << " XML\n" << message.toXML();
     }
     route(message);
@@ -1080,13 +1090,13 @@ void
 BridgeImpl::fromApp(const FIX::Message& message, const FIX::SessionID& session)
     throw(FIX::FieldNotFound, FIX::IncorrectDataFormat, FIX::IncorrectTagValue, FIX::UnsupportedMessageType)
 {
-    if(_trace > 0)
+    if(_trace > 1)
     {
         FIX::MsgSeqNum seqNum;
         message.getHeader().getField(seqNum);
 
         Ice::Trace trace(_communicator->getLogger(), "Bridge");
-        trace << "fromApp: " << seqNum << " session: " << session;
+        trace << "fromApp: seqNum: " << seqNum << " session: `" << session << "'";
         trace << " XML\n" << message.toXML();
     }
     route(message);
@@ -1100,7 +1110,7 @@ BridgeImpl::route(const FIX::Message& message)
     if(_trace > 1)
     {
         Ice::Trace trace(_communicator->getLogger(), "Bridge");
-        trace << "msgTypeValue: " << msgTypeValue;
+        trace << "msgTypeValue: `" << msgTypeValue << "'";
     }
 
     Ice::Long key = -1;
@@ -1158,7 +1168,7 @@ BridgeImpl::route(const FIX::Message& message)
                     if(q == seqnumDB.end())
                     {
                         Ice::Warning warning(_communicator->getLogger());
-                        warning << "Bridge: fromApp: can't find routing record for RefSeqNumber: `" << refSeqNum << "'";
+                        warning << "Bridge: fromApp: can't find routing record for RefSeqNumber: " << refSeqNum;
                     }
                     else
                     {
@@ -1209,7 +1219,7 @@ BridgeImpl::route(const FIX::Message& message)
             if(clients.empty())
             {
                 Ice::Warning warning(_communicator->getLogger());
-                warning << "Bridge: fromApp: `" << seqNum << "': no route for message\n";
+                warning << "Bridge: fromApp: " << seqNum << ": no route for message\n";
                 warning << message.toXML();
                 return;
             }
@@ -1217,7 +1227,7 @@ BridgeImpl::route(const FIX::Message& message)
             if(_trace > 1)
             {
                 Ice::Trace trace(_communicator->getLogger(), "Bridge");
-                trace << "fromApp: `" << seqNum << "': route message to clients: ";
+                trace << "fromApp: messageId: " << key << " seqNum: " << seqNum << ": route message to clients: ";
                 for(set<string>::const_iterator p = clients.begin(); p != clients.end(); ++p)
                 {
                     if(p != clients.begin())
