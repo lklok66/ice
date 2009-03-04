@@ -42,10 +42,10 @@ Parser::usage()
         "activate [list]          Activate the listed bridges, or all by default.\n"
         "deactivate [list]        Deactivate the listed bridges, or all by default.\n"
         "status [list]            Report the status for the listed bridges, or all by default.\n"
-        "testclean timeout [list] Show the number of records older than timeout for the listed bridges, or all by default that would be erased.\n"
+        "testclean timeout [list] Show the number of records older than timeout that would be erased for the listed bridges, or for all bridges by default.\n"
         "clean timeout [list]     Clean the database of all records older than timeout for the listed bridges, or all by default.\n"
         "dbstat [list]            Report the status of the databases for the listed bridges, or all by default.\n"
-        "clients [list]           List the registered clients for the listed bridges, or all by default.\n"
+        "clients [list]           Show the registered clients for the listed bridges, or all by default.\n"
         "unregister [--force] [bridge] ID"
         "                        Unregister the given client from the listed bridge, or all by default.\n"
         ;

@@ -27,7 +27,7 @@ interface Executor
      *
      * @return The sequence number of this message.
      *
-     * @raise ExecuteException if the message send failed.
+     * @throws ExecuteException if the message send failed.
      */
     int execute(string data)
         throws ExecuteException;
@@ -122,6 +122,7 @@ interface BridgeAdmin
      *
      * Return some statistics about the bridge database.
      *
+     * @return the statistics.
      */
     string dbstat();
 
@@ -145,7 +146,7 @@ interface BridgeAdmin
      * @param force If true erase the client even if there are queued
      * messages.
      *
-     * @throws RegistrationException if the request cannot be fulfilled.
+     * @throws RegistrationException if the client cannot unregister.
      *
      */
     void unregister(string id, bool force)
@@ -194,9 +195,9 @@ interface Bridge
 {
     /**
      *
-     * Retrieve the bridge admin.
+     * Retrieve the bridge administrative object.
      *
-     * @return A proxy to the bridge admin.
+     * @return A proxy to the bridge administrative object.
      *
      **/
     BridgeAdmin* getAdmin();
