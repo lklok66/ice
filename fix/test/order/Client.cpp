@@ -330,6 +330,20 @@ private:
 };
 typedef IceUtil::Handle<ReporterI> ReporterIPtr;
 
+static void
+waitLoggedOn(const IceFIX::BridgeAdminPrx& admin)
+{
+    IceUtil::Time start = IceUtil::Time::now();
+    IceUtil::Time end = start + IceUtil::Time::seconds(60 * 2); // 2 minutes
+    IceFIX::BridgeStatus status = admin->getStatus();
+    while(status != IceFIX::BridgeStatusLoggedOn && start < end)
+    {
+        IceUtil::ThreadControl::sleep(IceUtil::Time::seconds(1));
+        status = admin->getStatus();
+    }
+    test(status == IceFIX::BridgeStatusLoggedOn);
+}
+
 int
 IceFIXClient::run(int argc, char* argv[])
 {
@@ -440,6 +454,7 @@ IceFIXClient::run(int argc, char* argv[])
 
     tp2Control->start();
     tp2Admin->activate();
+    waitLoggedOn(tp2Admin);
 
     // TEST: activate/deactivate. Send a request and wait for the fill
     // which should not arrive.
@@ -469,6 +484,7 @@ IceFIXClient::run(int argc, char* argv[])
         tp1Control->start();
 
         tp1Admin->activate();
+        waitLoggedOn(tp1Admin);
 
         o = reporter->waitFill(getClOrdID(newOrderSingle1));
         test(o.ordStatus == FIX::OrdStatus_FILLED);
@@ -748,6 +764,7 @@ IceFIXClient::run(int argc, char* argv[])
         tp1Control->stop();
         tp1Control->start();
         tp1Admin->activate();
+        waitLoggedOn(tp1Admin);
         o = reporter->waitFill(getClOrdID(newOrderSingle3));
         test(o.ordStatus == FIX::OrdStatus_FILLED);
     }
@@ -891,6 +908,7 @@ IceFIXClient::run(int argc, char* argv[])
     {
         // Reactivate TP2.
         tp2Admin->activate();
+        waitLoggedOn(tp2Admin);
 
         // Destroy the non-filtered client, and then send a message.
         nonFilteredTp->destroy();
@@ -912,7 +930,7 @@ IceFIXClient::run(int argc, char* argv[])
 
         tp2->execute(newOrderSingle.toString());
 
-        Order o = reporter->waitFill(getClOrdID(newOrderSingle), IceUtil::Time::seconds(30));
+        Order o = reporter->waitFill(getClOrdID(newOrderSingle));
         test(o.ordStatus == FIX::OrdStatus_FILLED);
 
         // At this point it shouldn't be possible to unregister the
