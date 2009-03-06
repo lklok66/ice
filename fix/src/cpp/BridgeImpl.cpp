@@ -108,23 +108,31 @@ BridgeImpl::BridgeImpl(const string& name, const Ice::CommunicatorPtr& communica
 void
 BridgeImpl::stop()
 {
-    IceUtil::Mutex::Lock sync(*this);
-    if(_active)
+    bool stop = false;
     {
-        if(_trace > 0)
+        IceUtil::Mutex::Lock sync(*this);
+        if(_active)
         {
-            Ice::Trace trace(_communicator->getLogger(), "Bridge");
-            trace << "logout";
+            if(_trace > 0)
+            {
+                Ice::Trace trace(_communicator->getLogger(), "Bridge");
+                trace << "logout";
+            }
+
+            stop = true;
+            _active = false;
         }
+        _timer->destroy();
 
-        _initiator->stop();
-        _active = false;
+        for(map<string, ClientImplPtr>::const_iterator p = _clients.begin(); p != _clients.end(); ++p)
+        {
+            p->second->stop();
+        }
     }
-    _timer->destroy();
 
-    for(map<string, ClientImplPtr>::const_iterator p = _clients.begin(); p != _clients.end(); ++p)
+    if(stop)
     {
-        p->second->stop();
+        _initiator->stop();
     }
 }
 

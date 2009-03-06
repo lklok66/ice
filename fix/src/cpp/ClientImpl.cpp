@@ -100,7 +100,10 @@ void
 ClientImpl::enqueue(const Ice::Long& messageId, const Message& msg)
 {
     Lock sync(*this);
-    assert(!_destroy); // XXX: Correct?
+    if(_destroy)
+    {
+        return;
+    }
     _queue.push_back(messageId);
     if(_reporter && _queue.size() == 1)
     {
@@ -112,7 +115,10 @@ void
 ClientImpl::enqueue(const Ice::Long& messageId)
 {
     Lock sync(*this);
-    assert(!_destroy); // XXX: Correct?
+    if(_destroy)
+    {
+        return;
+    }
     _queue.push_back(messageId);
     if(_reporter && _queue.size() == 1)
     {
