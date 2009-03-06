@@ -142,7 +142,7 @@ ClientImpl::connect(const IceFIX::ReporterPrx& reporter)
     setReporter(reporter);
 
     // If we were not sending, and we can now send then start sending.
-    if(!sending && _reporter && !_queue.empty())
+    if(_timerTask || (!sending && _reporter && !_queue.empty()))
     {
         if(!_timerTask || _timer->cancel(_timerTask))
         {
