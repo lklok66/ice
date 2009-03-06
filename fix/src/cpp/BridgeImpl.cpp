@@ -563,8 +563,9 @@ void
 BridgeImpl::onCreate(const FIX::SessionID& session)
 {
     // This can only be called on construction, so no need to sync,
-    //and deadlock exceptions cannot occur.  IceUtil::Mutex::Lock
-    //sync(*this);
+    // and deadlock exceptions cannot occur.
+    //
+    // IceUtil::Mutex::Lock sync(*this);
 
     // Once onCreate has been called messages can be sent to the
     // trading partner.
@@ -577,7 +578,9 @@ BridgeImpl::onCreate(const FIX::SessionID& session)
     _session = FIX::Session::lookupSession(session);
 
     // Build an initial set of clients and queue the set of messages
-    // per client.
+    // per client. I don't want to start enqueuing from within the
+    // database access since that will start concurrent database and
+    // allow the possibilities of a deadlock exception.
     list<pair<Ice::Long, list<ClientImplPtr> > > m;
 
     // Recreate each client.
@@ -859,11 +862,11 @@ BridgeImpl::route(const FIX::Message& message)
 
     FIX::MsgSeqNum seqNum;
     message.getHeader().getField(seqNum);
+    string data = message.toString();
 
     list<ClientImplPtr> clients;
-    Message m;
-    m.data = message.toString();
 
+    // Need to lock the mutex due to accessing the _clients map.
     IceUtil::Mutex::Lock sync(*this);
 
     Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
@@ -883,7 +886,9 @@ BridgeImpl::route(const FIX::Message& message)
             p.set(key+1);
 
             clients.clear();
-            m.clients.clear();
+
+            Message m;
+            m.data = data;
 
             // Find all non-filtered clients, and add to the clients
             // list.
@@ -998,6 +1003,6 @@ BridgeImpl::route(const FIX::Message& message)
 
     for(list<ClientImplPtr>::const_iterator p = clients.begin(); p != clients.end(); ++p)
     {
-        (*p)->enqueue(key, m);
+        (*p)->enqueue(key, data);
     }
 }

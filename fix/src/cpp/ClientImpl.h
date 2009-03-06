@@ -14,7 +14,6 @@
 #include <Ice/Ice.h>
 #include <Freeze/Freeze.h>
 #include <IceFIX/IceFIX.h>
-#include <BridgeTypes.h>
 #include <MessageDB.h>
 
 #include <list>
@@ -33,7 +32,7 @@ public:
     bool filtered() const;
     IceFIX::ReporterPrx reporter() const;
 
-    void enqueue(const Ice::Long&, const FIXBridge::Message&);
+    void enqueue(const Ice::Long&, const std::string&);
     void enqueue(const Ice::Long&);
     void connect(const IceFIX::ReporterPrx&);
     void destroy(bool);
@@ -49,7 +48,7 @@ private:
     void setReporter(const ReporterPrx&);
     void forwarded(FIXBridge::MessageDB&, Ice::Long);
     void sendImpl(const Ice::Long&);
-    void sendImpl(const Ice::Long&, const FIXBridge::Message&);
+    void sendImpl(const Ice::Long&, const std::string&);
     void halt(const Freeze::DatabaseException&) const;
 
     const IceUtil::TimerPtr _timer;

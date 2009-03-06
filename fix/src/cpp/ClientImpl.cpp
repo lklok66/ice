@@ -97,7 +97,7 @@ ClientImpl::reporter() const
 }
 
 void
-ClientImpl::enqueue(const Ice::Long& messageId, const Message& msg)
+ClientImpl::enqueue(const Ice::Long& messageId, const string& data)
 {
     Lock sync(*this);
     if(_destroy)
@@ -107,7 +107,7 @@ ClientImpl::enqueue(const Ice::Long& messageId, const Message& msg)
     _queue.push_back(messageId);
     if(_reporter && _queue.size() == 1)
     {
-        sendImpl(messageId, msg);
+        sendImpl(messageId, data);
     }
 }
 
@@ -255,7 +255,7 @@ ClientImpl::response()
 {
     Lock sync(*this);
     
-    // If we were unregistered in the meantime, then we're done.
+    // If we were unregistered in the meantime, we're done.
     if(_destroy && _queue.empty())
     {
         return;
@@ -303,7 +303,7 @@ ClientImpl::response()
     // no messages to send, we're outta here.
     if(!_destroy && !_queue.empty() && _reporter)
     {
-        sendImpl(_queue.front(), msg);
+        sendImpl(_queue.front(), msg.data);
     }
 }
 
@@ -393,11 +393,11 @@ ClientImpl::sendImpl(const Ice::Long& messageId)
         }
     }
 
-    sendImpl(messageId, msg);
+    sendImpl(messageId, msg.data);
 }
 
 void
-ClientImpl::sendImpl(const Ice::Long& messageId, const Message& msg)
+ClientImpl::sendImpl(const Ice::Long& messageId, const string& data)
 {
     assert(!_destroy && !_queue.empty() && _reporter);
     if(_trace > 1)
@@ -405,7 +405,7 @@ ClientImpl::sendImpl(const Ice::Long& messageId, const Message& msg)
         Ice::Trace trace(_communicator->getLogger(), "Bridge");
         trace << "sending messageId: " << messageId << " to client: `" << _id << "'";
     }
-    _reporter->message_async(new MessageAsyncI(this, _reporter), msg.data);
+    _reporter->message_async(new MessageAsyncI(this, _reporter), data);
 }
 
 void
