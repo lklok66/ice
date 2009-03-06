@@ -43,7 +43,7 @@
       <parameter name="fix-config"/>
       <parameter name="db-home" default=""/>
 
-      <icebox id="${instance-name}" exe="iceboxd" activation="on-demand">
+      <icebox id="${instance-name}" exe="icebox" activation="on-demand">
         <service-instance template="IceFIX"
 			  instance-name="${instance-name}" 
 			  bridge-endpoints="${bridge-endpoints}"

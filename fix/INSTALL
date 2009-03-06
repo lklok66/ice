@@ -81,6 +81,8 @@ Python is required to run the test suite:
 You can now run the test suite. Open a command prompt and change to
 the top-level Ice directory. At the command prompt, execute:
 
+> set USE_BIN_DIST=yes
+> set ICE_HOME=<Ice installation directory>
 > python allTests.py
 
 If everything worked out, you should see lots of "ok" messages. In

@@ -37,8 +37,7 @@ public class Client
             Console.WriteLine("Usage: " + appName() + " [--id id]");
         }
 
-        public IceFIXClient() :
-            base(Ice.SignalPolicy.NoSignalHandling)
+        public IceFIXClient()
         {
         }
 
