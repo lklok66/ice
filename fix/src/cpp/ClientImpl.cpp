@@ -403,7 +403,7 @@ ClientImpl::sendImpl(const Ice::Long& messageId, const string& data)
     if(_trace > 1)
     {
         Ice::Trace trace(_communicator->getLogger(), "Bridge");
-        trace << "sending messageId: " << messageId << " to client: `" << _id << "'";
+        trace << "sending messageId: " << messageId << " to client: `" << _id << "': " << _reporter;
     }
     _reporter->message_async(new MessageAsyncI(this, _reporter), data);
 }

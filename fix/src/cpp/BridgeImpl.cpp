@@ -75,7 +75,7 @@ BridgeImpl::BridgeImpl(const string& name, const Ice::CommunicatorPtr& communica
     _retryInterval(IceUtil::Time::seconds(communicator->getProperties()->getPropertyAsIntWithDefault(
                                               name + ".RetryInterval", 60))),
     _forwardTimeout(communicator->getProperties()->getPropertyAsIntWithDefault(
-                        name + ".RetryInterval", 60)/2 * 1000),
+                        name + ".RetryInterval", 60)/2.0 * 1000),
     _initiator(0),
     _active(false),
     _session(0)
