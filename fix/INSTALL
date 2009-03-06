@@ -1,1 +1,104 @@
-TODO
+======================================================================
+Introduction
+======================================================================
+
+This file describes how to build and install IceFIX from source
+code. Note that this distribution also includes all library and
+executable files containing the IceFIX Bridge service, C++ and C#
+libraries, all demos and tests, therefore it is not usually necessary
+to compile the source yourself.
+
+======================================================================
+Requirements
+======================================================================
+
+
+Operating systems
+-----------------
+
+IceFIX has been tested under Windows XP.
+
+Compilers
+---------
+
+IceFIX has been tested with Visual Studio 2005 SP1.
+
+Ice
+---
+
+IceFIX requires an installation of Ice 3.3. You can download a
+binary distribution from the ZeroC web site, or you can build Ice
+yourself.
+
+Binary distributions for supported platforms are available at
+
+  http://www.zeroc.com/download.html
+
+
+QuickFIX
+--------
+
+IceFIX requires an installation of QuickFIX, and has been tested
+with QuickFIX 1.12.4. QuickFIX can be downloaded from
+http://www.quickfixengine.org.
+
+
+Building IceFIX
+---------------
+
+Using your favorite Zip tool, unzip the IceFIX source archive anywhere 
+you like.
+
+Add the "bin" directory of Ice and the Ice third-party libraries
+to your PATH.
+
+Open a visual studio command prompt.
+
+ - Visual Studio Command Prompt
+
+Change the working directory to IceFIX-@ver@. For example;
+
+> cd C:\IceFIX-@ver@\cpp
+
+Edit config\Make.rules.mak, and config/Make.rules.mak.cs to establish
+your build configuration. The comments in the file provide more
+information. In particular, you must set your QF_HOME to the location
+of your QuickFIX installation.
+
+Now you're ready to build IceFIX:
+
+> nmake /f Makefile.mak
+
+Running the Test Suite
+----------------------
+
+Python is required to run the test suite:
+
+  http://www.python.org/download
+
+You can now run the test suite. Open a command prompt and change to
+the top-level Ice directory. At the command prompt, execute:
+
+> python allTests.py
+
+If everything worked out, you should see lots of "ok" messages. In
+case of a failure, the tests abort with "failed".
+
+If you want to try out any of the demos, make sure to update your PATH
+environment variable to add the "bin" directory, which contains the
+Ice DLLs and executables.
+
+======================================================================
+Installation
+======================================================================
+
+Simply run "nmake /f Makefile.mak install". This will install Ice
+in the directory specified by the "prefix" variable in
+config\Make.rules.mak and config\Make.rules.mak.cs. After installation,
+make sure that the <prefix>\bin directory is in your PATH. You must
+also add the include directory to the Visual C++ "Include files",
+the lib directory to the "Library files", and the bin directory to
+the "Executable files":
+
+* Visual C++ 2005/2008: Tools->Options->Projects and Solutions->
+						    VC++ Directories
