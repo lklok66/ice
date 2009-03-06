@@ -23,7 +23,7 @@ OBJS		= IceFIX.obj
 
 SOBJS		= ServiceI.obj \
 		  BridgeImpl.obj \
-		  ClientImpl.o \
+		  ClientImpl.obj \
 		  RoutingRecordDB.obj \
 		  BridgeTypes.obj \
 		  ClientDB.obj \
