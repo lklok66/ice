@@ -40,5 +40,6 @@ for filename in [ os.path.join(storedir, f) for f in os.listdir(storedir) if f !
 #
 # Test client/server with on demand activation.
 #
-IceGridAdmin.iceGridTest(testdir, name, "application.xml", "", "icebox.exe=" + TestUtil.getIceBox(testdir))
+IceGridAdmin.iceGridTest(testdir, name, "application.xml", "", "debug icebox.exe=" + TestUtil.getIceBox(testdir))
+#IceGridAdmin.iceGridTest(testdir, name, "application.xml", "", "icebox.exe=" + TestUtil.getIceBox(testdir))
 sys.exit(0)

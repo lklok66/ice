@@ -11,7 +11,6 @@
 #include <IceUtil/IceUtil.h>
 #include <IceBox/IceBox.h>
 
-#include <ExecutorI.h>
 #include <BridgeImpl.h>
 #include <dbname.h>
 
@@ -291,6 +290,62 @@ private:
     const BridgeImplPtr _bridge;
 };
 
+class ExecutorI : public IceFIX::Executor
+{
+public:
+
+    ExecutorI(const BridgeImplPtr& bridge) :
+        _bridge(bridge)
+    {
+    }
+    
+    int
+    execute(const string& data, const Ice::Current& current)
+    {
+        return _bridge->execute(data, current);
+    }
+    
+    void
+    destroy(const Ice::Current& current)
+    {
+        _bridge->executorDestroy(current);
+    }
+    
+private:
+
+    const BridgeImplPtr _bridge;
+};
+
+class ExecutorLocatorI : public Ice::ServantLocator
+{
+public:
+
+    ExecutorLocatorI(const Ice::ObjectPtr& executor) :
+        _executor(executor)
+    {
+    }
+
+    Ice::ObjectPtr
+    locate(const Ice::Current&, Ice::LocalObjectPtr&)
+    {
+        return _executor;
+    }
+
+    void
+    finished(const Ice::Current&, const Ice::ObjectPtr&, const Ice::LocalObjectPtr&)
+    {
+    }
+
+    void
+    deactivate(const string&)
+    {
+    }
+
+private:
+
+    const Ice::ObjectPtr _executor;
+};
+
 class BridgeServer : public Ice::Application
 {
 public:
@@ -351,7 +406,7 @@ ServiceI::start(const string& name, const Ice::CommunicatorPtr& communicator, co
     }
 
     _impl->adapter = communicator->createObjectAdapter(name + ".Bridge");
-    _impl->adapter->addServantLocator(new ExecutorLocatorI(new ExecutorI(communicator, dbenv, sessionID)),
+    _impl->adapter->addServantLocator(new ExecutorLocatorI(new ExecutorI(bridge)),
                                       instanceName + "-Executor");
     IceFIX::BridgeAdminPrx adminPrx = IceFIX::BridgeAdminPrx::uncheckedCast(
         _impl->adapter->createProxy(communicator->stringToIdentity(instanceName + "/Admin")));

@@ -27,8 +27,8 @@ TARGETS		= $(LIBTARGETS) $(SVCLIBTARGETS) $(ADMIN)
 OBJS		= IceFIX.o
 
 SOBJS		= ServiceI.o \
-		  ExecutorI.o \
 		  BridgeImpl.o \
+		  ClientImpl.o \
 		  RoutingRecordDB.o \
 		  BridgeTypes.o \
 		  ClientDB.o \

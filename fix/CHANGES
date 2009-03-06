@@ -25,6 +25,9 @@ Changes since third release to QIM (Feb 25th, 2009)
 - Fixed a bug with the IceFIX Bridge that could cause an assertion
   failure when routing messages.
 
+- Fixed a bug with the IceFIX Bridge that could cause messages to be
+  routed out of order.
+
 Changes since second release to QIM (Feb 12th, 2009)
 
 - The CLOrdID generation in the demos was changed to be a counter,

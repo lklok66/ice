@@ -22,8 +22,8 @@ TARGETS         = $(LIBNAME) $(DLLNAME) $(SVCLIBNAME) $(SVCDLLNAME) $(ADMIN)
 OBJS		= IceFIX.obj
 
 SOBJS		= ServiceI.obj \
-		  ExecutorI.obj \
 		  BridgeImpl.obj \
+		  ClientImpl.o \
 		  RoutingRecordDB.obj \
 		  BridgeTypes.obj \
 		  ClientDB.obj \

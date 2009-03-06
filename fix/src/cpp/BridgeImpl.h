@@ -13,6 +13,7 @@
 #include <Ice/Ice.h>
 #include <Freeze/Freeze.h>
 #include <ClientDB.h>
+#include <ClientImpl.h>
 #include <RoutingRecordDB.h>
 #include <IceFIX/IceFIX.h>
 #include <quickfix/Session.h>
@@ -45,9 +46,8 @@ public:
     BridgeStatus getStatus(const Ice::Current&);
     ClientInfoSeq getClients(const Ice::Current&);
 
-    void send(Ice::Long);
-    void sendComplete(Ice::Long, const std::set<std::string>&);
-    void clientError(const std::string&, const ReporterPrx&);
+    void executorDestroy(const Ice::Current&);
+    int execute(const std::string&, const Ice::Current&);
 
 private:
 
@@ -80,6 +80,8 @@ private:
 
     bool _active;
     FIX::Session* _session;
+
+    std::map<std::string, ClientImplPtr> _clients;
 };
 typedef IceUtil::Handle<BridgeImpl> BridgeImplPtr;
 
