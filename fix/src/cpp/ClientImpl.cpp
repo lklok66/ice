@@ -156,16 +156,19 @@ void
 ClientImpl::destroy(bool force)
 {
     Lock sync(*this);
-    if(_reporter)
+    if(!force)
     {
-        throw RegistrationException("client is active");
-    }
-
-    if(!force && !_queue.empty())
-    {
-        ostringstream os;
-        os << "client has " << _queue.size() << " queued messages";
-        throw RegistrationException(os.str());
+        if(_reporter)
+        {
+            throw RegistrationException("client is connected");
+        }
+        
+        if(!_queue.empty())
+        {
+            ostringstream os;
+            os << "client has " << _queue.size() << " queued messages";
+            throw RegistrationException(os.str());
+        }
     }
 
     Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);

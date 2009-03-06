@@ -9,7 +9,9 @@ Changes since third release to QIM (Feb 25th, 2009)
 
 - Changed IceFIXAdmin.BridgeAdmin property to IceFIXAdmin.Bridge.
 
-- Added --force command to icefixadmin unregister.
+- Added --force command to icefixadmin unregister. This forces the
+  unregistration of a client even if it has queued messages, or is
+  connected.
 
 - Fixed BridgeAdmin::unregister to remove queued messages, if
   necessary.

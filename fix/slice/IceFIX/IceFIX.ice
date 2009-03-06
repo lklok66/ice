@@ -144,7 +144,7 @@ interface BridgeAdmin
      * @param id The id of the client to unregister.
      *
      * @param force If true erase the client even if there are queued
-     * messages.
+     * messages, or the client is connected.
      *
      * @throws RegistrationException if the client cannot unregister.
      *
