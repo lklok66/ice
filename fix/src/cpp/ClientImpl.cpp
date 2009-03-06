@@ -71,7 +71,7 @@ ClientImpl::ClientImpl(const IceUtil::TimerPtr& timer, const Ice::CommunicatorPt
                        const IceUtil::Time& retryInterval, int trace, const string& id, const IceFIX::QoS& qos,
                        const IceFIX::ReporterPrx& reporter) :
         _timer(timer), _communicator(communicator), _dbenv(dbenv), _trace(trace), _retryInterval(retryInterval),
-        _id(id), _filtered(true), _reporter(reporter), _destroy(false), _sending(false)
+        _id(id), _filtered(true), _reporter(reporter), _destroy(false)
 {
     IceFIX::QoS::const_iterator p = qos.find("filtered");
     if(p != qos.end())
@@ -100,18 +100,11 @@ void
 ClientImpl::enqueue(const Ice::Long& messageId, const Message& msg)
 {
     Lock sync(*this);
-    assert(!_destroy);
+    assert(!_destroy); // XXX: Correct?
     _queue.push_back(messageId);
-    if(_reporter && !_sending)
+    if(_reporter && _queue.size() == 1)
     {
-        assert(_queue.size() == 1);
-        if(_trace > 1)
-        {
-            Ice::Trace trace(_communicator->getLogger(), "Bridge");
-            trace << "sending messageId: " << _queue.front() << " to client: `" << _id << "'";
-        }
-        _sending = true;
-        _reporter->message_async(new MessageAsyncI(this, _reporter), msg.data);
+        sendImpl(messageId, msg);
     }
 }
 
@@ -119,11 +112,11 @@ void
 ClientImpl::enqueue(const Ice::Long& messageId)
 {
     Lock sync(*this);
-    assert(!_destroy);
+    assert(!_destroy); // XXX: Correct?
     _queue.push_back(messageId);
-    if(_reporter && !_sending)
+    if(_reporter && _queue.size() == 1)
     {
-        _timer->schedule(new SendTimerTask(this), IceUtil::Time::seconds(0));
+        sendImpl(messageId);
     }
 }
 
@@ -131,60 +124,25 @@ void
 ClientImpl::connect(const IceFIX::ReporterPrx& reporter)
 {
     Lock sync(*this);
-
-    _reporter = reporter;
-
-    Message msg;
-
-    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
-    ClientDB clients(connection, clientDBName);
-    MessageDB messageDB(connection, messageDBName);
-    for(;;)
+    if(_destroy)
     {
-        try
-        {
-            Client c;
-            ClientDB::iterator p = clients.find(_id);
-            assert(p != clients.end());
-
-            c = p->second;
-            c.reporter = reporter;
-            p.set(c);
-
-            if(!_queue.empty())
-            {
-                MessageDB::const_iterator q = messageDB.find(_queue.front());
-                assert(q != messageDB.end());
-                msg = q->second;
-            }
-            
-            break;
-        }
-        catch(const Freeze::DeadlockException&)
-        {
-            continue;
-        }
-        catch(const Freeze::DatabaseException& ex)
-        {
-            halt(ex);
-        }
+        return; // Ignore
     }
+    
+    // We need to check _reporter prior to setReporter to know if
+    // we're currently sending.
+    bool sending = _reporter && !_queue.empty();
 
-    if(_trace > 0)
-    {
-        Ice::Trace trace(_communicator->getLogger(), "Bridge");
-        trace << "connect: " << _id;
-    }
+    setReporter(reporter);
 
-    if(!_sending && !_destroy && !_queue.empty() && _reporter)
+    // If we were not sending, and we can now send then start sending.
+    if(!sending && _reporter && !_queue.empty())
     {
-        if(_trace > 1)
+        if(!_timerTask || _timer->cancel(_timerTask))
         {
-            Ice::Trace trace(_communicator->getLogger(), "Bridge");
-            trace << "sending messageId: " << _queue.front() << " to client: `" << _id << "'";
+            _timerTask = 0;
+            sendImpl(_queue.front());
         }
-        _sending = true;
-        _reporter->message_async(new MessageAsyncI(this, _reporter), msg.data);
     }
 }
 
@@ -195,6 +153,13 @@ ClientImpl::destroy(bool force)
     if(_reporter)
     {
         throw RegistrationException("client is active");
+    }
+
+    if(!force && !_queue.empty())
+    {
+        ostringstream os;
+        os << "client has " << _queue.size() << " queued messages";
+        throw RegistrationException(os.str());
     }
 
     Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
@@ -209,13 +174,6 @@ ClientImpl::destroy(bool force)
             ClientDB::iterator p = clients.find(_id);
             assert(p != clients.end());
 
-            if(!force && !_queue.empty())
-            {
-                ostringstream os;
-                os << "client has " << _queue.size() << " queued messages";
-                throw RegistrationException(os.str());
-            }
-
             // Dequeue all queued messages. We operate on a copy in
             // case the transaction is restarted.
             list<Ice::Long> queueCopy = _queue;
@@ -223,27 +181,7 @@ ClientImpl::destroy(bool force)
             {
                 Ice::Long messageId = queueCopy.front();
                 queueCopy.pop_front();
-
-                MessageDB::iterator q = messageDB.find(messageId);
-                assert(q != messageDB.end());
-                
-                Message msg = q->second;
-                
-                msg.forwarded.push_back(_id);
-                if(msg.forwarded.size() == msg.clients.size())
-                {
-                    if(_trace > 1)
-                    {
-                        Ice::Trace trace(_communicator->getLogger(), "Bridge");
-                        trace << "unregister: " << _id << " messageId: " << messageId
-                              << ": message fully routed, erasing";
-                    }
-                    messageDB.erase(q);
-                }
-                else
-                {
-                    q.set(msg);
-                }
+                forwarded(messageDB, messageId);
             }
 
             if(_trace > 0)
@@ -276,78 +214,27 @@ ClientImpl::disconnect()
     Lock sync(*this);
 
     // If we're not connected, we're done.
-    if(!_reporter)
+    if(!_reporter) 
     {
         return;
     }
-    _reporter = 0;
-
-    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
-    ClientDB clients(connection, clientDBName);
-    for(;;)
-    {
-        try
-        {
-            Client c;
-
-            ClientDB::iterator p = clients.find(_id);
-            if(p != clients.end())
-            {
-                c = p->second;
-                c.reporter = 0;
-                p.set(c);
-            }
-            break;
-        }
-        catch(const Freeze::DeadlockException&)
-        {
-            continue;
-        }
-        catch(const Freeze::DatabaseException& ex)
-        {
-            halt(ex);
-        }
-    }
+    setReporter(0);
 }
 
 void
 ClientImpl::send()
 {
     Lock sync(*this);
+    _timerTask = 0;
 
-    // If we're sending, destroyed, there are no messages to send, or
-    // the client is not connected we don't send the next message.
-    if(_sending || _destroy || _queue.empty() || !_reporter)
+    // If we're destroyed, there are no messages to send, or the
+    // client is not connected we don't send the next message.
+    if(_destroy || !_reporter)
     {
         return;
     }
-
-    // The message itself.
-    Message msg;
-
-    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
-    MessageDB messageDB(connection, messageDBName);
-    for(;;)
-    {
-        try
-        {
-            MessageDB::const_iterator q = messageDB.find(_queue.front());
-            assert(q != messageDB.end());
-            msg = q->second;
-            break;
-        }
-        catch(const Freeze::DeadlockException&)
-        {
-            continue;
-        }
-        catch(const Freeze::DatabaseException& ex)
-        {
-            halt(ex);
-        }
-    }
-
-    _sending = true;
-    _reporter->message_async(new MessageAsyncI(this, _reporter), msg.data);
+    assert(!_queue.empty());
+    sendImpl(_queue.front());
 }
 
 void
@@ -362,10 +249,6 @@ ClientImpl::response()
 {
     Lock sync(*this);
     
-    assert(_sending);
-    // We're no longer sending.
-    _sending = false;
-
     // If we were unregistered in the meantime, then we're done.
     if(_destroy && _queue.empty())
     {
@@ -377,12 +260,6 @@ ClientImpl::response()
     Ice::Long messageId = _queue.front();
     _queue.pop_front();
 
-    {
-        Ice::Trace trace(_communicator->getLogger(), "Bridge");
-        trace << "response messageId: " << messageId << ": client: `" << _id << "' messages remaining: "
-              << _queue.size();
-    }
-
     // The next message to send.
     Message msg;
 
@@ -392,44 +269,22 @@ ClientImpl::response()
     {
         try
         {
-            MessageDB::iterator q = messageDB.find(messageId);
-            assert(q != messageDB.end());
-
-            msg = q->second;
-
-            msg.forwarded.push_back(_id);
-            if(msg.forwarded.size() == msg.clients.size())
-            {
-                if(_trace > 1)
-                {
-                    Ice::Trace trace(_communicator->getLogger(), "Bridge");
-                    trace << "response messageId: " << messageId << ": message fully routed, erasing";
-                }
-                messageDB.erase(q);
-            }
-            else
-            {
-                q.set(msg);
-            }
+            Freeze::TransactionHolder txn(connection);
+            forwarded(messageDB, messageId);
 
             // Gather the next message to send, if the queue isn't
-            // empty.
-            if(!_queue.empty())
+            // empty and we're ready to send another message.
+            if(!_destroy && !_queue.empty() && _reporter)
             {
-                q = messageDB.find(_queue.front());
+                MessageDB::const_iterator q = messageDB.find(_queue.front());
                 assert(q != messageDB.end());
                 msg = q->second;
-                {
-                    Ice::Trace trace(_communicator->getLogger(), "Bridge");
-                    trace << "client `" << _id << "': gathered messageId: " << _queue.front() << " to send";
-                }
             }
+            txn.commit();
             break;
         }
         catch(const Freeze::DeadlockException&)
         {
-            Ice::Trace trace(_communicator->getLogger(), "Bridge");
-            trace << "client `" << _id << "': DeadlockException";
             continue;
         }
         catch(const Freeze::DatabaseException& ex)
@@ -442,18 +297,7 @@ ClientImpl::response()
     // no messages to send, we're outta here.
     if(!_destroy && !_queue.empty() && _reporter)
     {
-        if(_trace > 1)
-        {
-            Ice::Trace trace(_communicator->getLogger(), "Bridge");
-            trace << "sending messageId: " << _queue.front() << " to client: `" << _id << "'";
-        }
-        _sending = true;
-        _reporter->message_async(new MessageAsyncI(this, _reporter), msg.data);
-    }
-    else
-    {
-        Ice::Trace trace(_communicator->getLogger(), "Bridge");
-        trace << "client: `" << _id << "': not sending: destroy: " << _destroy << " _queue.empty(): " << _queue.empty() << " _reporter: " << _reporter;
+        sendImpl(_queue.front(), msg);
     }
 }
 
@@ -461,10 +305,6 @@ void
 ClientImpl::exception(const ReporterPrx& reporter, const Ice::Exception& ex)
 {
     Lock sync(*this);
-
-    assert(_sending);
-    _sending = false;
-
     if(_destroy)
     {
         return;
@@ -485,7 +325,8 @@ ClientImpl::exception(const ReporterPrx& reporter, const Ice::Exception& ex)
             Ice::Trace trace(_communicator->getLogger(), "Bridge");
             trace << "client: `" << _id << "': retry in " << _retryInterval.toDuration();
         }
-        _timer->schedule(new SendTimerTask(this), _retryInterval);
+        _timerTask = new SendTimerTask(this);
+        _timer->schedule(_timerTask, _retryInterval);
         return;
     }
 
@@ -493,39 +334,110 @@ ClientImpl::exception(const ReporterPrx& reporter, const Ice::Exception& ex)
     // not changed.
     if(reporter == _reporter)
     {
-        Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
-        ClientDB clientsDB(connection, clientDBName);
+        setReporter(0);
+    }
+}
 
-        for(;;)
+void
+ClientImpl::forwarded(MessageDB& messageDB, Ice::Long id)
+{
+    MessageDB::iterator q = messageDB.find(id);
+    assert(q != messageDB.end());
+
+    Message msg = q->second;
+
+    msg.forwarded.push_back(_id);
+    if(msg.forwarded.size() == msg.clients.size())
+    {
+        if(_trace > 1)
         {
-            try
-            {
-                ClientDB::iterator p = clientsDB.find(_id);
-                if(p != clientsDB.end())
-                {
-                    Client c = p->second;
-                    // Only clear the reporter if the reporter proxy
-                    // hasn't changed, otherwise there could be a race
-                    // condition between a new client connecting, and an
-                    // exiting message failing.
-                    if(c.reporter == reporter)
-                    {
-                        c.reporter = 0;
-                        p.set(c);
-                    }
-                }
-                break;
-            }
-            catch(const Freeze::DeadlockException&)
-            {
-                continue;
-            }
-            catch(const Freeze::DatabaseException& ex)
-            {
-                halt(ex);
-            }
+            Ice::Trace trace(_communicator->getLogger(), "Bridge");
+            trace << "response messageId: " << id << ": message fully routed, erasing";
         }
-        _reporter = 0;
+        messageDB.erase(q);
+    }
+    else
+    {
+        q.set(msg);
+    }
+}
+
+void 
+ClientImpl::sendImpl(const Ice::Long& messageId)
+{
+    Message msg;
+    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
+    MessageDB messageDB(connection, messageDBName);
+    for(;;)
+    {
+        try
+        {
+            MessageDB::const_iterator q = messageDB.find(messageId);
+            assert(q != messageDB.end());
+            msg = q->second;
+            break;
+        }
+        catch(const Freeze::DeadlockException&)
+        {
+            continue;
+        }
+        catch(const Freeze::DatabaseException& ex)
+        {
+            halt(ex);
+        }
+    }
+
+    sendImpl(messageId, msg);
+}
+
+void
+ClientImpl::sendImpl(const Ice::Long& messageId, const Message& msg)
+{
+    assert(!_destroy && !_queue.empty() && _reporter);
+    if(_trace > 1)
+    {
+        Ice::Trace trace(_communicator->getLogger(), "Bridge");
+        trace << "sending messageId: " << messageId << " to client: `" << _id << "'";
+    }
+    _reporter->message_async(new MessageAsyncI(this, _reporter), msg.data);
+}
+
+void
+ClientImpl::setReporter(const ReporterPrx& reporter)
+{
+    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
+    ClientDB clients(connection, clientDBName);
+    for(;;)
+    {
+        try
+        {
+            Client c;
+
+            ClientDB::iterator p = clients.find(_id);
+            if(p != clients.end())
+            {
+                c = p->second;
+                c.reporter = reporter;
+                p.set(c);
+            }
+            break;
+        }
+        catch(const Freeze::DeadlockException&)
+        {
+            continue;
+        }
+        catch(const Freeze::DatabaseException& ex)
+        {
+            halt(ex);
+        }
+    }
+
+    _reporter = reporter;
+
+    if(_trace > 0)
+    {
+        Ice::Trace trace(_communicator->getLogger(), "Bridge");
+        trace << (_reporter ? string("connect: ") : string("disconnect: ")) << _id;
     }
 }
 
@@ -536,3 +448,4 @@ ClientImpl::halt(const Freeze::DatabaseException& ex) const
     error << "fatal exception: " << ex << "\n*** Aborting application ***";
     abort();
 }
+

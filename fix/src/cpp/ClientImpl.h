@@ -15,6 +15,7 @@
 #include <Freeze/Freeze.h>
 #include <IceFIX/IceFIX.h>
 #include <BridgeTypes.h>
+#include <MessageDB.h>
 
 #include <list>
 
@@ -45,6 +46,10 @@ public:
 
 private:
 
+    void setReporter(const ReporterPrx&);
+    void forwarded(FIXBridge::MessageDB&, Ice::Long);
+    void sendImpl(const Ice::Long&);
+    void sendImpl(const Ice::Long&, const FIXBridge::Message&);
     void halt(const Freeze::DatabaseException&) const;
 
     const IceUtil::TimerPtr _timer;
@@ -58,6 +63,7 @@ private:
     bool _destroy;
     bool _sending;
     std::list<Ice::Long> _queue;
+    IceUtil::TimerTaskPtr _timerTask;
 };
 typedef IceUtil::Handle<ClientImpl> ClientImplPtr;
 

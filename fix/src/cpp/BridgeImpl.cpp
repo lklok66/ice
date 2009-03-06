@@ -554,7 +554,9 @@ BridgeImpl::halt(const Freeze::DatabaseException& ex) const
 void
 BridgeImpl::onCreate(const FIX::SessionID& session)
 {
-    IceUtil::Mutex::Lock sync(*this);
+    // This can only be called on construction, so no need to sync,
+    //and deadlock exceptions cannot occur.  IceUtil::Mutex::Lock
+    //sync(*this);
 
     // Once onCreate has been called messages can be sent to the
     // trading partner.
@@ -566,121 +568,105 @@ BridgeImpl::onCreate(const FIX::SessionID& session)
 
     _session = FIX::Session::lookupSession(session);
 
-
-    // Recreate each client.
-    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
-    ClientDB clientsDB(connection, clientDBName);
-    for(;;)
-    {
-        try
-        {
-            _clients.clear();
-            {
-                for(ClientDB::const_iterator p = clientsDB.begin(); p != clientsDB.end(); ++p)
-                {
-                    IceFIX::ReporterPrx reporter;
-                    if(p->second.reporter)
-                    {
-                        reporter = p->second.reporter->ice_timeout(_forwardTimeout);
-                    }
-                    ClientImplPtr client = new ClientImpl(_timer, _communicator, _dbenv, _retryInterval, _trace,
-                                                          p->second.id, p->second.qos, reporter);
-                    _clients.insert(make_pair(p->second.id, client));
-                }
-            }
-            break;
-        }
-        catch(const Freeze::DeadlockException&)
-        {
-            continue;
-        }
-        catch(const Freeze::DatabaseException& ex)
-        {
-            halt(ex);
-        }
-    }
-
     // Build an initial set of clients and queue the set of messages
     // per client.
     list<pair<Ice::Long, list<ClientImplPtr> > > m;
 
+    // Recreate each client.
+    Freeze::ConnectionPtr connection = Freeze::createConnection(_communicator, _dbenv);
+    ClientDB clientsDB(connection, clientDBName);
     MessageDB messageDB(connection, messageDBName);
-    for(;;)
+    try
     {
-        try
+        Freeze::TransactionHolder txn(connection);
         {
-            m.clear();
-            MessageDB::iterator p = messageDB.begin();
-            while(p != messageDB.end())
+            for(ClientDB::const_iterator p = clientsDB.begin(); p != clientsDB.end(); ++p)
             {
-                // The set of clients which have already received the
-                // message.
-                set<string> forwarded;
-                // The set of clients which should receive the message.
-                set<string> clients;
-
-                Message msg = p->second;
-
-                copy(msg.forwarded.begin(), msg.forwarded.end(), inserter(forwarded, forwarded.begin()));
-                copy(msg.clients.begin(), msg.clients.end(), inserter(clients, clients.begin()));
-
-                // Compute the set difference. The result is the set of
-                // clients which have not received the message.
-                set<string> routing;
-                set_difference(clients.begin(), clients.end(), forwarded.begin(), forwarded.end(),
-                               inserter(routing, routing.begin()));
-
-                list<ClientImplPtr> c;
-                for(set<string>::const_iterator q = routing.begin(); q != routing.end(); ++q)
+                IceFIX::ReporterPrx reporter;
+                if(p->second.reporter)
                 {
-                    map<string, ClientImplPtr>::const_iterator r = _clients.find(*q);
-                    if(r == _clients.end())
-                    {
-                        msg.forwarded.push_back(*q);
-                    }
-                    else
-                    {
-                        c.push_back(r->second);
-                    }
+                    reporter = p->second.reporter->ice_timeout(_forwardTimeout);
                 }
+                ClientImplPtr client = new ClientImpl(_timer, _communicator, _dbenv, _retryInterval, _trace,
+                                                      p->second.id, p->second.qos, reporter);
+                _clients.insert(make_pair(p->second.id, client));
+            }
+        }
 
-                if(msg.forwarded.size() == msg.clients.size())
+        MessageDB::iterator p = messageDB.begin();
+        while(p != messageDB.end())
+        {
+            // The set of clients which have already received the
+            // message.
+            set<string> forwarded;
+            // The set of clients which should receive the message.
+            set<string> clients;
+
+            Message msg = p->second;
+
+            copy(msg.forwarded.begin(), msg.forwarded.end(), inserter(forwarded, forwarded.begin()));
+            copy(msg.clients.begin(), msg.clients.end(), inserter(clients, clients.begin()));
+
+            // Compute the set difference. The result is the set of
+            // clients which have not received the message.
+            set<string> routing;
+            set_difference(clients.begin(), clients.end(), forwarded.begin(), forwarded.end(),
+                           inserter(routing, routing.begin()));
+
+            list<ClientImplPtr> c;
+
+            for(set<string>::const_iterator q = routing.begin(); q != routing.end(); ++q)
+            {
+                map<string, ClientImplPtr>::const_iterator r = _clients.find(*q);
+                if(r == _clients.end())
                 {
-                    assert(c.empty());
-                    if(_trace > 1)
-                    {
-                        Ice::Trace trace(_communicator->getLogger(), "Bridge");
-                        trace << "send messageId: " << p->first
-                              << ": message fully routed (unregistered client), erasing";
-                    }
-                    MessageDB::iterator tmp = p;
-                    ++p;
-                    messageDB.erase(tmp);
+                    msg.forwarded.push_back(*q);
                 }
                 else
                 {
-                    // Save the message, the forwarded list changed.
-                    if(c.size() != routing.size())
-                    {
-                        p.set(msg);
-                    }
-
-                    m.push_back(make_pair(p->first, c));
-                    ++p;
+                    c.push_back(r->second);
                 }
             }
-            break;
+
+            if(msg.forwarded.size() == msg.clients.size())
+            {
+                assert(c.empty());
+                if(_trace > 1)
+                {
+                    Ice::Trace trace(_communicator->getLogger(), "Bridge");
+                    trace << "send messageId: " << p->first
+                          << ": message fully routed (unregistered client), erasing";
+                }
+                MessageDB::iterator tmp = p;
+                ++p;
+                messageDB.erase(tmp);
+            }
+            else
+            {
+                // Save the message, the forwarded list changed.
+                if(c.size() != routing.size())
+                {
+                    p.set(msg);
+                }
+
+                m.push_back(make_pair(p->first, c));
+                ++p;
+            }
         }
-        catch(const Freeze::DeadlockException&)
-        {
-            continue;
-        }
-        catch(const Freeze::DatabaseException& ex)
-        {
-            halt(ex);
-        }
+        txn.commit();
+    }
+    catch(const Freeze::DeadlockException&)
+    {
+        Ice::Error error(_communicator->getLogger());
+        error << "fatal exception: unexpected DeadlockException\n*** Aborting application ***";
+        abort();
+    }
+    catch(const Freeze::DatabaseException& ex)
+    {
+        halt(ex);
     }
 
+    // Now enqueue all the messages, at this point the database becomes active.
     for(list<pair<Ice::Long, list<ClientImplPtr> > >::const_iterator p = m.begin(); p != m.end(); ++p)
     {
         for(list<ClientImplPtr>::const_iterator q = p->second.begin(); q != p->second.end(); ++q)
@@ -689,7 +675,6 @@ BridgeImpl::onCreate(const FIX::SessionID& session)
         }
     }
 }
-
 
 void
 BridgeImpl::onLogon(const FIX::SessionID& session)
