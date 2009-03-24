@@ -21,7 +21,7 @@
 #include <IceUtil/UUID.h>
 #include <Slice/Checksum.h>
 #include <Slice/ObjCNames.h>
-#include <Slice/SignalHandler.h>
+#include <Slice/FileTracker.h>
 #include <Slice/Util.h>
 
 using namespace std;
@@ -39,19 +39,6 @@ using IceUtilInternal::sb;
 using IceUtilInternal::eb;
 using IceUtilInternal::spar;
 using IceUtilInternal::epar;
-
-//
-// Callback for Crtl-C signal handling
-//
-static Gen* _gen = 0;
-
-static void closeCallback()
-{
-    if(_gen != 0)
-    {
-        _gen->closeOutput();
-    }
-}
 
 static string // Should be an anonymous namespace, but VC++ 6 can't handle that.
 sliceModeToIceMode(Operation::Mode opMode)
@@ -886,9 +873,6 @@ Slice::Gen::Gen(const string& name, const string& base, const string& include, c
       _impl(impl),
       _stream(stream)
 {
-    _gen = this;
-    SignalHandler::setCallback(closeCallback);
-
     for(vector<string>::iterator p = _includePaths.begin(); p != _includePaths.end(); ++p)
     {
         *p = fullPath(*p);
@@ -912,17 +896,51 @@ Slice::Gen::Gen(const string& name, const string& base, const string& include, c
         fileImplH = dir + '/' + fileImplH;
         fileImplM = dir + '/' + fileImplM;
     }
-    SignalHandler::addFile(fileH);
-    SignalHandler::addFile(fileM);
-    SignalHandler::addFile(fileImplH);
-    SignalHandler::addFile(fileImplM);
+
+    if(impl || implTie)
+    {
+        struct stat st;
+        if(stat(fileImplH.c_str(), &st) == 0)
+        {
+            ostringstream os;
+            os << fileImplH << "' already exists - will not overwrite";
+            throw FileException(__FILE__, __LINE__, os.str());
+        }
+
+        if(stat(fileImplM.c_str(), &st) == 0)
+        {
+            ostringstream os;
+            os << fileImplM << "' already exists - will not overwrite";
+            throw FileException(__FILE__, __LINE__, os.str());
+        }
+
+        _implH.open(fileImplH.c_str());
+        if(!_implH)
+        {
+            ostringstream os;
+            os << "cannot open `" << fileImplH << "': " << strerror(errno);
+            throw FileException(__FILE__, __LINE__, os.str());
+        }
+        FileTracker::instance()->addFile(fileImplH);
+
+        _implM.open(fileImplM.c_str());
+        if(!_implM)
+        {
+            ostringstream os;
+            os << "cannot open `" << fileImplM << "': " << strerror(errno);
+            throw FileException(__FILE__, __LINE__, os.str());
+        }
+        FileTracker::instance()->addFile(fileImplM);
+    }
 
     _H.open(fileH.c_str());
     if(!_H)
     {
-        cerr << name << ": can't open `" << fileH << "' for writing" << endl;
-        return;
+        ostringstream os;
+        os << "cannot open `" << fileH << "': " << strerror(errno);
+        throw FileException(__FILE__, __LINE__, os.str());
     }
+    FileTracker::instance()->addFile(fileH);
     printHeader(_H);
     _H << nl << "// Generated from file `" << _base << ".ice'";
 
@@ -936,39 +954,13 @@ Slice::Gen::Gen(const string& name, const string& base, const string& include, c
     _M.open(fileM.c_str());
     if(!_M)
     {
-        cerr << name << ": can't open `" << fileM << "' for writing" << endl;
-        return;
+        ostringstream os;
+        os << "cannot open `" << fileM << "': " << strerror(errno);
+        throw FileException(__FILE__, __LINE__, os.str());
     }
+    FileTracker::instance()->addFile(fileM);
     printHeader(_M);
     _M << nl << "// Generated from file `" << _base << ".ice'";
-
-    if(impl || implTie)
-    {
-        struct stat st;
-        if(stat(fileImplH.c_str(), &st) == 0)
-        {
-            cerr << name << ": `" << fileImplH << "' already exists--will not overwrite" << endl;
-            return;
-        }
-        _implH.open(fileImplH.c_str());
-        if(!_implH)
-        {
-            cerr << name << ": can't open `" << fileImplH << "' for writing" << endl;
-            return;
-        }
-
-        if(stat(fileImplM.c_str(), &st) == 0)
-        {
-            cerr << name << ": `" << fileImplM << "' already exists--will not overwrite" << endl;
-            return;
-        }
-        _implM.open(fileImplM.c_str());
-        if(!_implM)
-        {
-            cerr << name << ": can't open `" << fileImplM << "' for writing" << endl;
-            return;
-        }
-    }
 }
 
 Slice::Gen::~Gen()
@@ -983,8 +975,6 @@ Slice::Gen::~Gen()
         _implH << '\n';
         _implM << '\n';
     }
-
-    SignalHandler::setCallback(0);
 }
 
 bool
