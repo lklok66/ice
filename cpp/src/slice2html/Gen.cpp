@@ -1,15 +1,19 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
 
+#if defined(_MSC_VER) && _MSC_VER >= 1400
+#    define _CRT_SECURE_NO_DEPRECATE 1  // C4996 '<C function>' was declared deprecated
+#endif
+
 #include <IceUtil/DisableWarnings.h>
 #include <IceUtil/Functional.h>
-#include <Slice/SignalHandler.h>
+#include <Slice/FileTracker.h>
 #include <Gen.h>
 
 #include <sys/types.h>
@@ -25,24 +29,12 @@
 #  include <iterator>
 #endif
 
+#include <string.h>
+
 using namespace std;
 using namespace Slice;
 using namespace IceUtil;
 using namespace IceUtilInternal;
-
-//
-// Callback for Crtl-C signal handling
-//
-static GeneratorBase* _genBase = 0;
-
-static void closeCallback()
-{
-    if(_genBase != 0)
-    {
-        _genBase->closeStream();
-    }
-}
-
 
 namespace Slice
 {
@@ -52,8 +44,6 @@ generate(const UnitPtr& unit, const string& dir, const string& header, const str
          const string& indexHeader, const string& indexFooter, const string& imageDir, const string& logoURL,
          const string& searchAction, unsigned indexCount, unsigned warnSummary)
 {
-    SignalHandler::setCallback(closeCallback);
-
     unit->mergeModules();
 
     //
@@ -212,12 +202,10 @@ Slice::GeneratorBase::setSymbols(const ContainedList& symbols)
 Slice::GeneratorBase::GeneratorBase(XMLOutput& o, const Files& files)
     : _out(o), _files(files)
 {
-    _genBase = this;
 }
 
 Slice::GeneratorBase::~GeneratorBase()
 {
-    _genBase = 0;
 }
 
 //
@@ -1116,7 +1104,7 @@ Slice::GeneratorBase::getComment(const ContainedPtr& contained, const ContainerP
             comment += toString(literal, container, false, forIndex, summary ? &sz : 0);
             summarySize += sz;
         }
-        else if(summary && s[i] == '.' && (i + 1 >= s.size() || isspace(s[i + 1])))
+        else if(summary && s[i] == '.' && (i + 1 >= s.size() || isspace(static_cast<unsigned char>(s[i + 1]))))
         {
             comment += '.';
             ++summarySize;
@@ -1131,8 +1119,8 @@ Slice::GeneratorBase::getComment(const ContainedPtr& contained, const ContainerP
 
     if(summary && _warnSummary && summarySize > _warnSummary)
     {
-        cerr << contained->definitionContext()->filename() << ": summary size (" << summarySize << ") exceeds "
-            << _warnSummary << " characters: `" << comment << "'" << endl;
+        cerr << contained->file() << ": summary size (" << summarySize << ") exceeds " << _warnSummary
+             << " characters: `" << comment << "'" << endl;
     }
 
     return comment;
@@ -1260,14 +1248,14 @@ Slice::GeneratorBase::getLogoURL()
 void
 Slice::GeneratorBase::openStream(const string& path)
 {
-    SignalHandler::addFile(path);
-
     _out.open(path.c_str());
     if(!_out.isOpen())
     {
-        string err = "cannot open `" + path + "' for writing";
-        throw err;
+        ostringstream os;
+        os << "cannot open file `" << path << "': " << strerror(errno);
+        throw FileException(__FILE__, __LINE__, os.str());
     }
+    FileTracker::instance()->addFile(path);
 }
 
 void
@@ -1468,18 +1456,28 @@ Slice::GeneratorBase::makeDir(const string& dir)
     int rc = stat(dir.c_str(), &st);
     if(rc == 0)
     {
+        if(!(st.st_mode & S_IFDIR))
+        {
+            ostringstream os;
+            os << "failed to create package directory `" << dir
+               << "': file already exists and is not a directory";
+            throw FileException(__FILE__, __LINE__, os.str());
+        }
         return;
     }
+
 #ifdef _WIN32
-    rc = mkdir(dir.c_str());
+    rc = _mkdir(dir.c_str());
 #else
     rc = mkdir(dir.c_str(), S_IRWXU | S_IRWXG | S_IRWXO);
 #endif
     if(rc != 0)
     {
-        string err = "cannot create directory `" + dir + "'";
-        throw err;
+        ostringstream os;
+        os << "cannot create directory `" << dir << "': " << strerror(errno);
+        throw FileException(__FILE__, __LINE__, os.str());
     }
+    FileTracker::instance()->addDirectory(dir);
 }
 
 string
@@ -1488,8 +1486,9 @@ Slice::GeneratorBase::readFile(const string& file)
     ifstream in(file.c_str());
     if(!in)
     {
-        string err = "cannot open `" + file + "' for reading";
-        throw err;
+        ostringstream os;
+        os << "cannot open file `" << file << "': " << strerror(errno);
+        throw FileException(__FILE__, __LINE__, os.str());
     }
 
     ostringstream result;
@@ -1561,8 +1560,9 @@ Slice::GeneratorBase::readFile(const string& file, string& part1, string& part2)
     ifstream in(file.c_str());
     if(!in)
     {
-        string err = "cannot open `" + file + "' for reading";
-        throw err;
+        ostringstream os;
+        os << "cannot open file `" << file << "': " << strerror(errno);
+        throw FileException(__FILE__, __LINE__, os.str());
     }
 
     string line;
@@ -1713,53 +1713,53 @@ Slice::FileVisitor::visitUnitStart(const UnitPtr& u)
 bool
 Slice::FileVisitor::visitModuleStart(const ModulePtr& m)
 {
-    _files.insert(m->definitionContext()->filename());
+    _files.insert(m->file());
     return true;
 }
 
 bool
 Slice::FileVisitor::visitExceptionStart(const ExceptionPtr& e)
 {
-    _files.insert(e->definitionContext()->filename());
+    _files.insert(e->file());
     return false;
 }
 
 bool
 Slice::FileVisitor::visitClassDefStart(const ClassDefPtr& c)
 {
-    _files.insert(c->definitionContext()->filename());
+    _files.insert(c->file());
     return false;
 }
 
 void
 Slice::FileVisitor::visitClassDecl(const ClassDeclPtr& c)
 {
-    _files.insert(c->definitionContext()->filename());
+    _files.insert(c->file());
 }
 
 bool
 Slice::FileVisitor::visitStructStart(const StructPtr& s)
 {
-    _files.insert(s->definitionContext()->filename());
+    _files.insert(s->file());
     return false;
 }
 
 void
 Slice::FileVisitor::visitSequence(const SequencePtr& s)
 {
-    _files.insert(s->definitionContext()->filename());
+    _files.insert(s->file());
 }
 
 void
 Slice::FileVisitor::visitDictionary(const DictionaryPtr& d)
 {
-    _files.insert(d->definitionContext()->filename());
+    _files.insert(d->file());
 }
 
 void
 Slice::FileVisitor::visitEnum(const EnumPtr& e)
 {
-    _files.insert(e->definitionContext()->filename());
+    _files.insert(e->file());
 }
 
 Slice::StartPageVisitor::StartPageVisitor(const Files& files)

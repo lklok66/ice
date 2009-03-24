@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -17,8 +17,8 @@ for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
 else:
     raise "can't find toplevel directory!"
 
-sys.path.append(os.path.join(toplevel, "demoscript"))
-import Util
+sys.path.append(os.path.join(toplevel))
+from demoscript import Util
 
 #
 # List of all basic demos.
@@ -33,6 +33,7 @@ demos = [
     "Ice/minimal",
     "Ice/multicast",
     "Ice/nested",
+    "Ice/serialize",
     "Ice/session",
     "Ice/throughput",
     "Ice/value",
@@ -52,5 +53,9 @@ demos = [
     "book/lifecycle",
 ]
 
+protoDemos = [
+    "Ice/protobuf"
+]
+
 if __name__ == "__main__":
-    Util.run(demos)
+    Util.run(demos, protoDemos)

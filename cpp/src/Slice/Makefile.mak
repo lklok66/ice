@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -26,9 +26,9 @@ OBJS		= Scanner.obj \
 		  DotNetNames.obj \
 		  RubyUtil.obj \
 		  Util.obj \
+		  FileTracker.obj \
 		  MD5.obj \
 		  MD5I.obj \
-		  SignalHandler.obj \
 		  ObjCNames.obj \
 		  ObjCUtil.obj
 
@@ -42,7 +42,7 @@ CPPFLAGS	= -I.. -Idummyinclude $(CPPFLAGS) -DSLICE_API_EXPORTS  -DWIN32_LEAN_AND
 PDBFLAGS        = /pdb:$(DLLNAME:.dll=.pdb)
 !endif
 
-!if "$(CPP_COMPILER)" == "BCC2007"
+!if "$(BCPLUSPLUS)" == "yes"
 RES_FILE        = ,, Slice.res
 !else
 RES_FILE        = Slice.res
@@ -83,8 +83,6 @@ Grammar.cpp Grammar.h: Grammar.y
 	del /q Grammar.output
 
 clean::
-	-del /q Grammar.cpp Grammar.h
-	-del /q Scanner.cpp
 	-del /q Slice.res
 
 install:: all
@@ -92,7 +90,7 @@ install:: all
 	copy $(DLLNAME) $(install_bindir)
 
 
-!if "$(CPP_COMPILER)" == "BCC2007" && "$(OPTIMIZE)" != "yes"
+!if "$(BCPLUSPLUS)" == "yes" && "$(OPTIMIZE)" != "yes"
 
 install:: all
 	copy $(DLLNAME:.dll=.tds) $(install_bindir)

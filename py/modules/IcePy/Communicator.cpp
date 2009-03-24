@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -183,7 +183,7 @@ communicatorInit(CommunicatorObject* self, PyObject* args, PyObject* /*kwds*/)
    
     //
     // Remaining command line options are passed to the communicator
-    // as an argument vector in case they contain plugin properties.
+    // as an argument vector in case they contain plug-in properties.
     //
     int argc = static_cast<int>(seq.size());
     char** argv = new char*[argc + 1];
@@ -867,7 +867,8 @@ communicatorGetImplicitContext(CommunicatorObject* self)
     
     if(implicitContext == 0)
     {
-        return 0;
+        Py_INCREF(Py_None);
+        return Py_None;
     }
 
     return createImplicitContext(implicitContext);

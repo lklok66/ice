@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -585,6 +585,31 @@ class Twoways
             test(ro["qwerty"] == Test.MyEnum.enum3);
             test(ro[""] == Test.MyEnum.enum2);
             test(ro["Hello!!"] == Test.MyEnum.enum2);
+        }
+
+        {
+            Test.MyStruct s11 = new Test.MyStruct(1, 1);
+            Test.MyStruct s12 = new Test.MyStruct(1, 2);
+            Dictionary<Test.MyStruct, Test.MyEnum> di1 = new Dictionary<Test.MyStruct, Test.MyEnum>();
+            di1[s11] = Test.MyEnum.enum1;
+            di1[s12] = Test.MyEnum.enum2;
+
+            Test.MyStruct s22 = new Test.MyStruct(2, 2);
+            Test.MyStruct s23 = new Test.MyStruct(2, 3);
+            Dictionary<Test.MyStruct, Test.MyEnum> di2 = new Dictionary<Test.MyStruct, Test.MyEnum>();
+            di2[s11] = Test.MyEnum.enum1;
+            di2[s22] = Test.MyEnum.enum3;
+            di2[s23] = Test.MyEnum.enum2;
+            
+            Dictionary<Test.MyStruct, Test.MyEnum> _do;
+            Dictionary<Test.MyStruct, Test.MyEnum> ro = p.opMyStructMyEnumD(di1, di2, out _do);
+            
+            test(Ice.CollectionComparer.Equals(_do, di1));
+            test(ro.Count == 4);
+            test(ro[s11] == Test.MyEnum.enum1);
+            test(ro[s12] == Test.MyEnum.enum2);
+            test(ro[s22] == Test.MyEnum.enum3);
+            test(ro[s23] == Test.MyEnum.enum2);
         }
         
         {

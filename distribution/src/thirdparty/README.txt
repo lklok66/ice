@@ -51,20 +51,24 @@ allows bzip2 to be compiled into a DLL.
 After extracting the bzip2 source distribution, change to the
 top-level directory and apply the patch as shown below:
 
-  > patch -p0 bzlib.h < ..\bzlib.patch
+  > patch -p0 bzlib.h < ..\bzip2\bzlib.patch
 
 
-mcpp
-----
+Berkeley DB
+-----------
 
-The file mcpp-2.7.patch in this archive contains several important
-fixes required by Ice. We expect that all these fixes will be
-included in mcpp 2.7.1.
+The files patch.db-4.6.21.1, patch.db-4.6.21.2, patch.db-4.6.21.3 and
+patch.db-4.6.21.15663 in this archive contain several important fixes 
+for Berkeley DB required by Ice. 
 
-After extracting the mcpp source distribution, change to the top-level
-directory and apply the patch as shown below:
+After extracting the Berkeley DB 4.6.21 source distribution, change 
+to the top-level directory and apply the patches as shown below:
 
-  > patch -p0 < mcpp-2.7.patch
+ > cd db-4.6.21
+ > patch -p0 < patch.db-4.6.21.1
+ > patch -p0 < patch.db-4.6.21.2
+ > patch -p0 < patch.db-4.6.21.3
+ > patch -p0 < patch.db-4.6.21.15663
 
 
 ======================================================================
@@ -139,7 +143,7 @@ If you have not already applied the patch for bzip2, please read the
 To build bzip2, change to the source directory and use the replacement
 makefile included in this archive:
 
-  > nmake /f ..\Makefile.bzip2
+  > nmake /f ..\bzip2\Makefile.mak
 
 This will build the release and debug versions of the bzip2 DLLs.
 
@@ -147,19 +151,20 @@ This will build the release and debug versions of the bzip2 DLLs.
 mcpp
 ----
 
-If you have not already applied the patch for mcpp, please read the
-"Patches" section above before continuing.
-
 Follow these instructions for building mcpp:
 
 - Change to the mcpp src directory:
 
-  > cd mcpp-2.7\src
+  > cd mcpp-2.7.2\src
 
 - Apply the patch for noconfig.H appropriate for your compiler from
   the noconfig directory. For example, for VS2005 you would run:
 
   > patch -p0 < ..\noconfig\vc2005.dif
+
+  and for C++Builder 2007 you would run:
+
+  > patch -p0 < ..\noconfig\bc59.dif
 
 - Microsoft Visual C++: 
  

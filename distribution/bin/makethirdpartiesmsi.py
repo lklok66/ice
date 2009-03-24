@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -16,7 +16,7 @@ resources = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..", "s
 sys.path.append(resources)
 import components
 
-iceVersion = '3.3.0'
+iceVersion = '3.3.1'
 
 #
 # Current default third party library versions.
@@ -26,7 +26,7 @@ Bzip2Ver = '1.0.5'
 STLPortVer = '4.6.2'
 ExpatVer = '2.0.1'
 DBVer = '4.6.21'
-MCPPVer = '2.7'
+MCPPVer = '2.7.2'
 
 timeStampingURL = 'http://timestamp.verisign.com/scripts/timstamp.dll'
 
@@ -130,7 +130,7 @@ def convertLicensesToRTF(toolDir, installTarget):
     core = [ berkeleydb, bzip2, openssl, expat, mcpp ]
 
     collection = core
-    if installTarget != "bcc":
+    if installTarget != "bcc2007" and installTarget != "bcc2009":
         jgoodies =[(os.path.join(os.environ["JGOODIES_FORMS"], "license.txt"), "JGoodies Forms",
                     "JGOODIES_FORMS_LICENSE.rtf"),
                    (os.path.join(os.environ["JGOODIES_LOOKS"], "license.txt"), "JGoodies Looks",
@@ -251,7 +251,7 @@ def buildMergeModules(startDir, stageDir, iceVersion, installVersion):
         ("MCPPDevKit", "MCPP_DEV_KIT"),
     ]
 
-    if installVersion != "bcc":
+    if installVersion != "bcc2007" and installVersion != "bcc2009":
         javaExtras = [ ("JGoodies", "JGOODIES_RUNTIME"),  ("BerkeleyDBJava", "BERKELEYDB_JAVA") ]
         modules.extend(javaExtras)
 
@@ -282,8 +282,11 @@ def buildMergeModules(startDir, stageDir, iceVersion, installVersion):
 
     zipPath = "ThirdPartyMergeModules-" + iceVersion + "-" + installVersion.upper() + ".zip"
     zip = zipfile.ZipFile(os.path.join(stageDir, zipPath), 'w')
+    compiler = installVersion.upper()
+    if compiler == "BCC2007" or compiler == "BCC2009":
+        compiler = "BCC"
     for project, release in modules:
-        msm = project + "." + installVersion.upper() + ".msm"
+        msm = project + "." + compiler + ".msm"
         msmPath = os.path.join(os.getcwd(), project, "ZEROC", release, "DiskImages/DISK1", msm)
         zip.write(msmPath, os.path.basename(msmPath))
     zip.close()
@@ -344,7 +347,7 @@ def main():
         try:
             optionList, args = getopt.getopt(
                 sys.argv[1:], "dhil:", [ "help", "clean", "skip-build", "skip-installer", "info", "debug",
-                "logfile", "vc60", "vc80", "vc90", "bcc", "sslhome=", "expathome=", "dbhome=", "stlporthome=",
+                "logfile", "vc60", "vc80", "vc90", "bcc2007", "bcc2009", "sslhome=", "expathome=", "dbhome=", "stlporthome=",
                 "bzip2home=", "mcpphome=", "jgoodiesformshome=", "jgoodieslookshome=", "pfxfile=", "pfxpassword="])
         except getopt.GetoptError:
             usage()
@@ -376,8 +379,10 @@ def main():
                 target = 'vc80'
             elif o == '--vc90':
                 target = 'vc90'
-            elif o == '--bcc':
-                target = 'bcc'
+            elif o == '--bcc2007':
+                target = 'bcc2007'
+            elif o == '--bcc2009':
+                target = 'bcc2009'
             elif o == '--pfxfile':
                 os.environ['PFX_FILE'] = a
             elif o == '--pfxpassword':

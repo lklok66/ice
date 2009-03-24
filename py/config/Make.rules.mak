@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -41,22 +41,19 @@ PYTHON_HOME		= C:\Python25
 # is located in a different location.
 #
 !if "$(CPP_COMPILER)" == "VC60" && "$(STLPORT_HOME)" == ""
+!if "$(THIRDPARTY_HOME)" != ""
+STLPORT_HOME            = $(THIRDPARTY_HOME)
+!else
 STLPORT_HOME            = C:\Ice-$(VERSION)-ThirdParty-VC60
+!endif
 !endif
 
 #
-# For VC80 and VC80 Express it is necessary to set the location of the
-# manifest tool. This must be the 6.x version of mt.exe, not the 5.x
-# version!
-#
-# For VC80 Express mt.exe 6.x is provided by the Windows Platform SDK.
-# It is necessary to set the location of the Platform SDK through the
-# PDK_HOME environment variable (see INSTALL for details).
+# For VC80 it is necessary to set the location of the manifest tool.
+# This must be the 6.x version of mt.exe, not the 5.x version!
 #
 !if "$(CPP_COMPILER)" == "VC80"
 MT = "$(VS80COMNTOOLS)bin\mt.exe"
-!elseif "$(CPP_COMPILER)" == "VC80_EXPRESS"
-MT = "$(PDK_HOME)\bin\mt.exe"
 !else
 MT = mt.exe
 !endif

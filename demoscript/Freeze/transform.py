@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -9,7 +9,7 @@
 # **********************************************************************
 
 import sys, demoscript, time
-import demoscript.Expect as Expect
+from scripts import Expect
 
 def run(createCmd, recreateCmd, readCmd, readnewCmd):
     print "cleaning databases...",
@@ -55,6 +55,7 @@ def run(createCmd, recreateCmd, readCmd, readnewCmd):
     readnew.expect('All contacts \(default order\)')
     readnew.expect('All contacts \(ordered by phone number\)')
     readnew.expect('DbEnv \"dbnew\": Secondary index corrupt: not consistent with primary')
+    readnew.waitTestSuccess(1)
     print "ok"
 
     print "recreating database...",

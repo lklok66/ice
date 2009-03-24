@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -15,11 +15,7 @@ DLLNAME		= $(top_srcdir)\bin\icebox$(SOVERSION)$(LIBSUFFIX).dll
 SERVER_D	= $(top_srcdir)\bin\iceboxd.exe
 SERVER_R	= $(top_srcdir)\bin\icebox.exe
 
-!if "$(OPTIMIZE)" != "yes"
-SERVER		= $(SERVER_D)
-!else
-SERVER		= $(SERVER_R)
-!endif
+SERVER		= $(top_srcdir)\bin\icebox$(LIBSUFFIX).exe
 
 ADMIN		= $(top_srcdir)\bin\iceboxadmin.exe
 
@@ -52,7 +48,7 @@ SPDBFLAGS       = /pdb:$(SERVER:.exe=.pdb)
 APDBFLAGS       = /pdb:$(ADMIN:.exe=.pdb)
 !endif
 
-!if "$(CPP_COMPILER)" == "BCC2007"
+!if "$(BCPLUSPLUS)" == "yes"
 RES_FILE        = ,, IceBox.res
 SRES_FILE       = ,, IceBoxExe.res
 ARES_FILE       = ,, IceBoxAdmin.res
@@ -96,7 +92,7 @@ install:: all
 	copy $(ADMIN) $(install_bindir)
 
 
-!if "$(CPP_COMPILER)" == "BCC2007" && "$(OPTIMIZE)" != "yes"
+!if "$(BCPLUSPLUS)" == "yes" && "$(OPTIMIZE)" != "yes"
 
 install:: all
 	copy $(DLLNAME:.dll=.tds) $(install_bindir)

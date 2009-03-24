@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -596,6 +596,31 @@ class Twoways
             test(ro.get("qwerty") == Test.MyEnum.enum3);
             test(ro.get("") == Test.MyEnum.enum2);
             test(ro.get("Hello!!") == Test.MyEnum.enum2);
+        }
+
+        {
+            Test.MyStruct s11 = new Test.MyStruct(1, 1);
+            Test.MyStruct s12 = new Test.MyStruct(1, 2);
+            java.util.Map<Test.MyStruct, Test.MyEnum> di1 = new java.util.HashMap<Test.MyStruct, Test.MyEnum>();
+            di1.put(s11, Test.MyEnum.enum1);
+            di1.put(s12, Test.MyEnum.enum2);
+
+            Test.MyStruct s22 = new Test.MyStruct(2, 2);
+            Test.MyStruct s23 = new Test.MyStruct(2, 3);
+            java.util.Map<Test.MyStruct, Test.MyEnum> di2 = new java.util.HashMap<Test.MyStruct, Test.MyEnum>();
+            di2.put(s11, Test.MyEnum.enum1);
+            di2.put(s22, Test.MyEnum.enum3);
+            di2.put(s23, Test.MyEnum.enum2);
+
+            Test.MyStructMyEnumDHolder _do = new Test.MyStructMyEnumDHolder();
+            java.util.Map<Test.MyStruct, Test.MyEnum> ro = p.opMyStructMyEnumD(di1, di2, _do);
+
+            test(_do.value.equals(di1));
+            test(ro.size() == 4);
+            test(ro.get(s11) == Test.MyEnum.enum1);
+            test(ro.get(s12) == Test.MyEnum.enum2);
+            test(ro.get(s22) == Test.MyEnum.enum3);
+            test(ro.get(s23) == Test.MyEnum.enum2);
         }
 
         {

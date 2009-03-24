@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -780,6 +780,19 @@ class Platform:
         else:
             return ("%s-" + version + "-bin-" + self.pkgPlatform) % prefix
 
+    def getJGoodiesForms(self):
+	for t in self.thirdParties:
+            if t.__str__() == "JGoodiesForms":
+        	return t.getJar()
+	print "Unable to find JGoodiesForms"
+	sys.exit(1)
+
+    def getJGoodiesLooks(self):
+	for t in self.thirdParties:
+            if t.__str__() == "JGoodiesLooks":
+        	return t.getJar()
+	print "Unable to find JGoodiesLooks"
+	sys.exit(1)
 
 class Darwin(Platform):
     def __init__(self, uname, arch, languages):

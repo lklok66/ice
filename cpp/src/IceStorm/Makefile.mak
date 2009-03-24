@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -18,13 +18,8 @@ SVCDLLNAME_D	= $(top_srcdir)\bin\icestormservice$(SOVERSION)d.dll
 SVCLIBNAME_R	= $(top_srcdir)\lib\icestormservice.lib
 SVCDLLNAME_R	= $(top_srcdir)\bin\icestormservice$(SOVERSION).dll
 
-!if "$(OPTIMIZE)" != "yes"
-SVCLIBNAME		= $(SVCLIBNAME_D)
-SVCDLLNAME		= $(SVCDLLNAME_D)
-!else
-SVCLIBNAME		= $(SVCLIBNAME_R)
-SVCDLLNAME		= $(SVCDLLNAME_R)
-!endif
+SVCLIBNAME	= $(top_srcdir)\lib\icestormservice$(LIBSUFFIX).lib
+SVCDLLNAME	= $(top_srcdir)\bin\icestormservice$(SOVERSION)$(LIBSUFFIX).dll
 
 ADMIN		= $(top_srcdir)\bin\icestormadmin.exe
 MIGRATE		= $(top_srcdir)\bin\icestormmigrate.exe
@@ -95,7 +90,7 @@ APDBFLAGS       = /pdb:$(ADMIN:.exe=.pdb)
 MPDBFLAGS       = /pdb:$(MIGRATE:.exe=.pdb)
 !endif
 
-!if "$(CPP_COMPILER)" == "BCC2007"
+!if "$(BCPLUSPLUS)" == "yes"
 RES_FILE        = ,, IceStorm.res
 SRES_FILE       = ,, IceStormService.res
 ARES_FILE       = ,, IceStormAdmin.res
@@ -199,10 +194,6 @@ clean::
 	-del /q $(MIGRATE:.exe=.*)
 	-del /q IceStormAdmin.res IceStormMigrate.res IceStorm.res IceStormService.res
 
-clean::
-	del /q Grammar.cpp Grammar.h
-	del /q Scanner.cpp
-
 install:: all
 	copy $(LIBNAME) $(install_libdir)
 	copy $(DLLNAME) $(install_bindir)
@@ -212,7 +203,7 @@ install:: all
 	copy $(MIGRATE) $(install_bindir)
 
 
-!if "$(CPP_COMPILER)" == "BCC2007" && "$(OPTIMIZE)" != "yes"
+!if "$(BCPLUSPLUS)" == "yes" && "$(OPTIMIZE)" != "yes"
 
 install:: all
 	copy $(DLLNAME:.dll=.tds) $(install_bindir)

@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -47,7 +47,7 @@ TPDBFLAGS        = /pdb:$(TRANSFORMDB:.exe=.pdb)
 DPDBFLAGS        = /pdb:$(DUMPDB:.exe=.pdb)
 !endif
 
-!if "$(CPP_COMPILER)" == "BCC2007"
+!if "$(BCPLUSPLUS)" == "yes"
 TRES_FILE        = ,, TransformDB.res
 DRES_FILE        = ,, DumpDB.res
 !else
@@ -84,8 +84,6 @@ Grammar.cpp Grammar.h: Grammar.y
 clean::
 	-del /q $(TRANSFORMDB:.exe=.*)
 	-del /q $(DUMPDB:.exe=.*)
-	-del /q Grammar.cpp Grammar.h
-	-del /q Scanner.cpp
 	-del /q TransformDB.res DumpDB.res
 
 install:: all
@@ -93,7 +91,7 @@ install:: all
 	copy $(DUMPDB) $(install_bindir)
 
 
-!if "$(CPP_COMPILER)" == "BCC2007" && "$(OPTIMIZE)" != "yes"
+!if "$(BCPLUSPLUS)" == "yes" && "$(OPTIMIZE)" != "yes"
 
 install:: all
 	copy $(TRANSFORMDB:.exe=.tds) $(install_bindir)

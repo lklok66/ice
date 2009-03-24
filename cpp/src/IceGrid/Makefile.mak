@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -103,13 +103,13 @@ ALINKWITH 	= $(LINKWITH) icegrid$(LIBSUFFIX).lib icexml$(LIBSUFFIX).lib icepatch
 		  icebox$(LIBSUFFIX).lib
 NLINKWITH	= $(ALINKWITH) icestorm$(LIBSUFFIX).lib freeze$(LIBSUFFIX).lib icebox$(LIBSUFFIX).lib \
 		  icessl$(LIBSUFFIX).lib icestormservice$(LIBSUFFIX).lib $(OPENSSL_LIBS)
-!if "$(CPP_COMPILER)" != "BCC2007"
+!if "$(BCPLUSPLUS)" != "yes"
 NLINKWITH	= $(NLINKWITH) pdh.lib ws2_32.lib
 !endif
 
 SLICE2CPPFLAGS	= --checksum --ice --include-dir IceGrid $(SLICE2CPPFLAGS)
 CPPFLAGS	= -I. -I.. -Idummyinclude $(CPPFLAGS) -DWIN32_LEAN_AND_MEAN
-!if "$(CPP_COMPILER)" != "BCC2007"
+!if "$(BCPLUSPLUS)" != "yes"
 CPPFLAGS 	= $(CPPFLAGS) -Zm200
 !endif
 
@@ -119,7 +119,7 @@ RPDBFLAGS       = /pdb:$(REGISTRY_SERVER:.exe=.pdb)
 NPDBFLAGS       = /pdb:$(NODE_SERVER:.exe=.pdb)
 !endif
 
-!if "$(CPP_COMPILER)" == "BCC2007"
+!if "$(BCPLUSPLUS)" == "yes"
 ARES_FILE       = ,, IceGridAdmin.res
 RRES_FILE       = ,, IceGridRegistry.res
 NRES_FILE       = ,, IceGridNode.res
@@ -184,8 +184,6 @@ clean::
 	-del /q $(NODE_SERVER:.exe=.*)
 	-del /q $(REGISTRY_SERVER:.exe=.*)
 	-del /q IceGridAdmin.res IceGridNode.res IceGridRegistry.res
-	-del /q Grammar.cpp Grammar.h
-	-del /q Scanner.cpp
 
 install:: all
 	copy $(ADMIN) $(install_bindir)
@@ -193,7 +191,7 @@ install:: all
 	copy $(REGISTRY_SERVER) $(install_bindir)
 
 
-!if "$(CPP_COMPILER)" == "BCC2007" && "$(OPTIMIZE)" != "yes"
+!if "$(BCPLUSPLUS)" == "yes" && "$(OPTIMIZE)" != "yes"
 
 install:: all
 	copy $(ADMIN:.exe=.tds) $(install_bindir)

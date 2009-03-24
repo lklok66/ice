@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -81,6 +81,7 @@ OBJS		= Acceptor.obj \
 		  Proxy.obj \
 		  ReferenceFactory.obj \
 		  Reference.obj \
+		  RetryQueue.obj \
 		  RequestHandler.obj \
 		  RouterInfo.obj \
 		  Router.obj \
@@ -117,11 +118,11 @@ SDIR		= $(slicedir)\Ice
 CPPFLAGS	= -I.. $(CPPFLAGS) -DICE_API_EXPORTS -DFD_SETSIZE=1024 -DWIN32_LEAN_AND_MEAN
 SLICE2CPPFLAGS	= --ice --include-dir Ice --dll-export ICE_API $(SLICE2CPPFLAGS)
 LINKWITH        = $(BASELIBS) $(BZIP2_LIBS) $(ICE_OS_LIBS) ws2_32.lib
-!if "$(CPP_COMPILER)" != "BCC2007"
+!if "$(BCPLUSPLUS)" != "yes"
 LINKWITH	= $(LINKWITH) Iphlpapi.lib
 !endif
 
-!if "$(CPP_COMPILER)" == "BCC2007"
+!if "$(BCPLUSPLUS)" == "yes"
 RES_FILE	= ,, Ice.res
 !else
 !if "$(GENERATE_PDB)" == "yes"
@@ -151,6 +152,14 @@ EventLoggerMsg.h EventLoggerMsg.rc: EventLoggerMsg.mc
 	mc EventLoggerMsg.mc
 
 Ice.res: EventLoggerMsg.rc
+
+!if "$(CPP_COMPILER)" == "BCC2009" & "$(OPTIMIZE)" == "yes"
+#
+# Tests fail if GC.cpp is built with optimizations enabled
+#
+GC.obj: GC.cpp
+	$(CXX) /c $(CPPFLAGS) $(CXXFLAGS) -Od GC.cpp
+!endif
 
 clean::
 	-del /q BuiltinSequences.cpp $(HDIR)\BuiltinSequences.h
@@ -194,7 +203,7 @@ install:: all
 	copy $(DLLNAME) $(install_bindir)
 
 
-!if "$(CPP_COMPILER)" == "BCC2007" && "$(OPTIMIZE)" != "yes"
+!if "$(BCPLUSPLUS)" == "yes" && "$(OPTIMIZE)" != "yes"
 
 install:: all
 	copy $(DLLNAME:.dll=.tds) $(install_bindir)
