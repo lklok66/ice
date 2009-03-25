@@ -213,6 +213,7 @@ sys.stdout.flush()
 os.chdir(distDir)
 
 tarArchive(srcDir, verbose)
+zipArchive(srcDir, verbose)
 
 #
 # Write source distribution report in README file.
