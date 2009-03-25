@@ -1,3 +1,6 @@
+Introduction
+------------
+
 This demo shows how to integrate Google Protocol Buffers with Ice.
 
 The Protocol Buffers distribution and documentation can be found at
@@ -50,7 +53,11 @@ and has the following syntax:
 
   [["cpp:include:Person.pb.h"]]
 
-Building on Unix requires GNU make 3.80 or later. If your system does
+
+Building the demo on Linux/Mac OS X/Unix
+----------------------------------------
+
+Building the demo requires GNU make 3.80 or later. If your system does
 not come with GNU make, you can find information on how to acquire it
 at the following link:
 
@@ -58,8 +65,8 @@ at the following link:
 
 If you are using a non-RPM install or have not installed Ice in the 
 default location (/opt/Ice-VERSION) then you will need to set the 
-enviroment variable ICE_HOME to point to your Ice installation root
-directory.
+environment variable ICE_HOME to point to the root directory of your
+Ice installation:
 
   $ export ICE_HOME=[PATH TO ICE INSTALLATION]
 
@@ -67,9 +74,13 @@ Please review the Makefile in this directory and adjust the value
 of PROTOBUF_HOME to reflect the installation directory of Protocol
 Buffers on your system.
 
-To build the demo run:
+Use this command to build the demo:
 
   $ make (or gmake depending on system)
+
+
+Building the demo on Windows
+----------------------------
 
 For Windows, Visual Studio project files are provided to build the
 demo. Open the Ice.protobuf.sln solution and choose
@@ -79,7 +90,7 @@ demo. Open the Ice.protobuf.sln solution and choose
 Add the Protocol Buffers bin directory to "Executable Files", the
 include directory to "Include files", and the lib directory to
 "Library files". Also if you have not already done so you will 
-need to add the bin, include and lib directories from you Ice
+need to add the bin, include and lib directories from your Ice
 installation as well.
 
 Then select the target configuration (Debug or Release), right-click
@@ -106,6 +117,10 @@ using the following directory structure:
     Contains the output of the extract_includes.bat batch file that
     copies the include files contained in the Protocol Buffers
     distribution.
+
+
+Running the demo
+----------------
 
 To run the demo, first start the server:
 

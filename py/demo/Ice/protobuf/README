@@ -1,3 +1,6 @@
+Introduction
+------------
+
 This demo shows how to integrate Google Protocol Buffers with Ice.
 
 The Protocol Buffers distribution and documentation can be found at
@@ -29,6 +32,10 @@ Prior to running the demo, you must generate the Python code for
 Person.proto by running the following command:
 
   $ protoc --python_out=. Person.proto
+
+
+Running the demo
+----------------
 
 To run the demo, first start the server:
 
