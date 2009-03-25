@@ -225,7 +225,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						CommandLine="slice2cpp.exe Hello.ice"
-						Outputs="Hello.cpp Hello.h"
+						Outputs="Hello.cpp;Hello.h"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -234,7 +234,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						CommandLine="slice2cpp.exe Hello.ice"
-						Outputs="Hello.cpp Hello.h"
+						Outputs="Hello.cpp;Hello.h"
 					/>
 				</FileConfiguration>
 			</File>
@@ -247,7 +247,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						CommandLine="protoc --cpp_out=. Person.proto&#x0D;&#x0A;move Person.pb.cc Person.pb.cpp&#x0D;&#x0A;"
-						Outputs="Person.pb.cpp Person.pb.h"
+						Outputs="Person.pb.cpp;Person.pb.h"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -256,7 +256,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						CommandLine="protoc --cpp_out=. Person.proto&#x0D;&#x0A;move Person.pb.cc Person.pb.cpp&#x0D;&#x0A;"
-						Outputs="Person.pb.cpp Person.pb.h"
+						Outputs="Person.pb.cpp;Person.pb.h"
 					/>
 				</FileConfiguration>
 			</File>
