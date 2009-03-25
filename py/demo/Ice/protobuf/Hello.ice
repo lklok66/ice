@@ -13,8 +13,7 @@
 module Demo
 {
 
-["cpp:protobuf:tutorial::Person", "java:protobuf:tutorial.PersonPB.Person", "python:protobuf:Person_pb2.Person"]
-sequence<byte> Person;
+["python:protobuf:Person_pb2.Person"] sequence<byte> Person;
 
 interface Hello
 {

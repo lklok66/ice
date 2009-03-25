@@ -29,8 +29,30 @@ compiler (protoc) for the definition shown below:
 This demo uses an ant build task, located in the "ant" subdirectory,
 for compiling .proto files.
 
-Prior to building the demo, you should add protoc to your PATH and
-protobuf-java-2.0.3.jar to your CLASSPATH.
+Building the demo requires Ant 1.7.0 or greater which can be
+downloaded at:
+
+  http://ant.apache.org/bindownload.cgi
+
+If you have non-RPM install on Unix or have not installed Ice in
+the default location (/opt/Ice-VERSION on Unix or C:\Ice-VERSION on
+Windows) then you will need to set the enviroment variable ICE_HOME 
+to point to your Ice installation root directory. For example:
+
+Unix
+
+ $ export ICE_HOME=[PATH TO ICE INSTALLATION] 
+
+Windows
+
+ $ set ICE_HOME=[PATH TO ICE INSTALLATION]
+
+Prior to building the demo, you should also add protoc to your PATH
+and protobuf-java-2.0.3.jar to your CLASSPATH. 
+
+To build the demo run:
+
+  $ ant
 
 To run the demo, first start the server:
 
