@@ -34,6 +34,7 @@ filesToKeep = [
     "./java/config", \
     "./java/demo/Ice/protobuf", \
     "./py/demo/Ice/protobuf", \
+    "./distribution/src/protobuf"
 ]
 
 #
@@ -200,6 +201,7 @@ for d in ["cpp", "java"]:
 remove("cpp")
 remove("java")
 remove("py")
+remove("distribution")
 
 print "ok"
 
@@ -222,7 +224,7 @@ writeSrcDistReport("Ice-Protobuf-", version, compareToDir, [srcDir])
 #
 print "Cleaning up...",
 sys.stdout.flush()
-#remove(srcDir)
+remove(srcDir)
 print "ok"
 
 os.chdir(cwd)
