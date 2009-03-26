@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
 #
-# This copy of Ice is licensed to you under the terms described in the
-# ICE_LICENSE file included in this distribution.
+# This copy of Ice Protobuf is licensed to you under the terms
+# described in the ICE_PROTOBUF_LICENSE file included in this
+# distribution.
 #
 # **********************************************************************
 
@@ -12,7 +13,7 @@ import os, sys, traceback, time, threading
 
 for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
     toplevel = os.path.normpath(toplevel)
-    if os.path.exists(os.path.join(toplevel, "python", "Ice.py")):
+    if os.path.exists(os.path.join(toplevel, "config", "Make.rules")):
         break
 else:
     raise "can't find toplevel directory!"

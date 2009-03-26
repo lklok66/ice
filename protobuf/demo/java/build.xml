@@ -1,10 +1,10 @@
 <!--
  **********************************************************************
 
- Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+ Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
 
- This copy of Ice is licensed to you under the terms described in the
- ICE_LICENSE file included in this distribution.
+ This copy of Ice Protobuf is licensed to you under the terms described
+ in the ICE_PROTOBUF_LICENSE file included in this distribution.
 
  **********************************************************************
 -->
@@ -12,7 +12,7 @@
 <project name="demo_Ice_protobuf" default="all" basedir=".">
 
     <!-- set global properties for this build -->
-    <property name="top.dir" value="../../.."/>
+    <property name="top.dir" value="../.."/>
 
     <!-- import common definitions -->
     <import file="${top.dir}/config/common.xml"/>

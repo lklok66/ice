@@ -1,9 +1,10 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
 #
-# This copy of Ice is licensed to you under the terms described in the
-# ICE_LICENSE file included in this distribution.
+# This copy of Ice Protobuf is licensed to you under the terms
+# described in the ICE_PROTOBUF_LICENSE file included in this
+# distribution.
 #
 # **********************************************************************
 
@@ -14,7 +15,7 @@
 #
 PROTOBUF_HOME   ?= /usr/local
 
-top_srcdir	= ../../..
+top_srcdir	= ../..
 
 CLIENT		= client
 SERVER		= server
@@ -38,8 +39,8 @@ PROTO_SRCS	= Person.proto
 
 include $(top_srcdir)/config/Make.rules
 
-CPPFLAGS	:= -I$(PROTOBUF_HOME)/include -I. $(CPPFLAGS)
-LIBS		:= $(LIBS) -L$(PROTOBUF_HOME)/lib -lprotobuf
+CPPFLAGS	:= $(ICE_FLAGS) -I$(PROTOBUF_HOME)/include -I. $(CPPFLAGS)
+LIBS		:= $(ICE_LIB_DIR) $(LIBS) -L$(PROTOBUF_HOME)/lib -lprotobuf
 
 $(CLIENT): $(OBJS) $(COBJS)
 	rm -f $@

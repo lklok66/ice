@@ -34,7 +34,7 @@ for dir in ["protobuf"]:
 # are not taken care of above.
 #
 cpatMatch = "20[0-9][0-9]-(20[0-9][0-9]) ZeroC"
-copyright = "2008"
+copyright = "2009"
 
 files = [os.path.join(ice_dir, "protobuf", "ICE_PROTOBUF_LICENSE")]
 
