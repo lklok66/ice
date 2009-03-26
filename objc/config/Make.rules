@@ -56,7 +56,7 @@ embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 #
 ice_language     = objc
 slice_translator = slice2objc
-ICE_VERSION	 = 3.3.0
+ICE_VERSION	 = 3.3.1
 
 ifeq ($(shell test -f $(top_srcdir)/config/Make.common.rules.objc && echo 0),0)
     include $(top_srcdir)/config/Make.common.rules.objc
