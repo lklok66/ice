@@ -17,7 +17,7 @@
 PROTOBUF_HOME   = c:\protobuf
 !endif
 
-top_srcdir	= ..\..\..
+top_srcdir	= ..\..
 
 CLIENT		= client.exe
 SERVER		= server.exe
@@ -41,8 +41,8 @@ SRCS		= $(COBJS:.obj=.cpp) \
 
 # Need to use -W0 to gid rid of ugly warnings from generated protobuf file as
 # well as prevent compile failure on x64 due to warnings from protobuf headers
-CPPFLAGS	= -I$(PROTOBUF_HOME)\include -I. -I../../include $(CPPFLAGS) -DWIN32_LEAN_AND_MEAN -W0
-LIBS		= $(LIBS) /libpath:$(PROTOBUF_HOME)\lib libprotobuf.lib
+CPPFLAGS	= $(ICE_CPPFLAGS) -I$(PROTOBUF_HOME)\include -I. -I../../../cpp/test/include $(CPPFLAGS) -DWIN32_LEAN_AND_MEAN -W0
+LIBS		= $(ICE_LDFLAGS) $(LIBS) /libpath:$(PROTOBUF_HOME)\lib libprotobuf$(LIBSUFFIX).lib
 
 !if "$(GENERATE_PDB)" == "yes"
 CPDBFLAGS        = /pdb:$(CLIENT:.exe=.pdb)
