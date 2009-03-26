@@ -19,22 +19,22 @@ from DistUtils import *
 #
 filesToRemove = [
     "./cpp/config//Make.rules.mak", \
-    "./cpp/config//Make.rules.msvc", \
     "./cpp/config//Make.rules.bcc", \
-    "./cpp/demo/Ice/protobuf/Makefile.mak", \
+    "./cpp/config//Make.rules.msvc", \
+    "./protobuf/config//Make.rules.mak", \
+    "./protobuf/demo/cpp/Makefile.mak", \
 ]
 
 # List of files & subdirectories to keep, all others are removed.
 filesToKeep = [
     "./LICENSE", \
-    "./ICE_LICENSE", \
     "./config/Make.common.rules", \
     "./cpp/config", \
-    "./cpp/demo/Ice/protobuf", \
     "./java/config", \
-    "./java/demo/Ice/protobuf", \
-    "./py/demo/Ice/protobuf", \
-    "./distribution/src/protobuf"
+    "./protobuf/config", \
+    "./protobuf/demo", \
+    "./protobuf/README", \
+    "./protobuf/ICE_PROTOBUF_LICENSE", \
 ]
 
 #
@@ -186,22 +186,21 @@ print "ok"
 # Copy IceE specific install files.
 #
 print "Copying protobuf install files...",
-move(os.path.join("distribution", "src", "protobuf", "README"), os.path.join("README"))
+#move(os.path.join("distribution", "src", "protobuf", "README"), os.path.join("README"))
 
 #
 # Move demo directories to the correct places.
 #
-move(os.path.join("cpp", "demo"), os.path.join("demo"))
-move(os.path.join("java", "demo"), os.path.join("demoj"))
-move(os.path.join("py", "demo"), os.path.join("demopy"))
+move(os.path.join("protobuf", "demo"), os.path.join("demo"))
+move(os.path.join("protobuf", "README"), os.path.join("README"))
+move(os.path.join("protobuf", "ICE_PROTOBUF_LICENSE"), os.path.join("ICE_PROTOBUF_LICENSE"))
 
 for d in ["cpp", "java"]:
     copyMatchingFiles(os.path.join(d, "config"), os.path.join("config"), configFiles)
 
 remove("cpp")
 remove("java")
-remove("py")
-remove("distribution")
+remove("protobuf")
 
 print "ok"
 
