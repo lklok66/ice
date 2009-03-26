@@ -136,14 +136,14 @@ os.mkdir(distDir)
 
 print "Creating " + version + " source distributions in " + distDir
 
-srcDir = os.path.join(distDir, "Ice-Protobuf-" + version)
+srcDir = os.path.join(distDir, "IceProtobuf-" + version)
 
 #
 # Extract the sources with git archive using the given tag.
 #
 print "Creating git archive using " + tag + "...",
 sys.stdout.flush()
-os.system("git archive --prefix=Ice-Protobuf-" + version + "/ " + tag + " | ( cd " + distDir + " && tar xfm - )")
+os.system("git archive --prefix=IceProtobuf-" + version + "/ " + tag + " | ( cd " + distDir + " && tar xfm - )")
 print "ok"
 
 os.chdir(os.path.join(srcDir))
@@ -173,7 +173,7 @@ print "ok"
 #
 # Remove or move non-public files out of source distribution.
 #
-print "Removing non-Ice-Protobuf directories and files...",
+print "Removing non-IceProtobuf directories and files...",
 sys.stdout.flush()
 for x in genRemoveList(filesToKeep):
     remove(x, False)
@@ -218,7 +218,7 @@ zipArchive(srcDir, verbose)
 #
 # Write source distribution report in README file.
 #
-writeSrcDistReport("Ice-Protobuf-", version, compareToDir, [srcDir])
+writeSrcDistReport("IceProtobuf-", version, compareToDir, [srcDir])
 
 #
 # Done.
