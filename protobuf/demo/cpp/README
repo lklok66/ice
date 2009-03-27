@@ -122,6 +122,10 @@ using the following directory structure:
 Running the demo
 ----------------
 
+First you must ensure that your environment is set up to run Ice
+applications. Please see the documentation that came with your Ice
+distribution for more information.
+
 To run the demo, first start the server:
 
   $ server

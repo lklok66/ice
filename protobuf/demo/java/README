@@ -64,6 +64,19 @@ Use this command to build the demo:
 Running the demo
 ----------------
 
+First you must ensure that your environment is set up to run Ice
+applications. Please see the documentation that came with your Ice
+distribution for more information. You will also need to add the 
+classes directory to you CLASSPATH.
+
+Unix:
+
+  $ export CLASSPATH=$CLASSPATH:classes 
+
+Windows:
+
+  $ set CLASSPATH=%CLASSPATH%;classes
+
 To run the demo, first start the server:
 
   $ java Server
