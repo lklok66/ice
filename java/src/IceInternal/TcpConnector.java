@@ -19,33 +19,7 @@ final class TcpConnector implements Connector, java.lang.Comparable
             String s = "trying to establish tcp connection to " + toString();
             _logger.trace(_traceLevels.networkCat, s);
         }
-
-        try
-        {
-            java.nio.channels.SocketChannel fd = Network.createTcpSocket();
-            // The connection should be established non-blocking.
-            Network.setBlock(fd, false);
-            Network.setTcpBufSize(fd, _instance.initializationData().properties, _logger);
-            boolean connected = Network.doConnect(fd, _addr);
-            if(connected)
-            {
-                if(_traceLevels.network >= 1)
-                {
-                    String s = "tcp connection established\n" + Network.fdToString(fd);
-                    _logger.trace(_traceLevels.networkCat, s);
-                }
-            }
-            return new TcpTransceiver(_instance, fd, connected);
-        }
-        catch(Ice.LocalException ex)
-        {
-            if(_traceLevels.network >= 2)
-            {
-                String s = "failed to establish tcp connection to " + toString() + "\n" + ex;
-                _logger.trace(_traceLevels.networkCat, s);
-            }
-            throw ex;
-        }
+        return new TcpTransceiver(_instance, _addr);
     }
 
     public short

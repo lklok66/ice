@@ -32,7 +32,7 @@ final class TcpTransceiver implements Transceiver
                     // thrown.
                     try
                     {
-                        Network.doFinishConnect(fd);
+                        Network.doConnect(fd, _addr);
                     }
                     catch(RuntimeException ex)
                     {
@@ -334,42 +334,31 @@ final class TcpTransceiver implements Transceiver
     }
 
     //
-    // Only for use by TcpConnector, TcpAcceptor
+    // Only for use by TcpAcceptor
     //
-    TcpTransceiver(Instance instance, java.nio.channels.SocketChannel fd, boolean connected)
+    TcpTransceiver(Instance instance, java.nio.channels.SocketChannel fd)
     {
         _fd = fd;
         _traceLevels = instance.traceLevels();
         _logger = instance.initializationData().logger;
         _stats = instance.initializationData().stats;
         _desc = Network.fdToString(_fd);
-        _state = (connected) ? StateConnecting : StateNeedConnect;
+        _state = StateConnected;
+        startThreads();            
+    }
 
-        // If we're already connected, then start the read/write threads.
-        if(connected)
-        {
-            _state = StateConnected;
-            startThreads();            
-        }
-        else
-        {
-            _state = StateNeedConnect;   
-        }
-
-        _maxPacketSize = 0;
-        if(System.getProperty("os.name").startsWith("Windows"))
-        {
-            //
-            // On Windows, limiting the buffer size is important to prevent
-            // poor throughput performances when transfering large amount of
-            // data. See Microsoft KB article KB823764.
-            //
-            _maxPacketSize = Network.getSendBufferSize(_fd) / 2;
-            if(_maxPacketSize < 512)
-            {
-                _maxPacketSize = 0;
-            }
-        }
+    //
+    // Only for use by TcpConnector
+    //
+    TcpTransceiver(Instance instance, java.net.InetSocketAddress addr)
+    {
+        _fd = Network.createTcpSocket();
+        _addr = addr;
+        _traceLevels = instance.traceLevels();
+        _logger = instance.initializationData().logger;
+        _stats = instance.initializationData().stats;
+        _desc = Network.addressesToString(_addr.getAddress(), 0, null, 0);
+        _state = StateNeedConnect;   
     }
 
     protected synchronized void
@@ -390,7 +379,9 @@ final class TcpTransceiver implements Transceiver
     private Ice.Stats _stats;
     private String _desc;
     private int _state;
-    private int _maxPacketSize;
+    private int _maxPacketSize = 0;
+
+    private java.net.InetSocketAddress _addr;
     
     private static final int StateNeedConnect = 0;
     private static final int StateConnecting = 1;
