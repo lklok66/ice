@@ -37,7 +37,7 @@ public class IceClasspathContainer implements IClasspathContainer
 
     public int getKind()
     {
-        return IClasspathContainer.K_DEFAULT_SYSTEM;
+        return IClasspathContainer.K_APPLICATION;
     }
 
     public IPath getPath()
