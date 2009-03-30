@@ -43,7 +43,7 @@ class AMI_MyClass_opMessageI(CallbackBase):
         test(False)
 
 def allTests(communicator, collocated):
-    sref = "test:default -p 12010 -t 10000"
+    sref = "test:default -p 12010"
     obj = communicator.stringToProxy(sref)
     test(obj != None)
 

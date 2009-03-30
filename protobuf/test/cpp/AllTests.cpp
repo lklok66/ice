@@ -98,7 +98,7 @@ typedef IceUtil::Handle<AMI_MyClass_opMessageAMDI> AMI_MyClass_opMessageAMDIPtr;
 MyClassPrx
 allTests(const Ice::CommunicatorPtr& communicator)
 {
-    string ref = "test:default -p 12010 -t 10000";
+    string ref = "test:default -p 12010";
     Ice::ObjectPrx baseProxy = communicator->stringToProxy(ref);
     MyClassPrx cl = MyClassPrx::checkedCast(baseProxy);
     test(cl);

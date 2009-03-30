@@ -43,7 +43,7 @@ class MyClassI(Test.MyClass):
         current.adapter.getCommunicator().shutdown()
 
 def run(args, communicator):
-    communicator.getProperties().setProperty("TestAdapter.Endpoints", "default -p 12010 -t 10000:udp")
+    communicator.getProperties().setProperty("TestAdapter.Endpoints", "default -p 12010:udp")
     adapter = communicator.createObjectAdapter("TestAdapter")
     adapter.add(MyClassI(), communicator.stringToIdentity("test"))
     adapter.activate()
