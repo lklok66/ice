@@ -17,7 +17,7 @@ static int
 run(id<ICECommunicator> communicator)
 {
     void allTests(id<ICECommunicator>, NSString*);
-    allTests(communicator, @"ServerManager:default -p 12010 -t 10000");
+    allTests(communicator, @"ServerManager:default -p 12010");
     return EXIT_SUCCESS;
 }
 

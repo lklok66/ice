@@ -82,7 +82,7 @@ id<TestRetryRetryPrx>
 allTests(id<ICECommunicator> communicator)
 {
     tprintf("testing stringToProxy... ");
-    NSString* ref = @"retry:default -p 12010 -t 10000";
+    NSString* ref = @"retry:default -p 12010";
     id<ICEObjectPrx> base1 = [communicator stringToProxy:ref];
     test(base1);
     id<ICEObjectPrx> base2 = [communicator stringToProxy:ref];

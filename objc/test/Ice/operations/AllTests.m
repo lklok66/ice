@@ -15,7 +15,7 @@
 id<TestOperationsMyClassPrx>
 allTests(id<ICECommunicator> communicator, BOOL collocated)
 {
-    NSString* ref = @"test:default -p 12010 -t 10000";
+    NSString* ref = @"test:default -p 12010";
     id<ICEObjectPrx> base = [communicator stringToProxy:(ref)];
     id<TestOperationsMyClassPrx> cl = [TestOperationsMyClassPrx checkedCast:base];
     id<TestOperationsMyDerivedClassPrx> derived = [TestOperationsMyDerivedClassPrx checkedCast:cl];

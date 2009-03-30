@@ -120,7 +120,7 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
 #endif
 
     tprintf("testing stringToProxy... ");
-    NSString *ref = @"thrower:default -p 12010 -t 10000";
+    NSString *ref = @"thrower:default -p 12010";
     id<ICEObjectPrx> base = [communicator stringToProxy:ref];
     test(base);
     tprintf("ok\n");

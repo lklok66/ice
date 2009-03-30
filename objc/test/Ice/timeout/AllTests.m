@@ -97,7 +97,7 @@
 id<TestTimeoutTimeoutPrx>
 allTests(id<ICECommunicator> communicator)
 {
-    NSString* sref = @"timeout:default -p 12010 -t 10000";
+    NSString* sref = @"timeout:default -p 12010";
     id<ICEObjectPrx> obj = [communicator stringToProxy:sref];
     test(obj);
 

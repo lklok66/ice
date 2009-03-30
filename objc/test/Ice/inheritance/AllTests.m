@@ -16,7 +16,7 @@ id<TestInheritanceInitialPrx>
 allTests(id<ICECommunicator> communicator)
 {
     tprintf("testing stringToProxy... ");
-    NSString* ref = @"initial:default -p 12010 -t 10000";
+    NSString* ref = @"initial:default -p 12010";
     id<ICEObjectPrx> base = [communicator stringToProxy:ref];
     test(base);
     tprintf("ok\n");

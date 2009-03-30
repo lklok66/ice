@@ -16,7 +16,7 @@ id<TestObjectsInitialPrx>
 allTests(id<ICECommunicator> communicator, BOOL collocated)
 {
     tprintf("testing stringToProxy... ");
-    NSString* ref = @"initial:default -p 12010 -t 10000";
+    NSString* ref = @"initial:default -p 12010";
     id<ICEObjectPrx> base = [communicator stringToProxy:ref];
     test(base);
     tprintf("ok\n");
@@ -196,7 +196,7 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
 //     if(!collocated)
 //     {
     tprintf("testing UnexpectedObjectException... ");
-    ref = @"uoet:default -p 12010 -t 10000";
+    ref = @"uoet:default -p 12010";
     base = [communicator stringToProxy:ref];
     test(base);
     id<TestObjectsUnexpectedObjectExceptionTestPrx> uoet = [TestObjectsUnexpectedObjectExceptionTestPrx uncheckedCast:base];

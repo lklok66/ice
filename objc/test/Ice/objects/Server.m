@@ -50,7 +50,7 @@ run(id<ICECommunicator> communicator)
     [communicator addObjectFactory:factory sliceId:@"::Test::J"];
     [communicator addObjectFactory:factory sliceId:@"::Test::H"];
     
-    [[communicator getProperties] setProperty:@"TestAdapter.Endpoints" value:@"default -p 12010 -t 10000"];
+    [[communicator getProperties] setProperty:@"TestAdapter.Endpoints" value:@"default -p 12010"];
     id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestAdapter"];
     ICEObject* initial = [[[TestObjectsInitialI alloc] init] autorelease];
     [adapter add:initial identity:[communicator stringToIdentity:@"initial"]];

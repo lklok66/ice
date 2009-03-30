@@ -15,7 +15,7 @@ id<TestAdapterDeactivationTestIntfPrx>
 allTests(id<ICECommunicator> communicator)
 {
     tprintf("testing stringToProxy... ");
-    id<ICEObjectPrx> base = [communicator stringToProxy:@"test:default -p 12010 -t 10000"];
+    id<ICEObjectPrx> base = [communicator stringToProxy:@"test:default -p 12010"];
     test(base);
     tprintf("ok\n");
 

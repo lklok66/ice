@@ -97,7 +97,7 @@ allTests(id<ICECommunicator> communicator)
     [adapter deactivate];
 
     tprintf("testing stringToProxy... ");
-    NSString* ref = @"d:default -p 12010 -t 10000";
+    NSString* ref = @"d:default -p 12010";
     id<ICEObjectPrx> db = [communicator stringToProxy:ref];
     test(db);
     tprintf("ok\n");

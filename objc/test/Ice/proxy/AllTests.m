@@ -18,7 +18,7 @@ TestProxyMyClassPrx*
 allTests(id<ICECommunicator> communicator)
 {
     tprintf("testing stringToProxy... ");
-    NSString* ref = @"test:default -p 12010 -t 10000";
+    NSString* ref = @"test:default -p 12010";
     id<ICEObjectPrx> base = [communicator stringToProxy:ref];
     test(base);
 
@@ -240,7 +240,7 @@ allTests(id<ICECommunicator> communicator)
     tprintf("testing propertyToProxy... ");
     id<ICEProperties> prop = [communicator getProperties];
     NSString* propertyPrefix = @"Foo.Proxy";
-    [prop setProperty:propertyPrefix value:@"test:default -p 12010 -t 10000"];
+    [prop setProperty:propertyPrefix value:@"test:default -p 12010"];
     b1 = [communicator propertyToProxy:propertyPrefix];
     test([[[b1 ice_getIdentity] name] isEqualToString:@"test"] && [[[b1 ice_getIdentity] category] length] == 0 &&
          [[b1 ice_getAdapterId] length] == 0 && [[b1 ice_getFacet] length] == 0);
@@ -284,7 +284,7 @@ allTests(id<ICECommunicator> communicator)
     //test([b1 ice_getLocatorCacheTimeout] == 60);
     //prop->setProperty("Ice.Default.LocatorCacheTimeout" :@"");
 
-    [prop setProperty:propertyPrefix value:@"test:default -p 12010 -t 10000"];
+    [prop setProperty:propertyPrefix value:@"test:default -p 12010"];
 
     property = [propertyPrefix stringByAppendingString:@".Router"];
     test(![b1 ice_getRouter]);

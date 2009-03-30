@@ -159,7 +159,7 @@ random_shuffle(NSMutableArray* array)
 void
 allTests(id<ICECommunicator> communicator)
 {
-    NSString* ref = @"communicator:default -p 12010 -t 10000";
+    NSString* ref = @"communicator:default -p 12010";
     id<TestBindingRemoteCommunicatorPrx> com = [TestBindingRemoteCommunicatorPrx uncheckedCast:[
             communicator stringToProxy:ref]];
 

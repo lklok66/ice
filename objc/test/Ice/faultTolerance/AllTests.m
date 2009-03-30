@@ -138,7 +138,7 @@ allTests(id<ICECommunicator> communicator, NSArray* ports)
     NSString* ref = @"test";
     for(NSString* p in ports)
     {
-        ref = [ref stringByAppendingString:@":default -t 60000 -p "];
+        ref = [ref stringByAppendingString:@":default -p "];
         ref = [ref stringByAppendingString:p];
     }
     id<ICEObjectPrx> base = [communicator stringToProxy:ref];
