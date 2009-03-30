@@ -31,10 +31,10 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer
         }
         else if(os.startsWith("Windows"))
         {
-            File f = new File("C:\\Ice-3.3.0");
+            File f = new File("C:\\Ice-3.3.1");
             if(!f.exists())
             {
-                File f2 = new File("C:\\Ice-3.3.0-VC90");
+                File f2 = new File("C:\\Ice-3.3.1-VC90");
                 if(f2.exists())
                 {
                     return f2.toString();
@@ -42,7 +42,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer
             }
             return f.toString();
         }
-        return "/opt/Ice-3.3.0";
+        return "/opt/Ice-3.3.1";
     }
 
     /*
