@@ -211,6 +211,9 @@
             <fileset dir="test/Ice/retry">
                 <include name="Test.ice" />
             </fileset>
+            <fileset dir="test/Ice/serialize">
+                <include name="Test.ice" />
+            </fileset>
             <fileset dir="test/Ice/servantLocator">
                 <include name="Test.ice" />
                 <include name="TestAMD.ice" />
@@ -334,6 +337,7 @@
 	    <include name="test/Ice/proxy/"/>
 	    <include name="test/Ice/proxyAMD/"/>
 	    <include name="test/Ice/retry/"/>
+	    <include name="test/Ice/serialize/"/>
 	    <include name="test/Ice/servantLocator/"/>
 	    <include name="test/Ice/servantLocatorAMD/"/>
 	    <include name="test/Ice/slicing/exceptions/"/>

@@ -2302,7 +2302,7 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
         out << nl << " **/";
     }
 
-    out << nl << "public final class " << name << " implements java.lang.Cloneable";
+    out << nl << "public final class " << name << " implements java.lang.Cloneable, java.io.Serializable";
     out << sb;
 
     return true;
@@ -2826,11 +2826,11 @@ Slice::Gen::TypesVisitor::visitEnum(const EnumPtr& p)
         out << nl << " **/";
     }
 
-    bool java2 = p->definitionContext()->findMetaData("java:java2") == "java:java2";
+    bool java2 = p->definitionContext()->findMetaData(_java2MetaData) == _java2MetaData;
 
     if(java2)
     {
-        out << nl << "public final class " << name;
+        out << nl << "public final class " << name << " implements java.io.Serializable";
         out << sb;
 
         out << nl << "private static " << name << "[] __values = new " << name << "[" << sz << "];";
@@ -2883,7 +2883,7 @@ Slice::Gen::TypesVisitor::visitEnum(const EnumPtr& p)
     }
     else
     {
-        out << nl << "public enum " << name;
+        out << nl << "public enum " << name << " implements java.io.Serializable";
         out << sb;
 
         for(en = enumerators.begin(); en != enumerators.end(); ++en)
@@ -3009,8 +3009,21 @@ Slice::Gen::TypesVisitor::visitEnum(const EnumPtr& p)
 
     if(java2)
     {
+        //
+        // Without this method, Java would create a new instance of an enumerator
+        // during deserialization, but we want it to use one of the predefined
+        // enumerators instead.
+        //
+        out << sp << nl << "private java.lang.Object" << nl << "readResolve()";
+        out.inc();
+        out << nl << "throws java.io.ObjectStreamException";
+        out.dec();
+        out << sb;
+        out << nl << "return convert(__value);";
+        out << eb;
         out << sp << nl << "final static private String[] __T =";
         out << sb;
+
         en = enumerators.begin();
         while(en != enumerators.end())
         {

@@ -6,10 +6,11 @@ Table of Contents
 -----------------
 
   1. Introduction
-  2. Installation
-  3. Eclipse Development
-  4. Sample Projects
-  5. Application Notes
+  2. Requirements
+  3. Installation
+  4. Eclipse Development
+  5. Sample Projects
+  6. Application Notes
 
 
 ======================================================================
@@ -23,18 +24,28 @@ This Ice for Android distribution contains the following components:
  * Eclipse projects for three sample clients and a test suite
  * Source code for the Ice for Android run time, demos, and tests
 
-You must install Ice 3.3 to use Ice for Android. Binary and source
-distributions of Ice can be downloaded at the link below:
-
-  http://www.zeroc.com/download.html
-
-We also encourage you to review the RELEASE_NOTES file for important
+We encourage you to review the RELEASE_NOTES file for important
 information about this release. If you are interested in building Ice
 for Android from source, please consult the INSTALL file.
 
 
 ======================================================================
-2. Installation
+2. Requirements
+======================================================================
+
+You must install Ice 3.3 to use Ice for Android. Binary and source
+distributions of Ice can be downloaded at the link below:
+
+  http://www.zeroc.com/download.html
+
+Ice for Android also requires the Android 1.1r1 SDK, which is
+available at the following link:
+
+  http://developer.android.com
+
+
+======================================================================
+3. Installation
 ======================================================================
 
 You can extract this distribution in the location of your choice. The
@@ -45,7 +56,7 @@ directory.
 
 
 ======================================================================
-3. Eclipse Development
+4. Eclipse Development
 ======================================================================
 
 This section discusses Ice for Android development using Eclipse. If
@@ -74,8 +85,8 @@ and configured the Slice2Java plugin.
 Configuring your Project
 ------------------------
 
-After installation and configuring the Slice2Java plugin, you will
-need to add the Ice for Android run time JAR file to your project:
+After installing and configuring the Slice2Java plugin, you will need
+to add the Ice for Android run time JAR file to your project:
 
  1. Select Java Build Path in the project's properties
  2. Click on the Libraries tab
@@ -85,7 +96,7 @@ need to add the Ice for Android run time JAR file to your project:
 
 
 ======================================================================
-4. Sample Projects
+5. Sample Projects
 ======================================================================
 
 The following prerequisites are necessary for using the sample
@@ -220,7 +231,7 @@ test.
 
 
 ======================================================================
-5. Application Notes
+6. Application Notes
 ======================================================================
 
 

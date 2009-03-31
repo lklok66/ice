@@ -1,23 +1,23 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
 
-package test.Ice.facets;
+package test.Ice.serialize;
 
-import test.Ice.facets.Test.GPrx;
+import test.Ice.serialize.Test.InitialPrx;
 
 public class Client extends test.Util.Application
 {
     public int run(String[] args)
     {
         Ice.Communicator communicator = communicator();
-        GPrx g = AllTests.allTests(communicator, getWriter());
-        g.shutdown();
+        InitialPrx initial = AllTests.allTests(communicator, getWriter());
+        initial.shutdown();
         return 0;
     }
 
@@ -25,7 +25,7 @@ public class Client extends test.Util.Application
     {
         Ice.InitializationData initData = new Ice.InitializationData();
         initData.properties = Ice.Util.createProperties(argsH);
-        initData.properties.setProperty("Ice.Package.Test", "test.Ice.facets");
+        initData.properties.setProperty("Ice.Package.Test", "test.Ice.serialize");
         return initData;
     }
 

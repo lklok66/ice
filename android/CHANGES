@@ -1,0 +1,14 @@
+======================================================================
+CHANGES for Ice for Android 0.1.1
+======================================================================
+
+This file describes the change history for Ice for Android.
+
+
+======================================================================
+Changes since version 0.1.0
+======================================================================
+
+- Fixed a bug with connection establishment in the TCP transport.
+
+- Slice types now implement java.io.Serializable.

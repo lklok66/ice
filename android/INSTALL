@@ -64,6 +64,15 @@ RPMs can also be used on RHEL 5.2. If you install Ice from RPMs, make
 sure you install the ice-java-devel RPM and its dependencies.
 
 
+Android SDK
+-----------
+
+Ice for Android requires the Android 1.1r1 SDK, which is available at
+the following link:
+
+  http://developer.android.com
+
+
 ======================================================================
 Compiling the Source
 ======================================================================
