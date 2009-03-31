@@ -117,21 +117,20 @@ cwd = os.getcwd()
 os.chdir(os.path.dirname(__file__))
 
 #
-# Get IceE version.
+# Get version.
 #
 config = open(os.path.join("java", "config", "build.properties"), "r")
 version = re.search("iceandroid.version = ([0-9\.]*)", config.read()).group(1)
 
 #
 # Remove any existing "disticeandroid-" directory and create a new one
-# and sub-directories for the each source distribution.
 #
 distDir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "disticeandroid-" + tag.replace('/', '-')))
 if os.path.exists(distDir):
     remove(distDir)
 os.mkdir(distDir)
 
-print "Creating Ice Android " + version + " source distributions in " + distDir
+print "Creating IceAndroid " + version + " source distributions in " + distDir
 
 srcDir = os.path.join(distDir, "IceAndroid-" + version)
 
@@ -203,7 +202,7 @@ for root, dirnames, filesnames in os.walk('.'):
         if f == ".gitignore" or f == "expect.py":
             os.remove(filepath)
         else:
-            # Fix version of README/INSTALL files and keep track of bison/flex files for later processing
+            # Fix version of README/INSTALL files
             if fnmatch.fnmatch(f, "README*") or fnmatch.fnmatch(f, "INSTALL*"):
                 fixVersion(filepath, version)
             fixFilePermission(filepath)
@@ -228,13 +227,22 @@ print "ok"
 #
 # Copy IceAndroid specific install files.
 #
-print "Copying icee install files...",
+print "Copying install files...",
+move(os.path.join("android", "CHANGES"), os.path.join("CHANGES"))
 move(os.path.join("android", "README"), os.path.join("README"))
 move(os.path.join("android", "RELEASE_NOTES"), os.path.join("RELEASE_NOTES"))
 move(os.path.join("android", "INSTALL"), os.path.join("INSTALL"))
 
 move(os.path.join("Makefile.mak.android"), os.path.join("Makefile.mak"))
 move(os.path.join("Makefile.android"), os.path.join("Makefile"))
+
+#
+# Copy CHANGES and RELEASE_NOTES
+#
+copy(os.path.join(srcDir, "CHANGES"), os.path.join(distDir, "IceAndroid-" + version + "-CHANGES"))
+copy(os.path.join(srcDir, "RELEASE_NOTES"), os.path.join(distDir, "IceAndroid-" + version + "-RELEASE_NOTES"))
+copy(os.path.join(srcDir, "README"), os.path.join(distDir, "IceAndroid-" + version + "-README"))
+
 print "ok"
 
 #
@@ -244,6 +252,7 @@ copy("java", "java-build")
 os.chdir("java-build")
 if os.system("ant jar") != 0:
     print sys.argv[0] + ": failed to the build the Ice Android jar files"
+    sys.exit(1)
 os.chdir("..")
 os.mkdir(os.path.join("java", "lib"))
 move(os.path.join("java-build", "lib", "IceAndroid.jar"), os.path.join("java", "lib", "IceAndroid.jar"))
