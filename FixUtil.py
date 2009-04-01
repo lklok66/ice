@@ -5,7 +5,7 @@ from stat import *
 
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -15,7 +15,7 @@ def copyright(commentMark, patchIceE):
     result = [ ]
     result.append(commentMark + " **********************************************************************\n")
     result.append(commentMark + "\n")
-    result.append(commentMark + " Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.\n")
+    result.append(commentMark + " Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.\n")
     result.append(commentMark + "\n")
     if patchIceE == True:
         result.append(commentMark + " This copy of Ice-E is licensed to you under the terms described in the\n")
@@ -343,7 +343,7 @@ def fileMatchAndReplace(filename, matchAndReplaceExps, warn=True):
         os.rename(filename + ".new", filename)
         os.chmod(filename, S_IMODE(mode))
     elif warn:
-        print "warning: " + filename + " didn't contain any version"
+        print "warning: " + filename + " didn't contain a match"
         os.unlink(filename + ".new")
 
 #
@@ -382,7 +382,7 @@ def fileMatchAllAndReplace(filename, matchAndReplaceExps):
         print "updated " + filename
         os.rename(filename + ".new", filename)
     else:
-        print "warning: " + filename + " didn't contain any version"
+        print "warning: " + filename + " didn't contain a match"
         os.unlink(filename + ".new")
 
 def checkVersion(version):

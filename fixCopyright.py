@@ -23,43 +23,23 @@ ice_dir = os.path.normpath(os.path.join(os.path.dirname(__file__)))
 
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
 #
 # **********************************************************************
+
 FixUtil.replaceAllCopyrights(ice_dir, False, False)
-for dir in ["slice", "cpp", "java", "cs", "vb", "php", "py", "rb", "demoscript", "distribution", "config", "certs"]:
+for dir in ["slice", "java", "demoscript", "config", "certs", "android", "scripts"]:
     home = os.path.join(ice_dir, dir)
     if home:
        FixUtil.replaceAllCopyrights(home, False, True)
 
-#
-# Fix various other files that have copyright info in them that
-# are not taken care of above.
-#
 cpatMatch = "20[0-9][0-9]-(20[0-9][0-9]) ZeroC"
-copyright = "2008"
+copyright = "2009"
 
-files = FixUtil.find(ice_dir, "*.rc")
-files += FixUtil.find(ice_dir, "*LICENSE")
-files += FixUtil.find(os.path.join(ice_dir, "cpp", "src"), "Gen.cpp")
-files += FixUtil.find(os.path.join(ice_dir, "cpp", "src"), "Parser.cpp")
-files += FixUtil.find(os.path.join(ice_dir, "cpp", "src", "Slice"), "*Util.cpp")
-files += [os.path.join(ice_dir, "cpp", "src", "ca", "iceca")]
-files += [os.path.join(ice_dir, "cpp", "doc", "symboltree.js")]
-files += [os.path.join(ice_dir, "cpp", "demo", "Freeze", "backup", "backup")]
-files += FixUtil.find(os.path.join(ice_dir, "cpp"), "*.bat")
-files += [os.path.join(ice_dir, "cpp", "test", "IceSSL", "certs", "makecerts")]
-files += [os.path.join(ice_dir, "java", "bin", "icegridgui.rpm")]
-files += [os.path.join(ice_dir, "java", "src", "IceGridGUI", "Coordinator.java")]
-files += FixUtil.find(os.path.join(ice_dir, "java", "resources", "IceGridAdmin"), "icegridadmin_content_*.html")
-files += [os.path.join(ice_dir, "config", "makeprops.py")]
-files += FixUtil.find(os.path.join(ice_dir), "AssemblyInfo.cs")
-files += FixUtil.find(os.path.join(ice_dir, "distribution", "src", "rpm"), "*")
-files += FixUtil.find(os.path.join(ice_dir, "php"), "*.php")
-files += [os.path.join(ice_dir, "cpp", "test", "Slice", "errorDetection", "IllegalIdentifier.ice")]
+files = FixUtil.find(ice_dir, "*LICENSE")
 
 for f in files:
     FixUtil.fileMatchAndReplace(f, [(cpatMatch, copyright)])
