@@ -202,7 +202,20 @@ final class AcceptorI implements IceInternal.Acceptor
                 try
                 {
                     javax.net.SocketFactory factory = _instance.context().getSocketFactory();
-                    fd = (javax.net.ssl.SSLSocket)factory.createSocket(_addr.getAddress(), _addr.getPort());
+
+                    //
+                    // On a DHCP system, connection establishment may fail with an UnknownHostException
+                    // if this acceptor is listening on the wildcard address, therefore we obtain a
+                    // local address instead.
+                    //
+                    java.net.InetAddress addr = _addr.getAddress();
+                    if(addr.isAnyLocalAddress())
+                    {
+                        addr = Network.getLocalAddress(_instance.protocolSupport());
+                    }
+
+                    fd = (javax.net.ssl.SSLSocket)factory.createSocket(addr, _addr.getPort());
+
                     synchronized(AcceptorI.this)
                     {
                         //

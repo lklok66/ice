@@ -11,6 +11,6 @@ Changes since version 0.1.0
 
 - Fixed a bug with connection establishment in the TCP transport.
 
-- Fixed a bug in object adapter shutdown.
+- Fixed bugs in object adapter shutdown.
 
 - Slice types now implement java.io.Serializable.

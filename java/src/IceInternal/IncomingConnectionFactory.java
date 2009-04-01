@@ -81,10 +81,9 @@ public final class IncomingConnectionFactory implements Ice.ConnectionI.StartCal
         synchronized(this)
         {
             //
-            // First we wait until the factory is destroyed. If we are using
-            // an acceptor, we also wait for it to be closed.
+            // First we wait until the factory is destroyed.
             //
-            while(_state != StateClosed || _acceptor != null)
+            while(_state != StateClosed)
             {
                 try
                 {
@@ -92,6 +91,26 @@ public final class IncomingConnectionFactory implements Ice.ConnectionI.StartCal
                 }
                 catch(InterruptedException ex)
                 {
+                }
+            }
+
+            if(_acceptor != null)
+            {
+                //
+                // We connect to our own acceptor, which unblocks our acceptor
+                // thread stuck in accept(), then wait for the acceptor to be
+                // closed.
+                //
+                _acceptor.connectToSelf();
+                while(_acceptor != null)
+                {
+                    try
+                    {
+                        wait();
+                    }
+                    catch(InterruptedException ex)
+                    {
+                    }
                 }
             }
 
@@ -525,15 +544,6 @@ public final class IncomingConnectionFactory implements Ice.ConnectionI.StartCal
 
             case StateClosed:
             {
-                if(_acceptor != null)
-                {
-                    //
-                    // We connect to our own acceptor, which unblocks our acceptor
-                    // thread stuck in accept().
-                    //
-                    _acceptor.connectToSelf();
-                }
-
                 java.util.ListIterator<Ice.ConnectionI> p = _connections.listIterator();
                 while(p.hasNext())
                 {   

@@ -56,9 +56,19 @@ class TcpAcceptor implements Acceptor
     connectToSelf()
     {
         java.nio.channels.SocketChannel fd = Network.createTcpSocket();
-        // TODO:
-        //Network.setBlock(fd, false);
-        Network.doConnect(fd, _addr);
+
+        //
+        // On a DHCP system, connection establishment may fail with an UnknownHostException
+        // if this acceptor is listening on the wildcard address, therefore we obtain a
+        // local address instead.
+        //
+        java.net.InetAddress addr = _addr.getAddress();
+        if(addr.isAnyLocalAddress())
+        {
+            addr = Network.getLocalAddress(_instance.protocolSupport());
+        }
+
+        Network.doConnect(fd, new java.net.InetSocketAddress(addr, _addr.getPort()));
         Network.closeSocket(fd);
     }
 
