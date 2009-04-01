@@ -109,27 +109,18 @@ public class SessionController
         }
         _destroyed = true;
 
-        final SessionRefreshThread refresh = _refresh;
-        final Ice.Communicator communicator = _communicator;
-        final SessionAdapter session = _session;
-        final QueryController query = _queryController;
-        _refresh = null;
-        _session = null;
-        _communicator = null;
-        _queryController = null;
-
         new Thread(new Runnable()
         {
             public void run()
             {
-                query.destroy();
+                _queryController.destroy();
 
-                refresh.terminate();
-                while(refresh.isAlive())
+                _refresh.terminate();
+                while(_refresh.isAlive())
                 {
                     try
                     {
-                        refresh.join();
+                        _refresh.join();
                     }
                     catch(InterruptedException e)
                     {
@@ -138,7 +129,7 @@ public class SessionController
 
                 try
                 {
-                    session.destroy();
+                    _session.destroy();
                 }
                 catch(Exception e)
                 {
@@ -146,7 +137,7 @@ public class SessionController
             
                 try
                 {
-                    communicator.destroy();
+                    _communicator.destroy();
                 }
                 catch(Exception e)
                 {
