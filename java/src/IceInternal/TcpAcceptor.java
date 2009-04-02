@@ -56,19 +56,7 @@ class TcpAcceptor implements Acceptor
     connectToSelf()
     {
         java.nio.channels.SocketChannel fd = Network.createTcpSocket();
-
-        //
-        // On a DHCP system, connection establishment may fail with an UnknownHostException
-        // if this acceptor is listening on the wildcard address, therefore we obtain a
-        // local address instead.
-        //
-        java.net.InetAddress addr = _addr.getAddress();
-        if(addr.isAnyLocalAddress())
-        {
-            addr = Network.getLocalAddress(_instance.protocolSupport());
-        }
-
-        Network.doConnect(fd, new java.net.InetSocketAddress(addr, _addr.getPort()));
+        Network.doConnect(fd, new java.net.InetSocketAddress(_connectToSelfAddr, _addr.getPort()));
         Network.closeSocket(fd);
     }
 
@@ -119,6 +107,21 @@ class TcpAcceptor implements Acceptor
                 _logger.trace(_traceLevels.networkCat, s);
             }
             _addr = Network.doBind(_fd, _addr, _backlog);
+
+            //
+            // The IncomingConnectionFactory calls connectToSelf() to unblock the thread that
+            // calls accept(). On a DHCP system, establishing a connection to this acceptor's
+            // local port may fail with an UnknownHostException if the address is the
+            // wildcard address, therefore we obtain a local address to use instead.
+            //
+            if(_addr.getAddress().isAnyLocalAddress())
+            {
+                _connectToSelfAddr = Network.getLocalAddress(_instance.protocolSupport());
+            }
+            else
+            {
+                _connectToSelfAddr = _addr.getAddress();
+            }
         }
         catch(RuntimeException ex)
         {
@@ -142,5 +145,6 @@ class TcpAcceptor implements Acceptor
     private java.nio.channels.ServerSocketChannel _fd;
     private int _backlog;
     private java.net.InetSocketAddress _addr;
+    private java.net.InetAddress _connectToSelfAddr;
     private java.nio.channels.Selector _selector;
 }

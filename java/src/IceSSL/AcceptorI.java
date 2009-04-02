@@ -202,20 +202,7 @@ final class AcceptorI implements IceInternal.Acceptor
                 try
                 {
                     javax.net.SocketFactory factory = _instance.context().getSocketFactory();
-
-                    //
-                    // On a DHCP system, connection establishment may fail with an UnknownHostException
-                    // if this acceptor is listening on the wildcard address, therefore we obtain a
-                    // local address instead.
-                    //
-                    java.net.InetAddress addr = _addr.getAddress();
-                    if(addr.isAnyLocalAddress())
-                    {
-                        addr = Network.getLocalAddress(_instance.protocolSupport());
-                    }
-
-                    fd = (javax.net.ssl.SSLSocket)factory.createSocket(addr, _addr.getPort());
-
+                    fd = (javax.net.ssl.SSLSocket)factory.createSocket(_connectToSelfAddr, _addr.getPort());
                     synchronized(AcceptorI.this)
                     {
                         //
@@ -325,6 +312,21 @@ final class AcceptorI implements IceInternal.Acceptor
                     throw e;
                 }
             }
+
+            //
+            // The IncomingConnectionFactory calls connectToSelf() to unblock the thread that
+            // calls accept(). On a DHCP system, establishing a connection to this acceptor's
+            // local port may fail with an UnknownHostException if the address is the
+            // wildcard address, therefore we obtain a local address to use instead.
+            //
+            if(_addr.getAddress().isAnyLocalAddress())
+            {
+                _connectToSelfAddr = Network.getLocalAddress(_instance.protocolSupport());
+            }
+            else
+            {
+                _connectToSelfAddr = _addr.getAddress();
+            }
         }
         catch(java.io.IOException ex)
         {
@@ -362,5 +364,6 @@ final class AcceptorI implements IceInternal.Acceptor
     private javax.net.ssl.SSLServerSocket _fd;
     private int _backlog;
     private java.net.InetSocketAddress _addr;
+    private java.net.InetAddress _connectToSelfAddr;
     private java.net.Socket _connectToSelfFd;
 }
