@@ -31,7 +31,7 @@ public class AMDServer extends test.Util.Application
         //
         initData.properties.setProperty("Ice.Warn.Dispatch", "0");
         initData.properties.setProperty("Ice.Package.Test", "test.Ice.operationsAMD");
-        initData.properties.setProperty("TestAdapter.Endpoints", "default -p 12010 -t 20000:udp"); return initData;
+        initData.properties.setProperty("TestAdapter.Endpoints", "default -p 12010:udp"); return initData;
     }
 
     public static void main(String[] args)

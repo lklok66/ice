@@ -691,7 +691,7 @@ class Twoways
 
                 communicator.setDefaultContext(dflt);
                 MyClassPrx c = MyClassPrxHelper.checkedCast(
-                                        communicator.stringToProxy("test:default -p 12010 -t 20000"));
+                                        communicator.stringToProxy("test:default -p 12010"));
                 test(c.opContext().equals(dflt));
 
                 dflt.put("a", "c");
@@ -735,7 +735,7 @@ class Twoways
                 ctx.put("three", "THREE");
 
                 MyClassPrx p3 = MyClassPrxHelper.uncheckedCast(
-                    ic.stringToProxy("test:default -p 12010 -t 20000"));
+                    ic.stringToProxy("test:default -p 12010"));
 
                 ic.getImplicitContext().setContext(ctx);
                 test(ic.getImplicitContext().getContext().equals(ctx));
