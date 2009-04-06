@@ -18,7 +18,7 @@
     BOOL called;
     NSCondition* cond;
 }
--(BOOL) check;
+-(void) check;
 -(void) called;
 @end
 
@@ -37,19 +37,15 @@
     [cond release];
     [super dealloc];
 }
--(BOOL) check
+-(void) check
 {
     [cond lock];
     while(!called)
     {
-        if(![cond waitUntilDate:[NSDate dateWithTimeIntervalSinceNow:50]])
-        {
-            return NO;
-        }
+        [cond wait];
     }
     called = NO;
     [cond unlock];
-    return YES;
 }
 -(void) called
 {
@@ -219,7 +215,7 @@ allTests(id<ICECommunicator> communicator)
         id<TestTimeoutTimeoutPrx> to = [TestTimeoutTimeoutPrx uncheckedCast:[obj ice_timeout:500]];
         TestTimeoutCallback* cb = [[TestTimeoutCallback alloc] init];
         [to sleep_async:cb response:@selector(sleepExResponse) exception:@selector(sleepExException:) to:2000];
-        test([cb check]);
+        [cb check];
         [cb release];
     }
     {
@@ -230,7 +226,7 @@ allTests(id<ICECommunicator> communicator)
         id<TestTimeoutTimeoutPrx> to = [TestTimeoutTimeoutPrx uncheckedCast:[obj ice_timeout:1000]];
         TestTimeoutCallback* cb = [[TestTimeoutCallback alloc] init];
         [to sleep_async:cb response:@selector(sleepResponse) exception:@selector(sleepException:) to:500];
-        test([cb check]);
+        [cb check];
         [cb release];
     }
     tprintf("ok\n");
@@ -245,7 +241,7 @@ allTests(id<ICECommunicator> communicator)
         TestTimeoutByteSeq* seq = [TestTimeoutMutableByteSeq dataWithLength:10000];
         TestTimeoutCallback* cb = [[TestTimeoutCallback alloc] init];
         [to sendData_async:cb response:@selector(sendDataExResponse) exception:@selector(sendDataExException:) seq:seq];
-        test([cb check]);
+        [cb check];
         [cb release];
     }
     {
@@ -258,7 +254,7 @@ allTests(id<ICECommunicator> communicator)
         TestTimeoutByteSeq* seq = [TestTimeoutMutableByteSeq dataWithLength:10000];
         TestTimeoutCallback* cb = [[TestTimeoutCallback alloc] init];
         [to sendData_async:cb response:@selector(sendDataResponse) exception:@selector(sendDataException:) seq:seq];
-        test([cb check]);
+        [cb check];
         [cb release];
     }
     tprintf("ok\n");

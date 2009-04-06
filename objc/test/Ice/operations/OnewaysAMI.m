@@ -18,7 +18,7 @@
     BOOL called;
     NSCondition* cond;
 }
--(BOOL) check;
+-(void) check;
 -(void) called;
 @end
 
@@ -37,19 +37,15 @@
     [cond release];
     [super dealloc];
 }
--(BOOL) check
+-(void) check
 {
     [cond lock];
     while(!called)
     {
-        if(![cond waitUntilDate:[NSDate dateWithTimeIntervalSinceNow:50]])
-        {
-            return NO;
-        }
+        [cond wait];
     }
     called = NO;
     [cond unlock];
-    return YES;
 }
 -(void) called
 {
@@ -113,7 +109,7 @@ onewaysAMI(id<ICECommunicator> communicator, id<TestOperationsMyClassPrx> proxy)
         {
             test(NO);
         }
-        test([cb check]);
+        [cb check];
         [cb release];
     }
 
@@ -122,7 +118,7 @@ onewaysAMI(id<ICECommunicator> communicator, id<TestOperationsMyClassPrx> proxy)
         @try
         {
             [p opByte_async:cb  response:@selector(opByteExResponse) exception:@selector(opByteExException:) p1:0 p2:0];
-            test([cb check]);
+            [cb check];
         }
         @catch(ICETwowayOnlyException* ex)
         {

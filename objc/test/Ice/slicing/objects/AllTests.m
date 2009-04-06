@@ -23,7 +23,7 @@
 }
 @property(nonatomic, retain) id r;
 @property(nonatomic, retain) id bout;
--(BOOL) check;
+-(void) check;
 -(void) called;
 @end
 
@@ -44,19 +44,15 @@
     [cond release];
     [super dealloc];
 }
--(BOOL) check
+-(void) check
 {
     [cond lock];
     while(!called)
     {
-        if(![cond waitUntilDate:[NSDate dateWithTimeIntervalSinceNow:50]])
-        {
-            return NO;
-        }
+        [cond wait];
     }
     called = NO;
     [cond unlock];
-    return YES;
 }
 -(void) called
 {
@@ -482,7 +478,7 @@ allTests(id<ICECommunicator> communicator)
     {
         TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
         [test SBaseAsObject_async:cb response:@selector(SBaseAsObjectResponse:) exception:@selector(SBaseAsObjectException:)];
-        test([cb check]);
+        [cb check];
         [cb release];
     }
     tprintf("ok\n");
@@ -506,7 +502,7 @@ allTests(id<ICECommunicator> communicator)
     {
         TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
         [test SBaseAsSBase_async:cb response:@selector(SBaseAsSBaseResponse:) exception:@selector(SBaseAsSBaseException:)];
-        test([cb check]);
+        [cb check];
         [cb release];
     }
     tprintf("ok\n");
@@ -532,7 +528,7 @@ allTests(id<ICECommunicator> communicator)
     {
         TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
         [test SBSKnownDerivedAsSBase_async:cb response:@selector(SBSKnownDerivedAsSBaseResponse:) exception:@selector(SBSKnownDerivedAsSBaseException:)];
-        test([cb check]);
+        [cb check];
         [cb release];
     }
     tprintf("ok\n");
@@ -556,7 +552,7 @@ allTests(id<ICECommunicator> communicator)
     {
         TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
         [test SBSKnownDerivedAsSBSKnownDerived_async:cb response:@selector(SBSKnownDerivedAsSBSKnownDerivedResponse:) exception:@selector(SBSKnownDerivedAsSBSKnownDerivedException:)];
-        test([cb check]);
+        [cb check];
         [cb release];
     }
     tprintf("ok\n");
@@ -580,7 +576,7 @@ allTests(id<ICECommunicator> communicator)
     {
         TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
         [test SBSUnknownDerivedAsSBase_async:cb response:@selector(SBSUnknownDerivedAsSBaseResponse:) exception:@selector(SBSUnknownDerivedAsSBaseException:)];
-        test([cb check]);
+        [cb check];
         [cb release];
     }
     tprintf("ok\n");
@@ -609,7 +605,7 @@ allTests(id<ICECommunicator> communicator)
 //         {
 //             TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
 //             [test SUnknownAsObject_async:cb response:@selector(SUnknownAsObjectResponse:) exception:@selector(SUnknownAsObjectException:)];
-//             test([cb check]);
+//             [cb check];
 //             [cb release];
 //         }
 //         @catch(NSException*)
@@ -640,7 +636,7 @@ allTests(id<ICECommunicator> communicator)
     {
         TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
         [test oneElementCycle_async:cb response:@selector(oneElementCycleResponse:) exception:@selector(oneElementCycleException:)];
-        test([cb check]);
+        [cb check];
         [cb release];
     }
     tprintf("ok\n");
@@ -671,7 +667,7 @@ allTests(id<ICECommunicator> communicator)
     {
         TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
         [test twoElementCycle_async:cb response:@selector(twoElementCycleResponse:) exception:@selector(twoElementCycleException:)];
-        test([cb check]);
+        [cb check];
         [cb release];
     }
     tprintf("ok\n");
@@ -711,7 +707,7 @@ allTests(id<ICECommunicator> communicator)
     {
         TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
         [test D1AsB_async:cb response:@selector(D1AsBResponse:) exception:@selector(D1AsBException:)];
-        test([cb check]);
+        [cb check];
         [cb release];
     }
     tprintf("ok\n");
@@ -745,7 +741,7 @@ allTests(id<ICECommunicator> communicator)
     {
         TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
         [test D1AsD1_async:cb response:@selector(D1AsD1Response:) exception:@selector(D1AsD1Exception:)];
-        test([cb check]);
+        [cb check];
         [cb release];
     }
     tprintf("ok\n");
@@ -783,7 +779,7 @@ allTests(id<ICECommunicator> communicator)
     {
         TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
         [test D2AsB_async:cb response:@selector(D2AsBResponse:) exception:@selector(D2AsBException:)];
-        test([cb check]);
+        [cb check];
         [cb release];
     }
     tprintf("ok\n");
@@ -821,7 +817,7 @@ allTests(id<ICECommunicator> communicator)
     {
         TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
         [test paramTest1_async:cb response:@selector(paramTest1Response:p2:) exception:@selector(paramTest1Exception:)];
-        test([cb check]);
+        [cb check];
         [cb release];
     }
     tprintf("ok\n");
@@ -875,7 +871,7 @@ allTests(id<ICECommunicator> communicator)
     {
         TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
         [test returnTest1_async:cb response:@selector(returnTest1Response:p1:p2:) exception:@selector(returnTest1Exception:)];
-        test([cb check]);
+        [cb check];
         [cb release];
     }
     tprintf("ok\n");
@@ -900,7 +896,7 @@ allTests(id<ICECommunicator> communicator)
     {
         TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
         [test returnTest2_async:cb response:@selector(returnTest2Response:p1:p2:) exception:@selector(returnTest2Exception:)];
-        test([cb check]);
+        [cb check];
         [cb release];
     }
     tprintf("ok\n");
@@ -966,7 +962,7 @@ allTests(id<ICECommunicator> communicator)
 
             TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
             [test returnTest3_async:cb response:@selector(returnTest3Response:) exception:@selector(returnTest3Exception:) p1:d1 p2:d3];
-            test([cb check]);
+            [cb check];
             TestSlicingObjectsClientB* b1 = cb.r;
             [cb release];
 
@@ -1058,7 +1054,7 @@ allTests(id<ICECommunicator> communicator)
 
             TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
             [test returnTest3_async:cb response:@selector(returnTest3Response:) exception:@selector(returnTest3Exception:) p1:d3 p2:d1];
-            test([cb check]);
+            [cb check];
             TestSlicingObjectsClientB* b1 = cb.r;
             [cb release];
 
@@ -1123,7 +1119,7 @@ allTests(id<ICECommunicator> communicator)
     {
         TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
         [test paramTest3_async:cb response:@selector(paramTest3Response:p1:p2:) exception:@selector(paramTest3Exception:)];
-        test([cb check]);
+        [cb check];
         [cb release];
     }
     tprintf("ok\n");
@@ -1156,7 +1152,7 @@ allTests(id<ICECommunicator> communicator)
     {
         TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
         [test paramTest4_async:cb response:@selector(paramTest4Response:p1:) exception:@selector(paramTest4Exception:)];
-        test([cb check]);
+        [cb check];
         [cb release];
     }
     tprintf("ok\n");
@@ -1213,7 +1209,7 @@ allTests(id<ICECommunicator> communicator)
 
             TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
             [test returnTest3_async:cb response:@selector(returnTest3Response:) exception:@selector(returnTest3Exception:) p1:d3 p2:b2];
-            test([cb check]);
+            [cb check];
             TestSlicingObjectsClientB* r = cb.r;
             [cb release];
 
@@ -1286,7 +1282,7 @@ allTests(id<ICECommunicator> communicator)
 
             TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
             [test returnTest3_async:cb response:@selector(returnTest3Response:) exception:@selector(returnTest3Exception:) p1:d3 p2:d12];
-            test([cb check]);
+            [cb check];
             TestSlicingObjectsClientB* r = cb.r;
             [cb release];
             test(r);
@@ -1444,7 +1440,7 @@ allTests(id<ICECommunicator> communicator)
 
                 TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
                 [test sequenceTest_async:cb response:@selector(sequenceTestResponse:) exception:@selector(sequenceTestException:) p1:ss1 p2:ss2];
-                test([cb check]);
+                [cb check];
                 ss = cb.r;
                 [cb release];
             }
@@ -1556,7 +1552,7 @@ allTests(id<ICECommunicator> communicator)
 
             TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
             [test dictionaryTest_async:cb response:@selector(dictionaryTestResponse:bout:) exception:@selector(dictionaryTestException:) bin:bin];
-            test([cb check]);
+            [cb check];
             bout = cb.bout;
             r = cb.r;
             [cb release];
@@ -1621,7 +1617,7 @@ allTests(id<ICECommunicator> communicator)
     {
         TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
         [test throwBaseAsBase_async:cb response:@selector(throwBaseAsBaseResponse) exception:@selector(throwBaseAsBaseException:)];
-        test([cb check]);
+        [cb check];
         [cb release];
     }
     tprintf("ok\n");
@@ -1658,7 +1654,7 @@ allTests(id<ICECommunicator> communicator)
     {
         TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
         [test throwDerivedAsBase_async:cb response:@selector(throwDerivedAsBaseResponse) exception:@selector(throwDerivedAsBaseException:)];
-        test([cb check]);
+        [cb check];
         [cb release];
     }
     tprintf("ok\n");
@@ -1695,7 +1691,7 @@ allTests(id<ICECommunicator> communicator)
     {
         TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
         [test throwDerivedAsDerived_async:cb response:@selector(throwDerivedAsDerivedResponse) exception:@selector(throwDerivedAsDerivedException:)];
-        test([cb check]);
+        [cb check];
         [cb release];
     }
     tprintf("ok\n");
@@ -1726,7 +1722,7 @@ allTests(id<ICECommunicator> communicator)
     {
         TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
         [test throwUnknownDerivedAsBase_async:cb response:@selector(throwUnknownDerivedAsBaseResponse) exception:@selector(throwUnknownDerivedAsBaseException:)];
-        test([cb check]);
+        [cb check];
         [cb release];
     }
     tprintf("ok\n");
@@ -1750,7 +1746,7 @@ allTests(id<ICECommunicator> communicator)
     {
         TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
         [test useForward_async:cb response:@selector(useForwardResponse:) exception:@selector(useForwardException:)];
-        test([cb check]);
+        [cb check];
         [cb release];
     }
     tprintf("ok\n");

@@ -19,7 +19,7 @@
     NSCondition* cond;
     ICEInt pid;
 }
--(BOOL) check;
+-(void) check;
 -(void) called;
 -(ICEInt) pid;
 @end
@@ -39,19 +39,15 @@
     [cond release];
     [super dealloc];
 }
--(BOOL) check
+-(void) check
 {
     [cond lock];
     while(!called)
     {
-        if(![cond waitUntilDate:[NSDate dateWithTimeIntervalSinceNow:50]])
-        {
-            return NO;
-        }
+        [cond wait];
     }
     called = NO;
     [cond unlock];
-    return YES;
 }
 -(void) called
 {
@@ -175,7 +171,7 @@ allTests(id<ICECommunicator> communicator, NSArray* ports)
             tprintf("testing server %d with AMI... ", i);
             Callback* cb = [[Callback alloc] init];
             [obj pid_async:cb response:@selector(pidResponse:) exception:@selector(pidException:)];
-            test([cb check]);
+            [cb check];
             int pid = [cb pid];
             test(pid != oldPid);
             oldPid = pid;
@@ -196,7 +192,7 @@ allTests(id<ICECommunicator> communicator, NSArray* ports)
                 tprintf("shutting down server %d with AMI... ", i);
                 Callback* cb = [[Callback alloc] init];
                 [obj shutdown_async:cb response:@selector(shutdownResponse) exception:@selector(shutdownException:)];
-                test([cb check]);
+                [cb check];
                 [cb release];
                 tprintf("ok\n");
             }
@@ -225,7 +221,7 @@ allTests(id<ICECommunicator> communicator, NSArray* ports)
                 tprintf("aborting server %d with AMI... ", i);
                 Callback* cb = [[Callback alloc] init];
                 [obj abort_async:cb response:@selector(abortResponse) exception:@selector(abortException:)];
-                test([cb check]);
+                [cb check];
                 [cb release];
                 tprintf("ok\n");
             }
@@ -254,7 +250,7 @@ allTests(id<ICECommunicator> communicator, NSArray* ports)
                 tprintf("aborting server %d and #%d with idempotent AMI call... ", i, i + 1);
                 Callback* cb = [[Callback alloc] init];
                 [obj idempotentAbort_async:cb response:@selector(idempotentAbortResponse) exception:@selector(idempotentAbortException:)];
-                test([cb check]);
+                [cb check];
                 [cb release];
                 tprintf("ok\n");
             }

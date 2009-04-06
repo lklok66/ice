@@ -18,7 +18,7 @@
     BOOL called;
     NSCondition* cond;
 }
--(BOOL) check;
+-(void) check;
 -(void) called;
 @end
 
@@ -37,19 +37,15 @@
     [cond release];
     [super dealloc];
 }
--(BOOL) check
+-(void) check
 {
     [cond lock];
     while(!called)
     {
-        if(![cond waitUntilDate:[NSDate dateWithTimeIntervalSinceNow:50]])
-        {
-            return NO;
-        }
+        [cond wait];
     }
     called = NO;
     [cond unlock];
-    return YES;
 }
 -(void) called
 {
@@ -122,17 +118,17 @@ allTests(id<ICECommunicator> communicator)
 
     tprintf("calling regular AMI operation with first proxy... ");
     [retry1 op_async:cb1 response:@selector(retryOpResponse) exception:@selector(retryOpException:) kill:NO];
-    test([cb1 check]);
+    [cb1 check];
     tprintf("ok\n");
 
     tprintf("calling AMI operation to kill connection with second proxy... ");
     [retry2 op_async:cb2 response:@selector(killRetryOpResponse) exception:@selector(killRetryOpException:)  kill:YES];
-    test([cb2 check]);
+    [cb2 check];
     tprintf("ok\n");
 
     tprintf("calling regular AMI operation with first proxy again... ");
     [retry1 op_async:cb1 response:@selector(retryOpResponse) exception:@selector(retryOpException:) kill:NO];
-    test([cb1 check]);
+    [cb1 check];
     tprintf("ok\n");
 
     [cb1 release];
