@@ -29,18 +29,14 @@ public:
     {
     }
 
-    bool check()
+    void check()
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
         while(!_called)
         {
-            if(!timedWait(IceUtil::Time::seconds(5)))
-            {
-                return false;
-            }
+            wait();
         }
         _called = false;
-        return true;
     }
 
 protected:
@@ -133,7 +129,7 @@ allTests(const Ice::CommunicatorPtr& communicator)
 
         AMI_MyClass_opMessageIPtr cb = new AMI_MyClass_opMessageI();
         cl->opMessage_async(cb, i);
-        test(cb->check());
+        cb->check();
     }
     {
         test::Message i;
@@ -141,7 +137,7 @@ allTests(const Ice::CommunicatorPtr& communicator)
 
         AMI_MyClass_opMessageAMDIPtr cb = new AMI_MyClass_opMessageAMDI();
         cl->opMessageAMD_async(cb, i);
-        test(cb->check());
+        cb->check();
     }
     cout << "ok" << endl;
 

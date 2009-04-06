@@ -29,9 +29,8 @@ class CallbackBase:
     def check(self):
         self._cond.acquire()
         while not self._called:
-            self._cond.wait(5.0)
+            self._cond.wait()
         self._called = False
-        return True
 
 class AMI_MyClass_opMessageI(CallbackBase):
     def ice_response(self, r, o):

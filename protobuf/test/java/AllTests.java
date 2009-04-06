@@ -26,28 +26,21 @@ public class AllTests
             _called = false;
         }
 
-        public synchronized boolean
+        public synchronized void
         check()
         {
             while(!_called)
             {
                 try
                 {
-                    wait(5000);
+                    wait();
                 }
                 catch(InterruptedException ex)
                 {
-                    continue;
-                }
-
-                if(!_called)
-                {
-                    return false; // Must be timeout.
                 }
             }
 
             _called = false;
-            return true;
         }
 
         public synchronized void
@@ -77,10 +70,10 @@ public class AllTests
             test(false);
         }
 
-        public boolean
+        public void
         check()
         {
-            return callback.check();
+            callback.check();
         }
 
         private Callback callback = new Callback();
@@ -102,10 +95,10 @@ public class AllTests
             test(false);
         }
 
-        public boolean
+        public void
         check()
         {
-            return callback.check();
+            callback.check();
         }
 
         private Callback callback = new Callback();
@@ -147,14 +140,14 @@ public class AllTests
 
             AMI_MyClass_opMessage cb = new AMI_MyClass_opMessage();
             cl.opMessage_async(cb, i);
-            test(cb.check());
+            cb.check();
         }
         {
             test.TestPB.Message i = test.TestPB.Message.newBuilder().setI(99).build();
 
             AMI_MyClass_opMessageAMD cb = new AMI_MyClass_opMessageAMD();
             cl.opMessageAMD_async(cb, i);
-            test(cb.check());
+            cb.check();
         }
         System.out.println("ok");
 
