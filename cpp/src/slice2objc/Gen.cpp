@@ -506,11 +506,26 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
 	_M << eb;
     }
 
-    _M << sp << nl << "+(NSString **) staticIds__:(int*)count idIndex:(int*)idx";
+    _M << sp << nl << "-(NSArray*) ice_ids:(ICECurrent*)current";
     _M << sb;
-    _M << nl << "*count = sizeof(" << name << "_ids__) / sizeof(NSString *);";
-    _M << nl << "*idx = " << scopedPos << ";";
-    _M << nl << "return " << name << "_ids__;";
+    _M << nl << "int count = sizeof(" << name << "_ids__) / sizeof(NSString *);";
+    _M << nl << "return [NSArray arrayWithObjects:" << name << "_ids__ " << "count:count];";
+    _M << eb;
+
+    _M << sp << nl << "-(NSString*) ice_id:(ICECurrent*)current";
+    _M << sb;
+    _M << nl << "return " << name << "_ids__[" << scopedPos << "];";
+    _M << eb;
+
+    _M << sp << nl << "+(NSString*) ice_staticId";
+    _M << sb;
+    _M << nl << "return " << name << "_ids__[" << scopedPos << "];";
+    _M << eb;
+
+    _M << sp << nl << "-(BOOL) ice_isA:(NSString*)typeId current:(ICECurrent*)current";
+    _M << sb;
+    _M << nl << "int count = sizeof(" << name << "_ids__) / sizeof(NSString *);";
+    _M << nl << "return ICEInternalLookupString(" << name << "_ids__, count, typeId) >= 0;";
     _M << eb;
 }
 

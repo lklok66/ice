@@ -20,6 +20,8 @@
 #include <IceCpp/ObjectAdapter.h>
 
 #import <Foundation/NSAutoreleasePool.h>
+#import <Foundation/NSThread.h>
+#import <Foundation/NSInvocation.h>
 
 int
 ICEInternalLookupString(NSString* array[], size_t count, NSString* str)
@@ -227,7 +229,7 @@ IceObjC::BlobjectI::ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& 
 
 @implementation ICEObject (ICEInternal)
 
--(ICEObject*)init
+-(id)init
 {
     if(![super init])
     {
@@ -356,9 +358,7 @@ static NSString* ICEObject_all__[4] =
 
 -(BOOL) ice_isA:(NSString*)typeId current:(ICECurrent*)current
 {
-    int count, index;
-    NSString** staticIds = [[self class] staticIds__:&count idIndex:&index];
-    return ICEInternalLookupString(staticIds, count, typeId) >= 0;
+    return [typeId isEqualToString: ICEObject_ids__[0]];
 }
 
 -(void) ice_ping
@@ -378,7 +378,7 @@ static NSString* ICEObject_all__[4] =
 
 -(NSString*) ice_id:(ICECurrent*)current
 {
-    return [[self class] ice_staticId];
+    return ICEObject_ids__[0];
 }
 
 -(NSArray*) ice_ids
@@ -388,16 +388,13 @@ static NSString* ICEObject_all__[4] =
 
 -(NSArray*) ice_ids:(ICECurrent*)current
 {
-    int count, index;
-    NSString** staticIds = [[self class] staticIds__:&count idIndex:&index];
-    return [NSArray arrayWithObjects:staticIds count:count];
+    int count = sizeof(ICEObject_ids__) / sizeof(NSString*);
+    return [NSArray arrayWithObjects:ICEObject_ids__ count:count];
 }
 
 +(NSString*) ice_staticId
 {
-    int count, index;
-    NSString** staticIds = [self staticIds__:&count idIndex:&index];
-    return staticIds[index];
+    return ICEObject_ids__[0];
 }
 
 -(void) ice_preMarshal
@@ -406,13 +403,6 @@ static NSString* ICEObject_all__[4] =
 
 -(void) ice_postUnmarshal
 {
-}
-
-+(NSString**) staticIds__:(int*)count idIndex:(int*)idx
-{
-    *count = sizeof(ICEObject_ids__) / sizeof(NSString*);
-    *idx = 0;
-    return ICEObject_ids__;
 }
 
 -(BOOL) ice_dispatch:(id<ICERequest>)request
@@ -502,5 +492,55 @@ static NSString* ICEObject_all__[4] =
         }
     }
     return (IceObjC::ObjectWrapper*)object__;
+}
+@end
+
+@interface ICECallbackBackOnMainThreadServant()
+
+@property (retain) ICEObject* delegate;
+
+@end
+
+@implementation ICECallbackBackOnMainThreadServant
+
+@synthesize delegate;
+
+-(id)init:(ICEObject*)o
+{
+    if((self = [super init]))
+    {
+        self.delegate = o;
+    }
+    return self;
+}
+
++(id)iceCallbackBackOnMainThreadServant:(ICEObject*)o
+{
+    return [[[ICECallbackBackOnMainThreadServant alloc] init:o] autorelease];
+}
+
+-(BOOL) dispatch__:(ICECurrent *)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
+{
+    SEL selector = @selector(dispatch__:is:os:);
+    NSMethodSignature* sig = [[delegate class] instanceMethodSignatureForSelector:selector];
+    NSInvocation* inv = [NSInvocation invocationWithMethodSignature:sig];
+    [inv setTarget:delegate];
+    [inv setSelector:selector];
+    [inv setArgument:&current atIndex:2];
+    [inv setArgument:&is atIndex:3];
+    [inv setArgument:&os atIndex:4];
+    [inv retainArguments];
+    
+    [inv performSelectorOnMainThread:@selector(invokeWithTarget:) withObject:delegate waitUntilDone:YES];
+    
+    BOOL status;
+    [inv getReturnValue:&status];
+    return status;
+}
+
+-(void)dealloc
+{
+    [delegate release];
+    [super dealloc];
 }
 @end
