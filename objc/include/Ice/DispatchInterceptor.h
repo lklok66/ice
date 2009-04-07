@@ -15,3 +15,13 @@
 
 @interface ICEDispatchInterceptor : ICEObject
 @end
+
+@interface ICECallbackOnMainThreadServant : ICEDispatchInterceptor<ICEDispatchInterceptor>
+{
+    ICEObject* servant;
+}
+
+-(id)init:(ICEObject*)servant;
++(id)callbackOnMainThreadServant:(ICEObject*)servant;
+@end
+
