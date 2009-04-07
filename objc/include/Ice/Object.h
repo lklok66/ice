@@ -50,6 +50,7 @@ int ICEInternalLookupString(NSString *[], size_t, NSString *);
 -(BOOL) ice_dispatch:(id<ICERequest>)request;
 -(void) checkModeAndSelector__:(ICEOperationMode)expected selector:(SEL)sel current:(ICECurrent*)current;
 +(NSString*) ice_staticId;
++(NSString**) staticIds__:(int*)count idIndex:(int*)idx;
 +(BOOL) ice_isA___:(id)servant current:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os;
 +(BOOL) ice_ping___:(id)servant current:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os;
 +(BOOL) ice_id___:(id)servant current:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os;
@@ -65,15 +66,3 @@ int ICEInternalLookupString(NSString *[], size_t, NSString *);
 
 @interface ICEBlobject : ICEObject
 @end
-
-@interface ICECallbackBackOnMainThreadServant : ICEObject
-{
-@private
-    ICEObject* delegate;
-}
-
--(id)init:(ICEObject*)delegate;
-+(id)iceCallbackBackOnMainThreadServant:(ICEObject*)delegate;
-
-@end
-
