@@ -292,7 +292,7 @@ NSString* sslKey = @"sslKey";
         
         ICEIdentity* callbackId = [ICEIdentity identity:[ICEUtil generateUUID] category:[router getCategoryForClient]];
         id<ICEObjectPrx> proxy = [adapter add:[
-                                  ICECallbackOnMainThreadServant callbackOnMainThreadServant:
+                                  ICEMainThreadDispatch mainThreadDispatch:
                                     [ChatRoomCallbackI chatRoomCallbackWithTarget:self.chatViewController]]
                                   identity:callbackId];
 

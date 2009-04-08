@@ -22,7 +22,7 @@
 }
 @end
 
-@implementation ICECallbackOnMainThreadServant
+@implementation ICEMainThreadDispatch
 
 -(id)init:(ICEObject*)s
 {
@@ -30,7 +30,7 @@
     return self;
 }
 
-+(id)callbackOnMainThreadServant:(ICEObject*)s
++(id)mainThreadDispatch:(ICEObject*)s
 {
     return [[[self alloc] init:s] autorelease];
 }
