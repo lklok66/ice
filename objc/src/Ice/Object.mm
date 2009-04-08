@@ -69,6 +69,43 @@ operationModeToString(ICEOperationMode mode)
     }
 }
 
+void
+ICEInternalCheckModeAndSelector(id target, ICEOperationMode expected, SEL sel, ICECurrent* current)
+{
+    ICEOperationMode received = current.mode;
+    if(expected != received)
+    {
+        if(expected == ICEIdempotent && received == ICENonmutating)
+        {
+            // 
+            // Fine: typically an old client still using the deprecated nonmutating keyword
+            //
+            
+            //
+            // Note that expected == Nonmutating and received == Idempotent is not ok:
+            // the server may still use the deprecated nonmutating keyword to detect updates
+            // and the client should not break this (deprecated) feature.
+            //
+        }
+        else
+        {
+            ICEMarshalException* ex = [ICEMarshalException marshalException:__FILE__ line:__LINE__];
+            [ex setReason_:[NSString stringWithFormat:@"unexpected operation mode. expected = %@ received=%@", 
+                                     operationModeToString(expected), operationModeToString(received)]]; 
+            @throw ex;
+        }
+    }
+
+    if(![target respondsToSelector:sel])
+    {
+        @throw [ICEOperationNotExistException requestFailedException:__FILE__ 
+                                              line:__LINE__ 
+                                              id_:current.id_ 
+                                              facet:current.facet
+                                              operation:current.operation];
+    }
+}
+
 namespace IceObjC
 {
 
@@ -227,7 +264,7 @@ IceObjC::BlobjectI::ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& 
 
 @implementation ICEObject (ICEInternal)
 
--(ICEObject*)init
+-(id)init
 {
     if(![super init])
     {
@@ -235,6 +272,7 @@ IceObjC::BlobjectI::ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& 
     }
     
     object__ = 0;
+    delegate__ = 0;
     return self;
 }
 
@@ -265,6 +303,7 @@ IceObjC::BlobjectI::ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& 
         delete (IceObjC::ObjectWrapper*)object__;
         object__ = 0;
     }
+    [delegate__ release];
     [super dealloc];
 }
 
@@ -285,40 +324,21 @@ static NSString* ICEObject_all__[4] =
     @"ice_ping"
 };
 
--(void) checkModeAndSelector__:(ICEOperationMode)expected selector:(SEL)sel current:(ICECurrent*)current
+-(id)initWithDelegate:(id)delegate
 {
-    ICEOperationMode received = current.mode;
-    if(expected != received)
+    if(![super init])
     {
-        if(expected == ICEIdempotent && received == ICENonmutating)
-        {
-            // 
-            // Fine: typically an old client still using the deprecated nonmutating keyword
-            //
-            
-            //
-            // Note that expected == Nonmutating and received == Idempotent is not ok:
-            // the server may still use the deprecated nonmutating keyword to detect updates
-            // and the client should not break this (deprecated) feature.
-            //
-        }
-        else
-        {
-            ICEMarshalException* ex = [ICEMarshalException marshalException:__FILE__ line:__LINE__];
-            [ex setReason_:[NSString stringWithFormat:@"unexpected operation mode. expected = %@ received=%@", 
-                                     operationModeToString(expected), operationModeToString(received)]]; 
-            @throw ex;
-        }
+        return nil;
     }
+    
+    object__ = 0;
+    delegate__ = [delegate retain];
+    return self;
+}
 
-    if(![self respondsToSelector:sel])
-    {
-        @throw [ICEOperationNotExistException requestFailedException:__FILE__ 
-                                              line:__LINE__ 
-                                              id_:current.id_ 
-                                              facet:current.facet
-                                              operation:current.operation];
-    }
++(id)objectWithDelegate:(id)delegate
+{
+    return [[[ICEObject alloc] initWithDelegate:delegate] autorelease];
 }
 
 +(BOOL) ice_isA___:(id)servant current:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os
@@ -480,6 +500,11 @@ static NSString* ICEObject_all__[4] =
 -(id) copyWithZone:(NSZone*)zone
 {
     return [[[self class] allocWithZone:zone] init];
+}
+
+-(id)target__
+{
+    return (delegate__ == 0) ? self : delegate__;
 }
 @end
 

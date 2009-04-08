@@ -22,6 +22,10 @@
 extern "C"
 #endif
 int ICEInternalLookupString(NSString *[], size_t, NSString *);
+#if defined(__cplusplus)
+extern "C"
+#endif
+void ICEInternalCheckModeAndSelector(id, ICEOperationMode, SEL, ICECurrent*);
 
 @interface ICEInternalPrefixTable : NSObject
 @end
@@ -40,7 +44,10 @@ int ICEInternalLookupString(NSString *[], size_t, NSString *);
 @interface ICEObject : NSObject<ICEObject, NSCopying>
 {
     void* object__;
+    id delegate__;
 }
+-(id)initWithDelegate:(id)delegate;
++(id)objectWithDelegate:(id)delegate;
 -(BOOL) ice_isA:(NSString*)typeId;
 -(void) ice_ping;
 -(NSString*) ice_id;
@@ -48,7 +55,6 @@ int ICEInternalLookupString(NSString *[], size_t, NSString *);
 -(void) ice_preMarshal;
 -(void) ice_postUnmarshal;
 -(BOOL) ice_dispatch:(id<ICERequest>)request;
--(void) checkModeAndSelector__:(ICEOperationMode)expected selector:(SEL)sel current:(ICECurrent*)current;
 +(NSString*) ice_staticId;
 +(NSString**) staticIds__:(int*)count idIndex:(int*)idx;
 +(BOOL) ice_isA___:(id)servant current:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os;
@@ -58,6 +64,7 @@ int ICEInternalLookupString(NSString *[], size_t, NSString *);
 -(BOOL) dispatch__:(ICECurrent*)current is:(id<ICEInputStream>)is os:(id<ICEOutputStream>)os;
 -(void) write__:(id<ICEOutputStream>)os;
 -(void) read__:(id<ICEInputStream>)is readTypeId:(BOOL)rid;
+-(id)target__;
 @end
 
 @protocol ICEBlobject<ICEObject>

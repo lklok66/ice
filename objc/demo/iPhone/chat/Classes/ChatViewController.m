@@ -398,7 +398,7 @@
 
 #pragma mark ChatRoomCallbck
 
--(void)initUsers:(NSMutableArray *)users
+-(void)init:(NSMutableArray *)users current:(ICECurrent*)current;
 {
     self.userViewController.users = users;
     [self.userViewController.usersTableView reloadData];
@@ -407,12 +407,12 @@
                                                     (self.userViewController.users.count > 1 ? @"users" : @"user")];
 }
 
--(void)send:(ICELong)timestamp name:(NSMutableString *)name message:(NSMutableString *)message
+-(void)send:(ICELong)timestamp name:(NSMutableString *)name message:(NSMutableString *)message current:(ICECurrent*)current;
 {
     [self append:[ChatMessage chatMessageWithText:message who:name timestamp:timestamp]];
 }
 
--(void)join:(ICELong)timestamp name:(NSMutableString*)name
+-(void)join:(ICELong)timestamp name:(NSMutableString*)name current:(ICECurrent*)current;
 {
     NSString* s = [NSString stringWithFormat:@"%@ joined.\n", name];
     [self append:[ChatMessage chatMessageWithText:s who:@"system message" timestamp:timestamp]];
@@ -425,7 +425,7 @@
                                                     (self.userViewController.users.count > 1 ? @"users" : @"user")];
 }
 
--(void)leave:(ICELong)timestamp name:(NSMutableString*)name;
+-(void)leave:(ICELong)timestamp name:(NSMutableString*)name current:(ICECurrent*)current;
 {
     NSString* s = [NSString stringWithFormat:@"%@ left.\n", name];
     [self append:[ChatMessage chatMessageWithText:s who:@"system message" timestamp:timestamp]];

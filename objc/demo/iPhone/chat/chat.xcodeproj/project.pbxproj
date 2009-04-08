@@ -30,7 +30,6 @@
 		348A202C0E82BDC6003DBDDD /* libGlacier2ObjC.0.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 348A202B0E82BDC6003DBDDD /* libGlacier2ObjC.0.1.0.dylib */; };
 		348A202D0E82BDC9003DBDDD /* libGlacier2ObjC.0.1.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 348A202B0E82BDC6003DBDDD /* libGlacier2ObjC.0.1.0.dylib */; };
 		34BB759D0E87DBC000813E0B /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 34BB759C0E87DBC000813E0B /* icon.png */; };
-		34E056B70E82DAA4005C6912 /* ChatRoomCallbackI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34E056B60E82DAA4005C6912 /* ChatRoomCallbackI.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -77,8 +76,6 @@
 		348A1F140E82995D003DBDDD /* UserView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = UserView.xib; sourceTree = "<group>"; };
 		348A202B0E82BDC6003DBDDD /* libGlacier2ObjC.0.1.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libGlacier2ObjC.0.1.0.dylib; path = ../../../lib/libGlacier2ObjC.0.1.0.dylib; sourceTree = SOURCE_ROOT; };
 		34BB759C0E87DBC000813E0B /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icon.png; path = Images/icon.png; sourceTree = "<group>"; };
-		34E056B50E82DAA4005C6912 /* ChatRoomCallbackI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatRoomCallbackI.h; sourceTree = "<group>"; };
-		34E056B60E82DAA4005C6912 /* ChatRoomCallbackI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatRoomCallbackI.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -101,8 +98,6 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				34E056B50E82DAA4005C6912 /* ChatRoomCallbackI.h */,
-				34E056B60E82DAA4005C6912 /* ChatRoomCallbackI.m */,
 				348A1EE10E8297AC003DBDDD /* Chat.h */,
 				348A1EE20E8297AC003DBDDD /* Chat.m */,
 				348A1EE30E8297AC003DBDDD /* ChatSession.h */,
@@ -284,7 +279,6 @@
 				348A1EE00E829786003DBDDD /* UserViewController.m in Sources */,
 				348A1EE50E8297AC003DBDDD /* Chat.m in Sources */,
 				348A1EE60E8297AC003DBDDD /* ChatSession.m in Sources */,
-				34E056B70E82DAA4005C6912 /* ChatRoomCallbackI.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

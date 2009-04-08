@@ -11,8 +11,6 @@
 #import <ChatViewController.h>
 #import <AppDelegate.h>
 
-#import <ChatRoomCallbackI.h>
-
 #import <Ice/Ice.h>
 #import <ChatSession.h>
 #import <Glacier2/Router.h>
@@ -291,10 +289,14 @@ NSString* sslKey = @"sslKey";
                                         router:router];
         
         ICEIdentity* callbackId = [ICEIdentity identity:[ICEUtil generateUUID] category:[router getCategoryForClient]];
-        id<ICEObjectPrx> proxy = [adapter add:[
-                                  ICEMainThreadDispatch mainThreadDispatch:
-                                    [ChatRoomCallbackI chatRoomCallbackWithTarget:self.chatViewController]]
-                                  identity:callbackId];
+
+        // Here we tie the chat view controller to the ChatRoomCallback servant.
+        ChatChatRoomCallback* callbackImpl = [ChatChatRoomCallback objectWithDelegate:self.chatViewController];
+
+        // This helper ensures that all methods are dispatched in the main thread.
+        ICEObject* dispatchMainThread = [ICEMainThreadDispatch mainThreadDispatch:callbackImpl];
+        
+        id<ICEObjectPrx> proxy = [adapter add:dispatchMainThread identity:callbackId];
 
         [session setCallback:[ChatChatRoomCallbackPrx uncheckedCast:proxy]];
         [adapter activate];

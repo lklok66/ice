@@ -157,6 +157,7 @@ Slice::ObjCVisitor::writeInheritedOperations(const ClassDefPtr& p)
     }
 }
 
+// TODO: Merge?
 void
 Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool stream)
 {
@@ -204,15 +205,15 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
         assert(cl);
 
         string opName = fixId(op->name());
-        _M << sp << nl << "+(BOOL)" << opName << "___:(ICEObject<" << name
-	   << "> *)servant current:(ICECurrent *)current " 
+        _M << sp << nl << "+(BOOL)" << opName << "___:(id<" << name
+	   << ">)target current:(ICECurrent *)current " 
            << "is:(id<ICEInputStream>)is_ os:(id<ICEOutputStream>)os_";
         _M << sb;
 
         bool amd = false; //p->hasMetaData("amd") || op->hasMetaData("amd");
         if(!amd)
         {
-	    _M << nl << "[servant checkModeAndSelector__:" << sliceModeToIceMode(op->mode()) << " selector:@selector(";
+	    _M << nl << "ICEInternalCheckModeAndSelector(target, " << sliceModeToIceMode(op->mode()) << ", @selector(";
 	    string selector = getSelector(op);
 	    if(!selector.empty())
 	    {
@@ -222,7 +223,7 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
             {
                 _M << opName << ":";
             }
-	    _M << ") current:current];";
+	    _M << "), current);";
             TypeStringList inParams;
             TypeStringList outParams;
             ParamDeclList paramList = op->parameters();
@@ -295,7 +296,7 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
                 _M << nl;
             }
 	    string args = getServerArgs(op);
-	    _M << "[servant " << opName << args;
+	    _M << "[target " << opName << args;
 	    if(!args.empty())
 	    {
 	        _M << " current";
@@ -479,6 +480,7 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
         _M << sp << nl << "-(BOOL) dispatch__:(ICECurrent *)current is:(id<ICEInputStream>)is "
 	   << "os:(id<ICEOutputStream>)os";
         _M << sb;
+	_M << nl << "id target__ = [self target__];";
 	_M << nl << "switch(ICEInternalLookupString(" << name << "_all__, sizeof(" << name
 	   << "_all__) / sizeof(NSString*), current.operation))";
 	_M << sb;
@@ -487,8 +489,9 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p, bool strea
         {
             _M << nl << "case " << i++ << ':';
 	    _M.inc();
-	    _M << nl << "return [" << q->second << " " << q->first << "___:(ICEObject<" << q->second
-	       << "> *)self current:current is:is os:os];";
+            string target = (q->second == "ICEObject") ? "self" : "target__";
+	    _M << nl << "return [" << q->second << " " << q->first << "___:(id<" << q->second
+	       << ">)" << target << " current:current is:is os:os];";
             _M.dec();
         }
 	_M << nl << "default:";
@@ -1270,11 +1273,7 @@ Slice::Gen::TypesVisitor::visitClassDefStart(const ClassDefPtr& p)
     // TODO :if(_stream)
 
     _H << sp << nl << "@protocol " << name;
-    if(bases.empty())
-    {
-        _H << " <ICEObject>";
-    }
-    else
+    if(!bases.empty())
     {
         _H << " <";
         for(ClassList::const_iterator i = bases.begin(); i != bases.end(); ++i)
@@ -1419,10 +1418,15 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
     for(r = ops.begin(); r != ops.end(); ++r)
     {
         OperationPtr op = *r;
-        _H << nl << "+(BOOL)" << fixId(op->name()) << "___:(ICEObject<" << name
-	   << "> *)servant current:(ICECurrent *)current " 
+        _H << nl << "+(BOOL)" << fixId(op->name()) << "___:(id<" << name
+	   << ">)target current:(ICECurrent *)current " 
            << "is:(id<ICEInputStream>)is_ os:(id<ICEOutputStream>)os_;";
     }
+
+    _M << sp << nl << "+(id)objectWithDelegate:(id)delegate";
+    _M << sb;
+    _M << sp << nl << "return [[[" << name << " alloc] initWithDelegate:delegate] autorelease];";
+    _M << eb;
 
     //
     // Marshaling/unmarshaling

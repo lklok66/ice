@@ -10,10 +10,12 @@
 #import <UIKit/UIKit.h>
 #import <Ice/Ice.h>
 
+#import <ChatSession.h>
+
 @protocol ChatChatSessionPrx;
 @class UserViewController;
 
-@interface ChatViewController : UIViewController<UITableViewDelegate, UITableViewDataSource,UITextFieldDelegate>
+@interface ChatViewController : UIViewController<UITableViewDelegate, UITableViewDataSource,UITextFieldDelegate,ChatChatRoomCallback>
 {
 @private
     IBOutlet UITableView* chatView;
@@ -26,9 +28,9 @@
 @property (nonatomic, retain) id<ChatChatSessionPrx> session;
 
 -(void)clear;
--(void)initUsers:(NSMutableArray *)users;
--(void)send:(ICELong)timestamp name:(NSMutableString *)name message:(NSMutableString *)message;
--(void)join:(ICELong)timestamp name:(NSMutableString *)name;
--(void)leave:(ICELong)timestamp name:(NSMutableString *)name;
+-(void)init:(NSMutableArray *)users current:(ICECurrent*)current;
+-(void)send:(ICELong)timestamp name:(NSMutableString *)name message:(NSMutableString *)message current:(ICECurrent*)current;
+-(void)join:(ICELong)timestamp name:(NSMutableString *)name current:(ICECurrent*)current;
+-(void)leave:(ICELong)timestamp name:(NSMutableString *)name current:(ICECurrent*)current;
 
 @end
