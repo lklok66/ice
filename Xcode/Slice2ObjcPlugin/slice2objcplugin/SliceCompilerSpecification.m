@@ -117,6 +117,7 @@
 
     BOOL slice2cpp;
     [dependTask setLaunchPath:[self getSliceTranslator:context isCpp:&slice2cpp]];
+    //slice2cpp = YES; // TODO: So that IceTouch 0.1.0 slice2obj can work.
     [dependTask setEnvironment:env];
     [dependTask setCurrentDirectoryPath:[context baseDirectoryPath]];
     
@@ -173,8 +174,8 @@
         {
             NSEnumerator *e = [lines objectEnumerator];
             [e nextObject]; // Foo.cpp
-            [e nextObject]; // Foo.m
-            // The remaning lines are the dependencies themselves.
+            [e nextObject]; // Foo.ice
+            // The remaning lines are the slice dependencies themselves.
             NSString* line;
             while (line = [e nextObject])
             {
