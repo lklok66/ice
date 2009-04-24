@@ -305,7 +305,7 @@ Slice::Preprocessor::printMakefileDependencies(Language lang, const vector<strin
 #endif
     pos = unprocessed.find(suffix) + suffix.size();
     string result;
-    if(lang != JavaXML)
+    if(lang != XML)
     {
         result = unprocessed.substr(0, pos);
     }
@@ -354,7 +354,7 @@ Slice::Preprocessor::printMakefileDependencies(Language lang, const vector<strin
             }
         }
 
-        if(lang == JavaXML)
+        if(lang == XML)
         {
             if(result.size() == 0)
             {
@@ -384,7 +384,7 @@ Slice::Preprocessor::printMakefileDependencies(Language lang, const vector<strin
         }
         pos = end;
     }
-    if(lang == JavaXML)
+    if(lang == XML)
     {
         result += "\n  </source>\n";
     }
@@ -430,7 +430,7 @@ Slice::Preprocessor::printMakefileDependencies(Language lang, const vector<strin
             }
             break;
         }
-        case JavaXML:
+        case XML:
             break;
         case Java:
         {

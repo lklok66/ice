@@ -1,0 +1,68 @@
+// **********************************************************************
+//
+// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+//
+// This copy of Ice is licensed to you under the terms described in the
+// ICE_LICENSE file included in this distribution.
+//
+// **********************************************************************
+
+{
+    Type = Tool;
+    Identifier = com.zeroc.compilers.slice;
+    Class = SliceCompilerSpecification;
+    Name = "Slice";
+    Description = "Slice Parser Generator";
+    InputFileTypes = (sourcecode.slice);
+    CommandOutputParser = (
+        ("^([^:]+):([0-9]+): warning: (.*)$", emit-warning),
+        ("^([^:]+):([0-9]+): (.*)$", emit-error),
+        ("errors in preprocessor", ignore),
+        ("error in preprocessor", ignore),
+    );
+    Options = (
+        {
+            Name = Input;
+            Type = stringlist;
+            CommandLineArgs = ( "$(value)" );
+            InputDependencies = "$(Input)"; // add to list of files needed before running the compiler
+            IsCommandInput = YES;
+        },
+	{
+	    Name = SLICE_CPP_FLAG;
+	    Type = bool;
+	    DefaultValue = NO;
+	    Category = "Slice";
+	},
+	{
+	    Name = SLICE_ICE_FLAG;
+	    Type = bool;
+	    DefaultValue = NO;
+	    CommandLineArgs = { NO = (); YES = ("--ice"); };
+	    Category = "Slice";
+	},
+        {
+            Name = SLICE_INCLUDE_PATH;
+            Type = pathlist;
+            DefaultValue = "";
+            CommandLineArgs = ("-I", "$(value)");
+            Category = "Slice";
+        },
+        {   Name = SLICE_PREPROCESSOR_DEFINITIONS;
+            Type = stringlist;
+            CommandLinePrefixFlag = "-D";
+            Category = "Slice";
+        },
+	{
+	    Name = SLICE_ICE_HOME;
+	    Type = string;
+	    DefaultValue = "/opt/Ice-3.3.1";
+	    Category = "Slice";
+	},
+    );
+    OptionCategories = (
+	{   Name = "Slice";
+	    IconName = "PBX-option-build";
+	},
+    );
+}

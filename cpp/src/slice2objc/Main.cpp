@@ -9,10 +9,25 @@
 
 #include <IceUtil/Options.h>
 #include <Slice/Preprocessor.h>
+#include <Slice/FileTracker.h>
+#include <IceUtil/CtrlCHandler.h>
+#include <IceUtil/StaticMutex.h>
+#include <Slice/Util.h>
 #include <Gen.h>
 
 using namespace std;
 using namespace Slice;
+
+static IceUtil::StaticMutex _mutex = ICE_STATIC_MUTEX_INITIALIZER;
+static bool _interrupted = false;
+
+void
+interruptedCallback(int signal)
+{
+    IceUtil::StaticMutex::Lock lock(_mutex);
+
+    _interrupted = true;
+}
 
 void
 usage(const char* n)
@@ -33,6 +48,7 @@ usage(const char* n)
         "--impl                  Generate sample implementations.\n"
         "--impl-tie              Generate sample TIE implementations.\n"
         "--depend                Generate Makefile dependencies.\n"
+        "--depend-xml            Generate dependencies in XML format.\n"
         "-d, --debug             Print debug messages.\n"
         "--ice                   Permit `Ice' prefix (for building Ice source code only)\n"
         "--checksum              Generate checksums for Slice definitions.\n"
@@ -57,6 +73,7 @@ main(int argc, char* argv[])
     opts.addOpt("", "impl");
     opts.addOpt("", "impl-tie");
     opts.addOpt("", "depend");
+    opts.addOpt("", "depend-xml");
     opts.addOpt("d", "debug");
     opts.addOpt("", "ice");
     opts.addOpt("", "checksum");
@@ -120,6 +137,7 @@ main(int argc, char* argv[])
     bool implTie = opts.isSet("impl-tie");
 
     bool depend = opts.isSet("depend");
+    bool dependxml = opts.isSet("depend-xml");
 
     bool debug = opts.isSet("debug");
 
@@ -133,26 +151,37 @@ main(int argc, char* argv[])
 
     if(args.empty())
     {
-        cerr << argv[0] << ": no input file" << endl;
+        getErrorStream() << argv[0] << ": no input file" << endl;
         usage(argv[0]);
         return EXIT_FAILURE;
     }
 
     if(impl && implTie)
     {
-        cerr << argv[0] << ": cannot specify both --impl and --impl-tie" << endl;
+        getErrorStream() << argv[0] << ": cannot specify both --impl and --impl-tie" << endl;
         usage(argv[0]);
         return EXIT_FAILURE;
     }
 
     int status = EXIT_SUCCESS;
 
+    if(dependxml)
+    {
+        cout << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<dependencies>" << endl;
+    }
+
+    IceUtil::CtrlCHandler ctrlCHandler;
+    ctrlCHandler.setCallback(interruptedCallback);
+
     for(i = args.begin(); i != args.end(); ++i)
     {
-        if(depend)
+        if(depend || dependxml)
         {
             Preprocessor icecpp(argv[0], *i, cppArgs);
-            icecpp.printMakefileDependencies(Preprocessor::ObjC, includePaths);
+            if(!icecpp.printMakefileDependencies(depend ? Preprocessor::ObjC : Preprocessor::XML, includePaths))
+            {
+                return EXIT_FAILURE;
+            }
         }
         else
         {
@@ -180,12 +209,12 @@ main(int argc, char* argv[])
             }
             else
             {
-                UnitPtr p = Unit::createUnit(false, false, ice, caseSensitive);
-                int parseStatus = p->parse(*i, cppHandle, debug);
+                UnitPtr u = Unit::createUnit(false, false, ice, caseSensitive);
+                int parseStatus = u->parse(*i, cppHandle, debug);
 
                 if(!icecpp.close())
                 {
-                    p->destroy();
+                    u->destroy();
                     return EXIT_FAILURE;
                 }           
                 
@@ -195,34 +224,64 @@ main(int argc, char* argv[])
                 }
                 else
                 {
-                    Gen gen(argv[0], icecpp.getBaseName(), include, includePaths, output, impl, implTie, stream);
-                    if(!gen)
+                    try
                     {
-                        p->destroy();
+                        Gen gen(argv[0], icecpp.getBaseName(), include, includePaths, output, impl, implTie, stream);
+                        if(!gen)
+                        {
+                            u->destroy();
+                            return EXIT_FAILURE;
+                        }
+                        gen.generate(u);
+                        if(tie)
+                        {
+                            gen.generateTie(u);
+                        }
+                        if(impl)
+                        {
+                            gen.generateImpl(u);
+                        }
+                        if(implTie)
+                        {
+                            gen.generateImplTie(u);
+                        }
+                        if(checksum)
+                        {
+                            // gen.generateChecksums(u);
+                        }
+                    }
+                    catch(const Slice::FileException& ex)
+                    {
+                        // If a file could not be created, then
+                        // cleanup any created files.
+                        FileTracker::instance()->cleanup();
+                        u->destroy();
+                        getErrorStream() << argv[0] << ": error: " << ex.reason() << endl;
                         return EXIT_FAILURE;
-                    }
-                    gen.generate(p);
-                    if(tie)
-                    {
-                        gen.generateTie(p);
-                    }
-                    if(impl)
-                    {
-                        gen.generateImpl(p);
-                    }
-                    if(implTie)
-                    {
-                        gen.generateImplTie(p);
-                    }
-                    if(checksum)
-                    {
-                        // gen.generateChecksums(p);
                     }
                 }
 
-                p->destroy();
+                u->destroy();
             }
         }
+
+        {
+            IceUtil::StaticMutex::Lock lock(_mutex);
+
+            if(_interrupted)
+            {
+                //
+                // If the translator was interrupted then cleanup any files we've already created.
+                //
+                FileTracker::instance()->cleanup();
+                return EXIT_FAILURE;
+            }
+        }
+    }
+
+    if(dependxml)
+    {
+        cout << "</dependencies>\n";
     }
 
     return status;

@@ -211,7 +211,7 @@ main(int argc, char* argv[])
         if(depend || dependxml)
         {
             Preprocessor icecpp(argv[0], *i, cppArgs);
-            if(!icecpp.printMakefileDependencies(depend ? Preprocessor::Java : Preprocessor::JavaXML, includePaths))
+            if(!icecpp.printMakefileDependencies(depend ? Preprocessor::Java : Preprocessor::XML, includePaths))
             {
                 return EXIT_FAILURE;
             }

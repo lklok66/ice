@@ -1,0 +1,86 @@
+// **********************************************************************
+//
+// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+//
+// This copy of Ice is licensed to you under the terms described in the
+// ICE_LICENSE file included in this distribution.
+//
+// **********************************************************************
+
+(
+    // Slice
+    {
+        Identifier = slice;
+        Name = "Slice";
+        Description = "Slice";
+        BasedOn = "pbx_root_language";
+        //SourceScannerClassName = PBXJavaSourceScanner;
+        SupportsIndentation = YES;
+        Indentation = {
+        };
+        SyntaxColoring = {
+            CaseSensitive = YES;
+            UnicodeSymbols = YES;
+            UnicodeEscapes = YES;		// accept \uXXXX anywhere in a file, and return a single character (not yet supported!)
+            IndexedSymbols = YES;
+            CommentsCanBeNested = NO;
+            IdentifierStartChars = "_";
+            IdentifierChars = "_$";
+            EscapeCharacter = "\\";
+            String = (
+                ( "\"", "\"" )
+            );
+            Character = (
+                ( "'", "'" )
+            );
+            MultiLineComment = (
+                ( "/*", "*/" )
+            );
+            SingleLineComment = ( "//" );
+            DocComment = "*";
+            DocCommentKeywords = (
+                "@author",
+                "@beaninfo",
+                "@deprecated",
+                "@docRoot",
+                "@exception",
+                "@inheritDoc",
+                "@link",
+                "@linkplain",
+                "@param",
+                "@return",
+                "@see",
+                "@serial",
+                "@serialData",
+                "@serialField",
+                "@since",
+                "@throws",
+                "@value",
+                "@version"
+            );
+            Keywords = (
+                "module",
+                "interface"
+            );
+            PreprocessorKeywordStart = "#";
+            PreprocessorKeywords = (
+                "error",
+                "define",
+                "elif",
+                "else",
+                "endif",
+                "error",
+                "file",
+                "if",
+                "ifdef",
+                "ifndef",
+                "import",
+                "include",
+                "line",
+                "pragma",
+                "undef",
+                "warning"
+            );
+        };
+    }
+)
