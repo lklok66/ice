@@ -23,3 +23,6 @@
 
 "[SLICE_ICE_HOME]-name" = "Ice Home";
 "[SLICE_ICE_HOME]-description" = "The location of your Ice installation.";
+
+"[SLICE_ICE_TOUCH_0_1_0]-name" = "Support IceTouch 0.1.0";
+"[SLICE_ICE_TOUCH_0_1_0]-description" = "Provide support for IceTouch 0.1.0";

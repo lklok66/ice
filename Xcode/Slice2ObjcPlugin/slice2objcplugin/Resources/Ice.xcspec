@@ -59,6 +59,12 @@
 	    DefaultValue = "/opt/Ice-3.3.1";
 	    Category = "Slice";
 	},
+	{
+	    Name = SLICE_ICE_TOUCH_0_1_0;
+	    Type = bool;
+	    DefaultValue = NO;
+	    Category = "Slice";
+	},
     );
     OptionCategories = (
 	{   Name = "Slice";

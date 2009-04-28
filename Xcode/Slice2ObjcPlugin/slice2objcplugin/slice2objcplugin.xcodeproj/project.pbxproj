@@ -16,6 +16,7 @@
 		348748860F8E316300758FC2 /* XCPBuildSystem.m in Sources */ = {isa = PBXBuildFile; fileRef = 348748800F8E316300758FC2 /* XCPBuildSystem.m */; };
 		348A61B30F96CCAE00A0A1AB /* SliceCompilerSpecification.m in Sources */ = {isa = PBXBuildFile; fileRef = 348A61B20F96CCAE00A0A1AB /* SliceCompilerSpecification.m */; };
 		348E60510FA1754700857AA2 /* Ice.xclangspec in Resources */ = {isa = PBXBuildFile; fileRef = 348E60500FA1754700857AA2 /* Ice.xclangspec */; };
+		34B03F4F0FA1997B00EE0376 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34B03F4E0FA1997B00EE0376 /* Foundation.framework */; };
 		8D5B49B0048680CD000E48DA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C167DFE841241C02AAC07 /* InfoPlist.strings */; };
 		8D5B49B4048680CD000E48DA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
 /* End PBXBuildFile section */
@@ -42,6 +43,7 @@
 		348A61B10F96CCAE00A0A1AB /* SliceCompilerSpecification.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SliceCompilerSpecification.h; sourceTree = "<group>"; };
 		348A61B20F96CCAE00A0A1AB /* SliceCompilerSpecification.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SliceCompilerSpecification.m; sourceTree = "<group>"; };
 		348E60500FA1754700857AA2 /* Ice.xclangspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xclangspec; path = Ice.xclangspec; sourceTree = "<group>"; };
+		34B03F4E0FA1997B00EE0376 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		8D5B49B6048680CD000E48DA /* slice2objcplugin.pbplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = slice2objcplugin.pbplugin; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D5B49B7048680CD000E48DA /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D2F7E65807B2D6F200F64583 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
@@ -54,6 +56,7 @@
 			files = (
 				8D5B49B4048680CD000E48DA /* Cocoa.framework in Frameworks */,
 				348748670F8E30A000758FC2 /* DevToolsCore.framework in Frameworks */,
+				34B03F4F0FA1997B00EE0376 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -63,6 +66,7 @@
 		089C166AFE841209C02AAC07 /* slice2objcplugin */ = {
 			isa = PBXGroup;
 			children = (
+				34B03F4E0FA1997B00EE0376 /* Foundation.framework */,
 				346CB8480F8E350100D87FAB /* Resources */,
 				3487487E0F8E316300758FC2 /* Headers */,
 				348748660F8E30A000758FC2 /* DevToolsCore.framework */,

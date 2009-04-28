@@ -228,8 +228,6 @@
 			<key>Layout</key>
 			<array>
 				<dict>
-					<key>BecomeActive</key>
-					<true/>
 					<key>ContentConfiguration</key>
 					<dict>
 						<key>PBXBottomSmartGroupGIDs</key>
@@ -266,17 +264,16 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateExpansionKey</key>
 							<array>
 								<string>089C166AFE841209C02AAC07</string>
+								<string>34B03F4E0FA1997B00EE0376</string>
 								<string>346CB8480F8E350100D87FAB</string>
 								<string>3478319F0FA03EFA0071358D</string>
 								<string>3487487E0F8E316300758FC2</string>
-								<string>08FB77AFFE84173DC02AAC07</string>
 								<string>1C37FBAC04509CD000000102</string>
 								<string>1C37FABC05509CD000000102</string>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>1</integer>
 									<integer>0</integer>
 								</array>
 							</array>
@@ -311,6 +308,8 @@
 					<key>Dock</key>
 					<array>
 						<dict>
+							<key>BecomeActive</key>
+							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
@@ -328,7 +327,7 @@
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>346A8EFD0FA176B900FD3F75</string>
+										<string>34C8DB000FA5988A00CD9633</string>
 										<key>history</key>
 										<array>
 											<string>340A53BF0F8E368D00D4A005</string>
@@ -337,7 +336,6 @@
 											<string>34836EB10F9D52C900DC115E</string>
 											<string>341E5DD20F9D5CC9007DE30E</string>
 											<string>34F4A27A0F9D8836000E2F3F</string>
-											<string>34927C580F9EB13900861384</string>
 											<string>3496E9780F9EC8EA007F30CA</string>
 											<string>34676BD10F9ED52C0070E64A</string>
 											<string>34AB9DDF0F9EF14C0089CB7F</string>
@@ -346,7 +344,9 @@
 											<string>348586DF0FA03087002FEE11</string>
 											<string>348586E00FA03087002FEE11</string>
 											<string>348586E10FA03087002FEE11</string>
-											<string>341D5AB10FA176AE00B686E8</string>
+											<string>34D4034C0FA17C750014DC25</string>
+											<string>34C8DAAC0FA5881500CD9633</string>
+											<string>34C8DAAE0FA5881500CD9633</string>
 										</array>
 										<key>prevStack</key>
 										<array>
@@ -366,6 +366,7 @@
 											<string>34F988C10F9829550082783F</string>
 											<string>34676BD20F9ED52C0070E64A</string>
 											<string>3414FAD70FA0166100026C0D</string>
+											<string>34C8DAAD0FA5881500CD9633</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -423,9 +424,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>346A8EFA0FA176B900FD3F75</string>
+				<string>34C8DAF90FA594D600CD9633</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>346A8EFB0FA176B900FD3F75</string>
+				<string>34C8DAFA0FA594D600CD9633</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -640,7 +641,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>3487488E0F8E320E00758FC2</string>
-				<string>346A8EFC0FA176B900FD3F75</string>
+				<string>34C8DAFD0FA5955800CD9633</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>
@@ -778,7 +779,7 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>1CDD528C0622207200134675</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>XCPDependencyGraph.h</string>
+										<string>NSException.h</string>
 										<key>StatusBarVisibility</key>
 										<true/>
 									</dict>
@@ -834,8 +835,8 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>1C530D57069F1CE1000CFCEE</string>
-				<string>34836EAD0F9D52B600DC115E</string>
-				<string>34836EAE0F9D52B600DC115E</string>
+				<string>34B03FE50FA19A5E00EE0376</string>
+				<string>34B03FE60FA19A5E00EE0376</string>
 				<string>1CDD528C0622207200134675</string>
 				<string>1CD0528E0623707200166675</string>
 			</array>
@@ -844,7 +845,7 @@
 			<key>WindowToolGUID</key>
 			<string>1C530D57069F1CE1000CFCEE</string>
 			<key>WindowToolIsVisible</key>
-			<false/>
+			<true/>
 		</dict>
 		<dict>
 			<key>Identifier</key>

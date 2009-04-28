@@ -1,0 +1,12 @@
+Changes since version 0.1.0
+---------------------------
+
+- Fixed a bug with ICEConnection createProxy where the created proxy
+  was not returned.
+
+- Added ICECallbackOnMainThreadServant to ensure methods are
+  dispatched in the main thread.
+
+- Added support for tie servants. See demo/iPhone/chat for an example.
+
+- Added --depend-xml command line option to slice2objc.

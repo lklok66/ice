@@ -10,6 +10,7 @@
 #import <Ice/ConnectionI.h>
 #import <Ice/IdentityI.h>
 #import <Ice/ObjectAdapterI.h>
+#import <Ice/ProxyI.h>
 #import <Ice/Util.h>
 
 #define CONNECTION dynamic_cast<Ice::Connection*>(static_cast<IceUtil::Shared*>(cxxObject_))
@@ -30,13 +31,13 @@
 {
     try
     {
-        CONNECTION->createProxy([identity identity]);
+        return [ICEObjectPrx objectPrxWithObjectPrx__:CONNECTION->createProxy([identity identity])];
     }
     catch(const std::exception& ex)
     {
         rethrowObjCException(ex);
+        return nil; // Keep the compiler happy.
     }
-    return nil; // Keep the compiler happy.
 }
 -(void) setAdapter:(id<ICEObjectAdapter>)adapter
 {
