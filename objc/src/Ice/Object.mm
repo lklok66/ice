@@ -236,7 +236,7 @@ IceObjC::BlobjectI::ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& 
     NSData* inP = [NSData dataWithBytesNoCopy:const_cast<Ice::Byte*>(inParams.first) 
                           length:(inParams.second - inParams.first) 
                           freeWhenDone:NO];
-    NSData* outP = nil;
+    NSMutableData* outP = nil;
     @try
     {
 

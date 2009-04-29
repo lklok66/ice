@@ -68,7 +68,7 @@ void ICEInternalCheckModeAndSelector(id, ICEOperationMode, SEL, ICECurrent*);
 @end
 
 @protocol ICEBlobject<ICEObject>
--(BOOL) ice_invoke:(NSData*)inParams outParams:(NSData**)outParams current:(ICECurrent*)current;
+-(BOOL) ice_invoke:(NSData*)inParams outParams:(NSMutableData**)outParams current:(ICECurrent*)current;
 @end
 
 @interface ICEBlobject : ICEObject
