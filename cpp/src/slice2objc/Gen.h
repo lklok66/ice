@@ -57,7 +57,6 @@ public:
         const std::vector<std::string>&,
         const std::string&,
         bool,
-        bool,
         bool);
     ~Gen();
 

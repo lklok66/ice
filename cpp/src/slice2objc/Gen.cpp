@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// copyright (c) 2003-2008 zeroc, inc. All rights reserved.
+// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -23,6 +23,7 @@
 #include <Slice/ObjCNames.h>
 #include <Slice/FileTracker.h>
 #include <Slice/Util.h>
+#include <string.h>
 
 using namespace std;
 using namespace Slice;
@@ -869,7 +870,7 @@ Slice::ObjCVisitor::writeValue(const TypePtr& type)
 
 
 Slice::Gen::Gen(const string& name, const string& base, const string& include, const vector<string>& includePaths,
-                const string& dir, bool impl, bool implTie, bool stream)
+                const string& dir, bool impl, bool stream)
     : _base(base),
       _include(include),
       _includePaths(includePaths),
@@ -900,7 +901,7 @@ Slice::Gen::Gen(const string& name, const string& base, const string& include, c
         fileImplM = dir + '/' + fileImplM;
     }
 
-    if(impl || implTie)
+    if(impl)
     {
         struct stat st;
         if(stat(fileImplH.c_str(), &st) == 0)
@@ -1045,24 +1046,10 @@ Slice::Gen::generate(const UnitPtr& p)
 }
 
 void
-Slice::Gen::generateTie(const UnitPtr& p)
-{
-    //TieVisitor tieVisitor(_M);
-    //p->visit(&tieVisitor, false);
-}
-
-void
 Slice::Gen::generateImpl(const UnitPtr& p)
 {
     //ImplVisitor implVisitor(_impl);
     //p->visit(&implVisitor, false);
-}
-
-void
-Slice::Gen::generateImplTie(const UnitPtr& p)
-{
-    //ImplTieVisitor implTieVisitor(_impl);
-    //p->visit(&implTieVisitor, false);
 }
 
 #if 0
@@ -2608,7 +2595,7 @@ Slice::Gen::HelperVisitor::visitDictionary(const DictionaryPtr& p)
 
 
     ClassDeclPtr valueClass = ClassDeclPtr::dynamicCast(valueType);
-    if(valueBuiltin && valueBuiltin->kind() == Builtin::KindObject || valueClass)
+    if((valueBuiltin && valueBuiltin->kind() == Builtin::KindObject) || valueClass)
     {
         _H << sp << nl << "@interface " << name << " : ICEObjectDictionaryHelper";
         _H << nl << "+(Class) getContained:(NSString**)typeId;";
