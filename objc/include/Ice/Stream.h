@@ -160,7 +160,7 @@ typedef struct
 
 -(void) writePendingObjects;
 
--(NSData*) finished;
+-(NSMutableData*) finished;
 
 -(void) reset:(BOOL) clearBuffer;
 @end

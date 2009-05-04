@@ -275,7 +275,7 @@
 @end
 
 @implementation UnexpectedObjectExceptionTestI
--(BOOL)ice_invoke:(NSData*)inParams outParams:(NSData**)outParams current:(ICECurrent*)current
+-(BOOL)ice_invoke:(NSData*)inParams outParams:(NSMutableData**)outParams current:(ICECurrent*)current
 {
     id<ICECommunicator> communicator = [current.adapter getCommunicator];
     id<ICEOutputStream> o = [ICEUtil createOutputStream:communicator];

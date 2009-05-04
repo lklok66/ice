@@ -1610,13 +1610,13 @@ typedef enum { dummy } Dummy_Enum;
     }
 }
 
--(NSData*) finished
+-(NSMutableData*) finished
 {
     try
     {
         std::vector<Ice::Byte> buf;
         os_->finished(buf);
-        return [NSData dataWithBytes:&buf[0] length:buf.size()];
+        return [NSMutableData dataWithBytes:&buf[0] length:buf.size()];
     }
     catch(const std::exception& ex)
     {
