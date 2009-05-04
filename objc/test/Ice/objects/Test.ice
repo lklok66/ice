@@ -88,8 +88,15 @@ class H implements I
 {
 };
 
-sequence<Object> ObjectSeq;		// For Objective-C only
-dictionary<string, Object> ObjectDict;	// For Objective-C only
+sequence<Object> ObjectSeq;			// For Objective-C only
+sequence<Object*> ObjectPrxSeq;			// For Objective-C only
+sequence<Base> BaseSeq;				// For Objective-C only
+sequence<Base*> BasePrxSeq;			// For Objective-C only
+
+dictionary<string, Object> ObjectDict;		// For Objective-C only
+dictionary<string, Object*> ObjectPrxDict;	// For Objective-C only
+dictionary<string, Base> BaseDict;		// For Objective-C only
+dictionary<string, Base*> BasePrxDict;		// For Objective-C only
 
 class Initial
 {
@@ -113,7 +120,14 @@ class Initial
     // Remaining operations are here only for Objective-C and are not implemented by other language mappings.
     //
     ObjectSeq getObjectSeq(ObjectSeq s);
+    ObjectPrxSeq getObjectPrxSeq(ObjectPrxSeq s);
+    BaseSeq getBaseSeq(BaseSeq s);
+    BasePrxSeq getBasePrxSeq(BasePrxSeq s);
+
     ObjectDict getObjectDict(ObjectDict d);
+    ObjectPrxDict getObjectPrxDict(ObjectPrxDict d);
+    BaseDict getBaseDict(BaseDict d);
+    BasePrxDict getBasePrxDict(BasePrxDict d);
 };
 
 class Empty

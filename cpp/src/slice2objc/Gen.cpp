@@ -2559,10 +2559,12 @@ Slice::Gen::HelperVisitor::visitDictionary(const DictionaryPtr& p)
         }
     }
 
-    TypePtr valueType = p->valueType();
     string valueS;
+    TypePtr valueType = p->valueType();
     BuiltinPtr valueBuiltin = BuiltinPtr::dynamicCast(valueType);
     EnumPtr valueEnum = EnumPtr::dynamicCast(valueType);
+    ClassDeclPtr valueClass = ClassDeclPtr::dynamicCast(valueType);
+    ProxyPtr valueProxy = ProxyPtr::dynamicCast(valueType);
     if(valueBuiltin)
     {
         if(valueBuiltin->kind() == Builtin::KindObjectProxy)
@@ -2582,6 +2584,10 @@ Slice::Gen::HelperVisitor::visitDictionary(const DictionaryPtr& p)
     {
         valueS = moduleName(findModule(valueEnum)) + valueEnum->name() + "Helper";
     }
+    else if(valueProxy)
+    {
+        valueS = moduleName(findModule(valueProxy->_class())) + valueProxy->_class()->name() + "Prx";
+    }
     else
     {
 	ContainedPtr contained = ContainedPtr::dynamicCast(valueType);
@@ -2593,8 +2599,6 @@ Slice::Gen::HelperVisitor::visitDictionary(const DictionaryPtr& p)
         }
     }
 
-
-    ClassDeclPtr valueClass = ClassDeclPtr::dynamicCast(valueType);
     if((valueBuiltin && valueBuiltin->kind() == Builtin::KindObject) || valueClass)
     {
         _H << sp << nl << "@interface " << name << " : ICEObjectDictionaryHelper";
@@ -2617,7 +2621,6 @@ Slice::Gen::HelperVisitor::visitDictionary(const DictionaryPtr& p)
         _M << nl << "@end";
         return;
     }
-
     
     _H << sp << nl << "@interface " << name << " : ICEDictionaryHelper";
     _H << nl << "+(ICEKeyValueTypeHelper) getContained;";

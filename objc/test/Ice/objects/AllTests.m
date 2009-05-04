@@ -222,7 +222,7 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
     // TestObjectss specific to Objective-C.
     //
     {
-	tprintf("setting object sequence... ");
+	tprintf("setting Object sequence... ");
 	TestObjectsMutableObjectSeq* seq = [TestObjectsMutableObjectSeq array];
 
 	[seq addObject:[NSNull null]];
@@ -253,7 +253,89 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
     }
 
     {
-	tprintf("setting object dictionary... ");
+	tprintf("setting Object proxy sequence... ");
+	TestObjectsMutableObjectPrxSeq* seq = [TestObjectsMutableObjectPrxSeq array];
+
+	[seq addObject:[NSNull null]];
+	[seq addObject:initial];
+
+	@try
+	{
+	    TestObjectsObjectPrxSeq* r = [initial getObjectPrxSeq:seq];
+	    test([r objectAtIndex:0 == [NSNull null]]);
+	    test([[r objectAtIndex:1] isEqual:initial]);
+	}
+	@catch(ICEOperationNotExistException*)
+	{
+	    // Expected if we are testing against a non-Objective-C server.
+	}
+	@catch(...)
+	{
+	    test(NO);
+	}
+	tprintf("ok\n");
+    }
+
+    {
+	tprintf("setting Base sequence... ");
+	TestObjectsMutableBaseSeq* seq = [TestObjectsMutableBaseSeq array];
+
+	[seq addObject:[NSNull null]];
+
+	TestObjectsBase* b = [[[TestObjectsBase alloc] init] autorelease];
+	b.theS = [TestObjectsS s];
+	b.theS.str = @"Hello";
+	b.str = @"World";
+	[seq addObject:b];
+
+	@try
+	{
+	    TestObjectsBaseSeq* r = [initial getBaseSeq:seq];
+	    test([r objectAtIndex:0 == [NSNull null]]);
+	    TestObjectsBase* br = [r objectAtIndex:1];
+	    test([br.theS.str isEqualToString:@"Hello"]);
+	    test([br.str isEqualToString:@"World"]);
+	}
+	@catch(ICEOperationNotExistException*)
+	{
+	    // Expected if we are testing against a non-Objective-C server.
+	}
+	@catch(...)
+	{
+	    test(NO);
+	}
+	tprintf("ok\n");
+    }
+
+    {
+	tprintf("setting Base proxy sequence... ");
+	TestObjectsMutableBasePrxSeq* seq = [TestObjectsMutableBasePrxSeq array];
+
+	[seq addObject:[NSNull null]];
+	NSString* ref = @"base:default -p 12010";
+	id<ICEObjectPrx> base = [communicator stringToProxy:ref];
+	id<TestObjectsBasePrx> b = [TestObjectsBasePrx uncheckedCast:base];
+	[seq addObject:b];
+
+	@try
+	{
+	    TestObjectsBasePrxSeq* r = [initial getBasePrxSeq:seq];
+	    test([r objectAtIndex:0 == [NSNull null]]);
+	    test([[r objectAtIndex:1] isEqual:b]);
+	}
+	@catch(ICEOperationNotExistException*)
+	{
+	    // Expected if we are testing against a non-Objective-C server.
+	}
+	@catch(...)
+	{
+	    test(NO);
+	}
+	tprintf("ok\n");
+    }
+
+    {
+	tprintf("setting Object dictionary... ");
 	TestObjectsMutableObjectDict* dict = [TestObjectsMutableObjectDict dictionary];
 
 	[dict setObject:[NSNull null] forKey:@"zero"];
@@ -271,6 +353,90 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
 	    TestObjectsBase* br = [r objectForKey:@"one"];
 	    test([br.theS.str isEqualToString:@"Hello"]);
 	    test([br.str isEqualToString:@"World"]);
+	}
+	@catch(ICEOperationNotExistException*)
+	{
+	    // Expected if we are testing against a non-Objective-C server.
+	}
+	@catch(...)
+	{
+	    test(NO);
+	}
+	tprintf("ok\n");
+    }
+
+    {
+	tprintf("setting Object proxy dictionary... ");
+	TestObjectsMutableObjectPrxDict* dict = [TestObjectsMutableObjectPrxDict dictionary];
+
+	[dict setObject:[NSNull null] forKey:@"zero"];
+	NSString* ref = @"object:default -p 12010";
+	id<ICEObjectPrx> o = [communicator stringToProxy:ref];
+	[dict setObject:o forKey:@"one"];
+
+	@try
+	{
+	    TestObjectsObjectPrxDict* r = [initial getObjectPrxDict:dict];
+	    test([r objectForKey:@"zero"] == [NSNull null]);
+	    test([[r objectForKey:@"one"] isEqual:o]);
+	}
+	@catch(ICEOperationNotExistException*)
+	{
+	    // Expected if we are testing against a non-Objective-C server.
+	}
+	@catch(...)
+	{
+	    test(NO);
+	}
+	tprintf("ok\n");
+    }
+
+    {
+	tprintf("setting Base dictionary... ");
+	TestObjectsMutableBaseDict* dict = [TestObjectsMutableBaseDict dictionary];
+
+	[dict setObject:[NSNull null] forKey:@"zero"];
+
+	TestObjectsBase* b = [TestObjectsBase base];
+	b.theS = [TestObjectsS s];
+	b.theS.str = @"Hello";
+	b.str = @"World";
+	[dict setObject:b forKey:@"one"];
+
+	@try
+	{
+	    TestObjectsBaseDict* r = [initial getBaseDict:dict];
+	    test([r objectForKey:@"zero"] == [NSNull null]);
+	    TestObjectsBase* br = [r objectForKey:@"one"];
+	    test([br.theS.str isEqualToString:@"Hello"]);
+	    test([br.str isEqualToString:@"World"]);
+	}
+	@catch(ICEOperationNotExistException*)
+	{
+	    // Expected if we are testing against a non-Objective-C server.
+	}
+	@catch(...)
+	{
+	    test(NO);
+	}
+	tprintf("ok\n");
+    }
+
+    {
+	tprintf("setting Base proxy dictionary... ");
+	TestObjectsMutableBasePrxDict* dict = [TestObjectsMutableBasePrxDict dictionary];
+
+	[dict setObject:[NSNull null] forKey:@"zero"];
+	NSString* ref = @"base:default -p 12010";
+	id<ICEObjectPrx> base = [communicator stringToProxy:ref];
+	id<TestObjectsBasePrx> b = [TestObjectsBasePrx uncheckedCast:base];
+	[dict setObject:b forKey:@"one"];
+
+	@try
+	{
+	    TestObjectsObjectPrxDict* r = [initial getObjectPrxDict:dict];
+	    test([r objectForKey:@"zero"] == [NSNull null]);
+	    test([[r objectForKey:@"one"] isEqual:b]);
 	}
 	@catch(ICEOperationNotExistException*)
 	{

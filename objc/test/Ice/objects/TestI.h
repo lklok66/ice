@@ -65,9 +65,14 @@
 -(TestObjectsI *) getH:(ICECurrent *)current;
 -(void) setI:(TestObjectsI *)theI current:(ICECurrent *)current;
 -(TestObjectsObjectSeq *) getObjectSeq:(TestObjectsMutableObjectSeq *)s current:(ICECurrent *)current;
+-(TestObjectsObjectPrxSeq *) getObjectPrxSeq:(TestObjectsMutableObjectPrxSeq *)s current:(ICECurrent *)current;
+-(TestObjectsBaseSeq *) getBaseSeq:(TestObjectsMutableBaseSeq *)s current:(ICECurrent *)current;
+-(TestObjectsBasePrxSeq *) getBasePrxSeq:(TestObjectsMutableBasePrxSeq *)s current:(ICECurrent *)current;
 -(TestObjectsObjectDict *) getObjectDict:(TestObjectsMutableObjectDict *)d current:(ICECurrent *)current;
+-(TestObjectsObjectPrxDict *) getObjectPrxDict:(TestObjectsMutableObjectPrxDict *)d current:(ICECurrent *)current;
+-(TestObjectsBaseDict *) getBaseDict:(TestObjectsMutableBaseDict *)d current:(ICECurrent *)current;
+-(TestObjectsBasePrxDict *) getBasePrxDict:(TestObjectsMutableBasePrxDict *)d current:(ICECurrent *)current;
 @end
 
 @interface UnexpectedObjectExceptionTestI : ICEBlobject<ICEBlobject>
 @end
-

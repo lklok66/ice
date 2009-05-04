@@ -238,7 +238,37 @@
     return s;
 }
 
+-(TestObjectsObjectPrxSeq *) getObjectPrxSeq:(TestObjectsMutableObjectPrxSeq *)s current:(ICECurrent*)current
+{
+    return s;
+}
+
+-(TestObjectsBaseSeq *) getBaseSeq:(TestObjectsMutableBaseSeq *)s current:(ICECurrent*)current
+{
+    return s;
+}
+
+-(TestObjectsBasePrxSeq *) getBasePrxSeq:(TestObjectsMutableBasePrxSeq *)s current:(ICECurrent*)current
+{
+    return s;
+}
+
 -(TestObjectsObjectDict *) getObjectDict:(TestObjectsMutableObjectDict *)d current:(ICECurrent*)current
+{
+    return d;
+}
+
+-(TestObjectsObjectPrxDict *) getObjectPrxDict:(TestObjectsMutableObjectPrxDict *)d current:(ICECurrent*)current
+{
+    return d;
+}
+
+-(TestObjectsBaseDict *) getBaseDict:(TestObjectsMutableBaseDict *)d current:(ICECurrent*)current
+{
+    return d;
+}
+
+-(TestObjectsBasePrxDict *) getBasePrxDict:(TestObjectsMutableBasePrxDict *)d current:(ICECurrent*)current
 {
     return d;
 }
@@ -256,4 +286,3 @@
     return YES;
 }
 @end
-
