@@ -1,0 +1,48 @@
+// **********************************************************************
+//
+// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+//
+// This copy of Ice Touch is licensed to you under the terms described in the
+// ICE_TOUCH_LICENSE file included in this distribution.
+//
+// **********************************************************************
+
+#import <Ice/Ice.h>
+#import <Router.h>
+
+@class ClientProxyLocator;
+@class ServerProxyLocator;
+@class RouterBlobject;
+@protocol RouterDelegate;
+
+@interface RouterI : DemoRouter<DemoRouter>
+{
+@private
+    RouterBlobject* clientBlobject;
+    RouterBlobject* serverBlobject;
+
+    ClientProxyLocator* clientProxyLocator;
+    ServerProxyLocator* serverProxyLocator;
+    
+    id<ICECommunicator> communicator;
+    id<ICEObjectAdapter> routedServerAdapter;
+    ICEObjectPrx* serverProxy;
+    NSObject<RouterDelegate>* routerDelegate;
+    NSString* status;
+    id<Glacier2RouterPrx> router;
+    int trace;
+}
+
+@property (retain) ICEObject* clientBlobject;
+@property (retain) ICEObject* serverBlobject;
+@property (retain) NSString* status;
+@property (retain) id<Glacier2RouterPrx> router;
+@property (readonly) int clientRequests;
+@property (readonly) int clientExceptions;
+@property (readonly) int serverRequests;
+@property (readonly) int serverExceptions;
+
+-(id)initWithCommunicator:(id<ICECommunicator>)comm;
+-(void)setDelegate:(id<RouterDelegate>)delegate;
+
+@end
