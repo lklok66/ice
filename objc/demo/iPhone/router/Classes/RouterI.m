@@ -28,11 +28,9 @@
     NSObject<RouterDelegate>* routerDelegate;
     int requests;
     int exceptions;
-    id<ICERouterPrx> router;
 }
 
 @property (retain) NSObject<RouterDelegate>* routerDelegate;;
-@property (retain) id<ICERouterPrx> router;
 @property (readonly) int requests;
 @property (readonly) int exceptions;
 
@@ -44,7 +42,6 @@
 @synthesize routerDelegate;
 @synthesize requests;
 @synthesize exceptions;
-@synthesize router;
 
 -(id)initWithLocator:(id<ProxyLocator>)l
 {
@@ -83,11 +80,8 @@
     {
         proxy = [proxy ice_facet:current.facet];
     }
-    
-    //
-    // Modify the proxy according to the request id. This can
-    // be overridden by the _fwd context.
-    //
+
+    // If requestId == 0, the request is oneway.
     if(current.requestId == 0)
     {
         proxy = [proxy ice_oneway];
@@ -95,11 +89,6 @@
     else //if(current.requestId > 0)
     {
         proxy = [proxy ice_twoway];
-    }
-    
-    if(router)
-    {
-        proxy = [proxy ice_router:router];
     }
     
     @try
@@ -149,12 +138,14 @@
 {
 @private
     id<ICELogger> logger;
+    id<ICERouterPrx> router;
 
     NSMutableDictionary* routingTable;
     id<ICEConnection> connection;
 }
 
 @property (retain) id<ICEConnection> connection;
+@property (retain) id<ICERouterPrx> router;
 
 -(id)initWithLogger:(id<ICELogger>)logger;
 -(ICEObjectProxySeq *)add:(ICEMutableObjectProxySeq *)proxies;
@@ -165,6 +156,8 @@
 @implementation ClientProxyLocator
 
 @synthesize connection;
+@synthesize router;
+
 -(id)initWithLogger:(id<ICELogger>)l
 {
     if(self = [super init])
@@ -187,9 +180,15 @@
             {
                 continue;
             }
+
             if([routingTable objectForKey:prx.ice_getIdentity] != 0)
             {
                 continue;
+            }
+
+            if(router)
+            {
+                prx = [prx ice_router:router];
             }
             [routingTable setObject:prx forKey:prx.ice_getIdentity];
         }
@@ -228,6 +227,7 @@
 
 -(void)dealloc
 {
+    [router release];
     [routingTable release];
     [logger release];
     [connection release];
@@ -341,7 +341,7 @@
         {
             NSLog(@"conn close: %@", ex);
         }
-        clientBlobject.router = 0;
+        clientProxyLocator.router = 0;
         self.router = 0;
     }
     
@@ -429,7 +429,7 @@
         
         serverProxyLocator.category = *category;
         self.router = glacier2router;
-        clientBlobject.router = r;
+        clientProxyLocator.router = glacier2router;
         
         // Create a new bi-dir OA for callbacks.
         NSAssert(routedServerAdapter == 0, @"serverAdapter == 0");

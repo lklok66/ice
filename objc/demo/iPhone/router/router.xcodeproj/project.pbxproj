@@ -334,7 +334,7 @@
 				);
 				PRODUCT_NAME = router;
 				SLICE_ICE_HOME = "/Users/matthew/cvs/ice-objc";
-				SLICE_INCLUDE_PATH = "Classes ../../../../slice";
+				SLICE_INCLUDE_PATH = "../../../../slice Classes";
 			};
 			name = Debug;
 		};
@@ -352,6 +352,8 @@
 					"\"$(SRCROOT)/../../../lib\"",
 				);
 				PRODUCT_NAME = router;
+				SLICE_ICE_HOME = "/Users/matthew/cvs/ice-objc";
+				SLICE_INCLUDE_PATH = "../../../../slice Classes";
 			};
 			name = Release;
 		};

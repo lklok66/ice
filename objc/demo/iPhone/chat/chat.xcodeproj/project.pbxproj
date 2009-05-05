@@ -16,12 +16,10 @@
 		28AD73600D9D9599002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD735F0D9D9599002E5188 /* MainWindow.xib */; };
 		28C286E10D94DF7D0034E888 /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28C286E00D94DF7D0034E888 /* LoginViewController.m */; };
 		342EBAEA0E928AE2000051FA /* cacert.der in Resources */ = {isa = PBXBuildFile; fileRef = 342EBAE90E928AE2000051FA /* cacert.der */; };
+		3448C6E90FB0144F00BFB717 /* ChatSession.ice in Sources */ = {isa = PBXBuildFile; fileRef = 3448C6E70FB0144F00BFB717 /* ChatSession.ice */; };
+		3448C6EA0FB0144F00BFB717 /* Chat.ice in Sources */ = {isa = PBXBuildFile; fileRef = 3448C6E80FB0144F00BFB717 /* Chat.ice */; };
 		348A1EDD0E82976B003DBDDD /* ChatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 348A1EDC0E82976B003DBDDD /* ChatViewController.m */; };
 		348A1EE00E829786003DBDDD /* UserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 348A1EDF0E829786003DBDDD /* UserViewController.m */; };
-		348A1EE50E8297AC003DBDDD /* Chat.m in Sources */ = {isa = PBXBuildFile; fileRef = 348A1EE20E8297AC003DBDDD /* Chat.m */; };
-		348A1EE60E8297AC003DBDDD /* ChatSession.m in Sources */ = {isa = PBXBuildFile; fileRef = 348A1EE40E8297AC003DBDDD /* ChatSession.m */; };
-		348A1EF10E8297D3003DBDDD /* Chat.ice in Resources */ = {isa = PBXBuildFile; fileRef = 348A1EEF0E8297D3003DBDDD /* Chat.ice */; };
-		348A1EF20E8297D3003DBDDD /* ChatSession.ice in Resources */ = {isa = PBXBuildFile; fileRef = 348A1EF00E8297D3003DBDDD /* ChatSession.ice */; };
 		348A1EF60E8297E1003DBDDD /* libIceObjC.0.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 348A1EF40E8297E1003DBDDD /* libIceObjC.0.1.0.dylib */; };
 		348A1EF90E829817003DBDDD /* libIceObjC.0.1.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 348A1EF40E8297E1003DBDDD /* libIceObjC.0.1.0.dylib */; };
 		348A1F0D0E829947003DBDDD /* LoginView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 348A1F0C0E829947003DBDDD /* LoginView.xib */; };
@@ -60,16 +58,12 @@
 		28C286E00D94DF7D0034E888 /* LoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewController.m; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		342EBAE90E928AE2000051FA /* cacert.der */ = {isa = PBXFileReference; lastKnownFileType = file; path = cacert.der; sourceTree = "<group>"; };
+		3448C6E70FB0144F00BFB717 /* ChatSession.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; path = ChatSession.ice; sourceTree = "<group>"; };
+		3448C6E80FB0144F00BFB717 /* Chat.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; path = Chat.ice; sourceTree = "<group>"; };
 		348A1EDB0E82976B003DBDDD /* ChatViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatViewController.h; sourceTree = "<group>"; };
 		348A1EDC0E82976B003DBDDD /* ChatViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatViewController.m; sourceTree = "<group>"; };
 		348A1EDE0E829786003DBDDD /* UserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserViewController.h; sourceTree = "<group>"; };
 		348A1EDF0E829786003DBDDD /* UserViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserViewController.m; sourceTree = "<group>"; };
-		348A1EE10E8297AC003DBDDD /* Chat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Chat.h; sourceTree = "<group>"; };
-		348A1EE20E8297AC003DBDDD /* Chat.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Chat.m; sourceTree = "<group>"; };
-		348A1EE30E8297AC003DBDDD /* ChatSession.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChatSession.h; sourceTree = "<group>"; };
-		348A1EE40E8297AC003DBDDD /* ChatSession.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatSession.m; sourceTree = "<group>"; };
-		348A1EEF0E8297D3003DBDDD /* Chat.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Chat.ice; sourceTree = "<group>"; };
-		348A1EF00E8297D3003DBDDD /* ChatSession.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ChatSession.ice; sourceTree = "<group>"; };
 		348A1EF40E8297E1003DBDDD /* libIceObjC.0.1.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libIceObjC.0.1.0.dylib; path = ../../../lib/libIceObjC.0.1.0.dylib; sourceTree = SOURCE_ROOT; };
 		348A1F0C0E829947003DBDDD /* LoginView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = LoginView.xib; sourceTree = "<group>"; };
 		348A1F100E829950003DBDDD /* ChatView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ChatView.xib; sourceTree = "<group>"; };
@@ -98,10 +92,8 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				348A1EE10E8297AC003DBDDD /* Chat.h */,
-				348A1EE20E8297AC003DBDDD /* Chat.m */,
-				348A1EE30E8297AC003DBDDD /* ChatSession.h */,
-				348A1EE40E8297AC003DBDDD /* ChatSession.m */,
+				3448C6E70FB0144F00BFB717 /* ChatSession.ice */,
+				3448C6E80FB0144F00BFB717 /* Chat.ice */,
 				28C286DF0D94DF7D0034E888 /* LoginViewController.h */,
 				28C286E00D94DF7D0034E888 /* LoginViewController.m */,
 				1D3623240D0F684500981E51 /* AppDelegate.h */,
@@ -139,8 +131,6 @@
 		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
 			isa = PBXGroup;
 			children = (
-				348A1EEF0E8297D3003DBDDD /* Chat.ice */,
-				348A1EF00E8297D3003DBDDD /* ChatSession.ice */,
 				28A0AAE50D9B0CCF005BE974 /* chat_Prefix.pch */,
 				29B97316FDCFA39411CA2CEA /* main.m */,
 			);
@@ -188,7 +178,6 @@
 			buildConfigurationList = 1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "chat" */;
 			buildPhases = (
 				1D60588D0D05DD3D006BFB54 /* Resources */,
-				348A1EFB0E829821003DBDDD /* ShellScript */,
 				1D60588E0D05DD3D006BFB54 /* Sources */,
 				1D60588F0D05DD3D006BFB54 /* Frameworks */,
 				348A1EFD0E829893003DBDDD /* CopyFiles */,
@@ -232,8 +221,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				28AD73600D9D9599002E5188 /* MainWindow.xib in Resources */,
-				348A1EF10E8297D3003DBDDD /* Chat.ice in Resources */,
-				348A1EF20E8297D3003DBDDD /* ChatSession.ice in Resources */,
 				348A1F0D0E829947003DBDDD /* LoginView.xib in Resources */,
 				348A1F110E829950003DBDDD /* ChatView.xib in Resources */,
 				348A1F150E82995D003DBDDD /* UserView.xib in Resources */,
@@ -245,28 +232,6 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		348A1EFB0E829821003DBDDD /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"$(SRCROOT)/Chat.ice",
-				"$(SRCROOT)/ChatSession.ice",
-			);
-			outputPaths = (
-				"$(SRCROOT)/Classes/Chat.m",
-				"$(SRCROOT)/Classes/Chat.h",
-				"$(SRCROOT)/Classes/ChatSession.m",
-				"$(SRCROOT)/Classes/ChatSession.h",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "DYLD_LIBRARY_PATH=../../../../cpp/lib ../../../../cpp/bin/slice2objc -I../../../../slice -I . --output-dir Classes Chat.ice\nDYLD_LIBRARY_PATH=../../../../cpp/lib ../../../../cpp/bin/slice2objc -I../../../../slice -I . --output-dir Classes ChatSession.ice";
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
 		1D60588E0D05DD3D006BFB54 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -277,8 +242,8 @@
 				28C286E10D94DF7D0034E888 /* LoginViewController.m in Sources */,
 				348A1EDD0E82976B003DBDDD /* ChatViewController.m in Sources */,
 				348A1EE00E829786003DBDDD /* UserViewController.m in Sources */,
-				348A1EE50E8297AC003DBDDD /* Chat.m in Sources */,
-				348A1EE60E8297AC003DBDDD /* ChatSession.m in Sources */,
+				3448C6E90FB0144F00BFB717 /* ChatSession.ice in Sources */,
+				3448C6EA0FB0144F00BFB717 /* Chat.ice in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -304,6 +269,8 @@
 					"\"$(SRCROOT)/../../../lib\"",
 				);
 				PRODUCT_NAME = chat;
+				SLICE_ICE_HOME = "/Users/matthew/cvs/ice-objc";
+				SLICE_INCLUDE_PATH = "Classes ../../../../slice";
 			};
 			name = Debug;
 		};
@@ -324,6 +291,8 @@
 					"\"$(SRCROOT)/../../../lib\"",
 				);
 				PRODUCT_NAME = chat;
+				SLICE_ICE_HOME = "/Users/matthew/cvs/ice-objc";
+				SLICE_INCLUDE_PATH = "Classes ../../../../slice";
 			};
 			name = Release;
 		};

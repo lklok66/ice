@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1432BEC00E484C0E00DAC793 /* Hello.m in Sources */ = {isa = PBXBuildFile; fileRef = 1432BEBE0E484C0E00DAC793 /* Hello.m */; };
 		14A268EB0E83FD0A00E562FE /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14A268E90E83FD0A00E562FE /* CFNetwork.framework */; };
 		14A268EC0E83FD0A00E562FE /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14A268EA0E83FD0A00E562FE /* Security.framework */; };
 		14DF50B60E8D24BA0066CA84 /* cacert.der in Resources */ = {isa = PBXBuildFile; fileRef = 14DF50B50E8D24BA0066CA84 /* cacert.der */; };
@@ -20,6 +19,7 @@
 		2899E5220DE3E06400AC0155 /* helloViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2899E5210DE3E06400AC0155 /* helloViewController.xib */; };
 		28AD733F0D9D9553002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD733E0D9D9553002E5188 /* MainWindow.xib */; };
 		28D7ACF80DDB3853001CB0EB /* helloViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28D7ACF70DDB3853001CB0EB /* helloViewController.m */; };
+		3448C7200FB015FE00BFB717 /* Hello.ice in Sources */ = {isa = PBXBuildFile; fileRef = 3448C71F0FB015FE00BFB717 /* Hello.ice */; };
 		345E93940E8AA17800FED1BF /* libIceObjC.0.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 345E93930E8AA17800FED1BF /* libIceObjC.0.1.0.dylib */; };
 		345E93950E8AA18400FED1BF /* libIceObjC.0.1.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 345E93930E8AA17800FED1BF /* libIceObjC.0.1.0.dylib */; };
 		34BB75B20E87DC1800813E0B /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 34BB75B10E87DC1800813E0B /* icon.png */; };
@@ -39,9 +39,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		1432BEBE0E484C0E00DAC793 /* Hello.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Hello.m; sourceTree = "<group>"; };
-		1432BEBF0E484C0E00DAC793 /* Hello.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Hello.h; sourceTree = "<group>"; };
-		1432BF5A0E59A5FC00DAC793 /* Hello.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Hello.ice; sourceTree = "<group>"; };
 		14A268E90E83FD0A00E562FE /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		14A268EA0E83FD0A00E562FE /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		14DF50B50E8D24BA0066CA84 /* cacert.der */ = {isa = PBXFileReference; lastKnownFileType = file; name = cacert.der; path = ../../../../certs/cacert.der; sourceTree = SOURCE_ROOT; };
@@ -58,6 +55,7 @@
 		28D7ACF70DDB3853001CB0EB /* helloViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = helloViewController.m; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* hello_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hello_Prefix.pch; sourceTree = "<group>"; };
+		3448C71F0FB015FE00BFB717 /* Hello.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; path = Hello.ice; sourceTree = "<group>"; };
 		345E93930E8AA17800FED1BF /* libIceObjC.0.1.0.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; name = libIceObjC.0.1.0.dylib; path = ../../../lib/libIceObjC.0.1.0.dylib; sourceTree = SOURCE_ROOT; };
 		34BB75B10E87DC1800813E0B /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icon.png; path = Images/icon.png; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -82,8 +80,7 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				1432BEBF0E484C0E00DAC793 /* Hello.h */,
-				1432BEBE0E484C0E00DAC793 /* Hello.m */,
+				3448C71F0FB015FE00BFB717 /* Hello.ice */,
 				1D3623240D0F684500981E51 /* helloAppDelegate.h */,
 				1D3623250D0F684500981E51 /* helloAppDelegate.m */,
 				28D7ACF60DDB3853001CB0EB /* helloViewController.h */,
@@ -105,7 +102,6 @@
 			children = (
 				14EAF6F10E93B19A00EF4807 /* README.txt */,
 				34BB75B00E87DC0A00813E0B /* Images */,
-				1432BF5A0E59A5FC00DAC793 /* Hello.ice */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
@@ -164,7 +160,6 @@
 			buildConfigurationList = 1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "hello" */;
 			buildPhases = (
 				1D60588D0D05DD3D006BFB54 /* Resources */,
-				1432BF730E59A76900DAC793 /* ShellScript */,
 				1D60588E0D05DD3D006BFB54 /* Sources */,
 				1D60588F0D05DD3D006BFB54 /* Frameworks */,
 				141803990E40775B00DC7AFB /* CopyFiles */,
@@ -211,25 +206,6 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		1432BF730E59A76900DAC793 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 12;
-			files = (
-			);
-			inputPaths = (
-				"$(SRCROOT)/Hello.ice",
-			);
-			outputPaths = (
-				"$(SRCROOT)/Hello.m",
-				"$(SRCROOT)/Hello.h",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "DYLD_LIBRARY_PATH=../../../../cpp/lib ../../../../cpp/bin/slice2objc --output-dir Classes Hello.ice\n";
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
 		1D60588E0D05DD3D006BFB54 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -238,7 +214,7 @@
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
 				1D3623260D0F684500981E51 /* helloAppDelegate.m in Sources */,
 				28D7ACF80DDB3853001CB0EB /* helloViewController.m in Sources */,
-				1432BEC00E484C0E00DAC793 /* Hello.m in Sources */,
+				3448C7200FB015FE00BFB717 /* Hello.ice in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -266,6 +242,7 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRELINK_LIBS = "";
 				PRODUCT_NAME = hello;
+				SLICE_ICE_HOME = "/Users/matthew/cvs/ice-objc";
 			};
 			name = Debug;
 		};
@@ -287,6 +264,7 @@
 					"\"$(SRCROOT)/../../../lib\"",
 				);
 				PRODUCT_NAME = hello;
+				SLICE_ICE_HOME = "/Users/matthew/cvs/ice-objc";
 			};
 			name = Release;
 		};

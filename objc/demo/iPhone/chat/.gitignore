@@ -1,7 +1,3 @@
 build
 *.mode1v3
 *.pbxuser
-Classes/Chat.h
-Classes/Chat.m
-Classes/ChatSession.h
-Classes/ChatSession.m
