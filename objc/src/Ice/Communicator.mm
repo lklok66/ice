@@ -34,9 +34,19 @@ class ObjectFactoryI : public Ice::ObjectFactory
 {
 public:
 
+    // We must explicitely CFRetain/CFRelease so that the garbage
+    // collector does not trash the dictionaries.
     ObjectFactoryI(NSDictionary* factories, NSDictionary* prefixTable) : 
         _factories(factories), _prefixTable(prefixTable)
     {
+        CFRetain(_factories);
+        CFRetain(_prefixTable);
+    }
+
+    ~ObjectFactoryI()
+    {
+        CFRelease(_factories);
+        CFRelease(_prefixTable);
     }
 
     virtual Ice::ObjectPtr
