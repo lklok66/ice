@@ -1,6 +1,8 @@
 Changes since version 0.1.0
 ---------------------------
 
+- Added support for GC under Mac OS.
+
 - Changed the outParams parameter of ICEBlobject ice_invoke to NSMutableData**.
 
 - Fixed a bug with ICEConnection createProxy where the created proxy

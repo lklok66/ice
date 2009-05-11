@@ -11,11 +11,18 @@
 #import <Foundation/NSAutoreleasePool.h>
 #import <stdio.h>
 
+#if !TARGET_OS_IPHONE
+  #import <objc/objc-auto.h>
+#endif
+
 int runParser(int, char**, id<ICECommunicator>);
 
 int
 main(int argc, char* argv[])
 {
+#if !TARGET_OS_IPHONE
+    objc_startCollectorThread();
+#endif
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
 
     int status = 0;

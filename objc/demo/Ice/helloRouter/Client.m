@@ -15,6 +15,10 @@
 
 #import <stdio.h>
 
+#if !TARGET_OS_IPHONE
+  #import <objc/objc-auto.h>
+#endif
+
 void
 menu()
 {
@@ -98,6 +102,9 @@ run(int argc, char* argv[], id<ICECommunicator> communicator)
 int
 main(int argc, char* argv[])
 {
+#if !TARGET_OS_IPHONE
+    objc_startCollectorThread();
+#endif
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
     int status = EXIT_SUCCESS;
     id<ICECommunicator> communicator = nil;

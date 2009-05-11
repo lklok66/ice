@@ -11,6 +11,10 @@
 #import <TestI.h>
 
 #import <Foundation/NSAutoreleasePool.h>
+#if !TARGET_OS_IPHONE
+  #import <objc/objc-auto.h>
+  #import <Foundation/NSGarbageCollector.h>
+#endif
 
 #import <stdio.h>
 
@@ -64,6 +68,9 @@ run(int argc, char** argv, id<ICECommunicator> communicator)
 int
 main(int argc, char* argv[])
 {
+#if !TARGET_OS_IPHONE
+    objc_startCollectorThread();
+#endif
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
     int status;
     id<ICECommunicator> communicator = nil;
@@ -102,5 +109,8 @@ main(int argc, char* argv[])
     }
 
     [pool release];
+#if !TARGET_OS_IPHONE
+    [[NSGarbageCollector defaultCollector] collectExhaustively];
+#endif
     return status;
 }

@@ -41,14 +41,22 @@ class AMICallbackBase
 {
 public:
 
+// We must explicitely CFRetain/CFRelease so that the garbage
+// collector does not trash the _target.
 AMICallbackBase(id target, SEL ex) : _target(target), _exception(ex)
 {
-    [_target retain];
+    if(_target)
+    {
+	CFRetain(_target);
+    }
 }
 
 virtual ~AMICallbackBase()
 {
-    [_target release];
+    if(_target)
+    {
+	CFRelease(_target);
+    }
 }
 
 void ice_exception(const Ice::Exception& ex)
@@ -336,6 +344,13 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
     OBJECTPRX->__decRef();
     objectPrx__ = 0;
     [super dealloc];
+}
+
+-(void) finalize
+{
+    OBJECTPRX->__decRef();
+    objectPrx__ = 0;
+    [super finalize];
 }
 
 +(ICEObjectPrx*) objectPrxWithObjectPrx__:(const Ice::ObjectPrx&)arg

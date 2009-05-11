@@ -10,12 +10,19 @@
 #import <Ice/Ice.h>
 #import <Printer.h>
 
-#import <Foundation/NSAutoreleasePool.h>
 #import <stdio.h>
+
+#import <Foundation/NSAutoreleasePool.h>
+#if !TARGET_OS_IPHONE
+  #import <objc/objc-auto.h>
+#endif
 
 int
 main(int argc, char* argv[])
 {
+#if !TARGET_OS_IPHONE
+    objc_startCollectorThread();
+#endif
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
     
     int status = 1;

@@ -57,13 +57,16 @@ class ObjectReader : public Ice::ObjectReader
 {
 public:
     
+    // We must explicitely CFRetain/CFRelease so that the garbage
+    // collector does not trash the _obj.
     ObjectReader(ICEObject* obj) : _obj(obj)
     {
+        CFRetain(_obj);
     }
 
     virtual ~ObjectReader()
     {
-        [_obj release];
+        CFRelease(_obj);
     }
 
     virtual void
@@ -201,15 +204,17 @@ class ReadObjectForKey : public ReadObjectBase
 {
 public:
     
+    // We must explicitely CFRetain/CFRelease so that the garbage
+    // collector does not trash the _key.
     ReadObjectForKey(NSMutableDictionary* dict, id key, NSString* expectedType) : 
         ReadObjectBase(expectedType), _dict(dict), _key(key)
     {
-        [_key retain];
+        CFRetain(_key);
     }
 
     virtual ~ReadObjectForKey()
     {
-        [_key release];
+        CFRelease(_key);
     }
     
     virtual void
@@ -244,15 +249,17 @@ class ReadObjectCallback : public ReadObjectBase
 {
 public:
     
+    // We must explicitely CFRetain/CFRelease so that the garbage
+    // collector does not trash the _cb.
     ReadObjectCallback(id<ICEReadObjectCallback> cb, NSString* expectedType) : 
         ReadObjectBase(expectedType), _cb(cb)
     {
-        [_cb retain];
+        CFRetain(_cb);
     }
 
     virtual ~ReadObjectCallback()
     {
-        [_cb release];
+        CFRelease(_cb);
     }
     
     virtual void
@@ -294,10 +301,12 @@ private:
     is_ = dynamic_cast<Ice::InputStream*>(cxxObject);
     return self;
 }
+
 +(Ice::Object*)createObjectReader:(ICEObject*)obj
 {
     return new IceObjC::ObjectReader(obj);
 }
+
 -(Ice::InputStream*) is
 {
     return is_;
@@ -1058,10 +1067,12 @@ typedef enum { dummy } Dummy_Enum;
     objectWriters_ = 0;
     return self;
 }
+
 -(Ice::OutputStream*) os
 {
     return os_;
 }
+
 -(void) dealloc
 {
     if(objectWriters_)
@@ -1069,6 +1080,15 @@ typedef enum { dummy } Dummy_Enum;
         delete objectWriters_;
     }
     [super dealloc];
+}
+
+-(void) finalize
+{
+    if(objectWriters_)
+    {
+        delete objectWriters_;
+    }
+    [super finalize];
 }
 
 // @protocol ICEOutputStream methods

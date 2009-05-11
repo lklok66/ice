@@ -59,6 +59,16 @@ ifeq ($(STATICLIBS),yes)
 endif
 
 #
+# Enable dual mode garbage collection for MacOS builds.
+#
+ifneq ($(COMPILE_FOR_IPHONE),yes)
+  ifneq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
+	OBJCFLAGS	:= -fobjc-gc
+	OBJCXXFLAGS	:= -fobjc-gc
+  endif
+endif
+
+#
 # C++ run-time libraries, necessary for linking some shared libraries.
 #
 CXXLIBS			=

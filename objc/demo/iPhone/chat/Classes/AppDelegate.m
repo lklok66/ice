@@ -189,6 +189,7 @@
     session = [sess retain];
     SessionRefresh* refresh = [SessionRefresh sessionRefreshWithSession:session];
     // TODO: Use timeout.
+    // TODO: Get rid of session refresh. We should use self.
     self.refreshTimer = [NSTimer
                          timerWithTimeInterval:timeout
                          target:refresh

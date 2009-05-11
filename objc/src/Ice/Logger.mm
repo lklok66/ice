@@ -19,13 +19,16 @@ class LoggerI : public Ice::Logger
 {
 public:
 
+// We must explicitely CFRetain/CFRelease so that the garbage
+// collector does not trash the logger.
 LoggerI(id<ICELogger> logger) : _logger(logger)
 {
+    CFRetain(_logger);
 }
 
 virtual ~LoggerI()
 {
-    [_logger release];
+    CFRelease(_logger);
 }
 
 virtual void 
@@ -82,11 +85,14 @@ typedef IceUtil::Handle<LoggerI> LoggerIPtr;
 {
     if(logger == 0)
     {
-        return new LoggerI([[self alloc] init]);
+        id<ICELogger> l = [[self alloc] init];
+        Ice::Logger* impl = new LoggerI(l);
+        [l release];
+        return impl;
     }
     else
     {
-        return new LoggerI([logger retain]);
+        return new LoggerI(logger);
     }
 }
 +(id) wrapperWithCxxObject:(IceUtil::Shared*)cxxObject

@@ -124,14 +124,16 @@ public:
         return _object;
     }
 
+    // We must explicitely CFRetain/CFRelease so that the garbage
+    // collector does not trash the _object.
     virtual void __incRef()
     {
-        [_object retain];
+        CFRetain(_object);
     }
 
     virtual void __decRef()
     {
-        [_object release];
+        CFRelease(_object);
     }
 
 private:
@@ -154,14 +156,16 @@ public:
         return _blobject;
     }
 
+    // We must explicitely CFRetain/CFRelease so that the garbage
+    // collector does not trash the _blobject.
     virtual void __incRef()
     {
-        [_blobject retain];
+        CFRetain(_blobject);
     }
 
     virtual void __decRef()
     {
-        [_blobject release];
+        CFRelease(_blobject);
     }
 
 private:
@@ -305,6 +309,16 @@ IceObjC::BlobjectI::ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& 
     }
     [delegate__ release];
     [super dealloc];
+}
+
+-(void) finalize
+{
+    if(object__)
+    {
+        delete (IceObjC::ObjectWrapper*)object__;
+        object__ = 0;
+    }
+    [super finalize];
 }
 
 @end

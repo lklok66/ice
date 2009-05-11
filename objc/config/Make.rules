@@ -160,10 +160,10 @@ EVERYTHING		= all depend clean install
 .SUFFIXES:		.mm .m .o .cpp  .c
 
 .m.o:
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $<
+	$(CC) -c $(CPPFLAGS) $(OBJCFLAGS) $(CFLAGS) $<
 
 .mm.o:
-	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(OBJCXXFLAGS) $<
 
 %.o: %.cpp
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<

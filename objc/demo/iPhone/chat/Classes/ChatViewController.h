@@ -15,6 +15,7 @@
 @protocol ChatChatSessionPrx;
 @class UserViewController;
 
+
 @interface ChatViewController : UIViewController<UITableViewDelegate, UITableViewDataSource,UITextFieldDelegate,ChatChatRoomCallback>
 {
 @private

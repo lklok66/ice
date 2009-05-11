@@ -69,14 +69,13 @@ public:
             }
         }
 
+        Ice::ObjectPtr o;
         if(obj != nil)
         {
-            return [ICEInputStream createObjectReader:obj];
+            o = [ICEInputStream createObjectReader:obj];
+            [obj release];
         }
-        else
-        {
-            return nil;
-        }
+        return o;
     }
 
     virtual void
