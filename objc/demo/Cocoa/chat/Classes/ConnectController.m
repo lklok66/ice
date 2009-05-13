@@ -137,11 +137,13 @@ NSString* routerServerKey = @"routerServerKey";
 {
     @try
     {
-        id<DemoRouterPrx> router = [DemoRouterPrx checkedCast:proxy];
+        id<DemoRouterPrx> router = [DemoRouterPrx uncheckedCast:[communicator getDefaultRouter]];
+        id<ICERouterPrx> glacier2router = [ICERouterPrx uncheckedCast:proxy];
         id<Glacier2SessionPrx> glacier2session;
         NSMutableString* category;
         ICEInt sessionTimeout;
-        [router createGlacier2Session:router
+        NSLog(@"calling on %@", router);
+        [router createGlacier2Session:glacier2router
                                userId:usernameField.stringValue
                              password:passwordField.stringValue
                              category:&category
@@ -183,8 +185,8 @@ NSString* routerServerKey = @"routerServerKey";
     [initData.properties setProperty:@"Ice.RetryIntervals" value:@"-1"];
     
     // Tracing properties.
-    //[self.initData.properties setProperty:@"Ice.Trace.Network" value:@"1"];
-    //[self.initData.properties setProperty:@"Ice.Trace.Protocol" value:@"1"];
+    [initData.properties setProperty:@"Ice.Trace.Network" value:@"1"];
+    //[initData.properties setProperty:@"Ice.Trace.Protocol" value:@"1"];
     
     [initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
     [initData.properties setProperty:@"IceSSL.TrustOnly.Client" value:@"C2:E8:D3:33:D7:83:99:6E:08:F7:C2:34:31:F7:1E:8E:44:87:38:57"];
@@ -201,12 +203,18 @@ NSString* routerServerKey = @"routerServerKey";
         {
             if(sslField.state == NSOnState)
             {
-                s = [NSString stringWithFormat:@"iPhoneRouter/router:ssl -p 12001 -h %@ -t 10000", routerServerField.stringValue];
+                s = [NSString stringWithFormat:@"iPhoneRouter/Router:ssl -p 12001 -h %@ -t 10000", routerServerField.stringValue];
             }
             else
             {
-                s = [NSString stringWithFormat:@"iPhoneRouter/router:tcp -p 12000 -h %@ -t 10000", routerServerField.stringValue];
+                s = [NSString stringWithFormat:@"iPhoneRouter/Router:tcp -p 12000 -h %@ -t 10000", routerServerField.stringValue];
             }
+            proxy = [communicator stringToProxy:s];
+            id<ICERouterPrx> router = [ICERouterPrx uncheckedCast:proxy];
+            [communicator setDefaultRouter:router];
+
+            // The proxy to the Glacier2 router.
+            proxy = [communicator stringToProxy:[NSString stringWithFormat:@"Glacier2/router:tcp -p 4502 -h %@ -t 10000", chatServerField.stringValue]];
         }
         else
         {
@@ -218,11 +226,11 @@ NSString* routerServerKey = @"routerServerKey";
             {
                 s = [NSString stringWithFormat:@"Glacier2/router:tcp -p 4502 -h %@ -t 10000", chatServerField.stringValue];
             }
+            proxy = [communicator stringToProxy:s];
+            id<ICERouterPrx> router = [ICERouterPrx uncheckedCast:proxy];
+            
+            [communicator setDefaultRouter:router];
         }
-        proxy = [communicator stringToProxy:s];
-        id<ICERouterPrx> router = [ICERouterPrx uncheckedCast:proxy];
-        
-        [communicator setDefaultRouter:router];
     }
     @catch(ICEEndpointParseException* ex)
     {
@@ -240,7 +248,7 @@ NSString* routerServerKey = @"routerServerKey";
        didEndSelector:NULL 
           contextInfo:NULL];
 
-    SEL loginSelector= (routerField.state == NSOnState) ? @selector(doPhoneRouterLogin:) : @selector(doGlacier2Login:);
+    SEL loginSelector = (routerField.state == NSOnState) ? @selector(doPhoneRouterLogin:) : @selector(doGlacier2Login:);
     // Kick off the login process in a separate thread. This ensures that the UI is not blocked.
     NSInvocationOperation* op = [[NSInvocationOperation alloc]
                                  initWithTarget:self
