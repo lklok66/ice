@@ -23,6 +23,7 @@
 {
     if(delegate)
     {
+        // TODO: Remove this
         NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
         [delegate performSelectorOnMainThread:@selector(log:)
                                    withObject:[[LogEntry logEntryPrint:message] retain]
@@ -35,6 +36,7 @@
 {
     if(delegate)
     {
+        // TODO: Remove this
         NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
         [delegate performSelectorOnMainThread:@selector(log:)
                                    withObject:[[LogEntry logEntryTrace:message category:category] retain]
@@ -47,6 +49,7 @@
 {
     if(delegate)
     {
+        // TODO: Remove this
         NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
         [delegate performSelectorOnMainThread:@selector(log:)
                                    withObject:[[LogEntry logEntryWarning:message] retain]
@@ -59,6 +62,7 @@
 {
     if(delegate)
     {
+        // TODO: Remove this
         NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
         [delegate performSelectorOnMainThread:@selector(log:)
                                    withObject:[[LogEntry logEntryError:message] retain]

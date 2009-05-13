@@ -215,7 +215,9 @@
             if(logger)
             {
                 [logger trace:@"Router" message:
-                 [NSString stringWithFormat:@"rejecting request. no session is associated with the connection.\nidentity: %@.", current.id_]];
+                 [NSString stringWithFormat:
+                  @"rejecting request. no session is associated with the connection.\n"
+                  @"identity: category=%@ name=%@.", current.id_.category, current.id_.name]];
             }
             [current.con close:YES];
             @throw [ICEObjectNotExistException objectNotExistException:__FILE__ line:__LINE__];
