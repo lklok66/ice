@@ -45,6 +45,8 @@ interface Router extends Ice::Router
      * @param category The returned category that must be used in the
      * identities of all of the client's callback objects.
      *
+     * @param sessionTimeout The session timeout.
+     *
      * @param sess The A proxy for the newly created session, or null
      * if no [Glacier2::SessionManager] was defined.
      *
@@ -58,7 +60,8 @@ interface Router extends Ice::Router
      */
     
     void createGlacier2Session(Ice::Router* router, string userId, string password,
-                               out string category, out Glacier2::Session* sess)
+                               out string category, out int sessionTimeout,
+                               out Glacier2::Session* sess)
         throws Glacier2::PermissionDeniedException, Glacier2::CannotCreateSessionException;
 };
 

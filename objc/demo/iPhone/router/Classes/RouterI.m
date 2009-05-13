@@ -397,6 +397,7 @@
                         userId:(NSMutableString *)userId
                      password:(NSMutableString *)password
                      category:(NSString **)category
+               sessionTimeout:(ICEInt*)sessionTimeout
                          sess:(id<Glacier2SessionPrx> *)sess
                       current:(ICECurrent *)c
 {
@@ -407,6 +408,7 @@
         id<Glacier2RouterPrx> glacier2router = [Glacier2RouterPrx checkedCast:r];
         *sess = [glacier2router createSession:userId password:password];
         *category = [glacier2router getCategoryForClient];
+        *sessionTimeout = [glacier2router getSessionTimeout];
         
         // Reset the two proxy locators.
         [clientProxyLocator resetRoutingTable:c.con];
