@@ -22,11 +22,10 @@
                    router:(id<ICERouterPrx>)router
                  category:(NSString*)category
 { 
-    if(self = [super initWithNibName:@"ChatView" bundle:nil])
+    if(self = [super initWithWindowNibName:@"ChatView"])
     {
         communicator = c;
         session = s;
-        sessionTimeout = t;
         
         // Set up the adapter, and register the callback object, and setup the session ping.
         id<ICEObjectAdapter> adapter = [communicator createObjectAdapterWithRouter:@"ChatDemo.Client" router:router];
@@ -44,15 +43,9 @@
 
         // The callback is registered in awakeFromNib, otherwise the callbacks can arrive
         // prior to the IBOutlet connections being setup.
-        callbackProxy = [[ChatChatRoomCallbackPrx uncheckedCast:proxy] retain];
+        callbackProxy = [ChatChatRoomCallbackPrx uncheckedCast:proxy];
 
-        // Setup the session refresh timer.
-        refreshTimer = [NSTimer timerWithTimeInterval:sessionTimeout/2
-                                               target:self
-                                             selector:@selector(refreshSession)
-                                             userInfo:nil
-                                              repeats:YES];
-        [[NSRunLoop currentRunLoop] addTimer:refreshTimer forMode:NSDefaultRunLoopMode];
+        sessionTimeout = t;
 
         users = [NSMutableArray array];
 
@@ -82,6 +75,19 @@
 
 -(void)awakeFromNib
 {
+    NSApplication* app = [NSApplication sharedApplication];
+    AppDelegate* delegate = (AppDelegate*)[app delegate];
+    [delegate setChatActive:YES];
+    
+    NSLog(@"ChatController awakeFromNib");
+    // Setup the session refresh timer.
+    refreshTimer = [NSTimer timerWithTimeInterval:sessionTimeout/2
+                                           target:self
+                                         selector:@selector(refreshSession)
+                                         userInfo:nil
+                                          repeats:YES];
+    [[NSRunLoop currentRunLoop] addTimer:refreshTimer forMode:NSDefaultRunLoopMode];
+    
     [chatView.textStorage deleteCharactersInRange:NSMakeRange(0, chatView.textStorage.length)];
     
     // Register the chat callback.
@@ -90,6 +96,53 @@
                      exception:@selector(exception:)
                             cb:callbackProxy];
 }
+
+
+#pragma mark Message management
+
+-(void)append:(NSString*)text who:(NSString*)who timestamp:(NSDate*)timestamp
+{
+    // De-HTMLize the incoming message.
+    NSMutableString* s = [text mutableCopy];
+    NSString* replace[] =
+    {
+        @"&quot;",
+        @"\"",
+        @"&#39;", @"'",
+        @"&lt;", @"<",
+        @"&gt;", @">",
+        @"&amp;", @"&"
+    };
+    int i;
+    for(i = 0; i < sizeof(replace)/sizeof(replace[0]); i += 2)
+    {
+        [s replaceOccurrencesOfString:replace[i]
+                           withString:replace[i+1] options:NSCaseInsensitiveSearch
+                                range:NSMakeRange(0, s.length)];
+    }
+    
+    text = s;
+    
+    [chatView.textStorage appendAttributedString:[[NSAttributedString alloc]
+                                                  initWithString:[dateFormatter stringFromDate:timestamp]
+                                                  attributes:dateTextAttributes]];
+    [chatView.textStorage appendAttributedString:[[NSAttributedString alloc]
+                                                  initWithString:@" - "]];
+    [chatView.textStorage appendAttributedString:[[NSAttributedString alloc]
+                                                  initWithString:who
+                                                  attributes:whoTextAttributes]];
+    [chatView.textStorage appendAttributedString:[[NSAttributedString alloc]
+                                                  initWithString:@" - "]];
+    [chatView.textStorage appendAttributedString:[[NSAttributedString alloc]
+                                                  initWithString:text
+                                                  attributes:textAttributes]];
+    [chatView.textStorage appendAttributedString:[[NSAttributedString alloc]
+                                                  initWithString:@"\n"]];
+    
+    // Scroll the chatView to the end.
+    [chatView scrollRangeToVisible:NSMakeRange(chatView.string.length, 0)];
+}
+
 
 #pragma mark Session management
 
@@ -106,26 +159,34 @@
     // Clean up the communicator.
     [communicator destroy];
     communicator = nil;
+    
+    [self append:@"<disconnected>" who:@"system message" timestamp:[NSDate date]];
+    [inputField setEnabled:NO];
+    
+    NSApplication* app = [NSApplication sharedApplication];
+    AppDelegate* delegate = (AppDelegate*)[app delegate];
+    [delegate setChatActive:NO];
+}
+
+- (BOOL)validateMenuItem:(NSMenuItem *)item
+{
+    if ([item action] == @selector(logout:))
+    {
+        return session != nil;
+    }
+    return YES;
 }
 
 -(void)windowWillClose:(NSNotification *)notification
 {
     [self destroySession];
-    
-    // Terminate the application
-    NSApplication* app = [NSApplication sharedApplication];
-    [app stop:nil];
 }
 
 -(void)exception:(ICEException*)ex
 {
-    NSRunAlertPanel(@"Error", [ex description], @"OK", nil, nil);
-
     [self destroySession];
 
-    NSApplication* app = [NSApplication sharedApplication];
-    AppDelegate* del = (AppDelegate*)app.delegate;
-    [del switchController:del.connectController];
+    NSRunAlertPanel(@"Error", [ex description], @"OK", nil, nil);
 }
 
 -(void)refreshSession
@@ -141,10 +202,6 @@
 -(void)logout:(id)sender
 {
     [self destroySession];
-    
-    NSApplication* app = [NSApplication sharedApplication];
-    AppDelegate* del = (AppDelegate*)app.delegate;
-    [del switchController:del.connectController];
 }
 
 -(IBAction)sendChat:(id)sender
@@ -168,54 +225,6 @@
     }
 }
 
-#pragma mark Message management
-
--(void)append:(NSString*)text who:(NSString*)who timestamp:(ICELong)ts
-{
-    // De-HTMLize the incoming message.
-    NSMutableString* s = [text mutableCopy];
-    NSString* replace[] =
-    {
-        @"&quot;",
-        @"\"",
-        @"&#39;", @"'",
-        @"&lt;", @"<",
-        @"&gt;", @">",
-        @"&amp;", @"&"
-    };
-    int i;
-    for(i = 0; i < sizeof(replace)/sizeof(replace[0]); i += 2)
-    {
-        [s replaceOccurrencesOfString:replace[i]
-                           withString:replace[i+1] options:NSCaseInsensitiveSearch
-                                range:NSMakeRange(0, s.length)];
-    }
-    
-    text = s;
-    
-    // The ChatMessage timestamp is ms since the UNIX epoch.
-    NSDate* timestamp = [NSDate dateWithTimeIntervalSinceReferenceDate:(ts/ 1000.f) - NSTimeIntervalSince1970];
-    
-    [chatView.textStorage appendAttributedString:[[NSAttributedString alloc]
-                                                  initWithString:[dateFormatter stringFromDate:timestamp]
-                                                  attributes:dateTextAttributes]];
-    [chatView.textStorage appendAttributedString:[[NSAttributedString alloc]
-                                                  initWithString:@" - "]];
-    [chatView.textStorage appendAttributedString:[[NSAttributedString alloc]
-                                                  initWithString:who
-                                                  attributes:whoTextAttributes]];
-    [chatView.textStorage appendAttributedString:[[NSAttributedString alloc]
-                                                  initWithString:@" - "]];
-    [chatView.textStorage appendAttributedString:[[NSAttributedString alloc]
-                                                  initWithString:text
-                                                  attributes:textAttributes]];
-    [chatView.textStorage appendAttributedString:[[NSAttributedString alloc]
-                                                  initWithString:@"\n"]];
-    
-    // Scroll the chatView to the end.
-    [chatView scrollRangeToVisible:NSMakeRange(chatView.string.length, 0)];
-}
-
 #pragma mark ChatRoomCallbck
 
 -(void)init:(NSMutableArray *)u current:(ICECurrent*)current;
@@ -226,7 +235,9 @@
 
 -(void)send:(ICELong)timestamp name:(NSMutableString *)name message:(NSMutableString *)message current:(ICECurrent*)current;
 {
-    [self append:message who:name timestamp:timestamp];
+    [self append:message
+             who:name
+       timestamp:[NSDate dateWithTimeIntervalSinceReferenceDate:(timestamp/ 1000.f) - NSTimeIntervalSince1970]];
 }
 
 -(void)join:(ICELong)timestamp name:(NSMutableString*)name current:(ICECurrent*)current;
@@ -234,8 +245,9 @@
     [users addObject:name];
     [userTable reloadData];
    
-    NSString* s = [NSString stringWithFormat:@"%@ joined.", name];
-    [self append:s who:@"system message" timestamp:timestamp];
+    [self append:[NSString stringWithFormat:@"%@ joined.", name]
+             who:@"system message"
+       timestamp:[NSDate dateWithTimeIntervalSinceReferenceDate:(timestamp/ 1000.f) - NSTimeIntervalSince1970]];
 }
 
 -(void)leave:(ICELong)timestamp name:(NSMutableString*)name current:(ICECurrent*)current;
@@ -247,8 +259,9 @@
         [userTable reloadData];
     }
 
-    NSString* s = [NSString stringWithFormat:@"%@ left.", name];
-    [self append:s who:@"system message" timestamp:timestamp];
+    [self append:[NSString stringWithFormat:@"%@ left.", name]
+             who:@"system message"
+       timestamp:[NSDate dateWithTimeIntervalSinceReferenceDate:(timestamp/ 1000.f) - NSTimeIntervalSince1970]];
 }
 
 #pragma mark NSTableView delegate

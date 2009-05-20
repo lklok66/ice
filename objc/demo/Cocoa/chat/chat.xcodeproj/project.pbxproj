@@ -8,15 +8,15 @@
 
 /* Begin PBXBuildFile section */
 		1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DDD58140DA1D0A300B32029 /* MainMenu.xib */; };
-		3422DDC40FBAA0C100BF2266 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 3422DDBE0FBAA0C100BF2266 /* AppDelegate.m */; };
 		3422DDC50FBAA0C100BF2266 /* ChatController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3422DDC00FBAA0C100BF2266 /* ChatController.m */; };
 		3422DDC60FBAA0C100BF2266 /* ConnectController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3422DDC20FBAA0C100BF2266 /* ConnectController.m */; };
 		3422DDC70FBAA0C100BF2266 /* Router.ice in Sources */ = {isa = PBXBuildFile; fileRef = 3422DDC30FBAA0C100BF2266 /* Router.ice */; };
+		343DE5990FC3EBD900FCC49C /* ConnectView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 343DE5980FC3EBD900FCC49C /* ConnectView.xib */; };
+		343DE5F70FC3F0AD00FCC49C /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 343DE5F60FC3F0AD00FCC49C /* AppDelegate.m */; };
 		3448C79E0FB018C900BFB717 /* Chat.ice in Sources */ = {isa = PBXBuildFile; fileRef = 3448C79C0FB018C900BFB717 /* Chat.ice */; };
 		3448C79F0FB018C900BFB717 /* ChatSession.ice in Sources */ = {isa = PBXBuildFile; fileRef = 3448C79D0FB018C900BFB717 /* ChatSession.ice */; };
 		3448C7A50FB0191200BFB717 /* libIceObjC.0.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3448C7A40FB0191200BFB717 /* libIceObjC.0.1.0.dylib */; };
 		3448C7B20FB0198300BFB717 /* libGlacier2ObjC.0.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3448C7B10FB0198300BFB717 /* libGlacier2ObjC.0.1.0.dylib */; };
-		3448C7F20FB11F0C00BFB717 /* ConnectView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3448C7F10FB11F0C00BFB717 /* ConnectView.xib */; };
 		34537F320FBAA03100933480 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 34537F310FBAA03100933480 /* icon.icns */; };
 		345436120FB29554005CB1B6 /* ChatView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 345436110FB29554005CB1B6 /* ChatView.xib */; };
 		34D0A0530FB955EE0038BB19 /* cacert.der in Resources */ = {isa = PBXBuildFile; fileRef = 34D0A0520FB955EE0038BB19 /* cacert.der */; };
@@ -34,18 +34,18 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32CA4F630368D1EE00C91783 /* chat_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chat_Prefix.pch; sourceTree = "<group>"; };
-		3422DDBD0FBAA0C100BF2266 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Classes/AppDelegate.h; sourceTree = "<group>"; };
-		3422DDBE0FBAA0C100BF2266 /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = Classes/AppDelegate.m; sourceTree = "<group>"; };
 		3422DDBF0FBAA0C100BF2266 /* ChatController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChatController.h; path = Classes/ChatController.h; sourceTree = "<group>"; };
 		3422DDC00FBAA0C100BF2266 /* ChatController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ChatController.m; path = Classes/ChatController.m; sourceTree = "<group>"; };
 		3422DDC10FBAA0C100BF2266 /* ConnectController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ConnectController.h; path = Classes/ConnectController.h; sourceTree = "<group>"; };
 		3422DDC20FBAA0C100BF2266 /* ConnectController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ConnectController.m; path = Classes/ConnectController.m; sourceTree = "<group>"; };
 		3422DDC30FBAA0C100BF2266 /* Router.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = Router.ice; path = Classes/Router.ice; sourceTree = "<group>"; };
+		343DE5980FC3EBD900FCC49C /* ConnectView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ConnectView.xib; sourceTree = "<group>"; };
+		343DE5F60FC3F0AD00FCC49C /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = Classes/AppDelegate.m; sourceTree = "<group>"; };
+		343DE5F90FC3F10500FCC49C /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Classes/AppDelegate.h; sourceTree = "<group>"; };
 		3448C79C0FB018C900BFB717 /* Chat.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = Chat.ice; path = Classes/Chat.ice; sourceTree = "<group>"; };
 		3448C79D0FB018C900BFB717 /* ChatSession.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = ChatSession.ice; path = Classes/ChatSession.ice; sourceTree = "<group>"; };
 		3448C7A40FB0191200BFB717 /* libIceObjC.0.1.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libIceObjC.0.1.0.dylib; path = ../../../lib/libIceObjC.0.1.0.dylib; sourceTree = SOURCE_ROOT; };
 		3448C7B10FB0198300BFB717 /* libGlacier2ObjC.0.1.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libGlacier2ObjC.0.1.0.dylib; path = ../../../lib/libGlacier2ObjC.0.1.0.dylib; sourceTree = SOURCE_ROOT; };
-		3448C7F10FB11F0C00BFB717 /* ConnectView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ConnectView.xib; sourceTree = "<group>"; };
 		34537F310FBAA03100933480 /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = "<group>"; };
 		345436110FB29554005CB1B6 /* ChatView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ChatView.xib; sourceTree = "<group>"; };
 		34D0A0520FB955EE0038BB19 /* cacert.der */ = {isa = PBXFileReference; lastKnownFileType = file; path = cacert.der; sourceTree = "<group>"; };
@@ -70,8 +70,8 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				3422DDBD0FBAA0C100BF2266 /* AppDelegate.h */,
-				3422DDBE0FBAA0C100BF2266 /* AppDelegate.m */,
+				343DE5F90FC3F10500FCC49C /* AppDelegate.h */,
+				343DE5F60FC3F0AD00FCC49C /* AppDelegate.m */,
 				3422DDBF0FBAA0C100BF2266 /* ChatController.h */,
 				3422DDC00FBAA0C100BF2266 /* ChatController.m */,
 				3422DDC10FBAA0C100BF2266 /* ConnectController.h */,
@@ -138,8 +138,8 @@
 				8D1107310486CEB800E47090 /* Info.plist */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
 				1DDD58140DA1D0A300B32029 /* MainMenu.xib */,
-				3448C7F10FB11F0C00BFB717 /* ConnectView.xib */,
 				345436110FB29554005CB1B6 /* ChatView.xib */,
+				343DE5980FC3EBD900FCC49C /* ConnectView.xib */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -200,10 +200,10 @@
 			files = (
 				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
 				1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */,
-				3448C7F20FB11F0C00BFB717 /* ConnectView.xib in Resources */,
 				345436120FB29554005CB1B6 /* ChatView.xib in Resources */,
 				34D0A0530FB955EE0038BB19 /* cacert.der in Resources */,
 				34537F320FBAA03100933480 /* icon.icns in Resources */,
+				343DE5990FC3EBD900FCC49C /* ConnectView.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -217,10 +217,10 @@
 				8D11072D0486CEB800E47090 /* main.m in Sources */,
 				3448C79E0FB018C900BFB717 /* Chat.ice in Sources */,
 				3448C79F0FB018C900BFB717 /* ChatSession.ice in Sources */,
-				3422DDC40FBAA0C100BF2266 /* AppDelegate.m in Sources */,
 				3422DDC50FBAA0C100BF2266 /* ChatController.m in Sources */,
 				3422DDC60FBAA0C100BF2266 /* ConnectController.m in Sources */,
 				3422DDC70FBAA0C100BF2266 /* Router.ice in Sources */,
+				343DE5F70FC3F0AD00FCC49C /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

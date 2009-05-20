@@ -9,13 +9,15 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class ConnectController;
+
 @interface AppDelegate : NSObject
 {
-    NSViewController* connectController;
+    ConnectController* connectController;
+    BOOL chatActive;
 }
 
-@property (nonatomic, readonly) NSViewController* connectController;
-
--(void)switchController:(NSViewController*)controller;
+-(void)login:(id)sender;
+-(void)setChatActive:(BOOL)active;
 
 @end

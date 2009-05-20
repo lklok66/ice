@@ -8,9 +8,9 @@
 // **********************************************************************
 
 #import <Cocoa/Cocoa.h>
-#import <ChatSession.h>
+#import <ChatSession.h> // For ChatChatRoomCallback protocol
 
-@interface ChatController : NSViewController<ChatChatRoomCallback>
+@interface ChatController : NSWindowController<ChatChatRoomCallback>
 {
 @private
     IBOutlet NSTextView* chatView;
@@ -40,5 +40,6 @@
                  category:(NSString*)category;
 
 -(IBAction)sendChat:(id)sender;
+-(void)logout:(id)sender;
 
 @end

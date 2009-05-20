@@ -9,7 +9,6 @@
 
 #import <ConnectController.h>
 #import <ChatController.h>
-#import <AppDelegate.h>
 
 #import <Ice/Ice.h>
 #import <Chat.h>
@@ -17,24 +16,18 @@
 #import <Glacier2/Router.h>
 #import <Router.h>
 
+NSString* const serverKey = @"hostnameKey";
+NSString* const usernameKey = @"usernameKey";
+NSString* const passwordKey = @"passwordKey";
+NSString* const sslKey = @"sslKey";
+NSString* const routerKey = @"routerKey";
+NSString* const routerServerKey = @"routerServerKey";
+
 @implementation ConnectController
 
-- (id)init
-{ 
-    return [super initWithNibName:@"ConnectView" bundle:nil];
-}
-
-NSString* serverKey = @"hostnameKey";
-NSString* usernameKey = @"usernameKey";
-NSString* passwordKey = @"passwordKey";
-NSString* sslKey = @"sslKey";
-NSString* routerKey = @"routerKey";
-NSString* routerServerKey = @"routerServerKey";
-
--(void)awakeFromNib
+// Initialize the app defaults.
++(void)initialize
 {
-    NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-
     // Initialize the application defaults.
     NSDictionary* appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
                                  @"demo.zeroc.com", serverKey,
@@ -45,8 +38,23 @@ NSString* routerServerKey = @"routerServerKey";
                                  @"", routerServerKey,
                                  nil];
     
-    [defaults registerDefaults:appDefaults];
-    
+    [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
+}
+
+-(id)init
+{
+    if(self = [super initWithWindowNibName:@"ConnectView"])
+    {
+        queue = [[NSOperationQueue alloc] init];
+    }
+    return self;
+}
+
+-(void)awakeFromNib
+{
+    // Restore the field values from the app defaults.
+    NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+
     chatServerField.stringValue = [defaults stringForKey:serverKey];
     usernameField.stringValue = [defaults stringForKey:usernameKey];
     passwordField.stringValue = [defaults stringForKey:passwordKey];
@@ -67,8 +75,8 @@ NSString* routerServerKey = @"routerServerKey";
 -(void)windowWillClose:(NSNotification *)notification
 {
     // Terminate the application
-    NSApplication* app = [NSApplication sharedApplication];
-    [app stop:nil];
+//    NSApplication* app = [NSApplication sharedApplication];
+//    [app stop:nil];
 }
 
 #pragma mark Login callbacks
@@ -77,21 +85,23 @@ NSString* routerServerKey = @"routerServerKey";
 {
     // Hide the connecting sheet.
     [NSApp endSheet:connectingSheet];
-    [connectingSheet orderOut:self.view.window];
+    [connectingSheet orderOut:self.window];
+    [progress stopAnimation:self];
 
     // The communicator is now owned by the ChatController.
     communicator = nil;
+    [self.window close];
 
-    NSApplication* app = [NSApplication sharedApplication];
-    AppDelegate* del = (AppDelegate*)app.delegate;
-    [del switchController:controller];
+    //[self.window orderOut:self];
+    [controller showWindow:self];
 }
 
 -(void)exception:(NSString*)ex
 {
     // Hide the connecting sheet.
     [NSApp endSheet:connectingSheet]; 
-    [connectingSheet orderOut:self.view.window];
+    [connectingSheet orderOut:self.window];
+    [progress stopAnimation:self];
 
     [communicator destroy];
     communicator = nil;
@@ -104,7 +114,8 @@ NSString* routerServerKey = @"routerServerKey";
     @try
     {
         id<Glacier2RouterPrx> router = [Glacier2RouterPrx checkedCast:proxy];
-        id<Glacier2SessionPrx> glacier2session = [router createSession:usernameField.stringValue password:passwordField.stringValue];
+        id<Glacier2SessionPrx> glacier2session = [router createSession:usernameField.stringValue
+                                                              password:passwordField.stringValue];
         id<ChatChatSessionPrx> session = [ChatChatSessionPrx uncheckedCast:glacier2session];
         
         int sessionTimeout = [router getSessionTimeout];
@@ -177,8 +188,12 @@ NSString* routerServerKey = @"routerServerKey";
 
 #pragma mark Login
 
--(void)login:(id)sender
+-(void)doLogin:(id)sender
 {
+    NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:usernameField.stringValue forKey:usernameKey];
+    [defaults setObject:passwordField.stringValue forKey:passwordKey];
+    
     ICEInitializationData* initData = [ICEInitializationData initializationData];
     initData.properties = [ICEUtil createProperties ];
     [initData.properties setProperty:@"Ice.ACM.Client" value:@"0"];
@@ -189,12 +204,14 @@ NSString* routerServerKey = @"routerServerKey";
     //[initData.properties setProperty:@"Ice.Trace.Protocol" value:@"1"];
     
     [initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
-    [initData.properties setProperty:@"IceSSL.TrustOnly.Client" value:@"C2:E8:D3:33:D7:83:99:6E:08:F7:C2:34:31:F7:1E:8E:44:87:38:57"];
+    [initData.properties setProperty:@"IceSSL.TrustOnly.Client"
+                               value:@"C2:E8:D3:33:D7:83:99:6E:08:F7:C2:34:31:F7:1E:8E:44:87:38:57"];
     [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
 
     NSAssert(communicator == nil, @"communicator == nil");
     communicator = [ICEUtil createCommunicator:initData];
 
+    SEL loginSelector;
     id<ICEObjectPrx> proxy;
     @try
     {
@@ -203,33 +220,39 @@ NSString* routerServerKey = @"routerServerKey";
         {
             if(sslField.state == NSOnState)
             {
-                s = [NSString stringWithFormat:@"iPhoneRouter/Router:ssl -p 12001 -h %@ -t 10000", routerServerField.stringValue];
+                s = [NSString stringWithFormat:@"iPhoneRouter/Router:ssl -p 12001 -h %@ -t 10000",
+                     routerServerField.stringValue];
             }
             else
             {
-                s = [NSString stringWithFormat:@"iPhoneRouter/Router:tcp -p 12000 -h %@ -t 10000", routerServerField.stringValue];
+                s = [NSString stringWithFormat:@"iPhoneRouter/Router:tcp -p 12000 -h %@ -t 10000",
+                     routerServerField.stringValue];
             }
             proxy = [communicator stringToProxy:s];
             id<ICERouterPrx> router = [ICERouterPrx uncheckedCast:proxy];
             [communicator setDefaultRouter:router];
 
             // The proxy to the Glacier2 router.
-            proxy = [communicator stringToProxy:[NSString stringWithFormat:@"Glacier2/router:tcp -p 4502 -h %@ -t 10000", chatServerField.stringValue]];
+            proxy = [communicator stringToProxy:
+                     [NSString stringWithFormat:@"Glacier2/router:tcp -p 4502 -h %@ -t 10000",
+                      chatServerField.stringValue]];
+            loginSelector = @selector(doPhoneRouterLogin:);            
         }
         else
         {
             if(sslField.state == NSOnState)
             {
-                s = [NSString stringWithFormat:@"Glacier2/router:ssl -p 4064 -h %@ -t 10000", chatServerField.stringValue];
+                s = [NSString stringWithFormat:@"Glacier2/router:ssl -p 4064 -h %@ -t 10000",
+                     chatServerField.stringValue];
             }
             else
             {
-                s = [NSString stringWithFormat:@"Glacier2/router:tcp -p 4502 -h %@ -t 10000", chatServerField.stringValue];
+                s = [NSString stringWithFormat:@"Glacier2/router:tcp -p 4502 -h %@ -t 10000",
+                     chatServerField.stringValue];
             }
             proxy = [communicator stringToProxy:s];
-            id<ICERouterPrx> router = [ICERouterPrx uncheckedCast:proxy];
-            
-            [communicator setDefaultRouter:router];
+            [communicator setDefaultRouter:[ICERouterPrx uncheckedCast:proxy]];
+            loginSelector = @selector(doGlacier2Login:);
         }
     }
     @catch(ICEEndpointParseException* ex)
@@ -238,23 +261,18 @@ NSString* routerServerKey = @"routerServerKey";
         return;
     }
     
-    NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-    [defaults setObject:usernameField.stringValue forKey:usernameKey];
-    [defaults setObject:passwordField.stringValue forKey:passwordKey];
-
     [NSApp beginSheet:connectingSheet 
-       modalForWindow:[self.view window] 
+       modalForWindow:self.window
         modalDelegate:nil 
        didEndSelector:NULL 
           contextInfo:NULL];
+    [progress startAnimation:self];
 
-    SEL loginSelector = (routerField.state == NSOnState) ? @selector(doPhoneRouterLogin:) : @selector(doGlacier2Login:);
     // Kick off the login process in a separate thread. This ensures that the UI is not blocked.
     NSInvocationOperation* op = [[NSInvocationOperation alloc]
                                  initWithTarget:self
                                  selector:loginSelector
                                  object:proxy];
-    NSOperationQueue* queue = [[NSOperationQueue alloc] init];
     [queue addOperation:op];
 }
 
@@ -267,7 +285,7 @@ NSString* routerServerKey = @"routerServerKey";
 -(void)showAdvancedSheet:(id)sender
 {
     [NSApp beginSheet:advancedSheet 
-       modalForWindow:[self.view window] 
+       modalForWindow:self.window 
         modalDelegate:nil 
        didEndSelector:NULL 
           contextInfo:NULL];

@@ -11,7 +11,7 @@
 
 @protocol ICECommunicator;
 
-@interface ConnectController : NSViewController
+@interface ConnectController : NSWindowController
 {
 @private
     IBOutlet NSTextField* chatServerField;
@@ -22,11 +22,13 @@
     IBOutlet NSTextField* routerServerField;
     IBOutlet NSWindow* advancedSheet;
     IBOutlet NSWindow* connectingSheet;
+    IBOutlet NSProgressIndicator* progress;
     id<ICECommunicator> communicator;
     id<ICECommunicator> validationCommunicator;
+    NSOperationQueue* queue;
 }
 
--(void)login:(id)sender;
+-(void)doLogin:(id)sender;
 -(void)routerChanged:(id)sender;
 -(void)showAdvancedSheet:(id)sender;
 -(void)closeAdvancedSheet:(id)sender;
