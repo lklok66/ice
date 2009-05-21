@@ -39,7 +39,7 @@
 					<object class="IBUILabel" id="788485315">
 						<reference key="NSNextResponder" ref="249263867"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{20, 66}, {87, 21}}</string>
+						<string key="NSFrame">{{20, 90}, {87, 21}}</string>
 						<reference key="NSSuperview" ref="249263867"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
@@ -56,7 +56,7 @@
 					<object class="IBUILabel" id="329810819">
 						<reference key="NSNextResponder" ref="249263867"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{20, 123}, {63, 21}}</string>
+						<string key="NSFrame">{{20, 147}, {63, 21}}</string>
 						<reference key="NSSuperview" ref="249263867"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
@@ -73,7 +73,7 @@
 					<object class="IBUILabel" id="187932806">
 						<reference key="NSNextResponder" ref="249263867"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{20, 20}, {57, 21}}</string>
+						<string key="NSFrame">{{20, 44}, {57, 21}}</string>
 						<reference key="NSSuperview" ref="249263867"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
@@ -90,7 +90,7 @@
 					<object class="IBUISwitch" id="25542612">
 						<reference key="NSNextResponder" ref="249263867"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{108, 120}, {94, 27}}</string>
+						<string key="NSFrame">{{108, 144}, {94, 27}}</string>
 						<reference key="NSSuperview" ref="249263867"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
@@ -101,7 +101,7 @@
 					<object class="IBUILabel" id="493504003">
 						<reference key="NSNextResponder" ref="249263867"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{20, 167}, {63, 21}}</string>
+						<string key="NSFrame">{{20, 191}, {63, 21}}</string>
 						<reference key="NSSuperview" ref="249263867"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
@@ -118,7 +118,7 @@
 					<object class="IBUISwitch" id="995297909">
 						<reference key="NSNextResponder" ref="249263867"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{108, 164}, {94, 27}}</string>
+						<string key="NSFrame">{{108, 188}, {94, 27}}</string>
 						<reference key="NSSuperview" ref="249263867"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
@@ -130,7 +130,7 @@
 					<object class="IBUISegmentedControl" id="177967276">
 						<reference key="NSNextResponder" ref="249263867"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{108, 53}, {169, 44}}</string>
+						<string key="NSFrame">{{108, 77}, {169, 44}}</string>
 						<reference key="NSSuperview" ref="249263867"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClearsContextBeforeDrawing">NO</bool>
@@ -175,7 +175,7 @@
 					<object class="IBUILabel" id="778312819">
 						<reference key="NSNextResponder" ref="249263867"/>
 						<int key="NSvFlags">292</int>
-						<string key="NSFrame">{{20, 284}, {280, 75}}</string>
+						<string key="NSFrame">{{20, 308}, {280, 75}}</string>
 						<reference key="NSSuperview" ref="249263867"/>
 						<bool key="IBUIOpaque">NO</bool>
 						<bool key="IBUIClipsSubviews">YES</bool>
@@ -298,13 +298,13 @@
 						<reference key="object" ref="249263867"/>
 						<object class="NSMutableArray" key="children">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<reference ref="187932806"/>
 							<reference ref="788485315"/>
-							<reference ref="177967276"/>
+							<reference ref="329810819"/>
+							<reference ref="187932806"/>
+							<reference ref="25542612"/>
 							<reference ref="493504003"/>
 							<reference ref="995297909"/>
-							<reference ref="329810819"/>
-							<reference ref="25542612"/>
+							<reference ref="177967276"/>
 							<reference ref="778312819"/>
 						</object>
 						<reference key="parent" ref="360949347"/>
