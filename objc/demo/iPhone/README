@@ -15,3 +15,9 @@ Demos in this directory:
 
   This demo is an iPhone client for the java Database/library JDBC
   demo.
+
+- router
+
+  This demo is an iPhone application that allows routing Ice requests
+  from a computer on the Wifi network to servers on either the Wifi
+  or 3G network.
