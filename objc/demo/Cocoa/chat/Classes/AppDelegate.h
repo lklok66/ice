@@ -9,11 +9,9 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class ConnectController;
-
 @interface AppDelegate : NSObject
 {
-    ConnectController* connectController;
+    NSWindowController* connectController;
     BOOL chatActive;
 }
 

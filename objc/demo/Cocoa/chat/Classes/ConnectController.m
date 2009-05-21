@@ -70,15 +70,6 @@ NSString* const routerServerKey = @"routerServerKey";
     [super finalize];
 }
 
-#pragma mark NSWindow delegate
-
--(void)windowWillClose:(NSNotification *)notification
-{
-    // Terminate the application
-//    NSApplication* app = [NSApplication sharedApplication];
-//    [app stop:nil];
-}
-
 #pragma mark Login callbacks
 
 -(void)loginComplete:(ChatController*)controller
@@ -90,9 +81,9 @@ NSString* const routerServerKey = @"routerServerKey";
 
     // The communicator is now owned by the ChatController.
     communicator = nil;
-    [self.window close];
 
-    //[self.window orderOut:self];
+    // Close the connecting window, show the main window.
+    [self.window close];
     [controller showWindow:self];
 }
 
@@ -153,7 +144,6 @@ NSString* const routerServerKey = @"routerServerKey";
         id<Glacier2SessionPrx> glacier2session;
         NSMutableString* category;
         ICEInt sessionTimeout;
-        NSLog(@"calling on %@", router);
         [router createGlacier2Session:glacier2router
                                userId:usernameField.stringValue
                              password:passwordField.stringValue

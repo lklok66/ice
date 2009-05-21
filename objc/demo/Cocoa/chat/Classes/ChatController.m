@@ -79,7 +79,6 @@
     AppDelegate* delegate = (AppDelegate*)[app delegate];
     [delegate setChatActive:YES];
     
-    NSLog(@"ChatController awakeFromNib");
     // Setup the session refresh timer.
     refreshTimer = [NSTimer timerWithTimeInterval:sessionTimeout/2
                                            target:self

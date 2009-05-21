@@ -12,9 +12,17 @@
 
 @implementation AppDelegate
 
+-(id)init
+{
+    if(self = [super init])
+    {
+        connectController = [[ConnectController alloc] init];
+    }
+    return self;
+}
+
 -(void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-    connectController = [[ConnectController alloc] init];
     [connectController showWindow:self];
 }
 
