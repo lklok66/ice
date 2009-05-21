@@ -1,6 +1,12 @@
 Changes since version 0.1.0
 ---------------------------
 
+- Added Cocoa demos library & chat.
+
+- Added iPhone router demo.
+
+- Added simple router client demo/Ice/helloRouter.
+
 - Added support for GC under Mac OS.
 
 - Changed the outParams parameter of ICEBlobject ice_invoke to NSMutableData**.
