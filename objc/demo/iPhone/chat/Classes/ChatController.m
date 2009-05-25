@@ -88,56 +88,49 @@
     UILabel* timestamp;
     UILabel* who;
     UILabel* body;
-    ChatMessage* message;
     NSDateFormatter *dateFormatter;
+
+    ChatMessage* message;
 }
 
-@property (nonatomic, retain) UILabel* timestamp;
-@property (nonatomic, retain) UILabel* who;
-@property (nonatomic, retain) UILabel* body;
 @property (nonatomic, retain) ChatMessage* message;
-@property (nonatomic, retain) NSDateFormatter* dateFormatter;
 
 +(CGFloat)heightForMessage:(ChatMessage*)messsage;
 
 @end
 
 @implementation MessageCell
-@synthesize timestamp;
-@synthesize who;
-@synthesize body;
 @synthesize message;
-@synthesize dateFormatter;
 
 - (id)initWithFrame:(CGRect)frame reuseIdentifier:(NSString *)reuseIdentifier
 {
     if (self = [super initWithFrame:frame reuseIdentifier:reuseIdentifier])
     {
-        self.who = [[[UILabel alloc] initWithFrame:CGRectZero] autorelease];
+        who = [[UILabel alloc] initWithFrame:CGRectZero];
         
-        self.who.textAlignment = UITextAlignmentLeft;
-        self.who.textColor = [UIColor blueColor];
-        self.who.font = [UIFont boldSystemFontOfSize:12];
-        self.who.numberOfLines = 0;
+        who.textAlignment = UITextAlignmentLeft;
+        who.textColor = [UIColor blueColor];
+        who.font = [UIFont boldSystemFontOfSize:12];
+        who.numberOfLines = 0;
         
-        self.timestamp = [[[UILabel alloc] initWithFrame:CGRectZero] autorelease];
-        self.timestamp.textAlignment = UITextAlignmentRight;
-        self.timestamp.textColor = [UIColor blackColor];
-        self.timestamp.highlightedTextColor = [UIColor darkGrayColor];
-        self.timestamp.font = [UIFont boldSystemFontOfSize:12];
-        self.timestamp.numberOfLines = 0;
+        timestamp = [[UILabel alloc] initWithFrame:CGRectZero];
+        timestamp.textAlignment = UITextAlignmentRight;
+        timestamp.textColor = [UIColor blackColor];
+        timestamp.highlightedTextColor = [UIColor darkGrayColor];
+        timestamp.font = [UIFont boldSystemFontOfSize:12];
+        timestamp.numberOfLines = 0;
         
-        self.body = [[[UILabel alloc] initWithFrame:CGRectZero] autorelease];
+        body = [[UILabel alloc] initWithFrame:CGRectZero];
 
-        self.body.textColor = [UIColor lightGrayColor];
-        self.body.font = [UIFont boldSystemFontOfSize:14];
-        self.body.numberOfLines = 0;
+        body.textColor = [UIColor lightGrayColor];
+        body.font = [UIFont boldSystemFontOfSize:14];
+        body.numberOfLines = 0;
         
-        [self.contentView addSubview:self.timestamp];
-        [self.contentView addSubview:self.who];
-        [self.contentView addSubview:self.body];
+        [self.contentView addSubview:timestamp];
+        [self.contentView addSubview:who];
+        [self.contentView addSubview:body];
         
-        self.dateFormatter = [[[NSDateFormatter alloc] init]  autorelease];
+        dateFormatter = [[NSDateFormatter alloc] init];
         [dateFormatter setDateStyle:NSDateFormatterShortStyle];
         [dateFormatter setTimeStyle:NSDateFormatterMediumStyle];
     }
@@ -167,9 +160,9 @@
 
     CGRect bodyFrame = CGRectMake(10.f, 20.f, CGRectGetWidth(contentRect)-20.f, CGRectGetHeight(contentRect)-20.f);
 
-    self.timestamp.frame = timestampFrame;
-    self.who.frame = whoFrame;
-    self.body.frame = bodyFrame;
+    timestamp.frame = timestampFrame;
+    who.frame = whoFrame;
+    body.frame = bodyFrame;
 }
 
 - (void)dealloc
@@ -184,24 +177,16 @@
 
 -(void)setMessage:(ChatMessage*)m
 {
-    // Don't call self.message here, that results in infinite recursion.
-    if(message)
-    {
-        [message release];
-    }
+    [message release];
     message = [m retain];
-    self.timestamp.text = [dateFormatter stringFromDate:message.timestamp];
-    self.who.text = message.who;
-    self.body.text = message.text;    
+    timestamp.text = [dateFormatter stringFromDate:message.timestamp];
+    who.text = message.who;
+    body.text = message.text;    
 }
 
 @end
 
 @interface ChatController()
-
-@property (nonatomic, retain) UITableView* chatView;
-@property (nonatomic, retain) UITextField* inputField;
-@property (nonatomic, retain) NSMutableArray* messages;
 
 @property (nonatomic, retain) id<ChatChatSessionPrx> session;
 @property (nonatomic, retain) NSTimer* refreshTimer;
@@ -212,17 +197,14 @@
 
 @implementation ChatController
 
-@synthesize chatView;
-@synthesize inputField;
 @synthesize session;
-@synthesize messages;
 @synthesize refreshTimer;
 @synthesize communicator;
 @synthesize callbackProxy;
 
 -(void)viewDidLoad
 {
-    self.messages = [NSMutableArray array];
+    messages = [[NSMutableArray array] retain];
     
     self.navigationItem.rightBarButtonItem =
     [[[UIBarButtonItem alloc] initWithTitle:@"Users"
@@ -303,12 +285,11 @@ sessionTimeout:(int)t
     if(session != nil)
     {
         [session destroy_async:nil response:nil exception:nil];
-        [session release];
-        session = nil;
+        self.session = nil;
     }
     
     [communicator destroy];
-    [communicator release];
+    self.communicator = nil;
 }
 
 -(void)logout:(id)sender
@@ -557,7 +538,7 @@ sessionTimeout:(int)t
 
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
-    return self.chatView.sectionHeaderHeight;
+    return chatView.sectionHeaderHeight;
 }
 
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath

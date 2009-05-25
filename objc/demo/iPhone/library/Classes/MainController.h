@@ -13,6 +13,8 @@
 
 @protocol DemoLibraryPrx;
 @protocol DemoBookQueryResultPrx;
+@class ICEInitializationData;
+@protocol ICECommunicator;
 
 @class AddController;
 
@@ -21,9 +23,6 @@
                      DetailControllerDelegate>
 {
 @private
-    
-    id<DemoLibraryPrx> library;
-    
     IBOutlet UISegmentedControl* searchSegmentedControl;
     IBOutlet UITableView* searchTableView;
 
@@ -35,8 +34,18 @@
     NSMutableArray* books;
     int rowsQueried;
     int nrows;
+
+    // Session state.
+    NSTimer* refreshTimer;
+    id<ICECommunicator> communicator;
+    id session;
+    id<DemoLibraryPrx> library;
 }
 
-@property (nonatomic, retain) id<DemoLibraryPrx> library;
+// Called to setup the session.
+-(void)activate:(id<ICECommunicator>)communicator
+        session:(id)session
+ sessionTimeout:(int)timeout
+        library:(id<DemoLibraryPrx>)library;
 
 @end

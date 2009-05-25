@@ -12,6 +12,8 @@
 @protocol DemoLibraryPrx;
 @class MainController;
 @class WaitAlert;
+@class ICEInitializationData;
+@protocol ICECommunicator;
 
 @interface LoginController : UIViewController<UITextFieldDelegate,UIAlertViewDelegate>
 {
@@ -24,11 +26,14 @@
     NSString* hostname;
     MainController *mainController;
     
-    id session;
-    id<DemoLibraryPrx> library;
-    int sessionTimeout;
     NSOperationQueue* queue;
     WaitAlert* waitAlert;
+    
+    ICEInitializationData* initData;
+    id<ICECommunicator> communicator;
+    id session;
+    int sessionTimeout;
+    id<DemoLibraryPrx> library;
 }
 
 -(IBAction)login:(id)sender;

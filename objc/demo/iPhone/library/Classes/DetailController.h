@@ -16,6 +16,7 @@
 @protocol DetailControllerDelegate
 -(void)bookUpdated:(DemoBookDescription*)book;
 -(void)bookDeleted;
+-(void)destroy;
 @end
 
 @interface DetailController :
@@ -31,6 +32,7 @@
     
     id<DetailControllerDelegate> delegate;
     bool changed;
+    bool fatal;
 }
 
 @property (nonatomic, retain) DemoBookDescription* book;

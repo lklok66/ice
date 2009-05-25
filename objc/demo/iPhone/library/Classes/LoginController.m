@@ -9,7 +9,6 @@
 
 #import <LoginController.h>
 #import <MainController.h>
-#import <AppDelegate.h>
 #import <WaitAlert.h>
 
 #import <Ice/Ice.h>
@@ -20,36 +19,21 @@
 
 @interface LoginController()
 
-@property (nonatomic, retain) UITextField* hostnameTextField;
-@property (nonatomic, retain) UIButton* loginButton;
-@property (nonatomic, retain) UISwitch* glacier2Switch;
-@property (nonatomic, retain) UISwitch* sslSwitch;
-
 @property (nonatomic, retain) NSString* hostname;
-
-@property (nonatomic, retain) MainController* mainController;
-
-@property (retain) id<DemoLibraryPrx> library;
-@property (retain) id session;
-@property int sessionTimeout;
-@property (nonatomic, retain) NSOperationQueue* queue;
 @property (nonatomic, retain) WaitAlert* waitAlert;
+@property (nonatomic, retain) id<ICECommunicator> communicator;
+@property (nonatomic, retain) id session;
+@property (nonatomic, retain) id<DemoLibraryPrx> library;
 
 @end
 
 @implementation LoginController
 
-@synthesize hostnameTextField;
-@synthesize loginButton;
-@synthesize glacier2Switch;
-@synthesize sslSwitch;
 @synthesize hostname;
-@synthesize library;
-@synthesize session;
-@synthesize mainController;
-@synthesize queue;
-@synthesize sessionTimeout;
 @synthesize waitAlert;
+@synthesize communicator;
+@synthesize session;
+@synthesize library;
 
 NSString* hostnameKey = @"hostnameKey";
 NSString* glacier2Key = @"glacier2Key";
@@ -67,23 +51,56 @@ NSString* sslKey = @"sslKey";
 
 -(void)viewDidLoad
 {
+    initData = [[ICEInitializationData initializationData] retain];
+    initData.properties = [ICEUtil createProperties ];
+    [initData.properties setProperty:@"Ice.ACM.Client" value:@"0"];
+    [initData.properties setProperty:@"Ice.RetryIntervals" value:@"-1"];
+    
+    // Tracing properties.
+    //[initData.properties setProperty:@"Ice.Trace.Network" value:@"1"];
+    //[initData.properties setProperty:@"Ice.Trace.Protocol" value:@"1"];
+    
+    //[initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
+    
+    [initData.properties setProperty:@"IceSSL.TrustOnly.Client" value:@"11:DD:28:AD:13:44:76:47:4F:BE:3C:4D:AC:AD:5A:06:88:DA:52:DA"];
+    [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
+    
+#if TARGET_IPHONE_SIMULATOR
+    [initData.properties setProperty:@"IceSSL.Keychain" value:@"test"];
+    [initData.properties setProperty:@"IceSSL.KeychainPassword" value:@"password"];
+#endif        
+    
     NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
     self.hostname = [defaults stringForKey:hostnameKey];
     glacier2Switch.on = [defaults boolForKey:glacier2Key];
     sslSwitch.on = [defaults boolForKey:sslKey];
     
-    self.queue = [[[NSOperationQueue alloc] init] autorelease];
+    queue = [[NSOperationQueue alloc] init];
 
     // When the user starts typing, show the clear button in the text field.
     hostnameTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
     hostnameTextField.text = hostname;
     loginButton.enabled = hostname.length > 0;
+    
+    mainController = [[MainController alloc] initWithNibName:@"MainView" bundle:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(applicationWillTerminate) 
+                                                 name:UIApplicationWillTerminateNotification
+                                               object:nil]; 
+}
+
+-(void)applicationWillTerminate
+{
+    [communicator destroy];
+    self.communicator = nil;
 }
 
 -(void)viewWillAppear:(BOOL)animated
 {
-    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-    [appDelegate logout];
+    NSAssert(communicator == nil, @"communicator == nil");
+    self.communicator = [[ICEUtil createCommunicator:initData] retain];
+    
     [super viewWillAppear:animated];
 }
 
@@ -121,21 +138,12 @@ NSString* sslKey = @"sslKey";
     [sslSwitch release];
     [hostname release];
     [mainController release];
-    [session release];
-    [library release];
     [queue release];
     [waitAlert release];
-    [super dealloc];
-}
+    [session release];
+    [library release];
 
--(MainController*)mainController
-{
-    // Instantiate the main view controller if necessary.
-    if (mainController == nil)
-    {
-        mainController = [[MainController alloc] initWithNibName:@"MainView" bundle:nil];
-    }
-    return mainController;
+    [super dealloc];
 }
 
 -(void)glacier2Changed:(id)s
@@ -164,8 +172,7 @@ NSString* sslKey = @"sslKey";
                        theTextField.text];
         @try
         {
-            AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-            [appDelegate.communicator stringToProxy:s];
+            [communicator stringToProxy:s];
         }
         @catch(ICEEndpointParseException* ex)
         {
@@ -197,8 +204,8 @@ NSString* sslKey = @"sslKey";
     self.waitAlert = nil;
 
     // Restart the login process in the delegate.
-    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-    [appDelegate logout];
+    [communicator destroy];
+    self.communicator = [[ICEUtil createCommunicator:initData] retain];    
     
     // open an alert with just an OK button
     UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Error"
@@ -213,13 +220,18 @@ NSString* sslKey = @"sslKey";
 {
     [waitAlert dismissWithClickedButtonIndex:0 animated:YES];
     self.waitAlert = nil;
+
+    [mainController activate:communicator
+                     session:session
+           sessionTimeout:sessionTimeout
+                     library:library];
+
+    // Clear internal state.
+    self.communicator = nil;
+    self.session = nil;
+    self.library = nil;
     
-    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-    [appDelegate setSession:session timeout:self.sessionTimeout/2];
-    
-    MainController* controller = self.mainController;
-    controller.library = library;
-    [self.navigationController pushViewController:controller animated:YES];
+    [self.navigationController pushViewController:mainController animated:YES];
 }
 
 // Runs in a separate thread, called only by NSInvocationOperation.
@@ -235,10 +247,10 @@ NSString* sslKey = @"sslKey";
         }
 
         id<DemoSessionPrx> sess = [factory create];
-    
+
         self.session = sess;
+        sessionTimeout = [factory getSessionTimeout];
         self.library = [sess getLibrary];
-        self.sessionTimeout = [factory getSessionTimeout];
         
         [self performSelectorOnMainThread:@selector(loginComplete) withObject:nil waitUntilDone:NO];
     }
@@ -259,9 +271,9 @@ NSString* sslKey = @"sslKey";
         id<DemoGlacier2SessionPrx> sess = [DemoGlacier2SessionPrx uncheckedCast:glacier2session];
 
         self.session = sess;
+        sessionTimeout = [router getSessionTimeout];
         self.library = [sess getLibrary];
-        self.sessionTimeout = [router getSessionTimeout];
-
+        
         [self performSelectorOnMainThread:@selector(loginComplete) withObject:nil waitUntilDone:NO];
     }
     @catch(Glacier2CannotCreateSessionException* ex)
@@ -282,7 +294,6 @@ NSString* sslKey = @"sslKey";
 
 -(IBAction)login:(id)sender
 {
-    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
     id<ICEObjectPrx> proxy;
     SEL loginSelector;
 
@@ -299,11 +310,11 @@ NSString* sslKey = @"sslKey";
             {
                 s = [NSString stringWithFormat:@"DemoGlacier2/router:tcp -h %@ -p 4502 -t 10000", hostname];
             }
-            proxy = [appDelegate.communicator stringToProxy:s];
+            proxy = [communicator stringToProxy:s];
 
             // Configure the default router on the communicator.
             id<ICERouterPrx> router = [ICERouterPrx uncheckedCast:proxy];
-            [appDelegate.communicator setDefaultRouter:router];
+            [communicator setDefaultRouter:router];
 
             loginSelector = @selector(doGlacier2Login:);
         }
@@ -318,7 +329,7 @@ NSString* sslKey = @"sslKey";
             {
                 s = [NSString stringWithFormat:@"SessionFactory:tcp -h %@ -p 10000 -t 10000", hostname];
             }
-            proxy = [appDelegate.communicator stringToProxy:s];
+            proxy = [communicator stringToProxy:s];
 
             loginSelector = @selector(doLogin:);
         }

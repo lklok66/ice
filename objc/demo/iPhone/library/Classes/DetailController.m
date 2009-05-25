@@ -121,6 +121,7 @@ static EditController* editViewController_ = nil;
 
 -(void)startEdit:(DemoBookDescription*)b
 {
+    fatal = NO;
     changed = NO;
     self.book = b;
     [self setEditing:NO animated:NO];
@@ -170,8 +171,7 @@ static EditController* editViewController_ = nil;
         // However, doing so directly by calling [self.navigationController popToRootViewControllerAnimated:YES];
         // causes the navigation view & the bar to get out of sync. So instead, we pop to the root view
         // in the alert view didDismissWithButtonIndex callback.
-        AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-        appDelegate.fatal = YES;
+        fatal = YES;
     }
 
     // open an alert with just an OK button
@@ -279,9 +279,9 @@ static EditController* editViewController_ = nil;
 
 -(void)alertView:(UIAlertView*)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
 {
-    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-    if(appDelegate.fatal)
+    if(fatal)
     {
+        [delegate destroy];
         [self.navigationController popToRootViewControllerAnimated:YES];
     }
 }

@@ -9,7 +9,6 @@
 
 #import <LoginController.h>
 #import <ChatController.h>
-#import <AppDelegate.h>
 #import <WaitAlert.h>
 
 #import <Ice/Ice.h>
@@ -18,37 +17,18 @@
 
 @interface LoginController()
 
-@property (nonatomic, retain) UITextField* hostnameField;
-@property (nonatomic, retain) UITextField* usernameField;
-@property (nonatomic, retain) UITextField* passwordField;
-@property (nonatomic, retain) UIButton* loginButton;
-@property (nonatomic, retain) UISwitch* sslSwitch;
-
 @property (nonatomic, retain) UITextField* currentField;
 @property (nonatomic, retain) NSString* oldFieldValue;
-
-@property (nonatomic, retain) NSOperationQueue* queue;
-
 @property (nonatomic, retain) WaitAlert* waitAlert;
-
-@property (nonatomic, retain) ICEInitializationData* initData;
 @property (nonatomic, retain) id<ICECommunicator> communicator;
 
 @end
 
 @implementation LoginController
 
-@synthesize hostnameField;
-@synthesize usernameField;
-@synthesize passwordField;
-@synthesize loginButton;
-@synthesize sslSwitch;
-
 @synthesize currentField;
 @synthesize oldFieldValue;
-@synthesize queue;
 @synthesize waitAlert;
-@synthesize initData;
 @synthesize communicator;
 
 NSString* hostnameKey = @"hostnameKey";
@@ -70,7 +50,7 @@ NSString* sslKey = @"sslKey";
 - (void)viewDidLoad
 {
     NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-    self.queue = [[[NSOperationQueue alloc] init] autorelease];
+    queue = [[NSOperationQueue alloc] init];
 
     hostnameField.text = [defaults stringForKey:hostnameKey];
     hostnameField.clearButtonMode = UITextFieldViewModeWhileEditing;
@@ -83,7 +63,7 @@ NSString* sslKey = @"sslKey";
     
     sslSwitch.on = [defaults boolForKey:sslKey]; 
     
-    self.initData = [ICEInitializationData initializationData];
+    initData = [[ICEInitializationData initializationData] retain];
     
     initData.properties = [ICEUtil createProperties ];
     [initData.properties setProperty:@"Ice.ACM.Client" value:@"0"];

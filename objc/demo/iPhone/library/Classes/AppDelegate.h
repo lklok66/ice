@@ -17,23 +17,10 @@
 {
 @private
     
-    id<ICECommunicator> communicator;
-    id session;
-    BOOL fatal;
-
     IBOutlet UIWindow *window;
     IBOutlet UINavigationController *navigationController;
 
-    NSTimer* refreshTimer;
-    ICEInitializationData* initData;
 }
-
-@property (nonatomic, readonly) id<ICECommunicator> communicator;
-@property (nonatomic) BOOL fatal;
-
--(void)sessionRefreshException:(ICEException*)ex;
--(void)logout;
--(void)setSession:(id)session timeout:(int)timeout;
 
 @end
 

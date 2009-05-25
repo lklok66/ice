@@ -11,34 +11,31 @@
 #import <DetailController.h>
 #import <AddController.h>
 
-#import <AppDelegate.h>
+#import <Session.h>
 
 #import <Ice/Ice.h>
 #import <Library.h>
 
 @interface MainController()
 
-@property (nonatomic, retain) UITableView* searchTableView;
-@property (nonatomic, retain) UISegmentedControl* searchSegmentedControl;
-
 @property (nonatomic, retain) NSIndexPath* currentIndexPath;
-@property (nonatomic, retain) DetailController* detailController;
-@property (nonatomic, retain) AddController* addController;
 @property (nonatomic, retain) id<DemoBookQueryResultPrx> query;
-@property (nonatomic, retain) NSMutableArray* books;
+
+@property (nonatomic, retain) NSTimer* refreshTimer;
+@property (nonatomic, retain) id<ICECommunicator> communicator;
+@property (nonatomic, retain) id session;
+@property (nonatomic, retain) id<DemoLibraryPrx> library;
 
 @end
 
 @implementation MainController
 
-@dynamic library;
-@synthesize searchTableView;
-@synthesize searchSegmentedControl;
+@synthesize library;
 @synthesize query;
-@synthesize books;
-@synthesize addController;
-@synthesize detailController;
 @synthesize currentIndexPath;
+@synthesize communicator;
+@synthesize refreshTimer;
+@synthesize session;
 
 -(id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -47,9 +44,14 @@
         self.title = @"Search"; // Hostname?
 
 		// Initialization code
-        self.books = [NSMutableArray array];
+        books = [[NSMutableArray array] retain];
         nrows = 0;
         rowsQueried = 0;
+        
+        detailController = [[DetailController alloc] initWithNibName:@"DetailView" bundle:nil];
+        detailController.delegate = self;
+
+        addController = [[AddController alloc] initWithNibName:@"DetailView" bundle:nil];
 	}
 	return self;
 }
@@ -60,10 +62,24 @@
     [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd
                                                    target:self
                                                    action:@selector(addBook:)] autorelease];
+    self.navigationItem.leftBarButtonItem =
+    [[[UIBarButtonItem alloc] initWithTitle:@"Logout"
+                                      style:UIBarButtonItemStylePlain
+                                     target:self action:@selector(logout:)] autorelease];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(destroy)
+                                                 name:UIApplicationWillTerminateNotification
+                                               object:nil];    
 }
 
 -(void)viewWillAppear:(BOOL)animated
 {
+    // There was a fatal error and the session was destroyed.
+    if(session == nil)
+    {
+        [self.navigationController popViewControllerAnimated:YES];
+    }
     // Redisplay the data.
     [searchTableView reloadData];
 }
@@ -90,47 +106,79 @@
     [addController release];
     [query release];
     [books release];
+    [communicator release];
+    [session release];
+    [refreshTimer release];
 	[super dealloc];
 }
 
--(DetailController *)detailController
-{
-    // Instantiate the main view controller if necessary.
-    if (detailController == nil)
-    {
-        detailController = [[DetailController alloc] initWithNibName:@"DetailView" bundle:nil];
-        detailController.delegate = self;
-    }
-    return detailController;
-}
+#pragma mark SessionManagement
 
--(AddController *)addController
+-(void)activate:(id<ICECommunicator>)c session:(id)s sessionTimeout:(int)sessionTimeout library:(id<DemoLibraryPrx>)l
 {
-    if (addController == nil)
-    {
-        addController = [[AddController alloc] initWithNibName:@"DetailView" bundle:nil];
-    }
-    return addController;
-}
-
--(void)setLibrary:(id<DemoLibraryPrx>)l
-{
-    if(library)
-    {
-        [library release];
-    }
-    library = [l retain];
-    
-    // Kill the previous query results.
+    self.communicator = c;
+    self.session = s;
+    self.library = l;
     self.query = nil;
     nrows = 0;
     rowsQueried = 10;
     [books removeAllObjects];
+    
+    // Save the new session, and create the refresh timer.
+    self.refreshTimer = [NSTimer
+                         timerWithTimeInterval:sessionTimeout/2
+                         target:self
+                         selector:@selector(refreshSession:)
+                         userInfo:nil
+                         repeats:YES];
+    [[NSRunLoop currentRunLoop] addTimer:refreshTimer forMode:NSDefaultRunLoopMode];
 }
 
--(id<DemoLibraryPrx>)library
+-(void)destroy
 {
-    return [[library retain] autorelease];
+    // Destroy the old session, and invalidate the refresh timer.
+    [refreshTimer invalidate];
+    self.refreshTimer = nil;
+    
+    [session destroy_async:nil response:nil exception:nil];
+    self.session = nil;
+    
+    [communicator destroy];
+    self.communicator = nil;
+}
+
+-(void)logout:(id)sender
+{
+    [self destroy];
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+-(void)sessionRefreshException:(ICEException*)ex
+{
+    [self.navigationController popToRootViewControllerAnimated:YES];
+    
+    // The session is invalid, clear.
+    self.session = nil;
+    
+    // Clean up the remainder.
+    [self destroy];
+    
+    NSString* s = [NSString stringWithFormat:@"Lost connection with session!\n%@", ex];
+    
+    // open an alert with just an OK button
+    UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Error"
+                                                     message:s
+                                                    delegate:nil
+                                           cancelButtonTitle:@"OK"
+                                           otherButtonTitles:nil] autorelease];
+    [alert show];
+}
+
+-(void)refreshSession:(NSTimer*)timer
+{
+    [session refresh_async:[ICECallbackOnMainThread callbackOnMainThread:self]
+                  response:nil
+                 exception:@selector(sessionRefreshException:)];
 }
 
 -(void)removeCurrentBook
@@ -150,14 +198,13 @@
 
 -(void)addBook:(id)sender
 {
-    AddController *controller = self.addController;
     DemoBookDescription* book = [DemoBookDescription bookDescription];
     book.title = @"";
     book.authors = [NSMutableArray array];
     
-    [controller startEdit:book library:library];
+    [addController startEdit:book library:library];
 
-    [self.navigationController pushViewController:controller animated:YES];
+    [self.navigationController pushViewController:addController animated:YES];
 }
 
 #pragma mark DetailControllerDelegate
@@ -183,8 +230,7 @@
     // However, doing so directly by calling [self.navigationController popToRootViewControllerAnimated:YES];
     // causes the navigation view & the bar to get out of sync. So instead, we pop to the root view
     // in the alert view didDismissWithButtonIndex callback.
-    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-    appDelegate.fatal = YES;
+    [self destroy];
     
     // open an alert with just an OK button
     UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Error"
@@ -247,8 +293,7 @@
 
 -(void)alertView:(UIAlertView*)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
 {
-    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-    if(appDelegate.fatal)
+    if(session == nil)
     {
         [self.navigationController popToRootViewControllerAnimated:YES];
     }
@@ -356,7 +401,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
 
 -(UITableViewCell *)tableView:(UITableView *)tv cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewCell *cell = [self.searchTableView dequeueReusableCellWithIdentifier:@"MyIdentifier"];
+    UITableViewCell *cell = [searchTableView dequeueReusableCellWithIdentifier:@"MyIdentifier"];
     if (cell == nil)
     {
         // Create a new cell. CGRectZero allows the cell to determine the appropriate size.
@@ -397,12 +442,11 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
     }
     
     self.currentIndexPath = indexPath;
-    
-    DetailController* controller = self.detailController;
-    [controller startEdit:[books objectAtIndex:indexPath.row]];
+
+    [detailController startEdit:[books objectAtIndex:indexPath.row]];
     
     // Push the detail view on to the navigation controller's stack.
-    [self.navigationController pushViewController:controller animated:YES];
+    [self.navigationController pushViewController:detailController animated:YES];
     return nil;
 }
 

@@ -6,6 +6,7 @@
 // ICE_TOUCH_LICENSE file included in this distribution.
 //
 // **********************************************************************
+
 #import <UIKit/UIKit.h>
 
 @class ChatController;

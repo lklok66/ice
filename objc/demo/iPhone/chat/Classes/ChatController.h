@@ -8,8 +8,6 @@
 // **********************************************************************
 
 #import <UIKit/UIKit.h>
-#import <Ice/Ice.h>
-
 #import <ChatSession.h>
 
 @class UserController;
