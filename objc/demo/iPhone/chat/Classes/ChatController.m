@@ -7,8 +7,8 @@
 //
 // **********************************************************************
 
-#import <ChatViewController.h>
-#import <UserViewController.h>
+#import <ChatController.h>
+#import <UserController.h>
 
 #import <Ice/Ice.h>
 #import <ChatSession.h>
@@ -115,20 +115,12 @@
     {
         self.who = [[[UILabel alloc] initWithFrame:CGRectZero] autorelease];
         
-        // TODO: Clean
-        //self.who.backgroundColor = self.backgroundColor;
-        //self.who.backgroundColor = [UIColor whiteColor];
-        //self.who.opaque = NO;
         self.who.textAlignment = UITextAlignmentLeft;
         self.who.textColor = [UIColor blueColor];
-        //self.who.highlightedTextColor = [UIColor lightGrayColor];
         self.who.font = [UIFont boldSystemFontOfSize:12];
         self.who.numberOfLines = 0;
         
         self.timestamp = [[[UILabel alloc] initWithFrame:CGRectZero] autorelease];
-        //self.timestamp.backgroundColor = [UIColor whiteColor];
-        //self.timestamp.backgroundColor = self.backgroundColor;   
-        //self.timestamp.opaque = NO;
         self.timestamp.textAlignment = UITextAlignmentRight;
         self.timestamp.textColor = [UIColor blackColor];
         self.timestamp.highlightedTextColor = [UIColor darkGrayColor];
@@ -136,12 +128,8 @@
         self.timestamp.numberOfLines = 0;
         
         self.body = [[[UILabel alloc] initWithFrame:CGRectZero] autorelease];
-        //self.body.backgroundColor = self.backgroundColor;   
 
-        //self.body.backgroundColor = [UIColor whiteColor];
-        //self.body.opaque = NO;
         self.body.textColor = [UIColor lightGrayColor];
-        //self.body.highlightedTextColor = [UIColor lightGrayColor];
         self.body.font = [UIFont boldSystemFontOfSize:14];
         self.body.numberOfLines = 0;
         
@@ -162,8 +150,8 @@
     // The header is always one line, the body is multiple lines.
     // The width of the table is 320 - 20px of left & right padding. We don't want to let the body
     // text go past 200px.
-    CGSize body = [message.text sizeWithFont:[UIFont boldSystemFontOfSize:14] 
-                 constrainedToSize:CGSizeMake(300.f, 200.0f)];
+    CGSize body = [[message text] sizeWithFont:[UIFont boldSystemFontOfSize:14] 
+                             constrainedToSize:CGSizeMake(300.f, 200.0f)];
 
     return body.height + 20.f + 20.f; // 20px padding.
 }
@@ -209,46 +197,170 @@
 
 @end
 
-@interface ChatViewController()
+@interface ChatController()
 
 @property (nonatomic, retain) UITableView* chatView;
-@property (nonatomic, retain) UITextField* inputTextField;
-@property (nonatomic, retain) UserViewController* userViewController;
+@property (nonatomic, retain) UITextField* inputField;
 @property (nonatomic, retain) NSMutableArray* messages;
+
+@property (nonatomic, retain) id<ChatChatSessionPrx> session;
+@property (nonatomic, retain) NSTimer* refreshTimer;
+@property (nonatomic, retain) id<ICECommunicator> communicator;
+@property (nonatomic, retain) id<ChatChatRoomCallbackPrx> callbackProxy;
 
 @end
 
-@implementation ChatViewController
+@implementation ChatController
 
 @synthesize chatView;
-@synthesize inputTextField;
-@synthesize userViewController;
+@synthesize inputField;
 @synthesize session;
 @synthesize messages;
+@synthesize refreshTimer;
+@synthesize communicator;
+@synthesize callbackProxy;
 
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+-(void)viewDidLoad
 {
-	if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil])
-    {
-        self.title = @"Chat";
-        self.messages = [NSMutableArray array];
-        self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc]
-                                                   initWithTitle:@"Users"
-                                                   style:UIBarButtonItemStylePlain
-                                                   target:self action:@selector(users:)] autorelease];
-	}
-	return self;
+    self.messages = [NSMutableArray array];
+    
+    self.navigationItem.rightBarButtonItem =
+    [[[UIBarButtonItem alloc] initWithTitle:@"Users"
+                                      style:UIBarButtonItemStylePlain
+                                     target:self action:@selector(users:)] autorelease];
+    
+    self.navigationItem.leftBarButtonItem =
+    [[[UIBarButtonItem alloc] initWithTitle:@"Logout"
+                                      style:UIBarButtonItemStylePlain
+                                     target:self action:@selector(logout:)] autorelease];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(destroy)
+                                                 name:UIApplicationWillTerminateNotification
+                                               object:nil];
+    
+    userController = [[UserController alloc] initWithNibName:@"UserView" bundle:nil];
 }
 
-#pragma mark - UIViewController delegate methods
+#pragma mark SessionManagement
+
+// Called by the thread other than main.
+-(void)  setup:(id<ICECommunicator>)c
+       session:(id<ChatChatSessionPrx>)s
+sessionTimeout:(int)t
+        router:(id<ICERouterPrx>)router
+      category:(NSString*)category
+{
+    self.communicator = c;
+    self.session = s;
+    sessionTimeout = t;
+    id<ICEObjectAdapter> adapter = [communicator createObjectAdapterWithRouter:@"ChatDemo.Client"
+                                                                        router:router];
+    [adapter activate];
+    
+    // Here we tie the chat view controller to the ChatRoomCallback servant.
+    ChatChatRoomCallback* callbackImpl = [ChatChatRoomCallback objectWithDelegate:self];
+    
+    // This helper ensures that all methods are dispatched in the main thread.
+    ICEObject* dispatchMainThread = [ICEMainThreadDispatch mainThreadDispatch:callbackImpl];
+
+    ICEIdentity* callbackId = [ICEIdentity identity:[ICEUtil generateUUID] category:category];
+
+    // The callback is registered in clear:, otherwise the callbacks can arrive
+    // prior to the IBOutlet connections being setup.
+    self.callbackProxy = [ChatChatRoomCallbackPrx uncheckedCast:[adapter add:dispatchMainThread identity:callbackId]];
+}
+
+// Called when the chat controller becomes active.
+-(void)activate:(NSString*)t
+{
+    self.title = t;
+    
+    [messages removeAllObjects];
+    [chatView reloadData];
+    
+    // Setup the session refresh timer.
+    self.refreshTimer = [NSTimer timerWithTimeInterval:sessionTimeout/2
+                                                target:self
+                                              selector:@selector(refreshSession:)
+                                              userInfo:nil
+                                               repeats:YES];
+    [[NSRunLoop currentRunLoop] addTimer:refreshTimer forMode:NSDefaultRunLoopMode];
+    
+    // Register the chat callback.
+    [session setCallback_async:[ICECallbackOnMainThread callbackOnMainThread:self]
+                      response:nil
+                     exception:@selector(exception:)
+                            cb:callbackProxy];
+}
+
+-(void)destroy
+{
+    [refreshTimer invalidate];
+    self.refreshTimer = nil;
+
+    // Destroy the old session, and invalidate the refresh timer.
+    if(session != nil)
+    {
+        [session destroy_async:nil response:nil exception:nil];
+        [session release];
+        session = nil;
+    }
+    
+    [communicator destroy];
+    [communicator release];
+}
+
+-(void)logout:(id)sender
+{
+    [self destroy];
+    [self.navigationController popViewControllerAnimated:YES];
+}
+
+-(void)sessionRefreshException:(ICEException*)ex
+{
+    [self.navigationController popToRootViewControllerAnimated:YES];
+
+    // The session is invalid, clear.
+    self.session = nil;
+
+    // Clean up the remainder.
+    [self destroy];
+    
+    NSString* s = [NSString stringWithFormat:@"Lost connection with session!\n%@", ex];
+    
+    // open an alert with just an OK button
+    UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Error"
+                                                     message:s
+                                                    delegate:nil
+                                           cancelButtonTitle:@"OK"
+                                           otherButtonTitles:nil] autorelease];
+    [alert show];
+}
+
+-(void)refreshSession:(NSTimer*)timer
+{
+    [session ice_invoke_async:[ICECallbackOnMainThread callbackOnMainThread:self]
+                     response:nil
+                    exception:@selector(sessionRefreshException:)
+                    operation:@"ice_ping"
+                         mode:ICENonmutating
+                     inParams:nil];
+}
+
+#pragma mark UIViewController delegate methods
 
 - (void)viewWillAppear:(BOOL)animated
 {
     // Register for keyboard show/hide notifications.
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) 
-                                                 name:UIKeyboardWillShowNotification object:self.view.window]; 
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillHide:) 
-                                                 name:UIKeyboardWillHideNotification object:self.view.window]; 
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardWillShow:) 
+                                                 name:UIKeyboardWillShowNotification
+                                               object:self.view.window]; 
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardWillHide:) 
+                                                 name:UIKeyboardWillHideNotification
+                                               object:self.view.window]; 
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -260,8 +372,8 @@
 
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    [inputTextField resignFirstResponder];
-    inputTextField.text = @""; 
+    [inputField resignFirstResponder];
+    inputField.text = @""; 
     [super touchesBegan:touches withEvent:event];
 }
 
@@ -280,29 +392,18 @@
 - (void)dealloc
 {
     [chatView release];
-    [inputTextField release];
-    [userViewController release];
+    [inputField release];
+    [userController release];
     [messages release];
+    [refreshTimer release];
+    [communicator release];
+    [session release];
+    [callbackProxy release];
+    
 	[super dealloc];
 }
 
 #pragma mark -
-
--(void)clear
-{
-    [messages removeAllObjects];
-    [chatView reloadData];
-}
-
--(UserViewController *)userViewController
-{
-    // Instantiate the main view controller if necessary.
-    if (userViewController == nil)
-    {
-        userViewController = [[UserViewController alloc] initWithNibName:@"UserView" bundle:nil];
-    }
-    return userViewController;
-}
 
 -(void)append:(ChatMessage*)message
 {
@@ -318,9 +419,7 @@
 
 -(void)users:(id)sender
 {
-    UserViewController *controller = self.userViewController;
-    
-    [self.navigationController pushViewController:controller animated:YES];    
+    [self.navigationController pushViewController:userController animated:YES];    
 }
 
 - (void)setViewMovedUp:(BOOL)movedUp bounds:(CGRect)bounds
@@ -345,11 +444,14 @@
 -(void)exception:(ICEException*)ex
 {
     // open an alert with just an OK button
-    UIAlertView *alert = [[UIAlertView alloc]
-                          initWithTitle:@"Error" message:[ex description]
-                          delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Error"
+                                                     message:[ex description]
+                                                    delegate:self
+                                           cancelButtonTitle:@"OK"
+                                           otherButtonTitles:nil] autorelease];
     [alert show];       
-    [alert release];
+    
+    [self destroy];
     
     [self.navigationController popViewControllerAnimated:YES];
 }
@@ -383,11 +485,10 @@
         }
         NSAssert(s.length <= 1024, @"s.length <= 1024");
         
-        [session
-         send_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-         response:nil
-         exception:@selector(exception:)
-         message:s];
+        [session send_async:[ICECallbackOnMainThread callbackOnMainThread:self]
+                   response:nil
+                  exception:@selector(exception:)
+                    message:s];
     }
 
     theTextField.text = @"";
@@ -400,11 +501,11 @@
 
 -(void)init:(NSMutableArray *)users current:(ICECurrent*)current;
 {
-    self.userViewController.users = users;
-    [self.userViewController.usersTableView reloadData];
+    userController.users = users;
+    [userController.usersTableView reloadData];
     self.navigationItem.rightBarButtonItem.title = [NSString stringWithFormat:@"%d %@",
-                                                    self.userViewController.users.count,
-                                                    (self.userViewController.users.count > 1 ? @"users" : @"user")];
+                                                    userController.users.count,
+                                                    (userController.users.count > 1 ? @"users" : @"user")];
 }
 
 -(void)send:(ICELong)timestamp name:(NSMutableString *)name message:(NSMutableString *)message current:(ICECurrent*)current;
@@ -417,12 +518,12 @@
     NSString* s = [NSString stringWithFormat:@"%@ joined.\n", name];
     [self append:[ChatMessage chatMessageWithText:s who:@"system message" timestamp:timestamp]];
 
-    [self.userViewController.users addObject:name];
-    [self.userViewController.usersTableView reloadData];
+    [userController.users addObject:name];
+    [userController.usersTableView reloadData];
     
     self.navigationItem.rightBarButtonItem.title = [NSString stringWithFormat:@"%d %@",
-                                                    self.userViewController.users.count,
-                                                    (self.userViewController.users.count > 1 ? @"users" : @"user")];
+                                                    userController.users.count,
+                                                    (userController.users.count > 1 ? @"users" : @"user")];
 }
 
 -(void)leave:(ICELong)timestamp name:(NSMutableString*)name current:(ICECurrent*)current;
@@ -430,16 +531,16 @@
     NSString* s = [NSString stringWithFormat:@"%@ left.\n", name];
     [self append:[ChatMessage chatMessageWithText:s who:@"system message" timestamp:timestamp]];
     
-    int index = [self.userViewController.users indexOfObject:name];
+    int index = [userController.users indexOfObject:name];
     if(index != NSNotFound)
     {
-        [self.userViewController.users removeObjectAtIndex:index];
-        [self.userViewController.usersTableView reloadData];
+        [userController.users removeObjectAtIndex:index];
+        [userController.usersTableView reloadData];
     }
 
     self.navigationItem.rightBarButtonItem.title = [NSString stringWithFormat:@"%d %@",
-                                                    self.userViewController.users.count,
-                                                    (self.userViewController.users.count > 1 ? @"users" : @"user")];
+                                                    userController.users.count,
+                                                    (userController.users.count > 1 ? @"users" : @"user")];
 }
 
 #pragma mark <UITableViewDelegate, UITableViewDataSource> Methods

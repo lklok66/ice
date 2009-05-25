@@ -7,23 +7,15 @@
 //
 // **********************************************************************
 
-#import <AppDelegate.h>
+#import <UIKit/UIKit.h>
 
-@implementation AppDelegate
-
-- (void)applicationDidFinishLaunching:(UIApplication *)application
+@interface WaitAlert : UIAlertView
 {
-	// Configure and show the window
-	[window addSubview:[navigationController view]];
-	[window makeKeyAndVisible];
+@private
+    UIActivityIndicatorView* progressView;
+    UILabel* waitingLabel;
 }
 
-- (void)dealloc
-{
-    [navigationController release];
-    [window release];
-
-    [super dealloc];
-}
+@property (nonatomic, retain) NSString* text;
 
 @end

@@ -8,28 +8,28 @@
 // **********************************************************************
 #import <UIKit/UIKit.h>
 
-@class ChatViewController;
-@protocol ChatChatSessionPrx;
+@class ChatController;
+@class WaitAlert;
+@class ICEInitializationData;
+@protocol ICECommunicator;
 
-@interface LoginViewController : UIViewController<UITextFieldDelegate,UIAlertViewDelegate>
+@interface LoginController : UIViewController<UITextFieldDelegate,UIAlertViewDelegate>
 {
 @private
-    IBOutlet UITextField* hostnameTextField;
-    IBOutlet UITextField* usernameTextField;
-    IBOutlet UITextField* passwordTextField;
+    IBOutlet UITextField* hostnameField;
+    IBOutlet UITextField* usernameField;
+    IBOutlet UITextField* passwordField;
     IBOutlet UIButton* loginButton;
     IBOutlet UISwitch* sslSwitch;
 
-    NSString* hostname;
-    NSString* username;
-    NSString* password;
-    UITextField* currentTextField;
-    NSString* oldTextFieldValue;
-    ChatViewController* chatViewController;
+    UITextField* currentField;
+    NSString* oldFieldValue;
+    ChatController* chatController;
     NSOperationQueue* queue;
-    id<ChatChatSessionPrx> session;
-    int sessionTimeout;
-    BOOL showAlert;
+    WaitAlert* waitAlert;
+    
+    ICEInitializationData* initData;
+    id<ICECommunicator> communicator;
 }
 
 -(IBAction)login:(id)sender;

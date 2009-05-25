@@ -9,8 +9,7 @@
 
 #import <UIKit/UIKit.h>
 
-
-@interface UserViewController : UITableViewController
+@interface UserController : UITableViewController
 {
     IBOutlet UITableView* usersTableView;
     NSMutableArray* users;

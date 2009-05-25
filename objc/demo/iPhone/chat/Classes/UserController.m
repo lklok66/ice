@@ -7,9 +7,9 @@
 //
 // **********************************************************************
 
-#import <UserViewController.h>
+#import <UserController.h>
 
-@implementation UserViewController
+@implementation UserController
 
 @synthesize usersTableView;
 @synthesize users;
@@ -38,6 +38,7 @@
 
 - (void)dealloc
 {
+    [usersTableView dealloc];
     [users dealloc];
 	[super dealloc];
 }
