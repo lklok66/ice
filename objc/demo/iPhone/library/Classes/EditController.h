@@ -9,25 +9,22 @@
 
 #import <UIKit/UIKit.h>
 
-@protocol EditViewCallback<NSObject>
-@property (nonatomic, readonly) NSString *fieldName;
-@property (nonatomic, readonly) NSString *textValue;
--(void)save:(NSString*)value;
-@end
 
-@interface EditViewController : UIViewController
+@interface EditController : UIViewController
 {
 @private
     
     IBOutlet UITextField* textField;
-    id<EditViewCallback> cb;
+    
+    id obj;
+    SEL selector;
+    NSString* value;
 }
 
 @property (nonatomic, readonly) UITextField *textField;
-@property (nonatomic, retain) id<EditViewCallback> cb;
 
 -(IBAction)cancel:(id)sender;
 -(IBAction)save:(id)sender;
+-(void)startEdit:(id)obj selector:(SEL)selector name:(NSString*)name value:(NSString*)value;
 
 @end
-

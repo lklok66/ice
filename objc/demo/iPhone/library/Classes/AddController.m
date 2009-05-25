@@ -7,11 +7,17 @@
 //
 // **********************************************************************
 
-#import <AddViewController.h>
-
+#import <AddController.h>
 #import <Library.h>
+#import <WaitAlert.h>
 
-@implementation AddViewController
+@interface AddController ()
+
+@property (nonatomic, retain) id<DemoLibraryPrx> library;
+
+@end
+
+@implementation AddController
 
 @synthesize library;
 
@@ -51,6 +57,7 @@
 
 -(void)dealloc
 {
+    [waitAlert release];
     [library release];
 	[super dealloc];
 }
@@ -62,47 +69,49 @@
 
 -(IBAction)save:(id)sender
 {
-    // Disable the navigation buttons. The user is locked on this page
-    // until the save has completed.
-    self.navigationItem.leftBarButtonItem.enabled = NO;
-    self.navigationItem.rightBarButtonItem.enabled = NO;
-    [self setEditing:NO animated:NO];
-    [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = YES;
+    NSAssert(waitAlert == nil, @"savingAlert == nil");
+    self.waitAlert = [[WaitAlert alloc] init];
+    [waitAlert show];
+    
+    [library createBook_async:[ICECallbackOnMainThread callbackOnMainThread:self]
+                     response:@selector(createResponse)
+                    exception:@selector(exception:)
+                         isbn:book.isbn
+                        title:book.title
+                      authors:book.authors];
+}
 
-    [library
-     createBook_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-     response:@selector(createResponse)
-     exception:@selector(exception:)
-     isbn:book.isbn
-     title:book.title
-     authors:book.authors];
+-(void)startEdit:(DemoBookDescription*)b library:(id<DemoLibraryPrx>)l
+{
+    self.book = b;
+    self.library = l;
+    [self setEditing:YES animated:NO];
 }
 
 #pragma mark AMI callbacks
 
 -(void)createResponse
 {
-    [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
-  
+    NSAssert(waitAlert != nil, @"savingAlert != nil");
+    [waitAlert dismissWithClickedButtonIndex:0 animated:NO];
+    self.waitAlert = nil;
+    
     [self.navigationController popViewControllerAnimated:YES];
 }
 
 -(void)exception:(ICEException*)ex
 {
-    [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
+    NSAssert(waitAlert != nil, @"savingAlert != nil");
+    [waitAlert dismissWithClickedButtonIndex:0 animated:NO];
+    self.waitAlert = nil;
+
     if([ex isKindOfClass:[DemoBookExistsException class]])
     {
         // open an alert with just an OK button
-        UIAlertView *alert = [[UIAlertView alloc]
-                              initWithTitle:@"Error" message:@"That ISBN number already exists"
-                              delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        UIAlertView *alert = [[[UIAlertView alloc]
+                               initWithTitle:@"Error" message:@"That ISBN number already exists"
+                               delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] autorelease];
         [alert show];
-        [alert release];
-        
-        self.navigationItem.leftBarButtonItem.enabled = YES;
-        self.navigationItem.rightBarButtonItem.enabled = YES;
-        [self setEditing:YES animated:NO];
-        
         return;
     }
 

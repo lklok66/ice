@@ -9,21 +9,13 @@
 
 #import <UIKit/UIKit.h>
 
-
-#import <DetailViewController.h>
-
-@protocol DemoLibraryPrx;
-
-@interface AddViewController : DetailViewController
+@interface WaitAlert : UIAlertView
 {
 @private
-    
-    id<DemoLibraryPrx> library;
+    UIActivityIndicatorView* progressView;
+    UILabel* waitingLabel;
 }
 
-@property (nonatomic, retain) id<DemoLibraryPrx> library;
-
--(IBAction)cancel:(id)sender;
--(IBAction)save:(id)sender;
+@property (nonatomic, retain) NSString* text;
 
 @end

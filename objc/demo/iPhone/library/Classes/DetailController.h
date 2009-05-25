@@ -10,22 +10,34 @@
 #import <UIKit/UIKit.h>
 
 @class DemoBookDescription;
-@class EditViewController;
 @class ICEException;
+@class WaitAlert;
 
-@interface DetailViewController :
-    UIViewController<UITableViewDelegate, UITableViewDataSource, UIActionSheetDelegate,UIAlertViewDelegate>
+@protocol DetailControllerDelegate
+-(void)bookUpdated:(DemoBookDescription*)book;
+-(void)bookDeleted;
+@end
+
+@interface DetailController :
+    UIViewController<UITableViewDelegate, UITableViewDataSource, UIActionSheetDelegate, UIAlertViewDelegate>
 {
 @protected
     DemoBookDescription* book;
+    DemoBookDescription* updated;
     
     IBOutlet UITableView *tableView;
     NSIndexPath* selectedIndexPath;
+    WaitAlert* waitAlert;
+    
+    id<DetailControllerDelegate> delegate;
+    bool changed;
 }
 
 @property (nonatomic, retain) DemoBookDescription* book;
+@property (nonatomic, retain) WaitAlert* waitAlert;
+@property (nonatomic, retain) id<DetailControllerDelegate> delegate;
 
-+(EditViewController *)editViewController;
 -(void)exception:(ICEException*)ex;
+-(void)startEdit:(DemoBookDescription*)book;
 
 @end

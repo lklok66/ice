@@ -9,14 +9,16 @@
 
 #import <UIKit/UIKit.h>
 
+#import <DetailController.h>
+
 @protocol DemoLibraryPrx;
 @protocol DemoBookQueryResultPrx;
 
-@class DetailViewController;
-@class AddViewController;
+@class AddController;
 
-@interface MainViewController :
-    UIViewController<UISearchBarDelegate, UITableViewDataSource, UITableViewDelegate,UIAlertViewDelegate>
+@interface MainController :
+    UIViewController<UISearchBarDelegate, UITableViewDataSource, UITableViewDelegate,UIAlertViewDelegate,
+                     DetailControllerDelegate>
 {
 @private
     
@@ -27,8 +29,8 @@
 
     NSIndexPath* currentIndexPath;
 
-    DetailViewController* detailViewController;
-    AddViewController* addViewController;
+    DetailController* detailController;
+    AddController* addController;
     id<DemoBookQueryResultPrx> query;
     NSMutableArray* books;
     int rowsQueried;
@@ -36,7 +38,5 @@
 }
 
 @property (nonatomic, retain) id<DemoLibraryPrx> library;
-
--(void)removeCurrentBook:(BOOL)call;
 
 @end

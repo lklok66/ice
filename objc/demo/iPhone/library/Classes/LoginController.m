@@ -7,9 +7,10 @@
 //
 // **********************************************************************
 
-#import <LoginViewController.h>
-#import <MainViewController.h>
+#import <LoginController.h>
+#import <MainController.h>
 #import <AppDelegate.h>
+#import <WaitAlert.h>
 
 #import <Ice/Ice.h>
 #import <Library.h>
@@ -17,7 +18,7 @@
 #import <Glacier2Session.h>
 #import <Glacier2/Router.h>
 
-@interface LoginViewController()
+@interface LoginController()
 
 @property (nonatomic, retain) UITextField* hostnameTextField;
 @property (nonatomic, retain) UIButton* loginButton;
@@ -26,16 +27,17 @@
 
 @property (nonatomic, retain) NSString* hostname;
 
-@property (nonatomic, retain) MainViewController* mainViewController;
+@property (nonatomic, retain) MainController* mainController;
 
 @property (retain) id<DemoLibraryPrx> library;
 @property (retain) id session;
 @property int sessionTimeout;
 @property (nonatomic, retain) NSOperationQueue* queue;
+@property (nonatomic, retain) WaitAlert* waitAlert;
 
 @end
 
-@implementation LoginViewController
+@implementation LoginController
 
 @synthesize hostnameTextField;
 @synthesize loginButton;
@@ -44,32 +46,31 @@
 @synthesize hostname;
 @synthesize library;
 @synthesize session;
-@synthesize mainViewController;
+@synthesize mainController;
 @synthesize queue;
 @synthesize sessionTimeout;
+@synthesize waitAlert;
 
 NSString* hostnameKey = @"hostnameKey";
 NSString* glacier2Key = @"glacier2Key";
 NSString* sslKey = @"sslKey";
 
++(void)initialize
+{
+    NSDictionary* appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:@"demo2.zeroc.com", hostnameKey,
+                                 @"YES", glacier2Key,
+                                 @"YES", sslKey,
+                                 nil];
+	
+    [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];    
+}
+
 -(void)viewDidLoad
 {
-    // Initialize the application defaults.
-    NSString* testValue = [[NSUserDefaults standardUserDefaults] stringForKey:hostnameKey];
-    if (testValue == nil)
-    {
-        NSDictionary* appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:@"demo2.zeroc.com", hostnameKey,
-                                     @"YES", glacier2Key,
-                                     @"YES", sslKey,
-                                     nil];
-	
-        [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
-        [[NSUserDefaults standardUserDefaults] synchronize];
-    }
-
-    self.hostname = [[NSUserDefaults standardUserDefaults] stringForKey:hostnameKey];
-    glacier2Switch.on = [[NSUserDefaults standardUserDefaults] boolForKey:glacier2Key];
-    sslSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:sslKey];
+    NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+    self.hostname = [defaults stringForKey:hostnameKey];
+    glacier2Switch.on = [defaults boolForKey:glacier2Key];
+    sslSwitch.on = [defaults boolForKey:sslKey];
     
     self.queue = [[[NSOperationQueue alloc] init] autorelease];
 
@@ -77,7 +78,6 @@ NSString* sslKey = @"sslKey";
     hostnameTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
     hostnameTextField.text = hostname;
     loginButton.enabled = hostname.length > 0;
-    showAlert = NO;
 }
 
 -(void)viewWillAppear:(BOOL)animated
@@ -120,21 +120,22 @@ NSString* sslKey = @"sslKey";
     [glacier2Switch release];
     [sslSwitch release];
     [hostname release];
-    [mainViewController release];
+    [mainController release];
     [session release];
     [library release];
     [queue release];
+    [waitAlert release];
     [super dealloc];
 }
 
--(MainViewController*)mainViewController
+-(MainController*)mainController
 {
     // Instantiate the main view controller if necessary.
-    if (mainViewController == nil)
+    if (mainController == nil)
     {
-        mainViewController = [[MainViewController alloc] initWithNibName:@"MainView" bundle:nil];
+        mainController = [[MainController alloc] initWithNibName:@"MainView" bundle:nil];
     }
-    return mainViewController;
+    return mainController;
 }
 
 -(void)glacier2Changed:(id)s
@@ -142,7 +143,6 @@ NSString* sslKey = @"sslKey";
     UISwitch* sender = (UISwitch*)s;
 
     [[NSUserDefaults standardUserDefaults] setObject:(sender.isOn ? @"YES" : @"NO") forKey:glacier2Key];
-    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 -(void)sslChanged:(id)s
@@ -150,19 +150,6 @@ NSString* sslKey = @"sslKey";
     UISwitch* sender = (UISwitch*)s;
     
     [[NSUserDefaults standardUserDefaults] setObject:(sender.isOn ? @"YES" : @"NO") forKey:sslKey];
-    [[NSUserDefaults standardUserDefaults] synchronize];
-}
-
-#pragma mark UIAlertViewDelegate
-
--(void)didPresentAlertView:(UIAlertView *)alertView
-{
-    showAlert = YES;
-}
-
--(void)alertView:(UIAlertView*)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
-{
-    showAlert = NO;
 }
 
 #pragma mark UITextFieldDelegate
@@ -182,13 +169,12 @@ NSString* sslKey = @"sslKey";
         }
         @catch(ICEEndpointParseException* ex)
         {
-            UIAlertView *alert = [[UIAlertView alloc]
-                                     initWithTitle:@"Invalid Hostname"
-                                     message:@"The provided hostname is invalid."
-                                     delegate:self cancelButtonTitle:@"OK"
-                                     otherButtonTitles:nil];
+            UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Invalid Hostname"
+                                                             message:@"The provided hostname is invalid."
+                                                            delegate:self
+                                                   cancelButtonTitle:@"OK"
+                                                   otherButtonTitles:nil] autorelease];
             [alert show];
-            [alert release];
             return NO;
         }
         
@@ -207,36 +193,33 @@ NSString* sslKey = @"sslKey";
 
 -(void)exception:(NSString*)s
 {
+    [waitAlert dismissWithClickedButtonIndex:0 animated:YES];
+    self.waitAlert = nil;
+
     // Restart the login process in the delegate.
     AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
     [appDelegate logout];
     
-    // Re-enable the login button.
-    loginButton.enabled = YES;
-    
-    [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
-    
     // open an alert with just an OK button
-    UIAlertView *alert = [[UIAlertView alloc]
-                          initWithTitle:@"Error" message:s
-                          delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
-    [alert show];       
-    [alert release];
+    UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Error"
+                                                     message:s
+                                                    delegate:self
+                                           cancelButtonTitle:@"OK"
+                                           otherButtonTitles:nil] autorelease];
+    [alert show];
 }
 
--(void)loginComplete:(id)data
+-(void)loginComplete
 {
+    [waitAlert dismissWithClickedButtonIndex:0 animated:YES];
+    self.waitAlert = nil;
+    
     AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-   
     [appDelegate setSession:session timeout:self.sessionTimeout/2];
     
-    MainViewController* controller = self.mainViewController;
+    MainController* controller = self.mainController;
     controller.library = library;
     [self.navigationController pushViewController:controller animated:YES];
-
-    // Re-enable the login button.
-    loginButton.enabled = YES;
-    [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
 }
 
 // Runs in a separate thread, called only by NSInvocationOperation.
@@ -257,7 +240,7 @@ NSString* sslKey = @"sslKey";
         self.library = [sess getLibrary];
         self.sessionTimeout = [factory getSessionTimeout];
         
-        [self performSelectorOnMainThread:@selector(loginComplete:) withObject:nil waitUntilDone:NO];
+        [self performSelectorOnMainThread:@selector(loginComplete) withObject:nil waitUntilDone:NO];
     }
     @catch(ICEException* ex)
     {
@@ -279,7 +262,7 @@ NSString* sslKey = @"sslKey";
         self.library = [sess getLibrary];
         self.sessionTimeout = [router getSessionTimeout];
 
-        [self performSelectorOnMainThread:@selector(loginComplete:) withObject:nil waitUntilDone:NO];
+        [self performSelectorOnMainThread:@selector(loginComplete) withObject:nil waitUntilDone:NO];
     }
     @catch(Glacier2CannotCreateSessionException* ex)
     {
@@ -317,12 +300,11 @@ NSString* sslKey = @"sslKey";
                 s = [NSString stringWithFormat:@"DemoGlacier2/router:tcp -h %@ -p 4502 -t 10000", hostname];
             }
             proxy = [appDelegate.communicator stringToProxy:s];
-            id<ICERouterPrx> router = [ICERouterPrx uncheckedCast:proxy];
-            
+
             // Configure the default router on the communicator.
-            AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+            id<ICERouterPrx> router = [ICERouterPrx uncheckedCast:proxy];
             [appDelegate.communicator setDefaultRouter:router];
-            
+
             loginSelector = @selector(doGlacier2Login:);
         }
         else
@@ -343,27 +325,25 @@ NSString* sslKey = @"sslKey";
     }
     @catch(ICEEndpointParseException* ex)
     {
-        UIAlertView *alert = [[UIAlertView alloc]
-                              initWithTitle:@"Invalid Hostname"
-                              message:@"The provided hostname is invalid."
-                              delegate:self cancelButtonTitle:@"OK"
-                              otherButtonTitles:nil];
+        UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Invalid Hostname"
+                                                         message:@"The provided hostname is invalid."
+                                                        delegate:self
+                                               cancelButtonTitle:@"OK"
+                                               otherButtonTitles:nil] autorelease];
         [alert show];
-        [alert release];
-    }    
+        return;
+    }
     
-    // Disable the login button.
-    loginButton.enabled = NO;
+    // Show the wait alert.
+    self.waitAlert = [[WaitAlert alloc] init];
+    waitAlert.text = @"Connecting...";
+    [waitAlert show];
     
     // Kick off the login process in a separate thread. This ensures that the UI is not blocked.
-    [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = YES;
-    NSInvocationOperation* op = [[NSInvocationOperation alloc]
-                                 initWithTarget:self
-                                 selector:loginSelector
-                                 object:proxy];
+    NSInvocationOperation* op = [[[NSInvocationOperation alloc] initWithTarget:self
+                                                                     selector:loginSelector
+                                                                        object:proxy] autorelease];
     [queue addOperation:op];
-    [op release];
-    
 }
 
 @end

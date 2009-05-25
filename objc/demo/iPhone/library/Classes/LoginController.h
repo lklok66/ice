@@ -9,13 +9,11 @@
 
 #import <UIKit/UIKit.h>
 
-@protocol DemoSessionPrx;
 @protocol DemoLibraryPrx;
-@protocol DemoSessionFactoryPrx;
-@class MainViewController;
-@protocol SessionAdapter;
+@class MainController;
+@class WaitAlert;
 
-@interface LoginViewController : UIViewController<UITextFieldDelegate,UIAlertViewDelegate>
+@interface LoginController : UIViewController<UITextFieldDelegate,UIAlertViewDelegate>
 {
 @private
     IBOutlet UITextField* hostnameTextField;
@@ -23,15 +21,14 @@
     IBOutlet UISwitch* glacier2Switch;
     IBOutlet UISwitch* sslSwitch;
     
-    BOOL showAlert;
-
     NSString* hostname;
-    MainViewController *mainViewController;
+    MainController *mainController;
     
     id session;
     id<DemoLibraryPrx> library;
     int sessionTimeout;
     NSOperationQueue* queue;
+    WaitAlert* waitAlert;
 }
 
 -(IBAction)login:(id)sender;

@@ -7,37 +7,37 @@
 //
 // **********************************************************************
 
-#import <MainViewController.h>
-#import <DetailViewController.h>
-#import <AddViewController.h>
+#import <MainController.h>
+#import <DetailController.h>
+#import <AddController.h>
 
 #import <AppDelegate.h>
 
 #import <Ice/Ice.h>
 #import <Library.h>
 
-@interface MainViewController()
+@interface MainController()
 
 @property (nonatomic, retain) UITableView* searchTableView;
 @property (nonatomic, retain) UISegmentedControl* searchSegmentedControl;
 
 @property (nonatomic, retain) NSIndexPath* currentIndexPath;
-@property (nonatomic, retain) DetailViewController* detailViewController;
-@property (nonatomic, retain) AddViewController* addViewController;
+@property (nonatomic, retain) DetailController* detailController;
+@property (nonatomic, retain) AddController* addController;
 @property (nonatomic, retain) id<DemoBookQueryResultPrx> query;
 @property (nonatomic, retain) NSMutableArray* books;
 
 @end
 
-@implementation MainViewController
+@implementation MainController
 
 @dynamic library;
 @synthesize searchTableView;
 @synthesize searchSegmentedControl;
 @synthesize query;
 @synthesize books;
-@synthesize addViewController;
-@synthesize detailViewController;
+@synthesize addController;
+@synthesize detailController;
 @synthesize currentIndexPath;
 
 -(id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -56,9 +56,10 @@
 
 -(void)viewDidLoad
 {
-    self.navigationItem.rightBarButtonItem = [[[UIBarButtonItem alloc]
-                                               initWithBarButtonSystemItem:UIBarButtonSystemItemAdd
-                                               target:self action:@selector(addBook:)] autorelease];
+    self.navigationItem.rightBarButtonItem =
+    [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd
+                                                   target:self
+                                                   action:@selector(addBook:)] autorelease];
 }
 
 -(void)viewWillAppear:(BOOL)animated
@@ -85,30 +86,31 @@
     [searchSegmentedControl release];
     [searchTableView release];
     [currentIndexPath release];
-    [detailViewController release];
-    [addViewController release];
+    [detailController release];
+    [addController release];
     [query release];
     [books release];
 	[super dealloc];
 }
 
--(DetailViewController *)detailViewController
+-(DetailController *)detailController
 {
     // Instantiate the main view controller if necessary.
-    if (detailViewController == nil)
+    if (detailController == nil)
     {
-        detailViewController = [[DetailViewController alloc] initWithNibName:@"DetailView" bundle:nil];
+        detailController = [[DetailController alloc] initWithNibName:@"DetailView" bundle:nil];
+        detailController.delegate = self;
     }
-    return detailViewController;
+    return detailController;
 }
 
--(AddViewController *)addViewController
+-(AddController *)addController
 {
-    if (addViewController == nil)
+    if (addController == nil)
     {
-        addViewController = [[AddViewController alloc] initWithNibName:@"DetailView" bundle:nil];
+        addController = [[AddController alloc] initWithNibName:@"DetailView" bundle:nil];
     }
-    return addViewController;
+    return addController;
 }
 
 -(void)setLibrary:(id<DemoLibraryPrx>)l
@@ -131,17 +133,14 @@
     return [[library retain] autorelease];
 }
 
--(void)removeCurrentBook:(BOOL)call
+-(void)removeCurrentBook
 {
     DemoBookDescription *book = (DemoBookDescription *)[books objectAtIndex:currentIndexPath.row];
     
-    if(call)
-    {
-        [book.proxy destroy_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-         response:nil
-         exception:@selector(exceptionIgnoreONE:)];
-    }
-
+    [[book proxy] destroy_async:[ICECallbackOnMainThread callbackOnMainThread:self]
+                       response:nil
+                      exception:@selector(exceptionIgnoreONE:)];
+    
     // Remove the book, and the row from the table.
     [books removeObjectAtIndex:currentIndexPath.row];        
     --nrows;
@@ -151,14 +150,27 @@
 
 -(void)addBook:(id)sender
 {
-    AddViewController *controller = self.addViewController;
-    controller.book = [DemoBookDescription bookDescription];
-    controller.book.title = @"";
-    controller.book.authors = [NSMutableArray array];
-    controller.library = library;
+    AddController *controller = self.addController;
+    DemoBookDescription* book = [DemoBookDescription bookDescription];
+    book.title = @"";
+    book.authors = [NSMutableArray array];
+    
+    [controller startEdit:book library:library];
 
     [self.navigationController pushViewController:controller animated:YES];
-    [controller setEditing:YES animated:NO];
+}
+
+#pragma mark DetailControllerDelegate
+
+-(void)bookUpdated:(DemoBookDescription*)book
+{
+    [books replaceObjectAtIndex:currentIndexPath.row withObject:book];
+    [searchTableView reloadData];
+}
+
+-(void)bookDeleted
+{
+    [self removeCurrentBook];
 }
 
 #pragma mark AMI callbacks
@@ -175,11 +187,12 @@
     appDelegate.fatal = YES;
     
     // open an alert with just an OK button
-    UIAlertView *alert = [[UIAlertView alloc]
-                          initWithTitle:@"Error" message:[ex description]
-                          delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
-    [alert show];       
-    [alert release];
+    UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Error"
+                                                     message:[ex description]
+                                                    delegate:self
+                                           cancelButtonTitle:@"OK"
+                                           otherButtonTitles:nil] autorelease];
+    [alert show];
 }
 
 -(void)exceptionIgnoreONE:(ICEException*)ex
@@ -214,11 +227,12 @@
     if(nrows == 0)
     {
         // open an alert with just an OK button
-        UIAlertView *alert = [[UIAlertView alloc]
-                              initWithTitle:@"No Results" message:@"The search returned no results"
-                              delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
-        [alert show];       
-        [alert release];
+        UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"No Results"
+                                                         message:@"The search returned no results"
+                                                        delegate:self
+                                               cancelButtonTitle:@"OK"
+                                               otherButtonTitles:nil] autorelease];
+        [alert show];
         return;
     }
 
@@ -273,22 +287,22 @@
     {
         [library queryByIsbn_async:[ICECallbackOnMainThread callbackOnMainThread:self]
                           response:@selector(queryResponse:nrows:result:)
-                          exception:@selector(exception:)
+                         exception:@selector(exception:)
                               isbn:search n:10];
     }
     else if(searchMode == 1) // Authors
     {
         [library queryByAuthor_async:[ICECallbackOnMainThread callbackOnMainThread:self]
                             response:@selector(queryResponse:nrows:result:)
-                            exception:@selector(exception:)
-                                author:search n:10];
+                           exception:@selector(exception:)
+                              author:search n:10];
     }
     else // Title
     {
-
+        
         [library queryByTitle_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                            response:@selector(queryResponse:nrows:result:)
-                           exception:@selector(exception:)
+                           response:@selector(queryResponse:nrows:result:)
+                          exception:@selector(exception:)
                               title:search n:10];
     }
 }
@@ -310,7 +324,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
     if(editingStyle == UITableViewCellEditingStyleDelete)
     {
         self.currentIndexPath = indexPath;
-        [self removeCurrentBook:YES];
+        [self removeCurrentBook];
     }
 }
 
@@ -384,15 +398,11 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
     
     self.currentIndexPath = indexPath;
     
-    DemoBookDescription *book = (DemoBookDescription *)[books objectAtIndex:indexPath.row];
-    DetailViewController* controller = self.detailViewController;
-
-    // Set the detail controller's inspected item to the currently selected book.
-    controller.book = book;
+    DetailController* controller = self.detailController;
+    [controller startEdit:[books objectAtIndex:indexPath.row]];
     
     // Push the detail view on to the navigation controller's stack.
     [self.navigationController pushViewController:controller animated:YES];
-    [controller setEditing:NO animated:NO];
     return nil;
 }
 

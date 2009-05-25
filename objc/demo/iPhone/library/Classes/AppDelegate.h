@@ -10,7 +10,6 @@
 #import <UIKit/UIKit.h>
 
 @protocol ICECommunicator;
-@protocol DemoSessionPrx;
 @class ICEException;
 @class ICEInitializationData;
 
@@ -30,7 +29,6 @@
 }
 
 @property (nonatomic, readonly) id<ICECommunicator> communicator;
-@property (nonatomic, readonly) id session;
 @property (nonatomic) BOOL fatal;
 
 -(void)sessionRefreshException:(ICEException*)ex;

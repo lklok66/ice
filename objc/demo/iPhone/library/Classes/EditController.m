@@ -7,12 +7,11 @@
 //
 // **********************************************************************
 
-#import <EditViewController.h>
+#import <EditController.h>
 
-@implementation EditViewController
+@implementation EditController
 
 @synthesize textField;
-@synthesize cb;
 
 -(void)viewDidLoad
 {
@@ -27,11 +26,10 @@
 
 -(void)viewWillAppear:(BOOL)animated
 {
-    NSString *capitalizedKey = cb.fieldName;
-    self.title = capitalizedKey;
-    textField.placeholder = capitalizedKey;
+    textField.placeholder = self.title;
     textField.enabled = YES;
-    textField.text = cb.textValue;
+    textField.text = value;
+    
     [textField becomeFirstResponder];
 }
 
@@ -52,16 +50,25 @@
     [self.navigationController popViewControllerAnimated:YES];
 }
 
+-(void)startEdit:(id)o selector:(SEL)sel name:(NSString*)name value:(NSString*)v
+{
+    obj = o;
+    selector = sel;
+    
+    self.title = name;
+    value = v;
+}
+
 -(IBAction)save:(id)sender
 {
-    [cb save:textField.text];
+    [obj performSelector:selector withObject:textField.text];
     [self.navigationController popViewControllerAnimated:YES];
 }
 
 -(void)dealloc
 {
+    [value release];
     [textField release];
-    [cb release];
     
 	[super dealloc];
 }
