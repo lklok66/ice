@@ -82,7 +82,7 @@
     // Setup the session refresh timer.
     refreshTimer = [NSTimer timerWithTimeInterval:sessionTimeout/2
                                            target:self
-                                         selector:@selector(refreshSession)
+                                         selector:@selector(refreshSession:)
                                          userInfo:nil
                                           repeats:YES];
     [[NSRunLoop currentRunLoop] addTimer:refreshTimer forMode:NSDefaultRunLoopMode];
@@ -188,7 +188,7 @@
     NSRunAlertPanel(@"Error", [ex description], @"OK", nil, nil);
 }
 
--(void)refreshSession
+-(void)refreshSession:(NSTimer*)timer
 {
     [session ice_invoke_async:[ICECallbackOnMainThread callbackOnMainThread:self]
                      response:nil

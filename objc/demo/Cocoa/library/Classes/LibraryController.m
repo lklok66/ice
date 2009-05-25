@@ -49,7 +49,7 @@
     // Setup the session refresh timer.
     refreshTimer = [NSTimer timerWithTimeInterval:sessionTimeout/2
                                            target:self
-                                         selector:@selector(refreshSession)
+                                         selector:@selector(refreshSession:)
                                          userInfo:nil
                                           repeats:YES];
     [[NSRunLoop currentRunLoop] addTimer:refreshTimer forMode:NSDefaultRunLoopMode];
@@ -113,6 +113,24 @@
     [self destroySession];
 }
 
+-(void)setSelection:(DemoBookDescription*)description
+{
+    selection = description;
+    if(description)
+    {
+        isbnField.stringValue = description.isbn;
+        [[titleField textStorage] setAttributedString:[[NSAttributedString alloc] initWithString:description.title]];
+        renterField.stringValue = description.rentedBy;
+    }
+    else
+    {
+        isbnField.stringValue = @"";
+        [[titleField textStorage] setAttributedString:[[NSAttributedString alloc] initWithString:@""]];
+        renterField.stringValue = @"";
+    }
+    [authorsTable reloadData];
+}
+
 -(void)exception:(ICEException*)ex
 {
     [searchIndicator stopAnimation:self];
@@ -124,10 +142,46 @@
 
         savingController = nil;
     }
+
+    NSString* s;
     
-    NSRunAlertPanel(@"Error", [ex description], @"OK", nil, nil);
+    if([ex isKindOfClass:[ICEObjectNotExistException class]])
+    {
+        if(selection)
+        {
+            [books removeObjectAtIndex:queryTable.selectedRow];
+            --nrows;
+            [queryTable reloadData];
+        }
+    }
+    else if([ex isKindOfClass:[DemoBookRentedException class]])
+    {
+        DemoBookRentedException* ex2 = (DemoBookRentedException*)ex;
+        s = @"The book has already been rented";
+        
+        NSAssert(selection != nil, @"selection != nil");
+        selection.rentedBy = ex2.renter;
+        [self setSelection:selection]; // Update detail
+        [queryTable reloadData];
+    }
+    else if([ex isKindOfClass:[DemoBookNotRentedException class]])
+    {
+        s = @"The book has already been returned.";
+        NSAssert(selection != nil, @"selection != nil");        
+        selection.rentedBy = @"";
+        [self setSelection:selection]; // Update detail
+        [queryTable reloadData];
+    }
+    else
+    {
+        // Unknown exception.
+        s = [ex description];
+        [self destroySession];
+    }
     
-    if(editController)
+    NSRunAlertPanel(@"Error", s, @"OK", nil, nil);
+    
+    if(editController && session)
     {
         [NSApp beginSheet:editController.window 
            modalForWindow:self.window
@@ -153,7 +207,7 @@
     NSRunAlertPanel(@"Error", [ex description], @"OK", nil, nil);
 }
 
--(void)refreshSession
+-(void)refreshSession:(NSTimer*)timer
 {
     [session
      refresh_async:[ICECallbackOnMainThread callbackOnMainThread:self]
@@ -164,24 +218,6 @@
 -(void)logout:(id)sender
 {
     [self destroySession];
-}
-
--(void)setSelection:(DemoBookDescription*)description
-{
-    selection = description;
-    if(description)
-    {
-        isbnField.stringValue = description.isbn;
-        [[titleField textStorage] setAttributedString:[[NSAttributedString alloc] initWithString:description.title]];
-        renterField.stringValue = description.rentedBy;
-    }
-    else
-    {
-        isbnField.stringValue = @"";
-        [[titleField textStorage] setAttributedString:[[NSAttributedString alloc] initWithString:@""]];
-        renterField.stringValue = @"";
-    }
-    [authorsTable reloadData];
 }
 
 -(void)asyncRequestReply
