@@ -121,6 +121,7 @@ NSString* const routerServerKey = @"routerServerKey";
         LibraryController* libraryController = [[LibraryController alloc]
                                                 initWithCommunicator:[proxy ice_getCommunicator]
                                                 session:session
+                                                router:nil
                                                 sessionTimeout:sessionTimeout
                                                 library:library];
         [self performSelectorOnMainThread:@selector(loginComplete:) withObject:libraryController waitUntilDone:NO];
@@ -148,6 +149,7 @@ NSString* const routerServerKey = @"routerServerKey";
         LibraryController* libraryController = [[LibraryController alloc]
                                                 initWithCommunicator:[proxy ice_getCommunicator]
                                                 session:session
+                                                router:router
                                                 sessionTimeout:sessionTimeout
                                                 library:library];
         

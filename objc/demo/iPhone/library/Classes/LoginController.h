@@ -12,6 +12,7 @@
 @protocol DemoLibraryPrx;
 @class MainController;
 @class WaitAlert;
+@protocol Glacier2RouterPrx;
 @class ICEInitializationData;
 @protocol ICECommunicator;
 
@@ -32,6 +33,7 @@
     ICEInitializationData* initData;
     id<ICECommunicator> communicator;
     id session;
+    id<Glacier2RouterPrx> router;
     int sessionTimeout;
     id<DemoLibraryPrx> library;
 }

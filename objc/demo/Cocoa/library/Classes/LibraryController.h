@@ -12,6 +12,8 @@
 @protocol DemoLibraryPrx;
 @protocol ICECommunicator;
 @protocol DemoBookQueryResultPrx;
+@protocol Glacier2RouterPrx;
+
 @class DemoBookDescription;
 @class RentController;
 @class EditController;
@@ -41,6 +43,7 @@
     id session;
     int sessionTimeout;
     id<DemoLibraryPrx> library;
+    id<Glacier2RouterPrx> router;
 
     // The current query.
     id<DemoBookQueryResultPrx> query;
@@ -56,7 +59,8 @@
 }
 
 -(id)initWithCommunicator:(id<ICECommunicator>)communicator
-                  session:(id) session
+                  session:(id)session
+                   router:(id<Glacier2RouterPrx>)router
            sessionTimeout:(int)sessionTimeout
                   library:(id<DemoLibraryPrx>)library;
 

@@ -8,7 +8,7 @@
 // **********************************************************************
 
 #import <AppDelegate.h>
-#import <ConnectController.h>
+#import <LoginController.h>
 
 @implementation AppDelegate
 
@@ -16,19 +16,19 @@
 {
     if(self = [super init])
     {
-        connectController = [[ConnectController alloc] init];
+        loginController = [[LoginController alloc] init];
     }
     return self;
 }
 
 -(void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-    [connectController showWindow:self];
+    [loginController showWindow:self];
 }
 
 -(void)login:(id)sender
 {
-    [connectController showWindow:self];
+    [loginController showWindow:self];
 }
 
 -(void)setChatActive:(BOOL)active
@@ -40,7 +40,7 @@
 {
     if ([item action] == @selector(login:))
     {
-        return !chatActive && !connectController.window.isVisible;
+        return !chatActive && !loginController.window.isVisible;
     }
     return YES;
 }

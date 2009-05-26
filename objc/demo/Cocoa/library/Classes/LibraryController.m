@@ -12,6 +12,7 @@
 #import <Ice/Ice.h>
 #import <Library.h>
 #import <Session.h>
+#import <Glacier2/Router.h>
 #import <EditController.h>
 #import <SavingController.h>
 #import <RentController.h>
@@ -20,6 +21,7 @@
 
 -(id)initWithCommunicator:(id<ICECommunicator>)c
                   session:(id)s
+                   router:(id<Glacier2RouterPrx>)r
            sessionTimeout:(int)t
                   library:(id<DemoLibraryPrx>)l
 {
@@ -27,6 +29,7 @@
     {
         communicator = c;
         session = s;
+        router = r;
         library = l;
         
         books = [NSMutableArray array];
@@ -94,9 +97,17 @@
     // Cancel the refresh timeer.
     [refreshTimer invalidate];
     refreshTimer = nil;
-    
-    // Destroy the old session, and invalidate the refresh timer.
-    [session destroy_async:nil response:nil exception:nil];
+
+    // Destroy the session.
+    if(router)
+    {
+        [router destroySession_async:nil response:nil exception:nil];
+    }
+    else
+    {
+        [session destroy_async:nil response:nil exception:nil];
+    }
+    router = nil;
     session = nil;
     
     // Clean up the communicator.

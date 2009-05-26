@@ -19,13 +19,14 @@
 -(id)initWithCommunicator:(id<ICECommunicator>)c
                   session:(id<ChatChatSessionPrx>)s
            sessionTimeout:(int)t
-                   router:(id<ICERouterPrx>)router
+                   router:(id<ICERouterPrx>)r
                  category:(NSString*)category
 { 
     if(self = [super initWithWindowNibName:@"ChatView"])
     {
         communicator = c;
         session = s;
+        router = r;
         
         // Set up the adapter, and register the callback object, and setup the session ping.
         id<ICEObjectAdapter> adapter = [communicator createObjectAdapterWithRouter:@"ChatDemo.Client" router:router];
@@ -96,7 +97,6 @@
                             cb:callbackProxy];
 }
 
-
 #pragma mark Message management
 
 -(void)append:(NSString*)text who:(NSString*)who timestamp:(NSDate*)timestamp
@@ -151,10 +151,18 @@
     [refreshTimer invalidate];
     refreshTimer = nil;
 
-    // Destroy the old session, and invalidate the refresh timer.
-    [session destroy_async:nil response:nil exception:nil];
+    // Destroy the session.
+    if(router && [router isKindOfClass:[Glacier2RouterPrx class]])
+    {
+        id<Glacier2RouterPrx> glacier2router = [Glacier2RouterPrx uncheckedCast:router];
+        [glacier2router destroySession_async:nil response:nil exception:nil];
+    }
+    else
+    {
+        [session destroy_async:nil response:nil exception:nil];
+    }
+    router = nil;
     session = nil;
-
     // Clean up the communicator.
     [communicator destroy];
     communicator = nil;

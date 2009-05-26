@@ -11,9 +11,9 @@
 #import <DetailController.h>
 #import <AddController.h>
 
-#import <Session.h>
-
 #import <Ice/Ice.h>
+#import <Session.h>
+#import <Glacier2/Router.h>
 #import <Library.h>
 
 @interface MainController()
@@ -24,6 +24,7 @@
 @property (nonatomic, retain) NSTimer* refreshTimer;
 @property (nonatomic, retain) id<ICECommunicator> communicator;
 @property (nonatomic, retain) id session;
+@property (nonatomic, retain)  id<Glacier2RouterPrx> router;
 @property (nonatomic, retain) id<DemoLibraryPrx> library;
 
 @end
@@ -36,6 +37,7 @@
 @synthesize communicator;
 @synthesize refreshTimer;
 @synthesize session;
+@synthesize router;
 
 -(id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -68,7 +70,7 @@
                                      target:self action:@selector(logout:)] autorelease];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(destroy)
+                                             selector:@selector(destroySession)
                                                  name:UIApplicationWillTerminateNotification
                                                object:nil];    
 }
@@ -108,16 +110,22 @@
     [books release];
     [communicator release];
     [session release];
+    [router release];
     [refreshTimer release];
 	[super dealloc];
 }
 
 #pragma mark SessionManagement
 
--(void)activate:(id<ICECommunicator>)c session:(id)s sessionTimeout:(int)sessionTimeout library:(id<DemoLibraryPrx>)l
+-(void)activate:(id<ICECommunicator>)c
+        session:(id)s
+         router:(id<Glacier2RouterPrx>)r
+ sessionTimeout:(int)sessionTimeout
+        library:(id<DemoLibraryPrx>)l
 {
     self.communicator = c;
     self.session = s;
+    self.router = r;
     self.library = l;
     self.query = nil;
     nrows = 0;
@@ -134,13 +142,21 @@
     [[NSRunLoop currentRunLoop] addTimer:refreshTimer forMode:NSDefaultRunLoopMode];
 }
 
--(void)destroy
+-(void)destroySession
 {
     // Destroy the old session, and invalidate the refresh timer.
     [refreshTimer invalidate];
     self.refreshTimer = nil;
     
-    [session destroy_async:nil response:nil exception:nil];
+    if(router)
+    {
+        [router destroySession_async:nil response:nil exception:nil];
+    }
+    else
+    {
+        [session destroy_async:nil response:nil exception:nil];
+    }
+    self.router = nil;
     self.session = nil;
     
     [communicator destroy];
@@ -149,7 +165,7 @@
 
 -(void)logout:(id)sender
 {
-    [self destroy];
+    [self destroySession];
     [self.navigationController popViewControllerAnimated:YES];
 }
 
@@ -161,7 +177,7 @@
     self.session = nil;
     
     // Clean up the remainder.
-    [self destroy];
+    [self destroySession];
     
     NSString* s = [NSString stringWithFormat:@"Lost connection with session!\n%@", ex];
     
@@ -230,7 +246,7 @@
     // However, doing so directly by calling [self.navigationController popToRootViewControllerAnimated:YES];
     // causes the navigation view & the bar to get out of sync. So instead, we pop to the root view
     // in the alert view didDismissWithButtonIndex callback.
-    [self destroy];
+    [self destroySession];
     
     // open an alert with just an OK button
     UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Error"

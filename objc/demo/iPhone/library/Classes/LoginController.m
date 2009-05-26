@@ -24,6 +24,7 @@
 @property (nonatomic, retain) id<ICECommunicator> communicator;
 @property (nonatomic, retain) id session;
 @property (nonatomic, retain) id<DemoLibraryPrx> library;
+@property (nonatomic, retain) id<Glacier2RouterPrx> router;
 
 @end
 
@@ -34,6 +35,7 @@
 @synthesize communicator;
 @synthesize session;
 @synthesize library;
+@synthesize router;
 
 NSString* hostnameKey = @"hostnameKey";
 NSString* glacier2Key = @"glacier2Key";
@@ -142,6 +144,7 @@ NSString* sslKey = @"sslKey";
     [waitAlert release];
     [session release];
     [library release];
+    [router release];
 
     [super dealloc];
 }
@@ -223,6 +226,7 @@ NSString* sslKey = @"sslKey";
 
     [mainController activate:communicator
                      session:session
+                      router:router
            sessionTimeout:sessionTimeout
                      library:library];
 
@@ -230,6 +234,7 @@ NSString* sslKey = @"sslKey";
     self.communicator = nil;
     self.session = nil;
     self.library = nil;
+    self.router = nil;
     
     [self.navigationController pushViewController:mainController animated:YES];
 }
@@ -265,13 +270,14 @@ NSString* sslKey = @"sslKey";
 {
     @try
     {
-        id<Glacier2RouterPrx> router = [Glacier2RouterPrx uncheckedCast:proxy];
+        id<Glacier2RouterPrx> glacier2router = [Glacier2RouterPrx uncheckedCast:proxy];
         
-        id<Glacier2SessionPrx> glacier2session = [router createSession:@"dummy" password:@"none"];
+        id<Glacier2SessionPrx> glacier2session = [glacier2router createSession:@"dummy" password:@"none"];
         id<DemoGlacier2SessionPrx> sess = [DemoGlacier2SessionPrx uncheckedCast:glacier2session];
 
         self.session = sess;
-        sessionTimeout = [router getSessionTimeout];
+        self.router = glacier2router;
+        sessionTimeout = [glacier2router getSessionTimeout];
         self.library = [sess getLibrary];
         
         [self performSelectorOnMainThread:@selector(loginComplete) withObject:nil waitUntilDone:NO];
@@ -313,8 +319,8 @@ NSString* sslKey = @"sslKey";
             proxy = [communicator stringToProxy:s];
 
             // Configure the default router on the communicator.
-            id<ICERouterPrx> router = [ICERouterPrx uncheckedCast:proxy];
-            [communicator setDefaultRouter:router];
+            id<ICERouterPrx> r = [ICERouterPrx uncheckedCast:proxy];
+            [communicator setDefaultRouter:r];
 
             loginSelector = @selector(doGlacier2Login:);
         }

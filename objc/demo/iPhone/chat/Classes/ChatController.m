@@ -12,6 +12,7 @@
 
 #import <Ice/Ice.h>
 #import <ChatSession.h>
+#import <Glacier2/Router.h>
 
 @interface ChatMessage : NSObject
 {
@@ -189,6 +190,7 @@
 @interface ChatController()
 
 @property (nonatomic, retain) id<ChatChatSessionPrx> session;
+@property (nonatomic, retain) id<Glacier2RouterPrx> router;
 @property (nonatomic, retain) NSTimer* refreshTimer;
 @property (nonatomic, retain) id<ICECommunicator> communicator;
 @property (nonatomic, retain) id<ChatChatRoomCallbackPrx> callbackProxy;
@@ -198,6 +200,7 @@
 @implementation ChatController
 
 @synthesize session;
+@synthesize router;
 @synthesize refreshTimer;
 @synthesize communicator;
 @synthesize callbackProxy;
@@ -217,7 +220,7 @@
                                      target:self action:@selector(logout:)] autorelease];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(destroy)
+                                             selector:@selector(destroySession)
                                                  name:UIApplicationWillTerminateNotification
                                                object:nil];
     
@@ -230,11 +233,12 @@
 -(void)  setup:(id<ICECommunicator>)c
        session:(id<ChatChatSessionPrx>)s
 sessionTimeout:(int)t
-        router:(id<ICERouterPrx>)router
+        router:(id<Glacier2RouterPrx>)r
       category:(NSString*)category
 {
     self.communicator = c;
     self.session = s;
+    self.router = r;
     sessionTimeout = t;
     id<ICEObjectAdapter> adapter = [communicator createObjectAdapterWithRouter:@"ChatDemo.Client"
                                                                         router:router];
@@ -276,17 +280,15 @@ sessionTimeout:(int)t
                             cb:callbackProxy];
 }
 
--(void)destroy
+-(void)destroySession
 {
     [refreshTimer invalidate];
     self.refreshTimer = nil;
 
     // Destroy the old session, and invalidate the refresh timer.
-    if(session != nil)
-    {
-        [session destroy_async:nil response:nil exception:nil];
-        self.session = nil;
-    }
+    [router destroySession_async:self response:nil exception:nil];
+    self.router = nil;
+    self.session = nil;
     
     [communicator destroy];
     self.communicator = nil;
@@ -294,7 +296,7 @@ sessionTimeout:(int)t
 
 -(void)logout:(id)sender
 {
-    [self destroy];
+    [self destroySession];
     [self.navigationController popViewControllerAnimated:YES];
 }
 
@@ -304,9 +306,10 @@ sessionTimeout:(int)t
 
     // The session is invalid, clear.
     self.session = nil;
+    self.router = nil;
 
     // Clean up the remainder.
-    [self destroy];
+    [self destroySession];
     
     NSString* s = [NSString stringWithFormat:@"Lost connection with session!\n%@", ex];
     
@@ -380,6 +383,7 @@ sessionTimeout:(int)t
     [communicator release];
     [session release];
     [callbackProxy release];
+    [router release];
     
 	[super dealloc];
 }
@@ -432,7 +436,7 @@ sessionTimeout:(int)t
                                            otherButtonTitles:nil] autorelease];
     [alert show];       
     
-    [self destroy];
+    [self destroySession];
     
     [self.navigationController popViewControllerAnimated:YES];
 }

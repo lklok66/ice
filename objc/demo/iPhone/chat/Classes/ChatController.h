@@ -10,6 +10,7 @@
 #import <UIKit/UIKit.h>
 #import <ChatSession.h>
 
+@protocol Glacier2RouterPrx;
 @class UserController;
 
 @interface ChatController : UIViewController<UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate,
@@ -24,6 +25,7 @@
 
     id<ICECommunicator> communicator;
     id<ChatChatSessionPrx>  session;
+    id<Glacier2RouterPrx> router;
     id<ChatChatRoomCallbackPrx> callbackProxy;
     int sessionTimeout;
 }
@@ -32,7 +34,7 @@
 -(void)  setup:(id<ICECommunicator>)communicator
        session:(id<ChatChatSessionPrx>)session
 sessionTimeout:(int)timeout
-        router:(id<ICERouterPrx>)router
+        router:(id<Glacier2RouterPrx>)router
       category:(NSString*)category;
 // Called just prior to being shown.
 -(void)activate:(NSString*)title;

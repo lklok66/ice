@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-#import <ConnectController.h>
+#import <LoginController.h>
 #import <ChatController.h>
 
 #import <Ice/Ice.h>
@@ -23,7 +23,7 @@ NSString* const sslKey = @"sslKey";
 NSString* const routerKey = @"routerKey";
 NSString* const routerServerKey = @"routerServerKey";
 
-@implementation ConnectController
+@implementation LoginController
 
 // Initialize the app defaults.
 +(void)initialize
@@ -43,7 +43,7 @@ NSString* const routerServerKey = @"routerServerKey";
 
 -(id)init
 {
-    if(self = [super initWithWindowNibName:@"ConnectView"])
+    if(self = [super initWithWindowNibName:@"LoginView"])
     {
         queue = [[NSOperationQueue alloc] init];
     }
@@ -110,8 +110,8 @@ NSString* const routerServerKey = @"routerServerKey";
         id<ChatChatSessionPrx> session = [ChatChatSessionPrx uncheckedCast:glacier2session];
         
         int sessionTimeout = [router getSessionTimeout];
-
         NSString* category = [router getCategoryForClient];
+
         ChatController* chatController = [[ChatController alloc] initWithCommunicator:[proxy ice_getCommunicator]
                                                                               session:session
                                                                        sessionTimeout:sessionTimeout

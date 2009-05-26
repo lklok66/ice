@@ -13,6 +13,7 @@
 
 @protocol DemoLibraryPrx;
 @protocol DemoBookQueryResultPrx;
+@protocol Glacier2RouterPrx;
 @class ICEInitializationData;
 @protocol ICECommunicator;
 
@@ -39,12 +40,14 @@
     NSTimer* refreshTimer;
     id<ICECommunicator> communicator;
     id session;
+    id<Glacier2RouterPrx> router;
     id<DemoLibraryPrx> library;
 }
 
 // Called to setup the session.
 -(void)activate:(id<ICECommunicator>)communicator
         session:(id)session
+         router:(id<Glacier2RouterPrx>)router
  sessionTimeout:(int)timeout
         library:(id<DemoLibraryPrx>)library;
 
