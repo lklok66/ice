@@ -100,6 +100,12 @@ IceObjC::Transceiver::write(Buffer& buf)
         }
         assert(CFWriteStreamGetStatus(_writeStream) >= kCFStreamStatusOpen);
 
+        if(_checkCertificates)
+        {
+            _checkCertificates = false;
+            checkCertificates();
+        }
+
         assert(_fd != INVALID_SOCKET);
         CFIndex ret = CFWriteStreamWrite(_writeStream, reinterpret_cast<const UInt8*>(&*buf.i), packetSize);
 
@@ -187,6 +193,12 @@ IceObjC::Transceiver::read(Buffer& buf)
             return false;
         }
         assert(CFReadStreamGetStatus(_readStream) >= kCFStreamStatusOpen);
+
+        if(_checkCertificates)
+        {
+            _checkCertificates = false;
+            checkCertificates();
+        }
 
         assert(_fd != INVALID_SOCKET);
         CFIndex ret = CFReadStreamRead(_readStream, reinterpret_cast<UInt8*>(&*buf.i), packetSize);
@@ -404,8 +416,6 @@ IceObjC::Transceiver::initialize()
             setBlock(_fd, false);
             setTcpBufSize(_fd, _instance->initializationData().properties, _logger);
 
-            checkCertificates();
-
             CFWriteStreamOpen(_writeStream);
             assert(CFWriteStreamGetStatus(_writeStream) > kCFStreamStatusOpening);
         }
@@ -458,7 +468,8 @@ IceObjC::Transceiver::Transceiver(const InstancePtr& instance,
     _fd(INVALID_SOCKET),
     _readStream(readStream),
     _writeStream(writeStream),
-    _state(StateNeedConnect)
+    _checkCertificates(instance->type() == SslEndpointType),
+    _state(StateNeedConnect)    
 {
     ostringstream s;
     s << "local address = <not available>";
@@ -477,6 +488,7 @@ IceObjC::Transceiver::Transceiver(const InstancePtr& instance,
     _fd(fd),
     _readStream(readStream),
     _writeStream(writeStream),
+    _checkCertificates(false),
     _state(StateNeedConnect),
     _desc(fdToString(fd))
 {
@@ -706,5 +718,9 @@ IceObjC::Transceiver::checkCertificates()
 #endif
         }
         CFRelease(certificates);
+    }
+    else
+    {
+        throw Ice::SecurityException(__FILE__, __LINE__, "unable to obtain peer certificates");
     }
 }

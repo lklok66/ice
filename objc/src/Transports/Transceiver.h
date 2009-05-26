@@ -62,6 +62,7 @@ private:
     SOCKET _fd;
     CFReadStreamRef _readStream;
     CFWriteStreamRef _writeStream;
+    bool _checkCertificates;
 
     State _state;
     std::string _desc;
