@@ -11,7 +11,7 @@
 
 @protocol ICECommunicator;
 
-@interface helloViewController : UIViewController<UITextFieldDelegate, UIAlertViewDelegate, UIPickerViewDataSource,
+@interface HelloController : UIViewController<UITextFieldDelegate, UIAlertViewDelegate, UIPickerViewDataSource,
                                                   UIPickerViewDelegate >
 {
 @private

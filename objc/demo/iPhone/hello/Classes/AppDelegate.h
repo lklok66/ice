@@ -9,12 +9,12 @@
 
 #import <UIKit/UIKit.h>
 
-@class helloViewController;
+@class HelloController;
 
-@interface helloAppDelegate : NSObject <UIApplicationDelegate>
+@interface AppDelegate : NSObject <UIApplicationDelegate>
 {
     IBOutlet UIWindow *window;
-    IBOutlet helloViewController *viewController;
+    IBOutlet HelloController *viewController;
 }
 
 @end

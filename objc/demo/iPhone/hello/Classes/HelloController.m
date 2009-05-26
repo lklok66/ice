@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-#import <helloViewController.h>
+#import <HelloController.h>
 #import <Ice/Ice.h>
 #import <Hello.h>
 
@@ -24,10 +24,10 @@
 @interface AMIHello : NSObject
 {
     BOOL response;
-    helloViewController* controller;
+    HelloController* controller;
 }
 
-+(id)hello:(helloViewController*)controller;
++(id)hello:(HelloController*)controller;
 
 -(void)response;
 -(void)exception:(ICEException*)ex;
@@ -42,7 +42,7 @@
 -(void)setShowValue:(BOOL)val;
 @end
 
-@implementation helloViewController
+@implementation HelloController
 
 NSString* hostnameKey = @"hostnameKey";
 
@@ -392,7 +392,7 @@ NSString* hostnameKey = @"hostnameKey";
 
 @implementation AMIHello
 
-+(id)hello:(helloViewController*)controller
++(id)hello:(HelloController*)controller
 {
     AMIHello* h = [[AMIHello alloc] init];
     h->controller = [controller retain];

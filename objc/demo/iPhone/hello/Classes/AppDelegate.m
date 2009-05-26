@@ -7,10 +7,10 @@
 //
 // **********************************************************************
 
-#import <helloAppDelegate.h>
-#import <helloViewController.h>
+#import <AppDelegate.h>
+#import <HelloController.h>
 
-@implementation helloAppDelegate
+@implementation AppDelegate
 
 - (void)applicationDidFinishLaunching:(UIApplication *)application
 {
