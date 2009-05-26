@@ -8,9 +8,32 @@
 // **********************************************************************
 
 #import <helloViewController.h>
-#import <helloAppDelegate.h>
 #import <Ice/Ice.h>
 #import <Hello.h>
+
+// Various delivery mode constants
+#define DeliveryModeTwoway  0
+#define DeliveryModeTwowaySecure 1
+#define DeliveryModeOneway 2
+#define DeliveryModeOnewayBatch  3
+#define DeliveryModeOnewaySecure 4
+#define DeliveryModeOnewaySecureBatch 5
+#define DeliveryModeDatagram 6
+#define DeliveryModeDatagramBatch 7
+
+@interface AMIHello : NSObject
+{
+    BOOL response;
+    helloViewController* controller;
+}
+
++(id)hello:(helloViewController*)controller;
+
+-(void)response;
+-(void)exception:(ICEException*)ex;
+-(void)sent;
+
+@end
 
 //
 // Avoid warning for undocumented UISlider method
@@ -21,89 +44,47 @@
 
 @implementation helloViewController
 
-@synthesize flushButton;
-@synthesize hostnameTextField;
-@synthesize statusLabel;
-@synthesize batchSwitch;
-@synthesize secureSwitch;
-@synthesize timeoutSlider;
-@synthesize delaySlider;
-@synthesize activity;
-@synthesize hostname;
-@synthesize hello;
-
 NSString* hostnameKey = @"hostnameKey";
 
--(void)updateProxy:(NSString*)h
++(void)initialize
 {
-    NSString* s = [NSString stringWithFormat:@"hello:tcp -h %@ -p 10000:ssl -h %@ -p 10001:udp -h %@ -p 10000",h, h, h];
-    helloAppDelegate *appDelegate = (helloAppDelegate *)[[UIApplication sharedApplication] delegate];
-    ICEObjectPrx* prx = [appDelegate.communicator stringToProxy:s];
-    NSAssert(prx != nil, @"");
-    
-    switch(deliveryMode)
-    {
-        case DeliveryModeTwoway:
-            prx = [prx ice_twoway];
-            break;
-            
-        case DeliveryModeOneway:
-            prx = [prx ice_oneway];
-            break;
-            
-        case DeliveryModeBatchOneway:
-            prx = [prx ice_batchOneway];
-            break;
-            
-        case DeliveryModeDatagram:
-            prx = [prx ice_datagram];
-            break;
-            
-        case DeliveryModeBatchDatagram:
-            prx = [prx ice_batchDatagram];
-            break;
-    }
-    
-    if(timeout != 0)
-    {
-        prx = [prx ice_timeout:timeout];
-    }
+    NSDictionary* appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
+                                 @"127.0.0.1", hostnameKey, nil];
+	
+    [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
+}
 
-    // You cannot create secure datagram proxies.
-    if(deliveryMode != DeliveryModeDatagram && deliveryMode != DeliveryModeBatchDatagram)
-    {
-        prx = [prx ice_secure:secure];
-    }
-    
-    self.hello = [DemoHelloPrx uncheckedCast:prx];
+-(void)applicationWillTerminate
+{
+    [communicator destroy];
 }
 
 -(void)viewDidLoad
 {
-    [super viewDidLoad];
-
-    NSString* testValue = [[NSUserDefaults standardUserDefaults] stringForKey:hostnameKey];
-    if (testValue == nil)
-    {
-        NSDictionary* appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
-                                     @"127.0.0.1", hostnameKey, nil];
-	
-        [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
-        [[NSUserDefaults standardUserDefaults] synchronize];
-    }
+    ICEInitializationData* initData = [ICEInitializationData initializationData];
+    initData.properties = [ICEUtil createProperties];
+    [initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
+    [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
+    [initData.properties setProperty:@"IceSSL.CertFile" value:@"c_rsa1024.pfx"];
+    [initData.properties setProperty:@"IceSSL.Password" value:@"password"];
+#if TARGET_IPHONE_SIMULATOR
+    [initData.properties setProperty:@"IceSSL.Keychain" value:@"test"];
+    [initData.properties setProperty:@"IceSSL.KeychainPassword" value:@"password"];
+#endif     
+    communicator = [[ICEUtil createCommunicator:initData] retain];
     
-    self.hostname = [[NSUserDefaults standardUserDefaults] stringForKey:hostnameKey];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(applicationWillTerminate) 
+                                                 name:UIApplicationWillTerminateNotification
+                                               object:nil]; 
     
     // When the user starts typing, show the clear button in the text field.
     hostnameTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
-
+    
     // Defaults for the UI elements.
-    hostnameTextField.text = hostname; 
-
-    batchSwitch.enabled = NO;
+    hostnameTextField.text = [[NSUserDefaults standardUserDefaults] stringForKey:hostnameKey];
     flushButton.enabled = NO;
-    secureSwitch.enabled = YES;
-
+    
     // This generates a compile time warning, but does actually work!
     [delaySlider setShowValue:YES];
     [timeoutSlider setShowValue:YES];
@@ -111,68 +92,8 @@ NSString* hostnameKey = @"hostnameKey";
     statusLabel.text = @"Ready";
     
     showAlert = NO;
-    self.hello = nil;
-    delay = 0;
-    timeout = 0;
-    deliveryMode = DeliveryModeTwoway;
-    batch = NO;
-    secure = NO;
-    [self updateProxy:self.hostname];
-}
-
--(void)didPresentAlertView:(UIAlertView *)alertView
-{
-    showAlert = YES;
-}
-
--(void)alertView:(UIAlertView*)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
-{
-    showAlert = NO;
-}
-
--(BOOL)textFieldShouldReturn:(UITextField *)theTextField
-{
-    // If we've already showing an invalid hostname alert, then we ignore enter.
-    if(showAlert)
-    {
-        return NO;
-    }
-
-    // When the user presses return, take focus away from the text field so that the keyboard is dismissed.
-    if(theTextField == hostnameTextField)
-    {
-        @try
-        {
-            [self updateProxy:hostnameTextField.text];
-        }
-        @catch(ICEEndpointParseException* ex)
-        {
-            UIAlertView *alert = [[UIAlertView alloc]
-                                  initWithTitle:@"Invalid Hostname" message:@"The provided hostname is invalid."
-                                  delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
-            [alert show];
-            [alert release];
-            return NO;
-        }
-
-        // Close the text field, save the hostname in the preferences.
-        [hostnameTextField resignFirstResponder];
-        self.hostname = hostnameTextField.text;
-        [[NSUserDefaults standardUserDefaults] setObject:hostname forKey:hostnameKey];
-        [[NSUserDefaults standardUserDefaults] synchronize];
-    }
-    return YES;
-}
-
--(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
-{
-    // Dismiss the keyboard when the view outside the text field is touched.
-    [hostnameTextField resignFirstResponder];
-
-    // Revert the text field to the previous value.
-    hostnameTextField.text = hostname; 
-
-    [super touchesBegan:touches withEvent:event];
+    
+    queue = [[NSOperationQueue alloc] init];
 }
 
 -(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -187,122 +108,167 @@ NSString* hostnameKey = @"hostnameKey";
     // Release anything that's not essential, such as cached data
 }
 
--(void)modeChanged:(id)sender
+-(void)dealloc
 {
-    // Enable/disable the batch mode, depending on the current sending mode.
-    int mode = [sender selectedSegmentIndex];
-    switch (mode)
-    {
-        case 0: // Twoway
-            deliveryMode = DeliveryModeTwoway;
-            batchSwitch.enabled = NO;
-            flushButton.enabled = NO;
-            secureSwitch.enabled = YES;
-            break;
-        case 1: // Oneway
-            if(batch)
-            {
-                deliveryMode = DeliveryModeBatchOneway;
-            }
-            else
-            {
-                deliveryMode = DeliveryModeOneway;
-            }
-            batchSwitch.enabled = YES;
-            flushButton.enabled = batchSwitch.isOn;
-            secureSwitch.enabled = YES;
-            break;
-        case 2: // Datagram
-            if(batch)
-            {
-                deliveryMode = DeliveryModeBatchDatagram;
-            }
-            else
-            {
-                deliveryMode = DeliveryModeDatagram;
-            }
-            batchSwitch.enabled = YES;
-            flushButton.enabled = batchSwitch.isOn;
-            secureSwitch.enabled = NO;
-            break;
-        default:
-            break;
-    }
-    [self updateProxy:self.hostname];
+    [flushButton release];
+    [hostnameTextField release];
+    [statusLabel release];
+    [timeoutSlider release];
+    [delaySlider release];
+    [activity release];
+    [modePicker release];
+    [queue release];
+    
+    [super dealloc];
 }
 
--(void)batchChanged:(id)thesender
+#pragma mark UIAlertViewDelegate
+
+-(void)didPresentAlertView:(UIAlertView *)alertView
 {
-    UISwitch* sender = thesender;
-    batch = sender.isOn;
-    flushButton.enabled = batch;
-    if(batch && deliveryMode == DeliveryModeOneway)
-    {
-        deliveryMode = DeliveryModeBatchOneway;
-    }
-    else if(batch && deliveryMode == DeliveryModeDatagram)
-    {
-        deliveryMode = DeliveryModeBatchDatagram;
-    }
-    else if(!batch && deliveryMode == DeliveryModeBatchOneway)
-    {
-        deliveryMode = DeliveryModeOneway;
-    }
-    else if(!batch && deliveryMode == DeliveryModeBatchDatagram)
-    {
-        deliveryMode = DeliveryModeDatagram;
-    }
-    [self updateProxy:self.hostname];
+    showAlert = YES;
 }
 
--(void)secureChanged:(id)thesender
+-(void)alertView:(UIAlertView*)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
 {
-    UISwitch* sender = thesender;
-    secure = sender.isOn;
-    [self updateProxy:self.hostname];
+    showAlert = NO;
 }
 
--(void)delayChanged:(id)thesender
+#pragma mark UITextFieldDelegate
+
+-(BOOL)textFieldShouldReturn:(UITextField *)theTextField
 {
-    UISlider* sender = thesender;
-    delay = (int)(sender.value * 1000.0f); // Convert to ms.
+    // If we've already showing an invalid hostname alert, then we ignore enter.
+    if(showAlert)
+    {
+        return NO;
+    }
+
+    // Close the text field.
+    [theTextField resignFirstResponder];
+    return YES;
 }
 
--(void)timeoutChanged:(id)thesender
+-(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    UISlider* sender = thesender;
-    timeout = (int)(sender.value * 1000.0f); // Convert to ms.
-    [self updateProxy:self.hostname];
+    // Dismiss the keyboard when the view outside the text field is touched.
+    [hostnameTextField resignFirstResponder];
+
+    [super touchesBegan:touches withEvent:event];
 }
 
--(void)handleException:(ICEException*) ex
+#pragma mark AMI Callbacks
+
+-(void)exception:(ICEException*) ex
 {
     [activity stopAnimating];       
 
+    statusLabel.text = @"Ready";
+
     NSString* s = [NSString stringWithFormat:@"%@", ex];
     // open an alert with just an OK button
-    UIAlertView *alert = [[UIAlertView alloc]
-                          initWithTitle:@"Error" message:s
-                          delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
-    [alert show];       
-    [alert release];
-    
+    UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Error"
+                                                     message:s
+                                                    delegate:self
+                                           cancelButtonTitle:@"OK"
+                                           otherButtonTitles:nil] autorelease];
+    [alert show];
+}
+
+-(void)sayHelloSent
+{
+    int deliveryMode = [modePicker selectedRowInComponent:0];
+    if(deliveryMode == DeliveryModeTwoway || deliveryMode == DeliveryModeTwowaySecure)
+    {
+        statusLabel.text = @"Waiting for response";
+    }
+    else
+    {
+        statusLabel.text = @"Ready";
+        [activity stopAnimating];       
+    }
+}
+
+-(void)sayHelloResponse
+{
     statusLabel.text = @"Ready";
+    [activity stopAnimating];
+}
+
+-(void)shutdownResponse
+{
+    statusLabel.text = @"Ready";
+    [activity stopAnimating];       
+}
+
+#pragma mark UI Element Callbacks
+
+-(id<DemoHelloPrx>)createProxy
+{
+    NSString* s = [NSString stringWithFormat:@"hello:tcp -h %@ -p 10000:ssl -h %@ -p 10001:udp -h %@ -p 10000",
+                   hostnameTextField.text, hostnameTextField.text, hostnameTextField.text];
+    [[NSUserDefaults standardUserDefaults] setObject:hostnameTextField.text forKey:hostnameKey];
+
+    ICEObjectPrx* prx = [communicator stringToProxy:s];
+    
+    int deliveryMode = [modePicker selectedRowInComponent:0];
+    switch(deliveryMode)
+    {
+        case DeliveryModeTwoway:
+            prx = [prx ice_twoway];
+            break;
+        case DeliveryModeTwowaySecure:
+            prx = [[prx ice_twoway] ice_secure:YES];
+            break;
+        case DeliveryModeOneway:
+            prx = [prx ice_oneway];
+            break;
+        case DeliveryModeOnewayBatch:
+            prx = [prx ice_batchOneway];
+            break;
+        case DeliveryModeOnewaySecure:
+            prx = [[prx ice_oneway] ice_secure:YES];
+            break;
+        case DeliveryModeOnewaySecureBatch:
+            prx = [[prx ice_batchOneway] ice_secure:YES];
+            break;
+        case DeliveryModeDatagram:
+            prx = [prx ice_datagram];
+            break;
+        case DeliveryModeDatagramBatch:
+            prx = [prx ice_batchDatagram];
+            break;
+    }
+    
+    int timeout = (int)(timeoutSlider.value * 1000.0f); // Convert to ms.
+    if(timeout != 0)
+    {
+        prx = [prx ice_timeout:timeout];
+    }
+    
+    return [DemoHelloPrx uncheckedCast:prx];
 }
 
 -(void)sayHello:(id)sender
 {
     @try
     {
-        if(deliveryMode != DeliveryModeBatchOneway && deliveryMode != DeliveryModeBatchDatagram)
+        id<DemoHelloPrx> hello = [self createProxy];
+        int delay = (int)(delaySlider.value * 1000.0f); // Convert to ms.
+
+        int deliveryMode = [modePicker selectedRowInComponent:0];
+        if(deliveryMode != DeliveryModeOnewayBatch &&
+           deliveryMode != DeliveryModeOnewaySecureBatch &&
+           deliveryMode != DeliveryModeDatagramBatch)
         {
-            if([hello sayHello_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                       response:@selector(sayHelloResponse)
-                       exception:@selector(handleException:) 
-                       sent:@selector(sayHelloSent)
-                       delay:delay])
+            AMIHello* cb = [AMIHello hello:self];
+            if([hello sayHello_async:[ICECallbackOnMainThread callbackOnMainThread:cb]
+                            response:@selector(response)
+                           exception:@selector(exception:) 
+                                sent:@selector(sent)
+                               delay:delay])
             {
-                if(deliveryMode == DeliveryModeTwoway)
+                if(deliveryMode == DeliveryModeTwoway || deliveryMode == DeliveryModeTwowaySecure)
                 {
                     [activity startAnimating];
                     statusLabel.text = @"Waiting for response";
@@ -317,44 +283,13 @@ NSString* hostnameKey = @"hostnameKey";
         else
         {
             [hello sayHello:delay];
-            statusLabel.text = @"Queued batch request";
+            flushButton.enabled = YES;
+            statusLabel.text = @"Queued hello request";
         }
     }
     @catch(ICELocalException* ex)
     {
-        [self handleException:ex];
-    }
-}
--(void)sayHelloSent
-{
-    if(deliveryMode == DeliveryModeTwoway)
-    {
-        statusLabel.text = @"Waiting for response";
-    }
-    else
-    {
-        statusLabel.text = @"Ready";
-        [activity stopAnimating];       
-    }
-}
-
--(void)sayHelloResponse
-{
-    statusLabel.text = @"Ready";
-    [activity stopAnimating];       
-}
-
--(void)flushBatch:(id) sender
-{
-    @try
-    {
-        helloAppDelegate *appDelegate = (helloAppDelegate *)[[UIApplication sharedApplication] delegate];
-        [appDelegate.communicator flushBatchRequests];
-        statusLabel.text = @"Flushed batch requests";
-    }
-    @catch(ICELocalException* ex)
-    {
-        [self handleException:ex];
+        [self exception:ex];
     }
 }
 
@@ -362,37 +297,135 @@ NSString* hostnameKey = @"hostnameKey";
 {
     @try
     {
-        [hello shutdown];
-        if(deliveryMode == DeliveryModeBatchOneway || deliveryMode == DeliveryModeBatchDatagram)
+        id<DemoHelloPrx> hello = [self createProxy];
+        int deliveryMode = [modePicker selectedRowInComponent:0];
+        if(deliveryMode != DeliveryModeOnewayBatch &&
+           deliveryMode != DeliveryModeOnewaySecureBatch &&
+           deliveryMode != DeliveryModeDatagramBatch)
         {
-            statusLabel.text = @"Queued shutdown request";
+            [hello shutdown_async:[ICECallbackOnMainThread callbackOnMainThread:self]
+                         response:@selector(shutdownResponse)
+                        exception:@selector(exception:)];
+            if(deliveryMode == DeliveryModeTwoway || deliveryMode == DeliveryModeTwowaySecure)
+            {
+                [activity startAnimating];
+                statusLabel.text = @"Waiting for response";
+            }
         }
         else
         {
-            statusLabel.text = @"Sent shutdown";
+            [hello shutdown];
+            flushButton.enabled = YES;
+            statusLabel.text = @"Queued shutdown request";
         }
     }
     @catch(ICELocalException* ex)
     {
-        [self handleException:ex];
+        [self exception:ex];
     }
-   
+}
+
+// Run in a thread other than main.
+-(void)flush
+{
+    @try
+    {
+        [communicator flushBatchRequests];
+    }
+    @catch(ICELocalException* ex)
+    {
+        [self performSelectorOnMainThread:@selector(exception:) withObject:ex waitUntilDone:NO];
+    }
+}
+
+-(void)flushBatch:(id) sender
+{
+    // Flush the batch in a separate thread to avoid blocking the UI.
+    NSInvocationOperation* op = [[[NSInvocationOperation alloc] initWithTarget:self
+                                                                      selector:@selector(flush)
+                                                                        object:nil] autorelease];
+    [queue addOperation:op];
+    
+    flushButton.enabled = NO;
+    statusLabel.text = @"Flushed batch requests";
+}
+
+#pragma mark UIPickerViewDataSource
+
+- (NSInteger)numberOfComponentsInPickerView:(UIPickerView *)pickerView
+{
+    return 1;
+}
+
+- (NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent:(NSInteger)component
+{
+    return 8;
+}
+
+#pragma mark UIPickerViewDelegate
+
+- (NSString *)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component
+{
+    switch(row)
+    {
+        case DeliveryModeTwoway:
+            return @"Twoway";
+        case DeliveryModeTwowaySecure:
+            return @"Twoway secure";
+        case DeliveryModeOneway:
+            return @"Oneway";
+        case DeliveryModeOnewayBatch:
+            return @"Oneway batch";
+        case DeliveryModeOnewaySecure:
+            return @"Oneway secure";
+        case DeliveryModeOnewaySecureBatch:
+            return @"Oneway secure batch";
+        case DeliveryModeDatagram:
+            return @"Datagram";
+        case DeliveryModeDatagramBatch:
+            return @"Datagram batch";
+    }
+    return @"UNKNOWN";
+}
+
+@end
+
+@implementation AMIHello
+
++(id)hello:(helloViewController*)controller
+{
+    AMIHello* h = [[AMIHello alloc] init];
+    h->controller = [controller retain];
+    return [h autorelease];
+}
+
+-(void)response
+{
+    NSAssert(!response, @"!response");
+    response = YES;
+    [controller sayHelloResponse];
+}
+
+-(void)exception:(ICEException*)ex
+{
+    NSAssert(!response, @"!response");
+    response = YES;
+    [controller exception:ex];
+}
+
+-(void)sent
+{
+    if(response)
+    {
+        return;
+    }
+    [controller sayHelloSent];
 }
 
 -(void)dealloc
 {
-    [flushButton release];
-    [hostnameTextField release];
-    [statusLabel release];
-    [batchSwitch release];
-    [secureSwitch release];
-    [timeoutSlider release];
-    [delaySlider release];
-    [activity release];
-
-    [hostname release];
-    [hello release];
+    NSLog(@"dealloc");
+    [controller release];
     [super dealloc];
 }
-
 @end

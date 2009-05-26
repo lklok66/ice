@@ -10,58 +10,26 @@
 #import <UIKit/UIKit.h>
 
 @protocol ICECommunicator;
-@class DemoHelloPrx;
 
-@interface helloViewController : UIViewController<UITextFieldDelegate,UIAlertViewDelegate> {
+@interface helloViewController : UIViewController<UITextFieldDelegate, UIAlertViewDelegate, UIPickerViewDataSource,
+                                                  UIPickerViewDelegate >
+{
+@private
     IBOutlet UIButton* flushButton;
     IBOutlet UITextField* hostnameTextField;
     IBOutlet UILabel* statusLabel;
-    IBOutlet UISwitch* batchSwitch;
-    IBOutlet UISwitch* secureSwitch;
+    IBOutlet UIPickerView* modePicker;
     IBOutlet UISlider* timeoutSlider;
     IBOutlet UISlider* delaySlider;
     IBOutlet UIActivityIndicatorView* activity;
 
-@private
-    NSString* hostname;
-    enum DeliveryMode
-    {
-        DeliveryModeTwoway,
-        DeliveryModeOneway,
-        DeliveryModeDatagram,
-        DeliveryModeBatchOneway,
-        DeliveryModeBatchDatagram
-    }
-    deliveryMode;
     BOOL showAlert;
-    BOOL batch;
-    BOOL secure;
-    int delay;
-    int timeout;
-    DemoHelloPrx* hello;
+    id<ICECommunicator> communicator;
+    NSOperationQueue* queue;
 }
-
-@property (nonatomic, retain) UIButton* flushButton;
-@property (nonatomic, retain) UITextField* hostnameTextField;
-@property (nonatomic, retain) UILabel* statusLabel;
-@property (nonatomic, retain) UISwitch* batchSwitch;
-@property (nonatomic, retain) UISwitch* secureSwitch;
-@property (nonatomic, retain) UISlider* timeoutSlider;
-@property (nonatomic, retain) UISlider* delaySlider;
-@property (nonatomic, retain) UIActivityIndicatorView* activity;
-
-@property (nonatomic, copy) NSString* hostname;
-@property (nonatomic, retain) DemoHelloPrx* hello;
-
-- (void)modeChanged:(id)sender;
-- (void)batchChanged:(id)sender;
-- (void)secureChanged:(id)sender;
-- (void)delayChanged:(id)sender;
-- (void)timeoutChanged:(id)sender;
 
 - (void)sayHello:(id)sender;
 - (void)flushBatch:(id) sender;
-
 - (void)shutdown: (id)sender;
 
 @end
