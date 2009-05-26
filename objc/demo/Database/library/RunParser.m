@@ -202,7 +202,14 @@ runParser(int argc, char* argv[], id<ICECommunicator> communicator)
         [NSThread sleepForTimeInterval:0.1];
     }
 
-    [session destroy];
+    if(router)
+    {
+	[router destroySession];
+    }
+    else
+    {
+	[session destroy];
+    }
 
     return rc;
 }

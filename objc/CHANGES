@@ -1,6 +1,10 @@
 Changes since version 0.1.0
 ---------------------------
 
+- Fixed a bug in the library & chat demos where the
+  Glacier2::RouterPrx::destroySession was not called to destroy a
+  Glacier2 session.
+
 - Added Cocoa demos library & chat.
 
 - Added iPhone router demo.
