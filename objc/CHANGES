@@ -1,7 +1,12 @@
 Changes since version 0.1.0
 ---------------------------
 
-- Fixed a bug in the library & chat demos where the
+- Added username/password field to the iPhone library demo.
+
+- Fixed a bug in the iPhone chat demo where entering only white
+  space in the input field would cause an exception to be thrown.
+
+- Fixed a bug in the iPhone library & chat demos where the
   Glacier2::RouterPrx::destroySession was not called to destroy a
   Glacier2 session.
 
