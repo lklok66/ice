@@ -118,6 +118,7 @@ NSString* hostnameKey = @"hostnameKey";
     [activity release];
     [modePicker release];
     [queue release];
+    [communicator release];
     
     [super dealloc];
 }

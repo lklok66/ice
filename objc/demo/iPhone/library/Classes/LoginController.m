@@ -61,8 +61,7 @@ NSString* passwordKey = @"passwordKey";
 
 -(void)viewDidLoad
 {
-    ICEInitializationData* initData = [[ICEInitializationData initializationData] retain];
-    validateCommunicator = [[ICEUtil createCommunicator:initData] retain];
+    validateCommunicator = [[ICEUtil createCommunicator:[ICEInitializationData initializationData]] retain];
     
     NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
     glacier2Switch.on = [defaults boolForKey:glacier2Key];
@@ -322,6 +321,7 @@ NSString* passwordKey = @"passwordKey";
     NSString* hostname = hostnameField.text;
     if(sslSwitch.isOn)
     {
+        // TODO: Note that this conditional is reversed for testing purposes.
         if([hostname caseInsensitiveCompare:@"demo2.zeroc.com"] != NSOrderedSame)
         {
             NSLog(@"setting properties for demo2.zeroc.com");
