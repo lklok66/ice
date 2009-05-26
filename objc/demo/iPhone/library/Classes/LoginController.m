@@ -39,6 +39,7 @@
 @synthesize session;
 @synthesize library;
 @synthesize router;
+@synthesize communicator;
 
 NSString* hostnameKey = @"hostnameKey";
 NSString* glacier2Key = @"glacier2Key";
@@ -60,24 +61,8 @@ NSString* passwordKey = @"passwordKey";
 
 -(void)viewDidLoad
 {
-    initData = [[ICEInitializationData initializationData] retain];
-    initData.properties = [ICEUtil createProperties ];
-    [initData.properties setProperty:@"Ice.ACM.Client" value:@"0"];
-    [initData.properties setProperty:@"Ice.RetryIntervals" value:@"-1"];
-    
-    // Tracing properties.
-    //[initData.properties setProperty:@"Ice.Trace.Network" value:@"1"];
-    //[initData.properties setProperty:@"Ice.Trace.Protocol" value:@"1"];
-    
-    //[initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
-    
-    [initData.properties setProperty:@"IceSSL.TrustOnly.Client" value:@"11:DD:28:AD:13:44:76:47:4F:BE:3C:4D:AC:AD:5A:06:88:DA:52:DA"];
-    [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
-    
-#if TARGET_IPHONE_SIMULATOR
-    [initData.properties setProperty:@"IceSSL.Keychain" value:@"test"];
-    [initData.properties setProperty:@"IceSSL.KeychainPassword" value:@"password"];
-#endif        
+    ICEInitializationData* initData = [[ICEInitializationData initializationData] retain];
+    validateCommunicator = [[ICEUtil createCommunicator:initData] retain];
     
     NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
     glacier2Switch.on = [defaults boolForKey:glacier2Key];
@@ -107,14 +92,8 @@ NSString* passwordKey = @"passwordKey";
 {
     [communicator destroy];
     self.communicator = nil;
-}
-
--(void)viewWillAppear:(BOOL)animated
-{
-    NSAssert(communicator == nil, @"communicator == nil");
-    self.communicator = [[ICEUtil createCommunicator:initData] retain];
     
-    [super viewWillAppear:animated];
+    [validateCommunicator destroy];
 }
 
 -(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -149,9 +128,13 @@ NSString* passwordKey = @"passwordKey";
     [mainController release];
     [queue release];
     [waitAlert release];
+
     [session release];
     [library release];
     [router release];
+    
+    [communicator release];
+    [validateCommunicator release];
 
     [super dealloc];
 }
@@ -192,7 +175,7 @@ NSString* passwordKey = @"passwordKey";
                        theTextField.text];
         @try
         {
-            [communicator stringToProxy:s];
+            [validateCommunicator stringToProxy:s];
         }
         @catch(ICEEndpointParseException* ex)
         {
@@ -233,7 +216,7 @@ NSString* passwordKey = @"passwordKey";
 
     // Restart the login process in the delegate.
     [communicator destroy];
-    self.communicator = [[ICEUtil createCommunicator:initData] retain];    
+    self.communicator = nil;
     
     // open an alert with just an OK button
     UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Error"
@@ -325,10 +308,45 @@ NSString* passwordKey = @"passwordKey";
 
 -(IBAction)login:(id)sender
 {
+    ICEInitializationData* initData = [ICEInitializationData initializationData];
+    initData.properties = [ICEUtil createProperties ];
+    [initData.properties setProperty:@"Ice.ACM.Client" value:@"0"];
+    [initData.properties setProperty:@"Ice.RetryIntervals" value:@"-1"];
+    
+    // Tracing properties.
+    //[initData.properties setProperty:@"Ice.Trace.Network" value:@"1"];
+    //[initData.properties setProperty:@"Ice.Trace.Protocol" value:@"1"];
+    
+    [initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
+   
+    NSString* hostname = hostnameField.text;
+    if(sslSwitch.isOn)
+    {
+        if([hostname caseInsensitiveCompare:@"demo2.zeroc.com"] != NSOrderedSame)
+        {
+            NSLog(@"setting properties for demo2.zeroc.com");
+            [[initData properties] setProperty:@"IceSSL.TrustOnly.Client"
+                                         value:@"11:DD:28:AD:13:44:76:47:4F:BE:3C:4D:AC:AD:5A:06:88:DA:52:DA"];
+            [[initData properties] setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
+        }
+        else
+        {
+            NSLog(@"setting properties for demo ca");
+            [[initData properties] setProperty:@"IceSSL.TrustOnly.Client"
+                                         value:@"75:FA:B7:3C:6B:1C:F8:FA:69:4B:75:A0:22:51:B2:AC:11:54:A7:E7"];
+            [[initData properties] setProperty:@"IceSSL.CertAuthFile" value:@"democacert.der"];
+        }
+    }
+#if TARGET_IPHONE_SIMULATOR
+    [initData.properties setProperty:@"IceSSL.Keychain" value:@"test"];
+    [initData.properties setProperty:@"IceSSL.KeychainPassword" value:@"password"];
+#endif
+    
+    NSAssert(communicator == nil, @"communicator == nil");
+    self.communicator = [ICEUtil createCommunicator:initData];
+
     id<ICEObjectPrx> proxy;
     SEL loginSelector;
-
-    NSString* hostname = hostnameField.text;
     @try
     {
         if(glacier2Switch.isOn)
@@ -374,6 +392,9 @@ NSString* passwordKey = @"passwordKey";
                                                cancelButtonTitle:@"OK"
                                                otherButtonTitles:nil] autorelease];
         [alert show];
+        
+        [communicator destroy];
+        self.communicator = nil;
         return;
     }
     

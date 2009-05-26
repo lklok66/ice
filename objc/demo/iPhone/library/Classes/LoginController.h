@@ -13,7 +13,6 @@
 @class MainController;
 @class WaitAlert;
 @protocol Glacier2RouterPrx;
-@class ICEInitializationData;
 @protocol ICECommunicator;
 
 @interface LoginController : UIViewController<UITextFieldDelegate,UIAlertViewDelegate>
@@ -34,8 +33,8 @@
     NSOperationQueue* queue;
     WaitAlert* waitAlert;
     
-    ICEInitializationData* initData;
     id<ICECommunicator> communicator;
+    id<ICECommunicator> validateCommunicator;
     id session;
     id<Glacier2RouterPrx> router;
     int sessionTimeout;
