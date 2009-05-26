@@ -213,23 +213,22 @@
 
 -(IBAction)sendChat:(id)sender
 {
-    if(inputField.stringValue.length > 0)
+    NSString* s  = [inputField.stringValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    if(s.length > 1024)
     {
-        NSMutableString* s = [inputField.stringValue mutableCopy];
-        if(s.length > 1024)
-        {
-            [s deleteCharactersInRange:NSMakeRange(1024, s.length-1024)];
-        }
-        NSAssert(s.length <= 1024, @"s.length <= 1024");
-        
-        [session
-         send_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-         response:nil
-         exception:@selector(exception:)
-         message:s];
-
-        inputField.stringValue = @"";
+        s = [s substringToIndex:1024];
     }
+    
+    NSAssert(s.length <= 1024, @"s.length <= 1024");
+    if(s.length > 0)
+    {
+        [session send_async:[ICECallbackOnMainThread callbackOnMainThread:self]
+                   response:nil
+                  exception:@selector(exception:)
+                    message:s];
+    }
+
+    inputField.stringValue = @"";
 }
 
 #pragma mark ChatRoomCallbck

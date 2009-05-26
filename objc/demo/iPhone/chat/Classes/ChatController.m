@@ -460,22 +460,22 @@ sessionTimeout:(int)t
 #pragma mark UITextFieldDelegate
 
 -(BOOL)textFieldShouldReturn:(UITextField*)theTextField
-{
-    if(theTextField.text.length > 0)
+{    
+    NSString* s  = [theTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    if(s.length > 1024)
     {
-        NSMutableString* s = [theTextField.text mutableCopy];
-        if(s.length > 1024)
-        {
-            [s deleteCharactersInRange:NSMakeRange(1024, s.length-1024)];
-        }
-        NSAssert(s.length <= 1024, @"s.length <= 1024");
-        
+        s = [s substringToIndex:1024];
+    }
+    
+    NSAssert(s.length <= 1024, @"s.length <= 1024");
+    if(s.length > 0)
+    {
         [session send_async:[ICECallbackOnMainThread callbackOnMainThread:self]
                    response:nil
                   exception:@selector(exception:)
                     message:s];
     }
-
+    
     theTextField.text = @"";
     [theTextField resignFirstResponder];
     
