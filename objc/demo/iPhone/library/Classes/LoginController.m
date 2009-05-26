@@ -19,7 +19,9 @@
 
 @interface LoginController()
 
-@property (nonatomic, retain) NSString* hostname;
+@property (nonatomic, retain) UITextField* currentField;
+@property (nonatomic, retain) NSString* oldFieldValue;
+
 @property (nonatomic, retain) WaitAlert* waitAlert;
 @property (nonatomic, retain) id<ICECommunicator> communicator;
 @property (nonatomic, retain) id session;
@@ -30,7 +32,8 @@
 
 @implementation LoginController
 
-@synthesize hostname;
+@synthesize currentField;
+@synthesize oldFieldValue;
 @synthesize waitAlert;
 @synthesize communicator;
 @synthesize session;
@@ -40,10 +43,14 @@
 NSString* hostnameKey = @"hostnameKey";
 NSString* glacier2Key = @"glacier2Key";
 NSString* sslKey = @"sslKey";
+NSString* usernameKey = @"usernameKey";
+NSString* passwordKey = @"passwordKey";
 
 +(void)initialize
 {
     NSDictionary* appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:@"demo2.zeroc.com", hostnameKey,
+                                 @"", usernameKey,
+                                 @"", passwordKey,
                                  @"YES", glacier2Key,
                                  @"YES", sslKey,
                                  nil];
@@ -73,16 +80,20 @@ NSString* sslKey = @"sslKey";
 #endif        
     
     NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-    self.hostname = [defaults stringForKey:hostnameKey];
     glacier2Switch.on = [defaults boolForKey:glacier2Key];
     sslSwitch.on = [defaults boolForKey:sslKey];
     
     queue = [[NSOperationQueue alloc] init];
 
     // When the user starts typing, show the clear button in the text field.
-    hostnameTextField.clearButtonMode = UITextFieldViewModeWhileEditing;
-    hostnameTextField.text = hostname;
-    loginButton.enabled = hostname.length > 0;
+    hostnameField.clearButtonMode = UITextFieldViewModeWhileEditing;
+    hostnameField.text = [defaults stringForKey:hostnameKey];
+    usernameField.clearButtonMode = UITextFieldViewModeWhileEditing;
+    usernameField.text = [defaults stringForKey:usernameKey];
+    passwordField.clearButtonMode = UITextFieldViewModeWhileEditing;
+    passwordField.text = [defaults stringForKey:passwordKey];
+
+    loginButton.enabled = hostnameField.text.length > 0;
     
     mainController = [[MainController alloc] initWithNibName:@"MainView" bundle:nil];
     
@@ -120,25 +131,21 @@ NSString* sslKey = @"sslKey";
 
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    if(hostnameTextField.editing)
-    {
-        // Dismiss the keyboard when the view outside the text field is touched.
-        [hostnameTextField resignFirstResponder];
-        
-        // Revert the text field to the previous value.
-        hostnameTextField.text = hostname; 
-        loginButton.enabled = hostname.length > 0;
-    }
+    [currentField resignFirstResponder];
+    currentField.text = oldFieldValue; 
+    self.currentField = nil;
     [super touchesBegan:touches withEvent:event];
 }
 
 -(void)dealloc
 {
-    [hostnameTextField release];
+    [hostnameField release];
+    [usernameField release];
+    [passwordField release];
+
     [loginButton release];
     [glacier2Switch release];
     [sslSwitch release];
-    [hostname release];
     [mainController release];
     [queue release];
     [waitAlert release];
@@ -165,11 +172,21 @@ NSString* sslKey = @"sslKey";
 
 #pragma mark UITextFieldDelegate
 
+-(BOOL)textFieldShouldBeginEditing:(UITextField*)field
+{
+    self.currentField = field;
+    self.oldFieldValue = field.text;
+    return YES;
+}
+
 -(BOOL)textFieldShouldReturn:(UITextField*)theTextField
 {
+    NSAssert(theTextField == currentField, @"theTextField == currentTextField");
+
     // When the user presses return, take focus away from the text
     // field so that the keyboard is dismissed.
-    if(theTextField == hostnameTextField)
+    NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+    if(theTextField == hostnameField)
     {
         NSString* s = [NSString stringWithFormat:@"SessionFactory:tcp -h %@ -p 10000",
                        theTextField.text];
@@ -188,14 +205,22 @@ NSString* sslKey = @"sslKey";
             return NO;
         }
         
-        [hostnameTextField resignFirstResponder];
-        
-        self.hostname = theTextField.text;
-        loginButton.enabled = hostname.length > 0;
-        
-        [[NSUserDefaults standardUserDefaults] setObject:hostname forKey:hostnameKey];
-        [[NSUserDefaults standardUserDefaults] synchronize];
+        [defaults setObject:theTextField.text forKey:hostnameKey];
     }
+    else if(theTextField == usernameField)
+    {
+        [defaults setObject:theTextField.text forKey:usernameKey];
+    }
+    else if(theTextField == passwordField)
+    {
+        [defaults setObject:theTextField.text forKey:passwordKey];
+    }
+
+    loginButton.enabled = hostnameField.text.length > 0;
+
+    [theTextField resignFirstResponder];
+    self.currentField = nil;
+    
     return YES;
 }
 
@@ -272,7 +297,7 @@ NSString* sslKey = @"sslKey";
     {
         id<Glacier2RouterPrx> glacier2router = [Glacier2RouterPrx uncheckedCast:proxy];
         
-        id<Glacier2SessionPrx> glacier2session = [glacier2router createSession:@"dummy" password:@"none"];
+        id<Glacier2SessionPrx> glacier2session = [glacier2router createSession:usernameField.text password:passwordField.text];
         id<DemoGlacier2SessionPrx> sess = [DemoGlacier2SessionPrx uncheckedCast:glacier2session];
 
         self.session = sess;
@@ -303,6 +328,7 @@ NSString* sslKey = @"sslKey";
     id<ICEObjectPrx> proxy;
     SEL loginSelector;
 
+    NSString* hostname = hostnameField.text;
     @try
     {
         if(glacier2Switch.isOn)

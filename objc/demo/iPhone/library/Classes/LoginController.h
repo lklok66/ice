@@ -19,12 +19,16 @@
 @interface LoginController : UIViewController<UITextFieldDelegate,UIAlertViewDelegate>
 {
 @private
-    IBOutlet UITextField* hostnameTextField;
+    IBOutlet UITextField* hostnameField;
+    IBOutlet UITextField* usernameField;
+    IBOutlet UITextField* passwordField;
     IBOutlet UIButton* loginButton;
     IBOutlet UISwitch* glacier2Switch;
     IBOutlet UISwitch* sslSwitch;
     
-    NSString* hostname;
+    UITextField* currentField;
+    NSString* oldFieldValue;
+    
     MainController *mainController;
     
     NSOperationQueue* queue;
