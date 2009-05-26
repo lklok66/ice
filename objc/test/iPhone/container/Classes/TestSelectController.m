@@ -32,7 +32,7 @@
 {
     AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
     self.tests = appDelegate.tests;
-    self.sslSwitch.isOn = appDelegate.ssl;
+    [self.sslSwitch setOn:appDelegate.ssl animated:TRUE];
     [super viewDidLoad];
 }
 

@@ -498,7 +498,7 @@ IceObjC::Transceiver::checkCertificates()
         OSStatus err;
         bool checkCertName = !_host.empty() &&
             _instance->initializationData().properties->getPropertyAsIntWithDefault("IceSSL.CheckCertName", 1);
-#if TARGET_IPHONE_SIMULATOR || !TARGET_OS_IPHONE
+#if !TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR && !__IPHONE_3_0
         SecPolicySearchRef policySearch = 0;
         SecPolicyRef policy = 0;
         const CSSM_OID* oid = checkCertName ? &CSSMOID_APPLE_TP_SSL : &CSSMOID_APPLE_X509_BASIC;
@@ -593,7 +593,7 @@ IceObjC::Transceiver::checkCertificates()
 
         if(_instance->trustOnlyKeyID())
         {
-#if TARGET_IPHONE_SIMULATOR || !TARGET_OS_IPHONE
+#if !TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR && !__IPHONE_3_0
             SecCertificateRef cert = (SecCertificateRef)CFArrayGetValueAtIndex(certificates, 0);
 
             CSSM_CL_HANDLE handle;

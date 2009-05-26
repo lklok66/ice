@@ -201,7 +201,7 @@ IceObjC::Instance::Instance(const IceInternal::InstancePtr& instance, bool secur
     string certAuthFile = properties->getProperty("IceSSL.CertAuthFile");
     string certFile = properties->getProperty("IceSSL.CertFile");
 
-#if TARGET_IPHONE_SIMULATOR || !TARGET_OS_IPHONE
+#if !TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR && !__IPHONE_3_0 
 
     OSStatus err;
     if(!certAuthFile.empty())

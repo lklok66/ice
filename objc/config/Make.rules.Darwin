@@ -13,22 +13,24 @@
 
 ifeq ($(COMPILE_FOR_IPHONE),yes)
      SDK_NAME = iPhoneOS
-     ARCH=arm
+     ARCH=armv6
 endif
 ifeq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
      COMPILE_FOR_IPHONE = yes
      SDK_NAME = iPhoneSimulator
-     ARCH=i686
+     ARCH=i386
 endif
 
 ifeq ($(COMPILE_FOR_IPHONE),yes)
-    SDK_HOME=/Developer/Platforms/$(SDK_NAME).platform/Developer/SDKs/$(SDK_NAME)2.0.sdk
+    SDK_HOME=/Developer/Platforms/$(SDK_NAME).platform/Developer/SDKs/$(SDK_NAME)$(IPHONE_SDK_VERSION).sdk
 
-    CC       = /Developer/Platforms/$(SDK_NAME).platform/Developer/usr/bin/$(ARCH)-apple-darwin9-gcc-4.0.1
-    CXX      = /Developer/Platforms/$(SDK_NAME).platform/Developer/usr/bin/$(ARCH)-apple-darwin9-g++-4.0.1
+    CC       = /Developer/Platforms/$(SDK_NAME).platform/Developer/usr/bin/gcc-4.0
+    CXX      = /Developer/Platforms/$(SDK_NAME).platform/Developer/usr/bin/g++-4.0
+#    CC       = /Developer/Platforms/$(SDK_NAME).platform/Developer/usr/bin/gcc-4.2
+#    CXX      = /Developer/Platforms/$(SDK_NAME).platform/Developer/usr/bin/g++-4.2
 
-    CPPPLATFORMFLAGS    = -isysroot $(SDK_HOME)
-    LDPLATFORMFLAGS     = -isysroot $(SDK_HOME)
+    CPPPLATFORMFLAGS    = -arch $(ARCH) -isysroot $(SDK_HOME) -miphoneos-version-min=2.0
+    LDPLATFORMFLAGS     = -arch $(ARCH) -isysroot $(SDK_HOME)
     CODESIGN = CODESIGN_ALLOCATE=/Developer/Platforms/$(SDK_NAME).platform/Developer/usr/bin/codesign_allocate codesign
 else
     CC                  = cc
@@ -36,7 +38,7 @@ else
 endif
 
 CFLAGS                  = -Wall
-CXXFLAGS		= -ftemplate-depth-128 -Wall -D_REENTRANT
+CXXFLAGS		= -ftemplate-depth-128 -Wall -D_REENTRANT 
 
 OPT_FLAGS		=
 ifeq ($(OPTIMIZE_SPEED),yes)

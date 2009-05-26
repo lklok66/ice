@@ -36,6 +36,9 @@ embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 #COMPILE_FOR_IPHONE	    	= yes
 #COMPILE_FOR_IPHONE_SIMULATOR 	= yes
 
+IPHONE_SDK_VERSION		= 2.0
+#IPHONE_SDK_VERSION		= 3.0
+
 #STATICLIBS			= yes
 
 #
