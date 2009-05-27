@@ -14,6 +14,7 @@
 		3488C4F10FC23DCF001C9F93 /* EditView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3488C4F00FC23DCF001C9F93 /* EditView.xib */; };
 		3488C52A0FC24104001C9F93 /* RentView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3488C5290FC24104001C9F93 /* RentView.xib */; };
 		3488C52D0FC2414D001C9F93 /* SavingView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3488C52C0FC2414D001C9F93 /* SavingView.xib */; };
+		349A354C0FCBD6C8003F86BC /* democacert.der in Resources */ = {isa = PBXBuildFile; fileRef = 349A354B0FCBD6C8003F86BC /* democacert.der */; };
 		34C5F1930FC508AE00B226F7 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 34C5F1920FC508AE00B226F7 /* icon.icns */; };
 		34C5F2170FC514C900B226F7 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 34C5F2080FC514C900B226F7 /* AppDelegate.m */; };
 		34C5F2180FC514C900B226F7 /* ConnectController.m in Sources */ = {isa = PBXBuildFile; fileRef = 34C5F20A0FC514C900B226F7 /* ConnectController.m */; };
@@ -47,6 +48,7 @@
 		3488C4F00FC23DCF001C9F93 /* EditView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = EditView.xib; sourceTree = "<group>"; };
 		3488C5290FC24104001C9F93 /* RentView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RentView.xib; sourceTree = "<group>"; };
 		3488C52C0FC2414D001C9F93 /* SavingView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SavingView.xib; sourceTree = "<group>"; };
+		349A354B0FCBD6C8003F86BC /* democacert.der */ = {isa = PBXFileReference; lastKnownFileType = file; path = democacert.der; sourceTree = "<group>"; };
 		34C5F1920FC508AE00B226F7 /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = "<group>"; };
 		34C5F2070FC514C900B226F7 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Classes/AppDelegate.h; sourceTree = "<group>"; };
 		34C5F2080FC514C900B226F7 /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = Classes/AppDelegate.m; sourceTree = "<group>"; };
@@ -157,6 +159,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				349A354B0FCBD6C8003F86BC /* democacert.der */,
 				34C5F1920FC508AE00B226F7 /* icon.icns */,
 				344792F90FBC2CE20037E9FA /* cacert.der */,
 				3447919E0FBBC4AC0037E9FA /* ConnectView.xib */,
@@ -234,6 +237,7 @@
 				3488C52A0FC24104001C9F93 /* RentView.xib in Resources */,
 				3488C52D0FC2414D001C9F93 /* SavingView.xib in Resources */,
 				34C5F1930FC508AE00B226F7 /* icon.icns in Resources */,
+				349A354C0FCBD6C8003F86BC /* democacert.der in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
