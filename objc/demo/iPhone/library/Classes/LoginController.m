@@ -90,8 +90,6 @@ NSString* passwordKey = @"passwordKey";
 -(void)applicationWillTerminate
 {
     [communicator destroy];
-    self.communicator = nil;
-    
     [validateCommunicator destroy];
 }
 
@@ -213,7 +211,8 @@ NSString* passwordKey = @"passwordKey";
     [waitAlert dismissWithClickedButtonIndex:0 animated:YES];
     self.waitAlert = nil;
 
-    // Restart the login process in the delegate.
+    // We always create a new communicator each time
+    // we try to login.
     [communicator destroy];
     self.communicator = nil;
     
@@ -319,24 +318,24 @@ NSString* passwordKey = @"passwordKey";
     [initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
    
     NSString* hostname = hostnameField.text;
+    // Setup the SSL certificates depending on the which server host we are
+    // connecting with.
     if(sslSwitch.isOn)
     {
-        // TODO: Note that this conditional is reversed for testing purposes.
-        if([hostname caseInsensitiveCompare:@"demo2.zeroc.com"] != NSOrderedSame)
+        if([hostname caseInsensitiveCompare:@"demo2.zeroc.com"] == NSOrderedSame)
         {
-            NSLog(@"setting properties for demo2.zeroc.com");
             [[initData properties] setProperty:@"IceSSL.TrustOnly.Client"
                                          value:@"11:DD:28:AD:13:44:76:47:4F:BE:3C:4D:AC:AD:5A:06:88:DA:52:DA"];
             [[initData properties] setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
         }
         else
         {
-            NSLog(@"setting properties for demo ca");
             [[initData properties] setProperty:@"IceSSL.TrustOnly.Client"
                                          value:@"75:FA:B7:3C:6B:1C:F8:FA:69:4B:75:A0:22:51:B2:AC:11:54:A7:E7"];
             [[initData properties] setProperty:@"IceSSL.CertAuthFile" value:@"democacert.der"];
         }
     }
+
 #if TARGET_IPHONE_SIMULATOR
     [initData.properties setProperty:@"IceSSL.Keychain" value:@"test"];
     [initData.properties setProperty:@"IceSSL.KeychainPassword" value:@"password"];
