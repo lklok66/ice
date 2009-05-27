@@ -23,12 +23,9 @@
 {
     if(delegate)
     {
-        // TODO: Remove this
-        NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
         [delegate performSelectorOnMainThread:@selector(log:)
                                    withObject:[[LogEntry logEntryPrint:message] retain]
                                 waitUntilDone:NO];
-        [pool release];
     }
 }
 
@@ -36,12 +33,9 @@
 {
     if(delegate)
     {
-        // TODO: Remove this
-        NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
         [delegate performSelectorOnMainThread:@selector(log:)
                                    withObject:[[LogEntry logEntryTrace:message category:category] retain]
                                 waitUntilDone:NO];
-        [pool release];
     }
 }
 
@@ -49,12 +43,9 @@
 {
     if(delegate)
     {
-        // TODO: Remove this
-        NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
         [delegate performSelectorOnMainThread:@selector(log:)
                                    withObject:[[LogEntry logEntryWarning:message] retain]
                                 waitUntilDone:NO];
-        [pool release];
     }
 }
 
@@ -62,12 +53,9 @@
 {
     if(delegate)
     {
-        // TODO: Remove this
-        NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
         [delegate performSelectorOnMainThread:@selector(log:)
                                    withObject:[[LogEntry logEntryError:message] retain]
                                 waitUntilDone:NO];
-        [pool release];
     }
 }
 

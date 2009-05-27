@@ -36,7 +36,8 @@ class RunLoopThread : public IceUtil::Thread, public IceUtil::Monitor<IceUtil::M
 {
 public:
     
-    RunLoopThread() : _runLoop(0)
+    RunLoopThread(const InstancePtr& instance) :
+        _instance(instance), _runLoop(0)
     {
     }
 
@@ -61,6 +62,10 @@ public:
     virtual void
     run()
     {
+        if(_instance->initializationData().threadHook)
+        {
+            _instance->initializationData().threadHook->start();
+        }
         {
             Lock sync(*this);
             _runLoop = CFRunLoopGetCurrent();
@@ -78,6 +83,7 @@ public:
 
 private:
 
+    const InstancePtr _instance;
     CFRunLoopRef _runLoop;
 };
 
@@ -125,7 +131,7 @@ IceInternal::SelectorThread::SelectorThread(const InstancePtr& instance) :
     try
     {
 #ifdef ICE_APPLE_CFNETWORK
-        _runLoopThread = new RunLoopThread();
+        _runLoopThread = new RunLoopThread(instance);
         _runLoopThread->start();
 #endif
         _thread = new HelperThread(this);
@@ -377,6 +383,11 @@ IceInternal::SelectorThread::streamOpened(const SocketReadyCallbackPtr& cb)
 void
 IceInternal::SelectorThread::run()
 {
+    if(_instance->initializationData().threadHook)
+    {
+        _instance->initializationData().threadHook->start();
+    }
+
     while(true)
     {
         try
