@@ -28,8 +28,7 @@
     ChatController* chatController;
     NSOperationQueue* queue;
     WaitAlert* waitAlert;
-    
-    ICEInitializationData* initData;
+
     id<ICECommunicator> communicator;
 }
 

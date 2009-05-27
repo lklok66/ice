@@ -34,7 +34,6 @@
     WaitAlert* waitAlert;
     
     id<ICECommunicator> communicator;
-    id<ICECommunicator> validateCommunicator;
     id session;
     id<Glacier2RouterPrx> router;
     int sessionTimeout;

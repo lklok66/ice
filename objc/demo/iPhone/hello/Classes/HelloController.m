@@ -262,8 +262,7 @@ NSString* hostnameKey = @"hostnameKey";
            deliveryMode != DeliveryModeOnewaySecureBatch &&
            deliveryMode != DeliveryModeDatagramBatch)
         {
-            AMIHello* cb = [AMIHello hello:self];
-            if([hello sayHello_async:[ICECallbackOnMainThread callbackOnMainThread:cb]
+            if([hello sayHello_async:[ICECallbackOnMainThread callbackOnMainThread:[AMIHello hello:self]]
                             response:@selector(response)
                            exception:@selector(exception:) 
                                 sent:@selector(sent)
@@ -425,7 +424,6 @@ NSString* hostnameKey = @"hostnameKey";
 
 -(void)dealloc
 {
-    NSLog(@"dealloc");
     [controller release];
     [super dealloc];
 }

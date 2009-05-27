@@ -67,12 +67,6 @@ NSString* const routerServerKey = @"routerServerKey";
     [routerServerField setEnabled:routerField.state == NSOnState];
 }
 
--(void)finalize
-{
-    [validationCommunicator destroy];
-    [super finalize];
-}
-
 #pragma mark Login callbacks
 
 -(void)loginComplete:(LibraryController*)controller
@@ -257,12 +251,12 @@ NSString* const routerServerKey = @"routerServerKey";
     [defaults setObject:passwordField.stringValue forKey:passwordKey];
     
     ICEInitializationData* initData = [ICEInitializationData initializationData];
-    initData.properties = [ICEUtil createProperties ];
+    initData.properties = [ICEUtil createProperties];
     [initData.properties setProperty:@"Ice.ACM.Client" value:@"0"];
     [initData.properties setProperty:@"Ice.RetryIntervals" value:@"-1"];
     
     // Tracing properties.
-    [initData.properties setProperty:@"Ice.Trace.Network" value:@"1"];
+    //[initData.properties setProperty:@"Ice.Trace.Network" value:@"1"];
     //[initData.properties setProperty:@"Ice.Trace.Protocol" value:@"1"];
 
     if(sslField.state == NSOnState && routerField.state != NSOnState)
@@ -396,43 +390,8 @@ NSString* const routerServerKey = @"routerServerKey";
           contextInfo:NULL];
 }
 
--(BOOL)validateHostname:(NSString*)text
-{
-    if(!validationCommunicator)
-    {
-        validationCommunicator = [ICEUtil createCommunicator:[ICEInitializationData initializationData]];
-    }
-    
-    // The exact string doesn't matter as long as the hostname validates as correct.
-    NSString* s = [NSString stringWithFormat:@"Glacier2/router:tcp -p 4064 -h %@ -t 10000", text];
-    @try
-    {
-        [validationCommunicator stringToProxy:s];
-    }
-    @catch(ICEEndpointParseException* ex)
-    {
-        NSRunAlertPanel(@"Invalid Hostname", @"The provided hostname is invalid", nil, nil, nil);
-        return NO;
-    }
-    return YES;
-}
-
 -(void)closeAdvancedSheet:(id)sender
 {
-    // Validate the hostnames, save the updated preferences.
-    if(![self validateHostname:chatServerField.stringValue])
-    {
-        return;
-    }
-    
-    if(routerField.state == NSOnState)
-    {
-        if(![self validateHostname:routerServerField.stringValue])
-        {
-            return;
-        }
-    }
-        
     NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
     
     [defaults setObject:chatServerField.stringValue forKey:serverKey];

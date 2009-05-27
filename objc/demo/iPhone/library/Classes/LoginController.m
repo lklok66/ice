@@ -61,15 +61,11 @@ NSString* passwordKey = @"passwordKey";
 
 -(void)viewDidLoad
 {
-    validateCommunicator = [[ICEUtil createCommunicator:[ICEInitializationData initializationData]] retain];
-    
     NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-    glacier2Switch.on = [defaults boolForKey:glacier2Key];
-    sslSwitch.on = [defaults boolForKey:sslKey];
     
     queue = [[NSOperationQueue alloc] init];
 
-    // When the user starts typing, show the clear button in the text field.
+    // Set the default values, and show the clear button in the text field.
     hostnameField.clearButtonMode = UITextFieldViewModeWhileEditing;
     hostnameField.text = [defaults stringForKey:hostnameKey];
     usernameField.clearButtonMode = UITextFieldViewModeWhileEditing;
@@ -77,8 +73,9 @@ NSString* passwordKey = @"passwordKey";
     passwordField.clearButtonMode = UITextFieldViewModeWhileEditing;
     passwordField.text = [defaults stringForKey:passwordKey];
 
-    loginButton.enabled = hostnameField.text.length > 0;
-    
+    glacier2Switch.on = [defaults boolForKey:glacier2Key];
+    sslSwitch.on = [defaults boolForKey:sslKey];
+
     mainController = [[MainController alloc] initWithNibName:@"MainView" bundle:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -90,7 +87,12 @@ NSString* passwordKey = @"passwordKey";
 -(void)applicationWillTerminate
 {
     [communicator destroy];
-    [validateCommunicator destroy];
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    loginButton.enabled = hostnameField.text.length > 0;
+	[super viewWillAppear:animated];
 }
 
 -(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -103,14 +105,6 @@ NSString* passwordKey = @"passwordKey";
 {
     [super didReceiveMemoryWarning]; // Releases the view if it doesn't have a superview
     // Release anything that's not essential, such as cached data
-}
-
--(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
-{
-    [currentField resignFirstResponder];
-    currentField.text = oldFieldValue; 
-    self.currentField = nil;
-    [super touchesBegan:touches withEvent:event];
 }
 
 -(void)dealloc
@@ -131,23 +125,8 @@ NSString* passwordKey = @"passwordKey";
     [router release];
     
     [communicator release];
-    [validateCommunicator release];
 
     [super dealloc];
-}
-
--(void)glacier2Changed:(id)s
-{
-    UISwitch* sender = (UISwitch*)s;
-
-    [[NSUserDefaults standardUserDefaults] setObject:(sender.isOn ? @"YES" : @"NO") forKey:glacier2Key];
-}
-
--(void)sslChanged:(id)s
-{
-    UISwitch* sender = (UISwitch*)s;
-    
-    [[NSUserDefaults standardUserDefaults] setObject:(sender.isOn ? @"YES" : @"NO") forKey:sslKey];
 }
 
 #pragma mark UITextFieldDelegate
@@ -168,23 +147,6 @@ NSString* passwordKey = @"passwordKey";
     NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
     if(theTextField == hostnameField)
     {
-        NSString* s = [NSString stringWithFormat:@"SessionFactory:tcp -h %@ -p 10000",
-                       theTextField.text];
-        @try
-        {
-            [validateCommunicator stringToProxy:s];
-        }
-        @catch(ICEEndpointParseException* ex)
-        {
-            UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Invalid Hostname"
-                                                             message:@"The provided hostname is invalid."
-                                                            delegate:self
-                                                   cancelButtonTitle:@"OK"
-                                                   otherButtonTitles:nil] autorelease];
-            [alert show];
-            return NO;
-        }
-        
         [defaults setObject:theTextField.text forKey:hostnameKey];
     }
     else if(theTextField == usernameField)
@@ -202,6 +164,32 @@ NSString* passwordKey = @"passwordKey";
     self.currentField = nil;
     
     return YES;
+}
+
+#pragma mark -
+
+// A touch outside the keyboard dismisses the keyboard, and
+// sets back the old field value.
+-(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    [currentField resignFirstResponder];
+    currentField.text = oldFieldValue; 
+    self.currentField = nil;
+    [super touchesBegan:touches withEvent:event];
+}
+
+#pragma mark UI Actions
+
+-(void)glacier2Changed:(id)s
+{
+    UISwitch* sender = (UISwitch*)s;
+    [[NSUserDefaults standardUserDefaults] setBool:sender.isOn forKey:glacier2Key];
+}
+
+-(void)sslChanged:(id)s
+{
+    UISwitch* sender = (UISwitch*)s;
+    [[NSUserDefaults standardUserDefaults] setBool:sender.isOn forKey:sslKey];
 }
 
 #pragma mark Login

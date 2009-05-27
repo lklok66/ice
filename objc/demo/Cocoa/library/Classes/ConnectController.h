@@ -25,7 +25,6 @@
     IBOutlet NSWindow* connectingSheet;
     IBOutlet NSProgressIndicator* progress;
     id<ICECommunicator> communicator;
-    id<ICECommunicator> validationCommunicator;
     NSOperationQueue* queue;
 }
 

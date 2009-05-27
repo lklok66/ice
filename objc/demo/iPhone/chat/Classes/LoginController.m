@@ -52,35 +52,15 @@ NSString* sslKey = @"sslKey";
     NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
     queue = [[NSOperationQueue alloc] init];
 
+    // Set the default values, and show the clear button in the text field.
     hostnameField.text = [defaults stringForKey:hostnameKey];
     hostnameField.clearButtonMode = UITextFieldViewModeWhileEditing;
-
     usernameField.text =  [defaults stringForKey:usernameKey];
     usernameField.clearButtonMode = UITextFieldViewModeWhileEditing;
-
     passwordField.text = [defaults stringForKey:passwordKey];
     passwordField.clearButtonMode = UITextFieldViewModeWhileEditing;
     
     sslSwitch.on = [defaults boolForKey:sslKey]; 
-    
-    initData = [[ICEInitializationData initializationData] retain];
-    
-    initData.properties = [ICEUtil createProperties ];
-    [initData.properties setProperty:@"Ice.ACM.Client" value:@"0"];
-    [initData.properties setProperty:@"Ice.RetryIntervals" value:@"-1"];
-    
-    // Tracing properties.
-    //[self.initData.properties setProperty:@"Ice.Trace.Network" value:@"1"];
-    //[self.initData.properties setProperty:@"Ice.Trace.Protocol" value:@"1"];
-    
-    [initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
-    [initData.properties setProperty:@"IceSSL.TrustOnly.Client" value:@"C2:E8:D3:33:D7:83:99:6E:08:F7:C2:34:31:F7:1E:8E:44:87:38:57"];
-    [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
-    
-#if TARGET_IPHONE_SIMULATOR
-    [initData.properties setProperty:@"IceSSL.Keychain" value:@"test"];
-    [initData.properties setProperty:@"IceSSL.KeychainPassword" value:@"password"];
-#endif
     
     chatController = [[ChatController alloc] initWithNibName:@"ChatView" bundle:nil];
 
@@ -93,24 +73,12 @@ NSString* sslKey = @"sslKey";
 -(void)applicationWillTerminate
 {
     [communicator destroy];
-    self.communicator = nil;
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
-    NSAssert(communicator == nil, @"communicator == nil");
-    self.communicator = [[ICEUtil createCommunicator:initData] retain];
-        
     loginButton.enabled = hostnameField.text.length > 0 && usernameField.text.length > 0;
 	[super viewWillAppear:animated];
-}
-
--(void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
-{
-    [currentField resignFirstResponder];
-    currentField.text = oldFieldValue; 
-    self.currentField = nil;
-    [super touchesBegan:touches withEvent:event];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -137,14 +105,9 @@ NSString* sslKey = @"sslKey";
     [oldFieldValue release];
     [chatController release];
     [queue release];
-    [initData release];
     [communicator release];
+    
 	[super dealloc];
-}
-
--(IBAction)sslChanged:(id)sender
-{
-    [[NSUserDefaults standardUserDefaults] setObject:(sslSwitch.isOn ? @"YES" : @"NO") forKey:sslKey];
 }
 
 #pragma mark UITextFieldDelegate
@@ -165,23 +128,6 @@ NSString* sslKey = @"sslKey";
     NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults]; 
     if(theTextField == hostnameField)
     {
-        // The exact string doesn't matter as long as the hostname validates as correct.
-        NSString* s = [NSString stringWithFormat:@"Glacier2/router:tcp -p 4064 -h %@ -t 10000", theTextField.text];
-        @try
-        {
-            [communicator stringToProxy:s];
-        }
-        @catch(ICEEndpointParseException* ex)
-        {
-            UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Invalid Hostname"
-                                                             message:@"The provided hostname is invalid."
-                                                            delegate:nil
-                                                   cancelButtonTitle:@"OK"
-                                                   otherButtonTitles:nil] autorelease];
-            [alert show];
-            return NO;
-        }
-        
         [defaults setObject:theTextField.text forKey:hostnameKey];
     }
     else if(theTextField == usernameField)
@@ -200,6 +146,26 @@ NSString* sslKey = @"sslKey";
     return YES;
 }
 
+#pragma mark -
+
+// A touch outside the keyboard dismisses the keyboard, and
+// sets back the old field value.
+-(void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
+{
+    [currentField resignFirstResponder];
+    currentField.text = oldFieldValue; 
+    self.currentField = nil;
+    [super touchesBegan:touches withEvent:event];
+}
+
+#pragma mark UI Actions
+
+-(IBAction)sslChanged:(id)s
+{
+    UISwitch* sender = (UISwitch*)s;
+    [[NSUserDefaults standardUserDefaults] setBool:sender.isOn forKey:sslKey];
+}
+
 #pragma mark Login
 
 -(void)exception:(NSString*)s
@@ -207,8 +173,10 @@ NSString* sslKey = @"sslKey";
     [waitAlert dismissWithClickedButtonIndex:0 animated:YES];
     self.waitAlert = nil;
 
+    // We always create a new communicator each time
+    // we try to login.
     [communicator destroy];
-    self.communicator = [[ICEUtil createCommunicator:initData] retain];    
+    self.communicator = nil;
  
     loginButton.enabled = hostnameField.text.length > 0 && usernameField.text.length > 0;
     
@@ -266,6 +234,28 @@ NSString* sslKey = @"sslKey";
 
 -(IBAction)login:(id)sender
 {
+    ICEInitializationData* initData = [ICEInitializationData initializationData];
+    
+    initData.properties = [ICEUtil createProperties];
+    [initData.properties setProperty:@"Ice.ACM.Client" value:@"0"];
+    [initData.properties setProperty:@"Ice.RetryIntervals" value:@"-1"];
+    
+    // Tracing properties.
+    //[self.initData.properties setProperty:@"Ice.Trace.Network" value:@"1"];
+    //[self.initData.properties setProperty:@"Ice.Trace.Protocol" value:@"1"];
+    
+    [initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
+    [initData.properties setProperty:@"IceSSL.TrustOnly.Client" value:@"C2:E8:D3:33:D7:83:99:6E:08:F7:C2:34:31:F7:1E:8E:44:87:38:57"];
+    [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
+    
+#if TARGET_IPHONE_SIMULATOR
+    [initData.properties setProperty:@"IceSSL.Keychain" value:@"test"];
+    [initData.properties setProperty:@"IceSSL.KeychainPassword" value:@"password"];
+#endif
+    
+    NSAssert(communicator == nil, @"communicator == nil");
+    self.communicator = [ICEUtil createCommunicator:initData];
+
     @try
     {
         NSString* s;
@@ -291,6 +281,9 @@ NSString* sslKey = @"sslKey";
                                                cancelButtonTitle:@"OK"
                                                otherButtonTitles:nil] autorelease];
         [alert show];
+
+        [communicator destroy];
+        self.communicator = nil;
         return;
     }
     
