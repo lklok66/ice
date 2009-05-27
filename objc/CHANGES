@@ -1,6 +1,9 @@
 Changes since version 0.1.0
 ---------------------------
 
+- The iPhone library demo can now connect securely to both
+  demo2.zeroc.com and a locally hosted demo.
+
 - Added username/password field to the iPhone library demo.
 
 - Fixed a bug in the iPhone chat demo where entering only white
