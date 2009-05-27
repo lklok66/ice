@@ -315,8 +315,6 @@ NSString* passwordKey = @"passwordKey";
     //[initData.properties setProperty:@"Ice.Trace.Network" value:@"1"];
     //[initData.properties setProperty:@"Ice.Trace.Protocol" value:@"1"];
     
-    [initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
-   
     NSString* hostname = hostnameField.text;
     // Setup the SSL certificates depending on the which server host we are
     // connecting with.
@@ -335,11 +333,6 @@ NSString* passwordKey = @"passwordKey";
             [[initData properties] setProperty:@"IceSSL.CertAuthFile" value:@"democacert.der"];
         }
     }
-
-#if TARGET_IPHONE_SIMULATOR
-    [initData.properties setProperty:@"IceSSL.Keychain" value:@"test"];
-    [initData.properties setProperty:@"IceSSL.KeychainPassword" value:@"password"];
-#endif
     
     NSAssert(communicator == nil, @"communicator == nil");
     self.communicator = [ICEUtil createCommunicator:initData];
