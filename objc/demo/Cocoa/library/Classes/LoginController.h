@@ -11,7 +11,7 @@
 
 @protocol ICECommunicator;
 
-@interface ConnectController : NSWindowController
+@interface LoginController : NSWindowController
 {
 @private
     IBOutlet NSTextField* chatServerField;

@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-#import <ConnectController.h>
+#import <LoginController.h>
 #import <LibraryController.h>
 
 #import <Ice/Ice.h>
@@ -24,7 +24,7 @@ NSString* const glacier2Key = @"glacier2Key";
 NSString* const routerKey = @"routerKey";
 NSString* const routerServerKey = @"routerServerKey";
 
-@implementation ConnectController
+@implementation LoginController
 
 +(void)initialize
 {
@@ -45,7 +45,7 @@ NSString* const routerServerKey = @"routerServerKey";
 
 - (id)init
 { 
-    if(self = [super initWithWindowNibName:@"ConnectView"])
+    if(self = [super initWithWindowNibName:@"LoginView"])
     {
         queue = [[NSOperationQueue alloc] init];
     }

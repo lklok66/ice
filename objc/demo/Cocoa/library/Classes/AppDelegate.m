@@ -8,7 +8,7 @@
 // **********************************************************************
 
 #import <AppDelegate.h>
-#import <ConnectController.h>
+#import <LoginController.h>
 
 @implementation AppDelegate
 
@@ -16,7 +16,7 @@
 {
     if(self = [super init])
     {
-        connectController = [[ConnectController alloc] init];
+        connectController = [[LoginController alloc] init];
     }
     return self;
 }

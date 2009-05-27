@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DDD58140DA1D0A300B32029 /* MainMenu.xib */; };
-		3447919F0FBBC4AC0037E9FA /* ConnectView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3447919E0FBBC4AC0037E9FA /* ConnectView.xib */; };
+		3447919F0FBBC4AC0037E9FA /* LoginView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3447919E0FBBC4AC0037E9FA /* LoginView.xib */; };
 		3447926A0FBC13940037E9FA /* LibraryView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 344792690FBC13940037E9FA /* LibraryView.xib */; };
 		344792FA0FBC2CE20037E9FA /* cacert.der in Resources */ = {isa = PBXBuildFile; fileRef = 344792F90FBC2CE20037E9FA /* cacert.der */; };
 		3488C4F10FC23DCF001C9F93 /* EditView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3488C4F00FC23DCF001C9F93 /* EditView.xib */; };
@@ -17,7 +17,7 @@
 		349A354C0FCBD6C8003F86BC /* democacert.der in Resources */ = {isa = PBXBuildFile; fileRef = 349A354B0FCBD6C8003F86BC /* democacert.der */; };
 		34C5F1930FC508AE00B226F7 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 34C5F1920FC508AE00B226F7 /* icon.icns */; };
 		34C5F2170FC514C900B226F7 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 34C5F2080FC514C900B226F7 /* AppDelegate.m */; };
-		34C5F2180FC514C900B226F7 /* ConnectController.m in Sources */ = {isa = PBXBuildFile; fileRef = 34C5F20A0FC514C900B226F7 /* ConnectController.m */; };
+		34C5F2180FC514C900B226F7 /* LoginController.m in Sources */ = {isa = PBXBuildFile; fileRef = 34C5F20A0FC514C900B226F7 /* LoginController.m */; };
 		34C5F2190FC514C900B226F7 /* EditController.m in Sources */ = {isa = PBXBuildFile; fileRef = 34C5F20C0FC514C900B226F7 /* EditController.m */; };
 		34C5F21A0FC514C900B226F7 /* Glacier2Session.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34C5F20D0FC514C900B226F7 /* Glacier2Session.ice */; };
 		34C5F21B0FC514C900B226F7 /* Library.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34C5F20E0FC514C900B226F7 /* Library.ice */; };
@@ -42,7 +42,7 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32CA4F630368D1EE00C91783 /* library_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = library_Prefix.pch; sourceTree = "<group>"; };
-		3447919E0FBBC4AC0037E9FA /* ConnectView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ConnectView.xib; sourceTree = "<group>"; };
+		3447919E0FBBC4AC0037E9FA /* LoginView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = LoginView.xib; sourceTree = "<group>"; };
 		344792690FBC13940037E9FA /* LibraryView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = LibraryView.xib; sourceTree = "<group>"; };
 		344792F90FBC2CE20037E9FA /* cacert.der */ = {isa = PBXFileReference; lastKnownFileType = file; path = cacert.der; sourceTree = "<group>"; };
 		3488C4F00FC23DCF001C9F93 /* EditView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = EditView.xib; sourceTree = "<group>"; };
@@ -52,8 +52,8 @@
 		34C5F1920FC508AE00B226F7 /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = "<group>"; };
 		34C5F2070FC514C900B226F7 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Classes/AppDelegate.h; sourceTree = "<group>"; };
 		34C5F2080FC514C900B226F7 /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = Classes/AppDelegate.m; sourceTree = "<group>"; };
-		34C5F2090FC514C900B226F7 /* ConnectController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ConnectController.h; path = Classes/ConnectController.h; sourceTree = "<group>"; };
-		34C5F20A0FC514C900B226F7 /* ConnectController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ConnectController.m; path = Classes/ConnectController.m; sourceTree = "<group>"; };
+		34C5F2090FC514C900B226F7 /* LoginController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LoginController.h; path = Classes/LoginController.h; sourceTree = "<group>"; };
+		34C5F20A0FC514C900B226F7 /* LoginController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = LoginController.m; path = Classes/LoginController.m; sourceTree = "<group>"; };
 		34C5F20B0FC514C900B226F7 /* EditController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EditController.h; path = Classes/EditController.h; sourceTree = "<group>"; };
 		34C5F20C0FC514C900B226F7 /* EditController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = EditController.m; path = Classes/EditController.m; sourceTree = "<group>"; };
 		34C5F20D0FC514C900B226F7 /* Glacier2Session.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = Glacier2Session.ice; path = Classes/Glacier2Session.ice; sourceTree = "<group>"; };
@@ -89,22 +89,22 @@
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				34C5F2070FC514C900B226F7 /* AppDelegate.h */,
-				34C5F2080FC514C900B226F7 /* AppDelegate.m */,
-				34C5F2090FC514C900B226F7 /* ConnectController.h */,
-				34C5F20A0FC514C900B226F7 /* ConnectController.m */,
-				34C5F20B0FC514C900B226F7 /* EditController.h */,
-				34C5F20C0FC514C900B226F7 /* EditController.m */,
 				34C5F20D0FC514C900B226F7 /* Glacier2Session.ice */,
 				34C5F20E0FC514C900B226F7 /* Library.ice */,
+				34C5F2130FC514C900B226F7 /* Router.ice */,
+				34C5F2160FC514C900B226F7 /* Session.ice */,
+				34C5F2070FC514C900B226F7 /* AppDelegate.h */,
+				34C5F2080FC514C900B226F7 /* AppDelegate.m */,
+				34C5F2090FC514C900B226F7 /* LoginController.h */,
+				34C5F20A0FC514C900B226F7 /* LoginController.m */,
+				34C5F20B0FC514C900B226F7 /* EditController.h */,
+				34C5F20C0FC514C900B226F7 /* EditController.m */,
 				34C5F20F0FC514C900B226F7 /* LibraryController.h */,
 				34C5F2100FC514C900B226F7 /* LibraryController.m */,
 				34C5F2110FC514C900B226F7 /* RentController.h */,
 				34C5F2120FC514C900B226F7 /* RentController.m */,
-				34C5F2130FC514C900B226F7 /* Router.ice */,
 				34C5F2140FC514C900B226F7 /* SavingController.h */,
 				34C5F2150FC514C900B226F7 /* SavingController.m */,
-				34C5F2160FC514C900B226F7 /* Session.ice */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -162,7 +162,7 @@
 				349A354B0FCBD6C8003F86BC /* democacert.der */,
 				34C5F1920FC508AE00B226F7 /* icon.icns */,
 				344792F90FBC2CE20037E9FA /* cacert.der */,
-				3447919E0FBBC4AC0037E9FA /* ConnectView.xib */,
+				3447919E0FBBC4AC0037E9FA /* LoginView.xib */,
 				8D1107310486CEB800E47090 /* Info.plist */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
 				1DDD58140DA1D0A300B32029 /* MainMenu.xib */,
@@ -230,7 +230,7 @@
 			files = (
 				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
 				1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */,
-				3447919F0FBBC4AC0037E9FA /* ConnectView.xib in Resources */,
+				3447919F0FBBC4AC0037E9FA /* LoginView.xib in Resources */,
 				3447926A0FBC13940037E9FA /* LibraryView.xib in Resources */,
 				344792FA0FBC2CE20037E9FA /* cacert.der in Resources */,
 				3488C4F10FC23DCF001C9F93 /* EditView.xib in Resources */,
@@ -250,7 +250,7 @@
 			files = (
 				8D11072D0486CEB800E47090 /* main.m in Sources */,
 				34C5F2170FC514C900B226F7 /* AppDelegate.m in Sources */,
-				34C5F2180FC514C900B226F7 /* ConnectController.m in Sources */,
+				34C5F2180FC514C900B226F7 /* LoginController.m in Sources */,
 				34C5F2190FC514C900B226F7 /* EditController.m in Sources */,
 				34C5F21A0FC514C900B226F7 /* Glacier2Session.ice in Sources */,
 				34C5F21B0FC514C900B226F7 /* Library.ice in Sources */,
