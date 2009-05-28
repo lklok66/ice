@@ -14,6 +14,7 @@ include $(top_srcdir)/config/Make.rules
 SUBDIRS		= IceUtilCpp \
 		  IceCpp \
 		  Transports \
+		  IceSSL \
 		  Ice \
 		  Glacier2
 

@@ -1,6 +1,10 @@
 Changes since version 0.1.0
 ---------------------------
 
+- The Mac build now uses the native Ice socket & ssl transports.
+  This means that Mac/Cocoa applications use the same SSL properties
+  as standard Ice for C++ applications.
+
 - The iPhone library demo can now connect securely to both
   demo2.zeroc.com and a locally hosted demo.
 

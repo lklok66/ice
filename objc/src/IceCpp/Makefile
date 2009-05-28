@@ -75,14 +75,7 @@ OBJS		= Acceptor.o \
 		  UdpConnector.o \
 		  UdpEndpointI.o \
 		  UdpTransceiver.o \
-		  UnknownEndpointI.o
-#                 DispatchInterceptor.o \
-#		  TcpEndpointI.o \
-#		  TcpAcceptor.o \
-#		  TcpConnector.o \
-#		  TcpTransceiver.o \
-#		  Application.o \
-#		  Service.o \
+		  UnknownEndpointI.o 
 
 SLICE_OBJS	= BuiltinSequences.o \
 		  Communicator.o \
@@ -148,8 +141,13 @@ SDIR		= $(slicedir)/Ice
 
 include $(top_srcdir)/config/Make.rules
 
-CPPFLAGS	:= -Iinclude -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src -DICE_APPLE_CFNETWORK $(CPPPLATFORMFLAGS)
-SLICE2CPPFLAGS	:= -DICE_APPLE_CFSTREAM --ice --include-dir Ice $(SLICE2CPPFLAGS)
+CPPFLAGS	:= -Iinclude -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src $(CPPPLATFORMFLAGS)
+SLICE2CPPFLAGS	:= --ice --include-dir Ice $(SLICE2CPPFLAGS)
+
+ifeq ($(COMPILE_FOR_IPHONE),yes)
+CPPFLAGS	:= -DICE_APPLE_CFNETWORK $(CPPFLAGS)
+SLICE2CPPFLAGS	:= -DICE_APPLE_CFSTREAM $(SLICE2CPPFLAGS)
+endif
 
 include/Ice/%F.h: $(SDIR)/%F.ice $(SLICE2CPP)
 	rm -f $(*F)F.h $(*F)F.cpp

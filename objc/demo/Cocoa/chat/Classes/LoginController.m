@@ -184,13 +184,14 @@ NSString* const routerServerKey = @"routerServerKey";
     [initData.properties setProperty:@"Ice.RetryIntervals" value:@"-1"];
     
     // Tracing properties.
-    [initData.properties setProperty:@"Ice.Trace.Network" value:@"1"];
+    //[initData.properties setProperty:@"Ice.Trace.Network" value:@"1"];
     //[initData.properties setProperty:@"Ice.Trace.Protocol" value:@"1"];
+    //[initData.properties setProperty:@"IceSSL.Trace.Security" value:@"1"];
     
     [initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
-    [initData.properties setProperty:@"IceSSL.TrustOnly.Client"
-                               value:@"C2:E8:D3:33:D7:83:99:6E:08:F7:C2:34:31:F7:1E:8E:44:87:38:57"];
-    [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
+    [initData.properties setProperty:@"IceSSL.TrustOnly.Client" value:@"CN=\"Glacier2\""];
+    [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.pem"];
+    [initData.properties setProperty:@"IceSSL.DefaultDir" value:[[NSBundle mainBundle] resourcePath]];
 
     NSAssert(communicator == nil, @"communicator == nil");
     communicator = [ICEUtil createCommunicator:initData];

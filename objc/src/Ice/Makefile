@@ -43,7 +43,8 @@ OBJS		= $(OBJC_OBJS) \
 	          $(OBJCPP_OBJS) \
                   $(wildcard ../IceUtilCpp/*.o) \
 	          $(wildcard ../IceCpp/*.o) \
-	 	  $(wildcard ../Transports/*.o)
+	 	  $(wildcard ../Transports/*.o) \
+	 	  $(wildcard ../IceSSL/*.o)
 
 SRCS		= $(OBJCPP_OBJS:.o=.mm) \
 		  $(OBJC_OBJS:.o=.m)
@@ -66,7 +67,17 @@ include $(top_srcdir)/config/Make.rules
 CPPFLAGS	:= -I.. -Iinclude -I../../include $(CPPFLAGS)
 SLICE2OBJCFLAGS	:= --ice --include-dir Ice $(SLICE2OBJCFLAGS)
 
+ifneq ($(COMPILE_FOR_IPHONE),yes)
+    LINKWITH         := $(ICE_OS_LIBS) -framework CoreServices -framework Security -lbz2 -liconv -lssl -lcrypto
+else
+    LINKWITH         := $(ICE_OS_LIBS) -framework CFNetwork -framework Security
+endif
+
 LINKWITH        := $(ICE_OS_LIBS) $(BASELIBS)
+
+ifneq ($(COMPILE_FOR_IPHONE),yes)
+LINKWITH        := $(LINKWITH) $(OPENSSL_LIBS)
+endif
 
 ifeq ($(STATICLIBS),yes)
 

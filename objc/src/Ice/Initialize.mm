@@ -263,8 +263,9 @@ private:
             data.properties = createProperties(*argc, argv, data.properties);
         }
 
-        data.properties->setProperty("Ice.Plugin.IceTcp", "createIceTcp");
         data.properties->setProperty("Ice.Plugin.IceSSL", "createIceSSL");
+#if TARGET_OS_IPHONE
+        data.properties->setProperty("Ice.Plugin.IceTcp", "createIceTcp");
 
         //
         // Fake calls to the create transport plugin C methods. This is to ensure that these methods
@@ -272,6 +273,7 @@ private:
         //
         createIceTcp(0, "", Ice::StringSeq());
         createIceSSL(0, "", Ice::StringSeq());
+#endif
 
         Ice::CommunicatorPtr communicator;
         if(argc != nil && argv != nil)

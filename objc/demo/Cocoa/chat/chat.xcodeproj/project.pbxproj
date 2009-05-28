@@ -19,7 +19,7 @@
 		3448C7B20FB0198300BFB717 /* libGlacier2ObjC.0.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3448C7B10FB0198300BFB717 /* libGlacier2ObjC.0.1.0.dylib */; };
 		34537F320FBAA03100933480 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 34537F310FBAA03100933480 /* icon.icns */; };
 		345436120FB29554005CB1B6 /* ChatView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 345436110FB29554005CB1B6 /* ChatView.xib */; };
-		34D0A0530FB955EE0038BB19 /* cacert.der in Resources */ = {isa = PBXBuildFile; fileRef = 34D0A0520FB955EE0038BB19 /* cacert.der */; };
+		349A38170FCE326E003F86BC /* cacert.pem in Resources */ = {isa = PBXBuildFile; fileRef = 349A38160FCE326E003F86BC /* cacert.pem */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -48,7 +48,7 @@
 		3448C7B10FB0198300BFB717 /* libGlacier2ObjC.0.1.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libGlacier2ObjC.0.1.0.dylib; path = ../../../lib/libGlacier2ObjC.0.1.0.dylib; sourceTree = SOURCE_ROOT; };
 		34537F310FBAA03100933480 /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = "<group>"; };
 		345436110FB29554005CB1B6 /* ChatView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ChatView.xib; sourceTree = "<group>"; };
-		34D0A0520FB955EE0038BB19 /* cacert.der */ = {isa = PBXFileReference; lastKnownFileType = file; path = cacert.der; sourceTree = "<group>"; };
+		349A38160FCE326E003F86BC /* cacert.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = cacert.pem; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* ChatDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChatDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -133,8 +133,8 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				349A38160FCE326E003F86BC /* cacert.pem */,
 				34537F310FBAA03100933480 /* icon.icns */,
-				34D0A0520FB955EE0038BB19 /* cacert.der */,
 				8D1107310486CEB800E47090 /* Info.plist */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
 				1DDD58140DA1D0A300B32029 /* MainMenu.xib */,
@@ -201,9 +201,9 @@
 				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
 				1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */,
 				345436120FB29554005CB1B6 /* ChatView.xib in Resources */,
-				34D0A0530FB955EE0038BB19 /* cacert.der in Resources */,
 				34537F320FBAA03100933480 /* icon.icns in Resources */,
 				343DE5990FC3EBD900FCC49C /* LoginView.xib in Resources */,
+				349A38170FCE326E003F86BC /* cacert.pem in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

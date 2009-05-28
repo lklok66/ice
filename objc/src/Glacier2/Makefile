@@ -37,7 +37,7 @@ include $(top_srcdir)/config/Make.rules
 CPPFLAGS	:= -I.. -Iinclude -I../../include $(CPPFLAGS)
 SLICE2OBJCFLAGS	:= --include-dir Glacier2 $(SLICE2OBJCFLAGS)
 
-LINKWITH        := $(LIBS) $(ICE_OS_LIBS)
+LINKWITH        := $(LIBS)
 
 ifeq ($(STATICLIBS),yes)
 

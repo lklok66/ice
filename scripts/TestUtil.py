@@ -588,12 +588,12 @@ sslConfigTree = {
             "server" : " --IceSSL.CertFile=s_rsa1024.pfx --IceSSL.ImportCert.CurrentUser.Root=cacert.pem",
             "colloc" : " --IceSSL.CertFile=c_rsa1024.pfx --IceSSL.ImportCert.CurrentUser.Root=cacert.pem --IceSSL.CheckCertName=0"
             },
-        "objc" : {
-            "plugin" : " --Ice.Default.Protocol=ssl --IceSSL.CheckCertName=0" +
-            " --IceSSL.Password=password --IceSSL.CertAuthFile=cacert.der --IceSSL.DefaultDir=%(objccertsdir)s" +
-            " --IceSSL.Keychain=\"ZeroC Tests\" --IceSSL.KeychainPassword=password",
-            "client" : " --IceSSL.CertFile=c_rsa1024.pfx",
-            "server" : " --IceSSL.CertFile=s_rsa1024.pfx",
+        "objc" : { 
+            "plugin" : " --Ice.Default.Protocol=ssl " +
+            "--IceSSL.DefaultDir=%(certsdir)s --IceSSL.CertAuthFile=cacert.pem",
+            "client" : " --IceSSL.CertFile=c_rsa1024_pub.pem --IceSSL.KeyFile=c_rsa1024_priv.pem",
+            "server" : " --IceSSL.CertFile=s_rsa1024_pub.pem --IceSSL.KeyFile=s_rsa1024_priv.pem",
+            "colloc" : " --IceSSL.CertFile=c_rsa1024_pub.pem --IceSSL.KeyFile=c_rsa1024_priv.pem"
             },
         }
 sslConfigTree["py"] = sslConfigTree["cpp"]

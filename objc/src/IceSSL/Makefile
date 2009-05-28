@@ -9,36 +9,35 @@
 
 top_srcdir	= ../..
 
-TARGETS		= $(OBJS)
+TARGETS	      = $(OBJS)
 
-IPHONE_OBJS	= Acceptor.o \
-		  Connector.o \
-		  Transceiver.o \
-		  EndpointI.o
-
-TCP_OBJS	= TcpEndpointI.o \
-		  TcpAcceptor.o \
-		  TcpConnector.o \
-		  TcpTransceiver.o \
+SSL_OBJS      =	AcceptorI.o \
+		Certificate.o \
+                ConnectorI.o \
+                EndpointI.o \
+                Instance.o \
+                PluginI.o \
+                TransceiverI.o \
+                Util.o \
+		RFC2253.o \
+		TrustManager.o
 
 ifeq ($(COMPILE_FOR_IPHONE),yes)
 
-OBJS		= $(IPHONE_OBJS)
+OBJS	      =
 
 else ifeq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
 
-OBJS		= $(IPHONE_OBJS)
+OBJS	      =
 
 else
 
-OBJS		= $(TCP_OBJS)
+OBJS	      = $(SSL_OBJS)
 
 endif
 
-SRCS_DIR	= $(ice_dir)/cpp/src/Ice
-
-SRCS        = $(IPHONE_OBJS:.o=.cpp) \
-	      $(addprefix $(SRCS_DIR)/, $(TCP_OBJS:.o=.cpp))
+SRCS        = $(addprefix $(SRCS_DIR)/, $(SSL_OBJS:.o=.cpp))
+SRCS_DIR	= $(ice_dir)/cpp/src/IceSSL
 
 include $(top_srcdir)/config/Make.rules
 

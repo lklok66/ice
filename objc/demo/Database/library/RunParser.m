@@ -204,7 +204,20 @@ runParser(int argc, char* argv[], id<ICECommunicator> communicator)
 
     if(router)
     {
-	[router destroySession];
+	@try
+	{
+	    [router destroySession];
+	}
+	@catch(Glacier2SessionNotExistException* ex)
+	{
+	    printf("%s\n", [ex description]);
+	}
+	@catch(ICEConnectionLostException* ex)
+	{
+	    //
+	    // Expected: the router closed the connection.
+	    //
+	}
     }
     else
     {

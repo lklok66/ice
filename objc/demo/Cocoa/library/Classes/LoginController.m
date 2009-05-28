@@ -258,22 +258,23 @@ NSString* const routerServerKey = @"routerServerKey";
     // Tracing properties.
     //[initData.properties setProperty:@"Ice.Trace.Network" value:@"1"];
     //[initData.properties setProperty:@"Ice.Trace.Protocol" value:@"1"];
+    //[initData.properties setProperty:@"IceSSL.Trace.Security" value:@"1"];
 
     if(sslField.state == NSOnState && routerField.state != NSOnState)
     {   
         if([chatServerField.stringValue caseInsensitiveCompare:@"demo2.zeroc.com"] == NSOrderedSame)
         {
             [[initData properties] setProperty:@"IceSSL.TrustOnly.Client"
-                                       value:@"11:DD:28:AD:13:44:76:47:4F:BE:3C:4D:AC:AD:5A:06:88:DA:52:DA"];
-            [[initData properties] setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
+                                         value:@"CN=\"ZeroC library demo Glacier2\""];
+            [[initData properties] setProperty:@"IceSSL.CertAuthFile" value:@"democacert.pem"];
         }
         else
         {
-            [[initData properties] setProperty:@"IceSSL.TrustOnly.Client"
-                                       value:@"75:FA:B7:3C:6B:1C:F8:FA:69:4B:75:A0:22:51:B2:AC:11:54:A7:E7"];
-            [[initData properties] setProperty:@"IceSSL.CertAuthFile" value:@"democacert.der"];
+            [[initData properties] setProperty:@"IceSSL.TrustOnly.Client" value:@"CN=\"Server\""];
+            [[initData properties] setProperty:@"IceSSL.CertAuthFile" value:@"cacert.pem"];
         }
     }
+    [initData.properties setProperty:@"IceSSL.DefaultDir" value:[[NSBundle mainBundle] resourcePath]];
 
     NSAssert(communicator == nil, @"communicator == nil");
     communicator = [ICEUtil createCommunicator:initData];
