@@ -66,6 +66,7 @@ public:
         {
             _instance->initializationData().threadHook->start();
         }
+
         {
             Lock sync(*this);
             _runLoop = CFRunLoopGetCurrent();
@@ -79,6 +80,11 @@ public:
         CFRunLoopRun();
         CFRunLoopRemoveSource(CFRunLoopGetCurrent(), source, kCFRunLoopDefaultMode);
         CFRelease(source);
+
+        if(_instance->initializationData().threadHook)
+        {
+            _instance->initializationData().threadHook->end();
+        }
     }
 
 private:
@@ -503,6 +509,11 @@ IceInternal::SelectorThread::run()
                 }
             }
         }
+    }
+
+    if(_instance->initializationData().threadHook)
+    {
+        _instance->initializationData().threadHook->stop();
     }
 
     assert(_destroyed);
