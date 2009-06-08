@@ -9,7 +9,7 @@
 
 #import <Ice/Ice.h>
 #import <TestCommon.h>
-#import <Test.h>
+#import <RetryTest.h>
 
 #import <Foundation/Foundation.h>
 
@@ -75,7 +75,7 @@
 @end
 
 id<TestRetryRetryPrx>
-allTests(id<ICECommunicator> communicator)
+retryAllTests(id<ICECommunicator> communicator)
 {
     tprintf("testing stringToProxy... ");
     NSString* ref = @"retry:default -p 12010";

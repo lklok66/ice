@@ -37,17 +37,11 @@ OBJCPP_OBJS	= Communicator.o \
 		  Proxy.o \
 		  Stream.o \
 		  Util.o \
-		  Wrapper.o 
-
-OBJS		= $(OBJC_OBJS) \
-	          $(OBJCPP_OBJS) \
-                  $(wildcard ../IceUtilCpp/*.o) \
-	          $(wildcard ../IceCpp/*.o) \
-	 	  $(wildcard ../Transports/*.o) \
-	 	  $(wildcard ../IceSSL/*.o)
+		  Wrapper.o
 
 SRCS		= $(OBJCPP_OBJS:.o=.mm) \
 		  $(OBJC_OBJS:.o=.m)
+DEPENDFLAGS	= --platform-name
 
 SLICE_SRCS	= $(SDIR)/BuiltinSequences.ice \
 		  $(SDIR)/Identity.ice \
@@ -64,19 +58,20 @@ all::
 
 include $(top_srcdir)/config/Make.rules
 
+OBJS		:= $(addprefix $(PLATFORM_NAME)/,$(OBJC_OBJS)) \
+	           $(addprefix $(PLATFORM_NAME)/,$(OBJCPP_OBJS)) \
+                   $(wildcard ../IceUtilCpp/$(PLATFORM_NAME)/*.o) \
+	           $(wildcard ../IceCpp/$(PLATFORM_NAME)/*.o) \
+	 	   $(wildcard ../Transports/$(PLATFORM_NAME)/*.o) \
+	 	   $(wildcard ../IceSSL/$(PLATFORM_NAME)/*.o)
+
 CPPFLAGS	:= -I.. -Iinclude -I../../include $(CPPFLAGS)
 SLICE2OBJCFLAGS	:= --ice --include-dir Ice $(SLICE2OBJCFLAGS)
 
 ifneq ($(COMPILE_FOR_IPHONE),yes)
-    LINKWITH         := $(ICE_OS_LIBS) -framework CoreServices -framework Security -lbz2 -liconv -lssl -lcrypto
+    LINKWITH    := $(ICE_OS_LIBS) $(BASELIBS) -framework CoreServices -framework Security -lbz2 -liconv $(OPENSSL_LIBS)
 else
-    LINKWITH         := $(ICE_OS_LIBS) -framework CFNetwork -framework Security
-endif
-
-LINKWITH        := $(ICE_OS_LIBS) $(BASELIBS)
-
-ifneq ($(COMPILE_FOR_IPHONE),yes)
-LINKWITH        := $(LINKWITH) $(OPENSSL_LIBS)
+    LINKWITH    := $(ICE_OS_LIBS) $(BASELIBS) -framework CFNetwork -framework Security
 endif
 
 ifeq ($(STATICLIBS),yes)
@@ -85,20 +80,11 @@ $(libdir)/$(LIBNAME): $(OBJS)
 	rm -f $@
 	$(call mklib,$@,$(OBJS))
 
-else
+else ifeq ($(COMPILE_FOR_MACOSX),yes)
 
 $(libdir)/$(LIBFILENAME): $(OBJS)
 	rm -f $@
-ifeq ($(COMPILE_FOR_IPHONE),yes)
-	$(call mkshlib,$@,$(LIBFILENAME),$(OBJS),$(LINKWITH))
-ifneq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
-  ifneq ($(IDENTIFIER),)
-	$(CODESIGN) -s "$(IDENTIFIER)" $@
-  endif
-endif
-else
 	$(call mkshlib,$@,$(SONAME),$(OBJS),$(LINKWITH))
-endif
 
 $(libdir)/$(SONAME): $(libdir)/$(LIBFILENAME)
 	rm -f $@
@@ -108,7 +94,19 @@ $(libdir)/$(LIBNAME): $(libdir)/$(SONAME)
 	rm -f $@
 	ln -s $(SONAME) $@
 
+else
+
+$(libdir)/$(LIBNAME): $(OBJS)
+	rm -f $@
+	$(call mkshlib,$@,$(LIBNAME),$(OBJS),$(LINKWITH))
+
 endif
+
+$(PLATFORM_NAME)/%.o: %.mm
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(OBJCXXFLAGS) $< -o $@
+
+$(PLATFORM_NAME)/%.o: %.m
+	$(CC) -c $(CPPFLAGS) $(OBJCFLAGS) $(CFLAGS) $< -o $@
 
 # Prevent generation of these files from .ice files
 $(HDIR)/Communicator.h Communicator.m:
@@ -149,8 +147,10 @@ depend:: $(patsubst $(ice_cpp_include)/IceUtil/%.h,include/IceUtilCpp/%.h,$(wild
 	 $(patsubst $(ice_cpp_include)/Ice/%.h,include/IceCpp/%.h,$(wildcard $(ice_cpp_include)/Ice/*.h)) \
 	 $(patsubst ../IceCpp/include/Ice/%.h,include/IceCpp/%.h,$(wildcard ../IceCpp/include/Ice/*.h))
 
+ifeq ($(COMPILE_FOR_MACOSX),yes)
 install:: all
 	$(call installlib,$(install_libdir),$(libdir),$(LIBFILENAME),$(SONAME),$(LIBNAME))
+endif
 
 clean::
 	rm -f include/IceUtilCpp/*.h

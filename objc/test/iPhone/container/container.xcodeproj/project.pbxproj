@@ -15,62 +15,98 @@
 		2899E5220DE3E06400AC0155 /* TestView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2899E5210DE3E06400AC0155 /* TestView.xib */; };
 		28AD733F0D9D9553002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD733E0D9D9553002E5188 /* MainWindow.xib */; };
 		28D7ACF80DDB3853001CB0EB /* TestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28D7ACF70DDB3853001CB0EB /* TestViewController.m */; };
-		3404D98D0E9CF594003C95CA /* TestAdapterDeactivation.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3404D98B0E9CF588003C95CA /* TestAdapterDeactivation.dylib */; };
-		340EF2B70E958D7400E8DAA9 /* TestSlicingExceptions.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 340EF20C0E958D4B00E8DAA9 /* TestSlicingExceptions.dylib */; };
-		340EF2B80E958D7900E8DAA9 /* TestSlicingObjects.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 340EF20A0E958D4100E8DAA9 /* TestSlicingObjects.dylib */; };
 		342EB9EE0E9261A3000051FA /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 342EB9ED0E9261A3000051FA /* icon.png */; };
 		342EBA870E926E98000051FA /* c_rsa1024.pfx in Resources */ = {isa = PBXBuildFile; fileRef = 342EBA860E926E98000051FA /* c_rsa1024.pfx */; };
 		342EBA890E926E9F000051FA /* s_rsa1024.pfx in Resources */ = {isa = PBXBuildFile; fileRef = 342EBA880E926E9F000051FA /* s_rsa1024.pfx */; };
 		342EBA8B0E926F90000051FA /* cacert.der in Resources */ = {isa = PBXBuildFile; fileRef = 342EBA8A0E926F90000051FA /* cacert.der */; };
-		34B763420E8C307700CE4701 /* libIceObjC.0.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 34B763410E8C307700CE4701 /* libIceObjC.0.1.0.dylib */; };
-		34B7634A0E8C309A00CE4701 /* libIceObjC.0.1.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34B763410E8C307700CE4701 /* libIceObjC.0.1.0.dylib */; };
-		34B764E10E8D250100CE4701 /* libTestCommon.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34B764DF0E8D24FE00CE4701 /* libTestCommon.dylib */; };
-		34B765550E8D33D600CE4701 /* libTestCommon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 34B764DF0E8D24FE00CE4701 /* libTestCommon.dylib */; };
+		344126380FD8E8EA00C8D69C /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 344126360FD8E8EA00C8D69C /* Security.framework */; };
+		344126390FD8E8EA00C8D69C /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 344126370FD8E8EA00C8D69C /* CFNetwork.framework */; };
+		34B3B4B50FD7A7700018C227 /* AllTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B4AA0FD7A7700018C227 /* AllTests.m */; };
+		34B3B4B60FD7A7700018C227 /* BatchOneways.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B4AB0FD7A7700018C227 /* BatchOneways.m */; };
+		34B3B4B70FD7A7700018C227 /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B4AC0FD7A7700018C227 /* Client.m */; };
+		34B3B4B80FD7A7700018C227 /* Oneways.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B4AD0FD7A7700018C227 /* Oneways.m */; };
+		34B3B4B90FD7A7700018C227 /* OnewaysAMI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B4AE0FD7A7700018C227 /* OnewaysAMI.m */; };
+		34B3B4BA0FD7A7700018C227 /* Server.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B4AF0FD7A7700018C227 /* Server.m */; };
+		34B3B4BD0FD7A7700018C227 /* Twoways.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B4B30FD7A7700018C227 /* Twoways.m */; };
+		34B3B4BE0FD7A7700018C227 /* TwowaysAMI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B4B40FD7A7700018C227 /* TwowaysAMI.m */; };
+		34B3B4F30FD7A9660018C227 /* TestI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B4F10FD7A9660018C227 /* TestI.m */; };
+		34B3B5010FD7AB5C0018C227 /* TestCommon.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5000FD7AB5C0018C227 /* TestCommon.m */; };
+		34B3B5200FD7E7740018C227 /* AllTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5180FD7E7740018C227 /* AllTests.m */; };
+		34B3B5210FD7E7740018C227 /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5190FD7E7740018C227 /* Client.m */; };
+		34B3B5230FD7E7740018C227 /* Server.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B51C0FD7E7740018C227 /* Server.m */; };
+		34B3B5250FD7E7740018C227 /* TestI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B51F0FD7E7740018C227 /* TestI.m */; };
+		34B3B52C0FD7E78B0018C227 /* AllTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5260FD7E78B0018C227 /* AllTests.m */; };
+		34B3B52D0FD7E78B0018C227 /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5270FD7E78B0018C227 /* Client.m */; };
+		34B3B52E0FD7E78B0018C227 /* Server.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5280FD7E78B0018C227 /* Server.m */; };
+		34B3B52F0FD7E78B0018C227 /* BindingTest.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5290FD7E78B0018C227 /* BindingTest.ice */; };
+		34B3B5300FD7E78B0018C227 /* TestI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B52B0FD7E78B0018C227 /* TestI.m */; };
+		34B3B5350FD7E7BD0018C227 /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5320FD7E7BD0018C227 /* Client.m */; };
+		34B3B5360FD7E7BD0018C227 /* DefaultServantTest.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5330FD7E7BD0018C227 /* DefaultServantTest.ice */; };
+		34B3B5370FD7E7BD0018C227 /* MyObjectI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5340FD7E7BD0018C227 /* MyObjectI.m */; };
+		34B3B53E0FD7E7CA0018C227 /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5380FD7E7CA0018C227 /* Client.m */; };
+		34B3B53F0FD7E7CA0018C227 /* ExceptionsTest.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5390FD7E7CA0018C227 /* ExceptionsTest.ice */; };
+		34B3B5400FD7E7CA0018C227 /* TestI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B53A0FD7E7CA0018C227 /* TestI.m */; };
+		34B3B5410FD7E7CA0018C227 /* AllTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B53B0FD7E7CA0018C227 /* AllTests.m */; };
+		34B3B5420FD7E7CA0018C227 /* Server.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B53D0FD7E7CA0018C227 /* Server.m */; };
+		34B3B5490FD7E7E60018C227 /* TestI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5430FD7E7E60018C227 /* TestI.m */; };
+		34B3B54A0FD7E7E60018C227 /* AllTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5440FD7E7E60018C227 /* AllTests.m */; };
+		34B3B54B0FD7E7E60018C227 /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5450FD7E7E60018C227 /* Client.m */; };
+		34B3B54C0FD7E7E60018C227 /* FacetsTest.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5460FD7E7E60018C227 /* FacetsTest.ice */; };
+		34B3B54D0FD7E7E60018C227 /* Server.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5480FD7E7E60018C227 /* Server.m */; };
+		34B3B5540FD7E7FB0018C227 /* AllTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B54F0FD7E7FB0018C227 /* AllTests.m */; };
+		34B3B5550FD7E7FB0018C227 /* TestI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5500FD7E7FB0018C227 /* TestI.m */; };
+		34B3B5560FD7E7FB0018C227 /* Server.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5510FD7E7FB0018C227 /* Server.m */; };
+		34B3B5570FD7E7FB0018C227 /* InheritanceTest.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5520FD7E7FB0018C227 /* InheritanceTest.ice */; };
+		34B3B5580FD7E7FB0018C227 /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5530FD7E7FB0018C227 /* Client.m */; };
+		34B3B55F0FD7E8080018C227 /* InterceptorTest.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5590FD7E8080018C227 /* InterceptorTest.ice */; };
+		34B3B5600FD7E8080018C227 /* MyObjectI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B55B0FD7E8080018C227 /* MyObjectI.m */; };
+		34B3B5610FD7E8080018C227 /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B55C0FD7E8080018C227 /* Client.m */; };
+		34B3B5620FD7E8080018C227 /* InterceptorI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B55D0FD7E8080018C227 /* InterceptorI.m */; };
+		34B3B56B0FD7E81B0018C227 /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5630FD7E81B0018C227 /* Client.m */; };
+		34B3B56C0FD7E81B0018C227 /* Server.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5650FD7E81B0018C227 /* Server.m */; };
+		34B3B56D0FD7E81B0018C227 /* TestI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5660FD7E81B0018C227 /* TestI.m */; };
+		34B3B56E0FD7E81B0018C227 /* LocationTest.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5670FD7E81B0018C227 /* LocationTest.ice */; };
+		34B3B56F0FD7E81B0018C227 /* ServerLocator.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5680FD7E81B0018C227 /* ServerLocator.m */; };
+		34B3B5700FD7E81B0018C227 /* AllTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B56A0FD7E81B0018C227 /* AllTests.m */; };
+		34B3B5770FD7E8270018C227 /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5710FD7E8270018C227 /* Client.m */; };
+		34B3B5780FD7E8270018C227 /* TestI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5720FD7E8270018C227 /* TestI.m */; };
+		34B3B5790FD7E8270018C227 /* ObjectsTest.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5730FD7E8270018C227 /* ObjectsTest.ice */; };
+		34B3B57A0FD7E8270018C227 /* Server.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5740FD7E8270018C227 /* Server.m */; };
+		34B3B57B0FD7E8270018C227 /* AllTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5760FD7E8270018C227 /* AllTests.m */; };
+		34B3B5820FD7E8390018C227 /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B57D0FD7E8390018C227 /* Client.m */; };
+		34B3B5830FD7E8390018C227 /* Server.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B57E0FD7E8390018C227 /* Server.m */; };
+		34B3B5840FD7E8390018C227 /* TestI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B57F0FD7E8390018C227 /* TestI.m */; };
+		34B3B5850FD7E8390018C227 /* ProxyTest.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5800FD7E8390018C227 /* ProxyTest.ice */; };
+		34B3B5860FD7E8390018C227 /* AllTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5810FD7E8390018C227 /* AllTests.m */; };
+		34B3B58D0FD7E8440018C227 /* TestI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5870FD7E8440018C227 /* TestI.m */; };
+		34B3B58E0FD7E8440018C227 /* RetryTest.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5880FD7E8440018C227 /* RetryTest.ice */; };
+		34B3B58F0FD7E8440018C227 /* AllTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B58A0FD7E8440018C227 /* AllTests.m */; };
+		34B3B5900FD7E8440018C227 /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B58B0FD7E8440018C227 /* Client.m */; };
+		34B3B5910FD7E8440018C227 /* Server.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B58C0FD7E8440018C227 /* Server.m */; };
+		34B3B5980FD7E8560018C227 /* AllTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5920FD7E8560018C227 /* AllTests.m */; };
+		34B3B5990FD7E8560018C227 /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5930FD7E8560018C227 /* Client.m */; };
+		34B3B59A0FD7E8560018C227 /* Server.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5940FD7E8560018C227 /* Server.m */; };
+		34B3B59B0FD7E8560018C227 /* TestI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5950FD7E8560018C227 /* TestI.m */; };
+		34B3B59C0FD7E8560018C227 /* TimeoutTest.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5960FD7E8560018C227 /* TimeoutTest.ice */; };
+		34B3B5A40FD7E8640018C227 /* AllTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B59D0FD7E8640018C227 /* AllTests.m */; };
+		34B3B5A50FD7E8640018C227 /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B59E0FD7E8640018C227 /* Client.m */; };
+		34B3B5A60FD7E8640018C227 /* SlicingExceptionsTestServer.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B59F0FD7E8640018C227 /* SlicingExceptionsTestServer.ice */; settings = {COMPILER_FLAGS = "-I../../Ice/slicing/exceptions"; }; };
+		34B3B5A70FD7E8640018C227 /* TestI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5A00FD7E8640018C227 /* TestI.m */; };
+		34B3B5A80FD7E8640018C227 /* SlicingExceptionsTestClient.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5A20FD7E8640018C227 /* SlicingExceptionsTestClient.ice */; settings = {COMPILER_FLAGS = "-I../../Ice/slicing/exceptions"; }; };
+		34B3B5A90FD7E8640018C227 /* Server.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5A30FD7E8640018C227 /* Server.m */; };
+		34B3B5B20FD7E8700018C227 /* SlicingObjectsTestServer.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5AA0FD7E8700018C227 /* SlicingObjectsTestServer.ice */; settings = {COMPILER_FLAGS = "-I../../Ice/slicing/objects"; }; };
+		34B3B5B30FD7E8700018C227 /* TestI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5AB0FD7E8700018C227 /* TestI.m */; };
+		34B3B5B40FD7E8700018C227 /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5AC0FD7E8700018C227 /* Client.m */; };
+		34B3B5B50FD7E8700018C227 /* SlicingObjectsForward.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5AD0FD7E8700018C227 /* SlicingObjectsForward.ice */; settings = {COMPILER_FLAGS = "-I../../Ice/slicing/objects"; }; };
+		34B3B5B60FD7E8700018C227 /* AllTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5AE0FD7E8700018C227 /* AllTests.m */; };
+		34B3B5B70FD7E8700018C227 /* SlicingObjectsTestClient.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5B00FD7E8700018C227 /* SlicingObjectsTestClient.ice */; settings = {COMPILER_FLAGS = "-I../../Ice/slicing/objects"; }; };
+		34B3B5B80FD7E8700018C227 /* Server.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5B10FD7E8700018C227 /* Server.m */; };
+		34B3B6030FD7EFCC0018C227 /* AdapterDeactivationTest.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B6020FD7EFCC0018C227 /* AdapterDeactivationTest.ice */; };
+		34B3B66B0FD7F41C0018C227 /* OperationsTest.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B66A0FD7F41C0018C227 /* OperationsTest.ice */; };
 		34B7662A0E8D55E700CE4701 /* TestSelectController.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B766290E8D55E700CE4701 /* TestSelectController.m */; };
 		34B7662C0E8D55FE00CE4701 /* TestSelect.xib in Resources */ = {isa = PBXBuildFile; fileRef = 34B7662B0E8D55FE00CE4701 /* TestSelect.xib */; };
 		34B766340E8D56C700CE4701 /* Test.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B766330E8D56C700CE4701 /* Test.m */; };
-		34B767A70E8D898700CE4701 /* TestObjects.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34B767A30E8D887700CE4701 /* TestObjects.dylib */; };
-		34B767A80E8D898700CE4701 /* TestProxy.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34B767A10E8D886D00CE4701 /* TestProxy.dylib */; };
-		34B767A90E8D898700CE4701 /* TestOperations.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34B7679F0E8D886200CE4701 /* TestOperations.dylib */; };
-		34B767D90E8D9D8B00CE4701 /* TestTimeout.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34B767D10E8D9D6E00CE4701 /* TestTimeout.dylib */; };
-		34B767DA0E8D9D8B00CE4701 /* TestRetry.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34B767CF0E8D9D6400CE4701 /* TestRetry.dylib */; };
-		34B767DB0E8D9D8B00CE4701 /* TestLocation.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34B767CD0E8D9D5800CE4701 /* TestLocation.dylib */; };
-		34B767DC0E8D9D8B00CE4701 /* TestInterceptor.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34B767CB0E8D9D5100CE4701 /* TestInterceptor.dylib */; };
-		34B767DD0E8D9D8B00CE4701 /* TestInheritance.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34B767C90E8D9D4A00CE4701 /* TestInheritance.dylib */; };
-		34B767DE0E8D9D8B00CE4701 /* TestFacets.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34B767C70E8D9D3F00CE4701 /* TestFacets.dylib */; };
-		34B767DF0E8D9D8B00CE4701 /* TestExceptions.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34B767C50E8D9D3700CE4701 /* TestExceptions.dylib */; };
-		34B767E00E8D9D8B00CE4701 /* TestDefaultServant.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34B767C30E8D9D2E00CE4701 /* TestDefaultServant.dylib */; };
-		34B767E10E8D9D8B00CE4701 /* TestBinding.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34B767C10E8D9D2400CE4701 /* TestBinding.dylib */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		34B763570E8C30B400CE4701 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				3404D98D0E9CF594003C95CA /* TestAdapterDeactivation.dylib in CopyFiles */,
-				340EF2B80E958D7900E8DAA9 /* TestSlicingObjects.dylib in CopyFiles */,
-				340EF2B70E958D7400E8DAA9 /* TestSlicingExceptions.dylib in CopyFiles */,
-				34B767D90E8D9D8B00CE4701 /* TestTimeout.dylib in CopyFiles */,
-				34B767DA0E8D9D8B00CE4701 /* TestRetry.dylib in CopyFiles */,
-				34B767DB0E8D9D8B00CE4701 /* TestLocation.dylib in CopyFiles */,
-				34B767DC0E8D9D8B00CE4701 /* TestInterceptor.dylib in CopyFiles */,
-				34B767DD0E8D9D8B00CE4701 /* TestInheritance.dylib in CopyFiles */,
-				34B767DE0E8D9D8B00CE4701 /* TestFacets.dylib in CopyFiles */,
-				34B767DF0E8D9D8B00CE4701 /* TestExceptions.dylib in CopyFiles */,
-				34B767E00E8D9D8B00CE4701 /* TestDefaultServant.dylib in CopyFiles */,
-				34B767E10E8D9D8B00CE4701 /* TestBinding.dylib in CopyFiles */,
-				34B767A70E8D898700CE4701 /* TestObjects.dylib in CopyFiles */,
-				34B767A80E8D898700CE4701 /* TestProxy.dylib in CopyFiles */,
-				34B767A90E8D898700CE4701 /* TestOperations.dylib in CopyFiles */,
-				34B764E10E8D250100CE4701 /* libTestCommon.dylib in CopyFiles */,
-				34B7634A0E8C309A00CE4701 /* libIceObjC.0.1.0.dylib in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -85,32 +121,116 @@
 		28D7ACF70DDB3853001CB0EB /* TestViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestViewController.m; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* container_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = container_Prefix.pch; sourceTree = "<group>"; };
-		3404D98B0E9CF588003C95CA /* TestAdapterDeactivation.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestAdapterDeactivation.dylib; path = ../../Ice/adapterDeactivation/TestAdapterDeactivation.dylib; sourceTree = SOURCE_ROOT; };
-		340EF20A0E958D4100E8DAA9 /* TestSlicingObjects.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestSlicingObjects.dylib; path = ../../Ice/slicing/objects/TestSlicingObjects.dylib; sourceTree = SOURCE_ROOT; };
-		340EF20C0E958D4B00E8DAA9 /* TestSlicingExceptions.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestSlicingExceptions.dylib; path = ../../Ice/slicing/exceptions/TestSlicingExceptions.dylib; sourceTree = SOURCE_ROOT; };
 		342EB9ED0E9261A3000051FA /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icon.png; path = Images/icon.png; sourceTree = "<group>"; };
 		342EBA860E926E98000051FA /* c_rsa1024.pfx */ = {isa = PBXFileReference; lastKnownFileType = file; name = c_rsa1024.pfx; path = ../../certs/c_rsa1024.pfx; sourceTree = SOURCE_ROOT; };
 		342EBA880E926E9F000051FA /* s_rsa1024.pfx */ = {isa = PBXFileReference; lastKnownFileType = file; name = s_rsa1024.pfx; path = ../../certs/s_rsa1024.pfx; sourceTree = SOURCE_ROOT; };
 		342EBA8A0E926F90000051FA /* cacert.der */ = {isa = PBXFileReference; lastKnownFileType = file; name = cacert.der; path = ../../certs/cacert.der; sourceTree = SOURCE_ROOT; };
-		34B763410E8C307700CE4701 /* libIceObjC.0.1.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libIceObjC.0.1.0.dylib; path = ../../../lib/libIceObjC.0.1.0.dylib; sourceTree = SOURCE_ROOT; };
-		34B764DF0E8D24FE00CE4701 /* libTestCommon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libTestCommon.dylib; path = ../../../lib/libTestCommon.dylib; sourceTree = SOURCE_ROOT; };
+		344126360FD8E8EA00C8D69C /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		344126370FD8E8EA00C8D69C /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
+		34B3B4AA0FD7A7700018C227 /* AllTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AllTests.m; path = ../../Ice/operations/AllTests.m; sourceTree = SOURCE_ROOT; };
+		34B3B4AB0FD7A7700018C227 /* BatchOneways.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BatchOneways.m; path = ../../Ice/operations/BatchOneways.m; sourceTree = SOURCE_ROOT; };
+		34B3B4AC0FD7A7700018C227 /* Client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Client.m; path = ../../Ice/operations/Client.m; sourceTree = SOURCE_ROOT; };
+		34B3B4AD0FD7A7700018C227 /* Oneways.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Oneways.m; path = ../../Ice/operations/Oneways.m; sourceTree = SOURCE_ROOT; };
+		34B3B4AE0FD7A7700018C227 /* OnewaysAMI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OnewaysAMI.m; path = ../../Ice/operations/OnewaysAMI.m; sourceTree = SOURCE_ROOT; };
+		34B3B4AF0FD7A7700018C227 /* Server.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Server.m; path = ../../Ice/operations/Server.m; sourceTree = SOURCE_ROOT; };
+		34B3B4B30FD7A7700018C227 /* Twoways.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Twoways.m; path = ../../Ice/operations/Twoways.m; sourceTree = SOURCE_ROOT; };
+		34B3B4B40FD7A7700018C227 /* TwowaysAMI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TwowaysAMI.m; path = ../../Ice/operations/TwowaysAMI.m; sourceTree = SOURCE_ROOT; };
+		34B3B4F00FD7A9660018C227 /* TestI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestI.h; path = ../../Ice/operations/TestI.h; sourceTree = SOURCE_ROOT; };
+		34B3B4F10FD7A9660018C227 /* TestI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestI.m; path = ../../Ice/operations/TestI.m; sourceTree = SOURCE_ROOT; };
+		34B3B5000FD7AB5C0018C227 /* TestCommon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestCommon.m; path = ../../Common/TestCommon.m; sourceTree = SOURCE_ROOT; };
+		34B3B5180FD7E7740018C227 /* AllTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AllTests.m; path = ../../Ice/adapterDeactivation/AllTests.m; sourceTree = SOURCE_ROOT; };
+		34B3B5190FD7E7740018C227 /* Client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Client.m; path = ../../Ice/adapterDeactivation/Client.m; sourceTree = SOURCE_ROOT; };
+		34B3B51C0FD7E7740018C227 /* Server.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Server.m; path = ../../Ice/adapterDeactivation/Server.m; sourceTree = SOURCE_ROOT; };
+		34B3B51E0FD7E7740018C227 /* TestI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestI.h; path = ../../Ice/adapterDeactivation/TestI.h; sourceTree = SOURCE_ROOT; };
+		34B3B51F0FD7E7740018C227 /* TestI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestI.m; path = ../../Ice/adapterDeactivation/TestI.m; sourceTree = SOURCE_ROOT; };
+		34B3B5260FD7E78B0018C227 /* AllTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AllTests.m; path = ../../Ice/binding/AllTests.m; sourceTree = SOURCE_ROOT; };
+		34B3B5270FD7E78B0018C227 /* Client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Client.m; path = ../../Ice/binding/Client.m; sourceTree = SOURCE_ROOT; };
+		34B3B5280FD7E78B0018C227 /* Server.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Server.m; path = ../../Ice/binding/Server.m; sourceTree = SOURCE_ROOT; };
+		34B3B5290FD7E78B0018C227 /* BindingTest.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = BindingTest.ice; path = ../../Ice/binding/BindingTest.ice; sourceTree = SOURCE_ROOT; };
+		34B3B52A0FD7E78B0018C227 /* TestI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestI.h; path = ../../Ice/binding/TestI.h; sourceTree = SOURCE_ROOT; };
+		34B3B52B0FD7E78B0018C227 /* TestI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestI.m; path = ../../Ice/binding/TestI.m; sourceTree = SOURCE_ROOT; };
+		34B3B5310FD7E7BD0018C227 /* MyObjectI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MyObjectI.h; path = ../../Ice/defaultServant/MyObjectI.h; sourceTree = SOURCE_ROOT; };
+		34B3B5320FD7E7BD0018C227 /* Client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Client.m; path = ../../Ice/defaultServant/Client.m; sourceTree = SOURCE_ROOT; };
+		34B3B5330FD7E7BD0018C227 /* DefaultServantTest.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = DefaultServantTest.ice; path = ../../Ice/defaultServant/DefaultServantTest.ice; sourceTree = SOURCE_ROOT; };
+		34B3B5340FD7E7BD0018C227 /* MyObjectI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MyObjectI.m; path = ../../Ice/defaultServant/MyObjectI.m; sourceTree = SOURCE_ROOT; };
+		34B3B5380FD7E7CA0018C227 /* Client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Client.m; path = ../../Ice/exceptions/Client.m; sourceTree = SOURCE_ROOT; };
+		34B3B5390FD7E7CA0018C227 /* ExceptionsTest.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = ExceptionsTest.ice; path = ../../Ice/exceptions/ExceptionsTest.ice; sourceTree = SOURCE_ROOT; };
+		34B3B53A0FD7E7CA0018C227 /* TestI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestI.m; path = ../../Ice/exceptions/TestI.m; sourceTree = SOURCE_ROOT; };
+		34B3B53B0FD7E7CA0018C227 /* AllTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AllTests.m; path = ../../Ice/exceptions/AllTests.m; sourceTree = SOURCE_ROOT; };
+		34B3B53C0FD7E7CA0018C227 /* TestI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestI.h; path = ../../Ice/exceptions/TestI.h; sourceTree = SOURCE_ROOT; };
+		34B3B53D0FD7E7CA0018C227 /* Server.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Server.m; path = ../../Ice/exceptions/Server.m; sourceTree = SOURCE_ROOT; };
+		34B3B5430FD7E7E60018C227 /* TestI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestI.m; path = ../../Ice/facets/TestI.m; sourceTree = SOURCE_ROOT; };
+		34B3B5440FD7E7E60018C227 /* AllTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AllTests.m; path = ../../Ice/facets/AllTests.m; sourceTree = SOURCE_ROOT; };
+		34B3B5450FD7E7E60018C227 /* Client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Client.m; path = ../../Ice/facets/Client.m; sourceTree = SOURCE_ROOT; };
+		34B3B5460FD7E7E60018C227 /* FacetsTest.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = FacetsTest.ice; path = ../../Ice/facets/FacetsTest.ice; sourceTree = SOURCE_ROOT; };
+		34B3B5470FD7E7E60018C227 /* TestI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestI.h; path = ../../Ice/facets/TestI.h; sourceTree = SOURCE_ROOT; };
+		34B3B5480FD7E7E60018C227 /* Server.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Server.m; path = ../../Ice/facets/Server.m; sourceTree = SOURCE_ROOT; };
+		34B3B54E0FD7E7FB0018C227 /* TestI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestI.h; path = ../../Ice/inheritance/TestI.h; sourceTree = SOURCE_ROOT; };
+		34B3B54F0FD7E7FB0018C227 /* AllTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AllTests.m; path = ../../Ice/inheritance/AllTests.m; sourceTree = SOURCE_ROOT; };
+		34B3B5500FD7E7FB0018C227 /* TestI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestI.m; path = ../../Ice/inheritance/TestI.m; sourceTree = SOURCE_ROOT; };
+		34B3B5510FD7E7FB0018C227 /* Server.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Server.m; path = ../../Ice/inheritance/Server.m; sourceTree = SOURCE_ROOT; };
+		34B3B5520FD7E7FB0018C227 /* InheritanceTest.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = InheritanceTest.ice; path = ../../Ice/inheritance/InheritanceTest.ice; sourceTree = SOURCE_ROOT; };
+		34B3B5530FD7E7FB0018C227 /* Client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Client.m; path = ../../Ice/inheritance/Client.m; sourceTree = SOURCE_ROOT; };
+		34B3B5590FD7E8080018C227 /* InterceptorTest.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = InterceptorTest.ice; path = ../../Ice/interceptor/InterceptorTest.ice; sourceTree = SOURCE_ROOT; };
+		34B3B55A0FD7E8080018C227 /* MyObjectI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MyObjectI.h; path = ../../Ice/interceptor/MyObjectI.h; sourceTree = SOURCE_ROOT; };
+		34B3B55B0FD7E8080018C227 /* MyObjectI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = MyObjectI.m; path = ../../Ice/interceptor/MyObjectI.m; sourceTree = SOURCE_ROOT; };
+		34B3B55C0FD7E8080018C227 /* Client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Client.m; path = ../../Ice/interceptor/Client.m; sourceTree = SOURCE_ROOT; };
+		34B3B55D0FD7E8080018C227 /* InterceptorI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = InterceptorI.m; path = ../../Ice/interceptor/InterceptorI.m; sourceTree = SOURCE_ROOT; };
+		34B3B55E0FD7E8080018C227 /* InterceptorI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InterceptorI.h; path = ../../Ice/interceptor/InterceptorI.h; sourceTree = SOURCE_ROOT; };
+		34B3B5630FD7E81B0018C227 /* Client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Client.m; path = ../../Ice/location/Client.m; sourceTree = SOURCE_ROOT; };
+		34B3B5640FD7E81B0018C227 /* TestI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestI.h; path = ../../Ice/location/TestI.h; sourceTree = SOURCE_ROOT; };
+		34B3B5650FD7E81B0018C227 /* Server.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Server.m; path = ../../Ice/location/Server.m; sourceTree = SOURCE_ROOT; };
+		34B3B5660FD7E81B0018C227 /* TestI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestI.m; path = ../../Ice/location/TestI.m; sourceTree = SOURCE_ROOT; };
+		34B3B5670FD7E81B0018C227 /* LocationTest.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = LocationTest.ice; path = ../../Ice/location/LocationTest.ice; sourceTree = SOURCE_ROOT; };
+		34B3B5680FD7E81B0018C227 /* ServerLocator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ServerLocator.m; path = ../../Ice/location/ServerLocator.m; sourceTree = SOURCE_ROOT; };
+		34B3B5690FD7E81B0018C227 /* ServerLocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ServerLocator.h; path = ../../Ice/location/ServerLocator.h; sourceTree = SOURCE_ROOT; };
+		34B3B56A0FD7E81B0018C227 /* AllTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AllTests.m; path = ../../Ice/location/AllTests.m; sourceTree = SOURCE_ROOT; };
+		34B3B5710FD7E8270018C227 /* Client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Client.m; path = ../../Ice/objects/Client.m; sourceTree = SOURCE_ROOT; };
+		34B3B5720FD7E8270018C227 /* TestI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestI.m; path = ../../Ice/objects/TestI.m; sourceTree = SOURCE_ROOT; };
+		34B3B5730FD7E8270018C227 /* ObjectsTest.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = ObjectsTest.ice; path = ../../Ice/objects/ObjectsTest.ice; sourceTree = SOURCE_ROOT; };
+		34B3B5740FD7E8270018C227 /* Server.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Server.m; path = ../../Ice/objects/Server.m; sourceTree = SOURCE_ROOT; };
+		34B3B5750FD7E8270018C227 /* TestI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestI.h; path = ../../Ice/objects/TestI.h; sourceTree = SOURCE_ROOT; };
+		34B3B5760FD7E8270018C227 /* AllTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AllTests.m; path = ../../Ice/objects/AllTests.m; sourceTree = SOURCE_ROOT; };
+		34B3B57C0FD7E8390018C227 /* TestI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestI.h; path = ../../Ice/proxy/TestI.h; sourceTree = SOURCE_ROOT; };
+		34B3B57D0FD7E8390018C227 /* Client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Client.m; path = ../../Ice/proxy/Client.m; sourceTree = SOURCE_ROOT; };
+		34B3B57E0FD7E8390018C227 /* Server.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Server.m; path = ../../Ice/proxy/Server.m; sourceTree = SOURCE_ROOT; };
+		34B3B57F0FD7E8390018C227 /* TestI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestI.m; path = ../../Ice/proxy/TestI.m; sourceTree = SOURCE_ROOT; };
+		34B3B5800FD7E8390018C227 /* ProxyTest.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = ProxyTest.ice; path = ../../Ice/proxy/ProxyTest.ice; sourceTree = SOURCE_ROOT; };
+		34B3B5810FD7E8390018C227 /* AllTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AllTests.m; path = ../../Ice/proxy/AllTests.m; sourceTree = SOURCE_ROOT; };
+		34B3B5870FD7E8440018C227 /* TestI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestI.m; path = ../../Ice/retry/TestI.m; sourceTree = SOURCE_ROOT; };
+		34B3B5880FD7E8440018C227 /* RetryTest.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = RetryTest.ice; path = ../../Ice/retry/RetryTest.ice; sourceTree = SOURCE_ROOT; };
+		34B3B5890FD7E8440018C227 /* TestI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestI.h; path = ../../Ice/retry/TestI.h; sourceTree = SOURCE_ROOT; };
+		34B3B58A0FD7E8440018C227 /* AllTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AllTests.m; path = ../../Ice/retry/AllTests.m; sourceTree = SOURCE_ROOT; };
+		34B3B58B0FD7E8440018C227 /* Client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Client.m; path = ../../Ice/retry/Client.m; sourceTree = SOURCE_ROOT; };
+		34B3B58C0FD7E8440018C227 /* Server.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Server.m; path = ../../Ice/retry/Server.m; sourceTree = SOURCE_ROOT; };
+		34B3B5920FD7E8560018C227 /* AllTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AllTests.m; path = ../../Ice/timeout/AllTests.m; sourceTree = SOURCE_ROOT; };
+		34B3B5930FD7E8560018C227 /* Client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Client.m; path = ../../Ice/timeout/Client.m; sourceTree = SOURCE_ROOT; };
+		34B3B5940FD7E8560018C227 /* Server.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Server.m; path = ../../Ice/timeout/Server.m; sourceTree = SOURCE_ROOT; };
+		34B3B5950FD7E8560018C227 /* TestI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestI.m; path = ../../Ice/timeout/TestI.m; sourceTree = SOURCE_ROOT; };
+		34B3B5960FD7E8560018C227 /* TimeoutTest.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = TimeoutTest.ice; path = ../../Ice/timeout/TimeoutTest.ice; sourceTree = SOURCE_ROOT; };
+		34B3B5970FD7E8560018C227 /* TestI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestI.h; path = ../../Ice/timeout/TestI.h; sourceTree = SOURCE_ROOT; };
+		34B3B59D0FD7E8640018C227 /* AllTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AllTests.m; path = ../../Ice/slicing/exceptions/AllTests.m; sourceTree = SOURCE_ROOT; };
+		34B3B59E0FD7E8640018C227 /* Client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Client.m; path = ../../Ice/slicing/exceptions/Client.m; sourceTree = SOURCE_ROOT; };
+		34B3B59F0FD7E8640018C227 /* SlicingExceptionsTestServer.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = SlicingExceptionsTestServer.ice; path = ../../Ice/slicing/exceptions/SlicingExceptionsTestServer.ice; sourceTree = SOURCE_ROOT; };
+		34B3B5A00FD7E8640018C227 /* TestI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestI.m; path = ../../Ice/slicing/exceptions/TestI.m; sourceTree = SOURCE_ROOT; };
+		34B3B5A10FD7E8640018C227 /* TestI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestI.h; path = ../../Ice/slicing/exceptions/TestI.h; sourceTree = SOURCE_ROOT; };
+		34B3B5A20FD7E8640018C227 /* SlicingExceptionsTestClient.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = SlicingExceptionsTestClient.ice; path = ../../Ice/slicing/exceptions/SlicingExceptionsTestClient.ice; sourceTree = SOURCE_ROOT; };
+		34B3B5A30FD7E8640018C227 /* Server.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Server.m; path = ../../Ice/slicing/exceptions/Server.m; sourceTree = SOURCE_ROOT; };
+		34B3B5AA0FD7E8700018C227 /* SlicingObjectsTestServer.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = SlicingObjectsTestServer.ice; path = ../../Ice/slicing/objects/SlicingObjectsTestServer.ice; sourceTree = SOURCE_ROOT; };
+		34B3B5AB0FD7E8700018C227 /* TestI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestI.m; path = ../../Ice/slicing/objects/TestI.m; sourceTree = SOURCE_ROOT; };
+		34B3B5AC0FD7E8700018C227 /* Client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Client.m; path = ../../Ice/slicing/objects/Client.m; sourceTree = SOURCE_ROOT; };
+		34B3B5AD0FD7E8700018C227 /* SlicingObjectsForward.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = SlicingObjectsForward.ice; path = ../../Ice/slicing/objects/SlicingObjectsForward.ice; sourceTree = SOURCE_ROOT; };
+		34B3B5AE0FD7E8700018C227 /* AllTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AllTests.m; path = ../../Ice/slicing/objects/AllTests.m; sourceTree = SOURCE_ROOT; };
+		34B3B5AF0FD7E8700018C227 /* TestI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestI.h; path = ../../Ice/slicing/objects/TestI.h; sourceTree = SOURCE_ROOT; };
+		34B3B5B00FD7E8700018C227 /* SlicingObjectsTestClient.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = SlicingObjectsTestClient.ice; path = ../../Ice/slicing/objects/SlicingObjectsTestClient.ice; sourceTree = SOURCE_ROOT; };
+		34B3B5B10FD7E8700018C227 /* Server.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Server.m; path = ../../Ice/slicing/objects/Server.m; sourceTree = SOURCE_ROOT; };
+		34B3B6020FD7EFCC0018C227 /* AdapterDeactivationTest.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = AdapterDeactivationTest.ice; path = ../../Ice/adapterDeactivation/AdapterDeactivationTest.ice; sourceTree = SOURCE_ROOT; };
+		34B3B66A0FD7F41C0018C227 /* OperationsTest.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = OperationsTest.ice; path = ../../Ice/operations/OperationsTest.ice; sourceTree = SOURCE_ROOT; };
 		34B766280E8D55E700CE4701 /* TestSelectController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestSelectController.h; sourceTree = "<group>"; };
 		34B766290E8D55E700CE4701 /* TestSelectController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestSelectController.m; sourceTree = "<group>"; };
 		34B7662B0E8D55FE00CE4701 /* TestSelect.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TestSelect.xib; sourceTree = "<group>"; };
 		34B766320E8D56C700CE4701 /* Test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Test.h; sourceTree = "<group>"; };
 		34B766330E8D56C700CE4701 /* Test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Test.m; sourceTree = "<group>"; };
-		34B7679F0E8D886200CE4701 /* TestOperations.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestOperations.dylib; path = ../../Ice/operations/TestOperations.dylib; sourceTree = SOURCE_ROOT; };
-		34B767A10E8D886D00CE4701 /* TestProxy.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestProxy.dylib; path = ../../Ice/proxy/TestProxy.dylib; sourceTree = SOURCE_ROOT; };
-		34B767A30E8D887700CE4701 /* TestObjects.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestObjects.dylib; path = ../../Ice/objects/TestObjects.dylib; sourceTree = SOURCE_ROOT; };
-		34B767C10E8D9D2400CE4701 /* TestBinding.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestBinding.dylib; path = ../../Ice/binding/TestBinding.dylib; sourceTree = SOURCE_ROOT; };
-		34B767C30E8D9D2E00CE4701 /* TestDefaultServant.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestDefaultServant.dylib; path = ../../Ice/defaultServant/TestDefaultServant.dylib; sourceTree = SOURCE_ROOT; };
-		34B767C50E8D9D3700CE4701 /* TestExceptions.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestExceptions.dylib; path = ../../Ice/exceptions/TestExceptions.dylib; sourceTree = SOURCE_ROOT; };
-		34B767C70E8D9D3F00CE4701 /* TestFacets.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestFacets.dylib; path = ../../Ice/facets/TestFacets.dylib; sourceTree = SOURCE_ROOT; };
-		34B767C90E8D9D4A00CE4701 /* TestInheritance.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestInheritance.dylib; path = ../../Ice/inheritance/TestInheritance.dylib; sourceTree = SOURCE_ROOT; };
-		34B767CB0E8D9D5100CE4701 /* TestInterceptor.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestInterceptor.dylib; path = ../../Ice/interceptor/TestInterceptor.dylib; sourceTree = SOURCE_ROOT; };
-		34B767CD0E8D9D5800CE4701 /* TestLocation.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestLocation.dylib; path = ../../Ice/location/TestLocation.dylib; sourceTree = SOURCE_ROOT; };
-		34B767CF0E8D9D6400CE4701 /* TestRetry.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestRetry.dylib; path = ../../Ice/retry/TestRetry.dylib; sourceTree = SOURCE_ROOT; };
-		34B767D10E8D9D6E00CE4701 /* TestTimeout.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = TestTimeout.dylib; path = ../../Ice/timeout/TestTimeout.dylib; sourceTree = SOURCE_ROOT; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -119,11 +239,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				34B765550E8D33D600CE4701 /* libTestCommon.dylib in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
 				288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */,
-				34B763420E8C307700CE4701 /* libIceObjC.0.1.0.dylib in Frameworks */,
+				344126380FD8E8EA00C8D69C /* Security.framework in Frameworks */,
+				344126390FD8E8EA00C8D69C /* CFNetwork.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -156,6 +276,22 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				34B3B5160FD7E7490018C227 /* slicing-exceptions */,
+				34B3B5150FD7E7420018C227 /* slicing-objects */,
+				34B3B5140FD7E73E0018C227 /* timeout */,
+				34B3B5120FD7E7340018C227 /* retry */,
+				34B3B5110FD7E72F0018C227 /* proxy */,
+				34B3B50F0FD7E7280018C227 /* objects */,
+				34B3B50E0FD7E7230018C227 /* location */,
+				34B3B5090FD7E71D0018C227 /* interceptor */,
+				34B3B5080FD7E7130018C227 /* inheritance */,
+				34B3B5070FD7E7090018C227 /* facets */,
+				34B3B5060FD7E7030018C227 /* exceptions */,
+				34B3B5050FD7E6FC0018C227 /* defaultServant */,
+				34B3B5040FD7E6F60018C227 /* binding */,
+				34B3B5030FD7E6EB0018C227 /* adapterDeactivation */,
+				34B3B4FF0FD7AB4E0018C227 /* Common */,
+				34B3B4A90FD7A7510018C227 /* operations */,
 				342EB9E60E92600E000051FA /* Images */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
@@ -192,23 +328,8 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				3404D98B0E9CF588003C95CA /* TestAdapterDeactivation.dylib */,
-				340EF20C0E958D4B00E8DAA9 /* TestSlicingExceptions.dylib */,
-				340EF20A0E958D4100E8DAA9 /* TestSlicingObjects.dylib */,
-				34B767D10E8D9D6E00CE4701 /* TestTimeout.dylib */,
-				34B767CF0E8D9D6400CE4701 /* TestRetry.dylib */,
-				34B767CD0E8D9D5800CE4701 /* TestLocation.dylib */,
-				34B767CB0E8D9D5100CE4701 /* TestInterceptor.dylib */,
-				34B767C90E8D9D4A00CE4701 /* TestInheritance.dylib */,
-				34B767C70E8D9D3F00CE4701 /* TestFacets.dylib */,
-				34B767C50E8D9D3700CE4701 /* TestExceptions.dylib */,
-				34B767C30E8D9D2E00CE4701 /* TestDefaultServant.dylib */,
-				34B767C10E8D9D2400CE4701 /* TestBinding.dylib */,
-				34B767A30E8D887700CE4701 /* TestObjects.dylib */,
-				34B767A10E8D886D00CE4701 /* TestProxy.dylib */,
-				34B7679F0E8D886200CE4701 /* TestOperations.dylib */,
-				34B764DF0E8D24FE00CE4701 /* libTestCommon.dylib */,
-				34B763410E8C307700CE4701 /* libIceObjC.0.1.0.dylib */,
+				344126360FD8E8EA00C8D69C /* Security.framework */,
+				344126370FD8E8EA00C8D69C /* CFNetwork.framework */,
 				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
 				1D30AB110D05D00D00671497 /* Foundation.framework */,
 				288765A40DF7441C002DB57D /* CoreGraphics.framework */,
@@ -224,6 +345,217 @@
 			name = Images;
 			sourceTree = "<group>";
 		};
+		34B3B4A90FD7A7510018C227 /* operations */ = {
+			isa = PBXGroup;
+			children = (
+				34B3B66A0FD7F41C0018C227 /* OperationsTest.ice */,
+				34B3B4F00FD7A9660018C227 /* TestI.h */,
+				34B3B4F10FD7A9660018C227 /* TestI.m */,
+				34B3B4AA0FD7A7700018C227 /* AllTests.m */,
+				34B3B4AB0FD7A7700018C227 /* BatchOneways.m */,
+				34B3B4AC0FD7A7700018C227 /* Client.m */,
+				34B3B4AD0FD7A7700018C227 /* Oneways.m */,
+				34B3B4AE0FD7A7700018C227 /* OnewaysAMI.m */,
+				34B3B4AF0FD7A7700018C227 /* Server.m */,
+				34B3B4B30FD7A7700018C227 /* Twoways.m */,
+				34B3B4B40FD7A7700018C227 /* TwowaysAMI.m */,
+			);
+			name = operations;
+			sourceTree = "<group>";
+		};
+		34B3B4FF0FD7AB4E0018C227 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				34B3B5000FD7AB5C0018C227 /* TestCommon.m */,
+			);
+			name = Common;
+			sourceTree = "<group>";
+		};
+		34B3B5030FD7E6EB0018C227 /* adapterDeactivation */ = {
+			isa = PBXGroup;
+			children = (
+				34B3B6020FD7EFCC0018C227 /* AdapterDeactivationTest.ice */,
+				34B3B5180FD7E7740018C227 /* AllTests.m */,
+				34B3B5190FD7E7740018C227 /* Client.m */,
+				34B3B51C0FD7E7740018C227 /* Server.m */,
+				34B3B51E0FD7E7740018C227 /* TestI.h */,
+				34B3B51F0FD7E7740018C227 /* TestI.m */,
+			);
+			name = adapterDeactivation;
+			sourceTree = "<group>";
+		};
+		34B3B5040FD7E6F60018C227 /* binding */ = {
+			isa = PBXGroup;
+			children = (
+				34B3B5260FD7E78B0018C227 /* AllTests.m */,
+				34B3B5270FD7E78B0018C227 /* Client.m */,
+				34B3B5280FD7E78B0018C227 /* Server.m */,
+				34B3B5290FD7E78B0018C227 /* BindingTest.ice */,
+				34B3B52A0FD7E78B0018C227 /* TestI.h */,
+				34B3B52B0FD7E78B0018C227 /* TestI.m */,
+			);
+			name = binding;
+			sourceTree = "<group>";
+		};
+		34B3B5050FD7E6FC0018C227 /* defaultServant */ = {
+			isa = PBXGroup;
+			children = (
+				34B3B5310FD7E7BD0018C227 /* MyObjectI.h */,
+				34B3B5320FD7E7BD0018C227 /* Client.m */,
+				34B3B5330FD7E7BD0018C227 /* DefaultServantTest.ice */,
+				34B3B5340FD7E7BD0018C227 /* MyObjectI.m */,
+			);
+			name = defaultServant;
+			sourceTree = "<group>";
+		};
+		34B3B5060FD7E7030018C227 /* exceptions */ = {
+			isa = PBXGroup;
+			children = (
+				34B3B5380FD7E7CA0018C227 /* Client.m */,
+				34B3B5390FD7E7CA0018C227 /* ExceptionsTest.ice */,
+				34B3B53A0FD7E7CA0018C227 /* TestI.m */,
+				34B3B53B0FD7E7CA0018C227 /* AllTests.m */,
+				34B3B53C0FD7E7CA0018C227 /* TestI.h */,
+				34B3B53D0FD7E7CA0018C227 /* Server.m */,
+			);
+			name = exceptions;
+			sourceTree = "<group>";
+		};
+		34B3B5070FD7E7090018C227 /* facets */ = {
+			isa = PBXGroup;
+			children = (
+				34B3B5430FD7E7E60018C227 /* TestI.m */,
+				34B3B5440FD7E7E60018C227 /* AllTests.m */,
+				34B3B5450FD7E7E60018C227 /* Client.m */,
+				34B3B5460FD7E7E60018C227 /* FacetsTest.ice */,
+				34B3B5470FD7E7E60018C227 /* TestI.h */,
+				34B3B5480FD7E7E60018C227 /* Server.m */,
+			);
+			name = facets;
+			sourceTree = "<group>";
+		};
+		34B3B5080FD7E7130018C227 /* inheritance */ = {
+			isa = PBXGroup;
+			children = (
+				34B3B54E0FD7E7FB0018C227 /* TestI.h */,
+				34B3B54F0FD7E7FB0018C227 /* AllTests.m */,
+				34B3B5500FD7E7FB0018C227 /* TestI.m */,
+				34B3B5510FD7E7FB0018C227 /* Server.m */,
+				34B3B5520FD7E7FB0018C227 /* InheritanceTest.ice */,
+				34B3B5530FD7E7FB0018C227 /* Client.m */,
+			);
+			name = inheritance;
+			sourceTree = "<group>";
+		};
+		34B3B5090FD7E71D0018C227 /* interceptor */ = {
+			isa = PBXGroup;
+			children = (
+				34B3B5590FD7E8080018C227 /* InterceptorTest.ice */,
+				34B3B55A0FD7E8080018C227 /* MyObjectI.h */,
+				34B3B55B0FD7E8080018C227 /* MyObjectI.m */,
+				34B3B55C0FD7E8080018C227 /* Client.m */,
+				34B3B55D0FD7E8080018C227 /* InterceptorI.m */,
+				34B3B55E0FD7E8080018C227 /* InterceptorI.h */,
+			);
+			name = interceptor;
+			sourceTree = "<group>";
+		};
+		34B3B50E0FD7E7230018C227 /* location */ = {
+			isa = PBXGroup;
+			children = (
+				34B3B5630FD7E81B0018C227 /* Client.m */,
+				34B3B5640FD7E81B0018C227 /* TestI.h */,
+				34B3B5650FD7E81B0018C227 /* Server.m */,
+				34B3B5660FD7E81B0018C227 /* TestI.m */,
+				34B3B5670FD7E81B0018C227 /* LocationTest.ice */,
+				34B3B5680FD7E81B0018C227 /* ServerLocator.m */,
+				34B3B5690FD7E81B0018C227 /* ServerLocator.h */,
+				34B3B56A0FD7E81B0018C227 /* AllTests.m */,
+			);
+			name = location;
+			sourceTree = "<group>";
+		};
+		34B3B50F0FD7E7280018C227 /* objects */ = {
+			isa = PBXGroup;
+			children = (
+				34B3B5710FD7E8270018C227 /* Client.m */,
+				34B3B5720FD7E8270018C227 /* TestI.m */,
+				34B3B5730FD7E8270018C227 /* ObjectsTest.ice */,
+				34B3B5740FD7E8270018C227 /* Server.m */,
+				34B3B5750FD7E8270018C227 /* TestI.h */,
+				34B3B5760FD7E8270018C227 /* AllTests.m */,
+			);
+			name = objects;
+			sourceTree = "<group>";
+		};
+		34B3B5110FD7E72F0018C227 /* proxy */ = {
+			isa = PBXGroup;
+			children = (
+				34B3B57C0FD7E8390018C227 /* TestI.h */,
+				34B3B57D0FD7E8390018C227 /* Client.m */,
+				34B3B57E0FD7E8390018C227 /* Server.m */,
+				34B3B57F0FD7E8390018C227 /* TestI.m */,
+				34B3B5800FD7E8390018C227 /* ProxyTest.ice */,
+				34B3B5810FD7E8390018C227 /* AllTests.m */,
+			);
+			name = proxy;
+			sourceTree = "<group>";
+		};
+		34B3B5120FD7E7340018C227 /* retry */ = {
+			isa = PBXGroup;
+			children = (
+				34B3B5870FD7E8440018C227 /* TestI.m */,
+				34B3B5880FD7E8440018C227 /* RetryTest.ice */,
+				34B3B5890FD7E8440018C227 /* TestI.h */,
+				34B3B58A0FD7E8440018C227 /* AllTests.m */,
+				34B3B58B0FD7E8440018C227 /* Client.m */,
+				34B3B58C0FD7E8440018C227 /* Server.m */,
+			);
+			name = retry;
+			sourceTree = "<group>";
+		};
+		34B3B5140FD7E73E0018C227 /* timeout */ = {
+			isa = PBXGroup;
+			children = (
+				34B3B5920FD7E8560018C227 /* AllTests.m */,
+				34B3B5930FD7E8560018C227 /* Client.m */,
+				34B3B5940FD7E8560018C227 /* Server.m */,
+				34B3B5950FD7E8560018C227 /* TestI.m */,
+				34B3B5960FD7E8560018C227 /* TimeoutTest.ice */,
+				34B3B5970FD7E8560018C227 /* TestI.h */,
+			);
+			name = timeout;
+			sourceTree = "<group>";
+		};
+		34B3B5150FD7E7420018C227 /* slicing-objects */ = {
+			isa = PBXGroup;
+			children = (
+				34B3B5AA0FD7E8700018C227 /* SlicingObjectsTestServer.ice */,
+				34B3B5AB0FD7E8700018C227 /* TestI.m */,
+				34B3B5AC0FD7E8700018C227 /* Client.m */,
+				34B3B5AD0FD7E8700018C227 /* SlicingObjectsForward.ice */,
+				34B3B5AE0FD7E8700018C227 /* AllTests.m */,
+				34B3B5AF0FD7E8700018C227 /* TestI.h */,
+				34B3B5B00FD7E8700018C227 /* SlicingObjectsTestClient.ice */,
+				34B3B5B10FD7E8700018C227 /* Server.m */,
+			);
+			name = "slicing-objects";
+			sourceTree = "<group>";
+		};
+		34B3B5160FD7E7490018C227 /* slicing-exceptions */ = {
+			isa = PBXGroup;
+			children = (
+				34B3B59D0FD7E8640018C227 /* AllTests.m */,
+				34B3B59E0FD7E8640018C227 /* Client.m */,
+				34B3B59F0FD7E8640018C227 /* SlicingExceptionsTestServer.ice */,
+				34B3B5A00FD7E8640018C227 /* TestI.m */,
+				34B3B5A10FD7E8640018C227 /* TestI.h */,
+				34B3B5A20FD7E8640018C227 /* SlicingExceptionsTestClient.ice */,
+				34B3B5A30FD7E8640018C227 /* Server.m */,
+			);
+			name = "slicing-exceptions";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -234,7 +566,7 @@
 				1D60588D0D05DD3D006BFB54 /* Resources */,
 				1D60588E0D05DD3D006BFB54 /* Sources */,
 				1D60588F0D05DD3D006BFB54 /* Frameworks */,
-				34B763570E8C30B400CE4701 /* CopyFiles */,
+				34041E9F0FD8FE1C000D8134 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -279,6 +611,22 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		34041E9F0FD8FE1C000D8134 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ $PLATFORM_NAME=iPhoneSimulator ]; then\n\tcp $ADDITIONAL_SDKS/usr/local/lib/*.dylib $BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH\nfi";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		1D60588E0D05DD3D006BFB54 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -289,6 +637,88 @@
 				28D7ACF80DDB3853001CB0EB /* TestViewController.m in Sources */,
 				34B7662A0E8D55E700CE4701 /* TestSelectController.m in Sources */,
 				34B766340E8D56C700CE4701 /* Test.m in Sources */,
+				34B3B4B50FD7A7700018C227 /* AllTests.m in Sources */,
+				34B3B4B60FD7A7700018C227 /* BatchOneways.m in Sources */,
+				34B3B4B70FD7A7700018C227 /* Client.m in Sources */,
+				34B3B4B80FD7A7700018C227 /* Oneways.m in Sources */,
+				34B3B4B90FD7A7700018C227 /* OnewaysAMI.m in Sources */,
+				34B3B4BA0FD7A7700018C227 /* Server.m in Sources */,
+				34B3B4BD0FD7A7700018C227 /* Twoways.m in Sources */,
+				34B3B4BE0FD7A7700018C227 /* TwowaysAMI.m in Sources */,
+				34B3B4F30FD7A9660018C227 /* TestI.m in Sources */,
+				34B3B5010FD7AB5C0018C227 /* TestCommon.m in Sources */,
+				34B3B5200FD7E7740018C227 /* AllTests.m in Sources */,
+				34B3B5210FD7E7740018C227 /* Client.m in Sources */,
+				34B3B5230FD7E7740018C227 /* Server.m in Sources */,
+				34B3B5250FD7E7740018C227 /* TestI.m in Sources */,
+				34B3B52C0FD7E78B0018C227 /* AllTests.m in Sources */,
+				34B3B52D0FD7E78B0018C227 /* Client.m in Sources */,
+				34B3B52E0FD7E78B0018C227 /* Server.m in Sources */,
+				34B3B52F0FD7E78B0018C227 /* BindingTest.ice in Sources */,
+				34B3B5300FD7E78B0018C227 /* TestI.m in Sources */,
+				34B3B5350FD7E7BD0018C227 /* Client.m in Sources */,
+				34B3B5360FD7E7BD0018C227 /* DefaultServantTest.ice in Sources */,
+				34B3B5370FD7E7BD0018C227 /* MyObjectI.m in Sources */,
+				34B3B53E0FD7E7CA0018C227 /* Client.m in Sources */,
+				34B3B53F0FD7E7CA0018C227 /* ExceptionsTest.ice in Sources */,
+				34B3B5400FD7E7CA0018C227 /* TestI.m in Sources */,
+				34B3B5410FD7E7CA0018C227 /* AllTests.m in Sources */,
+				34B3B5420FD7E7CA0018C227 /* Server.m in Sources */,
+				34B3B5490FD7E7E60018C227 /* TestI.m in Sources */,
+				34B3B54A0FD7E7E60018C227 /* AllTests.m in Sources */,
+				34B3B54B0FD7E7E60018C227 /* Client.m in Sources */,
+				34B3B54C0FD7E7E60018C227 /* FacetsTest.ice in Sources */,
+				34B3B54D0FD7E7E60018C227 /* Server.m in Sources */,
+				34B3B5540FD7E7FB0018C227 /* AllTests.m in Sources */,
+				34B3B5550FD7E7FB0018C227 /* TestI.m in Sources */,
+				34B3B5560FD7E7FB0018C227 /* Server.m in Sources */,
+				34B3B5570FD7E7FB0018C227 /* InheritanceTest.ice in Sources */,
+				34B3B5580FD7E7FB0018C227 /* Client.m in Sources */,
+				34B3B55F0FD7E8080018C227 /* InterceptorTest.ice in Sources */,
+				34B3B5600FD7E8080018C227 /* MyObjectI.m in Sources */,
+				34B3B5610FD7E8080018C227 /* Client.m in Sources */,
+				34B3B5620FD7E8080018C227 /* InterceptorI.m in Sources */,
+				34B3B56B0FD7E81B0018C227 /* Client.m in Sources */,
+				34B3B56C0FD7E81B0018C227 /* Server.m in Sources */,
+				34B3B56D0FD7E81B0018C227 /* TestI.m in Sources */,
+				34B3B56E0FD7E81B0018C227 /* LocationTest.ice in Sources */,
+				34B3B56F0FD7E81B0018C227 /* ServerLocator.m in Sources */,
+				34B3B5700FD7E81B0018C227 /* AllTests.m in Sources */,
+				34B3B5770FD7E8270018C227 /* Client.m in Sources */,
+				34B3B5780FD7E8270018C227 /* TestI.m in Sources */,
+				34B3B5790FD7E8270018C227 /* ObjectsTest.ice in Sources */,
+				34B3B57A0FD7E8270018C227 /* Server.m in Sources */,
+				34B3B57B0FD7E8270018C227 /* AllTests.m in Sources */,
+				34B3B5820FD7E8390018C227 /* Client.m in Sources */,
+				34B3B5830FD7E8390018C227 /* Server.m in Sources */,
+				34B3B5840FD7E8390018C227 /* TestI.m in Sources */,
+				34B3B5850FD7E8390018C227 /* ProxyTest.ice in Sources */,
+				34B3B5860FD7E8390018C227 /* AllTests.m in Sources */,
+				34B3B58D0FD7E8440018C227 /* TestI.m in Sources */,
+				34B3B58E0FD7E8440018C227 /* RetryTest.ice in Sources */,
+				34B3B58F0FD7E8440018C227 /* AllTests.m in Sources */,
+				34B3B5900FD7E8440018C227 /* Client.m in Sources */,
+				34B3B5910FD7E8440018C227 /* Server.m in Sources */,
+				34B3B5980FD7E8560018C227 /* AllTests.m in Sources */,
+				34B3B5990FD7E8560018C227 /* Client.m in Sources */,
+				34B3B59A0FD7E8560018C227 /* Server.m in Sources */,
+				34B3B59B0FD7E8560018C227 /* TestI.m in Sources */,
+				34B3B59C0FD7E8560018C227 /* TimeoutTest.ice in Sources */,
+				34B3B5A40FD7E8640018C227 /* AllTests.m in Sources */,
+				34B3B5A50FD7E8640018C227 /* Client.m in Sources */,
+				34B3B5A60FD7E8640018C227 /* SlicingExceptionsTestServer.ice in Sources */,
+				34B3B5A70FD7E8640018C227 /* TestI.m in Sources */,
+				34B3B5A80FD7E8640018C227 /* SlicingExceptionsTestClient.ice in Sources */,
+				34B3B5A90FD7E8640018C227 /* Server.m in Sources */,
+				34B3B5B20FD7E8700018C227 /* SlicingObjectsTestServer.ice in Sources */,
+				34B3B5B30FD7E8700018C227 /* TestI.m in Sources */,
+				34B3B5B40FD7E8700018C227 /* Client.m in Sources */,
+				34B3B5B50FD7E8700018C227 /* SlicingObjectsForward.ice in Sources */,
+				34B3B5B60FD7E8700018C227 /* AllTests.m in Sources */,
+				34B3B5B70FD7E8700018C227 /* SlicingObjectsTestClient.ice in Sources */,
+				34B3B5B80FD7E8700018C227 /* Server.m in Sources */,
+				34B3B6030FD7EFCC0018C227 /* AdapterDeactivationTest.ice in Sources */,
+				34B3B66B0FD7F41C0018C227 /* OperationsTest.ice in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -298,6 +728,7 @@
 		1D6058940D05DD3E006BFB54 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ADDITIONAL_SDKS = "../../../SDK/IceTouch/$(PLATFORM_NAME).sdk";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "$(IDENTIFIER)";
 				COPY_PHASE_STRIP = NO;
@@ -307,38 +738,26 @@
 				GCC_PREFIX_HEADER = container_Prefix.pch;
 				HEADER_SEARCH_PATHS = (
 					../../include,
+					../../Ice,
 					Classes,
 				);
 				INFOPLIST_FILE = Info.plist;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../../../lib\"",
-					"\"$(SRCROOT)/../operations\"",
-					"\"$(SRCROOT)/../proxy\"",
-					"\"$(SRCROOT)/../objects\"",
-					"\"$(SRCROOT)/../adapterDeactivation\"",
-					"\"$(SRCROOT)/../binding\"",
-					"\"$(SRCROOT)/../defaultServant\"",
-					"\"$(SRCROOT)/../exceptions\"",
-					"\"$(SRCROOT)/../facets\"",
-					"\"$(SRCROOT)/../inheritance\"",
-					"\"$(SRCROOT)/../interceptor\"",
-					"\"$(SRCROOT)/../location\"",
-					"\"$(SRCROOT)/../retry\"",
-					"\"$(SRCROOT)/../timeout\"",
-					"\"$(SRCROOT)/../slicing/exceptions\"",
-					"\"$(SRCROOT)/../slicing/objects\"",
-					"\"$(SRCROOT)/../../Ice/slicing/objects\"",
-					"\"$(SRCROOT)/../../Ice/slicing/exceptions\"",
-					"\"$(SRCROOT)/../../Ice/adapterDeactivation\"",
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_LDFLAGS = (
+					"-lstdc++",
+					"-lIceObjc",
 				);
 				PRODUCT_NAME = container;
+				SDKROOT = iphonesimulator2.0;
+				SLICE_ICE_HOME = "";
+				SLICE_INCLUDE_PATH = .;
 			};
 			name = Debug;
 		};
 		1D6058950D05DD3E006BFB54 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ADDITIONAL_SDKS = "../../../SDK/IceTouch/$(PLATFORM_NAME).sdk";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "$(IDENTIFIER)";
 				COPY_PHASE_STRIP = NO;
@@ -346,32 +765,18 @@
 				GCC_PREFIX_HEADER = container_Prefix.pch;
 				HEADER_SEARCH_PATHS = (
 					../../include,
+					../../Ice,
 					Classes,
 				);
 				INFOPLIST_FILE = Info.plist;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../../../lib\"",
-					"\"$(SRCROOT)/../operations\"",
-					"\"$(SRCROOT)/../proxy\"",
-					"\"$(SRCROOT)/../objects\"",
-					"\"$(SRCROOT)/../adapterDeactivation\"",
-					"\"$(SRCROOT)/../binding\"",
-					"\"$(SRCROOT)/../defaultServant\"",
-					"\"$(SRCROOT)/../exceptions\"",
-					"\"$(SRCROOT)/../facets\"",
-					"\"$(SRCROOT)/../inheritance\"",
-					"\"$(SRCROOT)/../interceptor\"",
-					"\"$(SRCROOT)/../location\"",
-					"\"$(SRCROOT)/../retry\"",
-					"\"$(SRCROOT)/../timeout\"",
-					"\"$(SRCROOT)/../slicing/exceptions\"",
-					"\"$(SRCROOT)/../slicing/objects\"",
-					"\"$(SRCROOT)/../../Ice/slicing/objects\"",
-					"\"$(SRCROOT)/../../Ice/slicing/exceptions\"",
-					"\"$(SRCROOT)/../../Ice/adapterDeactivation\"",
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_LDFLAGS = (
+					"-lstdc++",
+					"-lIceObjc",
 				);
 				PRODUCT_NAME = container;
+				SLICE_ICE_HOME = "";
+				SLICE_INCLUDE_PATH = .;
 			};
 			name = Release;
 		};

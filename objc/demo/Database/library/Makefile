@@ -11,7 +11,7 @@ top_srcdir	= ../../..
 
 CLIENT		= client
 
-TARGETS		= $(CLIENT) $(SERVER)
+TARGETS_MACOS	= $(CLIENT)
 
 OBJS		= Library.o \
 		  Session.o \

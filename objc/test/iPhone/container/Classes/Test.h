@@ -13,22 +13,18 @@
 @interface Test : NSObject
 {
 @private
-    void* handle;
-    int (*runServer)(int,char**);
-    int (*runClient)(int,char**);
+    int (*server)(int,char**);
+    int (*client)(int,char**);
     NSString* name;
-    NSString* path;
 }
 
--(id)initWithPath:(NSString*)path name:(NSString*)n;
-+(id)testWithPath:(NSString*)path name:(NSString*)n;
--(BOOL)open;
--(void)close;
++(id)testWithName:(NSString*)name
+           server:(int (*)(int, char**))server
+           client:(int (*)(int, char**))client;
 
 -(int)server;
 -(int)client;
 
 @property (readonly) NSString* name;
-@property (readonly) NSString* path;
 
 @end

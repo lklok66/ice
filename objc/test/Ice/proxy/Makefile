@@ -11,9 +11,6 @@ top_srcdir	= ../../..
 
 CLIENT		= client
 SERVER		= server
-LIBNAME  	= TestProxy.dylib
-
-TARGETS_IPHONE	= $(LIBNAME)
 
 TARGETS_MACOS	= $(CLIENT) $(SERVER)
 
@@ -23,34 +20,25 @@ COBJS		= Client.o \
 SOBJS		= TestI.o \
 		  Server.o
 
-SHARED_OBJS 	= Test.o
+OBJS 		= ProxyTest.o
 
 SRCS		= $(COBJS:.o=.m) \
 		  $(SOBJS:.o=.m) \
-		  $(SHARED_OBJS:.o=.m)
+		  $(OBJS:.o=.m)
 
-SLICE_SRCS	= Test.ice
+SLICE_SRCS	= ProxyTest.ice
 
 include $(top_srcdir)/config/Make.rules
 
-CPPFLAGS	:= -I. -I../../include $(CPPFLAGS)
+CPPFLAGS	:= -I. -I.. -I../../include $(CPPFLAGS)
 LIBS		:= -lTestCommon $(LIBS)
 
-$(CLIENT): $(ICEOBJCLIB) $(COBJS) $(SHARED_OBJS)
+$(CLIENT): $(ICEOBJCLIB) $(COBJS) $(OBJS)
 	rm -f $@
-	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(COBJS) $(SHARED_OBJS) $(LIBS)
+	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(COBJS) $(OBJS) $(LIBS)
 
-$(SERVER): $(ICEOBJCLIB) $(SOBJS) $(SHARED_OBJS)
+$(SERVER): $(ICEOBJCLIB) $(SOBJS) $(OBJS)
 	rm -f $@
-	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(SOBJS) $(SHARED_OBJS) $(LIBS)
-
-$(LIBNAME): $(ICEOBJCLIB) $(COBJS) $(SHARED_OBJS) $(SOBJS)
-	rm -f $@
-	$(CXX) -dynamiclib $(shlibldflags) -exported_symbols_list symbols -install_name @executable_path/Frameworks/$(LIBNAME) -o $@ $(COBJS) $(SHARED_OBJS) $(SOBJS) $(LIBS)
-ifneq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
-  ifneq ($(IDENTIFIER),)
-	$(CODESIGN) -s "$(IDENTIFIER)" $@
-  endif
-endif
+	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(SOBJS) $(OBJS) $(LIBS)
 
 include .depend

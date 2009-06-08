@@ -8,7 +8,7 @@
 // **********************************************************************
 
 #import <Ice/Ice.h>
-#import <TestI.h>
+#import <slicing/objects/TestI.h>
 
 @implementation TestSlicingObjectsServerI
 -(ICEObject*) SBaseAsObject:(ICECurrent*)current

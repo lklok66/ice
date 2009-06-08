@@ -8,7 +8,7 @@
 // **********************************************************************
 
 #import <Ice/Locator.h>
-#import <Test.h>
+#import <LocationTest.h>
 
 @interface ServerLocatorRegistry : TestLocationTestLocatorRegistry<TestLocationTestLocatorRegistry>
 {

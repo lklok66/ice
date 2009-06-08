@@ -9,7 +9,7 @@
 
 #import <Ice/Ice.h>
 #import <TestCommon.h>
-#import <TestI.h>
+#import <objects/TestI.h>
 
 #import <Foundation/NSAutoreleasePool.h>
 #if !TARGET_OS_IPHONE
@@ -77,14 +77,14 @@ run(id<ICECommunicator> communicator)
     [communicator addObjectFactory:factory sliceId:@"::Test::J"];
     [communicator addObjectFactory:factory sliceId:@"::Test::H"];
 
-    id<TestObjectsInitialPrx> allTests(id<ICECommunicator>, bool);
-    id<TestObjectsInitialPrx> initial = allTests(communicator, NO);
+    id<TestObjectsInitialPrx> objectsAllTests(id<ICECommunicator>, bool);
+    id<TestObjectsInitialPrx> initial = objectsAllTests(communicator, NO);
     [initial shutdown];
     return EXIT_SUCCESS;
 }
 
 #if TARGET_OS_IPHONE
-#  define main startClient
+#  define main objectsClient
 #endif
 
 int

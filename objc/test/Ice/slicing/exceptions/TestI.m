@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-#import <TestI.h>
+#import <slicing/exceptions/TestI.h>
 #import <Ice/Ice.h>
 
 @implementation TestSlicingExceptionsServerI

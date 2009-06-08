@@ -9,38 +9,43 @@
 
 top_srcdir	= ../..
 
-ifeq ($(STATICLIBS),yes)
 LIBNAME		= $(call mklibname,TestCommon)
-else
-LIBNAME		= $(call mksoname,TestCommon)
-endif
 
-TARGETS		= $(libdir)/$(LIBNAME)
+TARGETS_MACOS	= $(libdir)/$(LIBNAME)
 
 OBJS		= TestCommon.o
 
-SRCS		= $(OBJS:.o=.m)
+SRCS		:= $(OBJS:.o=.m)
+DEPENDFLAGS	= --platform-name
 
 include $(top_srcdir)/config/Make.rules
 
+ifeq ($(STATICLIBS),yes)
+    mklibname	= lib$(1).a
+else
+    mklibname	= lib$(1).dylib
+endif
+
+OBJS		:= $(addprefix $(PLATFORM_NAME)/,$(OBJS))
+
 CPPFLAGS	:= -I../include $(CPPFLAGS)
+
+ifeq ($(STATICLIBS),yes)
 
 $(libdir)/$(LIBNAME): $(OBJS)
 	rm -f $@
-ifeq ($(COMPILE_FOR_IPHONE),yes)
-	$(call mkshlib,$@,$(LIBNAME),$(OBJS),$(LIBS))
-ifneq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
-  ifneq ($(IDENTIFIER),)
-	$(CODESIGN) -s "$(IDENTIFIER)" $@
-  endif
-endif
-else
-ifeq ($(STATICLIBS),yes)
 	$(call mklib,$@,$(OBJS))
+
 else
+
+$(libdir)/$(LIBNAME): $(OBJS)
+	rm -f $@
 	$(call mkshlib,$@,$(LIBNAME),$(OBJS),$(LIBS))
+
 endif
-endif
+
+$(PLATFORM_NAME)/%.o: %.m
+	$(CC) -c $(CPPFLAGS) $(OBJCFLAGS) $(CFLAGS) $< -o $@
 
 include .depend
 

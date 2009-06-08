@@ -9,7 +9,7 @@
 
 #import <Ice/Ice.h>
 #import <TestCommon.h>
-#import <TestI.h>
+#import <objects/TestI.h>
 
 #import <Foundation/NSAutoreleasePool.h>
 #if !TARGET_OS_IPHONE
@@ -69,7 +69,7 @@ run(id<ICECommunicator> communicator)
 }
 
 #if TARGET_OS_IPHONE
-#  define main startServer
+#  define main objectsServer
 #endif
 
 int

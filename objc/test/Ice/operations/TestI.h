@@ -7,7 +7,7 @@
 //
 // **********************************************************************
   
-#import <Test.h>
+#import <OperationsTest.h>
 
 //
 // Servant implementation

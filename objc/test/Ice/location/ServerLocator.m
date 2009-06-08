@@ -9,7 +9,7 @@
 
 #import <Ice/Ice.h>
 #import <Ice/BuiltinSequences.h>
-#import <ServerLocator.h>
+#import <location/ServerLocator.h>
 
 @implementation ServerLocatorRegistry
 -(id) init

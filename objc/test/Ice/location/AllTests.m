@@ -10,7 +10,7 @@
 #import <Ice/Ice.h>
 #import <Ice/Router.h>
 #import <TestCommon.h>
-#import <Test.h>
+#import <LocationTest.h>
 
 #include <Foundation/NSThread.h>
 
@@ -25,7 +25,7 @@
 @end
 
 void
-allTests(id<ICECommunicator> communicator, NSString* ref)
+locationAllTests(id<ICECommunicator> communicator, NSString* ref)
 {
     id<TestLocationServerManagerPrx> manager = [TestLocationServerManagerPrx checkedCast:[communicator stringToProxy:ref]];
     id<TestLocationTestLocatorPrx> locator = [TestLocationTestLocatorPrx uncheckedCast:[communicator getDefaultLocator]];

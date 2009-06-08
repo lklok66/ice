@@ -9,9 +9,9 @@
 
 #import <Ice/Ice.h>
 #import <TestCommon.h>
-#import <Test.h>
-#import <MyObjectI.h>
-#import <InterceptorI.h>
+#import <InterceptorTest.h>
+#import <interceptor/MyObjectI.h>
+#import <interceptor/InterceptorI.h>
 
 #import <Foundation/NSAutoreleasePool.h>
 #if !TARGET_OS_IPHONE
@@ -105,10 +105,10 @@ run(id<ICECommunicator> communicator)
 }
 
 #if TARGET_OS_IPHONE
-#  define main startClient
+#  define main interceptorClient
 
 int
-startServer(int argc, char* argv[])
+interceptorServer(int argc, char* argv[])
 {
     serverReady(nil);
     return 0;

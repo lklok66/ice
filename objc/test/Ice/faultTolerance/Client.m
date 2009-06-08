@@ -9,7 +9,7 @@
 
 #import <Ice/Ice.h>
 #import <TestCommon.h>
-#import <Test.h>
+#import <faultTolerance/Test.h>
 #import <stdio.h>
 
 #import <Foundation/NSAutoreleasePool.h>

@@ -12,48 +12,38 @@ top_srcdir	= ../../../..
 CLIENT		= client
 SERVER		= server
 
-LIBNAME  	= TestSlicingObjects.dylib
-
-TARGETS_IPHONE	= $(LIBNAME)
 TARGETS_MACOS	= $(CLIENT) $(SERVER)
 
-COBJS		= TestClient.o \
+COBJS		= SlicingObjectsTestClient.o \
 		  Client.o \
 		  AllTests.o
 
-SOBJS		= TestServer.o \
+SOBJS		= SlicingObjectsTestServer.o \
 		  TestI.o \
 		  Server.o
 
-SHARED_OBJS	= Forward.o
+OBJS		= SlicingObjectsForward.o
 
 SRCS		= $(COBJS:.o=.m) \
 		  $(SOBJS:.o=.m) \
-		  $(SHARED_OBJS:.o=.m)
+		  $(OBJS:.o=.m)
 
-SLICE_SRCS	= TestClient.ice TestServer.ice Forward.ice
+SLICE_SRCS	= SlicingObjectsTestClient.ice \
+		  SlicingObjectsTestServer.ice \
+		  SlicingObjectsForward.ice
 
 include $(top_srcdir)/config/Make.rules
 
-SLICE2OBJCFLAGS := -I.
-CPPFLAGS	:= -I. -I../../../include $(CPPFLAGS)
+CPPFLAGS	:= -I. -I../.. -I../../../include $(CPPFLAGS)
 LIBS		:= -lTestCommon $(LIBS)
+SLICE2OBJCFLAGS := -I. $(SLICE2OBJCFLAGS)
 
-$(CLIENT): $(ICEOBJCLIB) $(COBJS) $(SHARED_OBJS)
+$(CLIENT): $(ICEOBJCLIB) $(COBJS) $(OBJS)
 	rm -f $@
-	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(COBJS) $(SHARED_OBJS) $(LIBS)
+	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(COBJS) $(OBJS) $(LIBS)
 
-$(SERVER): $(ICEOBJCLIB) $(SOBJS) $(SHARED_OBJS)
+$(SERVER): $(ICEOBJCLIB) $(SOBJS) $(OBJS)
 	rm -f $@
-	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(SOBJS) $(SHARED_OBJS) $(LIBS)
-
-$(LIBNAME): $(ICEOBJCLIB) $(COBJS) $(SHARED_OBJS) $(SOBJS)
-	rm -f $@
-	$(CXX) -dynamiclib $(shlibldflags) -install_name @executable_path/Frameworks/$(LIBNAME) -o $@ $(COBJS) $(SHARED_OBJS) $(SOBJS) $(LIBS)
-ifneq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
-  ifneq ($(IDENTIFIER),)
-	$(CODESIGN) -s "$(IDENTIFIER)" $@
-  endif
-endif
+	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(SOBJS) $(OBJS) $(LIBS)
 
 include .depend

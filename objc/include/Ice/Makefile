@@ -11,18 +11,28 @@ top_srcdir	= ../..
 
 include $(top_srcdir)/config/Make.rules
 
+
+ifeq ($(COMPILE_FOR_MACOSX),yes)
+INSTALL_DIR = $(install_includedir)/Ice
+
 install::
-	@if test ! -d $(install_includedir)/Ice ; \
+else
+
+INSTALL_DIR = $(top_srcdir)/SDK/IceTouch/$(PLATFORM_NAME).sdk/usr/local/include/Ice
+
+all::
+endif
+	@if test ! -d $(INSTALL_DIR) ; \
 	then \
-	    echo "Creating $(install_includedir)/Ice..." ; \
-	    $(call mkdir,$(install_includedir)/Ice) ; \
+	    echo "Creating $(INSTALL_DIR)..." ; \
+	    $(call mkdir,$(INSTALL_DIR)) ; \
 	fi
 
 	@for i in *.h ; \
 	do \
 	    echo "Installing $$i" ; \
-	    $(INSTALL_DATA) $$i $(install_includedir)/Ice/$$i ; \
-	    chmod a+r $(install_includedir)/Ice/$$i ; \
+	    $(INSTALL_DATA) $$i $(INSTALL_DIR)/$$i ; \
+	    chmod a+r $(INSTALL_DIR)/$$i ; \
 	done
 
 depend::

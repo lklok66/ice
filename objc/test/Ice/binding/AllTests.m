@@ -9,7 +9,7 @@
 
 #import <Ice/Ice.h>
 #import <TestCommon.h>
-#import <Test.h>
+#import <BindingTest.h>
 
 #import <Foundation/Foundation.h>
 
@@ -157,7 +157,7 @@ random_shuffle(NSMutableArray* array)
 }
 
 void
-allTests(id<ICECommunicator> communicator)
+bindingAllTests(id<ICECommunicator> communicator)
 {
     NSString* ref = @"communicator:default -p 12010";
     id<TestBindingRemoteCommunicatorPrx> com = [TestBindingRemoteCommunicatorPrx uncheckedCast:[

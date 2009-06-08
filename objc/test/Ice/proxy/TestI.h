@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-#import <Test.h>
+#import <ProxyTest.h>
 
 @interface TestProxyMyDerivedClassI : TestProxyMyDerivedClass<TestProxyMyDerivedClass>
 {

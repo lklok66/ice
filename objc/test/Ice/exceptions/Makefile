@@ -12,10 +12,6 @@ top_srcdir	= ../../..
 CLIENT		= client
 SERVER		= server
 
-LIBNAME  	= TestExceptions.dylib
-
-TARGETS_IPHONE	= $(LIBNAME)
-
 TARGETS_MACOS	= $(CLIENT) $(SERVER)
 
 COBJS		= Client.o \
@@ -24,34 +20,25 @@ COBJS		= Client.o \
 SOBJS		= TestI.o \
 		  Server.o
 
-SHARED_OBJS	= Test.o
+OBJS		= ExceptionsTest.o
 
 SRCS		= $(COBJS:.o=.m) \
 		  $(SOBJS:.o=.m) \
-		  $(SHARED_OBJS=.o=.m)
+		  $(OBJS=.o=.m)
 
-SLICE_SRCS	= Test.ice
+SLICE_SRCS	= ExceptionsTest.ice
 
 include $(top_srcdir)/config/Make.rules
 
-CPPFLAGS	:= -I. -I../../include $(CPPFLAGS)
+CPPFLAGS	:= -I. -I.. -I../../include $(CPPFLAGS)
 LIBS		:= -lTestCommon $(LIBS)
 
-$(CLIENT): $(COBJS) $(SHARED_OBJS)
+$(CLIENT): $(COBJS) $(OBJS)
 	rm -f $@
-	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(COBJS) $(SHARED_OBJS) $(LIBS)
+	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(COBJS) $(OBJS) $(LIBS)
 
-$(SERVER): $(SOBJS) $(SHARED_OBJS)
+$(SERVER): $(SOBJS) $(OBJS)
 	rm -f $@
-	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(SOBJS) $(SHARED_OBJS) $(LIBS)
-
-$(LIBNAME): $(ICEOBJCLIB) $(COBJS) $(SOBJS) $(SHARED_OBJS)
-	rm -f $@
-	$(CXX) -dynamiclib $(shlibldflags) -install_name @executable_path/Frameworks/$(LIBNAME) -o $@ $(COBJS) $(SOBJS) $(SHARED_OBJS) $(LIBS)
-ifneq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
-  ifneq ($(IDENTIFIER),)
-	$(CODESIGN) -s "$(IDENTIFIER)" $@
-  endif
-endif
+	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(SOBJS) $(OBJS) $(LIBS)
 
 include .depend

@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-#import <TestServer.h>
+#import <SlicingExceptionsTestServer.h>
 
 @interface TestSlicingExceptionsServerI : TestSlicingExceptionsServerTestIntf
 @end

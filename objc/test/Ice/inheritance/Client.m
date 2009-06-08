@@ -9,7 +9,7 @@
 
 #import <Ice/Ice.h>
 #import <TestCommon.h>
-#import <Test.h>
+#import <InheritanceTest.h>
 
 #import <Foundation/NSAutoreleasePool.h>
 #if !TARGET_OS_IPHONE
@@ -20,14 +20,14 @@
 static int
 run(id<ICECommunicator> communicator)
 {
-    id<TestInheritanceInitialPrx> allTests(id<ICECommunicator>);
-    id<TestInheritanceInitialPrx> initial = allTests(communicator);
+    id<TestInheritanceInitialPrx> inheritanceAllTests(id<ICECommunicator>);
+    id<TestInheritanceInitialPrx> initial = inheritanceAllTests(communicator);
     [initial shutdown];
     return EXIT_SUCCESS;
 }
 
 #if TARGET_OS_IPHONE
-#  define main startClient
+#  define main inheritanceClient
 #endif
 
 int

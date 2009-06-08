@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-#import <Test.h>
+#import <AdapterDeactivationTest.h>
 
 @interface TestAdapterDeactivationI : TestAdapterDeactivationTestIntf
 -(void) transient:(ICECurrent*)current;

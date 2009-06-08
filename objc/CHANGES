@@ -1,6 +1,13 @@
 Changes since version 0.1.0
 ---------------------------
 
+- Added support for multi-archicture builds in the same source tree.
+  IceTouch now supports four different build types.
+  - MacOSX command line
+  - MacOSX SDK (for Cocoa apps)
+  - iPhoneOS SDK
+  - iPhoneSimulator SDK
+
 - The Mac build now uses the native Ice socket & ssl transports.
   This means that Mac/Cocoa applications use the same SSL properties
   as standard Ice for C++ applications.

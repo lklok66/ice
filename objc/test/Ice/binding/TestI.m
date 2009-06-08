@@ -8,7 +8,7 @@
 // **********************************************************************
 
 #import <Ice/Ice.h>
-#import <TestI.h>
+#import <binding/TestI.h>
 
 @implementation RemoteCommunicatorI
 -(id) init

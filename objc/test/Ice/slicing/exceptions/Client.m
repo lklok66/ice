@@ -9,21 +9,21 @@
 
 #import <Ice/Ice.h>
 #import <TestCommon.h>
-#import <TestClient.h>
+#import <SlicingExceptionsTestClient.h>
 
 #import <Foundation/NSAutoreleasePool.h>
 
 static int
 run(id<ICECommunicator> communicator)
 {
-    id<TestSlicingExceptionsClientTestIntfPrx> allTests(id<ICECommunicator>);
-    id<TestSlicingExceptionsClientTestIntfPrx> thrower = allTests(communicator);
+    id<TestSlicingExceptionsClientTestIntfPrx> slicingExceptiosnAllTests(id<ICECommunicator>);
+    id<TestSlicingExceptionsClientTestIntfPrx> thrower = slicingExceptiosnAllTests(communicator);
     [thrower shutdown];
     return EXIT_SUCCESS;
 }
 
-#if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
-#  define main startClient
+#if defined(TARGET_OS_IPHONE)
+#  define main slicingExceptionsClient
 #endif
 
 int

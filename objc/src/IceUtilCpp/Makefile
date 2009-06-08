@@ -9,8 +9,6 @@
 
 top_srcdir	= ../..
 
-TARGETS		= $(OBJS)
-
 OBJS		= ArgVector.o \
 		  Cond.o \
 		  ConvertUTF.o \
@@ -26,21 +24,24 @@ OBJS		= ArgVector.o \
 		  Timer.o \
 		  Unicode.o \
 		  UUID.o
-#		  InputUtil.o \
-#		  OutputUtil.o \
-#		  FileUtil.o \
-# 		  CountDownLatch.o \
-# 		  CtrlCHandler.o \
-# 		  Options.o \
-# 		  RWRecMutex.o \
 
 SRCS_DIR	= $(ice_dir)/cpp/src/IceUtil
-SRCS		= $(addprefix $(SRCS_DIR)/, $(OBJS:.o=.cpp))
+
+SRCS_OBJS	:= $(OBJS)
+SRCS		= $(addprefix $(SRCS_DIR)/, $(SRCS_OBJS:.o=.cpp))
+DEPENDFLAGS	= --platform-name
 
 include $(top_srcdir)/config/Make.rules
 
+OBJS 		:= $(addprefix $(PLATFORM_NAME)/,$(OBJS))
+
 CPPFLAGS        := -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src $(CPPPLATFORMFLAGS)
 
+all:: $(OBJS)
+
 install:: $(OBJS)
+
+$(PLATFORM_NAME)/%.o: $(SRCS_DIR)/%.cpp
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $< -o $@
 
 include .depend

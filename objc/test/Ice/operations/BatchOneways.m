@@ -9,7 +9,7 @@
 
 #import <Ice/Ice.h>
 #import <TestCommon.h>
-#import <Test.h>
+#import <OperationsTest.h>
 
 void
 batchOneways(id<TestOperationsMyClassPrx> p)

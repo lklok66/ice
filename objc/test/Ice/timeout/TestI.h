@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-#import <Test.h>
+#import <TimeoutTest.h>
 
 @interface TimeoutI : TestTimeoutTimeout
 -(void) op:(ICECurrent *)current;

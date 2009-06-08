@@ -26,8 +26,6 @@
 		34C5F21E0FC514C900B226F7 /* Router.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34C5F2130FC514C900B226F7 /* Router.ice */; };
 		34C5F21F0FC514C900B226F7 /* SavingController.m in Sources */ = {isa = PBXBuildFile; fileRef = 34C5F2150FC514C900B226F7 /* SavingController.m */; };
 		34C5F2200FC514C900B226F7 /* Session.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34C5F2160FC514C900B226F7 /* Session.ice */; };
-		34C5F2290FC514E500B226F7 /* libGlacier2ObjC.0.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C5F2270FC514E500B226F7 /* libGlacier2ObjC.0.1.0.dylib */; };
-		34C5F22A0FC514E500B226F7 /* libIceObjC.0.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 34C5F2280FC514E500B226F7 /* libIceObjC.0.1.0.dylib */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -66,10 +64,8 @@
 		34C5F2140FC514C900B226F7 /* SavingController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SavingController.h; path = Classes/SavingController.h; sourceTree = "<group>"; };
 		34C5F2150FC514C900B226F7 /* SavingController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SavingController.m; path = Classes/SavingController.m; sourceTree = "<group>"; };
 		34C5F2160FC514C900B226F7 /* Session.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = Session.ice; path = Classes/Session.ice; sourceTree = "<group>"; };
-		34C5F2270FC514E500B226F7 /* libGlacier2ObjC.0.1.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libGlacier2ObjC.0.1.0.dylib; path = ../../../lib/libGlacier2ObjC.0.1.0.dylib; sourceTree = SOURCE_ROOT; };
-		34C5F2280FC514E500B226F7 /* libIceObjC.0.1.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libIceObjC.0.1.0.dylib; path = ../../../lib/libIceObjC.0.1.0.dylib; sourceTree = SOURCE_ROOT; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* library.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = library.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* Library.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Library.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -78,8 +74,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
-				34C5F2290FC514E500B226F7 /* libGlacier2ObjC.0.1.0.dylib in Frameworks */,
-				34C5F22A0FC514E500B226F7 /* libIceObjC.0.1.0.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -130,7 +124,7 @@
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8D1107320486CEB800E47090 /* library.app */,
+				8D1107320486CEB800E47090 /* Library.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -177,8 +171,6 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				34C5F2270FC514E500B226F7 /* libGlacier2ObjC.0.1.0.dylib */,
-				34C5F2280FC514E500B226F7 /* libIceObjC.0.1.0.dylib */,
 				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
@@ -203,7 +195,7 @@
 			name = library;
 			productInstallPath = "$(HOME)/Applications";
 			productName = library;
-			productReference = 8D1107320486CEB800E47090 /* library.app */;
+			productReference = 8D1107320486CEB800E47090 /* Library.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -287,49 +279,69 @@
 		C01FCF4B08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ADDITIONAL_SDKS = "../../../SDK/IceTouch/$(PLATFORM_NAME).sdk";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../../../../../Library/Frameworks\"",
+				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_ENABLE_OBJC_GC = supported;
+				GCC_ENABLE_OBJC_GC = required;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = library_Prefix.pch;
-				HEADER_SEARCH_PATHS = (
-					../../../include,
-					.,
-					Classes,
-				);
+				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)\"",
-					"\"$(SRCROOT)/../../../lib\"",
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				OTHER_LDFLAGS = (
+					"-liconv",
+					"-lbz2",
+					"-lcrypto",
+					"-lssl",
+					"-lIceObjc",
+					"-lGlacier2Objc",
+					"-lstdc++",
 				);
-				PRODUCT_NAME = library;
-				SLICE_ICE_HOME = "/Users/matthew/cvs/ice-objc";
-				SLICE_INCLUDE_PATH = ../../../../slice;
+				PRODUCT_NAME = Library;
+				SLICE_ICE_HOME = "";
+				SLICE_INCLUDE_PATH = "";
 			};
 			name = Debug;
 		};
 		C01FCF4C08A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ADDITIONAL_SDKS = "../../../SDK/IceTouch/$(PLATFORM_NAME).sdk";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../../../../../../Library/Frameworks\"",
+				);
+				GCC_ENABLE_OBJC_GC = required;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = library_Prefix.pch;
+				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)\"",
-					"\"$(SRCROOT)/../../../lib\"",
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				OTHER_LDFLAGS = (
+					"-liconv",
+					"-lbz2",
+					"-lcrypto",
+					"-lssl",
+					"-lIceObjc",
+					"-lGlacier2Objc",
+					"-lstdc++",
 				);
-				PRODUCT_NAME = library;
+				PRODUCT_NAME = Library;
+				SLICE_ICE_HOME = "";
+				SLICE_INCLUDE_PATH = "";
 			};
 			name = Release;
 		};

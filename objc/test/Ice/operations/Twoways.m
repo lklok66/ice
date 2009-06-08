@@ -9,7 +9,7 @@
 
 #import <Ice/Ice.h>
 #import <TestCommon.h>
-#import <Test.h>
+#import <OperationsTest.h>
 #import <limits.h>
 #import <float.h>
     

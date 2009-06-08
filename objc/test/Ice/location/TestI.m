@@ -9,7 +9,7 @@
 
 #import <Ice/Ice.h>
 #import <Ice/Locator.h>
-#import <TestI.h>
+#import <location/TestI.h>
 
 @implementation ServerManagerI
 -(id) init:(ServerLocatorRegistry*)registry initData:(ICEInitializationData*)initData

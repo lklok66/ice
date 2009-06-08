@@ -9,7 +9,7 @@
 
 #import <Ice/Ice.h>
 
-#import <TestI.h>
+#import <exceptions/TestI.h>
 #import <TestCommon.h>
 #import <Foundation/NSException.h>
 

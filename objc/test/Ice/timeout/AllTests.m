@@ -9,7 +9,7 @@
 
 #import <Ice/Ice.h>
 #import <TestCommon.h>
-#import <Test.h>
+#import <TimeoutTest.h>
 
 #import <Foundation/Foundation.h>
 
@@ -91,7 +91,7 @@
 @end
 
 id<TestTimeoutTimeoutPrx>
-allTests(id<ICECommunicator> communicator)
+timeoutAllTests(id<ICECommunicator> communicator)
 {
     NSString* sref = @"timeout:default -p 12010";
     id<ICEObjectPrx> obj = [communicator stringToProxy:sref];

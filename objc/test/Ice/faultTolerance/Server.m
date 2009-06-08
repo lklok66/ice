@@ -8,7 +8,7 @@
 // **********************************************************************
 
 #import <Ice/Ice.h>
-#import <TestI.h>
+#import <faultTolerance/TestI.h>
 
 #import <Foundation/NSAutoreleasePool.h>
 #if !TARGET_OS_IPHONE

@@ -272,8 +272,8 @@ private:
         // will get linked into exe when using static libraries.
         //
         createIceTcp(0, "", Ice::StringSeq());
-        createIceSSL(0, "", Ice::StringSeq());
 #endif
+        createIceSSL(0, "", Ice::StringSeq());
 
         Ice::CommunicatorPtr communicator;
         if(argc != nil && argv != nil)

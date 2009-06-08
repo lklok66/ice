@@ -8,7 +8,7 @@
 // **********************************************************************
 
 #import <Ice/Ice.h>
-#import <TestI.h>
+#import <faultTolerance/TestI.h>
 
 #include <unistd.h>
 

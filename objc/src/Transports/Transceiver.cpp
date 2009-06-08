@@ -17,18 +17,10 @@
 #include <Ice/Stats.h>
 #include <Ice/Buffer.h>
 #include <Ice/Network.h>
-#include <Ice/LocalException.h>
 
 using namespace std;
 using namespace Ice;
 using namespace IceInternal;
-
-void
-Ice::CFNetworkException::ice_print(ostream& out) const
-{
-    Exception::ice_print(out);
-    out << ":\nnetwork exception: domain: " << domain << " error: " << error;
-}
 
 static inline std::string
 fromCFString(CFStringRef ref)

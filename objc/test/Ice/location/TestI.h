@@ -7,8 +7,8 @@
 //
 // **********************************************************************
 
-#import <Test.h>
-#import <ServerLocator.h>
+#import <LocationTest.h>
+#import <location/ServerLocator.h>
 
 @interface ServerManagerI : TestLocationServerManager
 {

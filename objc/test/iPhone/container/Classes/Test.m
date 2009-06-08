@@ -13,71 +13,27 @@
 @implementation Test
 
 @synthesize name;
-@synthesize path;
 
--(id)initWithPath:(NSString*)p name:(NSString*)n
++(id)testWithName:(NSString*)name
+           server:(int (*)(int, char**))server
+           client:(int (*)(int, char**))client;
 {
-    if(self = [super init])
+    Test* t = [[Test alloc] init];
+    if(t != nil)
     {
-        // name is "Test(something).dylib" Remove Test and dylib.
-        name = [[[n stringByReplacingOccurrencesOfString:@"Test" withString:@""]
-                 stringByReplacingOccurrencesOfString:@".dylib" withString:@""] retain];
-        path = [p retain];
+        t->name = name;
+        t->server = server;
+        t->client = client;
     }
-    return self;
-}
-
-+(id)testWithPath:(NSString*)path name:(NSString*)n
-{
-    return [[[Test alloc] initWithPath:path name:n] autorelease];
-}
-
--(BOOL)open
-{
-    NSAssert(handle == 0, @"handle == 0");
-    handle = dlopen([path UTF8String], RTLD_LOCAL);
-    if(handle == 0)
-    {
-        NSLog(@"dlopen of %@ failed: %s", path, strerror(errno));
-        return NO;
-    }
-    
-    runServer = (int(*)(int,char**))dlsym(handle, "startServer");
-    if(runServer == 0)
-    {
-        NSLog(@"dlsym of startServer failed");
-    }
-    
-    runClient = (int(*)(int,char**))dlsym(handle, "startClient");
-    if(runClient == 0)
-    {
-        NSLog(@"dlsym of startClient failed");
-    }
-    
-    if(runServer == 0 || runClient == 0)
-    {
-        [self close];
-        return NO;
-    }
-    
-    return YES;
-}
-
--(void)close
-{
-    if(handle != 0)
-    {
-        dlclose(handle);
-        handle = 0;
-    }
+    return t;
 }
 
 -(int)server
 {
-    NSAssert(runServer != 0, @"server != 0");
+    NSAssert(server != 0, @"server != 0");
     int argc = 0;
     char** argv = 0;
-    return (*runServer)(argc, argv);
+    return (*server)(argc, argv);
 }
 
 -(int)client
@@ -85,14 +41,13 @@
     int argc = 0;
     char** argv = 0;
 
-    NSAssert(runClient != 0, @"server != 0");
-    return (*runClient)(argc, argv);
+    NSAssert(client != 0, @"server != 0");
+    return (*client)(argc, argv);
 }
 
 -(void)dealloc
 {
     [name release];
-    [path release];
     [super dealloc];
 }
 

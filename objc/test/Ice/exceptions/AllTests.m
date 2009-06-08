@@ -10,12 +10,12 @@
 #import <Ice/Ice.h>
 #import <Ice/Locator.h>
 #import <TestCommon.h>
-#import <Test.h>
+#import <ExceptionsTest.h>
  
-@interface EmptyI : TestExceptionsEmpty<TestExceptionsEmpty>
+@interface ExceptionsEmptyI : TestExceptionsEmpty<TestExceptionsEmpty>
 @end
 
-@implementation EmptyI
+@implementation ExceptionsEmptyI
 @end
 
 #if 0 // TODO
@@ -35,7 +35,7 @@
 #endif
 
 id<TestExceptionsThrowerPrx>
-allTests(id<ICECommunicator> communicator, BOOL collocated)
+exceptionsAllTests(id<ICECommunicator> communicator, BOOL collocated)
 {
     tprintf("testing object adapter registration exceptions... ");
     {
@@ -82,7 +82,7 @@ allTests(id<ICECommunicator> communicator, BOOL collocated)
     {
         [[communicator getProperties] setProperty:@"TestAdapter1.Endpoints" value:@"default"];
 	id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestAdapter1"];
-	ICEObject* obj = [[[EmptyI alloc] init] autorelease];
+	ICEObject* obj = [[[ExceptionsEmptyI alloc] init] autorelease];
 	[adapter add:obj identity:[communicator stringToIdentity:@"x"]];
 	@try
 	{

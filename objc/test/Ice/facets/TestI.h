@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-#import <Test.h>
+#import <FacetsTest.h>
 
 @interface TestFacetsAI : TestFacetsA<TestFacetsA>
 @end

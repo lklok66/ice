@@ -447,7 +447,6 @@ local exception SocketException extends SyscallException
 {
 };
 
-#ifdef ICE_APPLE_CFSTREAM
 /**
  *
  * This exception indicates CFNetwork errors.
@@ -462,7 +461,6 @@ local exception CFNetworkException extends SocketException
      **/
     string domain;
 };
-#endif
 
 /**
  *

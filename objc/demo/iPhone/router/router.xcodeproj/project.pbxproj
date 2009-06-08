@@ -20,8 +20,8 @@
 		289233AE0DB2D0DB0083E9F9 /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 289233A90DB2D0DB0083E9F9 /* MainViewController.m */; };
 		289233AF0DB2D0DB0083E9F9 /* RootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 289233AB0DB2D0DB0083E9F9 /* RootViewController.m */; };
 		289233B00DB2D0DB0083E9F9 /* FlipsideViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 289233AD0DB2D0DB0083E9F9 /* FlipsideViewController.m */; };
-		34292B300FA806AF00CE3EAD /* libIceObjC.0.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 34292B2F0FA806AF00CE3EAD /* libIceObjC.0.1.0.dylib */; };
-		34292B310FA806B700CE3EAD /* libIceObjC.0.1.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 34292B2F0FA806AF00CE3EAD /* libIceObjC.0.1.0.dylib */; };
+		344125EA0FD8E85300C8D69C /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 344125E80FD8E85300C8D69C /* Security.framework */; };
+		344125EB0FD8E85300C8D69C /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 344125E90FD8E85300C8D69C /* CFNetwork.framework */; };
 		3448BF4F0FA971E300BFB717 /* LogView.m in Sources */ = {isa = PBXBuildFile; fileRef = 3448BF4C0FA971E300BFB717 /* LogView.m */; };
 		3448BF500FA971E300BFB717 /* LogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3448BF4E0FA971E300BFB717 /* LogViewController.m */; };
 		3448BF520FA9723E00BFB717 /* LogView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3448BF510FA9723E00BFB717 /* LogView.xib */; };
@@ -29,31 +29,15 @@
 		3448C1F70FAA812300BFB717 /* LoggingDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 3448C1F20FAA812300BFB717 /* LoggingDelegate.m */; };
 		3448C1F80FAA812300BFB717 /* LogZoomViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3448C1F40FAA812300BFB717 /* LogZoomViewController.m */; };
 		3448C1F90FAA812300BFB717 /* LogZoomView.m in Sources */ = {isa = PBXBuildFile; fileRef = 3448C1F50FAA812300BFB717 /* LogZoomView.m */; };
-		3448C63E0FAFE27B00BFB717 /* libGlacier2ObjC.0.1.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3448C63D0FAFE27B00BFB717 /* libGlacier2ObjC.0.1.0.dylib */; };
-		3448C63F0FAFE28600BFB717 /* libGlacier2ObjC.0.1.0.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 3448C63D0FAFE27B00BFB717 /* libGlacier2ObjC.0.1.0.dylib */; };
 		34684F500FA7EC15009000C3 /* RouterI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34684F4D0FA7EC15009000C3 /* RouterI.m */; };
 		34684F510FA7EC15009000C3 /* Router.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34684F4E0FA7EC15009000C3 /* Router.ice */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		34684E6D0FA71031009000C3 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				3448C63F0FAFE28600BFB717 /* libGlacier2ObjC.0.1.0.dylib in CopyFiles */,
-				34292B310FA806B700CE3EAD /* libIceObjC.0.1.0.dylib in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623240D0F684500981E51 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		1D6058910D05DD3D006BFB54 /* router.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = router.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1D6058910D05DD3D006BFB54 /* Router.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Router.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		280E754A0DD40C5E005A515E /* FlipsideView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = FlipsideView.xib; sourceTree = "<group>"; };
 		280E754B0DD40C5E005A515E /* MainView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = MainView.xib; sourceTree = "<group>"; };
@@ -71,7 +55,8 @@
 		289233AD0DB2D0DB0083E9F9 /* FlipsideViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FlipsideViewController.m; path = Classes/FlipsideViewController.m; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* router_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = router_Prefix.pch; sourceTree = "<group>"; };
-		34292B2F0FA806AF00CE3EAD /* libIceObjC.0.1.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libIceObjC.0.1.0.dylib; path = ../../../lib/libIceObjC.0.1.0.dylib; sourceTree = SOURCE_ROOT; };
+		344125E80FD8E85300C8D69C /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		344125E90FD8E85300C8D69C /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		3448BC3E0FA827FA00BFB717 /* LoggingDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LoggingDelegate.h; path = Classes/LoggingDelegate.h; sourceTree = "<group>"; };
 		3448BF4B0FA971E300BFB717 /* LogViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LogViewController.h; path = Classes/LogViewController.h; sourceTree = "<group>"; };
 		3448BF4C0FA971E300BFB717 /* LogView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = LogView.m; path = Classes/LogView.m; sourceTree = "<group>"; };
@@ -84,7 +69,6 @@
 		3448C1F40FAA812300BFB717 /* LogZoomViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = LogZoomViewController.m; path = Classes/LogZoomViewController.m; sourceTree = "<group>"; };
 		3448C1F50FAA812300BFB717 /* LogZoomView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = LogZoomView.m; path = Classes/LogZoomView.m; sourceTree = "<group>"; };
 		3448C1F60FAA812300BFB717 /* LogZoomView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LogZoomView.h; path = Classes/LogZoomView.h; sourceTree = "<group>"; };
-		3448C63D0FAFE27B00BFB717 /* libGlacier2ObjC.0.1.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libGlacier2ObjC.0.1.0.dylib; path = ../../../lib/libGlacier2ObjC.0.1.0.dylib; sourceTree = SOURCE_ROOT; };
 		34684F4C0FA7EC15009000C3 /* RouterI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RouterI.h; path = Classes/RouterI.h; sourceTree = "<group>"; };
 		34684F4D0FA7EC15009000C3 /* RouterI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RouterI.m; path = Classes/RouterI.m; sourceTree = "<group>"; };
 		34684F4E0FA7EC15009000C3 /* Router.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = Router.ice; path = Classes/Router.ice; sourceTree = "<group>"; };
@@ -100,8 +84,8 @@
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
 				288765590DF743DE002DB57D /* CoreGraphics.framework in Frameworks */,
-				34292B300FA806AF00CE3EAD /* libIceObjC.0.1.0.dylib in Frameworks */,
-				3448C63E0FAFE27B00BFB717 /* libGlacier2ObjC.0.1.0.dylib in Frameworks */,
+				344125EA0FD8E85300C8D69C /* Security.framework in Frameworks */,
+				344125EB0FD8E85300C8D69C /* CFNetwork.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -123,7 +107,7 @@
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1D6058910D05DD3D006BFB54 /* router.app */,
+				1D6058910D05DD3D006BFB54 /* Router.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -191,8 +175,8 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				3448C63D0FAFE27B00BFB717 /* libGlacier2ObjC.0.1.0.dylib */,
-				34292B2F0FA806AF00CE3EAD /* libIceObjC.0.1.0.dylib */,
+				344125E80FD8E85300C8D69C /* Security.framework */,
+				344125E90FD8E85300C8D69C /* CFNetwork.framework */,
 				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
 				1D30AB110D05D00D00671497 /* Foundation.framework */,
 				288765580DF743DE002DB57D /* CoreGraphics.framework */,
@@ -238,7 +222,7 @@
 				1D60588D0D05DD3D006BFB54 /* Resources */,
 				1D60588E0D05DD3D006BFB54 /* Sources */,
 				1D60588F0D05DD3D006BFB54 /* Frameworks */,
-				34684E6D0FA71031009000C3 /* CopyFiles */,
+				34041E5B0FD8FDB5000D8134 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -246,7 +230,7 @@
 			);
 			name = router;
 			productName = router;
-			productReference = 1D6058910D05DD3D006BFB54 /* router.app */;
+			productReference = 1D6058910D05DD3D006BFB54 /* Router.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -288,6 +272,22 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		34041E5B0FD8FDB5000D8134 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ $PLATFORM_NAME=iPhoneSimulator ]; then\n\tcp $ADDITIONAL_SDKS/usr/local/lib/*.dylib $BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH\nfi";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		1D60588E0D05DD3D006BFB54 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -316,44 +316,46 @@
 		1D6058940D05DD3E006BFB54 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ADDITIONAL_SDKS = "../../../SDK/IceTouch/$(PLATFORM_NAME).sdk";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = router_Prefix.pch;
-				HEADER_SEARCH_PATHS = (
-					../../../include,
-					Classes,
-				);
+				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = Info.plist;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)\"",
-					"\"$(SRCROOT)/../../../lib\"",
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_LDFLAGS = (
+					"-lstdc++",
+					"-lGlacier2Objc",
+					"-lIceObjc",
 				);
-				PRODUCT_NAME = router;
-				SLICE_ICE_HOME = "/Users/matthew/cvs/ice-objc";
-				SLICE_INCLUDE_PATH = "../../../../slice Classes";
+				PRODUCT_NAME = Router;
+				SLICE_ICE_HOME = "";
+				SLICE_INCLUDE_PATH = Classes;
 			};
 			name = Debug;
 		};
 		1D6058950D05DD3E006BFB54 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ADDITIONAL_SDKS = "../../../SDK/IceTouch/$(PLATFORM_NAME).sdk";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = router_Prefix.pch;
+				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = Info.plist;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)\"",
-					"\"$(SRCROOT)/../../../lib\"",
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_LDFLAGS = (
+					"-lstdc++",
+					"-lGlacier2Objc",
+					"-lIceObjc",
 				);
-				PRODUCT_NAME = router;
-				SLICE_ICE_HOME = "/Users/matthew/cvs/ice-objc";
-				SLICE_INCLUDE_PATH = "../../../../slice Classes";
+				PRODUCT_NAME = Router;
+				SLICE_ICE_HOME = "";
+				SLICE_INCLUDE_PATH = Classes;
 			};
 			name = Release;
 		};

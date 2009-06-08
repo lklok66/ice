@@ -9,7 +9,7 @@
 
 #import <Ice/Ice.h>
 #import <TestCommon.h>
-#import <Test.h>
+#import <RetryTest.h>
 
 #import <Foundation/NSAutoreleasePool.h>
 #if !TARGET_OS_IPHONE
@@ -20,14 +20,14 @@
 static int
 run(id<ICECommunicator> communicator)
 {
-    TestRetryRetryPrx* allTests(id<ICECommunicator>);
-    TestRetryRetryPrx* retry = allTests(communicator);
+    TestRetryRetryPrx* retryAllTests(id<ICECommunicator>);
+    TestRetryRetryPrx* retry = retryAllTests(communicator);
     [retry shutdown];
     return EXIT_SUCCESS;
 }
 
 #if TARGET_OS_IPHONE
-#  define main startClient
+#  define main retryClient
 #endif
 
 int

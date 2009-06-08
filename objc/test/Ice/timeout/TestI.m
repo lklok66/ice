@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-#import <TestI.h>
+#import <timeout/TestI.h>
 #import <Ice/Ice.h>
 
 #import <Foundation/NSThread.h>

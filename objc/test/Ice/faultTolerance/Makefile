@@ -12,32 +12,33 @@ top_srcdir	= ../../..
 CLIENT		= client
 SERVER		= server
 
-TARGETS		= $(CLIENT) $(SERVER)
+TARGETS_MACOS	= $(CLIENT) $(SERVER)
 
-COBJS		= Test.o \
-		  Client.o \
+COBJS		= Client.o \
 		  AllTests.o
 
-SOBJS		= Test.o \
-		  TestI.o \
+SOBJS		= TestI.o \
 		  Server.o
+
+OBJS		= Test.o
 
 SRCS		= $(COBJS:.o=.m) \
 		  $(SOBJS:.o=.m) \
+		  $(OBJS:.o=.m) \
 
 SLICE_SRCS	= Test.ice
 
 include $(top_srcdir)/config/Make.rules
 
-CPPFLAGS	:= -I. -I../../include $(CPPFLAGS)
+CPPFLAGS	:= -I. -I.. -I../../include $(CPPFLAGS)
 LIBS		:= -lTestCommon $(LIBS)
 
-$(CLIENT): $(ICEOBJCLIB) $(COBJS)
+$(CLIENT): $(ICEOBJCLIB) $(COBJS) $(OBJS)
 	rm -f $@
-	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(COBJS) $(LIBS)
+	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(COBJS) $(OBJS) $(LIBS)
 
 $(SERVER): $(ICEOBJCLIB) $(SOBJS)
 	rm -f $@
-	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(SOBJS) $(LIBS)
+	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(SOBJS) $(OBJS) $(LIBS)
 
 include .depend

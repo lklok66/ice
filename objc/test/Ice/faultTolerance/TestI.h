@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-#import <Test.h>
+#import <faultTolerance/Test.h>
 
 @interface TestI : TestTestIntf<TestTestIntf>
 @end

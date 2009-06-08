@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-#import <Test.h>
+#import <InheritanceTest.h>
 
 @interface TestInheritanceInitialI : TestInheritanceInitial<TestInheritanceInitial>
 {

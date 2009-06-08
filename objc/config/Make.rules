@@ -8,17 +8,15 @@
 # **********************************************************************
 
 #
-# Select an installation base directory. The directory will be created
-# if it does not exist.
+# Select an installation base directory for a command line build. The directory
+# will be created if it does not exist.
 #
 prefix			 ?= /opt/IceTouch-$(VERSION)
 
 #
 # The "root directory" for runpath embedded in executables. Can be
-# unset to avoid adding a runpath to Ice executables. This setting is
-# ignored when building for the iPhone or simulator. Instead,
-# @executable_path/Frameworks is used.
-#
+# unset to avoid adding a runpath to Ice executables. This setting
+# only applies for MacOSX command line builds.
 embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 
 # Define OPTIMIZE_SIZE as yes if you want to build with minimal size.
@@ -30,25 +28,30 @@ embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 #OPTIMIZE_SPEED		= yes
 
 #
-# Define COMPILE_FOR_IPHONE or COMPILE_FOR_IPHONE_EMULATOR as yes if
-# you want to build Ice for Objective-C with the iPhone SDK.
+# Compile for the iPhone platform (an Xcode SDK).
 #
 #COMPILE_FOR_IPHONE	    	= yes
+#
+# Compile for the iPhone simulator platform (an Xcode SDK).
+#
 #COMPILE_FOR_IPHONE_SIMULATOR 	= yes
+#
+# Compile for Cocoa (an Xcode SDK).
+#
+#COMPILE_FOR_COCOA 	        = yes
+
+#
+# The default is to build for a MacOSX command line dynamic library.
+#
 
 IPHONE_SDK_VERSION		= 2.0
 #IPHONE_SDK_VERSION		= 3.0
 
+#
+# You can choose to build static libraries for the MacOSX command line
+# build.
+#
 #STATICLIBS			= yes
-
-#
-# If you are building for the iPhone device and have not otherwise
-# defined the identity of the installed signing certificate, you can
-# define it here. Note that if IDENTIFIER is not set in your
-# ~/.MacOSX/environment.plist, you must manually fix the Xcode build
-# projects for the iPhone demos & tests before building.
-#
-#IDENTIFIER ?= iPhone Developer: Matthew Newhook
 
 # ----------------------------------------------------------------------
 # Don't change anything below this line!
@@ -59,7 +62,12 @@ IPHONE_SDK_VERSION		= 2.0
 #
 ice_language     = objc
 slice_translator = slice2objc
-ICE_VERSION	 = 3.3.1
+
+ifeq ($(COMPILE_FOR_COCOA),yes)
+    STATICLIBS = yes
+else ifeq ($(COMPILE_FOR_IPHONE),yes)
+    STATICLIBS = yes
+endif
 
 ifeq ($(shell test -f $(top_srcdir)/config/Make.common.rules.objc && echo 0),0)
     include $(top_srcdir)/config/Make.common.rules.objc
@@ -75,18 +83,36 @@ else ifeq ($(OPTIMIZE),yes)
     OPTIMIZE_SPEED	= yes
 endif
 
+#
+# Set the platform name according to the build type.
+#
 ifeq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
-libsubdir := $(libsubdir)/simulator
+    PLATFORM_NAME = iPhoneSimulator
 else ifeq ($(COMPILE_FOR_IPHONE),yes)
-libsubdir := $(libsubdir)/device
+    PLATFORM_NAME = iPhoneOS
+else ifeq ($(COMPILE_FOR_COCOA),yes)
+    PLATFORM_NAME = MacOSX
+else
+    PLATFORM_NAME = MacOSX
+    COMPILE_FOR_MACOSX = yes
 endif
 
+SDK_DIR                 = $(top_srcdir)/SDK/IceTouch/$(PLATFORM_NAME).sdk
+
 bindir			= $(top_srcdir)/bin
-libdir			= $(top_srcdir)/lib
-includedir		= $(top_srcdir)/include
-install_includedir	:= $(prefix)/include
-install_bindir	  	:= $(prefix)/$(binsubdir)
-install_libdir	  	:= $(prefix)/$(libsubdir)
+
+ifeq ($(COMPILE_FOR_MACOSX),yes)
+    libdir		= $(top_srcdir)/lib
+    includedir		= $(top_srcdir)/include
+    install_includedir	:= $(prefix)/include
+    libsubdir           := $(libsubdir)/$(PLATFORM_NAME)
+    install_libdir	:= $(prefix)/$(libsubdir)
+    install_bindir	:= $(prefix)/$(binsubdir)
+else
+    libdir		= $(SDK_DIR)/usr/local/lib
+    includedir		= $(top_srcdir)/include
+    libsubdir           := $(libsubdir)/$(PLATFORM_NAME)
+endif
 
 #
 # Platform specific definitions
@@ -139,16 +165,13 @@ endif
 
 ifdef ice_src_dist
     ifeq ($(ice_cpp_dir), $(ice_dir)/cpp)
-        SLICEPARSERLIB = $(ice_cpp_dir)/lib/$(call mklibfilename,Slice,$(ICE_VERSION))
         SLICE2CPP = $(ice_cpp_dir)/bin/slice2cpp
         SLICE2OBJC = $(ice_cpp_dir)/bin/slice2objc
     else
-        SLICEPARSERLIB = $(ice_cpp_dir)/$(libsubdir)/$(call mklibfilename,Slice,$(ICE_VERSION))
         SLICE2CPP = $(ice_cpp_dir)/$(binsubdir)/slice2cpp
         SLICE2OBJC = $(ice_cpp_dir)/$(binsubdir)/slice2objc
     endif
 else
-    SLICEPARSERLIB = $(ice_dir)/$(libsubdir)/$(call mklibfilename,Slice,$(ICE_VERSION))
     SLICE2CPP = $(ice_dir)/$(binsubdir)/slice2cpp
     SLICE2OBJC = $(ice_dir)/$(binsubdir)/slice2objc
 endif
@@ -156,6 +179,8 @@ endif
 ifeq ($(STATICLIBS),yes)
     ICEOBJCLIB = $(top_srcdir)/lib/libIceObjC.a
 endif
+
+# This cannot use .cpp:.o as we have multiple types of source files.
 
 EVERYTHING		= all depend clean install 
 
@@ -171,21 +196,18 @@ EVERYTHING		= all depend clean install
 %.o: %.cpp
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<
 
-%.o: $(SRCS_DIR)/%.cpp
-	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<
-
-$(HDIR)/%F.h: $(SDIR)/%F.ice $(SLICE2OBJC) $(SLICEPARSERLIB)
+$(HDIR)/%F.h: $(SDIR)/%F.ice $(SLICE2OBJC)
 	rm -f $(HDIR)/$(*F)F.h $(*F)F.m
 	$(SLICE2OBJC) $(SLICE2OBJCFLAGS) $<
 	mv $(*F)F.h $(HDIR)
 	rm -f $(*F)F.m
 
-$(HDIR)/%.h %.m: $(SDIR)/%.ice $(SLICE2OBJC) $(SLICEPARSERLIB)
+$(HDIR)/%.h %.m: $(SDIR)/%.ice $(SLICE2OBJC)
 	rm -f $(HDIR)/$(*F).h $(*F).m
 	$(SLICE2OBJC) $(SLICE2OBJCFLAGS) $<
 	mv $(*F).h $(HDIR)
 
-%.h %.m: %.ice $(SLICE2OBJC) $(SLICEPARSERLIB)
+%.h %.m: %.ice $(SLICE2OBJC)
 	rm -f $(*F).h $(*F).m
 	$(SLICE2OBJC) $(SLICE2OBJCFLAGS) $<
 
@@ -205,9 +227,9 @@ $(HDIR)/%.h %.m: $(SDIR)/%.ice $(SLICE2OBJC) $(SLICEPARSERLIB)
 all:: $(SRCS)
 
 ifeq ($(COMPILE_FOR_IPHONE),yes)
-all:: $(TARGETS_IPHONE)
-else
-all:: $(TARGETS_MACOS)
+    all:: $(TARGETS_IPHONE)
+else ifeq ($(COMPILE_FOR_MACOSX),yes)
+    all:: $(TARGETS_MACOS)
 endif
 
 all:: $(TARGETS)
@@ -216,18 +238,19 @@ ifneq ($(SRCS),)
 depend:: $(SRCS)
 	-rm -f .depend
 	if test -n "$(SRCS)" ; then \
-	    $(CXX) -DMAKEDEPEND -M $(CPPFLAGS) $(SRCS) | $(ice_dir)/config/makedepend.py >> .depend; \
+	    $(CXX) -DMAKEDEPEND -M $(CPPFLAGS) $(SRCS) | $(ice_dir)/objc/config/makedepend.py $(DEPENDFLAGS) >> .depend; \
 	fi
 endif
 
 clean::
 	-rm -f $(TARGETS)
 	-rm -f core *.o *.bak
+	-rm -f $(PLATFORM_NAME)/*
 
 ifeq ($(COMPILE_FOR_IPHONE),yes)
 clean::
 	-rm -f $(TARGETS_IPHONE)
-else
+else ifeq ($(COMPILE_FOR_MACOSX),yes)
 clean::
 	-rm -f $(TARGETS_MACOS)
 endif
@@ -251,3 +274,4 @@ clean::
 endif
 
 install::
+

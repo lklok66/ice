@@ -9,11 +9,11 @@
 
 #import <Ice/Ice.h>
 #import <TestCommon.h>
-#import <Test.h>
+#import <ObjectsTest.h>
 
 
 id<TestObjectsInitialPrx>
-allTests(id<ICECommunicator> communicator, BOOL collocated)
+objectsAllTests(id<ICECommunicator> communicator, BOOL collocated)
 {
     tprintf("testing stringToProxy... ");
     NSString* ref = @"initial:default -p 12010";

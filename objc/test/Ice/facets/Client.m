@@ -9,7 +9,7 @@
 
 #import <Ice/Ice.h>
 #import <TestCommon.h>
-#import <Test.h>
+#import <FacetsTest.h>
 
 #import <Foundation/NSAutoreleasePool.h>
 #if !TARGET_OS_IPHONE
@@ -20,14 +20,14 @@
 static int
 run(id<ICECommunicator> communicator)
 {
-    id<TestFacetsGPrx> allTests(id<ICECommunicator>);
-    id<TestFacetsGPrx> g = allTests(communicator);
+    id<TestFacetsGPrx> facetsAllTests(id<ICECommunicator>);
+    id<TestFacetsGPrx> g = facetsAllTests(communicator);
     [g shutdown];
     return EXIT_SUCCESS;
 }
 
 #if TARGET_OS_IPHONE
-#  define main startClient
+#  define main facetsClient
 #endif
 
 int

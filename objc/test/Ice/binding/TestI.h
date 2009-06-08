@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-#import <Test.h>
+#import <BindingTest.h>
 
 @interface RemoteCommunicatorI : TestBindingRemoteCommunicator
 {

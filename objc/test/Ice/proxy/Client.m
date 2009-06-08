@@ -9,7 +9,7 @@
 
 #import <Ice/Ice.h>
 #import <TestCommon.h>
-#import <Test.h>
+#import <ProxyTest.h>
 
 #import <Foundation/NSAutoreleasePool.h>
 #if !TARGET_OS_IPHONE
@@ -20,8 +20,8 @@
 static int
 run(id<ICECommunicator> communicator)
 {
-    TestProxyMyClassPrx* allTests(id<ICECommunicator>);
-    TestProxyMyClassPrx* myClass = allTests(communicator);
+    TestProxyMyClassPrx* proxyAllTests(id<ICECommunicator>);
+    TestProxyMyClassPrx* myClass = proxyAllTests(communicator);
 
     [myClass shutdown];
 
@@ -29,7 +29,7 @@ run(id<ICECommunicator> communicator)
 }
 
 #if TARGET_OS_IPHONE
-#  define main startClient
+#  define main proxyClient
 #endif
 
 int

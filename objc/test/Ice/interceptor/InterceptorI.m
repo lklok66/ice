@@ -7,8 +7,8 @@
 //
 // **********************************************************************
 
-#import <InterceptorI.h>
-#import <Test.h>
+#import <interceptor/InterceptorI.h>
+#import <InterceptorTest.h>
 #import <TestCommon.h>
 
 @implementation InterceptorI

@@ -14,15 +14,6 @@ include $(top_srcdir)/config/Make.rules
 SUBDIRS		= Common \
 		  Ice
 
-# The tests under the iPhone only support shared libraries.
-ifeq ($(COMPILE_FOR_IPHONE),yes)
-
-  ifeq ($(STATICLIBS),yes)
-    SUBDIRS	=
-  endif
-
-endif
-
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \
 	do \

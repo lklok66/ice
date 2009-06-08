@@ -7,7 +7,7 @@
 //
 // **********************************************************************
   
-#import <Test.h>
+#import <ExceptionsTest.h>
 
 @interface ThrowerI : TestExceptionsThrower<TestExceptionsThrower>
 {

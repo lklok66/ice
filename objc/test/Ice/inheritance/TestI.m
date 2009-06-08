@@ -8,7 +8,7 @@
 // **********************************************************************
 
 #import <Ice/Ice.h>
-#import <TestI.h>
+#import <inheritance/TestI.h>
 
 @implementation CAI
 -(id<TestInheritanceMACAPrx>) caop:(id<TestInheritanceMACAPrx>)p current:(ICECurrent*)current

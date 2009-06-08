@@ -9,10 +9,10 @@
 
 #import <Ice/Ice.h>
 #import <TestCommon.h>
-#import <Test.h>
+#import <AdapterDeactivationTest.h>
 
 id<TestAdapterDeactivationTestIntfPrx>
-allTests(id<ICECommunicator> communicator)
+adapterDeactivationAllTests(id<ICECommunicator> communicator)
 {
     tprintf("testing stringToProxy... ");
     id<ICEObjectPrx> base = [communicator stringToProxy:@"test:default -p 12010"];

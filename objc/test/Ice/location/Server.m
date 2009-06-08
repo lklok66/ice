@@ -8,8 +8,8 @@
 // **********************************************************************
 
 #import <Ice/Ice.h>
-#import <ServerLocator.h>
-#import <TestI.h>
+#import <location/ServerLocator.h>
+#import <location/TestI.h>
 #import <TestCommon.h>
 
 #import <Foundation/NSAutoreleasePool.h>
@@ -59,7 +59,7 @@ run(id<ICECommunicator> communicator, ICEInitializationData* initData)
 }
 
 #if TARGET_OS_IPHONE
-#  define main startServer
+#  define main locationServer
 #endif
 
 int

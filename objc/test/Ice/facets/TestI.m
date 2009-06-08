@@ -8,7 +8,7 @@
 // **********************************************************************
 
 #import <Ice/Ice.h>
-#import <TestI.h>
+#import <facets/TestI.h>
 
 @implementation TestFacetsAI
 -(NSString*) callA:(ICECurrent*)current

@@ -9,8 +9,6 @@
 
 top_srcdir	= ../..
 
-TARGETS		= $(OBJS) $(SLICE_OBJS)
-
 OBJS		= Acceptor.o \
                   Base64.o \
 		  Buffer.o \
@@ -98,10 +96,7 @@ SLICE_OBJS	= BuiltinSequences.o \
 		  SliceChecksumDict.o \
 		  Stats.o
 
-SRCS_DIR	= $(ice_dir)/cpp/src/Ice
-SRCS		= $(OJBS) \
-		  $(addprefix $(SRCS_DIR)/, $(OBJS:.o=.cpp)) \
-		  $(SLICE_OBJS:.o=.cpp)
+LOCAL_OBJS	= Exception2.o
 
 SLICECPP_SRCS	= $(SDIR)/BuiltinSequences.ice \
 		  $(SDIR)/CommunicatorF.ice \
@@ -137,17 +132,38 @@ SLICECPP_SRCS	= $(SDIR)/BuiltinSequences.ice \
 		  $(SDIR)/StatsF.ice \
 		  $(SDIR)/Stats.ice
 
-SDIR		= $(slicedir)/Ice
+SDIR		=  $(slicedir)/Ice
+
+SRCS_DIR	=  $(ice_dir)/cpp/src/Ice
+
+SRCS_OBJS	:= $(OBJS)
+SRCS_LOCAL_OBJS	:= $(LOCAL_OBJS)
+SRCS_SLICE_OBJS	:= $(SLICE_OBJS)
+SRCS		=  $(addprefix $(SRCS_DIR)/, $(SRCS_OBJS:.o=.cpp)) \
+		   $(SRCS_LOCAL_OBJS:.o=.cpp) \
+		   $(SRCS_SLICE_OBJS:.o=.cpp)
+DEPENDFLAGS	= --platform-name
 
 include $(top_srcdir)/config/Make.rules
 
-CPPFLAGS	:= -Iinclude -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src $(CPPPLATFORMFLAGS)
-SLICE2CPPFLAGS	:= --ice --include-dir Ice $(SLICE2CPPFLAGS)
+OBJS 			:= $(addprefix $(PLATFORM_NAME)/,$(OBJS))
+LOCAL_OBJS 		:= $(addprefix $(PLATFORM_NAME)/,$(LOCAL_OBJS))
+SLICE_OBJS 		:= $(addprefix $(PLATFORM_NAME)/,$(SLICE_OBJS))
+
+CPPFLAGS		:= -Iinclude -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src $(CPPPLATFORMFLAGS)
+SLICE2CPPFLAGS		:= --ice --include-dir Ice $(SLICE2CPPFLAGS)
 
 ifeq ($(COMPILE_FOR_IPHONE),yes)
-CPPFLAGS	:= -DICE_APPLE_CFNETWORK $(CPPFLAGS)
-SLICE2CPPFLAGS	:= -DICE_APPLE_CFSTREAM $(SLICE2CPPFLAGS)
+    CPPFLAGS		:= -DICE_APPLE_CFNETWORK $(CPPFLAGS)
 endif
+
+all:: $(OBJS) $(LOCAL_OBJS) $(SLICE_OBJS)
+
+$(PLATFORM_NAME)/%.o: %.cpp
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $< -o $@
+
+$(PLATFORM_NAME)/%.o: $(SRCS_DIR)/%.cpp
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $< -o $@
 
 include/Ice/%F.h: $(SDIR)/%F.ice $(SLICE2CPP)
 	rm -f $(*F)F.h $(*F)F.cpp

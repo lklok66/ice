@@ -8,7 +8,7 @@
 // **********************************************************************
 
 #import <Ice/Ice.h>
-#import <TestI.h>
+#import <proxy/TestI.h>
 #import <TestCommon.h>
 
 @implementation TestProxyMyDerivedClassI

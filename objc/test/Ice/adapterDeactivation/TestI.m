@@ -8,7 +8,7 @@
 // **********************************************************************
 
 #import <Ice/Ice.h>
-#import <TestI.h>
+#import <adapterDeactivation/TestI.h>
 
 #import <Foundation/NSThread.h>
 

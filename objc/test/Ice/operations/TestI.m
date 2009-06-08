@@ -9,7 +9,7 @@
 
 #import <Ice/Ice.h>
 
-#import <TestI.h>
+#import <operations/TestI.h>
 #import <TestCommon.h>
 
 @implementation TestOperationsMyDerivedClassI

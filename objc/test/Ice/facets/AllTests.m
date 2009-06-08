@@ -9,17 +9,17 @@
 
 #import <Ice/Ice.h>
 #import <TestCommon.h>
-#import <Test.h>
+#import <FacetsTest.h>
 
 
-@interface EmptyI : TestFacetsEmpty
+@interface FacetsEmptyI : TestFacetsEmpty
 @end
 
-@implementation EmptyI
+@implementation FacetsEmptyI
 @end
 
 id<TestFacetsGPrx>
-allTests(id<ICECommunicator> communicator)
+facetsAllTests(id<ICECommunicator> communicator)
 {
 //     tprintf("testing Ice.Admin.Facets property... ");
 //     test([[[communicator getProperties] getPropertyAsList:@"Ice.Admin.Facets"] length] > 0);
@@ -44,7 +44,7 @@ allTests(id<ICECommunicator> communicator)
     tprintf("testing facet registration exceptions... ");
     [[communicator getProperties] setProperty:@"FacetExceptionTestAdapter.Endpoints" value:@"default"];
     id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"FacetExceptionTestAdapter"];
-    ICEObject* obj = [[[EmptyI alloc] init] autorelease];
+    ICEObject* obj = [[[FacetsEmptyI alloc] init] autorelease];
     [adapter add:obj identity:[communicator stringToIdentity:@"d"]];
     [adapter addFacet:obj identity:[communicator stringToIdentity:@"d"] facet:@"facetABCD"];
     @try
@@ -67,11 +67,11 @@ allTests(id<ICECommunicator> communicator)
     tprintf("ok\n");
 
     tprintf("testing removeAllFacets... ");
-    ICEObject* obj1 = [[[EmptyI alloc] init] autorelease];
-    ICEObject* obj2 = [[[EmptyI alloc] init] autorelease];
+    ICEObject* obj1 = [[[FacetsEmptyI alloc] init] autorelease];
+    ICEObject* obj2 = [[[FacetsEmptyI alloc] init] autorelease];
     [adapter addFacet:obj1 identity:[communicator stringToIdentity:@"id1"] facet:@"f1"];
     [adapter addFacet:obj2 identity:[communicator stringToIdentity:@"id1"] facet:@"f2"];
-    ICEObject* obj3 = [[[EmptyI alloc] init] autorelease];
+    ICEObject* obj3 = [[[FacetsEmptyI alloc] init] autorelease];
     [adapter addFacet:obj1 identity:[communicator stringToIdentity:@"id2"] facet:@"f1"];
     [adapter addFacet:obj2 identity:[communicator stringToIdentity:@"id2"] facet:@"f2"];
     [adapter addFacet:obj3 identity:[communicator stringToIdentity:@"id2"] facet:@""];

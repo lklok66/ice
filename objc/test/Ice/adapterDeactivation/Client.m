@@ -9,7 +9,7 @@
 
 #import <Ice/Ice.h>
 #import <TestCommon.h>
-#import <Test.h>
+#import <AdapterDeactivationTest.h>
 
 #import <Foundation/NSAutoreleasePool.h>
 
@@ -21,13 +21,13 @@
 static int
 run(id<ICECommunicator> communicator)
 {
-    id<TestAdapterDeactivationTestIntfPrx> allTests(id<ICECommunicator>);
-    allTests(communicator);
+    id<TestAdapterDeactivationTestIntfPrx> adapterDeactivationAllTests(id<ICECommunicator>);
+    adapterDeactivationAllTests(communicator);
     return EXIT_SUCCESS;
 }
 
 #if TARGET_OS_IPHONE
-#  define main startClient
+#  define main adapterDeactivationClient
 #endif
 
 int

@@ -11,6 +11,59 @@
 #import <TestViewController.h>
 #import <Test.h>
 
+struct TestCases
+{
+    NSString* name;
+    int (*startServer)(int, char**);
+    int (*startClient)(int, char**);
+};
+int adapterDeactivationServer(int, char**);
+int adapterDeactivationClient(int, char**);
+int bindingServer(int, char**);
+int bindingClient(int, char**);
+int defaultServantServer(int, char**);
+int defaultServantClient(int, char**);
+int exceptionsServer(int, char**);
+int exceptionsClient(int, char**);
+int facetsServer(int, char**);
+int facetsClient(int, char**);
+int inheritanceServer(int, char**);
+int inheritanceClient(int, char**);
+int interceptorServer(int, char**);
+int interceptorClient(int, char**);
+int locationServer(int, char**);
+int locationClient(int, char**);
+int objectsServer(int, char**);
+int objectsClient(int, char**);
+int proxyServer(int, char**);
+int proxyClient(int, char**);
+int retryServer(int, char**);
+int retryClient(int, char**);
+int timeoutServer(int, char**);
+int timeoutClient(int, char**);
+int slicingObjectsServer(int, char**);
+int slicingObjectsClient(int, char**);
+int slicingExceptionsServer(int, char**);
+int slicingExceptionsClient(int, char**);
+
+static const struct TestCases alltests[] =
+{
+{ @"adapterDeactivation", adapterDeactivationServer, adapterDeactivationClient },
+{ @"binding", bindingServer, bindingClient },
+{ @"defaultServant", defaultServantServer, defaultServantClient },
+{ @"exceptions", exceptionsServer, exceptionsClient },
+{ @"facets", facetsServer, facetsClient },
+{ @"inheritance", inheritanceServer, inheritanceClient, },
+{ @"interceptor", interceptorServer, interceptorClient },
+{ @"location", locationServer, locationClient },
+{ @"objects", objectsServer, objectsClient },
+{ @"proxy", proxyServer, proxyClient },
+{ @"retry",retryServer, retryClient },
+{ @"timeout",timeoutServer, timeoutClient },
+{ @"slicing/objects",slicingObjectsServer, slicingObjectsClient },
+{ @"slicing/exceptions",slicingExceptionsServer, slicingExceptionsClient }
+};
+
 @implementation AppDelegate
 
 @synthesize window;
@@ -21,39 +74,28 @@
 NSString* currentTestKey = @"currentTestKey";
 NSString* sslKey = @"sslKey";
 
++(void)initialize
+{
+    NSDictionary* appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:
+                                 @"0", currentTestKey,
+                                 @"NO", sslKey,
+                                 nil];
+    [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
+}
+
 -(id)init
 {
     if(self = [super init])
     {
         NSMutableArray* theTests = [NSMutableArray array];
-        NSBundle* bundle = [NSBundle mainBundle];
-        
-        NSFileManager* manager = [NSFileManager defaultManager];
-        NSArray* frameworks = [manager directoryContentsAtPath:bundle.privateFrameworksPath];
-        int i;
-        for(i = 0; i < frameworks.count; ++i)
+        for(int i = 0; i < sizeof(alltests)/sizeof(alltests[0]); ++i)
         {
-            NSString* test = [frameworks objectAtIndex:i];
-            NSRange r = [test rangeOfString:@"Test"];
-            if(r.location == 0)
-            {
-                [theTests addObject:[Test testWithPath:[bundle.privateFrameworksPath stringByAppendingPathComponent:test] name:test]];
-            }
+            Test* test = [Test testWithName:alltests[i].name server:alltests[i].startServer client:alltests[i].startClient];
+            [theTests addObject:test];
         }
         tests = [[theTests copy] retain];
         
         // Initialize the application defaults.
-        NSString* testValue = [[NSUserDefaults standardUserDefaults] stringForKey:currentTestKey];
-        if(testValue == nil)
-        {
-            NSDictionary* appDefaults = [NSDictionary dictionaryWithObjectsAndKeys:@"0", currentTestKey,
-                                         @"NO", sslKey,
-                                         nil];
-            
-            [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
-            [[NSUserDefaults standardUserDefaults] synchronize];
-        }
-        
         currentTest = [[NSUserDefaults standardUserDefaults] integerForKey:currentTestKey];
         if(currentTest < 0 || currentTest > tests.count)
         {

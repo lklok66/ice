@@ -20,7 +20,8 @@ OBJS		= PermissionsVerifier.o \
 		  Session.o \
 		  SSLInfo.o \
 
-SRCS		= $(OBJS:.o=.m)
+SRCS		:= $(OBJS:.o=.m)
+DEPENDFLAGS	= --platform-name
 
 SLICE_SRCS	= $(SDIR)/PermissionsVerifier.ice \
 		  $(SDIR)/Router.ice \
@@ -34,6 +35,8 @@ all::
 
 include $(top_srcdir)/config/Make.rules
 
+OBJS 		:= $(addprefix $(PLATFORM_NAME)/,$(OBJS))
+
 CPPFLAGS	:= -I.. -Iinclude -I../../include $(CPPFLAGS)
 SLICE2OBJCFLAGS	:= --include-dir Glacier2 $(SLICE2OBJCFLAGS)
 
@@ -45,20 +48,11 @@ $(libdir)/$(LIBNAME): $(OBJS)
 	rm -f $@
 	$(call mklib,$@,$(OBJS))
 
-else
+else ifeq ($(COMPILE_FOR_MACOSX),yes)
 
 $(libdir)/$(LIBFILENAME): $(OBJS)
 	rm -f $@
-ifeq ($(COMPILE_FOR_IPHONE),yes)
-	$(call mkshlib,$@,$(LIBFILENAME),$(OBJS),$(LINKWITH))
-ifneq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
-  ifneq ($(IDENTIFIER),)
-	$(CODESIGN) -s "$(IDENTIFIER)" $@
-  endif
-endif
-else
 	$(call mkshlib,$@,$(SONAME),$(OBJS),$(LINKWITH))
-endif
 
 $(libdir)/$(SONAME): $(libdir)/$(LIBFILENAME)
 	rm -f $@
@@ -68,9 +62,20 @@ $(libdir)/$(LIBNAME): $(libdir)/$(SONAME)
 	rm -f $@
 	ln -s $(SONAME) $@
 
+else
+
+$(libdir)/$(LIBNAME): $(OBJS)
+	rm -f $@
+	$(call mkshlib,$@,$(LIBNAME),$(OBJS),$(LINKWITH))
+
 endif
 
+ifeq ($(COMPILE_FOR_MACOSX),yes)
 install:: all
 	$(call installlib,$(install_libdir),$(libdir),$(LIBFILENAME),$(SONAME),$(LIBNAME))
+endif
+
+$(PLATFORM_NAME)/%.o: %.m
+	$(CC) -c $(CPPFLAGS) $(OBJCFLAGS) $(CFLAGS) $< -o $@
 
 include .depend

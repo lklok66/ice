@@ -36,6 +36,13 @@ SUBDIRS		= IceUtil \
 		  IceGrid \
 		  ca
 
+ifeq ($(STATICLIBS),yes)
+SUBDIRS		= IceUtil \
+		  Slice \
+		  slice2cpp \
+		  slice2objc
+endif
+
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \
 	do \

@@ -9,7 +9,7 @@
 
 #import <Ice/Ice.h>
 #import <TestCommon.h>
-#import <Test.h>
+#import <BindingTest.h>
 
 #import <Foundation/NSAutoreleasePool.h>
 #if !TARGET_OS_IPHONE
@@ -20,13 +20,13 @@
 static int
 run(id<ICECommunicator> communicator)
 {
-    void allTests(id<ICECommunicator>);
-    allTests(communicator);
+    void bindingAllTests(id<ICECommunicator>);
+    bindingAllTests(communicator);
     return EXIT_SUCCESS;
 }
 
 #if TARGET_OS_IPHONE
-#  define main startClient
+#  define main bindingClient
 #endif
 
 int

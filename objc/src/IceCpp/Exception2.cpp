@@ -7,21 +7,15 @@
 //
 // **********************************************************************
 
-#import <Ice/Ice.h>
+#include <Ice/LocalException.h>
 
-@interface ServantLocatorI : ICEServantLocator
+using namespace std;
+using namespace Ice;
+using namespace IceInternal;
+
+void
+Ice::CFNetworkException::ice_print(ostream& out) const
 {
-public:
-
-    ServantLocatorI();
-    ~ServantLocatorI();
-
-    id<ICEObject> locate(ICECurrent*, ICELocalObjectPtr&);
--(void) finished:(ICECurrent*)XXX XXX:(id<ICEObject>)XXX XXX:(id<ICEObject>)XXX;
--(void) deactivate:(const NSString*&)XXX;
-
-public:
-
-    BOOL _deactivated;
-};
-
+    Exception::ice_print(out);
+    out << ":\nnetwork exception: domain: " << domain << " error: " << error;
+}

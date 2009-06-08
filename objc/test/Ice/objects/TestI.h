@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-#import <Test.h>
+#import <ObjectsTest.h>
 
 @interface TestObjectsBI : TestObjectsB<TestObjectsB>
 {

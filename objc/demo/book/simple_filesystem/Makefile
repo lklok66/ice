@@ -12,7 +12,7 @@ top_srcdir	= ../../..
 CLIENT		= client
 SERVER		= server
 
-TARGETS		= $(CLIENT) $(SERVER)
+TARGETS_MACOS	= $(CLIENT) $(SERVER)
 
 SLICE_SRCS	= Filesystem.ice
 

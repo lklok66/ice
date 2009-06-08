@@ -8,7 +8,7 @@
 // **********************************************************************
 
 #import <Ice/Ice.h>
-#import <TestI.h>
+#import <retry/TestI.h>
 
 @implementation TestRetryRetryI
 -(void) op:(BOOL)kill current:(ICECurrent*)current

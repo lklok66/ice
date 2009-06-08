@@ -12,28 +12,24 @@ top_srcdir	= ../../../..
 CLIENT		= client
 SERVER		= server
 
-LIBNAME  	= TestSlicingExceptions.dylib
-
-TARGETS_IPHONE	= $(LIBNAME)
 TARGETS_MACOS	= $(CLIENT) $(SERVER)
 
 COBJS		= Client.o \
 		  AllTests.o \
-		  TestClient.o
+		  SlicingExceptionsTestClient.o
 
 SOBJS		= TestI.o \
 		  Server.o \
-		  TestServer.o
+		  SlicingExceptionsTestServer.o
 
-SRCS		= $(COBJS:.o=.m) \
-		  $(SOBJS:.o=.m)
+SRCS		:= $(COBJS:.o=.m) \
+		   $(SOBJS:.o=.m)
 
-SLICE_SRCS	= TestClient.ice TestServer.ice
+SLICE_SRCS	= SlicingExceptionsTestClient.ice SlicingExceptionsTestServer.ice
 
 include $(top_srcdir)/config/Make.rules
 
-SLICE2OBJCFLAGS := -I.
-CPPFLAGS	:= -I. -I../../../include $(CPPFLAGS)
+CPPFLAGS	:= -I. -I../.. -I../../../include $(CPPFLAGS)
 LIBS		:= -lTestCommon $(LIBS)
 
 $(CLIENT): $(ICEOBJCLIB) $(COBJS)
@@ -43,14 +39,5 @@ $(CLIENT): $(ICEOBJCLIB) $(COBJS)
 $(SERVER): $(ICEOBJCLIB) $(SOBJS)
 	rm -f $@
 	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(SOBJS) $(LIBS)
-
-$(LIBNAME): $(ICEOBJCLIB) $(COBJS) $(SOBJS)
-	rm -f $@
-	$(CXX) -dynamiclib $(shlibldflags) -exported_symbols_list symbols -install_name @executable_path/Frameworks/$(LIBNAME) -o $@ $(COBJS) $(SOBJS) $(LIBS)
-ifneq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
-  ifneq ($(IDENTIFIER),)
-	$(CODESIGN) -s "$(IDENTIFIER)" $@
-  endif
-endif
 
 include .depend

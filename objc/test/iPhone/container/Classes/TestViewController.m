@@ -185,20 +185,13 @@
     [messages removeAllObjects];
     [output reloadData];
     
-    if(![test open])
-    {
-        [self add:[NSString stringWithFormat:@"open of %@ failed\n", test.name]];
-    }
-    else
-    {
-        completed = 0;
-        [activity startAnimating];
-        NSInvocationOperation* op = [[[NSInvocationOperation alloc]
-                                      initWithTarget:self
-                                      selector:@selector(runServer)
-                                      object:nil] autorelease];
-        [queue addOperation:op];
-    }    
+    completed = 0;
+    [activity startAnimating];
+    NSInvocationOperation* op = [[[NSInvocationOperation alloc]
+                                  initWithTarget:self
+                                  selector:@selector(runServer)
+                                  object:nil] autorelease];
+    [queue addOperation:op];
 }
 
 -(void)testComplete
@@ -213,7 +206,6 @@
     nextButton.enabled = YES;
     [self.navigationItem setHidesBackButton:NO animated:YES];
 
-    [test close];
     self.test = nil;
 }
 

@@ -8,7 +8,7 @@
 // **********************************************************************
 
 #import <Ice/Ice.h>
-#import <TestI.h>
+#import <objects/TestI.h>
 
 @implementation TestObjectsBI
 -(BOOL) postUnmarshalInvoked:(ICECurrent*)current

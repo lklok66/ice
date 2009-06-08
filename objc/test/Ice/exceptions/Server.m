@@ -8,7 +8,7 @@
 // **********************************************************************
 
 #import <Ice/Ice.h>
-#import <TestI.h>
+#import <exceptions/TestI.h>
 #import <TestCommon.h>
 
 #import <Foundation/NSAutoreleasePool.h>
@@ -34,7 +34,7 @@ run(id<ICECommunicator> communicator)
 }
 
 #if TARGET_OS_IPHONE
-#  define main startServer
+#  define main exceptionsServer
 #endif
 
 int

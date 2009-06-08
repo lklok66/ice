@@ -10,7 +10,7 @@
 #ifndef TEST_ICE
 #define TEST_ICE
 
-#include <Forward.ice>
+#include <SlicingObjectsForward.ice>
 
 ["objc:prefix:TestSlicingObjectsServer"]
 module Test

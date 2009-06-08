@@ -9,7 +9,7 @@
 
 #import <Ice/Ice.h>
 #import <TestCommon.h>
-#import <Test.h>
+#import <ExceptionsTest.h>
 
 #import <Foundation/NSAutoreleasePool.h>
 #if !TARGET_OS_IPHONE
@@ -20,14 +20,14 @@
 static int
 run(id<ICECommunicator> communicator)
 {
-    TestExceptionsThrowerPrx* allTests(id<ICECommunicator>, BOOL);
-    TestExceptionsThrowerPrx* thrower = allTests(communicator, NO);
+    TestExceptionsThrowerPrx* exceptionsAllTests(id<ICECommunicator>, BOOL);
+    TestExceptionsThrowerPrx* thrower = exceptionsAllTests(communicator, NO);
     [thrower shutdown];
     return EXIT_SUCCESS;
 }
 
 #if TARGET_OS_IPHONE
-#  define main startClient
+#  define main exceptionsClient
 #endif
 
 int

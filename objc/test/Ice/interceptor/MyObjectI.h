@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-#import <Test.h>
+#import <InterceptorTest.h>
 
 @interface TestInterceptorMyObjectI : TestInterceptorMyObject<TestInterceptorMyObject>
 @end

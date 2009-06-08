@@ -9,7 +9,7 @@
 
 #import <Ice/Ice.h>
 #import <TestCommon.h>
-#import <Test.h>
+#import <TimeoutTest.h>
 
 #import <Foundation/NSAutoreleasePool.h>
 #if !TARGET_OS_IPHONE
@@ -20,14 +20,14 @@
 static int
 run(id<ICECommunicator> communicator)
 {
-    id<TestTimeoutTimeoutPrx> allTests(id<ICECommunicator>);
-    id<TestTimeoutTimeoutPrx> timeout = allTests(communicator);
+    id<TestTimeoutTimeoutPrx> timeoutAllTests(id<ICECommunicator>);
+    id<TestTimeoutTimeoutPrx> timeout = timeoutAllTests(communicator);
     [timeout shutdown];
     return EXIT_SUCCESS;
 }
 
 #if TARGET_OS_IPHONE
-#  define main startClient
+#  define main timeoutClient
 #endif
 
 int

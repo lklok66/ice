@@ -9,7 +9,7 @@
 
 #import <Ice/Ice.h>
 #import <TestCommon.h>
-#import <TestClient.h>
+#import <SlicingExceptionsTestClient.h>
 
 #import <Foundation/Foundation.h>
 
@@ -233,7 +233,7 @@
 @end
 
 id<TestSlicingExceptionsClientTestIntfPrx>
-allTests(id<ICECommunicator> communicator)
+slicingExceptiosnAllTests(id<ICECommunicator> communicator)
 {
     id<ICEObjectPrx> obj = [communicator stringToProxy:@"Test:default -p 12010"];
     id<TestSlicingExceptionsClientTestIntfPrx> test = [TestSlicingExceptionsClientTestIntfPrx checkedCast:obj];

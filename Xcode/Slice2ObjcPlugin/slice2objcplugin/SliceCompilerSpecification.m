@@ -13,6 +13,135 @@
 #import <XCPSupport.h>
 #import <Foundation/NSException.h>
 
+@interface SliceCompilerConfiguration : NSObject
+{
+@private
+    NSString* translator;
+    NSString* shlibpath;
+    NSString* slicedir;
+    BOOL cpp;
+    NSString* error;
+}
+
+@property (readonly) NSString* translator;
+@property (readonly) NSString* shlibpath;
+@property (readonly) NSString* slicedir;
+@property (readonly) BOOL cpp;
+@property (readonly) NSString* error;
+
+-(id)initWithContext:(PBXTargetBuildContext*)context;
+
+@end
+
+@implementation SliceCompilerConfiguration
+
+@synthesize translator;
+@synthesize shlibpath;
+@synthesize slicedir;
+@synthesize cpp;
+@synthesize error;
+
+-(id)initWithContext:(PBXTargetBuildContext*)context
+{
+    if(!(self = [super init]))
+    {
+        return nil;
+    }
+
+    cpp = [[context expandedValueForString:@"$(SLICE_CPP_FLAG)"] isEqualToString:@"YES"];
+
+    NSString* translatorExe = (cpp ? @"slice2cpp" : @"slice2objc");
+
+    NSFileManager* fileManager = [NSFileManager defaultManager];
+    [fileManager changeCurrentDirectoryPath:context.baseDirectoryPath];
+    NSString* sliceIceHome = [context expandedValueForString:@"$(SLICE_ICE_HOME)"];
+    if(sliceIceHome.length > 0)
+    {
+        BOOL dir = NO;
+        if(![fileManager fileExistsAtPath:sliceIceHome isDirectory:&dir] || !dir)
+        {
+            error = [NSString stringWithFormat:@"Ice installation cannot be found: \"%@\"", sliceIceHome];
+            return self;
+        }
+
+        NSString* homeCpp = [sliceIceHome stringByAppendingPathComponent:@"cpp"];
+        
+        // Is this a development tree, as opposed to an install? If so the bin and lib directories
+        // are in cpp, not at the root.
+        if([fileManager fileExistsAtPath:homeCpp isDirectory:&dir] && dir)
+        {
+            slicedir = [sliceIceHome stringByAppendingPathComponent:@"slice"];
+            sliceIceHome = homeCpp;
+        }
+        else
+        {
+            slicedir = [sliceIceHome stringByAppendingPathComponent:@"slice"];
+        }
+
+        translator = [[sliceIceHome stringByAppendingPathComponent:@"bin"] stringByAppendingPathComponent:translatorExe];
+        
+        NSDictionary* env = [[NSProcessInfo processInfo] environment];
+        NSString* libdir = [sliceIceHome stringByAppendingPathComponent:@"lib"];
+        shlibpath = [env objectForKey:@"DYLD_LIBRARY_PATH"];
+        if(shlibpath)
+        {
+            shlibpath = [shlibpath stringByAppendingPathComponent:libdir];
+        }
+        else
+        {
+            shlibpath = libdir;
+        }
+    }
+    else
+    {
+        NSString* sdksRaw = [context expandedValueForString:@"$(ADDITIONAL_SDKS)"];
+        NSArray* sdks = [sdksRaw componentsSeparatedByString:@" "];
+        BOOL found = NO;
+        for(NSString* sdk in sdks)
+        {
+            if([sdk rangeOfString:@"IceTouch"].location != NSNotFound)
+            {
+                found = YES;
+                sdk = [sdk stringByDeletingLastPathComponent];
+                // The bin and slice directories exist at the root of the SDK.
+                slicedir = [sdk stringByAppendingPathComponent:@"slice"];
+                translator = [[sdk stringByAppendingPathComponent:@"bin"] stringByAppendingPathComponent:translatorExe];
+                break;
+            }
+        }
+        if(!found)
+        {
+            error = [NSString stringWithFormat:@"IceTouch SDK cannot be found: \"%@\"", sdksRaw];
+            return self;
+        }
+    }
+
+    if(![fileManager isExecutableFileAtPath:translator])
+    {
+        error = [NSString stringWithFormat:@"Slice translator is not executable: \"%@\"", translator];
+        return self;
+    }
+
+    BOOL dir = NO;
+    if(![fileManager fileExistsAtPath:slicedir isDirectory:&dir] || !dir)
+    {
+        error = [NSString stringWithFormat:@"Slice files cannot be found: \"%@\"", slicedir];
+        return self;
+    }
+    
+    return self;
+}
+
+-(NSString*)description
+{
+    return [NSString stringWithFormat:@"translator=%@ shlibpath=%@ slicedir=%@ cpp=%d", 
+            translator, shlibpath, slicedir, cpp];
+}
+@end
+
+
+typedef struct Configuration Configuration;
+
 @interface XMLSliceParserDelegate : NSObject
 {
 @private
@@ -44,7 +173,7 @@
 -(void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI
     qualifiedName:(NSString *)qualifiedName attributes:(NSDictionary *)attributeDict
 {
-    if([elementName compare:@"dependsOn"] == NSOrderedSame)
+    if([elementName isEqualToString:@"dependsOn"])
     {
         NSString* name = [attributeDict objectForKey:@"name"];
         if(name != 0)
@@ -55,69 +184,38 @@
     
 }
 
--(void)dealloc
-{
-    [depends release];
-    [super dealloc];
-}
-
 @end
 
 @implementation SliceCompilerSpecification
 + (void) initialize
 {
 	PBXFileType* type = (PBXFileType*)[PBXFileType specificationForIdentifier:@"sourcecode.slice"];
-	XCCompilerSpecification* spec = (XCCompilerSpecification*)[XCCompilerSpecification specificationForIdentifier:@"com.zeroc.compilers.slice"];
+	XCCompilerSpecification* spec = (XCCompilerSpecification*)
+    [XCCompilerSpecification specificationForIdentifier:@"com.zeroc.compilers.slice"];
 	[PBXTargetBuildContext activateImportedFileType:type withCompiler:spec];
 }
 
--(NSString*)getIceHome:(PBXTargetBuildContext*)context
-{
-    NSString* iceHome = [context expandedValueForString:@"$(SLICE_ICE_HOME)"];
-    NSString* iceHomeCpp = [NSString stringWithFormat:@"%@/cpp", iceHome];
-    BOOL dir;
-    if([[NSFileManager defaultManager] fileExistsAtPath:iceHomeCpp isDirectory:&dir] && dir)
-    {
-        return iceHomeCpp;
-    }
-    return iceHome;
-}
-
--(NSString*)getSliceTranslator:(PBXTargetBuildContext*)context isCpp:(BOOL*)slice2cpp
-{
-    NSString* iceHome = [self getIceHome:context];
-    
-    *slice2cpp = [[context expandedValueForString:@"$(SLICE_CPP_FLAG)"] compare:@"YES"] == NSOrderedSame;
-    NSString* exe = (*slice2cpp) ? @"slice2cpp" : @"slice2objc";
-    return [NSString stringWithFormat:@"%@/bin/%@", iceHome, exe];
-}
-
--(NSString*)getSliceSharedLibrary:(PBXTargetBuildContext*)context
-{
-    NSString* iceHome = [self getIceHome:context];
-    return [NSString stringWithFormat:@"%@/lib", iceHome];
-}
 
 // Run the slice compiler with --depend-xml to determine the dependencies for the given slice file.
 -(NSArray*)dependenciesForSliceFile:(NSString*)path context:(PBXTargetBuildContext*)context
 {
     NSMutableDictionary* env = [[[NSProcessInfo processInfo] environment] mutableCopy];
-    NSString* shlib = [env objectForKey:@"DYLD_LIBRARY_PATH"];
-    if(shlib != 0)
+    SliceCompilerConfiguration* conf = [[SliceCompilerConfiguration alloc] initWithContext:context];
+    if(conf.error)
     {
-        shlib = [shlib stringByAppendingFormat:@":%@", [self getSliceSharedLibrary:context]];
+        [context addDependencyAnalysisErrorMessageFormat:@"%@", conf.error];
+        return [NSArray array];
     }
-    else
-    {
-        shlib = [self getSliceSharedLibrary:context];
-    }
-    [env setObject:shlib forKey:@"DYLD_LIBRARY_PATH"];
     
-    NSTask *dependTask = [[[NSTask alloc] init] autorelease];
+    if(conf.shlibpath)
+    {
+        [env setObject:conf.shlibpath forKey:@"DYLD_LIBRARY_PATH"];
+    }
+        
+    NSTask *dependTask = [[NSTask alloc] init];
     NSMutableArray *args = [NSMutableArray array];
 
-    BOOL slice2cpp;
-    [dependTask setLaunchPath:[self getSliceTranslator:context isCpp:&slice2cpp]];
+    [dependTask setLaunchPath:conf.translator];
     [dependTask setEnvironment:env];
     [dependTask setCurrentDirectoryPath:[context baseDirectoryPath]];
     
@@ -132,10 +230,13 @@
     
     /* set arguments */
     [args addObjectsFromArray:[self commandLineForAutogeneratedOptionsInTargetBuildContext:context]];
-    [args addObjectsFromArray:[[context expandedValueForString:@"$(build_file_compiler_flags)"] arrayByParsingAsStringList]];
+    [args addObjectsFromArray:[[context expandedValueForString:@"$(build_file_compiler_flags)"]
+                               arrayByParsingAsStringList]];
+    [args addObject:[NSString stringWithFormat:@"-I%@", conf.slicedir]];
 
     // Use old style dependency parsing?
-    if([[context expandedValueForString:@"$(SLICE_ICE_TOUCH_0_1_0)"] compare:@"YES"] == NSOrderedSame)
+    BOOL slice2cpp = conf.cpp;
+    if([[context expandedValueForString:@"$(SLICE_ICE_TOUCH_0_1_0)"] isEqualToString:@"YES"])
     {
         slice2cpp = YES;
     }
@@ -164,7 +265,7 @@
         return [NSArray array];
     }
     
-    NSMutableData* output = [[[NSMutableData alloc] init] autorelease];
+    NSMutableData* output = [[NSMutableData alloc] init];
     while ((inData = [readHandle availableData]) && [inData length])
     {
         [output appendData:inData];
@@ -180,7 +281,7 @@
     if(slice2cpp)
     {
         NSMutableArray* dep = [NSMutableArray array];
-        NSString* soutput = [[[NSString alloc]initWithData:output encoding:NSUTF8StringEncoding] autorelease];
+        NSString* soutput = [[NSString alloc]initWithData:output encoding:NSUTF8StringEncoding];
         // Parse C++ style dependencies.
         NSArray* lines = [soutput componentsSeparatedByString:@"\n"];
         // Ignore the first two lines.
@@ -212,8 +313,8 @@
     else
     {
         // Parse XML style dependencies.
-        XMLSliceParserDelegate* del = [[[XMLSliceParserDelegate alloc] init] autorelease];
-        NSXMLParser* parser = [[[NSXMLParser alloc] initWithData:output] autorelease];
+        XMLSliceParserDelegate* del = [[XMLSliceParserDelegate alloc] init];
+        NSXMLParser* parser = [[NSXMLParser alloc] initWithData:output];
         [parser setDelegate:del];
         BOOL success = [parser parse];
         if(!success)
@@ -225,18 +326,26 @@
     }
 }
 
-- (NSArray*) computeDependenciesForFilePath:(NSString*)input ofType:(PBXFileType*)type outputDirectory:(NSString*)outputDir inTargetBuildContext:(PBXTargetBuildContext*)context
+- (NSArray*) computeDependenciesForFilePath:(NSString*)input
+                                     ofType:(PBXFileType*)type
+                            outputDirectory:(NSString*)outputDir
+                       inTargetBuildContext:(PBXTargetBuildContext*)context
 {
     // compute input path (for variable substitution)
     input = [context expandedValueForString:input];
 
-    BOOL slice2cpp;
-    NSString* translator = [self getSliceTranslator:context isCpp:&slice2cpp];
+    SliceCompilerConfiguration* conf = [[SliceCompilerConfiguration alloc] initWithContext:context];
+    if(conf.error)
+    {
+        [context addDependencyAnalysisErrorMessageFormat:@"%@", conf.error];
+        return [NSArray array];
+    }
     
     // The output file goes in the derived files dir.
     NSString* generatedOutputDir = [context expandedValueForString:@"$(DERIVED_FILE_DIR)"];
-    NSString* outputBase = [generatedOutputDir stringByAppendingPathComponent:[[input lastPathComponent] stringByDeletingPathExtension]];
-    NSString* sourceExtension = (slice2cpp) ? @"cpp" : @"m";
+    NSString* outputBase = [generatedOutputDir stringByAppendingPathComponent:[[input lastPathComponent]
+                                                                               stringByDeletingPathExtension]];
+    NSString* sourceExtension = (conf.cpp) ? @"cpp" : @"m";
     NSString* sourceOutput = [outputBase stringByAppendingPathExtension:sourceExtension];
     NSString* headerOutput = [outputBase stringByAppendingPathExtension:@"h"];
     
@@ -247,20 +356,25 @@
     XCDependencyNode* inputNode = [context dependencyNodeForName:input createIfNeeded:YES];
 
     // create slice2objc command
-    XCDependencyCommand* dep = [context
-                                createCommandWithRuleInfo:[NSArray arrayWithObjects:(slice2cpp ? @"slice2cpp" : @"slice2objc"),
-                                                           [context naturalPathForPath:input],nil]
-                                commandPath:translator
-                                arguments:nil
-                                forNode:outputHeaderNode];
+    XCDependencyCommand* dep =
+    [context createCommandWithRuleInfo:[NSArray arrayWithObjects:(conf.cpp ? @"slice2cpp" : @"slice2objc"),
+                                        [context naturalPathForPath:input],nil]
+                           commandPath:conf.translator
+                             arguments:nil
+                               forNode:outputHeaderNode];
     [dep addOutputNode:outputSourceNode];
     [dep setToolSpecification:self]; // So Xcode knows how to parse the output, etc.
     [dep addArgumentsFromArray:[self commandLineForAutogeneratedOptionsInTargetBuildContext:context]];
-    [dep addArgumentsFromArray:[[context expandedValueForString:@"$(build_file_compiler_flags)"] arrayByParsingAsStringList]];
+    [dep addArgumentsFromArray:[[context expandedValueForString:@"$(build_file_compiler_flags)"]
+                                arrayByParsingAsStringList]];
     [dep addArgument:[NSString stringWithFormat:@"--output-dir=%@", generatedOutputDir]];
+    [dep addArgument:[NSString stringWithFormat:@"-I%@", conf.slicedir]];
     [dep addArgument:input];
     [dep setPhaseNumber:3]; // This is the phase that the yacc plugin uses.
-    [dep addEnvironmentValue:[self getSliceSharedLibrary:context] forKey:@"DYLD_LIBRARY_PATH"];
+    if(conf.shlibpath)
+    {
+        [dep addEnvironmentValue:conf.shlibpath forKey:@"DYLD_LIBRARY_PATH"];
+    }
     
     // Create dependency rules. The source and the header depend on the
     // input file.
@@ -273,7 +387,8 @@
 
     // The yacc plugin does this, not sure why.
     [context setStringValue:input forDynamicSetting:@"source_file_path"];
-    [context setStringValue:[[input lastPathComponent] stringByDeletingPathExtension] forDynamicSetting:@"output_file_base"];
+    [context setStringValue:[[input lastPathComponent] stringByDeletingPathExtension]
+          forDynamicSetting:@"output_file_base"];
     [context setStringValue:sourceOutput forDynamicSetting:@"intermediate_file_path"];
     [context setStringValue:sourceExtension forDynamicSetting:@"output_file_extension"];
     [context setStringValue:sourceOutput forDynamicSetting:@"output_file_path"];
@@ -287,7 +402,8 @@
     return [NSArray arrayWithObject:outputSourceNode];
 }
 
-- (NSArray*)importedFilesForPath:(NSString*)path ensureFilesExist:(BOOL)ensure inTargetBuildContext:(PBXTargetBuildContext*)context
+- (NSArray*)importedFilesForPath:(NSString*)path ensureFilesExist:(BOOL)ensure
+            inTargetBuildContext:(PBXTargetBuildContext*)context
 {
    	XCDependencyNode* inputNode = [context dependencyNodeForName:path createIfNeeded:YES];
     NSMutableArray* imported = [NSMutableArray arrayWithCapacity:10];

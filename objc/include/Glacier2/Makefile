@@ -11,18 +11,28 @@ top_srcdir	= ../..
 
 include $(top_srcdir)/config/Make.rules
 
+ifeq ($(COMPILE_FOR_MACOSX),yes)
+
+INSTALL_DIR = $(install_includedir)/Glacier2
 install::
-	@if test ! -d $(install_includedir)/Glacier2 ; \
+
+else
+
+INSTALL_DIR = $(top_srcdir)/SDK/IceTouch/$(PLATFORM_NAME).sdk/usr/local/include/Glacier2
+
+all::
+endif
+	@if test ! -d $(INSTALL_DIR) ; \
 	then \
-	    echo "Creating $(install_includedir)/Glacier2..." ; \
-	    $(call mkdir,$(install_includedir)/Glacier2) ; \
+	    echo "Creating $(INSTALL_DIR)..." ; \
+	    $(call mkdir,$(INSTALL_DIR)) ; \
 	fi
 
 	@for i in *.h ; \
 	do \
 	    echo "Installing $$i" ; \
-	    $(INSTALL_DATA) $$i $(install_includedir)/Glacier2/$$i ; \
-	    chmod a+r $(install_includedir)/Glacier2/$$i ; \
+	    $(INSTALL_DATA) $$i $(INSTALL_DIR)/$$i ; \
+	    chmod a+r $(INSTALL_DIR)/$$i ; \
 	done
 
 depend::

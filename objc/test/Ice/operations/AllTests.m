@@ -10,10 +10,10 @@
 #import <Ice/Ice.h>
 #import <Ice/Locator.h>
 #import <TestCommon.h>
-#import <Test.h>
+#import <OperationsTest.h>
  
 id<TestOperationsMyClassPrx>
-allTests(id<ICECommunicator> communicator, BOOL collocated)
+operationsAllTests(id<ICECommunicator> communicator, BOOL collocated)
 {
     NSString* ref = @"test:default -p 12010";
     id<ICEObjectPrx> base = [communicator stringToProxy:(ref)];

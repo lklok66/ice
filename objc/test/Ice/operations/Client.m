@@ -9,7 +9,7 @@
 
 #import <Ice/Ice.h>
 #import <TestCommon.h>
-#import <Test.h>
+#import <OperationsTest.h>
 
 #import <Foundation/NSAutoreleasePool.h>
 #if !TARGET_OS_IPHONE
@@ -20,8 +20,8 @@
 static int
 run(id<ICECommunicator> communicator)
 {
-    id<TestOperationsMyClassPrx> allTests(id<ICECommunicator>, BOOL);
-    id<TestOperationsMyClassPrx> myClass = allTests(communicator, NO);
+    id<TestOperationsMyClassPrx> operationsAllTests(id<ICECommunicator>, BOOL);
+    id<TestOperationsMyClassPrx> myClass = operationsAllTests(communicator, NO);
 
     tprintf("testing server shutdown... ");
     [myClass shutdown];
@@ -39,7 +39,7 @@ run(id<ICECommunicator> communicator)
 }
 
 #if TARGET_OS_IPHONE
-#  define main startClient
+#  define main operationsClient
 #endif
 
 int

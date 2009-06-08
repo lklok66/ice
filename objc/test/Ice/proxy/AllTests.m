@@ -11,11 +11,11 @@
 #import <Ice/Locator.h>
 #import <Ice/Router.h>
 #import <TestCommon.h>
-#import <Test.h>
+#import <ProxyTest.h>
 
  
 TestProxyMyClassPrx*
-allTests(id<ICECommunicator> communicator)
+proxyAllTests(id<ICECommunicator> communicator)
 {
     tprintf("testing stringToProxy... ");
     NSString* ref = @"test:default -p 12010";

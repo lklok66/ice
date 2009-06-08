@@ -8,7 +8,7 @@
 // **********************************************************************
 
 #import <Ice/Ice.h>
-#import <TestI.h>
+#import <slicing/objects/TestI.h>
 #include <TestCommon.h>
 
 #import <Foundation/NSAutoreleasePool.h>
@@ -30,8 +30,8 @@ run(id<ICECommunicator> communicator)
     return EXIT_SUCCESS;
 }
 
-#if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
-#  define main startServer
+#if defined(TARGET_OS_IPHONE)
+#  define main slicingObjectsServer
 #endif
 
 int

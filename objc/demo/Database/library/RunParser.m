@@ -210,7 +210,7 @@ runParser(int argc, char* argv[], id<ICECommunicator> communicator)
 	}
 	@catch(Glacier2SessionNotExistException* ex)
 	{
-	    printf("%s\n", [ex description]);
+	    NSLog(@"%@\n", [ex description]);
 	}
 	@catch(ICEConnectionLostException* ex)
 	{

@@ -7,7 +7,7 @@
 //
 // **********************************************************************
 
-#import <Test.h>
+#import <DefaultServantTest.h>
 
 @interface TestDefaultServantMyObjectI : TestDefaultServantMyObject<TestDefaultServantMyObject>
 @end

@@ -12,10 +12,10 @@
 # ----------------------------------------------------------------------
 
 SHELL			= /bin/sh
-VERSION			= 0.1.0
-VERSION_MAJOR           = 0
-VERSION_MINOR           = 1
-SOVERSION		= 01
+VERSION			= 1.0.0
+VERSION_MAJOR           = 1
+VERSION_MINOR           = 0
+SOVERSION		= 10
 
 INSTALL			= cp -fp
 INSTALL_PROGRAM		= ${INSTALL}
@@ -175,6 +175,8 @@ endif
 ifndef mklibtargets
     ifeq ($(STATICLIBS),yes)
 	mklibtargets	= $(3)
+    else ifeq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
+	mklibtargets	= $(3)
     else
 	mklibtargets	= $(1) $(2) $(3)
     endif
@@ -219,18 +221,17 @@ install-common::
 	@if test ! -d $(install_slicedir) ; \
 	then \
 	    echo "Creating $(install_slicedir)..." ; \
-	    $(call mkdir,$(install_slicedir)) ; \
-	    cd $(top_srcdir)/../slice ; \
-	    for subdir in * ; \
+	    $(call mkdir, $(install_slicedir)) ; \
+	    for subdir in $(top_srcdir)/../slice/* ; \
 	    do \
 	        echo "Copying slice/$$subdir to $(install_slicedir)..." ; \
-	        cp -fpr $$subdir $(install_slicedir) ; \
+	        cp -fpr $(top_srcdir)/../slice/$$subdir $(install_slicedir) ; \
 	    done ; \
         fi
 
 	@if test ! -f $(prefix)/ICE_TOUCH_LICENSE ; \
 	then \
-	    $(call installdata,$(top_srcdir)/../ICE_TOUCH_LICENSE,$(prefix)) ; \
+	    $(call installdata,$(top_srcdir)/ICE_TOUCH_LICENSE,$(prefix)) ; \
 	fi
 
 	@if test ! -f $(prefix)/LICENSE ; \
