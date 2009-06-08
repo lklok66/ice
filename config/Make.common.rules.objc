@@ -231,7 +231,7 @@ install-common::
 
 	@if test ! -f $(prefix)/ICE_TOUCH_LICENSE ; \
 	then \
-	    $(call installdata,$(top_srcdir)/ICE_TOUCH_LICENSE,$(prefix)) ; \
+	    $(call installdata,$(top_srcdir)/../ICE_TOUCH_LICENSE,$(prefix)) ; \
 	fi
 
 	@if test ! -f $(prefix)/LICENSE ; \

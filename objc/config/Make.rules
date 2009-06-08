@@ -105,13 +105,11 @@ ifeq ($(COMPILE_FOR_MACOSX),yes)
     libdir		= $(top_srcdir)/lib
     includedir		= $(top_srcdir)/include
     install_includedir	:= $(prefix)/include
-    libsubdir           := $(libsubdir)/$(PLATFORM_NAME)
     install_libdir	:= $(prefix)/$(libsubdir)
     install_bindir	:= $(prefix)/$(binsubdir)
 else
     libdir		= $(SDK_DIR)/usr/local/lib
     includedir		= $(top_srcdir)/include
-    libsubdir           := $(libsubdir)/$(PLATFORM_NAME)
 endif
 
 #

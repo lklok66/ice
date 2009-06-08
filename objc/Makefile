@@ -63,7 +63,7 @@ build-sdk:
 	$(call mkdir,SDK/IceTouch)
 	$(call mkdir,SDK/IceTouch/bin)
 	$(call mkdir,SDK/IceTouch/slice)
-	$(call installdata,$(top_srcdir)/ICE_TOUCH_LICENSE,SDK/IceTouch)
+	$(call installdata,$(top_srcdir)/../ICE_TOUCH_LICENSE,SDK/IceTouch)
 	$(call installdata,$(top_srcdir)/../LICENSE,SDK/IceTouch)
 	for platform in MacOSX iPhoneOS iPhoneSimulator ; \
 	do \
