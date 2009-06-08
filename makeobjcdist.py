@@ -34,10 +34,12 @@ filesToKeep = [
     "./cpp/config/Make.rules.Darwin",
     "./cpp/include/IceUtil",
     "./cpp/include/Ice",
+    "./cpp/include/IceSSL",
     "./cpp/include/Slice",
     "./cpp/src/Makefile",
     "./cpp/src/IceUtil",
     "./cpp/src/Ice",
+    "./cpp/src/IceSSL",
     "./cpp/src/Slice",
     "./cpp/src/slice2cpp",
     "./cpp/src/slice2objc",
@@ -173,27 +175,6 @@ substitute(os.path.join("objc", "config", "Make.rules"),
             (r'^[#]*OPTIMIZE_SIZE([\s]*)=.*', r'#OPTIMIZE_SIZE\1= yes'),
             (r'^[#]*COMPILE_FOR_IPHONE([\s]*)=.*', r'#COMPILE_FOR_IPHONE\1= yes'),
             (r'^[#]*COMPILE_FOR_IPHONE_SIMULATOR([\s]*)=.*', r'#COMPILE_FOR_IPHONE_SIMULATOR\1= yes')])
-
-
-for makeFileName in [os.path.join("cpp", "src", "Makefile")]:
-    makeFile = open(makeFileName, "r")
-    lines = makeFile.readlines()
-    makeFile.close()
-
-    doRemove = 0
-    newlines = []
-    for i in range(len(lines)):
-        if lines[i].find("SUBDIRS") == 0:
-            newlines.append("SUBDIRS = IceUtil Slice slice2cpp slice2objc\n\n")
-            doRemove = 1
-        elif len(lines[i].strip()) == 0 and doRemove:
-            doRemove = 0
-        elif not doRemove:
-            newlines.append(lines[i])
-
-    makeFile = open(makeFileName, "w")
-    makeFile.writelines(newlines)
-    makeFile.close()
 
 
 #
