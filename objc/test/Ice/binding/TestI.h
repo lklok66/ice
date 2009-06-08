@@ -24,6 +24,7 @@
     id<ICEObjectAdapter> adapter_;
     id<TestBindingTestIntfPrx> testIntf_;
 }
+-(id)initWithAdapter:(id<ICEObjectAdapter>)adapter;
 -(id<TestBindingTestIntfPrx>) getTestIntf:(ICECurrent *)current;
 -(void) deactivate:(ICECurrent *)current;
 @end

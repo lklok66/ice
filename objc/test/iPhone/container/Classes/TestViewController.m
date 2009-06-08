@@ -178,8 +178,7 @@
 
     [nextButton setTitle:@"Test is running" forState:UIControlStateDisabled];
     
-    // Clear the current message, and the the table log. Note that at present
-    // this isn't really necessary since the view can only be loaded once.
+    // Clear the current message, and the the table log.
     [currentMessage deleteCharactersInRange:NSMakeRange(0, currentMessage.length)];
     
     [messages removeAllObjects];

@@ -83,7 +83,7 @@ public:
 
         if(_instance->initializationData().threadHook)
         {
-            _instance->initializationData().threadHook->end();
+            _instance->initializationData().threadHook->stop();
         }
     }
 

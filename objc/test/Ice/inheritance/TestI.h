@@ -21,6 +21,7 @@
     id<TestInheritanceMBIB2Prx> ib2_;
     id<TestInheritanceMAICPrx> ic_;
 }
+-(id)initWithAdapter:(id<ICEObjectAdapter>) adapter;
 @end
 
 @interface CAI : TestInheritanceMACA<TestInheritanceMACA>

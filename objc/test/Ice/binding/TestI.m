@@ -28,8 +28,8 @@
     id<ICECommunicator> com = [current.adapter getCommunicator];
     [[com getProperties] setProperty:[name stringByAppendingString:@".ThreadPool.Size"] value:@"1"];
     id<ICEObjectAdapter> adapter = [com createObjectAdapterWithEndpoints:name endpoints:endpts];
-    return [TestBindingRemoteObjectAdapterPrx uncheckedCast:[
-            current.adapter addWithUUID:[[[RemoteObjectAdapterI alloc] init:adapter] autorelease]]];
+    RemoteObjectAdapterI* remote = [[[RemoteObjectAdapterI alloc] initWithAdapter:adapter] autorelease];
+    return [TestBindingRemoteObjectAdapterPrx uncheckedCast:[current.adapter addWithUUID:remote]];
 }
 
 -(void) deactivateObjectAdapter:(id<TestBindingRemoteObjectAdapterPrx>)adapter current:(ICECurrent*)current
@@ -44,7 +44,7 @@
 @end
 
 @implementation RemoteObjectAdapterI
--(id) init:(id<ICEObjectAdapter>)adapter
+-(id) initWithAdapter:(id<ICEObjectAdapter>)adapter
 {
     if(![super init])
     {

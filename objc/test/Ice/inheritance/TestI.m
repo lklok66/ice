@@ -123,7 +123,7 @@
 @end
 
 @implementation TestInheritanceInitialI
--(id) init:(id<ICEObjectAdapter>)adapter
+-(id) initWithAdapter:(id<ICEObjectAdapter>)adapter
 {
     if(![super init])
     {

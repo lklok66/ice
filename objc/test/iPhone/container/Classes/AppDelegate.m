@@ -133,7 +133,6 @@ NSString* sslKey = @"sslKey";
     currentTest = test;
 
     [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithInt:currentTest] forKey:currentTestKey];
-    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 -(BOOL)ssl
@@ -146,7 +145,6 @@ NSString* sslKey = @"sslKey";
     ssl = v;
     
     [[NSUserDefaults standardUserDefaults] setObject:(v ? @"YES" : @"NO") forKey:sslKey];
-    [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
 -(void)testCompleted:(BOOL)success
