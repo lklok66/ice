@@ -21,6 +21,8 @@ OBJS      	= AcceptorI.o \
 		  TrustManager.o
 
 SRCS_DIR	=  $(ice_dir)/cpp/src/IceSSL
+# Copy OBJS for use with the dependency generation, since OBJS is
+# later transformed.
 SRCS_OBJS	:= $(OBJS)
 SRCS		=  $(addprefix $(SRCS_DIR)/, $(SRCS_OBJS:.o=.cpp))
 DEPENDFLAGS	=  --platform-name

@@ -224,9 +224,7 @@ $(HDIR)/%.h %.m: $(SDIR)/%.ice $(SLICE2OBJC)
 
 all:: $(SRCS)
 
-ifeq ($(COMPILE_FOR_IPHONE),yes)
-    all:: $(TARGETS_IPHONE)
-else ifeq ($(COMPILE_FOR_MACOSX),yes)
+ifeq ($(COMPILE_FOR_MACOSX),yes)
     all:: $(TARGETS_MACOS)
 endif
 
@@ -240,15 +238,16 @@ depend:: $(SRCS)
 	fi
 endif
 
+ifneq ($(TARGETS),)
 clean::
 	-rm -f $(TARGETS)
-	-rm -f core *.o *.bak
-	-rm -f $(PLATFORM_NAME)/*
+endif
 
-ifeq ($(COMPILE_FOR_IPHONE),yes)
 clean::
-	-rm -f $(TARGETS_IPHONE)
-else ifeq ($(COMPILE_FOR_MACOSX),yes)
+	-rm -f core *.o *.bak
+	-rm -f ./$(PLATFORM_NAME)/*
+
+ifeq ($(COMPILE_FOR_MACOSX),yes)
 clean::
 	-rm -f $(TARGETS_MACOS)
 endif

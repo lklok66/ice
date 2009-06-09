@@ -263,6 +263,7 @@
 					"-lIceObjc",
 					"-lGlacier2Objc",
 					"-lstdc++",
+					"-ObjC",
 				);
 				PRODUCT_NAME = ChatDemo;
 				SLICE_ICE_HOME = "";
@@ -293,6 +294,7 @@
 					"-lIceObjc",
 					"-lGlacier2Objc",
 					"-lstdc++",
+					"-ObjC",
 				);
 				PRODUCT_NAME = ChatDemo;
 				SLICE_ICE_HOME = "";

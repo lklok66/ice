@@ -21,6 +21,8 @@ TCP_OBJS	= TcpEndpointI.o \
 		  TcpConnector.o \
 		  TcpTransceiver.o
 
+# Copy CF_OBJS/TCP_OBJS for use with the dependency generation, since
+# OBJS is later transformed.
 SRCS_CF_OBJS	:= $(CF_OBJS)
 SRCS_TCP_OBJS	:= $(TCP_OBJS)
 SRCS		= $(addprefix $(SRCS_DIR)/, $(SRCS_TCP_OBJS:.o=.cpp)) \
