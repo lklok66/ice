@@ -100,16 +100,15 @@ endif
 SDK_DIR                 = $(top_srcdir)/SDK/IceTouch/$(PLATFORM_NAME).sdk
 
 bindir			= $(top_srcdir)/bin
+includedir		= $(top_srcdir)/include
 
 ifeq ($(COMPILE_FOR_MACOSX),yes)
     libdir		= $(top_srcdir)/lib
-    includedir		= $(top_srcdir)/include
     install_includedir	:= $(prefix)/include
     install_libdir	:= $(prefix)/$(libsubdir)
     install_bindir	:= $(prefix)/$(binsubdir)
 else
     libdir		= $(SDK_DIR)/usr/local/lib
-    includedir		= $(top_srcdir)/include
 endif
 
 #
@@ -127,6 +126,7 @@ ifdef ice_src_dist
     ICE_FLAGS 	= -I$(ice_cpp_dir)/include
 endif
 ifdef ice_bin_dist
+    includedir	= $(ice_dir)/include
     ICE_LIB_DIR = -L$(ice_dir)/$(libsubdir)
     ICE_FLAGS	= -I$(ice_dir)/include
 endif

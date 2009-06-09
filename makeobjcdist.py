@@ -26,6 +26,7 @@ filesToRemove = [
 filesToKeep = [
     "./LICENSE",
     "./ICE_LICENSE",
+    "./ICE_TOUCH_LICENSE",
     "./Makefile.objc",
     "./config/Make.common.rules.objc",
     "./config/TestUtil.py",
@@ -46,6 +47,7 @@ filesToKeep = [
     "./cpp/bin",
     "./cpp/lib",
     "./objc",
+    "./Xcode",
     "./slice",
     "./certs"
 ]
@@ -146,6 +148,8 @@ os.mkdir(distDir)
 print "Creating " + version + " source distributions in " + distDir
 
 srcDir = os.path.join(distDir, "IceTouch-" + version)
+demoDir = os.path.join(distDir, "IceTouch-" + version + "-demos")
+os.mkdir(demoDir)
 
 #
 # Extract the sources with git archive using the given tag.
@@ -218,8 +222,7 @@ print "Copying icetouch install files...",
 move(os.path.join("objc", "README"), os.path.join("README"))
 move(os.path.join("objc", "RELEASE_NOTES"), os.path.join("RELEASE_NOTES"))
 move(os.path.join("objc", "INSTALL"), os.path.join("INSTALL"))
-move(os.path.join("objc", "ICE_TOUCH_LICENSE"), os.path.join("ICE_TOUCH_LICENSE"))
-#move(os.path.join("objc", "CHANGES"), os.path.join("CHANGES"))
+move(os.path.join("objc", "CHANGES"), os.path.join("CHANGES"))
 
 #
 # Move *.iceobjc to the correct names.
@@ -276,6 +279,59 @@ for x in flexFiles:
 print "ok"
 
 #
+# Create the demo distribution.
+#
+print "Creating demo distribution...",
+sys.stdout.flush()
+
+#
+# Files from the top-level, cpp, java and cs config directories to include in the demo 
+# source distribution config directory.
+#
+configFiles = [ \
+    "Make.*", \
+]
+
+#
+# Files from the top-level certs directory to include in the demo distribution certs
+# directory.
+#
+certsFiles = [ \
+    "*.pem", \
+]
+
+
+# Demo distribution
+copy("ICE_LICENSE", demoDir)
+copy("ICE_TOUCH_LICENSE", demoDir)
+# TODO: README file.
+#copy(os.path.join(distFilesDir, "src", "common", "README.DEMOS"), demoDir)
+
+copyMatchingFiles(os.path.join("certs"), os.path.join(demoDir, "certs"), certsFiles)
+for d in ["", "objc"]:
+    copyMatchingFiles(os.path.join(d, "config"), os.path.join(demoDir, "config"), configFiles)
+
+# Consolidate demoscript and demo distribution with files from each language mapping
+baseDemoDir = os.path.join('objc', 'demo')
+for d in os.listdir(baseDemoDir):
+    if os.path.isdir(os.path.join(baseDemoDir, d)):
+        copy(os.path.join(baseDemoDir, d), os.path.join(demoDir, d))
+
+configSubstituteExprs = [(re.compile(regexpEscape("../../certs")), "../certs")]
+makeSubstituteExprs = [ (re.compile(regexpEscape("../..")), ".."), (re.compile(regexpEscape("../../..")), "../..")]
+xcodeSubstituteExprs = [ (re.compile("ADDITIONAL_SDKS = .*;"), "ADDITIONAL_SDKS = \"/Developer/SDKs/IceTouch/$(PLATFORM_NAME).sdk\";") ]
+for root, dirnames, filesnames in os.walk(demoDir):
+    for f in filesnames:
+        if fnmatch.fnmatch(f, "config*"):
+            substitute(os.path.join(root, f), configSubstituteExprs)
+        elif fnmatch.fnmatch(f, "Makefile"):
+            substitute(os.path.join(root, f), makeSubstituteExprs)
+        elif fnmatch.fnmatch(f, "project.pbxproj"):
+            substitute(os.path.join(root, f), xcodeSubstituteExprs)
+
+print "ok"
+
+#
 # Build the translators
 #
 shutil.copytree("cpp", "cpp-translators", True)
@@ -295,15 +351,16 @@ print "Archiving..."
 sys.stdout.flush()
 os.chdir(distDir)
 
+for d in [srcDir, demoDir]:
+    tarArchive(d, verbose)
+
 for d in [srcDir]:
-    zipArchive(srcDir, verbose)
-for d in [srcDir]:
-    tarArchive(srcDir, verbose)
+    zipArchive(d, verbose)
 
 #
 # Write source distribution report in README file.
 #
-writeSrcDistReport("IceTouch", version, compareToDir, [srcDir])
+writeSrcDistReport("IceTouch", version, compareToDir, [srcDir, demoDir])
 
 #
 # Done.
@@ -311,6 +368,7 @@ writeSrcDistReport("IceTouch", version, compareToDir, [srcDir])
 print "Cleaning up...",
 sys.stdout.flush()
 remove(srcDir)
+remove(demoDir)
 print "ok"
 
 os.chdir(cwd)
