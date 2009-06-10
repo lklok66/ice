@@ -10,10 +10,12 @@
 
 import os, sys, fnmatch, re, getopt
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "distribution", "lib"))
+rootDir = os.path.abspath(os.path.dirname(__file__))
+
+sys.path.append(os.path.join(rootDir, "distribution", "lib"))
 from DistUtils import *
 
-def writeBinDistReport(product, version, compareToDir, distributions):
+def writeBinDistReport(product, version):
 
     cwd = os.getcwd()
     os.chdir(cwd)
@@ -28,34 +30,7 @@ def writeBinDistReport(product, version, compareToDir, distributions):
     print >>readme, "User: " + os.environ["USER"]
     print >>readme, ""
 
-    if compareToDir:
-        print
-        print >>readme, "Comparison with", compareToDir
-        modifications = ([], [], [])
-        for dist in distributions:
-            dist = os.path.basename(dist)
-            print "   comparing " + dist + " ...",
-            sys.stdout.flush()
-            if untarArchive(os.path.join(compareToDir, dist) + ".tar.gz", False, dist + "-orig"):
-                n = compareDirs(dist + "-orig", dist)
-                modifications = [ modifications[i] + n[i]  for i in range(len(modifications))]
-                if n != ([], [], []):
-                    os.system("diff -r -N " + dist + "-orig " + dist + " > patch-" + dist)
-                remove(dist + "-orig")
-            print "ok"
-
-        (added, updated, removed) = modifications
-        for (desc, list) in [("Added", added), ("Removed", removed), ("Updated", updated)]:
-            if len(list) > 0:
-                list.sort()
-                print >>readme
-                print >>readme, desc, "files:"
-                print >>readme, string.join(["=" for c in range(len(desc + " files:"))], '')
-                for f in list:
-                    print >>readme, f
-
-    else:
-        print "ok"
+    print "ok"
         
     readme.close()
 
@@ -78,11 +53,10 @@ def usage():
 #
 verbose = 0
 tag = "HEAD"
-compareToDir = None
 build = True
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "Xhvc:k:")
+    opts, args = getopt.getopt(sys.argv[1:], "Xhv")
 except getopt.GetoptError:
     usage()
     sys.exit(1)
@@ -95,8 +69,6 @@ for o, a in opts:
         build = False
     elif o == "-v":
         verbose = 1
-    elif o == "-c":
-        compareToDir = a
 
 if len(args) > 1:
     usage()
@@ -106,7 +78,7 @@ if len(args) == 1:
     tag = args[0]
 
 cwd = os.getcwd()
-os.chdir(os.path.dirname(__file__))
+os.chdir(rootDir)
 
 #
 # Get IceTouch version.
@@ -117,15 +89,30 @@ mmversion = re.search("([0-9]+\.[0-9b]+)[\.0-9]*", version).group(1)
 versionMinor = re.search("([0-9\.]*).([0-9\.]*)", version).group(2)
 versionMajor = re.search("([0-9\.]*).([0-9\.]*)", version).group(1)
 
+volname = "IceTouch " + mmversion
+# First check to see whether the disk image is already accidently mounted.
+if not os.system("mount | grep \"%s (\" 2>&1 > /dev/null" % volname):
+    print "\"/Volumes/IceTouch %s\": already mounted. Unmount and restart." % mmversion
+    sys.exit(1)
+
 #
 # Get the distDir
 #
-distDir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "disticetouch-" + tag.replace('/', '-')))
-baseDir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "buildicetouch-" + tag.replace('/', '-')))
+distDir = os.path.abspath(os.path.join(rootDir, "..", "disticetouch-" + tag.replace('/', '-')))
+baseDir = os.path.abspath(os.path.join(rootDir, "..", "buildicetouch-" + tag.replace('/', '-')))
 if build: # TODO:
     if os.path.exists(baseDir):
         remove(baseDir)
     os.mkdir(baseDir)
+
+# Create a symlink for use with Iceberg.
+latestBuildDir = os.path.abspath(os.path.join(rootDir, "..", "buildicetouch-LATEST"))
+try:
+    os.remove(latestBuildDir)
+except OSError:
+    pass
+os.system("ln -s %s %s" % (baseDir, latestBuildDir))
+
 buildDir = os.path.join(baseDir, "build")
 buildLog = os.path.join(baseDir, "build.log")
 
@@ -135,6 +122,7 @@ os.chdir(os.path.join(baseDir))
 
 if build: # TODO:
     print "Extracting archive...",
+    sys.stdout.flush()
     baseName = os.path.join(distDir, "IceTouch-" + version)
     os.system("tar xfz " + os.path.join(distDir, baseName + ".tar.gz"))
     print "ok"
@@ -145,6 +133,7 @@ os.chdir(buildDir)
 
 if build:
     print "Building distributions...",
+    sys.stdout.flush()
 
     os.system("OPTIMIZE_SPEED=yes make > %s 2>&1" % buildLog)
     os.system("OPTIMIZE_SPEED=yes COMPILE_FOR_COCOA=yes make >> %s 2>&1" % buildLog)
@@ -157,47 +146,79 @@ if build:
 
     print "ok"
 
-print "Creating distributions",
+name = "IceTouch-" + mmversion
+installerDir = os.path.join(baseDir, "installer")
+sdkDir = os.path.join(baseDir, "sdk", name)
+examplesDir = os.path.join(baseDir, "examples", name)
+docDir = os.path.join(baseDir, "doc", name)
+optDir = os.path.join(baseDir, "opt", name)
 
+for d in ["installer", "sdk", "examples", "doc", "opt", "slice2objcplugin.pbplugin"]:
+    d = os.path.join(baseDir, d)
+    if os.path.exists(d):
+        remove(d)
+
+print "Preparing installer...",
+sys.stdout.flush()
+
+os.makedirs(installerDir)
+copy(os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", "installer-readme.rtf"),
+     os.path.join(installerDir, "readme.rtf"))
+copy(os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", "uninstall.sh"),
+     os.path.join(installerDir, "uninstall.sh"))
+
+os.makedirs(optDir)
 os.chdir(buildDir)
-os.system("prefix=%s make install >> %s 2>&1" % (os.path.join(baseDir, "IceTouch-" + version), buildLog))
+os.system("prefix=%s create_runpath_symlink=no make install >> %s 2>&1" % (optDir, buildLog))
 
-copy(os.path.join(buildDir, "objc", "SDK", "IceTouch"), os.path.join(baseDir, "IceTouch-" + version + "-SDK"))
+os.makedirs(docDir)
+
+move(os.path.join(optDir, "ICE_TOUCH_LICENSE"), os.path.join(docDir, "ICE_TOUCH_LICENSE"))
+move(os.path.join(optDir, "LICENSE"), os.path.join(docDir, "LICENSE"))
+# TODO: README, RELEASE_NOTES etc
+
+copy(os.path.join(buildDir, "objc", "SDK", "IceTouch"), sdkDir)
 
 copy(os.path.join(buildDir, "Xcode", "Slice2ObjcPlugin", "build", "Release", "slice2objcplugin.pbplugin"),
      os.path.join(baseDir, "slice2objcplugin.pbplugin"))
 
-copy(os.path.join(distDir, "IceTouch-" + version + "-demos.tar.gz"), 
-     os.path.join(baseDir, "IceTouch-" + version + "-demos.tar.gz"))
+os.mkdir(os.path.join(baseDir, "examples"))
+os.chdir(os.path.join(baseDir, "examples"))
+os.system("tar xfz %s" % os.path.join(distDir, "IceTouch-" + version + "-demos.tar.gz"))
+os.rename("IceTouch-" + version + "-demos", name)
+os.remove(os.path.join(examplesDir, "ICE_TOUCH_LICENSE"))
+os.remove(os.path.join(examplesDir, "ICE_LICENSE"))
+os.chdir(baseDir)
+print "ok"
 
-#
-# Everything should be clean now, we can create the source distributions archives
-# 
-print "Archiving..."
+print "Creating installer...",
 sys.stdout.flush()
+
+freezeProj = os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", "IceTouch-1.0.packproj")
+os.system("freeze %s" % freezeProj)
+
+print "ok"
+
 os.chdir(baseDir)
 
-dirs = [ os.path.join(baseDir, "IceTouch-" + version),
-         os.path.join(baseDir, "IceTouch-" + version + "-SDK"),
-         os.path.join(baseDir, "slice2objcplugin.pbplugin")
-         ]
+print "Building disk image...",
+sys.stdout.flush()
 
-for d in dirs:
-    tarArchive(d, verbose)
+
+if os.path.exists("scratch.dmg.sparseimage"):
+    os.remove("scratch.dmg.sparseimage")
+os.system("hdiutil create -quiet scratch.dmg -volname \"%s\" -type SPARSE -fs HFS+" % volname)
+os.system("hdid -quiet scratch.dmg.sparseimage")
+os.system("ditto -rsrc installer \"/Volumes/%s\"" % volname)
+os.system("hdiutil detach -quiet \"/Volumes/%s\"" % volname)
+os.system("hdiutil convert -quiet  scratch.dmg.sparseimage -format UDZO -o IceTouch-%s.dmg -imagekey zlib-devel=9" %
+          mmversion)
+os.remove("scratch.dmg.sparseimage")
+print "ok"
 
 #
 # Write source distribution report in README file.
 #
-writeBinDistReport("IceTouch", version, compareToDir, dirs)
-
-#
-# Done.
-#
-print "Cleaning up...",
-sys.stdout.flush()
-for d in dirs:
-    remove(d)
-#remove(buildDir)
-print "ok"
+writeBinDistReport("IceTouch", version)
 
 os.chdir(cwd)
