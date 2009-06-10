@@ -175,7 +175,10 @@ os.makedirs(docDir)
 
 move(os.path.join(optDir, "ICE_TOUCH_LICENSE"), os.path.join(docDir, "ICE_TOUCH_LICENSE"))
 move(os.path.join(optDir, "LICENSE"), os.path.join(docDir, "LICENSE"))
-# TODO: README, RELEASE_NOTES etc
+for f in [ "CHANGES", "RELEASE_NOTES"]:
+    copy(os.path.join(rootDir, "objc", f), os.path.join(docDir, f))
+copy(os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", "README"),
+     os.path.join(docDir, "README"))
 
 copy(os.path.join(buildDir, "objc", "SDK", "IceTouch"), sdkDir)
 
