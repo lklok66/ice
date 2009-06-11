@@ -8,7 +8,7 @@
 #
 # **********************************************************************
 
-import os, sys, fnmatch, re, getopt
+import os, sys, fnmatch, re, getopt, stat
 
 rootDir = os.path.abspath(os.path.dirname(__file__))
 
@@ -45,18 +45,15 @@ def usage():
     print "Options:"
     print "-h      Show this message."
     print "-v      Be verbose."
-    print "-c DIR  Compare distribution to the one from DIR and"
-    print "-X      Temporary no build option"
 
 #
 # Check arguments
 #
 verbose = 0
 tag = "HEAD"
-build = True
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "Xhv")
+    opts, args = getopt.getopt(sys.argv[1:], "hv")
 except getopt.GetoptError:
     usage()
     sys.exit(1)
@@ -65,8 +62,6 @@ for o, a in opts:
     if o == "-h":
         usage()
         sys.exit(0)
-    elif o == "-X":
-        build = False
     elif o == "-v":
         verbose = 1
 
@@ -100,9 +95,7 @@ if not os.system("mount | grep \"%s (\" 2>&1 > /dev/null" % volname):
 #
 distDir = os.path.abspath(os.path.join(rootDir, "..", "disticetouch-" + tag.replace('/', '-')))
 baseDir = os.path.abspath(os.path.join(rootDir, "..", "buildicetouch-" + tag.replace('/', '-')))
-if build: # TODO:
-    if os.path.exists(baseDir):
-        remove(baseDir)
+if not os.path.exists(baseDir):
     os.mkdir(baseDir)
 
 # Create a symlink for use with Iceberg.
@@ -114,37 +107,42 @@ except OSError:
 os.system("ln -s %s %s" % (baseDir, latestBuildDir))
 
 buildDir = os.path.join(baseDir, "build")
-buildLog = os.path.join(baseDir, "build.log")
 
 print "Building " + version + " distributions in " + baseDir
 
 os.chdir(os.path.join(baseDir))
 
-if build: # TODO:
+if not os.path.exists(buildDir):
     print "Extracting archive...",
     sys.stdout.flush()
     baseName = os.path.join(distDir, "IceTouch-" + version)
     os.system("tar xfz " + os.path.join(distDir, baseName + ".tar.gz"))
-    print "ok"
-
     os.rename("IceTouch-" + version, "build")
+    # Change SUBDIRS in top-level Makefile.
+    substitute(os.path.join("objc", "Makefile"), [(r'^SUBDIRS([\s]*)=.*', r'SUBDIRS\1= src include')])
+    print "ok"
+else:
+    print "Using existing build directory"
+    s1 = os.stat(buildDir)
+    s2 = os.stat(os.path.join(distDir, "IceTouch-" + version + ".tar.gz"))
+    if s2.st_mtime > s1.st_mtime:
+        print "WARNING: distribution is more recent than the existing build"
 
 os.chdir(buildDir)
 
-if build:
-    print "Building distributions...",
-    sys.stdout.flush()
+print "Building distributions...",
+sys.stdout.flush()
 
-    os.system("OPTIMIZE_SPEED=yes make > %s 2>&1" % buildLog)
-    os.system("OPTIMIZE_SPEED=yes COMPILE_FOR_COCOA=yes make >> %s 2>&1" % buildLog)
-    os.system("OPTIMIZE_SIZE=yes COMPILE_FOR_IPHONE=yes make >> %s 2>&1" % buildLog)
-    os.system("OPTIMIZE_SIZE=yes COMPILE_FOR_IPHONE_SIMULATOR=yes make >> %s 2>&1" % buildLog)
+os.system("OPTIMIZE_SPEED=yes make")
+os.system("OPTIMIZE_SPEED=yes COMPILE_FOR_COCOA=yes make")
+os.system("OPTIMIZE_SIZE=yes COMPILE_FOR_IPHONE=yes make")
+os.system("OPTIMIZE_SIZE=yes COMPILE_FOR_IPHONE_SIMULATOR=yes make")
 
-    os.chdir(os.path.join(buildDir, "Xcode", "Slice2ObjcPlugin"))
+os.chdir(os.path.join(buildDir, "Xcode", "Slice2ObjcPlugin"))
 
-    os.system("xcodebuild -configuration Release >> %s 2>&1")
+os.system("xcodebuild -configuration Release >> %s 2>&1")
 
-    print "ok"
+print "ok"
 
 name = "IceTouch-" + mmversion
 installerDir = os.path.join(baseDir, "installer")
@@ -169,7 +167,7 @@ copy(os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", "uninstall.
 
 os.makedirs(optDir)
 os.chdir(buildDir)
-os.system("prefix=%s create_runpath_symlink=no make install >> %s 2>&1" % (optDir, buildLog))
+os.system("prefix=%s create_runpath_symlink=no make install" % optDir)
 
 os.makedirs(docDir)
 

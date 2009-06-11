@@ -41,6 +41,7 @@ endif
 	$(call installprogram,$(ice_cpp_dir)/bin/slice2objc,$(install_bindir))
 else
 
+# TODO: Anyway to get around the call to "make sdk"?
 all::
 	if [ ! -d SDK ]; \
 	then \
@@ -63,8 +64,6 @@ build-sdk:
 	$(call mkdir,SDK/IceTouch)
 	$(call mkdir,SDK/IceTouch/bin)
 	$(call mkdir,SDK/IceTouch/slice)
-	$(call installdata,$(top_srcdir)/../ICE_TOUCH_LICENSE,SDK/IceTouch)
-	$(call installdata,$(top_srcdir)/../LICENSE,SDK/IceTouch)
 	for platform in MacOSX iPhoneOS iPhoneSimulator ; \
 	do \
 	    platform_sdk=SDK/IceTouch/$$platform.sdk ;\
