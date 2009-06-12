@@ -7,17 +7,27 @@
 #
 # **********************************************************************
 
-top_srcdir	= ..
+top_srcdir	= ../../..
+
+CLIENT		= client
+
+TARGETS_MACOS	= $(CLIENT)
+
+OBJS		= Key.o \
+		  Inherit.o \
+		  Client.o
+
+SRCS		= $(OBJS:.o=.m)
+
+SLICE_SRCS	= Key.ice Inherit.ice
 
 include $(top_srcdir)/config/Make.rules
 
-SUBDIRS		= Common \
-		  Slice \
-		  Ice
+CPPFLAGS	:= -I. -I.. -I../../include $(CPPFLAGS)
+LIBS		:= -lTestCommon $(LIBS)
 
-$(EVERYTHING)::
-	@for subdir in $(SUBDIRS); \
-	do \
-	    echo "making $@ in $$subdir"; \
-	    ( cd $$subdir && $(MAKE) $@ ) || exit 1; \
-	done
+$(CLIENT): $(OBJS)
+	rm -f $@
+	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(OBJS) $(LIBS)
+
+include .depend

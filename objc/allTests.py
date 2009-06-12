@@ -24,6 +24,7 @@ from scripts import *
 # List of all basic tests.
 #
 tests = [ 
+     ("Slice/keyword", []),
      ("Ice/proxy", ["core"]),
      ("Ice/operations", ["core"]),
      ("Ice/exceptions", ["core"]),

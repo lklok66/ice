@@ -44,13 +44,10 @@ usage(const char* n)
         "-E                      Print preprocessor output on stdout.\n"
 	"--include-dir DIR       Use DIR as the header include directory in source files.\n"
         "--output-dir DIR        Create files in the directory DIR.\n"
-        "--impl                  Generate sample implementations.\n"
         "--depend                Generate Makefile dependencies.\n"
         "--depend-xml            Generate dependencies in XML format.\n"
         "-d, --debug             Print debug messages.\n"
         "--ice                   Permit `Ice' prefix (for building Ice source code only)\n"
-        "--checksum              Generate checksums for Slice definitions.\n"
-        "--stream                Generate marshaling support for public stream API.\n"
         ;
     // Note: --case-sensitive is intentionally not shown here!
 }
@@ -67,13 +64,10 @@ main(int argc, char* argv[])
     opts.addOpt("E");
     opts.addOpt("", "include-dir", IceUtilInternal::Options::NeedArg);
     opts.addOpt("", "output-dir", IceUtilInternal::Options::NeedArg);
-    opts.addOpt("", "impl");
     opts.addOpt("", "depend");
     opts.addOpt("", "depend-xml");
     opts.addOpt("d", "debug");
     opts.addOpt("", "ice");
-    opts.addOpt("", "checksum");
-    opts.addOpt("", "stream");
     opts.addOpt("", "case-sensitive");
 
     vector<string> args;
@@ -126,18 +120,12 @@ main(int argc, char* argv[])
 
     string output = opts.optArg("output-dir");
 
-    bool impl = opts.isSet("impl");
-
     bool depend = opts.isSet("depend");
     bool dependxml = opts.isSet("depend-xml");
 
     bool debug = opts.isSet("debug");
 
     bool ice = opts.isSet("ice");
-
-    bool checksum = opts.isSet("checksum");
-
-    bool stream = opts.isSet("stream");
 
     bool caseSensitive = opts.isSet("case-sensitive");
 
@@ -211,21 +199,13 @@ main(int argc, char* argv[])
                 {
                     try
                     {
-                        Gen gen(argv[0], icecpp.getBaseName(), include, includePaths, output, impl, stream);
+                        Gen gen(argv[0], icecpp.getBaseName(), include, includePaths, output);
                         if(!gen)
                         {
                             u->destroy();
                             return EXIT_FAILURE;
                         }
                         gen.generate(u);
-                        if(impl)
-                        {
-                            gen.generateImpl(u);
-                        }
-                        if(checksum)
-                        {
-                            // gen.generateChecksums(u);
-                        }
                     }
                     catch(const Slice::FileException& ex)
                     {

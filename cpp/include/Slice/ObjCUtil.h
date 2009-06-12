@@ -16,6 +16,13 @@
 namespace Slice
 {
 
+enum BaseType
+{
+    BaseTypeNone,
+    BaseTypeObject,
+    BaseTypeException
+};
+
 class SLICE_API ObjCGenerator : private ::IceUtil::noncopyable
 {
 public:

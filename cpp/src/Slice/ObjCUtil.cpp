@@ -8,7 +8,6 @@
 // **********************************************************************
 
 #include <Slice/ObjCUtil.h>
-#include <Slice/ObjCNames.h>
 #include <IceUtil/Functional.h>
 #include <IceUtil/StringUtil.h>
 
@@ -31,33 +30,64 @@ using namespace IceUtilInternal;
 Slice::ObjCGenerator::ModuleMap Slice::ObjCGenerator::_modules;
 
 static string
-lookupKwd(const string& name, int baseTypes, bool mangleCasts = false)
+lookupKwd(const string& name, int baseType, bool mangleCasts = false)
 {
     //
-    // Keyword list. *Must* be kept in case-insensitive alphabetical order.
+    // All lists in this method *must* be kept in case-insensitive
+    // alphabetical order.
     //
     static string keywordList[] =
     {
-	"auto", "BOOL", "break", "bycopy", "byref", "case", "char", "Class", "const", "continue",
+	"auto", "BOOL", "break", "bycopy", "byref", "case", "char", "const", "continue",
 	"default", "do", "double", "else", "enum", "extern", "float", "for", "goto",
-	"id", "if", "IMP", "in", "inout", "int", "long", "nil", "NO", "oneway", "out",
+	"id", "if", "IMP", "in", "inline", "inout", "int", "long", "nil", "NO", "oneway", "out",
 	"register", "return", "SEL", "self", "short", "signed", "sizeof", "static", "struct", "super", "switch",
 	"typedef", "union", "unsigned", "void", "volatile", "while", "YES"
     };
-                        
+
+    static string nsObjectList[] = 
+    {
+        "autorelease", "class", "classForCoder", "copy", "dealloc", "description", "hash", "init", "isa",
+        "isProxy", "mutableCopy", "release", "retain", "retainCount", "superclass", "zone"
+    };
+    static string nsExceptionList[] = 
+    {
+        "callStackReturnAddresses", "name", "raise", "reason", "reserved", "userInfo",
+    };
+
     bool found = binary_search(&keywordList[0],
                                &keywordList[sizeof(keywordList) / sizeof(*keywordList)],
                                name,
                                Slice::CICompare());
-    if(found)
+    if(!found)
+    {
+        switch(baseType)
+        {
+        case BaseTypeNone:
+            break;
+
+        case BaseTypeException:
+            found = binary_search(&nsExceptionList[0],
+                                  &nsExceptionList[sizeof(nsExceptionList) / sizeof(*nsExceptionList)],
+                                  name,
+                                  Slice::CICompare());
+            if(found)
+            {
+                break;
+            }
+
+        case BaseTypeObject:
+            found = binary_search(&nsObjectList[0],
+                                  &nsObjectList[sizeof(nsObjectList) / sizeof(*nsObjectList)],
+                                  name,
+                                  Slice::CICompare());
+            break;
+        }
+    }
+    if(found || (mangleCasts && (name == "checkedCast" || name == "uncheckedCast")))
     {
         return name + "_";
     }
-    if(mangleCasts && (name == "checkedCast" || name == "uncheckedCast"))
-    {
-        return string(ObjC::manglePrefix) + name + string(ObjC::mangleSuffix);
-    }
-    return Slice::ObjC::mangleName(name, baseTypes);
     return name;
 }
 
@@ -111,12 +141,13 @@ Slice::ObjCGenerator::findModule(const ContainedPtr& cont, int baseTypes, bool m
 }
 
 //
-// If the passed name is a scoped name, return the identical scoped name,
-// but with all components that are Objective-C keywords replaced by
-// their prefixed version; otherwise, if the passed name is
-// not scoped, but an Objective-C keyword, return the prefixed name;
-// otherwise, check if the name is one of the method names of baseTypes;
-// if so, prefix it with ICE; otherwise, return the name unchanged.
+// If the passed name is a scoped name, return the identical scoped
+// name, but with all components that are Objective-C keywords
+// replaced by their prefixed version; otherwise, if the passed name
+// is not scoped, but an Objective-C keyword, return the prefixed
+// name; otherwise, check if the name is one of the method names of
+// baseTypes; if so, returned the prefixed name; otherwise, return the
+// name unchanged.
 //
 string
 Slice::ObjCGenerator::fixId(const string& name, int baseTypes, bool mangleCasts)
@@ -139,7 +170,7 @@ Slice::ObjCGenerator::fixId(const ContainedPtr& cont, int baseTypes, bool mangle
 string
 Slice::ObjCGenerator::fixName(const ContainedPtr& cont, int baseTypes, bool mangleCasts)
 {
-    return moduleName(findModule(cont, baseTypes, mangleCasts)) + fixId(cont->name());
+    return moduleName(findModule(cont, baseTypes, mangleCasts)) + cont->name();
 }
 
 string
@@ -496,21 +527,6 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
         {
             out << nl << "[" << stream << " readObject:(ICEObject**)&" << param 
                 << " typeId:@\"" << cl->scoped() << "\"];";
-//             if(isOutParam)
-//             {
-//                 //out << nl << "IceInternal.ParamPatcher<" << typeToString(type) << ">" << param
-//                     //<< "_PP = new IceInternal.ParamPatcher<" << typeToString(type) << ">(\""
-//                     //<< cl->scoped() << "\");";
-//                 out << nl << "[" << stream << " readObject:&" << param << "];"; // TODO: instantiate patcher
-// 		//out << "(Ice.ReadObjectCallback)";
-//                 //out << param << "_PP);";
-//             }
-//             else
-//             {
-//                 out << nl << "[" << stream << " readObject:nil];"; // TODO, instantiate callback
-// 		//out << "(Ice.ReadObjectCallback)";
-//                 //out << "new Patcher__(\"" << cl->scoped() << "\", " << patchParams << "));";
-//             }
         }
         return;
     }
@@ -670,36 +686,6 @@ Slice::ObjCGenerator::MetaDataVisitor::MetaDataVisitor()
 bool
 Slice::ObjCGenerator::MetaDataVisitor::visitModuleStart(const ModulePtr& p)
 {
-#if 0
-    if(!_globalMetaDataDone)
-    {
-        //
-        // Validate global metadata.
-        //
-        DefinitionContextPtr dc = p->definitionContext();
-        assert(dc);
-        StringList globalMetaData = dc->getMetaData();
-        string file = dc->filename();
-        static const string prefix = "cs:";
-        for(StringList::const_iterator q = globalMetaData.begin(); q != globalMetaData.end(); ++q)
-        {
-            string s = *q;
-            if(_history.count(s) == 0)
-            {
-                if(s.find(prefix) == 0)
-                {
-                    static const string attributePrefix = "cs:attribute:";
-                    if(s.find(attributePrefix) != 0 || s.size() == attributePrefix.size())
-                    {
-                        cout << file << ": warning: ignoring invalid global metadata `" << s << "'" << endl;
-                    }
-                }
-                _history.insert(s);
-            }
-        }
-        _globalMetaDataDone = true;
-    }
-#endif
     validate(p);
     return true;
 }

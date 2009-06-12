@@ -30,7 +30,6 @@ OBJS		= Scanner.o \
 		  FileTracker.o \
 		  MD5.o \
 		  MD5I.o \
-		  ObjCNames.o \
 		  ObjCUtil.o
 
 SRCS		= $(OBJS:.o=.cpp)

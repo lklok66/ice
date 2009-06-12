@@ -25,8 +25,8 @@ public:
 
 protected:
 
-    virtual void writeInheritedOperations(const ClassDefPtr&);
-    virtual void writeDispatchAndMarshalling(const ClassDefPtr&, bool);
+    virtual void writeDispatchAndMarshalling(const ClassDefPtr&);
+    virtual std::string getName(const OperationPtr&) const;
     virtual std::string getSelector(const OperationPtr&) const;
     virtual std::string getParams(const OperationPtr&) const;
     virtual std::string getServerParams(const OperationPtr&) const;
@@ -37,11 +37,6 @@ protected:
     virtual std::string getArgsAsync(const OperationPtr&, bool);
     virtual std::string getArgsAsyncCB(const OperationPtr&);
     virtual std::string getSigAsyncCB(const OperationPtr&);
-
-    void emitAttributes(const ContainedPtr&);
-    ::std::string getParamAttributes(const ParamDeclPtr&);
-
-    ::std::string writeValue(const TypePtr&);
 
     ::IceUtilInternal::Output& _H;
     ::IceUtilInternal::Output& _M;
@@ -55,32 +50,22 @@ public:
         const std::string&,
         const std::string&,
         const std::vector<std::string>&,
-        const std::string&,
-        bool,
-        bool);
+        const std::string&);
     ~Gen();
 
     bool operator!() const; // Returns true if there was a constructor error
 
     void generate(const UnitPtr&);
-    void generateTie(const UnitPtr&);
-    void generateImpl(const UnitPtr&);
-    void generateImplTie(const UnitPtr&);
-    void generateChecksums(const UnitPtr&);
     void closeOutput();
 
 private:
 
     IceUtilInternal::Output _H;
     IceUtilInternal::Output _M;
-    IceUtilInternal::Output _implH;
-    IceUtilInternal::Output _implM;
 
     std::string _base;
     std::string _include;
     std::vector<std::string> _includePaths;
-    bool _impl;
-    bool _stream;
 
     void printHeader(::IceUtilInternal::Output&);
 
@@ -88,14 +73,13 @@ private:
     {
     public:
 
-        UnitVisitor(::IceUtilInternal::Output&, ::IceUtilInternal::Output&, bool);
+        UnitVisitor(::IceUtilInternal::Output&, ::IceUtilInternal::Output&);
 
         virtual bool visitModuleStart(const ModulePtr&);
         virtual void visitUnitEnd(const UnitPtr&);
 
     private:
 
-        bool _stream;
         bool _globalMetaDataDone;
         std::vector<Slice::ObjCGenerator::ModulePrefix> _prefixes;
     };
@@ -122,7 +106,7 @@ private:
     {
     public:
 
-        TypesVisitor(::IceUtilInternal::Output&, ::IceUtilInternal::Output&, bool);
+        TypesVisitor(::IceUtilInternal::Output&, ::IceUtilInternal::Output&);
 
         virtual bool visitModuleStart(const ModulePtr&);
         virtual void visitModuleEnd(const ModulePtr&);
@@ -154,8 +138,6 @@ private:
         void writeMemberDealloc(const DataMemberList&, int) const;
         void writeMemberMarshal(const ::std::string&, const DataMemberList&, int) const;
         void writeMemberUnmarshal(const ::std::string&, const DataMemberList&, int) const;
-
-        bool _stream;
     };
 
     class ProxyVisitor : public ObjCVisitor
@@ -173,15 +155,11 @@ private:
     {
     public:
 
-        HelperVisitor(::IceUtilInternal::Output&, ::IceUtilInternal::Output&, bool);
+        HelperVisitor(::IceUtilInternal::Output&, ::IceUtilInternal::Output&);
 
 	virtual void visitEnum(const EnumPtr&);
         virtual void visitSequence(const SequencePtr&);
         virtual void visitDictionary(const DictionaryPtr&);
-
-    private:
-
-        bool _stream;
     };
 
     class DelegateMVisitor : public ObjCVisitor
@@ -196,59 +174,6 @@ private:
         virtual void visitClassDefEnd(const ClassDefPtr&);
         virtual void visitOperation(const OperationPtr&);
     };
-
-#if 0
-    class TieVisitor : public ObjCVisitor
-    {
-    public:
-
-        TieVisitor(::IceUtilInternal::Output&);
-
-        virtual bool visitModuleStart(const ModulePtr&);
-        virtual void visitModuleEnd(const ModulePtr&);
-        virtual bool visitClassDefStart(const ClassDefPtr&);
-        virtual void visitClassDefEnd(const ClassDefPtr&);
-
-    private:
-
-        typedef ::std::set< ::std::string> NameSet;
-        void writeInheritedOperationsWithOpNames(const ClassDefPtr&, NameSet&);
-    };
-
-    class BaseImplVisitor : public ObjCVisitor
-    {
-    public:
-
-        BaseImplVisitor(::IceUtilInternal::Output&);
-
-    protected:
-
-        void writeOperation(const OperationPtr&, bool, bool);
-    };
-
-    class ImplVisitor : public BaseImplVisitor
-    {
-    public:
-
-        ImplVisitor(::IceUtilInternal::Output&);
-
-        virtual bool visitModuleStart(const ModulePtr&);
-        virtual void visitModuleEnd(const ModulePtr&);
-        virtual bool visitClassDefStart(const ClassDefPtr&);
-        virtual void visitClassDefEnd(const ClassDefPtr&);
-    };
-
-    class ImplTieVisitor : public BaseImplVisitor
-    {
-    public:
-
-        ImplTieVisitor(::IceUtilInternal::Output&);
-
-        virtual bool visitModuleStart(const ModulePtr&);
-        virtual void visitModuleEnd(const ModulePtr&);
-        virtual bool visitClassDefStart(const ClassDefPtr&);
-    };
-#endif
 };
 
 }
