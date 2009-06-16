@@ -44,8 +44,8 @@ embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 # The default is to build for a MacOSX command line dynamic library.
 #
 
-IPHONE_SDK_VERSION		= 2.0
-#IPHONE_SDK_VERSION		= 3.0
+# The default SDK version is 3.0.
+#IPHONE_SDK_VERSION		= 2.0
 
 #
 # You can choose to build static libraries for the MacOSX command line
@@ -62,6 +62,10 @@ IPHONE_SDK_VERSION		= 2.0
 #
 ice_language     = objc
 slice_translator = slice2objc
+
+ifeq ($(IPHONE_SDK_VERSION),)
+IPHONE_SDK_VERSION		= 3.0
+endif
 
 ifeq ($(COMPILE_FOR_COCOA),yes)
     STATICLIBS = yes
@@ -97,7 +101,7 @@ else
     COMPILE_FOR_MACOSX = yes
 endif
 
-SDK_DIR                 = $(top_srcdir)/SDK/IceTouch/$(PLATFORM_NAME).sdk
+SDK_DIR                 = $(top_srcdir)/SDK/IceTouch-$(VERSION)/$(PLATFORM_NAME).sdk
 
 bindir			= $(top_srcdir)/bin
 includedir		= $(top_srcdir)/include

@@ -18,7 +18,7 @@ install::
 
 else
 
-INSTALL_DIR = $(top_srcdir)/SDK/IceTouch/$(PLATFORM_NAME).sdk/usr/local/include/Glacier2
+INSTALL_DIR = $(SDK_DIR)/usr/local/include/Glacier2
 
 all::
 endif

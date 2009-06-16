@@ -18,7 +18,7 @@ INSTALL_DIR = $(install_includedir)/Ice
 install::
 else
 
-INSTALL_DIR = $(top_srcdir)/SDK/IceTouch/$(PLATFORM_NAME).sdk/usr/local/include/Ice
+INSTALL_DIR = $(SDK_DIR)/usr/local/include/Ice
 
 all::
 endif
