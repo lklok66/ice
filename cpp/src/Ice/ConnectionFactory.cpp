@@ -1260,7 +1260,7 @@ IceInternal::IncomingConnectionFactory::waitUntilFinished()
         // First we wait until the factory is destroyed. If we are using
         // an acceptor, we also wait for it to be closed.
         //
-        while(_state != StateClosed || _acceptor)
+        while(_state != StateFinished)
         {
             wait();
         }
@@ -1270,7 +1270,6 @@ IceInternal::IncomingConnectionFactory::waitUntilFinished()
         //
         _adapter = 0;
 
-        //
         // We want to wait until all connections are finished outside the
         // thread synchronization.
         //
@@ -1326,68 +1325,79 @@ IceInternal::IncomingConnectionFactory::flushBatchRequests()
     }
 }
 
+#ifdef ICE_USE_IOCP
 bool
-IceInternal::IncomingConnectionFactory::datagram() const
+IceInternal::IncomingConnectionFactory::startAsync(SocketOperation)
 {
-    return _endpoint->datagram();
-}
-
-bool
-IceInternal::IncomingConnectionFactory::readable() const
-{
-    return false;
-}
-
-bool
-IceInternal::IncomingConnectionFactory::read(BasicStream&)
-{
-    assert(false); // Must not be called, readable() returns false.
-    return false;
-}
-
-class PromoteFollower
-{
-public:
-
-    PromoteFollower(const ThreadPoolPtr& threadPool) :
-        _threadPool(threadPool)
+    if(_state >= StateClosed)
     {
+        return false;
     }
 
-    ~PromoteFollower()
+    try
     {
-        _threadPool->promoteFollower();
+        _acceptor->startAccept();
+    }
+    catch(const Ice::LocalException& ex)
+    {
+        {
+            Error out(_instance->initializationData().logger);
+            out << "can't accept connections:\n" << ex << '\n' << _acceptor->toString();
+        }
+        abort();
+    }
+    return true;
+}
+
+bool
+IceInternal::IncomingConnectionFactory::finishAsync(SocketOperation)
+{
+    if(_state >= StateClosed)
+    {
+        return false;
     }
 
-private:
+    assert(_acceptor);
+    try
+    {
+        _acceptor->finishAccept();
+    }
+    catch(const LocalException& ex)
+    {
+        Error out(_instance->initializationData().logger);
+        out << "couldn't accept connection:\n" << ex << '\n' << _acceptor->toString();
+        return false;
+    }    
+    return true;
+}
+#endif
 
-    const ThreadPoolPtr _threadPool;
-};
-
-void
-IceInternal::IncomingConnectionFactory::message(BasicStream&, const ThreadPoolPtr& threadPool)
+bool
+IceInternal::IncomingConnectionFactory::message(ThreadPoolCurrent& curr)
 {
     ConnectionIPtr connection;
 
+    ThreadPoolMessage<IncomingConnectionFactory> msg(_threadPool.get(), this, curr);
+
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
-        
-        //
-        // This makes sure that we promote a follower before we leave
-        // the scope of the mutex above, but after we call accept()
-        // (if we call it).
-        //
-        // If _threadPool is null, then this class doesn't do
-        // anything.
-        //
-        PromoteFollower promote(threadPool);
 
-        if(_state != StateActive)
+        ThreadPoolMessage<IncomingConnectionFactory>::IOScope io(msg);
+        if(!io)
+        {
+            return false;
+        }
+
+        if(_state >= StateClosed)
+        {
+            return false;
+        }
+        else if(_state == StateHolding)
         {
             IceUtil::ThreadControl::yield();
-            return;
+            return false;
         }
-        
+
         //
         // Reap connections for which destruction has completed.
         //
@@ -1415,12 +1425,12 @@ IceInternal::IncomingConnectionFactory::message(BasicStream&, const ThreadPoolPt
             }
 
             // Ignore socket exceptions.
-            return;
+            return false;
         }
         catch(const TimeoutException&)
         {
             // Ignore timeouts.
-            return;
+            return false;
         }
         catch(const LocalException& ex)
         {
@@ -1430,7 +1440,7 @@ IceInternal::IncomingConnectionFactory::message(BasicStream&, const ThreadPoolPt
                 Warning out(_instance->initializationData().logger);
                 out << "connection exception:\n" << ex << '\n' << _acceptor->toString();
             }
-            return;
+            return false;
         }
 
         assert(transceiver);
@@ -1455,45 +1465,22 @@ IceInternal::IncomingConnectionFactory::message(BasicStream&, const ThreadPoolPt
                 Warning out(_instance->initializationData().logger);
                 out << "connection exception:\n" << ex << '\n' << _acceptor->toString();
             }
-            return;
+            return false;
         }
 
         _connections.push_back(connection);
     }
 
     assert(connection);
-
     connection->start(this);
+    return false;
 }
 
 void
-IceInternal::IncomingConnectionFactory::finished(const ThreadPoolPtr& threadPool)
+IceInternal::IncomingConnectionFactory::finished()
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
-
-    threadPool->promoteFollower();
-    assert(threadPool.get() == dynamic_cast<ObjectAdapterI*>(_adapter.get())->getThreadPool().get());
-    assert(_state == StateClosed);
-
-    dynamic_cast<ObjectAdapterI*>(_adapter.get())->getThreadPool()->decFdsInUse();
-    _acceptor->close();
-    _acceptor = 0;
-    notifyAll();
-}
-
-void
-IceInternal::IncomingConnectionFactory::exception(const LocalException&)
-{
-    assert(false); // Must not be called.
-}
-
-SOCKET
-IceInternal::IncomingConnectionFactory::fd() const
-{
-    // This method is called by the thread pool, as long as the factory is registered
-    // with the pool, we have the guarantee that _acceptor won't be cleared.
-    assert(_acceptor);
-    return _acceptor->fd();
+    setState(StateFinished);
 }
 
 string
@@ -1508,6 +1495,18 @@ IceInternal::IncomingConnectionFactory::toString() const
     
     assert(_acceptor);
     return _acceptor->toString();
+}
+
+NativeInfoPtr
+IceInternal::IncomingConnectionFactory::getNativeInfo()
+{
+    if(_transceiver)
+    {
+        return _transceiver->getNativeInfo();
+    }
+
+    assert(_acceptor);
+    return _acceptor->getNativeInfo();
 }
 
 void
@@ -1530,7 +1529,7 @@ IceInternal::IncomingConnectionFactory::connectionStartFailed(const Ice::Connect
                                                               const Ice::LocalException& ex)
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
-    if(_state == StateClosed)
+    if(_state >= StateClosed)
     {
         return;
     }
@@ -1560,9 +1559,10 @@ IceInternal::IncomingConnectionFactory::connectionStartFailed(const Ice::Connect
 IceInternal::IncomingConnectionFactory::IncomingConnectionFactory(const InstancePtr& instance,
                                                                   const EndpointIPtr& endpoint,
                                                                   const ObjectAdapterPtr& adapter) :
-    EventHandler(instance),
+    _instance(instance),
     _endpoint(endpoint),
     _adapter(adapter),
+    _threadPool(dynamic_cast<ObjectAdapterI*>(_adapter.get())->getThreadPool()),
     _warn(_instance->initializationData().properties->getPropertyAsInt("Ice.Warn.Connections") > 0),
     _state(StateHolding)
 {
@@ -1582,8 +1582,6 @@ IceInternal::IncomingConnectionFactory::initialize(const string& adapterName)
         const_cast<EndpointIPtr&>(_endpoint) =
             _endpoint->compress(_instance->defaultsAndOverrides()->overrideCompressValue);
     }
-
-    ObjectAdapterI* adapterImpl = dynamic_cast<ObjectAdapterI*>(_adapter.get());
 
     const_cast<TransceiverPtr&>(_transceiver) = _endpoint->transceiver(const_cast<EndpointIPtr&>(_endpoint));
     if(_transceiver)
@@ -1616,31 +1614,13 @@ IceInternal::IncomingConnectionFactory::initialize(const string& adapterName)
         _acceptor = _endpoint->acceptor(const_cast<EndpointIPtr&>(_endpoint), adapterName);
         assert(_acceptor);
         _acceptor->listen();
-
-        try
-        {
-            adapterImpl->getThreadPool()->incFdsInUse();
-        }
-        catch(const IceUtil::Exception&)
-        {
-            try
-            {
-                _acceptor->close();
-            }
-            catch(const LocalException&)
-            {
-                // Here we ignore any exceptions in close().
-            }
-            _acceptor = 0;
-            throw;
-        }
+        _threadPool->initialize(this);
     }
 }
 
 IceInternal::IncomingConnectionFactory::~IncomingConnectionFactory()
 {
-    //assert(_state == StateClosed);
-    assert(!_acceptor);
+    //assert(_state == StateFinished);
     assert(_connections.empty());
 }
 
@@ -1662,7 +1642,7 @@ IceInternal::IncomingConnectionFactory::setState(State state)
             }
             if(_acceptor)
             {
-                dynamic_cast<ObjectAdapterI*>(_adapter.get())->getThreadPool()->_register(this);
+                dynamic_cast<ObjectAdapterI*>(_adapter.get())->getThreadPool()->_register(this, SocketOperationRead);
             }
             for_each(_connections.begin(), _connections.end(), Ice::voidMemFun(&ConnectionI::activate));
             break;
@@ -1676,7 +1656,7 @@ IceInternal::IncomingConnectionFactory::setState(State state)
             }
             if(_acceptor)
             {
-                dynamic_cast<ObjectAdapterI*>(_adapter.get())->getThreadPool()->unregister(this);
+                dynamic_cast<ObjectAdapterI*>(_adapter.get())->getThreadPool()->unregister(this, SocketOperationRead);
             }
             for_each(_connections.begin(), _connections.end(), Ice::voidMemFun(&ConnectionI::hold));
             break;
@@ -1688,6 +1668,10 @@ IceInternal::IncomingConnectionFactory::setState(State state)
             {
                 dynamic_cast<ObjectAdapterI*>(_adapter.get())->getThreadPool()->finish(this);
             }
+            else
+            {
+                state = StateFinished;
+            }
 
 #ifdef _STLP_BEGIN_NAMESPACE
             // voidbind2nd is an STLport extension for broken compilers in IceUtil/Functional.h
@@ -1697,6 +1681,16 @@ IceInternal::IncomingConnectionFactory::setState(State state)
             for_each(_connections.begin(), _connections.end(),
                      bind2nd(Ice::voidMemFun1(&ConnectionI::destroy), ConnectionI::ObjectAdapterDeactivated));
 #endif
+            break;
+        }
+
+        case StateFinished:
+        {
+            assert(_state == StateClosed);
+            if(_acceptor)
+            {
+                _acceptor->close();
+            }
             break;
         }
     }

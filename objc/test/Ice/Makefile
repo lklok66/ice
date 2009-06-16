@@ -24,6 +24,7 @@ SUBDIRS		= proxy \
 		  adapterDeactivation \
 		  slicing \
 		  binding \
+		  hold \
 		  retry \
 		  timeout
 

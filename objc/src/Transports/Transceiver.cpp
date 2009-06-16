@@ -37,18 +37,24 @@ fromCFString(CFStringRef ref)
    return string(buf);
 }
 
-SOCKET
-IceObjC::Transceiver::fd()
+IceInternal::NativeInfoPtr
+IceObjC::Transceiver::getNativeInfo()
 {
-    assert(_fd != INVALID_SOCKET);
-    return _fd;
+    return this;
 }
 
-void*
-IceObjC::Transceiver::stream()
+CFReadStreamRef
+IceObjC::Transceiver::readStream()
 {
     assert(_readStream);
     return _readStream;
+}
+
+CFWriteStreamRef
+IceObjC::Transceiver::writeStream()
+{
+    assert(_writeStream);
+    return _writeStream;
 }
 
 void
@@ -292,12 +298,6 @@ IceObjC::Transceiver::read(Buffer& buf)
     return true;
 }
 
-bool
-IceObjC::Transceiver::hasMoreData()
-{
-    return CFReadStreamHasBytesAvailable(_readStream) || CFReadStreamGetStatus(_readStream) == kCFStreamStatusError;
-}
-
 string
 IceObjC::Transceiver::type() const
 {
@@ -310,24 +310,32 @@ IceObjC::Transceiver::toString() const
     return _desc;
 }
 
-SocketStatus
+SocketOperation
 IceObjC::Transceiver::initialize()
 {
     if(_state == StateNeedConnect)
     {
+        CFWriteStreamOpen(_writeStream);
+        CFReadStreamOpen(_readStream);
+
         _state = StateConnectPending;
-        return NeedConnect;
+        if(CFWriteStreamGetStatus(_writeStream) <= kCFStreamStatusOpening && 
+           CFReadStreamGetStatus(_readStream) <= kCFStreamStatusOpening)
+        {
+            return SocketOperationConnect;
+        }
     }
-    else if(_state <= StateConnectPending)
+    
+    if(_state <= StateConnectPending)
     {
         try
         {
-            CFStreamStatus status = CFReadStreamGetStatus(_readStream);
+            CFStreamStatus status = CFWriteStreamGetStatus(_writeStream);
             assert(status > kCFStreamStatusOpening);
 
             if(status == kCFStreamStatusError)
             {
-                CFErrorRef err = CFReadStreamCopyError(_readStream);
+                CFErrorRef err = CFWriteStreamCopyError(_writeStream);
                 CFStringRef domain = CFErrorGetDomain(err);
                 if(CFStringCompare(domain, kCFErrorDomainPOSIX, 0) == kCFCompareEqualTo)
                 {
@@ -407,9 +415,6 @@ IceObjC::Transceiver::initialize()
 
             setBlock(_fd, false);
             setTcpBufSize(_fd, _instance->initializationData().properties, _logger);
-
-            CFWriteStreamOpen(_writeStream);
-            assert(CFWriteStreamGetStatus(_writeStream) > kCFStreamStatusOpening);
         }
         catch(const Ice::LocalException& ex)
         {
@@ -435,7 +440,7 @@ IceObjC::Transceiver::initialize()
         }
     }
     assert(_state == StateConnected);
-    return Finished;
+    return SocketOperationNone;
 }
 
 void
@@ -457,7 +462,6 @@ IceObjC::Transceiver::Transceiver(const InstancePtr& instance,
     _logger(instance->initializationData().logger),
     _stats(instance->initializationData().stats),
     _host(host),
-    _fd(INVALID_SOCKET),
     _readStream(readStream),
     _writeStream(writeStream),
     _checkCertificates(instance->type() == SslEndpointType),
@@ -473,11 +477,11 @@ IceObjC::Transceiver::Transceiver(const InstancePtr& instance,
                                   CFReadStreamRef readStream,
                                   CFWriteStreamRef writeStream,
                                   SOCKET fd) :
+    NativeInfo(fd),
     _instance(instance),
     _traceLevels(instance->traceLevels()),
     _logger(instance->initializationData().logger),
     _stats(instance->initializationData().stats),
-    _fd(fd),
     _readStream(readStream),
     _writeStream(writeStream),
     _checkCertificates(false),

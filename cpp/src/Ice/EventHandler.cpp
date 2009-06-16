@@ -17,17 +17,14 @@ using namespace IceInternal;
 IceUtil::Shared* IceInternal::upCast(EventHandler* p) { return p; }
 ICE_DECLSPEC_EXPORT IceUtil::Shared* IceInternal::upCast(ThreadPoolWorkItem* p) { return p; }
 
-InstancePtr
-IceInternal::EventHandler::instance() const
-{
-    return _instance;
-}
-
-IceInternal::EventHandler::EventHandler(const InstancePtr& instance) :
-    _instance(instance),
-    _stream(_instance.get()),
-    _serializing(false),
-    _registered(false)
+IceInternal::EventHandler::EventHandler() :
+#ifdef ICE_USE_IOCP
+    _pending(SocketOperationNone),
+    _ready(SocketOperationNone),
+#else
+    _disabled(SocketOperationNone),
+#endif
+    _registered(SocketOperationNone)
 {
 }
 

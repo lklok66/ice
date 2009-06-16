@@ -29,12 +29,29 @@ using namespace std;
 using namespace Ice;
 using namespace IceInternal;
 
-SOCKET
-IceInternal::UdpTransceiver::fd()
+NativeInfoPtr
+IceInternal::UdpTransceiver::getNativeInfo()
 {
-    assert(_fd != INVALID_SOCKET);
-    return _fd;
+    return this;
 }
+
+
+#if defined(ICE_USE_IOCP)
+AsyncInfo*
+IceInternal::UdpTransceiver::getAsyncInfo(SocketOperation status)
+{
+    switch(status)
+    {
+    case SocketOperationRead:
+        return &_read;
+    case SocketOperationWrite:
+        return &_write;
+    default:
+        assert(false);
+        return 0;
+    }
+}
+#endif
 
 void
 IceInternal::UdpTransceiver::close()
@@ -69,7 +86,7 @@ IceInternal::UdpTransceiver::write(Buffer& buf)
     }
 
 repeat:
-
+    assert(!_connect);
     assert(_fd != INVALID_SOCKET);
 #ifdef _WIN32
     ssize_t ret = ::send(_fd, reinterpret_cast<const char*>(&buf.b[0]), static_cast<int>(buf.b.size()), 0);
@@ -220,6 +237,173 @@ repeat:
     return true;
 }
 
+#ifdef ICE_USE_IOCP
+void
+IceInternal::UdpTransceiver::startWrite(Buffer& buf)
+{
+    assert(buf.i == buf.b.begin());
+
+    //
+    // The maximum packetSize is either the maximum allowable UDP
+    // packet size, or the UDP send buffer size (which ever is
+    // smaller).
+    //
+    const int packetSize = min(_maxPacketSize, _sndSize - _udpOverhead);
+    if(packetSize < static_cast<int>(buf.b.size()))
+    {
+        //
+        // We don't log a warning here because the client gets an exception anyway.
+        //
+        throw DatagramLimitException(__FILE__, __LINE__);
+    }
+
+    assert(!_connect);
+    assert(_fd != INVALID_SOCKET);
+
+    _write.buf.len = static_cast<int>(buf.b.size());
+    _write.buf.buf = reinterpret_cast<char*>(&*buf.i);
+    int err = WSASend(_fd, &_write.buf, 1, &_write.count, 0, &_write, NULL);
+    if(err == SOCKET_ERROR)
+    {
+        if(!wouldBlock())
+        {
+            if(connectionLost())
+            {
+                ConnectionLostException ex(__FILE__, __LINE__);
+                ex.error = getSocketErrno();
+                throw ex;
+            }
+            else
+            {
+                SocketException ex(__FILE__, __LINE__);
+                ex.error = getSocketErrno();
+                throw ex;
+            }
+        }
+    }
+}
+
+void
+IceInternal::UdpTransceiver::finishWrite(Buffer& buf)
+{
+    if(_write.count == SOCKET_ERROR)
+    {
+        WSASetLastError(_write.error);
+        if(connectionLost())
+        {
+            ConnectionLostException ex(__FILE__, __LINE__);
+            ex.error = getSocketErrno();
+            throw ex;
+        }
+        else
+        {
+            SocketException ex(__FILE__, __LINE__);
+            ex.error = getSocketErrno();
+            throw ex;
+        }
+    }
+
+    if(_traceLevels->network >= 3)
+    {
+        Trace out(_logger, _traceLevels->networkCat);
+        out << "sent " << _write.count << " bytes via udp\n" << toString();
+    }
+
+    if(_stats)
+    {
+        _stats->bytesSent(type(), static_cast<Int>(_write.count));
+    }
+
+    assert(_write.count == static_cast<ssize_t>(buf.b.size()));
+    buf.i = buf.b.end();
+}
+
+void
+IceInternal::UdpTransceiver::startRead(Buffer& buf)
+{
+    //
+    // The maximum packetSize is either the maximum allowable UDP
+    // packet size, or the UDP send buffer size (which ever is
+    // smaller).
+    //
+    const int packetSize = min(_maxPacketSize, _rcvSize - _udpOverhead);
+    if(packetSize < static_cast<int>(buf.b.size()))
+    {
+        //
+        // We log a warning here because this is the server side -- without the
+        // the warning, there would only be silence.
+        //
+        if(_warn)
+        {
+            Warning out(_logger);
+            out << "DatagramLimitException: maximum size of " << packetSize << " exceeded";
+        }
+        throw DatagramLimitException(__FILE__, __LINE__);
+    }
+    buf.b.resize(packetSize);
+    buf.i = buf.b.begin();
+
+    assert(!buf.b.empty() && buf.i != buf.b.end());
+
+    _read.buf.len = packetSize;
+    _read.buf.buf = reinterpret_cast<char*>(&*buf.i);
+    int err = WSARecv(_fd, &_read.buf, 1, &_read.count, &_read.flags, &_read, NULL);
+    if(err == SOCKET_ERROR)
+    {
+        if(!wouldBlock())
+        {
+            if(connectionLost())
+            {
+                ConnectionLostException ex(__FILE__, __LINE__);
+                ex.error = getSocketErrno();
+                throw ex;
+            }
+            else
+            {
+                SocketException ex(__FILE__, __LINE__);
+                ex.error = getSocketErrno();
+                throw ex;
+            }
+        }
+    }
+}
+
+void
+IceInternal::UdpTransceiver::finishRead(Buffer& buf)
+{
+    if(_read.count == SOCKET_ERROR)
+    {
+        WSASetLastError(_read.error);
+        if(connectionLost())
+        {
+            ConnectionLostException ex(__FILE__, __LINE__);
+            ex.error = getSocketErrno();
+            throw ex;
+        }
+        else
+        {
+            SocketException ex(__FILE__, __LINE__);
+            ex.error = getSocketErrno();
+            throw ex;
+        }
+    }
+
+    if(_traceLevels->network >= 3)
+    {
+        Trace out(_logger, _traceLevels->networkCat);
+        out << "received " << _read.count << " bytes via udp\n" << toString();
+    }
+
+    if(_stats)
+    {
+        _stats->bytesReceived(type(), static_cast<Int>(_read.count));
+    }
+
+    buf.b.resize(_read.count);
+    buf.i = buf.b.end();
+}
+#endif
+
 string
 IceInternal::UdpTransceiver::type() const
 {
@@ -239,7 +423,7 @@ IceInternal::UdpTransceiver::toString() const
     }
 }
 
-SocketStatus
+SocketOperation
 IceInternal::UdpTransceiver::initialize()
 {
     if(!_incoming)
@@ -247,11 +431,11 @@ IceInternal::UdpTransceiver::initialize()
         if(_connect)
         {
             //
-            // If we're not connected yet, return NeedConnect. The transceiver will be 
+            // If we're not connected yet, return SocketOperationConnect. The transceiver will be 
             // connected once initialize is called again.
             //
             _connect = false;
-            return NeedConnect;
+            return SocketOperationConnect;
         }
         else
         {
@@ -260,10 +444,10 @@ IceInternal::UdpTransceiver::initialize()
                 Trace out(_logger, _traceLevels->networkCat);
                 out << "starting to send udp packets\n" << toString();
             }
-            return Finished;
+            return SocketOperationNone;
         }
     }
-    return Finished;
+    return SocketOperationNone;
 }
 
 void
@@ -295,37 +479,33 @@ IceInternal::UdpTransceiver::UdpTransceiver(const InstancePtr& instance, const s
     _addr(addr),
     _connect(true),
     _warn(instance->initializationData().properties->getPropertyAsInt("Ice.Warn.Datagrams") > 0)
+#ifdef ICE_USE_IOCP
+    , _read(SocketOperationRead), 
+    _write(SocketOperationWrite)
+#endif
 {
-    try
+    // AF_UNSPEC means not multicast.
+    _mcastAddr.ss_family = AF_UNSPEC;
+
+    _fd = createSocket(true, _addr.ss_family);
+    setBufSize(instance);
+    setBlock(_fd, false);
+    
+    if(doConnect(_fd, _addr))
     {
-        // AF_UNSPEC means not multicast.
-        _mcastAddr.ss_family = AF_UNSPEC;
-
-        _fd = createSocket(true, _addr.ss_family);
-        setBufSize(instance);
-        setBlock(_fd, false);
-
-        if(doConnect(_fd, _addr))
-        {
-            _connect = false; // We're connected now
-        }
-
-        if(isMulticast(_addr))
-        {
-            if(mcastInterface.length() > 0)
-            {
-                setMcastInterface(_fd, mcastInterface, _addr.ss_family == AF_INET);
-            }
-            if(mcastTtl != -1)
-            {
-                setMcastTtl(_fd, mcastTtl, _addr.ss_family == AF_INET);
-            }
-        }
+        _connect = false; // We're connected now
     }
-    catch(...)
+    
+    if(isMulticast(_addr))
     {
-        _fd = INVALID_SOCKET;
-        throw;
+        if(mcastInterface.length() > 0)
+        {
+            setMcastInterface(_fd, mcastInterface, _addr.ss_family == AF_INET);
+        }
+        if(mcastTtl != -1)
+        {
+            setMcastTtl(_fd, mcastTtl, _addr.ss_family == AF_INET);
+        }
     }
 }
 
@@ -335,86 +515,72 @@ IceInternal::UdpTransceiver::UdpTransceiver(const InstancePtr& instance, const s
     _logger(instance->initializationData().logger),
     _stats(instance->initializationData().stats),
     _incoming(true),
+    _addr(getAddressForServer(host, port, instance->protocolSupport())),
     _connect(connect),
     _warn(instance->initializationData().properties->getPropertyAsInt("Ice.Warn.Datagrams") > 0)
+#ifdef ICE_USE_IOCP
+    , _read(SocketOperationRead), 
+    _write(SocketOperationWrite)
+#endif
 {
-    try
+    _fd = createSocket(true, _addr.ss_family);
+    setBufSize(instance);
+    setBlock(_fd, false);
+    if(_traceLevels->network >= 2)
     {
-        getAddressForServer(host, port, _addr, instance->protocolSupport());
-        _fd = createSocket(true, _addr.ss_family);
-        setBufSize(instance);
-        setBlock(_fd, false);
-        if(_traceLevels->network >= 2)
-        {
-            Trace out(_logger, _traceLevels->networkCat);
-            out << "attempting to bind to udp socket " << addrToString(_addr);
-        }
+        Trace out(_logger, _traceLevels->networkCat);
+        out << "attempting to bind to udp socket " << addrToString(_addr);
+    }
 
-        if(isMulticast(_addr))
-        {
-            setReuseAddress(_fd, true);
+    if(isMulticast(_addr))
+    {
+        setReuseAddress(_fd, true);
+        _mcastAddr = _addr;
 
 #ifdef _WIN32
-            //
-            // Windows does not allow binding to the mcast address itself
-            // so we bind to INADDR_ANY (0.0.0.0) instead.
-            //
-            _mcastAddr = _addr;
-            getAddressForServer("", getPort(_mcastAddr), _addr,
+        //
+        // Windows does not allow binding to the mcast address itself
+        // so we bind to INADDR_ANY (0.0.0.0) instead.
+        //
+        const_cast<struct sockaddr_storage&>(_addr) =
+            getAddressForServer("", getPort(_mcastAddr),
                                 _mcastAddr.ss_family == AF_INET ? EnableIPv4 : EnableIPv6);
-            doBind(_fd, _addr);
-
-            if(getPort(_mcastAddr) == 0)
-            {
-                int port = getPort(_addr);
-                if(_mcastAddr.ss_family == AF_INET)
-                {
-                    reinterpret_cast<sockaddr_in*>(&_mcastAddr)->sin_port = htons(port);
-                }
-                else
-                {
-                    reinterpret_cast<sockaddr_in6*>(&_mcastAddr)->sin6_port = htons(port);
-                }
-            }
-#else
-            doBind(_fd, _addr);
-            _mcastAddr = _addr;
 #endif
-            setMcastGroup(_fd, _mcastAddr, mcastInterface);
-        }
-        else
-        {
-#ifndef _WIN32
-            //
-            // Enable SO_REUSEADDR on Unix platforms to allow re-using
-            // the socket even if it's in the TIME_WAIT state. On
-            // Windows, this doesn't appear to be necessary and
-            // enabling SO_REUSEADDR would actually not be a good
-            // thing since it allows a second process to bind to an
-            // address even it's already bound by another process.
-            //
-            // TODO: using SO_EXCLUSIVEADDRUSE on Windows would
-            // probably be better but it's only supported by recent
-            // Windows versions (XP SP2, Windows Server 2003).
-            //
-            setReuseAddress(_fd, true);
-#endif
-            doBind(_fd, _addr);
 
-            // AF_UNSPEC means not multicast.
-            _mcastAddr.ss_family = AF_UNSPEC;
-        }
-
-        if(_traceLevels->network >= 1)
+        const_cast<struct sockaddr_storage&>(_addr) = doBind(_fd, _addr);
+        if(getPort(_mcastAddr) == 0)
         {
-            Trace out(_logger, _traceLevels->networkCat);
-            out << "starting to receive udp packets\n" << toString();
+            setPort(_mcastAddr, getPort(_addr));
         }
+        setMcastGroup(_fd, _mcastAddr, mcastInterface);
     }
-    catch(...)
+    else
     {
-        _fd = INVALID_SOCKET;
-        throw;
+#ifndef _WIN32
+        //
+        // Enable SO_REUSEADDR on Unix platforms to allow re-using
+        // the socket even if it's in the TIME_WAIT state. On
+        // Windows, this doesn't appear to be necessary and
+        // enabling SO_REUSEADDR would actually not be a good
+        // thing since it allows a second process to bind to an
+        // address even it's already bound by another process.
+        //
+        // TODO: using SO_EXCLUSIVEADDRUSE on Windows would
+        // probably be better but it's only supported by recent
+        // Windows versions (XP SP2, Windows Server 2003).
+        //
+        setReuseAddress(_fd, true);
+#endif
+        const_cast<struct sockaddr_storage&>(_addr) = doBind(_fd, _addr);
+
+        // AF_UNSPEC means not multicast.
+        _mcastAddr.ss_family = AF_UNSPEC;
+    }
+
+    if(_traceLevels->network >= 1)
+    {
+        Trace out(_logger, _traceLevels->networkCat);
+        out << "starting to receive udp packets\n" << toString();
     }
 }
 

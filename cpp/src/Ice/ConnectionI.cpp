@@ -16,7 +16,6 @@
 #include <Ice/DefaultsAndOverrides.h>
 #include <Ice/Transceiver.h>
 #include <Ice/ThreadPool.h>
-#include <Ice/SelectorThread.h>
 #include <Ice/ConnectionMonitor.h>
 #include <Ice/ObjectAdapterI.h> // For getThreadPool() and getServantManager().
 #include <Ice/EndpointI.h>
@@ -27,7 +26,7 @@
 #include <Ice/ReferenceFactory.h> // For createProxy().
 #include <Ice/ProxyFactory.h> // For createProxy().
 
-#if defined(__APPLE__) && TARGET_OS_IPHONE == 0
+#if !defined(__APPLE__) || TARGET_OS_IPHONE == 0
 #include <bzlib.h>
 #endif
 
@@ -37,27 +36,26 @@ using namespace IceInternal;
 
 Ice::LocalObject* IceInternal::upCast(ConnectionI* p) { return p; }
 
-namespace IceInternal
+namespace
 {
 
-class FlushSentCallbacks : public ThreadPoolWorkItem
+class TimeoutCallback : public IceUtil::TimerTask
 {
 public:
 
-    FlushSentCallbacks(const Ice::ConnectionIPtr& connection) : _connection(connection)
+    TimeoutCallback(Ice::ConnectionI* connection) : _connection(connection)
     {
     }
 
     void
-    execute(const ThreadPoolPtr& threadPool)
+    runTimerTask()
     {
-        threadPool->promoteFollower();
-        _connection->flushSentCallbacks();
+        _connection->timedOut();
     }
-
+    
 private:
 
-    const Ice::ConnectionIPtr _connection;
+    Ice::ConnectionI* _connection;
 };
 
 }
@@ -149,34 +147,14 @@ Ice::ConnectionI::start(const StartCallbackPtr& callback)
     try
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
-        if(_state == StateClosed) // The connection might already be closed if the communicator was destroyed.
+        if(_state >= StateClosed) // The connection might already be closed if the communicator was destroyed.
         {
             assert(_exception.get());
             _exception->ice_throw();
         }
 
-        SocketStatus status = initialize();
-        if(status == Finished)
+        if(!initialize() || !validate())
         {
-            status = validate();
-        }
-
-        if(status != Finished)
-        {
-            int timeout;
-            DefaultsAndOverridesPtr defaultsAndOverrides = _instance->defaultsAndOverrides();
-            if(defaultsAndOverrides->overrideConnectTimeout)
-            {
-                timeout = defaultsAndOverrides->overrideConnectTimeoutValue;
-            }
-            else
-            {
-                timeout = _endpoint->timeout();
-            }
-
-            _sendInProgress = true;
-            _selectorThread->_register(this, status, timeout);
-
             if(callback)
             {
                 _startCallback = callback;
@@ -197,6 +175,11 @@ Ice::ConnectionI::start(const StartCallbackPtr& callback)
                 _exception->ice_throw();
             }
         }
+
+        //
+        // We start out in holding state.
+        //
+        setState(StateHolding);
     }
     catch(const Ice::LocalException& ex)
     {
@@ -324,12 +307,12 @@ Ice::ConnectionI::isFinished() const
         return false;
     }
 
-    if(_transceiver || _dispatchCount != 0)
+    if(_state != StateFinished || _dispatchCount != 0)
     {
         return false;
     }
 
-    assert(_state == StateClosed);
+    assert(_state == StateFinished);
     return true;
 }
 
@@ -377,9 +360,9 @@ Ice::ConnectionI::waitUntilFinished()
     // Now we must wait until close() has been called on the
     // transceiver.
     //
-    while(_transceiver)
+    while(_state != StateFinished)
     {
-        if(_state != StateClosed && _endpoint->timeout() >= 0)
+        if(_state < StateClosed && _endpoint->timeout() >= 0)
         {
             IceUtil::Time timeout = IceUtil::Time::milliSeconds(_endpoint->timeout());
             IceUtil::Time waitTime = _stateTime + timeout - IceUtil::Time::now(IceUtil::Time::Monotonic);
@@ -415,7 +398,7 @@ Ice::ConnectionI::waitUntilFinished()
         }
     }
 
-    assert(_state == StateClosed);
+    assert(_state == StateFinished);
 
     //
     // Clear the OA. See bug 1673 for the details of why this is necessary.
@@ -443,7 +426,7 @@ Ice::ConnectionI::monitor(const IceUtil::Time& now)
     if(_acmTimeout <= 0 ||
        !_requests.empty() || !_asyncRequests.empty() ||
        _batchStreamInUse || !_batchStream.b.empty() ||
-       _sendInProgress || _dispatchCount > 0)
+       !_sendStreams.empty() || _dispatchCount > 0)
     {
         return;
     }
@@ -915,7 +898,7 @@ Ice::ConnectionI::sendResponse(BasicStream* os, Byte compressFlag)
             notifyAll();
         }
 
-        if(_state == StateClosed)
+        if(_state >= StateClosed)
         {
             assert(_exception.get());
             _exception->ice_throw();
@@ -954,7 +937,7 @@ Ice::ConnectionI::sendNoResponse()
             notifyAll();
         }
 
-        if(_state == StateClosed)
+        if(_state >= StateClosed)
         {
             assert(_exception.get());
             _exception->ice_throw();
@@ -1032,103 +1015,13 @@ Ice::ConnectionI::createProxy(const Identity& ident) const
     return _instance->proxyFactory()->referenceToProxy(_instance->referenceFactory()->create(ident, self));
 }
 
-bool
-Ice::ConnectionI::datagram() const
-{
-    return _endpoint->datagram(); // No mutex protection necessary, _endpoint is immutable.
-}
-
-bool
-Ice::ConnectionI::readable() const
-{
-    return true;
-}
-
-bool
-Ice::ConnectionI::read(BasicStream& stream)
-{
-    return _transceiver->read(stream);
-
-    //
-    // Updating _acmAbsoluteTimeout is too expensive here, because we
-    // would have to acquire a lock just for this purpose. Instead, we
-    // update _acmAbsoluteTimeout in message().
-    //
-}
-
-#if defined(ICE_APPLE_CFNETWORK)
-bool
-Ice::ConnectionI::hasMoreData()
-{
-    return _transceiver->hasMoreData();
-}
-#endif
-
 void
-Ice::ConnectionI::message(BasicStream& stream, const ThreadPoolPtr& threadPool)
-{
-    Byte compress = 0;
-    Int requestId = 0;
-    Int invokeNum = 0;
-    ServantManagerPtr servantManager;
-    ObjectAdapterPtr adapter;
-    OutgoingAsyncPtr outAsync;
-
-    {
-        IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
-
-        //
-        // We must promote within the synchronization, otherwise there
-        // could be various race conditions with close connection
-        // messages and other messages.
-        //
-        threadPool->promoteFollower(this);
-
-        if(_state != StateClosed)
-        {
-            parseMessage(stream, invokeNum, requestId, compress, servantManager, adapter, outAsync);
-        }
-
-        //
-        // parseMessage() can close the connection, so we must check
-        // for closed state again.
-        //
-        if(_state == StateClosed)
-        {
-            return;
-        }
-    }
-
-    //
-    // Asynchronous replies must be handled outside the thread
-    // synchronization, so that nested calls are possible.
-    //
-    if(outAsync)
-    {
-        outAsync->__finished(stream);
-    }
-
-    //
-    // Method invocation (or multiple invocations for batch messages)
-    // must be done outside the thread synchronization, so that nested
-    // calls are possible.
-    //
-    invokeAll(stream, invokeNum, requestId, compress, servantManager, adapter);
-}
-
-void
-Ice::ConnectionI::finished(const ThreadPoolPtr& threadPool)
+Ice::ConnectionI::finished()
 {
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
-        assert(threadPool.get() == _threadPool.get() && _state == StateClosed && !_sendInProgress);
-
-        threadPool->promoteFollower();
-
-        _threadPool->decFdsInUse();
-        _selectorThread->decFdsInUse();
-
-        _flushSentCallbacks = 0; // Clear cyclic reference count.
+        assert(_state == StateClosed);
+        unscheduleTimeout(static_cast<SocketOperation>(SocketOperationRead | SocketOperationWrite));
     }
 
     if(_startCallback)
@@ -1137,11 +1030,16 @@ Ice::ConnectionI::finished(const ThreadPoolPtr& threadPool)
         _startCallback = 0;
     }
 
-    for(deque<OutgoingMessage>::iterator o = _sendStreams.begin(); o != _sendStreams.end(); ++o)
+    if(!_sendStreams.empty())
     {
-        o->finished(*_exception.get());
+        assert(!_writeStream.b.empty());
+        _writeStream.swap(*_sendStreams.front().stream);
+        for(deque<OutgoingMessage>::iterator o = _sendStreams.begin(); o != _sendStreams.end(); ++o)
+        {
+            o->finished(*_exception.get());
+        }
+        _sendStreams.clear(); // Must be cleared before _requests because of Outgoing* references in OutgoingMessage
     }
-    _sendStreams.clear(); // Must be cleared before _requests because of Outgoing* references in OutgoingMessage
 
     for(map<Int, Outgoing*>::iterator p = _requests.begin(); p != _requests.end(); ++p)
     {
@@ -1161,18 +1059,7 @@ Ice::ConnectionI::finished(const ThreadPoolPtr& threadPool)
     //
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
-        try
-        {
-            _transceiver->close();
-            _transceiver = 0;
-            notifyAll();
-        }
-        catch(const Ice::LocalException&)
-        {
-            _transceiver = 0;
-            notifyAll();
-            throw;
-        }
+        setState(StateFinished);
     }
 }
 
@@ -1218,109 +1105,331 @@ Ice::ConnectionI::timeout() const
     return _endpoint->timeout(); // No mutex lock, _endpoint is immutable.
 }
 
-SOCKET
-Ice::ConnectionI::fd() const
-{
-    // This method is called by the thread pool or selector thread, as long as the connection is registered
-    // with either the pool or selector thread, we have the guarantee that _transceiver won't be cleared.
-    assert(_transceiver);
-    return _transceiver->fd();
-}
-
 string
 Ice::ConnectionI::toString() const
 {
     return _desc; // No mutex lock, _desc is immutable.
 }
 
-//
-// Operations from SocketReadyCallback
-//
-SocketStatus
-Ice::ConnectionI::socketReady()
+NativeInfoPtr
+Ice::ConnectionI::getNativeInfo()
 {
-    StartCallbackPtr callback;
+    return _transceiver->getNativeInfo();
+}
+
+#ifdef ICE_USE_IOCP
+bool
+Ice::ConnectionI::startAsync(SocketOperation operation)
+{
+    if(_state >= StateClosed)
+    {
+        return false;
+    }
+
+    try
+    {
+        if(operation & SocketOperationWrite)                
+        {
+            _transceiver->startWrite(_writeStream);
+        }
+        else if(operation & SocketOperationRead)
+        {
+            _transceiver->startRead(_readStream);
+        }
+    }
+    catch(const Ice::LocalException& ex)
+    {
+        setState(StateClosed, ex);
+        return false;
+    }
+    return true;
+}
+
+bool
+Ice::ConnectionI::finishAsync(SocketOperation operation)
+{
+    if(_state >= StateClosed)
+    {
+        return false;
+    }
+
+    try
+    {
+        if(operation & SocketOperationWrite)
+        {
+            _transceiver->finishWrite(_writeStream);
+        }
+        else if(operation & SocketOperationRead)
+        {
+            _transceiver->finishRead(_readStream);
+        }
+    }
+    catch(const Ice::LocalException& ex)
+    {
+        setState(StateClosed, ex);
+        return false;
+    }
+    return true;
+}
+#endif
+
+bool
+Ice::ConnectionI::message(ThreadPoolCurrent& current)
+{
+    StartCallbackPtr startCB;
+    vector<OutgoingAsyncMessageCallbackPtr> sentCBs;
+    BasicStream stream(_instance.get());
+    Byte compress = 0;
+    Int requestId = 0;
+    Int invokeNum = 0;
+    ServantManagerPtr servantManager;
+    ObjectAdapterPtr adapter;
+    OutgoingAsyncPtr outAsync;
+
+    ThreadPoolMessage<ConnectionI> msg(_threadPool.get(), this, current);
 
     {
         IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
-        assert(_sendInProgress);
 
-        if(_state == StateClosed)
+        ThreadPoolMessage<ConnectionI>::IOScope io(msg);
+        if(!io)
         {
-            return Finished;
+            return false;
+        }
+
+        if(_state >= StateClosed)
+        {
+            return false;
         }
 
         try
         {
-            //
-            // First, we check if there's something to send. If that's the case, the connection
-            // must be active and the only thing to do is send the queued streams.
-            //
-            if(!_sendStreams.empty())
+            unscheduleTimeout(current.operation);
+            if(current.operation & SocketOperationWrite && !_writeStream.b.empty())
             {
-                if(!send())
+                if(_writeStream.i != _writeStream.b.end() && !_transceiver->write(_writeStream))
                 {
-                    return NeedWrite;
+                    assert(!_writeStream.b.empty());
+                    scheduleTimeout(SocketOperationWrite, _endpoint->timeout());
+                    return false;
                 }
-                assert(_sendStreams.empty());
+                assert(_writeStream.i == _writeStream.b.end());
+            }
+            if(current.operation & SocketOperationRead && !_readStream.b.empty())
+            {
+                if(static_cast<Int>(_readStream.b.size()) == headerSize) // Read header.
+                {
+                    if(_readStream.i != _readStream.b.end() && !_transceiver->read(_readStream))
+                    {
+                        return false;
+                    }   
+                    assert(_readStream.i == _readStream.b.end());
+                
+                    ptrdiff_t pos = _readStream.i - _readStream.b.begin();
+                    if(pos < headerSize)
+                    {
+                        //
+                        // This situation is possible for small UDP packets.
+                        //
+                        throw IllegalMessageSizeException(__FILE__, __LINE__);
+                    }
+                
+                    _readStream.i = _readStream.b.begin();
+                    const Byte* m;
+                    _readStream.readBlob(m, static_cast<Int>(sizeof(magic)));
+                    if(m[0] != magic[0] || m[1] != magic[1] || m[2] != magic[2] || m[3] != magic[3])
+                    {
+                        BadMagicException ex(__FILE__, __LINE__);
+                        ex.badMagic = Ice::ByteSeq(&m[0], &m[0] + sizeof(magic));
+                        throw ex;
+                    }
+                    Byte pMajor;
+                    Byte pMinor;
+                    _readStream.read(pMajor);
+                    _readStream.read(pMinor);
+                    if(pMajor != protocolMajor
+                       || static_cast<unsigned char>(pMinor) > static_cast<unsigned char>(protocolMinor))
+                    {
+                        UnsupportedProtocolException ex(__FILE__, __LINE__);
+                        ex.badMajor = static_cast<unsigned char>(pMajor);
+                        ex.badMinor = static_cast<unsigned char>(pMinor);
+                        ex.major = static_cast<unsigned char>(protocolMajor);
+                        ex.minor = static_cast<unsigned char>(protocolMinor);
+                        throw ex;
+                    }
+                    Byte eMajor;
+                    Byte eMinor;
+                    _readStream.read(eMajor);
+                    _readStream.read(eMinor);
+                    if(eMajor != encodingMajor
+                       || static_cast<unsigned char>(eMinor) > static_cast<unsigned char>(encodingMinor))
+                    {
+                        UnsupportedEncodingException ex(__FILE__, __LINE__);
+                        ex.badMajor = static_cast<unsigned char>(eMajor);
+                        ex.badMinor = static_cast<unsigned char>(eMinor);
+                        ex.major = static_cast<unsigned char>(encodingMajor);
+                        ex.minor = static_cast<unsigned char>(encodingMinor);
+                        throw ex;
+                    }
+                    Byte messageType;
+                    _readStream.read(messageType);
+                    Byte compress;
+                    _readStream.read(compress);
+                    Int size;
+                    _readStream.read(size);
+                    if(size < headerSize)
+                    {
+                        throw IllegalMessageSizeException(__FILE__, __LINE__);
+                    }
+                    if(size > static_cast<Int>(_instance->messageSizeMax()))
+                    {
+                        throw MemoryLimitException(__FILE__, __LINE__);
+                    }
+                    if(size > static_cast<Int>(_readStream.b.size()))
+                    {
+                        _readStream.b.resize(size);
+                    }
+                    _readStream.i = _readStream.b.begin() + pos;
+                }
+            
+                if(_readStream.i != _readStream.b.end())
+                {
+                    if(_endpoint->datagram())
+                    {
+                        if(_instance->initializationData().properties->getPropertyAsInt("Ice.Warn.Datagrams") > 0)
+                        {
+                            Warning out(_instance->initializationData().logger);
+                            out << "DatagramLimitException: maximum size of " << _readStream.i - _readStream.b.begin() 
+                                << " exceeded";
+                        }
+                        throw DatagramLimitException(__FILE__, __LINE__);
+                    }
+                    else
+                    {
+                        if(!_transceiver->read(_readStream))
+                        {
+                            assert(!_readStream.b.empty());
+                            scheduleTimeout(SocketOperationRead, _endpoint->timeout());
+                            return false;
+                        }
+                        assert(_readStream.i == _readStream.b.end());
+                    }
+                }
+            }
+        
+            if(_state <= StateNotValidated)
+            {
+                if(_state == StateNotInitialized && !initialize(current.operation))
+                {
+                    return false;
+                }
+
+                if(_state <= StateNotValidated && !validate(current.operation))
+                {
+                    return false;
+                }
+
+                _threadPool->unregister(this, current.operation);
+
+                //
+                // We start out in holding state.
+                //
+                setState(StateHolding);
+                swap(_startCallback, startCB);
             }
             else
             {
-                assert(_state == StateClosed || _state <= StateNotValidated);
-                if(_state == StateNotInitialized)
+                assert(_state <= StateClosing);
+
+                if(current.operation & SocketOperationWrite)
                 {
-                    SocketStatus status = initialize();
-                    if(status != Finished)
-                    {
-                        return status;
-                    }
+                    send(sentCBs);
                 }
 
-                if(_state <= StateNotValidated)
+                if(current.operation & SocketOperationRead)
                 {
-                    SocketStatus status = validate();
-                    if(status != Finished)
-                    {
-                        return status;
-                    }
+                    parseMessage(stream, invokeNum, requestId, compress, servantManager, adapter, outAsync);
                 }
-
-                swap(_startCallback, callback);
             }
         }
-        catch(const Ice::LocalException& ex)
+        catch(const DatagramLimitException&) // Expected.
+        {
+            _readStream.resize(headerSize);
+            _readStream.i = _readStream.b.begin();
+            return false;
+        }
+        catch(const SocketException& ex)
         {
             setState(StateClosed, ex);
-            return Finished;
+            return false;
+        }
+        catch(const LocalException& ex)
+        {
+            if(_endpoint->datagram())
+            {
+                if(_instance->initializationData().properties->getPropertyAsInt("Ice.Warn.Connections") > 0)
+                {
+                    Warning out(_instance->initializationData().logger);
+                    out << "datagram connection exception:\n" << ex << '\n' << _desc;
+                }
+                _readStream.resize(headerSize);
+                _readStream.i = _readStream.b.begin();
+            }
+            else
+            {
+                setState(StateClosed, ex);
+            }
+            return false;
         }
 
-        assert(_sendStreams.empty());
-        _selectorThread->unregister(this);
-        _sendInProgress = false;
         if(_acmTimeout > 0)
         {
             _acmAbsoluteTimeout = IceUtil::Time::now(IceUtil::Time::Monotonic) + IceUtil::Time::seconds(_acmTimeout);
         }
+
+        io.completed();
     }
 
-    if(callback)
+    //
+    // Notify the factory that the connection establishment and
+    // validation has completed.
+    //
+    if(startCB)
     {
-        callback->connectionStartCompleted(this);
+        startCB->connectionStartCompleted(this);
     }
-    return Finished;
+
+    //
+    // Notify AMI calls that the message was sent.
+    //
+    for(vector<OutgoingAsyncMessageCallbackPtr>::const_iterator p = sentCBs.begin(); p != sentCBs.end(); ++p)
+    {
+        (*p)->__sentCallback(_instance);
+    }
+
+    //
+    // Asynchronous replies must be handled outside the thread
+    // synchronization, so that nested calls are possible.
+    //
+    if(outAsync)
+    {
+        outAsync->__finished(stream);
+    }
+
+    //
+    // Method invocation (or multiple invocations for batch messages)
+    // must be done outside the thread synchronization, so that nested
+    // calls are possible.
+    //
+    if(invokeNum)
+    {
+        invokeAll(stream, invokeNum, requestId, compress, servantManager, adapter);
+    }
+    return true;
 }
 
 void
-Ice::ConnectionI::socketFinished()
-{
-    IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
-    assert(_sendInProgress && _state == StateClosed);
-    _sendInProgress = false;
-    _threadPool->finish(this);
-}
-
-void
-Ice::ConnectionI::socketTimeout()
+Ice::ConnectionI::timedOut()
 {
     IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
     if(_state <= StateNotValidated)
@@ -1333,13 +1442,19 @@ Ice::ConnectionI::socketTimeout()
     }
 }
 
-#ifdef ICE_APPLE_CFNETWORK
-void*
-Ice::ConnectionI::stream() const
+int
+Ice::ConnectionI::connectTimeout()
 {
-    return _transceiver->stream();
+    DefaultsAndOverridesPtr defaultsAndOverrides = _instance->defaultsAndOverrides();
+    if(defaultsAndOverrides->overrideConnectTimeout)
+    {
+        return defaultsAndOverrides->overrideConnectTimeoutValue;
+    }
+    else
+    {
+        return _endpoint->timeout();
+    }
 }
-#endif
 
 //
 // Only used by the SSL plug-in.
@@ -1357,14 +1472,19 @@ Ice::ConnectionI::ConnectionI(const InstancePtr& instance,
                               const TransceiverPtr& transceiver,
                               const EndpointIPtr& endpoint,
                               const ObjectAdapterPtr& adapter) :
-    EventHandler(instance),
     _transceiver(transceiver),
+    _instance(instance),
     _desc(transceiver->toString()),
     _type(transceiver->type()),
     _endpoint(endpoint),
     _adapter(adapter),
     _logger(_instance->initializationData().logger), // Cached for better performance.
     _traceLevels(_instance->traceLevels()), // Cached for better performance.
+    _timer(_instance->timer()), // Cached for better performance.
+    _writeTimeout(new TimeoutCallback(this)),
+    _writeTimeoutScheduled(false),
+    _readTimeout(new TimeoutCallback(this)),
+    _readTimeoutScheduled(false),
     _warn(_instance->initializationData().properties->getPropertyAsInt("Ice.Warn.Connections") > 0),
     _acmTimeout(0),
     _compressionLevel(1),
@@ -1378,7 +1498,8 @@ Ice::ConnectionI::ConnectionI(const InstancePtr& instance,
     _batchRequestNum(0),
     _batchRequestCompress(false),
     _batchMarker(0),
-    _sendInProgress(false),
+    _readStream(_instance.get()),
+    _writeStream(_instance.get()),
     _dispatchCount(0),
     _state(StateNotInitialized),
     _stateTime(IceUtil::Time::now(IceUtil::Time::Monotonic))
@@ -1429,12 +1550,7 @@ Ice::ConnectionI::ConnectionI(const InstancePtr& instance,
         {
             const_cast<ThreadPoolPtr&>(_threadPool) = _instance->clientThreadPool();
         }
-        _threadPool->incFdsInUse();
-
-        const_cast<SelectorThreadPtr&>(_selectorThread) = _instance->selectorThread();
-        _selectorThread->incFdsInUse();
-
-        _flushSentCallbacks = new FlushSentCallbacks(this);
+        _threadPool->initialize(this);
     }
     catch(const IceUtil::Exception&)
     {
@@ -1447,8 +1563,7 @@ Ice::ConnectionI::ConnectionI(const InstancePtr& instance,
 Ice::ConnectionI::~ConnectionI()
 {
     assert(!_startCallback);
-    assert(_state == StateClosed);
-    assert(!_transceiver);
+    assert(_state == StateFinished);
     assert(_dispatchCount == 0);
     assert(_requests.empty());
     assert(_asyncRequests.empty());
@@ -1461,7 +1576,7 @@ Ice::ConnectionI::setState(State state, const LocalException& ex)
     // If setState() is called with an exception, then only closed and
     // closing states are permissible.
     //
-    assert(state == StateClosing || state == StateClosed);
+    assert(state >= StateClosing);
 
     if(_state == state) // Don't switch twice.
     {
@@ -1562,7 +1677,7 @@ Ice::ConnectionI::setState(State state)
         {
             return;
         }
-        _threadPool->_register(this);
+        _threadPool->_register(this, SocketOperationRead);
         break;
     }
 
@@ -1576,7 +1691,10 @@ Ice::ConnectionI::setState(State state)
         {
             return;
         }
-        _threadPool->unregister(this);
+        if(_state == StateActive)
+        {
+            _threadPool->unregister(this, SocketOperationRead);
+        }
         break;
     }
 
@@ -1585,31 +1703,37 @@ Ice::ConnectionI::setState(State state)
         //
         // Can't change back from closed.
         //
-        if(_state == StateClosed)
+        if(_state >= StateClosed)
         {
             return;
         }
-        _threadPool->_register(this); // We need to continue to read in closing state.
+        if(_state == StateHolding)
+        {
+            _threadPool->_register(this, SocketOperationRead); // We need to continue to read in closing state.
+        }
         break;
     }
 
     case StateClosed:
     {
-        if(_sendInProgress)
+        if(_state == StateFinished)
         {
-            //
-            // Unregister with both the pool and the selector thread. We unregister with
-            // the pool to ensure that it stops reading on the socket (otherwise, if the
-            // socket is closed the thread pool would spin always reading 0 from the FD).
-            // The selector thread will register again the FD with the pool once it's
-            // done.
-            //
-            _selectorThread->finish(this);
-            _threadPool->unregister(this);
+            return;
         }
-        else
+        _threadPool->finish(this);
+        break;
+    }
+
+    case StateFinished:
+    {
+        assert(_state == StateClosed);
+        try
         {
-            _threadPool->finish(this);
+            _transceiver->close();
+        }
+        catch(const Ice::LocalException&)
+        {
+            throw;
         }
         break;
     }
@@ -1673,7 +1797,7 @@ Ice::ConnectionI::initiateShutdown()
         os.write(encodingMajor);
         os.write(encodingMinor);
         os.write(closeConnectionMsg);
-        os.write((Byte)1); // Compression status: compression supported but not used.
+        os.write((Byte)1); // Compression operation: compression supported but not used.
         os.write(headerSize); // Message size.
 
         OutgoingMessage message(&os, false);
@@ -1691,13 +1815,15 @@ Ice::ConnectionI::initiateShutdown()
     }
 }
 
-SocketStatus
-Ice::ConnectionI::initialize()
+bool
+Ice::ConnectionI::initialize(SocketOperation operation)
 {
-    SocketStatus status = _transceiver->initialize();
-    if(status != Finished)
+    SocketOperation s = _transceiver->initialize();
+    if(s != SocketOperationNone)
     {
-        return status;
+        scheduleTimeout(s, connectTimeout());
+        _threadPool->update(this, operation, s);
+        return false;
     }
 
     //
@@ -1705,60 +1831,62 @@ Ice::ConnectionI::initialize()
     //
     const_cast<string&>(_desc) = _transceiver->toString();
     setState(StateNotValidated);
-    return Finished;
+    return true;
 }
 
-SocketStatus
-Ice::ConnectionI::validate()
+bool
+Ice::ConnectionI::validate(SocketOperation operation)
 {
     if(!_endpoint->datagram()) // Datagram connections are always implicitly validated.
     {
         if(_adapter) // The server side has the active role for connection validation.
         {
-            BasicStream& os = _stream;
-            if(os.b.empty())
+            if(_writeStream.b.empty())
             {
-                os.write(magic[0]);
-                os.write(magic[1]);
-                os.write(magic[2]);
-                os.write(magic[3]);
-                os.write(protocolMajor);
-                os.write(protocolMinor);
-                os.write(encodingMajor);
-                os.write(encodingMinor);
-                os.write(validateConnectionMsg);
-                os.write(static_cast<Byte>(0)); // Compression status (always zero for validate connection).
-                os.write(headerSize); // Message size.
-                os.i = os.b.begin();
-                traceSend(os, _logger, _traceLevels);
+                _writeStream.write(magic[0]);
+                _writeStream.write(magic[1]);
+                _writeStream.write(magic[2]);
+                _writeStream.write(magic[3]);
+                _writeStream.write(protocolMajor);
+                _writeStream.write(protocolMinor);
+                _writeStream.write(encodingMajor);
+                _writeStream.write(encodingMinor);
+                _writeStream.write(validateConnectionMsg);
+                _writeStream.write(static_cast<Byte>(0)); // Compression status (always zero for validate connection).
+                _writeStream.write(headerSize); // Message size.
+                _writeStream.i = _writeStream.b.begin();
+                traceSend(_writeStream, _logger, _traceLevels);
             }
 
-            if(!_transceiver->write(os))
+            if(_writeStream.i != _writeStream.b.end() && !_transceiver->write(_writeStream))
             {
-                return NeedWrite;
+                scheduleTimeout(SocketOperationWrite, connectTimeout());
+                _threadPool->update(this, operation, SocketOperationWrite);
+                return false;
             }
         }
         else // The client side has the passive role for connection validation.
         {
-            BasicStream& is = _stream;
-            if(is.b.empty())
+            if(_readStream.b.empty())
             {
-                is.b.resize(headerSize);
-                is.i = is.b.begin();
+                _readStream.b.resize(headerSize);
+                _readStream.i = _readStream.b.begin();
             }
 
-            if(!_transceiver->read(is))
+            if(_readStream.i != _readStream.b.end() && !_transceiver->read(_readStream))
             {
-                return NeedRead;
+                scheduleTimeout(SocketOperationRead, connectTimeout());
+                _threadPool->update(this, operation, SocketOperationRead);
+                return false;
             }
 
-            assert(is.i == is.b.end());
-            is.i = is.b.begin();
+            assert(_readStream.i == _readStream.b.end());
+            _readStream.i = _readStream.b.begin();
             Byte m[4];
-            is.read(m[0]);
-            is.read(m[1]);
-            is.read(m[2]);
-            is.read(m[3]);
+            _readStream.read(m[0]);
+            _readStream.read(m[1]);
+            _readStream.read(m[2]);
+            _readStream.read(m[3]);
             if(m[0] != magic[0] || m[1] != magic[1] || m[2] != magic[2] || m[3] != magic[3])
             {
                 BadMagicException ex(__FILE__, __LINE__);
@@ -1767,8 +1895,8 @@ Ice::ConnectionI::validate()
             }
             Byte pMajor;
             Byte pMinor;
-            is.read(pMajor);
-            is.read(pMinor);
+            _readStream.read(pMajor);
+            _readStream.read(pMinor);
             if(pMajor != protocolMajor)
             {
                 UnsupportedProtocolException ex(__FILE__, __LINE__);
@@ -1780,8 +1908,8 @@ Ice::ConnectionI::validate()
             }
             Byte eMajor;
             Byte eMinor;
-            is.read(eMajor);
-            is.read(eMinor);
+            _readStream.read(eMajor);
+            _readStream.read(eMinor);
             if(eMajor != encodingMajor)
             {
                 UnsupportedEncodingException ex(__FILE__, __LINE__);
@@ -1792,40 +1920,39 @@ Ice::ConnectionI::validate()
                 throw ex;
             }
             Byte messageType;
-            is.read(messageType);
+            _readStream.read(messageType);
             if(messageType != validateConnectionMsg)
             {
                 throw ConnectionNotValidatedException(__FILE__, __LINE__);
             }
             Byte compress;
-            is.read(compress); // Ignore compression status for validate connection.
+            _readStream.read(compress); // Ignore compression status for validate connection.
             Int size;
-            is.read(size);
+            _readStream.read(size);
             if(size != headerSize)
             {
                 throw IllegalMessageSizeException(__FILE__, __LINE__);
             }
-            traceRecv(is, _logger, _traceLevels);
+            traceRecv(_readStream, _logger, _traceLevels);
         }
     }
 
-    _stream.resize(0);
-    _stream.i = _stream.b.begin();
+    _writeStream.resize(0);
+    _writeStream.i = _writeStream.b.begin();
 
-    //
-    // We start out in holding state.
-    //
-    setState(StateHolding);
-    return Finished;
+    _readStream.resize(headerSize);
+    _readStream.i = _readStream.b.begin();
+    return true;
 }
 
-bool
-Ice::ConnectionI::send()
+void
+Ice::ConnectionI::send(vector<OutgoingAsyncMessageCallbackPtr>& callbacks)
 {
-    assert(_transceiver);
     assert(!_sendStreams.empty());
     
-    bool flushSentCallbacks = _sentCallbacks.empty();
+    assert(!_writeStream.b.empty() && _writeStream.i == _writeStream.b.end());
+    _writeStream.swap(*_sendStreams.front().stream);
+    
     try
     {
         while(!_sendStreams.empty())
@@ -1838,7 +1965,7 @@ Ice::ConnectionI::send()
             if(!message->stream->i)
             {
                 message->stream->i = message->stream->b.begin();
-#if defined(__APPLE__) && TARGET_OS_IPHONE == 0
+#if !defined(__APPLE__) || TARGET_OS_IPHONE == 0
                 if(message->compress && message->stream->b.size() >= 100) // Only compress messages > 100 bytes.
                 {
                     //
@@ -1896,20 +2023,19 @@ Ice::ConnectionI::send()
                         traceSend(*message->stream, _logger, _traceLevels);
                     }
                 }
-#if defined(__APPLE__) && TARGET_OS_IPHONE == 0
+#if !defined(__APPLE__) || TARGET_OS_IPHONE == 0
             }
 #endif
             //
             // Send the first message.
             //
             assert(message->stream->i);
-            if(!_transceiver->write(*message->stream))
+            if(message->stream->i != message->stream->b.end() && !_transceiver->write(*message->stream))
             {
-                if(flushSentCallbacks && !_sentCallbacks.empty())
-                {
-                    _threadPool->execute(_flushSentCallbacks);
-                }
-                return false;
+                _writeStream.swap(*message->stream);
+                assert(!_writeStream.b.empty());
+                scheduleTimeout(SocketOperationWrite, _endpoint->timeout());
+                return;
             }
 
             //
@@ -1918,57 +2044,33 @@ Ice::ConnectionI::send()
             message->sent(this, true);
             if(dynamic_cast<Ice::AMISentCallback*>(message->outAsync.get()))
             {
-                _sentCallbacks.push_back(message->outAsync);
+                callbacks.push_back(message->outAsync);
             }
             _sendStreams.pop_front();
         }
     }
-    catch(const Ice::LocalException&)
+    catch(const Ice::LocalException& ex)
     {
-        if(flushSentCallbacks && !_sentCallbacks.empty())
-        {
-            _threadPool->execute(_flushSentCallbacks);
-        }
-        throw;
+        setState(StateClosed, ex);
+        return;
     }
 
-    if(flushSentCallbacks && !_sentCallbacks.empty())
-    {
-        _threadPool->execute(_flushSentCallbacks);
-    }
-    return true;
-}
-
-void
-Ice::ConnectionI::flushSentCallbacks()
-{
-    vector<OutgoingAsyncMessageCallbackPtr> callbacks;
-    {
-        Lock sync(*this);
-        assert(!_sentCallbacks.empty());
-        _sentCallbacks.swap(callbacks);
-    }
-    for(vector<OutgoingAsyncMessageCallbackPtr>::const_iterator p = callbacks.begin(); p != callbacks.end(); ++p)
-    {
-        (*p)->__sentCallback(_instance);
-    }
+    _threadPool->unregister(this, SocketOperationWrite);
 }
 
 bool
 Ice::ConnectionI::sendMessage(OutgoingMessage& message)
 {
-    assert(_state != StateClosed);
+    assert(_state < StateClosed);
 
     message.stream->i = 0; // Reset the message stream iterator before starting sending the message.
 
-    if(_sendInProgress)
+    if(!_sendStreams.empty())
     {
         _sendStreams.push_back(message);
         _sendStreams.back().adopt(0);
         return false;
     }
-
-    assert(!_sendInProgress);
 
     //
     // Attempt to send the message without blocking. If the send blocks, we register
@@ -1977,7 +2079,7 @@ Ice::ConnectionI::sendMessage(OutgoingMessage& message)
 
     message.stream->i = message.stream->b.begin();
 
-#if defined(__APPLE__) && TARGET_OS_IPHONE == 0
+#if !defined(__APPLE__) || TARGET_OS_IPHONE == 0
     if(message.compress && message.stream->b.size() >= 100) // Only compress messages larger than 100 bytes.
     {
         //
@@ -2028,6 +2130,7 @@ Ice::ConnectionI::sendMessage(OutgoingMessage& message)
             message.stream->b[9] = 1;
         }
 #endif
+
         //
         // No compression, just fill in the message size.
         //
@@ -2065,16 +2168,16 @@ Ice::ConnectionI::sendMessage(OutgoingMessage& message)
 
         _sendStreams.push_back(message);
         _sendStreams.back().adopt(0); // Adopt the stream.
-#if defined(__APPLE__) && TARGET_OS_IPHONE == 0
+#if !defined(__APPLE__) || TARGET_OS_IPHONE == 0
     }
 #endif
-
-    _sendInProgress = true;
-    _selectorThread->_register(this, NeedWrite, _endpoint->timeout());
+    _writeStream.swap(*_sendStreams.back().stream);
+    scheduleTimeout(SocketOperationWrite, _endpoint->timeout());
+    _threadPool->_register(this, SocketOperationWrite);
     return false;
 }
 
-#if defined(__APPLE__) && TARGET_OS_IPHONE == 0
+#if !defined(__APPLE__) || TARGET_OS_IPHONE == 0
 static string
 getBZ2Error(int bzError)
 {
@@ -2135,9 +2238,7 @@ getBZ2Error(int bzError)
         return "";
     }
 }
-#endif
 
-#if defined(__APPLE__) && TARGET_OS_IPHONE == 0
 void
 Ice::ConnectionI::doCompress(BasicStream& uncompressed, BasicStream& compressed)
 {
@@ -2230,10 +2331,11 @@ Ice::ConnectionI::parseMessage(BasicStream& stream, Int& invokeNum, Int& request
 {
     assert(_state > StateNotValidated && _state < StateClosed);
 
-    if(_acmTimeout > 0)
-    {
-        _acmAbsoluteTimeout = IceUtil::Time::now(IceUtil::Time::Monotonic) + IceUtil::Time::seconds(_acmTimeout);
-    }
+    _readStream.swap(stream);
+    _readStream.resize(headerSize);
+    _readStream.i = _readStream.b.begin();
+
+    assert(stream.i == stream.b.end());
 
     try
     {
@@ -2249,7 +2351,7 @@ Ice::ConnectionI::parseMessage(BasicStream& stream, Int& invokeNum, Int& request
         stream.read(compress);
         if(compress == 2)
         {
-#if defined(__APPLE__) && TARGET_OS_IPHONE == 0
+#if !defined(__APPLE__) || TARGET_OS_IPHONE == 0
             BasicStream ustream(_instance.get());
             doUncompress(stream, ustream);
             stream.b.swap(ustream.b);

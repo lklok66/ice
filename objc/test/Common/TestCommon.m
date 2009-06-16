@@ -140,7 +140,7 @@ defaultClientProperties(int* argc, char** argv)
 void
 TestCommonInit(id target, SEL output, SEL ready, BOOL s)
 {
-    outputTarget = [target retain];
+    outputTarget = target;
     outputSelector = output;
     readySelector = ready;
     ssl = s;

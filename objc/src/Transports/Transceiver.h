@@ -24,7 +24,7 @@ namespace IceObjC
 class Instance;
 typedef IceUtil::Handle<Instance> InstancePtr;
 
-class Transceiver : public IceInternal::Transceiver
+class Transceiver : public IceInternal::Transceiver, public IceInternal::NativeInfo
 {
     enum State
     {
@@ -39,15 +39,16 @@ public:
     Transceiver(const InstancePtr&, CFReadStreamRef, CFWriteStreamRef, SOCKET);
     virtual ~Transceiver();
 
-    virtual SOCKET fd();
-    virtual void* stream();
+    virtual IceInternal::NativeInfoPtr getNativeInfo();
+    virtual CFReadStreamRef readStream();
+    virtual CFWriteStreamRef writeStream();
+
     virtual void close();
     virtual bool write(IceInternal::Buffer&);
     virtual bool read(IceInternal::Buffer&);
-    virtual bool hasMoreData();
     virtual std::string type() const;
     virtual std::string toString() const;
-    virtual IceInternal::SocketStatus initialize();
+    virtual IceInternal::SocketOperation initialize();
     virtual void checkSendSize(const IceInternal::Buffer&, size_t);
 
 private:
@@ -59,7 +60,6 @@ private:
     const Ice::LoggerPtr _logger;
     const Ice::StatsPtr _stats;
     const std::string _host;
-    SOCKET _fd;
     CFReadStreamRef _readStream;
     CFWriteStreamRef _writeStream;
     bool _checkCertificates;

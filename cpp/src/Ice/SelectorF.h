@@ -13,15 +13,7 @@
 namespace IceInternal
 {
 
-enum SocketStatus
-{
-    Finished,
-    NeedConnect,
-    NeedRead,
-    NeedWrite
-};
-
-template<class T> class Selector;
+class Selector;
 
 };
 

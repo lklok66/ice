@@ -18,7 +18,6 @@
 #include <Ice/ReferenceFactory.h>
 #include <Ice/ProxyFactory.h>
 #include <Ice/ThreadPool.h>
-#include <Ice/SelectorThread.h>
 #include <Ice/ConnectionFactory.h>
 #include <Ice/ConnectionMonitor.h>
 #include <Ice/ObjectFactoryManager.h>
@@ -30,7 +29,7 @@
 #include <Ice/Network.h>
 #include <Ice/EndpointFactoryManager.h>
 #include <Ice/RetryQueue.h>
-#ifndef ICE_APPLE_CFNETWORK
+#ifndef ICE_USE_CFSTREAM
 #include <Ice/TcpEndpointI.h>
 #endif
 #include <Ice/UdpEndpointI.h>
@@ -250,24 +249,6 @@ IceInternal::Instance::serverThreadPool()
     }
 
     return _serverThreadPool;
-}
-
-SelectorThreadPtr
-IceInternal::Instance::selectorThread()
-{
-    IceUtil::RecMutex::Lock sync(*this);
-
-    if(_state == StateDestroyed)
-    {
-        throw CommunicatorDestroyedException(__FILE__, __LINE__);
-    }
-    
-    if(!_selectorThread) // Lazy initialization.
-    {
-        _selectorThread = new SelectorThread(this);
-    }
-
-    return _selectorThread;
 }
 
 EndpointHostResolverPtr
@@ -997,7 +978,7 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
             _protocolSupport = EnableIPv6;
         }
         _endpointFactoryManager = new EndpointFactoryManager(this);
-#ifndef ICE_APPLE_CFNETWORK
+#ifndef ICE_USE_CFSTREAM
         EndpointFactoryPtr tcpEndpointFactory = new TcpEndpointFactory(this);
         _endpointFactoryManager->add(tcpEndpointFactory);
 #endif
@@ -1061,7 +1042,6 @@ IceInternal::Instance::~Instance()
     assert(!_objectAdapterFactory);
     assert(!_clientThreadPool);
     assert(!_serverThreadPool);
-    assert(!_selectorThread);
     assert(!_endpointHostResolver);
     assert(!_retryQueue);
     assert(!_timer);
@@ -1243,7 +1223,6 @@ IceInternal::Instance::destroy()
 
     ThreadPoolPtr serverThreadPool;
     ThreadPoolPtr clientThreadPool;
-    SelectorThreadPtr selectorThread;
     EndpointHostResolverPtr endpointHostResolver;
 
     {
@@ -1269,12 +1248,6 @@ IceInternal::Instance::destroy()
         {
             _clientThreadPool->destroy();
             std::swap(_clientThreadPool, clientThreadPool);
-        }
-
-        if(_selectorThread)
-        {
-            _selectorThread->destroy();
-            std::swap(selectorThread, _selectorThread);
         }
 
         if(_endpointHostResolver)
@@ -1345,10 +1318,6 @@ IceInternal::Instance::destroy()
     if(serverThreadPool)
     {
         serverThreadPool->joinWithAllThreads();
-    }
-    if(selectorThread)
-    {
-        selectorThread->joinWithThread();
     }
     if(endpointHostResolver)
     {

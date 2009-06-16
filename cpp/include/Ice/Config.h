@@ -64,6 +64,18 @@ typedef double Double;
 
 }
 
+#if defined(__linux) && !defined(ICE_NO_EPOLL)
+#   define ICE_USE_EPOLL 1
+#elif defined(__APPLE__) && !defined(ICE_NO_KQUEUE)
+#   define ICE_USE_KQUEUE 1
+#elif defined(__APPLE__) && !defined(ICE_NO_CFSTREAM)
+#   define ICE_USE_CFSTREAM 1
+#elif defined(_WIN32) && !defined(ICE_NO_IOCP)
+#   define ICE_USE_IOCP 1
+#else
+#   define ICE_USE_SELECT 1
+#endif
+
 // TODO: Should not be inline, this is not performance critical.
 #ifdef _WIN32
 inline int getSystemErrno() { return GetLastError(); }

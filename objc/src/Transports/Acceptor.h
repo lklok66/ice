@@ -28,11 +28,11 @@ class EndpointI;
 class Instance;
 typedef IceUtil::Handle<Instance> InstancePtr;
 
-class Acceptor : public IceInternal::Acceptor
+class Acceptor : public IceInternal::Acceptor, public IceInternal::NativeInfo
 {
 public:
 
-    virtual SOCKET fd();
+    virtual IceInternal::NativeInfoPtr getNativeInfo();
     virtual void close();
     virtual void listen();
     virtual IceInternal::TransceiverPtr accept();
@@ -49,7 +49,6 @@ private:
     InstancePtr _instance;
     IceInternal::TraceLevelsPtr _traceLevels;
     Ice::LoggerPtr _logger;
-    SOCKET _fd;
     int _backlog;
     struct sockaddr_storage _addr;
 };

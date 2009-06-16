@@ -7,11 +7,11 @@
 //
 // **********************************************************************
 
-#include <Ice/Transceiver.h>
 
-using namespace std;
-using namespace Ice;
-using namespace IceInternal;
+#import <Test.h>
 
-IceUtil::Shared* IceInternal::upCast(Transceiver* p) { return p; }
-
+@interface HoldI : TestHoldHold<TestHoldHold>
+{
+    ICEInt last;
+}
+@end

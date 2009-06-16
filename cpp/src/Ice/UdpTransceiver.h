@@ -32,17 +32,27 @@ class UdpEndpoint;
 
 class SUdpTransceiver;
 
-class UdpTransceiver : public Transceiver
+class UdpTransceiver : public Transceiver, public NativeInfo
 {
 public:
 
-    virtual SOCKET fd();
+    virtual NativeInfoPtr getNativeInfo();
+#ifdef ICE_USE_IOCP
+    virtual AsyncInfo* getAsyncInfo(SocketOperation);
+#endif
+
     virtual void close();
     virtual bool write(Buffer&);
     virtual bool read(Buffer&);
+#ifdef ICE_USE_IOCP
+    virtual void startWrite(Buffer&);
+    virtual void finishWrite(Buffer&);
+    virtual void startRead(Buffer&);
+    virtual void finishRead(Buffer&);
+#endif
     virtual std::string type() const;
     virtual std::string toString() const;
-    virtual SocketStatus initialize();
+    virtual SocketOperation initialize();
     virtual void checkSendSize(const Buffer&, size_t);
 
     int effectivePort() const;
@@ -62,18 +72,20 @@ private:
     const Ice::LoggerPtr _logger;
     const Ice::StatsPtr _stats;
     const bool _incoming;
-
-    SOCKET _fd;
-    struct sockaddr_storage _addr;
+    const struct sockaddr_storage _addr;
     struct sockaddr_storage _mcastAddr;
+
     bool _connect;
     int _rcvSize;
     int _sndSize;
     const bool _warn;
     static const int _udpOverhead;
     static const int _maxPacketSize;
-    bool _shutdownReadWrite;
-    IceUtil::Mutex _shutdownReadWriteMutex;
+
+#ifdef ICE_USE_IOCP
+    AsyncInfo _read;
+    AsyncInfo _write;
+#endif
 };
 
 }

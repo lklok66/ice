@@ -59,7 +59,7 @@ OBJS		= Acceptor.o \
 		  RetryQueue.o \
 		  RequestHandler.o \
 		  RouterInfo.o \
-		  SelectorThread.o \
+		  Selector.o \
 		  ServantManager.o \
 		  SliceChecksums.o \
 		  StreamI.o \
@@ -154,7 +154,7 @@ CPPFLAGS		:= -Iinclude -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src $(CPPPLATFO
 SLICE2CPPFLAGS		:= --ice --include-dir Ice $(SLICE2CPPFLAGS)
 
 ifeq ($(COMPILE_FOR_IPHONE),yes)
-    CPPFLAGS		:= -DICE_APPLE_CFNETWORK $(CPPFLAGS)
+    CPPFLAGS		:= -DICE_NO_KQUEUE $(CPPFLAGS)
 endif
 
 all:: $(OBJS) $(LOCAL_OBJS) $(SLICE_OBJS)

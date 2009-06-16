@@ -36,9 +36,8 @@ public:
     }
     
     virtual void
-    execute(const ThreadPoolPtr& threadPool)
+    execute()
     {
-        threadPool->promoteFollower();
         _handler->flushRequestsWithException(*_exception.get());
     }
     
@@ -59,9 +58,8 @@ public:
     }
     
     virtual void
-    execute(const ThreadPoolPtr& threadPool)
+    execute()
     {
-        threadPool->promoteFollower();
         _handler->flushRequestsWithException(_exception);
     }
     
@@ -81,9 +79,8 @@ public:
     }
 
     virtual void
-    execute(const ThreadPoolPtr& threadPool)
+    execute()
     {
-        threadPool->promoteFollower();
         for(vector<OutgoingAsyncMessageCallbackPtr>::const_iterator p = _callbacks.begin(); p != _callbacks.end(); ++p)
         {
             (*p)->__sentCallback(_instance);
