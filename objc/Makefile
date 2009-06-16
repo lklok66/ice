@@ -61,12 +61,12 @@ sdk: build-sdk slice slice2objc
 
 build-sdk:
 	$(call mkdir,SDK)
-	$(call mkdir,SDK/IceTouch)
-	$(call mkdir,SDK/IceTouch/bin)
-	$(call mkdir,SDK/IceTouch/slice)
+	$(call mkdir,SDK/IceTouch-$(VERSION))
+	$(call mkdir,SDK/IceTouch-$(VERSION)/bin)
+	$(call mkdir,SDK/IceTouch-$(VERSION)/slice)
 	for platform in MacOSX iPhoneOS iPhoneSimulator ; \
 	do \
-	    platform_sdk=SDK/IceTouch/$$platform.sdk ;\
+	    platform_sdk=SDK/IceTouch-$(VERSION)/$$platform.sdk ;\
 	    $(call mkdir,$$platform_sdk) ;\
 	    $(call mkdir,$$platform_sdk/usr) ;\
 	    $(call mkdir,$$platform_sdk/usr/local) ;\
@@ -79,12 +79,12 @@ build-sdk:
 slice:
 	for subdir in $(top_srcdir)/../slice/* ; \
 	do \
-	    echo "Copying slice/$$subdir to SDK/IceTouch/slice..." ; \
-	    cp -fpr $(top_srcdir)/../slice/$$subdir SDK/IceTouch/slice ; \
+	    echo "Copying slice/$$subdir to SDK/IceTouch-$(VERSION)/slice..." ; \
+	    cp -fpr $(top_srcdir)/../slice/$$subdir SDK/IceTouch-$(VERSION)/slice ; \
 	done
 
 slice2objc: $(ice_cpp_dir)/bin/slice2objc
-	$(call installprogram,$(ice_cpp_dir)/bin/slice2objc,SDK/IceTouch/bin)
+	$(call installprogram,$(ice_cpp_dir)/bin/slice2objc,SDK/IceTouch-$(VERSION)/bin)
 
 clean::
 	-rm -rf SDK
