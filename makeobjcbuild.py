@@ -119,7 +119,7 @@ if not os.path.exists(buildDir):
     os.system("tar xfz " + os.path.join(distDir, baseName + ".tar.gz"))
     os.rename("IceTouch-" + version, "build")
     # Change SUBDIRS in top-level Makefile.
-    substitute(os.path.join("objc", "Makefile"), [(r'^SUBDIRS([\s]*)=.*', r'SUBDIRS\1= src include')])
+    substitute(os.path.join("build", "objc", "Makefile"), [(r'^SUBDIRS([\s]*)=.*', r'SUBDIRS\1= src include')])
     print "ok"
 else:
     print "Using existing build directory"
@@ -159,7 +159,8 @@ for d in ["installer", "sdk", "examples", "doc", "opt", "slice2objcplugin.pbplug
 print "Preparing installer...",
 sys.stdout.flush()
 
-os.makedirs(installerDir)
+if not os.path.exists(installerDir):
+    os.mkdir(installerDir)
 copy(os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", "installer-readme.rtf"),
      os.path.join(installerDir, "readme.rtf"))
 copy(os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", "uninstall.sh"),
@@ -178,7 +179,7 @@ for f in [ "CHANGES", "RELEASE_NOTES"]:
 copy(os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", "README"),
      os.path.join(docDir, "README"))
 
-copy(os.path.join(buildDir, "objc", "SDK", "IceTouch"), sdkDir)
+copy(os.path.join(buildDir, "objc", "SDK", "IceTouch-" + mmversion), sdkDir)
 
 copy(os.path.join(buildDir, "Xcode", "Slice2ObjcPlugin", "build", "Release", "slice2objcplugin.pbplugin"),
      os.path.join(baseDir, "slice2objcplugin.pbplugin"))
@@ -205,7 +206,6 @@ os.chdir(baseDir)
 
 print "Building disk image...",
 sys.stdout.flush()
-
 
 if os.path.exists("scratch.dmg.sparseimage"):
     os.remove("scratch.dmg.sparseimage")

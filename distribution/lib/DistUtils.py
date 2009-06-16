@@ -78,6 +78,12 @@ proguard = { \
 # Some utility methods
 # 
 
+# rmtree won't remove read only files.
+def _rmtreeError(fn, f, info):
+    if info[0] == OSError:
+	os.chmod(f, 0777)
+	fn(f)
+
 #
 # Remove file or directory, warn if it doesn't exist.
 #
@@ -89,7 +95,7 @@ def remove(path, recurse = True):
 
     if os.path.isdir(path):
         if recurse:
-            shutil.rmtree(path)
+            shutil.rmtree(path, _rmtreeError)
         else:
             try:
                 os.rmdir(path)
