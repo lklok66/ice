@@ -27,6 +27,8 @@ int exceptionsServer(int, char**);
 int exceptionsClient(int, char**);
 int facetsServer(int, char**);
 int facetsClient(int, char**);
+int holdServer(int, char**);
+int holdClient(int, char**);
 int inheritanceServer(int, char**);
 int inheritanceClient(int, char**);
 int interceptorServer(int, char**);
@@ -35,6 +37,8 @@ int locationServer(int, char**);
 int locationClient(int, char**);
 int objectsServer(int, char**);
 int objectsClient(int, char**);
+int operationsServer(int, char**);
+int operationsClient(int, char**);
 int proxyServer(int, char**);
 int proxyClient(int, char**);
 int retryServer(int, char**);
@@ -53,10 +57,12 @@ static const struct TestCases alltests[] =
 { @"defaultServant", defaultServantServer, defaultServantClient },
 { @"exceptions", exceptionsServer, exceptionsClient },
 { @"facets", facetsServer, facetsClient },
+{ @"hold", holdServer, holdClient },
 { @"inheritance", inheritanceServer, inheritanceClient, },
 { @"interceptor", interceptorServer, interceptorClient },
 { @"location", locationServer, locationClient },
 { @"objects", objectsServer, objectsClient },
+{ @"operations", operationsServer, operationsClient },
 { @"proxy", proxyServer, proxyClient },
 { @"retry",retryServer, retryClient },
 { @"timeout",timeoutServer, timeoutClient },

@@ -21,7 +21,7 @@
 }
 @end
 
-#if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
+#ifdef TARGET_OS_IPHONE
 
 #import <Foundation/NSString.h>
 #import <Foundation/NSObject.h>
@@ -41,7 +41,7 @@ defaultServerProperties(int *argc, char** argv)
 {
     id<ICEProperties> properties = [ICEUtil createProperties];
 
-#if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
+#ifdef TARGET_OS_IPHONE
     static NSString* defaults[] =
     {
         @"Ice.NullHandleAbort", @"1",
@@ -61,7 +61,7 @@ defaultServerProperties(int *argc, char** argv)
         @"IceSSL.CheckCertName", @"0",
 	@"IceSSL.CertFile", @"s_rsa1024.pfx",
 	@"IceSSL.Password", @"password",
-#if TARGET_IPHONE_SIMULATOR
+#if TARGET_IPHONE_SIMULATOR && !__IPHONE_3_0
         @"IceSSL.Keychain", @"test",
         @"IceSSL.KeychainPassword", @"password"
 #endif     
@@ -93,7 +93,7 @@ defaultClientProperties(int* argc, char** argv)
 {
     id<ICEProperties> properties = [ICEUtil createProperties];
 
-#if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
+#ifdef TARGET_OS_IPHONE
     static NSString* defaults[] =
     {
         @"Ice.NullHandleAbort", @"1",
@@ -108,7 +108,7 @@ defaultClientProperties(int* argc, char** argv)
         @"IceSSL.CertAuthFile", @"cacert.der",
 	@"IceSSL.CertFile", @"c_rsa1024.pfx",
 	@"IceSSL.Password", @"password",
-#if TARGET_IPHONE_SIMULATOR
+#if TARGET_IPHONE_SIMULATOR && !__IPHONE_3_0
         @"IceSSL.Keychain", @"test",
         @"IceSSL.KeychainPassword", @"password"
 #endif     
@@ -135,7 +135,7 @@ defaultClientProperties(int* argc, char** argv)
     return properties;
 }
 
-#if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
+#ifdef TARGET_OS_IPHONE
 
 void
 TestCommonInit(id target, SEL output, SEL ready, BOOL s)

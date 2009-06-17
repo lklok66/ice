@@ -113,8 +113,6 @@
 
 - (void)viewDidLoad
 {
-    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];    
-    
     self.currentMessage = [NSMutableString string];
     self.messages = [NSMutableArray array];
     self.queue = [[[NSOperationQueue alloc] init] autorelease]; 

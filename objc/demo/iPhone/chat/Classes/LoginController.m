@@ -248,7 +248,7 @@ NSString* sslKey = @"sslKey";
     [initData.properties setProperty:@"IceSSL.TrustOnly.Client" value:@"C2:E8:D3:33:D7:83:99:6E:08:F7:C2:34:31:F7:1E:8E:44:87:38:57"];
     [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
     
-#if TARGET_IPHONE_SIMULATOR
+#if TARGET_IPHONE_SIMULATOR && !__IPHONE_3_0
     [initData.properties setProperty:@"IceSSL.Keychain" value:@"test"];
     [initData.properties setProperty:@"IceSSL.KeychainPassword" value:@"password"];
 #endif

@@ -96,7 +96,7 @@
         
         // For the phone we want to target WiFi for the client endpoints, and
         // the 3g network for the server endpoints.
-#if TARGET_IPHONE_SIMULATOR
+#if TARGET_IPHONE_SIMULATOR && !__IPHONE_3_0
         [initData.properties setProperty:@"Client.Endpoints" value:@"tcp -h 127.0.0.1 -p 12000"];
         [initData.properties setProperty:@"Server.Endpoints" value:@"tcp -h 127.0.0.1"];
 #endif
@@ -114,7 +114,7 @@
         //[initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
         //[initData.properties setProperty:@"IceSSL.CertFile" value:@"c_rsa1024.pfx"];
         //[initData.properties setProperty:@"IceSSL.Password" value:@"password"];
-#if TARGET_IPHONE_SIMULATOR
+#if TARGET_IPHONE_SIMULATOR && !__IPHONE_3_0
         //[initData.properties setProperty:@"IceSSL.Keychain" value:@"test"];
         //[initData.properties setProperty:@"IceSSL.KeychainPassword" value:@"password"];
 #endif     

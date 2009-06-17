@@ -8,7 +8,7 @@
 // **********************************************************************
 
 #import <Ice/Ice.h>
-#import <TestI.h>
+#import <hold/TestI.h>
 #import <TestCommon.h>
 
 #import <Foundation/Foundation.h>

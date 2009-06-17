@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		146B34050FE8BC61009C6199 /* AllTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 146B33FF0FE8BC61009C6199 /* AllTests.m */; };
+		146B34060FE8BC61009C6199 /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 146B34000FE8BC61009C6199 /* Client.m */; };
+		146B34070FE8BC61009C6199 /* Server.m in Sources */ = {isa = PBXBuildFile; fileRef = 146B34010FE8BC61009C6199 /* Server.m */; };
+		146B34090FE8BC61009C6199 /* TestI.m in Sources */ = {isa = PBXBuildFile; fileRef = 146B34040FE8BC61009C6199 /* TestI.m */; };
+		146B340B0FE8BD58009C6199 /* HoldTest.ice in Sources */ = {isa = PBXBuildFile; fileRef = 146B340A0FE8BD58009C6199 /* HoldTest.ice */; };
 		1D3623260D0F684500981E51 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* AppDelegate.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
@@ -109,6 +114,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		146B33FF0FE8BC61009C6199 /* AllTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AllTests.m; path = ../../Ice/hold/AllTests.m; sourceTree = SOURCE_ROOT; };
+		146B34000FE8BC61009C6199 /* Client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Client.m; path = ../../Ice/hold/Client.m; sourceTree = SOURCE_ROOT; };
+		146B34010FE8BC61009C6199 /* Server.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Server.m; path = ../../Ice/hold/Server.m; sourceTree = SOURCE_ROOT; };
+		146B34030FE8BC61009C6199 /* TestI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestI.h; path = ../../Ice/hold/TestI.h; sourceTree = SOURCE_ROOT; };
+		146B34040FE8BC61009C6199 /* TestI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestI.m; path = ../../Ice/hold/TestI.m; sourceTree = SOURCE_ROOT; };
+		146B340A0FE8BD58009C6199 /* HoldTest.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = HoldTest.ice; path = ../../Ice/hold/HoldTest.ice; sourceTree = SOURCE_ROOT; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623240D0F684500981E51 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -265,6 +276,19 @@
 			path = Classes;
 			sourceTree = "<group>";
 		};
+		146B33FE0FE8BBF9009C6199 /* hold */ = {
+			isa = PBXGroup;
+			children = (
+				146B340A0FE8BD58009C6199 /* HoldTest.ice */,
+				146B33FF0FE8BC61009C6199 /* AllTests.m */,
+				146B34000FE8BC61009C6199 /* Client.m */,
+				146B34010FE8BC61009C6199 /* Server.m */,
+				146B34030FE8BC61009C6199 /* TestI.h */,
+				146B34040FE8BC61009C6199 /* TestI.m */,
+			);
+			name = hold;
+			sourceTree = "<group>";
+		};
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -276,6 +300,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				146B33FE0FE8BBF9009C6199 /* hold */,
 				34B3B5160FD7E7490018C227 /* slicing-exceptions */,
 				34B3B5150FD7E7420018C227 /* slicing-objects */,
 				34B3B5140FD7E73E0018C227 /* timeout */,
@@ -719,6 +744,11 @@
 				34B3B5B80FD7E8700018C227 /* Server.m in Sources */,
 				34B3B6030FD7EFCC0018C227 /* AdapterDeactivationTest.ice in Sources */,
 				34B3B66B0FD7F41C0018C227 /* OperationsTest.ice in Sources */,
+				146B34050FE8BC61009C6199 /* AllTests.m in Sources */,
+				146B34060FE8BC61009C6199 /* Client.m in Sources */,
+				146B34070FE8BC61009C6199 /* Server.m in Sources */,
+				146B34090FE8BC61009C6199 /* TestI.m in Sources */,
+				146B340B0FE8BD58009C6199 /* HoldTest.ice in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -742,7 +772,6 @@
 					Classes,
 				);
 				INFOPLIST_FILE = Info.plist;
-				LIBRARY_SEARCH_PATHS = "";
 				OTHER_LDFLAGS = (
 					"-lstdc++",
 					"-lIceObjc",
@@ -769,12 +798,12 @@
 					Classes,
 				);
 				INFOPLIST_FILE = Info.plist;
-				LIBRARY_SEARCH_PATHS = "";
 				OTHER_LDFLAGS = (
 					"-lstdc++",
 					"-lIceObjc",
 				);
 				PRODUCT_NAME = container;
+				SDKROOT = iphonesimulator2.0;
 				SLICE_ICE_HOME = "";
 				SLICE_INCLUDE_PATH = .;
 			};
@@ -790,7 +819,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
-				SDKROOT = iphoneos2.1;
+				SDKROOT = iphoneos2.0;
 			};
 			name = Debug;
 		};
@@ -803,7 +832,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
-				SDKROOT = iphoneos2.1;
+				SDKROOT = iphoneos2.0;
 			};
 			name = Release;
 		};

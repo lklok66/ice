@@ -177,7 +177,7 @@ def configurePaths():
     addClasspath(os.path.join(javaDir))
     
     if isDarwin():
-        objcDir = os.path.join(getIceDir("objc"), "lib", "mac")
+        objcDir = os.path.join(getIceDir("objc"), "lib")
         os.environ["DYLD_LIBRARY_PATH"] = objcDir + os.pathsep + os.getenv("DYLD_LIBRARY_PATH", "")
 
     # 

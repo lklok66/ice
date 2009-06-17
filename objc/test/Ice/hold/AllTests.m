@@ -9,7 +9,7 @@
 
 #import <Ice/Ice.h>
 #import <TestCommon.h>
-#import <Test.h>
+#import <HoldTest.h>
 
 #import <Foundation/Foundation.h>
 

@@ -8,7 +8,7 @@
 // **********************************************************************
 
 
-#import <Test.h>
+#import <HoldTest.h>
 
 @interface HoldI : TestHoldHold<TestHoldHold>
 {
