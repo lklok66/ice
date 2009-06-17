@@ -12,7 +12,6 @@
 
 #ifdef ICE_USE_CFSTREAM
 #   include <CoreFoundation/CoreFoundation.h>
-#   include <CoreServices/CoreServices.h>
 #endif
 
 using namespace std;
