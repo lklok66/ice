@@ -24,10 +24,10 @@ using namespace std;
 using namespace Ice;
 using namespace IceInternal;
 
-SOCKET
-IceObjC::Acceptor::fd()
+IceInternal::NativeInfoPtr
+IceObjC::Acceptor::getNativeInfo()
 {
-    return _fd;
+    return this;
 }
 
 void
@@ -121,7 +121,8 @@ IceObjC::Acceptor::effectivePort() const
 IceObjC::Acceptor::Acceptor(const InstancePtr& instance, const string& host, int port) :
     _instance(instance),
     _traceLevels(instance->traceLevels()),
-    _logger(instance->initializationData().logger)
+    _logger(instance->initializationData().logger),
+    _addr(getAddressForServer(host, port, instance->protocolSupport()))
 {
 #ifdef SOMAXCONN
     _backlog = instance->initializationData().properties->getPropertyAsIntWithDefault("Ice.TCP.Backlog", SOMAXCONN);
@@ -131,7 +132,6 @@ IceObjC::Acceptor::Acceptor(const InstancePtr& instance, const string& host, int
 
     try
     {
-        getAddressForServer(host, port, _addr, _instance->protocolSupport());
         _fd = createSocket(false, _addr.ss_family);
         setBlock(_fd, false);
         setTcpBufSize(_fd, _instance->initializationData().properties, _logger);
@@ -155,7 +155,7 @@ IceObjC::Acceptor::Acceptor(const InstancePtr& instance, const string& host, int
             Trace out(_logger, _traceLevels->networkCat);
             out << "attempting to bind to " << _instance->protocol() << " socket " << toString();
         }
-        doBind(_fd, _addr);
+        const_cast<struct sockaddr_storage&>(_addr) = doBind(_fd, _addr);
     }
     catch(...)
     {

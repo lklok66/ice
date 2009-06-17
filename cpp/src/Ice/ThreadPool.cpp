@@ -7,6 +7,13 @@
 //
 // **********************************************************************
 
+//
+// The following is required for GetThreadIOPendingFlag
+//
+#if defined(_WIN32) && !defined(_WIN32_WINNT)
+#  define _WIN32_WINNT 0x0501
+#endif
+
 #include <IceUtil/DisableWarnings.h>
 #include <Ice/ThreadPool.h>
 #include <Ice/EventHandler.h>
@@ -25,21 +32,293 @@ using namespace IceInternal;
 
 ICE_DECLSPEC_EXPORT IceUtil::Shared* IceInternal::upCast(ThreadPool* p) { return p; }
 
+namespace
+{
+
+class ShutdownWorkItem : public ThreadPoolWorkItem
+{
+public:
+
+    ShutdownWorkItem(const InstancePtr& instance) : _instance(instance)
+    {
+    }
+    
+    virtual void
+    execute()
+    {
+        ObjectAdapterFactoryPtr factory;
+        try
+        {
+            factory = _instance->objectAdapterFactory();
+        }
+        catch(const CommunicatorDestroyedException&)
+        {
+            return;
+        }
+        
+        factory->shutdown();
+    }
+    
+private:
+
+    InstancePtr _instance;
+};
+
+class FinishedWorkItem : public ThreadPoolWorkItem
+{
+public:
+
+    FinishedWorkItem(const EventHandlerPtr& handler) : _handler(handler)
+    {
+    }
+    
+    virtual void
+    execute()
+    {
+        _handler->finished();
+    }
+    
+private:
+
+    EventHandlerPtr _handler;
+};
+
+//
+// Exception raised by the thread pool work queue when the thread pool
+// is destroyed.
+//
+class ThreadPoolDestroyedException
+{
+};
+
+}
+
+namespace IceInternal
+{
+
+class ThreadPoolWorkQueue : public EventHandler, public IceUtil::Mutex
+{
+public:
+
+    ThreadPoolWorkQueue(ThreadPool* threadPool, const InstancePtr& instance, Selector& selector) : 
+        _threadPool(threadPool), 
+        _instance(instance),
+        _selector(selector),
+        _destroyed(false)
+#ifdef ICE_USE_IOCP
+        , _info(SocketOperationRead)
+#endif
+    {
+#ifndef ICE_USE_IOCP
+        SOCKET fds[2];
+        createPipe(fds);
+        _fdIntrRead = fds[0];
+        _fdIntrWrite = fds[1];
+
+        _selector.initialize(this);
+        _selector.update(this, SocketOperationNone, SocketOperationRead);
+#endif
+    }
+
+    ~ThreadPoolWorkQueue()
+    {
+#ifndef ICE_USE_IOCP
+        try
+        {
+            closeSocket(_fdIntrRead);
+        }
+        catch(const LocalException& ex)
+        {
+            Error out(_instance->initializationData().logger);
+            out << "exception in selector while calling closeSocket():\n" << ex;
+        }
+        
+        try
+        {
+            closeSocket(_fdIntrWrite);
+        }
+        catch(const LocalException& ex)
+        {
+            Error out(_instance->initializationData().logger);
+            out << "exception in selector while calling closeSocket():\n" << ex;
+        }
+#endif
+    }
+
+    void destroy()
+    {
+        Lock sync(*this);
+        assert(!_destroyed);
+        _destroyed = true;
+        postMessage();
+    }
+
+    void queue(const ThreadPoolWorkItemPtr& item)
+    {
+        Lock sync(*this);
+        if(_destroyed)
+        {
+            throw Ice::CommunicatorDestroyedException(__FILE__, __LINE__);
+        }
+        _workItems.push_back(item);
+        postMessage();
+    }
+
+#ifdef ICE_USE_IOCP
+    bool startAsync(IceInternal::SocketOperation)
+    {
+        assert(false);
+        return false;
+    }
+
+    bool finishAsync(IceInternal::SocketOperation)
+    {
+        assert(false);
+        return false;
+    }
+#endif
+
+    virtual bool message(ThreadPoolCurrent& current)
+    {
+#ifndef ICE_USE_IOCP
+        char c;
+        while(true)
+        {
+            ssize_t ret;
+#ifdef _WIN32
+            ret = ::recv(_fdIntrRead, &c, 1, 0);
+#else
+            ret = ::read(_fdIntrRead, &c, 1);
+#endif
+            if(ret == SOCKET_ERROR)
+            {
+                if(interrupted())
+                {
+                    continue;
+                }
+                
+                SocketException ex(__FILE__, __LINE__);
+                ex.error = IceInternal::getSocketErrno();
+                throw ex;
+            }
+            break;
+        }
+#endif
+
+        ThreadPoolWorkItemPtr workItem;
+        {        
+            Lock sync(*this);
+            if(!_workItems.empty())
+            {
+                workItem = _workItems.front();
+                _workItems.pop_front();
+            }
+            else
+            {
+                assert(_destroyed);
+                postMessage();
+            }
+        }
+
+        _threadPool->ioCompleted(this, current, false);
+        if(workItem)
+        {
+            workItem->execute();
+        }
+        else
+        {
+            throw ThreadPoolDestroyedException();
+        }
+        return true;
+    }
+
+    virtual void finished()
+    {
+        assert(false);
+    }
+
+    virtual std::string toString() const
+    {
+        return "work queue";
+    }
+
+    virtual NativeInfoPtr getNativeInfo()
+    {
+#ifndef ICE_USE_IOCP
+        return new NativeInfo(_fdIntrRead);
+#endif
+        return 0;
+    }
+
+    virtual void postMessage()
+    {
+#ifndef ICE_USE_IOCP
+        char c = 0;
+        while(true)
+        {
+#ifdef _WIN32
+            if(::send(_fdIntrWrite, &c, 1, 0) == SOCKET_ERROR)
+#else
+            if(::write(_fdIntrWrite, &c, 1) == SOCKET_ERROR)
+#endif
+            {
+                if(interrupted())
+                {
+                    continue;
+                }
+                
+                SocketException ex(__FILE__, __LINE__);
+                ex.error = IceInternal::getSocketErrno();
+                throw ex;
+            }
+            break;
+        }
+#else
+        if(!PostQueuedCompletionStatus(_selector.getIOCPHandle(), 0, reinterpret_cast<ULONG_PTR>(this), &_info))
+        {
+            SocketException ex(__FILE__, __LINE__);
+            ex.error = GetLastError();
+            throw ex;
+        }
+#endif
+    }
+
+private:
+
+    ThreadPool* _threadPool;
+    InstancePtr _instance;
+    Selector& _selector;
+    bool _destroyed;
+#ifdef ICE_USE_IOCP
+    AsyncInfo _info;
+#else
+    SOCKET _fdIntrRead;
+    SOCKET _fdIntrWrite;
+#endif
+    std::list<ThreadPoolWorkItemPtr> _workItems;
+};
+
+}
+
 IceInternal::ThreadPool::ThreadPool(const InstancePtr& instance, const string& prefix, int timeout) :
     _instance(instance),
     _destroyed(false),
     _prefix(prefix),
     _selector(instance, timeout),
     _size(0),
+    _sizeIO(0),
     _sizeMax(0),
     _sizeWarn(0),
     _serialize(_instance->initializationData().properties->getPropertyAsInt(_prefix + ".Serialize") > 0),
     _stackSize(0),
     _running(0),
     _inUse(0),
+#ifndef ICE_USE_IOCP
+    _inUseIO(0),
+    _nextHandler(_handlers.end()),
+#endif
     _load(1.0),
-    _promote(true),
-    _warnUdp(_instance->initializationData().properties->getPropertyAsInt("Ice.Warn.Datagrams") > 0)
+    _promote(true)
 {
     //
     // We use just one thread as the default. This is the fastest
@@ -72,9 +351,22 @@ IceInternal::ThreadPool::ThreadPool(const InstancePtr& instance, const string& p
         sizeWarn = sizeMax;
     }
 
+    int sizeIO = _instance->initializationData().properties->getPropertyAsIntWithDefault(_prefix + ".SizeIO", size);
+    if(sizeIO < 1)
+    {
+        Warning out(_instance->initializationData().logger);
+        out << _prefix << ".SizeIO < 1; Size adjusted to 1";
+        sizeIO = 1;
+    }    
+
     const_cast<int&>(_size) = size;
     const_cast<int&>(_sizeMax) = sizeMax;
     const_cast<int&>(_sizeWarn) = sizeWarn;
+    const_cast<int&>(_sizeIO) = sizeIO;
+
+#ifdef ICE_USE_IOCP
+    _selector.setup(_sizeIO);
+#endif
 
     int stackSize = _instance->initializationData().properties->getPropertyAsInt(_prefix + ".StackSize");
     if(stackSize < 0)
@@ -84,6 +376,8 @@ IceInternal::ThreadPool::ThreadPool(const InstancePtr& instance, const string& p
         stackSize = 0;
     }
     const_cast<size_t&>(_stackSize) = static_cast<size_t>(stackSize);
+
+    _workQueue = new ThreadPoolWorkQueue(this, _instance, _selector);
 
     __setNoDelete(true);
     try
@@ -124,157 +418,130 @@ IceInternal::ThreadPool::~ThreadPool()
 void
 IceInternal::ThreadPool::destroy()
 {
-    IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
-    assert(!_destroyed);
-    _destroyed = true;
-    _selector.setInterrupt();
-}
-
-void
-IceInternal::ThreadPool::incFdsInUse()
-{
-#ifdef ICE_USE_SELECT
-    IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
-    _selector.incFdsInUse();
-#endif
-}
-
-void
-IceInternal::ThreadPool::decFdsInUse()
-{
-#ifdef ICE_USE_SELECT
-    IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
-    _selector.decFdsInUse();
-#endif
-}
-
-void
-IceInternal::ThreadPool::_register(const EventHandlerPtr& handler)
-{
-    IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
-    assert(!_destroyed && handler->fd() != INVALID_SOCKET);
-    if(!handler->_registered)
     {
-        if(!handler->_serializing)
-        {
-            _selector.add(handler.get(), NeedRead);
-        }
-        handler->_registered = true;
+        Lock sync(*this);
+        assert(!_destroyed);
+        _destroyed = true;
     }
+    _workQueue->destroy();
 }
 
 void
-IceInternal::ThreadPool::unregister(const EventHandlerPtr& handler)
+IceInternal::ThreadPool::initialize(const EventHandlerPtr& handler)
 {
-    IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
-    assert(!_destroyed);
-    if(handler->_registered)
-    {
-        assert(handler->fd() != INVALID_SOCKET);
-        if(!handler->_serializing)
-        {
-            _selector.remove(handler.get(), NeedRead);
-        }
-        handler->_registered = false;
-    }
+    Lock sync(*this);
+    _selector.initialize(handler.get());
+}
+
+void
+IceInternal::ThreadPool::update(const EventHandlerPtr& handler, SocketOperation remove, SocketOperation add)
+{
+    Lock sync(*this);
+    _selector.update(handler.get(), remove, add);
 }
 
 void
 IceInternal::ThreadPool::finish(const EventHandlerPtr& handler)
 {
-    IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
-    assert(!_destroyed);
-    if(handler->_registered)
-    {
-        assert(handler->fd() != INVALID_SOCKET);
-        if(!handler->_serializing)
-        {
-            _selector.remove(handler.get(), NeedRead);
-        }
-        handler->_registered = false;
-    }
-    _finished.push_back(handler);
-    _selector.setInterrupt();
+    Lock sync(*this);
+    _selector.finish(handler.get());
+    _workQueue->queue(new FinishedWorkItem(handler));
+
+#ifndef ICE_USE_CFSTREAM
+    //
+    // Clear the current ready handlers. The handlers from this vector can't be 
+    // reference counted and a handler might get destroyed once it's finished.
+    //
+    _handlers.clear();
+    _nextHandler = _handlers.end();
+#endif
 }
 
 void
 IceInternal::ThreadPool::execute(const ThreadPoolWorkItemPtr& workItem)
 {
-    IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
-    if(_destroyed)
+    _workQueue->queue(workItem);
+}
+
+#ifdef ICE_USE_IOCP
+bool
+IceInternal::ThreadPool::startMessage(EventHandler* handler, ThreadPoolCurrent& current)
+{
+    if(handler->_pending & current.operation)
     {
-        throw Ice::CommunicatorDestroyedException(__FILE__, __LINE__);
+        assert(!(handler->_ready & current.operation));
+        handler->_ready = static_cast<SocketOperation>(handler->_ready | current.operation);
+
+        handler->__decRef();
+        handler->_pending = static_cast<SocketOperation>(handler->_pending & ~current.operation);
+        if(!handler->finishAsync(current.operation))
+        {
+            return false;
+        }
     }
-    _workItems.push_back(workItem);
-    _selector.setInterrupt();
+    else if(!(handler->_ready & current.operation))
+    {
+        assert(!(handler->_pending & current.operation));
+        if(handler->startAsync(current.operation))
+        {
+            handler->_pending = static_cast<SocketOperation>(handler->_pending | current.operation);
+            handler->__incRef();
+        }
+        return false;
+    }
+
+    assert(handler->_ready & current.operation);
+
+    if(handler->_registered & current.operation)
+    {
+        handler->_ready = static_cast<SocketOperation>(handler->_ready & ~current.operation);
+        handler->_pending = static_cast<SocketOperation>(handler->_pending | current.operation);
+        return true;
+    }
+    else
+    {
+        handler->_pending = static_cast<SocketOperation>(handler->_pending & ~current.operation);
+        return false;
+    }
 }
 
 void
-IceInternal::ThreadPool::promoteFollower(EventHandler* handler)
+IceInternal::ThreadPool::finishMessage(EventHandler* handler, ThreadPoolCurrent& current)
 {
-    if(_sizeMax > 1)
+    if(handler->_registered & current.operation)
     {
-        IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
-
-        if(_serialize && handler)
+        assert(!(handler->_ready & current.operation));
+        if(handler->startAsync(current.operation))
         {
-            handler->_serializing = true;
-            if(handler->_registered)
-            {
-                _selector.remove(handler, NeedRead, true); // No interrupt, no thread is blocked on select().
-            }
-        }
-
-        assert(!_promote);
-        _promote = true;
-        notify();
-
-        if(!_destroyed)
-        {
-            assert(_inUse >= 0);
-            ++_inUse;
-            
-            if(_inUse == _sizeWarn)
-            {
-                Warning out(_instance->initializationData().logger);
-                out << "thread pool `" << _prefix << "' is running low on threads\n"
-                    << "Size=" << _size << ", " << "SizeMax=" << _sizeMax << ", " << "SizeWarn=" << _sizeWarn;
-            }
-            
-            assert(_inUse <= _running);
-            if(_inUse < _sizeMax && _inUse == _running)
-            {
-                try
-                {
-                    IceUtil::ThreadPtr thread = new EventHandlerThread(this);
-                    thread->start(_stackSize);
-                    _threads.push_back(thread);
-                    ++_running;
-                }
-                catch(const IceUtil::Exception& ex)
-                {
-                    Error out(_instance->initializationData().logger);
-                    out << "cannot create thread for `" << _prefix << "':\n" << ex;
-                }
-            }
+            assert(handler->_pending & current.operation);
+            handler->__incRef();
         }
     }
+    else
+    {
+        handler->_pending = static_cast<SocketOperation>(handler->_pending & ~current.operation);
+    }
 }
+#endif
 
 void
 IceInternal::ThreadPool::joinWithAllThreads()
 {
+    assert(_destroyed);
+
     //
     // _threads is immutable after destroy() has been called,
     // therefore no synchronization is needed. (Synchronization
     // wouldn't be possible here anyway, because otherwise the other
     // threads would never terminate.)
     //
-    assert(_destroyed);
     for(vector<IceUtil::ThreadPtr>::iterator p = _threads.begin(); p != _threads.end(); ++p)
     {
         (*p)->getThreadControl().join();
     }
+
+    _selector.finish(_workQueue.get());
+    _selector.destroy();
 }
 
 string
@@ -283,493 +550,370 @@ IceInternal::ThreadPool::prefix() const
     return _prefix;
 }
 
-bool
+void
 IceInternal::ThreadPool::run()
 {
-    ThreadPoolPtr self = this;
-
-    if(_sizeMax > 1)
-    {
-        IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
-
-        while(!_promote)
-        {
-            wait();
-        }
-
-        _promote = false;
-    }
-
+#ifndef ICE_USE_IOCP
+    EventHandlerPtr handler;
+    ThreadPoolCurrent current;
+    current.operation = SocketOperationNone;
+    current.leader = false;
+    bool select = false;
+    vector<pair<EventHandler*, SocketOperation> > handlers;
     while(true)
     {
-        int ret;
+        bool ioCompleted;
         try
         {
-            ret = _selector.select();
+            if(handler)
+            {
+                ioCompleted = handler->message(current);
+            }
+            else if(select)
+            {
+                _selector.select(handlers);
+            }
         }
-        catch(const Ice::LocalException& ex)
+        catch(ThreadPoolDestroyedException&)
+        {
+            return;
+        }
+        catch(const LocalException& ex)
+        {
+            Error out(_instance->initializationData().logger);
+            out << "exception in `" << _prefix << "' while calling on event handler:\n"
+                << ex << '\n' << handler->toString();
+        }
+
+        {
+            Lock sync(*this);
+            if(!handler)
+            {
+                if(select)
+                {
+                    if(handlers.empty())
+                    {
+                        _workQueue->queue(new ShutdownWorkItem(_instance)); // Select timed-out.
+                    }
+                    _handlers.swap(handlers);
+                    _nextHandler = _handlers.begin();
+                    _selector.finishSelect();
+                    select = false;
+                }
+                else
+                {
+                    //
+                    // Wait to be promotted and for all the IO threads to be done.
+                    // 
+                    assert(!current.leader);
+                    while(!_promote || _inUseIO == _sizeIO || _nextHandler == _handlers.end() && _inUseIO > 0)
+                    {
+                        wait();
+                    }
+                    _promote = false;
+                    current.leader = true;
+                }
+            }
+            else if(_sizeMax > 1)
+            {
+                if(!ioCompleted)
+                {
+                    //
+                    // The handler didn't call ioCompleted so we take care of decreasing 
+                    // the IO thread count now.
+                    //
+                    --_inUseIO;
+                }
+                else
+                {
+                    //
+                    // If the handler called ioCompleted(), we re-enable the handler in
+                    // case it was disabled and we decrease the number of thread in use.
+                    //
+                    _selector.enable(handler.get(), current.operation);
+                    if(!decThreadInUse())
+                    {
+                        return;
+                    }
+                }
+
+                handler = 0; // It's important to clear the handler before waiting to make sure that
+                             // resources for the handler are released now if it's finished.
+                
+                if(!current.leader)
+                {
+                    //
+                    // Wait to be promotted and for all the IO threads to be done.
+                    //
+                    while(!_promote || _inUseIO == _sizeIO ||  _nextHandler == _handlers.end() && _inUseIO > 0)
+                    {
+                        wait();
+                    }
+                    _promote = false;
+                    current.leader = true;
+                }
+            }
+            else
+            {
+                handler = 0;
+            }
+
+            //
+            // Get the next ready handler.
+            //
+            if(_nextHandler != _handlers.end())
+            {
+                handler = _nextHandler->first;
+                current.operation = _nextHandler->second;
+                ++_nextHandler;
+            }
+
+            if(!handler)
+            {
+                //
+                // If there's no more ready handlers and there's still threads busy performing 
+                // IO, we give up leader ship and promote another follower (which will perform
+                // the select() only once all the IOs are completed). Otherwise, if there's no
+                // more threads peforming IOs, it's time to do another select().
+                //
+                if(_inUseIO > 0)
+                {
+                    promoteFollower();
+                    current.leader = false;
+                }
+                else
+                {
+                    _selector.startSelect();
+                    select = true;
+                }
+            }
+            else if(_sizeMax > 1)
+            {
+                //
+                // Increment the IO thread count and if there's still threads available
+                // to perform IO and more handlers ready, we promote a follower.
+                //
+                ++_inUseIO;
+                if(_nextHandler != _handlers.end() && _inUseIO < _sizeIO)
+                {
+                    promoteFollower();
+                    current.leader = false;
+                }
+            }
+        }
+    }
+#else
+    while(true)
+    {
+        EventHandlerPtr handler;
+        ThreadPoolCurrent current;
+        try
+        {
+            handler = _selector.getNextHandler(current.operation);
+        }
+        catch(const LocalException& ex)
         {
             Error out(_instance->initializationData().logger);
             out << "exception in `" << _prefix << "':\n" << ex; 
             continue;
         }
 
-        EventHandlerPtr handler;
-        ThreadPoolWorkItemPtr workItem;
-        bool finished = false;
-        bool shutdown = false;
-
-        if(ret == 0) // We initiate a shutdown if there is a thread pool timeout.
+        if(!handler) // We initiate a shutdown if there is a selector timeout.
         {
-            shutdown = true;
+            _workQueue->queue(new ShutdownWorkItem(_instance));
         }
         else
         {
-            IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
-            if(_selector.isInterrupted())
-            {
-                if(_selector.processInterrupt())
-                {
-                    continue;
-                }
-
-                //
-                // There are three possiblities for an interrupt:
-                //
-                // 1. An event handler is being finished (closed).
-                //
-                // 2. The thread pool has been destroyed.
-                //
-                // 3. A work item has been schedulded.
-                //
-                if(!_finished.empty())
-                {
-                    _selector.clearInterrupt();
-                    handler = _finished.front();
-                    _finished.pop_front();
-                    finished = true;
-                }
-                else if(!_workItems.empty())
-                {
-                    //
-                    // Work items must be executed first even if the thread pool is destroyed.
-                    //
-                    _selector.clearInterrupt();
-                    workItem = _workItems.front();
-                    _workItems.pop_front();
-                }
-                else if(_destroyed)
-                {
-                    //
-                    // Don't clear the interrupt if destroyed, so that the other threads exit as well.
-                    //
-                    return true;
-                }
-                else
-                {
-                    assert(false);
-                }
-            }
-            else
-            {
-                handler = _selector.getNextSelected();
-                if(!handler)
-                {
-                    continue;
-                }
-            }
-        }
-        
-        //
-        // Now we are outside the thread synchronization.
-        //
-        if(shutdown)
-        {
-            //
-            // Initiate server shutdown.
-            //
-            ObjectAdapterFactoryPtr factory;
             try
             {
-                factory = _instance->objectAdapterFactory();
+                bool ioCompleted = handler->message(current);
+                if(_sizeMax > 1 && ioCompleted)
+                {
+                    IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
+                    if(!decThreadInUse())
+                    {
+                        return;
+                    }
+                }
             }
-            catch(const Ice::CommunicatorDestroyedException&)
+            catch(ThreadPoolDestroyedException&)
             {
-                continue;
-            }
-
-            promoteFollower();
-            factory->shutdown();
-
-            //
-            // No "continue", because we want shutdown to be done in
-            // its own thread from this pool. Therefore we called
-            // promoteFollower().
-            //
-        }
-        else if(workItem)
-        {
-            try
-            {
-                //
-                // "self" is faster than "this", as the reference
-                // count is not modified.
-                //
-                workItem->execute(self);
+                return;
             }
             catch(const LocalException& ex)
             {
                 Error out(_instance->initializationData().logger);
-                out << "exception in `" << _prefix << "' while calling execute():\n" << ex;
+                out << "exception in `" << _prefix << "' while calling on event handler:\n"
+                    << ex << '\n' << handler->toString();
             }
-            
-            //
-            // No "continue", because we want execute() to be
-            // called in its own thread from this pool. Note that
-            // this means that execute() must call
-            // promoteFollower().
-            //
+        }
+    }
+#endif
+}
+
+bool
+IceInternal::ThreadPool::decThreadInUse()
+{
+    if(_size < _sizeMax) // Dynamic thread pool
+    {
+        //
+        // First we reap threads that have been destroyed before.
+        //
+        int sz = static_cast<int>(_threads.size());
+        assert(_running <= sz);
+        if(_running < sz)
+        {
+            vector<IceUtil::ThreadPtr>::iterator start =
+                partition(_threads.begin(), _threads.end(), 
+                          IceUtil::constMemFun(&IceUtil::Thread::isAlive));
+
+            for(vector<IceUtil::ThreadPtr>::iterator p = start; p != _threads.end(); ++p)
+            {
+                (*p)->getThreadControl().join();
+            }
+
+            _threads.erase(start, _threads.end());
+        }
+                
+        //
+        // Now we check if this thread can be destroyed, based
+        // on a load factor.
+        //
+
+        //
+        // The load factor jumps immediately to the number of
+        // threads that are currently in use, but decays
+        // exponentially if the number of threads in use is
+        // smaller than the load factor. This reflects that we
+        // create threads immediately when they are needed,
+        // but want the number of threads to slowly decline to
+        // the configured minimum.
+        //
+        double inUse = static_cast<double>(_inUse);
+        if(_load < inUse)
+        {
+            _load = inUse;
         }
         else
         {
-            assert(handler);
-            
-            if(finished)
-            {
-                //
-                // Notify a handler about it's removal from the thread pool.
-                //
-                try
-                {
-                    //
-                    // "self" is faster than "this", as the reference count is not modified.
-                    //
-                    handler->finished(self);
-                }
-                catch(const LocalException& ex)
-                {
-                    Error out(_instance->initializationData().logger);
-                    out << "exception in `" << _prefix << "' while calling finished():\n"
-                        << ex << '\n' << handler->toString();
-                }
-
-                //
-                // No "continue", because we want finished() to be
-                // called in its own thread from this pool. Note that
-                // this means that finished() must call
-                // promoteFollower().
-                //
-            }
-            else
-            {
-                //
-                // If the handler is "readable", try to read a message.
-                //
-                BasicStream stream(_instance.get());
-                if(handler->readable())
-                {
-                    try
-                    {
-                        if(!read(handler))
-                        {
-                            continue; // Can't read without blocking.
-                        }
-
-#if defined(ICE_APPLE_CFNETWORK)
-                        if(handler->hasMoreData())
-                        {
-                            _selector.hasMoreData(handler.get());
-                        }
-#endif
-                    }
-                    catch(const TimeoutException&)
-                    {
-                        assert(false); // This shouldn't occur as we only perform non-blocking reads.
-                        continue;
-                    }
-                    catch(const DatagramLimitException&) // Expected.
-                    {
-                        handler->_stream.resize(0);
-                        handler->_stream.i = stream.b.begin();
-                        continue;
-                    }
-                    catch(const SocketException& ex)
-                    {
-                        handler->exception(ex);
-                        continue;
-                    }
-                    catch(const LocalException& ex)
-                    {
-                        if(handler->datagram())
-                        {
-                            if(_instance->initializationData().properties->getPropertyAsInt("Ice.Warn.Connections") > 0)
-                            {
-                                Warning out(_instance->initializationData().logger);
-                                out << "datagram connection exception:\n" << ex << '\n' << handler->toString();
-                            }
-                            handler->_stream.resize(0);
-                            handler->_stream.i = stream.b.begin();
-                        }
-                        else
-                        {
-                            handler->exception(ex);
-                        }
-                        continue;
-                    }
-                    
-                    stream.swap(handler->_stream);
-                    assert(stream.i == stream.b.end());
-                }
-            
-                //
-                // Provide a new mesage to the handler.
-                //
-                try
-                {
-                    //
-                    // "self" is faster than "this", as the reference count is not modified.
-                    //
-                    handler->message(stream, self);
-                }
-                catch(const LocalException& ex)
-                {
-                    Error out(_instance->initializationData().logger);
-                    out << "exception in `" << _prefix << "' while calling message():\n"
-                        << ex << '\n' << handler->toString();
-                }
-                
-                //
-                // No "continue", because we want message() to be
-                // called in its own thread from this pool. Note that
-                // this means that message() must call
-                // promoteFollower().
-                //
-            }
+            const double loadFactor = 0.05; // TODO: Configurable?
+            const double oneMinusLoadFactor = 1 - loadFactor;
+            _load = _load * oneMinusLoadFactor + inUse * loadFactor;
         }
-
-        if(_sizeMax > 1)
+                
+        if(_running > _size)
         {
-            IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
+#ifdef ICE_USE_IOCP
+            BOOL hasIO = false;
+            GetThreadIOPendingFlag(GetCurrentThread(), &hasIO);
+#endif
 
-            if(!_destroyed)
+            int load = static_cast<int>(_load + 0.5);
+
+            //
+            // We add one to the load factor because on
+            // additional thread is needed for select().
+            //
+#ifdef ICE_USE_IOCP
+            if(!hasIO && load + 1 < _running)
+#else
+            if(load + 1 < _running)
+#endif
             {
-                if(_serialize && handler && handler->_serializing)
-                {
-                    if(handler->_registered)
-                    {
-                        // No interrupt if no thread is blocked on select (_promote == true)
-                        _selector.add(handler.get(), NeedRead, _promote);
-                    }
-                    handler->_serializing = false;
-                }
-
-                if(_size < _sizeMax) // Dynamic thread pool
-                {
-                    //
-                    // First we reap threads that have been destroyed before.
-                    //
-                    int sz = static_cast<int>(_threads.size());
-                    assert(_running <= sz);
-                    if(_running < sz)
-                    {
-                        vector<IceUtil::ThreadPtr>::iterator start =
-                            partition(_threads.begin(), _threads.end(), 
-                                      IceUtil::constMemFun(&IceUtil::Thread::isAlive));
-
-                        for(vector<IceUtil::ThreadPtr>::iterator p = start; p != _threads.end(); ++p)
-                        {
-                            (*p)->getThreadControl().join();
-                        }
-
-                        _threads.erase(start, _threads.end());
-                    }
-                
-                    //
-                    // Now we check if this thread can be destroyed, based
-                    // on a load factor.
-                    //
-
-                    //
-                    // The load factor jumps immediately to the number of
-                    // threads that are currently in use, but decays
-                    // exponentially if the number of threads in use is
-                    // smaller than the load factor. This reflects that we
-                    // create threads immediately when they are needed,
-                    // but want the number of threads to slowly decline to
-                    // the configured minimum.
-                    //
-                    double inUse = static_cast<double>(_inUse);
-                    if(_load < inUse)
-                    {
-                        _load = inUse;
-                    }
-                    else
-                    {
-                        const double loadFactor = 0.05; // TODO: Configurable?
-                        const double oneMinusLoadFactor = 1 - loadFactor;
-                        _load = _load * oneMinusLoadFactor + inUse * loadFactor;
-                    }
-                
-                    if(_running > _size)
-                    {
-                        int load = static_cast<int>(_load + 0.5);
-
-                        //
-                        // We add one to the load factor because on
-                        // additional thread is needed for select().
-                        //
-                        if(load + 1 < _running)
-                        {
-                            assert(_inUse > 0);
-                            --_inUse;
-                        
-                            assert(_running > 0);
-                            --_running;
-                        
-                            return false;
-                        }
-                    }
-                }
-
                 assert(_inUse > 0);
                 --_inUse;
+                        
+                assert(_running > 0);
+                --_running;
+                notify();
+                return false;
             }
+        }
+    }
 
-            //
-            // Do not wait to be promoted again to release these objects.
-            //
-            handler = 0;
-            workItem = 0;
+    assert(_inUse > 0);
+    --_inUse;
+    return true;
+}
 
-            while(!_promote)
+void
+IceInternal::ThreadPool::incThreadInUse()
+{
+    if(!_destroyed)
+    {
+        assert(_inUse >= 0);
+        ++_inUse;
+    
+        if(_inUse == _sizeWarn)
+        {
+            Warning out(_instance->initializationData().logger);
+            out << "thread pool `" << _prefix << "' is running low on threads\n"
+                << "Size=" << _size << ", " << "SizeMax=" << _sizeMax << ", " << "SizeWarn=" << _sizeWarn;
+        }
+    
+        assert(_inUse <= _running);
+        if(_inUse < _sizeMax && _inUse == _running)
+        {
+            try
             {
-                wait();
+                IceUtil::ThreadPtr thread = new EventHandlerThread(this);
+                thread->start(_stackSize);
+                _threads.push_back(thread);
+                ++_running;
             }
-            
-            _promote = false;
+            catch(const IceUtil::Exception& ex)
+            {
+                Error out(_instance->initializationData().logger);
+                out << "cannot create thread for `" << _prefix << "':\n" << ex;
+            }
         }
     }
 }
 
 bool
-IceInternal::ThreadPool::read(const EventHandlerPtr& handler)
+IceInternal::ThreadPool::ioCompleted(EventHandler* handler, ThreadPoolCurrent& current, bool serialize)
 {
-    BasicStream& stream = handler->_stream;
+    if(_sizeMax > 1)
+    {
+        IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*this);
+#ifndef ICE_USE_IOCP
+        --_inUseIO;
 
-    if(stream.i - stream.b.begin() >= headerSize)
-    {
-        if(!handler->read(stream))
+        if(serialize)
         {
-            return false;
-        }
-        assert(stream.i == stream.b.end());
-        return true;
-    }
+            _selector.disable(handler, current.operation);
+        }    
 
-    if(stream.b.size() == 0)
-    {
-        stream.b.resize(headerSize);
-        stream.i = stream.b.begin();
-    }
-
-    if(stream.i != stream.b.end())
-    {
-        if(!handler->read(stream))
+        if(current.leader)
         {
-            return false;
+            //
+            // If this thread is still the leader, it's time to promote a new leader.
+            //
+            promoteFollower();
+            current.leader = false;
         }
-        assert(stream.i == stream.b.end());
-    }
-    
-    ptrdiff_t pos = stream.i - stream.b.begin();
-    if(pos < headerSize)
-    {
-        //
-        // This situation is possible for small UDP packets.
-        //
-        throw IllegalMessageSizeException(__FILE__, __LINE__);
-    }
-
-    stream.i = stream.b.begin();
-    const Byte* m;
-    stream.readBlob(m, static_cast<Int>(sizeof(magic)));
-    if(m[0] != magic[0] || m[1] != magic[1] || m[2] != magic[2] || m[3] != magic[3])
-    {
-        BadMagicException ex(__FILE__, __LINE__);
-        ex.badMagic = Ice::ByteSeq(&m[0], &m[0] + sizeof(magic));
-        throw ex;
-    }
-    Byte pMajor;
-    Byte pMinor;
-    stream.read(pMajor);
-    stream.read(pMinor);
-    if(pMajor != protocolMajor
-       || static_cast<unsigned char>(pMinor) > static_cast<unsigned char>(protocolMinor))
-    {
-        UnsupportedProtocolException ex(__FILE__, __LINE__);
-        ex.badMajor = static_cast<unsigned char>(pMajor);
-        ex.badMinor = static_cast<unsigned char>(pMinor);
-        ex.major = static_cast<unsigned char>(protocolMajor);
-        ex.minor = static_cast<unsigned char>(protocolMinor);
-        throw ex;
-    }
-    Byte eMajor;
-    Byte eMinor;
-    stream.read(eMajor);
-    stream.read(eMinor);
-    if(eMajor != encodingMajor
-       || static_cast<unsigned char>(eMinor) > static_cast<unsigned char>(encodingMinor))
-    {
-        UnsupportedEncodingException ex(__FILE__, __LINE__);
-        ex.badMajor = static_cast<unsigned char>(eMajor);
-        ex.badMinor = static_cast<unsigned char>(eMinor);
-        ex.major = static_cast<unsigned char>(encodingMajor);
-        ex.minor = static_cast<unsigned char>(encodingMinor);
-        throw ex;
-    }
-    Byte messageType;
-    stream.read(messageType);
-    Byte compress;
-    stream.read(compress);
-    Int size;
-    stream.read(size);
-    if(size < headerSize)
-    {
-        throw IllegalMessageSizeException(__FILE__, __LINE__);
-    }
-    if(size > static_cast<Int>(_instance->messageSizeMax()))
-    {
-        throw MemoryLimitException(__FILE__, __LINE__);
-    }
-    if(size > static_cast<Int>(stream.b.size()))
-    {
-        stream.b.resize(size);
-    }
-    stream.i = stream.b.begin() + pos;
-    
-    if(stream.i != stream.b.end())
-    {
-        if(handler->datagram())
+        else if(_promote && (_nextHandler != _handlers.end() || _inUseIO == 0))
         {
-            if(_warnUdp)
-            {
-                Warning out(_instance->initializationData().logger);
-                out << "DatagramLimitException: maximum size of " << pos << " exceeded";
-            }
-            throw DatagramLimitException(__FILE__, __LINE__);
+            notify();
         }
-        else
-        {
-            if(!handler->read(stream))
-            {
-                return false;
-            }
-            assert(stream.i == stream.b.end());
-        }
+#endif
+        incThreadInUse();
     }
-    
-    return true;
+    return _serialize;
 }
+
+#ifndef ICE_USE_IOCP
+void
+IceInternal::ThreadPool::promoteFollower()
+{
+    assert(!_promote);
+    _promote = true;
+    if(_inUseIO < _sizeIO && (_nextHandler != _handlers.end() || _inUseIO == 0))
+    {
+        notify();
+    }
+}
+#endif
 
 IceInternal::ThreadPool::EventHandlerThread::EventHandlerThread(const ThreadPoolPtr& pool) :
     _pool(pool)
@@ -784,37 +928,19 @@ IceInternal::ThreadPool::EventHandlerThread::run()
         _pool->_instance->initializationData().threadHook->start();
     }
 
-    bool promote;
-
     try
     {
-        promote = _pool->run();
+        _pool->run();
     }
     catch(const std::exception& ex)
     {
         Error out(_pool->_instance->initializationData().logger);
         out << "exception in `" << _pool->_prefix << "':\n" << ex.what();
-        promote = true;
     }
     catch(...)
     {
         Error out(_pool->_instance->initializationData().logger);
         out << "unknown exception in `" << _pool->_prefix << "'"; 
-        promote = true;
-    }
-
-    if(promote && _pool->_sizeMax > 1)
-    {
-        //
-        // Promote a follower, but w/o modifying _inUse or creating
-        // new threads.
-        //
-        {
-            IceUtil::Monitor<IceUtil::Mutex>::Lock sync(*_pool.get());
-            assert(!_pool->_promote);
-            _pool->_promote = true;
-            _pool->notify();
-        }
     }
 
     if(_pool->_instance->initializationData().threadHook)

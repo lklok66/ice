@@ -24,7 +24,6 @@
 #include <Ice/ReferenceFactoryF.h>
 #include <Ice/ProxyFactoryF.h>
 #include <Ice/ThreadPoolF.h>
-#include <Ice/SelectorThreadF.h>
 #include <Ice/ConnectionFactoryF.h>
 #include <Ice/ConnectionMonitorF.h>
 #include <Ice/ObjectFactoryManagerF.h>
@@ -70,7 +69,6 @@ public:
     ProtocolSupport protocolSupport() const;
     ThreadPoolPtr clientThreadPool();
     ThreadPoolPtr serverThreadPool();
-    SelectorThreadPtr selectorThread();
     EndpointHostResolverPtr endpointHostResolver();
     RetryQueuePtr retryQueue();
     IceUtil::TimerPtr timer();
@@ -134,7 +132,6 @@ private:
     ProtocolSupport _protocolSupport;
     ThreadPoolPtr _clientThreadPool;
     ThreadPoolPtr _serverThreadPool;
-    SelectorThreadPtr _selectorThread;
     EndpointHostResolverPtr _endpointHostResolver;
     RetryQueuePtr _retryQueue;
     IceUtil::TimerPtr _timer;

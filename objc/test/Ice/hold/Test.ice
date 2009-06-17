@@ -7,11 +7,21 @@
 //
 // **********************************************************************
 
-#include <Ice/Transceiver.h>
+#ifndef TEST_ICE
+#define TEST_ICE
 
-using namespace std;
-using namespace Ice;
-using namespace IceInternal;
+["objc:prefix:TestHold"]
+module Test
+{
 
-IceUtil::Shared* IceInternal::upCast(Transceiver* p) { return p; }
+interface Hold
+{
+    void putOnHold(int seconds);
+    ["ami"] int set(int value, int delay);
+    void setOneway(int value, int expected);
+    void shutdown();
+};
 
+};
+
+#endif

@@ -113,10 +113,7 @@
 
 - (void)viewDidLoad
 {
-    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-    
-    // Initialize testCommon.
-    TestCommonInit(self, @selector(add:), @selector(serverReady), appDelegate.ssl);
+    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];    
     
     self.currentMessage = [NSMutableString string];
     self.messages = [NSMutableArray array];
@@ -129,6 +126,9 @@
 -(void)viewWillAppear:(BOOL)animated
 {
     AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+
+    // Initialize testCommon.
+    TestCommonInit(self, @selector(add:), @selector(serverReady), appDelegate.ssl);
 
     self.test = (Test*)[appDelegate.tests objectAtIndex:appDelegate.currentTest];
     [self startTest];

@@ -34,6 +34,14 @@ typedef int ssize_t;
 #   include <netdb.h>
 #endif
 
+#ifdef ICE_USE_CFSTREAM
+struct __CFReadStream;
+typedef struct __CFReadStream * CFReadStreamRef;
+
+struct __CFWriteStream;
+typedef struct __CFWriteStream * CFWriteStreamRef;
+#endif
+
 #if defined(_WIN32) || defined(__osf__) 
 typedef int socklen_t;
 #endif
@@ -67,6 +75,76 @@ typedef int socklen_t;
 namespace IceInternal
 {
 
+enum SocketOperation
+{
+    SocketOperationNone = 0,
+    SocketOperationRead = 1,
+    SocketOperationWrite = 2,
+#ifdef ICE_USE_CFSTREAM
+    SocketOperationConnect = 4,
+#else
+    SocketOperationConnect = 2
+#endif
+};
+
+#ifdef ICE_USE_IOCP
+
+struct ICE_API AsyncInfo : WSAOVERLAPPED
+{
+    AsyncInfo(SocketOperation);
+
+    SocketOperation status;
+    WSABUF buf;
+    DWORD flags;
+    DWORD count;
+    int error;
+};
+
+#endif 
+
+class ICE_API NativeInfo : virtual public IceUtil::Shared
+{
+public:
+    
+    NativeInfo(SOCKET fd = INVALID_SOCKET) : _fd(fd)
+#ifdef ICE_USE_CFSTREAM
+        , _connectError(0)
+#endif
+    {
+    }
+
+    SOCKET fd()
+    {
+        return _fd;
+    }
+
+#ifdef ICE_USE_IOCP
+    //
+    // This is implemented by transceiver and acceptor implementations.
+    //
+    virtual AsyncInfo* getAsyncInfo(SocketOperation) = 0;
+#endif
+
+#ifdef ICE_USE_CFSTREAM
+    virtual void setConnectError(int error) 
+    {
+        _connectError = error; 
+    }
+
+    virtual CFReadStreamRef readStream() { return 0; }
+
+    virtual CFWriteStreamRef writeStream() { return 0; }
+#endif
+
+protected:
+
+    SOCKET _fd;
+#ifdef ICE_USE_CFSTREAM
+    int _connectError;
+#endif
+};
+typedef IceUtil::Handle<NativeInfo> NativeInfoPtr;
+
 ICE_API bool interrupted();
 ICE_API bool acceptInterrupted();
 ICE_API bool noBuffers();
@@ -97,14 +175,18 @@ ICE_API void setMcastInterface(SOCKET, const std::string&, bool);
 ICE_API void setMcastTtl(SOCKET, int, bool);
 ICE_API void setReuseAddress(SOCKET, bool);
 
-ICE_API void doBind(SOCKET, struct sockaddr_storage&);
+ICE_API struct sockaddr_storage doBind(SOCKET, const struct sockaddr_storage&);
 ICE_API void doListen(SOCKET, int);
-ICE_API bool doConnect(SOCKET, struct sockaddr_storage&);
+ICE_API bool doConnect(SOCKET, const struct sockaddr_storage&);
 ICE_API void doFinishConnect(SOCKET);
+#ifdef ICE_USE_IOCP
+ICE_API void doConnectAsync(SOCKET, const struct sockaddr_storage&, AsyncInfo&);
+ICE_API void doFinishConnectAsync(SOCKET, AsyncInfo&);
+#endif
 ICE_API SOCKET doAccept(SOCKET);
 
-ICE_API void getAddressForServer(const std::string&, int, struct sockaddr_storage&, ProtocolSupport);
-ICE_API void getAddress(const std::string&, int, struct sockaddr_storage&, ProtocolSupport);
+ICE_API struct sockaddr_storage getAddressForServer(const std::string&, int, ProtocolSupport);
+ICE_API struct sockaddr_storage getAddress(const std::string&, int, ProtocolSupport);
 ICE_API std::vector<struct sockaddr_storage> getAddresses(const std::string&, int, ProtocolSupport, bool);
 
 ICE_API int compareAddress(const struct sockaddr_storage&, const struct sockaddr_storage&);
@@ -121,6 +203,7 @@ ICE_API std::string inetAddrToString(const struct sockaddr_storage&);
 ICE_API std::string addrToString(const struct sockaddr_storage&);
 ICE_API bool isMulticast(const struct sockaddr_storage&);
 ICE_API int getPort(const struct sockaddr_storage&);
+ICE_API void setPort(struct sockaddr_storage&, int);
 
 ICE_API std::vector<std::string> getHostsForEndpointExpand(const std::string&, ProtocolSupport);
 ICE_API void setTcpBufSize(SOCKET, const Ice::PropertiesPtr&, const Ice::LoggerPtr&);

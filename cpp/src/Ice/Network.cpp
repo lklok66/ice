@@ -35,6 +35,7 @@
 #  include <winsock2.h>
 #  include <ws2tcpip.h>
 #  include <iphlpapi.h>
+#  include <Mswsock.h>
 #else
 #  include <net/if.h>
 #  include <sys/ioctl.h>
@@ -264,9 +265,11 @@ getLocalAddresses(ProtocolSupport protocol)
     return result;
 }
 
-void
-getAddressImpl(const string& host, int port, struct sockaddr_storage& addr, ProtocolSupport protocol, bool server)
+struct sockaddr_storage
+getAddressImpl(const string& host, int port, ProtocolSupport protocol, bool server)
 {
+    struct sockaddr_storage addr;
+
     //
     // We now use getaddrinfo() on Windows.
     //
@@ -366,6 +369,7 @@ getAddressImpl(const string& host, int port, struct sockaddr_storage& addr, Prot
         throw ex;
     }
     freeaddrinfo(info);
+    return addr;
 }
 
 bool
@@ -373,8 +377,7 @@ isWildcard(const string& host, ProtocolSupport protocol)
 {
     try
     {
-        sockaddr_storage addr;
-        getAddressImpl(host, 0, addr, protocol, false);
+        sockaddr_storage addr = getAddressImpl(host, 0, protocol, false);
         if(addr.ss_family == AF_INET)
         {
             struct sockaddr_in* addrin = reinterpret_cast<sockaddr_in*>(&addr);
@@ -487,6 +490,14 @@ getInterfaceAddress(const string& name)
 
 }
 
+#ifdef ICE_USE_IOCP
+IceInternal::AsyncInfo::AsyncInfo(SocketOperation s)
+{
+    ZeroMemory(this, sizeof(AsyncInfo));
+    status = s;
+}
+#endif
+
 int
 IceInternal::getSocketErrno()
 {
@@ -547,7 +558,8 @@ bool
 IceInternal::wouldBlock()
 {
 #ifdef _WIN32
-    return WSAGetLastError() == WSAEWOULDBLOCK;
+    int error = WSAGetLastError();
+    return error == WSAEWOULDBLOCK || error == WSA_IO_PENDING;
 #else
     return errno == EAGAIN || errno == EWOULDBLOCK;
 #endif
@@ -581,7 +593,7 @@ IceInternal::connectionRefused()
 {
 #ifdef _WIN32
     int error = WSAGetLastError();
-    return error == WSAECONNREFUSED;
+    return error == WSAECONNREFUSED || error == ERROR_CONNECTION_REFUSED;
 #else
     return errno == ECONNREFUSED;
 #endif
@@ -591,7 +603,8 @@ bool
 IceInternal::connectInProgress()
 {
 #ifdef _WIN32
-    return WSAGetLastError() == WSAEWOULDBLOCK;
+    int error = WSAGetLastError();
+    return error == WSAEWOULDBLOCK || error == WSA_IO_PENDING;
 #else
     return errno == EINPROGRESS;
 #endif
@@ -605,6 +618,9 @@ IceInternal::connectionLost()
     return error == WSAECONNRESET ||
            error == WSAESHUTDOWN ||
            error == WSAENOTCONN ||
+#ifdef ICE_USE_IOCP
+           error == ERROR_NETNAME_DELETED ||
+#endif
            error == WSAECONNABORTED;
 #else
     return errno == ECONNRESET ||
@@ -939,8 +955,7 @@ IceInternal::setMcastGroup(SOCKET fd, const struct sockaddr_storage& group, cons
             mreq.imr_interface = getInterfaceAddress(interface);
             if(mreq.imr_interface.s_addr == INADDR_ANY)
             {
-                struct sockaddr_storage addr;
-                getAddressForServer(interface, 0, addr, EnableIPv4);
+                struct sockaddr_storage addr = getAddressForServer(interface, 0, EnableIPv4);
                 mreq.imr_interface = reinterpret_cast<const struct sockaddr_in*>(&addr)->sin_addr;
             }
         }
@@ -992,8 +1007,7 @@ IceInternal::setMcastInterface(SOCKET fd, const string& interface, bool IPv4)
         struct in_addr iface = getInterfaceAddress(interface);
         if(iface.s_addr == INADDR_ANY)
         {
-            struct sockaddr_storage addr;
-            getAddressForServer(interface, 0, addr, EnableIPv4);
+            struct sockaddr_storage addr = getAddressForServer(interface, 0, EnableIPv4);
             iface = reinterpret_cast<const struct sockaddr_in*>(&addr)->sin_addr;
         }
         rc = setsockopt(fd, IPPROTO_IP, IP_MULTICAST_IF, (char*)&iface, int(sizeof(iface)));
@@ -1059,8 +1073,8 @@ IceInternal::setReuseAddress(SOCKET fd, bool reuse)
     }
 }
 
-void
-IceInternal::doBind(SOCKET fd, struct sockaddr_storage& addr)
+struct sockaddr_storage
+IceInternal::doBind(SOCKET fd, const struct sockaddr_storage& addr)
 {
     int size;
     if(addr.ss_family == AF_INET)
@@ -1077,7 +1091,7 @@ IceInternal::doBind(SOCKET fd, struct sockaddr_storage& addr)
         size = 0; // Keep the compiler happy.
     }
 
-    if(bind(fd, reinterpret_cast<struct sockaddr*>(&addr), size) == SOCKET_ERROR)
+    if(bind(fd, reinterpret_cast<const struct sockaddr*>(&addr), size) == SOCKET_ERROR)
     {
         closeSocketNoThrow(fd);
         SocketException ex(__FILE__, __LINE__);
@@ -1085,13 +1099,15 @@ IceInternal::doBind(SOCKET fd, struct sockaddr_storage& addr)
         throw ex;
     }
 
-    socklen_t len = static_cast<socklen_t>(sizeof(addr));
+    struct sockaddr_storage local;
+    socklen_t len = static_cast<socklen_t>(sizeof(local));
 #ifdef NDEBUG
-    getsockname(fd, reinterpret_cast<struct sockaddr*>(&addr), &len);
+    getsockname(fd, reinterpret_cast<struct sockaddr*>(&local), &len);
 #else
-    int ret = getsockname(fd, reinterpret_cast<struct sockaddr*>(&addr), &len);
+    int ret = getsockname(fd, reinterpret_cast<struct sockaddr*>(&local), &len);
     assert(ret != SOCKET_ERROR);
 #endif
+    return local;
 }
 
 void
@@ -1113,7 +1129,7 @@ repeatListen:
 }
 
 bool
-IceInternal::doConnect(SOCKET fd, struct sockaddr_storage& addr)
+IceInternal::doConnect(SOCKET fd, const struct sockaddr_storage& addr)
 {
 repeatConnect:
     int size;
@@ -1131,7 +1147,7 @@ repeatConnect:
         size = 0; // Keep the compiler happy.
     }
 
-    if(::connect(fd, reinterpret_cast<struct sockaddr*>(&addr), size) == SOCKET_ERROR)
+    if(::connect(fd, reinterpret_cast<const struct sockaddr*>(&addr), size) == SOCKET_ERROR)
     {
         if(interrupted())
         {
@@ -1200,6 +1216,9 @@ IceInternal::doFinishConnect(SOCKET fd)
 #endif
 
     int val;
+#ifdef ICE_USE_CFSTREAM
+    val = errno;
+#else
     socklen_t len = static_cast<socklen_t>(sizeof(int));
     if(getsockopt(fd, SOL_SOCKET, SO_ERROR, reinterpret_cast<char*>(&val), &len) == SOCKET_ERROR)
     {
@@ -1207,6 +1226,7 @@ IceInternal::doFinishConnect(SOCKET fd)
         ex.error = getSocketErrno();
         throw ex;
     }
+#endif
 
     if(val > 0)
     {
@@ -1253,6 +1273,121 @@ IceInternal::doFinishConnect(SOCKET fd)
 #endif
 }
 
+#ifdef ICE_USE_IOCP
+void
+IceInternal::doConnectAsync(SOCKET fd, const struct sockaddr_storage& addr, AsyncInfo& info)
+{
+    struct sockaddr_storage bindAddr;
+    memset(&bindAddr, 0, sizeof(bindAddr));
+
+    int size;
+    if(addr.ss_family == AF_INET)
+    {
+        size = sizeof(sockaddr_in);
+
+        struct sockaddr_in* addrin = reinterpret_cast<struct sockaddr_in*>(&bindAddr);
+        addrin->sin_family = AF_INET;
+        addrin->sin_port = htons(0);
+        addrin->sin_addr.s_addr = htonl(INADDR_ANY);
+    }
+    else if(addr.ss_family == AF_INET6)
+    {
+        size = sizeof(sockaddr_in6);
+
+        struct sockaddr_in6* addrin = reinterpret_cast<struct sockaddr_in6*>(&bindAddr);
+        addrin->sin6_family = AF_INET6;
+        addrin->sin6_port = htons(0);
+        addrin->sin6_addr = in6addr_any;
+    }
+    else
+    {
+        assert(false);
+        size = 0; // Keep the compiler happy.
+    }
+
+    doBind(fd, bindAddr);
+
+    LPFN_CONNECTEX ConnectEx = NULL; // a pointer to the 'ConnectEx()' function
+    GUID GuidConnectEx = WSAID_CONNECTEX; // The Guid
+    DWORD dwBytes;
+    if(WSAIoctl(fd, 
+                SIO_GET_EXTENSION_FUNCTION_POINTER,
+                &GuidConnectEx,
+                sizeof(GuidConnectEx),
+                &ConnectEx,
+                sizeof(ConnectEx),
+                &dwBytes,
+                NULL, 
+                NULL) == SOCKET_ERROR)
+    {
+        SocketException ex(__FILE__, __LINE__);
+        ex.error = getSocketErrno();
+        throw ex;
+    }        
+
+    if(!ConnectEx(fd, reinterpret_cast<const struct sockaddr*>(&addr), size, 0, 0, 0, &info))
+    {
+        if(!connectInProgress())
+        {
+            closeSocketNoThrow(fd);
+            if(connectionRefused())
+            {
+                ConnectionRefusedException ex(__FILE__, __LINE__);
+                ex.error = getSocketErrno();
+                throw ex;
+            }
+            else if(connectFailed())
+            {
+                ConnectFailedException ex(__FILE__, __LINE__);
+                ex.error = getSocketErrno();
+                throw ex;
+            }
+            else
+            {
+                SocketException ex(__FILE__, __LINE__);
+                ex.error = getSocketErrno();
+                throw ex;
+            }
+        }
+    }
+
+}
+
+void
+IceInternal::doFinishConnectAsync(SOCKET fd, AsyncInfo& info)
+{
+    if(info.count == SOCKET_ERROR)
+    {
+        WSASetLastError(info.error);
+        if(connectionRefused())
+        {
+            ConnectionRefusedException ex(__FILE__, __LINE__);
+            ex.error = getSocketErrno();
+            throw ex;
+        }
+        else if(connectFailed())
+        {
+            ConnectFailedException ex(__FILE__, __LINE__);
+            ex.error = getSocketErrno();
+            throw ex;
+        }
+        else
+        {
+            SocketException ex(__FILE__, __LINE__);
+            ex.error = getSocketErrno();
+            throw ex;
+        }
+    }
+
+    if(setsockopt(fd, SOL_SOCKET, SO_UPDATE_CONNECT_CONTEXT, NULL, 0) == SOCKET_ERROR)
+    {
+        SocketException ex(__FILE__, __LINE__);
+        ex.error = getSocketErrno();
+        throw ex;
+    }
+}
+#endif
+
 SOCKET
 IceInternal::doAccept(SOCKET fd)
 {
@@ -1280,16 +1415,16 @@ repeatAccept:
     return ret;
 }
 
-void
-IceInternal::getAddressForServer(const string& host, int port, struct sockaddr_storage& addr, ProtocolSupport protocol)
+struct sockaddr_storage
+IceInternal::getAddressForServer(const string& host, int port, ProtocolSupport protocol)
 {
-    getAddressImpl(host, port, addr, protocol, true);
+    return getAddressImpl(host, port, protocol, true);
 }
 
-void
-IceInternal::getAddress(const string& host, int port, struct sockaddr_storage& addr, ProtocolSupport protocol)
+struct sockaddr_storage
+IceInternal::getAddress(const string& host, int port, ProtocolSupport protocol)
 {
-    getAddressImpl(host, port, addr, protocol, false);
+    return getAddressImpl(host, port, protocol, false);
 }
 
 vector<struct sockaddr_storage>
@@ -1513,7 +1648,7 @@ IceInternal::createPipe(SOCKET fds[2])
     addrin->sin_port = htons(0);
     addrin->sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
-    doBind(fd, addr);
+    addr = doBind(fd, addr);
     doListen(fd, 1);
 
     try
@@ -1749,6 +1884,19 @@ IceInternal::getPort(const struct sockaddr_storage& addr)
     else
     {
         return ntohs(reinterpret_cast<const sockaddr_in6*>(&addr)->sin6_port);
+    }
+}
+
+void
+IceInternal::setPort(struct sockaddr_storage& addr, int port)
+{
+    if(addr.ss_family == AF_INET)
+    {
+        reinterpret_cast<sockaddr_in*>(&addr)->sin_port = htons(port);
+    }
+    else
+    {
+        reinterpret_cast<sockaddr_in6*>(&addr)->sin6_port = htons(port);
     }
 }
 

@@ -25,13 +25,21 @@ namespace IceInternal
 
 class TcpEndpoint;
 
-class TcpAcceptor : public Acceptor
+class TcpAcceptor : public Acceptor, public NativeInfo
 {
 public:
 
-    virtual SOCKET fd();
+    virtual NativeInfoPtr getNativeInfo();
+#ifdef ICE_USE_IOCP
+    virtual AsyncInfo* getAsyncInfo(SocketOperation);
+#endif
+
     virtual void close();
     virtual void listen();
+#ifdef ICE_USE_IOCP
+    virtual void startAccept();
+    virtual void finishAccept();
+#endif
     virtual TransceiverPtr accept();
     virtual std::string toString() const;
 
@@ -43,12 +51,18 @@ private:
     virtual ~TcpAcceptor();
     friend class TcpEndpointI;
 
-    InstancePtr _instance;
-    TraceLevelsPtr _traceLevels;
-    ::Ice::LoggerPtr _logger;
-    SOCKET _fd;
+    const InstancePtr _instance;
+    const TraceLevelsPtr _traceLevels;
+    const ::Ice::LoggerPtr _logger;
+    const struct sockaddr_storage _addr;
+
     int _backlog;
-    struct sockaddr_storage _addr;
+#ifdef ICE_USE_IOCP
+    SOCKET _acceptFd;
+    int _acceptError;
+    char _acceptBuf[128];
+    AsyncInfo _info;
+#endif
 };
 
 }

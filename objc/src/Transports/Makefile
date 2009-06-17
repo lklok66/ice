@@ -35,7 +35,7 @@ CPPFLAGS	:= -I. -I../IceCpp/include -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/sr
 
 ifeq ($(COMPILE_FOR_IPHONE),yes)
 
-CPPFLAGS	:= $(CPPFLAGS) -DICE_APPLE_CFNETWORK
+CPPFLAGS	:= $(CPPFLAGS) -DICE_USE_CFSTREAM
 OBJS		:= $(addprefix $(PLATFORM_NAME)/,$(CF_OBJS))
 
 $(PLATFORM_NAME)/%.o: %.cpp
