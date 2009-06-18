@@ -37,6 +37,11 @@ else
     CXX	                = c++
 endif
 
+# For the simulator build we must support weak linking.
+ifeq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
+    LDPLATFORMFLAGS     := $(LDPLATFORMFLAGS) -Wl,-flat_namespace,-undefined,dynamic_lookup
+endif
+
 CFLAGS                  = -Wall
 CXXFLAGS		= -ftemplate-depth-128 -Wall -D_REENTRANT 
 

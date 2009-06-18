@@ -28,8 +28,20 @@ using namespace std;
 using namespace Ice;
 using namespace IceInternal;
 
+#if TARGET_IPHONE_SIMULATOR && __IPHONE_3_0
+extern "C"
+{
+    extern CFStringRef kSecImportExportPassphrase __attribute__((weak_import));
+    extern CFStringRef kSecImportItemIdentity __attribute__((weak_import));
+    OSStatus SecPKCS12Import(CFDataRef pkcs12_data, CFDictionaryRef options, CFArrayRef *items)
+        __attribute__((weak_import));
+    SecCertificateRef SecCertificateCreateWithData(CFAllocatorRef allocator, CFDataRef data)
+        __attribute__((weak_import));
+}
+#endif
+
 inline CFStringRef
-toCFString(const std::string& s)
+toCFString(const string& s)
 {
     return CFStringCreateWithCString(NULL, s.c_str(), kCFStringEncodingUTF8);
 }
@@ -201,9 +213,8 @@ IceObjC::Instance::Instance(const IceInternal::InstancePtr& instance, bool secur
     string certAuthFile = properties->getProperty("IceSSL.CertAuthFile");
     string certFile = properties->getProperty("IceSSL.CertFile");
 
-#if !TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR && !__IPHONE_3_0 
-
     OSStatus err;
+#if TARGET_IPHONE_SIMULATOR && !__IPHONE_3_0
     if(!certAuthFile.empty())
     {
         CFDataRef cert = readCert(defaultDir, certAuthFile);
@@ -213,10 +224,10 @@ IceObjC::Instance::Instance(const IceInternal::InstancePtr& instance, bool secur
         params.version = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
         params.keyUsage = CSSM_KEYUSE_ANY;
         params.keyAttributes = CSSM_KEYATTR_EXTRACTABLE;
-        
+
         SecExternalFormat format = kSecFormatUnknown;
         SecExternalItemType type = kSecItemTypeUnknown;
-        
+
         CFStringRef filename = toCFString(certAuthFile);
         err = SecKeychainItemImport(cert, filename, &format, &type, 0, &params, 0, &_certificateAuthorities);
         CFRelease(filename);
@@ -277,17 +288,17 @@ IceObjC::Instance::Instance(const IceInternal::InstancePtr& instance, bool secur
         }
 
         CFDataRef cert = readCert(defaultDir, certFile);
-        
+
         SecKeyImportExportParameters params;
         memset(&params, 0, sizeof(params));
         params.version = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
         params.passphrase = toCFString(properties->getProperty("IceSSL.Password"));
         params.keyUsage = CSSM_KEYUSE_ANY;
         params.keyAttributes = CSSM_KEYATTR_EXTRACTABLE;
-        
+
         SecExternalFormat format = kSecFormatUnknown;
         SecExternalItemType type = kSecItemTypeUnknown;
-        
+
         CFArrayRef items = 0;
         CFStringRef filename = toCFString(certFile);
         err = SecKeychainItemImport(cert, filename, &format, &type, 0, &params, keychain, &items);
@@ -306,7 +317,17 @@ IceObjC::Instance::Instance(const IceInternal::InstancePtr& instance, bool secur
         CFRelease(keychain);
     }
 #else
-    OSStatus err;
+
+#if TARGET_IPHONE_SIMULATOR
+    // This can happen if you run the 3.0 SDK with 2.x
+    if(SecCertificateCreateWithData == 0)
+    {
+        ostringstream os;
+        os << "When using the iPhoneSimulator 2.x runtime with SSL you should use the IceTouch 2.0 SDK";
+        throw Ice::SecurityException(__FILE__, __LINE__, os.str());
+    }
+#endif
+
     if(!certAuthFile.empty())
     {
         CFDataRef cert = readCert(defaultDir, certAuthFile);
@@ -316,7 +337,7 @@ IceObjC::Instance::Instance(const IceInternal::InstancePtr& instance, bool secur
             ex.reason = "IceSSL: unable to open file " + certAuthFile;
             throw ex;
         }
-        
+
         SecCertificateRef result = SecCertificateCreateWithData(0, cert);
         if(!result)
         {
@@ -349,7 +370,7 @@ IceObjC::Instance::Instance(const IceInternal::InstancePtr& instance, bool secur
         CFStringRef password = toCFString(properties->getProperty("IceSSL.Password"));
         CFDictionarySetValue(settings, kSecImportExportPassphrase, password);
         CFRelease(password);
-        
+
         CFArrayRef items = 0;
         err = SecPKCS12Import(cert, settings, &items);
         CFRelease(cert);
@@ -947,7 +968,7 @@ IceObjC::EndpointFactory::protocol() const
 }
 
 EndpointIPtr
-IceObjC::EndpointFactory::create(const std::string& str, bool oaEndpoint) const
+IceObjC::EndpointFactory::create(const string& str, bool oaEndpoint) const
 {
     return new EndpointI(_instance, str, oaEndpoint);
 }
