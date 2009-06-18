@@ -107,19 +107,24 @@ except OSError:
 os.system("ln -s %s %s" % (baseDir, latestBuildDir))
 
 buildDir = os.path.join(baseDir, "build")
+build2Dir = os.path.join(baseDir, "build2")
 
 print "Building " + version + " distributions in " + baseDir
 
 os.chdir(os.path.join(baseDir))
 
+def extract(dir):
+    baseName = os.path.join(distDir, "IceTouch-" + version)
+    os.system("tar xfz " + os.path.join(distDir, baseName + ".tar.gz"))
+    os.rename("IceTouch-" + version, dir)
+    # Change SUBDIRS in top-level Makefile.
+    substitute(os.path.join(dir, "objc", "Makefile"), [(r'^SUBDIRS([\s]*)=.*', r'SUBDIRS\1= src include')])
+
 if not os.path.exists(buildDir):
     print "Extracting archive...",
     sys.stdout.flush()
-    baseName = os.path.join(distDir, "IceTouch-" + version)
-    os.system("tar xfz " + os.path.join(distDir, baseName + ".tar.gz"))
-    os.rename("IceTouch-" + version, "build")
-    # Change SUBDIRS in top-level Makefile.
-    substitute(os.path.join("build", "objc", "Makefile"), [(r'^SUBDIRS([\s]*)=.*', r'SUBDIRS\1= src include')])
+    extract("build")
+    extract("build2")
     print "ok"
 else:
     print "Using existing build directory"
@@ -141,6 +146,10 @@ os.system("OPTIMIZE_SIZE=yes COMPILE_FOR_IPHONE_SIMULATOR=yes make")
 os.chdir(os.path.join(buildDir, "Xcode", "Slice2ObjcPlugin"))
 
 os.system("xcodebuild -configuration Release >> %s 2>&1")
+
+os.chdir(build2Dir)
+
+os.system("IPHONE_SDK_VERSION=3.0 OPTIMIZE_SIZE=yes COMPILE_FOR_IPHONE_SIMULATOR=yes make")
 
 print "ok"
 
@@ -180,6 +189,13 @@ copy(os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", "README"),
      os.path.join(docDir, "README"))
 
 copy(os.path.join(buildDir, "objc", "SDK", "IceTouch-" + mmversion), sdkDir)
+
+os.rename(os.path.join(sdkDir, "iPhoneSimulator.sdk"),
+          os.path.join(sdkDir, "iPhoneSimulator2.0.sdk"))
+copy(os.path.join(build2Dir, "objc", "SDK", "IceTouch-" + mmversion, "iPhoneSimulator.sdk"),
+          os.path.join(sdkDir, "iPhoneSimulator3.0.sdk"))
+os.chdir(sdkDir)
+os.system("ln -s iPhoneSimulator3.0.sdk iPhoneSimulator.sdk")
 
 copy(os.path.join(buildDir, "Xcode", "Slice2ObjcPlugin", "build", "Release", "slice2objcplugin.pbplugin"),
      os.path.join(baseDir, "slice2objcplugin.pbplugin"))
