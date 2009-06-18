@@ -17,15 +17,17 @@
 
 -(void) putOnHold:(ICEInt)milliSeconds current:(ICECurrent*)current
 {
-    if(milliSeconds <= 0)
+    @try
     {
-        [current.adapter hold];
-        [current.adapter activate];
-    }
-    else
-    {
-        [current.adapter hold];
-        [current.adapter activate];
+        if(milliSeconds <= 0)
+        {
+            [current.adapter hold];
+            [current.adapter activate];
+        }
+        else
+        {
+            [current.adapter hold];
+            [current.adapter activate];
 //         @try
 //         {
 //             [_timer schedule:this XXX:IceUtilTimemilliSeconds(milliSeconds]);
@@ -33,6 +35,10 @@
 //         @catch(IceUtilIllegalArgumentException*)
 //         {
 //         }
+        }
+    }
+    @catch(ICEObjectAdapterDeactivatedException*)
+    {
     }
 }
 

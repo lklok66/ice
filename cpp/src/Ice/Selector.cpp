@@ -574,15 +574,11 @@ EventHandlerWrapper::updateRunLoop()
     if(op && !CFRunLoopContainsSource(_selector.runLoop(), _source, kCFRunLoopDefaultMode))
     {
         CFRunLoopAddSource(_selector.runLoop(), _source, kCFRunLoopDefaultMode);
-        CFRetain(_source);
-        CFRetain(_socket);
     }
     else if(!op && CFRunLoopContainsSource(_selector.runLoop(), _source, kCFRunLoopDefaultMode))
     {
         CFRunLoopRemoveSource(_selector.runLoop(), _source, kCFRunLoopDefaultMode);
-        CFRelease(_source);
-        CFRelease(_socket);
-    }
+     }
 }
 
 void
