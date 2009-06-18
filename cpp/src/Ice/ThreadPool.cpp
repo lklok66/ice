@@ -320,30 +320,42 @@ IceInternal::ThreadPool::ThreadPool(const InstancePtr& instance, const string& p
     _load(1.0),
     _promote(true)
 {
+    Ice::PropertiesPtr properties = _instance->initializationData().properties;
+
+#ifdef _WIN32
+    SYSTEM_INFO sysInfo;
+    GetSystemInfo(&sysInfo);
+    int nProcessors = sysInfo.dwNumberOfProcessors;
+#else
+    int nProcessors = static_cast<int>(sysconf(_SC_NPROCESSORS_ONLN));
+#endif        
+
     //
     // We use just one thread as the default. This is the fastest
     // possible setting, still allows one level of nesting, and
     // doesn't require to make the servants thread safe.
     //
-    int size = _instance->initializationData().properties->getPropertyAsIntWithDefault(_prefix + ".Size", 1);
+    int size = properties->getPropertyAsIntWithDefault(_prefix + ".Size", 1);
     if(size < 1)
     {
         Warning out(_instance->initializationData().logger);
         out << _prefix << ".Size < 1; Size adjusted to 1";
         size = 1;
     }
-    
-    int sizeMax = 
-        _instance->initializationData().properties->getPropertyAsIntWithDefault(_prefix + ".SizeMax", size);
+
+    int sizeMax = properties->getPropertyAsIntWithDefault(_prefix + ".SizeMax", size);
+    if(sizeMax == -1)
+    {
+        sizeMax = nProcessors;
+    }
     if(sizeMax < size)
     {
         Warning out(_instance->initializationData().logger);
         out << _prefix << ".SizeMax < " << _prefix << ".Size; SizeMax adjusted to Size (" << size << ")";
         sizeMax = size;
-    }           
+    }
     
-    int sizeWarn = _instance->initializationData().properties->
-                        getPropertyAsIntWithDefault(_prefix + ".SizeWarn", sizeMax * 80 / 100);
+    int sizeWarn = properties->getPropertyAsIntWithDefault(_prefix + ".SizeWarn", sizeMax * 80 / 100);
     if(sizeWarn > sizeMax)
     {
         Warning out(_instance->initializationData().logger);
@@ -351,13 +363,19 @@ IceInternal::ThreadPool::ThreadPool(const InstancePtr& instance, const string& p
         sizeWarn = sizeMax;
     }
 
-    int sizeIO = _instance->initializationData().properties->getPropertyAsIntWithDefault(_prefix + ".SizeIO", size);
+    int sizeIO = properties->getPropertyAsIntWithDefault(_prefix + ".SizeIO", min(sizeMax, nProcessors));
     if(sizeIO < 1)
     {
         Warning out(_instance->initializationData().logger);
-        out << _prefix << ".SizeIO < 1; Size adjusted to 1";
+        out << _prefix << ".SizeIO < 1; SizeIO adjusted to 1";
         sizeIO = 1;
-    }    
+    }
+    else if(sizeIO > sizeMax)
+    {
+        Warning out(_instance->initializationData().logger);
+        out << _prefix << ".SizeIO > " << _prefix << ".SizeMax; SizeIO adjusted to SizeMax (" << sizeMax << ")";
+        sizeIO = sizeMax;
+    }
 
     const_cast<int&>(_size) = size;
     const_cast<int&>(_sizeMax) = sizeMax;
@@ -368,7 +386,7 @@ IceInternal::ThreadPool::ThreadPool(const InstancePtr& instance, const string& p
     _selector.setup(_sizeIO);
 #endif
 
-    int stackSize = _instance->initializationData().properties->getPropertyAsInt(_prefix + ".StackSize");
+    int stackSize = properties->getPropertyAsInt(_prefix + ".StackSize");
     if(stackSize < 0)
     {
         Warning out(_instance->initializationData().logger);
