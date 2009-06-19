@@ -1,5 +1,5 @@
 ======================================================================
-Release notes for Ice Touch 0.1.0
+Release notes for Ice Touch 1.0.0
 ======================================================================
 
 Table of Contents
@@ -17,27 +17,14 @@ Table of Contents
 1. Introduction
 ======================================================================
 
-Ice Touch is our most ambitious ZeroC Labs project to date, offering
-an Ice run time for the iPhone and iPod touch with a new Objective-C
-language mapping.
-
-We have strived to design a mapping that developers will find natural
-and intuitive, and we are counting on your feedback to let us know
-what we got right and what we need to improve. To get you started, we
-have created a new version of the Ice manual that contains Ice Touch
-material. You can view or download this manual at the link below:
-
-  http://www.zeroc.com/labs/icetouch/download.html
+Ice Touch offers an Objective-C language mapping, and an Ice runtime
+for Mac OS X, an Xcode SDK for Cocoa applications, the iPhone and
+iPod touch.
 
 The Ice Touch distribution does not include any Ice services, but
 its support for the complete Ice protocol means your Ice Touch
-applications will work seamlessly with existing Ice servers as well as
-Ice services such as IceGrid, Glacier2, and IceStorm.
-
-As with all ZeroC Labs projects, we do not advise using Ice Touch in
-mission-critical applications. Also be aware that any subsequent
-release of this product may contain changes that break backward
-compatibility.
+applications will work seamlessly with existing Ice servers as well
+as Ice services such as IceGrid, Glacier2, and IceStorm.
 
 
 ======================================================================
@@ -78,9 +65,12 @@ Ice Touch has limited support for:
 3. SSL Support
 ======================================================================
 
-Ice Touch SSL provides a subset of the Ice for C++ SSL functionality.
-Due to limitations in iPhone SSL support, the following restriction
-applies:
+Ice Touch for MacOSX and Cocoa uses the Ice for C++ SSL protocol
+plugin.
+
+For the iPhone and iPhone Simulator Ice Touch SSL provides only a
+subset of this functionality.  Due to limitations in iPhone SSL
+support, the following restriction applies:
 
   - Ice Touch servers cannot authenticate SSL clients.
 
@@ -102,8 +92,15 @@ and you cannot install a custom logger with a plug-in (Ice.Plugin.*).
 5. Garbage Collection
 ======================================================================
 
-The Ice Touch run time cannot garbage collect graphs of objects
-containing cycles. For example,
+For MacOSX and Cocoa the Ice Touch runtime is build with garbage
+collection support.
+
+For iPhone and iPhone Simulator, since garbage collection is not
+supported you must use explicit retain/release.
+
+Due to the lack of GC, the Ice Touch run time for iPhone and
+iPhone Simulator cannot garbage collect graphs of objects containing
+cycles. For example,
 
 class Foo
 {
@@ -118,9 +115,6 @@ b.next = a;
 If you send this graph over the wire, your application will leak
 memory unless you somehow retain the graph and manually break the
 cycle.
-
-Ice Touch has not been tested with Objective-C garbage collection on
-Mac OS X.
 
 
 ======================================================================

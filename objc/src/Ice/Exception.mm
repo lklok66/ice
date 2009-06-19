@@ -25,6 +25,11 @@
 {
     return [super initWithName:[self ice_name] reason:nil userInfo:nil];
 }
+
+-(id)initWithReason:(NSString*)reason
+{
+    return [super initWithName:[self ice_name] reason:reason userInfo:nil];
+}
 -(NSString*)ice_name
 {
     NSAssert(false, @"ice_name not overriden");
@@ -54,10 +59,24 @@
 }
 @end
 
+static NSString*
+localExceptionToString(const Ice::LocalException& ex)
+{
+    std::ostringstream os;
+    os << ex;
+    std::string str = os.str();
+    const std::string prefix = "../../../cpp/src/";
+    if(str.find(prefix) == 0)
+    {
+        str = str.substr(prefix.size());
+    }
+    return [NSString stringWithUTF8String:str.c_str()];
+}
+
 @implementation ICELocalException (ICEInternal)
 -(id)initWithLocalException:(const Ice::LocalException&)ex
 {
-    if(![super init])
+    if(![super initWithReason:localExceptionToString(ex)])
     {
         return nil;
     }
@@ -110,14 +129,7 @@
     }
     catch(const Ice::LocalException& ex)
     {
-        std::ostringstream os;
-        os << ex;
-        std::string str = os.str();
-        if(str.find("../../../cpp/src/Ice") == 0)
-        {
-            str = str.substr(21);
-        }
-        return [NSString stringWithUTF8String:str.c_str()];
+        return localExceptionToString(ex);
     }
 }
 

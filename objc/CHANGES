@@ -1,6 +1,8 @@
 Changes since version 0.1.0
 ---------------------------
 
+- Set NSException.reason string for Ice local exceptions.
+
 - Fixed several bugs and updated the name mangling for slice2objc.
 
 - Added support for multi-archicture builds in the same source tree.
