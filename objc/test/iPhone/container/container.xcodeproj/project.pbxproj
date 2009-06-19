@@ -95,14 +95,14 @@
 		34B3B59C0FD7E8560018C227 /* TimeoutTest.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5960FD7E8560018C227 /* TimeoutTest.ice */; };
 		34B3B5A40FD7E8640018C227 /* AllTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B59D0FD7E8640018C227 /* AllTests.m */; };
 		34B3B5A50FD7E8640018C227 /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B59E0FD7E8640018C227 /* Client.m */; };
-		34B3B5A60FD7E8640018C227 /* SlicingExceptionsTestServer.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B59F0FD7E8640018C227 /* SlicingExceptionsTestServer.ice */; settings = {COMPILER_FLAGS = "-I../../Ice/slicing/exceptions"; }; };
+		34B3B5A60FD7E8640018C227 /* SlicingExceptionsTestServer.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B59F0FD7E8640018C227 /* SlicingExceptionsTestServer.ice */; };
 		34B3B5A70FD7E8640018C227 /* TestI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5A00FD7E8640018C227 /* TestI.m */; };
-		34B3B5A80FD7E8640018C227 /* SlicingExceptionsTestClient.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5A20FD7E8640018C227 /* SlicingExceptionsTestClient.ice */; settings = {COMPILER_FLAGS = "-I../../Ice/slicing/exceptions"; }; };
+		34B3B5A80FD7E8640018C227 /* SlicingExceptionsTestClient.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5A20FD7E8640018C227 /* SlicingExceptionsTestClient.ice */; };
 		34B3B5A90FD7E8640018C227 /* Server.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5A30FD7E8640018C227 /* Server.m */; };
 		34B3B5B20FD7E8700018C227 /* SlicingObjectsTestServer.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5AA0FD7E8700018C227 /* SlicingObjectsTestServer.ice */; settings = {COMPILER_FLAGS = "-I../../Ice/slicing/objects"; }; };
 		34B3B5B30FD7E8700018C227 /* TestI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5AB0FD7E8700018C227 /* TestI.m */; };
 		34B3B5B40FD7E8700018C227 /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5AC0FD7E8700018C227 /* Client.m */; };
-		34B3B5B50FD7E8700018C227 /* SlicingObjectsForward.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5AD0FD7E8700018C227 /* SlicingObjectsForward.ice */; settings = {COMPILER_FLAGS = "-I../../Ice/slicing/objects"; }; };
+		34B3B5B50FD7E8700018C227 /* SlicingObjectsForward.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5AD0FD7E8700018C227 /* SlicingObjectsForward.ice */; };
 		34B3B5B60FD7E8700018C227 /* AllTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5AE0FD7E8700018C227 /* AllTests.m */; };
 		34B3B5B70FD7E8700018C227 /* SlicingObjectsTestClient.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5B00FD7E8700018C227 /* SlicingObjectsTestClient.ice */; settings = {COMPILER_FLAGS = "-I../../Ice/slicing/objects"; }; };
 		34B3B5B80FD7E8700018C227 /* Server.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5B10FD7E8700018C227 /* Server.m */; };
@@ -779,7 +779,7 @@
 				PRODUCT_NAME = container;
 				SDKROOT = iphonesimulator2.0;
 				SLICE_ICE_HOME = "";
-				SLICE_INCLUDE_PATH = .;
+				SLICE_INCLUDE_PATH = ../../Ice/slicing/objects;
 			};
 			name = Debug;
 		};
@@ -805,7 +805,7 @@
 				PRODUCT_NAME = container;
 				SDKROOT = iphonesimulator2.0;
 				SLICE_ICE_HOME = "";
-				SLICE_INCLUDE_PATH = .;
+				SLICE_INCLUDE_PATH = ../../Ice/slicing/objects;
 			};
 			name = Release;
 		};
