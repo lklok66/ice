@@ -226,13 +226,7 @@ $(HDIR)/%.h %.m: $(SDIR)/%.ice $(SLICE2OBJC)
 	cat lex.yy.c >> $@
 	rm -f lex.yy.c
 
-all:: $(SRCS)
-
-ifeq ($(COMPILE_FOR_MACOSX),yes)
-    all:: $(TARGETS_MACOS)
-endif
-
-all:: $(TARGETS)
+all:: $(SRCS) $(TARGETS)
 
 ifneq ($(SRCS),)
 depend:: $(SRCS)

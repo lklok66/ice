@@ -11,7 +11,7 @@ top_srcdir	= ../../..
 
 CLIENT		= client
 
-TARGETS_MACOS	= $(CLIENT)
+TARGETS		= $(CLIENT)
 
 OBJS		= DefaultServantTest.o \
 		  Client.o \

@@ -11,7 +11,7 @@ top_srcdir	= ../..
 
 LIBNAME		= $(call mklibname,TestCommon)
 
-TARGETS_MACOS	= $(libdir)/$(LIBNAME)
+TARGETS		= $(libdir)/$(LIBNAME)
 
 OBJS		= TestCommon.o
 

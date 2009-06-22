@@ -12,7 +12,7 @@ top_srcdir	= ../../../..
 CLIENT		= client
 SERVER		= server
 
-TARGETS_MACOS	= $(CLIENT) $(SERVER)
+TARGETS		= $(CLIENT) $(SERVER)
 
 COBJS		= SlicingObjectsTestClient.o \
 		  Client.o \

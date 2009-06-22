@@ -11,12 +11,10 @@ top_srcdir	= ..
 
 include $(top_srcdir)/config/Make.rules
 
+ifeq ($(COMPILE_FOR_MACOSX),yes)
 SUBDIRS		= Ice Database book
-
-ifeq ($(COMPILE_FOR_IPHONE),yes)
-  ifeq ($(COMPILE_FOR_IPHONE_SIMULATOR),no)
-    SUBDIRS	=
-  endif
+else
+SUBDIRS		=
 endif
 
 $(EVERYTHING)::

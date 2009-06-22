@@ -11,9 +11,11 @@ top_srcdir	= ..
 
 include $(top_srcdir)/config/Make.rules
 
-SUBDIRS		= Common \
-		  Slice \
-		  Ice
+ifeq ($(COMPILE_FOR_MACOSX),yes)
+SUBDIRS		= Common Slice Ice
+else
+SUBDIRS		=
+endif
 
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \

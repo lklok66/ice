@@ -15,7 +15,7 @@ SERVER		= server
 LIBNAME  	= TestHold.dylib
 
 TARGETS_IPHONE	= $(LIBNAME)
-TARGETS_MACOS	= $(CLIENT) $(SERVER)
+TARGETS		= $(CLIENT) $(SERVER)
 
 COBJS		= Client.o \
 		  AllTests.o
