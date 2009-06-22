@@ -200,7 +200,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ $PLATFORM_NAME=iPhoneSimulator ]; then\n\tcp $ADDITIONAL_SDKS/usr/local/lib/*.dylib $BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH\nfi";
+			shellScript = "if [ $PLATFORM_NAME = iPhoneSimulator ]; then\n\tcp $ADDITIONAL_SDKS/usr/local/lib/*.dylib $BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH\nfi";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -224,6 +224,8 @@
 			buildSettings = {
 				ADDITIONAL_SDKS = "../../../SDK/IceTouch-1.0/$(PLATFORM_NAME).sdk";
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_RESOURCE_RULES_PATH = "$(SDKROOT)/ResourceRules.plist";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -238,6 +240,7 @@
 				);
 				PRELINK_LIBS = "";
 				PRODUCT_NAME = Hello;
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SLICE_ICE_HOME = "";
 			};
 			name = Debug;
@@ -247,6 +250,8 @@
 			buildSettings = {
 				ADDITIONAL_SDKS = "../../../SDK/IceTouch-1.0/$(PLATFORM_NAME).sdk";
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_RESOURCE_RULES_PATH = "$(SDKROOT)/ResourceRules.plist";
 				COPY_PHASE_STRIP = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = hello_Prefix.pch;
@@ -258,6 +263,7 @@
 					"-lIceObjc",
 				);
 				PRODUCT_NAME = Hello;
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SLICE_ICE_HOME = "";
 			};
 			name = Release;

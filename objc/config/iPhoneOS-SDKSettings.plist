@@ -12,10 +12,10 @@
 	<dict>
 		<key>AD_HOC_CODE_SIGNING_ALLOWED</key>
 		<string>NO</string>
+		<key>CODE_SIGNING_REQUIRED</key>
+		<string>YES</string>
 		<key>CODE_SIGN_ENTITLEMENTS</key>
 		<string></string>
-		<key>CODE_SIGN_RESOURCE_RULES_PATH</key>
-		<string>$(SDKROOT)/ResourceRules.plist</string>
 		<key>DEAD_CODE_STRIPPING</key>
 		<string>YES</string>
 		<key>ENTITLEMENTS_REQUIRED</key>
@@ -42,7 +42,7 @@
 	<key>MinimalDisplayName</key>
 	<string>Device</string>
 	<key>MinimumSupportedToolsVersion</key>
-	<string>3.1</string>
+	<string>3.1.2</string>
 	<key>Version</key>
 	<string>2.0</string>
 </dict>
