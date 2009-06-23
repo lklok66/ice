@@ -77,8 +77,8 @@ static const struct TestCases alltests[] =
 @synthesize tests;
 @synthesize currentTest;
 
-NSString* currentTestKey = @"currentTestKey";
-NSString* sslKey = @"sslKey";
+static NSString* currentTestKey = @"currentTestKey";
+static NSString* sslKey = @"sslKey";
 
 +(void)initialize
 {
@@ -108,7 +108,11 @@ NSString* sslKey = @"sslKey";
             currentTest = 0;
         }
 
+#if TARGET_IPHONE_SIMULATOR
+        ssl = NO;
+#else    
         ssl = [[NSUserDefaults standardUserDefaults] boolForKey:sslKey];
+#endif
     }
     return self;
 }
@@ -150,7 +154,7 @@ NSString* sslKey = @"sslKey";
 {
     ssl = v;
     
-    [[NSUserDefaults standardUserDefaults] setObject:(v ? @"YES" : @"NO") forKey:sslKey];
+    [[NSUserDefaults standardUserDefaults] setBool:ssl forKey:sslKey];
 }
 
 -(void)testCompleted:(BOOL)success

@@ -21,21 +21,6 @@
 
 #pragma mark RouterBlobject
 
-@interface RouterBlobject : ICEBlobject<ICEBlobject>
-{
-@private
-    id<ProxyLocator> locator;
-    NSObject<RouterDelegate>* routerDelegate;
-    int requests;
-    int exceptions;
-}
-
-@property (retain) NSObject<RouterDelegate>* routerDelegate;;
-@property (readonly) int requests;
-@property (readonly) int exceptions;
-
--(id)initWithLocator:(id<ProxyLocator>)del;
-@end
 
 @implementation RouterBlobject
 

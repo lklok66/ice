@@ -31,10 +31,10 @@
 @synthesize waitAlert;
 @synthesize communicator;
 
-NSString* hostnameKey = @"hostnameKey";
-NSString* usernameKey = @"usernameKey";
-NSString* passwordKey = @"passwordKey";
-NSString* sslKey = @"sslKey";
+static NSString* hostnameKey = @"hostnameKey";
+static NSString* usernameKey = @"usernameKey";
+static NSString* passwordKey = @"passwordKey";
+static NSString* sslKey = @"sslKey";
 
 +(void)initialize
 {
@@ -60,7 +60,12 @@ NSString* sslKey = @"sslKey";
     passwordField.text = [defaults stringForKey:passwordKey];
     passwordField.clearButtonMode = UITextFieldViewModeWhileEditing;
     
-    sslSwitch.on = [defaults boolForKey:sslKey]; 
+#if TARGET_IPHONE_SIMULATOR
+    sslSwitch.userInteractionEnabled = NO;
+    sslSwitch.on = NO;
+#else    
+    sslSwitch.on = [defaults boolForKey:sslKey];
+#endif
     
     chatController = [[ChatController alloc] initWithNibName:@"ChatView" bundle:nil];
 

@@ -114,10 +114,6 @@
         //[initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
         //[initData.properties setProperty:@"IceSSL.CertFile" value:@"c_rsa1024.pfx"];
         //[initData.properties setProperty:@"IceSSL.Password" value:@"password"];
-#if TARGET_IPHONE_SIMULATOR && !__IPHONE_3_0
-        //[initData.properties setProperty:@"IceSSL.Keychain" value:@"test"];
-        //[initData.properties setProperty:@"IceSSL.KeychainPassword" value:@"password"];
-#endif     
         self.logger = [[Logger alloc] init];
         initData.logger = logger;
         self.communicator = [ICEUtil createCommunicator:initData];

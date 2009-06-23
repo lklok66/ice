@@ -20,7 +20,10 @@
 #else
 #    include <CoreServices/CoreServices.h>
 #endif
-#include <Security/Security.h>
+
+#if !TARGET_IPHONE_SIMULATOR
+#   include <Security/Security.h>
+#endif
 
 namespace IceObjC
 {

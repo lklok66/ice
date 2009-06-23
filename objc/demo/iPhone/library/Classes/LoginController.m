@@ -41,11 +41,11 @@
 @synthesize router;
 @synthesize communicator;
 
-NSString* hostnameKey = @"hostnameKey";
-NSString* glacier2Key = @"glacier2Key";
-NSString* sslKey = @"sslKey";
-NSString* usernameKey = @"usernameKey";
-NSString* passwordKey = @"passwordKey";
+static NSString* hostnameKey = @"hostnameKey";
+static NSString* glacier2Key = @"glacier2Key";
+static NSString* sslKey = @"sslKey";
+static NSString* usernameKey = @"usernameKey";
+static NSString* passwordKey = @"passwordKey";
 
 +(void)initialize
 {
@@ -74,14 +74,18 @@ NSString* passwordKey = @"passwordKey";
     passwordField.text = [defaults stringForKey:passwordKey];
 
     glacier2Switch.on = [defaults boolForKey:glacier2Key];
+#if TARGET_IPHONE_SIMULATOR
+    sslSwitch.userInteractionEnabled = NO;
+    sslSwitch.on = NO;
+#else    
     sslSwitch.on = [defaults boolForKey:sslKey];
-
+#endif
     mainController = [[MainController alloc] initWithNibName:@"MainView" bundle:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(applicationWillTerminate) 
                                                  name:UIApplicationWillTerminateNotification
-                                               object:nil]; 
+                                               object:nil];
 }
 
 -(void)applicationWillTerminate

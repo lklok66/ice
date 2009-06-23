@@ -328,6 +328,7 @@
 				INFOPLIST_FILE = Info.plist;
 				LIBRARY_SEARCH_PATHS = "";
 				OTHER_LDFLAGS = (
+					"-ObjC",
 					"-lstdc++",
 					"-lGlacier2Objc",
 					"-lIceObjc",
@@ -351,6 +352,7 @@
 				INFOPLIST_FILE = Info.plist;
 				LIBRARY_SEARCH_PATHS = "";
 				OTHER_LDFLAGS = (
+					"-ObjC",
 					"-lstdc++",
 					"-lGlacier2Objc",
 					"-lIceObjc",

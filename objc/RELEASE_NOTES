@@ -68,15 +68,17 @@ Ice Touch has limited support for:
 Ice Touch for MacOSX and Cocoa uses the Ice for C++ SSL protocol
 plugin.
 
-For the iPhone and iPhone Simulator Ice Touch SSL provides only a
-subset of this functionality.  Due to limitations in iPhone SSL
-support, the following restriction applies:
+For the iPhone Ice Touch SSL provides only a subset of this
+functionality.  Due to limitations in iPhone SSL support, the
+following restriction applies:
 
   - Ice Touch servers cannot authenticate SSL clients.
 
 Furthermore, the semantics of some IceSSL configuration properties
 have changed, and new properties have been added. The IceSSL property
 reference section of the Ice Touch manual provides complete details.
+
+SSL support is not available at all for the iPhone Simulator.
 
 
 ======================================================================

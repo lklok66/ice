@@ -12,14 +12,27 @@
 #import <Hello.h>
 
 // Various delivery mode constants
-#define DeliveryModeTwoway  0
-#define DeliveryModeTwowaySecure 1
-#define DeliveryModeOneway 2
-#define DeliveryModeOnewayBatch  3
-#define DeliveryModeOnewaySecure 4
-#define DeliveryModeOnewaySecureBatch 5
-#define DeliveryModeDatagram 6
-#define DeliveryModeDatagramBatch 7
+// The simulator does not support SSL.
+#if TARGET_IPHONE_SIMULATOR
+#   define DeliveryModeTwoway  0
+#   define DeliveryModeOneway 1
+#   define DeliveryModeOnewayBatch  2
+#   define DeliveryModeDatagram 3
+#   define DeliveryModeDatagramBatch 4
+// These are defined, but invalid.
+#   define DeliveryModeTwowaySecure -1
+#   define DeliveryModeOnewaySecure -2
+#   define DeliveryModeOnewaySecureBatch -3
+#else
+#   define DeliveryModeTwoway  0
+#   define DeliveryModeTwowaySecure 1
+#   define DeliveryModeOneway 2
+#   define DeliveryModeOnewayBatch  3
+#   define DeliveryModeOnewaySecure 4
+#   define DeliveryModeOnewaySecureBatch 5
+#   define DeliveryModeDatagram 6
+#   define DeliveryModeDatagramBatch 7
+#endif
 
 @interface AMIHello : NSObject
 {
@@ -44,7 +57,7 @@
 
 @implementation HelloController
 
-NSString* hostnameKey = @"hostnameKey";
+static NSString* hostnameKey = @"hostnameKey";
 
 +(void)initialize
 {
@@ -63,13 +76,13 @@ NSString* hostnameKey = @"hostnameKey";
 {
     ICEInitializationData* initData = [ICEInitializationData initializationData];
     initData.properties = [ICEUtil createProperties];
+
+    // The simulator does not support SSL.
+#if !TARGET_IPHONE_SIMULATOR
     [initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
     [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
     [initData.properties setProperty:@"IceSSL.CertFile" value:@"c_rsa1024.pfx"];
     [initData.properties setProperty:@"IceSSL.Password" value:@"password"];
-#if TARGET_IPHONE_SIMULATOR && !__IPHONE_3_0
-    [initData.properties setProperty:@"IceSSL.Keychain" value:@"test"];
-    [initData.properties setProperty:@"IceSSL.KeychainPassword" value:@"password"];
 #endif     
     communicator = [[ICEUtil createCommunicator:initData] retain];
     
@@ -206,8 +219,15 @@ NSString* hostnameKey = @"hostnameKey";
 
 -(id<DemoHelloPrx>)createProxy
 {
+    // The simulator does not support SSL.
+#if TARGET_IPHONE_SIMULATOR
+    NSString* s = [NSString stringWithFormat:@"hello:tcp -h %@ -p 10000:udp -h %@ -p 10000",
+                   hostnameTextField.text, hostnameTextField.text];
+#else
     NSString* s = [NSString stringWithFormat:@"hello:tcp -h %@ -p 10000:ssl -h %@ -p 10001:udp -h %@ -p 10000",
                    hostnameTextField.text, hostnameTextField.text, hostnameTextField.text];
+#endif     
+    
     [[NSUserDefaults standardUserDefaults] setObject:hostnameTextField.text forKey:hostnameKey];
 
     ICEObjectPrx* prx = [communicator stringToProxy:s];
@@ -359,7 +379,11 @@ NSString* hostnameKey = @"hostnameKey";
 
 - (NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent:(NSInteger)component
 {
+#if TARGET_IPHONE_SIMULATOR
+    return 4;
+#else
     return 8;
+#endif
 }
 
 #pragma mark UIPickerViewDelegate

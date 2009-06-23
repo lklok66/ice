@@ -70,6 +70,8 @@ SLICE2OBJCFLAGS	:= --ice --include-dir Ice $(SLICE2OBJCFLAGS)
 
 ifneq ($(COMPILE_FOR_IPHONE),yes)
     LINKWITH    := $(ICE_OS_LIBS) $(BASELIBS) -framework CoreServices -framework Security -lbz2 -liconv $(OPENSSL_LIBS)
+else ifeq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
+    LINKWITH    := $(ICE_OS_LIBS) $(BASELIBS)
 else
     LINKWITH    := $(ICE_OS_LIBS) $(BASELIBS) -framework CFNetwork -framework Security
 endif

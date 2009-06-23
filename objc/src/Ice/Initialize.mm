@@ -24,7 +24,9 @@
 extern "C" 
 {
     Ice::Plugin* createIceTcp(const Ice::CommunicatorPtr&, const std::string&, const Ice::StringSeq&);
+#if !TARGET_IPHONE_SIMULATOR
     Ice::Plugin* createIceSSL(const Ice::CommunicatorPtr&, const std::string&, const Ice::StringSeq&);
+#endif
 }
 
 namespace IceObjC
@@ -263,7 +265,6 @@ private:
             data.properties = createProperties(*argc, argv, data.properties);
         }
 
-        data.properties->setProperty("Ice.Plugin.IceSSL", "createIceSSL");
 #if TARGET_OS_IPHONE
         data.properties->setProperty("Ice.Plugin.IceTcp", "createIceTcp");
 
@@ -273,7 +274,10 @@ private:
         //
         createIceTcp(0, "", Ice::StringSeq());
 #endif
+#if !TARGET_IPHONE_SIMULATOR
+        data.properties->setProperty("Ice.Plugin.IceSSL", "createIceSSL");
         createIceSSL(0, "", Ice::StringSeq());
+#endif
 
         Ice::CommunicatorPtr communicator;
         if(argc != nil && argv != nil)

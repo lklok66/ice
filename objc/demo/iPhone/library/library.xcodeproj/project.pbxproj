@@ -258,7 +258,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ $PLATFORM_NAME = iPhoneSimulator ]; then\n\tcp $ADDITIONAL_SDKS/usr/local/lib/*.dylib $BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH\nfi";
+			shellScript = "if [ $PLATFORM_NAME = iphonesimulator ]; then\n\tcp $ADDITIONAL_SDKS/usr/local/lib/*.dylib $BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH\nfi";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -300,6 +300,7 @@
 				INFOPLIST_FILE = Info.plist;
 				LIBRARY_SEARCH_PATHS = "";
 				OTHER_LDFLAGS = (
+					"-ObjC",
 					"-lstdc++",
 					"-lIceObjc",
 					"-lGlacier2Objc",
@@ -325,6 +326,7 @@
 				INFOPLIST_FILE = Info.plist;
 				LIBRARY_SEARCH_PATHS = "";
 				OTHER_LDFLAGS = (
+					"-ObjC",
 					"-lstdc++",
 					"-lIceObjc",
 					"-lGlacier2Objc",

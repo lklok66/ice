@@ -281,7 +281,7 @@ static EditController* editViewController_ = nil;
 {
     if(fatal)
     {
-        [delegate destroy];
+        [delegate destroySession];
         [self.navigationController popToRootViewControllerAnimated:YES];
     }
 }

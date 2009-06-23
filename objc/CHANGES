@@ -1,6 +1,8 @@
 Changes since version 0.1.0
 ---------------------------
 
+- SSL support no longer available with the iPhone simulator.
+
 - Set NSException.reason string for Ice local exceptions.
 
 - Fixed several bugs and updated the name mangling for slice2objc.

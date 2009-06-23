@@ -12,8 +12,24 @@
 
 @class ClientProxyLocator;
 @class ServerProxyLocator;
-@class RouterBlobject;
 @protocol RouterDelegate;
+@protocol ProxyLocator;
+
+@interface RouterBlobject : ICEBlobject<ICEBlobject>
+{
+@private
+    id<ProxyLocator> locator;
+    NSObject<RouterDelegate>* routerDelegate;
+    int requests;
+    int exceptions;
+}
+
+@property (retain) NSObject<RouterDelegate>* routerDelegate;;
+@property (readonly) int requests;
+@property (readonly) int exceptions;
+
+-(id)initWithLocator:(id<ProxyLocator>)del;
+@end
 
 @interface RouterI : DemoRouter<DemoRouter>
 {
@@ -33,8 +49,8 @@
     int trace;
 }
 
-@property (retain) ICEObject* clientBlobject;
-@property (retain) ICEObject* serverBlobject;
+@property (retain) RouterBlobject* clientBlobject;
+@property (retain) RouterBlobject* serverBlobject;
 @property (retain) NSString* status;
 @property (retain) id<Glacier2RouterPrx> router;
 @property (readonly) int clientRequests;

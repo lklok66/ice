@@ -240,7 +240,7 @@
 
 -(void)exception:(ICEException*)ex
 {
-    [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 
     // BUGFIX: In the event of a fatal exception we want to pop back to the login view.
     // However, doing so directly by calling [self.navigationController popToRootViewControllerAnimated:YES];
@@ -259,7 +259,7 @@
 
 -(void)exceptionIgnoreONE:(ICEException*)ex
 {
-    [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
 
     // Ignore ICEObjectNotExistException
     if([ex isKindOfClass:[ICEObjectNotExistException class]])
@@ -279,7 +279,7 @@
         self.query = nil;
     }
 
-    [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
     [searchTableView reloadData];
 }
 
@@ -301,7 +301,7 @@
     [books addObjectsFromArray:seq];
     self.query = q;
 
-    [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = NO;
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
     [searchTableView reloadData];
 }
 
@@ -343,7 +343,7 @@
     [searchTableView reloadData];
     
     // Run the query.
-    [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = YES;
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     if(searchMode == 0) // ISBN
     {
         [library queryByIsbn_async:[ICECallbackOnMainThread callbackOnMainThread:self]
@@ -430,7 +430,7 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
         // how many rows of data we've actually asked for.
         if(indexPath.row > rowsQueried-1)
         {
-            [UIApplication sharedApplication].isNetworkActivityIndicatorVisible = YES;
+            [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
             NSAssert(query != nil, @"query != nil");
             [query next_async:[ICECallbackOnMainThread callbackOnMainThread:self]
                      response:@selector(nextResponse:destroyed:)

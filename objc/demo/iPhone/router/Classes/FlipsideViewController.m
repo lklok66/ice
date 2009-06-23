@@ -22,8 +22,8 @@
     self.view.backgroundColor = [UIColor viewFlipsideBackgroundColor];
 
     network.selectedSegmentIndex = [[NSUserDefaults standardUserDefaults] integerForKey:@"Ice.Trace.Network"];
-    protocol.isOn = [[NSUserDefaults standardUserDefaults] integerForKey:@"Ice.Trace.Protocol"];
-    router.isOn = [[NSUserDefaults standardUserDefaults] integerForKey:@"Trace.Router"];
+    protocol.on = [[NSUserDefaults standardUserDefaults] integerForKey:@"Ice.Trace.Protocol"];
+    router.on = [[NSUserDefaults standardUserDefaults] integerForKey:@"Trace.Router"];
 }
 
 

@@ -16,7 +16,7 @@
 @protocol DetailControllerDelegate
 -(void)bookUpdated:(DemoBookDescription*)book;
 -(void)bookDeleted;
--(void)destroy;
+-(void)destroySession;
 @end
 
 @interface DetailController :

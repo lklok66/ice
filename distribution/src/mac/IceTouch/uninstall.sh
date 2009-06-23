@@ -5,20 +5,20 @@ if [ -d /opt/IceTouch-1.0 ]; then
     /bin/rm -r /opt/IceTouch-1.0
 fi
 
-if [ -d /Developers/SDKs/IceTouch-1.0 ]; then
-    /bin/rm -r /Developers/SDKs/IceTouch-1.0
+if [ -d /Developer/SDKs/IceTouch-1.0 ]; then
+    /bin/rm -r /Developer/SDKs/IceTouch-1.0
 fi
 
-if [ -d /Developers/Examples/IceTouch-1.0 ]; then
-    /bin/rm -r /Developers/Examples/IceTouch-1.0
+if [ -d /Developer/Examples/IceTouch-1.0 ]; then
+    /bin/rm -r /Developer/Examples/IceTouch-1.0
 fi
 
-if [ -d /Developers/Documentation/IceTouch-1.0 ]; then
-    /bin/rm -r /Developers/Documentation/IceTouch-1.0
+if [ -d /Developer/Documentation/IceTouch-1.0 ]; then
+    /bin/rm -r /Developer/Documentation/IceTouch-1.0
 fi
 
-if [ -d /Developers/Library/Xcode/Plug-ins/slice2objcplugin.pbplugin ]; then
-    /bin/rm -r /Developers/Library/Xcode/Plug-ins/slice2objcplugin.pbplugin
+if [ -d /Developer/Library/Xcode/Plug-ins/slice2objcplugin.pbplugin ]; then
+    /bin/rm -r /Developer/Library/Xcode/Plug-ins/slice2objcplugin.pbplugin
 fi
 
 if [ -d /Library/Receipts/IceTouch.pkg ]; then

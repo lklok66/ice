@@ -115,6 +115,8 @@ LIBS			= -lIceObjC $(BASELIBS)
 ICE_OS_LIBS             = -ldl
 ifneq ($(COMPILE_FOR_IPHONE),yes)
     ICE_OS_LIBS         := $(ICE_OS_LIBS) -framework CoreServices -framework Security -lbz2 -liconv -lssl -lcrypto
+else ifeq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
+    ICE_OS_LIBS         := $(ICE_OS_LIBS) -framework CFNetwork
 else
     ICE_OS_LIBS         := $(ICE_OS_LIBS) -framework CFNetwork -framework Security
 endif

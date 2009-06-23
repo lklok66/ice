@@ -53,7 +53,10 @@ public:
 
 private:
     
+
+#if !TARGET_IPHONE_SIMULATOR
     void checkCertificates();
+#endif
 
     const InstancePtr _instance;
     const IceInternal::TraceLevelsPtr _traceLevels;
@@ -62,7 +65,9 @@ private:
     const std::string _host;
     CFReadStreamRef _readStream;
     CFWriteStreamRef _writeStream;
+#if !TARGET_IPHONE_SIMULATOR
     bool _checkCertificates;
+#endif
 
     State _state;
     std::string _desc;
