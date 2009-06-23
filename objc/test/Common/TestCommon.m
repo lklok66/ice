@@ -51,7 +51,9 @@ defaultServerProperties(int *argc, char** argv)
         @"Ice.ThreadPool.Server.SizeWarn", @"0",
         @"Ice.PrintAdapterReady", @"1",
         @"Ice.ServerIdleTime", @"30",
-        @"Ice.Default.Host", @"127.0.0.1"
+        @"Ice.Default.Host", @"127.0.0.1",
+        @"Ice.Trace.Network", @"0",
+        @"Ice.Trace.Protocol", @"0"
     };
 
     static NSString* ssldefaults[] =
@@ -98,7 +100,9 @@ defaultClientProperties(int* argc, char** argv)
     {
         @"Ice.NullHandleAbort", @"1",
         @"Ice.Warn.Connections", @"1",
-        @"Ice.Default.Host", @"127.0.0.1"
+        @"Ice.Default.Host", @"127.0.0.1",
+        @"Ice.Trace.Network", @"0",
+        @"Ice.Trace.Protocol", @"0"
     };
 
     static NSString* ssldefaults[] =
