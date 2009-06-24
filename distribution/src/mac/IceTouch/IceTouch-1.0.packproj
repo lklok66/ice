@@ -1476,7 +1476,7 @@
 			</dict>
 		</dict>
 		<key>IFPkgFlagComponentDirectory</key>
-		<string>..</string>
+		<string>Contents/Resources</string>
 		<key>IFPkgFlagPackageSelection</key>
 		<integer>0</integer>
 		<key>Name</key>
