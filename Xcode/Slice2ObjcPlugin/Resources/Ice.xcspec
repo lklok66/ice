@@ -54,6 +54,30 @@
 			Category = Slice;
 		},
 		{
+			Name = "SLICE_STREAM_FLAG";
+			Type = bool;
+			DefaultValue = NO;
+			CommandLineArgs = {
+				NO = ();
+				YES = (
+					"--stream",
+				);
+			};
+			Category = Slice;
+		},
+		{
+			Name = "SLICE_CHECKSUM_FLAG";
+			Type = bool;
+			DefaultValue = NO;
+			CommandLineArgs = {
+				NO = ();
+				YES = (
+					"--checksum",
+				);
+			};
+			Category = Slice;
+		},
+		{
 			Name = "SLICE_INCLUDE_PATH";
 			Type = pathlist;
 			DefaultValue = "";

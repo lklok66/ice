@@ -10,19 +10,25 @@
 "[Slice]-category" = "Slice - code generation";
 
 "[SLICE_CPP_FLAG]-name" = "Translate C++ code.";
-"[SLICE_CPP_FLAG]-description" = "Run slice2cpp instead of Objective-C.";
+"[SLICE_CPP_FLAG]-description" = "Generate C++ code from Slice files.";
 
 "[SLICE_ICE_FLAG]-name" = "Permit `Ice' prefix";
 "[SLICE_ICE_FLAG]-description" = "Permit `Ice' prefix (for building Ice source code only).";
 
+"[SLICE_STREAM_FLAG]-name" = "Streaming support";
+"[SLICE_STREAM_FLAG]-description" = "Generate marshaling support for stream API.";
+
+"[SLICE_CHECKSUM_FLAG]-name" = "Checksum support";
+"[SLICE_CHECKSUM_FLAG]-description" = "Generate checksums for Slice definitions.";
+
 "[SLICE_INCLUDE_PATH]-name" = "Header Search Paths";
-"[SLICE_INCLUDE_PATH]-description" = "The path to search for slice files.";
+"[SLICE_INCLUDE_PATH]-description" = "The path to search for Slice files.";
 
 "[SLICE_PREPROCESSOR_DEFINITIONS]-name" = "Preprocessor Macros";
-"[SLICE_PREPROCESSOR_DEFINITIONS]-description" = "Preprocessor macros used by the slice compiler.";
+"[SLICE_PREPROCESSOR_DEFINITIONS]-description" = "Preprocessor macros used by the Slice compiler.";
 
 "[SLICE_ICE_HOME]-name" = "Ice Home";
 "[SLICE_ICE_HOME]-description" = "The location of your Ice installation.";
 
-"[SLICE_ICE_TOUCH_0_1_0]-name" = "Support IceTouch 0.1.0";
-"[SLICE_ICE_TOUCH_0_1_0]-description" = "Provide support for IceTouch 0.1.0";
+"[SLICE_ICE_TOUCH_0_1_0]-name" = "Support Ice Touch 0.1.0";
+"[SLICE_ICE_TOUCH_0_1_0]-description" = "Generate dependencies with --depend, for compatibility with Ice Touch 0.1.0.";

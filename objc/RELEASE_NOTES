@@ -126,3 +126,26 @@ cycle.
 The Ice run time creates an NSAutoReleasePool object before each
 server-side dispatched invocation and client-side AMI callback. The
 pool is released once the dispatch is complete.
+
+======================================================================
+7. Xcode project settings
+======================================================================
+
+When creating a new iPhone Xcode project you must be sure to set "Code
+Signing Resource Rules Path" to:
+
+$(SDKROOT)/ResourceRules.plist
+
+If you do not do this you will receive an error signing your
+application when targeting iPhone 2.2 or later.
+
+You must add to "Additional SDKs"
+
+/Developer/SDKs/IceTouch-1.0/$(PLATFORM_NAME).sdk
+
+You should add to the "Other Linker Flags":
+
+-ObjC -lstd++ -lIceObjC
+
+You must link your application with the foundation and security
+frameworks.

@@ -134,25 +134,6 @@ following subdirectories:
   - objc/demo/iPhone/hello
   - objc/test/iPhone/container
 
-Before building the iPhone demos you must set your iPhone Developer
-Certificate private key identifier in the environment variable
-IDENTIFIER. This environment variable must be accessible by the
-build as well as by Xcode to sign the demo and test iPhone binaries.
-
-/bin/bash: mt: command not found
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-	<key>IDENTIFIER</key>
-	<string>iPhone Developer: Matthew Newhook</string>
-</dict>
-</plist>
-
-You must log out and log in again for the changes to take effect.
-Please see http://developer.apple.com/qa/qa2001/qa1067.html for
-more information on this file.
-
 After a successful build, you can run the test suite.
 
 Under Mac OS X, run:
@@ -180,4 +161,71 @@ For the Cocoa/iPhone and iPhoneSimulator builds the copy the contents
 of objc/SDK to either /Developer/SDKs, or ~/Library/SDKs.
 
 For Mac OS X builds of Ice Touch, the install name of the shared
-library is /opt/IceTouch-@mmver@/lib.
+Library is /opt/IceTouch-@mmver@/lib.
+
+
+======================================================================
+Configuring the Xcode plugin
+======================================================================
+
+The Xcode plugin simplifies the process of building Ice and Ice Touch
+applications using Xcode.
+
+The Xcode plug-in provides the following features:
+
+  - Handles all aspects of translating your Slice files for both
+    Objective-C and C++ projects.
+  - Incrementally recompiles Slice files after modifications
+  - Maintains dependencies between Slice files
+  - Highlights compilation errors in your source code
+
+The Xcode plugin is configured using the per-target info build
+settings, just as you would configure the compiler settings. Select a
+target, press info (or Cmd-i), select the build tab, and enter "Slice"
+in the "Search in Build Settings" field.
+
+The following fields are defined:
+
+- Header Search Path
+
+   Set the list of directories to search for included Slice files (-I
+   option). Note that the Ice slice files are automatically in the
+   header search path.
+
+- Ice Home
+
+  If you are building with the Ice Touch Xcode SDK this should left
+  unset, otherwise if using the command line toolkit, or regular Ice
+  set this to the location of the installation (ie: /opt/Ice-3.3.1, or
+  /opt/IceTouch-1.0)
+
+- Permit `Ice' prefix
+
+  Pass --ice to the slice compiler.
+
+- Streaming support
+
+  Pass --stream to the slice compiler (C++ only).
+
+- Checksum support
+
+  Pass --checksum to the slice compiler (C++ only).
+
+- Preprocessor Macros
+
+  Set the list of preprocessor macros to define (-D option).
+
+- Support Ice Touch 0.1.0
+
+  If you are using the plugin with Ice Touch 0.1.0 set this option,
+  otherwise leave it unset.
+
+- Translate C++ code
+
+  If set slice2cpp will be used to translate the slice files,
+  otherwise slice2objc is used.
+
+You may set specific slice compiler flags on individual source slice
+files by selecting the slice file, press info (or Cmd-i), selecting
+the build tab and entering any desired flags in "Additional Compiler
+Flags for Target".
