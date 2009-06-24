@@ -149,3 +149,12 @@ You must also add to the Frameworks folder:
  - CFNetwork.framework
  - Security.framework
  - Foundation.framework
+
+
+For iPhoneSimulator applications the Ice dynamically linked libraries
+must be copied into the application directory. For our iPhone demos
+this is done in the Xcode project with a post-build script as follows:
+
+if [ $PLATFORM_NAME = iphonesimulator ]; then
+  cp $ADDITIONAL_SDKS/usr/local/lib/*.dylib $BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH
+fi
