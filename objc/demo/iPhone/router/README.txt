@@ -1,6 +1,6 @@
 This demo illustrates how to route Ice requests from computers on an
-isolated (not connected to the Internet) Wifi network to the Edge/3G
-network of the iPhone.
+isolated (not connected to the Internet) Wifi network to the Internet
+using the Edge/3G network of the iPhone.
 
 The demo shows:
 
@@ -11,10 +11,10 @@ The demo shows:
     
   - How to implement a custom Ice logger.
 
-To try the router provided with this demo, you can use the Cocoa
-library or chat clients. These clients can optionally connect to the
-libray or chat servers using the iPhone router provided with this
-demo.
+To test the router provided with this demo, you can use the Cocoa
+library or chat clients, or the command line demo/Ice/helloRouter
+demo. These clients can optionally connect to the libray, chat or
+hello world servers using the iPhone router provided with this demo.
 
 You also need to configure the Wifi network appropriately on the
 iPhone and computers that wish to route Ice requests through the
@@ -35,12 +35,11 @@ setup for this network, you also need to manually assign an IP address
 to the Wifi interface, we'll use "192.168.1.3".
 
 The Mac OS X computer and the iPhone should now be able to
-communicate. You can try pinging the iPhone from you Mac OS X
-computer to verify it.
+communicate. You can try pinging the iPhone from you Mac OS X computer
+to verify it.
 
-On the iPhone, run router built with the project from this
-directory. The router application listens on port 12000 and on all
-network interfaces by defaut.
+On the iPhone, run the router application.  The router application
+listens on port 12000 and on all network interfaces by defaut.
 
 You're now ready to try the Cocoa library or chat demo located in the
 demo/Cocoa directory of your Ice Touch distribution. To use the iPhone
@@ -49,3 +48,7 @@ IP address (192.168.1.3) in the "Advanced" panel of the library or
 chat client login dialog. The client will connect to the library or
 chat server on the Internet through the iPhone 3G/Edge connection.
 
+To test the demo/Ice/helloRouter demo change the value of
+"Ice.Default.Router" in config.client to be:
+
+Ice.Default.Router=iPhoneRouter/Router:tcp -h 192.168.1.3 -p 12000
