@@ -3,7 +3,7 @@ This installer installs the following development kits:
  - Mac OS X command line SDK in /opt/IceTouch-1.0
  - Cocoa Xcode SDK in /Developer/SDKs/IceTouch-1.0/MacOSX.sdk
  - iPhone Xcode SDK in /Developer/SDKs/IceTouch-1.0/iPhone.sdk
- - iPhoneSimulator Xcode SDK in /Developer/SDKs/IceTouch-1.0/iPhoneSimulator.sdk
+ - iPhone Simulator Xcode SDK in /Developer/SDKs/IceTouch-1.0/iPhoneSimulator.sdk
  
 An Xcode plugin for use with IceTouch is installed in:
 

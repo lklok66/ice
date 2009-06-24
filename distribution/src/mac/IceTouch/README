@@ -185,7 +185,7 @@ Ice Touch has limited support for:
 3. SSL Support
 ======================================================================
 
-Ice Touch for MacOSX and Cocoa uses the Ice for C++ SSL
+Ice Touch for Mac OS X and Cocoa uses the Ice for C++ SSL
 protocol plug-in.
 
 For the iPhone, Ice Touch SSL provides only a subset of this
@@ -214,7 +214,7 @@ and you cannot install a custom logger with a plug-in (Ice.Plugin.*).
 5. Garbage Collection
 ======================================================================
 
-For MacOSX and Cocoa, the Ice Touch run time is built with garbage
+For Mac OS X and Cocoa, the Ice Touch run time is built with garbage
 collection support.
 
 For the iPhone and iPhone Simulator, since garbage collection is not
@@ -272,7 +272,7 @@ You must also add to the Frameworks folder:
  - Foundation.framework
 
 
-For iPhoneSimulator applications, the dynamically linked Ice libraries
+For iPhone Simulator applications, the dynamically linked Ice libraries
 must be copied into the application directory. For our iPhone demos,
 this is done in the Xcode project with a post-build script as follows:
 
