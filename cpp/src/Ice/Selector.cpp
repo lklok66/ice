@@ -773,6 +773,7 @@ void
 Selector::update(EventHandler* handler, SocketOperation remove, SocketOperation add)
 {
     Lock sync(*this);
+    cerr << "update " << handler->_registered << " " << add << " " << remove <<endl;
     EventHandlerWrapperPtr wrapper = _wrappers[handler];
     assert(wrapper);
     if(wrapper->update(remove, add))

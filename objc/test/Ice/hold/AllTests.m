@@ -180,7 +180,11 @@ allTests(id<ICECommunicator> communicator)
         Condition* cond = [(Condition*)[Condition alloc] init:YES];
         int value = 0;
         AMICheckSetValue* cb;
+#if TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR
+        while(value < 300 && [cond value])
+#else
         while(value < 3000 && [cond value])
+#endif
         {
             cb = [[AMICheckSetValue alloc] init:cond expected:value];
             if([holdSerialized set_async:cb response:@selector(ice_response:) exception:nil sent:@selector(ice_sent)
@@ -204,7 +208,11 @@ allTests(id<ICECommunicator> communicator)
         }
         test([cond value]);
         int i;
+#if TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR
+        for(i = 0; i < 400; ++i)
+#else
         for(i = 0; i < 20000; ++i)
+#endif
         {
             [[holdSerialized ice_oneway] setOneway:(value + 1) expected:value];
             ++value;
