@@ -12,9 +12,9 @@ Ice Touch requires:
 - iPod touch v2 using software version 2.2.1, or 3.0
 - iPhone 3G using software version 2.2.1 or 3.0
 
-We expect that Ice Touch will build successfully with iPhone SDK 2.0 and
-run on iPhone OS 2.0; however, we did not test these versions.
-
+We expect that Ice Touch will run on any iPhone OS 2.x version;
+however, we did not test these versions, we only tested on iPhone OS
+2.2.1 and 3.0.
 
 Compiler
 --------
@@ -62,7 +62,11 @@ below:
 XCode Plugin
 ------------
 
-If you intend to develop with Xcode you will need the Xcode plug-in.
+The XCode Plugin is required to build the Cocoa and iPhone demos from
+this distribution. It's also strongly recommended to develop Ice or
+Touch applications with Xcode as it greatly simplifies the process of
+building.
+
 To build the Xcode plug-in:
 
 $ cd Xcode/Slice2ObjcPlugin
@@ -166,7 +170,7 @@ For the Cocoa/iPhone and iPhone Simulator builds, copy the contents
 of objc/SDK to either /Developer/SDKs, or ~/Library/SDKs.
 
 For Mac OS X builds of Ice Touch, the install name of the shared
-Library is /opt/IceTouch-@mmver@/lib.
+library is prefixed with the path /opt/IceTouch-@mmver@/lib.
 
 
 ======================================================================

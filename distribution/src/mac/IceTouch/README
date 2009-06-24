@@ -11,8 +11,9 @@ Ice Touch requires:
 - iPod touch v2 using software version 2.2.1, or 3.0
 - iPhone 3G using software version 2.2.1 or 3.0
 
-We expect that Ice Touch will build successfully with iPhone SDK 2.0 and
-run on iPhone OS 2.0; however, we did not test these versions.
+We expect that Ice Touch will run on any iPhone OS 2.x version;
+however, we did not test these versions, we only tested on iPhone OS
+2.2.1 and 3.0.
 
 
 Compiler
