@@ -316,9 +316,12 @@ baseDemoDir = os.path.join('objc', 'demo')
 for d in os.listdir(baseDemoDir):
     if os.path.isdir(os.path.join(baseDemoDir, d)):
         copy(os.path.join(baseDemoDir, d), os.path.join(demoDir, d))
+copy(os.path.join(baseDemoDir, "Makefile"), os.path.join(demoDir, "Makefile"))
 
 configSubstituteExprs = [(re.compile(regexpEscape("../../certs")), "../certs")]
-makeSubstituteExprs = [ (re.compile(regexpEscape("../..")), ".."), (re.compile(regexpEscape("../../..")), "../..")]
+makeSubstituteExprs = [ (re.compile("= \.\.$"), " = ."),
+                        (re.compile(regexpEscape("../..")), ".."),
+                        (re.compile(regexpEscape("../../..")), "../..")]
 xcodeSubstituteExprs = [ (re.compile("ADDITIONAL_SDKS = .*;"), "ADDITIONAL_SDKS = \"/Developer/SDKs/IceTouch-%s/$(PLATFORM_NAME).sdk\";" % mmversion) ]
 for root, dirnames, filesnames in os.walk(demoDir):
     for f in filesnames:
