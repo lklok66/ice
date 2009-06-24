@@ -18,37 +18,42 @@ run on iPhone OS 2.0; however, we did not test these versions.
 Compiler
 --------
 
-Ice Touch requires:
+To build iPhone applications, you need:
 
 - Xcode 3.1.3
 - iPhone SDK for iPhone OS 3.0 (build 9M2736)
+
+To build Cocoa applications, you need:
+
+- Xcode 3.1.2 or later.
 
 
 ======================================================================
 Compiling the Demos
 ======================================================================
 
-To build the demos from the command line:
+All the demos can be found under /Developer/Examples/IceTouch-1.0
 
-$ cd /opt/IceTouch-1.0
+To build the command-line demos:
+
+$ cd /Developer/Examples/IceTouch-1.0
 $ make
 
 If you are building for Cocoa, you can use Xcode to build
 the demos located in the following subdirectories of
-/Developer/SDKs/IceTouch-1.0/MacOSX.sdk:
+/Developer/Examples/IceTouch-1.0/Cocoa
 
- - objc/demo/Cocoa/chat
- - objc/demo/Cocoa/library
+ - chat
+ - library
 
 If you are building for iPhone or the iPhone simulator, you can
-use Xcode to build the demos and test suite GUI located in the
-subdirectories of the corresponding SDK (/Developer/SDKs/IceTouch-1.0/iPhone.sdk
-or /Developer/SDKs/IceTouch-1.0/iPhoneSimulator.sdk):
+use Xcode to build the demos located in subdirectories of
+/Developer/Examples/IceTouch-1.0/iPhone
 
-  - objc/demo/iPhone/chat
-  - objc/demo/iPhone/library
-  - objc/demo/iPhone/hello
-  - objc/test/iPhone/container
+  - chat
+  - library
+  - hello
+  - router
 
 
 ======================================================================
