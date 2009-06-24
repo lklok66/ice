@@ -105,8 +105,8 @@ timeoutAllTests(id<ICECommunicator> communicator)
         //
         // Expect ConnectTimeoutException.
         //
-        id<TestTimeoutTimeoutPrx> to = [TestTimeoutTimeoutPrx uncheckedCast:[obj ice_timeout:250]];
-        [to holdAdapter:750];
+        id<TestTimeoutTimeoutPrx> to = [TestTimeoutTimeoutPrx uncheckedCast:[obj ice_timeout:500]];
+        [to holdAdapter:1000];
         [[to ice_getConnection] close:YES]; // Force a reconnect.
         @try
         {
