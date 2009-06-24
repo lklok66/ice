@@ -1,5 +1,5 @@
 Ice Touch 1.0.0 offers an Objective-C language mapping, development
-kits and runtimes for Mac OS X and the iPhone OS.
+kits and run times for Mac OS X and the iPhone OS.
 
 Ice is a modern alternative to object middleware such as CORBA or
 COM/DCOM/COM+. It is easy to learn, yet provides a powerful network

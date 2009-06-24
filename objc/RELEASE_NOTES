@@ -17,13 +17,13 @@ Table of Contents
 1. Introduction
 ======================================================================
 
-Ice Touch offers an Objective-C language mapping, and an Ice runtime
-for Mac OS X, an Xcode SDK for Cocoa applications, the iPhone and
-iPod touch.
+Ice Touch offers an Objective-C language mapping, an Ice run time
+for Mac OS X, and an Xcode SDK for Cocoa applications, the iPhone
+and the iPod touch.
 
 The Ice Touch distribution does not include any Ice services, but
-its support for the complete Ice protocol means your Ice Touch
-applications will work seamlessly with existing Ice servers as well
+its support for the complete Ice protocol means that your Ice Touch
+applications can work seamlessly with existing Ice servers as well
 as Ice services such as IceGrid, Glacier2, and IceStorm.
 
 
@@ -36,7 +36,7 @@ Ice Touch supports the following new features:
   - Objective-C mapping
   - Default servants
 
-These topics are described in the Ice Touch version of the manual.
+These topics are described in the manual.
 
 Ice Touch currently lacks support for the following Ice features:
 
@@ -46,7 +46,7 @@ Ice Touch currently lacks support for the following Ice features:
   - Implicit contexts
   - Protocol plug-ins
   - Local interfaces
-  - Ice.Application and Service helper classes
+  - Ice.Application and Ice.Service helper classes
   - Ice.Stats interface
 
 Ice Touch has limited support for:
@@ -65,11 +65,11 @@ Ice Touch has limited support for:
 3. SSL Support
 ======================================================================
 
-Ice Touch for MacOSX and Cocoa uses the Ice for C++ SSL protocol
-plugin.
+Ice Touch for MacOSX and Cocoa uses the Ice for C++ SSL
+protocol plug-in.
 
-For the iPhone Ice Touch SSL provides only a subset of this
-functionality.  Due to limitations in iPhone SSL support, the
+For the iPhone, Ice Touch SSL provides only a subset of this
+functionality. Due to limitations in iPhone SSL support, the
 following restriction applies:
 
   - Ice Touch servers cannot authenticate SSL clients.
@@ -78,7 +78,7 @@ Furthermore, the semantics of some IceSSL configuration properties
 have changed, and new properties have been added. The IceSSL property
 reference section of the Ice Touch manual provides complete details.
 
-SSL support is not available at all for the iPhone Simulator.
+SSL support is not available for the iPhone Simulator.
 
 
 ======================================================================
@@ -94,11 +94,11 @@ and you cannot install a custom logger with a plug-in (Ice.Plugin.*).
 5. Garbage Collection
 ======================================================================
 
-For MacOSX and Cocoa the Ice Touch runtime is build with garbage
+For MacOSX and Cocoa, the Ice Touch run time is built with garbage
 collection support.
 
-For iPhone and iPhone Simulator, since garbage collection is not
-supported you must use explicit retain/release.
+For the iPhone and iPhone Simulator, since garbage collection is not
+supported, you must use explicit retain/release.
 
 Due to the lack of GC, the Ice Touch run time for iPhone and
 iPhone Simulator cannot garbage collect graphs of objects containing
@@ -127,21 +127,22 @@ The Ice run time creates an NSAutoReleasePool object before each
 server-side dispatched invocation and client-side AMI callback. The
 pool is released once the dispatch is complete.
 
+
 ======================================================================
 7. Xcode project settings
 ======================================================================
 
-For both Cocoa and iPhone applications, which use the Xcode SDK you must
+For Cocoa and iPhone applications, which use the Xcode SDK, you must
 add to "Additional SDKs"
 
   /Developer/SDKs/IceTouch-1.0/$(PLATFORM_NAME).sdk
 
-In addition, for iPhone applications when creating a new iPhone Xcode
-project you must be sure to set "Code Signing Resource Rules Path" to:
+In addition, for iPhone applications, when creating a new iPhone Xcode
+project, you set the "Code Signing Resource Rules Path" to:
 
   $(SDKROOT)/ResourceRules.plist
 
-If you do not do this you will receive an error signing your
+If you do not do this, you will receive an error signing your
 application when targeting iPhone 2.2 or later.
 
 You must also add to the Frameworks folder:
@@ -151,8 +152,8 @@ You must also add to the Frameworks folder:
  - Foundation.framework
 
 
-For iPhoneSimulator applications the Ice dynamically linked libraries
-must be copied into the application directory. For our iPhone demos
+For iPhoneSimulator applications, the dynamically linked Ice libraries
+must be copied into the application directory. For our iPhone demos,
 this is done in the Xcode project with a post-build script as follows:
 
 if [ $PLATFORM_NAME = iphonesimulator ]; then

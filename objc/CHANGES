@@ -1,7 +1,7 @@
 Changes since version 0.1.0
 ---------------------------
 
-- SSL support no longer available with the iPhone simulator.
+- SSL support si no longer available with the iPhone simulator.
 
 - Set NSException.reason string for Ice local exceptions.
 
@@ -16,9 +16,9 @@ Changes since version 0.1.0
 
 - The Mac build now uses the native Ice socket & ssl transports.
   This means that Mac/Cocoa applications use the same SSL properties
-  as standard Ice for C++ applications.
+  as other Ice for C++ applications.
 
-- The iPhone library demo can now connect securely to both
+- The iPhone library demo can now securely connect to both
   demo2.zeroc.com and a locally hosted demo.
 
 - Added username/password field to the iPhone library demo.
@@ -27,10 +27,10 @@ Changes since version 0.1.0
   space in the input field would cause an exception to be thrown.
 
 - Fixed a bug in the iPhone library & chat demos where the
-  Glacier2::RouterPrx::destroySession was not called to destroy a
-  Glacier2 session.
+  Glacier2::RouterPrx::destroySession was not called, so the
+  Glacier2 session was not destroyed.
 
-- Added Cocoa demos library & chat.
+- Added "library" and "chat" demos for Cocoa.
 
 - Added iPhone router demo.
 
@@ -40,12 +40,13 @@ Changes since version 0.1.0
 
 - Changed the outParams parameter of ICEBlobject ice_invoke to NSMutableData**.
 
-- Fixed a bug with ICEConnection createProxy where the created proxy
+- Fixed a bug in ICEConnection::createProxy where the created proxy
   was not returned.
 
 - Added ICECallbackOnMainThreadServant to ensure methods are
   dispatched in the main thread.
 
-- Added support for tie servants. See demo/iPhone/chat for an example.
+- Added support for tie servants. See server-side mapping chapter in
+  the manual and demo/iPhone/chat for an example.
 
 - Added --depend-xml command line option to slice2objc.

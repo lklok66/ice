@@ -12,8 +12,9 @@ Ice Touch requires:
 - iPod touch v2 using software version 2.2.1, or 3.0
 - iPhone 3G using software version 2.2.1 or 3.0
 
-We expect Ice Touch will build successfully with iPhone SDK 2.0 and
-run on iPhone OS 2.0, however, we did not test these versions.
+We expect that Ice Touch will build successfully with iPhone SDK 2.0 and
+run on iPhone OS 2.0; however, we did not test these versions.
+
 
 Compiler
 --------
@@ -27,7 +28,7 @@ Ice Touch requires:
 Slice translators
 -----------------
 
-You will need the Slice-to-ObjC compiler (slice2objc) and the
+You will need the Slice-to-Objective-C compiler (slice2objc) and the
 Slice-to-C++ compiler (slice2cpp). The distribution includes binaries
 for these compilers as well as the source code in case you want to
 build them yourself.
@@ -39,8 +40,8 @@ mcpp
 Building the mcpp library is only necessary if you want to build the
 Slice translators yourself.
 
-The Slice-to-ObjC and Slice-to-C++ compilers (slice2objc/slice2cpp)
-have a dependency on mcpp 2.7.2
+The Slice-to-Objective-C and Slice-to-C++ compilers
+(slice2objc/slice2cpp) have a dependency on mcpp 2.7.2
 
 We recommend downloading the Ice third-party source archive from
 
@@ -55,16 +56,17 @@ below:
 
  http://mcpp.sourceforge.net
 
+
 XCode Plugin
 ------------
 
-If you intent to develop with Xcode you will need the Xcode plugin.
-To build the Xcode plugin
+If you intend to develop with Xcode you will need the Xcode plug-in.
+To build the Xcode plug-in:
 
 $ cd Xcode/Slice2ObjcPlugin
 $ xcodebuild -configuration Release
 
-To install the plugin either:
+To install the plug-in either:
 
 $ cp -r Xcode/Slice2ObjcPlugin/build/Release/slice2objcplugin.pbplugin \
     ~/Library/Application\ Support/Developer/Shared/Xcode/Plug-ins
@@ -119,8 +121,8 @@ $ make
 This will build the Ice Touch library and tests. If you are building
 for Mac OS X, this will also build the demos.
 
-If you are building for Cocao, you should now use Xcode to build
-the demos located following subdirectories:
+If you are building for Cocoa, you should now use Xcode to build
+the demos located in the following subdirectories:
 
   - objc/demo/Cocoa/chat
   - objc/demo/Cocoa/library
@@ -157,7 +159,7 @@ For the Mac OS X build, simply run "make install" to install Ice
 Touch in the directory specified by the "prefix" variable in
 objc/config/Make.rules.
 
-For the Cocoa/iPhone and iPhoneSimulator builds the copy the contents
+For the Cocoa/iPhone and iPhoneSimulator builds, copy the contents
 of objc/SDK to either /Developer/SDKs, or ~/Library/SDKs.
 
 For Mac OS X builds of Ice Touch, the install name of the shared
@@ -165,11 +167,11 @@ Library is /opt/IceTouch-@mmver@/lib.
 
 
 ======================================================================
-Configuring the Xcode plugin
+Configuring the Xcode plug-in
 ======================================================================
 
 The Xcode plugin simplifies the process of building Ice and Ice Touch
-applications using Xcode.
+applications with Xcode.
 
 The Xcode plug-in provides the following features:
 
@@ -179,7 +181,7 @@ The Xcode plug-in provides the following features:
   - Maintains dependencies between Slice files
   - Highlights compilation errors in your source code
 
-The Xcode plugin is configured using the per-target info build
+The Xcode plug-in is configured using the per-target info build
 settings, just as you would configure the compiler settings. Select a
 target, press info (or Cmd-i), select the build tab, and enter "Slice"
 in the "Search in Build Settings" field.
@@ -188,28 +190,28 @@ The following fields are defined:
 
 - Header Search Path
 
-   Set the list of directories to search for included Slice files (-I
-   option). Note that the Ice slice files are automatically in the
+   Set the list of directories to search for included Slice files
+   (-I option). Note that the Ice Slice files are automatically in the
    header search path.
 
 - Ice Home
 
-  If you are building with the Ice Touch Xcode SDK this should left
-  unset, otherwise if using the command line toolkit, or regular Ice
+  If you are building with the Ice Touch Xcode SDK, this should left
+  unset; otherwise, if using the command line toolkit or regular Ice,
   set this to the location of the installation (ie: /opt/Ice-3.3.1, or
   /opt/IceTouch-1.0)
 
 - Permit `Ice' prefix
 
-  Pass --ice to the slice compiler.
+  Pass --ice to the Slice compiler.
 
 - Streaming support
 
-  Pass --stream to the slice compiler (C++ only).
+  Pass --stream to the Slice compiler (C++ only).
 
 - Checksum support
 
-  Pass --checksum to the slice compiler (C++ only).
+  Pass --checksum to the Slice compiler (C++ only).
 
 - Preprocessor Macros
 
@@ -217,15 +219,15 @@ The following fields are defined:
 
 - Support Ice Touch 0.1.0
 
-  If you are using the plugin with Ice Touch 0.1.0 set this option,
+  If you are using the plug-in with Ice Touch 0.1.0, set this option,
   otherwise leave it unset.
 
 - Translate C++ code
 
-  If set slice2cpp will be used to translate the slice files,
+  If set, slice2cpp will be used to translate the Slice files,
   otherwise slice2objc is used.
 
-You may set specific slice compiler flags on individual source slice
-files by selecting the slice file, press info (or Cmd-i), selecting
+You may set specific Slice compiler flags on individual source Slice
+files by selecting the Slice file, press info (or Cmd-i), selecting
 the build tab and entering any desired flags in "Additional Compiler
 Flags for Target".
