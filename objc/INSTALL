@@ -224,11 +224,6 @@ The following fields are defined:
 
   Set the list of preprocessor macros to define (-D option).
 
-- Support Ice Touch 0.1.0
-
-  If you are using the plug-in with Ice Touch 0.1.0, set this option,
-  otherwise leave it unset.
-
 - Translate C++ code
 
   If set, slice2cpp will be used to translate the Slice files,

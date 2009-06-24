@@ -9,7 +9,7 @@
 
 "[Slice]-category" = "Slice - code generation";
 
-"[SLICE_CPP_FLAG]-name" = "Translate C++ code.";
+"[SLICE_CPP_FLAG]-name" = "Translate C++ code";
 "[SLICE_CPP_FLAG]-description" = "Generate C++ code from Slice files.";
 
 "[SLICE_ICE_FLAG]-name" = "Permit `Ice' prefix";
@@ -29,6 +29,3 @@
 
 "[SLICE_ICE_HOME]-name" = "Ice Home";
 "[SLICE_ICE_HOME]-description" = "The location of your Ice installation.";
-
-"[SLICE_ICE_TOUCH_0_1_0]-name" = "Support Ice Touch 0.1.0";
-"[SLICE_ICE_TOUCH_0_1_0]-description" = "Generate dependencies with --depend, for compatibility with Ice Touch 0.1.0.";

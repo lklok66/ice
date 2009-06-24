@@ -240,13 +240,7 @@ typedef struct Configuration Configuration;
     [args addObject:[NSString stringWithFormat:@"-I%@", conf.slicedir]];
 
     // Use old style dependency parsing?
-    BOOL slice2cpp = conf.cpp;
-    if([[context expandedValueForString:@"$(SLICE_ICE_TOUCH_0_1_0)"] isEqualToString:@"YES"])
-    {
-        slice2cpp = YES;
-    }
-    
-    if(slice2cpp)
+    if(conf.cpp)
     {
         [args addObject:@"--depend"];
     }
@@ -283,7 +277,7 @@ typedef struct Configuration Configuration;
         return [NSArray array];
     }
     
-    if(slice2cpp)
+    if(conf.cpp)
     {
         NSMutableArray* dep = [NSMutableArray array];
         NSString* soutput = [[NSString alloc]initWithData:output encoding:NSUTF8StringEncoding];
