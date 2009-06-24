@@ -21,12 +21,14 @@
     NSString* slicedir;
     BOOL cpp;
     NSString* error;
+    BOOL sdk;
 }
 
 @property (readonly) NSString* translator;
 @property (readonly) NSString* shlibpath;
 @property (readonly) NSString* slicedir;
 @property (readonly) BOOL cpp;
+@property (readonly) BOOL sdk;
 @property (readonly) NSString* error;
 
 -(id)initWithContext:(PBXTargetBuildContext*)context;
@@ -39,6 +41,7 @@
 @synthesize shlibpath;
 @synthesize slicedir;
 @synthesize cpp;
+@synthesize sdk;
 @synthesize error;
 
 -(id)initWithContext:(PBXTargetBuildContext*)context
@@ -57,6 +60,7 @@
     NSString* sliceIceHome = [context expandedValueForString:@"$(SLICE_ICE_HOME)"];
     if(sliceIceHome.length > 0)
     {
+        sdk = NO;
         BOOL dir = NO;
         if(![fileManager fileExistsAtPath:sliceIceHome isDirectory:&dir] || !dir)
         {
@@ -97,15 +101,16 @@
         NSString* sdksRaw = [context expandedValueForString:@"$(ADDITIONAL_SDKS)"];
         NSArray* sdks = [sdksRaw componentsSeparatedByString:@" "];
         BOOL found = NO;
-        for(NSString* sdk in sdks)
+        for(NSString* sdkDir in sdks)
         {
-            if([sdk rangeOfString:@"IceTouch"].location != NSNotFound)
+            if([sdkDir rangeOfString:@"IceTouch"].location != NSNotFound)
             {
+                sdk = YES;
                 found = YES;
-                sdk = [sdk stringByDeletingLastPathComponent];
+                sdkDir = [sdkDir stringByDeletingLastPathComponent];
                 // The bin and slice directories exist at the root of the SDK.
-                slicedir = [sdk stringByAppendingPathComponent:@"slice"];
-                translator = [[sdk stringByAppendingPathComponent:@"bin"] stringByAppendingPathComponent:translatorExe];
+                slicedir = [sdkDir stringByAppendingPathComponent:@"slice"];
+                translator = [[sdkDir stringByAppendingPathComponent:@"bin"] stringByAppendingPathComponent:translatorExe];
                 break;
             }
         }
@@ -397,6 +402,32 @@ typedef struct Configuration Configuration;
     // This causes importedFilesForPath to be called (dependency management
     // between slice files).
 	[inputNode setScansFileContentsForIncludes:YES];
+    
+    if(conf.sdk)
+    {
+        NSArray* options;
+        if([[context expandedValueForString:@"$(PLATFORM_NAME)"] isEqualToString:@"macosx"])
+        {
+            options = [NSArray arrayWithObjects:@"-ObjC", @"-lstdc++", @"-liconv", @"-lbz2", @"-lcrypto", @"-lssl", @"-lIceObjC", nil];
+        }
+        else
+        {
+            options = [NSArray arrayWithObjects:@"-ObjC", @"-lstdc++", @"-lIceObjC", nil];
+        }
+        NSArray* current = [[context expandedValueForString:@"$(OTHER_LDFLAGS)"] arrayByParsingAsStringList];
+        NSMutableArray* copy = [current mutableCopy];
+        for(NSString* o in options)
+        {
+            if(![current containsObject:o])
+            {
+                [copy addObject:o];
+            }
+        }
+        if(copy.count != current.count)
+        {
+            [context setStringValue:[copy componentsJoinedByString:@" "] forDynamicSetting:@"OTHER_LDFLAGS"];
+        }
+    }
 
     // The output of the plugin is a single source node.
     return [NSArray arrayWithObject:outputSourceNode];

@@ -131,21 +131,21 @@ pool is released once the dispatch is complete.
 7. Xcode project settings
 ======================================================================
 
-When creating a new iPhone Xcode project you must be sure to set "Code
-Signing Resource Rules Path" to:
+For both Cocoa and iPhone applications, which use the Xcode SDK you must
+add to "Additional SDKs"
 
-$(SDKROOT)/ResourceRules.plist
+  /Developer/SDKs/IceTouch-1.0/$(PLATFORM_NAME).sdk
+
+In addition, for iPhone applications when creating a new iPhone Xcode
+project you must be sure to set "Code Signing Resource Rules Path" to:
+
+  $(SDKROOT)/ResourceRules.plist
 
 If you do not do this you will receive an error signing your
 application when targeting iPhone 2.2 or later.
 
-You must add to "Additional SDKs"
+You must also add to the Frameworks folder:
 
-/Developer/SDKs/IceTouch-1.0/$(PLATFORM_NAME).sdk
-
-You should add to the "Other Linker Flags":
-
--ObjC -lstd++ -lIceObjC
-
-You must link your application with the foundation and security
-frameworks.
+ - CFNetwork.framework
+ - Security.framework
+ - Foundation.framework

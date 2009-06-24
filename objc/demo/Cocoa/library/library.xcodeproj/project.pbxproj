@@ -294,16 +294,7 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				OTHER_LDFLAGS = (
-					"-ObjC",
-					"-liconv",
-					"-lbz2",
-					"-lcrypto",
-					"-lssl",
-					"-lIceObjc",
-					"-lGlacier2Objc",
-					"-lstdc++",
-				);
+				OTHER_LDFLAGS = "-lGlacier2Objc";
 				PRODUCT_NAME = Library;
 				SLICE_ICE_HOME = "";
 				SLICE_INCLUDE_PATH = "";
@@ -325,16 +316,7 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				OTHER_LDFLAGS = (
-					"-ObjC",
-					"-liconv",
-					"-lbz2",
-					"-lcrypto",
-					"-lssl",
-					"-lIceObjc",
-					"-lGlacier2Objc",
-					"-lstdc++",
-				);
+				OTHER_LDFLAGS = "-lGlacier2Objc";
 				PRODUCT_NAME = Library;
 				SLICE_ICE_HOME = "";
 				SLICE_INCLUDE_PATH = "";

@@ -255,16 +255,7 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				OTHER_LDFLAGS = (
-					"-liconv",
-					"-lbz2",
-					"-lcrypto",
-					"-lssl",
-					"-lIceObjc",
-					"-lGlacier2Objc",
-					"-lstdc++",
-					"-ObjC",
-				);
+				OTHER_LDFLAGS = "-lGlacier2Objc";
 				PRODUCT_NAME = ChatDemo;
 				SLICE_ICE_HOME = "";
 				SLICE_INCLUDE_PATH = Classes;
@@ -286,16 +277,7 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				OTHER_LDFLAGS = (
-					"-liconv",
-					"-lbz2",
-					"-lcrypto",
-					"-lssl",
-					"-lIceObjc",
-					"-lGlacier2Objc",
-					"-lstdc++",
-					"-ObjC",
-				);
+				OTHER_LDFLAGS = "-lGlacier2Objc";
 				PRODUCT_NAME = ChatDemo;
 				SLICE_ICE_HOME = "";
 				SLICE_INCLUDE_PATH = Classes;

@@ -97,13 +97,13 @@ endif
 # Set the platform name according to the build type.
 #
 ifeq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
-    PLATFORM_NAME = iPhoneSimulator
+    PLATFORM_NAME = iphonesimulator
 else ifeq ($(COMPILE_FOR_IPHONE),yes)
-    PLATFORM_NAME = iPhoneOS
+    PLATFORM_NAME = iphoneos
 else ifeq ($(COMPILE_FOR_COCOA),yes)
-    PLATFORM_NAME = MacOSX
+    PLATFORM_NAME = macosx
 else
-    PLATFORM_NAME = MacOSX
+    PLATFORM_NAME = macosx
     COMPILE_FOR_MACOSX = yes
 endif
 

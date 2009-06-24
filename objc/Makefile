@@ -64,7 +64,7 @@ build-sdk:
 	$(call mkdir,SDK/IceTouch-$(VERSION))
 	$(call mkdir,SDK/IceTouch-$(VERSION)/bin)
 	$(call mkdir,SDK/IceTouch-$(VERSION)/slice)
-	for platform in MacOSX iPhoneOS iPhoneSimulator ; \
+	for platform in macosx iphoneos iphonesimulator ; \
 	do \
 	    platform_sdk=SDK/IceTouch-$(VERSION)/$$platform.sdk ;\
 	    $(call mkdir,$$platform_sdk) ;\
