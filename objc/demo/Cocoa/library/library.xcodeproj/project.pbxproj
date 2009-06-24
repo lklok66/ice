@@ -10,6 +10,7 @@
 		1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DDD58140DA1D0A300B32029 /* MainMenu.xib */; };
 		3447919F0FBBC4AC0037E9FA /* LoginView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3447919E0FBBC4AC0037E9FA /* LoginView.xib */; };
 		3447926A0FBC13940037E9FA /* LibraryView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 344792690FBC13940037E9FA /* LibraryView.xib */; };
+		3478AF810FF2107100BD9F2B /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = 3478AF800FF2107100BD9F2B /* README.txt */; };
 		3488C4F10FC23DCF001C9F93 /* EditView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3488C4F00FC23DCF001C9F93 /* EditView.xib */; };
 		3488C52A0FC24104001C9F93 /* RentView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3488C5290FC24104001C9F93 /* RentView.xib */; };
 		3488C52D0FC2414D001C9F93 /* SavingView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3488C52C0FC2414D001C9F93 /* SavingView.xib */; };
@@ -42,6 +43,7 @@
 		32CA4F630368D1EE00C91783 /* library_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = library_Prefix.pch; sourceTree = "<group>"; };
 		3447919E0FBBC4AC0037E9FA /* LoginView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = LoginView.xib; sourceTree = "<group>"; };
 		344792690FBC13940037E9FA /* LibraryView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = LibraryView.xib; sourceTree = "<group>"; };
+		3478AF800FF2107100BD9F2B /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 		3488C4F00FC23DCF001C9F93 /* EditView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = EditView.xib; sourceTree = "<group>"; };
 		3488C5290FC24104001C9F93 /* RentView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RentView.xib; sourceTree = "<group>"; };
 		3488C52C0FC2414D001C9F93 /* SavingView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SavingView.xib; sourceTree = "<group>"; };
@@ -132,6 +134,7 @@
 		29B97314FDCFA39411CA2CEA /* library */ = {
 			isa = PBXGroup;
 			children = (
+				3478AF800FF2107100BD9F2B /* README.txt */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
@@ -230,6 +233,7 @@
 				34C5F1930FC508AE00B226F7 /* icon.icns in Resources */,
 				349A38480FCE3653003F86BC /* cacert.pem in Resources */,
 				349A38490FCE3653003F86BC /* democacert.pem in Resources */,
+				3478AF810FF2107100BD9F2B /* README.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

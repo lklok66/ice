@@ -31,6 +31,7 @@
 		3448C1F90FAA812300BFB717 /* LogZoomView.m in Sources */ = {isa = PBXBuildFile; fileRef = 3448C1F50FAA812300BFB717 /* LogZoomView.m */; };
 		34684F500FA7EC15009000C3 /* RouterI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34684F4D0FA7EC15009000C3 /* RouterI.m */; };
 		34684F510FA7EC15009000C3 /* Router.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34684F4E0FA7EC15009000C3 /* Router.ice */; };
+		3478AF670FF2100300BD9F2B /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = 3478AF660FF2100300BD9F2B /* README.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -73,6 +74,7 @@
 		34684F4D0FA7EC15009000C3 /* RouterI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RouterI.m; path = Classes/RouterI.m; sourceTree = "<group>"; };
 		34684F4E0FA7EC15009000C3 /* Router.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = Router.ice; path = Classes/Router.ice; sourceTree = "<group>"; };
 		34684F4F0FA7EC15009000C3 /* RouterDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RouterDelegate.h; path = Classes/RouterDelegate.h; sourceTree = "<group>"; };
+		3478AF660FF2100300BD9F2B /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -137,6 +139,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				3478AF660FF2100300BD9F2B /* README.txt */,
 				3448BF340FA971D700BFB717 /* Log View */,
 				34684E350FA70F0E009000C3 /* Router */,
 				289233A00DB2D0730083E9F9 /* Main View */,
@@ -267,6 +270,7 @@
 				280E754F0DD40C5E005A515E /* MainWindow.xib in Resources */,
 				3448BF520FA9723E00BFB717 /* LogView.xib in Resources */,
 				3448C1BC0FAA7E4900BFB717 /* LogZoomView.xib in Resources */,
+				3478AF670FF2100300BD9F2B /* README.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
