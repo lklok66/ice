@@ -24,7 +24,7 @@ namespace IceObjC
 class Instance;
 typedef IceUtil::Handle<Instance> InstancePtr;
 
-class Transceiver : public IceInternal::Transceiver, public IceInternal::NativeInfo
+class Transceiver : public IceInternal::Transceiver, public IceInternal::StreamNativeInfo
 {
     enum State
     {

@@ -207,7 +207,109 @@ IceObjC::Instance::Instance(const IceInternal::InstancePtr& instance, bool secur
     string certFile = properties->getProperty("IceSSL.CertFile");
 
     OSStatus err;
+#if !TARGET_OS_IPHONE
+    if(!certAuthFile.empty())
+    {
+        CFDataRef cert = readCert(defaultDir, certAuthFile);
 
+        SecKeyImportExportParameters params;
+        memset(&params, 0, sizeof(params));
+        params.version = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
+        params.keyUsage = CSSM_KEYUSE_ANY;
+        params.keyAttributes = CSSM_KEYATTR_EXTRACTABLE;
+
+        SecExternalFormat format = kSecFormatUnknown;
+        SecExternalItemType type = kSecItemTypeUnknown;
+
+        CFStringRef filename = toCFString(certAuthFile);
+        err = SecKeychainItemImport(cert, filename, &format, &type, 0, &params, 0, &_certificateAuthorities);
+        CFRelease(filename);
+        CFRelease(cert);
+        if(err != noErr)
+        {
+            ostringstream os;
+            os << "IceSSL: unable to import certificate from file " << certAuthFile << " (error = " << err << ")";
+            throw PluginInitializationException(__FILE__, __LINE__, os.str());
+        }
+
+        // The root CA will be validated by the transciever.
+        CFDictionarySetValue(_clientSettings, kCFStreamSSLAllowsAnyRoot, kCFBooleanTrue);
+    }
+
+    if(!certFile.empty())
+    {
+        SecKeychainRef keychain = 0;
+        string keychainName = properties->getPropertyWithDefault("IceSSL.Keychain", "login");
+        string keychainPassword = properties->getProperty("IceSSL.KeychainPassword");
+        char *home = getenv("HOME");
+        if(home == NULL) 
+        {
+            home = "";
+        }
+        string path = string(home) + "/Library/Keychains/" + keychainName + ".keychain";
+        err = SecKeychainOpen(path.c_str(),  &keychain);
+        SecKeychainStatus status;
+        err = SecKeychainGetStatus(keychain, &status);
+        if(err == noErr)
+        {
+            if(!keychainPassword.empty())
+            {
+                SecKeychainUnlock(keychain, keychainPassword.size(), keychainPassword.c_str(), true);
+            }
+            else
+            {
+                SecKeychainUnlock(keychain, 0, 0, false);
+            }
+        }
+        if(err == errSecNoSuchKeychain)
+        {
+            if(!keychainPassword.empty())
+            {
+                err = SecKeychainCreate(path.c_str(), keychainPassword.size(), keychainPassword.c_str(), false, 0, 
+                                        &keychain);
+            }
+            else
+            {
+                err = SecKeychainCreate(path.c_str(), 0, 0, true, 0, &keychain);
+            }
+        }
+        if(err != noErr)
+        {
+            ostringstream os;
+            os << "IceSSL: unable to open keychain " << path << " (error = " << err << ")";
+            throw PluginInitializationException(__FILE__, __LINE__, os.str());
+        }
+
+        CFDataRef cert = readCert(defaultDir, certFile);
+
+        SecKeyImportExportParameters params;
+        memset(&params, 0, sizeof(params));
+        params.version = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
+        params.passphrase = toCFString(properties->getProperty("IceSSL.Password"));
+        params.keyUsage = CSSM_KEYUSE_ANY;
+        params.keyAttributes = CSSM_KEYATTR_EXTRACTABLE;
+
+        SecExternalFormat format = kSecFormatUnknown;
+        SecExternalItemType type = kSecItemTypeUnknown;
+
+        CFArrayRef items = 0;
+        CFStringRef filename = toCFString(certFile);
+        err = SecKeychainItemImport(cert, filename, &format, &type, 0, &params, keychain, &items);
+        CFRelease(params.passphrase);
+        CFRelease(filename);
+        CFRelease(cert);
+        if(err != noErr)
+        {
+            ostringstream os;
+            os << "IceSSL: unable to import certificate from file " << certFile << " (error = " << err << ")";
+            throw PluginInitializationException(__FILE__, __LINE__, os.str());
+        }
+
+        CFDictionarySetValue(_clientSettings, kCFStreamSSLCertificates, items);
+        CFRelease(items);
+        CFRelease(keychain);
+    }
+#else
     if(!certAuthFile.empty())
     {
         CFDataRef cert = readCert(defaultDir, certAuthFile);
@@ -283,6 +385,7 @@ IceObjC::Instance::Instance(const IceInternal::InstancePtr& instance, bool secur
         CFRelease(identity);
         CFRelease(items);
     }
+#endif
 
     string trustOnly = properties->getProperty("IceSSL.TrustOnly.Client");
     if(!trustOnly.empty())

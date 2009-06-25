@@ -29,7 +29,7 @@ DEPENDFLAGS	=  --platform-name
 
 include $(top_srcdir)/config/Make.rules
 
-ifeq ($(COMPILE_FOR_IPHONE),yes)
+ifeq ($(COMPILE_WITH_CFSTREAM_TRANSPORT),yes)
     OBJS 	:=
 else
     OBJS 	:= $(addprefix $(PLATFORM_NAME)/,$(OBJS))

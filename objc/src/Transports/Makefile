@@ -33,9 +33,9 @@ include $(top_srcdir)/config/Make.rules
 
 CPPFLAGS	:= -I. -I../IceCpp/include -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src $(CPPPLATFORMFLAGS)
 
-ifeq ($(COMPILE_FOR_IPHONE),yes)
+ifeq ($(COMPILE_WITH_CFSTREAM_TRANSPORT),yes)
 
-CPPFLAGS	:= $(CPPFLAGS) -DICE_USE_CFSTREAM
+CPPFLAGS	:= $(CPPFLAGS) -DICE_NO_KQUEUE
 OBJS		:= $(addprefix $(PLATFORM_NAME)/,$(CF_OBJS))
 
 $(PLATFORM_NAME)/%.o: %.cpp

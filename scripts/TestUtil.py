@@ -595,6 +595,13 @@ sslConfigTree = {
             "server" : " --IceSSL.CertFile=s_rsa1024_pub.pem --IceSSL.KeyFile=s_rsa1024_priv.pem",
             "colloc" : " --IceSSL.CertFile=c_rsa1024_pub.pem --IceSSL.KeyFile=c_rsa1024_priv.pem"
             },
+#         "objc" : {
+#             "plugin" : " --Ice.Default.Protocol=ssl --IceSSL.CheckCertName=0" +
+#             " --IceSSL.Password=password --IceSSL.CertAuthFile=cacert.der --IceSSL.DefaultDir=%(objccertsdir)s" +
+#             " --IceSSL.Keychain=\"ZeroC Tests\" --IceSSL.KeychainPassword=password",
+#             "client" : " --IceSSL.CertFile=c_rsa1024.pfx",
+#             "server" : " --IceSSL.CertFile=s_rsa1024.pfx",
+#             },
         }
 sslConfigTree["py"] = sslConfigTree["cpp"]
 sslConfigTree["rb"] = sslConfigTree["cpp"]
@@ -1111,8 +1118,8 @@ def processCmdLine():
     if not x64:
         x64 = isWin32() and os.environ.get("XTARGET") == "x64" or os.environ.get("LP64") == "yes"
     
-    if getDefaultMapping() == "objc" and protocol == "ssl":
-        os.system("security delete-keychain \"ZeroC Tests.keychain\" >& /dev/null")
+    #if getDefaultMapping() == "objc" and protocol == "ssl":
+    #    os.system("security delete-keychain \"ZeroC Tests.keychain\" >& /dev/null")
 
     configurePaths()
 

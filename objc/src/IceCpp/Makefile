@@ -160,7 +160,7 @@ ifneq ($(COMPILE_FOR_IPHONE),yes)
   endif
 endif
 
-ifeq ($(COMPILE_FOR_IPHONE),yes)
+ifeq ($(COMPILE_WITH_CFSTREAM_TRANSPORT),yes)
     CPPFLAGS		:= -DICE_NO_KQUEUE $(CPPFLAGS)
 endif
 

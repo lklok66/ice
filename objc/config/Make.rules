@@ -107,6 +107,12 @@ else
     COMPILE_FOR_MACOSX = yes
 endif
 
+ifeq ($(COMPILE_WITH_CFSTREAM_TRANSPORT),)
+    ifneq ($(PLATFORM_NAME),macosx)
+	COMPILE_WITH_CFSTREAM_TRANSPORT=yes
+    endif
+endif
+
 SDK_DIR                 = $(top_srcdir)/SDK/IceTouch-$(VERSION)/$(PLATFORM_NAME).sdk
 
 bindir			= $(top_srcdir)/bin

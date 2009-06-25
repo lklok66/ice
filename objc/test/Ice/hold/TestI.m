@@ -67,7 +67,7 @@
 
 -(void) shutdown:(ICECurrent*)current
 {
-//    [current.adapter hold];
+    [current.adapter hold];
     [[current.adapter getCommunicator] shutdown];
 }
 

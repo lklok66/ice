@@ -68,6 +68,10 @@ OBJS		:= $(addprefix $(PLATFORM_NAME)/,$(OBJC_OBJS)) \
 CPPFLAGS	:= -I.. -Iinclude -I../../include $(CPPFLAGS)
 SLICE2OBJCFLAGS	:= --ice --include-dir Ice $(SLICE2OBJCFLAGS)
 
+ifeq ($(COMPILE_WITH_CFSTREAM_TRANSPORT),yes)
+    CPPFLAGS		:= -DICE_NO_KQUEUE $(CPPFLAGS)
+endif
+
 ifneq ($(COMPILE_FOR_IPHONE),yes)
     LINKWITH    := $(ICE_OS_LIBS) $(BASELIBS) -framework CoreServices -framework Security -lbz2 -liconv $(OPENSSL_LIBS)
 else ifeq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)

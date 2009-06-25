@@ -518,9 +518,14 @@ toCFCallbacks(SocketOperation op)
 }
 
 EventHandlerWrapper::EventHandlerWrapper(const EventHandlerPtr& handler, Selector& selector) : 
-    _handler(handler), _selector(selector), _ready(SocketOperationNone)
+    _handler(handler), 
+    _selector(selector),
+    _ready(SocketOperationNone),
+    _finish(false),
+    _readStreamRegistered(false),
+    _writeStreamRegistered(false)
 {
-    if(!handler->getNativeInfo()->readStream())
+    if(!StreamNativeInfoPtr::dynamicCast(handler->getNativeInfo()))
     {
         SOCKET fd = handler->getNativeInfo()->fd();
         CFSocketContext ctx = { 0, this, eventHandlerWrapperRetain, eventHandlerWrapperRelease, 0 };
@@ -541,19 +546,6 @@ EventHandlerWrapper::EventHandlerWrapper(const EventHandlerPtr& handler, Selecto
     {
         _socket = 0;
         _source = 0;
-
-        CFOptionFlags events;
-        CFStreamClientContext ctx = { 0, this, eventHandlerWrapperRetain, eventHandlerWrapperRelease, 0 };
-
-        events = kCFStreamEventHasBytesAvailable | kCFStreamEventErrorOccurred;
-        CFReadStreamRef readStream = _handler->getNativeInfo()->readStream();
-        CFReadStreamSetClient(readStream, events, selectorReadCallback, &ctx);
-        CFReadStreamScheduleWithRunLoop(readStream, _selector.runLoop(), kCFRunLoopDefaultMode);
-        
-        CFWriteStreamRef writeStream = _handler->getNativeInfo()->writeStream();
-        events = kCFStreamEventOpenCompleted | kCFStreamEventCanAcceptBytes | kCFStreamEventErrorOccurred;
-        CFWriteStreamSetClient(writeStream, events, selectorWriteCallback, &ctx);
-        CFWriteStreamScheduleWithRunLoop(writeStream, _selector.runLoop(), kCFRunLoopDefaultMode);        
     }
 }
 
@@ -569,34 +561,185 @@ EventHandlerWrapper::~EventHandlerWrapper()
 void
 EventHandlerWrapper::updateRunLoop()
 {
-    assert(_socket);
     SocketOperation op = _handler->_registered;
-    if(op && !CFRunLoopContainsSource(_selector.runLoop(), _source, kCFRunLoopDefaultMode))
+    assert(!op || !_finish);
+
+    if(_socket)
     {
-        CFRunLoopAddSource(_selector.runLoop(), _source, kCFRunLoopDefaultMode);
+        CFSocketDisableCallBacks(_socket, kCFSocketReadCallBack | kCFSocketWriteCallBack | kCFSocketConnectCallBack);
+        if(op)
+        {
+            CFSocketEnableCallBacks(_socket, toCFCallbacks(op));
+        }
+
+        if(op && !CFRunLoopContainsSource(CFRunLoopGetCurrent(), _source, kCFRunLoopDefaultMode))
+        {
+            CFRunLoopAddSource(CFRunLoopGetCurrent(), _source, kCFRunLoopDefaultMode);
+        }
+        else if(!op && CFRunLoopContainsSource(CFRunLoopGetCurrent(), _source, kCFRunLoopDefaultMode))
+        {
+            CFRunLoopRemoveSource(CFRunLoopGetCurrent(), _source, kCFRunLoopDefaultMode);
+        }
+
+        if(_finish)
+        {
+            CFSocketInvalidate(_socket);
+        }
     }
-    else if(!op && CFRunLoopContainsSource(_selector.runLoop(), _source, kCFRunLoopDefaultMode))
+    else
     {
-        CFRunLoopRemoveSource(_selector.runLoop(), _source, kCFRunLoopDefaultMode);
-     }
+        SocketOperation readyOp = SocketOperationNone;
+        StreamNativeInfoPtr nativeInfo = StreamNativeInfoPtr::dynamicCast(_handler->getNativeInfo());
+        CFOptionFlags events;
+
+        if(op & (SocketOperationConnect | SocketOperationWrite))
+        {
+            CFWriteStreamRef stream = nativeInfo->writeStream();
+            if(op & SocketOperationConnect && CFWriteStreamGetStatus(stream) > kCFStreamStatusOpening)
+            {
+                readyOp = static_cast<SocketOperation>(readyOp | SocketOperationConnect);
+            }
+            else if(op & SocketOperationWrite && CFWriteStreamCanAcceptBytes(stream))
+            {
+                readyOp = static_cast<SocketOperation>(readyOp | SocketOperationWrite);
+            }
+            else if(!_writeStreamRegistered)
+            {
+                //
+                // Schedule the stream with the runloop. Note that this might call ready() so 
+                // it's important to set the registered boolean *after* to ensure read won't 
+                // unregister the stream from the loop (which isn't safe). Instead, we check
+                // if ready() was called below by checking the _ready flags and unregister the
+                // stream from the loop
+                //
+                CFStreamClientContext ctx = { 0, this, eventHandlerWrapperRetain, eventHandlerWrapperRelease, 0 };
+                events = kCFStreamEventOpenCompleted | kCFStreamEventCanAcceptBytes | kCFStreamEventErrorOccurred;
+                CFWriteStreamSetClient(stream, events, selectorWriteCallback, &ctx);
+
+                CFWriteStreamScheduleWithRunLoop(stream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+                _writeStreamRegistered = true; // Note: this must be set after the schedule call, see above
+                if(CFWriteStreamGetStatus(stream) == kCFStreamStatusNotOpen)
+                {
+                    CFWriteStreamOpen(stream);
+                }
+            }
+        }
+
+        if(!(op & (SocketOperationConnect | SocketOperationWrite)) || 
+           _ready & (SocketOperationConnect | SocketOperationWrite))
+        {
+            if(_writeStreamRegistered)
+            {
+                CFWriteStreamRef stream = nativeInfo->writeStream();
+                CFWriteStreamUnscheduleFromRunLoop(stream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+                CFWriteStreamSetClient(stream, kCFStreamEventNone, 0, 0);
+                _writeStreamRegistered = false;
+            }
+        }
+
+        if(op & SocketOperationRead)
+        {
+            CFReadStreamRef stream = nativeInfo->readStream();
+            if(op & SocketOperationRead && CFReadStreamHasBytesAvailable(stream))
+            {
+                readyOp = static_cast<SocketOperation>(readyOp | SocketOperationRead);
+            }
+            else if(!_readStreamRegistered)
+            {
+                //
+                // Schedule the stream with the runloop. Note that this might call ready() so 
+                // it's important to set the registered boolean *after* to ensure read won't 
+                // unregister the stream from the loop (which isn't safe). Instead, we check
+                // if ready() was called below by checking the _ready flags and unregister the
+                // stream from the loop
+                //
+                CFStreamClientContext ctx = { 0, this, eventHandlerWrapperRetain, eventHandlerWrapperRelease, 0 };
+                events = kCFStreamEventHasBytesAvailable | kCFStreamEventErrorOccurred;
+                CFReadStreamSetClient(stream, events, selectorReadCallback, &ctx);
+
+                CFReadStreamScheduleWithRunLoop(stream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+                _readStreamRegistered = true; // Note: this must be set after the schedule call, see above
+                if(CFReadStreamGetStatus(stream) == kCFStreamStatusNotOpen)
+                {
+                    CFReadStreamOpen(stream);
+                }
+            }
+        }
+
+        if(!(op & SocketOperationRead) || _ready & SocketOperationRead)
+        {
+            if(_readStreamRegistered)
+            {
+                CFReadStreamRef stream = nativeInfo->readStream();
+                CFReadStreamUnscheduleFromRunLoop(stream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+                CFReadStreamSetClient(stream, kCFStreamEventNone, 0, 0);        
+                _readStreamRegistered = false;
+            }
+        }
+
+        if(readyOp)
+        {
+            ready(readyOp, 0);
+        }
+
+        if(_finish)
+        {
+            CFReadStreamClose(nativeInfo->readStream());
+            CFWriteStreamClose(nativeInfo->writeStream());
+        }
+    }
 }
 
 void
 EventHandlerWrapper::ready(SocketOperation op, int error)
 {
+    if(!_socket)
+    {
+        //
+        // Unregister the stream from the runloop as soon as we got the callback. This is
+        // required to allow thread pool thread to perform read/write operations on the
+        // stream (which can't be used from another thread than the run loop thread if 
+        // it's registered with a run loop).
+        //
+        StreamNativeInfoPtr nativeInfo = StreamNativeInfoPtr::dynamicCast(_handler->getNativeInfo());
+        if(op & (SocketOperationConnect | SocketOperationWrite))
+        {
+            if(_writeStreamRegistered)
+            {
+                CFWriteStreamRef stream = nativeInfo->writeStream();
+                CFWriteStreamUnscheduleFromRunLoop(stream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+                CFWriteStreamSetClient(stream, kCFStreamEventNone, 0, 0);        
+                _writeStreamRegistered = false;
+            }
+        }
+        if(op & SocketOperationRead)
+        {
+            if(_readStreamRegistered)
+            {
+                CFReadStreamRef stream = nativeInfo->readStream();
+                CFReadStreamUnscheduleFromRunLoop(stream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+                CFReadStreamSetClient(stream, kCFStreamEventNone, 0, 0);        
+                _readStreamRegistered = false;                
+            }
+        }
+    }
+
     op = static_cast<SocketOperation>(_handler->_registered & op);
     if(!op || _ready & op)
     {
         return;
     }
 
-    if(op & SocketOperationConnect)
+    if(_socket)
     {
-        _handler->getNativeInfo()->setConnectError(error);
+        if(op & SocketOperationConnect)
+        {
+            _handler->getNativeInfo()->setConnectError(error);
+        }
     }
 
     _ready = static_cast<SocketOperation>(_ready | op);
-    if(!(_handler->_disabled & op))// && (wrapper->_ready & ~wrapper->_handler->_disabled) == op)
+    if(!(_handler->_disabled & op))
     {
         _selector.addReadyHandler(this);
     }
@@ -609,41 +752,6 @@ EventHandlerWrapper::checkReady()
     {
         _selector.addReadyHandler(this);
     }   
-    else if(!_socket)
-    {
-        SocketOperation readyOp = SocketOperationNone;
-        if(_handler->_registered & SocketOperationRead)
-        {
-            CFReadStreamRef stream = _handler->getNativeInfo()->readStream();
-            if(CFReadStreamHasBytesAvailable(stream))
-            {
-                readyOp = static_cast<SocketOperation>(readyOp | SocketOperationRead);
-            }
-        }
-
-        if(_handler->_registered & SocketOperationWrite)
-        {
-            CFWriteStreamRef stream = _handler->getNativeInfo()->writeStream();
-            if(CFWriteStreamCanAcceptBytes(stream))
-            {
-                readyOp = static_cast<SocketOperation>(readyOp | SocketOperationWrite);
-            }
-        }
-
-        if(_handler->_registered & SocketOperationConnect)
-        {
-            CFWriteStreamRef stream = _handler->getNativeInfo()->writeStream();
-            if(CFWriteStreamGetStatus(stream) > kCFStreamStatusOpening)
-            {
-                readyOp = static_cast<SocketOperation>(readyOp | SocketOperationConnect);
-            }
-        }
-
-        if(readyOp)
-        {
-            ready(readyOp, 0);
-        }
-    }
 }
 
 SocketOperation
@@ -651,7 +759,7 @@ EventHandlerWrapper::readyOp()
 {
     assert(!(~_handler->_registered & _ready));
     SocketOperation op = static_cast<SocketOperation>(~_handler->_disabled & _ready);
-    _ready = static_cast<SocketOperation>(_handler->_disabled & _ready);
+    _ready = static_cast<SocketOperation>(~op & _ready);
     return op;
 }
 
@@ -668,65 +776,19 @@ EventHandlerWrapper::update(SocketOperation remove, SocketOperation add)
 
     // Clear ready flags which might not be valid anymore.
     _ready = static_cast<SocketOperation>(_ready & _handler->_registered);
-
-    if(_socket)
-    {
-        if(previous)
-        {
-            CFSocketDisableCallBacks(_socket, toCFCallbacks(previous));
-        }
-        if(_handler->_registered)
-        {
-            CFSocketEnableCallBacks(_socket, toCFCallbacks(_handler->_registered));
-        }
-        return true;
-    }
-    else
-    {
-        checkReady();
-        return false;
-    }
+    return true;
 }
 
-bool
+void
 EventHandlerWrapper::finish()
 {
-    if(_socket)
-    {
-        if(_handler->_registered)
-        {
-            CFSocketDisableCallBacks(_socket, toCFCallbacks(_handler->_registered));
-        }
-        CFSocketInvalidate(_socket);
-    }
-    else
-    {
-        CFReadStreamRef readStream = _handler->getNativeInfo()->readStream();
-        CFReadStreamUnscheduleFromRunLoop(readStream, _selector.runLoop(), kCFRunLoopDefaultMode);
-        CFReadStreamSetClient(readStream, kCFStreamEventNone, 0, 0);
-        
-        CFWriteStreamRef writeStream = _handler->getNativeInfo()->writeStream();
-        CFWriteStreamUnscheduleFromRunLoop(writeStream, _selector.runLoop(), kCFRunLoopDefaultMode);
-        CFWriteStreamSetClient(writeStream, kCFStreamEventNone, 0, 0);
-    }
-
+    _finish = true;
     _ready = SocketOperationNone;
-    if(_handler->_registered)
-    {
-        _handler->_registered = SocketOperationNone;        
-        return _socket != 0;
-    }
-    else
-    {
-        return false;
-    } 
+    _handler->_registered = SocketOperationNone;
 }
 
 Selector::Selector(const InstancePtr& instance, int timeout = 0) : _instance(instance), _timeout(timeout)
 {
-    _nSelected = -1;
-    _nSelectedReturned = -1;
-
     CFRunLoopSourceContext ctx;
     memset(&ctx, 0, sizeof(CFRunLoopSourceContext));
     ctx.info = this;
@@ -777,12 +839,8 @@ Selector::update(EventHandler* handler, SocketOperation remove, SocketOperation 
     assert(wrapper);
     if(wrapper->update(remove, add))
     {
-        _changes.push_back(wrapper);
-        if(_changes.size() == 1)
-        {
-            CFRunLoopSourceSignal(_source);
-            CFRunLoopWakeUp(_runLoop);
-        }
+        _changes.insert(wrapper);
+        notify();
     }
 }
 
@@ -817,18 +875,13 @@ void
 Selector::finish(EventHandler* handler)
 {
     Lock sync(*this);
-    EventHandlerWrapperPtr wrapper = _wrappers[handler];
-    assert(wrapper);
-    if(wrapper->finish())
-    {
-        _changes.push_back(wrapper);
-        if(_changes.size() == 1)
-        {
-            CFRunLoopSourceSignal(_source);
-            CFRunLoopWakeUp(_runLoop);
-        }
-    }
-    _wrappers.erase(handler);
+    std::map<EventHandlerPtr, EventHandlerWrapperPtr, EventHandlerCI>::iterator p = _wrappers.find(handler);
+    assert(p != _wrappers.end());
+    EventHandlerWrapperPtr wrapper = p->second;
+    wrapper->finish();
+    _wrappers.erase(p);
+    _changes.insert(wrapper);
+    notify();
 }
     
 void
@@ -839,17 +892,15 @@ Selector::select(std::vector<std::pair<EventHandler*, SocketOperation> >& handle
     //
     // Re-enable callbacks for previously selected handlers.
     //
-    vector<pair<EventHandlerWrapperPtr, SocketOperation> >::const_iterator p;
-    for(p = _selectedHandlers.begin(); p != _selectedHandlers.end(); ++p)
+    if(!_selectedHandlers.empty())
     {
-        EventHandlerWrapperPtr wrapper = p->first;
-        if(wrapper->_socket)
+        vector<pair<EventHandlerWrapperPtr, SocketOperation> >::const_iterator p;
+        for(p = _selectedHandlers.begin(); p != _selectedHandlers.end(); ++p)
         {
-            SocketOperation op = static_cast<SocketOperation>(wrapper->_handler->_registered & p->second);
-            CFSocketEnableCallBacks(wrapper->_socket, toCFCallbacks(op));
+            _changes.insert(p->first);
         }
+        _selectedHandlers.clear();
     }
-    _selectedHandlers.clear();
 
     //
     // Wait for handlers to be ready.
@@ -857,6 +908,14 @@ Selector::select(std::vector<std::pair<EventHandler*, SocketOperation> >& handle
     handlers.clear();
     while(_selectedHandlers.empty())
     {
+        while(!_changes.empty())
+        {
+            CFRunLoopSourceSignal(_source);
+            CFRunLoopWakeUp(_runLoop);
+ 
+            wait();
+        }
+
         if(_readyHandlers.empty())
         {
             if(_timeout > 0)
@@ -870,6 +929,11 @@ Selector::select(std::vector<std::pair<EventHandler*, SocketOperation> >& handle
             {
                 wait();
             }
+        }
+
+        if(!_changes.empty())
+        {
+            continue; // Make sure to process the changes first.
         }
 
         for(vector<EventHandlerWrapperPtr>::const_iterator p = _readyHandlers.begin(); p != _readyHandlers.end(); ++p)
@@ -889,12 +953,15 @@ void
 Selector::processInterrupt()
 {
     Lock sync(*this);
-    assert(!_changes.empty());
-    for(vector<EventHandlerWrapperPtr>::const_iterator p = _changes.begin(); p != _changes.end(); ++p)
+    if(!_changes.empty())
     {
-        (*p)->updateRunLoop();
+        for(set<EventHandlerWrapperPtr>::const_iterator p = _changes.begin(); p != _changes.end(); ++p)
+        {
+            (*p)->updateRunLoop();
+        }
+        _changes.clear();
+        notify();
     }
-    _changes.clear();
 }
 
 void 

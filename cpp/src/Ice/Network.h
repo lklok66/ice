@@ -130,10 +130,6 @@ public:
     {
         _connectError = error; 
     }
-
-    virtual CFReadStreamRef readStream() { return 0; }
-
-    virtual CFWriteStreamRef writeStream() { return 0; }
 #endif
 
 protected:
@@ -144,6 +140,22 @@ protected:
 #endif
 };
 typedef IceUtil::Handle<NativeInfo> NativeInfoPtr;
+
+#ifdef ICE_USE_CFSTREAM
+class StreamNativeInfo : public NativeInfo
+{
+public:
+
+    StreamNativeInfo(SOCKET fd) : NativeInfo(fd)
+    {
+    }
+
+    virtual CFReadStreamRef readStream() = 0;
+
+    virtual CFWriteStreamRef writeStream() = 0;
+};
+typedef IceUtil::Handle<StreamNativeInfo> StreamNativeInfoPtr;
+#endif
 
 ICE_API bool interrupted();
 ICE_API bool acceptInterrupted();

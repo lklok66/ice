@@ -143,13 +143,18 @@ public:
     void updateRunLoop();
 
     void ready(SocketOperation, int);
-    void checkReady();
     SocketOperation readyOp();
+    void checkReady();
 
     bool update(SocketOperation, SocketOperation);
-    bool finish();
+    void finish();
 
     Selector& selector() { return _selector; }
+
+    bool operator<(const EventHandlerWrapper& o)
+    {
+        return this < &o;
+    }
 
 private:
 
@@ -158,12 +163,15 @@ private:
     EventHandlerPtr _handler;
     Selector& _selector;
     SocketOperation _ready;
+    bool _finish;
     CFSocketRef _socket;
+    bool _readStreamRegistered;
+    bool _writeStreamRegistered;
     CFRunLoopSourceRef _source;
 };
 typedef IceUtil::Handle<EventHandlerWrapper> EventHandlerWrapperPtr;
 
-class Selector : IceUtil::Monitor<IceUtil::Mutex>
+class Selector : IceUtil::Monitor<IceUtil::RecMutex>
 {
 
 public:
@@ -188,8 +196,6 @@ public:
     void addReadyHandler(EventHandlerWrapper*);
     void run();
 
-    CFRunLoopRef runLoop() { return _runLoop; }
-
 private:
 
     struct EventHandlerCI
@@ -205,13 +211,12 @@ private:
     int _timeout;
     CFRunLoopRef _runLoop;
     CFRunLoopSourceRef _source;
+    
+    std::set<EventHandlerWrapperPtr> _changes;
 
-    std::vector<EventHandlerWrapperPtr> _changes;
     std::vector<EventHandlerWrapperPtr> _readyHandlers;
     std::vector<std::pair<EventHandlerWrapperPtr, SocketOperation> > _selectedHandlers;
     std::map<EventHandlerPtr, EventHandlerWrapperPtr, EventHandlerCI> _wrappers;
-    int _nSelected;
-    int _nSelectedReturned;
 };
 
 #endif

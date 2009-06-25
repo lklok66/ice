@@ -66,9 +66,6 @@ IceObjC::Transceiver::close()
         out << "closing " << _instance->protocol() << " connection\n" << toString();
     }
 
-    CFReadStreamClose(_readStream);
-    CFWriteStreamClose(_writeStream);
-
     if(_fd != INVALID_SOCKET)
     {
         try
@@ -89,7 +86,7 @@ IceObjC::Transceiver::write(Buffer& buf)
 {
     // Its impossible for the packetSize to be more than an Int.
     int packetSize = static_cast<int>(buf.b.end() - buf.i);
-    
+
     while(buf.i != buf.b.end())
     {
         if(!CFWriteStreamCanAcceptBytes(_writeStream) && CFWriteStreamGetStatus(_writeStream) != kCFStreamStatusError)
@@ -97,7 +94,6 @@ IceObjC::Transceiver::write(Buffer& buf)
             return false;
         }
         assert(CFWriteStreamGetStatus(_writeStream) >= kCFStreamStatusOpen);
-
 #if !TARGET_IPHONE_SIMULATOR
         if(_checkCertificates)
         {
@@ -185,7 +181,7 @@ IceObjC::Transceiver::read(Buffer& buf)
 {
     // Its impossible for the packetSize to be more than an Int.
     int packetSize = static_cast<int>(buf.b.end() - buf.i);
-    
+
     while(buf.i != buf.b.end())
     {
         if(!CFReadStreamHasBytesAvailable(_readStream) && CFReadStreamGetStatus(_readStream) != kCFStreamStatusError)
@@ -319,15 +315,8 @@ IceObjC::Transceiver::initialize()
 {
     if(_state == StateNeedConnect)
     {
-        CFWriteStreamOpen(_writeStream);
-        CFReadStreamOpen(_readStream);
-
         _state = StateConnectPending;
-        if(CFWriteStreamGetStatus(_writeStream) <= kCFStreamStatusOpening && 
-           CFReadStreamGetStatus(_readStream) <= kCFStreamStatusOpening)
-        {
-            return SocketOperationConnect;
-        }
+        return SocketOperationConnect;
     }
     
     if(_state <= StateConnectPending)
@@ -461,6 +450,7 @@ IceObjC::Transceiver::Transceiver(const InstancePtr& instance,
                                   CFWriteStreamRef writeStream,
                                   const string& host,
                                   Ice::Int port) :
+    StreamNativeInfo(INVALID_SOCKET),
     _instance(instance),
     _traceLevels(instance->traceLevels()),
     _logger(instance->initializationData().logger),
@@ -483,7 +473,7 @@ IceObjC::Transceiver::Transceiver(const InstancePtr& instance,
                                   CFReadStreamRef readStream,
                                   CFWriteStreamRef writeStream,
                                   SOCKET fd) :
-    NativeInfo(fd),
+    StreamNativeInfo(fd),
     _instance(instance),
     _traceLevels(instance->traceLevels()),
     _logger(instance->initializationData().logger),
@@ -516,7 +506,35 @@ IceObjC::Transceiver::checkCertificates()
         bool checkCertName = !_host.empty() &&
             _instance->initializationData().properties->getPropertyAsIntWithDefault("IceSSL.CheckCertName", 1);
         SecPolicyRef policy = 0;
+#if !TARGET_OS_IPHONE
+        SecPolicySearchRef policySearch = 0;
+        const CSSM_OID* oid = checkCertName ? &CSSMOID_APPLE_TP_SSL : &CSSMOID_APPLE_X509_BASIC;
+        if((err = SecPolicySearchCreate(CSSM_CERT_X_509v3, oid, NULL, &policySearch)) != noErr ||
+           (err = SecPolicySearchCopyNext(policySearch, &policy)) != noErr)
+        {
+            if(policySearch)
+            {
+                CFRelease(policySearch);
+            }
+            CFRelease(certificates);
+            ostringstream os;
+            os << "unable to create policy object (error = " << err << ")";
+            throw Ice::SecurityException(__FILE__, __LINE__, os.str());
+        }
+        CFRelease(policySearch);
 
+        if(checkCertName)
+        {
+            CSSM_APPLE_TP_SSL_OPTIONS opts;
+            memset(&opts, 0, sizeof(opts));
+            opts.Version = CSSM_APPLE_TP_SSL_OPTS_VERSION;
+            opts.ServerNameLen = _host.size();
+            opts.ServerName = _host.c_str();
+            opts.Flags = CSSM_APPLE_TP_SSL_CLIENT;
+            CSSM_DATA optsData = { sizeof(opts), (uint8 *)&opts };
+            SecPolicySetValue(policy, &optsData);
+        }
+#else
         if(!checkCertName)
         {
             policy = SecPolicyCreateBasicX509();
@@ -527,6 +545,7 @@ IceObjC::Transceiver::checkCertificates()
             policy = SecPolicyCreateSSL(false, h);
             CFRelease(h);
         }
+#endif
 
         SecTrustRef trust;
         SecTrustResultType result;
@@ -581,6 +600,61 @@ IceObjC::Transceiver::checkCertificates()
 
         if(_instance->trustOnlyKeyID())
         {
+#if !TARGET_OS_IPHONE
+            SecCertificateRef cert = (SecCertificateRef)CFArrayGetValueAtIndex(certificates, 0);
+
+            CSSM_CL_HANDLE handle;
+            CSSM_DATA data;
+            if((err = SecCertificateGetCLHandle(cert, &handle)) != noErr ||
+               (err = SecCertificateGetData(cert, &data)) != noErr)
+            {
+                CFRelease(certificates);
+                ostringstream os;
+                os << "couldn't obtain certificate information to check the subject key ID (error = " << err << ")";
+                throw Ice::SecurityException(__FILE__, __LINE__, os.str());
+            }
+
+            const CSSM_OID* tag = &CSSMOID_SubjectKeyIdentifier;
+            CSSM_DATA *result;
+            uint32 count;
+            CSSM_HANDLE moreResults;
+            CSSM_RETURN error = CSSM_CL_CertGetFirstFieldValue(handle, &data, tag, &moreResults, &count, &result);
+            if(error != CSSM_OK)
+            {
+                CFRelease(certificates);
+                ostringstream os;
+                os << "couldn't obtain certificate information to check the subject key ID (error = "
+                   << error << ")";
+                throw Ice::SecurityException(__FILE__, __LINE__, os.str());
+            }
+
+            CSSM_X509_EXTENSION_PTR ext = (CSSM_X509_EXTENSION_PTR)result->Data;
+            if(ext->format != CSSM_X509_DATAFORMAT_PARSED)
+            {
+                CSSM_CL_CertAbortQuery(handle, moreResults);
+                CSSM_CL_FreeFieldValue(handle, tag, result);
+                CFRelease(certificates);
+                ostringstream os;
+                os << "unexpected format for subject key ID (format = " << ext->format << ")";
+                throw Ice::SecurityException(__FILE__, __LINE__, os.str());
+            }
+
+            CE_SubjectKeyID* peerKey = (CE_SubjectKeyID*)ext->value.parsedValue;
+            CFDataRef key = _instance->trustOnlyKeyID();
+            if(peerKey->Length != (uint32)CFDataGetLength(key) ||
+               memcmp(peerKey->Data, CFDataGetBytePtr(key), peerKey->Length) != 0)
+            {
+                CSSM_CL_CertAbortQuery(handle, moreResults);
+                CSSM_CL_FreeFieldValue(handle, tag, result);
+                CFRelease(certificates);
+                ostringstream os;
+                os << "the certificate subject key ID doesn't match the `IceSSL.TrustOnly.Client' property";
+                throw Ice::SecurityException(__FILE__, __LINE__, os.str());
+            }
+
+            CSSM_CL_CertAbortQuery(handle, moreResults);
+            CSSM_CL_FreeFieldValue(handle, tag, result);
+#else
             //
             // To check the subject key ID, we add the peer certificate to the keychain with SetItemAdd,
             // then we lookup for the cert using the kSecAttrSubjectKeyID. Then we remove the cert from
@@ -640,6 +714,7 @@ IceObjC::Transceiver::checkCertificates()
                 os << "(error = " << foundErr << ")";
                 throw Ice::SecurityException(__FILE__, __LINE__, os.str());
             }
+#endif
         }
         CFRelease(certificates);
     }
