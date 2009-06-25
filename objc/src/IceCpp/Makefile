@@ -28,7 +28,7 @@ OBJS		= Acceptor.o \
 		  EndpointI.o \
 		  EventHandler.o \
 		  Exception.o \
-		  FactoryTableDef.o \
+		  FactoryTableInit.o \
 		  FactoryTable.o \
 		  GC.o \
 		  ImplicitContextI.o \
