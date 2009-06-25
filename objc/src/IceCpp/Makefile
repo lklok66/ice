@@ -153,6 +153,13 @@ SLICE_OBJS 		:= $(addprefix $(PLATFORM_NAME)/,$(SLICE_OBJS))
 CPPFLAGS		:= -Iinclude -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src $(CPPPLATFORMFLAGS)
 SLICE2CPPFLAGS		:= --ice --include-dir Ice $(SLICE2CPPFLAGS)
 
+# For Mac OS X builds we're building objc gc.
+ifneq ($(COMPILE_FOR_IPHONE),yes)
+  ifneq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
+	CPPFLAGS	:= -DICE_OBJC_GC $(CPPFLAGS)
+  endif
+endif
+
 ifeq ($(COMPILE_FOR_IPHONE),yes)
     CPPFLAGS		:= -DICE_NO_KQUEUE $(CPPFLAGS)
 endif

@@ -41,6 +41,8 @@
 #include <Ice/PropertiesI.h>
 #include <IceUtil/UUID.h>
 #include <Ice/Communicator.h>
+#include <IceUtil/Mutex.h>
+#include <IceUtil/MutexPtrLock.h>
 
 #include <stdio.h>
 
@@ -61,7 +63,7 @@ using namespace std;
 using namespace Ice;
 using namespace IceInternal;
 
-static IceUtil::StaticMutex staticMutex = ICE_STATIC_MUTEX_INITIALIZER;
+static IceUtil::Mutex* staticMutex = 0;
 static bool oneOffDone = false;
 static int instanceCount = 0;
 static bool printProcessIdDone = false;
@@ -71,6 +73,30 @@ namespace IceUtil
 {
 
 extern bool ICE_DECLSPEC_IMPORT nullHandleAbort;
+
+}
+
+namespace
+{
+
+class Init
+{
+public:
+
+    Init()
+    {
+        staticMutex = new IceUtil::Mutex;
+    }
+
+    ~Init()
+    {
+#ifndef ICE_OBJC_GC
+        delete staticMutex;
+        staticMutex = 0;
+#endif
+    }
+};
+Init init;
 
 }
 
@@ -780,7 +806,7 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
     {
         __setNoDelete(true);
 
-        IceUtil::StaticMutex::Lock sync(staticMutex);
+        IceUtilInternal::MutexPtrLock<IceUtil::Mutex> sync(staticMutex);
         instanceCount++;
 
         if(!_initData.properties)
@@ -1021,7 +1047,7 @@ IceInternal::Instance::Instance(const CommunicatorPtr& communicator, const Initi
     catch(...)
     {
         {
-            IceUtil::StaticMutex::Lock sync(staticMutex);
+            IceUtilInternal::MutexPtrLock<IceUtil::Mutex> sync(staticMutex);
             --instanceCount;
         }
         destroy();
@@ -1051,7 +1077,7 @@ IceInternal::Instance::~Instance()
     assert(!_dynamicLibraryList);
     assert(!_pluginManager);
 
-    IceUtil::StaticMutex::Lock sync(staticMutex);
+    IceUtilInternal::MutexPtrLock<IceUtil::Mutex> sync(staticMutex);
     if(--instanceCount == 0)
     {
 #ifdef _WIN32
@@ -1110,7 +1136,7 @@ IceInternal::Instance::finishSetup(int& argc, char* argv[])
         //
         // Safe double-check locking (no dependent variable!)
         // 
-        IceUtil::StaticMutex::Lock sync(staticMutex);
+        IceUtilInternal::MutexPtrLock<IceUtil::Mutex> sync(staticMutex);
         printProcessId = !printProcessIdDone;
         
         //

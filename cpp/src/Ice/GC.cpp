@@ -8,7 +8,7 @@
 // **********************************************************************
 
 #include <IceUtil/Time.h>
-#include <IceUtil/StaticMutex.h>
+#include <IceUtil/MutexPtrLock.h>
 #include <IceUtil/RecMutex.h>
 #include <Ice/GC.h>
 #include <Ice/GCShared.h>
@@ -18,12 +18,39 @@ using namespace IceUtil;
 
 namespace 
 {
-StaticMutex numCollectorsMutex = ICE_STATIC_MUTEX_INITIALIZER;
-int numCollectors = 0;
-typedef std::set<IceInternal::GCShared*> GCObjectSet;
-GCObjectSet gcObjects; // Set of pointers to all existing classes with class data members.
 
-RecMutex gcRecMutex;
+static Mutex* numCollectorsMutex = 0;
+static int numCollectors = 0;
+typedef std::set<IceInternal::GCShared*> GCObjectSet;
+static GCObjectSet* gcObjects = 0; // Set of pointers to all existing classes with class data members.
+static RecMutex* gcRecMutex = 0;
+
+class Init
+{
+public:
+
+    Init()
+    {
+        numCollectorsMutex = new IceUtil::Mutex;
+        gcObjects = new GCObjectSet();
+        gcRecMutex = new RecMutex();
+    }
+
+    ~Init()
+    {
+#ifndef ICE_OBJC_GC
+        delete numCollectorsMutex;
+        numCollectorsMutex = 0;
+        delete gcRecMutex;
+        gcRecMutex = 0;
+        delete gcObjects;
+        gcObjects = 0;
+#endif
+    }
+};
+
+Init init;
+
 }
 
 
@@ -57,7 +84,7 @@ using namespace IceInternal;
 void
 IceInternal::GCShared::__incRef()
 {
-    RecMutex::Lock lock(gcRecMutex);
+    RecMutex::Lock lock(*gcRecMutex);
     assert(_ref >= 0);
     ++_ref;
 }
@@ -65,7 +92,7 @@ IceInternal::GCShared::__incRef()
 void
 IceInternal::GCShared::__decRef()
 {
-    RecMutex::Lock lock(gcRecMutex);
+    IceUtilInternal::MutexPtrLock<IceUtil::RecMutex> lock(gcRecMutex);
     bool doDelete = false;
     assert(_ref > 0);
     if(--_ref == 0)
@@ -83,28 +110,28 @@ IceInternal::GCShared::__decRef()
 int
 IceInternal::GCShared::__getRef() const
 {
-    RecMutex::Lock lock(gcRecMutex);
+    IceUtilInternal::MutexPtrLock<IceUtil::RecMutex> lock(gcRecMutex);
     return _ref;
 }
 
 void
 IceInternal::GCShared::__setNoDelete(bool b)
 {
-    RecMutex::Lock lock(gcRecMutex);
+    IceUtilInternal::MutexPtrLock<IceUtil::RecMutex> lock(gcRecMutex);
     _noDelete = b;
 }
 
 void
 IceInternal::GCShared::__gcIncRef()
 {
-    RecMutex::Lock lock(gcRecMutex);
+    IceUtilInternal::MutexPtrLock<IceUtil::RecMutex> lock(gcRecMutex);
     assert(_ref >= 0);
-    if(_ref == 0)
+    if(_ref == 0 && gcObjects != 0)
     {
 #ifdef NDEBUG // To avoid annoying warnings about variables that are not used...
-        gcObjects.insert(this);
+        gcObjects->insert(this);
 #else
-        std::pair<GCObjectSet::iterator, bool> rc = gcObjects.insert(this);
+        std::pair<GCObjectSet::iterator, bool> rc = gcObjects->insert(this);
         assert(rc.second);
 #endif
     }
@@ -114,17 +141,17 @@ IceInternal::GCShared::__gcIncRef()
 void
 IceInternal::GCShared::__gcDecRef()
 {
-    RecMutex::Lock lock(gcRecMutex);
+    IceUtilInternal::MutexPtrLock<IceUtil::RecMutex> lock(gcRecMutex);
     bool doDelete = false;
     assert(_ref > 0);
-    if(--_ref == 0)
+    if(--_ref == 0 && gcObjects != 0)
     {
         doDelete = !_noDelete;
         _noDelete = true;
 #ifdef NDEBUG // To avoid annoying warnings about variables that are not used...
-        gcObjects.erase(this);
+        gcObjects->erase(this);
 #else
-        GCObjectSet::size_type num = gcObjects.erase(this);
+        GCObjectSet::size_type num = gcObjects->erase(this);
         assert(num == 1);
 #endif
     }
@@ -143,7 +170,7 @@ IceInternal::GCShared::__gcDecRef()
 
 IceInternal::GC::GC(int interval, StatsCallback cb)
 {
-    StaticMutex::Lock sync(numCollectorsMutex);
+    IceUtilInternal::MutexPtrLock<IceUtil::Mutex> sync(numCollectorsMutex);
     if(numCollectors++ > 0)
     {
         abort(); // Enforce singleton.
@@ -157,7 +184,7 @@ IceInternal::GC::GC(int interval, StatsCallback cb)
 
 IceInternal::GC::~GC()
 {
-    StaticMutex::Lock sync(numCollectorsMutex);
+    IceUtilInternal::MutexPtrLock<IceUtil::Mutex> sync(numCollectorsMutex);
     --numCollectors;
 }
 
@@ -247,9 +274,11 @@ IceInternal::GC::collectGarbage()
             return;
         }
         _collecting = true;
+        assert(gcObjects != 0);
     }
 
-    RecMutex::Lock sync(gcRecMutex); // Prevent any further class reference count activity.
+    // Prevent any further class reference count activity.
+    IceUtilInternal::MutexPtrLock<IceUtil::RecMutex> lock(gcRecMutex);
 
     Time t;
     GCStats stats;
@@ -257,7 +286,7 @@ IceInternal::GC::collectGarbage()
     if(_statsCallback)
     {
         t = Time::now(IceUtil::Time::Monotonic);
-        stats.examined = static_cast<int>(gcObjects.size());
+        stats.examined = static_cast<int>(gcObjects->size());
     }
 
     GCCountMap counts;
@@ -274,7 +303,7 @@ IceInternal::GC::collectGarbage()
         //
         GCCountMap reachable;
         {
-            for(GCObjectSet::const_iterator i = gcObjects.begin(); i != gcObjects.end(); ++i)
+            for(GCObjectSet::const_iterator i = gcObjects->begin(); i != gcObjects->end(); ++i)
             {
                 counts.insert(GCCountMap::value_type(*i, (*i)->__getRefUnsafe()));
                 (*i)->__gcReachable(reachable);
@@ -348,7 +377,7 @@ IceInternal::GC::collectGarbage()
         }
         for(i = counts.begin(); i != counts.end(); ++i)
         {
-            gcObjects.erase(i->first); // Remove this object from candidate set.
+            gcObjects->erase(i->first); // Remove this object from candidate set.
             delete i->first; // Delete this object.
         }
     }

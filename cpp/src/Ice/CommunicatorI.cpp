@@ -20,6 +20,8 @@
 #include <Ice/DefaultsAndOverrides.h>
 #include <Ice/TraceLevels.h>
 #include <Ice/GC.h>
+#include <IceUtil/Mutex.h>
+#include <IceUtil/MutexPtrLock.h>
 
 using namespace std;
 using namespace Ice;
@@ -45,11 +47,36 @@ struct GarbageCollectorStats
 };
 
 static int communicatorCount = 0;
-static IceUtil::StaticMutex gcMutex = ICE_STATIC_MUTEX_INITIALIZER;
+static IceUtil::Mutex* gcMutex = 0;
 static GarbageCollectorStats gcStats;
 static int gcTraceLevel;
 static string gcTraceCat;
 static int gcInterval;
+
+namespace
+{
+
+class Init
+{
+public:
+
+    Init()
+    {
+        gcMutex = new IceUtil::Mutex;
+    }
+
+    ~Init()
+    {
+#ifndef ICE_OBJC_GC
+        delete gcMutex;
+        gcMutex = 0;
+#endif
+    }
+};
+
+Init init;
+
+}
 
 static void
 printGCStats(const IceInternal::GCStats& stats)
@@ -73,7 +100,7 @@ Ice::CommunicatorI::destroy()
 {
     if(_instance && _instance->destroy())
     {
-        IceUtil::StaticMutex::Lock sync(gcMutex);
+        IceUtilInternal::MutexPtrLock<IceUtil::Mutex> sync(gcMutex);
 
         //
         // Wait for the collector thread to stop if this is the last communicator
@@ -297,7 +324,7 @@ Ice::CommunicatorI::CommunicatorI(const InitializationData& initData)
         // collector can continue to log messages even if the first communicator that
         // is created isn't the last communicator to be destroyed.
         //
-        IceUtil::StaticMutex::Lock sync(gcMutex);
+        IceUtilInternal::MutexPtrLock<IceUtil::Mutex> sync(gcMutex);
         static bool gcOnce = true;
         if(gcOnce)
         {

@@ -9,13 +9,38 @@
 
 #include <IceUtil/Time.h>
 #include <Ice/LoggerI.h>
-#include <IceUtil/StaticMutex.h>
+#include <IceUtil/Mutex.h>
+#include <IceUtil/MutexPtrLock.h>
 
 using namespace std;
 using namespace Ice;
 using namespace IceInternal;
 
-static IceUtil::StaticMutex outputMutex = ICE_STATIC_MUTEX_INITIALIZER;
+namespace
+{
+
+static IceUtil::Mutex* outputMutex = 0;
+
+class Init
+{
+public:
+
+    Init()
+    {
+        outputMutex = new IceUtil::Mutex;
+    }
+
+    ~Init()
+    {
+#ifndef ICE_OBJC_GC
+        delete outputMutex;
+        outputMutex = 0;
+#endif
+    }
+};
+Init init;
+
+}
 
 Ice::LoggerI::LoggerI(const string& prefix)
 {
@@ -28,7 +53,7 @@ Ice::LoggerI::LoggerI(const string& prefix)
 void
 Ice::LoggerI::print(const string& message)
 {
-    IceUtil::StaticMutex::Lock sync(outputMutex);
+    IceUtilInternal::MutexPtrLock<IceUtil::Mutex> sync(outputMutex);
 
     cerr << message << endl;
 }
@@ -50,7 +75,7 @@ Ice::LoggerI::trace(const string& category, const string& message)
         ++idx;
     }
 
-    IceUtil::StaticMutex::Lock sync(outputMutex);
+    IceUtilInternal::MutexPtrLock<IceUtil::Mutex> sync(outputMutex);
 
     cerr << s << endl;
 }
@@ -58,7 +83,7 @@ Ice::LoggerI::trace(const string& category, const string& message)
 void
 Ice::LoggerI::warning(const string& message)
 {
-    IceUtil::StaticMutex::Lock sync(outputMutex);
+    IceUtilInternal::MutexPtrLock<IceUtil::Mutex> sync(outputMutex);
 
     cerr << IceUtil::Time::now().toDateTime() << " " << _prefix << "warning: " << message << endl;
 }
@@ -66,7 +91,7 @@ Ice::LoggerI::warning(const string& message)
 void
 Ice::LoggerI::error(const string& message)
 {
-    IceUtil::StaticMutex::Lock sync(outputMutex);
+    IceUtilInternal::MutexPtrLock<IceUtil::Mutex> sync(outputMutex);
 
     cerr << IceUtil::Time::now().toDateTime() << " " << _prefix << "error: " << message << endl;
 }
