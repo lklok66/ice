@@ -1,4 +1,4 @@
-This demo is an Cocoa client for the java library demo located at
+This demo is a Cocoa client for the Java library demo located at
 demoj/Database/library in the Ice distribution. This application
 provides a graphical interface to the library server. It permits you to:
 

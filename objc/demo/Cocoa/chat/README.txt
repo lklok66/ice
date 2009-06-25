@@ -5,7 +5,7 @@ participants.
 
 The demo, by default, connects to a chat server hosted on
 demo.zeroc.com. The server accepts both secure and non-secure
-connections through Glacier2. You may use any username and password
+connections through Glacier2. You may use any user name and password
 when connecting.
 
 If you would like to run your own server, or are otherwise interested
