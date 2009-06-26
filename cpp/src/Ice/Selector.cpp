@@ -546,6 +546,17 @@ EventHandlerWrapper::EventHandlerWrapper(const EventHandlerPtr& handler, Selecto
     {
         _socket = 0;
         _source = 0;
+
+        StreamNativeInfoPtr nativeInfo = StreamNativeInfoPtr::dynamicCast(_handler->getNativeInfo());
+
+        CFOptionFlags events;
+        CFStreamClientContext ctx = { 0, this, eventHandlerWrapperRetain, eventHandlerWrapperRelease, 0 };
+
+        events = kCFStreamEventOpenCompleted | kCFStreamEventCanAcceptBytes | kCFStreamEventErrorOccurred;
+        CFWriteStreamSetClient(nativeInfo->writeStream(), events, selectorWriteCallback, &ctx);
+
+        events = kCFStreamEventHasBytesAvailable | kCFStreamEventErrorOccurred;
+        CFReadStreamSetClient(nativeInfo->readStream(), events, selectorReadCallback, &ctx);
     }
 }
 
@@ -590,7 +601,6 @@ EventHandlerWrapper::updateRunLoop()
     {
         SocketOperation readyOp = SocketOperationNone;
         StreamNativeInfoPtr nativeInfo = StreamNativeInfoPtr::dynamicCast(_handler->getNativeInfo());
-        CFOptionFlags events;
 
         if(op & (SocketOperationConnect | SocketOperationWrite))
         {
@@ -612,10 +622,6 @@ EventHandlerWrapper::updateRunLoop()
                 // if ready() was called below by checking the _ready flags and unregister the
                 // stream from the loop
                 //
-                CFStreamClientContext ctx = { 0, this, eventHandlerWrapperRetain, eventHandlerWrapperRelease, 0 };
-                events = kCFStreamEventOpenCompleted | kCFStreamEventCanAcceptBytes | kCFStreamEventErrorOccurred;
-                CFWriteStreamSetClient(stream, events, selectorWriteCallback, &ctx);
-
                 CFWriteStreamScheduleWithRunLoop(stream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
                 _writeStreamRegistered = true; // Note: this must be set after the schedule call, see above
                 if(CFWriteStreamGetStatus(stream) == kCFStreamStatusNotOpen)
@@ -632,7 +638,6 @@ EventHandlerWrapper::updateRunLoop()
             {
                 CFWriteStreamRef stream = nativeInfo->writeStream();
                 CFWriteStreamUnscheduleFromRunLoop(stream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
-                CFWriteStreamSetClient(stream, kCFStreamEventNone, 0, 0);
                 _writeStreamRegistered = false;
             }
         }
@@ -653,9 +658,6 @@ EventHandlerWrapper::updateRunLoop()
                 // if ready() was called below by checking the _ready flags and unregister the
                 // stream from the loop
                 //
-                CFStreamClientContext ctx = { 0, this, eventHandlerWrapperRetain, eventHandlerWrapperRelease, 0 };
-                events = kCFStreamEventHasBytesAvailable | kCFStreamEventErrorOccurred;
-                CFReadStreamSetClient(stream, events, selectorReadCallback, &ctx);
 
                 CFReadStreamScheduleWithRunLoop(stream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
                 _readStreamRegistered = true; // Note: this must be set after the schedule call, see above
@@ -672,7 +674,6 @@ EventHandlerWrapper::updateRunLoop()
             {
                 CFReadStreamRef stream = nativeInfo->readStream();
                 CFReadStreamUnscheduleFromRunLoop(stream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
-                CFReadStreamSetClient(stream, kCFStreamEventNone, 0, 0);        
                 _readStreamRegistered = false;
             }
         }
@@ -684,6 +685,9 @@ EventHandlerWrapper::updateRunLoop()
 
         if(_finish)
         {
+            CFReadStreamSetClient(nativeInfo->readStream(), kCFStreamEventNone, 0, 0);        
+            CFWriteStreamSetClient(nativeInfo->writeStream(), kCFStreamEventNone, 0, 0);
+
             CFReadStreamClose(nativeInfo->readStream());
             CFWriteStreamClose(nativeInfo->writeStream());
         }
@@ -708,7 +712,6 @@ EventHandlerWrapper::ready(SocketOperation op, int error)
             {
                 CFWriteStreamRef stream = nativeInfo->writeStream();
                 CFWriteStreamUnscheduleFromRunLoop(stream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
-                CFWriteStreamSetClient(stream, kCFStreamEventNone, 0, 0);        
                 _writeStreamRegistered = false;
             }
         }
@@ -718,7 +721,6 @@ EventHandlerWrapper::ready(SocketOperation op, int error)
             {
                 CFReadStreamRef stream = nativeInfo->readStream();
                 CFReadStreamUnscheduleFromRunLoop(stream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
-                CFReadStreamSetClient(stream, kCFStreamEventNone, 0, 0);        
                 _readStreamRegistered = false;                
             }
         }
