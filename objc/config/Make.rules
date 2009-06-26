@@ -113,6 +113,12 @@ ifeq ($(COMPILE_WITH_CFSTREAM_TRANSPORT),)
     endif
 endif
 
+ifeq ($(COMPILE_WITH_GC),)
+    ifeq ($(PLATFORM_NAME),macosx)
+	COMPILE_WITH_GC=yes
+    endif
+endif
+
 SDK_DIR                 = $(top_srcdir)/SDK/IceTouch-$(VERSION)/$(PLATFORM_NAME).sdk
 
 bindir			= $(top_srcdir)/bin
@@ -175,6 +181,10 @@ else
     else
         LDFLAGS		= $(LDPLATFORMFLAGS) $(CXXFLAGS) -L$(ice_dir)/$(libsubdir) 
     endif
+endif
+
+ifeq ($(COMPILE_WITH_GC),yes)
+!   CPPPLATFORMFLAGS := -DICE_OBJC_GC $(CPPPLATFORMFLAGS)
 endif
 
 ifdef ice_src_dist

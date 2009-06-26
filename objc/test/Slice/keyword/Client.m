@@ -13,8 +13,10 @@
 #import <Inherit.h>
 
 #import <Foundation/NSAutoreleasePool.h>
-#import <objc/objc-auto.h>
-#import <Foundation/NSGarbageCollector.h>
+#if ICE_OBJC_GC
+#   import <objc/objc-auto.h>
+#   import <Foundation/NSGarbageCollector.h>
+#endif
 
 // Verify that the expected symbols are present
 @interface andbreakI : andbreak<andbreak>
@@ -181,7 +183,9 @@ run(id<ICECommunicator> communicator)
 int
 main(int argc, char* argv[])
 {
+#if ICE_OBJC_GC
     objc_startCollectorThread();
+#endif
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
     int status;
     id<ICECommunicator> communicator = nil;
@@ -217,7 +221,9 @@ main(int argc, char* argv[])
     }
     
     [pool release];
+#if ICE_OBJC_GC
     [[NSGarbageCollector defaultCollector] collectExhaustively];
+#endif
     return status;
 }
 
