@@ -184,7 +184,7 @@ else
 endif
 
 ifeq ($(COMPILE_WITH_GC),yes)
-!   CPPPLATFORMFLAGS := -DICE_OBJC_GC $(CPPPLATFORMFLAGS)
+   CPPPLATFORMFLAGS := -DICE_OBJC_GC $(CPPPLATFORMFLAGS)
 endif
 
 ifdef ice_src_dist
