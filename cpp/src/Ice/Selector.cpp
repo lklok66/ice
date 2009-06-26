@@ -817,6 +817,9 @@ Selector::destroy()
     _thread->getThreadControl().join();
     _thread = 0;
 
+    // Process any pending interrupts.
+    processInterrupt();
+
     CFRelease(_source);
 
     assert(_wrappers.empty());
