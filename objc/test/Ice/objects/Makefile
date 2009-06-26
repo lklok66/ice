@@ -24,7 +24,7 @@ OBJS		= TestI.o \
 
 SRCS		= $(COBJS:.o=.m) \
 		  $(SOBJS:.o=.m) \
-		  $(OBJS=.o=.m)
+		  $(OBJS:.o=.m)
 
 SLICE_SRCS	= ObjectsTest.ice
 
