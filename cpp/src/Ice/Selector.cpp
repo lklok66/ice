@@ -813,12 +813,23 @@ Selector::~Selector()
 void
 Selector::destroy()
 {
+    Lock sync(*this);
+
+    //
+    // Make sure any pending changes are processed to ensure remaining
+    // streams/sockets are closed.
+    //
+    while(!_changes.empty())
+    {
+        CFRunLoopSourceSignal(_source);
+        CFRunLoopWakeUp(_runLoop);
+        
+        wait();
+    }
+
     CFRunLoopStop(_runLoop);
     _thread->getThreadControl().join();
     _thread = 0;
-
-    // Process any pending interrupts.
-    processInterrupt();
 
     CFRelease(_source);
 
