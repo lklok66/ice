@@ -33,6 +33,8 @@
     AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
     self.tests = appDelegate.tests;
     [self.sslSwitch setOn:appDelegate.ssl animated:TRUE];
+    [self.sslSwitch setOn:NO animated:TRUE];
+
 #if TARGET_IPHONE_SIMULATOR
     sslSwitch.userInteractionEnabled = NO;
 #endif
@@ -86,6 +88,7 @@
     AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
     appDelegate.currentTest = row;
     appDelegate.ssl = sslSwitch.isOn;
+    appDelegate.loop = loopSwitch.isOn;
     
     TestViewController* controller = self.testViewController;
     [self.navigationController pushViewController:controller animated:YES];

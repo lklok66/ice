@@ -139,7 +139,7 @@ public:
     {
         IceInternal::InstancePtr instance = IceInternal::getInstance(communicator);
         instance->endpointFactoryManager()->add(new EndpointFactory(instance, secure));
-    };
+    }
 
     virtual void initialize()
     {

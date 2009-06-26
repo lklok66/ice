@@ -51,6 +51,7 @@
 }
 -(void) exception:(ICEException*)ex
 {
+    tprintf("unexpected exception: %@", ex);
     test(NO);
 }
 -(NSString*) getResult

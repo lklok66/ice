@@ -17,13 +17,15 @@
 {
     BOOL value;
 }
--(id) init:(BOOL)value;
--(void) set:(BOOL)value;
--(BOOL) value;
+-(id) initWithValue:(BOOL)value;
+@property (assign) BOOL value;
 @end
 
 @implementation Condition
--(id) init:(BOOL)v
+
+@synthesize value;
+
+-(id) initWithValue:(BOOL)v
 {
     if(![super init])
     {
@@ -31,22 +33,6 @@
     }
     value = v;
     return self;
-}
--(void) set:(BOOL)v
-{
-    @synchronized(self)
-    {
-        value = v;
-    }
-}
-
--(BOOL) value
-{
-    @synchronized(self)
-    {
-        return value;
-    }
-    return value;
 }
 @end
 
@@ -73,18 +59,23 @@
     expected = e;
     return self;
 }
--(void) release
+-(void) dealloc
 {
     [cond release];
     [condition release];
-    [super release];
+    [super dealloc];
 }
 -(void) ice_response:(ICEInt)value
 {
     if(value != expected)
     {
-        [condition set:NO];
+        condition.value = NO;
     }
+}
+-(void) ice_exception:(ICEException*)ex
+{
+    tprintf("unexpected exception: %@", ex);
+    test(false);
 }
 -(void) ice_sent
 {
@@ -147,13 +138,14 @@ allTests(id<ICECommunicator> communicator)
 
     tprintf("testing without serialize mode... ");
     {
-        Condition* cond = [(Condition*)[Condition alloc] init:YES];
+        Condition* cond = [[[Condition alloc] initWithValue:YES] autorelease];
         int value = 0;
         AMICheckSetValue* cb;
         while([cond value])
         {
-            cb = [[AMICheckSetValue alloc] init:cond expected:value];
-            if([hold set_async:cb response:@selector(ice_response:) exception:nil sent:@selector(ice_sent) 
+            cb = [[[AMICheckSetValue alloc] init:cond expected:value] autorelease];
+            if([hold set_async:cb response:@selector(ice_response:) exception:@selector(ice_exception:)
+                     sent:@selector(ice_sent) 
                      value:++value delay:(random() % 5 + 1)])
             {
                 cb = 0;
@@ -177,7 +169,7 @@ allTests(id<ICECommunicator> communicator)
 
     tprintf("testing with serialize mode... ");
     {
-        Condition* cond = [(Condition*)[Condition alloc] init:YES];
+        Condition* cond = [[[Condition alloc] initWithValue:YES] autorelease];
         int value = 0;
         AMICheckSetValue* cb;
 #if TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR
@@ -186,9 +178,9 @@ allTests(id<ICECommunicator> communicator)
         while(value < 3000 && [cond value])
 #endif
         {
-            cb = [[AMICheckSetValue alloc] init:cond expected:value];
-            if([holdSerialized set_async:cb response:@selector(ice_response:) exception:nil sent:@selector(ice_sent)
-                               value:++value delay:0])
+            cb = [[[AMICheckSetValue alloc] init:cond expected:value] autorelease];
+            if([holdSerialized set_async:cb response:@selector(ice_response:) exception:@selector(ice_exception:)
+                               sent:@selector(ice_sent) value:++value delay:0])
             {
                 cb = 0;
             }

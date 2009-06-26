@@ -76,6 +76,7 @@ static const struct TestCases alltests[] =
 @synthesize navigationController;
 @synthesize tests;
 @synthesize currentTest;
+@synthesize loop;
 
 static NSString* currentTestKey = @"currentTestKey";
 static NSString* sslKey = @"sslKey";
@@ -113,6 +114,7 @@ static NSString* sslKey = @"sslKey";
 #else    
         ssl = [[NSUserDefaults standardUserDefaults] boolForKey:sslKey];
 #endif
+        loop = NO;
     }
     return self;
 }

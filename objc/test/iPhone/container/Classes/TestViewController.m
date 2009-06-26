@@ -171,10 +171,18 @@
 -(void)startTest
 {
     self.title = test.name;
-    nextButton.enabled = NO;
     [self.navigationItem setHidesBackButton:YES animated:YES];
 
-    [nextButton setTitle:@"Test is running" forState:UIControlStateDisabled];
+    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+    if(appDelegate.loop)
+    {
+        [nextButton setTitle:@"Stop running" forState:UIControlStateNormal];
+    }
+    else
+    {
+        nextButton.enabled = NO;
+        [nextButton setTitle:@"Test is running" forState:UIControlStateDisabled];
+    }
     
     // Clear the current message, and the the table log.
     [currentMessage deleteCharactersInRange:NSMakeRange(0, currentMessage.length)];
@@ -204,17 +212,35 @@
     [self.navigationItem setHidesBackButton:NO animated:YES];
 
     self.test = nil;
+    if(appDelegate.loop)
+    {
+        NSAssert(test == nil, @"test == nil");
+        
+        AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+        [appDelegate testCompleted:YES];
+        
+        self.test = (Test*)[appDelegate.tests objectAtIndex:appDelegate.currentTest];
+        [self startTest];
+    }
 }
 
 -(IBAction)next:(id)sender
 {
-    NSAssert(test == nil, @"test == nil");
-
     AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-    [appDelegate testCompleted:YES];
-
-    self.test = (Test*)[appDelegate.tests objectAtIndex:appDelegate.currentTest];
-    [self startTest];
+    if(appDelegate.loop)
+    {
+        appDelegate.loop = NO;
+    }
+    else
+    {
+        NSAssert(test == nil, @"test == nil");
+        
+        AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+        [appDelegate testCompleted:YES];
+        
+        self.test = (Test*)[appDelegate.tests objectAtIndex:appDelegate.currentTest];
+        [self startTest];
+    }
 }
 
 -(void)clientComplete:(NSNumber*)rc

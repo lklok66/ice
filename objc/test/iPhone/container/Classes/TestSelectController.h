@@ -16,6 +16,7 @@
 @private
     IBOutlet UIPickerView* pickerView;
     IBOutlet UISwitch* sslSwitch;
+    IBOutlet UISwitch* loopSwitch;
     NSArray* tests;
     NSEnumerator* testsEnum;
     TestViewController *testViewController;

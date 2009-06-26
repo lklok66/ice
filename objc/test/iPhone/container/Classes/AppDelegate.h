@@ -19,6 +19,7 @@
     NSArray* tests;
     int currentTest;
     BOOL ssl;
+    BOOL loop;
 }
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
@@ -26,6 +27,7 @@
 @property (nonatomic, readonly) NSArray* tests;
 @property (nonatomic) int currentTest;
 @property (nonatomic) BOOL ssl;
+@property (nonatomic) BOOL loop;
 
 -(void)testCompleted:(BOOL)success;
 
