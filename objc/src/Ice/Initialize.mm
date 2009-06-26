@@ -25,9 +25,9 @@ extern "C"
 {
 #ifdef ICE_USE_CFSTREAM
     Ice::Plugin* createIceTcp(const Ice::CommunicatorPtr&, const std::string&, const Ice::StringSeq&);
+#endif
 #if !TARGET_IPHONE_SIMULATOR
     Ice::Plugin* createIceSSL(const Ice::CommunicatorPtr&, const std::string&, const Ice::StringSeq&);
-#endif
 #endif
 }
 
@@ -275,10 +275,10 @@ private:
         // will get linked into exe when using static libraries.
         //
         createIceTcp(0, "", Ice::StringSeq());
+#endif
 #if !TARGET_IPHONE_SIMULATOR
         data.properties->setProperty("Ice.Plugin.IceSSL", "createIceSSL");
         createIceSSL(0, "", Ice::StringSeq());
-#endif
 #endif
 
         Ice::CommunicatorPtr communicator;

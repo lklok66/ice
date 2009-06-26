@@ -94,13 +94,9 @@
         ICEInitializationData* initData = [[ICEInitializationData initializationData] retain];
         initData.properties = [ICEUtil createProperties];
         
-        // For the phone we want to target WiFi for the client endpoints, and
-        // the 3g network for the server endpoints.
-#if TARGET_IPHONE_SIMULATOR && !__IPHONE_3_0
-        [initData.properties setProperty:@"Client.Endpoints" value:@"tcp -h 127.0.0.1 -p 12000"];
-        [initData.properties setProperty:@"Server.Endpoints" value:@"tcp -h 127.0.0.1"];
-#endif
-        
+        [initData.properties setProperty:@"Client.Endpoints" value:@"tcp -p 12000"];
+        [initData.properties setProperty:@"Server.Endpoints" value:@"tcp"];
+
         [initData.properties setProperty:@"RoutedServer.Endpoints" value:@""];
 
         [initData.properties setProperty:@"Ice.Trace.Network" value:[[NSUserDefaults standardUserDefaults] stringForKey:@"Ice.Trace.Network"]];
