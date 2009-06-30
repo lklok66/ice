@@ -132,6 +132,8 @@ Table of Contents
   4. Loggers
   5. Garbage Collection
   6. Auto release pool
+  7. AMI Invocations
+  8. Xcode project settings
 
 
 ======================================================================
@@ -215,7 +217,7 @@ and you cannot install a custom logger with a plug-in (Ice.Plugin.*).
 5. Garbage Collection
 ======================================================================
 
-For Mac OS X and Cocoa, the Ice Touch run time is built with garbage
+For MacOS X and Cocoa, the Ice Touch run time is built with garbage
 collection support.
 
 For the iPhone and iPhone Simulator, since garbage collection is not
@@ -250,7 +252,19 @@ pool is released once the dispatch is complete.
 
 
 ======================================================================
-7. Xcode project settings
+7. AMI Invocations
+======================================================================
+
+If you attempt to invoke an operation that returns values to the
+client as a oneway operation, the Ice run time throws a
+TwowayOnlyException. With Ice Touch, when this is done through an AMI
+invocation this exception is raised directly to the caller, not
+through the AMI exception callback. This is contrary to our other
+language mappings, where the exception is raised through the AMI
+callback.
+
+======================================================================
+8. Xcode project settings
 ======================================================================
 
 For Cocoa and iPhone applications, which use the Xcode SDK, you must
@@ -262,6 +276,9 @@ In addition, for iPhone applications, when creating a new iPhone Xcode
 project, you set the "Code Signing Resource Rules Path" to:
 
   $(SDKROOT)/ResourceRules.plist
+
+To set the path, select "Target", press "Info", select the "Build" tab,
+and press "Select".
 
 If you do not do this, you will receive an error signing your
 application when targeting iPhone 2.2 or later.

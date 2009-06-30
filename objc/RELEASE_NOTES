@@ -11,6 +11,8 @@ Table of Contents
   4. Loggers
   5. Garbage Collection
   6. Auto release pool
+  7. AMI Invocations
+  8. Xcode project settings
 
 
 ======================================================================
@@ -129,7 +131,19 @@ pool is released once the dispatch is complete.
 
 
 ======================================================================
-7. Xcode project settings
+7. AMI Invocations
+======================================================================
+
+If you attempt to invoke an operation that returns values to the
+client as a oneway operation, the Ice run time throws a
+TwowayOnlyException. With Ice Touch, when this is done through an AMI
+invocation this exception is raised directly to the caller, not
+through the AMI exception callback. This is contrary to our other
+language mappings, where the exception is raised through the AMI
+callback.
+
+======================================================================
+8. Xcode project settings
 ======================================================================
 
 For Cocoa and iPhone applications, which use the Xcode SDK, you must
