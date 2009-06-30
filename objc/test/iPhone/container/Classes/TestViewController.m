@@ -218,7 +218,7 @@
         
         AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
         // For memory leak testing comment the following line out.
-        //[appDelegate testCompleted:YES];
+        [appDelegate testCompleted:YES];
         
         self.test = (Test*)[appDelegate.tests objectAtIndex:appDelegate.currentTest];
         [self startTest];
