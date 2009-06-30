@@ -218,7 +218,7 @@
         
         AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
         // For memory leak testing comment the following line out.
-        [appDelegate testCompleted:YES];
+        //[appDelegate testCompleted:YES];
         
         self.test = (Test*)[appDelegate.tests objectAtIndex:appDelegate.currentTest];
         [self startTest];
@@ -301,7 +301,7 @@
     NSRange range = [currentMessage rangeOfString:@"\n" options:NSBackwardsSearch];
     if(range.location != NSNotFound)
     {
-        [messages addObject:[currentMessage copy]];
+        [messages addObject:[[currentMessage copy] autorelease]];
         [currentMessage deleteCharactersInRange:NSMakeRange(0, currentMessage.length)];
         [output reloadData];
         NSUInteger path[] = {0, messages.count-1};
