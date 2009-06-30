@@ -14,8 +14,32 @@
 
 #define CXXOBJECT ((IceUtil::Shared*)cxxObject_)
 
-static std::map<IceUtil::Shared*, ICEInternalWrapper*>* cachedObjects =
-    new std::map<IceUtil::Shared*, ICEInternalWrapper*>();
+
+namespace 
+{
+
+std::map<IceUtil::Shared*, ICEInternalWrapper*>* cachedObjects = 0;
+
+class Init
+{
+public:
+
+    Init()
+    {
+        cachedObjects = new std::map<IceUtil::Shared*, ICEInternalWrapper*>();
+    }
+
+    ~Init()
+    {
+#ifndef ICE_OBJC_GC
+        delete cachedObjects;
+#endif
+    }
+};
+
+Init init;
+
+}
 
 @implementation ICEInternalWrapper
 

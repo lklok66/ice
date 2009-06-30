@@ -12,12 +12,16 @@
 #import <SlicingExceptionsTestClient.h>
 
 #import <Foundation/NSAutoreleasePool.h>
+#if ICE_OBJC_GC
+#import <objc/objc-auto.h>
+#import <Foundation/NSGarbageCollector.h>
+#endif
 
 static int
 run(id<ICECommunicator> communicator)
 {
-    id<TestSlicingExceptionsClientTestIntfPrx> slicingExceptiosnAllTests(id<ICECommunicator>);
-    id<TestSlicingExceptionsClientTestIntfPrx> thrower = slicingExceptiosnAllTests(communicator);
+    id<TestSlicingExceptionsClientTestIntfPrx> slicingExceptionsAllTests(id<ICECommunicator>);
+    id<TestSlicingExceptionsClientTestIntfPrx> thrower = slicingExceptionsAllTests(communicator);
     [thrower shutdown];
     return EXIT_SUCCESS;
 }
@@ -29,6 +33,9 @@ run(id<ICECommunicator> communicator)
 int
 main(int argc, char* argv[])
 {
+#if ICE_OBJC_GC
+    objc_startCollectorThread();
+#endif
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
     int status;
     id<ICECommunicator> communicator = nil;

@@ -40,10 +40,10 @@
 {
     if (self = [super initWithFrame:frame reuseIdentifier:reuseIdentifier])
     {
-        self.body = [[[UILabel alloc] initWithFrame:CGRectZero] autorelease];
-        self.body.textColor = [UIColor blackColor];
-        self.body.font = [UIFont boldSystemFontOfSize:14];
-        self.body.numberOfLines = 0;
+        body = [[UILabel alloc] initWithFrame:CGRectZero];
+        body.textColor = [UIColor blackColor];
+        body.font = [UIFont boldSystemFontOfSize:14];
+        body.numberOfLines = 0;
         
         [self.contentView addSubview:self.body];
     }
@@ -115,7 +115,7 @@
 {
     self.currentMessage = [NSMutableString string];
     self.messages = [NSMutableArray array];
-    self.queue = [[[NSOperationQueue alloc] init] autorelease]; 
+    queue = [[NSOperationQueue alloc] init];
     self.queue.maxConcurrentOperationCount = 2; // We need at least 2 concurrent operations.
     
     [super viewDidLoad];
@@ -217,6 +217,7 @@
         NSAssert(test == nil, @"test == nil");
         
         AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+        // For memory leak testing comment the following line out.
         [appDelegate testCompleted:YES];
         
         self.test = (Test*)[appDelegate.tests objectAtIndex:appDelegate.currentTest];

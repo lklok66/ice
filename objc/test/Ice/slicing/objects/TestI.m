@@ -191,7 +191,7 @@
     ss.c2 = p2;
     return ss;
 }
--(TestSlicingObjectsServerBDict*) dictionaryTest:(TestSlicingObjectsServerBDict*)bin bout:(TestSlicingObjectsServerBDict**)bout current:(ICECurrent*)current
+-(TestSlicingObjectsServerBDict*) dictionaryTest:(TestSlicingObjectsServerMutableBDict*)bin bout:(TestSlicingObjectsServerBDict**)bout current:(ICECurrent*)current
 {
     int i;
     *bout = [TestSlicingObjectsServerMutableBDict dictionary];

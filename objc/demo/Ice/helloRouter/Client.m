@@ -102,7 +102,7 @@ run(int argc, char* argv[], id<ICECommunicator> communicator)
 int
 main(int argc, char* argv[])
 {
-#if !TARGET_OS_IPHONE
+#if ICE_OBJC_GC
     objc_startCollectorThread();
 #endif
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];

@@ -52,40 +52,53 @@ public:
     virtual Ice::ObjectPtr
     create(const std::string& type)
     {
-        ICEObject* obj = nil;
 
         NSString* sliceId = [[NSString alloc] initWithUTF8String:type.c_str()];
-        id<ICEObjectFactory> factory = nil;
-        @synchronized(_factories)
+        @try
         {
-            factory = [_factories objectForKey:sliceId];
-        }
-        if(factory != nil)
-        {
-            obj = [factory create:sliceId];
-        }
-
-        if(obj == nil)
-        {
-            std::string tId = toObjCSliceId(type, _prefixTable);
-            Class c = objc_lookUpClass(tId.c_str());
-            if(c == nil)
+            id<ICEObjectFactory> factory = nil;
+            @synchronized(_factories)
             {
-                return 0; // No object factory.
+                factory = [_factories objectForKey:sliceId];
             }
-            if([c isSubclassOfClass:[ICEObject class]])
-            {
-                obj = (ICEObject*)[[c alloc] init];
-            }
-        }
 
-        Ice::ObjectPtr o;
-        if(obj != nil)
-        {
-            o = [ICEInputStream createObjectReader:obj];
-            [obj release];
+            ICEObject* obj = nil;
+            if(factory != nil)
+            {
+                obj = [factory create:sliceId];
+            }
+
+            if(obj == nil)
+            {
+                std::string tId = toObjCSliceId(type, _prefixTable);
+                Class c = objc_lookUpClass(tId.c_str());
+                if(c == nil)
+                {
+                    return 0; // No object factory.
+                }
+                if([c isSubclassOfClass:[ICEObject class]])
+                {
+                    obj = (ICEObject*)[[c alloc] init];
+                }
+            }
+
+            Ice::ObjectPtr o;
+            if(obj != nil)
+            {
+                o = [ICEInputStream createObjectReader:obj];
+                [obj release];
+            }
+            return o;
         }
-        return o;
+        @catch(NSException* ex)
+        {
+            rethrowCxxException(ex);
+        }
+        @finally
+        {
+            [sliceId release];
+        }
+        return nil; // Keep the compiler happy.
     }
 
     virtual void
@@ -166,120 +179,149 @@ private:
 
 -(void) destroy
 {
+    NSException* nsex = nil;
     try
     {
         COMMUNICATOR->destroy();
+        return;
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(void) shutdown
 {
+    NSException* nsex = nil;
     try
     {
         COMMUNICATOR->shutdown();
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(void) waitForShutdown
 {
+    NSException* nsex = nil;
     try
     {
         COMMUNICATOR->waitForShutdown();
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(BOOL) isShutdown
 {
+    NSException* nsex = nil;
     try
     {
         return COMMUNICATOR->isShutdown();
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return NO; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return NO; // Keep the compiler happy.
 }
 
 -(id<ICEObjectPrx>) stringToProxy:(NSString*)str
 {
+    NSException* nsex = nil;
     try
     {
         return [ICEObjectPrx objectPrxWithObjectPrx__:COMMUNICATOR->stringToProxy(fromNSString(str))];
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(NSString*)proxyToString:(id<ICEObjectPrx>)obj
 {
+    NSException* nsex = nil;
     try
     {
         return [toNSString(COMMUNICATOR->proxyToString([(ICEObjectPrx*)obj objectPrx__])) autorelease];
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(id<ICEObjectPrx>)propertyToProxy:(NSString*)property
 {
+    NSException* nsex = nil;
     try
     {
         return [ICEObjectPrx objectPrxWithObjectPrx__:COMMUNICATOR->propertyToProxy(fromNSString(property))];
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(ICEIdentity*) stringToIdentity:(NSString*)str
 {
+    NSException* nsex = nil;
     try
     {
         return [ICEIdentity identityWithIdentity:COMMUNICATOR->stringToIdentity(fromNSString(str))];
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(NSString*) identityToString:(ICEIdentity*)ident
 {
+    NSException* nsex = nil;
     try
     {
         return [toNSString(COMMUNICATOR->identityToString([ident identity])) autorelease];
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(id<ICEObjectAdapter>) createObjectAdapter:(NSString*)name;
 {
+    NSException* nsex = nil;
     try
     {
         ICEObjectAdapter* adapter = [ICEObjectAdapter wrapperWithCxxObject:
@@ -289,13 +331,15 @@ private:
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(id<ICEObjectAdapter>) createObjectAdapterWithEndpoints:(NSString*)name endpoints:(NSString*)endpoints;
 {
+    NSException* nsex = nil;
     try
     {
         ICEObjectAdapter* adapter = [ICEObjectAdapter wrapperWithCxxObject:
@@ -305,13 +349,15 @@ private:
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(id<ICEObjectAdapter>) createObjectAdapterWithRouter:(NSString*)name router:(id<ICERouterPrx>)rtr
 {
+    NSException* nsex = nil;
     try
     {
         Ice::RouterPrx router = Ice::RouterPrx::uncheckedCast(Ice::ObjectPrx([(ICEObjectPrx*)rtr objectPrx__]));
@@ -322,9 +368,10 @@ private:
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 -(void) addObjectFactory:(id<ICEObjectFactory>)factory sliceId:(NSString*)sliceId
 {
@@ -343,89 +390,113 @@ private:
 }
 -(id<ICEProperties>) getProperties
 {
+    NSException* nsex = nil;
     try
     {
         return [ICEProperties wrapperWithCxxObject:COMMUNICATOR->getProperties().get()];
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(id<ICELogger>) getLogger
 {
+    NSException* nsex = nil;
     try
     {
         return [ICELogger wrapperWithCxxObject:COMMUNICATOR->getLogger().get()];
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(id<ICERouterPrx>) getDefaultRouter
 {
+    NSException* nsex = nil;
     try
     {
         return (id<ICERouterPrx>)[ICERouterPrx objectPrxWithObjectPrx__:COMMUNICATOR->getDefaultRouter()];
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(void) setDefaultRouter:(id<ICERouterPrx>)rtr
 {
+    NSException* nsex = nil;
     try
     {
         COMMUNICATOR->setDefaultRouter(Ice::RouterPrx::uncheckedCast(Ice::ObjectPrx([(ICEObjectPrx*)rtr objectPrx__])));
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(id<ICELocatorPrx>) getDefaultLocator
 {
+    NSException* nsex = nil;
     try
     {
         return (id<ICELocatorPrx>)[ICELocatorPrx objectPrxWithObjectPrx__:COMMUNICATOR->getDefaultLocator()];
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(void) setDefaultLocator:(id<ICELocatorPrx>)loc
 {
+    NSException* nsex = nil;
     try
     {
-        COMMUNICATOR->setDefaultLocator(Ice::LocatorPrx::uncheckedCast(Ice::ObjectPrx([(ICEObjectPrx*)loc objectPrx__])));
+        COMMUNICATOR->setDefaultLocator(Ice::LocatorPrx::uncheckedCast(
+                                            Ice::ObjectPrx([(ICEObjectPrx*)loc objectPrx__])));
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(void) flushBatchRequests
 {
+    NSException* nsex = nil;
     try
     {
         COMMUNICATOR->flushBatchRequests();
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 

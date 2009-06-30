@@ -233,11 +233,10 @@
 @end
 
 id<TestSlicingExceptionsClientTestIntfPrx>
-slicingExceptiosnAllTests(id<ICECommunicator> communicator)
+slicingExceptionsAllTests(id<ICECommunicator> communicator)
 {
     id<ICEObjectPrx> obj = [communicator stringToProxy:@"Test:default -p 12010"];
     id<TestSlicingExceptionsClientTestIntfPrx> test = [TestSlicingExceptionsClientTestIntfPrx checkedCast:obj];
-
     tprintf("base... ");
     {
         @try
@@ -259,13 +258,12 @@ slicingExceptiosnAllTests(id<ICECommunicator> communicator)
 
     tprintf("base (AMI)... ");
     {
-        TestSlicingExceptionsClientCallback *cb = [[TestSlicingExceptionsClientCallback alloc] init];
+        TestSlicingExceptionsClientCallback *cb = [[[TestSlicingExceptionsClientCallback alloc] init] autorelease];
         [test baseAsBase_async:cb response:@selector(response) exception:@selector(baseAsBaseException:)];
         [cb check];
-	[cb release];
     }
     tprintf("ok\n");
-
+   
     tprintf("slicing of unknown derived... ");
     {
         @try
@@ -287,10 +285,9 @@ slicingExceptiosnAllTests(id<ICECommunicator> communicator)
 
     tprintf("slicing of unknown derived (AMI)... ");
     {
-        TestSlicingExceptionsClientCallback* cb = [[TestSlicingExceptionsClientCallback alloc] init];
+        TestSlicingExceptionsClientCallback* cb = [[[TestSlicingExceptionsClientCallback alloc] init] autorelease];
         [test unknownDerivedAsBase_async:cb response:@selector(response) exception:@selector(unknownDerivedAsBaseException:)];
         [cb check];
-	[cb release];
     }
     tprintf("ok\n");
 
@@ -316,10 +313,9 @@ slicingExceptiosnAllTests(id<ICECommunicator> communicator)
 
     tprintf("non-slicing of known derived as base (AMI)... ");
     {
-        TestSlicingExceptionsClientCallback* cb = [[TestSlicingExceptionsClientCallback alloc] init];
+        TestSlicingExceptionsClientCallback* cb = [[[TestSlicingExceptionsClientCallback alloc] init] autorelease];
         [test knownDerivedAsBase_async:cb response:@selector(response) exception:@selector(knownDerivedException:)];
         [cb check];
-	[cb release];
     }
     tprintf("ok\n");
 
@@ -345,10 +341,9 @@ slicingExceptiosnAllTests(id<ICECommunicator> communicator)
 
     tprintf("non-slicing of known derived as derived (AMI)... ");
     {
-        TestSlicingExceptionsClientCallback* cb = [[TestSlicingExceptionsClientCallback alloc] init];
+        TestSlicingExceptionsClientCallback* cb = [[[TestSlicingExceptionsClientCallback alloc] init] autorelease];
         [test knownDerivedAsKnownDerived_async:cb response:@selector(response) exception:@selector(knownDerivedException:)];
         [cb check];
-	[cb release];
     }
     tprintf("ok\n");
 
@@ -373,10 +368,9 @@ slicingExceptiosnAllTests(id<ICECommunicator> communicator)
 
     tprintf("slicing of unknown intermediate as base (AMI)... ");
     {
-        TestSlicingExceptionsClientCallback* cb = [[TestSlicingExceptionsClientCallback alloc] init];
+        TestSlicingExceptionsClientCallback* cb = [[[TestSlicingExceptionsClientCallback alloc] init] autorelease];
         [test unknownIntermediateAsBase_async:cb response:@selector(response) exception:@selector(unknownIntermediateAsBaseException:)];
         [cb check];
-	[cb release];
     }
     tprintf("ok\n");
 
@@ -402,10 +396,9 @@ slicingExceptiosnAllTests(id<ICECommunicator> communicator)
 
     tprintf("slicing of known intermediate as base (AMI)... ");
     {
-        TestSlicingExceptionsClientCallback* cb = [[TestSlicingExceptionsClientCallback alloc] init];
+        TestSlicingExceptionsClientCallback* cb = [[[TestSlicingExceptionsClientCallback alloc] init] autorelease];
         [test knownIntermediateAsBase_async:cb response:@selector(response) exception:@selector(knownIntermediateAsBaseException:)];
         [cb check];
-	[cb release];
     }
     tprintf("ok\n");
 
@@ -432,10 +425,9 @@ slicingExceptiosnAllTests(id<ICECommunicator> communicator)
 
     tprintf("slicing of known most derived as base (AMI)... ");
     {
-        TestSlicingExceptionsClientCallback* cb = [[TestSlicingExceptionsClientCallback alloc] init];
+        TestSlicingExceptionsClientCallback* cb = [[[TestSlicingExceptionsClientCallback alloc] init] autorelease];
         [test knownMostDerivedAsBase_async:cb response:@selector(response) exception:@selector(knownMostDerivedException:)];
         [cb check];
-	[cb release];
     }
     tprintf("ok\n");
 
@@ -461,10 +453,9 @@ slicingExceptiosnAllTests(id<ICECommunicator> communicator)
 
     tprintf("non-slicing of known intermediate as intermediate (AMI)... ");
     {
-        TestSlicingExceptionsClientCallback* cb = [[TestSlicingExceptionsClientCallback alloc] init];
+        TestSlicingExceptionsClientCallback* cb = [[[TestSlicingExceptionsClientCallback alloc] init] autorelease];
         [test knownIntermediateAsKnownIntermediate_async:cb response:@selector(response) exception:@selector(knownIntermediateAsKnownIntermediateException:)];
         [cb check];
-	[cb release];
     }
     tprintf("ok\n");
 
@@ -491,10 +482,9 @@ slicingExceptiosnAllTests(id<ICECommunicator> communicator)
 
     tprintf("non-slicing of known most derived as intermediate (AMI)... ");
     {
-        TestSlicingExceptionsClientCallback* cb = [[TestSlicingExceptionsClientCallback alloc] init];
+        TestSlicingExceptionsClientCallback* cb = [[[TestSlicingExceptionsClientCallback alloc] init] autorelease];
         [test knownMostDerivedAsKnownIntermediate_async:cb response:@selector(response) exception:@selector(knownMostDerivedException:)];
         [cb check];
-	[cb release];
     }
     tprintf("ok\n");
 
@@ -521,10 +511,9 @@ slicingExceptiosnAllTests(id<ICECommunicator> communicator)
 
     tprintf("non-slicing of known most derived as most derived (AMI)... ");
     {
-        TestSlicingExceptionsClientCallback* cb = [[TestSlicingExceptionsClientCallback alloc] init];
+        TestSlicingExceptionsClientCallback* cb = [[[TestSlicingExceptionsClientCallback alloc] init] autorelease];
         [test knownMostDerivedAsKnownMostDerived_async:cb response:@selector(response) exception:@selector(knownMostDerivedException:)];
         [cb check];
-	[cb release];
     }
     tprintf("ok\n");
 
@@ -550,10 +539,9 @@ slicingExceptiosnAllTests(id<ICECommunicator> communicator)
 
     tprintf("slicing of unknown most derived, known intermediate as base (AMI)... ");
     {
-        TestSlicingExceptionsClientCallback* cb = [[TestSlicingExceptionsClientCallback alloc] init];
+        TestSlicingExceptionsClientCallback* cb = [[[TestSlicingExceptionsClientCallback alloc] init] autorelease];
         [test unknownMostDerived1AsBase_async:cb response:@selector(response) exception:@selector(unknownMostDerived1Exception:)];
         [cb check];
-	[cb release];
     }
     tprintf("ok\n");
 
@@ -579,10 +567,9 @@ slicingExceptiosnAllTests(id<ICECommunicator> communicator)
 
     tprintf("slicing of unknown most derived, known intermediate as intermediate (AMI)... ");
     {
-        TestSlicingExceptionsClientCallback* cb = [[TestSlicingExceptionsClientCallback alloc] init];
+        TestSlicingExceptionsClientCallback* cb = [[[TestSlicingExceptionsClientCallback alloc] init]  autorelease];
         [test unknownMostDerived1AsKnownIntermediate_async:cb response:@selector(response) exception:@selector(unknownMostDerived1Exception:)];
         [cb check];
-	[cb release];
     }
     tprintf("ok\n");
 
@@ -607,12 +594,10 @@ slicingExceptiosnAllTests(id<ICECommunicator> communicator)
 
     tprintf("slicing of unknown most derived, unknown intermediate as base (AMI)... ");
     {
-        TestSlicingExceptionsClientCallback* cb = [[TestSlicingExceptionsClientCallback alloc] init];
+        TestSlicingExceptionsClientCallback* cb = [[[TestSlicingExceptionsClientCallback alloc] init] autorelease];
         [test unknownMostDerived2AsBase_async:cb response:@selector(response) exception:@selector(unknownMostDerived2Exception:)];
         [cb check];
-	[cb release];
     }
     tprintf("ok\n");
-
     return test;
 }

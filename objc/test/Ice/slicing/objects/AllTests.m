@@ -469,17 +469,16 @@ slicingObjectsAllTests(id<ICECommunicator> communicator)
             test(0);
         }
 
-	test([o isKindOfClass:[TestSlicingObjectsClientSBase class]]);
+        test([o isKindOfClass:[TestSlicingObjectsClientSBase class]]);
         test([((TestSlicingObjectsClientSBase*)o).sb isEqualToString:@"SBase.sb"]);
     }
     tprintf("ok\n");
 
     tprintf("base as Object (AMI)... ");
     {
-        TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
+        TestSlicingObjectsClientCallback* cb = [[[TestSlicingObjectsClientCallback alloc] init] autorelease];
         [test SBaseAsObject_async:cb response:@selector(SBaseAsObjectResponse:) exception:@selector(SBaseAsObjectException:)];
         [cb check];
-        [cb release];
     }
     tprintf("ok\n");
 
@@ -500,10 +499,9 @@ slicingObjectsAllTests(id<ICECommunicator> communicator)
  
     tprintf("base as base (AMI)... ");
     {
-        TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
+        TestSlicingObjectsClientCallback* cb = [[[TestSlicingObjectsClientCallback alloc] init] autorelease];
         [test SBaseAsSBase_async:cb response:@selector(SBaseAsSBaseResponse:) exception:@selector(SBaseAsSBaseException:)];
         [cb check];
-        [cb release];
     }
     tprintf("ok\n");
 
@@ -526,10 +524,9 @@ slicingObjectsAllTests(id<ICECommunicator> communicator)
 
     tprintf("base with known derived as base (AMI)... ");
     {
-        TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
+        TestSlicingObjectsClientCallback* cb = [[[TestSlicingObjectsClientCallback alloc] init] autorelease];
         [test SBSKnownDerivedAsSBase_async:cb response:@selector(SBSKnownDerivedAsSBaseResponse:) exception:@selector(SBSKnownDerivedAsSBaseException:)];
         [cb check];
-        [cb release];
     }
     tprintf("ok\n");
 
@@ -550,10 +547,9 @@ slicingObjectsAllTests(id<ICECommunicator> communicator)
 
     tprintf("base with known derived as known derived (AMI)... ");
     {
-        TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
+        TestSlicingObjectsClientCallback* cb = [[[TestSlicingObjectsClientCallback alloc] init] autorelease];
         [test SBSKnownDerivedAsSBSKnownDerived_async:cb response:@selector(SBSKnownDerivedAsSBSKnownDerivedResponse:) exception:@selector(SBSKnownDerivedAsSBSKnownDerivedException:)];
         [cb check];
-        [cb release];
     }
     tprintf("ok\n");
 
@@ -574,10 +570,9 @@ slicingObjectsAllTests(id<ICECommunicator> communicator)
 
     tprintf("base with unknown derived as base (AMI)... ");
     {
-        TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
+        TestSlicingObjectsClientCallback* cb = [[[TestSlicingObjectsClientCallback alloc] init] autorelease];
         [test SBSUnknownDerivedAsSBase_async:cb response:@selector(SBSUnknownDerivedAsSBaseResponse:) exception:@selector(SBSUnknownDerivedAsSBaseException:)];
         [cb check];
-        [cb release];
     }
     tprintf("ok\n");
 
@@ -603,10 +598,9 @@ slicingObjectsAllTests(id<ICECommunicator> communicator)
 //     {
 //         @try
 //         {
-//             TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
+//             TestSlicingObjectsClientCallback* cb = [[[TestSlicingObjectsClientCallback alloc] init] autorelease];
 //             [test SUnknownAsObject_async:cb response:@selector(SUnknownAsObjectResponse:) exception:@selector(SUnknownAsObjectException:)];
 //             [cb check];
-//             [cb release];
 //         }
 //         @catch(NSException*)
 //         {
@@ -634,10 +628,9 @@ slicingObjectsAllTests(id<ICECommunicator> communicator)
 
     tprintf("one-element cycle (AMI)... ");
     {
-        TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
+        TestSlicingObjectsClientCallback* cb = [[[TestSlicingObjectsClientCallback alloc] init] autorelease];
         [test oneElementCycle_async:cb response:@selector(oneElementCycleResponse:) exception:@selector(oneElementCycleException:)];
         [cb check];
-        [cb release];
     }
     tprintf("ok\n");
 
@@ -665,10 +658,9 @@ slicingObjectsAllTests(id<ICECommunicator> communicator)
 
     tprintf("two-element cycle (AMI)... ");
     {
-        TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
+        TestSlicingObjectsClientCallback* cb = [[[TestSlicingObjectsClientCallback alloc] init] autorelease];
         [test twoElementCycle_async:cb response:@selector(twoElementCycleResponse:) exception:@selector(twoElementCycleException:)];
         [cb check];
-        [cb release];
     }
     tprintf("ok\n");
 
@@ -705,10 +697,9 @@ slicingObjectsAllTests(id<ICECommunicator> communicator)
 
     tprintf("known derived pointer slicing as base (AMI)... ");
     {
-        TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
+        TestSlicingObjectsClientCallback* cb = [[[TestSlicingObjectsClientCallback alloc] init] autorelease];
         [test D1AsB_async:cb response:@selector(D1AsBResponse:) exception:@selector(D1AsBException:)];
         [cb check];
-        [cb release];
     }
     tprintf("ok\n");
 
@@ -739,10 +730,9 @@ slicingObjectsAllTests(id<ICECommunicator> communicator)
 
     tprintf("known derived pointer slicing as derived (AMI)... ");
     {
-        TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
+        TestSlicingObjectsClientCallback* cb = [[[TestSlicingObjectsClientCallback alloc] init] autorelease];
         [test D1AsD1_async:cb response:@selector(D1AsD1Response:) exception:@selector(D1AsD1Exception:)];
         [cb check];
-        [cb release];
     }
     tprintf("ok\n");
 
@@ -777,10 +767,9 @@ slicingObjectsAllTests(id<ICECommunicator> communicator)
 
     tprintf("unknown derived pointer slicing as base (AMI)... ");
     {
-        TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
+        TestSlicingObjectsClientCallback* cb = [[[TestSlicingObjectsClientCallback alloc] init] autorelease];
         [test D2AsB_async:cb response:@selector(D2AsBResponse:) exception:@selector(D2AsBException:)];
         [cb check];
-        [cb release];
     }
     tprintf("ok\n");
 
@@ -815,10 +804,9 @@ slicingObjectsAllTests(id<ICECommunicator> communicator)
 
     tprintf("param ptr slicing with known first (AMI)... ");
     {
-        TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
+        TestSlicingObjectsClientCallback* cb = [[[TestSlicingObjectsClientCallback alloc] init] autorelease];
         [test paramTest1_async:cb response:@selector(paramTest1Response:p2:) exception:@selector(paramTest1Exception:)];
         [cb check];
-        [cb release];
     }
     tprintf("ok\n");
 
@@ -869,10 +857,9 @@ slicingObjectsAllTests(id<ICECommunicator> communicator)
 
     tprintf("return value identity with known first (AMI)... ");
     {
-        TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
+        TestSlicingObjectsClientCallback* cb = [[[TestSlicingObjectsClientCallback alloc] init] autorelease];
         [test returnTest1_async:cb response:@selector(returnTest1Response:p1:p2:) exception:@selector(returnTest1Exception:)];
         [cb check];
-        [cb release];
     }
     tprintf("ok\n");
 
@@ -894,10 +881,9 @@ slicingObjectsAllTests(id<ICECommunicator> communicator)
 
     tprintf("return value identity with unknown first (AMI)... ");
     {
-        TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
+        TestSlicingObjectsClientCallback* cb = [[[TestSlicingObjectsClientCallback alloc] init] autorelease];
         [test returnTest2_async:cb response:@selector(returnTest2Response:p1:p2:) exception:@selector(returnTest2Exception:)];
         [cb check];
-        [cb release];
     }
     tprintf("ok\n");
 
@@ -960,11 +946,10 @@ slicingObjectsAllTests(id<ICECommunicator> communicator)
             d1.pb = d3;
             d1.pd1 = d3;
 
-            TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
+            TestSlicingObjectsClientCallback* cb = [[[TestSlicingObjectsClientCallback alloc] init] autorelease];
             [test returnTest3_async:cb response:@selector(returnTest3Response:) exception:@selector(returnTest3Exception:) p1:d1 p2:d3];
             [cb check];
             TestSlicingObjectsClientB* b1 = cb.r;
-            [cb release];
 
             test(b1);
             test([b1.sb isEqualToString:@"D1.sb"]);
@@ -1052,11 +1037,10 @@ slicingObjectsAllTests(id<ICECommunicator> communicator)
             d1.pb = d3;
             d1.pd1 = d3;
 
-            TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
+            TestSlicingObjectsClientCallback* cb = [[[TestSlicingObjectsClientCallback alloc] init] autorelease];
             [test returnTest3_async:cb response:@selector(returnTest3Response:) exception:@selector(returnTest3Exception:) p1:d3 p2:d1];
             [cb check];
             TestSlicingObjectsClientB* b1 = cb.r;
-            [cb release];
 
             test(b1);
             test([b1.sb isEqualToString:@"D3.sb"]);
@@ -1117,10 +1101,9 @@ slicingObjectsAllTests(id<ICECommunicator> communicator)
 
     tprintf("remainder unmarshaling (3 instances) (AMI)... ");
     {
-        TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
+        TestSlicingObjectsClientCallback* cb = [[[TestSlicingObjectsClientCallback alloc] init] autorelease];
         [test paramTest3_async:cb response:@selector(paramTest3Response:p1:p2:) exception:@selector(paramTest3Exception:)];
         [cb check];
-        [cb release];
     }
     tprintf("ok\n");
 
@@ -1150,10 +1133,9 @@ slicingObjectsAllTests(id<ICECommunicator> communicator)
 
     tprintf("remainder unmarshaling (4 instances) (AMI)... ");
     {
-        TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
+        TestSlicingObjectsClientCallback* cb = [[[TestSlicingObjectsClientCallback alloc] init] autorelease];
         [test paramTest4_async:cb response:@selector(paramTest4Response:p1:) exception:@selector(paramTest4Exception:)];
         [cb check];
-        [cb release];
     }
     tprintf("ok\n");
 
@@ -1207,11 +1189,10 @@ slicingObjectsAllTests(id<ICECommunicator> communicator)
             b2.sb = @"B.sb(2)";
             b2.pb = b1;
 
-            TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
+            TestSlicingObjectsClientCallback* cb = [[[TestSlicingObjectsClientCallback alloc] init] autorelease];
             [test returnTest3_async:cb response:@selector(returnTest3Response:) exception:@selector(returnTest3Exception:) p1:d3 p2:b2];
             [cb check];
             TestSlicingObjectsClientB* r = cb.r;
-            [cb release];
 
             test(r);
             test([[r ice_id:nil] isEqualToString:@"::Test::B"]);
@@ -1280,11 +1261,10 @@ slicingObjectsAllTests(id<ICECommunicator> communicator)
             d12.sd1 = @"D1.sd1(2)";
             d12.pd1 = d11;
 
-            TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
+            TestSlicingObjectsClientCallback* cb = [[[TestSlicingObjectsClientCallback alloc] init] autorelease];
             [test returnTest3_async:cb response:@selector(returnTest3Response:) exception:@selector(returnTest3Exception:) p1:d3 p2:d12];
             [cb check];
             TestSlicingObjectsClientB* r = cb.r;
-            [cb release];
             test(r);
             test([[r ice_id:nil] isEqualToString:@"::Test::B"]);
             test([r.sb isEqualToString:@"D3.sb"]);
@@ -1438,11 +1418,10 @@ slicingObjectsAllTests(id<ICECommunicator> communicator)
                 [(NSMutableArray*)ss2.s addObject:ss2d1];
                 [(NSMutableArray*)ss2.s addObject:ss2d3];
 
-                TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
+                TestSlicingObjectsClientCallback* cb = [[[TestSlicingObjectsClientCallback alloc] init] autorelease];
                 [test sequenceTest_async:cb response:@selector(sequenceTestResponse:) exception:@selector(sequenceTestException:) p1:ss1 p2:ss2];
                 [cb check];
                 ss = cb.r;
-                [cb release];
             }
 
             test(ss.c1);
@@ -1550,12 +1529,11 @@ slicingObjectsAllTests(id<ICECommunicator> communicator)
                 [bin setObject:d1 forKey:[NSNumber numberWithInt:i]];
             }
 
-            TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
+            TestSlicingObjectsClientCallback* cb = [[[TestSlicingObjectsClientCallback alloc] init] autorelease];
             [test dictionaryTest_async:cb response:@selector(dictionaryTestResponse:bout:) exception:@selector(dictionaryTestException:) bin:bin];
             [cb check];
             bout = cb.bout;
             r = cb.r;
-            [cb release];
 
             test([bout count] == 10);
             for(i = 0; i < 10; ++i)
@@ -1615,10 +1593,9 @@ slicingObjectsAllTests(id<ICECommunicator> communicator)
 
     tprintf("base exception thrown as base exception (AMI)... ");
     {
-        TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
+        TestSlicingObjectsClientCallback* cb = [[[TestSlicingObjectsClientCallback alloc] init] autorelease];
         [test throwBaseAsBase_async:cb response:@selector(throwBaseAsBaseResponse) exception:@selector(throwBaseAsBaseException:)];
         [cb check];
-        [cb release];
     }
     tprintf("ok\n");
 
@@ -1652,10 +1629,9 @@ slicingObjectsAllTests(id<ICECommunicator> communicator)
 
     tprintf("derived exception thrown as base exception (AMI)... ");
     {
-        TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
+        TestSlicingObjectsClientCallback* cb = [[[TestSlicingObjectsClientCallback alloc] init] autorelease];
         [test throwDerivedAsBase_async:cb response:@selector(throwDerivedAsBaseResponse) exception:@selector(throwDerivedAsBaseException:)];
         [cb check];
-        [cb release];
     }
     tprintf("ok\n");
 
@@ -1689,10 +1665,9 @@ slicingObjectsAllTests(id<ICECommunicator> communicator)
 
     tprintf("derived exception thrown as derived exception (AMI)... ");
     {
-        TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
+        TestSlicingObjectsClientCallback* cb = [[[TestSlicingObjectsClientCallback alloc] init] autorelease];
         [test throwDerivedAsDerived_async:cb response:@selector(throwDerivedAsDerivedResponse) exception:@selector(throwDerivedAsDerivedException:)];
         [cb check];
-        [cb release];
     }
     tprintf("ok\n");
 
@@ -1720,10 +1695,9 @@ slicingObjectsAllTests(id<ICECommunicator> communicator)
 
     tprintf("unknown derived exception thrown as base exception (AMI)... ");
     {
-        TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
+        TestSlicingObjectsClientCallback* cb = [[[TestSlicingObjectsClientCallback alloc] init] autorelease];
         [test throwUnknownDerivedAsBase_async:cb response:@selector(throwUnknownDerivedAsBaseResponse) exception:@selector(throwUnknownDerivedAsBaseException:)];
         [cb check];
-        [cb release];
     }
     tprintf("ok\n");
 
@@ -1744,10 +1718,9 @@ slicingObjectsAllTests(id<ICECommunicator> communicator)
 
     tprintf("forward-declared class (AMI)... ");
     {
-        TestSlicingObjectsClientCallback* cb = [[TestSlicingObjectsClientCallback alloc] init];
+        TestSlicingObjectsClientCallback* cb = [[[TestSlicingObjectsClientCallback alloc] init] autorelease];
         [test useForward_async:cb response:@selector(useForwardResponse:) exception:@selector(useForwardException:)];
         [cb check];
-        [cb release];
     }
     tprintf("ok\n");
 

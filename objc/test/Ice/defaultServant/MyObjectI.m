@@ -9,7 +9,6 @@
 
 #import <Ice/Ice.h>
 #import <defaultServant/MyObjectI.h>
-#import <TestCommon.h>
 
 @implementation TestDefaultServantMyObjectI
 

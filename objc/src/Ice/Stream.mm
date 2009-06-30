@@ -321,31 +321,39 @@ private:
 
 -(void) sliceObjects:(BOOL)b
 {
+    NSException* nsex = nil;
     try
     {
         is_->sliceObjects(b);
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(BOOL)readBool
 {
+    NSException* nsex = nil;
     try
     {
         return is_->readBool();
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return NO; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return NO; // Keep the compiler happy.
 }
 
 -(NSMutableData*) readBoolSeq
 {
+    NSException* nsex = nil;
     try
     {
         std::pair<const bool*, const bool*> seq;
@@ -356,26 +364,30 @@ private:
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(ICEByte) readByte
 {
+    NSException* nsex = nil;
     try
     {
         return is_->readByte();
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return 0; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(NSMutableData*) readByteSeq
 {
+    NSException* nsex = nil;
     try
     {
         std::pair<const Ice::Byte*, const Ice::Byte*> seq;
@@ -385,13 +397,15 @@ private:
     }    
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(NSData*) readByteSeqNoCopy
 {
+    NSException* nsex = nil;
     try
     {
         std::pair<const Ice::Byte*, const Ice::Byte*> seq;
@@ -402,26 +416,30 @@ private:
     }    
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(ICEShort) readShort
 {
+    NSException* nsex = nil;
     try
     {
         return is_->readShort();
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return 0; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return 0; // Keep the compiler happy.
 }
 
 -(NSMutableData*) readShortSeq
 {
+    NSException* nsex = nil;
     try
     {
         std::pair<const Ice::Short*, const Ice::Short*> seq;
@@ -431,26 +449,30 @@ private:
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(ICEInt) readInt
 {
+    NSException* nsex = nil;
     try
     {
         return is_->readInt();
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return 0;
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return 0; // Keep the compiler happy.
 }
 
 -(NSMutableData*) readIntSeq
 {
+    NSException* nsex = nil;
     try
     {
         std::pair<const Ice::Int*, const Ice::Int*> seq;
@@ -460,26 +482,30 @@ private:
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(ICELong) readLong
 {
+    NSException* nsex = nil;
     try
     {
         return is_->readLong();
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return 0; // Keep the compiler happy.
 }
 
 -(NSMutableData*) readLongSeq
 {
+    NSException* nsex = nil;
     try
     {
         std::pair<const Ice::Long*, const Ice::Long*> seq;
@@ -489,26 +515,30 @@ private:
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(ICEFloat) readFloat
 {
+    NSException* nsex = nil;
     try
     {
         return is_->readFloat();
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return 0; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(NSMutableData*) readFloatSeq
 {
+    NSException* nsex = nil;
     try
     {
         std::pair<const Ice::Float*, const Ice::Float*> seq;
@@ -518,26 +548,30 @@ private:
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(ICEDouble) readDouble
 {
+    NSException* nsex = nil;
     try
     {
         return is_->readDouble();
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return 0; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(NSMutableData*) readDoubleSeq
 {
+    NSException* nsex = nil;
     try
     {
         std::pair<const Ice::Double*, const Ice::Double*> seq;
@@ -547,26 +581,30 @@ private:
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(NSMutableString*)readString
 {
+    NSException* nsex = nil;
     try
     {
         return toNSMutableString(is_->readString());
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(NSMutableArray*) readStringSeq
 {
+    NSException* nsex = nil;
     try
     {
 	// TODO: size check
@@ -574,13 +612,15 @@ private:
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(ICEInt) readEnumerator:(ICEInt)limit
 {
+    NSException* nsex = nil;
     ICEInt val = 0; // Keep the compiler happy.
     try
     {
@@ -599,7 +639,11 @@ private:
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
     if(val >= limit)
     {
@@ -632,6 +676,7 @@ typedef enum { dummy } Dummy_Enum;
 	minWireSize = 4;
     }
 
+    NSException* nsex = nil;
     NSMutableData* ret = 0;
     try
     {
@@ -685,26 +730,33 @@ typedef enum { dummy } Dummy_Enum;
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
     return ret;
 }
 
 -(ICEInt) readSize
 {
+    NSException* nsex = nil;
     try
     {
         return is_->readSize();
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return 0; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(id<ICEObjectPrx>) readProxy:(Class)type
 {
+    NSException* nsex = nil;
     try
     {
 	Ice::ObjectPrx p = is_->readProxy();
@@ -719,32 +771,43 @@ typedef enum { dummy } Dummy_Enum;
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(void) readObject:(ICEObject**)object typeId:(NSString*)typeId
 {
+    NSException* nsex = nil;
     try
     {
         is_->readObject(new IceObjC::ReadObject(object, typeId));
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(void) readObjectWithCallback:(id<ICEReadObjectCallback>)callback typeId:(NSString*)typeId
 {
+    NSException* nsex = nil;
     try
     {
         is_->readObject(new IceObjC::ReadObjectCallback(callback, typeId));
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
@@ -753,6 +816,7 @@ typedef enum { dummy } Dummy_Enum;
     ICEInt sz = [self readSize];
     // TODO sequence size check
     NSMutableArray* arr = [[NSMutableArray alloc] initWithCapacity:sz];
+    NSException* nsex = nil;
     try
     {
         int i;
@@ -765,8 +829,12 @@ typedef enum { dummy } Dummy_Enum;
     }
     catch(const std::exception& ex)
     {
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
         [arr release];
-        rethrowObjCException(ex);
+        @throw nsex;
     }
     return arr;
 }
@@ -789,15 +857,20 @@ typedef enum { dummy } Dummy_Enum;
             @throw ex;
         }
 
+        NSException* nsex = nil;
         try
         {
             is_->readObject(new IceObjC::ReadObjectForKey(dictionary, key, typeId));
         }
         catch(const std::exception& ex)
         {
+            nsex = toObjCException(ex);
+        }
+        if(nsex != nil)
+        {
             [key release];
             [dictionary release];
-            rethrowObjCException(ex);
+            @throw nsex;
         }
         [key release];
     }
@@ -872,21 +945,24 @@ typedef enum { dummy } Dummy_Enum;
 
 -(NSString*) readTypeId
 {
+    NSException* nsex = nil;
     try
     {
         return toNSString(is_->readTypeId());
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(void) throwException
 {
     ICEUserException* ex = nil;
     bool usesClasses = false;
+    NSException* nsex = nil;
     try
     {
         usesClasses = is_->readBool();
@@ -920,7 +996,11 @@ typedef enum { dummy } Dummy_Enum;
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 
     if(ex)
@@ -960,98 +1040,138 @@ typedef enum { dummy } Dummy_Enum;
 
 -(void) startSlice
 {
+    NSException* nsex = nil;
     try
     {
         is_->startSlice();
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(void) endSlice
 {
+    NSException* nsex = nil;
     try
     {
         is_->endSlice();
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(void) skipSlice
 {
+    NSException* nsex = nil;
     try
     {
         is_->skipSlice();
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(void) startEncapsulation
 {
+    NSException* nsex = nil;
     try
     {
         is_->startEncapsulation();
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(void) endEncapsulation
 {
+    NSException* nsex = nil;
     try
     {
         is_->endEncapsulation();
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(void) skipEncapsulation
 {
+    NSException* nsex = nil;
     try
     {
         is_->skipEncapsulation();
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(void) readPendingObjects
 {
+    NSException* nsex = nil;
     try
     {
         is_->readPendingObjects();
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(void) rewind
 {
+    NSException* nsex = nil;
     try
     {
         is_->rewind();
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-    } 
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
+    }
 }
 
 @end
@@ -1100,18 +1220,24 @@ typedef enum { dummy } Dummy_Enum;
 
 -(void)writeBool:(BOOL)v
 {
+    NSException* nsex = nil;
     try
     {
         os_->writeBool(v);
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(void) writeBoolSeq:(NSData*)v
 {
+    NSException* nsex = nil;
     try
     {
         v == nil ? os_->writeSize(0)
@@ -1119,24 +1245,34 @@ typedef enum { dummy } Dummy_Enum;
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(void) writeByte:(ICEByte)v
 {
+    NSException* nsex = nil;
     try
     {
         os_->writeByte(v);
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(void) writeByteSeq:(NSData*)v
 { 
+    NSException* nsex = nil;
     try
     {
         v == nil ? os_->writeSize(0)
@@ -1144,24 +1280,34 @@ typedef enum { dummy } Dummy_Enum;
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(void) writeShort:(ICEShort)v
 {
+    NSException* nsex = nil;
     try
     {
         os_->writeShort(v);
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(void) writeShortSeq:(NSData*)v
 {
+    NSException* nsex = nil;
     try
     {
         v == nil ? os_->writeSize(0)
@@ -1169,25 +1315,35 @@ typedef enum { dummy } Dummy_Enum;
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 
 -(void) writeInt:(ICEInt)v
 {
+    NSException* nsex = nil;
     try
     {
         os_->writeInt(v);
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(void) writeIntSeq:(NSData*)v
 {
+    NSException* nsex = nil;
     try
     {
         v == nil ? os_->writeSize(0)
@@ -1195,24 +1351,34 @@ typedef enum { dummy } Dummy_Enum;
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(void) writeLong:(ICELong)v
 {
+    NSException* nsex = nil;
     try
     {
         os_->writeLong(v);
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(void) writeLongSeq:(NSData*)v
 {
+    NSException* nsex = nil;
     try
     {
         v == nil ? os_->writeSize(0)
@@ -1220,25 +1386,35 @@ typedef enum { dummy } Dummy_Enum;
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 
 -(void) writeFloat:(ICEFloat)v
 {
+    NSException* nsex = nil;
     try
     {
         os_->writeFloat(v);
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(void) writeFloatSeq:(NSData*)v
 {
+    NSException* nsex = nil;
     try
     {
         v == nil ? os_->writeSize(0)
@@ -1246,25 +1422,35 @@ typedef enum { dummy } Dummy_Enum;
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 
 -(void) writeDouble:(ICEDouble)v
 {
+    NSException* nsex = nil;
     try
     {
         os_->writeDouble(v);
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(void) writeDoubleSeq:(NSData*)v
 {
+    NSException* nsex = nil;
     try
     {
         v == nil ? os_->writeSize(0)
@@ -1273,25 +1459,35 @@ typedef enum { dummy } Dummy_Enum;
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 
 -(void) writeString:(NSString*)v
 {
+    NSException* nsex = nil;
     try
     {
 	os_->writeString(fromNSString(v));
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(void) writeStringSeq:(NSArray*)v
 {
+    NSException* nsex = nil;
     try
     {
 	std::vector<std::string> s;
@@ -1299,7 +1495,11 @@ typedef enum { dummy } Dummy_Enum;
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
@@ -1347,6 +1547,7 @@ typedef enum { dummy } Dummy_Enum;
     {
 	@throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"enumerator out of range"];
     }
+    NSException* nsex = nil;
     try
     {
         if(limit <= 0x7f)
@@ -1364,7 +1565,11 @@ typedef enum { dummy } Dummy_Enum;
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
@@ -1377,6 +1582,7 @@ typedef enum { dummy } Dummy_Enum;
 //
 -(void) writeEnumSeq:(NSData*)v limit:(ICEInt)limit
 {
+    NSException* nsex = nil;
     try
     {
 	int count = v == nil ? 0 : [v length] / ENUM_SIZE;
@@ -1426,32 +1632,46 @@ typedef enum { dummy } Dummy_Enum;
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(void) writeSize:(ICEInt)v
 {
+    NSException* nsex = nil;
     try
     {
         os_->writeSize(v);
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 
 -(void) writeProxy:(id<ICEObjectPrx>)v
 {
+    NSException* nsex = nil;
     try
     {
         os_->writeProxy([(ICEObjectPrx*)v objectPrx__]);
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
@@ -1471,6 +1691,7 @@ typedef enum { dummy } Dummy_Enum;
                                              expectedType:expectedType];
     }
 
+    NSException* nsex = nil;
     try
     {
         if(v == nil)
@@ -1505,7 +1726,11 @@ typedef enum { dummy } Dummy_Enum;
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
@@ -1549,13 +1774,18 @@ typedef enum { dummy } Dummy_Enum;
 
 -(void) writeTypeId:(NSString*)v
 {
+    NSException* nsex = nil;
     try
     {
         os_->writeTypeId([v UTF8String]);
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
@@ -1572,66 +1802,92 @@ typedef enum { dummy } Dummy_Enum;
 
 -(void) startSlice
 {
+    NSException* nsex = nil;
     try
     {
         os_->startSlice();
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(void) endSlice
 {
+    NSException* nsex = nil;
     try
     {
         os_->endSlice();
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(void) startEncapsulation
 {
+    NSException* nsex = nil;
     try
     {
         os_->startEncapsulation();
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(void) endEncapsulation
 {
+    NSException* nsex = nil;
     try
     {
         os_->endEncapsulation();
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(void) writePendingObjects
 {
+    NSException* nsex = nil;
     try
     {
         os_->writePendingObjects();
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(NSMutableData*) finished
 {
+    NSException* nsex = nil;
     try
     {
         std::vector<Ice::Byte> buf;
@@ -1640,21 +1896,27 @@ typedef enum { dummy } Dummy_Enum;
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 -(void) reset:(BOOL) clearBuffer
 {
+    NSException* nsex = nil;
     try
     {
         os_->reset(clearBuffer);
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-    } 
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
+    }
 }
 @end
 

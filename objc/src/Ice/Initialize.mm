@@ -197,6 +197,7 @@ private:
 
 +(id<ICEProperties>) createProperties:(int*)argc argv:(char*[])argv
 { 
+    NSException* nsex = nil;
     try
     {
         Ice::PropertiesPtr properties;
@@ -212,9 +213,10 @@ private:
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 +(id<ICECommunicator>) createCommunicator
@@ -248,6 +250,7 @@ private:
                                            reason_:@"properties were not created with createProperties"];
     }
 
+    NSException* nsex = nil;
     try
     {
         Ice::InitializationData data;
@@ -297,13 +300,15 @@ private:
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 +(id<ICEInputStream>) createInputStream:(id<ICECommunicator>)communicator data:(NSData*)data
 {
+    NSException* nsex = nil;
     try
     {
         Ice::CommunicatorPtr com = [(ICECommunicator*)communicator communicator];
@@ -321,13 +326,15 @@ private:
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 +(id<ICEOutputStream>) createOutputStream:(id<ICECommunicator>)communicator
 {
+    NSException* nsex = nil;
     try
     {
         Ice::CommunicatorPtr com = [(ICECommunicator*)communicator communicator];
@@ -343,9 +350,10 @@ private:
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 +(NSString*) generateUUID
@@ -361,7 +369,7 @@ private:
     {
         [ns addObject:[NSString stringWithCString:argv[i] encoding:NSUTF8StringEncoding]];
     }
-    return [ns copy];
+    return [[ns copy] autorelease];
 }
 
 +(void)stringSeqToArgs:(NSArray*)args argc:(int*)argc argv:(char*[])argv;

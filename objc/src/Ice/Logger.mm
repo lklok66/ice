@@ -35,8 +35,18 @@ virtual void
 print(const std::string& msg)
 {
     NSString* s = toNSString(msg);
-    [_logger print:s];
-    [s release];
+    @try
+    {
+        [_logger print:s];
+    }
+    @catch(NSException* ex)
+    {
+        rethrowCxxException(ex);
+    }
+    @finally
+    {
+        [s release];
+    }
 }
 
 virtual void 
@@ -44,25 +54,55 @@ trace(const std::string& category, const std::string& msg)
 {
     NSString* s1 = toNSString(category);
     NSString* s2 = toNSString(msg);
-    [_logger trace:s1 message:s2];
-    [s1 release];
-    [s2 release];
+    @try
+    {
+        [_logger trace:s1 message:s2];
+    }
+    @catch(NSException* ex)
+    {
+        rethrowCxxException(ex);
+    }
+    @finally
+    {
+        [s1 release];
+        [s2 release];
+    }
 }
 
 virtual void 
 warning(const std::string& msg)
 {
     NSString* s = toNSString(msg);
-    [_logger warning:s];
-    [s release];
+    @try
+    {
+        [_logger warning:s];
+    }
+    @catch(NSException* ex)
+    {
+        rethrowCxxException(ex);
+    }
+    @finally
+    {
+        [s release];
+    }
 }
 
 virtual void 
 error(const std::string& msg)
 {
     NSString* s = toNSString(msg);
-    [_logger error:s];
-    [s release];
+    @try
+    {
+        [_logger error:s];
+    }
+    @catch(NSException* ex)
+    {
+        rethrowCxxException(ex);
+    }
+    @finally
+    {
+        [s release];
+    }
 }
 
 id<ICELogger>

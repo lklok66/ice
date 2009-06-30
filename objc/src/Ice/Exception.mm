@@ -16,10 +16,6 @@
 
 #import <Foundation/NSKeyedArchiver.h>
 
-//
-// TODO: add dealloc.
-//
-
 @implementation ICEException
 -(id)init
 {

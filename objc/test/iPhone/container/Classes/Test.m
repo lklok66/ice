@@ -25,7 +25,7 @@
         t->server = server;
         t->client = client;
     }
-    return t;
+    return [t autorelease];
 }
 
 -(int)server

@@ -13,7 +13,7 @@
 #import <Foundation/NSAutoreleasePool.h>
 #import <stdio.h>
 
-#if !TARGET_OS_IPHONE
+#if ICE_OBJC_GC
   #import <objc/objc-auto.h>
 #endif
 
@@ -54,7 +54,7 @@ listRecursive(id<FSDirectoryPrx> dir, int depth)
 int
 main(int argc, char* argv[])
 {
-#if !TARGET_OS_IPHONE
+#if ICE_OBJC_GC
     objc_startCollectorThread();
 #endif
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];

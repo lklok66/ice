@@ -27,7 +27,7 @@ run(id<ICECommunicator> communicator)
     [[communicator getProperties] setProperty:@"TestAdapter1.ThreadPool.SizeWarn" value:@"0"]; 
     [[communicator getProperties] setProperty:@"TestAdapter1.ThreadPool.Serialize" value:@"0"];
     id<ICEObjectAdapter> adapter1 = [communicator createObjectAdapter:@"TestAdapter1"];
-    [adapter1 add:[[HoldI alloc] init] identity:[communicator stringToIdentity:@"hold"]];
+    [adapter1 add:[[[HoldI alloc] init] autorelease] identity:[communicator stringToIdentity:@"hold"]];
 
     [[communicator getProperties] setProperty:@"TestAdapter2.Endpoints" value:@"default -p 12011 -t 10000:udp"];
     [[communicator getProperties] setProperty:@"TestAdapter2.ThreadPool.Size" value:@"5"]; 
@@ -35,7 +35,7 @@ run(id<ICECommunicator> communicator)
     [[communicator getProperties] setProperty:@"TestAdapter2.ThreadPool.SizeWarn" value:@"0"]; 
     [[communicator getProperties] setProperty:@"TestAdapter2.ThreadPool.Serialize" value:@"1"];
     id<ICEObjectAdapter> adapter2 = [communicator createObjectAdapter:@"TestAdapter2"];
-    [adapter2 add:[[HoldI alloc] init] identity:[communicator stringToIdentity:@"hold"]];
+    [adapter2 add:[[[HoldI alloc] init] autorelease] identity:[communicator stringToIdentity:@"hold"]];
 
     [adapter1 activate];
     [adapter2 activate];

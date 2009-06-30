@@ -72,7 +72,8 @@ void ice_exception(const Ice::Exception& ex)
     {
         @try
         {
-            rethrowObjCException(ex);
+            NSException* nsex = toObjCException(ex);
+            @throw nsex;
         }
         @catch(ICEException* e)
         {
@@ -460,6 +461,7 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
 
 -(id<ICEOutputStream>) createOutputStream__
 {
+    NSException* nsex = nil;
     try
     {
         Ice::OutputStreamPtr os = Ice::createOutputStream(OBJECTPRX->ice_getCommunicator());
@@ -467,9 +469,10 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 -(void) checkTwowayOnly__:(NSString*)name
 {
@@ -486,6 +489,7 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
          context:(ICEContext*)context
 {
     BOOL ok = YES; // Keep the compiler happy.
+    NSException* nsex = nil;
     try
     {
         std::vector<Ice::Byte> inParams;
@@ -533,7 +537,11 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 
     if(!ok)
@@ -554,6 +562,7 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
                     os:(id<ICEOutputStream>)os
                context:(ICEContext*)context
 {
+    NSException* nsex = nil;
     try
     {
         std::vector<Ice::Byte> inParams;
@@ -588,9 +597,10 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return NO; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return NO; // Keep the compiler happy.
 }
 
 -(id) copyWithZone:(NSZone *)zone
@@ -667,18 +677,21 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
 
 -(BOOL) ice_isA:(NSString*)typeId
 {
+    NSException* nsex = nil;
     try
     {
         return OBJECTPRX->ice_isA(fromNSString(typeId));
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return NO; // Keep the compiler happy
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return NO; // Keep the compiler happy
 }
 -(BOOL) ice_isA:(NSString*)typeId context:(ICEContext*)context
 {
+    NSException* nsex = nil;
     try
     {
         Ice::Context ctx;
@@ -686,24 +699,31 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return NO; // Keep the compiler happy
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return NO; // Keep the compiler happy
 }
 
 -(void) ice_ping
 {
+    NSException* nsex = nil;
     try
     {
         OBJECTPRX->ice_ping();
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 -(void) ice_ping:(ICEContext*)context
 {
+    NSException* nsex = nil;
     try
     {
         Ice::Context ctx;
@@ -711,24 +731,31 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 
 -(NSArray*) ice_ids
 {
+    NSException* nsex = nil;
     try
     {
         return [toNSArray(OBJECTPRX->ice_ids()) autorelease];
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return NO; // Keep the compiler happy
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return NO; // Keep the compiler happy
 }
 -(NSArray*) ice_ids:(ICEContext*)context
 {
+    NSException* nsex = nil;
     try
     {
         Ice::Context ctx;
@@ -736,25 +763,29 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return NO; // Keep the compiler happy
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return NO; // Keep the compiler happy
 }
 
 -(NSString*) ice_id
 {
+    NSException* nsex = nil;
     try
     {
         return [toNSString(OBJECTPRX->ice_id()) autorelease];
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return NO; // Keep the compiler happy
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return NO; // Keep the compiler happy
 }
 -(NSString*) ice_id:(ICEContext*)context
 {
+    NSException* nsex = nil;
     try
     {
         Ice::Context ctx;
@@ -762,9 +793,10 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return NO; // Keep the compiler happy
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return NO; // Keep the compiler happy
 }
 
 -(BOOL) ice_invoke:(NSString*)operation 
@@ -772,6 +804,7 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
           inParams:(NSData*)inParams 
          outParams:(NSMutableData**)outParams
 {
+    NSException* nsex = nil;
     try
     {
         std::pair<const Ice::Byte*, const Ice::Byte*> inP((ICEByte*)[inParams bytes], 
@@ -783,9 +816,10 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return NO; // Keep the compiler happy
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return NO; // Keep the compiler happy
 }
 
 -(BOOL) ice_invoke:(NSString*)operation 
@@ -794,6 +828,7 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
          outParams:(NSMutableData**)outParams
            context:(ICEContext*)context
 {
+    NSException* nsex = nil;
     try
     {
         Ice::Context ctx;
@@ -810,9 +845,10 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return NO; // Keep the compiler happy
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return NO; // Keep the compiler happy
 }
 
 -(BOOL) ice_invoke_async:(id)target
@@ -846,6 +882,7 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
                     mode:(ICEOperationMode)mode 
                 inParams:(NSData*)inParams
 {
+    NSException* nsex = nil;
     try
     {
         std::pair<const Ice::Byte*, const Ice::Byte*> inP((ICEByte*)[inParams bytes], 
@@ -863,9 +900,10 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return NO; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return NO; // Keep the compiler happy.
 }
 
 -(BOOL) ice_invoke_async:(id)target
@@ -877,6 +915,7 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
                 inParams:(NSData*)inParams 
                  context:(ICEContext*)context
 {
+    NSException* nsex = nil;
     try
     {
         std::pair<const Ice::Byte*, const Ice::Byte*> inP((ICEByte*)[inParams bytes], 
@@ -896,9 +935,10 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return NO; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return NO; // Keep the compiler happy.
 }
 
 -(ICEIdentity*) ice_getIdentity
@@ -1060,37 +1100,46 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
 }
 -(id<ICEConnection>) ice_getConnection
 {
+    NSException* nsex = nil;
     try
     {
         return [ICEConnection wrapperWithCxxObject:OBJECTPRX->ice_getConnection().get()];
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
     return nil; // Keep the compiler happy.
 }
 -(id<ICEConnection>) ice_getCachedConnection
 {
+    NSException* nsex = nil;
     try
     {
         return [ICEConnection wrapperWithCxxObject:OBJECTPRX->ice_getCachedConnection().get()];
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
     return nil; // Keep the compiler happy.
 }
 -(void) ice_flushBatchRequests
 {
+    NSException* nsex = nil;
     try
     {
         OBJECTPRX->ice_flushBatchRequests();
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 -(BOOL) ice_flushBatchRequests_async:(id)target exception:(SEL)exception
@@ -1099,6 +1148,7 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
 }
 -(BOOL) ice_flushBatchRequests_async:(id)target exception:(SEL)exception sent:(SEL)sent
 {
+    NSException* nsex = nil;
     try
     {
         Ice::AMI_Object_ice_flushBatchRequestsPtr amiCB;
@@ -1114,8 +1164,9 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return NO; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return NO; // Keep the compiler happy.
 }
 @end

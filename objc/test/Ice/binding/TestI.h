@@ -9,7 +9,7 @@
 
 #import <BindingTest.h>
 
-@interface RemoteCommunicatorI : TestBindingRemoteCommunicator
+@interface RemoteCommunicatorI : TestBindingRemoteCommunicator<TestBindingRemoteCommunicator>
 {
     int nextPort_;
 }
@@ -19,7 +19,7 @@
 -(void) shutdown:(ICECurrent *)current;
 @end
 
-@interface RemoteObjectAdapterI : TestBindingRemoteObjectAdapter
+@interface RemoteObjectAdapterI : TestBindingRemoteObjectAdapter<TestBindingRemoteObjectAdapter>
 {
     id<ICEObjectAdapter> adapter_;
     id<TestBindingTestIntfPrx> testIntf_;
@@ -29,7 +29,7 @@
 -(void) deactivate:(ICECurrent *)current;
 @end
 
-@interface TestBindingI : TestBindingTestIntf
+@interface TestBindingI : TestBindingTestIntf<TestBindingTestIntf>
 -(NSString *) getAdapterName:(ICECurrent *)current;
 @end
 

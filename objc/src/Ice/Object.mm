@@ -213,6 +213,7 @@ IceObjC::ObjectI::ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& cb
 
     if(exception != nil)
     {
+        [os release];
         rethrowCxxException(exception, true); // True = release the exception.
     }
     
@@ -232,7 +233,6 @@ IceObjC::BlobjectI::ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& 
                                      const std::pair<const Ice::Byte*, const Ice::Byte*>& inParams,
                                      const Ice::Current& current)
 {
-
     ICECurrent* c = [[ICECurrent alloc] initWithCurrent:current];
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     BOOL ok = YES; // Keep the compiler happy.

@@ -279,7 +279,7 @@
 {
     id<ICECommunicator> communicator = [current.adapter getCommunicator];
     id<ICEOutputStream> o = [ICEUtil createOutputStream:communicator];
-    TestObjectsAlsoEmpty* ae = [[TestObjectsAlsoEmpty alloc] init];
+    TestObjectsAlsoEmpty* ae = [[[TestObjectsAlsoEmpty alloc] init] autorelease];
     [o writeObject:ae typeId:[TestObjectsAlsoEmpty ice_staticId]];
     [o writePendingObjects];
     *outParams = [o finished];

@@ -10,11 +10,5 @@
 #import <SlicingObjectsTestServer.h>
 #import <SlicingObjectsForward.h>
 
-@interface TestSlicingObjectsServerI : TestSlicingObjectsServerTestIntf
-{
-    TestSlicingObjectsServerB* oneElementCycle_;
-    TestSlicingObjectsServerB* twoElementCycle_;
-}
+@interface TestSlicingObjectsServerI : TestSlicingObjectsServerTestIntf<TestSlicingObjectsServerTestIntf>
 @end
-
-

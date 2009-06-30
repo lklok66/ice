@@ -113,8 +113,8 @@ retryAllTests(id<ICECommunicator> communicator)
     [retry1 op:NO];
     tprintf("ok\n");
 
-    TestRetryCallback* cb1 = [[TestRetryCallback alloc] init];
-    TestRetryCallback* cb2 = [[TestRetryCallback alloc] init];
+    TestRetryCallback* cb1 = [[[TestRetryCallback alloc] init] autorelease];
+    TestRetryCallback* cb2 = [[[TestRetryCallback alloc] init] autorelease];
 
     tprintf("calling regular AMI operation with first proxy... ");
     [retry1 op_async:cb1 response:@selector(retryOpResponse) exception:@selector(retryOpException:) kill:NO];
@@ -130,9 +130,6 @@ retryAllTests(id<ICECommunicator> communicator)
     [retry1 op_async:cb1 response:@selector(retryOpResponse) exception:@selector(retryOpException:) kill:NO];
     [cb1 check];
     tprintf("ok\n");
-
-    [cb1 release];
-    [cb2 release];
 
     return retry1;
 }

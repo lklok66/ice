@@ -98,13 +98,6 @@
 		34B3B5A70FD7E8640018C227 /* TestI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5A00FD7E8640018C227 /* TestI.m */; };
 		34B3B5A80FD7E8640018C227 /* SlicingExceptionsTestClient.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5A20FD7E8640018C227 /* SlicingExceptionsTestClient.ice */; };
 		34B3B5A90FD7E8640018C227 /* Server.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5A30FD7E8640018C227 /* Server.m */; };
-		34B3B5B20FD7E8700018C227 /* SlicingObjectsTestServer.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5AA0FD7E8700018C227 /* SlicingObjectsTestServer.ice */; settings = {COMPILER_FLAGS = "-I../../Ice/slicing/objects"; }; };
-		34B3B5B30FD7E8700018C227 /* TestI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5AB0FD7E8700018C227 /* TestI.m */; };
-		34B3B5B40FD7E8700018C227 /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5AC0FD7E8700018C227 /* Client.m */; };
-		34B3B5B50FD7E8700018C227 /* SlicingObjectsForward.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5AD0FD7E8700018C227 /* SlicingObjectsForward.ice */; };
-		34B3B5B60FD7E8700018C227 /* AllTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5AE0FD7E8700018C227 /* AllTests.m */; };
-		34B3B5B70FD7E8700018C227 /* SlicingObjectsTestClient.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5B00FD7E8700018C227 /* SlicingObjectsTestClient.ice */; settings = {COMPILER_FLAGS = "-I../../Ice/slicing/objects"; }; };
-		34B3B5B80FD7E8700018C227 /* Server.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5B10FD7E8700018C227 /* Server.m */; };
 		34B3B6030FD7EFCC0018C227 /* AdapterDeactivationTest.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B6020FD7EFCC0018C227 /* AdapterDeactivationTest.ice */; };
 		34B3B66B0FD7F41C0018C227 /* OperationsTest.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B66A0FD7F41C0018C227 /* OperationsTest.ice */; };
 		34B7662A0E8D55E700CE4701 /* TestSelectController.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B766290E8D55E700CE4701 /* TestSelectController.m */; };
@@ -226,14 +219,6 @@
 		34B3B5A10FD7E8640018C227 /* TestI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestI.h; path = ../../Ice/slicing/exceptions/TestI.h; sourceTree = SOURCE_ROOT; };
 		34B3B5A20FD7E8640018C227 /* SlicingExceptionsTestClient.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = SlicingExceptionsTestClient.ice; path = ../../Ice/slicing/exceptions/SlicingExceptionsTestClient.ice; sourceTree = SOURCE_ROOT; };
 		34B3B5A30FD7E8640018C227 /* Server.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Server.m; path = ../../Ice/slicing/exceptions/Server.m; sourceTree = SOURCE_ROOT; };
-		34B3B5AA0FD7E8700018C227 /* SlicingObjectsTestServer.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = SlicingObjectsTestServer.ice; path = ../../Ice/slicing/objects/SlicingObjectsTestServer.ice; sourceTree = SOURCE_ROOT; };
-		34B3B5AB0FD7E8700018C227 /* TestI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestI.m; path = ../../Ice/slicing/objects/TestI.m; sourceTree = SOURCE_ROOT; };
-		34B3B5AC0FD7E8700018C227 /* Client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Client.m; path = ../../Ice/slicing/objects/Client.m; sourceTree = SOURCE_ROOT; };
-		34B3B5AD0FD7E8700018C227 /* SlicingObjectsForward.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = SlicingObjectsForward.ice; path = ../../Ice/slicing/objects/SlicingObjectsForward.ice; sourceTree = SOURCE_ROOT; };
-		34B3B5AE0FD7E8700018C227 /* AllTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AllTests.m; path = ../../Ice/slicing/objects/AllTests.m; sourceTree = SOURCE_ROOT; };
-		34B3B5AF0FD7E8700018C227 /* TestI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestI.h; path = ../../Ice/slicing/objects/TestI.h; sourceTree = SOURCE_ROOT; };
-		34B3B5B00FD7E8700018C227 /* SlicingObjectsTestClient.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = SlicingObjectsTestClient.ice; path = ../../Ice/slicing/objects/SlicingObjectsTestClient.ice; sourceTree = SOURCE_ROOT; };
-		34B3B5B10FD7E8700018C227 /* Server.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Server.m; path = ../../Ice/slicing/objects/Server.m; sourceTree = SOURCE_ROOT; };
 		34B3B6020FD7EFCC0018C227 /* AdapterDeactivationTest.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = AdapterDeactivationTest.ice; path = ../../Ice/adapterDeactivation/AdapterDeactivationTest.ice; sourceTree = SOURCE_ROOT; };
 		34B3B66A0FD7F41C0018C227 /* OperationsTest.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = OperationsTest.ice; path = ../../Ice/operations/OperationsTest.ice; sourceTree = SOURCE_ROOT; };
 		34B766280E8D55E700CE4701 /* TestSelectController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestSelectController.h; sourceTree = "<group>"; };
@@ -302,7 +287,6 @@
 			children = (
 				146B33FE0FE8BBF9009C6199 /* hold */,
 				34B3B5160FD7E7490018C227 /* slicing-exceptions */,
-				34B3B5150FD7E7420018C227 /* slicing-objects */,
 				34B3B5140FD7E73E0018C227 /* timeout */,
 				34B3B5120FD7E7340018C227 /* retry */,
 				34B3B5110FD7E72F0018C227 /* proxy */,
@@ -552,21 +536,6 @@
 			name = timeout;
 			sourceTree = "<group>";
 		};
-		34B3B5150FD7E7420018C227 /* slicing-objects */ = {
-			isa = PBXGroup;
-			children = (
-				34B3B5AA0FD7E8700018C227 /* SlicingObjectsTestServer.ice */,
-				34B3B5AB0FD7E8700018C227 /* TestI.m */,
-				34B3B5AC0FD7E8700018C227 /* Client.m */,
-				34B3B5AD0FD7E8700018C227 /* SlicingObjectsForward.ice */,
-				34B3B5AE0FD7E8700018C227 /* AllTests.m */,
-				34B3B5AF0FD7E8700018C227 /* TestI.h */,
-				34B3B5B00FD7E8700018C227 /* SlicingObjectsTestClient.ice */,
-				34B3B5B10FD7E8700018C227 /* Server.m */,
-			);
-			name = "slicing-objects";
-			sourceTree = "<group>";
-		};
 		34B3B5160FD7E7490018C227 /* slicing-exceptions */ = {
 			isa = PBXGroup;
 			children = (
@@ -735,13 +704,6 @@
 				34B3B5A70FD7E8640018C227 /* TestI.m in Sources */,
 				34B3B5A80FD7E8640018C227 /* SlicingExceptionsTestClient.ice in Sources */,
 				34B3B5A90FD7E8640018C227 /* Server.m in Sources */,
-				34B3B5B20FD7E8700018C227 /* SlicingObjectsTestServer.ice in Sources */,
-				34B3B5B30FD7E8700018C227 /* TestI.m in Sources */,
-				34B3B5B40FD7E8700018C227 /* Client.m in Sources */,
-				34B3B5B50FD7E8700018C227 /* SlicingObjectsForward.ice in Sources */,
-				34B3B5B60FD7E8700018C227 /* AllTests.m in Sources */,
-				34B3B5B70FD7E8700018C227 /* SlicingObjectsTestClient.ice in Sources */,
-				34B3B5B80FD7E8700018C227 /* Server.m in Sources */,
 				34B3B6030FD7EFCC0018C227 /* AdapterDeactivationTest.ice in Sources */,
 				34B3B66B0FD7F41C0018C227 /* OperationsTest.ice in Sources */,
 				146B34050FE8BC61009C6199 /* AllTests.m in Sources */,

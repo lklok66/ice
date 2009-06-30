@@ -15,8 +15,8 @@
 
 #import <objc/runtime.h>
 
-void
-rethrowObjCException(const std::exception& ex)
+NSException*
+toObjCException(const std::exception& ex)
 {
     NSException *nsex;
     {
@@ -56,7 +56,7 @@ rethrowObjCException(const std::exception& ex)
             }
         }
     }
-    @throw nsex;
+    return nsex;
 }
 
 void

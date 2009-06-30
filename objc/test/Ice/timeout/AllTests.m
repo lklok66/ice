@@ -213,10 +213,9 @@ timeoutAllTests(id<ICECommunicator> communicator)
         // Expect TimeoutException.
         //
         id<TestTimeoutTimeoutPrx> to = [TestTimeoutTimeoutPrx uncheckedCast:[obj ice_timeout:500]];
-        TestTimeoutCallback* cb = [[TestTimeoutCallback alloc] init];
+        TestTimeoutCallback* cb = [[[TestTimeoutCallback alloc] init] autorelease];
         [to sleep_async:cb response:@selector(sleepExResponse) exception:@selector(sleepExException:) to:2000];
         [cb check];
-        [cb release];
     }
     {
         //
@@ -224,10 +223,9 @@ timeoutAllTests(id<ICECommunicator> communicator)
         //
         [timeout op]; // Ensure adapter is active.
         id<TestTimeoutTimeoutPrx> to = [TestTimeoutTimeoutPrx uncheckedCast:[obj ice_timeout:1000]];
-        TestTimeoutCallback* cb = [[TestTimeoutCallback alloc] init];
+        TestTimeoutCallback* cb = [[[TestTimeoutCallback alloc] init] autorelease];
         [to sleep_async:cb response:@selector(sleepResponse) exception:@selector(sleepException:) to:500];
         [cb check];
-        [cb release];
     }
     tprintf("ok\n");
 
@@ -239,10 +237,9 @@ timeoutAllTests(id<ICECommunicator> communicator)
         id<TestTimeoutTimeoutPrx> to = [TestTimeoutTimeoutPrx uncheckedCast:[obj ice_timeout:500]];
         [to holdAdapter:2000];
         TestTimeoutByteSeq* seq = [TestTimeoutMutableByteSeq dataWithLength:10000];
-        TestTimeoutCallback* cb = [[TestTimeoutCallback alloc] init];
+        TestTimeoutCallback* cb = [[[TestTimeoutCallback alloc] init] autorelease];
         [to sendData_async:cb response:@selector(sendDataExResponse) exception:@selector(sendDataExException:) seq:seq];
         [cb check];
-        [cb release];
     }
     {
         //
@@ -252,10 +249,9 @@ timeoutAllTests(id<ICECommunicator> communicator)
         id<TestTimeoutTimeoutPrx> to = [TestTimeoutTimeoutPrx uncheckedCast:[obj ice_timeout:1000]];
         [to holdAdapter:500];
         TestTimeoutByteSeq* seq = [TestTimeoutMutableByteSeq dataWithLength:10000];
-        TestTimeoutCallback* cb = [[TestTimeoutCallback alloc] init];
+        TestTimeoutCallback* cb = [[[TestTimeoutCallback alloc] init] autorelease];
         [to sendData_async:cb response:@selector(sendDataResponse) exception:@selector(sendDataException:) seq:seq];
         [cb check];
-        [cb release];
     }
     tprintf("ok\n");
 

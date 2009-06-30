@@ -110,12 +110,8 @@ defaultClientProperties(int* argc, char** argv)
         @"Ice.Default.Protocol", @"ssl",
         @"IceSSL.CheckCertName", @"0",
         @"IceSSL.CertAuthFile", @"cacert.der",
-	@"IceSSL.CertFile", @"c_rsa1024.pfx",
-	@"IceSSL.Password", @"password",
-#if TARGET_IPHONE_SIMULATOR && !__IPHONE_3_0
-        @"IceSSL.Keychain", @"test",
-        @"IceSSL.KeychainPassword", @"password"
-#endif     
+        @"IceSSL.CertFile", @"c_rsa1024.pfx",
+        @"IceSSL.Password", @"password",
     };
 
     int i;
@@ -135,7 +131,6 @@ defaultClientProperties(int* argc, char** argv)
 
     NSArray* args = [properties parseIceCommandLineOptions:[ICEUtil argsToStringSeq:*argc argv:argv]];
     [ICEUtil stringSeqToArgs:args argc:argc argv:argv];
-
     return properties;
 }
 
@@ -185,7 +180,7 @@ testFailed(const char* expr, const char* file, unsigned int line)
     tprintf("failed!\n");
     tprintf("%s:%u: assertion `%s' failed\n", file, line, expr);
 
-    @throw [[TestFailedException alloc] init];
+    @throw [[[TestFailedException alloc] init] autorelease];
 }
 
 #else

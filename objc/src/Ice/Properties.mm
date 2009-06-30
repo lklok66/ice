@@ -29,66 +29,77 @@
 
 -(NSString*) getProperty:(NSString*)key
 {
+    NSException* nsex = nil;
     try
     {
         return [toNSString(properties_->getProperty(fromNSString(key))) autorelease];
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 -(NSString*) getPropertyWithDefault:(NSString*)key value:(NSString*)value
 {
+    NSException* nsex = nil;
     try
     {
         return [toNSString(properties_->getPropertyWithDefault(fromNSString(key), fromNSString(value))) autorelease];
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 -(int) getPropertyAsInt:(NSString*)key
 {
+    NSException* nsex = nil;
     try
     {
         return properties_->getPropertyAsInt(fromNSString(key));
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return 0; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 -(int) getPropertyAsIntWithDefault:(NSString*)key value:(int)value
 {
+    NSException* nsex = nil;
     try
     {
         return properties_->getPropertyAsIntWithDefault(fromNSString(key), value);
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return 0; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 -(NSArray*) getPropertyAsList:(NSString*)key
 {
+    NSException* nsex = nil;
     try
     {
         return [toNSArray(properties_->getPropertyAsList(fromNSString(key))) autorelease];
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 -(NSArray*) getPropertyAsListWithDefault:(NSString*)key value:(NSArray*)value
 {
+    NSException* nsex = nil;
     try
     {
         std::vector<std::string> s;
@@ -97,47 +108,58 @@
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 -(NSDictionary*) getPropertiesForPrefix:(NSString*)prefix
 {
+    NSException* nsex = nil;
     try
     {
         return [toNSDictionary(properties_->getPropertiesForPrefix(fromNSString(prefix))) autorelease];
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 -(void) setProperty:(NSString*)key value:(NSString*)value
 {
+    NSException* nsex = nil;
     try
     {
         properties_->setProperty(fromNSString(key), fromNSString(value));
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 -(NSArray*) getCommandLineOptions
 {
+    NSException* nsex = nil;
     try
     {
         return [toNSArray(properties_->getCommandLineOptions()) autorelease];
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 -(NSArray*) parseCommandLineOptions:(NSString*)prefix options:(NSArray*)options
 {
+    NSException* nsex = nil;
     try
     {
         std::vector<std::string> o;
@@ -146,12 +168,14 @@
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 -(NSArray*) parseIceCommandLineOptions:(NSArray*)options
 {
+    NSException* nsex = nil;
     try
     {
         std::vector<std::string> o;
@@ -160,32 +184,40 @@
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 -(void) load:(NSString*)file
 {
+    NSException* nsex = nil;
     try
     {
         properties_->load(fromNSString(file));
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
     }
 }
 -(id<ICEProperties>) clone
 {
+    NSException* nsex = nil;
     try
     {
         return [ICEProperties wrapperWithCxxObject:properties_->clone().get()];
     }
     catch(const std::exception& ex)
     {
-        rethrowObjCException(ex);
-        return nil; // Keep the compiler happy.
+        nsex = toObjCException(ex);
     }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
 }
 
 @end

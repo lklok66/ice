@@ -65,6 +65,7 @@
     [tests release];
     [pickerView release];
     [sslSwitch release];
+    [loopSwitch release];
     [testViewController release];
     
     [super dealloc];

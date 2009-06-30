@@ -9,5 +9,5 @@
 
 #import <SlicingExceptionsTestServer.h>
 
-@interface TestSlicingExceptionsServerI : TestSlicingExceptionsServerTestIntf
+@interface TestSlicingExceptionsServerI : TestSlicingExceptionsServerTestIntf<TestSlicingExceptionsServerTestIntf>
 @end

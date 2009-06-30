@@ -27,9 +27,8 @@ run(id<ICECommunicator> communicator)
     //  
     id<ICEObjectAdapter> oa = [communicator createObjectAdapterWithEndpoints:@"MyOA" endpoints:@"tcp -h localhost"];
     
-    ICEObject* servant = [[TestInterceptorMyObjectI alloc] init];
-    InterceptorI* interceptor = [[InterceptorI alloc] init:servant];
-    [interceptor autorelease];
+    ICEObject* servant = [[[TestInterceptorMyObjectI alloc] init] autorelease];
+    InterceptorI* interceptor = [[[InterceptorI alloc] init:servant] autorelease];
     
     id<TestInterceptorMyObjectPrx> prx = [TestInterceptorMyObjectPrx uncheckedCast:[oa addWithUUID:interceptor]];
     

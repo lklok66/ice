@@ -88,19 +88,18 @@ onewaysAMI(id<ICECommunicator> communicator, id<TestOperationsMyClassPrx> proxy)
     id<TestOperationsMyClassPrx> p = [TestOperationsMyClassPrx uncheckedCast:[proxy ice_oneway]];
 
     {
-        OnewayCallback* cb = [[OnewayCallback alloc] init];
+        OnewayCallback* cb = [[[OnewayCallback alloc] init] autorelease];
         [p opVoid_async:cb response:@selector(opVoidResponse) exception:@selector(opVoidException:)];
 
         // Let's check if we can reuse the same callback object for another call.
         [p opVoid_async:cb response:@selector(opVoidResponse) exception:@selector(opVoidException:)];
-        [cb release];
     }
 
     {
         // Check that a call to a void operation raises NoEndpointException
         // in the ice_exception() callback instead of at the point of call.
         id<TestOperationsMyClassPrx> indirect = [TestOperationsMyClassPrx uncheckedCast:[p ice_adapterId:@"dummy"]];
-        OnewayCallback* cb = [[OnewayCallback alloc] init];
+        OnewayCallback* cb = [[[OnewayCallback alloc] init] autorelease];
         @try
         {
             [indirect opVoid_async:cb response:@selector(opVoidExResponse) exception:@selector(opVoidExException:)];
@@ -110,11 +109,10 @@ onewaysAMI(id<ICECommunicator> communicator, id<TestOperationsMyClassPrx> proxy)
             test(NO);
         }
         [cb check];
-        [cb release];
     }
 
     {
-        OnewayCallback* cb = [[OnewayCallback alloc] init];
+        OnewayCallback* cb = [[[OnewayCallback alloc] init] autorelease];
         @try
         {
             [p opByte_async:cb  response:@selector(opByteExResponse) exception:@selector(opByteExException:) p1:0 p2:0];
@@ -124,6 +122,5 @@ onewaysAMI(id<ICECommunicator> communicator, id<TestOperationsMyClassPrx> proxy)
         {
             // TODO: fix once we decide how.
         }
-        [cb release];
     }
 }

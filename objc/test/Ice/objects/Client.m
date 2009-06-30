@@ -21,6 +21,9 @@
 @end
 
 @implementation ClientMyObjectFactory
+
+// Note that the object factory must not autorelease the
+// returned objects.
 -(ICEObject*) create:(NSString*)type
 {
     if([type isEqualToString:@"::Test::B"])

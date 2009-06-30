@@ -17,7 +17,7 @@
 #include <string>
 
 
-void rethrowObjCException(const std::exception& ex);
+NSException* toObjCException(const std::exception& ex);
 void rethrowCxxException(NSException* ex, bool = false);
 
 //

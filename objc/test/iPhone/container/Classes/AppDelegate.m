@@ -45,8 +45,6 @@ int retryServer(int, char**);
 int retryClient(int, char**);
 int timeoutServer(int, char**);
 int timeoutClient(int, char**);
-int slicingObjectsServer(int, char**);
-int slicingObjectsClient(int, char**);
 int slicingExceptionsServer(int, char**);
 int slicingExceptionsClient(int, char**);
 
@@ -66,7 +64,6 @@ static const struct TestCases alltests[] =
 { @"proxy", proxyServer, proxyClient },
 { @"retry",retryServer, retryClient },
 { @"timeout",timeoutServer, timeoutClient },
-{ @"slicing/objects",slicingObjectsServer, slicingObjectsClient },
 { @"slicing/exceptions",slicingExceptionsServer, slicingExceptionsClient }
 };
 
