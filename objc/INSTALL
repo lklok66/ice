@@ -63,9 +63,9 @@ XCode Plugin
 ------------
 
 The XCode Plugin is required to build the Cocoa and iPhone demos from
-this distribution. It's also strongly recommended to develop Ice or
-Touch applications with Xcode as it greatly simplifies the process of
-building.
+this distribution. It's also strongly recommended to develop Ice for
+C++ or Ice Touch applications with Xcode as it greatly simplifies the
+process of building.
 
 To build the Xcode plug-in:
 

@@ -16,13 +16,13 @@ prefix			 ?= /opt/IceTouch-$(VERSION)
 #
 # The "root directory" for runpath embedded in executables. Can be
 # unset to avoid adding a runpath to Ice executables. This setting
-# only applies for MacOSX command line builds.
+# only applies for Mac OS X command line builds.
 embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 
 # Define OPTIMIZE_SIZE as yes if you want to build with minimal size.
 # Define OPTIMIZE_SPEED as yes if you want to build with maximum speed.
 # These options are mutually exclusive.
-# If neither is set, Ice-ObjC is built with debug information.
+# If neither is set, Ice Touch is built with debug information.
 #
 #OPTIMIZE_SIZE		= yes
 #OPTIMIZE_SPEED		= yes
@@ -41,15 +41,18 @@ embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 #COMPILE_FOR_COCOA 	        = yes
 
 #
-# The default is to build for a MacOSX command line dynamic library.
+# The default is to build for a Mac OS X command line dynamic library.
 #
 
-# The default SDK version is 2.0 for iPhone, and 3.0 for iPhone simulator.
+#
+# The default SDK version is 2.0 for iPhone, and 3.0 for iPhone
+# simulator.
+#
 #IPHONE_SDK_VERSION		= 3.0
 
 #
-# You can choose to build static libraries for the MacOSX command line
-# build.
+# You can choose to build static libraries for the Mac OS X command
+# line build.
 #
 #STATICLIBS			= yes
 
