@@ -319,7 +319,7 @@ for d in os.listdir(baseDemoDir):
         copy(os.path.join(baseDemoDir, d), os.path.join(demoDir, d))
 copy(os.path.join(baseDemoDir, "Makefile"), os.path.join(demoDir, "Makefile"))
 
-configSubstituteExprs = [(re.compile(regexpEscape("../../certs")), "../certs")]
+configSubstituteExprs = [(re.compile(regexpEscape("../../../certs")), "../certs")]
 makeSubstituteExprs = [ (re.compile("= \.\.$"), " = ."),
                         (re.compile(regexpEscape("../..")), ".."),
                         (re.compile(regexpEscape("../../..")), "../..")]
