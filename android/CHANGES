@@ -6,6 +6,13 @@ This file describes the change history for Ice for Android.
 
 
 ======================================================================
+Changes since version 0.1.1
+======================================================================
+
+- Fixed a NullPointerException in the network tracing code.
+
+
+======================================================================
 Changes since version 0.1.0
 ======================================================================
 
