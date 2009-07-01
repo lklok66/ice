@@ -37,6 +37,10 @@ endif
 
 CPPFLAGS	:= -I. -I../IceCpp/include -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src $(CPPPLATFORMFLAGS)
 
+ifeq ($(COMPILE_WITH_GC),yes)
+   CPPFLAGS		:= -DICE_OBJC_GC $(CPPFLAGS)
+endif
+
 $(PLATFORM_NAME)/%.o: $(SRCS_DIR)/%.cpp
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $< -o $@
 

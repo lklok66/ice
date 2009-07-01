@@ -115,7 +115,7 @@ endif
 
 ifeq ($(COMPILE_WITH_GC),)
     ifeq ($(PLATFORM_NAME),macosx)
-	COMPILE_WITH_GC=yes
+	COMPILE_WITH_GC = yes
     endif
 endif
 
@@ -183,8 +183,8 @@ else
     endif
 endif
 
-ifeq ($(COMPILE_WITH_GC),yes)
-   CPPPLATFORMFLAGS := -DICE_OBJC_GC $(CPPPLATFORMFLAGS)
+ifeq ($(COMPILE_WITH_GC),no)
+   CPPPLATFORMFLAGS := -DICE_OBJC_NOGC $(CPPPLATFORMFLAGS)
 endif
 
 ifdef ice_src_dist

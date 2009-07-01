@@ -37,6 +37,10 @@ OBJS 		:= $(addprefix $(PLATFORM_NAME)/,$(OBJS))
 
 CPPFLAGS        := -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src $(CPPPLATFORMFLAGS)
 
+ifeq ($(COMPILE_WITH_GC),yes)
+   CPPFLAGS		:= -DICE_OBJC_GC $(CPPFLAGS)
+endif
+
 all:: $(OBJS)
 
 install:: $(OBJS)

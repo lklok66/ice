@@ -12,7 +12,7 @@
 #import <BindingTest.h>
 
 #import <Foundation/NSAutoreleasePool.h>
-#if ICE_OBJC_GC
+#ifndef ICE_OBJC_NOGC
   #import <objc/objc-auto.h>
   #import <Foundation/NSGarbageCollector.h>
 #endif
@@ -32,7 +32,7 @@ run(id<ICECommunicator> communicator)
 int
 main(int argc, char* argv[])
 {
-#if ICE_OBJC_GC
+#ifndef ICE_OBJC_NOGC
     objc_startCollectorThread();
 #endif
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
@@ -75,7 +75,7 @@ main(int argc, char* argv[])
     }
 
     [pool release];
-#if ICE_OBJC_GC
+#ifndef ICE_OBJC_NOGC
     [[NSGarbageCollector defaultCollector] collectExhaustively];
 #endif
     return status;

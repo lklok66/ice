@@ -206,7 +206,7 @@ run(int argc, char* argv[], id<ICECommunicator> communicator)
 int
 main(int argc, char* argv[])
 {
-#if ICE_OBJC_GC
+#ifndef ICE_OBJC_NOGC
     objc_startCollectorThread();
 #endif
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];

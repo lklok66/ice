@@ -68,6 +68,10 @@ OBJS		:= $(addprefix $(PLATFORM_NAME)/,$(OBJC_OBJS)) \
 CPPFLAGS	:= -I.. -Iinclude -I../../include $(CPPFLAGS)
 SLICE2OBJCFLAGS	:= --ice --include-dir Ice $(SLICE2OBJCFLAGS)
 
+ifeq ($(COMPILE_WITH_GC),yes)
+   CPPFLAGS		:= -DICE_OBJC_GC $(CPPFLAGS)
+endif
+
 ifeq ($(COMPILE_WITH_CFSTREAM_TRANSPORT),yes)
     CPPFLAGS		:= -DICE_NO_KQUEUE $(CPPFLAGS)
 endif
