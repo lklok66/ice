@@ -49,7 +49,8 @@ filesToKeep = [
     "./objc",
     "./Xcode",
     "./slice",
-    "./certs"
+    "./certs",
+    "./scripts"
 ]
 
 def pathInList(p, l):
