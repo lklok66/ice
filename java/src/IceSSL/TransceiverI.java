@@ -92,7 +92,7 @@ final class TransceiverI implements IceInternal.Transceiver
                         se.initCause(ex);
                         throw se;
                     }
-                    
+
                     Ice.SocketException se = new Ice.SocketException();
                     se.initCause(ex);
                     throw se;
@@ -105,7 +105,7 @@ final class TransceiverI implements IceInternal.Transceiver
             }
         }
     }
-    
+
     class WriteThread extends TransceiverWriteThread
     {
         protected void write(Buffer buf)
@@ -164,7 +164,7 @@ final class TransceiverI implements IceInternal.Transceiver
                         // TODO: throw new IceInternal.LocalExceptionWrapper(se, false);
                         throw se;
                     }
-                    
+
                     Ice.SocketException se = new Ice.SocketException();
                     se.initCause(ex);
                     throw se;
@@ -177,7 +177,7 @@ final class TransceiverI implements IceInternal.Transceiver
             }
         }
     }
-    
+
     // This thread is responsible for connecting the SSL socket in the case that the
     // ConnectorI created the transceiver, and then subsequently handshaking and validating
     // the SSL connection.
@@ -185,17 +185,17 @@ final class TransceiverI implements IceInternal.Transceiver
     {
         private AsyncCallback _callback;
         private javax.net.ssl.SSLSocket _connectfd = null;
-        
+
         ConnectThread(AsyncCallback cb)
         {
             _callback = cb;
         }
-        
+
         public javax.net.ssl.SSLSocket getFd()
         {
             return _connectfd;
         }
-        
+
         public void run()
         {
             try
@@ -215,7 +215,7 @@ final class TransceiverI implements IceInternal.Transceiver
             }
             _callback.complete(null);
         }
-        
+
         private javax.net.ssl.SSLSocket connect()
         {
             if(_incoming)
@@ -272,7 +272,7 @@ final class TransceiverI implements IceInternal.Transceiver
 
                 fd.startHandshake();
                 fd.getSession().invalidate();
-                
+
                 return fd;
             }
             catch(java.net.ConnectException ex)
@@ -374,7 +374,7 @@ final class TransceiverI implements IceInternal.Transceiver
                     }
                 }
             }
-            
+
             _info = Util.populateConnectionInfo(fd.getSession(), fd, _adapterName, _incoming);
             _instance.verifyPeer(_info, fd, _host, _incoming);
 
@@ -412,7 +412,7 @@ final class TransceiverI implements IceInternal.Transceiver
             _connectThread.start();
             return false;
         }
-        
+
         case StateConnecting:
         {
             _state = StateConnected;
@@ -441,7 +441,7 @@ final class TransceiverI implements IceInternal.Transceiver
             }
 
             assert _readThread == null && _writeThread == null;
-            
+
             StringBuffer desc = new StringBuffer();
             desc.append(_fd.getLocalAddress());
             desc.append(':');
@@ -454,16 +454,16 @@ final class TransceiverI implements IceInternal.Transceiver
             _readThread = new ReadThread();
             _readThread.setName("SSLTransceiverReadThread:" + desc);
             _readThread.start();
-            
+
             _writeThread = new WriteThread();
             _writeThread.setName("SSLTransceiverWriteThread:" + desc);
             _writeThread.start();
             break;
         }
-        
+
         case StateConnected:
             assert false; // Not expected
-            
+
         case StateShutdown:
             _fd = _connectThread.getFd();
             try
@@ -478,7 +478,7 @@ final class TransceiverI implements IceInternal.Transceiver
         }
         return true;
     }
-    
+
     public void
     close()
     {
@@ -510,7 +510,7 @@ final class TransceiverI implements IceInternal.Transceiver
             }
             return;
         }
-        
+
         // Return immediately if the connection hasn't completed yet.
         if(_fd == null)
         {
@@ -562,7 +562,7 @@ final class TransceiverI implements IceInternal.Transceiver
             _fd = null;
         }
     }
-    
+
     public void shutdownReadWrite()
     {
         if(_traceLevels.network >= 2)
@@ -611,7 +611,7 @@ final class TransceiverI implements IceInternal.Transceiver
         */
     }
 
-    
+
     public void
     write(Buffer buf, AsyncCallback callback)
     {
@@ -646,7 +646,7 @@ final class TransceiverI implements IceInternal.Transceiver
             throw new Ice.MemoryLimitException();
         }
     }
-    
+
     ConnectionInfo
     getConnectionInfo()
     {
@@ -664,10 +664,10 @@ final class TransceiverI implements IceInternal.Transceiver
     {
         _incoming = true;
         _instance = instance;
-        
+
         _adapterName = adapterName;
         _host = host;
-        
+
         _traceLevels = instance.traceLevels();
         _logger = instance.getLogger();
         try
@@ -679,8 +679,10 @@ final class TransceiverI implements IceInternal.Transceiver
             // Ignore.
         }
         _incomingfd = fd;
-        
-        // Set temporary desc.
+
+        //
+        // Set temporary description.
+        //
         _desc = Network.fdToString(_incomingfd);
     }
 
@@ -691,10 +693,10 @@ final class TransceiverI implements IceInternal.Transceiver
     {
         _incoming = false;
         _instance = instance;
-        
+
         _host = addr.getHostName();
         _addr = addr;
-        
+
         _traceLevels = instance.traceLevels();
         _logger = instance.getLogger();
         try
@@ -705,10 +707,13 @@ final class TransceiverI implements IceInternal.Transceiver
         {
             // Ignore.
         }
-        
-        _desc = Network.addressesToString(_addr.getAddress(), 0, null, 0);
+
+        //
+        // Set temporary description.
+        //
+        _desc = Network.addressesToString(null, 0, null, 0);
     }
- 
+
     protected void
     finalize()
         throws Throwable
@@ -717,7 +722,7 @@ final class TransceiverI implements IceInternal.Transceiver
 
         super.finalize();
     }
-    
+
     private InetSocketAddress _addr; // Immutable
     private boolean _incoming; // Immutable
     private Instance _instance; // Immutable

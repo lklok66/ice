@@ -58,7 +58,13 @@ final class TcpTransceiver implements Transceiver
             assert(_fd != null);
 
             _state = StateConnected;
-            _desc = Network.fdToString(_fd);
+            //
+            // TODO: Android bug 3123 prevents us from obtaining a useful description
+            // of the remote socket address after we have set socket options. We'll use
+            // the original target address until this bug is fixed.
+            //
+            //_desc = Network.fdToString(_fd);
+            _desc = Network.addressesToString((java.net.InetSocketAddress)_fd.socket().getLocalSocketAddress(), _addr);
 
             if(_traceLevels.network >= 1)
             {
@@ -357,7 +363,7 @@ final class TcpTransceiver implements Transceiver
         _traceLevels = instance.traceLevels();
         _logger = instance.initializationData().logger;
         _stats = instance.initializationData().stats;
-        _desc = Network.addressesToString(_addr.getAddress(), 0, null, 0);
+        _desc = Network.fdToString(_fd);
         _state = StateNeedConnect;   
     }
 

@@ -123,6 +123,7 @@ public final class Network
             java.net.Socket socket = fd.socket();
             socket.setTcpNoDelay(true);
             socket.setKeepAlive(true);
+            socket.bind(null);
             return fd;
         }
         catch(java.io.IOException ex)
@@ -1088,31 +1089,24 @@ public final class Network
             return "<closed>";
         }
 
-        java.net.InetAddress localAddr = null, remoteAddr = null;
-        int localPort = -1, remotePort = -1;
+        String result = null;
 
         if(fd instanceof java.nio.channels.SocketChannel)
         {
             java.net.Socket socket = ((java.nio.channels.SocketChannel)fd).socket();
-            localAddr = socket.getLocalAddress();
-            localPort = socket.getLocalPort();
-            remoteAddr = socket.getInetAddress();
-            remotePort = socket.getPort();
+            result = fdToString(socket);
         }
         else if(fd instanceof java.nio.channels.DatagramChannel)
         {
             java.net.DatagramSocket socket = ((java.nio.channels.DatagramChannel)fd).socket();
-            localAddr = socket.getLocalAddress();
-            localPort = socket.getLocalPort();
-            remoteAddr = socket.getInetAddress();
-            remotePort = socket.getPort();
+            result = fdToString(socket);
         }
         else
         {
             assert(false);
         }
 
-        return addressesToString(localAddr, localPort, remoteAddr, remotePort);
+        return result;
     }
 
     public static String
@@ -1123,12 +1117,27 @@ public final class Network
             return "<closed>";
         }
 
-        java.net.InetAddress localAddr = fd.getLocalAddress();
-        int localPort = fd.getLocalPort();
-        java.net.InetAddress remoteAddr = fd.getInetAddress();
-        int remotePort = fd.getPort();
+        java.net.InetSocketAddress localAddr =
+            fd.isBound() ? (java.net.InetSocketAddress)fd.getLocalSocketAddress() : null;
+        java.net.InetSocketAddress remoteAddr =
+            fd.isConnected() ? (java.net.InetSocketAddress)fd.getRemoteSocketAddress() : null;
 
-        return addressesToString(localAddr, localPort, remoteAddr, remotePort);
+        return addressesToString(localAddr, remoteAddr);
+    }
+
+    public static String
+    fdToString(java.net.DatagramSocket fd)
+    {
+        if(fd == null)
+        {
+            return "<closed>";
+        }
+
+        java.net.InetSocketAddress localAddr =
+            fd.isBound() ? (java.net.InetSocketAddress)fd.getLocalSocketAddress() : null;
+        java.net.InetSocketAddress remoteAddr = (java.net.InetSocketAddress)fd.getRemoteSocketAddress();
+
+        return addressesToString(localAddr, remoteAddr);
     }
 
     public static String
@@ -1136,22 +1145,28 @@ public final class Network
     {
         StringBuffer s = new StringBuffer();
         s.append("local address = ");
-        s.append(localAddr.getHostAddress());
-        s.append(':');
-        s.append(localPort);
-        if(remoteAddr == null)
-        {
-            s.append("\nremote address = <not connected>");
-        }
-        else
-        {
-            s.append("\nremote address = ");
-            s.append(remoteAddr.getHostAddress());
-            s.append(':');
-            s.append(remotePort);
-        }
-
+        s.append(addrToString(localAddr, localPort));
+        s.append("\nremote address = ");
+        s.append(addrToString(remoteAddr, remotePort));
         return s.toString();
+    }
+
+    public static String
+    addressesToString(java.net.InetSocketAddress localAddr, java.net.InetSocketAddress remoteAddr)
+    {
+        java.net.InetAddress la = null, ra = null;
+        int lp = 0, rp = 0;
+        if(localAddr != null)
+        {
+            la = localAddr.getAddress();
+            lp = localAddr.getPort();
+        }
+        if(remoteAddr != null)
+        {
+            ra = remoteAddr.getAddress();
+            rp = remoteAddr.getPort();
+        }
+        return addressesToString(la, lp, ra, rp);
     }
 
     public static String
@@ -1170,6 +1185,29 @@ public final class Network
         return ex instanceof java.io.InterruptedIOException ||
             ex.getMessage().indexOf("Interrupted system call") >= 0 ||
             ex.getMessage().indexOf("A system call received an interrupt") >= 0; // AIX JDK 1.4.2
+    }
+
+    private static String
+    addrToString(java.net.InetAddress addr, int port)
+    {
+        StringBuffer s = new StringBuffer();
+
+        if(addr == null || addr.isAnyLocalAddress())
+        {
+            s.append("<not available>");
+        }
+        else
+        {
+            s.append(addr.getHostAddress());
+        }
+
+        if(port > 0)
+        {
+            s.append(':');
+            s.append(port);
+        }
+
+        return s.toString();
     }
 
     private static java.net.InetSocketAddress
