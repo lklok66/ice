@@ -3,7 +3,7 @@ Changes since version 0.1.0
 
 - Fixed several memory leaks.
 
-- SSL support si no longer available with the iPhone simulator.
+- SSL support is no longer available with the iPhone simulator.
 
 - Set NSException.reason string for Ice local exceptions.
 
