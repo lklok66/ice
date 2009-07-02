@@ -11,8 +11,8 @@ SSL-based security, a firewall solution, and much more.
 
 Ice Touch is available under the terms of the GNU General Public
 License (GPL). Commercial licenses are available for customers who
-wish to use Ice in proprietary products. Please contact sales@zeroc.com
-for more information on licensing Ice.
+wish to use Ice Touch in proprietary products. Please contact
+sales@zeroc.com for more information on licensing Ice Touch .
 
 You will now be guided through the steps necessary to install this
 software.
