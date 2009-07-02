@@ -137,9 +137,9 @@ pool is released once the dispatch is complete.
 If you attempt to invoke an operation that returns values to the
 client as a oneway operation, the Ice run time throws a
 TwowayOnlyException. With Ice Touch, when this is done through an AMI
-invocation this exception is raised directly to the caller, not
-through the AMI exception callback. This is contrary to our other
-language mappings, where the exception is raised through the AMI
+invocation, the exception is raised directly to the caller, instead of
+being reported via the AMI exception callback. This is contrary to our other
+language mappings, where the exception is reported via the AMI
 callback.
 
 ======================================================================
