@@ -65,6 +65,11 @@ NSString* const routerServerKey = @"routerServerKey";
     routerField.state = [defaults boolForKey:routerKey] ? NSOnState : NSOffState;
     routerServerField.stringValue = [defaults stringForKey:routerServerKey];
     [routerServerField setEnabled:routerField.state == NSOnState];
+    if(routerField.state == NSOnState)
+    {
+        [sslField setEnabled:routerField.state != NSOnState];
+        sslField.state = NSOffState;
+    }
 }
 
 #pragma mark Login callbacks
@@ -380,6 +385,11 @@ NSString* const routerServerKey = @"routerServerKey";
 {
     BOOL on = routerField.state == NSOnState;
     [routerServerField setEnabled:on];
+    if(on)
+    {
+        sslField.state = NSOffState;
+    }
+    [sslField setEnabled:!on];
 }
 
 -(void)showAdvancedSheet:(id)sender
