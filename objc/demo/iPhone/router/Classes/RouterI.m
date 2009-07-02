@@ -355,12 +355,12 @@
 
         // Set the status.
         NSString* desc = [c.con toString];
-        int start = [desc rangeOfString:@"= "].location;
+        NSString* pref = @"remote address = ";
+        int start = [desc rangeOfString:pref].location;
         if(start != NSNotFound)   
         {
-            start += 2; // Skip the "= "
-            int end = [desc rangeOfString:@"\n" options:0 range:NSMakeRange(start, desc.length - start)].location;
-            desc = [desc substringWithRange:NSMakeRange(start, end - start)];
+            start += pref.length;
+            desc = [desc substringWithRange:NSMakeRange(start, desc.length - start)];
         }
         else
         {
@@ -403,12 +403,12 @@
         
         // Set the status.
         NSString* desc = [c.con toString];
-        int start = [desc rangeOfString:@"= "].location;
+        NSString* pref = @"remote address = ";
+        int start = [desc rangeOfString:pref].location;
         if(start != NSNotFound)   
         {
-            start += 2; // Skip the "= "
-            int end = [desc rangeOfString:@"\n" options:0 range:NSMakeRange(start, desc.length - start)].location;
-            desc = [desc substringWithRange:NSMakeRange(start, end - start)];
+            start += pref.length;
+            desc = [desc substringWithRange:NSMakeRange(start, desc.length - start)];
         }
         else
         {
