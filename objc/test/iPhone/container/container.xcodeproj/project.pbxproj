@@ -730,17 +730,16 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = container_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS = ICE_OBJC_NOGC;
 				HEADER_SEARCH_PATHS = (
 					../../include,
 					../../Ice,
 					Classes,
 				);
 				INFOPLIST_FILE = Info.plist;
-				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = container;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos2.0;
-				SLICE_ICE_HOME = "";
 				SLICE_INCLUDE_PATH = ../../Ice/slicing/objects;
 			};
 			name = Debug;
@@ -755,17 +754,16 @@
 				COPY_PHASE_STRIP = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = container_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS = ICE_OBJC_NOGC;
 				HEADER_SEARCH_PATHS = (
 					../../include,
 					../../Ice,
 					Classes,
 				);
 				INFOPLIST_FILE = Info.plist;
-				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = container;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos2.0;
-				SLICE_ICE_HOME = "";
 				SLICE_INCLUDE_PATH = ../../Ice/slicing/objects;
 			};
 			name = Release;

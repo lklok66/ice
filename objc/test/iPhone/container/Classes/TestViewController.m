@@ -231,6 +231,8 @@
     if(appDelegate.loop)
     {
         appDelegate.loop = NO;
+        nextButton.enabled = NO;
+        [nextButton setTitle:@"Waiting..." forState:UIControlStateDisabled];
     }
     else
     {

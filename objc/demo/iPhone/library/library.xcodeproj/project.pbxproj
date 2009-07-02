@@ -298,11 +298,9 @@
 				GCC_PREFIX_HEADER = library_Prefix.pch;
 				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = Info.plist;
-				LIBRARY_SEARCH_PATHS = "";
 				OTHER_LDFLAGS = "-lGlacier2Objc";
 				PRODUCT_NAME = library;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
-				SLICE_ICE_HOME = "";
 				SLICE_INCLUDE_PATH = Classes;
 			};
 			name = Debug;
@@ -319,11 +317,9 @@
 				GCC_PREFIX_HEADER = library_Prefix.pch;
 				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = Info.plist;
-				LIBRARY_SEARCH_PATHS = "";
 				OTHER_LDFLAGS = "-lGlacier2Objc";
 				PRODUCT_NAME = library;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
-				SLICE_ICE_HOME = "";
 				SLICE_INCLUDE_PATH = Classes;
 			};
 			name = Release;

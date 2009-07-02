@@ -233,12 +233,8 @@
 				GCC_PREFIX_HEADER = hello_Prefix.pch;
 				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = Info.plist;
-				LIBRARY_SEARCH_PATHS = "";
-				OTHER_LDFLAGS = "";
-				PRELINK_LIBS = "";
 				PRODUCT_NAME = Hello;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
-				SLICE_ICE_HOME = "";
 			};
 			name = Debug;
 		};
@@ -254,11 +250,8 @@
 				GCC_PREFIX_HEADER = hello_Prefix.pch;
 				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = Info.plist;
-				LIBRARY_SEARCH_PATHS = "";
-				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = Hello;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
-				SLICE_ICE_HOME = "";
 			};
 			name = Release;
 		};

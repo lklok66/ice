@@ -261,9 +261,7 @@
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-lGlacier2Objc";
 				PRODUCT_NAME = ChatDemo;
-				SLICE_ICE_HOME = "";
 				SLICE_INCLUDE_PATH = Classes;
-				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug;
 		};
@@ -281,11 +279,10 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "-lGlacier2Objc";
 				PRODUCT_NAME = ChatDemo;
-				SLICE_ICE_HOME = "";
 				SLICE_INCLUDE_PATH = Classes;
-				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Release;
 		};
