@@ -125,11 +125,13 @@ public:
         {
             if(status & IceInternal::SocketOperationRead)
             {
+                assert(!_readTimeoutScheduled);
                 _timer->schedule(_readTimeout, IceUtil::Time::milliSeconds(timeout));
                 _readTimeoutScheduled = true;
             }
-            else // SocketOperationWrite | SocketOperationConnect
+            if(status & (IceInternal::SocketOperationWrite | IceInternal::SocketOperationConnect))
             {
+                assert(!_writeTimeoutScheduled);
                 _timer->schedule(_writeTimeout, IceUtil::Time::milliSeconds(timeout));
                 _writeTimeoutScheduled = true;
             }
@@ -149,7 +151,7 @@ public:
                 _readTimeoutScheduled = false;
             }
         }
-        else // SocketOperationWrite | SocketOperationConnect
+        if(status & (IceInternal::SocketOperationWrite | IceInternal::SocketOperationConnect))
         {
             if(_writeTimeoutScheduled)
             {
