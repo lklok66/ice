@@ -45,4 +45,5 @@ because the Slice operation sayHello is marked as idempotent, meaning
 that Ice does not need to preserve the at-most-once retry semantics.
 See the manual for more information about retry behavior.
 
-Note that SSL is not avaible when running the demo in the iPhone simulator.
+Note that SSL is not available when running the demo in the iPhone 
+simulator.

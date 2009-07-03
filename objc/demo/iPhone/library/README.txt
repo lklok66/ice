@@ -12,4 +12,5 @@ demo2.zeroc.com accepts both secure and non-secure connections using
 Glacier2. Direct connections to the library session manager are not
 permitted on demo2.zeroc.com.
 
-Note that SSL is not avaible when running the demo in the iPhone simulator.
+Note that SSL is not available when running the demo in the iPhone 
+simulator.
