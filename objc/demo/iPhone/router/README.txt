@@ -52,3 +52,5 @@ To test the demo/Ice/helloRouter demo change the value of
 "Ice.Default.Router" in config.client to:
 
 Ice.Default.Router=iPhoneRouter/Router:tcp -h 192.168.1.3 -p 12000
+
+Note that SSL is not avaible when running the demo in the iPhone simulator.
