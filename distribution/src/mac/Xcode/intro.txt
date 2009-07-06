@@ -1,14 +1,13 @@
-The Xcode plugin simplifies the process of building Ice and Ice Touch
+The Xcode plug-in simplifies the process of building Ice and Ice Touch
 applications with Xcode.
 
 The Xcode plug-in provides the following features:
 
   - Handles all aspects of translating your Slice files for both
-    Objective-C and C++ projects.
+    Objective-C and C++ projects
   - Incrementally recompiles Slice files after modifications
   - Maintains dependencies between Slice files
   - Highlights compilation errors in your source code
 
 You will now be guided through the steps necessary to install this
 software.
-
