@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -8,6 +8,7 @@
 // **********************************************************************
 
 #include <Ice/TcpTransceiver.h>
+#include <Ice/Connection.h>
 #include <Ice/Instance.h>
 #include <Ice/TraceLevels.h>
 #include <Ice/LoggerUtil.h>
@@ -43,10 +44,53 @@ IceInternal::TcpTransceiver::getAsyncInfo(SocketOperation status)
 }
 #endif
 
+SocketOperation
+IceInternal::TcpTransceiver::initialize()
+{
+    if(_state == StateNeedConnect)
+    {
+        _state = StateConnectPending;
+        return SocketOperationConnect;
+    }
+    else if(_state <= StateConnectPending)
+    {
+        try
+        {
+#ifdef ICE_USE_CFSTREAM
+            errno = _connectError;
+#endif            
+#ifndef ICE_USE_IOCP
+            doFinishConnect(_fd);
+#else
+            doFinishConnectAsync(_fd, _write);
+#endif
+            _state = StateConnected;
+            _desc = fdToString(_fd);
+        }
+        catch(const Ice::LocalException& ex)
+        {
+            if(_traceLevels->network >= 2)
+            {
+                Trace out(_logger, _traceLevels->networkCat);
+                out << "failed to establish tcp connection\n" << _desc << "\n" << ex;
+            }
+            throw;
+        }
+
+        if(_traceLevels->network >= 1)
+        {
+            Trace out(_logger, _traceLevels->networkCat);
+            out << "tcp connection established\n" << _desc;
+        }
+    }
+    assert(_state == StateConnected);
+    return SocketOperationNone;
+}
+
 void
 IceInternal::TcpTransceiver::close()
 {
-    if(_traceLevels->network >= 1)
+    if(_state == StateConnected && _traceLevels->network >= 1)
     {
         Trace out(_logger, _traceLevels->networkCat);
         out << "closing tcp connection\n" << toString();
@@ -229,24 +273,21 @@ IceInternal::TcpTransceiver::read(Buffer& buf)
 
         buf.i += ret;
 
-        if(packetSize > buf.b.end() - buf.i)
-        {
-            packetSize = static_cast<int>(buf.b.end() - buf.i);
-        }
+        packetSize = static_cast<int>(buf.b.end() - buf.i);
     }
 
     return true;
 }
 
 #ifdef ICE_USE_IOCP
-void
+bool
 IceInternal::TcpTransceiver::startWrite(Buffer& buf)
 {
     if(_state < StateConnected)
     {
         doConnectAsync(_fd, _connectAddr, _write);
         _desc = fdToString(_fd);
-        return;
+        return false;
     }
 
     assert(!buf.b.empty() && buf.i != buf.b.end());
@@ -278,6 +319,7 @@ IceInternal::TcpTransceiver::startWrite(Buffer& buf)
             }
         }
     }
+    return packetSize == static_cast<int>(buf.b.end() - buf.i);
 }
 
 void
@@ -285,7 +327,6 @@ IceInternal::TcpTransceiver::finishWrite(Buffer& buf)
 {
     if(_state < StateConnected)
     {
-        doFinishConnectAsync(_fd, _write);
         return;
     }
 
@@ -417,45 +458,13 @@ IceInternal::TcpTransceiver::toString() const
     return _desc;
 }
 
-SocketOperation
-IceInternal::TcpTransceiver::initialize()
+Ice::ConnectionInfoPtr 
+IceInternal::TcpTransceiver::getInfo() const
 {
-    if(_state == StateNeedConnect)
-    {
-        _state = StateConnectPending;
-        return SocketOperationConnect;
-    }
-    else if(_state <= StateConnectPending)
-    {
-        try
-        {
-#ifdef ICE_USE_CFSTREAM
-            errno = _connectError;
-#endif            
-#ifndef ICE_USE_IOCP
-            doFinishConnect(_fd);
-#endif
-            _state = StateConnected;
-            _desc = fdToString(_fd);
-        }
-        catch(const Ice::LocalException& ex)
-        {
-            if(_traceLevels->network >= 2)
-            {
-                Trace out(_logger, _traceLevels->networkCat);
-                out << "failed to establish tcp connection\n" << _desc << "\n" << ex;
-            }
-            throw;
-        }
-
-        if(_traceLevels->network >= 1)
-        {
-            Trace out(_logger, _traceLevels->networkCat);
-            out << "tcp connection established\n" << _desc;
-        }
-    }
-    assert(_state == StateConnected);
-    return SocketOperationNone;
+    assert(_fd != INVALID_SOCKET);
+    Ice::TCPConnectionInfoPtr info = new Ice::TCPConnectionInfo();
+    fdToAddressAndPort(_fd, info->localAddress, info->localPort, info->remoteAddress, info->remotePort);
+    return info;
 }
 
 void
@@ -463,7 +472,7 @@ IceInternal::TcpTransceiver::checkSendSize(const Buffer& buf, size_t messageSize
 {
     if(buf.b.size() > messageSizeMax)
     {
-        throw MemoryLimitException(__FILE__, __LINE__);
+        Ex::throwMemoryLimitException(__FILE__, __LINE__, buf.b.size(), messageSizeMax);
     }
 }
 

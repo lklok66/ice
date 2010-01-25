@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -33,8 +33,8 @@ from scripts import Expect
 keepGoing = False
 iceHome = None
 x64 = False
-java2 = False
 preferIPv4 = False
+serviceDir = None
 demoErrors = []
 
 #
@@ -83,10 +83,8 @@ def configurePaths():
     #
     if iceHome == "/usr":
         javaDir = os.path.join("/", "usr", "share", "java")
-        if java2:
-            addenv("CLASSPATH", os.path.join(javaDir, "Ice-java2.jar"))
-        else:
-            addenv("CLASSPATH", os.path.join(javaDir, "Ice.jar"))
+        addenv("CLASSPATH", os.path.join(javaDir, "Ice.jar"))
+        addenv("CLASSPATH", os.path.join(javaDir, "Freeze.jar"))
         addenv("CLASSPATH", "classes")
         return # That's it, we're done!
 
@@ -98,12 +96,10 @@ def configurePaths():
 
     # 64-bits binaries are located in a subdirectory with binary
     # distributions.
+    addenv("PATH", binDir)
     if iceHome and x64: 
         if isWin32():
             binDir = os.path.join(binDir, "x64")
-        elif isHpUx():
-            libDir = os.path.join(libDir, "pa20_64")
-            binDir = os.path.join(binDir, "pa20_64")
         elif isSolaris():
             if isSparc():
                 libDir = os.path.join(libDir, "sparcv9")
@@ -114,19 +110,20 @@ def configurePaths():
         else:
             libDir = libDir + "64"
             binDir = binDir + "64"
+        addenv("PATH", binDir)
 
     # Only add the lib directory to the shared library path if we're
-     # not using the embedded location.
-    if libDir and iceHome != "/opt/Ice-3.3":
+    # not using the embedded location.
+    if libDir and iceHome != "/opt/Ice-3.4b":
         addLdPath(libDir)
 
     if not iceHome:
         addenv("PATH", os.path.join(getIceDir("cs"), "bin"))
-    addenv("PATH", binDir)
 
     javaDir = getIceDir("java")
 
     addenv("CLASSPATH", os.path.join(javaDir, "lib", "Ice.jar"))
+    addenv("CLASSPATH", os.path.join(javaDir, "lib", "Freeze.jar"))
     if not iceHome:
         addenv("CLASSPATH", os.path.join(javaDir, "lib"))
     addenv("CLASSPATH", os.path.join("classes"))
@@ -134,7 +131,9 @@ def configurePaths():
     # 
     # On Windows, C# assemblies are found thanks to the .exe.config files.
     #
-    if not isWin32():
+    if isWin32():
+        addenv("DEVPATH", os.path.join(getIceDir("cs"), "bin"))
+    else:
         addenv("MONO_PATH", os.path.join(getIceDir("cs"), "bin"))
 
     #
@@ -199,9 +198,6 @@ def getIceDir(subdir = None):
 def isWin32():
     return sys.platform == "win32"
 
-def isHpUx():
-   return sys.platform == "hp-ux11"
-
 def isSolaris():
     return sys.platform == "sunos5"
 
@@ -227,6 +223,22 @@ def isMono():
 
 def isSolaris():
     return sys.platform == "sunos5"
+
+def isNoServices():
+    if not isWin32():
+        return False
+    compiler = ""
+    if os.environ.get("CPP_COMPILER", "") != "":
+        compiler = os.environ["CPP_COMPILER"]
+    else:
+        config = None
+        if os.path.exists(os.path.join(toplevel, "cpp", "config", "Make.rules.mak")):
+            config = open(os.path.join(toplevel, "cpp", "config", "Make.rules.mak"), "r")
+        elif os.path.exists(os.path.join(toplevel, "config", "Make.rules.mak")):
+            config = open(os.path.join(toplevel, "config", "Make.rules.mak"), "r")
+        if config != None:
+            compiler = re.search("CPP_COMPILER[\t\s]*= ([A-Z0-9]*)", config.read()).group(1)
+    return compiler == "BCC2010" or compiler == "VC60"
 
 def getMapping():
     """Determine the current mapping based on the cwd."""
@@ -295,7 +307,7 @@ def runDemos(start, args, demos, num = 0, script = False, root = False):
                 print "  exit 1"
             print "fi"
         else:
-            status = os.system("python " + os.path.join(dir, "expect.py " + args))
+            status = os.system('python "' + os.path.join(dir, "expect.py") + '" ' + args)
 
             if status:
                 if(num > 0):
@@ -328,6 +340,7 @@ def run(demos, protobufDemos = [], root = False):
         --preferIPv4            Prefer IPv4 stack (java only)."
         --fast                  Run an abbreviated version of the demos."
         --script                Generate a script to run the demos.
+        --service-dir=<path>    Directory to locate services for C++Builder/VC6.
         --env                   Dump the environment."
         --noenv                 Do not automatically modify environment.""" % (sys.argv[0])
         sys.exit(2)
@@ -337,7 +350,7 @@ def run(demos, protobufDemos = [], root = False):
     try:
         opts, args = getopt.getopt(sys.argv[1:], "lr:R:", [
                 "filter=", "rfilter=", "start=", "loop", "fast", "trace=", "debug", "host=", "mode=",
-                "continue", "ice-home=", "x64", "java2", "preferIPv4", "env", "noenv", "script", "protobuf"])
+                "continue", "ice-home=", "x64", "preferIPv4", "env", "noenv", "script", "protobuf", "service-dir="])
     except getopt.GetoptError:
         usage()
 
@@ -383,6 +396,9 @@ def run(demos, protobufDemos = [], root = False):
             script = True
         elif o in '--protobuf':
             demos = demos + protobufDemos
+        elif o in '--service-dir':
+            global serviceDir
+            serviceDir = a
 
     for demoFilter, removeFilter in filters:
         if removeFilter:
@@ -426,7 +442,7 @@ def guessBuildMode():
     else:
 	m = guessBuildModeForDir(".")
     if m is None:
-        raise "cannot guess debug or release mode"
+        raise RuntimeError("cannot guess debug or release mode")
     return m
 
 def isDebugBuild():
@@ -438,9 +454,27 @@ def isDebugBuild():
 	buildmode = guessBuildMode()
 	print "(guessed build mode %s)" % buildmode
     return buildmode == "debug"
-        
+
+def getIceVersion():
+    if isWin32():
+        config = open(os.path.join(toplevel, "config", "Make.common.rules.mak"), "r")
+    else:
+        config = open(os.path.join(toplevel, "config", "Make.common.rules"), "r")
+    return re.search("VERSION[\t\s]*= ([0-9]+\.[0-9]+(\.[0-9]+|b[0-9]*))", config.read()).group(1)
+
+def getServiceDir():
+    global serviceDir
+    if serviceDir == None:
+        if iceHome:
+            serviceDir = os.path.join(iceHome, "bin")
+        else:
+            serviceDir = "C:\\Progra~1\ZeroC\Ice-" + str(getIceVersion()) + "\\bin"
+    return serviceDir
+
 def getIceBox(mapping = "cpp"):
     if mapping == "cpp":
+        if isNoServices():
+            return os.path.join(getServiceDir(), "icebox.exe")
         if isWin32() and isDebugBuild():
 	    return "iceboxd"
         return "icebox"
@@ -452,19 +486,56 @@ def getIceBox(mapping = "cpp"):
             return "iceboxnet.exe"
     assert False
 
-def spawn(command, cwd = None):
-    desc = command.split(' ')[0]
+def getIceBoxAdmin():
+    if isNoServices():
+        return os.path.join(getServiceDir(), "iceboxadmin")
+    else:
+        return "iceboxadmin"
+
+def getIceGridRegistry():
+    if isNoServices():
+        return os.path.join(getServiceDir(), "icegridregistry")
+    else:
+        return "icegridregistry"
+
+def getIceGridNode():
+    if isNoServices():
+        return os.path.join(getServiceDir(), "icegridnode")
+    else:
+        return "icegridnode"
+
+def getIceGridAdmin():
+    if isNoServices():
+        return os.path.join(getServiceDir(), "icegridadmin")
+    else:
+        return "icegridadmin"
+
+def getGlacier2Router():
+    if isNoServices():
+        return os.path.join(getServiceDir(), "glacier2router")
+    else:
+        return "glacier2router"
+
+def spawn(command, cwd = None, mapping = None):
+    tokens = command.split(' ')
+    desc = tokens[0]
+    args = ""
+    for arg in tokens[1:len(tokens)]:
+        args += " " + arg
+
 
     if defaultHost:
         command = '%s %s' % (command, defaultHost)
+        args = '%s %s' % (args, defaultHost)
 
     # magic
     knownCommands = [ "icegridnode", "icegridregistry", "icebox", "iceboxd", "icegridadmin", "icestormadmin",
                       "iceboxadmin", "transformdb", "glacier2router" ]
-    if desc in knownCommands:
-        mapping = "cpp"
-    else:
-        mapping = getMapping()
+    if mapping == None:
+        if desc in knownCommands:
+            mapping = "cpp"
+        else:
+            mapping = getMapping()
 
     if mapping == "cs":
         if isMono():
@@ -480,12 +551,18 @@ def spawn(command, cwd = None):
             command = command.replace("java", "java -Djava.net.preferIPv4Stack=true")
         if isSolaris() and x64:
             command = command.replace("java", "java -d64")
+    elif mapping == "cpp":
+        if cwd != None:
+            desc = os.path.join(cwd, desc)
+        if isWin32():
+            if desc.find(".") == -1:
+                desc += ".exe"
+        command = desc + " " + args
 
-    if debug:
-        print '(%s)' % (command)
     if isWin32(): # Under Win32 ./ does not work.
         command = command.replace("./", "")
-
+    if debug:
+        print '(%s)' % (command)
     return Expect.Expect(command, logfile = tracefile, desc = desc, mapping = mapping, cwd = cwd)
 
 def cleanDbDir(path):
@@ -504,11 +581,6 @@ def cleanDbDir(path):
 def addLdPath(libpath):
     if isWin32():
         addenv("PATH", libpath)
-    elif isHpUx():
-        if x64:
-            addenv("LD_LIBRARY_PATH", libpath)
-        else:
-            addenv("SHLIB_PATH", libpath)
     elif isDarwin():
         addenv("DYLD_LIBRARY_PATH", libpath)
     elif isAIX():
@@ -526,10 +598,10 @@ def addLdPath(libpath):
 
 def processCmdLine():
     def usage():
-	print "usage: " + sys.argv[0] + " --x64 --preferIPv4 --env --noenv --fast --trace=output --debug --host host --mode=[debug|release] --ice-home=<dir>"
+	print "usage: " + sys.argv[0] + " --x64 --preferIPv4 --env --noenv --fast --trace=output --debug --host host --mode=[debug|release] --ice-home=<dir> --service-dir=<dir>"
 	sys.exit(2)
     try:
-	opts, args = getopt.getopt(sys.argv[1:], "", ["env", "noenv", "x64", "java2", "preferIPv4", "fast", "trace=", "debug", "host=", "mode=", "ice-home="])
+	opts, args = getopt.getopt(sys.argv[1:], "", ["env", "noenv", "x64", "preferIPv4", "fast", "trace=", "debug", "host=", "mode=", "ice-home=", "--servicedir="])
     except getopt.GetoptError:
 	usage()
 
@@ -538,17 +610,16 @@ def processCmdLine():
     global tracefile
     global buildmode
     global x64
-    global java2
     global preferIPv4
     global debug
     global host
     global iceHome
+    global serviceDir
 
     fast = False
     trace = False
     buildmode = None
     x64 = False
-    java2 = False
     tracefile = None
     env = False
     noenv = False
@@ -571,12 +642,12 @@ def processCmdLine():
 	    fast = True
 	if o == "--x64":
 	    x64 = True
-	if o == "--java2":
-	    java2 = True
 	if o == "--preferIPv4":
 	    preferIPv4 = True
         if o == "--ice-home":
             iceHome = a
+        if o == "--service-dir":
+            serviceDir = a
 	if o == "--mode":
 	    buildmode = a
 	    if buildmode != 'debug' and buildmode != 'release':
@@ -600,6 +671,10 @@ def processCmdLine():
         configurePaths()
     if env:
         dumpenv()
+
+    if iceHome and isWin32() and not buildmode:
+        print "Error: please define --mode=debug or --mode=release"
+        sys.exit(1)
 
 import inspect
 frame = inspect.currentframe().f_back

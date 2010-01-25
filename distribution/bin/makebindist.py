@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -54,6 +54,8 @@ thirdParties = [
     "Expat", \
     "OpenSSL", \
     "Mcpp", \
+    "Qt", \
+    "Iconv", \
     "JGoodiesLooks", \
     "JGoodiesForms", \
     "Proguard", \
@@ -154,7 +156,7 @@ if forceclean or not os.path.exists(srcDir) or not os.path.exists(buildDir):
         sys.exit(1)
     os.rename("Ice-" + version, srcDir)
     
-    if build_lp64.has_key(str(platform)):
+    if "cpp-64" in buildLanguages:
         if os.system("gunzip -c " + os.path.join(cwd, "Ice-" + version + ".tar.gz") + " | tar x" + quiet + "f -"):
             print sys.argv[0] + ": failed to unpack ./Ice-" + version + ".tar.gz"
             sys.exit(1)
@@ -173,37 +175,26 @@ for l in buildLanguages:
     print "============= Building " + l + " sources ============="
     print
 
-    os.chdir(os.path.join(srcDir, l))
+    if l != "cpp-64":
+        os.chdir(os.path.join(srcDir, l))
+    else:
+        os.chdir(os.path.join(srcDir + "-64", "cpp"))
 
     if l != "java":
 
         makeCmd = "gmake " + platform.getMakeEnvs(version, l) + " prefix=" + buildDir + " install"
 
-        if not l in build_lp64.get(str(platform), []):
-            if os.system(makeCmd) != 0:
-                print sys.argv[0] + ": `" + l + "' build failed"
-                os.chdir(cwd)
-                sys.exit(1)
-        else:
-            if os.system("LP64=no " + makeCmd) != 0:
-                print sys.argv[0] + ": `" + l + "' build failed"
-                os.chdir(cwd)
-                sys.exit(1)
-
-            os.chdir(os.path.join(srcDir + "-64", l))
-            if os.system("LP64=yes " + makeCmd) != 0:
-                print sys.argv[0] + ": `" + l + "' build failed"
-                os.chdir(cwd)
-                sys.exit(1)
-
+        if os.system(makeCmd) != 0:
+            print sys.argv[0] + ": `" + l + "' build failed"
+            os.chdir(cwd)
+            sys.exit(1)
     else:
         antCmd = platform.getAntEnv() + " ant " + platform.getAntOptions() + " -Dprefix=" + buildDir
 
 	jgoodiesDefines = "-Djgoodies.forms=" + platform.getJGoodiesForms() + " -Djgoodies.looks=" + \
 			  platform.getJGoodiesLooks()
 
-        if os.system(antCmd + " -Dbuild.suffix=-java2 -Dice.mapping=java2 install") != 0 or \
-           os.system(antCmd + " -Dbuild.suffix=-java5 -Dice.mapping=java5 " + jgoodiesDefines + " install") != 0: 
+        if os.system(antCmd + " " + jgoodiesDefines + " install") != 0: 
            print sys.argv[0] + ": `" + l + "' build failed"
            os.chdir(cwd)
            sys.exit(1)

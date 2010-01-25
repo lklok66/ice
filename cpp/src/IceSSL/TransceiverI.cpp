@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -8,6 +8,7 @@
 // **********************************************************************
 
 #include <IceSSL/TransceiverI.h>
+#include <IceSSL/ConnectionInfo.h>
 #include <IceSSL/Instance.h>
 #include <IceSSL/Util.h>
 #include <Ice/Communicator.h>
@@ -47,10 +48,233 @@ IceSSL::TransceiverI::getAsyncInfo(IceInternal::SocketOperation status)
 }
 #endif
 
+IceInternal::SocketOperation
+IceSSL::TransceiverI::initialize()
+{
+    try
+    {
+        if(_state == StateNeedConnect)
+        {
+            _state = StateConnectPending;
+            return IceInternal::SocketOperationConnect; 
+        }
+        else if(_state <= StateConnectPending)
+        {
+#ifdef ICE_USE_CFSTREAM
+            errno = _connectError;
+#endif            
+#ifndef ICE_USE_IOCP
+            IceInternal::doFinishConnect(_fd);
+#else
+            IceInternal::doFinishConnectAsync(_fd, _write);
+#endif            
+            _state = StateConnected;
+            _desc = IceInternal::fdToString(_fd);
+        }
+        assert(_state == StateConnected);
+
+        if(!_ssl)
+        {
+#ifdef ICE_USE_IOCP
+            //
+            // On Windows, limiting the buffer size is important to prevent
+            // poor throughput performances when transfering large amount of
+            // data. See Microsoft KB article KB823764.
+            //
+            _maxSendPacketSize = IceInternal::getSendBufferSize(_fd) / 2;
+            if(_maxSendPacketSize < 512)
+            {
+                _maxSendPacketSize = 0;
+            }
+
+            _maxReceivePacketSize = IceInternal::getRecvBufferSize(_fd);
+            if(_maxReceivePacketSize < 512)
+            {
+                _maxReceivePacketSize = 0;
+            }
+
+            _readI = _readBuffer.end();
+            _writeI = _writeBuffer.end();
+            _sentBytes = 0;
+#endif
+
+#ifndef ICE_USE_IOCP
+            // This static_cast is necessary due to 64bit windows. There SOCKET is a non-int type.
+            BIO* bio = BIO_new_socket(static_cast<int>(_fd), 0);
+#else
+            BIO* bio;
+            if(!BIO_new_bio_pair(&bio, _maxSendPacketSize, &_iocpBio, _maxReceivePacketSize))
+            {
+                bio = 0;
+            }
+#endif        
+            if(!bio)
+            {
+                SecurityException ex(__FILE__, __LINE__);
+                ex.reason = "openssl failure";
+                throw ex;
+            }
+
+            _ssl = SSL_new(_instance->context());
+            if(!_ssl)
+            {
+                BIO_free(bio);
+                SecurityException ex(__FILE__, __LINE__);
+                ex.reason = "openssl failure";
+                throw ex;
+            }
+            SSL_set_bio(_ssl, bio, bio);
+        }
+
+        while(!SSL_is_init_finished(_ssl))
+        {
+            //
+            // Only one thread calls initialize(), so synchronization is not necessary here.
+            //
+            int ret = _incoming ? SSL_accept(_ssl) : SSL_connect(_ssl);
+#ifdef ICE_USE_IOCP
+            if(BIO_ctrl_pending(_iocpBio))
+            {
+                if(!send())
+                {
+                    return IceInternal::SocketOperationWrite;
+                }
+                continue;
+            }
+#endif
+            if(ret <= 0)
+            {
+                switch(SSL_get_error(_ssl, ret))
+                {
+                case SSL_ERROR_NONE:
+                    assert(SSL_is_init_finished(_ssl));
+                    break;
+                case SSL_ERROR_ZERO_RETURN:
+                {
+                    ConnectionLostException ex(__FILE__, __LINE__);
+                    ex.error = IceInternal::getSocketErrno();
+                    throw ex;
+                }
+                case SSL_ERROR_WANT_READ:
+                {
+#ifdef ICE_USE_IOCP
+                    if(receive())
+                    {
+                        continue;
+                    }
+#endif
+                    return IceInternal::SocketOperationRead;
+                }
+                case SSL_ERROR_WANT_WRITE:
+                {
+#ifdef ICE_USE_IOCP
+                    if(send())
+                    {
+                        continue;
+                    }
+#endif
+                    return IceInternal::SocketOperationWrite;
+                }
+                case SSL_ERROR_SYSCALL:
+                {            
+                    if(ret == 0)
+                    {
+                        ConnectionLostException ex(__FILE__, __LINE__);
+                        ex.error = 0;
+                        throw ex;
+                    }
+
+#ifndef ICE_USE_IOCP                
+                    if(ret == -1)
+                    {
+                        if(IceInternal::interrupted())
+                        {
+                            break;
+                        }
+                
+                        if(IceInternal::wouldBlock())
+                        {
+                            if(SSL_want_read(_ssl))
+                            {
+                                return IceInternal::SocketOperationRead;
+                            }
+                            else if(SSL_want_write(_ssl))
+                            {
+                                return IceInternal::SocketOperationWrite;
+                            }
+                    
+                            break;
+                        }
+                
+                        if(IceInternal::connectionLost())
+                        {
+                            ConnectionLostException ex(__FILE__, __LINE__);
+                            ex.error = IceInternal::getSocketErrno();
+                            throw ex;
+                        }
+                    }
+#endif
+                    SocketException ex(__FILE__, __LINE__);
+                    ex.error = IceInternal::getSocketErrno();
+                    throw ex;
+                }
+                case SSL_ERROR_SSL:
+                {
+                    struct sockaddr_storage remoteAddr;
+                    string desc = "<not available>";
+                    if(IceInternal::fdToRemoteAddress(_fd, remoteAddr))
+                    {
+                        desc = IceInternal::addrToString(remoteAddr);
+                    }
+                    ostringstream ostr;
+                    ostr << "SSL error occurred for new " << (_incoming ? "incoming" : "outgoing")
+                         << " connection:\nremote address = " << desc << "\n" << _instance->sslErrors();
+                    ProtocolException ex(__FILE__, __LINE__);
+                    ex.reason = ostr.str();
+                    throw ex;
+                }
+                }
+            }
+        }
+
+        _instance->verifyPeer(_ssl, _fd, _host, getNativeConnectionInfo());
+        _state = StateHandshakeComplete;
+    }
+    catch(const Ice::LocalException& ex)
+    {
+        if(_instance->networkTraceLevel() >= 2)
+        {
+            Trace out(_logger, _instance->networkTraceCategory());
+            out << "failed to establish ssl connection\n" << _desc << "\n" << ex;
+        }
+        throw;
+    }
+
+    if(_instance->networkTraceLevel() >= 1)
+    {
+        Trace out(_logger, _instance->networkTraceCategory());
+        if(_incoming)
+        {
+            out << "accepted ssl connection\n" << _desc;
+        }
+        else
+        {
+            out << "ssl connection established\n" << _desc;
+        }
+    }
+
+    if(_instance->securityTraceLevel() >= 1)
+    {
+        _instance->traceConnection(_ssl, _incoming);
+    }
+
+    return IceInternal::SocketOperationNone;
+}
+
 void
 IceSSL::TransceiverI::close()
 {
-    if(_instance->networkTraceLevel() >= 1)
+    if(_state == StateHandshakeComplete && _instance->networkTraceLevel() >= 1)
     {
         Trace out(_logger, _instance->networkTraceCategory());
         out << "closing ssl connection\n" << toString();
@@ -391,14 +615,14 @@ IceSSL::TransceiverI::read(IceInternal::Buffer& buf)
 }
 
 #ifdef ICE_USE_IOCP
-void
+bool
 IceSSL::TransceiverI::startWrite(IceInternal::Buffer& buf)
 {
     if(_state < StateConnected)
     {
-        doConnectAsync(_fd, _connectAddr, _write);
+        IceInternal::doConnectAsync(_fd, _connectAddr, _write);
         _desc = IceInternal::fdToString(_fd);
-        return;
+        return false;
     }
 
     assert(!_writeBuffer.empty() && _writeI != _writeBuffer.end());
@@ -430,6 +654,7 @@ IceSSL::TransceiverI::startWrite(IceInternal::Buffer& buf)
             }
         }
     }
+    return packetSize == static_cast<int>(_writeBuffer.end() - _writeI);
 }
 
 void
@@ -437,7 +662,6 @@ IceSSL::TransceiverI::finishWrite(IceInternal::Buffer& buf)
 {
     if(_state < StateConnected)
     {
-        doFinishConnectAsync(_fd, _write);
         return;
     }
 
@@ -469,6 +693,7 @@ IceSSL::TransceiverI::startRead(IceInternal::Buffer& buf)
         assert(!buf.b.empty() && buf.i != buf.b.end());
         assert(!BIO_ctrl_get_read_request(_iocpBio));
 
+        ERR_clear_error(); // Clear any spurious errors.
         int ret = SSL_read(_ssl, reinterpret_cast<void*>(&*buf.i), static_cast<int>(buf.b.end() - buf.i));
         assert(ret <= 0 && SSL_get_error(_ssl, ret) == SSL_ERROR_WANT_READ);
 
@@ -534,6 +759,12 @@ IceSSL::TransceiverI::finishRead(IceInternal::Buffer& buf)
     {
         assert(_readI == _readBuffer.end());
         int n = BIO_write(_iocpBio, &_readBuffer[0], static_cast<int>(_readBuffer.size()));
+        if(n < 0) // Expected if the transceiver was closed.
+        {
+            SecurityException ex(__FILE__, __LINE__);
+            ex.reason = "SSL bio write failed";
+            throw ex;
+        }
         assert(n == static_cast<int>(_readBuffer.size()));
     }
 }
@@ -551,224 +782,10 @@ IceSSL::TransceiverI::toString() const
     return _desc;
 }
 
-IceInternal::SocketOperation
-IceSSL::TransceiverI::initialize()
+Ice::ConnectionInfoPtr 
+IceSSL::TransceiverI::getInfo() const
 {
-    try
-    {
-        if(_state == StateNeedConnect)
-        {
-            _state = StateConnectPending;
-            return IceInternal::SocketOperationConnect; 
-        }
-        else if(_state <= StateConnectPending)
-        {
-#ifdef ICE_USE_CFSTREAM
-            errno = _connectError;
-#endif            
-#ifndef ICE_USE_IOCP
-            IceInternal::doFinishConnect(_fd);
-#endif
-            _state = StateConnected;
-            _desc = IceInternal::fdToString(_fd);
-        }
-        assert(_state == StateConnected);
-
-        if(!_ssl)
-        {
-#ifdef ICE_USE_IOCP
-            //
-            // On Windows, limiting the buffer size is important to prevent
-            // poor throughput performances when transfering large amount of
-            // data. See Microsoft KB article KB823764.
-            //
-            _maxSendPacketSize = IceInternal::getSendBufferSize(_fd) / 2;
-            if(_maxSendPacketSize < 512)
-            {
-                _maxSendPacketSize = 0;
-            }
-
-            _maxReceivePacketSize = IceInternal::getRecvBufferSize(_fd);
-            if(_maxReceivePacketSize < 512)
-            {
-                _maxReceivePacketSize = 0;
-            }
-
-            _readI = _readBuffer.end();
-            _writeI = _writeBuffer.end();
-            _sentBytes = 0;
-#endif
-
-#ifndef ICE_USE_IOCP
-            // This static_cast is necessary due to 64bit windows. There SOCKET is a non-int type.
-            BIO* bio = BIO_new_socket(static_cast<int>(_fd), 0);
-#else
-            BIO* bio;
-            if(!BIO_new_bio_pair(&bio, _maxSendPacketSize, &_iocpBio, _maxReceivePacketSize))
-            {
-                bio = 0;
-            }
-#endif        
-            if(!bio)
-            {
-                SecurityException ex(__FILE__, __LINE__);
-                ex.reason = "openssl failure";
-                throw ex;
-            }
-
-            _ssl = SSL_new(_instance->context());
-            if(!_ssl)
-            {
-                BIO_free(bio);
-                SecurityException ex(__FILE__, __LINE__);
-                ex.reason = "openssl failure";
-                throw ex;
-            }
-            SSL_set_bio(_ssl, bio, bio);
-        }
-
-        while(!SSL_is_init_finished(_ssl))
-        {
-            //
-            // Only one thread calls initialize(), so synchronization is not necessary here.
-            //
-            int ret = _incoming ? SSL_accept(_ssl) : SSL_connect(_ssl);
-#ifdef ICE_USE_IOCP
-            if(BIO_ctrl_pending(_iocpBio))
-            {
-                if(!send())
-                {
-                    return IceInternal::SocketOperationWrite;
-                }
-                continue;
-            }
-#endif
-            if(ret <= 0)
-            {
-                switch(SSL_get_error(_ssl, ret))
-                {
-                case SSL_ERROR_NONE:
-                    assert(SSL_is_init_finished(_ssl));
-                    break;
-                case SSL_ERROR_ZERO_RETURN:
-                {
-                    ConnectionLostException ex(__FILE__, __LINE__);
-                    ex.error = IceInternal::getSocketErrno();
-                    throw ex;
-                }
-                case SSL_ERROR_WANT_READ:
-                {
-#ifdef ICE_USE_IOCP
-                    if(receive())
-                    {
-                        continue;
-                    }
-#endif
-                    return IceInternal::SocketOperationRead;
-                }
-                case SSL_ERROR_WANT_WRITE:
-                {
-#ifdef ICE_USE_IOCP
-                    if(send())
-                    {
-                        continue;
-                    }
-#endif
-                    return IceInternal::SocketOperationWrite;
-                }
-                case SSL_ERROR_SYSCALL:
-                {            
-                    if(ret == 0)
-                    {
-                        ConnectionLostException ex(__FILE__, __LINE__);
-                        ex.error = 0;
-                        throw ex;
-                    }
-
-#ifndef ICE_USE_IOCP                
-                    if(ret == -1)
-                    {
-                        if(IceInternal::interrupted())
-                        {
-                            break;
-                        }
-                
-                        if(IceInternal::wouldBlock())
-                        {
-                            if(SSL_want_read(_ssl))
-                            {
-                                return IceInternal::SocketOperationRead;
-                            }
-                            else if(SSL_want_write(_ssl))
-                            {
-                                return IceInternal::SocketOperationWrite;
-                            }
-                    
-                            break;
-                        }
-                
-                        if(IceInternal::connectionLost())
-                        {
-                            ConnectionLostException ex(__FILE__, __LINE__);
-                            ex.error = IceInternal::getSocketErrno();
-                            throw ex;
-                        }
-                    }
-#endif
-                    SocketException ex(__FILE__, __LINE__);
-                    ex.error = IceInternal::getSocketErrno();
-                    throw ex;
-                }
-                case SSL_ERROR_SSL:
-                {
-                    struct sockaddr_storage remoteAddr;
-                    string desc = "<not available>";
-                    if(IceInternal::fdToRemoteAddress(_fd, remoteAddr))
-                    {
-                        desc = IceInternal::addrToString(remoteAddr);
-                    }
-                    ostringstream ostr;
-                    ostr << "SSL error occurred for new " << (_incoming ? "incoming" : "outgoing")
-                         << " connection:\nremote address = " << desc << "\n" << _instance->sslErrors();
-                    ProtocolException ex(__FILE__, __LINE__);
-                    ex.reason = ostr.str();
-                    throw ex;
-                }
-                }
-            }
-        }
-
-        _instance->verifyPeer(_ssl, _fd, _host, _adapterName, _incoming);
-    }
-    catch(const Ice::LocalException& ex)
-    {
-        if(_instance->networkTraceLevel() >= 2)
-        {
-            Trace out(_logger, _instance->networkTraceCategory());
-            out << "failed to establish ssl connection\n" << _desc << "\n" << ex;
-        }
-        throw;
-    }
-
-    if(_instance->networkTraceLevel() >= 1)
-    {
-        Trace out(_logger, _instance->networkTraceCategory());
-        if(_incoming)
-        {
-            out << "accepted ssl connection\n" << _desc;
-        }
-        else
-        {
-            out << "ssl connection established\n" << _desc;
-        }
-    }
-
-    if(_instance->securityTraceLevel() >= 1)
-    {
-        _instance->traceConnection(_ssl, _incoming);
-    }
-
-    return IceInternal::SocketOperationNone;
+    return getNativeConnectionInfo();
 }
 
 void
@@ -776,23 +793,13 @@ IceSSL::TransceiverI::checkSendSize(const IceInternal::Buffer& buf, size_t messa
 {
     if(buf.b.size() > messageSizeMax)
     {
-        throw MemoryLimitException(__FILE__, __LINE__);
+        IceInternal::Ex::throwMemoryLimitException(__FILE__, __LINE__, buf.b.size(), messageSizeMax);
     }
-}
-
-ConnectionInfo
-IceSSL::TransceiverI::getConnectionInfo() const
-{
-    //
-    // This can only be called on an open transceiver.
-    //
-    assert(_fd != INVALID_SOCKET);
-    return populateConnectionInfo(_ssl, _fd, _adapterName, _incoming);
 }
 
 IceSSL::TransceiverI::TransceiverI(const InstancePtr& instance, SOCKET fd, const string& host, 
                                    const struct sockaddr_storage& addr) :
-    NativeInfo(fd),
+    IceInternal::NativeInfo(fd),
     _instance(instance),
     _logger(instance->communicator()->getLogger()),
     _stats(instance->communicator()->getStats()),
@@ -829,7 +836,7 @@ IceSSL::TransceiverI::TransceiverI(const InstancePtr& instance, SOCKET fd, const
 }
 
 IceSSL::TransceiverI::TransceiverI(const InstancePtr& instance, SOCKET fd, const string& adapterName) :
-    NativeInfo(fd),
+    IceInternal::NativeInfo(fd),
     _instance(instance),
     _logger(instance->communicator()->getLogger()),
     _stats(instance->communicator()->getStats()),
@@ -852,6 +859,53 @@ IceSSL::TransceiverI::~TransceiverI()
     assert(_fd == INVALID_SOCKET);
 }
 
+NativeConnectionInfoPtr
+IceSSL::TransceiverI::getNativeConnectionInfo() const
+{
+    assert(_fd != INVALID_SOCKET && _ssl != 0);
+
+    NativeConnectionInfoPtr info = new NativeConnectionInfo();
+    IceInternal::fdToAddressAndPort(_fd, info->localAddress, info->localPort, info->remoteAddress, info->remotePort);
+
+    //
+    // On the client side, SSL_get_peer_cert_chain returns the entire chain of certs.
+    // On the server side, the peer certificate must be obtained separately.
+    //
+    // Since we have no clear idea whether the connection is server or client side,
+    // the peer certificate is obtained separately and compared against the first
+    // certificate in the chain. If they are not the same, it is added to the chain.
+    //
+    X509* cert = SSL_get_peer_certificate(_ssl);
+    STACK_OF(X509)* chain = SSL_get_peer_cert_chain(_ssl);
+    if(cert != 0 && (chain == 0 || sk_X509_num(chain) == 0 || cert != sk_X509_value(chain, 0)))
+    {
+        CertificatePtr certificate = new Certificate(cert);
+        info->nativeCerts.push_back(certificate);
+        info->certs.push_back(certificate->encode());
+    }
+    else
+    {
+        X509_free(cert);
+    }
+    
+    if(chain != 0)
+    {
+        for(int i = 0; i < sk_X509_num(chain); ++i)
+        {
+            //
+            // Duplicate the certificate since the stack comes straight from the SSL connection.
+            //
+            CertificatePtr certificate = new Certificate(X509_dup(sk_X509_value(chain, i)));
+            info->nativeCerts.push_back(certificate);
+            info->certs.push_back(certificate->encode());
+        }
+    }
+    
+    info->cipher = SSL_get_cipher_name(_ssl); // Nothing needs to be free'd.
+    info->adapterName = _adapterName;
+    info->incoming = _incoming;
+    return info;
+}
 #ifdef ICE_USE_IOCP
 bool
 IceSSL::TransceiverI::receive()

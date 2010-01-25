@@ -13,7 +13,9 @@ OBJS		= ArgVector.o \
 		  Cond.o \
 		  ConvertUTF.o \
 		  Exception.o \
+		  FileUtil.o \
 		  Random.o \
+		  MutexProtocol.o \
 		  RecMutex.o \
 		  StaticMutex.o \
 		  Shared.o \

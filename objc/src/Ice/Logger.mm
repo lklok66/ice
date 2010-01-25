@@ -105,6 +105,12 @@ error(const std::string& msg)
     }
 }
 
+virtual Ice::LoggerPtr
+cloneWithPrefix(const std::string& prefix)
+{
+    return this;
+}
+
 id<ICELogger>
 getLogger()
 {

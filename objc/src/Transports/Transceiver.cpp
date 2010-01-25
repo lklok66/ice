@@ -13,6 +13,7 @@
 #include <Ice/Instance.h>
 #include <Ice/Properties.h>
 #include <Ice/TraceLevels.h>
+#include <Ice/Connection.h>
 #include <Ice/LoggerUtil.h>
 #include <Ice/Stats.h>
 #include <Ice/Buffer.h>
@@ -308,6 +309,16 @@ string
 IceObjC::Transceiver::toString() const
 {
     return _desc;
+}
+
+Ice::ConnectionInfoPtr 
+IceObjC::Transceiver::getInfo() const
+{
+    // TODO: XXX
+    assert(_fd != INVALID_SOCKET);
+    Ice::TCPConnectionInfoPtr info = new Ice::TCPConnectionInfo();
+    fdToAddressAndPort(_fd, info->localAddress, info->localPort, info->remoteAddress, info->remotePort);
+    return info;
 }
 
 SocketOperation

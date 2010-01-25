@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -15,16 +15,21 @@ from scripts import Expect
 def runClient(clientCmd, server1, server2):
     client = Util.spawn(clientCmd)
     received = False
-    try:
-        server1.expect('Hello World!')
-        received = True
-    except Expect.TIMEOUT:
-        pass
-    try:
-        server2.expect('Hello World!')
-        received = True
-    except Expect.TIMEOUT:
-        pass
+    for i in range(0, 20):
+        try:
+            server1.expect('Hello World!', 1)
+            received = True
+        except Expect.TIMEOUT:
+            pass
+        try:
+            server2.expect('Hello World!', 1)
+            received = True
+        except Expect.TIMEOUT:
+            pass
+
+        if received:
+            break
+
     if not received:
         raise Expect.TIMEOUT
     client.waitTestSuccess()
@@ -51,7 +56,10 @@ def runDemo(clientCmd, serverCmd):
 def run(clientCmd, serverCmd):
     print "testing multicast discovery (Ipv4)...",
     sys.stdout.flush()
-    runDemo(clientCmd, serverCmd)
+    if serverCmd.startswith("java"):
+        runDemo(clientCmd, "java -Djava.net.preferIPv4Stack=true Server")
+    else:
+        runDemo(clientCmd, serverCmd)
     print "ok"
 
     if Util.getMapping() == "java" and Util.isWin32():

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -16,14 +16,6 @@
 #include <Ice/ThreadPoolF.h>
 #include <Ice/BasicStream.h>
 #include <Ice/Network.h>
-#include <Ice/SelectorF.h>
-
-namespace Ice
-{
-
-class LocalException;
-
-}
 
 namespace IceInternal
 {
@@ -32,20 +24,23 @@ class EventHandler : virtual public ::IceUtil::Shared
 {
 public:
 
-    //
-    // The handler is ready for the given operation.
-    //
 #ifdef ICE_USE_IOCP
+    //
+    // Called to start a new asynchronous read or write operation.
+    //
     virtual bool startAsync(SocketOperation) = 0;
     virtual bool finishAsync(SocketOperation) = 0;
 #endif
 
-    virtual bool message(ThreadPoolCurrent&) = 0;
+    //
+    // Called when there's a message ready to be processed.
+    //
+    virtual void message(ThreadPoolCurrent&) = 0;
 
     //
-    // Called if the event handler is unregistered.
+    // Called when the event handler is unregistered.
     //
-    virtual void finished() = 0;
+    virtual void finished(ThreadPoolCurrent&) = 0;
 
     //
     // Get a textual representation of the event handler.
@@ -53,7 +48,7 @@ public:
     virtual std::string toString() const = 0;
 
     //
-    // Get the selector information for the given status.
+    // Get the native information of the handler, this is used by the selector.
     //
     virtual NativeInfoPtr getNativeInfo() = 0;
 
@@ -65,6 +60,8 @@ protected:
 #ifdef ICE_USE_IOCP
     SocketOperation _ready;
     SocketOperation _pending;
+    SocketOperation _started;
+    bool _finish;
 #else
     SocketOperation _disabled;
 #endif
@@ -75,13 +72,6 @@ protected:
 #ifdef ICE_USE_CFSTREAM
     friend class EventHandlerWrapper;
 #endif
-};
-
-class ThreadPoolWorkItem : virtual public IceUtil::Shared
-{
-public:
-    
-    virtual void execute() = 0;
 };
 
 }

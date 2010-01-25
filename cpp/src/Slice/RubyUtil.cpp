@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -594,8 +594,8 @@ Slice::Ruby::CodeVisitor::visitClassDefStart(const ClassDefPtr& p)
     _out << nl << "end";
     _classHistory.insert(scoped); // Avoid redundant declarations.
 
-    _out << sp << nl << "T_" << name << ".defineClass(" << name << ", "
-         << (p->isAbstract() ? "true" : "false") << ", ";
+    bool isAbstract = p->isInterface() || p->allOperations().size() > 0; // Don't use isAbstract() here - see bug 3739
+    _out << sp << nl << "T_" << name << ".defineClass(" << name << ", " << (isAbstract ? "true" : "false") << ", ";
     if(!base)
     {
         _out << "nil";
@@ -861,15 +861,6 @@ Slice::Ruby::CodeVisitor::visitExceptionStart(const ExceptionPtr& p)
     _out << sp << nl << "def to_s";
     _out.inc();
     _out << nl << "'" << scoped.substr(2) << "'";
-    _out.dec();
-    _out << nl << "end";
-
-    //
-    // inspect
-    //
-    _out << sp << nl << "def inspect";
-    _out.inc();
-    _out << nl << "return ::Ice::__stringifyException(self)";
     _out.dec();
     _out << nl << "end";
 
@@ -1739,7 +1730,7 @@ Slice::Ruby::printHeader(IceUtilInternal::Output& out)
     static const char* header =
 "# **********************************************************************\n"
 "#\n"
-"# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.\n"
+"# Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.\n"
 "#\n"
 "# This copy of Ice is licensed to you under the terms described in the\n"
 "# ICE_LICENSE file included in this distribution.\n"

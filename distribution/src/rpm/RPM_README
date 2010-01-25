@@ -33,13 +33,13 @@ following:
 
 %vendor ZeroC, Inc.
 
-%dist .sles10
+%dist .sles11
 
 The gpg settings are only needed if you want to sign your RPMs.
 Replace "/home/rpmbuilder" with a path name that is appropriate for
 your system.
 
-The value for %dist should be one of ".sles10", ".rhel4" or ".rhel5".
+The value for %dist should be one of ".sles11" or ".rhel5".
 
 
 ======================================================================
@@ -82,22 +82,23 @@ The ice.spec file defines a number of build requirements that must be
 installed on your system in order to build the source RPM. These
 dependencies are listed below:
 
- - db46
- - db46-devel
- - db46-java
+ - db48
+ - db48-devel
+ - db48-java
  - mcpp-devel
  - openssl-devel
  - jpackage-utils
  - python-devel
- - bzip2-devel (RHEL4/RHEL5)
- - expat-devel (RHEL4/RHEL5)
- - php-devel (RHEL4/RHEL5)
- - nptl-devel (RHEL4)
+ - bzip2-devel (RHEL)
+ - expat-devel (RHEL)
+ - php-devel (RHEL)
+ - qt4-devel (RHEL)
  - php5-devel (SLES)
+ - libqt4-devel (SLES)
  - mono-core (SLES)
  - mono-devel (SLES)
 
-The db46* and mcpp-devel RPMs are provided by ZeroC. You can determine
+The db48* and mcpp-devel RPMs are provided by ZeroC. You can determine
 the version requirements for all other prerequisites by examining the
 BuildRequires directives in the ice.spec file.
 
@@ -129,15 +130,15 @@ $ rpm -i ice-@ver@-1.src.rpm
 If you have not already done so, install the RPM prerequisites listed
 in step 3 above. The following additional steps are also necessary:
 
- - Install the JGoodies Looks 2.1.4 JAR file as
+ - Install the JGoodies Looks 2.3.0 JAR file as
 
-   /usr/share/java/jgoodies-looks-2.1.4.jar
+   /usr/share/java/jgoodies-looks-2.3.0.jar
 
- - Install the JGoodies Forms 1.2.0 JAR file as
+ - Install the JGoodies Forms 1.2.1 JAR file as
 
-   /usr/share/java/jgoodies-forms-1.2.0.jar
+   /usr/share/java/jgoodies-forms-1.2.1.jar
 
- - Install the ProGuard 4.3 JAR file as
+ - Install the ProGuard 4.4 JAR file as
 
    /usr/share/java/proguard.jar
 
@@ -155,8 +156,8 @@ in step 3 above. The following additional steps are also necessary:
 You can run the 'find-jar' program to verify that the JAR files are
 installed correctly. For example:
 
-$ find-jar jgoodies-looks-2.1.4.jar
-$ find-jar jgoodies-forms-1.2.0.jar
+$ find-jar jgoodies-looks-2.3.0.jar
+$ find-jar jgoodies-forms-1.2.1.jar
 $ find-jar proguard.jar
 
 Finally, build the RPMs as a non-root user.
@@ -191,8 +192,8 @@ building the binary RPMs.
 
 The Mono-related RPMs created during this process are shown below:
 
-  ice-mono-@ver@-1.sles10.noarch.rpm
-  ice-mono-devel-@ver@-1.sles10.<arch>.rpm
+  ice-mono-@ver@-1.sles11.noarch.rpm
+  ice-mono-devel-@ver@-1.sles11.<arch>.rpm
 
 The ice-mono-devel RPM is arch-specific because it contains the
 executable for the Slice-to-C# compiler.
@@ -200,7 +201,7 @@ executable for the Slice-to-C# compiler.
 Note that building the binary RPMs also generates an arch-specific
 ice-mono package:
 
-  ice-mono-@ver@-1.sles10.<arch>.rpm
+  ice-mono-@ver@-1.sles11.<arch>.rpm
 
 This file is an artifact of the build process and should be removed.
 

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -14,11 +14,12 @@
 using namespace std;
 using namespace Ice;
 
-static SliceChecksumDict* _sliceChecksums = 0;
 namespace
 {
 
-static IceUtil::Mutex* _mutex = 0;
+SliceChecksumDict* _sliceChecksums = 0;
+
+IceUtil::Mutex* _mutex = 0;
 
 class Init
 {
@@ -37,9 +38,8 @@ public:
 #endif
     }
 };
-Init init;
 
-}
+Init init;
 
 class SliceChecksumDictDestroyer
 {
@@ -51,7 +51,10 @@ public:
         _sliceChecksums = 0;
     }
 };
-static SliceChecksumDictDestroyer destroyer;
+
+SliceChecksumDictDestroyer destroyer;
+
+}
 
 SliceChecksumDict
 Ice::sliceChecksums()

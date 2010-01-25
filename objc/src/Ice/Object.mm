@@ -115,7 +115,7 @@ public:
 
     ObjectI(id<ICEObject>);
 
-    virtual void ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr&, 
+    virtual void ice_invoke_async(const Ice::AMD_Object_ice_invokePtr&, 
                                   const std::pair<const Ice::Byte*, const Ice::Byte*>&,
                                   const Ice::Current&);
 
@@ -147,7 +147,7 @@ public:
 
     BlobjectI(ICEBlobject*);
     
-    virtual void ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr&, 
+    virtual void ice_invoke_async(const Ice::AMD_Object_ice_invokePtr&, 
                                   const std::pair<const Ice::Byte*, const Ice::Byte*>&,
                                   const Ice::Current&);
 
@@ -180,7 +180,7 @@ IceObjC::ObjectI::ObjectI(id<ICEObject> object) : _object((ICEObject*)object)
 }
 
 void
-IceObjC::ObjectI::ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& cb, 
+IceObjC::ObjectI::ice_invoke_async(const Ice::AMD_Object_ice_invokePtr& cb, 
                                    const std::pair<const Ice::Byte*, const Ice::Byte*>& inParams,
                                    const Ice::Current& current)
 {
@@ -229,7 +229,7 @@ IceObjC::BlobjectI::BlobjectI(ICEBlobject* blobject) : _blobject(blobject)
 }
 
 void
-IceObjC::BlobjectI::ice_invoke_async(const Ice::AMD_Array_Object_ice_invokePtr& cb, 
+IceObjC::BlobjectI::ice_invoke_async(const Ice::AMD_Object_ice_invokePtr& cb, 
                                      const std::pair<const Ice::Byte*, const Ice::Byte*>& inParams,
                                      const Ice::Current& current)
 {

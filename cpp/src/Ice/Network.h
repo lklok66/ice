@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -34,12 +34,20 @@ typedef int ssize_t;
 #   include <netdb.h>
 #endif
 
-#ifdef ICE_USE_CFSTREAM
-struct __CFReadStream;
-typedef struct __CFReadStream * CFReadStreamRef;
-
-struct __CFWriteStream;
-typedef struct __CFWriteStream * CFWriteStreamRef;
+#if defined(__linux) && !defined(ICE_NO_EPOLL)
+#   define ICE_USE_EPOLL 1
+#elif defined(__APPLE__) && !defined(ICE_NO_KQUEUE)
+#   define ICE_USE_KQUEUE 1
+#elif defined(__APPLE__) && !defined(ICE_NO_CFSTREAM)
+#   define ICE_USE_CFSTREAM 1
+#elif defined(_WIN32)
+#  if !defined(ICE_NO_IOCP)
+#     define ICE_USE_IOCP 1
+#  else
+#     define ICE_USE_SELECT 1
+#  endif
+#else
+#   define ICE_USE_POLL 1
 #endif
 
 #if defined(_WIN32) || defined(__osf__) 
@@ -70,6 +78,14 @@ typedef int socklen_t;
 
 #ifndef NETDB_SUCCESS
 #   define NETDB_SUCCESS 0
+#endif
+
+#ifdef ICE_USE_CFSTREAM
+struct __CFReadStream;
+typedef struct __CFReadStream * CFReadStreamRef;
+
+struct __CFWriteStream;
+typedef struct __CFWriteStream * CFWriteStreamRef;
 #endif
 
 namespace IceInternal
@@ -208,6 +224,8 @@ ICE_API void createPipe(SOCKET fds[2]);
 ICE_API std::string errorToStringDNS(int);
 
 ICE_API std::string fdToString(SOCKET);
+ICE_API void fdToAddressAndPort(SOCKET, std::string&, int&, std::string&, int&);
+ICE_API void addrToAddressAndPort(const struct sockaddr_storage&, std::string&, int&);
 ICE_API std::string addressesToString(const struct sockaddr_storage&, const struct sockaddr_storage&, bool);
 ICE_API void fdToLocalAddress(SOCKET, struct sockaddr_storage&);
 ICE_API bool fdToRemoteAddress(SOCKET, struct sockaddr_storage&);
@@ -217,7 +235,7 @@ ICE_API bool isMulticast(const struct sockaddr_storage&);
 ICE_API int getPort(const struct sockaddr_storage&);
 ICE_API void setPort(struct sockaddr_storage&, int);
 
-ICE_API std::vector<std::string> getHostsForEndpointExpand(const std::string&, ProtocolSupport);
+ICE_API std::vector<std::string> getHostsForEndpointExpand(const std::string&, ProtocolSupport, bool);
 ICE_API void setTcpBufSize(SOCKET, const Ice::PropertiesPtr&, const Ice::LoggerPtr&);
 
 ICE_API int getSocketErrno();

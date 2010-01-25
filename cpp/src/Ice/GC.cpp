@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -19,11 +19,11 @@ using namespace IceUtil;
 namespace 
 {
 
-static Mutex* numCollectorsMutex = 0;
-static int numCollectors = 0;
+Mutex* numCollectorsMutex = 0;
+int numCollectors = 0;
 typedef std::set<IceInternal::GCShared*> GCObjectSet;
-static GCObjectSet* gcObjects = 0; // Set of pointers to all existing classes with class data members.
-static RecMutex* gcRecMutex = 0;
+GCObjectSet* gcObjects = 0; // Set of pointers to all existing classes with class data members.
+RecMutex* gcRecMutex = 0;
 
 class Init
 {
@@ -80,49 +80,8 @@ using namespace IceInternal;
 //
 // GCShared
 //
-
 void
 IceInternal::GCShared::__incRef()
-{
-    RecMutex::Lock lock(*gcRecMutex);
-    assert(_ref >= 0);
-    ++_ref;
-}
-
-void
-IceInternal::GCShared::__decRef()
-{
-    IceUtilInternal::MutexPtrLock<IceUtil::RecMutex> lock(gcRecMutex);
-    bool doDelete = false;
-    assert(_ref > 0);
-    if(--_ref == 0)
-    {
-        doDelete = !_noDelete;
-        _noDelete = true;
-    }
-    lock.release();
-    if(doDelete)
-    {
-        delete this;
-    }
-}
-
-int
-IceInternal::GCShared::__getRef() const
-{
-    IceUtilInternal::MutexPtrLock<IceUtil::RecMutex> lock(gcRecMutex);
-    return _ref;
-}
-
-void
-IceInternal::GCShared::__setNoDelete(bool b)
-{
-    IceUtilInternal::MutexPtrLock<IceUtil::RecMutex> lock(gcRecMutex);
-    _noDelete = b;
-}
-
-void
-IceInternal::GCShared::__gcIncRef()
 {
     IceUtilInternal::MutexPtrLock<IceUtil::RecMutex> lock(gcRecMutex);
     assert(_ref >= 0);
@@ -139,7 +98,7 @@ IceInternal::GCShared::__gcIncRef()
 }
 
 void
-IceInternal::GCShared::__gcDecRef()
+IceInternal::GCShared::__decRef()
 {
     IceUtilInternal::MutexPtrLock<IceUtil::RecMutex> lock(gcRecMutex);
     bool doDelete = false;
@@ -162,6 +121,19 @@ IceInternal::GCShared::__gcDecRef()
     }
 }
 
+int
+IceInternal::GCShared::__getRef() const
+{
+    IceUtilInternal::MutexPtrLock<IceUtil::RecMutex> lock(gcRecMutex);
+    return _ref;
+}
+
+void
+IceInternal::GCShared::__setNoDelete(bool b)
+{
+    IceUtilInternal::MutexPtrLock<IceUtil::RecMutex> lock(gcRecMutex);
+    _noDelete = b;
+}
 
 //
 // GC

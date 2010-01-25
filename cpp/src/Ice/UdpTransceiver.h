@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -19,6 +19,7 @@
 #include <Ice/LoggerF.h>
 #include <Ice/StatsF.h>
 #include <Ice/Transceiver.h>
+#include <Ice/Protocol.h>
 #include <IceUtil/Mutex.h>
 
 #ifndef _WIN32
@@ -34,6 +35,14 @@ class SUdpTransceiver;
 
 class UdpTransceiver : public Transceiver, public NativeInfo
 {
+    enum State
+    {
+        StateNeedConnect,
+        StateConnectPending,
+        StateConnected,
+        StateNotConnected
+    };
+
 public:
 
     virtual NativeInfoPtr getNativeInfo();
@@ -41,18 +50,19 @@ public:
     virtual AsyncInfo* getAsyncInfo(SocketOperation);
 #endif
 
+    virtual SocketOperation initialize();
     virtual void close();
     virtual bool write(Buffer&);
     virtual bool read(Buffer&);
 #ifdef ICE_USE_IOCP
-    virtual void startWrite(Buffer&);
+    virtual bool startWrite(Buffer&);
     virtual void finishWrite(Buffer&);
     virtual void startRead(Buffer&);
     virtual void finishRead(Buffer&);
 #endif
     virtual std::string type() const;
     virtual std::string toString() const;
-    virtual SocketOperation initialize();
+    virtual Ice::ConnectionInfoPtr getInfo() const;
     virtual void checkSendSize(const Buffer&, size_t);
 
     int effectivePort() const;
@@ -74,17 +84,19 @@ private:
     const bool _incoming;
     const struct sockaddr_storage _addr;
     struct sockaddr_storage _mcastAddr;
-
-    bool _connect;
+    struct sockaddr_storage _peerAddr;
+    
+    State _state;
     int _rcvSize;
     int _sndSize;
-    const bool _warn;
     static const int _udpOverhead;
     static const int _maxPacketSize;
 
 #ifdef ICE_USE_IOCP
     AsyncInfo _read;
     AsyncInfo _write;
+    struct sockaddr_storage _readAddr;
+    socklen_t _readAddrLen;
 #endif
 };
 

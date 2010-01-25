@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -437,7 +437,7 @@ public:
     bool hasClassDecls() const;
     bool hasClassDefs() const;
     bool hasAbstractClassDefs() const;
-    bool hasDataOnlyClasses() const;
+    bool hasNonLocalDataOnlyClasses() const;
     bool hasOtherConstructedOrExceptions() const; // Exceptions or constructed types other than classes.
     bool hasContentsWithMetaData(const std::string&) const;
     bool hasAsyncOps() const;
@@ -929,12 +929,11 @@ class SLICE_API Unit : virtual public Container
 {
 public:
 
-    static UnitPtr createUnit(bool, bool, bool, bool, const StringList& = StringList());
+    static UnitPtr createUnit(bool, bool, bool, const StringList& = StringList());
 
     bool ignRedefs() const;
 
     bool allowIcePrefix() const;
-    bool caseSensitive() const;
 
     void setComment(const std::string&);
     std::string currentComment(); // Not const, as this function removes the current comment.
@@ -943,7 +942,7 @@ public:
     int currentLine() const;
 
     void nextLine();
-    void scanPosition(const char*);
+    bool scanPosition(const char*);
     int currentIncludeLevel() const;
 
     void addGlobalMetaData(const StringList&);
@@ -997,13 +996,12 @@ public:
 
 private:
 
-    Unit(bool, bool, bool, bool, const StringList&);
+    Unit(bool, bool, bool, const StringList&);
     static void eraseWhiteSpace(::std::string&);
 
     bool _ignRedefs;
     bool _all;
     bool _allowIcePrefix;
-    bool _caseSensitive;
     StringList _defaultGlobalMetaData;
     int _errors;
     std::string _currentComment;

@@ -73,6 +73,7 @@ public:
 
     virtual void streamWrite(IceInternal::BasicStream*) const;
     virtual std::string toString() const;
+    virtual Ice::EndpointInfoPtr getInfo() const;
     virtual Ice::Short type() const;
     virtual Ice::Int timeout() const;
     virtual IceInternal::EndpointIPtr timeout(Ice::Int) const;
@@ -89,20 +90,12 @@ public:
     virtual std::vector<IceInternal::EndpointIPtr> expand() const;
     virtual bool equivalent(const IceInternal::EndpointIPtr&) const;
 
-    virtual bool operator==(const IceInternal::EndpointI&) const;
-    virtual bool operator!=(const IceInternal::EndpointI&) const;
-    virtual bool operator<(const IceInternal::EndpointI&) const;
+    virtual bool operator==(const Ice::LocalObject&) const;
+    virtual bool operator<(const Ice::LocalObject&) const;
 
 private:
 
-#if defined(__SUNPRO_CC)
-    //
-    // COMPILERFIX: prevent the compiler from emitting a warning about
-    // hidding these operators.
-    //
-    using LocalObject::operator==;
-    using LocalObject::operator<;
-#endif
+    virtual ::Ice::Int hashInit() const;
 
     //
     // All members are const, because endpoints are immutable.

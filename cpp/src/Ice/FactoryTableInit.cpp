@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -9,6 +9,7 @@
 
 #include <Ice/FactoryTableInit.h>
 #include <Ice/UserExceptionFactory.h>
+#include <IceUtil/Mutex.h>
 #include <IceUtil/MutexPtrLock.h>
 
 namespace IceInternal
@@ -25,8 +26,8 @@ ICE_DECLSPEC_EXPORT FactoryTable* factoryTable;
 namespace
 {
 
-static int initCount = 0;   // Initialization count
-static IceUtil::Mutex* initCountMutex = 0;
+int initCount = 0;   // Initialization count
+IceUtil::Mutex* initCountMutex = 0;
 
 class Init
 {
@@ -61,7 +62,7 @@ Init init;
 //
 IceInternal::FactoryTableInit::FactoryTableInit()
 {
-    IceUtilInternal::MutexPtrLock<IceUtil::Mutex> sync(initCountMutex);
+    IceUtilInternal::MutexPtrLock<IceUtil::Mutex> lock(initCountMutex);
     if(0 == initCount++)
     {
         factoryTable = new FactoryTable;
@@ -74,7 +75,7 @@ IceInternal::FactoryTableInit::FactoryTableInit()
 //
 IceInternal::FactoryTableInit::~FactoryTableInit()
 {
-    IceUtilInternal::MutexPtrLock<IceUtil::Mutex> sync(initCountMutex);
+    IceUtilInternal::MutexPtrLock<IceUtil::Mutex> lock(initCountMutex);
     if(0 == --initCount)
     {
         delete factoryTable;

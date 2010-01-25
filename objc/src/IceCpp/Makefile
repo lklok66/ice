@@ -45,6 +45,7 @@ OBJS		= Acceptor.o \
 		  ObjectAdapterI.o \
 		  ObjectFactoryManager.o \
 		  Object.o \
+		  OpaqueEndpointI.o \
 		  OutgoingAsync.o \
 		  Outgoing.o \
 		  PluginManagerI.o \
@@ -73,7 +74,6 @@ OBJS		= Acceptor.o \
 		  UdpConnector.o \
 		  UdpEndpointI.o \
 		  UdpTransceiver.o \
-		  UnknownEndpointI.o 
 
 SLICE_OBJS	= BuiltinSequences.o \
 		  Communicator.o \

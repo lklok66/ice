@@ -19,6 +19,7 @@
 #include <Ice/Initialize.h>
 #include <Ice/EndpointFactoryManager.h>
 #include <Ice/Properties.h>
+#include <Ice/HashUtil.h>
 
 #include <CoreFoundation/CoreFoundation.h>
 
@@ -95,6 +96,9 @@ parseKey(const string& keyStr)
     return data;
 }
 
+namespace
+{
+
 CFDataRef 
 readCert(const string& defaultDir, const string& certFile)
 {
@@ -128,6 +132,63 @@ readCert(const string& defaultDir, const string& certFile)
     return cert;
 }
 
+class TcpInfoI : public Ice::TCPEndpointInfo
+{
+public:
+    
+    TcpInfoI(Ice::Int to, bool comp, const string& host, Ice::Int port) :
+        TCPEndpointInfo(to, comp, host, port)
+    {
+    }
+
+    virtual Ice::Short
+    type() const
+    {
+        return TCPEndpointType;
+    }
+    
+    virtual bool
+    datagram() const
+    {
+        return false;
+    }
+    
+    virtual bool
+    secure() const
+    {
+        return false;
+    }
+};
+
+// class SslInfoI : public IceSSL::EndpointInfo
+// {
+// public:
+    
+//     InfoI(Ice::Int to, bool comp, const string& host, Ice::Int port) :
+//         TCPEndpointInfo(to, comp, host, port)
+//     {
+//     }
+
+//     virtual Ice::Short
+//     type() const
+//     {
+//         return TCPEndpointType;
+//     }
+    
+//     virtual bool
+//     datagram() const
+//     {
+//         return false;
+//     }
+    
+//     virtual bool
+//     secure() const
+//     {
+//         return true;
+//     }
+// };
+
+}
 namespace IceObjC
 {
 
@@ -678,6 +739,13 @@ IceObjC::EndpointI::toString() const
     return s.str();
 }
 
+EndpointInfoPtr
+IceObjC::EndpointI::getInfo() const
+{
+    // TODO: XXX:FIX
+    return new TcpInfoI(_timeout, _compress, _host, _port);
+}
+
 Short
 IceObjC::EndpointI::type() const
 {
@@ -793,7 +861,7 @@ vector<EndpointIPtr>
 IceObjC::EndpointI::expand() const
 {
     vector<EndpointIPtr> endps;
-    vector<string> hosts = getHostsForEndpointExpand(_host, _instance->protocolSupport());
+    vector<string> hosts = getHostsForEndpointExpand(_host, _instance->protocolSupport(), false);
     if(hosts.empty())
     {
         endps.push_back(const_cast<EndpointI*>(this));
@@ -820,7 +888,7 @@ IceObjC::EndpointI::equivalent(const EndpointIPtr& endpoint) const
 }
 
 bool
-IceObjC::EndpointI::operator==(const IceInternal::EndpointI& r) const
+IceObjC::EndpointI::operator==(const Ice::LocalObject& r) const
 {
     const EndpointI* p = dynamic_cast<const EndpointI*>(&r);
     if(!p)
@@ -862,18 +930,17 @@ IceObjC::EndpointI::operator==(const IceInternal::EndpointI& r) const
 }
 
 bool
-IceObjC::EndpointI::operator!=(const IceInternal::EndpointI& r) const
-{
-    return !operator==(r);
-}
-
-bool
-IceObjC::EndpointI::operator<(const IceInternal::EndpointI& r) const
+IceObjC::EndpointI::operator<(const Ice::LocalObject& r) const
 {
     const EndpointI* p = dynamic_cast<const EndpointI*>(&r);
     if(!p)
     {
-        return type() < r.type();
+        const IceInternal::EndpointI* e = dynamic_cast<const IceInternal::EndpointI*>(&r);
+        if(!e)
+        {
+            return false;
+        }
+        return type() < e->type();
     }
 
     if(this == p)
@@ -929,6 +996,18 @@ IceObjC::EndpointI::operator<(const IceInternal::EndpointI& r) const
     return false;
 }
 
+Ice::Int
+IceObjC::EndpointI::hashInit() const
+{
+    Ice::Int h = 0;
+    hashAdd(h, _host);
+    hashAdd(h, _port);
+    hashAdd(h, _timeout);
+    hashAdd(h, _connectionId);
+    hashAdd(h, _compress);
+    return h;
+}
+ 
 IceObjC::EndpointFactory::EndpointFactory(const IceInternal::InstancePtr& instance, bool secure) : 
     _instance(new Instance(instance, secure))
 {

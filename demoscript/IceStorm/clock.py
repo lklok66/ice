@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -43,7 +43,7 @@ def run(subCmd, pubCmd):
     print "ok"
 
     if Util.defaultHost:
-        args = ' --IceBox.Service.IceStorm="IceStormService,33:createIceStorm --Ice.Config=config.service %s"' % Util.defaultHost
+        args = ' --IceBox.Service.IceStorm="IceStormService,34b:createIceStorm --Ice.Config=config.service %s"' % Util.defaultHost
     else:
         args = ''
 
@@ -60,6 +60,6 @@ def run(subCmd, pubCmd):
     for s in pubargs:
         runtest(icestorm, subCmd, "", pubCmd, s)
 
-    admin = Util.spawn('iceboxadmin --Ice.Config=config.icebox shutdown')
+    admin = Util.spawn(Util.getIceBoxAdmin() + ' --Ice.Config=config.icebox shutdown')
     admin.waitTestSuccess()
     icestorm.waitTestSuccess()

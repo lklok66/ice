@@ -21,6 +21,10 @@
 #import <Foundation/NSAutoreleasePool.h>
 #import <Foundation/NSThread.h>
 
+#ifdef ICE_NO_KQUEUE
+#  define ICE_USE_CFSTREAM 1
+#endif
+
 extern "C" 
 {
 #ifdef ICE_USE_CFSTREAM

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -36,7 +36,7 @@ else:
 
 print "creating certificates...",
 sys.stdout.flush()
-makecerts = Util.spawn('python -u makecerts.py --iceca=' + os.path.join(Util.getIceDir("cpp"), "bin", "iceca"))
+makecerts = Util.spawn("python -u makecerts.py")
 makecerts.expect("Do you want to keep this as the CA subject name?")
 makecerts.sendline("y")
 makecerts.expect("Enter the email address of the CA:")
@@ -63,9 +63,9 @@ print "ok"
 print "starting icegrid...",
 sys.stdout.flush()
 registryProps = " --Ice.PrintAdapterReady"
-registry = Util.spawn('icegridregistry --Ice.Config=config.registry' + registryProps)
+registry = Util.spawn(Util.getIceGridRegistry() + ' --Ice.Config=config.registry' + registryProps)
 registry.expect('IceGrid.Registry.Internal ready\nIceGrid.Registry.Server ready\nIceGrid.Registry.Client ready')
-node = Util.spawn('icegridnode --Ice.Config=config.node --Ice.PrintAdapterReady %s' % (args))
+node = Util.spawn(Util.getIceGridNode() + ' --Ice.Config=config.node --Ice.PrintAdapterReady %s' % (args))
 node.expect('IceGrid.Node ready')
 print "ok"
 
@@ -73,14 +73,14 @@ print "starting glacier2...",
 sys.stdout.flush()
 
 glacier2Props = " --Ice.PrintAdapterReady --Glacier2.SessionTimeout=5"
-glacier2 = Util.spawn('glacier2router --Ice.Config=config.glacier2' + glacier2Props)
+glacier2 = Util.spawn(Util.getGlacier2Router() + ' --Ice.Config=config.glacier2' + glacier2Props)
 glacier2.expect('Glacier2.Client ready')
 glacier2.expect('Glacier2.Server ready')
 print "ok"
 
 print "deploying application...",
 sys.stdout.flush()
-admin = Util.spawn('icegridadmin --Ice.Config=config.admin')
+admin = Util.spawn(Util.getIceGridAdmin() + ' --Ice.Config=config.admin')
 admin.expect('>>>')
 admin.sendline("application add application.xml")
 admin.expect('>>>')
@@ -109,7 +109,7 @@ print "ok"
 print "completing shutdown...", 
 sys.stdout.flush()
 
-admin = Util.spawn('icegridadmin --Ice.Config=config.admin')
+admin = Util.spawn(Util.getIceGridAdmin() + ' --Ice.Config=config.admin')
 admin.expect('>>>')
 
 admin.sendline('node shutdown Node')

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -276,9 +276,6 @@ ServerAdapterEntry::getAdapterInfo() const
     info.replicaGroupId = _replicaGroupId;
     try
     {
-#if defined(__BCPLUSPLUS__) && (__BCPLUSPLUS__ >= 0x0600)
-        IceUtil::DummyBCC dummy;
-#endif
         info.proxy = _server->getAdapter(_id, true)->getDirectProxy();
     }
     catch(const Ice::Exception&)

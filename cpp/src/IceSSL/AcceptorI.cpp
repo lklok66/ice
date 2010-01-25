@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -18,6 +18,7 @@
 #include <Ice/LoggerUtil.h>
 #include <Ice/Network.h>
 #include <Ice/Properties.h>
+#include <IceUtil/StringUtil.h>
 
 #ifdef ICE_USE_IOCP
 #  include <Mswsock.h>
@@ -74,6 +75,15 @@ IceSSL::AcceptorI::listen()
     {
         Trace out(_logger, _instance->networkTraceCategory());
         out << "accepting ssl connections at " << toString();
+
+        vector<string> interfaces = 
+            IceInternal::getHostsForEndpointExpand(IceInternal::inetAddrToString(_addr), _instance->protocolSupport(),
+                                                   true);
+        if(!interfaces.empty())
+        {
+            out << "\nlocal interfaces: ";
+            out << IceUtilInternal::joinString(interfaces, ", ");
+        }
     }
 }
 
@@ -101,9 +111,16 @@ IceSSL::AcceptorI::startAccept()
 
     assert(_acceptFd == INVALID_SOCKET);
     _acceptFd = IceInternal::createSocket(false, _addr.ss_family);
-    if(!AcceptEx(_fd, _acceptFd, _acceptBuf, 0, 64, 64, &_info.count, &_info))
+    const int sz = static_cast<int>(_acceptBuf.size() / 2);
+    if(!AcceptEx(_fd, _acceptFd, &_acceptBuf[0], 0, sz, sz, &_info.count,
+#if defined(_MSC_VER) && (_MSC_VER < 1300) // COMPILER FIX: VC60
+                 reinterpret_cast<LPOVERLAPPED>(&_info)
+#else
+                 &_info
+#endif
+                 ))
     {
-        if(WSAGetLastError() != WSA_IO_PENDING)
+        if(!IceInternal::wouldBlock())
         {
             SocketException ex(__FILE__, __LINE__);
             ex.error = IceInternal::getSocketErrno();
@@ -115,7 +132,7 @@ IceSSL::AcceptorI::startAccept()
 void 
 IceSSL::AcceptorI::finishAccept()
 {
-    if(_info.count == SOCKET_ERROR)
+    if(_info.count == SOCKET_ERROR || _fd == INVALID_SOCKET)
     {
         IceInternal::closeSocketNoThrow(_acceptFd);
         _acceptFd = INVALID_SOCKET;
@@ -210,6 +227,9 @@ IceSSL::AcceptorI::AcceptorI(const InstancePtr& instance, const string& adapterN
 #endif
 
     _fd = IceInternal::createSocket(false, _addr.ss_family);
+#ifdef ICE_USE_IOCP
+    _acceptBuf.resize((sizeof(sockaddr_storage) + 16) * 2);
+#endif
     IceInternal::setBlock(_fd, false);
     IceInternal::setTcpBufSize(_fd, _instance->communicator()->getProperties(), _logger);
 #ifndef _WIN32
@@ -238,4 +258,7 @@ IceSSL::AcceptorI::AcceptorI(const InstancePtr& instance, const string& adapterN
 IceSSL::AcceptorI::~AcceptorI()
 {
     assert(_fd == INVALID_SOCKET);
+#ifdef ICE_USE_IOCP
+    assert(_acceptFd == INVALID_SOCKET);
+#endif
 }

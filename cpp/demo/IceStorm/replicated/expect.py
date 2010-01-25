@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -23,13 +23,16 @@ from demoscript import *
 import time, signal
 
 desc = 'application.xml'
-if Util.isDebugBuild():
+if Util.isNoServices() or Util.isDebugBuild():
     fi = open(desc, "r")
     desc = 'tmp_application.xml'
     fo = open(desc, "w")
     for l in fi:
         if l.find('exe="icebox"') != -1:
-            l = l.replace('exe="icebox"', 'exe="iceboxd.exe"')
+            if Util.isNoServices():
+                l = l.replace('exe="icebox"', 'exe="' + Util.getIceBox() + '"')
+            else:
+                l = l.replace('exe="icebox"', 'exe="iceboxd.exe"')
         fo.write(l)
     fi.close()
     fo.close()
@@ -47,13 +50,13 @@ else:
 
 print "starting icegridnode...",
 sys.stdout.flush()
-node = Util.spawn('icegridnode --Ice.Config=config.grid --Ice.PrintAdapterReady %s' % (args))
+node = Util.spawn(Util.getIceGridNode() + ' --Ice.Config=config.grid --Ice.PrintAdapterReady %s' % (args))
 node.expect('IceGrid.Registry.Server ready\nIceGrid.Registry.Client ready\nIceGrid.Node ready')
 print "ok"
 
 print "deploying application...",
 sys.stdout.flush()
-admin = Util.spawn('icegridadmin --Ice.Config=config.grid')
+admin = Util.spawn(Util.getIceGridAdmin() + ' --Ice.Config=config.grid')
 admin.expect('>>>')
 admin.sendline("application add \'%s\'" %(desc))
 admin.expect('>>>')
@@ -67,9 +70,9 @@ node.expectall([ 'Election: node 1: reporting for duty in group 3:[-0-9A-Fa-f]+ 
                  'Election: node 2: reporting for duty in group 3:[-0-9A-Fa-f]+ with coordinator 3',
                  'Election: node 3: reporting for duty in group 3:[-0-9A-Fa-f]+ as coordinator' ], timeout=60)
          
-node.expectall(['DemoIceStorm-3: Topic: time: subscribeAndGetPublisher: [-0-9A-Fa-f]+',
-                'DemoIceStorm-1: Topic: time: add replica observer: [-0-9A-Fa-f]+',
-                'DemoIceStorm-2: Topic: time: add replica observer: [-0-9A-Fa-f]+' ], timeout=60)
+node.expectall(['DemoIceStorm-3-IceStorm: Topic: time: subscribeAndGetPublisher: [-0-9A-Fa-f]+',
+                'DemoIceStorm-1-IceStorm: Topic: time: add replica observer: [-0-9A-Fa-f]+',
+                'DemoIceStorm-2-IceStorm: Topic: time: add replica observer: [-0-9A-Fa-f]+' ], timeout=60)
 
 sub.expect('.* ready')
 
@@ -84,9 +87,9 @@ sub.waitTestSuccess()
 pub.kill(signal.SIGINT)
 pub.waitTestSuccess()
 
-node.expectall([ 'DemoIceStorm-1: Topic: time: remove replica observer: [-0-9A-Fa-f]+',
-                 'DemoIceStorm-2: Topic: time: remove replica observer: [-0-9A-Fa-f]+' ,
-                 'DemoIceStorm-3: Topic: time: unsubscribe: [-0-9A-Fa-f]+' ], timeout=60) 
+node.expectall([ 'DemoIceStorm-1-IceStorm: Topic: time: remove replica observer: [-0-9A-Fa-f]+',
+                 'DemoIceStorm-2-IceStorm: Topic: time: remove replica observer: [-0-9A-Fa-f]+' ,
+                 'DemoIceStorm-3-IceStorm: Topic: time: unsubscribe: [-0-9A-Fa-f]+' ], timeout=60) 
 
 admin.sendline('registry shutdown Master')
 admin.sendline('exit')

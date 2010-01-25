@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -12,12 +12,6 @@
 #include <Ice/Service.h>
 #include <IceGrid/RegistryI.h>
 #include <IceGrid/TraceLevels.h>
-#ifdef __BCPLUSPLUS__
-#  include <IceGrid/AdminSessionI.h>
-#  include <IceGrid/ReapThread.h>
-#  include <IceGrid/Database.h>
-#  include <IceGrid/WellKnownObjectsManager.h>
-#endif
 
 using namespace std;
 using namespace Ice;
@@ -31,12 +25,13 @@ class RegistryService : public Service
 public:
 
     RegistryService();
+    ~RegistryService();
 
     virtual bool shutdown();
 
 protected:
 
-    virtual bool start(int, char*[]);
+    virtual bool start(int, char*[], int&);
     virtual void waitForShutdown();
     virtual bool stop();
     virtual CommunicatorPtr initializeCommunicator(int&, char*[], const InitializationData&);
@@ -54,6 +49,10 @@ RegistryService::RegistryService()
 {
 }
 
+RegistryService::~RegistryService()
+{
+}
+
 bool
 RegistryService::shutdown()
 {
@@ -63,7 +62,7 @@ RegistryService::shutdown()
 }
 
 bool
-RegistryService::start(int argc, char* argv[])
+RegistryService::start(int argc, char* argv[], int& status)
 {
     bool nowarn;
     bool readonly;
@@ -77,9 +76,6 @@ RegistryService::start(int argc, char* argv[])
     vector<string> args;
     try
     {
-#if defined(__BCPLUSPLUS__) && (__BCPLUSPLUS__ >= 0x0600)
-        IceUtil::DummyBCC dummy;
-#endif
         args = opts.parse(argc, (const char**)argv);
     }
     catch(const IceUtilInternal::BadOptException& e)
@@ -92,11 +88,13 @@ RegistryService::start(int argc, char* argv[])
     if(opts.isSet("help"))
     {
         usage(argv[0]);
+        status = EXIT_SUCCESS;
         return false;
     }
     if(opts.isSet("version"))
     {
         print(ICE_STRING_VERSION);
+        status = EXIT_SUCCESS;
         return false;
     }
     nowarn = opts.isSet("nowarn");
@@ -120,6 +118,7 @@ RegistryService::start(int argc, char* argv[])
         out << "setting `Ice.ThreadPool.Server.Size' is not useful, ";
         out << "you should set individual adapter thread pools instead.";
     }
+
 
     TraceLevelsPtr traceLevels = new TraceLevels(communicator(), "IceGrid.Registry");
     
@@ -163,6 +162,14 @@ RegistryService::initializeCommunicator(int& argc, char* argv[],
     //
     initData.properties->setProperty("Ice.Default.CollocationOptimized", "0");
 
+    //
+    // Default backend database plugin is Freeze if none is specified.
+    //
+    if(initData.properties->getProperty("Ice.Plugin.DB").empty())
+    {
+        initData.properties->setProperty("Ice.Plugin.DB", "IceGridFreezeDB:createFreezeDB");
+    }
+
     return Service::initializeCommunicator(argc, argv, initData);
 }
 
@@ -188,8 +195,18 @@ RegistryService::usage(const string& appName)
     print("Usage: " + appName + " [options]\n" + options);
 }
 
+//COMPILERFIX: Borland C++ 2010 doesn't support wmain for console applications.
+#if defined(_WIN32 ) && !defined(__BCPLUSPLUS__)
+
+int
+wmain(int argc, wchar_t* argv[])
+
+#else
+
 int
 main(int argc, char* argv[])
+
+#endif
 {
     RegistryService svc;
     return svc.main(argc, argv);

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -38,18 +38,19 @@ public:
     virtual AsyncInfo* getAsyncInfo(SocketOperation);
 #endif
 
+    virtual SocketOperation initialize();
     virtual void close();
     virtual bool write(Buffer&);
     virtual bool read(Buffer&);
 #ifdef ICE_USE_IOCP
-    virtual void startWrite(Buffer&);
+    virtual bool startWrite(Buffer&);
     virtual void finishWrite(Buffer&);
     virtual void startRead(Buffer&);
     virtual void finishRead(Buffer&);
 #endif
     virtual std::string type() const;
     virtual std::string toString() const;
-    virtual SocketOperation initialize();
+    virtual Ice::ConnectionInfoPtr getInfo() const;
     virtual void checkSendSize(const Buffer&, size_t);
 
 private:
@@ -68,12 +69,12 @@ private:
     
     State _state;
     std::string _desc;
-#if defined(ICE_USE_IOCP)
-    int _maxSendPacketSize;
-    int _maxReceivePacketSize;
+#ifdef ICE_USE_IOCP
     struct sockaddr_storage _connectAddr;
     AsyncInfo _read;
     AsyncInfo _write;
+    int _maxSendPacketSize;
+    int _maxReceivePacketSize;
 #endif
 };
 

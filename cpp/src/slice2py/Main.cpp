@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -12,7 +12,8 @@
 #include <IceUtil/Options.h>
 #include <IceUtil/StringUtil.h>
 #include <IceUtil/CtrlCHandler.h>
-#include <IceUtil/StaticMutex.h>
+#include <IceUtil/Mutex.h>
+#include <IceUtil/MutexPtrLock.h>
 #include <Slice/Preprocessor.h>
 #include <Slice/FileTracker.h>
 #include <Slice/PythonUtil.h>
@@ -36,15 +37,38 @@ using namespace std;
 using namespace Slice;
 using namespace Slice::Python;
 
-static IceUtil::StaticMutex _mutex = ICE_STATIC_MUTEX_INITIALIZER;
-static bool _interrupted = false;
+namespace
+{
+
+IceUtil::Mutex* mutex = 0;
+bool interrupted = false;
+
+class Init
+{
+public:
+
+    Init()
+    {
+        mutex = new IceUtil::Mutex;
+    }
+
+    ~Init()
+    {
+        delete mutex;
+        mutex = 0;
+    }
+};
+
+Init init;
+
+}
 
 void
 interruptedCallback(int signal)
 {
-    IceUtil::StaticMutex::Lock lock(_mutex);
+    IceUtilInternal::MutexPtrLock<IceUtil::Mutex> sync(mutex);
 
-    _interrupted = true;
+    interrupted = true;
 }
 
 //
@@ -56,7 +80,7 @@ interruptedCallback(int signal)
 //
 // Inside __init__.py we add an import statement for Foo_ice, causing
 // Foo_ice to be imported implicitly when M is imported.
-// 
+//
 // Of course, another Slice file Bar.ice may contain definitions for the
 // same Slice module M, in which case the __init__.py file for M is modified
 // to contain an additional import statement for Bar_ice. Therefore a
@@ -143,7 +167,7 @@ PackageVisitor::visitModuleStart(const ModulePtr& p)
                 {
                     addSubmodule(path, fixIdent(*q));
                 }
-                    
+
                 path += "/" + *q;
                 createDirectory(path);
 
@@ -208,7 +232,7 @@ PackageVisitor::createDirectory(const string& dir)
     }
 #ifdef _WIN32
     result = _mkdir(dir.c_str());
-#else       
+#else
     result = mkdir(dir.c_str(), S_IRWXU | S_IRWXG | S_IRWXO);
 #endif
 
@@ -361,8 +385,8 @@ PackageVisitor::writeInit(const string& dir, const StringList& modules, const St
 void
 usage(const char* n)
 {
-    cerr << "Usage: " << n << " [options] slice-files...\n";
-    cerr <<        
+    getErrorStream() << "Usage: " << n << " [options] slice-files...\n";
+    getErrorStream() <<
         "Options:\n"
         "-h, --help           Show this message.\n"
         "-v, --version        Display the Ice version.\n"
@@ -372,6 +396,7 @@ usage(const char* n)
         "-IDIR                Put DIR in the include file search path.\n"
         "-E                   Print preprocessor output on stdout.\n"
         "--output-dir DIR     Create files in the directory DIR.\n"
+        "--depend             Generate Makefile dependencies.\n"
         "-d, --debug          Print debug messages.\n"
         "--ice                Permit `Ice' prefix (for building Ice source code only)\n"
         "--all                Generate code for Slice definitions in included files.\n"
@@ -379,11 +404,10 @@ usage(const char* n)
         "--checksum           Generate checksums for Slice definitions.\n"
         "--prefix PREFIX      Prepend filenames of Python modules with PREFIX.\n"
         ;
-    // Note: --case-sensitive is intentionally not shown here!
 }
 
 int
-main(int argc, char* argv[])
+compile(int argc, char* argv[])
 {
     IceUtilInternal::Options opts;
     opts.addOpt("h", "help");
@@ -393,25 +417,22 @@ main(int argc, char* argv[])
     opts.addOpt("I", "", IceUtilInternal::Options::NeedArg, "", IceUtilInternal::Options::Repeat);
     opts.addOpt("E");
     opts.addOpt("", "output-dir", IceUtilInternal::Options::NeedArg);
+    opts.addOpt("", "depend");
     opts.addOpt("d", "debug");
     opts.addOpt("", "ice");
     opts.addOpt("", "all");
     opts.addOpt("", "no-package");
     opts.addOpt("", "checksum");
     opts.addOpt("", "prefix", IceUtilInternal::Options::NeedArg);
-    opts.addOpt("", "case-sensitive");
-     
+
     vector<string> args;
     try
     {
-#if defined(__BCPLUSPLUS__) && (__BCPLUSPLUS__ >= 0x0600)
-        IceUtil::DummyBCC dummy;
-#endif
         args = opts.parse(argc, (const char**)argv);
     }
     catch(const IceUtilInternal::BadOptException& e)
     {
-        cerr << argv[0] << ": error: " << e.reason << endl;
+        getErrorStream() << argv[0] << ": error: " << e.reason << endl;
         usage(argv[0]);
         return EXIT_FAILURE;
     }
@@ -424,7 +445,7 @@ main(int argc, char* argv[])
 
     if(opts.isSet("version"))
     {
-        cerr << ICE_STRING_VERSION << endl;
+        getErrorStream() << ICE_STRING_VERSION << endl;
         return EXIT_SUCCESS;
     }
 
@@ -452,6 +473,8 @@ main(int argc, char* argv[])
 
     string output = opts.optArg("output-dir");
 
+    bool depend = opts.isSet("depend");
+
     bool debug = opts.isSet("debug");
 
     bool ice = opts.isSet("ice");
@@ -463,8 +486,6 @@ main(int argc, char* argv[])
     bool checksum = opts.isSet("checksum");
 
     string prefix = opts.optArg("prefix");
-
-    bool caseSensitive = opts.isSet("case-sensitive");
 
     if(args.empty())
     {
@@ -478,123 +499,155 @@ main(int argc, char* argv[])
     IceUtil::CtrlCHandler ctrlCHandler;
     ctrlCHandler.setCallback(interruptedCallback);
 
-    
+    bool keepComments = true;
+
     for(i = args.begin(); i != args.end(); ++i)
     {
-        Preprocessor icecpp(argv[0], *i, cppArgs);
-        FILE* cppHandle = icecpp.preprocess(false);
-
-        if(cppHandle == 0)
+        if(depend)
         {
-            return EXIT_FAILURE;
-        }
+            PreprocessorPtr icecpp = Preprocessor::create(argv[0], *i, cppArgs);
+            FILE* cppHandle = icecpp->preprocess(false);
 
-        if(preprocess)
-        {
-            char buf[4096];
-            while(fgets(buf, static_cast<int>(sizeof(buf)), cppHandle) != NULL)
+            if(cppHandle == 0)
             {
-                if(fputs(buf, stdout) == EOF)
-                {
-                    return EXIT_FAILURE;
-                }
+                return EXIT_FAILURE;
             }
-            if(!icecpp.close())
+
+            UnitPtr u = Unit::createUnit(false, false, ice);
+            int parseStatus = u->parse(*i, cppHandle, debug);
+            u->destroy();
+
+            if(parseStatus == EXIT_FAILURE)
+            {
+                return EXIT_FAILURE;
+            }
+
+            if(!icecpp->printMakefileDependencies(Preprocessor::Python, includePaths, "", prefix))
+            {
+                return EXIT_FAILURE;
+            }
+
+            if(!icecpp->close())
             {
                 return EXIT_FAILURE;
             }
         }
         else
         {
-            UnitPtr u = Unit::createUnit(false, all, ice, caseSensitive);
-            int parseStatus = u->parse(*i, cppHandle, debug);
+            PreprocessorPtr icecpp = Preprocessor::create(argv[0], *i, cppArgs);
+            FILE* cppHandle = icecpp->preprocess(keepComments);
 
-            if(!icecpp.close())
+            if(cppHandle == 0)
             {
-                u->destroy();
                 return EXIT_FAILURE;
             }
 
-            if(parseStatus == EXIT_FAILURE)
+            if(preprocess)
             {
-                status = EXIT_FAILURE;
+                char buf[4096];
+                while(fgets(buf, static_cast<int>(sizeof(buf)), cppHandle) != NULL)
+                {
+                    if(fputs(buf, stdout) == EOF)
+                    {
+                        return EXIT_FAILURE;
+                    }
+                }
+                if(!icecpp->close())
+                {
+                    return EXIT_FAILURE;
+                }
             }
             else
             {
-                string base = icecpp.getBaseName();
-                string::size_type pos = base.find_last_of("/\\");
-                if(pos != string::npos)
+                UnitPtr u = Unit::createUnit(false, all, ice);
+                int parseStatus = u->parse(*i, cppHandle, debug);
+
+                if(!icecpp->close())
                 {
-                    base.erase(0, pos + 1);
-                }
-
-                //
-                // Append the suffix "_ice" to the filename in order to avoid any conflicts
-                // with Slice module names. For example, if the file Test.ice defines a
-                // Slice module named "Test", then we couldn't create a Python package named
-                // "Test" and also call the generated file "Test.py".
-                //
-                string file = prefix + base + "_ice.py";
-                if(!output.empty())
-                {
-                    file = output + '/' + file;
-                }
-
-                try
-                {
-                    IceUtilInternal::Output out;
-                    out.open(file.c_str());
-                    if(!out)
-                    {
-                        ostringstream os;
-                        os << "cannot open`" << file << "': " << strerror(errno);
-                        throw FileException(__FILE__, __LINE__, os.str());
-                    }
-                    FileTracker::instance()->addFile(file);
-
-                    printHeader(out);
-                    out << "\n# Generated from file `" << base << ".ice'\n";
-
-                    //
-                    // Generate the Python mapping.
-                    //
-                    generate(u, all, checksum, includePaths, out);
-
-                    out.close();
-
-                    //
-                    // Create or update the Python package hierarchy.
-                    //
-                    if(!noPackage)
-                    {
-                        PackageVisitor visitor(prefix + base + "_ice", output);
-                        u->visit(&visitor, false);
-                    }
-                }
-                catch(const Slice::FileException& ex)
-                {
-                    // If a file could not be created, then cleanup any
-                    // created files.
-                    FileTracker::instance()->cleanup();
                     u->destroy();
-                    getErrorStream() << argv[0] << ": error: " << ex.reason() << endl;
                     return EXIT_FAILURE;
                 }
-                catch(const string& err)
+
+                if(parseStatus == EXIT_FAILURE)
                 {
-                    FileTracker::instance()->cleanup();
-                    getErrorStream() << argv[0] << ": error: " << err << endl;
                     status = EXIT_FAILURE;
                 }
-            }
+                else
+                {
+                    string base = icecpp->getBaseName();
+                    string::size_type pos = base.find_last_of("/\\");
+                    if(pos != string::npos)
+                    {
+                        base.erase(0, pos + 1);
+                    }
 
-            u->destroy();
+                    //
+                    // Append the suffix "_ice" to the filename in order to avoid any conflicts
+                    // with Slice module names. For example, if the file Test.ice defines a
+                    // Slice module named "Test", then we couldn't create a Python package named
+                    // "Test" and also call the generated file "Test.py".
+                    //
+                    string file = prefix + base + "_ice.py";
+                    if(!output.empty())
+                    {
+                        file = output + '/' + file;
+                    }
+
+                    try
+                    {
+                        IceUtilInternal::Output out;
+                        out.open(file.c_str());
+                        if(!out)
+                        {
+                            ostringstream os;
+                            os << "cannot open`" << file << "': " << strerror(errno);
+                            throw FileException(__FILE__, __LINE__, os.str());
+                        }
+                        FileTracker::instance()->addFile(file);
+
+                        printHeader(out);
+                        printGeneratedHeader(out, base + ".ice", "#");
+                        //
+                        // Generate the Python mapping.
+                        //
+                        generate(u, all, checksum, includePaths, out);
+    
+                        out.close();
+
+                        //
+                        // Create or update the Python package hierarchy.
+                        //
+                        if(!noPackage)
+                        {
+                            PackageVisitor visitor(prefix + base + "_ice", output);
+                            u->visit(&visitor, false);
+                        }
+                    }
+                    catch(const Slice::FileException& ex)
+                    {
+                        // If a file could not be created, then cleanup any
+                        // created files.
+                        FileTracker::instance()->cleanup();
+                        u->destroy();
+                        getErrorStream() << argv[0] << ": error: " << ex.reason() << endl;
+                        return EXIT_FAILURE;
+                    }
+                    catch(const string& err)
+                    {
+                        FileTracker::instance()->cleanup();
+                        getErrorStream() << argv[0] << ": error: " << err << endl;
+                        status = EXIT_FAILURE;
+                    }
+                }
+
+                u->destroy();
+            }
         }
 
         {
-            IceUtil::StaticMutex::Lock lock(_mutex);
+            IceUtilInternal::MutexPtrLock<IceUtil::Mutex> sync(mutex);
 
-            if(_interrupted)
+            if(interrupted)
             {
                 FileTracker::instance()->cleanup();
                 return EXIT_FAILURE;
@@ -603,4 +656,33 @@ main(int argc, char* argv[])
     }
 
     return status;
+}
+
+int
+main(int argc, char* argv[])
+{
+    try
+    {
+        return compile(argc, argv);
+    }
+    catch(const std::exception& ex)
+    {
+        getErrorStream() << argv[0] << ": error:" << ex.what() << endl;
+        return EXIT_FAILURE;
+    }
+    catch(const std::string& msg)
+    {
+        getErrorStream() << argv[0] << ": error:" << msg << endl;
+        return EXIT_FAILURE;
+    }
+    catch(const char* msg)
+    {
+        getErrorStream() << argv[0] << ": error:" << msg << endl;
+        return EXIT_FAILURE;
+    }
+    catch(...)
+    {
+        getErrorStream() << argv[0] << ": error:" << "unknown exception" << endl;
+        return EXIT_FAILURE;
+    }
 }

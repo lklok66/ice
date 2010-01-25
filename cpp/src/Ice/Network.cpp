@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -26,6 +26,7 @@
 #endif
 
 #include <IceUtil/StringUtil.h>
+#include <IceUtil/Unicode.h>
 #include <Ice/Network.h>
 #include <Ice/LocalException.h>
 #include <Ice/Properties.h> // For setTcpBufSize
@@ -51,7 +52,7 @@ using namespace std;
 using namespace Ice;
 using namespace IceInternal;
 
-#ifdef __sun
+#if defined(__sun) && !defined(__GNUC__)
 #    define INADDR_NONE (in_addr_t)0xffffffff
 #endif
 
@@ -110,23 +111,23 @@ getLocalAddresses(ProtocolSupport protocol)
             SOCKET_ADDRESS_LIST* addrs = reinterpret_cast<SOCKET_ADDRESS_LIST*>(&buffer[0]);
             for (int i = 0; i < addrs->iAddressCount; ++i)
             {
-		sockaddr_storage addr;
-		memcpy(&addr, addrs->Address[i].lpSockaddr, addrs->Address[i].iSockaddrLength);
-		if(addr.ss_family == AF_INET && protocol != EnableIPv6)
-		{
-		    if(reinterpret_cast<struct sockaddr_in*>(&addr)->sin_addr.s_addr != 0)
-		    {
-			result.push_back(addr);
-		    }
-		}
-		else if(addr.ss_family == AF_INET6 && protocol != EnableIPv4)
-		{
-		    struct in6_addr* inaddr6 = &reinterpret_cast<struct sockaddr_in6*>(&addr)->sin6_addr;
-		    if(!IN6_IS_ADDR_UNSPECIFIED(inaddr6) && !IN6_IS_ADDR_LOOPBACK(inaddr6))
-		    {
-			result.push_back(addr);
-		    }
-		}
+                sockaddr_storage addr;
+                memcpy(&addr, addrs->Address[i].lpSockaddr, addrs->Address[i].iSockaddrLength);
+                if(addr.ss_family == AF_INET && protocol != EnableIPv6)
+                {
+                    if(reinterpret_cast<struct sockaddr_in*>(&addr)->sin_addr.s_addr != 0)
+                    {
+                        result.push_back(addr);
+                    }
+                }
+                else if(addr.ss_family == AF_INET6 && protocol != EnableIPv4)
+                {
+                    struct in6_addr* inaddr6 = &reinterpret_cast<struct sockaddr_in6*>(&addr)->sin6_addr;
+                    if(!IN6_IS_ADDR_UNSPECIFIED(inaddr6) && !IN6_IS_ADDR_LOOPBACK(inaddr6))
+                    {
+                        result.push_back(addr);
+                    }
+                }
             }
 
             closeSocket(fd);
@@ -154,8 +155,8 @@ getLocalAddresses(ProtocolSupport protocol)
         {
             if(curr->ifa_addr->sa_family == AF_INET && protocol != EnableIPv6)
             {
-		sockaddr_storage addr;
-		memcpy(&addr, curr->ifa_addr, sizeof(sockaddr_in));
+                sockaddr_storage addr;
+                memcpy(&addr, curr->ifa_addr, sizeof(sockaddr_in));
                 if(reinterpret_cast<struct sockaddr_in*>(&addr)->sin_addr.s_addr != 0)
                 {
                     result.push_back(addr);
@@ -163,8 +164,8 @@ getLocalAddresses(ProtocolSupport protocol)
             }
             else if(curr->ifa_addr->sa_family == AF_INET6 && protocol != EnableIPv4)
             {
-		sockaddr_storage addr;
-		memcpy(&addr, curr->ifa_addr, sizeof(sockaddr_in6));
+                sockaddr_storage addr;
+                memcpy(&addr, curr->ifa_addr, sizeof(sockaddr_in6));
                 if(!IN6_IS_ADDR_UNSPECIFIED(&reinterpret_cast<struct sockaddr_in6*>(&addr)->sin6_addr))
                 {
                     result.push_back(*reinterpret_cast<struct sockaddr_storage*>(curr->ifa_addr));
@@ -238,23 +239,52 @@ getLocalAddresses(ProtocolSupport protocol)
         {
             if(!(ifr[i].ifr_flags & IFF_LOOPBACK)) // Don't include loopback interface addresses
             {
+		//
+		// On Solaris the above Loopback check does not always work so we double 
+		// check the address below. Solaris also returns duplicate entries that need
+		// to be filtered out.
+		//
                 if(ifr[i].ifr_addr.sa_family == AF_INET && protocol != EnableIPv6)
                 {
-		    sockaddr_storage addr;
-		    memcpy(&addr, &ifr[i].ifr_addr, sizeof(sockaddr_in));
-		    if(reinterpret_cast<struct sockaddr_in*>(&addr)->sin_addr.s_addr != 0)
-		    {
-			result.push_back(addr);
-		    }
+                    sockaddr_storage addr;
+                    memcpy(&addr, &ifr[i].ifr_addr, sizeof(sockaddr_in));
+                    struct in_addr* inaddr = &reinterpret_cast<struct sockaddr_in*>(&addr)->sin_addr;
+                    if(inaddr->s_addr != 0 && inaddr->s_addr != htonl(INADDR_LOOPBACK))
+                    {
+			unsigned int j;
+			for(j = 0; j < result.size(); ++j)
+			{
+			   if(compareAddress(addr, result[j]) == 0)
+			   {
+			       break;
+			   }
+			}
+			if(j == result.size())
+			{
+                            result.push_back(addr);
+			}
+                    }
                 }
                 else if(ifr[i].ifr_addr.sa_family == AF_INET6 && protocol != EnableIPv4)
                 {
-		    sockaddr_storage addr;
-		    memcpy(&addr, &ifr[i].ifr_addr, sizeof(sockaddr_in6));
-		    if(!IN6_IS_ADDR_UNSPECIFIED(&reinterpret_cast<struct sockaddr_in6*>(&addr)->sin6_addr))
-		    {
-			result.push_back(addr);
-		    }
+                    sockaddr_storage addr;
+                    memcpy(&addr, &ifr[i].ifr_addr, sizeof(sockaddr_in6));
+                    struct in6_addr* inaddr6 = &reinterpret_cast<struct sockaddr_in6*>(&addr)->sin6_addr;
+                    if(!IN6_IS_ADDR_UNSPECIFIED(inaddr6) && !IN6_IS_ADDR_LOOPBACK(inaddr6))
+                    {
+			unsigned int j;
+			for(j = 0; j < result.size(); ++j)
+			{
+			   if(compareAddress(addr, result[j]) == 0)
+			   {
+			       break;
+			   }
+			}
+			if(j == result.size())
+			{
+                            result.push_back(addr);
+			}
+                    }
                 }
             }
         }
@@ -269,40 +299,31 @@ struct sockaddr_storage
 getAddressImpl(const string& host, int port, ProtocolSupport protocol, bool server)
 {
     struct sockaddr_storage addr;
-
-    //
-    // We now use getaddrinfo() on Windows.
-    //
-// #ifdef _WIN32
-
-//         //
-//         // Windows XP has getaddrinfo(), but we don't want to require XP to run Ice.
-//         //
-
-//         //
-//         // gethostbyname() is thread safe on Windows, with a separate hostent per thread
-//         //
-//         struct hostent* entry;
-//         int retry = 5;
-//         do
-//         {
-//             entry = gethostbyname(host.c_str());
-//         }
-//         while(entry == 0 && WSAGetLastError() == WSATRY_AGAIN && --retry >= 0);
-
-//         if(entry == 0)
-//         {
-//             DNSException ex(__FILE__, __LINE__);
-
-//             ex.error = WSAGetLastError();
-//             ex.host = host;
-//             throw ex;
-//         }
-//         memcpy(&addr.sin_addr, entry->h_addr, entry->h_length);
-
-// #else
-
     memset(&addr, 0, sizeof(struct sockaddr_storage));
+
+    //
+    // We don't use getaddrinfo when host is empty as it's not portable (some old Linux
+    // versions don't support it).
+    //
+    if(host.empty())
+    {
+        if(protocol == EnableIPv6)
+        {
+            sockaddr_in6* addrin6 = reinterpret_cast<sockaddr_in6*>(&addr);
+            addrin6->sin6_family = AF_INET6;
+            addrin6->sin6_port = htons(port);
+            addrin6->sin6_addr = server ? in6addr_any : in6addr_loopback;
+        }
+        else
+        {
+            sockaddr_in* addrin = reinterpret_cast<sockaddr_in*>(&addr);
+            addrin->sin_family = AF_INET;
+            addrin->sin_port = htons(port);
+            addrin->sin_addr.s_addr = server ? htonl(INADDR_ANY) : htonl(INADDR_LOOPBACK);
+        }
+        return addr;
+    }
+
     struct addrinfo* info = 0;
     int retry = 5;
 
@@ -333,14 +354,7 @@ getAddressImpl(const string& host, int port, ProtocolSupport protocol, bool serv
     int rs = 0;
     do
     {
-        if(host.empty())
-        {
-            rs = getaddrinfo(0, "1", &hints, &info);
-        }
-        else
-        {
-            rs = getaddrinfo(host.c_str(), 0, &hints, &info);
-        }
+        rs = getaddrinfo(host.c_str(), 0, &hints, &info);
     }
     while(info == 0 && rs == EAI_AGAIN && --retry >= 0);
 
@@ -406,8 +420,6 @@ getInterfaceIndex(const string& name)
 {
     int index = 0;
 #ifdef _WIN32
-
-#ifndef __BCPLUSPLUS__
     IP_ADAPTER_ADDRESSES addrs;
     ULONG buflen = 0;
     if(::GetAdaptersAddresses(AF_INET6, 0, 0, &addrs, &buflen) == ERROR_BUFFER_OVERFLOW)
@@ -429,8 +441,6 @@ getInterfaceIndex(const string& name)
         }
         delete[] buf;
     }
-#endif
-
 #elif !defined(__hpux)
     index = if_nametoindex(name.c_str());
 #endif
@@ -443,8 +453,6 @@ getInterfaceAddress(const string& name)
     struct in_addr addr;
     addr.s_addr = INADDR_ANY;
 #ifdef _WIN32
-
-#ifndef __BCPLUSPLUS__
     IP_ADAPTER_ADDRESSES addrs;
     ULONG buflen = 0;
     if(::GetAdaptersAddresses(AF_INET, 0, 0, &addrs, &buflen) == ERROR_BUFFER_OVERFLOW)
@@ -459,7 +467,7 @@ getInterfaceAddress(const string& name)
                 if(IceUtil::wstringToString(paddrs->FriendlyName) == name)
                 {
                     struct sockaddr_in addrin;
-		    memcpy(&addrin, paddrs->FirstUnicastAddress->Address.lpSockaddr,
+                    memcpy(&addrin, paddrs->FirstUnicastAddress->Address.lpSockaddr,
                            paddrs->FirstUnicastAddress->Address.iSockaddrLength);
                     addr =  addrin.sin_addr;
                     break;
@@ -469,8 +477,6 @@ getInterfaceAddress(const string& name)
         }
         delete[] buf;
     }
-#endif
-
 #else
     ifreq if_address;
     strcpy(if_address.ifr_name, name.c_str());
@@ -559,7 +565,7 @@ IceInternal::wouldBlock()
 {
 #ifdef _WIN32
     int error = WSAGetLastError();
-    return error == WSAEWOULDBLOCK || error == WSA_IO_PENDING;
+    return error == WSAEWOULDBLOCK || error == WSA_IO_PENDING || error == ERROR_IO_PENDING;
 #else
     return errno == EAGAIN || errno == EWOULDBLOCK;
 #endif
@@ -604,7 +610,7 @@ IceInternal::connectInProgress()
 {
 #ifdef _WIN32
     int error = WSAGetLastError();
-    return error == WSAEWOULDBLOCK || error == WSA_IO_PENDING;
+    return error == WSAEWOULDBLOCK || error == WSA_IO_PENDING || error == ERROR_IO_PENDING;
 #else
     return errno == EINPROGRESS;
 #endif
@@ -647,7 +653,8 @@ bool
 IceInternal::recvTruncated()
 {
 #ifdef _WIN32
-    return WSAGetLastError() == WSAEMSGSIZE;
+    int err = WSAGetLastError();
+    return  err == WSAEMSGSIZE || err == ERROR_MORE_DATA;
 #else
     // We don't get an error under Linux if a datagram is truncated.
     return false;
@@ -742,11 +749,11 @@ IceInternal::shutdownSocketWrite(SOCKET fd)
         //
 #if defined(_WIN32)
         int error = WSAGetLastError();
-	//
-	// Under Vista its possible to get a WSAECONNRESET. See
-	// http://bugzilla.zeroc.com/bugzilla/show_bug.cgi?id=1739 for
-	// some details.
-	//
+        //
+        // Under Vista its possible to get a WSAECONNRESET. See
+        // http://bugzilla.zeroc.com/bugzilla/show_bug.cgi?id=1739 for
+        // some details.
+        //
         if(error == WSAENOTCONN || error == WSAECONNRESET)
         {
             return;
@@ -778,11 +785,11 @@ IceInternal::shutdownSocketReadWrite(SOCKET fd)
         //
 #if defined(_WIN32)
         int error = WSAGetLastError();
-	//
-	// Under Vista its possible to get a WSAECONNRESET. See
-	// http://bugzilla.zeroc.com/bugzilla/show_bug.cgi?id=1739 for
-	// some details.
-	//
+        //
+        // Under Vista its possible to get a WSAECONNRESET. See
+        // http://bugzilla.zeroc.com/bugzilla/show_bug.cgi?id=1739 for
+        // some details.
+        //
         if(error == WSAENOTCONN || error == WSAECONNRESET)
         {
             return;
@@ -1277,6 +1284,11 @@ IceInternal::doFinishConnect(SOCKET fd)
 void
 IceInternal::doConnectAsync(SOCKET fd, const struct sockaddr_storage& addr, AsyncInfo& info)
 {
+    //
+    // NOTE: It's the caller's responsability to close the socket upon
+    // failure to connect. The socket isn't closed by this method.
+    //
+
     struct sockaddr_storage bindAddr;
     memset(&bindAddr, 0, sizeof(bindAddr));
 
@@ -1305,7 +1317,12 @@ IceInternal::doConnectAsync(SOCKET fd, const struct sockaddr_storage& addr, Asyn
         size = 0; // Keep the compiler happy.
     }
 
-    doBind(fd, bindAddr);
+    if(bind(fd, reinterpret_cast<const struct sockaddr*>(&bindAddr), size) == SOCKET_ERROR)
+    {
+        SocketException ex(__FILE__, __LINE__);
+        ex.error = getSocketErrno();
+        throw ex;
+    }
 
     LPFN_CONNECTEX ConnectEx = NULL; // a pointer to the 'ConnectEx()' function
     GUID GuidConnectEx = WSAID_CONNECTEX; // The Guid
@@ -1325,11 +1342,16 @@ IceInternal::doConnectAsync(SOCKET fd, const struct sockaddr_storage& addr, Asyn
         throw ex;
     }        
 
-    if(!ConnectEx(fd, reinterpret_cast<const struct sockaddr*>(&addr), size, 0, 0, 0, &info))
+    if(!ConnectEx(fd, reinterpret_cast<const struct sockaddr*>(&addr), size, 0, 0, 0, 
+#if defined(_MSC_VER) && (_MSC_VER < 1300) // COMPILER FIX: VC60
+                  reinterpret_cast<LPOVERLAPPED>(&info)
+#else
+                  &info
+#endif
+                  ))
     {
         if(!connectInProgress())
         {
-            closeSocketNoThrow(fd);
             if(connectionRefused())
             {
                 ConnectionRefusedException ex(__FILE__, __LINE__);
@@ -1356,6 +1378,11 @@ IceInternal::doConnectAsync(SOCKET fd, const struct sockaddr_storage& addr, Asyn
 void
 IceInternal::doFinishConnectAsync(SOCKET fd, AsyncInfo& info)
 {
+    //
+    // NOTE: It's the caller's responsability to close the socket upon
+    // failure to connect. The socket isn't closed by this method.
+    //
+
     if(info.count == SOCKET_ERROR)
     {
         WSASetLastError(info.error);
@@ -1430,47 +1457,34 @@ IceInternal::getAddress(const string& host, int port, ProtocolSupport protocol)
 vector<struct sockaddr_storage>
 IceInternal::getAddresses(const string& host, int port, ProtocolSupport protocol, bool blocking)
 {
-    //
-    // We now use getaddrinfo() on Windows.
-    //
-// #ifdef _WIN32
-//         //
-//         // Windows XP has getaddrinfo(), but we don't want to require XP to run Ice.
-//         //
-
-//         //
-//         // gethostbyname() is thread safe on Windows, with a separate hostent per thread
-//         //
-//         struct hostent* entry = 0;
-//         int retry = 5;
-
-//         do
-//         {
-//             entry = gethostbyname(host.c_str());
-//         }
-//         while(entry == 0 && h_errno == TRY_AGAIN && --retry >= 0);
-
-//         if(entry == 0)
-//         {
-//             DNSException ex(__FILE__, __LINE__);
-//             ex.error = h_errno;
-//             ex.host = host;
-//             throw ex;
-//         }
-
-//         char** p = entry->h_addr_list;
-//         while(*p)
-//         {
-//             memcpy(&addr.sin_addr, *p, entry->h_length);
-//             result.push_back(addr);
-//             p++;
-//         }
-
-// #else
-
     vector<struct sockaddr_storage> result;
     struct sockaddr_storage addr;
     memset(&addr, 0, sizeof(struct sockaddr_storage));
+
+    //
+    // We don't use getaddrinfo when host is empty as it's not portable (some old Linux
+    // versions don't support it).
+    //
+    if(host.empty())
+    {
+        if(protocol != EnableIPv4)
+        {
+            sockaddr_in6* addrin6 = reinterpret_cast<sockaddr_in6*>(&addr);
+            addrin6->sin6_family = AF_INET6;
+            addrin6->sin6_port = htons(port);
+            addrin6->sin6_addr = in6addr_loopback;
+            result.push_back(addr);
+        }
+        if(protocol != EnableIPv6)
+        {
+            sockaddr_in* addrin = reinterpret_cast<sockaddr_in*>(&addr);
+            addrin->sin_family = AF_INET;
+            addrin->sin_port = htons(port);
+            addrin->sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+            result.push_back(addr);
+        }
+        return result;
+    }
 
     struct addrinfo* info = 0;
     int retry = 5;
@@ -1497,14 +1511,7 @@ IceInternal::getAddresses(const string& host, int port, ProtocolSupport protocol
     int rs = 0;
     do
     {
-        if(host.empty())
-        {
-            rs = getaddrinfo(0, "1", &hints, &info); // Get the address of the loopback interface
-        }
-        else
-        {
-            rs = getaddrinfo(host.c_str(), 0, &hints, &info);
-        }
+        rs = getaddrinfo(host.c_str(), 0, &hints, &info);
     }
     while(info == 0 && rs == EAI_AGAIN && --retry >= 0);
 
@@ -1771,6 +1778,41 @@ IceInternal::fdToString(SOCKET fd)
     return addressesToString(localAddr, remoteAddr, peerConnected);
 };
 
+void
+IceInternal::fdToAddressAndPort(SOCKET fd, string& localAddress, int& localPort, string& remoteAddress, int& remotePort)
+{
+    if(fd == INVALID_SOCKET)
+    {
+        localAddress.clear();
+        remoteAddress.clear();
+        localPort = -1;
+        remotePort = -1;
+        return;
+    }
+
+    struct sockaddr_storage localAddr;
+    fdToLocalAddress(fd, localAddr);
+    addrToAddressAndPort(localAddr, localAddress, localPort);
+
+    struct sockaddr_storage remoteAddr;
+    if(fdToRemoteAddress(fd, remoteAddr))
+    {
+        addrToAddressAndPort(remoteAddr, remoteAddress, remotePort);
+    }
+    else
+    {
+        remoteAddress.clear();
+        remotePort = -1;
+    }
+}
+
+void
+IceInternal::addrToAddressAndPort(const struct sockaddr_storage& addr, string& address, int& port)
+{
+    address = inetAddrToString(addr);
+    port = getPort(addr);
+}
+
 std::string
 IceInternal::addressesToString(const struct sockaddr_storage& localAddr, const struct sockaddr_storage& remoteAddr,
                                bool peerConnected)
@@ -1835,6 +1877,10 @@ IceInternal::inetAddrToString(const struct sockaddr_storage& ss)
     {
         size = sizeof(sockaddr_in6);
     }
+    else
+    {
+        return "";
+    }
 
     char namebuf[1024];
     namebuf[0] = '\0';
@@ -1847,17 +1893,7 @@ IceInternal::addrToString(const struct sockaddr_storage& addr)
 {
     ostringstream s;
     string port;
-    s << inetAddrToString(addr) << ':';
-    if(addr.ss_family == AF_INET)
-    {
-        const struct sockaddr_in* addrin = reinterpret_cast<const sockaddr_in*>(&addr);
-        s << ntohs(addrin->sin_port);
-    }
-    else
-    {
-        const struct sockaddr_in6* addrin = reinterpret_cast<const sockaddr_in6*>(&addr);
-        s << ntohs(addrin->sin6_port);
-    }
+    s << inetAddrToString(addr) << ':' << getPort(addr);
     return s.str();
 }
 
@@ -1868,9 +1904,13 @@ IceInternal::isMulticast(const struct sockaddr_storage& addr)
     {
         return IN_MULTICAST(ntohl(reinterpret_cast<const struct sockaddr_in*>(&addr)->sin_addr.s_addr));
     }
-    else
+    else if(addr.ss_family == AF_INET6)
     {
         return IN6_IS_ADDR_MULTICAST(&reinterpret_cast<const struct sockaddr_in6*>(&addr)->sin6_addr);
+    }
+    else
+    {
+        return false;
     }
 }
 
@@ -1881,9 +1921,13 @@ IceInternal::getPort(const struct sockaddr_storage& addr)
     {
         return ntohs(reinterpret_cast<const sockaddr_in*>(&addr)->sin_port);
     }
-    else
+    else if(addr.ss_family == AF_INET6)
     {
         return ntohs(reinterpret_cast<const sockaddr_in6*>(&addr)->sin6_port);
+    }
+    else
+    {
+        return -1;
     }
 }
 
@@ -1896,12 +1940,13 @@ IceInternal::setPort(struct sockaddr_storage& addr, int port)
     }
     else
     {
+        assert(addr.ss_family == AF_INET6);
         reinterpret_cast<sockaddr_in6*>(&addr)->sin6_port = htons(port);
     }
 }
 
 vector<string>
-IceInternal::getHostsForEndpointExpand(const string& host, ProtocolSupport protocolSupport)
+IceInternal::getHostsForEndpointExpand(const string& host, ProtocolSupport protocolSupport, bool includeLoopback)
 {
     vector<string> hosts;
     if(host.empty() || isWildcard(host, protocolSupport))
@@ -1920,7 +1965,7 @@ IceInternal::getHostsForEndpointExpand(const string& host, ProtocolSupport proto
             }
         }
 
-        if(hosts.empty())
+        if(hosts.empty() || includeLoopback)
         {
             if(protocolSupport != EnableIPv6)
             {

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -15,6 +15,7 @@
 #include <Ice/Network.h>
 #include <Ice/Exception.h>
 #include <Ice/Properties.h>
+#include <IceUtil/StringUtil.h>
 
 #ifdef ICE_USE_IOCP
 #  include <Mswsock.h>
@@ -70,6 +71,14 @@ IceInternal::TcpAcceptor::listen()
     {
         Trace out(_logger, _traceLevels->networkCat);
         out << "accepting tcp connections at " << toString();
+
+        vector<string> interfaces = 
+            getHostsForEndpointExpand(inetAddrToString(_addr), _instance->protocolSupport(), true);
+        if(!interfaces.empty())
+        {
+            out << "\nlocal interfaces: ";
+            out << IceUtilInternal::joinString(interfaces, ", ");
+        }
     }
 }
 
@@ -97,9 +106,16 @@ IceInternal::TcpAcceptor::startAccept()
 
     assert(_acceptFd == INVALID_SOCKET);
     _acceptFd = createSocket(false, _addr.ss_family);
-    if(!AcceptEx(_fd, _acceptFd, _acceptBuf, 0, 64, 64, &_info.count, &_info))
+    const int sz = static_cast<int>(_acceptBuf.size() / 2);
+    if(!AcceptEx(_fd, _acceptFd, &_acceptBuf[0], 0, sz, sz, &_info.count, 
+#if defined(_MSC_VER) && (_MSC_VER < 1300) // COMPILER FIX: VC60
+                 reinterpret_cast<LPOVERLAPPED>(&_info)
+#else
+                 &_info
+#endif
+                 ))
     {
-        if(WSAGetLastError() != WSA_IO_PENDING)
+        if(!wouldBlock())
         {
             SocketException ex(__FILE__, __LINE__);
             ex.error = getSocketErrno();
@@ -111,7 +127,7 @@ IceInternal::TcpAcceptor::startAccept()
 void
 IceInternal::TcpAcceptor::finishAccept()
 {
-    if(_info.count == SOCKET_ERROR)
+    if(_info.count == SOCKET_ERROR || _fd == INVALID_SOCKET)
     {
         closeSocketNoThrow(_acceptFd);
         _acceptFd = INVALID_SOCKET;
@@ -184,7 +200,9 @@ IceInternal::TcpAcceptor::TcpAcceptor(const InstancePtr& instance, const string&
 #endif
 
     _fd = createSocket(false, _addr.ss_family);
-
+#ifdef ICE_USE_IOCP
+    _acceptBuf.resize((sizeof(sockaddr_storage) + 16) * 2);
+#endif
     setBlock(_fd, false);
     setTcpBufSize(_fd, _instance->initializationData().properties, _logger);
 #ifndef _WIN32
@@ -213,4 +231,7 @@ IceInternal::TcpAcceptor::TcpAcceptor(const InstancePtr& instance, const string&
 IceInternal::TcpAcceptor::~TcpAcceptor()
 {
     assert(_fd == INVALID_SOCKET);
+#ifdef ICE_USE_IOCP
+    assert(_acceptFd == INVALID_SOCKET);
+#endif
 }

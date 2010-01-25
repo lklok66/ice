@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -10,11 +10,13 @@
 top_srcdir	= ..\..
 
 LIBNAME		= IceRuby$(LIBSUFFIX).lib
-DLLNAME         = $(libdir)\IceRuby$(LIBSUFFIX).dll
+DLLNAME         = $(libdir)\IceRuby$(LIBSUFFIX).so
 
 TARGETS		= $(LIBNAME) $(DLLNAME)
 
-OBJS		= Communicator.obj \
+OBJS		= Connection.obj \
+		  Communicator.obj \
+		  Endpoint.obj \
 		  Init.obj \
 		  ImplicitContext.obj \
 		  Logger.obj \
@@ -42,9 +44,9 @@ $(LIBNAME): $(DLLNAME)
 $(DLLNAME): $(OBJS)
 	$(LINK) $(RUBY_LDFLAGS) $(ICE_LDFLAGS) $(LD_DLLFLAGS) $(PDBFLAGS) /export:Init_IceRuby $(OBJS) \
 		$(PREOUT)$(DLLNAME) $(PRELIBS)$(LINKWITH)
-	move $(DLLNAME:.dll=.lib) $(LIBNAME)
+	move $(DLLNAME:.so=.lib) $(LIBNAME)
 
 install:: all
-	copy $(DLLNAME) $(install_libdir)
+	copy $(DLLNAME) "$(install_libdir)"
 
-!include .depend
+!include .depend.mak

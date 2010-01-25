@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -15,8 +15,7 @@ from stat import *
 # Defines which languges are supported on each supported platform
 #
 languages = { \
-    'SunOS' : ['cpp', 'java'], \
-    'HP-UX' : ['cpp'], \
+    'SunOS' : ['cpp', 'cpp-64', 'java'], \
     'Darwin' : ['cpp', 'java', 'py'], \
     'Linux' : ['cpp', 'java', 'cs', 'py', 'rb', 'php'], \
 }
@@ -26,53 +25,57 @@ languages = { \
 # location.
 #
 bzip2 = { \
-    'HP-UX' : '/usr/local', \
 }
 
 berkeleydb = { \
     'SunOS' : '/opt/db', \
     'Darwin' : '/opt/db', \
-    'HP-UX' : '/opt/db', \
 }
 
 berkeleydbjar = { \
-    'Linux' : '/usr/share/java/db-4.6.21.jar', \
+    'Linux' : '/usr/share/java/db-4.8.24.jar', \
 }
 
 expat = { \
     'SunOS' : '/usr/sfw', \
-    'HP-UX' : '/usr/local', \
     'Darwin' : '/opt/expat', \
 }
 
 openssl = { \
     'SunOS' : '/usr/sfw', \
-    'HP-UX' : '/opt/openssl', \
 }
 
 mcpp = { 
     'SunOS' : '/opt/mcpp', \
-    'HP-UX' : '/opt/mcpp', \
     'Darwin' : '/opt/mcpp' 
 }
 
+qt = { \
+    'SunOS' : '/opt/qt', \
+    'Darwin' : '/Library/Frameworks', \
+}
+
+iconv = { \
+    'SunOS' : '/usr/sfw' \
+}
+
 jgoodies_looks = { \
-    'SunOS' : '/share/opt/looks-2.1.4/looks-2.1.4.jar', \
-    'Darwin' : '/opt/looks-2.1.4/looks-2.1.4.jar', \
-    'Linux' : '/opt/looks-2.1.4/looks-2.1.4.jar', \
+    'SunOS' : '/usr/share/java/looks-2.3.0.jar', \
+    'Darwin' : '/opt/looks-2.3.0/looks-2.3.0.jar', \
+    'Linux' : '/opt/looks-2.3.0/looks-2.3.0.jar', \
 }
 
 jgoodies_forms = { \
-    'SunOS' : '/share/opt/forms-1.2.0/forms-1.2.0.jar', \
-    'Darwin' : '/opt/forms-1.2.0/forms-1.2.0.jar', \
-    'Linux' : '/opt/forms-1.2.0/forms-1.2.0.jar', \
+    'SunOS' : '/usr/share/java/forms-1.2.1.jar', \
+    'Darwin' : '/opt/forms-1.2.1/forms-1.2.1.jar', \
+    'Linux' : '/opt/forms-1.2.1/forms-1.2.1.jar', \
 }
 
 proguard = { \
-    'SunOS' : '/share/opt/proguard4.1/lib/proguard.jar', \
+    'SunOS' : '/usr/share/java/proguard.jar', \
     'Darwin' : '/opt/proguard/lib/proguard.jar', \
     'Linux' : '/opt/proguard/lib/proguard.jar', \
-}    
+}
 
 #
 # Some utility methods
@@ -511,7 +514,7 @@ def untarArchive(archive, verbose = False, archiveDir = None):
 
     return True
 
-def zipArchive(dir, verbose = False):
+def zipArchive(dir, verbose = False, archiveDir = None):
 
     dist = os.path.basename(dir)
     print "   creating " + dist + ".zip ...",
@@ -520,10 +523,22 @@ def zipArchive(dir, verbose = False):
     cwd = os.getcwd()
     os.chdir(os.path.dirname(dir))
 
-    if verbose:
-        os.system("zip -9r " + dist + ".zip " + dist)
+    if archiveDir:
+        os.mkdir("tmp")
+        os.rename(dist, os.path.join("tmp", archiveDir))
+        os.chdir("tmp")
+        if verbose:
+            os.system("zip -9r " + os.path.join("..", dist + ".zip ") + archiveDir)
+        else:
+            os.system("zip -9rq " + os.path.join("..", dist +".zip ") + archiveDir)
+        os.chdir("..")
+        os.rename(os.path.join("tmp", archiveDir), dir)
+        os.rmdir("tmp")
     else:
-        os.system("zip -9rq " + dist +".zip " + dist)
+        if verbose:
+            os.system("zip -9r " + dist + ".zip " + dist)
+        else:
+            os.system("zip -9rq " + dist +".zip " + dist)
 
     os.chdir(cwd)
     print "ok"
@@ -739,11 +754,17 @@ class Platform:
             envs.append("OPTIMIZE=yes")
 
         # Language specific environment variables to pass to make.
-        if language == "cpp":
+        if language == "cpp" or language == "cpp-64":
             envs.append("create_runpath_symlink=no")
         elif language == "cs":
             envs.append("NOGAC=1")
 
+        # LP64
+        if language == "cpp-64":
+            envs.append("LP64=yes")
+        else:
+            envs.append("LP64=no")
+            
         return string.join(envs, " ")
 
     def getAntEnv(self):
@@ -818,6 +839,13 @@ class Darwin(Platform):
                 links.append(link[len(root) + 1::])
         return libraries + links
 
+    def getMakeEnvs(self, version, language):
+        envs = Platform.getMakeEnvs(self, version, language)
+        # Build fat binaries by default.
+        if not os.environ.has_key("CXXARCHFLAGS"):
+            envs += " CXXARCHFLAGS=\"-arch i386 -arch x86_64\"";
+        return envs
+
     def completeDistribution(self, buildDir, version):
 
         print "Fixing install names...",
@@ -856,10 +884,6 @@ class Darwin(Platform):
 
         print "ok"
 
-class HPUX(Platform):
-    def __init__(self, uname, arch, languages):
-        Platform.__init__(self, uname, "hpux", None, languages, "", "sl")
-
 class Linux(Platform):
     def __init__(self, uname, arch, languages):
         Platform.__init__(self, uname, "linux", arch, languages, "", "so")
@@ -877,7 +901,7 @@ class SunOS(Platform):
 class BerkeleyDB(ThirdParty):
     def __init__(self, platform):
         global berkeleydb, berkeleydbjar
-        ThirdParty.__init__(self, platform, "BerkeleyDB", berkeleydb, ["cpp", "java"], None, "DB_HOME")
+        ThirdParty.__init__(self, platform, "BerkeleyDB", berkeleydb, ["cpp", "cpp-64", "java"], None, "DB_HOME")
         if not self.location: # BerkeleyDB is installed with the system (Linux)
             self.languages = ["java"]
             self.location = berkeleydbjar.get(str(platform), None)
@@ -908,25 +932,54 @@ class Bzip2(ThirdParty):
 class Expat(ThirdParty):
     def __init__(self, platform):
         global expat
-        ThirdParty.__init__(self, platform, "Expat", expat, ["cpp"])
+        ThirdParty.__init__(self, platform, "Expat", expat, ["cpp", "cpp-64"])
 
     def getFilesFromSubDirs(self, platform, bindir, libdir, x64):
-        return platform.getSharedLibraryFiles(self.location, os.path.join(libdir, "*"))
+        return platform.getSharedLibraryFiles(self.location, os.path.join(libdir, "libexpat*"))
 
 class OpenSSL(ThirdParty):
     def __init__(self, platform):
         global openssl
-        ThirdParty.__init__(self, platform, "OpenSSL", openssl, ["cpp"])
+        ThirdParty.__init__(self, platform, "OpenSSL", openssl, ["cpp", "cpp-64"])
 
     def getFilesFromSubDirs(self, platform, bindir, libdir, x64):
         files = [ os.path.join(bindir, "openssl") ]
-        files += platform.getSharedLibraryFiles(self.location, os.path.join(libdir, "*"))
+        files += platform.getSharedLibraryFiles(self.location, os.path.join(libdir, "libssl*"))
+        files += platform.getSharedLibraryFiles(self.location, os.path.join(libdir, "libcrypto*"))
         return files
 
 class Mcpp(ThirdParty):
     def __init__(self, platform):
         global mcpp
-        ThirdParty.__init__(self, platform, "Mcpp", mcpp, ["cpp"])
+        ThirdParty.__init__(self, platform, "Mcpp", mcpp, ["cpp", "cpp-64"])
+
+class Qt(ThirdParty):
+    def __init__(self, platform):
+        global qt
+        if platform.pkgArch == "sparc":
+            ThirdParty.__init__(self, platform, "Qt", qt, ["cpp"])
+        else:
+            ThirdParty.__init__(self, platform, "Qt", qt, ["cpp", "cpp-64"])
+            
+    def getFilesFromSubDirs(self, platform, bindir, libdir, x64):
+	files = platform.getSharedLibraryFiles(self.location, os.path.join(libdir, "libQtCore*"))
+	files += platform.getSharedLibraryFiles(self.location, os.path.join(libdir, "libQtSql*"))
+	# We also need some symbolic links
+	files += [os.path.join(self.location, os.path.join(libdir, "libQtCore." + platform.shlibExtension + ".4")),
+	          os.path.join(self.location, os.path.join(libdir, "libQtSql." + platform.shlibExtension + ".4"))]
+        return files
+
+class Iconv(ThirdParty):
+    def __init__(self, platform):
+        global iconv
+        ThirdParty.__init__(self, platform, "Iconv", iconv, ["cpp", "cpp-64"])
+
+    def getFilesFromSubDirs(self, platform, bindir, libdir, x64):
+	files = platform.getSharedLibraryFiles(self.location, os.path.join(libdir, "libiconv*"))
+	# We also need some symbolic links
+	files += [os.path.join(self.location, os.path.join(libdir, "libiconv." + platform.shlibExtension + ".2")),
+	          os.path.join(self.location, os.path.join(libdir, "libiconv." + platform.shlibExtension))]
+        return files
 
 class JGoodiesLooks(ThirdParty):
     def __init__(self, platform):

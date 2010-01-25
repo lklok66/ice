@@ -1,11 +1,19 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
+
+//
+// We disable deprecation warning here, to allow clean compilation of
+// of deprecated methods from StreamI.h.
+//
+#ifdef _MSC_VER
+#   pragma warning( disable : 4996 )
+#endif
 
 #include <IceUtil/DisableWarnings.h>
 #include <IceUtil/ArgVector.h>
@@ -16,6 +24,7 @@
 #include <Ice/LocalException.h>
 #include <Ice/StreamI.h>
 #include <Ice/LoggerI.h>
+#include <Ice/Instance.h>
 #include <IceUtil/Mutex.h>
 #include <IceUtil/MutexPtrLock.h>
 
@@ -49,6 +58,29 @@ Ice::argsToStringSeq(int argc, char* argv[])
     }
     return result;
 }
+
+#ifdef _WIN32
+
+StringSeq
+Ice::argsToStringSeq(int argc, wchar_t* argv[])
+{
+   return argsToStringSeq(argc, argv, 0);
+}
+
+StringSeq
+Ice::argsToStringSeq(int argc, wchar_t* argv[], const StringConverterPtr& converter)
+{
+    StringSeq args;
+    for(int i=0; argv[i] != 0; i++)
+    {
+        string value = IceUtil::wstringToString(argv[i]);
+        value = Ice::UTF8ToNative(converter, value);
+        args.push_back(value);
+    }
+    return args;
+}
+
+#endif
 
 void
 Ice::stringSeqToArgs(const StringSeq& args, int& argc, char* argv[])
@@ -108,6 +140,30 @@ Ice::createProperties(int& argc, char* argv[], const PropertiesPtr& defaults, co
     return properties;
 }
 
+Ice::ThreadHookPlugin::ThreadHookPlugin(const CommunicatorPtr& communicator, const ThreadNotificationPtr& threadHook)
+{
+    if(communicator == 0)
+    {
+        throw PluginInitializationException(__FILE__, __LINE__, "Communicator cannot be null");
+    }
+
+    IceInternal::InstancePtr instance = IceInternal::getInstance(communicator);
+    instance->setThreadHook(threadHook);
+}
+
+void
+Ice::ThreadHookPlugin::initialize()
+{
+}
+
+void
+Ice::ThreadHookPlugin::destroy()
+{
+}
+
+namespace
+{
+
 inline void checkIceVersion(Int version)
 {
 #ifndef ICE_IGNORE_VERSION
@@ -151,6 +207,7 @@ inline void checkIceVersion(Int version)
 #endif
 }
 
+}
 
 CommunicatorPtr
 Ice::initialize(int& argc, char* argv[], const InitializationData& initializationData, Int version)
@@ -234,6 +291,7 @@ public:
 #endif
     }
 };
+
 Init init;
 
 }
@@ -248,7 +306,7 @@ Ice::getProcessLogger()
        //
        // TODO: Would be nice to be able to use process name as prefix by default.
        //
-       processLogger = new Ice::LoggerI("");
+       processLogger = new Ice::LoggerI("", "");
     }
     return processLogger;
 }
@@ -256,8 +314,8 @@ Ice::getProcessLogger()
 void
 Ice::setProcessLogger(const LoggerPtr& logger)
 {
-    IceUtilInternal::MutexPtrLock<IceUtil::Mutex> lock(processLoggerMutex);
-   processLogger = logger;   
+   IceUtilInternal::MutexPtrLock<IceUtil::Mutex> lock(processLoggerMutex);
+   processLogger = logger;
 }
 
 InstancePtr

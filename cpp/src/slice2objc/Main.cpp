@@ -11,22 +11,45 @@
 #include <Slice/Preprocessor.h>
 #include <Slice/FileTracker.h>
 #include <IceUtil/CtrlCHandler.h>
-#include <IceUtil/StaticMutex.h>
+#include <IceUtil/Mutex.h>
+#include <IceUtil/MutexPtrLock.h>
 #include <Slice/Util.h>
 #include <Gen.h>
 
 using namespace std;
 using namespace Slice;
 
-static IceUtil::StaticMutex _mutex = ICE_STATIC_MUTEX_INITIALIZER;
-static bool _interrupted = false;
+namespace
+{
+
+IceUtil::Mutex* mutex = 0;
+bool interrupted = false;
+
+class Init
+{
+public:
+
+    Init()
+    {
+        mutex = new IceUtil::Mutex;
+    }
+
+    ~Init()
+    {
+        delete mutex;
+        mutex = 0;
+    }
+};
+
+Init init;
+
+}
 
 void
 interruptedCallback(int signal)
 {
-    IceUtil::StaticMutex::Lock lock(_mutex);
-
-    _interrupted = true;
+    IceUtilInternal::MutexPtrLock<IceUtil::Mutex> sync(mutex);
+    interrupted = true;
 }
 
 void
@@ -127,8 +150,6 @@ main(int argc, char* argv[])
 
     bool ice = opts.isSet("ice");
 
-    bool caseSensitive = opts.isSet("case-sensitive");
-
     if(args.empty())
     {
         getErrorStream() << argv[0] << ": no input file" << endl;
@@ -150,21 +171,43 @@ main(int argc, char* argv[])
     {
         if(depend || dependxml)
         {
-            Preprocessor icecpp(argv[0], *i, cppArgs);
-            if(!icecpp.printMakefileDependencies(depend ? Preprocessor::ObjC : Preprocessor::XML, includePaths))
+            PreprocessorPtr icecpp = Preprocessor::create(argv[0], *i, cppArgs);
+            FILE* cppHandle = icecpp->preprocess(false);
+
+            if(cppHandle == 0)
+            {
+                return EXIT_FAILURE;
+            }
+            
+            UnitPtr u = Unit::createUnit(false, false, ice);
+            int parseStatus = u->parse(*i, cppHandle, debug);
+            u->destroy();
+
+            if(parseStatus == EXIT_FAILURE)
+            {
+                return EXIT_FAILURE;
+            }
+
+            if(!icecpp->printMakefileDependencies(depend ? Preprocessor::ObjC : Preprocessor::JavaXML, includePaths))
+            {
+                return EXIT_FAILURE;
+            }
+
+            if(!icecpp->close())
             {
                 return EXIT_FAILURE;
             }
         }
         else
         {
-            Preprocessor icecpp(argv[0], *i, cppArgs);
-            FILE* cppHandle = icecpp.preprocess(false);
+            PreprocessorPtr icecpp = Preprocessor::create(argv[0], *i, cppArgs);
+            FILE* cppHandle = icecpp->preprocess(false);
 
             if(cppHandle == 0)
             {
                 return EXIT_FAILURE;
             }
+
             if(preprocess)
             {
                 char buf[4096];
@@ -175,17 +218,17 @@ main(int argc, char* argv[])
                         return EXIT_FAILURE;
                     }
                 }
-                if(!icecpp.close())
+                if(!icecpp->close())
                 {
                     return EXIT_FAILURE;
                 }           
             }
             else
             {
-                UnitPtr u = Unit::createUnit(false, false, ice, caseSensitive);
+                UnitPtr u = Unit::createUnit(false, false, ice);
                 int parseStatus = u->parse(*i, cppHandle, debug);
 
-                if(!icecpp.close())
+                if(!icecpp->close())
                 {
                     u->destroy();
                     return EXIT_FAILURE;
@@ -199,7 +242,7 @@ main(int argc, char* argv[])
                 {
                     try
                     {
-                        Gen gen(argv[0], icecpp.getBaseName(), include, includePaths, output);
+                        Gen gen(argv[0], icecpp->getBaseName(), include, includePaths, output);
                         if(!gen)
                         {
                             u->destroy();
@@ -223,13 +266,10 @@ main(int argc, char* argv[])
         }
 
         {
-            IceUtil::StaticMutex::Lock lock(_mutex);
+            IceUtilInternal::MutexPtrLock<IceUtil::Mutex> sync(mutex);
 
-            if(_interrupted)
+            if(interrupted)
             {
-                //
-                // If the translator was interrupted then cleanup any files we've already created.
-                //
                 FileTracker::instance()->cleanup();
                 return EXIT_FAILURE;
             }

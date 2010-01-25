@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -8,7 +8,7 @@
 # **********************************************************************
 
 def allTests(communicator)
-    sref = "timeout:default -p 12010 -t 10000"
+    sref = "timeout:default -p 12010"
     obj = communicator.stringToProxy(sref)
     test(obj)
 
@@ -161,7 +161,7 @@ def allTests(communicator)
     begin
         to.sleep(1500)
         test(false)
-    rescue Ice::TimeoutException:
+    rescue Ice::TimeoutException
         # Expected.
     end
     comm.destroy()

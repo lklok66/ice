@@ -37,13 +37,13 @@
 namespace
 {
 
-class AMICallbackBase
+class ObjCAMICallbackBase
 {
 public:
 
 // We must explicitely CFRetain/CFRelease so that the garbage
 // collector does not trash the _target.
-AMICallbackBase(id target, SEL ex) : _target(target), _exception(ex)
+ObjCAMICallbackBase(id target, SEL ex) : _target(target), _exception(ex)
 {
     if(_target)
     {
@@ -51,7 +51,7 @@ AMICallbackBase(id target, SEL ex) : _target(target), _exception(ex)
     }
 }
 
-virtual ~AMICallbackBase()
+virtual ~ObjCAMICallbackBase()
 {
     if(_target)
     {
@@ -99,11 +99,11 @@ SEL _exception;
 
 };
 
-class AMICallbackBaseWithSent : virtual public AMICallbackBase, public Ice::AMISentCallback
+class ObjCAMICallbackBaseWithSent : virtual public ObjCAMICallbackBase, public Ice::AMISentCallback
 {
 public:
 
-AMICallbackBaseWithSent(id target, SEL ex, SEL sent) : AMICallbackBase(target, ex), _sent(sent)
+ObjCAMICallbackBaseWithSent(id target, SEL ex, SEL sent) : ObjCAMICallbackBase(target, ex), _sent(sent)
 {
 }
 
@@ -133,12 +133,12 @@ SEL _sent;
 
 };
 
-class AMICallback : virtual public AMICallbackBase, public Ice::AMI_Array_Object_ice_invoke
+class AMICallback : virtual public ObjCAMICallbackBase, public Ice::AMI_Array_Object_ice_invoke
 {
 public:
 
 AMICallback(const Ice::CommunicatorPtr& communicator, id target, SEL resp, SEL ex, Class finishedClass, SEL finished) : 
-    AMICallbackBase(target, ex),
+    ObjCAMICallbackBase(target, ex),
     _communicator(communicator), 
     _response(resp),
     _finishedClass(finishedClass),
@@ -181,7 +181,7 @@ ice_response(bool ok , const std::pair<const Byte*, const Byte*>& outParams)
 
 virtual void ice_exception(const Ice::Exception& ex)
 {
-    AMICallbackBase::ice_exception(ex);
+    ObjCAMICallbackBase::ice_exception(ex);
 }
 
 private:
@@ -193,24 +193,24 @@ SEL _finished;
 };
 typedef IceUtil::Handle<AMICallback> AMICallbackPtr;
 
-class AMICallbackWithSent : public AMICallbackBaseWithSent, public AMICallback
+class AMICallbackWithSent : public ObjCAMICallbackBaseWithSent, public AMICallback
 {
 public:
     
 AMICallbackWithSent(const Ice::CommunicatorPtr& communicator, id target, SEL resp, SEL ex, SEL sent, 
                     Class finishedClass ,SEL finished) : 
-    AMICallbackBase(target, ex),
-    AMICallbackBaseWithSent(target, ex, sent),
+    ObjCAMICallbackBase(target, ex),
+    ObjCAMICallbackBaseWithSent(target, ex, sent),
     AMICallback(communicator, target, resp, ex, finishedClass, finished)
 {
 }
 };
 
-class AMIIceInvokeCallback : virtual public AMICallbackBase, public Ice::AMI_Array_Object_ice_invoke
+class AMIIceInvokeCallback : virtual public ObjCAMICallbackBase, public Ice::AMI_Array_Object_ice_invoke
 {
 public:
     
-AMIIceInvokeCallback(id target, SEL response, SEL ex) : AMICallbackBase(target, ex), _response(response)
+AMIIceInvokeCallback(id target, SEL response, SEL ex) : ObjCAMICallbackBase(target, ex), _response(response)
 {
 }
 
@@ -242,7 +242,7 @@ ice_response(bool ok , const std::pair<const Byte*, const Byte*>& oP)
 
 virtual void ice_exception(const Ice::Exception& ex)
 {
-    AMICallbackBase::ice_exception(ex);
+    ObjCAMICallbackBase::ice_exception(ex);
 }
 
 private:
@@ -251,41 +251,41 @@ SEL _response;
 
 };
 
-class AMIIceInvokeCallbackWithSent : public AMICallbackBaseWithSent, public AMIIceInvokeCallback
+class AMIIceInvokeCallbackWithSent : public ObjCAMICallbackBaseWithSent, public AMIIceInvokeCallback
 {
 public:
     
 AMIIceInvokeCallbackWithSent(id target, SEL response, SEL ex, SEL sent) :
-    AMICallbackBase(target, ex),
-    AMICallbackBaseWithSent(target, ex, sent),
+    ObjCAMICallbackBase(target, ex),
+    ObjCAMICallbackBaseWithSent(target, ex, sent),
     AMIIceInvokeCallback(target, response, ex)
 {
 }
 
 };
 
-class AMIIceFlushBatchRequestsCallback : virtual public AMICallbackBase, public Ice::AMI_Object_ice_flushBatchRequests
+class AMIIceFlushBatchRequestsCallback : virtual public ObjCAMICallbackBase, public Ice::AMI_Object_ice_flushBatchRequests
 {
 public:
 
-AMIIceFlushBatchRequestsCallback(id target, SEL ex) : AMICallbackBase(target, ex)
+AMIIceFlushBatchRequestsCallback(id target, SEL ex) : ObjCAMICallbackBase(target, ex)
 {
 }
 
 virtual void ice_exception(const Ice::Exception& ex)
 {
-    AMICallbackBase::ice_exception(ex);
+    ObjCAMICallbackBase::ice_exception(ex);
 }
 
 };
 
-class AMIIceFlushBatchRequestsCallbackWithSent : public AMICallbackBaseWithSent, public AMIIceFlushBatchRequestsCallback
+class AMIIceFlushBatchRequestsCallbackWithSent : public ObjCAMICallbackBaseWithSent, public AMIIceFlushBatchRequestsCallback
 {
 public:
 
 AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
-    AMICallbackBase(target, ex),
-    AMICallbackBaseWithSent(target, ex, sent),
+    ObjCAMICallbackBase(target, ex),
+    ObjCAMICallbackBaseWithSent(target, ex, sent),
     AMIIceFlushBatchRequestsCallback(target, ex)
 {
 }

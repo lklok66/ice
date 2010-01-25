@@ -1,18 +1,18 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
 #
 # **********************************************************************
 
-%if "%{dist}" == ".rhel4" || "%{dist}" == ".rhel5"
+%if "%{dist}" == ".rhel5"
   %define ruby 1
   %define mono 0
 %else
-  %if "%{dist}" == ".sles10"
-    %define ruby 0
+  %if "%{dist}" == ".sles11"
+    %define ruby 1
     %define mono 1
   %else
     %define ruby 0
@@ -21,9 +21,21 @@
 %endif
 
 %define buildall 1
-%define makeopts -j2
+%define makeopts -j1
 
 %define core_arches %{ix86} x86_64
+
+%if "%{dist}" == ".rhel5"
+  %ifarch x86_64
+    %define qt_home /usr/lib64/qt4
+  %else
+    %define qt_home /usr/lib/qt4
+  %endif
+%endif
+
+%if "%{dist}" == ".sles11"
+  %define qt_home /usr
+%endif
 
 #
 # See http://fedoraproject.org/wiki/Packaging/Python
@@ -44,7 +56,7 @@
 %endif
 
 Name: ice
-Version: 3.3.1
+Version: 3.4b
 Summary: Files common to all Ice packages 
 Release: 1%{?dist}
 License: GPL with exceptions
@@ -56,16 +68,16 @@ Source1: Ice-rpmbuild-%{version}.tar.gz
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-%define soversion 33
-%define dotnetversion 3.3.1
-%define dotnetpolicyversion 3.3
+%define soversion 34b
+%define dotnetversion 3.4.51
+%define dotnetpolicyversion 3.4
 
-%define formsversion 1.2.0
-%define looksversion 2.1.4
-%define dbversion 4.6.21
+%define formsversion 1.2.1
+%define looksversion 2.3.0
+%define dbversion 4.8.24
 
 BuildRequires: openssl-devel >= 0.9.7a
-BuildRequires: db46-devel >= 4.6.21, db46-java >= 4.6.21
+BuildRequires: db48-devel >= 4.8.24, db48-java >= 4.8.24
 BuildRequires: jpackage-utils
 BuildRequires: mcpp-devel >= 2.7.2
 
@@ -87,25 +99,20 @@ BuildRequires: ruby-devel
 %endif
 
 %if %{mono}
-BuildRequires: mono-core >= 1.2.6, mono-devel >= 1.2.6
+BuildRequires: mono-core >= 2.0.1, mono-devel >= 2.0.1
 %endif
 
-%if "%{dist}" == ".rhel4"
-BuildRequires: nptl-devel
-BuildRequires: bzip2-devel >= 1.0.2
-BuildRequires: expat-devel >= 1.95.7
-BuildRequires: php-devel >= 5.1.4
-BuildRequires: python-devel >= 2.3.4
-%endif
 %if "%{dist}" == ".rhel5"
 BuildRequires: bzip2-devel >= 1.0.3
 BuildRequires: expat-devel >= 1.95.8
 BuildRequires: php-devel >= 5.1.6
 BuildRequires: python-devel >= 2.4.3
+BuildRequires: qt4-devel >= 4.2.1
 %endif
-%if "%{dist}" == ".sles10"
-BuildRequires: php5-devel >= 5.1.2
-BuildRequires: python-devel >= 2.4.2
+%if "%{dist}" == ".sles11"
+BuildRequires: php5-devel >= 5.2.6
+BuildRequires: python-devel >= 2.6.0
+BuildRequires: libqt4-devel >= 4.4.3
 %endif
 
 %description
@@ -126,12 +133,12 @@ solution, and much more.
 #
 %if %{mono}
 %package mono
-Summary: The Ice runtime for .NET (mono)
+Summary: The Ice run time for .NET (mono)
 Group: System Environment/Libraries
 Requires: ice = %{version}-%{release}, mono-core >= 1.2.2
 Obsoletes: ice-dotnet < %{version}-%{release}
 %description mono
-The Ice runtime for .NET (mono).
+The Ice run time for .NET (mono).
 %endif
 
 #
@@ -139,11 +146,11 @@ The Ice runtime for .NET (mono).
 #
 %ifarch noarch
 %package java
-Summary: The Ice runtime for Java
+Summary: The Ice run time for Java
 Group: System Environment/Libraries
-Requires: ice = %{version}-%{release}, db46-java,
+Requires: ice = %{version}-%{release}, db48-java
 %description java
-The Ice runtime for Java.
+The Ice run time for Java.
 %endif
 
 #
@@ -151,18 +158,18 @@ The Ice runtime for Java.
 #
 %ifarch %{core_arches}
 %package libs
-Summary: The Ice runtime for C++
+Summary: The Ice run time for C++
 Group: System Environment/Libraries
-Requires: ice = %{version}-%{release}, db46
+Requires: ice = %{version}-%{release}, db48
 %description libs
-The Ice runtime for C++
+The Ice run time for C++
 
 %package utils
 Summary: Ice utilities and admin tools.
 Group: Applications/System
 Requires: ice-libs = %{version}-%{release}
 %description utils
-Admin tools to manage Ice servers (IceGrid, IceStorm, IceBox etc.),
+Admin tools to manage Ice servers (IceGrid, IceStorm, IceBox, etc.),
 plus various Ice-related utilities.
 
 %package servers
@@ -173,10 +180,10 @@ Requires: ice-utils = %{version}-%{release}
 Requires: ice-mono = %{version}-%{release}
 %endif
 # Requirements for the users
-%if "%{dist}" == ".sles10"
+%if "%{dist}" == ".sles11"
 Requires(pre): pwdutils
 %endif
-%if "%{dist}" == ".rhel4" || "%{dist}" == ".rhel5"
+%if "%{dist}" == ".rhel5"
 Requires(pre): shadow-utils
 %endif
 # Requirements for the init.d services
@@ -191,9 +198,6 @@ icebox, iceboxnet, icepatch2server and related files.
 Summary: Tools, libraries and headers for developing Ice applications in C++
 Group: Development/Tools
 Requires: ice-libs = %{version}-%{release}
-%if "%{dist}" == ".rhel4"
-Requires: nptl-devel
-%endif
 %description c++-devel
 Tools, libraries and headers for developing Ice applications in C++.
 
@@ -216,11 +220,11 @@ Tools for developing Ice applications in C#.
 
 %if %{ruby}
 %package ruby
-Summary: The Ice runtime for Ruby
+Summary: The Ice run time for Ruby
 Group: System Environment/Libraries
 Requires: ice-libs = %{version}-%{release}, ruby
 %description ruby
-The Ice runtime for Ruby.
+The Ice run time for Ruby.
 
 %package ruby-devel
 Summary: Tools for developing Ice applications in Ruby
@@ -231,11 +235,11 @@ Tools for developing Ice applications in Ruby.
 %endif
 
 %package python
-Summary: The Ice runtime for Python
+Summary: The Ice run time for Python
 Group: System Environment/Libraries
-Requires: ice-libs = %{version}-%{release}
+Requires: ice-libs = %{version}-%{release}, python
 %description python
-The Ice runtime for Python.
+The Ice run time for Python.
 
 %package python-devel
 Summary: Tools for developing Ice applications in Python
@@ -245,11 +249,40 @@ Requires: ice-python = %{version}-%{release}
 Tools for developing Ice applications in Python.
 
 %package php
-Summary: The Ice runtime for PHP
+Summary: The Ice run time for PHP
 Group: System Environment/Libraries
-Requires: ice = %{version}-%{release}
+Requires: ice-libs = %{version}-%{release}
+%if "%{dist}" == ".sles11"
+Requires: php5
+%endif
+%if "%{dist}" == ".rhel5"
+Requires: php
+%endif
 %description php
-The Ice runtime for PHP.
+The Ice run time for PHP.
+
+%package php-devel
+Summary: Tools for developing Ice applications in PHP
+Group: Development/Tools
+Requires: ice-php = %{version}-%{release}
+%description php-devel
+Tools for developing Ice applications in PHP.
+
+%package sqldb
+Summary: SQL database support for IceGrid and IceStorm
+Group: System Environment/Daemons
+Requires: ice-libs = %{version}-%{release}
+# Requirements for the users
+%if "%{dist}" == ".sles11"
+Requires(pre): libqt4
+%endif
+%if "%{dist}" == ".rhel5"
+Requires(pre): qt4
+%endif
+%description sqldb
+Database plug-ins that allow the IceGrid registry and IceStorm
+services to use a SQL database via the Qt4 SQL API.
+
 %endif
 
 
@@ -262,13 +295,11 @@ The Ice runtime for PHP.
 
 %build
 
-#
-# We build C++ all the time since we need slice2xxx
-#
-cd $RPM_BUILD_DIR/Ice-%{version}/cpp/src
-make %{makeopts} OPTIMIZE=yes embedded_runpath_prefix=""
-
 %ifarch %{core_arches}
+
+cd $RPM_BUILD_DIR/Ice-%{version}/cpp/src
+make %{makeopts} OPTIMIZE=yes embedded_runpath_prefix="" QT_HOME=%{qt_home}
+
 cd $RPM_BUILD_DIR/Ice-%{version}/py
 make %{makeopts} OPTIMIZE=yes embedded_runpath_prefix=""
 
@@ -280,10 +311,30 @@ cd $RPM_BUILD_DIR/Ice-%{version}/rb
 make %{makeopts} OPTIMIZE=yes embedded_runpath_prefix=""
 %endif
 
+%else
+
+#
+# Build only what we need in C++.
+#
+cd $RPM_BUILD_DIR/Ice-%{version}/cpp/src/IceUtil
+make %{makeopts} OPTIMIZE=yes embedded_runpath_prefix=""
+
+cd $RPM_BUILD_DIR/Ice-%{version}/cpp/src/Slice
+make %{makeopts} OPTIMIZE=yes embedded_runpath_prefix=""
+
+cd $RPM_BUILD_DIR/Ice-%{version}/cpp/src/slice2java
+make %{makeopts} OPTIMIZE=yes embedded_runpath_prefix=""
+
+cd $RPM_BUILD_DIR/Ice-%{version}/cpp/src/slice2freezej
+make %{makeopts} OPTIMIZE=yes embedded_runpath_prefix=""
+
+cd $RPM_BUILD_DIR/Ice-%{version}/cpp/src/slice2cs
+make %{makeopts} OPTIMIZE=yes embedded_runpath_prefix=""
+
 %endif
 
 #
-# We build java5 all the time, since we include the GUI and
+# We build java all the time, since we include the GUI and
 # ant-ice.jar in a non-noarch package.
 #
 cd $RPM_BUILD_DIR/Ice-%{version}/java
@@ -291,11 +342,7 @@ export CLASSPATH=`build-classpath db-%{dbversion} jgoodies-forms-%{formsversion}
 JGOODIES_FORMS=`find-jar jgoodies-forms-%{formsversion}`
 JGOODIES_LOOKS=`find-jar jgoodies-looks-%{looksversion}`
 
-ant -Dice.mapping=java5 -Dbuild.suffix=java5 -Djgoodies.forms=$JGOODIES_FORMS -Djgoodies.looks=$JGOODIES_LOOKS jar
-
-%ifarch noarch
-ant -Dice.mapping=java2 -Dbuild.suffix=java2 jar
-%endif
+ant -Djgoodies.forms=$JGOODIES_FORMS -Djgoodies.looks=$JGOODIES_LOOKS dist-jar
 
 # 
 # We build mono all the time because we include iceboxnet.exe in an
@@ -327,7 +374,7 @@ rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/lib
 
 cd $RPM_BUILD_DIR/Ice-%{version}/cpp
-make prefix=$RPM_BUILD_ROOT embedded_runpath_prefix="" install
+make prefix=$RPM_BUILD_ROOT embedded_runpath_prefix="" QT_HOME=%{qt_home} install
 
 mkdir -p $RPM_BUILD_ROOT%{_bindir}
 mv $RPM_BUILD_ROOT/bin/* $RPM_BUILD_ROOT%{_bindir}
@@ -356,18 +403,22 @@ cp -p $RPM_BUILD_DIR/Ice-rpmbuild-%{version}/ice.pth $RPM_BUILD_ROOT%{python_sit
 cd $RPM_BUILD_DIR/Ice-%{version}/php
 make prefix=$RPM_BUILD_ROOT install
 
-%if "%{dist}" == ".rhel4" || "%{dist}" == ".rhel5"
+%if "%{dist}" == ".rhel5"
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/php.d
 cp -p $RPM_BUILD_DIR/Ice-rpmbuild-%{version}/ice.ini $RPM_BUILD_ROOT%{_sysconfdir}/php.d
 mkdir -p $RPM_BUILD_ROOT%{_libdir}/php/modules
-mv $RPM_BUILD_ROOT/%_lib/IcePHP.so $RPM_BUILD_ROOT%{_libdir}/php/modules
+mv $RPM_BUILD_ROOT/php/IcePHP.so $RPM_BUILD_ROOT%{_libdir}/php/modules
+mkdir -p $RPM_BUILD_ROOT%{_datadir}/php
+mv $RPM_BUILD_ROOT/php/* $RPM_BUILD_ROOT%{_datadir}/php
 %endif
 
-%if "%{dist}" == ".sles10"
+%if "%{dist}" == ".sles11"
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/php5/conf.d
 cp -p $RPM_BUILD_DIR/Ice-rpmbuild-%{version}/ice.ini $RPM_BUILD_ROOT%{_sysconfdir}/php5/conf.d
 mkdir -p $RPM_BUILD_ROOT%{_libdir}/php5/extensions
-mv $RPM_BUILD_ROOT/%_lib/IcePHP.so $RPM_BUILD_ROOT%{_libdir}/php5/extensions
+mv $RPM_BUILD_ROOT/php/IcePHP.so $RPM_BUILD_ROOT%{_libdir}/php5/extensions
+mkdir -p $RPM_BUILD_ROOT%{_datadir}/php5
+mv $RPM_BUILD_ROOT/php/* $RPM_BUILD_ROOT%{_datadir}/php5
 %endif
 
 #
@@ -386,7 +437,7 @@ rm -f $RPM_BUILD_ROOT%{_bindir}/slice2rb
 # IceGridGUI
 #
 mkdir -p $RPM_BUILD_ROOT%{_javadir}
-cp -p $RPM_BUILD_DIR/Ice-%{version}/java/libjava5/IceGridGUI.jar $RPM_BUILD_ROOT%{_javadir}/IceGridGUI-%{version}.jar
+cp -p $RPM_BUILD_DIR/Ice-%{version}/java/lib/IceGridGUI.jar $RPM_BUILD_ROOT%{_javadir}/IceGridGUI-%{version}.jar
 ln -s IceGridGUI-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/IceGridGUI.jar 
 cp -p $RPM_BUILD_DIR/Ice-%{version}/java/bin/icegridgui.rpm $RPM_BUILD_ROOT%{_bindir}/icegridgui
 mkdir -p $RPM_BUILD_ROOT%{_defaultdocdir}/%{name}-%{version}/help
@@ -395,7 +446,7 @@ cp -Rp $RPM_BUILD_DIR/Ice-%{version}/java/resources/IceGridAdmin $RPM_BUILD_ROOT
 #
 # ant-ice.jar
 #
-cp -p $RPM_BUILD_DIR/Ice-%{version}/java/libjava5/ant-ice.jar $RPM_BUILD_ROOT%{_javadir}/ant-ice-%{version}.jar
+cp -p $RPM_BUILD_DIR/Ice-%{version}/java/lib/ant-ice.jar $RPM_BUILD_ROOT%{_javadir}/ant-ice-%{version}.jar
 ln -s ant-ice-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/ant-ice.jar 
 
 
@@ -406,6 +457,10 @@ ln -s ant-ice-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/ant-ice.jar
 #
 cd $RPM_BUILD_DIR/Ice-%{version}/cs
 make prefix=$RPM_BUILD_ROOT GACINSTALL=yes GAC_ROOT=$RPM_BUILD_ROOT%{_prefix}/lib install
+for f in Ice Glacier2 IceBox IceGrid IcePatch2 IceStorm
+do
+     mv $RPM_BUILD_ROOT/bin/$f.xml $RPM_BUILD_ROOT%{_prefix}/lib/mono/gac/$f/%{dotnetversion}.*/
+done
 mv $RPM_BUILD_ROOT/bin/* $RPM_BUILD_ROOT%{_bindir}
 
 #
@@ -441,7 +496,12 @@ rm -f $RPM_BUILD_ROOT/ICE_LICENSE
 rm -f $RPM_BUILD_ROOT/LICENSE
 rm -fr $RPM_BUILD_ROOT/doc/reference
 rm -fr $RPM_BUILD_ROOT/slice
+rm -f $RPM_BUILD_ROOT%{_libdir}/libIceDB.so
 rm -f $RPM_BUILD_ROOT%{_libdir}/libIceStormService.so
+rm -f $RPM_BUILD_ROOT%{_libdir}/libIceStormFreezeDB.so
+rm -f $RPM_BUILD_ROOT%{_libdir}/libIceGridFreezeDB.so
+rm -f $RPM_BUILD_ROOT%{_libdir}/libIceStormSqlDB.so
+rm -f $RPM_BUILD_ROOT%{_libdir}/libIceGridSqlDB.so
 
 %if !%{mono}
 rm -f $RPM_BUILD_ROOT%{_bindir}/slice2cs
@@ -468,14 +528,13 @@ cp -p $RPM_BUILD_DIR/Ice-rpmbuild-%{version}/SOURCES.Linux $RPM_BUILD_ROOT%{_def
 # Java install (using jpackage conventions)
 # 
 cd $RPM_BUILD_DIR/Ice-%{version}/java
-ant -Dice.mapping=java5 -Dbuild.suffix=java5 -Dprefix=$RPM_BUILD_ROOT install
-ant -Dice.mapping=java2 -Dbuild.suffix=java2 -Dprefix=$RPM_BUILD_ROOT install
+ant -Dprefix=$RPM_BUILD_ROOT install
 
 mkdir -p $RPM_BUILD_ROOT%{_javadir}
 mv $RPM_BUILD_ROOT/lib/Ice.jar $RPM_BUILD_ROOT%{_javadir}/Ice-%{version}.jar
 ln -s  Ice-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/Ice.jar 
-mv $RPM_BUILD_ROOT/lib/java2/Ice.jar $RPM_BUILD_ROOT%{_javadir}/Ice-java2-%{version}.jar
-ln -s Ice-java2-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/Ice-java2.jar
+mv $RPM_BUILD_ROOT/lib/Freeze.jar $RPM_BUILD_ROOT%{_javadir}/Freeze-%{version}.jar
+ln -s  Freeze-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/Freeze.jar
 
 
 %if %{mono}
@@ -484,6 +543,10 @@ ln -s Ice-java2-%{version}.jar $RPM_BUILD_ROOT%{_javadir}/Ice-java2.jar
 #
 cd $RPM_BUILD_DIR/Ice-%{version}/cs
 make prefix=$RPM_BUILD_ROOT GACINSTALL=yes GAC_ROOT=$RPM_BUILD_ROOT%{_prefix}/lib install
+for f in Ice Glacier2 IceBox IceGrid IcePatch2 IceStorm
+do
+     mv $RPM_BUILD_ROOT/bin/$f.xml $RPM_BUILD_ROOT%{_prefix}/lib/mono/gac/$f/%{dotnetversion}.*/
+done
 %endif
 
 #
@@ -540,18 +603,18 @@ rm -rf $RPM_BUILD_ROOT
 %{_prefix}/lib/mono/gac/IcePatch2/%{dotnetversion}.*/
 %dir %{_prefix}/lib/mono/gac/IceStorm
 %{_prefix}/lib/mono/gac/IceStorm/%{dotnetversion}.*/
-%dir %{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.Glacier2
-%{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.Glacier2/0.*/
-%dir %{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.Ice
-%{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.Ice/0.*/
-%dir %{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IceBox
-%{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IceBox/0.*/
-%dir %{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IceGrid
-%{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IceGrid/0.*/
-%dir %{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IcePatch2
-%{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IcePatch2/0.*/
-%dir %{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IceStorm
-%{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IceStorm/0.*/
+#%dir %{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.Glacier2
+#%{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.Glacier2/0.*/
+#%dir %{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.Ice
+#%{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.Ice/0.*/
+#%dir %{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IceBox
+#%{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IceBox/0.*/
+#%dir %{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IceGrid
+#%{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IceGrid/0.*/
+#%dir %{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IcePatch2
+#%{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IcePatch2/0.*/
+#%dir %{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IceStorm
+#%{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IceStorm/0.*/
 %endif
 
 #
@@ -568,8 +631,8 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-, root, root, -)
 %{_javadir}/Ice-%{version}.jar
 %{_javadir}/Ice.jar
-%{_javadir}/Ice-java2-%{version}.jar
-%{_javadir}/Ice-java2.jar
+%{_javadir}/Freeze-%{version}.jar
+%{_javadir}/Freeze.jar
 %endif
 
 #
@@ -612,7 +675,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/icepatch2calc
 %{_bindir}/icepatch2client
 %{_bindir}/icestormadmin
-%{_bindir}/slice2docbook
 %{_bindir}/slice2html
 %{_bindir}/icegridadmin
 %{_bindir}/icegridgui
@@ -639,8 +701,14 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/icegridregistry
 %{_bindir}/icepatch2server
 %{_bindir}/icestormmigrate
+%{_libdir}/libIceDB.so.%{version}
+%{_libdir}/libIceDB.so.%{soversion}
+%{_libdir}/libIceGridFreezeDB.so.%{version}
+%{_libdir}/libIceGridFreezeDB.so.%{soversion}
 %{_libdir}/libIceStormService.so.%{version}
 %{_libdir}/libIceStormService.so.%{soversion}
+%{_libdir}/libIceStormFreezeDB.so.%{version}
+%{_libdir}/libIceStormFreezeDB.so.%{soversion}
 %dir %{_datadir}/Ice-%{version}
 %{_datadir}/Ice-%{version}/templates.xml
 %attr(755,root,root) %{_datadir}/Ice-%{version}/upgradeicegrid.py*
@@ -667,7 +735,7 @@ exit 0
 
 %post servers
 /sbin/ldconfig
-%if "%{dist}" != ".sles10"
+%if "%{dist}" != ".sles11"
 /sbin/chkconfig --add icegridregistry
 /sbin/chkconfig --add icegridnode
 /sbin/chkconfig --add glacier2router
@@ -675,7 +743,7 @@ exit 0
 
 %preun servers
 if [ $1 = 0 ]; then
-%if "%{dist}" == ".sles10"
+%if "%{dist}" == ".sles11"
         /sbin/service icegridnode stop >/dev/null 2>&1 || :
         /sbin/insserv -r icegridnode
 	/sbin/service icegridregistry stop >/dev/null 2>&1 || :
@@ -776,20 +844,40 @@ fi
 %files php
 %defattr(-, root, root, -)
 
-%if "%{dist}" == ".rhel4" || "%{dist}" == ".rhel5"
+%if "%{dist}" == ".rhel5"
+%{_datadir}/php
 %{_libdir}/php/modules/IcePHP.so
 %config(noreplace) %{_sysconfdir}/php.d/ice.ini
 %endif
 
-%if "%{dist}" == ".sles10"
+%if "%{dist}" == ".sles11"
+%{_datadir}/php5
 %{_libdir}/php5/extensions
 %config(noreplace) %{_sysconfdir}/php5/conf.d/ice.ini
 %endif
+
+%files php-devel
+%defattr(-, root, root, -)
+%{_bindir}/slice2php
+
+%files sqldb
+%defattr(-, root, root, -)
+%{_libdir}/libIceGridSqlDB.so.%{version}
+%{_libdir}/libIceGridSqlDB.so.%{soversion}
+%{_libdir}/libIceStormSqlDB.so.%{version}
+%{_libdir}/libIceStormSqlDB.so.%{soversion}
+
+%post sqldb -p /sbin/ldconfig
+%postun sqldb -p /sbin/ldconfig
 %endif
 
 
 %changelog
 
+* Wed Dec 15 2009 Mark Spruiell <mes@zeroc.com> 3.4b
+- Updates for the Ice 3.4b release.
+
+* Wed Feb 27 2008 Bernard Normier <bernard@zeroc.com> 3.3b-1
 * Wed Mar 4 2009 Bernard Normier <bernard@zeroc.com> 3.3.1
 - Minor updates for the Ice 3.3.1 release.
 

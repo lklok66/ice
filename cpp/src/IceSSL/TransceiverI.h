@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -32,7 +32,8 @@ class TransceiverI : public IceInternal::Transceiver, public IceInternal::Native
     {
         StateNeedConnect,
         StateConnectPending,
-        StateConnected
+        StateConnected,
+        StateHandshakeComplete
     };
 
 public:
@@ -42,27 +43,28 @@ public:
     virtual IceInternal::AsyncInfo* getAsyncInfo(IceInternal::SocketOperation);
 #endif
     
+    virtual IceInternal::SocketOperation initialize();
     virtual void close();
     virtual bool write(IceInternal::Buffer&);
     virtual bool read(IceInternal::Buffer&);
 #ifdef ICE_USE_IOCP
-    virtual void startWrite(IceInternal::Buffer&);
+    virtual bool startWrite(IceInternal::Buffer&);
     virtual void finishWrite(IceInternal::Buffer&);
     virtual void startRead(IceInternal::Buffer&);
     virtual void finishRead(IceInternal::Buffer&);
 #endif
     virtual std::string type() const;
     virtual std::string toString() const;
-    virtual IceInternal::SocketOperation initialize();
+    virtual Ice::ConnectionInfoPtr getInfo() const;
     virtual void checkSendSize(const IceInternal::Buffer&, size_t);
-
-    ConnectionInfo getConnectionInfo() const;
 
 private:
 
     TransceiverI(const InstancePtr&, SOCKET, const std::string&, const struct sockaddr_storage&);
     TransceiverI(const InstancePtr&, SOCKET, const std::string&);
     virtual ~TransceiverI();
+
+    virtual NativeConnectionInfoPtr getNativeConnectionInfo() const;
  
 #ifdef ICE_USE_IOCP
     bool send();

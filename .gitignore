@@ -17,11 +17,13 @@
 *.ncb
 *.opt
 *.user
+*.res
 .gdb_history
 .DS_Store
 core
 /*/dist
 generated
+generated.test
 cgenerated
 sgenerated
 /java/depcache
@@ -40,15 +42,13 @@ sgenerated
 *.idb
 *.suo
 core.*
-cpp/src/Ice/EventLoggerMsg.h
-cpp/src/Ice/EventLoggerMsg.rc
 cpp/src/Ice/EventLoggerMsg.res
-cpp/src/Ice/MSG00001.bin
 tmp_*.xml
 obj
-*.exe.config
 *.RES
 ClientBin
 vcproj
+.metadata
+.DS_Store
 # VIM swap file
 *.swp

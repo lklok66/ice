@@ -9,9 +9,8 @@ Windows.
 This document provides instructions for applying patches and important
 information about building the third-party packages. Note that you do
 not need to build these packages yourself, as ZeroC supplies a Windows
-installer for each supported compiler that contains release and debug
-libraries for all of the third-party dependencies. The installer is
-available at
+installer that contains release and debug libraries for all of the
+third-party dependencies. The installer is available at
 
   http://www.zeroc.com/download.html
 
@@ -57,18 +56,28 @@ top-level directory and apply the patch as shown below:
 Berkeley DB
 -----------
 
-The files patch.db-4.6.21.1, patch.db-4.6.21.2, patch.db-4.6.21.3 and
-patch.db-4.6.21.15663 in this archive contain several important fixes 
-for Berkeley DB required by Ice. 
+The file db/patch.4.8.24.17646 in this archive contains an important
+fix for Berkeley DB required by Ice. 
 
-After extracting the Berkeley DB 4.6.21 source distribution, change 
+After extracting the Berkeley DB 4.8.24 source distribution, change 
 to the top-level directory and apply the patches as shown below:
 
- > cd db-4.6.21
- > patch -p0 < patch.db-4.6.21.1
- > patch -p0 < patch.db-4.6.21.2
- > patch -p0 < patch.db-4.6.21.3
- > patch -p0 < patch.db-4.6.21.15663
+ > cd db-4.8.24
+ > patch -p0 < patch.db-4.8.24.17646
+
+
+mcpp
+----
+
+The file mcpp/patch.mcpp.2.7.2 in this archive contains several
+important fixes required by Ice. We expect that these changes will be
+included in a future release of mcpp.
+
+After extracting the mcpp source distribution, change to the top-level
+directory and apply the patch as shown below:
+
+  > cd mcpp-2.7.2
+  > patch -p0 < patch.mcpp.2.7.2
 
 
 ======================================================================
@@ -88,29 +97,11 @@ instructions, please refer to
 Berkeley DB
 -----------
 
-Users of Visual C++ 6.0 must configure Visual Studio to use STLport
-before building Berkeley DB:
-
-- In the Visual C++ 6.0 IDE, choose Tools->Options->Directories
-
-- Select "Include files"
-
-- Add the include directory for STLport first in the list. (Note that
-  you must add the "include\stlport" directory, not just "include".)
-
-- Select "Library files"
-
-- Add the lib directory for STLport.
-
-Users of Visual Studio 2008 must remove bufferoverflowU.lib from the 
-linker input "Additional Dependencies" in most projects when building
-on x64.
-
 When building the debug version of the Berkeley DB DLL (db_dll
-project), you should also remove the "DIAGNOSTIC" define and the
-/export:__db_assert linker option. Without these modifications,
-Berkeley DB environments created by the debug DLL are not compatible
-with environments created by the release DLL.
+project), you should remove the "DIAGNOSTIC" and "CONFIG_TEST" defines
+and the /export:__db_assert linker option. Without these modifications,
+database environments created by the debug DLL are not compatible with
+environments created by the release DLL.
 
 For installation instructions, please refer to
 
@@ -131,8 +122,13 @@ OpenSSL
 After extracting the OpenSSL source archive, refer to the file
 INSTALL.W32 or INSTALL.W64 for build instructions.
 
-When building with Visual Studio 2008 for a x64 target, you also 
-need to edit ms\ntdll.mak to remove all occurences of bufferoverflowU.lib.
+For Visual C++ 6.0, you should use the replacement makefile included
+in this archive:
+
+  > nmake /f ..\openssl\ntdll.mak
+
+For 64-bit builds it is also necessary to remove references to
+libbufferoverflowu.lib from ms\ntdll.mak before running nmake.
 
 bzip2
 -----
@@ -145,7 +141,11 @@ makefile included in this archive:
 
   > nmake /f ..\bzip2\Makefile.mak
 
-This will build the release and debug versions of the bzip2 DLLs.
+This will build the release and debug versions of the bzip2 DLLs. If
+you are using Visual C++ 6.0, first set the CPP_COMPILER environment
+variable as shown below:
+
+  > set CPP_COMPILER=VC60
 
 
 mcpp
@@ -158,11 +158,11 @@ Follow these instructions for building mcpp:
   > cd mcpp-2.7.2\src
 
 - Apply the patch for noconfig.H appropriate for your compiler from
-  the noconfig directory. For example, for VS2005 you would run:
+  the noconfig directory. For example, for VS2008 you would run:
 
-  > patch -p0 < ..\noconfig\vc2005.dif
+  > patch -p0 < ..\noconfig\vc2008.dif
 
-  and for C++Builder 2007 you would run:
+  and for C++Builder 2010 you would run:
 
   > patch -p0 < ..\noconfig\bc59.dif
 

@@ -1,12 +1,13 @@
 #
-# Copyright (c) 2008-2009 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2008-2010 ZeroC, Inc. All rights reserved.
 #
 
 Summary: mcpp, a portable C/C++ preprocessor
 Name: mcpp-devel
 Version: 2.7.2
-Release: 1ice%{?dist}
+Release: 2ice%{?dist}
 Source0: http://prdownloads.sourceforge.net/mcpp/mcpp-2.7.2.tar.gz
+Patch1: patch.mcpp.2.7.2
 URL: http://mcpp.sourceforge.net/
 License: BSD
 Group: System Environment/Libraries
@@ -38,6 +39,7 @@ It is probably number one C/C++ preprocessor now available in the world.
 %prep
 
 %setup -q -n mcpp-%{version}
+%patch1 -p0 -b .mcpp.2.7.2
 
 %build
 

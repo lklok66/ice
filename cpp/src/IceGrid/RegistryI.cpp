@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -9,12 +9,13 @@
 
 #include <IceUtil/DisableWarnings.h>
 #include <IceUtil/UUID.h>
+#include <IceUtil/FileUtil.h>
 #include <Ice/Ice.h>
 #include <Ice/Network.h>
 #include <Ice/ProtocolPluginFacade.h> // Just to get the hostname
 
 #include <IceStorm/Service.h>
-#include <IceSSL/Plugin.h>
+#include <IceSSL/IceSSL.h>
 #include <Glacier2/PermissionsVerifier.h>
 
 #include <IceGrid/TraceLevels.h>
@@ -42,17 +43,6 @@
 #include <openssl/des.h> // For crypt() passwords
 
 #include <sys/types.h>
-#include <sys/stat.h>
-
-#ifdef _WIN32
-#   include <direct.h>
-#   ifdef _MSC_VER
-#      define S_ISDIR(mode) ((mode) & _S_IFDIR)
-#      define S_ISREG(mode) ((mode) & _S_IFREG)
-#   endif
-#else
-#   include <unistd.h>
-#endif
 
 using namespace std;
 using namespace Ice;
@@ -190,29 +180,6 @@ RegistryI::startImpl()
     PropertiesPtr properties = _communicator->getProperties();
 
     //
-    // Initialize the database environment.
-    //
-    string dbPath = properties->getProperty("IceGrid.Registry.Data");
-    if(dbPath.empty())
-    {
-        Error out(_communicator->getLogger());
-        out << "property `IceGrid.Registry.Data' is not set";
-        return false;
-    }
-    else
-    {
-        struct stat filestat;
-        if(stat(dbPath.c_str(), &filestat) != 0 || !S_ISDIR(filestat.st_mode))
-        {
-            Error out(_communicator->getLogger());
-            SyscallException ex(__FILE__, __LINE__);
-            ex.error = getSystemErrno();
-            out << "property `IceGrid.Registry.Data' is set to an invalid path:\n" << ex;
-            return false;
-        }
-    }
-
-    //
     // Check that required properties are set and valid.
     //
     if(properties->getProperty("IceGrid.Registry.Client.Endpoints").empty())
@@ -279,6 +246,16 @@ RegistryI::startImpl()
     _master = _replicaName == "Master";
     _sessionTimeout = properties->getPropertyAsIntWithDefault("IceGrid.Registry.SessionTimeout", 30);
 
+    if(!_master && properties->getProperty("Ice.Default.Locator").empty())
+    {
+        if(properties->getProperty("Ice.Default.Locator").empty())
+        {
+            Error out(_communicator->getLogger());
+            out << "property `Ice.Default.Locator' is not set";
+            return false;
+        }
+    }
+
     //
     // Get the instance name
     //
@@ -299,12 +276,6 @@ RegistryI::startImpl()
     }
     else
     {
-        if(properties->getProperty("Ice.Default.Locator").empty())
-        {
-            Error out(_communicator->getLogger());
-            out << "property `Ice.Default.Locator' is not set";
-            return false;
-        }
         _instanceName = _communicator->getDefaultLocator()->ice_getIdentity().category;
     }
 
@@ -328,8 +299,6 @@ RegistryI::startImpl()
     {
     }
     
-    properties->setProperty("Freeze.DbEnv.Registry.DbHome", dbPath);
-
     //
     // Create the reaper thread.
     //
@@ -359,7 +328,22 @@ RegistryI::startImpl()
     //
     // Create the registry database.
     //
-    _database = new Database(registryAdapter, topicManager, _instanceName, _traceLevels, getInfo(), _readonly);
+    DatabasePluginPtr plugin;
+    try
+    {
+        plugin = DatabasePluginPtr::dynamicCast(_communicator->getPluginManager()->getPlugin("DB"));
+    }
+    catch(const NotRegisteredException&)
+    {
+    }
+    if(!plugin)
+    {
+        Error out(_communicator->getLogger());
+        out << "no database plugin configured with `Ice.Plugin.DB' or plugin is not a database plugin";
+        return false;
+    }
+    
+    _database = new Database(registryAdapter, topicManager, _instanceName, _traceLevels, getInfo(), plugin, _readonly);
     _wellKnownObjects = new WellKnownObjectsManager(_database);
 
     //
@@ -1050,9 +1034,6 @@ RegistryI::getPermissionsVerifier(const ObjectAdapterPtr& adapter,
         {
             try
             {
-#if defined(__BCPLUSPLUS__) && (__BCPLUSPLUS__ >= 0x0600)
-                IceUtil::DummyBCC dummy;
-#endif
                 verifier = _communicator->propertyToProxy(verifierProperty);
             }
             catch(const ProxyParseException&)
@@ -1091,7 +1072,11 @@ RegistryI::getPermissionsVerifier(const ObjectAdapterPtr& adapter,
     }
     else if(!passwordsProperty.empty())
     {
-        ifstream passwordFile(passwordsProperty.c_str());
+        //
+        // No nativeToUTF8 conversion necessary here, since no string
+        // converter is installed by IceGrid the string is UTF-8.
+        //
+        IceUtilInternal::ifstream passwordFile(passwordsProperty);
         if(!passwordFile)
         {
             Error out(_communicator->getLogger());
@@ -1135,9 +1120,6 @@ RegistryI::getPermissionsVerifier(const ObjectAdapterPtr& adapter,
     Glacier2::PermissionsVerifierPrx verifierPrx;
     try
     {
-#if defined(__BCPLUSPLUS__) && (__BCPLUSPLUS__ >= 0x0600)
-        IceUtil::DummyBCC dummy;
-#endif
         //
         // Set the permission verifier proxy locator to the internal
         // locator. We can't use the "public" locator, this could lead
@@ -1179,9 +1161,6 @@ RegistryI::getSSLPermissionsVerifier(const IceGrid::LocatorPrx& locator, const s
         {
             try
             {
-#if defined(__BCPLUSPLUS__) && (__BCPLUSPLUS__ >= 0x0600)
-                IceUtil::DummyBCC dummy;
-#endif
                 verifier = _communicator->propertyToProxy(verifierProperty);
             }
             catch(const ProxyParseException&)
@@ -1225,9 +1204,6 @@ RegistryI::getSSLPermissionsVerifier(const IceGrid::LocatorPrx& locator, const s
     Glacier2::SSLPermissionsVerifierPrx verifierPrx;
     try
     {
-#if defined(__BCPLUSPLUS__) && (__BCPLUSPLUS__ >= 0x0600)
-        IceUtil::DummyBCC dummy;
-#endif
         //
         // Set the permission verifier proxy locator to the internal
         // locator. We can't use the "public" locator, this could lead
@@ -1260,61 +1236,35 @@ RegistryI::getSSLInfo(const ConnectionPtr& connection, string& userDN)
     Glacier2::SSLInfo sslinfo;
     try
     {
-        IceSSL::ConnectionInfo info = IceSSL::getConnectionInfo(connection);
-
-        if(info.remoteAddr.ss_family == AF_UNSPEC)
+        IceSSL::ConnectionInfoPtr info = IceSSL::ConnectionInfoPtr::dynamicCast(connection->getInfo());
+        if(!info)
         {
-            //
-            // The remote address may not be available on Windows XP SP2 when using IPv6.
-            //
-            sslinfo.remotePort = 0;
-            sslinfo.remoteHost = "";
-        }
-        else
-        {
-            if(info.remoteAddr.ss_family == AF_INET)
-            {
-                sslinfo.remotePort = ntohs(reinterpret_cast<sockaddr_in*>(&info.remoteAddr)->sin_port);
-            }
-            else
-            {
-                sslinfo.remotePort = ntohs(reinterpret_cast<sockaddr_in6*>(&info.remoteAddr)->sin6_port);
-            }
-            sslinfo.remoteHost = IceInternal::inetAddrToString(info.remoteAddr);
+            PermissionDeniedException exc;
+            exc.reason = "not ssl connection";
+            throw exc;
         }
 
-        if(info.localAddr.ss_family == AF_INET)
+        sslinfo.remotePort = info->remotePort;
+        sslinfo.remoteHost = info->remoteAddress;
+        sslinfo.localPort = info->localPort;
+        sslinfo.localHost = info->localAddress;
+        sslinfo.cipher = info->cipher;
+        sslinfo.certs = info->certs;
+        if(info->certs.size() > 0)
         {
-            sslinfo.localPort = ntohs(reinterpret_cast<sockaddr_in*>(&info.localAddr)->sin_port);
+            userDN = IceSSL::Certificate::decode(info->certs[0])->getSubjectDN();
         }
-        else
-        {
-            sslinfo.localPort = ntohs(reinterpret_cast<sockaddr_in6*>(&info.localAddr)->sin6_port);
-        }
-        sslinfo.localHost = IceInternal::inetAddrToString(info.localAddr);
-
-        sslinfo.cipher = info.cipher;
-
-        if(!info.certs.empty())
-        {
-            sslinfo.certs.resize(info.certs.size());
-            for(unsigned int i = 0; i < info.certs.size(); ++i)
-            {
-                sslinfo.certs[i] = info.certs[i]->encode();
-            }
-            userDN = info.certs[0]->getSubjectDN();
-        }
-    }
-    catch(const IceSSL::ConnectionInvalidException&)
-    {
-        PermissionDeniedException exc;
-        exc.reason = "not ssl connection";
-        throw exc;
     }
     catch(const IceSSL::CertificateEncodingException&)
     {
         PermissionDeniedException exc;
         exc.reason = "certificate encoding exception";
+        throw exc;
+    }
+    catch(const Ice::LocalException&)
+    {
+        PermissionDeniedException exc;
+        exc.reason = "connection exception";
         throw exc;
     }
 

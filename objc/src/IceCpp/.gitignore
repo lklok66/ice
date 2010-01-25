@@ -8,6 +8,7 @@ ConnectionF.cpp
 Connection.cpp
 Current.cpp
 Endpoint.cpp
+EndpointTypes.cpp
 FacetMap.cpp
 Identity.cpp
 ImplicitContextF.cpp

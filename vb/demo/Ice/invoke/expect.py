@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -24,7 +24,5 @@ from demoscript.Ice import invoke
 
 server = Util.spawn('server.exe --Ice.PrintAdapterReady')
 server.expect('.* ready')
-client = Util.spawn('client.exe')
-client.expect('.*==>')
 
-invoke.run(client, server)
+invoke.run('client.exe', server)

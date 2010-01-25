@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -257,6 +257,7 @@ SharedImplicitContext::combine(const Context& proxyCtx, Context& ctx) const
 long PerThreadImplicitContext::_nextId;
 PerThreadImplicitContext::IndexInUse* PerThreadImplicitContext::_indexInUse;
 IceUtil::Mutex* PerThreadImplicitContext::_mutex = 0;
+
 namespace
 {
 
@@ -277,6 +278,7 @@ public:
 #endif
     }
 };
+
 Init init;
 
 }

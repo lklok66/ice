@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -358,7 +358,7 @@ printMessage(ostream& s, BasicStream& stream)
 namespace
 {
 
-static IceUtil::Mutex* slicingMutex = 0;
+IceUtil::Mutex* slicingMutex = 0;
 
 class Init
 {
@@ -377,14 +377,16 @@ public:
 #endif
     }
 };
+
 Init init;
+
 }
-static set<string> slicingIds;
 
 void
 IceInternal::traceSlicing(const char* kind, const string& typeId, const char* slicingCat, const LoggerPtr& logger)
 {
     IceUtilInternal::MutexPtrLock<IceUtil::Mutex> lock(slicingMutex);
+    static set<string> slicingIds;
     if(slicingIds.insert(typeId).second)
     {
         string s("unknown ");

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -52,7 +52,7 @@ class InternalDistributionDescriptor
     string icepatch;
 
     /** The source directories. */
-    ["java:type:{java.util.LinkedList}"] Ice::StringSeq directories;
+    ["java:type:java.util.LinkedList<String>"] Ice::StringSeq directories;
 };
 
 dictionary<string, PropertyDescriptorSeq> PropertyDescriptorSeqDict;
@@ -405,6 +405,14 @@ interface Node extends FileReader, ReplicaObserver
      *
      **/
     ["nonmutating", "cpp:const"] idempotent LoadInfo getLoad();
+
+    /**
+     *
+     * Get the number of processor sockets for the machine where this
+     * node is running.
+     *
+     **/
+    ["nonmutating", "cpp:const"] idempotent int getProcessorSocketCount();
 
     /**
      *

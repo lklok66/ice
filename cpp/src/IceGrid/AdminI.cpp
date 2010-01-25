@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -772,6 +772,29 @@ AdminI::getNodeLoad(const string& name, const Current&) const
         throw NodeUnreachableException(name, os.str());
     }    
     return LoadInfo(); // Keep the compiler happy.
+}
+
+int
+AdminI::getNodeProcessorSocketCount(const string& name, const Current&) const
+{
+    try
+    {
+        return _database->getNode(name)->getProxy()->getProcessorSocketCount();
+    }
+    catch(const Ice::OperationNotExistException&)
+    {
+        return 0; // Not supported.
+    }
+    catch(const Ice::ObjectNotExistException&)
+    {
+        throw NodeNotExistException(name);
+    }
+    catch(const Ice::LocalException& ex)
+    {
+        ostringstream os;
+        os << ex;
+        throw NodeUnreachableException(name, os.str());
+    }
 }
 
 void

@@ -49,6 +49,7 @@ public:
     virtual std::string type() const;
     virtual std::string toString() const;
     virtual IceInternal::SocketOperation initialize();
+    virtual Ice::ConnectionInfoPtr getInfo() const;
     virtual void checkSendSize(const IceInternal::Buffer&, size_t);
 
 private:

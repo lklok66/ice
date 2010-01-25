@@ -707,13 +707,6 @@ localExceptionToString(const Ice::LocalException& ex)
 }
 @end
 
-@implementation ICEIllegalIndirectionException (ICEInternal)
--(void) rethrowCxx
-{
-    throw Ice::IllegalIndirectionException(file, line, fromNSString([self reason_]));
-}
-@end
-
 @implementation ICEMemoryLimitException (ICEInternal)
 -(void) rethrowCxx
 {
@@ -732,13 +725,6 @@ localExceptionToString(const Ice::LocalException& ex)
 -(void) rethrowCxx
 {
     throw Ice::EncapsulationException(file, line, fromNSString([self reason_]));
-}
-@end
-
-@implementation ICENegativeSizeException (ICEInternal)
--(void) rethrowCxx
-{
-    throw Ice::NegativeSizeException(file, line, fromNSString([self reason_]));
 }
 @end
 

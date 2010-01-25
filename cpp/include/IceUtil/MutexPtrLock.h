@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice-E is licensed to you under the terms described in the
 // ICEE_LICENSE file included in this distribution.
@@ -11,7 +11,6 @@
 #define ICE_UTIL_MUTEX_PTR_LOCK_H
 
 #include <IceUtil/Config.h>
-#include <IceUtil/Mutex.h>
 #include <IceUtil/ThreadException.h>
 
 namespace IceUtilInternal
@@ -59,8 +58,8 @@ public:
                 throw IceUtil::ThreadLockedException(__FILE__, __LINE__);
             }
             _mutex->unlock();
+            _acquired = false;
         }
-        _acquired = false;
     }
 
     bool acquired() const
