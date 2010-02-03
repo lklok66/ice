@@ -202,9 +202,9 @@ that supports the `com.zeroc.ice' protocol by default. This protocol
 string is application defined and must match the protocol string that
 the accessory advertises.
 
-In order to enable the accessory transport Ice Touch applications must
-add properties to the Ice communicator initialization property set
-using the ICEConfigureAccessoryTransport method. 
+In order to enable the accessory transport, Ice Touch applications
+must add properties to the Ice communicator initialization property
+set using the ICEConfigureAccessoryTransport method.
 
 For example:
 
@@ -214,7 +214,7 @@ For example:
   communicator = [[ICEUtil createCommunicator:initData] retain];
 
 This call will add the required properties and ensure that the
-accessory trasnport is linked in with your application. The project
+accessory transport is linked in with your application. The project
 for your application will need to include the ExternalAccessory
 framework as well.
 
