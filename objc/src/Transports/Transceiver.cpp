@@ -23,6 +23,61 @@ using namespace std;
 using namespace Ice;
 using namespace IceInternal;
 
+namespace
+{
+
+
+void selectorReadCallback(CFReadStreamRef, CFStreamEventType event, void* info)
+{
+    SelectorReadyCallback* callback = reinterpret_cast<SelectorReadyCallback*>(info);
+    switch(event)
+    {
+    case kCFStreamEventHasBytesAvailable:
+        callback->readyCallback(SocketOperationRead);
+        break;        
+    case kCFStreamEventOpenCompleted:
+        callback->readyCallback(static_cast<SocketOperation>(SocketOperationConnect | SocketOperationRead));
+        break;
+    case kCFStreamEventErrorOccurred:
+        callback->readyCallback(static_cast<SocketOperation>(SocketOperationConnect | SocketOperationRead));
+        break;
+    default:
+        assert(false);
+    }
+}
+ 
+void selectorWriteCallback(CFWriteStreamRef, CFStreamEventType event, void* info)
+{
+    SelectorReadyCallback* callback = reinterpret_cast<SelectorReadyCallback*>(info);
+    switch(event)
+    {
+    case kCFStreamEventCanAcceptBytes:
+        callback->readyCallback(SocketOperationWrite);
+        break;        
+    case kCFStreamEventOpenCompleted:
+        callback->readyCallback(static_cast<SocketOperation>(SocketOperationConnect | SocketOperationWrite));
+        break;
+    case kCFStreamEventErrorOccurred:
+        callback->readyCallback(static_cast<SocketOperation>(SocketOperationConnect | SocketOperationWrite));
+        break;
+    default:
+        assert(false);
+    }
+}
+
+void* eventHandlerWrapperRetain(void* info)
+{
+    reinterpret_cast<SelectorReadyCallback*>(info)->__incRef();
+    return info;
+}
+
+void eventHandlerWrapperRelease(void* info)
+{
+    reinterpret_cast<SelectorReadyCallback*>(info)->__decRef();
+}
+
+}
+
 static inline string
 fromCFString(CFStringRef ref)
 {
@@ -44,18 +99,102 @@ IceObjC::Transceiver::getNativeInfo()
     return this;
 }
 
-CFReadStreamRef
-IceObjC::Transceiver::readStream()
+void
+IceObjC::Transceiver::initStreams(SelectorReadyCallback* callback)
 {
-    assert(_readStream);
-    return _readStream;
+    CFOptionFlags events;
+    CFStreamClientContext ctx = { 0, callback, eventHandlerWrapperRetain, eventHandlerWrapperRelease, 0 };
+
+    events = kCFStreamEventOpenCompleted | kCFStreamEventCanAcceptBytes | kCFStreamEventErrorOccurred;
+    CFWriteStreamSetClient(_writeStream, events, selectorWriteCallback, &ctx);
+
+    events = kCFStreamEventOpenCompleted | kCFStreamEventHasBytesAvailable | kCFStreamEventErrorOccurred;
+    CFReadStreamSetClient(_readStream, events, selectorReadCallback, &ctx);
 }
 
-CFWriteStreamRef
-IceObjC::Transceiver::writeStream()
+SocketOperation 
+IceObjC::Transceiver::registerWithRunLoop(SocketOperation op)
 {
-    assert(_writeStream);
-    return _writeStream;
+    SocketOperation readyOp = SocketOperationNone;
+
+    if(op & SocketOperationConnect)
+    {
+        if(CFWriteStreamGetStatus(_writeStream) == kCFStreamStatusNotOpen)
+        {
+            CFWriteStreamScheduleWithRunLoop(_writeStream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+            _writeStreamRegistered = true; // Note: this must be set after the schedule call
+            CFWriteStreamOpen(_writeStream);
+        }
+
+        if(CFReadStreamGetStatus(_readStream) == kCFStreamStatusNotOpen)
+        {
+            assert(!_readStreamRegistered);
+            CFReadStreamScheduleWithRunLoop(_readStream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+            _readStreamRegistered = true; // Note: this must be set after the schedule call
+            CFReadStreamOpen(_readStream);
+        }
+    }
+    else
+    {
+        if(op & SocketOperationWrite)
+        {
+            if(CFWriteStreamCanAcceptBytes(_writeStream))
+            {
+                readyOp = static_cast<SocketOperation>(readyOp | SocketOperationWrite);
+            }
+            else if(!_writeStreamRegistered)
+            {
+                CFWriteStreamScheduleWithRunLoop(_writeStream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+                _writeStreamRegistered = true; // Note: this must be set after the schedule call
+            }
+        }
+
+        if(op & SocketOperationRead)
+        {
+            if(CFReadStreamHasBytesAvailable(_readStream))
+            {
+                readyOp = static_cast<SocketOperation>(readyOp | SocketOperationRead);
+            }
+            else if(!_readStreamRegistered)
+            {
+                CFReadStreamScheduleWithRunLoop(_readStream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+                _readStreamRegistered = true; // Note: this must be set after the schedule call
+            }
+        }
+    }
+    return readyOp;
+}
+
+void
+IceObjC::Transceiver::unregisterFromRunLoop(SocketOperation op)
+{
+    if(op & SocketOperationWrite)
+    {
+        if(_writeStreamRegistered)
+        {
+            CFWriteStreamUnscheduleFromRunLoop(_writeStream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+            _writeStreamRegistered = false;
+        }
+    }
+    
+    if(op & SocketOperationRead)
+    {
+        if(_readStreamRegistered)
+        {
+            CFReadStreamUnscheduleFromRunLoop(_readStream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+            _readStreamRegistered = false;
+        }
+    }
+}
+
+void 
+IceObjC::Transceiver::closeStreams()
+{
+    CFReadStreamSetClient(_readStream, kCFStreamEventNone, 0, 0);
+    CFWriteStreamSetClient(_writeStream, kCFStreamEventNone, 0, 0);
+    
+    CFReadStreamClose(_readStream);
+    CFWriteStreamClose(_writeStream);
 }
 
 void
@@ -90,7 +229,7 @@ IceObjC::Transceiver::write(Buffer& buf)
 
     while(buf.i != buf.b.end())
     {
-        if(!CFWriteStreamCanAcceptBytes(_writeStream) && CFWriteStreamGetStatus(_writeStream) != kCFStreamStatusError)
+        if(!CFWriteStreamCanAcceptBytes(_writeStream) && CFWriteStreamGetStatus(_writeStream) == kCFStreamStatusOpen)
         {
             return false;
         }
@@ -185,7 +324,7 @@ IceObjC::Transceiver::read(Buffer& buf)
 
     while(buf.i != buf.b.end())
     {
-        if(!CFReadStreamHasBytesAvailable(_readStream) && CFReadStreamGetStatus(_readStream) != kCFStreamStatusError)
+        if(!CFReadStreamHasBytesAvailable(_readStream) && CFReadStreamGetStatus(_readStream) == kCFStreamStatusOpen)
         {
             return false;
         }
@@ -314,11 +453,9 @@ IceObjC::Transceiver::toString() const
 Ice::ConnectionInfoPtr 
 IceObjC::Transceiver::getInfo() const
 {
-    // TODO: XXX
-    assert(_fd != INVALID_SOCKET);
-    Ice::TCPConnectionInfoPtr info = new Ice::TCPConnectionInfo();
-    fdToAddressAndPort(_fd, info->localAddress, info->localPort, info->remoteAddress, info->remotePort);
-    return info;
+    // This shouldn't be called as IceTouch doesn't implement the Connection::getInfo method.
+    assert(false);
+    return 0;
 }
 
 SocketOperation
@@ -329,15 +466,13 @@ IceObjC::Transceiver::initialize()
         _state = StateConnectPending;
         return SocketOperationConnect;
     }
-    
+
     if(_state <= StateConnectPending)
     {
         try
         {
-            CFStreamStatus status = CFWriteStreamGetStatus(_writeStream);
-            assert(status > kCFStreamStatusOpening);
-
-            if(status == kCFStreamStatusError)
+            if(CFWriteStreamGetStatus(_writeStream) == kCFStreamStatusError ||
+               CFReadStreamGetStatus(_readStream) == kCFStreamStatusError)
             {
                 CFErrorRef err = CFWriteStreamCopyError(_writeStream);
                 CFStringRef domain = CFErrorGetDomain(err);
@@ -398,8 +533,12 @@ IceObjC::Transceiver::initialize()
                 CFRelease(err);
                 throw ex;
             }
+            else if(CFWriteStreamGetStatus(_writeStream) < kCFStreamStatusOpen ||
+                    CFReadStreamGetStatus(_readStream) < kCFStreamStatusOpen)
+            {
+                return SocketOperationConnect;
+            }
 
-            assert(status == kCFStreamStatusOpen);
             _state = StateConnected;
 
             if(_fd == INVALID_SOCKET)
@@ -469,6 +608,8 @@ IceObjC::Transceiver::Transceiver(const InstancePtr& instance,
     _host(host),
     _readStream(readStream),
     _writeStream(writeStream),
+    _readStreamRegistered(false),
+    _writeStreamRegistered(false),
 #if !TARGET_IPHONE_SIMULATOR
     _checkCertificates(instance->type() == SslEndpointType),
 #endif
@@ -491,6 +632,8 @@ IceObjC::Transceiver::Transceiver(const InstancePtr& instance,
     _stats(instance->initializationData().stats),
     _readStream(readStream),
     _writeStream(writeStream),
+    _readStreamRegistered(false),
+    _writeStreamRegistered(false),
 #if !TARGET_IPHONE_SIMULATOR
     _checkCertificates(false),
 #endif

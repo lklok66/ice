@@ -132,63 +132,8 @@ readCert(const string& defaultDir, const string& certFile)
     return cert;
 }
 
-class TcpInfoI : public Ice::TCPEndpointInfo
-{
-public:
-    
-    TcpInfoI(Ice::Int to, bool comp, const string& host, Ice::Int port) :
-        TCPEndpointInfo(to, comp, host, port)
-    {
-    }
-
-    virtual Ice::Short
-    type() const
-    {
-        return TCPEndpointType;
-    }
-    
-    virtual bool
-    datagram() const
-    {
-        return false;
-    }
-    
-    virtual bool
-    secure() const
-    {
-        return false;
-    }
-};
-
-// class SslInfoI : public IceSSL::EndpointInfo
-// {
-// public:
-    
-//     InfoI(Ice::Int to, bool comp, const string& host, Ice::Int port) :
-//         TCPEndpointInfo(to, comp, host, port)
-//     {
-//     }
-
-//     virtual Ice::Short
-//     type() const
-//     {
-//         return TCPEndpointType;
-//     }
-    
-//     virtual bool
-//     datagram() const
-//     {
-//         return false;
-//     }
-    
-//     virtual bool
-//     secure() const
-//     {
-//         return true;
-//     }
-// };
-
 }
+
 namespace IceObjC
 {
 
@@ -742,8 +687,9 @@ IceObjC::EndpointI::toString() const
 EndpointInfoPtr
 IceObjC::EndpointI::getInfo() const
 {
-    // TODO: XXX:FIX
-    return new TcpInfoI(_timeout, _compress, _host, _port);
+    // This shouldn't be called as IceTouch doesn't implement the Endpoint local interface.
+    assert(false);
+    return 0;
 }
 
 Short

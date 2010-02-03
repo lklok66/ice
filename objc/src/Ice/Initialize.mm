@@ -18,6 +18,8 @@
 #include <IceCpp/Initialize.h>
 #include <IceUtilCpp/UUID.h>
 
+#include <Availability.h>
+
 #import <Foundation/NSAutoreleasePool.h>
 #import <Foundation/NSThread.h>
 
@@ -29,9 +31,12 @@ extern "C"
 {
 #ifdef ICE_USE_CFSTREAM
     Ice::Plugin* createIceTcp(const Ice::CommunicatorPtr&, const std::string&, const Ice::StringSeq&);
-#endif
-#if !TARGET_IPHONE_SIMULATOR
+#  ifdef __IPHONE_3_0
+    Ice::Plugin* createIceAccessory(const Ice::CommunicatorPtr&, const std::string&, const Ice::StringSeq&);
+#  endif
+#  if !TARGET_IPHONE_SIMULATOR
     Ice::Plugin* createIceSSL(const Ice::CommunicatorPtr&, const std::string&, const Ice::StringSeq&);
+#  endif
 #endif
 }
 
@@ -276,16 +281,15 @@ private:
 
 #ifdef ICE_USE_CFSTREAM
         data.properties->setProperty("Ice.Plugin.IceTcp", "createIceTcp");
-
         //
         // Fake calls to the create transport plugin C methods. This is to ensure that these methods
         // will get linked into exe when using static libraries.
         //
         createIceTcp(0, "", Ice::StringSeq());
-#endif
 #if !TARGET_IPHONE_SIMULATOR
         data.properties->setProperty("Ice.Plugin.IceSSL", "createIceSSL");
         createIceSSL(0, "", Ice::StringSeq());
+#endif
 #endif
 
         Ice::CommunicatorPtr communicator;
@@ -423,3 +427,21 @@ private:
 }
 
 @end
+
+#if TARGET_OS_IPHONE && defined(__IPHONE_3_0)
+
+#include <Foundation/Foundation.h>
+#include <ExternalAccessory/ExternalAccessory.h>
+
+extern "C" 
+{
+
+void ICEConfigureAccessoryTransport(id<ICEProperties> properties)
+{
+    createIceAccessory(0, "", Ice::StringSeq()); // Make sure accessory transport is linked in.
+    [properties setProperty:@"Ice.Plugin.IceAccessory" value:@"createIceAccessory"];
+}
+
+}
+
+#endif

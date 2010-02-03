@@ -13,6 +13,8 @@
 #import <Ice/Properties.h>
 #import <Ice/Stream.h>
 
+#include <Availability.h>
+
 //
 // Forward declarations.
 //
@@ -48,3 +50,10 @@
 +(NSArray*)argsToStringSeq:(int)argc argv:(char*[])argv;
 +(void)stringSeqToArgs:(NSArray*)args argc:(int*)argc argv:(char*[])argv;
 @end
+
+#if TARGET_OS_IPHONE && defined(__IPHONE_3_0)
+#if defined(__cplusplus)
+extern "C"
+#endif
+void ICEConfigureAccessoryTransport(id<ICEProperties>);
+#endif

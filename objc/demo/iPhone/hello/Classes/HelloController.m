@@ -23,6 +23,9 @@
 #   define DeliveryModeTwowaySecure -1
 #   define DeliveryModeOnewaySecure -2
 #   define DeliveryModeOnewaySecureBatch -3
+#   define DeliveryModeTwowayAccessory -4
+#   define DeliveryModeOnewayAccessory -5
+#   define DeliveryModeOnewayAccessoryBatch -6
 #else
 #   define DeliveryModeTwoway  0
 #   define DeliveryModeTwowaySecure 1
@@ -32,6 +35,9 @@
 #   define DeliveryModeOnewaySecureBatch 5
 #   define DeliveryModeDatagram 6
 #   define DeliveryModeDatagramBatch 7
+#   define DeliveryModeTwowayAccessory 8
+#   define DeliveryModeOnewayAccessory 9
+#   define DeliveryModeOnewayAccessoryBatch 10
 #endif
 
 @interface AMIHello : NSObject
@@ -77,13 +83,17 @@ static NSString* hostnameKey = @"hostnameKey";
     ICEInitializationData* initData = [ICEInitializationData initializationData];
     initData.properties = [ICEUtil createProperties];
 
-    // The simulator does not support SSL.
+    // The simulator does not support SSL or the accessory transport.
 #if !TARGET_IPHONE_SIMULATOR
     [initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
     [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
     [initData.properties setProperty:@"IceSSL.CertFile" value:@"c_rsa1024.pfx"];
     [initData.properties setProperty:@"IceSSL.Password" value:@"password"];
+	
+    // Configure the accessory transport.
+    ICEConfigureAccessoryTransport(initData.properties);
 #endif     
+
     communicator = [[ICEUtil createCommunicator:initData] retain];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -219,32 +229,43 @@ static NSString* hostnameKey = @"hostnameKey";
 
 -(id<DemoHelloPrx>)createProxy
 {
-    // The simulator does not support SSL.
+    // The simulator does not support SSL or accessories.
+    int deliveryMode = [modePicker selectedRowInComponent:0];
 #if TARGET_IPHONE_SIMULATOR
     NSString* s = [NSString stringWithFormat:@"hello:tcp -h %@ -p 10000:udp -h %@ -p 10000",
                    hostnameTextField.text, hostnameTextField.text];
 #else
-    NSString* s = [NSString stringWithFormat:@"hello:tcp -h %@ -p 10000:ssl -h %@ -p 10001:udp -h %@ -p 10000",
-                   hostnameTextField.text, hostnameTextField.text, hostnameTextField.text];
+    NSString* s;
+	if(deliveryMode == DeliveryModeTwowayAccessory || deliveryMode == DeliveryModeOnewayAccessory || deliveryMode == DeliveryModeOnewayAccessoryBatch)
+	{
+		s = @"hello:accessory -p com.zeroc.helloWorld";
+	}
+	else
+	{
+		s = [NSString stringWithFormat:@"hello:tcp -h %@ -p 10000:ssl -h %@ -p 10001:udp -h %@ -p 10000",
+			 hostnameTextField.text, hostnameTextField.text, hostnameTextField.text];
+	}
 #endif     
     
     [[NSUserDefaults standardUserDefaults] setObject:hostnameTextField.text forKey:hostnameKey];
 
     ICEObjectPrx* prx = [communicator stringToProxy:s];
     
-    int deliveryMode = [modePicker selectedRowInComponent:0];
     switch(deliveryMode)
     {
         case DeliveryModeTwoway:
+        case DeliveryModeTwowayAccessory:
             prx = [prx ice_twoway];
             break;
         case DeliveryModeTwowaySecure:
             prx = [[prx ice_twoway] ice_secure:YES];
             break;
         case DeliveryModeOneway:
+        case DeliveryModeOnewayAccessory:
             prx = [prx ice_oneway];
             break;
         case DeliveryModeOnewayBatch:
+        case DeliveryModeOnewayAccessoryBatch:
             prx = [prx ice_batchOneway];
             break;
         case DeliveryModeOnewaySecure:
@@ -280,6 +301,7 @@ static NSString* hostnameKey = @"hostnameKey";
         int deliveryMode = [modePicker selectedRowInComponent:0];
         if(deliveryMode != DeliveryModeOnewayBatch &&
            deliveryMode != DeliveryModeOnewaySecureBatch &&
+		   deliveryMode != DeliveryModeOnewayAccessoryBatch &&
            deliveryMode != DeliveryModeDatagramBatch)
         {
             if([hello sayHello_async:[ICECallbackOnMainThread callbackOnMainThread:[AMIHello hello:self]]
@@ -382,7 +404,7 @@ static NSString* hostnameKey = @"hostnameKey";
 #if TARGET_IPHONE_SIMULATOR
     return 4;
 #else
-    return 8;
+    return 11;
 #endif
 }
 
@@ -396,14 +418,20 @@ static NSString* hostnameKey = @"hostnameKey";
             return @"Twoway";
         case DeliveryModeTwowaySecure:
             return @"Twoway secure";
+        case DeliveryModeTwowayAccessory:
+            return @"Twoway (accessory)";
         case DeliveryModeOneway:
             return @"Oneway";
         case DeliveryModeOnewayBatch:
             return @"Oneway batch";
         case DeliveryModeOnewaySecure:
             return @"Oneway secure";
+        case DeliveryModeOnewayAccessory:
+            return @"Oneway (accessory)";
         case DeliveryModeOnewaySecureBatch:
             return @"Oneway secure batch";
+        case DeliveryModeOnewayAccessoryBatch:
+            return @"Oneway batch (accessory)";
         case DeliveryModeDatagram:
             return @"Datagram";
         case DeliveryModeDatagramBatch:

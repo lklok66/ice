@@ -45,8 +45,7 @@ embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 #
 
 #
-# The default SDK version is 2.0 for iPhone, and 3.0 for iPhone
-# simulator.
+# The default SDK version is 3.0 for iPhone
 #
 #IPHONE_SDK_VERSION		= 3.0
 
@@ -68,11 +67,7 @@ slice_translator = slice2objc
 
 ifeq ($(IPHONE_SDK_VERSION),)
 
-ifeq ($(COMPILE_FOR_IPHONE),yes)
-   IPHONE_SDK_VERSION		= 2.0
-else
-   IPHONE_SDK_VERSION		= 3.0
-endif
+IPHONE_SDK_VERSION = 3.0
 
 endif
 

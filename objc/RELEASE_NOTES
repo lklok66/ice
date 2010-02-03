@@ -13,7 +13,7 @@ Table of Contents
   6. Auto release pool
   7. AMI Invocations
   8. Xcode project settings
-
+  9. Accessory Transport
 
 ======================================================================
 1. Introduction
@@ -176,3 +176,62 @@ this is done in the Xcode project with a post-build script as follows:
 if [ $PLATFORM_NAME = iphonesimulator ]; then
   cp $ADDITIONAL_SDKS/usr/local/lib/*.dylib $BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH
 fi
+
+======================================================================
+9. Accessory Transport
+======================================================================
+
+The accessory transport enables Ice Touch clients running on an iPhone
+or iPod Touch device to communicate with acccessories connected either
+via Bluetooth or USB.
+
+This transport is built on top of the iPhone OS External Accessory
+framework. In order to use it, proxies must use the following
+endpoint syntax:
+
+  accessory [-p PROTOCOL] [-n NAME] [-m MANUFACTURER] [-o MODELNUMBER]
+
+For example, to invoke on a proxy for the `hello' object running on an
+accessory that implements the com.zeroc.helloWorld protocol, use the
+following stringified proxy:
+
+  hello:accessory -p com.zeroc.helloWorld
+
+If the -p option is ommitted, the transport will lookup an accessory
+that supports the `com.zeroc.ice' protocol by default. This protocol
+string is application defined and must match the protocol string that
+the accessory advertises.
+
+In order to enable the accessory transport Ice Touch applications must
+add properties to the Ice communicator initialization property set
+using the ICEConfigureAccessoryTransport method. 
+
+For example:
+
+  ICEInitializationData* initData = [ICEInitializationData initializationData];
+  initData.properties = [ICEUtil createProperties];
+  ICEConfigureAccessoryTransport(initData.properties);
+  communicator = [[ICEUtil createCommunicator:initData] retain];
+
+This call will add the required properties and ensure that the
+accessory trasnport is linked in with your application. The project
+for your application will need to include the ExternalAccessory
+framework as well.
+
+To specify that your application supports a given acccessory protocol,
+you need to set UISupportedExternalAccessoryProtocols in your project
+Info.plist file. For example:
+
+	<key>UISupportedExternalAccessoryProtocols</key>
+	<array>
+           <string>com.zeroc.helloWorld</string>
+	</array>
+
+The iPhone hello world demo from the demo/iPhone/hello directory
+demonstrates how to configure the accessory transport.
+
+In order to use the Ice Touch accessory transport, your accessory must
+also support running an Ice server that is capable of receiving Ice
+requests from Ice Touch over USB or Bluetooth. We can assist you with
+the implementation of the Ice server side transport for your accessory.
+For more information on this, please contact us at info@zeroc.com.

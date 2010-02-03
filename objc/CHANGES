@@ -1,3 +1,13 @@
+Changes since version 1.0.0
+---------------------------
+
+- Added support for accessory transport. This transport is built on
+  top of the iPhone OS External Accessory framework and allows Ice
+  clients to talk to iPhone accessories over Bluetooth or USB. For
+  information on the Ice server side running on iPhone accessories,
+  please contact us at info@zero.com.
+
+
 Changes since version 0.1.0
 ---------------------------
 

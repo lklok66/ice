@@ -158,6 +158,15 @@ protected:
 typedef IceUtil::Handle<NativeInfo> NativeInfoPtr;
 
 #ifdef ICE_USE_CFSTREAM
+
+class SelectorReadyCallback : public IceUtil::Shared
+{
+public: 
+
+    virtual ~SelectorReadyCallback() { }
+    virtual void readyCallback(SocketOperation, int = 0) = 0;
+};
+
 class StreamNativeInfo : public NativeInfo
 {
 public:
@@ -166,9 +175,10 @@ public:
     {
     }
 
-    virtual CFReadStreamRef readStream() = 0;
-
-    virtual CFWriteStreamRef writeStream() = 0;
+    virtual void initStreams(SelectorReadyCallback*) = 0;
+    virtual SocketOperation registerWithRunLoop(SocketOperation) = 0;
+    virtual void unregisterFromRunLoop(SocketOperation) = 0;
+    virtual void closeStreams() = 0;
 };
 typedef IceUtil::Handle<StreamNativeInfo> StreamNativeInfoPtr;
 #endif

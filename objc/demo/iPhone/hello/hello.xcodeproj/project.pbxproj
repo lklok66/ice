@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		14A268EB0E83FD0A00E562FE /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14A268E90E83FD0A00E562FE /* CFNetwork.framework */; };
 		14A268EC0E83FD0A00E562FE /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14A268EA0E83FD0A00E562FE /* Security.framework */; };
+		14EA66D41118D9EF0080A47C /* ExternalAccessory.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14EA66D31118D9EF0080A47C /* ExternalAccessory.framework */; };
 		14EAF6F20E93B19A00EF4807 /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = 14EAF6F10E93B19A00EF4807 /* README.txt */; };
 		1D3623260D0F684500981E51 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* AppDelegate.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
@@ -26,6 +27,7 @@
 /* Begin PBXFileReference section */
 		14A268E90E83FD0A00E562FE /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		14A268EA0E83FD0A00E562FE /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		14EA66D31118D9EF0080A47C /* ExternalAccessory.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ExternalAccessory.framework; path = System/Library/Frameworks/ExternalAccessory.framework; sourceTree = SDKROOT; };
 		14EAF6F10E93B19A00EF4807 /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623240D0F684500981E51 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -54,6 +56,7 @@
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
 				14A268EB0E83FD0A00E562FE /* CFNetwork.framework in Frameworks */,
 				14A268EC0E83FD0A00E562FE /* Security.framework in Frameworks */,
+				14EA66D41118D9EF0080A47C /* ExternalAccessory.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -118,6 +121,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				14EA66D31118D9EF0080A47C /* ExternalAccessory.framework */,
 				14A268E90E83FD0A00E562FE /* CFNetwork.framework */,
 				14A268EA0E83FD0A00E562FE /* Security.framework */,
 				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
@@ -265,7 +269,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
-				SDKROOT = iphoneos2.0;
+				SDKROOT = iphoneos3.0;
 			};
 			name = Debug;
 		};
@@ -278,7 +282,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
-				SDKROOT = iphoneos2.0;
+				SDKROOT = iphoneos3.0;
 			};
 			name = Release;
 		};

@@ -139,7 +139,7 @@ private:
 
 class Selector;
 
-class EventHandlerWrapper : public IceUtil::Shared
+class EventHandlerWrapper : public SelectorReadyCallback
 {
 public:
 
@@ -148,14 +148,15 @@ public:
 
     void updateRunLoop();
 
+    virtual void readyCallback(SocketOperation, int = 0);
+
     void ready(SocketOperation, int);
+
     SocketOperation readyOp();
     void checkReady();
 
     bool update(SocketOperation, SocketOperation);
     void finish();
-
-    Selector& selector() { return _selector; }
 
     bool operator<(const EventHandlerWrapper& o)
     {
@@ -171,8 +172,6 @@ private:
     SocketOperation _ready;
     bool _finish;
     CFSocketRef _socket;
-    bool _readStreamRegistered;
-    bool _writeStreamRegistered;
     CFRunLoopSourceRef _source;
 };
 typedef IceUtil::Handle<EventHandlerWrapper> EventHandlerWrapperPtr;

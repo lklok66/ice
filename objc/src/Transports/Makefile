@@ -12,7 +12,11 @@ top_srcdir	= ../..
 CF_OBJS		= Acceptor.o \
 		  Connector.o \
 		  Transceiver.o \
-		  EndpointI.o
+		  EndpointI.o \
+
+OBJC_OBJS	= AccessoryConnector.o \
+		  AccessoryEndpointI.o \
+		  AccessoryTransceiver.o
 
 SRCS_DIR	= $(ice_dir)/cpp/src/Ice
 
@@ -24,9 +28,11 @@ TCP_OBJS	= TcpEndpointI.o \
 # Copy CF_OBJS/TCP_OBJS for use with the dependency generation, since
 # OBJS is later transformed.
 SRCS_CF_OBJS	:= $(CF_OBJS)
+SRCS_OBJC_OBJS	:= $(OBJC_OBJS)
 SRCS_TCP_OBJS	:= $(TCP_OBJS)
 SRCS		= $(addprefix $(SRCS_DIR)/, $(SRCS_TCP_OBJS:.o=.cpp)) \
-		  $(SRCS_CF_OBJS:.o=.cpp)
+		  $(SRCS_CF_OBJS:.o=.cpp) \
+		  $(SRCS_OBJC_OBJS:.o=.mm)
 DEPENDFLAGS	= --platform-name
 
 include $(top_srcdir)/config/Make.rules
@@ -42,7 +48,14 @@ ifeq ($(COMPILE_WITH_CFSTREAM_TRANSPORT),yes)
 CPPFLAGS	:= $(CPPFLAGS) -DICE_NO_KQUEUE
 OBJS		:= $(addprefix $(PLATFORM_NAME)/,$(CF_OBJS))
 
+ifeq ($(COMPILE_FOR_IPHONE),yes)
+    OBJS += $(addprefix $(PLATFORM_NAME)/,$(OBJC_OBJS))
+endif
+
 $(PLATFORM_NAME)/%.o: %.cpp
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $< -o $@
+
+$(PLATFORM_NAME)/%.o: %.mm
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $< -o $@
 
 else

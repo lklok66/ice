@@ -7,8 +7,8 @@
 //
 // **********************************************************************
 
-#ifndef ICE_OBJC_TRANSCEIVER_H
-#define ICE_OBJC_TRANSCEIVER_H
+#ifndef ICE_OBJC_ACCESSORY_TRANSCEIVER_H
+#define ICE_OBJC_ACCESSORY_TRANSCEIVER_H
 
 #include <Ice/InstanceF.h>
 #include <Ice/TraceLevelsF.h>
@@ -16,15 +16,15 @@
 #include <Ice/StatsF.h>
 #include <Ice/Transceiver.h>
 
-#include <CoreFoundation/CFStream.h>
+#import <Foundation/Foundation.h>
+#import <ExternalAccessory/ExternalAccessory.h>
+
+@class AccessoryTransceiverCallback;
 
 namespace IceObjC
 {
 
-class Instance;
-typedef IceUtil::Handle<Instance> InstancePtr;
-
-class Transceiver : public IceInternal::Transceiver, public IceInternal::StreamNativeInfo
+class AccessoryTransceiver : public IceInternal::Transceiver, public IceInternal::StreamNativeInfo
 {
     enum State
     {
@@ -35,9 +35,8 @@ class Transceiver : public IceInternal::Transceiver, public IceInternal::StreamN
 
 public:
 
-    Transceiver(const InstancePtr&, CFReadStreamRef, CFWriteStreamRef, const std::string&, Ice::Int);
-    Transceiver(const InstancePtr&, CFReadStreamRef, CFWriteStreamRef, SOCKET);
-    virtual ~Transceiver();
+    AccessoryTransceiver(const IceInternal::InstancePtr&, EASession*);
+    virtual ~AccessoryTransceiver();
 
     virtual IceInternal::NativeInfoPtr getNativeInfo();
 
@@ -55,24 +54,17 @@ public:
     virtual Ice::ConnectionInfoPtr getInfo() const;
     virtual void checkSendSize(const IceInternal::Buffer&, size_t);
 
-private:    
+private:
+    
 
-#if !TARGET_IPHONE_SIMULATOR
-    void checkCertificates();
-#endif
-
-    const InstancePtr _instance;
     const IceInternal::TraceLevelsPtr _traceLevels;
     const Ice::LoggerPtr _logger;
     const Ice::StatsPtr _stats;
-    const std::string _host;
-    CFReadStreamRef _readStream;
-    CFWriteStreamRef _writeStream;
+    NSInputStream* _readStream;
+    NSOutputStream* _writeStream;
+    AccessoryTransceiverCallback* _callback;
     bool _readStreamRegistered;
     bool _writeStreamRegistered;
-#if !TARGET_IPHONE_SIMULATOR
-    bool _checkCertificates;
-#endif
 
     State _state;
     std::string _desc;
