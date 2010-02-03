@@ -29,7 +29,7 @@ run(id<ICECommunicator> communicator)
     return EXIT_SUCCESS;
 }
 
-#if defined(TARGET_OS_IPHONE)
+#if TARGET_OS_IPHONE
 #  define main slicingExceptionsServer
 #endif
 
