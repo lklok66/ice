@@ -96,14 +96,9 @@ NSArray* importedFilesForPath_ensureFilesExist_hook(PBXTargetBuildContext* self,
 	// Setup hook for importedFilesForPath:ensureFilesExist:
 	if(__original_importedFilesForPath_ensureFilesExist == nil) {
 		__compilers_with_import = [NSMutableDictionary new];
-		
 		Class c = [self class];
-		Method m = class_getInstanceMethod(c, @selector(importedFilesForPath:ensureFilesExist:));
-		__original_importedFilesForPath_ensureFilesExist = (importedFilesForPath_ensureFilesExist_func)m->method_imp;
-		m->method_imp = (IMP)importedFilesForPath_ensureFilesExist_hook;
-		
-		// Clear Objective-C runtime cache
-		if(c->cache->mask != 0) memset(c->cache->buckets, 0, (c->cache->mask+1)*sizeof(Method));
+		__original_importedFilesForPath_ensureFilesExist = (importedFilesForPath_ensureFilesExist_func)
+		     class_replaceMethod(c, @selector(importedFilesForPath:ensureFilesExist:), (IMP)importedFilesForPath_ensureFilesExist_hook, 0);
 	}
 	
 	// Add include parser for this file type
