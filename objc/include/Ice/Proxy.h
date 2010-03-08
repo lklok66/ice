@@ -37,7 +37,7 @@
 -(void)forwardInvocation:(NSInvocation *)inv;
 @end
 
-@protocol ICEObjectPrx <NSObject, NSCopying>
+@protocol ICEObjectPrx <NSObject, NSCopying, ICEStreamBaseHelper>
 
 -(NSComparisonResult) compareIdentity:(id<ICEObjectPrx>)aProxy;
 -(NSComparisonResult) compareIdentityAndFacet:(id<ICEObjectPrx>)aProxy;

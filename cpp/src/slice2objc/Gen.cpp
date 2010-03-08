@@ -1348,7 +1348,7 @@ Slice::Gen::TypesVisitor::visitStructStart(const StructPtr& p)
 
     _H << sp;
 
-    _H << nl << "@interface " << name << " : NSObject <NSCopying>";
+    _H << nl << "@interface " << name << " : NSObject <NSCopying, ICEStreamBaseHelper>";
     _H << sb;
     _H << nl << "@private";
     _H.inc();
@@ -1469,7 +1469,6 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     //
     // Marshaling/unmarshaling
     //
-    _H << nl << "+(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;";
     _M << sp << nl << "+(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)os_";
     _M << sb;
     _M << nl << name << "*" << " p = (" << name << "*)obj;";
@@ -1490,7 +1489,6 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     _M << eb;
     _M << eb;
 
-    _H << nl << "+(id) ice_readWithStream:(id<ICEInputStream>)stream;";
     _M << sp << nl << "+(id) ice_readWithStream:(id<ICEInputStream>)is_";
     _M << sb;
     _M << nl << name << "*" << " p = [[[self class] alloc] init];";
@@ -1504,6 +1502,11 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     _M << nl << "@throw ex;";
     _M << eb;
     _M << nl << "return p;";
+    _M << eb;
+
+    _M << sp << nl << "+(ICEInt) minWireSize";
+    _M << sb;
+    _M << nl << "return " << p->minWireSize() << ";";
     _M << eb;
 
     _H << nl << "@end";
@@ -2022,9 +2025,7 @@ Slice::Gen::HelperVisitor::visitSequence(const SequencePtr& p)
             return;
         }
 
-	_H << sp << nl << "@interface " << name << " : NSObject";
-	_H << nl << "+(id) ice_readWithStream:(id<ICEInputStream>)stream;";
-	_H << nl << "+(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;";
+	_H << sp << nl << "@interface " << name << " : NSObject<ICEStreamBaseHelper>";
 	_H << nl << "@end";
 
 	_M << sp << nl << "@implementation " << name;
@@ -2037,17 +2038,20 @@ Slice::Gen::HelperVisitor::visitSequence(const SequencePtr& p)
 	_M << sb;
         _M << nl << "[stream write" << getBuiltinName(builtin) << "Seq:obj];";
 	_M << eb;
+
+        _M << sp << nl << "+(ICEInt) minWireSize";
+        _M << sb;
+        _M << nl << "return 1;";
+        _M << eb;
+
 	_M << nl << "@end";
-	
 	return;
     }
 
     EnumPtr en = EnumPtr::dynamicCast(p->type());
     if(en)
     {
-	_H << sp << nl << "@interface " << name << " : NSObject";
-	_H << nl << "+(id) ice_readWithStream:(id<ICEInputStream>)stream;";
-	_H << nl << "+(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;";
+	_H << sp << nl << "@interface " << name << " : NSObject<ICEStreamBaseHelper>";
 	_H << nl << "@end";
 
 	string typeS = typeToString(en);
@@ -2062,8 +2066,13 @@ Slice::Gen::HelperVisitor::visitSequence(const SequencePtr& p)
 	_M << sb;
 	_M << nl << "[stream writeEnumSeq:obj limit:" << limit << "];";
 	_M << eb;
-	_M << nl << "@end";
 
+        _M << sp << nl << "+(ICEInt) minWireSize";
+        _M << sb;
+        _M << nl << "return 1;";
+        _M << eb;
+
+	_M << nl << "@end";
         return;
     }
 

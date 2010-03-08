@@ -357,8 +357,6 @@ private:
     try
     {
         std::pair<const bool*, const bool*> seq;
-	// TODO: size check. This is awkward because, to do that, we need to read the size
-	// from the stream first, but that also happens inside readBoolSeq().
         is_->readBoolSeq(seq);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(BOOL)];
     }
@@ -391,7 +389,6 @@ private:
     try
     {
         std::pair<const Ice::Byte*, const Ice::Byte*> seq;
-	// TODO: size check
         is_->readByteSeq(seq);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first)];
     }    
@@ -409,7 +406,6 @@ private:
     try
     {
         std::pair<const Ice::Byte*, const Ice::Byte*> seq;
-	// TODO: size check
         is_->readByteSeq(seq);
         return [NSData dataWithBytesNoCopy:const_cast<Ice::Byte*>(seq.first) 
                        length:(seq.second - seq.first) freeWhenDone:NO];
@@ -443,7 +439,6 @@ private:
     try
     {
         std::pair<const Ice::Short*, const Ice::Short*> seq;
-	// TODO: size check
         is_->readShortSeq(seq);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEShort)];
     }
@@ -476,7 +471,6 @@ private:
     try
     {
         std::pair<const Ice::Int*, const Ice::Int*> seq;
-	// TODO: size check
         is_->readIntSeq(seq);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEInt)];
     }
@@ -509,7 +503,6 @@ private:
     try
     {
         std::pair<const Ice::Long*, const Ice::Long*> seq;
-	// TODO: size check
         is_->readLongSeq(seq);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICELong)];
     }
@@ -542,7 +535,6 @@ private:
     try
     {
         std::pair<const Ice::Float*, const Ice::Float*> seq;
-	// TODO: size check
         is_->readFloatSeq(seq);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEFloat)];
     }
@@ -575,7 +567,6 @@ private:
     try
     {
         std::pair<const Ice::Double*, const Ice::Double*> seq;
-	// TODO: size check
         is_->readDoubleSeq(seq);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEDouble)];
     }
@@ -607,7 +598,6 @@ private:
     NSException* nsex = nil;
     try
     {
-	// TODO: size check
         return toNSArray(is_->readStringSeq());
     }
     catch(const std::exception& ex)
@@ -680,8 +670,7 @@ typedef enum { dummy } Dummy_Enum;
     NSMutableData* ret = 0;
     try
     {
-	int count = is_->readSize();
-	[self checkFixedSeq:count elemSize:minWireSize];
+	int count = is_->readAndCheckSeqSize(minWireSize);
 	if((ret = [[NSMutableData alloc] initWithLength:(count * ENUM_SIZE)]) == 0)
 	{
 	    return ret;
@@ -754,6 +743,21 @@ typedef enum { dummy } Dummy_Enum;
     return nil; // Keep the compiler happy.
 }
 
+-(ICEInt) readAndCheckSeqSize:(ICEInt)minSize
+{
+    NSException* nsex = nil;
+    try
+    {
+        return is_->readAndCheckSeqSize(minSize);
+    }
+    catch(const std::exception& ex)
+    {
+        nsex = toObjCException(ex);
+    }
+    @throw nsex;
+    return nil; // Keep the compiler happy.
+}
+
 -(id<ICEObjectPrx>) readProxy:(Class)type
 {
     NSException* nsex = nil;
@@ -813,8 +817,7 @@ typedef enum { dummy } Dummy_Enum;
 
 -(NSMutableArray*) readObjectSeq:(NSString*)typeId
 {
-    ICEInt sz = [self readSize];
-    // TODO sequence size check
+    ICEInt sz = [self readAndCheckSeqSize:4];
     NSMutableArray* arr = [[NSMutableArray alloc] initWithCapacity:sz];
     NSException* nsex = nil;
     try
@@ -841,8 +844,7 @@ typedef enum { dummy } Dummy_Enum;
 
 -(NSMutableDictionary*) readObjectDict:(Class)keyType typeId:(NSString*)typeId
 {
-    ICEInt sz = [self readSize];
-    // TODO size check
+    ICEInt sz = [self readAndCheckSeqSize:[keyType minWireSize] + 4];
     NSMutableDictionary* dictionary = [[NSMutableDictionary alloc] initWithCapacity:sz];
     id key = nil;
     for(int i = 0; i < sz; ++i)
@@ -879,8 +881,7 @@ typedef enum { dummy } Dummy_Enum;
 
 -(NSMutableArray*) readSequence:(Class)type
 {
-    ICEInt sz = [self readSize];
-    // TODO sequence size check
+    ICEInt sz = [self readAndCheckSeqSize:[type minWireSize]];
     NSMutableArray* arr = [[NSMutableArray alloc] initWithCapacity:sz];
     id obj = nil;
     @try
@@ -910,8 +911,7 @@ typedef enum { dummy } Dummy_Enum;
 
 -(NSMutableDictionary*) readDictionary:(ICEKeyValueTypeHelper)type
 {
-    ICEInt sz = [self readSize];
-    // TODO size check
+    ICEInt sz = [self readAndCheckSeqSize:[type.key minWireSize] + [type.value minWireSize]];
     NSMutableDictionary* dictionary = [[NSMutableDictionary alloc] initWithCapacity:sz];
     id key = nil;
     id value = nil;
@@ -1012,30 +1012,6 @@ typedef enum { dummy } Dummy_Enum;
         }
         @throw [ex autorelease]; // NOTE: exceptions are always auto-released, no need for the caller to do it.
     }
-}
-
--(void) startSeq:(ICEInt)numElements minSize:(ICEInt)minSize
-{
-}
-
--(void) checkSeq
-{
-}
-
--(void) checkSeq:(ICEInt)bytesLeft
-{
-}
-
--(void) checkFixedSeq:(ICEInt)numElements elemSize:(ICEInt)elemSize
-{
-}
-
--(void) endElement
-{
-}
-
--(void) endSeq:(ICEInt)size
-{
 }
 
 -(void) startSlice
@@ -1934,6 +1910,11 @@ typedef enum { dummy } Dummy_Enum;
     }
     [stream writeBool:[obj boolValue]];
 }
+
++(ICEInt) minWireSize
+{
+    return 1;
+}
 @end
 
 @implementation ICEByteHelper
@@ -1949,6 +1930,11 @@ typedef enum { dummy } Dummy_Enum;
 	@throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"illegal NSNull value"];
     }
     [stream writeByte:[obj unsignedCharValue]];
+}
+
++(ICEInt) minWireSize
+{
+    return 1;
 }
 @end
 
@@ -1966,6 +1952,11 @@ typedef enum { dummy } Dummy_Enum;
     }
     [stream writeShort:[obj shortValue]];
 }
+
++(ICEInt) minWireSize
+{
+    return 2;
+}
 @end
 
 @implementation ICEIntHelper
@@ -1981,6 +1972,11 @@ typedef enum { dummy } Dummy_Enum;
 	@throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"illegal NSNull value"];
     }
     [stream writeInt:[obj intValue]];
+}
+
++(ICEInt) minWireSize
+{
+    return 4;
 }
 @end
 
@@ -1998,6 +1994,11 @@ typedef enum { dummy } Dummy_Enum;
     }
     [stream writeLong:[obj longValue]];
 }
+
++(ICEInt) minWireSize
+{
+    return 8;
+}
 @end
 
 @implementation ICEFloatHelper
@@ -2013,6 +2014,11 @@ typedef enum { dummy } Dummy_Enum;
 	@throw [ICEMarshalException marshalException:__FILE__ line:__LINE__ reason_:@"illegal NSNull value"];
     }
     [stream writeFloat:[obj floatValue]];
+}
+
++(ICEInt) minWireSize
+{
+    return 4;
 }
 @end
 
@@ -2030,6 +2036,11 @@ typedef enum { dummy } Dummy_Enum;
     }
     [stream writeDouble:[obj doubleValue]];
 }
+
++(ICEInt) minWireSize
+{
+    return 8;
+}
 @end
 
 @implementation ICEStringHelper
@@ -2045,6 +2056,11 @@ typedef enum { dummy } Dummy_Enum;
         obj = nil;
     }
     [stream writeString:obj];
+}
+
++(ICEInt) minWireSize
+{
+    return 1;
 }
 @end
 
@@ -2068,6 +2084,23 @@ typedef enum { dummy } Dummy_Enum;
     NSAssert(false, @"ICEEnumHelper getLimit requires override");
     return nil;
 }
+
++(ICEInt) minWireSize
+{
+    ICEInt limit = [self getLimit];
+    if(limit <= 0x7f)
+    {
+        return 1;
+    }
+    else if(limit <= 0x7fff)
+    {
+        return 2;
+    }
+    else
+    {
+        return 4;
+    }
+}
 @end
 
 @implementation ICEObjectPrxSequenceHelper
@@ -2078,6 +2111,10 @@ typedef enum { dummy } Dummy_Enum;
 +(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream
 {
     return [stream writeSequence:obj type:[ICEObjectPrx class]];
+}
++(ICEInt) minWireSize
+{
+    return 1;
 }
 @end
 
@@ -2095,6 +2132,11 @@ typedef enum { dummy } Dummy_Enum;
 +(NSString*) getContained
 {
     return @"::Ice::Object";
+}
+
++(ICEInt) minWireSize
+{
+    return 1;
 }
 @end
 
@@ -2119,6 +2161,10 @@ typedef enum { dummy } Dummy_Enum;
     *typeId = nil;
     return nil;
 }
++(ICEInt) minWireSize
+{
+    return 1;
+}
 @end
 
 @implementation ICESequenceHelper
@@ -2136,6 +2182,10 @@ typedef enum { dummy } Dummy_Enum;
 {
     NSAssert(false, @"ICESequenceHelper getContained requires override");
     return nil;
+}
++(ICEInt) minWireSize
+{
+    return 1;
 }
 @end
 
@@ -2155,5 +2205,10 @@ typedef enum { dummy } Dummy_Enum;
     NSAssert(false, @"ICEDictionaryHelper getContained requires override");
     ICEKeyValueTypeHelper dummy;
     return dummy; // Keep compiler quiet
+}
+
++(ICEInt) minWireSize
+{
+    return 1;
 }
 @end

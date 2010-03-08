@@ -376,6 +376,10 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
 {
     [stream writeProxy:obj];
 }
++(ICEInt) minWireSize
+{
+    return 2;
+}
 +(id) uncheckedCast:(id<ICEObjectPrx>)proxy
 {
     if(proxy != nil)

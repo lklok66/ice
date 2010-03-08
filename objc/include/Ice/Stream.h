@@ -74,17 +74,11 @@ typedef struct
 -(NSMutableDictionary*) readDictionary:(ICEKeyValueTypeHelper)type;
 
 -(ICEInt) readSize;
+-(ICEInt) readAndCheckSeqSize:(ICEInt)minSize;
 
 -(NSString*) readTypeId;
 
 -(void) throwException;
-
--(void) startSeq:(ICEInt)numElements minSize:(ICEInt)minSize;
--(void) checkSeq;
--(void) checkSeq:(ICEInt)bytesLeft;
--(void) checkFixedSeq:(ICEInt)numElements elemSize:(ICEInt)elemSize;
--(void) endElement;
--(void) endSeq:(ICEInt)size;
 
 -(void) startSlice;
 -(void) endSlice;
@@ -145,13 +139,6 @@ typedef struct
 
 -(void) writeException:(ICEUserException*)v;
 
-// -(void) startSeq:(ICEInt)numElements minSize:(ICEInt)minSize;
-// -(void) checkSeq;
-// -(void) checkSeq:(ICEInt)bytesLeft;
-// -(void) checkFixedSeq:(ICEInt)numElements elemSize:(ICEInt)elemSize;
-// -(void) endEleemnt;
-// -(void) endSeq;
-
 -(void) startSlice;
 -(void) endSlice;
 
@@ -168,101 +155,76 @@ typedef struct
 //
 // Helper classes for the Slice built-in types.
 //
-
-@interface ICEBoolHelper : NSObject
+@protocol ICEStreamBaseHelper
 +(id) ice_readWithStream:(id<ICEInputStream>)stream;
 +(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
++(ICEInt) minWireSize;
+@end
+ 
+@interface ICEBoolHelper : NSObject<ICEStreamBaseHelper>
 @end
 
-@interface ICEByteHelper : NSObject
-+(id) ice_readWithStream:(id<ICEInputStream>)stream;
-+(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
+@interface ICEByteHelper : NSObject<ICEStreamBaseHelper>
 @end
 
-@interface ICEShortHelper : NSObject
-+(id) ice_readWithStream:(id<ICEInputStream>)stream;
-+(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
+@interface ICEShortHelper : NSObject<ICEStreamBaseHelper>
 @end
 
-@interface ICEIntHelper : NSObject
-+(id) ice_readWithStream:(id<ICEInputStream>)stream;
-+(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
+@interface ICEIntHelper : NSObject<ICEStreamBaseHelper>
 @end
 
-@interface ICELongHelper : NSObject
-+(id) ice_readWithStream:(id<ICEInputStream>)stream;
-+(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
+@interface ICELongHelper : NSObject<ICEStreamBaseHelper>
 @end
 
-@interface ICEFloatHelper : NSObject
-+(id) ice_readWithStream:(id<ICEInputStream>)stream;
-+(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
+@interface ICEFloatHelper : NSObject<ICEStreamBaseHelper>
 @end
 
-@interface ICEDoubleHelper : NSObject
-+(id) ice_readWithStream:(id<ICEInputStream>)stream;
-+(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
+@interface ICEDoubleHelper : NSObject<ICEStreamBaseHelper>
 @end
 
-@interface ICEStringHelper : NSObject
-+(id) ice_readWithStream:(id<ICEInputStream>)stream;
-+(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
+@interface ICEStringHelper : NSObject<ICEStreamBaseHelper>
 @end
 
-@interface ICEObjectHelper : NSObject
-+(id) ice_readWithStream:(id<ICEInputStream>)stream;
-+(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
+@interface ICEObjectHelper : NSObject<ICEStreamBaseHelper>
 @end
 
 //
 // Helper for enums.
 //
-@interface ICEEnumHelper : NSObject
-+(id) ice_readWithStream:(id<ICEInputStream>)stream;
-+(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
+@interface ICEEnumHelper : NSObject<ICEStreamBaseHelper>
 +(ICEInt) getLimit;
 @end
 
 //
 // Helper for sequence of proxies
 //
-@interface ICEObjectPrxSequenceHelper : NSObject
-+(id) ice_readWithStream:(id<ICEInputStream>)stream;
-+(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
+@interface ICEObjectPrxSequenceHelper : NSObject<ICEStreamBaseHelper>
 @end
 
 //
 // Helper for sequence of objects
 //
-@interface ICEObjectSequenceHelper : NSObject
-+(id) ice_readWithStream:(id<ICEInputStream>)stream;
-+(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
+@interface ICEObjectSequenceHelper : NSObject<ICEStreamBaseHelper>
 +(NSString*) getContained;
 @end
 
 //
 // Helper for dictionary of objects
 //
-@interface ICEObjectDictionaryHelper : NSObject
-+(id) ice_readWithStream:(id<ICEInputStream>)stream;
-+(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
+@interface ICEObjectDictionaryHelper : NSObject<ICEStreamBaseHelper>
 +(Class) getContained:(NSString**)typeId;
 @end
 
 //
 // Helper for sequences of non-value types.
 //
-@interface ICESequenceHelper : NSObject
-+(id) ice_readWithStream:(id<ICEInputStream>)stream;
-+(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
+@interface ICESequenceHelper : NSObject<ICEStreamBaseHelper>
 +(Class) getContained;
 @end
 
 //
 // Helper for dictionaries.
 //
-@interface ICEDictionaryHelper : NSObject
-+(id) ice_readWithStream:(id<ICEInputStream>)stream;
-+(void) ice_writeWithStream:(id)obj stream:(id<ICEOutputStream>)stream;
+@interface ICEDictionaryHelper : NSObject<ICEStreamBaseHelper>
 +(ICEKeyValueTypeHelper) getContained;
 @end

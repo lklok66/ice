@@ -77,14 +77,16 @@ extern "C"
 void
 IceSSL_opensslLockCallback(int mode, int n, const char* file, int line)
 {
-    assert(locks);
-    if(mode & CRYPTO_LOCK)
+    if(locks) // Locks might be destroyed already if this is called from a static destructor.
     {
-        locks[n].lock();
-    }
-    else
-    {
-        locks[n].unlock();
+        if(mode & CRYPTO_LOCK)
+        {
+            locks[n].lock();
+        }
+        else
+        {
+            locks[n].unlock();
+        }
     }
 }
 
