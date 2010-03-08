@@ -56,7 +56,7 @@
 %endif
 
 Name: ice
-Version: 3.4b
+Version: 3.4.0
 Summary: Files common to all Ice packages 
 Release: 1%{?dist}
 License: GPL with exceptions
@@ -68,8 +68,8 @@ Source1: Ice-rpmbuild-%{version}.tar.gz
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-%define soversion 34b
-%define dotnetversion 3.4.51
+%define soversion 34
+%define dotnetversion 3.4.0
 %define dotnetpolicyversion 3.4
 
 %define formsversion 1.2.1
@@ -116,14 +116,14 @@ BuildRequires: libqt4-devel >= 4.4.3
 %endif
 
 %description
-Ice is a modern alternative to object middleware such as CORBA or
-COM/DCOM/COM+.  It is easy to learn, yet provides a powerful network
-infrastructure for demanding technical applications. It features an
-object-oriented specification language, easy to use C++, .NET, Java,
-Python, Ruby, and PHP mappings, a highly efficient protocol, 
-asynchronous method invocation and dispatch, dynamic transport 
-plug-ins, TCP/IP and UDP/IP support, SSL-based security, a firewall
-solution, and much more.
+Ice is a modern object-oriented toolkit that enables you to build
+distributed applications with minimal effort. Ice allows you to focus
+your efforts on your application logic while it takes care of all
+interactions with low-level network programming interfaces. With Ice,
+there is no need to worry about details such as opening network
+connections, serializing and deserializing data for network
+transmission, or retrying failed connection attempts (to name but a
+few of dozens of such low-level details).
 
 #
 # We create both noarch and arch-specific packages for these GAC files.
@@ -877,7 +877,6 @@ fi
 * Wed Dec 15 2009 Mark Spruiell <mes@zeroc.com> 3.4b
 - Updates for the Ice 3.4b release.
 
-* Wed Feb 27 2008 Bernard Normier <bernard@zeroc.com> 3.3b-1
 * Wed Mar 4 2009 Bernard Normier <bernard@zeroc.com> 3.3.1
 - Minor updates for the Ice 3.3.1 release.
 

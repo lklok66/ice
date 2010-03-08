@@ -2,23 +2,51 @@
 The Internet Communications Engine
 ======================================================================
 
-Ice is a modern alternative to object middleware such as CORBA or
-COM/DCOM/COM+. It is easy to learn, yet provides a powerful network
-infrastructure for demanding technical applications. It features an
-object-oriented specification language, easy to use C++, .NET, Java,
-Python, Ruby, and PHP mappings, a highly efficient protocol, 
-asynchronous method invocation and dispatch, dynamic transport 
-plug-ins, TCP/IP and UDP/IP support, SSL-based security, a firewall
-solution, and much more.
 
-Ice is available under the terms of the GNU General Public License
-(GPL) (see LICENSE file). Commercial licenses are available for
-customers who wish to use Ice with proprietary products. Please
-contact sales@zeroc.com for more information about licensing Ice.
+Introduction
+------------
+
+Ice is a modern object-oriented toolkit that enables you to build
+distributed applications with minimal effort. Ice allows you to focus
+your efforts on your application logic while it takes care of all
+interactions with low-level network programming interfaces. With Ice,
+there is no need to worry about details such as opening network
+connections, serializing and deserializing data for network
+transmission, or retrying failed connection attempts (to name but a
+few of dozens of such low-level details).
+
+In addition to fully-featured and high-performance RPC, Ice also
+provides a number of services. These services supply functionality
+that most distributed applications require, such as event distribution
+or server management.
+
+Ice is available under the terms and conditions of the GNU General
+Public License v2 (see the ICE_LICENSE file). Commercial licenses are
+available for customers who wish to use Ice in proprietary products.
+Please contact sales@zeroc.com for more information on licensing Ice.
+
+
+Table of Contents
+-----------------
+
+  1. About this distribution
+  2. Requirements
+     - Java
+     - Python
+  3. Berkeley DB and Expat
+  4. Qt
+  5. Setting up your environment to use Ice
+     - General
+     - C++
+     - Java
+     - Python
+  6. Using the IceGrid Administrative Console
+  7. Demos
+  8. Binary compatibility
 
 
 ======================================================================
-About this distribution
+1. About this distribution
 ======================================================================
 
 This distribution is a binary release of Ice @ver@ for Mac OS X and
@@ -34,7 +62,7 @@ includes the following components:
 
 
 ======================================================================
-Requirements
+2. Requirements
 ======================================================================
 
 This binary distribution was compiled on Mac OS X 10.6.2 using the
@@ -44,6 +72,8 @@ This distribution only includes Intel binaries. If you need PowerPC
 binaries, you can download the Ice source code from the ZeroC web site
 at http://www.zeroc.com/download.html.
 
+The Intel binaries from this distribution are FAT binaries with
+support for both 32-bit and 64-bit architectures.
 
 Java
 ----
@@ -61,27 +91,27 @@ code from the ZeroC web site at http://www.zeroc.com/download.html.
 
 
 ======================================================================
-Berkeley DB and Expat
+3. Berkeley DB and Expat
 ======================================================================
 
 This distribution includes the C++ and Java run time for Berkeley DB
-4.8.24 and the Expat 2.0.0 library. The Berkeley DB C++ run time was
+4.8.24 and the Expat 2.0.1 library. The Berkeley DB C++ run time was
 built using GCC 4.2.1. The Berkeley DB and Expat licenses are provided
 in the file THIRD_PARTY_LICENSE.
 
 
 ======================================================================
-Qt
+4. Qt
 ======================================================================
 
-The IceGrid and IceStorm SQL database plugins depend on the Qt 4.6
+The IceGrid and IceStorm SQL database plugins depend on the Qt 4.6.2
 framework. This framework is not included with this distribution. You
 can download binaries for the Qt framework at
 http://qt.nokia.com/downloads.
 
 
 ======================================================================
-Setting up your environment to use Ice
+5. Setting up your environment to use Ice
 ======================================================================
 
 
@@ -128,6 +158,10 @@ $ c++ -I <Ice installation directory>/include -o myprogram myprogram.o \
 Additional libraries are necessary if you are using an Ice service
 such as IceGrid or Glacier2.
 
+To build FAT binaries or binaries using an architecture that differs
+from the default architecture, you can specify the GCC -arch compiler
+flag. For example, use "-arch i386 -arch x86_64" to build Intel 32-bit
+and 64-bit FAT binaries.
 
 Java
 ----
@@ -196,7 +230,7 @@ $ export PYTHONPATH=<Ice installation directory>/python:$PYTHONPATH
 
 
 ======================================================================
-Using the IceGrid Administrative Console
+6. Using the IceGrid Administrative Console
 ======================================================================
 
 A Java-based graphical tool for administering IceGrid applications
@@ -212,7 +246,7 @@ $ java -jar IceGridGUI.jar
 
 
 ======================================================================
-Demos
+7. Demos
 ======================================================================
 
 Sample programs are provided in the Ice-@ver@-demos.tar.gz package,
@@ -225,7 +259,7 @@ more information.
 
 
 ======================================================================
-Binary compatibility
+8. Binary compatibility
 ======================================================================
 
 Please refer to the RELEASE_NOTES file included in this distribution

@@ -88,7 +88,15 @@ def configurePaths():
         addenv("CLASSPATH", "classes")
         return # That's it, we're done!
 
-    binDir = os.path.join(getIceDir("cpp"), "bin")        
+    binDir = os.path.join(getIceDir("cpp"), "bin")
+
+    if isWin32() and iceHome:
+        compiler = ""
+        if os.environ.get("CPP_COMPILER", "") != "":
+            compiler = os.environ["CPP_COMPILER"]
+        if compiler == "BCC2010":
+            binDir = binDir + "\\bcc10;" + binDir
+
     shlibVar = None
     libDir = None
     if not isWin32():
@@ -114,7 +122,7 @@ def configurePaths():
 
     # Only add the lib directory to the shared library path if we're
     # not using the embedded location.
-    if libDir and iceHome != "/opt/Ice-3.4b":
+    if libDir and iceHome != "/opt/Ice-3.4":
         addLdPath(libDir)
 
     if not iceHome:

@@ -2,23 +2,64 @@
 The Internet Communications Engine
 ======================================================================
 
-Ice is a modern alternative to object middleware such as CORBA or
-COM/DCOM/COM+. It is easy to learn, yet provides a powerful network
-infrastructure for demanding technical applications. It features an
-object-oriented specification language, easy to use C++, .NET, Java,
-Python, Ruby, and PHP mappings, a highly efficient protocol,
-asynchronous method invocation and dispatch, dynamic transport
-plug-ins, TCP/IP and UDP/IP support, SSL-based security, a firewall
-solution, and much more.
 
-Ice is available under the terms of the GNU General Public License
-(GPL) (see LICENSE file). Commercial licenses are available for
-customers who wish to use Ice in proprietary products. Please contact
-sales@zeroc.com for more information on licensing Ice.
+Introduction
+------------
+
+Ice is a modern object-oriented toolkit that enables you to build
+distributed applications with minimal effort. Ice allows you to focus
+your efforts on your application logic while it takes care of all
+interactions with low-level network programming interfaces. With Ice,
+there is no need to worry about details such as opening network
+connections, serializing and deserializing data for network
+transmission, or retrying failed connection attempts (to name but a
+few of dozens of such low-level details).
+
+In addition to fully-featured and high-performance RPC, Ice also
+provides a number of services. These services supply functionality
+that most distributed applications require, such as event distribution
+or server management.
+
+Ice is available under the terms and conditions of the GNU General
+Public License v2 (see the ICE_LICENSE.txt file). Commercial licenses
+are available for customers who wish to use Ice in proprietary 
+products. Please contact sales@zeroc.com for more information on 
+licensing Ice.
+
+
+Table of Contents
+-----------------
+
+  1. About this distribution
+  2. Supported Windows versions
+  3. Third party packages
+     - Qt SQL driver
+  4. Ice Visual Studio 2008 Extension
+     - Activating the plug-in for a project
+     - Project properties
+     - Environment variables
+     - Adding Slice files to a project
+     - Generating code
+     - VC++ Pre-compiled headers
+  5. Setting up your environment to use Ice
+     - C++
+     - .NET
+     - Java
+     - Python
+     - Ruby
+     - PHP
+  6. Running IceGrid and Glacier2 components as services
+  7. Using the IceGrid Administrative Console
+  8. Demos
+  9. Binary compatibility
+ 10. Monotonic clock
+ 11. Managed code in Ice for .NET
+ 12. Ice and the Windows Registry
+ 13. Acknowledgments
 
 
 ======================================================================
-About this distribution
+1. About this distribution
 ======================================================================
 
 This binary distribution provides all Ice run time services and
@@ -42,7 +83,7 @@ build applications with Ice.
 
 
 ======================================================================
-Supported Windows versions
+2. Supported Windows versions
 ======================================================================
 
 This distribution is supported on the following Windows versions:
@@ -56,7 +97,7 @@ This distribution is supported on the following Windows versions:
 
 
 ======================================================================
-Third Party Packages
+3. Third party packages
 ======================================================================
 
 This distribution contains binaries for various third-party packages
@@ -73,7 +114,7 @@ The licenses for these packages are provided in the file
 THIRD_PARTY_LICENSE.txt.
 
 
-Qt SQL Driver
+Qt SQL driver
 -------------
 
 The QtSql DLL included in this distribution has the SQLite driver
@@ -81,7 +122,7 @@ built-in.
 
 
 ======================================================================
-Ice Visual Studio 2008 Extension
+4. Ice Visual Studio 2008 Extension
 ======================================================================
 
 The Ice Visual Studio Extension integrates Ice projects into the
@@ -161,7 +202,7 @@ Project properties
   Set the list of Ice libraries to link with.
 
 
-Environment Variables
+Environment variables
 ---------------------
 
 The "Ice Home", "Extra Compiler Options", and "Slice Include Path"
@@ -206,7 +247,7 @@ rebuild the project.
 
 
 ======================================================================
-Setting up your environment to use Ice
+5. Setting up your environment to use Ice
 ======================================================================
 
 
@@ -564,7 +605,7 @@ appropriate changes as you follow the instructions.
 
 
 ======================================================================
-Running IceGrid and Glacier2 components as services
+6. Running IceGrid and Glacier2 components as services
 ======================================================================
 
 The "config" subdirectory of this distribution includes sample
@@ -589,7 +630,7 @@ Windows services.
 
 
 ======================================================================
-Using the IceGrid Administrative Console
+7. Using the IceGrid Administrative Console
 ======================================================================
 
 A Java-based graphical tool for administering IceGrid applications
@@ -603,7 +644,7 @@ by double-clicking on this file.
 
 
 ======================================================================
-Demos
+8. Demos
 ======================================================================
 
 This distribution includes an archive named demos.zip that contains
@@ -626,7 +667,7 @@ section of this page:
 
 
 ======================================================================
-Binary compatibility
+9. Binary compatibility
 ======================================================================
 
 Please refer to the RELEASE_NOTES.txt file included in this
@@ -635,7 +676,7 @@ upgrade instructions.
 
 
 ======================================================================
-Monotonic clock
+10. Monotonic clock
 ======================================================================
 
 Ice uses the QueryPerformanceCounter Windows API function to measure
@@ -648,7 +689,7 @@ relevant for your system:
 
 
 ======================================================================
-Managed code in Ice for .NET
+11. Managed code in Ice for .NET
 ======================================================================
 
 The main Ice for .NET assembly (Ice.dll) included in this distribution
@@ -664,7 +705,7 @@ You can download the source distribution at the link below:
 
 
 ======================================================================
-Ice and the Windows Registry
+12. Ice and the Windows Registry
 ======================================================================
 
 The Ice installer adds information to the Windows registry to indicate
@@ -682,7 +723,7 @@ The install location is stored as a string value named 'InstallDir'.
 
 
 ======================================================================
-Acknowledgments
+13. Acknowledgments
 ======================================================================
 
 This product includes software developed by the OpenSSL Project for

@@ -1,5 +1,19 @@
-Building the Demos
-==================
+Table of Contents
+-----------------
+
+  1. Building the Demos
+  2. Running the Ice Demos
+  3. Running the C++ demos
+  4. Running the Java demos
+  5. Running the C# demos
+  6. Running the Python demos
+  7. Running the Ruby demos
+  8. Running the PHP demos
+
+
+======================================================================
+1. Building the Demos
+======================================================================
 
 This section describes how to build the demos included in the Ice demo
 distribution.
@@ -51,12 +65,13 @@ To build the demos you need to:
     $ICE_HOME/lib/sparcv9 on Solaris for SPARC 64-bit and
     $ICE_HOME/lib/amd64 on Solaris for x86 64-bit.
 
-  - Review the build settings found in config/Make.rules (C++), 
+  - Review the build settings found in config/Make.rules (C++),
     config/Make.rules.cs (C#), config/Make.rules.php (PHP) and
     config/build.properties (Java) and adjust any you want changed.
     For example, for C++ and C#, set OPTIMIZE=yes in order to build
     with optimization, or for C++ set LP64=yes if you are building
-    against a 64-bit Ice installation.
+    against a 64-bit Ice installation (on Mac OS X, set CXXARCHFLAGS
+    to build 32-bit and 64-bit FAT binaries).
 
   - Build the demos. For example:
 
@@ -77,8 +92,9 @@ To build the demos you need to:
     ant
 
 
-Running the Ice Demos
-=====================
+======================================================================
+2. Running the Ice Demos
+======================================================================
 
 Most demos consist of a single server and client. The instructions to
 run a demo depend on the programming language. Instructions for each
@@ -86,8 +102,9 @@ language are included below. Some demo directories contain README
 files if additional steps are necessary.
 
 
-Running the C++ demos
-=====================
+======================================================================
+3. Running the C++ demos
+======================================================================
 
 To run a demo, open a terminal window, change to the desired demo
 directory, and enter the following command to run the server:
@@ -100,8 +117,9 @@ desired demo directory, and run:
 $ ./client
 
 
-Running the Java demos
-======================
+======================================================================
+4. Running the Java demos
+======================================================================
 
 After a successful build, the compiled classes are stored in a
 subdirectory named "classes" in each demo directory. You need to add
@@ -122,8 +140,9 @@ desired demo directory, and run:
 $ java Client
 
 
-Running the C# demos
-====================
+======================================================================
+5. Running the C# demos
+======================================================================
 
 The C# demos are only supported on SuSE Enterprise Linux Server but
 may work on other platforms. Note however that the Ice for .NET run
@@ -141,8 +160,9 @@ desired demo directory, and run:
 $ mono client.exe
 
 
-Running the Python demos
-========================
+======================================================================
+6. Running the Python demos
+======================================================================
 
 To run a demo, open a terminal window, change to the desired demo
 directory, and enter the following command to run the server:
@@ -155,8 +175,9 @@ desired demo directory, and run:
 $ python Client.py
 
 
-Running the Ruby demos
-======================
+======================================================================
+7. Running the Ruby demos
+======================================================================
 
 Ice provides only client demos in Ruby since Ice for Ruby does not
 support server-side activities. In order to run a sample client, you
@@ -173,8 +194,9 @@ $ cd $HOME/testing/Ice-@ver@-demos/demorb/Ice/hello
 $ ruby Client.rb
 
 
-Running the PHP demos
-=====================
+======================================================================
+8. Running the PHP demos
+======================================================================
 
 PHP demos are provided in the demophp directory.
 

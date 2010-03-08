@@ -15,12 +15,12 @@ import textwrap
 resources = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "..", "src", "windows")
 sys.path.append(resources)
 
-iceVersion = '3.4b'
+iceVersion = '3.4.0'
 
 #
 # Current default third party library versions.
 #
-OpenSSLVer = '0.9.8k'
+OpenSSLVer = '0.9.8l'
 Bzip2Ver = '1.0.5'
 STLPortVer = '4.6.2'
 ExpatVer = '2.0.1'
