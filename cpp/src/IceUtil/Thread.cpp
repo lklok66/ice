@@ -27,6 +27,10 @@
     #include <sys/resource.h>
 #endif
 
+#ifdef ICE_OBJC_GC
+    #include <objc/objc-auto.h>
+#endif
+
 using namespace std;
 
 #ifdef _WIN32
@@ -410,6 +414,10 @@ startHook(void* arg)
         // See the comment in IceUtil::Thread::start() for details.
         //
         rawThread->__decRef();
+
+#ifdef ICE_OBJC_GC
+        objc_registerThreadWithCollector();
+#endif
         thread->run();
     }
     catch(...)
@@ -420,6 +428,10 @@ startHook(void* arg)
         }
         std::terminate();
     }
+
+#ifdef ICE_OBJC_GC
+    objc_unregisterThreadWithCollector();
+#endif    
 
     thread->_done();
     
@@ -514,6 +526,7 @@ IceUtil::Thread::start(size_t stackSize, bool realtimeScheduling, int priority)
         pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
     }
     rc = pthread_create(&_thread, &attr, startHook, this);
+    
     pthread_attr_destroy(&attr);
     if(rc != 0)
     {
