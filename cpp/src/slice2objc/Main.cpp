@@ -71,6 +71,7 @@ usage(const char* n)
         "--depend-xml            Generate dependencies in XML format.\n"
         "-d, --debug             Print debug messages.\n"
         "--ice                   Permit `Ice' prefix (for building Ice source code only)\n"
+        "--underscore             Permit underscores in Slice identifiers.\n"
         ;
     // Note: --case-sensitive is intentionally not shown here!
 }
@@ -91,6 +92,7 @@ main(int argc, char* argv[])
     opts.addOpt("", "depend-xml");
     opts.addOpt("d", "debug");
     opts.addOpt("", "ice");
+    opts.addOpt("", "underscore");
     opts.addOpt("", "case-sensitive");
 
     vector<string> args;
@@ -150,6 +152,8 @@ main(int argc, char* argv[])
 
     bool ice = opts.isSet("ice");
 
+    bool underscore = opts.isSet("underscore");
+
     if(args.empty())
     {
         getErrorStream() << argv[0] << ": no input file" << endl;
@@ -179,7 +183,7 @@ main(int argc, char* argv[])
                 return EXIT_FAILURE;
             }
             
-            UnitPtr u = Unit::createUnit(false, false, ice);
+            UnitPtr u = Unit::createUnit(false, false, ice, underscore);
             int parseStatus = u->parse(*i, cppHandle, debug);
             u->destroy();
 
@@ -225,7 +229,7 @@ main(int argc, char* argv[])
             }
             else
             {
-                UnitPtr u = Unit::createUnit(false, false, ice);
+                UnitPtr u = Unit::createUnit(false, false, ice, underscore);
                 int parseStatus = u->parse(*i, cppHandle, debug);
 
                 if(!icecpp->close())

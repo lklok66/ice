@@ -58,6 +58,23 @@ Windows executable from the following location:
 
   http://gnuwin32.sourceforge.net/packages/patch.htm
 
+On Windows Vista or later, UAC can make it difficult to use the patch
+utility unless you take extra steps. One solution is to run patch.exe
+in a command window that you started with Administrator privileges
+(right-click on Command Prompt in the Start menu and choose "Run as
+administrator"). If running as administrator is not an option, follow
+these recommendations:
+
+  1. Do not install patch.exe in a system-protected directory such as
+     C:\Program Files.
+
+  2. Create a manifest file named patch.exe.manifest as explained at
+     the link below:
+
+     http://drupal.org/node/99903
+
+     Place the manifest file in the same directory as patch.exe.
+
 
 bzip2
 -----
@@ -69,20 +86,20 @@ allows bzip2 to be compiled into a DLL.
 After extracting the bzip2 source distribution, change to the
 top-level directory and apply the patch as shown below:
 
-  > patch -p0 bzlib.h < ..\bzip2\bzlib.patch
+  > patch --binary -p0 bzlib.h < ..\bzip2\bzlib.patch
 
 
 Berkeley DB
 -----------
 
-The file db/patch.4.8.24.17646 in this archive contains an important
+The file db/patch.4.8.30.17646 in this archive contains an important
 fix for Berkeley DB required by Ice. 
 
-After extracting the Berkeley DB 4.8.24 source distribution, change 
+After extracting the Berkeley DB 4.8.30 source distribution, change 
 to the top-level directory and apply the patches as shown below:
 
- > cd db-4.8.24
- > patch -p0 < patch.db-4.8.24.17646
+ > cd db-4.8.30
+ > patch --binary -p0 < patch.db-4.8.30.17646
 
 
 mcpp
@@ -96,7 +113,7 @@ After extracting the mcpp source distribution, change to the top-level
 directory and apply the patch as shown below:
 
   > cd mcpp-2.7.2
-  > patch -p0 < patch.mcpp.2.7.2
+  > patch --binary -p0 < patch.mcpp.2.7.2
 
 
 ======================================================================
@@ -180,11 +197,11 @@ Follow these instructions for building mcpp:
 - Apply the patch for noconfig.H appropriate for your compiler from
   the noconfig directory. For example, for VS2008 you would run:
 
-  > patch -p0 < ..\noconfig\vc2008.dif
+  > patch --binary -p0 < ..\noconfig\vc2008.dif
 
   and for C++Builder 2010 you would run:
 
-  > patch -p0 < ..\noconfig\bc59.dif
+  > patch --binary -p0 < ..\noconfig\bc59.dif
 
 - Microsoft Visual C++: 
  

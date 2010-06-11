@@ -56,7 +56,7 @@
 %endif
 
 Name: ice
-Version: 3.4.0
+Version: 3.4.1
 Summary: Files common to all Ice packages 
 Release: 1%{?dist}
 License: GPL with exceptions
@@ -69,15 +69,15 @@ Source1: Ice-rpmbuild-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %define soversion 34
-%define dotnetversion 3.4.0
+%define dotnetversion 3.4.1
 %define dotnetpolicyversion 3.4
 
 %define formsversion 1.2.1
 %define looksversion 2.3.0
-%define dbversion 4.8.24
+%define dbversion 4.8.30
 
 BuildRequires: openssl-devel >= 0.9.7a
-BuildRequires: db48-devel >= 4.8.24, db48-java >= 4.8.24
+BuildRequires: db48-devel >= 4.8.30, db48-java >= 4.8.30
 BuildRequires: jpackage-utils
 BuildRequires: mcpp-devel >= 2.7.2
 
@@ -603,18 +603,18 @@ rm -rf $RPM_BUILD_ROOT
 %{_prefix}/lib/mono/gac/IcePatch2/%{dotnetversion}.*/
 %dir %{_prefix}/lib/mono/gac/IceStorm
 %{_prefix}/lib/mono/gac/IceStorm/%{dotnetversion}.*/
-#%dir %{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.Glacier2
-#%{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.Glacier2/0.*/
-#%dir %{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.Ice
-#%{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.Ice/0.*/
-#%dir %{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IceBox
-#%{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IceBox/0.*/
-#%dir %{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IceGrid
-#%{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IceGrid/0.*/
-#%dir %{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IcePatch2
-#%{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IcePatch2/0.*/
-#%dir %{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IceStorm
-#%{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IceStorm/0.*/
+%dir %{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.Glacier2
+%{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.Glacier2/0.*/
+%dir %{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.Ice
+%{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.Ice/0.*/
+%dir %{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IceBox
+%{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IceBox/0.*/
+%dir %{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IceGrid
+%{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IceGrid/0.*/
+%dir %{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IcePatch2
+%{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IcePatch2/0.*/
+%dir %{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IceStorm
+%{_prefix}/lib/mono/gac/policy.%{dotnetpolicyversion}.IceStorm/0.*/
 %endif
 
 #

@@ -11,7 +11,7 @@
 
 Summary: The Berkeley DB database library (version 4.8) for C and C++
 Name: db48
-Version: 4.8.24
+Version: 4.8.30
 Release: 1ice%{?dist}
 Source0: http://download.oracle.com/berkeley-db/db-%{version}.NC.tar.gz
 URL: http://www.oracle.com/database/berkeley-db/
@@ -193,6 +193,9 @@ rm -rf ${RPM_BUILD_ROOT}
 %endif
 
 %changelog
+
+* Thu May 14 2010 Mark Spruiell <mes@zeroc.com> 4.8.30-1ice
+- Updated Berkeley DB to version 4.8.30
 
 * Thu Dec 17 2009 Mark Spruiell <mes@zeroc.com> 4.8.24-1ice
 - Updated Berkeley DB to version 4.8.24
