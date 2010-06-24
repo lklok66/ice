@@ -21,7 +21,7 @@
 }
 @end
 
-#ifdef TARGET_OS_IPHONE
+#if TARGET_OS_IPHONE
 
 #import <Foundation/NSString.h>
 #import <Foundation/NSObject.h>
@@ -41,7 +41,7 @@ defaultServerProperties(int *argc, char** argv)
 {
     id<ICEProperties> properties = [ICEUtil createProperties];
 
-#ifdef TARGET_OS_IPHONE
+#if TARGET_OS_IPHONE
     static NSString* defaults[] =
     {
         @"Ice.NullHandleAbort", @"1",
@@ -95,7 +95,7 @@ defaultClientProperties(int* argc, char** argv)
 {
     id<ICEProperties> properties = [ICEUtil createProperties];
 
-#ifdef TARGET_OS_IPHONE
+#if TARGET_OS_IPHONE
     static NSString* defaults[] =
     {
         @"Ice.NullHandleAbort", @"1",
@@ -134,7 +134,7 @@ defaultClientProperties(int* argc, char** argv)
     return properties;
 }
 
-#ifdef TARGET_OS_IPHONE
+#if TARGET_OS_IPHONE
 
 void
 TestCommonInit(id target, SEL output, SEL ready, BOOL s)

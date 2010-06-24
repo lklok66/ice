@@ -12,10 +12,10 @@
 # ----------------------------------------------------------------------
 
 SHELL			= /bin/sh
-VERSION			= 1.0
+VERSION			= 1.1
 VERSION_MAJOR           = 1
-VERSION_MINOR           = 0
-SOVERSION		= 10
+VERSION_MINOR           = 1
+SOVERSION		= 11
 
 INSTALL			= cp -fp
 INSTALL_PROGRAM		= ${INSTALL}

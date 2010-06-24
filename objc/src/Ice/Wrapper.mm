@@ -9,12 +9,29 @@
 
 #import <Ice/Wrapper.h>
 
+//
+// Using NSMapTable is necessary for this code to work properly with GC.
+// We could also use NSMapTable on MacOS without GC, however,
+// it's preferable to use the same code for non-GC on MacOS and other platforms
+//
+// #if defined(ICE_OBJC_GC) || !TARGET_OS_IPHONE
+//
+#ifdef ICE_OBJC_GC
+   #define ICE_USE_MAP_TABLE 1
+#endif
+
+#ifdef ICE_USE_MAP_TABLE
+   #import <Foundation/NSMapTable.h>
+#else
+   #include <map>
+#endif
+
 #include <IceUtilCpp/Shared.h>
-#include <map>
+#include <Foundation/Foundation.h>
 
 #define CXXOBJECT ((IceUtil::Shared*)cxxObject_)
 
-
+#ifndef ICE_USE_MAP_TABLE
 namespace 
 {
 
@@ -26,22 +43,47 @@ public:
 
     Init()
     {
-        cachedObjects = new std::map<IceUtil::Shared*, ICEInternalWrapper*>();
+        cachedObjects = new std::map<IceUtil::Shared*, ICEInternalWrapper*>;
     }
 
     ~Init()
     {
-#ifndef ICE_OBJC_GC
         delete cachedObjects;
-#endif
     }
 };
 
 Init init;
-
 }
+#endif
+
 
 @implementation ICEInternalWrapper
+
+#ifdef ICE_USE_MAP_TABLE
+//
+// mapTable singleton
+//
++(NSMapTable*) mapTable
+{
+    static NSMapTable* instance;
+    @synchronized(self)
+    {
+        if(instance == 0)
+        {
+            //
+            // Unfortunately the values we use are not very well documented, and small variations
+            // (like using the opaque pointer memory personality for keys) introduces strange bugs
+            //
+            instance = [NSMapTable
+                         mapTableWithKeyOptions:NSPointerFunctionsOpaquePersonality
+                         valueOptions:NSMapTableZeroingWeakMemory];
+
+            CFRetain(instance); // leak it!
+        }
+    }
+    return instance;
+} 
+#endif
 
 -(id) initWithCxxObject:(IceUtil::Shared*)arg
 {
@@ -51,8 +93,21 @@ Init init;
     }
     cxxObject_ = arg;
     CXXOBJECT->__incRef();
+
+#ifdef ICE_USE_MAP_TABLE
+    //
+    // No synchronization because initWithCxxObject is always called with mapTable locked, see below
+    //
+    void* result = NSMapInsertIfAbsent([ICEInternalWrapper mapTable], arg, self); 
+    assert(result == 0);
+#else
+    //
+    // No synchronization because initWithCxxObject is always called with the wrapper class object locked
+    //
     assert(cachedObjects->find(CXXOBJECT) == cachedObjects->end());
     cachedObjects->insert(std::make_pair(CXXOBJECT, self));
+#endif
+    
     return self;
 }
 
@@ -62,31 +117,59 @@ Init init;
 }
 
 -(void) dealloc
-{
+{  
+   
+#ifdef ICE_USE_MAP_TABLE
+    //
+    // No synchronization because dealloc is always called with 
+    // mapTable locked, see below
+    //
+    NSMapRemove([ICEInternalWrapper mapTable], cxxObject_);
+#else
+    //
+    // No synchronization because dealloc is always called with the wrapper class object locked
+    //
     cachedObjects->erase(CXXOBJECT);
+#endif
+
     CXXOBJECT->__decRef();
     cxxObject_ = 0;
     [super dealloc];
 }
 
+#ifdef ICE_USE_MAP_TABLE
+//
+// No GC and therefore finalize without the MapTable!
+//
 -(void) finalize
-{
-    @synchronized([ICEInternalWrapper class])
-    {
-        cachedObjects->erase(CXXOBJECT);
-    }
+{ 
+    assert(cxxObject_ != 0);
     CXXOBJECT->__decRef();
     cxxObject_ = 0;
     [super finalize];
 }
+#endif
 
 +(id) getWrapperWithCxxObjectNoAutoRelease:(IceUtil::Shared*)arg
 {
+    //
+    // Note: the returned object is NOT retained. It must be held
+    // some other way by the calling thread.
+    //
+
     if(arg == 0)
     {
         return nil;
     }
     
+#ifdef ICE_USE_MAP_TABLE
+    NSMapTable* mapTable = [ICEInternalWrapper mapTable];
+    @synchronized(mapTable)
+    {
+        id val = (id)NSMapGet(mapTable, arg);
+        return val;
+    }
+#else
     @synchronized([ICEInternalWrapper class])
     {
         std::map<IceUtil::Shared*, ICEInternalWrapper*>::const_iterator p = cachedObjects->find(arg);
@@ -95,6 +178,7 @@ Init init;
             return p->second;
         }
     }
+#endif
     return nil;
 }
 
@@ -105,6 +189,22 @@ Init init;
         return nil;
     }
     
+#ifdef ICE_USE_MAP_TABLE
+    NSMapTable* mapTable = [ICEInternalWrapper mapTable];
+    @synchronized(mapTable)
+    {
+        id val = (id)NSMapGet(mapTable, arg);
+
+        if(val == nil)
+        {
+            return [[self alloc] initWithCxxObject:arg];
+        }
+        else
+        {
+            return [val retain];
+        }
+    }
+#else
     @synchronized([ICEInternalWrapper class])
     {
         std::map<IceUtil::Shared*, ICEInternalWrapper*>::const_iterator p = cachedObjects->find(arg);
@@ -117,6 +217,7 @@ Init init;
             return [[self alloc] initWithCxxObject:arg];
         }
     }
+#endif
     return nil; // Keep the compiler happy.
 }
 
@@ -124,6 +225,7 @@ Init init;
 {
     return [[self wrapperWithCxxObjectNoAutoRelease:arg] autorelease];
 }
+
 
 -(id) retain
 {
@@ -133,7 +235,11 @@ Init init;
 
 -(void) release
 {
-    @synchronized([ICEInternalWrapper class])
+#ifdef ICE_USE_MAP_TABLE
+    @synchronized([ICEInternalWrapper mapTable])
+#else
+    @synchronized([ICEInternalWrapper class])  
+#endif
     {
         if(NSDecrementExtraRefCountWasZero(self))
         {

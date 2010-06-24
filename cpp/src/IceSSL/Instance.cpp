@@ -58,6 +58,7 @@ public:
 
     ~Init()
     {
+#ifndef ICE_OBJC_GC
         delete staticMutex;
         staticMutex = 0;
 
@@ -66,6 +67,7 @@ public:
             delete[] locks;
             locks = 0;
         }
+#endif
     }
 };
 

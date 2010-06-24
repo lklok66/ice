@@ -74,7 +74,13 @@ public:
     {
         @try
         {
-            [_obj read__:[ICEInputStream getWrapperWithCxxObjectNoAutoRelease:stream.get()] readTypeId:rid];
+            
+            //
+            // TODO: explain why calling getWrapperWithCxxObjectNoAutoRelease is safe here
+            //
+            ICEInputStream* is = [ICEInputStream getWrapperWithCxxObjectNoAutoRelease:stream.get()];
+            assert(is != 0);
+            [_obj read__:is readTypeId:rid];
         }
         @catch(NSException* ex)
         {

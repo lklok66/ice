@@ -13,7 +13,7 @@
 @interface TestFailedException : NSException
 @end
 
-#if defined(TARGET_OS_IPHONE)
+#if TARGET_OS_IPHONE
 void TestCommonInit(id, SEL, SEL, BOOL);
 #endif
 
