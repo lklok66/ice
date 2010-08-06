@@ -39,6 +39,8 @@ endif
 
 # For the simulator build we must support weak linking.
 ifeq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
+    OBJCFLAGS           := -fobjc-abi-version=2 -fobjc-legacy-dispatch
+    OBJCXXFLAGS         := $(OBJCFLAGS)
     LDPLATFORMFLAGS     := $(LDPLATFORMFLAGS) -Wl,-flat_namespace,-undefined,dynamic_lookup
 endif
 
