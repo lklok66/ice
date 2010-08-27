@@ -71,6 +71,24 @@ IPHONE_SDK_VERSION = 4.0
 
 endif
 
+#
+# Set the platform name according to the build type.
+#
+ifeq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
+    STATICLIBS = yes
+    PLATFORM_NAME = iphonesimulator
+else ifeq ($(COMPILE_FOR_IPHONE),yes)
+    STATICLIBS = yes
+    PLATFORM_NAME = iphoneos
+else ifeq ($(COMPILE_FOR_COCOA),yes)
+    STATICLIBS = yes
+    PLATFORM_NAME = macosx
+else
+    PLATFORM_NAME = macosx
+    COMPILE_FOR_MACOSX = yes
+endif
+
+
 ifeq ($(shell test -f $(top_srcdir)/config/Make.common.rules.objc && echo 0),0)
     include $(top_srcdir)/config/Make.common.rules.objc
 else
@@ -83,23 +101,6 @@ else ifeq ($(OPTIMIZE_SIZE),yes)
     OPTIMIZE		= yes
 else ifeq ($(OPTIMIZE),yes)
     OPTIMIZE_SPEED	= yes
-endif
-
-#
-# Set the platform name according to the build type.
-#
-ifeq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
-    PLATFORM_NAME = iphonesimulator
-    STATICLIBS = yes
-else ifeq ($(COMPILE_FOR_IPHONE),yes)
-    PLATFORM_NAME = iphoneos
-    STATICLIBS = yes
-else ifeq ($(COMPILE_FOR_COCOA),yes)
-    PLATFORM_NAME = macosx
-    STATICLIBS = yes
-else
-    PLATFORM_NAME = macosx
-    COMPILE_FOR_MACOSX = yes
 endif
 
 ifeq ($(COMPILE_WITH_CFSTREAM_TRANSPORT),)
