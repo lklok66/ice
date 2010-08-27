@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 45;
+	objectVersion = 46;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -25,6 +25,7 @@
 		342EBA8B0E926F90000051FA /* cacert.der in Resources */ = {isa = PBXBuildFile; fileRef = 342EBA8A0E926F90000051FA /* cacert.der */; };
 		344126380FD8E8EA00C8D69C /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 344126360FD8E8EA00C8D69C /* Security.framework */; };
 		344126390FD8E8EA00C8D69C /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 344126370FD8E8EA00C8D69C /* CFNetwork.framework */; };
+		34885BE21227F66E0060DE41 /* ExternalAccessory.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34885BE11227F66E0060DE41 /* ExternalAccessory.framework */; };
 		34B3B4B50FD7A7700018C227 /* AllTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B4AA0FD7A7700018C227 /* AllTests.m */; };
 		34B3B4B60FD7A7700018C227 /* BatchOneways.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B4AB0FD7A7700018C227 /* BatchOneways.m */; };
 		34B3B4B70FD7A7700018C227 /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B4AC0FD7A7700018C227 /* Client.m */; };
@@ -130,6 +131,7 @@
 		342EBA8A0E926F90000051FA /* cacert.der */ = {isa = PBXFileReference; lastKnownFileType = file; name = cacert.der; path = ../../certs/cacert.der; sourceTree = SOURCE_ROOT; };
 		344126360FD8E8EA00C8D69C /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		344126370FD8E8EA00C8D69C /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
+		34885BE11227F66E0060DE41 /* ExternalAccessory.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ExternalAccessory.framework; path = System/Library/Frameworks/ExternalAccessory.framework; sourceTree = SDKROOT; };
 		34B3B4AA0FD7A7700018C227 /* AllTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AllTests.m; path = ../../Ice/operations/AllTests.m; sourceTree = SOURCE_ROOT; };
 		34B3B4AB0FD7A7700018C227 /* BatchOneways.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BatchOneways.m; path = ../../Ice/operations/BatchOneways.m; sourceTree = SOURCE_ROOT; };
 		34B3B4AC0FD7A7700018C227 /* Client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Client.m; path = ../../Ice/operations/Client.m; sourceTree = SOURCE_ROOT; };
@@ -240,6 +242,7 @@
 				344126380FD8E8EA00C8D69C /* Security.framework in Frameworks */,
 				344126390FD8E8EA00C8D69C /* CFNetwork.framework in Frameworks */,
 				34E396630FF1D71400FBACD6 /* CoreGraphics.framework in Frameworks */,
+				34885BE21227F66E0060DE41 /* ExternalAccessory.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -337,6 +340,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				34885BE11227F66E0060DE41 /* ExternalAccessory.framework */,
 				34E396620FF1D71400FBACD6 /* CoreGraphics.framework */,
 				344126360FD8E8EA00C8D69C /* Security.framework */,
 				344126370FD8E8EA00C8D69C /* CFNetwork.framework */,
@@ -560,7 +564,6 @@
 				1D60588D0D05DD3D006BFB54 /* Resources */,
 				1D60588E0D05DD3D006BFB54 /* Sources */,
 				1D60588F0D05DD3D006BFB54 /* Frameworks */,
-				34041E9F0FD8FE1C000D8134 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -577,7 +580,7 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "container" */;
-			compatibilityVersion = "Xcode 3.1";
+			compatibilityVersion = "Xcode 3.2";
 			hasScannedForEncodings = 1;
 			mainGroup = 29B97314FDCFA39411CA2CEA /* CustomTemplate */;
 			projectDirPath = "";
@@ -604,22 +607,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		34041E9F0FD8FE1C000D8134 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if [ $PLATFORM_NAME = iphonesimulator ]; then\n\tcp $ADDITIONAL_SDKS/usr/local/lib/*.dylib $BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH\nfi";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		1D60588E0D05DD3D006BFB54 /* Sources */ = {
@@ -720,7 +707,7 @@
 		1D6058940D05DD3E006BFB54 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ADDITIONAL_SDKS = "../../../SDK/IceTouch-1.0/$(PLATFORM_NAME).sdk";
+				ADDITIONAL_SDKS = "../../../SDK/IceTouch-1.1/$(PLATFORM_NAME).sdk";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_RESOURCE_RULES_PATH = "$(SDKROOT)/ResourceRules.plist";
@@ -739,7 +726,7 @@
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = container;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
-				SDKROOT = iphoneos3.0;
+				SDKROOT = iphoneos4.0;
 				SLICE_INCLUDE_PATH = ../../Ice/slicing/objects;
 			};
 			name = Debug;
@@ -747,7 +734,7 @@
 		1D6058950D05DD3E006BFB54 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ADDITIONAL_SDKS = "../../../SDK/IceTouch-1.0/$(PLATFORM_NAME).sdk";
+				ADDITIONAL_SDKS = "../../../SDK/IceTouch-1.1/$(PLATFORM_NAME).sdk";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_RESOURCE_RULES_PATH = "$(SDKROOT)/ResourceRules.plist";
@@ -763,7 +750,7 @@
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = container;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
-				SDKROOT = iphoneos3.0;
+				SDKROOT = iphoneos4.0;
 				SLICE_INCLUDE_PATH = ../../Ice/slicing/objects;
 			};
 			name = Release;
@@ -778,7 +765,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
-				SDKROOT = iphoneos3.0;
+				SDKROOT = iphoneos4.0;
 			};
 			name = Debug;
 		};
@@ -791,7 +778,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
-				SDKROOT = iphoneos3.0;
+				SDKROOT = iphoneos4.0;
 			};
 			name = Release;
 		};

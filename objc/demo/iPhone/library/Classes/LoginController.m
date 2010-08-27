@@ -35,7 +35,6 @@
 @synthesize currentField;
 @synthesize oldFieldValue;
 @synthesize waitAlert;
-@synthesize communicator;
 @synthesize session;
 @synthesize library;
 @synthesize router;

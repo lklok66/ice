@@ -406,7 +406,7 @@ typedef struct Configuration Configuration;
         }
         else
         {
-            options = [NSArray arrayWithObjects:@"-ObjC", @"-lstdc++", @"-lIceObjC", nil];
+            options = [NSArray arrayWithObjects:@"-all_load", @"-ObjC", @"-lstdc++", @"-lIceObjC", nil];
         }
         NSArray* current = [[context expandedValueForString:@"$(OTHER_LDFLAGS)"] arrayByParsingAsStringList];
         NSMutableArray* copy = [current mutableCopy];

@@ -1,5 +1,5 @@
 ======================================================================
-Release notes for Ice Touch 1.0.0
+Release notes for Ice Touch 1.1.0
 ======================================================================
 
 Table of Contents
@@ -149,7 +149,7 @@ callback.
 For Cocoa and iPhone applications, which use the Xcode SDK, you must
 add to "Additional SDKs"
 
-  /Developer/SDKs/IceTouch-1.0/$(PLATFORM_NAME).sdk
+  /Developer/SDKs/IceTouch-1.1/$(PLATFORM_NAME).sdk
 
 In addition, for iPhone applications, when creating a new iPhone Xcode
 project, you set the "Code Signing Resource Rules Path" to:
@@ -167,15 +167,8 @@ You must also add to the Frameworks folder:
  - CFNetwork.framework
  - Security.framework
  - Foundation.framework
+ - ExternalAccessory.framework
 
-
-For iPhone Simulator applications, the dynamically linked Ice libraries
-must be copied into the application directory. For our iPhone demos,
-this is done in the Xcode project with a post-build script as follows:
-
-if [ $PLATFORM_NAME = iphonesimulator ]; then
-  cp $ADDITIONAL_SDKS/usr/local/lib/*.dylib $BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH
-fi
 
 ======================================================================
 9. Accessory Transport

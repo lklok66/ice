@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 45;
+	objectVersion = 46;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -27,6 +27,7 @@
 		347553B00E71AB3A001C7AB8 /* DetailView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 347553AF0E71AB3A001C7AB8 /* DetailView.xib */; };
 		347553EB0E71BA29001C7AB8 /* EditController.m in Sources */ = {isa = PBXBuildFile; fileRef = 347553EA0E71BA29001C7AB8 /* EditController.m */; };
 		347553ED0E71BA33001C7AB8 /* EditView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 347553EC0E71BA33001C7AB8 /* EditView.xib */; };
+		34885B711227EFB20060DE41 /* ExternalAccessory.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34885B701227EFB20060DE41 /* ExternalAccessory.framework */; };
 		349A35960FCBDC9A003F86BC /* democacert.der in Resources */ = {isa = PBXBuildFile; fileRef = 349A35950FCBDC9A003F86BC /* democacert.der */; };
 		34B128E00E9A4AE900EBD53F /* cacert.der in Resources */ = {isa = PBXBuildFile; fileRef = 34B128DF0E9A4AE900EBD53F /* cacert.der */; };
 		34BB75760E87DAEC00813E0B /* redButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 34BB75750E87DAEC00813E0B /* redButton.png */; };
@@ -63,6 +64,7 @@
 		347553E90E71BA29001C7AB8 /* EditController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EditController.h; sourceTree = "<group>"; };
 		347553EA0E71BA29001C7AB8 /* EditController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EditController.m; sourceTree = "<group>"; };
 		347553EC0E71BA33001C7AB8 /* EditView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = EditView.xib; sourceTree = "<group>"; };
+		34885B701227EFB20060DE41 /* ExternalAccessory.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ExternalAccessory.framework; path = System/Library/Frameworks/ExternalAccessory.framework; sourceTree = SDKROOT; };
 		349A35950FCBDC9A003F86BC /* democacert.der */ = {isa = PBXFileReference; lastKnownFileType = file; path = democacert.der; sourceTree = "<group>"; };
 		34B128DF0E9A4AE900EBD53F /* cacert.der */ = {isa = PBXFileReference; lastKnownFileType = file; path = cacert.der; sourceTree = "<group>"; };
 		34BB75750E87DAEC00813E0B /* redButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = redButton.png; sourceTree = "<group>"; };
@@ -84,6 +86,7 @@
 				2892E4100DC94CBA00A64D0F /* CoreGraphics.framework in Frameworks */,
 				344125850FD8E7CE00C8D69C /* Security.framework in Frameworks */,
 				344125950FD8E7DF00C8D69C /* CFNetwork.framework in Frameworks */,
+				34885B711227EFB20060DE41 /* ExternalAccessory.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -163,6 +166,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				34885B701227EFB20060DE41 /* ExternalAccessory.framework */,
 				344125940FD8E7DF00C8D69C /* CFNetwork.framework */,
 				344125840FD8E7CE00C8D69C /* Security.framework */,
 				2892E40F0DC94CBA00A64D0F /* CoreGraphics.framework */,
@@ -191,7 +195,6 @@
 				1D60588D0D05DD3D006BFB54 /* Resources */,
 				1D60588E0D05DD3D006BFB54 /* Sources */,
 				1D60588F0D05DD3D006BFB54 /* Frameworks */,
-				34041DD50FD8F370000D8134 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -208,7 +211,7 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "library" */;
-			compatibilityVersion = "Xcode 3.1";
+			compatibilityVersion = "Xcode 3.2";
 			hasScannedForEncodings = 1;
 			knownRegions = (
 				English,
@@ -246,22 +249,6 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		34041DD50FD8F370000D8134 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 12;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if [ $PLATFORM_NAME = iphonesimulator ]; then\n\tcp $ADDITIONAL_SDKS/usr/local/lib/*.dylib $BUILT_PRODUCTS_DIR/$CONTENTS_FOLDER_PATH\nfi";
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
 		1D60588E0D05DD3D006BFB54 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -287,7 +274,7 @@
 		1D6058940D05DD3E006BFB54 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ADDITIONAL_SDKS = "../../../SDK/IceTouch-1.0/$(PLATFORM_NAME).sdk";
+				ADDITIONAL_SDKS = "../../../SDK/IceTouch-1.1/$(PLATFORM_NAME).sdk";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_RESOURCE_RULES_PATH = "$(SDKROOT)/ResourceRules.plist";
@@ -308,7 +295,7 @@
 		1D6058950D05DD3E006BFB54 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ADDITIONAL_SDKS = "../../../SDK/IceTouch-1.0/$(PLATFORM_NAME).sdk";
+				ADDITIONAL_SDKS = "../../../SDK/IceTouch-1.1/$(PLATFORM_NAME).sdk";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_RESOURCE_RULES_PATH = "$(SDKROOT)/ResourceRules.plist";
@@ -334,7 +321,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
-				SDKROOT = iphoneos3.0;
+				SDKROOT = iphoneos4.0;
 			};
 			name = Debug;
 		};
@@ -347,7 +334,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
-				SDKROOT = iphoneos3.0;
+				SDKROOT = iphoneos4.0;
 			};
 			name = Release;
 		};

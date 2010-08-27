@@ -56,7 +56,7 @@ $(PLATFORM_NAME)/%.o: %.cpp
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $< -o $@
 
 $(PLATFORM_NAME)/%.o: %.mm
-	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $< -o $@
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(OBJCXXFLAGS) $< -o $@
 
 else
 

@@ -1,6 +1,14 @@
 Changes since version 1.0.0
 ---------------------------
 
+- Added -all_load to the linker flags in the Xcode plugin. See
+  http://developer.apple.com/mac/library/qa/qa2006/qa1490.html for
+  details on why this is necessary.
+
+- Updated IceTouch to support iOS 4.
+
+- iPhone simulator builds now use static libraries.
+
 - Added support for accessory transport. This transport is built on
   top of the iPhone OS External Accessory framework and allows Ice
   clients to talk to iPhone accessories over Bluetooth or USB. For

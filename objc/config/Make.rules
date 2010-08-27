@@ -71,12 +71,6 @@ IPHONE_SDK_VERSION = 4.0
 
 endif
 
-ifeq ($(COMPILE_FOR_COCOA),yes)
-    STATICLIBS = yes
-else ifeq ($(COMPILE_FOR_IPHONE),yes)
-    STATICLIBS = yes
-endif
-
 ifeq ($(shell test -f $(top_srcdir)/config/Make.common.rules.objc && echo 0),0)
     include $(top_srcdir)/config/Make.common.rules.objc
 else
@@ -96,10 +90,13 @@ endif
 #
 ifeq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
     PLATFORM_NAME = iphonesimulator
+    STATICLIBS = yes
 else ifeq ($(COMPILE_FOR_IPHONE),yes)
     PLATFORM_NAME = iphoneos
+    STATICLIBS = yes
 else ifeq ($(COMPILE_FOR_COCOA),yes)
     PLATFORM_NAME = macosx
+    STATICLIBS = yes
 else
     PLATFORM_NAME = macosx
     COMPILE_FOR_MACOSX = yes

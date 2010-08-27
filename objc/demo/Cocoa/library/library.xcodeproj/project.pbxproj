@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 45;
+	objectVersion = 46;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -56,16 +56,16 @@
 		34C5F20A0FC514C900B226F7 /* LoginController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = LoginController.m; path = Classes/LoginController.m; sourceTree = "<group>"; };
 		34C5F20B0FC514C900B226F7 /* EditController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EditController.h; path = Classes/EditController.h; sourceTree = "<group>"; };
 		34C5F20C0FC514C900B226F7 /* EditController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = EditController.m; path = Classes/EditController.m; sourceTree = "<group>"; };
-		34C5F20D0FC514C900B226F7 /* Glacier2Session.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = Glacier2Session.ice; path = Classes/Glacier2Session.ice; sourceTree = "<group>"; };
-		34C5F20E0FC514C900B226F7 /* Library.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = Library.ice; path = Classes/Library.ice; sourceTree = "<group>"; };
+		34C5F20D0FC514C900B226F7 /* Glacier2Session.ice */ = {isa = PBXFileReference; explicitFileType = sourcecode.slice; fileEncoding = 4; name = Glacier2Session.ice; path = Classes/Glacier2Session.ice; sourceTree = "<group>"; };
+		34C5F20E0FC514C900B226F7 /* Library.ice */ = {isa = PBXFileReference; explicitFileType = sourcecode.slice; fileEncoding = 4; name = Library.ice; path = Classes/Library.ice; sourceTree = "<group>"; };
 		34C5F20F0FC514C900B226F7 /* LibraryController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LibraryController.h; path = Classes/LibraryController.h; sourceTree = "<group>"; };
 		34C5F2100FC514C900B226F7 /* LibraryController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = LibraryController.m; path = Classes/LibraryController.m; sourceTree = "<group>"; };
 		34C5F2110FC514C900B226F7 /* RentController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RentController.h; path = Classes/RentController.h; sourceTree = "<group>"; };
 		34C5F2120FC514C900B226F7 /* RentController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RentController.m; path = Classes/RentController.m; sourceTree = "<group>"; };
-		34C5F2130FC514C900B226F7 /* Router.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = Router.ice; path = Classes/Router.ice; sourceTree = "<group>"; };
+		34C5F2130FC514C900B226F7 /* Router.ice */ = {isa = PBXFileReference; explicitFileType = sourcecode.slice; fileEncoding = 4; name = Router.ice; path = Classes/Router.ice; sourceTree = "<group>"; };
 		34C5F2140FC514C900B226F7 /* SavingController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SavingController.h; path = Classes/SavingController.h; sourceTree = "<group>"; };
 		34C5F2150FC514C900B226F7 /* SavingController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SavingController.m; path = Classes/SavingController.m; sourceTree = "<group>"; };
-		34C5F2160FC514C900B226F7 /* Session.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = Session.ice; path = Classes/Session.ice; sourceTree = "<group>"; };
+		34C5F2160FC514C900B226F7 /* Session.ice */ = {isa = PBXFileReference; explicitFileType = sourcecode.slice; fileEncoding = 4; name = Session.ice; path = Classes/Session.ice; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Library.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Library.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -207,7 +207,7 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "library" */;
-			compatibilityVersion = "Xcode 3.1";
+			compatibilityVersion = "Xcode 3.2";
 			hasScannedForEncodings = 1;
 			mainGroup = 29B97314FDCFA39411CA2CEA /* library */;
 			projectDirPath = "";
@@ -283,7 +283,7 @@
 		C01FCF4B08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ADDITIONAL_SDKS = "../../../SDK/IceTouch-1.0/$(PLATFORM_NAME).sdk";
+				ADDITIONAL_SDKS = "../../../SDK/IceTouch-1.1/$(PLATFORM_NAME).sdk";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
@@ -306,7 +306,7 @@
 		C01FCF4C08A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ADDITIONAL_SDKS = "../../../SDK/IceTouch-1.0/$(PLATFORM_NAME).sdk";
+				ADDITIONAL_SDKS = "../../../SDK/IceTouch-1.1/$(PLATFORM_NAME).sdk";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
@@ -327,26 +327,28 @@
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
-				SDKROOT = macosx10.5;
+				SDKROOT = macosx10.6;
+				VALID_ARCHS = "i386 x86_64";
 			};
 			name = Debug;
 		};
 		C01FCF5008A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
-				SDKROOT = macosx10.5;
+				SDKROOT = macosx10.6;
+				VALID_ARCHS = "i386 x86_64";
 			};
 			name = Release;
 		};
