@@ -25,6 +25,8 @@
 		342EBA8B0E926F90000051FA /* cacert.der in Resources */ = {isa = PBXBuildFile; fileRef = 342EBA8A0E926F90000051FA /* cacert.der */; };
 		344126380FD8E8EA00C8D69C /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 344126360FD8E8EA00C8D69C /* Security.framework */; };
 		344126390FD8E8EA00C8D69C /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 344126370FD8E8EA00C8D69C /* CFNetwork.framework */; };
+		34730A11122BF6C300D293CC /* TestSelect-iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 34730A10122BF6C300D293CC /* TestSelect-iPad.xib */; };
+		34730A15122BF6ED00D293CC /* TestView-iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 34730A14122BF6ED00D293CC /* TestView-iPad.xib */; };
 		34885BE21227F66E0060DE41 /* ExternalAccessory.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34885BE11227F66E0060DE41 /* ExternalAccessory.framework */; };
 		34B3B4B50FD7A7700018C227 /* AllTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B4AA0FD7A7700018C227 /* AllTests.m */; };
 		34B3B4B60FD7A7700018C227 /* BatchOneways.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B4AB0FD7A7700018C227 /* BatchOneways.m */; };
@@ -104,6 +106,7 @@
 		34B7662A0E8D55E700CE4701 /* TestSelectController.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B766290E8D55E700CE4701 /* TestSelectController.m */; };
 		34B7662C0E8D55FE00CE4701 /* TestSelect.xib in Resources */ = {isa = PBXBuildFile; fileRef = 34B7662B0E8D55FE00CE4701 /* TestSelect.xib */; };
 		34B766340E8D56C700CE4701 /* Test.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B766330E8D56C700CE4701 /* Test.m */; };
+		34C618AF122C035000F60A28 /* MainWindow-iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 34C618AE122C035000F60A28 /* MainWindow-iPad.xib */; };
 		34E396630FF1D71400FBACD6 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34E396620FF1D71400FBACD6 /* CoreGraphics.framework */; };
 /* End PBXBuildFile section */
 
@@ -131,6 +134,8 @@
 		342EBA8A0E926F90000051FA /* cacert.der */ = {isa = PBXFileReference; lastKnownFileType = file; name = cacert.der; path = ../../certs/cacert.der; sourceTree = SOURCE_ROOT; };
 		344126360FD8E8EA00C8D69C /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		344126370FD8E8EA00C8D69C /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
+		34730A10122BF6C300D293CC /* TestSelect-iPad.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "TestSelect-iPad.xib"; sourceTree = "<group>"; };
+		34730A14122BF6ED00D293CC /* TestView-iPad.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "TestView-iPad.xib"; sourceTree = "<group>"; };
 		34885BE11227F66E0060DE41 /* ExternalAccessory.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ExternalAccessory.framework; path = System/Library/Frameworks/ExternalAccessory.framework; sourceTree = SDKROOT; };
 		34B3B4AA0FD7A7700018C227 /* AllTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AllTests.m; path = ../../Ice/operations/AllTests.m; sourceTree = SOURCE_ROOT; };
 		34B3B4AB0FD7A7700018C227 /* BatchOneways.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BatchOneways.m; path = ../../Ice/operations/BatchOneways.m; sourceTree = SOURCE_ROOT; };
@@ -228,6 +233,7 @@
 		34B7662B0E8D55FE00CE4701 /* TestSelect.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TestSelect.xib; sourceTree = "<group>"; };
 		34B766320E8D56C700CE4701 /* Test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Test.h; sourceTree = "<group>"; };
 		34B766330E8D56C700CE4701 /* Test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Test.m; sourceTree = "<group>"; };
+		34C618AE122C035000F60A28 /* MainWindow-iPad.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "MainWindow-iPad.xib"; sourceTree = "<group>"; };
 		34E396620FF1D71400FBACD6 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -308,6 +314,7 @@
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
+				34730A09122BF68100D293CC /* Resources-iPad */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
 			);
@@ -356,6 +363,16 @@
 				342EB9ED0E9261A3000051FA /* icon.png */,
 			);
 			name = Images;
+			sourceTree = "<group>";
+		};
+		34730A09122BF68100D293CC /* Resources-iPad */ = {
+			isa = PBXGroup;
+			children = (
+				34C618AE122C035000F60A28 /* MainWindow-iPad.xib */,
+				34730A14122BF6ED00D293CC /* TestView-iPad.xib */,
+				34730A10122BF6C300D293CC /* TestSelect-iPad.xib */,
+			);
+			name = "Resources-iPad";
 			sourceTree = "<group>";
 		};
 		34B3B4A90FD7A7510018C227 /* operations */ = {
@@ -603,6 +620,9 @@
 				342EBA870E926E98000051FA /* c_rsa1024.pfx in Resources */,
 				342EBA890E926E9F000051FA /* s_rsa1024.pfx in Resources */,
 				342EBA8B0E926F90000051FA /* cacert.der in Resources */,
+				34730A11122BF6C300D293CC /* TestSelect-iPad.xib in Resources */,
+				34730A15122BF6ED00D293CC /* TestView-iPad.xib in Resources */,
+				34C618AF122C035000F60A28 /* MainWindow-iPad.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -709,6 +729,7 @@
 			buildSettings = {
 				ADDITIONAL_SDKS = "../../../SDK/IceTouch-1.1/$(PLATFORM_NAME).sdk";
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_RESOURCE_RULES_PATH = "$(SDKROOT)/ResourceRules.plist";
 				COPY_PHASE_STRIP = NO;
@@ -724,10 +745,12 @@
 					Classes,
 				);
 				INFOPLIST_FILE = Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 3.2;
 				PRODUCT_NAME = container;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos4.0;
 				SLICE_INCLUDE_PATH = ../../Ice/slicing/objects;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -736,6 +759,7 @@
 			buildSettings = {
 				ADDITIONAL_SDKS = "../../../SDK/IceTouch-1.1/$(PLATFORM_NAME).sdk";
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_RESOURCE_RULES_PATH = "$(SDKROOT)/ResourceRules.plist";
 				COPY_PHASE_STRIP = NO;
@@ -748,10 +772,12 @@
 					Classes,
 				);
 				INFOPLIST_FILE = Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 3.2;
 				PRODUCT_NAME = container;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos4.0;
 				SLICE_INCLUDE_PATH = ../../Ice/slicing/objects;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
