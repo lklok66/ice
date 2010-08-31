@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		140A392D122CF11300E1931D /* TestI.m in Sources */ = {isa = PBXBuildFile; fileRef = 140A3927122CF11300E1931D /* TestI.m */; };
+		140A392E122CF11300E1931D /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 140A3929122CF11300E1931D /* Client.m */; };
+		140A392F122CF11300E1931D /* Server.m in Sources */ = {isa = PBXBuildFile; fileRef = 140A392A122CF11300E1931D /* Server.m */; };
+		140A3930122CF11300E1931D /* AllTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 140A392B122CF11300E1931D /* AllTests.m */; };
+		140A3931122CF11300E1931D /* AMITest.ice in Sources */ = {isa = PBXBuildFile; fileRef = 140A392C122CF11300E1931D /* AMITest.ice */; };
 		146B34050FE8BC61009C6199 /* AllTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 146B33FF0FE8BC61009C6199 /* AllTests.m */; };
 		146B34060FE8BC61009C6199 /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 146B34000FE8BC61009C6199 /* Client.m */; };
 		146B34070FE8BC61009C6199 /* Server.m in Sources */ = {isa = PBXBuildFile; fileRef = 146B34010FE8BC61009C6199 /* Server.m */; };
@@ -111,6 +116,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		140A3927122CF11300E1931D /* TestI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestI.m; path = ../../Ice/ami/TestI.m; sourceTree = SOURCE_ROOT; };
+		140A3928122CF11300E1931D /* TestI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestI.h; path = ../../Ice/ami/TestI.h; sourceTree = SOURCE_ROOT; };
+		140A3929122CF11300E1931D /* Client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Client.m; path = ../../Ice/ami/Client.m; sourceTree = SOURCE_ROOT; };
+		140A392A122CF11300E1931D /* Server.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Server.m; path = ../../Ice/ami/Server.m; sourceTree = SOURCE_ROOT; };
+		140A392B122CF11300E1931D /* AllTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AllTests.m; path = ../../Ice/ami/AllTests.m; sourceTree = SOURCE_ROOT; };
+		140A392C122CF11300E1931D /* AMITest.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = AMITest.ice; path = ../../Ice/ami/AMITest.ice; sourceTree = SOURCE_ROOT; };
 		146B33FF0FE8BC61009C6199 /* AllTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AllTests.m; path = ../../Ice/hold/AllTests.m; sourceTree = SOURCE_ROOT; };
 		146B34000FE8BC61009C6199 /* Client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Client.m; path = ../../Ice/hold/Client.m; sourceTree = SOURCE_ROOT; };
 		146B34010FE8BC61009C6199 /* Server.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Server.m; path = ../../Ice/hold/Server.m; sourceTree = SOURCE_ROOT; };
@@ -270,6 +281,19 @@
 			path = Classes;
 			sourceTree = "<group>";
 		};
+		140A3926122CF0EC00E1931D /* ami */ = {
+			isa = PBXGroup;
+			children = (
+				140A3927122CF11300E1931D /* TestI.m */,
+				140A3928122CF11300E1931D /* TestI.h */,
+				140A3929122CF11300E1931D /* Client.m */,
+				140A392A122CF11300E1931D /* Server.m */,
+				140A392B122CF11300E1931D /* AllTests.m */,
+				140A392C122CF11300E1931D /* AMITest.ice */,
+			);
+			name = ami;
+			sourceTree = "<group>";
+		};
 		146B33FE0FE8BBF9009C6199 /* hold */ = {
 			isa = PBXGroup;
 			children = (
@@ -294,6 +318,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				140A3926122CF0EC00E1931D /* ami */,
 				146B33FE0FE8BBF9009C6199 /* hold */,
 				34B3B5160FD7E7490018C227 /* slicing-exceptions */,
 				34B3B5140FD7E73E0018C227 /* timeout */,
@@ -718,6 +743,11 @@
 				146B34070FE8BC61009C6199 /* Server.m in Sources */,
 				146B34090FE8BC61009C6199 /* TestI.m in Sources */,
 				146B340B0FE8BD58009C6199 /* HoldTest.ice in Sources */,
+				140A392D122CF11300E1931D /* TestI.m in Sources */,
+				140A392E122CF11300E1931D /* Client.m in Sources */,
+				140A392F122CF11300E1931D /* Server.m in Sources */,
+				140A3930122CF11300E1931D /* AllTests.m in Sources */,
+				140A3931122CF11300E1931D /* AMITest.ice in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

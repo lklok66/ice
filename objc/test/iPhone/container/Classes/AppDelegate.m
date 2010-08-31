@@ -19,6 +19,8 @@ struct TestCases
 };
 int adapterDeactivationServer(int, char**);
 int adapterDeactivationClient(int, char**);
+int amiServer(int, char**);
+int amiClient(int, char**);
 int bindingServer(int, char**);
 int bindingClient(int, char**);
 int defaultServantServer(int, char**);
@@ -51,6 +53,7 @@ int slicingExceptionsClient(int, char**);
 static const struct TestCases alltests[] =
 {
 { @"adapterDeactivation", adapterDeactivationServer, adapterDeactivationClient },
+{ @"ami", amiServer, amiClient },
 { @"binding", bindingServer, bindingClient },
 { @"defaultServant", defaultServantServer, defaultServantClient },
 { @"exceptions", exceptionsServer, exceptionsClient },

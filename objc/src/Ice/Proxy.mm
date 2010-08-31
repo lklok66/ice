@@ -33,6 +33,223 @@
 #import <Foundation/NSAutoreleasePool.h>
 
 #define OBJECTPRX ((IceProxy::Ice::Object*)objectPrx__)
+#define ASYNCRESULT ((Ice::AsyncResult*)asyncResult__)
+
+namespace 
+{
+
+class AsyncCallback : public IceUtil::Shared
+{
+public:
+
+AsyncCallback(void (^completed)(const Ice::AsyncResultPtr&), void (^exception)(ICEException*), void (^sent)(BOOL)) :
+    _completed([completed copy]), _exception([exception retain]), _sent([sent retain])
+{
+}
+
+~AsyncCallback()
+{
+    [_completed release];
+    [_exception release];
+    [_sent release];
+}
+
+void completed(const Ice::AsyncResultPtr& result)
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSException* exception = nil;
+    @try
+    {
+        try
+        {
+            _completed(result);
+        }    
+        catch(const Ice::Exception& ex)
+        {
+            @try
+            {
+                NSException* nsex = toObjCException(ex);
+                @throw nsex;
+            }
+            @catch(ICEException* e)
+            {
+                if(_exception)
+                {
+                    _exception(e);
+                }
+            }
+        }
+    }
+    @catch(NSException* e)
+    {
+        exception = [e retain];
+    }
+    [pool release];
+    
+    if(exception != nil)
+    {
+        rethrowCxxException(exception, true); // True = release the exception.
+    }
+}
+
+void sent(const Ice::AsyncResultPtr& result)
+{
+    if(!_sent)
+    {
+        return;
+    }
+
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSException* exception = nil;
+    @try
+    {
+        _sent(result->sentSynchronously());
+    }
+    @catch(NSException* e)
+    {
+        exception = [e retain];
+    }
+    [pool release];
+    
+    if(exception != nil)
+    {
+        rethrowCxxException(exception, true); // True = release the exception.
+    }
+}
+
+private:
+
+void (^_completed)(const Ice::AsyncResultPtr&);
+void (^_exception)(ICEException*);
+void (^_sent)(BOOL);
+
+};
+
+};
+
+static void proxyCall(void (^fn)())
+{
+    NSException* nsex = nil;
+    try
+    {
+        fn();
+        return;
+    }
+    catch(const std::exception& ex)
+    {
+        nsex = toObjCException(ex);
+    }
+    @throw nsex;
+}
+
+static void proxyCall(void (^fn)(const Ice::Context&), ICEContext* context)
+{
+    NSException* nsex = nil;
+    try
+    {
+        Ice::Context ctx;
+        fromNSDictionary(context, ctx);
+        fn(ctx);
+        return;
+    }
+    catch(const std::exception& ex)
+    {
+        nsex = toObjCException(ex);
+    }
+    @throw nsex;
+}
+
+static ICEAsyncResult* proxyBeginCall(void (^fn)(Ice::AsyncResultPtr&))
+{
+    NSException* nsex = nil;
+    try
+    {
+        Ice::AsyncResultPtr r;
+        fn(r);
+        return [ICEAsyncResult asyncResultWithAsyncResult__:r];
+    }
+    catch(const std::exception& ex)
+    {
+        nsex = toObjCException(ex);
+    }
+    @throw nsex;
+}
+
+static ICEAsyncResult* proxyBeginCall(void (^fn)(Ice::AsyncResultPtr&, const Ice::CallbackPtr&), 
+                                      void (^completed)(const Ice::AsyncResultPtr&),
+                                      void (^exception)(ICEException*),
+                                      void (^sent)(BOOL))
+{
+    NSException* nsex = nil;
+    try
+    {
+        AsyncCallback* cb = new AsyncCallback(completed, exception, sent);
+        Ice::AsyncResultPtr r;
+        fn(r, Ice::newCallback(cb, &AsyncCallback::completed, &AsyncCallback::sent));
+        return [ICEAsyncResult asyncResultWithAsyncResult__:r];
+    }
+    catch(const std::exception& ex)
+    {
+        nsex = toObjCException(ex);
+    }
+    @throw nsex;
+}
+
+static ICEAsyncResult* proxyBeginCall(void (^fn)(Ice::AsyncResultPtr&, const Ice::Context&), ICEContext* context)
+{
+    NSException* nsex = nil;
+    try
+    {
+        Ice::Context ctx;
+        fromNSDictionary(context, ctx);
+        Ice::AsyncResultPtr r;
+        fn(r, ctx);
+        return [ICEAsyncResult asyncResultWithAsyncResult__:r];
+    }
+    catch(const std::exception& ex)
+    {
+        nsex = toObjCException(ex);
+    }
+    @throw nsex;
+}
+
+static ICEAsyncResult* proxyBeginCall(void (^fn)(Ice::AsyncResultPtr&, const Ice::Context&, const Ice::CallbackPtr&), 
+                                      ICEContext* context,
+                                      void (^completed)(const Ice::AsyncResultPtr&),
+                                      void (^exception)(ICEException*),
+                                      void (^sent)(BOOL))
+{
+    NSException* nsex = nil;
+    try
+    {
+        Ice::Context ctx;
+        fromNSDictionary(context, ctx);
+        AsyncCallback* cb = new AsyncCallback(completed, exception, sent);
+        Ice::AsyncResultPtr r;
+        fn(r, ctx, Ice::newCallback(cb, &AsyncCallback::completed, &AsyncCallback::sent));
+        return [ICEAsyncResult asyncResultWithAsyncResult__:r];
+    }
+    catch(const std::exception& ex)
+    {
+        nsex = toObjCException(ex);
+    }
+    @throw nsex;
+}
+
+static void proxyEndCall(void (^fn)(const Ice::AsyncResultPtr&), ICEAsyncResult* r)
+{
+    NSException* nsex = nil;
+    try
+    {
+        fn([r asyncResult__]);
+        return;
+    }
+    catch(const std::exception& ex)
+    {
+        nsex = toObjCException(ex);
+    }
+    @throw nsex;
+}
 
 namespace
 {
@@ -294,7 +511,6 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
 
 };
 
-
 @implementation ICECallbackOnMainThread
 -(id)init:(id)cb
 {
@@ -318,6 +534,101 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
 -(NSMethodSignature *)methodSignatureForSelector:(SEL)selector
 {
     return [cb_ methodSignatureForSelector:selector];
+}
+@end
+
+@implementation ICEAsyncResult (ICEInternal)
+-(ICEAsyncResult*) initWithAsyncResult__:(const Ice::AsyncResultPtr&)arg
+{
+    if(![super init])
+    {
+        return nil;
+    }
+
+    asyncResult__ = arg.get();
+    ASYNCRESULT->__incRef();
+    return self;
+}
+
+-(Ice::AsyncResult*) asyncResult__
+{
+    return ASYNCRESULT;
+}
+
+-(void) dealloc
+{
+    ASYNCRESULT->__decRef();
+    asyncResult__ = 0;
+    [super dealloc];
+}
+
+-(void) finalize
+{
+    ASYNCRESULT->__decRef();
+    asyncResult__ = 0;
+    [super finalize];
+}
+
++(ICEAsyncResult*) asyncResultWithAsyncResult__:(const Ice::AsyncResultPtr&)arg
+{
+    if(!arg)
+    {
+        return nil;
+    }
+    else
+    {
+        return [[[self alloc] initWithAsyncResult__:arg] autorelease];
+    }
+}
+@end
+
+@implementation ICEAsyncResult
+
+-(id<ICECommunicator>) getCommunicator
+{
+    return [ICECommunicator wrapperWithCxxObject:ASYNCRESULT->getCommunicator().get()];
+}
+
+-(id<ICEConnection>) getConnection
+{
+    return [ICEConnection wrapperWithCxxObject:ASYNCRESULT->getConnection().get()];
+}
+
+-(id<ICEObjectPrx>) getProxy
+{
+    // XXX
+    //return [ICEObjectPrx wrapperWithCxxObject:ASYNCRESULT->getProxy().get()];
+    return nil;
+}
+
+-(BOOL) isCompleted
+{
+    return ASYNCRESULT->isCompleted();
+}
+
+-(void) waitForCompleted
+{
+    ASYNCRESULT->waitForCompleted();
+}
+
+-(BOOL) isSent
+{
+    return ASYNCRESULT->isSent();
+}
+
+-(void) waitForSent
+{
+    ASYNCRESULT->waitForSent();
+}
+
+-(BOOL) sentSynchronously
+{
+    return ASYNCRESULT->sentSynchronously();
+}
+
+-(NSString*) getOperation
+{
+    return [toNSString(ASYNCRESULT->getOperation()) autorelease];
 }
 @end
 
@@ -681,126 +992,301 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
 
 -(BOOL) ice_isA:(NSString*)typeId
 {
-    NSException* nsex = nil;
-    try
-    {
-        return OBJECTPRX->ice_isA(fromNSString(typeId));
-    }
-    catch(const std::exception& ex)
-    {
-        nsex = toObjCException(ex);
-    }
-    @throw nsex;
-    return NO; // Keep the compiler happy
+    __block BOOL ret__;
+    proxyCall(^ { ret__ = OBJECTPRX->ice_isA(fromNSString(typeId)); });
+    return ret__;
 }
 -(BOOL) ice_isA:(NSString*)typeId context:(ICEContext*)context
 {
-    NSException* nsex = nil;
-    try
-    {
-        Ice::Context ctx;
-        return OBJECTPRX->ice_isA(fromNSString(typeId), fromNSDictionary(context, ctx));
-    }
-    catch(const std::exception& ex)
-    {
-        nsex = toObjCException(ex);
-    }
-    @throw nsex;
-    return NO; // Keep the compiler happy
+    __block BOOL ret__;
+    proxyCall(^(const Ice::Context& ctx) { ret__ = OBJECTPRX->ice_isA(fromNSString(typeId), ctx); }, context);
+    return ret__;
+}
+-(ICEAsyncResult*) begin_ice_isA:(NSString*)typeId
+{
+    return proxyBeginCall(^(Ice::AsyncResultPtr& result)
+                          {
+                              result = OBJECTPRX->begin_ice_isA(fromNSString(typeId)); 
+                          });
+}
+-(ICEAsyncResult*) begin_ice_isA:(NSString*)typeId context:(ICEContext*)context
+{
+    return proxyBeginCall(^(Ice::AsyncResultPtr& result, const Ice::Context& ctx) 
+                          { 
+                              result = OBJECTPRX->begin_ice_isA(fromNSString(typeId), ctx); 
+                          }, context);
+}
+-(ICEAsyncResult*) begin_ice_isA:(NSString*)typeId response:(void(^)(BOOL))response 
+                       exception:(void(^)(ICEException*))exception
+{
+    return [self begin_ice_isA:typeId response:response exception:exception sent:nil];
+}
+-(ICEAsyncResult*) begin_ice_isA:(NSString*)typeId response:(void(^)(BOOL))response 
+                       exception:(void(^)(ICEException*))exception 
+                         context:(ICEContext*)context
+{
+    return [self begin_ice_isA:typeId response:response exception:exception sent:nil context:context];
+}
+-(ICEAsyncResult*) begin_ice_isA:(NSString*)typeId response:(void(^)(BOOL))response 
+                       exception:(void(^)(ICEException*))exception 
+                            sent:(void(^)(BOOL))sent
+{
+    return proxyBeginCall(^(Ice::AsyncResultPtr& result, const Ice::CallbackPtr& cb) 
+                          {
+                              result = OBJECTPRX->begin_ice_isA(fromNSString(typeId), cb); 
+                          }, 
+                          ^(const Ice::AsyncResultPtr& result) {
+                              BOOL ret__ = OBJECTPRX->end_ice_isA(result);
+                              if(response) 
+                              {
+                                  response(ret__);
+                              }
+                          },
+                          exception, sent);
+
+}
+-(ICEAsyncResult*) begin_ice_isA:(NSString*)typeId response:(void(^)(BOOL))response 
+                       exception:(void(^)(ICEException*))exception 
+                            sent:(void(^)(BOOL))sent context:(ICEContext*)context
+{
+    return proxyBeginCall(^(Ice::AsyncResultPtr& result, const Ice::Context& ctx, const Ice::CallbackPtr& cb) 
+                          {
+                              result = OBJECTPRX->begin_ice_isA(fromNSString(typeId), ctx, cb); 
+                          }, 
+                          context,
+                          ^(const Ice::AsyncResultPtr& result) {
+                              BOOL ret__ = OBJECTPRX->end_ice_isA(result);
+                              if(response)
+                              {
+                                  response(ret__);
+                              }
+                          },
+                          exception, sent);
+
+}
+-(BOOL) end_ice_isA:(ICEAsyncResult*)result
+{
+    __block BOOL ret__;
+    proxyEndCall(^(const Ice::AsyncResultPtr& r) { ret__ = OBJECTPRX->end_ice_isA(r); }, result);
+    return ret__;
 }
 
 -(void) ice_ping
 {
-    NSException* nsex = nil;
-    try
-    {
-        OBJECTPRX->ice_ping();
-    }
-    catch(const std::exception& ex)
-    {
-        nsex = toObjCException(ex);
-    }
-    if(nsex != nil)
-    {
-        @throw nsex;
-    }
+    proxyCall(^ { OBJECTPRX->ice_ping(); });
 }
 -(void) ice_ping:(ICEContext*)context
 {
-    NSException* nsex = nil;
-    try
-    {
-        Ice::Context ctx;
-        OBJECTPRX->ice_ping(fromNSDictionary(context, ctx));
-    }
-    catch(const std::exception& ex)
-    {
-        nsex = toObjCException(ex);
-    }
-    if(nsex != nil)
-    {
-        @throw nsex;
-    }
+    proxyCall(^(const Ice::Context& ctx) { OBJECTPRX->ice_ping(ctx); }, context);
+}
+-(ICEAsyncResult*) begin_ice_ping
+{
+    return proxyBeginCall(^(Ice::AsyncResultPtr& result) { result = OBJECTPRX->begin_ice_ping(); } );
+}
+-(ICEAsyncResult*) begin_ice_ping:(ICEContext*)context
+{
+    return proxyBeginCall(^(Ice::AsyncResultPtr& result, const Ice::Context& ctx) 
+                          {
+                              result = OBJECTPRX->begin_ice_ping(ctx); 
+                          }, context);
+}
+-(ICEAsyncResult*) begin_ice_ping:(void(^)())response exception:(void(^)(ICEException*))exception
+{
+    return [self begin_ice_ping:response exception:exception sent:nil];
+}
+-(ICEAsyncResult*) begin_ice_ping:(void(^)())response exception:(void(^)(ICEException*))exception 
+                          context:(ICEContext*)context
+{
+    return [self begin_ice_ping:response exception:exception sent:nil context:context];
+}
+-(ICEAsyncResult*) begin_ice_ping:(void(^)())response exception:(void(^)(ICEException*))exception 
+                             sent:(void(^)(BOOL))sent
+{
+    return proxyBeginCall(^(Ice::AsyncResultPtr& result, const Ice::CallbackPtr& cb) 
+                          {
+                              result = OBJECTPRX->begin_ice_ping(cb); 
+                          }, 
+                          ^(const Ice::AsyncResultPtr& result) {
+                              OBJECTPRX->end_ice_ping(result);
+                              if(response) 
+                              {
+                                  response();
+                              }
+                          },
+                          exception, sent);
+
+}
+-(ICEAsyncResult*) begin_ice_ping:(void(^)())response exception:(void(^)(ICEException*))exception 
+                             sent:(void(^)(BOOL))sent context:(ICEContext*)context
+{
+    return proxyBeginCall(^(Ice::AsyncResultPtr& result, const Ice::Context& ctx, const Ice::CallbackPtr& cb) 
+                          {
+                              result = OBJECTPRX->begin_ice_ping(ctx, cb); 
+                          }, 
+                          context,
+                          ^(const Ice::AsyncResultPtr& result) {
+                              OBJECTPRX->end_ice_ping(result);
+                              if(response)
+                              {
+                                  response();
+                              }
+                          },
+                          exception, sent);
+
+}
+-(void) end_ice_ping:(ICEAsyncResult*)result
+{
+    proxyEndCall(^(const Ice::AsyncResultPtr& r) { OBJECTPRX->end_ice_ping(r); }, result);
 }
 
 -(NSArray*) ice_ids
 {
-    NSException* nsex = nil;
-    try
-    {
-        return [toNSArray(OBJECTPRX->ice_ids()) autorelease];
-    }
-    catch(const std::exception& ex)
-    {
-        nsex = toObjCException(ex);
-    }
-    @throw nsex;
-    return NO; // Keep the compiler happy
+    __block NSArray* ret__;
+    proxyCall(^ { ret__ = [toNSArray(OBJECTPRX->ice_ids()) autorelease]; });
+    return ret__;
 }
 -(NSArray*) ice_ids:(ICEContext*)context
 {
-    NSException* nsex = nil;
-    try
-    {
-        Ice::Context ctx;
-        return [toNSArray(OBJECTPRX->ice_ids(fromNSDictionary(context, ctx))) autorelease];
-    }
-    catch(const std::exception& ex)
-    {
-        nsex = toObjCException(ex);
-    }
-    @throw nsex;
-    return NO; // Keep the compiler happy
+    __block NSArray* ret__;
+    proxyCall(^(const Ice::Context& ctx) { ret__ = [toNSArray(OBJECTPRX->ice_ids(ctx)) autorelease]; }, context);
+    return ret__;
+}
+-(ICEAsyncResult*) begin_ice_ids
+{
+    return proxyBeginCall(^(Ice::AsyncResultPtr& result) { result = OBJECTPRX->begin_ice_ids(); } );
+}
+-(ICEAsyncResult*) begin_ice_ids:(ICEContext*)context
+{
+    return proxyBeginCall(^(Ice::AsyncResultPtr& result, const Ice::Context& ctx) 
+                          {
+                              result = OBJECTPRX->begin_ice_ids(ctx); 
+                          }, context);
+}
+-(ICEAsyncResult*) begin_ice_ids:(void(^)(NSArray*))response exception:(void(^)(ICEException*))exception
+{
+    return [self begin_ice_ids:response exception:exception sent:nil];
+}
+-(ICEAsyncResult*) begin_ice_ids:(void(^)(NSArray*))response exception:(void(^)(ICEException*))exception 
+                          context:(ICEContext*)context
+{
+    return [self begin_ice_ids:response exception:exception sent:nil context:context];
+}
+-(ICEAsyncResult*) begin_ice_ids:(void(^)(NSArray*))response exception:(void(^)(ICEException*))exception 
+                             sent:(void(^)(BOOL))sent
+{
+    return proxyBeginCall(^(Ice::AsyncResultPtr& result, const Ice::CallbackPtr& cb) 
+                          {
+                              result = OBJECTPRX->begin_ice_ids(cb); 
+                          }, 
+                          ^(const Ice::AsyncResultPtr& result) {
+                              NSArray* ret__ = [toNSArray(OBJECTPRX->end_ice_ids(result)) autorelease];
+                              if(response) 
+                              {
+                                  response(ret__);
+                              }
+                          },
+                          exception, sent);
+
+}
+-(ICEAsyncResult*) begin_ice_ids:(void(^)(NSArray*))response exception:(void(^)(ICEException*))exception 
+                             sent:(void(^)(BOOL))sent context:(ICEContext*)context
+{
+    return proxyBeginCall(^(Ice::AsyncResultPtr& result, const Ice::Context& ctx, const Ice::CallbackPtr& cb) 
+                          {
+                              result = OBJECTPRX->begin_ice_ids(ctx, cb); 
+                          }, 
+                          context,
+                          ^(const Ice::AsyncResultPtr& result) {
+                              NSArray* ret__ = [toNSArray(OBJECTPRX->end_ice_ids(result)) autorelease];
+                              if(response)
+                              {
+                                  response(ret__);
+                              }
+                          },
+                          exception, sent);
+
+}
+-(NSArray*) end_ice_ids:(ICEAsyncResult*)result
+{
+    __block NSArray* ret__;
+    proxyEndCall(^(const Ice::AsyncResultPtr& r) { ret__ = [toNSArray(OBJECTPRX->end_ice_ids(r)) autorelease]; }, 
+                 result);
+    return ret__;
 }
 
 -(NSString*) ice_id
 {
-    NSException* nsex = nil;
-    try
-    {
-        return [toNSString(OBJECTPRX->ice_id()) autorelease];
-    }
-    catch(const std::exception& ex)
-    {
-        nsex = toObjCException(ex);
-    }
-    @throw nsex;
-    return NO; // Keep the compiler happy
+    __block NSString* ret__;
+    proxyCall(^ { ret__ = [toNSString(OBJECTPRX->ice_id()) autorelease]; });
+    return ret__;
 }
 -(NSString*) ice_id:(ICEContext*)context
 {
-    NSException* nsex = nil;
-    try
-    {
-        Ice::Context ctx;
-        return [toNSString(OBJECTPRX->ice_id(fromNSDictionary(context, ctx))) autorelease];
-    }
-    catch(const std::exception& ex)
-    {
-        nsex = toObjCException(ex);
-    }
-    @throw nsex;
-    return NO; // Keep the compiler happy
+    __block NSString* ret__;
+    proxyCall(^(const Ice::Context& ctx) { ret__ = [toNSString(OBJECTPRX->ice_id(ctx)) autorelease]; }, context);
+    return ret__;
+}
+-(ICEAsyncResult*) begin_ice_id
+{
+    return proxyBeginCall(^(Ice::AsyncResultPtr& result) { result = OBJECTPRX->begin_ice_id(); } );
+}
+-(ICEAsyncResult*) begin_ice_id:(ICEContext*)context
+{
+    return proxyBeginCall(^(Ice::AsyncResultPtr& result, const Ice::Context& ctx) 
+                          {
+                              result = OBJECTPRX->begin_ice_id(ctx); 
+                          }, context);
+}
+-(ICEAsyncResult*) begin_ice_id:(void(^)(NSString*))response exception:(void(^)(ICEException*))exception
+{
+    return [self begin_ice_id:response exception:exception sent:nil];
+}
+-(ICEAsyncResult*) begin_ice_id:(void(^)(NSString*))response exception:(void(^)(ICEException*))exception 
+                          context:(ICEContext*)context
+{
+    return [self begin_ice_id:response exception:exception sent:nil context:context];
+}
+-(ICEAsyncResult*) begin_ice_id:(void(^)(NSString*))response exception:(void(^)(ICEException*))exception 
+                             sent:(void(^)(BOOL))sent
+{
+    return proxyBeginCall(^(Ice::AsyncResultPtr& result, const Ice::CallbackPtr& cb) 
+                          {
+                              result = OBJECTPRX->begin_ice_id(cb); 
+                          }, 
+                          ^(const Ice::AsyncResultPtr& result) {
+                              NSString* ret__ = [toNSString(OBJECTPRX->end_ice_id(result)) autorelease];
+                              if(response) 
+                              {
+                                  response(ret__);
+                              }
+                          },
+                          exception, sent);
+
+}
+-(ICEAsyncResult*) begin_ice_id:(void(^)(NSString*))response exception:(void(^)(ICEException*))exception 
+                             sent:(void(^)(BOOL))sent context:(ICEContext*)context
+{
+    return proxyBeginCall(^(Ice::AsyncResultPtr& result, const Ice::Context& ctx, const Ice::CallbackPtr& cb) 
+                          {
+                              result = OBJECTPRX->begin_ice_id(ctx, cb); 
+                          }, 
+                          context,
+                          ^(const Ice::AsyncResultPtr& result) {
+                              NSString* ret__ = [toNSString(OBJECTPRX->end_ice_id(result)) autorelease];
+                              if(response)
+                              {
+                                  response(ret__);
+                              }
+                          },
+                          exception, sent);
+
+}
+-(NSString*) end_ice_id:(ICEAsyncResult*)result
+{
+    __block NSString* ret__;
+    proxyEndCall(^(const Ice::AsyncResultPtr& r) { ret__ = [toNSString(OBJECTPRX->end_ice_id(r)) autorelease]; }, 
+                 result);
+    return ret__;
 }
 
 -(BOOL) ice_invoke:(NSString*)operation 
@@ -808,22 +1294,15 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
           inParams:(NSData*)inParams 
          outParams:(NSMutableData**)outParams
 {
-    NSException* nsex = nil;
-    try
-    {
-        std::pair<const Ice::Byte*, const Ice::Byte*> inP((ICEByte*)[inParams bytes], 
-                                                          (ICEByte*)[inParams bytes] + [inParams length]);
-        std::vector<Ice::Byte> outP;
-        BOOL ok = OBJECTPRX->ice_invoke(fromNSString(operation), (Ice::OperationMode)mode, inP, outP);
-        *outParams = [NSMutableData dataWithBytes:&outP[0] length:outP.size()];
-        return ok;
-    }
-    catch(const std::exception& ex)
-    {
-        nsex = toObjCException(ex);
-    }
-    @throw nsex;
-    return NO; // Keep the compiler happy
+    __block BOOL ret__;
+    proxyCall(^ { 
+            std::pair<const Ice::Byte*, const Ice::Byte*> inP((ICEByte*)[inParams bytes], 
+                                                              (ICEByte*)[inParams bytes] + [inParams length]);
+            std::vector<Ice::Byte> outP;
+            ret__ = OBJECTPRX->ice_invoke(fromNSString(operation), (Ice::OperationMode)mode, inP, outP);
+            *outParams = [NSMutableData dataWithBytes:&outP[0] length:outP.size()];
+        });
+    return ret__;
 }
 
 -(BOOL) ice_invoke:(NSString*)operation 
@@ -832,27 +1311,15 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
          outParams:(NSMutableData**)outParams
            context:(ICEContext*)context
 {
-    NSException* nsex = nil;
-    try
-    {
-        Ice::Context ctx;
+    __block BOOL ret__;
+    proxyCall(^(const Ice::Context& ctx) {
         std::pair<const Ice::Byte*, const Ice::Byte*> inP((ICEByte*)[inParams bytes], 
                                                           (ICEByte*)[inParams bytes] + [inParams length]);
         std::vector<Ice::Byte> outP;
-        BOOL ok = OBJECTPRX->ice_invoke(fromNSString(operation), 
-                                        (Ice::OperationMode)mode, 
-                                        inP, 
-                                        outP, 
-                                        fromNSDictionary(context, ctx));
+        ret__ = OBJECTPRX->ice_invoke(fromNSString(operation), (Ice::OperationMode)mode, inP, outP, ctx);
         *outParams = [NSMutableData dataWithBytes:&outP[0] length:outP.size()];
-        return ok;
-    }
-    catch(const std::exception& ex)
-    {
-        nsex = toObjCException(ex);
-    }
-    @throw nsex;
-    return NO; // Keep the compiler happy
+        }, context);
+    return ret__;
 }
 
 -(BOOL) ice_invoke_async:(id)target

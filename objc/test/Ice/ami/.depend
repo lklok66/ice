@@ -1,0 +1,2 @@
+AMITest.m: AMITest.ice $(slicedir)/Ice/BuiltinSequences.ice $(slicedir)/Ice/Endpoint.ice $(slicedir)/Ice/EndpointF.ice
+AMITest.ice: $(SLICE2OBJC)

@@ -26,6 +26,7 @@ from scripts import *
 tests = [ 
      ("Slice/keyword", []),
      ("Ice/proxy", ["core"]),
+     ("Ice/ami", ["core"]),
      ("Ice/operations", ["core"]),
      ("Ice/exceptions", ["core"]),
      ("Ice/inheritance", ["core"]),
