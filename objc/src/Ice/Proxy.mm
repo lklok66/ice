@@ -1313,12 +1313,128 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
 {
     __block BOOL ret__;
     proxyCall(^(const Ice::Context& ctx) {
-        std::pair<const Ice::Byte*, const Ice::Byte*> inP((ICEByte*)[inParams bytes], 
-                                                          (ICEByte*)[inParams bytes] + [inParams length]);
-        std::vector<Ice::Byte> outP;
-        ret__ = OBJECTPRX->ice_invoke(fromNSString(operation), (Ice::OperationMode)mode, inP, outP, ctx);
-        *outParams = [NSMutableData dataWithBytes:&outP[0] length:outP.size()];
+            std::pair<const Ice::Byte*, const Ice::Byte*> inP((ICEByte*)[inParams bytes], 
+                                                              (ICEByte*)[inParams bytes] + [inParams length]);
+            std::vector<Ice::Byte> outP;
+            ret__ = OBJECTPRX->ice_invoke(fromNSString(operation), (Ice::OperationMode)mode, inP, outP, ctx);
+            *outParams = [NSMutableData dataWithBytes:&outP[0] length:outP.size()];
         }, context);
+    return ret__;
+}
+-(ICEAsyncResult*) begin_ice_invoke:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams
+{
+    return proxyBeginCall(^(Ice::AsyncResultPtr& result)
+                          {
+                              std::pair<const Ice::Byte*, const Ice::Byte*> 
+                                  inP((ICEByte*)[inParams bytes], (ICEByte*)[inParams bytes] + [inParams length]);
+                              result = OBJECTPRX->begin_ice_invoke(fromNSString(operation), 
+                                                                   (Ice::OperationMode)mode, 
+                                                                   inP); 
+                          });
+}
+-(ICEAsyncResult*) begin_ice_invoke:(NSString*)operation 
+                               mode:(ICEOperationMode)mode 
+                           inParams:(NSData*)inParams 
+                            context:(ICEContext*)context
+{
+    return proxyBeginCall(^(Ice::AsyncResultPtr& result, const Ice::Context& ctx) 
+                          { 
+                              std::pair<const Ice::Byte*, const Ice::Byte*> 
+                                  inP((ICEByte*)[inParams bytes], (ICEByte*)[inParams bytes] + [inParams length]);
+                              result = OBJECTPRX->begin_ice_invoke(fromNSString(operation), 
+                                                                   (Ice::OperationMode)mode, 
+                                                                   inP,
+                                                                   ctx); 
+                          }, context);
+}
+-(ICEAsyncResult*) begin_ice_invoke:(NSString*)operation 
+                               mode:(ICEOperationMode)mode 
+                           inParams:(NSData*)inParams 
+                           response:(void(^)(BOOL, NSMutableData*))response 
+                          exception:(void(^)(ICEException*))exception
+{
+    return [self begin_ice_invoke:operation mode:mode inParams:inParams response:response exception:exception sent:nil];
+}
+-(ICEAsyncResult*) begin_ice_invoke:(NSString*)operation 
+                               mode:(ICEOperationMode)mode 
+                           inParams:(NSData*)inParams 
+                           response:(void(^)(BOOL, NSMutableData*))response 
+                          exception:(void(^)(ICEException*))exception 
+                            context:(ICEContext*)context
+{
+    return [self begin_ice_invoke:operation mode:mode inParams:inParams response:response exception:exception sent:nil 
+                 context:context];
+}
+-(ICEAsyncResult*) begin_ice_invoke:(NSString*)operation 
+                               mode:(ICEOperationMode)mode 
+                           inParams:(NSData*)inParams 
+                           response:(void(^)(BOOL, NSMutableData*))response 
+                          exception:(void(^)(ICEException*))exception 
+                               sent:(void(^)(BOOL))sent
+{
+    return proxyBeginCall(^(Ice::AsyncResultPtr& result, const Ice::CallbackPtr& cb) 
+                          {
+                              std::pair<const Ice::Byte*, const Ice::Byte*> 
+                                  inP((ICEByte*)[inParams bytes], (ICEByte*)[inParams bytes] + [inParams length]);
+                              result = OBJECTPRX->begin_ice_invoke(fromNSString(operation), 
+                                                                   (Ice::OperationMode)mode, 
+                                                                   inP,
+                                                                   cb); 
+                          },
+                          ^(const Ice::AsyncResultPtr& result) {
+                              std::pair<const ::Ice::Byte*, const ::Ice::Byte*> outP;
+                              BOOL ret__ = OBJECTPRX->___end_ice_invoke(outP, result);
+                              NSMutableData* outParams = 
+                                  [NSMutableData dataWithBytes:outP.first length:(outP.second - outP.first)];
+                              if(response) 
+                              {
+                                  response(ret__, outParams);
+                              }
+                          },
+                          exception, sent);
+
+}
+-(ICEAsyncResult*) begin_ice_invoke:(NSString*)operation 
+                               mode:(ICEOperationMode)mode 
+                           inParams:(NSData*)inParams
+                           response:(void(^)(BOOL, NSMutableData*))response 
+                          exception:(void(^)(ICEException*))exception 
+                               sent:(void(^)(BOOL))sent context:(ICEContext*)context
+{
+    return proxyBeginCall(^(Ice::AsyncResultPtr& result, const Ice::Context& ctx, const Ice::CallbackPtr& cb) 
+                          {
+                              std::pair<const Ice::Byte*, const Ice::Byte*> 
+                                  inP((ICEByte*)[inParams bytes], (ICEByte*)[inParams bytes] + [inParams length]);
+                              result = OBJECTPRX->begin_ice_invoke(fromNSString(operation), 
+                                                                   (Ice::OperationMode)mode, 
+                                                                   inP,
+                                                                   ctx, 
+                                                                   cb); 
+                          }, 
+                          context,
+                          ^(const Ice::AsyncResultPtr& result) {
+                              std::pair<const ::Ice::Byte*, const ::Ice::Byte*> outP;
+                              BOOL ret__ = OBJECTPRX->___end_ice_invoke(outP, result);
+                              NSMutableData* outParams = 
+                                  [NSMutableData dataWithBytes:outP.first length:(outP.second - outP.first)];
+                              if(response)
+                              {
+                                  response(ret__, outParams);
+                              }
+                          },
+                          exception, sent);
+
+}
+-(BOOL) end_ice_invoke:(NSMutableData**)outParams result:(ICEAsyncResult*)result
+             
+{
+    __block BOOL ret__;
+    proxyEndCall(^(const Ice::AsyncResultPtr& r) 
+                 {
+                     std::vector<Ice::Byte> outP;
+                     ret__ = OBJECTPRX->end_ice_invoke(outP, r); 
+                     *outParams = [NSMutableData dataWithBytes:&outP[0] length:outP.size()];
+                 }, result);
     return ret__;
 }
 
