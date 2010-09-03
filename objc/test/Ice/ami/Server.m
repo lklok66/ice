@@ -22,9 +22,20 @@ static int
 run(id<ICECommunicator> communicator)
 {
     [[communicator getProperties] setProperty:@"TestAMIAdapter.Endpoints" value:@"default -p 12010:udp"];
+    [[communicator getProperties] setProperty:@"ControllerAdapter.Endpoints" value:@"tcp -p 12011"];
+    [[communicator getProperties] setProperty:@"ControllerAdapter.ThreadPool.Size" value:@"1"];
+
     id<ICEObjectAdapter> adapter = [communicator createObjectAdapter:@"TestAMIAdapter"];
+    id<ICEObjectAdapter> adapter2 = [communicator createObjectAdapter:@"ControllerAdapter"];
+
+    TestAMITestIntfControllerI* testController 
+        = [[[TestAMITestIntfControllerI alloc] initWithAdapter:adapter] autorelease];
+
     [adapter add:[[[TestAMITestIntfI alloc] init] autorelease] identity:[communicator stringToIdentity:@"test"]];
     [adapter activate];
+
+    [adapter2 add:testController identity:[communicator stringToIdentity:@"testController"]];
+    [adapter2 activate];
 
     serverReady(communicator);
 

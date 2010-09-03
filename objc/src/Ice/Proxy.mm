@@ -25,12 +25,15 @@
 #include <IceCpp/Router.h>
 #include <IceCpp/Locator.h>
 
+#include <Block.h>
+
 #import <objc/runtime.h>
 #import <objc/message.h>
 
 #import <Foundation/NSThread.h>
 #import <Foundation/NSInvocation.h>
 #import <Foundation/NSAutoreleasePool.h>
+
 
 #define OBJECTPRX ((IceProxy::Ice::Object*)objectPrx__)
 #define ASYNCRESULT ((Ice::AsyncResult*)asyncResult__)
@@ -43,13 +46,13 @@ class AsyncCallback : public IceUtil::Shared
 public:
 
 AsyncCallback(void (^completed)(const Ice::AsyncResultPtr&), void (^exception)(ICEException*), void (^sent)(BOOL)) :
-    _completed([completed copy]), _exception([exception retain]), _sent([sent retain])
+    _completed(Block_copy(completed)), _exception([exception retain]), _sent([sent retain])
 {
 }
 
-~AsyncCallback()
+virtual ~AsyncCallback()
 {
-    [_completed release];
+    Block_release(_completed);
     [_exception release];
     [_sent release];
 }
@@ -125,6 +128,139 @@ void (^_sent)(BOOL);
 
 };
 
+class BeginInvokeAsyncCallback : public IceUtil::Shared
+{
+public:
+
+BeginInvokeAsyncCallback(void (^completed)(id<ICEInputStream>, BOOL), 
+                         void (^exception)(ICEException*), 
+                         void (^sent)(BOOL),
+                         BOOL returnsData) :
+    _completed(Block_copy(completed)), _exception([exception retain]), _sent([sent retain]), _returnsData(returnsData)
+{
+}
+
+virtual ~BeginInvokeAsyncCallback()
+{
+    Block_release(_completed);
+    [_exception release];
+    [_sent release];
+}
+
+void completed(const Ice::AsyncResultPtr& result)
+{
+    BOOL ok = YES; // Keep the compiler happy.
+    ICEInputStream* is = nil;
+    NSException* nsex = nil;
+    Ice::ObjectPrx proxy = result->getProxy();
+    try
+    {
+        std::vector<Ice::Byte> outParams;
+        ok = proxy->end_ice_invoke(outParams, result);
+        Ice::InputStreamPtr s = Ice::createInputStream(proxy->ice_getCommunicator(), outParams);
+        if(_returnsData)
+        {
+            is = [ICEInputStream wrapperWithCxxObjectNoAutoRelease:s.get()];
+        }
+        else if(!outParams.empty())
+        {
+            if(ok)
+            {
+                throw Ice::EncapsulationException(__FILE__, __LINE__);
+            }
+            else
+            {
+                Ice::InputStreamPtr s = Ice::createInputStream(proxy->ice_getCommunicator(), outParams);
+                try
+                {
+                    s->throwException();
+                }
+                catch(const Ice::UserException& ex)
+                {
+                    throw Ice::UnknownUserException(__FILE__, __LINE__, ex.ice_name());
+                }
+            }
+        }
+    }
+    catch(const std::exception& ex)
+    {
+        if(is != nil)
+        {
+            [is release];
+            is = nil;
+        }
+        nsex = toObjCException(ex);
+    }
+
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSException* exception = nil;
+    @try
+    {
+        if(nsex != nil)
+        {
+            @try
+            {
+                @throw nsex;
+            }
+            @catch(ICEException* ex)
+            {
+                if(_exception)
+                {
+                    _exception(ex);
+                }
+                return;
+            }
+        }
+
+        _completed(is, ok);
+    }
+    @catch(NSException* e)
+    {
+        exception = [e retain];
+    }
+    [is release];
+    [pool release];
+
+    if(exception != nil)
+    {
+        rethrowCxxException(exception, true); // True = release the exception.
+    }
+}
+
+void sent(const Ice::AsyncResultPtr& result)
+{
+    if(!_sent)
+    {
+        return;
+    }
+
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSException* exception = nil;
+    @try
+    {
+        _sent(result->sentSynchronously());
+    }
+    @catch(NSException* e)
+    {
+        exception = [e retain];
+    }
+    [pool release];
+    
+    if(exception != nil)
+    {
+        rethrowCxxException(exception, true); // True = release the exception.
+    }
+}
+
+private:
+
+void (^_completed)(id<ICEInputStream>, BOOL);
+void (^_exception)(ICEException*);
+void (^_sent)(BOOL);
+BOOL _returnsData;
+
+};
+
 };
 
 static void proxyCall(void (^fn)())
@@ -168,6 +304,10 @@ static ICEAsyncResult* proxyBeginCall(void (^fn)(Ice::AsyncResultPtr&))
         fn(r);
         return [ICEAsyncResult asyncResultWithAsyncResult__:r];
     }
+    catch(const IceUtil::IllegalArgumentException& ex)
+    {
+        nsex = [NSException exceptionWithName:NSInvalidArgumentException reason:toNSString(ex.reason()) userInfo:nil];
+    }
     catch(const std::exception& ex)
     {
         nsex = toObjCException(ex);
@@ -185,8 +325,13 @@ static ICEAsyncResult* proxyBeginCall(void (^fn)(Ice::AsyncResultPtr&, const Ice
     {
         AsyncCallback* cb = new AsyncCallback(completed, exception, sent);
         Ice::AsyncResultPtr r;
-        fn(r, Ice::newCallback(cb, &AsyncCallback::completed, &AsyncCallback::sent));
+        Ice::CallbackPtr callback = Ice::newCallback(cb, &AsyncCallback::completed, &AsyncCallback::sent);
+        fn(r, callback);
         return [ICEAsyncResult asyncResultWithAsyncResult__:r];
+    }
+    catch(const IceUtil::IllegalArgumentException& ex)
+    {
+        nsex = [NSException exceptionWithName:NSInvalidArgumentException reason:toNSString(ex.reason()) userInfo:nil];
     }
     catch(const std::exception& ex)
     {
@@ -205,6 +350,10 @@ static ICEAsyncResult* proxyBeginCall(void (^fn)(Ice::AsyncResultPtr&, const Ice
         Ice::AsyncResultPtr r;
         fn(r, ctx);
         return [ICEAsyncResult asyncResultWithAsyncResult__:r];
+    }
+    catch(const IceUtil::IllegalArgumentException& ex)
+    {
+        nsex = [NSException exceptionWithName:NSInvalidArgumentException reason:toNSString(ex.reason()) userInfo:nil];
     }
     catch(const std::exception& ex)
     {
@@ -226,8 +375,14 @@ static ICEAsyncResult* proxyBeginCall(void (^fn)(Ice::AsyncResultPtr&, const Ice
         fromNSDictionary(context, ctx);
         AsyncCallback* cb = new AsyncCallback(completed, exception, sent);
         Ice::AsyncResultPtr r;
-        fn(r, ctx, Ice::newCallback(cb, &AsyncCallback::completed, &AsyncCallback::sent));
+        Ice::CallbackPtr callback = Ice::newCallback(cb, &AsyncCallback::completed, &AsyncCallback::sent);
+        fn(r, ctx, callback);
         return [ICEAsyncResult asyncResultWithAsyncResult__:r];
+    }
+    catch(const IceUtil::IllegalArgumentException& ex)
+    {
+        nsex = [NSException exceptionWithName:NSInvalidArgumentException reason:[toNSString(ex.reason()) autorelease]
+                            userInfo:nil];
     }
     catch(const std::exception& ex)
     {
@@ -243,6 +398,11 @@ static void proxyEndCall(void (^fn)(const Ice::AsyncResultPtr&), ICEAsyncResult*
     {
         fn([r asyncResult__]);
         return;
+    }
+    catch(const IceUtil::IllegalArgumentException& ex)
+    {
+        nsex = [NSException exceptionWithName:NSInvalidArgumentException reason:[toNSString(ex.reason()) autorelease]
+                            userInfo:nil];
     }
     catch(const std::exception& ex)
     {
@@ -538,7 +698,7 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
 @end
 
 @implementation ICEAsyncResult (ICEInternal)
--(ICEAsyncResult*) initWithAsyncResult__:(const Ice::AsyncResultPtr&)arg
+-(ICEAsyncResult*) initWithAsyncResult__:(const Ice::AsyncResultPtr&)arg operation:(NSString*)op
 {
     if(![super init])
     {
@@ -547,6 +707,7 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
 
     asyncResult__ = arg.get();
     ASYNCRESULT->__incRef();
+    operation_ = [op retain];
     return self;
 }
 
@@ -559,6 +720,7 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
 {
     ASYNCRESULT->__decRef();
     asyncResult__ = 0;
+    [operation_ release];
     [super dealloc];
 }
 
@@ -571,14 +733,22 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
 
 +(ICEAsyncResult*) asyncResultWithAsyncResult__:(const Ice::AsyncResultPtr&)arg
 {
+    return [self asyncResultWithAsyncResult__:arg operation:nil];
+}
++(ICEAsyncResult*) asyncResultWithAsyncResult__:(const Ice::AsyncResultPtr&)arg operation:(NSString*)op
+{
     if(!arg)
     {
         return nil;
     }
     else
     {
-        return [[[self alloc] initWithAsyncResult__:arg] autorelease];
+        return [[[self alloc] initWithAsyncResult__:arg operation:op] autorelease];
     }
+}
+-(NSString*) operation
+{
+    return operation_;
 }
 @end
 
@@ -628,7 +798,14 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
 
 -(NSString*) getOperation
 {
-    return [toNSString(ASYNCRESULT->getOperation()) autorelease];
+    if(operation_ != nil)
+    {
+        return [[operation_ retain] autorelease];
+    }
+    else
+    {
+        return [toNSString(ASYNCRESULT->getOperation()) autorelease];
+    }
 }
 @end
 
@@ -789,21 +966,56 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
     @throw nsex;
     return nil; // Keep the compiler happy.
 }
--(void) checkTwowayOnly__:(NSString*)name
+-(void) checkTwowayOnly__:(NSString*)operation
 {
     if(!OBJECTPRX->ice_isTwoway())
     {
-        @throw [ICETwowayOnlyException twowayOnlyException:__FILE__ line:__LINE__ operation:name];
+        @throw [ICETwowayOnlyException twowayOnlyException:__FILE__ line:__LINE__ operation:operation];
+    }
+}
+-(void) checkAsyncTwowayOnly__:(NSString*)operation
+{
+    //
+    // No mutex lock necessary, there is nothing mutable in this
+    // operation.
+    //
+    
+    if(![self ice_isTwoway])
+    {
+        @throw [NSException exceptionWithName:NSInvalidArgumentException 
+                            reason:[NSString stringWithFormat:@"`%@' can only be called with a twoway proxy", operation]
+                            userInfo:nil];
     }
 }
 
 -(void) invoke__:(NSString*)operation 
             mode:(ICEOperationMode)mode 
-              os:(id<ICEOutputStream>)os 
-              is:(id<ICEInputStream>*)is 
+         marshal:(ICEMarshalCB)marshal 
+       unmarshal:(ICEUnmarshalCB)unmarshal
          context:(ICEContext*)context
 {
+    if(unmarshal && !OBJECTPRX->ice_isTwoway())
+    {
+        @throw [ICETwowayOnlyException twowayOnlyException:__FILE__ line:__LINE__ operation:operation];
+    }
+
+    id<ICEOutputStream> os = nil;
+    if(marshal)
+    {
+        os = [self createOutputStream__];
+        @try
+        {
+            marshal(os);
+        }
+        @catch(NSException* ex)
+        {
+            [os release];
+            @throw ex;
+        }
+    }
+
     BOOL ok = YES; // Keep the compiler happy.
+    ICEInputStream* is = nil;
     NSException* nsex = nil;
     try
     {
@@ -811,6 +1023,8 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
         if(os)
         {
             [(ICEOutputStream*)os os]->finished(inParams);
+            [os release];
+            os = nil;
         }
 
         std::vector<Ice::Byte> outParams;
@@ -825,10 +1039,10 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
             ok = OBJECTPRX->ice_invoke(fromNSString(operation), (Ice::OperationMode)mode, inParams, outParams);
         }
 
-        if(is)
+        if(unmarshal)
         {
             Ice::InputStreamPtr s = Ice::createInputStream(OBJECTPRX->ice_getCommunicator(), outParams);
-            *is = [ICEInputStream wrapperWithCxxObjectNoAutoRelease:s.get()];
+            is = [ICEInputStream wrapperWithCxxObjectNoAutoRelease:s.get()];
         }
         else if(!outParams.empty())
         {
@@ -852,6 +1066,16 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
     }
     catch(const std::exception& ex)
     {
+        if(os != nil)
+        {
+            [os release];
+            os = nil;
+        }
+        if(is != nil)
+        {
+            [is release];
+            is = nil;
+        }
         nsex = toObjCException(ex);
     }
     if(nsex != nil)
@@ -859,10 +1083,17 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
         @throw nsex;
     }
 
-    if(!ok)
+    NSAssert(!os, @"output stream not cleared");
+    if(is)
     {
-        NSAssert(is && *is, @"input stream not set");
-        [*is throwException];
+        @try
+        {
+            unmarshal(is, ok);
+        }
+        @finally
+        {
+            [is release];
+        }
     }
 }
 
@@ -916,6 +1147,270 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
     }
     @throw nsex;
     return NO; // Keep the compiler happy.
+}
+
+-(ICEAsyncResult*) begin_invoke__:(NSString*)operation 
+                             mode:(ICEOperationMode)mode 
+                          marshal:(void(^)(id<ICEOutputStream>))marshal
+                      returnsData:(BOOL)returnsData
+                          context:(ICEContext*)context
+{
+    if(returnsData)
+    {
+        [self checkAsyncTwowayOnly__:operation];
+    }
+
+    id<ICEOutputStream> os = nil;
+    if(marshal)
+    {
+        os = [self createOutputStream__];
+        @try
+        {
+            marshal(os);
+        }
+        @catch(NSException* ex)
+        {
+            [os release];
+            @throw ex;
+        }
+    }
+
+    NSException* nsex = nil;
+    try
+    {
+        std::vector<Ice::Byte> inParams;
+        if(os)
+        {
+            [(ICEOutputStream*)os os]->finished(inParams);
+            [os release];
+            os = nil;
+        }
+
+        Ice::AsyncResultPtr r;
+        if(context != nil)
+        {
+            Ice::Context ctx;
+            fromNSDictionary(context, ctx);
+            r = OBJECTPRX->begin_ice_invoke(fromNSString(operation), (Ice::OperationMode)mode, inParams, ctx);
+        }
+        else
+        {
+            r = OBJECTPRX->begin_ice_invoke(fromNSString(operation), (Ice::OperationMode)mode, inParams);
+        }
+        return [ICEAsyncResult asyncResultWithAsyncResult__:r operation:operation];
+    }
+    catch(const std::exception& ex)
+    {
+        if(os != nil)
+        {
+            [os release];
+            os = nil;
+        }
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
+    }
+    return nil; // Keep the compiler happy.
+}
+
+-(ICEAsyncResult*) begin_invoke__:(NSString*)operation 
+                             mode:(ICEOperationMode)mode 
+                          marshal:(void(^)(id<ICEOutputStream>))marshal
+                      returnsData:(BOOL)returnsData
+                        completed:(void(^)(id<ICEInputStream>, BOOL))completed
+                        exception:(void(^)(ICEException*))exception 
+                             sent:(void(^)(BOOL))sent 
+                          context:(ICEContext*)context
+{
+    if(returnsData)
+    {
+        [self checkAsyncTwowayOnly__:operation];
+    }
+
+    id<ICEOutputStream> os = nil;
+    if(marshal)
+    {
+        os = [self createOutputStream__];
+        @try
+        {
+            marshal(os);
+        }
+        @catch(NSException* ex)
+        {
+            [os release];
+            @throw ex;
+        }
+    }
+
+    NSException* nsex = nil;
+    try
+    {
+        std::vector<Ice::Byte> inParams;
+        if(os)
+        {
+            [(ICEOutputStream*)os os]->finished(inParams);
+            [os release];
+            os = nil;
+        }
+
+        Ice::CallbackPtr cb = Ice::newCallback(new BeginInvokeAsyncCallback(completed, exception, sent, returnsData), 
+                                               &BeginInvokeAsyncCallback::completed,
+                                               &BeginInvokeAsyncCallback::sent);
+        Ice::AsyncResultPtr r;
+        if(context != nil)
+        {
+            Ice::Context ctx;
+            fromNSDictionary(context, ctx);
+            r = OBJECTPRX->begin_ice_invoke(fromNSString(operation), (Ice::OperationMode)mode, inParams, ctx, cb);
+        }
+        else
+        {
+            r = OBJECTPRX->begin_ice_invoke(fromNSString(operation), (Ice::OperationMode)mode, inParams, cb);
+        }
+        return [ICEAsyncResult asyncResultWithAsyncResult__:r operation:operation];
+    }
+    catch(const IceUtil::IllegalArgumentException& ex)
+    {
+        if(os != nil)
+        {
+            [os release];
+            os = nil;
+        }
+        nsex = [NSException exceptionWithName:NSInvalidArgumentException reason:[toNSString(ex.reason()) autorelease]
+                            userInfo:nil];
+    }
+    catch(const std::exception& ex)
+    {
+        if(os != nil)
+        {
+            [os release];
+            os = nil;
+        }
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
+    }
+    return nil; // Keep the compiler happy.
+}
+-(ICEAsyncResult*) begin_invoke__:(NSString*)op
+                             mode:(ICEOperationMode)mode 
+                          marshal:(void(^)(id<ICEOutputStream>))marshal
+                         response:(void(^)())response
+                        exception:(void(^)(ICEException*))exception 
+                             sent:(void(^)(BOOL))sent 
+                          context:(ICEContext*)ctx
+{
+    void(^completed)(id<ICEInputStream>, BOOL) = ^(id<ICEInputStream>, BOOL) {
+        if(response)
+        {
+            response();   
+        }
+    };
+    return [self begin_invoke__:op mode:mode marshal:marshal returnsData:NO completed:completed exception:exception 
+                 sent:sent context:ctx];
+}
+
+-(ICEAsyncResult*) begin_invoke__:(NSString*)op
+                             mode:(ICEOperationMode)mode 
+                          marshal:(void(^)(id<ICEOutputStream>))marshal
+                        completed:(void(^)(id<ICEInputStream>, BOOL))completed
+                        exception:(void(^)(ICEException*))exception 
+                             sent:(void(^)(BOOL))sent 
+                          context:(ICEContext*)ctx
+{
+    return [self begin_invoke__:op mode:mode marshal:marshal returnsData:TRUE completed:completed exception:exception
+                 sent:sent context:ctx];
+}
+
+
+-(void)end_invoke__:(NSString*)operation unmarshal:(ICEUnmarshalCB)unmarshal result:(ICEAsyncResult*)result
+{
+    if(operation != [result operation])
+    {
+        @throw [NSException exceptionWithName:NSInvalidArgumentException
+                            reason:[NSString stringWithFormat:@"Incorrect operation for end_%@ method: %@", 
+                                             operation, [result operation]]
+                            userInfo:nil];
+    }
+    if(result == nil)
+    {
+        @throw [NSException exceptionWithName:NSInvalidArgumentException
+                            reason:@"ICEAsyncResult is nil"
+                            userInfo:nil];
+    }
+
+    BOOL ok = YES; // Keep the compiler happy.
+    NSException* nsex = nil;
+    ICEInputStream* is = nil;
+    try
+    {
+        std::vector<Ice::Byte> outParams;
+        ok = OBJECTPRX->end_ice_invoke(outParams, [result asyncResult__]);
+
+        if(unmarshal)
+        {
+            Ice::InputStreamPtr s = Ice::createInputStream(OBJECTPRX->ice_getCommunicator(), outParams);
+            is = [ICEInputStream wrapperWithCxxObjectNoAutoRelease:s.get()];
+        }
+        else if(!outParams.empty())
+        {
+            if(ok)
+            {
+                throw Ice::EncapsulationException(__FILE__, __LINE__);
+            }
+            else
+            {
+                Ice::InputStreamPtr s = Ice::createInputStream(OBJECTPRX->ice_getCommunicator(), outParams);
+                try
+                {
+                    s->throwException();
+                }
+                catch(const Ice::UserException& ex)
+                {
+                    throw Ice::UnknownUserException(__FILE__, __LINE__, ex.ice_name());
+                }
+            }
+        }
+    }
+    catch(const IceUtil::IllegalArgumentException& ex)
+    {
+        if(is != nil)
+        {
+            [is release];
+            is = nil;
+        }
+        nsex = [NSException exceptionWithName:NSInvalidArgumentException reason:[toNSString(ex.reason()) autorelease]
+                            userInfo:nil];
+    }
+    catch(const std::exception& ex)
+    {
+        if(is != nil)
+        {
+            [is release];
+            is = nil;
+        }
+        nsex = toObjCException(ex);
+    }
+    if(nsex != nil)
+    {
+        @throw nsex;
+    }
+
+    if(is)
+    {
+        @try
+        {
+            unmarshal(is, ok);
+        }
+        @finally
+        {
+            [is release];
+        }
+    }
 }
 
 -(id) copyWithZone:(NSZone *)zone
@@ -1016,18 +1511,22 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
                               result = OBJECTPRX->begin_ice_isA(fromNSString(typeId), ctx); 
                           }, context);
 }
--(ICEAsyncResult*) begin_ice_isA:(NSString*)typeId response:(void(^)(BOOL))response 
+-(ICEAsyncResult*) begin_ice_isA:(NSString*)typeId 
+                        response:(void(^)(BOOL))response 
                        exception:(void(^)(ICEException*))exception
 {
     return [self begin_ice_isA:typeId response:response exception:exception sent:nil];
 }
--(ICEAsyncResult*) begin_ice_isA:(NSString*)typeId response:(void(^)(BOOL))response 
+-(ICEAsyncResult*) begin_ice_isA:(NSString*)typeId 
+                         context:(ICEContext*)context 
+                        response:(void(^)(BOOL))response 
                        exception:(void(^)(ICEException*))exception 
-                         context:(ICEContext*)context
+                         
 {
-    return [self begin_ice_isA:typeId response:response exception:exception sent:nil context:context];
+    return [self begin_ice_isA:typeId context:context response:response exception:exception sent:nil];
 }
--(ICEAsyncResult*) begin_ice_isA:(NSString*)typeId response:(void(^)(BOOL))response 
+-(ICEAsyncResult*) begin_ice_isA:(NSString*)typeId 
+                        response:(void(^)(BOOL))response 
                        exception:(void(^)(ICEException*))exception 
                             sent:(void(^)(BOOL))sent
 {
@@ -1045,9 +1544,11 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
                           exception, sent);
 
 }
--(ICEAsyncResult*) begin_ice_isA:(NSString*)typeId response:(void(^)(BOOL))response 
+-(ICEAsyncResult*) begin_ice_isA:(NSString*)typeId 
+                         context:(ICEContext*)context 
+                        response:(void(^)(BOOL))response 
                        exception:(void(^)(ICEException*))exception 
-                            sent:(void(^)(BOOL))sent context:(ICEContext*)context
+                            sent:(void(^)(BOOL))sent
 {
     return proxyBeginCall(^(Ice::AsyncResultPtr& result, const Ice::Context& ctx, const Ice::CallbackPtr& cb) 
                           {
@@ -1094,12 +1595,15 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
 {
     return [self begin_ice_ping:response exception:exception sent:nil];
 }
--(ICEAsyncResult*) begin_ice_ping:(void(^)())response exception:(void(^)(ICEException*))exception 
-                          context:(ICEContext*)context
+-(ICEAsyncResult*) begin_ice_ping:(ICEContext*)context
+                         response:(void(^)())response 
+                        exception:(void(^)(ICEException*))exception 
+                          
 {
-    return [self begin_ice_ping:response exception:exception sent:nil context:context];
+    return [self begin_ice_ping:context response:response exception:exception sent:nil];
 }
--(ICEAsyncResult*) begin_ice_ping:(void(^)())response exception:(void(^)(ICEException*))exception 
+-(ICEAsyncResult*) begin_ice_ping:(void(^)())response
+                        exception:(void(^)(ICEException*))exception 
                              sent:(void(^)(BOOL))sent
 {
     return proxyBeginCall(^(Ice::AsyncResultPtr& result, const Ice::CallbackPtr& cb) 
@@ -1116,8 +1620,10 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
                           exception, sent);
 
 }
--(ICEAsyncResult*) begin_ice_ping:(void(^)())response exception:(void(^)(ICEException*))exception 
-                             sent:(void(^)(BOOL))sent context:(ICEContext*)context
+-(ICEAsyncResult*) begin_ice_ping:(ICEContext*)context 
+                         response:(void(^)())response 
+                        exception:(void(^)(ICEException*))exception 
+                             sent:(void(^)(BOOL))sent
 {
     return proxyBeginCall(^(Ice::AsyncResultPtr& result, const Ice::Context& ctx, const Ice::CallbackPtr& cb) 
                           {
@@ -1166,13 +1672,15 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
 {
     return [self begin_ice_ids:response exception:exception sent:nil];
 }
--(ICEAsyncResult*) begin_ice_ids:(void(^)(NSArray*))response exception:(void(^)(ICEException*))exception 
-                          context:(ICEContext*)context
+-(ICEAsyncResult*) begin_ice_ids:(ICEContext*)context 
+                        response:(void(^)(NSArray*))response
+                       exception:(void(^)(ICEException*))exception 
 {
-    return [self begin_ice_ids:response exception:exception sent:nil context:context];
+    return [self begin_ice_ids:context response:response exception:exception sent:nil];
 }
--(ICEAsyncResult*) begin_ice_ids:(void(^)(NSArray*))response exception:(void(^)(ICEException*))exception 
-                             sent:(void(^)(BOOL))sent
+-(ICEAsyncResult*) begin_ice_ids:(void(^)(NSArray*))response 
+                       exception:(void(^)(ICEException*))exception 
+                            sent:(void(^)(BOOL))sent
 {
     return proxyBeginCall(^(Ice::AsyncResultPtr& result, const Ice::CallbackPtr& cb) 
                           {
@@ -1188,8 +1696,10 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
                           exception, sent);
 
 }
--(ICEAsyncResult*) begin_ice_ids:(void(^)(NSArray*))response exception:(void(^)(ICEException*))exception 
-                             sent:(void(^)(BOOL))sent context:(ICEContext*)context
+-(ICEAsyncResult*) begin_ice_ids:(ICEContext*)context 
+                        response:(void(^)(NSArray*))response 
+                       exception:(void(^)(ICEException*))exception 
+                            sent:(void(^)(BOOL))sent
 {
     return proxyBeginCall(^(Ice::AsyncResultPtr& result, const Ice::Context& ctx, const Ice::CallbackPtr& cb) 
                           {
@@ -1241,13 +1751,16 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
 {
     return [self begin_ice_id:response exception:exception sent:nil];
 }
--(ICEAsyncResult*) begin_ice_id:(void(^)(NSString*))response exception:(void(^)(ICEException*))exception 
-                          context:(ICEContext*)context
+-(ICEAsyncResult*) begin_ice_id:(ICEContext*)context 
+                       response:(void(^)(NSString*))response 
+                      exception:(void(^)(ICEException*))exception 
+                        
 {
-    return [self begin_ice_id:response exception:exception sent:nil context:context];
+    return [self begin_ice_id:context response:response exception:exception sent:nil];
 }
--(ICEAsyncResult*) begin_ice_id:(void(^)(NSString*))response exception:(void(^)(ICEException*))exception 
-                             sent:(void(^)(BOOL))sent
+-(ICEAsyncResult*) begin_ice_id:(void(^)(NSString*))response 
+                      exception:(void(^)(ICEException*))exception 
+                           sent:(void(^)(BOOL))sent
 {
     return proxyBeginCall(^(Ice::AsyncResultPtr& result, const Ice::CallbackPtr& cb) 
                           {
@@ -1263,8 +1776,10 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
                           exception, sent);
 
 }
--(ICEAsyncResult*) begin_ice_id:(void(^)(NSString*))response exception:(void(^)(ICEException*))exception 
-                             sent:(void(^)(BOOL))sent context:(ICEContext*)context
+-(ICEAsyncResult*) begin_ice_id:(ICEContext*)context 
+                       response:(void(^)(NSString*))response 
+                      exception:(void(^)(ICEException*))exception 
+                           sent:(void(^)(BOOL))sent
 {
     return proxyBeginCall(^(Ice::AsyncResultPtr& result, const Ice::Context& ctx, const Ice::CallbackPtr& cb) 
                           {
@@ -1358,12 +1873,12 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
 -(ICEAsyncResult*) begin_ice_invoke:(NSString*)operation 
                                mode:(ICEOperationMode)mode 
                            inParams:(NSData*)inParams 
+                            context:(ICEContext*)context
                            response:(void(^)(BOOL, NSMutableData*))response 
                           exception:(void(^)(ICEException*))exception 
-                            context:(ICEContext*)context
 {
-    return [self begin_ice_invoke:operation mode:mode inParams:inParams response:response exception:exception sent:nil 
-                 context:context];
+    return [self begin_ice_invoke:operation mode:mode inParams:inParams context:context response:response 
+                 exception:exception sent:nil];
 }
 -(ICEAsyncResult*) begin_ice_invoke:(NSString*)operation 
                                mode:(ICEOperationMode)mode 
@@ -1397,9 +1912,10 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
 -(ICEAsyncResult*) begin_ice_invoke:(NSString*)operation 
                                mode:(ICEOperationMode)mode 
                            inParams:(NSData*)inParams
+                            context:(ICEContext*)context
                            response:(void(^)(BOOL, NSMutableData*))response 
                           exception:(void(^)(ICEException*))exception 
-                               sent:(void(^)(BOOL))sent context:(ICEContext*)context
+                               sent:(void(^)(BOOL))sent 
 {
     return proxyBeginCall(^(Ice::AsyncResultPtr& result, const Ice::Context& ctx, const Ice::CallbackPtr& cb) 
                           {
@@ -1423,7 +1939,6 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
                               }
                           },
                           exception, sent);
-
 }
 -(BOOL) end_ice_invoke:(NSMutableData**)outParams result:(ICEAsyncResult*)result
              

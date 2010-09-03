@@ -26,6 +26,12 @@
 @protocol ICEInputStream;
 
 //
+// Marshal/Unmarshall callbacks
+//
+typedef void (^ICEMarshalCB)(id<ICEOutputStream>);
+typedef void (^ICEUnmarshalCB)(id<ICEInputStream>, BOOL);
+
+//
 // An helper class to run Ice callbacks on the main thread.
 //
 @interface ICECallbackOnMainThread : NSProxy
@@ -39,7 +45,9 @@
 
 @interface ICEAsyncResult : NSObject
 {
+@private
     void* asyncResult__;
+    NSString* operation_;
 }
 -(id<ICECommunicator>) getCommunicator;
 -(id<ICEConnection>) getConnection;
@@ -72,45 +80,45 @@
 -(ICEAsyncResult*) begin_ice_isA:(NSString*)typeId;
 -(ICEAsyncResult*) begin_ice_isA:(NSString*)typeId context:(ICEContext*)context;
 -(ICEAsyncResult*) begin_ice_isA:(NSString*)typeId response:(void(^)(BOOL))response exception:(void(^)(ICEException*))exception;
--(ICEAsyncResult*) begin_ice_isA:(NSString*)typeId response:(void(^)(BOOL))response exception:(void(^)(ICEException*))exception context:(ICEContext*)context;
+-(ICEAsyncResult*) begin_ice_isA:(NSString*)typeId context:(ICEContext*)context response:(void(^)(BOOL))response exception:(void(^)(ICEException*))exception;
 -(ICEAsyncResult*) begin_ice_isA:(NSString*)typeId response:(void(^)(BOOL))response exception:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent;
--(ICEAsyncResult*) begin_ice_isA:(NSString*)typeId response:(void(^)(BOOL))response exception:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent context:(ICEContext*)context;
+-(ICEAsyncResult*) begin_ice_isA:(NSString*)typeId context:(ICEContext*)context response:(void(^)(BOOL))response exception:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent;
 -(BOOL) end_ice_isA:(ICEAsyncResult*)result;
 -(void) ice_ping;
 -(void) ice_ping:(ICEContext*)context;
 -(ICEAsyncResult*) begin_ice_ping;
 -(ICEAsyncResult*) begin_ice_ping:(ICEContext*)context;
 -(ICEAsyncResult*) begin_ice_ping:(void(^)())response exception:(void(^)(ICEException*))exception;
--(ICEAsyncResult*) begin_ice_ping:(void(^)())response exception:(void(^)(ICEException*))exception context:(ICEContext*)context;
+-(ICEAsyncResult*) begin_ice_ping:(ICEContext*)context response:(void(^)())response exception:(void(^)(ICEException*))exception;
 -(ICEAsyncResult*) begin_ice_ping:(void(^)())response exception:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent;
--(ICEAsyncResult*) begin_ice_ping:(void(^)())response exception:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent context:(ICEContext*)context;
+-(ICEAsyncResult*) begin_ice_ping:(ICEContext*)context response:(void(^)())response exception:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent;
 -(void) end_ice_ping:(ICEAsyncResult*)result;
 -(NSArray*) ice_ids;
 -(NSArray*) ice_ids:(ICEContext*)context;
 -(ICEAsyncResult*) begin_ice_ids;
 -(ICEAsyncResult*) begin_ice_ids:(ICEContext*)context;
 -(ICEAsyncResult*) begin_ice_ids:(void(^)(NSArray*))response exception:(void(^)(ICEException*))exception;
--(ICEAsyncResult*) begin_ice_ids:(void(^)(NSArray*))response exception:(void(^)(ICEException*))exception context:(ICEContext*)context;
+-(ICEAsyncResult*) begin_ice_ids:(ICEContext*)context response:(void(^)(NSArray*))response exception:(void(^)(ICEException*))exception;
 -(ICEAsyncResult*) begin_ice_ids:(void(^)(NSArray*))response exception:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent;
--(ICEAsyncResult*) begin_ice_ids:(void(^)(NSArray*))response exception:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent context:(ICEContext*)context;
+-(ICEAsyncResult*) begin_ice_ids:(ICEContext*)context response:(void(^)(NSArray*))response exception:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent;
 -(NSArray*) end_ice_ids:(ICEAsyncResult*)result;
 -(NSString*) ice_id;
 -(NSString*) ice_id:(ICEContext*)context;
 -(ICEAsyncResult*) begin_ice_id;
 -(ICEAsyncResult*) begin_ice_id:(ICEContext*)context;
 -(ICEAsyncResult*) begin_ice_id:(void(^)(NSString*))response exception:(void(^)(ICEException*))exception;
--(ICEAsyncResult*) begin_ice_id:(void(^)(NSString*))response exception:(void(^)(ICEException*))exception context:(ICEContext*)context;
+-(ICEAsyncResult*) begin_ice_id:(ICEContext*)context response:(void(^)(NSString*))response exception:(void(^)(ICEException*))exception;
 -(ICEAsyncResult*) begin_ice_id:(void(^)(NSString*))response exception:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent;
--(ICEAsyncResult*) begin_ice_id:(void(^)(NSString*))response exception:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent context:(ICEContext*)context;
+-(ICEAsyncResult*) begin_ice_id:(ICEContext*)context response:(void(^)(NSString*))response exception:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent;
 -(NSString*) end_ice_id:(ICEAsyncResult*)result;
 -(BOOL) ice_invoke:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams outParams:(NSMutableData**)outParams;
 -(BOOL) ice_invoke:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams outParams:(NSMutableData**)outParams context:(ICEContext*)context;
 -(ICEAsyncResult*) begin_ice_invoke:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams;
 -(ICEAsyncResult*) begin_ice_invoke:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams context :(ICEContext*)context;
 -(ICEAsyncResult*) begin_ice_invoke:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams response:(void(^)(BOOL, NSMutableData*))response exception:(void(^)(ICEException*))exception;
--(ICEAsyncResult*) begin_ice_invoke:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams response:(void(^)(BOOL, NSMutableData*))response exception:(void(^)(ICEException*))exception context:(ICEContext*)context;
+-(ICEAsyncResult*) begin_ice_invoke:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams  context:(ICEContext*)context response:(void(^)(BOOL, NSMutableData*))response exception:(void(^)(ICEException*))exception;
 -(ICEAsyncResult*) begin_ice_invoke:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams response:(void(^)(BOOL, NSMutableData*))response exception:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent;
--(ICEAsyncResult*) begin_ice_invoke:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams response:(void(^)(BOOL, NSMutableData*))response exception:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent context:(ICEContext*)context;
+-(ICEAsyncResult*) begin_ice_invoke:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams  context:(ICEContext*)context response:(void(^)(BOOL, NSMutableData*))response exception:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent;
 -(BOOL) end_ice_invoke:(NSMutableData**)outParams result:(ICEAsyncResult*)result;
 -(BOOL) ice_invoke_async:(id)target response:(SEL)response exception:(SEL)exception operation:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams;
 -(BOOL) ice_invoke_async:(id)target response:(SEL)response exception:(SEL)exception operation:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams context:(ICEContext*)context;
@@ -179,9 +187,20 @@
 +(Protocol*) protocol__;
 -(id<ICEOutputStream>) createOutputStream__;
 -(void) checkTwowayOnly__:(NSString*)operation;
--(void) invoke__:(NSString*)operation mode:(ICEOperationMode)mode os:(id<ICEOutputStream>)os 
-              is:(id<ICEInputStream>*)is context:(ICEContext*)context;
+-(void) invoke__:(NSString*)operation mode:(ICEOperationMode)mode marshal:(ICEMarshalCB)marshal 
+       unmarshal:(ICEUnmarshalCB)unmarshal context:(ICEContext*)context;
 -(BOOL) invoke_async__:(id)target response:(SEL)response exception:(SEL)exception sent:(SEL)sent 
          finishedClass:(Class)finishedClass finished:(SEL)finished operation:(NSString*)operation 
                   mode:(ICEOperationMode)mode os:(id<ICEOutputStream>)os context:(ICEContext*)context;
+-(ICEAsyncResult*) begin_invoke__:(NSString*)operation mode:(ICEOperationMode)mode marshal:(ICEMarshalCB)marshal
+                      returnsData:(BOOL)returnsData context:(ICEContext*)context;
+-(ICEAsyncResult*) begin_invoke__:(NSString*)operation mode:(ICEOperationMode)mode marshal:(ICEMarshalCB)marshal
+                        response:(void(^)())response
+                        exception:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent 
+                          context:(ICEContext*)context;
+-(ICEAsyncResult*) begin_invoke__:(NSString*)operation mode:(ICEOperationMode)mode marshal:(ICEMarshalCB)marshal
+                        completed:(void(^)(id<ICEInputStream>, BOOL))completed
+                        exception:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent 
+                          context:(ICEContext*)context;
+-(void)end_invoke__:(NSString*)operation unmarshal:(ICEUnmarshalCB)unmarshal result:(ICEAsyncResult*)result;
 @end

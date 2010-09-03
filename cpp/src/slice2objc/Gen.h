@@ -29,10 +29,16 @@ protected:
     virtual std::string getName(const OperationPtr&) const;
     virtual std::string getSelector(const OperationPtr&) const;
     virtual std::string getParams(const OperationPtr&) const;
+    virtual std::string getMarshalParams(const OperationPtr&) const;
+    virtual std::string getUnmarshalParams(const OperationPtr&) const;
     virtual std::string getServerParams(const OperationPtr&) const;
+    virtual std::string getResponseCBSig(const OperationPtr&) const;
     virtual std::string getParamsAsync(const OperationPtr&, bool);
+    virtual std::string getBeginParamsAsync(const OperationPtr&, bool, bool);
     virtual std::string getParamsAsyncCB(const OperationPtr&);
     virtual std::string getArgs(const OperationPtr&) const;
+    virtual std::string getMarshalArgs(const OperationPtr&) const;
+    virtual std::string getUnmarshalArgs(const OperationPtr&) const;
     virtual std::string getServerArgs(const OperationPtr&) const;
     virtual std::string getArgsAsync(const OperationPtr&, bool);
     virtual std::string getArgsAsyncCB(const OperationPtr&);

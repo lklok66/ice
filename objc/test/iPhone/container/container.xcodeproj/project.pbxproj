@@ -805,7 +805,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 3.2;
 				PRODUCT_NAME = container;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
-				SDKROOT = iphoneos4.0;
+				SDKROOT = iphoneos3.2;
 				SLICE_INCLUDE_PATH = ../../Ice/slicing/objects;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

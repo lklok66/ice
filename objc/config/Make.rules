@@ -47,7 +47,7 @@ embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 #
 # The default SDK version is 4.0 for iPhone
 #
-#IPHONE_SDK_VERSION		= 4.0
+IPHONE_SDK_VERSION		= 4.0
 
 #
 # You can choose to build static libraries for the Mac OS X command
