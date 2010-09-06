@@ -50,6 +50,7 @@
 {
     [_cond lock];
     ++_batchCount;
+    [_cond signal];
     [_cond unlock];
 }
 -(ICEInt) opBatchCount:(ICECurrent *)current
@@ -72,7 +73,7 @@
     {
         while(_batchCount < count)
         {
-            [_cond waitUntilDate:[NSDate dateWithTimeIntervalSinceNow:5]];
+            [_cond waitUntilDate:[NSDate dateWithTimeIntervalSinceNow:500]];
         }
         BOOL result = count == _batchCount;
         _batchCount = 0;

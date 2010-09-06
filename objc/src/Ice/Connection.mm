@@ -92,6 +92,35 @@
         @throw nsex;
     }
 }
+-(ICEAsyncResult*) begin_flushBatchRequests
+{
+    return beginCppCall(^(Ice::AsyncResultPtr& result) 
+                        {
+                            result = CONNECTION->begin_flushBatchRequests(); 
+                        });
+}
+-(ICEAsyncResult*) begin_flushBatchRequests:(void(^)(ICEException*))exception
+{
+    return [self begin_flushBatchRequests:exception sent:nil];
+}
+-(ICEAsyncResult*) begin_flushBatchRequests:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent 
+{
+    return beginCppCall(^(Ice::AsyncResultPtr& result, const Ice::CallbackPtr& cb) 
+                        {
+                            result = CONNECTION->begin_flushBatchRequests(cb); 
+                        }, 
+                        ^(const Ice::AsyncResultPtr& result) {
+                            CONNECTION->end_flushBatchRequests(result);
+                        },
+                        exception, sent);
+}
+-(void) end_flushBatchRequests:(ICEAsyncResult*)result
+{
+    endCppCall(^(const Ice::AsyncResultPtr& r) 
+               {
+                   CONNECTION->end_flushBatchRequests(r); 
+               }, result);
+}
 -(NSString*) type
 {
     return [toNSString(CONNECTION->type()) autorelease];

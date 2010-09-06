@@ -459,472 +459,106 @@ amiAllTests(id<ICECommunicator> communicator)
     }
     tprintf("ok\n");
 
-    tprintf("testing batch requests with proxy... TODO ");
+    tprintf("testing batch requests with proxy... ");
     {
-//         {
-//             test([[p opBatchCount]:isEqual:0)];
-//             TestTestIntfPrx* b1 = [p ice_batchOneway];
-//             [b1 opBatch];
-//             [b1 opBatch];
-//             FlushCallback* cb = [[FlushCallback alloc] init]();
-//             ICEAsyncResult* r = b1->begin_ice_flushBatchRequests(
-//                 ICEnewCallback(cb, &FlushCallbackcompletedAsync, &FlushCallbacksentAsync));
-//             [cb check];
-//             test([r isSent)];
-//             test([r isCompleted)];
-//             test([p waitForBatch:2)];
-//         }
+        {
+            test([p opBatchCount] == 0);
+            id<TestAMITestIntfPrx> b1 = [p ice_batchOneway];
+            [b1 opBatch];
+            [b1 opBatch];
+            TestAMICallback* cb = [[TestAMICallback alloc] init];
+            ICEAsyncResult* r = [b1 begin_ice_flushBatchRequests:^(ICEException* ex) { test(NO); }
+                                                            sent:^(BOOL sentSynchronously) { [cb called]; }];
+            [cb check];
+            test([r isSent]);
+            test([r isCompleted]);
+            test([p waitForBatch:2]);
+            [cb release];
+        }
 
-//         {
-//             test([[p opBatchCount]:isEqual:0)];
-//             TestTestIntfPrx* b1 = [p ice_batchOneway];
-//             [b1 opBatch];
-//             [[b1 ice_getConnection] close:false];
-//             FlushExCallback* cb = [[FlushExCallback alloc] init]();
-//             ICEAsyncResult* r = b1->begin_ice_flushBatchRequests(
-//                 ICEnewCallback(cb, &FlushExCallbackcompletedAsync, &FlushExCallbacksentAsync));
-//             [cb check];
-//             test(![r isSent)];
-//             test([r isCompleted)];
-//             test([[p opBatchCount]:isEqual:0)];
-//         }
-
-//         {
-//             test([[p opBatchCount]:isEqual:0)];
-//             TestTestIntfPrx* b1 = [p ice_batchOneway];
-//             [b1 opBatch];
-//             [b1 opBatch];
-//             FlushCallback* cb = [[FlushCallback alloc] init]();
-//             ICEAsyncResult* r = b1->begin_ice_flushBatchRequests(
-//                 ICEnewCallback_Object_ice_flushBatchRequests(cb, &FlushCallbackexception,
-//                                                                &FlushCallbacksent));
-//             [cb check];
-//             test([r isSent)];
-//             test([r isCompleted)];
-//             test([p waitForBatch:2)];
-//         }
-
-//         {
-//             test([[p opBatchCount]:isEqual:0)];
-//             TestTestIntfPrx* b1 = [p ice_batchOneway];
-//             [b1 opBatch];
-//             [[b1 ice_getConnection] close:false];
-//             FlushExCallback* cb = [[FlushExCallback alloc] init]();
-//             ICEAsyncResult* r = b1->begin_ice_flushBatchRequests(
-//                 ICEnewCallback_Object_ice_flushBatchRequests(cb, &FlushExCallbackexception,
-//                                                                &FlushExCallbacksent));
-//             [cb check];
-//             test(![r isSent)];
-//             test([r isCompleted)];
-//             test([[p opBatchCount]:isEqual:0)];
-//         }
+        {
+            test([p opBatchCount] == 0);
+            id<TestAMITestIntfPrx> b1 = [p ice_batchOneway];
+            [b1 opBatch];
+            [[b1 ice_getConnection] close:false];
+            TestAMICallback* cb = [[TestAMICallback alloc] init];
+            ICEAsyncResult* r = [b1 begin_ice_flushBatchRequests:^(ICEException* ex) { [cb called]; }
+                                                            sent:^(BOOL sentSynchronously) { test(NO); }];
+            [cb check];
+            test(![r isSent]);
+            test([r isCompleted]);
+            test([p opBatchCount] == 0);
+            [cb release];
+        }
     }
     tprintf("ok\n");
 
-    tprintf("testing batch requests with connection... TODO ");
+    tprintf("testing batch requests with connection... ");
     {
-//         Cookie* cookie = [[Cookie alloc] init](5);
+        {
+            test([p opBatchCount] == 0);
+            id<TestAMITestIntfPrx> b1 = [p ice_batchOneway];
+            [b1 opBatch];
+            [b1 opBatch];
+            TestAMICallback* cb = [[TestAMICallback alloc] init];
+            ICEAsyncResult* r = [[b1 ice_getConnection] begin_flushBatchRequests:^(ICEException* ex) { test(NO); }
+                                                            sent:^(BOOL sentSynchronously) { [cb called]; }];
+            [cb check];
+            test([r isSent]);
+            test([r isCompleted]);
+            test([p waitForBatch:2]);
+            [cb release];
+        }
 
-//         {
-//             //
-//             // AsyncResult without cookie.
-//             //
-//             test([[p opBatchCount]:isEqual:0)];
-//             TestTestIntfPrx* b1 = [p ice_batchOneway];
-//             [b1 opBatch];
-//             [b1 opBatch];
-//             FlushCallback* cb = [[FlushCallback alloc] init]();
-//             ICEAsyncResult* r = [b1 ice_getConnection]->begin_flushBatchRequests(
-//                 ICEnewCallback(cb, &FlushCallbackcompletedAsync, &FlushCallbacksentAsync));
-//             [cb check];
-//             test([r isSent)];
-//             test([r isCompleted)];
-//             test([p waitForBatch:2)];
-//         }
-
-//         {
-//             //
-//             // AsyncResult with cookie.
-//             //
-//             test([[p opBatchCount]:isEqual:0)];
-//             TestTestIntfPrx* b1 = [p ice_batchOneway];
-//             [b1 opBatch];
-//             [b1 opBatch];
-//             FlushCallback* cb = [[FlushCallback alloc] init](cookie);
-//             [b1 ice_getConnection]->begin_flushBatchRequests(
-//                 ICEnewCallback(cb, &FlushCallbackcompletedAsync, &FlushCallbacksentAsync), cookie);
-//             [cb check];
-//             test([p waitForBatch:2)];
-//         }
-
-//         {
-//             //
-//             // AsyncResult exception without cookie.
-//             //
-//             test([[p opBatchCount]:isEqual:0)];
-//             TestTestIntfPrx* b1 = [p ice_batchOneway];
-//             [b1 opBatch];
-//             [[b1 ice_getConnection] close:false];
-//             FlushExCallback* cb = [[FlushExCallback alloc] init]();
-//             ICEAsyncResult* r = [b1 ice_getConnection]->begin_flushBatchRequests(
-//                 ICEnewCallback(cb, &FlushExCallbackcompletedAsync, &FlushExCallbacksentAsync));
-//             [cb check];
-//             test(![r isSent)];
-//             test([r isCompleted)];
-//             test([[p opBatchCount]:isEqual:0)];
-//         }
-
-//         {
-//             //
-//             // AsyncResult exception with cookie.
-//             //
-//             test([[p opBatchCount]:isEqual:0)];
-//             TestTestIntfPrx* b1 = [p ice_batchOneway];
-//             [b1 opBatch];
-//             [[b1 ice_getConnection] close:false];
-//             FlushExCallback* cb = [[FlushExCallback alloc] init](cookie);
-//             [b1 ice_getConnection]->begin_flushBatchRequests(
-//                 ICEnewCallback(cb, &FlushExCallbackcompletedAsync, &FlushExCallbacksentAsync), cookie);
-//             [cb check];
-//             test([[p opBatchCount]:isEqual:0)];
-//         }
-
-//         {
-//             //
-//             // Without cookie.
-//             //
-//             test([[p opBatchCount]:isEqual:0)];
-//             TestTestIntfPrx* b1 = [p ice_batchOneway];
-//             [b1 opBatch];
-//             [b1 opBatch];
-//             FlushCallback* cb = [[FlushCallback alloc] init]();
-//             ICEAsyncResult* r = [b1 ice_getConnection]->begin_flushBatchRequests(
-//                 ICEnewCallback_Connection_flushBatchRequests(cb, &FlushCallbackexception, &FlushCallbacksent));
-//             [cb check];
-//             test([r isSent)];
-//             test([r isCompleted)];
-//             test([p waitForBatch:2)];
-//         }
-
-//         {
-//             //
-//             // With cookie.
-//             //
-//             test([[p opBatchCount]:isEqual:0)];
-//             TestTestIntfPrx* b1 = [p ice_batchOneway];
-//             [b1 opBatch];
-//             [b1 opBatch];
-//             FlushCallback* cb = [[FlushCallback alloc] init](cookie);
-//             [b1 ice_getConnection]->begin_flushBatchRequests(
-//                 ICEnewCallback_Connection_flushBatchRequests(cb, &FlushCallbackexceptionWC,
-//                                                                &FlushCallbacksentWC), cookie);
-//             [cb check];
-//             test([p waitForBatch:2)];
-//         }
-
-//         {
-//             //
-//             // Exception without cookie.
-//             //
-//             test([[p opBatchCount]:isEqual:0)];
-//             TestTestIntfPrx* b1 = [p ice_batchOneway];
-//             [b1 opBatch];
-//             [[b1 ice_getConnection] close:false];
-//             FlushExCallback* cb = [[FlushExCallback alloc] init]();
-//             ICEAsyncResult* r = [b1 ice_getConnection]->begin_flushBatchRequests(
-//                 ICEnewCallback_Connection_flushBatchRequests(cb, &FlushExCallbackexception,
-//                                                                &FlushExCallbacksent));
-//             [cb check];
-//             test(![r isSent)];
-//             test([r isCompleted)];
-//             test([[p opBatchCount]:isEqual:0)];
-//         }
-
-//         {
-//             //
-//             // Exception with cookie.
-//             //
-//             test([[p opBatchCount]:isEqual:0)];
-//             TestTestIntfPrx* b1 = [p ice_batchOneway];
-//             [b1 opBatch];
-//             [[b1 ice_getConnection] close:false];
-//             FlushExCallback* cb = [[FlushExCallback alloc] init](cookie);
-//             [b1 ice_getConnection]->begin_flushBatchRequests(
-//                 ICEnewCallback_Connection_flushBatchRequests(cb, &FlushExCallbackexceptionWC,
-//                                                                &FlushExCallbacksentWC), cookie);
-//             [cb check];
-//             test([[p opBatchCount]:isEqual:0)];
-//         }
+        {
+            test([p opBatchCount] == 0);
+            TestAMITestIntfPrx* b1 = [p ice_batchOneway];
+            [b1 opBatch];
+            [[b1 ice_getConnection] close:false];
+            TestAMICallback* cb = [[TestAMICallback alloc] init];
+            ICEAsyncResult* r = [[b1 ice_getConnection] begin_flushBatchRequests:
+                                                            ^(ICEException* ex) { [cb called]; }
+            sent:^(BOOL sentSynchronously) { test(NO); }];
+            [cb check];
+            test(![r isSent]);
+            test([r isCompleted]);
+            test([p opBatchCount] == 0);
+            [cb release];
+        }
     }
     tprintf("ok\n");
 
-    tprintf("testing batch requests with communicator... TODO ");
+    tprintf("testing batch requests with communicator... ");
     {
-//         Cookie* cookie = [[Cookie alloc] init](5);
+        {
+            test([p opBatchCount] == 0);
+            id<TestAMITestIntfPrx> b1 = [p ice_batchOneway];
+            [b1 opBatch];
+            [b1 opBatch];
+            TestAMICallback* cb = [[TestAMICallback alloc] init];
+            ICEAsyncResult* r = [communicator begin_flushBatchRequests:^(ICEException* ex) { test(NO); }
+                                                            sent:^(BOOL sentSynchronously) { [cb called]; }];
+            [cb check];
+            test([r isSent]);
+            test([r isCompleted]);
+            test([p waitForBatch:2]);
+            [cb release];
+        }
 
-//         {
-//             //
-//             // AsyncResult without cookie - 1 connection.
-//             //
-//             test([[p opBatchCount]:isEqual:0)];
-//             TestTestIntfPrx* b1 = [p ice_batchOneway];
-//             [b1 opBatch];
-//             [b1 opBatch];
-//             FlushCallback* cb = [[FlushCallback alloc] init]();
-//             ICEAsyncResult* r = communicator->begin_flushBatchRequests(
-//                 ICEnewCallback(cb, &FlushCallbackcompletedAsync, &FlushCallbacksentAsync));
-//             [cb check];
-//             test([r isSent)];
-//             test([r isCompleted)];
-//             test([p waitForBatch:2)];
-//         }
-
-//         {
-//             //
-//             // AsyncResult with cookie - 1 connection.
-//             //
-//             test([[p opBatchCount]:isEqual:0)];
-//             TestTestIntfPrx* b1 = [p ice_batchOneway];
-//             [b1 opBatch];
-//             [b1 opBatch];
-//             FlushCallback* cb = [[FlushCallback alloc] init](cookie);
-//             communicator->begin_flushBatchRequests(
-//                 ICEnewCallback(cb, &FlushCallbackcompletedAsync, &FlushCallbacksentAsync), cookie);
-//             [cb check];
-//             test([p waitForBatch:2)];
-//         }
-
-//         {
-//             //
-//             // AsyncResult exception without cookie - 1 connection.
-//             //
-//             test([[p opBatchCount]:isEqual:0)];
-//             TestTestIntfPrx* b1 = [p ice_batchOneway];
-//             [b1 opBatch];
-//             [[b1 ice_getConnection] close:false];
-//             FlushCallback* cb = [[FlushCallback alloc] init]();
-//             ICEAsyncResult* r = communicator->begin_flushBatchRequests(
-//                 ICEnewCallback(cb, &FlushCallbackcompletedAsync, &FlushCallbacksentAsync));
-//             [cb check];
-//             test([r isSent)]; // Exceptions are ignored!
-//             test([r isCompleted)];
-//             test([[p opBatchCount]:isEqual:0)];
-//         }
-
-//         {
-//             //
-//             // AsyncResult exception with cookie - 1 connection.
-//             //
-//             test([[p opBatchCount]:isEqual:0)];
-//             TestTestIntfPrx* b1 = [p ice_batchOneway];
-//             [b1 opBatch];
-//             [[b1 ice_getConnection] close:false];
-//             FlushCallback* cb = [[FlushCallback alloc] init](cookie);
-//             communicator->begin_flushBatchRequests(
-//                 ICEnewCallback(cb, &FlushCallbackcompletedAsync, &FlushCallbacksentAsync), cookie);
-//             [cb check];
-//             test([[p opBatchCount]:isEqual:0)];
-//         }
-
-//         {
-//             //
-//             // AsyncResult - 2 connections.
-//             //
-//             test([[p opBatchCount]:isEqual:0)];
-//             TestTestIntfPrx* b1 = [p ice_batchOneway];
-//             TestTestIntfPrx* b2 = [[p ice_connectionId:@"2"] ice_batchOneway];
-//             [b2 ice_getConnection]; // Ensure connection is established.
-//             [b1 opBatch];
-//             [b1 opBatch];
-//             [b2 opBatch];
-//             [b2 opBatch];
-//             FlushCallback* cb = [[FlushCallback alloc] init]();
-//             ICEAsyncResult* r = communicator->begin_flushBatchRequests(
-//                 ICEnewCallback(cb, &FlushCallbackcompletedAsync, &FlushCallbacksentAsync));
-//             [cb check];
-//             test([r isSent)];
-//             test([r isCompleted)];
-//             test([p waitForBatch:4)];
-//         }
-
-//         {
-//             //
-//             // AsyncResult exception - 2 connections - 1 failure.
-//             //
-//             // All connections should be flushed even if there are failures on some connections.
-//             // Exceptions should not be reported.
-//             //
-//             test([[p opBatchCount]:isEqual:0)];
-//             TestTestIntfPrx* b1 = [p ice_batchOneway];
-//             TestTestIntfPrx* b2 = [[p ice_connectionId:@"2"] ice_batchOneway];
-//             [b2 ice_getConnection]; // Ensure connection is established.
-//             [b1 opBatch];
-//             [b2 opBatch];
-//             [[b1 ice_getConnection] close:false];
-//             FlushCallback* cb = [[FlushCallback alloc] init]();
-//             ICEAsyncResult* r = communicator->begin_flushBatchRequests(
-//                 ICEnewCallback(cb, &FlushCallbackcompletedAsync, &FlushCallbacksentAsync));
-//             [cb check];
-//             test([r isSent)]; // Exceptions are ignored!
-//             test([r isCompleted)];
-//             test([p waitForBatch:1)];
-//         }
-
-//         {
-//             //
-//             // AsyncResult exception - 2 connections - 2 failures.
-//             //
-//             // The sent callback should be invoked even if all connections fail.
-//             //
-//             test([[p opBatchCount]:isEqual:0)];
-//             TestTestIntfPrx* b1 = [p ice_batchOneway];
-//             TestTestIntfPrx* b2 = [[p ice_connectionId:@"2"] ice_batchOneway];
-//             [b2 ice_getConnection]; // Ensure connection is established.
-//             [b1 opBatch];
-//             [b2 opBatch];
-//             [[b1 ice_getConnection] close:false];
-//             [[b2 ice_getConnection] close:false];
-//             FlushCallback* cb = [[FlushCallback alloc] init]();
-//             ICEAsyncResult* r = communicator->begin_flushBatchRequests(
-//                 ICEnewCallback(cb, &FlushCallbackcompletedAsync, &FlushCallbacksentAsync));
-//             [cb check];
-//             test([r isSent)]; // Exceptions are ignored!
-//             test([r isCompleted)];
-//             test([[p opBatchCount]:isEqual:0)];
-//         }
-
-//         {
-//             //
-//             // Without cookie - 1 connection.
-//             //
-//             test([[p opBatchCount]:isEqual:0)];
-//             TestTestIntfPrx* b1 = [p ice_batchOneway];
-//             [b1 opBatch];
-//             [b1 opBatch];
-//             FlushCallback* cb = [[FlushCallback alloc] init]();
-//             ICEAsyncResult* r = communicator->begin_flushBatchRequests(
-//                 ICEnewCallback_Communicator_flushBatchRequests(cb, &FlushCallbackexception, &FlushCallbacksent));
-//             [cb check];
-//             test([r isSent)];
-//             test([r isCompleted)];
-//             test([p waitForBatch:2)];
-//         }
-
-//         {
-//             //
-//             // With cookie - 1 connection.
-//             //
-//             test([[p opBatchCount]:isEqual:0)];
-//             TestTestIntfPrx* b1 = [p ice_batchOneway];
-//             [b1 opBatch];
-//             [b1 opBatch];
-//             FlushCallback* cb = [[FlushCallback alloc] init](cookie);
-//             communicator->begin_flushBatchRequests(
-//                 ICEnewCallback_Communicator_flushBatchRequests(cb, &FlushCallbackexceptionWC,
-//                     &FlushCallbacksentWC), cookie);
-//             [cb check];
-//             test([p waitForBatch:2)];
-//         }
-
-//         {
-//             //
-//             // Exception without cookie - 1 connection.
-//             //
-//             test([[p opBatchCount]:isEqual:0)];
-//             TestTestIntfPrx* b1 = [p ice_batchOneway];
-//             [b1 opBatch];
-//             [[b1 ice_getConnection] close:false];
-//             FlushCallback* cb = [[FlushCallback alloc] init]();
-//             ICEAsyncResult* r = communicator->begin_flushBatchRequests(
-//                 ICEnewCallback_Communicator_flushBatchRequests(cb, &FlushCallbackexception, &FlushCallbacksent));
-//             [cb check];
-//             test([r isSent)]; // Exceptions are ignored!
-//             test([r isCompleted)];
-//             test([[p opBatchCount]:isEqual:0)];
-//         }
-
-//         {
-//             //
-//             // Exception with cookie - 1 connection.
-//             //
-//             test([[p opBatchCount]:isEqual:0)];
-//             TestTestIntfPrx* b1 = [p ice_batchOneway];
-//             [b1 opBatch];
-//             [[b1 ice_getConnection] close:false];
-//             FlushCallback* cb = [[FlushCallback alloc] init](cookie);
-//             communicator->begin_flushBatchRequests(
-//                 ICEnewCallback_Communicator_flushBatchRequests(cb, &FlushCallbackexceptionWC,
-//                     &FlushCallbacksentWC), cookie);
-//             [cb check];
-//             test([[p opBatchCount]:isEqual:0)];
-//         }
-
-//         {
-//             //
-//             // 2 connections.
-//             //
-//             test([[p opBatchCount]:isEqual:0)];
-//             TestTestIntfPrx* b1 = [p ice_batchOneway];
-//             TestTestIntfPrx* b2 = [[p ice_connectionId:@"2"] ice_batchOneway];
-//             [b2 ice_getConnection]; // Ensure connection is established.
-//             [b1 opBatch];
-//             [b1 opBatch];
-//             [b2 opBatch];
-//             [b2 opBatch];
-//             FlushCallback* cb = [[FlushCallback alloc] init]();
-//             ICEAsyncResult* r = communicator->begin_flushBatchRequests(
-//                 ICEnewCallback_Communicator_flushBatchRequests(cb, &FlushCallbackexception, &FlushCallbacksent));
-//             [cb check];
-//             test([r isSent)];
-//             test([r isCompleted)];
-//             test([p waitForBatch:4)];
-//         }
-
-//         {
-//             //
-//             // Exception - 2 connections - 1 failure.
-//             //
-//             // All connections should be flushed even if there are failures on some connections.
-//             // Exceptions should not be reported.
-//             //
-//             test([[p opBatchCount]:isEqual:0)];
-//             TestTestIntfPrx* b1 = [p ice_batchOneway];
-//             TestTestIntfPrx* b2 = [[p ice_connectionId:@"2"] ice_batchOneway];
-//             [b2 ice_getConnection]; // Ensure connection is established.
-//             [b1 opBatch];
-//             [b2 opBatch];
-//             [[b1 ice_getConnection] close:false];
-//             FlushCallback* cb = [[FlushCallback alloc] init]();
-//             ICEAsyncResult* r = communicator->begin_flushBatchRequests(
-//                 ICEnewCallback_Communicator_flushBatchRequests(cb, &FlushCallbackexception, &FlushCallbacksent));
-//             [cb check];
-//             test([r isSent)]; // Exceptions are ignored!
-//             test([r isCompleted)];
-//             test([p waitForBatch:1)];
-//         }
-
-//         {
-//             //
-//             // Exception - 2 connections - 2 failures.
-//             //
-//             // The sent callback should be invoked even if all connections fail.
-//             //
-//             test([[p opBatchCount]:isEqual:0)];
-//             TestTestIntfPrx* b1 = [p ice_batchOneway];
-//             TestTestIntfPrx* b2 = [[p ice_connectionId:@"2"] ice_batchOneway];
-//             [b2 ice_getConnection]; // Ensure connection is established.
-//             [b1 opBatch];
-//             [b2 opBatch];
-//             [[b1 ice_getConnection] close:false];
-//             [[b2 ice_getConnection] close:false];
-//             FlushCallback* cb = [[FlushCallback alloc] init]();
-//             ICEAsyncResult* r = communicator->begin_flushBatchRequests(
-//                 ICEnewCallback_Communicator_flushBatchRequests(cb, &FlushCallbackexception, &FlushCallbacksent));
-//             [cb check];
-//             test([r isSent)]; // Exceptions are ignored!
-//             test([r isCompleted)];
-//             test([[p opBatchCount]:isEqual:0)];
-//         }
+        {
+            test([p opBatchCount] == 0);
+            TestAMITestIntfPrx* b1 = [p ice_batchOneway];
+            [b1 opBatch];
+            [[b1 ice_getConnection] close:false];
+            TestAMICallback* cb = [[TestAMICallback alloc] init];
+            ICEAsyncResult* r = [communicator begin_flushBatchRequests:^(ICEException* ex) { test(NO); }
+                                                                  sent:^(BOOL sentSynchronously) { [cb called]; }];
+            [cb check];
+            test([r isSent]);
+            test([r isCompleted]);
+            test([p opBatchCount] == 0);
+            [cb release];
+        }
     }
     tprintf("ok\n");
 

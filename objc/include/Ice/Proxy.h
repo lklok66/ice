@@ -168,6 +168,10 @@ typedef void (^ICEUnmarshalCB)(id<ICEInputStream>, BOOL);
 -(void) ice_flushBatchRequests;
 -(BOOL) ice_flushBatchRequests_async:(id)target exception:(SEL)exception;
 -(BOOL) ice_flushBatchRequests_async:(id)target exception:(SEL)exception sent:(SEL)sent;
+-(ICEAsyncResult*) begin_ice_flushBatchRequests;
+-(ICEAsyncResult*) begin_ice_flushBatchRequests:(void(^)(ICEException*))exception;
+-(ICEAsyncResult*) begin_ice_flushBatchRequests:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent;
+-(void) end_ice_flushBatchRequests:(ICEAsyncResult*)result;
 @end
 
 @interface ICEObjectPrx : NSObject<ICEObjectPrx>

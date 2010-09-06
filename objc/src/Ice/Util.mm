@@ -10,10 +10,257 @@
 #import <Ice/Util.h>
 #import <Ice/LocalException.h>
 #import <Ice/ExceptionI.h>
+#import <Ice/StreamI.h>
+#import <Ice/ProxyI.h>
 
 #include <IceCpp/LocalException.h>
+#include <IceCpp/Initialize.h>
+
+#include <Block.h>
 
 #import <objc/runtime.h>
+
+#import <Foundation/NSAutoreleasePool.h>
+
+namespace 
+{
+
+class AsyncCallback : public IceUtil::Shared
+{
+public:
+
+AsyncCallback(void (^completed)(const Ice::AsyncResultPtr&), void (^exception)(ICEException*), void (^sent)(BOOL)) :
+    _completed(Block_copy(completed)), _exception(Block_copy(exception)), _sent(Block_copy(sent))
+{
+}
+
+virtual ~AsyncCallback()
+{
+    Block_release(_completed);
+    Block_release(_exception);
+    Block_release(_sent);
+}
+
+void completed(const Ice::AsyncResultPtr& result)
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSException* exception = nil;
+    @try
+    {
+        try
+        {
+            _completed(result);
+        }    
+        catch(const Ice::Exception& ex)
+        {
+            @try
+            {
+                NSException* nsex = toObjCException(ex);
+                @throw nsex;
+            }
+            @catch(ICEException* e)
+            {
+                if(_exception)
+                {
+                    _exception(e);
+                }
+            }
+        }
+    }
+    @catch(NSException* e)
+    {
+        exception = [e retain];
+    }
+    [pool release];
+    
+    if(exception != nil)
+    {
+        rethrowCxxException(exception, true); // True = release the exception.
+    }
+}
+
+void sent(const Ice::AsyncResultPtr& result)
+{
+    if(!_sent)
+    {
+        return;
+    }
+
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSException* exception = nil;
+    @try
+    {
+        _sent(result->sentSynchronously());
+    }
+    @catch(NSException* e)
+    {
+        exception = [e retain];
+    }
+    [pool release];
+    
+    if(exception != nil)
+    {
+        rethrowCxxException(exception, true); // True = release the exception.
+    }
+}
+
+private:
+
+void (^_completed)(const Ice::AsyncResultPtr&);
+void (^_exception)(ICEException*);
+void (^_sent)(BOOL);
+
+};
+
+};
+
+void cppCall(void (^fn)())
+{
+    NSException* nsex = nil;
+    try
+    {
+        fn();
+        return;
+    }
+    catch(const std::exception& ex)
+    {
+        nsex = toObjCException(ex);
+    }
+    @throw nsex;
+}
+
+void cppCall(void (^fn)(const Ice::Context&), ICEContext* context)
+{
+    NSException* nsex = nil;
+    try
+    {
+        Ice::Context ctx;
+        fromNSDictionary(context, ctx);
+        fn(ctx);
+        return;
+    }
+    catch(const std::exception& ex)
+    {
+        nsex = toObjCException(ex);
+    }
+    @throw nsex;
+}
+
+ICEAsyncResult* beginCppCall(void (^fn)(Ice::AsyncResultPtr&))
+{
+    NSException* nsex = nil;
+    try
+    {
+        Ice::AsyncResultPtr r;
+        fn(r);
+        return [ICEAsyncResult asyncResultWithAsyncResult__:r];
+    }
+    catch(const IceUtil::IllegalArgumentException& ex)
+    {
+        nsex = [NSException exceptionWithName:NSInvalidArgumentException reason:toNSString(ex.reason()) userInfo:nil];
+    }
+    catch(const std::exception& ex)
+    {
+        nsex = toObjCException(ex);
+    }
+    @throw nsex;
+}
+
+ICEAsyncResult* beginCppCall(void (^fn)(Ice::AsyncResultPtr&, const Ice::CallbackPtr&), 
+                             void (^completed)(const Ice::AsyncResultPtr&),
+                             void (^exception)(ICEException*),
+                             void (^sent)(BOOL))
+{
+    NSException* nsex = nil;
+    try
+    {
+        AsyncCallback* cb = new AsyncCallback(completed, exception, sent);
+        Ice::AsyncResultPtr r;
+        Ice::CallbackPtr callback = Ice::newCallback(cb, &AsyncCallback::completed, &AsyncCallback::sent);
+        fn(r, callback);
+        return [ICEAsyncResult asyncResultWithAsyncResult__:r];
+    }
+    catch(const IceUtil::IllegalArgumentException& ex)
+    {
+        nsex = [NSException exceptionWithName:NSInvalidArgumentException reason:toNSString(ex.reason()) userInfo:nil];
+    }
+    catch(const std::exception& ex)
+    {
+        nsex = toObjCException(ex);
+    }
+    @throw nsex;
+}
+
+ICEAsyncResult* beginCppCall(void (^fn)(Ice::AsyncResultPtr&, const Ice::Context&), ICEContext* context)
+{
+    NSException* nsex = nil;
+    try
+    {
+        Ice::Context ctx;
+        fromNSDictionary(context, ctx);
+        Ice::AsyncResultPtr r;
+        fn(r, ctx);
+        return [ICEAsyncResult asyncResultWithAsyncResult__:r];
+    }
+    catch(const IceUtil::IllegalArgumentException& ex)
+    {
+        nsex = [NSException exceptionWithName:NSInvalidArgumentException reason:toNSString(ex.reason()) userInfo:nil];
+    }
+    catch(const std::exception& ex)
+    {
+        nsex = toObjCException(ex);
+    }
+    @throw nsex;
+}
+
+ICEAsyncResult* beginCppCall(void (^fn)(Ice::AsyncResultPtr&, const Ice::Context&, const Ice::CallbackPtr&), 
+                             ICEContext* context,
+                             void (^completed)(const Ice::AsyncResultPtr&),
+                             void (^exception)(ICEException*),
+                             void (^sent)(BOOL))
+{
+    NSException* nsex = nil;
+    try
+    {
+        Ice::Context ctx;
+        fromNSDictionary(context, ctx);
+        AsyncCallback* cb = new AsyncCallback(completed, exception, sent);
+        Ice::AsyncResultPtr r;
+        Ice::CallbackPtr callback = Ice::newCallback(cb, &AsyncCallback::completed, &AsyncCallback::sent);
+        fn(r, ctx, callback);
+        return [ICEAsyncResult asyncResultWithAsyncResult__:r];
+    }
+    catch(const IceUtil::IllegalArgumentException& ex)
+    {
+        nsex = [NSException exceptionWithName:NSInvalidArgumentException reason:[toNSString(ex.reason()) autorelease]
+                            userInfo:nil];
+    }
+    catch(const std::exception& ex)
+    {
+        nsex = toObjCException(ex);
+    }
+    @throw nsex;
+}
+
+void endCppCall(void (^fn)(const Ice::AsyncResultPtr&), ICEAsyncResult* r)
+{
+    NSException* nsex = nil;
+    try
+    {
+        fn([r asyncResult__]);
+        return;
+    }
+    catch(const IceUtil::IllegalArgumentException& ex)
+    {
+        nsex = [NSException exceptionWithName:NSInvalidArgumentException reason:[toNSString(ex.reason()) autorelease]
+                            userInfo:nil];
+    }
+    catch(const std::exception& ex)
+    {
+        nsex = toObjCException(ex);
+    }
+    @throw nsex;
+}
 
 NSException*
 toObjCException(const std::exception& ex)
