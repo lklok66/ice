@@ -77,7 +77,8 @@ NSString*
 getAdapterNameWithAMI(id<TestBindingTestIntfPrx> test)
 {
     GetAdapterNameCB* cb = [[[GetAdapterNameCB alloc] init] autorelease];
-    [test getAdapterName_async:cb response:@selector(response:) exception:@selector(exception:)];
+    [test begin_getAdapterName:^(NSMutableString* name) { [cb response:name]; } 
+                     exception:^(ICEException* ex) { [cb exception:ex]; }];
     return [cb getResult];
 }
 

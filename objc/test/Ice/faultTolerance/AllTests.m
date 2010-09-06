@@ -170,7 +170,8 @@ allTests(id<ICECommunicator> communicator, NSArray* ports)
         {
             tprintf("testing server %d with AMI... ", i);
             Callback* cb = [[Callback alloc] init];
-            [obj pid_async:cb response:@selector(pidResponse:) exception:@selector(pidException:)];
+            [obj begin_pid:^(ICEInt pid) { [cb pidResponse:pid]; } 
+                 exception:^(ICEException* ex) { [cb pidException:ex]; } ];
             [cb check];
             int pid = [cb pid];
             test(pid != oldPid);
@@ -191,7 +192,8 @@ allTests(id<ICECommunicator> communicator, NSArray* ports)
             {
                 tprintf("shutting down server %d with AMI... ", i);
                 Callback* cb = [[Callback alloc] init];
-                [obj shutdown_async:cb response:@selector(shutdownResponse) exception:@selector(shutdownException:)];
+                [obj begin_shutdown:^{ [cb shutdownResponse]; } 
+                          exception:^(ICEException* ex) { [cb shutdownException:ex]; }];
                 [cb check];
                 [cb release];
                 tprintf("ok\n");
@@ -220,7 +222,7 @@ allTests(id<ICECommunicator> communicator, NSArray* ports)
             {
                 tprintf("aborting server %d with AMI... ", i);
                 Callback* cb = [[Callback alloc] init];
-                [obj abort_async:cb response:@selector(abortResponse) exception:@selector(abortException:)];
+                [obj begin_abort:^{ [cb abortResponse]; } exception:^(ICEException* ex) { [cb abortException:ex]; }];
                 [cb check];
                 [cb release];
                 tprintf("ok\n");
@@ -249,7 +251,8 @@ allTests(id<ICECommunicator> communicator, NSArray* ports)
             {
                 tprintf("aborting server %d and #%d with idempotent AMI call... ", i, i + 1);
                 Callback* cb = [[Callback alloc] init];
-                [obj idempotentAbort_async:cb response:@selector(idempotentAbortResponse) exception:@selector(idempotentAbortException:)];
+                [obj begin_abort:^{ [cb idempotentAbortResponse]; } 
+                       exception:^(ICEException* ex) { [cb idempotentAbortException:ex]; }];
                 [cb check];
                 [cb release];
                 tprintf("ok\n");

@@ -144,9 +144,8 @@ allTests(id<ICECommunicator> communicator)
         while([cond value])
         {
             cb = [[[AMICheckSetValue alloc] init:cond expected:value] autorelease];
-            if([hold set_async:cb response:@selector(ice_response:) exception:@selector(ice_exception:)
-                     sent:@selector(ice_sent) 
-                     value:++value delay:(random() % 5 + 1)])
+            if([hold begin_set:++value delay:(random() % 5 + 1) response:^(ICEInt r) { [cb ice_response:r]; }
+                     exception:^(ICEException* ex) { [cb ice_exception:ex]; } sent:^(BOOL ss) { [cb ice_sent]; }])
             {
                 cb = 0;
             }
@@ -179,8 +178,8 @@ allTests(id<ICECommunicator> communicator)
 #endif
         {
             cb = [[[AMICheckSetValue alloc] init:cond expected:value] autorelease];
-            if([holdSerialized set_async:cb response:@selector(ice_response:) exception:@selector(ice_exception:)
-                               sent:@selector(ice_sent) value:++value delay:0])
+            if([holdSerialized begin_set:++value delay:0 response:^(ICEInt r) { [cb ice_response:r]; }
+                     exception:^(ICEException* ex) { [cb ice_exception:ex]; } sent:^(BOOL ss) { [cb ice_sent]; }])
             {
                 cb = 0;
             }

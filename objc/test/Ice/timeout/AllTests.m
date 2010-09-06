@@ -214,7 +214,8 @@ timeoutAllTests(id<ICECommunicator> communicator)
         //
         id<TestTimeoutTimeoutPrx> to = [TestTimeoutTimeoutPrx uncheckedCast:[obj ice_timeout:500]];
         TestTimeoutCallback* cb = [[[TestTimeoutCallback alloc] init] autorelease];
-        [to sleep_async:cb response:@selector(sleepExResponse) exception:@selector(sleepExException:) to:2000];
+        [to begin_sleep:2000 response:^{ [cb sleepExResponse]; } 
+              exception:^(ICEException* ex) { [cb sleepExException:ex]; }];
         [cb check];
     }
     {
@@ -224,7 +225,8 @@ timeoutAllTests(id<ICECommunicator> communicator)
         [timeout op]; // Ensure adapter is active.
         id<TestTimeoutTimeoutPrx> to = [TestTimeoutTimeoutPrx uncheckedCast:[obj ice_timeout:1000]];
         TestTimeoutCallback* cb = [[[TestTimeoutCallback alloc] init] autorelease];
-        [to sleep_async:cb response:@selector(sleepResponse) exception:@selector(sleepException:) to:500];
+        [to begin_sleep:500 response:^{ [cb sleepResponse]; } 
+              exception:^(ICEException* ex) { [cb sleepException:ex]; }];
         [cb check];
     }
     tprintf("ok\n");
@@ -238,7 +240,8 @@ timeoutAllTests(id<ICECommunicator> communicator)
         [to holdAdapter:2000];
         TestTimeoutByteSeq* seq = [TestTimeoutMutableByteSeq dataWithLength:10000];
         TestTimeoutCallback* cb = [[[TestTimeoutCallback alloc] init] autorelease];
-        [to sendData_async:cb response:@selector(sendDataExResponse) exception:@selector(sendDataExException:) seq:seq];
+        [to begin_sendData:seq response:^{ [cb sendDataExResponse]; } 
+                 exception:^(ICEException* ex) { [cb sendDataExException:ex]; } ];
         [cb check];
     }
     {
@@ -250,7 +253,8 @@ timeoutAllTests(id<ICECommunicator> communicator)
         [to holdAdapter:500];
         TestTimeoutByteSeq* seq = [TestTimeoutMutableByteSeq dataWithLength:10000];
         TestTimeoutCallback* cb = [[[TestTimeoutCallback alloc] init] autorelease];
-        [to sendData_async:cb response:@selector(sendDataResponse) exception:@selector(sendDataException:) seq:seq];
+        [to begin_sendData:seq response:^{ [cb sendDataResponse]; } 
+                 exception:^(ICEException* ex) { [cb sendDataException:ex]; } ];
         [cb check];
     }
     tprintf("ok\n");
