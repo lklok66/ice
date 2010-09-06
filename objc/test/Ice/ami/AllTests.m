@@ -135,58 +135,58 @@ amiAllTests(id<ICECommunicator> communicator)
         TestAMICallback* cb = [[TestAMICallback alloc] init];
         ICEContext* ctx = [NSDictionary dictionary];
 
- 	void (^isACB)(BOOL) = [[ ^(BOOL ret) { test(ret); [cb called]; } copy] autorelease];
+ 	void (^isACB)(BOOL) = ^(BOOL ret) { test(ret); [cb called]; };
         [p begin_ice_isA:[TestAMITestIntfPrx ice_staticId] response:isACB exception:nil];
         [cb check];
         [p begin_ice_isA:[TestAMITestIntfPrx ice_staticId] context:ctx response:isACB exception:nil];
         [cb check];
 
- 	void (^pingCB)() = [[ ^ { [cb called]; } copy] autorelease];
+ 	void (^pingCB)() = ^ { [cb called]; };
         [p begin_ice_ping:pingCB exception:nil];
         [cb check];
         [p begin_ice_ping:ctx response:pingCB exception:nil];
         [cb check];
 
-        void (^idCB)(NSString* typeId) = [[ ^(NSString* typeId) 
+        void (^idCB)(NSString* typeId) = ^(NSString* typeId) 
         { 
             test([typeId isEqualToString:[TestAMITestIntfPrx ice_staticId]]); 
             [cb called]; 
-        } copy] autorelease];
+        };
 
         [p begin_ice_id:idCB exception:nil];
         [cb check];
         [p begin_ice_id:ctx response:idCB exception:nil];
         [cb check];
 
-        void (^idsCB)(NSArray* types) = [[ ^(NSArray* types) 
+        void (^idsCB)(NSArray* types) = ^(NSArray* types) 
         { 
             test([types count] == 2); 
             [cb called]; 
-        } copy] autorelease];
+        };
 
         [p begin_ice_ids:idsCB exception:nil];
         [cb check];
         [p begin_ice_ids:ctx response:idsCB exception:nil];
         [cb check];
 
- 	void (^opCB)() = [[ ^ { [cb called]; } copy] autorelease];
+ 	void (^opCB)() = ^ { [cb called]; };
         [p begin_op:opCB exception:nil];
         [cb check];
         [p begin_op:ctx response:opCB exception:nil];
         [cb check];
 
-        void (^opWithResultCB)(ICEInt) = [[ ^(ICEInt r) 
+        void (^opWithResultCB)(ICEInt) = ^(ICEInt r) 
         { 
             test(r == 15); 
             [cb called]; 
-        } copy] autorelease];
+        };
         [p begin_opWithResult:opWithResultCB exception:nil];
         [cb check];
         [p begin_opWithResult:ctx response:opWithResultCB exception:nil];
         [cb check];
 
         void (^opWithUE)() = [[ ^() { test(NO); } copy ] autorelease];
-        void (^opWithUEEx)(ICEException*) = [[ ^(ICEException* ex) 
+        void (^opWithUEEx)(ICEException*) = ^(ICEException* ex) 
         { 
             @try
             {
@@ -197,7 +197,7 @@ amiAllTests(id<ICECommunicator> communicator)
             {
                 [cb called];
             }
-        } copy] autorelease];
+        };
         [p begin_opWithUE:opWithUE exception:opWithUEEx];
         [cb check];
         [p begin_opWithUE:ctx response:opWithUE exception:opWithUEEx];
@@ -269,10 +269,10 @@ amiAllTests(id<ICECommunicator> communicator)
         TestAMICallback* cb = [[TestAMICallback alloc] init];
         ICEContext* ctx = [NSDictionary dictionary];
 
-        void (^exCB)(ICEException*) = [[^ (ICEException* ex) {
+        void (^exCB)(ICEException*) =  ^(ICEException* ex) {
             test([ex isKindOfClass:[ICENoEndpointException class]]);
             [cb called];
-        } copy] autorelease];
+        };
 
         void (^isACB)(BOOL) = [[ ^(BOOL ret) { test(NO); } copy ] autorelease];
         [i begin_ice_isA:@"dummy" response:isACB exception:exCB];
@@ -313,7 +313,7 @@ amiAllTests(id<ICECommunicator> communicator)
         TestAMICallback* cb = [[TestAMICallback alloc] init];
         ICEContext* ctx = [NSDictionary dictionary];
 
-        void (^sentCB)(BOOL) = [[ ^ { [cb called]; } copy] autorelease];
+        void (^sentCB)(BOOL) = ^(BOOL ss) { [cb called]; };
 
         [p begin_ice_isA:@"test" response:nil exception:nil sent:sentCB];
         [cb check];
@@ -349,10 +349,10 @@ amiAllTests(id<ICECommunicator> communicator)
             TestAMICallback* cb = [[TestAMICallback alloc] init];
             while(true)
             {
-                if(![[p begin_opWithPayload:seq response:nil exception:nil sent:[[^ 
-                                                { 
-                                                    [cb called];
-                                                } copy] autorelease]] sentSynchronously])
+                if(![[p begin_opWithPayload:seq response:nil exception:nil sent: 
+                            ^(BOOL ss) { 
+                               [cb called];
+                           }] sentSynchronously])
                 {
                     [cbs addObject:cb];
                     break;
@@ -432,9 +432,9 @@ amiAllTests(id<ICECommunicator> communicator)
         int i;
         for(i = 0; i < 3; ++i)
         {
-            void (^throwResponse)() = [[^{ thrower(i); } copy] autorelease];
-            void (^throwEx)(ICEException*) = [[^(ICEException* ex){ thrower(i); } copy] autorelease];
-            void (^throwSent)(BOOL) = [[^(BOOL b){ thrower(i); } copy] autorelease];
+            void (^throwResponse)() = ^{ thrower(i); };
+            void (^throwEx)(ICEException*) = ^(ICEException* ex){ thrower(i); };
+            void (^throwSent)(BOOL) = ^(BOOL b){ thrower(i); };
 
             [p begin_ice_ping:throwResponse exception:nil];
             [cb check];

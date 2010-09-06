@@ -506,7 +506,7 @@ Slice::ObjCVisitor::getResponseCBSig(const OperationPtr& op) const
             {
                 result += ", ";
             }
-            result += typeToString(type);
+            result += outTypeToString(type);
             if(mapsToPointerType(type))
             {
                 result += "*";

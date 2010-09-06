@@ -15,29 +15,20 @@ SERVER		= server
 TARGETS		= $(CLIENT) $(SERVER)
 
 COBJS		= Client.o \
-		  AllTests.o \
-		  Twoways.o \
-		  TwowaysAMI.o \
-		  TwowaysNewAMI.o \
-		  Oneways.o \
-		  OnewaysAMI.o \
-		  OnewaysNewAMI.o \
-		  BatchOneways.o
+		  AllTests.o
 
-SOBJS		= TestI.o \
+SOBJS		= BlobjectI.o \
 		  Server.o
 
-OBJS		= OperationsTest.o
+OBJS		= InvokeTest.o
 
 SRCS		= $(COBJS:.o=.m) \
 		  $(SOBJS:.o=.m) \
 		  $(OBJS=.o=.m)
 
-SLICE_SRCS	= OperationsTest.ice
+SLICE_SRCS	= InvokeTest.ice
 
 include $(top_srcdir)/config/Make.rules
-
-# Put in Make.rules
 
 CPPFLAGS	:= -I. -I.. -I../../include $(CPPFLAGS)
 LIBS		:= -lTestCommon $(LIBS)

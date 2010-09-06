@@ -46,15 +46,15 @@ class AsyncCallback : public IceUtil::Shared
 public:
 
 AsyncCallback(void (^completed)(const Ice::AsyncResultPtr&), void (^exception)(ICEException*), void (^sent)(BOOL)) :
-    _completed(Block_copy(completed)), _exception([exception retain]), _sent([sent retain])
+    _completed(Block_copy(completed)), _exception(Block_copy(exception)), _sent(Block_copy(sent))
 {
 }
 
 virtual ~AsyncCallback()
 {
     Block_release(_completed);
-    [_exception release];
-    [_sent release];
+    Block_release(_exception);
+    Block_release(_sent);
 }
 
 void completed(const Ice::AsyncResultPtr& result)
@@ -136,15 +136,18 @@ BeginInvokeAsyncCallback(void (^completed)(id<ICEInputStream>, BOOL),
                          void (^exception)(ICEException*), 
                          void (^sent)(BOOL),
                          BOOL returnsData) :
-    _completed(Block_copy(completed)), _exception([exception retain]), _sent([sent retain]), _returnsData(returnsData)
-{
+    _completed(Block_copy(completed)), 
+        _exception(Block_copy(exception)),
+        _sent(Block_copy(sent)), 
+        _returnsData(returnsData)
+        {
 }
 
 virtual ~BeginInvokeAsyncCallback()
 {
     Block_release(_completed);
-    [_exception release];
-    [_sent release];
+    Block_release(_exception);
+    Block_release(_sent);
 }
 
 void completed(const Ice::AsyncResultPtr& result)

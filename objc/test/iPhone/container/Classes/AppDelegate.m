@@ -35,6 +35,8 @@ int inheritanceServer(int, char**);
 int inheritanceClient(int, char**);
 int interceptorServer(int, char**);
 int interceptorClient(int, char**);
+int invokeServer(int, char**);
+int invokeClient(int, char**);
 int locationServer(int, char**);
 int locationClient(int, char**);
 int objectsServer(int, char**);
@@ -61,6 +63,7 @@ static const struct TestCases alltests[] =
 { @"hold", holdServer, holdClient },
 { @"inheritance", inheritanceServer, inheritanceClient, },
 { @"interceptor", interceptorServer, interceptorClient },
+{ @"invoke", invokeServer, invokeClient },
 { @"location", locationServer, locationClient },
 { @"objects", objectsServer, objectsClient },
 { @"operations", operationsServer, operationsClient },
