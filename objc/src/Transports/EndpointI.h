@@ -55,6 +55,7 @@ private:
 
     const IceInternal::InstancePtr _instance;
     const Ice::Short _type;
+    const bool _voip;
     const std::string _protocol;
     CFMutableDictionaryRef _serverSettings;
     CFMutableDictionaryRef _clientSettings;

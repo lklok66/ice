@@ -188,6 +188,7 @@ createIceSSL(const CommunicatorPtr& communicator, const string& name, const Stri
 IceObjC::Instance::Instance(const IceInternal::InstancePtr& instance, bool secure) :
     _instance(instance),
     _type(secure ? SslEndpointType : TcpEndpointType),
+    _voip(instance->initializationData().properties->getPropertyAsIntWithDefault("Ice.Voip", 0) > 0),
     _protocol(secure ? string("ssl") : string("tcp")),
     _serverSettings(0),
     _clientSettings(0),
@@ -443,6 +444,19 @@ IceObjC::Instance::setupStreams(CFReadStreamRef readStream,
                                 bool server, 
                                 const string& host) const
 {
+    if(_voip)
+    {
+#if !defined(TARGET_IPHONE_SIMULATOR)
+        if(!CFReadStreamSetProperty(readStream, kCFStreamNetworkServiceType, 
+                                    kCFStreamNetworkServiceTypeVoIP) ||
+           !CFWriteStreamSetProperty(writeStream, kCFStreamNetworkServiceType, 
+                                     kCFStreamNetworkServiceTypeVoIP))
+        {
+            throw Ice::SyscallException(__FILE__, __LINE__);
+        }
+#endif
+    }
+
     if(_type == SslEndpointType)
     {
         CFDictionaryRef settings = server ? _serverSettings : _clientSettings;

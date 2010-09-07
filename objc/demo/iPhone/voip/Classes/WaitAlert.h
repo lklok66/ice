@@ -1,0 +1,21 @@
+// **********************************************************************
+//
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
+//
+// This copy of Ice Touch is licensed to you under the terms described in the
+// ICE_TOUCH_LICENSE file included in this distribution.
+//
+// **********************************************************************
+
+#import <UIKit/UIKit.h>
+
+@interface WaitAlert : UIAlertView
+{
+@private
+    UIActivityIndicatorView* progressView;
+    UILabel* waitingLabel;
+}
+
+@property (nonatomic, retain) NSString* text;
+
+@end
