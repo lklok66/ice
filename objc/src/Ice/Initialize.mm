@@ -12,6 +12,7 @@
 #import <Ice/CommunicatorI.h>
 #import <Ice/StreamI.h>
 #import <Ice/LoggerI.h>
+#import <Ice/DispatcherI.h>
 #import <Ice/Util.h>
 #import <Ice/LocalException.h>
 
@@ -79,6 +80,10 @@ private:
     Ice::InitializationData data;
     data.properties = [(ICEProperties*)properties properties];
     data.logger = [ICELogger loggerWithLogger:logger];
+    if(dispatcher)
+    {
+        data.dispatcher = [ICEDispatcher dispatcherWithDispatcher:dispatcher];
+    }
     return data;
 }
 @end
@@ -87,9 +92,11 @@ private:
 
 @synthesize properties;
 @synthesize logger;
+@synthesize dispatcher;
 @synthesize prefixTable__;
 
 -(id) init:(id<ICEProperties>)props logger:(id<ICELogger>)log
+dispatcher:(void(^)(id<ICEDispatcherCall>, id<ICEConnection>))d;
 {
     if(![super init])
     {
@@ -97,6 +104,7 @@ private:
     }
     properties = [props retain];
     logger = [log retain];
+    dispatcher = [d copy];
     return self;
 }
 
@@ -107,11 +115,10 @@ private:
    return s;
 }
 
-+(id) initializationData:(id<ICEProperties>)props logger:(id<ICELogger>)log
++(id) initializationData:(id<ICEProperties>)p logger:(id<ICELogger>)l
+              dispatcher:(void(^)(id<ICEDispatcherCall>, id<ICEConnection>))d;
 {
-   ICEInitializationData *s = [((ICEInitializationData *)[ICEInitializationData alloc]) init:props logger:log];
-   [s autorelease];
-   return s;
+   return [[((ICEInitializationData *)[ICEInitializationData alloc]) init:p logger:l dispatcher:d] autorelease];
 }
 
 -(id) copyWithZone:(NSZone *)zone
@@ -119,6 +126,7 @@ private:
     ICEInitializationData *copy = [ICEInitializationData allocWithZone:zone];
     copy->properties = [properties retain];
     copy->logger = [logger retain];
+    copy->dispatcher = [dispatcher copy];
     copy->prefixTable__ = [prefixTable__ retain];
     return copy;
 }
@@ -171,6 +179,20 @@ private:
 	    return NO;
 	}
     }
+    if(!dispatcher)
+    {
+        if(obj->dispatcher)
+	{
+	    return NO;
+	}
+    }
+    else
+    {
+        if(dispatcher == obj->dispatcher)
+	{
+	    return NO;
+	}
+    }
     if(!prefixTable__)
     {
         if(obj->prefixTable__)
@@ -192,6 +214,7 @@ private:
 {
     [properties release];
     [logger release];
+    [dispatcher release];
     [prefixTable__ release];
     [super dealloc];
 }

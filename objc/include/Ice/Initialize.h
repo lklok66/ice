@@ -12,7 +12,7 @@
 #import <Ice/Communicator.h>
 #import <Ice/Properties.h>
 #import <Ice/Stream.h>
-
+#import <Ice/Connection.h>
 #include <Availability.h>
 
 //
@@ -20,20 +20,28 @@
 //
 @protocol ICELogger;
 
+@protocol ICEDispatcherCall <NSObject>
+-(void) run;
+@end
+
 @interface ICEInitializationData : NSObject
 {
 @private
     id<ICEProperties> properties;
     id<ICELogger> logger;
+    void(^dispatcher)(id<ICEDispatcherCall>, id<ICEConnection>);
     NSDictionary* prefixTable__;
 }
 @property(retain, nonatomic) id<ICEProperties> properties;
 @property(retain, nonatomic) id<ICELogger> logger;
+@property(copy, nonatomic) void(^dispatcher)(id<ICEDispatcherCall>, id<ICEConnection>);
 @property(retain, nonatomic) NSDictionary* prefixTable__;
 
--(id) init:(id<ICEProperties>)properties logger:(id<ICELogger>)logger;
+-(id) init:(id<ICEProperties>)properties logger:(id<ICELogger>)logger 
+     dispatcher:(void(^)(id<ICEDispatcherCall>, id<ICEConnection>))d;
 +(id) initializationData;
-+(id) initializationData:(id<ICEProperties>)properties logger:(id<ICELogger>)logger;
++(id) initializationData:(id<ICEProperties>)properties logger:(id<ICELogger>)logger
+     dispatcher:(void(^)(id<ICEDispatcherCall>, id<ICEConnection>))d;
 // This class also overrides copyWithZone:, hash, isEqual:, and dealloc.
 @end
 

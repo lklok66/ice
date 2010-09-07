@@ -14,6 +14,11 @@
 		1400641E1234DFE800249AA4 /* AllTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 140064181234DFE800249AA4 /* AllTests.m */; };
 		1400642B1234E0E900249AA4 /* TwowaysNewAMI.m in Sources */ = {isa = PBXBuildFile; fileRef = 140064291234E0E900249AA4 /* TwowaysNewAMI.m */; };
 		1400642C1234E0E900249AA4 /* OnewaysNewAMI.m in Sources */ = {isa = PBXBuildFile; fileRef = 1400642A1234E0E900249AA4 /* OnewaysNewAMI.m */; };
+		140157C1123645D0007C165E /* TestI.m in Sources */ = {isa = PBXBuildFile; fileRef = 140157BA123645D0007C165E /* TestI.m */; };
+		140157C2123645D0007C165E /* AllTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 140157BB123645D0007C165E /* AllTests.m */; };
+		140157C3123645D0007C165E /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 140157BC123645D0007C165E /* Client.m */; };
+		140157C5123645D0007C165E /* DispatcherTest.ice in Sources */ = {isa = PBXBuildFile; fileRef = 140157BE123645D0007C165E /* DispatcherTest.ice */; };
+		140157C6123645D0007C165E /* Server.m in Sources */ = {isa = PBXBuildFile; fileRef = 140157BF123645D0007C165E /* Server.m */; };
 		140A392D122CF11300E1931D /* TestI.m in Sources */ = {isa = PBXBuildFile; fileRef = 140A3927122CF11300E1931D /* TestI.m */; };
 		140A392E122CF11300E1931D /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 140A3929122CF11300E1931D /* Client.m */; };
 		140A392F122CF11300E1931D /* Server.m in Sources */ = {isa = PBXBuildFile; fileRef = 140A392A122CF11300E1931D /* Server.m */; };
@@ -131,6 +136,12 @@
 		140064181234DFE800249AA4 /* AllTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AllTests.m; path = ../../Ice/invoke/AllTests.m; sourceTree = SOURCE_ROOT; };
 		140064291234E0E900249AA4 /* TwowaysNewAMI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TwowaysNewAMI.m; path = ../../Ice/operations/TwowaysNewAMI.m; sourceTree = SOURCE_ROOT; };
 		1400642A1234E0E900249AA4 /* OnewaysNewAMI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OnewaysNewAMI.m; path = ../../Ice/operations/OnewaysNewAMI.m; sourceTree = SOURCE_ROOT; };
+		140157B9123645D0007C165E /* TestI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestI.h; path = ../../Ice/dispatcher/TestI.h; sourceTree = SOURCE_ROOT; };
+		140157BA123645D0007C165E /* TestI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestI.m; path = ../../Ice/dispatcher/TestI.m; sourceTree = SOURCE_ROOT; };
+		140157BB123645D0007C165E /* AllTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AllTests.m; path = ../../Ice/dispatcher/AllTests.m; sourceTree = SOURCE_ROOT; };
+		140157BC123645D0007C165E /* Client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Client.m; path = ../../Ice/dispatcher/Client.m; sourceTree = SOURCE_ROOT; };
+		140157BE123645D0007C165E /* DispatcherTest.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = DispatcherTest.ice; path = ../../Ice/dispatcher/DispatcherTest.ice; sourceTree = SOURCE_ROOT; };
+		140157BF123645D0007C165E /* Server.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Server.m; path = ../../Ice/dispatcher/Server.m; sourceTree = SOURCE_ROOT; };
 		140A3927122CF11300E1931D /* TestI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestI.m; path = ../../Ice/ami/TestI.m; sourceTree = SOURCE_ROOT; };
 		140A3928122CF11300E1931D /* TestI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestI.h; path = ../../Ice/ami/TestI.h; sourceTree = SOURCE_ROOT; };
 		140A3929122CF11300E1931D /* Client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Client.m; path = ../../Ice/ami/Client.m; sourceTree = SOURCE_ROOT; };
@@ -309,6 +320,19 @@
 			name = invoke;
 			sourceTree = "<group>";
 		};
+		140157B6123645B3007C165E /* dispatcher */ = {
+			isa = PBXGroup;
+			children = (
+				140157B9123645D0007C165E /* TestI.h */,
+				140157BA123645D0007C165E /* TestI.m */,
+				140157BB123645D0007C165E /* AllTests.m */,
+				140157BC123645D0007C165E /* Client.m */,
+				140157BE123645D0007C165E /* DispatcherTest.ice */,
+				140157BF123645D0007C165E /* Server.m */,
+			);
+			name = dispatcher;
+			sourceTree = "<group>";
+		};
 		140A3926122CF0EC00E1931D /* ami */ = {
 			isa = PBXGroup;
 			children = (
@@ -346,6 +370,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				140157B6123645B3007C165E /* dispatcher */,
 				140064111234DFBF00249AA4 /* invoke */,
 				140A3926122CF0EC00E1931D /* ami */,
 				146B33FE0FE8BBF9009C6199 /* hold */,
@@ -786,6 +811,11 @@
 				1400641E1234DFE800249AA4 /* AllTests.m in Sources */,
 				1400642B1234E0E900249AA4 /* TwowaysNewAMI.m in Sources */,
 				1400642C1234E0E900249AA4 /* OnewaysNewAMI.m in Sources */,
+				140157C1123645D0007C165E /* TestI.m in Sources */,
+				140157C2123645D0007C165E /* AllTests.m in Sources */,
+				140157C3123645D0007C165E /* Client.m in Sources */,
+				140157C5123645D0007C165E /* DispatcherTest.ice in Sources */,
+				140157C6123645D0007C165E /* Server.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

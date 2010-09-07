@@ -19,6 +19,7 @@ SUBDIRS		= proxy \
 		  facets \
 		  objects \
                   interceptor \
+		  dispatcher \
  		  defaultServant \
 		  faultTolerance \
 		  location \

@@ -33,6 +33,7 @@ tests = [
      ("Ice/facets", ["core"]),
      ("Ice/objects", ["core"]),
      ("Ice/interceptor", ["core"]),
+     ("Ice/dispatcher", ["core"]),
      ("Ice/defaultServant", ["core"]),
      ("Ice/binding", ["core"]),
      ("Ice/hold", ["core"]),

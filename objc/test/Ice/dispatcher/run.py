@@ -20,27 +20,4 @@ if len(path) == 0:
 sys.path.append(os.path.join(path[0]))
 from scripts import *
 
-server = os.path.join(os.getcwd(), "server")
-client = os.path.join(os.getcwd(), "client")
-
-num = 12
-base = 12340
-
-serverProc = []
-for i in range(0, num):
-    print "starting server #%d..." % (i + 1),
-    serverProc.append(TestUtil.startServer(server, "%d" % (base + i)))
-    print "ok"
-
-ports = ""
-for i in range(0, num):
-    ports = "%s %d" % (ports, base + i)
-
-print "starting client...",
-clientProc = TestUtil.startClient(client, ports + " " + "--Ice.Trace.Network=0", startReader = False)
-print "ok"
-clientProc.startReader()
-
-clientProc.waitTestSuccess()
-for p in serverProc:
-    p.waitTestSuccess()
+TestUtil.clientServerTest()

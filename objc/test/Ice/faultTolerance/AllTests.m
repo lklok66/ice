@@ -251,7 +251,7 @@ allTests(id<ICECommunicator> communicator, NSArray* ports)
             {
                 tprintf("aborting server %d and #%d with idempotent AMI call... ", i, i + 1);
                 Callback* cb = [[Callback alloc] init];
-                [obj begin_abort:^{ [cb idempotentAbortResponse]; } 
+                [obj begin_idempotentAbort:^{ [cb idempotentAbortResponse]; } 
                        exception:^(ICEException* ex) { [cb idempotentAbortException:ex]; }];
                 [cb check];
                 [cb release];

@@ -25,6 +25,8 @@ int bindingServer(int, char**);
 int bindingClient(int, char**);
 int defaultServantServer(int, char**);
 int defaultServantClient(int, char**);
+int dispatcherServer(int, char**);
+int dispatcherClient(int, char**);
 int exceptionsServer(int, char**);
 int exceptionsClient(int, char**);
 int facetsServer(int, char**);
@@ -58,6 +60,7 @@ static const struct TestCases alltests[] =
 { @"ami", amiServer, amiClient },
 { @"binding", bindingServer, bindingClient },
 { @"defaultServant", defaultServantServer, defaultServantClient },
+{ @"dispatcher", dispatcherServer, dispatcherClient },
 { @"exceptions", exceptionsServer, exceptionsClient },
 { @"facets", facetsServer, facetsClient },
 { @"hold", holdServer, holdClient },
