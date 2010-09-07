@@ -76,7 +76,6 @@ static NSString* sslKey = @"sslKey";
 
 - (void)viewDidLoad {
 	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-    queue = [[NSOperationQueue alloc] init];
 	
     // Set the default values, and show the clear button in the text field.
     hostnameField.text = [defaults stringForKey:hostnameKey];
@@ -95,11 +94,6 @@ static NSString* sslKey = @"sslKey";
 
 	callButton.enabled = NO;
 
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(applicationWillTerminate) 
-                                                 name:UIApplicationWillTerminateNotification
-                                               object:nil]; 
-	
 	[[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(didEnterBackground) 
                                                  name:UIApplicationDidEnterBackgroundNotification
@@ -113,12 +107,6 @@ static NSString* sslKey = @"sslKey";
     [super viewDidLoad];
 }
 
--(void)applicationWillTerminate
-{
-	NSLog(@"applicationWillTerminate");
-	// TODO: Logout.
-    [communicator destroy];
-}
 
 - (void)viewWillAppear:(BOOL)animated
 {
@@ -153,7 +141,6 @@ static NSString* sslKey = @"sslKey";
     
     [currentField release];
     [oldFieldValue release];
-    [queue release];
     [communicator release];
 	[router release];
 	[controlPrx release];
@@ -295,84 +282,16 @@ static NSString* sslKey = @"sslKey";
     [alert show];       
 }
 
--(void)loginComplete
-{
-    [waitAlert dismissWithClickedButtonIndex:0 animated:YES];
-    self.waitAlert = nil;
-	
-	loginButton.titleLabel.text = @"Logout";
-	callButton.enabled = YES;
-
-	id<ICEObjectAdapter> adapter = [communicator createObjectAdapterWithRouter:@"VoipClient"
-                                                                        router:router];
-    [adapter activate];
-    
-    // Here we tie the chat view controller to the ChatRoomCallback servant.
-    VoipControl* callbackImpl = [VoipControl objectWithDelegate:self];
-    
-    // This helper ensures that all methods are dispatched in the main thread.
-    ICEObject* dispatchMainThread = [ICEMainThreadDispatch mainThreadDispatch:callbackImpl];
-	
-    ICEIdentity* callbackId = [ICEIdentity identity:[ICEUtil generateUUID] category:category];
-	
-    // The callback is registered in clear:, otherwise the callbacks can arrive
-    // prior to the IBOutlet connections being setup.
-    self.controlPrx = [VoipControlPrx uncheckedCast:[adapter add:dispatchMainThread identity:callbackId]];
-
-    // Register the chat callback.
-    [sess setControl_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                      response:nil
-                     exception:@selector(exception:)
-                            ctrl:controlPrx];
-
-	// Setup the session refresh timer.
-    self.refreshTimer = [NSTimer timerWithTimeInterval:sessionTimeout/2
-                                                target:self
-                                              selector:@selector(refreshSession:)
-                                              userInfo:nil
-                                               repeats:YES];
-    [[NSRunLoop currentRunLoop] addTimer:refreshTimer forMode:NSDefaultRunLoopMode];
-}
-
-// Runs in a separate thread, called only by NSInvocationOperation.
--(void)doGlacier2Login
-{
-    @try
-    {
-		self.router = [Glacier2RouterPrx checkedCast:[communicator getDefaultRouter]];
-        id<Glacier2SessionPrx> glacier2session = [router createSession:usernameField.text password:passwordField.text];
-		self.sess = [VoipSessionPrx uncheckedCast:glacier2session];
-		sessionTimeout = [router getSessionTimeout];
-		self.category = [router getCategoryForClient];
-		self.router = router;
-		
-        [self performSelectorOnMainThread:@selector(loginComplete) withObject:nil waitUntilDone:NO];
-    }
-    @catch(Glacier2CannotCreateSessionException* ex)
-    {
-        NSString* s = [NSString stringWithFormat:@"Session creation failed: %@", ex.reason_];
-        [self performSelectorOnMainThread:@selector(exception:) withObject:s waitUntilDone:NO];
-    }
-    @catch(Glacier2PermissionDeniedException* ex)
-    {
-        NSString* s = [NSString stringWithFormat:@"Login failed: %@", ex.reason_];
-        [self performSelectorOnMainThread:@selector(exception:) withObject:s waitUntilDone:NO];
-    }
-    @catch(ICEException* ex)
-    {
-        [self performSelectorOnMainThread:@selector(exception:) withObject:[ex description] waitUntilDone:NO];
-    }
-}
-
 -(IBAction)login:(id)sender
 {
+    // Logout.
 	if(communicator != nil)
 	{
-		//		[refreshTimer invalidate];
-		//		self.refreshTimer = nil;
+        [refreshTimer invalidate];
+        self.refreshTimer = nil;
 		
 		// Destroy the old session, and invalidate the refresh timer.
-		[router destroySession_async:self response:nil exception:nil];
+		[router begin_destroySession];
 		self.router = nil;
 		self.sess = nil;
 		
@@ -403,6 +322,10 @@ static NSString* sslKey = @"sslKey";
     [initData.properties setProperty:@"IceSSL.Keychain" value:@"test"];
     [initData.properties setProperty:@"IceSSL.KeychainPassword" value:@"password"];
 #endif
+
+    initData.dispatcher = ^(id<ICEDispatcherCall> call, id<ICEConnection> con) {
+        dispatch_sync(dispatch_get_main_queue(), ^ { [call run]; });
+    };
     
     NSAssert(communicator == nil, @"communicator == nil");
     self.communicator = [ICEUtil createCommunicator:initData];
@@ -443,25 +366,71 @@ static NSString* sslKey = @"sslKey";
     waitAlert.text = @"Connecting...";
     [waitAlert show];
     
-    // Kick off the login process in a separate thread. This ensures that the UI is not blocked.
-    NSInvocationOperation* op = [[[NSInvocationOperation alloc] initWithTarget:self
-                                                                      selector:@selector(doGlacier2Login)
-                                                                        object:nil] autorelease];
-    [queue addOperation:op];
-}
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^ {
+        @try
+        {
+            self.router = [Glacier2RouterPrx checkedCast:[communicator getDefaultRouter]];
+            id<Glacier2SessionPrx> glacier2session = [router createSession:usernameField.text password:passwordField.text];
+            self.sess = [VoipSessionPrx uncheckedCast:glacier2session];
+            sessionTimeout = [router getSessionTimeout];
+            self.category = [router getCategoryForClient];
+            self.router = router;
+            
+            id<ICEObjectAdapter> adapter = [communicator createObjectAdapterWithRouter:@"VoipClient"
+                                                                                router:router];
+            [adapter activate];
+            
+            // Here we tie the chat view controller to the ChatRoomCallback servant.
+            VoipControl* callbackImpl = [VoipControl objectWithDelegate:self];
+            
+            ICEIdentity* callbackId = [ICEIdentity identity:[ICEUtil generateUUID] category:category];
+            
+            // The callback is registered in clear:, otherwise the callbacks can arrive
+            // prior to the IBOutlet connections being setup.
+            self.controlPrx = [VoipControlPrx uncheckedCast:[adapter add:callbackImpl identity:callbackId]];
+            
+            // Register the chat callback.
+            [sess begin_setControl:controlPrx response:nil exception:^(ICEException* ex) { [self exception:[ex description]]; }];
+            
+            dispatch_async(dispatch_get_main_queue(), ^ {
 
--(void)refreshException:(ICEException*)ex
-{
-	[self exception:[ex description]];
+                [waitAlert dismissWithClickedButtonIndex:0 animated:YES];
+                self.waitAlert = nil;
+                
+                loginButton.titleLabel.text = @"Logout";
+                callButton.enabled = YES;
+
+                // Setup the session refresh timer.
+                self.refreshTimer = [NSTimer timerWithTimeInterval:sessionTimeout/2
+                                                            target:self
+                                                          selector:@selector(refreshSession:)
+                                                          userInfo:nil
+                                                           repeats:YES];
+                [[NSRunLoop currentRunLoop] addTimer:refreshTimer forMode:NSDefaultRunLoopMode];
+            });
+        }
+        @catch(Glacier2CannotCreateSessionException* ex)
+        {
+            NSString* s = [NSString stringWithFormat:@"Session creation failed: %@", ex.reason_];
+            dispatch_async(dispatch_get_main_queue(), ^ { [self exception:s]; });
+        }
+        @catch(Glacier2PermissionDeniedException* ex)
+        {
+            NSString* s = [NSString stringWithFormat:@"Login failed: %@", ex.reason_];
+            dispatch_async(dispatch_get_main_queue(), ^ { [self exception:s]; });
+        }
+        @catch(ICEException* ex)
+        {
+            dispatch_async(dispatch_get_main_queue(), ^ { [self exception:[ex description]]; });
+        }        
+    });
 }
 
 -(void)refreshSession:(NSTimer*)timer
 {
 	if(sess != nil)
 	{
-		[sess refresh_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-				   response:nil
-				  exception:@selector(refreshException:)];
+		[sess begin_refresh:nil exception:^(ICEException* ex) { [self exception:[ex description]]; }];
 	}
 }
 
@@ -469,7 +438,7 @@ static NSString* sslKey = @"sslKey";
 
 -(IBAction)call:(id)sender
 {
-	[sess simulateCall_async:[ICECallbackOnMainThread callbackOnMainThread:self] response:nil exception:@selector(exception:)];
+	[sess begin_simulateCall:nil exception:^(ICEException* ex) { [self exception:[ex description]]; }];
 }
 
 #pragma mark VoipControl
@@ -477,7 +446,7 @@ static NSString* sslKey = @"sslKey";
 -(void)incomingCall:(ICECurrent*)current
 {
 	NSLog(@"incoming call");
-	UILocalNotification *localNotif = [[UILocalNotification alloc] init];
+	UILocalNotification *localNotif = [[[UILocalNotification alloc] init] autorelease];
     if (localNotif != nil)
 	{
 		NSDate* now = [NSDate date];
@@ -491,7 +460,6 @@ static NSString* sslKey = @"sslKey";
 		localNotif.applicationIconBadgeNumber = 1;
 	
 		[[UIApplication sharedApplication] scheduleLocalNotification:localNotif];
-		[localNotif release];
 	}
 }
 @end

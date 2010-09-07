@@ -221,13 +221,50 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(destroySession)
-                                                 name:UIApplicationWillTerminateNotification
+                                                 name:UIApplicationDidEnterBackgroundNotification
                                                object:nil];
     
     userController = [[UserController alloc] initWithNibName:@"UserView" bundle:nil];
 }
 
 #pragma mark SessionManagement
+
+-(void)destroySession
+{
+    [refreshTimer invalidate];
+    self.refreshTimer = nil;
+    
+    // Destroy the old session, and invalidate the refresh timer.
+    [router begin_destroySession];
+    self.router = nil;
+    self.session = nil;
+    
+    id<ICECommunicator> com = [communicator retain];
+    self.communicator = nil;
+    
+    // Clean up the communicator.
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^ {
+        
+        // Destroy might block so we call it from a separate thread.
+        [com destroy];
+        [com release];
+    });
+}
+
+-(void)exception:(ICEException*)ex
+{
+    // open an alert with just an OK button
+    UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Error"
+                                                     message:[ex description]
+                                                    delegate:self
+                                           cancelButtonTitle:@"OK"
+                                           otherButtonTitles:nil] autorelease];
+    [alert show];       
+    
+    [self destroySession];
+    
+    [self.navigationController popViewControllerAnimated:YES];
+}
 
 // Called by the thread other than main.
 -(void)  setup:(id<ICECommunicator>)c
@@ -247,14 +284,11 @@ sessionTimeout:(int)t
     // Here we tie the chat view controller to the ChatRoomCallback servant.
     ChatChatRoomCallback* callbackImpl = [ChatChatRoomCallback objectWithDelegate:self];
     
-    // This helper ensures that all methods are dispatched in the main thread.
-    ICEObject* dispatchMainThread = [ICEMainThreadDispatch mainThreadDispatch:callbackImpl];
-
     ICEIdentity* callbackId = [ICEIdentity identity:[ICEUtil generateUUID] category:category];
 
     // The callback is registered in clear:, otherwise the callbacks can arrive
     // prior to the IBOutlet connections being setup.
-    self.callbackProxy = [ChatChatRoomCallbackPrx uncheckedCast:[adapter add:dispatchMainThread identity:callbackId]];
+    self.callbackProxy = [ChatChatRoomCallbackPrx uncheckedCast:[adapter add:callbackImpl identity:callbackId]];
 }
 
 // Called when the chat controller becomes active.
@@ -274,24 +308,7 @@ sessionTimeout:(int)t
     [[NSRunLoop currentRunLoop] addTimer:refreshTimer forMode:NSDefaultRunLoopMode];
     
     // Register the chat callback.
-    [session setCallback_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                      response:nil
-                     exception:@selector(exception:)
-                            cb:callbackProxy];
-}
-
--(void)destroySession
-{
-    [refreshTimer invalidate];
-    self.refreshTimer = nil;
-
-    // Destroy the old session, and invalidate the refresh timer.
-    [router destroySession_async:self response:nil exception:nil];
-    self.router = nil;
-    self.session = nil;
-    
-    [communicator destroy];
-    self.communicator = nil;
+    [session begin_setCallback:callbackProxy response:nil exception:^(ICEException* ex) { [self exception:ex]; }];
 }
 
 -(void)logout:(id)sender
@@ -300,36 +317,29 @@ sessionTimeout:(int)t
     [self.navigationController popViewControllerAnimated:YES];
 }
 
--(void)sessionRefreshException:(ICEException*)ex
-{
-    [self.navigationController popToRootViewControllerAnimated:YES];
-
-    // The session is invalid, clear.
-    self.session = nil;
-    self.router = nil;
-
-    // Clean up the remainder.
-    [self destroySession];
-    
-    NSString* s = [NSString stringWithFormat:@"Lost connection with session!\n%@", ex];
-    
-    // open an alert with just an OK button
-    UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Error"
-                                                     message:s
-                                                    delegate:nil
-                                           cancelButtonTitle:@"OK"
-                                           otherButtonTitles:nil] autorelease];
-    [alert show];
-}
-
 -(void)refreshSession:(NSTimer*)timer
 {
-    [session ice_invoke_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                     response:nil
-                    exception:@selector(sessionRefreshException:)
-                    operation:@"ice_ping"
-                         mode:ICENonmutating
-                     inParams:nil];
+    [session begin_ice_ping:nil exception:^(ICEException* ex) {
+        
+        [self.navigationController popToRootViewControllerAnimated:YES];
+        
+        // The session is invalid, clear.
+        self.session = nil;
+        self.router = nil;
+        
+        // Clean up the remainder.
+        [self destroySession];
+        
+        NSString* s = [NSString stringWithFormat:@"Lost connection with session!\n%@", ex];
+        
+        // open an alert with just an OK button
+        UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Error"
+                                                         message:s
+                                                        delegate:nil
+                                               cancelButtonTitle:@"OK"
+                                               otherButtonTitles:nil] autorelease];
+        [alert show];
+    }];
 }
 
 #pragma mark UIViewController delegate methods
@@ -426,21 +436,6 @@ sessionTimeout:(int)t
     [UIView commitAnimations];
 }
 
--(void)exception:(ICEException*)ex
-{
-    // open an alert with just an OK button
-    UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Error"
-                                                     message:[ex description]
-                                                    delegate:self
-                                           cancelButtonTitle:@"OK"
-                                           otherButtonTitles:nil] autorelease];
-    [alert show];       
-    
-    [self destroySession];
-    
-    [self.navigationController popViewControllerAnimated:YES];
-}
-
 #pragma mark Keyboard notifications
 
 - (void)keyboardWillShow:(NSNotification *)notif
@@ -470,10 +465,7 @@ sessionTimeout:(int)t
     NSAssert(s.length <= 1024, @"s.length <= 1024");
     if(s.length > 0)
     {
-        [session send_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                   response:nil
-                  exception:@selector(exception:)
-                    message:s];
+        [session begin_send:s response:nil exception:^(ICEException* ex) { [self exception:ex]; }];
     }
     
     theTextField.text = @"";

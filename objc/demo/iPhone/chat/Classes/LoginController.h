@@ -26,7 +26,6 @@
     UITextField* currentField;
     NSString* oldFieldValue;
     ChatController* chatController;
-    NSOperationQueue* queue;
     WaitAlert* waitAlert;
 
     id<ICECommunicator> communicator;

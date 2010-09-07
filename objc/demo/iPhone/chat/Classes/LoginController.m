@@ -50,7 +50,6 @@ static NSString* sslKey = @"sslKey";
 - (void)viewDidLoad
 {
     NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-    queue = [[NSOperationQueue alloc] init];
 
     // Set the default values, and show the clear button in the text field.
     hostnameField.text = [defaults stringForKey:hostnameKey];
@@ -70,14 +69,21 @@ static NSString* sslKey = @"sslKey";
     chatController = [[ChatController alloc] initWithNibName:@"ChatView" bundle:nil];
 
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(applicationWillTerminate) 
-                                                 name:UIApplicationWillTerminateNotification
+                                             selector:@selector(applicationDidEnterBackground) 
+                                                 name:UIApplicationDidEnterBackgroundNotification
                                                object:nil]; 
+    
+    
 }
 
--(void)applicationWillTerminate
+- (void)applicationDidEnterBackground
 {
-    [communicator destroy];
+    // TODO: do we need to copy communicator here?
+    
+    // Start the long-running task and return immediately.
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [communicator destroy];
+    });
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -109,7 +115,6 @@ static NSString* sslKey = @"sslKey";
     [currentField release];
     [oldFieldValue release];
     [chatController release];
-    [queue release];
     [communicator release];
     
 	[super dealloc];
@@ -194,49 +199,6 @@ static NSString* sslKey = @"sslKey";
     [alert show];       
 }
 
--(void)loginComplete
-{
-    [waitAlert dismissWithClickedButtonIndex:0 animated:YES];
-    self.waitAlert = nil;
-
-    // The communicator is now owned by the ChatController.
-    self.communicator = nil;
-
-    [chatController activate:hostnameField.text];
-    [self.navigationController pushViewController:chatController animated:YES];
-}
-
-// Runs in a separate thread, called only by NSInvocationOperation.
--(void)doGlacier2Login
-{
-    @try
-    {
-        id<Glacier2RouterPrx> router = [Glacier2RouterPrx checkedCast:[communicator getDefaultRouter]];
-        id<Glacier2SessionPrx> glacier2session = [router createSession:usernameField.text password:passwordField.text];
-        id<ChatChatSessionPrx> sess = [ChatChatSessionPrx uncheckedCast:glacier2session];
-        [chatController setup:communicator
-                      session:sess
-               sessionTimeout:[router getSessionTimeout]
-                       router:router
-                     category:[router getCategoryForClient]];
-        [self performSelectorOnMainThread:@selector(loginComplete) withObject:nil waitUntilDone:NO];
-    }
-    @catch(Glacier2CannotCreateSessionException* ex)
-    {
-        NSString* s = [NSString stringWithFormat:@"Session creation failed: %@", ex.reason_];
-        [self performSelectorOnMainThread:@selector(exception:) withObject:s waitUntilDone:NO];
-    }
-    @catch(Glacier2PermissionDeniedException* ex)
-    {
-        NSString* s = [NSString stringWithFormat:@"Login failed: %@", ex.reason_];
-        [self performSelectorOnMainThread:@selector(exception:) withObject:s waitUntilDone:NO];
-    }
-    @catch(ICEException* ex)
-    {
-        [self performSelectorOnMainThread:@selector(exception:) withObject:[ex description] waitUntilDone:NO];
-    }
-}
-
 -(IBAction)login:(id)sender
 {
     ICEInitializationData* initData = [ICEInitializationData initializationData];
@@ -257,6 +219,11 @@ static NSString* sslKey = @"sslKey";
     [initData.properties setProperty:@"IceSSL.Keychain" value:@"test"];
     [initData.properties setProperty:@"IceSSL.KeychainPassword" value:@"password"];
 #endif
+    
+    initData.dispatcher = ^(id<ICEDispatcherCall> call, id<ICEConnection> con)
+    {
+        dispatch_sync(dispatch_get_main_queue(), ^ { [call run]; });
+    };
     
     NSAssert(communicator == nil, @"communicator == nil");
     self.communicator = [ICEUtil createCommunicator:initData];
@@ -297,11 +264,50 @@ static NSString* sslKey = @"sslKey";
     waitAlert.text = @"Connecting...";
     [waitAlert show];
     
-    // Kick off the login process in a separate thread. This ensures that the UI is not blocked.
-    NSInvocationOperation* op = [[[NSInvocationOperation alloc] initWithTarget:self
-                                                                      selector:@selector(doGlacier2Login)
-                                                                        object:nil] autorelease];
-    [queue addOperation:op];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^ {
+        @try
+        {
+            id<Glacier2RouterPrx> router = [Glacier2RouterPrx checkedCast:[communicator getDefaultRouter]];
+            id<Glacier2SessionPrx> glacier2session = [router createSession:usernameField.text password:passwordField.text];
+            id<ChatChatSessionPrx> sess = [ChatChatSessionPrx uncheckedCast:glacier2session];
+            [chatController setup:communicator
+                          session:sess
+                   sessionTimeout:[router getSessionTimeout]
+                           router:router
+                         category:[router getCategoryForClient]];
+            dispatch_async(dispatch_get_main_queue(), ^ {
+                [waitAlert dismissWithClickedButtonIndex:0 animated:YES];
+                self.waitAlert = nil;
+                
+                // The communicator is now owned by the ChatController.
+                self.communicator = nil;
+                
+                [chatController activate:hostnameField.text];
+                [self.navigationController pushViewController:chatController animated:YES];
+                
+            });
+        }
+        @catch(Glacier2CannotCreateSessionException* ex)
+        {
+            NSString* s = [NSString stringWithFormat:@"Session creation failed: %@", ex.reason_];
+            dispatch_async(dispatch_get_main_queue(), ^ {
+                [self exception:s];
+            });
+        }
+        @catch(Glacier2PermissionDeniedException* ex)
+        {
+            NSString* s = [NSString stringWithFormat:@"Login failed: %@", ex.reason_];
+            dispatch_async(dispatch_get_main_queue(), ^ {
+                [self exception:s];
+            });
+        }
+        @catch(ICEException* ex)
+        {
+            dispatch_async(dispatch_get_main_queue(), ^ {
+                [self exception:[ex description]];
+            });
+        }        
+    });
 }
 
 @end

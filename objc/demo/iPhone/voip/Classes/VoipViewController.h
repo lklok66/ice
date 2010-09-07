@@ -27,7 +27,6 @@
 	
     UITextField* currentField;
     NSString* oldFieldValue;
-    NSOperationQueue* queue;
     WaitAlert* waitAlert;
 	NSTimer* refreshTimer;
 	
