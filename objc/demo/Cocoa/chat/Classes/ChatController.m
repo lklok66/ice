@@ -37,10 +37,7 @@
         // Here we tie the chat view controller to the ChatRoomCallback servant.
         ChatChatRoomCallback* callbackImpl = [ChatChatRoomCallback objectWithDelegate:self];
         
-        // This helper ensures that all methods are dispatched in the main thread.
-        ICEObject* dispatchMainThread = [ICEMainThreadDispatch mainThreadDispatch:callbackImpl];
-        
-        id<ICEObjectPrx> proxy = [adapter add:dispatchMainThread identity:callbackId];
+        id<ICEObjectPrx> proxy = [adapter add:callbackImpl identity:callbackId];
 
         // The callback is registered in awakeFromNib, otherwise the callbacks can arrive
         // prior to the IBOutlet connections being setup.
@@ -91,10 +88,7 @@
     [chatView.textStorage deleteCharactersInRange:NSMakeRange(0, chatView.textStorage.length)];
     
     // Register the chat callback.
-    [session setCallback_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                      response:nil
-                     exception:@selector(exception:)
-                            cb:callbackProxy];
+    [session begin_setCallback:callbackProxy response:nil exception:^(ICEException* ex) { [self exception:ex]; }];
 }
 
 #pragma mark Message management
@@ -155,24 +149,31 @@
     if(router && [router isKindOfClass:[Glacier2RouterPrx class]])
     {
         id<Glacier2RouterPrx> glacier2router = [Glacier2RouterPrx uncheckedCast:router];
-        [glacier2router destroySession_async:nil response:nil exception:nil];
+        [glacier2router begin_destroySession];
     }
     else
     {
-        [session destroy_async:nil response:nil exception:nil];
+        [session begin_destroy];
     }
     router = nil;
     session = nil;
+    
     // Clean up the communicator.
-    [communicator destroy];
-    communicator = nil;
-    
-    [self append:@"<disconnected>" who:@"system message" timestamp:[NSDate date]];
-    [inputField setEnabled:NO];
-    
-    NSApplication* app = [NSApplication sharedApplication];
-    AppDelegate* delegate = (AppDelegate*)[app delegate];
-    [delegate setChatActive:NO];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^ {
+	
+	// Destroy might block so we call it from a separate thread.
+	[communicator destroy];
+	communicator = nil;
+	
+	dispatch_async(dispatch_get_main_queue(), ^ {
+	    [self append:@"<disconnected>" who:@"system message" timestamp:[NSDate date]];
+	    [inputField setEnabled:NO];
+	    
+	    NSApplication* app = [NSApplication sharedApplication];
+	    AppDelegate* delegate = (AppDelegate*)[app delegate];
+	    [delegate setChatActive:NO];
+	});
+    });
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem *)item
@@ -198,12 +199,7 @@
 
 -(void)refreshSession:(NSTimer*)timer
 {
-    [session ice_invoke_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                     response:nil
-                    exception:@selector(exception:)
-                    operation:@"ice_ping"
-                         mode:ICENonmutating
-                     inParams:nil];
+    [session begin_ice_ping:nil exception:^(ICEException* ex) { [self exception:ex]; }];
 }
 
 -(void)logout:(id)sender
@@ -222,10 +218,7 @@
     NSAssert(s.length <= 1024, @"s.length <= 1024");
     if(s.length > 0)
     {
-        [session send_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                   response:nil
-                  exception:@selector(exception:)
-                    message:s];
+        [session begin_send:s response:nil exception:^(ICEException* ex) { [self exception:ex]; }];
     }
 
     inputField.stringValue = @"";

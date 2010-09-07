@@ -43,11 +43,7 @@ NSString* const routerServerKey = @"routerServerKey";
 
 -(id)init
 {
-    if(self = [super initWithWindowNibName:@"LoginView"])
-    {
-        queue = [[NSOperationQueue alloc] init];
-    }
-    return self;
+    return [super initWithWindowNibName:@"LoginView"];
 }
 
 -(void)awakeFromNib
@@ -71,108 +67,42 @@ NSString* const routerServerKey = @"routerServerKey";
 
 #pragma mark Login callbacks
 
--(void)loginComplete:(ChatController*)controller
+-(ChatController*)doGlacier2Login:(id)proxy
 {
-    // Hide the connecting sheet.
-    [NSApp endSheet:connectingSheet];
-    [connectingSheet orderOut:self.window];
-    [progress stopAnimation:self];
-
-    // The communicator is now owned by the ChatController.
-    communicator = nil;
-
-    // Close the connecting window, show the main window.
-    [self.window close];
-    [controller showWindow:self];
+    id<Glacier2RouterPrx> router = [Glacier2RouterPrx checkedCast:proxy];
+    id<Glacier2SessionPrx> glacier2session = [router createSession:usernameField.stringValue
+							  password:passwordField.stringValue];
+    id<ChatChatSessionPrx> session = [ChatChatSessionPrx uncheckedCast:glacier2session];
+    
+    int sessionTimeout = [router getSessionTimeout];
+    NSString* category = [router getCategoryForClient];
+    
+    return [[ChatController alloc] initWithCommunicator:[proxy ice_getCommunicator]
+						session:session
+					 sessionTimeout:sessionTimeout
+						 router:router
+					       category:category];
 }
 
--(void)exception:(NSString*)ex
+-(ChatController*)doPhoneRouterLogin:(id)proxy
 {
-    // Hide the connecting sheet.
-    [NSApp endSheet:connectingSheet]; 
-    [connectingSheet orderOut:self.window];
-    [progress stopAnimation:self];
-
-    [communicator destroy];
-    communicator = nil;
-
-    NSRunAlertPanel(@"Error", ex, @"OK", nil, nil);
-}
-
--(void)doGlacier2Login:(id)proxy
-{
-    @try
-    {
-        id<Glacier2RouterPrx> router = [Glacier2RouterPrx checkedCast:proxy];
-        id<Glacier2SessionPrx> glacier2session = [router createSession:usernameField.stringValue
-                                                              password:passwordField.stringValue];
-        id<ChatChatSessionPrx> session = [ChatChatSessionPrx uncheckedCast:glacier2session];
-        
-        int sessionTimeout = [router getSessionTimeout];
-        NSString* category = [router getCategoryForClient];
-
-        ChatController* chatController = [[ChatController alloc] initWithCommunicator:[proxy ice_getCommunicator]
-                                                                              session:session
-                                                                       sessionTimeout:sessionTimeout
-                                                                               router:router
-                                                                             category:category];
-        [self performSelectorOnMainThread:@selector(loginComplete:) withObject:chatController waitUntilDone:NO];
-    }
-    @catch(Glacier2CannotCreateSessionException* ex)
-    {
-        NSString* s = [NSString stringWithFormat:@"Session creation failed: %@", ex.reason_];
-        [self performSelectorOnMainThread:@selector(exception:) withObject:s waitUntilDone:NO];
-    }
-    @catch(Glacier2PermissionDeniedException* ex)
-    {
-        NSString* s = [NSString stringWithFormat:@"Login failed: %@", ex.reason_];
-        [self performSelectorOnMainThread:@selector(exception:) withObject:s waitUntilDone:NO];
-    }
-    @catch(ICEException* ex)
-    {
-        [self performSelectorOnMainThread:@selector(exception:) withObject:[ex description] waitUntilDone:NO];
-    }
-}
-
--(void)doPhoneRouterLogin:(id)proxy
-{
-    @try
-    {
-        id<DemoRouterPrx> router = [DemoRouterPrx uncheckedCast:[communicator getDefaultRouter]];
-        id<ICERouterPrx> glacier2router = [ICERouterPrx uncheckedCast:proxy];
-        id<Glacier2SessionPrx> glacier2session;
-        NSMutableString* category;
-        ICEInt sessionTimeout;
-        [router createGlacier2Session:glacier2router
-                               userId:usernameField.stringValue
-                             password:passwordField.stringValue
-                             category:&category
-                       sessionTimeout:&sessionTimeout
-                                 sess:&glacier2session];
-
-        ChatController* chatController = [[ChatController alloc]
-                                          initWithCommunicator:[proxy ice_getCommunicator]
-                                          session:[ChatChatSessionPrx uncheckedCast:glacier2session]
-                                          sessionTimeout:sessionTimeout
-                                          router:router
-                                          category:category];
-
-        [self performSelectorOnMainThread:@selector(loginComplete:) withObject:chatController waitUntilDone:NO];
-    }
-    @catch(Glacier2CannotCreateSessionException* ex)
-    {
-        NSString* s = [NSString stringWithFormat:@"Session creation failed: %@", ex.reason_];
-        [self performSelectorOnMainThread:@selector(exception:) withObject:s waitUntilDone:NO];
-    }
-    @catch(Glacier2PermissionDeniedException* ex)
-    {
-        NSString* s = [NSString stringWithFormat:@"Login failed: %@", ex.reason_];
-        [self performSelectorOnMainThread:@selector(exception:) withObject:s waitUntilDone:NO];
-    }
-    @catch(ICEException* ex)
-    {
-        [self performSelectorOnMainThread:@selector(exception:) withObject:[ex description] waitUntilDone:NO];
-    }
+    id<DemoRouterPrx> router = [DemoRouterPrx uncheckedCast:[communicator getDefaultRouter]];
+    id<ICERouterPrx> glacier2router = [ICERouterPrx uncheckedCast:proxy];
+    id<Glacier2SessionPrx> glacier2session;
+    NSMutableString* category;
+    ICEInt sessionTimeout;
+    [router createGlacier2Session:glacier2router
+			   userId:usernameField.stringValue
+			 password:passwordField.stringValue
+			 category:&category
+		   sessionTimeout:&sessionTimeout
+			     sess:&glacier2session];
+    
+    return [[ChatController alloc] initWithCommunicator:[proxy ice_getCommunicator]
+						session:[ChatChatSessionPrx uncheckedCast:glacier2session]
+					 sessionTimeout:sessionTimeout
+						 router:router
+					       category:category];
 }
 
 #pragma mark Login
@@ -193,6 +123,11 @@ NSString* const routerServerKey = @"routerServerKey";
     //[initData.properties setProperty:@"Ice.Trace.Protocol" value:@"1"];
     //[initData.properties setProperty:@"IceSSL.Trace.Security" value:@"1"];
     
+    initData.dispatcher = ^(id<ICEDispatcherCall> call, id<ICEConnection> con)
+    {
+        dispatch_sync(dispatch_get_main_queue(), ^ { [call run]; });
+    };
+
     [initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
     [initData.properties setProperty:@"IceSSL.TrustOnly.Client" value:@"CN=\"Glacier2\""];
     [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.pem"];
@@ -257,13 +192,56 @@ NSString* const routerServerKey = @"routerServerKey";
        didEndSelector:NULL 
           contextInfo:NULL];
     [progress startAnimation:self];
-
-    // Kick off the login process in a separate thread. This ensures that the UI is not blocked.
-    NSInvocationOperation* op = [[NSInvocationOperation alloc]
-                                 initWithTarget:self
-                                 selector:loginSelector
-                                 object:proxy];
-    [queue addOperation:op];
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^ {
+	NSString* msg;
+	@try 
+	{
+	    ChatController* chatController = [self performSelector:loginSelector withObject:proxy];
+	    dispatch_async(dispatch_get_main_queue(), ^ {
+		// Hide the connecting sheet.
+		[NSApp endSheet:connectingSheet];
+		[connectingSheet orderOut:self.window];
+		[progress stopAnimation:self];
+		
+		// The communicator is now owned by the LibraryController.
+		communicator = nil;
+		
+		// Close the connecting window, show the main window.
+		[self.window close];
+		[chatController showWindow:self];
+	    });
+	    return;
+	}
+	@catch(Glacier2CannotCreateSessionException* ex)
+	{
+	    msg = [NSString stringWithFormat:@"Session creation failed: %@", ex.reason_];
+	}
+	@catch(Glacier2PermissionDeniedException* ex)
+	{
+	    msg = [NSString stringWithFormat:@"Login failed: %@", ex.reason_];
+	}
+	@catch(ICEException* ex)
+	{
+	    msg = [ex description];
+	}
+	@catch(NSException *ex)
+	{
+	    msg = [ex reason];
+	}
+	
+	dispatch_async(dispatch_get_main_queue(), ^ {
+	    // Hide the connecting sheet.
+	    [NSApp endSheet:connectingSheet]; 
+	    [connectingSheet orderOut:self.window];
+	    [progress stopAnimation:self];
+	    
+	    [communicator destroy];
+	    communicator = nil;
+	    
+	    NSRunAlertPanel(@"Error", msg, @"OK", nil, nil);
+	});
+    });    
 }
 
 -(void)routerChanged:(id)sender
