@@ -37,10 +37,21 @@ operationsAllTests(id<ICECommunicator> communicator, BOOL collocated)
     twowaysAMI(communicator, cl);
     twowaysAMI(communicator, derived);
     tprintf("ok\n");
+
+    tprintf("testing twoway operations with new AMI... ");
+    void twowaysNewAMI(id<ICECommunicator>, id<TestOperationsMyClassPrx>);
+    twowaysNewAMI(communicator, cl);
+    twowaysNewAMI(communicator, derived);
+    tprintf("ok\n");
     
     tprintf("testing oneway operations with AMI... ");
     void onewaysAMI(id<ICECommunicator>, id<TestOperationsMyClassPrx>);
     onewaysAMI(communicator, cl);
+    tprintf("ok\n");
+
+    tprintf("testing oneway operations with new AMI... ");
+    void onewaysNewAMI(id<ICECommunicator>, id<TestOperationsMyClassPrx>);
+    onewaysNewAMI(communicator, cl);
     tprintf("ok\n");
     
     tprintf("testing batch oneway operations... ");

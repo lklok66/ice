@@ -52,8 +52,6 @@
     int nrows;
     int searchType; // Equivalent to the tag of the menu item.
     
-    NSOperationQueue* queue;
-    
     DemoBookDescription* selection;
     DemoBookDescription* updated;
 }

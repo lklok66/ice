@@ -125,6 +125,10 @@ IceObjC::Transceiver::registerWithRunLoop(SocketOperation op)
             _writeStreamRegistered = true; // Note: this must be set after the schedule call
             CFWriteStreamOpen(_writeStream);
         }
+        else
+        {
+            readyOp = static_cast<SocketOperation>(readyOp | SocketOperationConnect);
+        }
 
         if(CFReadStreamGetStatus(_readStream) == kCFStreamStatusNotOpen)
         {
@@ -132,6 +136,10 @@ IceObjC::Transceiver::registerWithRunLoop(SocketOperation op)
             CFReadStreamScheduleWithRunLoop(_readStream, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
             _readStreamRegistered = true; // Note: this must be set after the schedule call
             CFReadStreamOpen(_readStream);
+        }
+        else
+        {
+            readyOp = static_cast<SocketOperation>(readyOp | SocketOperationConnect);
         }
     }
     else

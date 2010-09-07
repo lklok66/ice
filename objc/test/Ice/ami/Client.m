@@ -50,6 +50,7 @@ main(int argc, char* argv[])
         //
         [initData.properties setProperty:@"Ice.ThreadPool.Client.Size" value:@"2"];
         [initData.properties setProperty:@"Ice.ThreadPool.Client.SizeWarn" value:@"0"];
+        [initData.properties setProperty:@"Ice.Warn.AMICallback" value:@"0"];
 
         //
         // We must set MessageSizeMax to an explicit values, because

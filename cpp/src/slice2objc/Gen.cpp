@@ -397,6 +397,58 @@ Slice::ObjCVisitor::getParams(const OperationPtr& op) const
 }
 
 string
+Slice::ObjCVisitor::getMarshalParams(const OperationPtr& op) const
+{
+    ParamDeclList paramList = op->parameters();
+    string result;
+    for(ParamDeclList::const_iterator q = paramList.begin(); q != paramList.end(); ++q)
+    {
+        if(!(*q)->isOutParam())
+        {
+            TypePtr type = (*q)->type();
+            string name = fixId((*q)->name());
+            if(!result.empty())
+            {
+                result += " " + name;
+            }
+            result += ":(" + typeToString(type);
+            if(mapsToPointerType(type))
+            {
+                result += " *";
+            }
+            result += ")" + name;
+        }
+    }
+    return result;
+}
+
+string
+Slice::ObjCVisitor::getUnmarshalParams(const OperationPtr& op) const
+{
+    string result;
+    ParamDeclList paramList = op->parameters();
+    for(ParamDeclList::const_iterator q = paramList.begin(); q != paramList.end(); ++q)
+    {
+        if((*q)->isOutParam())
+        {
+            TypePtr type = (*q)->type();
+            string name = fixId((*q)->name());
+            if(!result.empty())
+            {
+                result += " " + name;
+            }
+            result += ":(" + outTypeToString(type);
+            if(mapsToPointerType(type))
+            {
+                result += "*";
+            }
+            result += "*)" + name;
+        }
+    }
+    return result;
+}
+
+string
 Slice::ObjCVisitor::getServerParams(const OperationPtr& op) const
 {
     string result;
@@ -430,6 +482,41 @@ Slice::ObjCVisitor::getServerParams(const OperationPtr& op) const
 }
 
 string
+Slice::ObjCVisitor::getResponseCBSig(const OperationPtr& op) const
+{
+    string result;
+    TypePtr returnType = op->returnType();
+    if(returnType)
+    {
+        result += outTypeToString(returnType);
+        if(mapsToPointerType(returnType))
+        {
+            result += "*";
+        }
+    }
+
+    ParamDeclList paramList = op->parameters();
+    for(ParamDeclList::const_iterator q = paramList.begin(); q != paramList.end(); ++q)
+    {
+        if((*q)->isOutParam())
+        {
+            TypePtr type = (*q)->type();
+            string name = fixId((*q)->name());
+            if(!result.empty())
+            {
+                result += ", ";
+            }
+            result += outTypeToString(type);
+            if(mapsToPointerType(type))
+            {
+                result += "*";
+            }
+        }
+    }
+    return "void(^)(" + result + ")";
+}
+
+string
 Slice::ObjCVisitor::getParamsAsync(const OperationPtr& op, bool sent)
 {
     ParamDeclList paramList = op->parameters();
@@ -450,6 +537,61 @@ Slice::ObjCVisitor::getParamsAsync(const OperationPtr& op, bool sent)
                 result += " *";
             }
             result += ")" + name;
+        }
+    }
+    return result;
+}
+
+string
+Slice::ObjCVisitor::getBeginParamsAsync(const OperationPtr& op, bool callbacks, bool sent)
+{
+    ParamDeclList paramList = op->parameters();
+
+    string result;
+    string responseCBParams;
+    for(ParamDeclList::const_iterator q = paramList.begin(); q != paramList.end(); ++q)
+    {
+        if((*q)->isOutParam())
+        {
+            TypePtr type = (*q)->type();
+            string name = fixId((*q)->name());
+            if(!responseCBParams.empty())
+            {
+                responseCBParams += ", ";
+            }
+            responseCBParams +=  typeToString(type);
+            if(mapsToPointerType(type))
+            {
+                responseCBParams += "* ";
+            }
+            responseCBParams += " " + name;
+        }
+        else
+        {
+            TypePtr type = (*q)->type();
+            string name = fixId((*q)->name());
+            if(!result.empty())
+            {
+                result += " " + name;
+            }
+            result += ":(" + typeToString(type);
+            if(mapsToPointerType(type))
+            {
+                result += " *";
+            }
+            result += ")" + name;
+        }
+    }
+    if(callbacks)
+    {
+        if(!result.empty())
+        {
+            result += " response";
+        }
+        result += ":(void(^)(" + responseCBParams + "))response_ exception:(void(^)(ICEException*))exception_";
+        if(sent)
+        {
+            result += " sent:(void(^)(BOOL))sent_";
         }
     }
     return result;
@@ -498,12 +640,51 @@ Slice::ObjCVisitor::getArgs(const OperationPtr& op) const
     for(ParamDeclList::const_iterator q = paramList.begin(); q != paramList.end(); ++q)
     {
         string name = fixId((*q)->name());
-
 	if(q != paramList.begin())
 	{
 	    result += " " + name;
 	}
 	result += ":" + name;
+    }
+    return result;
+}
+
+string
+Slice::ObjCVisitor::getMarshalArgs(const OperationPtr& op) const
+{
+    string result;
+    ParamDeclList paramList = op->parameters();
+    for(ParamDeclList::const_iterator q = paramList.begin(); q != paramList.end(); ++q)
+    {
+        if(!(*q)->isOutParam())
+        {
+            string name = fixId((*q)->name());
+            if(!result.empty())
+            {
+                result += " " + name;
+            }
+            result += ":" + name;
+        }
+    }
+    return result;
+}
+
+string
+Slice::ObjCVisitor::getUnmarshalArgs(const OperationPtr& op) const
+{
+    string result;
+    ParamDeclList paramList = op->parameters();
+    for(ParamDeclList::const_iterator q = paramList.begin(); q != paramList.end(); ++q)
+    {
+        if((*q)->isOutParam())
+        {
+            string name = fixId((*q)->name());
+            if(!result.empty())
+            {
+                result += " " + name;
+            }
+            result += ":" + name;
+        }
     }
     return result;
 }
@@ -1942,6 +2123,8 @@ Slice::Gen::ProxyVisitor::visitOperation(const OperationPtr& p)
     string retString = outTypeToString(returnType);
     bool retIsPointer = mapsToPointerType(returnType);
     string params = getParams(p);
+    string marshalParams = getMarshalParams(p);
+    string unmarshalParams = getUnmarshalParams(p);
 
     //
     // Write two versions of the operation--with and without a
@@ -1965,6 +2148,57 @@ Slice::Gen::ProxyVisitor::visitOperation(const OperationPtr& p)
         _H << " context";
     }
     _H << ":(ICEContext *)context;";
+
+    _H << nl << "-(ICEAsyncResult*) begin_" << p->name() << marshalParams << ";";
+    _H << nl << "-(ICEAsyncResult*) begin_" << p->name() << marshalParams;
+    if(!marshalParams.empty())
+    {
+        _H << " context";
+    }
+    _H << ":(ICEContext *)context;";
+
+    _H << nl << "-(" << retString;
+    if(retIsPointer)
+    {
+        _H << " *";
+    }
+    _H << ") end_" << p->name() << unmarshalParams;
+    if(!unmarshalParams.empty())
+    {
+        _H << " result";
+    }
+    _H << ":(ICEAsyncResult *)result;";
+
+    string responseCBSig = getResponseCBSig(p);
+    _H << nl << "-(ICEAsyncResult*) begin_" << p->name() << marshalParams;
+    if(!marshalParams.empty())
+    {
+        _H << " response";
+    }
+    _H << ":(" << responseCBSig << ")response_ exception:(void(^)(ICEException*))exception_;";
+
+    _H << nl << "-(ICEAsyncResult*) begin_" << p->name() << marshalParams;
+    if(!marshalParams.empty())
+    {
+        _H << " context";
+    }
+    _H << ":(ICEContext *)context";
+    _H << " response:(" << responseCBSig << ")response_ exception:(void(^)(ICEException*))exception_;";
+
+    _H << nl << "-(ICEAsyncResult*) begin_" << p->name() << marshalParams;
+    if(!marshalParams.empty())
+    {
+        _H << " response";
+    }
+    _H << ":(" << responseCBSig << ")response_ exception:(void(^)(ICEException*))exception_ sent:(void(^)(BOOL))sent_;";
+
+    _H << nl << "-(ICEAsyncResult*) begin_" << p->name() << marshalParams;
+    if(!marshalParams.empty())
+    {
+        _H << " context";
+    }
+    _H << ":(ICEContext *)context";
+    _H << " response:(" << responseCBSig << ")response_ exception:(void(^)(ICEException*))exception_ sent:(void(^)(BOOL))sent_;";
 
     ContainerPtr container = p->container();
     ClassDefPtr cl = ClassDefPtr::dynamicCast(container);
@@ -2274,6 +2508,21 @@ Slice::Gen::DelegateMVisitor::visitClassDefStart(const ClassDefPtr& p)
 	string params = getParams(*r);
 	string args = getArgs(*r);
 
+        TypeStringList inParams;
+        TypeStringList outParams;
+        ParamDeclList paramList = (*r)->parameters();
+        for(ParamDeclList::const_iterator pli = paramList.begin(); pli != paramList.end(); ++pli)
+        {
+            if((*pli)->isOutParam())
+            {
+                outParams.push_back(make_pair((*pli)->type(), (*pli)->name()));
+            }
+            else
+            {
+                inParams.push_back(make_pair((*pli)->type(), (*pli)->name()));
+            }
+        }
+
 	ContainerPtr container = (*r)->container();
 	ClassDefPtr cl = ClassDefPtr::dynamicCast(container);
 	string className = fixName(cl);
@@ -2293,12 +2542,7 @@ Slice::Gen::DelegateMVisitor::visitClassDefStart(const ClassDefPtr& p)
 	{
 	    _M << "return ";
 	}
-	_M << "[" << className << "Prx " << (*r)->name() << "___" << args;
-	if(!args.empty())
-	{
-	    _M << " prx";
-	}
-	_M << ":self context:nil];";
+	_M << "[self " << opName << args << (args.empty() ? ":nil" : " context:nil") << "];";
 	_M << eb;
 
 	//
@@ -2316,18 +2560,271 @@ Slice::Gen::DelegateMVisitor::visitClassDefStart(const ClassDefPtr& p)
 	}
 	_M << ":(ICEContext *)ctx_";
 	_M << sb;
-	_M << nl;
-	if(returnType)
-	{
-	    _M << "return ";
-	}
-	_M << "[" << className << "Prx " << (*r)->name() << "___" << args;
-	if(!args.empty())
-	{
-	    _M << " prx";
-	}
-	_M << ":self context:ctx_];";
+        if(returnType)
+        {
+            _M << nl << "__block " << retString << (retIsPointer ? "* " : " ") << "ret_";
+            if(!isValueType(returnType))
+            {
+                _M << " = nil;";
+            }
+            else
+            {
+                _M << ";";
+            }
+        }        
+
+        string marshal;
+        string marshalArgs = getMarshalArgs(*r);
+        string marshalParams = getMarshalParams(*r);
+        if(!inParams.empty())
+        {
+            _M << nl << "ICEMarshalCB marshal_ = ^(id<ICEOutputStream> os_) ";
+            _M << "{ [" << className << "Prx " << (*r)->name() << "_marshal___" << marshalArgs;
+            _M << (marshalArgs.empty() ? ":os_" : " os:os_") << "]; };";
+            marshal = "marshal_";
+        }
+        else
+        {
+            marshal = "nil";
+        }
+
+        string unmarshal;
+        string unmarshalArgs = getUnmarshalArgs(*r);
+        string unmarshalParams = getUnmarshalParams(*r);
+        if((*r)->returnsData())
+        {
+            _M << nl << "ICEUnmarshalCB unmarshal_ = ^(id<ICEInputStream> is_, BOOL ok_) ";
+            if(returnType)
+            {
+                _M << "{ ret_ = ";
+            }
+            else
+            {
+                _M << "{ ";
+            }
+            _M << "[" << className << "Prx " << (*r)->name() << "_unmarshal___" << unmarshalArgs;
+            _M << (unmarshalArgs.empty() ? ":is_" : " is:is_") << " ok:ok_]; };";
+            unmarshal = "unmarshal_";
+        }
+        else 
+        {
+            unmarshal = "nil";
+        }
+
+        _M << nl << "[self invoke__:@\"" << (*r)->name() <<  "\" mode:" << sliceModeToIceMode((*r)->sendMode())
+           << " marshal:" << marshal << " unmarshal:" << unmarshal << " context:ctx_];";
+        if(returnType)
+        {
+            _M << nl << "return ret_;";
+        }
 	_M << eb;
+
+        //
+        // Write begin_ context-less operation that forwards to the version with a context.
+        //
+        _M << sp << nl << "-(ICEAsyncResult*) begin_" << (*r)->name() << marshalParams;
+        _M << sb;
+        _M << nl << "return [self begin_" << (*r)->name() << marshalArgs;
+        _M << (marshalArgs.empty() ? "" : " context") << ":nil];";
+        _M << eb;
+                
+        //
+        // Write begin_ version with context.
+        //
+        _M << sp << nl << "-(ICEAsyncResult*) begin_" << (*r)->name() << marshalParams;
+        _M << (marshalParams.empty() ? "" : " context") << ":(ICEContext *)ctx_";
+        _M << sb;
+        if(!inParams.empty())
+        {
+            _M << nl << "ICEMarshalCB marshal_ = ^(id<ICEOutputStream> os_) ";
+            _M << "{ [" << className << "Prx " << (*r)->name() << "_marshal___" << marshalArgs;
+            _M << (marshalArgs.empty() ? "" : " os") << ":os_]; };";
+        }
+        _M << nl << "return [self begin_invoke__:@\"" << (*r)->name() <<  "\" mode:" 
+           << sliceModeToIceMode((*r)->sendMode()) << " marshal:" << marshal
+           << " returnsData:" << ((*r)->returnsData() ? "YES" : "NO")
+           << " context:ctx_];";
+        _M << eb;
+
+        //
+        // Write end_ operation
+        // 
+	_M << sp << nl << "-(" << retString;
+	if(retIsPointer)
+	{
+	    _M << " *";
+	}
+	_M << ") end_" << (*r)->name() << unmarshalParams;
+	if(!unmarshalParams.empty())
+	{
+	    _M << " result";
+	}
+	_M << ":(ICEAsyncResult *)result_";
+	_M << sb;
+        if(returnType)
+        {
+            _M << nl << "__block " << retString << (retIsPointer ? "* " : " ") << "ret_";
+            if(!isValueType(returnType))
+            {
+                _M << " = nil;";
+            }
+            else
+            {
+                _M << ";";
+            }
+        }        
+        if((*r)->returnsData())
+        {
+            _M << nl << "ICEUnmarshalCB unmarshal_ = ^(id<ICEInputStream> is_, BOOL ok_) ";
+            if(returnType)
+            {
+                _M << "{ ret_ = ";
+            }
+            else
+            {
+                _M << "{ ";
+            }
+            _M << "[" << className << "Prx " << (*r)->name() << "_unmarshal___" << unmarshalArgs;
+            _M << (unmarshalArgs.empty() ? ":is_" : " is:is_") << " ok:ok_]; };";
+        }
+        _M << nl << "[self end_invoke__:@\"" << (*r)->name() << "\" unmarshal:" << unmarshal << " result:result_];";
+        if(returnType)
+        {
+            _M << nl << "return ret_;";
+        }
+        _M << eb;
+
+        //
+        // Write begin_ operations with callbacks
+        //
+        string responseCBSig = getResponseCBSig(*r);
+
+        _M << sp << nl << "-(ICEAsyncResult*) begin_" << (*r)->name() << marshalParams;
+        _M << (marshalParams.empty() ? "" : " response") << ":(" << responseCBSig << ")response_";
+        _M << " exception:(void(^)(ICEException*))exception_";
+        _M << sb;
+        _M << nl << "return [self begin_" << (*r)->name() << marshalArgs;
+        _M << (marshalArgs.empty() ? "" : " context") << ":nil response:response_ exception:exception_ sent:nil];";
+        _M << eb;
+
+        _M << sp << nl << "-(ICEAsyncResult*) begin_" << (*r)->name() << marshalParams;
+        _M << (marshalParams.empty() ? "" : " response") << ":(" << responseCBSig << ")response_";
+        _M << " exception:(void(^)(ICEException*))exception_ sent:(void(^)(BOOL))sent_";
+        _M << sb;
+        _M << nl << "return [self begin_" << (*r)->name() << marshalArgs;
+        _M << (marshalArgs.empty() ? "" : " context") << ":nil response:response_ exception:exception_ sent:sent_];";
+        _M << eb;
+
+        _M << sp << nl << "-(ICEAsyncResult*) begin_" << (*r)->name() << marshalParams;
+        _M << (marshalParams.empty() ? "" : " context") << ":(ICEContext*)ctx_";
+        _M << " response:(" << responseCBSig << ")response_ exception:(void(^)(ICEException*))exception_ ";
+        _M << sb;
+        _M << nl << "return [self begin_" << (*r)->name() << marshalArgs;
+        _M << (marshalArgs.empty() ? "" : " context") << ":ctx_ response:response_ exception:exception_ sent:nil];";
+        _M << eb;
+
+        _M << sp << nl << "-(ICEAsyncResult*) begin_" << (*r)->name() << marshalParams;
+        _M << (marshalParams.empty() ? "" : " context") << ":(ICEContext*)ctx_";
+        _M << " response:(" << responseCBSig << ")response_ exception:(void(^)(ICEException*))exception_ ";
+        _M << " sent:(void(^)(BOOL))sent_";
+        _M << sb;
+        if(!inParams.empty())
+        {
+            _M << nl << "ICEMarshalCB marshal_ = ^(id<ICEOutputStream> os_) ";
+            _M << "{ [" << className << "Prx " << (*r)->name() << "_marshal___" << marshalArgs;
+            _M << (marshalArgs.empty() ? "" : " os") << ":os_]; };";
+        }
+        if((*r)->returnsData())
+        {
+            _M << nl << "void(^completed_)(id<ICEInputStream>, BOOL) = ^(id<ICEInputStream> is_, BOOL ok_)";
+            _M << sb;
+            string responseCallArgs;
+            string unmarshalCallArgs;
+            if(!outParams.empty() || returnType)
+            {
+                if(returnType)
+                {
+                    responseCallArgs += "ret_";
+                }
+
+                for(TypeStringList::const_iterator op = outParams.begin(); op != outParams.end(); ++op)
+                {
+                    string type = outTypeToString(op->first);
+                    string name = fixId(op->second);
+                    _M << nl << type << " ";
+                    if(mapsToPointerType(op->first))
+                    {
+                        _M << "*";
+                    }
+                    _M << name;
+                    
+                    if(!isValueType(op->first))
+                    {
+                        _M << " = nil";
+                    }
+                    _M << ";";
+
+                    if(!unmarshalCallArgs.empty())
+                    {
+                        unmarshalCallArgs += " " + name;
+                    }
+                    unmarshalCallArgs += ":&" + name;
+
+                    if(!responseCallArgs.empty())
+                    {
+                        responseCallArgs += ", ";
+                    }
+                    responseCallArgs += name;
+                }
+                if(returnType)
+                {
+                    _M << nl << outTypeToString(returnType) << " ";
+                    if(mapsToPointerType(returnType))
+                    {
+                        _M << "*";
+                    }
+                    _M << "ret_";
+                    if(!isValueType(returnType))
+                    {
+                        _M << " = nil";
+                    }
+                    _M << ";";
+                }
+            }
+            _M << nl << "@try";
+            _M << sb;
+            _M << nl;
+            if(returnType)
+            {
+                _M << "ret_ = ";
+            }
+            _M << "[" << className << "Prx " << (*r)->name() << "_unmarshal___" << unmarshalCallArgs;
+            _M << (unmarshalCallArgs.empty() ? ":is_" : " is:is_") << " ok:ok_];";
+            _M << eb;
+            _M << nl << "@catch(ICEException* ex)";
+            _M << sb;
+            _M << nl << "if(exception_)";
+            _M << sb;
+            _M << nl << "exception_(ex);";
+            _M << eb;
+            _M << nl << "return;";
+            _M << eb;
+            _M << nl << "if(response_)";
+            _M << sb;
+            _M << nl << "response_(" << responseCallArgs << ");";
+            _M << eb;
+            _M << eb << ";";
+            _M << nl << "return [self begin_invoke__:@\"" << (*r)->name() <<  "\" mode:" 
+               << sliceModeToIceMode((*r)->sendMode()) << " marshal:" << marshal 
+               << " completed:completed_ exception:exception_ sent:sent_ context:ctx_];";
+        }
+        else
+        {
+            _M << nl << "return [self begin_invoke__:@\"" << (*r)->name() <<  "\" mode:" 
+               << sliceModeToIceMode((*r)->sendMode()) << " marshal:" << marshal 
+               << " response:response_ exception:exception_ sent:sent_ context:ctx_];";
+        }
+        _M << eb;
 
         if(cl->hasMetaData("ami") || (*r)->hasMetaData("ami"))
         {
@@ -2383,6 +2880,8 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
     bool retIsPointer = mapsToPointerType(returnType);
     string params = getParams(p);
     string args = getParams(p);
+    string marshalParams = getMarshalParams(p);
+    string unmarshalParams = getUnmarshalParams(p);
 
     TypeStringList inParams;
     TypeStringList outParams;
@@ -2405,72 +2904,78 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
     ContainerPtr container = p->container();
     ClassDefPtr cl = ClassDefPtr::dynamicCast(container);
     string className = fixName(cl);
-    _H << nl << "+(" << retString;
-    if(retIsPointer)
+    if(!inParams.empty())
     {
-        _H << " *";
+        _H << nl << "+(void) " << p->name() << "_marshal___" << marshalParams;
+        if(!marshalParams.empty())
+        {
+            _H << " os";
+        }
+        _H << ":(id<ICEOutputStream>)os_;";
+            
+        _M << sp << nl << "+(void) " << p->name() << "_marshal___" << marshalParams;
+        if(!marshalParams.empty())
+        {
+            _M << " os";
+        }
+        _M << ":(id<ICEOutputStream>)os_";
+        _M << sb;
+        for(TypeStringList::const_iterator ip = inParams.begin(); ip != inParams.end(); ++ip)
+        {
+            writeMarshalUnmarshalCode(_M, ip->first, fixId(ip->second), true, false, false);
+        }
+        if(p->sendsClasses())
+        {
+            _M << nl << "[os_ writePendingObjects];";
+        }
+        _M << eb;
     }
-    _H << ") " << p->name() << "___" << params;
-    if(!params.empty())
-    {
-        _H << " prx";
-    }
-    _H << ":(ICEObjectPrx <" << className << "Prx> *)prx context:(ICEContext *)ctx;";
 
-    _M << sp << nl << "+(" << retString;
-    if(retIsPointer)
-    {
-        _M << " *";
-    }
-    _M << ") " << p->name() << "___" << params;
-    if(!params.empty())
-    {
-        _M << " prx";
-    }
-    _M << ":(ICEObjectPrx <" << className << "Prx> *)prx_ context:(ICEContext *)ctx_";
-    _M << sb;
     if(p->returnsData())
     {
-        _M << nl << "[prx_ checkTwowayOnly__:@\"" << p->name() <<  "\"];";
-    }
-    _M << nl << "id<ICEOutputStream> os_ = [prx_ createOutputStream__];";
-    _M << nl << "id<ICEInputStream> is_ = nil;";
-    if(returnType)
-    {
-        _M << nl << retString << " " << (retIsPointer ? "*ret_" : "ret_");
-        if(!isValueType(returnType))
+        _H << nl << "+(" << retString << (retIsPointer ? "*)" : ")") << p->name() << "_unmarshal___" << unmarshalParams;
+        if(!unmarshalParams.empty())
         {
-            _M << " = nil;";
+            _H << " is";
         }
-        else
+        _H << ":(id<ICEInputStream>)is_ ok:(BOOL)ok_;";
+
+        _M << nl << "+(" << retString << (retIsPointer ? "*)" : ")") << p->name() << "_unmarshal___" << unmarshalParams;
+        if(!unmarshalParams.empty())
         {
-            _M << ";";
+            _M << " is";
         }
-    }
-    if(p->returnsData())
-    {
-	for(TypeStringList::const_iterator op = outParams.begin(); op != outParams.end(); ++op)
-	{
-            if(!isValueType(op->first))
+        _M << ":(id<ICEInputStream>)is_ ok:(BOOL)ok_";
+        _M << sb;
+        if(returnType)
+        {
+            _M << nl << retString << " " << (retIsPointer ? "* ret_" : "ret_");
+            if(!isValueType(returnType))
             {
-                _M << nl << "*" << fixId(op->second) << " = nil;";
+                _M << " = nil;";
             }
-	}
-    }
-    _M << nl << "@try";
-    _M << sb;
-    for(TypeStringList::const_iterator ip = inParams.begin(); ip != inParams.end(); ++ip)
-    {
-	writeMarshalUnmarshalCode(_M, ip->first, fixId(ip->second), true, false, false);
-    }
-    if(p->sendsClasses())
-    {
-        _M << nl << "[os_ writePendingObjects];";
-    }
-    _M << nl << "[prx_ invoke__:@\"" << p->name() <<  "\" mode:" << sliceModeToIceMode(p->sendMode())
-       << " os:os_ is:&is_ context:ctx_];";
-    if(p->returnsData())
-    {
+            else
+            {
+                _M << ";";
+            }
+        }
+        if(p->returnsData())
+        {
+            for(TypeStringList::const_iterator op = outParams.begin(); op != outParams.end(); ++op)
+            {
+                if(!isValueType(op->first))
+                {
+                    _M << nl << "*" << fixId(op->second) << " = nil;";
+                }
+            }
+        }
+        _M << nl << "@try";
+        _M << sb;
+        if(returnType || !outParams.empty())
+        {
+            _M << nl << "if(ok_)";
+            _M << sb;
+        }
 	for(TypeStringList::const_iterator op = outParams.begin(); op != outParams.end(); ++op)
 	{
 	    writeMarshalUnmarshalCode(_M, op->first, "*" + fixId(op->second), false, false, true, "");
@@ -2483,57 +2988,65 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
 	{
  	    _M << nl << "[is_ readPendingObjects];";
 	}
-    }
-
-    _M << eb;
-
-    //
-    // Arrange exceptions into most-derived to least-derived order. If we don't
-    // do this, a base exception handler can appear before a derived exception
-    // handler, causing compiler warnings and resulting in the base exception
-    // being marshaled instead of the derived exception.
-    //
-    ExceptionList throws = p->throws();
-    throws.sort();
-    throws.unique();
-    throws.sort(Slice::DerivedToBaseCompare());
-
-    for(ExceptionList::const_iterator e = throws.begin(); e != throws.end(); ++e)
-    {
-        _M << nl << "@catch(" << fixName(*e) << " *ex_)";
-	_M << sb;
-	_M << nl << "@throw;";
-	_M << eb;
-    }
-    _M << nl << "@catch(ICEUserException *ex_)";
-    _M << sb;
-    _M << nl << "@throw [ICEUnknownUserException unknownUserException:__FILE__ line:__LINE__ unknown:[ex_ ice_name]];";
-    _M << eb;
-    _M << nl << "@finally";
-    _M << sb;
-    if(p->returnsData())
-    {
-	for(TypeStringList::const_iterator op = outParams.begin(); op != outParams.end(); ++op)
-	{
-            if(!isValueType(op->first))
-            {
-                _M << nl << "[(" << (isClass(op->first) ? "NSObject*" : "id<NSObject>")
-		   << ")*" + fixId(op->second) << " autorelease];";
-            }
-        }
-        if(returnType && !isValueType(returnType))
+        if(returnType || !outParams.empty())
         {
-            _M << nl << "[(" << (isClass(returnType) ? "NSObject*" : "id<NSObject>") << ")ret_ autorelease];";
+            _M << eb;
+            _M << nl << "else";
+            _M << sb;
         }
+        _M << nl << "[is_ throwException];";
+        if(returnType || !outParams.empty())
+        {
+            _M << eb;
+        }
+        _M << eb;
+        
+        //
+        // Arrange exceptions into most-derived to least-derived order. If we don't
+        // do this, a base exception handler can appear before a derived exception
+        // handler, causing compiler warnings and resulting in the base exception
+        // being marshaled instead of the derived exception.
+        //
+        ExceptionList throws = p->throws();
+        throws.sort();
+        throws.unique();
+        throws.sort(Slice::DerivedToBaseCompare());
+
+        for(ExceptionList::const_iterator e = throws.begin(); e != throws.end(); ++e)
+        {
+            _M << nl << "@catch(" << fixName(*e) << " *ex_)";
+            _M << sb;
+            _M << nl << "@throw;";
+            _M << eb;
+        }
+        _M << nl << "@catch(ICEUserException *ex_)";
+        _M << sb;
+        _M << nl << "@throw [ICEUnknownUserException unknownUserException:__FILE__ line:__LINE__ unknown:[ex_ ice_name]];";
+        _M << eb;
+        if(returnType || !outParams.empty())
+        {
+            _M << nl << "@finally";
+            _M << sb;
+            for(TypeStringList::const_iterator op = outParams.begin(); op != outParams.end(); ++op)
+            {
+                if(!isValueType(op->first))
+                {
+                    _M << nl << "[(" << (isClass(op->first) ? "NSObject*" : "id<NSObject>")
+                       << ")*" + fixId(op->second) << " autorelease];";
+                }
+            }
+            if(returnType && !isValueType(returnType))
+            {
+                _M << nl << "[(" << (isClass(returnType) ? "NSObject*" : "id<NSObject>") << ")ret_ autorelease];";
+            }
+            _M << eb;
+        }
+        if(returnType)
+        {
+            _M << nl << "return ret_;";
+        }
+        _M << eb;
     }
-    _M << nl << "[os_ release];";
-    _M << nl << "[is_ release];";
-    _M << eb;
-    if(returnType)
-    {
-        _M << nl << "return ret_;";
-    }
-    _M << eb;
 
     if(cl->hasMetaData("ami") || p->hasMetaData("ami"))
     {

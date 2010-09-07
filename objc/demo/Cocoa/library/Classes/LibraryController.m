@@ -37,8 +37,6 @@
         nrows = 0;
         sessionTimeout = t;
         searchType = 0;
-
-        queue = [[NSOperationQueue alloc] init];
     }
     return self;
 }
@@ -101,22 +99,27 @@
     // Destroy the session.
     if(router)
     {
-        [router destroySession_async:nil response:nil exception:nil];
+        [router begin_destroySession];
     }
     else
     {
-        [session destroy_async:nil response:nil exception:nil];
+        [session begin_destroy];
     }
     router = nil;
     session = nil;
     
-    // Clean up the communicator.
-    [communicator destroy];
-    communicator = nil;
-    
-    NSApplication* app = [NSApplication sharedApplication];
-    AppDelegate* delegate = (AppDelegate*)[app delegate];
-    [delegate setLibraryActive:NO];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^ {
+	
+	// Destroy might block so we call it from a separate thread.
+	[communicator destroy];
+	communicator = nil;
+	
+	dispatch_async(dispatch_get_main_queue(), ^ {
+	    NSApplication* app = [NSApplication sharedApplication];
+	    AppDelegate* delegate = (AppDelegate*)[app delegate];
+	    [delegate setLibraryActive:NO];
+	});
+    });
 }
 
 -(void)windowWillClose:(NSNotification *)notification
@@ -202,28 +205,22 @@
     }
 }
 
--(void)refreshException:(ICEException*)ex
-{
-    [self destroySession];
-    
-    if(savingController)
-    {
-        // Hide the saving sheet.
-        [NSApp endSheet:savingController.window];
-        [savingController.window orderOut:self]; 
-        
-        savingController = nil;
-    }
-    
-    NSRunAlertPanel(@"Error", [ex description], @"OK", nil, nil);
-}
-
 -(void)refreshSession:(NSTimer*)timer
 {
-    [session
-     refresh_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-     response:nil
-     exception:@selector(refreshException:)];
+    [session begin_refresh:nil exception:^(ICEException *ex) {
+	[self destroySession];
+	
+	if(savingController)
+	{
+	    // Hide the saving sheet.
+	    [NSApp endSheet:savingController.window];
+	    [savingController.window orderOut:self]; 
+	    
+	    savingController = nil;
+	}
+	
+	NSRunAlertPanel(@"Error", [ex description], @"OK", nil, nil);    
+    }];
 }
 
 -(void)logout:(id)sender
@@ -268,12 +265,11 @@
               contextInfo:NULL];
         
         DemoBookDescription* result = editController.result;
-        [library createBook_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                         response:@selector(asyncRequestReply)
-                        exception:@selector(exception:)
-                             isbn:result.isbn
-                            title:result.title
-                          authors:result.authors];
+        [library begin_createBook:result.isbn
+			    title:result.title
+                          authors:result.authors
+                         response:^(id<DemoBookPrx> b) { [self asyncRequestReply]; }
+                        exception:^(ICEException* ex) { [self exception:ex]; }];
     }
     else
     {
@@ -297,9 +293,14 @@
 {
     if(NSRunAlertPanel(@"Confirm", @"Remove book?", @"OK", @"Cancel", nil) == NSAlertDefaultReturn)
     {
-        [selection.proxy destroy_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-         response:nil
-         exception:@selector(exceptionIgnoreONE:)];
+        [selection.proxy begin_destroy:nil exception:^(ICEException* ex) {
+	    if([ex isKindOfClass:[ICEObjectNotExistException class]]) // Ignore ICEObjectNotExistException
+	    {
+		[searchIndicator stopAnimation:self];
+		return;
+	    }	    
+	    [self exception:ex];
+	}];
         
         // Remove the book, and the row from the table.
         [books removeObjectAtIndex:queryTable.selectedRow];        
@@ -309,45 +310,6 @@
 }
 
 #pragma mark Query
-
--(void)exceptionIgnoreONE:(ICEException*)ex
-{
-    [searchIndicator stopAnimation:self];
-    // Ignore ICEObjectNotExistException
-    if([ex isKindOfClass:[ICEObjectNotExistException class]])
-    {
-        return;
-    }
-    
-    [self exception:ex];
-}
-
--(void)nextResponse:(NSArray*)seq destroyed:(BOOL)d
-{
-    [searchIndicator stopAnimation:self];
-    [books addObjectsFromArray:seq];
-    // The query has returned all available results.
-    if(d)
-    {
-        query = nil;
-    }
-    
-    [queryTable reloadData];
-}
-
--(void)queryResponse:(NSArray*)seq nrows:(int)n result:(id<DemoBookQueryResultPrx>)q
-{
-    [searchIndicator stopAnimation:self];
-    nrows = n;
-    if(nrows == 0)
-    {
-        return;
-    }
-    
-    [books addObjectsFromArray:seq];
-    query = q;
-    [queryTable reloadData];
-}
 
 -(void)setSearchType:(id)sender
 {
@@ -387,70 +349,45 @@
     [searchIndicator startAnimation:self];
     
     // Run the query.
+    void(^queryResponse)(NSMutableArray*, int, id<DemoBookQueryResultPrx>) = 
+    ^(NSMutableArray* seq, int n, id<DemoBookQueryResultPrx> q) 
+    {
+	[searchIndicator stopAnimation:self];
+	nrows = n;
+	if(nrows == 0)
+	{
+	    return;
+	}
+	
+	[books addObjectsFromArray:seq];
+	query = q;
+	[queryTable reloadData];
+    };
+    
     switch(searchType)
     {
         case 0: // ISBN
-            [library queryByIsbn_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                              response:@selector(queryResponse:nrows:result:)
-                             exception:@selector(exception:)
-                                  isbn:s
-                                     n:10];
+            [library begin_queryByIsbn:s
+                                     n:10
+                              response:queryResponse
+                             exception:^(ICEException* ex) { [self exception:ex]; }];
             break;
         case 1: // Authors
-            [library queryByAuthor_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                                response:@selector(queryResponse:nrows:result:)
-                               exception:@selector(exception:)
-                                  author:s
-                                       n:10];
+            [library begin_queryByAuthor:s
+				       n:10
+                                response:queryResponse
+			       exception:^(ICEException* ex) { [self exception:ex]; }];
             break;
         case 2: // Title
-            [library queryByTitle_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                               response:@selector(queryResponse:nrows:result:)
-                              exception:@selector(exception:)
-                                  title:s
-                                      n:10];
+            [library begin_queryByTitle:s
+				      n:10
+                               response:queryResponse
+			      exception:^(ICEException* ex) { [self exception:ex]; }];
             break;
     }
 }
 
 #pragma mark Edit Book
-
-// Called in a separate thread.
--(void)saveBook
-{
-    @try
-    {
-        if(![updated.title isEqualToString:selection.title])
-        {
-            [updated.proxy setTitle:updated.title];
-        }
-        BOOL diff = NO;
-        if(updated.authors.count == selection.authors.count)
-        {
-            for(int i = 0; i < updated.authors.count; ++i)
-            {
-                if(![[updated.authors objectAtIndex:i] isEqualToString:[selection.authors objectAtIndex:i]])
-                {
-                    diff = YES;
-                    break;
-                }
-            }
-        }
-        else
-        {
-            diff = YES;
-        }
-        if(diff)
-        {
-            [updated.proxy setAuthors:updated.authors];
-        }
-        [self performSelectorOnMainThread:@selector(asyncRequestReply) withObject:nil waitUntilDone:NO];
-    }
-    @catch(ICEException* ex)
-    {
-        [self performSelectorOnMainThread:@selector(exception:) withObject:ex waitUntilDone:NO];        
-    }
-}
 
 - (void)editFinished:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
 {
@@ -464,14 +401,43 @@
             modalDelegate:nil 
            didEndSelector:NULL 
               contextInfo:NULL];
-
+	
         updated = editController.result;
-
-        // Do the actual save in a separate thread.
-        NSInvocationOperation* op = [[NSInvocationOperation alloc] initWithTarget:self
-                                                                         selector:@selector(saveBook)
-                                                                           object:nil];
-        [queue addOperation:op];
+	
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+	    @try
+	    {
+		if(![updated.title isEqualToString:selection.title])
+		{
+		    [updated.proxy setTitle:updated.title];
+		}
+		BOOL diff = NO;
+		if(updated.authors.count == selection.authors.count)
+		{
+		    for(int i = 0; i < updated.authors.count; ++i)
+		    {
+			if(![[updated.authors objectAtIndex:i] isEqualToString:[selection.authors objectAtIndex:i]])
+			{
+			    diff = YES;
+			    break;
+			}
+		    }
+		}
+		else
+		{
+		    diff = YES;
+		}
+		if(diff)
+		{
+		    [updated.proxy setAuthors:updated.authors];
+		}
+		dispatch_async(dispatch_get_main_queue(), ^{ [self asyncRequestReply]; });
+	    }
+	    @catch(ICEException* ex)
+	    {
+		dispatch_async(dispatch_get_main_queue(), ^{ [self exception:ex]; });
+	    }
+	});
     }
 }
 
@@ -503,10 +469,9 @@
         updated = [selection copy];
         updated.rentedBy = rentController.renter;
 
-        [selection.proxy rentBook_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                               response:@selector(asyncRequestReply)
-                              exception:@selector(exception:)
-                                   name:rentController.renter];
+        [selection.proxy begin_rentBook:rentController.renter
+                               response:^ { [self asyncRequestReply]; }
+                              exception:^(ICEException* ex) { [self exception:ex]; }];
     }
     else
     {
@@ -541,9 +506,8 @@
         updated = [selection copy];
         updated.rentedBy = @"";
         
-        [selection.proxy returnBook_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-         response:@selector(asyncRequestReply)
-         exception:@selector(exception:)];
+        [selection.proxy begin_returnBook:^ { [self asyncRequestReply]; }
+				exception:^(ICEException* ex) { [self exception:ex]; }];
     }
 }
 
@@ -591,10 +555,18 @@
             {
                 [searchIndicator startAnimation:self];
                 NSAssert(query != nil, @"query != nil");
-                [query next_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                         response:@selector(nextResponse:destroyed:)
-                        exception:@selector(exception:)
-                                n:10];
+                [query begin_next:10
+			 response:^(NSMutableArray* seq, BOOL destroyed) { 
+			     [searchIndicator stopAnimation:self];
+			     [books addObjectsFromArray:seq];
+			     // The query has returned all available results.
+			     if(destroyed)
+			     {
+				 query = nil;
+			     }
+			     [queryTable reloadData];
+			 }
+                        exception:^(ICEException* ex) { [self exception:ex]; } ];
                 rowsQueried += 10;
             }
             

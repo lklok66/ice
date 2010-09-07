@@ -18,8 +18,10 @@ COBJS		= Client.o \
 		  AllTests.o \
 		  Twoways.o \
 		  TwowaysAMI.o \
+		  TwowaysNewAMI.o \
 		  Oneways.o \
 		  OnewaysAMI.o \
+		  OnewaysNewAMI.o \
 		  BatchOneways.o
 
 SOBJS		= TestI.o \

@@ -37,7 +37,7 @@ for i in range(0, num):
     ports = "%s %d" % (ports, base + i)
 
 print "starting client...",
-clientProc = TestUtil.startClient(client, ports, startReader = False)
+clientProc = TestUtil.startClient(client, ports + " " + "--Ice.Trace.Network=0", startReader = False)
 print "ok"
 clientProc.startReader()
 

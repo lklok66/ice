@@ -8,6 +8,9 @@
 // **********************************************************************
 
 #include <Ice/Config.h>
+#include <Ice/Current.h>
+
+#include <IceCpp/Proxy.h>
 
 #import <Foundation/NSException.h>
 
@@ -16,9 +19,27 @@
 #include <map>
 #include <string>
 
+@class ICEAsyncResult;
+@class ICEException;
 
-NSException* toObjCException(const std::exception& ex);
-void rethrowCxxException(NSException* ex, bool = false);
+void cppCall(void (^fn)());
+void cppCall(void (^fn)(const Ice::Context&), ICEContext*);
+ICEAsyncResult* beginCppCall(void (^fn)(Ice::AsyncResultPtr&));
+ICEAsyncResult* beginCppCall(void (^fn)(Ice::AsyncResultPtr&, const Ice::CallbackPtr&), 
+                             void (^completed)(const Ice::AsyncResultPtr&),
+                             void (^exception)(ICEException*),
+                             void (^sent)(BOOL));
+ICEAsyncResult* beginCppCall(void (^fn)(Ice::AsyncResultPtr&, const Ice::Context&), ICEContext*);
+ICEAsyncResult* beginCppCall(void (^fn)(Ice::AsyncResultPtr&, const Ice::Context&, const Ice::CallbackPtr&), 
+                             ICEContext*,
+                             void (^completed)(const Ice::AsyncResultPtr&),
+                             void (^exception)(ICEException*),
+                             void (^sent)(BOOL));
+void endCppCall(void (^fn)(const Ice::AsyncResultPtr&), ICEAsyncResult*);
+
+
+NSException* toObjCException(const std::exception&);
+void rethrowCxxException(NSException*, bool = false);
 
 //
 // The toXXX methods don't auto release the returned object: the caller

@@ -28,6 +28,7 @@ OBJCPP_OBJS	= Communicator.o \
 		  Connection.o \
 		  Current.o \
                   Exception.o \
+		  Dispatcher.o \
 		  IdentityI.o \
 		  Initialize.o \
 	          Logger.o \

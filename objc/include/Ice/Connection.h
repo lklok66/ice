@@ -13,6 +13,9 @@
 // Forward declarations
 //
 @class ICEIdentity;
+@class ICEAsyncResult;
+@class ICEException;
+
 @protocol ICEObjectPrx;
 @protocol ICEObjectAdapter;
 
@@ -22,6 +25,10 @@
 -(void) setAdapter:(id<ICEObjectAdapter>)adapter;
 -(id<ICEObjectAdapter>) getAdapter;
 -(void) flushBatchRequests;
+-(ICEAsyncResult*) begin_flushBatchRequests;
+-(ICEAsyncResult*) begin_flushBatchRequests:(void(^)(ICEException*))exception;
+-(ICEAsyncResult*) begin_flushBatchRequests:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent;
+-(void) end_flushBatchRequests:(ICEAsyncResult*)result;
 -(NSString*) type;
 -(ICEInt) timeout;
 -(NSString*) toString;

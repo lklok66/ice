@@ -25,6 +25,8 @@ int bindingServer(int, char**);
 int bindingClient(int, char**);
 int defaultServantServer(int, char**);
 int defaultServantClient(int, char**);
+int dispatcherServer(int, char**);
+int dispatcherClient(int, char**);
 int exceptionsServer(int, char**);
 int exceptionsClient(int, char**);
 int facetsServer(int, char**);
@@ -35,6 +37,8 @@ int inheritanceServer(int, char**);
 int inheritanceClient(int, char**);
 int interceptorServer(int, char**);
 int interceptorClient(int, char**);
+int invokeServer(int, char**);
+int invokeClient(int, char**);
 int locationServer(int, char**);
 int locationClient(int, char**);
 int objectsServer(int, char**);
@@ -56,11 +60,13 @@ static const struct TestCases alltests[] =
 { @"ami", amiServer, amiClient },
 { @"binding", bindingServer, bindingClient },
 { @"defaultServant", defaultServantServer, defaultServantClient },
+{ @"dispatcher", dispatcherServer, dispatcherClient },
 { @"exceptions", exceptionsServer, exceptionsClient },
 { @"facets", facetsServer, facetsClient },
 { @"hold", holdServer, holdClient },
 { @"inheritance", inheritanceServer, inheritanceClient, },
 { @"interceptor", interceptorServer, interceptorClient },
+{ @"invoke", invokeServer, invokeClient },
 { @"location", locationServer, locationClient },
 { @"objects", objectsServer, objectsClient },
 { @"operations", operationsServer, operationsClient },

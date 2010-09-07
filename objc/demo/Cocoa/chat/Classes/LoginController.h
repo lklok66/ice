@@ -24,7 +24,6 @@
     IBOutlet NSWindow* connectingSheet;
     IBOutlet NSProgressIndicator* progress;
     id<ICECommunicator> communicator;
-    NSOperationQueue* queue;
 }
 
 -(void)doLogin:(id)sender;

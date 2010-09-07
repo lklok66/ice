@@ -98,7 +98,7 @@ ICEInternalCheckModeAndSelector(id target, ICEOperationMode expected, SEL sel, I
 
     if(![target respondsToSelector:sel])
     {
-        @throw [ICEOperationNotExistException requestFailedException:__FILE__ 
+        @throw [ICEOperationNotExistException operationNotExistException:__FILE__ 
                                               line:__LINE__ 
                                               id_:current.id_ 
                                               facet:current.facet
