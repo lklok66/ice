@@ -21,10 +21,8 @@
 @property (nonatomic, retain) WaitAlert* waitAlert;
 @property (nonatomic, retain) id<ICECommunicator> communicator;
 
-@property (nonatomic, retain) NSString* category;
-@property (nonatomic, retain) id<VoipSessionPrx> sess;
+@property (nonatomic, retain) id<VoipSessionPrx> session;
 @property (nonatomic, retain) id<Glacier2RouterPrx> router;
-@property (nonatomic, retain) id<VoipControlPrx> controlPrx;
 
 @property (nonatomic, retain) NSTimer* refreshTimer;
 @end
@@ -35,10 +33,8 @@
 @synthesize oldFieldValue;
 @synthesize waitAlert;
 @synthesize communicator;
-@synthesize category;
-@synthesize sess;
+@synthesize session;
 @synthesize router;
-@synthesize controlPrx;
 @synthesize refreshTimer;
 
 static NSString* hostnameKey = @"hostnameKey";
@@ -143,9 +139,140 @@ static NSString* sslKey = @"sslKey";
     [oldFieldValue release];
     [communicator release];
 	[router release];
-	[controlPrx release];
-	[sess release];
+	[session release];
     [super dealloc];
+}
+
+#pragma mark Session Management
+
+-(void)destroySession
+{
+    UIApplication* app = [UIApplication sharedApplication];
+    if(app.applicationState ==  UIApplicationStateBackground)
+    {
+        [app clearKeepAliveTimeout];
+    }
+    else
+    {
+        // Invalidate the refresh timer.
+        [refreshTimer invalidate];
+        self.refreshTimer = nil;        
+    }
+    self.session = nil;
+
+    callButton.enabled = NO;
+    loginButton.enabled = hostnameField.text.length > 0 && usernameField.text.length > 0;
+    [loginButton setTitle:@"Login" forState:UIControlStateNormal];
+    
+    // Destroy the session and destroy the communicator from another thread since these
+    // calls block.
+    id<ICECommunicator> c = [communicator retain];
+    id<Glacier2RouterPrx> r = [router retain];
+    self.router = nil;
+    self.communicator = nil;
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^ {
+        @try
+        {
+            [r destroySession];
+        }
+        @catch (ICEException* ex) {
+        }
+        
+        @try
+        {            
+            [c destroy];
+        }
+        @catch (ICEException* ex) {
+        }
+        [r release];
+        [c release];
+    });
+}
+
+-(void)exception:(NSString*)s
+{
+    [waitAlert dismissWithClickedButtonIndex:0 animated:YES];
+    self.waitAlert = nil;
+    
+    [self destroySession];
+
+    UIApplication* app = [UIApplication sharedApplication];
+    if(app.applicationState != UIApplicationStateBackground)
+    {
+        // open an alert with just an OK button
+        UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Error"
+                                                         message:s
+                                                        delegate:nil
+                                               cancelButtonTitle:@"OK"
+                                               otherButtonTitles:nil] autorelease];
+        [alert show];
+    }
+}
+
+-(void)refreshSession:(NSTimer*)timer
+{
+	if(session != nil)
+	{
+		[session begin_refresh:nil exception:^(ICEException* ex) { [self exception:[ex description]]; }];
+	}
+}
+
+-(void)setupRefresh:(BOOL)background
+{
+    NSAssert(session != nil, @"sess is nil");
+    
+    // Timeout. Minimum is 601 seconds.
+    int timeout = sessionTimeout/2;
+    if(timeout <= 600) {
+        timeout = 601;
+    }
+    
+    UIApplication* app = [UIApplication sharedApplication];
+    if(background)
+    {
+        NSLog(@"setting up background refresh");
+        // Setup the session refresh timer.
+		[app setKeepAliveTimeout:sessionTimeout/2 handler:^{
+			// Note that this is blocking.
+			if(session != nil)
+			{
+				@try
+				{
+					[session refresh];
+				}
+				@catch(ICEException* ex)
+				{
+                    [self destroySession];
+
+                    NSDate* now = [NSDate date];
+                    UILocalNotification *localNotif = [[[UILocalNotification alloc] init] autorelease];
+                    if (localNotif != nil)
+                    {
+                        localNotif.fireDate = [now dateByAddingTimeInterval:1];
+                        localNotif.timeZone = [NSTimeZone defaultTimeZone];
+                        
+                        localNotif.alertBody = [NSString stringWithFormat:@"Lost connection: %@.", [ex description]];
+                        
+                        localNotif.soundName = UILocalNotificationDefaultSoundName;
+                        
+                        [app scheduleLocalNotification:localNotif];
+                    }
+                }			
+			}
+		}];
+    }
+    else
+    {
+        NSLog(@"setting up foreground refresh");
+        // Setup the session refresh timer.
+		self.refreshTimer = [NSTimer timerWithTimeInterval:sessionTimeout/2
+													target:self
+												  selector:@selector(refreshSession:)
+												  userInfo:nil
+												   repeats:YES];
+		[[NSRunLoop currentRunLoop] addTimer:refreshTimer forMode:NSDefaultRunLoopMode];
+    }
 }
 
 #pragma mark State transition
@@ -153,54 +280,27 @@ static NSString* sslKey = @"sslKey";
 - (void)didEnterBackground
 {
 	NSLog(@"applicationDidEnterBackground");
+    
 	// Disable the refresh timer.
 	[refreshTimer invalidate];
     self.refreshTimer = nil;
 
-	if(sess != nil) {
-		// Timeout. Minimum is 601 seconds.
-		int timeout = sessionTimeout/2;
-		if(timeout <= 600) {
-			timeout = 601;
-		}
-		// Setup the session refresh timer.
-		[[UIApplication sharedApplication] setKeepAliveTimeout:sessionTimeout/2 handler:^{
-			// Note that this is blocking.
-			if(sess != nil)
-			{
-				@try
-				{
-					[sess refresh];
-				}
-				@catch(ICEException* ex)
-				{
-					// TODO: Refactor.
-					// Kill the session and such.
-					self.sess = nil;
-					// 
-					// TOOD: Pop warning dialog.
-				}			
-			}
-		}];
-	}
+    if(session != nil)
+    {
+        [self setupRefresh:YES];
+    }
 }
 
 - (void)willEnterForeground
 {
 	NSLog(@"applicationWillEnterForeground");
+    
 	// Disable the keep alive timer.
 	[[UIApplication sharedApplication] clearKeepAliveTimeout];
-
-	if(sess != nil)
-	{
-		// Setup the session refresh timer.
-		self.refreshTimer = [NSTimer timerWithTimeInterval:sessionTimeout/2
-													target:self
-												  selector:@selector(refreshSession:)
-												  userInfo:nil
-												   repeats:YES];
-		[[NSRunLoop currentRunLoop] addTimer:refreshTimer forMode:NSDefaultRunLoopMode];
-	}
+    if(session != nil)
+    {
+        [self setupRefresh:NO];
+    }
 }
 
 #pragma mark Text Field support
@@ -261,45 +361,12 @@ static NSString* sslKey = @"sslKey";
 
 #pragma mark Login
 
--(void)exception:(NSString*)s
-{
-    [waitAlert dismissWithClickedButtonIndex:0 animated:YES];
-    self.waitAlert = nil;
-	
-    // We always create a new communicator each time
-    // we try to login.
-    [communicator destroy];
-    self.communicator = nil;
-	
-    loginButton.enabled = hostnameField.text.length > 0 && usernameField.text.length > 0;
-    
-    // open an alert with just an OK button
-    UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Error"
-                                                     message:s
-                                                    delegate:nil
-                                           cancelButtonTitle:@"OK"
-                                           otherButtonTitles:nil] autorelease];
-    [alert show];       
-}
-
 -(IBAction)login:(id)sender
 {
     // Logout.
 	if(communicator != nil)
 	{
-        [refreshTimer invalidate];
-        self.refreshTimer = nil;
-		
-		// Destroy the old session, and invalidate the refresh timer.
-		[router begin_destroySession];
-		self.router = nil;
-		self.sess = nil;
-		
-		[communicator destroy];
-		self.communicator = nil;
-		
-		callButton.enabled = NO;
-		
+        [self destroySession];		
 		return;
 	}
 	
@@ -369,44 +436,35 @@ static NSString* sslKey = @"sslKey";
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^ {
         @try
         {
-            self.router = [Glacier2RouterPrx checkedCast:[communicator getDefaultRouter]];
-            id<Glacier2SessionPrx> glacier2session = [router createSession:usernameField.text password:passwordField.text];
-            self.sess = [VoipSessionPrx uncheckedCast:glacier2session];
-            sessionTimeout = [router getSessionTimeout];
-            self.category = [router getCategoryForClient];
-            self.router = router;
-            
+            id<Glacier2RouterPrx> r = [Glacier2RouterPrx checkedCast:[communicator getDefaultRouter]];
+            id<Glacier2SessionPrx> glacier2session = [r createSession:usernameField.text password:passwordField.text];
+            id<VoipSessionPrx> s = [VoipSessionPrx uncheckedCast:glacier2session];
+            int timeout = [r getSessionTimeout];
+
             id<ICEObjectAdapter> adapter = [communicator createObjectAdapterWithRouter:@"VoipClient"
-                                                                                router:router];
+                                                                                router:r];
             [adapter activate];
             
-            // Here we tie the chat view controller to the ChatRoomCallback servant.
             VoipControl* callbackImpl = [VoipControl objectWithDelegate:self];
             
-            ICEIdentity* callbackId = [ICEIdentity identity:[ICEUtil generateUUID] category:category];
-            
-            // The callback is registered in clear:, otherwise the callbacks can arrive
-            // prior to the IBOutlet connections being setup.
-            self.controlPrx = [VoipControlPrx uncheckedCast:[adapter add:callbackImpl identity:callbackId]];
+            ICEIdentity* callbackId = [ICEIdentity identity:[ICEUtil generateUUID] category:[r getCategoryForClient]];
             
             // Register the chat callback.
-            [sess begin_setControl:controlPrx response:nil exception:^(ICEException* ex) { [self exception:[ex description]]; }];
+            [s setControl:[VoipControlPrx uncheckedCast:[adapter add:callbackImpl identity:callbackId]]];
             
             dispatch_async(dispatch_get_main_queue(), ^ {
+
+                self.router = r;
+                self.session = s;
+                sessionTimeout = timeout;
 
                 [waitAlert dismissWithClickedButtonIndex:0 animated:YES];
                 self.waitAlert = nil;
                 
-                loginButton.titleLabel.text = @"Logout";
+                [loginButton setTitle:@"Logout" forState:UIControlStateNormal];
                 callButton.enabled = YES;
-
-                // Setup the session refresh timer.
-                self.refreshTimer = [NSTimer timerWithTimeInterval:sessionTimeout/2
-                                                            target:self
-                                                          selector:@selector(refreshSession:)
-                                                          userInfo:nil
-                                                           repeats:YES];
-                [[NSRunLoop currentRunLoop] addTimer:refreshTimer forMode:NSDefaultRunLoopMode];
+                
+                [self setupRefresh:[UIApplication sharedApplication].applicationState == UIApplicationStateBackground];
             });
         }
         @catch(Glacier2CannotCreateSessionException* ex)
@@ -426,40 +484,48 @@ static NSString* sslKey = @"sslKey";
     });
 }
 
--(void)refreshSession:(NSTimer*)timer
-{
-	if(sess != nil)
-	{
-		[sess begin_refresh:nil exception:^(ICEException* ex) { [self exception:[ex description]]; }];
-	}
-}
 
 #pragma mark Call
 
 -(IBAction)call:(id)sender
 {
-	[sess begin_simulateCall:nil exception:^(ICEException* ex) { [self exception:[ex description]]; }];
+    if(session != nil)
+    {
+        [session begin_simulateCall:nil exception:^(ICEException* ex) { [self exception:[ex description]]; }];
+    }
 }
 
 #pragma mark VoipControl
 
 -(void)incomingCall:(ICECurrent*)current
 {
-	NSLog(@"incoming call");
-	UILocalNotification *localNotif = [[[UILocalNotification alloc] init] autorelease];
-    if (localNotif != nil)
-	{
-		NSDate* now = [NSDate date];
-		localNotif.fireDate = [now dateByAddingTimeInterval:1];
-		localNotif.timeZone = [NSTimeZone defaultTimeZone];
-	
-		localNotif.alertBody = [NSString stringWithFormat:@"Incoming call at %@.", now];
-		localNotif.alertAction = @"View Details";
-	
-		localNotif.soundName = UILocalNotificationDefaultSoundName;
-		localNotif.applicationIconBadgeNumber = 1;
-	
-		[[UIApplication sharedApplication] scheduleLocalNotification:localNotif];
-	}
+    NSDate* now = [NSDate date];
+
+    UIApplication* app = [UIApplication sharedApplication];
+    if(app.applicationState ==  UIApplicationStateBackground)
+    {
+        UILocalNotification *localNotif = [[[UILocalNotification alloc] init] autorelease];
+        if (localNotif != nil)
+        {
+            localNotif.fireDate = [now dateByAddingTimeInterval:1];
+            localNotif.timeZone = [NSTimeZone defaultTimeZone];
+        
+            localNotif.alertBody = [NSString stringWithFormat:@"Incoming call at %@.", now];
+        
+            localNotif.soundName = UILocalNotificationDefaultSoundName;
+        
+            [[UIApplication sharedApplication] scheduleLocalNotification:localNotif];
+        }
+    }
+    else
+    {
+        // open an alert with just an OK button
+        UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Call"
+                                                         message:[NSString stringWithFormat:@"Incoming call at %@.", now]
+                                                        delegate:nil
+                                               cancelButtonTitle:@"OK"
+                                               otherButtonTitles:nil] autorelease];
+        [alert show];
+    }
 }
 @end

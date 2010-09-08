@@ -78,8 +78,6 @@ static NSString* sslKey = @"sslKey";
 
 - (void)applicationDidEnterBackground
 {
-    // TODO: do we need to copy communicator here?
-    
     // Start the long-running task and return immediately.
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         [communicator destroy];
@@ -237,7 +235,7 @@ static NSString* sslKey = @"sslKey";
         }
         else
         {
-            s = [NSString stringWithFormat:@"Glacier2/router:tcp -p 4502 -h %@ -t 10000", hostnameField.text];
+            s = [NSString stringWithFormat:@"Glacier2/router:tcp -p 4063 -h %@ -t 10000", hostnameField.text];
         }
         id<ICEObjectPrx> proxy = [communicator stringToProxy:s];
         id<ICERouterPrx> router = [ICERouterPrx uncheckedCast:proxy];
@@ -284,7 +282,6 @@ static NSString* sslKey = @"sslKey";
                 
                 [chatController activate:hostnameField.text];
                 [self.navigationController pushViewController:chatController animated:YES];
-                
             });
         }
         @catch(Glacier2CannotCreateSessionException* ex)

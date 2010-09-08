@@ -231,23 +231,33 @@
 
 -(void)destroySession
 {
+    // Invalidate the refresh timer.
     [refreshTimer invalidate];
     self.refreshTimer = nil;
-    
-    // Destroy the old session, and invalidate the refresh timer.
-    [router begin_destroySession];
-    self.router = nil;
     self.session = nil;
     
-    id<ICECommunicator> com = [communicator retain];
+    // Destroy the session and destroy the communicator from another thread since these
+    // calls block.
+    id<ICECommunicator> c = [communicator retain];
+    id<Glacier2RouterPrx> r = [router retain];
+    self.router = nil;
     self.communicator = nil;
-    
-    // Clean up the communicator.
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^ {
-        
-        // Destroy might block so we call it from a separate thread.
-        [com destroy];
-        [com release];
+        @try
+        {
+            [r destroySession];
+        }
+        @catch (ICEException* ex) {
+        }
+
+        @try
+        {            
+            [c destroy];
+        }
+        @catch (ICEException* ex) {
+        }
+        [r release];
+        [c release];
     });
 }
 

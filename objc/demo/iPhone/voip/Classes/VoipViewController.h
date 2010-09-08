@@ -28,15 +28,13 @@
     UITextField* currentField;
     NSString* oldFieldValue;
     WaitAlert* waitAlert;
-	NSTimer* refreshTimer;
-	
-    id<ICECommunicator> communicator;
 
-	NSString* category;
-	id<VoipSessionPrx> sess;
+    // Per session state.
+    NSTimer* refreshTimer;
+    id<ICECommunicator> communicator;
+	id<VoipSessionPrx> session;
 	id<Glacier2RouterPrx> router;
 	int sessionTimeout;
-	id<VoipControlPrx> controlPrx;
 }
 
 -(IBAction)login:(id)sender;

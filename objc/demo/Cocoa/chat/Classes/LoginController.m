@@ -172,7 +172,7 @@ NSString* const routerServerKey = @"routerServerKey";
             }
             else
             {
-                s = [NSString stringWithFormat:@"Glacier2/router:tcp -p 4502 -h %@ -t 10000",
+                s = [NSString stringWithFormat:@"Glacier2/router:tcp -p 4063 -h %@ -t 10000",
                      chatServerField.stringValue];
             }
             proxy = [communicator stringToProxy:s];
