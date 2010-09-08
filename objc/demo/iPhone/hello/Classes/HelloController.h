@@ -25,7 +25,6 @@
 
     BOOL showAlert;
     id<ICECommunicator> communicator;
-    NSOperationQueue* queue;
 }
 
 - (void)sayHello:(id)sender;

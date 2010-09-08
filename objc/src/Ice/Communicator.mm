@@ -52,7 +52,6 @@ public:
     virtual Ice::ObjectPtr
     create(const std::string& type)
     {
-
         NSString* sliceId = [[NSString alloc] initWithUTF8String:type.c_str()];
         @try
         {

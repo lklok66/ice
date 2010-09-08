@@ -777,7 +777,7 @@ AMIIceFlushBatchRequestsCallbackWithSent(id target, SEL ex, SEL sent) :
     }
 
     BOOL ok = YES; // Keep the compiler happy.
-    ICEInputStream* is = nil;
+    id<ICEInputStream> is = nil;
     NSException* nsex = nil;
     try
     {

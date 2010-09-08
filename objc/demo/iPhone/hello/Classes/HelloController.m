@@ -40,20 +40,6 @@
 #   define DeliveryModeOnewayAccessoryBatch 10
 #endif
 
-@interface AMIHello : NSObject
-{
-    BOOL response;
-    HelloController* controller;
-}
-
-+(id)hello:(HelloController*)controller;
-
--(void)response;
--(void)exception:(ICEException*)ex;
--(void)sent;
-
-@end
-
 //
 // Avoid warning for undocumented UISlider method
 //
@@ -94,6 +80,12 @@ static NSString* hostnameKey = @"hostnameKey";
     ICEConfigureAccessoryTransport(initData.properties);
 #endif     
 
+	// Dispatch AMI callbacks on the main thread
+    initData.dispatcher = ^(id<ICEDispatcherCall> call, id<ICEConnection> con)
+    {
+        dispatch_sync(dispatch_get_main_queue(), ^ { [call run]; });
+    };
+	
     communicator = [[ICEUtil createCommunicator:initData] retain];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -115,8 +107,6 @@ static NSString* hostnameKey = @"hostnameKey";
     statusLabel.text = @"Ready";
     
     showAlert = NO;
-    
-    queue = [[NSOperationQueue alloc] init];
 }
 
 -(BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -140,7 +130,6 @@ static NSString* hostnameKey = @"hostnameKey";
     [delaySlider release];
     [activity release];
     [modePicker release];
-    [queue release];
     [communicator release];
     
     [super dealloc];
@@ -197,32 +186,6 @@ static NSString* hostnameKey = @"hostnameKey";
                                            cancelButtonTitle:@"OK"
                                            otherButtonTitles:nil] autorelease];
     [alert show];
-}
-
--(void)sayHelloSent
-{
-    int deliveryMode = [modePicker selectedRowInComponent:0];
-    if(deliveryMode == DeliveryModeTwoway || deliveryMode == DeliveryModeTwowaySecure)
-    {
-        statusLabel.text = @"Waiting for response";
-    }
-    else
-    {
-        statusLabel.text = @"Ready";
-        [activity stopAnimating];       
-    }
-}
-
--(void)sayHelloResponse
-{
-    statusLabel.text = @"Ready";
-    [activity stopAnimating];
-}
-
--(void)shutdownResponse
-{
-    statusLabel.text = @"Ready";
-    [activity stopAnimating];       
 }
 
 #pragma mark UI Element Callbacks
@@ -304,23 +267,49 @@ static NSString* hostnameKey = @"hostnameKey";
 		   deliveryMode != DeliveryModeOnewayAccessoryBatch &&
            deliveryMode != DeliveryModeDatagramBatch)
         {
-            if([hello sayHello_async:[ICECallbackOnMainThread callbackOnMainThread:[AMIHello hello:self]]
-                            response:@selector(response)
-                           exception:@selector(exception:) 
-                                sent:@selector(sent)
-                               delay:delay])
-            {
-                if(deliveryMode == DeliveryModeTwoway || deliveryMode == DeliveryModeTwowaySecure)
-                {
-                    [activity startAnimating];
-                    statusLabel.text = @"Waiting for response";
-                }
-            }
-            else
-            {
-                [activity startAnimating];
-                statusLabel.text = @"Sending request";
-            }
+			__block BOOL response = NO;
+			ICEAsyncResult* result = [hello begin_sayHello:delay 
+												  response:^ {
+													  response = YES;
+													  [activity stopAnimating];
+													  statusLabel.text = @"Ready";
+												  }
+												 exception:^(ICEException* ex) {
+													 response = YES;
+													 [self exception:ex];
+												 }
+													  sent:^(BOOL sentSynchronously) {
+														  if(response)
+														  {
+															  return; // Response was received already.
+														  }
+														  
+														  int deliveryMode = [modePicker selectedRowInComponent:0];
+														  if(deliveryMode == DeliveryModeTwoway || deliveryMode == DeliveryModeTwowaySecure)
+														  {
+															  statusLabel.text = @"Waiting for response";
+														  }
+														  else if(!sentSynchronously)
+														  {
+															  statusLabel.text = @"Ready";
+															  [activity stopAnimating];       
+														  }
+														  
+													  }];
+			if(![result sentSynchronously])
+			{
+				
+				[activity startAnimating];
+				statusLabel.text = @"Sending request";
+			}
+			else 
+			{
+				int deliveryMode = [modePicker selectedRowInComponent:0];
+				if(deliveryMode != DeliveryModeTwoway && deliveryMode != DeliveryModeTwowaySecure)
+				{
+					statusLabel.text = @"Ready";
+				}
+			}
         }
         else
         {
@@ -345,9 +334,8 @@ static NSString* hostnameKey = @"hostnameKey";
            deliveryMode != DeliveryModeOnewaySecureBatch &&
            deliveryMode != DeliveryModeDatagramBatch)
         {
-            [hello shutdown_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                         response:@selector(shutdownResponse)
-                        exception:@selector(exception:)];
+            [hello begin_shutdown:^ { [activity stopAnimating]; statusLabel.text = @"Ready"; }
+                        exception:^(ICEException* ex) { [self exception:ex]; }];
             if(deliveryMode == DeliveryModeTwoway || deliveryMode == DeliveryModeTwowaySecure)
             {
                 [activity startAnimating];
@@ -367,27 +355,16 @@ static NSString* hostnameKey = @"hostnameKey";
     }
 }
 
-// Run in a thread other than main.
--(void)flush
+-(void)flushBatch:(id) sender
 {
     @try
     {
-        [communicator flushBatchRequests];
+        [communicator begin_flushBatchRequests:^(ICEException* ex) { [self exception:ex]; }];
     }
     @catch(ICELocalException* ex)
     {
-        [self performSelectorOnMainThread:@selector(exception:) withObject:ex waitUntilDone:NO];
+		[self exception:ex];
     }
-}
-
--(void)flushBatch:(id) sender
-{
-    // Flush the batch in a separate thread to avoid blocking the UI.
-    NSInvocationOperation* op = [[[NSInvocationOperation alloc] initWithTarget:self
-                                                                      selector:@selector(flush)
-                                                                        object:nil] autorelease];
-    [queue addOperation:op];
-    
     flushButton.enabled = NO;
     statusLabel.text = @"Flushed batch requests";
 }
@@ -442,41 +419,4 @@ static NSString* hostnameKey = @"hostnameKey";
 
 @end
 
-@implementation AMIHello
 
-+(id)hello:(HelloController*)controller
-{
-    AMIHello* h = [[AMIHello alloc] init];
-    h->controller = [controller retain];
-    return [h autorelease];
-}
-
--(void)response
-{
-    NSAssert(!response, @"!response");
-    response = YES;
-    [controller sayHelloResponse];
-}
-
--(void)exception:(ICEException*)ex
-{
-    NSAssert(!response, @"!response");
-    response = YES;
-    [controller exception:ex];
-}
-
--(void)sent
-{
-    if(response)
-    {
-        return;
-    }
-    [controller sayHelloSent];
-}
-
--(void)dealloc
-{
-    [controller release];
-    [super dealloc];
-}
-@end
