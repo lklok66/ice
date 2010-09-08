@@ -76,18 +76,18 @@ NSString* const routerServerKey = @"routerServerKey";
     id<DemoSessionFactoryPrx> factory = [DemoSessionFactoryPrx checkedCast:proxy];
     if(factory == nil)
     {
-	@throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Invalid proxy" userInfo:nil];
+		@throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Invalid proxy" userInfo:nil];
     }
     
     id<DemoSessionPrx> session = [factory create];
     int sessionTimeout = [factory getSessionTimeout];
     id<DemoLibraryPrx> library = [session getLibrary];
     return [[LibraryController alloc]
-	    initWithCommunicator:[proxy ice_getCommunicator]
-	    session:session
-	    router:nil
-	    sessionTimeout:sessionTimeout
-	    library:library];
+			initWithCommunicator:[proxy ice_getCommunicator]
+			session:session
+			router:nil
+			sessionTimeout:sessionTimeout
+			library:library];
 }
 
 // Direct login through Glacier2.
@@ -95,7 +95,7 @@ NSString* const routerServerKey = @"routerServerKey";
 {
     id<Glacier2RouterPrx> router = [Glacier2RouterPrx checkedCast:proxy];
     id<Glacier2SessionPrx> glacier2session = [router createSession:usernameField.stringValue
-							  password:passwordField.stringValue];
+														  password:passwordField.stringValue];
     id<DemoGlacier2SessionPrx> session = [DemoGlacier2SessionPrx uncheckedCast:glacier2session];
     
     int sessionTimeout = [router getSessionTimeout];
@@ -103,11 +103,11 @@ NSString* const routerServerKey = @"routerServerKey";
     id<DemoLibraryPrx> library = [session getLibrary];
     
     return [[LibraryController alloc]
-	    initWithCommunicator:[proxy ice_getCommunicator]
-	    session:session
-	    router:router
-	    sessionTimeout:sessionTimeout
-	    library:library];
+			initWithCommunicator:[proxy ice_getCommunicator]
+			session:session
+			router:router
+			sessionTimeout:sessionTimeout
+			library:library];
 }
 
 // Login through the iPhone router.
@@ -119,18 +119,18 @@ NSString* const routerServerKey = @"routerServerKey";
     id<DemoSessionFactoryPrx> factory = [DemoSessionFactoryPrx checkedCast:proxy];
     if(factory == nil)
     {
-	@throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Invalid proxy" userInfo:nil];
+		@throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Invalid proxy" userInfo:nil];
     }
     
     id<DemoSessionPrx> session = [factory create];
     int sessionTimeout = [factory getSessionTimeout];
     id<DemoLibraryPrx> library = [session getLibrary];
     return [[LibraryController alloc]
-	    initWithCommunicator:[proxy ice_getCommunicator]
-	    session:session
-	    router:nil
-	    sessionTimeout:sessionTimeout
-	    library:library];
+			initWithCommunicator:[proxy ice_getCommunicator]
+			session:session
+			router:nil
+			sessionTimeout:sessionTimeout
+			library:library];
 }
 
 // Login through the iPhone router, using Glacier2.
@@ -143,19 +143,19 @@ NSString* const routerServerKey = @"routerServerKey";
     ICEInt sessionTimeout;
     
     [router createGlacier2Session:glacier2router
-			   userId:usernameField.stringValue
-			 password:passwordField.stringValue
-			 category:&category
-		   sessionTimeout:&sessionTimeout
-			     sess:&glacier2session];
+						   userId:usernameField.stringValue
+						 password:passwordField.stringValue
+						 category:&category
+				   sessionTimeout:&sessionTimeout
+							 sess:&glacier2session];
     id<DemoGlacier2SessionPrx> session = [DemoGlacier2SessionPrx uncheckedCast:glacier2session];
     id<DemoLibraryPrx> library = [session getLibrary];
     
     return [[LibraryController alloc] initWithCommunicator:[proxy ice_getCommunicator]
-						   session:[DemoGlacier2SessionPrx uncheckedCast:glacier2session]
-						    router:nil
-					    sessionTimeout:sessionTimeout
-						   library:library];
+												   session:[DemoGlacier2SessionPrx uncheckedCast:glacier2session]
+													router:nil
+											sessionTimeout:sessionTimeout
+												   library:library];
 }
 
 #pragma mark Login
@@ -175,12 +175,12 @@ NSString* const routerServerKey = @"routerServerKey";
     //[initData.properties setProperty:@"Ice.Trace.Network" value:@"1"];
     //[initData.properties setProperty:@"Ice.Trace.Protocol" value:@"1"];
     //[initData.properties setProperty:@"IceSSL.Trace.Security" value:@"1"];
-
+	
     initData.dispatcher = ^(id<ICEDispatcherCall> call, id<ICEConnection> con)
     {
         dispatch_sync(dispatch_get_main_queue(), ^ { [call run]; });
     };
-
+	
     if(sslField.state == NSOnState && routerField.state != NSOnState)
     {   
         if([chatServerField.stringValue caseInsensitiveCompare:@"demo2.zeroc.com"] == NSOrderedSame)
@@ -196,10 +196,10 @@ NSString* const routerServerKey = @"routerServerKey";
         }
     }
     [initData.properties setProperty:@"IceSSL.DefaultDir" value:[[NSBundle mainBundle] resourcePath]];
-
+	
     NSAssert(communicator == nil, @"communicator == nil");
     communicator = [ICEUtil createCommunicator:initData];
-
+	
     SEL loginSelector;
     id<ICEObjectPrx> proxy;
     @try
@@ -220,7 +220,7 @@ NSString* const routerServerKey = @"routerServerKey";
             proxy = [communicator stringToProxy:s];
             id<ICERouterPrx> router = [ICERouterPrx uncheckedCast:proxy];
             [communicator setDefaultRouter:router];
-
+			
             if(glacier2Field.state == NSOnState)
             {
                 // The proxy to the Glacier2 router.
@@ -253,7 +253,7 @@ NSString* const routerServerKey = @"routerServerKey";
                     s = [NSString stringWithFormat:@"DemoGlacier2/router:tcp -p 4502 -h %@ -t 10000",
                          chatServerField.stringValue];
                 }
-
+				
                 proxy = [communicator stringToProxy:s];
                 id<ICERouterPrx> router = [ICERouterPrx uncheckedCast:proxy];
                 [communicator setDefaultRouter:router];
@@ -280,10 +280,10 @@ NSString* const routerServerKey = @"routerServerKey";
     @catch(ICEEndpointParseException* ex)
     {
         [communicator destroy];
-	communicator = nil;
-
-	NSRunAlertPanel(@"Error", [ex description], @"OK", nil, nil);
-	return;
+		communicator = nil;
+		
+		NSRunAlertPanel(@"Error", [ex description], @"OK", nil, nil);
+		return;
     }
     
     [NSApp beginSheet:connectingSheet
@@ -294,53 +294,53 @@ NSString* const routerServerKey = @"routerServerKey";
     [progress startAnimation:self];
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^ {
-	NSString* msg;
-	@try 
-	{
-	    LibraryController* libraryController = [self performSelector:loginSelector withObject:proxy];
-	    dispatch_async(dispatch_get_main_queue(), ^ {
-		// Hide the connecting sheet.
-		[NSApp endSheet:connectingSheet];
-		[connectingSheet orderOut:self.window];
-		[progress stopAnimation:self];
-    
-		// The communicator is now owned by the LibraryController.
-		communicator = nil;
-    
-		// Close the connecting window, show the main window.
-		[self.window close];
-		[libraryController showWindow:self];
-	    });
-	    return;
-	}
-	@catch(Glacier2CannotCreateSessionException* ex)
-	{
-	    msg = [NSString stringWithFormat:@"Session creation failed: %@", ex.reason_];
-	}
-	@catch(Glacier2PermissionDeniedException* ex)
-	{
-	    msg = [NSString stringWithFormat:@"Login failed: %@", ex.reason_];
-	}
-	@catch(ICEException* ex)
-	{
-	    msg = [ex description];
-	}
-	@catch(NSException *ex)
-	{
-	    msg = [ex reason];
-	}
-	
-	dispatch_async(dispatch_get_main_queue(), ^ {
-	    // Hide the connecting sheet.
-	    [NSApp endSheet:connectingSheet]; 
-	    [connectingSheet orderOut:self.window];
-	    [progress stopAnimation:self];
-    
-	    [communicator destroy];
-	    communicator = nil;
-
-	    NSRunAlertPanel(@"Error", msg, @"OK", nil, nil);
-	});
+		NSString* msg;
+		@try 
+		{
+			LibraryController* libraryController = [self performSelector:loginSelector withObject:proxy];
+			dispatch_async(dispatch_get_main_queue(), ^ {
+				// Hide the connecting sheet.
+				[NSApp endSheet:connectingSheet];
+				[connectingSheet orderOut:self.window];
+				[progress stopAnimation:self];
+				
+				// The communicator is now owned by the LibraryController.
+				communicator = nil;
+				
+				// Close the connecting window, show the main window.
+				[self.window close];
+				[libraryController showWindow:self];
+			});
+			return;
+		}
+		@catch(Glacier2CannotCreateSessionException* ex)
+		{
+			msg = [NSString stringWithFormat:@"Session creation failed: %@", ex.reason_];
+		}
+		@catch(Glacier2PermissionDeniedException* ex)
+		{
+			msg = [NSString stringWithFormat:@"Login failed: %@", ex.reason_];
+		}
+		@catch(ICEException* ex)
+		{
+			msg = [ex description];
+		}
+		@catch(NSException *ex)
+		{
+			msg = [ex reason];
+		}
+		
+		dispatch_async(dispatch_get_main_queue(), ^ {
+			// Hide the connecting sheet.
+			[NSApp endSheet:connectingSheet]; 
+			[connectingSheet orderOut:self.window];
+			[progress stopAnimation:self];
+			
+			[communicator destroy];
+			communicator = nil;
+			
+			NSRunAlertPanel(@"Error", msg, @"OK", nil, nil);
+		});
     });    
 }
 
@@ -373,7 +373,7 @@ NSString* const routerServerKey = @"routerServerKey";
     [defaults setBool:(glacier2Field.state == NSOnState) forKey:glacier2Key];
     [defaults setBool:(routerField.state == NSOnState) forKey:routerKey];
     [defaults setObject:routerServerField.stringValue forKey:routerServerKey];
-        
+	
     [NSApp endSheet:advancedSheet]; 
     [advancedSheet orderOut:sender]; 
 }

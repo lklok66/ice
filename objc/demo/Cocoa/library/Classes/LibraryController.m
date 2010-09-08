@@ -95,7 +95,7 @@
     // Cancel the refresh timeer.
     [refreshTimer invalidate];
     refreshTimer = nil;
-
+	
     // Destroy the session.
     if(router)
     {
@@ -109,16 +109,16 @@
     session = nil;
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^ {
-	
-	// Destroy might block so we call it from a separate thread.
-	[communicator destroy];
-	communicator = nil;
-	
-	dispatch_async(dispatch_get_main_queue(), ^ {
-	    NSApplication* app = [NSApplication sharedApplication];
-	    AppDelegate* delegate = (AppDelegate*)[app delegate];
-	    [delegate setLibraryActive:NO];
-	});
+		
+		// Destroy might block so we call it from a separate thread.
+		[communicator destroy];
+		communicator = nil;
+		
+		dispatch_async(dispatch_get_main_queue(), ^ {
+			NSApplication* app = [NSApplication sharedApplication];
+			AppDelegate* delegate = (AppDelegate*)[app delegate];
+			[delegate setLibraryActive:NO];
+		});
     });
 }
 
@@ -153,10 +153,10 @@
         // Hide the saving sheet.
         [NSApp endSheet:savingController.window];
         [savingController.window orderOut:self]; 
-
+		
         savingController = nil;
     }
-
+	
     NSString* s;
     
     if([ex isKindOfClass:[ICEObjectNotExistException class]])
@@ -208,18 +208,18 @@
 -(void)refreshSession:(NSTimer*)timer
 {
     [session begin_refresh:nil exception:^(ICEException *ex) {
-	[self destroySession];
-	
-	if(savingController)
-	{
-	    // Hide the saving sheet.
-	    [NSApp endSheet:savingController.window];
-	    [savingController.window orderOut:self]; 
-	    
-	    savingController = nil;
-	}
-	
-	NSRunAlertPanel(@"Error", [ex description], @"OK", nil, nil);    
+		[self destroySession];
+		
+		if(savingController)
+		{
+			// Hide the saving sheet.
+			[NSApp endSheet:savingController.window];
+			[savingController.window orderOut:self]; 
+			
+			savingController = nil;
+		}
+		
+		NSRunAlertPanel(@"Error", [ex description], @"OK", nil, nil);    
     }];
 }
 
@@ -242,7 +242,7 @@
     NSAssert(savingController != nil, @"savingController != nil");
     [NSApp endSheet:savingController.window];
     [savingController.window orderOut:self];
-
+	
     // Clear the state variables.
     savingController = nil;
     editController = nil;
@@ -254,7 +254,7 @@
 - (void)addFinished:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
 {
     [sheet orderOut:self];
-
+	
     if(returnCode)
     {
         savingController = [[SavingController alloc] init];
@@ -266,7 +266,7 @@
         
         DemoBookDescription* result = editController.result;
         [library begin_createBook:result.isbn
-			    title:result.title
+							title:result.title
                           authors:result.authors
                          response:^(id<DemoBookPrx> b) { [self asyncRequestReply]; }
                         exception:^(ICEException* ex) { [self exception:ex]; }];
@@ -279,7 +279,7 @@
 
 -(void)add:(id)sender
 {
-   editController = [[EditController alloc] initWithDesc:nil];
+	editController = [[EditController alloc] initWithDesc:nil];
     [NSApp beginSheet:editController.window
        modalForWindow:self.window
         modalDelegate:self
@@ -294,13 +294,13 @@
     if(NSRunAlertPanel(@"Confirm", @"Remove book?", @"OK", @"Cancel", nil) == NSAlertDefaultReturn)
     {
         [selection.proxy begin_destroy:nil exception:^(ICEException* ex) {
-	    if([ex isKindOfClass:[ICEObjectNotExistException class]]) // Ignore ICEObjectNotExistException
-	    {
-		[searchIndicator stopAnimation:self];
-		return;
-	    }	    
-	    [self exception:ex];
-	}];
+			if([ex isKindOfClass:[ICEObjectNotExistException class]]) // Ignore ICEObjectNotExistException
+			{
+				[searchIndicator stopAnimation:self];
+				return;
+			}	    
+			[self exception:ex];
+		}];
         
         // Remove the book, and the row from the table.
         [books removeObjectAtIndex:queryTable.selectedRow];        
@@ -352,16 +352,16 @@
     void(^queryResponse)(NSMutableArray*, int, id<DemoBookQueryResultPrx>) = 
     ^(NSMutableArray* seq, int n, id<DemoBookQueryResultPrx> q) 
     {
-	[searchIndicator stopAnimation:self];
-	nrows = n;
-	if(nrows == 0)
-	{
-	    return;
-	}
-	
-	[books addObjectsFromArray:seq];
-	query = q;
-	[queryTable reloadData];
+		[searchIndicator stopAnimation:self];
+		nrows = n;
+		if(nrows == 0)
+		{
+			return;
+		}
+		
+		[books addObjectsFromArray:seq];
+		query = q;
+		[queryTable reloadData];
     };
     
     switch(searchType)
@@ -374,15 +374,15 @@
             break;
         case 1: // Authors
             [library begin_queryByAuthor:s
-				       n:10
+									   n:10
                                 response:queryResponse
-			       exception:^(ICEException* ex) { [self exception:ex]; }];
+							   exception:^(ICEException* ex) { [self exception:ex]; }];
             break;
         case 2: // Title
             [library begin_queryByTitle:s
-				      n:10
+									  n:10
                                response:queryResponse
-			      exception:^(ICEException* ex) { [self exception:ex]; }];
+							  exception:^(ICEException* ex) { [self exception:ex]; }];
             break;
     }
 }
@@ -401,50 +401,50 @@
             modalDelegate:nil 
            didEndSelector:NULL 
               contextInfo:NULL];
-	
+		
         updated = editController.result;
-	
-	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-	    @try
-	    {
-		if(![updated.title isEqualToString:selection.title])
-		{
-		    [updated.proxy setTitle:updated.title];
-		}
-		BOOL diff = NO;
-		if(updated.authors.count == selection.authors.count)
-		{
-		    for(int i = 0; i < updated.authors.count; ++i)
-		    {
-			if(![[updated.authors objectAtIndex:i] isEqualToString:[selection.authors objectAtIndex:i]])
+		
+		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+			@try
 			{
-			    diff = YES;
-			    break;
+				if(![updated.title isEqualToString:selection.title])
+				{
+					[updated.proxy setTitle:updated.title];
+				}
+				BOOL diff = NO;
+				if(updated.authors.count == selection.authors.count)
+				{
+					for(int i = 0; i < updated.authors.count; ++i)
+					{
+						if(![[updated.authors objectAtIndex:i] isEqualToString:[selection.authors objectAtIndex:i]])
+						{
+							diff = YES;
+							break;
+						}
+					}
+				}
+				else
+				{
+					diff = YES;
+				}
+				if(diff)
+				{
+					[updated.proxy setAuthors:updated.authors];
+				}
+				dispatch_async(dispatch_get_main_queue(), ^{ [self asyncRequestReply]; });
 			}
-		    }
-		}
-		else
-		{
-		    diff = YES;
-		}
-		if(diff)
-		{
-		    [updated.proxy setAuthors:updated.authors];
-		}
-		dispatch_async(dispatch_get_main_queue(), ^{ [self asyncRequestReply]; });
-	    }
-	    @catch(ICEException* ex)
-	    {
-		dispatch_async(dispatch_get_main_queue(), ^{ [self exception:ex]; });
-	    }
-	});
+			@catch(ICEException* ex)
+			{
+				dispatch_async(dispatch_get_main_queue(), ^{ [self exception:ex]; });
+			}
+		});
     }
 }
 
 -(void)edit:(id)sender
 {
     editController = [[EditController alloc] initWithDesc:selection];
-
+	
     [NSApp beginSheet:editController.window 
        modalForWindow:self.window
         modalDelegate:self 
@@ -465,10 +465,10 @@
             modalDelegate:nil 
            didEndSelector:NULL 
               contextInfo:NULL];
-
+		
         updated = [selection copy];
         updated.rentedBy = rentController.renter;
-
+		
         [selection.proxy begin_rentBook:rentController.renter
                                response:^ { [self asyncRequestReply]; }
                               exception:^(ICEException* ex) { [self exception:ex]; }];
@@ -507,7 +507,7 @@
         updated.rentedBy = @"";
         
         [selection.proxy begin_returnBook:^ { [self asyncRequestReply]; }
-				exception:^(ICEException* ex) { [self exception:ex]; }];
+								exception:^(ICEException* ex) { [self exception:ex]; }];
     }
 }
 
@@ -556,16 +556,16 @@
                 [searchIndicator startAnimation:self];
                 NSAssert(query != nil, @"query != nil");
                 [query begin_next:10
-			 response:^(NSMutableArray* seq, BOOL destroyed) { 
-			     [searchIndicator stopAnimation:self];
-			     [books addObjectsFromArray:seq];
-			     // The query has returned all available results.
-			     if(destroyed)
-			     {
-				 query = nil;
-			     }
-			     [queryTable reloadData];
-			 }
+						 response:^(NSMutableArray* seq, BOOL destroyed) { 
+							 [searchIndicator stopAnimation:self];
+							 [books addObjectsFromArray:seq];
+							 // The query has returned all available results.
+							 if(destroyed)
+							 {
+								 query = nil;
+							 }
+							 [queryTable reloadData];
+						 }
                         exception:^(ICEException* ex) { [self exception:ex]; } ];
                 rowsQueried += 10;
             }

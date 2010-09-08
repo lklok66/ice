@@ -2971,32 +2971,26 @@ Slice::Gen::DelegateMVisitor::visitOperation(const OperationPtr& p)
         }
         _M << nl << "@try";
         _M << sb;
+        _M << nl << "if(!ok_)";
+        _M << sb;
+        _M << nl << "[is_ throwException];";
+        _M << eb;
         if(returnType || !outParams.empty())
         {
-            _M << nl << "if(ok_)";
-            _M << sb;
-        }
-	for(TypeStringList::const_iterator op = outParams.begin(); op != outParams.end(); ++op)
-	{
-	    writeMarshalUnmarshalCode(_M, op->first, "*" + fixId(op->second), false, false, true, "");
-	}
-        if(returnType)
-        {
-	   writeMarshalUnmarshalCode(_M, returnType, "ret_", false, false, true, "");
-	}
-	if(p->returnsClasses())
-	{
- 	    _M << nl << "[is_ readPendingObjects];";
-	}
-        if(returnType || !outParams.empty())
-        {
-            _M << eb;
             _M << nl << "else";
             _M << sb;
-        }
-        _M << nl << "[is_ throwException];";
-        if(returnType || !outParams.empty())
-        {
+            for(TypeStringList::const_iterator op = outParams.begin(); op != outParams.end(); ++op)
+            {
+                writeMarshalUnmarshalCode(_M, op->first, "*" + fixId(op->second), false, false, true, "");
+            }
+            if(returnType)
+            {
+                writeMarshalUnmarshalCode(_M, returnType, "ret_", false, false, true, "");
+            }
+            if(p->returnsClasses())
+            {
+                _M << nl << "[is_ readPendingObjects];";
+            }
             _M << eb;
         }
         _M << eb;

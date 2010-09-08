@@ -50,7 +50,7 @@ NSString* const routerServerKey = @"routerServerKey";
 {
     // Restore the field values from the app defaults.
     NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-
+	
     chatServerField.stringValue = [defaults stringForKey:serverKey];
     usernameField.stringValue = [defaults stringForKey:usernameKey];
     passwordField.stringValue = [defaults stringForKey:passwordKey];
@@ -71,17 +71,17 @@ NSString* const routerServerKey = @"routerServerKey";
 {
     id<Glacier2RouterPrx> router = [Glacier2RouterPrx checkedCast:proxy];
     id<Glacier2SessionPrx> glacier2session = [router createSession:usernameField.stringValue
-							  password:passwordField.stringValue];
+														  password:passwordField.stringValue];
     id<ChatChatSessionPrx> session = [ChatChatSessionPrx uncheckedCast:glacier2session];
     
     int sessionTimeout = [router getSessionTimeout];
     NSString* category = [router getCategoryForClient];
     
     return [[ChatController alloc] initWithCommunicator:[proxy ice_getCommunicator]
-						session:session
-					 sessionTimeout:sessionTimeout
-						 router:router
-					       category:category];
+												session:session
+										 sessionTimeout:sessionTimeout
+												 router:router
+											   category:category];
 }
 
 -(ChatController*)doPhoneRouterLogin:(id)proxy
@@ -92,17 +92,17 @@ NSString* const routerServerKey = @"routerServerKey";
     NSMutableString* category;
     ICEInt sessionTimeout;
     [router createGlacier2Session:glacier2router
-			   userId:usernameField.stringValue
-			 password:passwordField.stringValue
-			 category:&category
-		   sessionTimeout:&sessionTimeout
-			     sess:&glacier2session];
+						   userId:usernameField.stringValue
+						 password:passwordField.stringValue
+						 category:&category
+				   sessionTimeout:&sessionTimeout
+							 sess:&glacier2session];
     
     return [[ChatController alloc] initWithCommunicator:[proxy ice_getCommunicator]
-						session:[ChatChatSessionPrx uncheckedCast:glacier2session]
-					 sessionTimeout:sessionTimeout
-						 router:router
-					       category:category];
+												session:[ChatChatSessionPrx uncheckedCast:glacier2session]
+										 sessionTimeout:sessionTimeout
+												 router:router
+											   category:category];
 }
 
 #pragma mark Login
@@ -127,15 +127,15 @@ NSString* const routerServerKey = @"routerServerKey";
     {
         dispatch_sync(dispatch_get_main_queue(), ^ { [call run]; });
     };
-
+	
     [initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
     [initData.properties setProperty:@"IceSSL.TrustOnly.Client" value:@"CN=\"Glacier2\""];
     [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.pem"];
     [initData.properties setProperty:@"IceSSL.DefaultDir" value:[[NSBundle mainBundle] resourcePath]];
-
+	
     NSAssert(communicator == nil, @"communicator == nil");
     communicator = [ICEUtil createCommunicator:initData];
-
+	
     SEL loginSelector;
     id<ICEObjectPrx> proxy;
     @try
@@ -156,7 +156,7 @@ NSString* const routerServerKey = @"routerServerKey";
             proxy = [communicator stringToProxy:s];
             id<ICERouterPrx> router = [ICERouterPrx uncheckedCast:proxy];
             [communicator setDefaultRouter:router];
-
+			
             // The proxy to the Glacier2 router.
             proxy = [communicator stringToProxy:
                      [NSString stringWithFormat:@"Glacier2/router:tcp -p 4502 -h %@ -t 10000",
@@ -182,8 +182,11 @@ NSString* const routerServerKey = @"routerServerKey";
     }
     @catch(ICEEndpointParseException* ex)
     {
-        [self exception:@"The provided hostname is invalid"];
-        return;
+        [communicator destroy];
+		communicator = nil;
+		
+		NSRunAlertPanel(@"Error", [ex description], @"OK", nil, nil);
+		return;
     }
     
     [NSApp beginSheet:connectingSheet 
@@ -194,53 +197,53 @@ NSString* const routerServerKey = @"routerServerKey";
     [progress startAnimation:self];
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^ {
-	NSString* msg;
-	@try 
-	{
-	    ChatController* chatController = [self performSelector:loginSelector withObject:proxy];
-	    dispatch_async(dispatch_get_main_queue(), ^ {
-		// Hide the connecting sheet.
-		[NSApp endSheet:connectingSheet];
-		[connectingSheet orderOut:self.window];
-		[progress stopAnimation:self];
+		NSString* msg;
+		@try 
+		{
+			ChatController* chatController = [self performSelector:loginSelector withObject:proxy];
+			dispatch_async(dispatch_get_main_queue(), ^ {
+				// Hide the connecting sheet.
+				[NSApp endSheet:connectingSheet];
+				[connectingSheet orderOut:self.window];
+				[progress stopAnimation:self];
+				
+				// The communicator is now owned by the LibraryController.
+				communicator = nil;
+				
+				// Close the connecting window, show the main window.
+				[self.window close];
+				[chatController showWindow:self];
+			});
+			return;
+		}
+		@catch(Glacier2CannotCreateSessionException* ex)
+		{
+			msg = [NSString stringWithFormat:@"Session creation failed: %@", ex.reason_];
+		}
+		@catch(Glacier2PermissionDeniedException* ex)
+		{
+			msg = [NSString stringWithFormat:@"Login failed: %@", ex.reason_];
+		}
+		@catch(ICEException* ex)
+		{
+			msg = [ex description];
+		}
+		@catch(NSException *ex)
+		{
+			msg = [ex reason];
+		}
 		
-		// The communicator is now owned by the LibraryController.
-		communicator = nil;
-		
-		// Close the connecting window, show the main window.
-		[self.window close];
-		[chatController showWindow:self];
-	    });
-	    return;
-	}
-	@catch(Glacier2CannotCreateSessionException* ex)
-	{
-	    msg = [NSString stringWithFormat:@"Session creation failed: %@", ex.reason_];
-	}
-	@catch(Glacier2PermissionDeniedException* ex)
-	{
-	    msg = [NSString stringWithFormat:@"Login failed: %@", ex.reason_];
-	}
-	@catch(ICEException* ex)
-	{
-	    msg = [ex description];
-	}
-	@catch(NSException *ex)
-	{
-	    msg = [ex reason];
-	}
-	
-	dispatch_async(dispatch_get_main_queue(), ^ {
-	    // Hide the connecting sheet.
-	    [NSApp endSheet:connectingSheet]; 
-	    [connectingSheet orderOut:self.window];
-	    [progress stopAnimation:self];
-	    
-	    [communicator destroy];
-	    communicator = nil;
-	    
-	    NSRunAlertPanel(@"Error", msg, @"OK", nil, nil);
-	});
+		dispatch_async(dispatch_get_main_queue(), ^ {
+			// Hide the connecting sheet.
+			[NSApp endSheet:connectingSheet]; 
+			[connectingSheet orderOut:self.window];
+			[progress stopAnimation:self];
+			
+			[communicator destroy];
+			communicator = nil;
+			
+			NSRunAlertPanel(@"Error", msg, @"OK", nil, nil);
+		});
     });    
 }
 
@@ -272,7 +275,7 @@ NSString* const routerServerKey = @"routerServerKey";
     [defaults setBool:(sslField.state == NSOnState) forKey:sslKey];
     [defaults setBool:(routerField.state == NSOnState) forKey:routerKey];
     [defaults setObject:routerServerField.stringValue forKey:routerServerKey];
-        
+	
     [NSApp endSheet:advancedSheet]; 
     [advancedSheet orderOut:sender]; 
 }
