@@ -27,6 +27,8 @@
 @property (nonatomic, retain)  id<Glacier2RouterPrx> router;
 @property (nonatomic, retain) id<DemoLibraryPrx> library;
 
+-(void)exception:(ICEException*)ex;
+
 @end
 
 @implementation MainController
@@ -150,17 +152,36 @@
     
     if(router)
     {
-        [router destroySession_async:nil response:nil exception:nil];
+        [router begin_destroySession];
     }
     else
     {
-        [session destroy_async:nil response:nil exception:nil];
+        [session begin_destroy];
     }
-    self.router = nil;
-    self.session = nil;
     
-    [communicator destroy];
+	// Destroy the session and destroy the communicator from another thread since these
+    // calls block.
+    id<ICECommunicator> c = [communicator retain];
+    id<Glacier2RouterPrx> r = [router retain];
+    self.router = nil;
     self.communicator = nil;
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^ {
+        @try
+        {
+            [r destroySession];
+        }
+        @catch (ICEException* ex) {
+        }
+		
+        @try
+        {            
+            [c destroy];
+        }
+        @catch (ICEException* ex) {
+        }
+        [r release];
+        [c release];
+    });
 }
 
 -(void)logout:(id)sender
@@ -169,41 +190,44 @@
     [self.navigationController popViewControllerAnimated:YES];
 }
 
--(void)sessionRefreshException:(ICEException*)ex
-{
-    [self.navigationController popToRootViewControllerAnimated:YES];
-    
-    // The session is invalid, clear.
-    self.session = nil;
-    
-    // Clean up the remainder.
-    [self destroySession];
-    
-    NSString* s = [NSString stringWithFormat:@"Lost connection with session!\n%@", ex];
-    
-    // open an alert with just an OK button
-    UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Error"
-                                                     message:s
-                                                    delegate:nil
-                                           cancelButtonTitle:@"OK"
-                                           otherButtonTitles:nil] autorelease];
-    [alert show];
-}
-
 -(void)refreshSession:(NSTimer*)timer
 {
-    [session refresh_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                  response:nil
-                 exception:@selector(sessionRefreshException:)];
+    [session begin_refresh:nil exception:^(ICEException* ex) {
+		[self.navigationController popToRootViewControllerAnimated:YES];
+		
+		// The session is invalid, clear.
+		self.session = nil;
+		
+		// Clean up the remainder.
+		[self destroySession];
+		
+		NSString* s = [NSString stringWithFormat:@"Lost connection with session!\n%@", ex];
+		
+		// open an alert with just an OK button
+		UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Error"
+														 message:s
+														delegate:nil
+											   cancelButtonTitle:@"OK"
+											   otherButtonTitles:nil] autorelease];
+		[alert show];
+	}];
 }
 
 -(void)removeCurrentBook
 {
     DemoBookDescription *book = (DemoBookDescription *)[books objectAtIndex:currentIndexPath.row];
     
-    [[book proxy] destroy_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                       response:nil
-                      exception:@selector(exceptionIgnoreONE:)];
+    [[book proxy] begin_destroy:nil exception:^(ICEException* ex) {
+		[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+		
+		// Ignore ICEObjectNotExistException
+		if([ex isKindOfClass:[ICEObjectNotExistException class]])
+		{
+			return;
+		}
+		
+		[self exception:ex];
+	}];
     
     // Remove the book, and the row from the table.
     [books removeObjectAtIndex:currentIndexPath.row];        
@@ -257,54 +281,6 @@
     [alert show];
 }
 
--(void)exceptionIgnoreONE:(ICEException*)ex
-{
-    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-
-    // Ignore ICEObjectNotExistException
-    if([ex isKindOfClass:[ICEObjectNotExistException class]])
-    {
-        return;
-    }
-    
-    [self exception:ex];
-}
-
--(void)nextResponse:(NSArray*)seq destroyed:(BOOL)d
-{
-    [books addObjectsFromArray:seq];
-    // The query has returned all available results.
-    if(d)
-    {
-        self.query = nil;
-    }
-
-    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-    [searchTableView reloadData];
-}
-
--(void)queryResponse:(NSArray*)seq nrows:(int)n result:(id<DemoBookQueryResultPrx>)q
-{
-    nrows = n;
-    if(nrows == 0)
-    {
-        // open an alert with just an OK button
-        UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"No Results"
-                                                         message:@"The search returned no results"
-                                                        delegate:self
-                                               cancelButtonTitle:@"OK"
-                                               otherButtonTitles:nil] autorelease];
-        [alert show];
-        return;
-    }
-
-    [books addObjectsFromArray:seq];
-    self.query = q;
-
-    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-    [searchTableView reloadData];
-}
-
 #pragma mark UIAlertViewDelegate
 
 -(void)alertView:(UIAlertView*)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
@@ -343,28 +319,51 @@
     [searchTableView reloadData];
     
     // Run the query.
+	void(^queryResponse)(NSMutableArray*, int, id<DemoBookQueryResultPrx>) = 
+    ^(NSMutableArray* seq, int n, id<DemoBookQueryResultPrx> q) 
+    {
+		nrows = n;
+		if(nrows == 0)
+		{
+			// open an alert with just an OK button
+			UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"No Results"
+															 message:@"The search returned no results"
+															delegate:self
+												   cancelButtonTitle:@"OK"
+												   otherButtonTitles:nil] autorelease];
+			[alert show];
+			return;
+		}
+		
+		[books addObjectsFromArray:seq];
+		self.query = q;
+		
+		[UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+		[searchTableView reloadData];
+    };
+	
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     if(searchMode == 0) // ISBN
     {
-        [library queryByIsbn_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                          response:@selector(queryResponse:nrows:result:)
-                         exception:@selector(exception:)
-                              isbn:search n:10];
+        [library begin_queryByIsbn:search
+								 n:10
+                          response:queryResponse
+                         exception:^(ICEException* ex) { [self exception:ex]; }];
     }
     else if(searchMode == 1) // Authors
     {
-        [library queryByAuthor_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                            response:@selector(queryResponse:nrows:result:)
-                           exception:@selector(exception:)
-                              author:search n:10];
+        [library begin_queryByAuthor:search
+								   n:10
+                            response:queryResponse
+                           exception:^(ICEException* ex) { [self exception:ex]; }];
     }
     else // Title
     {
         
-        [library queryByTitle_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                           response:@selector(queryResponse:nrows:result:)
-                          exception:@selector(exception:)
-                              title:search n:10];
+        [library begin_queryByTitle:search
+								  n:10
+                           response:queryResponse
+                          exception:^(ICEException* ex) { [self exception:ex]; }];
     }
 }
 
@@ -432,10 +431,19 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
         {
             [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
             NSAssert(query != nil, @"query != nil");
-            [query next_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                     response:@selector(nextResponse:destroyed:)
-                    exception:@selector(exception:)
-                            n:10];
+            [query begin_next:10
+                     response:^(NSMutableArray* seq, BOOL destroyed) { 
+						 [books addObjectsFromArray:seq];
+						 // The query has returned all available results.
+						 if(destroyed)
+						 {
+							 self.query = nil;
+						 }
+						 
+						 [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+						 [searchTableView reloadData];
+					 }
+                    exception:^(ICEException* ex) { [self exception:ex]; }];
             rowsQueried += 10;
         }
 

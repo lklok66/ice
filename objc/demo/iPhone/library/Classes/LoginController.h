@@ -29,8 +29,7 @@
     NSString* oldFieldValue;
     
     MainController *mainController;
-    
-    NSOperationQueue* queue;
+
     WaitAlert* waitAlert;
     
     id<ICECommunicator> communicator;

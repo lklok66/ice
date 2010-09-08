@@ -62,8 +62,6 @@ static NSString* passwordKey = @"passwordKey";
 {
     NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
     
-    queue = [[NSOperationQueue alloc] init];
-
     // Set the default values, and show the clear button in the text field.
     hostnameField.clearButtonMode = UITextFieldViewModeWhileEditing;
     hostnameField.text = [defaults stringForKey:hostnameKey];
@@ -120,7 +118,6 @@ static NSString* passwordKey = @"passwordKey";
     [glacier2Switch release];
     [sslSwitch release];
     [mainController release];
-    [queue release];
     [waitAlert release];
 
     [session release];
@@ -216,83 +213,34 @@ static NSString* passwordKey = @"passwordKey";
     [alert show];
 }
 
--(void)loginComplete
-{
-    [waitAlert dismissWithClickedButtonIndex:0 animated:YES];
-    self.waitAlert = nil;
-
-    [mainController activate:communicator
-                     session:session
-                      router:router
-           sessionTimeout:sessionTimeout
-                     library:library];
-
-    // Clear internal state.
-    self.communicator = nil;
-    self.session = nil;
-    self.library = nil;
-    self.router = nil;
-    
-    [self.navigationController pushViewController:mainController animated:YES];
-}
-
 // Runs in a separate thread, called only by NSInvocationOperation.
 -(void)doLogin:(id)proxy
 {
-    @try
-    {
-        id<DemoSessionFactoryPrx> factory = [DemoSessionFactoryPrx checkedCast:proxy];
-        if(factory == nil)
-        {
-            [self performSelectorOnMainThread:@selector(exception:) withObject:@"Invalid proxy" waitUntilDone:NO];
-            return;
-        }
-
-        id<DemoSessionPrx> sess = [factory create];
-
-        self.session = sess;
-        sessionTimeout = [factory getSessionTimeout];
-        self.library = [sess getLibrary];
-        
-        [self performSelectorOnMainThread:@selector(loginComplete) withObject:nil waitUntilDone:NO];
-    }
-    @catch(ICEException* ex)
-    {
-        [self performSelectorOnMainThread:@selector(exception:) withObject:[ex description] waitUntilDone:NO];
-    }
+	id<DemoSessionFactoryPrx> factory = [DemoSessionFactoryPrx checkedCast:proxy];
+	if(factory == nil)
+	{
+		@throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"Invalid proxy" userInfo:nil];
+	}
+	
+	id<DemoSessionPrx> sess = [factory create];
+	
+	self.session = sess;
+	sessionTimeout = [factory getSessionTimeout];
+	self.library = [sess getLibrary];
 }
 
 // Runs in a separate thread, called only by NSInvocationOperation.
 -(void)doGlacier2Login:(id)proxy
 {
-    @try
-    {
-        id<Glacier2RouterPrx> glacier2router = [Glacier2RouterPrx uncheckedCast:proxy];
-        
-        id<Glacier2SessionPrx> glacier2session = [glacier2router createSession:usernameField.text password:passwordField.text];
-        id<DemoGlacier2SessionPrx> sess = [DemoGlacier2SessionPrx uncheckedCast:glacier2session];
-
-        self.session = sess;
-        self.router = glacier2router;
-        sessionTimeout = [glacier2router getSessionTimeout];
-        self.library = [sess getLibrary];
-        
-        [self performSelectorOnMainThread:@selector(loginComplete) withObject:nil waitUntilDone:NO];
-    }
-    @catch(Glacier2CannotCreateSessionException* ex)
-    {
-        NSString* s = [NSString stringWithFormat:@"Session creation failed: %@", ex.reason_];
-        [self performSelectorOnMainThread:@selector(exception:) withObject:s waitUntilDone:NO];
-    }
-    @catch(Glacier2PermissionDeniedException* ex)
-    {
-        NSString* s = [NSString stringWithFormat:@"Login failed: %@", ex.reason_];
-        [self performSelectorOnMainThread:@selector(exception:) withObject:s waitUntilDone:NO];
-    }
-    @catch(ICEException* ex)
-    {
-        [self performSelectorOnMainThread:@selector(exception:) withObject:[ex description] waitUntilDone:NO];
-    }
+	id<Glacier2RouterPrx> glacier2router = [Glacier2RouterPrx uncheckedCast:proxy];
+	
+	id<Glacier2SessionPrx> glacier2session = [glacier2router createSession:usernameField.text password:passwordField.text];
+	id<DemoGlacier2SessionPrx> sess = [DemoGlacier2SessionPrx uncheckedCast:glacier2session];
+	
+	self.session = sess;
+	self.router = glacier2router;
+	sessionTimeout = [glacier2router getSessionTimeout];
+	self.library = [sess getLibrary];
 }
 
 -(IBAction)login:(id)sender
@@ -305,6 +253,10 @@ static NSString* passwordKey = @"passwordKey";
     // Tracing properties.
     //[initData.properties setProperty:@"Ice.Trace.Network" value:@"1"];
     //[initData.properties setProperty:@"Ice.Trace.Protocol" value:@"1"];
+
+    initData.dispatcher = ^(id<ICEDispatcherCall> call, id<ICEConnection> con) {
+        dispatch_sync(dispatch_get_main_queue(), ^ { [call run]; });
+    };
     
     NSString* hostname = hostnameField.text;
     // Setup the SSL certificates depending on the which server host we are
@@ -386,11 +338,55 @@ static NSString* passwordKey = @"passwordKey";
     waitAlert.text = @"Connecting...";
     [waitAlert show];
     
-    // Kick off the login process in a separate thread. This ensures that the UI is not blocked.
-    NSInvocationOperation* op = [[[NSInvocationOperation alloc] initWithTarget:self
-                                                                     selector:loginSelector
-                                                                        object:proxy] autorelease];
-    [queue addOperation:op];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^ {
+        @try
+        {
+			[self performSelector:loginSelector withObject:proxy];
+			dispatch_async(dispatch_get_main_queue(), ^ {
+				[waitAlert dismissWithClickedButtonIndex:0 animated:YES];
+				self.waitAlert = nil;
+				
+				[mainController activate:communicator
+								 session:session
+								  router:router
+						  sessionTimeout:sessionTimeout
+								 library:library];
+				
+				// Clear internal state.
+				self.communicator = nil;
+				self.session = nil;
+				self.library = nil;
+				self.router = nil;
+				
+				[self.navigationController pushViewController:mainController animated:YES];
+			});
+		}
+		@catch(Glacier2CannotCreateSessionException* ex)
+		{
+			NSString* s = [NSString stringWithFormat:@"Session creation failed: %@", ex.reason_];
+			dispatch_async(dispatch_get_main_queue(), ^ {
+				[self exception:s];
+			});
+		}
+		@catch(Glacier2PermissionDeniedException* ex)
+		{
+			NSString* s = [NSString stringWithFormat:@"Login failed: %@", ex.reason_];
+			dispatch_async(dispatch_get_main_queue(), ^ {
+				[self exception:s];
+			});
+		}
+		@catch(ICEException* ex)
+		{
+			dispatch_async(dispatch_get_main_queue(), ^ {
+				[self exception:[ex description]];
+			});
+		}        
+		@catch(NSException *ex)
+		{
+			dispatch_async(dispatch_get_main_queue(), ^ {
+				[self exception:[ex reason]];
+			});
+		}
+	});
 }
-
 @end

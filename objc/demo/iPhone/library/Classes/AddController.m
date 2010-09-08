@@ -73,12 +73,33 @@
     self.waitAlert = [[WaitAlert alloc] init];
     [waitAlert show];
     
-    [library createBook_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                     response:@selector(createResponse)
-                    exception:@selector(exception:)
-                         isbn:book.isbn
+    [library begin_createBook:book.isbn
                         title:book.title
-                      authors:book.authors];
+                      authors:book.authors
+                     response:^(id<DemoBookPrx> prx) {
+						 NSAssert(waitAlert != nil, @"savingAlert != nil");
+						 [waitAlert dismissWithClickedButtonIndex:0 animated:NO];
+						 self.waitAlert = nil;
+						 
+						 [self.navigationController popViewControllerAnimated:YES];
+					 }
+                    exception:^(ICEException* ex) { 
+						NSAssert(waitAlert != nil, @"savingAlert != nil");
+						[waitAlert dismissWithClickedButtonIndex:0 animated:NO];
+						self.waitAlert = nil;
+						
+						if([ex isKindOfClass:[DemoBookExistsException class]])
+						{
+							// open an alert with just an OK button
+							UIAlertView *alert = [[[UIAlertView alloc]
+												   initWithTitle:@"Error" message:@"That ISBN number already exists"
+												   delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] autorelease];
+							[alert show];
+							return;
+						}
+						
+						[super exception:ex];
+					}];
 }
 
 -(void)startEdit:(DemoBookDescription*)b library:(id<DemoLibraryPrx>)l
@@ -86,36 +107,6 @@
     self.book = b;
     self.library = l;
     [self setEditing:YES animated:NO];
-}
-
-#pragma mark AMI callbacks
-
--(void)createResponse
-{
-    NSAssert(waitAlert != nil, @"savingAlert != nil");
-    [waitAlert dismissWithClickedButtonIndex:0 animated:NO];
-    self.waitAlert = nil;
-    
-    [self.navigationController popViewControllerAnimated:YES];
-}
-
--(void)exception:(ICEException*)ex
-{
-    NSAssert(waitAlert != nil, @"savingAlert != nil");
-    [waitAlert dismissWithClickedButtonIndex:0 animated:NO];
-    self.waitAlert = nil;
-
-    if([ex isKindOfClass:[DemoBookExistsException class]])
-    {
-        // open an alert with just an OK button
-        UIAlertView *alert = [[[UIAlertView alloc]
-                               initWithTitle:@"Error" message:@"That ISBN number already exists"
-                               delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] autorelease];
-        [alert show];
-        return;
-    }
-
-    [super exception:ex];
 }
 
 @end

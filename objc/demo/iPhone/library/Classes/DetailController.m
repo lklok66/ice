@@ -215,11 +215,10 @@ static EditController* editViewController_ = nil;
         self.waitAlert = [[WaitAlert alloc] init];
         [waitAlert show];
         
-        [[book proxy] setTitle_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                            response:@selector(commitEdit)
-                           exception:@selector(exception:)
-                               title:title];
-    }
+        [[book proxy] begin_setTitle:title
+                            response:^ { [self commitEdit]; }
+						   exception:^(ICEException* ex) { [self exception:ex]; }];
+	}
     else
     {
         [self commitEdit];
@@ -247,10 +246,9 @@ static EditController* editViewController_ = nil;
         NSAssert(waitAlert == nil, @"waitAlert == nil");
         self.waitAlert = [[WaitAlert alloc] init];
         [waitAlert show];
-        [[book proxy] setAuthors_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                              response:@selector(commitEdit)
-                             exception:@selector(exception:)
-                               authors:arr];
+        [[book proxy] begin_setAuthors:arr
+							  response:^ { [self commitEdit]; }
+							 exception:^(ICEException* ex) { [self exception:ex]; }];
     }
     else
     {
@@ -269,10 +267,9 @@ static EditController* editViewController_ = nil;
     self.waitAlert = [[WaitAlert alloc] init];
     [waitAlert show];
     
-    [[book proxy] rentBook_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                        response:@selector(commitEdit)
-                       exception:@selector(exception:)
-                            name:value];
+    [[book proxy] begin_rentBook:value
+						response:^ { [self commitEdit]; }
+					   exception:^(ICEException* ex) { [self exception:ex]; }];
 }
 
 #pragma mark UIAlertViewDelegate
@@ -347,10 +344,9 @@ static EditController* editViewController_ = nil;
             NSAssert(waitAlert == nil, @"waitAlert == nil");
             self.waitAlert = [[WaitAlert alloc] init];
             [waitAlert show];
-            [[book proxy] setAuthors_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                                  response:@selector(commitEdit)
-                                 exception:@selector(exception:)
-                                   authors:arr];
+            [[book proxy] begin_setAuthors:arr
+								  response:^ { [self commitEdit]; }
+								 exception:^(ICEException* ex) { [self exception:ex]; }];
         }
         else
         {
@@ -611,17 +607,6 @@ static EditController* editViewController_ = nil;
 
 #pragma mark - UIActionSheetDelegate
 
--(void)returnBookResponse
-{
-    [waitAlert dismissWithClickedButtonIndex:0 animated:YES];
-    self.waitAlert = nil;
-    
-    [self.tableView deselectRowAtIndexPath:selectedIndexPath animated:NO];
-    
-    book.rentedBy = @"";
-    [tableView reloadData];
-}
-
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
     [self.tableView deselectRowAtIndexPath:selectedIndexPath animated:NO];
@@ -631,9 +616,16 @@ static EditController* editViewController_ = nil;
         self.waitAlert = [[WaitAlert alloc] init];
         [waitAlert show];
         
-        [[book proxy] returnBook_async:[ICECallbackOnMainThread callbackOnMainThread:self]
-                              response:@selector(returnBookResponse)
-                             exception:@selector(exception:)];
+        [[book proxy] begin_returnBook:^ {
+			[waitAlert dismissWithClickedButtonIndex:0 animated:YES];
+			self.waitAlert = nil;
+			
+			[self.tableView deselectRowAtIndexPath:selectedIndexPath animated:NO];
+			
+			book.rentedBy = @"";
+			[tableView reloadData];
+		}
+                             exception:^(ICEException* ex) { [self exception:ex]; }];
     }
 }
 
