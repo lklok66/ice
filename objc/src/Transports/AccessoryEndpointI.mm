@@ -7,10 +7,6 @@
 //
 // **********************************************************************
 
-#include <Availability.h>
-
-#if __IPHONE_3_0
-
 #include <AccessoryEndpointI.h>
 #include <AccessoryConnector.h>
 
@@ -696,5 +692,3 @@ IceObjC::AccessoryEndpointFactory::destroy()
 {
     _instance = 0;
 }
-
-#endif

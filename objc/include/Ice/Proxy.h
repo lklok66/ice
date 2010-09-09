@@ -31,18 +31,6 @@
 typedef void (^ICEMarshalCB)(id<ICEOutputStream>);
 typedef void (^ICEUnmarshalCB)(id<ICEInputStream>, BOOL);
 
-//
-// An helper class to run Ice callbacks on the main thread.
-//
-@interface ICECallbackOnMainThread : NSProxy
-{
-    id cb_;
-}
--(id)init:(id)cb;
-+(id)callbackOnMainThread:(id)cb;
--(void)forwardInvocation:(NSInvocation *)inv;
-@end
-
 @interface ICEAsyncResult : NSObject
 {
 @private
@@ -120,10 +108,6 @@ typedef void (^ICEUnmarshalCB)(id<ICEInputStream>, BOOL);
 -(ICEAsyncResult*) begin_ice_invoke:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams response:(void(^)(BOOL, NSMutableData*))response exception:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent;
 -(ICEAsyncResult*) begin_ice_invoke:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams  context:(ICEContext*)context response:(void(^)(BOOL, NSMutableData*))response exception:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent;
 -(BOOL) end_ice_invoke:(NSMutableData**)outParams result:(ICEAsyncResult*)result;
--(BOOL) ice_invoke_async:(id)target response:(SEL)response exception:(SEL)exception operation:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams;
--(BOOL) ice_invoke_async:(id)target response:(SEL)response exception:(SEL)exception operation:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams context:(ICEContext*)context;
--(BOOL) ice_invoke_async:(id)target response:(SEL)response exception:(SEL)exception sent:(SEL)sent operation:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams;
--(BOOL) ice_invoke_async:(id)target response:(SEL)response exception:(SEL)exception sent:(SEL)sent operation:(NSString*)operation mode:(ICEOperationMode)mode inParams:(NSData*)inParams context:(ICEContext*)context;
 -(ICEIdentity*) ice_getIdentity;
 -(id) ice_identity:(ICEIdentity*)identity;
 -(ICEMutableContext*) ice_getContext;
@@ -166,8 +150,6 @@ typedef void (^ICEUnmarshalCB)(id<ICEInputStream>, BOOL);
 -(id<ICEConnection>) ice_getConnection;
 -(id<ICEConnection>) ice_getCachedConnection;
 -(void) ice_flushBatchRequests;
--(BOOL) ice_flushBatchRequests_async:(id)target exception:(SEL)exception;
--(BOOL) ice_flushBatchRequests_async:(id)target exception:(SEL)exception sent:(SEL)sent;
 -(ICEAsyncResult*) begin_ice_flushBatchRequests;
 -(ICEAsyncResult*) begin_ice_flushBatchRequests:(void(^)(ICEException*))exception;
 -(ICEAsyncResult*) begin_ice_flushBatchRequests:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent;
@@ -190,12 +172,8 @@ typedef void (^ICEUnmarshalCB)(id<ICEInputStream>, BOOL);
 
 +(Protocol*) protocol__;
 -(id<ICEOutputStream>) createOutputStream__;
--(void) checkTwowayOnly__:(NSString*)operation;
 -(void) invoke__:(NSString*)operation mode:(ICEOperationMode)mode marshal:(ICEMarshalCB)marshal 
        unmarshal:(ICEUnmarshalCB)unmarshal context:(ICEContext*)context;
--(BOOL) invoke_async__:(id)target response:(SEL)response exception:(SEL)exception sent:(SEL)sent 
-         finishedClass:(Class)finishedClass finished:(SEL)finished operation:(NSString*)operation 
-                  mode:(ICEOperationMode)mode os:(id<ICEOutputStream>)os context:(ICEContext*)context;
 -(ICEAsyncResult*) begin_invoke__:(NSString*)operation mode:(ICEOperationMode)mode marshal:(ICEMarshalCB)marshal
                       returnsData:(BOOL)returnsData context:(ICEContext*)context;
 -(ICEAsyncResult*) begin_invoke__:(NSString*)operation mode:(ICEOperationMode)mode marshal:(ICEMarshalCB)marshal

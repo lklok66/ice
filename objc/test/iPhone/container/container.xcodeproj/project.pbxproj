@@ -49,10 +49,8 @@
 		34B3B4B60FD7A7700018C227 /* BatchOneways.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B4AB0FD7A7700018C227 /* BatchOneways.m */; };
 		34B3B4B70FD7A7700018C227 /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B4AC0FD7A7700018C227 /* Client.m */; };
 		34B3B4B80FD7A7700018C227 /* Oneways.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B4AD0FD7A7700018C227 /* Oneways.m */; };
-		34B3B4B90FD7A7700018C227 /* OnewaysAMI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B4AE0FD7A7700018C227 /* OnewaysAMI.m */; };
 		34B3B4BA0FD7A7700018C227 /* Server.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B4AF0FD7A7700018C227 /* Server.m */; };
 		34B3B4BD0FD7A7700018C227 /* Twoways.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B4B30FD7A7700018C227 /* Twoways.m */; };
-		34B3B4BE0FD7A7700018C227 /* TwowaysAMI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B4B40FD7A7700018C227 /* TwowaysAMI.m */; };
 		34B3B4F30FD7A9660018C227 /* TestI.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B4F10FD7A9660018C227 /* TestI.m */; };
 		34B3B5010FD7AB5C0018C227 /* TestCommon.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5000FD7AB5C0018C227 /* TestCommon.m */; };
 		34B3B5200FD7E7740018C227 /* AllTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 34B3B5180FD7E7740018C227 /* AllTests.m */; };
@@ -178,10 +176,8 @@
 		34B3B4AB0FD7A7700018C227 /* BatchOneways.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = BatchOneways.m; path = ../../Ice/operations/BatchOneways.m; sourceTree = SOURCE_ROOT; };
 		34B3B4AC0FD7A7700018C227 /* Client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Client.m; path = ../../Ice/operations/Client.m; sourceTree = SOURCE_ROOT; };
 		34B3B4AD0FD7A7700018C227 /* Oneways.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Oneways.m; path = ../../Ice/operations/Oneways.m; sourceTree = SOURCE_ROOT; };
-		34B3B4AE0FD7A7700018C227 /* OnewaysAMI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = OnewaysAMI.m; path = ../../Ice/operations/OnewaysAMI.m; sourceTree = SOURCE_ROOT; };
 		34B3B4AF0FD7A7700018C227 /* Server.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Server.m; path = ../../Ice/operations/Server.m; sourceTree = SOURCE_ROOT; };
 		34B3B4B30FD7A7700018C227 /* Twoways.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Twoways.m; path = ../../Ice/operations/Twoways.m; sourceTree = SOURCE_ROOT; };
-		34B3B4B40FD7A7700018C227 /* TwowaysAMI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TwowaysAMI.m; path = ../../Ice/operations/TwowaysAMI.m; sourceTree = SOURCE_ROOT; };
 		34B3B4F00FD7A9660018C227 /* TestI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestI.h; path = ../../Ice/operations/TestI.h; sourceTree = SOURCE_ROOT; };
 		34B3B4F10FD7A9660018C227 /* TestI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestI.m; path = ../../Ice/operations/TestI.m; sourceTree = SOURCE_ROOT; };
 		34B3B5000FD7AB5C0018C227 /* TestCommon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestCommon.m; path = ../../Common/TestCommon.m; sourceTree = SOURCE_ROOT; };
@@ -466,10 +462,8 @@
 				34B3B4AB0FD7A7700018C227 /* BatchOneways.m */,
 				34B3B4AC0FD7A7700018C227 /* Client.m */,
 				34B3B4AD0FD7A7700018C227 /* Oneways.m */,
-				34B3B4AE0FD7A7700018C227 /* OnewaysAMI.m */,
 				34B3B4AF0FD7A7700018C227 /* Server.m */,
 				34B3B4B30FD7A7700018C227 /* Twoways.m */,
-				34B3B4B40FD7A7700018C227 /* TwowaysAMI.m */,
 			);
 			name = operations;
 			sourceTree = "<group>";
@@ -723,10 +717,8 @@
 				34B3B4B60FD7A7700018C227 /* BatchOneways.m in Sources */,
 				34B3B4B70FD7A7700018C227 /* Client.m in Sources */,
 				34B3B4B80FD7A7700018C227 /* Oneways.m in Sources */,
-				34B3B4B90FD7A7700018C227 /* OnewaysAMI.m in Sources */,
 				34B3B4BA0FD7A7700018C227 /* Server.m in Sources */,
 				34B3B4BD0FD7A7700018C227 /* Twoways.m in Sources */,
-				34B3B4BE0FD7A7700018C227 /* TwowaysAMI.m in Sources */,
 				34B3B4F30FD7A9660018C227 /* TestI.m in Sources */,
 				34B3B5010FD7AB5C0018C227 /* TestCommon.m in Sources */,
 				34B3B5200FD7E7740018C227 /* AllTests.m in Sources */,

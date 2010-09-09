@@ -7,10 +7,6 @@
 //
 // **********************************************************************
 
-#include <Availability.h>
-
-#ifdef __IPHONE_3_0
-
 #include <AccessoryTransceiver.h>
 #include <AccessoryEndpointI.h>
 #include <AccessoryConnector.h>
@@ -178,5 +174,3 @@ IceObjC::AccessoryConnector::~AccessoryConnector()
     [_protocol release];
     [_accessory release];
 }
-
-#endif

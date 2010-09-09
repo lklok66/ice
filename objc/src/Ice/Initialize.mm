@@ -32,7 +32,7 @@ extern "C"
 {
 #ifdef ICE_USE_CFSTREAM
     Ice::Plugin* createIceTcp(const Ice::CommunicatorPtr&, const std::string&, const Ice::StringSeq&);
-#  ifdef __IPHONE_3_0
+#  if TARGET_OS_IPHONE
     Ice::Plugin* createIceAccessory(const Ice::CommunicatorPtr&, const std::string&, const Ice::StringSeq&);
 #  endif
 #endif
@@ -451,7 +451,7 @@ dispatcher:(void(^)(id<ICEDispatcherCall>, id<ICEConnection>))d;
 
 @end
 
-#if TARGET_OS_IPHONE && defined(__IPHONE_3_0)
+#if TARGET_OS_IPHONE
 
 #include <Foundation/Foundation.h>
 #include <ExternalAccessory/ExternalAccessory.h>

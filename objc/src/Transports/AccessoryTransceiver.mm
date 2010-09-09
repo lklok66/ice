@@ -7,10 +7,6 @@
 //
 // **********************************************************************
 
-#include <Availability.h>
-
-#ifdef __IPHONE_3_0
-
 #include <AccessoryTransceiver.h>
 #include <AccessoryEndpointI.h>
 
@@ -29,7 +25,7 @@ using namespace std;
 using namespace Ice;
 using namespace IceInternal;
 
-@interface AccessoryTransceiverCallback : NSObject
+@interface AccessoryTransceiverCallback : NSObject<NSStreamDelegate>
 {
 @private
 
@@ -491,5 +487,3 @@ IceObjC::AccessoryTransceiver::~AccessoryTransceiver()
     [_readStream release];
     [_writeStream release];
 }
-
-#endif
