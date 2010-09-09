@@ -12,16 +12,13 @@
 
 #import <Foundation/NSAutoreleasePool.h>
 
-#if !TARGET_OS_IPHONE
-  #import <objc/objc-auto.h>
-#endif
+#import <objc/objc-auto.h>
 
 int
 main(int argc, char* argv[])
 {
-#if !TARGET_OS_IPHONE
     objc_startCollectorThread();
-#endif
+
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
     
     int status = 0;

@@ -179,10 +179,6 @@ else
     endif
 endif
 
-ifeq ($(COMPILE_WITH_GC),no)
-   CPPPLATFORMFLAGS := -DICE_OBJC_NOGC $(CPPPLATFORMFLAGS)
-endif
-
 ifdef ice_src_dist
     ifeq ($(ice_cpp_dir), $(ice_dir)/cpp)
         SLICE2CPP = $(ice_cpp_dir)/bin/slice2cpp

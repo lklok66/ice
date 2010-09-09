@@ -12,9 +12,7 @@
 
 #import <Foundation/NSAutoreleasePool.h>
 
-#if !TARGET_OS_IPHONE
-  #import <objc/objc-auto.h>
-#endif
+#import <objc/objc-auto.h>
 
 int
 run(int argc, char* argv[], id<ICECommunicator> communicator)
@@ -36,9 +34,8 @@ run(int argc, char* argv[], id<ICECommunicator> communicator)
 int
 main(int argc, char* argv[])
 {
-#ifndef ICE_OBJC_NOGC
     objc_startCollectorThread();
-#endif
+
     NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
     
     int status = EXIT_SUCCESS;

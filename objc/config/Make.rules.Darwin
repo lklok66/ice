@@ -44,7 +44,7 @@ ifeq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
 endif
 
 CFLAGS                  = -Wall
-CXXFLAGS		= -ftemplate-depth-128 -Wall -D_REENTRANT 
+CXXFLAGS		= -Wall -D_REENTRANT 
 
 OPT_FLAGS		=
 ifeq ($(OPTIMIZE_SPEED),yes)

@@ -30,6 +30,10 @@ SLICE_SRCS	= AMITest.ice
 
 include $(top_srcdir)/config/Make.rules
 
+ifeq ($(COMPILE_WITH_GC),yes)
+   CPPFLAGS		:= -DICE_OBJC_GC $(CPPFLAGS)
+endif
+
 # Put in Make.rules
 
 CPPFLAGS	:= -I. -I.. -I../../include $(CPPFLAGS)

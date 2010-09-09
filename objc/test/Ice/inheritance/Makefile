@@ -30,6 +30,10 @@ SLICE_SRCS	= InheritanceTest.ice
 
 include $(top_srcdir)/config/Make.rules
 
+ifeq ($(COMPILE_WITH_GC),yes)
+   CPPFLAGS		:= -DICE_OBJC_GC $(CPPFLAGS)
+endif
+
 CPPFLAGS	:= -I. -I.. -I../../include $(CPPFLAGS)
 LIBS		:= -lTestCommon $(LIBS)
 

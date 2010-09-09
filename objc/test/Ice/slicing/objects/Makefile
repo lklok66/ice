@@ -34,6 +34,10 @@ SLICE_SRCS	= SlicingObjectsTestClient.ice \
 
 include $(top_srcdir)/config/Make.rules
 
+ifeq ($(COMPILE_WITH_GC),yes)
+   CPPFLAGS		:= -DICE_OBJC_GC $(CPPFLAGS)
+endif
+
 CPPFLAGS	:= -I. -I../.. -I../../../include $(CPPFLAGS)
 LIBS		:= -lTestCommon $(LIBS)
 SLICE2OBJCFLAGS := -I. $(SLICE2OBJCFLAGS)
