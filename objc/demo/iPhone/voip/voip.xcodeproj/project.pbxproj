@@ -12,6 +12,9 @@
 		2899E5220DE3E06400AC0155 /* VoipViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2899E5210DE3E06400AC0155 /* VoipViewController.xib */; };
 		28AD733F0D9D9553002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD733E0D9D9553002E5188 /* MainWindow.xib */; };
 		28D7ACF80DDB3853001CB0EB /* VoipViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28D7ACF70DDB3853001CB0EB /* VoipViewController.m */; };
+		34D64A3F12393DCE00F93FB0 /* cacert.der in Resources */ = {isa = PBXBuildFile; fileRef = 34D64A3E12393DCE00F93FB0 /* cacert.der */; };
+		34D64A4612393E9D00F93FB0 /* democacert.der in Resources */ = {isa = PBXBuildFile; fileRef = 34D64A3C12393DC000F93FB0 /* democacert.der */; };
+		34D64A4712393EAE00F93FB0 /* voip-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8D1107310486CEB800E47090 /* voip-Info.plist */; };
 		34EA354E123130C000A53E14 /* Voip.ice in Sources */ = {isa = PBXBuildFile; fileRef = 34EA354D123130C000A53E14 /* Voip.ice */; };
 		34EA3550123130D300A53E14 /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = 34EA354F123130D300A53E14 /* README.txt */; };
 		34EA3557123131A600A53E14 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34EA353F1231305B00A53E14 /* CoreGraphics.framework */; };
@@ -20,7 +23,6 @@
 		34EA355A123131A600A53E14 /* ExternalAccessory.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 34EA34EF12312F2900A53E14 /* ExternalAccessory.framework */; };
 		34EA355B123131A600A53E14 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
 		34EA355C123131A600A53E14 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
-		34EA3575123137EE00A53E14 /* cacert.der in Resources */ = {isa = PBXBuildFile; fileRef = 34EA3574123137EE00A53E14 /* cacert.der */; };
 		34EA358B123171A000A53E14 /* WaitAlert.m in Sources */ = {isa = PBXBuildFile; fileRef = 34EA358A123171A000A53E14 /* WaitAlert.m */; };
 /* End PBXBuildFile section */
 
@@ -36,13 +38,14 @@
 		28D7ACF70DDB3853001CB0EB /* VoipViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VoipViewController.m; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* voip_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = voip_Prefix.pch; sourceTree = "<group>"; };
+		34D64A3C12393DC000F93FB0 /* democacert.der */ = {isa = PBXFileReference; lastKnownFileType = file; path = democacert.der; sourceTree = "<group>"; };
+		34D64A3E12393DCE00F93FB0 /* cacert.der */ = {isa = PBXFileReference; lastKnownFileType = file; path = cacert.der; sourceTree = "<group>"; };
 		34EA34EF12312F2900A53E14 /* ExternalAccessory.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ExternalAccessory.framework; path = System/Library/Frameworks/ExternalAccessory.framework; sourceTree = SDKROOT; };
 		34EA34F612312F2E00A53E14 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		34EA350412312F3600A53E14 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		34EA353F1231305B00A53E14 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		34EA354D123130C000A53E14 /* Voip.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; path = Voip.ice; sourceTree = "<group>"; };
 		34EA354F123130D300A53E14 /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
-		34EA3574123137EE00A53E14 /* cacert.der */ = {isa = PBXFileReference; lastKnownFileType = file; path = cacert.der; sourceTree = "<group>"; };
 		34EA35891231719900A53E14 /* WaitAlert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WaitAlert.h; sourceTree = "<group>"; };
 		34EA358A123171A000A53E14 /* WaitAlert.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WaitAlert.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* voip-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "voip-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
@@ -112,7 +115,8 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				34EA3574123137EE00A53E14 /* cacert.der */,
+				34D64A3E12393DCE00F93FB0 /* cacert.der */,
+				34D64A3C12393DC000F93FB0 /* democacert.der */,
 				2899E5210DE3E06400AC0155 /* VoipViewController.xib */,
 				28AD733E0D9D9553002E5188 /* MainWindow.xib */,
 				8D1107310486CEB800E47090 /* voip-Info.plist */,
@@ -175,10 +179,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				34D64A4712393EAE00F93FB0 /* voip-Info.plist in Resources */,
+				34D64A4612393E9D00F93FB0 /* democacert.der in Resources */,
 				28AD733F0D9D9553002E5188 /* MainWindow.xib in Resources */,
 				2899E5220DE3E06400AC0155 /* VoipViewController.xib in Resources */,
 				34EA3550123130D300A53E14 /* README.txt in Resources */,
-				34EA3575123137EE00A53E14 /* cacert.der in Resources */,
+				34D64A3F12393DCE00F93FB0 /* cacert.der in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
