@@ -34,11 +34,6 @@
     self.tests = appDelegate.tests;
     [self.sslSwitch setOn:appDelegate.ssl animated:TRUE];
     [self.sslSwitch setOn:NO animated:TRUE];
-
-#if TARGET_IPHONE_SIMULATOR
-    sslSwitch.userInteractionEnabled = NO;
-#endif
-    
     [super viewDidLoad];
 }
 

@@ -242,19 +242,24 @@ IceObjC::Transceiver::write(Buffer& buf)
             return false;
         }
         assert(CFWriteStreamGetStatus(_writeStream) >= kCFStreamStatusOpen);
-#if !TARGET_IPHONE_SIMULATOR
         if(_checkCertificates)
         {
             _checkCertificates = false;
             checkCertificates();
         }
-#endif
 
         assert(_fd != INVALID_SOCKET);
         CFIndex ret = CFWriteStreamWrite(_writeStream, reinterpret_cast<const UInt8*>(&*buf.i), packetSize);
 
         if(ret == SOCKET_ERROR)
         {
+            if(CFWriteStreamGetStatus(_writeStream) == kCFStreamStatusAtEnd)
+            {
+                ConnectionLostException ex(__FILE__, __LINE__);
+                ex.error = getSocketErrno();
+                throw ex;
+            }
+
             assert(CFWriteStreamGetStatus(_writeStream) == kCFStreamStatusError);
             CFErrorRef err = CFWriteStreamCopyError(_writeStream);
             CFStringRef domain = CFErrorGetDomain(err);
@@ -338,13 +343,11 @@ IceObjC::Transceiver::read(Buffer& buf)
         }
         assert(CFReadStreamGetStatus(_readStream) >= kCFStreamStatusOpen);
 
-#if !TARGET_IPHONE_SIMULATOR
         if(_checkCertificates)
         {
             _checkCertificates = false;
             checkCertificates();
         }
-#endif
 
         assert(_fd != INVALID_SOCKET);
         CFIndex ret = CFReadStreamRead(_readStream, reinterpret_cast<UInt8*>(&*buf.i), packetSize);
@@ -369,6 +372,13 @@ IceObjC::Transceiver::read(Buffer& buf)
 
         if(ret == SOCKET_ERROR)
         {
+            if(CFReadStreamGetStatus(_readStream) == kCFStreamStatusAtEnd)
+            {
+                ConnectionLostException ex(__FILE__, __LINE__);
+                ex.error = getSocketErrno();
+                throw ex;
+            }
+
             assert(CFReadStreamGetStatus(_readStream) == kCFStreamStatusError);
             CFErrorRef err = CFReadStreamCopyError(_readStream);
             CFStringRef domain = CFErrorGetDomain(err);
@@ -618,9 +628,7 @@ IceObjC::Transceiver::Transceiver(const InstancePtr& instance,
     _writeStream(writeStream),
     _readStreamRegistered(false),
     _writeStreamRegistered(false),
-#if !TARGET_IPHONE_SIMULATOR
     _checkCertificates(instance->type() == SslEndpointType),
-#endif
     _state(StateNeedConnect)    
 {
     ostringstream s;
@@ -642,9 +650,7 @@ IceObjC::Transceiver::Transceiver(const InstancePtr& instance,
     _writeStream(writeStream),
     _readStreamRegistered(false),
     _writeStreamRegistered(false),
-#if !TARGET_IPHONE_SIMULATOR
     _checkCertificates(false),
-#endif
     _state(StateNeedConnect),
     _desc(fdToString(fd))
 {
@@ -657,7 +663,6 @@ IceObjC::Transceiver::~Transceiver()
     CFRelease(_writeStream);
 }
 
-#if !TARGET_IPHONE_SIMULATOR
 void
 IceObjC::Transceiver::checkCertificates()
 {
@@ -885,4 +890,3 @@ IceObjC::Transceiver::checkCertificates()
         throw Ice::SecurityException(__FILE__, __LINE__, "unable to obtain peer certificates");
     }
 }
-#endif

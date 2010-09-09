@@ -21,9 +21,7 @@
 #    include <CoreServices/CoreServices.h>
 #endif
 
-#if !TARGET_IPHONE_SIMULATOR
-#   include <Security/Security.h>
-#endif
+#include <Security/Security.h>
 
 namespace IceObjC
 {

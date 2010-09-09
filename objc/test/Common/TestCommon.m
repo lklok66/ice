@@ -61,13 +61,8 @@ defaultServerProperties(int *argc, char** argv)
         @"Ice.Default.Protocol", @"ssl",
         @"IceSSL.CertAuthFile", @"cacert.der",
         @"IceSSL.CheckCertName", @"0",
-	@"IceSSL.CertFile", @"s_rsa1024.pfx",
-	@"IceSSL.Password", @"password",
-#if TARGET_IPHONE_SIMULATOR && !__IPHONE_3_0
-        @"IceSSL.Keychain", @"test",
-        @"IceSSL.KeychainPassword", @"password"
-#endif     
-
+		@"IceSSL.CertFile", @"s_rsa1024.pfx",
+		@"IceSSL.Password", @"password"
     };
 
     int i;

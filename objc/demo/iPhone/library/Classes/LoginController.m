@@ -71,12 +71,9 @@ static NSString* passwordKey = @"passwordKey";
     passwordField.text = [defaults stringForKey:passwordKey];
 
     glacier2Switch.on = [defaults boolForKey:glacier2Key];
-#if TARGET_IPHONE_SIMULATOR
-    sslSwitch.userInteractionEnabled = NO;
-    sslSwitch.on = NO;
-#else    
+
     sslSwitch.on = [defaults boolForKey:sslKey];
-#endif
+
     mainController = [[MainController alloc] initWithNibName:@"MainView" bundle:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self

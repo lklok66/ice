@@ -199,11 +199,6 @@ IceObjC::Instance::Instance(const IceInternal::InstancePtr& instance, bool secur
     {
         return;
     }
-#if TARGET_IPHONE_SIMULATOR
-    ostringstream os;
-    os << "The iPhone Simulator does not support SSL";
-    throw Ice::SecurityException(__FILE__, __LINE__, os.str());
-#else
 
     Ice::PropertiesPtr properties = _instance->initializationData().properties;
     
@@ -415,7 +410,6 @@ IceObjC::Instance::Instance(const IceInternal::InstancePtr& instance, bool secur
 
     _serverSettings = CFDictionaryCreateMutableCopy(0, 0, _clientSettings);
     CFDictionarySetValue(_serverSettings, kCFStreamSSLIsServer, kCFBooleanTrue);
-#endif
 }
 
 IceObjC::Instance::~Instance()

@@ -98,7 +98,14 @@ Init init;
     //
     // No synchronization because initWithCxxObject is always called with mapTable locked, see below
     //
-    void* result = NSMapInsertIfAbsent([ICEInternalWrapper mapTable], arg, self); 
+    NSMapTable* mapTable = [ICEInternalWrapper mapTable];
+    void* result = NSMapInsertIfAbsent(mapTable, arg, self); 
+    // COMPILERFIX: NSMapTable bug where the entry sometime doesn't get properly
+    // added. Adding it a second time works.
+    if(NSMapGet(mapTable, arg) == 0)
+    {
+        result = NSMapInsertIfAbsent([ICEInternalWrapper mapTable], arg, self);
+    }
     assert(result == 0);
 #else
     //

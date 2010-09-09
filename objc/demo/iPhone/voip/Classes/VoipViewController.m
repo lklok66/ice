@@ -81,12 +81,7 @@ static NSString* sslKey = @"sslKey";
     passwordField.text = [defaults stringForKey:passwordKey];
     passwordField.clearButtonMode = UITextFieldViewModeWhileEditing;
     
-#if TARGET_IPHONE_SIMULATOR
-    sslSwitch.userInteractionEnabled = NO;
-    sslSwitch.on = NO;
-#else    
     sslSwitch.on = [defaults boolForKey:sslKey];
-#endif
 
 	callButton.enabled = NO;
 
@@ -385,11 +380,6 @@ static NSString* sslKey = @"sslKey";
     [initData.properties setProperty:@"IceSSL.TrustOnly.Client" value:@"C2:E8:D3:33:D7:83:99:6E:08:F7:C2:34:31:F7:1E:8E:44:87:38:57"];
     [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
     
-#if TARGET_IPHONE_SIMULATOR && !__IPHONE_3_0
-    [initData.properties setProperty:@"IceSSL.Keychain" value:@"test"];
-    [initData.properties setProperty:@"IceSSL.KeychainPassword" value:@"password"];
-#endif
-
     initData.dispatcher = ^(id<ICEDispatcherCall> call, id<ICEConnection> con) {
         dispatch_sync(dispatch_get_main_queue(), ^ { [call run]; });
     };

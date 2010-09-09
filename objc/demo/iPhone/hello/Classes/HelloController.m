@@ -12,33 +12,17 @@
 #import <Hello.h>
 
 // Various delivery mode constants
-// The simulator does not support SSL.
-#if TARGET_IPHONE_SIMULATOR
-#   define DeliveryModeTwoway  0
-#   define DeliveryModeOneway 1
-#   define DeliveryModeOnewayBatch  2
-#   define DeliveryModeDatagram 3
-#   define DeliveryModeDatagramBatch 4
-// These are defined, but invalid.
-#   define DeliveryModeTwowaySecure -1
-#   define DeliveryModeOnewaySecure -2
-#   define DeliveryModeOnewaySecureBatch -3
-#   define DeliveryModeTwowayAccessory -4
-#   define DeliveryModeOnewayAccessory -5
-#   define DeliveryModeOnewayAccessoryBatch -6
-#else
-#   define DeliveryModeTwoway  0
-#   define DeliveryModeTwowaySecure 1
-#   define DeliveryModeOneway 2
-#   define DeliveryModeOnewayBatch  3
-#   define DeliveryModeOnewaySecure 4
-#   define DeliveryModeOnewaySecureBatch 5
-#   define DeliveryModeDatagram 6
-#   define DeliveryModeDatagramBatch 7
-#   define DeliveryModeTwowayAccessory 8
-#   define DeliveryModeOnewayAccessory 9
-#   define DeliveryModeOnewayAccessoryBatch 10
-#endif
+#define DeliveryModeTwoway  0
+#define DeliveryModeTwowaySecure 1
+#define DeliveryModeOneway 2
+#define DeliveryModeOnewayBatch  3
+#define DeliveryModeOnewaySecure 4
+#define DeliveryModeOnewaySecureBatch 5
+#define DeliveryModeDatagram 6
+#define DeliveryModeDatagramBatch 7
+#define DeliveryModeTwowayAccessory 8
+#define DeliveryModeOnewayAccessory 9
+#define DeliveryModeOnewayAccessoryBatch 10
 
 //
 // Avoid warning for undocumented UISlider method
@@ -69,8 +53,6 @@ static NSString* hostnameKey = @"hostnameKey";
     ICEInitializationData* initData = [ICEInitializationData initializationData];
     initData.properties = [ICEUtil createProperties];
 
-    // The simulator does not support SSL or the accessory transport.
-#if !TARGET_IPHONE_SIMULATOR
     [initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
     [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
     [initData.properties setProperty:@"IceSSL.CertFile" value:@"c_rsa1024.pfx"];
@@ -78,8 +60,7 @@ static NSString* hostnameKey = @"hostnameKey";
 	
     // Configure the accessory transport.
     ICEConfigureAccessoryTransport(initData.properties);
-#endif     
-
+	
 	// Dispatch AMI callbacks on the main thread
     initData.dispatcher = ^(id<ICEDispatcherCall> call, id<ICEConnection> con)
     {
@@ -192,13 +173,8 @@ static NSString* hostnameKey = @"hostnameKey";
 
 -(id<DemoHelloPrx>)createProxy
 {
-    // The simulator does not support SSL or accessories.
-    int deliveryMode = [modePicker selectedRowInComponent:0];
-#if TARGET_IPHONE_SIMULATOR
-    NSString* s = [NSString stringWithFormat:@"hello:tcp -h %@ -p 10000:udp -h %@ -p 10000",
-                   hostnameTextField.text, hostnameTextField.text];
-#else
     NSString* s;
+	int deliveryMode = [modePicker selectedRowInComponent:0];
 	if(deliveryMode == DeliveryModeTwowayAccessory || deliveryMode == DeliveryModeOnewayAccessory || deliveryMode == DeliveryModeOnewayAccessoryBatch)
 	{
 		s = @"hello:accessory -p com.zeroc.helloWorld";
@@ -208,7 +184,7 @@ static NSString* hostnameKey = @"hostnameKey";
 		s = [NSString stringWithFormat:@"hello:tcp -h %@ -p 10000:ssl -h %@ -p 10001:udp -h %@ -p 10000",
 			 hostnameTextField.text, hostnameTextField.text, hostnameTextField.text];
 	}
-#endif     
+
     
     [[NSUserDefaults standardUserDefaults] setObject:hostnameTextField.text forKey:hostnameKey];
 
@@ -378,11 +354,7 @@ static NSString* hostnameKey = @"hostnameKey";
 
 - (NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent:(NSInteger)component
 {
-#if TARGET_IPHONE_SIMULATOR
-    return 4;
-#else
     return 11;
-#endif
 }
 
 #pragma mark UIPickerViewDelegate

@@ -115,11 +115,7 @@ static NSString* sslKey = @"sslKey";
             currentTest = 0;
         }
 
-#if TARGET_IPHONE_SIMULATOR
-        ssl = NO;
-#else    
         ssl = [[NSUserDefaults standardUserDefaults] boolForKey:sslKey];
-#endif
         loop = NO;
     }
     return self;
