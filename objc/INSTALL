@@ -102,15 +102,15 @@ There are four possible build configurations:
 
 * Build for Cocoa
 
-  - In objc/config/Make.rules, set COMPILE_FOR_COCOA=YES
+  - In objc/config/Make.rules, set COMPILE_FOR_COCOA=yes
 
 * Build for the iPhone simulator
 
-  - In objc/config/Make.rules, set COMPILE_FOR_IPHONE_SIMULATOR=YES
+  - In objc/config/Make.rules, set COMPILE_FOR_IPHONE_SIMULATOR=yes
 
 * Build for the iPhone or iPod touch
 
-  - In objc/config/Make.rules, set COMPILE_FOR_IPHONE=YES
+  - In objc/config/Make.rules, set COMPILE_FOR_IPHONE=yes
 
 The Cocoa and iPhone SDKs are built with static libraries. The Mac
 OS X builds use dynamic libraries. We do not recommend changing
