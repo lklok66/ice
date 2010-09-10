@@ -134,11 +134,12 @@ Follow these steps to ensure your application is correct configured:
 - Add the "voip" flag to the "UIBackgroundModes" key of your
   applications Info.plist
 
-- Set the configuration property "Ice.Voip" to "1" in your communicator
-  configuration properties. As described in the "Configuring Sockets for VoIP Usage"
-  section of the iOS Application Programming Guide, this causes the Ice
-  runtime to set the "kCFStreamNetworkServiceType" property "kCFStreamNetworkServiceTypeVoIP"
-  for all sockets.
+- Set the configuration property "Ice.Voip" to "1" in your
+  communicator configuration properties. As described in the
+  "Configuring Sockets for VoIP Usage" section of the iOS Application
+  Programming Guide, this causes the Ice runtime to set the
+  "kCFStreamNetworkServiceType" property
+  "kCFStreamNetworkServiceTypeVoIP" for all sockets.
 
 - Before moving your application to the background call the
   "setKeepAliveTimeout:handler:" method to specify the frequency at

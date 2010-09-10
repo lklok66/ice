@@ -197,7 +197,7 @@ print "ok"
 print "Creating installer...",
 sys.stdout.flush()
 
-freezeProj = os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", "IceTouch-1.0.packproj")
+freezeProj = os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", "IceTouch-1.1.packproj")
 os.system("freeze %s" % freezeProj)
 
 print "ok"

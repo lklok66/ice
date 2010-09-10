@@ -1,20 +1,20 @@
 #!/bin/sh
 
 # This script must be run via sudo
-if [ -d /opt/IceTouch-1.0 ]; then
-    /bin/rm -r /opt/IceTouch-1.0
+if [ -d /opt/IceTouch-1.1 ]; then
+    /bin/rm -r /opt/IceTouch-1.1
 fi
 
-if [ -d /Developer/SDKs/IceTouch-1.0 ]; then
-    /bin/rm -r /Developer/SDKs/IceTouch-1.0
+if [ -d /Developer/SDKs/IceTouch-1.1 ]; then
+    /bin/rm -r /Developer/SDKs/IceTouch-1.1
 fi
 
-if [ -d /Developer/Examples/IceTouch-1.0 ]; then
-    /bin/rm -r /Developer/Examples/IceTouch-1.0
+if [ -d /Developer/Examples/IceTouch-1.1 ]; then
+    /bin/rm -r /Developer/Examples/IceTouch-1.1
 fi
 
-if [ -d /Developer/Documentation/IceTouch-1.0 ]; then
-    /bin/rm -r /Developer/Documentation/IceTouch-1.0
+if [ -d /Developer/Documentation/IceTouch-1.1 ]; then
+    /bin/rm -r /Developer/Documentation/IceTouch-1.1
 fi
 
 if [ -d /Developer/Library/Xcode/Plug-ins/slice2objcplugin.pbplugin ]; then

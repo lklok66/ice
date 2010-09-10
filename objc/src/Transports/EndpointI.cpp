@@ -440,7 +440,7 @@ IceObjC::Instance::setupStreams(CFReadStreamRef readStream,
 {
     if(_voip)
     {
-#if !defined(TARGET_IPHONE_SIMULATOR)
+#if TARGET_IPHONE_SIMULATOR == 0
         if(!CFReadStreamSetProperty(readStream, kCFStreamNetworkServiceType, 
                                     kCFStreamNetworkServiceTypeVoIP) ||
            !CFWriteStreamSetProperty(writeStream, kCFStreamNetworkServiceType, 
