@@ -90,6 +90,7 @@ static NSString* passwordKey = @"passwordKey";
 - (void)viewWillAppear:(BOOL)animated
 {
     loginButton.enabled = hostnameField.text.length > 0;
+    [loginButton setAlpha:loginButton.enabled ? 1.0 : 0.5];
 	[super viewWillAppear:animated];
 }
 
@@ -156,6 +157,7 @@ static NSString* passwordKey = @"passwordKey";
     }
 
     loginButton.enabled = hostnameField.text.length > 0;
+    [loginButton setAlpha:loginButton.enabled ? 1.0 : 0.5];
 
     [theTextField resignFirstResponder];
     self.currentField = nil;

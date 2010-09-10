@@ -142,7 +142,7 @@ static NSString* defaultHost = @"demo2.zeroc.com";
     callButton.enabled = NO;
     [callButton setAlpha:0.5];
     loginButton.enabled = hostnameField.text.length > 0 && usernameField.text.length > 0;
-    [loginButton setAlpha:(loginButton.enabled) ? 1.0 : 0.5];
+    [loginButton setAlpha:loginButton.enabled ? 1.0 : 0.5];
     [loginButton setTitle:@"Login" forState:UIControlStateNormal];
     
     // Destroy the session and destroy the communicator from another thread since these

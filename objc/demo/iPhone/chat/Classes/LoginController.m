@@ -82,6 +82,7 @@ static NSString* sslKey = @"sslKey";
 - (void)viewWillAppear:(BOOL)animated
 {
     loginButton.enabled = hostnameField.text.length > 0 && usernameField.text.length > 0;
+    [loginButton setAlpha:loginButton.enabled ? 1.0 : 0.5];
 	[super viewWillAppear:animated];
 }
 
@@ -142,6 +143,7 @@ static NSString* sslKey = @"sslKey";
         [defaults setObject:theTextField.text forKey:passwordKey];
     }
     loginButton.enabled = hostnameField.text.length > 0 && usernameField.text.length > 0;
+    [loginButton setAlpha:loginButton.enabled ? 1.0 : 0.5];
 
     [theTextField resignFirstResponder];
     self.currentField = nil;
@@ -182,6 +184,7 @@ static NSString* sslKey = @"sslKey";
     self.communicator = nil;
  
     loginButton.enabled = hostnameField.text.length > 0 && usernameField.text.length > 0;
+    [loginButton setAlpha:loginButton.enabled ? 1.0 : 0.5];
     
     // open an alert with just an OK button
     UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Error"

@@ -80,6 +80,7 @@ static NSString* hostnameKey = @"hostnameKey";
     // Defaults for the UI elements.
     hostnameTextField.text = [[NSUserDefaults standardUserDefaults] stringForKey:hostnameKey];
     flushButton.enabled = NO;
+    [flushButton setAlpha:0.5];
     
     // This generates a compile time warning, but does actually work!
     [delaySlider setShowValue:YES];
@@ -291,6 +292,7 @@ static NSString* hostnameKey = @"hostnameKey";
         {
             [hello sayHello:delay];
             flushButton.enabled = YES;
+            [flushButton setAlpha:1.0];
             statusLabel.text = @"Queued hello request";
         }
     }
@@ -322,6 +324,7 @@ static NSString* hostnameKey = @"hostnameKey";
         {
             [hello shutdown];
             flushButton.enabled = YES;
+            [flushButton setAlpha:1.0];
             statusLabel.text = @"Queued shutdown request";
         }
     }
@@ -342,6 +345,7 @@ static NSString* hostnameKey = @"hostnameKey";
 		[self exception:ex];
     }
     flushButton.enabled = NO;
+    [flushButton setAlpha:0.5];
     statusLabel.text = @"Flushed batch requests";
 }
 

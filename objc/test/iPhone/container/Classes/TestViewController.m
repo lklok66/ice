@@ -181,6 +181,7 @@
     else
     {
         nextButton.enabled = NO;
+        [nextButton setAlpha:0.5];
         [nextButton setTitle:@"Test is running" forState:UIControlStateDisabled];
     }
     
@@ -209,6 +210,7 @@
     [nextButton setTitle:buttonTitle forState:UIControlStateNormal];
 
     nextButton.enabled = YES;
+    [nextButton setAlpha:1.0];
     [self.navigationItem setHidesBackButton:NO animated:YES];
 
     self.test = nil;
@@ -232,6 +234,7 @@
     {
         appDelegate.loop = NO;
         nextButton.enabled = NO;
+        [nextButton setAlpha:0.5];
         [nextButton setTitle:@"Waiting..." forState:UIControlStateDisabled];
     }
     else
