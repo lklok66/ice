@@ -37,14 +37,18 @@ as Ice services such as IceGrid, Glacier2, and IceStorm.
 Changes and fixes in IceTouch 1.1.0
 ===================================
 
-- The Ice Touch 1.0.0 AMI mapping was replaced with a new mapping. If
-  your application is using AMI, you will need to update it to use the
-  new AMI mapping. See below for more information on the new AMI
+- The Ice Touch 1.0.0 AMI mapping was replaced with an incompatible
+  new mapping, therefore any applications which use AMI must be
+  updated. See the Ice manual for more information on the new
   mapping.
 
 - SSL now works with the iOS simulator.
 
-- The Xcode plugin now adds -all_load to the linker flags.
+- The iOS simulator builds now use static linking.
+
+- The Xcode plugin now adds -all_load to the linker flags. See
+  http://developer.apple.com/mac/library/qa/qa2006/qa1490.html for
+  more information.
 
 - The demos and tests were updated to support the iPad screen
   resolution.
@@ -77,12 +81,10 @@ to section 9 below for more information.
 New AMI mapping
 ---------------
 
-This release features a completely new AMI facility that allows you to
-structure your code with same flexibility as with the new AMI mapping
-introduced with Ice 3.4.0. Callbacks are now specified using
-Objectie-C blocks which provide much greater flexibility. 
-
-TBD: Document the new mapping here? Or refer to the manual?
+This release features a completely new AMI facility that allows you
+to structure your code with same flexibility as with the new AMI
+mapping introduced with Ice 3.4.0. Callbacks are now specified using
+Objectie-C blocks which provide much greater flexibility.
 
 New Dispatcher facility
 -----------------------
@@ -123,16 +125,27 @@ the following directories:
 Support for background applications
 -----------------------------------
 
-TDB
+IceTouch 1.1.0 adds support for voip applications as documented in
+the "Executing Code in the Background" section of the iOS Application
+Programming Guide.
 
-New sample programs
--------------------
+Follow these steps to ensure your application is correct configured:
 
-This release adds the following sample program:
+- Add the "voip" flag to the "UIBackgroundModes" key of your
+  applications Info.plist
 
-  - demo/iPhone/voip
+- Set the configuration property "Ice.Voip" to "1" in your communicator
+  configuration properties. As described in the "Configuring Sockets for VoIP Usage"
+  section of the iOS Application Programming Guide, this causes the Ice
+  runtime to set the "kCFStreamNetworkServiceType" property "kCFStreamNetworkServiceTypeVoIP"
+  for all sockets.
 
-    Shows how to take advantage of Ice Touch background support.
+- Before moving your application to the background call the
+  "setKeepAliveTimeout:handler:" method to specify the frequency at
+  which your application must be woken to maintain your service.
+
+The new sample application demo/iPhone/voip provides a demonstration
+of the above steps.
 
 
 ======================================================================
@@ -160,7 +173,7 @@ Ice Touch has limited support for:
 
   - SSL
 
-    Refer to Section 3 below for more information.
+    Refer to Section 4 below for more information.
 
   - UDP
 
