@@ -8,9 +8,16 @@ Changes since version 1.0.0
   http://developer.apple.com/mac/library/qa/qa2006/qa1490.html for
   details on why this is necessary.
 
-- Updated IceTouch to support iOS 4.
+- Updated Ice Touch to support iOS 4.
 
 - iPhone simulator builds now use static libraries.
+
+- Fixed un-marshalling code to support size checks to prevent memory
+  over-allocations by malicious clients or servers.
+
+- Fixed bug which could cause GC resurection errors.
+
+- Ice threads are now registered with the garbage collector.
 
 - Added support for accessory transport. This transport is built on
   top of the iPhone OS External Accessory framework and allows Ice

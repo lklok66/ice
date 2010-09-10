@@ -6,39 +6,144 @@ Table of Contents
 -----------------
 
   1. Introduction
-  2. Ice Touch Feature Set
-  3. SSL Support
-  4. Loggers
-  5. Garbage Collection
-  6. Auto release pool
-  7. AMI Invocations
+  2. New Features
+     - Changes and fixes in Ice Touch 1.1.0
+     - Features added with Ice 1.1.0
+  3. Ice Touch Feature Set
+  4. SSL Support
+  5. Loggers
+  6. Garbage Collection
+  7. Auto release pool
   8. Xcode project settings
   9. Accessory Transport
+
 
 ======================================================================
 1. Introduction
 ======================================================================
 
 Ice Touch offers an Objective-C language mapping, an Ice run time
-for Mac OS X, and an Xcode SDK for Cocoa applications, the iPhone
-and the iPod touch.
+for Mac OS X, and an Xcode SDK for Cocoa and iOS applications.
 
 The Ice Touch distribution does not include any Ice services, but
 its support for the complete Ice protocol means that your Ice Touch
 applications can work seamlessly with existing Ice servers as well
 as Ice services such as IceGrid, Glacier2, and IceStorm.
 
+======================================================================
+2. New Features
+======================================================================
+
+Changes and fixes in IceTouch 1.1.0
+===================================
+
+- The Ice Touch 1.0.0 AMI mapping was replaced with a new mapping. If
+  your application is using AMI, you will need to update it to use the
+  new AMI mapping. See below for more information on the new AMI
+  mapping.
+
+- SSL now works with the iOS simulator.
+
+- The Xcode plugin now adds -all_load to the linker flags.
+
+- The demos and tests were updated to support the iPad screen
+  resolution.
+
+- Ice threads are now registered with the garbage collector.
+
+- The ICECallbackOnMainThread helper was removed. The new Ice
+  dispatcher facility should be used instead. See below for more
+  information.
+
+- Un-marshalling now supports size checks to prevent memory over
+  allocations by malicious clients or servers.
+
+- The Xcode plugin now supports both 32 and 64 bits architectures.
+
+
+Features added with IceTouch 1.1.0
+==================================
+
+Accessory Transport
+-------------------
+
+Ice Touch supports a new accessory transport to enable Ice Touch
+applications to communicate with accessories connected to an iOS
+device (either through USB or Bluetooth). The accessory must run an
+Ice server with a custom transport to allow the communication. Refer
+to section 9 below for more information.
+
+
+New AMI mapping
+---------------
+
+This release features a completely new AMI facility that allows you to
+structure your code with same flexibility as with the new AMI mapping
+introduced with Ice 3.4.0. Callbacks are now specified using
+Objectie-C blocks which provide much greater flexibility. 
+
+TBD: Document the new mapping here? Or refer to the manual?
+
+New Dispatcher facility
+-----------------------
+
+In previous releases, the developer of a graphical Ice application
+would need to take precautions to make sure that updates to the user
+interface were performed in the proper thread. For example, graphical
+applications typically use AMI because it does not block the calling
+thread, but AMI callbacks are invoked from an Ice run time thread.
+Since the callback cannot update the user interface directly from such
+a thread, it is forced to schedule an update instead. With Ice Touch
+1.0.0, this was facilitated with the ICECallbackOnMainThread helper.
+
+Ice Touch 1.1.0 introduces the same Dispatcher facility that was added
+with Ice 3.4.0. The dispatcher lets you control the thread in which
+servant methods and AMI callbacks are invoked. It is especially useful
+for a graphical application, in which you can easily install a custom
+dispatcher to guarantee that all of your servant and callback
+invocations are made in a thread that can safely update the user
+interface.
+
+For example, to execute all Ice servant methods and AMI callbacks on
+the main GUI thread, you just need to setup the following dispatcher
+on communicator initialization:
+
+  initData.dispatcher = ^(id<ICEDispatcherCall> call, id<ICEConnection> con)
+  {
+      dispatch_sync(dispatch_get_main_queue(), ^ { [call run]; });
+  };
+
+This technique is demonstrated in all the GUI demo applications from
+the following directories:
+
+- demo/Cocoa
+- demo/iPhone
+
+
+Support for background applications
+-----------------------------------
+
+TDB
+
+New sample programs
+-------------------
+
+This release adds the following sample program:
+
+  - demo/iPhone/voip
+
+    Shows how to take advantage of Ice Touch background support.
+
 
 ======================================================================
-2. Ice Touch Feature Set
+3. Ice Touch Feature Set
 ======================================================================
 
-Ice Touch supports the following new features:
+Ice Touch supports the following features:
 
   - Objective-C mapping
-  - Default servants
 
-These topics are described in the manual.
+This topic is described in the manual.
 
 Ice Touch currently lacks support for the following Ice features:
 
@@ -64,15 +169,15 @@ Ice Touch has limited support for:
 
 
 ======================================================================
-3. SSL Support
+4. SSL Support
 ======================================================================
 
 Ice Touch for Mac OS X and Cocoa uses the Ice for C++ SSL
 protocol plug-in.
 
-For the iPhone, Ice Touch SSL provides only a subset of this
-functionality. Due to limitations in iPhone SSL support, the
-following restriction applies:
+For iOS devices, Ice Touch SSL provides only a subset of this
+functionality. Due to limitations in iOS SSL support, the following
+restriction applies:
 
   - Ice Touch servers cannot authenticate SSL clients.
 
@@ -80,11 +185,9 @@ Furthermore, the semantics of some IceSSL configuration properties
 have changed, and new properties have been added. The IceSSL property
 reference section of the Ice Touch manual provides complete details.
 
-SSL support is not available for the iPhone Simulator.
-
 
 ======================================================================
-4. Loggers
+5. Loggers
 ======================================================================
 
 Custom loggers must be installed via ICEInitializationData. You cannot
@@ -93,18 +196,17 @@ and you cannot install a custom logger with a plug-in (Ice.Plugin.*).
 
 
 ======================================================================
-5. Garbage Collection
+6. Garbage Collection
 ======================================================================
 
 For MacOS X and Cocoa, the Ice Touch run time is built with garbage
 collection support.
 
-For the iPhone and iPhone Simulator, since garbage collection is not
+For iOS devices and the simulator, since garbage collection is not
 supported, you must use explicit retain/release.
 
-Due to the lack of GC, the Ice Touch run time for iPhone and
-iPhone Simulator cannot garbage collect graphs of objects containing
-cycles. For example,
+Due to the lack of GC, the Ice Touch run time for iOS cannot garbage
+collect graphs of objects containing cycles. For example,
 
 class Foo
 {
@@ -122,7 +224,7 @@ cycle.
 
 
 ======================================================================
-6. Auto release pool
+7. Auto release pool
 ======================================================================
 
 The Ice run time creates an NSAutoReleasePool object before each
@@ -131,28 +233,16 @@ pool is released once the dispatch is complete.
 
 
 ======================================================================
-7. AMI Invocations
-======================================================================
-
-If you attempt to invoke an operation that returns values to the
-client as a oneway operation, the Ice run time throws a
-TwowayOnlyException. With Ice Touch, when this is done through an AMI
-invocation, the exception is raised directly to the caller, instead of
-being reported via the AMI exception callback. This is contrary to our other
-language mappings, where the exception is reported via the AMI
-callback.
-
-======================================================================
 8. Xcode project settings
 ======================================================================
 
-For Cocoa and iPhone applications, which use the Xcode SDK, you must
-add to "Additional SDKs"
+For Cocoa and iOS applications, which use the Xcode SDK, you must add
+to "Additional SDKs"
 
   /Developer/SDKs/IceTouch-1.1/$(PLATFORM_NAME).sdk
 
-In addition, for iPhone applications, when creating a new iPhone Xcode
-project, you set the "Code Signing Resource Rules Path" to:
+In addition, for iOS applications, when creating a new Xcode project,
+you set the "Code Signing Resource Rules Path" to:
 
   $(SDKROOT)/ResourceRules.plist
 
@@ -160,7 +250,7 @@ To set the path, select "Target", press "Info", select the "Build" tab,
 and press "Select".
 
 If you do not do this, you will receive an error signing your
-application when targeting iPhone 2.2 or later.
+application.
 
 You must also add to the Frameworks folder:
 
@@ -174,9 +264,9 @@ You must also add to the Frameworks folder:
 9. Accessory Transport
 ======================================================================
 
-The accessory transport enables Ice Touch clients running on an iPhone
-or iPod Touch device to communicate with acccessories connected either
-via Bluetooth or USB.
+The accessory transport enables Ice Touch clients running on an iOS
+device to communicate with acccessories connected either via Bluetooth
+or USB.
 
 This transport is built on top of the iPhone OS External Accessory
 framework. In order to use it, proxies must use the following

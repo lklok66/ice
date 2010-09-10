@@ -259,11 +259,6 @@ clean::
 	-rm -f core *.o *.bak
 	-rm -f ./$(PLATFORM_NAME)/*
 
-ifeq ($(COMPILE_FOR_MACOSX),yes)
-clean::
-	-rm -f $(TARGETS_MACOS)
-endif
-
 ifneq ($(SLICE_SRCS),)
 depend:: $(SLICE_SRCS)
 	if test -n "$(SLICE_SRCS)" ; then \
