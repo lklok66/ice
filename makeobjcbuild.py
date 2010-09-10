@@ -135,8 +135,8 @@ sys.stdout.flush()
 
 os.system("OPTIMIZE_SPEED=yes make")
 os.system("OPTIMIZE_SPEED=yes COMPILE_FOR_COCOA=yes make")
-os.system("IPHONE_SDK_VERSION=2.0 OPTIMIZE_SIZE=yes COMPILE_FOR_IPHONE=yes make")
-os.system("IPHONE_SDK_VERSION=3.0 OPTIMIZE_SIZE=yes COMPILE_FOR_IPHONE_SIMULATOR=yes make")
+os.system("OPTIMIZE_SIZE=yes COMPILE_FOR_IPHONE=yes make")
+os.system("OPTIMIZE_SIZE=yes COMPILE_FOR_IPHONE_SIMULATOR=yes make")
 
 os.chdir(os.path.join(buildDir, "Xcode", "Slice2ObjcPlugin"))
 
