@@ -54,23 +54,6 @@ static NSString* defaultHost = @"demo2.zeroc.com";
     [[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
 }
 
-/*
-// The designated initializer. Override to perform setup that is required before the view is loaded.
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
-    if ((self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil])) {
-        // Custom initialization
-    }
-    return self;
-}
-*/
-
-/*
-// Implement loadView to create a view hierarchy programmatically, without using a nib.
-- (void)loadView {
-}
-*/
-
-
 - (void)viewDidLoad {
 	NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
 	
@@ -101,16 +84,9 @@ static NSString* defaultHost = @"demo2.zeroc.com";
     [delaySlider setShowValue:YES];
     
     loginButton.enabled = hostnameField.text.length > 0 && usernameField.text.length > 0;
-    [loginButton setAlpha:(loginButton.enabled) ? 1.0 : 0.5];
+    [loginButton setAlpha:loginButton.enabled ? 1.0 : 0.5];
 
     [super viewDidLoad];
-}
-
-
-- (void)viewWillAppear:(BOOL)animated
-{
-
-	[super viewWillAppear:animated];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -125,11 +101,6 @@ static NSString* defaultHost = @"demo2.zeroc.com";
 	// Release any cached data, images, etc that aren't in use.
 }
 
-- (void)viewDidUnload {
-	// Release any retained subviews of the main view.
-	// e.g. self.myOutlet = nil;
-}
-
 - (void)dealloc {
 	[hostnameField release];
     [usernameField release];
@@ -141,9 +112,13 @@ static NSString* defaultHost = @"demo2.zeroc.com";
     
     [currentField release];
     [oldFieldValue release];
+    [waitAlert release];
+
+    [refreshTimer release];
     [communicator release];
-	[router release];
 	[session release];
+	[router release];
+
     [super dealloc];
 }
 
@@ -237,7 +212,6 @@ static NSString* defaultHost = @"demo2.zeroc.com";
     UIApplication* app = [UIApplication sharedApplication];
     if(background)
     {
-        NSLog(@"setting up background refresh");
         // Setup the session refresh timer.
 		[app setKeepAliveTimeout:sessionTimeout/2 handler:^{
 			// Note that this is blocking.
@@ -270,7 +244,6 @@ static NSString* defaultHost = @"demo2.zeroc.com";
     }
     else
     {
-        NSLog(@"setting up foreground refresh");
         // Setup the session refresh timer.
 		self.refreshTimer = [NSTimer timerWithTimeInterval:sessionTimeout/2
 													target:self
@@ -285,8 +258,6 @@ static NSString* defaultHost = @"demo2.zeroc.com";
 
 - (void)didEnterBackground
 {
-	NSLog(@"applicationDidEnterBackground");
-    
 	// Disable the refresh timer.
 	[refreshTimer invalidate];
     self.refreshTimer = nil;
@@ -299,8 +270,6 @@ static NSString* defaultHost = @"demo2.zeroc.com";
 
 - (void)willEnterForeground
 {
-	NSLog(@"applicationWillEnterForeground");
-    
 	// Disable the keep alive timer.
 	[[UIApplication sharedApplication] clearKeepAliveTimeout];
     if(session != nil)
@@ -338,7 +307,7 @@ static NSString* defaultHost = @"demo2.zeroc.com";
         [defaults setObject:theTextField.text forKey:passwordKey];
     }
     loginButton.enabled = hostnameField.text.length > 0 && usernameField.text.length > 0;
-    [loginButton setAlpha:(loginButton.enabled) ? 1.0 : 0.5];
+    [loginButton setAlpha:loginButton.enabled ? 1.0 : 0.5];
 	
     [theTextField resignFirstResponder];
     self.currentField = nil;
