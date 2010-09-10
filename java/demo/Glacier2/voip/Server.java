@@ -42,7 +42,7 @@ public class Server extends Ice.Application
 		}
 
 		@Override
-		public void simulateCall(Current current)
+		public void simulateCall(int delay, Current current)
 		{
 			timer.schedule(new Runnable()
 			{
@@ -69,7 +69,7 @@ public class Server extends Ice.Application
 						});
 					}
 				}
-			}, 5, TimeUnit.SECONDS);
+			}, delay, TimeUnit.MILLISECONDS);
 		}
 
 		@Override
@@ -114,7 +114,8 @@ public class Server extends Ice.Application
 		public SessionPrx create(String userId, SessionControlPrx control,
 				Current current) throws CannotCreateSessionException
 		{
-			final long sessionTimeout = 60;
+			 // The configured timeout must be greater than 600. This is 601 * 2.
+			final long sessionTimeout = 1202;
 			final SessionI session = new SessionI();
 			final SessionPrx proxy = SessionPrxHelper.uncheckedCast(current.adapter.addWithUUID(session));
 			timer.scheduleWithFixedDelay(new Runnable()

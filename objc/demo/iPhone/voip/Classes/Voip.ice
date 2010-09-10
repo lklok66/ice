@@ -19,11 +19,11 @@ interface Control
 
 interface Session extends Glacier2::Session
 {
-	["ami"] void setControl(Control* ctrl);
+	void setControl(Control* ctrl);
 	
-	["ami"] void simulateCall();
+	void simulateCall(int delay);
 	
-	["ami"] void refresh();
+	void refresh();
 };
 
 };

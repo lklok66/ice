@@ -21,7 +21,7 @@ interface Session extends Glacier2::Session
 {
 	void setControl(Control* ctrl);
 	
-	void simulateCall();
+	void simulateCall(int delay);
 	
 	void refresh();
 };

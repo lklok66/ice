@@ -24,6 +24,7 @@
     IBOutlet UIButton* loginButton;
 	IBOutlet UIButton* callButton;
     IBOutlet UISwitch* sslSwitch;
+    IBOutlet UISlider* delaySlider;
 	
     UITextField* currentField;
     NSString* oldFieldValue;

@@ -85,6 +85,7 @@ static NSString* defaultHost = @"demo2.zeroc.com";
     sslSwitch.on = [defaults boolForKey:sslKey];
 
 	callButton.enabled = NO;
+    [callButton setAlpha:0.5];
 
 	[[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(didEnterBackground) 
@@ -96,13 +97,19 @@ static NSString* defaultHost = @"demo2.zeroc.com";
                                                  name:UIApplicationWillEnterForegroundNotification
                                                object:nil]; 
 	
+    // This generates a compile time warning, but does actually work!
+    [delaySlider setShowValue:YES];
+    
+    loginButton.enabled = hostnameField.text.length > 0 && usernameField.text.length > 0;
+    [loginButton setAlpha:(loginButton.enabled) ? 1.0 : 0.5];
+
     [super viewDidLoad];
 }
 
 
 - (void)viewWillAppear:(BOOL)animated
 {
-    loginButton.enabled = hostnameField.text.length > 0 && usernameField.text.length > 0;
+
 	[super viewWillAppear:animated];
 }
 
@@ -130,6 +137,7 @@ static NSString* defaultHost = @"demo2.zeroc.com";
     [loginButton release];
 	[callButton release];
     [sslSwitch release];
+    [delaySlider release];
     
     [currentField release];
     [oldFieldValue release];
@@ -157,7 +165,9 @@ static NSString* defaultHost = @"demo2.zeroc.com";
     self.session = nil;
 
     callButton.enabled = NO;
+    [callButton setAlpha:0.5];
     loginButton.enabled = hostnameField.text.length > 0 && usernameField.text.length > 0;
+    [loginButton setAlpha:(loginButton.enabled) ? 1.0 : 0.5];
     [loginButton setTitle:@"Login" forState:UIControlStateNormal];
     
     // Destroy the session and destroy the communicator from another thread since these
@@ -328,6 +338,7 @@ static NSString* defaultHost = @"demo2.zeroc.com";
         [defaults setObject:theTextField.text forKey:passwordKey];
     }
     loginButton.enabled = hostnameField.text.length > 0 && usernameField.text.length > 0;
+    [loginButton setAlpha:(loginButton.enabled) ? 1.0 : 0.5];
 	
     [theTextField resignFirstResponder];
     self.currentField = nil;
@@ -469,6 +480,7 @@ static NSString* defaultHost = @"demo2.zeroc.com";
                 
                 [loginButton setTitle:@"Logout" forState:UIControlStateNormal];
                 callButton.enabled = YES;
+                [callButton setAlpha:1.0];
                 
                 [self setupRefresh:[UIApplication sharedApplication].applicationState == UIApplicationStateBackground];
             });
@@ -497,7 +509,9 @@ static NSString* defaultHost = @"demo2.zeroc.com";
 {
     if(session != nil)
     {
-        [session begin_simulateCall:nil exception:^(ICEException* ex) { [self exception:[ex description]]; }];
+        int delay = (int)(delaySlider.value * 1000.0f); // Convert to ms.
+
+        [session begin_simulateCall:delay response:nil exception:^(ICEException* ex) { [self exception:[ex description]]; }];
     }
 }
 
