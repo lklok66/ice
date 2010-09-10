@@ -30,8 +30,7 @@ Changes since version 1.0.0
 - Ice threads are now registered with the garbage collector.
 
 - The ICECallbackOnMainThread helper was removed. The new Ice
-  dispatcher facility should be used instead. See below for more
-  information.
+  dispatcher facility should be used instead.
 
 - Un-marshalling now supports size checks to prevent memory over
   allocations by malicious clients or servers.
