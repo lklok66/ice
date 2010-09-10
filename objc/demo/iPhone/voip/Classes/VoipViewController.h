@@ -9,7 +9,7 @@
 
 #import <UIKit/UIKit.h>
 
-#import <Voip.H>
+#import <Voip.h>
 
 @class WaitAlert;
 @class ICEInitializationData;

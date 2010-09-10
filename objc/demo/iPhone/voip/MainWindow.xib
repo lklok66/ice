@@ -41,7 +41,7 @@
 				<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 			</object>
 			<object class="IBUIViewController" id="943309135">
-				<string key="IBUINibName">voipViewController</string>
+				<string key="IBUINibName">VoipViewController</string>
 				<object class="IBUISimulatedStatusBarMetrics" key="IBUISimulatedStatusBarMetrics"/>
 				<object class="IBUISimulatedOrientationMetrics" key="IBUISimulatedOrientationMetrics">
 					<int key="interfaceOrientation">1</int>
@@ -277,6 +277,8 @@
 							<string>hostnameField</string>
 							<string>loginButton</string>
 							<string>passwordField</string>
+							<string>router</string>
+							<string>session</string>
 							<string>sslSwitch</string>
 							<string>usernameField</string>
 						</object>
@@ -287,6 +289,8 @@
 							<string>UITextField</string>
 							<string>UIButton</string>
 							<string>UITextField</string>
+							<string>id</string>
+							<string>id</string>
 							<string>UISwitch</string>
 							<string>UITextField</string>
 						</object>
@@ -300,6 +304,8 @@
 							<string>hostnameField</string>
 							<string>loginButton</string>
 							<string>passwordField</string>
+							<string>router</string>
+							<string>session</string>
 							<string>sslSwitch</string>
 							<string>usernameField</string>
 						</object>
@@ -324,6 +330,14 @@
 							<object class="IBToOneOutletInfo">
 								<string key="name">passwordField</string>
 								<string key="candidateClassName">UITextField</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">router</string>
+								<string key="candidateClassName">id</string>
+							</object>
+							<object class="IBToOneOutletInfo">
+								<string key="name">session</string>
+								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">sslSwitch</string>
