@@ -12,6 +12,7 @@ Ice Touch requires:
 - iPod touch v2 or iPhone 3G/iPhone 4 using software version 4.0.2
   or later.
 
+
 Compiler
 --------
 
@@ -38,8 +39,8 @@ mcpp
 Building the mcpp library is only necessary if you want to build the
 Slice translators yourself.
 
-The Slice-to-Objective-C and Slice-to-C++ compilers
-(slice2objc/slice2cpp) have a dependency on mcpp 2.7.2
+The Slice-to-Objective-C (slice2objc) and Slice-to-C++ (slice2cpp)
+compilers have a dependency on mcpp 2.7.2.
 
 We recommend downloading the Ice third-party source archive from
 
@@ -55,13 +56,13 @@ below:
  http://mcpp.sourceforge.net
 
 
-XCode Plugin
-------------
+XCode Plug-in
+-------------
 
-The XCode Plugin is required to build the Cocoa and iPhone demos in
-this distribution. We strongly recommended to develop Ice for
+The XCode Plug-in is required to build the Cocoa and iPhone demos in
+this distribution. We strongly recommended that you develop Ice for
 C++ and Ice Touch applications with Xcode; this greatly simplifies the
-process of building.
+build process.
 
 To build the Xcode plug-in:
 
@@ -73,7 +74,7 @@ To install the plug-in either:
 $ cp -r Xcode/Slice2ObjcPlugin/build/Release/slice2objcplugin.pbplugin \
     ~/Library/Application\ Support/Developer/Shared/Xcode/Plug-ins
 
-You may need to create this directory
+(You may need to create this directory.)
 
 or:
 
@@ -173,13 +174,11 @@ library is prefixed with the path /opt/IceTouch-@mmver@/lib.
 Configuring the Xcode plug-in
 ======================================================================
 
-The Xcode plugin simplifies the process of building Ice and Ice Touch
-applications with Xcode.
-
-The Xcode plug-in provides the following features:
+The Xcode plug-in simplifies the process of building Ice and Ice Touch
+applications and provides the following features:
 
   - Handles all aspects of translating your Slice files for both
-    Objective-C and C++ projects.
+    Objective-C and C++ projects
   - Incrementally recompiles Slice files after modifications
   - Maintains dependencies between Slice files
   - Highlights compilation errors in your source code
@@ -199,10 +198,10 @@ The following fields are defined:
 
 - Ice Home
 
-  If you are building with the Ice Touch Xcode SDK, this should left
-  unset; otherwise, if using the command line toolkit or regular Ice,
-  set this to the location of the installation (ie: /opt/Ice-3.3.1, or
-  /opt/IceTouch-1.0)
+  If you are building with the Ice Touch Xcode SDK, this should be
+  left unset; otherwise, if using the command-line toolkit or regular
+  Ice, set this to the location of the installation (such as
+  /opt/Ice-3.4.1 or /opt/IceTouch-1.1).
 
 - Permit `Ice' prefix
 

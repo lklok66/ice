@@ -3,24 +3,23 @@ Changes since version 1.0.0
 
 - Updated Ice Touch to support iOS 4.
 
-- Fixed bug which could cause GC resurection errors.
+- Fixed bug that could cause GC resurrection errors.
 
 - Added support for accessory transport. This transport is built on
   top of the iPhone OS External Accessory framework and allows Ice
   clients to talk to iPhone accessories over Bluetooth or USB. For
-  information on the Ice server side running on iPhone accessories,
+  information on the Ice server-side running on iPhone accessories,
   please contact us at info@zero.com.
 
-- The Ice Touch 1.0.0 AMI mapping was replaced with an incompatible
-  new mapping, therefore any applications which use AMI must be
-  updated. See the Ice manual for more information on the new
-  mapping.
+- Replaced the AMI mapping. Applications that use the AMI mapping from
+  Ice Touch 1.0 must be updated. Refer to the Ice manual for more
+  information on the new mapping.
 
 - SSL now works with the iOS simulator.
 
 - The iOS simulator builds now use static linking.
 
-- The Xcode plugin now adds -all_load to the linker flags. See
+- The Xcode plug-in now adds -all_load to the linker flags. See
   http://developer.apple.com/mac/library/qa/qa2006/qa1490.html for
   more information.
 
@@ -29,13 +28,13 @@ Changes since version 1.0.0
 
 - Ice threads are now registered with the garbage collector.
 
-- The ICECallbackOnMainThread helper was removed. The new Ice
+- The ICECallbackOnMainThread helper has been removed. The new Ice
   dispatcher facility should be used instead.
 
-- Un-marshalling now supports size checks to prevent memory over
+- Unmarshaling now supports size checks to prevent memory over
   allocations by malicious clients or servers.
 
-- The Xcode plugin now supports both 32 and 64 bits architectures.
+- The Xcode plug-in now supports both 32- and 64-bit architectures.
 
 
 Changes since version 0.1.0
@@ -49,14 +48,15 @@ Changes since version 0.1.0
 
 - Fixed several bugs and updated the name mangling for slice2objc.
 
-- Added support for multi-archicture builds in the same source tree.
-  IceTouch now supports four different build types.
+- Added support for multi-architecture builds in the same source tree.
+  IceTouch now supports four different build types:
+
   - Mac OS X command line
   - Mac OS X SDK (for Cocoa apps)
   - iPhone OS SDK
   - iPhone Simulator SDK
 
-- The Mac build now uses the native Ice socket & ssl transports.
+- The Mac build now uses the native Ice socket and ssl transports.
   This means that Mac/Cocoa applications use the same SSL properties
   as other Ice for C++ applications.
 
@@ -80,7 +80,8 @@ Changes since version 0.1.0
 
 - Added support for GC under Mac OS.
 
-- Changed the outParams parameter of ICEBlobject ice_invoke to NSMutableData**.
+- Changed the outParams parameter of ICEBlobject ice_invoke to
+  NSMutableData**.
 
 - Fixed a bug in ICEConnection::createProxy where the created proxy
   was not returned.

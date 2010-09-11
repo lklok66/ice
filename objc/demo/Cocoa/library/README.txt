@@ -1,6 +1,7 @@
 This demo is a Cocoa client for the Java library demo located at
 demoj/Database/library in the Ice distribution. This application
-provides a graphical interface to the library server. It permits you to:
+provides a graphical interface to the library server. It permits you
+to:
 
   - Create and delete books
   - Query for books by isbn, author or title

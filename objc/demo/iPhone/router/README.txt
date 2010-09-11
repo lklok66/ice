@@ -27,19 +27,19 @@ On the Mac OS X computer, start System Preferences and choose
 drop-down list, select "Create Network..." Enter a name such as
 "iPhone Network". This creates a new WiFi network named "iPhone
 Network". Next, assign a fixed IP address for the Airport interface,
-such "192.168.1.2".
+such as "192.168.1.2".
 
 On the iPhone, you need to set up the network to join the "iPhone
 Network" WiFi network in "Settings->Wi-Fi". Since no DHCP server is
-configured for this network, you also need to manually assign an IP address
-to the WiFi interface; we'll use "192.168.1.3".
+configured for this network, you also need to manually assign an IP
+address to the WiFi interface; we'll use "192.168.1.3".
 
 The Mac OS X computer and the iPhone should now be able to
-communicate. You can try pinging the iPhone from you Mac OS X computer
-to verify it.
+communicate. You can try pinging the iPhone from your Mac OS X
+computer to verify it.
 
-On the iPhone, run the router application.  The router application
-listens on port 12000 and on all network interfaces by default.
+On the iPhone, run the router application. This application listens
+on port 12000 and on all network interfaces by default.
 
 You are now ready to try the Cocoa library or chat demo located in the
 demo/Cocoa directory of your Ice Touch distribution. To use the iPhone
