@@ -11,6 +11,3 @@ when connecting.
 If you would like to run your own server, or are otherwise interested
 in the Chat Demo, the complete source is available at
 http://www.zeroc.com/chat/download.html.
-
-Note that SSL is not available when running the demo in the iPhone 
-simulator.
