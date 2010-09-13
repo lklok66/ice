@@ -1936,8 +1936,8 @@ Slice::Gen::ProxyVisitor::visitOperation(const OperationPtr& p)
     }
     _H << ":(ICEContext *)context;";
 
-    _H << nl << "-(ICEAsyncResult*) begin_" << p->name() << marshalParams << ";";
-    _H << nl << "-(ICEAsyncResult*) begin_" << p->name() << marshalParams;
+    _H << nl << "-(id<ICEAsyncResult>) begin_" << p->name() << marshalParams << ";";
+    _H << nl << "-(id<ICEAsyncResult>) begin_" << p->name() << marshalParams;
     if(!marshalParams.empty())
     {
         _H << " context";
@@ -1954,17 +1954,17 @@ Slice::Gen::ProxyVisitor::visitOperation(const OperationPtr& p)
     {
         _H << " result";
     }
-    _H << ":(ICEAsyncResult *)result;";
+    _H << ":(id<ICEAsyncResult>)result;";
 
     string responseCBSig = getResponseCBSig(p);
-    _H << nl << "-(ICEAsyncResult*) begin_" << p->name() << marshalParams;
+    _H << nl << "-(id<ICEAsyncResult>) begin_" << p->name() << marshalParams;
     if(!marshalParams.empty())
     {
         _H << " response";
     }
     _H << ":(" << responseCBSig << ")response_ exception:(void(^)(ICEException*))exception_;";
 
-    _H << nl << "-(ICEAsyncResult*) begin_" << p->name() << marshalParams;
+    _H << nl << "-(id<ICEAsyncResult>) begin_" << p->name() << marshalParams;
     if(!marshalParams.empty())
     {
         _H << " context";
@@ -1972,14 +1972,14 @@ Slice::Gen::ProxyVisitor::visitOperation(const OperationPtr& p)
     _H << ":(ICEContext *)context";
     _H << " response:(" << responseCBSig << ")response_ exception:(void(^)(ICEException*))exception_;";
 
-    _H << nl << "-(ICEAsyncResult*) begin_" << p->name() << marshalParams;
+    _H << nl << "-(id<ICEAsyncResult>) begin_" << p->name() << marshalParams;
     if(!marshalParams.empty())
     {
         _H << " response";
     }
     _H << ":(" << responseCBSig << ")response_ exception:(void(^)(ICEException*))exception_ sent:(void(^)(BOOL))sent_;";
 
-    _H << nl << "-(ICEAsyncResult*) begin_" << p->name() << marshalParams;
+    _H << nl << "-(id<ICEAsyncResult>) begin_" << p->name() << marshalParams;
     if(!marshalParams.empty())
     {
         _H << " context";
@@ -2394,7 +2394,7 @@ Slice::Gen::DelegateMVisitor::visitClassDefStart(const ClassDefPtr& p)
         //
         // Write begin_ context-less operation that forwards to the version with a context.
         //
-        _M << sp << nl << "-(ICEAsyncResult*) begin_" << (*r)->name() << marshalParams;
+        _M << sp << nl << "-(id<ICEAsyncResult>) begin_" << (*r)->name() << marshalParams;
         _M << sb;
         _M << nl << "return [self begin_" << (*r)->name() << marshalArgs;
         _M << (marshalArgs.empty() ? "" : " context") << ":nil];";
@@ -2403,7 +2403,7 @@ Slice::Gen::DelegateMVisitor::visitClassDefStart(const ClassDefPtr& p)
         //
         // Write begin_ version with context.
         //
-        _M << sp << nl << "-(ICEAsyncResult*) begin_" << (*r)->name() << marshalParams;
+        _M << sp << nl << "-(id<ICEAsyncResult>) begin_" << (*r)->name() << marshalParams;
         _M << (marshalParams.empty() ? "" : " context") << ":(ICEContext *)ctx_";
         _M << sb;
         if(!inParams.empty())
@@ -2431,7 +2431,7 @@ Slice::Gen::DelegateMVisitor::visitClassDefStart(const ClassDefPtr& p)
 	{
 	    _M << " result";
 	}
-	_M << ":(ICEAsyncResult *)result_";
+	_M << ":(id<ICEAsyncResult>)result_";
 	_M << sb;
         if(returnType)
         {
@@ -2471,7 +2471,7 @@ Slice::Gen::DelegateMVisitor::visitClassDefStart(const ClassDefPtr& p)
         //
         string responseCBSig = getResponseCBSig(*r);
 
-        _M << sp << nl << "-(ICEAsyncResult*) begin_" << (*r)->name() << marshalParams;
+        _M << sp << nl << "-(id<ICEAsyncResult>) begin_" << (*r)->name() << marshalParams;
         _M << (marshalParams.empty() ? "" : " response") << ":(" << responseCBSig << ")response_";
         _M << " exception:(void(^)(ICEException*))exception_";
         _M << sb;
@@ -2479,7 +2479,7 @@ Slice::Gen::DelegateMVisitor::visitClassDefStart(const ClassDefPtr& p)
         _M << (marshalArgs.empty() ? "" : " context") << ":nil response:response_ exception:exception_ sent:nil];";
         _M << eb;
 
-        _M << sp << nl << "-(ICEAsyncResult*) begin_" << (*r)->name() << marshalParams;
+        _M << sp << nl << "-(id<ICEAsyncResult>) begin_" << (*r)->name() << marshalParams;
         _M << (marshalParams.empty() ? "" : " response") << ":(" << responseCBSig << ")response_";
         _M << " exception:(void(^)(ICEException*))exception_ sent:(void(^)(BOOL))sent_";
         _M << sb;
@@ -2487,7 +2487,7 @@ Slice::Gen::DelegateMVisitor::visitClassDefStart(const ClassDefPtr& p)
         _M << (marshalArgs.empty() ? "" : " context") << ":nil response:response_ exception:exception_ sent:sent_];";
         _M << eb;
 
-        _M << sp << nl << "-(ICEAsyncResult*) begin_" << (*r)->name() << marshalParams;
+        _M << sp << nl << "-(id<ICEAsyncResult>) begin_" << (*r)->name() << marshalParams;
         _M << (marshalParams.empty() ? "" : " context") << ":(ICEContext*)ctx_";
         _M << " response:(" << responseCBSig << ")response_ exception:(void(^)(ICEException*))exception_ ";
         _M << sb;
@@ -2495,7 +2495,7 @@ Slice::Gen::DelegateMVisitor::visitClassDefStart(const ClassDefPtr& p)
         _M << (marshalArgs.empty() ? "" : " context") << ":ctx_ response:response_ exception:exception_ sent:nil];";
         _M << eb;
 
-        _M << sp << nl << "-(ICEAsyncResult*) begin_" << (*r)->name() << marshalParams;
+        _M << sp << nl << "-(id<ICEAsyncResult>) begin_" << (*r)->name() << marshalParams;
         _M << (marshalParams.empty() ? "" : " context") << ":(ICEContext*)ctx_";
         _M << " response:(" << responseCBSig << ")response_ exception:(void(^)(ICEException*))exception_ ";
         _M << " sent:(void(^)(BOOL))sent_";

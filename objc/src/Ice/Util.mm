@@ -146,14 +146,14 @@ void cppCall(void (^fn)(const Ice::Context&), ICEContext* context)
     @throw nsex;
 }
 
-ICEAsyncResult* beginCppCall(void (^fn)(Ice::AsyncResultPtr&))
+ICEAsyncResult* beginCppCall(void (^fn)(Ice::AsyncResultPtr&), ICEObjectPrx* prx)
 {
     NSException* nsex = nil;
     try
     {
         Ice::AsyncResultPtr r;
         fn(r);
-        return [ICEAsyncResult asyncResultWithAsyncResult__:r];
+        return [ICEAsyncResult asyncResultWithAsyncResult__:r operation:nil proxy:prx];
     }
     catch(const IceUtil::IllegalArgumentException& ex)
     {
@@ -169,7 +169,8 @@ ICEAsyncResult* beginCppCall(void (^fn)(Ice::AsyncResultPtr&))
 ICEAsyncResult* beginCppCall(void (^fn)(Ice::AsyncResultPtr&, const Ice::CallbackPtr&), 
                              void (^completed)(const Ice::AsyncResultPtr&),
                              void (^exception)(ICEException*),
-                             void (^sent)(BOOL))
+                             void (^sent)(BOOL), 
+                             ICEObjectPrx* prx)
 {
     NSException* nsex = nil;
     try
@@ -178,7 +179,7 @@ ICEAsyncResult* beginCppCall(void (^fn)(Ice::AsyncResultPtr&, const Ice::Callbac
         Ice::AsyncResultPtr r;
         Ice::CallbackPtr callback = Ice::newCallback(cb, &AsyncCallback::completed, &AsyncCallback::sent);
         fn(r, callback);
-        return [ICEAsyncResult asyncResultWithAsyncResult__:r];
+        return [ICEAsyncResult asyncResultWithAsyncResult__:r operation:nil proxy:prx];
     }
     catch(const IceUtil::IllegalArgumentException& ex)
     {
@@ -191,7 +192,9 @@ ICEAsyncResult* beginCppCall(void (^fn)(Ice::AsyncResultPtr&, const Ice::Callbac
     @throw nsex;
 }
 
-ICEAsyncResult* beginCppCall(void (^fn)(Ice::AsyncResultPtr&, const Ice::Context&), ICEContext* context)
+ICEAsyncResult* beginCppCall(void (^fn)(Ice::AsyncResultPtr&, const Ice::Context&),
+                             ICEContext* context, 
+                             ICEObjectPrx* prx)
 {
     NSException* nsex = nil;
     try
@@ -200,7 +203,7 @@ ICEAsyncResult* beginCppCall(void (^fn)(Ice::AsyncResultPtr&, const Ice::Context
         fromNSDictionary(context, ctx);
         Ice::AsyncResultPtr r;
         fn(r, ctx);
-        return [ICEAsyncResult asyncResultWithAsyncResult__:r];
+        return [ICEAsyncResult asyncResultWithAsyncResult__:r operation:nil proxy:prx];
     }
     catch(const IceUtil::IllegalArgumentException& ex)
     {
@@ -217,7 +220,8 @@ ICEAsyncResult* beginCppCall(void (^fn)(Ice::AsyncResultPtr&, const Ice::Context
                              ICEContext* context,
                              void (^completed)(const Ice::AsyncResultPtr&),
                              void (^exception)(ICEException*),
-                             void (^sent)(BOOL))
+                             void (^sent)(BOOL), 
+                             ICEObjectPrx* prx)
 {
     NSException* nsex = nil;
     try
@@ -228,7 +232,7 @@ ICEAsyncResult* beginCppCall(void (^fn)(Ice::AsyncResultPtr&, const Ice::Context
         Ice::AsyncResultPtr r;
         Ice::CallbackPtr callback = Ice::newCallback(cb, &AsyncCallback::completed, &AsyncCallback::sent);
         fn(r, ctx, callback);
-        return [ICEAsyncResult asyncResultWithAsyncResult__:r];
+        return [ICEAsyncResult asyncResultWithAsyncResult__:r operation:nil proxy:prx];
     }
     catch(const IceUtil::IllegalArgumentException& ex)
     {

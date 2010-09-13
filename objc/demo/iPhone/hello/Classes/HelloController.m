@@ -245,7 +245,7 @@ static NSString* hostnameKey = @"hostnameKey";
            deliveryMode != DeliveryModeDatagramBatch)
         {
 			__block BOOL response = NO;
-			ICEAsyncResult* result = [hello begin_sayHello:delay 
+			id<ICEAsyncResult> result = [hello begin_sayHello:delay 
 												  response:^ {
 													  response = YES;
 													  [activity stopAnimating];

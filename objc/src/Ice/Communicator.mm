@@ -498,18 +498,18 @@ private:
         @throw nsex;
     }
 }
--(ICEAsyncResult*) begin_flushBatchRequests
+-(id<ICEAsyncResult>) begin_flushBatchRequests
 {
     return beginCppCall(^(Ice::AsyncResultPtr& result) 
                         {
                             result = COMMUNICATOR->begin_flushBatchRequests(); 
                         });
 }
--(ICEAsyncResult*) begin_flushBatchRequests:(void(^)(ICEException*))exception
+-(id<ICEAsyncResult>) begin_flushBatchRequests:(void(^)(ICEException*))exception
 {
     return [self begin_flushBatchRequests:exception sent:nil];
 }
--(ICEAsyncResult*) begin_flushBatchRequests:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent 
+-(id<ICEAsyncResult>) begin_flushBatchRequests:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent 
 {
     return beginCppCall(^(Ice::AsyncResultPtr& result, const Ice::CallbackPtr& cb) 
                         {
@@ -520,7 +520,7 @@ private:
                         },
                         exception, sent);
 }
--(void) end_flushBatchRequests:(ICEAsyncResult*)result
+-(void) end_flushBatchRequests:(id<ICEAsyncResult>)result
 {
     endCppCall(^(const Ice::AsyncResultPtr& r) 
                {

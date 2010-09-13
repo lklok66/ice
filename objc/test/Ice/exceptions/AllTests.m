@@ -18,22 +18,6 @@
 @implementation ExceptionsEmptyI
 @end
 
-#if 0 // TODO
-@interface ObjectFactoryI : ICEObjectFactory<ICEObjectFactory>
-@end
-
-@implementation ObjectFactoryI
--(id<ICEObject>) create:(NSMutableString *)s
-{
-    return nil;
-}
-
--(void) destroy
-{
-}
-@end
-#endif
-
 id<TestExceptionsThrowerPrx>
 exceptionsAllTests(id<ICECommunicator> communicator, BOOL collocated)
 {
@@ -106,18 +90,6 @@ exceptionsAllTests(id<ICECommunicator> communicator, BOOL collocated)
 	[adapter deactivate];
     }
     tprintf("ok\n");
-
-#if 0 // TODO
-    tprintf("testing servant locator registration exceptions... ");
-    {
-    }
-    tprintf("ok\n");
-
-    tprintf("testing object factory registration exception... ");
-    {
-    }
-    tprintf("ok\n");
-#endif
 
     tprintf("testing stringToProxy... ");
     NSString *ref = @"thrower:default -p 12010";

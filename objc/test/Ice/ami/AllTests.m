@@ -77,7 +77,7 @@ amiAllTests(id<ICECommunicator> communicator)
     tprintf("testing begin/end invocation... ");
     {
         ICEContext* ctx = [ICEContext dictionary];
-        ICEAsyncResult* result;
+        id<ICEAsyncResult> result;
 
         result = [p begin_ice_isA:[TestAMITestIntfPrx ice_staticId]];
         test([p end_ice_isA:result]);
@@ -134,17 +134,20 @@ amiAllTests(id<ICECommunicator> communicator)
     {
         TestAMICallback* cb = [[TestAMICallback alloc] init];
         ICEContext* ctx = [NSDictionary dictionary];
+        void (^exCB)(ICEException*) = ^(ICEException* ex) {
+            test(NO);
+        };
 
  	void (^isACB)(BOOL) = ^(BOOL ret) { test(ret); [cb called]; };
-        [p begin_ice_isA:[TestAMITestIntfPrx ice_staticId] response:isACB exception:nil];
+        [p begin_ice_isA:[TestAMITestIntfPrx ice_staticId] response:isACB exception:exCB];
         [cb check];
-        [p begin_ice_isA:[TestAMITestIntfPrx ice_staticId] context:ctx response:isACB exception:nil];
+        [p begin_ice_isA:[TestAMITestIntfPrx ice_staticId] context:ctx response:isACB exception:exCB];
         [cb check];
 
  	void (^pingCB)() = ^ { [cb called]; };
-        [p begin_ice_ping:pingCB exception:nil];
+        [p begin_ice_ping:pingCB exception:exCB];
         [cb check];
-        [p begin_ice_ping:ctx response:pingCB exception:nil];
+        [p begin_ice_ping:ctx response:pingCB exception:exCB];
         [cb check];
 
         void (^idCB)(NSString* typeId) = ^(NSString* typeId) 
@@ -153,9 +156,9 @@ amiAllTests(id<ICECommunicator> communicator)
             [cb called]; 
         };
 
-        [p begin_ice_id:idCB exception:nil];
+        [p begin_ice_id:idCB exception:exCB];
         [cb check];
-        [p begin_ice_id:ctx response:idCB exception:nil];
+        [p begin_ice_id:ctx response:idCB exception:exCB];
         [cb check];
 
         void (^idsCB)(NSArray* types) = ^(NSArray* types) 
@@ -164,15 +167,15 @@ amiAllTests(id<ICECommunicator> communicator)
             [cb called]; 
         };
 
-        [p begin_ice_ids:idsCB exception:nil];
+        [p begin_ice_ids:idsCB exception:exCB];
         [cb check];
-        [p begin_ice_ids:ctx response:idsCB exception:nil];
+        [p begin_ice_ids:ctx response:idsCB exception:exCB];
         [cb check];
 
  	void (^opCB)() = ^ { [cb called]; };
-        [p begin_op:opCB exception:nil];
+        [p begin_op:opCB exception:exCB];
         [cb check];
-        [p begin_op:ctx response:opCB exception:nil];
+        [p begin_op:ctx response:opCB exception:exCB];
         [cb check];
 
         void (^opWithResultCB)(ICEInt) = ^(ICEInt r) 
@@ -180,9 +183,9 @@ amiAllTests(id<ICECommunicator> communicator)
             test(r == 15); 
             [cb called]; 
         };
-        [p begin_opWithResult:opWithResultCB exception:nil];
+        [p begin_opWithResult:opWithResultCB exception:exCB];
         [cb check];
-        [p begin_opWithResult:ctx response:opWithResultCB exception:nil];
+        [p begin_opWithResult:ctx response:opWithResultCB exception:exCB];
         [cb check];
 
         void (^opWithUE)() = [[ ^() { test(NO); } copy ] autorelease];
@@ -210,7 +213,7 @@ amiAllTests(id<ICECommunicator> communicator)
     tprintf("testing local exceptions... ");
     {
         TestAMITestIntfPrx* indirect = [TestAMITestIntfPrx uncheckedCast:[p ice_adapterId:@"dummy"]];
-        ICEAsyncResult* r;
+        id<ICEAsyncResult> r;
 
         r = [indirect begin_op];
         @try
@@ -312,32 +315,35 @@ amiAllTests(id<ICECommunicator> communicator)
     {
         TestAMICallback* cb = [[TestAMICallback alloc] init];
         ICEContext* ctx = [NSDictionary dictionary];
+        void (^exCB)(ICEException*) = ^(ICEException* ex) {
+            test(NO);
+        };
 
         void (^sentCB)(BOOL) = ^(BOOL ss) { [cb called]; };
 
-        [p begin_ice_isA:@"test" response:nil exception:nil sent:sentCB];
+        [p begin_ice_isA:@"test" response:nil exception:exCB sent:sentCB];
         [cb check];
-        [p begin_ice_isA:@"test" context:ctx response:nil exception:nil sent:sentCB];
-        [cb check];
-
-        [p begin_ice_ping:nil exception:nil sent:sentCB];
-        [cb check];
-        [p begin_ice_ping:ctx response:nil exception:nil sent:sentCB];
+        [p begin_ice_isA:@"test" context:ctx response:nil exception:exCB sent:sentCB];
         [cb check];
 
-        [p begin_ice_id:nil exception:nil sent:sentCB];
+        [p begin_ice_ping:nil exception:exCB sent:sentCB];
         [cb check];
-        [p begin_ice_id:ctx response:nil exception:nil sent:sentCB];
-        [cb check];
-
-        [p begin_ice_ids:nil exception:nil sent:sentCB];
-        [cb check];
-        [p begin_ice_ids:ctx response:nil exception:nil sent:sentCB];
+        [p begin_ice_ping:ctx response:nil exception:exCB sent:sentCB];
         [cb check];
 
-        [p begin_op:nil exception:nil sent:sentCB];
+        [p begin_ice_id:nil exception:exCB sent:sentCB];
         [cb check];
-        [p begin_op:ctx response:nil exception:nil sent:sentCB];
+        [p begin_ice_id:ctx response:nil exception:exCB sent:sentCB];
+        [cb check];
+
+        [p begin_ice_ids:nil exception:exCB sent:sentCB];
+        [cb check];
+        [p begin_ice_ids:ctx response:nil exception:exCB sent:sentCB];
+        [cb check];
+
+        [p begin_op:nil exception:exCB sent:sentCB];
+        [cb check];
+        [p begin_op:ctx response:nil exception:exCB sent:sentCB];
         [cb check];
 
         ICEByte d[1024];
@@ -349,7 +355,7 @@ amiAllTests(id<ICECommunicator> communicator)
             TestAMICallback* cb = [[TestAMICallback alloc] init];
             while(true)
             {
-                if(![[p begin_opWithPayload:seq response:nil exception:nil sent: 
+                if(![[p begin_opWithPayload:seq response:nil exception:exCB sent: 
                             ^(BOOL ss) { 
                                [cb called];
                            }] sentSynchronously])
@@ -376,7 +382,7 @@ amiAllTests(id<ICECommunicator> communicator)
 
     tprintf("testing illegal arguments... ");
     {
-        ICEAsyncResult* result;
+        id<ICEAsyncResult> result;
 
         result = [p begin_op];
         [p end_op:result];
@@ -429,6 +435,9 @@ amiAllTests(id<ICECommunicator> communicator)
             }
         };
 
+        void (^exCB)(ICEException*) = ^(ICEException* ex) {
+            test(NO);
+        };
         int i;
         for(i = 0; i < 3; ++i)
         {
@@ -436,22 +445,22 @@ amiAllTests(id<ICECommunicator> communicator)
             void (^throwEx)(ICEException*) = ^(ICEException* ex){ thrower(i); };
             void (^throwSent)(BOOL) = ^(BOOL b){ thrower(i); };
 
-            [p begin_ice_ping:throwResponse exception:nil];
+            [p begin_ice_ping:throwResponse exception:exCB];
             [cb check];
 
             [q begin_ice_ping:nil exception:throwEx];
             [cb check];
 
-            [p begin_ice_ping:nil exception:nil sent:throwSent];
+            [p begin_ice_ping:nil exception:exCB sent:throwSent];
             [cb check];
 
-            [p begin_op:throwResponse exception:nil];
+            [p begin_op:throwResponse exception:exCB];
             [cb check];
 
             [q begin_op:nil exception:throwEx];
             [cb check];
 
-            [p begin_op:nil exception:nil sent:throwSent];
+            [p begin_op:nil exception:exCB sent:throwSent];
             [cb check];
         }
 
@@ -467,7 +476,7 @@ amiAllTests(id<ICECommunicator> communicator)
             [b1 opBatch];
             [b1 opBatch];
             TestAMICallback* cb = [[TestAMICallback alloc] init];
-            ICEAsyncResult* r = [b1 begin_ice_flushBatchRequests:^(ICEException* ex) { test(NO); }
+            id<ICEAsyncResult> r = [b1 begin_ice_flushBatchRequests:^(ICEException* ex) { test(NO); }
                                                             sent:^(BOOL sentSynchronously) { [cb called]; }];
             [cb check];
             test([r isSent]);
@@ -482,7 +491,7 @@ amiAllTests(id<ICECommunicator> communicator)
             [b1 opBatch];
             [[b1 ice_getConnection] close:false];
             TestAMICallback* cb = [[TestAMICallback alloc] init];
-            ICEAsyncResult* r = [b1 begin_ice_flushBatchRequests:^(ICEException* ex) { [cb called]; }
+            id<ICEAsyncResult> r = [b1 begin_ice_flushBatchRequests:^(ICEException* ex) { [cb called]; }
                                                             sent:^(BOOL sentSynchronously) { test(NO); }];
             [cb check];
             test(![r isSent]);
@@ -501,7 +510,7 @@ amiAllTests(id<ICECommunicator> communicator)
             [b1 opBatch];
             [b1 opBatch];
             TestAMICallback* cb = [[TestAMICallback alloc] init];
-            ICEAsyncResult* r = [[b1 ice_getConnection] begin_flushBatchRequests:^(ICEException* ex) { test(NO); }
+            id<ICEAsyncResult> r = [[b1 ice_getConnection] begin_flushBatchRequests:^(ICEException* ex) { test(NO); }
                                                             sent:^(BOOL sentSynchronously) { [cb called]; }];
             [cb check];
             test([r isSent]);
@@ -516,7 +525,7 @@ amiAllTests(id<ICECommunicator> communicator)
             [b1 opBatch];
             [[b1 ice_getConnection] close:false];
             TestAMICallback* cb = [[TestAMICallback alloc] init];
-            ICEAsyncResult* r = [[b1 ice_getConnection] begin_flushBatchRequests:
+            id<ICEAsyncResult> r = [[b1 ice_getConnection] begin_flushBatchRequests:
                                                             ^(ICEException* ex) { [cb called]; }
             sent:^(BOOL sentSynchronously) { test(NO); }];
             [cb check];
@@ -536,7 +545,7 @@ amiAllTests(id<ICECommunicator> communicator)
             [b1 opBatch];
             [b1 opBatch];
             TestAMICallback* cb = [[TestAMICallback alloc] init];
-            ICEAsyncResult* r = [communicator begin_flushBatchRequests:^(ICEException* ex) { test(NO); }
+            id<ICEAsyncResult> r = [communicator begin_flushBatchRequests:^(ICEException* ex) { test(NO); }
                                                             sent:^(BOOL sentSynchronously) { [cb called]; }];
             [cb check];
             test([r isSent]);
@@ -551,7 +560,7 @@ amiAllTests(id<ICECommunicator> communicator)
             [b1 opBatch];
             [[b1 ice_getConnection] close:false];
             TestAMICallback* cb = [[TestAMICallback alloc] init];
-            ICEAsyncResult* r = [communicator begin_flushBatchRequests:^(ICEException* ex) { test(NO); }
+            id<ICEAsyncResult> r = [communicator begin_flushBatchRequests:^(ICEException* ex) { test(NO); }
                                                                   sent:^(BOOL sentSynchronously) { [cb called]; }];
             [cb check];
             test([r isSent]);
@@ -565,8 +574,8 @@ amiAllTests(id<ICECommunicator> communicator)
     tprintf("testing AsyncResult operations... ");
     {
         [testController holdAdapter];
-        ICEAsyncResult* r1;
-        ICEAsyncResult* r2;
+        id<ICEAsyncResult> r1;
+        id<ICEAsyncResult> r2;
         @try
         {
             r1 = [p begin_op];

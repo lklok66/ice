@@ -11,11 +11,17 @@
 
 #include <IceCpp/Proxy.h>
 
-@interface ICEAsyncResult (ICEInternal)
--(ICEAsyncResult*)initWithAsyncResult__:(const Ice::AsyncResultPtr&)arg operation:(NSString*)op;
+@interface ICEAsyncResult : NSObject<ICEAsyncResult>
+{
+@private
+    void* asyncResult__;
+    NSString* operation_;
+    id<ICEObjectPrx> proxy_;
+}
+-(ICEAsyncResult*)initWithAsyncResult__:(const Ice::AsyncResultPtr&)arg operation:(NSString*)op proxy:(id<ICEObjectPrx>)p;
 -(Ice::AsyncResult*) asyncResult__;
 +(ICEAsyncResult*)asyncResultWithAsyncResult__:(const Ice::AsyncResultPtr&)arg;
-+(ICEAsyncResult*)asyncResultWithAsyncResult__:(const Ice::AsyncResultPtr&)arg operation:(NSString*)op;
++(ICEAsyncResult*)asyncResultWithAsyncResult__:(const Ice::AsyncResultPtr&)arg operation:(NSString*)op proxy:(id<ICEObjectPrx>)p;
 -(NSString*)operation;
 @end
 

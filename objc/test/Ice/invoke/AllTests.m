@@ -178,7 +178,7 @@ invokeAllTests(id<ICECommunicator> communicator)
     {
         NSData* inParams = [NSData data];
         NSMutableData* outParams;
-        ICEAsyncResult* result = [onewayCl begin_ice_invoke:@"opOneway" mode:ICENormal inParams:inParams];
+        id<ICEAsyncResult> result = [onewayCl begin_ice_invoke:@"opOneway" mode:ICENormal inParams:inParams];
         if(![onewayCl end_ice_invoke:&outParams result:result])
         {
             test(NO);
@@ -217,7 +217,7 @@ invokeAllTests(id<ICECommunicator> communicator)
         NSMutableData* outParams;
 
         // begin_ice_invoke with no callback
-        ICEAsyncResult* result = [cl begin_ice_invoke:@"opException" mode:ICENormal inParams:inParams];
+        id<ICEAsyncResult> result = [cl begin_ice_invoke:@"opException" mode:ICENormal inParams:inParams];
         if([cl end_ice_invoke:&outParams result:result])
         {
             test(NO);

@@ -794,7 +794,7 @@ twoways(id<ICECommunicator> communicator, id<TestOperationsMyClassPrx> p)
 	}
     }
 
-#if 0 // TODO: commented out until context stuff is implemented
+#if 0 // TODO: commented out until implicit contexts are implemented
     {
         //
 	// TestOperations implicit context propagation

@@ -120,7 +120,7 @@ dispatcherAllTests(id<ICECommunicator> communicator)
 
         ICEByte d[1024];
         ICEMutableByteSeq* seq = [ICEMutableByteSeq dataWithBytes:d length:sizeof(d)];
-        ICEAsyncResult* result;
+        id<ICEAsyncResult> result;
         while([(result = [p begin_opWithPayload:seq response:^{ [cb payload]; } 
                                       exception:^(ICEException* ex) { [cb ignoreEx:ex]; }
                                            sent:^(BOOL ss) { [cb sent:ss]; }]) sentSynchronously]);

@@ -19,8 +19,8 @@
 @protocol ICEProperties;
 @protocol ICEObjectAdapter;
 @protocol ICEObjectFactory;
+@protocol ICEAsyncResult;
 @class ICEIdentity;
-@class ICEAsyncResult;
 @class ICEException;
 
 @protocol ICECommunicator <NSObject>
@@ -48,10 +48,10 @@
 -(void) setDefaultLocator:(id<ICELocatorPrx>)loc;
 //-(PluginManager*) getPluginManager;
 -(void) flushBatchRequests;
--(ICEAsyncResult*) begin_flushBatchRequests;
--(ICEAsyncResult*) begin_flushBatchRequests:(void(^)(ICEException*))exception;
--(ICEAsyncResult*) begin_flushBatchRequests:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent;
--(void) end_flushBatchRequests:(ICEAsyncResult*)result;
+-(id<ICEAsyncResult>) begin_flushBatchRequests;
+-(id<ICEAsyncResult>) begin_flushBatchRequests:(void(^)(ICEException*))exception;
+-(id<ICEAsyncResult>) begin_flushBatchRequests:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent;
+-(void) end_flushBatchRequests:(id<ICEAsyncResult>)result;
 //Object* getAdmin;
 //void addAdminFacet(Object servant, NSString* facet);
 //Object removeAdminFacet(NSString* facet);

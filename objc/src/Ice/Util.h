@@ -20,21 +20,24 @@
 #include <string>
 
 @class ICEAsyncResult;
+@class ICEObjectPrx;
 @class ICEException;
 
 void cppCall(void (^fn)());
 void cppCall(void (^fn)(const Ice::Context&), ICEContext*);
-ICEAsyncResult* beginCppCall(void (^fn)(Ice::AsyncResultPtr&));
+ICEAsyncResult* beginCppCall(void (^fn)(Ice::AsyncResultPtr&), ICEObjectPrx* = nil);
 ICEAsyncResult* beginCppCall(void (^fn)(Ice::AsyncResultPtr&, const Ice::CallbackPtr&), 
                              void (^completed)(const Ice::AsyncResultPtr&),
                              void (^exception)(ICEException*),
-                             void (^sent)(BOOL));
-ICEAsyncResult* beginCppCall(void (^fn)(Ice::AsyncResultPtr&, const Ice::Context&), ICEContext*);
+                             void (^sent)(BOOL),
+                             ICEObjectPrx* = nil);
+ICEAsyncResult* beginCppCall(void (^fn)(Ice::AsyncResultPtr&, const Ice::Context&), ICEContext*, ICEObjectPrx* = nil);
 ICEAsyncResult* beginCppCall(void (^fn)(Ice::AsyncResultPtr&, const Ice::Context&, const Ice::CallbackPtr&), 
                              ICEContext*,
                              void (^completed)(const Ice::AsyncResultPtr&),
                              void (^exception)(ICEException*),
-                             void (^sent)(BOOL));
+                             void (^sent)(BOOL), 
+                             ICEObjectPrx* = nil);
 void endCppCall(void (^fn)(const Ice::AsyncResultPtr&), ICEAsyncResult*);
 
 
