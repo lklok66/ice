@@ -338,15 +338,18 @@ static NSString* hostnameKey = @"hostnameKey";
 {
     @try
     {
-        [communicator begin_flushBatchRequests:^(ICEException* ex) { [self exception:ex]; }];
+        [communicator begin_flushBatchRequests:^(ICEException* ex) { [self exception:ex]; }
+										  sent:^(BOOL sentSynchronously)
+		 {
+			 flushButton.enabled = NO;
+			 [flushButton setAlpha:0.5];
+			 statusLabel.text = @"Flushed batch requests";
+		 }];
     }
     @catch(ICELocalException* ex)
     {
 		[self exception:ex];
     }
-    flushButton.enabled = NO;
-    [flushButton setAlpha:0.5];
-    statusLabel.text = @"Flushed batch requests";
 }
 
 #pragma mark UIPickerViewDataSource

@@ -177,6 +177,8 @@ amiAllTests(id<ICECommunicator> communicator)
         [cb check];
         [p begin_op:ctx response:opCB exception:exCB];
         [cb check];
+        [p begin_op:nil exception:exCB];
+        [p begin_op:ctx response:nil exception:exCB];
 
         void (^opWithResultCB)(ICEInt) = ^(ICEInt r) 
         { 
@@ -204,6 +206,10 @@ amiAllTests(id<ICECommunicator> communicator)
         [p begin_opWithUE:opWithUE exception:opWithUEEx];
         [cb check];
         [p begin_opWithUE:ctx response:opWithUE exception:opWithUEEx];
+        [cb check];
+        [p begin_opWithUE:nil exception:opWithUEEx];
+        [cb check];
+        [p begin_opWithUE:ctx response:nil exception:opWithUEEx];
         [cb check];
 
         [cb release];
@@ -244,6 +250,16 @@ amiAllTests(id<ICECommunicator> communicator)
             test([ex name] == NSInvalidArgumentException);
         }
 
+        @try
+        {
+            r = [p begin_op:nil exception:nil];
+            test(NO);
+        }
+        @catch(NSException* ex)
+        {
+            test([ex name] == NSInvalidArgumentException);
+        }
+
         //
         // Check that CommunicatorDestroyedException is raised directly.
         //
@@ -266,7 +282,7 @@ amiAllTests(id<ICECommunicator> communicator)
     }
     tprintf("ok\n");
 
-    tprintf("testing local exceptions with response callback... ");
+    tprintf("testing exception callback... ");
     {
         id<TestAMITestIntfPrx> i = [TestAMITestIntfPrx uncheckedCast:[p ice_adapterId:@"dummy"]];
         TestAMICallback* cb = [[TestAMICallback alloc] init];
@@ -306,7 +322,17 @@ amiAllTests(id<ICECommunicator> communicator)
         [cb check];
         [i begin_op:ctx response:opCB exception:exCB];
         [cb check];
-        
+
+        @try
+        {
+            [p begin_opWithResult:nil exception:^(ICEException* ex) { test(NO); }];
+            test(NO);
+        }
+        @catch(NSException* ex)
+        {
+            test([ex name] == NSInvalidArgumentException);
+        }
+
         [cb release];
     }
     tprintf("ok\n");

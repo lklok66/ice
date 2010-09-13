@@ -2586,9 +2586,18 @@ Slice::Gen::DelegateMVisitor::visitClassDefStart(const ClassDefPtr& p)
             _M << nl << "response_(" << responseCallArgs << ");";
             _M << eb;
             _M << eb << ";";
-            _M << nl << "return [self begin_invoke__:@\"" << (*r)->name() <<  "\" mode:" 
-               << sliceModeToIceMode((*r)->sendMode()) << " marshal:" << marshal 
-               << " completed:completed_ exception:exception_ sent:sent_ context:ctx_];";
+            if(returnType || !outParams.empty())
+            {
+                _M << nl << "return [self begin_invoke__:@\"" << (*r)->name() <<  "\" mode:" 
+                   << sliceModeToIceMode((*r)->sendMode()) << " marshal:" << marshal 
+                   << " completed:completed_ response:(response_ != nil) exception:exception_ sent:sent_ context:ctx_];";
+            }
+            else
+            {
+                _M << nl << "return [self begin_invoke__:@\"" << (*r)->name() <<  "\" mode:" 
+                   << sliceModeToIceMode((*r)->sendMode()) << " marshal:" << marshal 
+                   << " completed:completed_ response:TRUE exception:exception_ sent:sent_ context:ctx_];";
+            }
         }
         else
         {

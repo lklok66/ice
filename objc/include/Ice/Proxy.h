@@ -172,7 +172,7 @@ typedef void (^ICEUnmarshalCB)(id<ICEInputStream>, BOOL);
                           context:(ICEContext*)context;
 -(id<ICEAsyncResult>) begin_invoke__:(NSString*)operation mode:(ICEOperationMode)mode marshal:(ICEMarshalCB)marshal
                         completed:(void(^)(id<ICEInputStream>, BOOL))completed
-                        exception:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent 
+                         response:(BOOL)response exception:(void(^)(ICEException*))exception sent:(void(^)(BOOL))sent 
                           context:(ICEContext*)context;
 -(void)end_invoke__:(NSString*)operation unmarshal:(ICEUnmarshalCB)unmarshal result:(id<ICEAsyncResult>)result;
 @end

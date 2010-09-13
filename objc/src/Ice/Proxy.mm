@@ -643,6 +643,7 @@ BOOL _returnsData;
                              marshal:(void(^)(id<ICEOutputStream>))marshal
                          returnsData:(BOOL)returnsData
                            completed:(void(^)(id<ICEInputStream>, BOOL))completed
+                            response:(BOOL)response
                            exception:(void(^)(ICEException*))exception 
                                 sent:(void(^)(BOOL))sent 
                              context:(ICEContext*)context
@@ -650,6 +651,19 @@ BOOL _returnsData;
     if(returnsData)
     {
         [self checkAsyncTwowayOnly__:operation];
+        if(!response)
+        {
+            @throw [NSException exceptionWithName:NSInvalidArgumentException 
+                                reason:@"Response callback is nil"
+                                userInfo:nil];
+        }
+    }
+
+    if(!exception)
+    {
+        @throw [NSException exceptionWithName:NSInvalidArgumentException 
+                            reason:@"Exception callback is nil"
+                            userInfo:nil];
     }
 
     id<ICEOutputStream> os = nil;
@@ -733,19 +747,33 @@ BOOL _returnsData;
             response();   
         }
     };
-    return [self begin_invoke__:op mode:mode marshal:marshal returnsData:NO completed:completed exception:exception 
-                 sent:sent context:ctx];
+    return [self begin_invoke__:op 
+                 mode:mode 
+                 marshal:marshal 
+                 returnsData:NO
+                 completed:completed
+                 response:TRUE
+                 exception:exception 
+                 sent:sent 
+                 context:ctx];
 }
 
 -(id<ICEAsyncResult>) begin_invoke__:(NSString*)op
                                 mode:(ICEOperationMode)mode 
                              marshal:(void(^)(id<ICEOutputStream>))marshal
                            completed:(void(^)(id<ICEInputStream>, BOOL))completed
+                            response:(BOOL)response
                            exception:(void(^)(ICEException*))exception 
                                 sent:(void(^)(BOOL))sent 
                              context:(ICEContext*)ctx
 {
-    return [self begin_invoke__:op mode:mode marshal:marshal returnsData:TRUE completed:completed exception:exception
+    return [self begin_invoke__:op 
+                 mode:mode 
+                 marshal:marshal 
+                 returnsData:TRUE
+                 completed:completed 
+                 response:response 
+                 exception:exception
                  sent:sent context:ctx];
 }
 
