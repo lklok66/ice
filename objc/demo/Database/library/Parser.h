@@ -10,7 +10,6 @@
 #import <Ice/Ice.h>
 #import <Library.h>
 #import <Foundation/NSArray.h>
-#import <Foundation/NSAutoreleasePool.h>
 
 //
 // Stuff for flex and bison
@@ -46,7 +45,6 @@ DemoBookQueryResultPrx* query;
 DemoBookDescription* current;
 id<DemoLibraryPrx> library;
 
-NSAutoreleasePool* pool;
 BOOL cont;
 int errors;
 }

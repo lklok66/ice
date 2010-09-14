@@ -39,7 +39,7 @@ Parser* parser;
 
 +(id)parserWithLibrary:(id<DemoLibraryPrx>)library
 {
-    return [[[Parser alloc] initWithLibrary:library] autorelease];
+    return [[Parser alloc] initWithLibrary:library];
 }
 
 -(void)usage
@@ -277,7 +277,6 @@ Parser* parser;
             [auth appendString:s];
         }
         printf("authors: %s\n",  [auth UTF8String]);
-        [auth release];
         if([current.rentedBy length] > 0)
         {
             printf("rented: %s\n", [current.rentedBy UTF8String]);
@@ -393,13 +392,10 @@ Parser* parser;
 
 -(int)getInput:(char*)buf max:(int)max
 {
-    NSAssert(pool, @"");
-    [pool drain];
-
     printf("%s", self.getPrompt);
     fflush(stdout);
 
-    NSMutableData* line = [ [ NSMutableData alloc] init];
+    NSMutableData* line = [[ NSMutableData alloc] init];
     while(true)
     {
         char c = (char)(getc(yyin));
@@ -420,29 +416,22 @@ Parser* parser;
             break;
         }
     }
-    NSString* ss = [ [NSString alloc] initWithData:line encoding:NSUTF8StringEncoding ];
+    NSString* ss = [[NSString alloc] initWithData:line encoding:NSUTF8StringEncoding];
     int len;
-    @try
+    const char* utf8 = [ss UTF8String];
+    
+    len = strlen(utf8);
+    if(len > max)
     {
-        const char* utf8 = [ss UTF8String];
+        [self errorWithString:@"input line too long"];
+        buf[0] = EOF;
+        return 1;
+    }
+    else
+    {
+        strcpy(buf, utf8);
+    }
 
-        len = strlen(utf8);
-        if(len > max)
-        {
-            [self errorWithString:@"input line too long"];
-            buf[0] = EOF;
-            return 1;
-        }
-        else
-        {
-            strcpy(buf, utf8);
-        }
-    }
-    @finally
-    {
-        [ss release];
-        [line release];
-    }
     return len;
 }
 
@@ -473,10 +462,6 @@ Parser* parser;
 
 -(int)parse
 {
-    NSAssert(!pool, @"");
-
-    pool = [[NSAutoreleasePool alloc] init];
-
     NSAssert(!parser, @"");
     parser = self;
 
@@ -495,19 +480,7 @@ Parser* parser;
         status = EXIT_FAILURE;
     }
 
-    [pool release];
-    pool = nil;
-
     parser = nil;
     return status;
-}
-
--(void)dealloc
-{
-    [query release];
-    [current release];
-    [library release];
-    NSAssert(!pool, @"");
-    [super dealloc];
 }
 @end

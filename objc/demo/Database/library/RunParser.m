@@ -18,7 +18,6 @@
 
 #import <Foundation/NSThread.h>
 #import <Foundation/NSLock.h>
-#import <Foundation/NSAutoreleasePool.h>
 
 @interface SessionRefreshThread : NSThread
 {
@@ -52,7 +51,7 @@
     {
         self.logger = l;
         self.session = s;
-        self.cond = [[[NSCondition alloc] init] autorelease];
+        self.cond = [[NSCondition alloc] init];
         timeout = t;
     }
     return self;
@@ -60,7 +59,7 @@
 
 +(id)sessionRefreshThreadWithLogger:(id<ICELogger>)logger timeout:(long)timeout session:(id)session
 {
-    return [[[SessionRefreshThread alloc] initWithLogger:logger timeout:timeout session:session] autorelease];
+    return [[SessionRefreshThread alloc] initWithLogger:logger timeout:timeout session:session];
 }
 
 -(void)main
@@ -70,7 +69,6 @@
     {
         while(!self.isCancelled)
         {
-            NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
             [cond waitUntilDate:[NSDate dateWithTimeIntervalSinceNow:timeout]];
             if(!self.isCancelled)
             {
@@ -85,7 +83,6 @@
                     [super cancel];
                 }
             }
-            [pool release];
         }
     }
     @finally
@@ -108,21 +105,11 @@
     }
 }
 
--(void)dealloc
-{
-    [logger release];
-    [session release];
-    [cond release];
-    [super dealloc];
-}
 @end
 
 int
 runParser(int argc, char* argv[], id<ICECommunicator> communicator)
 {
-    // For this demo we don't need to retain the below objects since
-    // the autorelease pool in scope is not released until main
-    // terminates.
     id<Glacier2RouterPrx> router = [Glacier2RouterPrx uncheckedCast:[communicator getDefaultRouter]];
     ICELong timeout;
     id<DemoLibraryPrx> library;
