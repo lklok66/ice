@@ -34,7 +34,7 @@ CPPFLAGS	:= -I. $(CPPFLAGS)
 
 $(CLIENT): $(ICEOBJCLIB) $(OBJS) $(CPP_OBJS)
 	rm -f $@
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(CPP_OBJS) -lGlacier2Objc $(LIBS)
+	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(CPP_OBJS) -lGlacier2ObjC $(LIBS)
 
 clean::
 	-rm -f Grammar.m Grammar.h

@@ -1,5 +1,5 @@
 Ice Touch 1.1.0 offers an Objective-C language mapping, development
-kits and run times for Mac OS X and the iOS.
+kits and run times for Mac OS X and iOS.
 
 Ice is a modern object-oriented toolkit that enables you to build
 distributed applications with minimal effort. Ice allows you to focus
@@ -16,9 +16,9 @@ that most distributed applications require, such as event distribution
 or server management.
 
 Ice is available under the terms and conditions of the GNU General
-Public License v2 (see the ICE_LICENSE file). Commercial licenses are
-available for customers who wish to use Ice in proprietary products.
-Please contact sales@zeroc.com for more information on licensing Ice.
+Public License v2. Commercial licenses are available for customers who
+wish to use Ice Touch in proprietary products.  Please contact
+sales@zeroc.com for more information on licensing Ice Touch.
 
 You will now be guided through the steps necessary to install this
 software.

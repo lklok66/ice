@@ -28,6 +28,6 @@ CPPFLAGS	:= -I. $(CPPFLAGS)
 
 $(CLIENT): $(ICEOBJCLIB) $(OBJS) $(COBJS)
 	rm -f $@
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(COBJS) $(LIBS) -lGlacier2Objc
+	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(COBJS) $(LIBS) -lGlacier2ObjC
 
 include .depend

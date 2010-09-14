@@ -298,7 +298,7 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				OTHER_LDFLAGS = "-lGlacier2Objc";
+				OTHER_LDFLAGS = "-lGlacier2ObjC";
 				PRODUCT_NAME = Library;
 			};
 			name = Debug;
@@ -319,7 +319,7 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = "-lGlacier2Objc";
+				OTHER_LDFLAGS = "-lGlacier2ObjC";
 				PRODUCT_NAME = Library;
 			};
 			name = Release;
