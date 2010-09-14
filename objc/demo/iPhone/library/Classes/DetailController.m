@@ -200,7 +200,9 @@ static EditController* editViewController_ = nil;
 -(void)saveIsbn:(NSString*)value
 {
     NSAssert(book.proxy == nil, @"book.proxy == nil");
-    book.isbn = value;
+    self.updated = book;
+    updated.isbn = value;
+
     [self commitEdit];
 }
 
