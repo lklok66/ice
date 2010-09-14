@@ -475,7 +475,7 @@ sessionTimeout:(int)t
     NSAssert(s.length <= 1024, @"s.length <= 1024");
     if(s.length > 0)
     {
-        [session begin_send:s response:nil exception:^(ICEException* ex) { [self exception:ex]; }];
+        [session begin_send:s response:^(ICELong t) { } exception:^(ICEException* ex) { [self exception:ex]; }];
     }
     
     theTextField.text = @"";
