@@ -736,14 +736,14 @@ Slice::Gen::printHeader(Output& o)
 "//\n"
 "// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.\n"
 "//\n"
-"// This copy of Ice is licensed to you under the terms described in the\n"
-"// ICE_TOUCH_LICENSE file included in this distribution.\n"
+"// This copy of Ice Touch is licensed to you under the terms described in\n"
+"// the ICE_TOUCH_LICENSE file included in this distribution.\n"
 "//\n"
 "// **********************************************************************\n"
         ;
 
     o << header;
-    o << "\n// Ice version " << ICE_STRING_VERSION;
+    o << "\n// Ice Touch version " << ICE_TOUCH_STRING_VERSION;
 }
 
 Slice::Gen::UnitVisitor::UnitVisitor(Output& H, Output& M) :

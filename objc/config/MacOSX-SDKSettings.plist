@@ -26,7 +26,7 @@
 	<key>MinimalDisplayName</key>
 	<string>10.5</string>
 	<key>MinimumSupportedToolsVersion</key>
-	<string>3.1</string>
+	<string>3.2.3</string>
 	<key>Version</key>
 	<string>10.5</string>
 	<key>IsBaseSDK</key>

@@ -115,7 +115,7 @@ main(int argc, char* argv[])
 
     if(opts.isSet("version"))
     {
-        cout << ICE_STRING_VERSION << endl;
+        cout << ICE_TOUCH_STRING_VERSION << endl;
         return EXIT_SUCCESS;
     }
 

@@ -12,6 +12,12 @@
 
 #include <Slice/ObjCUtil.h>
 
+//
+// The Ice Touch version.
+//
+#define ICE_TOUCH_STRING_VERSION "1.1.0" // "A.B.C", with A=major, B=minor, C=patch
+#define ICE_TOUCH_INT_VERSION 10100      // AABBCC, with AA=major, BB=minor, CC=patch
+
 namespace Slice
 {
 
