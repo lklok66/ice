@@ -497,7 +497,7 @@ private:
 CFOptionFlags
 toCFCallbacks(SocketOperation op)
 {
-    CFOptionFlags cbs;
+    CFOptionFlags cbs = 0;
     if(op & SocketOperationRead)
     {
         cbs |= kCFSocketReadCallBack;
