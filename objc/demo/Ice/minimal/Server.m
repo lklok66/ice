@@ -10,8 +10,6 @@
 #import <Ice/Ice.h>
 #import <HelloI.h>
 
-#import <Foundation/NSAutoreleasePool.h>
-
 #import <objc/objc-auto.h>
 
 int
@@ -19,8 +17,6 @@ main(int argc, char* argv[])
 {
     objc_startCollectorThread();
 
-    NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-    
     int status = 0;
     id<ICECommunicator> communicator = nil;
     @try
@@ -34,7 +30,7 @@ main(int argc, char* argv[])
 
         id<ICEObjectAdapter> adapter = [communicator createObjectAdapterWithEndpoints:@"Hello"
                                                      endpoints:@"tcp -p 10000"];
-        DemoHello* hello = [[[HelloI alloc] init] autorelease];
+        DemoHello* hello = [[HelloI alloc] init];
         [adapter add:hello identity:[communicator stringToIdentity:@"hello"]];
         [adapter activate];
         [communicator waitForShutdown];
@@ -58,6 +54,5 @@ main(int argc, char* argv[])
         }
     }
 
-    [pool release];
     return status;
 }

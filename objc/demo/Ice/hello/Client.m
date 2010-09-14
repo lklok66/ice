@@ -10,8 +10,6 @@
 #import <Ice/Ice.h>
 #import <Hello.h>
 
-#import <Foundation/NSAutoreleasePool.h>
-
 #import <stdio.h>
 
 #import <objc/objc-auto.h>
@@ -206,7 +204,6 @@ main(int argc, char* argv[])
 {
     objc_startCollectorThread();
 
-    NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
     int status = EXIT_SUCCESS;
     id<ICECommunicator> communicator = nil;
     @try
@@ -237,6 +234,5 @@ main(int argc, char* argv[])
         }
     }
 
-    [pool release];
     return status;
 }
