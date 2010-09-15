@@ -22,6 +22,7 @@
            server:(int (*)(int, char**))server
            client:(int (*)(int, char**))client;
 
+-(BOOL)hasServer;
 -(int)server;
 -(int)client;
 

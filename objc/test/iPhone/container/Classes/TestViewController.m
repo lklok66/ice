@@ -193,10 +193,15 @@
     
     completed = 0;
     [activity startAnimating];
-    NSInvocationOperation* op = [[[NSInvocationOperation alloc]
-                                  initWithTarget:self
-                                  selector:@selector(runServer)
-                                  object:nil] autorelease];
+    NSInvocationOperation* op;
+    if([test hasServer])
+    {
+        op = [[[NSInvocationOperation alloc] initWithTarget:self selector:@selector(runServer) object:nil] autorelease];
+    }
+    else 
+    {
+        op = [[[NSInvocationOperation alloc] initWithTarget:self selector:@selector(runClient) object:nil] autorelease];
+    }
     [queue addOperation:op];
 }
 
@@ -254,10 +259,13 @@
     if([rc intValue] != 0)
     {
         [self add:[NSString stringWithFormat:@"client error: %@!\n", rc]];
-        serverStop();
+        if([test hasServer])
+        {
+            serverStop();
+        }
     }
     
-    if(++completed == 2)
+    if(![test hasServer] || ++completed == 2)
     {
         [self testComplete];
     }

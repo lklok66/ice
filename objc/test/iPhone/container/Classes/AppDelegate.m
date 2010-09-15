@@ -25,6 +25,7 @@ int bindingServer(int, char**);
 int bindingClient(int, char**);
 int defaultServantServer(int, char**);
 int defaultServantClient(int, char**);
+int defaultValueClient(int, char**);
 int dispatcherServer(int, char**);
 int dispatcherClient(int, char**);
 int exceptionsServer(int, char**);
@@ -60,6 +61,7 @@ static const struct TestCases alltests[] =
 { @"ami", amiServer, amiClient },
 { @"binding", bindingServer, bindingClient },
 { @"defaultServant", defaultServantServer, defaultServantClient },
+{ @"defaultValue", 0, defaultValueClient },
 { @"dispatcher", dispatcherServer, dispatcherClient },
 { @"exceptions", exceptionsServer, exceptionsClient },
 { @"facets", facetsServer, facetsClient },
@@ -165,7 +167,7 @@ static NSString* sslKey = @"sslKey";
 {
     if(success)
     {
-        self.currentTest = (currentTest+1) % tests.count;;
+        self.currentTest = (currentTest+1) % tests.count;
     }
 }
 

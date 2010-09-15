@@ -20,7 +20,8 @@ SUBDIRS		= proxy \
 		  objects \
                   interceptor \
 		  dispatcher \
- 		  defaultServant \
+		  defaultServant \
+		  defaultValue \
 		  faultTolerance \
 		  location \
 		  adapterDeactivation \

@@ -29,6 +29,9 @@
 		146B34070FE8BC61009C6199 /* Server.m in Sources */ = {isa = PBXBuildFile; fileRef = 146B34010FE8BC61009C6199 /* Server.m */; };
 		146B34090FE8BC61009C6199 /* TestI.m in Sources */ = {isa = PBXBuildFile; fileRef = 146B34040FE8BC61009C6199 /* TestI.m */; };
 		146B340B0FE8BD58009C6199 /* HoldTest.ice in Sources */ = {isa = PBXBuildFile; fileRef = 146B340A0FE8BD58009C6199 /* HoldTest.ice */; };
+		14D5BF981240C61900A19716 /* AllTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 14D5BF951240C61900A19716 /* AllTests.m */; };
+		14D5BF991240C61900A19716 /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 14D5BF961240C61900A19716 /* Client.m */; };
+		14D5BF9A1240C61900A19716 /* DefaultValueTest.ice in Sources */ = {isa = PBXBuildFile; fileRef = 14D5BF971240C61900A19716 /* DefaultValueTest.ice */; };
 		1D3623260D0F684500981E51 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* AppDelegate.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
@@ -152,6 +155,9 @@
 		146B34030FE8BC61009C6199 /* TestI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TestI.h; path = ../../Ice/hold/TestI.h; sourceTree = SOURCE_ROOT; };
 		146B34040FE8BC61009C6199 /* TestI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TestI.m; path = ../../Ice/hold/TestI.m; sourceTree = SOURCE_ROOT; };
 		146B340A0FE8BD58009C6199 /* HoldTest.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = HoldTest.ice; path = ../../Ice/hold/HoldTest.ice; sourceTree = SOURCE_ROOT; };
+		14D5BF951240C61900A19716 /* AllTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AllTests.m; path = ../../Ice/defaultValue/AllTests.m; sourceTree = SOURCE_ROOT; };
+		14D5BF961240C61900A19716 /* Client.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Client.m; path = ../../Ice/defaultValue/Client.m; sourceTree = SOURCE_ROOT; };
+		14D5BF971240C61900A19716 /* DefaultValueTest.ice */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.slice; name = DefaultValueTest.ice; path = ../../Ice/defaultValue/DefaultValueTest.ice; sourceTree = SOURCE_ROOT; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623240D0F684500981E51 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -355,6 +361,16 @@
 			name = hold;
 			sourceTree = "<group>";
 		};
+		14D5BF941240C5EB00A19716 /* defaultValue */ = {
+			isa = PBXGroup;
+			children = (
+				14D5BF951240C61900A19716 /* AllTests.m */,
+				14D5BF961240C61900A19716 /* Client.m */,
+				14D5BF971240C61900A19716 /* DefaultValueTest.ice */,
+			);
+			name = defaultValue;
+			sourceTree = "<group>";
+		};
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -366,6 +382,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				14D5BF941240C5EB00A19716 /* defaultValue */,
 				140157B6123645B3007C165E /* dispatcher */,
 				140064111234DFBF00249AA4 /* invoke */,
 				140A3926122CF0EC00E1931D /* ami */,
@@ -808,6 +825,9 @@
 				140157C3123645D0007C165E /* Client.m in Sources */,
 				140157C5123645D0007C165E /* DispatcherTest.ice in Sources */,
 				140157C6123645D0007C165E /* Server.m in Sources */,
+				14D5BF981240C61900A19716 /* AllTests.m in Sources */,
+				14D5BF991240C61900A19716 /* Client.m in Sources */,
+				14D5BF9A1240C61900A19716 /* DefaultValueTest.ice in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

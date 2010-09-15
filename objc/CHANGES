@@ -1,6 +1,16 @@
 Changes since version 1.0.0
 ---------------------------
 
+- Added ability to define default values for Slice data members. For
+  example, you can write:
+
+  // Slice
+  class C
+  {
+      int i = 2;
+      string name = "John";
+  };
+
 - Updated Ice Touch to support iOS 4.
 
 - Fixed bug that could cause GC resurrection errors.

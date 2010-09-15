@@ -125,6 +125,26 @@ in the following directories:
 - demo/iPhone
 
 
+New Slice syntax for default values
+-----------------------------------
+
+It is now possible to specify in Slice the default values for data
+members of classes, structures, and exceptions. The semantics are the
+same as for Slice constants in that you can only specify default
+values for a data member whose type is a primitive or enumeration.
+For example:
+
+// Slice
+enum Color { red, green, blue };
+
+struct Point
+{
+    int x = -1;
+    int y = -1;
+    Color c = blue;
+};
+
+
 Support for background applications
 -----------------------------------
 

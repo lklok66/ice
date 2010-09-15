@@ -133,9 +133,11 @@ private:
         enum Escape { NoEscape, WithEscape };
 	enum ContainerType { LocalException, Other };
 
+        void writeConstantValue(IceUtilInternal::Output&, const TypePtr&, const std::string&) const;
 	void writeMembers(const DataMemberList&, int) const;
 	void writeMemberSignature(const DataMemberList&, int, ContainerType) const;
 	void writeMemberCall(const DataMemberList&, int, ContainerType, Escape) const;
+	void writeMemberDefaultValueInit(const DataMemberList&, int) const;
 	void writeMemberInit(const DataMemberList&, int) const;
 	void writeProperties(const DataMemberList&, int) const;
 	void writeSynthesize(const DataMemberList&, int) const;

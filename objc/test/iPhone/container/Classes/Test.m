@@ -27,7 +27,10 @@
     }
     return [t autorelease];
 }
-
+-(BOOL) hasServer
+{
+    return server != 0;
+}
 -(int)server
 {
     NSAssert(server != 0, @"server != 0");
@@ -41,7 +44,7 @@
     int argc = 0;
     char** argv = 0;
 
-    NSAssert(client != 0, @"server != 0");
+    NSAssert(client != 0, @"client != 0");
     return (*client)(argc, argv);
 }
 

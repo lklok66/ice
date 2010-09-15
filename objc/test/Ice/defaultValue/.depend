@@ -1,0 +1,2 @@
+DefaultValueTest.m: DefaultValueTest.ice
+DefaultValueTest.ice: $(SLICE2OBJC)

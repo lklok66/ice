@@ -915,6 +915,19 @@ Slice::Gen::TypesVisitor::visitClassDefEnd(const ClassDefPtr& p)
     }
     if(!p->isInterface() && !dataMembers.empty())
     {
+        if(p->hasDefaultValues())
+        {
+            _H << nl << "-(id) init;";
+            _M << sp << nl << "-(id) init";
+            _M << sb;
+            _M << nl << "if(![super init])";
+            _M << sb;
+            _M << nl << "return nil;";
+            _M << eb;
+            writeMemberDefaultValueInit(dataMembers, BaseTypeObject);
+            _M << nl << "return self;";
+            _M << eb;
+        }
 	_H << nl << "-(id) init";
 	_M << sp << nl << "-(id) init";
 	writeMemberSignature(allDataMembers, BaseTypeObject, Other);
@@ -1164,6 +1177,29 @@ Slice::Gen::TypesVisitor::visitExceptionEnd(const ExceptionPtr& p)
     }
     if(!dataMembers.empty())
     {
+        if(!p->base() || p->hasDefaultValues())
+        {
+            _H << sp << nl << "-(id) init;";
+            _M << sp << nl << "-(id) init";
+            _M << sb;
+            if(!p->base())
+            {
+                _M << nl << "if(![super initWithName:[self ice_name] reason:nil userInfo:nil])";
+            }
+            else
+            {
+                _M << nl << "if(![super init])";
+            }
+            _M << sb;
+            _M << nl << "return nil;";
+            _M << eb;
+            if(p->hasDefaultValues())
+            {
+                writeMemberDefaultValueInit(dataMembers, BaseTypeObject);
+            }
+            _M << nl << "return self;";
+            _M << eb;
+        }
 	_H << nl << "-(id) init";
 	_M << sp << nl << "-(id) init";
 	writeMemberSignature(allDataMembers, BaseTypeException, p->isLocal() ? LocalException : Other);
@@ -1352,6 +1388,19 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
     //
     // Constructor.
     //
+    if(p->hasDefaultValues())
+    {
+        _H << sp << nl << "-(id) init;";
+        _M << sp << nl << "-(id) init";
+        _M << sb;
+        _M << nl << "if(![super init])";
+        _M << sb;
+        _M << nl << "return nil;";
+        _M << eb;
+        writeMemberDefaultValueInit(dataMembers, BaseTypeObject);
+        _M << nl << "return self;";
+        _M << eb;
+    }
     _H << sp << nl << "-(id) init";
     _M << sp << nl << "-(id) init";
     writeMemberSignature(dataMembers, BaseTypeObject, Other);
@@ -1526,8 +1575,14 @@ Slice::Gen::TypesVisitor::visitConst(const ConstPtr& p)
         _H << nl << "static const " << typeToString(p->type());
     }
     _H << " " << fixName(p) << " = ";
+    writeConstantValue(_H, p->type(), p->value());
+    _H << ';';
+}
 
-    if(isString(p->type()))
+void
+Slice::Gen::TypesVisitor::writeConstantValue(IceUtilInternal::Output& out, const TypePtr& type, const string& val) const
+{
+    if(isString(type))
     {
         //
         // Expand strings into the basic source character set. We can't use isalpha() and the like
@@ -1539,9 +1594,8 @@ Slice::Gen::TypesVisitor::visitConst(const ConstPtr& p)
                                                "_{}[]#()<>%:;.?*+-/^&|~!=,\\\"' ";
         static const set<char> charSet(basicSourceChars.begin(), basicSourceChars.end());
 
-        _H << "@\"";                                      // Opening @"
+        out << "@\"";                                      // Opening @"
 
-        const string val = p->value();
         for(string::const_iterator c = val.begin(); c != val.end(); ++c)
         {
             if(charSet.find(*c) == charSet.end())
@@ -1553,40 +1607,40 @@ Slice::Gen::TypesVisitor::visitConst(const ConstPtr& p)
                 s.fill('0');
                 s << oct;
                 s << static_cast<unsigned>(uc);
-                _H << s.str();
+                out << s.str();
             }
             else
             {
-                _H << *c;                                // Print normally if in basic source character set
+                out << *c;                                // Print normally if in basic source character set
             }
         }
 
-        _H << "\"";                                      // Closing "
+        out << "\"";                                      // Closing "
     }
     else
     {
-        EnumPtr ep = EnumPtr::dynamicCast(p->type());
+        EnumPtr ep = EnumPtr::dynamicCast(type);
         if(ep)
         {
 	    string prefix = moduleName(findModule(ep));
-            _H << prefix << p->value();
+            out  << prefix << val;
         }
         else
         {
-	    string value = p->value();
-	    if(value == "true")
+	    if(val == "true")
 	    {
-	        value = "YES";
+	        out << "YES";
 	    }
-	    else if(value == "false")
+	    else if(val == "false")
 	    {
-	        value = "NO";
+	        out << "NO";
 	    }
-            _H << value;
+            else
+            {
+                out << val;
+            }
         }
     }
-
-    _H << ';';
 }
 
 void
@@ -1660,6 +1714,20 @@ Slice::Gen::TypesVisitor::writeMemberCall(const DataMemberList& dataMembers, int
 	{
 	    _M << ":" << fixId(name) << "_p";
 	}
+    }
+}
+
+void
+Slice::Gen::TypesVisitor::writeMemberDefaultValueInit(const DataMemberList& dataMembers, int baseType) const
+{
+    for(DataMemberList::const_iterator p = dataMembers.begin(); p != dataMembers.end(); ++p)
+    {
+        if((*p)->hasDefaultValue())
+        {
+            _M << nl << fixId((*p)->name(), baseType) << " = ";
+            writeConstantValue(_M, (*p)->type(), (*p)->defaultValue());
+            _M << ";";
+        }
     }
 }
 

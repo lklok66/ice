@@ -35,6 +35,7 @@ tests = [
      ("Ice/interceptor", ["core"]),
      ("Ice/dispatcher", ["core"]),
      ("Ice/defaultServant", ["core"]),
+     ("Ice/defaultValue", ["core"]),
      ("Ice/binding", ["core"]),
      ("Ice/hold", ["core"]),
      ("Ice/faultTolerance", ["core"]),
