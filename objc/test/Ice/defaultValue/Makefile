@@ -17,7 +17,7 @@ OBJS		= Client.o \
 		  AllTests.o \
 		  DefaultValueTest.o
 
-SRCS		= $(OBJS=.o=.m)
+SRCS		= $(OBJS:.o=.m)
 
 SLICE_SRCS	= DefaultValueTest.ice
 
@@ -30,8 +30,8 @@ endif
 CPPFLAGS	:= -I. -I.. -I../../include $(CPPFLAGS)
 LIBS		:= -lTestCommon $(LIBS)
 
-$(CLIENT): $(ICEOBJCLIB) $(COBJS) $(OBJS)
+$(CLIENT): $(ICEOBJCLIB) $(OBJS)
 	rm -f $@
-	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(COBJS) $(OBJS) $(LIBS)
+	$(CXX) $(LDFLAGS) $(STATICLIBSTDFLAG) -o $@ $(OBJS) $(LIBS)
 
 include .depend
