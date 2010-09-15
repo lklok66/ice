@@ -26,10 +26,9 @@ OPTIMIZE		= yes
 #MCPP_HOME		?= /opt/mcpp
 
 #
-# Define LP64 as yes or no if you want force a 32 or 64 bit. The
-# default is platform-dependent
+# Build i386 and x86_64 fat binaries.
 #
-#LP64			?= yes
+CXXARCHFLAGS		     = -arch i386 -arch x86_64
 
 # ----------------------------------------------------------------------
 # Don't change anything below this line!
