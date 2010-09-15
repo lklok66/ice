@@ -57,13 +57,13 @@ use Xcode to build the demos located in subdirectories of
 Configuring the Xcode plug-in
 ======================================================================
 
-The Xcode plugin simplifies the process of building Ice and Ice Touch
+The Xcode plug-in simplifies the process of building Ice and Ice Touch
 applications with Xcode.
 
 The Xcode plug-in provides the following features:
 
   - Handles all aspects of translating your Slice files for both
-    Objective-C and C++ projects.
+    Objective-C and C++ projects
   - Incrementally recompiles Slice files after modifications
   - Maintains dependencies between Slice files
   - Highlights compilation errors in your source code
@@ -83,10 +83,10 @@ The following fields are defined:
 
 - Ice Home
 
-  If you are building with the Ice Touch Xcode SDK, this should left
-  unset; otherwise, if using the command line toolkit or regular Ice,
-  set this to the location of the installation (ie: /opt/Ice-3.4.1, or
-  /opt/IceTouch-1.1)
+  If you are building with the Ice Touch Xcode SDK, this should be
+  left unset; otherwise, if using the command-line toolkit or regular
+  Ice, set this to the location of the installation (such as
+  /opt/Ice-3.4.1 or /opt/IceTouch-1.1).
 
 - Permit `Ice' prefix
 
@@ -109,7 +109,7 @@ The following fields are defined:
   If set, slice2cpp will be used to translate the Slice files,
   otherwise slice2objc is used.
 
-You may set specific Slice compiler flags on individual source Slice
-files by selecting the Slice file, press info (or Cmd-i), selecting
+You may set specific Slice compiler flags on individual Slice source
+files by selecting the Slice file, pressing info (or Cmd-i), selecting
 the build tab and entering any desired flags in "Additional Compiler
 Flags for Target".
