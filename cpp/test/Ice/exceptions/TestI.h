@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -16,7 +16,7 @@ class ThrowerI : public Test::Thrower
 {
 public:
 
-    ThrowerI(const Ice::ObjectAdapterPtr&);
+    ThrowerI();
 
     virtual void shutdown(const Ice::Current&);
     virtual bool supportsUndeclaredExceptions(const Ice::Current&);
@@ -39,9 +39,8 @@ public:
     virtual void throwNonIceException(const Ice::Current&);
     virtual void throwAssertException(const Ice::Current&);
 
-private:
-
-    Ice::ObjectAdapterPtr _adapter;
+    virtual void throwAfterResponse(const Ice::Current&);
+    virtual void throwAfterException(const Ice::Current&);
 };
 
 #endif

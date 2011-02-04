@@ -1,7 +1,7 @@
 <!--
  **********************************************************************
 
- Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+ Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 
  This copy of Ice is licensed to you under the terms described in the
  ICE_LICENSE file included in this distribution.
@@ -21,7 +21,6 @@
         <!-- Create the output directory for generated code -->
         <mkdir dir="${generated.dir}"/>
         <slice2java outputdir="${generated.dir}" tie="on" stream="on">
-	    <meta value="${java2metadata}"/>
             <includepath>
                 <pathelement path="." />
             </includepath>
@@ -45,9 +44,8 @@
             <fileset dir="." includes="TestSingleModuleWithPackage12.ice"/>
             <fileset dir="." includes="TestSingleModuleWithPackage13.ice"/>
         </slice2java>
-        <!-- We use 2 tasks to limit the size of the slice2java command line -->
+        <!-- We use another task to limit the size of the slice2java command line -->
         <slice2java outputdir="${generated.dir}" tie="on" stream="on">
-	    <meta value="${java2metadata}"/>
             <includepath>
                 <pathelement path="." />
             </includepath>
@@ -63,6 +61,12 @@
             <fileset dir="." includes="TestDoubleModuleWithPackage9.ice"/>
             <fileset dir="." includes="TestDoubleModuleWithPackage10.ice"/>
             <fileset dir="." includes="TestDoubleModuleWithPackage11.ice"/>
+        </slice2java>
+        <slice2java outputdir="${generated.dir}" tie="on" stream="on" underscore="on">
+            <includepath>
+                <pathelement path="." />
+            </includepath>
+            <fileset dir="." includes="Underscore.ice"/>
         </slice2java>
     </target>
 

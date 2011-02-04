@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -527,7 +527,12 @@ FreezeScript::TransformVisitor::transformObject(const ObjectDataPtr& dest, const
     catch(...)
     {
         objectDataMap.erase(p);
+
+#if (defined(_MSC_VER) && (_MSC_VER >= 1600))
+	objectDataMap.insert(ObjectDataMap::value_type(src.get(), nullptr));
+#else
         objectDataMap.insert(ObjectDataMap::value_type(src.get(), 0));
+#endif
         throw;
     }
 }

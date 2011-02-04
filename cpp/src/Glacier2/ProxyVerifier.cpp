@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -37,7 +37,7 @@ struct Range
     long end;
 };
 
-static void 
+static void
 parseGroup(const string& parameter, vector<int>& validPorts, vector<Range>& ranges)
 {
     istringstream istr(parameter);
@@ -346,7 +346,7 @@ public:
         {
             return false;
         }
-        pos += istr.tellg();
+        pos += static_cast<string::size_type>(istr.tellg());
         {
             for(vector<int>::const_iterator i = _values.begin(); i != _values.end(); ++i)
             {

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -25,10 +25,13 @@ from scripts import *
 #
 tests = [
     ("Slice/keyword", ["once"]),
+    ("Slice/structure", ["once"]),
     ("IceUtil/inputUtil", ["once"]),
     ("Ice/proxy", ["core"]),
     ("Ice/operations", ["core"]),
     ("Ice/exceptions", ["core"]),
+    ("Ice/ami", ["core"]),
+    ("Ice/info", ["core", "noipv6", "nocompress"]),
     ("Ice/inheritance", ["core"]),
     ("Ice/facets", ["core"]),
     ("Ice/hold", ["core"]),
@@ -40,6 +43,7 @@ tests = [
     ("Ice/slicing/exceptions", ["core"]),
     ("Ice/slicing/objects", ["core"]),
     ("Ice/checksum", ["core"]),
+    ("Ice/dispatcher", ["core"]),
     ("Ice/stream", ["core"]),
     ("Ice/retry", ["core"]),
     ("Ice/timeout", ["core"]),
@@ -49,6 +53,10 @@ tests = [
     ("Ice/seqMapping", ["core"]),
     ("Ice/background", ["core"]),
     ("Ice/udp", ["core"]),
+    ("Ice/defaultServant", ["core"]),
+    ("Ice/defaultValue", ["core"]),
+    ("Ice/threadPoolPriority", ["core", "nomono"]),
+    ("Ice/invoke", ["core"]),
     ("IceBox/configuration", ["core", "noipv6"]),
     ("Glacier2/router", ["service"]),
     ("IceGrid/simple", ["service"]),

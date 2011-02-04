@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -101,6 +101,20 @@ TestAMDI::intfUserException_async(const Test::AMD_TestIntf_intfUserExceptionPtr&
         //
         cb->ice_response("Hello");
     }
+}
+
+void
+TestAMDI::asyncResponse_async(const Test::AMD_TestIntf_asyncResponsePtr& cb, const Current&)
+{
+    cb->ice_response();
+    throw Ice::ObjectNotExistException(__FILE__, __LINE__);
+}
+
+void
+TestAMDI::asyncException_async(const Test::AMD_TestIntf_asyncExceptionPtr& cb, const Current&)
+{
+    cb->ice_exception(Test::TestIntfUserException());
+    throw Ice::ObjectNotExistException(__FILE__, __LINE__);
 }
 
 void

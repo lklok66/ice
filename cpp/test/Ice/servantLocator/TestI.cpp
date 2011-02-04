@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -86,6 +86,22 @@ TestI::intfUserException(bool _cpp_throw, const Current&)
     // is reset correctly if finished() throws.
     //
     return "Hello";
+}
+
+void
+TestI::asyncResponse(const Current&)
+{
+    //
+    // Only relevant for AMD.
+    //
+}
+
+void
+TestI::asyncException(const Current&)
+{
+    //
+    // Only relevant for AMD.
+    //
 }
 
 void

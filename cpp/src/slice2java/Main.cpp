@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -9,35 +9,56 @@
 
 #include <IceUtil/Options.h>
 #include <IceUtil/CtrlCHandler.h>
-#include <IceUtil/StaticMutex.h>
+#include <IceUtil/Mutex.h>
+#include <IceUtil/MutexPtrLock.h>
 #include <Slice/Preprocessor.h>
 #include <Slice/FileTracker.h>
 #include <Slice/Util.h>
 #include <Gen.h>
-
-#ifdef __BCPLUSPLUS__
-#  include <iterator>
-#endif
+#include <iterator>
 
 using namespace std;
 using namespace Slice;
 
-static IceUtil::StaticMutex _mutex = ICE_STATIC_MUTEX_INITIALIZER;
-static bool _interrupted = false;
+namespace
+{
+
+IceUtil::Mutex* mutex = 0;
+bool interrupted = false;
+
+class Init
+{
+public:
+
+    Init()
+    {
+        mutex = new IceUtil::Mutex;
+    }
+
+    ~Init()
+    {
+        delete mutex;
+        mutex = 0;
+    }
+};
+
+Init init;
+
+}
 
 void
 interruptedCallback(int signal)
 {
-    IceUtil::StaticMutex::Lock lock(_mutex);
+    IceUtilInternal::MutexPtrLock<IceUtil::Mutex> sync(mutex);
 
-    _interrupted = true;
+    interrupted = true;
 }
 
 void
 usage(const char* n)
 {
-    cerr << "Usage: " << n << " [options] slice-files...\n";
-    cerr <<        
+    getErrorStream() << "Usage: " << n << " [options] slice-files...\n";
+    getErrorStream() <<        
         "Options:\n"
         "-h, --help              Show this message.\n"
         "-v, --version           Display the Ice version.\n"
@@ -54,16 +75,16 @@ usage(const char* n)
         "--depend-xml            Generate dependencies in XML format.\n"
         "--list-generated        Emit list of generated files in XML format.\n"
         "-d, --debug             Print debug messages.\n"
-        "--ice                   Permit `Ice' prefix (for building Ice source code only)\n"
+        "--ice                   Permit `Ice' prefix (for building Ice source code only).\n"
+        "--underscore            Permit underscores in Slice identifiers.\n"
         "--checksum CLASS        Generate checksums for Slice definitions into CLASS.\n"
         "--stream                Generate marshaling support for public stream API.\n"
         "--meta META             Define global metadata directive META.\n"
         ;
-    // Note: --case-sensitive is intentionally not shown here!
 }
 
 int
-main(int argc, char* argv[])
+compile(int argc, char* argv[])
 {
     IceUtilInternal::Options opts;
     opts.addOpt("h", "help");
@@ -81,22 +102,19 @@ main(int argc, char* argv[])
     opts.addOpt("", "list-generated");
     opts.addOpt("d", "debug");
     opts.addOpt("", "ice");
+    opts.addOpt("", "underscore");
     opts.addOpt("", "checksum", IceUtilInternal::Options::NeedArg);
     opts.addOpt("", "stream");
     opts.addOpt("", "meta", IceUtilInternal::Options::NeedArg, "", IceUtilInternal::Options::Repeat);
-    opts.addOpt("", "case-sensitive");
 
     vector<string>args;
     try
     {
-#if defined(__BCPLUSPLUS__) && (__BCPLUSPLUS__ >= 0x0600)
-        IceUtil::DummyBCC dummy;
-#endif
         args = opts.parse(argc, (const char**)argv);
     }
     catch(const IceUtilInternal::BadOptException& e)
     {
-        cerr << argv[0] << ": error: " << e.reason << endl;
+        getErrorStream() << argv[0] << ": error: " << e.reason << endl;
         usage(argv[0]);
         return EXIT_FAILURE;
     }
@@ -109,7 +127,7 @@ main(int argc, char* argv[])
 
     if(opts.isSet("version"))
     {
-        cerr << ICE_STRING_VERSION << endl;
+        getErrorStream() << ICE_STRING_VERSION << endl;
         return EXIT_SUCCESS;
     }
 
@@ -150,6 +168,8 @@ main(int argc, char* argv[])
 
     bool ice = opts.isSet("ice");
 
+    bool underscore = opts.isSet("underscore");
+
     string checksumClass = opts.optArg("checksum");
 
     bool stream = opts.isSet("stream");
@@ -159,26 +179,6 @@ main(int argc, char* argv[])
     StringList globalMetadata;
     vector<string> v = opts.argVec("meta");
     copy(v.begin(), v.end(), back_inserter(globalMetadata));
-
-    //
-    // Look for the Java2 metadata.
-    //
-    bool java2 = false;
-    for(StringList::iterator p = globalMetadata.begin(); p != globalMetadata.end(); ++p)
-    {
-        if((*p) == "java:java2")
-        {
-            java2 = true;
-            break;
-        }
-    }
-
-    if(java2 && !listGenerated && !depend && !dependxml)
-    {
-        getErrorStream() << argv[0] << ": warning: The Java2 mapping is deprecated." << endl;
-    }
-
-    bool caseSensitive = opts.isSet("case-sensitive");
 
     if(args.empty())
     {
@@ -208,10 +208,40 @@ main(int argc, char* argv[])
 
     for(i = args.begin(); i != args.end(); ++i)
     {
+        //
+        // Ignore duplicates.
+        //
+        vector<string>::iterator p = find(args.begin(), args.end(), *i);
+        if(p != i)
+        {
+            continue;
+        }
+
         if(depend || dependxml)
         {
-            Preprocessor icecpp(argv[0], *i, cppArgs);
-            if(!icecpp.printMakefileDependencies(depend ? Preprocessor::Java : Preprocessor::JavaXML, includePaths))
+            PreprocessorPtr icecpp = Preprocessor::create(argv[0], *i, cppArgs);
+            FILE* cppHandle = icecpp->preprocess(false);
+
+            if(cppHandle == 0)
+            {
+                return EXIT_FAILURE;
+            }
+
+            UnitPtr u = Unit::createUnit(false, false, ice, underscore);
+            int parseStatus = u->parse(*i, cppHandle, debug);
+            u->destroy();
+
+            if(parseStatus == EXIT_FAILURE)
+            {
+                return EXIT_FAILURE;
+            }
+
+            if(!icecpp->printMakefileDependencies(depend ? Preprocessor::Java : Preprocessor::JavaXML, includePaths))
+            {
+                return EXIT_FAILURE;
+            }
+
+            if(!icecpp->close())
             {
                 return EXIT_FAILURE;
             }
@@ -226,12 +256,15 @@ main(int argc, char* argv[])
 
             FileTracker::instance()->setSource(*i);
 
-            Preprocessor icecpp(argv[0], *i, cppArgs);
-            FILE* cppHandle = icecpp.preprocess(false);
+            PreprocessorPtr icecpp = Preprocessor::create(argv[0], *i, cppArgs);
+            FILE* cppHandle = icecpp->preprocess(true);
 
             if(cppHandle == 0)
             {
-                FileTracker::instance()->setOutput(os.str(), true);
+                if(listGenerated)
+                {
+                    FileTracker::instance()->setOutput(os.str(), true);
+                }
                 status = EXIT_FAILURE;
                 break;
             }
@@ -246,17 +279,17 @@ main(int argc, char* argv[])
                         return EXIT_FAILURE;
                     }
                 }
-                if(!icecpp.close())
+                if(!icecpp->close())
                 {
                     return EXIT_FAILURE;
                 }
             }
             else
             {
-                UnitPtr p = Unit::createUnit(false, false, ice, caseSensitive, globalMetadata);
+                UnitPtr p = Unit::createUnit(false, false, ice, underscore, globalMetadata);
                 int parseStatus = p->parse(*i, cppHandle, debug, Ice);
 
-                if(!icecpp.close())
+                if(!icecpp->close())
                 {
                     p->destroy();
                     return EXIT_FAILURE;
@@ -265,14 +298,17 @@ main(int argc, char* argv[])
                 if(parseStatus == EXIT_FAILURE)
                 {
                     p->destroy();
-                    FileTracker::instance()->setOutput(os.str(), true);
+                    if(listGenerated)
+                    {
+                        FileTracker::instance()->setOutput(os.str(), true);
+                    }
                     status = EXIT_FAILURE;
                 }
                 else
                 {
                     try
                     {
-                        Gen gen(argv[0], icecpp.getBaseName(), includePaths, output);
+                        Gen gen(argv[0], icecpp->getBaseName(), includePaths, output);
                         gen.generate(p, stream);
                         if(tie)
                         {
@@ -294,7 +330,10 @@ main(int argc, char* argv[])
                             ChecksumMap m = createChecksums(p);
                             copy(m.begin(), m.end(), inserter(checksums, checksums.begin()));
                         }
-                        FileTracker::instance()->setOutput(os.str(), false);
+                        if(listGenerated)
+                        {
+                            FileTracker::instance()->setOutput(os.str(), false);
+                        }
                     }
                     catch(const Slice::FileException& ex)
                     {
@@ -303,8 +342,11 @@ main(int argc, char* argv[])
                         //
                         FileTracker::instance()->cleanup();
                         p->destroy();
-                        os << argv[0] << ": error: " << ex.reason() << endl;
-                        FileTracker::instance()->setOutput(os.str(), true);
+                        getErrorStream() << argv[0] << ": error: " << ex.reason() << endl;
+                        if(listGenerated)
+                        {
+                            FileTracker::instance()->setOutput(os.str(), true);
+                        }
                         status = EXIT_FAILURE;
                         break;
                     }
@@ -314,9 +356,9 @@ main(int argc, char* argv[])
         }
 
         {
-            IceUtil::StaticMutex::Lock lock(_mutex);
+            IceUtilInternal::MutexPtrLock<IceUtil::Mutex> sync(mutex);
 
-            if(_interrupted)
+            if(interrupted)
             {
                 //
                 // If the translator was interrupted then cleanup any files we've already created.
@@ -336,7 +378,7 @@ main(int argc, char* argv[])
     {
         try
         {
-            Gen::writeChecksumClass(checksumClass, output, checksums, java2);
+            Gen::writeChecksumClass(checksumClass, output, checksums);
         }
         catch(const Slice::FileException& ex)
         {
@@ -354,4 +396,33 @@ main(int argc, char* argv[])
     }
 
     return status;
+}
+
+int
+main(int argc, char* argv[])
+{
+    try
+    {
+        return compile(argc, argv);
+    }
+    catch(const std::exception& ex)
+    {
+        getErrorStream() << argv[0] << ": error:" << ex.what() << endl;
+        return EXIT_FAILURE;
+    }
+    catch(const std::string& msg)
+    {
+        getErrorStream() << argv[0] << ": error:" << msg << endl;
+        return EXIT_FAILURE;
+    }
+    catch(const char* msg)
+    {
+        getErrorStream() << argv[0] << ": error:" << msg << endl;
+        return EXIT_FAILURE;
+    }
+    catch(...)
+    {
+        getErrorStream() << argv[0] << ": error:" << "unknown exception" << endl;
+        return EXIT_FAILURE;
+    }
 }

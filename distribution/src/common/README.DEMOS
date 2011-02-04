@@ -1,5 +1,19 @@
-Building the Demos
-==================
+Table of Contents
+-----------------
+
+  1. Building the Demos
+  2. Running the Ice Demos
+  3. Running the C++ demos
+  4. Running the Java demos
+  5. Running the C# demos
+  6. Running the Python demos
+  7. Running the Ruby demos
+  8. Running the PHP demos
+
+
+======================================================================
+1. Building the Demos
+======================================================================
 
 This section describes how to build the demos included in the Ice demo
 distribution.
@@ -10,14 +24,15 @@ distributions. Distributions for specific platform/tool combinations
 may not support every Ice language mapping.
 
 The build systems included in the demo distribution are either
-'makefile' based or 'ant' based. The C++ and C# demos use makefiles
-and the Java demos use the Apache Foundation's ant build tool.
+'makefile' based or 'ant' based. The C++, C#, and PHP demos use
+makefiles and the Java demos use the Apache Foundation's ant build
+tool.
 
-NOTE: The Ruby, Python and PHP demos do not need to be built.
+NOTE: The Ruby and Python demos do not need to be built.
 
-The makefiles for C++ and C# require GNU make 3.80 or later. If your
-system does not come with GNU make, you can find information on how
-to acquire it at the following link:
+The makefiles for C++, C#, and PHP require GNU make 3.80 or later. If
+your system does not come with GNU make, you can find information on
+how to acquire it at the following link:
 
   http://www.gnu.org/software/make/
 
@@ -42,14 +57,21 @@ To build the demos you need to:
     With a non-RPM installation, you also need to either create an 
     /opt/Ice-@mmver@ symbolic link (as described in the binary 
     distribution README file), or add the Ice library directory to 
-    your shared library search path. For example on Linux x86:
+    your shared library search path. For example, on Linux x86:
 
     $ export LD_LIBRARY_PATH=$ICE_HOME/lib:$LD_LIBRARY_PATH
   
     The Ice library directory is $ICE_HOME/lib64 on Linux x86_64, 
-    $ICE_HOME/lib/sparcv9 on Solaris for SPARC 64-bit,
-    $ICE_HOME/lib/amd64 on Solaris for x86 64-bit and 
-    $ICE_HOME/lib/pa20_64 on HP-UX 64-bit.
+    $ICE_HOME/lib/sparcv9 on Solaris for SPARC 64-bit and
+    $ICE_HOME/lib/amd64 on Solaris for x86 64-bit.
+
+  - Review the build settings found in config/Make.rules (C++),
+    config/Make.rules.cs (C#), config/Make.rules.php (PHP) and
+    config/build.properties (Java) and adjust any you want changed.
+    For example, for C++ and C#, set OPTIMIZE=yes in order to build
+    with optimization, or for C++ set LP64=yes if you are building
+    against a 64-bit Ice installation (on Mac OS X, set CXXARCHFLAGS
+    to build 32-bit and 64-bit FAT binaries).
 
   - Build the demos. For example:
 
@@ -61,13 +83,18 @@ To build the demos you need to:
     cd Ice-@ver@-demos/democs
     make
 
+    # PHP demos
+    cd Ice-@ver@-demos/demophp
+    make
+
     # Java demos
     cd Ice-@ver@-demos/demoj
     ant
 
 
-Running the Ice Demos
-=====================
+======================================================================
+2. Running the Ice Demos
+======================================================================
 
 Most demos consist of a single server and client. The instructions to
 run a demo depend on the programming language. Instructions for each
@@ -75,11 +102,12 @@ language are included below. Some demo directories contain README
 files if additional steps are necessary.
 
 
-Running the C++ demos
-=====================
+======================================================================
+3. Running the C++ demos
+======================================================================
 
-To run a demo, open a terminal terminal window, change to the desired
-demo directory, and enter the following command to run the server:
+To run a demo, open a terminal window, change to the desired demo
+directory, and enter the following command to run the server:
 
 $ ./server
 
@@ -89,12 +117,15 @@ desired demo directory, and run:
 $ ./client
 
 
-Running the Java demos
-======================
+======================================================================
+4. Running the Java demos
+======================================================================
 
-To run the demos you need to add classes to your CLASSPATH.
+After a successful build, the compiled classes are stored in a
+subdirectory named "classes" in each demo directory. You need to add
+this subdirectory to your CLASSPATH.
 
-For example with a bash shell:
+For example, with a bash shell:
 
 $ export CLASSPATH=classes:$CLASSPATH
 
@@ -109,12 +140,13 @@ desired demo directory, and run:
 $ java Client
 
 
-Running the C# demos
-====================
+======================================================================
+5. Running the C# demos
+======================================================================
 
 The C# demos are only supported on SuSE Enterprise Linux Server but
 may work on other platforms. Note however that the Ice for .NET run
-time is included only in the binary distributions for SuSE Enterprise
+time is included only in the RPM distribution for SuSE Enterprise
 Linux Server.
 
 To run a demo, open a terminal window, change to the desired demo
@@ -128,8 +160,9 @@ desired demo directory, and run:
 $ mono client.exe
 
 
-Running the Python demos
-========================
+======================================================================
+6. Running the Python demos
+======================================================================
 
 To run a demo, open a terminal window, change to the desired demo
 directory, and enter the following command to run the server:
@@ -142,41 +175,44 @@ desired demo directory, and run:
 $ python Client.py
 
 
-Running the Ruby demos
-======================
+======================================================================
+7. Running the Ruby demos
+======================================================================
 
 Ice provides only client demos in Ruby since Ice for Ruby does not
 support server-side activities. In order to run a sample client, you
 must first start its corresponding server from another Ice language
-mapping, such as C++:
+mapping. For example, start the C++ hello server:
 
-# for example in $HOME/testing/Ice-@ver@-demos/demo/Ice/hello
-$ server
+$ cd $HOME/testing/Ice-@ver@-demos/demo/Ice/hello
+$ ./server
 
 To run the client, open another terminal window, change to the
 corresponding demo directory, and run:
 
-# for example in $HOME/testing/Ice-@ver@-demos/demorb/Ice/hello
+$ cd $HOME/testing/Ice-@ver@-demos/demorb/Ice/hello
 $ ruby Client.rb
 
 
-Running the PHP demos
-=====================
+======================================================================
+8. Running the PHP demos
+======================================================================
 
-Two PHP demos are provided in the demophp directory.
+PHP demos are provided in the demophp directory.
 
 The Ice extension for PHP is provided as a dynamically-loadable shared
 library in Linux RPM distributions. On all other Unix platforms,
-you'll need to build PHP and the Ice extension from source
-code. Please refer to the php/INSTALL file included in the Ice source
+you will need to build PHP and the Ice extension from source code.
+Please refer to the php/INSTALL file included in the Ice source
 distribution for more information.
 
-The example in demophp/Ice/hello demonstrates the use of the Ice
-extension for PHP in a dynamic Web page, whereas the example in
-demophp/Ice/value requires PHP's command line interpreter. Both
-examples require that an Ice server be available; a matching server
-from any of the other language mappings can be used. A README file is
-provided in each of the example directories.
+The examples in demophp/Ice/hello and demophp/Glacier2/hello
+demonstrate the use of the Ice extension for PHP in a dynamic Web
+page, whereas the example in demophp/Ice/value requires PHP's command
+line interpreter. All examples require that an Ice server be
+available; a matching server from any of the other language mappings
+can be used. A README file is provided in each of the example
+directories.
 
 Note that you may need to modify the php.ini files in each demo
 directory to match your PHP installation and ensure that the Ice

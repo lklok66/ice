@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -30,16 +30,17 @@ demos = [
     "Ice/callback",
     "Ice/converter",
     "Ice/hello",
+    "Ice/interleaved",
     "Ice/invoke",
     "Ice/latency",
     "Ice/minimal",
     "Ice/multicast",
     "Ice/nested",
+    "Ice/nrvo",
+    "Ice/plugin",
     "Ice/session",
     "Ice/throughput",
     "Ice/value",
-    "Ice/nrvo",
-    "IceBox/hello",
     "IceStorm/clock",
     "IceStorm/counter",
     "IceStorm/replicated",
@@ -48,7 +49,6 @@ demos = [
     "IceGrid/allocate",
     "IceGrid/sessionActivation",
     "IceGrid/replication",
-    "IceGrid/icebox",
     "IceGrid/secure",
     "Glacier2/chat",
     "Glacier2/callback",
@@ -59,15 +59,15 @@ demos = [
     "Freeze/backup",
     "Freeze/transform",
     "Freeze/casino",
-    "book/freeze_filesystem",
+    "book/map_filesystem",
+    "book/evictor_filesystem",
     "book/simple_filesystem",
     "book/printer",
     "book/lifecycle",
 ]
 
-protoDemos = [
-    "Ice/protobuf"
-]
+if not Util.isNoServices():
+    demos += ["IceBox/hello", "IceGrid/icebox"]
 
 if __name__ == "__main__":
-    Util.run(demos, protoDemos)
+    Util.run(demos)

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -12,7 +12,7 @@ namespace IceInternal
 
     using System.Diagnostics;
 
-    public class IncomingAsync : IncomingBase
+    public class IncomingAsync : IncomingBase, Ice.AMDCallback
     {
         public IncomingAsync(Incoming inc)
             : base(inc)
@@ -25,8 +25,61 @@ namespace IceInternal
             }
         }
 
-        internal void
-        deactivate__(Incoming inc)
+        virtual public void ice_exception(System.Exception ex)
+        {
+            //
+            // Only call exception__ if this incoming is not retriable or if
+            // all the interceptors return true and no response has been sent
+            // yet.
+            //
+            
+            if(_retriable)
+            {
+                try
+                {
+                    if(interceptorAsyncCallbackList_ != null)
+                    {
+                        foreach(Ice.DispatchInterceptorAsyncCallback cb in  interceptorAsyncCallbackList_)
+                        {
+                            if(cb.exception(ex) == false)
+                            {
+                                return;
+                            }
+                        }
+                    }
+                }
+                catch(System.Exception)
+                {
+                    return;
+                }
+    
+                lock(this)
+                {
+                    if(!_active)
+                    {
+                        return;
+                    }
+                    _active = false;
+                }
+            }
+
+            if(connection_ != null)
+            {
+                exception__(ex);
+            }
+            else
+            {
+                //
+                // Response has already been sent.
+                //
+                if(instance_.initializationData().properties.getPropertyAsIntWithDefault("Ice.Warn.Dispatch", 1) > 0)
+                {
+                    warning__(ex);
+                }
+            }
+        }
+
+        internal void deactivate__(Incoming inc)
         {
             Debug.Assert(_retriable);
             
@@ -45,7 +98,6 @@ namespace IceInternal
             inc.adopt(this);
         }
 
-
         protected void response__(bool ok)
         {
             try
@@ -54,6 +106,8 @@ namespace IceInternal
                 {
                     return;
                 }
+
+                Debug.Assert(connection_ != null);
 
                 if(response_)
                 {
@@ -79,6 +133,8 @@ namespace IceInternal
                 {
                     connection_.sendNoResponse();
                 }
+
+                connection_ = null;
             }
             catch(Ice.LocalException ex)
             {
@@ -108,92 +164,45 @@ namespace IceInternal
             return os_;
         }
 
-        protected bool 
-        validateResponse__(bool ok)
+        protected bool validateResponse__(bool ok)
         {
-            if(!_retriable)
-            {
-                return true;
-            }
-            
-            try
-            {
-                if(interceptorAsyncCallbackList_ != null)
-                {
-                    foreach(Ice.DispatchInterceptorAsyncCallback cb in  interceptorAsyncCallbackList_)
-                    {
-                        if(cb.response(ok) == false)
-                        {
-                            return false;
-                        }
-                    }
-                }
-            }
-            catch(System.Exception)
-            {
-                return false;
-            }
-            
             //
-            // interceptorAsyncCallbackList is null or all its elements returned OK
-            // 
-            
-            lock(this)
-            {   
-                if(_active)
-                {
-                    _active = false;
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
-        
-        protected bool 
-        validateException__(System.Exception exc)
-        {
-            if(!_retriable)
-            {
-                return true;
-            }
-            
-            try
-            {
-                if(interceptorAsyncCallbackList_ != null)
-                {
-                    foreach(Ice.DispatchInterceptorAsyncCallback cb in  interceptorAsyncCallbackList_)
-                    {
-                        if(cb.exception(exc) == false)
-                        {
-                            return false;
-                        }
-                    }
-                }
-            }
-            catch(System.Exception)
-            {
-                return false;
-            }
+            // Only returns true if this incoming is not retriable or if all
+            // the interceptors return true and no response has been sent
+            // yet. Upon getting a true return value, the caller should send
+            // the response.
+            //
 
-            //
-            // interceptorAsyncCallbackList is null or all its elements returned OK
-            // 
-            
-            lock(this)
+            if(_retriable)
             {
-                if(_active)
+                try
                 {
-                    _active = false;
-                    return true;
+                    if(interceptorAsyncCallbackList_ != null)
+                    {
+                        foreach(Ice.DispatchInterceptorAsyncCallback cb in  interceptorAsyncCallbackList_)
+                        {
+                            if(cb.response(ok) == false)
+                            {
+                                return false;
+                            }
+                        }
+                    }
                 }
-                else
+                catch(System.Exception)
                 {
                     return false;
                 }
+            
+                lock(this)
+                {   
+                    if(!_active)
+                    {
+                        return false;
+                    }
+                    _active = false;
+                }
             }
+            return true;
         }
 
         private readonly bool _retriable;
@@ -204,10 +213,21 @@ namespace IceInternal
 namespace Ice
 {
 
-    public interface AMD_Object_ice_invoke
+    /// <summary>
+    /// Callback interface for Blobject AMD servants.
+    /// </summary>
+    public interface AMD_Object_ice_invoke : Ice.AMDCallback
     {
+        /// <summary>
+        /// Indicates to the Ice run time that an operation
+        /// completed.
+        /// </summary>
+        /// <param name="ok">True indicates that the operation
+        /// completed successfully; false indicates that the
+        /// operation raised a user exception.</param>
+        /// <param name="outParams">The encoded out-parameters for the operation or,
+        /// if ok is false, the encoded user exception.</param>
         void ice_response(bool ok, byte[] outParams);
-        void ice_exception(System.Exception ex);
     }
 
     sealed class _AMD_Object_ice_invoke : IceInternal.IncomingAsync, AMD_Object_ice_invoke
@@ -229,11 +249,6 @@ namespace Ice
                 return;
             }
             response__(ok);
-        }
-        
-        public void ice_exception(System.Exception ex)
-        {
-            exception__(ex);
         }
     }
 }

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -10,11 +10,13 @@
 #include <FreezeScript/DumpDescriptors.h>
 #include <FreezeScript/Util.h>
 #include <FreezeScript/Exception.h>
+#include <Freeze/Initialize.h>
+#include <Freeze/Connection.h>
 #include <IceUtil/OutputUtil.h>
 #include <IceUtil/Options.h>
+#include <IceUtil/FileUtil.h>
 #include <db_cxx.h>
 #include <sys/stat.h>
-#include <fstream>
 #include <algorithm>
 
 using namespace std;
@@ -77,7 +79,7 @@ private:
 }
 
 static void
-usage(const char* n)
+usage(const string& n)
 {
     cerr << "Usage:\n";
     cerr << "\n";
@@ -93,7 +95,8 @@ usage(const char* n)
         "-UNAME                Remove any definition for NAME.\n"
         "-IDIR                 Put DIR in the include file search path.\n"
         "-d, --debug           Print debug messages.\n"
-        "--ice                 Permit `Ice' prefix (for building Ice source code only)\n"
+        "--ice                 Permit `Ice' prefix (for building Ice source code only).\n"
+        "--underscore          Permit underscores in Slice identifiers.\n"
         "-o FILE               Output sample descriptors into the file FILE.\n"
         "-f FILE               Execute the descriptors in the file FILE.\n"
         "--load SLICE          Load Slice definitions from the file SLICE.\n"
@@ -104,7 +107,6 @@ usage(const char* n)
         "-c, --catalog         Display information about the databases in an\n"
         "                      environment, or about a particular database.\n"
         ;
-    // Note: --case-sensitive is intentionally not shown here!
 }
 
 static void
@@ -124,11 +126,12 @@ printCatalogData(const string& dbName, const Freeze::CatalogData& data)
 }
 
 static int
-run(int argc, char** argv, const Ice::CommunicatorPtr& communicator)
+run(const Ice::StringSeq& originalArgs, const Ice::CommunicatorPtr& communicator)
 {
     vector<string> cppArgs;
     bool debug;
     bool ice = true; // Needs to be true in order to create default definitions.
+    bool underscore;
     string outputFile;
     string inputFile;
     vector<string> slice;
@@ -136,9 +139,8 @@ run(int argc, char** argv, const Ice::CommunicatorPtr& communicator)
     string keyTypeName;
     string valueTypeName;
     string selectExpr;
-    bool caseSensitive;
     string dbEnvName, dbName;
-
+    const string appName = originalArgs[0];
     IceUtilInternal::Options opts;
     opts.addOpt("h", "help");
     opts.addOpt("v", "version");
@@ -147,6 +149,7 @@ run(int argc, char** argv, const Ice::CommunicatorPtr& communicator)
     opts.addOpt("I", "", IceUtilInternal::Options::NeedArg, "", IceUtilInternal::Options::Repeat);
     opts.addOpt("d", "debug");
     opts.addOpt("", "ice");
+    opts.addOpt("", "underscore");
     opts.addOpt("o", "", IceUtilInternal::Options::NeedArg);
     opts.addOpt("f", "", IceUtilInternal::Options::NeedArg);
     opts.addOpt("", "load", IceUtilInternal::Options::NeedArg, "", IceUtilInternal::Options::Repeat);
@@ -155,26 +158,42 @@ run(int argc, char** argv, const Ice::CommunicatorPtr& communicator)
     opts.addOpt("", "value", IceUtilInternal::Options::NeedArg);
     opts.addOpt("", "select", IceUtilInternal::Options::NeedArg);
     opts.addOpt("c", "catalog");
-    opts.addOpt("", "case-sensitive");
 
     vector<string> args;
     try
     {
-#if defined(__BCPLUSPLUS__) && (__BCPLUSPLUS__ >= 0x0600)
-        IceUtil::DummyBCC dummy;
-#endif
-        args = opts.parse(argc, (const char**)argv);
+        args = opts.parse(originalArgs);
     }
     catch(const IceUtilInternal::BadOptException& e)
     {
-        cerr << argv[0] << ": " << e.reason << endl;
-        usage(argv[0]);
+        cerr << appName << ": " << e.reason << endl;
+        usage(appName);
         return EXIT_FAILURE;
+    }
+
+    //
+    // Freeze creates a lock file by default to prevent multiple processes from opening
+    // the same database environment simultaneously. In the case of a read-only program
+    // such as dumpdb, however, we still want to be able to open the environment despite
+    // the lock. This assumes of course that the other process has opened the environment
+    // with DbPrivate=0. If DbPrivate=0 is also set for dumpdb, we disable the lock.
+    //
+    if(!args.empty())
+    {
+        //
+        // If an argument is present, we assume it is the name of the database environment.
+        //
+        Ice::PropertiesPtr props = communicator->getProperties();
+        string prefix = "Freeze.DbEnv." + args[0];
+        if(props->getPropertyAsIntWithDefault(prefix + ".DbPrivate", 1) == 0)
+        {
+            props->setProperty(prefix + ".LockFile", "0");
+        }
     }
 
     if(opts.isSet("h"))
     {
-        usage(argv[0]);
+        usage(appName);
         return EXIT_SUCCESS;
     }
     if(opts.isSet("version"))
@@ -186,13 +205,13 @@ run(int argc, char** argv, const Ice::CommunicatorPtr& communicator)
     {
         if(args.empty())
         {
-            cerr << argv[0] << ": no database environment specified." << endl;
-            usage(argv[0]);
+            cerr << appName << ": no database environment specified." << endl;
+            usage(appName);
             return EXIT_FAILURE;
         }
         else if(args.size() > 2)
         {
-            usage(argv[0]);
+            usage(appName);
             return EXIT_FAILURE;
         }
         try
@@ -219,7 +238,7 @@ run(int argc, char** argv, const Ice::CommunicatorPtr& communicator)
                 FreezeScript::CatalogDataMap::const_iterator p = catalog.find(args[1]);
                 if(p == catalog.end())
                 {
-                    cerr << argv[0] << ": database `" << args[1] << "' not found in environment `" << args[0] << "'."
+                    cerr << appName << ": database `" << args[1] << "' not found in environment `" << args[0] << "'."
                          << endl;
                     return EXIT_FAILURE;
                 }
@@ -232,7 +251,7 @@ run(int argc, char** argv, const Ice::CommunicatorPtr& communicator)
         }
         catch(const FreezeScript::FailureException& ex)
         {
-            cerr << argv[0] << ": " << ex.reason() << endl;
+            cerr << appName << ": " << ex.reason() << endl;
             return EXIT_FAILURE;
         }
     }
@@ -264,6 +283,8 @@ run(int argc, char** argv, const Ice::CommunicatorPtr& communicator)
 
     // No need to set --ice option here -- it is always true.
 
+    underscore = opts.isSet("underscore");
+
     if(opts.isSet("o"))
     {
         outputFile = opts.optArg("o");
@@ -293,11 +314,10 @@ run(int argc, char** argv, const Ice::CommunicatorPtr& communicator)
     {
         selectExpr = opts.optArg("select");
     }
-    caseSensitive = opts.isSet("case-sensitive");
 
     if(outputFile.empty() && args.size() != 2)
     {
-        usage(argv[0]);
+        usage(appName);
         return EXIT_FAILURE;
     }
 
@@ -311,19 +331,19 @@ run(int argc, char** argv, const Ice::CommunicatorPtr& communicator)
     }
     else
     {
-        usage(argv[0]);
+        usage(appName);
         return EXIT_FAILURE;
     }
 
     if(!inputFile.empty() && !selectExpr.empty())
     {
-        cerr << argv[0] << ": an input file cannot be specified with --select" << endl;
+        cerr << appName << ": an input file cannot be specified with --select" << endl;
         return EXIT_FAILURE;
     }
 
-    Slice::UnitPtr unit = Slice::Unit::createUnit(true, true, ice, caseSensitive);
+    Slice::UnitPtr unit = Slice::Unit::createUnit(true, true, ice, underscore);
     FreezeScript::Destroyer<Slice::UnitPtr> unitD(unit);
-    if(!FreezeScript::parseSlice(argv[0], unit, slice, cppArgs, debug))
+    if(!FreezeScript::parseSlice(appName, unit, slice, cppArgs, debug))
     {
         return EXIT_FAILURE;
     }
@@ -341,8 +361,8 @@ run(int argc, char** argv, const Ice::CommunicatorPtr& communicator)
 
         if((!keyTypeName.empty() && valueTypeName.empty()) || (keyTypeName.empty() && !valueTypeName.empty()))
         {
-            cerr << argv[0] << ": a key type and a value type must be specified" << endl;
-            usage(argv[0]);
+            cerr << appName << ": a key type and a value type must be specified" << endl;
+            usage(appName);
             return EXIT_FAILURE;
         }
         else if(!evictor && keyTypeName.empty() && valueTypeName.empty())
@@ -353,7 +373,7 @@ run(int argc, char** argv, const Ice::CommunicatorPtr& communicator)
                 FreezeScript::CatalogDataMap::iterator p = catalog.find(dbName);
                 if(p == catalog.end())
                 {
-                    cerr << argv[0] << ": database `" << dbName << "' not found in catalog." << endl;
+                    cerr << appName << ": database `" << dbName << "' not found in catalog." << endl;
                     cerr << "Current catalog databases:" << endl;
                     for(p = catalog.begin(); p != catalog.end(); ++p)
                     {
@@ -376,7 +396,7 @@ run(int argc, char** argv, const Ice::CommunicatorPtr& communicator)
             }
             catch(const FreezeScript::FailureException& ex)
             {
-                cerr << argv[0] << ": " << ex.reason() << endl;
+                cerr << appName << ": " << ex.reason() << endl;
                 return EXIT_FAILURE;
             }
         }
@@ -393,7 +413,7 @@ run(int argc, char** argv, const Ice::CommunicatorPtr& communicator)
         l = unit->lookupType(keyTypeName, false);
         if(l.empty())
         {
-            cerr << argv[0] << ": unknown key type `" << keyTypeName << "'" << endl;
+            cerr << appName << ": unknown key type `" << keyTypeName << "'" << endl;
             return EXIT_FAILURE;
         }
         keyType = l.front();
@@ -401,7 +421,7 @@ run(int argc, char** argv, const Ice::CommunicatorPtr& communicator)
         l = unit->lookupType(valueTypeName, false);
         if(l.empty())
         {
-            cerr << argv[0] << ": unknown value type `" << valueTypeName << "'" << endl;
+            cerr << appName << ": unknown value type `" << valueTypeName << "'" << endl;
             return EXIT_FAILURE;
         }
         valueType = l.front();
@@ -420,10 +440,14 @@ run(int argc, char** argv, const Ice::CommunicatorPtr& communicator)
 
         if(!outputFile.empty())
         {
-            ofstream of(outputFile.c_str());
+            //
+            // No nativeToUTF8 conversion necessary here, no string converter is installed 
+            // by wmain() on Windows and args are assumbed to be UTF8 on Unix platforms.
+            //
+            IceUtilInternal::ofstream of(outputFile);
             if(!of.good())
             {
-                cerr << argv[0] << ": unable to open file `" << outputFile << "'" << endl;
+                cerr << appName << ": unable to open file `" << outputFile << "'" << endl;
                 return EXIT_FAILURE;
             }
             of << descriptors << endl;
@@ -433,12 +457,16 @@ run(int argc, char** argv, const Ice::CommunicatorPtr& communicator)
     }
     else
     {
-        ifstream in(inputFile.c_str());
+        //
+        // No nativeToUTF8 conversion necessary here, no string converter is installed 
+        // by wmain() on Windows and args are assumbed to be UTF8 on Unix platforms.
+        //
+        IceUtilInternal::ifstream in(inputFile);
         char buff[1024];
         while(true)
         {
             in.read(buff, 1024);
-            descriptors.append(buff, in.gcount());
+            descriptors.append(buff, static_cast<size_t>(in.gcount()));
             if(in.gcount() < 1024)
             {
                 break;
@@ -451,6 +479,7 @@ run(int argc, char** argv, const Ice::CommunicatorPtr& communicator)
 
     DbEnv dbEnv(0);
     DbTxn* txn = 0;
+    Freeze::ConnectionPtr connection;
     int status = EXIT_SUCCESS;
     try
     {
@@ -465,9 +494,16 @@ run(int argc, char** argv, const Ice::CommunicatorPtr& communicator)
         // Open the database environment and start a transaction.
         //
         {
-            u_int32_t flags = DB_INIT_LOG | DB_INIT_MPOOL | DB_INIT_TXN | DB_RECOVER | DB_CREATE;
+            u_int32_t flags = DB_THREAD | DB_CREATE | DB_INIT_TXN | DB_INIT_MPOOL;
             dbEnv.open(dbEnvName.c_str(), flags, FREEZE_SCRIPT_DB_MODE);
         }
+
+        //
+        // We're creating a connection just to make sure the database environment
+        // isn't locked.
+        //
+        connection = Freeze::createConnection(communicator, dbEnvName, dbEnv);
+
         dbEnv.txn_begin(0, &txn, 0);
 
         FreezeScript::ErrorReporterPtr errorReporter = new FreezeScript::ErrorReporter(cerr, false);
@@ -547,7 +583,7 @@ run(int argc, char** argv, const Ice::CommunicatorPtr& communicator)
     }
     catch(const DbException& ex)
     {
-        cerr << argv[0] << ": database error: " << ex.what() << endl;
+        cerr << appName << ": database error: " << ex.what() << endl;
         status = EXIT_FAILURE;
     }
     catch(...)
@@ -562,7 +598,12 @@ run(int argc, char** argv, const Ice::CommunicatorPtr& communicator)
         }
         catch(const DbException& ex)
         {
-            cerr << argv[0] << ": database error: " << ex.what() << endl;
+            cerr << appName << ": database error: " << ex.what() << endl;
+        }
+        if(connection)
+        {
+            connection->close();
+            connection = 0;
         }
         throw;
     }
@@ -573,40 +614,62 @@ run(int argc, char** argv, const Ice::CommunicatorPtr& communicator)
         {
             txn->abort();
         }
+        if(connection)
+        {
+            connection->close();
+        }
         dbEnv.close(0);
     }
     catch(const DbException& ex)
     {
-        cerr << argv[0] << ": database error: " << ex.what() << endl;
+        cerr << appName << ": database error: " << ex.what() << endl;
         status = EXIT_FAILURE;
     }
 
     return status;
 }
 
+//COMPILERFIX: Borland C++ 2010 doesn't support wmain for console applications.
+#if defined(_WIN32 ) && !defined(__BCPLUSPLUS__)
+
+int
+wmain(int argc, wchar_t* argv[])
+
+#else
+
 int
 main(int argc, char* argv[])
+
+#endif
 {
+    Ice::StringSeq args = Ice::argsToStringSeq(argc, argv);
+    assert(args.size() > 0);
+    const string appName = args[0];
     Ice::CommunicatorPtr communicator;
     int status = EXIT_SUCCESS;
     try
     {
-        communicator = Ice::initialize(argc, argv);
-        status = run(argc, argv, communicator);
+        communicator = Ice::initialize(args);
+        status = run(args, communicator);
     }
     catch(const FreezeScript::FailureException& ex)
     {
         string reason = ex.reason();
-        cerr << argv[0] << ": " << reason;
+        cerr << appName << ": " << reason;
         if(reason[reason.size() - 1] != '\n')
         {
             cerr << endl;
         }
         return EXIT_FAILURE;
     }
-    catch(const IceUtil::Exception& ex)
+    catch(const std::exception& ex)
     {
-        cerr << argv[0] << ": " << ex << endl;
+        cerr << appName << ": " << ex.what() << endl;
+        status = EXIT_FAILURE;
+    }
+    catch(...)
+    {
+        cerr << appName << ": unknown error" << endl;
         return EXIT_FAILURE;
     }
 

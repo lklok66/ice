@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -78,5 +78,6 @@ const int using = 0;
 const int virtual = 0;
 const int while = 0;
 const int xor = 0;
+const int xor_eq = 0;
 
 };

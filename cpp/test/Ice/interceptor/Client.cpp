@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -14,6 +14,14 @@
 #include <InterceptorI.h>
 #include <AMDInterceptorI.h>
 #include <iostream>
+
+#ifndef _WIN32
+//
+// SIGPIPE test
+//
+#   include <signal.h>
+#endif
+
 
 using namespace std;
 
@@ -29,16 +37,55 @@ private:
     int runAmd(const Test::MyObjectPrx&, const AMDInterceptorIPtr&); 
 };
 
+#ifndef _WIN32
+void testAction(int)
+{
+    test(false);
+}
+#endif
+
 int
 main(int argc, char* argv[])
 {
+#ifndef _WIN32
+//
+// Set SIGPIPE action
+//
+    struct sigaction action;
+    action.sa_handler = &testAction;
+    sigemptyset(&action.sa_mask);
+    action.sa_flags = 0;
+    sigaction(SIGPIPE, &action, 0);
+#endif
+
     Client app;
-    return app.main(argc, argv);
+    int result = app.main(argc, argv);
+
+#ifndef _WIN32
+//
+// Check SIGPIPE was properly reset to old action
+//
+    struct sigaction newAction;
+    sigaction(SIGPIPE, 0, &newAction);
+    test(action.sa_handler == &testAction);
+#endif
+
+    return result;
 }
 
 int
 Client::run(int, char*[])
 {
+
+#ifndef _WIN32
+//
+// Check SIGPIPE is now SIG_IGN
+//
+    struct sigaction action;
+    sigaction(SIGPIPE, 0, &action);
+    test(action.sa_handler == SIG_IGN);
+#endif
+
     //
     // Create OA and servants  
     //  

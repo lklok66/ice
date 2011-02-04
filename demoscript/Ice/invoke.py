@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -12,8 +12,7 @@ import sys
 from demoscript import *
 from scripts import Expect
 
-def run(client, server):
-    print "testing...",
+def runDemo(client, server):
     sys.stdout.flush()
     client.sendline('1')
     server.expect("Printing string `The streaming API works!'")
@@ -44,10 +43,17 @@ def run(client, server):
         server.expect("Printing class: s\\.name=blue, s\\.value=blue")
         client.sendline('8')
         client.expect("Got string `hello' and class: s\\.name=green, s\\.value=green")
-    print "ok"
+
+def run(clientStr, server):
+    print "testing...",
+    client = Util.spawn(clientStr)
+    client.expect('==>')
+
+    runDemo(client, server)
 
     client.sendline('s')
     server.waitTestSuccess()
 
     client.sendline('x')
     client.waitTestSuccess()
+    print "ok"

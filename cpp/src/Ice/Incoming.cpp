@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -27,7 +27,14 @@ using namespace std;
 using namespace Ice;
 using namespace IceInternal;
 
-IceInternal::IncomingBase::IncomingBase(Instance* instance, ConnectionI* connection, 
+namespace IceUtilInternal
+{
+
+extern bool ICE_DECLSPEC_IMPORT printStackTraces;
+
+}
+
+IceInternal::IncomingBase::IncomingBase(Instance* instance, ConnectionI* connection,
                                         const ObjectAdapterPtr& adapter,
                                         bool response, Byte compress, Int requestId) :
     _response(response),
@@ -53,21 +60,21 @@ IceInternal::IncomingBase::adopt(IncomingBase& other)
 {
     _servant = other._servant;
     other._servant = 0;
-    
+
     _locator = other._locator;
     other._locator = 0;
-    
+
     _cookie = other._cookie;
     other._cookie = 0;
-    
+
     _response = other._response;
     other._response = false;
-    
+
     _compress = other._compress;
     other._compress = 0;
-    
+
     _os.swap(other._os);
-    
+
     _connection = other._connection;
     other._connection = 0;
 }
@@ -75,16 +82,19 @@ IceInternal::IncomingBase::adopt(IncomingBase& other)
 void
 IceInternal::IncomingBase::__warning(const Exception& ex) const
 {
-    ostringstream str;
-    str << ex;
-    __warning(str.str());
+    Warning out(_os.instance()->initializationData().logger);
+
+    out << "dispatch exception: " << ex;
+    out << "\nidentity: " << _os.instance()->identityToString(_current.id);
+    out << "\nfacet: " << IceUtilInternal::escapeString(_current.facet, "");
+    out << "\noperation: " << _current.operation;
 }
 
 void
 IceInternal::IncomingBase::__warning(const string& msg) const
 {
     Warning out(_os.instance()->initializationData().logger);
-    
+
     out << "dispatch exception: " << msg;
     out << "\nidentity: " << _os.instance()->identityToString(_current.id);
     out << "\nfacet: " << IceUtilInternal::escapeString(_current.facet, "");
@@ -102,6 +112,8 @@ IceInternal::IncomingBase::__servantLocatorFinished()
     }
     catch(const UserException& ex)
     {
+        assert(_connection);
+
         //
         // The operation may have already marshaled a reply; we must overwrite that reply.
         //
@@ -119,6 +131,8 @@ IceInternal::IncomingBase::__servantLocatorFinished()
         {
             _connection->sendNoResponse();
         }
+
+        _connection = 0;
     }
     catch(const std::exception& ex)
     {
@@ -134,6 +148,8 @@ IceInternal::IncomingBase::__servantLocatorFinished()
 void
 IceInternal::IncomingBase::__handleException(const std::exception& exc)
 {
+    assert(_connection);
+
     if(dynamic_cast<const RequestFailedException*>(&exc))
     {
         RequestFailedException* rfe =
@@ -143,12 +159,12 @@ IceInternal::IncomingBase::__handleException(const std::exception& exc)
         {
             rfe->id = _current.id;
         }
-        
+
         if(rfe->facet.empty() && !_current.facet.empty())
         {
             rfe->facet = _current.facet;
         }
-        
+
         if(rfe->operation.empty() && !_current.operation.empty())
         {
             rfe->operation = _current.operation;
@@ -195,7 +211,7 @@ IceInternal::IncomingBase::__handleException(const std::exception& exc)
             }
 
             _os.write(rfe->operation, false);
-            
+
             _connection->sendResponse(&_os, _compress);
         }
         else
@@ -203,9 +219,9 @@ IceInternal::IncomingBase::__handleException(const std::exception& exc)
             _connection->sendNoResponse();
         }
     }
-    else if(const Exception* ex = dynamic_cast<const Exception*>(&exc)) 
+    else if(const Exception* ex = dynamic_cast<const Exception*>(&exc))
     {
-        
+
         if(_os.instance()->initializationData().properties->getPropertyAsIntWithDefault("Ice.Warn.Dispatch", 1) > 0)
         {
             __warning(*ex);
@@ -235,6 +251,12 @@ IceInternal::IncomingBase::__handleException(const std::exception& exc)
                 _os.write(replyUnknownLocalException);
                 ostringstream str;
                 str << *le;
+#ifdef __GNUC__
+                if(IceUtilInternal::printStackTraces)
+                {
+                    str <<  '\n' << ex->ice_stackTrace();
+                }
+#endif
                 _os.write(str.str(), false);
             }
             else if(const UserException* ue = dynamic_cast<const UserException*>(&exc))
@@ -242,6 +264,12 @@ IceInternal::IncomingBase::__handleException(const std::exception& exc)
                 _os.write(replyUnknownUserException);
                 ostringstream str;
                 str << *ue;
+#ifdef __GNUC__
+                if(IceUtilInternal::printStackTraces)
+                {
+                    str <<  '\n' << ex->ice_stackTrace();
+                }
+#endif
                 _os.write(str.str(), false);
             }
             else
@@ -264,7 +292,7 @@ IceInternal::IncomingBase::__handleException(const std::exception& exc)
         {
             __warning(string("std::exception: ") + exc.what());
         }
-    
+
         if(_response)
         {
             _os.endWriteEncaps();
@@ -278,8 +306,10 @@ IceInternal::IncomingBase::__handleException(const std::exception& exc)
         else
         {
             _connection->sendNoResponse();
-        }    
+        }
     }
+
+    _connection = 0;
 }
 
 void
@@ -289,7 +319,9 @@ IceInternal::IncomingBase::__handleException()
     {
         __warning("unknown c++ exception");
     }
-    
+
+    assert(_connection);
+
     if(_response)
     {
         _os.endWriteEncaps();
@@ -303,10 +335,12 @@ IceInternal::IncomingBase::__handleException()
     {
         _connection->sendNoResponse();
     }
+
+    _connection = 0;
 }
 
 
-IceInternal::Incoming::Incoming(Instance* instance, ConnectionI* connection, 
+IceInternal::Incoming::Incoming(Instance* instance, ConnectionI* connection,
                                 const ObjectAdapterPtr& adapter,
                                 bool response, Byte compress, Int requestId) :
     IncomingBase(instance, connection, adapter, response, compress, requestId),
@@ -316,19 +350,19 @@ IceInternal::Incoming::Incoming(Instance* instance, ConnectionI* connection,
 }
 
 
-void 
+void
 IceInternal::Incoming::push(const Ice::DispatchInterceptorAsyncCallbackPtr& cb)
 {
     _interceptorAsyncCallbackQueue.push_front(cb);
 }
 
-void 
+void
 IceInternal::Incoming::pop()
 {
     _interceptorAsyncCallbackQueue.pop_front();
 }
 
-void 
+void
 IceInternal::Incoming::startOver()
 {
     if(_inParamPos == 0)
@@ -341,23 +375,23 @@ IceInternal::Incoming::startOver()
     else
     {
         killAsync();
-        
+
         //
         // Let's rewind _is and clean-up _os
         //
         _is.i = _inParamPos;
-        
+
         if(_response)
         {
             _os.endWriteEncaps();
-            _os.b.resize(headerSize + 4); 
+            _os.b.resize(headerSize + 4);
             _os.write(static_cast<Byte>(0));
             _os.startWriteEncaps();
         }
     }
 }
 
-void 
+void
 IceInternal::Incoming::killAsync()
 {
     //
@@ -544,18 +578,20 @@ IceInternal::Incoming::invoke(const ServantManagerPtr& servantManager)
         return;
     }
 
+    assert(_connection);
+
     if(_response)
     {
         _os.endWriteEncaps();
-        
+
         if(replyStatus != replyOK && replyStatus != replyUserException)
         {
             assert(replyStatus == replyObjectNotExist ||
                    replyStatus == replyFacetNotExist);
-            
+
             _os.b.resize(headerSize + 4); // Reply status position.
             _os.write(replyStatus);
-            
+
             _current.id.__write(&_os);
 
             //
@@ -583,6 +619,8 @@ IceInternal::Incoming::invoke(const ServantManagerPtr& servantManager)
     {
         _connection->sendNoResponse();
     }
+
+    _connection = 0;
 }
 
 

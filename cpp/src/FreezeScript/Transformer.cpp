@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -2649,7 +2649,11 @@ FreezeScript::ObjectVisitor::visitObject(const ObjectRefPtr& data)
         ObjectDataMap::iterator p = _map.find(value.get());
         if(p == _map.end())
         {
-            _map.insert(ObjectDataMap::value_type(value.get(), 0));
+#if (defined(_MSC_VER) && (_MSC_VER >= 1600))
+            _map.insert(ObjectDataMap::value_type(value.get(), nullptr));
+#else
+	    _map.insert(ObjectDataMap::value_type(value.get(), 0));
+#endif
             DataMemberMap& members = value->getMembers();
             for(DataMemberMap::iterator q = members.begin(); q != members.end(); ++q)
             {

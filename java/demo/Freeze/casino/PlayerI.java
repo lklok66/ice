@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -22,8 +22,9 @@ class PlayerI extends CasinoStore.PersistentPlayer
         _evictor.remove(current.id);
     }
 
-    public void 
-    withdraw(int count, Ice.Current current) throws Casino.OutOfChipsException
+    public void
+    withdraw(int count, Ice.Current current)
+        throws Casino.OutOfChipsException
     {
         int newBalance = chips - count;
         if(newBalance < 0)
@@ -40,8 +41,8 @@ class PlayerI extends CasinoStore.PersistentPlayer
         chips += count;
     }
 
-    void 
-    init(CasinoStore.PersistentPlayerPrx myPrx, Freeze.TransactionalEvictor evictor, 
+    void
+    init(CasinoStore.PersistentPlayerPrx myPrx, Freeze.TransactionalEvictor evictor,
          CasinoStore.PersistentBankPrx bank)
     {
         _myPrx = myPrx;

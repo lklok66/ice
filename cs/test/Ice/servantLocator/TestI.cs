@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -63,6 +63,20 @@ public sealed class TestI : TestIntfDisp_
         // is reset correctly if finished() throws.
         //
         return "Hello";
+    }
+
+    public override void asyncResponse(Ice.Current current)
+    {
+        //
+        // Only relevant for AMD.
+        //
+    }
+
+    public override void asyncException(Ice.Current current)
+    {
+        //
+        // Only relevant for AMD.
+        //
     }
 
     public override void shutdown(Ice.Current current)

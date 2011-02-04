@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -36,6 +36,11 @@ struct SmallStruct
     MyClass* p;
 };
 
+["cpp:class"] struct ClassStruct
+{
+    int i;
+};
+
 sequence<bool> BoolS;
 sequence<byte> ByteS;
 sequence<short> ShortS;
@@ -45,6 +50,7 @@ sequence<float> FloatS;
 sequence<double> DoubleS;
 sequence<string> StringS;
 sequence<MyEnum> MyEnumS;
+sequence<SmallStruct> SmallStructS;
 sequence<MyClass> MyClassS;
 
 sequence<BoolS> BoolSS;
@@ -56,6 +62,7 @@ sequence<FloatS> FloatSS;
 sequence<DoubleS> DoubleSS;
 sequence<StringS> StringSS;
 sequence<MyEnumS> MyEnumSS;
+sequence<SmallStructS> SmallStructSS;
 sequence<MyClassS> MyClassSS;
 
 dictionary<byte, bool> ByteBoolD;
@@ -86,6 +93,79 @@ interface MyInterface
 {
 };
 
+exception MyException
+{
+    MyClass c;
+};
+
+module Sub
+{
+    enum NestedEnum
+    {
+        nestedEnum1,
+        nestedEnum2,
+        nestedEnum3
+    };
+
+    struct NestedStruct
+    {
+        bool bo;
+        byte by;
+        short sh;
+        int i;
+        long l;
+        float f;
+        double d;
+        string str;
+        NestedEnum e;
+    };
+
+    ["cpp:class"] struct NestedClassStruct
+    {
+        int i;
+    };
+
+    exception NestedException
+    {
+        string str;
+    };
+};
+};
+
+module Test2
+{
+module Sub2
+{
+    enum NestedEnum2
+    {
+        nestedEnum4,
+        nestedEnum5,
+        nestedEnum6
+    };
+
+    struct NestedStruct2
+    {
+        bool bo;
+        byte by;
+        short sh;
+        int i;
+        long l;
+        float f;
+        double d;
+        string str;
+        NestedEnum2 e;
+    };
+
+    ["cpp:class"] struct NestedClassStruct2
+    {
+        int i;
+    };
+
+    exception NestedException2
+    {
+        string str;
+    };
+};
 };
 
 #endif

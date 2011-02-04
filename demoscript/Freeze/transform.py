@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -54,7 +54,7 @@ def run(createCmd, recreateCmd, readCmd, readnewCmd):
     readnew = demoscript.Util.spawn(readnewCmd)
     readnew.expect('All contacts \(default order\)')
     readnew.expect('All contacts \(ordered by phone number\)')
-    readnew.expect('DbEnv \"dbnew\": Secondary index corrupt: not consistent with primary')
+    readnew.expect('DbEnv \"dbnew\": contacts: DB_SECONDARY_BAD: Secondary index inconsistent with primary')
     readnew.waitTestSuccess(1)
     print "ok"
 
