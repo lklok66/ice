@@ -1,9 +1,9 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2008 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
-# This copy of Chat Demo is licensed to you under the terms
-# described in the CHAT_DEMO_LICENSE file included in this
+# This copy of Ice Protobuf is licensed to you under the terms
+# described in the ICE_PROTOBUF_LICENSE file included in this
 # distribution.
 #
 # **********************************************************************
