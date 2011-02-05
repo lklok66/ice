@@ -1,5 +1,5 @@
 This archive contains sample applications that demonstrate how to
-intergrate Google Protocol Buffers with Ice.
+integrate Google Protocol Buffers with Ice.
 
 Included are demos written in C++, Java and Python. The demos were
 tested with:

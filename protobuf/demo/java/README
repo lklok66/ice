@@ -7,7 +7,7 @@ The Protocol Buffers distribution and documentation can be found at
 
   http://code.google.com/apis/protocolbuffers/
 
-This demo was tested with Protocol Buffers version 2.0.3.
+This demo was tested with Protocol Buffers version 2.4.0.
 
 We have added new metadata that makes it possible for you to specify
 protocol buffers message types in your Slice definitions, with Ice
@@ -54,7 +54,7 @@ Or on Windows:
   $ set ICE_HOME=<Ice installation root directory>
 
 Prior to building the demo, you should also add protoc to your PATH
-and protobuf-java-2.0.3.jar to your CLASSPATH.
+and protobuf-java-2.4.0.jar to your CLASSPATH.
 
 Use this command to build the demo:
 

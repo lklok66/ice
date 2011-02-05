@@ -7,7 +7,7 @@ The Protocol Buffers distribution and documentation can be found at
 
   http://code.google.com/apis/protocolbuffers/
 
-This demo was tested with Protocol Buffers version 2.0.3.
+This demo was tested with Protocol Buffers version 2.4.0.
 
 We have added new metadata that makes it possible for you to specify
 protocol buffers message types in your Slice definitions, with Ice
@@ -97,7 +97,7 @@ Then select the target configuration (Debug or Release), right-click
 on the solution in the Solution Explorer window and select 
 "Build Solution".
 
-Note that on Windows the Procotol Buffers source package doesn't
+Note that on Windows the Protocol Buffers source package doesn't
 support automatic installation. The build system for this demo
 assumes that you have compiled and manually installed Protocol Buffers
 using the following directory structure:
