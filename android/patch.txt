@@ -1,0 +1,157 @@
+diff --git a/java/src/IceInternal/Network.java b/java/src/IceInternal/Network.java
+index 568a6c5..d2ccaec 100644
+--- a/java/src/IceInternal/Network.java
++++ b/java/src/IceInternal/Network.java
+@@ -1103,9 +1103,7 @@ public final class Network
+     {
+         StringBuilder s = new StringBuilder(128);
+         s.append("local address = ");
+-        s.append(localAddr.getHostAddress());
+-        s.append(':');
+-        s.append(localPort);
++        s.append(addrToString(localAddr, localPort));
+         if(remoteAddr == null)
+         {
+             s.append("\nremote address = <not connected>");
+@@ -1113,9 +1111,7 @@ public final class Network
+         else
+         {
+             s.append("\nremote address = ");
+-            s.append(remoteAddr.getHostAddress());
+-            s.append(':');
+-            s.append(remotePort);
++            s.append(addrToString(remoteAddr, remotePort));
+         }
+ 
+         return s.toString();
+@@ -1150,6 +1146,33 @@ public final class Network
+ 	        (bytes.length == 4 && protocol == EnableIPv4));
+     }
+ 
++    private static String
++    addrToString(java.net.InetAddress addr, int port)
++    {
++        StringBuffer s = new StringBuffer();
++
++        //
++        // In early Android releases, sockets don't correctly report their address and
++        // port information.
++        //
++
++        if(addr == null || addr.isAnyLocalAddress())
++        {
++            s.append("<not available>");
++        }
++        else
++        {
++            s.append(addr.getHostAddress());
++        }
++
++        if(port > 0)
++        {
++            s.append(':');
++            s.append(port);
++        }
++
++        return s.toString();
++    }
+ 
+     private static java.net.InetSocketAddress
+     getAddressImpl(String host, int port, int protocol, boolean server)
+diff --git a/java/src/IceSSL/AcceptorI.java b/java/src/IceSSL/AcceptorI.java
+index 563878e..ff3f152 100644
+--- a/java/src/IceSSL/AcceptorI.java
++++ b/java/src/IceSSL/AcceptorI.java
+@@ -74,7 +74,8 @@ final class AcceptorI implements IceInternal.Acceptor
+             IceInternal.Network.setBlock(fd, false);
+             IceInternal.Network.setTcpBufSize(fd, _instance.communicator().getProperties(), _logger);
+ 
+-            engine = _instance.createSSLEngine(true);
++            java.net.InetSocketAddress peerAddr = (java.net.InetSocketAddress)fd.socket().getRemoteSocketAddress();
++            engine = _instance.createSSLEngine(true, peerAddr);
+         }
+         catch(RuntimeException ex)
+         {
+diff --git a/java/src/IceSSL/ConnectorI.java b/java/src/IceSSL/ConnectorI.java
+index 7bc0fa3..544a25c 100644
+--- a/java/src/IceSSL/ConnectorI.java
++++ b/java/src/IceSSL/ConnectorI.java
+@@ -38,7 +38,7 @@ final class ConnectorI implements IceInternal.Connector
+             boolean connected = IceInternal.Network.doConnect(fd, _addr);
+             try
+             {
+-                javax.net.ssl.SSLEngine engine = _instance.createSSLEngine(false);
++                javax.net.ssl.SSLEngine engine = _instance.createSSLEngine(false, _addr);
+                 return new TransceiverI(_instance, engine, fd, _host, connected, false, "");
+             }
+             catch(RuntimeException ex)
+diff --git a/java/src/IceSSL/Instance.java b/java/src/IceSSL/Instance.java
+index 633e353..25dc8da 100644
+--- a/java/src/IceSSL/Instance.java
++++ b/java/src/IceSSL/Instance.java
+@@ -704,9 +704,17 @@ class Instance
+     }
+ 
+     javax.net.ssl.SSLEngine
+-    createSSLEngine(boolean incoming)
++    createSSLEngine(boolean incoming, java.net.InetSocketAddress peerAddr)
+     {
+-        javax.net.ssl.SSLEngine engine = _context.createSSLEngine();
++        javax.net.ssl.SSLEngine engine;
++        if(peerAddr != null)
++        {
++            engine = _context.createSSLEngine(peerAddr.getHostName(), peerAddr.getPort());
++        }
++        else
++        {
++            engine = _context.createSSLEngine();
++        }
+         engine.setUseClientMode(!incoming);
+ 
+         String[] cipherSuites = filterCiphers(engine.getSupportedCipherSuites(), engine.getEnabledCipherSuites());
+diff --git a/java/src/IceSSL/TransceiverI.java b/java/src/IceSSL/TransceiverI.java
+index b84f439..c7efdbb 100644
+--- a/java/src/IceSSL/TransceiverI.java
++++ b/java/src/IceSSL/TransceiverI.java
+@@ -351,8 +351,21 @@ final class TransceiverI implements IceInternal.Transceiver
+ 
+         NativeConnectionInfo info = new NativeConnectionInfo();
+         java.net.Socket socket = _fd.socket();
+-        info.localAddress = socket.getLocalAddress().getHostAddress();
+-        info.localPort = socket.getLocalPort();
++        if(socket.getLocalAddress() != null)
++        {
++            info.localAddress = socket.getLocalAddress().getHostAddress();
++            info.localPort = socket.getLocalPort();
++        }
++        else
++        {
++            //
++            // On some platforms (e.g., early Android releases), sockets don't
++            // correctly return address information.
++            //
++            info.localAddress = "";
++            info.localPort = -1;
++        }
++
+         if(socket.getInetAddress() != null)
+         {
+             info.remoteAddress = socket.getInetAddress().getHostAddress();
+@@ -402,6 +415,7 @@ final class TransceiverI implements IceInternal.Transceiver
+                 switch(status)
+                 {
+                 case FINISHED:
++                case NOT_HANDSHAKING:
+                     handshakeCompleted();
+                     break;
+                 case NEED_TASK:
+@@ -470,9 +484,6 @@ final class TransceiverI implements IceInternal.Transceiver
+                     status = result.getHandshakeStatus();
+                     break;
+                 }
+-                case NOT_HANDSHAKING:
+-                    assert(false);
+-                    break;
+                 }
+ 
+                 if(result != null)
