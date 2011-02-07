@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -36,11 +36,12 @@ public class AppSession
     private String _hostname;
     private String _error;
 
-    public AppSession(Handler handler, IceSSL.CertificateVerifier verifier, String hostname, String username, String password,
-            boolean secure) throws Glacier2.CannotCreateSessionException, Glacier2.PermissionDeniedException
+    public AppSession(Handler handler, IceSSL.CertificateVerifier verifier, String hostname, String username,
+                      String password, boolean secure)
+        throws Glacier2.CannotCreateSessionException, Glacier2.PermissionDeniedException
     {
         _handler = handler;
-        
+
         Ice.InitializationData initData = new Ice.InitializationData();
 
         initData.properties = Ice.Util.createProperties();
@@ -48,6 +49,7 @@ public class AppSession
         initData.properties.setProperty("Ice.RetryIntervals", "-1");
         initData.properties.setProperty("Ice.Trace.Network", "0");
         initData.properties.setProperty("Ice.Plugin.IceSSL", "IceSSL.PluginFactory");
+        initData.properties.setProperty("IceSSL.VerifyPeer", "0");
         initData.properties.setProperty("IceSSL.TrustOnly.Client", "CN=Glacier2");
 
         _communicator = Ice.Util.initialize(initData);
@@ -88,7 +90,7 @@ public class AppSession
 
         _refreshTimeout = (_router.getSessionTimeout() * 1000) / 2;
     }
-    
+
     synchronized public long getRefreshTimeout()
     {
         return _refreshTimeout;
@@ -114,7 +116,7 @@ public class AppSession
                 catch(Exception ex)
                 {
                 }
-           
+
                 try
                 {
                     _communicator.destroy();
@@ -126,7 +128,7 @@ public class AppSession
             }
         }).start();
     }
-    
+
     synchronized public String getError()
     {
         return _error;
@@ -141,26 +143,26 @@ public class AppSession
         }
 
         _lastSend = System.currentTimeMillis();
-        Chat.AMI_ChatSession_send cb = new Chat.AMI_ChatSession_send()
+        Chat.Callback_ChatSession_send cb = new Chat.Callback_ChatSession_send()
         {
             @Override
-            public void ice_exception(Ice.LocalException ex)
+            public void exception(Ice.LocalException ex)
             {
                 destroyWithError(ex.toString());
             }
 
             @Override
-            public void ice_exception(Ice.UserException ex)
+            public void exception(Ice.UserException ex)
             {
                 destroyWithError(ex.toString());
             }
 
             @Override
-            public void ice_response(long ret)
+            public void response(long ret)
             {
             }
         };
-        _session.send_async(cb, t);
+        _session.begin_send(t, cb);
     }
 
     // This method is only called by the UI thread.
@@ -168,7 +170,7 @@ public class AppSession
     {
         _listeners.add(cb);
         cb.init(_users);
-        
+
         if(replay)
         {
             // Replay the entire state.
@@ -177,7 +179,7 @@ public class AppSession
                 r.replay(cb);
             }
         }
-        
+
         if(_error != null)
         {
             cb.error();
@@ -191,7 +193,7 @@ public class AppSession
     {
         _listeners.remove(cb);
     }
-    
+
     // Returns false if the session has been destroyed, true otherwise.
     synchronized public boolean refresh()
     {
@@ -206,7 +208,7 @@ public class AppSession
         {
             destroy();
             _error = "The session was dropped due to inactivity.";
-            
+
             final List<ChatRoomListener> copy = new ArrayList<ChatRoomListener>(_listeners);
             _handler.post(new Runnable()
             {
@@ -223,8 +225,19 @@ public class AppSession
 
         try
         {
-            // TODO: This should be async.
-            _session.ice_ping();
+            _session.begin_ice_ping(new Ice.Callback_Object_ice_ping()
+                {
+                    @Override
+                    public void response()
+                    {
+                    }
+
+                    @Override
+                    public void exception(final Ice.LocalException ex)
+                    {
+                        destroyWithError(ex.toString());
+                    }
+                });
         }
         catch(Ice.LocalException e)
         {
@@ -353,7 +366,7 @@ public class AppSession
     {
         destroy();
         _error = msg;
-        
+
         final List<ChatRoomListener> copy = new ArrayList<ChatRoomListener>(_listeners);
         _handler.post(new Runnable()
         {

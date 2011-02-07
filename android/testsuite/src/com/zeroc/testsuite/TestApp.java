@@ -1,3 +1,12 @@
+// **********************************************************************
+//
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
+//
+// This copy of Ice is licensed to you under the terms described in the
+// ICE_LICENSE file included in this distribution.
+//
+// **********************************************************************
+
 package com.zeroc.testsuite;
 
 import java.io.FileNotFoundException;
@@ -22,13 +31,15 @@ import test.Util.Application.CommunicatorListener;
 import Ice.Communicator;
 import android.app.Application;
 import android.os.Handler;
+import android.os.Build.VERSION;
 
 public class TestApp extends Application
 {
     static private class TestSuiteEntry
     {
         TestSuiteEntry(String name, Class<? extends test.Util.Application> client,
-                Class<? extends test.Util.Application> server, Class<? extends test.Util.Application> collocated)
+                       Class<? extends test.Util.Application> server,
+                       Class<? extends test.Util.Application> collocated)
         {
             _name = name;
             _client = client;
@@ -77,79 +88,104 @@ public class TestApp extends Application
         private Class<? extends test.Util.Application> _client;
         private Class<? extends test.Util.Application> _server;
         private Class<? extends test.Util.Application> _collocated;
-    };
+    }
 
     static final private TestSuiteEntry[] _tests =
     {
         new TestSuiteEntry("adapterDeactivation", test.Ice.adapterDeactivation.Client.class,
-                test.Ice.adapterDeactivation.Server.class, test.Ice.adapterDeactivation.Collocated.class),
+                           test.Ice.adapterDeactivation.Server.class, test.Ice.adapterDeactivation.Collocated.class),
+        new TestSuiteEntry("ami", test.Ice.ami.Client.class, test.Ice.ami.Server.class, null),
         new TestSuiteEntry("binding", test.Ice.binding.Client.class, test.Ice.binding.Server.class, null),
         new TestSuiteEntry("checksum", test.Ice.checksum.Client.class, test.Ice.checksum.Server.class, null),
-        new TestSuiteEntry("custom15", test.Ice.custom15.Client.class, test.Ice.custom15.Server.class,
-                test.Ice.custom15.Collocated.class),
+        new TestSuiteEntry("classLoader", test.Ice.classLoader.Client.class, test.Ice.classLoader.Server.class, null),
+        new TestSuiteEntry("custom", test.Ice.custom.Client.class, test.Ice.custom.Server.class,
+                           test.Ice.custom.Collocated.class),
+        new TestSuiteEntry("defaultServant", test.Ice.defaultServant.Client.class, null, null),
+        new TestSuiteEntry("defaultValue", test.Ice.defaultValue.Client.class, null, null),
+        // This test is not currently supported - see bug 5002.
+        //new TestSuiteEntry("dispatcher", test.Ice.dispatcher.Client.class, test.Ice.dispatcher.Server.class, null),
         new TestSuiteEntry("exceptions", test.Ice.exceptions.Client.class, test.Ice.exceptions.Server.class,
-                test.Ice.exceptions.Collocated.class),
+                           test.Ice.exceptions.Collocated.class),
         new TestSuiteEntry("facets", test.Ice.facets.Client.class, test.Ice.facets.Server.class,
-                test.Ice.facets.Collocated.class),
+                           test.Ice.facets.Collocated.class),
         new TestSuiteEntry("hold", test.Ice.hold.Client.class, test.Ice.hold.Server.class, null),
+        // The info test is not currently enabled - it relies on sockets to accurately return
+        // address and port information, which really only works in Android 2.3+.
+        //new TestSuiteEntry("info", test.Ice.info.Client.class, test.Ice.info.Server.class, null),
         new TestSuiteEntry("inheritance", test.Ice.inheritance.Client.class, test.Ice.inheritance.Server.class,
-                test.Ice.inheritance.Collocated.class),
+                           test.Ice.inheritance.Collocated.class),
         new TestSuiteEntry("interceptor", test.Ice.interceptor.Client.class, null, null),
+        new TestSuiteEntry("invoke", test.Ice.invoke.Client.class, test.Ice.invoke.Server.class, null),
         new TestSuiteEntry("location", test.Ice.location.Client.class, test.Ice.location.Server.class, null),
         new TestSuiteEntry("objects", test.Ice.objects.Client.class, test.Ice.objects.Server.class,
-                test.Ice.objects.Collocated.class),
+                           test.Ice.objects.Collocated.class),
         new TestSuiteEntry("operations", test.Ice.operations.Client.class, test.Ice.operations.Server.class,
-                test.Ice.operations.Collocated.class),
+                           test.Ice.operations.Collocated.class),
         new TestSuiteEntry("packagemd", test.Ice.packagemd.Client.class, test.Ice.packagemd.Server.class, null),
         new TestSuiteEntry("proxy", test.Ice.proxy.Client.class, test.Ice.proxy.Server.class,
-                test.Ice.proxy.Collocated.class),
+                           test.Ice.proxy.Collocated.class),
         new TestSuiteEntry("retry", test.Ice.retry.Client.class, test.Ice.retry.Server.class, null),
         new TestSuiteEntry("serialize", test.Ice.serialize.Client.class, test.Ice.serialize.Server.class, null),
         new TestSuiteEntry("servantLocator", test.Ice.servantLocator.Client.class,
-                test.Ice.servantLocator.Server.class, test.Ice.servantLocator.Collocated.class),
+                           test.Ice.servantLocator.Server.class, test.Ice.servantLocator.Collocated.class),
         new TestSuiteEntry("slicing/exceptions", test.Ice.slicing.exceptions.Client.class,
-                test.Ice.slicing.exceptions.Server.class, null),
+                           test.Ice.slicing.exceptions.Server.class, null),
         new TestSuiteEntry("slicing/objects", test.Ice.slicing.objects.Client.class,
-                test.Ice.slicing.objects.Server.class, null),
+                           test.Ice.slicing.objects.Server.class, null),
         new TestSuiteEntry("stream", test.Ice.stream.Client.class, null, null),
-        new TestSuiteEntry("throughput", test.Ice.throughput.Client.class, test.Ice.throughput.Server.class, null),
+        // The throughput test uses too much memory.
+        //new TestSuiteEntry("throughput", test.Ice.throughput.Client.class, test.Ice.throughput.Server.class, null),
         new TestSuiteEntry("timeout", test.Ice.timeout.Client.class, test.Ice.timeout.Server.class, null),
     };
 
     static final private TestSuiteEntry[] _ssltests =
     {
         new TestSuiteEntry("adapterDeactivation", test.Ice.adapterDeactivation.Client.class,
-                test.Ice.adapterDeactivation.Server.class, test.Ice.adapterDeactivation.Collocated.class),
+                           test.Ice.adapterDeactivation.Server.class, test.Ice.adapterDeactivation.Collocated.class),
+        // This test is not currently supported - see bug 5002.
+        //new TestSuiteEntry("ami", test.Ice.ami.Client.class, test.Ice.ami.Server.class, null),
         new TestSuiteEntry("binding", test.Ice.binding.Client.class, test.Ice.binding.Server.class, null),
         new TestSuiteEntry("checksum", test.Ice.checksum.Client.class, test.Ice.checksum.Server.class, null),
-        new TestSuiteEntry("custom15", test.Ice.custom15.Client.class, test.Ice.custom15.Server.class,
-                test.Ice.custom15.Collocated.class),
+        // This test is not currently supported - see bug 5002.
+        //new TestSuiteEntry("classLoader", test.Ice.classLoader.Client.class, test.Ice.classLoader.Server.class, null),
+        new TestSuiteEntry("custom", test.Ice.custom.Client.class, test.Ice.custom.Server.class,
+                           test.Ice.custom.Collocated.class),
+        new TestSuiteEntry("defaultServant", test.Ice.defaultServant.Client.class, null, null),
+        new TestSuiteEntry("defaultValue", test.Ice.defaultValue.Client.class, null, null),
+        // This test is not currently supported - see bug 5002.
+        //new TestSuiteEntry("dispatcher", test.Ice.dispatcher.Client.class, test.Ice.dispatcher.Server.class, null),
         new TestSuiteEntry("exceptions", test.Ice.exceptions.Client.class, test.Ice.exceptions.Server.class,
-                test.Ice.exceptions.Collocated.class),
+                           test.Ice.exceptions.Collocated.class),
         new TestSuiteEntry("facets", test.Ice.facets.Client.class, test.Ice.facets.Server.class,
-                test.Ice.facets.Collocated.class),
+                           test.Ice.facets.Collocated.class),
         new TestSuiteEntry("hold", test.Ice.hold.Client.class, test.Ice.hold.Server.class, null),
+        // The info test is not currently enabled - it relies on sockets to accurately return
+        // address and port information, which really only works in Android 2.3+.
+        //new TestSuiteEntry("info", test.Ice.info.Client.class, test.Ice.info.Server.class, null),
         new TestSuiteEntry("inheritance", test.Ice.inheritance.Client.class, test.Ice.inheritance.Server.class,
-                test.Ice.inheritance.Collocated.class),
+                           test.Ice.inheritance.Collocated.class),
         new TestSuiteEntry("interceptor", test.Ice.interceptor.Client.class, null, null),
-        new TestSuiteEntry("location", test.Ice.location.Client.class, test.Ice.location.Server.class, null),
+        new TestSuiteEntry("invoke", test.Ice.invoke.Client.class, test.Ice.invoke.Server.class, null),
+        // This test is not currently supported - see bug 5002.
+        //new TestSuiteEntry("location", test.Ice.location.Client.class, test.Ice.location.Server.class, null),
         new TestSuiteEntry("objects", test.Ice.objects.Client.class, test.Ice.objects.Server.class,
-                test.Ice.objects.Collocated.class),
+                           test.Ice.objects.Collocated.class),
         new TestSuiteEntry("operations", test.Ice.operations.Client.class, test.Ice.operations.Server.class,
-                test.Ice.operations.Collocated.class),
+                           test.Ice.operations.Collocated.class),
         new TestSuiteEntry("packagemd", test.Ice.packagemd.Client.class, test.Ice.packagemd.Server.class, null),
         new TestSuiteEntry("proxy", test.Ice.proxy.Client.class, test.Ice.proxy.Server.class,
-                test.Ice.proxy.Collocated.class),
+                           test.Ice.proxy.Collocated.class),
         new TestSuiteEntry("retry", test.Ice.retry.Client.class, test.Ice.retry.Server.class, null),
         new TestSuiteEntry("serialize", test.Ice.serialize.Client.class, test.Ice.serialize.Server.class, null),
         new TestSuiteEntry("servantLocator", test.Ice.servantLocator.Client.class,
-                test.Ice.servantLocator.Server.class, test.Ice.servantLocator.Collocated.class),
+                           test.Ice.servantLocator.Server.class, test.Ice.servantLocator.Collocated.class),
         new TestSuiteEntry("slicing/exceptions", test.Ice.slicing.exceptions.Client.class,
-                test.Ice.slicing.exceptions.Server.class, null),
+                           test.Ice.slicing.exceptions.Server.class, null),
         new TestSuiteEntry("slicing/objects", test.Ice.slicing.objects.Client.class,
-                test.Ice.slicing.objects.Server.class, null),
+                           test.Ice.slicing.objects.Server.class, null),
         new TestSuiteEntry("stream", test.Ice.stream.Client.class, null, null),
-        new TestSuiteEntry("timeout", test.Ice.timeout.Client.class, test.Ice.timeout.Server.class, null),
+        // This test is not currently supported - see bug 5002.
+        //new TestSuiteEntry("timeout", test.Ice.timeout.Client.class, test.Ice.timeout.Server.class, null),
     };
     private TestSuiteEntry[] _curtests = _tests;
     
@@ -182,7 +218,7 @@ public class TestApp extends Application
         }
 
         private StringBuffer _data = new StringBuffer();
-    };
+    }
 
     private Handler _handler;
     private LinkedList<String> _strings = new LinkedList<String>();
@@ -194,16 +230,17 @@ public class TestApp extends Application
         public void onOutput(String s);
 
         public void onComplete(int status);
-    };
+    }
 
     private TestListener _listener = null;
 
     private boolean _complete = false;
     private int _status = 0;
     private int _currentTest = -1;
-    
+
     private boolean _ssl = false;
     private boolean _sslInitialized = false;
+    private boolean _sslSupported = false;
     private SSLContext _clientContext = null;
     private SSLContext _serverContext = null;
     private SSLInitializationListener _ssllistener;
@@ -229,6 +266,19 @@ public class TestApp extends Application
             {
                 "--Ice.Plugin.IceSSL=IceSSL.PluginFactory", "--Ice.Default.Protocol=ssl", "--Ice.InitPlugins=0"
             };
+
+            //
+            // Froyo apparently still suffers from Harmony bug 6047, requiring that we
+            // disable server-side verification of client certificates.
+            //
+            if(VERSION.SDK_INT == 8) // android.os.Build.VERSION_CODES.FROYO (8)
+            {
+                String[] arr = new String[sslargs.length + 1];
+                System.arraycopy(sslargs, 0, arr, 0, sslargs.length);
+                arr[arr.length - 1] = "--IceSSL.VerifyPeer=0";
+                sslargs = arr;
+            }
+
             String[] nargs = new String[args.length + sslargs.length];
             System.arraycopy(args, 0, nargs, 0, args.length);
             System.arraycopy(sslargs, 0, nargs, args.length, sslargs.length);
@@ -472,6 +522,22 @@ public class TestApp extends Application
     public void onCreate()
     {
         _handler = new Handler();
+
+        if(VERSION.SDK_INT == 8) // android.os.Build.VERSION_CODES.FROYO (8)
+        {
+            //
+            // Workaround for a bug in Android 2.2 (Froyo).
+            //
+            // See http://code.google.com/p/android/issues/detail?id=9431
+            //
+            java.lang.System.setProperty("java.net.preferIPv4Stack", "true");
+            java.lang.System.setProperty("java.net.preferIPv6Addresses", "false");
+        }
+
+        //
+        // The SSLEngine class only works properly in Froyo (or later).
+        //
+        _sslSupported = VERSION.SDK_INT >= 8;
     }
 
     @Override
@@ -575,8 +641,14 @@ public class TestApp extends Application
         r.start();
     }
 
+    public boolean isSSLSupported()
+    {
+        return _sslSupported;
+    }
+
     public void setSSL(boolean ssl)
     {
+        assert(!ssl || (ssl && _sslSupported));
         _ssl = ssl;
         if(_ssl)
         {
@@ -611,8 +683,8 @@ public class TestApp extends Application
                     ks.load(cert, passphrase);
                     kmf.init(ks, passphrase);
 
-                    TrustManagerFactory tmf = TrustManagerFactory
-                            .getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                    TrustManagerFactory tmf =
+                        TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
                     tmf.init(ks);
 
                     context.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
@@ -643,7 +715,7 @@ public class TestApp extends Application
         }
     }
 
-    synchronized public void setSSInitializationListener(SSLInitializationListener listener)
+    synchronized public void setSSLInitializationListener(SSLInitializationListener listener)
     {
         _ssllistener = listener;
         if(_ssl)

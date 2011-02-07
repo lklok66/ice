@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -24,6 +24,7 @@ import android.text.TextWatcher;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.os.Build.VERSION;
 
 import com.zeroc.chat.service.ChatService;
 import com.zeroc.chat.service.Service;
@@ -34,14 +35,14 @@ public class LoginActivity extends Activity
     private static final int DIALOG_ERROR = 1;
     private static final int DIALOG_CONFIRM = 2;
     private static final int DIALOG_INVALID_HOST = 3;
-    
+
     private static final String DEFAULT_HOST = "demo.zeroc.com";
     private static final boolean DEFAULT_SECURE = false;
     private static final String HOSTNAME_KEY = "host";
     private static final String USERNAME_KEY = "username";
     private static final String PASSWORD_KEY = "password";
     private static final String SECURE_KEY = "secure";
-    
+
     private Button _login;
     private EditText _hostname;
     private EditText _username;
@@ -88,7 +89,7 @@ public class LoginActivity extends Activity
             // service that we know is running in our own process, we can
             // cast its IBinder to a concrete class and directly access it.
             setLoginState();
-            
+
             _service = ((com.zeroc.chat.service.ChatService.LocalBinder)service).getService();
             _service.setSessionListener(_listener);
         }
@@ -185,6 +186,17 @@ public class LoginActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
 
+        if(VERSION.SDK_INT == 8) // android.os.Build.VERSION_CODES.FROYO (8)
+        {
+            //
+            // Workaround for a bug in Android 2.2 (Froyo).
+            //
+            // See http://code.google.com/p/android/issues/detail?id=9431
+            //
+            java.lang.System.setProperty("java.net.preferIPv4Stack", "true");
+            java.lang.System.setProperty("java.net.preferIPv6Addresses", "false");
+        }
+
         _login = (Button)findViewById(R.id.login);
         _login.setOnClickListener(new android.view.View.OnClickListener()
         {
@@ -229,7 +241,9 @@ public class LoginActivity extends Activity
             }
         });
         _password = (EditText)findViewById(R.id.password);
+
         _secure = (CheckBox)findViewById(R.id.secure);
+        _secure.setEnabled(VERSION.SDK_INT >= 8); // android.os.Build.VERSION_CODES.FROYO (8)
 
         _prefs = getPreferences(MODE_PRIVATE);
 
@@ -292,7 +306,7 @@ public class LoginActivity extends Activity
             });
             return builder.create();
         }
-        
+
         case DIALOG_INVALID_HOST:
         {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -311,7 +325,7 @@ public class LoginActivity extends Activity
 
         return null;
     }
-    
+
     @Override
     protected void onPrepareDialog(int id, Dialog dialog)
     {

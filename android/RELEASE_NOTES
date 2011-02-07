@@ -1,5 +1,5 @@
 ======================================================================
-Release notes for Ice for Android 0.1.1
+Release notes for Ice for Android 0.2.0
 ======================================================================
 
 Table of Contents
@@ -13,11 +13,23 @@ Table of Contents
 1. Introduction
 ======================================================================
 
-Ice for Android provides a complete implementation of the Ice run time
-for devices running Google's Android platform. This release of Ice for
-Android is a port of Ice for Java 3.3, therefore you can refer to the
-Ice 3.3 manual for more information about Ice and the Java language
-mapping.
+Initial releases of Ice for Android contained a modified copy of the
+Ice for Java run time, with substantial changes that addressed short-
+comings in the Android implementation of the standard APIs that Ice
+uses.
+
+The Android implementation has improved greatly since then, such
+that now only a few minor patches to the standard Ice for Java 3.4.1
+run time are required for use in an Android application. Consequently,
+this release no longer includes the complete Ice for Java source code,
+but rather just the source code patches for Ice 3.4.1 as well as the
+source code for the sample programs and test suite driver.
+
+If you are upgrading from an earlier Ice for Android release, we
+strongly encourage you to review the upgrade guide included in the
+release notes for Ice 3.4.1:
+
+  http://www.zeroc.com/download/Ice/3.4/Ice-3.4.1-RELEASE_NOTES
 
 The Ice for Android distribution does not include any Ice services,
 but its support for the complete Ice protocol means your Android
@@ -25,9 +37,7 @@ applications will work seamlessly with existing Ice servers as well as
 Ice services such as IceGrid, Glacier2, and IceStorm.
 
 As with all ZeroC Labs projects, we do not advise using Ice for
-Android in mission-critical applications. Also be aware that any
-subsequent release of this product may contain changes that break
-backward compatibility.
+Android in mission-critical applications.
 
 
 ======================================================================
@@ -38,8 +48,45 @@ This section describes known issues in this release that may affect
 your applications.
 
 
+Android 2.2 bug
+---------------
+
+For compatibility with Android 2.2, add the following code to your
+application's initialization logic:
+
+    if(android.os.Build.VERSION.SDK_INT == 8) // FROYO (8)
+    {
+        java.lang.System.setProperty("java.net.preferIPv4Stack", "true");
+        java.lang.System.setProperty("java.net.preferIPv6Addresses", "false");
+    }
+
+This code is a work around for bug 9431, which you can read about at
+the link below:
+
+  http://code.google.com/p/android/issues/detail?id=9431
+
+
 SSL
 ---
 
-Due to performance and stability issues in the current Android SSL
-implementation, we recommend using TCP over SSL whenever feasible.
+Ice for Android supports the use of SSL on Android 2.2 or later. In
+the sample programs and the test suite, SSL is disabled when using
+Android 2.1 or earlier due to the following bug:
+
+  http://code.google.com/p/android/issues/detail?id=4914
+
+Note that there is an SSL incompatibility between an Android client
+and an Ice for C++ (OpenSSL) server that prevents a connection from
+being established in certain situations. If the server is configured
+to request and validate the client's certificate, which occurs when
+the server's IceSSL.VerifyPeer property is set to 1 or 2, Android
+raises an exception indicating a "failed handshake". The only known
+solution at this time is to set IceSSL.VerifyPeer=0 in the server,
+which allows the connection to succeed but has the disadvantage that
+the client's certificate is no longer validated.
+
+Also note that SSL incurs significantly more overhead than TCP in
+Android. Connection establishment in particular is very costly. If you
+run the Ice for Android test suite (see README) with SSL enabled, be
+aware that some tests involve the creation of many connections and
+therefore can take a long time to complete.

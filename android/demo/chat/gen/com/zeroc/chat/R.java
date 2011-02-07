@@ -12,7 +12,7 @@ public final class R {
     }
     public static final class drawable {
         public static final int icon=0x7f020000;
-        public static final int stat_sample=0x7f020001;
+        public static final int stat_notify=0x7f020001;
     }
     public static final class id {
         public static final int hostname=0x7f060002;

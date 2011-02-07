@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -166,14 +166,17 @@ public class ChatService extends Service implements com.zeroc.chat.service.Servi
                 }
                 catch(final Glacier2.CannotCreateSessionException ex)
                 {
+                    ex.printStackTrace();
                     postLoginFailure(String.format("Session creation failed: %s", ex.toString()));
                 }
                 catch(final Glacier2.PermissionDeniedException ex)
                 {
+                    ex.printStackTrace();
                     postLoginFailure(String.format("Login failed: %s", ex.toString()));
                 }
                 catch(final Ice.LocalException ex)
                 {
+                    ex.printStackTrace();
                     postLoginFailure(String.format("Login failed: %s", ex.toString()));
                 }
                 finally
@@ -245,13 +248,13 @@ public class ChatService extends Service implements com.zeroc.chat.service.Servi
             _caCert = caCert;
         }
 
-        public boolean verify(IceSSL.ConnectionInfo info)
+        public boolean verify(IceSSL.NativeConnectionInfo info)
         {
             try
             {
                 if(info.certs != null && info.certs.length > 0)
                 {
-                    info.certs[0].verify(_caCert.getPublicKey());
+                    info.nativeCerts[0].verify(_caCert.getPublicKey());
                     return true;
                 }
             }
@@ -314,7 +317,7 @@ public class ChatService extends Service implements com.zeroc.chat.service.Servi
         am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, firstTime, refreshTimeout, sender);
 
         // Display a notification that the user is logged in.
-        Notification notification = new Notification(R.drawable.stat_sample, "Logged In", System.currentTimeMillis());
+        Notification notification = new Notification(R.drawable.stat_notify, "Logged In", System.currentTimeMillis());
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, ChatActivity.class), 0);
         notification.setLatestEventInfo(this, "Chat Demo", "You are logged into " + hostname, contentIntent);
         NotificationManager n = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);

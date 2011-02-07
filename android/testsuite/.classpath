@@ -2,9 +2,9 @@
 <classpath>
 	<classpathentry kind="src" path="generated"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="com.zeroc.Slice2JavaPlugin.ICE_FRAMEWORK"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
-	<classpathentry kind="lib" path="ICE_JAR_HOME/IceAndroid.jar" sourcepath="/Users/matthew/cvs/ice-33/java/src"/>
-	<classpathentry kind="lib" path="ICE_JAR_HOME/IceTest.jar" sourcepath="/Users/matthew/cvs/disticeandroid-HEAD/IceAndroid-0.1.0/java/"/>
+	<classpathentry kind="src" path="gen"/>
+	<classpathentry kind="var" path="ICE_HOME/lib/Ice.jar"/>
+	<classpathentry kind="var" path="ICE_HOME/lib/IceTest.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

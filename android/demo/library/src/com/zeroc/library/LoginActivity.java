@@ -1,15 +1,13 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
-package com.zeroc.library;
 
-import com.zeroc.library.controller.LoginController;
-import com.zeroc.library.controller.SessionController;
+package com.zeroc.library;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -17,12 +15,16 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build.VERSION;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+
+import com.zeroc.library.controller.LoginController;
+import com.zeroc.library.controller.SessionController;
 
 public class LoginActivity extends Activity
 {
@@ -132,6 +134,17 @@ public class LoginActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
 
+        if(VERSION.SDK_INT == 8) // android.os.Build.VERSION_CODES.FROYO (8)
+        {
+            //
+            // Workaround for a bug in Android 2.2 (Froyo).
+            //
+            // See http://code.google.com/p/android/issues/detail?id=9431
+            //
+            java.lang.System.setProperty("java.net.preferIPv4Stack", "true");
+            java.lang.System.setProperty("java.net.preferIPv6Addresses", "false");
+        }
+
         _login = (Button) findViewById(R.id.login);
         _login.setOnClickListener(new android.view.View.OnClickListener()
         {
@@ -156,7 +169,10 @@ public class LoginActivity extends Activity
             {
             }
         });
+
         _secure = (android.widget.CheckBox) findViewById(R.id.secure);
+        _secure.setEnabled(VERSION.SDK_INT >= 8); // android.os.Build.VERSION_CODES.FROYO (8)
+
         _glacier2 = (android.widget.CheckBox) findViewById(R.id.glacier2);
 
         _prefs = getPreferences(MODE_PRIVATE);

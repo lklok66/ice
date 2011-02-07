@@ -1,3 +1,12 @@
+// **********************************************************************
+//
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
+//
+// This copy of Ice is licensed to you under the terms described in the
+// ICE_LICENSE file included in this distribution.
+//
+// **********************************************************************
+
 package com.zeroc.testsuite;
 
 import java.util.ArrayList;
@@ -31,9 +40,10 @@ public class TestSuite extends ListActivity
 
         final TestApp app = (TestApp)getApplication();
         _tests.addAll(app.getTestNames());
-        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, _tests);
+        final ArrayAdapter<String> adapter =
+            new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, _tests);
         setListAdapter(adapter);
-        app.setSSInitializationListener(new TestApp.SSLInitializationListener()
+        app.setSSLInitializationListener(new TestApp.SSLInitializationListener()
         {
             private boolean dismiss = false;
 
@@ -62,16 +72,23 @@ public class TestSuite extends ListActivity
             }
         });
         CheckBox secure = (CheckBox)findViewById(R.id.secure);
-        secure.setOnCheckedChangeListener(new OnCheckedChangeListener()
+        if(app.isSSLSupported())
         {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+            secure.setOnCheckedChangeListener(new OnCheckedChangeListener()
             {
-                app.setSSL(isChecked);
-                _tests.clear();
-                _tests.addAll(app.getTestNames());
-                adapter.notifyDataSetChanged();
-            }
-        });
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+                {
+                    app.setSSL(isChecked);
+                    _tests.clear();
+                    _tests.addAll(app.getTestNames());
+                    adapter.notifyDataSetChanged();
+                }
+            });
+        }
+        else
+        {
+            secure.setEnabled(false);
+        }
     }
 
     protected void onListItemClick(ListView l, View v, int position, long id)

@@ -1,5 +1,5 @@
 ======================================================================
-CHANGES for Ice for Android 0.1.1
+CHANGES for Ice for Android 0.2.0
 ======================================================================
 
 This file describes the change history for Ice for Android.
@@ -10,6 +10,15 @@ Changes since version 0.1.1
 ======================================================================
 
 - Fixed a NullPointerException in the network tracing code.
+
+- Updated the demos to use the new AMI mapping for Ice 3.4.
+
+- Changed the way the demo and test suite projects locate Ice.jar. It
+  is no longer necessary to manually create the ICE_JAR_HOME path
+  variable. Instead, the most recent version of the Slice2Java Eclipse
+  plug-in creates the ICE_HOME classpath variable automatically, and
+  the sample projects now refer to this variable. See the README file
+  for details.
 
 
 ======================================================================

@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -104,12 +104,12 @@ public class HelloWorld extends Activity
         return Demo.HelloPrxHelper.uncheckedCast(prx);
     }
 
-    class SayHelloI extends Demo.AMI_Hello_sayHello implements Ice.AMISentCallback
+    class SayHelloI extends Demo.Callback_Hello_sayHello
     {
         private boolean _response = false;
 
         @Override
-        synchronized public void ice_exception(final Ice.LocalException ex)
+        synchronized public void exception(final Ice.LocalException ex)
         {
             assert (!_response);
             _response = true;
@@ -123,7 +123,8 @@ public class HelloWorld extends Activity
             });
         }
 
-        synchronized public void ice_sent()
+        @Override
+        synchronized public void sent(boolean sentSynchronously)
         {
             if(_response)
             {
@@ -152,7 +153,7 @@ public class HelloWorld extends Activity
         }
 
         @Override
-        synchronized public void ice_response()
+        synchronized public void response()
         {
             assert (!_response);
             _response = true;
@@ -179,7 +180,8 @@ public class HelloWorld extends Activity
         {
             if(!_deliveryMode.isBatch())
             {
-                if(hello.sayHello_async(new SayHelloI(), _delay.getProgress()))
+                Ice.AsyncResult r = hello.begin_sayHello(_delay.getProgress(), new SayHelloI());
+                if(r.sentSynchronously())
                 {
                     if(_deliveryMode == DeliveryMode.TWOWAY || _deliveryMode == DeliveryMode.TWOWAY_SECURE)
                     {
@@ -218,6 +220,7 @@ public class HelloWorld extends Activity
 
         _lastError = ex.toString();
         showDialog(DIALOG_ERROR);
+        ex.printStackTrace();
     }
 
     private void shutdown()
@@ -227,11 +230,10 @@ public class HelloWorld extends Activity
         {
             if(!_deliveryMode.isBatch())
             {
-                hello.shutdown_async(new Demo.AMI_Hello_shutdown()
+                hello.begin_shutdown(new Demo.Callback_Hello_shutdown()
                 {
-
                     @Override
-                    public void ice_exception(final Ice.LocalException ex)
+                    public void exception(final Ice.LocalException ex)
                     {
                         runOnUiThread(new Runnable()
                         {
@@ -243,7 +245,7 @@ public class HelloWorld extends Activity
                     }
 
                     @Override
-                    public void ice_response()
+                    public void response()
                     {
                         runOnUiThread(new Runnable()
                         {

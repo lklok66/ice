@@ -1,11 +1,12 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
+
 package com.zeroc.library.controller;
 
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class QueryController
     public enum QueryType
     {
         ISBN, TITLE, AUTHOR
-    };
+    }
     
     private ArrayList<Demo.BookDescription> _books = new ArrayList<Demo.BookDescription>();
     private int _nrows = 0;
@@ -124,59 +125,59 @@ public class QueryController
         
         if(_type == QueryType.ISBN)
         {
-            Demo.AMI_Library_queryByIsbn cb = new Demo.AMI_Library_queryByIsbn()
+            Demo.Callback_Library_queryByIsbn cb = new Demo.Callback_Library_queryByIsbn()
             {
                 @Override
-                public void ice_exception(Ice.LocalException ex)
+                public void exception(Ice.LocalException ex)
                 {
                     postError(ex.toString());
                 }
 
                 @Override
-                public void ice_response(List<Demo.BookDescription> first, int nrows, Demo.BookQueryResultPrx result)
+                public void response(List<Demo.BookDescription> first, int nrows, Demo.BookQueryResultPrx result)
                 {
                     queryResponse(first, nrows, result);
                 }
             };
 
-            _library.queryByIsbn_async(cb, _queryString, 10);
+            _library.begin_queryByIsbn(_queryString, 10, cb);
         }
         else if(_type == QueryType.AUTHOR)
         {
-            Demo.AMI_Library_queryByAuthor cb = new Demo.AMI_Library_queryByAuthor()
+            Demo.Callback_Library_queryByAuthor cb = new Demo.Callback_Library_queryByAuthor()
             {
                 @Override
-                public void ice_exception(Ice.LocalException ex)
+                public void exception(Ice.LocalException ex)
                 {
                     postError(ex.toString());
                 }
 
                 @Override
-                public void ice_response(List<Demo.BookDescription> first, int nrows, Demo.BookQueryResultPrx result)
+                public void response(List<Demo.BookDescription> first, int nrows, Demo.BookQueryResultPrx result)
                 {
                     queryResponse(first, nrows, result);
                 }
             };
 
-            _library.queryByAuthor_async(cb, _queryString, 10);
+            _library.begin_queryByAuthor(_queryString, 10, cb);
         }
         else
         {
-            Demo.AMI_Library_queryByTitle cb = new Demo.AMI_Library_queryByTitle()
+            Demo.Callback_Library_queryByTitle cb = new Demo.Callback_Library_queryByTitle()
             {
                 @Override
-                public void ice_exception(Ice.LocalException ex)
+                public void exception(Ice.LocalException ex)
                 {
                     postError(ex.toString());
                 }
 
                 @Override
-                public void ice_response(List<Demo.BookDescription> first, int nrows, Demo.BookQueryResultPrx result)
+                public void response(List<Demo.BookDescription> first, int nrows, Demo.BookQueryResultPrx result)
                 {
                     queryResponse(first, nrows, result);
                 }
             };
-            _library.queryByTitle_async(cb, _queryString, 10);
+            _library.begin_queryByTitle(_queryString, 10, cb);
         }
     }
 
@@ -184,15 +185,15 @@ public class QueryController
     {
         if(_query != null)
         {
-            _query.destroy_async(new Demo.AMI_BookQueryResult_destroy()
+            _query.begin_destroy(new Demo.Callback_BookQueryResult_destroy()
             {
                 @Override
-                public void ice_exception(Ice.LocalException ex)
+                public void exception(Ice.LocalException ex)
                 {
                 }
     
                 @Override
-                public void ice_response()
+                public void response()
                 {
                 }
             });
@@ -228,16 +229,16 @@ public class QueryController
             return;
         }
 
-        Demo.AMI_BookQueryResult_next cb = new Demo.AMI_BookQueryResult_next()
+        Demo.Callback_BookQueryResult_next cb = new Demo.Callback_BookQueryResult_next()
         {
             @Override
-            public void ice_exception(Ice.LocalException ex)
+            public void exception(Ice.LocalException ex)
             {
                 postError(ex.toString());
             }
 
             @Override
-            public void ice_response(final List<Demo.BookDescription> ret, final boolean destroyed)
+            public void response(final List<Demo.BookDescription> ret, final boolean destroyed)
             {
                 synchronized(QueryController.this)
                 {
@@ -246,7 +247,7 @@ public class QueryController
                 }
             }
         };
-        _query.next_async(cb, 10);
+        _query.begin_next(10, cb);
         _rowsQueried += 10;
     }
 
@@ -264,16 +265,16 @@ public class QueryController
     {
         assert _currentBook != NO_BOOK;
         final Demo.BookDescription desc = _books.get(_currentBook);
-        Demo.AMI_Book_returnBook returnBookCB = new Demo.AMI_Book_returnBook()
+        Demo.Callback_Book_returnBook returnBookCB = new Demo.Callback_Book_returnBook()
         {
             @Override
-            public void ice_exception(Ice.LocalException ex)
+            public void exception(Ice.LocalException ex)
             {
                 postError(ex.toString());
             }
 
             @Override
-            public void ice_exception(Ice.UserException ex)
+            public void exception(Ice.UserException ex)
             {
                 final String error;
                 if(ex instanceof Demo.BookNotRentedException)
@@ -288,7 +289,7 @@ public class QueryController
             }
 
             @Override
-            public void ice_response()
+            public void response()
             {
                 synchronized(QueryController.this)
                 {
@@ -297,23 +298,23 @@ public class QueryController
                 }
             }
         };
-        desc.proxy.returnBook_async(returnBookCB);
+        desc.proxy.begin_returnBook(returnBookCB);
     }
 
     synchronized public void rentBook(final String r)
     {
         assert _currentBook != NO_BOOK;
         final Demo.BookDescription desc = _books.get(_currentBook);
-        Demo.AMI_Book_rentBook rentBookCB = new Demo.AMI_Book_rentBook()
+        Demo.Callback_Book_rentBook rentBookCB = new Demo.Callback_Book_rentBook()
         {
             @Override
-            public void ice_exception(final Ice.LocalException ex)
+            public void exception(final Ice.LocalException ex)
             {
                 postError(ex.toString());
             }
 
             @Override
-            public void ice_exception(Ice.UserException ex)
+            public void exception(Ice.UserException ex)
             {
                 final String error;
                 if(ex instanceof Demo.InvalidCustomerException)
@@ -332,7 +333,7 @@ public class QueryController
             }
 
             @Override
-            public void ice_response()
+            public void response()
             {
                 synchronized(QueryController.this)
                 {
@@ -341,23 +342,23 @@ public class QueryController
                 }
             }
         };
-        desc.proxy.rentBook_async(rentBookCB, r);
+        desc.proxy.begin_rentBook(r, rentBookCB);
     }
 
     synchronized public void deleteBook()
     {
         assert _currentBook != NO_BOOK;
         final Demo.BookDescription desc = _books.get(_currentBook);
-        desc.proxy.destroy_async(new Demo.AMI_Book_destroy()
+        desc.proxy.begin_destroy(new Demo.Callback_Book_destroy()
         {
             @Override
-            public void ice_exception(Ice.LocalException ex)
+            public void exception(Ice.LocalException ex)
             {
                 postError(ex.toString());
             }
 
             @Override
-            public void ice_response()
+            public void response()
             {
                 synchronized(QueryController.this)
                 {
@@ -375,16 +376,17 @@ public class QueryController
         assert _currentBook != NO_BOOK;
         if(_currentBook == NEW_BOOK)
         {
-            _library.createBook_async(new Demo.AMI_Library_createBook()
+            _library.begin_createBook(newDesc.isbn, newDesc.title, newDesc.authors,
+                                      new Demo.Callback_Library_createBook()
             {
                 @Override
-                public void ice_exception(Ice.LocalException ex)
+                public void exception(Ice.LocalException ex)
                 {
                     postError(ex.toString());
                 }
 
                 @Override
-                public void ice_exception(Ice.UserException ex)
+                public void exception(Ice.UserException ex)
                 {
                     if(ex instanceof Demo.BookExistsException)
                     {
@@ -397,7 +399,7 @@ public class QueryController
                 }
 
                 @Override
-                public void ice_response(Demo.BookPrx ret)
+                public void response(Demo.BookPrx ret)
                 {
                     synchronized(QueryController.this)
                     {
@@ -406,7 +408,7 @@ public class QueryController
                     }
                 }
 
-            }, newDesc.isbn, newDesc.title, newDesc.authors);
+            });
             
             return true;
         }

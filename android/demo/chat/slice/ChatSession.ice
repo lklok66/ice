@@ -1,7 +1,6 @@
-
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -27,7 +26,7 @@ module Chat
  * with connected clients.
  *
  **/
-["ami"] interface ChatRoomCallback
+interface ChatRoomCallback
 {
     /**
      *
@@ -87,7 +86,7 @@ module Chat
  * @see Glacier2::Session
  *
  **/
-["ami"] interface ChatSession extends Glacier2::Session
+interface ChatSession extends Glacier2::Session
 {
     /**
      *

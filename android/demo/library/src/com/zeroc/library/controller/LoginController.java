@@ -1,11 +1,12 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2009 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
 //
 // **********************************************************************
+
 package com.zeroc.library.controller;
 
 import com.zeroc.library.R;
@@ -20,7 +21,7 @@ public class LoginController
         void onLoginInProgress();
         void onLogin(SessionController controller);
         void onLoginError();
-    };
+    }
 
     private boolean _destroyed = false;
     private Handler _handler;
@@ -45,7 +46,8 @@ public class LoginController
         }
     }
 
-    public LoginController(Resources resources, final String hostname, final boolean secure, final boolean glacier2, Listener listener)
+    public LoginController(Resources resources, final String hostname, final boolean secure, final boolean glacier2,
+                           Listener listener)
     {
         _handler = new Handler();
         _loginListener = listener;
@@ -234,14 +236,17 @@ public class LoginController
                 }
                 catch(final Glacier2.CannotCreateSessionException ex)
                 {
+                    ex.printStackTrace();
                     postLoginFailure(String.format("Session creation failed: %s", ex.reason));
                 }
                 catch(Glacier2.PermissionDeniedException ex)
                 {
+                    ex.printStackTrace();
                     postLoginFailure(String.format("Login failed: %s", ex.reason));
                 }
                 catch(Ice.LocalException ex)
                 {
+                    ex.printStackTrace();
                     postLoginFailure(String.format("Login failed: %s", ex.toString()));
                 }
             }
