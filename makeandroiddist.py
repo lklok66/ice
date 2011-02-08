@@ -104,7 +104,7 @@ os.chdir(os.path.dirname(__file__))
 #
 # Ice for Android version.
 #
-version = "0.2"
+version = "0.2.0"
 
 #
 # Ice tag.
@@ -160,7 +160,7 @@ os.system("make")
 os.chdir(os.path.join(iceDir, "cpp", "src", "slice2freezej"))
 os.system("make")
 os.chdir(os.path.join(iceDir, "java"))
-os.system("ant ice-jar")
+os.system("ant -Dant.build.javac.target=1.5 ice-jar")
 
 os.chdir(srcDir)
 
