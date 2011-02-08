@@ -24,7 +24,7 @@ This Ice for Android distribution contains the following components:
    * Chat (android/demo/chat)
    * Hello (android/demo/hello)
    * Library (android/demo/library)
- * Eclipse project a test suite (android/testsuite)
+ * Eclipse project for a test suite (android/testsuite)
  * Source patches for Ice 3.4.1 (android/patch.txt)
 
 We encourage you to review the RELEASE_NOTES file for important
@@ -127,7 +127,7 @@ projects in this distribution:
 
  2. Android ADT is installed and configured
 
-    See http://developer.android.com/sdk/installing.html
+    See http://developer.android.com/sdk/eclipse-adt.html#installing
 
  3. Ice 3.4.1 is installed
 

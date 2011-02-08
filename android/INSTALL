@@ -18,7 +18,7 @@ Neither the patch nor the Ice for Java 3.4.1 sources have any
 dependencies on Android and can be compiled using any suitable Ice for
 Java development environment. However, ZeroC only supports the
 development platforms that are also supported by the Android
-development tools, namely Mac OS X Leopard, Linux, and Windows.
+development tools, namely Mac OS X Snow Leopard, Linux, and Windows.
 
 
 ======================================================================
@@ -88,24 +88,23 @@ source distribution, as shown below on Unix:
 
   # On Unix.
   $ tar xzf Ice-3.4.1.tar.gz
-  $ tar xzf IceAndroid-0.2.tar.gz
+  $ tar xzf IceAndroid-0.2.0.tar.gz
 
 On Windows, use your favorite archive utility to extract the contents
-of Ice-3.4.1.zip and IceAndroid-0.2.zip.
+of Ice-3.4.1.zip and IceAndroid-0.2.0.zip.
 
 Apply the patch to the Ice 3.4.1 sources using the patch utility:
 
   # On Unix.
   $ cd Ice-3.4.1
-  $ patch -p1 < ../IceAndroid-0.2/android/patch.txt
+  $ patch -p1 < ../IceAndroid-0.2.0/android/patch.txt
 
   # On Windows.
   > cd Ice-3.4.1
-  > patch --binary -p1 < ..\IceAndroid-0.2\android\patch.txt
+  > patch --binary -p1 < ..\IceAndroid-0.2.0\android\patch.txt
 
 See "Applying Patches on Windows" below for important information.
 
-If you are building Ice for C++ from source, please follow the
 For more information on building Ice from source, please refer to the
 instructions provided in the INSTALL file that is appropriate for your
 platform in the top-level subdirectory of the Ice source distribution.
@@ -119,7 +118,7 @@ environment variable to point to your installation directory:
   # On Windows.
   > set ICE_HOME=C:\Ice-3.4.1
 
-Now you are ready to build the Ice for Android run time JAR file:
+You are now ready to build the Ice for Android run time JAR file:
 
   # On Unix.
   $ cd Ice-3.4.1/java
