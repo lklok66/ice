@@ -20,9 +20,12 @@ Table of Contents
 This Ice for Android distribution contains the following components:
 
  * Ice for Android run time (android/lib/Ice.jar)
- * Eclipse projects for three sample clients and a test suite
- * Source code for the demos and test suite driver
- * Source patches for Ice 3.4.1
+ * Eclipse projects for three sample clients
+   * Chat (android/demo/chat)
+   * Hello (android/demo/hello)
+   * Library (android/demo/library)
+ * Eclipse project a test suite (android/testsuite)
+ * Source patches for Ice 3.4.1 (android/patch.txt)
 
 We encourage you to review the RELEASE_NOTES file for important
 information about this release. If you are interested in building Ice
@@ -104,11 +107,11 @@ instructions below assume that you have replaced the standard Ice
  5. Open the lib subdirectory and select Ice.jar
  6. Click OK to save your changes
 
-The Slice2Java plug-in creates the ICE_HOME classpath variable, which
-always refers to the Ice installation directory you configured in the
-Eclipse Preferences dialog. If you installed the Ice for Android run
-time JAR file in a different location, you will need to add it to your
-project as an external JAR file.
+The Slice2Java plug-in automatically creates the ICE_HOME classpath
+variable, which always refers to the Ice installation directory that
+you configured in the Eclipse Preferences dialog. If you installed the
+Ice for Android run time JAR file in a different location, you will
+need to add it to your project as an external JAR file.
 
 
 ======================================================================
@@ -154,7 +157,7 @@ open one of the subdirectories of
 
   <IceAndroid-install>/android/demo
 
-To open the testsuite project, select the following subdirectory:
+To open the test suite project, select the following subdirectory:
 
   <IceAndroid-install>/android/testsuite
 

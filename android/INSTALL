@@ -3,24 +3,22 @@ Introduction
 ======================================================================
 
 This file describes how to build and install Ice for Android from
-source code. Note that this distribution also includes JAR files
-containing the Ice for Android run time (java/lib/IceAndroid.jar) and
-the Ice for Android tests (java/lib/IceTest.jar), therefore it is not
-usually necessary to compile the source yourself. Please refer to the
-README file for more information on incorporating Ice for Android into
-your development environment.
+source code. Note that this distribution also includes a JAR file
+containing the Ice for Android run time (android/lib/Ice.jar),
+therefore it is not usually necessary to compile the source yourself.
+Please refer to the README file for more information on incorporating
+Ice for Android into your development environment.
 
-This release of Ice for Android includes a modified version of Ice for
-Java 3.3 that addresses some limitations in the Android libraries. The
-source code of the Ice for Android run time has no dependencies on
-Android and can be compiled using any suitable Ice for Java
-development environment. However, ZeroC only supports the development
-platforms that are also supported by the Android development tools,
-namely Mac OS X Leopard, Linux, and Windows.
+This release of Ice for Android includes a patch for Ice 3.4.1. This
+patch (android/patch.txt) resolves several minor issues arising from
+differences in the implementation of Android APIs as compared to
+desktop Java implementations.
 
-After building the source you can run the demos and test suites on
-your development platform, but note that Ice for Android is only
-supported for use in creating Android applications.
+Neither the patch nor the Ice for Java 3.4.1 sources have any
+dependencies on Android and can be compiled using any suitable Ice for
+Java development environment. However, ZeroC only supports the
+development platforms that are also supported by the Android
+development tools, namely Mac OS X Leopard, Linux, and Windows.
 
 
 ======================================================================
@@ -31,9 +29,10 @@ Requirements
 Operating systems
 -----------------
 
-Ice for Android has been tested in the Android emulator and on the
-T-Mobile G1 handset. The supported development environments are
-Mac OS X Leopard, Red Hat Enterprise Linux 5.2, and Windows XP.
+Ice for Android has been tested in the emulator using Android 2.1,
+2.2, and 2.3, and on the T-Mobile G2 handset using Android 2.2. The
+supported development environments are Mac OS X Snow Leopard, Red Hat
+Enterprise Linux 5.4, and Windows XP or later.
 
 
 Java version
@@ -43,132 +42,129 @@ Ice for Android requires J2SE 1.5.0 or later.
 
 You can download Java5 and Java6 for Windows and Linux from:
 
-  http://java.sun.com
+  http://www.oracle.com/technetwork/java/index.html
 
 Make sure to add javac and java to your PATH.
-
-
-Ice
----
-
-Ice for Android requires an installation of Ice 3.3. You can download
-a binary distribution from the ZeroC web site, or you can build Ice
-yourself.
-
-Binary distributions for supported platforms are available at
-
-  http://www.zeroc.com/download.html
-
-ZeroC currently supplies Ice 3.3 RPM packages for RHEL 5.1, but these
-RPMs can also be used on RHEL 5.2. If you install Ice from RPMs, make
-sure you install the ice-java-devel RPM and its dependencies.
 
 
 Android SDK
 -----------
 
-Ice for Android requires the Android 1.1r1 SDK, which is available at
-the following link:
+Ice for Android requires the Android SDK, which is available at the
+following link:
 
   http://developer.android.com
+
+
+Ice
+---
+
+Download a copy of the Ice 3.4.1 source distribution from the ZeroC
+web site:
+
+  http://www.zeroc.com/download.html
+
+To save time, we also recommend installing a binary distribution of
+Ice 3.4.1. Doing so avoids the need for you to build portions of the
+Ice for C++ sources. If you prefer to build Ice for C++ as well, you
+will also need to install the third-party libraries required by Ice.
+
+
+ant
+---
+
+The ant utility, version 1.7.0 or later, is necessary for building the
+Ice for Android run time JAR file. You can download ant from
+
+  http://ant.apache.org
 
 
 ======================================================================
 Compiling the Source
 ======================================================================
 
-
-Preparing to Build
-------------------
-
-The Ice for Android build system requires Apache Ant 1.7.0 or later.
-Ant is available at the link below:
-
-  http://ant.apache.org/
-
-The build system requires the Slice-to-Java translator, the Slice
-files and the Slice Ant tasks from your Ice 3.3 distribution. The
-build system assumes that your Ice installation is located in a
-standard directory unless you set the ICE_HOME environment variable to
-specify an alternate location. Setting ICE_HOME is not necessary if
-you have installed Ice from RPMs, or if you installed it in
-/opt/Ice-3.3.0 on Unix or C:\Ice-3.3.0 on Windows. For example:
+Extract the Ice 3.4.1 source distribution and the Ice for Android
+source distribution, as shown below on Unix:
 
   # On Unix.
-  $ export ICE_HOME=$HOME/testing/Ice-3.3.0
+  $ tar xzf Ice-3.4.1.tar.gz
+  $ tar xzf IceAndroid-0.2.tar.gz
 
-  # On Windows
-  > set ICE_HOME=C:\testing\Ice-3.3.0
+On Windows, use your favorite archive utility to extract the contents
+of Ice-3.4.1.zip and IceAndroid-0.2.zip.
 
-Before building Ice for Android, review the settings in the file
-java/config/build.properties and edit as necessary.
+Apply the patch to the Ice 3.4.1 sources using the patch utility:
 
+  # On Unix.
+  $ cd Ice-3.4.1
+  $ patch -p1 < ../IceAndroid-0.2/android/patch.txt
 
-Building Ice for Android
-------------------------
+  # On Windows.
+  > cd Ice-3.4.1
+  > patch --binary -p1 < ..\IceAndroid-0.2\android\patch.txt
 
-Change your working directory to the java directory:
+See "Applying Patches on Windows" below for important information.
 
-  cd java
+If you are building Ice for C++ from source, please follow the
+For more information on building Ice from source, please refer to the
+instructions provided in the INSTALL file that is appropriate for your
+platform in the top-level subdirectory of the Ice source distribution.
 
-To build only the Ice for Android run time (IceAndroid.jar), use the
-following command:
+If you have installed an Ice binary distribution, set the ICE_HOME
+environment variable to point to your installation directory:
 
-  ant ice-jar
+  # On Unix.
+  $ export ICE_HOME=/opt/Ice-3.4.1
 
-To build the entire source distribution, including tests and sample
-programs, use this command:
+  # On Windows.
+  > set ICE_HOME=C:\Ice-3.4.1
 
-  ant
+Now you are ready to build the Ice for Android run time JAR file:
 
-Upon completion, the JAR files can be found in the "lib" subdirectory.
+  # On Unix.
+  $ cd Ice-3.4.1/java
+  $ ant ice-jar
 
-If at any time you wish to discard the current build and start a new
-one, use these commands:
+  # On Windows.
+  > cd Ice-3.4.1\java
+  > ant ice-jar
 
-  ant clean
-  ant
+Upon successful completion of the build, the JAR file can be found in
+lib/Ice.jar.
 
 
 ======================================================================
 Installation
 ======================================================================
 
-The only file installed by this distribution is
+You can copy lib/Ice.jar to the location of your choice.
 
-  java/lib/IceAndroid.jar
-
-You can copy this file to the location of your choice, or you can run
-"ant install" to copy this file to the directory specified by the
-"prefix" variable in config/build.properties. It is not necessary to
-rebuild Ice for Android after changing the value of the prefix
-variable.
-
-After installation, add IceAndroid.jar to your CLASSPATH or to your
-Eclipse configuration. Refer to the README file for more information.
+After installation, add Ice.jar to your CLASSPATH or to your Eclipse
+configuration. Refer to the README file for more information.
 
 
 ======================================================================
-Tests
+Applying Patches on Windows
 ======================================================================
 
-You will need Python to run the test suite on your development
-platform:
+Applying patches requires the "patch" utility. You can download a
+Windows executable from the following location:
 
-  http://www.python.org/download
+  http://gnuwin32.sourceforge.net/packages/patch.htm
 
-To run the tests, open a command window and change to the java
-directory. At the command prompt, execute:
+On Windows Vista or later, UAC can make it difficult to use the patch
+utility unless you take extra steps. One solution is to run patch.exe
+in a command window that you started with Administrator privileges
+(right-click on Command Prompt in the Start menu and choose "Run as
+administrator"). If running as administrator is not an option, follow
+these recommendations:
 
-  python allTests.py
+  1. Do not install patch.exe in a system-protected directory such as
+     C:\Program Files.
 
-You can also run tests individually by changing to the test directory
-and running this command:
+  2. Create a manifest file named patch.exe.manifest as explained at
+     the link below:
 
-  python run.py
+     http://drupal.org/node/99903
 
-If everything worked out, you should see lots of "ok" messages. In
-case of a failure, the tests abort with "failed".
-
-You can also run the test suite as an Android application, as
-described in the README file.
+     Place the manifest file in the same directory as patch.exe.

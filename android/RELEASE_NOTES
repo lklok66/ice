@@ -14,9 +14,9 @@ Table of Contents
 ======================================================================
 
 Initial releases of Ice for Android contained a modified copy of the
-Ice for Java run time, with substantial changes that addressed short-
-comings in the Android implementation of the standard APIs that Ice
-uses.
+Ice for Java run time. Substantial changes were necessary to address
+shortcomings in the Android implementation of the standard APIs that
+Ice uses.
 
 The Android implementation has improved greatly since then, such
 that now only a few minor patches to the standard Ice for Java 3.4.1
