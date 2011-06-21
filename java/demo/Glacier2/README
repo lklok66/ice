@@ -12,4 +12,4 @@ Demos in this directory:
 
 - voip
 
-  A demo voip server for IceTouch
+   This demo contains the server side for the Ice Touch VOIP demo.

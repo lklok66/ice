@@ -19,8 +19,13 @@ third-party dependencies. The installer is available at
 
 If you prefer to compile the third-party packages from source code, we
 recommend that you use the same Visual C++ version to build all of the
-packages. You will need a utility such as WinZip to extract the
-source code distributions.
+packages.
+
+You can use an archive utility such as 7-Zip to extract the source
+code packages in this distribution. 7-Zip is available for free at the
+link below:
+
+  http://www.7-zip.org
 
 For more information about the third-party dependencies, please refer
 to the links below:
@@ -79,7 +84,7 @@ these recommendations:
 bzip2
 -----
 
-The bzip2-1.0.5 distribution does not directly support creating DLLs.
+The bzip2-1.0.6 distribution does not directly support creating DLLs.
 The file bzlib.patch in this archive contains a patch for bzlib.h that
 allows bzip2 to be compiled into a DLL.
 
@@ -99,7 +104,7 @@ After extracting the Berkeley DB 4.8.30 source distribution, change
 to the top-level directory and apply the patches as shown below:
 
  > cd db-4.8.30
- > patch --binary -p0 < patch.db-4.8.30.17646
+ > patch --binary -p0 < ..\db\patch.db-4.8.30.17646
 
 
 mcpp
@@ -113,7 +118,7 @@ After extracting the mcpp source distribution, change to the top-level
 directory and apply the patch as shown below:
 
   > cd mcpp-2.7.2
-  > patch --binary -p0 < patch.mcpp.2.7.2
+  > patch --binary -p0 < ..\mcpp\patch.mcpp.2.7.2
 
 
 ======================================================================

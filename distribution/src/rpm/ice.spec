@@ -1,13 +1,13 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
 #
 # **********************************************************************
 
-%if "%{dist}" == ".rhel5"
+%if "%{dist}" == ".rhel5" || "%{dist}" == ".rhel6"
   %define ruby 1
   %define mono 0
 %else
@@ -25,7 +25,7 @@
 
 %define core_arches %{ix86} x86_64
 
-%if "%{dist}" == ".rhel5"
+%if "%{dist}" == ".rhel5" || "%{dist}" == ".rhel6"
   %ifarch x86_64
     %define qt_home /usr/lib64/qt4
   %else
@@ -56,7 +56,7 @@
 %endif
 
 Name: ice
-Version: 3.4.1
+Version: 3.4.2
 Summary: Files common to all Ice packages 
 Release: 1%{?dist}
 License: GPL with exceptions
@@ -69,11 +69,12 @@ Source1: Ice-rpmbuild-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %define soversion 34
-%define dotnetversion 3.4.1
+%define dotnetversion 3.4.2
 %define dotnetpolicyversion 3.4
 
-%define formsversion 1.2.1
-%define looksversion 2.3.0
+%define commonversion 1.2.0
+%define formsversion 1.4.1
+%define looksversion 2.4.1
 %define dbversion 4.8.30
 
 BuildRequires: openssl-devel >= 0.9.7a
@@ -85,8 +86,9 @@ BuildRequires: mcpp-devel >= 2.7.2
 # Prerequisites for building Ice for Java:
 #
 # - a recent version of ant
+# - %{_javadir}/jgoodies-common-%{commonversion}.jar
 # - %{_javadir}/jgoodies-forms-%{formsversion}.jar
-# - %{_javadir}/jgoodies-forms-%{looksversion}.jar
+# - %{_javadir}/jgoodies-looks-%{looksversion}.jar
 # - %{_javadir}/proguard.jar
 #
 # Use find-jar to verify that the JAR files are present:
@@ -108,6 +110,13 @@ BuildRequires: expat-devel >= 1.95.8
 BuildRequires: php-devel >= 5.1.6
 BuildRequires: python-devel >= 2.4.3
 BuildRequires: qt4-devel >= 4.2.1
+%endif
+%if "%{dist}" == ".rhel6"
+BuildRequires: bzip2-devel >= 1.0.5
+BuildRequires: expat-devel >= 2.0.1
+BuildRequires: php-devel >= 5.3.2
+BuildRequires: python-devel >= 2.6.5
+BuildRequires: qt-devel >= 4.6.2
 %endif
 %if "%{dist}" == ".sles11"
 BuildRequires: php5-devel >= 5.2.6
@@ -183,7 +192,7 @@ Requires: ice-mono = %{version}-%{release}
 %if "%{dist}" == ".sles11"
 Requires(pre): pwdutils
 %endif
-%if "%{dist}" == ".rhel5"
+%if "%{dist}" == ".rhel5" || "%{dist}" == ".rhel6"
 Requires(pre): shadow-utils
 %endif
 # Requirements for the init.d services
@@ -255,7 +264,7 @@ Requires: ice-libs = %{version}-%{release}
 %if "%{dist}" == ".sles11"
 Requires: php5
 %endif
-%if "%{dist}" == ".rhel5"
+%if "%{dist}" == ".rhel5" || "%{dist}" == ".rhel6"
 Requires: php
 %endif
 %description php
@@ -278,6 +287,9 @@ Requires(pre): libqt4
 %endif
 %if "%{dist}" == ".rhel5"
 Requires(pre): qt4
+%endif
+%if "%{dist}" == ".rhel6"
+Requires(pre): qt
 %endif
 %description sqldb
 Database plug-ins that allow the IceGrid registry and IceStorm
@@ -338,11 +350,12 @@ make %{makeopts} OPTIMIZE=yes embedded_runpath_prefix=""
 # ant-ice.jar in a non-noarch package.
 #
 cd $RPM_BUILD_DIR/Ice-%{version}/java
-export CLASSPATH=`build-classpath db-%{dbversion} jgoodies-forms-%{formsversion} jgoodies-looks-%{looksversion} proguard`
+export CLASSPATH=`build-classpath db-%{dbversion} jgoodies-common-%{commonversion} jgoodies-forms-%{formsversion} jgoodies-looks-%{looksversion} proguard`
+JGOODIES_COMMON=`find-jar jgoodies-common-%{commonversion}`
 JGOODIES_FORMS=`find-jar jgoodies-forms-%{formsversion}`
 JGOODIES_LOOKS=`find-jar jgoodies-looks-%{looksversion}`
 
-ant -Djgoodies.forms=$JGOODIES_FORMS -Djgoodies.looks=$JGOODIES_LOOKS dist-jar
+ant -Djgoodies.common=$JGOODIES_COMMON -Djgoodies.forms=$JGOODIES_FORMS -Djgoodies.looks=$JGOODIES_LOOKS dist-jar
 
 # 
 # We build mono all the time because we include iceboxnet.exe in an
@@ -403,7 +416,7 @@ cp -p $RPM_BUILD_DIR/Ice-rpmbuild-%{version}/ice.pth $RPM_BUILD_ROOT%{python_sit
 cd $RPM_BUILD_DIR/Ice-%{version}/php
 make prefix=$RPM_BUILD_ROOT install
 
-%if "%{dist}" == ".rhel5"
+%if "%{dist}" == ".rhel5" || "%{dist}" == ".rhel6"
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/php.d
 cp -p $RPM_BUILD_DIR/Ice-rpmbuild-%{version}/ice.ini $RPM_BUILD_ROOT%{_sysconfdir}/php.d
 mkdir -p $RPM_BUILD_ROOT%{_libdir}/php/modules
@@ -844,7 +857,7 @@ fi
 %files php
 %defattr(-, root, root, -)
 
-%if "%{dist}" == ".rhel5"
+%if "%{dist}" == ".rhel5" || "%{dist}" == ".rhel6"
 %{_datadir}/php
 %{_libdir}/php/modules/IcePHP.so
 %config(noreplace) %{_sysconfdir}/php.d/ice.ini

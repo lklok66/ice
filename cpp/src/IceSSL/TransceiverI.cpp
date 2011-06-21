@@ -1,6 +1,6 @@
 // **********************************************************************
 //
-// Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
+// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 //
 // This copy of Ice is licensed to you under the terms described in the
 // ICE_LICENSE file included in this distribution.
@@ -56,7 +56,7 @@ IceSSL::TransceiverI::initialize()
         if(_state == StateNeedConnect)
         {
             _state = StateConnectPending;
-            return IceInternal::SocketOperationConnect; 
+            return IceInternal::SocketOperationConnect;
         }
         else if(_state <= StateConnectPending)
         {
@@ -67,7 +67,7 @@ IceSSL::TransceiverI::initialize()
             IceInternal::doFinishConnect(_fd);
 #else
             IceInternal::doFinishConnectAsync(_fd, _write);
-#endif            
+#endif
             _state = StateConnected;
             _desc = IceInternal::fdToString(_fd);
         }
@@ -106,8 +106,9 @@ IceSSL::TransceiverI::initialize()
             if(!BIO_new_bio_pair(&bio, _maxSendPacketSize, &_iocpBio, _maxReceivePacketSize))
             {
                 bio = 0;
+                _iocpBio = 0;
             }
-#endif        
+#endif
             if(!bio)
             {
                 SecurityException ex(__FILE__, __LINE__);
@@ -119,6 +120,10 @@ IceSSL::TransceiverI::initialize()
             if(!_ssl)
             {
                 BIO_free(bio);
+#ifdef ICE_USE_IOCP
+                BIO_free(_iocpBio);
+                _iocpBio = 0;
+#endif
                 SecurityException ex(__FILE__, __LINE__);
                 ex.reason = "openssl failure";
                 throw ex;
@@ -176,7 +181,7 @@ IceSSL::TransceiverI::initialize()
                     return IceInternal::SocketOperationWrite;
                 }
                 case SSL_ERROR_SYSCALL:
-                {            
+                {
                     if(ret == 0)
                     {
                         ConnectionLostException ex(__FILE__, __LINE__);
@@ -184,14 +189,14 @@ IceSSL::TransceiverI::initialize()
                         throw ex;
                     }
 
-#ifndef ICE_USE_IOCP                
+#ifndef ICE_USE_IOCP
                     if(ret == -1)
                     {
                         if(IceInternal::interrupted())
                         {
                             break;
                         }
-                
+
                         if(IceInternal::wouldBlock())
                         {
                             if(SSL_want_read(_ssl))
@@ -202,10 +207,10 @@ IceSSL::TransceiverI::initialize()
                             {
                                 return IceInternal::SocketOperationWrite;
                             }
-                    
+
                             break;
                         }
-                
+
                         if(IceInternal::connectionLost())
                         {
                             ConnectionLostException ex(__FILE__, __LINE__);
@@ -245,7 +250,14 @@ IceSSL::TransceiverI::initialize()
         if(_instance->networkTraceLevel() >= 2)
         {
             Trace out(_logger, _instance->networkTraceCategory());
-            out << "failed to establish ssl connection\n" << _desc << "\n" << ex;
+
+            struct sockaddr_storage localAddr;
+            IceInternal::fdToLocalAddress(_fd, localAddr);
+
+            out << "failed to establish ssl connection\n"
+                    << "local address: " << IceInternal::addrToString(localAddr) << "\n"
+                    << "remote address: " << IceInternal::addrToString(_connectAddr) << "\n"
+                    << ex;
         }
         throw;
     }
@@ -283,7 +295,7 @@ IceSSL::TransceiverI::close()
     if(_ssl)
     {
         int err = SSL_shutdown(_ssl);
-    
+
         //
         // Call it one more time if it returned 0.
         //
@@ -295,6 +307,14 @@ IceSSL::TransceiverI::close()
         SSL_free(_ssl);
         _ssl = 0;
     }
+
+#ifdef ICE_USE_IOCP
+    if(_iocpBio)
+    {
+        BIO_free(_iocpBio);
+        _iocpBio = 0;
+    }
+#endif
 
     assert(_fd != INVALID_SOCKET);
     try
@@ -464,7 +484,7 @@ IceSSL::TransceiverI::read(IceInternal::Buffer& buf)
 #endif
 
     // It's impossible for the packetSize to be more than an Int.
-    int packetSize = static_cast<int>(buf.b.end() - buf.i);    
+    int packetSize = static_cast<int>(buf.b.end() - buf.i);
     while(buf.i != buf.b.end())
     {
         ERR_clear_error(); // Clear any spurious errors.
@@ -629,7 +649,7 @@ IceSSL::TransceiverI::startWrite(IceInternal::Buffer& buf)
 
     int packetSize = static_cast<int>(_writeBuffer.end() - _writeI);
     if(_maxSendPacketSize > 0 && packetSize > _maxSendPacketSize)
-    { 
+    {
         packetSize = _maxSendPacketSize;
     }
 
@@ -733,7 +753,7 @@ IceSSL::TransceiverI::startRead(IceInternal::Buffer& buf)
     }
 }
 
-void 
+void
 IceSSL::TransceiverI::finishRead(IceInternal::Buffer& buf)
 {
     if(_read.count == SOCKET_ERROR)
@@ -755,7 +775,7 @@ IceSSL::TransceiverI::finishRead(IceInternal::Buffer& buf)
 
     _readI += _read.count;
 
-    if(_readI == _readBuffer.end())
+    if(_iocpBio && _readI == _readBuffer.end())
     {
         assert(_readI == _readBuffer.end());
         int n = BIO_write(_iocpBio, &_readBuffer[0], static_cast<int>(_readBuffer.size()));
@@ -782,7 +802,7 @@ IceSSL::TransceiverI::toString() const
     return _desc;
 }
 
-Ice::ConnectionInfoPtr 
+Ice::ConnectionInfoPtr
 IceSSL::TransceiverI::getInfo() const
 {
     return getNativeConnectionInfo();
@@ -797,7 +817,7 @@ IceSSL::TransceiverI::checkSendSize(const IceInternal::Buffer& buf, size_t messa
     }
 }
 
-IceSSL::TransceiverI::TransceiverI(const InstancePtr& instance, SOCKET fd, const string& host, 
+IceSSL::TransceiverI::TransceiverI(const InstancePtr& instance, SOCKET fd, const string& host,
                                    const struct sockaddr_storage& addr) :
     IceInternal::NativeInfo(fd),
     _instance(instance),
@@ -808,7 +828,8 @@ IceSSL::TransceiverI::TransceiverI(const InstancePtr& instance, SOCKET fd, const
     _incoming(false),
     _state(StateNeedConnect)
 #ifdef ICE_USE_IOCP
-    , _read(IceInternal::SocketOperationRead), 
+    , _iocpBio(0),
+    _read(IceInternal::SocketOperationRead),
     _write(IceInternal::SocketOperationWrite)
 #endif
 {
@@ -830,9 +851,8 @@ IceSSL::TransceiverI::TransceiverI(const InstancePtr& instance, SOCKET fd, const
     {
         _desc = IceInternal::fdToString(_fd);
     }
-#else
-    _connectAddr = addr;
 #endif
+    _connectAddr = addr;
 }
 
 IceSSL::TransceiverI::TransceiverI(const InstancePtr& instance, SOCKET fd, const string& adapterName) :
@@ -846,7 +866,8 @@ IceSSL::TransceiverI::TransceiverI(const InstancePtr& instance, SOCKET fd, const
     _state(StateConnected),
     _desc(IceInternal::fdToString(fd))
 #ifdef ICE_USE_IOCP
-    , _read(IceInternal::SocketOperationRead), 
+    , _iocpBio(0),
+    _read(IceInternal::SocketOperationRead),
     _write(IceInternal::SocketOperationWrite)
 #endif
 {
@@ -887,7 +908,7 @@ IceSSL::TransceiverI::getNativeConnectionInfo() const
     {
         X509_free(cert);
     }
-    
+
     if(chain != 0)
     {
         for(int i = 0; i < sk_X509_num(chain); ++i)
@@ -900,12 +921,13 @@ IceSSL::TransceiverI::getNativeConnectionInfo() const
             info->certs.push_back(certificate->encode());
         }
     }
-    
+
     info->cipher = SSL_get_cipher_name(_ssl); // Nothing needs to be free'd.
     info->adapterName = _adapterName;
     info->incoming = _incoming;
     return info;
 }
+
 #ifdef ICE_USE_IOCP
 bool
 IceSSL::TransceiverI::receive()
@@ -935,7 +957,7 @@ IceSSL::TransceiverI::receive()
             {
                 continue;
             }
-            
+
             if(IceInternal::noBuffers() && packetSize > 1024)
             {
                 packetSize /= 2;
@@ -946,7 +968,7 @@ IceSSL::TransceiverI::receive()
             {
                 return false;
             }
-            
+
             if(IceInternal::connectionLost())
             {
                 ConnectionLostException ex(__FILE__, __LINE__);
@@ -988,7 +1010,7 @@ IceSSL::TransceiverI::send()
 
     int packetSize = static_cast<int>(_writeBuffer.end() - _writeI);
     if(_maxSendPacketSize > 0 && packetSize > _maxSendPacketSize)
-    { 
+    {
         packetSize = _maxSendPacketSize;
     }
 
@@ -1001,7 +1023,7 @@ IceSSL::TransceiverI::send()
             ex.error = 0;
             throw ex;
         }
-        
+
         if(ret == SOCKET_ERROR)
         {
             if(IceInternal::interrupted())
@@ -1019,7 +1041,7 @@ IceSSL::TransceiverI::send()
             {
                 return false;
             }
-            
+
             if(IceInternal::connectionLost())
             {
                 ConnectionLostException ex(__FILE__, __LINE__);
@@ -1033,7 +1055,7 @@ IceSSL::TransceiverI::send()
                 throw ex;
             }
         }
-        
+
         _writeI += ret;
         if(packetSize > _writeBuffer.end() - _writeI)
         {

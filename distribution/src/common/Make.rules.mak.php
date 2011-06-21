@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -31,7 +31,7 @@ slice_translator = slice2php.exe
 !include $(top_srcdir)\config\Make.common.rules.mak
 !endif
 
-!if "$(ice_src_dist)" != ""
+!if exist ($(top_srcdir)\..\cpp\config\Make.rules.msvc)
 !include $(top_srcdir)\..\cpp\config\Make.rules.msvc
 !else
 !include $(top_srcdir)\config\Make.rules.msvc

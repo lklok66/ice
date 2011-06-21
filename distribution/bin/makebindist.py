@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -56,6 +56,7 @@ thirdParties = [
     "Mcpp", \
     "Qt", \
     "Iconv", \
+    "JGoodiesCommon", \
     "JGoodiesLooks", \
     "JGoodiesForms", \
     "Proguard", \
@@ -192,7 +193,7 @@ for l in buildLanguages:
         antCmd = platform.getAntEnv() + " ant " + platform.getAntOptions() + " -Dprefix=" + buildDir
 
 	jgoodiesDefines = "-Djgoodies.forms=" + platform.getJGoodiesForms() + " -Djgoodies.looks=" + \
-			  platform.getJGoodiesLooks()
+			  platform.getJGoodiesLooks() + " -Djgoodies.common=" + platform.getJGoodiesCommon()
 
         if os.system(antCmd + " " + jgoodiesDefines + " install") != 0: 
            print sys.argv[0] + ": `" + l + "' build failed"

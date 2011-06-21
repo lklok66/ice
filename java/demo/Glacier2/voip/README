@@ -1,35 +1,7 @@
-This demo contains the server side for the Ice Touch 1.1.0 VOIP demo.
+This demo contains the server side for the Ice Touch VOIP demo.
 
 A running instance of this server is also publicly available on
 demo2.zeroc.com.
-
-======================================================================
-Requirements
-======================================================================
-
-Ice version
------------
-
-This VOIP demo server is implemented in Java and requires Ice 3.4.1.
-
-
-Java and Apache Ant
--------------------
-
-The VOIP demo requires the same versions of Java and Ant as Ice 3.4.1. 
-Please refer to the Ice 3.4.1 documentation for more information.
-
-======================================================================
-Build
-======================================================================
-
-Review and if necessary edit config/build.properties to establish your 
-Java build configuration.
-
-Then build the VOIP demo server:
-
-  $ ant
-
 
 ======================================================================
 Running the VOIP server
@@ -38,17 +10,18 @@ Running the VOIP server
 Before running the server, review the server and Glacier2 router
 configuration files, config.server and config.glacier2 respectively.
 
-Starting the VOIP server
-------------------------
+To run the demo:
 
-On Linux with a RPM installation:
-  $ java -cp classes:/usr/share/java/Ice-3.4.1.jar Server
+Start the server:
 
-On Windows x64, with Ice installed in its default location:
-  > java -cp "classes;C:\Program Files (x86)\ZeroC\Ice-3.4.1\lib\Ice.jar" Server
+$ java Server
 
-
-Starting the Glacier2 router
-----------------------------
+In a separate window, start the Glacier2 router:
 
 $ glacier2router --Ice.Config=config.glacier2
+
+======================================================================
+Running the VOIP client
+======================================================================
+
+The client for this demo is part of the Ice Touch distribution.

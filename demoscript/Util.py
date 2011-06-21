@@ -1,6 +1,6 @@
 # **********************************************************************
 #
-# Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -558,9 +558,9 @@ def spawn(command, cwd = None, mapping = None):
         command = "./" + command
     elif mapping == "java":
         if preferIPv4:
-            command = command.replace("java", "java -Djava.net.preferIPv4Stack=true")
+            command = command.replace("java", "java -Djava.net.preferIPv4Stack=true", 1)
         if isSolaris() and x64:
-            command = command.replace("java", "java -d64")
+            command = command.replace("java", "java -d64", 1)
     elif mapping == "cpp":
         if cwd != None:
             desc = os.path.join(cwd, desc)

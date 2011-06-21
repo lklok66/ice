@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # **********************************************************************
 #
-# Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
 #
 # This copy of Ice is licensed to you under the terms described in the
 # ICE_LICENSE file included in this distribution.
@@ -12,6 +12,7 @@ import os, sys, fnmatch, re, getopt
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
 from DistUtils import *
+import FixUtil
 
 #
 # Sub-directories to keep to create the source distributions.
@@ -24,7 +25,7 @@ includeSubDirs = [ \
     "py", \
     "vb", \
     "rb", \
-    "vsplugin", \
+    "vsaddin", \
     "config", \
     "scripts", \
     "certs", \
@@ -171,8 +172,10 @@ fixVersion(os.path.join("cpp", "config", "icegridregistry.cfg"), *versions)
 fixVersion(os.path.join("distribution", "src", "rpm", "glacier2router.conf"), *versions)
 fixVersion(os.path.join("distribution", "src", "rpm", "icegridregistry.conf"), *versions)
 fixVersion(os.path.join("distribution", "src", "rpm", "RPM_README"), *versions)
-fixVersion(os.path.join("vsplugin", "config", "Ice-VS2008.AddIn"), *versions)
-fixVersion(os.path.join("vsplugin", "config", "Ice-VS2010.AddIn"), *versions)
+fixVersion(os.path.join("vsaddin", "config", "Ice-VS2008.AddIn"), *versions)
+fixVersion(os.path.join("vsaddin", "config", "Ice-VS2010.AddIn"), *versions)
+fixVersion(os.path.join("vsaddin", "config", "ice.vsprops"), *versions)
+fixVersion(os.path.join("vsaddin", "config", "ice.props"), *versions)
 
 bisonFiles = []
 flexFiles = []
@@ -290,41 +293,18 @@ for d in os.listdir('.'):
         copy(os.path.join(d, "demo"), os.path.join(winDemoDir, getMappingDir("demo", d)))
 
 rmFiles = []
-csprojSubstituteExprs = [(re.compile(regexpEscape("ZerocIce_Home=\"..\..\..\..\"")), "")]
-slice2freezeSubstituteExprs = [(re.compile(regexpEscape("..\\..\\..\\bin\\slice2freeze")), "&quot;$(IceHome)&quot;\\\\bin\\slice2freeze")]
+
 for root, dirnames, filesnames in os.walk(winDemoDir):
     for f in filesnames:
 
+        if fnmatch.fnmatch(f, "README"):
+	    oldreadme = os.path.join(root, f)
+	    newreadme = oldreadme + ".txt"
+	    os.rename(oldreadme, newreadme)
+	    os.system('unix2dos -q ' + newreadme)
+
         if fnmatch.fnmatch(f, "config*"):
             substitute(os.path.join(root, f), configSubstituteExprs)
-
-        # Remove ZerocIce_Home setting from C# and VB projects
-        if fnmatch.fnmatch(f, "*.csproj") or fnmatch.fnmatch(f, "*.vbproj"):
-            substitute(os.path.join(root, f), csprojSubstituteExprs)
-
-        if fnmatch.fnmatch(f, "*.vcproj"):
-            # Remove ZerocIce_Home setting from C++ projects
-            foundGlobal = False
-            deleteLines = 0
-            globalLine = None
-            for line in fileinput.input(os.path.join(root, f), True):
-                if deleteLines > 0:
-                    deleteLines = deleteLines - 1
-                elif foundGlobal:
-                    if line.find("Name=\"ZerocIce_Home\"") != -1:
-                        deleteLines = 2
-                    else:
-                        print globalLine,
-                        print line,
-                    foundGlobal = False
-                elif line.find("<Global") != -1:
-                        foundGlobal = True
-                        globalLine = line
-                else:
-                    print line,
-
-            # Fix slice2freeze commands
-            substitute(os.path.join(root, f), slice2freezeSubstituteExprs)
 
         for m in [ "Makefile", ".depend", "*.exe.config" ]:
             if fnmatch.fnmatch(f, m):
@@ -336,6 +316,13 @@ for d in ["democs", "demovb"]:
             for m in [ "Makefile.mak", ".depend.mak" ]:
                 if fnmatch.fnmatch(f, m):
                     rmFiles.append(os.path.join(root[len(winDemoDir) + 1:], f))
+
+for d in ["demo", "democs", "demovb"]:
+    for root, dirnames, filesnames in os.walk(os.path.join(winDemoDir, d)):
+        for f in filesnames:
+            for m in [ "*.vcproj", "*.vcxproj", "*.vcxproj.filters", "*.csproj", "*.vbproj" ]:
+                if fnmatch.fnmatch(f, m):
+		    FixUtil.fileMatchAndReplace(os.path.join(root, f), [("(README)", "README.txt")], False)
 
 for f in rmFiles: remove(os.path.join(winDemoDir, f))
 
@@ -374,11 +361,12 @@ for d in [srcDir, demoDir, distFilesDir, rpmBuildDir]:
 for (dir, archiveDir) in [(demoscriptDir, "Ice-" + version + "-demos")]:
     tarArchive(dir, verbose, archiveDir)
 
-for d in [srcDir]:
-    zipArchive(d, verbose)
+zipArchive(srcDir, verbose)
 
 for (dir, archiveDir) in [(winDemoDir, "Ice-" + version + "-demos")]:
     zipArchive(dir, verbose, archiveDir)
+
+os.rename(os.path.join(distDir, "demos.zip"), os.path.join(distDir, "Ice-" + version + "-demos.zip"))
 
 #
 # Write source distribution report in README file.

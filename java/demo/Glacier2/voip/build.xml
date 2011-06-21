@@ -1,7 +1,11 @@
 <!--
  **********************************************************************
 
+<<<<<<< HEAD
  Copyright (c) 2003-2010 ZeroC, Inc. All rights reserved.
+=======
+ Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
+>>>>>>> R3_4_2
 
  This copy of Ice is licensed to you under the terms described in the
  ICE_LICENSE file included in this distribution.
@@ -20,10 +24,10 @@
     <target name="generate" depends="init">
         <!-- Create the output directory for generated code -->
         <mkdir dir="${generated.dir}"/>
-         <includepath>
-            <pathelement path="${slice.dir}"/>
-        </includepath>
         <slice2java outputdir="${generated.dir}">
+            <includepath>
+                <pathelement path="${slice.dir}"/>
+            </includepath>
             <fileset dir="." includes="Voip.ice"/>
         </slice2java>
     </target>
