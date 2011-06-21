@@ -1722,7 +1722,7 @@ Slice::Gen::TypesVisitor::writeMemberDefaultValueInit(const DataMemberList& data
 {
     for(DataMemberList::const_iterator p = dataMembers.begin(); p != dataMembers.end(); ++p)
     {
-        if((*p)->hasDefaultValue())
+        if((*p)->defaultValueType())
         {
             _M << nl << fixId((*p)->name(), baseType) << " = ";
             writeConstantValue(_M, (*p)->type(), (*p)->defaultValue());
