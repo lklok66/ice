@@ -202,7 +202,7 @@
 		089C1669FE841209C02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = 1DEB913E08733D840010E9CD /* Build configuration list for PBXProject "slice2objcplugin" */;
-			compatibilityVersion = "Xcode 3.1";
+			compatibilityVersion = "Xcode 4.0";
 			hasScannedForEncodings = 1;
 			mainGroup = 089C166AFE841209C02AAC07 /* slice2objcplugin */;
 			projectDirPath = "";
@@ -272,8 +272,7 @@
 				EXECUTABLE_EXTENSION = "";
 				EXECUTABLE_SUFFIX = "";
 				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(DEVELOPER_DIR)/Library/PrivateFrameworks\"",
+					"/Developer/Library/Xcode/PrivatePlugIns/Xcode3Core.ideplugin/Contents/Frameworks",
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -282,14 +281,14 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = slice2objcplugin_Prefix.pch;
-				GCC_PREPROCESSOR_DEFINITIONS = "XCODE_VERSION=31";
+				GCC_PREPROCESSOR_DEFINITIONS = "XCODE_VERSION=40";
 				HEADER_SEARCH_PATHS = (
 					Headers,
 					.,
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
-				LD_RUNPATH_SEARCH_PATHS = /Developer;
+				LD_RUNPATH_SEARCH_PATHS = "/Developer/Library/Xcode/PrivatePlugIns/Xcode3Core.ideplugin/Contents/Frameworks";
 				PRODUCT_NAME = slice2objcplugin;
 				WRAPPER_EXTENSION = pbplugin;
 			};
@@ -305,21 +304,20 @@
 				EXECUTABLE_EXTENSION = "";
 				EXECUTABLE_SUFFIX = "";
 				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(DEVELOPER_DIR)/Library/PrivateFrameworks\"",
+					"/Developer/Library/Xcode/PrivatePlugIns/Xcode3Core.ideplugin/Contents/Frameworks",
 				);
 				GCC_ENABLE_OBJC_GC = supported;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = slice2objcplugin_Prefix.pch;
-				GCC_PREPROCESSOR_DEFINITIONS = "XCODE_VERSION=31";
+				GCC_PREPROCESSOR_DEFINITIONS = "XCODE_VERSION=40";
 				HEADER_SEARCH_PATHS = (
 					Headers,
 					.,
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
-				LD_RUNPATH_SEARCH_PATHS = /Developer;
+				LD_RUNPATH_SEARCH_PATHS = "/Developer/Library/Xcode/PrivatePlugIns/Xcode3Core.ideplugin/Contents/Frameworks";
 				PRODUCT_NAME = slice2objcplugin;
 				WRAPPER_EXTENSION = pbplugin;
 			};
@@ -335,7 +333,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
-				SDKROOT = macosx10.6;
+				SDKROOT = "";
 			};
 			name = Debug;
 		};
@@ -348,7 +346,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = NO;
 				PREBINDING = NO;
-				SDKROOT = macosx10.6;
+				SDKROOT = "";
 				VALID_ARCHS = "i386 x86_64";
 			};
 			name = Release;

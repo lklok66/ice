@@ -147,7 +147,7 @@
 
 typedef struct Configuration Configuration;
 
-@interface XMLSliceParserDelegate : NSObject
+@interface XMLSliceParserDelegate : NSObject<NSXMLParserDelegate>
 {
 @private
     
@@ -265,7 +265,7 @@ typedef struct Configuration Configuration;
     }
     
     NSMutableData* output = [[NSMutableData alloc] init];
-    while ((inData = [readHandle availableData]) && [inData length])
+    while((inData = [readHandle availableData]) && [inData length])
     {
         [output appendData:inData];
     }
@@ -291,7 +291,7 @@ typedef struct Configuration Configuration;
             [e nextObject]; // Foo.ice
             // The remaning lines are the slice dependencies themselves.
             NSString* line;
-            while (line = [e nextObject])
+            while((line = [e nextObject]))
             {
                 // Strip the trailing \ if any.
                 if([line characterAtIndex:line.length-1] == '\\')
@@ -430,17 +430,17 @@ typedef struct Configuration Configuration;
 - (NSArray*)importedFilesForPath:(NSString*)path ensureFilesExist:(BOOL)ensure
             inTargetBuildContext:(PBXTargetBuildContext*)context
 {
-   	XCDependencyNode* inputNode = [context dependencyNodeForName:path createIfNeeded:YES];
+    XCDependencyNode* inputNode = [context dependencyNodeForName:path createIfNeeded:YES];
     NSMutableArray* imported = [NSMutableArray arrayWithCapacity:10];
     NSEnumerator *e = [[self dependenciesForSliceFile:path context:context] objectEnumerator];
-	NSString *filename;
-	while (filename = [e nextObject])
+    NSString *filename;
+    while((filename = [e nextObject]))
     {
         NSString *filepath = [context absolutePathForPath:filename];
-		XCDependencyNode *node = [context dependencyNodeForName:filepath createIfNeeded:YES];
-		[node setDontCareIfExists:YES];
-		[inputNode addIncludedNode:node];
-		[imported addObject:filename];
+        XCDependencyNode *node = [context dependencyNodeForName:filepath createIfNeeded:YES];
+        [node setDontCareIfExists:YES];
+        [inputNode addIncludedNode:node];
+        [imported addObject:filename];
     }
     
     return imported;
