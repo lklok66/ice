@@ -344,16 +344,16 @@ def generateBisonFile(x, verbose = False):
         targetext = ".m"
 
     #
-    # Run gmake to create the output files.
+    # Run make to create the output files.
     #
     if verbose:
         quiet = ""
     else:
         quiet = "-s"
     if file == "cexp.y":
-        os.system("gmake " + quiet + " cexp.c")
+        os.system("make " + quiet + " cexp.c")
     else:
-        os.system("gmake " + quiet + " " + base + targetext)
+        os.system("make " + quiet + " " + base + targetext)
 
     #
     # Edit the Makefile to comment out the grammar rules.
@@ -388,13 +388,13 @@ def generateFlexFile(x, verbose = False):
         targetext = ".m"
 
     #
-    # Run gmake to create the output files.
+    # Run make to create the output files.
     #
     if verbose:
         quiet = ""
     else:
         quiet = "-s"
-    os.system("gmake " + quiet + " " + base + targetext)
+    os.system("make " + quiet + " " + base + targetext)
 
     #
     # Edit the Makefile to comment out the flex rules.
