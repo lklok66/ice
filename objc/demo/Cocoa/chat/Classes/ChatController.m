@@ -71,28 +71,6 @@
     return self; 
 }
 
--(void)awakeFromNib
-{
-    NSApplication* app = [NSApplication sharedApplication];
-    AppDelegate* delegate = (AppDelegate*)[app delegate];
-    [delegate setChatActive:YES];
-    
-    // Setup the session refresh timer.
-    refreshTimer = [NSTimer timerWithTimeInterval:sessionTimeout/2
-                                           target:self
-                                         selector:@selector(refreshSession:)
-                                         userInfo:nil
-                                          repeats:YES];
-    [[NSRunLoop currentRunLoop] addTimer:refreshTimer forMode:NSDefaultRunLoopMode];
-    
-    [chatView.textStorage deleteCharactersInRange:NSMakeRange(0, chatView.textStorage.length)];
-    
-    // Register the chat callback.
-    [session begin_setCallback:callbackProxy response:nil exception:^(ICEException* ex) { [self exception:ex]; }];
-}
-
-#pragma mark Message management
-
 -(void)append:(NSString*)text who:(NSString*)who timestamp:(NSDate*)timestamp
 {
     // De-HTMLize the incoming message.
@@ -136,15 +114,12 @@
     [chatView scrollRangeToVisible:NSMakeRange(chatView.string.length, 0)];
 }
 
-
-#pragma mark Session management
-
 -(void)destroySession
 {
     // Cancel the refresh timeer.
     [refreshTimer invalidate];
     refreshTimer = nil;
-	
+        
     // Destroy the session.
     if(router && [router isKindOfClass:[Glacier2RouterPrx class]])
     {
@@ -160,20 +135,46 @@
     
     // Clean up the communicator.
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^ {
-		
-		// Destroy might block so we call it from a separate thread.
-		[communicator destroy];
-		communicator = nil;
-		
-		dispatch_async(dispatch_get_main_queue(), ^ {
-			[self append:@"<disconnected>" who:@"system message" timestamp:[NSDate date]];
-			[inputField setEnabled:NO];
-			
-			NSApplication* app = [NSApplication sharedApplication];
-			AppDelegate* delegate = (AppDelegate*)[app delegate];
-			[delegate setChatActive:NO];
-		});
+            // Destroy might block so we call it from a separate thread.
+            [communicator destroy];
+            communicator = nil;
+            
+            dispatch_async(dispatch_get_main_queue(), ^ {
+                    [self append:@"<disconnected>" who:@"system message" timestamp:[NSDate date]];
+                    [inputField setEnabled:NO];
+                    
+                    NSApplication* app = [NSApplication sharedApplication];
+                    AppDelegate* delegate = (AppDelegate*)[app delegate];
+                    [delegate setChatActive:NO];
+            });
     });
+}
+
+-(void)exception:(ICEException*)ex
+{
+    [self destroySession];
+        
+    NSRunAlertPanel(@"Error", [ex description], @"OK", nil, nil);
+}
+
+-(void)awakeFromNib
+{
+    NSApplication* app = [NSApplication sharedApplication];
+    AppDelegate* delegate = (AppDelegate*)[app delegate];
+    [delegate setChatActive:YES];
+    
+    // Setup the session refresh timer.
+    refreshTimer = [NSTimer timerWithTimeInterval:sessionTimeout/2
+                                           target:self
+                                         selector:@selector(refreshSession:)
+                                         userInfo:nil
+                                          repeats:YES];
+    [[NSRunLoop currentRunLoop] addTimer:refreshTimer forMode:NSDefaultRunLoopMode];
+    
+    [chatView.textStorage deleteCharactersInRange:NSMakeRange(0, chatView.textStorage.length)];
+    
+    // Register the chat callback.
+    [session begin_setCallback:callbackProxy response:nil exception:^(ICEException* ex) { [self exception:ex]; }];
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem *)item
@@ -188,13 +189,6 @@
 -(void)windowWillClose:(NSNotification *)notification
 {
     [self destroySession];
-}
-
--(void)exception:(ICEException*)ex
-{
-    [self destroySession];
-	
-    NSRunAlertPanel(@"Error", [ex description], @"OK", nil, nil);
 }
 
 -(void)refreshSession:(NSTimer*)timer
@@ -251,7 +245,7 @@
 
 -(void)leave:(ICELong)timestamp name:(NSMutableString*)name current:(ICECurrent*)current;
 {
-    int index = [users indexOfObject:name];
+    NSUInteger index = [users indexOfObject:name];
     if(index != NSNotFound)
     {
         [users removeObjectAtIndex:index];
