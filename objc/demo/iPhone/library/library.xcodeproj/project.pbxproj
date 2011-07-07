@@ -285,7 +285,7 @@
 				GCC_PREFIX_HEADER = library_Prefix.pch;
 				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = Info.plist;
-				OTHER_LDFLAGS = "-lGlacier2ObjC";
+				OTHER_LDFLAGS = "-Wl,-no_compact_unwind -lGlacier2ObjC";
 				PRODUCT_NAME = library;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SLICE_INCLUDE_PATH = Classes;
@@ -304,7 +304,7 @@
 				GCC_PREFIX_HEADER = library_Prefix.pch;
 				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = Info.plist;
-				OTHER_LDFLAGS = "-lGlacier2ObjC";
+				OTHER_LDFLAGS = "-Wl,-no_compact_unwind -lGlacier2ObjC";
 				PRODUCT_NAME = library;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SLICE_INCLUDE_PATH = Classes;

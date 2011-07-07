@@ -229,7 +229,7 @@
 				GCC_PREFIX_HEADER = voip_Prefix.pch;
 				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = "voip-Info.plist";
-				OTHER_LDFLAGS = "-lGlacier2ObjC";
+				OTHER_LDFLAGS = "-Wl,-no_compact_unwind -lGlacier2ObjC";
 				PRODUCT_NAME = VoIP;
 				SLICE_INCLUDE_PATH = "";
 			};
@@ -245,7 +245,7 @@
 				GCC_PREFIX_HEADER = voip_Prefix.pch;
 				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = "voip-Info.plist";
-				OTHER_LDFLAGS = "-lGlacier2ObjC";
+				OTHER_LDFLAGS = "-Wl,-no_compact_unwind -lGlacier2ObjC";
 				PRODUCT_NAME = VoIP;
 				SLICE_INCLUDE_PATH = "";
 				VALIDATE_PRODUCT = YES;

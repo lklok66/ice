@@ -856,6 +856,7 @@
 				);
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+                                OTHER_LDFLAGS = "-Wl,-no_compact_unwind";
 				PRODUCT_NAME = container;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos4.3;
@@ -883,6 +884,7 @@
 				);
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
+                                OTHER_LDFLAGS = "-Wl,-no_compact_unwind";
 				PRODUCT_NAME = container;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos4.3;

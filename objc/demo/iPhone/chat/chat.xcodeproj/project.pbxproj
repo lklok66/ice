@@ -257,7 +257,7 @@
 				GCC_PREFIX_HEADER = chat_Prefix.pch;
 				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = Info.plist;
-				OTHER_LDFLAGS = "-lGlacier2ObjC";
+				OTHER_LDFLAGS = "-Wl,-no_compact_unwind -lGlacier2ObjC";
 				PRODUCT_NAME = Chat;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SLICE_INCLUDE_PATH = Classes;
@@ -276,7 +276,7 @@
 				GCC_PREFIX_HEADER = chat_Prefix.pch;
 				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = Info.plist;
-				OTHER_LDFLAGS = "-lGlacier2ObjC";
+				OTHER_LDFLAGS = "-Wl,-no_compact_unwind -lGlacier2ObjC";
 				PRODUCT_NAME = Chat;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SLICE_INCLUDE_PATH = Classes;
