@@ -78,10 +78,7 @@ static NSString* defaultHost = @"demo2.zeroc.com";
 	[[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(willEnterForeground) 
                                                  name:UIApplicationWillEnterForegroundNotification
-                                               object:nil]; 
-	
-    // This generates a compile time warning, but does actually work!
-    [delaySlider setShowValue:YES];
+                                               object:nil];
     
     loginButton.enabled = hostnameField.text.length > 0 && usernameField.text.length > 0;
     [loginButton setAlpha:loginButton.enabled ? 1.0 : 0.5];
@@ -508,9 +505,16 @@ static NSString* defaultHost = @"demo2.zeroc.com";
     }
     else
     {
+        //
+        // Create a date formatter configured for local time zone.
+        //
+        NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
+        formatter.dateFormat = @"yyyy-MM-dd HH:mm";
+        [formatter setTimeZone:[NSTimeZone systemTimeZone]];
         // open an alert with just an OK button
         UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Call"
-                                                         message:[NSString stringWithFormat:@"Incoming call at %@.", now]
+                                                         message:[NSString stringWithFormat:@"Incoming call at %@.", 
+                                                                                            [formatter stringFromDate:now]]
                                                         delegate:nil
                                                cancelButtonTitle:@"OK"
                                                otherButtonTitles:nil] autorelease];
