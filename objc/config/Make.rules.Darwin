@@ -13,24 +13,22 @@
 
 ifeq ($(COMPILE_FOR_IPHONE),yes)
      SDK_NAME = iPhoneOS
-     ARCH=armv6
+     ARCH= -arch armv6 -arch armv7
 endif
 ifeq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
      COMPILE_FOR_IPHONE = yes
      SDK_NAME = iPhoneSimulator
-     ARCH=i386
+     ARCH= -arch i386
 endif
 
 ifeq ($(COMPILE_FOR_IPHONE),yes)
     SDK_HOME=/Developer/Platforms/$(SDK_NAME).platform/Developer/SDKs/$(SDK_NAME)$(IPHONE_SDK_VERSION).sdk
 
-#    CC       = /Developer/Platforms/$(SDK_NAME).platform/Developer/usr/bin/gcc-4.0
-#    CXX      = /Developer/Platforms/$(SDK_NAME).platform/Developer/usr/bin/g++-4.0
     CC       = /Developer/Platforms/$(SDK_NAME).platform/Developer/usr/bin/gcc-4.2
     CXX      = /Developer/Platforms/$(SDK_NAME).platform/Developer/usr/bin/g++-4.2
 
-    CPPPLATFORMFLAGS    = -arch $(ARCH) -isysroot $(SDK_HOME) -miphoneos-version-min=$(IPHONE_SDK_VERSION)
-    LDPLATFORMFLAGS     = -arch $(ARCH) -isysroot $(SDK_HOME)
+    CPPPLATFORMFLAGS    = $(ARCH) -isysroot $(SDK_HOME) -miphoneos-version-min=$(IPHONE_SDK_VERSION)
+    LDPLATFORMFLAGS     = $(ARCH) -isysroot $(SDK_HOME)
     CODESIGN = CODESIGN_ALLOCATE=/Developer/Platforms/$(SDK_NAME).platform/Developer/usr/bin/codesign_allocate codesign
 else
 ifeq ($(OPTIMIZE),yes)
