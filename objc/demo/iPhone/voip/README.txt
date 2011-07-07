@@ -10,6 +10,10 @@ Glacier2.
 If you want to deploy your own VoIP server, the source code for the 
 server is included in Ice in the directory "java/demo/Glacier2/voip"
 
+Note that because a bug in the demo glacier2 SSL configuration , you 
+must set the  property "IceSSL.VerifyPeer=0" in the server "config.glacier2" 
+file if you want to use SSL.
+
 After pressing the "Call Back" button the server will call
 "incomingCall" on the Voip::Control callback proxy after the specified
 delay. A local notification is pushed if the application is in the

@@ -221,19 +221,28 @@ static NSString* defaultHost = @"demo2.zeroc.com";
 				@catch(ICEException* ex)
 				{
                     [self destroySession];
-
-                    NSDate* now = [NSDate date];
-                    UILocalNotification *localNotif = [[[UILocalNotification alloc] init] autorelease];
-                    if (localNotif != nil)
+                    if(app.applicationState ==  UIApplicationStateBackground)
                     {
-                        localNotif.fireDate = [now dateByAddingTimeInterval:1];
-                        localNotif.timeZone = [NSTimeZone defaultTimeZone];
+                        UILocalNotification *localNotif = [[[UILocalNotification alloc] init] autorelease];
+                        if (localNotif != nil)
+                        {                        
+                            localNotif.alertBody = [NSString stringWithFormat:@"Lost connection: %@.", [ex description]];
                         
-                        localNotif.alertBody = [NSString stringWithFormat:@"Lost connection: %@.", [ex description]];
+                            localNotif.soundName = UILocalNotificationDefaultSoundName;
                         
-                        localNotif.soundName = UILocalNotificationDefaultSoundName;
-                        
-                        [app scheduleLocalNotification:localNotif];
+                            [app presentLocalNotificationNow:localNotif];
+                        }
+                        else
+                        {
+                            // open an alert with just an OK button
+                            UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Call"
+                                                                             message:[NSString stringWithFormat:@"Lost connection: %@.", [ex description]]
+                                                                            delegate:nil
+                                                                   cancelButtonTitle:@"OK"
+                                                                   otherButtonTitles:nil] autorelease];
+                            [alert show];
+
+                        }
                     }
                 }			
 			}
@@ -371,6 +380,7 @@ static NSString* defaultHost = @"demo2.zeroc.com";
         [initData.properties setProperty:@"IceSSL.TrustOnly.Client"
                                    value:@"75:FA:B7:3C:6B:1C:F8:FA:69:4B:75:A0:22:51:B2:AC:11:54:A7:E7"];
         [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"democacert.der"];
+        [initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
     }
         
     initData.dispatcher = ^(id<ICEDispatcherCall> call, id<ICEConnection> con) {
@@ -488,29 +498,28 @@ static NSString* defaultHost = @"demo2.zeroc.com";
     NSDate* now = [NSDate date];
 
     UIApplication* app = [UIApplication sharedApplication];
+    
+    //
+    // Create a date formatter configured for local time zone.
+    //
+    NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
+    formatter.dateFormat = @"yyyy-MM-dd HH:mm";
+    [formatter setTimeZone:[NSTimeZone systemTimeZone]];
+    
     if(app.applicationState ==  UIApplicationStateBackground)
     {
         UILocalNotification *localNotif = [[[UILocalNotification alloc] init] autorelease];
         if (localNotif != nil)
         {
-            localNotif.fireDate = [now dateByAddingTimeInterval:1];
-            localNotif.timeZone = [NSTimeZone defaultTimeZone];
-        
-            localNotif.alertBody = [NSString stringWithFormat:@"Incoming call at %@.", now];
+            localNotif.alertBody = [NSString stringWithFormat:@"Incoming call at %@.", [formatter stringFromDate:now]];
         
             localNotif.soundName = UILocalNotificationDefaultSoundName;
         
-            [[UIApplication sharedApplication] scheduleLocalNotification:localNotif];
+            [[UIApplication sharedApplication] presentLocalNotificationNow:localNotif];
         }
     }
     else
     {
-        //
-        // Create a date formatter configured for local time zone.
-        //
-        NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
-        formatter.dateFormat = @"yyyy-MM-dd HH:mm";
-        [formatter setTimeZone:[NSTimeZone systemTimeZone]];
         // open an alert with just an OK button
         UIAlertView *alert = [[[UIAlertView alloc] initWithTitle:@"Call"
                                                          message:[NSString stringWithFormat:@"Incoming call at %@.", 
