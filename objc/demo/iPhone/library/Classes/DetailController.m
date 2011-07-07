@@ -493,23 +493,23 @@ static EditController* editViewController_ = nil;
             
             if(indexPath.section == 0)
             {
-                cell.text = book.isbn;
+                [cell.textLabel setText:book.isbn];
             }
             else if(indexPath.section == 2)
             {
                 if(indexPath.row == book.authors.count)
                 {
                     NSAssert(self.editing, @"self.editing");
-                    cell.text = @"Add new author";
+                    cell.textLabel setText:@"Add new author"];
                 }
                 else
                 {
-                    cell.text = [book.authors objectAtIndex:(indexPath.row)];
+                    [cell.textLabel setText:[book.authors objectAtIndex:(indexPath.row)]];
                 }
             }
             else if(indexPath.section == 3)
             {
-                cell.text = book.rentedBy;
+                [cell.textLabel setText:book.rentedBy];
             }
         }
     }

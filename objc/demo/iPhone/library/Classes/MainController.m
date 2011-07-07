@@ -447,12 +447,12 @@ forRowAtIndexPath:(NSIndexPath *)indexPath
             rowsQueried += 10;
         }
 
-        cell.text = @"<loading>";
+        [cell.textLabel setText:@"<loading>"];
     }
     else
     {
         DemoBookDescription *book = (DemoBookDescription *)[books objectAtIndex:indexPath.row];
-        cell.text = book.title;
+        [cell.textLabel setText:book.title];
     }
     return cell;
 }

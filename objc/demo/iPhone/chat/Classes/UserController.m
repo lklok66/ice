@@ -16,7 +16,7 @@
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
-	if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil])
+	if((self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]))
     {
         self.title = @"Users";
         self.users = [NSMutableArray array];
@@ -63,7 +63,7 @@
 	if (cell == nil) {
 		cell = [[[UITableViewCell alloc] initWithFrame:CGRectZero reuseIdentifier:MyIdentifier] autorelease];
 	}
-    cell.text = [users objectAtIndex:indexPath.row];
+    [cell.textLabel setText:[users objectAtIndex:indexPath.row]];
 	return cell;
 }
 
