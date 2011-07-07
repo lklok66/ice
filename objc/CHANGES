@@ -3,6 +3,10 @@ Changes since version 1.1.0
 
 - Updated Ice Touch to support Xcode 4 and iOS 4.3
 
+- Updated build system to create fat binaries with
+  armv6 and armv7 architectures when building the iPhoneOS
+  SDK
+
 Changes since version 1.0.0
 ---------------------------
 
