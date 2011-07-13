@@ -272,7 +272,7 @@
 				EXECUTABLE_EXTENSION = "";
 				EXECUTABLE_SUFFIX = "";
 				FRAMEWORK_SEARCH_PATHS = (
-					"/Developer/Library/Xcode/PrivatePlugIns/Xcode3Core.ideplugin/Contents/Frameworks",
+					"$(XCODE_SDK_PATH)",
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -281,14 +281,14 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = slice2objcplugin_Prefix.pch;
-				GCC_PREPROCESSOR_DEFINITIONS = "XCODE_VERSION=40";
+				GCC_PREPROCESSOR_DEFINITIONS = "XCODE_VERSION=$(XCODE_VERSION)";
 				HEADER_SEARCH_PATHS = (
 					Headers,
 					.,
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
-				LD_RUNPATH_SEARCH_PATHS = "/Developer/Library/Xcode/PrivatePlugIns/Xcode3Core.ideplugin/Contents/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(XCODE_SDK_PATH)";
 				PRODUCT_NAME = slice2objcplugin;
 				WRAPPER_EXTENSION = pbplugin;
 			};
@@ -304,20 +304,20 @@
 				EXECUTABLE_EXTENSION = "";
 				EXECUTABLE_SUFFIX = "";
 				FRAMEWORK_SEARCH_PATHS = (
-					"/Developer/Library/Xcode/PrivatePlugIns/Xcode3Core.ideplugin/Contents/Frameworks",
+					"$(XCODE_SDK_PATH)",
 				);
 				GCC_ENABLE_OBJC_GC = supported;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = slice2objcplugin_Prefix.pch;
-				GCC_PREPROCESSOR_DEFINITIONS = "XCODE_VERSION=40";
+				GCC_PREPROCESSOR_DEFINITIONS = "XCODE_VERSION=$(XCODE_VERSION)";
 				HEADER_SEARCH_PATHS = (
 					Headers,
 					.,
 				);
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Library/Bundles";
-				LD_RUNPATH_SEARCH_PATHS = "/Developer/Library/Xcode/PrivatePlugIns/Xcode3Core.ideplugin/Contents/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(XCODE_SDK_PATH)";
 				PRODUCT_NAME = slice2objcplugin;
 				WRAPPER_EXTENSION = pbplugin;
 			};

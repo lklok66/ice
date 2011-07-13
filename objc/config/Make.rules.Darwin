@@ -22,14 +22,13 @@ ifeq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
 endif
 
 ifeq ($(COMPILE_FOR_IPHONE),yes)
-    SDK_HOME=/Developer/Platforms/$(SDK_NAME).platform/Developer/SDKs/$(SDK_NAME)$(IPHONE_SDK_VERSION).sdk
+    SDK_HOME=$(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/SDKs/$(SDK_NAME)$(IPHONE_SDK_VERSION).sdk
 
-    CC       = /Developer/Platforms/$(SDK_NAME).platform/Developer/usr/bin/gcc-4.2
-    CXX      = /Developer/Platforms/$(SDK_NAME).platform/Developer/usr/bin/g++-4.2
-
+    CC       = $(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/usr/bin/gcc-4.2
+    CXX      = $(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/usr/bin/g++-4.2
     CPPPLATFORMFLAGS    = $(ARCH) -isysroot $(SDK_HOME) -miphoneos-version-min=$(IPHONE_SDK_VERSION)
     LDPLATFORMFLAGS     = $(ARCH) -isysroot $(SDK_HOME)
-    CODESIGN = CODESIGN_ALLOCATE=/Developer/Platforms/$(SDK_NAME).platform/Developer/usr/bin/codesign_allocate codesign
+    CODESIGN = CODESIGN_ALLOCATE=$(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/usr/bin/codesign_allocate codesign
 else
 ifeq ($(OPTIMIZE),yes)
     CPPPLATFORMFLAGS    = -arch i386 -arch x86_64

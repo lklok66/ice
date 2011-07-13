@@ -14,6 +14,20 @@
 prefix			 ?= /opt/IceTouch-$(VERSION)
 
 #
+# Xcode root dir, if you have several Xcode version
+# choose the version you want to use to build the 
+# SDKs and Xcode plug-ing, the default is to use
+# xcode from  "/Developer"
+#
+#DEVELOPER_PATH          = /Developer
+
+#
+# Define as 32 if building with Xcode 3.2.x the default is 40
+# for Xcode 4.0.x
+#
+#XCODE_VERSION		?= 40
+
+#
 # The "root directory" for runpath embedded in executables. Can be
 # unset to avoid adding a runpath to Ice executables. This setting
 # only applies for Mac OS X command line builds.
@@ -34,7 +48,7 @@ embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 #
 # Compile for the iPhone simulator platform (an Xcode SDK).
 #
-#COMPILE_FOR_IPHONE_SIMULATOR 	= yes
+COMPILE_FOR_IPHONE_SIMULATOR 	= yes
 #
 # Compile for Cocoa (an Xcode SDK).
 #
@@ -45,9 +59,10 @@ embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 #
 
 #
-# The default SDK version is 4.3 for iPhone
+# The default SDK version is 4.3 for iPhone, suported versions
+# are 4.3 and 4.2
 #
-IPHONE_SDK_VERSION		= 4.3
+#IPHONE_SDK_VERSION		= 4.3
 
 #
 # You can choose to build static libraries for the Mac OS X command
@@ -69,6 +84,26 @@ ifeq ($(IPHONE_SDK_VERSION),)
 
 IPHONE_SDK_VERSION = 4.3
 
+endif
+
+ifeq ($(XCODE_VERSION),)
+
+XCODE_VERSION = 40
+
+endif
+
+ifeq ($(DEVELOPER_PATH),)
+
+DEVELOPER_PATH = /Developer
+
+endif
+
+ifeq ($(XCODE_VERSION),32)
+    XCODE_PLUGIN_INSTALL_PATH = /Library/Application Support/Developer/3.2/Xcode/Plug-ins
+    XCODE_SDK_PATH = $(DEVELOPER_PATH)/Library/PrivateFrameworks
+else
+	XCODE_PLUGIN_INSTALL_PATH = /Library/Application Support/Developer/4.0/Xcode/Plug-ins
+    XCODE_SDK_PATH = $(DEVELOPER_PATH)/Library/Xcode/PrivatePlugIns/Xcode3Core.ideplugin/Contents/Frameworks
 endif
 
 #
