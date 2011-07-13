@@ -248,6 +248,27 @@ typedef struct Configuration Configuration;
     {
         [args addObject:@"--depend-xml"];
     }
+    
+    //
+    // Always add --ice when parsing dependencies, this avoid
+    // errors when try to parse dependencies for Ice Slice files.
+    //
+    BOOL found = NO;
+    NSString* item;
+    for(item in args)
+    {
+        if([item rangeOfString:@"--ice"].location != NSNotFound)
+        {
+            found = YES;
+            break;
+        }
+    }
+
+    if(!found)
+    {
+        [args addObject:@"--ice"];
+    }
+    
     [args addObject:path];
     
     //NSLog(@"args: %@", args);
