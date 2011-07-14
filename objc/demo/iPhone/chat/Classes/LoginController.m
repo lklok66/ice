@@ -59,8 +59,6 @@ static NSString* sslKey = @"sslKey";
     passwordField.text = [defaults stringForKey:passwordKey];
     passwordField.clearButtonMode = UITextFieldViewModeWhileEditing;
     
-    sslSwitch.on = [defaults boolForKey:sslKey];
-    
     chatController = [[ChatController alloc] initWithNibName:@"ChatView" bundle:nil];
 
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -104,7 +102,6 @@ static NSString* sslKey = @"sslKey";
     [usernameField release];
     [passwordField release];
     [loginButton release];
-    [sslSwitch release];
     
     [currentField release];
     [oldFieldValue release];
@@ -221,15 +218,7 @@ static NSString* sslKey = @"sslKey";
 
     @try
     {
-        NSString* s;
-        if(sslSwitch.isOn)
-        {
-            s = [NSString stringWithFormat:@"Glacier2/router:ssl -p 4064 -h %@ -t 10000", hostnameField.text];
-        }
-        else
-        {
-            s = [NSString stringWithFormat:@"Glacier2/router:tcp -p 4063 -h %@ -t 10000", hostnameField.text];
-        }
+        NSString* s = [NSString stringWithFormat:@"Glacier2/router:ssl -p 4064 -h %@ -t 10000", hostnameField.text];
         id<ICEObjectPrx> proxy = [communicator stringToProxy:s];
         id<ICERouterPrx> router = [ICERouterPrx uncheckedCast:proxy];
         

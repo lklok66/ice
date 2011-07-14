@@ -17,9 +17,6 @@
     IBOutlet NSTextField* chatServerField;
     IBOutlet NSTextField* usernameField;
     IBOutlet NSTextField* passwordField;
-    IBOutlet NSButton* sslField;
-    IBOutlet NSButton* routerField;
-    IBOutlet NSTextField* routerServerField;
     IBOutlet NSWindow* advancedSheet;
     IBOutlet NSWindow* connectingSheet;
     IBOutlet NSProgressIndicator* progress;
@@ -27,7 +24,6 @@
 }
 
 -(void)doLogin:(id)sender;
--(void)routerChanged:(id)sender;
 -(void)showAdvancedSheet:(id)sender;
 -(void)closeAdvancedSheet:(id)sender;
 

@@ -21,7 +21,6 @@
     IBOutlet UITextField* usernameField;
     IBOutlet UITextField* passwordField;
     IBOutlet UIButton* loginButton;
-    IBOutlet UISwitch* sslSwitch;
 
     UITextField* currentField;
     NSString* oldFieldValue;
@@ -32,6 +31,5 @@
 }
 
 -(IBAction)login:(id)sender;
--(IBAction)sslChanged:(id)sender;
 
 @end
