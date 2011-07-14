@@ -76,7 +76,7 @@ cwd = os.getcwd()
 os.chdir(rootDir)
 
 #
-# Get IceTouch version.
+# Get Xcode, iOS and IceTouch Versions.
 #
 xcodeVersion = "40"
 installerProject = "IceTouch-1.1.1-xcode-4.0.pmdoc"
@@ -88,7 +88,12 @@ except KeyError:
 if xcodeVersion != "40" and xcodeVersion != "32":
 	xcodeVersion = "40"
 	
-print "Xcode version: " + xcodeVersion
+
+iPhoneSDKVersion = "4.3"
+try:
+	iPhoneSDKVersion = os.environ["IPHONE_SDK_VERSION"]
+except KeyError:
+	iPhoneSDKVersion = "4.3"
 
 if xcodeVersion == "32":
 	installerProject = "IceTouch-1.1.1-xcode-3.2.pmdoc"
@@ -100,6 +105,8 @@ versionMinor = re.search("([0-9\.]*).([0-9\.]*)", version).group(2)
 versionMajor = re.search("([0-9\.]*).([0-9\.]*)", version).group(1)
 
 volname = "IceTouch " + version
+basePackageName = "IceTouch-" + version
+
 # First check to see whether the disk image is already accidently mounted.
 if not os.system("mount | grep \"%s (\" 2>&1 > /dev/null" % volname):
     print "\"/Volumes/IceTouch %s\": already mounted. Unmount and restart." % mmversion
@@ -219,12 +226,6 @@ os.chdir(baseDir)
 
 # Fix iPhone demos iOS SDK and deployment version.
 
-iPhoneSDKVersion = "4.3"
-try:
-	iPhoneSDKVersion = os.environ["IPHONE_SDK_VERSION"]
-except KeyError:
-	iPhoneSDKVersion = "4.3"
-
 xcodeSDKRootExprs = [ (re.compile("SDKROOT = iphoneos.*;"), "SDKROOT = \"iphoneos%s\";" % iPhoneSDKVersion) ]
 xcodeIPhoneOSDeplyomentExprs = [ (re.compile("IPHONEOS_DEPLOYMENT_TARGET = .*;"), "IPHONEOS_DEPLOYMENT_TARGET = %s;" % iPhoneSDKVersion) ]
 
@@ -239,7 +240,7 @@ print "Creating installer...",
 sys.stdout.flush()
 
 pmdoc = os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", installerProject)
-os.system("/Developer/usr/bin/packagemaker --doc " + pmdoc + " --out " + latestBuildDir + "/installer/IceTouch-" + version + ".pkg")
+os.system("/Developer/usr/bin/packagemaker --doc " + pmdoc + " --out " + latestBuildDir + "/installer/" + basePackageName + ".pkg")
 
 print "ok"
 
@@ -254,8 +255,8 @@ os.system("hdiutil create -quiet scratch.dmg -volname \"%s\" -type SPARSE -fs HF
 os.system("hdid -quiet scratch.dmg.sparseimage")
 os.system("ditto -rsrc installer \"/Volumes/%s\"" % volname)
 os.system("hdiutil detach -quiet \"/Volumes/%s\"" % volname)
-os.system("hdiutil convert -quiet  scratch.dmg.sparseimage -format UDZO -o IceTouch-%s.dmg -imagekey zlib-devel=9" %
-          mmversion)
+os.system("hdiutil convert -quiet  scratch.dmg.sparseimage -format UDZO -o %s.dmg -imagekey zlib-devel=9" %
+          basePackageName)
 os.remove("scratch.dmg.sparseimage")
 print "ok"
 
