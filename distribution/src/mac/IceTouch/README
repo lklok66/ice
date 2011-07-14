@@ -8,9 +8,8 @@ Operating system
 
 Ice Touch requires:
 
-- Mac OS X 10.6.4 or later
-- iPod touch v2 or iPhone 3G/iPhone 4 using software version 4.0.2
-  or later.
+- Mac OS X 10.6.8 or later
+- iOS 4.2 or iOS 4.3.
 
 
 Compiler
@@ -18,10 +17,20 @@ Compiler
 
 To build iPhone applications, you need:
 
-- Xcode 3.2.3
-- iPhone SDK for iOS 4.0
+- Xcode 3.2 with iOS 4.2 SDK
 
-To build Cocoa applications, you need Xcode 3.2.3 or later.
+Or
+
+- Xcode 4.0 with iOS 4.3 SDK
+
+
+To build Cocoa applications, you need 
+
+- Xcode 3.2
+
+Or
+
+- Xcode 4.0
 
 
 ======================================================================

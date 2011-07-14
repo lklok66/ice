@@ -1,4 +1,4 @@
-Ice Touch 1.1.0 offers an Objective-C language mapping, development
+Ice Touch 1.1.1 offers an Objective-C language mapping, development
 kits and run times for Mac OS X and iOS.
 
 Ice is a modern object-oriented toolkit that enables you to build

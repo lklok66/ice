@@ -78,13 +78,28 @@ os.chdir(rootDir)
 #
 # Get IceTouch version.
 #
+xcodeVersion = "40"
+installerProject = "IceTouch-1.1.1-xcode-4.0.pmdoc"
+try:
+	xcodeVersion = os.environ["XCODE_VERSION"]
+except KeyError:
+	xcodeVersion = "40"
+
+if xcodeVersion != "40" and xcodeVersion != "32":
+	xcodeVersion = "40"
+	
+print "Xcode version: " + xcodeVersion
+
+if xcodeVersion == "32":
+	installerProject = "IceTouch-1.1.1-xcode-3.2.pmdoc"
+	
 config = open(os.path.join("cpp", "config", "Make.rules.objc"), "r")
 version = re.search("VERSION[\s]*= ([0-9\.]*)", config.read()).group(1)
 mmversion = re.search("([0-9]+\.[0-9b]+)[\.0-9]*", version).group(1)
 versionMinor = re.search("([0-9\.]*).([0-9\.]*)", version).group(2)
 versionMajor = re.search("([0-9\.]*).([0-9\.]*)", version).group(1)
 
-volname = "IceTouch " + mmversion
+volname = "IceTouch " + version
 # First check to see whether the disk image is already accidently mounted.
 if not os.system("mount | grep \"%s (\" 2>&1 > /dev/null" % volname):
     print "\"/Volumes/IceTouch %s\": already mounted. Unmount and restart." % mmversion
@@ -140,21 +155,22 @@ os.system("OPTIMIZE_SIZE=yes COMPILE_FOR_IPHONE_SIMULATOR=yes make")
 
 os.chdir(os.path.join(buildDir, "Xcode", "Slice2ObjcPlugin"))
 
-os.system("xcodebuild -configuration Release >> %s 2>&1")
+os.system("make >> %s 2>&1")
 
 print "ok"
 
 name = "IceTouch-" + mmversion
 installerDir = os.path.join(baseDir, "installer")
-sdkDir = os.path.join(baseDir, "sdk", name)
-examplesDir = os.path.join(baseDir, "examples", name)
-docDir = os.path.join(baseDir, "doc", name)
+developerDir = os.path.join(baseDir, "Developer")
+sdkDir = os.path.join(developerDir, "SDKs", name)
+examplesDir = os.path.join(developerDir, "Examples", name)
+docDir = os.path.join(developerDir, "Documentation", name)
 optDir = os.path.join(baseDir, "opt", name)
 
-for d in ["installer", "sdk", "examples", "doc", "opt", "slice2objcplugin.pbplugin"]:
-    d = os.path.join(baseDir, d)
-    if os.path.exists(d):
-        remove(d)
+os.system("rm -rfv " + developerDir)
+os.system("rm -rfv " + installerDir)
+os.system("rm -rfv " + os.path.join(baseDir, "slice2objcplugin.pbplugin"))
+os.system("rm -rfv " + optDir)
 
 print "Preparing installer...",
 sys.stdout.flush()
@@ -165,6 +181,14 @@ copy(os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", "installer-
      os.path.join(installerDir, "readme.rtf"))
 copy(os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", "uninstall.sh"),
      os.path.join(installerDir, "uninstall.sh"))
+
+
+with open(os.path.join(installerDir, "uninstall.sh"), "a+") as f:
+	f.write("unistallPackage \"com.zeroc.icetouch-xcode" + xcodeVersion + "-developer.pkg\"")
+	f.write("\n")
+	f.write("unistallPackage \"com.zeroc.icetouch-xcode" + xcodeVersion + "-plugin.pkg\"")
+	f.write("\n")
+
 
 os.makedirs(optDir)
 os.chdir(buildDir)
@@ -184,27 +208,44 @@ copy(os.path.join(buildDir, "objc", "SDK", "IceTouch-" + mmversion), sdkDir)
 copy(os.path.join(buildDir, "Xcode", "Slice2ObjcPlugin", "build", "Release", "slice2objcplugin.pbplugin"),
      os.path.join(baseDir, "slice2objcplugin.pbplugin"))
 
-os.mkdir(os.path.join(baseDir, "examples"))
-os.chdir(os.path.join(baseDir, "examples"))
+os.makedirs(os.path.join(developerDir, "Examples"))
+os.chdir(os.path.join(developerDir, "Examples"))
 os.system("tar xfz %s" % os.path.join(distDir, "IceTouch-" + version + "-demos.tar.gz"))
 os.rename("IceTouch-" + version + "-demos", name)
 os.system("chmod -R g+wX %s" % examplesDir)
 os.remove(os.path.join(examplesDir, "ICE_TOUCH_LICENSE"))
 os.remove(os.path.join(examplesDir, "ICE_LICENSE"))
 os.chdir(baseDir)
+
+# Fix iPhone demos iOS SDK and deployment version.
+
+iPhoneSDKVersion = "4.3"
+try:
+	iPhoneSDKVersion = os.environ["IPHONE_SDK_VERSION"]
+except KeyError:
+	iPhoneSDKVersion = "4.3"
+
+xcodeSDKRootExprs = [ (re.compile("SDKROOT = iphoneos.*;"), "SDKROOT = \"iphoneos%s\";" % iPhoneSDKVersion) ]
+xcodeIPhoneOSDeplyomentExprs = [ (re.compile("IPHONEOS_DEPLOYMENT_TARGET = .*;"), "IPHONEOS_DEPLOYMENT_TARGET = %s;" % iPhoneSDKVersion) ]
+
+for root, dirnames, filesnames in os.walk(os.path.join(examplesDir, "iPhone")):
+    for f in filesnames:
+        if fnmatch.fnmatch(f, "project.pbxproj"):
+            substitute(os.path.join(root, f), xcodeSDKRootExprs)
+            substitute(os.path.join(root, f), xcodeIPhoneOSDeplyomentExprs)
 print "ok"
 
 print "Creating installer...",
 sys.stdout.flush()
 
-freezeProj = os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", "IceTouch-1.1.packproj")
-os.system("freeze %s" % freezeProj)
+pmdoc = os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", installerProject)
+os.system("/Developer/usr/bin/packagemaker --doc " + pmdoc + " --out " + latestBuildDir + "/installer/IceTouch-" + version + ".pkg")
 
 print "ok"
 
 os.chdir(baseDir)
 
-print "Building disk image...",
+print "Building disk image... " + volname + " ",
 sys.stdout.flush()
 
 if os.path.exists("scratch.dmg.sparseimage"):

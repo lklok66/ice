@@ -8,9 +8,8 @@ Operating system
 
 Ice Touch requires:
 
-- Mac OS X 10.6.4 or later
-- iPod touch v2 or iPhone 3G/iPhone 4 using software version 4.0.2
-  or later.
+- Mac OS X 10.6.8 or later
+- iOS 4.2 or iOS 4.3.
 
 
 Compiler
@@ -18,10 +17,20 @@ Compiler
 
 To build iPhone applications, you need:
 
-- Xcode 3.2.3
-- iPhone SDK for iOS 4.0
+- Xcode 3.2 with iOS 4.2 SDK
 
-To build Cocoa applications, you need Xcode 3.2.3 or later.
+Or
+
+- Xcode 4.0 with iOS 4.3 SDK
+
+
+To build Cocoa applications, you need 
+
+- Xcode 3.2
+
+Or
+
+- Xcode 4.0
 
 
 Slice translators
@@ -66,21 +75,22 @@ build process.
 
 To build the Xcode plug-in:
 
+Review update settings in objc/config/Make.rules
+
 $ cd Xcode/Slice2ObjcPlugin
-$ xcodebuild -configuration Release
+$ make
 
-To install the plug-in either:
+To install the plug-in:
 
-$ cp -r Xcode/Slice2ObjcPlugin/build/Release/slice2objcplugin.pbplugin \
-    ~/Library/Application\ Support/Developer/Shared/Xcode/Plug-ins
+$ sudo make install
 
-(You may need to create this directory.)
+The Xcode plug-in is installed to
 
-or:
+/Library/Application Support/Developer/4.0/Xcode/Plug-ins/slice2objcplugin.pbplugin
 
-$ cp -r Xcode/Slice2ObjcPlugin/build/Release/slice2objcplugin.pbplugin \
-    /Developer/Library/Xcode/Plug-ins
+Or:
 
+/Library/Application Support/Developer/3.2/Xcode/Plug-ins/slice2objcplugin.pbplugin
 
 ======================================================================
 Compilation
