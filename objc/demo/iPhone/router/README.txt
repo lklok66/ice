@@ -12,8 +12,8 @@ The demo shows:
   - How to implement a custom Ice logger.
 
 To test the router provided with this demo, you can use the Cocoa
-library or chat clients, or the command line demo/Ice/helloRouter
-demo. These clients can optionally connect to the libray, chat or
+library client, or the command line demo/Ice/helloRouterdemo. 
+These clients can optionally connect to the libray or
 hello world servers using the iPhone router provided with this demo.
 
 You also need to configure the WiFi network appropriately on the
@@ -41,12 +41,12 @@ computer to verify it.
 On the iPhone, run the router application. This application listens
 on port 12000 and on all network interfaces by default.
 
-You are now ready to try the Cocoa library or chat demo located in the
-demo/Cocoa directory of your Ice Touch distribution. To use the iPhone
-router, you need to check the "iPhone Router" checkbox and specify its
-IP address (192.168.1.3) in the "Advanced" panel of the library or
-chat client login dialog. The client will connect to the library or
-chat server on the internet through the iPhone 3G/Edge connection.
+You are now ready to try the Cocoa library located in the demo/Cocoa 
+directory of your Ice Touch distribution. To use the iPhonerouter, 
+you need to check the "iPhone Router" checkbox and specify its
+IP address (192.168.1.3) in the "Advanced" panel of the library client 
+login dialog. The client will connect to the library server on the 
+internet through the iPhone 3G/Edge connection.
 
 To test the demo/Ice/helloRouter demo change the value of
 "Ice.Default.Router" in config.client to:
