@@ -500,7 +500,7 @@ static EditController* editViewController_ = nil;
                 if(indexPath.row == book.authors.count)
                 {
                     NSAssert(self.editing, @"self.editing");
-                    cell.textLabel setText:@"Add new author"];
+                    [cell.textLabel setText:@"Add new author"];
                 }
                 else
                 {
