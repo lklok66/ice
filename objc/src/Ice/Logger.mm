@@ -154,7 +154,7 @@ typedef IceUtil::Handle<LoggerI> LoggerIPtr;
 
 -(void) print:(NSString*)message
 {
-    NSLog(@"@", message);
+    NSLog(@"%@", message);
 }
 
 -(void) trace:(NSString*)category message:(NSString*)message
