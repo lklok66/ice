@@ -24,7 +24,7 @@ Or
 - Xcode 4.0 with iOS 4.3 SDK
 
 
-To build Cocoa applications, you need 
+To build Cocoa applications, you need:
 
 - Xcode 3.2
 
@@ -51,7 +51,7 @@ Slice translators yourself.
 The Slice-to-Objective-C (slice2objc) and Slice-to-C++ (slice2cpp)
 compilers have a dependency on mcpp 2.7.2.
 
-We recommend downloading the Ice third-party source archive from
+We recommend downloading the IceTouch third-party source archive from
 
  http://www.zeroc.com/download.html
 
@@ -75,7 +75,7 @@ build process.
 
 To build the Xcode plug-in:
 
-Review update settings in objc/config/Make.rules
+Review and update the settings in the objc/config/Make.rules file.
 
 $ cd Xcode/Slice2ObjcPlugin
 $ make
@@ -84,7 +84,7 @@ To install the plug-in:
 
 $ sudo make install
 
-The Xcode plug-in is installed to
+The Xcode plug-in is installed at the following location:
 
 /Library/Application Support/Developer/4.0/Xcode/Plug-ins/slice2objcplugin.pbplugin
 

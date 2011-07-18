@@ -76,7 +76,7 @@ cwd = os.getcwd()
 os.chdir(rootDir)
 
 #
-# Get Xcode, iOS and IceTouch Versions.
+# Get Xcode, iOS and IceTouch versions.
 #
 xcodeVersion = "40"
 installerProject = "IceTouch-1.1.1-xcode-4.0.pmdoc"

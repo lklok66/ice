@@ -9,8 +9,8 @@ This installer installs the following components:
  - Examples in: /Developer/Examples/IceTouch-1.1
 
 To uninstall IceTouch-1.1.1 please use the uninstall script that
-accompanies the distribution. 
+accompanies the distribution.
 
 For uninstall details execute:
 
-> uninstall.sh -h 
+> uninstall.sh -h

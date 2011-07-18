@@ -14,10 +14,9 @@
 prefix			 ?= /opt/IceTouch-$(VERSION)
 
 #
-# Xcode root dir, if you have several Xcode version
-# choose the version you want to use to build the 
-# SDKs and Xcode plug-ing, the default is to use
-# xcode from  "/Developer"
+# Xcode root directory, if you have several Xcode versions installed
+# choose the version you want to use to build the SDKs and Xcode
+# plug-in, the default is "/Developer"
 #
 #DEVELOPER_PATH          = /Developer
 
@@ -31,12 +30,15 @@ prefix			 ?= /opt/IceTouch-$(VERSION)
 # The "root directory" for runpath embedded in executables. Can be
 # unset to avoid adding a runpath to Ice executables. This setting
 # only applies for Mac OS X command line builds.
+#
 embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 
+#
 # Define OPTIMIZE_SIZE as yes if you want to build with minimal size.
 # Define OPTIMIZE_SPEED as yes if you want to build with maximum speed.
-# These options are mutually exclusive.
-# If neither is set, Ice Touch is built with debug information.
+#
+# These options are mutually exclusive. If neither is set, Ice Touch
+# is built with debug information.
 #
 #OPTIMIZE_SIZE		= yes
 #OPTIMIZE_SPEED		= yes
@@ -45,10 +47,12 @@ embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 # Compile for the iPhone platform (an Xcode SDK).
 #
 #COMPILE_FOR_IPHONE	    	= yes
+
 #
 # Compile for the iPhone simulator platform (an Xcode SDK).
 #
-COMPILE_FOR_IPHONE_SIMULATOR 	= yes
+#COMPILE_FOR_IPHONE_SIMULATOR 	= yes
+
 #
 # Compile for Cocoa (an Xcode SDK).
 #
@@ -102,7 +106,7 @@ ifeq ($(XCODE_VERSION),32)
     XCODE_PLUGIN_INSTALL_PATH = /Library/Application Support/Developer/3.2/Xcode/Plug-ins
     XCODE_SDK_PATH = $(DEVELOPER_PATH)/Library/PrivateFrameworks
 else
-	XCODE_PLUGIN_INSTALL_PATH = /Library/Application Support/Developer/4.0/Xcode/Plug-ins
+    XCODE_PLUGIN_INSTALL_PATH = /Library/Application Support/Developer/4.0/Xcode/Plug-ins
     XCODE_SDK_PATH = $(DEVELOPER_PATH)/Library/Xcode/PrivatePlugIns/Xcode3Core.ideplugin/Contents/Frameworks
 endif
 

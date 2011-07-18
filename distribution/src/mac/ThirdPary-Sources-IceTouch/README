@@ -3,16 +3,15 @@ Introduction
 ======================================================================
 
 This archive contains the source code distributions, including any
-source patches, for the third-party packages required to build IceTouch.
+source patches, for the third-party packages required to build
+IceTouch.
 
 This document provides instructions for applying patches and for
-configuring the third-party packages on each of the supported
-platforms.
+configuring the third-party packages.
 
 For more information about the third-party dependencies, please refer
 to the links below:
 
-OpenSSL        http://www.openssl.org
 mcpp           http://mcpp.sourceforge.net
 
 
@@ -39,18 +38,14 @@ building mcpp
 
 
 ======================================================================
-Instructions for Mac OS X
+Build Instructions
 ======================================================================
-
-If a third-party package is not listed below, there are no special
-requirements for configuring or building that package.
-
 
 mcpp
 ----
 
-Ice requires the library version of mcpp, so configure mcpp as shown
-below:
+IceTouch requires the library version of mcpp, so configure mcpp as
+shown below:
 
   $ export CFLAGS="-O3 -fno-common"
   $ ./configure --enable-mcpplib --disable-shared

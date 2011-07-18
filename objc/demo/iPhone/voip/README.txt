@@ -7,8 +7,9 @@ client connects to this host by default. The deployment on
 demo2.zeroc.com accepts both secure and non-secure connections using
 Glacier2.
 
-If you want to deploy your own VoIP server, the source code for the 
-server is included in Ice in the directory "java/demo/Glacier2/voip"
+If you want to deploy your own VoIP server, the source code for the
+server is included with the Ice distribution in the directory
+"java/demo/Glacier2/voip"
 
 Note that because a bug in the demo glacier2 SSL configuration , you 
 must set the  property "IceSSL.VerifyPeer=0" in the server "config.glacier2" 

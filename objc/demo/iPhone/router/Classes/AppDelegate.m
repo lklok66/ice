@@ -138,7 +138,7 @@
     {
         NSMutableString* s = [NSMutableString stringWithFormat:@"failed to initialize communicator:\n %@", ex];
         [s replaceOccurrencesOfString:@"\n" withString:@" " options:0 range:NSMakeRange(0, s.length)];
-        NSLog(@"%s", s);
+        NSLog(@"%@", s);
     }
 }
 

@@ -2,16 +2,16 @@
 
 showHelp ()
 {
-    echo "ZeroC, IceTouch unistaller script"
+    echo "ZeroC, IceTouch uninstaller script"
     echo "usage: "
-    echo "  \"sudo $0 --mode all\" unistall all IceTouch components"
-    echo "  \"sudo $0\" unistal\" unistall all IceTouch components except IceTouch command line SDK"
+    echo "  \"sudo $0 --mode all\" uninstall all IceTouch components"
+    echo "  \"sudo $0\" unistal\" uninstall all IceTouch components except IceTouch command line SDK"
 }
 
 #
-# Unistall a package
+# Uninstall a package
 #
-unistallPackage ()
+uninstallPackage ()
 {
     PACKAGE=$1
 
@@ -88,7 +88,7 @@ unistallPackage ()
             rm -rf "/Library/Application Support/Developer/3.2/Xcode/Plug-ins/slice2objcplugin.pbplugin"
         fi
 
-        echo "Package: '"$PACKAGE"' unistalled ok"
+        echo "Package: '"$PACKAGE"' uninstalled ok"
         rm "/var/db/receipts/$PACKAGE.bom"
         rm "/var/db/receipts/$PACKAGE.plist"
         return 0
@@ -129,8 +129,8 @@ fi
 
 
 #
-# Unistall IceTouch packages
+# Uninstall IceTouch packages
 #
 if [[ $mode == "all" ]]; then
-    unistallPackage "com.zeroc.icetouch-command-line-developer.pkg"
+    uninstallPackage "com.zeroc.icetouch-command-line-developer.pkg"
 fi
