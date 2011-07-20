@@ -425,10 +425,17 @@ typedef struct Configuration Configuration;
         {
             options = [NSArray arrayWithObjects:@"-ObjC", @"-lstdc++", @"-liconv", @"-lbz2", @"-lcrypto", @"-lssl", @"-lIceObjC", nil];
         }
-        else
+        else if([[context expandedValueForString:@"$(PLATFORM_NAME)"] isEqualToString:@"iphoneos"])
         {
             options = [NSArray arrayWithObjects:@"-all_load", @"-ObjC", @"-lstdc++", @"-lIceObjC", nil];
         }
+	else // iPhoneSimulator
+	{
+            options = [NSArray arrayWithObjects:@"-all_load", @"-ObjC", @"-lstdc++", @"-lIceObjC", 
+                                                @"-Wl,-no_compact_unwind", // Workaround Xcode compact_unwind warnings.
+                                                nil];
+	}
+
         NSArray* current = [[context expandedValueForString:@"$(OTHER_LDFLAGS)"] arrayByParsingAsStringList];
         NSMutableArray* copy = [current mutableCopy];
         for(NSString* o in options)
