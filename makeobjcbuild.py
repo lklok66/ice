@@ -10,6 +10,11 @@
 
 import os, sys, fnmatch, re, getopt, stat
 
+if not os.geteuid() == 0:
+    print "Script must be run as root - prefix command with 'sudo'"
+    sys.exit(1)
+
+
 rootDir = os.path.abspath(os.path.dirname(__file__))
 
 sys.path.append(os.path.join(rootDir, "distribution", "lib"))
@@ -43,17 +48,23 @@ def usage():
     print "Usage: " + sys.argv[0] + " [options] tag"
     print
     print "Options:"
-    print "-h      Show this message."
-    print "-v      Be verbose."
+    print "-h                   Show this message."
+    print "-v                   Be verbose."
+    print "--xcode-version      Xcode version to build the plug-in. Default is '40' for Xcode 4.0, supported versions are 32 and 40"
+    print "--xcode-path         Xcode install path. Default is '/Developer'"
+    print "--iphone-version     iPhone version to build SDKs, Default is '4.3' for iOS 4.3, supported versions are 4.2 and 4.3"
 
 #
 # Check arguments
 #
 verbose = 0
 tag = "HEAD"
+xcodeVersion = "40";
+xcodePath = "/Developer"
+iOSVersion = "4.3"
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "hv")
+    opts, args = getopt.getopt(sys.argv[1:], "hv", ["xcode-version=", "xcode-path=", "ios-version="])
 except getopt.GetoptError:
     usage()
     sys.exit(1)
@@ -64,6 +75,21 @@ for o, a in opts:
         sys.exit(0)
     elif o == "-v":
         verbose = 1
+    elif o == "--xcode-version":
+        xcodeVersion = a;
+    elif o == "--xcode-path":
+        xcodePath = a;
+    elif o == "--ios-version":
+        iOSVersion = a;
+
+
+if xcodeVersion != "40" and xcodeVersion != "32":
+    usage()
+    sys.exit(1)
+
+if iOSVersion != "4.3" and iOSVersion != "4.2":
+    usage()
+    sys.exit(1)
 
 if len(args) > 1:
     usage()
@@ -75,48 +101,34 @@ if len(args) == 1:
 cwd = os.getcwd()
 os.chdir(rootDir)
 
-#
-# Get Xcode, iOS and IceTouch versions.
-#
-xcodeVersion = "40"
-installerProject = "IceTouch-1.1.1-xcode-4.0.pmdoc"
-try:
-	xcodeVersion = os.environ["XCODE_VERSION"]
-except KeyError:
-	xcodeVersion = "40"
-
-if xcodeVersion != "40" and xcodeVersion != "32":
-	xcodeVersion = "40"
-	
-
-iPhoneSDKVersion = "4.3"
-try:
-	iPhoneSDKVersion = os.environ["IPHONE_SDK_VERSION"]
-except KeyError:
-	iPhoneSDKVersion = "4.3"
-
-if xcodeVersion == "32":
-	installerProject = "IceTouch-1.1.1-xcode-3.2.pmdoc"
-	
+# Get IceTouch version.
 config = open(os.path.join("cpp", "config", "Make.rules.objc"), "r")
 version = re.search("VERSION[\s]*= ([0-9\.]*)", config.read()).group(1)
 mmversion = re.search("([0-9]+\.[0-9b]+)[\.0-9]*", version).group(1)
 versionMinor = re.search("([0-9\.]*).([0-9\.]*)", version).group(2)
 versionMajor = re.search("([0-9\.]*).([0-9\.]*)", version).group(1)
 
-volname = "IceTouch " + version
-basePackageName = "IceTouch-" + version
+
+installerProject = "IceTouch-" + version + "-xcode-4.0.pmdoc"
+installerReadme = "installer-xcode-4.0-readme.rtf"
+    
+if xcodeVersion == "32":
+    installerProject = "IceTouch-1.1.1-xcode-3.2.pmdoc"
+    installerReadme = "installer-xcode-3.2-readme.rtf"
+
+volname = "IceTouch " + version + " for Xcode " + xcodeVersion
+basePackageName = "IceTouch-" + version + "-for-Xcode-" + xcodeVersion
 
 # First check to see whether the disk image is already accidently mounted.
 if not os.system("mount | grep \"%s (\" 2>&1 > /dev/null" % volname):
-    print "\"/Volumes/IceTouch %s\": already mounted. Unmount and restart." % mmversion
+    print "\"/Volumes/%s\": already mounted. Unmount and restart." % volname
     sys.exit(1)
 
 #
 # Get the distDir
 #
 distDir = os.path.abspath(os.path.join(rootDir, "..", "disticetouch-" + tag.replace('/', '-')))
-baseDir = os.path.abspath(os.path.join(rootDir, "..", "buildicetouch-" + tag.replace('/', '-')))
+baseDir = os.path.abspath(os.path.join(rootDir, "..", "buildicetouch-" + tag.replace('/', '-'))) + "-xcode-" + xcodeVersion
 if not os.path.exists(baseDir):
     os.mkdir(baseDir)
 
@@ -155,14 +167,14 @@ os.chdir(buildDir)
 print "Building distributions...",
 sys.stdout.flush()
 
-os.system("OPTIMIZE_SPEED=yes make")
-os.system("OPTIMIZE_SPEED=yes COMPILE_FOR_COCOA=yes make")
-os.system("OPTIMIZE_SIZE=yes COMPILE_FOR_IPHONE=yes make")
-os.system("OPTIMIZE_SIZE=yes COMPILE_FOR_IPHONE_SIMULATOR=yes make")
+os.system(("DEVELOPER_PATH=%s OPTIMIZE_SPEED=yes make" % xcodePath))
+os.system(("DEVELOPER_PATH=%s OPTIMIZE_SPEED=yes COMPILE_FOR_COCOA=yes make" % xcodePath))
+os.system(("DEVELOPER_PATH=%s IPHONE_SDK_VERSION=%s OPTIMIZE_SIZE=yes COMPILE_FOR_IPHONE=yes make" % (xcodePath, iOSVersion)))
+os.system(("DEVELOPER_PATH=%s IPHONE_SDK_VERSION=%s OPTIMIZE_SIZE=yes COMPILE_FOR_IPHONE_SIMULATOR=yes make" % (xcodePath, iOSVersion)))
 
 os.chdir(os.path.join(buildDir, "Xcode", "Slice2ObjcPlugin"))
 
-os.system("make >> %s 2>&1")
+os.system(("DEVELOPER_PATH=%s XCODE_VERSION=%s make" % (xcodePath, xcodeVersion)))
 
 print "ok"
 
@@ -184,18 +196,15 @@ sys.stdout.flush()
 
 if not os.path.exists(installerDir):
     os.mkdir(installerDir)
-copy(os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", "installer-readme.rtf"),
+copy(os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", installerReadme),
      os.path.join(installerDir, "readme.rtf"))
 copy(os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", "uninstall.sh"),
      os.path.join(installerDir, "uninstall.sh"))
 
 
 with open(os.path.join(installerDir, "uninstall.sh"), "a+") as f:
-	f.write("unistallPackage \"com.zeroc.icetouch-xcode" + xcodeVersion + "-developer.pkg\"")
-	f.write("\n")
-	f.write("unistallPackage \"com.zeroc.icetouch-xcode" + xcodeVersion + "-plugin.pkg\"")
-	f.write("\n")
-
+	f.write("uninstallPackage \"com.zeroc.icetouch-xcode" + xcodeVersion + "-developer.pkg\"\n")
+	f.write("uninstallPackage \"com.zeroc.icetouch-xcode" + xcodeVersion + "-plugin.pkg\"\n")
 
 os.makedirs(optDir)
 os.chdir(buildDir)
@@ -226,8 +235,8 @@ os.chdir(baseDir)
 
 # Fix iPhone demos iOS SDK and deployment version.
 
-xcodeSDKRootExprs = [ (re.compile("SDKROOT = iphoneos.*;"), "SDKROOT = \"iphoneos%s\";" % iPhoneSDKVersion) ]
-xcodeIPhoneOSDeplyomentExprs = [ (re.compile("IPHONEOS_DEPLOYMENT_TARGET = .*;"), "IPHONEOS_DEPLOYMENT_TARGET = %s;" % iPhoneSDKVersion) ]
+xcodeSDKRootExprs = [ (re.compile("SDKROOT = iphoneos.*;"), "SDKROOT = \"iphoneos%s\";" % iOSVersion) ]
+xcodeIPhoneOSDeplyomentExprs = [ (re.compile("IPHONEOS_DEPLOYMENT_TARGET = .*;"), "IPHONEOS_DEPLOYMENT_TARGET = %s;" % iOSVersion) ]
 
 for root, dirnames, filesnames in os.walk(os.path.join(examplesDir, "iPhone")):
     for f in filesnames:
@@ -236,11 +245,16 @@ for root, dirnames, filesnames in os.walk(os.path.join(examplesDir, "iPhone")):
             substitute(os.path.join(root, f), xcodeIPhoneOSDeplyomentExprs)
 print "ok"
 
+print "Fix file permissions",
+os.system("chown -R root:admin " + baseDir);
+os.system("chmod -R g+w " + baseDir);
+print "ok"
+
 print "Creating installer...",
 sys.stdout.flush()
 
 pmdoc = os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", installerProject)
-os.system("/Developer/usr/bin/packagemaker --doc " + pmdoc + " --out " + latestBuildDir + "/installer/" + basePackageName + ".pkg")
+os.system(xcodePath + "/usr/bin/packagemaker --doc " + pmdoc + " --out " + latestBuildDir + "/installer/" + basePackageName + ".pkg")
 
 print "ok"
 

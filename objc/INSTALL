@@ -53,16 +53,11 @@ compilers have a dependency on mcpp 2.7.2.
 
 We recommend downloading the IceTouch third-party source archive from
 
- http://www.zeroc.com/download.html
+ http://www.zeroc.com/icetouch/download.html
 
-This archive contains the source distribution for mcpp (along with
-other third-party dependencies for the full Ice distribution), as well
-as required source patches and configuration instructions.
-
-For more information about this dependency, please refer to the link
-below:
-
- http://mcpp.sourceforge.net
+This archive contains the source distribution for all Ice Touch
+third-party dependencies, as well as required source patches 
+and configuration instructions.
 
 
 XCode Plug-in
@@ -82,15 +77,29 @@ $ make
 
 To install the plug-in:
 
-$ sudo make install
+$ make install
 
 The Xcode plug-in is installed at the following location:
+
+~/Library/Application Support/Developer/4.0/Xcode/Plug-ins/slice2objcplugin.pbplugin
+
+Or:
+
+~/Library/Application Support/Developer/3.2/Xcode/Plug-ins/slice2objcplugin.pbplugin
+
+If you have set XCODE_PLUGIN_ALL_USER=YES in objc/config/Make.rules, the plug-in
+will be installed for all users at the following location:
 
 /Library/Application Support/Developer/4.0/Xcode/Plug-ins/slice2objcplugin.pbplugin
 
 Or:
 
 /Library/Application Support/Developer/3.2/Xcode/Plug-ins/slice2objcplugin.pbplugin
+
+Note that this require to have admin acces when run plug-in make install, you can
+just prefix the make "install" command with sudo as show below.
+
+$sudo make install
 
 ======================================================================
 Compilation

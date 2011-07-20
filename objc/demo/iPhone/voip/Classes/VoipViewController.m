@@ -14,6 +14,13 @@
 #import <Glacier2/Router.h>
 #import <WaitAlert.h>
 
+//
+// Avoid warning for undocumented UISlider method
+//
+@interface UISlider(UndocumentedAPI)
+-(void)setShowValue:(BOOL)val;
+@end
+
 @interface VoipViewController()
 
 @property (nonatomic, retain) UITextField* currentField;
@@ -82,6 +89,8 @@ static NSString* defaultHost = @"demo2.zeroc.com";
     
     loginButton.enabled = hostnameField.text.length > 0 && usernameField.text.length > 0;
     [loginButton setAlpha:loginButton.enabled ? 1.0 : 0.5];
+     // This generates a compile time warning, but does actually work!
+    [delaySlider setShowValue:YES];
 
     [super viewDidLoad];
 }

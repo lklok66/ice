@@ -74,6 +74,14 @@ embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 #
 #STATICLIBS			= yes
 
+
+#
+# Install the Xcode plug-in for all users. Default is to install
+# to the user home dir.
+#
+#XCODE_PLUGIN_ALL_USERS		= yes
+
+
 # ----------------------------------------------------------------------
 # Don't change anything below this line!
 # ----------------------------------------------------------------------
@@ -103,10 +111,18 @@ DEVELOPER_PATH = /Developer
 endif
 
 ifeq ($(XCODE_VERSION),32)
-    XCODE_PLUGIN_INSTALL_PATH = /Library/Application Support/Developer/3.2/Xcode/Plug-ins
+    ifeq ($(XCODE_PLUGIN_ALL_USERS),yes)
+        XCODE_PLUGIN_INSTALL_PATH = /Library/Application Support/Developer/3.2/Xcode/Plug-ins
+    else
+        XCODE_PLUGIN_INSTALL_PATH = $HOME/Library/Application Support/Developer/3.2/Xcode/Plug-ins
+    endif
     XCODE_SDK_PATH = $(DEVELOPER_PATH)/Library/PrivateFrameworks
 else
-    XCODE_PLUGIN_INSTALL_PATH = /Library/Application Support/Developer/4.0/Xcode/Plug-ins
+    ifeq ($(XCODE_PLUGIN_ALL_USERS),yes)
+        XCODE_PLUGIN_INSTALL_PATH = /Library/Application Support/Developer/4.0/Xcode/Plug-ins
+    else
+        XCODE_PLUGIN_INSTALL_PATH = $HOME/Library/Application Support/Developer/4.0/Xcode/Plug-ins
+    endif
     XCODE_SDK_PATH = $(DEVELOPER_PATH)/Library/Xcode/PrivatePlugIns/Xcode3Core.ideplugin/Contents/Frameworks
 endif
 

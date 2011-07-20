@@ -24,5 +24,6 @@ clean::
 install::
 	if test -d "$(XCODE_PLUGIN_INSTALL_PATH)/slice2objcplugin.pbplugin"; \
 		then rm -rf "$(XCODE_PLUGIN_INSTALL_PATH)/slice2objcplugin.pbplugin"; \
-	fi
+	fi;
+	mkdir -p "$(XCODE_PLUGIN_INSTALL_PATH)"
 	cp -rf "build/Release/slice2objcplugin.pbplugin" "$(XCODE_PLUGIN_INSTALL_PATH)"
