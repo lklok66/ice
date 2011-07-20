@@ -1695,8 +1695,14 @@ Ice::ConnectionI::getInfo() const
     }
 
     ConnectionInfoPtr info = _transceiver->getInfo();
-    info->incoming = _connector == 0;
-    info->adapterName = _adapter ? _adapter->getName() : string();
+    //
+    // Can be null if getInfo isn't implemented.
+    //
+    if(info)
+    {
+        info->incoming = _connector == 0;
+        info->adapterName = _adapter ? _adapter->getName() : string();
+    }
     return info;
 }
 

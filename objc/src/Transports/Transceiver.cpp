@@ -471,8 +471,7 @@ IceObjC::Transceiver::toString() const
 Ice::ConnectionInfoPtr 
 IceObjC::Transceiver::getInfo() const
 {
-    // This shouldn't be called as IceTouch doesn't implement the Connection::getInfo method.
-    assert(false);
+    // IceTouch doesn't implement the Connection::getInfo method.
     return 0;
 }
 
