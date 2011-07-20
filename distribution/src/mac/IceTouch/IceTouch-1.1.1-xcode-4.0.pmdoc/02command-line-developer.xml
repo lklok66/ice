@@ -1,0 +1,25 @@
+<pkgref spec="1.12" uuid="86998A8B-B1D3-4008-8222-792E488B2F92">
+    <config>
+        <identifier>com.zeroc.icetouch-command-line-developer.pkg</identifier>
+        <version>1.1.1</version>
+        <description></description>
+        <post-install type="none"/><requireAuthorization/>
+        <installFrom relative="true" includeRoot="true">../../../../../buildicetouch-LATEST/opt/IceTouch-1.1</installFrom>
+        <installTo mod="true">/opt</installTo>
+        <flags>
+            <followSymbolicLinks/>
+        </flags>
+        <packageStore type="internal"></packageStore>
+        <mod>requireAuthorization</mod>
+        <mod>installTo</mod>
+        <mod>postInstall</mod>
+        <mod>includeRoot</mod>
+        <mod>identifier</mod>
+        <mod>parent</mod>
+        <mod>version</mod>
+        <mod>installTo.path</mod>
+        <mod>installFrom.isRelativeType</mod>
+        <mod>extraFiles</mod>
+    </config>
+    <extra-files/>
+</pkgref>

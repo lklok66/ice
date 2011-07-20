@@ -1,0 +1,23 @@
+<pkgref spec="1.12" uuid="396ED0F5-3FF2-4DF0-A765-48BC60B97B86">
+    <config>
+        <identifier>com.zeroc.icetouch-xcode40-developer.pkg</identifier>
+        <version>1.1.1</version>
+        <description></description>
+        <post-install type="none"/>
+        <requireAuthorization/>
+        <installFrom relative="true">../../../../../buildicetouch-LATEST/Developer</installFrom>
+        <installTo mod="true">/</installTo>
+        <flags><followSymbolicLinks/></flags>
+        <packageStore type="internal"></packageStore>
+        <mod>requireAuthorization</mod>
+        <mod>installTo</mod>
+        <mod>postInstall</mod>
+        <mod>identifier</mod>
+        <mod>parent</mod>
+        <mod>version</mod>
+        <mod>installTo.path</mod>
+        <mod>installFrom.isRelativeType</mod>
+        <mod>extraFiles</mod>
+    </config>
+    <extra-files/>
+</pkgref>

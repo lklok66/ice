@@ -1,1 +1,50 @@
-<pkmkdoc spec="1.12"><properties><title>IceTouch 1.1.1 for Xcode 4.0 &amp; iOS 4.3</title><build>/IceTouch-1.1.1.pkg</build><organization>com.zeroc</organization><userSees ui="custom"/><min-target os="3"/><domain system="true"/></properties><distribution><versions min-spec="1.000000"/><scripts></scripts></distribution><contents><choice title="iPhone / Cocoa SDKs" id="xcode40developer" tooltip="iPhone / Cocoa SDKs" description="IceTouch iPhone and Cocoa SDKs, Documentation and Examples" starts_selected="true" starts_enabled="true" starts_hidden="false"><customLoc allowAltVol="true">/Developer</customLoc><pkgref id="com.zeroc.icetouch-xcode40-developer.pkg"/></choice><choice title="Xcode 4.0 Plug-in" id="xcode40plugin" tooltip="Xcode 4.0 Plug-in" description="Xcode Plug-in for use with IceTouch" starts_selected="true" starts_enabled="true" starts_hidden="false"><pkgref id="com.zeroc.icetouch-xcode40-plugin.pkg"/></choice><choice title="Command Line SDK" id="commandlinedeveloper" tooltip="Command Line SDK" description="IceTouch Command line SDK" starts_selected="true" starts_enabled="true" starts_hidden="false"><pkgref id="com.zeroc.icetouch-command-line-developer.pkg"/></choice></contents><resources bg-scale="none" bg-align="topleft"><locale lang="en"><resource type="license">/Users/jose/ice-objc/distribution/src/mac/IceTouch/license.txt</resource><resource type="readme">/Users/jose/ice-objc/distribution/src/mac/IceTouch/readme-xcode-4.0.txt</resource><resource type="welcome">/Users/jose/ice-objc/distribution/src/mac/IceTouch/intro.txt</resource></locale></resources><flags/><extra-files/><item type="file">01slice.xml</item><item type="file">02icetouch.xml</item><item type="file">03developer.xml</item><mod>extraFiles</mod><mod>properties.title</mod><mod>properties.customizeOption</mod><mod>properties.userDomain</mod><mod>properties.anywhereDomain</mod><mod>properties.systemDomain</mod></pkmkdoc>
+<pkmkdoc spec="1.12">
+    <properties>
+        <title>IceTouch 1.1.1 for Xcode 4.0 &amp; iOS 4.3</title>
+	<build>IceTouch-1.1.1-for-Xcode-40.pkg</build>
+        <organization>com.zeroc</organization>
+        <userSees ui="custom"/>
+        <min-target os="3"/>
+        <domain system="true"/>
+    </properties>
+    <distribution>
+        <versions min-spec="1.000000"/>
+        <scripts></scripts>
+    </distribution>
+    <contents>
+        <choice title="iPhone / Cocoa SDKs" id="xcode40developer" tooltip="iPhone / Cocoa SDKs" 
+                description="IceTouch iPhone and Cocoa SDKs, Documentation and Examples"
+                starts_selected="true" starts_enabled="true" starts_hidden="false">
+            <customLoc allowAltVol="true">/Developer</customLoc>
+            <pkgref id="com.zeroc.icetouch-xcode40-developer.pkg"/>
+        </choice>
+        <choice title="Xcode 4.0 Plug-in" id="xcode40plugin" tooltip="Xcode 4.0 Plug-in" 
+                description="Xcode Plug-in for use with IceTouch" 
+                starts_selected="true" starts_enabled="true" starts_hidden="false">
+            <pkgref id="com.zeroc.icetouch-xcode40-plugin.pkg"/>
+        </choice>
+        <choice title="Command Line SDK" id="commandlinedeveloper" tooltip="Command Line SDK" 
+                description="IceTouch Command line SDK" starts_selected="true" starts_enabled="true" 
+                starts_hidden="false">
+            <pkgref id="com.zeroc.icetouch-command-line-developer.pkg"/>
+        </choice>
+    </contents>
+    <resources bg-scale="none" bg-align="topleft">
+        <locale lang="en">
+            <resource relative="true" mod="true" type="license">license.txt</resource>
+            <resource relative="true" mod="true" type="readme">readme-xcode-4.0.txt</resource>
+            <resource relative="true" mod="true" type="welcome">intro.txt</resource>
+        </locale>
+    </resources>
+    <flags/>
+    <extra-files/>
+    <item type="file">01xcode-plugin.xml</item>
+    <item type="file">02command-line-developer.xml</item>
+    <item type="file">03xcode-developer.xml</item>
+    <mod>properties.systemDomain</mod>
+    <mod>properties.title</mod>
+    <mod>properties.customizeOption</mod>
+    <mod>properties.userDomain</mod>
+    <mod>properties.anywhereDomain</mod>
+    <mod>extraFiles</mod>
+</pkmkdoc>
