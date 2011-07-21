@@ -52,6 +52,9 @@ uninstallPackage ()
 
 
         XCODE_DEV_PACKAGE="NO"
+        if [[ "$PACKAGE" == "com.zeroc.icetouch-xcode41-developer.pkg" ]]; then
+            XCODE_DEV_PACKAGE="YES"
+        fi
         if [[ "$PACKAGE" == "com.zeroc.icetouch-xcode40-developer.pkg" ]]; then
             XCODE_DEV_PACKAGE="YES"	
         fi
@@ -80,12 +83,16 @@ uninstallPackage ()
             rm -rf "/opt/IceTouch-$VERSION_MM"
         fi
 
+        if [[ "$PACKAGE" == "com.zeroc.icetouch-xcode32-plugin.pkg" ]]; then
+            rm -rf "/Library/Application Support/Developer/3.2/Xcode/Plug-ins/slice2objcplugin.pbplugin"
+        fi
+
         if [[ "$PACKAGE" == "com.zeroc.icetouch-xcode40-plugin.pkg" ]]; then
             rm -rf "/Library/Application Support/Developer/4.0/Xcode/Plug-ins/slice2objcplugin.pbplugin"
         fi
 
-        if [[ "$PACKAGE" == "com.zeroc.icetouch-xcode32-plugin.pkg" ]]; then
-            rm -rf "/Library/Application Support/Developer/3.2/Xcode/Plug-ins/slice2objcplugin.pbplugin"
+        if [[ "$PACKAGE" == "com.zeroc.icetouch-xcode41-plugin.pkg" ]]; then
+            rm -rf "/Library/Application Support/Developer/4.1/Xcode/Plug-ins/slice2objcplugin.pbplugin"
         fi
 
         echo "Package: '"$PACKAGE"' uninstalled ok"
