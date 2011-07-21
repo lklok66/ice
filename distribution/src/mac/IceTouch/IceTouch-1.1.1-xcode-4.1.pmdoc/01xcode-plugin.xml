@@ -1,0 +1,27 @@
+<pkgref spec="1.12" uuid="8E1A8CAF-1152-4835-9794-6BCC7FFD7E39">
+    <config>
+        <identifier>com.zeroc.icetouch-xcode41-plugin.pkg</identifier>
+        <version>1.1.1</version>
+        <description></description>
+        <post-install type="none"/>
+        <requireAuthorization/>
+        <installFrom relative="true" mod="true" includeRoot="true">../../../../../buildicetouch-LATEST/slice2objcplugin.pbplugin</installFrom>
+        <installTo mod="true">/Library/Application Support/Developer/4.1/Xcode/Plug-ins</installTo>
+        <flags><followSymbolicLinks/></flags>
+        <packageStore type="internal"></packageStore>
+        <mod>installTo</mod>
+        <mod>includeRoot</mod>
+        <mod>installFrom.isRelativeType</mod>
+        <mod>version</mod>
+        <mod>parent</mod>
+        <mod>identifier</mod>
+        <mod>relocatable</mod>
+        <mod>installFrom.path</mod>
+        <mod>requireAuthorization</mod>
+        <mod>extraFiles</mod>
+        <mod>installTo.path</mod>
+        <mod>postInstall</mod>
+    </config>
+    <extra-files/>
+</pkgref>
+

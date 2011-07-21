@@ -50,7 +50,7 @@ def usage():
     print "Options:"
     print "-h                   Show this message."
     print "-v                   Be verbose."
-    print "--xcode-version      Xcode version to build the plug-in. Default is '40' for Xcode 4.0, supported versions are 32 and 40"
+    print "--xcode-version      Xcode version to build the plug-in. Default is '40' for Xcode 4.0, supported versions are 32, 40 and 41"
     print "--xcode-path         Xcode install path. Default is '/Developer'"
     print "--iphone-version     iPhone version to build SDKs, Default is '4.3' for iOS 4.3, supported versions are 4.2 and 4.3"
 
@@ -83,7 +83,7 @@ for o, a in opts:
         iOSVersion = a;
 
 
-if xcodeVersion != "40" and xcodeVersion != "32":
+if xcodeVersion != "41" and xcodeVersion != "40" and xcodeVersion != "32":
     usage()
     sys.exit(1)
 
@@ -109,15 +109,15 @@ versionMinor = re.search("([0-9\.]*).([0-9\.]*)", version).group(2)
 versionMajor = re.search("([0-9\.]*).([0-9\.]*)", version).group(1)
 
 
-installerProject = "IceTouch-" + version + "-xcode-4.0.pmdoc"
-installerReadme = "installer-xcode-4.0-readme.rtf"
-    
-if xcodeVersion == "32":
-    installerProject = "IceTouch-1.1.1-xcode-3.2.pmdoc"
-    installerReadme = "installer-xcode-3.2-readme.rtf"
+xcodeVersionMajor = xcodeVersion[0:1]
+xcodeVersionMinor = xcodeVersion[1:2]
+xcodeVersionString = xcodeVersionMajor + "." + xcodeVersionMinor
 
-volname = "IceTouch " + version + " for Xcode " + xcodeVersion
-basePackageName = "IceTouch-" + version + "-for-Xcode-" + xcodeVersion
+installerProject = "IceTouch-" + version + "-xcode-" + xcodeVersionString +".pmdoc"
+installerReadme = "installer-xcode-" + xcodeVersionString + "-readme.rtf"
+
+volname = "IceTouch " + version + " for Xcode " + xcodeVersionString
+basePackageName = "IceTouch-" + version + "-for-Xcode-" + xcodeVersionString
 
 # First check to see whether the disk image is already accidently mounted.
 if not os.system("mount | grep \"%s (\" 2>&1 > /dev/null" % volname):

@@ -21,8 +21,8 @@ prefix			 ?= /opt/IceTouch-$(VERSION)
 #DEVELOPER_PATH          = /Developer
 
 #
-# Define as 32 if building with Xcode 3.2.x the default is 40
-# for Xcode 4.0.x
+# Define as 32 if building with Xcode 3.2.x, define as 41 if building
+# for Xcode 4.1.x the default is 40 for Xcode 4.0.x
 #
 #XCODE_VERSION		?= 40
 
@@ -104,6 +104,9 @@ XCODE_VERSION = 40
 
 endif
 
+XCODE_VERSION_MAJOR := $(shell v="$(XCODE_VERSION)"; echo "$${v:0:1}")
+XCODE_VERSION_MINOR := $(shell v="$(XCODE_VERSION)"; echo "$${v:1:1}")
+
 ifeq ($(DEVELOPER_PATH),)
 
 DEVELOPER_PATH = /Developer
@@ -111,19 +114,15 @@ DEVELOPER_PATH = /Developer
 endif
 
 ifeq ($(XCODE_VERSION),32)
-    ifeq ($(XCODE_PLUGIN_ALL_USERS),yes)
-        XCODE_PLUGIN_INSTALL_PATH = /Library/Application Support/Developer/3.2/Xcode/Plug-ins
-    else
-        XCODE_PLUGIN_INSTALL_PATH = $HOME/Library/Application Support/Developer/3.2/Xcode/Plug-ins
-    endif
     XCODE_SDK_PATH = $(DEVELOPER_PATH)/Library/PrivateFrameworks
-else
-    ifeq ($(XCODE_PLUGIN_ALL_USERS),yes)
-        XCODE_PLUGIN_INSTALL_PATH = /Library/Application Support/Developer/4.0/Xcode/Plug-ins
-    else
-        XCODE_PLUGIN_INSTALL_PATH = $HOME/Library/Application Support/Developer/4.0/Xcode/Plug-ins
-    endif
+else ## Xcode 4.x
     XCODE_SDK_PATH = $(DEVELOPER_PATH)/Library/Xcode/PrivatePlugIns/Xcode3Core.ideplugin/Contents/Frameworks
+endif
+
+ifeq ($(XCODE_PLUGIN_ALL_USERS),yes)
+    XCODE_PLUGIN_INSTALL_PATH = /Library/Application Support/Developer/$(XCODE_VERSION_MAJOR).$(XCODE_VERSION_MINOR)/Xcode/Plug-ins
+else
+    XCODE_PLUGIN_INSTALL_PATH = $(HOME)/Library/Application Support/Developer/$(XCODE_VERSION_MAJOR).$(XCODE_VERSION_MINOR)/Xcode/Plug-ins
 endif
 
 #
