@@ -1,6 +1,6 @@
 This installer installs the following components:
 
- - Xcode 3.2 Command line SDK in: /opt/IceTouch-1.1
+ - Command line SDK for Mac OS X in: /opt/IceTouch-1.1
  - Xcode 3.2 Cocoa SDK in: /Developer/SDKs/IceTouch-1.1/macosx.sdk
  - Xcode 3.2 iPhone iOS 4.2 SDK in: /Developer/SDKs/IceTouch-1.1/iphoneos.sdk
  - Xcode 3.2 iPhone Simulator iOS 4.2 SDK in: /Developer/SDKs/IceTouch-1.1/iphonesimulator.sdk
