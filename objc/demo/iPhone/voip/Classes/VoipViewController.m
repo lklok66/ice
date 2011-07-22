@@ -93,6 +93,21 @@ static NSString* defaultHost = @"demo2.zeroc.com";
     [delaySlider setShowValue:YES];
 
     [super viewDidLoad];
+
+    UIDevice* device = [UIDevice currentDevice];
+    BOOL backgroundSupported = NO;
+    if ([device respondsToSelector:@selector(isMultitaskingSupported)])
+        backgroundSupported = device.multitaskingSupported;
+    if(!backgroundSupported)
+    {
+        UIAlertView *alert = [[[UIAlertView alloc] 
+                               initWithTitle:@"Warning"
+                               message:@"The device doesn't support background applications, the application will terminate when moved to background."
+                               delegate:nil
+                               cancelButtonTitle:@"OK"
+                               otherButtonTitles:nil] autorelease];
+        [alert show];
+    }
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {

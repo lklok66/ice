@@ -20,4 +20,5 @@ After pressing the "Call Back" button the server will call
 delay. A local notification is pushed if the application is in the
 background, otherwise an alert box is displayed.
 
-Note that background notifications do not work in the simulator.
+Note that background applicatinos aren't supported in devices before 3G,
+and background notifications do not work in the simulator.
