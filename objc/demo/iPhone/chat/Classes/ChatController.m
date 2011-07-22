@@ -220,7 +220,7 @@
                                      target:self action:@selector(logout:)] autorelease];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(destroySession)
+                                             selector:@selector(enterBackground)
                                                  name:UIApplicationDidEnterBackgroundNotification
                                                object:nil];
     
@@ -228,6 +228,12 @@
 }
 
 #pragma mark SessionManagement
+
+-(void)enterBackground
+{
+    [self destroySession];
+    [self.navigationController popViewControllerAnimated:NO];
+}
 
 -(void)destroySession
 {
