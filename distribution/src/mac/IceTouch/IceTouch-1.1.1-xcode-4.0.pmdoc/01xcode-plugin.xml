@@ -15,13 +15,19 @@
         <mod>version</mod>
         <mod>parent</mod>
         <mod>identifier</mod>
-        <mod>relocatable</mod>
         <mod>installFrom.path</mod>
         <mod>requireAuthorization</mod>
         <mod>extraFiles</mod>
         <mod>installTo.path</mod>
         <mod>postInstall</mod>
+        <mod>scripts.preinstall.path</mod>
     </config>
     <extra-files/>
+    <scripts>
+        <preinstall relative="true" mod="true">scripts/pre-install.sh</preinstall>
+        <scripts-element>
+            <preinstall-element>preinstall</preinstall-element>
+        </scripts-element>
+    </scripts>
 </pkgref>
 

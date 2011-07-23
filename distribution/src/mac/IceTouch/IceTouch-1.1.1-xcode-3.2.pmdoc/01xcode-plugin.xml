@@ -1,4 +1,4 @@
-<pkgref spec="1.12" uuid="8E1A8CAF-1152-4835-9794-6BCC7FFD7E39">
+<pkgref spec="1.12" uuid="DB8A8D2E-47F5-4D0D-AD51-9D8A06BC3FF5">
     <config>
         <identifier>com.zeroc.icetouch-xcode32-plugin.pkg</identifier>
         <version>1.1.1</version>
@@ -15,12 +15,18 @@
         <mod>version</mod>
         <mod>parent</mod>
         <mod>identifier</mod>
-        <mod>relocatable</mod>
         <mod>installFrom.path</mod>
         <mod>requireAuthorization</mod>
         <mod>extraFiles</mod>
         <mod>installTo.path</mod>
         <mod>postInstall</mod>
+        <mod>scripts.preinstall.path</mod>
     </config>
+    <scripts>
+        <preinstall relative="true" mod="true">scripts/pre-install.sh</preinstall>
+        <scripts-element>
+            <preinstall-element>preinstall</preinstall-element>
+        </scripts-element>
+    </scripts>
     <extra-files/>
 </pkgref>

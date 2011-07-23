@@ -1,4 +1,4 @@
-<pkgref spec="1.12" uuid="396ED0F5-3FF2-4DF0-A765-48BC60B97B86">
+<pkgref spec="1.12" uuid="9F27AB16-10F8-4E7E-AC82-C5091E92C43E">
     <config>
         <identifier>com.zeroc.icetouch-xcode41-developer.pkg</identifier>
         <version>1.1.1</version>
@@ -18,6 +18,13 @@
         <mod>installTo.path</mod>
         <mod>installFrom.isRelativeType</mod>
         <mod>extraFiles</mod>
+        <mod>scripts.preinstall.path</mod>
     </config>
+    <scripts>
+        <preinstall relative="true" mod="true">scripts/pre-install.sh</preinstall>
+        <scripts-element>
+            <preinstall-element>preinstall</preinstall-element>
+        </scripts-element>
+    </scripts>
     <extra-files/>
 </pkgref>

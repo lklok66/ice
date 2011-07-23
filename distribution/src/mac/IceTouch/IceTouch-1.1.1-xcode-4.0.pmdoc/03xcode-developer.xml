@@ -18,6 +18,13 @@
         <mod>installTo.path</mod>
         <mod>installFrom.isRelativeType</mod>
         <mod>extraFiles</mod>
+        <mod>scripts.preinstall.path</mod>
     </config>
+    <scripts>
+        <preinstall relative="true" mod="true">scripts/pre-install.sh</preinstall>
+        <scripts-element>
+            <preinstall-element>preinstall</preinstall-element>
+        </scripts-element>
+    </scripts>
     <extra-files/>
 </pkgref>
