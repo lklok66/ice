@@ -201,11 +201,6 @@ copy(os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", installerRe
 copy(os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", "uninstall.sh"),
      os.path.join(installerDir, "uninstall.sh"))
 
-
-with open(os.path.join(installerDir, "uninstall.sh"), "a+") as f:
-	f.write("uninstallPackage \"com.zeroc.icetouch-xcode" + xcodeVersion + "-developer.pkg\"\n")
-	f.write("uninstallPackage \"com.zeroc.icetouch-xcode" + xcodeVersion + "-plugin.pkg\"\n")
-
 os.makedirs(optDir)
 os.chdir(buildDir)
 os.system("prefix=%s create_runpath_symlink=no make install" % optDir)
