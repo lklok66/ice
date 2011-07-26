@@ -21,16 +21,13 @@ To build iPhone applications, you need:
 
 Or
 
-- Xcode 4.0 with iOS 4.3 SDK
+- Xcode 4.0 or Xcode 4.1 with iOS 4.3 SDK
 
 
 To build Cocoa applications, you need:
 
-- Xcode 3.2
+- Xcode 3.2, Xcode 4.0 or Xcode 4.1
 
-Or
-
-- Xcode 4.0
 
 
 Slice translators
@@ -81,6 +78,10 @@ $ make install
 
 The Xcode plug-in is installed at the following location:
 
+~/Library/Application Support/Developer/4.1/Xcode/Plug-ins/slice2objcplugin.pbplugin
+
+Or:
+
 ~/Library/Application Support/Developer/4.0/Xcode/Plug-ins/slice2objcplugin.pbplugin
 
 Or:
@@ -90,14 +91,18 @@ Or:
 If you have set XCODE_PLUGIN_ALL_USER=YES in objc/config/Make.rules, the plug-in
 will be installed for all users at the following location:
 
+/Library/Application Support/Developer/4.1/Xcode/Plug-ins/slice2objcplugin.pbplugin
+
+Or:
+
 /Library/Application Support/Developer/4.0/Xcode/Plug-ins/slice2objcplugin.pbplugin
 
 Or:
 
 /Library/Application Support/Developer/3.2/Xcode/Plug-ins/slice2objcplugin.pbplugin
 
-Note that this require to have admin acces when run plug-in make install, you can
-just prefix the make "install" command with sudo as show below.
+Note that this require to have admin access when run plug-in make install, you can
+just prefix the "make install" command with sudo as show below.
 
 $sudo make install
 
@@ -172,6 +177,19 @@ case of a failure, the tests abort with "failed".
 For the iPhone or iPhone simulator, the test suite runs within an
 iPhone application named "Test Suite", located in the directory
 objc/test/iPhone/container.
+
+Running the container application with Xcode 3.2 and iOS 4.2 requires
+to change the following settings in container project:
+
+  * The container project is configured to be build with iOS 4.3 
+    SDK, to build the project with a previous iOS version, 
+    you must update the project "Base SDk" build property, to 
+    match the desired iOS SDK version.
+
+  * The containter project is configured to be deployed in iOS 
+    4.3, if you want to deploy the application in a previous iOS 
+    version you must set the Xcode "Deployment Target" property 
+    of the target, to match the desired iOS version.
 
 
 ======================================================================

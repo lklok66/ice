@@ -21,16 +21,12 @@ To build iPhone applications, you need:
 
 Or
 
-- Xcode 4.0 with iOS 4.3 SDK
+- Xcode 4.0 or Xcode 4.1 with iOS 4.3 SDK
 
 
 To build Cocoa applications, you need:
 
-- Xcode 3.2
-
-Or
-
-- Xcode 4.0
+- Xcode 3.2, Xcode 4.0 or Xcode 4.1
 
 
 ======================================================================
