@@ -92,6 +92,10 @@ static NSString* defaultHost = @"demo2.zeroc.com";
      // This generates a compile time warning, but does actually work!
     [delaySlider setShowValue:YES];
 
+    delaySlider.minimumValue = 0;
+    delaySlider.maximumValue = 10;
+    delaySlider.value = 0.0;
+
     [super viewDidLoad];
 
     UIDevice* device = [UIDevice currentDevice];
