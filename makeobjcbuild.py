@@ -52,7 +52,7 @@ def usage():
     print "-v                   Be verbose."
     print "--xcode-version      Xcode version to build the plug-in. Default is '40' for Xcode 4.0, supported versions are 32, 40 and 41"
     print "--xcode-path         Xcode install path. Default is '/Developer'"
-    print "--iphone-version     iPhone version to build SDKs, Default is '4.3' for iOS 4.3, supported versions are 4.2 and 4.3"
+    print "--ios-version        iPhone version to build SDKs, Default is '4.3' for iOS 4.3, supported versions are 4.2 and 4.3"
 
 #
 # Check arguments
