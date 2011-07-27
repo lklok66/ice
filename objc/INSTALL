@@ -9,7 +9,7 @@ Operating system
 Ice Touch requires:
 
 - Mac OS X 10.6.8 or later
-- iOS 4.2 or iOS 4.3.
+- iOS 4.2 or iOS 4.3
 
 
 Compiler
@@ -26,8 +26,7 @@ Or
 
 To build Cocoa applications, you need:
 
-- Xcode 3.2, Xcode 4.0 or Xcode 4.1
-
+- Xcode 3.2, Xcode 4.0, or Xcode 4.1
 
 
 Slice translators
@@ -48,7 +47,7 @@ Slice translators yourself.
 The Slice-to-Objective-C (slice2objc) and Slice-to-C++ (slice2cpp)
 compilers have a dependency on mcpp 2.7.2.
 
-We recommend downloading the IceTouch third-party source archive from
+We recommend downloading the Ice Touch third-party source archive from
 
  http://www.zeroc.com/icetouch/download.html
 
@@ -57,17 +56,16 @@ third-party dependencies, as well as required source patches
 and configuration instructions.
 
 
-XCode Plug-in
+Xcode Plug-in
 -------------
 
-The XCode Plug-in is required to build the Cocoa and iPhone demos in
+The Xcode Plug-in is required to build the Cocoa and iPhone demos in
 this distribution. We strongly recommended that you develop Ice for
 C++ and Ice Touch applications with Xcode; this greatly simplifies the
 build process.
 
-To build the Xcode plug-in:
-
-Review and update the settings in the objc/config/Make.rules file.
+To build the Xcode plug-in, first review and update the settings in
+the objc/config/Make.rules file. Next, execute the following commands:
 
 $ cd Xcode/Slice2ObjcPlugin
 $ make
@@ -101,10 +99,12 @@ Or:
 
 /Library/Application Support/Developer/3.2/Xcode/Plug-ins/slice2objcplugin.pbplugin
 
-Note that this require to have admin access when run plug-in make install, you can
-just prefix the "make install" command with sudo as show below.
+Note that admin access is required when installing the plug-in for all
+users. You can prefix the "make install" command with sudo as shown
+below:
 
-$sudo make install
+$ sudo make install
+
 
 ======================================================================
 Compilation
@@ -179,17 +179,17 @@ iPhone application named "Test Suite", located in the directory
 objc/test/iPhone/container.
 
 Running the container application with Xcode 3.2 and iOS 4.2 requires
-to change the following settings in container project:
+changing the following settings in the container project:
 
-  * The container project is configured to be build with iOS 4.3 
-    SDK, to build the project with a previous iOS version, 
-    you must update the project "Base SDk" build property, to 
-    match the desired iOS SDK version.
+  * The container project is configured to be built with the iOS 4.3
+    SDK. To build the project with an earlier iOS version, you must
+    update the project "Base SDK" build property to match the desired
+    iOS SDK version.
 
-  * The containter project is configured to be deployed in iOS 
-    4.3, if you want to deploy the application in a previous iOS 
-    version you must set the Xcode "Deployment Target" property 
-    of the target, to match the desired iOS version.
+  * The container project is configured to be deployed in iOS 4.3. If
+    you want to deploy the application in a previous iOS version, you
+    must set the Xcode "Deployment Target" property of the target to
+    match the desired iOS version.
 
 
 ======================================================================
@@ -229,9 +229,9 @@ The following fields are defined:
 
 - Header Search Path
 
-   Set the list of directories to search for included Slice files
-   (-I option). Note that the Ice Slice files are automatically in the
-   header search path.
+  Set the list of directories to search for included Slice files
+  (-I option). Note that the Ice Slice files are automatically in the
+  header search path.
 
 - Ice Home
 

@@ -14,15 +14,15 @@
 prefix			 ?= /opt/IceTouch-$(VERSION)
 
 #
-# Xcode root directory, if you have several Xcode versions installed
+# Xcode root directory. If you have several Xcode versions installed,
 # choose the version you want to use to build the SDKs and Xcode
-# plug-in, the default is "/Developer"
+# plug-in. The default is the one installed in "/Developer".
 #
 #DEVELOPER_PATH          = /Developer
 
 #
-# Define as 32 if building with Xcode 3.2.x, define as 41 if building
-# for Xcode 4.1.x the default is 40 for Xcode 4.0.x
+# Define as 32 if building with Xcode 3.2.x, or define as 41 if building
+# for Xcode 4.1.x. The default is 40 for Xcode 4.0.x.
 #
 #XCODE_VERSION		?= 40
 
@@ -63,7 +63,7 @@ embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 #
 
 #
-# The default SDK version is 4.3 for iPhone, suported versions
+# The default SDK version is 4.3 for iPhone, supported versions
 # are 4.3 and 4.2
 #
 #IPHONE_SDK_VERSION		= 4.3
@@ -73,7 +73,6 @@ embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 # line build.
 #
 #STATICLIBS			= yes
-
 
 #
 # Install the Xcode plug-in for all users. Default is to install

@@ -1,6 +1,7 @@
 Changes since version 1.1.0
 ---------------------------
-- Update Ice Touch Xcode plug-in to support Xcode 3.2, Xcode 4.0
+
+- Update Ice Touch Xcode plug-in to support Xcode 3.2, Xcode 4.0,
   and Xcode 4.1
 
 - Updated Ice Touch to support OS X 10.7 (Lion) and Xcode 4.1
@@ -8,8 +9,9 @@ Changes since version 1.1.0
 - Updated build system to create fat binaries with armv6 and armv7
   architectures when building the iPhoneOS SDK
 
-- Updated build system to work with Xcode installed in not default
-  location "/Developer"
+- Updated build system to work with Xcode installed in non-standard
+  location
+
 
 Changes since version 1.0.0
 ---------------------------
