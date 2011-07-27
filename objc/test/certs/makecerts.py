@@ -144,7 +144,6 @@ if force or not os.path.exists(cppServerCert) or not os.path.exists(cppServerKey
 else:
     print "Skipping C++ server RSA certificate and key."
 
-#
 # C++ client RSA certificate and key.
 #
 cppClientCert = os.path.join(certs, "c_rsa1024_pub.pem")

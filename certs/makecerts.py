@@ -311,7 +311,7 @@ if (lang == ".net" or lang == None) and (force or not os.path.exists(csServer) o
         os.remove(csServer)
 
     cmd = "openssl pkcs12 -in " + cppServerCert + " -inkey " + cppServerKey + " -export -out " + csServer + \
-          " -passout pass:password"
+          " -certpbe PBE-SHA1-RC4-40 -keypbe PBE-SHA1-RC4-40 -passout pass:password"
     if debug:
         print "[debug]", cmd
     os.system(cmd)
@@ -331,7 +331,7 @@ if (lang == ".net" or lang == None) and (force or not os.path.exists(csClient) o
         os.remove(csClient)
 
     cmd = "openssl pkcs12 -in " + cppClientCert + " -inkey " + cppClientKey + " -export -out " + csClient + \
-          " -passout pass:password"
+          " -certpbe PBE-SHA1-RC4-40 -keypbe PBE-SHA1-RC4-40 -passout pass:password"
     if debug:
         print "[debug]", cmd
     os.system(cmd)
