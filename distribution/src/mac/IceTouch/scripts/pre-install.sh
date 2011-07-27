@@ -1,7 +1,5 @@
 #!/bin/sh
 
-echo "OK" > /opt/preinstall.txt
-
 #
 # Uninstall IceTouch-1.1.0 SDKs
 #
