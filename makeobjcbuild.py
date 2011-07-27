@@ -50,7 +50,7 @@ def usage():
     print "Options:"
     print "-h                   Show this message."
     print "-v                   Be verbose."
-    print "--xcode-version      Xcode version to build the plug-in. Default is '40' for Xcode 4.0, supported versions are 32, 40 and 41"
+    print "--xcode-version      Xcode version to build the installer. Default is '40' for Xcode 4.0, supported versions are 32, 40 and 41"
     print "--xcode-path         Xcode install path. Default is '/Developer'"
     print "--ios-version        iPhone version to build SDKs, Default is '4.3' for iOS 4.3, supported versions are 4.2 and 4.3"
 
@@ -132,7 +132,7 @@ baseDir = os.path.abspath(os.path.join(rootDir, "..", "buildicetouch-" + tag.rep
 if not os.path.exists(baseDir):
     os.mkdir(baseDir)
 
-# Create a symlink for use with Iceberg.
+# Create a symlink for use with PackageMaker.
 latestBuildDir = os.path.abspath(os.path.join(rootDir, "..", "buildicetouch-LATEST"))
 try:
     os.remove(latestBuildDir)
