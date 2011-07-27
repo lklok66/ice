@@ -116,8 +116,8 @@ xcodeVersionString = xcodeVersionMajor + "." + xcodeVersionMinor
 installerProject = "IceTouch-" + version + "-xcode-" + xcodeVersionString +".pmdoc"
 installerReadme = "installer-xcode-" + xcodeVersionString + "-readme.rtf"
 
-volname = "IceTouch " + version + " for Xcode " + xcodeVersionString
-basePackageName = "IceTouch-" + version + "-for-Xcode-" + xcodeVersionString
+volname = "IceTouch " + version + " Xcode " + xcodeVersionString
+basePackageName = "IceTouch-" + version + "-Xcode-" + xcodeVersionString
 
 # First check to see whether the disk image is already accidently mounted.
 if not os.system("mount | grep \"%s (\" 2>&1 > /dev/null" % volname):
