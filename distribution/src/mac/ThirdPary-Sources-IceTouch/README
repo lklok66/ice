@@ -23,6 +23,9 @@ Patches
 mcpp
 ----
 
+mcpp is the C/C++ preprocessor used by the slice2objc translator. It is
+used only during development (on Mac OS X).
+
 The file mcpp/patch.mcpp.2.7.2 in this archive contains several
 important fixes required by Ice Touch. We expect that these changes 
 will be included in a future release of mcpp.
