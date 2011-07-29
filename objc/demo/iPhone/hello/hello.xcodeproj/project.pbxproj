@@ -238,7 +238,7 @@
 				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
-				OTHER_LDFLAGS = "-Wl,-no_compact_unwind";
+				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = Hello;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos4.3;
@@ -260,7 +260,7 @@
 				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.3;
-				OTHER_LDFLAGS = "-Wl,-no_compact_unwind";
+				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = Hello;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos4.3;

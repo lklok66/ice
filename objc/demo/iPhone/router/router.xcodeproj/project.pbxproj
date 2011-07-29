@@ -330,7 +330,7 @@
 				GCC_PREFIX_HEADER = router_Prefix.pch;
 				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = Info.plist;
-				OTHER_LDFLAGS = "-Wl,-no_compact_unwind -lGlacier2ObjC";
+				OTHER_LDFLAGS = "-lGlacier2ObjC";
 				PRODUCT_NAME = Router;
 				SDKROOT = iphoneos4.3;
 				SLICE_INCLUDE_PATH = Classes;
@@ -349,7 +349,7 @@
 				GCC_PREFIX_HEADER = router_Prefix.pch;
 				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = Info.plist;
-				OTHER_LDFLAGS = "-Wl,-no_compact_unwind -lGlacier2ObjC";
+				OTHER_LDFLAGS = "-lGlacier2ObjC";
 				PRODUCT_NAME = Router;
 				SDKROOT = iphoneos4.3;
 				SLICE_INCLUDE_PATH = Classes;
