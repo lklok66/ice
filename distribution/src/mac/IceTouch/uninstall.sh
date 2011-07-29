@@ -1,14 +1,14 @@
 #!/bin/sh
 
 #
-# This script uninstall all IceTouch-1.1.1 distributions installed in the computer.
+# This script uninstall all IceTouch-1.1.1 packages installed in the computer.
 #
 
 showHelp ()
 {
     echo "ZeroC, IceTouch-1.1.1 uninstaller script"
     echo "usage: "
-    echo "  \"sudo $0\" -- uninstall all IceTouch-1.1.1 distributions installed in the computer."
+    echo "  \"sudo $0\" -- uninstall all IceTouch-1.1.1 packages installed in the computer."
 }
 
 #
@@ -19,10 +19,12 @@ uninstallPackage ()
     PACKAGE=$1
 
     if [[ ! -f "/var/db/receipts/$PACKAGE.bom" ]]; then
+        echo "$PACKAGE not installed"
         return 0
     fi
 
     if [[ ! -f "/var/db/receipts/$PACKAGE.plist" ]]; then
+        echo "$PACKAGE not installed"
         return 0
     fi
     
@@ -43,10 +45,6 @@ uninstallPackage ()
 
         BASE_PATH=$VOLUME$LOCATION
         
-        if [[ $BASE_PATH != "/" ]]; then
-            BASE_PATH+="/"
-        fi
-
         VERSION_MAJOR=${VERSION:0:1}
         VERSION_MINOR=${VERSION:2:1}
         VERSION_MM=$VERSION_MAJOR"."$VERSION_MINOR
@@ -106,6 +104,12 @@ uninstallPackage ()
         rm "/var/db/receipts/$PACKAGE.bom"
         rm "/var/db/receipts/$PACKAGE.plist"
 
+        if [[ "$XCODE_DEV_PACKAGE" == "YES" ]]; then
+            echo "$PACKAGE uninstalled from $BASE_PATH"
+        else
+            echo "$PACKAGE uninstalled"
+        fi
+
         return 0
     }
 }
@@ -130,6 +134,47 @@ if [ "$(id -u)" != "0" ]; then
     exit 1
 fi
 
+
+#
+# Ask the user for comfirmation.
+#
+
+
+ok=0
+confirmed="no"
+answer=""
+
+while [[ $ok -eq 0 ]]
+do
+    echo "Uninstall all IceTouch-1.1.1 packages installed in the computer? Yes/No"
+    read -p "$*" answer
+    if [[ ! "$answer" ]]; then
+        answer="no"
+    else
+        answer=$(tr '[:upper:]' '[:lower:]' <<<$answer)
+    fi
+
+    if [[ "$answer" == 'y' || "$answer" == 'yes' || "$answer" == 'n' || "$answer" == 'no' ]]; then
+        ok=1
+    fi
+
+    if [[ $ok -eq 0 ]]; then
+        echo "Valid answers are: 'yes', 'y', 'no', 'n'"
+    fi
+done
+
+if [[ "$answer" == 'y' || "$answer" == 'yes' ]]; then
+    confirmed="yes"
+else
+    confirmed="no"
+fi
+
+
+if [[ "$confirmed" == "no" ]]; then
+    echo "Unintall cancelled"
+    exit 0
+fi
+
 uninstallPackage "com.zeroc.icetouch-command-line-developer.pkg"
 uninstallPackage "com.zeroc.icetouch-xcode32-developer.pkg"
 uninstallPackage "com.zeroc.icetouch-xcode40-developer.pkg"
@@ -137,3 +182,5 @@ uninstallPackage "com.zeroc.icetouch-xcode41-developer.pkg"
 uninstallPackage "com.zeroc.icetouch-xcode32-plugin.pkg"
 uninstallPackage "com.zeroc.icetouch-xcode40-plugin.pkg"
 uninstallPackage "com.zeroc.icetouch-xcode41-plugin.pkg"
+
+echo "All IceTouch-1.1.1 packages uninstalled successfully"
