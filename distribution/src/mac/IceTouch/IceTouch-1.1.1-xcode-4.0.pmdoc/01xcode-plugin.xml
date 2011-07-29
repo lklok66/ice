@@ -21,12 +21,15 @@
         <mod>installTo.path</mod>
         <mod>postInstall</mod>
         <mod>scripts.preinstall.path</mod>
+        <mod>scripts.postinstall.path</mod>
     </config>
     <extra-files/>
     <scripts>
         <preinstall relative="true" mod="true">scripts/pre-install.sh</preinstall>
+        <postinstall relative="true" mod="true">scripts/post-install.sh</postinstall>
         <scripts-element>
             <preinstall-element>preinstall</preinstall-element>
+            <postinstall-element>postinstall</postinstall-element>
         </scripts-element>
     </scripts>
 </pkgref>
