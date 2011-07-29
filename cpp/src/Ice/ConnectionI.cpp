@@ -2066,6 +2066,12 @@ Ice::ConnectionI::initiateShutdown()
     assert(_state == StateClosing);
     assert(_dispatchCount == 0);
 
+    if(_shutdownInitiated)
+    {
+        return;
+    }
+    _shutdownInitiated = true;
+
     if(!_endpoint->datagram())
     {
         //
