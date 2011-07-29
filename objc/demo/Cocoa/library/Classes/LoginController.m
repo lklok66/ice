@@ -183,7 +183,8 @@ NSString* const routerServerKey = @"routerServerKey";
 	
     if(sslField.state == NSOnState && routerField.state != NSOnState)
     {   
-        if([chatServerField.stringValue caseInsensitiveCompare:@"demo2.zeroc.com"] == NSOrderedSame)
+        if([chatServerField.stringValue caseInsensitiveCompare:@"demo2.zeroc.com"] == NSOrderedSame &&
+           glacier2Field.state == NSOnState)
         {
             [[initData properties] setProperty:@"IceSSL.TrustOnly.Client"
                                          value:@"CN=\"ZeroC library demo Glacier2\""];

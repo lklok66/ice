@@ -262,7 +262,7 @@ static NSString* passwordKey = @"passwordKey";
     // connecting with.
     if(sslSwitch.isOn)
     {
-        if([hostname caseInsensitiveCompare:@"demo2.zeroc.com"] == NSOrderedSame)
+        if([hostname caseInsensitiveCompare:@"demo2.zeroc.com"] == NSOrderedSame && glacier2Switch.isOn)
         {
             [initData.properties setProperty:@"IceSSL.TrustOnly.Client"
                                        value:@"11:DD:28:AD:13:44:76:47:4F:BE:3C:4D:AC:AD:5A:06:88:DA:52:DA"];
@@ -273,6 +273,7 @@ static NSString* passwordKey = @"passwordKey";
             [initData.properties setProperty:@"IceSSL.TrustOnly.Client"
                                        value:@"75:FA:B7:3C:6B:1C:F8:FA:69:4B:75:A0:22:51:B2:AC:11:54:A7:E7"];
             [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"democacert.der"];
+            [initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
         }
     }
     
