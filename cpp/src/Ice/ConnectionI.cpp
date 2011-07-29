@@ -1494,7 +1494,14 @@ ConnectionI::dispatch(const StartCallbackPtr& startCB, const vector<OutgoingAsyn
             {
                 try
                 {
-                    initiateShutdown();
+                    if(!_shutdownInitiated)
+                    {
+                        initiateShutdown();
+                    }
+                    else
+                    {
+                        setState(StateClosed);
+                    }
                 }
                 catch(const LocalException& ex)
                 {
@@ -1780,7 +1787,8 @@ Ice::ConnectionI::ConnectionI(const InstancePtr& instance,
     _readHeader(false),
     _writeStream(_instance.get()),
     _dispatchCount(0),
-    _state(StateNotInitialized)
+    _state(StateNotInitialized),
+    _shutdownInitiated(false)
 {
 
     int& compressionLevel = const_cast<int&>(_compressionLevel);
@@ -2065,11 +2073,8 @@ Ice::ConnectionI::initiateShutdown()
 {
     assert(_state == StateClosing);
     assert(_dispatchCount == 0);
-
-    if(_shutdownInitiated)
-    {
-        return;
-    }
+    assert(!_shutdownInitiated);
+    
     _shutdownInitiated = true;
 
     if(!_endpoint->datagram())
