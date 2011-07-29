@@ -164,6 +164,9 @@ following subdirectories:
   - objc/demo/iPhone/router
   - objc/test/iPhone/container
 
+Make sure to build the SDKs before opening the demo or test projects
+in Xcode.
+
 After a successful build, you can run the test suite.
 
 Under Mac OS X, run:
