@@ -1492,6 +1492,12 @@ ConnectionI::dispatch(const StartCallbackPtr& startCB, const vector<OutgoingAsyn
         {
             if(_state == StateClosing)
             {
+                //
+                // Only initiate shutdown if not already done. It
+                // might have already been done if the sent callback
+                // or AMI callback was dispatched when the connection
+                // was already in the closing state.
+                //
                 try
                 {
                     if(!_shutdownInitiated)
