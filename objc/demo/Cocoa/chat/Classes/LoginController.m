@@ -90,7 +90,15 @@ NSString* const passwordKey = @"passwordKey";
 	
     [initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
     [initData.properties setProperty:@"IceSSL.TrustOnly.Client" value:@"CN=\"Glacier2\""];
-    [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.pem"];
+
+    if([chatServerField.stringValue caseInsensitiveCompare:@"demo.zeroc.com"] == NSOrderedSame)
+    {
+        [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.pem"];
+    }
+    else
+    {
+        [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"dev_ca_cert.pem"];
+    }
     [initData.properties setProperty:@"IceSSL.DefaultDir" value:[[NSBundle mainBundle] resourcePath]];
 	
     NSAssert(communicator == nil, @"communicator == nil");

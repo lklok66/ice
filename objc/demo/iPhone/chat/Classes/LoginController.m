@@ -200,13 +200,17 @@ static NSString* sslKey = @"sslKey";
     [initData.properties setProperty:@"Ice.ACM.Client" value:@"0"];
     [initData.properties setProperty:@"Ice.RetryIntervals" value:@"-1"];
     
-    // Tracing properties.
-    //[self.initData.properties setProperty:@"Ice.Trace.Network" value:@"1"];
-    //[self.initData.properties setProperty:@"Ice.Trace.Protocol" value:@"1"];
-    
     [initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
-    [initData.properties setProperty:@"IceSSL.TrustOnly.Client" value:@"C2:E8:D3:33:D7:83:99:6E:08:F7:C2:34:31:F7:1E:8E:44:87:38:57"];
-    [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
+    if([hostnameField.text caseInsensitiveCompare:@"demo.zeroc.com"] == NSOrderedSame)
+    {
+        [initData.properties setProperty:@"IceSSL.TrustOnly.Client" value:@"C2:E8:D3:33:D7:83:99:6E:08:F7:C2:34:31:F7:1E:8E:44:87:38:57"];
+        [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
+    }
+    else
+    {
+        [initData.properties setProperty:@"IceSSL.TrustOnly.Client" value:@"BA:80:EC:8D:69:11:FB:4D:DD:CB:72:B4:F1:4B:2A:1C:9E:80:33:3E"];
+        [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"dev_ca_cert.der"];
+    }
     
     initData.dispatcher = ^(id<ICEDispatcherCall> call, id<ICEConnection> con)
     {
