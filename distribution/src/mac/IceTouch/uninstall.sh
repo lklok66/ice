@@ -1,14 +1,15 @@
 #!/bin/sh
 
 #
-# This script uninstall all IceTouch-1.1.1 packages installed in the computer.
+# This script uninstalls all Ice Touch 1.1.1 packages currently installed on this system.
 #
 
 showHelp ()
 {
-    echo "ZeroC, IceTouch-1.1.1 uninstaller script"
+    echo "Ice Touch 1.1.1 uninstall script"
+    echo "Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved."
     echo "usage: "
-    echo "  \"sudo $0\" -- uninstall all IceTouch-1.1.1 packages installed in the computer."
+    echo "  \"sudo $0\" -- uninstall all Ice Touch 1.1.1 packages installed on this system."
 }
 
 #
@@ -19,12 +20,12 @@ uninstallPackage ()
     PACKAGE=$1
 
     if [[ ! -f "/var/db/receipts/$PACKAGE.bom" ]]; then
-        echo "$PACKAGE not installed"
+        echo "$PACKAGE - not installed, skipping"
         return 0
     fi
 
     if [[ ! -f "/var/db/receipts/$PACKAGE.plist" ]]; then
-        echo "$PACKAGE not installed"
+        echo "$PACKAGE - not installed, skipping"
         return 0
     fi
     
@@ -105,9 +106,9 @@ uninstallPackage ()
         rm "/var/db/receipts/$PACKAGE.plist"
 
         if [[ "$XCODE_DEV_PACKAGE" == "YES" ]]; then
-            echo "$PACKAGE uninstalled from $BASE_PATH"
+            echo "$PACKAGE - uninstalled from $BASE_PATH"
         else
-            echo "$PACKAGE uninstalled"
+            echo "$PACKAGE - uninstalled"
         fi
 
         return 0
@@ -129,7 +130,7 @@ done
 # Display a error if not running as root.
 #
 if [ "$(id -u)" != "0" ]; then
-    echo "ERROR: Must be run with root permissions -- prefix command with 'sudo'" 1>&2
+    echo "ERROR: This script must be executed with root permissions -- prefix command with 'sudo'" 1>&2
     showHelp
     exit 1
 fi
@@ -146,7 +147,7 @@ answer=""
 
 while [[ $ok -eq 0 ]]
 do
-    echo "Uninstall all IceTouch-1.1.1 packages installed in the computer? Yes/No"
+    echo "Uninstall all Ice Touch 1.1.1 packages installed on this sytem? Yes/No"
     read -p "$*" answer
     if [[ ! "$answer" ]]; then
         answer="no"
@@ -171,7 +172,7 @@ fi
 
 
 if [[ "$confirmed" == "no" ]]; then
-    echo "Unintall cancelled"
+    echo "Uninstallation cancelled"
     exit 0
 fi
 
@@ -183,4 +184,5 @@ uninstallPackage "com.zeroc.icetouch-xcode32-plugin.pkg"
 uninstallPackage "com.zeroc.icetouch-xcode40-plugin.pkg"
 uninstallPackage "com.zeroc.icetouch-xcode41-plugin.pkg"
 
-echo "All IceTouch-1.1.1 packages uninstalled successfully"
+echo "Ice Touch 1.1.1 uninstallation completed successfully"
+
