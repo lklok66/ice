@@ -1,20 +1,11 @@
-Ice Touch is ZeroC's implementation of Ice for iOS devices, with full
-support for the Objective-C programming language.
+Ice Touch is ZeroC's implementation of Ice for iOS devices, with full support for the Objective-C programming language.
 
-With Ice Touch, you can easily build distributed applications, with
-apps running on iOS that communicate with server-side Ice components 
-running on Mac OS X, Windows, Linux or Solaris. You can implement 
-these server-side components in Objective-C (with Ice Touch on Mac 
-OS X) or, using Ice, in C++, Java, C# or Python.
+With Ice Touch, you can easily build distributed applications, with apps running on iOS that communicate with each others and with Ice servers running on Mac OS X, Windows, Linux or Solaris. You can implement these servers in C++, Java, C# or Python (using Ice) or in Objective-C (using Ice Touch). 
 
-Ice Touch provides development kits and run times for iOS devices,
-the iOS simulator and Mac OS X.
+Ice and Ice Touch allow you to focus your efforts on your application logic, by taking care of all interactions with low-level network programming interfaces. With these toolkits, there is no need to worry about details such as opening network connections, serializing and deserializing data for network transmission, or retrying failed connection attempts (to name but a few of dozens of such low-level details).
 
-Like Ice, Ice Touch is available under the terms and conditions of 
-the GNU General Public License v2. Commercial licenses are available
-for customers who wish to use Ice Touch in proprietary products.  
-Please contact sales@zeroc.com for more information on licensing 
-Ice Touch.
+Ice Touch provides development kits and run times for iOS devices, the iOS simulator and Mac OS X.
 
-You will now be guided through the steps necessary to install this
-software.
+Like Ice, Ice Touch is available under the terms and conditions of the GNU General Public License v2. Commercial licenses are available for customers who wish to use Ice Touch in proprietary products.  Please contact sales@zeroc.com for more information on licensing Ice Touch.
+
+You will now be guided through the steps necessary to install this software.
