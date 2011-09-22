@@ -168,9 +168,9 @@ print "Building distributions...",
 sys.stdout.flush()
 
 os.system(("DEVELOPER_PATH=%s OPTIMIZE_SPEED=yes make" % xcodePath))
-os.system(("DEVELOPER_PATH=%s OPTIMIZE_SPEED=yes COMPILE_FOR_COCOA=yes make" % xcodePath))
-os.system(("DEVELOPER_PATH=%s IPHONE_SDK_VERSION=%s OPTIMIZE_SIZE=yes COMPILE_FOR_IPHONE=yes make" % (xcodePath, iOSVersion)))
-os.system(("DEVELOPER_PATH=%s IPHONE_SDK_VERSION=%s OPTIMIZE_SIZE=yes COMPILE_FOR_IPHONE_SIMULATOR=yes make" % (xcodePath, iOSVersion)))
+os.system(("DEVELOPER_PATH=%s OPTIMIZE_SPEED=yes COMPILE_CPP_SDK=yes COMPILE_FOR_COCOA=yes make" % xcodePath))
+os.system(("DEVELOPER_PATH=%s IPHONE_SDK_VERSION=%s OPTIMIZE_SIZE=yes COMPILE_CPP_SDK=yes COMPILE_FOR_IPHONE=yes make" % (xcodePath, iOSVersion)))
+os.system(("DEVELOPER_PATH=%s IPHONE_SDK_VERSION=%s OPTIMIZE_SIZE=yes COMPILE_CPP_SDK=yes COMPILE_FOR_IPHONE_SIMULATOR=yes make" % (xcodePath, iOSVersion)))
 
 os.chdir(os.path.join(buildDir, "Xcode", "Slice2ObjcPlugin"))
 
@@ -182,6 +182,7 @@ name = "IceTouch-" + mmversion
 installerDir = os.path.join(baseDir, "installer")
 developerDir = os.path.join(baseDir, "Developer")
 sdkDir = os.path.join(developerDir, "SDKs", name)
+cppSdkDir = os.path.join(developerDir, "SDKs", "IceTouchCpp-" + mmversion)
 examplesDir = os.path.join(developerDir, "Examples", name)
 docDir = os.path.join(developerDir, "Documentation", name)
 optDir = os.path.join(baseDir, "opt", name)
@@ -215,6 +216,7 @@ copy(os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", "README"),
      os.path.join(docDir, "README"))
 
 copy(os.path.join(buildDir, "objc", "SDK", "IceTouch-" + mmversion), sdkDir)
+copy(os.path.join(buildDir, "objc", "SDK", "IceTouchCpp-" + mmversion), cppSdkDir)
 
 copy(os.path.join(buildDir, "Xcode", "Slice2ObjcPlugin", "build", "Release", "slice2objcplugin.pbplugin"),
      os.path.join(baseDir, "slice2objcplugin.pbplugin"))

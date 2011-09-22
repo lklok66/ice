@@ -7,31 +7,15 @@
 #
 # **********************************************************************
 
-top_srcdir	= ..
+top_srcdir	= ../../..
 
 include $(top_srcdir)/config/Make.rules
 
-SUBDIRS		= IceUtilCpp \
-		  IceCpp \
-		  Transports \
-		  IceSSL \
-		  Ice \
-		  Glacier2
-
-ifeq ($(COMPILE_CPP_SDK),yes)
-ifneq ($(COMPILE_FOR_MACOSX),yes)
-SUBDIRS		:= $(SUBDIRS) \
-		  IceCppLib \
-		  Glacier2CppLib
-endif
-endif
+SUBDIRS		= Glacier2
 
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \
 	do \
-	    if test -d $$subdir ; \
-	    then \
-		echo "making $@ in $$subdir"; \
-		( cd $$subdir && $(MAKE) $@ ) || exit 1; \
-	    fi; \
+	    echo "making $@ in $$subdir"; \
+	    ( cd $$subdir && $(MAKE) $@ ) || exit 1; \
 	done

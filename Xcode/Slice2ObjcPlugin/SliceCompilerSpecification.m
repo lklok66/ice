@@ -51,10 +51,6 @@
         return nil;
     }
 
-    cpp = [[context expandedValueForString:@"$(SLICE_CPP_FLAG)"] isEqualToString:@"YES"];
-
-    NSString* translatorExe = (cpp ? @"slice2cpp" : @"slice2objc");
-
     NSFileManager* fileManager = [NSFileManager defaultManager];
     [fileManager changeCurrentDirectoryPath:context.baseDirectoryPath];
     NSString* sliceIceHome = [context expandedValueForString:@"$(SLICE_ICE_HOME)"];
@@ -82,6 +78,9 @@
             slicedir = [sliceIceHome stringByAppendingPathComponent:@"slice"];
         }
 
+        cpp = [[context expandedValueForString:@"$(SLICE_CPP_FLAG)"] isEqualToString:@"YES"];
+
+        NSString* translatorExe = (cpp ? @"slice2cpp" : @"slice2objc");
         translator = [[sliceIceHome stringByAppendingPathComponent:@"bin"] stringByAppendingPathComponent:translatorExe];
         
         NSDictionary* env = [[NSProcessInfo processInfo] environment];
@@ -106,10 +105,14 @@
             if([sdkDir rangeOfString:@"IceTouch"].location != NSNotFound)
             {
                 sdk = YES;
+                cpp = [sdkDir rangeOfString:@"IceTouchCpp"].location != NSNotFound;
                 found = YES;
                 sdkDir = [sdkDir stringByDeletingLastPathComponent];
                 // The bin and slice directories exist at the root of the SDK.
                 slicedir = [sdkDir stringByAppendingPathComponent:@"slice"];
+
+
+                NSString* translatorExe = (cpp ? @"slice2cpp" : @"slice2objc");
                 translator = [[sdkDir stringByAppendingPathComponent:@"bin"] stringByAppendingPathComponent:translatorExe];
                 break;
             }

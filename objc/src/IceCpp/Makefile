@@ -9,7 +9,7 @@
 
 top_srcdir	= ../..
 
-OBJS		= Acceptor.o \
+CPP_OBJS	= Acceptor.o \
                   Base64.o \
 		  Buffer.o \
 		  BasicStream.o \
@@ -136,7 +136,7 @@ SDIR		=  $(slicedir)/Ice
 
 SRCS_DIR	=  $(ice_dir)/cpp/src/Ice
 
-SRCS_OBJS	:= $(OBJS)
+SRCS_CPP_OBJS	:= $(CPP_OBJS)
 SRCS_LOCAL_OBJS	:= $(LOCAL_OBJS)
 SRCS_SLICE_OBJS	:= $(SLICE_OBJS)
 SRCS		=  $(addprefix $(SRCS_DIR)/, $(SRCS_OBJS:.o=.cpp)) \
@@ -146,9 +146,10 @@ DEPENDFLAGS	= --platform-name
 
 include $(top_srcdir)/config/Make.rules
 
-OBJS 			:= $(addprefix $(PLATFORM_NAME)/,$(OBJS))
+CPP_OBJS		:= $(addprefix $(PLATFORM_NAME)/,$(CPP_OBJS))
 LOCAL_OBJS 		:= $(addprefix $(PLATFORM_NAME)/,$(LOCAL_OBJS))
 SLICE_OBJS 		:= $(addprefix $(PLATFORM_NAME)/,$(SLICE_OBJS))
+OBJS			:= $(CPP_OBJS) $(LOCAL_OBJS) $(SLICE_OBJS)
 
 CPPFLAGS		:= -Iinclude -I$(ice_dir)/cpp/include -I$(ice_dir)/cpp/src $(CPPPLATFORMFLAGS)
 SLICE2CPPFLAGS		:= --ice --include-dir Ice $(SLICE2CPPFLAGS)
@@ -161,7 +162,7 @@ ifeq ($(COMPILE_WITH_CFSTREAM_TRANSPORT),yes)
     CPPFLAGS		:= -DICE_NO_KQUEUE $(CPPFLAGS)
 endif
 
-all:: $(OBJS) $(LOCAL_OBJS) $(SLICE_OBJS)
+all:: $(OBJS)
 
 $(PLATFORM_NAME)/%.o: %.cpp
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $< -o $@
@@ -180,11 +181,11 @@ include/Ice/%.h %.cpp: $(SDIR)/%.ice $(SLICE2CPP)
 	$(SLICE2CPP) $(SLICE2CPPFLAGS) $<
 	mv $(*F).h include/Ice/$(*F).h
 
-$(addprefix $(SRCS_DIR)/, $(OBJS:.o=.cpp)): \
+$(addprefix $(SRCS_DIR)/, $(CPP_OBJS:.o=.cpp)): \
 	$(patsubst $(SDIR)/%.ice,include/Ice/%.h,$(wildcard $(SDIR)/*F.ice)) \
 	$(patsubst $(SDIR)/%.ice,include/Ice/%.h,$(SLICECPP_SRCS))
 
-install:: $(OBJS) $(SLICE_OBJS)
+install:: $(OBJS)
 
 depend:: $(patsubst $(SDIR)/%.ice,include/Ice/%.h,$(wildcard $(SDIR)/*F.ice)) \
 	 $(patsubst $(SDIR)/%.ice,include/Ice/%.h,$(SLICECPP_SRCS))

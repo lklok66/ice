@@ -80,6 +80,12 @@ embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 #
 #XCODE_PLUGIN_ALL_USERS		= yes
 
+#
+# You can choose to also build and install support for using Ice Touch
+# with the C++ language in addition to Objective-C by setting the
+# following variable to yes.
+#
+#COMPILE_CPP_SDK		= yes
 
 # ----------------------------------------------------------------------
 # Don't change anything below this line!
@@ -169,6 +175,7 @@ ifeq ($(COMPILE_WITH_GC),)
 endif
 
 SDK_DIR                 = $(top_srcdir)/SDK/IceTouch-$(VERSION)/$(PLATFORM_NAME).sdk
+CPP_SDK_DIR             = $(top_srcdir)/SDK/IceTouchCpp-$(VERSION)/$(PLATFORM_NAME).sdk
 
 bindir			= $(top_srcdir)/bin
 includedir		= $(top_srcdir)/include
@@ -179,7 +186,9 @@ ifeq ($(COMPILE_FOR_MACOSX),yes)
     install_libdir	:= $(prefix)/$(libsubdir)
     install_bindir	:= $(prefix)/$(binsubdir)
 else
-    libdir		= $(SDK_DIR)/usr/local/lib
+    ifeq ($(libdir),)
+	libdir		= $(SDK_DIR)/usr/local/lib
+    endif
 endif
 
 #
