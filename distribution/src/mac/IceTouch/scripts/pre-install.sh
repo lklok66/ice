@@ -20,7 +20,7 @@ if [ -d /Developer/SDKs/IceTouch-1.1 ]; then
 fi
 
 if [ -d /Developer/SDKs/IceTouchCpp-1.1 ]; then
-    rm -rf /Developer/SDKs/IceTouch-1.1
+    rm -rf /Developer/SDKs/IceTouchCpp-1.1
 fi
 
 if [ -d /Developer/Examples/IceTouch-1.1 ]; then
