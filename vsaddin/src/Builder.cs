@@ -1125,15 +1125,39 @@ namespace Ice.VisualStudio
 
         public bool buildCppProject(Project project, bool force)
         {
-            VCConfiguration configuration = Util.getActiveVCConfiguration(project);
-            VCCLCompilerTool compilerTool =
-                    (VCCLCompilerTool)(((IVCCollection)configuration.Tools).Item("VCCLCompilerTool"));
-            VCLinkerTool linkerTool = (VCLinkerTool)(((IVCCollection)configuration.Tools).Item("VCLinkerTool"));
+            VCConfiguration conf = Util.getActiveVCConfiguration(project);
+            if(conf.ConfigurationType == ConfigurationTypes.typeGeneric ||
+               conf.ConfigurationType == ConfigurationTypes.typeUnknown)
+            {
+                string err = "Configuration Type: '" + conf.ConfigurationType.ToString() + "' not suported by Ice Visual Studio Add-in";
+                Util.write(project, Util.msgLevel.msgError,
+                    "------ Slice compilation failed: Project: " + Util.getTraceProjectName(project) + " ------\n\n" +
+                    err);
+                MessageBox.Show(err, "Ice Visual Studio Add-in", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1,
+                                (MessageBoxOptions)0);
 
+                Connect.getBuilder().addError(project, "", TaskErrorCategory.Error, 0, 0, err);
+
+                return false;
+            }
+
+            VCCLCompilerTool compilerTool =
+                    (VCCLCompilerTool)(((IVCCollection)conf.Tools).Item("VCCLCompilerTool"));
+
+            bool staticLib = conf.ConfigurationType == Microsoft.VisualStudio.VCProjectEngine.ConfigurationTypes.typeStaticLibrary;
+            LinkerAdapter linkerAdapter;
+            if(staticLib)
+            {
+                linkerAdapter = new StaticLinkerAdapter((VCLibrarianTool)(((IVCCollection)conf.Tools).Item("VCLibrarianTool")));
+            }
+            else
+            {
+                linkerAdapter = new DynamicLinkerAdapter((VCLinkerTool)(((IVCCollection)conf.Tools).Item("VCLinkerTool")));
+            }
 
             if(!_opening)
             {
-                Util.checkCppRunTimeLibrary(this, project, compilerTool, linkerTool);
+                Util.checkCppRunTimeLibrary(this, project, compilerTool, linkerAdapter);
             }
             string sliceCompiler = getSliceCompilerPath(project);
             return buildCppProject(project, project.ProjectItems, sliceCompiler, force);
@@ -1582,8 +1606,15 @@ namespace Ice.VisualStudio
         
         public static string getSliceCompilerVersion(Project project, string sliceCompiler)
         {
+            string iceHome = Util.getIceHome();
+            if(Util.isSilverlightProject(project))
+            {
+                iceHome = Util.getIceSlHome();
+            }
+            sliceCompiler = Path.Combine(iceHome, Path.Combine("bin", sliceCompiler));
+
             System.Diagnostics.Process process = new System.Diagnostics.Process();
-            process.StartInfo.FileName = Path.Combine(Util.getIceHome(), "bin\\" +  sliceCompiler);
+            process.StartInfo.FileName = sliceCompiler;
             process.StartInfo.Arguments = "-v";
             process.StartInfo.CreateNoWindow = true;
             process.StartInfo.UseShellExecute = false;
@@ -2509,7 +2540,7 @@ namespace Ice.VisualStudio
             bool standardError = true;
             if(Util.isSilverlightProject(project))
             {
-                string version = getSliceCompilerVersion(project, sliceCompiler);
+                string version = getSliceCompilerVersion(project, Util.slice2sl);
                 List<String> tokens = new List<string>(version.Split(new char[]{'.'}, 
                                                                      StringSplitOptions.RemoveEmptyEntries));
                                                                      
