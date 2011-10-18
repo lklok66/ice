@@ -69,14 +69,16 @@ parseKey(const string& keyStr)
         }
         else if(i == (int)keyStr.size() - 1)
         {
-            return false; // Not enough bytes.
+            CFRelease(data);
+            return 0; // Not enough bytes.
         }
 
         int vh = hexValue(m[i++]);
         int vl = hexValue(m[i++]);
         if(vh < 0 || vl < 0)
         {
-            return false;
+            CFRelease(data);
+            return 0;
         }
         buf[j] = vh << 4;
         buf[j++] += vl;

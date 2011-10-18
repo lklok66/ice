@@ -58,7 +58,7 @@ typedef IceUtil::Handle<DispatcherI> DispatcherIPtr;
 }
 
 @implementation ICEDispatcher
-+(Ice::Dispatcher*) dispatcherWithDispatcher:(void(^dispatcher)(id<ICEDispatcherCall>, id<ICEConnection>))dispatcher
++(Ice::Dispatcher*) dispatcherWithDispatcher:(void(^)(id<ICEDispatcherCall>, id<ICEConnection>))dispatcher
 {
     return new DispatcherI(dispatcher);
 }

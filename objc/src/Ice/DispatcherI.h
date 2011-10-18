@@ -14,7 +14,7 @@
 #include <IceCpp/Dispatcher.h>
 
 @interface ICEDispatcher : NSObject
-+(Ice::Dispatcher*)dispatcherWithDispatcher:(void(^dispatcher)(id<ICEDispatcherCall>, id<ICEConnection>))arg;
++(Ice::Dispatcher*)dispatcherWithDispatcher:(void(^)(id<ICEDispatcherCall>, id<ICEConnection>))arg;
 @end
 
 @interface ICEDispatcherCall : NSObject<ICEDispatcherCall>

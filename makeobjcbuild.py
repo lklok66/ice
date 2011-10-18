@@ -251,8 +251,7 @@ print "Creating installer...",
 sys.stdout.flush()
 
 pmdoc = os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", installerProject)
-resources = os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", "resources")
-os.system(xcodePath + "/usr/bin/packagemaker --doc " + pmdoc + " --scripts " + resources + " --out " + latestBuildDir + "/installer/" + basePackageName + ".pkg")
+os.system(xcodePath + "/usr/bin/packagemaker --doc " + pmdoc + " --out " + latestBuildDir + "/installer/" + basePackageName + ".pkg")
 
 print "ok"
 

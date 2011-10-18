@@ -11,6 +11,11 @@
 # This file is included by Make.rules when uname is Darwin.
 #
 
+#CC     = cc
+#CXX    = c++
+CC     = clang
+CXX    = clang++
+
 ifeq ($(COMPILE_FOR_IPHONE),yes)
      SDK_NAME = iPhoneOS
      ARCH= -arch armv6 -arch armv7
@@ -24,8 +29,8 @@ endif
 ifeq ($(COMPILE_FOR_IPHONE),yes)
     SDK_HOME=$(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/SDKs/$(SDK_NAME)$(IPHONE_SDK_VERSION).sdk
 
-    CC       = $(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/usr/bin/gcc
-    CXX      = $(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/usr/bin/g++
+    CC       := $(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/usr/bin/$(CC)
+    CXX      := $(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/usr/bin/$(CXX)
     CPPPLATFORMFLAGS    = $(ARCH) -isysroot $(SDK_HOME) -miphoneos-version-min=$(IPHONE_SDK_VERSION)
     LDPLATFORMFLAGS     = $(ARCH) -isysroot $(SDK_HOME)
     CODESIGN = CODESIGN_ALLOCATE=$(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/usr/bin/codesign_allocate codesign
@@ -34,8 +39,6 @@ ifeq ($(OPTIMIZE),yes)
     CPPPLATFORMFLAGS    = -arch i386 -arch x86_64
     LDPLATFORMFLAGS     = -arch i386 -arch x86_64
 endif
-    CC                  = cc
-    CXX	                = c++
 endif
 
 # For the simulator build we must support weak linking.
