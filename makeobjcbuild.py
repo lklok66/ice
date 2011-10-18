@@ -59,9 +59,9 @@ def usage():
 #
 verbose = 0
 tag = "HEAD"
-xcodeVersion = "40";
+xcodeVersion = "42";
 xcodePath = "/Developer"
-iOSVersion = "4.3"
+iOSVersion = "5.0"
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], "hv", ["xcode-version=", "xcode-path=", "ios-version="])
@@ -83,11 +83,11 @@ for o, a in opts:
         iOSVersion = a;
 
 
-if xcodeVersion != "41" and xcodeVersion != "40" and xcodeVersion != "32":
+if xcodeVersion != "42":
     usage()
     sys.exit(1)
 
-if iOSVersion != "4.3" and iOSVersion != "4.2":
+if iOSVersion != "5.0":
     usage()
     sys.exit(1)
 
@@ -169,8 +169,8 @@ sys.stdout.flush()
 
 os.system(("DEVELOPER_PATH=%s OPTIMIZE_SPEED=yes make" % xcodePath))
 os.system(("DEVELOPER_PATH=%s OPTIMIZE_SPEED=yes COMPILE_CPP_SDK=yes COMPILE_FOR_COCOA=yes make" % xcodePath))
-os.system(("DEVELOPER_PATH=%s IPHONE_SDK_VERSION=%s OPTIMIZE_SIZE=yes COMPILE_CPP_SDK=yes COMPILE_FOR_IPHONE=yes make" % (xcodePath, iOSVersion)))
-os.system(("DEVELOPER_PATH=%s IPHONE_SDK_VERSION=%s OPTIMIZE_SIZE=yes COMPILE_CPP_SDK=yes COMPILE_FOR_IPHONE_SIMULATOR=yes make" % (xcodePath, iOSVersion)))
+os.system(("DEVELOPER_PATH=%s IPHONE_SDK_VERSION=%s COMPILE_CPP_SDK=yes COMPILE_FOR_IPHONE=yes make" % (xcodePath, iOSVersion)))
+os.system(("DEVELOPER_PATH=%s IPHONE_SDK_VERSION=%s COMPILE_CPP_SDK=yes COMPILE_FOR_IPHONE_SIMULATOR=yes make" % (xcodePath, iOSVersion)))
 
 os.chdir(os.path.join(buildDir, "Xcode", "Slice2ObjcPlugin"))
 
@@ -251,7 +251,8 @@ print "Creating installer...",
 sys.stdout.flush()
 
 pmdoc = os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", installerProject)
-os.system(xcodePath + "/usr/bin/packagemaker --doc " + pmdoc + " --out " + latestBuildDir + "/installer/" + basePackageName + ".pkg")
+resources = os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", "resources")
+os.system(xcodePath + "/usr/bin/packagemaker --doc " + pmdoc + " --scripts " + resources + " --out " + latestBuildDir + "/installer/" + basePackageName + ".pkg")
 
 print "ok"
 

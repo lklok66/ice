@@ -24,8 +24,8 @@ endif
 ifeq ($(COMPILE_FOR_IPHONE),yes)
     SDK_HOME=$(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/SDKs/$(SDK_NAME)$(IPHONE_SDK_VERSION).sdk
 
-    CC       = $(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/usr/bin/gcc-4.2
-    CXX      = $(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/usr/bin/g++-4.2
+    CC       = $(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/usr/bin/gcc
+    CXX      = $(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/usr/bin/g++
     CPPPLATFORMFLAGS    = $(ARCH) -isysroot $(SDK_HOME) -miphoneos-version-min=$(IPHONE_SDK_VERSION)
     LDPLATFORMFLAGS     = $(ARCH) -isysroot $(SDK_HOME)
     CODESIGN = CODESIGN_ALLOCATE=$(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/usr/bin/codesign_allocate codesign
