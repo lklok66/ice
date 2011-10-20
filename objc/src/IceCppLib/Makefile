@@ -34,7 +34,6 @@ include/Ice/%.h:  $(ice_cpp_include)/Ice/%.h
 	@echo Creating $@ from $<
 	cp $< $@
 
-
 include/Ice/%.h:  ../IceCpp/include/Ice/%.h
 	@echo Creating $@ from $<
 	cp $< $@

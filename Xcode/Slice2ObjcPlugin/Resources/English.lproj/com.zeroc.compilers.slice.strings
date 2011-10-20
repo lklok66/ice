@@ -21,8 +21,17 @@
 "[SLICE_CHECKSUM_FLAG]-name" = "Checksum support";
 "[SLICE_CHECKSUM_FLAG]-description" = "Generate checksums for Slice definitions.";
 
+"[SLICE_UNDERSCORE_FLAG]-name" = "Underscore support";
+"[SLICE_UNDERSCORE_FLAG]-description" = "Permit underscores in Slice identifiers.";
+
 "[SLICE_INCLUDE_PATH]-name" = "Header Search Paths";
 "[SLICE_INCLUDE_PATH]-description" = "The path to search for Slice files.";
+
+"[SLICE_INCLUDE_DIR]-name" = "Header Directory";
+"[SLICE_INCLUDE_DIR]-description" = "Use specified directory as the header include directory in source files.";
+
+"[SLICE_OUTPUT_DIR]-name" = "Output Directory";
+"[SLICE_OUTPUT_DIR]-description" = "The path to output directory for generated files.";
 
 "[SLICE_PREPROCESSOR_DEFINITIONS]-name" = "Preprocessor Macros";
 "[SLICE_PREPROCESSOR_DEFINITIONS]-description" = "Preprocessor macros used by the Slice compiler.";

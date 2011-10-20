@@ -78,6 +78,38 @@
 			Category = Slice;
 		},
 		{
+			Name = "SLICE_UNDERSCORE_FLAG";
+			Type = bool;
+			DefaultValue = NO;
+			CommandLineArgs = {
+				NO = ();
+				YES = (
+					"--underscore",
+				);
+			};
+			Category = Slice;
+		},
+		{
+			Name = "SLICE_OUTPUT_DIR";
+			Type = pathlist;
+			DefaultValue = "$(DERIVED_FILE_DIR)";
+			CommandLineArgs = (
+				"--output-dir",
+				"$(value)",
+			);
+			Category = Slice;
+		},
+		{
+			Name = "SLICE_INCLUDE_DIR";
+			Type = path;
+			DefaultValue = "";
+			CommandLineArgs = (
+				"--include-dir",
+				"$(value)",
+			);
+			Category = Slice;
+		},
+		{
 			Name = "SLICE_INCLUDE_PATH";
 			Type = pathlist;
 			DefaultValue = "";

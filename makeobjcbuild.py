@@ -169,8 +169,8 @@ sys.stdout.flush()
 
 os.system(("DEVELOPER_PATH=%s OPTIMIZE_SPEED=yes make" % xcodePath))
 os.system(("DEVELOPER_PATH=%s OPTIMIZE_SPEED=yes COMPILE_CPP_SDK=yes COMPILE_FOR_COCOA=yes make" % xcodePath))
-os.system(("DEVELOPER_PATH=%s IPHONE_SDK_VERSION=%s COMPILE_CPP_SDK=yes COMPILE_FOR_IPHONE=yes make" % (xcodePath, iOSVersion)))
-os.system(("DEVELOPER_PATH=%s IPHONE_SDK_VERSION=%s COMPILE_CPP_SDK=yes COMPILE_FOR_IPHONE_SIMULATOR=yes make" % (xcodePath, iOSVersion)))
+os.system(("DEVELOPER_PATH=%s OPTIMIZE_SIZE=yes IPHONE_SDK_VERSION=%s COMPILE_CPP_SDK=yes COMPILE_FOR_IPHONE=yes make" % (xcodePath, iOSVersion)))
+os.system(("DEVELOPER_PATH=%s OPTIMIZE_SIZE=yes IPHONE_SDK_VERSION=%s COMPILE_CPP_SDK=yes COMPILE_FOR_IPHONE_SIMULATOR=yes make" % (xcodePath, iOSVersion)))
 
 os.chdir(os.path.join(buildDir, "Xcode", "Slice2ObjcPlugin"))
 

@@ -26,21 +26,6 @@ ifeq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
      ARCH= -arch i386
 endif
 
-ifeq ($(COMPILE_FOR_IPHONE),yes)
-    SDK_HOME=$(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/SDKs/$(SDK_NAME)$(IPHONE_SDK_VERSION).sdk
-
-    CC       := $(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/usr/bin/$(CC)
-    CXX      := $(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/usr/bin/$(CXX)
-    CPPPLATFORMFLAGS    = $(ARCH) -isysroot $(SDK_HOME) -miphoneos-version-min=$(IPHONE_SDK_VERSION)
-    LDPLATFORMFLAGS     = $(ARCH) -isysroot $(SDK_HOME)
-    CODESIGN = CODESIGN_ALLOCATE=$(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/usr/bin/codesign_allocate codesign
-else
-ifeq ($(OPTIMIZE),yes)
-    CPPPLATFORMFLAGS    = -arch i386 -arch x86_64
-    LDPLATFORMFLAGS     = -arch i386 -arch x86_64
-endif
-endif
-
 # For the simulator build we must support weak linking.
 ifeq ($(COMPILE_FOR_IPHONE_SIMULATOR),yes)
     OBJCFLAGS           := -fobjc-abi-version=2 -fobjc-legacy-dispatch -fmessage-length=0 -fpascal-strings -fasm-blocks
@@ -55,7 +40,10 @@ ifeq ($(OPTIMIZE_SPEED),yes)
   OPT_FLAGS		= -O2
 endif
 ifeq ($(OPTIMIZE_SIZE),yes)
-  OPT_FLAGS		= -Oz -dead_strip 
+  OPT_FLAGS		= -Oz 
+ifeq ($(CXX),c++)
+  OPT_FLAGS             := -dead_strip $(OPT_FLAGS)
+endif
 endif
 
 ifeq ($(OPTIMIZE),yes)
@@ -64,6 +52,21 @@ ifeq ($(OPTIMIZE),yes)
 else
      CFLAGS		:= -g $(CFLAGS)
      CXXFLAGS		:= -g $(CXXFLAGS)
+endif
+
+ifeq ($(COMPILE_FOR_IPHONE),yes)
+    PLATFORM_HOME=$(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform
+    SDK_HOME=$(PLATFORM_HOME)/Developer/SDKs/$(SDK_NAME)$(IPHONE_SDK_VERSION).sdk
+    CC                  := $(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/usr/bin/$(CC)
+    CXX                 := $(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/usr/bin/$(CXX)
+    CPPPLATFORMFLAGS    = $(ARCH) -isysroot $(SDK_HOME) -miphoneos-version-min=$(IPHONE_SDK_VERSION)
+    LDPLATFORMFLAGS     = $(ARCH) -isysroot $(SDK_HOME)
+    CODESIGN = CODESIGN_ALLOCATE=$(PLATFORM_HOME)/Developer/usr/bin/codesign_allocate codesign
+else
+ifeq ($(OPTIMIZE),yes)
+    CPPPLATFORMFLAGS    = -arch i386 -arch x86_64
+    LDPLATFORMFLAGS     = -arch i386 -arch x86_64
+endif
 endif
 
 ifeq ($(STATICLIBS),yes)
