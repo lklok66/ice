@@ -1197,7 +1197,7 @@ Slice::Gen::TypesVisitor::visitStructEnd(const StructPtr& p)
         //
         if(*pi == "id")
         {
-            H << nl << "if(" << *pi << ".operator<(__rhs." << *pi << "))";
+            H << nl << "if(IceInternal::lower(" << *pi << ", __rhs." << *pi << "))";
         }
         else
         {

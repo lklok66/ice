@@ -74,6 +74,22 @@ inline int getSystemErrno() { return GetLastError(); }
 inline int getSystemErrno() { return errno; }
 #endif
 
+//
+// Inline template to do < comparisons
+//
+// COMPILERFIX: This is required for to workaround a compiler issue with Objective-C++ 
+// where "id" is interpreted as the (id) type when the header is included from an ObjC
+// file.
+//
+// slice2cpp generates IceInternal::lower(id, rhs.id); instead of id < rhs.id
+// just when the param named is "id".
+//
+template<typename T>
+inline bool lower(T lhs, T rhs)
+{
+    return lhs < rhs;
+}
+
 }
 
 #endif
