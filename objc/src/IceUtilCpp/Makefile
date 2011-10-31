@@ -25,7 +25,9 @@ OBJS		= ArgVector.o \
 		  Time.o \
 		  Timer.o \
 		  Unicode.o \
-		  UUID.o
+		  UUID.o \
+		  CountDownLatch.o \
+		  CtrlCHandler.o
 
 SRCS_DIR	= $(ice_dir)/cpp/src/IceUtil
 
