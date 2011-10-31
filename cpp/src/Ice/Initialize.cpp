@@ -32,6 +32,14 @@ using namespace std;
 using namespace Ice;
 using namespace IceInternal;
 
+extern "C" 
+{
+#ifdef ICE_USE_CFSTREAM
+    Ice::Plugin* createIceTcp(const Ice::CommunicatorPtr&, const std::string&, const Ice::StringSeq&);
+#endif
+    Ice::Plugin* createIceSSL(const Ice::CommunicatorPtr&, const std::string&, const Ice::StringSeq&);
+}
+
 namespace IceInternal
 {
 
@@ -217,6 +225,16 @@ Ice::initialize(int& argc, char* argv[], const InitializationData& initializatio
     InitializationData initData = initializationData;
     initData.properties = createProperties(argc, argv, initData.properties, initData.stringConverter);
 
+#ifdef ICE_USE_CFSTREAM
+    initData.properties->setProperty("Ice.Plugin.IceTcp", "createIceTcp");
+    //
+    // Fake calls to the create transport plugin C methods. This is to ensure that these methods
+    // will get linked into exe when using static libraries.
+    //
+    createIceTcp(0, "", Ice::StringSeq());
+#endif
+    initData.properties->setProperty("Ice.Plugin.IceSSL", "createIceSSL");
+
     CommunicatorI* communicatorI = new CommunicatorI(initData);
     CommunicatorPtr result = communicatorI; // For exception safety.
     communicatorI->finishSetup(argc, argv);
@@ -242,10 +260,23 @@ Ice::initialize(const InitializationData& initData, Int version)
     //
     checkIceVersion(version);
 
-    CommunicatorI* communicatorI = new CommunicatorI(initData);
-    CommunicatorPtr result = communicatorI; // For exception safety.
+    InitializationData initData = initializationData;
     int argc = 0;
     char* argv[] = { 0 };
+    initData.properties = createProperties(argc, argv, initData.properties, initData.stringConverter);
+#ifdef ICE_USE_CFSTREAM
+    initData.properties->setProperty("Ice.Plugin.IceTcp", "createIceTcp");
+    //
+    // Fake calls to the create transport plugin C methods. This is to ensure that these methods
+    // will get linked into exe when using static libraries.
+    //
+    createIceTcp(0, "", Ice::StringSeq());
+#endif
+    initData.properties->setProperty("Ice.Plugin.IceSSL", "createIceSSL");
+    createIceSSL(0, "", Ice::StringSeq());
+	
+    CommunicatorI* communicatorI = new CommunicatorI(initData);
+    CommunicatorPtr result = communicatorI; // For exception safety.
     communicatorI->finishSetup(argc, argv);
     return result;
 }
