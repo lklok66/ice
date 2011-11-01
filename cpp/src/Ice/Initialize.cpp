@@ -25,6 +25,7 @@
 #include <Ice/StreamI.h>
 #include <Ice/LoggerI.h>
 #include <Ice/Instance.h>
+#include <Ice/Network.h>                // Required for ICE_USE_CFSTREAM
 #include <IceUtil/Mutex.h>
 #include <IceUtil/MutexPtrLock.h>
 
@@ -252,7 +253,7 @@ Ice::initialize(StringSeq& args, const InitializationData& initializationData, I
 }
 
 CommunicatorPtr
-Ice::initialize(const InitializationData& initData, Int version)
+Ice::initialize(const InitializationData& initializationData, Int version)
 {
     //
     // We can't simply call the other initialize() because this one does NOT read

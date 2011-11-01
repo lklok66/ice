@@ -94,6 +94,10 @@ $(addprefix $(SRCS_DIR)/, $(CPP_OBJS:.o=.cpp)): \
 	$(patsubst $(SDIR)/%.ice,include/Glacier2/%.h,$(wildcard $(SDIR)/*F.ice)) \
 	$(patsubst $(SDIR)/%.ice,include/Glacier2/%.h,$(SLICECPP_SRCS))
 
+$(EVERYTHING)::
+	@echo "making $@ in $$subdir"; \
+	( cd include && $(MAKE) $@ ) || exit 1; \
+
 install:: $(OBJS)
 
 
@@ -112,9 +116,5 @@ clean::
 	rm -f $(addsuffix .cpp, $(basename $(notdir $(SLICECPP_SRCS))))
 	rm -f $(addprefix include/Glacier2, $(addsuffix .h, $(basename $(subst $(SDIR),, \
 	$(filter $(SDIR)/%.ice, $(SLICECPP_SRCS))))))
-
-$(EVERYTHING)::
-	@echo "making $@ in $$subdir"; \
-	( cd include && $(MAKE) $@ ) || exit 1; \
 
 include .depend
