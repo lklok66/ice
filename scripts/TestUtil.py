@@ -124,7 +124,7 @@ testErrors = []
 
 toplevel = None 
 
-path = [ ".", "..", "../..", "../../..", "../../../..", "../../../../.." ]
+path = [ ".", "..", "../..", "../../..", "../../../..", "../../../../..", "../../../../../.." ]
 head = os.path.dirname(sys.argv[0])
 if len(head) > 0:
     path = [os.path.join(head, p) for p in path]
@@ -1136,7 +1136,6 @@ def clientServerTest(additionalServerOptions = "", additionalClientOptions = "",
 
     lang = getDefaultMapping()
     testdir = os.getcwd()
-
     # Setup the server.
     if lang in ["rb", "php"]:
         serverdir = getMirrorDir(testdir, "cpp")

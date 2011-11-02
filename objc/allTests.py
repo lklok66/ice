@@ -10,7 +10,7 @@
 
 import os, sys, re, getopt
 
-for toplevel in [".", "..", "../..", "../../..", "../../../.."]:
+for toplevel in [".", "..", "../..", "../../..", "../../../..", "../../../../.."]:
     toplevel = os.path.abspath(toplevel)
     if os.path.exists(os.path.join(toplevel, "scripts", "TestUtil.py")):
         break
@@ -24,27 +24,46 @@ from scripts import *
 # List of all basic tests.
 #
 tests = [ 
-     ("Slice/keyword", []),
-     ("Ice/proxy", ["core"]),
-     ("Ice/ami", ["core"]),
-     ("Ice/operations", ["core"]),
-     ("Ice/exceptions", ["core"]),
-     ("Ice/inheritance", ["core"]),
-     ("Ice/facets", ["core"]),
-     ("Ice/objects", ["core"]),
-     ("Ice/interceptor", ["core"]),
-     ("Ice/dispatcher", ["core"]),
-     ("Ice/defaultServant", ["core"]),
-     ("Ice/defaultValue", ["core"]),
-     ("Ice/binding", ["core"]),
-     ("Ice/hold", ["core"]),
-     ("Ice/faultTolerance", ["core"]),
-     ("Ice/location", ["core"]),
-     ("Ice/adapterDeactivation", ["core"]),
-     ("Ice/slicing/exceptions", ["core"]),
-     ("Ice/slicing/objects", ["core"]),
-     ("Ice/retry", ["core"]),
-     ("Ice/timeout", ["core"]),
+     ("objc/Slice/keyword", []),
+     ("objc/Ice/proxy", ["core"]),
+     ("objc/Ice/ami", ["core"]),
+     ("objc/Ice/operations", ["core"]),
+     ("objc/Ice/exceptions", ["core"]),
+     ("objc/Ice/inheritance", ["core"]),
+     ("objc/Ice/facets", ["core"]),
+     ("objc/Ice/objects", ["core"]),
+     ("objc/Ice/interceptor", ["core"]),
+     ("objc/Ice/dispatcher", ["core"]),
+     ("objc/Ice/defaultServant", ["core"]),
+     ("objc/Ice/defaultValue", ["core"]),
+     ("objc/Ice/binding", ["core"]),
+     ("objc/Ice/hold", ["core"]),
+     ("objc/Ice/faultTolerance", ["core"]),
+     ("objc/Ice/location", ["core"]),
+     ("objc/Ice/adapterDeactivation", ["core"]),
+     ("objc/Ice/slicing/exceptions", ["core"]),
+     ("objc/Ice/slicing/objects", ["core"]),
+     ("objc/Ice/retry", ["core"]),
+     ("objc/Ice/timeout", ["core"]),
+
+     ("cpp/Ice/proxy", ["core"]),
+     ("cpp/Ice/ami", ["core"]),
+     ("cpp/Ice/operations", ["core"]),
+     ("cpp/Ice/exceptions", ["core"]),
+     ("cpp/Ice/inheritance", ["core"]),
+     ("cpp/Ice/facets", ["core"]),
+     ("cpp/Ice/objects", ["core"]),
+     ("cpp/Ice/interceptor", ["core"]),
+     ("cpp/Ice/dispatcher", ["core"]),
+     ("cpp/Ice/defaultServant", ["core"]),
+     ("cpp/Ice/defaultValue", ["core"]),
+     ("cpp/Ice/binding", ["core"]),
+     ("cpp/Ice/hold", ["core"]),
+     ("cpp/Ice/location", ["core"]),
+     ("cpp/Ice/adapterDeactivation", ["core"]),
+     ("cpp/Ice/slicing/exceptions", ["core"]),
+     ("cpp/Ice/retry", ["core"]),
+     ("cpp/Ice/timeout", ["core"]),
     ]
 
 if __name__ == "__main__":

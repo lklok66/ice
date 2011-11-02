@@ -1,0 +1,6 @@
+OperationsTest.m: OperationsTest.ice "$(slicedir)/Ice/Current.ice" "$(slicedir)/Ice/ObjectAdapterF.ice" "$(slicedir)/Ice/ConnectionF.ice" "$(slicedir)/Ice/Identity.ice"
+OperationsTest.cpp: OperationsTest.ice "$(slicedir)/Ice/Current.ice" "$(slicedir)/Ice/ObjectAdapterF.ice" "$(slicedir)/Ice/ConnectionF.ice" "$(slicedir)/Ice/Identity.ice" "$(SLICE2CPP)" "$(SLICEPARSERLIB)"
+OperationsTest.m: OperationsTest.ice "$(slicedir)/Ice/Current.ice" "$(slicedir)/Ice/ObjectAdapterF.ice" "$(slicedir)/Ice/ConnectionF.ice" "$(slicedir)/Ice/Identity.ice"
+OperationsTest.cpp: OperationsTest.ice "$(slicedir)/Ice/Current.ice" "$(slicedir)/Ice/ObjectAdapterF.ice" "$(slicedir)/Ice/ConnectionF.ice" "$(slicedir)/Ice/Identity.ice" "$(SLICE2CPP)" "$(SLICEPARSERLIB)"
+OperationsTest.m: OperationsTest.ice "$(slicedir)/Ice/Current.ice" "$(slicedir)/Ice/ObjectAdapterF.ice" "$(slicedir)/Ice/ConnectionF.ice" "$(slicedir)/Ice/Identity.ice"
+OperationsTest.cpp: OperationsTest.ice "$(slicedir)/Ice/Current.ice" "$(slicedir)/Ice/ObjectAdapterF.ice" "$(slicedir)/Ice/ConnectionF.ice" "$(slicedir)/Ice/Identity.ice" "$(SLICE2CPP)" "$(SLICEPARSERLIB)"

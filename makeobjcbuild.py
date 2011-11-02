@@ -262,11 +262,11 @@ sys.stdout.flush()
 
 if os.path.exists("scratch.dmg.sparseimage"):
     os.remove("scratch.dmg.sparseimage")
-os.system("hdiutil create -quiet scratch.dmg -volname \"%s\" -type SPARSE -fs HFS+" % volname)
-os.system("hdid -quiet scratch.dmg.sparseimage")
+os.system("hdiutil create scratch.dmg -volname \"%s\" -type SPARSE -fs HFS+" % volname)
+os.system("hdid scratch.dmg.sparseimage")
 os.system("ditto -rsrc installer \"/Volumes/%s\"" % volname)
-os.system("hdiutil detach -quiet \"/Volumes/%s\"" % volname)
-os.system("hdiutil convert -quiet  scratch.dmg.sparseimage -format UDZO -o %s.dmg -imagekey zlib-devel=9" %
+os.system("hdiutil detach \"/Volumes/%s\"" % volname)
+os.system("hdiutil convert  scratch.dmg.sparseimage -format UDZO -o %s.dmg -imagekey zlib-devel=9" %
           basePackageName)
 os.remove("scratch.dmg.sparseimage")
 print "ok"

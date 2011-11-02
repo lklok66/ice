@@ -1,0 +1,6 @@
+AMITest.m: AMITest.ice "$(slicedir)/Ice/BuiltinSequences.ice"
+AMITest.cpp: AMITest.ice "$(slicedir)/Ice/BuiltinSequences.ice" "$(SLICE2CPP)" "$(SLICEPARSERLIB)"
+AMITest.m: AMITest.ice "$(slicedir)/Ice/BuiltinSequences.ice"
+AMITest.cpp: AMITest.ice "$(slicedir)/Ice/BuiltinSequences.ice" "$(SLICE2CPP)" "$(SLICEPARSERLIB)"
+AMITest.m: AMITest.ice "$(slicedir)/Ice/BuiltinSequences.ice"
+AMITest.cpp: AMITest.ice "$(slicedir)/Ice/BuiltinSequences.ice" "$(SLICE2CPP)" "$(SLICEPARSERLIB)"

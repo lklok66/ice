@@ -21,10 +21,9 @@ prefix			 ?= /opt/IceTouch-$(VERSION)
 #DEVELOPER_PATH          = /Developer
 
 #
-# Define as 32 if building with Xcode 3.2.x, or define as 41 if building
-# for Xcode 4.1.x. The default is 40 for Xcode 4.0.x.
+# The default is 42 for Xcode 4.2.x.
 #
-#XCODE_VERSION		?= 40
+#XCODE_VERSION		?= 42
 
 #
 # The "root directory" for runpath embedded in executables. Can be
@@ -63,10 +62,10 @@ embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 #
 
 #
-# The default SDK version is 4.3 for iPhone, supported versions
-# are 4.3 and 4.2
+# The default SDK version is 5.0 for iPhone, supported versions
+# are 5.0, 4.3 and 4.2
 #
-#IPHONE_SDK_VERSION		= 4.3
+#IPHONE_SDK_VERSION		= 5.0
 
 #
 # You can choose to build static libraries for the Mac OS X command
@@ -99,13 +98,13 @@ slice_translator = slice2objc
 
 ifeq ($(IPHONE_SDK_VERSION),)
 
-IPHONE_SDK_VERSION = 4.3
+IPHONE_SDK_VERSION = 5.0
 
 endif
 
 ifeq ($(XCODE_VERSION),)
 
-XCODE_VERSION = 40
+XCODE_VERSION = 42
 
 endif
 
@@ -187,7 +186,11 @@ ifeq ($(COMPILE_FOR_MACOSX),yes)
     install_bindir	:= $(prefix)/$(binsubdir)
 else
     ifeq ($(libdir),)
-	libdir		= $(SDK_DIR)/usr/local/lib
+		ifeq ($(COMPILE_CPP_SDK),)
+			libdir		= $(SDK_DIR)/usr/local/lib
+		else
+			libdir		= $(CPP_SDK_DIR)/usr/local/lib
+		endif
     endif
 endif
 
@@ -197,7 +200,7 @@ endif
 include	 $(top_srcdir)/config/Make.rules.$(UNAME)
 
 ifdef ice_src_dist
-    ifeq ($(ice_cpp_dir), $(ice_dir)/cpp)
+    ifeq ($(ice_ƒ_dir), $(ice_dir)/cpp)
         ICE_LIB_DIR = -L$(ice_cpp_dir)/lib
     else
         ICE_LIB_DIR = -L$(ice_cpp_dir)/$(libsubdir)
@@ -274,21 +277,6 @@ EVERYTHING		= all depend clean install
 %.o: %.cpp
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<
 
-$(HDIR)/%F.h: $(SDIR)/%F.ice $(SLICE2OBJC)
-	rm -f $(HDIR)/$(*F)F.h $(*F)F.m
-	$(SLICE2OBJC) $(SLICE2OBJCFLAGS) $<
-	mv $(*F)F.h $(HDIR)
-	rm -f $(*F)F.m
-
-$(HDIR)/%.h %.m: $(SDIR)/%.ice $(SLICE2OBJC)
-	rm -f $(HDIR)/$(*F).h $(*F).m
-	$(SLICE2OBJC) $(SLICE2OBJCFLAGS) $<
-	mv $(*F).h $(HDIR)
-
-%.h %.m: %.ice $(SLICE2OBJC)
-	rm -f $(*F).h $(*F).m
-	$(SLICE2OBJC) $(SLICE2OBJCFLAGS) $<
-
 %.h %.m: %.y
 	rm -f $(*F).h $(*F).c
 	bison $(BISONFLAGS) $<
@@ -320,6 +308,22 @@ endif
 clean::
 	-rm -f core *.o *.bak
 	-rm -f ./$(PLATFORM_NAME)/*
+
+$(HDIR)/%F.h: $(SDIR)/%F.ice $(SLICE2OBJC)
+	rm -f $(HDIR)/$(*F)F.h $(*F)F.m
+	$(SLICE2OBJC) $(SLICE2OBJCFLAGS) $<
+	mv $(*F)F.h $(HDIR)
+	rm -f $(*F)F.m
+
+$(HDIR)/%.h %.m: $(SDIR)/%.ice $(SLICE2OBJC)
+	rm -f $(HDIR)/$(*F).h $(*F).m
+	$(SLICE2OBJC) $(SLICE2OBJCFLAGS) $<
+	mv $(*F).h $(HDIR)
+
+%.h %.m: %.ice $(SLICE2OBJC)
+	rm -f $(*F).h $(*F).m
+	$(SLICE2OBJC) $(SLICE2OBJCFLAGS) $<
+
 
 ifneq ($(SLICE_SRCS),)
 depend:: $(SLICE_SRCS)

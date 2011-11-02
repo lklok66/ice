@@ -116,7 +116,12 @@ endif
 mklib                   = libtool -static -o $(1) $(2)
 
 BASELIBS		= -framework Foundation
+
+ifeq ($(COMPILE_CPP_SDK),)
 LIBS			= -lIceObjC $(BASELIBS)
+else
+LIBS			= -lIceCpp $(BASELIBS)
+endif
 
 ICE_OS_LIBS             = -ldl
 ifneq ($(COMPILE_FOR_IPHONE),yes)

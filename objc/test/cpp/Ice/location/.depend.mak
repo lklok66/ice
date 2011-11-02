@@ -1,0 +1,6 @@
+LocationTest.m: LocationTest.ice "$(slicedir)/Ice/Locator.ice" "$(slicedir)/Ice/Identity.ice" "$(slicedir)/Ice/ProcessF.ice"
+LocationTest.cpp: LocationTest.ice "$(slicedir)/Ice/Locator.ice" "$(slicedir)/Ice/Identity.ice" "$(slicedir)/Ice/ProcessF.ice" "$(SLICE2CPP)" "$(SLICEPARSERLIB)"
+LocationTest.m: LocationTest.ice "$(slicedir)/Ice/Locator.ice" "$(slicedir)/Ice/Identity.ice" "$(slicedir)/Ice/ProcessF.ice"
+LocationTest.cpp: LocationTest.ice "$(slicedir)/Ice/Locator.ice" "$(slicedir)/Ice/Identity.ice" "$(slicedir)/Ice/ProcessF.ice" "$(SLICE2CPP)" "$(SLICEPARSERLIB)"
+LocationTest.m: LocationTest.ice "$(slicedir)/Ice/Locator.ice" "$(slicedir)/Ice/Identity.ice" "$(slicedir)/Ice/ProcessF.ice"
+LocationTest.cpp: LocationTest.ice "$(slicedir)/Ice/Locator.ice" "$(slicedir)/Ice/Identity.ice" "$(slicedir)/Ice/ProcessF.ice" "$(SLICE2CPP)" "$(SLICEPARSERLIB)"

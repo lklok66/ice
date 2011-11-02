@@ -12,7 +12,11 @@ top_srcdir	= ..
 include $(top_srcdir)/config/Make.rules
 
 ifeq ($(COMPILE_FOR_MACOSX),yes)
-SUBDIRS		= Common Slice Ice
+SUBDIRS		= objc
+else ifeq ($(COMPILE_FOR_COCOA),yes)
+	ifeq ($(COMPILE_CPP_SDK),yes)
+		SUBDIRS		= cpp
+	endif
 else
 SUBDIRS		=
 endif
