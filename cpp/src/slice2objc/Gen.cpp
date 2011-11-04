@@ -1724,7 +1724,7 @@ Slice::Gen::TypesVisitor::writeMemberDefaultValueInit(const DataMemberList& data
     {
         if((*p)->defaultValueType())
         {
-            _M << nl << fixId((*p)->name(), baseType) << " = ";
+            _M << nl << "self." << fixId((*p)->name(), baseType) << " = ";
             writeConstantValue(_M, (*p)->type(), (*p)->defaultValue());
             _M << ";";
         }
@@ -1740,7 +1740,7 @@ Slice::Gen::TypesVisitor::writeMemberInit(const DataMemberList& dataMembers, int
 	string typeString = typeToString(type);
 	string name = fixId((*q)->name());
 
-	_M << nl << fixId((*q)->name(), baseType) << " = ";
+	_M << nl << "self." << fixId((*q)->name(), baseType) << " = ";
 	if(isValueType(type))
 	{
 	    _M << name << "_p;";
@@ -1827,7 +1827,7 @@ Slice::Gen::TypesVisitor::writeMemberHashCode(const DataMemberList& dataMembers,
 	}
 	else
 	{
-	    _M << "[" << name << " hash];";
+	    _M << "[self." << name << " hash];";
 	}
     }
     _M << nl << "return h_;";
@@ -1866,7 +1866,7 @@ Slice::Gen::TypesVisitor::writeMemberEquals(const DataMemberList& dataMembers, i
 		_M << eb;
 		_M << nl << "else";
 		_M << sb;
-		_M << nl << "if(![" << name << " ";
+		_M << nl << "if(![self." << name << " ";
 		_M << (isString(type) ? "isEqualToString" : "isEqual");
 		_M << ":obj_->" << name << "])";
 		_M << sb;
@@ -1898,7 +1898,7 @@ Slice::Gen::TypesVisitor::writeMemberDealloc(const DataMemberList& dataMembers, 
 	    bool isValue = isValueType(type);
 	    if(!isValue)
 	    {
-		_M << nl << "[" << fixId((*q)->name(), baseType) << " release];";
+		_M << nl << "[self." << fixId((*q)->name(), baseType) << " release];";
 	    }
 	}
     }
