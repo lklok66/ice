@@ -11,12 +11,8 @@ top_srcdir	= ../..
 
 include $(top_srcdir)/config/Make.rules
 
-ifeq ($(COMPILE_FOR_COCOA),yes)
-    ifeq ($(COMPILE_CPP_SDK),yes)
-		SUBDIRS		= Common Ice
-	endif
-else
-SUBDIRS		=
+ifeq ($(PLATFORM_NAME),macosx)
+SUBDIRS         = Common Ice
 endif
 
 $(EVERYTHING)::

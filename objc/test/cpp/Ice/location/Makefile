@@ -10,7 +10,7 @@
 top_srcdir	= ../../../..
 
 LIBNAME		= TestCommon.o
-
+USE_CPP_SDK = yes
 SERVER		= server
 CLIENT		= client
 
@@ -61,11 +61,11 @@ CPPFLAGS	:= -I.. -I../../Common -I. -I$(CPP_SDK_DIR)/usr/local/include
 
 $(CLIENT): $(OBJS) $(COBJS)
 	rm -f $@
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(COBJS) $(LIBS)
+	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(COBJS) $(CPP_LIBS)
 
 $(SERVER): $(OBJS) $(SOBJS)
 	rm -f $@
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(SOBJS) $(LIBS)
+	$(CXX) $(LDFLAGS) -o $@ $(OBJS) $(SOBJS) $(CPP_LIBS)
 
 
 include .depend

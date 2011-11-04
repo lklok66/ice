@@ -8,8 +8,9 @@
 # **********************************************************************
 
 top_srcdir	= ../..
-libdir		= $(CPP_SDK_DIR)/usr/local/lib
-
+COMPILE_CPP_SDK = yes
+libdir          = $(CPP_SDK_DIR)/usr/local/lib
+STATICLIBS      = yes
 LIBNAME		= $(call mklibname,IceCpp)
 
 TARGETS		= $(libdir)/$(LIBNAME)

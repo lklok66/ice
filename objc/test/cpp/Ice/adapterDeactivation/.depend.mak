@@ -7,3 +7,5 @@ AdapterDeactivationTest.m: AdapterDeactivationTest.ice
 AdapterDeactivationTest.cpp: AdapterDeactivationTest.ice "$(SLICE2CPP)" "$(SLICEPARSERLIB)"
 AdapterDeactivationTest.m: AdapterDeactivationTest.ice
 AdapterDeactivationTest.cpp: AdapterDeactivationTest.ice "$(SLICE2CPP)" "$(SLICEPARSERLIB)"
+AdapterDeactivationTest.cpp: AdapterDeactivationTest.ice "$(SLICE2CPP)" "$(SLICEPARSERLIB)"
+AdapterDeactivationTest.cpp: AdapterDeactivationTest.ice "$(SLICE2CPP)" "$(SLICEPARSERLIB)"

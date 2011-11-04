@@ -21,11 +21,6 @@ prefix			 ?= /opt/IceTouch-$(VERSION)
 #DEVELOPER_PATH          = /Developer
 
 #
-# The default is 42 for Xcode 4.2.x.
-#
-#XCODE_VERSION		?= 42
-
-#
 # The "root directory" for runpath embedded in executables. Can be
 # unset to avoid adding a runpath to Ice executables. This setting
 # only applies for Mac OS X command line builds.
@@ -65,7 +60,13 @@ embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 # The default SDK version is 5.0 for iPhone, supported versions
 # are 5.0, 4.3 and 4.2
 #
-#IPHONE_SDK_VERSION		= 5.0
+#IPHONE_SDK_VERSION			= 5.0
+
+#
+# The min SDK version supported by targets
+#
+#
+#IPHONE_TARGET_MIN_SDK_VERSION          = 4.2
 
 #
 # You can choose to build static libraries for the Mac OS X command
@@ -79,13 +80,6 @@ embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 #
 #XCODE_PLUGIN_ALL_USERS		= yes
 
-#
-# You can choose to also build and install support for using Ice Touch
-# with the C++ language in addition to Objective-C by setting the
-# following variable to yes.
-#
-#COMPILE_CPP_SDK		= yes
-
 # ----------------------------------------------------------------------
 # Don't change anything below this line!
 # ----------------------------------------------------------------------
@@ -96,37 +90,26 @@ embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 ice_language     = objc
 slice_translator = slice2objc
 
-ifeq ($(IPHONE_SDK_VERSION),)
+ifeq ($(COMPILE_CPP_SDK),yes)
+	USE_CPP_SDK	= yes
+endif
+
+ifeq ($(IPHONESDK_VERSION),)
 
 IPHONE_SDK_VERSION = 5.0
 
 endif
 
-ifeq ($(XCODE_VERSION),)
+ifeq ($(IPHONE_TARGET_MIN_SDK_VERSION),)
 
-XCODE_VERSION = 42
+IPHONE_TARGET_MIN_SDK_VERSION = 4.2
 
 endif
-
-XCODE_VERSION_MAJOR := $(shell v="$(XCODE_VERSION)"; echo "$${v:0:1}")
-XCODE_VERSION_MINOR := $(shell v="$(XCODE_VERSION)"; echo "$${v:1:1}")
 
 ifeq ($(DEVELOPER_PATH),)
 
 DEVELOPER_PATH = /Developer
 
-endif
-
-ifeq ($(XCODE_VERSION),32)
-    XCODE_SDK_PATH = $(DEVELOPER_PATH)/Library/PrivateFrameworks
-else ## Xcode 4.x
-    XCODE_SDK_PATH = $(DEVELOPER_PATH)/Library/Xcode/PrivatePlugIns/Xcode3Core.ideplugin/Contents/Frameworks
-endif
-
-ifeq ($(XCODE_PLUGIN_ALL_USERS),yes)
-    XCODE_PLUGIN_INSTALL_PATH = /Library/Application Support/Developer/$(XCODE_VERSION_MAJOR).$(XCODE_VERSION_MINOR)/Xcode/Plug-ins
-else
-    XCODE_PLUGIN_INSTALL_PATH = $(HOME)/Library/Application Support/Developer/$(XCODE_VERSION_MAJOR).$(XCODE_VERSION_MINOR)/Xcode/Plug-ins
 endif
 
 #
@@ -180,19 +163,25 @@ bindir			= $(top_srcdir)/bin
 includedir		= $(top_srcdir)/include
 
 ifeq ($(COMPILE_FOR_MACOSX),yes)
-    libdir		= $(top_srcdir)/lib
-    install_includedir	:= $(prefix)/include
-    install_libdir	:= $(prefix)/$(libsubdir)
-    install_bindir	:= $(prefix)/$(binsubdir)
+    ifeq ($(USE_CPP_SDK),)
+    	libdir		= $(top_srcdir)/lib
+    	install_includedir	:= $(prefix)/include
+    	install_libdir	:= $(prefix)/$(libsubdir)
+    	install_bindir	:= $(prefix)/$(binsubdir)
+    else
+    	libdir  = $(CPP_SDK_DIR)/usr/local/lib
+    endif
 else
     ifeq ($(libdir),)
-		ifeq ($(COMPILE_CPP_SDK),)
-			libdir		= $(SDK_DIR)/usr/local/lib
-		else
-			libdir		= $(CPP_SDK_DIR)/usr/local/lib
-		endif
+	ifeq ($(USE_CPP_SDK),)
+		libdir	= $(SDK_DIR)/usr/local/lib
+	else
+		libdir  = $(CPP_SDK_DIR)/usr/local/lib
+	endif
     endif
 endif
+
+cpp_sdk_libdir  = $(CPP_SDK_DIR)/usr/local/lib
 
 #
 # Platform specific definitions
@@ -200,7 +189,7 @@ endif
 include	 $(top_srcdir)/config/Make.rules.$(UNAME)
 
 ifdef ice_src_dist
-    ifeq ($(ice_ƒ_dir), $(ice_dir)/cpp)
+    ifeq ($(ice_dir), $(ice_dir)/cpp)
         ICE_LIB_DIR = -L$(ice_cpp_dir)/lib
     else
         ICE_LIB_DIR = -L$(ice_cpp_dir)/$(libsubdir)
@@ -307,7 +296,7 @@ endif
 
 clean::
 	-rm -f core *.o *.bak
-	-rm -f ./$(PLATFORM_NAME)/*
+	-rm -f ./$(PLATFORM_NAME)/*.o
 
 $(HDIR)/%F.h: $(SDIR)/%F.ice $(SLICE2OBJC)
 	rm -f $(HDIR)/$(*F)F.h $(*F)F.m
@@ -324,7 +313,7 @@ $(HDIR)/%.h %.m: $(SDIR)/%.ice $(SLICE2OBJC)
 	rm -f $(*F).h $(*F).m
 	$(SLICE2OBJC) $(SLICE2OBJCFLAGS) $<
 
-
+ifeq ($(USE_CPP_SDK),)
 ifneq ($(SLICE_SRCS),)
 depend:: $(SLICE_SRCS)
 	if test -n "$(SLICE_SRCS)" ; then \
@@ -335,6 +324,7 @@ depend:: $(SLICE_SRCS)
 clean::
 	rm -f $(addsuffix .m, $(basename $(notdir $(SLICE_SRCS))))
 	rm -f $(addsuffix .h, $(basename $(notdir $(SLICE_SRCS))))
+endif
 endif
 
 ifneq ($(HDIR),)

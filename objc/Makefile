@@ -41,14 +41,14 @@ endif
 	$(call installprogram,$(ice_cpp_dir)/bin/slice2objc,$(install_bindir))
 else
 
+endif
+
 # TODO: Anyway to get around the call to "make sdk"?
 all::
 	if [ ! -d SDK ]; \
 	then \
 		make sdk ;\
 	fi
-
-endif
 
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \
@@ -59,14 +59,19 @@ $(EVERYTHING)::
 
 sdk: build-sdk
 
-
-ifeq ($(COMPILE_CPP_SDK),yes)
-CPP_SDK = Cpp
+ifeq ($(COMPILE_FOR_COCOA),yes)
+SDKS = "" "Cpp"
+else
+ifeq ($(COMPILE_FOR_IPHONE),yes)
+SDKS = "" "Cpp"
+else
+SDKS = "Cpp"
+endif
 endif
 
 build-sdk:
 	$(call mkdir,SDK)
-	for sdk in "" $(CPP_SDK); \
+	for sdk in $(SDKS); \
 	do \
 	    $(call mkdir,SDK/IceTouch$$sdk-$(VERSION)) ;\
 	    $(call mkdir,SDK/IceTouch$$sdk-$(VERSION)/bin) ;\
@@ -89,9 +94,7 @@ build-sdk:
 	    done ;\
 	done
 	$(call installprogram,$(ice_cpp_dir)/bin/slice2objc,SDK/IceTouch-$(VERSION)/bin)
-ifeq ($(COMPILE_CPP_SDK),yes)
 	$(call installprogram,$(ice_cpp_dir)/bin/slice2cpp,SDK/IceTouchCpp-$(VERSION)/bin)
-endif
 
 clean::
 	-rm -rf SDK

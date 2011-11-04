@@ -1,0 +1,57 @@
+# **********************************************************************
+#
+# Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.
+#
+# This copy of Ice Touch is licensed to you under the terms described
+# in the ICE_TOUCH_LICENSE file included in this distribution.
+#
+# **********************************************************************
+
+#
+# Xcode root directory. If you have several Xcode versions installed,
+# choose the version you want to use to build the SDKs and Xcode
+# plug-in. The default is the one installed in "/Developer".
+#
+#DEVELOPER_PATH          = /Developer
+
+#
+# The default is 42 for Xcode 4.2.x.
+#
+#XCODE_VERSION		?= 42
+
+#
+# Install the Xcode plug-in for all users. Default is to install
+# to the user home dir.
+#
+#XCODE_PLUGIN_ALL_USERS		= yes
+
+# ----------------------------------------------------------------------
+# Don't change anything below this line!
+# ----------------------------------------------------------------------
+
+ifeq ($(XCODE_VERSION),)
+
+XCODE_VERSION = 42
+
+endif
+
+XCODE_VERSION_MAJOR := $(shell v="$(XCODE_VERSION)"; echo "$${v:0:1}")
+XCODE_VERSION_MINOR := $(shell v="$(XCODE_VERSION)"; echo "$${v:1:1}")
+
+ifeq ($(DEVELOPER_PATH),)
+
+DEVELOPER_PATH = /Developer
+
+endif
+
+ifeq ($(XCODE_VERSION),32)
+    XCODE_SDK_PATH = $(DEVELOPER_PATH)/Library/PrivateFrameworks
+else ## Xcode 4.x
+    XCODE_SDK_PATH = $(DEVELOPER_PATH)/Library/Xcode/PrivatePlugIns/Xcode3Core.ideplugin/Contents/Frameworks
+endif
+
+ifeq ($(XCODE_PLUGIN_ALL_USERS),yes)
+    XCODE_PLUGIN_INSTALL_PATH = /Library/Application Support/Developer/$(XCODE_VERSION_MAJOR).$(XCODE_VERSION_MINOR)/Xcode/Plug-ins
+else
+    XCODE_PLUGIN_INSTALL_PATH = $(HOME)/Library/Application Support/Developer/$(XCODE_VERSION_MAJOR).$(XCODE_VERSION_MINOR)/Xcode/Plug-ins
+endif

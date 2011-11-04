@@ -4,3 +4,7 @@ SlicingExceptionsServerPrivate.cpp: SlicingExceptionsServerPrivate.ice ./Slicing
 SlicingExceptionsTest.m: SlicingExceptionsTest.ice
 SlicingExceptionsTest.cpp: SlicingExceptionsTest.ice "$(SLICE2CPP)" "$(SLICEPARSERLIB)"
 SlicingExceptionsServerPrivate.cpp: SlicingExceptionsServerPrivate.ice ./SlicingExceptionsTest.ice "$(SLICE2CPP)" "$(SLICEPARSERLIB)"
+SlicingExceptionsTest.cpp: SlicingExceptionsTest.ice "$(SLICE2CPP)" "$(SLICEPARSERLIB)"
+SlicingExceptionsServerPrivate.cpp: SlicingExceptionsServerPrivate.ice ./SlicingExceptionsTest.ice "$(SLICE2CPP)" "$(SLICEPARSERLIB)"
+SlicingExceptionsTest.cpp: SlicingExceptionsTest.ice "$(SLICE2CPP)" "$(SLICEPARSERLIB)"
+SlicingExceptionsServerPrivate.cpp: SlicingExceptionsServerPrivate.ice ./SlicingExceptionsTest.ice "$(SLICE2CPP)" "$(SLICEPARSERLIB)"

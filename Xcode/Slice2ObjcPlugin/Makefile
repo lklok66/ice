@@ -7,7 +7,7 @@
 #
 # **********************************************************************
 
-top_srcdir	= ../../objc
+top_srcdir	= .
 
 include $(top_srcdir)/config/Make.rules
 

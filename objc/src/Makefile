@@ -16,15 +16,9 @@ SUBDIRS		= IceUtilCpp \
 		  Transports \
 		  IceSSL \
 		  Ice \
-		  Glacier2
-
-ifeq ($(COMPILE_CPP_SDK),yes)
-ifneq ($(COMPILE_FOR_MACOSX),yes)
-SUBDIRS		:= $(SUBDIRS) \
+		  Glacier2 \
 		  IceCppLib \
 		  Glacier2CppLib
-endif
-endif
 
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \

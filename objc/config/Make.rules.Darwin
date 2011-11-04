@@ -59,7 +59,7 @@ ifeq ($(COMPILE_FOR_IPHONE),yes)
     SDK_HOME=$(PLATFORM_HOME)/Developer/SDKs/$(SDK_NAME)$(IPHONE_SDK_VERSION).sdk
     CC                  := $(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/usr/bin/$(CC)
     CXX                 := $(DEVELOPER_PATH)/Platforms/$(SDK_NAME).platform/Developer/usr/bin/$(CXX)
-    CPPPLATFORMFLAGS    = $(ARCH) -isysroot $(SDK_HOME) -miphoneos-version-min=$(IPHONE_SDK_VERSION)
+    CPPPLATFORMFLAGS    = $(ARCH) -isysroot $(SDK_HOME) -miphoneos-version-min=$(IPHONE_TARGET_MIN_SDK_VERSION)
     LDPLATFORMFLAGS     = $(ARCH) -isysroot $(SDK_HOME)
     CODESIGN = CODESIGN_ALLOCATE=$(PLATFORM_HOME)/Developer/usr/bin/codesign_allocate codesign
 else
@@ -117,11 +117,8 @@ mklib                   = libtool -static -o $(1) $(2)
 
 BASELIBS		= -framework Foundation
 
-ifeq ($(COMPILE_CPP_SDK),)
 LIBS			= -lIceObjC $(BASELIBS)
-else
-LIBS			= -lIceCpp $(BASELIBS)
-endif
+CPP_LIBS			= -lIceCpp $(BASELIBS)
 
 ICE_OS_LIBS             = -ldl
 ifneq ($(COMPILE_FOR_IPHONE),yes)
@@ -135,3 +132,4 @@ endif
 ifeq ($(STATICLIBS),yes)
     LIBS := $(LIBS) $(ICE_OS_LIBS)
 endif
+CPP_LIBS	:= $(CPP_LIBS) $(ICE_OS_LIBS)

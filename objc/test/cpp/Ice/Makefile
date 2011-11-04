@@ -11,32 +11,27 @@ top_srcdir	= ../../..
 
 include $(top_srcdir)/config/Make.rules
 
-ifeq ($(COMPILE_FOR_COCOA),yes)
-    ifeq ($(COMPILE_CPP_SDK),yes)
-		SUBDIRS		= adapterDeactivation \
-				defaultServant \
-				exceptions \
-				inheritance \
-				location \
-				proxy \
-				timeout \
-				ami \
-				interceptor \
-				defaultValue \
-				facets \
-				objects \
-				retry \
-				binding \
-				dispatcher \
-				hold \
-				invoke \
-				operations \
-				slicing/exceptions
-	endif
-else
-SUBDIRS		=
+ifeq ($(PLATFORM_NAME),macosx)
+SUBDIRS		= adapterDeactivation \
+		defaultServant \
+		exceptions \
+		inheritance \
+		location \
+		proxy \
+		timeout \
+		ami \
+		interceptor \
+		defaultValue \
+		facets \
+		objects \
+		retry \
+		binding \
+		dispatcher \
+		hold \
+		invoke \
+		operations \
+		slicing/exceptions
 endif
-
 $(EVERYTHING)::
 	@for subdir in $(SUBDIRS); \
 	do \
