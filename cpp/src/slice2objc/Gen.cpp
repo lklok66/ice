@@ -126,11 +126,11 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p)
 
         string opName = getName(op);
         _M << sp << nl << "+(BOOL)" << op->name() << "___:(id<" << name
-	   << ">)target current:(ICECurrent *)current " 
+	   << ">)target_ current:(ICECurrent *)current " 
            << "is:(id<ICEInputStream>)is_ os:(id<ICEOutputStream>)os_";
         _M << sb;
 
-        _M << nl << "ICEInternalCheckModeAndSelector(target, " << sliceModeToIceMode(op->mode()) << ", @selector(";
+        _M << nl << "ICEInternalCheckModeAndSelector(target_, " << sliceModeToIceMode(op->mode()) << ", @selector(";
         string selector = getSelector(op);
         if(!selector.empty())
         {
@@ -213,7 +213,7 @@ Slice::ObjCVisitor::writeDispatchAndMarshalling(const ClassDefPtr& p)
             _M << nl;
         }
         string args = getServerArgs(op);
-        _M << "[target " << opName << args;
+        _M << "[target_ " << opName << args;
         if(!args.empty())
         {
             _M << " current";
