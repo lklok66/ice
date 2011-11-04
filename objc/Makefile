@@ -59,15 +59,9 @@ $(EVERYTHING)::
 
 sdk: build-sdk
 
-ifeq ($(COMPILE_FOR_COCOA),yes)
 SDKS = "" "Cpp"
-else
-ifeq ($(COMPILE_FOR_IPHONE),yes)
-SDKS = "" "Cpp"
-else
-SDKS = "Cpp"
-endif
-endif
+
+build-cpp-sdk: build-sdk
 
 build-sdk:
 	$(call mkdir,SDK)

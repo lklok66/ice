@@ -12,7 +12,7 @@
 		<string>macosx</string>
 	</dict>
 	<key>DisplayName</key>
-	<string>Mac OS X 10.5</string>
+	<string>Mac OS X 10.6</string>
 	<key>DocSetFeedName</key>
 	<string>Apple Mac OS X</string>
 	<key>DocSetFeedURL</key>
@@ -22,13 +22,13 @@
 	<key>FamilyName</key>
 	<string>Mac OS X</string>
 	<key>MaximumDeploymentTarget</key>
-	<string>10.5</string>
+	<string>10.6</string>
 	<key>MinimalDisplayName</key>
-	<string>10.5</string>
+	<string>10.6</string>
 	<key>MinimumSupportedToolsVersion</key>
-	<string>3.2.3</string>
+	<string>4.0.2</string>
 	<key>Version</key>
-	<string>10.5</string>
+	<string>10.6</string>
 	<key>IsBaseSDK</key>
 	<string>NO</string>
 </dict>
