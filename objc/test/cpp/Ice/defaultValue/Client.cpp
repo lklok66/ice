@@ -7,7 +7,6 @@
 //
 // **********************************************************************
 
-#include <Ice/Application.h>
 #include <TestCommon.h>
 #include <DefaultValueTest.h>
 

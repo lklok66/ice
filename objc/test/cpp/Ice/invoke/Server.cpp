@@ -8,7 +8,6 @@
 // **********************************************************************
 
 #include <Ice/Ice.h>
-#include <IceUtil/Options.h>
 #include <invoke/BlobjectI.h>
 #include <TestCommon.h>
 

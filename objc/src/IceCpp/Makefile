@@ -74,7 +74,6 @@ CPP_OBJS	= Acceptor.o \
 		  UdpConnector.o \
 		  UdpEndpointI.o \
 		  UdpTransceiver.o \
-		  Application.o \
 		  DispatchInterceptor.o
 
 SLICE_OBJS	= BuiltinSequences.o \

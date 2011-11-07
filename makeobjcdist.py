@@ -28,6 +28,7 @@ filesToKeep = [
     "./ICE_LICENSE",
     "./ICE_TOUCH_LICENSE",
     "./Makefile.objc",
+	"./config/makedepend.py",
     "./config/Make.common.rules.objc",
     "./config/TestUtil.py",
     "./cpp/Makefile",

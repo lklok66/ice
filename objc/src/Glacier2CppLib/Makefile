@@ -102,9 +102,19 @@ $(EVERYTHING)::
 install:: $(OBJS)
 
 
-$(OBJS): $(patsubst $(ice_cpp_include)/Glacier2/%.h,include/Glacier2/%.h,$(wildcard $(ice_cpp_include)/Glacier2/*.h))
+$(OBJS): include/Glacier2/Glacier2.h \
+		include/Glacier2/PermissionsVerifier.h \
+		include/Glacier2/Router.h \
+		include/Glacier2/SSLInfo.h \
+		include/Glacier2/Session.h \
+		include/Glacier2/SessionHelper.h
 
-depend:: $(patsubst $(ice_cpp_include)/Glacier2/%.h,include/Glacier2/%.h,$(wildcard $(ice_cpp_include)/Glacier2/*.h))
+depend:: include/Glacier2/Glacier2.h \
+		include/Glacier2/PermissionsVerifier.h \
+		include/Glacier2/Router.h \
+		include/Glacier2/SSLInfo.h \
+		include/Glacier2/Session.h \
+		include/Glacier2/SessionHelper.h
 
 depend:: $(patsubst $(SDIR)/%.ice,include/Glacier2/%.h,$(wildcard $(SDIR)/*F.ice)) \
 	 $(patsubst $(SDIR)/%.ice,include/Glacier2/%.h,$(SLICECPP_SRCS))

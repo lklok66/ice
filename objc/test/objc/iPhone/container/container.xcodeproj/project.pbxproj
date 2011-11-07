@@ -844,7 +844,7 @@
 		1D6058940D05DD3E006BFB54 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ADDITIONAL_SDKS = "/Developer/SDKs/IceTouch-1.1/$(PLATFORM_NAME).sdk";
+				ADDITIONAL_SDKS = "../../../../SDK/IceTouch-1.1/$(PLATFORM_NAME).sdk";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -875,7 +875,7 @@
 		1D6058950D05DD3E006BFB54 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ADDITIONAL_SDKS = "/Developer/SDKs/IceTouch-1.1/$(PLATFORM_NAME).sdk";
+				ADDITIONAL_SDKS = "../../../../SDK/IceTouch-1.1/$(PLATFORM_NAME).sdk";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
