@@ -235,6 +235,7 @@ Ice::initialize(int& argc, char* argv[], const InitializationData& initializatio
     createIceTcp(0, "", Ice::StringSeq());
 #endif
     initData.properties->setProperty("Ice.Plugin.IceSSL", "createIceSSL");
+    createIceSSL(0, "", Ice::StringSeq());
 
     CommunicatorI* communicatorI = new CommunicatorI(initData);
     CommunicatorPtr result = communicatorI; // For exception safety.

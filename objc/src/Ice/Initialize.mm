@@ -31,12 +31,10 @@
 extern "C" 
 {
 #ifdef ICE_USE_CFSTREAM
-    Ice::Plugin* createIceTcp(const Ice::CommunicatorPtr&, const std::string&, const Ice::StringSeq&);
 #  if TARGET_OS_IPHONE
     Ice::Plugin* createIceAccessory(const Ice::CommunicatorPtr&, const std::string&, const Ice::StringSeq&);
 #  endif
 #endif
-    Ice::Plugin* createIceSSL(const Ice::CommunicatorPtr&, const std::string&, const Ice::StringSeq&);
 }
 
 namespace IceObjC
@@ -299,17 +297,6 @@ dispatcher:(void(^)(id<ICEDispatcherCall>, id<ICEConnection>))d;
         {
             data.properties = createProperties(*argc, argv, data.properties);
         }
-
-#ifdef ICE_USE_CFSTREAM
-        data.properties->setProperty("Ice.Plugin.IceTcp", "createIceTcp");
-        //
-        // Fake calls to the create transport plugin C methods. This is to ensure that these methods
-        // will get linked into exe when using static libraries.
-        //
-        createIceTcp(0, "", Ice::StringSeq());
-#endif
-        data.properties->setProperty("Ice.Plugin.IceSSL", "createIceSSL");
-        createIceSSL(0, "", Ice::StringSeq());
 
         Ice::CommunicatorPtr communicator;
         if(argc != nil && argv != nil)
