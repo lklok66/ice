@@ -23,6 +23,7 @@ subdirectory of each language mapping (e.g., cpp/CHANGES).
 Changes since version 3.4.2
 ======================================================================
 
+
 General Changes
 ===============
 
@@ -43,6 +44,11 @@ General Changes
 - Fixed IceGrid bug where the server deactivation timeout would be
   ignored if the server was not deactivated using the IceGrid
   administrative facility.
+
+- Fixed IceSSL bug in all language mappings that could cause a server
+  to crash if a failure occurred during connection establishment and
+  network tracing was enabled.
+
 
 C++ Changes
 ===========
@@ -65,6 +71,13 @@ C# Changes
 
 - Added missing throwLocalException method to Ice.AsyncResult
   interface.
+
+
+Java Changes
+============
+
+- Fixed an IceSSL bug in which the IceSSL.Alias property was not
+  working correctly.
 
 
 ======================================================================
