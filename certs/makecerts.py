@@ -360,7 +360,6 @@ if (lang == "java" or lang == None) and (force or not os.path.exists(truststore)
     if debug:
         print "[debug]", cmd
     os.system(cmd)
-    os.remove(tmpFile)
 else:
     print "Skipping Java truststore."
 

@@ -57,3 +57,5 @@ vcproj
 
 # OS X (Desktop Service Store)
 .DS_Store 
+project.xcworkspace
+xcuserdata
