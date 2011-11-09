@@ -53,22 +53,14 @@ embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 #COMPILE_FOR_COCOA 	        = yes
 
 #
-# The default is to build for a Mac OS X command line dynamic library,
-# and C++ Cocoa SDK with static libraries.
-#
-
-#
-# The default SDK version is 5.0 for iPhone, supported versions
-# are 5.0, 4.3 and 4.2
-#
-#IPHONE_SDK_VERSION			= 5.0
-
-#
 # The minimum SDK version supported by targets, the default is 4.2 to
 # allow using Ice Touch binaries older iOS versions.
 #
 #IPHONE_TARGET_MIN_SDK_VERSION          = 4.2
 
+#
+# The default is to build for a Mac OS X command line dynamic library,
+# and C++ Cocoa SDK with static libraries.
 #
 # You can choose to build static libraries for the Mac OS X command
 # line build.
