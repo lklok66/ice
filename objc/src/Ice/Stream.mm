@@ -363,7 +363,8 @@ private:
     try
     {
         std::pair<const bool*, const bool*> seq;
-        is_->readBoolSeq(seq);
+        IceUtil::ScopedArray<bool> result;
+        is_->read(seq, result);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(BOOL)];
     }
     catch(const std::exception& ex)
@@ -395,7 +396,7 @@ private:
     try
     {
         std::pair<const Ice::Byte*, const Ice::Byte*> seq;
-        is_->readByteSeq(seq);
+        is_->read(seq);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first)];
     }    
     catch(const std::exception& ex)
@@ -412,7 +413,7 @@ private:
     try
     {
         std::pair<const Ice::Byte*, const Ice::Byte*> seq;
-        is_->readByteSeq(seq);
+        is_->read(seq);
         return [NSData dataWithBytesNoCopy:const_cast<Ice::Byte*>(seq.first) 
                        length:(seq.second - seq.first) freeWhenDone:NO];
     }    
@@ -445,7 +446,8 @@ private:
     try
     {
         std::pair<const Ice::Short*, const Ice::Short*> seq;
-        is_->readShortSeq(seq);
+        IceUtil::ScopedArray<Ice::Short> result;
+        is_->read(seq, result);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEShort)];
     }
     catch(const std::exception& ex)
@@ -477,7 +479,8 @@ private:
     try
     {
         std::pair<const Ice::Int*, const Ice::Int*> seq;
-        is_->readIntSeq(seq);
+        IceUtil::ScopedArray<Ice::Int> result;
+        is_->read(seq, result);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEInt)];
     }
     catch(const std::exception& ex)
@@ -509,7 +512,8 @@ private:
     try
     {
         std::pair<const Ice::Long*, const Ice::Long*> seq;
-        is_->readLongSeq(seq);
+        IceUtil::ScopedArray<Ice::Long> result;
+        is_->read(seq, result);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICELong)];
     }
     catch(const std::exception& ex)
@@ -541,7 +545,8 @@ private:
     try
     {
         std::pair<const Ice::Float*, const Ice::Float*> seq;
-        is_->readFloatSeq(seq);
+        IceUtil::ScopedArray<Ice::Float> result;
+        is_->read(seq, result);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEFloat)];
     }
     catch(const std::exception& ex)
@@ -573,7 +578,8 @@ private:
     try
     {
         std::pair<const Ice::Double*, const Ice::Double*> seq;
-        is_->readDoubleSeq(seq);
+        IceUtil::ScopedArray<Ice::Double> result;
+        is_->read(seq, result);
         return [[NSMutableData alloc] initWithBytes:seq.first length:(seq.second - seq.first) * sizeof(ICEDouble)];
     }
     catch(const std::exception& ex)
@@ -1223,7 +1229,7 @@ typedef enum { dummy } Dummy_Enum;
     try
     {
         v == nil ? os_->writeSize(0)
-	         : os_->writeBoolSeq((bool*)[v bytes], (bool*)[v bytes] + [v length] / sizeof(BOOL));
+	         : os_->write((bool*)[v bytes], (bool*)[v bytes] + [v length] / sizeof(BOOL));
     }
     catch(const std::exception& ex)
     {
@@ -1258,7 +1264,7 @@ typedef enum { dummy } Dummy_Enum;
     try
     {
         v == nil ? os_->writeSize(0)
-                 : os_->writeByteSeq((ICEByte*)[v bytes], (ICEByte*)[v bytes] + [v length]);
+                 : os_->write((ICEByte*)[v bytes], (ICEByte*)[v bytes] + [v length]);
     }
     catch(const std::exception& ex)
     {
@@ -1293,7 +1299,7 @@ typedef enum { dummy } Dummy_Enum;
     try
     {
         v == nil ? os_->writeSize(0)
-                 : os_->writeShortSeq((ICEShort*)[v bytes], (ICEShort*)[v bytes] + [v length] / sizeof(ICEShort));
+                 : os_->write((ICEShort*)[v bytes], (ICEShort*)[v bytes] + [v length] / sizeof(ICEShort));
     }
     catch(const std::exception& ex)
     {
@@ -1329,7 +1335,7 @@ typedef enum { dummy } Dummy_Enum;
     try
     {
         v == nil ? os_->writeSize(0)
-                 : os_->writeIntSeq((ICEInt*)[v bytes], (ICEInt*)[v bytes] + [v length] / sizeof(ICEInt));
+                 : os_->write((ICEInt*)[v bytes], (ICEInt*)[v bytes] + [v length] / sizeof(ICEInt));
     }
     catch(const std::exception& ex)
     {
@@ -1364,7 +1370,7 @@ typedef enum { dummy } Dummy_Enum;
     try
     {
         v == nil ? os_->writeSize(0)
-                 : os_->writeLongSeq((ICELong*)[v bytes], (ICELong*)[v bytes] + [v length] / sizeof(ICELong));
+                 : os_->write((ICELong*)[v bytes], (ICELong*)[v bytes] + [v length] / sizeof(ICELong));
     }
     catch(const std::exception& ex)
     {
@@ -1400,7 +1406,7 @@ typedef enum { dummy } Dummy_Enum;
     try
     {
         v == nil ? os_->writeSize(0)
-                 : os_->writeFloatSeq((ICEFloat*)[v bytes], (ICEFloat*)[v bytes] + [v length] / sizeof(ICEFloat));
+                 : os_->write((ICEFloat*)[v bytes], (ICEFloat*)[v bytes] + [v length] / sizeof(ICEFloat));
     }
     catch(const std::exception& ex)
     {
@@ -1436,8 +1442,8 @@ typedef enum { dummy } Dummy_Enum;
     try
     {
         v == nil ? os_->writeSize(0)
-                 : os_->writeDoubleSeq((ICEDouble*)[v bytes],
-		                           (ICEDouble*)[v bytes] + [v length] / sizeof(ICEDouble));
+                 : os_->write((ICEDouble*)[v bytes],
+		                      (ICEDouble*)[v bytes] + [v length] / sizeof(ICEDouble));
     }
     catch(const std::exception& ex)
     {
@@ -1473,7 +1479,7 @@ typedef enum { dummy } Dummy_Enum;
     try
     {
 	std::vector<std::string> s;
-	os_->writeStringSeq(fromNSArray(v, s));
+	os_->write(fromNSArray(v, s));
     }
     catch(const std::exception& ex)
     {
