@@ -398,18 +398,18 @@ static NSString* defaultHost = @"demo2.zeroc.com";
     int portOffset = 0;
     if([hostname caseInsensitiveCompare:@"demo2.zeroc.com"] == NSOrderedSame)
     {
-        portOffset = 100;
-        [initData.properties setProperty:@"IceSSL.TrustOnly.Client"
-                                   value:@"11:DD:28:AD:13:44:76:47:4F:BE:3C:4D:AC:AD:5A:06:88:DA:52:DA"];
-        [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
+        if(sslSwitch.isOn)
+        {
+            portOffset = 1100;
+        }
+        else
+        {
+            portOffset = 100;
+        }
     }
-    else
-    {
-        [initData.properties setProperty:@"IceSSL.TrustOnly.Client"
-                                   value:@"75:FA:B7:3C:6B:1C:F8:FA:69:4B:75:A0:22:51:B2:AC:11:54:A7:E7"];
-        [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"democacert.der"];
-        [initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
-    }
+    [initData.properties setProperty:@"IceSSL.TrustOnly.Client" value:@"1F:32:F4:BB:A4:4B:43:D5:37:38:D3:CF:65:60:9B:57:A8:F3:8E:AD"];
+    [initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
+    [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
         
     initData.dispatcher = ^(id<ICEDispatcherCall> call, id<ICEConnection> con) {
         dispatch_sync(dispatch_get_main_queue(), ^ { [call run]; });

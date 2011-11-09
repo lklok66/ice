@@ -262,19 +262,9 @@ static NSString* passwordKey = @"passwordKey";
     // connecting with.
     if(sslSwitch.isOn)
     {
-        if([hostname caseInsensitiveCompare:@"demo2.zeroc.com"] == NSOrderedSame && glacier2Switch.isOn)
-        {
-            [initData.properties setProperty:@"IceSSL.TrustOnly.Client"
-                                       value:@"11:DD:28:AD:13:44:76:47:4F:BE:3C:4D:AC:AD:5A:06:88:DA:52:DA"];
-            [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
-        }
-        else
-        {
-            [initData.properties setProperty:@"IceSSL.TrustOnly.Client"
-                                       value:@"75:FA:B7:3C:6B:1C:F8:FA:69:4B:75:A0:22:51:B2:AC:11:54:A7:E7"];
-            [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"democacert.der"];
-            [initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
-        }
+        [initData.properties setProperty:@"IceSSL.TrustOnly.Client"
+                                   value:@"11:DD:28:AD:13:44:76:47:4F:BE:3C:4D:AC:AD:5A:06:88:DA:52:DA"];
+        [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
     }
     
     NSAssert(communicator == nil, @"communicator == nil");
@@ -289,7 +279,7 @@ static NSString* passwordKey = @"passwordKey";
             NSString* s;
             if(sslSwitch.isOn)
             {
-                s = [NSString stringWithFormat:@"DemoGlacier2/router:ssl -h %@ -p 4064 -t 10000", hostname];
+                s = [NSString stringWithFormat:@"DemoGlacier2/router:ssl -h %@ -p 5064 -t 10000", hostname];
             }
             else
             {
@@ -308,7 +298,7 @@ static NSString* passwordKey = @"passwordKey";
             NSString* s;
             if(sslSwitch.isOn)
             {
-                s = [NSString stringWithFormat:@"SessionFactory:ssl -h %@ -p 10001 -t 10000", hostname];
+                s = [NSString stringWithFormat:@"SessionFactory:ssl -h %@ -p 20001 -t 10000", hostname];
             }
             else
             {

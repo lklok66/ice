@@ -229,7 +229,7 @@
 		1D6058940D05DD3E006BFB54 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ADDITIONAL_SDKS = "../../../../SDK/IceTouchCpp-1.1/$(PLATFORM_NAME).sdk";
+				ADDITIONAL_SDKS = "../../../../SDK/IceTouchCpp-1.2.0/$(PLATFORM_NAME).sdk";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = (
 					armv6,
@@ -263,7 +263,7 @@
 		1D6058950D05DD3E006BFB54 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ADDITIONAL_SDKS = "../../../../SDK/IceTouchCpp-1.1/$(PLATFORM_NAME).sdk";
+				ADDITIONAL_SDKS = "../../../../SDK/IceTouchCpp-1.2.0/$(PLATFORM_NAME).sdk";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = (
 					armv6,
