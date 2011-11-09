@@ -183,21 +183,13 @@ NSString* const routerServerKey = @"routerServerKey";
 	
     if(sslField.state == NSOnState && routerField.state != NSOnState)
     {   
-        if([chatServerField.stringValue caseInsensitiveCompare:@"demo2.zeroc.com"] == NSOrderedSame &&
-           glacier2Field.state == NSOnState)
-        {
-            [[initData properties] setProperty:@"IceSSL.TrustOnly.Client"
-                                         value:@"CN=\"ZeroC library demo Glacier2\""];
-            [[initData properties] setProperty:@"IceSSL.CertAuthFile" value:@"democacert.pem"];
-        }
-        else
-        {
-            [[initData properties] setProperty:@"IceSSL.TrustOnly.Client" value:@"CN=\"Server\""];
-            [[initData properties] setProperty:@"IceSSL.CertAuthFile" value:@"cacert.pem"];
-        }
+        [[initData properties] setProperty:@"IceSSL.TrustOnly.Client"
+                                     value:@"CN=\"Server\""];
+        [[initData properties] setProperty:@"IceSSL.CertAuthFile" value:@"cacert.pem"];
     }
     [initData.properties setProperty:@"IceSSL.DefaultDir" value:[[NSBundle mainBundle] resourcePath]];
-	
+	NSString *hostname = [chatServerField.stringValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    
     NSAssert(communicator == nil, @"communicator == nil");
     communicator = [ICEUtil createCommunicator:initData];
 	
@@ -224,10 +216,15 @@ NSString* const routerServerKey = @"routerServerKey";
 			
             if(glacier2Field.state == NSOnState)
             {
+                int port = 4063;
+                if([hostname caseInsensitiveCompare:@"demo2.zeroc.com"] == NSOrderedSame)
+                {
+                    port = 4502;
+                }
                 // The proxy to the Glacier2 router.
                 proxy = [communicator stringToProxy:
-                         [NSString stringWithFormat:@"DemoGlacier2/router:tcp -p 4502 -h %@ -t 10000",
-                          chatServerField.stringValue]];
+                         [NSString stringWithFormat:@"DemoGlacier2/router:tcp -p %d -h %@ -t 10000",
+                          port, chatServerField.stringValue]];
                 loginSelector = @selector(doPhoneRouterGlacier2Login:);
             }
             else
@@ -246,13 +243,23 @@ NSString* const routerServerKey = @"routerServerKey";
                 NSString* s;
                 if(sslField.state == NSOnState)
                 {
-                    s = [NSString stringWithFormat:@"DemoGlacier2/router:ssl -p 4064 -h %@ -t 10000",
-                         chatServerField.stringValue];
+                    int port = 4064;
+                    if([hostname caseInsensitiveCompare:@"demo2.zeroc.com"] == NSOrderedSame)
+                    {
+                        port = 5064;
+                    }
+                    s = [NSString stringWithFormat:@"DemoGlacier2/router:ssl -p %d -h %@ -t 10000",
+                         port, chatServerField.stringValue];
                 }
                 else
                 {
-                    s = [NSString stringWithFormat:@"DemoGlacier2/router:tcp -p 4502 -h %@ -t 10000",
-                         chatServerField.stringValue];
+                    int port = 4063;
+                    if([hostname caseInsensitiveCompare:@"demo2.zeroc.com"] == NSOrderedSame)
+                    {
+                        port = 4502;
+                    }
+                    s = [NSString stringWithFormat:@"DemoGlacier2/router:tcp -p %d -h %@ -t 10000",
+                         port, chatServerField.stringValue];
                 }
 				
                 proxy = [communicator stringToProxy:s];
@@ -265,8 +272,13 @@ NSString* const routerServerKey = @"routerServerKey";
                 NSString* s;
                 if(sslField.state == NSOnState)
                 {
-                    s = [NSString stringWithFormat:@"SessionFactory:ssl -h %@ -p 10001 -t 10000",
-                         chatServerField.stringValue];
+                    int port = 10001;
+                    if([hostname caseInsensitiveCompare:@"demo2.zeroc.com"] == NSOrderedSame)
+                    {
+                        port = 20001;
+                    }
+                    s = [NSString stringWithFormat:@"SessionFactory:ssl -p %d -h %@ -t 10000",
+                         port, chatServerField.stringValue];
                 }
                 else
                 {

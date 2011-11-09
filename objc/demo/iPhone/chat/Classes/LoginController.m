@@ -213,7 +213,15 @@ static NSString* sslKey = @"sslKey";
 
     @try
     {
-        NSString* s = [NSString stringWithFormat:@"Glacier2/router:ssl -p 5064 -h %@ -t 10000", hostnameField.text];
+        NSString *hostname = [hostnameField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        int port = 4064;
+        if([hostname caseInsensitiveCompare:@"demo.zeroc.com"] == NSOrderedSame)
+        {
+            port = 5064;
+        }
+
+        NSString* s = [NSString stringWithFormat:@"Glacier2/router:ssl -p %d -h %@ -t 10000", port, hostname];
+           
         id<ICEObjectPrx> proxy = [communicator stringToProxy:s];
         id<ICERouterPrx> router = [ICERouterPrx uncheckedCast:proxy];
         

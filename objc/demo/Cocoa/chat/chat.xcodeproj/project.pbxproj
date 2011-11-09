@@ -19,7 +19,6 @@
 		345436120FB29554005CB1B6 /* ChatView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 345436110FB29554005CB1B6 /* ChatView.xib */; };
 		3478AF7D0FF2104F00BD9F2B /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = 3478AF7C0FF2104F00BD9F2B /* README.txt */; };
 		349A38170FCE326E003F86BC /* cacert.pem in Resources */ = {isa = PBXBuildFile; fileRef = 349A38160FCE326E003F86BC /* cacert.pem */; };
-		827F52C213E1890B009C7B32 /* dev_ca_cert.pem in Resources */ = {isa = PBXBuildFile; fileRef = 827F52C113E1890B009C7B32 /* dev_ca_cert.pem */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -48,7 +47,6 @@
 		345436110FB29554005CB1B6 /* ChatView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = ChatView.xib; sourceTree = "<group>"; };
 		3478AF7C0FF2104F00BD9F2B /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 		349A38160FCE326E003F86BC /* cacert.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = cacert.pem; sourceTree = "<group>"; };
-		827F52C113E1890B009C7B32 /* dev_ca_cert.pem */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dev_ca_cert.pem; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* ChatDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChatDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -132,7 +130,6 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				827F52C113E1890B009C7B32 /* dev_ca_cert.pem */,
 				349A38160FCE326E003F86BC /* cacert.pem */,
 				34537F310FBAA03100933480 /* icon.icns */,
 				8D1107310486CEB800E47090 /* Info.plist */,
@@ -180,8 +177,12 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "chat" */;
-			compatibilityVersion = "Xcode 4.0";
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				en,
+			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* chat */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -203,7 +204,6 @@
 				343DE5990FC3EBD900FCC49C /* LoginView.xib in Resources */,
 				349A38170FCE326E003F86BC /* cacert.pem in Resources */,
 				3478AF7D0FF2104F00BD9F2B /* README.txt in Resources */,
-				827F52C213E1890B009C7B32 /* dev_ca_cert.pem in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

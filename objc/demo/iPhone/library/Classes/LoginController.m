@@ -256,34 +256,55 @@ static NSString* passwordKey = @"passwordKey";
     initData.dispatcher = ^(id<ICEDispatcherCall> call, id<ICEConnection> con) {
         dispatch_sync(dispatch_get_main_queue(), ^ { [call run]; });
     };
-    
-    NSString* hostname = hostnameField.text;
-    // Setup the SSL certificates depending on the which server host we are
-    // connecting with.
+    // Setup the SSL certificates
     if(sslSwitch.isOn)
     {
         [initData.properties setProperty:@"IceSSL.TrustOnly.Client"
-                                   value:@"11:DD:28:AD:13:44:76:47:4F:BE:3C:4D:AC:AD:5A:06:88:DA:52:DA"];
+                                   value:@"1F:32:F4:BB:A4:4B:43:D5:37:38:D3:CF:65:60:9B:57:A8:F3:8E:AD"];
+        [initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
         [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.der"];
     }
     
     NSAssert(communicator == nil, @"communicator == nil");
     self.communicator = [ICEUtil createCommunicator:initData];
 
+	NSString *hostname = [hostnameField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+	
     id<ICEObjectPrx> proxy;
     SEL loginSelector;
     @try
     {
         if(glacier2Switch.isOn)
         {
+			int port = 4063;
+    		if([hostname caseInsensitiveCompare:@"demo2.zeroc.com"] == NSOrderedSame)
+		    {
+        		if(sslSwitch.isOn)
+        		{
+		            port = 5064;
+        		}
+		        else
+        		{
+            		port = 4502;
+        		}
+		    }
+			else
+			{
+				if(sslSwitch.isOn)
+        		{
+		            port = 4064;
+        		}
+			}
+
             NSString* s;
             if(sslSwitch.isOn)
             {
-                s = [NSString stringWithFormat:@"DemoGlacier2/router:ssl -h %@ -p 5064 -t 10000", hostname];
+				
+                s = [NSString stringWithFormat:@"DemoGlacier2/router:ssl -h %@ -p %d -t 10000", hostname, port];
             }
             else
             {
-                s = [NSString stringWithFormat:@"DemoGlacier2/router:tcp -h %@ -p 4502 -t 10000", hostname];
+                s = [NSString stringWithFormat:@"DemoGlacier2/router:tcp -h %@ -p %d -t 10000", hostname, port];
             }
             proxy = [communicator stringToProxy:s];
 
@@ -295,14 +316,29 @@ static NSString* passwordKey = @"passwordKey";
         }
         else
         {
+			int port = 10000;
+    		if([hostname caseInsensitiveCompare:@"demo2.zeroc.com"] == NSOrderedSame)
+		    {
+        		if(sslSwitch.isOn)
+        		{
+		            port = 20001;
+        		}
+		    }
+			else
+			{
+				if(sslSwitch.isOn)
+        		{
+		            port = 10001;
+        		}
+			}
             NSString* s;
             if(sslSwitch.isOn)
             {
-                s = [NSString stringWithFormat:@"SessionFactory:ssl -h %@ -p 20001 -t 10000", hostname];
+                s = [NSString stringWithFormat:@"SessionFactory:ssl -h %@ -p %d -t 10000", hostname, port];
             }
             else
             {
-                s = [NSString stringWithFormat:@"SessionFactory:tcp -h %@ -p 10000 -t 10000", hostname];
+                s = [NSString stringWithFormat:@"SessionFactory:tcp -h %@ -p %d -t 10000", hostname, port];
             }
             proxy = [communicator stringToProxy:s];
 

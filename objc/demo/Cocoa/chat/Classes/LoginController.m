@@ -89,16 +89,11 @@ NSString* const passwordKey = @"passwordKey";
     };
 	
     [initData.properties setProperty:@"IceSSL.CheckCertName" value:@"0"];
-    [initData.properties setProperty:@"IceSSL.TrustOnly.Client" value:@"CN=\"Glacier2\""];
+    [initData.properties setProperty:@"IceSSL.TrustOnly.Client" value:@"CN=\"Server\""];
 
-    if([chatServerField.stringValue caseInsensitiveCompare:@"demo.zeroc.com"] == NSOrderedSame)
-    {
-        [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.pem"];
-    }
-    else
-    {
-        [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"dev_ca_cert.pem"];
-    }
+
+    [initData.properties setProperty:@"IceSSL.CertAuthFile" value:@"cacert.pem"];
+
     [initData.properties setProperty:@"IceSSL.DefaultDir" value:[[NSBundle mainBundle] resourcePath]];
 	
     NSAssert(communicator == nil, @"communicator == nil");
@@ -108,8 +103,15 @@ NSString* const passwordKey = @"passwordKey";
     id<ICEObjectPrx> proxy;
     @try
     {
-        NSString* s = [NSString stringWithFormat:@"Glacier2/router:ssl -p 4064 -h %@ -t 10000",
-                                                 chatServerField.stringValue];
+        NSString *hostname = [chatServerField.stringValue stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        int port = 4064;
+        if([hostname caseInsensitiveCompare:@"demo.zeroc.com"] == NSOrderedSame)
+        {
+            port = 5064;
+        }
+        
+        NSString* s = [NSString stringWithFormat:@"Glacier2/router:ssl -p %d -h %@ -t 10000", port, hostname];
+        
         proxy = [communicator stringToProxy:s];
         [communicator setDefaultRouter:[ICERouterPrx uncheckedCast:proxy]];
         loginSelector = @selector(doGlacier2Login:);
