@@ -52,7 +52,7 @@ CPPFLAGS	:= -Iinclude -I../IceCpp/include -I$(ice_dir)/cpp/include -I$(ice_dir)/
 SLICE2CPPFLAGS	:= --ice --include-dir IceSSL $(SLICE2CPPFLAGS)
 
 ifeq ($(COMPILE_WITH_GC),yes)
-   CPPFLAGS		:= -DICE_OBJC_GC $(CPPFLAGS)
+   CPPFLAGS		:= -DICE_OBJC_GC $(CPPFLAGS) -Wno-deprecated-declarations
 endif
 
 all:: $(OBJS) $(SLICE_OBJS)
