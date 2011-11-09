@@ -31,13 +31,6 @@
     return ident;
 }
 
--(void) dealloc
-{
-    [name release];
-    [category release];
-    [super dealloc];
-}
-
 +(ICEIdentity*) identityWithIdentity:(const Ice::Identity&)arg
 {
     return [[[ICEIdentity alloc] initWithIdentity:arg] autorelease];

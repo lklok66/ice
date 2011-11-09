@@ -240,7 +240,7 @@ Init init;
     return self;
 }
 
--(void) release
+-(oneway void) release
 {
 #ifdef ICE_USE_MAP_TABLE
     @synchronized([ICEInternalWrapper mapTable])

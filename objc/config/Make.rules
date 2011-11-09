@@ -64,9 +64,8 @@ embedded_runpath_prefix  ?= /opt/IceTouch-$(VERSION_MAJOR).$(VERSION_MINOR)
 #IPHONE_SDK_VERSION			= 5.0
 
 #
-# The min SDK version supported by targets, the default version is 4.2
-# that allow to use Ice Touch binaries with older devices that cannot be
-# updated to iOS 5.0
+# The minimum SDK version supported by targets, the default is 4.2 to
+# allow using Ice Touch binaries older iOS versions.
 #
 #IPHONE_TARGET_MIN_SDK_VERSION          = 4.2
 
@@ -160,12 +159,12 @@ includedir		= $(top_srcdir)/include
 
 ifeq ($(COMPILE_FOR_MACOSX),yes)
     ifeq ($(USE_CPP_SDK),)
-    	libdir		= $(top_srcdir)/lib
-    	install_includedir	:= $(prefix)/include
-    	install_libdir	:= $(prefix)/$(libsubdir)
-    	install_bindir	:= $(prefix)/$(binsubdir)
+	libdir		= $(top_srcdir)/lib
+	install_includedir := $(prefix)/include
+	install_libdir	:= $(prefix)/$(libsubdir)
+	install_bindir	:= $(prefix)/$(binsubdir)
     else
-    	libdir  = $(CPP_SDK_DIR)/usr/local/lib
+	libdir  = $(CPP_SDK_DIR)/usr/local/lib
     endif
 else
     ifeq ($(libdir),)

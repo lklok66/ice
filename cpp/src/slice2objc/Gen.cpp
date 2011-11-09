@@ -691,6 +691,9 @@ Slice::Gen::generate(const UnitPtr& p)
     }
     _M << _base << ".h>";
 
+    // Necessary for objc_getClass use when marshalling/unmarshalling proxies.
+    _M << nl << "#import <objc/runtime.h>";
+
     _M << nl;
 
     StringList includes = p->includeFiles();
@@ -1891,7 +1894,7 @@ Slice::Gen::TypesVisitor::writeMemberDealloc(const DataMemberList& dataMembers, 
 	    if(!once)
 	    {
 		 once = true;
-		_M << sp << nl << "-(void) dealloc;";
+		_M << sp << nl << "-(void) dealloc";
 		_M << sb;
 	    }
 

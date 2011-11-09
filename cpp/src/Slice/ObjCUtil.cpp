@@ -508,6 +508,7 @@ Slice::ObjCGenerator::writeMarshalUnmarshalCode(Output &out,
             //
             // We use objc_getClass to get the proxy class instead of [name class]. This is to avoid
             // a warning if the proxy is forward declared.
+            //
 	    out << nl << param << " = (id<" << name << ">)[" << stream 
                 << " readProxy:objc_getClass(\"" << name << "\")];";
 	}

@@ -22,9 +22,8 @@ public:
 
 // We must explicitely retain/release so that the garbage
 // collector does not trash the dispatcher.
-DispatcherI(void(^dispatcher)(id<ICEDispatcherCall>, id<ICEConnection>)) : _dispatcher(dispatcher)
+DispatcherI(void(^dispatcher)(id<ICEDispatcherCall>, id<ICEConnection>)) : _dispatcher(Block_copy(dispatcher))
 {
-    Block_copy(_dispatcher);
 }
 
 virtual ~DispatcherI()
