@@ -9,7 +9,7 @@ Operating system
 Ice Touch requires:
 
 - Mac OS X 10.6.8 or later
-- iOS 4.2 or iOS 4.3
+- iOS 5.0
 
 
 Compiler
@@ -17,16 +17,19 @@ Compiler
 
 To build iPhone applications, you need:
 
-- Xcode 3.2 with iOS 4.2 SDK
-
-Or
-
-- Xcode 4.0 or Xcode 4.1 with iOS 4.3 SDK
-
+- Xcode 4.2 with iOS 5.0 SDK
 
 To build Cocoa applications, you need:
 
-- Xcode 3.2, Xcode 4.0, or Xcode 4.1
+- Xcode 4.2
+
+Xcode plug-in
+-------------
+
+The Xcode Plug-in is required to build the Cocoa and iPhone demos in
+this distribution. We strongly recommended that you develop Ice for
+C++ and Ice Touch applications with Xcode; this greatly simplifies the
+build process. For details see Xcode/INSTALL.
 
 
 Slice translators
@@ -54,56 +57,6 @@ We recommend downloading the Ice Touch third-party source archive from
 This archive contains the source distribution for all Ice Touch
 third-party dependencies, as well as required source patches 
 and configuration instructions.
-
-
-Xcode Plug-in
--------------
-
-The Xcode Plug-in is required to build the Cocoa and iPhone demos in
-this distribution. We strongly recommended that you develop Ice for
-C++ and Ice Touch applications with Xcode; this greatly simplifies the
-build process.
-
-To build the Xcode plug-in, first review and update the settings in
-the objc/config/Make.rules file. Next, execute the following commands:
-
-$ cd Xcode/Slice2ObjcPlugin
-$ make
-
-To install the plug-in:
-
-$ make install
-
-The Xcode plug-in is installed at the following location:
-
-~/Library/Application Support/Developer/4.1/Xcode/Plug-ins/slice2objcplugin.pbplugin
-
-Or:
-
-~/Library/Application Support/Developer/4.0/Xcode/Plug-ins/slice2objcplugin.pbplugin
-
-Or:
-
-~/Library/Application Support/Developer/3.2/Xcode/Plug-ins/slice2objcplugin.pbplugin
-
-If you have set XCODE_PLUGIN_ALL_USER=YES in objc/config/Make.rules, the plug-in
-will be installed for all users at the following location:
-
-/Library/Application Support/Developer/4.1/Xcode/Plug-ins/slice2objcplugin.pbplugin
-
-Or:
-
-/Library/Application Support/Developer/4.0/Xcode/Plug-ins/slice2objcplugin.pbplugin
-
-Or:
-
-/Library/Application Support/Developer/3.2/Xcode/Plug-ins/slice2objcplugin.pbplugin
-
-Note that admin access is required when installing the plug-in for all
-users. You can prefix the "make install" command with sudo as shown
-below:
-
-$ sudo make install
 
 
 ======================================================================
@@ -151,18 +104,20 @@ for Mac OS X, this will also build the demos.
 If you are building for Cocoa, you should now use Xcode to build
 the demos located in the following subdirectories:
 
-  - objc/demo/Cocoa/chat
-  - objc/demo/Cocoa/library
+  - objc/demo/Cocoa/chat			(Objetive-c)
+  - objc/demo/Cocoa/library			(Objetive-c)
 
 If you are building for iPhone or the iPhone simulator, you should
 now use Xcode to build the demos and test suite GUI located in the
 following subdirectories:
 
-  - objc/demo/iPhone/chat
-  - objc/demo/iPhone/library
-  - objc/demo/iPhone/hello
-  - objc/demo/iPhone/router
-  - objc/test/iPhone/container
+  - objc/demo/iPhone/chat			(Objetive-c)
+  - objc/demo/iPhone/cpp/hello		(C++)
+  - objc/demo/iPhone/library		(Objetive-c)
+  - objc/demo/iPhone/hello			(Objetive-c)
+  - objc/demo/iPhone/router			(Objetive-c)
+  - objc/test/objc/iPhone/container	(Objetive-c)
+  - objc/test/cpp/iPhone/container	(C++)
 
 Make sure to build the SDKs before opening the demo or test projects
 in Xcode.
@@ -181,18 +136,18 @@ For the iPhone or iPhone simulator, the test suite runs within an
 iPhone application named "Test Suite", located in the directory
 objc/test/iPhone/container.
 
-Running the container application with Xcode 3.2 and iOS 4.2 requires
-changing the following settings in the container project:
+Running the container application with Xcode 4.2 and iOS 4.2 devices
+requires changing the following settings in the container project:
 
-  * The container project is configured to be built with the iOS 4.3
-    SDK. To build the project with an earlier iOS version, you must
-    update the project "Base SDK" build property to match the desired
-    iOS SDK version.
-
-  * The container project is configured to be deployed in iOS 4.3. If
+  * The container project is configured to be deployed in iOS 5.0. If
     you want to deploy the application in a previous iOS version, you
     must set the Xcode "Deployment Target" property of the target to
     match the desired iOS version.
+
+  * The container project is configured to use Architectures 
+	$(ARCHS_STANDARD_32_BIT) that in Xcode 4.2 expands to "Standard (armv7)"
+    if you want to debug in a old 2G device, remember that these devices
+    are armv6 so you should update the Debug Architecture to armv6
 
 
 ======================================================================
@@ -208,63 +163,3 @@ of objc/SDK to either /Developer/SDKs, or ~/Library/SDKs.
 
 For Mac OS X builds of Ice Touch, the install name of the shared
 library is prefixed with the path /opt/IceTouch-@mmver@/lib.
-
-
-======================================================================
-Configuring the Xcode plug-in
-======================================================================
-
-The Xcode plug-in simplifies the process of building Ice and Ice Touch
-applications and provides the following features:
-
-  - Handles all aspects of translating your Slice files for both
-    Objective-C and C++ projects
-  - Incrementally recompiles Slice files after modifications
-  - Maintains dependencies between Slice files
-  - Highlights compilation errors in your source code
-
-The Xcode plug-in is configured using the per-target info build
-settings, just as you would configure the compiler settings. Select a
-target, press info (or Cmd-i), select the build tab, and enter "Slice"
-in the "Search in Build Settings" field.
-
-The following fields are defined:
-
-- Header Search Path
-
-  Set the list of directories to search for included Slice files
-  (-I option). Note that the Ice Slice files are automatically in the
-  header search path.
-
-- Ice Home
-
-  If you are building with the Ice Touch Xcode SDK, this should be
-  left unset; otherwise, if using the command-line toolkit or regular
-  Ice, set this to the location of the installation (such as
-  /opt/Ice-3.4.1 or /opt/IceTouch-1.1).
-
-- Permit `Ice' prefix
-
-  Pass --ice to the Slice compiler.
-
-- Streaming support
-
-  Pass --stream to the Slice compiler (C++ only).
-
-- Checksum support
-
-  Pass --checksum to the Slice compiler (C++ only).
-
-- Preprocessor Macros
-
-  Set the list of preprocessor macros to define (-D option).
-
-- Translate C++ code
-
-  If set, slice2cpp will be used to translate the Slice files,
-  otherwise slice2objc is used.
-
-You may set specific Slice compiler flags on individual source Slice
-files by selecting the Slice file, press info (or Cmd-i), selecting
-the build tab and entering any desired flags in "Additional Compiler
-Flags for Target".

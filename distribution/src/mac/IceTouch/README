@@ -17,55 +17,49 @@ Compiler
 
 To build iPhone applications, you need:
 
-- Xcode 3.2 with iOS 4.2 SDK
-
-Or
-
-- Xcode 4.0 or Xcode 4.1 with iOS 4.3 SDK
+- Xcode 4.2 with iOS 5.0 SDK
 
 
 To build Cocoa applications, you need:
 
-- Xcode 3.2, Xcode 4.0 or Xcode 4.1
+- Xcode 4.2
 
 
 ======================================================================
 Compiling the Demos
 ======================================================================
 
-All the demos can be found under /Developer/Examples/IceTouch-1.1
+All the demos can be found under /Developer/Examples/IceTouch-1.2.0
 
 To build the command-line demos:
 
-$ cd /Developer/Examples/IceTouch-1.1
+$ cd /Developer/Examples/IceTouch-1.2.0
 $ make
 
 If you are building for Cocoa, you can use Xcode to build the demos
 located in the following subdirectories of
-/Developer/Examples/IceTouch-1.1/Cocoa
+/Developer/Examples/IceTouch-1.2.0/Cocoa
 
- - chat
- - library
+ - chat		  (Objetive-c)
+ - library 	  (Objetive-c)
 
 If you are building for iPhone or the iPhone simulator, you can
 use Xcode to build the demos located in subdirectories of
-/Developer/Examples/IceTouch-1.1/iPhone
+/Developer/Examples/IceTouch-1.2.0/iPhone
 
-  - chat
-  - library
-  - hello
-  - router
-  - voip
-
+  - chat	  (Objetive-c)
+  - cpp/hello (C++)
+  - library   (Objetive-c)
+  - hello     (Objetive-c)
+  - router    (Objetive-c)
+  - voip      (Objetive-c)
 
 ======================================================================
 Configuring the Xcode plug-in
 ======================================================================
 
 The Xcode plug-in simplifies the process of building Ice and Ice Touch
-applications with Xcode.
-
-The Xcode plug-in provides the following features:
+applications and provides the following features:
 
   - Handles all aspects of translating your Slice files for both
     Objective-C and C++ projects
@@ -75,10 +69,13 @@ The Xcode plug-in provides the following features:
 
 The Xcode plug-in is configured using the per-target info build
 settings, just as you would configure the compiler settings. Select a
-target, press info (or Cmd-i), select the build tab, and enter "Slice"
-in the "Search in Build Settings" field.
+target, and enter "Slice" in the "Search in Build Settings" field.
 
 The following fields are defined:
+
+- Header Directory
+
+  Directory to use as the header include directory in source files.
 
 - Header Search Path
 
@@ -91,7 +88,11 @@ The following fields are defined:
   If you are building with the Ice Touch Xcode SDK, this should be
   left unset; otherwise, if using the command-line toolkit or regular
   Ice, set this to the location of the installation (such as
-  /opt/Ice-3.4.1 or /opt/IceTouch-1.1).
+  /opt/Ice-3.4.2 or /opt/IceTouch-1.2.0).
+
+- Output Directory
+
+  Directory to place generated source files.
 
 - Permit `Ice' prefix
 
@@ -114,7 +115,17 @@ The following fields are defined:
   If set, slice2cpp will be used to translate the Slice files,
   otherwise slice2objc is used.
 
-You may set specific Slice compiler flags on individual Slice source
-files by selecting the Slice file, pressing info (or Cmd-i), selecting
-the build tab and entering any desired flags in "Additional Compiler
-Flags for Target".
+  When using Objective-c IceTouch SDK slice2objc is always
+  used, when using C++ IceTouch SDK slice2cpp is always used.
+
+- Underscore support
+
+  Permit underscores in Slice identifiers.
+
+
+You may set specific Slice compiler flags on individual source Slice
+files, to do that select your project in the Project Navigator, select
+the relevant target (you may have only one), then select the "Build Phases"
+tab, expand the "Compile Sources" phase and the "Compiler Flags" column lets
+you set each file’s flags for that target.
+

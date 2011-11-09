@@ -1,4 +1,4 @@
-Ice Touch is ZeroC's implementation of Ice for iOS devices, with full support for the Objective-C programming language.
+Ice Touch is ZeroC's implementation of Ice for iOS devices, with full support for the Objective-C and C++ programming languages.
 
 With Ice Touch, you can easily build distributed applications, with apps running on iOS that communicate with each others and with Ice servers running on Mac OS X, Windows, Linux or Solaris. You can implement these servers in C++, Java, C# or Python (using Ice) or in Objective-C (using Ice Touch). 
 

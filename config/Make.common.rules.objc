@@ -12,10 +12,12 @@
 # ----------------------------------------------------------------------
 
 SHELL			= /bin/sh
-VERSION			= 1.1
+VERSION			= 1.2.0
 VERSION_MAJOR           = 1
-VERSION_MINOR           = 1
-SOVERSION		= 11
+VERSION_MINOR           = 2
+VERSION_PATCH           = 0
+SOVERSION		= 12
+SHORT_VERSION	= 1.2
 
 INSTALL			= cp -fp
 INSTALL_PROGRAM		= ${INSTALL}

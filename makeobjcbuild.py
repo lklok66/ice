@@ -104,7 +104,6 @@ os.chdir(rootDir)
 # Get IceTouch version.
 config = open(os.path.join("cpp", "config", "Make.rules.objc"), "r")
 version = re.search("VERSION[\s]*= ([0-9\.]*)", config.read()).group(1)
-mmversion = re.search("([0-9]+\.[0-9b]+)[\.0-9]*", version).group(1)
 versionMinor = re.search("([0-9\.]*).([0-9\.]*)", version).group(2)
 versionMajor = re.search("([0-9\.]*).([0-9\.]*)", version).group(1)
 
@@ -178,11 +177,11 @@ os.system(("DEVELOPER_PATH=%s XCODE_VERSION=%s make" % (xcodePath, xcodeVersion)
 
 print "ok"
 
-name = "IceTouch-" + mmversion
+name = "IceTouch-" + version
 installerDir = os.path.join(baseDir, "installer")
 developerDir = os.path.join(baseDir, "Developer")
 sdkDir = os.path.join(developerDir, "SDKs", name)
-cppSdkDir = os.path.join(developerDir, "SDKs", "IceTouchCpp-" + mmversion)
+cppSdkDir = os.path.join(developerDir, "SDKs", "IceTouchCpp-" + version)
 examplesDir = os.path.join(developerDir, "Examples", name)
 docDir = os.path.join(developerDir, "Documentation", name)
 optDir = os.path.join(baseDir, "opt", name)
@@ -215,8 +214,8 @@ for f in [ "CHANGES", "RELEASE_NOTES"]:
 copy(os.path.join(rootDir, "distribution", "src", "mac", "IceTouch", "README"),
      os.path.join(docDir, "README"))
 
-copy(os.path.join(buildDir, "objc", "SDK", "IceTouch-" + mmversion), sdkDir)
-copy(os.path.join(buildDir, "objc", "SDK", "IceTouchCpp-" + mmversion), cppSdkDir)
+copy(os.path.join(buildDir, "objc", "SDK", "IceTouch-" + version), sdkDir)
+copy(os.path.join(buildDir, "objc", "SDK", "IceTouchCpp-" + version), cppSdkDir)
 
 copy(os.path.join(buildDir, "Xcode", "Slice2ObjcPlugin", "build", "Release", "slice2objcplugin.pbplugin"),
      os.path.join(baseDir, "slice2objcplugin.pbplugin"))

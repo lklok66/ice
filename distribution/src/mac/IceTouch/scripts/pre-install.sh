@@ -1,37 +1,6 @@
 #!/bin/sh
 
 #
-# Uninstall IceTouch-1.1.0 SDKs
-#
-if [ -f /var/db/receipts/com.zeroc.pkg.IceTouch-sdk-1.1.bom ]; then
-    rm -rf /var/db/receipts/com.zeroc.pkg.IceTouch-sdk-1.1.bom
-fi
-
-if [ -f /var/db/receipts/com.zeroc.pkg.IceTouch-sdk-1.1.plist ]; then
-    rm -rf /var/db/receipts/com.zeroc.pkg.IceTouch-sdk-1.1.plist
-fi
-
-if [ -d /opt/IceTouch-1.1 ]; then
-    rm -rf /opt/IceTouch-1.1
-fi
-
-if [ -d /Developer/SDKs/IceTouch-1.1 ]; then
-    rm -rf /Developer/SDKs/IceTouch-1.1
-fi
-
-if [ -d /Developer/SDKs/IceTouchCpp-1.1 ]; then
-    rm -rf /Developer/SDKs/IceTouchCpp-1.1
-fi
-
-if [ -d /Developer/Examples/IceTouch-1.1 ]; then
-    rm -rf /Developer/Examples/IceTouch-1.1
-fi
-
-if [ -d /Developer/Documentation/IceTouch-1.1 ]; then
-    rm -rf /Developer/Documentation/IceTouch-1.1
-fi
-
-#
 # Uninstall IceTouch-1.1.0 Xcode plug-in
 #
 

@@ -6,3 +6,4 @@ ProxyTest.m: ProxyTest.ice "$(slicedir)/Ice/Current.ice" "$(slicedir)/Ice/Object
 ProxyTest.cpp: ProxyTest.ice "$(slicedir)/Ice/Current.ice" "$(slicedir)/Ice/ObjectAdapterF.ice" "$(slicedir)/Ice/ConnectionF.ice" "$(slicedir)/Ice/Identity.ice" "$(SLICE2CPP)" "$(SLICEPARSERLIB)"
 ProxyTest.cpp: ProxyTest.ice "$(slicedir)/Ice/Current.ice" "$(slicedir)/Ice/ObjectAdapterF.ice" "$(slicedir)/Ice/ConnectionF.ice" "$(slicedir)/Ice/Identity.ice" "$(SLICE2CPP)" "$(SLICEPARSERLIB)"
 ProxyTest.cpp: ProxyTest.ice "$(slicedir)/Ice/Current.ice" "$(slicedir)/Ice/ObjectAdapterF.ice" "$(slicedir)/Ice/ConnectionF.ice" "$(slicedir)/Ice/Identity.ice" "$(SLICE2CPP)" "$(SLICEPARSERLIB)"
+ProxyTest.cpp: ProxyTest.ice "$(slicedir)/Ice/Current.ice" "$(slicedir)/Ice/ObjectAdapterF.ice" "$(slicedir)/Ice/ConnectionF.ice" "$(slicedir)/Ice/Identity.ice" "$(SLICE2CPP)" "$(SLICEPARSERLIB)"

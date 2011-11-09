@@ -7,3 +7,4 @@ DispatcherTest.cpp: DispatcherTest.ice "$(slicedir)/Ice/BuiltinSequences.ice" "$
 DispatcherTest.cpp: DispatcherTest.ice "$(slicedir)/Ice/BuiltinSequences.ice" "$(SLICE2CPP)" "$(SLICEPARSERLIB)"
 DispatcherTest.cpp: DispatcherTest.ice "$(slicedir)/Ice/BuiltinSequences.ice" "$(SLICE2CPP)" "$(SLICEPARSERLIB)"
 DispatcherTest.cpp: DispatcherTest.ice "$(slicedir)/Ice/BuiltinSequences.ice" "$(SLICE2CPP)" "$(SLICEPARSERLIB)"
+DispatcherTest.cpp: DispatcherTest.ice "$(slicedir)/Ice/BuiltinSequences.ice" "$(SLICE2CPP)" "$(SLICEPARSERLIB)"
