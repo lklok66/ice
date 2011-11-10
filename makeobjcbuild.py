@@ -61,7 +61,7 @@ verbose = 0
 tag = "HEAD"
 xcodeVersion = "42";
 xcodePath = "/Developer"
-iOSVersion = "5.0"
+iOSMinSDKVersion = "4.2"
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], "hv", ["xcode-version=", "xcode-path=", "ios-version="])
@@ -167,9 +167,9 @@ print "Building distributions...",
 sys.stdout.flush()
 
 os.system(("DEVELOPER_PATH=%s OPTIMIZE_SPEED=yes make" % xcodePath))
-os.system(("DEVELOPER_PATH=%s OPTIMIZE_SPEED=yes COMPILE_CPP_SDK=yes COMPILE_FOR_COCOA=yes make" % xcodePath))
-os.system(("DEVELOPER_PATH=%s OPTIMIZE_SIZE=yes IPHONE_SDK_VERSION=%s COMPILE_CPP_SDK=yes COMPILE_FOR_IPHONE=yes make" % (xcodePath, iOSVersion)))
-os.system(("DEVELOPER_PATH=%s OPTIMIZE_SIZE=yes IPHONE_SDK_VERSION=%s COMPILE_CPP_SDK=yes COMPILE_FOR_IPHONE_SIMULATOR=yes make" % (xcodePath, iOSVersion)))
+os.system(("DEVELOPER_PATH=%s OPTIMIZE_SPEED=yes COMPILE_FOR_COCOA=yes make" % xcodePath))
+os.system(("DEVELOPER_PATH=%s OPTIMIZE_SIZE=yes IPHONE_TARGET_MIN_SDK_VERSION=%s COMPILE_FOR_IPHONE=yes make" % (xcodePath, iOSMinSDKVersion)))
+os.system(("DEVELOPER_PATH=%s OPTIMIZE_SIZE=yes IPHONE_TARGET_MIN_SDK_VERSION=%s COMPILE_FOR_IPHONE_SIMULATOR=yes make" % (xcodePath, iOSMinSDKVersion)))
 
 os.chdir(os.path.join(buildDir, "Xcode", "Slice2ObjcPlugin"))
 

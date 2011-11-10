@@ -68,6 +68,7 @@ build-sdk:
 	for sdk in $(SDKS); \
 	do \
 	    $(call mkdir,SDK/IceTouch$$sdk-$(VERSION)) ;\
+		ln -s IceTouch$$sdk-$(VERSION) SDK/IceTouch$$sdk-$(SHORT_VERSION) ;\
 	    $(call mkdir,SDK/IceTouch$$sdk-$(VERSION)/bin) ;\
 	    $(call mkdir,SDK/IceTouch$$sdk-$(VERSION)/slice) ;\
 	    for platform in macosx iphoneos iphonesimulator ; \
