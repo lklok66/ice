@@ -387,11 +387,11 @@ BOOL _returnsData;
 }
 +(id) checkedCast:(id<ICEObjectPrx>)proxy facet:(NSString*)facet
 {
-    try
+    @try
     {
         return [self checkedCast:[proxy ice_facet:facet]];
     }
-    catch(ICEFacetNotExistException* ex)
+    @catch(ICEFacetNotExistException* ex)
     {
         return nil;
     }
@@ -414,11 +414,11 @@ BOOL _returnsData;
 }
 +(id) checkedCast:(id<ICEObjectPrx>)proxy facet:(NSString*)facet context:(ICEContext*)context
 {
-    try
+    @try
     {
         return [self checkedCast:[proxy ice_facet:facet] context:context];
     }
-    catch(ICEFacetNotExistException* ex)
+    @catch(ICEFacetNotExistException* ex)
     {
         return nil;
     }
