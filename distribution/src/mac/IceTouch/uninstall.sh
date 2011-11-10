@@ -48,8 +48,7 @@ uninstallPackage ()
         
         VERSION_MAJOR=${VERSION:0:1}
         VERSION_MINOR=${VERSION:2:1}
-		VERSION_PATCH=$P{VERSION:4:1}
-        VERSION_MM=$VERSION_MAJOR"."$VERSION_MINOR"."$VERSION_PATCH
+        VERSION_MM=$VERSION_MAJOR"."$VERSION_MINOR
 
         XCODE_DEV_PACKAGE="NO"
         if [[ "$PACKAGE" == "com.zeroc.icetouch-xcode42-developer.pkg" ]]; then
@@ -60,20 +59,36 @@ uninstallPackage ()
         # Remove IceTouch contents from Xcode Developer dir.
         #
         if [[ "$XCODE_DEV_PACKAGE" == "YES" ]]; then
-            if [[ -d "$BASE_PATH/SDKs/IceTouch-$VERSION_MM" ]]; then
-                rm -rf "$BASE_PATH/SDKs/IceTouch-$VERSION_MM"
+            if [[ -d "$BASE_PATH/SDKs/IceTouch-$VERSION" ]]; then
+                rm -rf "$BASE_PATH/SDKs/IceTouch-$VERSION"
+            fi
+
+            if [[ "$BASE_PATH/SDKs/IceTouch-$VERSION_MM" ]]; then
+                rm -f "$BASE_PATH/SDKs/IceTouch-$VERSION_MM"
+            fi
+
+			if [[ -d "$BASE_PATH/SDKs/IceTouchCpp-$VERSION" ]]; then
+                rm -rf "$BASE_PATH/SDKs/IceTouchCpp-$VERSION"
+            fi
+
+            if [[ "$BASE_PATH/SDKs/IceTouchCpp-$VERSION_MM" ]]; then
+                rm -f "$BASE_PATH/SDKs/IceTouchCpp-$VERSION_MM"
             fi
             
-            if [[ -d "$BASE_PATH/Examples/IceTouch-$VERSION_MM" ]]; then
-                rm -rf "$BASE_PATH/Examples/IceTouch-$VERSION_MM"
+            if [[ -d "$BASE_PATH/Examples/IceTouch-$VERSION" ]]; then
+                rm -rf "$BASE_PATH/Examples/IceTouch-$VERSION"
             fi
             
-            if [[ -d "$BASE_PATH/Documentation/IceTouch-$VERSION_MM" ]]; then
-                rm -rf "$BASE_PATH/Documentation/IceTouch-$VERSION_MM"
+            if [[ -d "$BASE_PATH/Documentation/IceTouch-$VERSION" ]]; then
+                rm -rf "$BASE_PATH/Documentation/IceTouch-$VERSION"
             fi
         fi
 
         if [[ "$PACKAGE" == "com.zeroc.icetouch-command-line-developer.pkg" ]]; then
+            if [[ -d "/opt/IceTouch-$VERSION" ]]; then
+                rm -rf "/opt/IceTouch-$VERSION"
+            fi
+
             if [[ "/opt/IceTouch-$VERSION_MM" ]]; then
                 rm -rf "/opt/IceTouch-$VERSION_MM"
             fi

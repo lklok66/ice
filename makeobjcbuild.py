@@ -50,9 +50,8 @@ def usage():
     print "Options:"
     print "-h                   Show this message."
     print "-v                   Be verbose."
-    print "--xcode-version      Xcode version to build the installer. Default is '40' for Xcode 4.0, supported versions are 32, 40 and 41"
     print "--xcode-path         Xcode install path. Default is '/Developer'"
-    print "--ios-version        iPhone version to build SDKs, Default is '4.3' for iOS 4.3, supported versions are 4.2 and 4.3"
+    print "--ios-min-version    The minimum iOS SDK version supported by targets, Default is '4.2', supported versions are 4.2, 4.3 and 5.0"
 
 #
 # Check arguments
@@ -61,6 +60,7 @@ verbose = 0
 tag = "HEAD"
 xcodeVersion = "42";
 xcodePath = "/Developer"
+iOSVersion = "5.0"
 iOSMinSDKVersion = "4.2"
 
 try:
@@ -75,19 +75,12 @@ for o, a in opts:
         sys.exit(0)
     elif o == "-v":
         verbose = 1
-    elif o == "--xcode-version":
-        xcodeVersion = a;
     elif o == "--xcode-path":
         xcodePath = a;
-    elif o == "--ios-version":
-        iOSVersion = a;
+    elif o == "--ios-min-version":
+        iOSMinSDKVersion = a;
 
-
-if xcodeVersion != "42":
-    usage()
-    sys.exit(1)
-
-if iOSVersion != "5.0":
+if iOSMinSDKVersion != "5.0" and iOSMinSDKVersion != "4.3" and iOSMinSDKVersion != "4.2":
     usage()
     sys.exit(1)
 
@@ -104,6 +97,7 @@ os.chdir(rootDir)
 # Get IceTouch version.
 config = open(os.path.join("cpp", "config", "Make.rules.objc"), "r")
 version = re.search("VERSION[\s]*= ([0-9\.]*)", config.read()).group(1)
+mmversion = re.search("([0-9]+\.[0-9b]+)[\.0-9]*", version).group(1)
 versionMinor = re.search("([0-9\.]*).([0-9\.]*)", version).group(2)
 versionMajor = re.search("([0-9\.]*).([0-9\.]*)", version).group(1)
 
@@ -227,12 +221,18 @@ os.rename("IceTouch-" + version + "-demos", name)
 os.system("chmod -R g+wX %s" % examplesDir)
 os.remove(os.path.join(examplesDir, "ICE_TOUCH_LICENSE"))
 os.remove(os.path.join(examplesDir, "ICE_LICENSE"))
+
+# SDK symlinks
+os.chdir(os.path.join(developerDir, "SDKs"));
+os.system("ln -s IceTouch-%s IceTouch-%s" % (version, mmversion))
+os.system("ln -s IceTouchCpp-%s IceTouchCpp-%s" % (version, mmversion))
+
 os.chdir(baseDir)
 
 # Fix iPhone demos iOS SDK and deployment version.
 
 xcodeSDKRootExprs = [ (re.compile("SDKROOT = iphoneos.*;"), "SDKROOT = \"iphoneos%s\";" % iOSVersion) ]
-xcodeIPhoneOSDeplyomentExprs = [ (re.compile("IPHONEOS_DEPLOYMENT_TARGET = .*;"), "IPHONEOS_DEPLOYMENT_TARGET = %s;" % iOSVersion) ]
+xcodeIPhoneOSDeplyomentExprs = [ (re.compile("IPHONEOS_DEPLOYMENT_TARGET = .*;"), "IPHONEOS_DEPLOYMENT_TARGET = %s;" % iOSMinSDKVersion) ]
 
 for root, dirnames, filesnames in os.walk(os.path.join(examplesDir, "iPhone")):
     for f in filesnames:
