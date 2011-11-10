@@ -133,8 +133,10 @@ If everything works, you should see lots of "ok" messages. In
 case of a failure, the tests abort with "failed".
 
 For the iPhone or iPhone simulator, the test suite runs within an
-iPhone application named "Test Suite", located in the directory
-objc/test/iPhone/container.
+iPhone application named "Test Suite", the Objetive-c version
+is located in the directory objc/test/objc/iPhone/container and
+the C++ version is located in the directory 
+objc/test/cpp/iPhone/container.
 
 Running the container application with Xcode 4.2 and iOS 4.2 devices
 requires changing the following settings in the container project:

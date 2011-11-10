@@ -1,0 +1,35 @@
+======================================================================
+Installation
+======================================================================
+
+To build the Xcode plug-in, first review and update the settings in
+the Xcode/Slice2ObjcPlugin/config/Make.rules file. Next, execute the
+following commands:
+
+$ cd Xcode/Slice2ObjcPlugin
+$ make
+
+To install the plug-in:
+
+$ make install
+
+The Xcode plug-in is installed at the following location:
+
+~/Library/Application Support/Developer/4.2/Xcode/Plug-ins/slice2objcplugin.pbplugin
+
+If you have set XCODE_PLUGIN_ALL_USER=YES in Xcode/Slice2ObjcPlugin/config/Make.rules,
+the plug-in will be installed for all users at the following location:
+
+/Library/Application Support/Developer/4.2/Xcode/Plug-ins/slice2objcplugin.pbplugin
+
+Note that admin access is required when installing the plug-in for all
+users. You can prefix the "make install" command with sudo as shown
+below:
+
+$ sudo make install
+
+======================================================================
+Configuring the Xcode plug-in
+======================================================================
+
+See http://doc.zeroc.com/display/Ice/Xcode+Plug-in
