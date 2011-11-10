@@ -115,8 +115,12 @@ IceUtil::Shared::__incRef()
     assert(InterlockedExchangeAdd(&_ref, 0) >= 0);
     InterlockedIncrement(&_ref);
 #elif defined(ICE_HAS_GCC_BUILTINS)
-    int c = __sync_fetch_and_add(&_ref, 1);
+#  ifdef NDEBUG
+    __sync_fetch_and_add(&_ref, 1);
+#  else
+	int c = __sync_fetch_and_add(&_ref, 1);
     assert(c >= 0);
+#  endif
 #elif defined(ICE_HAS_ATOMIC_FUNCTIONS)
     assert(IceUtilInternal::atomicExchangeAdd(&_ref, 0) >= 0);
     IceUtilInternal::atomicInc(&_ref);
