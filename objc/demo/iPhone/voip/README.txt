@@ -27,9 +27,9 @@ If you intend to run this demo using a local server instead of the
 public one provided by ZeroC, you will need to modify the Glacier2
 configuration to use new certificates. iOS 5 no longer supports X.509
 certificates that use MD5 hashes. Since the certificates that are
-included in the Chat Demo distribution use MD5 hashes, the iPhone chat
-client will not be able to connect to a local Glacier2 server unless
-you replace the Glacier2 certificates with new ones that are included
+included in the Ice distribution use MD5 hashes, the iPhone client 
+will not be able to connect to a local Glacier2 server unless you 
+replace the Glacier2 certificates with new ones that are included
 in your Ice Touch distribution.
 
 In the file java/demo/Glacier2/voip/config.glacier2, replace the

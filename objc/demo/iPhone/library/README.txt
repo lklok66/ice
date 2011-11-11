@@ -10,8 +10,7 @@ to:
 ZeroC hosts a server for this demo on demo2.zeroc.com. The iPhone
 client connects to this host by default. The deployment on
 demo2.zeroc.com accepts both secure and non-secure connections using
-Glacier2. Direct connections to the library session manager are not
-permitted on demo2.zeroc.com.
+Glacier2 or direct connections to the library session manager.
 
 
 SSL Notes
