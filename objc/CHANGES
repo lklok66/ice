@@ -3,13 +3,13 @@ Changes since version 1.1.1
 
 - Updated Ice Touch to support Xcode 4.2 and iOS 5
 
-- Added new C++ SDKs for Cocoa, iPhone and iPhone
-  Simulator.
+- Added new C++ SDKs for Cocoa, iPhone and iPhone Simulator
 
-- Update IceTouch to use clang++ compiler.
+- Updated Ice Touch to use clang++ compiler
 
-- Fixed a bug in slice2objc, that cause conflicts with
-  names defined in global scope.
+- Fixed a bug in slice2objc that caused conflicts with names defined
+  in the global scope
+
 
 Changes since version 1.1.0
 ---------------------------

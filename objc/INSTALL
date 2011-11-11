@@ -9,7 +9,7 @@ Operating system
 Ice Touch requires:
 
 - Mac OS X 10.6.8 or later
-- iOS 5.0
+- iOS 4.2 or later
 
 
 Compiler
@@ -23,10 +23,11 @@ To build Cocoa applications, you need:
 
 - Xcode 4.2
 
+
 Xcode plug-in
 -------------
 
-The Xcode Plug-in is required to build the Cocoa and iPhone demos in
+Our Xcode Plug-in is required to build the Cocoa and iPhone demos in
 this distribution. We strongly recommended that you develop Ice for
 C++ and Ice Touch applications with Xcode; this greatly simplifies the
 build process. For details see Xcode/INSTALL.
@@ -48,7 +49,7 @@ Building the mcpp library is only necessary if you want to build the
 Slice translators yourself.
 
 The Slice-to-Objective-C (slice2objc) and Slice-to-C++ (slice2cpp)
-compilers have a dependency on mcpp 2.7.2.
+compilers have a dependency on mcpp 2.7.2 (with patches).
 
 We recommend downloading the Ice Touch third-party source archive from
 
@@ -104,20 +105,20 @@ for Mac OS X, this will also build the demos.
 If you are building for Cocoa, you should now use Xcode to build
 the demos located in the following subdirectories:
 
-  - objc/demo/Cocoa/chat			(Objetive-c)
-  - objc/demo/Cocoa/library			(Objetive-c)
+  - objc/demo/Cocoa/chat                    (Objective-c)
+  - objc/demo/Cocoa/library                 (Objective-c)
 
 If you are building for iPhone or the iPhone simulator, you should
 now use Xcode to build the demos and test suite GUI located in the
 following subdirectories:
 
-  - objc/demo/iPhone/chat			(Objetive-c)
-  - objc/demo/iPhone/cpp/hello		(C++)
-  - objc/demo/iPhone/library		(Objetive-c)
-  - objc/demo/iPhone/hello			(Objetive-c)
-  - objc/demo/iPhone/router			(Objetive-c)
-  - objc/test/objc/iPhone/container	(Objetive-c)
-  - objc/test/cpp/iPhone/container	(C++)
+  - objc/demo/iPhone/chat                   (Objective-c)
+  - objc/demo/iPhone/cpp/hello              (C++)
+  - objc/demo/iPhone/library                (Objective-c)
+  - objc/demo/iPhone/hello                  (Objective-c)
+  - objc/demo/iPhone/router                 (Objective-c)
+  - objc/test/objc/iPhone/container         (Objective-c)
+  - objc/test/cpp/iPhone/container          (C++)
 
 Make sure to build the SDKs before opening the demo or test projects
 in Xcode.
@@ -133,10 +134,9 @@ If everything works, you should see lots of "ok" messages. In
 case of a failure, the tests abort with "failed".
 
 For the iPhone or iPhone simulator, the test suite runs within an
-iPhone application named "Test Suite", the Objetive-c version
-is located in the directory objc/test/objc/iPhone/container and
-the C++ version is located in the directory 
-objc/test/cpp/iPhone/container.
+iPhone application named "Test Suite". The Objective-C version is
+located in the directory objc/test/objc/iPhone/container and the C++
+version is located in the directory objc/test/cpp/iPhone/container.
 
 Running the container application with Xcode 4.2 and iOS 4.2 devices
 requires changing the following settings in the container project:
@@ -146,10 +146,11 @@ requires changing the following settings in the container project:
     must set the Xcode "Deployment Target" property of the target to
     match the desired iOS version.
 
-  * The container project is configured to use Architectures 
-	$(ARCHS_STANDARD_32_BIT) that in Xcode 4.2 expands to "Standard (armv7)"
-    if you want to debug in a old 2G device, remember that these devices
-    are armv6 so you should update the Debug Architecture to armv6
+  * The container project is configured to use the architectures
+    $(ARCHS_STANDARD_32_BIT), which in Xcode 4.2 expands to
+    "Standard (armv7)". If you want to debug with an old 2G device,
+    remember that these devices are armv6 so you should update the
+    Debug Architecture to armv6.
 
 
 ======================================================================

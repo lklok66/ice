@@ -10,4 +10,27 @@ when connecting.
 
 If you would like to run your own server, or are otherwise interested
 in the Chat Demo, the complete source is available at
-http://www.zeroc.com/chat/download.html.
+
+http://www.zeroc.com/chat/download.html
+
+
+SSL Notes
+---------
+
+If you intend to run this demo using a local chat server instead of
+the public one provided by ZeroC, you will need to modify the Glacier2
+configuration to use new certificates that are included in your Ice
+Touch distribution.
+
+In the file config/config.glacier2router from the Chat Demo package,
+replace the following property definitions:
+
+#
+# SSL Configuration
+#
+Ice.Plugin.IceSSL=IceSSL:createIceSSL
+IceSSL.DefaultDir=/opt/IceTouch-1.2.0/certs
+IceSSL.CertAuthFile=cacert.pem
+IceSSL.CertFile=s_rsa1024_pub.pem
+IceSSL.KeyFile=s_rsa1024_priv.pem
+IceSSL.VerifyPeer=0

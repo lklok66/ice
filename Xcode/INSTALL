@@ -3,7 +3,7 @@ Installation
 ======================================================================
 
 To build the Xcode plug-in, first review and update the settings in
-the Xcode/Slice2ObjcPlugin/config/Make.rules file. Next, execute the
+the file Xcode/Slice2ObjcPlugin/config/Make.rules. Next, execute the
 following commands:
 
 $ cd Xcode/Slice2ObjcPlugin
@@ -28,8 +28,12 @@ below:
 
 $ sudo make install
 
+
 ======================================================================
 Configuring the Xcode plug-in
 ======================================================================
 
-See http://doc.zeroc.com/display/Ice/Xcode+Plug-in
+Please refer to the Ice documentation for more information the Xcode
+plug-in:
+
+http://doc.zeroc.com/display/Ice/Xcode+Plug-in

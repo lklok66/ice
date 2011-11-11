@@ -9,7 +9,7 @@ Operating system
 Ice Touch requires:
 
 - Mac OS X 10.6.8 or later
-- iOS 4.2 or iOS 4.3.
+- iOS 4.2 or later
 
 
 Compiler
@@ -18,7 +18,6 @@ Compiler
 To build iPhone applications, you need:
 
 - Xcode 4.2 with iOS 5.0 SDK
-
 
 To build Cocoa applications, you need:
 
@@ -29,7 +28,7 @@ To build Cocoa applications, you need:
 Compiling the Demos
 ======================================================================
 
-All the demos can be found under /Developer/Examples/IceTouch-1.2.0
+All the demos can be found under /Developer/Examples/IceTouch-1.2.0.
 
 To build the command-line demos:
 
@@ -37,25 +36,28 @@ $ cd /Developer/Examples/IceTouch-1.2.0
 $ make
 
 If you are building for Cocoa, you can use Xcode to build the demos
-located in the following subdirectories of
-/Developer/Examples/IceTouch-1.2.0/Cocoa
+located in /Developer/Examples/IceTouch-1.2.0/Cocoa:
 
- - chat		  (Objetive-c)
- - library 	  (Objetive-c)
+ - chat         (Objective-C)
+ - library      (Objective-C)
 
 If you are building for iPhone or the iPhone simulator, you can
-use Xcode to build the demos located in subdirectories of
-/Developer/Examples/IceTouch-1.2.0/iPhone
+use Xcode to build the demos located in
+/Developer/Examples/IceTouch-1.2.0/iPhone:
 
-  - chat	  (Objetive-c)
-  - cpp/hello (C++)
-  - library   (Objetive-c)
-  - hello     (Objetive-c)
-  - router    (Objetive-c)
-  - voip      (Objetive-c)
+  - chat        (Objective-C)
+  - cpp/hello   (C++)
+  - library     (Objective-C)
+  - hello       (Objective-C)
+  - router      (Objective-C)
+  - voip        (Objective-C)
+
 
 ======================================================================
 Configuring the Xcode plug-in
 ======================================================================
 
-See http://doc.zeroc.com/display/Ice/Xcode+Plug-in
+Please refer to the Ice documentation for more information the Xcode
+plug-in:
+
+http://doc.zeroc.com/display/Ice/Xcode+Plug-in
