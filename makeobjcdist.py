@@ -326,7 +326,9 @@ configSubstituteExprs = [(re.compile(regexpEscape("../../../certs")), "../certs"
 makeSubstituteExprs = [ (re.compile("= \.\.$"), " = ."),
                         (re.compile(regexpEscape("../..")), ".."),
                         (re.compile(regexpEscape("../../..")), "../..")]
+xcodeCppSubstituteExprs = [ (re.compile("ADDITIONAL_SDKS = .*;"), "ADDITIONAL_SDKS = \"$(DEVELOPER_DIR)/SDKs/IceTouchCpp-%s/$(PLATFORM_NAME).sdk\";" % mmversion) ]
 xcodeSubstituteExprs = [ (re.compile("ADDITIONAL_SDKS = .*;"), "ADDITIONAL_SDKS = \"$(DEVELOPER_DIR)/SDKs/IceTouch-%s/$(PLATFORM_NAME).sdk\";" % mmversion) ]
+
 for root, dirnames, filesnames in os.walk(demoDir):
     for f in filesnames:
         if fnmatch.fnmatch(f, "config*"):
@@ -334,7 +336,10 @@ for root, dirnames, filesnames in os.walk(demoDir):
         elif fnmatch.fnmatch(f, "Makefile"):
             substitute(os.path.join(root, f), makeSubstituteExprs)
         elif fnmatch.fnmatch(f, "project.pbxproj"):
-            substitute(os.path.join(root, f), xcodeSubstituteExprs)
+            if fnmatch.fnmatch(root, "*/iPhone/cpp/*"):
+                substitute(os.path.join(root, f), xcodeCppSubstituteExprs)
+            else:
+                substitute(os.path.join(root, f), xcodeSubstituteExprs)
 
 print "ok"
 
