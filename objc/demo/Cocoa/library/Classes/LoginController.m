@@ -217,14 +217,10 @@ NSString* const routerServerKey = @"routerServerKey";
             if(glacier2Field.state == NSOnState)
             {
                 int port = 4063;
-                if([hostname caseInsensitiveCompare:@"demo2.zeroc.com"] == NSOrderedSame)
-                {
-                    port = 4502;
-                }
                 // The proxy to the Glacier2 router.
                 proxy = [communicator stringToProxy:
-                         [NSString stringWithFormat:@"DemoGlacier2/router:tcp -p %d -h %@ -t 10000",
-                          port, chatServerField.stringValue]];
+                         [NSString stringWithFormat:@"DemoGlacier2/router:tcp -p 4063 -h %@ -t 10000",
+                          chatServerField.stringValue]];
                 loginSelector = @selector(doPhoneRouterGlacier2Login:);
             }
             else
@@ -253,13 +249,8 @@ NSString* const routerServerKey = @"routerServerKey";
                 }
                 else
                 {
-                    int port = 4063;
-                    if([hostname caseInsensitiveCompare:@"demo2.zeroc.com"] == NSOrderedSame)
-                    {
-                        port = 4502;
-                    }
-                    s = [NSString stringWithFormat:@"DemoGlacier2/router:tcp -p %d -h %@ -t 10000",
-                         port, chatServerField.stringValue];
+                    s = [NSString stringWithFormat:@"DemoGlacier2/router:tcp -p 4063 -h %@ -t 10000",
+                         chatServerField.stringValue];
                 }
 				
                 proxy = [communicator stringToProxy:s];

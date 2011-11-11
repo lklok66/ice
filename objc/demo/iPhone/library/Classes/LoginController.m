@@ -283,10 +283,6 @@ static NSString* passwordKey = @"passwordKey";
         		{
 		            port = 5064;
         		}
-		        else
-        		{
-            		port = 4502;
-        		}
 		    }
 			else
 			{
