@@ -19,7 +19,7 @@ SRCS		:= $(OBJS:.o=.cpp)
 
 include $(top_srcdir)/config/Make.rules
 
-CPPFLAGS	:= -I. -I$(CPP_SDK_DIR)/usr/local/include
+CPPFLAGS	:= -I. -I$(CPP_SDK_DIR)/usr/local/include $(CPPFLAGS)
 
 %.o: %.cpp
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<

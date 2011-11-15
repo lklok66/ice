@@ -48,7 +48,7 @@ clean::
 endif
 
 
-CPPFLAGS	:= -I.. -I../../Common -I. -I$(CPP_SDK_DIR)/usr/local/include
+CPPFLAGS	:= -I.. -I../../Common -I. -I$(CPP_SDK_DIR)/usr/local/include $(CPPFLAGS)
 
 %.o: %.cpp
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $<
