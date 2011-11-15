@@ -99,8 +99,8 @@ timeoutAllTests(const Ice::CommunicatorPtr& communicator)
         //
         // Expect ConnectTimeoutException.
         //
-        TimeoutPrx to = TimeoutPrx::uncheckedCast(obj->ice_timeout(250));
-        to->holdAdapter(750);
+        TimeoutPrx to = TimeoutPrx::uncheckedCast(obj->ice_timeout(500));
+        to->holdAdapter(1000);
         to->ice_getConnection()->close(true); // Force a reconnect.
         try
         {
@@ -251,9 +251,9 @@ timeoutAllTests(const Ice::CommunicatorPtr& communicator)
     
     tprintf("testing close timeout... ");
     {
-        TimeoutPrx to = TimeoutPrx::checkedCast(obj->ice_timeout(250));
+        TimeoutPrx to = TimeoutPrx::checkedCast(obj->ice_timeout(500));
         Ice::ConnectionPtr connection = to->ice_getConnection();
-        timeout->holdAdapter(750);
+        timeout->holdAdapter(1000);
         connection->close(false);
         try
         {
@@ -263,7 +263,7 @@ timeoutAllTests(const Ice::CommunicatorPtr& communicator)
         {
             test(false);
         }
-        IceUtil::ThreadControl::sleep(IceUtil::Time::milliSeconds(500));
+        IceUtil::ThreadControl::sleep(IceUtil::Time::milliSeconds(1000));
         try
         {
             connection->getInfo();
@@ -371,10 +371,10 @@ timeoutAllTests(const Ice::CommunicatorPtr& communicator)
         initData.properties->setProperty("Ice.Override.CloseTimeout", "200");
         Ice::CommunicatorPtr comm = Ice::initialize(initData);
         Ice::ConnectionPtr connection = comm->stringToProxy(sref)->ice_getConnection();
-        timeout->holdAdapter(750);
+        timeout->holdAdapter(1000);
         IceUtil::Time now = IceUtil::Time::now();
         comm->destroy();
-        test(IceUtil::Time::now() - now < IceUtil::Time::milliSeconds(500));
+        test(IceUtil::Time::now() - now < IceUtil::Time::milliSeconds(750));
     }
     tprintf("ok\n");
     

@@ -138,20 +138,6 @@ iPhone application named "Test Suite". The Objective-C version is
 located in the directory objc/test/objc/iPhone/container and the C++
 version is located in the directory objc/test/cpp/iPhone/container.
 
-Running the container application with Xcode 4.2 and iOS 4.2 devices
-requires changing the following settings in the container project:
-
-  * The container project is configured to be deployed in iOS 5.0. If
-    you want to deploy the application in a previous iOS version, you
-    must set the Xcode "Deployment Target" property of the target to
-    match the desired iOS version.
-
-  * The container project is configured to use the architectures
-    $(ARCHS_STANDARD_32_BIT), which in Xcode 4.2 expands to
-    "Standard (armv7)". If you want to debug with an old 2G device,
-    remember that these devices are armv6 so you should update the
-    Debug Architecture to armv6.
-
 
 ======================================================================
 Installation
@@ -165,4 +151,4 @@ For the Cocoa/iPhone and iPhone Simulator builds, copy the contents
 of objc/SDK to either /Developer/SDKs, or ~/Library/SDKs.
 
 For Mac OS X builds of Ice Touch, the install name of the shared
-library is prefixed with the path /opt/IceTouch-@mmver@/lib.
+library is prefixed with the path /opt/IceTouch-@ver@/lib.

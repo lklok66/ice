@@ -917,7 +917,10 @@
 			buildSettings = {
 				ADDITIONAL_SDKS = "../../../../SDK/IceTouchCpp-1.2/$(PLATFORM_NAME).sdk";
 				ALWAYS_SEARCH_USER_PATHS = YES;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = (
+					armv6,
+					armv7,
+				);
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_RESOURCE_RULES_PATH = "$(SDKROOT)/ResourceRules.plist";
 				COPY_PHASE_STRIP = NO;
@@ -929,13 +932,14 @@
 				GCC_PREFIX_HEADER = container_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = ICE_OBJC_NOGC;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
 				HEADER_SEARCH_PATHS = (
 					../../Common,
 					../../Ice,
 					generated,
 				);
 				INFOPLIST_FILE = Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				OTHER_CFLAGS = "-DTARGET_OS_IPHONE";
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = container;
@@ -953,7 +957,10 @@
 			buildSettings = {
 				ADDITIONAL_SDKS = "../../../../SDK/IceTouchCpp-1.2/$(PLATFORM_NAME).sdk";
 				ALWAYS_SEARCH_USER_PATHS = YES;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = (
+					armv6,
+					armv7,
+				);
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_RESOURCE_RULES_PATH = "$(SDKROOT)/ResourceRules.plist";
 				COPY_PHASE_STRIP = NO;
@@ -962,13 +969,14 @@
 				GCC_PREFIX_HEADER = container_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = ICE_OBJC_NOGC;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
 				HEADER_SEARCH_PATHS = (
 					../../Common,
 					../../Ice,
 					generated,
 				);
 				INFOPLIST_FILE = Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				OTHER_CFLAGS = "-DTARGET_OS_IPHONE";
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = container;

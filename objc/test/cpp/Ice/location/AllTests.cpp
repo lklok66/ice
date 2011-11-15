@@ -323,7 +323,11 @@ locationAllTests(const Ice::CommunicatorPtr& communicator, const string& ref)
     test(hello->ice_getAdapterId() == "ReplicatedAdapter");
     hello->sayHello();
     tprintf("ok\n");
-    
+
+    //
+    // This portion of the test create many request an is slow on devices.
+    //
+#ifndef TARGET_OS_IPHONE
     tprintf("testing locator request queuing... ");
     hello = obj->getReplicatedHello()->ice_locatorCacheTimeout(0)->ice_connectionCached(false);
     count = locator->getRequestCount();
@@ -375,6 +379,7 @@ locationAllTests(const Ice::CommunicatorPtr& communicator, const string& ref)
         tprintf(os.str().c_str());
     }
     tprintf("ok\n");
+#endif
     
     tprintf("testing adapter locator cache... ");
     try

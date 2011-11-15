@@ -252,6 +252,7 @@
 					Classes,
 				);
 				INFOPLIST_FILE = Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = Hello;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
@@ -283,6 +284,7 @@
 					Classes,
 				);
 				INFOPLIST_FILE = Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = Hello;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
