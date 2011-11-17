@@ -937,7 +937,7 @@
 				HEADER_SEARCH_PATHS = (
 					../../Common,
 					../../Ice,
-					generated,
+					Classes,
 				);
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
@@ -946,7 +946,6 @@
 				PRODUCT_NAME = container;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
-				SLICE_CPP_FLAG = YES;
 				SLICE_INCLUDE_PATH = "../../Ice/slicing/objects ../../Ice/slicing/exceptions";
 				STRIP_STYLE = debugging;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -956,7 +955,7 @@
 		1D6058950D05DD3E006BFB54 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ADDITIONAL_SDKS = "../../../../SDK/IceTouchCpp-1.2/$(PLATFORM_NAME).sdk";
+				ADDITIONAL_SDKS = "/Developer/SDKs/IceTouchCpp-1.2/$(PLATFORM_NAME).sdk";
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				ARCHS = (
 					armv6,
@@ -975,7 +974,7 @@
 				HEADER_SEARCH_PATHS = (
 					../../Common,
 					../../Ice,
-					generated,
+					Classes,
 				);
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
@@ -984,10 +983,7 @@
 				PRODUCT_NAME = container;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
-				SLICE_CPP_FLAG = YES;
-				SLICE_INCLUDE_DIR = "";
 				SLICE_INCLUDE_PATH = "../../Ice/slicing/objects ../../Ice/slicing/exceptions";
-				SLICE_OUTPUT_DIR = generated;
 				STRIP_STYLE = debugging;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -1003,8 +999,6 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
-				SLICE_INCLUDE_DIR = "";
-				SLICE_OUTPUT_DIR = generated;
 			};
 			name = Debug;
 		};
@@ -1017,8 +1011,6 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				SDKROOT = iphoneos;
-				SLICE_INCLUDE_DIR = "";
-				SLICE_OUTPUT_DIR = generated;
 			};
 			name = Release;
 		};

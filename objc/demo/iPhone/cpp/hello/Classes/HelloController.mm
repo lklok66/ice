@@ -30,16 +30,10 @@ using namespace Demo;
 
 using namespace std;
 
-void sentSynchronously();
-void queuedRequest();
-
-class HelloClient;
-typedef IceUtil::Handle<HelloClient> HelloClientPtr;
-
 namespace
 {
-    HelloClientPtr client = 0;
-}
+void sentSynchronously();
+void queuedRequest();
 
 class HelloClient : public IceUtil::Shared
 {
@@ -170,10 +164,9 @@ public:
         ostringstream os;
         os << ex;
         const string s = os.str();
-        NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];
-        NSString* err = [ NSString stringWithUTF8String:s.c_str()] ;
+        NSString* err = [NSString stringWithUTF8String:s.c_str()];
         [_controller exception:err];
-        [pool release];
+        [err release];
     }
     
     void shutdown(const string& hostname, int deliveryMode, long timeout)
@@ -231,6 +224,7 @@ public:
         if(_communicator)
         {
             _communicator->destroy();
+            _communicator = 0;
         }
     }
                                     
@@ -242,6 +236,10 @@ private:
     bool _response;
     int _deliveryMode;
 };
+
+typedef IceUtil::Handle<HelloClient> HelloClientPtr;
+HelloClientPtr client;
+}
 //
 // Avoid warning for undocumented UISlider method
 //
@@ -357,8 +355,8 @@ void dispatchCall(Ice::DispatcherCallPtr& call)
 {
     client->sayHello([hostnameTextField.text cStringUsingEncoding:[NSString defaultCStringEncoding]], 
                      [modePicker selectedRowInComponent:0], 
-                     (int)(delaySlider.value * 1000.0f),     // Convert to ms.
-                     (int)(timeoutSlider.value * 1000.0f));  // Convert to ms.
+                     (int)(timeoutSlider.value * 1000.0f),     // Convert to ms.
+                     (int)(delaySlider.value * 1000.0f));  // Convert to ms.
     
 }
 
@@ -396,8 +394,6 @@ void dispatchCall(Ice::DispatcherCallPtr& call)
     [delaySlider release];
     [activity release];
     [modePicker release];
-    //TODO [communicator release];
-    
     [super dealloc];
 }
 

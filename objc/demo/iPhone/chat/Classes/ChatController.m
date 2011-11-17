@@ -103,9 +103,9 @@
 @implementation MessageCell
 @synthesize message;
 
-- (id)initWithFrame:(CGRect)frame reuseIdentifier:(NSString *)reuseIdentifier
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
-    if (self = [super initWithFrame:frame reuseIdentifier:reuseIdentifier])
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier])
     {
         who = [[UILabel alloc] initWithFrame:CGRectZero];
         
@@ -228,12 +228,6 @@
 }
 
 #pragma mark SessionManagement
-
--(void)enterBackground
-{
-    [self destroySession];
-    [self.navigationController popViewControllerAnimated:NO];
-}
 
 -(void)destroySession
 {
@@ -457,14 +451,14 @@ sessionTimeout:(int)t
 - (void)keyboardWillShow:(NSNotification *)notif
 {
     CGRect r;
-    [[[notif userInfo] objectForKey:UIKeyboardBoundsUserInfoKey] getValue:&r];
+    [[[notif userInfo] objectForKey:UIKeyboardFrameBeginUserInfoKey] getValue:&r];
     [self setViewMovedUp:YES bounds:r];
 }
 
 - (void)keyboardWillHide:(NSNotification *)notif
 {
     CGRect r;
-    [[[notif userInfo] objectForKey:UIKeyboardBoundsUserInfoKey] getValue:&r];
+    [[[notif userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] getValue:&r];
     [self setViewMovedUp:NO bounds:r];
 }
 

@@ -247,18 +247,13 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = hello_Prefix.pch;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				HEADER_SEARCH_PATHS = (
-					generated,
-					Classes,
-				);
+				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = Hello;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
-				SLICE_CPP_FLAG = YES;
-				SLICE_OUTPUT_DIR = generated;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -266,7 +261,7 @@
 		1D6058950D05DD3E006BFB54 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ADDITIONAL_SDKS = "../../../../SDK/IceTouchCpp-1.2/$(PLATFORM_NAME).sdk";
+				ADDITIONAL_SDKS = "/Developer/SDKs/IceTouchCpp-1.2/$(PLATFORM_NAME).sdk";
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = (
 					armv6,
@@ -279,18 +274,13 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = hello_Prefix.pch;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				HEADER_SEARCH_PATHS = (
-					generated,
-					Classes,
-				);
+				HEADER_SEARCH_PATHS = Classes;
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 4.2;
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = Hello;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
-				SLICE_CPP_FLAG = YES;
-				SLICE_OUTPUT_DIR = generated;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;

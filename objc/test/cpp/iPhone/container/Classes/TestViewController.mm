@@ -34,9 +34,9 @@
 @implementation MessageCell
 @synthesize body;
 
-- (id)initWithFrame:(CGRect)frame reuseIdentifier:(NSString *)reuseIdentifier
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
-    if (self = [super initWithFrame:frame reuseIdentifier:reuseIdentifier])
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier])
     {
         body = [[UILabel alloc] initWithFrame:CGRectZero];
         body.textColor = [UIColor blackColor];
@@ -347,8 +347,7 @@
     MessageCell *cell = (MessageCell*)[output dequeueReusableCellWithIdentifier:@"MessageCell"];
     if(cell == nil)
     {
-        // Create a new cell. CGRectZero allows the cell to determine the appropriate size.
-        cell = [[[MessageCell alloc] initWithFrame:CGRectZero reuseIdentifier:@"MessageCell"] autorelease];
+        cell = [[[MessageCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"MessageCell"] autorelease];
     }
     [cell setMessage:[messages objectAtIndex:indexPath.row]];
     return cell;

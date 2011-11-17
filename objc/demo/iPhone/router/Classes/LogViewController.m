@@ -43,9 +43,9 @@
 @synthesize entry;
 @synthesize dateFormatter;
 
-- (id)initWithFrame:(CGRect)frame reuseIdentifier:(NSString *)reuseIdentifier
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
-    if (self = [super initWithFrame:frame reuseIdentifier:reuseIdentifier])
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier])
     {
         self.category = [[[UILabel alloc] initWithFrame:CGRectZero] autorelease];
         
@@ -256,7 +256,7 @@
     if(cell == nil)
     {
         // Create a new cell. CGRectZero allows the cell to determine the appropriate size.
-        cell = [[[MessageCell alloc] initWithFrame:CGRectZero reuseIdentifier:@"MessageCell"] autorelease];
+        cell = [[[MessageCell alloc] initWithFrame:CGRectZero] autorelease];
     }
     cell.entry = [messages objectAtIndex:indexPath.row];
     return cell;
