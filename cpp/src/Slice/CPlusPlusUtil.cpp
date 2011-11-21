@@ -44,7 +44,7 @@ Slice::printHeader(Output& out)
 "//\n"
 "// Copyright (c) 2003-2011 ZeroC, Inc. All rights reserved.\n"
 "//\n"
-"// This copy of Ice is licensed to you under the terms described in the\n"
+"// This copy of Ice Touch is licensed to you under the terms described in the\n"
 "// ICE_TOUCH_LICENSE file included in this distribution.\n"
 "//\n"
 "// **********************************************************************\n"
