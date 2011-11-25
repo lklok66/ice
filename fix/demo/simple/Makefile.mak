@@ -36,4 +36,4 @@ clean::
 	-for %f in (store\*) do if not %f == store\.gitignore del /q %f
 	-del /q *-clordid
 
-!include .depend
+!include .depend.mak

@@ -44,7 +44,7 @@ SDIR		= $(slicedir)\IceFIX
 
 !include $(top_srcdir)\config\Make.rules.mak
 
-SLICE2CPPFLAGS	= -I./ $(SLICE2CPPFLAGS)
+SLICE2CPPFLAGS	= -I. $(SLICE2CPPFLAGS)
 CPPFLAGS	= -I. -Idummyinclude $(ICE_CPPFLAGS) $(CPPFLAGS) -DWIN32_LEAN_AND_MEAN $(QF_FLAGS)
 SLINKWITH 	= $(LIBS) icefix$(LIBSUFFIX).lib icebox$(LIBSUFFIX).lib freeze$(LIBSUFFIX).lib $(QF_LIBS)
 ALINKWITH 	= icegrid$(LIBSUFFIX).lib glacier2$(LIBSUFFIX).lib icefix$(LIBSUFFIX).lib $(LIBS)
@@ -80,30 +80,30 @@ $(ADMIN): $(AOBJS) IceFIXAdmin.res
 
 IceFIX.cpp $(HDIR)\IceFIX.h: $(SDIR)\IceFIX.ice
 	del /q $(HDIR)\IceFIX.h IceFIX.cpp
-	$(SLICE2CPP) --dll-export ICE_FIX_LIB_API --ice --include-dir IceFIX $(SLICE2CPPFLAGS) $(SDIR)\IceFIX.ice
+	"$(SLICE2CPP)" --dll-export ICE_FIX_LIB_API --ice --include-dir IceFIX $(SLICE2CPPFLAGS) $(SDIR)\IceFIX.ice
 	move IceFIX.h $(HDIR)
 
 BridgeTypes.cpp BridgeTypes.h: BridgeTypes.ice
 	del /q BridgeTypes.h BridgeTypes.cpp
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) BridgeTypes.ice
+	"$(SLICE2CPP)" $(SLICE2CPPFLAGS) BridgeTypes.ice
 
 RoutingRecordDB.h RoutingRecordDB.cpp: BridgeTypes.ice
 	del /q RoutingRecordDB.h RoutingRecordDB.cpp
-	$(SLICE2FREEZE) $(SLICE2CPPFLAGS) --dict FIXBridge::RoutingRecordDB,string,FIXBridge::RoutingRecord \
+	"$(SLICE2FREEZE)" $(SLICE2CPPFLAGS) --dict FIXBridge::RoutingRecordDB,string,FIXBridge::RoutingRecord \
 	RoutingRecordDB BridgeTypes.ice
 
 ClientDB.h ClientDB.cpp: BridgeTypes.ice
 	del /q ClientDB.h ClientDB.cpp
-	$(SLICE2FREEZE) $(SLICE2CPPFLAGS) --dict FIXBridge::ClientDB,string,FIXBridge::Client ClientDB \
+	"$(SLICE2FREEZE)" $(SLICE2CPPFLAGS) --dict FIXBridge::ClientDB,string,FIXBridge::Client ClientDB \
 		BridgeTypes.ice
 
 MessageDB.h MessageDB.cpp: BridgeTypes.ice
 	del /q MessageDB.h MessageDB.cpp
-	$(SLICE2FREEZE) $(SLICE2CPPFLAGS) --dict "FIXBridge::MessageDB,long,FIXBridge::Message,sort,std::less<Ice::Long>" MessageDB BridgeTypes.ice
+	"$(SLICE2FREEZE)" $(SLICE2CPPFLAGS) --dict "FIXBridge::MessageDB,long,FIXBridge::Message,sort,std::less<Ice::Long>" MessageDB BridgeTypes.ice
 
 MessageDBKey.h MessageDBKey.cpp:
 	del /q MessageDBKey.h MessageDBKey.cpp
-	$(SLICE2FREEZE) $(SLICE2CPPFLAGS) --dict "FIXBridge::MessageDBKey,int,long"  MessageDBKey
+	"$(SLICE2FREEZE)" $(SLICE2CPPFLAGS) --dict "FIXBridge::MessageDBKey,int,long"  MessageDBKey
 
 #Scanner.cpp: Scanner.l
 #	flex Scanner.l
@@ -152,4 +152,4 @@ install:: all
 
 !endif
 
-!include .depend
+!include .depend.mak

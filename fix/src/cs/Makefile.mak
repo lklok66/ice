@@ -28,7 +28,7 @@ MCSFLAGS	= $(MCSFLAGS) -keyfile:$(KEYFILE)
 SLICE2CSFLAGS	= $(SLICE2CSFLAGS) -I$(slicedir) --ice --tie
 
 $(TARGETS):: $(SRCS) $(GEN_SRCS)
-	$(MCS) $(MCSFLAGS) -r:$(ice_refdir)\Ice.dll $(SRCS) $(GEN_SRCS)
+	$(MCS) $(MCSFLAGS) -r:"$(ice_refdir)\Ice.dll" $(SRCS) $(GEN_SRCS)
 
 !if "$(DEBUG)" == "yes"
 clean::
@@ -41,4 +41,4 @@ install:: all
 	copy $(bindir)\$(PKG).pdb $(install_bindir)
 !endif
 
-!include .depend
+!include .depend.mak

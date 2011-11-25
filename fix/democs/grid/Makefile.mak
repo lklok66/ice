@@ -19,7 +19,7 @@ C_SRCS		= Client.cs
 MCSFLAGS	= $(MCSFLAGS) -target:exe
 
 client.exe: $(C_SRCS)
-	$(MCS) $(MCSFLAGS) -out:$@ -r:$(ice_refdir)\Ice.dll -r:$(ice_refdir)\IceGrid.dll -r:$(ice_refdir)\Glacier2.dll -r:$(refdir)\IceFIX.dll  $(QF_FLAGS) $(C_SRCS)
+	$(MCS) $(MCSFLAGS) -out:$@ -r:"$(ice_refdir)\Ice.dll" -r:"$(ice_refdir)\IceGrid.dll" -r:"$(ice_refdir)\Glacier2.dll" -r:"$(refdir)\IceFIX.dll"  $(QF_FLAGS) $(C_SRCS)
 
 clean::
 	-for %f in (db\registry\*) do if not %f == db\registry\.gitignore del /q %f

@@ -21,7 +21,7 @@ SDIR		= .
 MCSFLAGS	= $(MCSFLAGS) -target:exe
 
 client.exe: $(C_SRCS) $(GEN_SRCS)
-	$(MCS) $(MCSFLAGS) -out:$@ -r:$(ice_refdir)\Ice.dll -r:$(refdir)\IceFIX.dll  $(QF_FLAGS) $(C_SRCS) $(GEN_SRCS)
+	$(MCS) $(MCSFLAGS) -out:$@ -r:"$(ice_refdir)\Ice.dll" -r:"$(refdir)\IceFIX.dll"  $(QF_FLAGS) $(C_SRCS) $(GEN_SRCS)
 
 clean::
 	-for %f in (db\*) do if not %f == db\.gitignore del /q %f

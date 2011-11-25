@@ -95,9 +95,9 @@ MCSFLAGS 		= $(MCSFLAGS) -optimize+
 
 !if "$(QF_HOME)" != ""
 !if "$(DEBUG)" == "yes"
-QF_FLAGS		= -r:$(QF_HOME)\lib\debug\quickfix_net.dll -r:$(QF_HOME)\lib\debug\quickfix_net_messages.dll
+QF_FLAGS		= -r:"$(QF_HOME)\lib\debug\quickfix_net.dll" -r:"$(QF_HOME)\lib\debug\quickfix_net_messages.dll"
 !else
-QF_FLAGS		= -r:$(QF_HOME)\lib\quickfix_net.dll -r:$(QF_HOME)\lib\quickfix_net_messages.dll
+QF_FLAGS		= -r:"$(QF_HOME)\lib\quickfix_net.dll" -r:"$(QF_HOME)\lib\quickfix_net_messages.dll"
 !endif
 !endif
 
@@ -176,7 +176,7 @@ $(bindir)/$(POLICY_TARGET):
 	del tmp.pub tmp.publicKeyToken && \
 	nmake /nologo /f Makefile.mak policy"
 !else
-	@sn -q -T $(ice_dir)\bin\Ice.dll > tmp.publicKeyToken && \
+	@sn -q -T "$(ice_dir)\bin\Ice.dll" > tmp.publicKeyToken && \
 	set /P TMP_TOKEN= < tmp.publicKeyToken && \
         cmd /c "set PUBLIC_KEY_TOKEN=%TMP_TOKEN:~-16% && \
 	del tmp.pub tmp.publicKeyToken && \
@@ -238,9 +238,9 @@ $(TARGETS_CONFIG):
 	nmake /nologo /f Makefile.mak config"
 !else
 $(TARGETS_CONFIG):
-	@sn -q -T $(ice_dir)\bin\Ice.dll > tmp.publicKeyToken && \
+	@sn -q -T "$(ice_dir)\bin\Ice.dll" > tmp.publicKeyToken && \
 	set /P TMP_TOKEN= < tmp.publicKeyToken && \
-	@sn -q -T $(refdir)\IceFIX.dll > tmp.iceFixPublicKeyToken && \
+	@sn -q -T "$(refdir)\IceFIX.dll" > tmp.iceFixPublicKeyToken && \
 	set /P ICEFIX_TMP_TOKEN= < tmp.iceFixPublicKeyToken && \
         cmd /c "set PUBLIC_KEY_TOKEN=%TMP_TOKEN:~-16% && \
         set ICEFIX_PUBLIC_KEY_TOKEN=%ICEFIX_TMP_TOKEN:~-16% && \

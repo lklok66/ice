@@ -14,6 +14,13 @@
 prefix			= C:\IceFIX-$(ICEFIX_VERSION)
 
 #
+# If Ice is not installed in a standard location, set ICE_HOME to the
+# Ice installation directory.
+#
+#ICE_HOME               ?= C:\Program Files\ZeroC\Ice-3.4.2
+
+
+#
 # Define OPTIMIZE as yes if you want to build with
 # optimization. Otherwise Ice is build with debug information.
 #
@@ -27,47 +34,9 @@ prefix			= C:\IceFIX-$(ICEFIX_VERSION)
 
 #
 # Specify your C++ compiler. Supported values are:
-# VC60, VC80, VC80_EXPRESS, VC90, VC90_EXPRESS, BCC2007
+# VC90, VC90_EXPRESS, VC100, VC100_EXPRESS
 #
-!if "$(CPP_COMPILER)" == ""
-CPP_COMPILER		= VC80
-!endif
-
-#
-# If third party libraries are not installed in the default location
-# or THIRDPARTY_HOME is not set in your environment variables then
-# change the following setting to reflect the installation location.
-#
-!if "$(CPP_COMPILER)" == "BCC2007"
-THIRDPARTY_HOME_EXT 	= BCC
-!elseif "$(CPP_COMPILER)" == "VC80_EXPRESS"
-THIRDPARTY_HOME_EXT	= VC80
-!elseif "$(CPP_COMPILER)" == "VC90_EXPRESS"
-THIRDPARTY_HOME_EXT	= VC90
-!else
-THIRDPARTY_HOME_EXT	= $(CPP_COMPILER)
-!endif
-
-!if "$(THIRDPARTY_HOME)" == ""
-THIRDPARTY_HOME		= C:\Ice-$(VERSION)-ThirdParty-$(THIRDPARTY_HOME_EXT)
-!endif
-
-#
-# For VC80 and VC80 Express it is necessary to set the location of the
-# manifest tool. This must be the 6.x version of mt.exe, not the 5.x
-# version!
-#
-# For VC80 Express mt.exe 6.x is provided by the Windows Platform SDK. 
-# It is necessary to set the location of the Platform SDK through the
-# PDK_HOME environment variable (see INSTALL.WINDOWS for details).
-#
-!if "$(CPP_COMPILER)" == "VC80"
-MT = "$(VS80COMNTOOLS)bin\mt.exe"
-!elseif "$(CPP_COMPILER)" == "VC80_EXPRESS"
-MT = "$(PDK_HOME)\bin\mt.exe"
-!else
-MT = mt.exe
-!endif
+#CPP_COMPILER		= VC100
 
 #
 # If QuickFix is not installed in a standard location where the
@@ -80,6 +49,10 @@ MT = mt.exe
 # ----------------------------------------------------------------------
 # Don't change anything below this line!
 # ----------------------------------------------------------------------
+
+!if "$(CPP_COMPILER)" == ""
+CPP_COMPILER		= VC100
+!endif
 
 #
 # Common definitions
@@ -118,18 +91,18 @@ RCFLAGS		= -D_DEBUG
 !endif
 
 !if "$(QF_HOME)" != ""
-QF_FLAGS	= -I$(QF_HOME)\include
+QF_FLAGS	= -I"$(QF_HOME)\include"
 !if "$(OPTIMIZE)" != "yes"
-QF_LIBS		= $(QF_HOME)\lib\debug\quickfix.lib wsock32.lib
+QF_LIBS		= "$(QF_HOME)\lib\debug\quickfix.lib" wsock32.lib
 !else
-QF_LIBS		= $(QF_HOME)\lib\quickfix.lib wsock32.lib
+QF_LIBS		= "$(QF_HOME)\lib\quickfix.lib" wsock32.lib
 !endif
 !endif
 
 slicedir		= $(top_srcdir)\slice
 
 CPPFLAGS		= $(CPPFLAGS) -I$(includedir)
-SLICE2CPPFLAGS		= -I$(slicedir) -I$(ice_slicedir)
+SLICE2CPPFLAGS		= -I"$(slicedir)" -I"$(ice_slicedir)"
 LDFLAGS			= /LIBPATH:"$(libdir)" $(LDFLAGS) $(LDPLATFORMFLAGS) $(CXXFLAGS)
 
 !if "$(ice_src_dist)" != ""
@@ -167,12 +140,12 @@ EVERYTHING		= all clean install
 
 {$(SDIR)\}.ice{$(HDIR)}.h:
 	del /q $(HDIR)\$(*F).h $(*F).cpp
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) $<
+	"$(SLICE2CPP)" $(SLICE2CPPFLAGS) $<
 	move $(*F).h $(HDIR)
 
 .ice.cpp:
 	del /q $(*F).h $(*F).cpp
-	$(SLICE2CPP) $(SLICE2CPPFLAGS) $(*F).ice
+	"$(SLICE2CPP)" $(SLICE2CPPFLAGS) $(*F).ice
 
 .rc.res:
 	rc $(RCFLAGS) $<

@@ -40,4 +40,4 @@ clean::
 	-for %f in (store-tp2\*) do if not %f == store-tp2\.gitignore del /q %f
 	-del /q *-clordid
 
-!include .depend
+!include .depend.mak

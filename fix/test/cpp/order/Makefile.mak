@@ -63,4 +63,4 @@ clean::
         -if exist db\replica-1 rmdir /s /q db\replica-1
 	-for %f in (store\*) do if not %f == store\.gitignore del /q %f
 
-!include .depend
+!include .depend.mak
