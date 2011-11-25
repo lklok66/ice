@@ -159,7 +159,14 @@ install-common::
 	    cmd /c "xcopy /s /y $(top_srcdir)\..\slice "$(install_slicedir)"" || exit 1
 !endif
 
-	@if not exist "$(prefix)\ICE_LICENSE" \
-	    @copy $(top_srcdir)\..\ICE_LICENSE "$(prefix)"
+!if "$(ice_bin_dist)" == ""
+	@if not exist "$(prefix)\ICE_FIX_LICENSE" \
+	    @copy $(top_srcdir)\..\ICE_FIX_LICENSE "$(prefix)"
 	@if not exist "$(prefix)\LICENSE" \
 	    @copy $(top_srcdir)\..\LICENSE "$(prefix)"
+!else
+	@if not exist "$(prefix)\ICE_FIX_LICENSE" \
+	    @copy $(top_srcdir)\ICE_FIX_LICENSE "$(prefix)"
+	@if not exist "$(prefix)\LICENSE" \
+	    @copy $(top_srcdir)\LICENSE "$(prefix)"
+!endif

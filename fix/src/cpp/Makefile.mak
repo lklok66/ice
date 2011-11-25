@@ -67,7 +67,7 @@ $(DLLNAME): $(OBJS) IceFIX.res
 $(SVCLIBNAME): $(SVCDLLNAME)
 
 $(SVCDLLNAME): $(SOBJS) IceFIXService.res
-	$(LINK) $(LD_DLLFLAGS) $(ICE_LDFLAGS) $(PDBFLAGS) $(SOBJS) $(PREOUT)$@ $(PRELIBS)$(SLINKWITH) $(RES_FILE)
+	$(LINK) $(LD_DLLFLAGS) $(ICE_LDFLAGS) $(SPDBFLAGS) $(SOBJS) $(PREOUT)$@ $(PRELIBS)$(SLINKWITH) $(RES_FILE)
 	move $(SVCDLLNAME:.dll=.lib) $(SVCLIBNAME)
 	@if exist $@.manifest echo ^ ^ ^ Embedding manifest using $(MT) && \
 	    $(MT) -nologo -manifest $@.manifest -outputresource:$@;#2 && del /q $@.manifest

@@ -17,19 +17,19 @@ Requirements
 Operating systems
 -----------------
 
-IceFIX has been tested on Windows XP.
+IceFIX has been tested on Windows 7
 
 
 Compilers
 ---------
 
-IceFIX has been tested with Visual Studio 2005 SP1.
+IceFIX has been tested with Visual Studio 2010 SP1.
 
 
 Ice
 ---
 
-IceFIX requires an installation of Ice 3.3. You can download a binary
+IceFIX requires an installation of Ice 3.4.2. You can download a binary
 distribution from the ZeroC web site, or you can build Ice yourself.
 
 Binary distributions for supported platforms are available at
@@ -52,9 +52,6 @@ Building IceFIX
 
 Using your favorite Zip tool, unzip the IceFIX source archive anywhere 
 you like.
-
-Add the "bin" directory of Ice and the Ice third-party libraries to
-your PATH.
 
 Open a Visual Studio command prompt and change the working directory
 to IceFIX-@ver@. For example;
